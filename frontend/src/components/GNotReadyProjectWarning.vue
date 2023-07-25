@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
       The project phase is <v-chip
         color="primary"
         label
-        x-small
+        size="x-small"
         class="px-1"
       >
         {{ projectDetails.phase }}

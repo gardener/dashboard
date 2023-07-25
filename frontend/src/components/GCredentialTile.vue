@@ -29,9 +29,9 @@ SPDX-License-Identifier: Apache-2.0
               v-bind="props"
               :color="phaseColor"
               label
-              x-small
+              size="x-small"
               class="ml-2"
-              outlined
+              variant="outlined"
             >
               {{ phaseCaption }}
             </v-chip>
@@ -44,7 +44,7 @@ SPDX-License-Identifier: Apache-2.0
                   <v-chip
                     color="primary"
                     label
-                    x-small
+                    size="x-small"
                     class="ml-2"
                   >Prepared</v-chip>
                   in order to perform this operation
@@ -66,7 +66,7 @@ SPDX-License-Identifier: Apache-2.0
                 <v-chip
                   color="primary"
                   label
-                  x-small
+                  size="x-small"
                   class="ml-2"
                 >
                   Prepared

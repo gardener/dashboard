@@ -42,7 +42,7 @@ const hints = computed(() => {
 
     const severities = ['info', 'success', 'warning', 'error']
     return map(hints, ({ severity, ...rest }) => {
-      const className = severities.includes(severity) ? `${severity}--text` : ''
+      const className = severities.includes(severity) ? `text-${severity}` : ''
       return { ...rest, className }
     })
   } catch (err) {

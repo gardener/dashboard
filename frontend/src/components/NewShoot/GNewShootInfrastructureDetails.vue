@@ -190,7 +190,7 @@ SPDX-License-Identifier: Apache-2.0
                   {{ isLoadBalancerClassSelected(item) ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline' }}
                 </v-icon>
               </v-list-item-action>
-              <v-list-item-title :class="{ 'grey--text': item.disabled }">
+              <v-list-item-title :class="{ 'text-grey': item.disabled }">
                 {{ item.text }}
               </v-list-item-title>
             </template>

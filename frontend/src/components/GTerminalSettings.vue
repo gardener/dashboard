@@ -86,7 +86,7 @@ SPDX-License-Identifier: Apache-2.0
         <template #selection="{ item }">
           <span
             v-if="selectedRunOnShootWorker"
-            :class="{'grey--text': !selectedRunOnShootWorker}"
+            :class="{'text-grey': !selectedRunOnShootWorker}"
             class="ml-2"
           >
             <template v-if="!isAutoSelectNodeItem(item)">
