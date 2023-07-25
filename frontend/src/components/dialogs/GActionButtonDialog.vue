@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <div class="g-action-button">
     <template v-if="canPatchShoots">
       <v-tooltip
-        top
+        location="top"
         max-width="600px"
         :disabled="disableToolTip"
       >

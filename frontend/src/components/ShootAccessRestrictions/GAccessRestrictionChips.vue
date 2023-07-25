@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
       class="d-flex"
     >
       <v-tooltip
-        top
+        location="top"
         :disabled="!description"
         max-width="600px"
       >
@@ -33,7 +33,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-tooltip
         v-for="options in optionsList"
         :key="`${key}_${options.key}`"
-        top
+        location="top"
         :disabled="!options.description"
         max-width="600px"
       >

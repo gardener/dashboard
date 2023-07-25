@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div>
     <v-tooltip
-      top
+      location="top"
       :disabled="controlPlaneFailureToleranceTypeChangeAllowed"
       max-width="400px"
     >

@@ -46,7 +46,7 @@ SPDX-License-Identifier: Apache-2.0
     >
       <div class="d-flex align-center justify-start fill-height">
         <div class="px-2">
-          <v-tooltip top>
+          <v-tooltip location="top">
             <template #activator="{ props }">
               <div v-bind="props">
                 <g-action-button
@@ -62,7 +62,7 @@ SPDX-License-Identifier: Apache-2.0
         </div>
         <v-divider vertical />
         <div class="px-2">
-          <v-tooltip top>
+          <v-tooltip location="top">
             <template #activator="{ props }">
               <div v-bind="props">
                 <g-action-button
@@ -77,7 +77,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-tooltip>
         </div>
         <div class="px-2">
-          <v-tooltip top>
+          <v-tooltip location="top">
             <template #activator="{ props }">
               <div v-bind="props">
                 <g-action-button
@@ -93,7 +93,7 @@ SPDX-License-Identifier: Apache-2.0
         </div>
         <v-divider vertical />
         <div class="px-2">
-          <v-tooltip top>
+          <v-tooltip location="top">
             <template #activator="{ props }">
               <div v-bind="props">
                 <g-action-button
@@ -118,7 +118,7 @@ SPDX-License-Identifier: Apache-2.0
         </div>
         <v-divider vertical />
         <div class="px-2">
-          <v-tooltip top>
+          <v-tooltip location="top">
             <template #activator="{ props }">
               <div v-bind="props">
                 <g-action-button
@@ -140,7 +140,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </div>
     <v-tooltip
-      right
+      location="right"
       absolute
       :model-value="helpTooltip.visible"
       :style="`left: ${helpTooltip.posX}px; top: ${helpTooltip.posY}px`"
