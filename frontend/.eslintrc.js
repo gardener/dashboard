@@ -27,6 +27,7 @@ module.exports = {
   ignorePatterns: [
     '/dist/',
     '/build/',
+    '/tmp/',
   ],
   rules: {
     'comma-dangle': ['error', 'always-multiline'],

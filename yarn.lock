@@ -784,6 +784,7 @@ __metadata:
     "@braintree/sanitize-url": ^6.0.2
     "@kyvg/vue3-notification": ^2.9.0
     "@mdi/font": 7.0.96
+    "@pinia/testing": ^0.1.2
     "@vitejs/plugin-vue": ^4.2.3
     "@vitest/coverage-v8": ^0.33.0
     "@vue/test-utils": ^2.4.1
@@ -1508,6 +1509,17 @@ __metadata:
   version: 0.1.1
   resolution: "@one-ini/wasm@npm:0.1.1"
   checksum: 11de17108eae57c797e552e36b259398aede999b4a689d78be6459652edc37f3428472410590a9d328011a8751b771063a5648dd5c4205631c55d1d58e313156
+  languageName: node
+  linkType: hard
+
+"@pinia/testing@npm:^0.1.2":
+  version: 0.1.2
+  resolution: "@pinia/testing@npm:0.1.2"
+  dependencies:
+    vue-demi: ">=0.14.5"
+  peerDependencies:
+    pinia: ">=2.1.2"
+  checksum: 18f24860175bda02a3c0a20946137b93b12e72dad5843a9707f9dfc323dee369b58d31f2fa426e7af51389500ca074e04c70016143464d338c2745e558033e8a
   languageName: node
   linkType: hard
 

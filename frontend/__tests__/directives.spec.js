@@ -4,10 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { createVuetify } from 'vuetify'
-import * as components from 'vuetify/components'
 import { mount } from '@vue/test-utils'
 import { messagesColor } from '@/directives'
+
+const { createVuetifyPlugin } = global.fixtures.helper
 
 describe('directives', () => {
   describe('v-messages-color', () => {
@@ -57,9 +57,7 @@ describe('directives', () => {
       return mount(Component, {
         global: {
           plugins: [
-            createVuetify({
-              components,
-            }),
+            createVuetifyPlugin(),
           ],
           directives: {
             messagesColor,
@@ -85,7 +83,7 @@ describe('directives', () => {
       await wrapper.setProps({
         color: 'primary',
       })
-      expect(colorizerHintElement.element.style.color).toMatch(wrapper.vm.rgbColor)
+      expect(colorizerHintElement.element.style.color).toBe(wrapper.vm.rgbColor)
 
       await wrapper.setProps({
         color: 'default',
@@ -99,7 +97,7 @@ describe('directives', () => {
         color: 'warning',
       })
       const colorizerHintElement = findMessagesElement(wrapper)
-      expect(colorizerHintElement.element.style.color).toMatch(wrapper.vm.rgbColor)
+      expect(colorizerHintElement.element.style.color).toBe(wrapper.vm.rgbColor)
     })
 
     it('should not overwrite error color for v-text-field', () => {
