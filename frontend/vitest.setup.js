@@ -7,6 +7,8 @@
 import { vi } from 'vitest'
 import createFetchMock from 'vitest-fetch-mock'
 
+import * as fixtures from './__fixtures__'
+
 const fetchMock = createFetchMock(vi)
 fetchMock.enableMocks()
 
@@ -43,3 +45,5 @@ global.console = {
 
 // see issue https://github.com/vuejs/vue-test-utils/issues/974#issuecomment-423721358
 global.requestAnimationFrame = vi.fn().mockImplementation(cb => cb())
+
+global.fixtures = fixtures

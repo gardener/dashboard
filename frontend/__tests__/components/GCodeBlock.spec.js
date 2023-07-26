@@ -11,17 +11,12 @@ describe('components', () => {
   describe('g-code-block', () => {
     it('should render correct contents', () => {
       const wrapper = shallowMount(GCodeBlock, {
-        propsData: {
+        props: {
           lang: 'yaml',
           content: `
           ---
           foo: true
           bar: 42`,
-        },
-        computed: {
-          codeBlockClass () {
-            return ''
-          },
         },
       })
       const codeWrapper = wrapper.find('code.yaml')

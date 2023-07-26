@@ -110,27 +110,6 @@ export default defineConfig(({ command, mode }) => {
         },
       },
     },
-    test: {
-      include: ['__tests__/**/*.spec.js'],
-      globals: true,
-      environment: 'jsdom',
-      clearMocks: true,
-      setupFiles: [
-        'vitest.setup.js',
-      ],
-      deps: {
-        inline: [
-          'vuetify',
-        ],
-      },
-      coverage: {
-        provider: 'v8',
-        branches: 42,
-        functions: 27,
-        lines: 39,
-        statements: 39,
-      },
-    },
   }
 
   if (command === 'build') {
@@ -165,6 +144,35 @@ export default defineConfig(({ command, mode }) => {
         template: 'network',
       }),
     )
+  }
+
+  if (process.env.NODE_ENV === 'test') {
+    const coverage = {
+      provider: 'v8',
+      branches: 42,
+      functions: 27,
+      lines: 39,
+      statements: 39,
+    }
+
+    // TODO: remove this once all test are migrated
+    coverage.functions = 14
+
+    config.test = {
+      include: ['__tests__/**/*.spec.js'],
+      globals: true,
+      environment: 'jsdom',
+      clearMocks: true,
+      setupFiles: [
+        'vitest.setup.js',
+      ],
+      deps: {
+        inline: [
+          'vuetify',
+        ],
+      },
+      coverage,
+    }
   }
 
   return config
