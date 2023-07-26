@@ -8,7 +8,16 @@ import { defineStore } from 'pinia'
 import { computed, reactive } from 'vue'
 
 import { useApi, useLogger } from '@/composables'
-import { useStores } from '..'
+
+import { useAppStore } from '../app'
+import { useAuthzStore } from '../authz'
+import { useCloudProfileStore } from '../cloudProfile'
+import { useConfigStore } from '../config'
+import { useGardenerExtensionStore } from '../gardenerExtension'
+import { useProjectStore } from '../project'
+import { useSecretStore } from '../secret'
+import { useSocketStore } from '../socket'
+import { useTicketStore } from '../ticket'
 
 import {
   uriPattern,
@@ -39,27 +48,15 @@ export const useShootStore = defineStore('shoot', () => {
   const api = useApi()
   const logger = useLogger()
 
-  const {
-    appStore,
-    authzStore,
-    cloudProfileStore,
-    configStore,
-    secretStore,
-    gardenerExtensionStore,
-    ticketStore,
-    socketStore,
-    projectStore,
-  } = useStores([
-    'app',
-    'authz',
-    'cloudProfile',
-    'config',
-    'secret',
-    'gardenerExtension',
-    'ticket',
-    'socket',
-    'project',
-  ])
+  const appStore = useAppStore()
+  const authzStore = useAuthzStore()
+  const cloudProfileStore = useCloudProfileStore()
+  const configStore = useConfigStore()
+  const secretStore = useSecretStore()
+  const gardenerExtensionStore = useGardenerExtensionStore()
+  const ticketStore = useTicketStore()
+  const socketStore = useSocketStore()
+  const projectStore = useProjectStore()
 
   const context = {
     api,

@@ -169,7 +169,7 @@ export const useConfigStore = defineStore('config', () => {
   })
 
   const apiServerUrl = computed(() => {
-    return state.value?.apiServerUrl ?? browserLocation.origin
+    return state.value?.apiServerUrl ?? browserLocation.value.origin
   })
 
   const clusterIdentity = computed(() => {

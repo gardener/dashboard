@@ -54,18 +54,13 @@ const GShootList = () => import('@/views/GShootList.vue')
 const GShootItem = () => import('@/views/GShootItem.vue')
 const GShootItemTerminal = () => import('@/views/GShootItemTerminal.vue')
 
-export function createRoutes ({ logger, useStores }) {
+export function createRoutes (context) {
   const {
     appStore,
     authnStore,
     authzStore,
     projectStore,
-  } = useStores([
-    'app',
-    'authn',
-    'authz',
-    'project',
-  ])
+  } = context
 
   return [
     loginRoute('/login'),

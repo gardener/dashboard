@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { createPinia, mapStores } from 'pinia'
+import { createPinia } from 'pinia'
 
 import { useAppStore } from './app'
 import { useAuthnStore } from './authn'
@@ -44,37 +44,6 @@ export {
   useSocketStore,
   useTerminalStore,
   useTicketStore,
-}
-
-export const useStore = mapStores(...[
-  useAppStore,
-  useAuthnStore,
-  useAuthzStore,
-  useCloudProfileStore,
-  useConfigStore,
-  useGardenerExtensionStore,
-  useKubeconfigStore,
-  useLoginStore,
-  useMemberStore,
-  useProjectStore,
-  useQuotaStore,
-  useSecretStore,
-  useSeedStore,
-  useShootStore,
-  useShootStagingStore,
-  useSocketStore,
-  useTerminalStore,
-  useTicketStore,
-])
-
-export function useStores (...args) {
-  const ids = args.flat(1)
-  const iteratee = (stores, id) => {
-    const key = `${id}Store`
-    stores[key] = useStore[key]()
-    return stores
-  }
-  return ids.reduce(iteratee, {})
 }
 
 export default createPinia()

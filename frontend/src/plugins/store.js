@@ -4,13 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import pinia, { useStores } from '@/store'
-
-export { useStores }
+import pinia from '@/store'
 
 export default {
   install (app) {
     app.use(pinia)
-    app.provide('useStores', useStores)
   },
 }

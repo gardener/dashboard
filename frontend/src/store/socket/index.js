@@ -8,25 +8,21 @@ import { defineStore } from 'pinia'
 import { computed, reactive, markRaw } from 'vue'
 
 import { useLogger } from '@/composables'
-import { useStores } from '..'
+import { useAuthnStore } from '../authn'
+import { useProjectStore } from '../project'
+import { useShootStore } from '../shoot'
 import { constants } from '../shoot/helper'
+import { useTicketStore } from '../ticket'
 
 import { createSocket } from './helper'
 
 export const useSocketStore = defineStore('socket', () => {
   const logger = useLogger()
 
-  const {
-    authnStore,
-    projectStore,
-    shootStore,
-    ticketStore,
-  } = useStores([
-    'authn',
-    'project',
-    'shoot',
-    'ticket',
-  ])
+  const authnStore = useAuthnStore()
+  const projectStore = useProjectStore()
+  const shootStore = useShootStore()
+  const ticketStore = useTicketStore()
 
   const state = reactive({
     id: null,

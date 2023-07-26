@@ -6,16 +6,61 @@
 
 import { createRouter as createVueRouter, createWebHistory } from 'vue-router'
 
+import { useAppStore } from '@/store/app'
+import { useAuthzStore } from '@/store/authz'
+import { useAuthnStore } from '@/store/authn'
+import { useProjectStore } from '@/store/project'
+import { useConfigStore } from '@/store/config'
+import { useCloudProfileStore } from '@/store/cloudProfile'
+import { useGardenerExtensionStore } from '@/store/gardenerExtension'
+import { useKubeconfigStore } from '@/store/kubeconfig'
+import { useMemberStore } from '@/store/member'
+import { useSecretStore } from '@/store/secret'
+import { useSeedStore } from '@/store/seed'
+import { useShootStore } from '@/store/shoot'
+import { useTerminalStore } from '@/store/terminal'
+
 import { createRoutes } from './routes'
 import { createGuards } from './guards'
+import { useLogger } from '@/composables'
 
-export function createRouter ({ logger, useStores }) {
-  const { appStore } = useStores('app')
+export function createRouter () {
+  const logger = useLogger()
+  const appStore = useAppStore()
+  const configStore = useConfigStore()
+  const authnStore = useAuthnStore()
+  const authzStore = useAuthzStore()
+  const projectStore = useProjectStore()
+  const cloudProfileStore = useCloudProfileStore()
+  const seedStore = useSeedStore()
+  const gardenerExtensionStore = useGardenerExtensionStore()
+  const kubeconfigStore = useKubeconfigStore()
+  const memberStore = useMemberStore()
+  const secretStore = useSecretStore()
+  const shootStore = useShootStore()
+  const terminalStore = useTerminalStore()
+
+  const context = {
+    logger,
+    appStore,
+    configStore,
+    authnStore,
+    authzStore,
+    projectStore,
+    cloudProfileStore,
+    seedStore,
+    gardenerExtensionStore,
+    kubeconfigStore,
+    memberStore,
+    secretStore,
+    shootStore,
+    terminalStore,
+  }
 
   const zeroPoint = { left: 0, top: 0 }
 
   /* router */
-  const routes = createRoutes({ logger, useStores })
+  const routes = createRoutes(context)
   const router = createVueRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes,
@@ -25,7 +70,7 @@ export function createRouter ({ logger, useStores }) {
   })
 
   /* navigation guards */
-  const guards = createGuards({ logger, useStores })
+  const guards = createGuards(context)
   for (const guard of guards.beforeEach) {
     router.beforeEach(guard)
   }

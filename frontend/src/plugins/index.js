@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { useLogger } from '@/composables'
-import { useStores } from '@/store'
 import { messagesColor } from '@/directives'
 
 // Styles
@@ -22,10 +20,9 @@ import components from './components'
 
 export function registerPlugins (app) {
   loadFonts()
-  const logger = useLogger()
   app
     .use(store)
-    .use(router, { logger, useStores })
+    .use(router)
     .use(vuetify)
     .use(notify)
     .use(yaml)

@@ -6,10 +6,9 @@
 
 import { useLocalStorage } from '@vueuse/core'
 
-export function createGuards ({ logger, useStores }) {
-  const shootListFilter = useLocalStorage('project/_all/shoot-list/filter', {})
-
+export function createGuards (context) {
   const {
+    logger,
     appStore,
     configStore,
     authnStore,
@@ -23,21 +22,8 @@ export function createGuards ({ logger, useStores }) {
     secretStore,
     shootStore,
     terminalStore,
-  } = useStores([
-    'app',
-    'config',
-    'authn',
-    'authz',
-    'project',
-    'cloudProfile',
-    'seed',
-    'gardenerExtension',
-    'kubeconfig',
-    'member',
-    'secret',
-    'shoot',
-    'terminal',
-  ])
+  } = context
+  const shootListFilter = useLocalStorage('project/_all/shoot-list/filter', {})
 
   function ensureUserAuthenticatedForNonPublicRoutes () {
     return (to) => {
