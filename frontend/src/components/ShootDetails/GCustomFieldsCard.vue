@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
           <g-list-item-content :label="customField.name">
             <v-tooltip
               v-if="customField.tooltip"
-              top
+              location="top"
             >
               <template #activator="{ props }">
                 <span v-bind="props">{{ customField.value }}</span>

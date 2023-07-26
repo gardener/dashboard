@@ -61,7 +61,7 @@ SPDX-License-Identifier: Apache-2.0
             />
           </div>
           <template #description>
-            <v-tooltip top>
+            <v-tooltip location="top">
               <template #activator="{ props }">
                 <div
                   class="d-flex align-center pt-1"

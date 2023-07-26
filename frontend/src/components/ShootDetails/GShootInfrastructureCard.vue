@@ -204,7 +204,7 @@ SPDX-License-Identifier: Apache-2.0
                 v-for="{ name } in shootLoadbalancerClasses"
                 :key="name"
                 :disabled="name !== defaultLoadbalancerClass"
-                top
+                location="top"
               >
                 <template #activator="{ props }">
                   <v-chip

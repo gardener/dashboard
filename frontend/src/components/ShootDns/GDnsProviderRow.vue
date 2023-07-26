@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <div>
     <!-- do not wrap v-row with tooltip component as this breaks expand (appear) animation -->
     <v-tooltip
-      top
+      location="top"
       :disabled="!readonly"
       open-delay="0"
       :activator="$refs.dnsrow"
