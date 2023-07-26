@@ -5,14 +5,19 @@
 //
 
 import { vi } from 'vitest'
+
 import createFetchMock from 'vitest-fetch-mock'
 
 import * as fixtures from './__fixtures__'
 
+const globalConsole = global.console
+const globalDocument = global.document
+const globalWindow = global.window
+
 const fetchMock = createFetchMock(vi)
 fetchMock.enableMocks()
 
-global.document.createRange = vi.fn().mockImplementation(() => {
+globalDocument.createRange = vi.fn().mockImplementation(() => {
   const range = new Range()
   range.getBoundingClientRect = vi.fn()
   range.getClientRects = () => {
@@ -25,7 +30,7 @@ global.document.createRange = vi.fn().mockImplementation(() => {
   return range
 })
 
-global.window.matchMedia = vi.fn().mockImplementation(query => {
+globalWindow.matchMedia = vi.fn().mockImplementation(query => {
   return {
     matches: false,
     media: query,
@@ -34,16 +39,20 @@ global.window.matchMedia = vi.fn().mockImplementation(query => {
   }
 })
 
-const globalConsole = global.console
-global.console = {
+vi.stubGlobal('console', {
   log (...args) {
     globalConsole.log(...args)
   },
   warn: vi.fn(),
   error: vi.fn(),
-}
+})
 
-// see issue https://github.com/vuejs/vue-test-utils/issues/974#issuecomment-423721358
-global.requestAnimationFrame = vi.fn().mockImplementation(cb => cb())
+const ResizeObserverMock = vi.fn(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
+}))
 
-global.fixtures = fixtures
+vi.stubGlobal('ResizeObserver', ResizeObserverMock)
+vi.stubGlobal('requestAnimationFrame', window.requestAnimationFrame)
+vi.stubGlobal('fixtures', fixtures)
