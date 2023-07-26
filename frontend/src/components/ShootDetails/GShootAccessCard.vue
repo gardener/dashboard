@@ -84,6 +84,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-tooltip>
           <a
             v-else
+            class="text-anchor"
             :href="dashboardUrl"
             target="_blank"
             rel="noopener"

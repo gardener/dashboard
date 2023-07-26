@@ -95,6 +95,7 @@ SPDX-License-Identifier: Apache-2.0
                     <code>
                       <router-link
                         v-if="canLinkToSecret"
+                        class="text-anchor"
                         :to="{ name: 'Secret', params: { name: secretBindingName, namespace: namespace } }"
                       >
                         <span>{{ secretBindingName }}</span>
