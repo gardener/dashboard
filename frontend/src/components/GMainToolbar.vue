@@ -318,8 +318,8 @@ import { useRoute } from 'vue-router'
 import { useLocalStorage } from '@vueuse/core'
 import { useNamespace } from '@/composables'
 import GShootSubscriptionStatus from './GShootSubscriptionStatus.vue'
-import GBreadcrumb from './GBreadcrumb.vue'
-import GInfoDialog from './dialogs/GInfoDialog.vue'
+import GBreadcrumb from '@/components/GBreadcrumb.vue'
+import GInfoDialog from '@/components/dialogs/GInfoDialog.vue'
 
 const route = useRoute()
 
