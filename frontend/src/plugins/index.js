@@ -9,7 +9,6 @@ import { messagesColor } from '@/directives'
 // Styles
 import '@/sass/main.scss'
 
-import { loadFonts } from './webfontloader'
 import store from './store'
 import router from './router'
 import vuetify from './vuetify'
@@ -19,7 +18,6 @@ import utils from './utils'
 import components from './components'
 
 export function registerPlugins (app) {
-  loadFonts()
   app
     .use(store)
     .use(router)

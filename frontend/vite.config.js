@@ -10,6 +10,7 @@ import { defineConfig } from 'vite'
 // Plugins
 import vue from '@vitejs/plugin-vue'
 import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
+import Unfonts from 'unplugin-fonts/vite'
 import compression from 'vite-plugin-compression'
 import { visualizer } from 'rollup-plugin-visualizer'
 
@@ -68,6 +69,23 @@ export default defineConfig(({ command, mode }) => {
         autoImport: true,
         styles: {
           configFile: 'src/sass/settings.scss',
+        },
+      }),
+      Unfonts({
+        fontsource: {
+          families: [
+            {
+              name: 'Roboto',
+              weights: [100, 300, 400, 500, 700, 900],
+              subset: 'latin',
+            },
+            {
+              name: 'Roboto',
+              weights: [400],
+              styles: ['italic'],
+              subset: 'latin',
+            },
+          ],
         },
       }),
     ],

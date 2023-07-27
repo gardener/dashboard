@@ -702,6 +702,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@fontsource/roboto@npm:^5.0.5":
+  version: 5.0.5
+  resolution: "@fontsource/roboto@npm:5.0.5"
+  checksum: 07d3aa70e60b38258055ef1ec478898da52c9f156c52199c2aca2a3d313f52674d662f24a6452605a9ecdfdb1f345df1972efe45bc534269947ff7f5565ffca0
+  languageName: node
+  linkType: hard
+
 "@gardener-dashboard/backend@workspace:backend":
   version: 0.0.0-use.local
   resolution: "@gardener-dashboard/backend@workspace:backend"
@@ -782,6 +789,7 @@ __metadata:
   resolution: "@gardener-dashboard/frontend@workspace:frontend"
   dependencies:
     "@braintree/sanitize-url": ^6.0.2
+    "@fontsource/roboto": ^5.0.5
     "@kyvg/vue3-notification": ^2.9.0
     "@mdi/font": 7.0.96
     "@pinia/testing": ^0.1.2
@@ -793,6 +801,7 @@ __metadata:
     "@vueuse/core": ^10.0.2
     "@vueuse/integrations": ^10.0.2
     "@vueuse/router": ^10.0.2
+    add: ^2.0.6
     ansi-html: ^0.0.9
     buffer: ^6.0.3
     codemirror: ^5.65.13
@@ -818,7 +827,6 @@ __metadata:
     mitt: ^3.0.0
     netmask: ^2.0.2
     pinia: ^2.0.33
-    roboto-fontface: "*"
     rollup-plugin-visualizer: ^5.9.0
     sass: ^1.62.0
     semver: ^7.3.8
@@ -828,6 +836,7 @@ __metadata:
     symbol-tree: ^3.2.4
     toidentifier: ^1.0.1
     universal-cookie: ^4.0.4
+    unplugin-fonts: ^1.0.3
     url-template: ^3.1.0
     uuid: ^8.3.2
     vite: ^4.4.6
@@ -838,7 +847,6 @@ __metadata:
     vue: ^3.3.4
     vue-router: ^4.2.2
     vuetify: ^3.3.9
-    webfontloader: ^1.6.28
     xterm: ^5.2.1
     xterm-addon-fit: ^0.7.0
     xterm-addon-web-links: ^0.8.0
@@ -2264,6 +2272,13 @@ __metadata:
   bin:
     acorn: bin/acorn
   checksum: 538ba38af0cc9e5ef983aee196c4b8b4d87c0c94532334fa7e065b2c8a1f85863467bb774231aae91613fcda5e68740c15d97b1967ae3394d20faddddd8af61d
+  languageName: node
+  linkType: hard
+
+"add@npm:^2.0.6":
+  version: 2.0.6
+  resolution: "add@npm:2.0.6"
+  checksum: e2d23d40494565dfed4acd65e478570c444db5ac6c053551ed429c39ea0f2c99d83df63e7befec936df601827d2254d06a2fb6f7dcfd2022e810b25eab818b8c
   languageName: node
   linkType: hard
 
@@ -4545,7 +4560,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-glob@npm:^3.2.9":
+"fast-glob@npm:^3.2.12, fast-glob@npm:^3.2.9":
   version: 3.3.1
   resolution: "fast-glob@npm:3.3.1"
   dependencies:
@@ -8240,13 +8255,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"roboto-fontface@npm:*":
-  version: 0.10.0
-  resolution: "roboto-fontface@npm:0.10.0"
-  checksum: 58749bb49133974aa72d79ab1928d5d0aa1df162daab7398cbceeadc1508d222054d2e81d41ab548361a785c5cd2da97159544c3acecc8a180030c91b504be3b
-  languageName: node
-  linkType: hard
-
 "rollup-plugin-visualizer@npm:^5.9.0":
   version: 5.9.2
   resolution: "rollup-plugin-visualizer@npm:5.9.2"
@@ -9382,6 +9390,34 @@ __metadata:
   languageName: node
   linkType: hard
 
+"unplugin-fonts@npm:^1.0.3":
+  version: 1.0.3
+  resolution: "unplugin-fonts@npm:1.0.3"
+  dependencies:
+    fast-glob: ^3.2.12
+    unplugin: ^1.3.1
+  peerDependencies:
+    "@nuxt/kit": ^3.0.0
+    vite: ^2.0.0 || ^3.0.0 || ^4.0.0
+  peerDependenciesMeta:
+    "@nuxt/kit":
+      optional: true
+  checksum: 0128603ec3b653e2ad36e42225d4db256fb142bbea77db206e8ca758f05ac16fa3a015f121d513620847407ced639faca654d0daa683bdc271aacf22eeb7ddd2
+  languageName: node
+  linkType: hard
+
+"unplugin@npm:^1.3.1":
+  version: 1.4.0
+  resolution: "unplugin@npm:1.4.0"
+  dependencies:
+    acorn: ^8.9.0
+    chokidar: ^3.5.3
+    webpack-sources: ^3.2.3
+    webpack-virtual-modules: ^0.5.0
+  checksum: 49f586b07988397aa130b44710e8017a0472e825d08a218557031f08d694788b3ee61d686e67af153cb39b73132e2616c2f135222b83ff8aa2f7a89027f74600
+  languageName: node
+  linkType: hard
+
 "upath@npm:^2.0.1":
   version: 2.0.1
   resolution: "upath@npm:2.0.1"
@@ -9814,13 +9850,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webfontloader@npm:^1.6.28":
-  version: 1.6.28
-  resolution: "webfontloader@npm:1.6.28"
-  checksum: cbebbe593cb0d27dbb4d418f7f96bd9893024f1f2062e858af76209b6524e25d766964b6e2a724f3b694fadef661dd3a01065455a96df05337b3281ca09ab656
-  languageName: node
-  linkType: hard
-
 "webidl-conversions@npm:^3.0.0":
   version: 3.0.1
   resolution: "webidl-conversions@npm:3.0.1"
@@ -9846,6 +9875,20 @@ __metadata:
   version: 7.0.0
   resolution: "webidl-conversions@npm:7.0.0"
   checksum: f05588567a2a76428515333eff87200fae6c83c3948a7482ebb109562971e77ef6dc49749afa58abb993391227c5697b3ecca52018793e0cb4620a48f10bd21b
+  languageName: node
+  linkType: hard
+
+"webpack-sources@npm:^3.2.3":
+  version: 3.2.3
+  resolution: "webpack-sources@npm:3.2.3"
+  checksum: 989e401b9fe3536529e2a99dac8c1bdc50e3a0a2c8669cbafad31271eadd994bc9405f88a3039cd2e29db5e6d9d0926ceb7a1a4e7409ece021fe79c37d9c4607
+  languageName: node
+  linkType: hard
+
+"webpack-virtual-modules@npm:^0.5.0":
+  version: 0.5.0
+  resolution: "webpack-virtual-modules@npm:0.5.0"
+  checksum: 22b59257b55c89d11ae295b588b683ee9fdf3aeb591bc7b6f88ac1d69cb63f4fcb507666ea986866dfae161a1fa534ad6fb4e2ea91bbcd0a6d454368d7d4c64b
   languageName: node
   linkType: hard
 

@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@braintree/sanitize-url": "^6.0.2",
+    "@fontsource/roboto": "^5.0.5",
     "@kyvg/vue3-notification": "^2.9.0",
     "@mdi/font": "7.0.96",
     "@vuelidate/core": "^2.0.2",
@@ -54,7 +55,6 @@
     "mitt": "^3.0.0",
     "netmask": "^2.0.2",
     "pinia": "^2.0.33",
-    "roboto-fontface": "*",
     "semver": "^7.3.8",
     "socket.io-client": "^4.6.2",
     "splitpanes": "^3.1.5",
@@ -67,7 +67,6 @@
     "vue": "^3.3.4",
     "vue-router": "^4.2.2",
     "vuetify": "^3.3.9",
-    "webfontloader": "^1.6.28",
     "xterm": "^5.2.1",
     "xterm-addon-fit": "^0.7.0",
     "xterm-addon-web-links": "^0.8.0"
@@ -87,6 +86,7 @@
     "jsdom": "^22.1.0",
     "rollup-plugin-visualizer": "^5.9.0",
     "sass": "^1.62.0",
+    "unplugin-fonts": "^1.0.3",
     "vite": "^4.4.6",
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-vuetify": "^1.0.2",

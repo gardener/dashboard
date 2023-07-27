@@ -1248,6 +1248,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["@fontsource/roboto", [\
+        ["npm:5.0.5", {\
+          "packageLocation": "./.yarn/cache/@fontsource-roboto-npm-5.0.5-aa7051935d-07d3aa70e6.zip/node_modules/@fontsource/roboto/",\
+          "packageDependencies": [\
+            ["@fontsource/roboto", "npm:5.0.5"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["@gardener-dashboard/backend", [\
         ["workspace:backend", {\
           "packageLocation": "./backend/",\
@@ -1333,6 +1342,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [\
             ["@gardener-dashboard/frontend", "workspace:frontend"],\
             ["@braintree/sanitize-url", "npm:6.0.2"],\
+            ["@fontsource/roboto", "npm:5.0.5"],\
             ["@kyvg/vue3-notification", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.9.1"],\
             ["@mdi/font", "npm:7.0.96"],\
             ["@pinia/testing", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.1.2"],\
@@ -1344,6 +1354,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@vueuse/core", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:10.2.1"],\
             ["@vueuse/integrations", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:10.2.1"],\
             ["@vueuse/router", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:10.2.1"],\
+            ["add", "npm:2.0.6"],\
             ["ansi-html", "npm:0.0.9"],\
             ["buffer", "npm:6.0.3"],\
             ["codemirror", "npm:5.65.14"],\
@@ -1369,7 +1380,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["mitt", "npm:3.0.1"],\
             ["netmask", "npm:2.0.2"],\
             ["pinia", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.1.4"],\
-            ["roboto-fontface", "npm:0.10.0"],\
             ["rollup-plugin-visualizer", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.9.2"],\
             ["sass", "npm:1.64.1"],\
             ["semver", "npm:7.5.4"],\
@@ -1379,6 +1389,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["symbol-tree", "npm:3.2.4"],\
             ["toidentifier", "npm:1.0.1"],\
             ["universal-cookie", "npm:4.0.4"],\
+            ["unplugin-fonts", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:1.0.3"],\
             ["url-template", "npm:3.1.0"],\
             ["uuid", "npm:8.3.2"],\
             ["vite", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:4.4.6"],\
@@ -1389,7 +1400,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["vue", "npm:3.3.4"],\
             ["vue-router", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:4.2.4"],\
             ["vuetify", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.3.9"],\
-            ["webfontloader", "npm:1.6.28"],\
             ["xterm", "npm:5.2.1"],\
             ["xterm-addon-fit", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.7.0"],\
             ["xterm-addon-web-links", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.8.0"]\
@@ -3242,6 +3252,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/acorn-walk-npm-8.2.0-2f2cac3177-1715e76c01.zip/node_modules/acorn-walk/",\
           "packageDependencies": [\
             ["acorn-walk", "npm:8.2.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["add", [\
+        ["npm:2.0.6", {\
+          "packageLocation": "./.yarn/cache/add-npm-2.0.6-c96b78d852-e2d23d4049.zip/node_modules/add/",\
+          "packageDependencies": [\
+            ["add", "npm:2.0.6"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -10157,15 +10176,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
-      ["roboto-fontface", [\
-        ["npm:0.10.0", {\
-          "packageLocation": "./.yarn/cache/roboto-fontface-npm-0.10.0-6476b79561-58749bb491.zip/node_modules/roboto-fontface/",\
-          "packageDependencies": [\
-            ["roboto-fontface", "npm:0.10.0"]\
-          ],\
-          "linkType": "HARD"\
-        }]\
-      ]],\
       ["rollup", [\
         ["npm:3.26.3", {\
           "packageLocation": "./.yarn/cache/rollup-npm-3.26.3-072c90700e-e6a765b2b7.zip/node_modules/rollup/",\
@@ -11449,6 +11459,47 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["unplugin", [\
+        ["npm:1.4.0", {\
+          "packageLocation": "./.yarn/cache/unplugin-npm-1.4.0-4cad140f03-49f586b079.zip/node_modules/unplugin/",\
+          "packageDependencies": [\
+            ["unplugin", "npm:1.4.0"],\
+            ["acorn", "npm:8.10.0"],\
+            ["chokidar", "npm:3.5.3"],\
+            ["webpack-sources", "npm:3.2.3"],\
+            ["webpack-virtual-modules", "npm:0.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["unplugin-fonts", [\
+        ["npm:1.0.3", {\
+          "packageLocation": "./.yarn/cache/unplugin-fonts-npm-1.0.3-6a0e140e2a-0128603ec3.zip/node_modules/unplugin-fonts/",\
+          "packageDependencies": [\
+            ["unplugin-fonts", "npm:1.0.3"]\
+          ],\
+          "linkType": "SOFT"\
+        }],\
+        ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:1.0.3", {\
+          "packageLocation": "./.yarn/__virtual__/unplugin-fonts-virtual-640d7dec4f/0/cache/unplugin-fonts-npm-1.0.3-6a0e140e2a-0128603ec3.zip/node_modules/unplugin-fonts/",\
+          "packageDependencies": [\
+            ["unplugin-fonts", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:1.0.3"],\
+            ["@nuxt/kit", null],\
+            ["@types/nuxt__kit", null],\
+            ["@types/vite", null],\
+            ["fast-glob", "npm:3.3.1"],\
+            ["unplugin", "npm:1.4.0"],\
+            ["vite", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:4.4.6"]\
+          ],\
+          "packagePeers": [\
+            "@nuxt/kit",\
+            "@types/nuxt__kit",\
+            "@types/vite",\
+            "vite"\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["upath", [\
         ["npm:2.0.1", {\
           "packageLocation": "./.yarn/cache/upath-npm-2.0.1-f0ea260247-2db04f24a0.zip/node_modules/upath/",\
@@ -12130,15 +12181,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
-      ["webfontloader", [\
-        ["npm:1.6.28", {\
-          "packageLocation": "./.yarn/cache/webfontloader-npm-1.6.28-5e6803960c-cbebbe593c.zip/node_modules/webfontloader/",\
-          "packageDependencies": [\
-            ["webfontloader", "npm:1.6.28"]\
-          ],\
-          "linkType": "HARD"\
-        }]\
-      ]],\
       ["webidl-conversions", [\
         ["npm:3.0.1", {\
           "packageLocation": "./.yarn/cache/webidl-conversions-npm-3.0.1-60310f6a2b-c92a0a6ab9.zip/node_modules/webidl-conversions/",\
@@ -12165,6 +12207,24 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/webidl-conversions-npm-7.0.0-e8c8e30c68-f05588567a.zip/node_modules/webidl-conversions/",\
           "packageDependencies": [\
             ["webidl-conversions", "npm:7.0.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["webpack-sources", [\
+        ["npm:3.2.3", {\
+          "packageLocation": "./.yarn/cache/webpack-sources-npm-3.2.3-6bfb5d9563-989e401b9f.zip/node_modules/webpack-sources/",\
+          "packageDependencies": [\
+            ["webpack-sources", "npm:3.2.3"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["webpack-virtual-modules", [\
+        ["npm:0.5.0", {\
+          "packageLocation": "./.yarn/cache/webpack-virtual-modules-npm-0.5.0-314fd879d0-22b59257b5.zip/node_modules/webpack-virtual-modules/",\
+          "packageDependencies": [\
+            ["webpack-virtual-modules", "npm:0.5.0"]\
           ],\
           "linkType": "HARD"\
         }]\

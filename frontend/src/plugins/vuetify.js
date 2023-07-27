@@ -4,8 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// Styles
+// Material Design Icons Webfont
 import '@mdi/font/css/materialdesignicons.css'
+
+// Styles
+import 'unfonts.css'
 import 'vuetify/styles'
 
 // Composables
