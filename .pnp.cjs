@@ -1354,7 +1354,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@vueuse/core", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:10.2.1"],\
             ["@vueuse/integrations", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:10.2.1"],\
             ["@vueuse/router", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:10.2.1"],\
-            ["add", "npm:2.0.6"],\
             ["ansi-html", "npm:0.0.9"],\
             ["buffer", "npm:6.0.3"],\
             ["codemirror", "npm:5.65.14"],\
@@ -3252,15 +3251,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/acorn-walk-npm-8.2.0-2f2cac3177-1715e76c01.zip/node_modules/acorn-walk/",\
           "packageDependencies": [\
             ["acorn-walk", "npm:8.2.0"]\
-          ],\
-          "linkType": "HARD"\
-        }]\
-      ]],\
-      ["add", [\
-        ["npm:2.0.6", {\
-          "packageLocation": "./.yarn/cache/add-npm-2.0.6-c96b78d852-e2d23d4049.zip/node_modules/add/",\
-          "packageDependencies": [\
-            ["add", "npm:2.0.6"]\
           ],\
           "linkType": "HARD"\
         }]\

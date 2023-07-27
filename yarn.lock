@@ -801,7 +801,6 @@ __metadata:
     "@vueuse/core": ^10.0.2
     "@vueuse/integrations": ^10.0.2
     "@vueuse/router": ^10.0.2
-    add: ^2.0.6
     ansi-html: ^0.0.9
     buffer: ^6.0.3
     codemirror: ^5.65.13
@@ -2272,13 +2271,6 @@ __metadata:
   bin:
     acorn: bin/acorn
   checksum: 538ba38af0cc9e5ef983aee196c4b8b4d87c0c94532334fa7e065b2c8a1f85863467bb774231aae91613fcda5e68740c15d97b1967ae3394d20faddddd8af61d
-  languageName: node
-  linkType: hard
-
-"add@npm:^2.0.6":
-  version: 2.0.6
-  resolution: "add@npm:2.0.6"
-  checksum: e2d23d40494565dfed4acd65e478570c444db5ac6c053551ed429c39ea0f2c99d83df63e7befec936df601827d2254d06a2fb6f7dcfd2022e810b25eab818b8c
   languageName: node
   linkType: hard
 
