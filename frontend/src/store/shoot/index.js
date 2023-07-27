@@ -511,10 +511,6 @@ export const useShootStore = defineStore('shoot', () => {
     }
   }
 
-  function conditionForType (type) {
-    return configStore.conditionForType(type)
-  }
-
   return {
     // state
     newShootResource,
@@ -557,6 +553,5 @@ export const useShootStore = defineStore('shoot', () => {
     setSubscription,
     setSubscriptionState,
     setSubscriptionError,
-    conditionForType,
   }
 })

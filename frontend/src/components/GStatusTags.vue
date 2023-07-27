@@ -39,15 +39,15 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapActions } from 'pinia'
+import { useConfigStore } from '@/store/config'
+import { shootItem } from '@/mixins/shootItem'
+
 import GStatusTag from '@/components/GStatusTag.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
-
-import { shootItem } from '@/mixins/shootItem'
 
 import { objectsFromErrorCodes, errorCodesFromArray } from '@/utils/errorCodes'
 
 import sortBy from 'lodash/sortBy'
-import { useShootStore } from '@/store'
 
 export default {
   components: {
@@ -66,12 +66,16 @@ export default {
   },
   computed: {
     conditions () {
-      return sortBy(this.shootReadiness
+      const conditions = this.shootReadiness
         .filter(condition => !!condition.lastTransitionTime)
-        .map(condition => ({
-          ...this.conditionForType(condition.type),
-          ...condition,
-        })), 'sortOrder')
+        .map(condition => {
+          const conditiondDefaults = this.conditionForType(condition.type)
+          return {
+            ...conditiondDefaults,
+            ...condition,
+          }
+        })
+      return sortBy(conditions, 'sortOrder')
     },
     errorCodeObjects () {
       const allErrorCodes = errorCodesFromArray(this.conditions)
@@ -79,7 +83,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(useShootStore, [
+    ...mapActions(useConfigStore, [
       'conditionForType',
     ]),
   },
