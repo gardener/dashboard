@@ -6,6 +6,7 @@
 
 import { createPinia } from 'pinia'
 import { useCloudProfileStore } from '@/store/cloudProfile'
+import { firstItemMatchingVersionClassification } from '@/store/cloudProfile/helper'
 
 describe('stores', () => {
   describe('cloudProfile', () => {
@@ -379,6 +380,35 @@ describe('stores', () => {
           expect(expiredWorkerGroups).toBeInstanceOf(Array)
           expect(expiredWorkerGroups).toHaveLength(0)
         })
+      })
+    })
+
+    describe('helper', () => {
+      it('should select default item that matches version classification', () => {
+        const items = [
+          {
+            version: '1',
+            classification: 'deprecated',
+          },
+          {
+            version: '2',
+          },
+          {
+            version: '3',
+            classification: 'supported',
+          },
+        ]
+
+        let item = firstItemMatchingVersionClassification(items)
+        expect(item.version).toBe('3')
+
+        items.pop()
+        item = firstItemMatchingVersionClassification(items)
+        expect(item.version).toBe('2')
+
+        items.pop()
+        item = firstItemMatchingVersionClassification(items)
+        expect(item.version).toBe('1')
       })
     })
   })
