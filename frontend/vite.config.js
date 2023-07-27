@@ -173,9 +173,6 @@ export default defineConfig(({ command, mode }) => {
       statements: 39,
     }
 
-    // TODO: remove this once all test are migrated
-    coverage.functions = 14
-
     config.test = {
       include: ['__tests__/**/*.spec.js'],
       globals: true,
