@@ -56,7 +56,13 @@ SPDX-License-Identifier: Apache-2.0
               :completion-paths="['spec.properties.provider.properties.workers', 'spec.properties.provider.properties.infrastructureConfig']"
               hide-toolbar
               animate-on-appear
-            />
+              alert-banner-identifier="workerEditorWarning"
+            >
+              <template #modificationWarning>
+                By modifying the resource directly you may cause serious problems in your cluster.
+                We cannot guarantee that you can solve problems that result from using worker resource editor incorrectly.
+              </template>
+            </g-shoot-editor>
           </div>
         </v-window-item>
       </v-window>
