@@ -26,8 +26,16 @@ function hasStatusCode (statusCode, err) {
 }
 
 export function errorDetailsFromError (err) {
-  const errorCode = get(err, 'response.data.error.code', get(err, 'response.status'))
-  const detailedMessage = get(err, 'response.data.message', 'Request failed with code: ' + errorCode)
+  let errorCode = 'unknown'
+  let detailedMessage = 'An unknown error occurred: ' + JSON.stringify(err)
+
+  if (err.name === 'YAMLException') {
+    errorCode = 'YAMLException'
+    detailedMessage = 'YAML parsing failed with message: ' + err.message
+  } else if (err.name === 'FetchError') {
+    errorCode = get(err, 'response.data.error.code', get(err, 'response.status'))
+    detailedMessage = get(err, 'response.data.message', 'Request failed with code: ' + errorCode)
+  }
 
   return { errorCode, detailedMessage }
 }
