@@ -23,8 +23,8 @@ SPDX-License-Identifier: Apache-2.0
             Confirm Dialog
           </slot>
           <template v-if="$slots.affectedObjectName">
-            <span class="font-family-monospace font-weight-bold pl-2">
-              <slot name="affectedObjectName" />
+            <span class="font-family-monospace font-weight-bold">
+              &ZeroWidthSpace;<slot name="affectedObjectName" />
             </span>
           </template>
         </v-toolbar-title>
