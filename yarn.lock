@@ -975,7 +975,7 @@ __metadata:
     http-errors: ^2.0.0
     jest: ^27.5.1
     js-yaml: ^4.1.0
-    lightship: ^7.1.1
+    lightship: ^9.0.2
     lodash: ^4.17.21
     object-hash: ^3.0.0
     p-timeout: ^4.1.0
@@ -6704,15 +6704,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lightship@npm:^7.1.1":
-  version: 7.3.0
-  resolution: "lightship@npm:7.3.0"
+"lightship@npm:^9.0.2":
+  version: 9.0.2
+  resolution: "lightship@npm:9.0.2"
   dependencies:
     delay: ^5.0.0
     fastify: ^4.17.0
     roarr: ^7.15.0
     serialize-error: ^11.0.0
-  checksum: 5c7963bdb69c20d26d15d46de42db06aec03f42c145c406e78830733afea9d7243b9201d06eede4d941017ea58f97bb647517432704b995963b5036b788292bc
+  checksum: db84ef75830e8b54c039bbd06bf2a3eace6d958ff1a6b889febd92b079db43817f90f09b8552a1d3be456bc59ecd2b6a5660804ae0790915d498fcdc086da981
   languageName: node
   linkType: hard
 
