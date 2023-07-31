@@ -125,18 +125,10 @@ export default {
       return !isEqual(this.initialNewShootResource, shootResource)
     },
     async createShoot (shootResource) {
-      try {
-        await this.api.createShoot({ namespace: this.namespace, data: shootResource })
-        this.alert = {
-          type: 'success',
-          title: 'Cluster created',
-        }
-      } catch (err) {
-        this.alert = {
-          type: 'error',
-          title: 'Cluster create error',
-          message: err.message,
-        }
+      await this.api.createShoot({ namespace: this.namespace, data: shootResource })
+      this.alert = {
+        type: 'success',
+        title: 'Cluster created',
       }
     },
   },
