@@ -119,6 +119,7 @@ export default defineComponent({
   .comment {
     padding: 0;
     margin-bottom: 12px;
+    overflow: hidden;
   }
 
   .comment-header {
