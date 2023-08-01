@@ -131,6 +131,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
   .ticket-toolbar {
+    white-space: pre-wrap;
     padding-top: 10px;
     padding-bottom: 10px;
   }
