@@ -88,7 +88,7 @@ FROM node-scratch as dashboard-terminal-bootstrapper
 
 COPY --from=dashboard-terminal-bootstrapper-builder /app/dist .
 
-ENTRYPOINT [ "tini", "--", "node", "--require=/app/.pnp.cjs"]
+ENTRYPOINT [ "tini", "--", "node", "--require=/app/.pnp.cjs", "--loader=/app/.pnp.loader.mjs"]
 CMD ["main.js"]
 
 ############# dashboard-builder #############
@@ -120,5 +120,5 @@ FROM node-scratch as dashboard
 
 COPY --from=dashboard-builder /app/dist .
 
-ENTRYPOINT [ "tini", "--", "node", "--require=/app/.pnp.cjs"]
+ENTRYPOINT [ "tini", "--", "node", "--require=/app/.pnp.cjs", "--loader=/app/.pnp.loader.mjs"]
 CMD ["server.js"]
