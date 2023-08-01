@@ -46,7 +46,7 @@ export function createGuards (context) {
     return async (to, from, next) => {
       const { meta = {} } = to
       if (meta.public || to.name === 'Error') {
-        await shootStore.unsubscribe()
+        await shootStore.unsubscribeShoots()
         return next()
       }
 
@@ -72,14 +72,14 @@ export function createGuards (context) {
           case 'Secret': {
             await Promise.all([
               secretStore.fetchSecrets(),
-              shootStore.subscribe(),
+              shootStore.subscribeShoots(),
             ])
             break
           }
           case 'NewShoot':
           case 'NewShootEditor': {
             const promises = [
-              shootStore.subscribe(),
+              shootStore.subscribeShoots(),
             ]
             if (authzStore.canGetSecrets) {
               promises.push(secretStore.fetchSecrets())
@@ -107,7 +107,7 @@ export function createGuards (context) {
             })
 
             const promises = [
-              shootStore.subscribe(),
+              shootStore.subscribeShoots(),
             ]
 
             if (authzStore.canUseProjectTerminalShortcuts) {
@@ -120,13 +120,13 @@ export function createGuards (context) {
           case 'Administration': {
             await Promise.all([
               memberStore.fetchMembers(),
-              shootStore.subscribe(),
+              shootStore.subscribeShoots(),
             ])
             break
           }
           case 'Account':
           case 'Settings': {
-            await shootStore.unsubscribe()
+            await shootStore.unsubscribeShoots()
             break
           }
         }

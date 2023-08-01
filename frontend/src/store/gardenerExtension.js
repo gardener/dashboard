@@ -6,7 +6,10 @@
 
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+
 import { useApi } from '@/composables'
+import { useAppStore } from './app'
+
 import map from 'lodash/map'
 import flatMap from 'lodash/flatMap'
 import filter from 'lodash/filter'
@@ -17,6 +20,7 @@ import sortBy from 'lodash/sortBy'
 
 export const useGardenerExtensionStore = defineStore('gardenerExtension', () => {
   const api = useApi()
+  const appStore = useAppStore()
 
   const list = ref(null)
 
@@ -24,13 +28,21 @@ export const useGardenerExtensionStore = defineStore('gardenerExtension', () => 
     return list.value === null
   })
 
-  const gardenerExtensionsList = computed(() => {
+  const gardenerExtensionList = computed(() => {
     return list.value
   })
 
-  async function fetchGardenerExtensions () {
+  async function fetchData () {
     const response = await api.getGardenerExtensions()
     list.value = response.data
+  }
+
+  async function fetchGardenerExtensions () {
+    try {
+      await fetchData()
+    } catch (err) {
+      appStore.setError(err)
+    }
   }
 
   const sortedDnsProviderList = computed(() => {
@@ -66,7 +78,7 @@ export const useGardenerExtensionStore = defineStore('gardenerExtension', () => 
   return {
     list,
     isInitial,
-    gardenerExtensionsList,
+    gardenerExtensionList,
     fetchGardenerExtensions,
     sortedDnsProviderList,
     networkingTypes,

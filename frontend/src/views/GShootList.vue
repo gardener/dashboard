@@ -266,6 +266,7 @@ export default {
     GTableColumnSelection,
     GDataTableFooter,
   },
+  inject: ['logger'],
   beforeRouteEnter (to, from, next) {
     next(vm => {
       vm.cachedItems = null
@@ -702,7 +703,7 @@ export default {
     ...mapActions(useShootStore, [
       'setSelection',
       'setShootListFilter',
-      'subscribe',
+      'subscribeShoots',
       'sortItems',
       'searchItems',
       'setFocusMode',
@@ -714,8 +715,8 @@ export default {
           try {
             await this.setSelection(args.shootItem.metadata)
             this.dialog = args.action
-          } catch (error) {
-            // Currently not handled
+          } catch (err) {
+            this.logger('Failed to select shoot: %s', err.message)
           }
       }
     },
@@ -781,7 +782,7 @@ export default {
       ])
 
       if (key === 'onlyShootsWithIssues') {
-        await this.subscribe()
+        await this.subscribeShoots()
       }
     },
     isFilterActive (key) {

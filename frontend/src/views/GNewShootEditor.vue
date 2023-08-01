@@ -48,7 +48,7 @@ export default {
     GShootEditor: defineAsyncComponent(() => import('@/components/GShootEditor')),
     GConfirmDialog,
   },
-  inject: ['yaml', 'api', 'logger'],
+  inject: ['yaml', 'logger'],
   async beforeRouteLeave (to, from, next) {
     if (to.name === 'NewShoot') {
       try {
@@ -84,11 +84,19 @@ export default {
     }
   },
   computed: {
-    ...mapState(useAuthzStore, ['namespace']),
-    ...mapState(useShootStore, ['newShootResource', 'initialNewShootResource']),
+    ...mapState(useAuthzStore, [
+      'namespace',
+    ]),
+    ...mapState(useShootStore, [
+      'newShootResource',
+      'initialNewShootResource',
+    ]),
   },
   methods: {
-    ...mapActions(useShootStore, ['setNewShootResource']),
+    ...mapActions(useShootStore, [
+      'setNewShootResource',
+      'createShoot',
+    ]),
     ...mapActions(useAppStore, ['alert']),
     confirmEditorNavigation () {
       return this.$refs.confirmDialog.waitForConfirmation({
@@ -123,13 +131,6 @@ export default {
     async isShootContentDirty () {
       const shootResource = await this.getShootResource()
       return !isEqual(this.initialNewShootResource, shootResource)
-    },
-    async createShoot (shootResource) {
-      await this.api.createShoot({ namespace: this.namespace, data: shootResource })
-      this.alert = {
-        type: 'success',
-        title: 'Cluster created',
-      }
     },
   },
 }

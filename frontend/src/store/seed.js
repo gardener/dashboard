@@ -8,6 +8,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
 import { useApi } from '@/composables'
+import { useAppStore } from './app'
 
 import find from 'lodash/find'
 import get from 'lodash/get'
@@ -15,6 +16,7 @@ import keyBy from 'lodash/keyBy'
 
 export const useSeedStore = defineStore('seed', () => {
   const api = useApi()
+  const appStore = useAppStore()
 
   const list = ref(null)
 
@@ -26,9 +28,17 @@ export const useSeedStore = defineStore('seed', () => {
     return list.value
   })
 
-  async function fetchSeeds () {
+  async function fetchData () {
     const response = await api.getSeeds()
     list.value = response.data
+  }
+
+  async function fetchSeeds () {
+    try {
+      await fetchData()
+    } catch (err) {
+      appStore.setError(err)
+    }
   }
 
   function seedByName (name) {

@@ -212,9 +212,27 @@ export const useShootStore = defineStore('shoot', () => {
     return this.synchronize()
   }
 
+  function subscribeShoots (metadata) {
+    (async () => {
+      try {
+        await this.subscribe(metadata)
+      } catch (err) {
+        appStore.setError(err)
+      }
+    })()
+  }
+
   function unsubscribe () {
     closeSubscription()
     clearAll()
+  }
+
+  function unsubscribeShoots () {
+    try {
+      unsubscribe()
+    } catch (err) {
+      appStore.setError(err)
+    }
   }
 
   async function assignInfo (metadata) {
@@ -282,13 +300,17 @@ export const useShootStore = defineStore('shoot', () => {
     }
   }
 
-  function createShoot (data) {
+  async function createShoot (data) {
     const namespace = data.metadata.namespace || authzStore.namespace
-    return api.createShoot({ namespace, data })
+    const response = await api.createShoot({ namespace, data })
+    appStore.setSuccess('Cluster created')
+    return response
   }
 
-  function deleteShoot ({ namespace, name }) {
-    return api.deleteShoot({ namespace, name })
+  async function deleteShoot ({ namespace, name }) {
+    const response = await api.deleteShoot({ namespace, name })
+    appStore.setSuccess('Cluster marked for deletion')
+    return response
   }
 
   async function fetchInfo ({ name, namespace }) {
@@ -337,14 +359,22 @@ export const useShootStore = defineStore('shoot', () => {
 
   function setShootListFilters (value) {
     state.shootListFilters = value
-    state.filteredShoots = getFilteredItems(state, context)
+    updateFilteredShoots()
   }
 
   function setShootListFilter (data) {
     if (state.shootListFilters) {
       const { filter, value } = data
       state.shootListFilters[filter] = value
+      updateFilteredShoots()
+    }
+  }
+
+  function updateFilteredShoots () {
+    try {
       state.filteredShoots = getFilteredItems(state, context)
+    } catch (err) {
+      appStore.setError(err)
     }
   }
 
@@ -455,7 +485,7 @@ export const useShootStore = defineStore('shoot', () => {
     }
 
     state.shoots = shoots
-    state.filteredShoots = getFilteredItems(state, context)
+    updateFilteredShoots()
   }
 
   function receiveInfo ({ namespace, name, info }) {
@@ -507,7 +537,7 @@ export const useShootStore = defineStore('shoot', () => {
         logger.error('undhandled event type', event.type)
     }
     if (setFilteredItemsRequired) {
-      state.filteredShoots = getFilteredItems(state, context)
+      updateFilteredShoots()
     }
   }
 
@@ -535,7 +565,9 @@ export const useShootStore = defineStore('shoot', () => {
     clearStaleShoots,
     synchronize,
     subscribe,
+    subscribeShoots,
     unsubscribe,
+    unsubscribeShoots,
     handleEvent,
     createShoot,
     deleteShoot,

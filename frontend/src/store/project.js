@@ -20,10 +20,12 @@ import isObject from 'lodash/isObject'
 import mapKeys from 'lodash/mapKeys'
 import mapValues from 'lodash/mapValues'
 import replace from 'lodash/replace'
+import { useAppStore } from './app'
 
 export const useProjectStore = defineStore('project', () => {
   const logger = useLogger()
   const api = useApi()
+  const appStore = useAppStore()
   const authzStore = useAuthzStore()
 
   const list = ref(null)
@@ -143,9 +145,17 @@ export const useProjectStore = defineStore('project', () => {
     return get(project, 'metadata.name') || replace(namespace, /^garden-/, '')
   }
 
-  async function fetchProjects () {
+  async function fetchData () {
     const response = await api.getProjects()
     list.value = response.data
+  }
+
+  async function fetchProjects () {
+    try {
+      await fetchData()
+    } catch (err) {
+      appStore.setError(err)
+    }
   }
 
   async function createProject (obj) {
@@ -156,6 +166,7 @@ export const useProjectStore = defineStore('project', () => {
         data,
       },
     })
+    appStore.setSuccess('Project created')
     updateList(response.data)
   }
 
@@ -180,6 +191,7 @@ export const useProjectStore = defineStore('project', () => {
         data,
       },
     })
+    appStore.setSuccess('Project updated')
     updateList(response.data)
   }
 
@@ -188,6 +200,7 @@ export const useProjectStore = defineStore('project', () => {
     await api.deleteProject({
       namespace: metadata.namespace ?? namespace.value,
     })
+    appStore.setSuccess('Project deleted')
     // do not remove project from store as it will stay in termininating phase for a while
   }
 

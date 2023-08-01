@@ -29,10 +29,23 @@ export const useAppStore = defineStore('app', () => {
     alert.value = value
   }
 
+  function setSuccess (value) {
+    const message = typeof value === 'string'
+      ? value
+      : value?.message ?? ''
+    setAlert({
+      type: 'success',
+      message,
+    })
+  }
+
   function setError (value) {
+    const message = typeof value === 'string'
+      ? value
+      : value?.message ?? ''
     setAlert({
       type: 'error',
-      message: value?.message ?? '',
+      message,
     })
   }
 
@@ -50,5 +63,6 @@ export const useAppStore = defineStore('app', () => {
     updateSplitpaneResize,
     setAlert,
     setError,
+    setSuccess,
   }
 })

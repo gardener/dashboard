@@ -7,8 +7,9 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
-import { useAuthzStore } from './authz'
 import { useApi } from '@/composables'
+import { useAppStore } from './app'
+import { useAuthzStore } from './authz'
 
 import { isOwnSecret } from '@/utils'
 
@@ -23,6 +24,7 @@ function eqlNameAndNamespace ({ namespace, name }) {
 
 export const useSecretStore = defineStore('secret', () => {
   const api = useApi()
+  const appStore = useAppStore()
   const authzStore = useAuthzStore()
 
   const list = ref(null)
@@ -35,7 +37,7 @@ export const useSecretStore = defineStore('secret', () => {
     list.value = null
   }
 
-  async function fetchSecrets () {
+  async function fetchData () {
     const namespace = authzStore.namespace
     try {
       const response = await api.getCloudProviderSecrets({ namespace })
@@ -46,8 +48,26 @@ export const useSecretStore = defineStore('secret', () => {
     }
   }
 
+  async function fetchSecrets () {
+    try {
+      await fetchData()
+    } catch (err) {
+      appStore.setError(err)
+    }
+  }
+
   function getSecret ({ namespace, name }) {
     return find(list.value, eqlNameAndNamespace({ namespace, name }))
+  }
+
+  async function createSecret (obj) {
+    const {
+      namespace = authzStore.namespace,
+    } = obj.metadata
+    const response = await api.createCloudProviderSecret({ namespace, data: obj })
+
+    appStore.setSuccess('Cloud Provider secret created')
+    replace(response.data)
   }
 
   async function updateSecret (obj) {
@@ -56,20 +76,14 @@ export const useSecretStore = defineStore('secret', () => {
       name,
     } = obj.metadata
     const response = await api.updateCloudProviderSecret({ namespace, name, data: obj })
-    replace(response.data)
-  }
-
-  async function createSecret (obj) {
-    const {
-      namespace = authzStore.namespace,
-    } = obj.metadata
-    const response = await api.createCloudProviderSecret({ namespace, data: obj })
+    appStore.setSuccess('Cloud Provider secret updated')
     replace(response.data)
   }
 
   async function deleteSecret (name) {
     const namespace = authzStore.namespace
     const response = await api.deleteCloudProviderSecret({ namespace, name })
+    appStore.setSuccess('Cloud Provider secret deleted')
     remove(response.data)
   }
 

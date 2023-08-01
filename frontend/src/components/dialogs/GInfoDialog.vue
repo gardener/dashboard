@@ -93,14 +93,14 @@ export default {
     }
   },
   computed: {
-    ...mapState(useGardenerExtensionStore, {
-      gardenerExtensionsList: 'list',
-    }),
+    ...mapState(useGardenerExtensionStore, [
+      'gardenerExtensionList',
+    ]),
     ...mapState(useAuthnStore, [
       'isAdmin',
     ]),
     extensionsList () {
-      return sortBy(this.gardenerExtensionsList, 'name')
+      return sortBy(this.gardenerExtensionList, 'name')
     },
   },
   watch: {

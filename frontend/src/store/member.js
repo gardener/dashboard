@@ -6,11 +6,13 @@
 
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { useAuthzStore } from './authz'
 import { useApi } from '@/composables'
+import { useAuthzStore } from './authz'
+import { useAppStore } from './app'
 
 export const useMemberStore = defineStore('member', () => {
   const api = useApi()
+  const appStore = useAppStore()
   const authzStore = useAuthzStore()
 
   const list = ref(null)
@@ -23,7 +25,7 @@ export const useMemberStore = defineStore('member', () => {
     return list.value ?? []
   })
 
-  async function fetchMembers () {
+  async function fetchData () {
     const namespace = authzStore.namespace
     try {
       const response = await api.getMembers({ namespace })
@@ -34,28 +36,46 @@ export const useMemberStore = defineStore('member', () => {
     }
   }
 
+  async function fetchMembers () {
+    try {
+      await fetchData()
+    } catch (err) {
+      appStore.setError(err)
+    }
+  }
+
   async function addMember (data) {
     const namespace = authzStore.namespace
     const response = await api.addMember({ namespace, data })
+    appStore.setSuccess('Member added')
     list.value = response.data
   }
 
   async function updateMember (name, data) {
     const namespace = authzStore.namespace
     const response = await api.updateMember({ namespace, name, data })
+    appStore.setSuccess('Member updated')
     list.value = response.data
   }
 
   async function deleteMember (name) {
     const namespace = authzStore.namespace
     const response = await api.deleteMember({ namespace, name })
+    appStore.setSuccess('Member deleted')
     list.value = response.data
   }
 
   async function resetServiceAccount (name) {
-    const namespace = authzStore.namespace
-    const response = await api.resetServiceAccount({ namespace, name })
-    list.value = response.data
+    try {
+      const namespace = authzStore.namespace
+      const response = await api.resetServiceAccount({ namespace, name })
+      appStore.setSuccess('Service Account has been reset')
+      list.value = response.data
+    } catch (err) {
+      appStore.setError({
+        message: `Failed to reset Service Account: ${err.message}`,
+      })
+    }
   }
 
   function $reset () {
