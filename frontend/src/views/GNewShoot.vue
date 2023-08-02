@@ -223,7 +223,7 @@ export default {
     GManageControlPlaneHighAvailability,
     GToolbar,
   },
-  inject: ['api', 'logger'],
+  inject: ['logger'],
   async beforeRouteLeave (to, from, next) {
     if (!this.sortedInfrastructureKindList.length) {
       return next()
@@ -305,7 +305,10 @@ export default {
     }
   },
   methods: {
-    ...mapActions(useShootStore, ['setNewShootResource']),
+    ...mapActions(useShootStore, [
+      'createShoot',
+      'setNewShootResource',
+    ]),
     ...mapActions(useShootStagingStore, [
       'setClusterConfiguration',
     ]),
@@ -540,13 +543,6 @@ export default {
       const noHibernationSchedule = get(shootResource, 'metadata.annotations["dashboard.garden.sapcloud.io/no-hibernation-schedule"]', false)
 
       await this.hibernationSchedule.dispatch('setScheduleData', { hibernationSchedule, noHibernationSchedule, purpose })
-    },
-    async createShoot (shootResource) {
-      await this.api.createShoot({ namespace: this.namespace, data: shootResource })
-      this.alert = {
-        type: 'success',
-        title: 'Cluster created',
-      }
     },
     async createClicked () {
       const shootResource = await this.updateShootResourceWithUIComponents()
