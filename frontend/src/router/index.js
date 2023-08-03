@@ -82,10 +82,7 @@ export function createRouter () {
   router.onError(err => {
     logger.error('Router error:', err)
     appStore.loading = false
-    appStore.alert = {
-      type: 'error',
-      message: err.message,
-    }
+    appStore.setError(err)
     router.push({ name: 'Error' })
   })
 
