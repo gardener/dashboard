@@ -37,7 +37,7 @@ export const useSecretStore = defineStore('secret', () => {
     list.value = null
   }
 
-  async function fetchData () {
+  async function fetchSecrets () {
     const namespace = authzStore.namespace
     try {
       const response = await api.getCloudProviderSecrets({ namespace })
@@ -45,14 +45,6 @@ export const useSecretStore = defineStore('secret', () => {
     } catch (err) {
       $reset()
       throw err
-    }
-  }
-
-  async function fetchSecrets () {
-    try {
-      await fetchData()
-    } catch (err) {
-      appStore.setError(err)
     }
   }
 

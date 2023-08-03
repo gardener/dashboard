@@ -6,10 +6,12 @@
 
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+
 import { useApi } from '@/composables'
 import { useConfigStore } from './config'
 import { useAuthnStore } from './authn'
 import { useProjectStore } from './project'
+
 import { canI } from '@/utils'
 
 export const useAuthzStore = defineStore('authz', () => {
@@ -130,13 +132,12 @@ export const useAuthzStore = defineStore('authz', () => {
   })
 
   async function fetchRules (namespace) {
-    if (spec.value && spec.value.namespace === namespace) {
-      return
+    if (namespace && spec.value?.namespace !== namespace) {
+      const body = { namespace }
+      const response = await api.getSubjectRules(body)
+      spec.value = body
+      status.value = response.data
     }
-    const body = { namespace }
-    const response = await api.getSubjectRules(body)
-    spec.value = body
-    status.value = response.data
   }
 
   function $reset () {
