@@ -10,6 +10,7 @@ SPDX-License-Identifier: Apache-2.0
   <v-tooltip
     v-else
     location="top"
+    :open-delay="50"
   >
     <template #activator="{ props }">
       <div

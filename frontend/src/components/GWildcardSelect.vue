@@ -27,13 +27,14 @@ SPDX-License-Identifier: Apache-2.0
             ref="wildCardStart"
             v-model="wildcardVariablePartPrefix"
             density="compact"
-            class="mb-1 mr-1 text-field"
+            class="mb-1 mr-1 selection-text-field"
             flat
             variant="outlined"
             color="primary"
             hide-details
             @click.stop="$refs.wildCardStart.focus()"
             @mousedown.stop="$refs.wildCardStart.focus()"
+            @input="onInput"
           />
           <span>{{ item.raw.value }}</span>
           <v-text-field
@@ -41,7 +42,7 @@ SPDX-License-Identifier: Apache-2.0
             ref="wildCardEnd"
             v-model="wildcardVariablePartSuffix"
             density="compact"
-            class="mb-1 ml-1 text-field"
+            class="mb-1 ml-1 selection-text-field"
             flat
             variant="outlined"
             color="primary"
@@ -208,8 +209,15 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.text-field {
+.selection-text-field {
   width: 100px;
+
+  /* vuetify hides textfields inside v-select selection slot */
+  :deep(input) {
+    opacity: 1 !important;
+    pointer-events: all !important;
+    caret-color: auto !important;
+  }
 }
 
 </style>

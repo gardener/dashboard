@@ -21,8 +21,12 @@ SPDX-License-Identifier: Apache-2.0
         </router-link>
       </template>
       <template v-if="cell.header.key === 'name'">
-        <v-row class="pa-0 ma-0 fill-height flex-nowrap align-center">
-          <v-col class="grow pa-0 ma-0">
+        <v-row
+          class="pa-0 ma-0 fill-height flex-nowrap align-center"
+        >
+          <v-col
+            class="flex-grow-1 flex-shrink-0 pa-0 ma-0"
+          >
             <g-auto-hide right>
               <template #activator>
                 <router-link
@@ -35,7 +39,9 @@ SPDX-License-Identifier: Apache-2.0
               <g-copy-btn :clipboard-text="shootName" />
             </g-auto-hide>
           </v-col>
-          <v-col class="shrink pa-0 ma-0">
+          <v-col
+            class="flex-grow-0 flex-shrink-1 pa-0 ma-0"
+          >
             <g-shoot-messages
               :shoot-item="shootItem"
             />

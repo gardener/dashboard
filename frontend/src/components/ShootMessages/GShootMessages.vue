@@ -23,11 +23,11 @@ SPDX-License-Identifier: Apache-2.0
       />
     </template>
     <template #text>
-      <v-list
+      <g-list
         density="compact"
         class="py-1"
       >
-        <v-list-item
+        <g-list-item
           v-for="shootMessage in shootMessages"
           :key="shootMessage.key"
         >
@@ -37,13 +37,15 @@ SPDX-License-Identifier: Apache-2.0
               :color="colorForSeverity(shootMessage.severity)"
             />
           </template>
-          <component
-            :is="shootMessage.component.name"
-            v-bind="shootMessage.component.props"
-            class="g-message"
-          />
-        </v-list-item>
-      </v-list>
+          <g-list-item-content>
+            <component
+              :is="shootMessage.component.name"
+              v-bind="shootMessage.component.props"
+              class="g-message"
+            />
+          </g-list-item-content>
+        </g-list-item>
+      </g-list>
     </template>
   </g-popover>
 </template>

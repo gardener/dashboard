@@ -201,7 +201,7 @@ export default {
     GAlertBanner,
   },
   mixins: [shootItem],
-  inject: ['yaml', 'api', 'colorMode'],
+  inject: ['yaml', 'api'],
   props: {
     alertBannerIdentifier: {
       type: String,
@@ -310,7 +310,7 @@ export default {
       return !this.isReadOnly && !this.hideToolbar
     },
     theme () {
-      return this.colorMode === 'dark'
+      return this.$vuetify.theme.current.dark
         ? 'seti'
         : 'default'
     },

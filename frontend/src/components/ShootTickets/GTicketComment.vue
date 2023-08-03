@@ -40,6 +40,7 @@ SPDX-License-Identifier: Apache-2.0
       <!-- eslint-disable vue/no-v-html -->
       <div
         class="wrap-text comment-body"
+        :class="gThemeClass"
         v-html="commentHtml"
       />
       <!-- eslint-enable vue/no-v-html -->
@@ -106,6 +107,9 @@ export default defineComponent({
     htmlUrl () {
       return get(this.comment, 'data.html_url')
     },
+    gThemeClass () {
+      return this.$vuetify.theme.current.dark ? 'g-theme-dark' : 'g-theme-light'
+    },
   },
 })
 </script>
@@ -113,8 +117,11 @@ export default defineComponent({
 <style lang="scss" scoped>
   @import 'vuetify/settings';
 
-  $gh-code-background-color: map-get($grey, 'lighten-4');
-  $gh-code-color: map-get($grey, 'darken-4');
+  $gh-code-background-color-light: map-get($grey, 'lighten-3');
+  $gh-code-background-color-dark: map-get($grey, 'darken-3');
+
+  $gh-code-color-light: map-get($grey, 'darken-4');
+  $gh-code-color-dark: map-get($grey, 'lighten-4');
 
   .comment {
     padding: 0;
@@ -129,6 +136,34 @@ export default defineComponent({
 
     padding: 4px 8px;
     margin-bottom: 0;
+  }
+
+  .g-theme-dark {
+    :deep(pre) {
+      background-color: $gh-code-background-color-dark;
+      & > code {
+        color: $gh-code-color-dark;
+      }
+    }
+
+    :deep(code) {
+      color: $gh-code-color-dark;
+      background-color: $gh-code-background-color-dark;
+    }
+  }
+
+  .g-theme-light {
+    :deep(pre) {
+      background-color: $gh-code-background-color-light;
+      & > code {
+        color: $gh-code-color-light;
+      }
+    }
+
+    :deep(code) {
+      color: $gh-code-color-light;
+      background-color: $gh-code-background-color-light;
+    }
   }
 
   .comment-body {
@@ -146,10 +181,8 @@ export default defineComponent({
       border-radius: 3px;
       white-space: pre;
       overflow: auto;
-      background-color: $gh-code-background-color;
       & > code {
         padding: 0;
-        color: $gh-code-color;
         background-color: transparent;
         background-attachment: scroll;
         font-weight: normal;
@@ -165,8 +198,6 @@ export default defineComponent({
       padding: .2em .4em;
       border-radius: 3px;
       font-weight: normal;
-      color: $gh-code-color;
-      background-color: $gh-code-background-color;
     }
 
     :deep(img) {
