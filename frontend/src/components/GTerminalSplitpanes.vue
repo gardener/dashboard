@@ -40,7 +40,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { useLocalStorage } from '@vueuse/core'
 import { mapState } from 'pinia'
 
@@ -65,7 +64,7 @@ function terminatedSessionIds (uuids, terminals) {
   return difference(uuids, terminalSessionIds)
 }
 
-export default defineComponent({
+export default {
   components: {
     GSplitpane,
     GTerminal,
@@ -296,6 +295,5 @@ export default defineComponent({
       } // ignore unknown orientations
     },
   },
-})
-
+}
 </script>
