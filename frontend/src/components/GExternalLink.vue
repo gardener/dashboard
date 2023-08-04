@@ -21,9 +21,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
-export default defineComponent({
+export default {
   inject: ['sanitizeUrl'],
   props: {
     url: {
@@ -43,5 +41,5 @@ export default defineComponent({
       return this.title ?? this.url
     },
   },
-})
+}
 </script>

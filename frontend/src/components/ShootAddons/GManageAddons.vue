@@ -36,8 +36,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
 import { mapState } from 'pinia'
 import filter from 'lodash/filter'
 import cloneDeep from 'lodash/cloneDeep'
@@ -49,7 +47,7 @@ import {
   useProjectStore,
 } from '@/store'
 
-export default defineComponent({
+export default {
   props: {
     createMode: {
       type: Boolean,
@@ -89,7 +87,7 @@ export default defineComponent({
         : 'text-secondary'
     },
   },
-})
+}
 </script>
 
 <style lang="scss" scoped>

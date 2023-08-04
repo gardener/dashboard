@@ -49,7 +49,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { mapState } from 'pinia'
 
 import { useConfigStore } from '@/store'
@@ -67,7 +66,7 @@ const AvatarEnum = {
   NONE: 'none',
 }
 
-export default defineComponent({
+export default {
   components: {
     GTimeString,
     GExternalLink,
@@ -111,7 +110,7 @@ export default defineComponent({
       return this.$vuetify.theme.current.dark ? 'g-theme-dark' : 'g-theme-light'
     },
   },
-})
+}
 </script>
 
 <style lang="scss" scoped>

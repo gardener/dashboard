@@ -40,14 +40,13 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { mapState } from 'pinia'
 import { useConfigStore } from '@/store'
 import GDialog from '@/components/dialogs/GDialog.vue'
 import GActionButton from '@/components/GActionButton.vue'
 import { transformHtml } from '@/utils'
 
-export default defineComponent({
+export default {
   components: {
     GDialog,
     GActionButton,
@@ -65,5 +64,5 @@ export default defineComponent({
       this.$refs.gDialog.showDialog()
     },
   },
-})
+}
 </script>

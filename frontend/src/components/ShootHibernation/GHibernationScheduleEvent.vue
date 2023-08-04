@@ -83,7 +83,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import join from 'lodash/join'
 import split from 'lodash/split'
 import get from 'lodash/get'
@@ -112,7 +111,7 @@ const validationErrors = {
   },
 }
 
-export default defineComponent({
+export default {
   props: {
     scheduleEvent: {
       type: Object,
@@ -301,5 +300,5 @@ export default defineComponent({
       }
     },
   },
-})
+}
 </script>

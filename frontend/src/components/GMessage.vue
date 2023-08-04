@@ -35,9 +35,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
-export default defineComponent({
+export default {
   props: {
     message: {
       type: String,
@@ -82,7 +80,7 @@ export default defineComponent({
       },
     },
   },
-})
+}
 </script>
 
 <style lang="scss" scoped>

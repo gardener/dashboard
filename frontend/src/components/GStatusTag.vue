@@ -76,7 +76,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { mapState } from 'pinia'
 
 import GShootMessageDetails from '@/components/GShootMessageDetails.vue'
@@ -88,7 +87,7 @@ import isEmpty from 'lodash/isEmpty'
 import filter from 'lodash/filter'
 import { useAuthnStore } from '@/store'
 
-export default defineComponent({
+export default {
   components: {
     GShootMessageDetails,
   },
@@ -231,7 +230,7 @@ export default defineComponent({
       return true
     },
   },
-})
+}
 </script>
 
 <style lang="scss" scoped>

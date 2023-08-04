@@ -14,12 +14,10 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
 import contrast from 'get-contrast'
 import get from 'lodash/get'
 
-export default defineComponent({
+export default {
   props: {
     label: {
       type: Object,
@@ -35,7 +33,7 @@ export default defineComponent({
       }
     },
   },
-})
+}
 </script>
 
 <style lang="scss" scoped>

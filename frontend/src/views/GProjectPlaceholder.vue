@@ -11,12 +11,12 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { ref, computed, watch, onMounted, defineComponent } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthzStore, useProjectStore } from '@/store'
 import GProjectError from '@/views/GProjectError.vue'
 
-export default defineComponent({
+export default {
   components: {
     GProjectError,
   },
@@ -91,5 +91,5 @@ export default defineComponent({
       componentProperties,
     }
   },
-})
+}
 </script>

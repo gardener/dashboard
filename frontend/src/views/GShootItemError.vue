@@ -15,7 +15,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { mapState } from 'pinia'
 
 import { useProjectStore } from '@/store'
@@ -23,7 +22,7 @@ import GError from '@/components/GError.vue'
 
 import get from 'lodash/get'
 
-export default defineComponent({
+export default {
   components: {
     GError,
   },
@@ -73,5 +72,5 @@ export default defineComponent({
       }
     },
   },
-})
+}
 </script>

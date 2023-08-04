@@ -26,11 +26,9 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
 import { getTimestampFormatted } from '@/utils'
 
-export default defineComponent({
+export default {
   props: {
     triggeredTime: {
       type: String,
@@ -60,5 +58,5 @@ export default defineComponent({
       return getTimestampFormatted(this.triggeredTime)
     },
   },
-})
+}
 </script>

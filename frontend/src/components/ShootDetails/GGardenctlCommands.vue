@@ -51,7 +51,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { mapState } from 'pinia'
 
 import { useAuthnStore, useConfigStore, useProjectStore } from '@/store'
@@ -67,7 +66,7 @@ import { shootItem } from '@/mixins/shootItem'
 
 import get from 'lodash/get'
 
-export default defineComponent({
+export default {
   components: {
     GListItem,
     GListItemContent,
@@ -163,7 +162,7 @@ export default defineComponent({
       this.expansionPanel[index] = !this.expansionPanel[index]
     },
   },
-})
+}
 </script>
 
 <style scoped>

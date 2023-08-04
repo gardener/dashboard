@@ -33,15 +33,13 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
-export default defineComponent({
+export default {
   computed: {
     clusterName () {
       return this.$route.params.name
     },
   },
-})
+}
 </script>
 
 <style lang="scss" scoped>

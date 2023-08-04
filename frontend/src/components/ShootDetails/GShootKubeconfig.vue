@@ -82,7 +82,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import download from 'downloadjs'
 
 import { shootItem } from '@/mixins/shootItem'
@@ -95,7 +94,7 @@ import GCodeBlock from '@/components/GCodeBlock.vue'
 import GGardenloginInfo from '@/components/GGardenloginInfo.vue'
 import GStaticTokenKubeconfigConfiguration from '@/components/GStaticTokenKubeconfigConfiguration.vue'
 
-export default defineComponent({
+export default {
   components: {
     GListItem,
     GListItemContent,
@@ -166,5 +165,5 @@ export default defineComponent({
       }
     },
   },
-})
+}
 </script>

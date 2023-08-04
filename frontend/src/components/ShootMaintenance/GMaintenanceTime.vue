@@ -1,4 +1,3 @@
-import { defineComponent } from 'vue'
 <!--
 SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 

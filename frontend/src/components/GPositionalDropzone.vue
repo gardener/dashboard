@@ -123,12 +123,11 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { mapState } from 'pinia'
 import { useTerminalStore } from '@/store'
 import { PositionEnum } from '@/lib/g-symbol-tree'
 
-export default defineComponent({
+export default {
   props: {
     uuid: {
       type: String,
@@ -219,7 +218,7 @@ export default defineComponent({
       this.$emit('droppedAt', this.currentPosition)
     },
   },
-})
+}
 </script>
 
 <style lang="scss" scoped>

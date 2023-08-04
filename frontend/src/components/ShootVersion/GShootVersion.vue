@@ -95,7 +95,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { mapState, mapActions } from 'pinia'
 
 import { useAuthzStore, useCloudProfileStore } from '@/store'
@@ -110,7 +109,7 @@ import { errorDetailsFromError } from '@/utils/error'
 import get from 'lodash/get'
 import find from 'lodash/find'
 
-export default defineComponent({
+export default {
   components: {
     GShootVersionUpdate,
     GDialog,
@@ -219,7 +218,7 @@ export default defineComponent({
       this.$refs.shootVersionUpdate.reset()
     },
   },
-})
+}
 </script>
 
 <style lang="scss" scoped>

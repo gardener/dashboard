@@ -12,9 +12,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
-export default defineComponent({
+export default {
   props: {
     constraintCaption: {
       type: String,
@@ -25,5 +23,5 @@ export default defineComponent({
       required: true,
     },
   },
-})
+}
 </script>

@@ -47,7 +47,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import GVendorIcon from '@/components/GVendorIcon'
 import GMultiMessage from '@/components/GMultiMessage'
 import { required } from '@vuelidate/validators'
@@ -67,7 +66,7 @@ const validationErrors = {
   },
 }
 
-export default defineComponent({
+export default {
   components: {
     GVendorIcon,
     GMultiMessage,
@@ -222,5 +221,5 @@ export default defineComponent({
       return join(itemDescription, ' | ')
     },
   },
-})
+}
 </script>

@@ -24,7 +24,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { mapActions } from 'pinia'
 import { useAppStore } from '@/store'
 
@@ -32,7 +31,7 @@ import { shootItem } from '@/mixins/shootItem'
 
 import get from 'lodash/get'
 
-export default defineComponent({
+export default {
   mixins: [shootItem],
   inject: ['api', 'logger'],
   data () {
@@ -71,5 +70,5 @@ export default defineComponent({
       this.retryingOperation = false
     },
   },
-})
+}
 </script>

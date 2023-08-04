@@ -26,11 +26,9 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
 import GTimeString from '@/components/GTimeString.vue'
 
-export default defineComponent({
+export default {
   components: {
     GTimeString,
   },
@@ -48,5 +46,5 @@ export default defineComponent({
       required: true,
     },
   },
-})
+}
 </script>

@@ -73,14 +73,13 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import trim from 'lodash/trim'
 import { getValidationErrors } from '@/utils'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import { wildcardObjectsFromStrings, bestMatchForString } from '@/utils/wildcard'
 
-export default defineComponent({
+export default {
   props: {
     wildcardSelectItems: {
       type: Array,
@@ -205,7 +204,7 @@ export default defineComponent({
   validations () {
     return this.validators
   },
-})
+}
 </script>
 
 <style lang="scss" scoped>

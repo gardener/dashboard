@@ -35,15 +35,13 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent, nextTick } from 'vue'
-
 import { useAppStore } from '@/store'
 
 import { Splitpanes, Pane } from 'splitpanes'
 
 import 'splitpanes/dist/splitpanes.css'
 
-export default defineComponent({
+export default {
   components: {
     Splitpanes,
     Pane,
@@ -60,7 +58,7 @@ export default defineComponent({
     function resize () {
       // use nextTick as splitpanes library needs to be finished with rendering because fitAddon relies on
       // dynamic dimensions calculated via css, which do not return correct values before rendering is complete
-      nextTick(store.updateSplitpaneResize)
+      this.$nextTick(store.updateSplitpaneResize)
     }
 
     return {
@@ -79,8 +77,7 @@ export default defineComponent({
       return isSplitpaneTree
     },
   },
-})
-
+}
 </script>
 
 <style lang="scss">

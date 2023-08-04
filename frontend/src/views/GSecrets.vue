@@ -252,8 +252,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent, mergeProps } from 'vue'
-
 import { mapGetters, mapActions } from 'pinia'
 import {
   isOwnSecret,
@@ -287,7 +285,7 @@ import mapValues from 'lodash/mapValues'
 import orderBy from 'lodash/orderBy'
 import some from 'lodash/some'
 
-export default defineComponent({
+export default {
   components: {
     GSecretDialogWrapper,
     GTableColumnSelection,
@@ -297,6 +295,7 @@ export default defineComponent({
     GToolbar,
     GDataTableFooter,
   },
+  inject: ['mergeProps'],
   data () {
     return {
       selectedSecret: {},
@@ -571,7 +570,6 @@ export default defineComponent({
       const tableKeys = mapKeys(sortableTableHeaders, ({ key }) => key)
       return mapValues(tableKeys, () => () => 0)
     },
-    mergeProps,
   },
-})
+}
 </script>

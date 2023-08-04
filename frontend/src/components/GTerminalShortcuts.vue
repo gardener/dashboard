@@ -85,7 +85,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { mapActions } from 'pinia'
 
 import GListItem from './GListItem.vue'
@@ -112,7 +111,7 @@ function shootSelectorFilter (shortcuts, shootItem) {
   })
 }
 
-export default defineComponent({
+export default {
   components: {
     GListItem,
     GListItemContent,
@@ -157,5 +156,5 @@ export default defineComponent({
       this.$emit('addTerminalShortcut', shortcut)
     },
   },
-})
+}
 </script>

@@ -33,11 +33,9 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
 import { shootItem } from '@/mixins/shootItem'
 
-export default defineComponent({
+export default {
   mixins: [shootItem],
-})
+}
 </script>

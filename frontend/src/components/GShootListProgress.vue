@@ -15,11 +15,9 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
 import { shootSubscription } from '@/mixins/shootSubscription'
 
-export default defineComponent({
+export default {
   mixins: [shootSubscription],
   computed: {
     indeterminate () {
@@ -32,5 +30,5 @@ export default defineComponent({
       return this.kind === 'alert-connect' ? 100 : 0
     },
   },
-})
+}
 </script>

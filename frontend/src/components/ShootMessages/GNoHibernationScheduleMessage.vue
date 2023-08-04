@@ -21,9 +21,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
-export default defineComponent({
+export default {
   props: {
     purposeText: {
       type: String,
@@ -42,5 +40,5 @@ export default defineComponent({
       required: true,
     },
   },
-})
+}
 </script>

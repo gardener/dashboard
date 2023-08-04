@@ -67,7 +67,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { mapState } from 'pinia'
 import {
   useAuthnStore,
@@ -75,7 +74,7 @@ import {
 } from '@/store'
 import { shootItem } from '@/mixins/shootItem'
 
-export default defineComponent({
+export default {
   mixins: [shootItem],
   props: {
     modelValue: {
@@ -128,5 +127,5 @@ export default defineComponent({
   mounted () {
     this.$emit('valid', this.valid)
   },
-})
+}
 </script>

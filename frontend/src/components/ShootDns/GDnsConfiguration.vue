@@ -21,8 +21,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
 import { mapActions, mapGetters } from 'pinia'
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GManageShootDns from '@/components/ShootDns/GManageDns'
@@ -34,7 +32,7 @@ import {
   useShootStagingStore,
 } from '@/store'
 
-export default defineComponent({
+export default {
   components: {
     GActionButtonDialog,
     GManageShootDns,
@@ -82,5 +80,5 @@ export default defineComponent({
       this.componentKey = uuidv4() // force re-render
     },
   },
-})
+}
 </script>
