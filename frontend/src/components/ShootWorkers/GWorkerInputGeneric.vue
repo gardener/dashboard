@@ -72,13 +72,13 @@ SPDX-License-Identifier: Apache-2.0
         v-if="canDefineVolumeSize"
         class="smallInput"
       >
-        <g-size-input
+        <g-volume-size-input
           v-model="volumeSize"
           :min="minimumVolumeSize"
           color="primary"
           :error-messages="getErrorMessages('volumeSize')"
           label="Volume Size"
-          @input="onInputVolumeSize"
+          @update:model-value="onInputVolumeSize"
           @blur="v$.volumeSize.$touch()"
         />
       </div>
@@ -91,7 +91,7 @@ SPDX-License-Identifier: Apache-2.0
           type="number"
           label="Autoscaler Min."
           variant="underlined"
-          @input="onInputminimum"
+          @input="onInputMinimum"
           @blur="v$.worker.minimum.$touch()"
         />
       </div>
@@ -104,7 +104,7 @@ SPDX-License-Identifier: Apache-2.0
           type="number"
           label="Autoscaler Max."
           variant="underlined"
-          @input="onInputmaximum"
+          @input="onInputMaximum"
           @blur="v$.worker.maximum.$touch()"
         />
       </div>
@@ -159,7 +159,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapActions } from 'pinia'
-import GSizeInput from '@/components/ShootWorkers/GVolumeSizeInput'
+import GVolumeSizeInput from '@/components/ShootWorkers/GVolumeSizeInput'
 import GMachineType from '@/components/ShootWorkers/GMachineType'
 import GVolumeType from '@/components/ShootWorkers/GVolumeType'
 import GMachineImage from '@/components/ShootWorkers/GMachineImage'
@@ -215,7 +215,7 @@ const validationErrors = {
 
 export default {
   components: {
-    GSizeInput,
+    GVolumeSizeInput,
     GMachineType,
     GVolumeType,
     GMachineImage,
@@ -545,11 +545,11 @@ export default {
       this.v$.volumeSize.$touch()
       this.validateInput()
     },
-    onInputminimum () {
+    onInputMinimum () {
       this.v$.worker.minimum.$touch()
       this.validateInput()
     },
-    onInputmaximum () {
+    onInputMaximum () {
       this.v$.worker.maximum.$touch()
       this.validateInput()
     },
