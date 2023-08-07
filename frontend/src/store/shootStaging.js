@@ -21,7 +21,6 @@ import omit from 'lodash/omit'
 import filter from 'lodash/filter'
 import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
-import every from 'lodash/every'
 import find from 'lodash/find'
 import { useSecretStore } from './secret'
 
