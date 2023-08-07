@@ -24,11 +24,9 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
 import toUpper from 'lodash/toUpper'
 
-export default defineComponent({
+export default {
   props: {
     purpose: {
       type: String,
@@ -62,7 +60,7 @@ export default defineComponent({
       }
     },
   },
-})
+}
 </script>
 
 <style lang="scss" scoped>

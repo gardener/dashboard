@@ -22,8 +22,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GManageShootAddons from '@/components/ShootAddons/GManageAddons'
 import { errorDetailsFromError } from '@/utils/error'
@@ -31,7 +29,7 @@ import { shootItem } from '@/mixins/shootItem'
 import get from 'lodash/get'
 import cloneDeep from 'lodash/cloneDeep'
 
-export default defineComponent({
+export default {
   components: {
     GActionButtonDialog,
     GManageShootAddons,
@@ -63,5 +61,5 @@ export default defineComponent({
       this.$refs.addons.updateAddons(addons)
     },
   },
-})
+}
 </script>

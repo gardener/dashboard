@@ -25,7 +25,7 @@ export const useMemberStore = defineStore('member', () => {
     return list.value ?? []
   })
 
-  async function fetchData () {
+  async function fetchMembers () {
     const namespace = authzStore.namespace
     try {
       const response = await api.getMembers({ namespace })
@@ -33,14 +33,6 @@ export const useMemberStore = defineStore('member', () => {
     } catch (err) {
       $reset()
       throw err
-    }
-  }
-
-  async function fetchMembers () {
-    try {
-      await fetchData()
-    } catch (err) {
-      appStore.setError(err)
     }
   }
 

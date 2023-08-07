@@ -46,7 +46,7 @@ export function createGuards (context) {
     return async (to, from, next) => {
       const { meta = {} } = to
       if (meta.public || to.name === 'Error') {
-        await shootStore.unsubscribeShoots()
+        shootStore.unsubscribeShoots()
         return next()
       }
 
@@ -64,32 +64,32 @@ export function createGuards (context) {
 
         if (namespace && namespace !== '_all' && !projectStore.namespaces.includes(namespace)) {
           authzStore.$reset()
-          logger.error('User %s has no authorization for namespace %s', authnStore.username, namespace)
+          const message = `User ${authnStore.username} has no authorization for namespace ${namespace}`
+          logger.error(message)
+          throw Object.assign(new Error(message), {
+            status: 403,
+            reason: 'Forbidden',
+          })
         }
 
         switch (to.name) {
           case 'Secrets':
           case 'Secret': {
-            await Promise.all([
-              secretStore.fetchSecrets(),
-              shootStore.subscribeShoots(),
-            ])
+            shootStore.subscribeShoots()
+            await secretStore.fetchSecrets()
             break
           }
           case 'NewShoot':
           case 'NewShootEditor': {
-            const promises = [
-              shootStore.subscribeShoots(),
-            ]
+            shootStore.subscribeShoots()
             if (authzStore.canGetSecrets) {
-              promises.push(secretStore.fetchSecrets())
+              await secretStore.fetchSecrets()
             }
-            await Promise.all(promises)
 
             const namespaceChanged = from.params.namespace !== to.params.namespace
             const toNewShoot = from.name !== 'NewShoot' && from.name !== 'NewShootEditor'
             if (namespaceChanged || toNewShoot) {
-              await shootStore.resetNewShootResource()
+              shootStore.resetNewShootResource()
             }
             break
           }
@@ -106,34 +106,28 @@ export function createGuards (context) {
               ...shootListFilter.value,
             })
 
-            const promises = [
-              shootStore.subscribeShoots(),
-            ]
-
+            shootStore.subscribeShoots()
             if (authzStore.canUseProjectTerminalShortcuts) {
-              promises.push(terminalStore.ensureProjectTerminalShortcutsLoaded())
+              await terminalStore.ensureProjectTerminalShortcutsLoaded()
             }
-            await Promise.all(promises)
             break
           }
           case 'Members':
           case 'Administration': {
-            await Promise.all([
-              memberStore.fetchMembers(),
-              shootStore.subscribeShoots(),
-            ])
+            shootStore.subscribeShoots()
+            await memberStore.fetchMembers()
             break
           }
           case 'Account':
           case 'Settings': {
-            await shootStore.unsubscribeShoots()
+            shootStore.unsubscribeShoots()
             break
           }
         }
-        next()
       } catch (err) {
-        logger.error(err.message)
-        next(err)
+        appStore.setRouterError(err)
+      } finally {
+        next()
       }
     }
   }

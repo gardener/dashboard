@@ -186,7 +186,6 @@ function onToggleFilter (filter) {
 function checkboxColor (selected) {
   return selected ? 'primary' : ''
 }
-
 </script>
 
 <style lang="scss" scoped>

@@ -14,11 +14,10 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import ansiHTML from 'ansi-html'
 import escape from 'lodash/escape'
 
-export default defineComponent({
+export default {
   props: {
     text: {
       type: String,
@@ -30,7 +29,7 @@ export default defineComponent({
       return ansiHTML(escape(this.text))
     },
   },
-})
+}
 </script>
 
 <style lang="scss" scoped>

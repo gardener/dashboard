@@ -31,7 +31,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import { getValidationErrors } from '@/utils'
@@ -42,7 +41,7 @@ const validationErrors = {
   },
 }
 
-export default defineComponent({
+export default {
   props: {
     modelValue: {
       type: String,
@@ -90,5 +89,5 @@ export default defineComponent({
       this.$emit('update:modelValue', modelValue)
     },
   },
-})
+}
 </script>

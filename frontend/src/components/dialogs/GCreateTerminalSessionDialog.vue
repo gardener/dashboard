@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0
           <g-terminal-target
             v-model="targetTab.selectedTarget"
             :shoot-item="shootItem"
-            @input="updateSettings"
+            @update:model-value="updateSettings"
           />
           <v-expansion-panels
             v-model="targetTab.value"

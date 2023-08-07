@@ -176,7 +176,7 @@ export function parseSize (value) {
   const result = sizeRegex.exec(value)
   if (result) {
     const [, sizeValue] = result
-    return sizeValue
+    return parseInt(sizeValue, 10)
   }
   logger.error(`Could not parse size ${value} as it does not match regex ^(\\d+)Gi$`)
   return 0

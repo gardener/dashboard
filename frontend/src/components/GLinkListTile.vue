@@ -36,13 +36,11 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
 import GListItem from './GListItem.vue'
 import GListItemContent from './GListItemContent.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
 
-export default defineComponent({
+export default {
   components: {
     GListItem,
     GListItemContent,
@@ -71,5 +69,5 @@ export default defineComponent({
       type: String,
     },
   },
-})
+}
 </script>

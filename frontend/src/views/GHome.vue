@@ -35,7 +35,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { mapState } from 'pinia'
 import {
   useAuthzStore,
@@ -46,7 +45,7 @@ import isEmpty from 'lodash/isEmpty'
 
 import GProjectDialog from '@/components/dialogs/GProjectDialog.vue'
 
-export default defineComponent({
+export default {
   components: {
     GProjectDialog,
   },
@@ -71,5 +70,5 @@ export default defineComponent({
       this.projectDialog = true
     }
   },
-})
+}
 </script>

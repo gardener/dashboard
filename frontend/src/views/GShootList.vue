@@ -769,9 +769,12 @@ export default {
 
       this.sortByInternal = this.defaultSortBy
     },
-    async toggleFilter ({ value }) {
+    toggleFilter ({ value }) {
       const key = value
-      await this.setShootListFilter({ filter: key, value: !this.shootListFilters[key] })
+      this.setShootListFilter({
+        filter: key,
+        value: !this.shootListFilters[key],
+      })
 
       useLocalStorage('project/_all/shoot-list/filter', []).value = pick(this.shootListFilters, [
         'onlyShootsWithIssues',
@@ -782,7 +785,7 @@ export default {
       ])
 
       if (key === 'onlyShootsWithIssues') {
-        await this.subscribeShoots()
+        this.subscribeShoots()
       }
     },
     isFilterActive (key) {

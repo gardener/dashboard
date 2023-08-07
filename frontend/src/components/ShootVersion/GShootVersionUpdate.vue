@@ -58,7 +58,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import semver from 'semver'
 
 import map from 'lodash/map'
@@ -68,7 +67,7 @@ import head from 'lodash/head'
 import get from 'lodash/get'
 import join from 'lodash/join'
 
-export default defineComponent({
+export default {
   props: {
     availableK8sUpdates: {
       type: Object,
@@ -238,5 +237,5 @@ export default defineComponent({
       this.selectedItem = undefined
     },
   },
-})
+}
 </script>

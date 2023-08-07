@@ -22,8 +22,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
 import GActionButtonDialog from './dialogs/GActionButtonDialog.vue'
 import GStaticTokenKubeconfigSwitch from './GStaticTokenKubeconfigSwitch.vue'
 
@@ -31,7 +29,7 @@ import shootItem from '@/mixins/shootItem'
 
 import { errorDetailsFromError } from '@/utils/error'
 
-export default defineComponent({
+export default {
   components: {
     GActionButtonDialog,
     GStaticTokenKubeconfigSwitch,
@@ -74,5 +72,5 @@ export default defineComponent({
       this.enableStaticTokenKubeconfig = this.shootEnableStaticTokenKubeconfig
     },
   },
-})
+}
 </script>

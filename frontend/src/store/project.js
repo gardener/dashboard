@@ -145,17 +145,9 @@ export const useProjectStore = defineStore('project', () => {
     return get(project, 'metadata.name') || replace(namespace, /^garden-/, '')
   }
 
-  async function fetchData () {
+  async function fetchProjects () {
     const response = await api.getProjects()
     list.value = response.data
-  }
-
-  async function fetchProjects () {
-    try {
-      await fetchData()
-    } catch (err) {
-      appStore.setError(err)
-    }
   }
 
   async function createProject (obj) {

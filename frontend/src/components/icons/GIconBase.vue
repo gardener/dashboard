@@ -24,10 +24,9 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { isHtmlColorCode } from '@/utils'
 
-export default defineComponent({
+export default {
   props: {
     iconName: {
       type: String,
@@ -59,5 +58,5 @@ export default defineComponent({
       return this.$vuetify.theme.current.colors[iconColor]
     },
   },
-})
+}
 </script>

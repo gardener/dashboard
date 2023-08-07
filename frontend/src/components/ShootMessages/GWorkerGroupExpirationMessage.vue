@@ -1,4 +1,3 @@
-import { defineComponent } from 'vue'
 <!--
 SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
@@ -28,12 +27,11 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 
 import { getDateFormatted } from '@/utils'
 import GTimeString from '@/components/GTimeString.vue'
 
-export default defineComponent({
+export default {
   components: {
     GTimeString,
   },
@@ -68,5 +66,5 @@ export default defineComponent({
       return getDateFormatted(date)
     },
   },
-})
+}
 </script>

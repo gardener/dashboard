@@ -67,7 +67,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { mapState, mapActions } from 'pinia'
 
 import { useConfigStore, useTicketStore } from '@/store'
@@ -79,7 +78,7 @@ import GExternalLink from '@/components/GExternalLink.vue'
 
 import get from 'lodash/get'
 
-export default defineComponent({
+export default {
   components: {
     GTimeString,
     GTicketLabel,
@@ -126,7 +125,7 @@ export default defineComponent({
       ticketCommentsByIssueNumber: 'comments',
     }),
   },
-})
+}
 </script>
 
 <style lang="scss" scoped>

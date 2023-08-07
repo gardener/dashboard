@@ -15,11 +15,10 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import get from 'lodash/get'
 import GTerminalSplitpanes from '@/components/GTerminalSplitpanes.vue'
 
-export default defineComponent({
+export default {
   components: {
     GTerminalSplitpanes,
   },
@@ -37,6 +36,5 @@ export default defineComponent({
   mounted () {
     this.$refs.terminalSplitpanes.load()
   },
-})
-
+}
 </script>

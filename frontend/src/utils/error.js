@@ -33,7 +33,7 @@ export function errorDetailsFromError (err) {
     errorCode = 'YAMLException'
     detailedMessage = 'YAML parsing failed with message: ' + err.message
   } else if (err.name === 'FetchError') {
-    errorCode = get(err, 'response.data.error.code', get(err, 'response.status'))
+    errorCode = get(err, 'response.data.code', get(err, 'response.status'))
     detailedMessage = get(err, 'response.data.message', 'Request failed with code: ' + errorCode)
   }
 

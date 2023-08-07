@@ -9,6 +9,9 @@ import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import * as labs from 'vuetify/labs/components'
 
+import componentsPlugin from '@/plugins/components'
+import utilsPlugin from '@/plugins/utils'
+
 import 'vuetify/styles'
 
 export function createVuetifyPlugin () {
@@ -22,4 +25,12 @@ export function createVuetifyPlugin () {
     },
     directives,
   })
+}
+
+export function createPlugins () {
+  return [
+    createVuetifyPlugin(),
+    componentsPlugin,
+    utilsPlugin,
+  ]
 }

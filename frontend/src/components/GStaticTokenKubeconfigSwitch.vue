@@ -26,11 +26,9 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
 import GExternalLink from '@/components/GExternalLink.vue'
 
-export default defineComponent({
+export default {
   components: {
     GExternalLink,
   },
@@ -53,5 +51,5 @@ export default defineComponent({
       },
     },
   },
-})
+}
 </script>

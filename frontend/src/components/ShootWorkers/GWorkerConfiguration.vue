@@ -70,7 +70,7 @@ SPDX-License-Identifier: Apache-2.0
           tile
           prominent
           closable
-          @input="setNetworkConfiguration(undefined)"
+          @update:model-value="setNetworkConfiguration(undefined)"
         >
           <span>Adding addtional zones will extend the zone network configuration by adding new networks to your cluster:</span>
           <g-code-block

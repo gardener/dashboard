@@ -128,7 +128,10 @@ export function createError (status, message, properties = {}) {
   err.name = 'FetchError'
   err.status = err.statusCode = status
   for (const [key, value] of Object.entries(properties)) {
-    Object.defineProperty(err, key, { value })
+    Object.defineProperty(err, key, {
+      value,
+      enumerable: true,
+    })
   }
   return err
 }

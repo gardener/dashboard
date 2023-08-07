@@ -108,15 +108,13 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
 import { shootSubscription } from '@/mixins/shootSubscription'
 
 import GIconBase from '@/components/icons/GIconBase.vue'
 import GConnected from '@/components/icons/GConnected.vue'
 import GDisconnected from '@/components/icons/GDisconnected.vue'
 
-export default defineComponent({
+export default {
   components: {
     GIconBase,
     GConnected,
@@ -145,5 +143,5 @@ export default defineComponent({
       this.modelValue = false
     },
   },
-})
+}
 </script>

@@ -67,7 +67,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { mapState } from 'pinia'
 import {
   useAuthnStore,
@@ -77,7 +76,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import { shootItem } from '@/mixins/shootItem'
 
-export default defineComponent({
+export default {
   mixins: [shootItem],
   props: {
     modelValue: {
@@ -133,5 +132,5 @@ export default defineComponent({
       return 'Choose for which target you want to have a terminal session'
     },
   },
-})
+}
 </script>

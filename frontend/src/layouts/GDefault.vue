@@ -6,29 +6,66 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-app ref="app">
-    <g-loading />
-    <g-main-navigation />
-    <g-main-toolbar />
-    <g-main-content ref="mainContent" />
-    <g-notify />
+    <v-main v-if="hasRouterError">
+      <g-error
+        :code="routerErrorCode"
+        :text="routerErrorText"
+        :message="routerErrorMessage"
+        button-text="Reload this page"
+        @click="reload"
+      />
+    </v-main>
+    <template v-else>
+      <g-loading />
+      <g-main-navigation />
+      <g-main-toolbar />
+      <g-main-content ref="mainContent" />
+      <g-notify />
+    </template>
   </v-app>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { onBeforeRouteUpdate } from 'vue-router'
 import { useLogger } from '@/composables'
+import { useAppStore } from '@/store'
+
+import GError from '@/components/GError.vue'
 import GLoading from '@/components/GLoading.vue'
 import GMainNavigation from '@/components/GMainNavigation.vue'
 import GMainToolbar from '@/components/GMainToolbar.vue'
 import GMainContent from '@/components/GMainContent.vue'
 import GNotify from '@/components/GNotify.vue'
 
+import get from 'lodash/get'
+
 const logger = useLogger()
+const appStore = useAppStore()
 
 // refs
 const app = ref(null)
 const mainContent = ref(null)
+
+// computed
+const hasRouterError = computed(() => {
+  return !!appStore.routerError
+})
+
+const routerErrorCode = computed(() => {
+  const err = appStore.routerError
+  return get(err, 'response.data.code', get(err, 'status', 500))
+})
+
+const routerErrorText = computed(() => {
+  const err = appStore.routerError
+  return get(err, 'response.data.reason', get(err, 'reason', 'Unexpected error :('))
+})
+
+const routerErrorMessage = computed(() => {
+  const err = appStore.routerError
+  return get(err, 'response.data.message', get(err, 'message'))
+})
 
 // methods
 function setElementOverflowY (element, value) {
@@ -37,9 +74,13 @@ function setElementOverflowY (element, value) {
   }
 }
 
+function reload () {
+  window.location.reload()
+}
+
 // hooks
 onBeforeRouteUpdate((to, from, next) => {
-  mainContent.value.setScrollTop(0)
+  mainContent.value?.setScrollTop(0)
   next()
 })
 

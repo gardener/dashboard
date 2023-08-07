@@ -27,8 +27,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
 import get from 'lodash/get'
 import assign from 'lodash/assign'
 
@@ -41,7 +39,7 @@ import { useVuelidate } from '@vuelidate/core'
 
 import { shootItem } from '@/mixins/shootItem'
 
-export default defineComponent({
+export default {
   components: {
     GActionButtonDialog,
     GMaintenanceComponents,
@@ -102,5 +100,5 @@ export default defineComponent({
       this.$refs.maintenanceComponents.setComponentUpdates({ k8sUpdates: this.data.updateKubernetesVersion, osUpdates: this.data.updateOSVersion })
     },
   },
-})
+}
 </script>

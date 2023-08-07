@@ -112,7 +112,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { mapState } from 'pinia'
 import {
@@ -131,7 +130,7 @@ const validationErrors = {
   },
 }
 
-export default defineComponent({
+export default {
   components: {
     GTimeString,
   },
@@ -253,5 +252,5 @@ export default defineComponent({
       return item.raw.data?.kubernetesHostname === this.autoSelectNodeItem.data?.kubernetesHostname
     },
   },
-})
+}
 </script>

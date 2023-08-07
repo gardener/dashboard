@@ -54,11 +54,10 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
 import join from 'lodash/join'
 import GVendorIcon from '@/components/GVendorIcon'
 
-export default defineComponent({
+export default {
   components: {
     GVendorIcon,
   },
@@ -129,7 +128,7 @@ export default defineComponent({
       return join(titles, ' / ')
     },
   },
-})
+}
 </script>
 
 <style lang="scss" scoped>

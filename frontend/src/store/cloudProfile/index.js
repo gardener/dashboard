@@ -9,7 +9,6 @@ import { ref, computed } from 'vue'
 import semver from 'semver'
 
 import { useApi, useLogger } from '@/composables'
-import { useAppStore } from '../app'
 import { useSeedStore } from '../seed'
 import { useConfigStore } from '../config'
 import {
@@ -57,7 +56,6 @@ import pick from 'lodash/pick'
 export const useCloudProfileStore = defineStore('cloudProfile', () => {
   const logger = useLogger()
   const api = useApi()
-  const appStore = useAppStore()
   const seedStore = useSeedStore()
   const configStore = useConfigStore()
 
@@ -73,17 +71,9 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return list.value
   })
 
-  async function fetchData () {
+  async function fetchCloudProfiles () {
     const response = await api.getCloudProfiles()
     list.value = response.data
-  }
-
-  async function fetchCloudProfiles () {
-    try {
-      await fetchData()
-    } catch (err) {
-      appStore.setError(err)
-    }
   }
 
   function isValidRegion (cloudProfile) {

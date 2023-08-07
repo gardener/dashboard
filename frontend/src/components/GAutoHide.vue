@@ -17,9 +17,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
-export default defineComponent({
+export default {
   props: {
     left: {
       type: Boolean,
@@ -30,7 +28,7 @@ export default defineComponent({
       default: false,
     },
   },
-})
+}
 </script>
 
 <style lang="scss" scoped>

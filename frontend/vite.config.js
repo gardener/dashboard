@@ -167,10 +167,10 @@ export default defineConfig(({ command, mode }) => {
   if (process.env.NODE_ENV === 'test') {
     const coverage = {
       provider: 'v8',
-      branches: 42,
-      functions: 27,
-      lines: 39,
-      statements: 39,
+      statements: 60,
+      branches: 60,
+      functions: 30,
+      lines: 60,
     }
 
     config.test = {

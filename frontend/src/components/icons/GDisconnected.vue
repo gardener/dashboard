@@ -34,14 +34,12 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-
-export default defineComponent({
+export default {
   props: {
     color: {
       type: String,
       default: '#FFFFFF',
     },
   },
-})
+}
 </script>

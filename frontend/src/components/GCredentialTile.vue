@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -128,7 +128,6 @@ import shootStatusCredentialRotation from '@/mixins/shootStatusCredentialRotatio
 import get from 'lodash/get'
 
 export default {
-  name: 'CredentialTile',
   components: {
     GShootActionRotateCredentials,
     GTimeString,
