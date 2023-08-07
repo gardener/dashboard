@@ -58,7 +58,6 @@ export default defineComponent({
   },
   emits: [
     'update:modelValue',
-    'valid',
   ],
   setup () {
     return {
@@ -68,7 +67,6 @@ export default defineComponent({
   data () {
     return {
       validationErrors,
-      valid: undefined,
     }
   },
   validations () {
@@ -90,14 +88,6 @@ export default defineComponent({
     onInput (modelValue) {
       this.v$.modelValue.$touch()
       this.$emit('update:modelValue', modelValue)
-      this.validateInput()
-    },
-    validateInput () {
-      const valid = !this.v$.$invalid
-      if (this.valid !== valid) {
-        this.valid = valid
-        this.$emit('valid', valid)
-      }
     },
   },
 })

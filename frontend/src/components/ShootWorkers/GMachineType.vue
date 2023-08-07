@@ -58,9 +58,6 @@ export default {
     searchInput: {
       type: String,
     },
-    valid: {
-      type: Boolean,
-    },
     machineTypes: {
       type: Array,
       default: () => [],
@@ -69,7 +66,6 @@ export default {
   emits: [
     'update:search-input',
     'update:modelValue',
-    'update:valid',
   ],
   setup () {
     return {
@@ -137,13 +133,6 @@ export default {
     },
     searchInput (value) {
       this.lazySearch = value
-    },
-    'v$.internalValue.$invalid': {
-      handler (value) {
-        this.$emit('update:valid', !value)
-      },
-      // force eager callback execution https://vuejs.org/guide/essentials/watchers.html#eager-watchers
-      immediate: true,
     },
   },
   mounted () {

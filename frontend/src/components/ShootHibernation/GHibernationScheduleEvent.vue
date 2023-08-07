@@ -125,7 +125,6 @@ export default defineComponent({
     'remove-schedule-event',
     'update-wake-up-time',
     'update-hibernate-time',
-    'valid',
   ],
   setup () {
     return {
@@ -143,7 +142,6 @@ export default defineComponent({
       wakeUpTime: null,
       hibernateTime: null,
       selectedDays: null,
-      valid: undefined,
       weekdays: [
         {
           title: 'Mon',
@@ -229,7 +227,6 @@ export default defineComponent({
         minute = momentObj.format('mm')
       }
       this.$emit(eventName, { hour, minute, id })
-      this.validateInput()
     },
     getTime ({ hour, minute } = {}) {
       if (hour && minute) {
@@ -244,7 +241,6 @@ export default defineComponent({
     updateLocation (location) {
       const id = this.id
       this.$emit('update-location', { location, id })
-      this.validateInput()
     },
     setSelectedDays (scheduleEvent) {
       const days = get(scheduleEvent, 'start.weekdays', get(scheduleEvent, 'end.weekdays'))
@@ -265,7 +261,6 @@ export default defineComponent({
       }
       const id = this.id
       this.$emit('update-selected-days', { weekdays, id })
-      this.validateInput()
     },
     removeScheduleEvent () {
       this.$emit('remove-schedule-event')
@@ -293,12 +288,6 @@ export default defineComponent({
     },
     onInputSelectedLocation () {
       this.updateLocation(this.selectedLocation)
-    },
-    validateInput () {
-      if (this.valid !== !this.v$.$invalid) {
-        this.valid = !this.v$.$invalid
-        this.$emit('valid', { id: this.id, valid: this.valid })
-      }
     },
   },
 })

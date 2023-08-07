@@ -39,7 +39,6 @@ SPDX-License-Identifier: Apache-2.0
           <g-terminal-target
             v-model="targetTab.selectedTarget"
             :shoot-item="shootItem"
-            @valid="onTerminalTargetValid"
             @input="updateSettings"
           />
           <v-expansion-panels
@@ -60,7 +59,6 @@ SPDX-License-Identifier: Apache-2.0
                   ref="settings"
                   :target="targetTab.selectedTarget"
                   @selected-config="selectedConfigChanged"
-                  @valid-settings="validSettingsChanged"
                 />
               </v-expansion-panel-text>
             </v-expansion-panel>
@@ -97,6 +95,8 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { useVuelidate } from '@vuelidate/core'
+
 import { mapState, mapActions } from 'pinia'
 import {
   useAuthnStore,
@@ -136,16 +136,19 @@ export default {
       type: String,
     },
   },
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
       tab: undefined,
       targetTab: {
         selectedTarget: undefined,
-        terminalTargetValid: false,
         value: [],
         initializedForTarget: undefined,
         selectedConfig: undefined,
-        validSettings: true, // settings are assumed to be valid initially as the defaults apply. Once the settings expansion panel is expanded, this property get's updated
       },
       shortcutTab: {
         selectedShortcuts: undefined,
@@ -167,18 +170,11 @@ export default {
     },
     valid () {
       switch (this.tab) {
-        case 'target-tab': {
-          if (!this.targetTab.terminalTargetValid) {
-            return false
-          }
-
-          return this.targetTab.validSettings
-        }
         case 'shortcut-tab': {
           return !isEmpty(this.shortcutTab.selectedShortcuts)
         }
         default: {
-          return false
+          return !this.v$.$invalid
         }
       }
     },
@@ -265,11 +261,9 @@ export default {
       this.tab = 'target-tab'
       this.targetTab = {
         selectedTarget: undefined,
-        terminalTargetValid: false,
         value: [],
         initializedForTarget: undefined,
         selectedConfig: undefined,
-        validSettings: true, // settings are assumed to be valid initially as the defaults apply. Once the settings expansion panel is expanded, this property get's updated
       }
       this.shortcutTab = {
         selectedShortcuts: [],
@@ -293,9 +287,6 @@ export default {
     selectedConfigChanged (selectedConfig) {
       this.targetTab.selectedConfig = selectedConfig
     },
-    validSettingsChanged (validSettings) {
-      this.targetTab.validSettings = validSettings
-    },
     onAddTerminalShortcut (shortcut) {
       this.shortcutTab.selectedShortcuts = [shortcut]
       // need to defer execution as at this time.
@@ -304,9 +295,6 @@ export default {
       this.$nextTick(() => {
         this.$refs.gDialog.resolveAction(true)
       })
-    },
-    onTerminalTargetValid (valid) {
-      this.targetTab.terminalTargetValid = valid
     },
   },
 }

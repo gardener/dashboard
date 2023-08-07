@@ -174,13 +174,6 @@ export default {
       return !!this.primaryProvider || (this.clusterIsNew && !!this.dnsDomain)
     },
   },
-  watch: {
-    'v$.primaryProvider.$invalid' (value) {
-      if (this.primaryProviderVisible) {
-        this.setDnsPrimaryProviderValid(!value)
-      }
-    },
-  },
   mounted () {
     this.v$.$touch()
   },
@@ -188,7 +181,6 @@ export default {
     ...mapActions(useShootStagingStore, [
       'addDnsProvider',
       'setDnsPrimaryProvider',
-      'setDnsPrimaryProviderValid',
       'setDnsDomain',
     ]),
     getErrorMessages (field) {

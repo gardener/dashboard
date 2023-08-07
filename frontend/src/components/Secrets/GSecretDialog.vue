@@ -238,11 +238,7 @@ export default {
       },
     },
     valid () {
-      let isCloudProfileValid = true
-      if (this.isCreateMode && this.isInfrastructureSecret) {
-        isCloudProfileValid = this.isValid(this.$refs.cloudProfile)
-      }
-      return isCloudProfileValid && this.dataValid && this.isValid(this)
+      return this.dataValid && !this.v$.$invalid
     },
     validators () {
       const validators = {}
@@ -306,13 +302,6 @@ export default {
     ...mapActions(useCloudProfileStore, [
       'cloudProfilesByCloudProviderKind',
     ]),
-    isValid (component) {
-      let isValid = true
-      if (component) {
-        isValid = !component.v$.$invalid
-      }
-      return isValid
-    },
     hide () {
       this.visible = false
     },

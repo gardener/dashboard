@@ -30,10 +30,6 @@ function getId (object) {
   return get(object, 'id', null)
 }
 
-function isDnsProviderValid ({ type, secretName }) {
-  return !!type && !!secretName
-}
-
 function notYetCreated (object) {
   return !get(object, 'metadata.creationTimestamp')
 }
@@ -49,7 +45,6 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
     dnsProviders: {},
     dnsProviderIds: [],
     dnsPrimaryProviderId: null,
-    dnsPrimaryProviderValid: null,
     cloudProfileName: null,
     controlPlaneFailureToleranceType: null,
     initialControlPlaneFailureToleranceType: null,
@@ -95,10 +90,6 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
     })
   })
 
-  const dnsProvidersValid = computed(() => {
-    return every(state.dnsProviders, 'valid')
-  })
-
   const dnsPrimaryProvider = computed(() => {
     return state.dnsProviders[state.dnsPrimaryProviderId]
   })
@@ -106,10 +97,6 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
   const dnsDefaultPrimaryProviderId = computed(() => {
     const defaultPrimaryProvider = head(dnsProvidersWithPrimarySupport.value)
     return getId(defaultPrimaryProvider)
-  })
-
-  const dnsConfigurationValid = computed(() => {
-    return state.dnsPrimaryProviderValid && dnsProvidersValid.value
   })
 
   const controlPlaneFailureToleranceTypeChangeAllowed = computed(() => {
@@ -197,7 +184,6 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
       includeDomains: [],
       excludeZones: [],
       includeZones: [],
-      valid: isDnsProviderValid({ type, secretName }),
       readonly: false,
     }
   }
@@ -222,10 +208,8 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
     if (isEmpty(state.dnsProviderIds)) {
       state.dnsDomain = null
       state.dnsPrimaryProviderId = null
-      state.dnsPrimaryProviderValid = true
     } else if (state.dnsPrimaryProviderId === id) {
       state.dnsPrimaryProviderId = null
-      state.dnsPrimaryProviderValid = !state.dnsDomain
     }
   }
 
@@ -288,7 +272,6 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
         includeDomains: [...includeDomains],
         excludeZones: [...excludeZones],
         includeZones: [...includeZones],
-        valid: isDnsProviderValid({ type, secretName }),
         readonly,
       }
     })
@@ -313,7 +296,6 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
     state.dnsProviders = keyBy(providers, 'id')
     state.dnsProviderIds = map(providers, 'id')
     state.dnsPrimaryProviderId = primaryProviderId
-    state.dnsPrimaryProviderValid = true
   }
 
   function setDnsPrimaryProvider (value) {
@@ -322,10 +304,6 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
 
   function setDnsPrimaryProviderId (value) {
     state.dnsPrimaryProviderId = value
-  }
-
-  function setDnsPrimaryProviderValid (value) {
-    state.dnsPrimaryProviderValid = value
   }
 
   function setControlPlaneFailureToleranceType (value) {
@@ -345,10 +323,8 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
     dnsProviderTypesWithPrimarySupport,
     dnsProviders,
     dnsProvidersWithPrimarySupport,
-    dnsProvidersValid,
     dnsPrimaryProvider,
     dnsDefaultPrimaryProviderId,
-    dnsConfigurationValid,
     controlPlaneFailureToleranceTypeChangeAllowed,
     // actions
     getDnsProviderSecrets,
@@ -364,7 +340,6 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
     setDns,
     setDnsPrimaryProvider,
     setDnsPrimaryProviderId,
-    setDnsPrimaryProviderValid,
     setControlPlaneFailureToleranceType,
   }
 })

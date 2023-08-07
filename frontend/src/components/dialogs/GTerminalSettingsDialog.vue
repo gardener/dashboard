@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <g-dialog
     ref="gDialog"
     confirm-button-text="Change"
-    :confirm-disabled="!validSettings"
+    :confirm-disabled="v$.$invalid"
     width="750"
     max-height="100vh"
   >
@@ -20,13 +20,14 @@ SPDX-License-Identifier: Apache-2.0
         ref="settings"
         :target="target"
         @selected-config="selectedConfigChanged"
-        @valid-settings="validSettingsChanged"
       />
     </template>
   </g-dialog>
 </template>
 
 <script>
+import { useVuelidate } from '@vuelidate/core'
+
 import GDialog from '@/components/dialogs/GDialog.vue'
 import GTerminalSettings from '@/components/GTerminalSettings.vue'
 
@@ -40,10 +41,14 @@ export default {
       type: String,
     },
   },
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
       selectedConfig: undefined,
-      validSettings: false,
     }
   },
   methods: {
@@ -67,9 +72,6 @@ export default {
     },
     selectedConfigChanged (selectedConfig) {
       this.selectedConfig = selectedConfig
-    },
-    validSettingsChanged (validSettings) {
-      this.validSettings = validSettings
     },
   },
 }

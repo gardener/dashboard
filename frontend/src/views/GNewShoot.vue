@@ -19,7 +19,6 @@ SPDX-License-Identifier: Apache-2.0
           <g-new-shoot-select-infrastructure
             ref="infrastructure"
             :user-inter-action-bus="userInterActionBus"
-            @valid="onInfrastructureValid"
           />
         </v-card-text>
       </v-card>
@@ -32,7 +31,6 @@ SPDX-License-Identifier: Apache-2.0
           <g-new-shoot-details
             ref="clusterDetails"
             :user-inter-action-bus="userInterActionBus"
-            @valid="onDetailsValid"
           />
         </v-card-text>
       </v-card>
@@ -45,7 +43,6 @@ SPDX-License-Identifier: Apache-2.0
           <g-new-shoot-infrastructure-details
             ref="infrastructureDetails"
             :user-inter-action-bus="userInterActionBus"
-            @valid="onInfrastructureDetailsValid"
           />
         </v-card-text>
       </v-card>
@@ -89,7 +86,6 @@ SPDX-License-Identifier: Apache-2.0
           <g-manage-workers
             ref="manageWorkersRef"
             :user-inter-action-bus="userInterActionBus"
-            @valid="onWorkersValid"
           />
         </v-card-text>
       </v-card>
@@ -113,7 +109,6 @@ SPDX-License-Identifier: Apache-2.0
         <v-card-text class="pt-1">
           <g-maintenance-time
             ref="maintenanceTime"
-            @valid="onMaintenanceTimeValid"
           />
           <g-maintenance-components
             ref="maintenanceComponents"
@@ -130,7 +125,6 @@ SPDX-License-Identifier: Apache-2.0
           <g-manage-hibernation-schedule
             ref="hibernationScheduleRef"
             :user-inter-action-bus="userInterActionBus"
-            @valid="onHibernationScheduleValid"
           />
         </v-card-text>
       </v-card>
@@ -147,7 +141,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-divider vertical />
       <v-btn
         variant="text"
-        :disabled="!valid"
+        :disabled="v$.$invalid"
         color="primary"
         @click.stop="createClicked()"
       >
@@ -167,6 +161,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { defineAsyncComponent } from 'vue'
+import { useVuelidate } from '@vuelidate/core'
 
 import { mapActions, mapState } from 'pinia'
 import set from 'lodash/set'
@@ -230,7 +225,7 @@ export default {
     }
 
     if (to.name === 'NewShootEditor') {
-      if (!this.valid && !await this.confirmNavigateToYamlIfInvalid()) {
+      if (this.v$.$invalid && !await this.confirmNavigateToYamlIfInvalid()) {
         return next(false)
       }
 
@@ -248,16 +243,11 @@ export default {
     return {
       ...useAsyncRef('manageWorkers'),
       ...useAsyncRef('hibernationSchedule'),
+      v$: useVuelidate(),
     }
   },
   data () {
     return {
-      infrastructureValid: false,
-      infrastructureDetailsValid: false,
-      detailsValid: false,
-      workersValid: false,
-      maintenanceTimeValid: false,
-      hibernationScheduleValid: false,
       errorMessage: undefined,
       detailedErrorMessage: undefined,
       isShootCreated: false,
@@ -270,7 +260,6 @@ export default {
     ...mapState(useShootStagingStore, ['controlPlaneFailureToleranceType']),
     ...mapState(useShootStagingStore, [
       'getDnsConfiguration',
-      'dnsConfigurationValid',
     ]),
     ...mapState(useShootStore, [
       'newShootResource',
@@ -284,15 +273,6 @@ export default {
       'zonesByCloudProfileNameAndRegion',
       'sortedInfrastructureKindList',
     ]),
-    valid () {
-      return this.infrastructureValid &&
-        this.infrastructureDetailsValid &&
-        this.detailsValid &&
-        this.workersValid &&
-        this.maintenanceTimeValid &&
-        this.hibernationScheduleValid &&
-        this.dnsConfigurationValid
-    },
   },
   mounted () {
     if (this.sortedInfrastructureKindList.length) {
@@ -309,24 +289,6 @@ export default {
     ...mapActions(useShootStagingStore, [
       'setClusterConfiguration',
     ]),
-    onInfrastructureValid (value) {
-      this.infrastructureValid = value
-    },
-    onInfrastructureDetailsValid (value) {
-      this.infrastructureDetailsValid = value
-    },
-    onDetailsValid (value) {
-      this.detailsValid = value
-    },
-    onWorkersValid (value) {
-      this.workersValid = value
-    },
-    onMaintenanceTimeValid (value) {
-      this.maintenanceTimeValid = value
-    },
-    onHibernationScheduleValid (value) {
-      this.hibernationScheduleValid = value
-    },
     async isShootContentDirty () {
       const shootResource = await this.shootResourceFromUIComponents()
       return !isEqual(this.initialNewShootResource, shootResource)

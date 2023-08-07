@@ -51,7 +51,6 @@ SPDX-License-Identifier: Apache-2.0
           ref="purposeRef"
           :secret="secret"
           @update-purpose="onUpdatePurpose"
-          @valid="onPurposeValid"
         />
       </v-col>
     </v-row>
@@ -122,9 +121,6 @@ export default {
       required: true,
     },
   },
-  emits: [
-    'valid',
-  ],
   setup () {
     return {
       v$: useVuelidate(),
@@ -137,8 +133,6 @@ export default {
       name: undefined,
       kubernetesVersion: undefined,
       purposeValue: undefined,
-      valid: false,
-      purposeValid: false,
       cloudProfileName: undefined,
       secret: undefined,
       updateK8sMaintenance: undefined,
@@ -238,28 +232,14 @@ export default {
     },
     onInputName () {
       this.v$.name.$touch()
-      this.validateInput()
     },
     onInputKubernetesVersion () {
       this.v$.kubernetesVersion.$touch()
       this.userInterActionBus.emit('updateKubernetesVersion', this.kubernetesVersion)
-      this.validateInput()
     },
     onUpdatePurpose (purpose) {
       this.purposeValue = purpose
       this.userInterActionBus.emit('updatePurpose', this.purposeValue)
-      this.validateInput()
-    },
-    onPurposeValid (value) {
-      this.purposeValid = value
-      this.validateInput()
-    },
-    validateInput () {
-      const valid = !this.v$.$invalid && this.purposeValid
-      if (this.valid !== valid) {
-        this.valid = valid
-        this.$emit('valid', valid)
-      }
     },
     setDefaultKubernetesVersion () {
       this.kubernetesVersion = get(this.defaultKubernetesVersionForCloudProfileName(this.cloudProfileName), 'version')
@@ -282,8 +262,6 @@ export default {
       this.enableStaticTokenKubeconfig = enableStaticTokenKubeconfig
 
       await this.purpose.dispatch('setPurpose', purpose)
-
-      this.validateInput()
     },
     versionItemDescription (version) {
       const itemDescription = []

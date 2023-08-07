@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <g-action-button-dialog
     ref="actionDialog"
     :shoot-item="shootItem"
-    :valid="maintenanceTimeValid"
+    :valid="!v$.$invalid"
     width="900"
     caption="Configure Maintenance"
     @dialog-opened="onConfigurationDialogOpened"
@@ -18,7 +18,6 @@ SPDX-License-Identifier: Apache-2.0
         ref="maintenanceTime"
         :time-window-begin="data.timeWindowBegin"
         :time-window-end="data.timeWindowEnd"
-        @valid="onMaintenanceTimeValid"
       />
       <g-maintenance-components
         ref="maintenanceComponents"
@@ -38,6 +37,7 @@ import GMaintenanceComponents from '@/components/ShootMaintenance/GMaintenanceCo
 import GMaintenanceTime from '@/components/ShootMaintenance/GMaintenanceTime'
 
 import { errorDetailsFromError } from '@/utils/error'
+import { useVuelidate } from '@vuelidate/core'
 
 import { shootItem } from '@/mixins/shootItem'
 
@@ -49,9 +49,13 @@ export default defineComponent({
   },
   mixins: [shootItem],
   inject: ['api', 'logger'],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
-      maintenanceTimeValid: true,
       data: {
         timeWindowBegin: undefined,
         timeWindowEnd: undefined,
@@ -88,8 +92,6 @@ export default defineComponent({
       }
     },
     reset () {
-      this.maintenanceTimeValid = true
-
       this.data.timeWindowBegin = get(this.shootItem, 'spec.maintenance.timeWindow.begin')
       this.data.timeWindowEnd = get(this.shootItem, 'spec.maintenance.timeWindow.end')
       this.data.updateKubernetesVersion = get(this.shootItem, 'spec.maintenance.autoUpdate.kubernetesVersion', false)
@@ -98,9 +100,6 @@ export default defineComponent({
       this.$refs.maintenanceTime.reset()
 
       this.$refs.maintenanceComponents.setComponentUpdates({ k8sUpdates: this.data.updateKubernetesVersion, osUpdates: this.data.updateOSVersion })
-    },
-    onMaintenanceTimeValid (value) {
-      this.maintenanceTimeValid = value
     },
   },
 })

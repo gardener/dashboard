@@ -76,9 +76,6 @@ export default {
       required: true,
     },
   },
-  emits: [
-    'valid',
-  ],
   setup () {
     return {
       v$: useVuelidate(),
@@ -86,7 +83,6 @@ export default {
   },
   data () {
     return {
-      valid: undefined,
       validationErrors,
     }
   },
@@ -166,12 +162,10 @@ export default {
   watch: {
     criItems (criItems) {
       this.v$.$touch()
-      this.validateInput()
     },
   },
   mounted () {
     this.v$.$touch()
-    this.validateInput()
   },
   methods: {
     getErrorMessages (field) {
@@ -180,13 +174,6 @@ export default {
     onInputCriName (value) {
       this.selectedCriContainerRuntimeTypes = undefined
       this.v$.criName.$touch()
-      this.validateInput()
-    },
-    validateInput () {
-      if (this.valid !== !this.v$.$invalid) {
-        this.valid = !this.v$.$invalid
-        this.$emit('valid', { id: this.worker.id, valid: this.valid })
-      }
     },
   },
 }

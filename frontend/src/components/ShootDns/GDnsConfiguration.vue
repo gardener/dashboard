@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <g-action-button-dialog
     ref="actionDialog"
     :shoot-item="shootItem"
-    :valid="dnsConfigurationValid"
+    :valid="!v$.$invalid"
     caption="Configure DNS"
     width="900"
     confirm-required
@@ -22,6 +22,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { defineComponent } from 'vue'
+import { useVuelidate } from '@vuelidate/core'
 
 import { mapActions, mapGetters } from 'pinia'
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
@@ -41,6 +42,11 @@ export default defineComponent({
   },
   mixins: [shootItem],
   inject: ['api', 'logger'],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
       componentKey: uuidv4(),
@@ -49,7 +55,6 @@ export default defineComponent({
   computed: {
     ...mapGetters(useShootStagingStore, [
       'getDnsConfiguration',
-      'dnsConfigurationValid',
     ]),
   },
   methods: {

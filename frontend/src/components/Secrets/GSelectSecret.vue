@@ -93,10 +93,6 @@ export default {
     modelValue: {
       type: Object,
     },
-    valid: {
-      type: Boolean,
-      default: true,
-    },
     disabled: {
       type: Boolean,
       default: false,
@@ -109,7 +105,6 @@ export default {
     },
   },
   emits: [
-    'update:valid',
     'update:modelValue',
   ],
   setup () {
@@ -161,16 +156,6 @@ export default {
         this.$emit('update:modelValue', modelValue)
       },
     },
-    secretValid: {
-      get () {
-        return this.valid
-      },
-      set (value) {
-        if (this.valid !== value) {
-          this.$emit('update:valid', value)
-        }
-      },
-    },
     secretList () {
       if (this.cloudProfileName) {
         return this.infrastructureSecretsByCloudProfileName(this.cloudProfileName)
@@ -215,13 +200,9 @@ export default {
     modelValue () {
       this.v$.secret.$touch() // secret may not be valid (e.g. missing cost object). We want to show the error immediatley
     },
-    'v$.secret.$invalid' (value) {
-      this.secretValid = !value
-    },
   },
   mounted () {
     this.v$.secret.$touch()
-    this.secretValid = !this.v$.secret.$invalid
   },
   methods: {
     ...mapActions(useCloudProfileStore, [

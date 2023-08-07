@@ -73,6 +73,8 @@ import {
   useAuthnStore,
   useAuthzStore,
 } from '@/store'
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
 import { shootItem } from '@/mixins/shootItem'
 
 export default defineComponent({
@@ -87,8 +89,15 @@ export default defineComponent({
   },
   emits: [
     'update:modelValue',
-    'valid',
   ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
+  validations () {
+    return this.validators
+  },
   computed: {
     ...mapState(useAuthnStore, [
       'isAdmin',
@@ -98,6 +107,13 @@ export default defineComponent({
       'hasControlPlaneTerminalAccess',
       'hasShootTerminalAccess',
     ]),
+    validators () {
+      return {
+        modelValue: {
+          required,
+        },
+      }
+    },
     selectedTarget: {
       get () {
         return this.modelValue
@@ -116,17 +132,6 @@ export default defineComponent({
       }
       return 'Choose for which target you want to have a terminal session'
     },
-    valid () {
-      return !!this.selectedTarget
-    },
-  },
-  watch: {
-    modelValue (value) {
-      this.$emit('valid', this.valid)
-    },
-  },
-  mounted () {
-    this.$emit('valid', this.valid)
   },
 })
 </script>

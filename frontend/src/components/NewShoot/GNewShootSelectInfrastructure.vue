@@ -50,14 +50,9 @@ export default {
       required: true,
     },
   },
-  emits: [
-    'valid',
-  ],
   data () {
     return {
       selectedInfrastructure: undefined,
-      valid: false,
-      infrastructureValid: false,
     }
   },
   computed: {
@@ -71,17 +66,8 @@ export default {
       this.setSelectedInfrastructure(infrastructure)
       this.userInterActionBus.emit('updateInfrastructure', infrastructure)
     },
-    validateInput () {
-      const valid = this.infrastructureValid
-      if (this.valid !== valid) {
-        this.valid = valid
-        this.$emit('valid', valid)
-      }
-    },
     setSelectedInfrastructure (infrastructure) {
       this.selectedInfrastructure = infrastructure
-      this.infrastructureValid = true
-      this.validateInput()
     },
   },
 }

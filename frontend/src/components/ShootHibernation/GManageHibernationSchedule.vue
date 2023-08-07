@@ -21,7 +21,6 @@ SPDX-License-Identifier: Apache-2.0
             @update-hibernate-time="onUpdateHibernateTime"
             @update-selected-days="onUpdateSelectedDays"
             @update-location="onUpdateLocation"
-            @valid="onScheduleEventValid"
           />
         </v-row>
       </g-expand-transition-group>
@@ -107,6 +106,7 @@ import GHibernationScheduleEvent from '@/components/ShootHibernation/GHibernatio
 import { parsedScheduleEventsFromCrontabBlock, crontabFromParsedScheduleEvents } from '@/utils/hibernationSchedule'
 import { v4 as uuidv4 } from '@/utils/uuid'
 import { useAppStore, useConfigStore } from '@/store'
+import { useVuelidate } from '@vuelidate/core'
 
 export default {
   components: {
@@ -126,14 +126,15 @@ export default {
       type: String,
     },
   },
-  emits: [
-    'valid',
-  ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
       parsedScheduleEvents: undefined,
       parseError: false,
-      valid: true,
       confirmNoSchedule: false,
       scheduleCrontab: undefined,
       purpose: undefined,
@@ -203,7 +204,6 @@ export default {
       } else {
         this.parsedScheduleEvents = []
       }
-      this.validateInput()
     },
     addSchedule () {
       if (!isEmpty(this.parsedScheduleEvents)) {
@@ -221,14 +221,11 @@ export default {
       const start = {}
       const end = {}
       const location = this.location
-      const valid = false
-      this.parsedScheduleEvents.push({ start, end, location, id, valid })
+      this.parsedScheduleEvents.push({ start, end, location, id })
       this.confirmNoSchedule = false
-      this.validateInput()
     },
     onRemoveSchedule (index) {
       this.parsedScheduleEvents.splice(index, 1)
-      this.validateInput()
     },
     ensureScheduleWeekdaysIsSet (schedule, weekdays1, weekdays2) {
       if (!get(schedule, weekdays1)) {
@@ -256,14 +253,8 @@ export default {
       set(schedule, 'start.weekdays', weekdays)
       set(schedule, 'end.weekdays', weekdays)
     },
-    onScheduleEventValid ({ id, valid }) {
-      const schedule = find(this.parsedScheduleEvents, { id })
-      schedule.valid = valid
-
-      this.validateInput()
-    },
     getScheduleCrontab () {
-      if (this.valid) {
+      if (!this.v$.$invalid) {
         const { scheduleCrontab, valid } = crontabFromParsedScheduleEvents(this.parsedScheduleEvents)
         if (valid && !this.parseError) {
           return scheduleCrontab
@@ -277,17 +268,6 @@ export default {
     },
     setNoHibernationSchedule (noSchedule) {
       this.confirmNoSchedule = noSchedule
-    },
-    validateInput () {
-      let valid = true
-      forEach(this.parsedScheduleEvents, schedule => {
-        if (!schedule.valid) {
-          valid = false
-        }
-      })
-
-      this.valid = valid && !this.parseError
-      this.$emit('valid', this.valid)
     },
     setScheduleData ({ hibernationSchedule, noHibernationSchedule, purpose }) {
       this.purpose = purpose

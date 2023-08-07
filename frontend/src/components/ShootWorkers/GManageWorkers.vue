@@ -26,7 +26,6 @@ SPDX-License-Identifier: Apache-2.0
           :is-new="isNewCluster || worker.isNew"
           :max-additional-zones="maxAdditionalZones"
           :kubernetes-version="kubernetesVersion"
-          @valid="onWorkerValid"
           @removed-zones="onRemovedZones"
         >
           <template #action>
@@ -104,12 +103,10 @@ export default {
   },
   emits: [
     'additionalZonesNetworkConfiguration',
-    'valid',
   ],
   data () {
     return {
       internalWorkers: undefined,
-      valid: false,
       cloudProfileName: undefined,
       region: undefined,
       zonesNetworkConfiguration: undefined,
@@ -249,46 +246,19 @@ export default {
           this.internalWorkers.push(internalWorker)
         })
       }
-      this.validateInput()
     },
     addWorker () {
       // by default propose only zones already used in this cluster
       const availableZones = this.usedZones.length ? this.usedZones : this.availableZones
       const worker = this.generateWorker(availableZones, this.cloudProfileName, this.region, this.kubernetesVersion)
       this.internalWorkers.push(worker)
-      this.validateInput()
     },
     onRemoveWorker (index) {
       this.internalWorkers.splice(index, 1)
-      // Need to evaluate the other components as well, as valid state may depend on each other (e.g. duplicate name)
-      // Lack of doing so can lead to worker valid state != true even if conflict has been resolved, if input happens
-      // on component which did not report valid = false in the first place
-      forEach(this.$refs.workerInput, workerInput => {
-        workerInput.validateInput()
-      })
-      this.validateInput()
     },
     setDefaultWorker () {
       this.internalWorkers = []
       this.addWorker()
-    },
-    onWorkerValid ({ valid, id }) {
-      const worker = find(this.internalWorkers, { id })
-      if (!worker) {
-        // if worker has been removed and we receive an onWorkerValid event for this worker ->ignore
-        return
-      }
-      const wasValid = worker.valid
-      worker.valid = valid
-      if (valid !== wasValid) {
-        // Need to evaluate the other components as well, as valid state may depend on each other (e.g. duplicate name)
-        // Lack of doing so can lead to worker valid state != true even if conflict has been resolved, if input happens
-        // on component which did not report valid = false in the first place
-        forEach(this.$refs.workerInput, workerInput => {
-          workerInput.validateInput()
-        })
-      }
-      this.validateInput()
     },
     onRemovedZones (removedZones) {
       // when user switches back from yaml tab, networkConfiguration includes any additional networkconfiguration
@@ -306,20 +276,9 @@ export default {
     },
     getWorkers () {
       const workers = map(this.internalWorkers, internalWorker => {
-        return omit(internalWorker, ['id', 'valid', 'isNew'])
+        return omit(internalWorker, ['id', 'isNew'])
       })
       return workers
-    },
-    validateInput () {
-      let valid = true
-      forEach(this.internalWorkers, worker => {
-        if (!worker.valid) {
-          valid = false
-        }
-      })
-
-      this.valid = valid
-      this.$emit('valid', this.valid)
     },
     updateWorkersData ({ workers, zonesNetworkConfiguration }) {
       this.setInternalWorkers(workers)

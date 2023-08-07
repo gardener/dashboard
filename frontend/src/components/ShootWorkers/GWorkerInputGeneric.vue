@@ -34,7 +34,6 @@ SPDX-License-Identifier: Apache-2.0
       <div class="regularInput">
         <g-machine-type
           v-model="machineTypeValue"
-          v-model:valid="internalMachineTypeValid"
           :machine-types="machineTypes"
         />
       </div>
@@ -44,8 +43,6 @@ SPDX-License-Identifier: Apache-2.0
           :worker="worker"
           :machine-type="selectedMachineType"
           :update-o-s-maintenance="updateOSMaintenance"
-          @update-machine-image="onUpdateMachineImage"
-          @valid="onMachineImageValid"
         />
       </div>
       <div class="regularInput">
@@ -53,7 +50,6 @@ SPDX-License-Identifier: Apache-2.0
           :machine-image-cri="machineImageCri"
           :worker="worker"
           :kubernetes-version="kubernetesVersion"
-          @valid="onContainerRuntimeValid"
         />
       </div>
       <div
@@ -64,8 +60,6 @@ SPDX-License-Identifier: Apache-2.0
           :volume-types="volumeTypes"
           :worker="worker"
           :cloud-profile-name="cloudProfileName"
-          @update-volume-type="onUpdateVolumeType"
-          @valid="onVolumeTypeValid"
         />
       </div>
       <div
@@ -264,7 +258,6 @@ export default {
   emits: [
     'removedZones',
     'updateMaxSurge',
-    'valid',
   ],
   setup () {
     return {
@@ -274,11 +267,6 @@ export default {
   data () {
     return {
       validationErrors,
-      valid: undefined,
-      machineTypeValid: undefined,
-      volumeTypeValid: true, // selection not shown in all cases, default to true
-      machineImageValid: undefined,
-      containerRuntimeValid: undefined,
       immutableZones: undefined,
       volumeSize: undefined,
     }
@@ -486,23 +474,10 @@ export default {
         this.worker.machine.type = value
         this.setVolumeDependingOnMachineType()
         this.onInputVolumeSize()
-        this.validateInput()
-      },
-    },
-    internalMachineTypeValid: {
-      get () {
-        return this.machineTypeValid
-      },
-      set (value) {
-        if (this.machineTypeValid !== value) {
-          this.machineTypeValid = value
-          this.validateInput()
-        }
       },
     },
   },
   mounted () {
-    this.validateInput()
     const volumeSize = get(this.worker, 'volume.size')
     if (volumeSize) {
       this.volumeSize = volumeSize
@@ -524,10 +499,6 @@ export default {
     },
     onInputName () {
       this.v$.worker.name.$touch()
-      this.validateInput()
-    },
-    onUpdateVolumeType () {
-      this.validateInput()
     },
     onInputVolumeSize () {
       const machineType = this.selectedMachineType
@@ -543,52 +514,19 @@ export default {
         set(this.worker, 'volume.size', this.volumeSize)
       }
       this.v$.volumeSize.$touch()
-      this.validateInput()
     },
     onInputminimum () {
       this.v$.worker.minimum.$touch()
-      this.validateInput()
     },
     onInputmaximum () {
       this.v$.worker.maximum.$touch()
-      this.validateInput()
-    },
-    onUpdateMachineImage () {
-      this.validateInput()
     },
     onInputMaxSurge () {
       this.v$.worker.maxSurge.$touch()
       this.$emit('updateMaxSurge', { maxSurge: this.worker.maxSurge, id: this.worker.id })
-      this.validateInput()
     },
     onInputZones () {
       this.v$.selectedZones.$touch()
-      this.validateInput()
-    },
-    onVolumeTypeValid ({ valid }) {
-      if (this.volumeTypeValid !== valid) {
-        this.volumeTypeValid = valid
-        this.validateInput()
-      }
-    },
-    onMachineImageValid ({ valid }) {
-      if (this.machineImageValid !== valid) {
-        this.machineImageValid = valid
-        this.validateInput()
-      }
-    },
-    onContainerRuntimeValid ({ valid }) {
-      if (this.containerRuntimeValid !== valid) {
-        this.containerRuntimeValid = valid
-        this.validateInput()
-      }
-    },
-    validateInput () {
-      const valid = !this.v$.$invalid && this.machineTypeValid && this.volumeTypeValid && this.machineImageValid && this.containerRuntimeValid
-      if (this.valid !== valid) {
-        this.valid = valid
-        this.$emit('valid', { id: this.worker.id, valid: this.valid })
-      }
     },
     setVolumeDependingOnMachineType () {
       const storage = get(this.selectedMachineType, 'storage')

@@ -120,7 +120,6 @@ import {
 } from '@/store'
 import GTimeString from '@/components/GTimeString.vue'
 import { required } from '@vuelidate/validators'
-import isEmpty from 'lodash/isEmpty'
 import some from 'lodash/some'
 import get from 'lodash/get'
 import head from 'lodash/head'
@@ -143,7 +142,6 @@ export default defineComponent({
   },
   emits: [
     'selected-config',
-    'valid-settings',
   ],
   setup () {
     return {
@@ -172,9 +170,6 @@ export default defineComponent({
     ...mapState(useAuthnStore, [
       'isAdmin',
     ]),
-    validSettings () {
-      return !isEmpty(this.selectedContainerImage)
-    },
     validators () {
       return {
         selectedContainerImage: {
@@ -229,9 +224,6 @@ export default defineComponent({
     selectedConfig () {
       this.$emit('selected-config', this.selectedConfig)
     },
-    validSettings () {
-      this.$emit('valid-settings', this.validSettings)
-    },
   },
   methods: {
     initialize ({ container = {}, defaultNode, currentNode, privilegedMode, nodes = [] }) {
@@ -253,7 +245,6 @@ export default defineComponent({
 
       // in case "initialize" is called with the same parameters, selectedConfig does not change and hence the watch is not called. Make sure that selectedConfig is emitted in any case
       this.$emit('selected-config', this.selectedConfig)
-      this.$emit('valid-settings', this.validSettings)
     },
     getErrorMessages (field) {
       return getValidationErrors(this, field)

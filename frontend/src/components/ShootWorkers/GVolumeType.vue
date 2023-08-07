@@ -74,7 +74,6 @@ export default {
   },
   emits: [
     'updateVolumeType',
-    'valid',
   ],
   setup () {
     return {
@@ -83,7 +82,6 @@ export default {
   },
   data () {
     return {
-      valid: undefined,
       workerIops: undefined,
     }
   },
@@ -150,7 +148,6 @@ export default {
   mounted () {
     this.workerIops = get(this.worker, 'providerConfig.volume.iops')
     this.v$.$touch()
-    this.validateInput()
   },
   methods: {
     ...mapActions(useCloudProfileStore, [
@@ -162,7 +159,6 @@ export default {
     onInputVolumeType () {
       this.v$.worker.volume.type.$touch()
       this.$emit('updateVolumeType')
-      this.validateInput()
     },
     onInputIops (value) {
       const iopsValue = parseInt(value)
@@ -176,13 +172,6 @@ export default {
       }
       this.v$.workerIops.$touch()
       this.$emit('updateVolumeType')
-      this.validateInput()
-    },
-    validateInput () {
-      if (this.valid !== !this.v$.$invalid) {
-        this.valid = !this.v$.$invalid
-        this.$emit('valid', { id: this.worker.id, valid: this.valid })
-      }
     },
   },
 }
