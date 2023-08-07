@@ -128,7 +128,6 @@ import shootStatusCredentialRotation from '@/mixins/shootStatusCredentialRotatio
 import get from 'lodash/get'
 
 export default {
-  name: 'CredentialTile',
   components: {
     GShootActionRotateCredentials,
     GTimeString,
