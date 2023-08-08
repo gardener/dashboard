@@ -7,21 +7,21 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-autocomplete
     ref="autocomplete"
-    v-model="internalValue"
-    v-model:search-input="internalSearch"
+    v-model:modelValue="internalValue"
     v-messages-color="{ color: 'warning' }"
+    auto-select-first
     color="primary"
     item-color="primary"
     :items="machineTypeItems"
     item-title="name"
     item-value="name"
+    :search="search"
     :error-messages="getErrorMessages('internalValue')"
-    :filter="filter"
+    :custom-filter="customFilter"
     label="Machine Type"
     :hint="hint"
     persistent-hint
     variant="underlined"
-    @update:model-value="v$.internalValue.$touch()"
     @blur="v$.internalValue.$touch()"
   >
     <template #item="{ item, props }">
@@ -41,6 +41,7 @@ SPDX-License-Identifier: Apache-2.0
 import { required } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 import { getValidationErrors } from '@/utils'
+
 import find from 'lodash/find'
 
 const validationErrors = {
@@ -55,16 +56,12 @@ export default {
       type: String,
       required: true,
     },
-    searchInput: {
-      type: String,
-    },
     machineTypes: {
       type: Array,
       default: () => [],
     },
   },
   emits: [
-    'update:search-input',
     'update:modelValue',
   ],
   setup () {
@@ -75,7 +72,7 @@ export default {
   data () {
     return {
       lazyValue: this.modelValue,
-      lazySearch: this.searchInput,
+      search: '',
       validationErrors,
     }
   },
@@ -86,22 +83,14 @@ export default {
       },
       set (value) {
         this.lazyValue = value ?? ''
+        this.v$.internalValue.$touch()
         this.$emit('update:modelValue', this.lazyValue)
       },
     },
-    internalSearch: {
-      get () {
-        return this.lazySearch
-      },
-      set (value) {
-        if (this.lazySearch !== value) {
-          this.lazySearch = value
-          this.$emit('update:search-input', value)
-        }
-      },
-    },
     machineTypeItems () {
-      const machineTypes = [...this.machineTypes]
+      const machineTypes = [
+        ...this.machineTypes,
+      ]
       if (this.notInList && this.internalValue) {
         machineTypes.push({
           name: this.internalValue,
@@ -129,10 +118,9 @@ export default {
   },
   watch: {
     modelValue (value) {
-      this.lazyValue = value
-    },
-    searchInput (value) {
-      this.lazySearch = value
+      if (this.lazyValue !== value) {
+        this.lazyValue = value
+      }
     },
   },
   mounted () {
@@ -146,31 +134,35 @@ export default {
     getErrorMessages (field) {
       return getValidationErrors(this, field)
     },
-    filter (item, query) {
+    customFilter (title, query, item) {
       if (!item) {
         return false
       }
       if (typeof query !== 'string') {
         return true
       }
-      const name = item.name?.toLowerCase()
-      const terms = query.trim().split(/ +/).map(term => term.toLowerCase())
+      const name = item.raw.name?.toLowerCase()
+      const terms = query
+        .trim()
+        .split(/ +/)
+        .map(term => term.toLowerCase())
       const properties = []
       const addProperty = value => {
         if (value) {
           properties.push(value.toString().toLowerCase())
         }
       }
-      addProperty(item.cpu)
-      addProperty(item.gpu)
-      addProperty(item.memory)
-      if (item.storage) {
-        addProperty(item.storage.type)
-        addProperty(item.storage.class)
-        addProperty(item.storage.size)
+      addProperty(item.raw.cpu)
+      addProperty(item.raw.gpu)
+      addProperty(item.raw.memory)
+      if (item.raw.storage) {
+        addProperty(item.raw.storage.type)
+        addProperty(item.raw.storage.class)
+        addProperty(item.raw.storage.size)
       }
 
-      return terms.every(term => name?.includes(term) || properties.includes(term))
+      const includesTerm = term => name?.includes(term) || properties.includes(term)
+      return terms.every(includesTerm)
     },
   },
 }
