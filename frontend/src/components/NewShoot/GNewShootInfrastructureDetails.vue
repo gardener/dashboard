@@ -17,17 +17,14 @@ SPDX-License-Identifier: Apache-2.0
           create-mode
           :cloud-profiles="cloudProfiles"
           color="primary"
-          @valid="onCloudProfileNameValid"
           @update:model-value="onUpdateCloudProfileName"
         />
       </v-col>
       <v-col cols="3">
         <g-select-secret
           v-model="secret"
-          v-model:valid="secretValid"
           :cloud-profile-name="cloudProfileName"
           @update:model-value="onUpdateSecret"
-          @update:valid="onSecretValid"
         />
       </v-col>
       <v-col cols="3">
@@ -76,7 +73,6 @@ SPDX-License-Identifier: Apache-2.0
             v-model="floatingPoolName"
             :wildcard-select-items="allFloatingPoolNames"
             wildcard-select-label="Floating Pool"
-            @valid="onFloatingPoolWildcardValid"
           />
         </v-col>
         <v-col cols="3">
@@ -239,9 +235,6 @@ export default {
       required: true,
     },
   },
-  emits: [
-    'valid',
-  ],
   setup () {
     return {
       v$: useVuelidate(),
@@ -256,9 +249,6 @@ export default {
       networkingType: undefined,
       floatingPoolName: undefined,
       // default validation status of subcomponents is true, as they are not shown in all cases
-      floatingPoolValid: true,
-      cloudProfileValid: true,
-      secretValid: true,
       fpname: undefined,
       loadBalancerProviderName: undefined,
       loadBalancerClassNames: [],
@@ -267,7 +257,6 @@ export default {
       firewallSize: undefined,
       firewallNetworks: undefined,
       projectID: undefined,
-      valid: false,
     }
   },
   validations () {
@@ -460,11 +449,6 @@ export default {
       return getValidationErrors(this, field)
     },
     setDefaultsDependingOnCloudProfile () {
-      // Reset subcomponent valid states
-      // default validation status of subcomponents is true, as they are not shown in all cases
-      this.floatingPoolValid = true
-      this.cloudProfileValid = true
-
       this.onUpdateSecret(head(this.infrastructureSecretsByProfileName))
       this.region = head(this.regionsWithSeed)
       if (!this.region && this.showAllRegions) {
@@ -498,11 +482,6 @@ export default {
     onUpdateSecret (secret) {
       this.secret = secret
       this.userInterActionBus.emit('updateSecret', this.secret)
-      this.validateInput()
-    },
-    onSecretValid (valid) {
-      this.secretValid = valid
-      this.validateInput()
     },
     onInputRegion () {
       this.partitionID = head(this.partitionIDs)
@@ -512,21 +491,14 @@ export default {
       this.onInputLoadBalancerProviderName()
       this.v$.region.$touch()
       this.userInterActionBus.emit('updateRegion', this.region)
-      this.validateInput()
-    },
-    onFloatingPoolWildcardValid (valid) {
-      this.floatingPoolValid = valid
-      this.validateInput()
     },
     onInputLoadBalancerProviderName () {
       this.v$.loadBalancerProviderName.$touch()
-      this.validateInput()
     },
     onInputLoadBalancerClassNames () {
       // sort loadBalancerClassNames in the same order as they are listed in the cloudProfile
       this.loadBalancerClassNames = intersection(this.allLoadBalancerClassNames, this.loadBalancerClassNames)
       this.v$.loadBalancerClassNames.$touch()
-      this.validateInput()
     },
     onInputPartitionID () {
       this.v$.partitionID.$touch()
@@ -537,40 +509,23 @@ export default {
       } else {
         this.firewallNetworks = undefined
       }
-      this.validateInput()
     },
     onInputProjectID () {
       this.v$.projectID.$touch()
-      this.validateInput()
     },
     onInputFirewallImage () {
       this.v$.firewallImage.$touch()
-      this.validateInput()
     },
     onInputFirewallSize () {
       this.v$.firewallSize.$touch()
-      this.validateInput()
     },
     onInputFirewallNetworks () {
       this.v$.firewallNetworks.$touch()
-      this.validateInput()
     },
     onUpdateCloudProfileName () {
       this.setCloudProfileName(this.cloudProfileName)
       this.userInterActionBus.emit('updateCloudProfileName', this.cloudProfileName)
       this.setDefaultsDependingOnCloudProfile()
-      this.validateInput()
-    },
-    onCloudProfileNameValid (valid) {
-      this.cloudProfileValid = valid
-      this.validateInput()
-    },
-    validateInput () {
-      const valid = !this.v$.$invalid && this.cloudProfileValid && this.floatingPoolValid && this.secretValid
-      if (this.valid !== valid) {
-        this.valid = valid
-        this.$emit('valid', valid)
-      }
     },
     getInfrastructureData () {
       return {
@@ -618,7 +573,6 @@ export default {
       this.firewallSize = firewallSize
       this.firewallNetworks = firewallNetworks
       this.v$.projectID.$touch() // project id is a required field (for metal). We want to show the error immediatley
-      this.validateInput()
     },
   },
 }

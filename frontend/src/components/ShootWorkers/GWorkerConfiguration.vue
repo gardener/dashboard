@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     :key="componentKey"
     ref="actionDialog"
     :shoot-item="shootItem"
-    :valid="workersValid"
+    :valid="!v$.$invalid"
     width="1250"
     confirm-required
     caption="Configure Workers"
@@ -45,7 +45,6 @@ SPDX-License-Identifier: Apache-2.0
           <g-manage-workers
             ref="manageWorkersRef"
             :disable-worker-animation="disableWorkerAnimation"
-            @valid="onWorkersValid"
             @additional-zones-network-configuration="setNetworkConfiguration"
           />
         </v-window-item>
@@ -106,7 +105,7 @@ import { isZonedCluster } from '@/utils'
 import get from 'lodash/get'
 import cloneDeep from 'lodash/cloneDeep'
 import { v4 as uuidv4 } from '@/utils/uuid'
-
+import { useVuelidate } from '@vuelidate/core'
 export default {
 
   components: {
@@ -123,11 +122,11 @@ export default {
     return {
       ...useAsyncRef('manageWorkers'),
       ...useAsyncRef('workerEditor'),
+      v$: useVuelidate(),
     }
   },
   data () {
     return {
-      workersValid: false,
       workers: undefined,
       networkConfiguration: [],
       networkConfigurationYaml: undefined,
@@ -196,8 +195,6 @@ export default {
       }
     },
     async reset () {
-      this.workersValid = false
-
       const workers = cloneDeep(this.shootWorkerGroups)
       const zonesNetworkConfiguration = get(this.shootItem, 'spec.provider.infrastructureConfig.networks.zones')
       const cloudProfileName = this.shootCloudProfileName
@@ -206,9 +203,6 @@ export default {
       const existingWorkerCIDR = get(this.shootItem, 'spec.networking.nodes')
 
       await this.manageWorkers.dispatch('setWorkersData', { workers, cloudProfileName, region, zonesNetworkConfiguration, zonedCluster, existingWorkerCIDR, kubernetesVersion: this.shootK8sVersion })
-    },
-    onWorkersValid (value) {
-      this.workersValid = value
     },
     async setNetworkConfiguration (value) {
       if (value) {

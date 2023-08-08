@@ -50,7 +50,6 @@ export default {
     },
   },
   emits: [
-    'valid',
     'update-purpose',
   ],
   setup () {
@@ -91,14 +90,6 @@ export default {
     onInputPurpose () {
       this.v$.internalPurpose.$touch()
       this.$emit('update-purpose', this.internalPurpose)
-      this.validateInput()
-    },
-    validateInput () {
-      const valid = !this.v$.$invalid
-      if (this.valid !== valid) {
-        this.valid = valid
-        this.$emit('valid', valid)
-      }
     },
     descriptionForPurpose (purpose) {
       switch (purpose) {

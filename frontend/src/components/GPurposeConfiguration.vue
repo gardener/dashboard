@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <g-action-button-dialog
     ref="actionDialog"
     :shoot-item="shootItem"
-    :valid="valid"
+    :valid="!v$.$invalid"
     width="450"
     caption="Configure Purpose"
     @dialog-opened="onConfigurationDialogOpened"
@@ -18,13 +18,13 @@ SPDX-License-Identifier: Apache-2.0
         ref="purposeRef"
         :secret="secret"
         @update-purpose="onUpdatePurpose"
-        @valid="onPurposeValid"
       />
     </template>
   </g-action-button-dialog>
 </template>
 
 <script>
+import { useVuelidate } from '@vuelidate/core'
 import { defineAsyncComponent } from 'vue'
 import { mapState } from 'pinia'
 import find from 'lodash/find'
@@ -52,19 +52,16 @@ export default {
   setup () {
     return {
       ...useAsyncRef('purpose'),
+      v$: useVuelidate(),
     }
   },
   data () {
     return {
       purposeValue: undefined,
-      purposeValid: false,
     }
   },
   computed: {
     ...mapState(useSecretStore, ['infrastructureSecretList']),
-    valid () {
-      return this.purposeValid
-    },
     secret () {
       const secrets = this.infrastructureSecretList
       const secret = find(secrets, ['metadata.name', this.shootSecretBindingName])
@@ -75,9 +72,6 @@ export default {
     },
   },
   methods: {
-    onPurposeValid (value) {
-      this.purposeValid = value
-    },
     onUpdatePurpose (purpose) {
       this.purposeValue = purpose
     },

@@ -86,7 +86,6 @@ export default {
   },
   emits: [
     'updateMachineImage',
-    'valid',
   ],
   setup () {
     return {
@@ -96,7 +95,6 @@ export default {
   data () {
     return {
       validationErrors,
-      valid: undefined,
     }
   },
   computed: {
@@ -193,7 +191,6 @@ export default {
   },
   mounted () {
     this.v$.$touch()
-    this.validateInput()
   },
   methods: {
     getErrorMessages (field) {
@@ -202,13 +199,6 @@ export default {
     onInputMachineImage () {
       this.v$.worker.machine.image.$touch()
       this.$emit('updateMachineImage', this.worker.machine.image)
-      this.validateInput()
-    },
-    validateInput () {
-      if (this.valid !== !this.v$.$invalid) {
-        this.valid = !this.v$.$invalid
-        this.$emit('valid', { id: this.worker.id, valid: this.valid })
-      }
     },
     itemDescription (machineImage) {
       const itemDescription = []

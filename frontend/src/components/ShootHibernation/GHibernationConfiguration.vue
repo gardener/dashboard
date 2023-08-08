@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <g-action-button-dialog
     ref="actionDialog"
     :shoot-item="shootItem"
-    :valid="hibernationScheduleValid"
+    :valid="!v$.$invalid"
     width="900"
     caption="Configure Hibernation Schedule"
     @dialog-opened="onConfigurationDialogOpened"
@@ -19,7 +19,6 @@ SPDX-License-Identifier: Apache-2.0
         ref="hibernationScheduleRef"
         :is-hibernation-possible="isHibernationPossible"
         :hibernation-possible-message="hibernationPossibleMessage"
-        @valid="onHibernationScheduleValid"
       />
     </template>
   </g-action-button-dialog>
@@ -38,6 +37,8 @@ import { v4 as uuidv4 } from '@/utils/uuid'
 import shootItem from '@/mixins/shootItem'
 import { useAsyncRef } from '@/composables'
 
+import { useVuelidate } from '@vuelidate/core'
+
 export default {
   components: {
     GActionButtonDialog,
@@ -50,11 +51,11 @@ export default {
   setup () {
     return {
       ...useAsyncRef('hibernationSchedule'),
+      v$: useVuelidate(),
     }
   },
   data () {
     return {
-      hibernationScheduleValid: false,
       componentKey: uuidv4(),
     }
   },
@@ -98,8 +99,6 @@ export default {
       }
     },
     async reset () {
-      this.hibernationScheduleValid = false
-
       const noScheduleAnnotation = !!get(this.shootItem, 'metadata.annotations', {})['dashboard.garden.sapcloud.io/no-hibernation-schedule']
 
       await this.hibernationSchedule.dispatch('setScheduleData', {
@@ -107,9 +106,6 @@ export default {
         noHibernationSchedule: noScheduleAnnotation,
         purpose: this.shootPurpose,
       })
-    },
-    onHibernationScheduleValid (value) {
-      this.hibernationScheduleValid = value
     },
     showDialog () { // called from ShootLifeCycleCard
       this.$refs.actionDialog.showDialog()

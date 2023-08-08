@@ -92,7 +92,6 @@ export default {
     },
   },
   emits: [
-    'valid',
     'update:modelValue',
   ],
   setup () {
@@ -105,7 +104,6 @@ export default {
       wildcardVariablePartPrefix: undefined,
       wildcardVariablePartSuffix: undefined,
       wildcardSelectedValue: {},
-      valid: undefined,
     }
   },
   computed: {
@@ -171,10 +169,6 @@ export default {
     },
     onInput () {
       this.v$.wildcardSelectedValue.$touch()
-      if (this.valid !== !this.v$.$invalid) {
-        this.valid = !this.v$.$invalid
-        this.$emit('valid', this.valid)
-      }
       this.$emit('update:modelValue', this.internalValue)
     },
     setInternalValue (newValue) {

@@ -64,22 +64,13 @@ export default {
       type: String,
     },
   },
-  emits: [
-    'valid',
-  ],
   setup () {
     return {
       v$: useVuelidate(),
     }
   },
-  validations: {
-    maintenanceBegin: {
-      required,
-    },
-    maintenanceTimezone: {
-      required,
-      isTimezone,
-    },
+  validations () {
+    return this.validators
   },
   data () {
     return {
@@ -87,18 +78,27 @@ export default {
       validationErrors,
       maintenanceBegin: undefined,
       windowDuration: 60,
-      valid: undefined,
     }
   },
   computed: {
     ...mapState(useAppStore, [
       'timezone',
     ]),
+    validators () {
+      return {
+        maintenanceBegin: {
+          required,
+        },
+        maintenanceTimezone: {
+          required,
+          isTimezone,
+        },
+      }
+    },
   },
   watch: {
     timeWindowBegin (windowBegin) {
       this.setBeginTimeTimezoneString(windowBegin)
-      this.validateInput()
     },
     timeWindowEnd (windowEnd) {
       this.setEndTimeTimezoneString(windowEnd)
@@ -117,16 +117,9 @@ export default {
       } else {
         this.setBeginTimeTimezoneString(this.timeWindowBegin)
       }
-      this.validateInput()
     },
     getErrorMessages (field) {
       return getValidationErrors(this, field)
-    },
-    validateInput () {
-      if (this.valid !== !this.v$.$invalid) {
-        this.valid = !this.v$.$invalid
-        this.$emit('valid', this.valid)
-      }
     },
     setBeginTimeTimezoneString (windowBegin) {
       const beginTime = new TimeWithOffset(windowBegin)
@@ -152,11 +145,9 @@ export default {
     },
     onInputmaintenanceBegin () {
       this.v$.maintenanceBegin.$touch()
-      this.validateInput()
     },
     onInputmaintenanceTimezone () {
       this.v$.maintenanceTimezone.$touch()
-      this.validateInput()
     },
   },
 }
