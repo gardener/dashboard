@@ -108,6 +108,10 @@ export default {
       default: true,
     },
   },
+  emits: [
+    'updateK8sMaintenance',
+    'updateOSMaintenance',
+  ],
   data () {
     return {
       k8sUpdatesInternal: false,
