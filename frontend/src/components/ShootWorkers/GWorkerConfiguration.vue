@@ -187,10 +187,15 @@ export default {
         return true
       } catch (err) {
         const errorMessage = 'Could not save worker configuration'
-        const errorDetails = errorDetailsFromError(err)
-        const detailedErrorMessage = errorDetails.detailedMessage
+        let detailedErrorMessage
+        if (err.response) {
+          const errorDetails = errorDetailsFromError(err)
+          detailedErrorMessage = errorDetails.detailedMessage
+        } else {
+          detailedErrorMessage = err.message
+        }
         this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
-        this.logger.error(errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        this.logger.error(errorMessage, detailedErrorMessage, err)
         return false
       }
     },
