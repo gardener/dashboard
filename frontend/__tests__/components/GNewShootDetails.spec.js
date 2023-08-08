@@ -9,11 +9,10 @@ import { createTestingPinia } from '@pinia/testing'
 import { useAuthzStore } from '@/store/authz'
 import { useConfigStore } from '@/store/config'
 import { useProjectStore } from '@/store/project'
-import utilsPlugin from '@/plugins/utils'
 import EventEmitter from 'events'
 import GNewShootDetails from '@/components/NewShoot/GNewShootDetails.vue'
 
-const { createVuetifyPlugin } = global.fixtures.helper
+const { createPlugins } = global.fixtures.helper
 
 describe('components', () => {
   describe('g-new-shoot-details', () => {
@@ -23,9 +22,8 @@ describe('components', () => {
       return mount(GNewShootDetails, {
         global: {
           plugins: [
-            createVuetifyPlugin(),
+            ...createPlugins(),
             pinia,
-            utilsPlugin,
           ],
         },
         props,
