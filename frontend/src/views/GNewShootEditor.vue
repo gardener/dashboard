@@ -40,7 +40,6 @@ import { useShootStore, useAuthzStore, useAppStore } from '@/store'
 import { useAsyncRef } from '@/composables'
 
 // lodash
-import get from 'lodash/get'
 import isEqual from 'lodash/isEqual'
 
 export default {
@@ -56,7 +55,7 @@ export default {
         this.setNewShootResource(shootResource)
         return next()
       } catch (err) {
-        this.errorMessage = get(err, 'response.data.message', err.message)
+        this.errorMessage = err.message
         return next(false)
       }
     }
@@ -122,10 +121,14 @@ export default {
           },
         })
       } catch (err) {
-        const errorDetails = errorDetailsFromError(err)
         this.errorMessage = 'Failed to create cluster.'
-        this.detailedErrorMessage = errorDetails.detailedMessage
-        this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        if (err.response) {
+          const errorDetails = errorDetailsFromError(err)
+          this.detailedErrorMessage = errorDetails.detailedMessage
+        } else {
+          this.detailedErrorMessage = err.message
+        }
+        this.logger.error(this.errorMessage, this.detailedErrorMessage, err)
       }
     },
     async isShootContentDirty () {

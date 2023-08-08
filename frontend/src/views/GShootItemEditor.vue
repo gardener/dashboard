@@ -38,6 +38,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import GConfirmDialog from '@/components/dialogs/GConfirmDialog'
 import { mapState, mapActions } from 'pinia'
+import { errorDetailsFromError } from '@/utils/error'
 
 import { useAsyncRef } from '@/composables'
 import { defineAsyncComponent } from 'vue'
@@ -56,7 +57,7 @@ export default {
     GShootEditor: defineAsyncComponent(() => import('@/components/GShootEditor')),
     GConfirmDialog,
   },
-  inject: ['yaml', 'api'],
+  inject: ['yaml', 'api', 'logger'],
   async beforeRouteLeave (to, from, next) {
     if (this.clean) {
       return next()
@@ -137,7 +138,14 @@ export default {
         this.snackbarText = 'Cluster specification has been successfully updated'
         this.snackbar = true
       } catch (err) {
-        this.errorMessage = get(err, 'response.data.message', err.message)
+        this.errorMessage = 'Failed to save changes.'
+        if (err.response) {
+          const errorDetails = errorDetailsFromError(err)
+          this.detailedErrorMessage = errorDetails.detailedMessage
+        } else {
+          this.detailedErrorMessage = err.message
+        }
+        this.logger.error(this.errorMessage, this.detailedErrorMessage, err)
       }
     },
     confirmEditorNavigation () {
