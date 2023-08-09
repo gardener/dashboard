@@ -135,9 +135,13 @@ export const useAuthzStore = defineStore('authz', () => {
     if (namespace && spec.value?.namespace !== namespace) {
       const body = { namespace }
       const response = await api.getSubjectRules(body)
-      spec.value = body
+      this.setNamespace(namespace)
       status.value = response.data
     }
+  }
+
+  function setNamespace (namespace) {
+    spec.value = { namespace }
   }
 
   function $reset () {
@@ -147,6 +151,7 @@ export const useAuthzStore = defineStore('authz', () => {
 
   return {
     namespace,
+    setNamespace,
     canCreateTerminals,
     canCreateShoots,
     canPatchShoots,
