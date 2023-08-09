@@ -49,7 +49,6 @@ import {
 } from '@/store'
 
 // lodash
-import get from 'lodash/get'
 import pick from 'lodash/pick'
 
 export default {
