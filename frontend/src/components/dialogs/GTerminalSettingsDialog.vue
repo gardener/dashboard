@@ -27,7 +27,7 @@ SPDX-License-Identifier: Apache-2.0
 import { toRefs, toRaw } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 
-import { useTerminalConfig } from '@/composables'
+import { useTerminalConfig } from '@/composables/useTerminalConfig'
 
 import GDialog from '@/components/dialogs/GDialog.vue'
 import GTerminalSettings from '@/components/GTerminalSettings.vue'

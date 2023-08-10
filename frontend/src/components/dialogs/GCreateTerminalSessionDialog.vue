@@ -103,7 +103,8 @@ import {
   useShootStore,
   useTerminalStore,
 } from '@/store'
-import { useTerminalConfig } from '@/composables'
+
+import { useTerminalConfig } from '@/composables/useTerminalConfig'
 
 import GDialog from '@/components/dialogs/GDialog.vue'
 import GTerminalSettings from '@/components/GTerminalSettings.vue'

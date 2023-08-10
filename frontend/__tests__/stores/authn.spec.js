@@ -24,7 +24,7 @@ vi.mock('@vueuse/core', async () => {
 })
 
 describe('stores', () => {
-  describe('cloudProfile', () => {
+  describe('authn', () => {
     let location
     let authnStore
 
@@ -35,7 +35,7 @@ describe('stores', () => {
       return url
     }
 
-    beforeAll(() => {
+    beforeEach(() => {
       location = useBrowserLocation()
       setActivePinia(createPinia())
       authnStore = useAuthnStore()
