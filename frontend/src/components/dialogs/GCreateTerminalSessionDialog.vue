@@ -57,8 +57,7 @@ SPDX-License-Identifier: Apache-2.0
                 <g-terminal-settings
                   v-show="!!targetTab.selectedConfig"
                   ref="settings"
-                  :target="targetTab.selectedTarget"
-                  @selected-config="selectedConfigChanged"
+                  v-model:target="targetTab.selectedTarget"
                 />
               </v-expansion-panel-text>
             </v-expansion-panel>
@@ -95,6 +94,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { toRefs, toRaw } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 
 import { mapState, mapActions } from 'pinia'
@@ -103,6 +103,8 @@ import {
   useShootStore,
   useTerminalStore,
 } from '@/store'
+import { useTerminalConfig } from '@/composables'
+
 import GDialog from '@/components/dialogs/GDialog.vue'
 import GTerminalSettings from '@/components/GTerminalSettings.vue'
 import GTerminalTarget from '@/components/GTerminalTarget.vue'
@@ -128,6 +130,11 @@ export default {
     GWebterminalServiceAccountDialog,
   },
   inject: ['api'],
+  provide () {
+    return {
+      ...toRefs(this.state),
+    }
+  },
   props: {
     name: {
       type: String,
@@ -139,6 +146,7 @@ export default {
   setup () {
     return {
       v$: useVuelidate(),
+      ...useTerminalConfig(),
     }
   },
   data () {
@@ -214,6 +222,9 @@ export default {
     isSettingsExpanded () {
       this.updateSettings()
     },
+    config (value) {
+      this.targetTab.selectedConfig = toRaw(value)
+    },
   },
   methods: {
     ...mapActions(useShootStore, ['shootByNamespaceAndName']),
@@ -279,13 +290,10 @@ export default {
       try {
         this.targetTab.initializedForTarget = this.targetTab.selectedTarget
         const { data: config } = await this.api.terminalConfig({ name: this.name, namespace: this.namespace, target: this.targetTab.selectedTarget })
-        this.$refs.settings.initialize(config)
+        this.updateState(config)
       } catch (err) {
         this.targetTab.initializedForTarget = undefined
       }
-    },
-    selectedConfigChanged (selectedConfig) {
-      this.targetTab.selectedConfig = selectedConfig
     },
     onAddTerminalShortcut (shortcut) {
       this.shortcutTab.selectedShortcuts = [shortcut]

@@ -19,40 +19,43 @@ SPDX-License-Identifier: Apache-2.0
       multi-line
     >
       <div>{{ snackbarText }}</div>
-      <g-popover
-        v-if="snackbarDetailsText"
-        toolbar-title="Details"
-        placement="bottom"
-        :boundary="`#boundary_${uuid}`"
+      <div
+        class="d-flex flex-nowrap align-center justify-center"
       >
-        <template #activator="{ props }">
-          <v-btn
-            v-bind="props"
-            variant="text"
-            size="small"
-            color="primary"
-          >
-            Details
-          </v-btn>
-        </template>
-        <template #text>
-          {{ snackbarDetailsText }}
-        </template>
-      </g-popover>
-      <v-btn
-        variant="text"
-        color="primary"
-        @click="retry"
-      >
-        Retry
-      </v-btn>
-      <v-btn
-        variant="text"
-        color="primary"
-        @click="hideSnackbarAndClose"
-      >
-        Close
-      </v-btn>
+        <g-popover
+          v-if="snackbarDetailsText"
+          toolbar-title="Details"
+          placement="bottom"
+          :boundary="`#boundary_${uuid}`"
+        >
+          <template #activator="{ props }">
+            <v-btn
+              v-bind="props"
+              variant="text"
+              color="primary"
+            >
+              Details
+            </v-btn>
+          </template>
+          <template #text>
+            {{ snackbarDetailsText }}
+          </template>
+        </g-popover>
+        <v-btn
+          variant="text"
+          color="primary"
+          @click="retry"
+        >
+          Retry
+        </v-btn>
+        <v-btn
+          variant="text"
+          color="primary"
+          @click="hideSnackbarAndClose"
+        >
+          Close
+        </v-btn>
+      </div>
     </v-snackbar>
     <v-snackbar
       v-model="errorSnackbarBottom"

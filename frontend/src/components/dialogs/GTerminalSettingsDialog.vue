@@ -17,16 +17,17 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <template #message>
       <g-terminal-settings
-        ref="settings"
         :target="target"
-        @selected-config="selectedConfigChanged"
       />
     </template>
   </g-dialog>
 </template>
 
 <script>
+import { toRefs, toRaw } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
+
+import { useTerminalConfig } from '@/composables'
 
 import GDialog from '@/components/dialogs/GDialog.vue'
 import GTerminalSettings from '@/components/GTerminalSettings.vue'
@@ -36,6 +37,11 @@ export default {
     GDialog,
     GTerminalSettings,
   },
+  provide () {
+    return {
+      ...toRefs(this.state),
+    }
+  },
   props: {
     target: {
       type: String,
@@ -44,6 +50,7 @@ export default {
   setup () {
     return {
       v$: useVuelidate(),
+      ...useTerminalConfig(),
     }
   },
   data () {
@@ -51,27 +58,19 @@ export default {
       selectedConfig: undefined,
     }
   },
+  watch: {
+    config (value) {
+      this.selectedConfig = toRaw(value)
+    },
+  },
   methods: {
-    promptForConfigurationChange (initialState) {
+    async promptForConfigurationChange (initialState) {
+      this.updateState(initialState)
       const confirmWithDialogPromise = this.$refs.gDialog.confirmWithDialog()
-      return new Promise(resolve => {
-        this.$nextTick(async () => {
-          // delay execution to make sure that all components (especially $refs.settings) are loaded (slot in g-dialog/v-dialog is lazy)
-          this.initialize(initialState)
-          const confirmed = await confirmWithDialogPromise
-          if (confirmed) {
-            resolve(this.selectedConfig)
-          } else {
-            resolve(undefined)
-          }
-        })
-      })
-    },
-    initialize (initialState) {
-      this.$refs.settings.initialize(initialState)
-    },
-    selectedConfigChanged (selectedConfig) {
-      this.selectedConfig = selectedConfig
+      const confirmed = await confirmWithDialogPromise
+      if (confirmed) {
+        return this.config
+      }
     },
   },
 }

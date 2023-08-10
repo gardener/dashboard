@@ -7,20 +7,20 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div>
     <v-text-field
-      v-model="selectedContainerImage"
+      v-model="containerImage"
       color="primary"
       label="Image"
       hint="Image to be used for the Container"
       persistent-hint
-      :error-messages="getErrorMessages('selectedContainerImage')"
+      :error-messages="getErrorMessages('containerImage')"
       variant="underlined"
-      @update:model-value="v$.selectedContainerImage.$touch()"
-      @blur="v$.selectedContainerImage.$touch()"
+      @update:model-value="v$.containerImage.$touch()"
+      @blur="v$.containerImage.$touch()"
     />
     <template v-if="target === 'shoot'">
       <v-radio-group
         v-if="isAdmin"
-        v-model="selectedRunOnShootWorker"
+        v-model="runtime"
         label="Terminal Runtime"
         class="mt-6"
         hint="Choose &quot;Cluster&quot; if you want to troubleshoot a worker node of the cluster"
@@ -28,18 +28,18 @@ SPDX-License-Identifier: Apache-2.0
       >
         <v-radio
           label="Infrastructure (Seed)"
-          :value="false"
+          value="seed"
           color="primary"
         />
         <v-radio
           label="Cluster"
-          :value="true"
+          value="shoot"
           color="primary"
         />
       </v-radio-group>
       <v-switch
-        v-model="selectedPrivilegedMode"
-        :disabled="!selectedRunOnShootWorker"
+        v-model="privilegedMode"
+        :disabled="runtime === 'seed'"
         color="primary"
         label="Privileged"
         hint="Enable to schedule a privileged Container, with hostPID and hostNetwork enabled. The host root filesystem will be mounted under the path /host."
@@ -48,14 +48,14 @@ SPDX-License-Identifier: Apache-2.0
         class="ml-2"
       />
       <v-select
-        v-model="selectedNode"
-        :disabled="!selectedRunOnShootWorker"
+        v-model="node"
+        :disabled="runtime === 'seed'"
         no-data-text="No workers available"
         color="primary"
         item-color="primary"
         label="Node"
         placeholder="Change worker node..."
-        :items="shootNodes"
+        :items="shootNodesInternal"
         item-value="data.kubernetesHostname"
         hint="Node on which the Pod should be scheduled"
         persistent-hint
@@ -85,8 +85,8 @@ SPDX-License-Identifier: Apache-2.0
         </template>
         <template #selection="{ item }">
           <span
-            v-if="selectedRunOnShootWorker"
-            :class="{'text-grey': !selectedRunOnShootWorker}"
+            v-if="runtime === 'shoot'"
+            :class="{'text-grey': runtime === 'seed'}"
             class="ml-2"
           >
             <template v-if="!isAutoSelectNodeItem(item)">
@@ -97,9 +97,9 @@ SPDX-License-Identifier: Apache-2.0
         </template>
       </v-select>
       <v-alert
-        v-if="isAdmin && selectedRunOnShootWorker"
+        v-if="isAdmin && runtime === 'shoot'"
         class="ml-6 mt-6 mb-2"
-        :value="true"
+        :model-value="true"
         type="info"
         color="primary"
         variant="outlined"
@@ -119,13 +119,10 @@ import {
 } from '@/store'
 import GTimeString from '@/components/GTimeString.vue'
 import { required } from '@vuelidate/validators'
-import some from 'lodash/some'
-import get from 'lodash/get'
-import head from 'lodash/head'
 import { getValidationErrors } from '@/utils'
 
 const validationErrors = {
-  selectedContainerImage: {
+  containerImage: {
     required: 'You can\'t leave this empty.',
   },
 }
@@ -134,14 +131,18 @@ export default {
   components: {
     GTimeString,
   },
+  inject: [
+    'node',
+    'containerImage',
+    'shootNodes',
+    'privilegedMode',
+    'runtime',
+  ],
   props: {
     target: {
       type: String,
     },
   },
-  emits: [
-    'selected-config',
-  ],
   setup () {
     return {
       v$: useVuelidate(),
@@ -149,16 +150,6 @@ export default {
   },
   data () {
     return {
-      autoSelectNodeItem: {
-        data: {
-          kubernetesHostname: -1, // node will be auto selected by the kube-scheduler. Value needs to be set to any value
-        },
-      },
-      selectedRunOnShootWorkerInternal: false,
-      selectedContainerImage: undefined,
-      selectedNode: undefined,
-      selectedPrivilegedMode: undefined,
-      shootNodesInternal: [],
       validationErrors,
     }
   },
@@ -171,85 +162,24 @@ export default {
     ]),
     validators () {
       return {
-        selectedContainerImage: {
+        containerImage: {
           required,
         },
       }
     },
-    selectedRunOnShootWorker: {
-      get () {
-        return this.selectedRunOnShootWorkerInternal
-      },
-      set (value) {
-        /* If user is admin, the default runtime is an infrastructure cluster.
-        An admin would usually only choose the cluster as terminal runtime when in need of troubleshooting the worker nodes. Hence, enable privileged mode automatically.
-        */
-        if (this.isAdmin) {
-          this.selectedPrivilegedMode = value
-        }
-        this.selectedRunOnShootWorkerInternal = value
-      },
-    },
-    shootNodes: {
-      get () {
-        return this.selectedRunOnShootWorker ? this.shootNodesInternal : []
-      },
-      set (value) {
-        this.shootNodesInternal = value
-      },
-    },
-    selectedConfig () {
-      const node = this.selectedNode === this.autoSelectNodeItem.data.kubernetesHostname
-        ? undefined
-        : this.selectedNode
-
-      const preferredHost = this.selectedRunOnShootWorker ? 'shoot' : 'seed'
-
-      const selectedConfig = {
-        container: {
-          image: this.selectedContainerImage,
-          privileged: this.selectedPrivilegedMode,
-        },
-        node,
-        preferredHost,
-        hostPID: this.selectedPrivilegedMode,
-        hostNetwork: this.selectedPrivilegedMode,
-      }
-
-      return selectedConfig
-    },
-  },
-  watch: {
-    selectedConfig () {
-      this.$emit('selected-config', this.selectedConfig)
+    shootNodesInternal () {
+      return this.runtime === 'shoot' ? this.shootNodes : []
     },
   },
   methods: {
-    initialize ({ container = {}, defaultNode, currentNode, privilegedMode, nodes = [] }) {
-      this.selectedContainerImage = container.image
-      if (!defaultNode) {
-        defaultNode = this.isAdmin
-          ? get(head(nodes), 'data.kubernetesHostname')
-          : this.autoSelectNodeItem.data.kubernetesHostname
-      }
-      this.selectedNode = defaultNode
-      this.shootNodes = [this.autoSelectNodeItem, ...nodes]
-      if (!this.isAdmin) {
-        this.selectedRunOnShootWorker = true
-      } else {
-        const currentNodeIsShootWorker = some(nodes, ['data.kubernetesHostname', currentNode])
-        this.selectedRunOnShootWorker = currentNodeIsShootWorker
-      }
-      this.selectedPrivilegedMode = privilegedMode
-
-      // in case "initialize" is called with the same parameters, selectedConfig does not change and hence the watch is not called. Make sure that selectedConfig is emitted in any case
-      this.$emit('selected-config', this.selectedConfig)
-    },
     getErrorMessages (field) {
       return getValidationErrors(this, field)
     },
     isAutoSelectNodeItem (item) {
-      return item.raw.data?.kubernetesHostname === this.autoSelectNodeItem.data?.kubernetesHostname
+      return this.isAutoSelectNode(item.raw.data?.kubernetesHostname)
+    },
+    isAutoSelectNode (hostname) {
+      return hostname === '<AUTO-SELECT>'
     },
   },
 }
