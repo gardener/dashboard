@@ -53,7 +53,7 @@ export default {
     ]),
     componentProperties () {
       switch (this.component) {
-        case 'shoot-item-error': {
+        case 'g-shoot-item-error': {
           const {
             code = 500,
             reason = 'Oops, something went wrong',
@@ -113,7 +113,7 @@ export default {
           code: 410,
           reason: 'Cluster is gone',
         })
-        this.component = 'shoot-item-error'
+        this.component = 'g-shoot-item-error'
       } else if (type === 'ADDED' && includes([404, 410], get(this.error, 'code'))) {
         this.error = undefined
         this.component = 'router-view'
@@ -121,7 +121,7 @@ export default {
     },
     async load ({ name, params }) {
       this.error = undefined
-      this.component = 'shoot-item-loading'
+      this.component = 'g-shoot-item-loading'
       try {
         const promises = [
           this.subscribe(params),
