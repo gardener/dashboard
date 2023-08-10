@@ -59,6 +59,17 @@ SPDX-License-Identifier: Apache-2.0
         <g-static-token-kubeconfig-switch v-model="enableStaticTokenKubeconfig" />
       </v-col>
     </v-row>
+    <v-row>
+      <v-col cols="12">
+        <v-checkbox
+          v-model="enableWorkerlessShoot"
+          label="Workerless Cluster"
+          color="primary"
+          hide-details
+          density="compact"
+        />
+      </v-col>
+    </v-row>
     <v-row v-if="slaDescriptionHtml">
       <v-col cols="12">
         <label>{{ slaTitle }}</label>
@@ -88,6 +99,7 @@ import { useAuthzStore } from '@/store/authz'
 import { useConfigStore } from '@/store/config'
 import { useProjectStore } from '@/store/project'
 import { useShootStore } from '@/store/shoot'
+import { useShootStagingStore } from '@/store/shootStaging'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import GStaticTokenKubeconfigSwitch from '@/components/GStaticTokenKubeconfigSwitch'
@@ -159,6 +171,7 @@ export default {
     return this.validators
   },
   computed: {
+    ...mapState(useShootStagingStore, ['workerless']),
     ...mapState(useProjectStore, ['projectList']),
     ...mapState(useAuthzStore, ['namespace']),
     ...mapState(useConfigStore, ['sla']),
@@ -218,6 +231,14 @@ export default {
         },
       }
     },
+    enableWorkerlessShoot: {
+      set (value) {
+        this.setWorkerless(value)
+      },
+      get () {
+        return this.workerless
+      },
+    },
   },
   mounted () {
     this.userInterActionBus.on('updateSecret', secret => {
@@ -242,6 +263,9 @@ export default {
     ]),
     ...mapActions(useShootStore, [
       'shootByNamespaceAndName',
+    ]),
+    ...mapActions(useShootStagingStore, [
+      'setWorkerless',
     ]),
     getErrorMessages (field) {
       return getValidationErrors(this, field)

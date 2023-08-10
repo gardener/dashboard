@@ -53,6 +53,7 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
     controlPlaneFailureToleranceType: null,
     initialControlPlaneFailureToleranceType: null,
     seedName: null,
+    workerless: null,
   })
 
   const dnsDomain = computed(() => {
@@ -69,6 +70,10 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
 
   const seedName = computed(() => {
     return state.seedName
+  })
+
+  const workerless = computed(() => {
+    return state.workerless
   })
 
   const clusterIsNew = computed(() => {
@@ -225,6 +230,10 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
     state.seedName = value
   }
 
+  function setWorkerless (value) {
+    state.workerless = value
+  }
+
   function setClusterConfiguration (value) {
     const {
       metadata = {},
@@ -321,6 +330,7 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
     cloudProfileName,
     seedName,
     controlPlaneFailureToleranceType,
+    workerless,
     // getters
     clusterIsNew,
     dnsProviderTypes,
@@ -345,5 +355,6 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
     setDnsPrimaryProvider,
     setDnsPrimaryProviderId,
     setControlPlaneFailureToleranceType,
+    setWorkerless,
   }
 })

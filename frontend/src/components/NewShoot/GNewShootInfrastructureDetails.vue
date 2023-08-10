@@ -20,7 +20,10 @@ SPDX-License-Identifier: Apache-2.0
           @update:model-value="onUpdateCloudProfileName"
         />
       </v-col>
-      <v-col cols="3">
+      <v-col
+        v-if="!workerless"
+        cols="3"
+      >
         <g-select-secret
           v-model="secret"
           :cloud-profile-name="cloudProfileName"
@@ -53,7 +56,10 @@ SPDX-License-Identifier: Apache-2.0
           </template>
         </v-select>
       </v-col>
-      <v-col cols="3">
+      <v-col
+        v-if="!workerless"
+        cols="3"
+      >
         <v-select
           v-model="networkingType"
           color="primary"
@@ -275,6 +281,7 @@ export default {
   computed: {
     ...mapState(useConfigStore, ['seedCandidateDeterminationStrategy']),
     ...mapState(useGardenerExtensionStore, ['networkingTypes']),
+    ...mapState(useShootStagingStore, ['workerless']),
     validators () {
       return {
         region: {
@@ -427,6 +434,15 @@ export default {
       const region = this.region
       const secretDomain = get(this.secret, 'data.domainName')
       return this.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({ cloudProfileName, region, secretDomain })
+    },
+  },
+  watch: {
+    workerless (value) {
+      if (!value && !this.secret && !this.networkingType) {
+        // If worker required values missing (navigated to overview tab from yaml), reset to defaults
+        this.setDefaultsDependingOnCloudProfile()
+        this.networkingType = head(this.networkingTypes)
+      }
     },
   },
   mounted () {

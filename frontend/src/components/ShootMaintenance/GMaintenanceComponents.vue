@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
       {{ title }}
     </div>
     <div
-      v-if="selectable || osUpdates"
+      v-if="!workerless && (selectable || osUpdates)"
       class="d-flex mt-4"
     >
       <div class="d-flex align-center justify-center action-select">
@@ -94,6 +94,10 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { mapState } from 'pinia'
+
+import { useShootStagingStore } from '@/store/shootStaging'
+
 export default {
   props: {
     userInterActionBus: {
@@ -119,6 +123,7 @@ export default {
     }
   },
   computed: {
+    ...mapState(useShootStagingStore, ['workerless']),
     k8sUpdates: {
       get () {
         return this.k8sUpdatesInternal

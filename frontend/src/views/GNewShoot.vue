@@ -78,10 +78,13 @@ SPDX-License-Identifier: Apache-2.0
         </v-card-text>
       </v-card>
       <v-card
+        v-show="!workerless"
         flat
         class="mt-4"
       >
-        <g-toolbar title="Worker" />
+        <g-toolbar
+          title="Worker"
+        />
         <v-card-text class="pt-1">
           <g-manage-workers
             ref="manageWorkersRef"
@@ -90,10 +93,13 @@ SPDX-License-Identifier: Apache-2.0
         </v-card-text>
       </v-card>
       <v-card
+        v-show="!workerless"
         flat
         class="mt-4"
       >
-        <g-toolbar title="Add-Ons (not actively monitored and provided on a best-effort basis only)" />
+        <g-toolbar
+          title="Add-Ons (not actively monitored and provided on a best-effort basis only)"
+        />
         <v-card-text>
           <g-manage-shoot-addons
             ref="addons"
@@ -206,6 +212,7 @@ import {
   cloneDeep,
   isEqual,
   unset,
+  omit,
 } from '@/lodash'
 
 export default {
@@ -267,6 +274,7 @@ export default {
     ...mapState(useShootStagingStore, ['controlPlaneFailureToleranceType']),
     ...mapState(useShootStagingStore, [
       'getDnsConfiguration',
+      'workerless',
     ]),
     ...mapState(useShootStore, [
       'newShootResource',
@@ -328,31 +336,35 @@ export default {
       }
       set(shootResource, 'spec.cloudProfileName', cloudProfileName)
       set(shootResource, 'spec.region', region)
-      set(shootResource, 'spec.networking.type', networkingType)
-      set(shootResource, 'spec.secretBindingName', get(secret, 'metadata.name'))
-      if (!isEmpty(floatingPoolName)) {
-        set(shootResource, 'spec.provider.infrastructureConfig.floatingPoolName', floatingPoolName)
-      }
-      if (!isEmpty(loadBalancerProviderName)) {
-        set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerProvider', loadBalancerProviderName)
-      }
-      if (!isEmpty(loadBalancerClasses)) {
-        set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerClasses', loadBalancerClasses)
-      }
-      if (!isEmpty(partitionID)) {
-        set(shootResource, 'spec.provider.infrastructureConfig.partitionID', partitionID)
-      }
-      if (!isEmpty(projectID)) {
-        set(shootResource, 'spec.provider.infrastructureConfig.projectID', projectID)
-      }
-      if (!isEmpty(firewallImage)) {
-        set(shootResource, 'spec.provider.infrastructureConfig.firewall.image', firewallImage)
-      }
-      if (!isEmpty(firewallSize)) {
-        set(shootResource, 'spec.provider.infrastructureConfig.firewall.size', firewallSize)
-      }
-      if (!isEmpty(firewallNetworks)) {
-        set(shootResource, 'spec.provider.infrastructureConfig.firewall.networks', firewallNetworks)
+
+      if (!this.workerless) {
+        set(shootResource, 'spec.networking.type', networkingType)
+
+        set(shootResource, 'spec.secretBindingName', get(secret, 'metadata.name'))
+        if (!isEmpty(floatingPoolName)) {
+          set(shootResource, 'spec.provider.infrastructureConfig.floatingPoolName', floatingPoolName)
+        }
+        if (!isEmpty(loadBalancerProviderName)) {
+          set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerProvider', loadBalancerProviderName)
+        }
+        if (!isEmpty(loadBalancerClasses)) {
+          set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerClasses', loadBalancerClasses)
+        }
+        if (!isEmpty(partitionID)) {
+          set(shootResource, 'spec.provider.infrastructureConfig.partitionID', partitionID)
+        }
+        if (!isEmpty(projectID)) {
+          set(shootResource, 'spec.provider.infrastructureConfig.projectID', projectID)
+        }
+        if (!isEmpty(firewallImage)) {
+          set(shootResource, 'spec.provider.infrastructureConfig.firewall.image', firewallImage)
+        }
+        if (!isEmpty(firewallSize)) {
+          set(shootResource, 'spec.provider.infrastructureConfig.firewall.size', firewallSize)
+        }
+        if (!isEmpty(firewallNetworks)) {
+          set(shootResource, 'spec.provider.infrastructureConfig.firewall.networks', firewallNetworks)
+        }
       }
 
       const dnsConfiguration = this.getDnsConfiguration()
@@ -377,31 +389,35 @@ export default {
       set(shootResource, 'spec.kubernetes.enableStaticTokenKubeconfig', enableStaticTokenKubeconfig)
       set(shootResource, 'spec.purpose', purpose)
 
-      const workers = await this.manageWorkers.dispatch('getWorkers')
-      set(shootResource, 'spec.provider.workers', workers)
+      if (!this.workerless) {
+        const workers = await this.manageWorkers.dispatch('getWorkers')
+        set(shootResource, 'spec.provider.workers', workers)
 
-      const allZones = this.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
-      const oldZoneConfiguration = get(shootResource, 'spec.provider.infrastructureConfig.networks.zones', [])
-      const nodeCIDR = get(shootResource, 'spec.networking.nodes', this.defaultNodesCIDR)
-      const zonesNetworkConfiguration = getZonesNetworkConfiguration(oldZoneConfiguration, workers, infrastructureKind, allZones.length, undefined, nodeCIDR)
-      if (zonesNetworkConfiguration) {
-        set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', zonesNetworkConfiguration)
+        const allZones = this.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
+        const oldZoneConfiguration = get(shootResource, 'spec.provider.infrastructureConfig.networks.zones', [])
+        const nodeCIDR = get(shootResource, 'spec.networking.nodes', this.defaultNodesCIDR)
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration(oldZoneConfiguration, workers, infrastructureKind, allZones.length, undefined, nodeCIDR)
+        if (zonesNetworkConfiguration) {
+          set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', zonesNetworkConfiguration)
+        }
+
+        const oldControlPlaneZone = get(shootResource, 'spec.provider.controlPlaneConfig.zone')
+        const controlPlaneZone = getControlPlaneZone(workers, infrastructureKind, oldControlPlaneZone)
+        if (controlPlaneZone) {
+          set(shootResource, 'spec.provider.controlPlaneConfig.zone', controlPlaneZone)
+        }
+
+        const addons = this.$refs.addons.getAddons()
+        set(shootResource, 'spec.addons', addons)
       }
-
-      const oldControlPlaneZone = get(shootResource, 'spec.provider.controlPlaneConfig.zone')
-      const controlPlaneZone = getControlPlaneZone(workers, infrastructureKind, oldControlPlaneZone)
-      if (controlPlaneZone) {
-        set(shootResource, 'spec.provider.controlPlaneConfig.zone', controlPlaneZone)
-      }
-
-      const addons = this.$refs.addons.getAddons()
-      set(shootResource, 'spec.addons', addons)
 
       const { begin, end } = this.$refs.maintenanceTime.getMaintenanceWindow()
       const { k8sUpdates, osUpdates } = this.$refs.maintenanceComponents.getComponentUpdates()
       const autoUpdate = get(shootResource, 'spec.maintenance.autoUpdate', {})
       autoUpdate.kubernetesVersion = k8sUpdates
-      autoUpdate.machineImageVersion = osUpdates
+      if (!this.workerless) {
+        autoUpdate.machineImageVersion = osUpdates
+      }
       const maintenance = {
         timeWindow: {
           begin,
@@ -425,6 +441,17 @@ export default {
         set(shootResource, 'spec.controlPlane.highAvailability.failureTolerance.type', this.controlPlaneFailureToleranceType)
       } else {
         unset(shootResource, 'spec.controlPlane')
+      }
+
+      if (this.workerless) {
+        return omit(shootResource, [
+          'spec.provider.infrastructureConfig',
+          'spec.provider.controlPlaneConfig',
+          'spec.provider.workers',
+          'spec.addons',
+          'spec.networking',
+          'spec.secretBindingName',
+          'spec.maintenance.autoUpdate.machineImageVersion'])
       }
 
       return shootResource
@@ -489,6 +516,7 @@ export default {
       const enableStaticTokenKubeconfig = get(shootResource, 'spec.kubernetes.enableStaticTokenKubeconfig')
       const purpose = get(shootResource, 'spec.purpose')
       this.purpose = purpose
+      const workers = get(shootResource, 'spec.provider.workers')
       await this.$refs.clusterDetails.setDetailsData({
         name,
         kubernetesVersion,
@@ -497,9 +525,9 @@ export default {
         cloudProfileName,
         updateK8sMaintenance: k8sUpdates,
         enableStaticTokenKubeconfig,
+        enableWorkerlessShoot: !workers?.length,
       })
 
-      const workers = get(shootResource, 'spec.provider.workers')
       const zonedCluster = isZonedCluster({ cloudProviderKind: infrastructureKind, isNewCluster: true })
 
       const newShootWorkerCIDR = get(shootResource, 'spec.networking.nodes', this.defaultNodesCIDR)
