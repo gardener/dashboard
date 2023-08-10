@@ -5,11 +5,14 @@
 //
 
 import { setActivePinia, createPinia } from 'pinia'
-import { useApi } from '@/composables'
+import { useApi } from '@/composables/useApi'
 import { useAuthzStore } from '@/store/authz'
 import { useConfigStore } from '@/store/config'
 import { useCloudProfileStore } from '@/store/cloudProfile'
-import { firstItemMatchingVersionClassification } from '@/store/cloudProfile/helper'
+import {
+  firstItemMatchingVersionClassification,
+  mapAccessRestrictionForInput,
+} from '@/store/cloudProfile/helper'
 
 import find from 'lodash/find'
 
@@ -18,6 +21,7 @@ describe('stores', () => {
     const namespace = 'default'
 
     const api = useApi()
+    let mockGetConfiguration // eslint-disable-line no-unused-vars
     let authzStore
     let configStore
     let cloudProfileStore
@@ -48,7 +52,7 @@ describe('stores', () => {
       authzStore = useAuthzStore()
       authzStore.setNamespace(namespace)
       configStore = useConfigStore()
-      vi.spyOn(api, 'getConfiguration').mockResolvedValue({
+      mockGetConfiguration = vi.spyOn(api, 'getConfiguration').mockResolvedValue({
         vendorHints: [{
           type: 'warning',
           message: 'test',
@@ -778,31 +782,132 @@ describe('stores', () => {
       })
     })
     describe('helper', () => {
-      it('should select default item that matches version classification', () => {
-        const items = [
-          {
-            version: '1',
-            classification: 'deprecated',
-          },
-          {
-            version: '2',
-          },
-          {
-            version: '3',
-            classification: 'supported',
-          },
-        ]
+      describe('#firstItemMatchingVersionClassification', () => {
+        it('should select default item that matches version classification', () => {
+          const items = [
+            {
+              version: '1',
+              classification: 'deprecated',
+            },
+            {
+              version: '2',
+            },
+            {
+              version: '3',
+              classification: 'supported',
+            },
+          ]
 
-        let item = firstItemMatchingVersionClassification(items)
-        expect(item.version).toBe('3')
+          let item = firstItemMatchingVersionClassification(items)
+          expect(item.version).toBe('3')
 
-        items.pop()
-        item = firstItemMatchingVersionClassification(items)
-        expect(item.version).toBe('2')
+          items.pop()
+          item = firstItemMatchingVersionClassification(items)
+          expect(item.version).toBe('2')
 
-        items.pop()
-        item = firstItemMatchingVersionClassification(items)
-        expect(item.version).toBe('1')
+          items.pop()
+          item = firstItemMatchingVersionClassification(items)
+          expect(item.version).toBe('1')
+        })
+      })
+
+      describe('#mapAccessRestrictionForInput', () => {
+        let definition
+        let shootResource
+
+        beforeEach(() => {
+          definition = {
+            key: 'foo',
+            input: {
+              inverted: false,
+            },
+            options: [
+              {
+                key: 'foo-option-1',
+                input: {
+                  inverted: false,
+                },
+              },
+              {
+                key: 'foo-option-2',
+                input: {
+                  inverted: true,
+                },
+              },
+              {
+                key: 'foo-option-3',
+                input: {
+                  inverted: true,
+                },
+              },
+              {
+                key: 'foo-option-4',
+                input: {
+                  inverted: true,
+                },
+              },
+            ],
+          }
+
+          shootResource = {
+            metadata: {
+              annotations: {
+                'foo-option-1': 'false',
+                'foo-option-2': 'false',
+                'foo-option-3': 'true',
+              },
+            },
+            spec: {
+              seedSelector: {
+                matchLabels: {
+                  foo: 'true',
+                },
+              },
+            },
+          }
+        })
+
+        it('should map definition and shoot resources to access restriction data model', () => {
+          const accessRestrictionPair = mapAccessRestrictionForInput(definition, shootResource)
+          expect(accessRestrictionPair).toEqual([
+            'foo',
+            {
+              value: true,
+              options: {
+                'foo-option-1': {
+                  value: false,
+                },
+                'foo-option-2': {
+                  value: true, // value inverted as defined in definition
+                },
+                'foo-option-3': {
+                  value: false, // value inverted as defined in definition
+                },
+                'foo-option-4': {
+                  value: false, // value not set in spec always maps to false
+                },
+              },
+            },
+          ])
+        })
+
+        it('should invert access restriction', () => {
+          definition.input.inverted = true
+          const [, accessRestriction] = mapAccessRestrictionForInput(definition, shootResource)
+          expect(accessRestriction.value).toBe(false)
+        })
+
+        it('should not invert option', () => {
+          definition.options[1].input.inverted = false
+          const [, accessRestriction] = mapAccessRestrictionForInput(definition, shootResource)
+          expect(accessRestriction.options['foo-option-2'].value).toBe(false)
+        })
+
+        it('should invert option', () => {
+          definition.options[1].input.inverted = true
+          const [, accessRestriction] = mapAccessRestrictionForInput(definition, shootResource)
+          expect(accessRestriction.options['foo-option-2'].value).toBe(true)
+        })
       })
     })
   })

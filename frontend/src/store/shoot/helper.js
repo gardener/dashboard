@@ -419,7 +419,6 @@ export function getRawVal (context, item, column) {
         const path = get(projectStore.shootCustomFields, [column, 'path'])
         return get(item, path)
       }
-
       return metadata[column]
     }
   }

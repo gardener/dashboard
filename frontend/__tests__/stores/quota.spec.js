@@ -5,7 +5,8 @@
 //
 
 import { setActivePinia, createPinia } from 'pinia'
-import { useAuthzStore, useQuotaStore } from '@/store'
+import { useAuthzStore } from '@/store/authz'
+import { useQuotaStore } from '@/store/quota'
 import { aggregateResourceQuotaStatus } from '@/store/quota/helper'
 
 describe('stores', () => {
@@ -15,13 +16,23 @@ describe('stores', () => {
     let authzStore
     let quotaStore
 
+    function setQuota (quota) {
+      quotaStore.quotas = {
+        [namespace]: quota,
+      }
+    }
+
     beforeEach(async () => {
       setActivePinia(createPinia())
       authzStore = useAuthzStore()
       authzStore.setNamespace(namespace)
       quotaStore = useQuotaStore()
-      quotaStore.quotas = {
-        [namespace]: {
+      quotaStore.quotas = {}
+    })
+
+    describe('#projectQuotaStatus', () => {
+      it('should return the projectQuotaStatus for the default namespace', () => {
+        setQuota({
           hard: {
             'count/shoots.core.gardener.cloud': 25,
             'count/configmaps': 22,
@@ -29,12 +40,8 @@ describe('stores', () => {
           used: {
             'count/shoots.core.gardener.cloud': 20,
           },
-        },
-      }
-    })
+        })
 
-    describe('#projectQuotaStatus', () => {
-      it('should return the projectQuotaStatus for the default namespace', () => {
         expect(quotaStore.projectQuotaStatus).toEqual([
           {
             key: 'count/configmaps',
@@ -57,48 +64,50 @@ describe('stores', () => {
       })
     })
 
-    describe('#aggregateResourceQuotaStatus', () => {
-      const resourceQuotaStatuses = [
-        {
-          hard: {
-            'count/shoots.core.gardener.cloud': '25',
-            'count/configmaps': '22',
-            'count/secrets': '70',
+    describe('helper', () => {
+      describe('#aggregateResourceQuotaStatus', () => {
+        const resourceQuotaStatuses = [
+          {
+            hard: {
+              'count/shoots.core.gardener.cloud': '25',
+              'count/configmaps': '22',
+              'count/secrets': '70',
+            },
+            used: {
+              'count/shoots.core.gardener.cloud': '10',
+              'count/secrets': '70',
+            },
           },
-          used: {
-            'count/shoots.core.gardener.cloud': '10',
-            'count/secrets': '70',
+          {
+            hard: {
+              'count/rolebindings': '14',
+              'count/shoots.core.gardener.cloud': '30',
+              'count/configmaps': '10',
+            },
+            used: {
+              'count/shoots.core.gardener.cloud': '20',
+              'count/configmaps': '5',
+              'count/secrets': '50',
+            },
           },
-        },
-        {
-          hard: {
-            'count/rolebindings': '14',
-            'count/shoots.core.gardener.cloud': '30',
-            'count/configmaps': '10',
-          },
-          used: {
-            'count/shoots.core.gardener.cloud': '20',
-            'count/configmaps': '5',
-            'count/secrets': '50',
-          },
-        },
-      ]
+        ]
 
-      it('should return aggregated resource quota status', () => {
-        const aggregatedQuotaStatus = aggregateResourceQuotaStatus(resourceQuotaStatuses)
+        it('should return aggregated resource quota status', () => {
+          const aggregatedQuotaStatus = aggregateResourceQuotaStatus(resourceQuotaStatuses)
 
-        expect(aggregatedQuotaStatus).toEqual({
-          hard: {
-            'count/shoots.core.gardener.cloud': '25',
-            'count/configmaps': '10',
-            'count/secrets': '70',
-            'count/rolebindings': '14',
-          },
-          used: {
-            'count/shoots.core.gardener.cloud': '20',
-            'count/configmaps': '5',
-            'count/secrets': '70',
-          },
+          expect(aggregatedQuotaStatus).toEqual({
+            hard: {
+              'count/shoots.core.gardener.cloud': '25',
+              'count/configmaps': '10',
+              'count/secrets': '70',
+              'count/rolebindings': '14',
+            },
+            used: {
+              'count/shoots.core.gardener.cloud': '20',
+              'count/configmaps': '5',
+              'count/secrets': '70',
+            },
+          })
         })
       })
     })

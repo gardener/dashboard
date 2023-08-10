@@ -89,6 +89,18 @@ export const useShootStore = defineStore('shoot', () => {
   })
 
   // state
+  const staleShoots = computed(() => {
+    return state.staleShoots
+  })
+
+  const sortedUidsAtFreeze = computed(() => {
+    return state.sortedUidsAtFreeze
+  })
+
+  const filteredShoots = computed(() => {
+    return state.filteredShoots
+  })
+
   const shootListFilters = computed(() => {
     return state.shootListFilters
   })
@@ -543,6 +555,9 @@ export const useShootStore = defineStore('shoot', () => {
 
   return {
     // state
+    staleShoots,
+    sortedUidsAtFreeze,
+    filteredShoots,
     newShootResource,
     initialNewShootResource,
     shootListFilters,
