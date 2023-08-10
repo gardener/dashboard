@@ -23,7 +23,10 @@ function print (key, ...args) {
   } else {
     args.unshift(prefix)
   }
-  console[key](...args) // eslint-disable-line no-console
+  const fn = console[key] // eslint-disable-line no-console
+  if (typeof fn === 'function') {
+    fn(...args)
+  }
 }
 
 export const useLogger = createGlobalState(() => {
