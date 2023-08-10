@@ -136,7 +136,7 @@ export default {
     validators () {
       return {
         primaryProvider: {
-          required: requiredIf(!!this.domain),
+          required: requiredIf(this.clusterIsNew && !!this.domain),
           nil: nilUnless('domain'),
         },
       }
