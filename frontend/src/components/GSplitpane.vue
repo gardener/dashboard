@@ -52,19 +52,6 @@ export default {
       default: undefined,
     },
   },
-  setup () {
-    const store = useAppStore()
-
-    function resize () {
-      // use nextTick as splitpanes library needs to be finished with rendering because fitAddon relies on
-      // dynamic dimensions calculated via css, which do not return correct values before rendering is complete
-      this.$nextTick(store.updateSplitpaneResize)
-    }
-
-    return {
-      resize,
-    }
-  },
   watch: {
     // workaround for https://github.com/antoniandre/splitpanes/issues/79
     'splitpaneTree.horizontal' (value) {
@@ -72,6 +59,12 @@ export default {
     },
   },
   methods: {
+    resize () {
+      const store = useAppStore()
+      // use nextTick as splitpanes library needs to be finished with rendering because fitAddon relies on
+      // dynamic dimensions calculated via css, which do not return correct values before rendering is complete
+      this.$nextTick(store.updateSplitpaneResize)
+    },
     hasChildren (item) {
       const isSplitpaneTree = Reflect.has(item, 'horizontal')
       return isSplitpaneTree
