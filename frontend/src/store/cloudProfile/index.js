@@ -357,7 +357,6 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
   function machineImagesByCloudProfileName (cloudProfileName) {
     const cloudProfile = cloudProfileByName(cloudProfileName)
     const machineImages = get(cloudProfile, 'data.machineImages')
-
     const mapMachineImages = (machineImage) => {
       const versions = filter(machineImage.versions, ({ version, expirationDate }) => {
         if (!semver.valid(version)) {
