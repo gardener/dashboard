@@ -130,7 +130,12 @@ export default {
     GUnverifiedTerminalShortcutsDialog,
     GWebterminalServiceAccountDialog,
   },
-  inject: ['api'],
+  inject: [
+    'api',
+    'defaultTarget',
+    'splitpanesState',
+    'setSelections',
+  ],
   provide () {
     return {
       ...toRefs(this.state),
@@ -226,11 +231,16 @@ export default {
     config (value) {
       this.targetTab.selectedConfig = toRaw(value)
     },
+    async 'splitpanesState.newTerminal.show' (newVal, oldVal) {
+      if (newVal && !oldVal) {
+        await this.promptForSelections()
+      }
+    },
   },
   methods: {
     ...mapActions(useShootStore, ['shootByNamespaceAndName']),
-    async promptForSelections (initialState) {
-      this.initialize(initialState)
+    async promptForSelections () {
+      this.initialize()
       const confirmed = await this.$refs.gDialog.confirmWithDialog(
         async () => {
           const unverifiedSelections = filter(this.shortcutTab.selectedShortcuts, ['unverified', true])
@@ -257,16 +267,16 @@ export default {
         },
       )
       if (!confirmed) {
-        return undefined
+        return this.setSelections(undefined)
       }
-      return this.selections
+      return this.setSelections(this.selections)
     },
-    initialize ({ target, container }) {
+    initialize () {
       this.reset()
 
-      this.targetTab.selectedTarget = target
+      this.targetTab.selectedTarget = this.defaultTarget
       this.targetTab.selectedConfig = {
-        container,
+        container: undefined,
       }
     },
     reset () {
