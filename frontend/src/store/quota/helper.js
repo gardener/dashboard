@@ -5,7 +5,7 @@
 //
 
 import map from 'lodash/map'
-import round from 'lodash/round'
+import floor from 'lodash/floor'
 import replace from 'lodash/replace'
 import upperFirst from 'lodash/upperFirst'
 import sortBy from 'lodash/sortBy'
@@ -20,7 +20,7 @@ export function getProjectQuotaStatus (quota) {
   const { hard, used } = quota
   const quotaStatus = map(hard, (limitValue, key) => {
     const usedValue = used[key] || 0
-    const percentage = round((usedValue / limitValue) * 100, 2)
+    const percentage = floor((usedValue / limitValue) * 100)
     const resourceName = replace(key, 'count/', '')
     const caption = upperFirst(head(split(resourceName, '.')))
     let progressColor = 'primary'
