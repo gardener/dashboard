@@ -40,9 +40,8 @@ import {
 } from '@/lib/g-symbol-tree'
 
 import { useApi } from './useApi'
-import { createLocalState } from './createLocalState'
 
-export const useTerminalSplitpanes = createLocalState(({ name, namespace, target }) => {
+export const useTerminalSplitpanes = ({ name, namespace, target }) => {
   const router = useRouter()
   const currentRoute = useRoute()
 
@@ -270,4 +269,4 @@ export const useTerminalSplitpanes = createLocalState(({ name, namespace, target
     moveTo,
     leavePage,
   }
-})
+}

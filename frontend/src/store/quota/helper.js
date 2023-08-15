@@ -6,7 +6,6 @@
 
 import {
   map,
-  round,
   replace,
   upperFirst,
   sortBy,
@@ -22,7 +21,7 @@ export function getProjectQuotaStatus (quota) {
   const { hard, used } = quota
   const quotaStatus = map(hard, (limitValue, key) => {
     const usedValue = used[key] || 0
-    const percentage = round((usedValue / limitValue) * 100, 2)
+    const percentage = Math.floor((usedValue / limitValue) * 100)
     const resourceName = replace(key, 'count/', '')
     const caption = upperFirst(head(split(resourceName, '.')))
     let progressColor = 'primary'

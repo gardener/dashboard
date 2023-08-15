@@ -17,9 +17,7 @@ import {
   some,
 } from '@/utils/lodash'
 
-import { createLocalState } from './createLocalState'
-
-export const useTerminalConfig = createLocalState(() => {
+export const useTerminalConfig = () => {
   const authnStore = useAuthnStore()
 
   function updateState (options = {}) {
@@ -104,4 +102,4 @@ export const useTerminalConfig = createLocalState(() => {
     config,
     updateState,
   }
-})
+}
