@@ -3,8 +3,15 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { setActivePinia, createPinia } from 'pinia'
-import { io, mockSocket } from 'socket.io-client'
+import {
+  setActivePinia,
+  createPinia,
+} from 'pinia'
+import {
+  io,
+  mockSocket,
+} from 'socket.io-client'
+
 import { useSocketStore } from '@/store/socket'
 import { useAuthnStore } from '@/store/authn'
 

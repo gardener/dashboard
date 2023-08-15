@@ -95,19 +95,23 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState, mapActions } from 'pinia'
+import {
+  mapState,
+  mapActions,
+} from 'pinia'
 
-import { useAuthzStore, useCloudProfileStore } from '@/store'
-
+import {
+  useAuthzStore,
+  useCloudProfileStore,
+} from '@/store'
 import GShootVersionUpdate from '@/components/ShootVersion/GShootVersionUpdate.vue'
 import GDialog from '@/components/dialogs/GDialog.vue'
-
 import { shootItem } from '@/mixins/shootItem'
-
 import { errorDetailsFromError } from '@/utils/error'
-
-import get from 'lodash/get'
-import find from 'lodash/find'
+import {
+  get,
+  find,
+} from '@/utils/lodash'
 
 export default {
   components: {

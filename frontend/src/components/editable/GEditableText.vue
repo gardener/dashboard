@@ -99,8 +99,10 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { useVuelidate } from '@vuelidate/core'
-import GErrorMessage from './GErrorMessage.vue'
+
 import { setDelayedInputFocus } from '@/utils'
+
+import GErrorMessage from './GErrorMessage.vue'
 
 export default {
   components: {

@@ -60,18 +60,25 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState, mapActions } from 'pinia'
-import get from 'lodash/get'
-import join from 'lodash/join'
-import map from 'lodash/map'
-import template from 'lodash/template'
-import uniq from 'lodash/uniq'
+import {
+  mapState,
+  mapActions,
+} from 'pinia'
 
+import {
+  get,
+  join,
+  map,
+  template,
+  uniq,
+} from '@/utils/lodash'
 import GTicket from '@/components/ShootTickets/GTicket'
 import { shootItem } from '@/mixins/shootItem'
 import moment from '@/utils/moment'
-
-import { useConfigStore, useTicketStore } from '@/store'
+import {
+  useConfigStore,
+  useTicketStore,
+} from '@/store'
 
 export default {
   components: {

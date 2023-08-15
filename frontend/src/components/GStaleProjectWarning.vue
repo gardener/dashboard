@@ -40,7 +40,11 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { computed, toRef } from 'vue'
+import {
+  computed,
+  toRef,
+} from 'vue'
+
 import GTimeString from '@/components/GTimeString.vue'
 import { getProjectDetails } from '@/utils'
 

@@ -36,9 +36,10 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import GExternalLink from '@/components/GExternalLink.vue'
+
 import GListItem from './GListItem.vue'
 import GListItemContent from './GListItemContent.vue'
-import GExternalLink from '@/components/GExternalLink.vue'
 
 export default {
   components: {

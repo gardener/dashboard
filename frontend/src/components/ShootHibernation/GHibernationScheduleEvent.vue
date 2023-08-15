@@ -83,16 +83,21 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import join from 'lodash/join'
-import split from 'lodash/split'
-import get from 'lodash/get'
-import map from 'lodash/map'
-import find from 'lodash/find'
-import isEqual from 'lodash/isEqual'
-import sortBy from 'lodash/sortBy'
-import { required, requiredIf } from '@vuelidate/validators'
+import {
+  required,
+  requiredIf,
+} from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
+import {
+  join,
+  split,
+  get,
+  map,
+  find,
+  isEqual,
+  sortBy,
+} from '@/utils/lodash'
 import { getValidationErrors } from '@/utils'
 import moment from '@/utils/moment'
 

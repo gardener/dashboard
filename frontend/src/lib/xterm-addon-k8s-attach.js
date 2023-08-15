@@ -5,6 +5,7 @@
 //
 
 import { Buffer } from 'buffer'
+
 import { useLogger } from '@/composables'
 
 export const WsReadyStateEnum = {

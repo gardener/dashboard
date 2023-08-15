@@ -252,16 +252,15 @@ import {
   useProjectStore,
   useKubeconfigStore,
 } from '@/store'
-
 import GCopyBtn from '@/components/GCopyBtn.vue'
 import GCodeBlock from '@/components/GCodeBlock.vue'
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
-
 import moment from '@/utils/moment'
-
-import map from 'lodash/map'
-import find from 'lodash/find'
-import get from 'lodash/get'
+import {
+  map,
+  find,
+  get,
+} from '@/utils/lodash'
 
 export default {
   components: {

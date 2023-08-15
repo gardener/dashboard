@@ -27,10 +27,11 @@ import NetlifyDialog from '@/components/Secrets/GSecretDialogNetlify'
 import DeleteDialog from '@/components/Secrets/GSecretDialogDelete'
 import HcloudDialog from '@/components/Secrets/GSecretDialogHCloud'
 import GenericDialog from '@/components/Secrets/GSecretDialogGeneric'
-
-import upperFirst from 'lodash/upperFirst'
-import split from 'lodash/split'
-import head from 'lodash/head'
+import {
+  upperFirst,
+  split,
+  head,
+} from '@/utils/lodash'
 
 const components = {
   GcpDialog,

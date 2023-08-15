@@ -74,20 +74,34 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { defineAsyncComponent } from 'vue'
-import { mapActions, mapState } from 'pinia'
-import get from 'lodash/get'
-import find from 'lodash/find'
-import join from 'lodash/join'
-import filter from 'lodash/filter'
+import {
+  mapActions,
+  mapState,
+} from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
-import { required, maxLength } from '@vuelidate/validators'
+import {
+  required,
+  maxLength,
+} from '@vuelidate/validators'
 
-import { getValidationErrors, transformHtml, setDelayedInputFocus } from '@/utils'
-import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
+import {
+  get,
+  find,
+  join,
+  filter,
+} from '@/utils/lodash'
+import {
+  getValidationErrors,
+  transformHtml,
+  setDelayedInputFocus,
+} from '@/utils'
+import {
+  resourceName,
+  noStartEndHyphen,
+  noConsecutiveHyphen,
+} from '@/utils/validators'
 import GStaticTokenKubeconfigSwitch from '@/components/GStaticTokenKubeconfigSwitch'
-
 import { useAsyncRef } from '@/composables'
-
 import {
   useAuthzStore,
   useConfigStore,

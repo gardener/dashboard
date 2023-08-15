@@ -127,10 +127,22 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState, mapActions } from 'pinia'
+import {
+  mapState,
+  mapActions,
+} from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
-import { maxLength, required } from '@vuelidate/validators'
-import { resourceName, unique, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
+import {
+  maxLength,
+  required,
+} from '@vuelidate/validators'
+
+import {
+  resourceName,
+  unique,
+  noStartEndHyphen,
+  noConsecutiveHyphen,
+} from '@/utils/validators'
 import {
   getValidationErrors,
   setInputFocus,
@@ -139,18 +151,27 @@ import {
   transformHtml,
   getProjectDetails,
 } from '@/utils'
-import { errorDetailsFromError, isConflict, isGatewayTimeout } from '@/utils/error'
-
-import get from 'lodash/get'
-import map from 'lodash/map'
-import set from 'lodash/set'
-import includes from 'lodash/includes'
-import filter from 'lodash/filter'
-import isEmpty from 'lodash/isEmpty'
-
+import {
+  errorDetailsFromError,
+  isConflict,
+  isGatewayTimeout,
+} from '@/utils/error'
+import {
+  get,
+  map,
+  set,
+  includes,
+  filter,
+  isEmpty,
+} from '@/utils/lodash'
 import GMessage from '@/components/GMessage.vue'
 import GToolbar from '@/components/GToolbar.vue'
-import { useAuthnStore, useConfigStore, useMemberStore, useProjectStore } from '@/store'
+import {
+  useAuthnStore,
+  useConfigStore,
+  useMemberStore,
+  useProjectStore,
+} from '@/store'
 
 const defaultProjectName = ''
 

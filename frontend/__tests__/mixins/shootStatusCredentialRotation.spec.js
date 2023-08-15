@@ -5,9 +5,9 @@
 //
 
 import { shallowMount } from '@vue/test-utils'
-import shootStatusCredentialRotation from '@/mixins/shootStatusCredentialRotation'
 
-import find from 'lodash/find'
+import shootStatusCredentialRotation from '@/mixins/shootStatusCredentialRotation'
+import { find } from '@/utils/lodash'
 
 describe('mixins', () => {
   describe('shootStatusCredentialRotation', () => {

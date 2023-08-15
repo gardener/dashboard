@@ -26,18 +26,14 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { defineAsyncComponent } from 'vue'
+import { useVuelidate } from '@vuelidate/core'
 
-import get from 'lodash/get'
-
+import { get } from '@/utils/lodash'
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
-
 import { errorDetailsFromError } from '@/utils/error'
 import { v4 as uuidv4 } from '@/utils/uuid'
-
 import shootItem from '@/mixins/shootItem'
 import { useAsyncRef } from '@/composables'
-
-import { useVuelidate } from '@vuelidate/core'
 
 export default {
   components: {

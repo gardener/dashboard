@@ -3,14 +3,17 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
+/* eslint object-curly-newline: ["error", "always" ] */
+/* eslint-env es6 */
 
-// Lodash
-import startsWith from 'lodash/startsWith'
-import endsWith from 'lodash/endsWith'
-import includes from 'lodash/includes'
-import map from 'lodash/map'
-import filter from 'lodash/filter'
-import head from 'lodash/head'
+import {
+  startsWith,
+  endsWith,
+  includes,
+  map,
+  filter,
+  head,
+} from '@/utils/lodash'
 
 export function wildcardObjectsFromStrings (wildcardStrings) {
   return map(wildcardStrings, item => {

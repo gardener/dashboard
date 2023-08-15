@@ -34,8 +34,12 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-import { getValidationErrors, purposesForSecret } from '@/utils'
-import map from 'lodash/map'
+
+import {
+  getValidationErrors,
+  purposesForSecret,
+} from '@/utils'
+import { map } from '@/utils/lodash'
 
 const validationErrors = {
   internalPurpose: {

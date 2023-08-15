@@ -198,23 +198,32 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import {
+  required,
+  requiredIf,
+} from '@vuelidate/validators'
+import {
+  mapState,
+  mapActions,
+} from 'pinia'
+import { useVuelidate } from '@vuelidate/core'
+
 import GCloudProfile from '@/components/GCloudProfile'
 import GWildcardSelect from '@/components/GWildcardSelect'
 import GSelectSecret from '@/components/Secrets/GSelectSecret'
-import { required, requiredIf } from '@vuelidate/validators'
 import { getValidationErrors } from '@/utils'
 import { includesIfAvailable } from '@/utils/validators'
-import sortBy from 'lodash/sortBy'
-import head from 'lodash/head'
-import get from 'lodash/get'
-import map from 'lodash/map'
-import isEmpty from 'lodash/isEmpty'
-import includes from 'lodash/includes'
-import forEach from 'lodash/forEach'
-import intersection from 'lodash/intersection'
-import find from 'lodash/find'
-import { mapState, mapActions } from 'pinia'
-import { useVuelidate } from '@vuelidate/core'
+import {
+  sortBy,
+  head,
+  get,
+  map,
+  isEmpty,
+  includes,
+  forEach,
+  intersection,
+  find,
+} from '@/utils/lodash'
 import {
   useCloudProfileStore,
   useConfigStore,

@@ -5,9 +5,14 @@
 //
 
 import { defineStore } from 'pinia'
-import { computed, reactive, markRaw } from 'vue'
+import {
+  computed,
+  reactive,
+  markRaw,
+} from 'vue'
 
 import { useLogger } from '@/composables'
+
 import { useAuthnStore } from '../authn'
 import { useProjectStore } from '../project'
 import { useShootStore } from '../shoot'

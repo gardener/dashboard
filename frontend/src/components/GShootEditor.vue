@@ -165,19 +165,6 @@ SPDX-License-Identifier: Apache-2.0
 import { markRaw } from 'vue'
 import { mapGetters } from 'pinia'
 import download from 'downloadjs'
-
-import { useAuthzStore } from '@/store'
-
-import GCopyBtn from '@/components/GCopyBtn'
-import GActionButton from '@/components/GActionButton'
-import GMessage from '@/components/GMessage'
-import GAlertBanner from '@/components/GAlertBanner'
-
-import { shootItem } from '@/mixins/shootItem'
-
-import { ShootEditorCompletions } from '@/utils/shootEditorCompletions'
-
-// codemirror
 import CodeMirror from 'codemirror'
 import 'codemirror/addon/hint/show-hint.js'
 import 'codemirror/addon/hint/show-hint.css'
@@ -185,13 +172,21 @@ import 'codemirror/mode/yaml/yaml.js'
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/theme/seti.css'
 
-// lodash
-import get from 'lodash/get'
-import has from 'lodash/has'
-import pick from 'lodash/pick'
-import cloneDeep from 'lodash/cloneDeep'
-import assign from 'lodash/assign'
-import isEqual from 'lodash/isEqual'
+import { useAuthzStore } from '@/store'
+import GCopyBtn from '@/components/GCopyBtn'
+import GActionButton from '@/components/GActionButton'
+import GMessage from '@/components/GMessage'
+import GAlertBanner from '@/components/GAlertBanner'
+import { shootItem } from '@/mixins/shootItem'
+import { ShootEditorCompletions } from '@/utils/shootEditorCompletions'
+import {
+  get,
+  has,
+  pick,
+  cloneDeep,
+  assign,
+  isEqual,
+} from '@/utils/lodash'
 
 export default {
   components: {

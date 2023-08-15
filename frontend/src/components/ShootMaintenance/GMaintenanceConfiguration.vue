@@ -27,16 +27,16 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import get from 'lodash/get'
-import assign from 'lodash/assign'
+import { useVuelidate } from '@vuelidate/core'
 
+import {
+  get,
+  assign,
+} from '@/utils/lodash'
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GMaintenanceComponents from '@/components/ShootMaintenance/GMaintenanceComponents'
 import GMaintenanceTime from '@/components/ShootMaintenance/GMaintenanceTime'
-
 import { errorDetailsFromError } from '@/utils/error'
-import { useVuelidate } from '@vuelidate/core'
-
 import { shootItem } from '@/mixins/shootItem'
 
 export default {

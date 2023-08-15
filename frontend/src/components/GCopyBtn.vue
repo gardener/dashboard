@@ -28,7 +28,11 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { ref, computed, inject } from 'vue'
+import {
+  ref,
+  computed,
+  inject,
+} from 'vue'
 
 const logger = inject('logger')
 

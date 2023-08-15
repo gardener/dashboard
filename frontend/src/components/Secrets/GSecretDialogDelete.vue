@@ -50,7 +50,8 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapActions } from 'pinia'
-import get from 'lodash/get'
+
+import { get } from '@/utils/lodash'
 import GMessage from '@/components/GMessage'
 import GToolbar from '@/components/GToolbar.vue'
 import { errorDetailsFromError } from '@/utils/error'

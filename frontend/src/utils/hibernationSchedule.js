@@ -4,19 +4,20 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// Lodash
-import get from 'lodash/get'
-import forEach from 'lodash/forEach'
-import isEmpty from 'lodash/isEmpty'
-import replace from 'lodash/replace'
-import split from 'lodash/split'
-import join from 'lodash/join'
-import flatMap from 'lodash/flatMap'
-import uniq from 'lodash/uniq'
-import range from 'lodash/range'
-import toUpper from 'lodash/toUpper'
-
 // Local
+import {
+  get,
+  forEach,
+  isEmpty,
+  replace,
+  split,
+  join,
+  flatMap,
+  uniq,
+  range,
+  toUpper,
+} from '@/utils/lodash'
+
 import { v4 as uuidv4 } from './uuid'
 import moment from './moment'
 

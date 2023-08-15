@@ -6,15 +6,14 @@
 
 import SymbolTree from 'symbol-tree'
 
-// Lodash
-import forEach from 'lodash/forEach'
-import isEmpty from 'lodash/isEmpty'
-import keys from 'lodash/keys'
-import compact from 'lodash/compact'
-import values from 'lodash/values'
-
-// Utilities
 import { v4 as uuidv4 } from '@/utils/uuid'
+import {
+  forEach,
+  isEmpty,
+  keys,
+  compact,
+  values,
+} from '@/utils/lodash'
 
 export const PositionEnum = {
   TOP: 'top',

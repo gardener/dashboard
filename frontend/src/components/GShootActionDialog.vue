@@ -35,7 +35,6 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { shootItem } from '@/mixins/shootItem'
-
 import GDialog from '@/components/dialogs/GDialog'
 import GMessage from '@/components/GMessage.vue'
 

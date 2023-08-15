@@ -87,18 +87,19 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapActions } from 'pinia'
 
+import { TargetEnum } from '@/utils'
+import {
+  filter,
+  get,
+  every,
+} from '@/utils/lodash'
+import { useTerminalStore } from '@/store'
+
 import GListItem from './GListItem.vue'
 import GListItemContent from './GListItemContent.vue'
 import GTerminalShortcut from './GTerminalShortcut.vue'
 import GIconBase from './icons/GIconBase.vue'
 import GTerminalShortcutIcon from './icons/GTerminalShortcutIcon.vue'
-
-import { TargetEnum } from '@/utils'
-
-import filter from 'lodash/filter'
-import get from 'lodash/get'
-import every from 'lodash/every'
-import { useTerminalStore } from '@/store'
 
 function shootSelectorFilter (shortcuts, shootItem) {
   return filter(shortcuts, shortcut => {

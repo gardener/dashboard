@@ -67,16 +67,20 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState, mapActions } from 'pinia'
+import {
+  mapState,
+  mapActions,
+} from 'pinia'
 
-import { useConfigStore, useTicketStore } from '@/store'
-
+import {
+  useConfigStore,
+  useTicketStore,
+} from '@/store'
 import GTimeString from '@/components/GTimeString.vue'
 import GTicketLabel from '@/components/ShootTickets/GTicketLabel.vue'
 import GTicketComment from '@/components/ShootTickets/GTicketComment.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
-
-import get from 'lodash/get'
+import { get } from '@/utils/lodash'
 
 export default {
   components: {

@@ -28,20 +28,16 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import map from 'lodash/map'
-import filter from 'lodash/filter'
-
 import { mapState } from 'pinia'
 
-import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
-
-import { errorDetailsFromError } from '@/utils/error'
-
-import shootItem from '@/mixins/shootItem'
-
 import {
-  useSeedStore,
-} from '@/store'
+  map,
+  filter,
+} from '@/utils/lodash'
+import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
+import { errorDetailsFromError } from '@/utils/error'
+import shootItem from '@/mixins/shootItem'
+import { useSeedStore } from '@/store'
 
 export default {
   name: 'SeedConfiguration',

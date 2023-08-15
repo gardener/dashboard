@@ -35,9 +35,12 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { useAppStore } from '@/store'
+import {
+  Splitpanes,
+  Pane,
+} from 'splitpanes'
 
-import { Splitpanes, Pane } from 'splitpanes'
+import { useAppStore } from '@/store'
 
 import 'splitpanes/dist/splitpanes.css'
 

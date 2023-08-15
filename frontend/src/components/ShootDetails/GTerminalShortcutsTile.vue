@@ -60,9 +60,7 @@ SPDX-License-Identifier: Apache-2.0
 import { mapState } from 'pinia'
 
 import { useAuthnStore } from '@/store'
-
 import { shootItem } from '@/mixins/shootItem'
-
 import GListItem from '@/components/GListItem.vue'
 import GListItemContent from '@/components/GListItemContent.vue'
 import GActionButton from '@/components/GActionButton.vue'
@@ -71,12 +69,12 @@ import GIconBase from '@/components/icons/GIconBase.vue'
 import GTerminalShortcutIcon from '@/components/icons/GTerminalShortcutIcon.vue'
 import GUnverifiedTerminalShortcutsDialog from '@/components/dialogs/GUnverifiedTerminalShortcutsDialog.vue'
 import GWebterminalServiceAccountDialog from '@/components/dialogs/GWebterminalServiceAccountDialog.vue'
-
 import { TargetEnum } from '@/utils'
-
-import get from 'lodash/get'
-import find from 'lodash/find'
-import includes from 'lodash/includes'
+import {
+  get,
+  find,
+  includes,
+} from '@/utils/lodash'
 
 export default {
   components: {

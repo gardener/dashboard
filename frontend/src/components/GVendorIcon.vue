@@ -28,8 +28,12 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { computed, toRef } from 'vue'
-import startsWith from 'lodash/startsWith'
+import {
+  computed,
+  toRef,
+} from 'vue'
+
+import { startsWith } from '@/utils/lodash'
 
 const props = defineProps({
   icon: {

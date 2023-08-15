@@ -4,24 +4,24 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import pTimeout from '@/utils/p-timeout'
-
-// Lodash
-import assign from 'lodash/assign'
-import find from 'lodash/find'
-import get from 'lodash/get'
-import head from 'lodash/head'
-import merge from 'lodash/merge'
-import intersection from 'lodash/intersection'
-import keys from 'lodash/keys'
-import includes from 'lodash/includes'
-import pick from 'lodash/pick'
-
-// Utilities
 import { encodeBase64Url } from '@/utils'
-import { useApi, useLogger } from '@/composables'
+import pTimeout from '@/utils/p-timeout'
+import {
+  useApi,
+  useLogger,
+} from '@/composables'
+import {
+  assign,
+  find,
+  get,
+  head,
+  merge,
+  intersection,
+  keys,
+  includes,
+  pick,
+} from '@/utils/lodash'
 
-// Local
 import {
   K8sAttachAddon,
   WsReadyStateEnum,

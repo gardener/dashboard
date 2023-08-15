@@ -39,7 +39,11 @@ import { mapState } from 'pinia'
 import { required } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
-import { getValidationErrors, randomMaintenanceBegin, maintenanceWindowWithBeginAndTimezone } from '@/utils'
+import {
+  getValidationErrors,
+  randomMaintenanceBegin,
+  maintenanceWindowWithBeginAndTimezone,
+} from '@/utils'
 import { isTimezone } from '@/utils/validators'
 import TimeWithOffset from '@/utils/TimeWithOffset'
 import moment from '@/utils/moment'

@@ -6,19 +6,20 @@
 
 import { Netmask } from 'netmask'
 
-// Lodash
-import map from 'lodash/map'
-import flatMap from 'lodash/flatMap'
-import uniq from 'lodash/uniq'
-import compact from 'lodash/compact'
-import find from 'lodash/find'
-import some from 'lodash/some'
-import sample from 'lodash/sample'
-import includes from 'lodash/includes'
-import filter from 'lodash/filter'
-import range from 'lodash/range'
-import pick from 'lodash/pick'
-import values from 'lodash/values'
+import {
+  map,
+  flatMap,
+  uniq,
+  compact,
+  find,
+  some,
+  sample,
+  includes,
+  filter,
+  range,
+  pick,
+  values,
+} from '@/utils/lodash'
 
 export function getSpecTemplate (infrastructureKind, defaultWorkerCIDR) {
   switch (infrastructureKind) {

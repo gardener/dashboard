@@ -97,7 +97,10 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState, mapActions } from 'pinia'
+import {
+  mapState,
+  mapActions,
+} from 'pinia'
 import { requiredIf } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
@@ -106,10 +109,7 @@ import GVendorIcon from '@/components/GVendorIcon'
 import GExpandTransitionGroup from '@/components/GExpandTransitionGroup'
 import { getValidationErrors } from '@/utils'
 import { nilUnless } from '@/utils/validators'
-
-import {
-  useShootStagingStore,
-} from '@/store'
+import { useShootStagingStore } from '@/store'
 
 export default {
   components: {

@@ -4,15 +4,20 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { computed, reactive, watch } from 'vue'
-
-import { createLocalState } from './createLocalState'
+import {
+  computed,
+  reactive,
+  watch,
+} from 'vue'
 
 import { useAuthnStore } from '@/store/authn'
+import {
+  get,
+  head,
+  some,
+} from '@/utils/lodash'
 
-import get from 'lodash/get'
-import head from 'lodash/head'
-import some from 'lodash/some'
+import { createLocalState } from './createLocalState'
 
 export const useTerminalConfig = createLocalState(() => {
   const authnStore = useAuthnStore()

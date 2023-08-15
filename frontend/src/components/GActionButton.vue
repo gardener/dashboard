@@ -31,7 +31,11 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { computed, toRefs, useSlots } from 'vue'
+import {
+  computed,
+  toRefs,
+  useSlots,
+} from 'vue'
 
 const slots = useSlots()
 

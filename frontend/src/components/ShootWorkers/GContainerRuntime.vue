@@ -44,16 +44,19 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { getValidationErrors } from '@/utils'
 import { required } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
-import find from 'lodash/find'
-import map from 'lodash/map'
-import get from 'lodash/get'
-import set from 'lodash/set'
-import unset from 'lodash/unset'
-import includes from 'lodash/includes'
-import isEmpty from 'lodash/isEmpty'
+
+import { getValidationErrors } from '@/utils'
+import {
+  find,
+  map,
+  get,
+  set,
+  unset,
+  includes,
+  isEmpty,
+} from '@/utils/lodash'
 
 const validationErrors = {
   criName: {

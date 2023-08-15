@@ -23,19 +23,14 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { toRef } from 'vue'
 import { useRoute } from 'vue-router'
-
 import { mapActions } from 'pinia'
-import get from 'lodash/get'
 
+import { get } from '@/utils/lodash'
 import { useTerminalSplitpanes } from '@/composables/useTerminalSplitpanes'
-
 import GShootDetails from '@/components/ShootDetails/GShootDetails'
-
 import GPositionalDropzone from '@/components/GPositionalDropzone'
 import GTerminalSplitpanes from '@/components/GTerminalSplitpanes'
-
 import { PositionEnum } from '@/lib/g-symbol-tree'
-
 import { useShootStore } from '@/store'
 
 export default {

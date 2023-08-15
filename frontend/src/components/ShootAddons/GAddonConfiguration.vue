@@ -26,8 +26,10 @@ import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GManageShootAddons from '@/components/ShootAddons/GManageAddons'
 import { errorDetailsFromError } from '@/utils/error'
 import { shootItem } from '@/mixins/shootItem'
-import get from 'lodash/get'
-import cloneDeep from 'lodash/cloneDeep'
+import {
+  get,
+  cloneDeep,
+} from '@/utils/lodash'
 
 export default {
   components: {

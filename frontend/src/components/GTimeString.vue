@@ -20,7 +20,14 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import {
+  ref,
+  computed,
+  onMounted,
+  onUnmounted,
+  watch,
+} from 'vue'
+
 import {
   getTimeStringFrom,
   getTimeStringTo,

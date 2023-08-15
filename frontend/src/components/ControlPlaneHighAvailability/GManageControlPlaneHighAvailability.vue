@@ -74,9 +74,13 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState, mapActions } from 'pinia'
+import {
+  mapState,
+  mapActions,
+} from 'pinia'
+
 import { transformHtml } from '@/utils'
-import some from 'lodash/some'
+import { some } from '@/utils/lodash'
 import GExternalLink from '@/components/GExternalLink.vue'
 import {
   useShootStagingStore,

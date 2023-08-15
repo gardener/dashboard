@@ -5,7 +5,10 @@
 //
 
 import { useApi } from '@/composables/useApi'
-import fetchWrapper, { registry, isUnauthorizedError } from '@/composables/useApi/fetch'
+import fetchWrapper, {
+  registry,
+  isUnauthorizedError,
+} from '@/composables/useApi/fetch'
 
 describe('composables', () => {
   describe('useApi', () => {

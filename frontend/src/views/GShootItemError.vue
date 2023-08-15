@@ -19,8 +19,7 @@ import { mapState } from 'pinia'
 
 import { useProjectStore } from '@/store'
 import GError from '@/components/GError.vue'
-
-import get from 'lodash/get'
+import { get } from '@/utils/lodash'
 
 export default {
   components: {

@@ -5,8 +5,9 @@
 //
 
 import { mount } from '@vue/test-utils'
+
 import GMachineType from '@/components/ShootWorkers/GMachineType.vue'
-import map from 'lodash/map'
+import { map } from '@/utils/lodash'
 
 const { createPlugins } = global.fixtures.helper
 

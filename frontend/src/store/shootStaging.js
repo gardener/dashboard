@@ -5,23 +5,27 @@
 //
 
 import { defineStore } from 'pinia'
-import { computed, reactive } from 'vue'
-
-import { useGardenerExtensionStore } from './gardenerExtension'
+import {
+  computed,
+  reactive,
+} from 'vue'
 
 import { v4 as uuidv4 } from '@/utils/uuid'
+import {
+  has,
+  get,
+  set,
+  head,
+  map,
+  keyBy,
+  omit,
+  filter,
+  includes,
+  isEmpty,
+  find,
+} from '@/utils/lodash'
 
-import has from 'lodash/has'
-import get from 'lodash/get'
-import set from 'lodash/set'
-import head from 'lodash/head'
-import map from 'lodash/map'
-import keyBy from 'lodash/keyBy'
-import omit from 'lodash/omit'
-import filter from 'lodash/filter'
-import includes from 'lodash/includes'
-import isEmpty from 'lodash/isEmpty'
-import find from 'lodash/find'
+import { useGardenerExtensionStore } from './gardenerExtension'
 import { useSecretStore } from './secret'
 
 // helper

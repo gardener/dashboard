@@ -3,7 +3,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { setActivePinia, createPinia } from 'pinia'
+import {
+  setActivePinia,
+  createPinia,
+} from 'pinia'
+
 import { useAuthzStore } from '@/store/authz'
 import { useProjectStore } from '@/store/project'
 

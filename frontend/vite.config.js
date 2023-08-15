@@ -4,21 +4,20 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// vite
-import { defineConfig } from 'vite'
+import zlib from 'node:zlib'
+import { createRequire } from 'node:module'
+import { readFileSync } from 'node:fs'
+import {
+  fileURLToPath,
+  URL,
+} from 'node:url'
 
-// Plugins
+import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 import Unfonts from 'unplugin-fonts/vite'
 import compression from 'vite-plugin-compression'
 import { visualizer } from 'rollup-plugin-visualizer'
-
-// Utilities
-import zlib from 'node:zlib'
-import { createRequire } from 'node:module'
-import { readFileSync } from 'node:fs'
-import { fileURLToPath, URL } from 'node:url'
 
 const proxyTarget = 'http://localhost:3030'
 

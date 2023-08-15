@@ -5,13 +5,17 @@
 //
 
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import {
+  ref,
+  computed,
+} from 'vue'
 
 import { useApi } from '@/composables'
-
-import find from 'lodash/find'
-import get from 'lodash/get'
-import keyBy from 'lodash/keyBy'
+import {
+  find,
+  get,
+  keyBy,
+} from '@/utils/lodash'
 
 export const useSeedStore = defineStore('seed', () => {
   const api = useApi()

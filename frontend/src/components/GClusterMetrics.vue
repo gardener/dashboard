@@ -40,7 +40,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import get from 'lodash/get'
+import { get } from '@/utils/lodash'
 import GUsernamePassword from '@/components/GUsernamePasswordListTile'
 import GLinkListTile from '@/components/GLinkListTile'
 import { shootItem } from '@/mixins/shootItem'

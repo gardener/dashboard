@@ -145,7 +145,11 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { ref, toRefs, mergeProps } from 'vue'
+import {
+  ref,
+  toRefs,
+  mergeProps,
+} from 'vue'
 
 const columnSelectionMenu = ref(false)
 

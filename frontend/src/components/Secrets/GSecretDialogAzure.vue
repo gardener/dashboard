@@ -97,11 +97,15 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import GSecretDialog from '@/components/Secrets/GSecretDialog'
-import GExternalLink from '@/components/GExternalLink'
-import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
+
+import GSecretDialog from '@/components/Secrets/GSecretDialog'
+import GExternalLink from '@/components/GExternalLink'
+import {
+  getValidationErrors,
+  setDelayedInputFocus,
+} from '@/utils'
 
 const validationErrors = {
   clientId: {

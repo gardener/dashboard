@@ -21,17 +21,18 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'pinia'
+import {
+  mapActions,
+  mapGetters,
+} from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
+
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GManageShootDns from '@/components/ShootDns/GManageDns'
 import { errorDetailsFromError } from '@/utils/error'
 import { shootItem } from '@/mixins/shootItem'
 import { v4 as uuidv4 } from '@/utils/uuid'
-
-import {
-  useShootStagingStore,
-} from '@/store'
+import { useShootStagingStore } from '@/store'
 
 export default {
   components: {

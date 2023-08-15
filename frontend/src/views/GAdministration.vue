@@ -491,8 +491,14 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState, mapActions } from 'pinia'
-import { required, helpers } from '@vuelidate/validators'
+import {
+  mapState,
+  mapActions,
+} from 'pinia'
+import {
+  required,
+  helpers,
+} from '@vuelidate/validators'
 
 import GList from '@/components/GList.vue'
 import GListItem from '@/components/GListItem.vue'
@@ -505,7 +511,6 @@ import GDialog from '@/components/dialogs/GDialog.vue'
 import GTimeString from '@/components/GTimeString.vue'
 import GShootCustomField from '@/components/GShootCustomField.vue'
 import GResourceQuotaHelp from '@/components/GResourceQuotaHelp.vue'
-
 import {
   transformHtml,
   getProjectDetails,
@@ -514,12 +519,12 @@ import {
   getDateFormatted,
 } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
-
-import get from 'lodash/get'
-import set from 'lodash/set'
-import includes from 'lodash/includes'
-import isEmpty from 'lodash/isEmpty'
-
+import {
+  get,
+  set,
+  includes,
+  isEmpty,
+} from '@/utils/lodash'
 import {
   useAppStore,
   useAuthzStore,

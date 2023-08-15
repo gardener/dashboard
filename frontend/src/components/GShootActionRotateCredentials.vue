@@ -68,19 +68,23 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState, mapActions } from 'pinia'
+import {
+  mapState,
+  mapActions,
+} from 'pinia'
 
-import { useAppStore, useAuthnStore } from '@/store'
-
+import {
+  useAppStore,
+  useAuthnStore,
+} from '@/store'
 import GShootActionButton from '@/components/GShootActionButton.vue'
 import GShootActionDialog from '@/components/GShootActionDialog.vue'
-
 import shootStatusCredentialRotation from '@/mixins/shootStatusCredentialRotation'
-
 import { errorDetailsFromError } from '@/utils/error'
-
-import includes from 'lodash/includes'
-import compact from 'lodash/compact'
+import {
+  includes,
+  compact,
+} from '@/utils/lodash'
 
 export default {
   components: {

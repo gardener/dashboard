@@ -6,23 +6,24 @@
 
 import CodeMirror from 'codemirror'
 
-// Lodash
-import forEach from 'lodash/forEach'
-import join from 'lodash/join'
-import map from 'lodash/map'
-import trim from 'lodash/trim'
-import nth from 'lodash/nth'
-import filter from 'lodash/filter'
-import includes from 'lodash/includes'
-import last from 'lodash/last'
-import words from 'lodash/words'
-import repeat from 'lodash/repeat'
-import upperFirst from 'lodash/upperFirst'
-import flatMap from 'lodash/flatMap'
-import get from 'lodash/get'
-import forIn from 'lodash/forIn'
-import isEqual from 'lodash/isEqual'
-import first from 'lodash/first'
+import {
+  forEach,
+  join,
+  map,
+  trim,
+  nth,
+  filter,
+  includes,
+  last,
+  words,
+  repeat,
+  upperFirst,
+  flatMap,
+  get,
+  forIn,
+  isEqual,
+  first,
+} from '@/utils/lodash'
 
 export class ShootEditorCompletions {
   constructor (shootProperties, editorIndent, supportedPaths) {

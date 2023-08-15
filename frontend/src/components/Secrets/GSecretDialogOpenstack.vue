@@ -166,14 +166,20 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapActions } from 'pinia'
-import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import { useVuelidate } from '@vuelidate/core'
-import { required, requiredIf } from '@vuelidate/validators'
-import { getValidationErrors, setDelayedInputFocus } from '@/utils'
-import GExternalLink from '@/components/GExternalLink'
 import {
-  useCloudProfileStore,
-} from '@/store'
+  required,
+  requiredIf,
+} from '@vuelidate/validators'
+
+import GSecretDialog from '@/components/Secrets/GSecretDialog'
+import {
+  getValidationErrors,
+  setDelayedInputFocus,
+} from '@/utils'
+import GExternalLink from '@/components/GExternalLink'
+import { useCloudProfileStore } from '@/store'
+
 const requiredMessage = 'You can\'t leave this empty.'
 const requiredUserMessage = 'Required for technical user authentication'
 const requiredApplicationCredentialsMessage = 'Required for application credentials authentication'

@@ -64,17 +64,27 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import cloneDeep from 'lodash/cloneDeep'
-import differenceWith from 'lodash/differenceWith'
-import isEqual from 'lodash/isEqual'
-import isEmpty from 'lodash/isEmpty'
-import head from 'lodash/head'
-import get from 'lodash/get'
-import toUpper from 'lodash/toUpper'
-import { mapState, mapActions } from 'pinia'
-import { getValidationErrors, isOwnSecret, selfTerminationDaysForSecret } from '@/utils'
+import {
+  mapState,
+  mapActions,
+} from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
+
+import {
+  getValidationErrors,
+  isOwnSecret,
+  selfTerminationDaysForSecret,
+} from '@/utils'
+import {
+  cloneDeep,
+  differenceWith,
+  isEqual,
+  isEmpty,
+  head,
+  get,
+  toUpper,
+} from '@/utils/lodash'
 import { requiresCostObjectIfEnabled } from '@/utils/validators'
 import GSecretDialogWrapper from '@/components/Secrets/GSecretDialogWrapper'
 import {

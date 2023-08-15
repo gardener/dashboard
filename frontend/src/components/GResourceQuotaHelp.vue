@@ -41,6 +41,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapState } from 'pinia'
+
 import { useConfigStore } from '@/store'
 import GDialog from '@/components/dialogs/GDialog.vue'
 import GActionButton from '@/components/GActionButton.vue'

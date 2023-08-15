@@ -4,13 +4,15 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import map from 'lodash/map'
-import round from 'lodash/round'
-import replace from 'lodash/replace'
-import upperFirst from 'lodash/upperFirst'
-import sortBy from 'lodash/sortBy'
-import head from 'lodash/head'
-import split from 'lodash/split'
+import {
+  map,
+  round,
+  replace,
+  upperFirst,
+  sortBy,
+  head,
+  split,
+} from '@/utils/lodash'
 
 export function getProjectQuotaStatus (quota) {
   if (!quota) {

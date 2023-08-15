@@ -4,14 +4,15 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import get from 'lodash/get'
-import filter from 'lodash/filter'
-import find from 'lodash/find'
-import map from 'lodash/map'
-import flatMap from 'lodash/flatMap'
-import head from 'lodash/head'
-import compact from 'lodash/compact'
-
+import {
+  get,
+  filter,
+  find,
+  map,
+  flatMap,
+  head,
+  compact,
+} from '@/utils/lodash'
 import { shootItem } from '@/mixins/shootItem'
 
 const rotationTypes = [

@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { hash, md5 } from '@/utils/crypto'
+import {
+  hash,
+  md5,
+} from '@/utils/crypto'
 
 function md5JSON (value = null) {
   return md5(JSON.stringify(value))

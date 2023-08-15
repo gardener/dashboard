@@ -60,12 +60,14 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import semver from 'semver'
 
-import map from 'lodash/map'
-import flatMap from 'lodash/flatMap'
-import upperFirst from 'lodash/upperFirst'
-import head from 'lodash/head'
-import get from 'lodash/get'
-import join from 'lodash/join'
+import {
+  map,
+  flatMap,
+  upperFirst,
+  head,
+  get,
+  join,
+} from '@/utils/lodash'
 
 export default {
   props: {

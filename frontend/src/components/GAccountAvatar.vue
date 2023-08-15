@@ -29,9 +29,15 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { computed, toRefs } from 'vue'
+import {
+  computed,
+  toRefs,
+} from 'vue'
 
-import { gravatarUrlGeneric, isEmail } from '@/utils'
+import {
+  gravatarUrlGeneric,
+  isEmail,
+} from '@/utils'
 
 const props = defineProps({
   accountName: {

@@ -40,9 +40,9 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { required } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
-import { getValidationErrors } from '@/utils'
 
-import find from 'lodash/find'
+import { getValidationErrors } from '@/utils'
+import { find } from '@/utils/lodash'
 
 const validationErrors = {
   internalValue: {

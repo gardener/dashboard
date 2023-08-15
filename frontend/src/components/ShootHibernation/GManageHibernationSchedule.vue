@@ -93,20 +93,31 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState, mapActions } from 'pinia'
-import forEach from 'lodash/forEach'
-import flatMap from 'lodash/flatMap'
-import get from 'lodash/get'
-import set from 'lodash/set'
-import find from 'lodash/find'
-import isEmpty from 'lodash/isEmpty'
+import {
+  mapState,
+  mapActions,
+} from 'pinia'
+import { useVuelidate } from '@vuelidate/core'
 
+import {
+  forEach,
+  flatMap,
+  get,
+  set,
+  find,
+  isEmpty,
+} from '@/utils/lodash'
 import GExpandTransitionGroup from '@/components/GExpandTransitionGroup'
 import GHibernationScheduleEvent from '@/components/ShootHibernation/GHibernationScheduleEvent'
-import { parsedScheduleEventsFromCrontabBlock, crontabFromParsedScheduleEvents } from '@/utils/hibernationSchedule'
+import {
+  parsedScheduleEventsFromCrontabBlock,
+  crontabFromParsedScheduleEvents,
+} from '@/utils/hibernationSchedule'
 import { v4 as uuidv4 } from '@/utils/uuid'
-import { useAppStore, useConfigStore } from '@/store'
-import { useVuelidate } from '@vuelidate/core'
+import {
+  useAppStore,
+  useConfigStore,
+} from '@/store'
 
 export default {
   components: {

@@ -5,9 +5,26 @@
 //
 
 import { defineStore } from 'pinia'
-import { computed, reactive } from 'vue'
+import {
+  computed,
+  reactive,
+} from 'vue'
 
-import { useApi, useLogger } from '@/composables'
+import {
+  useApi,
+  useLogger,
+} from '@/composables'
+import { shootHasIssue } from '@/utils'
+import { isNotFound } from '@/utils/error'
+import {
+  cloneDeep,
+  get,
+  map,
+  replace,
+  difference,
+  differenceWith,
+  find,
+} from '@/utils/lodash'
 
 import { useAppStore } from '../app'
 import { useAuthzStore } from '../authz'
@@ -32,17 +49,6 @@ import {
   searchItemsFn,
   sortItemsFn,
 } from './helper'
-
-import { shootHasIssue } from '@/utils'
-import { isNotFound } from '@/utils/error'
-
-import cloneDeep from 'lodash/cloneDeep'
-import get from 'lodash/get'
-import map from 'lodash/map'
-import replace from 'lodash/replace'
-import difference from 'lodash/difference'
-import differenceWith from 'lodash/differenceWith'
-import find from 'lodash/find'
 
 export const useShootStore = defineStore('shoot', () => {
   const api = useApi()

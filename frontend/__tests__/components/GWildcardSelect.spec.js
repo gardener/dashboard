@@ -5,6 +5,7 @@
 //
 
 import { mount } from '@vue/test-utils'
+
 import GWildcardSelect from '@/components/GWildcardSelect'
 
 const { createVuetifyPlugin } = global.fixtures.helper

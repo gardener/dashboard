@@ -63,23 +63,29 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { mapActions } from 'pinia'
+
 import GWorkerInputGeneric from '@/components/ShootWorkers/GWorkerInputGeneric'
 import GExpandTransitionGroup from '@/components/GExpandTransitionGroup'
-import { mapActions } from 'pinia'
 import { isZonedCluster } from '@/utils'
-import { findFreeNetworks, getZonesNetworkConfiguration } from '@/utils/createShoot'
-import forEach from 'lodash/forEach'
-import map from 'lodash/map'
-import uniq from 'lodash/uniq'
-import omit from 'lodash/omit'
-import some from 'lodash/some'
-import assign from 'lodash/assign'
-import isEmpty from 'lodash/isEmpty'
-import flatMap from 'lodash/flatMap'
-import difference from 'lodash/difference'
-import get from 'lodash/get'
-import includes from 'lodash/includes'
-import filter from 'lodash/filter'
+import {
+  findFreeNetworks,
+  getZonesNetworkConfiguration,
+} from '@/utils/createShoot'
+import {
+  forEach,
+  map,
+  uniq,
+  omit,
+  some,
+  assign,
+  isEmpty,
+  flatMap,
+  difference,
+  get,
+  includes,
+  filter,
+} from '@/utils/lodash'
 import { v4 as uuidv4 } from '@/utils/uuid'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 

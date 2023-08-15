@@ -10,7 +10,11 @@ SPDX-License-Identifier: Apache-2.0
 <script setup>
 import { provide } from 'vue'
 import { useTheme } from 'vuetify'
-import { onKeyStroke, useEventBus, useColorMode } from '@vueuse/core'
+import {
+  onKeyStroke,
+  useEventBus,
+  useColorMode,
+} from '@vueuse/core'
 
 const theme = useTheme()
 const colorMode = useColorMode({

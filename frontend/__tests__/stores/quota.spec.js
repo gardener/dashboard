@@ -4,7 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { setActivePinia, createPinia } from 'pinia'
+import {
+  setActivePinia,
+  createPinia,
+} from 'pinia'
+
 import { useAuthzStore } from '@/store/authz'
 import { useQuotaStore } from '@/store/quota'
 import { aggregateResourceQuotaStatus } from '@/store/quota/helper'

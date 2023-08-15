@@ -4,12 +4,14 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import EventEmitter from 'events'
+
 import { mount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
+
 import { useAuthzStore } from '@/store/authz'
 import { useConfigStore } from '@/store/config'
 import { useProjectStore } from '@/store/project'
-import EventEmitter from 'events'
 import GNewShootDetails from '@/components/NewShoot/GNewShootDetails.vue'
 
 const { createPlugins } = global.fixtures.helper

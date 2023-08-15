@@ -24,9 +24,14 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { computed, useSlots, toRefs } from 'vue'
-import { transformHtml } from '@/utils'
+import {
+  computed,
+  useSlots,
+  toRefs,
+} from 'vue'
 import { useLocalStorage } from '@vueuse/core'
+
+import { transformHtml } from '@/utils'
 
 const slots = useSlots()
 const hiddenMessages = useLocalStorage('global/alert-banner/hidden-messages', {})

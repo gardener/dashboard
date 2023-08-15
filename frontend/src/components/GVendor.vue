@@ -54,7 +54,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import join from 'lodash/join'
+import { join } from '@/utils/lodash'
 import GVendorIcon from '@/components/GVendorIcon'
 
 export default {

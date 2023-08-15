@@ -311,15 +311,26 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { ref, computed, toRef, inject } from 'vue'
+import {
+  ref,
+  computed,
+  toRef,
+  inject,
+} from 'vue'
 import { storeToRefs } from 'pinia'
-import { useAppStore, useAuthnStore, useConfigStore } from '@/store'
 import { useRoute } from 'vue-router'
 import { useLocalStorage } from '@vueuse/core'
+
 import { useNamespace } from '@/composables'
-import GShootSubscriptionStatus from './GShootSubscriptionStatus.vue'
+import {
+  useAppStore,
+  useAuthnStore,
+  useConfigStore,
+} from '@/store'
 import GBreadcrumb from '@/components/GBreadcrumb.vue'
 import GInfoDialog from '@/components/dialogs/GInfoDialog.vue'
+
+import GShootSubscriptionStatus from './GShootSubscriptionStatus.vue'
 
 const route = useRoute()
 

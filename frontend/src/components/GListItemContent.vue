@@ -28,6 +28,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script setup>
 import { useSlots } from 'vue'
+
 const slots = useSlots()
 
 const props = defineProps({

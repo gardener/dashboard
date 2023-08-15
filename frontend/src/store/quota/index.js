@@ -5,12 +5,15 @@
 //
 
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import {
+  ref,
+  computed,
+} from 'vue'
 
-import map from 'lodash/map'
-
+import { map } from '@/utils/lodash'
 import { useApi } from '@/composables'
 import { useAuthzStore } from '@/store/authz'
+
 import {
   getProjectQuotaStatus,
   aggregateResourceQuotaStatus,

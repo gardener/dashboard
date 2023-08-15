@@ -68,12 +68,13 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapState } from 'pinia'
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
+
 import {
   useAuthnStore,
   useAuthzStore,
 } from '@/store'
-import { useVuelidate } from '@vuelidate/core'
-import { required } from '@vuelidate/validators'
 import { shootItem } from '@/mixins/shootItem'
 
 export default {

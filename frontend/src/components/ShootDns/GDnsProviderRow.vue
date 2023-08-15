@@ -120,18 +120,23 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState, mapGetters, mapActions } from 'pinia'
+import {
+  mapState,
+  mapGetters,
+  mapActions,
+} from 'pinia'
 import { required } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
-import get from 'lodash/get'
-import head from 'lodash/head'
-import find from 'lodash/find'
-import map from 'lodash/map'
 
+import {
+  get,
+  head,
+  find,
+  map,
+} from '@/utils/lodash'
 import GSelectSecret from '@/components/Secrets/GSelectSecret'
 import GVendorIcon from '@/components/GVendorIcon'
 import { getValidationErrors } from '@/utils'
-
 import {
   useSecretStore,
   useShootStagingStore,

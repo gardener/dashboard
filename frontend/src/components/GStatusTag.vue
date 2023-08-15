@@ -79,12 +79,15 @@ SPDX-License-Identifier: Apache-2.0
 import { mapState } from 'pinia'
 
 import GShootMessageDetails from '@/components/GShootMessageDetails.vue'
-
-import { isUserError, objectsFromErrorCodes } from '@/utils/errorCodes'
-
-import get from 'lodash/get'
-import isEmpty from 'lodash/isEmpty'
-import filter from 'lodash/filter'
+import {
+  isUserError,
+  objectsFromErrorCodes,
+} from '@/utils/errorCodes'
+import {
+  get,
+  isEmpty,
+  filter,
+} from '@/utils/lodash'
 import { useAuthnStore } from '@/store'
 
 export default {

@@ -5,6 +5,7 @@
 //
 
 import { mount } from '@vue/test-utils'
+
 import { messagesColor } from '@/directives'
 
 const { createVuetifyPlugin } = global.fixtures.helper

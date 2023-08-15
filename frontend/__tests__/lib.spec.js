@@ -4,8 +4,13 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { GSymbolTree, Leaf, SplitpaneTree, PositionEnum } from '@/lib/g-symbol-tree'
-import cloneDeep from 'lodash/cloneDeep'
+import {
+  GSymbolTree,
+  Leaf,
+  SplitpaneTree,
+  PositionEnum,
+} from '@/lib/g-symbol-tree'
+import { cloneDeep } from '@/utils/lodash'
 
 describe('lib', () => {
   describe('g-symbol-tree', () => {

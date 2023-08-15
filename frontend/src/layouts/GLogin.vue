@@ -120,13 +120,20 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import {
+  ref,
+  watch,
+} from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { useRouteQuery } from '@vueuse/router'
 
 import { useApi } from '@/composables'
-import { useAppStore, useAuthnStore, useLoginStore } from '@/store'
+import {
+  useAppStore,
+  useAuthnStore,
+  useLoginStore,
+} from '@/store'
 import { setDelayedInputFocus } from '@/utils'
 import GNotify from '@/components/GNotify.vue'
 

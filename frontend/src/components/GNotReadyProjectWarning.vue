@@ -44,6 +44,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script setup>
 import { computed } from 'vue'
+
 import { getProjectDetails } from '@/utils'
 
 const props = defineProps({

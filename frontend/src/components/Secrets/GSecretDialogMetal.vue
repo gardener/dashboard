@@ -54,10 +54,17 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import { useVuelidate } from '@vuelidate/core'
-import { required, url } from '@vuelidate/validators'
-import { getValidationErrors, setDelayedInputFocus } from '@/utils'
+import {
+  required,
+  url,
+} from '@vuelidate/validators'
+
+import GSecretDialog from '@/components/Secrets/GSecretDialog'
+import {
+  getValidationErrors,
+  setDelayedInputFocus,
+} from '@/utils'
 
 const validationErrors = {
   apiHmac: {

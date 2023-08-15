@@ -114,11 +114,10 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { mapState } from 'pinia'
-import {
-  useAuthnStore,
-} from '@/store'
-import GTimeString from '@/components/GTimeString.vue'
 import { required } from '@vuelidate/validators'
+
+import { useAuthnStore } from '@/store'
+import GTimeString from '@/components/GTimeString.vue'
 import { getValidationErrors } from '@/utils'
 
 const validationErrors = {

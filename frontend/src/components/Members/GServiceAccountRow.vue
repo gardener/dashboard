@@ -162,7 +162,12 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { computed, toRef, toRefs } from 'vue'
+import {
+  computed,
+  toRef,
+  toRefs,
+} from 'vue'
+
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
 import GAccountRoles from '@/components/Members/GAccountRoles.vue'
 import GTimeString from '@/components/GTimeString.vue'
@@ -172,7 +177,6 @@ import {
   parseServiceAccountUsername,
   mapTableHeader,
 } from '@/utils'
-
 import { useAuthzStore } from '@/store'
 
 const authzStore = useAuthzStore()

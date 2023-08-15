@@ -5,18 +5,22 @@
 //
 
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import {
+  ref,
+  computed,
+} from 'vue'
 
 import { useApi } from '@/composables'
-import { useAppStore } from './app'
-import { useAuthzStore } from './authz'
-
 import { isOwnSecret } from '@/utils'
+import {
+  findIndex,
+  find,
+  filter,
+  matches,
+} from '@/utils/lodash'
 
-import findIndex from 'lodash/findIndex'
-import find from 'lodash/find'
-import filter from 'lodash/filter'
-import matches from 'lodash/matches'
+import { useAuthzStore } from './authz'
+import { useAppStore } from './app'
 
 function eqlNameAndNamespace ({ namespace, name }) {
   return matches({ metadata: { namespace, name } })

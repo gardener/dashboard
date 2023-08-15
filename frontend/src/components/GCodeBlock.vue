@@ -33,17 +33,19 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import GCopyBtn from '@/components/GCopyBtn.vue'
-import trim from 'lodash/trim'
-import split from 'lodash/split'
-import replace from 'lodash/replace'
 import hljs from 'highlight.js/lib/core'
-
 import bash from 'highlight.js/lib/languages/bash'
 import shell from 'highlight.js/lib/languages/shell'
 import json from 'highlight.js/lib/languages/json'
 import javascript from 'highlight.js/lib/languages/javascript'
 import yaml from 'highlight.js/lib/languages/yaml'
+
+import {
+  trim,
+  split,
+  replace,
+} from '@/utils/lodash'
+import GCopyBtn from '@/components/GCopyBtn.vue'
 
 import 'highlight.js/styles/docco.css'
 

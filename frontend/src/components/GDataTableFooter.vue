@@ -56,7 +56,10 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { computed, toRefs } from 'vue'
+import {
+  computed,
+  toRefs,
+} from 'vue'
 
 const props = defineProps({
   itemsLength: {

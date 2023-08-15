@@ -153,28 +153,44 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapActions } from 'pinia'
+import {
+  required,
+  maxLength,
+  minValue,
+  requiredIf,
+} from '@vuelidate/validators'
+import { useVuelidate } from '@vuelidate/core'
+
 import GVolumeSizeInput from '@/components/ShootWorkers/GVolumeSizeInput'
 import GMachineType from '@/components/ShootWorkers/GMachineType'
 import GVolumeType from '@/components/ShootWorkers/GVolumeType'
 import GMachineImage from '@/components/ShootWorkers/GMachineImage'
 import GContainerRuntime from '@/components/ShootWorkers/GContainerRuntime'
-import isEmpty from 'lodash/isEmpty'
-import filter from 'lodash/filter'
-import map from 'lodash/map'
-import includes from 'lodash/includes'
-import sortBy from 'lodash/sortBy'
-import find from 'lodash/find'
-import concat from 'lodash/concat'
-import last from 'lodash/last'
-import difference from 'lodash/difference'
-import get from 'lodash/get'
-import set from 'lodash/set'
-import head from 'lodash/head'
-import pick from 'lodash/pick'
-import { required, maxLength, minValue, requiredIf } from '@vuelidate/validators'
-import { useVuelidate } from '@vuelidate/core'
-import { getValidationErrors, parseSize } from '@/utils'
-import { uniqueWorkerName, resourceName, noStartEndHyphen, numberOrPercentage } from '@/utils/validators'
+import {
+  isEmpty,
+  filter,
+  map,
+  includes,
+  sortBy,
+  find,
+  concat,
+  last,
+  difference,
+  get,
+  set,
+  head,
+  pick,
+} from '@/utils/lodash'
+import {
+  getValidationErrors,
+  parseSize,
+} from '@/utils'
+import {
+  uniqueWorkerName,
+  resourceName,
+  noStartEndHyphen,
+  numberOrPercentage,
+} from '@/utils/validators'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
 const validationErrors = {

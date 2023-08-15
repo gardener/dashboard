@@ -152,8 +152,11 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapState } from 'pinia'
 
-import { useAuthnStore, useAuthzStore, useTerminalStore } from '@/store'
-
+import {
+  useAuthnStore,
+  useAuthzStore,
+  useTerminalStore,
+} from '@/store'
 import GList from '@/components/GList.vue'
 import GListItem from '@/components/GListItem.vue'
 import GListItemContent from '@/components/GListItemContent.vue'
@@ -162,15 +165,15 @@ import GCopyBtn from '@/components/GCopyBtn.vue'
 import GUsernamePassword from '@/components/GUsernamePasswordListTile.vue'
 import GTerminalListTile from '@/components/GTerminalListTile.vue'
 import GLinkListTile from '@/components/GLinkListTile.vue'
-
-import GTerminalShortcutsTile from './GTerminalShortcutsTile.vue'
-import GShootKubeconfig from './GShootKubeconfig.vue'
-import GGardenctlCommands from './GGardenctlCommands.vue'
-
 import { shootItem } from '@/mixins/shootItem'
+import {
+  get,
+  isEmpty,
+} from '@/utils/lodash'
 
-import get from 'lodash/get'
-import isEmpty from 'lodash/isEmpty'
+import GGardenctlCommands from './GGardenctlCommands.vue'
+import GShootKubeconfig from './GShootKubeconfig.vue'
+import GTerminalShortcutsTile from './GTerminalShortcutsTile.vue'
 
 export default {
   components: {

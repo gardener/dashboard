@@ -36,20 +36,20 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import GConfirmDialog from '@/components/dialogs/GConfirmDialog'
-import { mapState, mapActions } from 'pinia'
-import { errorDetailsFromError } from '@/utils/error'
-
-import { useAsyncRef } from '@/composables'
 import { defineAsyncComponent } from 'vue'
+import {
+  mapState,
+  mapActions,
+} from 'pinia'
 
 import {
   useAuthzStore,
   useShootStore,
 } from '@/store'
-
-// lodash
-import pick from 'lodash/pick'
+import GConfirmDialog from '@/components/dialogs/GConfirmDialog'
+import { errorDetailsFromError } from '@/utils/error'
+import { useAsyncRef } from '@/composables'
+import { pick } from '@/utils/lodash'
 
 export default {
   components: {

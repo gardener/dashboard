@@ -26,19 +26,22 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import {
+  ref,
+  computed,
+  onMounted,
+} from 'vue'
 import { onBeforeRouteUpdate } from 'vue-router'
+
 import { useLogger } from '@/composables'
 import { useAppStore } from '@/store'
-
 import GError from '@/components/GError.vue'
 import GLoading from '@/components/GLoading.vue'
 import GMainNavigation from '@/components/GMainNavigation.vue'
 import GMainToolbar from '@/components/GMainToolbar.vue'
 import GMainContent from '@/components/GMainContent.vue'
 import GNotify from '@/components/GNotify.vue'
-
-import get from 'lodash/get'
+import { get } from '@/utils/lodash'
 
 const logger = useLogger()
 const appStore = useAppStore()

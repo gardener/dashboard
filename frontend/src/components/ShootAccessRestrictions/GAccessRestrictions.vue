@@ -81,15 +81,15 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapActions } from 'pinia'
-import cloneDeep from 'lodash/cloneDeep'
-import isEmpty from 'lodash/isEmpty'
-import get from 'lodash/get'
-import set from 'lodash/set'
-import unset from 'lodash/unset'
-import {
-  useCloudProfileStore,
-} from '@/store'
 
+import {
+  cloneDeep,
+  isEmpty,
+  get,
+  set,
+  unset,
+} from '@/utils/lodash'
+import { useCloudProfileStore } from '@/store'
 import { transformHtml } from '@/utils'
 
 export default {

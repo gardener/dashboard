@@ -157,8 +157,8 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 <script>
 import { mapState } from 'pinia'
-import get from 'lodash/get'
 
+import { get } from '@/utils/lodash'
 import GShootActionChangeHibernation from '@/components/ShootHibernation/GShootActionChangeHibernation'
 import GShootActionDeleteCluster from '@/components/GShootActionDeleteCluster'
 import GHibernationConfiguration from '@/components/ShootHibernation/GHibernationConfiguration'
@@ -167,12 +167,9 @@ import GMaintenanceConfiguration from '@/components/ShootMaintenance/GMaintenanc
 import GShootActionReconcileStart from '@/components/GShootActionReconcileStart'
 import GShootMessages from '@/components/ShootMessages/GShootMessages'
 import GTimeString from '@/components/GTimeString'
-
 import TimeWithOffset from '@/utils/TimeWithOffset'
 import moment from '@/utils/moment'
-
 import { shootItem } from '@/mixins/shootItem'
-
 import {
   useConfigStore,
   useAuthzStore,

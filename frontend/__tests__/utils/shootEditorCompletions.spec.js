@@ -2,11 +2,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import { ShootEditorCompletions } from '@/utils/shootEditorCompletions'
 import CodeMirror from 'codemirror'
 import 'codemirror/mode/yaml/yaml.js'
 
-import repeat from 'lodash/repeat'
+import { ShootEditorCompletions } from '@/utils/shootEditorCompletions'
+import { repeat } from '@/utils/lodash'
 
 const shootCompletions = {
   spec: {

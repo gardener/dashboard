@@ -193,15 +193,20 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+
 import { shootItem } from '@/mixins/shootItem'
+import {
+  isUserError,
+  objectsFromErrorCodes,
+  errorCodesFromArray,
+} from '@/utils/errorCodes'
+import {
+  join,
+  map,
+} from '@/utils/lodash'
 
-import GRetryOperation from './GRetryOperation.vue'
 import GShootMessageDetails from './GShootMessageDetails.vue'
-
-import { isUserError, objectsFromErrorCodes, errorCodesFromArray } from '@/utils/errorCodes'
-
-import join from 'lodash/join'
-import map from 'lodash/map'
+import GRetryOperation from './GRetryOperation.vue'
 
 export default {
   components: {

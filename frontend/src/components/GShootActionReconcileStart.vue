@@ -42,12 +42,9 @@ import { mapActions } from 'pinia'
 
 import GShootActionButton from '@/components/GShootActionButton.vue'
 import GShootActionDialog from '@/components/GShootActionDialog.vue'
-
 import { shootItem } from '@/mixins/shootItem'
-
 import { errorDetailsFromError } from '@/utils/error'
-
-import get from 'lodash/get'
+import { get } from '@/utils/lodash'
 import { useAppStore } from '@/store'
 
 export default {

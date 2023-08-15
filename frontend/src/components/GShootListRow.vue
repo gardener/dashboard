@@ -213,7 +213,10 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState, mapActions } from 'pinia'
+import {
+  mapState,
+  mapActions,
+} from 'pinia'
 
 import GAccessRestrictionChips from '@/components/ShootAccessRestrictions/GAccessRestrictionChips.vue'
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
@@ -232,20 +235,22 @@ import GShootListRowActions from '@/components/GShootListRowActions.vue'
 import GAutoHide from '@/components/GAutoHide.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
 import GControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityTag.vue'
-
 import {
   isTypeDelete,
   getTimestampFormatted,
   getIssueSince,
 } from '@/utils'
-
 import { shootItem } from '@/mixins/shootItem'
-
-import includes from 'lodash/includes'
-import get from 'lodash/get'
-import map from 'lodash/map'
-import isObject from 'lodash/isObject'
-import { useAuthzStore, useTicketStore } from '@/store'
+import {
+  includes,
+  get,
+  map,
+  isObject,
+} from '@/utils/lodash'
+import {
+  useAuthzStore,
+  useTicketStore,
+} from '@/store'
 
 export default {
   components: {

@@ -96,13 +96,24 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { useVuelidate } from '@vuelidate/core'
+import {
+  required,
+  minLength,
+  maxLength,
+} from '@vuelidate/validators'
+
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GCodeBlock from '@/components/GCodeBlock'
 import GExternalLink from '@/components/GExternalLink'
-import { useVuelidate } from '@vuelidate/core'
-import { required, minLength, maxLength } from '@vuelidate/validators'
-import { alphaNumUnderscore, base64 } from '@/utils/validators'
-import { getValidationErrors, setDelayedInputFocus } from '@/utils'
+import {
+  alphaNumUnderscore,
+  base64,
+} from '@/utils/validators'
+import {
+  getValidationErrors,
+  setDelayedInputFocus,
+} from '@/utils'
 
 const validationErrors = {
   accessKeyId: {

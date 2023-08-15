@@ -5,19 +5,29 @@
 //
 
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import {
+  ref,
+  computed,
+} from 'vue'
 
-import { useApi, useLogger } from '@/composables'
-import { useAuthzStore } from './authz'
+import {
+  useApi,
+  useLogger,
+} from '@/composables'
+import {
+  TargetEnum,
+  Shortcut,
+} from '@/utils'
+import {
+  map,
+  uniqBy,
+  filter,
+  includes,
+  isEmpty,
+} from '@/utils/lodash'
+
 import { useConfigStore } from './config'
-
-import { TargetEnum, Shortcut } from '@/utils'
-
-import map from 'lodash/map'
-import uniqBy from 'lodash/uniqBy'
-import filter from 'lodash/filter'
-import includes from 'lodash/includes'
-import isEmpty from 'lodash/isEmpty'
+import { useAuthzStore } from './authz'
 
 export const useTerminalStore = defineStore('terminal', () => {
   const logger = useLogger()

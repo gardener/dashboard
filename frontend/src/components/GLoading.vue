@@ -17,6 +17,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script setup>
 import { toRef } from 'vue'
+
 import { useAppStore } from '@/store'
 
 const store = useAppStore()

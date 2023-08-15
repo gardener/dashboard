@@ -6,6 +6,7 @@
 
 import { mount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
+
 import { useConfigStore } from '@/store/config'
 import GStatusTags from '@/components/GStatusTags'
 

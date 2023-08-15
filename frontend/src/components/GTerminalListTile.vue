@@ -30,11 +30,11 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { shootItem } from '@/mixins/shootItem'
+
 import GListItem from './GListItem.vue'
 import GListItemContent from './GListItemContent.vue'
 import GActionButton from './GActionButton.vue'
-
-import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {

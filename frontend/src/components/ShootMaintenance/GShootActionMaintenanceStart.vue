@@ -48,12 +48,9 @@ SPDX-License-Identifier: Apache-2.0
 import GShootActionButton from '@/components/GShootActionButton.vue'
 import GShootActionDialog from '@/components/GShootActionDialog.vue'
 import GMaintenanceComponents from '@/components/ShootMaintenance/GMaintenanceComponents'
-
 import { shootItem } from '@/mixins/shootItem'
-
 import { errorDetailsFromError } from '@/utils/error'
-
-import get from 'lodash/get'
+import { get } from '@/utils/lodash'
 
 export default {
   components: {

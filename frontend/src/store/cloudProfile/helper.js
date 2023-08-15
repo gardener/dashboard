@@ -4,20 +4,19 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import {
-  getDateFormatted,
-} from '@/utils'
+import { getDateFormatted } from '@/utils'
 import moment from '@/utils/moment'
-
-import map from 'lodash/map'
-import get from 'lodash/get'
-import find from 'lodash/find'
-import isEqual from 'lodash/isEqual'
-import fromPairs from 'lodash/fromPairs'
-import includes from 'lodash/includes'
-import lowerCase from 'lodash/lowerCase'
-import compact from 'lodash/compact'
-import head from 'lodash/head'
+import {
+  map,
+  get,
+  find,
+  isEqual,
+  fromPairs,
+  includes,
+  lowerCase,
+  compact,
+  head,
+} from '@/utils/lodash'
 
 export function matchesPropertyOrEmpty (path, srcValue) {
   return object => {

@@ -6,13 +6,14 @@
 
 'use strict'
 
-// Lodash
-import get from 'lodash/get'
-import compact from 'lodash/compact'
-import uniq from 'lodash/uniq'
-import flatMap from 'lodash/flatMap'
-import map from 'lodash/map'
-import some from 'lodash/some'
+import {
+  get,
+  compact,
+  uniq,
+  flatMap,
+  map,
+  some,
+} from '@/utils/lodash'
 
 export function errorCodesFromArray (array) {
   return uniq(compact(flatMap(array, 'codes')))

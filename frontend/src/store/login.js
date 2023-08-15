@@ -5,8 +5,12 @@
 //
 
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import {
+  ref,
+  computed,
+} from 'vue'
 import { useLocalStorage } from '@vueuse/core'
+
 import { useLogger } from '@/composables'
 
 export const useLoginStore = defineStore('login', () => {

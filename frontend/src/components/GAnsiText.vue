@@ -15,7 +15,8 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import ansiHTML from 'ansi-html'
-import escape from 'lodash/escape'
+
+import { escape } from '@/utils/lodash'
 
 export default {
   props: {

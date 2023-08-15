@@ -4,35 +4,42 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { nextTick, unref } from 'vue'
-import semver from 'semver'
-
 import { Buffer } from 'buffer'
 
+import semver from 'semver'
+import {
+  nextTick,
+  unref,
+} from 'vue'
+
 import { useLogger } from '@/composables'
+import {
+  capitalize,
+  replace,
+  get,
+  head,
+  map,
+  toLower,
+  filter,
+  words,
+  find,
+  some,
+  sortBy,
+  isEmpty,
+  includes,
+  split,
+  join,
+  sample,
+  compact,
+  forEach,
+} from '@/utils/lodash'
 
 import moment from './moment'
-import { md5, hash } from './crypto'
+import {
+  md5,
+  hash,
+} from './crypto'
 import TimeWithOffset from './TimeWithOffset'
-
-import capitalize from 'lodash/capitalize'
-import replace from 'lodash/replace'
-import get from 'lodash/get'
-import head from 'lodash/head'
-import map from 'lodash/map'
-import toLower from 'lodash/toLower'
-import filter from 'lodash/filter'
-import words from 'lodash/words'
-import find from 'lodash/find'
-import some from 'lodash/some'
-import sortBy from 'lodash/sortBy'
-import isEmpty from 'lodash/isEmpty'
-import includes from 'lodash/includes'
-import split from 'lodash/split'
-import join from 'lodash/join'
-import sample from 'lodash/sample'
-import compact from 'lodash/compact'
-import forEach from 'lodash/forEach'
 
 const serviceAccountRegex = /^system:serviceaccount:([^:]+):([^:]+)$/
 const logger = useLogger()

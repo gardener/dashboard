@@ -96,16 +96,20 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { defineAsyncComponent } from 'vue'
+import { useVuelidate } from '@vuelidate/core'
+
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GCodeBlock from '@/components/GCodeBlock'
 import shootItem from '@/mixins/shootItem'
 import { useAsyncRef } from '@/composables'
 import { errorDetailsFromError } from '@/utils/error'
 import { isZonedCluster } from '@/utils'
-import get from 'lodash/get'
-import cloneDeep from 'lodash/cloneDeep'
+import {
+  get,
+  cloneDeep,
+} from '@/utils/lodash'
 import { v4 as uuidv4 } from '@/utils/uuid'
-import { useVuelidate } from '@vuelidate/core'
+
 export default {
 
   components: {

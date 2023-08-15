@@ -21,14 +21,19 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { ref, computed, onMounted, provide, watch } from 'vue'
+import {
+  ref,
+  computed,
+  onMounted,
+  provide,
+  watch,
+} from 'vue'
 import { useLayout } from 'vuetify'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 
 import { useConfigStore } from '@/store'
 import { useLogger } from '@/composables'
-
 import GAlertBanner from '@/components/GAlertBanner.vue'
 
 const layout = useLayout()

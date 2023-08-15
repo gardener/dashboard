@@ -125,7 +125,7 @@ import GShootActionRotateCredentials from '@/components/GShootActionRotateCreden
 import GTimeString from '@/components/GTimeString'
 import GShootMessages from '@/components/ShootMessages/GShootMessages'
 import shootStatusCredentialRotation from '@/mixins/shootStatusCredentialRotation'
-import get from 'lodash/get'
+import { get } from '@/utils/lodash'
 
 export default {
   components: {

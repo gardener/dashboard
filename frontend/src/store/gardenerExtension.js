@@ -5,17 +5,21 @@
 //
 
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import {
+  ref,
+  computed,
+} from 'vue'
 
 import { useApi } from '@/composables'
-
-import map from 'lodash/map'
-import flatMap from 'lodash/flatMap'
-import filter from 'lodash/filter'
-import get from 'lodash/get'
-import some from 'lodash/some'
-import find from 'lodash/find'
-import sortBy from 'lodash/sortBy'
+import {
+  map,
+  flatMap,
+  filter,
+  get,
+  some,
+  find,
+  sortBy,
+} from '@/utils/lodash'
 
 export const useGardenerExtensionStore = defineStore('gardenerExtension', () => {
   const api = useApi()

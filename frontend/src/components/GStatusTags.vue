@@ -39,15 +39,16 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapActions } from 'pinia'
+
 import { useConfigStore } from '@/store/config'
 import { shootItem } from '@/mixins/shootItem'
-
 import GStatusTag from '@/components/GStatusTag.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
-
-import { objectsFromErrorCodes, errorCodesFromArray } from '@/utils/errorCodes'
-
-import sortBy from 'lodash/sortBy'
+import {
+  objectsFromErrorCodes,
+  errorCodesFromArray,
+} from '@/utils/errorCodes'
+import { sortBy } from '@/utils/lodash'
 
 export default {
   components: {

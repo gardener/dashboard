@@ -12,14 +12,23 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState, mapActions } from 'pinia'
-import { useAuthzStore, useSecretStore, useShootStore, useTerminalStore } from '@/store'
+import {
+  mapState,
+  mapActions,
+} from 'pinia'
 
+import {
+  useAuthzStore,
+  useSecretStore,
+  useShootStore,
+  useTerminalStore,
+} from '@/store'
 import GShootItemLoading from '@/views/GShootItemLoading.vue'
 import GShootItemError from '@/views/GShootItemError.vue'
-
-import get from 'lodash/get'
-import includes from 'lodash/includes'
+import {
+  get,
+  includes,
+} from '@/utils/lodash'
 
 export default {
   components: {

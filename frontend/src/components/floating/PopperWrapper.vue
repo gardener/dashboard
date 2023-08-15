@@ -70,7 +70,6 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { useTheme } from 'vuetify'
-
 import {
   Popper,
   PopperContent,
@@ -80,8 +79,10 @@ import {
 
 import 'floating-vue/dist/style.css'
 
-import omit from 'lodash/omit'
-import pick from 'lodash/pick'
+import {
+  omit,
+  pick,
+} from '@/utils/lodash'
 
 const referenceProps = ['class']
 

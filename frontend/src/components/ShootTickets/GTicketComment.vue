@@ -52,13 +52,13 @@ SPDX-License-Identifier: Apache-2.0
 import { mapState } from 'pinia'
 
 import { useConfigStore } from '@/store'
-
 import GTimeString from '@/components/GTimeString.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
-
-import { gravatarUrlIdenticon, transformHtml } from '@/utils'
-
-import get from 'lodash/get'
+import {
+  gravatarUrlIdenticon,
+  transformHtml,
+} from '@/utils'
+import { get } from '@/utils/lodash'
 
 const AvatarEnum = {
   GITHUB: 'github', // default

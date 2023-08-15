@@ -4,8 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import get from 'lodash/get'
-import pick from 'lodash/pick'
+import {
+  get,
+  pick,
+} from '@/utils/lodash'
 
 export function homeBreadcrumbs () {
   return [

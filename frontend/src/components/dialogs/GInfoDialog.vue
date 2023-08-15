@@ -66,12 +66,19 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState, mapActions } from 'pinia'
+import {
+  mapState,
+  mapActions,
+} from 'pinia'
 
-import { useAppStore, useAuthnStore, useGardenerExtensionStore } from '@/store'
+import {
+  useAppStore,
+  useAuthnStore,
+  useGardenerExtensionStore,
+} from '@/store'
+import { sortBy } from '@/utils/lodash'
+
 import GDialog from './GDialog.vue'
-
-import sortBy from 'lodash/sortBy'
 
 export default {
   components: {

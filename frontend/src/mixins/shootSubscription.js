@@ -4,11 +4,16 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { mapState, mapActions } from 'pinia'
-
+import {
+  mapState,
+  mapActions,
+} from 'pinia'
 import colors from 'vuetify/lib/util/colors'
 
-import { useShootStore, useSocketStore } from '@/store'
+import {
+  useShootStore,
+  useSocketStore,
+} from '@/store'
 import { constants } from '@/store/shoot/helper'
 
 export const shootSubscription = {

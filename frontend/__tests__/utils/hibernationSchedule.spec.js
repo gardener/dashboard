@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { parsedScheduleEventsFromCrontabBlock, crontabFromParsedScheduleEvents } from '@/utils/hibernationSchedule'
+import {
+  parsedScheduleEventsFromCrontabBlock,
+  crontabFromParsedScheduleEvents,
+} from '@/utils/hibernationSchedule'
 import moment from '@/utils/moment'
 
 const currentLocation = moment.tz.guess()

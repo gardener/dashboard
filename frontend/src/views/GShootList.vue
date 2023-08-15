@@ -219,9 +219,16 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineAsyncComponent, toRaw } from 'vue'
+import {
+  defineAsyncComponent,
+  toRaw,
+} from 'vue'
 import { useLocalStorage } from '@vueuse/core'
-import { mapState, mapActions } from 'pinia'
+import {
+  mapState,
+  mapActions,
+} from 'pinia'
+
 import {
   useAuthnStore,
   useAuthzStore,
@@ -230,7 +237,6 @@ import {
   useProjectStore,
   useConfigStore,
 } from '@/store'
-
 import GToolbar from '@/components/GToolbar.vue'
 import GShootListRow from '@/components/GShootListRow.vue'
 import GShootListProgress from '@/components/GShootListProgress.vue'
@@ -238,22 +244,22 @@ import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
 import GIconBase from '@/components/icons/GIconBase.vue'
 import GCertifiedKubernetes from '@/components/icons/GCertifiedKubernetes.vue'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
-
 import { mapTableHeader } from '@/utils'
-
-import debounce from 'lodash/debounce'
-import filter from 'lodash/filter'
-import get from 'lodash/get'
-import isEmpty from 'lodash/isEmpty'
-import join from 'lodash/join'
-import map from 'lodash/map'
-import mapKeys from 'lodash/mapKeys'
-import mapValues from 'lodash/mapValues'
-import pick from 'lodash/pick'
-import some from 'lodash/some'
-import sortBy from 'lodash/sortBy'
-import startsWith from 'lodash/startsWith'
-import upperCase from 'lodash/upperCase'
+import {
+  debounce,
+  filter,
+  get,
+  isEmpty,
+  join,
+  map,
+  mapKeys,
+  mapValues,
+  pick,
+  some,
+  sortBy,
+  startsWith,
+  upperCase,
+} from '@/utils/lodash'
 
 export default {
   components: {

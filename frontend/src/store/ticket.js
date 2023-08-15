@@ -5,21 +5,25 @@
 //
 
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import {
+  ref,
+  computed,
+} from 'vue'
 
 import { useLogger } from '@/composables'
-
-import assign from 'lodash/assign'
-import filter from 'lodash/filter'
-import findIndex from 'lodash/findIndex'
-import get from 'lodash/get'
-import head from 'lodash/head'
-import flatMap from 'lodash/flatMap'
-import matches from 'lodash/matches'
-import matchesProperty from 'lodash/matchesProperty'
-import groupBy from 'lodash/groupBy'
-import orderBy from 'lodash/orderBy'
-import uniqBy from 'lodash/uniqBy'
+import {
+  assign,
+  filter,
+  findIndex,
+  get,
+  head,
+  flatMap,
+  matches,
+  matchesProperty,
+  groupBy,
+  orderBy,
+  uniqBy,
+} from '@/utils/lodash'
 
 const eql = ({ projectName, name, state = undefined }) => {
   const source = { metadata: { projectName } }

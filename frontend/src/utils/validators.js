@@ -6,9 +6,10 @@
 
 import { helpers } from '@vuelidate/validators'
 
-// Lodash
-import includes from 'lodash/includes'
-import get from 'lodash/get'
+import {
+  includes,
+  get,
+} from '@/utils/lodash'
 
 const { withParams, regex, req } = helpers
 

@@ -5,21 +5,23 @@
 //
 
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import {
+  ref,
+  computed,
+} from 'vue'
 import { useBrowserLocation } from '@vueuse/core'
 import { useCookies } from '@vueuse/integrations/useCookies'
 import decode from 'jwt-decode'
 
-import { useLogger, useInterceptors } from '@/composables'
-
-import { useSocketStore } from './socket'
-
+import {
+  useLogger,
+  useInterceptors,
+} from '@/composables'
 import {
   gravatarUrlGeneric,
   displayName as getDisplayName,
   fullDisplayName as getFullDisplayName,
 } from '@/utils'
-
 import {
   createError,
   createAbortError,
@@ -29,6 +31,8 @@ import {
   isNoUserError,
   isClockSkewError,
 } from '@/utils/errors'
+
+import { useSocketStore } from './socket'
 
 const COOKIE_HEADER_PAYLOAD = 'gHdrPyl'
 const CLOCK_TOLERANCE = 15

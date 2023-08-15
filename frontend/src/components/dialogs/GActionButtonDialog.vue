@@ -89,9 +89,7 @@ SPDX-License-Identifier: Apache-2.0
 import { mapState } from 'pinia'
 
 import { useAuthzStore } from '@/store'
-
 import { shootItem } from '@/mixins/shootItem'
-
 import GDialog from '@/components/dialogs/GDialog'
 
 export default {

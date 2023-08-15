@@ -4,7 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { setActivePinia, createPinia } from 'pinia'
+import {
+  setActivePinia,
+  createPinia,
+} from 'pinia'
+
 import { useApi } from '@/composables/useApi'
 import { useAuthzStore } from '@/store/authz'
 import { useConfigStore } from '@/store/config'
@@ -13,8 +17,7 @@ import {
   firstItemMatchingVersionClassification,
   mapAccessRestrictionForInput,
 } from '@/store/cloudProfile/helper'
-
-import find from 'lodash/find'
+import { find } from '@/utils/lodash'
 
 describe('stores', () => {
   describe('cloudProfile', () => {

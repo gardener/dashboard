@@ -15,7 +15,11 @@ SPDX-License-Identifier: Apache-2.0
 
 <script setup>
 import { computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import {
+  useRoute,
+  useRouter,
+} from 'vue-router'
+
 import { useProjectStore } from '@/store'
 import GError from '@/components/GError.vue'
 

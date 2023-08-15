@@ -22,12 +22,11 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import shootItem from '@/mixins/shootItem'
+import { errorDetailsFromError } from '@/utils/error'
+
 import GActionButtonDialog from './dialogs/GActionButtonDialog.vue'
 import GStaticTokenKubeconfigSwitch from './GStaticTokenKubeconfigSwitch.vue'
-
-import shootItem from '@/mixins/shootItem'
-
-import { errorDetailsFromError } from '@/utils/error'
 
 export default {
   components: {

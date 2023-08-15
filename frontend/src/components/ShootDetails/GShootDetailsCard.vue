@@ -216,9 +216,11 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapState } from 'pinia'
-import filter from 'lodash/filter'
-import map from 'lodash/map'
 
+import {
+  filter,
+  map,
+} from '@/utils/lodash'
 import GAccessRestrictionChips from '@/components/ShootAccessRestrictions/GAccessRestrictionChips'
 import GAccountAvatar from '@/components/GAccountAvatar'
 import GTimeString from '@/components/GTimeString'
@@ -230,16 +232,16 @@ import GShootVersion from '@/components/ShootVersion/GShootVersion'
 import GShootMessages from '@/components/ShootMessages/GShootMessages'
 import GAddonConfiguration from '@/components/ShootAddons/GAddonConfiguration'
 import GCopyBtn from '@/components/GCopyBtn'
-
 import {
   isValidTerminationDate,
   getTimeStringTo,
   shootAddonList,
   transformHtml,
 } from '@/utils'
-
-import { useConfigStore, useAuthzStore } from '@/store'
-
+import {
+  useConfigStore,
+  useAuthzStore,
+} from '@/store'
 import { shootItem } from '@/mixins/shootItem'
 
 export default {

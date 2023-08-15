@@ -5,21 +5,31 @@
 //
 
 import { defineStore } from 'pinia'
-import { ref, computed, toRef } from 'vue'
-import { useApi, useLogger } from '@/composables'
-import { useAuthzStore } from './authz'
+import {
+  ref,
+  computed,
+  toRef,
+} from 'vue'
 
-import find from 'lodash/find'
-import findIndex from 'lodash/findIndex'
-import map from 'lodash/map'
-import get from 'lodash/get'
-import pickBy from 'lodash/pickBy'
-import some from 'lodash/some'
-import isEmpty from 'lodash/isEmpty'
-import isObject from 'lodash/isObject'
-import mapKeys from 'lodash/mapKeys'
-import mapValues from 'lodash/mapValues'
-import replace from 'lodash/replace'
+import {
+  useApi,
+  useLogger,
+} from '@/composables'
+import {
+  find,
+  findIndex,
+  map,
+  get,
+  pickBy,
+  some,
+  isEmpty,
+  isObject,
+  mapKeys,
+  mapValues,
+  replace,
+} from '@/utils/lodash'
+
+import { useAuthzStore } from './authz'
 import { useAppStore } from './app'
 
 export const useProjectStore = defineStore('project', () => {

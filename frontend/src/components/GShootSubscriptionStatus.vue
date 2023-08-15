@@ -109,7 +109,6 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { shootSubscription } from '@/mixins/shootSubscription'
-
 import GIconBase from '@/components/icons/GIconBase.vue'
 import GConnected from '@/components/icons/GConnected.vue'
 import GDisconnected from '@/components/icons/GDisconnected.vue'

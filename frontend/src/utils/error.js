@@ -6,8 +6,7 @@
 
 'use strict'
 
-// Lodash
-import get from 'lodash/get'
+import { get } from '@/utils/lodash'
 
 export function isConflict (error) {
   return hasStatusCode(409, error)

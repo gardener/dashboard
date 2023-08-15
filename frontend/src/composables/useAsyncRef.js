@@ -4,7 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { ref, watch } from 'vue'
+import {
+  ref,
+  watch,
+} from 'vue'
+
 import pTimeout from '@/utils/p-timeout'
 import { useLogger } from '@/composables/useLogger'
 

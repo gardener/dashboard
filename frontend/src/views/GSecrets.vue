@@ -252,12 +252,28 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'pinia'
+import {
+  mapGetters,
+  mapActions,
+} from 'pinia'
+import { useLocalStorage } from '@vueuse/core'
+
 import {
   isOwnSecret,
   mapTableHeader,
 } from '@/utils'
-import get from 'lodash/get'
+import {
+  get,
+  filter,
+  head,
+  includes,
+  isEmpty,
+  map,
+  mapKeys,
+  mapValues,
+  orderBy,
+  some,
+} from '@/utils/lodash'
 import GSecretDialogWrapper from '@/components/Secrets/GSecretDialogWrapper'
 import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
 import GSecretRowInfra from '@/components/Secrets/GSecretRowInfra.vue'
@@ -265,7 +281,6 @@ import GSecretRowDns from '@/components/Secrets/GSecretRowDns.vue'
 import GVendorIcon from '@/components/GVendorIcon'
 import GToolbar from '@/components/GToolbar'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
-
 import {
   useCloudProfileStore,
   useGardenerExtensionStore,
@@ -273,17 +288,6 @@ import {
   useAuthzStore,
   useShootStore,
 } from '@/store'
-import { useLocalStorage } from '@vueuse/core'
-
-import filter from 'lodash/filter'
-import head from 'lodash/head'
-import includes from 'lodash/includes'
-import isEmpty from 'lodash/isEmpty'
-import map from 'lodash/map'
-import mapKeys from 'lodash/mapKeys'
-import mapValues from 'lodash/mapValues'
-import orderBy from 'lodash/orderBy'
-import some from 'lodash/some'
 
 export default {
   components: {

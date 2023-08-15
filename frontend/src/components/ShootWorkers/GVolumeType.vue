@@ -48,14 +48,21 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapActions } from 'pinia'
-import { required, requiredIf, minValue } from '@vuelidate/validators'
+import {
+  required,
+  requiredIf,
+  minValue,
+} from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
+
 import { getValidationErrors } from '@/utils'
 import { getWorkerProviderConfig } from '@/utils/createShoot'
-import find from 'lodash/find'
-import get from 'lodash/get'
-import set from 'lodash/set'
-import unset from 'lodash/unset'
+import {
+  find,
+  get,
+  set,
+  unset,
+} from '@/utils/lodash'
 import { useCloudProfileStore } from '@/store'
 
 export default {

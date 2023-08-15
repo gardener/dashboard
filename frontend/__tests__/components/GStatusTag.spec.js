@@ -6,6 +6,7 @@
 
 import { mount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
+
 import GStatusTag from '@/components/GStatusTag.vue'
 
 const { createVuetifyPlugin } = global.fixtures.helper

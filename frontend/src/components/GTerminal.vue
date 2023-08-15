@@ -364,28 +364,32 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { reactive } from 'vue'
 import { mapState } from 'pinia'
+import { Terminal } from 'xterm'
+import { FitAddon } from 'xterm-addon-fit'
+import { WebLinksAddon } from 'xterm-addon-web-links'
+import 'xterm/css/xterm.css'
 
 import {
   useAppStore,
   useConfigStore,
   useTerminalStore,
 } from '@/store'
-
-import get from 'lodash/get'
-import assign from 'lodash/assign'
-import find from 'lodash/find'
-import head from 'lodash/head'
-
-import 'xterm/css/xterm.css'
-import { Terminal } from 'xterm'
-import { FitAddon } from 'xterm-addon-fit'
-import { WebLinksAddon } from 'xterm-addon-web-links'
-
-import { TerminalSession, Spinner } from '@/lib/terminal'
+import {
+  get,
+  assign,
+  find,
+  head,
+} from '@/utils/lodash'
+import {
+  TerminalSession,
+  Spinner,
+} from '@/lib/terminal'
 import { FocusAddon } from '@/lib/xterm-addon-focus'
-
 import GDragNDroppableComponent from '@/components/GDragNDroppableComponent.vue'
-import { targetText, transformHtml } from '@/utils'
+import {
+  targetText,
+  transformHtml,
+} from '@/utils'
 import { isGatewayTimeout } from '@/utils/error'
 import GTerminalSettingsDialog from '@/components/dialogs/GTerminalSettingsDialog.vue'
 import GIconBase from '@/components/icons/GIconBase.vue'

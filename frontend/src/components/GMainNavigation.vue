@@ -233,19 +233,27 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { ref, computed, nextTick, watch, toRef } from 'vue'
+import {
+  ref,
+  computed,
+  nextTick,
+  watch,
+  toRef,
+} from 'vue'
+import {
+  useRouter,
+  useRoute,
+} from 'vue-router'
+
 import {
   useAppStore,
   useConfigStore,
   useAuthzStore,
   useProjectStore,
 } from '@/store'
-import { useRouter, useRoute } from 'vue-router'
-
 import GProjectDialog from '@/components/dialogs/GProjectDialog.vue'
 import GStaleProjectWarning from '@/components/GStaleProjectWarning.vue'
 import GNotReadyProjectWarning from '@/components/GNotReadyProjectWarning.vue'
-
 import {
   emailToDisplayName,
   setDelayedInputFocus,
@@ -253,19 +261,20 @@ import {
   namespacedRoute as getNamespacedRoute,
   routeName as getRouteName,
 } from '@/utils'
-
-import find from 'lodash/find'
-import findIndex from 'lodash/findIndex'
-import filter from 'lodash/filter'
-import sortBy from 'lodash/sortBy'
-import toLower from 'lodash/toLower'
-import includes from 'lodash/includes'
-import replace from 'lodash/replace'
-import get from 'lodash/get'
-import has from 'lodash/has'
-import head from 'lodash/head'
-import slice from 'lodash/slice'
-import last from 'lodash/last'
+import {
+  find,
+  findIndex,
+  filter,
+  sortBy,
+  toLower,
+  includes,
+  replace,
+  get,
+  has,
+  head,
+  slice,
+  last,
+} from '@/utils/lodash'
 
 const allProjectsItem = {
   metadata: {

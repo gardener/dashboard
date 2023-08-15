@@ -16,6 +16,7 @@ SPDX-License-Identifier: Apache-2.0
 <script setup>
 import { toRefs } from 'vue'
 import { useRouter } from 'vue-router'
+
 import GError from '@/components/GError.vue'
 
 const router = useRouter()

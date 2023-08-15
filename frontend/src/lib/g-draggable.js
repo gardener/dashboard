@@ -4,10 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// Lodash
-import get from 'lodash/get'
-import set from 'lodash/set'
-import forEach from 'lodash/forEach'
+import {
+  get,
+  set,
+  forEach,
+} from '@/utils/lodash'
 
 export const ATTRIBUTE_DRAG_AND_DROP_ID = 'data-g-id'
 

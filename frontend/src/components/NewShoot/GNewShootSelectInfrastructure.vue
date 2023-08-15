@@ -34,11 +34,13 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import GVendorIcon from '@/components/GVendorIcon'
-import { mapState, mapActions } from 'pinia'
 import {
-  useCloudProfileStore,
-} from '@/store'
+  mapState,
+  mapActions,
+} from 'pinia'
+
+import GVendorIcon from '@/components/GVendorIcon'
+import { useCloudProfileStore } from '@/store'
 
 export default {
   components: {

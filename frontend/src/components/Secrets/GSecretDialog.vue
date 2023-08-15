@@ -116,22 +116,42 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapActions, mapState, mapGetters } from 'pinia'
+import {
+  mapActions,
+  mapState,
+  mapGetters,
+} from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
-import { required, maxLength } from '@vuelidate/validators'
-import { unique, resourceName } from '@/utils/validators'
-import { getValidationErrors, setDelayedInputFocus, setInputFocus } from '@/utils'
+import {
+  required,
+  maxLength,
+} from '@vuelidate/validators'
+
+import {
+  unique,
+  resourceName,
+} from '@/utils/validators'
+import {
+  getValidationErrors,
+  setDelayedInputFocus,
+  setInputFocus,
+} from '@/utils'
 import GCloudProfile from '@/components/GCloudProfile'
-import cloneDeep from 'lodash/cloneDeep'
-import get from 'lodash/get'
-import map from 'lodash/map'
-import head from 'lodash/head'
-import sortBy from 'lodash/sortBy'
-import filter from 'lodash/filter'
-import includes from 'lodash/includes'
+import {
+  cloneDeep,
+  get,
+  map,
+  head,
+  sortBy,
+  filter,
+  includes,
+} from '@/utils/lodash'
 import GMessage from '@/components/GMessage'
 import GToolbar from '@/components/GToolbar.vue'
-import { errorDetailsFromError, isConflict } from '@/utils/error'
+import {
+  errorDetailsFromError,
+  isConflict,
+} from '@/utils/error'
 import {
   useSecretStore,
   useAuthzStore,

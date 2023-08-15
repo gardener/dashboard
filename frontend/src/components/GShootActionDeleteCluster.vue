@@ -58,13 +58,10 @@ SPDX-License-Identifier: Apache-2.0
 import { mapActions } from 'pinia'
 
 import { useShootStore } from '@/store'
-
 import GShootActionButton from '@/components/GShootActionButton.vue'
 import GShootActionDialog from '@/components/GShootActionDialog.vue'
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
-
 import { shootItem } from '@/mixins/shootItem'
-
 import { errorDetailsFromError } from '@/utils/error'
 
 export default {

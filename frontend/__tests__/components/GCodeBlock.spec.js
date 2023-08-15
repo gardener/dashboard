@@ -5,6 +5,7 @@
 //
 
 import { shallowMount } from '@vue/test-utils'
+
 import GCodeBlock from '@/components/GCodeBlock.vue'
 
 describe('components', () => {

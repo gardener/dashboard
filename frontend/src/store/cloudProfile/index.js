@@ -5,22 +5,16 @@
 //
 
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import {
+  ref,
+  computed,
+} from 'vue'
 import semver from 'semver'
 
-import { useApi, useLogger } from '@/composables'
-import { useSeedStore } from '../seed'
-import { useConfigStore } from '../config'
 import {
-  matchesPropertyOrEmpty,
-  vendorNameFromImageName,
-  findVendorHint,
-  decorateClassificationObject,
-  firstItemMatchingVersionClassification,
-  mapAccessRestrictionForInput,
-  mapAccessRestrictionForDisplay,
-} from './helper'
-
+  useApi,
+  useLogger,
+} from '@/composables'
 import {
   shortRandomString,
   parseSize,
@@ -30,28 +24,42 @@ import {
   UNKNOWN_EXPIRED_TIMESTAMP,
 } from '@/utils'
 import { v4 as uuidv4 } from '@/utils/uuid'
+import {
+  filter,
+  sortBy,
+  uniq,
+  map,
+  get,
+  some,
+  intersection,
+  find,
+  difference,
+  toPairs,
+  fromPairs,
+  includes,
+  isEmpty,
+  flatMap,
+  template,
+  compact,
+  head,
+  max,
+  cloneDeep,
+  sample,
+  pick,
+} from '@/utils/lodash'
 
-import filter from 'lodash/filter'
-import sortBy from 'lodash/sortBy'
-import uniq from 'lodash/uniq'
-import map from 'lodash/map'
-import get from 'lodash/get'
-import some from 'lodash/some'
-import intersection from 'lodash/intersection'
-import find from 'lodash/find'
-import difference from 'lodash/difference'
-import toPairs from 'lodash/toPairs'
-import fromPairs from 'lodash/fromPairs'
-import includes from 'lodash/includes'
-import isEmpty from 'lodash/isEmpty'
-import flatMap from 'lodash/flatMap'
-import template from 'lodash/template'
-import compact from 'lodash/compact'
-import head from 'lodash/head'
-import max from 'lodash/max'
-import cloneDeep from 'lodash/cloneDeep'
-import sample from 'lodash/sample'
-import pick from 'lodash/pick'
+import { useConfigStore } from '../config'
+import { useSeedStore } from '../seed'
+
+import {
+  matchesPropertyOrEmpty,
+  vendorNameFromImageName,
+  findVendorHint,
+  decorateClassificationObject,
+  firstItemMatchingVersionClassification,
+  mapAccessRestrictionForInput,
+  mapAccessRestrictionForDisplay,
+} from './helper'
 
 export const useCloudProfileStore = defineStore('cloudProfile', () => {
   const logger = useLogger()

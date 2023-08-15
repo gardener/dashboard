@@ -38,8 +38,7 @@ import { mapActions } from 'pinia'
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog.vue'
 import { shootItem } from '@/mixins/shootItem'
 import { errorDetailsFromError } from '@/utils/error'
-
-import get from 'lodash/get'
+import { get } from '@/utils/lodash'
 import { useAppStore } from '@/store'
 
 export default {

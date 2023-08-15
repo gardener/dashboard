@@ -47,14 +47,21 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import GVendorIcon from '@/components/GVendorIcon'
-import GMultiMessage from '@/components/GMultiMessage'
 import { required } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
-import { getValidationErrors, selectedImageIsNotLatest, transformHtml } from '@/utils'
-import pick from 'lodash/pick'
-import find from 'lodash/find'
-import join from 'lodash/join'
+
+import GVendorIcon from '@/components/GVendorIcon'
+import GMultiMessage from '@/components/GMultiMessage'
+import {
+  getValidationErrors,
+  selectedImageIsNotLatest,
+  transformHtml,
+} from '@/utils'
+import {
+  pick,
+  find,
+  join,
+} from '@/utils/lodash'
 
 const validationErrors = {
   worker: {

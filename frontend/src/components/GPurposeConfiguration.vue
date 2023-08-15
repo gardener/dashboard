@@ -27,18 +27,13 @@ SPDX-License-Identifier: Apache-2.0
 import { useVuelidate } from '@vuelidate/core'
 import { defineAsyncComponent } from 'vue'
 import { mapState } from 'pinia'
-import find from 'lodash/find'
 
+import { find } from '@/utils/lodash'
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
-
 import { errorDetailsFromError } from '@/utils/error'
-
 import shootItem from '@/mixins/shootItem'
 import { useAsyncRef } from '@/composables'
-
-import {
-  useSecretStore,
-} from '@/store'
+import { useSecretStore } from '@/store'
 
 export default {
   components: {

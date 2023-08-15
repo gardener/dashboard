@@ -128,8 +128,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import GAnsiText from '@/components/GAnsiText.vue'
-
-import isEmpty from 'lodash/isEmpty'
+import { isEmpty } from '@/utils/lodash'
 
 export default {
   components: {

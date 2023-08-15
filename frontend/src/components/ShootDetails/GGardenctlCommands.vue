@@ -53,18 +53,19 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapState } from 'pinia'
 
-import { useAuthnStore, useConfigStore, useProjectStore } from '@/store'
-
+import {
+  useAuthnStore,
+  useConfigStore,
+  useProjectStore,
+} from '@/store'
 import GListItem from '@/components/GListItem.vue'
 import GListItemContent from '@/components/GListItemContent.vue'
 import GActionButton from '@/components/GActionButton.vue'
 import GCopyBtn from '@/components/GCopyBtn.vue'
 import GCodeBlock from '@/components/GCodeBlock.vue'
 import GGardenctlInfo from '@/components/GGardenctlInfo.vue'
-
 import { shootItem } from '@/mixins/shootItem'
-
-import get from 'lodash/get'
+import { get } from '@/utils/lodash'
 
 export default {
   components: {

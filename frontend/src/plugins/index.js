@@ -4,10 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { messagesColor } from '@/directives'
-
-// Styles
 import '@/sass/main.scss'
+
+import { messagesColor } from '../directives'
 
 import store from './store'
 import router from './router'

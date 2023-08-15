@@ -130,23 +130,50 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapActions, mapState, mapGetters } from 'pinia'
+import {
+  mapActions,
+  mapState,
+  mapGetters,
+} from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
-import { required, requiredIf } from '@vuelidate/validators'
-import { resourceName, unique } from '@/utils/validators'
+import {
+  required,
+  requiredIf,
+} from '@vuelidate/validators'
+
+import {
+  resourceName,
+  unique,
+} from '@/utils/validators'
 import GMessage from '@/components/GMessage.vue'
 import GToolbar from '@/components/GToolbar.vue'
-import { errorDetailsFromError, isConflict } from '@/utils/error'
-import { parseServiceAccountUsername, isServiceAccountUsername, setDelayedInputFocus, getValidationErrors, isForeignServiceAccount, MEMBER_ROLE_DESCRIPTORS } from '@/utils'
-import toLower from 'lodash/toLower'
-import filter from 'lodash/filter'
-import map from 'lodash/map'
-import includes from 'lodash/includes'
-import forEach from 'lodash/forEach'
-import find from 'lodash/find'
-import negate from 'lodash/negate'
-import get from 'lodash/get'
-import { useAuthnStore, useAuthzStore, useMemberStore } from '@/store'
+import {
+  errorDetailsFromError,
+  isConflict,
+} from '@/utils/error'
+import {
+  parseServiceAccountUsername,
+  isServiceAccountUsername,
+  setDelayedInputFocus,
+  getValidationErrors,
+  isForeignServiceAccount,
+  MEMBER_ROLE_DESCRIPTORS,
+} from '@/utils'
+import {
+  toLower,
+  filter,
+  map,
+  includes,
+  forEach,
+  find,
+  negate,
+  get,
+} from '@/utils/lodash'
+import {
+  useAuthnStore,
+  useAuthzStore,
+  useMemberStore,
+} from '@/store'
 
 const defaultUsername = ''
 const defaultServiceName = 'robot'

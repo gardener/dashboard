@@ -284,23 +284,30 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { ref, computed, markRaw, inject } from 'vue'
+import {
+  ref,
+  computed,
+  markRaw,
+  inject,
+} from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import download from 'downloadjs'
+import { useLocalStorage } from '@vueuse/core'
 
-import filter from 'lodash/filter'
-import forEach from 'lodash/forEach'
-import get from 'lodash/get'
-import head from 'lodash/head'
-import includes from 'lodash/includes'
-import join from 'lodash/join'
-import map from 'lodash/map'
-import mapKeys from 'lodash/mapKeys'
-import mapValues from 'lodash/mapValues'
-import orderBy from 'lodash/orderBy'
-import toLower from 'lodash/toLower'
-
+import {
+  filter,
+  forEach,
+  get,
+  head,
+  includes,
+  join,
+  map,
+  mapKeys,
+  mapValues,
+  orderBy,
+  toLower,
+} from '@/utils/lodash'
 import GUserRow from '@/components/Members/GUserRow.vue'
 import GServiceAccountRow from '@/components/Members/GServiceAccountRow.vue'
 import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
@@ -314,7 +321,6 @@ import GCodeBlock from '@/components/GCodeBlock.vue'
 import GToolbar from '@/components/GToolbar.vue'
 import GActionButton from '@/components/GActionButton.vue'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
-
 import {
   useAuthzStore,
   useProjectStore,
@@ -322,7 +328,6 @@ import {
   useMemberStore,
   useAppStore,
 } from '@/store'
-
 import {
   displayName,
   gravatarUrlGeneric,
@@ -334,9 +339,8 @@ import {
   sortedRoleDisplayNames,
   mapTableHeader,
 } from '@/utils'
-
-import { useLocalStorage } from '@vueuse/core'
 import { useApi } from '@/composables'
+
 const renderComponent = inject('renderComponent')
 
 const api = useApi()

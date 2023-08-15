@@ -4,17 +4,21 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { setActivePinia, createPinia } from 'pinia'
+import {
+  setActivePinia,
+  createPinia,
+} from 'pinia'
+
 import { useApi } from '@/composables/useApi'
 import { useAuthzStore } from '@/store/authz'
 import { useShootStore } from '@/store/shoot'
 import { useProjectStore } from '@/store/project'
 import { useSocketStore } from '@/store/socket'
-
 import { parseSearch } from '@/store/shoot/helper'
-
-import cloneDeep from 'lodash/cloneDeep'
-import map from 'lodash/map'
+import {
+  cloneDeep,
+  map,
+} from '@/utils/lodash'
 
 const noop = () => {}
 

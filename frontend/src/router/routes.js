@@ -4,10 +4,20 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import {
-  newShootTabs,
-  shootItemTabs,
-} from './tabs'
+/* Layouts */
+import GLogin from '@/layouts/GLogin.vue'
+import GDefault from '@/layouts/GDefault.vue'
+/* Views */
+import GError from '@/views/GError.vue'
+import GNotFound from '@/views/GNotFound.vue'
+import GProjectPlaceholder from '@/views/GProjectPlaceholder.vue'
+import GNewShootEditor from '@/views/GNewShootEditor.vue'
+import GShootItemPlaceholder from '@/views/GShootItemPlaceholder.vue'
+import GShootItemEditor from '@/views/GShootItemEditor.vue'
+import GAccount from '@/views/GAccount.vue'
+import GSettings from '@/views/GSettings.vue'
+/* Components */
+import GRouterView from '@/components/GRouterView.vue'
 
 import {
   homeBreadcrumbs,
@@ -26,23 +36,10 @@ import {
   terminalBreadcrumbs,
   notFoundBreadcrumbs,
 } from './breadcrumbs'
-
-/* Layouts */
-import GLogin from '@/layouts/GLogin.vue'
-import GDefault from '@/layouts/GDefault.vue'
-
-/* Views */
-import GError from '@/views/GError.vue'
-import GNotFound from '@/views/GNotFound.vue'
-import GProjectPlaceholder from '@/views/GProjectPlaceholder.vue'
-import GNewShootEditor from '@/views/GNewShootEditor.vue'
-import GShootItemPlaceholder from '@/views/GShootItemPlaceholder.vue'
-import GShootItemEditor from '@/views/GShootItemEditor.vue'
-import GAccount from '@/views/GAccount.vue'
-import GSettings from '@/views/GSettings.vue'
-
-/* Components */
-import GRouterView from '@/components/GRouterView.vue'
+import {
+  newShootTabs,
+  shootItemTabs,
+} from './tabs'
 
 const GMembers = () => import('@/views/GMembers.vue')
 const GHome = () => import('@/views/GHome.vue')

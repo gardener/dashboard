@@ -57,10 +57,10 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapActions } from 'pinia'
-import { useCloudProfileStore } from '@/store'
 
+import { useCloudProfileStore } from '@/store'
 import { shootItem } from '@/mixins/shootItem'
-import some from 'lodash/some'
+import { some } from '@/utils/lodash'
 
 export default {
   mixins: [shootItem],

@@ -162,17 +162,21 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { defineAsyncComponent } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
-
-import { mapActions, mapState } from 'pinia'
-import set from 'lodash/set'
-import get from 'lodash/get'
-import find from 'lodash/find'
-import isEmpty from 'lodash/isEmpty'
-import cloneDeep from 'lodash/cloneDeep'
-import isEqual from 'lodash/isEqual'
-import unset from 'lodash/unset'
+import {
+  mapActions,
+  mapState,
+} from 'pinia'
 import mitt from 'mitt'
 
+import {
+  set,
+  get,
+  find,
+  isEmpty,
+  cloneDeep,
+  isEqual,
+  unset,
+} from '@/utils/lodash'
 import GAccessRestrictions from '@/components/ShootAccessRestrictions/GAccessRestrictions'
 import GConfirmDialog from '@/components/dialogs/GConfirmDialog'
 import GMessage from '@/components/GMessage'
@@ -185,13 +189,14 @@ import GManageShootAddons from '@/components/ShootAddons/GManageAddons'
 import GManageShootDns from '@/components/ShootDns/GManageDns'
 import GManageControlPlaneHighAvailability from '@/components/ControlPlaneHighAvailability/GManageControlPlaneHighAvailability'
 import GToolbar from '@/components/GToolbar.vue'
-
 import { isZonedCluster } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
-import { getSpecTemplate, getZonesNetworkConfiguration, getControlPlaneZone } from '@/utils/createShoot'
-
+import {
+  getSpecTemplate,
+  getZonesNetworkConfiguration,
+  getControlPlaneZone,
+} from '@/utils/createShoot'
 import { useAsyncRef } from '@/composables'
-
 import {
   useCloudProfileStore,
   useShootStagingStore,

@@ -94,32 +94,41 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { toRefs, toRaw } from 'vue'
+import {
+  toRefs,
+  toRaw,
+} from 'vue'
 import { useVuelidate } from '@vuelidate/core'
+import {
+  mapState,
+  mapActions,
+} from 'pinia'
 
-import { mapState, mapActions } from 'pinia'
 import {
   useAuthnStore,
   useShootStore,
   useTerminalStore,
 } from '@/store'
-
 import { useTerminalConfig } from '@/composables/useTerminalConfig'
-
 import GDialog from '@/components/dialogs/GDialog.vue'
 import GTerminalSettings from '@/components/GTerminalSettings.vue'
 import GTerminalTarget from '@/components/GTerminalTarget.vue'
 import GTerminalShortcuts from '@/components/GTerminalShortcuts.vue'
 import GUnverifiedTerminalShortcutsDialog from '@/components/dialogs/GUnverifiedTerminalShortcutsDialog.vue'
 import GWebterminalServiceAccountDialog from '@/components/dialogs/GWebterminalServiceAccountDialog.vue'
-import { TargetEnum, isShootStatusHibernated } from '@/utils'
-import filter from 'lodash/filter'
-import get from 'lodash/get'
-import includes from 'lodash/includes'
-import isEmpty from 'lodash/isEmpty'
-import pick from 'lodash/pick'
-import find from 'lodash/find'
-import some from 'lodash/some'
+import {
+  TargetEnum,
+  isShootStatusHibernated,
+} from '@/utils'
+import {
+  filter,
+  get,
+  includes,
+  isEmpty,
+  pick,
+  find,
+  some,
+} from '@/utils/lodash'
 
 export default {
   components: {

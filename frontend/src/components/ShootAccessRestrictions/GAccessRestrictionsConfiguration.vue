@@ -23,16 +23,17 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { mapGetters } from 'pinia'
+
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GAccessRestrictions from '@/components/ShootAccessRestrictions/GAccessRestrictions'
-import isEmpty from 'lodash/isEmpty'
-import cloneDeep from 'lodash/cloneDeep'
-import { shootItem } from '@/mixins/shootItem'
-import { mapGetters } from 'pinia'
-import { errorDetailsFromError } from '@/utils/error'
 import {
-  useCloudProfileStore,
-} from '@/store'
+  isEmpty,
+  cloneDeep,
+} from '@/utils/lodash'
+import { shootItem } from '@/mixins/shootItem'
+import { errorDetailsFromError } from '@/utils/error'
+import { useCloudProfileStore } from '@/store'
 
 export default {
   name: 'AccessRestrictionConfiguration',

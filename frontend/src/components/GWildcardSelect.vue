@@ -73,11 +73,15 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import trim from 'lodash/trim'
-import { getValidationErrors } from '@/utils'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-import { wildcardObjectsFromStrings, bestMatchForString } from '@/utils/wildcard'
+
+import { trim } from '@/utils/lodash'
+import { getValidationErrors } from '@/utils'
+import {
+  wildcardObjectsFromStrings,
+  bestMatchForString,
+} from '@/utils/wildcard'
 
 export default {
   props: {

@@ -33,7 +33,6 @@ SPDX-License-Identifier: Apache-2.0
 import { mapActions } from 'pinia'
 
 import { useTerminalStore } from '@/store'
-
 import { gDraggable } from '@/lib/g-draggable'
 import GPositionalDropzone from '@/components/GPositionalDropzone.vue'
 

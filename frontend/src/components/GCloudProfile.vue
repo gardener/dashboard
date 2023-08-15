@@ -33,6 +33,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
+
 import { getValidationErrors } from '@/utils'
 
 const validationErrors = {

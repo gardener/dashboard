@@ -37,11 +37,12 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapState } from 'pinia'
-import filter from 'lodash/filter'
-import cloneDeep from 'lodash/cloneDeep'
 
+import {
+  filter,
+  cloneDeep,
+} from '@/utils/lodash'
 import { shootAddonList } from '@/utils'
-
 import {
   useAuthzStore,
   useProjectStore,

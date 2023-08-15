@@ -4,7 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { splitCIDR, getZonesNetworkConfiguration, findFreeNetworks } from '@/utils/createShoot'
+import {
+  splitCIDR,
+  getZonesNetworkConfiguration,
+  findFreeNetworks,
+} from '@/utils/createShoot'
 
 describe('utils', () => {
   describe('createShoot', () => {

@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
-import kebabCase from 'lodash/kebabCase'
+import { kebabCase } from '@/utils/lodash'
 
 const route = useRoute()
 

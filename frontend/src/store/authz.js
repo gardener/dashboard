@@ -5,14 +5,17 @@
 //
 
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import {
+  ref,
+  computed,
+} from 'vue'
 
 import { useApi } from '@/composables'
+import { canI } from '@/utils'
+
 import { useConfigStore } from './config'
 import { useAuthnStore } from './authn'
 import { useProjectStore } from './project'
-
-import { canI } from '@/utils'
 
 export const useAuthzStore = defineStore('authz', () => {
   const api = useApi()

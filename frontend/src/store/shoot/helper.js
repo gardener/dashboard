@@ -19,37 +19,36 @@ import {
   isShootStatusHibernated,
   getIssueSince,
 } from '@/utils'
-
 import {
   isUserError,
   isTemporaryError,
   errorCodesFromArray,
 } from '@/utils/errorCodes'
-
 import {
   getSpecTemplate,
   getDefaultZonesNetworkConfiguration,
   getControlPlaneZone,
 } from '@/utils/createShoot'
-
-import find from 'lodash/find'
-import includes from 'lodash/includes'
-import assign from 'lodash/assign'
-import set from 'lodash/set'
-import head from 'lodash/head'
-import get from 'lodash/get'
-import isEmpty from 'lodash/isEmpty'
-import map from 'lodash/map'
-import sample from 'lodash/sample'
-import omit from 'lodash/omit'
-import forEach from 'lodash/forEach'
-import filter from 'lodash/filter'
-import some from 'lodash/some'
-import startsWith from 'lodash/startsWith'
-import toLower from 'lodash/toLower'
-import join from 'lodash/join'
-import padStart from 'lodash/padStart'
-import orderBy from 'lodash/orderBy'
+import {
+  find,
+  includes,
+  assign,
+  set,
+  head,
+  get,
+  isEmpty,
+  map,
+  sample,
+  omit,
+  forEach,
+  filter,
+  some,
+  startsWith,
+  toLower,
+  join,
+  padStart,
+  orderBy,
+} from '@/utils/lodash'
 
 export const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
 

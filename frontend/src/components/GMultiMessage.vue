@@ -26,8 +26,9 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import map from 'lodash/map'
 import { computed } from 'vue'
+
+import { map } from '@/utils/lodash'
 
 const props = defineProps({
   message: {

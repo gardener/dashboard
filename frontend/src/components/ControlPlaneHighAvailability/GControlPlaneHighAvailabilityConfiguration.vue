@@ -21,15 +21,17 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapActions, mapState } from 'pinia'
+import {
+  mapActions,
+  mapState,
+} from 'pinia'
+
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GManageControlPlaneHighAvailability from '@/components/ControlPlaneHighAvailability/GManageControlPlaneHighAvailability'
 import { errorDetailsFromError } from '@/utils/error'
 import { shootItem } from '@/mixins/shootItem'
 import { v4 as uuidv4 } from '@/utils/uuid'
-import {
-  useShootStagingStore,
-} from '@/store'
+import { useShootStagingStore } from '@/store'
 
 export default {
   components: {

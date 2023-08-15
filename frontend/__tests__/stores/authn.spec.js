@@ -6,9 +6,13 @@
 
 import { ref } from 'vue'
 import { vi } from 'vitest'
-import { setActivePinia, createPinia } from 'pinia'
-import { useAuthnStore } from '@/store/authn'
+import {
+  setActivePinia,
+  createPinia,
+} from 'pinia'
 import { useBrowserLocation } from '@vueuse/core'
+
+import { useAuthnStore } from '@/store/authn'
 
 vi.mock('@vueuse/core', async () => {
   const url = new URL(window.location.href)

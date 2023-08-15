@@ -49,11 +49,15 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import GSecretDialog from '@/components/Secrets/GSecretDialog'
-import GExternalLink from '@/components/GExternalLink.vue'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-import { getValidationErrors, setDelayedInputFocus } from '@/utils'
+
+import GSecretDialog from '@/components/Secrets/GSecretDialog'
+import GExternalLink from '@/components/GExternalLink.vue'
+import {
+  getValidationErrors,
+  setDelayedInputFocus,
+} from '@/utils'
 
 const validationErrors = {
   hcloudToken: {

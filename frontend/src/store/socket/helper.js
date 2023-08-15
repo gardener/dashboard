@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 import { unref } from 'vue'
-import { io, Manager } from 'socket.io-client'
+import {
+  io,
+  Manager,
+} from 'socket.io-client'
 
 import { createClockSkewError } from '@/utils/errors'
 

@@ -5,8 +5,13 @@
 //
 
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import {
+  ref,
+  computed,
+} from 'vue'
+
 import { useApi } from '@/composables'
+
 import { useAuthzStore } from './authz'
 import { useAppStore } from './app'
 

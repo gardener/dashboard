@@ -51,23 +51,30 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState, mapActions } from 'pinia'
-import { useAuthzStore, useCloudProfileStore, useConfigStore } from '@/store'
+import {
+  mapState,
+  mapActions,
+} from 'pinia'
 
+import {
+  useAuthzStore,
+  useCloudProfileStore,
+  useConfigStore,
+} from '@/store'
 import GK8sExpirationMessage from '@/components/ShootMessages/GK8sExpirationMessage.vue'
 import GWorkerGroupExpirationMessage from '@/components/ShootMessages/GWorkerGroupExpirationMessage.vue'
 import GNoHibernationScheduleMessage from '@/components/ShootMessages/GNoHibernationScheduleMessage.vue'
 import GClusterExpirationMessage from '@/components/ShootMessages/GClusterExpirationMessage.vue'
 import GConstraintMessage from '@/components/ShootMessages/GConstraintMessage.vue'
 import GMaintenanceStatusMessage from '@/components/ShootMessages/GMaintenanceStatusMessage.vue'
-
 import { shootItem } from '@/mixins/shootItem'
 import { isSelfTerminationWarning } from '@/utils'
-
-import get from 'lodash/get'
-import map from 'lodash/map'
-import includes from 'lodash/includes'
-import isEmpty from 'lodash/isEmpty'
+import {
+  get,
+  map,
+  includes,
+  isEmpty,
+} from '@/utils/lodash'
 
 export default {
   components: {

@@ -234,13 +234,21 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState, mapActions } from 'pinia'
-import { wildcardObjectsFromStrings, bestMatchForString } from '@/utils/wildcard'
-import get from 'lodash/get'
-import find from 'lodash/find'
-import map from 'lodash/map'
-import head from 'lodash/head'
+import {
+  mapState,
+  mapActions,
+} from 'pinia'
 
+import {
+  wildcardObjectsFromStrings,
+  bestMatchForString,
+} from '@/utils/wildcard'
+import {
+  get,
+  find,
+  map,
+  head,
+} from '@/utils/lodash'
 import GCopyBtn from '@/components/GCopyBtn'
 import GShootSeedName from '@/components/GShootSeedName'
 import GVendor from '@/components/GVendor'
@@ -250,9 +258,7 @@ import GSeedConfiguration from '@/components/GSeedConfiguration'
 import GControlPlaneHighAvailabilityConfiguration from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityConfiguration'
 import GControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityTag'
 import GSecretDetailsItemContent from '@/components/Secrets/GSecretDetailsItemContent'
-
 import { shootItem } from '@/mixins/shootItem'
-
 import {
   useCloudProfileStore,
   useSecretStore,

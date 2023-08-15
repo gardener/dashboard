@@ -36,13 +36,12 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapState } from 'pinia'
+
 import {
   useAuthzStore,
   useProjectStore,
 } from '@/store'
-
-import isEmpty from 'lodash/isEmpty'
-
+import { isEmpty } from '@/utils/lodash'
 import GProjectDialog from '@/components/dialogs/GProjectDialog.vue'
 
 export default {

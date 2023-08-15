@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { createRouter as createVueRouter, createWebHistory } from 'vue-router'
+import {
+  createRouter as createVueRouter,
+  createWebHistory,
+} from 'vue-router'
 
 import { useAppStore } from '@/store/app'
 import { useAuthzStore } from '@/store/authz'
@@ -19,10 +22,10 @@ import { useSecretStore } from '@/store/secret'
 import { useSeedStore } from '@/store/seed'
 import { useShootStore } from '@/store/shoot'
 import { useTerminalStore } from '@/store/terminal'
-
-import { createRoutes } from './routes'
-import { createGuards } from './guards'
 import { useLogger } from '@/composables'
+
+import { createGuards } from './guards'
+import { createRoutes } from './routes'
 
 export function createRouter () {
   const logger = useLogger()

@@ -4,8 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import pick from 'lodash/pick'
-
+import { pick } from '@/utils/lodash'
 import {
   canI,
   selectedImageIsNotLatest,

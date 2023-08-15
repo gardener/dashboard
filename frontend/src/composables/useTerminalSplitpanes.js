@@ -10,25 +10,37 @@ import {
   toRef,
   unref,
 } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-
-import { createLocalState } from './createLocalState'
-
+import {
+  useRouter,
+  useRoute,
+} from 'vue-router'
 import { useLocalStorage } from '@vueuse/core'
 
-import { useAppStore, useAuthzStore } from '@/store'
-import { useApi } from './useApi'
+import {
+  useAppStore,
+  useAuthzStore,
+} from '@/store'
+import {
+  every,
+  get,
+  filter,
+  includes,
+  map,
+  merge,
+  cloneDeep,
+  difference,
+} from '@/utils/lodash'
+import {
+  TargetEnum,
+  routeName,
+} from '@/utils'
+import {
+  GSymbolTree,
+  Leaf,
+} from '@/lib/g-symbol-tree'
 
-import every from 'lodash/every'
-import get from 'lodash/get'
-import filter from 'lodash/filter'
-import includes from 'lodash/includes'
-import map from 'lodash/map'
-import merge from 'lodash/merge'
-import cloneDeep from 'lodash/cloneDeep'
-import difference from 'lodash/difference'
-import { TargetEnum, routeName } from '@/utils'
-import { GSymbolTree, Leaf } from '@/lib/g-symbol-tree'
+import { useApi } from './useApi'
+import { createLocalState } from './createLocalState'
 
 export const useTerminalSplitpanes = createLocalState(({ name, namespace, target }) => {
   const router = useRouter()
