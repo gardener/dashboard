@@ -12,8 +12,6 @@ import {
 } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
-import { createLocalState } from './createLocalState'
-
 import { useLocalStorage } from '@vueuse/core'
 
 import { useAppStore, useAuthzStore } from '@/store'
@@ -30,7 +28,7 @@ import difference from 'lodash/difference'
 import { TargetEnum, routeName } from '@/utils'
 import { GSymbolTree, Leaf } from '@/lib/g-symbol-tree'
 
-export const useTerminalSplitpanes = createLocalState(({ name, namespace, target }) => {
+export const useTerminalSplitpanes = ({ name, namespace, target }) => {
   const router = useRouter()
   const currentRoute = useRoute()
 
@@ -258,4 +256,4 @@ export const useTerminalSplitpanes = createLocalState(({ name, namespace, target
     moveTo,
     leavePage,
   }
-})
+}

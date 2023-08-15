@@ -6,15 +6,13 @@
 
 import { computed, reactive, watch } from 'vue'
 
-import { createLocalState } from './createLocalState'
-
 import { useAuthnStore } from '@/store/authn'
 
 import get from 'lodash/get'
 import head from 'lodash/head'
 import some from 'lodash/some'
 
-export const useTerminalConfig = createLocalState(() => {
+export const useTerminalConfig = () => {
   const authnStore = useAuthnStore()
 
   function updateState (options = {}) {
@@ -99,4 +97,4 @@ export const useTerminalConfig = createLocalState(() => {
     config,
     updateState,
   }
-})
+}
