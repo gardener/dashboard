@@ -11,7 +11,7 @@ import {
   markRaw,
 } from 'vue'
 
-import { useLogger } from '@/composables'
+import { useLogger } from '@/composables/useLogger'
 
 import { useAuthnStore } from '../authn'
 import { useProjectStore } from '../project'

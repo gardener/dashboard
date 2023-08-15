@@ -14,9 +14,11 @@ SPDX-License-Identifier: Apache-2.0
 import { toRef } from 'vue'
 import { useRoute } from 'vue-router'
 
-import { get } from '@/utils/lodash'
-import { useTerminalSplitpanes } from '@/composables/useTerminalSplitpanes'
 import GTerminalSplitpanes from '@/components/GTerminalSplitpanes.vue'
+
+import { useTerminalSplitpanes } from '@/composables/useTerminalSplitpanes'
+
+import { get } from '@/lodash'
 
 export default {
   components: {
@@ -52,3 +54,4 @@ export default {
   },
 }
 </script>
+@/lodash

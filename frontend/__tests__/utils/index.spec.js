@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { pick } from '@/utils/lodash'
 import {
   canI,
   selectedImageIsNotLatest,
@@ -12,6 +11,8 @@ import {
   defaultCriNameByKubernetesVersion,
   getIssueSince,
 } from '@/utils'
+
+import { pick } from '@/lodash'
 
 describe('utils', () => {
   describe('authorization', () => {

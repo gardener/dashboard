@@ -128,14 +128,15 @@ import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { useRouteQuery } from '@vueuse/router'
 
-import { useApi } from '@/composables'
-import {
-  useAppStore,
-  useAuthnStore,
-  useLoginStore,
-} from '@/store'
-import { setDelayedInputFocus } from '@/utils'
+import { useAppStore } from '@/store/app'
+import { useAuthnStore } from '@/store/authn'
+import { useLoginStore } from '@/store/login'
+
 import GNotify from '@/components/GNotify.vue'
+
+import { useApi } from '@/composables/useApi'
+
+import { setDelayedInputFocus } from '@/utils'
 
 const router = useRouter()
 const appStore = useAppStore()

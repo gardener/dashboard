@@ -33,15 +33,18 @@ import {
 } from 'vue'
 import { onBeforeRouteUpdate } from 'vue-router'
 
-import { useLogger } from '@/composables'
-import { useAppStore } from '@/store'
+import { useAppStore } from '@/store/app'
+
 import GError from '@/components/GError.vue'
 import GLoading from '@/components/GLoading.vue'
 import GMainNavigation from '@/components/GMainNavigation.vue'
 import GMainToolbar from '@/components/GMainToolbar.vue'
 import GMainContent from '@/components/GMainContent.vue'
 import GNotify from '@/components/GNotify.vue'
-import { get } from '@/utils/lodash'
+
+import { useLogger } from '@/composables/useLogger'
+
+import { get } from '@/lodash'
 
 const logger = useLogger()
 const appStore = useAppStore()
@@ -99,3 +102,4 @@ onMounted(() => {
   }
 })
 </script>
+@/lodash

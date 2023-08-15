@@ -6,7 +6,7 @@
 
 import { Buffer } from 'buffer'
 
-import { useLogger } from '@/composables'
+import { useLogger } from '@/composables/useLogger'
 
 export const WsReadyStateEnum = {
   CONNECTING: 0,

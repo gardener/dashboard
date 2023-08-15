@@ -87,11 +87,13 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapGetters } from 'pinia'
 
-import { mapTableHeader } from '@/utils'
+import { useAuthzStore } from '@/store/authz'
+
 import GVendor from '@/components/GVendor'
 import GSecretDetailsItemContent from '@/components/Secrets/GSecretDetailsItemContent'
 import GActionButton from '@/components/GActionButton.vue'
-import { useAuthzStore } from '@/store'
+
+import { mapTableHeader } from '@/utils'
 
 export default {
   components: {

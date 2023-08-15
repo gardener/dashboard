@@ -38,15 +38,15 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapState } from 'pinia'
 
+import { useAuthzStore } from '@/store/authz'
+import { useProjectStore } from '@/store/project'
+
+import { shootAddonList } from '@/utils'
+
 import {
   filter,
   cloneDeep,
-} from '@/utils/lodash'
-import { shootAddonList } from '@/utils'
-import {
-  useAuthzStore,
-  useProjectStore,
-} from '@/store'
+} from '@/lodash'
 
 export default {
   props: {
@@ -96,3 +96,4 @@ export default {
   min-width: 48px;
 }
 </style>
+@/lodash

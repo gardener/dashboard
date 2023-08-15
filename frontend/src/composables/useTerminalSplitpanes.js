@@ -16,10 +16,21 @@ import {
 } from 'vue-router'
 import { useLocalStorage } from '@vueuse/core'
 
+import { useAppStore } from '@/store/app'
+import { useAuthzStore } from '@/store/authz'
+
 import {
-  useAppStore,
-  useAuthzStore,
-} from '@/store'
+  TargetEnum,
+  routeName,
+} from '@/utils'
+
+import {
+  GSymbolTree,
+  Leaf,
+} from '@/lib/g-symbol-tree'
+
+import { useApi } from './useApi'
+
 import {
   every,
   get,
@@ -29,17 +40,7 @@ import {
   merge,
   cloneDeep,
   difference,
-} from '@/utils/lodash'
-import {
-  TargetEnum,
-  routeName,
-} from '@/utils'
-import {
-  GSymbolTree,
-  Leaf,
-} from '@/lib/g-symbol-tree'
-
-import { useApi } from './useApi'
+} from '@/lodash'
 
 export const useTerminalSplitpanes = ({ name, namespace, target }) => {
   const router = useRouter()

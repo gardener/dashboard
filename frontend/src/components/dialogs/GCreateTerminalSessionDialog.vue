@@ -104,22 +104,24 @@ import {
   mapActions,
 } from 'pinia'
 
-import {
-  useAuthnStore,
-  useShootStore,
-  useTerminalStore,
-} from '@/store'
-import { useTerminalConfig } from '@/composables/useTerminalConfig'
+import { useAuthnStore } from '@/store/authn'
+import { useShootStore } from '@/store/shoot'
+import { useTerminalStore } from '@/store/terminal'
+
 import GDialog from '@/components/dialogs/GDialog.vue'
 import GTerminalSettings from '@/components/GTerminalSettings.vue'
 import GTerminalTarget from '@/components/GTerminalTarget.vue'
 import GTerminalShortcuts from '@/components/GTerminalShortcuts.vue'
 import GUnverifiedTerminalShortcutsDialog from '@/components/dialogs/GUnverifiedTerminalShortcutsDialog.vue'
 import GWebterminalServiceAccountDialog from '@/components/dialogs/GWebterminalServiceAccountDialog.vue'
+
+import { useTerminalConfig } from '@/composables/useTerminalConfig'
+
 import {
   TargetEnum,
   isShootStatusHibernated,
 } from '@/utils'
+
 import {
   filter,
   get,
@@ -128,7 +130,7 @@ import {
   pick,
   find,
   some,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 export default {
   components: {
@@ -327,3 +329,4 @@ export default {
   },
 }
 </script>
+@/lodash

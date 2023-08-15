@@ -19,7 +19,7 @@ import {
   range,
   pick,
   values,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 export function getSpecTemplate (infrastructureKind, defaultWorkerCIDR) {
   switch (infrastructureKind) {

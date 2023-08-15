@@ -10,10 +10,8 @@ import {
 } from 'pinia'
 import colors from 'vuetify/lib/util/colors'
 
-import {
-  useShootStore,
-  useSocketStore,
-} from '@/store'
+import { useShootStore } from '@/store/shoot'
+import { useSocketStore } from '@/store/socket'
 import { constants } from '@/store/shoot/helper'
 
 export const shootSubscription = {

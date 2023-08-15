@@ -64,10 +64,11 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import GVendorIcon from '@/components/GVendorIcon'
 import GSecretDetailsItemContent from '@/components/Secrets/GSecretDetailsItemContent.vue'
+
 import {
   join,
   get,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 export default {
   components: {
@@ -155,3 +156,4 @@ export default {
   },
 }
 </script>
+@/lodash

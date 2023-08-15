@@ -13,7 +13,7 @@ import {
   flatMap,
   map,
   some,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 export function errorCodesFromArray (array) {
   return uniq(compact(flatMap(array, 'codes')))

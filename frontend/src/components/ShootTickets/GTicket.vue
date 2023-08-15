@@ -72,15 +72,15 @@ import {
   mapActions,
 } from 'pinia'
 
-import {
-  useConfigStore,
-  useTicketStore,
-} from '@/store'
+import { useConfigStore } from '@/store/config'
+import { useTicketStore } from '@/store/ticket'
+
 import GTimeString from '@/components/GTimeString.vue'
 import GTicketLabel from '@/components/ShootTickets/GTicketLabel.vue'
 import GTicketComment from '@/components/ShootTickets/GTicketComment.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
-import { get } from '@/utils/lodash'
+
+import { get } from '@/lodash'
 
 export default {
   components: {
@@ -150,3 +150,4 @@ export default {
     text-decoration: none;
   }
 </style>
+@/lodash

@@ -9,8 +9,9 @@ import {
   watch,
 } from 'vue'
 
-import pTimeout from '@/utils/p-timeout'
 import { useLogger } from '@/composables/useLogger'
+
+import pTimeout from '@/utils/p-timeout'
 
 export const useAsyncRef = (key, options = {}) => {
   const {

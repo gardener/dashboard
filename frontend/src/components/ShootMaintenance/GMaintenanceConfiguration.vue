@@ -29,15 +29,17 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { useVuelidate } from '@vuelidate/core'
 
-import {
-  get,
-  assign,
-} from '@/utils/lodash'
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GMaintenanceComponents from '@/components/ShootMaintenance/GMaintenanceComponents'
 import GMaintenanceTime from '@/components/ShootMaintenance/GMaintenanceTime'
+
 import { errorDetailsFromError } from '@/utils/error'
 import { shootItem } from '@/mixins/shootItem'
+
+import {
+  get,
+  assign,
+} from '@/lodash'
 
 export default {
   components: {
@@ -102,3 +104,4 @@ export default {
   },
 }
 </script>
+@/lodash

@@ -17,9 +17,11 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapState } from 'pinia'
 
-import { useProjectStore } from '@/store'
+import { useProjectStore } from '@/store/project'
+
 import GError from '@/components/GError.vue'
-import { get } from '@/utils/lodash'
+
+import { get } from '@/lodash'
 
 export default {
   components: {
@@ -73,3 +75,4 @@ export default {
   },
 }
 </script>
+@/lodash

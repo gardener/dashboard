@@ -7,13 +7,14 @@
 import SymbolTree from 'symbol-tree'
 
 import { v4 as uuidv4 } from '@/utils/uuid'
+
 import {
   forEach,
   isEmpty,
   keys,
   compact,
   values,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 export const PositionEnum = {
   TOP: 'top',

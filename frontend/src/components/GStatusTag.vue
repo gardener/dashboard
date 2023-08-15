@@ -78,17 +78,20 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapState } from 'pinia'
 
+import { useAuthnStore } from '@/store/authn'
+
 import GShootMessageDetails from '@/components/GShootMessageDetails.vue'
+
 import {
   isUserError,
   objectsFromErrorCodes,
 } from '@/utils/errorCodes'
+
 import {
   get,
   isEmpty,
   filter,
-} from '@/utils/lodash'
-import { useAuthnStore } from '@/store'
+} from '@/lodash'
 
 export default {
   components: {
@@ -254,3 +257,4 @@ export default {
     }
   }
 </style>
+@/lodash

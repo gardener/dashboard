@@ -34,7 +34,7 @@ import {
   toRefs,
 } from 'vue'
 
-import { useAppStore } from '@/store'
+import { useAppStore } from '@/store/app'
 
 const store = useAppStore()
 const notify = inject('notify')

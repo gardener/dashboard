@@ -5,6 +5,10 @@
 //
 
 // Local
+
+import { v4 as uuidv4 } from './uuid'
+import moment from './moment'
+
 import {
   get,
   forEach,
@@ -16,10 +20,7 @@ import {
   uniq,
   range,
   toUpper,
-} from '@/utils/lodash'
-
-import { v4 as uuidv4 } from './uuid'
-import moment from './moment'
+} from '@/lodash'
 
 const scheduleCrontabRegex = /^(\d{0,2})\s(\d{0,2})\s\*\s\*\s(([0-7,*-]*|MON|TUE|WED|THU|FRI|SAT|SUN)+)$/
 

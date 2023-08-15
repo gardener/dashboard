@@ -7,6 +7,7 @@
 /* Layouts */
 import GLogin from '@/layouts/GLogin.vue'
 import GDefault from '@/layouts/GDefault.vue'
+
 /* Views */
 import GError from '@/views/GError.vue'
 import GNotFound from '@/views/GNotFound.vue'
@@ -16,6 +17,7 @@ import GShootItemPlaceholder from '@/views/GShootItemPlaceholder.vue'
 import GShootItemEditor from '@/views/GShootItemEditor.vue'
 import GAccount from '@/views/GAccount.vue'
 import GSettings from '@/views/GSettings.vue'
+
 /* Components */
 import GRouterView from '@/components/GRouterView.vue'
 

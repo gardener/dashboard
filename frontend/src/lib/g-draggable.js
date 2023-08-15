@@ -8,7 +8,7 @@ import {
   get,
   set,
   forEach,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 export const ATTRIBUTE_DRAG_AND_DROP_ID = 'data-g-id'
 

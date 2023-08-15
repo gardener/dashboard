@@ -56,25 +56,26 @@ import {
   mapActions,
 } from 'pinia'
 
-import {
-  useAuthzStore,
-  useCloudProfileStore,
-  useConfigStore,
-} from '@/store'
+import { useAuthzStore } from '@/store/authz'
+import { useCloudProfileStore } from '@/store/cloudProfile'
+import { useConfigStore } from '@/store/config'
+
 import GK8sExpirationMessage from '@/components/ShootMessages/GK8sExpirationMessage.vue'
 import GWorkerGroupExpirationMessage from '@/components/ShootMessages/GWorkerGroupExpirationMessage.vue'
 import GNoHibernationScheduleMessage from '@/components/ShootMessages/GNoHibernationScheduleMessage.vue'
 import GClusterExpirationMessage from '@/components/ShootMessages/GClusterExpirationMessage.vue'
 import GConstraintMessage from '@/components/ShootMessages/GConstraintMessage.vue'
 import GMaintenanceStatusMessage from '@/components/ShootMessages/GMaintenanceStatusMessage.vue'
+
 import { shootItem } from '@/mixins/shootItem'
 import { isSelfTerminationWarning } from '@/utils'
+
 import {
   get,
   map,
   includes,
   isEmpty,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 export default {
   components: {
@@ -409,3 +410,4 @@ export default {
     }
   }
 </style>
+@/lodash

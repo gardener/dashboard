@@ -168,16 +168,18 @@ import {
   toRefs,
 } from 'vue'
 
+import { useAuthzStore } from '@/store/authz'
+
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
 import GAccountRoles from '@/components/Members/GAccountRoles.vue'
 import GTimeString from '@/components/GTimeString.vue'
 import GActionButton from '@/components/GActionButton.vue'
+
 import {
   isForeignServiceAccount,
   parseServiceAccountUsername,
   mapTableHeader,
 } from '@/utils'
-import { useAuthzStore } from '@/store'
 
 const authzStore = useAuthzStore()
 

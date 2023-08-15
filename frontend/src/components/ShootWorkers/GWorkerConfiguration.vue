@@ -100,15 +100,18 @@ import { useVuelidate } from '@vuelidate/core'
 
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GCodeBlock from '@/components/GCodeBlock'
+
+import { useAsyncRef } from '@/composables/useAsyncRef'
+
 import shootItem from '@/mixins/shootItem'
-import { useAsyncRef } from '@/composables'
 import { errorDetailsFromError } from '@/utils/error'
 import { isZonedCluster } from '@/utils'
+import { v4 as uuidv4 } from '@/utils/uuid'
+
 import {
   get,
   cloneDeep,
-} from '@/utils/lodash'
-import { v4 as uuidv4 } from '@/utils/uuid'
+} from '@/lodash'
 
 export default {
 
@@ -269,3 +272,4 @@ export default {
   },
 }
 </script>
+@/lodash

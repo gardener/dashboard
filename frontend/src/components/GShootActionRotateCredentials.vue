@@ -73,18 +73,19 @@ import {
   mapActions,
 } from 'pinia'
 
-import {
-  useAppStore,
-  useAuthnStore,
-} from '@/store'
+import { useAppStore } from '@/store/app'
+import { useAuthnStore } from '@/store/authn'
+
 import GShootActionButton from '@/components/GShootActionButton.vue'
 import GShootActionDialog from '@/components/GShootActionDialog.vue'
+
 import shootStatusCredentialRotation from '@/mixins/shootStatusCredentialRotation'
 import { errorDetailsFromError } from '@/utils/error'
+
 import {
   includes,
   compact,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 export default {
   components: {
@@ -486,3 +487,4 @@ export default {
   },
 }
 </script>
+@/lodash

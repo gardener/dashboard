@@ -116,8 +116,10 @@ import { useVuelidate } from '@vuelidate/core'
 import { mapState } from 'pinia'
 import { required } from '@vuelidate/validators'
 
-import { useAuthnStore } from '@/store'
+import { useAuthnStore } from '@/store/authn'
+
 import GTimeString from '@/components/GTimeString.vue'
+
 import { getValidationErrors } from '@/utils'
 
 const validationErrors = {

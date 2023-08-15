@@ -39,7 +39,8 @@ import {
   getValidationErrors,
   purposesForSecret,
 } from '@/utils'
-import { map } from '@/utils/lodash'
+
+import { map } from '@/lodash'
 
 const validationErrors = {
   internalPurpose: {
@@ -116,3 +117,4 @@ export default {
   },
 }
 </script>
+@/lodash

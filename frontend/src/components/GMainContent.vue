@@ -32,9 +32,11 @@ import { useLayout } from 'vuetify'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 
-import { useConfigStore } from '@/store'
-import { useLogger } from '@/composables'
+import { useConfigStore } from '@/store/config'
+
 import GAlertBanner from '@/components/GAlertBanner.vue'
+
+import { useLogger } from '@/composables/useLogger'
 
 const layout = useLayout()
 const route = useRoute()

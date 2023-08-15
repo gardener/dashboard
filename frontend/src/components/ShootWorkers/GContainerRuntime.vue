@@ -48,6 +48,7 @@ import { required } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
 import { getValidationErrors } from '@/utils'
+
 import {
   find,
   map,
@@ -56,7 +57,7 @@ import {
   unset,
   includes,
   isEmpty,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 const validationErrors = {
   criName: {
@@ -181,3 +182,4 @@ export default {
   },
 }
 </script>
+@/lodash

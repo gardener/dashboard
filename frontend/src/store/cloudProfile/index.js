@@ -11,10 +11,9 @@ import {
 } from 'vue'
 import semver from 'semver'
 
-import {
-  useApi,
-  useLogger,
-} from '@/composables'
+import { useLogger } from '@/composables/useLogger'
+import { useApi } from '@/composables/useApi'
+
 import {
   shortRandomString,
   parseSize,
@@ -24,6 +23,20 @@ import {
   UNKNOWN_EXPIRED_TIMESTAMP,
 } from '@/utils'
 import { v4 as uuidv4 } from '@/utils/uuid'
+
+import { useConfigStore } from '../config'
+import { useSeedStore } from '../seed'
+
+import {
+  matchesPropertyOrEmpty,
+  vendorNameFromImageName,
+  findVendorHint,
+  decorateClassificationObject,
+  firstItemMatchingVersionClassification,
+  mapAccessRestrictionForInput,
+  mapAccessRestrictionForDisplay,
+} from './helper'
+
 import {
   filter,
   sortBy,
@@ -46,20 +59,7 @@ import {
   cloneDeep,
   sample,
   pick,
-} from '@/utils/lodash'
-
-import { useConfigStore } from '../config'
-import { useSeedStore } from '../seed'
-
-import {
-  matchesPropertyOrEmpty,
-  vendorNameFromImageName,
-  findVendorHint,
-  decorateClassificationObject,
-  firstItemMatchingVersionClassification,
-  mapAccessRestrictionForInput,
-  mapAccessRestrictionForDisplay,
-} from './helper'
+} from '@/lodash'
 
 export const useCloudProfileStore = defineStore('cloudProfile', () => {
   const logger = useLogger()

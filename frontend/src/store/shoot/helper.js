@@ -29,6 +29,7 @@ import {
   getDefaultZonesNetworkConfiguration,
   getControlPlaneZone,
 } from '@/utils/createShoot'
+
 import {
   find,
   includes,
@@ -48,7 +49,7 @@ import {
   join,
   padStart,
   orderBy,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 export const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
 

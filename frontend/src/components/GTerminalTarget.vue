@@ -71,10 +71,9 @@ import { mapState } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
-import {
-  useAuthnStore,
-  useAuthzStore,
-} from '@/store'
+import { useAuthnStore } from '@/store/authn'
+import { useAuthzStore } from '@/store/authz'
+
 import { shootItem } from '@/mixins/shootItem'
 
 export default {

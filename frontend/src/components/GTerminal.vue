@@ -369,34 +369,36 @@ import { FitAddon } from 'xterm-addon-fit'
 import { WebLinksAddon } from 'xterm-addon-web-links'
 import 'xterm/css/xterm.css'
 
-import {
-  useAppStore,
-  useConfigStore,
-  useTerminalStore,
-} from '@/store'
-import {
-  get,
-  assign,
-  find,
-  head,
-} from '@/utils/lodash'
-import {
-  TerminalSession,
-  Spinner,
-} from '@/lib/terminal'
-import { FocusAddon } from '@/lib/xterm-addon-focus'
+import { useAppStore } from '@/store/app'
+import { useConfigStore } from '@/store/config'
+import { useTerminalStore } from '@/store/terminal'
+
 import GDragNDroppableComponent from '@/components/GDragNDroppableComponent.vue'
-import {
-  targetText,
-  transformHtml,
-} from '@/utils'
-import { isGatewayTimeout } from '@/utils/error'
 import GTerminalSettingsDialog from '@/components/dialogs/GTerminalSettingsDialog.vue'
 import GIconBase from '@/components/icons/GIconBase.vue'
 import GConnected from '@/components/icons/GConnected.vue'
 import GDisconnected from '@/components/icons/GDisconnected.vue'
 import GSplitVertically from '@/components/icons/GSplitVertically.vue'
 import GSplitHorizontally from '@/components/icons/GSplitHorizontally.vue'
+
+import { isGatewayTimeout } from '@/utils/error'
+import {
+  targetText,
+  transformHtml,
+} from '@/utils'
+
+import { FocusAddon } from '@/lib/xterm-addon-focus'
+import {
+  TerminalSession,
+  Spinner,
+} from '@/lib/terminal'
+
+import {
+  get,
+  assign,
+  find,
+  head,
+} from '@/lodash'
 
 export default {
   components: {
@@ -718,3 +720,4 @@ export default {
     width: 400px;
   }
 </style>
+@/lodash

@@ -9,7 +9,6 @@ import {
   createPinia,
 } from 'pinia'
 
-import { useApi } from '@/composables/useApi'
 import { useAuthzStore } from '@/store/authz'
 import { useConfigStore } from '@/store/config'
 import { useCloudProfileStore } from '@/store/cloudProfile'
@@ -17,7 +16,10 @@ import {
   firstItemMatchingVersionClassification,
   mapAccessRestrictionForInput,
 } from '@/store/cloudProfile/helper'
-import { find } from '@/utils/lodash'
+
+import { useApi } from '@/composables/useApi'
+
+import { find } from '@/lodash'
 
 describe('stores', () => {
   describe('cloudProfile', () => {

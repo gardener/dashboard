@@ -84,7 +84,6 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import download from 'downloadjs'
 
-import { shootItem } from '@/mixins/shootItem'
 import GListItem from '@/components/GListItem.vue'
 import GListItemContent from '@/components/GListItemContent.vue'
 import GActionButton from '@/components/GActionButton.vue'
@@ -92,6 +91,8 @@ import GCopyBtn from '@/components/GCopyBtn.vue'
 import GCodeBlock from '@/components/GCodeBlock.vue'
 import GGardenloginInfo from '@/components/GGardenloginInfo.vue'
 import GStaticTokenKubeconfigConfiguration from '@/components/GStaticTokenKubeconfigConfiguration.vue'
+
+import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {

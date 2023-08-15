@@ -75,10 +75,12 @@ import {
   toRefs,
 } from 'vue'
 
+import { useAuthzStore } from '@/store/authz'
+
 import GAccountRoles from '@/components/Members/GAccountRoles.vue'
 import GActionButton from '@/components/GActionButton.vue'
+
 import { mapTableHeader } from '@/utils'
-import { useAuthzStore } from '@/store'
 
 const authzStore = useAuthzStore()
 

@@ -27,11 +27,12 @@ import NetlifyDialog from '@/components/Secrets/GSecretDialogNetlify'
 import DeleteDialog from '@/components/Secrets/GSecretDialogDelete'
 import HcloudDialog from '@/components/Secrets/GSecretDialogHCloud'
 import GenericDialog from '@/components/Secrets/GSecretDialogGeneric'
+
 import {
   upperFirst,
   split,
   head,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 const components = {
   GcpDialog,
@@ -100,3 +101,4 @@ export default {
   },
 }
 </script>
+@/lodash

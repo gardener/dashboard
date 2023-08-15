@@ -40,12 +40,13 @@ import json from 'highlight.js/lib/languages/json'
 import javascript from 'highlight.js/lib/languages/javascript'
 import yaml from 'highlight.js/lib/languages/yaml'
 
+import GCopyBtn from '@/components/GCopyBtn.vue'
+
 import {
   trim,
   split,
   replace,
-} from '@/utils/lodash'
-import GCopyBtn from '@/components/GCopyBtn.vue'
+} from '@/lodash'
 
 import 'highlight.js/styles/docco.css'
 
@@ -241,3 +242,4 @@ export default {
     }
   }
 </style>
+@/lodash

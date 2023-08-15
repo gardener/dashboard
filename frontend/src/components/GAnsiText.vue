@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import ansiHTML from 'ansi-html'
 
-import { escape } from '@/utils/lodash'
+import { escape } from '@/lodash'
 
 export default {
   props: {
@@ -41,3 +41,4 @@ export default {
   max-height: inherit;
 }
 </style>
+@/lodash

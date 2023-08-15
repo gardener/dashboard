@@ -26,9 +26,11 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapActions } from 'pinia'
 
-import { useAppStore } from '@/store'
+import { useAppStore } from '@/store/app'
+
 import { shootItem } from '@/mixins/shootItem'
-import { get } from '@/utils/lodash'
+
+import { get } from '@/lodash'
 
 export default {
   mixins: [shootItem],
@@ -71,3 +73,4 @@ export default {
   },
 }
 </script>
+@/lodash

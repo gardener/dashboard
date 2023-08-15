@@ -19,10 +19,9 @@ import {
 } from 'vue'
 import { useRoute } from 'vue-router'
 
-import {
-  useAuthzStore,
-  useProjectStore,
-} from '@/store'
+import { useAuthzStore } from '@/store/authz'
+import { useProjectStore } from '@/store/project'
+
 import GProjectError from '@/views/GProjectError.vue'
 
 export default {

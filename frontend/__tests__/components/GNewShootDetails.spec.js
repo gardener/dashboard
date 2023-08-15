@@ -12,6 +12,7 @@ import { createTestingPinia } from '@pinia/testing'
 import { useAuthzStore } from '@/store/authz'
 import { useConfigStore } from '@/store/config'
 import { useProjectStore } from '@/store/project'
+
 import GNewShootDetails from '@/components/NewShoot/GNewShootDetails.vue'
 
 const { createPlugins } = global.fixtures.helper

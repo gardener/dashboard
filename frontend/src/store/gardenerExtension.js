@@ -10,7 +10,8 @@ import {
   computed,
 } from 'vue'
 
-import { useApi } from '@/composables'
+import { useApi } from '@/composables/useApi'
+
 import {
   map,
   flatMap,
@@ -19,7 +20,7 @@ import {
   some,
   find,
   sortBy,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 export const useGardenerExtensionStore = defineStore('gardenerExtension', () => {
   const api = useApi()

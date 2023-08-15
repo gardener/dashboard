@@ -100,18 +100,19 @@ import {
   mapActions,
 } from 'pinia'
 
-import {
-  useAuthzStore,
-  useCloudProfileStore,
-} from '@/store'
+import { useAuthzStore } from '@/store/authz'
+import { useCloudProfileStore } from '@/store/cloudProfile'
+
 import GShootVersionUpdate from '@/components/ShootVersion/GShootVersionUpdate.vue'
 import GDialog from '@/components/dialogs/GDialog.vue'
+
 import { shootItem } from '@/mixins/shootItem'
 import { errorDetailsFromError } from '@/utils/error'
+
 import {
   get,
   find,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 export default {
   components: {
@@ -239,3 +240,4 @@ export default {
     text-decoration: none;
   }
 </style>
+@/lodash

@@ -118,6 +118,7 @@ SPDX-License-Identifier: Apache-2.0
 import { useVuelidate } from '@vuelidate/core'
 
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
+
 import {
   gravatarUrlGeneric,
   setDelayedInputFocus,

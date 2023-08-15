@@ -245,15 +245,15 @@ import {
   useRoute,
 } from 'vue-router'
 
-import {
-  useAppStore,
-  useConfigStore,
-  useAuthzStore,
-  useProjectStore,
-} from '@/store'
+import { useAppStore } from '@/store/app'
+import { useConfigStore } from '@/store/config'
+import { useAuthzStore } from '@/store/authz'
+import { useProjectStore } from '@/store/project'
+
 import GProjectDialog from '@/components/dialogs/GProjectDialog.vue'
 import GStaleProjectWarning from '@/components/GStaleProjectWarning.vue'
 import GNotReadyProjectWarning from '@/components/GNotReadyProjectWarning.vue'
+
 import {
   emailToDisplayName,
   setDelayedInputFocus,
@@ -261,6 +261,7 @@ import {
   namespacedRoute as getNamespacedRoute,
   routeName as getRouteName,
 } from '@/utils'
+
 import {
   find,
   findIndex,
@@ -274,7 +275,7 @@ import {
   head,
   slice,
   last,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 const allProjectsItem = {
   metadata: {
@@ -702,3 +703,4 @@ $teaserHeight: 200px;
   }
 }
 </style>
+@/lodash

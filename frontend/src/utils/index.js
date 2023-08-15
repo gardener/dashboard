@@ -12,7 +12,15 @@ import {
   unref,
 } from 'vue'
 
-import { useLogger } from '@/composables'
+import { useLogger } from '@/composables/useLogger'
+
+import moment from './moment'
+import {
+  md5,
+  hash,
+} from './crypto'
+import TimeWithOffset from './TimeWithOffset'
+
 import {
   capitalize,
   replace,
@@ -32,14 +40,7 @@ import {
   sample,
   compact,
   forEach,
-} from '@/utils/lodash'
-
-import moment from './moment'
-import {
-  md5,
-  hash,
-} from './crypto'
-import TimeWithOffset from './TimeWithOffset'
+} from '@/lodash'
 
 const serviceAccountRegex = /^system:serviceaccount:([^:]+):([^:]+)$/
 const logger = useLogger()

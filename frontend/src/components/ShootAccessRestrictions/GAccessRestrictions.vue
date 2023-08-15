@@ -82,15 +82,17 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapActions } from 'pinia'
 
+import { useCloudProfileStore } from '@/store/cloudProfile'
+
+import { transformHtml } from '@/utils'
+
 import {
   cloneDeep,
   isEmpty,
   get,
   set,
   unset,
-} from '@/utils/lodash'
-import { useCloudProfileStore } from '@/store'
-import { transformHtml } from '@/utils'
+} from '@/lodash'
 
 export default {
   props: {
@@ -197,3 +199,4 @@ export default {
   }
 
 </style>
+@/lodash

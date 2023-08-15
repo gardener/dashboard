@@ -42,10 +42,13 @@ SPDX-License-Identifier: Apache-2.0
 import { parseTemplate } from 'url-template'
 import { mapState } from 'pinia'
 
-import { get } from '@/utils/lodash'
+import { useConfigStore } from '@/store/config'
+
 import GExternalLink from '@/components/GExternalLink'
+
 import { shootItem } from '@/mixins/shootItem'
-import { useConfigStore } from '@/store'
+
+import { get } from '@/lodash'
 
 export default {
   components: {
@@ -71,3 +74,4 @@ export default {
   },
 }
 </script>
+@/lodash

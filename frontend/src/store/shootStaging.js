@@ -11,6 +11,10 @@ import {
 } from 'vue'
 
 import { v4 as uuidv4 } from '@/utils/uuid'
+
+import { useGardenerExtensionStore } from './gardenerExtension'
+import { useSecretStore } from './secret'
+
 import {
   has,
   get,
@@ -23,10 +27,7 @@ import {
   includes,
   isEmpty,
   find,
-} from '@/utils/lodash'
-
-import { useGardenerExtensionStore } from './gardenerExtension'
-import { useSecretStore } from './secret'
+} from '@/lodash'
 
 // helper
 function getId (object) {

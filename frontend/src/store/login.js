@@ -11,7 +11,7 @@ import {
 } from 'vue'
 import { useLocalStorage } from '@vueuse/core'
 
-import { useLogger } from '@/composables'
+import { useLogger } from '@/composables/useLogger'
 
 export const useLoginStore = defineStore('login', () => {
   const logger = useLogger()

@@ -99,6 +99,18 @@ import {
 } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 
+import { useAppStore } from '@/store/app'
+import { useConfigStore } from '@/store/config'
+
+import GExpandTransitionGroup from '@/components/GExpandTransitionGroup'
+import GHibernationScheduleEvent from '@/components/ShootHibernation/GHibernationScheduleEvent'
+
+import {
+  parsedScheduleEventsFromCrontabBlock,
+  crontabFromParsedScheduleEvents,
+} from '@/utils/hibernationSchedule'
+import { v4 as uuidv4 } from '@/utils/uuid'
+
 import {
   forEach,
   flatMap,
@@ -106,18 +118,7 @@ import {
   set,
   find,
   isEmpty,
-} from '@/utils/lodash'
-import GExpandTransitionGroup from '@/components/GExpandTransitionGroup'
-import GHibernationScheduleEvent from '@/components/ShootHibernation/GHibernationScheduleEvent'
-import {
-  parsedScheduleEventsFromCrontabBlock,
-  crontabFromParsedScheduleEvents,
-} from '@/utils/hibernationSchedule'
-import { v4 as uuidv4 } from '@/utils/uuid'
-import {
-  useAppStore,
-  useConfigStore,
-} from '@/store'
+} from '@/lodash'
 
 export default {
   components: {
@@ -288,3 +289,4 @@ export default {
   },
 }
 </script>
+@/lodash

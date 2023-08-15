@@ -100,6 +100,7 @@ import GShootActionMaintenanceStart from '@/components/ShootMaintenance/GShootAc
 import GShootActionReconcileStart from '@/components/GShootActionReconcileStart.vue'
 import GShootActionRotateCredentials from '@/components/GShootActionRotateCredentials.vue'
 import GShootActionDeleteCluster from '@/components/GShootActionDeleteCluster.vue'
+
 import { shootItem } from '@/mixins/shootItem'
 
 export default {

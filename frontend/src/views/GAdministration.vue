@@ -500,6 +500,15 @@ import {
   helpers,
 } from '@vuelidate/validators'
 
+import { useAppStore } from '@/store/app'
+import { useAuthzStore } from '@/store/authz'
+import { useConfigStore } from '@/store/config'
+import { useQuotaStore } from '@/store/quota'
+import { useKubeconfigStore } from '@/store/kubeconfig'
+import { useProjectStore } from '@/store/project'
+import { useShootStore } from '@/store/shoot'
+import { useMemberStore } from '@/store/member'
+
 import GList from '@/components/GList.vue'
 import GListItem from '@/components/GListItem.vue'
 import GToolbar from '@/components/GToolbar.vue'
@@ -511,6 +520,7 @@ import GDialog from '@/components/dialogs/GDialog.vue'
 import GTimeString from '@/components/GTimeString.vue'
 import GShootCustomField from '@/components/GShootCustomField.vue'
 import GResourceQuotaHelp from '@/components/GResourceQuotaHelp.vue'
+
 import {
   transformHtml,
   getProjectDetails,
@@ -519,22 +529,13 @@ import {
   getDateFormatted,
 } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
+
 import {
   get,
   set,
   includes,
   isEmpty,
-} from '@/utils/lodash'
-import {
-  useAppStore,
-  useAuthzStore,
-  useConfigStore,
-  useQuotaStore,
-  useKubeconfigStore,
-  useProjectStore,
-  useShootStore,
-  useMemberStore,
-} from '@/store'
+} from '@/lodash'
 
 export default {
   components: {
@@ -810,3 +811,4 @@ export default {
     white-space: normal !important;
   }
 </style>
+@/lodash

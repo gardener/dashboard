@@ -9,16 +9,18 @@ import {
   createPinia,
 } from 'pinia'
 
-import { useApi } from '@/composables/useApi'
 import { useAuthzStore } from '@/store/authz'
 import { useShootStore } from '@/store/shoot'
 import { useProjectStore } from '@/store/project'
 import { useSocketStore } from '@/store/socket'
 import { parseSearch } from '@/store/shoot/helper'
+
+import { useApi } from '@/composables/useApi'
+
 import {
   cloneDeep,
   map,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 const noop = () => {}
 

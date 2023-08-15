@@ -52,16 +52,18 @@ import { useVuelidate } from '@vuelidate/core'
 
 import GVendorIcon from '@/components/GVendorIcon'
 import GMultiMessage from '@/components/GMultiMessage'
+
 import {
   getValidationErrors,
   selectedImageIsNotLatest,
   transformHtml,
 } from '@/utils'
+
 import {
   pick,
   find,
   join,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 const validationErrors = {
   worker: {
@@ -220,3 +222,4 @@ export default {
   },
 }
 </script>
+@/lodash

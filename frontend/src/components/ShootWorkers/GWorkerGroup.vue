@@ -344,12 +344,14 @@ SPDX-License-Identifier: Apache-2.0
 import { mapActions } from 'pinia'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
+
 import GVendorIcon from '@/components/GVendorIcon'
 import GCodeBlock from '@/components/GCodeBlock'
+
 import {
   find,
   get,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 export default {
   name: 'GWorkerGroup',
@@ -450,3 +452,4 @@ export default {
   },
 }
 </script>
+@/lodash

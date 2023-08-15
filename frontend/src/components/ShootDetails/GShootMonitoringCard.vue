@@ -65,6 +65,7 @@ SPDX-License-Identifier: Apache-2.0
 import GShootStatus from '@/components/GShootStatus'
 import GStatusTags from '@/components/GStatusTags'
 import GClusterMetrics from '@/components/GClusterMetrics'
+
 import { shootItem } from '@/mixins/shootItem'
 
 export default {

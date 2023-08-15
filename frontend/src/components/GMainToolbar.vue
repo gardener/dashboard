@@ -321,14 +321,14 @@ import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
 import { useLocalStorage } from '@vueuse/core'
 
-import { useNamespace } from '@/composables'
-import {
-  useAppStore,
-  useAuthnStore,
-  useConfigStore,
-} from '@/store'
+import { useAppStore } from '@/store/app'
+import { useAuthnStore } from '@/store/authn'
+import { useConfigStore } from '@/store/config'
+
 import GBreadcrumb from '@/components/GBreadcrumb.vue'
 import GInfoDialog from '@/components/dialogs/GInfoDialog.vue'
+
+import { useNamespace } from '@/composables/useNamespace'
 
 import GShootSubscriptionStatus from './GShootSubscriptionStatus.vue'
 

@@ -127,16 +127,30 @@ import {
   maxLength,
 } from '@vuelidate/validators'
 
+import { useSecretStore } from '@/store/secret'
+import { useAuthzStore } from '@/store/authz'
+import { useCloudProfileStore } from '@/store/cloudProfile'
+import { useGardenerExtensionStore } from '@/store/gardenerExtension'
+import { useShootStore } from '@/store/shoot'
+
+import GToolbar from '@/components/GToolbar.vue'
+import GMessage from '@/components/GMessage'
+import GCloudProfile from '@/components/GCloudProfile'
+
 import {
-  unique,
-  resourceName,
-} from '@/utils/validators'
+  errorDetailsFromError,
+  isConflict,
+} from '@/utils/error'
 import {
   getValidationErrors,
   setDelayedInputFocus,
   setInputFocus,
 } from '@/utils'
-import GCloudProfile from '@/components/GCloudProfile'
+import {
+  unique,
+  resourceName,
+} from '@/utils/validators'
+
 import {
   cloneDeep,
   get,
@@ -145,20 +159,7 @@ import {
   sortBy,
   filter,
   includes,
-} from '@/utils/lodash'
-import GMessage from '@/components/GMessage'
-import GToolbar from '@/components/GToolbar.vue'
-import {
-  errorDetailsFromError,
-  isConflict,
-} from '@/utils/error'
-import {
-  useSecretStore,
-  useAuthzStore,
-  useCloudProfileStore,
-  useGardenerExtensionStore,
-  useShootStore,
-} from '@/store'
+} from '@/lodash'
 
 const validationErrors = {
   name: {
@@ -418,3 +419,4 @@ export default {
   }
 
 </style>
+@/lodash

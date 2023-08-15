@@ -58,17 +58,20 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapActions } from 'pinia'
 
-import { useMemberStore } from '@/store'
+import { useMemberStore } from '@/store/member'
+
 import GDialog from '@/components/dialogs/GDialog.vue'
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
 import GMessage from '@/components/GMessage.vue'
 import GAccountRoles from '@/components/Members/GAccountRoles.vue'
+
 import {
   errorDetailsFromError,
   isConflict,
 } from '@/utils/error'
-import { get } from '@/utils/lodash'
 import { sortedRoleDisplayNames } from '@/utils'
+
+import { get } from '@/lodash'
 
 export default {
   components: {
@@ -165,3 +168,4 @@ export default {
   },
 }
 </script>
+@/lodash

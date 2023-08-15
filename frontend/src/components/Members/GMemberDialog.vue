@@ -141,12 +141,17 @@ import {
   requiredIf,
 } from '@vuelidate/validators'
 
+import { useAuthnStore } from '@/store/authn'
+import { useAuthzStore } from '@/store/authz'
+import { useMemberStore } from '@/store/member'
+
+import GMessage from '@/components/GMessage.vue'
+import GToolbar from '@/components/GToolbar.vue'
+
 import {
   resourceName,
   unique,
 } from '@/utils/validators'
-import GMessage from '@/components/GMessage.vue'
-import GToolbar from '@/components/GToolbar.vue'
 import {
   errorDetailsFromError,
   isConflict,
@@ -159,6 +164,7 @@ import {
   isForeignServiceAccount,
   MEMBER_ROLE_DESCRIPTORS,
 } from '@/utils'
+
 import {
   toLower,
   filter,
@@ -168,12 +174,7 @@ import {
   find,
   negate,
   get,
-} from '@/utils/lodash'
-import {
-  useAuthnStore,
-  useAuthzStore,
-  useMemberStore,
-} from '@/store'
+} from '@/lodash'
 
 const defaultUsername = ''
 const defaultServiceName = 'robot'
@@ -516,3 +517,4 @@ export default {
   },
 }
 </script>
+@/lodash

@@ -30,14 +30,17 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapState } from 'pinia'
 
+import { useSeedStore } from '@/store/seed'
+
+import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
+
+import { errorDetailsFromError } from '@/utils/error'
+import shootItem from '@/mixins/shootItem'
+
 import {
   map,
   filter,
-} from '@/utils/lodash'
-import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
-import { errorDetailsFromError } from '@/utils/error'
-import shootItem from '@/mixins/shootItem'
-import { useSeedStore } from '@/store'
+} from '@/lodash'
 
 export default {
   name: 'SeedConfiguration',
@@ -96,3 +99,4 @@ export default {
   },
 }
 </script>
+@/lodash

@@ -82,7 +82,7 @@ import 'floating-vue/dist/style.css'
 import {
   omit,
   pick,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 const referenceProps = ['class']
 
@@ -140,3 +140,4 @@ export default {
   max-width: max-content;
 }
 </style>
+@/lodash

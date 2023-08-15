@@ -42,14 +42,16 @@ import {
   mapActions,
 } from 'pinia'
 
-import {
-  useAuthzStore,
-  useShootStore,
-} from '@/store'
+import { useAuthzStore } from '@/store/authz'
+import { useShootStore } from '@/store/shoot'
+
 import GConfirmDialog from '@/components/dialogs/GConfirmDialog'
+
+import { useAsyncRef } from '@/composables/useAsyncRef'
+
 import { errorDetailsFromError } from '@/utils/error'
-import { useAsyncRef } from '@/composables'
-import { pick } from '@/utils/lodash'
+
+import { pick } from '@/lodash'
 
 export default {
   components: {
@@ -169,3 +171,4 @@ export default {
 
 }
 </script>
+@/lodash

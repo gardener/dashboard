@@ -11,7 +11,7 @@ import {
   sortBy,
   head,
   split,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 export function getProjectQuotaStatus (quota) {
   if (!quota) {

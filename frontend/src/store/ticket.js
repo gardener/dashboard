@@ -10,7 +10,8 @@ import {
   computed,
 } from 'vue'
 
-import { useLogger } from '@/composables'
+import { useLogger } from '@/composables/useLogger'
+
 import {
   assign,
   filter,
@@ -23,7 +24,7 @@ import {
   groupBy,
   orderBy,
   uniqBy,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 const eql = ({ projectName, name, state = undefined }) => {
   const source = { metadata: { projectName } }

@@ -11,13 +11,15 @@ import {
 } from 'vue'
 import { useBrowserLocation } from '@vueuse/core'
 
-import { useApi } from '@/composables'
+import { useApi } from '@/composables/useApi'
+
 import { hash } from '@/utils/crypto'
+
 import {
   get,
   isEmpty,
   camelCase,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 const wellKnownConditions = {
   APIServerAvailable: {

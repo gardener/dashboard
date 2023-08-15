@@ -200,13 +200,14 @@ import {
   objectsFromErrorCodes,
   errorCodesFromArray,
 } from '@/utils/errorCodes'
-import {
-  join,
-  map,
-} from '@/utils/lodash'
 
 import GShootMessageDetails from './GShootMessageDetails.vue'
 import GRetryOperation from './GRetryOperation.vue'
+
+import {
+  join,
+  map,
+} from '@/lodash'
 
 export default {
   components: {
@@ -335,3 +336,4 @@ export default {
     font-size: 30px !important;
   }
 </style>
+@/lodash

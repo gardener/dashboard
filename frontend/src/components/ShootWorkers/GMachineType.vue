@@ -42,7 +42,8 @@ import { required } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
 import { getValidationErrors } from '@/utils'
-import { find } from '@/utils/lodash'
+
+import { find } from '@/lodash'
 
 const validationErrors = {
   internalValue: {
@@ -167,3 +168,4 @@ export default {
   },
 }
 </script>
+@/lodash

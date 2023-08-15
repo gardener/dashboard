@@ -22,7 +22,8 @@ import { useSecretStore } from '@/store/secret'
 import { useSeedStore } from '@/store/seed'
 import { useShootStore } from '@/store/shoot'
 import { useTerminalStore } from '@/store/terminal'
-import { useLogger } from '@/composables'
+
+import { useLogger } from '@/composables/useLogger'
 
 import { createGuards } from './guards'
 import { createRoutes } from './routes'

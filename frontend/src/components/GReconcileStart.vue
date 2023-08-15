@@ -35,11 +35,14 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapActions } from 'pinia'
 
+import { useAppStore } from '@/store/app'
+
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog.vue'
+
 import { shootItem } from '@/mixins/shootItem'
 import { errorDetailsFromError } from '@/utils/error'
-import { get } from '@/utils/lodash'
-import { useAppStore } from '@/store'
+
+import { get } from '@/lodash'
 
 export default {
   components: {
@@ -143,3 +146,4 @@ export default {
     vertical-align: middle;
   }
 </style>
+@/lodash

@@ -229,14 +229,13 @@ import {
   mapActions,
 } from 'pinia'
 
-import {
-  useAuthnStore,
-  useAuthzStore,
-  useShootStore,
-  useSocketStore,
-  useProjectStore,
-  useConfigStore,
-} from '@/store'
+import { useAuthnStore } from '@/store/authn'
+import { useAuthzStore } from '@/store/authz'
+import { useShootStore } from '@/store/shoot'
+import { useSocketStore } from '@/store/socket'
+import { useProjectStore } from '@/store/project'
+import { useConfigStore } from '@/store/config'
+
 import GToolbar from '@/components/GToolbar.vue'
 import GShootListRow from '@/components/GShootListRow.vue'
 import GShootListProgress from '@/components/GShootListProgress.vue'
@@ -244,7 +243,9 @@ import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
 import GIconBase from '@/components/icons/GIconBase.vue'
 import GCertifiedKubernetes from '@/components/icons/GCertifiedKubernetes.vue'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
+
 import { mapTableHeader } from '@/utils'
+
 import {
   debounce,
   filter,
@@ -259,7 +260,7 @@ import {
   sortBy,
   startsWith,
   upperCase,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 export default {
   components: {
@@ -809,3 +810,4 @@ export default {
   },
 }
 </script>
+@/lodash

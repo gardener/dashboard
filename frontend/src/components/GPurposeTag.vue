@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { toUpper } from '@/utils/lodash'
+import { toUpper } from '@/lodash'
 
 export default {
   props: {
@@ -74,3 +74,4 @@ export default {
   }
 
 </style>
+@/lodash

@@ -10,14 +10,16 @@ import {
   computed,
 } from 'vue'
 
-import { map } from '@/utils/lodash'
-import { useApi } from '@/composables'
 import { useAuthzStore } from '@/store/authz'
+
+import { useApi } from '@/composables/useApi'
 
 import {
   getProjectQuotaStatus,
   aggregateResourceQuotaStatus,
 } from './helper'
+
+import { map } from '@/lodash'
 
 export const useQuotaStore = defineStore('quota', () => {
   const api = useApi()

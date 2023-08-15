@@ -13,7 +13,7 @@ import {
   map,
   filter,
   head,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 export function wildcardObjectsFromStrings (wildcardStrings) {
   return map(wildcardStrings, item => {

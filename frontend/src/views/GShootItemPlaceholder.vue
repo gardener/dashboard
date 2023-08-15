@@ -17,18 +17,18 @@ import {
   mapActions,
 } from 'pinia'
 
-import {
-  useAuthzStore,
-  useSecretStore,
-  useShootStore,
-  useTerminalStore,
-} from '@/store'
+import { useAuthzStore } from '@/store/authz'
+import { useSecretStore } from '@/store/secret'
+import { useShootStore } from '@/store/shoot'
+import { useTerminalStore } from '@/store/terminal'
+
 import GShootItemLoading from '@/views/GShootItemLoading.vue'
 import GShootItemError from '@/views/GShootItemError.vue'
+
 import {
   get,
   includes,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 export default {
   components: {
@@ -161,3 +161,4 @@ export default {
   },
 }
 </script>
+@/lodash

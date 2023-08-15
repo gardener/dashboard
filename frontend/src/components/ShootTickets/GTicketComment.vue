@@ -51,14 +51,17 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapState } from 'pinia'
 
-import { useConfigStore } from '@/store'
+import { useConfigStore } from '@/store/config'
+
 import GTimeString from '@/components/GTimeString.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
+
 import {
   gravatarUrlIdenticon,
   transformHtml,
 } from '@/utils'
-import { get } from '@/utils/lodash'
+
+import { get } from '@/lodash'
 
 const AvatarEnum = {
   GITHUB: 'github', // default
@@ -246,3 +249,4 @@ export default {
     text-decoration: underline;
   }
 </style>
+@/lodash

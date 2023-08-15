@@ -33,7 +33,7 @@ import {
   toRef,
 } from 'vue'
 
-import { startsWith } from '@/utils/lodash'
+import { startsWith } from '@/lodash'
 
 const props = defineProps({
   icon: {
@@ -135,3 +135,4 @@ const iconStyle = computed(() => {
     background-color: $grey-darken-2
   }
 </style>
+@/lodash

@@ -125,7 +125,8 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapState } from 'pinia'
 
-import { useTerminalStore } from '@/store'
+import { useTerminalStore } from '@/store/terminal'
+
 import { PositionEnum } from '@/lib/g-symbol-tree'
 
 export default {

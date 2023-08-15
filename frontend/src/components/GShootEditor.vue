@@ -172,13 +172,16 @@ import 'codemirror/mode/yaml/yaml.js'
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/theme/seti.css'
 
-import { useAuthzStore } from '@/store'
+import { useAuthzStore } from '@/store/authz'
+
 import GCopyBtn from '@/components/GCopyBtn'
 import GActionButton from '@/components/GActionButton'
 import GMessage from '@/components/GMessage'
 import GAlertBanner from '@/components/GAlertBanner'
+
 import { shootItem } from '@/mixins/shootItem'
 import { ShootEditorCompletions } from '@/utils/shootEditorCompletions'
+
 import {
   get,
   has,
@@ -186,7 +189,7 @@ import {
   cloneDeep,
   assign,
   isEqual,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 export default {
   components: {
@@ -641,3 +644,4 @@ export default {
     max-height: 100vh;
   }
 </style>
+@/lodash

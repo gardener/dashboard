@@ -10,24 +10,24 @@ import {
   computed,
 } from 'vue'
 
-import {
-  useApi,
-  useLogger,
-} from '@/composables'
+import { useLogger } from '@/composables/useLogger'
+import { useApi } from '@/composables/useApi'
+
 import {
   TargetEnum,
   Shortcut,
 } from '@/utils'
+
+import { useConfigStore } from './config'
+import { useAuthzStore } from './authz'
+
 import {
   map,
   uniqBy,
   filter,
   includes,
   isEmpty,
-} from '@/utils/lodash'
-
-import { useConfigStore } from './config'
-import { useAuthzStore } from './authz'
+} from '@/lodash'
 
 export const useTerminalStore = defineStore('terminal', () => {
   const logger = useLogger()

@@ -46,6 +46,7 @@ import {
 } from 'vue'
 
 import GTimeString from '@/components/GTimeString.vue'
+
 import { getProjectDetails } from '@/utils'
 
 const props = defineProps({

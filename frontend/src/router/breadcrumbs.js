@@ -7,7 +7,7 @@
 import {
   get,
   pick,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 export function homeBreadcrumbs () {
   return [

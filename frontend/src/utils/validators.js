@@ -9,7 +9,7 @@ import { helpers } from '@vuelidate/validators'
 import {
   includes,
   get,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 const { withParams, regex, req } = helpers
 

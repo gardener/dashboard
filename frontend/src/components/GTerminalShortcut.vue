@@ -84,22 +84,22 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapState } from 'pinia'
 
-import {
-  useAuthnStore,
-  useAuthzStore,
-} from '@/store'
+import { useAuthnStore } from '@/store/authn'
+import { useAuthzStore } from '@/store/authz'
+
 import { shootItem } from '@/mixins/shootItem'
 import {
   TargetEnum,
   targetText,
 } from '@/utils'
-import {
-  get,
-  join,
-} from '@/utils/lodash'
 
 import GCodeBlock from './GCodeBlock.vue'
 import GActionButton from './GActionButton.vue'
+
+import {
+  get,
+  join,
+} from '@/lodash'
 
 export default {
   components: {
@@ -201,3 +201,4 @@ export default {
   },
 }
 </script>
+@/lodash

@@ -10,7 +10,7 @@ import {
   computed,
 } from 'vue'
 
-import { useApi } from '@/composables'
+import { useApi } from '@/composables/useApi'
 
 import { useAuthzStore } from './authz'
 import { useAppStore } from './app'

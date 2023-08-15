@@ -46,11 +46,13 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
+
 import {
   getValidationErrors,
   setDelayedInputFocus,
 } from '@/utils'
-import { isObject } from '@/utils/lodash'
+
+import { isObject } from '@/lodash'
 
 const validationErrors = {
   data: {
@@ -176,3 +178,4 @@ export default {
   }
 
 </style>
+@/lodash

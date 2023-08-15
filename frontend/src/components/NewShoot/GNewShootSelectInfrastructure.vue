@@ -39,8 +39,9 @@ import {
   mapActions,
 } from 'pinia'
 
+import { useCloudProfileStore } from '@/store/cloudProfile'
+
 import GVendorIcon from '@/components/GVendorIcon'
-import { useCloudProfileStore } from '@/store'
 
 export default {
   components: {

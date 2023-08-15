@@ -6,6 +6,7 @@
 
 import { getDateFormatted } from '@/utils'
 import moment from '@/utils/moment'
+
 import {
   map,
   get,
@@ -16,7 +17,7 @@ import {
   lowerCase,
   compact,
   head,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 export function matchesPropertyOrEmpty (path, srcValue) {
   return object => {

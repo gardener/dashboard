@@ -71,11 +71,21 @@ import {
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
+import { useCloudProfileStore } from '@/store/cloudProfile'
+import { useAuthzStore } from '@/store/authz'
+import { useConfigStore } from '@/store/config'
+import { useSecretStore } from '@/store/secret'
+import { useProjectStore } from '@/store/project'
+
+import GSecretDialogWrapper from '@/components/Secrets/GSecretDialogWrapper'
+
+import { requiresCostObjectIfEnabled } from '@/utils/validators'
 import {
   getValidationErrors,
   isOwnSecret,
   selfTerminationDaysForSecret,
 } from '@/utils'
+
 import {
   cloneDeep,
   differenceWith,
@@ -84,16 +94,7 @@ import {
   head,
   get,
   toUpper,
-} from '@/utils/lodash'
-import { requiresCostObjectIfEnabled } from '@/utils/validators'
-import GSecretDialogWrapper from '@/components/Secrets/GSecretDialogWrapper'
-import {
-  useCloudProfileStore,
-  useAuthzStore,
-  useConfigStore,
-  useSecretStore,
-  useProjectStore,
-} from '@/store'
+} from '@/lodash'
 
 export default {
   components: {
@@ -244,3 +245,4 @@ export default {
   },
 }
 </script>
+@/lodash

@@ -49,15 +49,9 @@ SPDX-License-Identifier: Apache-2.0
 import { defineAsyncComponent } from 'vue'
 import { mapState } from 'pinia'
 
-import {
-  filter,
-  get,
-  map,
-} from '@/utils/lodash'
-import {
-  useAuthzStore,
-  useProjectStore,
-} from '@/store'
+import { useAuthzStore } from '@/store/authz'
+import { useProjectStore } from '@/store/project'
+
 import GShootDetailsCard from '@/components/ShootDetails/GShootDetailsCard'
 import GCustomFieldsCard from '@/components/ShootDetails/GCustomFieldsCard'
 import GShootExternalToolsCard from '@/components/ShootDetails/GShootExternalToolsCard'
@@ -66,7 +60,14 @@ import GShootLifecycleCard from '@/components/ShootDetails/GShootLifecycleCard'
 import GShootMonitoringCard from '@/components/ShootDetails/GShootMonitoringCard'
 import GShootCredentialRotationCard from '@/components/ShootDetails/GShootCredentialRotationCard'
 import GTicketsCard from '@/components/GTicketsCard'
+
 import { shootItem } from '@/mixins/shootItem'
+
+import {
+  filter,
+  get,
+  map,
+} from '@/lodash'
 
 export default {
   name: 'ShootDetails',
@@ -118,3 +119,4 @@ export default {
     line-height: 10px;
   }
 </style>
+@/lodash

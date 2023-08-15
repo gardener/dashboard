@@ -110,11 +110,13 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import GMessage from '@/components/GMessage.vue'
+
 import { setDelayedInputFocus } from '@/utils'
+
 import {
   noop,
   isFunction,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 export default {
   components: {
@@ -278,3 +280,4 @@ export default {
     height: auto;
   }
 </style>
+@/lodash

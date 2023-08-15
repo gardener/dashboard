@@ -128,7 +128,8 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import GAnsiText from '@/components/GAnsiText.vue'
-import { isEmpty } from '@/utils/lodash'
+
+import { isEmpty } from '@/lodash'
 
 export default {
   components: {
@@ -173,3 +174,4 @@ export default {
     height: fit-content;
   }
 </style>
+@/lodash

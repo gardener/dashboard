@@ -295,19 +295,12 @@ import { useRouter } from 'vue-router'
 import download from 'downloadjs'
 import { useLocalStorage } from '@vueuse/core'
 
-import {
-  filter,
-  forEach,
-  get,
-  head,
-  includes,
-  join,
-  map,
-  mapKeys,
-  mapValues,
-  orderBy,
-  toLower,
-} from '@/utils/lodash'
+import { useAuthzStore } from '@/store/authz'
+import { useProjectStore } from '@/store/project'
+import { useAuthnStore } from '@/store/authn'
+import { useMemberStore } from '@/store/member'
+import { useAppStore } from '@/store/app'
+
 import GUserRow from '@/components/Members/GUserRow.vue'
 import GServiceAccountRow from '@/components/Members/GServiceAccountRow.vue'
 import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
@@ -321,13 +314,9 @@ import GCodeBlock from '@/components/GCodeBlock.vue'
 import GToolbar from '@/components/GToolbar.vue'
 import GActionButton from '@/components/GActionButton.vue'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
-import {
-  useAuthzStore,
-  useProjectStore,
-  useAuthnStore,
-  useMemberStore,
-  useAppStore,
-} from '@/store'
+
+import { useApi } from '@/composables/useApi'
+
 import {
   displayName,
   gravatarUrlGeneric,
@@ -339,7 +328,20 @@ import {
   sortedRoleDisplayNames,
   mapTableHeader,
 } from '@/utils'
-import { useApi } from '@/composables'
+
+import {
+  filter,
+  forEach,
+  get,
+  head,
+  includes,
+  join,
+  map,
+  mapKeys,
+  mapValues,
+  orderBy,
+  toLower,
+} from '@/lodash'
 
 const renderComponent = inject('renderComponent')
 
@@ -796,3 +798,4 @@ function disableCustomKeySort (tableHeaders) {
 }
 
 </script>
+@/lodash

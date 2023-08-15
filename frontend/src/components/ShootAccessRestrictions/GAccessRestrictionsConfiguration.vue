@@ -25,15 +25,18 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapGetters } from 'pinia'
 
+import { useCloudProfileStore } from '@/store/cloudProfile'
+
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GAccessRestrictions from '@/components/ShootAccessRestrictions/GAccessRestrictions'
+
+import { shootItem } from '@/mixins/shootItem'
+import { errorDetailsFromError } from '@/utils/error'
+
 import {
   isEmpty,
   cloneDeep,
-} from '@/utils/lodash'
-import { shootItem } from '@/mixins/shootItem'
-import { errorDetailsFromError } from '@/utils/error'
-import { useCloudProfileStore } from '@/store'
+} from '@/lodash'
 
 export default {
   name: 'AccessRestrictionConfiguration',
@@ -89,3 +92,4 @@ export default {
   },
 }
 </script>
+@/lodash

@@ -258,10 +258,25 @@ import {
 } from 'pinia'
 import { useLocalStorage } from '@vueuse/core'
 
+import { useCloudProfileStore } from '@/store/cloudProfile'
+import { useGardenerExtensionStore } from '@/store/gardenerExtension'
+import { useSecretStore } from '@/store/secret'
+import { useAuthzStore } from '@/store/authz'
+import { useShootStore } from '@/store/shoot'
+
+import GSecretDialogWrapper from '@/components/Secrets/GSecretDialogWrapper'
+import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
+import GSecretRowInfra from '@/components/Secrets/GSecretRowInfra.vue'
+import GSecretRowDns from '@/components/Secrets/GSecretRowDns.vue'
+import GVendorIcon from '@/components/GVendorIcon'
+import GToolbar from '@/components/GToolbar'
+import GDataTableFooter from '@/components/GDataTableFooter.vue'
+
 import {
   isOwnSecret,
   mapTableHeader,
 } from '@/utils'
+
 import {
   get,
   filter,
@@ -273,21 +288,7 @@ import {
   mapValues,
   orderBy,
   some,
-} from '@/utils/lodash'
-import GSecretDialogWrapper from '@/components/Secrets/GSecretDialogWrapper'
-import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
-import GSecretRowInfra from '@/components/Secrets/GSecretRowInfra.vue'
-import GSecretRowDns from '@/components/Secrets/GSecretRowDns.vue'
-import GVendorIcon from '@/components/GVendorIcon'
-import GToolbar from '@/components/GToolbar'
-import GDataTableFooter from '@/components/GDataTableFooter.vue'
-import {
-  useCloudProfileStore,
-  useGardenerExtensionStore,
-  useSecretStore,
-  useAuthzStore,
-  useShootStore,
-} from '@/store'
+} from '@/lodash'
 
 export default {
   components: {
@@ -577,3 +578,4 @@ export default {
   },
 }
 </script>
+@/lodash

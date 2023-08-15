@@ -137,6 +137,14 @@ import {
   required,
 } from '@vuelidate/validators'
 
+import { useAuthnStore } from '@/store/authn'
+import { useConfigStore } from '@/store/config'
+import { useMemberStore } from '@/store/member'
+import { useProjectStore } from '@/store/project'
+
+import GMessage from '@/components/GMessage.vue'
+import GToolbar from '@/components/GToolbar.vue'
+
 import {
   resourceName,
   unique,
@@ -156,6 +164,7 @@ import {
   isConflict,
   isGatewayTimeout,
 } from '@/utils/error'
+
 import {
   get,
   map,
@@ -163,15 +172,7 @@ import {
   includes,
   filter,
   isEmpty,
-} from '@/utils/lodash'
-import GMessage from '@/components/GMessage.vue'
-import GToolbar from '@/components/GToolbar.vue'
-import {
-  useAuthnStore,
-  useConfigStore,
-  useMemberStore,
-  useProjectStore,
-} from '@/store'
+} from '@/lodash'
 
 const defaultProjectName = ''
 
@@ -410,3 +411,4 @@ export default {
     height: auto;
   }
 </style>
+@/lodash

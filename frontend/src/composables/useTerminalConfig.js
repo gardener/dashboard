@@ -11,11 +11,12 @@ import {
 } from 'vue'
 
 import { useAuthnStore } from '@/store/authn'
+
 import {
   get,
   head,
   some,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 export const useTerminalConfig = () => {
   const authnStore = useAuthnStore()

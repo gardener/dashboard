@@ -6,7 +6,7 @@
 
 import { toRef } from 'vue'
 
-import { useAppStore } from '@/store'
+import { useAppStore } from '@/store/app'
 
 const store = useAppStore()
 

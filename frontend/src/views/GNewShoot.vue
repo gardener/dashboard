@@ -168,15 +168,13 @@ import {
 } from 'pinia'
 import mitt from 'mitt'
 
-import {
-  set,
-  get,
-  find,
-  isEmpty,
-  cloneDeep,
-  isEqual,
-  unset,
-} from '@/utils/lodash'
+import { useCloudProfileStore } from '@/store/cloudProfile'
+import { useShootStagingStore } from '@/store/shootStaging'
+import { useShootStore } from '@/store/shoot'
+import { useAuthzStore } from '@/store/authz'
+import { useConfigStore } from '@/store/config'
+import { useSecretStore } from '@/store/secret'
+
 import GAccessRestrictions from '@/components/ShootAccessRestrictions/GAccessRestrictions'
 import GConfirmDialog from '@/components/dialogs/GConfirmDialog'
 import GMessage from '@/components/GMessage'
@@ -189,6 +187,9 @@ import GManageShootAddons from '@/components/ShootAddons/GManageAddons'
 import GManageShootDns from '@/components/ShootDns/GManageDns'
 import GManageControlPlaneHighAvailability from '@/components/ControlPlaneHighAvailability/GManageControlPlaneHighAvailability'
 import GToolbar from '@/components/GToolbar.vue'
+
+import { useAsyncRef } from '@/composables/useAsyncRef'
+
 import { isZonedCluster } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
 import {
@@ -196,15 +197,16 @@ import {
   getZonesNetworkConfiguration,
   getControlPlaneZone,
 } from '@/utils/createShoot'
-import { useAsyncRef } from '@/composables'
+
 import {
-  useCloudProfileStore,
-  useShootStagingStore,
-  useShootStore,
-  useAuthzStore,
-  useConfigStore,
-  useSecretStore,
-} from '@/store'
+  set,
+  get,
+  find,
+  isEmpty,
+  cloneDeep,
+  isEqual,
+  unset,
+} from '@/lodash'
 
 export default {
   components: {
@@ -578,3 +580,4 @@ export default {
   overflow: auto;
 }
 </style>
+@/lodash

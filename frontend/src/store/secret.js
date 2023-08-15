@@ -10,17 +10,19 @@ import {
   computed,
 } from 'vue'
 
-import { useApi } from '@/composables'
+import { useApi } from '@/composables/useApi'
+
 import { isOwnSecret } from '@/utils'
+
+import { useAuthzStore } from './authz'
+import { useAppStore } from './app'
+
 import {
   findIndex,
   find,
   filter,
   matches,
-} from '@/utils/lodash'
-
-import { useAuthzStore } from './authz'
-import { useAppStore } from './app'
+} from '@/lodash'
 
 function eqlNameAndNamespace ({ namespace, name }) {
   return matches({ metadata: { namespace, name } })

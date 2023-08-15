@@ -239,16 +239,10 @@ import {
   mapActions,
 } from 'pinia'
 
-import {
-  wildcardObjectsFromStrings,
-  bestMatchForString,
-} from '@/utils/wildcard'
-import {
-  get,
-  find,
-  map,
-  head,
-} from '@/utils/lodash'
+import { useCloudProfileStore } from '@/store/cloudProfile'
+import { useSecretStore } from '@/store/secret'
+import { useAuthzStore } from '@/store/authz'
+
 import GCopyBtn from '@/components/GCopyBtn'
 import GShootSeedName from '@/components/GShootSeedName'
 import GVendor from '@/components/GVendor'
@@ -258,12 +252,19 @@ import GSeedConfiguration from '@/components/GSeedConfiguration'
 import GControlPlaneHighAvailabilityConfiguration from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityConfiguration'
 import GControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityTag'
 import GSecretDetailsItemContent from '@/components/Secrets/GSecretDetailsItemContent'
-import { shootItem } from '@/mixins/shootItem'
+
 import {
-  useCloudProfileStore,
-  useSecretStore,
-  useAuthzStore,
-} from '@/store'
+  wildcardObjectsFromStrings,
+  bestMatchForString,
+} from '@/utils/wildcard'
+import { shootItem } from '@/mixins/shootItem'
+
+import {
+  get,
+  find,
+  map,
+  head,
+} from '@/lodash'
 
 export default {
   components: {
@@ -350,3 +351,4 @@ export default {
   },
 }
 </script>
+@/lodash

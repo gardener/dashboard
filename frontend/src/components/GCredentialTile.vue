@@ -124,8 +124,10 @@ SPDX-License-Identifier: Apache-2.0
 import GShootActionRotateCredentials from '@/components/GShootActionRotateCredentials'
 import GTimeString from '@/components/GTimeString'
 import GShootMessages from '@/components/ShootMessages/GShootMessages'
+
 import shootStatusCredentialRotation from '@/mixins/shootStatusCredentialRotation'
-import { get } from '@/utils/lodash'
+
+import { get } from '@/lodash'
 
 export default {
   components: {
@@ -179,3 +181,4 @@ export default {
   },
 }
 </script>
+@/lodash

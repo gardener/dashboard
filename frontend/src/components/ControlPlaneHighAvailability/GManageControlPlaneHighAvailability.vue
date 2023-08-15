@@ -79,15 +79,16 @@ import {
   mapActions,
 } from 'pinia'
 
-import { transformHtml } from '@/utils'
-import { some } from '@/utils/lodash'
+import { useShootStagingStore } from '@/store/shootStaging'
+import { useCloudProfileStore } from '@/store/cloudProfile'
+import { useConfigStore } from '@/store/config'
+import { useSeedStore } from '@/store/seed'
+
 import GExternalLink from '@/components/GExternalLink.vue'
-import {
-  useShootStagingStore,
-  useCloudProfileStore,
-  useConfigStore,
-  useSeedStore,
-} from '@/store'
+
+import { transformHtml } from '@/utils'
+
+import { some } from '@/lodash'
 
 export default {
   components: {
@@ -157,3 +158,4 @@ export default {
   },
 }
 </script>
+@/lodash

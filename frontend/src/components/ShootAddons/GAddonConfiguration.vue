@@ -24,12 +24,14 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GManageShootAddons from '@/components/ShootAddons/GManageAddons'
+
 import { errorDetailsFromError } from '@/utils/error'
 import { shootItem } from '@/mixins/shootItem'
+
 import {
   get,
   cloneDeep,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 export default {
   components: {
@@ -65,3 +67,4 @@ export default {
   },
 }
 </script>
+@/lodash

@@ -41,6 +41,7 @@ SPDX-License-Identifier: Apache-2.0
 import GSplitpane from '@/components/GSplitpane.vue'
 import GTerminal from '@/components/GTerminal.vue'
 import GCreateTerminalSessionDialog from '@/components/dialogs/GCreateTerminalSessionDialog.vue'
+
 import { PositionEnum } from '@/lib/g-symbol-tree'
 
 export default {

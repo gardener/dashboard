@@ -13,10 +13,9 @@ import { useBrowserLocation } from '@vueuse/core'
 import { useCookies } from '@vueuse/integrations/useCookies'
 import decode from 'jwt-decode'
 
-import {
-  useLogger,
-  useInterceptors,
-} from '@/composables'
+import { useLogger } from '@/composables/useLogger'
+import { useInterceptors } from '@/composables/useApi'
+
 import {
   gravatarUrlGeneric,
   displayName as getDisplayName,

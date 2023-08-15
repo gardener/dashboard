@@ -67,7 +67,7 @@ import {
   head,
   get,
   join,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 export default {
   props: {
@@ -241,3 +241,4 @@ export default {
   },
 }
 </script>
+@/lodash

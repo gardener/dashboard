@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import contrast from 'get-contrast'
 
-import { get } from '@/utils/lodash'
+import { get } from '@/lodash'
 
 export default {
   props: {
@@ -51,3 +51,4 @@ export default {
   }
 
 </style>
+@/lodash

@@ -84,31 +84,33 @@ import {
   maxLength,
 } from '@vuelidate/validators'
 
-import {
-  get,
-  find,
-  join,
-  filter,
-} from '@/utils/lodash'
-import {
-  getValidationErrors,
-  transformHtml,
-  setDelayedInputFocus,
-} from '@/utils'
+import { useAuthzStore } from '@/store/authz'
+import { useConfigStore } from '@/store/config'
+import { useProjectStore } from '@/store/project'
+import { useShootStore } from '@/store/shoot'
+import { useCloudProfileStore } from '@/store/cloudProfile'
+
+import GStaticTokenKubeconfigSwitch from '@/components/GStaticTokenKubeconfigSwitch'
+
+import { useAsyncRef } from '@/composables/useAsyncRef'
+
 import {
   resourceName,
   noStartEndHyphen,
   noConsecutiveHyphen,
 } from '@/utils/validators'
-import GStaticTokenKubeconfigSwitch from '@/components/GStaticTokenKubeconfigSwitch'
-import { useAsyncRef } from '@/composables'
 import {
-  useAuthzStore,
-  useConfigStore,
-  useProjectStore,
-  useShootStore,
-  useCloudProfileStore,
-} from '@/store'
+  getValidationErrors,
+  transformHtml,
+  setDelayedInputFocus,
+} from '@/utils'
+
+import {
+  get,
+  find,
+  join,
+  filter,
+} from '@/lodash'
 
 const validationErrors = {
   name: {
@@ -290,3 +292,4 @@ export default {
   },
 }
 </script>
+@/lodash

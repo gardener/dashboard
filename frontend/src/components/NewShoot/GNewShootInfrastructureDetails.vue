@@ -208,11 +208,19 @@ import {
 } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 
+import { useCloudProfileStore } from '@/store/cloudProfile'
+import { useConfigStore } from '@/store/config'
+import { useGardenerExtensionStore } from '@/store/gardenerExtension'
+import { useSecretStore } from '@/store/secret'
+import { useShootStagingStore } from '@/store/shootStaging'
+
 import GCloudProfile from '@/components/GCloudProfile'
 import GWildcardSelect from '@/components/GWildcardSelect'
 import GSelectSecret from '@/components/Secrets/GSelectSecret'
+
 import { getValidationErrors } from '@/utils'
 import { includesIfAvailable } from '@/utils/validators'
+
 import {
   sortBy,
   head,
@@ -223,14 +231,7 @@ import {
   forEach,
   intersection,
   find,
-} from '@/utils/lodash'
-import {
-  useCloudProfileStore,
-  useConfigStore,
-  useGardenerExtensionStore,
-  useSecretStore,
-  useShootStagingStore,
-} from '@/store'
+} from '@/lodash'
 
 export default {
   components: {
@@ -586,3 +587,4 @@ export default {
   },
 }
 </script>
+@/lodash

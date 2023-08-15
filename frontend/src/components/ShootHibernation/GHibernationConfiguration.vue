@@ -28,12 +28,15 @@ SPDX-License-Identifier: Apache-2.0
 import { defineAsyncComponent } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 
-import { get } from '@/utils/lodash'
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
+
+import { useAsyncRef } from '@/composables/useAsyncRef'
+
 import { errorDetailsFromError } from '@/utils/error'
 import { v4 as uuidv4 } from '@/utils/uuid'
 import shootItem from '@/mixins/shootItem'
-import { useAsyncRef } from '@/composables'
+
+import { get } from '@/lodash'
 
 export default {
   components: {
@@ -109,3 +112,4 @@ export default {
   },
 }
 </script>
+@/lodash

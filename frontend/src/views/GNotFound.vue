@@ -20,7 +20,8 @@ import {
   useRouter,
 } from 'vue-router'
 
-import { useProjectStore } from '@/store'
+import { useProjectStore } from '@/store/project'
+
 import GError from '@/components/GError.vue'
 
 const store = useProjectStore()

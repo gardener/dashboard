@@ -6,11 +6,10 @@
 
 import { mapActions } from 'pinia'
 
-import {
-  useCloudProfileStore,
-  useProjectStore,
-  useSeedStore,
-} from '@/store'
+import { useCloudProfileStore } from '@/store/cloudProfile'
+import { useProjectStore } from '@/store/project'
+import { useSeedStore } from '@/store/seed'
+
 import {
   getTimestampFormatted,
   getCreatedBy,
@@ -19,6 +18,7 @@ import {
   isTypeDelete,
   isTruthyValue,
 } from '@/utils'
+
 import {
   get,
   uniq,
@@ -28,7 +28,7 @@ import {
   some,
   filter,
   compact,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 export const shootItem = {
   props: {

@@ -40,7 +40,7 @@ import {
   Pane,
 } from 'splitpanes'
 
-import { useAppStore } from '@/store'
+import { useAppStore } from '@/store/app'
 
 import 'splitpanes/dist/splitpanes.css'
 

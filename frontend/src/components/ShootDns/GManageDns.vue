@@ -104,12 +104,14 @@ import {
 import { requiredIf } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
+import { useShootStagingStore } from '@/store/shootStaging'
+
 import GDnsProviderRow from '@/components/ShootDns/GDnsProviderRow'
 import GVendorIcon from '@/components/GVendorIcon'
 import GExpandTransitionGroup from '@/components/GExpandTransitionGroup'
+
 import { getValidationErrors } from '@/utils'
 import { nilUnless } from '@/utils/validators'
-import { useShootStagingStore } from '@/store'
 
 export default {
   components: {

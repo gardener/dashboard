@@ -39,6 +39,8 @@ import { mapState } from 'pinia'
 import { required } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
+import { useAppStore } from '@/store/app'
+
 import {
   getValidationErrors,
   randomMaintenanceBegin,
@@ -47,7 +49,6 @@ import {
 import { isTimezone } from '@/utils/validators'
 import TimeWithOffset from '@/utils/TimeWithOffset'
 import moment from '@/utils/moment'
-import { useAppStore } from '@/store'
 
 const validationErrors = {
   maintenanceBegin: {

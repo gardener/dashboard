@@ -23,7 +23,7 @@ import {
   forIn,
   isEqual,
   first,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 export class ShootEditorCompletions {
   constructor (shootProperties, editorIndent, supportedPaths) {

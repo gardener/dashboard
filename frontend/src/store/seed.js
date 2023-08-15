@@ -10,12 +10,13 @@ import {
   computed,
 } from 'vue'
 
-import { useApi } from '@/composables'
+import { useApi } from '@/composables/useApi'
+
 import {
   find,
   get,
   keyBy,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 export const useSeedStore = defineStore('seed', () => {
   const api = useApi()

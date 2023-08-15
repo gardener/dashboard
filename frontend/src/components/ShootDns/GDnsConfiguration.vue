@@ -27,12 +27,14 @@ import {
 } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 
+import { useShootStagingStore } from '@/store/shootStaging'
+
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GManageShootDns from '@/components/ShootDns/GManageDns'
+
 import { errorDetailsFromError } from '@/utils/error'
 import { shootItem } from '@/mixins/shootItem'
 import { v4 as uuidv4 } from '@/utils/uuid'
-import { useShootStagingStore } from '@/store'
 
 export default {
   components: {

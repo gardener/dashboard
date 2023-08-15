@@ -56,7 +56,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapState } from 'pinia'
 
-import { useConfigStore } from '@/store'
+import { useConfigStore } from '@/store/config'
 
 import GCodeBlock from './GCodeBlock.vue'
 

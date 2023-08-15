@@ -10,7 +10,8 @@ import {
   SplitpaneTree,
   PositionEnum,
 } from '@/lib/g-symbol-tree'
-import { cloneDeep } from '@/utils/lodash'
+
+import { cloneDeep } from '@/lodash'
 
 describe('lib', () => {
   describe('g-symbol-tree', () => {

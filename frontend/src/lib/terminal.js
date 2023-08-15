@@ -4,12 +4,17 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import { useLogger } from '@/composables/useLogger'
+import { useApi } from '@/composables/useApi'
+
 import { encodeBase64Url } from '@/utils'
 import pTimeout from '@/utils/p-timeout'
+
 import {
-  useApi,
-  useLogger,
-} from '@/composables'
+  K8sAttachAddon,
+  WsReadyStateEnum,
+} from './xterm-addon-k8s-attach'
+
 import {
   assign,
   find,
@@ -20,12 +25,7 @@ import {
   keys,
   includes,
   pick,
-} from '@/utils/lodash'
-
-import {
-  K8sAttachAddon,
-  WsReadyStateEnum,
-} from './xterm-addon-k8s-attach'
+} from '@/lodash'
 
 const api = useApi()
 const logger = useLogger()

@@ -218,6 +218,9 @@ import {
   mapActions,
 } from 'pinia'
 
+import { useAuthzStore } from '@/store/authz'
+import { useTicketStore } from '@/store/ticket'
+
 import GAccessRestrictionChips from '@/components/ShootAccessRestrictions/GAccessRestrictionChips.vue'
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
 import GActionButton from '@/components/GActionButton.vue'
@@ -235,22 +238,20 @@ import GShootListRowActions from '@/components/GShootListRowActions.vue'
 import GAutoHide from '@/components/GAutoHide.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
 import GControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityTag.vue'
+
 import {
   isTypeDelete,
   getTimestampFormatted,
   getIssueSince,
 } from '@/utils'
 import { shootItem } from '@/mixins/shootItem'
+
 import {
   includes,
   get,
   map,
   isObject,
-} from '@/utils/lodash'
-import {
-  useAuthzStore,
-  useTicketStore,
-} from '@/store'
+} from '@/lodash'
 
 export default {
   components: {
@@ -412,3 +413,4 @@ export default {
     }
   }
 </style>
+@/lodash

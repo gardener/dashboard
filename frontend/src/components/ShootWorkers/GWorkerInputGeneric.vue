@@ -161,11 +161,25 @@ import {
 } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
+import { useCloudProfileStore } from '@/store/cloudProfile'
+
 import GVolumeSizeInput from '@/components/ShootWorkers/GVolumeSizeInput'
 import GMachineType from '@/components/ShootWorkers/GMachineType'
 import GVolumeType from '@/components/ShootWorkers/GVolumeType'
 import GMachineImage from '@/components/ShootWorkers/GMachineImage'
 import GContainerRuntime from '@/components/ShootWorkers/GContainerRuntime'
+
+import {
+  getValidationErrors,
+  parseSize,
+} from '@/utils'
+import {
+  uniqueWorkerName,
+  resourceName,
+  noStartEndHyphen,
+  numberOrPercentage,
+} from '@/utils/validators'
+
 import {
   isEmpty,
   filter,
@@ -180,18 +194,7 @@ import {
   set,
   head,
   pick,
-} from '@/utils/lodash'
-import {
-  getValidationErrors,
-  parseSize,
-} from '@/utils'
-import {
-  uniqueWorkerName,
-  resourceName,
-  noStartEndHyphen,
-  numberOrPercentage,
-} from '@/utils/validators'
-import { useCloudProfileStore } from '@/store/cloudProfile'
+} from '@/lodash'
 
 const validationErrors = {
   worker: {
@@ -585,3 +588,4 @@ export default {
     opacity: 1;
   }
 </style>
+@/lodash

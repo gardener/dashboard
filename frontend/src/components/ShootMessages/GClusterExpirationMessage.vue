@@ -19,8 +19,9 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { isValidTerminationDate } from '@/utils'
 import GTimeString from '@/components/GTimeString.vue'
+
+import { isValidTerminationDate } from '@/utils'
 
 export default {
   components: {

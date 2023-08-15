@@ -54,8 +54,9 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { join } from '@/utils/lodash'
 import GVendorIcon from '@/components/GVendorIcon'
+
+import { join } from '@/lodash'
 
 export default {
   components: {
@@ -137,3 +138,4 @@ export default {
     padding: 0;
   }
 </style>
+@/lodash

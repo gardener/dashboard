@@ -28,12 +28,16 @@ import { useVuelidate } from '@vuelidate/core'
 import { defineAsyncComponent } from 'vue'
 import { mapState } from 'pinia'
 
-import { find } from '@/utils/lodash'
+import { useSecretStore } from '@/store/secret'
+
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
+
+import { useAsyncRef } from '@/composables/useAsyncRef'
+
 import { errorDetailsFromError } from '@/utils/error'
 import shootItem from '@/mixins/shootItem'
-import { useAsyncRef } from '@/composables'
-import { useSecretStore } from '@/store'
+
+import { find } from '@/lodash'
 
 export default {
   components: {
@@ -101,3 +105,4 @@ export default {
   },
 }
 </script>
+@/lodash

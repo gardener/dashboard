@@ -37,12 +37,47 @@ module.exports = {
       groups: [
         'builtin',
         'external',
+        'unknown',
         'internal',
         'parent',
         'sibling',
         'index',
       ],
       pathGroups: [
+        {
+          pattern: '@/store/**',
+          group: 'external',
+          position: 'after',
+        },
+        {
+          pattern: '@/layouts/**',
+          group: 'unknown',
+          position: 'before',
+        },
+        {
+          pattern: '@/views/**',
+          group: 'unknown',
+        },
+        {
+          pattern: '@/components/**',
+          group: 'unknown',
+          position: 'after',
+        },
+        {
+          pattern: '@/composables/**',
+          group: 'internal',
+          position: 'before',
+        },
+        {
+          pattern: '@/lodash',
+          group: 'index',
+          position: 'after',
+        },
+        {
+          pattern: '@/lib/**',
+          group: 'internal',
+          position: 'after',
+        },
         {
           pattern: '@/**',
           group: 'internal',

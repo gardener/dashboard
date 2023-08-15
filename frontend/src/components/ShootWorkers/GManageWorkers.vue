@@ -65,13 +65,18 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapActions } from 'pinia'
 
+import { useCloudProfileStore } from '@/store/cloudProfile'
+
 import GWorkerInputGeneric from '@/components/ShootWorkers/GWorkerInputGeneric'
 import GExpandTransitionGroup from '@/components/GExpandTransitionGroup'
+
 import { isZonedCluster } from '@/utils'
 import {
   findFreeNetworks,
   getZonesNetworkConfiguration,
 } from '@/utils/createShoot'
+import { v4 as uuidv4 } from '@/utils/uuid'
+
 import {
   forEach,
   map,
@@ -85,9 +90,7 @@ import {
   get,
   includes,
   filter,
-} from '@/utils/lodash'
-import { v4 as uuidv4 } from '@/utils/uuid'
-import { useCloudProfileStore } from '@/store/cloudProfile'
+} from '@/lodash'
 
 const NO_LIMIT = -1
 
@@ -306,3 +309,4 @@ export default {
   },
 }
 </script>
+@/lodash

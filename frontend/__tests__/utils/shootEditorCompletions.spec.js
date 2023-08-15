@@ -6,7 +6,8 @@ import CodeMirror from 'codemirror'
 import 'codemirror/mode/yaml/yaml.js'
 
 import { ShootEditorCompletions } from '@/utils/shootEditorCompletions'
-import { repeat } from '@/utils/lodash'
+
+import { repeat } from '@/lodash'
 
 const shootCompletions = {
   spec: {

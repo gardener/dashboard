@@ -37,6 +37,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import GShootActionButton from '@/components/GShootActionButton.vue'
 import GShootActionDialog from '@/components/GShootActionDialog.vue'
+
 import { shootItem } from '@/mixins/shootItem'
 import { errorDetailsFromError } from '@/utils/error'
 

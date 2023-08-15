@@ -51,11 +51,14 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapActions } from 'pinia'
 
-import { get } from '@/utils/lodash'
+import { useSecretStore } from '@/store/secret'
+
 import GMessage from '@/components/GMessage'
 import GToolbar from '@/components/GToolbar.vue'
+
 import { errorDetailsFromError } from '@/utils/error'
-import { useSecretStore } from '@/store'
+
+import { get } from '@/lodash'
 
 export default {
   components: {
@@ -137,3 +140,4 @@ export default {
     font-weight: 400;
   }
 </style>
+@/lodash

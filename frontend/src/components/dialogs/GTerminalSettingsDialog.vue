@@ -30,9 +30,10 @@ import {
 } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 
-import { useTerminalConfig } from '@/composables/useTerminalConfig'
 import GDialog from '@/components/dialogs/GDialog.vue'
 import GTerminalSettings from '@/components/GTerminalSettings.vue'
+
+import { useTerminalConfig } from '@/composables/useTerminalConfig'
 
 export default {
   components: {

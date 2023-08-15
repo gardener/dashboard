@@ -65,20 +65,21 @@ import {
   mapActions,
 } from 'pinia'
 
+import { useConfigStore } from '@/store/config'
+import { useTicketStore } from '@/store/ticket'
+
+import GTicket from '@/components/ShootTickets/GTicket'
+
+import { shootItem } from '@/mixins/shootItem'
+import moment from '@/utils/moment'
+
 import {
   get,
   join,
   map,
   template,
   uniq,
-} from '@/utils/lodash'
-import GTicket from '@/components/ShootTickets/GTicket'
-import { shootItem } from '@/mixins/shootItem'
-import moment from '@/utils/moment'
-import {
-  useConfigStore,
-  useTicketStore,
-} from '@/store'
+} from '@/lodash'
 
 export default {
   components: {
@@ -153,3 +154,4 @@ export default {
     text-decoration: none;
   }
 </style>
+@/lodash

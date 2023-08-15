@@ -11,10 +11,12 @@ import {
   toRef,
 } from 'vue'
 
-import {
-  useApi,
-  useLogger,
-} from '@/composables'
+import { useLogger } from '@/composables/useLogger'
+import { useApi } from '@/composables/useApi'
+
+import { useAuthzStore } from './authz'
+import { useAppStore } from './app'
+
 import {
   find,
   findIndex,
@@ -27,10 +29,7 @@ import {
   mapKeys,
   mapValues,
   replace,
-} from '@/utils/lodash'
-
-import { useAuthzStore } from './authz'
-import { useAppStore } from './app'
+} from '@/lodash'
 
 export const useProjectStore = defineStore('project', () => {
   const logger = useLogger()

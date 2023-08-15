@@ -6,12 +6,10 @@
 
 import { mergeProps } from 'vue'
 
-import {
-  useLogger,
-  useApi,
-  useSanitizeUrl,
-  useRenderComponent,
-} from '@/composables'
+import { useLogger } from '@/composables/useLogger'
+import { useApi } from '@/composables/useApi'
+import { useSanitizeUrl } from '@/composables/useSanitizeUrl'
+import { useRenderComponent } from '@/composables/useRenderComponent'
 
 export default {
   install (app) {

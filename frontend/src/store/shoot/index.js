@@ -10,21 +10,11 @@ import {
   reactive,
 } from 'vue'
 
-import {
-  useApi,
-  useLogger,
-} from '@/composables'
+import { useLogger } from '@/composables/useLogger'
+import { useApi } from '@/composables/useApi'
+
 import { shootHasIssue } from '@/utils'
 import { isNotFound } from '@/utils/error'
-import {
-  cloneDeep,
-  get,
-  map,
-  replace,
-  difference,
-  differenceWith,
-  find,
-} from '@/utils/lodash'
 
 import { useAppStore } from '../app'
 import { useAuthzStore } from '../authz'
@@ -49,6 +39,16 @@ import {
   searchItemsFn,
   sortItemsFn,
 } from './helper'
+
+import {
+  cloneDeep,
+  get,
+  map,
+  replace,
+  difference,
+  differenceWith,
+  find,
+} from '@/lodash'
 
 export const useShootStore = defineStore('shoot', () => {
   const api = useApi()

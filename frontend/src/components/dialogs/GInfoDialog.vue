@@ -71,14 +71,13 @@ import {
   mapActions,
 } from 'pinia'
 
-import {
-  useAppStore,
-  useAuthnStore,
-  useGardenerExtensionStore,
-} from '@/store'
-import { sortBy } from '@/utils/lodash'
+import { useAppStore } from '@/store/app'
+import { useAuthnStore } from '@/store/authn'
+import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 
 import GDialog from './GDialog.vue'
+
+import { sortBy } from '@/lodash'
 
 export default {
   components: {
@@ -154,3 +153,4 @@ export default {
     height: 50px;
   }
 </style>
+@/lodash

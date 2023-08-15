@@ -128,20 +128,21 @@ import {
 import { required } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
+import { useSecretStore } from '@/store/secret'
+import { useShootStagingStore } from '@/store/shootStaging'
+import { useGardenerExtensionStore } from '@/store/gardenerExtension'
+
+import GSelectSecret from '@/components/Secrets/GSelectSecret'
+import GVendorIcon from '@/components/GVendorIcon'
+
+import { getValidationErrors } from '@/utils'
+
 import {
   get,
   head,
   find,
   map,
-} from '@/utils/lodash'
-import GSelectSecret from '@/components/Secrets/GSelectSecret'
-import GVendorIcon from '@/components/GVendorIcon'
-import { getValidationErrors } from '@/utils'
-import {
-  useSecretStore,
-  useShootStagingStore,
-  useGardenerExtensionStore,
-} from '@/store'
+} from '@/lodash'
 
 const validationErrors = {
   type: {
@@ -329,3 +330,4 @@ export default {
   }
 
 </style>
+@/lodash

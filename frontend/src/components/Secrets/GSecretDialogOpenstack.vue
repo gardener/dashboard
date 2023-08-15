@@ -172,13 +172,15 @@ import {
   requiredIf,
 } from '@vuelidate/validators'
 
+import { useCloudProfileStore } from '@/store/cloudProfile'
+
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
+import GExternalLink from '@/components/GExternalLink'
+
 import {
   getValidationErrors,
   setDelayedInputFocus,
 } from '@/utils'
-import GExternalLink from '@/components/GExternalLink'
-import { useCloudProfileStore } from '@/store'
 
 const requiredMessage = 'You can\'t leave this empty.'
 const requiredUserMessage = 'Required for technical user authentication'

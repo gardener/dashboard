@@ -53,6 +53,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import GCredentialTile from '@/components/GCredentialTile'
+
 import { shootItem } from '@/mixins/shootItem'
 
 export default {

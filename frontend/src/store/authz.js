@@ -10,7 +10,8 @@ import {
   computed,
 } from 'vue'
 
-import { useApi } from '@/composables'
+import { useApi } from '@/composables/useApi'
+
 import { canI } from '@/utils'
 
 import { useConfigStore } from './config'

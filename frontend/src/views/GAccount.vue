@@ -246,21 +246,22 @@ SPDX-License-Identifier: Apache-2.0
 import download from 'downloadjs'
 import { mapState } from 'pinia'
 
-import {
-  useAuthnStore,
-  useAuthzStore,
-  useProjectStore,
-  useKubeconfigStore,
-} from '@/store'
+import { useAuthnStore } from '@/store/authn'
+import { useAuthzStore } from '@/store/authz'
+import { useProjectStore } from '@/store/project'
+import { useKubeconfigStore } from '@/store/kubeconfig'
+
 import GCopyBtn from '@/components/GCopyBtn.vue'
 import GCodeBlock from '@/components/GCodeBlock.vue'
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
+
 import moment from '@/utils/moment'
+
 import {
   map,
   find,
   get,
-} from '@/utils/lodash'
+} from '@/lodash'
 
 export default {
   components: {
@@ -462,3 +463,4 @@ export default {
     -webkit-line-clamp: 2;
   }
 </style>
+@/lodash

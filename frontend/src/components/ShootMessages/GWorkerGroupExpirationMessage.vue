@@ -28,8 +28,9 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 
-import { getDateFormatted } from '@/utils'
 import GTimeString from '@/components/GTimeString.vue'
+
+import { getDateFormatted } from '@/utils'
 
 export default {
   components: {

@@ -76,12 +76,13 @@ SPDX-License-Identifier: Apache-2.0
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
-import { trim } from '@/utils/lodash'
 import { getValidationErrors } from '@/utils'
 import {
   wildcardObjectsFromStrings,
   bestMatchForString,
 } from '@/utils/wildcard'
+
+import { trim } from '@/lodash'
 
 export default {
   props: {
@@ -218,3 +219,4 @@ export default {
 }
 
 </style>
+@/lodash

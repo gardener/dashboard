@@ -55,15 +55,17 @@ import {
 } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
+import { useCloudProfileStore } from '@/store/cloudProfile'
+
 import { getValidationErrors } from '@/utils'
 import { getWorkerProviderConfig } from '@/utils/createShoot'
+
 import {
   find,
   get,
   set,
   unset,
-} from '@/utils/lodash'
-import { useCloudProfileStore } from '@/store'
+} from '@/lodash'
 
 export default {
   props: {
@@ -183,3 +185,4 @@ export default {
   },
 }
 </script>
+@/lodash

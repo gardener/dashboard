@@ -89,6 +89,9 @@ import {
 } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
+import { getValidationErrors } from '@/utils'
+import moment from '@/utils/moment'
+
 import {
   join,
   split,
@@ -97,9 +100,7 @@ import {
   find,
   isEqual,
   sortBy,
-} from '@/utils/lodash'
-import { getValidationErrors } from '@/utils'
-import moment from '@/utils/moment'
+} from '@/lodash'
 
 const validationErrors = {
   selectedDays: {
@@ -296,3 +297,4 @@ export default {
   },
 }
 </script>
+@/lodash
