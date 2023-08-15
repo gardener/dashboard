@@ -103,6 +103,18 @@ Object {
 }
 `;
 
+exports[`gardener-dashboard configmap grantTypes should render the template 1`] = `
+Object {
+  "frontend": Object {
+    "grantTypes": Array [
+      "a",
+      "b",
+      "c",
+    ],
+  },
+}
+`;
+
 exports[`gardener-dashboard configmap knownConditions should render the template with knownConditions markdown 1`] = `
 Object {
   "frontend": Object {

@@ -547,6 +547,26 @@ describe('gardener-dashboard', function () {
       })
     })
 
+    describe('grantTypes', function () {
+      it('should render the template', async function () {
+        const values = {
+          global: {
+            dashboard: {
+              frontendConfig: {
+                grantTypes: ['a', 'b', 'c']
+              }
+            }
+          }
+        }
+
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [configMap] = documents
+        const config = yaml.load(configMap.data['config.yaml'])
+        expect(pick(config, ['frontend.grantTypes'])).toMatchSnapshot()
+      })
+    })
+
     describe('resourceQuotaHelp', function () {
       it('should render the template with resourceQuotaHelp markdown', async function () {
         const values = {

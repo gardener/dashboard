@@ -243,11 +243,13 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { ref } from 'vue'
 import download from 'downloadjs'
 import { mapState } from 'pinia'
 
 import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
+import { useConfigStore } from '@/store/config'
 import { useProjectStore } from '@/store/project'
 import { useKubeconfigStore } from '@/store/kubeconfig'
 
@@ -261,6 +263,7 @@ import {
   map,
   find,
   get,
+  head,
 } from '@/lodash'
 
 export default {
@@ -270,14 +273,23 @@ export default {
     GAccountAvatar,
   },
   inject: ['api', 'logger', 'yaml'],
+  setup () {
+    const configStore = useConfigStore()
+    const grantTypes = configStore.grantTypes
+
+    const grantType = ref(head(grantTypes))
+
+    return {
+      grantType,
+      grantTypes,
+    }
+  },
   data () {
     return {
       kubeconfigExpansionPanel: false,
       kubeconfigTab: 'configure',
       projectName: undefined,
       skipOpenBrowser: false,
-      grantType: 'auto',
-      grantTypes: ['auto', 'authcode', 'authcode-keyboard'],
       idToken: undefined,
       showToken: false,
       showMessage: false,
