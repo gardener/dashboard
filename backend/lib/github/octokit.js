@@ -9,6 +9,8 @@
 const { Agent } = require('https')
 const _ = require('lodash')
 const { Octokit } = require('@octokit/rest')
+const { createTokenAuth } = require('@octokit/auth-token')
+const { createAppAuth } = require('@octokit/auth-app')
 const config = require('../config')
 const logger = require('../logger')
 
@@ -31,37 +33,32 @@ class OctokitLog {
 }
 
 function getAuthOptions (auth) {
-  if (auth && _.isString(auth)) {
-    return auth
-  }
   const {
     token,
-    username,
-    password,
+    appId,
     clientId,
     clientSecret,
-    key,
-    secret
+    installationId,
+    privateKey
   } = auth || {}
   if (token) {
-    return `token ${token}`
-  }
-  if (username && password) {
     return {
-      username,
-      password
+      authStrategy: ({ token }) => createTokenAuth(token),
+      auth: {
+        token
+      }
     }
   }
-  if (clientId && clientSecret) {
+  if (appId && clientId && clientSecret && installationId && privateKey) {
     return {
-      clientId,
-      clientSecret
-    }
-  }
-  if (key && secret) {
-    return {
-      clientId: key,
-      clientSecret: secret
+      authStrategy: createAppAuth,
+      auth: {
+        appId,
+        clientId,
+        clientSecret,
+        installationId,
+        privateKey
+      }
     }
   }
 }
@@ -82,9 +79,9 @@ function init (options) {
       keepAlive: true
     })
   }
-  const auth = getAuthOptions(authentication)
+  const authOptions = getAuthOptions(authentication)
   options = _.merge({}, {
-    auth,
+    ...authOptions,
     baseUrl: _.replace(baseUrl, /\/$/, ''),
     previews: ['symmetra'],
     log: OctokitLog,
