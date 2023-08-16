@@ -76,6 +76,7 @@ SPDX-License-Identifier: Apache-2.0
                         label="Token"
                         required
                         hide-details="auto"
+                        autocomplete="off"
                         @click:append-inner="showToken = !showToken"
                       />
                     </v-form>
@@ -119,14 +120,12 @@ SPDX-License-Identifier: Apache-2.0
   </v-app>
 </template>
 
-<script setup>
+<script>
 import {
-  ref,
-  watch,
-} from 'vue'
-import { storeToRefs } from 'pinia'
-import { useRouter } from 'vue-router'
-import { useRouteQuery } from '@vueuse/router'
+  mapState,
+  mapWritableState,
+  mapActions,
+} from 'pinia'
 
 import { useAppStore } from '@/store/app'
 import { useAuthnStore } from '@/store/authn'
@@ -134,72 +133,117 @@ import { useLoginStore } from '@/store/login'
 
 import GNotify from '@/components/GNotify.vue'
 
-import { useApi } from '@/composables/useApi'
-
 import { setDelayedInputFocus } from '@/utils'
 
-const router = useRouter()
-const appStore = useAppStore()
-const authnStore = useAuthnStore()
-const loginStore = useLoginStore()
-const api = useApi()
+import { get } from '@/lodash'
 
-const showToken = ref(false)
-const token = ref('')
-const tokenField = ref(null)
-const { isFetching, loginType, loginTypes, landingPageUrl } = storeToRefs(loginStore)
-
-const redirectPath = useRouteQuery('redirectPath', '/')
-
-function handleLogin () {
-  switch (loginType.value) {
-    case 'oidc':
-      oidcLogin()
-      break
-    case 'token':
-      tokenLogin()
-      break
-  }
-}
-
-function oidcLogin () {
-  try {
-    authnStore.signinWithOidc(redirectPath.value)
-  } catch (err) {
-    appStore.alert = {
-      type: 'error',
-      title: 'OIDC Login Error',
-      message: err.message,
+export default {
+  components: {
+    GNotify,
+  },
+  inject: ['api'],
+  async beforeRouteEnter (to, from, next) {
+    let err
+    if (/^#.+/.test(to.hash)) {
+      const searchParams = new URLSearchParams(to.hash.substring(1))
+      if (searchParams.has('error')) {
+        err = new Error(searchParams.get('error'))
+        err.title = searchParams.get('title') ?? 'Login Error'
+      }
     }
-  }
-}
 
-async function tokenLogin () {
-  try {
-    const value = token.value
-    token.value = undefined
-    await api.createTokenReview({ token: value })
-    try {
-      await router.push(redirectPath.value)
-    } catch (err) {
-      /* Catch and ignore navigation aborted errors. Redirection happens in navigation guards
-        * (see https://router.vuejs.org/guide/essentials/navigation.html#router-push-location-oncomplete-onabort).
-        */
+    const loginStore = useLoginStore()
+    await loginStore.isNotFetching()
+    if (!err && loginStore.loginType === 'oidc' && loginStore.autoLoginEnabled) {
+      const redirectPath = get(to.query, 'redirectPath', '/')
+      const authnStore = useAuthnStore()
+      authnStore.signinWithOidc(redirectPath)
+      return next(false)
     }
-  } catch (err) {
-    appStore.alert = {
-      message: err.message,
-      title: 'Token Login Error',
-      type: 'error',
-    }
-  }
-}
 
-watch(loginType, value => {
-  if (value === 'token') {
-    setDelayedInputFocus(tokenField)
-  }
-})
+    next(vm => {
+      if (err) {
+        if (err.message !== 'NoAutoLogin') {
+          vm.setError(err)
+        }
+        vm.$router.replace('/login')
+      }
+    })
+  },
+  data () {
+    return {
+      showToken: false,
+      token: '',
+    }
+  },
+  computed: {
+    ...mapState(useLoginStore, [
+      'isFetching',
+      'loginTypes',
+      'landingPageUrl',
+      'autoLoginEnabled',
+    ]),
+    ...mapWritableState(useLoginStore, [
+      'loginType',
+    ]),
+    redirectPath () {
+      return get(this.$route.query, 'redirectPath', '/')
+    },
+  },
+  watch: {
+    loginType (value) {
+      if (value === 'token') {
+        setDelayedInputFocus(this, 'tokenField')
+      }
+    },
+  },
+
+  methods: {
+    ...mapActions(useAppStore, [
+      'setError',
+    ]),
+    ...mapActions(useAuthnStore, [
+      'signinWithOidc',
+    ]),
+    handleLogin () {
+      switch (this.loginType) {
+        case 'oidc':
+          this.oidcLogin()
+          break
+        case 'token':
+          this.tokenLogin()
+          break
+      }
+    },
+    oidcLogin () {
+      try {
+        this.signinWithOidc(this.redirectPath)
+      } catch (err) {
+        this.setError({
+          title: 'OIDC Login Error',
+          message: err.message,
+        })
+      }
+    },
+    async tokenLogin () {
+      try {
+        const token = this.token
+        this.token = undefined
+        await this.api.createTokenReview({ token })
+        try {
+          await this.$router.push(this.redirectPath)
+        } catch (err) {
+          /* Catch and ignore navigation aborted errors. Redirection happens in navigation guards */
+        }
+      } catch (err) {
+        this.setError({
+          title: 'Token Login Error',
+          message: err.message,
+        })
+      }
+    },
+  },
+}
 </script>
 
 <style lang="scss" scoped>

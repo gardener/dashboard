@@ -171,22 +171,6 @@ export function createRoutes (context) {
       path,
       name: 'Login',
       component: GLogin,
-      async beforeEnter (to) {
-        if (/^#.+/.test(to.hash)) {
-          const searchParams = new URLSearchParams(to.hash.substring(1))
-          if (searchParams.has('error')) {
-            appStore.alert = {
-              type: 'error',
-              title: searchParams.get('title') ?? 'Login Error',
-              message: searchParams.get('error'),
-            }
-            return {
-              ...to,
-              hash: '',
-            }
-          }
-        }
-      },
       meta: {
         public: true,
       },

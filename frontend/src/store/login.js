@@ -4,11 +4,12 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { defineStore } from 'pinia'
 import {
   ref,
   computed,
+  watch,
 } from 'vue'
+import { defineStore } from 'pinia'
 import { useLocalStorage } from '@vueuse/core'
 
 import { useLogger } from '@/composables/useLogger'
@@ -49,6 +50,19 @@ export const useLoginStore = defineStore('login', () => {
 
   fetchLoginConfig(url)
 
+  function isNotFetching () {
+    const executor = resolve => {
+      watch(isFetching, value => {
+        if (!value) {
+          resolve()
+        }
+      })
+    }
+    return !isFetching.value
+      ? Promise.resolve()
+      : new Promise(executor)
+  }
+
   return {
     isFetching,
     loginError,
@@ -56,5 +70,6 @@ export const useLoginStore = defineStore('login', () => {
     loginTypes,
     landingPageUrl,
     autoLoginEnabled,
+    isNotFetching,
   }
 })

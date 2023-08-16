@@ -30,24 +30,30 @@ export const useAppStore = defineStore('app', () => {
     alert.value = value
   }
 
-  function setSuccess (value) {
-    const message = typeof value === 'string'
-      ? value
-      : value?.message ?? ''
-    setAlert({
-      type: 'success',
-      message,
-    })
+  function setAlertWithType (type, value) {
+    const alert = {
+      type,
+    }
+    if (typeof value === 'string') {
+      alert.message = value
+    } else if (value) {
+      const { message = '', title } = value
+      alert.message = message
+      if (title) {
+        alert.title = title
+      }
+    } else {
+      alert.message = ''
+    }
+    setAlert(alert)
   }
 
   function setError (value) {
-    const message = typeof value === 'string'
-      ? value
-      : value?.message ?? ''
-    setAlert({
-      type: 'error',
-      message,
-    })
+    setAlertWithType('error', value)
+  }
+
+  function setSuccess (value) {
+    setAlertWithType('success', value)
   }
 
   function setRouterError (value) {
