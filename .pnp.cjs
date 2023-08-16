@@ -1270,6 +1270,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@gardener-dashboard/request", "workspace:packages/request"],\
             ["@gardener-dashboard/test-utils", "workspace:packages/test-utils"],\
             ["@godaddy/terminus", "npm:4.12.1"],\
+            ["@octokit/auth-app", "npm:6.0.0"],\
+            ["@octokit/auth-token", "npm:4.0.0"],\
             ["@octokit/rest", "npm:18.12.0"],\
             ["abort-controller", "npm:3.0.0"],\
             ["base64url", "npm:3.0.1"],\
@@ -2028,12 +2030,81 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["@octokit/auth-app", [\
+        ["npm:6.0.0", {\
+          "packageLocation": "./.yarn/cache/@octokit-auth-app-npm-6.0.0-88cce64c7c-e3eb3ff7be.zip/node_modules/@octokit/auth-app/",\
+          "packageDependencies": [\
+            ["@octokit/auth-app", "npm:6.0.0"],\
+            ["@octokit/auth-oauth-app", "npm:7.0.0"],\
+            ["@octokit/auth-oauth-user", "npm:4.0.0"],\
+            ["@octokit/request", "npm:8.1.1"],\
+            ["@octokit/request-error", "npm:5.0.0"],\
+            ["@octokit/types", "npm:11.1.0"],\
+            ["deprecation", "npm:2.3.1"],\
+            ["lru-cache", "npm:10.0.1"],\
+            ["universal-github-app-jwt", "npm:1.1.1"],\
+            ["universal-user-agent", "npm:6.0.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@octokit/auth-oauth-app", [\
+        ["npm:7.0.0", {\
+          "packageLocation": "./.yarn/cache/@octokit-auth-oauth-app-npm-7.0.0-0782f4f46b-fa050fbd05.zip/node_modules/@octokit/auth-oauth-app/",\
+          "packageDependencies": [\
+            ["@octokit/auth-oauth-app", "npm:7.0.0"],\
+            ["@octokit/auth-oauth-device", "npm:6.0.0"],\
+            ["@octokit/auth-oauth-user", "npm:4.0.0"],\
+            ["@octokit/request", "npm:8.1.1"],\
+            ["@octokit/types", "npm:11.1.0"],\
+            ["@types/btoa-lite", "npm:1.0.0"],\
+            ["btoa-lite", "npm:1.0.0"],\
+            ["universal-user-agent", "npm:6.0.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@octokit/auth-oauth-device", [\
+        ["npm:6.0.0", {\
+          "packageLocation": "./.yarn/cache/@octokit-auth-oauth-device-npm-6.0.0-2501846a20-ba6e46a42a.zip/node_modules/@octokit/auth-oauth-device/",\
+          "packageDependencies": [\
+            ["@octokit/auth-oauth-device", "npm:6.0.0"],\
+            ["@octokit/oauth-methods", "npm:4.0.0"],\
+            ["@octokit/request", "npm:8.1.1"],\
+            ["@octokit/types", "npm:11.1.0"],\
+            ["universal-user-agent", "npm:6.0.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@octokit/auth-oauth-user", [\
+        ["npm:4.0.0", {\
+          "packageLocation": "./.yarn/cache/@octokit-auth-oauth-user-npm-4.0.0-a6aff64dd4-d4382d5fa3.zip/node_modules/@octokit/auth-oauth-user/",\
+          "packageDependencies": [\
+            ["@octokit/auth-oauth-user", "npm:4.0.0"],\
+            ["@octokit/auth-oauth-device", "npm:6.0.0"],\
+            ["@octokit/oauth-methods", "npm:4.0.0"],\
+            ["@octokit/request", "npm:8.1.1"],\
+            ["@octokit/types", "npm:11.1.0"],\
+            ["btoa-lite", "npm:1.0.0"],\
+            ["universal-user-agent", "npm:6.0.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["@octokit/auth-token", [\
         ["npm:2.5.0", {\
           "packageLocation": "./.yarn/cache/@octokit-auth-token-npm-2.5.0-a1c6ffb640-45949296c0.zip/node_modules/@octokit/auth-token/",\
           "packageDependencies": [\
             ["@octokit/auth-token", "npm:2.5.0"],\
             ["@octokit/types", "npm:6.41.0"]\
+          ],\
+          "linkType": "HARD"\
+        }],\
+        ["npm:4.0.0", {\
+          "packageLocation": "./.yarn/cache/@octokit-auth-token-npm-4.0.0-9ad78a752f-d78f4dc48b.zip/node_modules/@octokit/auth-token/",\
+          "packageDependencies": [\
+            ["@octokit/auth-token", "npm:4.0.0"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -2064,6 +2135,16 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["universal-user-agent", "npm:6.0.0"]\
           ],\
           "linkType": "HARD"\
+        }],\
+        ["npm:9.0.0", {\
+          "packageLocation": "./.yarn/cache/@octokit-endpoint-npm-9.0.0-0d4530e44e-0e402c4d0f.zip/node_modules/@octokit/endpoint/",\
+          "packageDependencies": [\
+            ["@octokit/endpoint", "npm:9.0.0"],\
+            ["@octokit/types", "npm:11.1.0"],\
+            ["is-plain-object", "npm:5.0.0"],\
+            ["universal-user-agent", "npm:6.0.0"]\
+          ],\
+          "linkType": "HARD"\
         }]\
       ]],\
       ["@octokit/graphql", [\
@@ -2078,11 +2159,41 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["@octokit/oauth-authorization-url", [\
+        ["npm:6.0.2", {\
+          "packageLocation": "./.yarn/cache/@octokit-oauth-authorization-url-npm-6.0.2-7e66c4af6b-0f11169a3e.zip/node_modules/@octokit/oauth-authorization-url/",\
+          "packageDependencies": [\
+            ["@octokit/oauth-authorization-url", "npm:6.0.2"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@octokit/oauth-methods", [\
+        ["npm:4.0.0", {\
+          "packageLocation": "./.yarn/cache/@octokit-oauth-methods-npm-4.0.0-5405a95ddc-623f3031f5.zip/node_modules/@octokit/oauth-methods/",\
+          "packageDependencies": [\
+            ["@octokit/oauth-methods", "npm:4.0.0"],\
+            ["@octokit/oauth-authorization-url", "npm:6.0.2"],\
+            ["@octokit/request", "npm:8.1.1"],\
+            ["@octokit/request-error", "npm:5.0.0"],\
+            ["@octokit/types", "npm:11.1.0"],\
+            ["btoa-lite", "npm:1.0.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["@octokit/openapi-types", [\
         ["npm:12.11.0", {\
           "packageLocation": "./.yarn/cache/@octokit-openapi-types-npm-12.11.0-cc40f04bc8-8a7d4bd628.zip/node_modules/@octokit/openapi-types/",\
           "packageDependencies": [\
             ["@octokit/openapi-types", "npm:12.11.0"]\
+          ],\
+          "linkType": "HARD"\
+        }],\
+        ["npm:18.0.0", {\
+          "packageLocation": "./.yarn/cache/@octokit-openapi-types-npm-18.0.0-1586e405d6-d487d6c6c1.zip/node_modules/@octokit/openapi-types/",\
+          "packageDependencies": [\
+            ["@octokit/openapi-types", "npm:18.0.0"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -2169,6 +2280,18 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["universal-user-agent", "npm:6.0.0"]\
           ],\
           "linkType": "HARD"\
+        }],\
+        ["npm:8.1.1", {\
+          "packageLocation": "./.yarn/cache/@octokit-request-npm-8.1.1-404934a724-dec3ba2cba.zip/node_modules/@octokit/request/",\
+          "packageDependencies": [\
+            ["@octokit/request", "npm:8.1.1"],\
+            ["@octokit/endpoint", "npm:9.0.0"],\
+            ["@octokit/request-error", "npm:5.0.0"],\
+            ["@octokit/types", "npm:11.1.0"],\
+            ["is-plain-object", "npm:5.0.0"],\
+            ["universal-user-agent", "npm:6.0.0"]\
+          ],\
+          "linkType": "HARD"\
         }]\
       ]],\
       ["@octokit/request-error", [\
@@ -2177,6 +2300,16 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [\
             ["@octokit/request-error", "npm:2.1.0"],\
             ["@octokit/types", "npm:6.41.0"],\
+            ["deprecation", "npm:2.3.1"],\
+            ["once", "npm:1.4.0"]\
+          ],\
+          "linkType": "HARD"\
+        }],\
+        ["npm:5.0.0", {\
+          "packageLocation": "./.yarn/cache/@octokit-request-error-npm-5.0.0-262908a2c1-2012eca66f.zip/node_modules/@octokit/request-error/",\
+          "packageDependencies": [\
+            ["@octokit/request-error", "npm:5.0.0"],\
+            ["@octokit/types", "npm:11.1.0"],\
             ["deprecation", "npm:2.3.1"],\
             ["once", "npm:1.4.0"]\
           ],\
@@ -2197,6 +2330,14 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["@octokit/types", [\
+        ["npm:11.1.0", {\
+          "packageLocation": "./.yarn/cache/@octokit-types-npm-11.1.0-668299c1c7-72627a94dd.zip/node_modules/@octokit/types/",\
+          "packageDependencies": [\
+            ["@octokit/types", "npm:11.1.0"],\
+            ["@octokit/openapi-types", "npm:18.0.0"]\
+          ],\
+          "linkType": "HARD"\
+        }],\
         ["npm:6.41.0", {\
           "packageLocation": "./.yarn/cache/@octokit-types-npm-6.41.0-5788f32962-fd6f75e0b1.zip/node_modules/@octokit/types/",\
           "packageDependencies": [\
@@ -2359,6 +2500,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["@types/btoa-lite", [\
+        ["npm:1.0.0", {\
+          "packageLocation": "./.yarn/cache/@types-btoa-lite-npm-1.0.0-01da883611-4d0c3c36cc.zip/node_modules/@types/btoa-lite/",\
+          "packageDependencies": [\
+            ["@types/btoa-lite", "npm:1.0.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["@types/chai", [\
         ["npm:4.3.5", {\
           "packageLocation": "./.yarn/cache/@types-chai-npm-4.3.5-dce79013f2-c8f26a88c6.zip/node_modules/@types/chai/",\
@@ -2457,6 +2607,16 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/@types-json5-npm-0.0.29-f63a7916bd-e60b153664.zip/node_modules/@types/json5/",\
           "packageDependencies": [\
             ["@types/json5", "npm:0.0.29"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@types/jsonwebtoken", [\
+        ["npm:9.0.2", {\
+          "packageLocation": "./.yarn/cache/@types-jsonwebtoken-npm-9.0.2-7af15f7b9b-3bb8d40e78.zip/node_modules/@types/jsonwebtoken/",\
+          "packageDependencies": [\
+            ["@types/jsonwebtoken", "npm:9.0.2"],\
+            ["@types/node", "npm:20.4.4"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -4018,6 +4178,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [\
             ["bser", "npm:2.1.1"],\
             ["node-int64", "npm:0.4.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["btoa-lite", [\
+        ["npm:1.0.0", {\
+          "packageLocation": "./.yarn/cache/btoa-lite-npm-1.0.0-e85ee9286e-c2d61993b8.zip/node_modules/btoa-lite/",\
+          "packageDependencies": [\
+            ["btoa-lite", "npm:1.0.0"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -8604,6 +8773,13 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           ],\
           "linkType": "HARD"\
         }],\
+        ["npm:10.0.1", {\
+          "packageLocation": "./.yarn/cache/lru-cache-npm-10.0.1-0e1abf4c13-06f8d0e1ce.zip/node_modules/lru-cache/",\
+          "packageDependencies": [\
+            ["lru-cache", "npm:10.0.1"]\
+          ],\
+          "linkType": "HARD"\
+        }],\
         ["npm:5.1.1", {\
           "packageLocation": "./.yarn/cache/lru-cache-npm-5.1.1-f475882a51-c154ae1cbb.zip/node_modules/lru-cache/",\
           "packageDependencies": [\
@@ -11522,6 +11698,17 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["universal-cookie", "npm:4.0.4"],\
             ["@types/cookie", "npm:0.3.3"],\
             ["cookie", "npm:0.4.2"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["universal-github-app-jwt", [\
+        ["npm:1.1.1", {\
+          "packageLocation": "./.yarn/cache/universal-github-app-jwt-npm-1.1.1-07e57504be-31d30150b9.zip/node_modules/universal-github-app-jwt/",\
+          "packageDependencies": [\
+            ["universal-github-app-jwt", "npm:1.1.1"],\
+            ["@types/jsonwebtoken", "npm:9.0.2"],\
+            ["jsonwebtoken", "npm:9.0.1"]\
           ],\
           "linkType": "HARD"\
         }]\
