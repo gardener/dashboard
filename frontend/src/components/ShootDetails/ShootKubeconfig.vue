@@ -15,11 +15,16 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item-subtitle v-if="isKubeconfigAvailable" class="wrap-text">Does not contain credentials (requires <span class="font-family-monospace">gardenlogin</span> kubectl plugin)</v-list-item-subtitle>
         <v-list-item-subtitle v-else>Gardenlogin kubeconfig currently not available</v-list-item-subtitle>
       </v-list-item-content>
-      <v-list-item-content v-else>
+      <v-list-item-content v-if="isStaticKubeconfigLoginType">
         <v-list-item-title>Kubeconfig - Static Token</v-list-item-title>
         <v-list-item-subtitle v-if="!shootEnableStaticTokenKubeconfig">Static token kubeconfig is disabled for this cluster</v-list-item-subtitle>
         <v-list-item-subtitle v-else-if="!isKubeconfigAvailable">Static token kubeconfig currently not available</v-list-item-subtitle>
         <v-list-item-subtitle class="wrap-text" v-else>Contains static token credential. Not recommended, consider disabling the static token kubeconfig</v-list-item-subtitle>
+      </v-list-item-content>
+      <v-list-item-content v-if="isAdminKubeconfigLoginType">
+        <v-list-item-title>Admin Kubeconfig</v-list-item-title>
+        <v-list-item-subtitle v-if="!isKubeconfigAvailable">Request a time limited kubeconfig</v-list-item-subtitle>
+        <v-list-item-subtitle class="wrap-text" v-else>Retreive your kubeconfig</v-list-item-subtitle>
       </v-list-item-content>
       <v-list-item-action v-if="isGardenloginType" class="mx-0">
         <gardenlogin-info></gardenlogin-info>
@@ -47,8 +52,11 @@ SPDX-License-Identifier: Apache-2.0
           <span>{{kubeconfigVisibilityTitle}}</span>
         </v-tooltip>
       </v-list-item-action>
-      <v-list-item-action v-if="!isGardenloginType" class="mx-0">
+      <v-list-item-action v-if="isStaticKubeconfigLoginType" class="mx-0">
         <static-token-kubeconfig-configuration :shootItem="shootItem"></static-token-kubeconfig-configuration>
+      </v-list-item-action>
+      <v-list-item-action v-if="isAdminKubeconfigLoginType && !isKubeconfigAvailable" class="mx-0">
+        <admin-kube-config-request :shootItem="shootItem" @adminKubeConfig="onAdminKubeconfigReceived"></admin-kube-config-request>
       </v-list-item-action>
     </v-list-item>
     <v-list-item v-if="kubeconfigExpansionPanel" key="expansion-gardenlogin-kubeconfig">
@@ -65,6 +73,7 @@ import CopyBtn from '@/components/CopyBtn'
 import CodeBlock from '@/components/CodeBlock'
 import GardenloginInfo from '@/components/GardenloginInfo.vue'
 import StaticTokenKubeconfigConfiguration from '@/components/StaticTokenKubeconfigConfiguration'
+import AdminKubeConfigRequest from '@/components/AdminKubeConfigRequest'
 import download from 'downloadjs'
 import { shootItem } from '@/mixins/shootItem'
 
@@ -73,7 +82,8 @@ export default {
     CopyBtn,
     CodeBlock,
     GardenloginInfo,
-    StaticTokenKubeconfigConfiguration
+    StaticTokenKubeconfigConfiguration,
+    AdminKubeConfigRequest
   },
   mixins: [shootItem],
   props: {
@@ -88,7 +98,8 @@ export default {
   },
   data () {
     return {
-      kubeconfigExpansionPanel: false
+      kubeconfigExpansionPanel: false,
+      adminKubeConfig: undefined
     }
   },
   computed: {
@@ -96,9 +107,16 @@ export default {
       return this.showListIcon ? 'mdi-file' : ''
     },
     kubeconfig () {
-      return this.isGardenloginType
-        ? this.shootInfo?.kubeconfigGardenlogin
-        : this.shootInfo?.kubeconfig
+      if (this.isGardenloginType) {
+        return this.shootInfo?.kubeconfigGardenlogin
+      }
+
+      if (this.isStaticKubeconfigLoginType) {
+        return this.shootInfo?.kubeconfig
+      }
+
+      // Fall-through -> Admin kubeconfig type
+      return this.adminKubeConfig
     },
     isKubeconfigAvailable () {
       return !!this.kubeconfig
@@ -111,6 +129,12 @@ export default {
     },
     isGardenloginType () {
       return this.type === 'gardenlogin'
+    },
+    isStaticKubeconfigLoginType () {
+      return this.type === 'token'
+    },
+    isAdminKubeconfigLoginType () {
+      return this.type === 'adminkubeconfig'
     },
     getQualifiedName () {
       const prefix = this.isGardenloginType ? 'kubeconfig-gardenlogin' : 'kubeconfig'
@@ -129,6 +153,9 @@ export default {
       if (kubeconfig) {
         download(kubeconfig, this.getQualifiedName, 'text/yaml')
       }
+    },
+    onAdminKubeconfigReceived (kubeconfig) {
+      this.adminKubeConfig = kubeconfig
     }
   },
   watch: {

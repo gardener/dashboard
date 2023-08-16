@@ -198,6 +198,12 @@ export function updateShootSeedName ({ namespace, name, data }) {
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/seedname`, data)
 }
 
+export function getShootAdminKubeconfig ({ namespace, name, data }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
+  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/adminkubeconfig`, data)
+}
+
 /* Cloud Profiles */
 
 export function getCloudprofiles () {

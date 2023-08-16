@@ -254,3 +254,17 @@ router.route('/:name/spec/seedName')
       next(err)
     }
   })
+
+router.route('/:name/adminkubeconfig')
+  .all(metricsMiddleware)
+  .put(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      const name = req.params.name
+      const expirationSeconds = req.body.expirationSeconds
+      res.send(await shoots.getAdminKubeconfig({ user, namespace, name, expirationSeconds }))
+    } catch (err) {
+      next(err)
+    }
+  })

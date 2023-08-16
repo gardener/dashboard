@@ -9,6 +9,7 @@
 const { isHttpError } = require('@gardener-dashboard/request')
 const { cleanKubeconfig, Config } = require('@gardener-dashboard/kube-config')
 const { dashboardClient } = require('@gardener-dashboard/kube-client')
+const resources = require('@gardener-dashboard/kube-client/lib/resources')
 const utils = require('../utils')
 const cache = require('../cache')
 const authorization = require('./authorization')
@@ -157,6 +158,20 @@ exports.replaceSeedName = async function ({ user, namespace, name, body }) {
     value: seedName
   }]
   return client['core.gardener.cloud'].shoots.jsonPatch(namespace, [name, 'binding'], patchOperations)
+}
+
+exports.getAdminKubeconfig = async function ({ user, namespace, name, expirationSeconds }) {
+  const client = user.client
+  const { apiVersion, kind } = resources.Resources.AdminKubeconfigRequest
+    const body = {
+      kind,
+      apiVersion,
+      spec: {
+        expirationSeconds: expirationSeconds
+      }
+    }
+
+  return client['core.gardener.cloud'].shoots.createAdminKubeconfigRequest(namespace, name, body)
 }
 
 exports.replaceAddons = async function ({ user, namespace, name, body }) {
