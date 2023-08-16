@@ -452,7 +452,7 @@ Object {
 }
 `;
 
-exports[`gardener-dashboard configmap tickets should render the template 1`] = `
+exports[`gardener-dashboard configmap tickets github app authentication should render the template 1`] = `
 Object {
   "frontend": Object {
     "ticket": Object {
@@ -479,11 +479,65 @@ Object {
 }
 `;
 
-exports[`gardener-dashboard configmap tickets should render the template 2`] = `
+exports[`gardener-dashboard configmap tickets github app authentication should render the template 2`] = `
 Object {
   "apiVersion": "v1",
   "data": Object {
-    "authentication.token": "d2ViaG9va0F1dGhlbnRpY2F0aW9uVG9rZW4=",
+    "authentication.appId": "MQ==",
+    "authentication.clientId": "bHYxLjEyYWI=",
+    "authentication.clientSecret": "MTJhYmNk",
+    "authentication.installationId": "MTIz",
+    "authentication.privateKey": "a2V5",
+    "webhookSecret": "d2ViaG9va1NlY3JldA==",
+  },
+  "kind": "Secret",
+  "metadata": Object {
+    "labels": Object {
+      "app.kubernetes.io/component": "dashboard",
+      "app.kubernetes.io/instance": "gardener-dashboard",
+      "app.kubernetes.io/managed-by": "Helm",
+      "app.kubernetes.io/name": "gardener-dashboard",
+      "helm.sh/chart": "gardener-dashboard-runtime-0.1.0",
+    },
+    "name": "gardener-dashboard-github",
+    "namespace": "garden",
+  },
+  "type": "Opaque",
+}
+`;
+
+exports[`gardener-dashboard configmap tickets token authentication should render the template 1`] = `
+Object {
+  "frontend": Object {
+    "ticket": Object {
+      "avatarSource": "gravatar",
+      "gitHubRepoUrl": "https://github.com/gardener/tickets",
+      "hideClustersWithLabels": Array [
+        "ignore1",
+        "ignore2",
+      ],
+      "issueDescriptionTemplate": "issue description",
+      "newTicketLabels": Array [
+        "default-label",
+      ],
+    },
+  },
+  "gitHub": Object {
+    "apiUrl": "https://github.com/api/v3/",
+    "org": "gardener",
+    "pollIntervalSeconds": 60,
+    "repository": "tickets",
+    "syncConcurrency": 5,
+    "syncThrottleSeconds": 10,
+  },
+}
+`;
+
+exports[`gardener-dashboard configmap tickets token authentication should render the template 2`] = `
+Object {
+  "apiVersion": "v1",
+  "data": Object {
+    "authentication.token": "dG9rZW4=",
     "webhookSecret": "d2ViaG9va1NlY3JldA==",
   },
   "kind": "Secret",

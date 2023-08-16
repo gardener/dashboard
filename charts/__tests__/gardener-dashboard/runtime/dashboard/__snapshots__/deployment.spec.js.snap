@@ -1,5 +1,115 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`gardener-dashboard deployment github app authentication should render GITHUB environment variables 1`] = `
+Array [
+  Object {
+    "name": "SESSION_SECRET",
+    "valueFrom": Object {
+      "secretKeyRef": Object {
+        "key": "keyValue",
+        "name": "gardener-dashboard-sessionsecret",
+      },
+    },
+  },
+  Object {
+    "name": "OIDC_CLIENT_ID",
+    "valueFrom": Object {
+      "secretKeyRef": Object {
+        "key": "client_id",
+        "name": "gardener-dashboard-oidc",
+      },
+    },
+  },
+  Object {
+    "name": "OIDC_CLIENT_SECRET",
+    "valueFrom": Object {
+      "secretKeyRef": Object {
+        "key": "client_secret",
+        "name": "gardener-dashboard-oidc",
+      },
+    },
+  },
+  Object {
+    "name": "GITHUB_AUTHENTICATION_APP_ID",
+    "valueFrom": Object {
+      "secretKeyRef": Object {
+        "key": "authentication.appId",
+        "name": "gardener-dashboard-github",
+      },
+    },
+  },
+  Object {
+    "name": "GITHUB_AUTHENTICATION_CLIENT_ID",
+    "valueFrom": Object {
+      "secretKeyRef": Object {
+        "key": "authentication.clientId",
+        "name": "gardener-dashboard-github",
+      },
+    },
+  },
+  Object {
+    "name": "GITHUB_AUTHENTICATION_CLIENT_SECRET",
+    "valueFrom": Object {
+      "secretKeyRef": Object {
+        "key": "authentication.clientSecret",
+        "name": "gardener-dashboard-github",
+      },
+    },
+  },
+  Object {
+    "name": "GITHUB_AUTHENTICATION_INSTALLATION_ID",
+    "valueFrom": Object {
+      "secretKeyRef": Object {
+        "key": "authentication.installationId",
+        "name": "gardener-dashboard-github",
+      },
+    },
+  },
+  Object {
+    "name": "GITHUB_AUTHENTICATION_PRIVATE_KEY",
+    "valueFrom": Object {
+      "secretKeyRef": Object {
+        "key": "authentication.privateKey",
+        "name": "gardener-dashboard-github",
+      },
+    },
+  },
+  Object {
+    "name": "GITHUB_WEBHOOK_SECRET",
+    "valueFrom": Object {
+      "secretKeyRef": Object {
+        "key": "webhookSecret",
+        "name": "gardener-dashboard-github",
+      },
+    },
+  },
+  Object {
+    "name": "GARDENER_CONFIG",
+    "value": "/etc/gardener-dashboard/config.yaml",
+  },
+  Object {
+    "name": "METRICS_PORT",
+    "value": "9050",
+  },
+  Object {
+    "name": "POD_NAME",
+    "valueFrom": Object {
+      "fieldRef": Object {
+        "fieldPath": "metadata.name",
+      },
+    },
+  },
+  Object {
+    "name": "POD_NAMESPACE",
+    "valueFrom": Object {
+      "fieldRef": Object {
+        "fieldPath": "metadata.namespace",
+      },
+    },
+  },
+]
+`;
+
 exports[`gardener-dashboard deployment kubeconfig should render the template 1`] = `
 Object {
   "name": "gardener-dashboard-secret-kubeconfig",
@@ -286,6 +396,80 @@ Array [
   "--trace-gc",
   "--gc-interval=100",
   "server.js",
+]
+`;
+
+exports[`gardener-dashboard deployment when github is configured token authentication should render GITHUB environment variable 1`] = `
+Array [
+  Object {
+    "name": "SESSION_SECRET",
+    "valueFrom": Object {
+      "secretKeyRef": Object {
+        "key": "keyValue",
+        "name": "gardener-dashboard-sessionsecret",
+      },
+    },
+  },
+  Object {
+    "name": "OIDC_CLIENT_ID",
+    "valueFrom": Object {
+      "secretKeyRef": Object {
+        "key": "client_id",
+        "name": "gardener-dashboard-oidc",
+      },
+    },
+  },
+  Object {
+    "name": "OIDC_CLIENT_SECRET",
+    "valueFrom": Object {
+      "secretKeyRef": Object {
+        "key": "client_secret",
+        "name": "gardener-dashboard-oidc",
+      },
+    },
+  },
+  Object {
+    "name": "GITHUB_AUTHENTICATION_TOKEN",
+    "valueFrom": Object {
+      "secretKeyRef": Object {
+        "key": "authentication.token",
+        "name": "gardener-dashboard-github",
+      },
+    },
+  },
+  Object {
+    "name": "GITHUB_WEBHOOK_SECRET",
+    "valueFrom": Object {
+      "secretKeyRef": Object {
+        "key": "webhookSecret",
+        "name": "gardener-dashboard-github",
+      },
+    },
+  },
+  Object {
+    "name": "GARDENER_CONFIG",
+    "value": "/etc/gardener-dashboard/config.yaml",
+  },
+  Object {
+    "name": "METRICS_PORT",
+    "value": "9050",
+  },
+  Object {
+    "name": "POD_NAME",
+    "valueFrom": Object {
+      "fieldRef": Object {
+        "fieldPath": "metadata.name",
+      },
+    },
+  },
+  Object {
+    "name": "POD_NAMESPACE",
+    "valueFrom": Object {
+      "fieldRef": Object {
+        "fieldPath": "metadata.namespace",
+      },
+    },
+  },
 ]
 `;
 
