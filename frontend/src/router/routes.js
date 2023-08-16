@@ -55,7 +55,6 @@ const GShootItemTerminal = () => import('@/views/GShootItemTerminal.vue')
 
 export function createRoutes (context) {
   const {
-    appStore,
     authnStore,
     authzStore,
     projectStore,
