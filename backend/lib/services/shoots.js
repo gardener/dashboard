@@ -163,13 +163,13 @@ exports.replaceSeedName = async function ({ user, namespace, name, body }) {
 exports.getAdminKubeconfig = async function ({ user, namespace, name, expirationSeconds }) {
   const client = user.client
   const { apiVersion, kind } = resources.Resources.AdminKubeconfigRequest
-    const body = {
-      kind,
-      apiVersion,
-      spec: {
-        expirationSeconds: expirationSeconds
-      }
+  const body = {
+    kind,
+    apiVersion,
+    spec: {
+      expirationSeconds: expirationSeconds
     }
+  }
 
   return client['core.gardener.cloud'].shoots.createAdminKubeconfigRequest(namespace, name, body)
 }
