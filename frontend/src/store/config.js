@@ -127,7 +127,7 @@ export const useConfigStore = defineStore('config', () => {
   })
 
   const grantTypes = computed(() => {
-    return state.value?.grantTypes || ['auto', 'authcode', 'device-code']
+    return state.value?.grantTypes ?? ['auto', 'authcode', 'device-code']
   })
 
   const knownConditions = computed(() => {
