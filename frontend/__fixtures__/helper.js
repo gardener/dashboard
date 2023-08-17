@@ -11,6 +11,7 @@ import * as labs from 'vuetify/labs/components'
 
 import componentsPlugin from '@/plugins/components'
 import utilsPlugin from '@/plugins/utils'
+import notifyPlugin from '@/plugins/notify'
 
 import 'vuetify/styles'
 
@@ -32,5 +33,6 @@ export function createPlugins () {
     createVuetifyPlugin(),
     componentsPlugin,
     utilsPlugin,
+    notifyPlugin,
   ]
 }

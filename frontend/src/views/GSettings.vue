@@ -143,5 +143,5 @@ const logLevels = [
 
 const { logLevel } = inject('logger')
 const colorMode = inject('colorMode')
-const autoLogin = useLocalStorage('global/auto-login')
+const autoLogin = useLocalStorage('global/auto-login', 'disabled')
 </script>

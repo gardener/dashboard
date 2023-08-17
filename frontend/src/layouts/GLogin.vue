@@ -197,7 +197,6 @@ export default {
       }
     },
   },
-
   methods: {
     ...mapActions(useAppStore, [
       'setError',

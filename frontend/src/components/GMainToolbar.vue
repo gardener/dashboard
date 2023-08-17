@@ -340,7 +340,7 @@ const configStore = useConfigStore()
 
 const colorMode = inject('colorMode')
 const namespace = useNamespace(route)
-const autoLogin = useLocalStorage('global/auto-login')
+const autoLogin = useLocalStorage('global/auto-login', 'disabled')
 
 const help = ref(false)
 const menu = ref(false)

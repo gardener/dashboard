@@ -16,7 +16,7 @@ import { useLogger } from '@/composables/useLogger'
 
 export const useLoginStore = defineStore('login', () => {
   const logger = useLogger()
-  const autoLogin = useLocalStorage('global/auto-login')
+  const autoLogin = useLocalStorage('global/auto-login', 'disabled')
 
   const url = import.meta.env.BASE_URL + 'login-config.json'
 
