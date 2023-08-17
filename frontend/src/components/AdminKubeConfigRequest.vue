@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import WildcardSelect from '@/components/WildcardSelect'
-import { getShootAdminKubeconfig } from '@/utils/api'
+import { createAdminKubeconfig } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import shootItem from '@/mixins/shootItem'
 
@@ -56,7 +56,7 @@ export default {
       const expirationSeconds = parseInt(this.kubeconfigExpiration.split(' ')[0])
 
       try {
-        const resp = await getShootAdminKubeconfig({
+        const resp = await createAdminKubeconfig({
           namespace: this.shootNamespace,
           name: this.shootName,
           data: {
