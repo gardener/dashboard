@@ -8,7 +8,6 @@
 
 const _ = require('lodash')
 const config = require('../config')
-const logger = require('../logger')
 const github = require('../github')
 const markdown = require('../markdown')
 const cache = require('../cache')
@@ -126,33 +125,6 @@ async function loadOpenIssues (...args) {
   return issues
 }
 exports.loadOpenIssues = exports.list = loadOpenIssues
-
-async function finalizeIssue (number) {
-  const { data: githubIssue } = await github.getIssue({ number })
-  const issue = fromIssue(githubIssue)
-
-  if (issue.metadata.state === 'closed') {
-    logger.debug('Ticket already closed. Removing from cache..')
-    const ticketCache = cache.getTicketCache()
-    ticketCache.removeIssue({ issue })
-
-    return
-  }
-
-  await github.createComment({ number }, '_[Auto-closed due to Shoot deletion]_')
-  await github.closeIssue({ number })
-}
-
-function deleteTickets ({ name, projectName }) {
-  const ticketCache = cache.getTicketCache()
-  const numbers = ticketCache.getIssueNumbersForNameAndProjectName({ name, projectName })
-  if (_.isEmpty(numbers)) {
-    return Promise.resolve()
-  }
-  logger.debug('Deleting ticket for shoot %s/%s. Affected issue numbers: %s', projectName, name, _.join(numbers, ', '))
-  return Promise.all(_.map(numbers, finalizeIssue))
-}
-exports.deleteTickets = deleteTickets
 
 async function getIssueComments ({ number }) {
   const ticketCache = cache.getTicketCache()

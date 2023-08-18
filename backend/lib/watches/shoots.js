@@ -6,19 +6,7 @@
 
 'use strict'
 
-const logger = require('../logger')
 const { shootHasIssue } = require('../utils')
-const { tickets } = require('../services')
-const cache = require('../cache')
-
-async function deleteTickets ({ namespace, name }) {
-  try {
-    const projectName = cache.findProjectByNamespace(namespace).metadata.name
-    await tickets.deleteTickets({ projectName, name })
-  } catch (error) {
-    logger.error('failed to delete tickets for %s/%s: %s', namespace, name, error)
-  }
-}
 
 module.exports = (io, informer, { shootsWithIssues = new Set() } = {}) => {
   const nsp = io.of('/')
@@ -53,12 +41,6 @@ module.exports = (io, informer, { shootsWithIssues = new Set() } = {}) => {
       nsp.to(rooms).emit('shoots', { type, object })
     }
     unhealthyShootsPublish(event)
-
-    switch (event.type) {
-      case 'DELETED':
-        deleteTickets(event.object.metadata)
-        break
-    }
   }
 
   informer.on('add', object => handleEvent({ type: 'ADDED', object }))
