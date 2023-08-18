@@ -243,7 +243,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { ref } from 'vue'
 import download from 'downloadjs'
 import { mapState } from 'pinia'
 
@@ -273,17 +272,6 @@ export default {
     GAccountAvatar,
   },
   inject: ['api', 'logger', 'yaml'],
-  setup () {
-    const configStore = useConfigStore()
-    const grantTypes = configStore.grantTypes
-
-    const grantType = ref(head(grantTypes))
-
-    return {
-      grantType,
-      grantTypes,
-    }
-  },
   data () {
     return {
       kubeconfigExpansionPanel: false,
@@ -294,9 +282,13 @@ export default {
       showToken: false,
       showMessage: false,
       kubeconfigYaml: '',
+      grantType: undefined,
     }
   },
   computed: {
+    ...mapState(useConfigStore, [
+      'grantTypes',
+    ]),
     ...mapState(useAuthnStore, [
       'user',
       'username',
@@ -425,6 +417,9 @@ export default {
     kubeconfig (value) {
       this.updateKubeconfigYaml(value)
     },
+  },
+  created () {
+    this.grantType = head(this.grantTypes)
   },
   async mounted () {
     try {
