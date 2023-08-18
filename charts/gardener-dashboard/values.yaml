@@ -200,7 +200,7 @@ global:
         terminalEnabled: false
         projectTerminalShortcutsEnabled: false
 
-      adminKubeconfig:
+      shootAdminKubeconfig:
         enabled: true
         maxExpirationSeconds: 86400
       # alert:

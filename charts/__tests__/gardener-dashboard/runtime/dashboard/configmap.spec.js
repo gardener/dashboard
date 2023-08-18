@@ -615,5 +615,30 @@ describe('gardener-dashboard', function () {
         expect(pick(config, ['frontend.knownConditions'])).toMatchSnapshot()
       })
     })
+
+    describe('shootAdminKubeconfig', function () {
+      it('should render the template', async function () {
+        const maxExpirationSeconds = 86400
+        const values = {
+          global: {
+            dashboard: {
+              frontendConfig: {
+                shootAdminKubeconfig: {
+                  enabled: true,
+                  maxExpirationSeconds: maxExpirationSeconds
+                }
+              }
+            }
+          }
+        }
+
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [configMap] = documents
+        const config = yaml.load(configMap.data['config.yaml'])
+        expect(config.frontend.shootAdminKubeconfig.maxExpirationSeconds).toBe(maxExpirationSeconds)
+        expect(config.frontend.shootAdminKubeconfig.enabled).toBe(true)
+      })
+    })
   })
 })

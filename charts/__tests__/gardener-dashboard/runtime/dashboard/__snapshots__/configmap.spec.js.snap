@@ -324,6 +324,10 @@ Object {
     ],
     "seedCandidateDeterminationStrategy": "SameRegion",
     "serviceAccountDefaultTokenExpiration": 7776000,
+    "shootAdminKubeconfig": Object {
+      "enabled": true,
+      "maxExpirationSeconds": 86400,
+    },
   },
   "logFormat": "text",
   "logLevel": "debug",

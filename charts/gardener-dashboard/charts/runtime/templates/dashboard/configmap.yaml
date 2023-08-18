@@ -223,6 +223,10 @@ data:
       defaultHibernationSchedule:
 {{ toYaml .Values.global.dashboard.frontendConfig.defaultHibernationSchedule | trim | indent 8 }}
       {{- end }}
+      {{- if .Values.global.dashboard.frontendConfig.shootAdminKubeconfig }}
+      shootAdminKubeconfig:
+{{ toYaml .Values.global.dashboard.frontendConfig.shootAdminKubeconfig | trim | indent 8 }}
+      {{- end }}
       {{- if .Values.global.dashboard.frontendConfig.seedCandidateDeterminationStrategy }}
       seedCandidateDeterminationStrategy: {{ .Values.global.dashboard.frontendConfig.seedCandidateDeterminationStrategy }}
       {{- end }}

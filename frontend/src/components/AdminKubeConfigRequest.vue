@@ -13,8 +13,8 @@ SPDX-License-Identifier: Apache-2.0
     caption="Configure Kubeconfig Lifetime">
     <template v-slot:actionComponent>
       <wildcard-select
-        v-model="kubeconfigExpiration"
-        :wildcard-select-items="possibleExpirationSettings"
+        v-model="expiration"
+        :wildcard-select-items="expirations"
         wildcard-select-label="Lifetime"
         ></wildcard-select>
     </template>
@@ -37,26 +37,24 @@ export default {
   ],
   data () {
     return {
-      kubeconfigExpiration: undefined
+      expiration: undefined
     }
   },
   props: {
-    possibleExpirationSettings: {
+    expirations: {
       type: Array
     }
   },
   methods: {
-    onConfigurationDialogOpened () {
+    async onConfigurationDialogOpened () {
       this.reset()
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
-        this.$emit('kubeconfigExpirationUpdate', this.kubeconfigExpiration)
+        this.$emit('expirationUpdate', this.expiration)
       }
     },
     reset () {
-      if (!this.kubeconfigExpiration) {
-        this.kubeconfigExpiration = this.possibleExpirationSettings[0]
-      }
+      this.expiration = this.expirations[0]
     }
   }
 }
