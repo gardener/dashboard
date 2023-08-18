@@ -9,7 +9,6 @@
 const { Agent } = require('https')
 const _ = require('lodash')
 const { Octokit } = require('@octokit/rest')
-const { createTokenAuth } = require('@octokit/auth-token')
 const { createAppAuth } = require('@octokit/auth-app')
 const config = require('../config')
 const logger = require('../logger')
@@ -43,10 +42,7 @@ function getAuthOptions (auth) {
   } = auth || {}
   if (token) {
     return {
-      authStrategy: ({ token }) => createTokenAuth(token),
-      auth: {
-        token
-      }
+      auth: token
     }
   }
   if (appId && clientId && clientSecret && installationId && privateKey) {

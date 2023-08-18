@@ -7,9 +7,12 @@
 'use strict'
 
 const yaml = require('js-yaml')
-const { omit, pick } = require('lodash')
+const { omit, pick, mapValues } = require('lodash')
 const { helm, helper } = fixtures
-const { getCertificate } = helper
+const {
+  getCertificate,
+  decodeBase64
+} = helper
 
 const renderTemplates = helm.renderDashboardRuntimeTemplates
 
@@ -289,7 +292,8 @@ describe('gardener-dashboard', function () {
           expect(githubSecret.metadata.name).toBe('gardener-dashboard-github')
           const config = yaml.load(configMap.data['config.yaml'])
           expect(pick(config, ['frontend.ticket', 'gitHub'])).toMatchSnapshot()
-          expect(githubSecret).toMatchSnapshot()
+          const data = mapValues(githubSecret.data, decodeBase64)
+          expect(data).toMatchSnapshot()
         })
       })
 
@@ -297,10 +301,10 @@ describe('gardener-dashboard', function () {
         beforeEach(() => {
           values.global.dashboard.gitHub.authentication = {
             appId: 1,
-            clientId: 'lv1.12ab',
-            clientSecret: '12abcd',
+            clientId: 'clientId',
+            clientSecret: 'clientSecret',
             installationId: 123,
-            privateKey: 'key'
+            privateKey: 'privateKey'
           }
         })
 
@@ -312,7 +316,8 @@ describe('gardener-dashboard', function () {
           expect(githubSecret.metadata.name).toBe('gardener-dashboard-github')
           const config = yaml.load(configMap.data['config.yaml'])
           expect(pick(config, ['frontend.ticket', 'gitHub'])).toMatchSnapshot()
-          expect(githubSecret).toMatchSnapshot()
+          const data = mapValues(githubSecret.data, decodeBase64)
+          expect(data).toMatchSnapshot()
         })
       })
     })

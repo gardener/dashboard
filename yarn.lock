@@ -722,7 +722,6 @@ __metadata:
     "@gardener-dashboard/test-utils": "workspace:*"
     "@godaddy/terminus": ^4.11.2
     "@octokit/auth-app": ^6.0.0
-    "@octokit/auth-token": ^4.0.0
     "@octokit/rest": ^18.12.0
     abort-controller: ^3.0.0
     base64url: ^3.0.1
@@ -1449,13 +1448,6 @@ __metadata:
   dependencies:
     "@octokit/types": ^6.0.3
   checksum: 45949296c09abcd6beb4c3f69d45b0c1f265f9581d2a9683cf4d1800c4cf8259c2f58d58e44c16c20bffb85a0282a176c0d51f4af300e428b863f27b910e6297
-  languageName: node
-  linkType: hard
-
-"@octokit/auth-token@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "@octokit/auth-token@npm:4.0.0"
-  checksum: d78f4dc48b214d374aeb39caec4fdbf5c1e4fd8b9fcb18f630b1fe2cbd5a880fca05445f32b4561f41262cb551746aeb0b49e89c95c6dd99299706684d0cae2f
   languageName: node
   linkType: hard
 

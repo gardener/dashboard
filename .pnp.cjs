@@ -1271,7 +1271,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@gardener-dashboard/test-utils", "workspace:packages/test-utils"],\
             ["@godaddy/terminus", "npm:4.12.1"],\
             ["@octokit/auth-app", "npm:6.0.0"],\
-            ["@octokit/auth-token", "npm:4.0.0"],\
             ["@octokit/rest", "npm:18.12.0"],\
             ["abort-controller", "npm:3.0.0"],\
             ["base64url", "npm:3.0.1"],\
@@ -2098,13 +2097,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [\
             ["@octokit/auth-token", "npm:2.5.0"],\
             ["@octokit/types", "npm:6.41.0"]\
-          ],\
-          "linkType": "HARD"\
-        }],\
-        ["npm:4.0.0", {\
-          "packageLocation": "./.yarn/cache/@octokit-auth-token-npm-4.0.0-9ad78a752f-d78f4dc48b.zip/node_modules/@octokit/auth-token/",\
-          "packageDependencies": [\
-            ["@octokit/auth-token", "npm:4.0.0"]\
           ],\
           "linkType": "HARD"\
         }]\

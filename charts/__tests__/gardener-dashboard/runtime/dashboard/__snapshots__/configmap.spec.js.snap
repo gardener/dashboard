@@ -481,28 +481,12 @@ Object {
 
 exports[`gardener-dashboard configmap tickets github app authentication should render the template 2`] = `
 Object {
-  "apiVersion": "v1",
-  "data": Object {
-    "authentication.appId": "MQ==",
-    "authentication.clientId": "bHYxLjEyYWI=",
-    "authentication.clientSecret": "MTJhYmNk",
-    "authentication.installationId": "MTIz",
-    "authentication.privateKey": "a2V5",
-    "webhookSecret": "d2ViaG9va1NlY3JldA==",
-  },
-  "kind": "Secret",
-  "metadata": Object {
-    "labels": Object {
-      "app.kubernetes.io/component": "dashboard",
-      "app.kubernetes.io/instance": "gardener-dashboard",
-      "app.kubernetes.io/managed-by": "Helm",
-      "app.kubernetes.io/name": "gardener-dashboard",
-      "helm.sh/chart": "gardener-dashboard-runtime-0.1.0",
-    },
-    "name": "gardener-dashboard-github",
-    "namespace": "garden",
-  },
-  "type": "Opaque",
+  "authentication.appId": "1",
+  "authentication.clientId": "clientId",
+  "authentication.clientSecret": "clientSecret",
+  "authentication.installationId": "123",
+  "authentication.privateKey": "privateKey",
+  "webhookSecret": "webhookSecret",
 }
 `;
 
@@ -535,24 +519,8 @@ Object {
 
 exports[`gardener-dashboard configmap tickets token authentication should render the template 2`] = `
 Object {
-  "apiVersion": "v1",
-  "data": Object {
-    "authentication.token": "dG9rZW4=",
-    "webhookSecret": "d2ViaG9va1NlY3JldA==",
-  },
-  "kind": "Secret",
-  "metadata": Object {
-    "labels": Object {
-      "app.kubernetes.io/component": "dashboard",
-      "app.kubernetes.io/instance": "gardener-dashboard",
-      "app.kubernetes.io/managed-by": "Helm",
-      "app.kubernetes.io/name": "gardener-dashboard",
-      "helm.sh/chart": "gardener-dashboard-runtime-0.1.0",
-    },
-    "name": "gardener-dashboard-github",
-    "namespace": "garden",
-  },
-  "type": "Opaque",
+  "authentication.token": "token",
+  "webhookSecret": "webhookSecret",
 }
 `;
 
