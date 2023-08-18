@@ -136,7 +136,7 @@ export default {
     isGardenloginType () {
       return this.type === 'gardenlogin'
     },
-    isStaticKubeconfigLoginType () {
+    isStaticKubeconfigType () {
       return this.type === 'token'
     },
     isAdminKubeconfigLoginType () {
