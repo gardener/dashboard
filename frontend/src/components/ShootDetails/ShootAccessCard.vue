@@ -186,11 +186,7 @@ export default {
       return get(this.shootItem, 'spec.addons.kubernetesDashboard.authenticationMode', 'basic') === 'token'
     },
     hasAdminKubeconfigEnabled () {
-      if (this.cfg.adminKubeconfig && this.cfg.adminKubeconfig.enabled) {
-        return true
-      }
-
-      return false
+      return get(this.cfg, 'adminKubeconfig.enabled', false)
     },
     kubeconfig () {
       return get(this.shootInfo, 'kubeconfig')
