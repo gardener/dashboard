@@ -139,6 +139,11 @@ global:
       - title: Issues
         icon: bug_report
         url: https://github.com/gardener/gardener/issues
+      # # supported grantTypes of the garden cluster oidc issuer. See https://github.com/int128/kubelogin/blob/master/docs/usage.md for possible values.
+      # grantTypes:
+      # - auto
+      # - authcode
+      # - device-code
       # ticket:
       #   avatarSource: github # Define from which source the avatar is fetched. For enterprise github instances it is recommended to use gravatar or none. Possible values: github, gravatar, none
       #   gitHubRepoUrl: https://foo-github.com/dummyorg/dummyrepo

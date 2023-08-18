@@ -126,6 +126,10 @@ export const useConfigStore = defineStore('config', () => {
     return state.value?.features
   })
 
+  const grantTypes = computed(() => {
+    return state.value?.grantTypes ?? ['auto', 'authcode', 'device-code']
+  })
+
   const knownConditions = computed(() => {
     return state.value?.knownConditions
   })
@@ -296,6 +300,7 @@ export const useConfigStore = defineStore('config', () => {
     sla,
     costObject,
     features,
+    grantTypes,
     knownConditions,
     resourceQuotaHelp,
     resourceQuotaHelpText,

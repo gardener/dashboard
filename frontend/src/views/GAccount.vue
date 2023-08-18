@@ -248,6 +248,7 @@ import { mapState } from 'pinia'
 
 import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
+import { useConfigStore } from '@/store/config'
 import { useProjectStore } from '@/store/project'
 import { useKubeconfigStore } from '@/store/kubeconfig'
 
@@ -261,6 +262,7 @@ import {
   map,
   find,
   get,
+  head,
 } from '@/lodash'
 
 export default {
@@ -276,15 +278,17 @@ export default {
       kubeconfigTab: 'configure',
       projectName: undefined,
       skipOpenBrowser: false,
-      grantType: 'auto',
-      grantTypes: ['auto', 'authcode', 'authcode-keyboard'],
       idToken: undefined,
       showToken: false,
       showMessage: false,
       kubeconfigYaml: '',
+      grantType: undefined,
     }
   },
   computed: {
+    ...mapState(useConfigStore, [
+      'grantTypes',
+    ]),
     ...mapState(useAuthnStore, [
       'user',
       'username',
@@ -413,6 +417,9 @@ export default {
     kubeconfig (value) {
       this.updateKubeconfigYaml(value)
     },
+  },
+  created () {
+    this.grantType = head(this.grantTypes)
   },
   async mounted () {
     try {
