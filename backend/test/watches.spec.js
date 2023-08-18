@@ -55,20 +55,6 @@ const io = {
 describe('watches', function () {
   const foobar = { metadata: { namespace: 'foo', name: 'bar', uid: 4 } }
   const foobaz = { metadata: { namespace: 'foo', name: 'baz', uid: 5 } }
-  const projectList = [
-    {
-      metadata: { name: 'foo' },
-      spec: {
-        namespace: 'foo'
-      }
-    },
-    {
-      metadata: { name: 'bar' },
-      spec: {
-        namespace: 'bar'
-      }
-    }
-  ]
 
   let informer
 
@@ -93,15 +79,8 @@ describe('watches', function () {
 
     let shootsWithIssues
 
-    let deleteTicketsStub
-    let findProjectByNamespaceStub
-
     beforeEach(() => {
       shootsWithIssues = new Set()
-      deleteTicketsStub = jest.spyOn(tickets, 'deleteTickets')
-      findProjectByNamespaceStub = jest.spyOn(cache, 'findProjectByNamespace').mockImplementation(namespace => {
-        return _.find(projectList, ['spec.namespace', namespace])
-      })
     })
 
     it('should watch shoots without issues', async function () {
@@ -115,9 +94,6 @@ describe('watches', function () {
       informer.emit('delete', foobar)
 
       expect(logger.error).not.toBeCalled()
-      expect(deleteTicketsStub).toBeCalledTimes(1)
-      expect(findProjectByNamespaceStub).toBeCalledTimes(1)
-      expect(findProjectByNamespaceStub.mock.calls).toEqual([['foo']])
 
       const keys = ['shoots:admin', 'shoots;foo', 'shoots;foo/bar']
       expect(nsp.to).toBeCalledTimes(3)
@@ -158,8 +134,6 @@ describe('watches', function () {
       informer.emit('delete', foobazUnhealthy)
       expect(shootsWithIssues).toHaveProperty('size', 0)
 
-      expect(deleteTicketsStub).toBeCalledTimes(1)
-
       const fooRoom = rooms.get('shoots;foo')
       expect(fooRoom.emit).toBeCalledTimes(5)
       const fooIssuesRoom = rooms.get('shoots:unhealthy;foo')
@@ -186,23 +160,6 @@ describe('watches', function () {
           { type: 'DELETED', object: foobazUnhealthy }
         ]
       ])
-    })
-
-    it('should delete tickets for a deleted shoot', async function () {
-      deleteTicketsStub.mockImplementation(({ projectName, name }) => {
-        const namespace = _.find(projectList, ['metadata.name', projectName]).spec.namespace
-        if (namespace === 'foo' && name === 'baz') {
-          throw new Error('TicketError')
-        }
-      })
-
-      watches.shoots(io, informer)
-
-      informer.emit('delete', foobar)
-      informer.emit('delete', foobaz)
-
-      expect(logger.error).toBeCalledTimes(1)
-      expect(deleteTicketsStub).toBeCalledTimes(2)
     })
   })
 
