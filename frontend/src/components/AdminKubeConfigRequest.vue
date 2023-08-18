@@ -46,15 +46,12 @@ export default {
     }
   },
   methods: {
-    async onConfigurationDialogOpened () {
+    onConfigurationDialogOpened () {
       this.reset()
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
-        await this.updateKubeconfigExpiration()
+        this.$emit('kubeconfigExpirationUpdate', this.kubeconfigExpiration)
       }
-    },
-    async updateKubeconfigExpiration () {
-      this.$emit('kubeconfigExpirationUpdate', this.kubeconfigExpiration)
     },
     reset () {
       if (!this.kubeconfigExpiration) {
