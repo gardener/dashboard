@@ -160,18 +160,20 @@ exports.replaceSeedName = async function ({ user, namespace, name, body }) {
   return client['core.gardener.cloud'].shoots.jsonPatch(namespace, [name, 'binding'], patchOperations)
 }
 
-exports.createAdminKubeconfig = async function ({ user, namespace, name, expirationSeconds }) {
+exports.createAdminKubeconfig = async function ({ user, namespace, name, body }) {
   const client = user.client
   const { apiVersion, kind } = resources.Resources.AdminKubeconfigRequest
-  const body = {
+  const payload = {
     kind,
     apiVersion,
     spec: {
-      expirationSeconds: expirationSeconds
+      expirationSeconds: body.expirationSeconds
     }
   }
 
-  return client['core.gardener.cloud'].shoots.createAdminKubeconfigRequest(namespace, name, body)
+  const adminKubeConfigRequest = await client['core.gardener.cloud'].shoots.createAdminKubeconfigRequest(namespace, name, payload)
+  const kubeconfig = Buffer.from(adminKubeConfigRequest.status.kubeconfig, 'base64').toString('utf8')
+  return kubeconfig
 }
 
 exports.replaceAddons = async function ({ user, namespace, name, body }) {

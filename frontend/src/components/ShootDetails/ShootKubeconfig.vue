@@ -172,7 +172,7 @@ export default {
           }
         })
 
-        this.adminKubeconfig = Buffer.from(resp.data.status.kubeconfig, 'base64').toString('utf8')
+        this.adminKubeconfig = resp.data
       } catch (err) {
         const errorMessage = 'Could not request admin kubeconfig'
         const errorDetails = errorDetailsFromError(err)
