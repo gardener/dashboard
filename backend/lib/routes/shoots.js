@@ -9,6 +9,7 @@
 const express = require('express')
 const { shoots } = require('../services')
 const { metricsRoute } = require('../middleware')
+const config = require('../config')
 
 const router = module.exports = express.Router({
   mergeParams: true
@@ -255,6 +256,7 @@ router.route('/:name/spec/seedName')
     }
   })
 
+if (config.frontend.shootAdminKubeconfig && config.frontend.shootAdminKubeconfig.enabled){
 router.route('/:name/adminkubeconfig')
   .all(metricsMiddleware)
   .post(async (req, res, next) => {
@@ -268,3 +270,4 @@ router.route('/:name/adminkubeconfig')
       next(err)
     }
   })
+}
