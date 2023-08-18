@@ -139,7 +139,7 @@ export default {
     isStaticKubeconfigType () {
       return this.type === 'token'
     },
-    isAdminKubeconfigLoginType () {
+    isAdminKubeconfigType () {
       return this.type === 'adminkubeconfig'
     },
     possibleAdminKubeconfigExpirationSettings () {
