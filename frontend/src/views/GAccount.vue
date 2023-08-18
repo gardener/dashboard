@@ -470,4 +470,3 @@ export default {
     -webkit-line-clamp: 2;
   }
 </style>
-@/lodash

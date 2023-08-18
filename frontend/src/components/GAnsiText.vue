@@ -41,4 +41,3 @@ export default {
   max-height: inherit;
 }
 </style>
-@/lodash
