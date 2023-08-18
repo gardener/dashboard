@@ -45,6 +45,11 @@ export default {
       type: Array
     }
   },
+  props: {
+    possibleExpirationSettings: {
+      type: Array
+    }
+  },
   methods: {
     async onConfigurationDialogOpened () {
       this.reset()
