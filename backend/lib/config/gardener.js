@@ -122,6 +122,11 @@ module.exports = {
       _.unset(config, 'frontend.ticket')
     }
 
+    if (config.adminKubeconfig) {
+      _.set(config, 'frontend.adminKubeconfig.enabled', config.adminKubeconfig.enabled)
+      _.set(config, 'frontend.adminKubeconfig.maxExpirationSeconds', config.adminKubeconfig.maxExpirationSeconds)
+    }
+
     return config
   },
   readConfig (path) {

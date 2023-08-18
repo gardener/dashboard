@@ -55,7 +55,7 @@ SPDX-License-Identifier: Apache-2.0
         <static-token-kubeconfig-configuration :shootItem="shootItem"></static-token-kubeconfig-configuration>
       </v-list-item-action>
       <v-list-item-action v-if="isAdminKubeconfigLoginType" class="mx-0">
-        <admin-kube-config-request :shootItem="shootItem" @kubeconfigExpirationUpdate="onKubeconfigExpirationUpdate"></admin-kube-config-request>
+        <admin-kube-config-request :possibleExpirationSettings="possibleAdminKubeconfigExpirationSettings" :shootItem="shootItem" @kubeconfigExpirationUpdate="onKubeconfigExpirationUpdate"></admin-kube-config-request>
       </v-list-item-action>
     </v-list-item>
     <v-list-item v-if="kubeconfigExpansionPanel" key="expansion-gardenlogin-kubeconfig">
@@ -77,6 +77,7 @@ import download from 'downloadjs'
 import { shootItem } from '@/mixins/shootItem'
 import { createAdminKubeconfig } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
+import { mapState } from 'vuex'
 
 export default {
   components: {
@@ -105,6 +106,9 @@ export default {
     }
   },
   computed: {
+    ...mapState([
+      'cfg'
+    ]),
     icon () {
       return this.showListIcon ? 'mdi-file' : ''
     },
@@ -138,13 +142,20 @@ export default {
     isAdminKubeconfigLoginType () {
       return this.type === 'adminkubeconfig'
     },
-    adminKubeConfigExpirationSeconds () {
-      const units = { d: 86400, h: 3600, m: 60 }
-      const regex = /(\d+)([dhm])/g
-      const match = regex.exec(this.adminKubeConfigExpiration)
-      const seconds = parseInt(match[1]) * units[match[2]]
+    possibleAdminKubeconfigExpirationSettings () {
+      const defaultExpirations = ['30m', '1h', '3h', '6h', '12h', '1d', '3d', '7d']
+      let filteredExpirations = defaultExpirations
 
-      return seconds
+      if (this.cfg.adminKubeconfig.maxExpirationSeconds) {
+        filteredExpirations = []
+        defaultExpirations.forEach((val) => {
+          if (this.adminKubeConfigExpirationInSeconds(val) <= this.cfg.adminKubeconfig.maxExpirationSeconds) {
+            filteredExpirations.push(val)
+          }
+        })
+      }
+
+      return filteredExpirations
     },
     getQualifiedName () {
       const prefix = this.isGardenloginType ? 'kubeconfig-gardenlogin' : 'kubeconfig'
@@ -159,7 +170,7 @@ export default {
             namespace: this.shootNamespace,
             name: this.shootName,
             data: {
-              expirationSeconds: this.adminKubeConfigExpirationSeconds
+              expirationSeconds: this.adminKubeConfigExpirationInSeconds(this.adminKubeConfigExpiration)
             }
           })
 
@@ -196,6 +207,14 @@ export default {
         this.adminKubeConfigExpiration = kubeconfigExpiration
         this.adminKubeConfig = undefined
       }
+    },
+    adminKubeConfigExpirationInSeconds (durationAsString) {
+      const units = { d: 86400, h: 3600, m: 60 }
+      const regex = /(\d+)([dhm])/g
+      const match = regex.exec(durationAsString)
+      const seconds = parseInt(match[1]) * units[match[2]]
+
+      return seconds
     }
   },
   watch: {

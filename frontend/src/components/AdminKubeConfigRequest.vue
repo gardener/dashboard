@@ -37,8 +37,12 @@ export default {
   ],
   data () {
     return {
-      possibleExpirationSettings: ['30m', '1h', '3h', '6h', '12h', '1d'],
       kubeconfigExpiration: undefined
+    }
+  },
+  props: {
+    possibleExpirationSettings: {
+      type: Array
     }
   },
   methods: {
