@@ -46,7 +46,7 @@ export default {
     }
   },
   props: {
-    possibleExpirationSettings: {
+    expirations: {
       type: Array
     }
   },
