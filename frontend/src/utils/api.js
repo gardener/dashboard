@@ -201,7 +201,7 @@ export function updateShootSeedName ({ namespace, name, data }) {
 export function createAdminKubeconfig ({ namespace, name, data }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
-  return callResourceMethod(`/api/namespaces/${namespace}/shoots/${name}/adminkubeconfig`, data)
+  return createResource(`/api/namespaces/${namespace}/shoots/${name}/adminkubeconfig`, data)
 }
 
 /* Cloud Profiles */
