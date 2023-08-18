@@ -163,11 +163,39 @@ spec:
           {{- end }}
           {{- end }}
           {{- if .Values.global.dashboard.gitHub }}
+          {{- if .Values.global.dashboard.gitHub.authentication.token }}
           - name: GITHUB_AUTHENTICATION_TOKEN
             valueFrom:
               secretKeyRef:
                 name: gardener-dashboard-github
                 key: authentication.token
+          {{ else }}
+          - name: GITHUB_AUTHENTICATION_APP_ID
+            valueFrom:
+              secretKeyRef:
+                name: gardener-dashboard-github
+                key: authentication.appId
+          - name: GITHUB_AUTHENTICATION_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: gardener-dashboard-github
+                key: authentication.clientId
+          - name: GITHUB_AUTHENTICATION_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: gardener-dashboard-github
+                key: authentication.clientSecret
+          - name: GITHUB_AUTHENTICATION_INSTALLATION_ID
+            valueFrom:
+              secretKeyRef:
+                name: gardener-dashboard-github
+                key: authentication.installationId
+          - name: GITHUB_AUTHENTICATION_PRIVATE_KEY
+            valueFrom:
+              secretKeyRef:
+                name: gardener-dashboard-github
+                key: authentication.privateKey
+          {{ end }}
           - name: GITHUB_WEBHOOK_SECRET
             valueFrom:
               secretKeyRef:
