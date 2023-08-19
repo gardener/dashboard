@@ -78,6 +78,7 @@ import { shootItem } from '@/mixins/shootItem'
 import { createAdminKubeconfig } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import { mapState } from 'vuex'
+import filter from 'lodash/filter'
 
 export default {
   components: {
@@ -142,19 +143,15 @@ export default {
       return this.type === 'adminkubeconfig'
     },
     possibleAdminKubeconfigExpirationSettings () {
-      const defaultExpirations = ['30m', '1h', '3h', '6h', '12h', '1d', '3d', '7d']
-      let filteredExpirations = defaultExpirations
+      let expirations = ['30m', '1h', '3h', '6h', '12h', '1d', '3d', '7d']
 
       if (this.cfg.shootAdminKubeconfig.maxExpirationSeconds) {
-        filteredExpirations = []
-        defaultExpirations.forEach((val) => {
-          if (this.adminKubeConfigExpirationInSeconds(val) <= this.cfg.shootAdminKubeconfig.maxExpirationSeconds) {
-            filteredExpirations.push(val)
-          }
+        expirations = filter(expirations, expiration => {
+          return this.adminKubeConfigExpirationInSeconds(expiration) <= this.cfg.shootAdminKubeconfig.maxExpirationSeconds
         })
       }
 
-      return filteredExpirations
+      return expirations
     },
     getQualifiedName () {
       const prefix = this.isGardenloginType ? 'kubeconfig-gardenlogin' : 'kubeconfig'
