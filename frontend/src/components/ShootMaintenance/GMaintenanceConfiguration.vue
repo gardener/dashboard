@@ -21,6 +21,7 @@ SPDX-License-Identifier: Apache-2.0
       />
       <g-maintenance-components
         ref="maintenanceComponents"
+        :is-shoot-workerless="isShootWorkerless"
       />
     </template>
   </g-action-button-dialog>
@@ -82,6 +83,9 @@ export default {
           updateKubernetesVersion: k8sUpdates,
           updateOSVersion: osUpdates,
         })
+        if (this.isShootWorkerless) {
+          delete this.data.updateOSVersion
+        }
         await this.api.updateShootMaintenance({ namespace: this.shootNamespace, name: this.shootName, data: this.data })
       } catch (err) {
         const errorMessage = 'Could not save maintenance configuration'
