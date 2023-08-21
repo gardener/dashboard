@@ -190,6 +190,7 @@ Object {
       "app.kubernetes.io/managed-by": "Helm",
       "app.kubernetes.io/name": "gardener-dashboard",
       "helm.sh/chart": "gardener-dashboard-runtime-0.1.0",
+      "high-availability-config.resources.gardener.cloud/type": "server",
     },
     "name": "gardener-dashboard",
     "namespace": "garden",

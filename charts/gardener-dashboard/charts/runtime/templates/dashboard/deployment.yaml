@@ -14,6 +14,7 @@ metadata:
     helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     app.kubernetes.io/instance: "{{ .Release.Name }}"
     app.kubernetes.io/managed-by: "{{ .Release.Service }}"
+    high-availability-config.resources.gardener.cloud/type: server
     {{- if .Values.global.dashboard.deploymentLabels }}
     {{- toYaml .Values.global.dashboard.deploymentLabels | nindent 4 }}
     {{- end }}
