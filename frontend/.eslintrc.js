@@ -1,44 +1,96 @@
-// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+//
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
+//
 
-const development = process.env.NODE_ENV === 'development'
+const { environments } = require('eslint-plugin-vitest')
 
 module.exports = {
   root: true,
   env: {
     node: true,
-    'jest/globals': true
+    es2022: true,
   },
+  parserOptions: { ecmaVersion: '2022' },
+  globals: { ...environments.env.globals },
   extends: [
-    'plugin:vue/essential',
-    'plugin:vuetify/base',
-    '@vue/standard'
+    'eslint:recommended',
+    'standard',
+    'plugin:vue/vue3-recommended',
+    'plugin:vitest/recommended',
   ],
-  parserOptions: {
-    parser: '@babel/eslint-parser'
-  },
   plugins: [
-    'jest'
+    'import-newlines',
+  ],
+  ignorePatterns: [
+    '/dist/',
+    '/build/',
+    '/tmp/',
   ],
   rules: {
-    'no-console': [development ? 'off' : 'error', { allow: ['error'] }],
-    'no-debugger': development ? 'off' : 'error',
-    'vue/multi-word-component-names': 'off',
-    'vue/no-mutating-props': 'off',
-    'vuetify/no-deprecated-classes': 'error',
-    'vuetify/grid-unknown-attributes': 'error',
-    'vuetify/no-legacy-grid': 'error'
-  },
-  overrides: [
-    {
-      files: [
-        '**/__tests__/*.{j,t}s?(x)',
-        '**/tests/unit/**/*.spec.{j,t}s?(x)'
+    'comma-dangle': ['error', 'always-multiline'],
+    'no-console': 'error',
+    quotes: ['error', 'single'],
+    'space-before-function-paren': ['error', 'always'],
+    'import/order': ['error', {
+      groups: [
+        'builtin',
+        'external',
+        'unknown',
+        'internal',
+        'parent',
+        'sibling',
+        'index',
       ],
-      env: {
-        jest: true
-      }
-    }
-  ]
+      pathGroups: [
+        {
+          pattern: '@/store/**',
+          group: 'external',
+          position: 'after',
+        },
+        {
+          pattern: '@/layouts/**',
+          group: 'unknown',
+          position: 'before',
+        },
+        {
+          pattern: '@/views/**',
+          group: 'unknown',
+        },
+        {
+          pattern: '@/components/**',
+          group: 'unknown',
+          position: 'after',
+        },
+        {
+          pattern: '@/composables/**',
+          group: 'internal',
+          position: 'before',
+        },
+        {
+          pattern: '@/lodash',
+          group: 'index',
+          position: 'after',
+        },
+        {
+          pattern: '@/lib/**',
+          group: 'internal',
+          position: 'after',
+        },
+        {
+          pattern: '@/**',
+          group: 'internal',
+        },
+      ],
+      'newlines-between': 'always',
+    }],
+    'object-curly-newline': ['error', {
+      ImportDeclaration: { multiline: true, minProperties: 2 },
+    }],
+    'import-newlines/enforce': ['error', 1],
+    'vue/no-mutating-props': ['error', { shallowOnly: true }],
+    'vue/require-default-prop': 'off',
+    'vue/order-in-components': 'error',
+  },
 }

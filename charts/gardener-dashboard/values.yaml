@@ -139,6 +139,11 @@ global:
       - title: Issues
         icon: bug_report
         url: https://github.com/gardener/gardener/issues
+      # # supported grantTypes of the garden cluster oidc issuer. See https://github.com/int128/kubelogin/blob/master/docs/usage.md for possible values.
+      # grantTypes:
+      # - auto
+      # - authcode
+      # - device-code
       # ticket:
       #   avatarSource: github # Define from which source the avatar is fetched. For enterprise github instances it is recommended to use gravatar or none. Possible values: github, gravatar, none
       #   gitHubRepoUrl: https://foo-github.com/dummyorg/dummyrepo
@@ -325,7 +330,16 @@ global:
     #   repository: dummyrepo
     #   webhookSecret: foobar # optional if pollIntervalSeconds is defined
     #   authentication:
-    #     username: dashboard
+    #     # authenticate as github app installation. The github app requires the permission to read and write issues and has to be installed in the respective repository
+    #     appId: 1
+    #     clientId: lv1.1234567890abcdef
+    #     clientSecret: 1234567890abcdef1234567890abcdef12345678
+    #     installationId: 123
+    #     privateKey: |
+    #       -----BEGIN RSA PRIVATE KEY-----
+    #       ...
+    #       -----END RSA PRIVATE KEY-----
+    #     # alternatively: token authentication
     #     token: dummytoken
     #   pollIntervalSeconds: 900 # In which interval GitHub issues will be synced. Timer is resetted by receiving a webhook. Disabled if 0 or not defined.
     #   syncThrottleSeconds: 20 # Defines the time window in which only one sync is allowed to avoid issues with rate limiting. Default 20. Disabled if 0.

@@ -1,28 +1,29 @@
 //
-// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
 import CodeMirror from 'codemirror'
-import forEach from 'lodash/forEach'
-import join from 'lodash/join'
-import map from 'lodash/map'
-import trim from 'lodash/trim'
-import nth from 'lodash/nth'
-import filter from 'lodash/filter'
-import includes from 'lodash/includes'
-import last from 'lodash/last'
-import words from 'lodash/words'
-import repeat from 'lodash/repeat'
-import upperFirst from 'lodash/upperFirst'
-import flatMap from 'lodash/flatMap'
-import get from 'lodash/get'
-import forIn from 'lodash/forIn'
-import isEqual from 'lodash/isEqual'
-import first from 'lodash/first'
+
+import {
+  forEach,
+  join,
+  map,
+  trim,
+  nth,
+  filter,
+  includes,
+  last,
+  words,
+  repeat,
+  upperFirst,
+  flatMap,
+  get,
+  forIn,
+  isEqual,
+  first,
+} from '@/lodash'
 
 export class ShootEditorCompletions {
   constructor (shootProperties, editorIndent, supportedPaths) {
@@ -41,7 +42,7 @@ export class ShootEditorCompletions {
     return {
       list,
       from: CodeMirror.Pos(cur.line, token.start),
-      to: CodeMirror.Pos(cur.line, token.end)
+      to: CodeMirror.Pos(cur.line, token.end),
     }
   }
 
@@ -49,7 +50,7 @@ export class ShootEditorCompletions {
   editorTooltip (e, cm) {
     const pos = cm.coordsChar({
       left: e.clientX,
-      top: e.clientY
+      top: e.clientY,
     })
     const lineTokens = cm.getLineTokens(pos.line)
     const lineString = join(map(lineTokens, 'string'), '')
@@ -64,7 +65,7 @@ export class ShootEditorCompletions {
       const token = {
         start,
         end,
-        string
+        string,
       }
       if (token.start <= pos.ch && pos.ch <= token.end) {
         // Ensure that mouse pointer is on propety and not somewhere else on this line
@@ -160,7 +161,7 @@ export class ShootEditorCompletions {
 
           el.appendChild(propertyWrapper)
           el.appendChild(descriptionWrapper)
-        }
+        },
       })
     })
     if (trim(token.string).length > 0) {

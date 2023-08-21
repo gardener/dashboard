@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -26,6 +26,8 @@ const periodSeconds = config.readinessProbe?.periodSeconds || 10
 // resolve pathnames
 const PUBLIC_DIRNAME = resolve(join(__dirname, '..', 'public'))
 const INDEX_FILENAME = join(PUBLIC_DIRNAME, 'index.html')
+const STATIC_PATHS = ['/assets', '/static', '/js', '/css', '/fonts', '/img']
+
 // csp sources
 const connectSrc = ['\'self\'', 'wss:', 'ws:']
 const imgSrc = ['\'self\'', 'data:', 'https://www.gravatar.com']
@@ -55,7 +57,7 @@ app.use(helmet.dnsPrefetchControl())
 app.use(helmet.permittedCrossDomainPolicies())
 app.use(helmet.noSniff())
 app.use(helmet.hsts())
-app.use(noCache(['/js', '/css', '/fonts', '/img', '/static']))
+app.use(noCache(STATIC_PATHS))
 app.use('/auth', auth.router)
 app.use('/webhook', githubWebhook.router)
 app.use('/api', api.router)
@@ -84,7 +86,7 @@ app.use(expressStaticGzip(PUBLIC_DIRNAME, {
     maxAge: '1 Week'
   }
 }))
-app.use(['/js', '/css', '/fonts', '/img', '/static'], notFound)
+app.use(STATIC_PATHS, notFound)
 
 app.use(helmet.frameguard({
   action: 'deny'

@@ -1,31 +1,33 @@
 //
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { mapState, mapGetters, mapActions, mapMutations } from 'vuex'
-import { constants } from '@/store/modules/shoots/helper'
+import {
+  mapState,
+  mapActions,
+} from 'pinia'
 import colors from 'vuetify/lib/util/colors'
+
+import { useShootStore } from '@/store/shoot'
+import { useSocketStore } from '@/store/socket'
+import { constants } from '@/store/shoot/helper'
 
 export const shootSubscription = {
   computed: {
-    ...mapState('shoots', [
+    ...mapState(useShootStore, [
       'subscriptionState',
-      'subscriptionError'
-    ]),
-    ...mapGetters('shoots', [
+      'subscriptionError',
       'loading',
       'subscription',
       'subscribed',
-      'unsubscribed'
+      'unsubscribed',
     ]),
-    ...mapState('socket', [
+    ...mapState(useSocketStore, [
       'readyState',
-      'connected'
-    ]),
-    ...mapGetters('socket', [
-      'active'
+      'connected',
+      'active',
     ]),
     kind () {
       if (this.loading) {
@@ -92,23 +94,23 @@ export const shootSubscription = {
         default:
           return ''
       }
-    }
+    },
   },
   methods: {
-    ...mapActions('shoots', {
-      reload: 'synchronize'
-    }),
-    ...mapMutations('socket', {
-      reconnect: 'CONNECT'
-    }),
+    ...mapActions(useShootStore, [
+      'synchronize',
+    ]),
+    ...mapActions(useSocketStore, [
+      'connect',
+    ]),
     retry () {
       if (!this.connected && !this.active) {
-        this.reconnect()
+        this.connect()
       } else {
-        this.reload()
+        this.synchronize()
       }
-    }
-  }
+    },
+  },
 }
 
 export default shootSubscription

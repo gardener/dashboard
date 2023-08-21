@@ -1,27 +1,25 @@
 //
-// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import Vue from 'vue'
-const yaml = import(/* webpackPrefetch: true */ 'js-yaml')
+const jsYaml = import('js-yaml')
 
-const VueYaml = {
-  install (Vue) {
-    const value = {
-      dump (obj) {
-        return yaml.then(({ dump }) => dump(obj, {
-          skipInvalid: true
-        }))
-      },
-      load (data) {
-        return yaml.then(({ load }) => load(data))
-      }
-    }
-    Object.defineProperty(Vue, 'yaml', { value })
-    Object.defineProperty(Vue.prototype, '$yaml', { value })
-  }
+const yaml = {
+  dump (obj, options) {
+    return jsYaml.then(({ dump }) => dump(obj, {
+      skipInvalid: true,
+      ...options,
+    }))
+  },
+  load (data, options) {
+    return jsYaml.then(({ load }) => load(data, options))
+  },
 }
 
-Vue.use(VueYaml)
+export default {
+  install (app) {
+    app.provide('yaml', yaml)
+  },
+}

@@ -1,250 +1,430 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <div v-resize="onResize" :class="backgroundClass" class="d-flex flex-column fill-height position-relative" :id="`boundary_${uuid}`">
+  <div
+    :id="`boundary_${uuid}`"
+    v-resize="onResize"
+    :class="backgroundClass"
+    class="d-flex flex-column fill-height"
+  >
     <v-snackbar
       v-model="snackbarTop"
       :timeout="-1"
       :absolute="true"
-      :top="true"
+      location="top"
       multi-line
     >
       <div>{{ snackbarText }}</div>
-      <g-popper
-        v-if="snackbarDetailsText"
-        title="Details"
-        :popper-key="`popper_snackbar_${uuid}`"
-        placement="bottom"
-        :boundaries-selector="`#boundary_${uuid}`"
+      <div
+        class="d-flex flex-nowrap align-center justify-center"
       >
-        {{snackbarDetailsText}}
-        <template v-slot:popperRef>
-          <v-btn text small color="primary">
-            Details
-          </v-btn>
-        </template>
-      </g-popper>
-      <v-btn text color="primary" @click="retry">
-        Retry
-      </v-btn>
-      <v-btn text color="primary" @click="hideSnackbarAndClose">
-        Close
-      </v-btn>
+        <g-popover
+          v-if="snackbarDetailsText"
+          toolbar-title="Details"
+          placement="bottom"
+          :boundary="`#boundary_${uuid}`"
+        >
+          <template #activator="{ props }">
+            <v-btn
+              v-bind="props"
+              variant="text"
+              color="primary"
+            >
+              Details
+            </v-btn>
+          </template>
+          <template #text>
+            {{ snackbarDetailsText }}
+          </template>
+        </g-popover>
+        <v-btn
+          variant="text"
+          color="primary"
+          @click="retry"
+        >
+          Retry
+        </v-btn>
+        <v-btn
+          variant="text"
+          color="primary"
+          @click="hideSnackbarAndClose"
+        >
+          Close
+        </v-btn>
+      </div>
     </v-snackbar>
     <v-snackbar
       v-model="errorSnackbarBottom"
       :timeout="-1"
       :absolute="true"
-      :bottom="true"
+      location="bottom"
       color="error"
     >
       {{ snackbarText }}
-      <v-btn text @click="hideSnackbarAndClose">
+      <v-btn
+        variant="text"
+        @click="hideSnackbarAndClose"
+      >
         Close
       </v-btn>
     </v-snackbar>
-    <drag-n-droppable-component :uuid="uuid">
-      <template v-slot:handle>
-        <v-system-bar dark class="systemBarTop" :class="backgroundClass" @click.native="focus">
-          <v-btn icon small color="grey lighten-1" class="text-none systemBarButton mx-1 g-ignore-drag" @click="deleteTerminal">
-            <v-icon class="mr-0" small>mdi-close</v-icon>
-          </v-btn>
-          <v-spacer></v-spacer>
-          <v-icon class="pr-2">mdi-console</v-icon>
-          <span>{{terminalTitle}}</span>
-          <v-spacer></v-spacer>
-          <v-tooltip v-if="terminalSession.imageHelpText" top class="g-ignore-drag">
-            <template v-slot:activator="{ on: tooltip }">
-              <!-- g-popper boundaries-selector: The id must not start with a digit. QuerySelector method uses CSS3 selectors for querying the DOM and CSS3 doesn't support ID selectors that start with a digit -->
-              <g-popper
-                :title="`${imageShortText} Help`"
-                :popper-key="`popper_${uuid}`"
+    <g-drag-n-droppable-component :uuid="uuid">
+      <template #handle>
+        <div
+          class="g-system-bar d-flex"
+          :class="backgroundClass"
+          @click="focus"
+        >
+          <v-btn
+            icon="mdi-close"
+            size="small"
+            color="grey-lighten-1"
+            variant="text"
+            class="text-none g-system-bar-button g-ignore-drag"
+            @click="deleteTerminal"
+          />
+          <v-spacer />
+          <v-icon
+            class="pr-2"
+            color="grey-lighten-1"
+          >
+            mdi-console
+          </v-icon>
+          <span class="text-grey-lighten-1">{{ terminalTitle }}</span>
+          <v-spacer />
+          <v-tooltip
+            v-if="terminalSession.imageHelpText"
+            location="top"
+            class="g-ignore-drag"
+          >
+            <template #activator="{ props: tooltipProps }">
+              <!-- g-popover boundary: The id must not start with a digit. QuerySelector method uses CSS3 selectors for querying the DOM and CSS3 doesn't support ID selectors that start with a digit -->
+              <g-popover
+                :toolbar-title="`${imageShortText} Help`"
                 placement="bottom"
-                :boundaries-selector="`#boundary_${uuid}`"
+                :boundary="`#boundary_${uuid}`"
               >
-                <span v-html="imageHelpHtml"></span>
-                <template v-slot:popperRef>
-                  <v-btn v-on="tooltip" v-if="terminalSession.imageHelpText" icon small color="grey lighten-1" class="text-none systemBarButton mx-1 g-ignore-drag">
-                    <v-icon class="mr-0" small>mdi-help-circle-outline</v-icon>
-                  </v-btn>
+                <template #activator="{ props: activatorProps }">
+                  <v-btn
+                    v-if="terminalSession.imageHelpText"
+                    v-bind="mergeProps(activatorProps, tooltipProps)"
+                    icon="mdi-help-circle-outline"
+                    size="small"
+                    color="grey-lighten-1"
+                    variant="text"
+                    class="text-none g-system-bar-button mx-1 g-ignore-drag"
+                  />
                 </template>
-              </g-popper>
+                <template #text>
+                  <!-- eslint-disable-next-line vue/no-v-html -->
+                  <span v-html="imageHelpHtml" />
+                </template>
+              </g-popover>
             </template>
             Help
           </v-tooltip>
           <v-menu
-            bottom
+            location="bottom"
             offset-y
-            dark
             min-width="400px"
+            theme="dark"
           >
-            <template v-slot:activator="{ on: menu }">
-              <v-btn v-on="menu" icon small color="grey lighten-1" class="text-none systemBarButton mx-1 g-ignore-drag">
-                <v-icon class="mr-0" small>mdi-menu</v-icon>
-              </v-btn>
+            <template #activator="{ props }">
+              <v-btn
+                v-bind="props"
+                icon="mdi-menu"
+                size="small"
+                color="grey-lighten-1"
+                variant="text"
+                class="text-none g-system-bar-button mx-1 g-ignore-drag"
+              />
             </template>
-            <v-card tile>
+            <v-card rounded="0">
               <v-card-actions>
-                <v-btn small block text class="justify-start" @click="split('horizontal')">
-                  <icon-base width="16" height="16" view-box="0 -2 20 20" class="mr-2">
-                    <split-vertically></split-vertically>
-                  </icon-base>
-                  <span>Split Pane Vertically</span>
-                  <v-spacer></v-spacer>
-                  <span>(ctrl + shift + v)</span>
+                <v-btn
+                  size="small"
+                  block
+                  variant="text"
+                  @click="split('horizontal')"
+                >
+                  <div class="d-flex g-burger-menu-button">
+                    <g-icon-base
+                      width="16"
+                      height="16"
+                      view-box="0 -2 20 20"
+                      class="mr-2"
+                    >
+                      <g-split-vertically />
+                    </g-icon-base>
+                    <span>Split Pane Vertically</span>
+                    <v-spacer />
+                    <span>(ctrl + shift + v)</span>
+                  </div>
                 </v-btn>
               </v-card-actions>
               <v-card-actions>
-                <v-btn small block text class="justify-start" @click="split('vertical')">
-                  <icon-base width="16" height="16" view-box="0 -2 20 20" class="mr-2">
-                    <split-horizontally></split-horizontally>
-                  </icon-base>
-                  <span>Split Pane Horizontally</span>
-                  <v-spacer></v-spacer>
-                  <span>(ctrl + shift + h)</span>
+                <v-btn
+                  size="small"
+                  block
+                  variant="text"
+                  @click="split('vertical')"
+                >
+                  <div class="d-flex g-burger-menu-button">
+                    <g-icon-base
+                      width="16"
+                      height="16"
+                      view-box="0 -2 20 20"
+                      class="mr-2"
+                    >
+                      <g-split-horizontally />
+                    </g-icon-base>
+                    <span>Split Pane Horizontally</span>
+                    <v-spacer />
+                    <span>(ctrl + shift + h)</span>
+                  </div>
                 </v-btn>
               </v-card-actions>
-              <v-divider class="mt-1 mb-1"></v-divider>
+              <v-divider class="mt-1 mb-1" />
               <v-card-actions>
-                <v-btn small block text class="justify-start" @click="configure('settingsBtn')" :loading="loading.settingsBtn">
-                  <v-icon small class="mr-2">mdi-cog</v-icon>
-                  Settings
+                <v-btn
+                  size="small"
+                  block
+                  :loading="loading.settingsBtn"
+                  @click="configure('settingsBtn')"
+                >
+                  <div class="d-flex g-burger-menu-button">
+                    <v-icon class="mr-2">
+                      mdi-cog
+                    </v-icon>
+                    Settings
+                  </div>
                 </v-btn>
               </v-card-actions>
             </v-card>
           </v-menu>
-        </v-system-bar>
+        </div>
       </template>
-      <template v-slot:component>
-        <div ref="container" class="terminal-container"></div>
-        <v-system-bar dark class="systemBarBottom" :class="backgroundClass">
+      <template #component>
+        <div
+          ref="container"
+          class="terminal-container"
+        />
+        <div
+          class="g-system-bar"
+          :class="backgroundClass"
+        >
           <v-menu
             v-model="connectionMenu"
-            top
+            location="top"
             offset-y
-            dark
           >
-            <template v-slot:activator="{ on: menu }">
-              <v-tooltip :disabled="connectionMenu" top style="min-width: 110px">
-                <template v-slot:activator="{ on: tooltip }">
-                  <v-btn v-on="{ ...tooltip, ...menu }" small text color="grey lighten-1" class="text-none systemBarButton">
-                    <icon-base width="18" height="18" view-box="-2 -2 30 30" icon-color="#bdbdbd" class="mr-2">
-                      <connected v-if="terminalSession.connectionState === TerminalSession.CONNECTED"></connected>
-                      <disconnected v-else></disconnected>
-                    </icon-base>
-                    <span class="text-none grey--text text--lighten-1" style="font-size: 13px">{{connectionStateText}}</span>
+            <template #activator="{ props: menuProps }">
+              <v-tooltip
+                :disabled="connectionMenu"
+                location="top"
+                style="min-width: 110px"
+              >
+                <template #activator="{ props: tooltipProps }">
+                  <v-btn
+                    v-bind="mergeProps(menuProps, tooltipProps)"
+                    size="small"
+                    variant="text"
+                    color="grey-lighten-1"
+                    class="text-none g-system-bar-button"
+                  >
+                    <g-icon-base
+                      width="18"
+                      height="18"
+                      view-box="-2 -2 30 30"
+                      icon-color="#bdbdbd"
+                      class="mr-2"
+                    >
+                      <g-connected v-if="terminalSession.connectionState === TerminalSession.CONNECTED" />
+                      <g-disconnected v-else />
+                    </g-icon-base>
+                    <span class="text-none text-grey-lighten-1">{{ connectionStateText }}</span>
                   </v-btn>
                 </template>
-                {{terminalSession.detailedConnectionStateText || connectionStateText}}
+                {{ terminalSession.detailedConnectionStateText || connectionStateText }}
               </v-tooltip>
             </template>
-            <v-card tile>
+            <v-card rounded="0">
               <v-card-actions v-if="terminalSession.connectionState === TerminalSession.DISCONNECTED">
-                <v-btn small text class="action-button" @click="retry()">
-                  <v-icon small left>mdi-reload</v-icon>
+                <v-btn
+                  size="small"
+                  variant="text"
+                  class="action-button"
+                  @click="retry()"
+                >
+                  <v-icon
+                    size="small"
+                    start
+                  >
+                    mdi-reload
+                  </v-icon>
                   Reconnect
                 </v-btn>
               </v-card-actions>
-              <v-card-text v-else class="ml-2 mr-2">
-                {{terminalSession.detailedConnectionStateText || connectionStateText}}
+              <v-card-text
+                v-else
+                class="ml-2 mr-2"
+              >
+                {{ terminalSession.detailedConnectionStateText || connectionStateText }}
               </v-card-text>
             </v-card>
           </v-menu>
 
-          <v-tooltip v-if="imageShortText" top>
-            <template v-slot:activator="{ on: tooltip }">
-              <v-btn v-on="tooltip" text @click="configure('imageBtn')" :loading="loading.imageBtn" color="grey lighten-1" class="text-none systemBarButton">
-                <v-icon class="mr-2">mdi-layers-triple-outline</v-icon>
-                <span>{{imageShortText}}</span>
+          <v-tooltip
+            v-if="imageShortText"
+            location="top"
+          >
+            <template #activator="{ props }">
+              <v-btn
+                v-bind="props"
+                size="small"
+                variant="text"
+                :loading="loading.imageBtn"
+                color="grey-lighten-1"
+                class="text-none g-system-bar-button"
+                @click="configure('imageBtn')"
+              >
+                <v-icon class="mr-2">
+                  mdi-layers-triple-outline
+                </v-icon>
+                <span>{{ imageShortText }}</span>
               </v-btn>
             </template>
-            Image: {{terminalSession.container.image}}
+            Image: {{ terminalSession.container.image }}
           </v-tooltip>
 
-          <v-tooltip v-if="privilegedMode !== undefined && target === 'shoot'" top>
-            <template v-slot:activator="{ on: tooltip }">
-              <v-btn v-on="tooltip" small text @click="configure('secContextBtn')" :loading="loading.secContextBtn" color="grey lighten-1" class="text-none systemBarButton">
-                <v-icon class="mr-2">mdi-shield-account</v-icon>
-                <span>{{privilegedModeText}}</span>
+          <v-tooltip
+            v-if="privilegedMode !== undefined && target === 'shoot'"
+            location="top"
+          >
+            <template #activator="{ props }">
+              <v-btn
+                v-bind="props"
+                size="small"
+                variant="text"
+                :loading="loading.secContextBtn"
+                color="grey-lighten-1"
+                class="text-none g-system-bar-button"
+                @click="configure('secContextBtn')"
+              >
+                <v-icon class="mr-2">
+                  mdi-shield-account
+                </v-icon>
+                <span>{{ privilegedModeText }}</span>
               </v-btn>
             </template>
-            <strong>Privileged:</strong> {{terminalSession.container.privileged}}<br/>
-            <strong>Host PID:</strong> {{terminalSession.hostPID}}<br/>
-            <strong>Host Network:</strong> {{terminalSession.hostNetwork}}
+            <strong>Privileged:</strong> {{ terminalSession.container.privileged }}<br>
+            <strong>Host PID:</strong> {{ terminalSession.hostPID }}<br>
+            <strong>Host Network:</strong> {{ terminalSession.hostNetwork }}
           </v-tooltip>
 
-          <v-tooltip v-if="terminalSession.node && target === 'shoot'" top>
-            <template v-slot:activator="{ on: tooltip }">
-              <v-btn v-on="tooltip" small text @click="configure('nodeBtn')" :loading="loading.nodeBtn" color="grey lighten-1" class="text-none systemBarButton">
-                <v-icon :size="14" class="mr-2">mdi-server</v-icon>
-                <span>{{terminalSession.node}}</span>
+          <v-tooltip
+            v-if="terminalSession.node && target === 'shoot'"
+            location="top"
+          >
+            <template #activator="{ props }">
+              <v-btn
+                v-bind="props"
+                size="small"
+                variant="text"
+                :loading="loading.nodeBtn"
+                color="grey-lighten-1"
+                class="text-none g-system-bar-button"
+                @click="configure('nodeBtn')"
+              >
+                <v-icon
+                  :size="14"
+                  class="mr-2"
+                >
+                  mdi-server
+                </v-icon>
+                <span>{{ terminalSession.node }}</span>
               </v-btn>
             </template>
-            Node: {{terminalSession.node}}
+            Node: {{ terminalSession.node }}
           </v-tooltip>
-        </v-system-bar>
+        </div>
       </template>
-    </drag-n-droppable-component>
-    <terminal-settings-dialog
+    </g-drag-n-droppable-component>
+    <g-terminal-settings-dialog
       ref="settings"
       :target="target"
-    ></terminal-settings-dialog>
+    />
   </div>
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex'
-import get from 'lodash/get'
-import assign from 'lodash/assign'
-import find from 'lodash/find'
-import head from 'lodash/head'
-
-import 'xterm/css/xterm.css'
+import { reactive } from 'vue'
+import { mapState } from 'pinia'
 import { Terminal } from 'xterm'
 import { FitAddon } from 'xterm-addon-fit'
 import { WebLinksAddon } from 'xterm-addon-web-links'
+import 'xterm/css/xterm.css'
 
-import { TerminalSession, Spinner } from '@/lib/terminal'
-import { FocusAddon } from '@/lib/xterm-addon-focus'
-import GPopper from '@/components/GPopper'
+import { useAppStore } from '@/store/app'
+import { useConfigStore } from '@/store/config'
+import { useTerminalStore } from '@/store/terminal'
 
-import DragNDroppableComponent from '@/components/DragNDroppableComponent'
-import { targetText, transformHtml } from '@/utils'
-import { terminalConfig } from '@/utils/api'
+import GDragNDroppableComponent from '@/components/GDragNDroppableComponent.vue'
+import GTerminalSettingsDialog from '@/components/dialogs/GTerminalSettingsDialog.vue'
+import GIconBase from '@/components/icons/GIconBase.vue'
+import GConnected from '@/components/icons/GConnected.vue'
+import GDisconnected from '@/components/icons/GDisconnected.vue'
+import GSplitVertically from '@/components/icons/GSplitVertically.vue'
+import GSplitHorizontally from '@/components/icons/GSplitHorizontally.vue'
+
 import { isGatewayTimeout } from '@/utils/error'
-import TerminalSettingsDialog from '@/components/dialogs/TerminalSettingsDialog'
-import IconBase from '@/components/icons/IconBase'
-import Connected from '@/components/icons/Connected'
-import Disconnected from '@/components/icons/Disconnected'
-import SplitVertically from '@/components/icons/SplitVertically'
-import SplitHorizontally from '@/components/icons/SplitHorizontally'
+import {
+  targetText,
+  transformHtml,
+} from '@/utils'
+
+import { FocusAddon } from '@/lib/xterm-addon-focus'
+import {
+  TerminalSession,
+  Spinner,
+} from '@/lib/terminal'
+
+import {
+  get,
+  assign,
+  find,
+  head,
+} from '@/lodash'
 
 export default {
-  name: 'g-terminal',
   components: {
-    TerminalSettingsDialog,
-    IconBase,
-    Connected,
-    Disconnected,
-    GPopper,
-    SplitVertically,
-    SplitHorizontally,
-    DragNDroppableComponent
+    GTerminalSettingsDialog,
+    GIconBase,
+    GConnected,
+    GDisconnected,
+    GSplitVertically,
+    GSplitHorizontally,
+    GDragNDroppableComponent,
   },
+  inject: ['api', 'logger', 'mergeProps'],
   props: {
     uuid: {
       type: String,
-      required: true
+      required: true,
     },
     data: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
+  emits: [
+    'terminated',
+    'split',
+  ],
   data () {
     return {
       hasFocus: true,
@@ -252,35 +432,37 @@ export default {
       errorSnackbarBottom: false,
       snackbarText: '',
       snackbarDetailsText: undefined,
-      spinner: undefined,
       loading: {
         imageBtn: false,
         secContextBtn: false,
         nodeBtn: false,
-        settingsBtn: false
+        settingsBtn: false,
       },
       connectionMenu: false,
       config: {
         container: {
-          image: undefined
+          image: undefined,
         },
-        nodes: []
+        nodes: [],
       },
       selectedConfig: {},
       terminalSession: {
-        container: {}
+        container: {},
       },
       TerminalSession,
-      showMenu: false
+      showMenu: false,
     }
   },
   computed: {
-    ...mapState([
-      'cfg'
+    ...mapState(useConfigStore, [
+      'terminal',
     ]),
-    ...mapGetters([
+    ...mapState(useTerminalStore, [
+      'heartbeatIntervalSeconds',
+    ]),
+    ...mapState(useAppStore, [
       'focusedElementId',
-      'splitpaneResize'
+      'splitpaneResize',
     ]),
     terminalTitle () {
       const title = [this.targetText]
@@ -296,7 +478,7 @@ export default {
       return targetText(this.target) || 'UNKNOWN'
     },
     backgroundClass () {
-      return this.hasFocus ? 'background' : 'brightBackground'
+      return this.hasFocus ? 'background' : 'bright-background'
     },
     isTerminalSessionCreated () {
       return this.terminalSession && this.terminalSession.isCreated
@@ -330,7 +512,7 @@ export default {
       }
     },
     heartbeatIntervalSeconds () {
-      return get(this.cfg, 'terminal.heartbeatIntervalSeconds', 60)
+      return get(this.terminal, 'heartbeatIntervalSeconds', 60)
     },
     privilegedModeText () {
       return this.privilegedMode ? 'Privileged' : 'Unprivileged'
@@ -351,6 +533,49 @@ export default {
     },
     target () {
       return this.data.target
+    },
+  },
+  watch: {
+    splitpaneResize () {
+      this.onResize()
+    },
+  },
+  mounted () {
+    const term = this.term = new Terminal({
+      fontSize: 15,
+      fontWeight: 600,
+      fontFamily: '"DejaVu Sans Mono", "Everson Mono", FreeMono, Menlo, Terminal, monospace, "Apple Symbols"',
+    })
+    const fitAddon = this.fitAddon = new FitAddon()
+    const focusAddon = new FocusAddon(this.uuid, this.$store)
+    focusAddon.onFocus = () => {
+      term.options.theme = { background: '#000' }
+      this.hasFocus = true
+    }
+    focusAddon.onBlur = () => {
+      term.options.theme = { background: '#333' }
+      this.hasFocus = false
+    }
+
+    term.open(this.$refs.container)
+    term.loadAddon(focusAddon) // must be called after open, otherwise the terminal.textarea is not initialized
+    term.loadAddon(fitAddon)
+    term.loadAddon(new WebLinksAddon())
+
+    term.focus()
+    this.$nextTick(() => {
+      // use nextTick as xterm needs to be finished with rendering because fitAddon relies on
+      // dynamic dimensions calculated via css, which do not return correct values before rendering is complete
+      fitAddon.fit()
+    })
+
+    this.spinner = new Spinner(term)
+    this.connect()
+  },
+  beforeUnmount () {
+    this.cancelConnectAndClose()
+    if (this.term) {
+      this.term.dispose()
     }
   },
   methods: {
@@ -376,7 +601,7 @@ export default {
       this.loading[refName] = true
       const { namespace, name, target } = this.data
       try {
-        const { data: config } = await terminalConfig({ name, namespace, target })
+        const { data: config } = await this.api.terminalConfig({ name, namespace, target })
 
         assign(this.config, config)
       } catch (err) {
@@ -387,20 +612,19 @@ export default {
 
       const initialState = {
         container: {
-          image: this.defaultImage
+          image: this.defaultImage,
         },
         defaultNode: this.defaultNode,
         currentNode: this.terminalSession.node,
         privilegedMode: this.defaultPrivilegedMode,
-        nodes: this.config.nodes
+        nodes: this.config.nodes,
       }
       const selectedConfig = await this.$refs.settings.promptForConfigurationChange(initialState)
       if (selectedConfig) {
         try {
           await this.terminalSession.deleteTerminal()
         } catch (err) {
-          // eslint-disable-next-line no-console
-          console.log('failed to cleanup terminal session on configuration change')
+          this.logger.error('failed to cleanup terminal session on configuration change', err)
         }
         this.cancelConnectAndClose()
 
@@ -447,7 +671,7 @@ export default {
       this.terminalSession.close()
     },
     async connect () {
-      const terminalSession = this.terminalSession = new TerminalSession(this)
+      const terminalSession = this.terminalSession = reactive(new TerminalSession(this))
 
       this.spinner.start()
       this.spinner.text = 'Preparing terminal session'
@@ -465,84 +689,34 @@ export default {
     },
     split (orientation) {
       this.$emit('split', orientation)
-    }
+    },
   },
-  mounted () {
-    const term = this.term = new Terminal()
-    const fitAddon = this.fitAddon = new FitAddon()
-    const focusAddon = new FocusAddon(this.uuid, this.$store)
-    focusAddon.onFocus = () => {
-      term.setOption('theme', { background: '#000' })
-      this.hasFocus = true
-    }
-    focusAddon.onBlur = () => {
-      term.setOption('theme', { background: '#333' })
-      this.hasFocus = false
-    }
-
-    term.open(this.$refs.container)
-    term.loadAddon(focusAddon) // must be called after open, otherwise the terminal.textarea is not initialized
-    term.loadAddon(fitAddon)
-    term.loadAddon(new WebLinksAddon())
-
-    term.focus()
-    this.$nextTick(() => {
-      // use $nextTick as xterm needs to be finished with rendering because fitAddon relies on
-      // dynamic dimensions calculated via css, which do not return correct values before rendering is complete
-      fitAddon.fit()
-    })
-
-    this.spinner = new Spinner(term)
-    this.connect()
-  },
-  beforeDestroy () {
-    this.cancelConnectAndClose()
-    if (this.term) {
-      this.term.dispose()
-    }
-  },
-  watch: {
-    splitpaneResize () {
-      this.onResize()
-    }
-  }
 }
 </script>
 
 <style lang="scss" scoped>
-  .position-relative {
-    position: relative !important
-  }
   .terminal-container {
-    flex: 1 1 auto;
     height: 100%;
-    width: 100%;
-    margin-top: 4px;
-    margin-left: 4px;
-    margin-bottom: 0;
-    margin-right: 0;
-    max-height: calc(100% - 52px);
-    /* Change stacking order so that PositionalDropzone is in front. See also https://philipwalton.com/articles/what-no-one-told-you-about-z-index/ */
-    opacity: .99;
+    max-height: calc(100% - 49px);
   }
-  .terminal {
-    font-family: "DejaVu Sans Mono", "Everson Mono", FreeMono, Menlo, Terminal, monospace, "Apple Symbols";
-    height: 100%;
-    width: 100%;
-  }
-  .systemBarTop .systemBarBottom {
-    min-height: 25px;
+
+  .g-system-bar {
+    height: 24px;
+    font-size: .875rem;
+    font-weight: 400;
   }
   .background {
     background: #000;
   }
-  .brightBackground {
+  .bright-background {
     background: #333;
   }
-  .systemBarButton {
-    min-width: 20px;
-    max-height: 25px;
+  .g-system-bar-button {
+    max-height: 24px;
     letter-spacing: normal;
   }
 
+  .g-burger-menu-button {
+    width: 400px;
+  }
 </style>

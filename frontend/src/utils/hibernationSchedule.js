@@ -1,21 +1,26 @@
 //
-// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import get from 'lodash/get'
-import forEach from 'lodash/forEach'
-import isEmpty from 'lodash/isEmpty'
-import replace from 'lodash/replace'
-import split from 'lodash/split'
-import join from 'lodash/join'
-import flatMap from 'lodash/flatMap'
-import uniq from 'lodash/uniq'
-import range from 'lodash/range'
-import toUpper from 'lodash/toUpper'
+// Local
+
+import { v4 as uuidv4 } from './uuid'
 import moment from './moment'
-import { v4 as uuidv4 } from '@/utils/uuid'
+
+import {
+  get,
+  forEach,
+  isEmpty,
+  replace,
+  split,
+  join,
+  flatMap,
+  uniq,
+  range,
+  toUpper,
+} from '@/lodash'
 
 const scheduleCrontabRegex = /^(\d{0,2})\s(\d{0,2})\s\*\s\*\s(([0-7,*-]*|MON|TUE|WED|THU|FRI|SAT|SUN)+)$/
 
@@ -35,7 +40,7 @@ function scheduleEventObjFromRegex (regexVal) {
       SAT: 6,
       SUN: 0,
       7: 0,
-      '*': '1,2,3,4,5,6,0'
+      '*': '1,2,3,4,5,6,0',
     }
     weekdays = replace(weekdays, /[7*]|MON|TUE|WED|THU|FRI|SAT|SUN/g, weekday => intVals[weekday])
 
@@ -110,7 +115,7 @@ export function parsedScheduleEventsFromCrontabBlock (crontabBlock, defaultLocat
   }
 }
 
-function crontabLineFromParsedScheduleEvent ({ crontabBlock, parsedScheduleEvent, line }) {
+function crontabLineFromParsedScheduleEvent ({ parsedScheduleEvent, line }) {
   const { weekdays, hour, minute } = get(parsedScheduleEvent, line, {})
   if (parsedScheduleEvent && hour && minute && weekdays) {
     return `${minute} ${hour} * * ${weekdays}`

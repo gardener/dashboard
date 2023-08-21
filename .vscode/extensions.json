@@ -4,7 +4,7 @@
     "dbaeumer.vscode-eslint",
     "editorconfig.editorconfig",
     "firsttris.vscode-jest-runner",
-    "octref.vetur",
+    "vue.volar",
     "syler.sass-indented"
   ]
 }

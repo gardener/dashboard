@@ -1,18 +1,14 @@
 //
-// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import get from 'lodash/get'
-import uniq from 'lodash/uniq'
-import flatMap from 'lodash/flatMap'
-import cloneDeep from 'lodash/cloneDeep'
-import find from 'lodash/find'
-import some from 'lodash/some'
-import filter from 'lodash/filter'
-import compact from 'lodash/compact'
-import { mapGetters } from 'vuex'
+import { mapActions } from 'pinia'
+
+import { useCloudProfileStore } from '@/store/cloudProfile'
+import { useProjectStore } from '@/store/project'
+import { useSeedStore } from '@/store/seed'
 
 import {
   getTimestampFormatted,
@@ -20,22 +16,28 @@ import {
   isShootStatusHibernated,
   isReconciliationDeactivated,
   isTypeDelete,
-  isTruthyValue
+  isTruthyValue,
 } from '@/utils'
+
+import {
+  get,
+  uniq,
+  flatMap,
+  cloneDeep,
+  find,
+  some,
+  filter,
+  compact,
+} from '@/lodash'
 
 export const shootItem = {
   props: {
     shootItem: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   computed: {
-    ...mapGetters([
-      'selectedAccessRestrictionsForShootByCloudProfileNameAndRegion',
-      'isSeedUnreachableByName',
-      'projectNameByNamespace'
-    ]),
     shootMetadata () {
       return get(this.shootItem, 'metadata', {})
     },
@@ -73,7 +75,6 @@ export const shootItem = {
     shootProjectName () {
       return this.projectNameByNamespace(this.shootMetadata)
     },
-
     shootAnnotations () {
       return get(this.shootMetadata, 'annotations', {})
     },
@@ -201,7 +202,7 @@ export const shootItem = {
       })
       return [
         ...this.shootConditions,
-        ...shootConstraintsWithErrorCode
+        ...shootConstraintsWithErrorCode,
       ]
     },
     shootObservedGeneration () {
@@ -262,16 +263,25 @@ export const shootItem = {
     },
     isStaleShoot () {
       return this.shootItem?.stale
-    }
+    },
   },
   methods: {
+    ...mapActions(useCloudProfileStore, [
+      'selectedAccessRestrictionsForShootByCloudProfileNameAndRegion',
+    ]),
+    ...mapActions(useSeedStore, [
+      'isSeedUnreachableByName',
+    ]),
+    ...mapActions(useProjectStore, [
+      'projectNameByNamespace',
+    ]),
     shootActionToolTip (tooltip) {
       if (!this.isShootActionsDisabledForPurpose) {
         return tooltip
       }
       return 'Actions disabled for cluster with purpose infrastructure'
-    }
-  }
+    },
+  },
 }
 
 export default shootItem

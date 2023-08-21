@@ -2,12 +2,12 @@
 
 ## Project setup
 ```
-yarn install
+yarn
 ```
 
 ### Compiles and hot-reloads for development
 ```
-yarn serve
+yarn dev
 ```
 
 ### Compiles and minifies for production
@@ -17,7 +17,7 @@ yarn build
 
 ### Run your unit tests
 ```
-yarn test:unit
+yarn test
 ```
 
 ### Lints and fixes files
@@ -26,4 +26,4 @@ yarn lint
 ```
 
 ### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+See [Configuration Reference](https://vitejs.dev/config/).

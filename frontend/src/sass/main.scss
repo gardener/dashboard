@@ -1,21 +1,15 @@
 /*
- *  SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+ *  SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
  *
  *  SPDX-License-Identifier: Apache-2.0
  */
 
+@forward 'vuetify/lib/styles/main.sass';
+
 /** Gardener Styles */
-@import '~vuetify/src/styles/styles.sass';
-
-[data-app] {
-  .v-main > .container {
+[data-v-app] {
+  .v-main > .v-container {
     min-height: calc(100vh - 156px)
-  }
-}
-
-.v-list-item__action {
-  .v-btn.v-btn--icon {
-    color: map-deep-get($material-theme, 'text', 'primary');
   }
 }
 
@@ -33,6 +27,23 @@
       font-weight: 300;
     }
   }
+}
+
+.g-table {
+  font-size: 14px;
+  .v-data-table-header__content {
+    white-space: nowrap !important;
+    text-transform: uppercase !important;
+    font-size: 12px !important;
+  }
+  .v-data-table-footer__items-per-page .v-field {
+    font-size: 14px !important;
+  }
+}
+
+.g-table-search-field {
+  min-width: 200px;
+  max-width: 400px;
 }
 
 .cursor-pointer {
@@ -62,7 +73,7 @@
 }
 
 .rounded-0 {
-  border-radius: 0;
+  border-radius: 0 !important;
 }
 
 .rounded-1 {
@@ -77,14 +88,36 @@
   border-radius: 8px;
 }
 
-.theme--light .alternate-row-background > div:nth-of-type(even) {
-  background-color: rgba(0, 0, 0, .02);
+.v-theme--light {
+  .alternate-row-background > div:nth-of-type(even) {
+    background-color: rgba(0, 0, 0, .02);
+  }
 }
 
-.theme--dark .alternate-row-background > div:nth-of-type(even) {
-  background-color: rgba(0, 0, 0, .2);
+.v-theme--dark {
+  .alternate-row-background > div:nth-of-type(even) {
+    background-color: rgba(0, 0, 0, .2);
+  }
 }
 
 .inherit-color {
   color: inherit !important;
+}
+
+.inherit-opacity {
+  opacity: inherit !important;
+}
+
+/*
+ This fixes the missing margin for multi-line hints
+ TODO Maybe we can remove this whith future vuetify version
+*/
+.v-input__details {
+  padding-top: 5px !important;
+}
+
+.g-action-button {
+  margin-left: 2px;
+  margin-right: 2px;
+  width: fit-content !important;
 }

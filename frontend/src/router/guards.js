@@ -1,199 +1,190 @@
 //
-// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import includes from 'lodash/includes'
-import isEmpty from 'lodash/isEmpty'
-import { getConfiguration } from '@/utils/api'
+import { useLocalStorage } from '@vueuse/core'
 
-export default function createGuards (store, userManager, localStorage, logger) {
-  return {
-    beforeEach: [
-      setLoading(store, true),
-      ensureUserAuthenticatedForNonPublicRoutes(store, userManager, logger),
-      ensureDataLoaded(store, localStorage, logger)
-    ],
-    afterEach: [
-      setLoading(store, false)
-    ]
+export function createGuards (context) {
+  const {
+    logger,
+    appStore,
+    configStore,
+    authnStore,
+    authzStore,
+    projectStore,
+    cloudProfileStore,
+    seedStore,
+    gardenerExtensionStore,
+    kubeconfigStore,
+    memberStore,
+    secretStore,
+    shootStore,
+    terminalStore,
+  } = context
+  const shootListFilter = useLocalStorage('project/_all/shoot-list/filter', {})
+
+  function ensureUserAuthenticatedForNonPublicRoutes () {
+    return (to) => {
+      const { meta = {}, path } = to
+      authnStore.$reset()
+      if (!meta.public && authnStore.isExpired()) {
+        logger.info('User not found or session has expired --> Redirecting to login page')
+        const query = path !== '/'
+          ? { redirectPath: path }
+          : undefined
+        return {
+          name: 'Login',
+          query,
+        }
+      }
+    }
   }
-}
 
-function setLoading (store, value) {
-  return (to, from, next) => {
-    try {
-      store.commit('SET_LOADING', value)
-    } finally {
-      if (typeof next === 'function') {
+  function ensureDataLoaded () {
+    return async (to, from, next) => {
+      const { meta = {} } = to
+      if (meta.public || to.name === 'Error') {
+        shootStore.unsubscribeShoots()
+        return next()
+      }
+
+      try {
+        const namespace = to.params.namespace ?? to.query.namespace
+        await Promise.all([
+          ensureConfigLoaded(configStore),
+          ensureProjectsLoaded(projectStore),
+          ensureCloudProfilesLoaded(cloudProfileStore),
+          ensureSeedsLoaded(seedStore),
+          ensureGardenerExtensionsLoaded(gardenerExtensionStore),
+          ensureKubeconfigLoaded(kubeconfigStore),
+          refreshRules(authzStore, namespace),
+        ])
+
+        if (namespace && namespace !== '_all' && !projectStore.namespaces.includes(namespace)) {
+          authzStore.$reset()
+          const message = `User ${authnStore.username} has no authorization for namespace ${namespace}`
+          logger.error(message)
+          throw Object.assign(new Error(message), {
+            status: 403,
+            reason: 'Forbidden',
+          })
+        }
+
+        switch (to.name) {
+          case 'Secrets':
+          case 'Secret': {
+            shootStore.subscribeShoots()
+            await secretStore.fetchSecrets()
+            break
+          }
+          case 'NewShoot':
+          case 'NewShootEditor': {
+            shootStore.subscribeShoots()
+            if (authzStore.canGetSecrets) {
+              await secretStore.fetchSecrets()
+            }
+
+            const namespaceChanged = from.params.namespace !== to.params.namespace
+            const toNewShoot = from.name !== 'NewShoot' && from.name !== 'NewShootEditor'
+            if (namespaceChanged || toNewShoot) {
+              shootStore.resetNewShootResource()
+            }
+            break
+          }
+          case 'ShootList': {
+            const isAdmin = authnStore.isAdmin
+
+            // filter has to be set before subscribing shoots
+            shootStore.setShootListFilters({
+              onlyShootsWithIssues: isAdmin,
+              progressing: true,
+              noOperatorAction: isAdmin,
+              deactivatedReconciliation: isAdmin,
+              hideTicketsWithLabel: isAdmin,
+              ...shootListFilter.value,
+            })
+
+            shootStore.subscribeShoots()
+            if (authzStore.canUseProjectTerminalShortcuts) {
+              await terminalStore.ensureProjectTerminalShortcutsLoaded()
+            }
+            break
+          }
+          case 'Members':
+          case 'Administration': {
+            shootStore.subscribeShoots()
+            await memberStore.fetchMembers()
+            break
+          }
+          case 'Account':
+          case 'Settings': {
+            shootStore.unsubscribeShoots()
+            break
+          }
+        }
+      } catch (err) {
+        appStore.setRouterError(err)
+      } finally {
         next()
       }
     }
   }
-}
 
-function ensureUserAuthenticatedForNonPublicRoutes (store, userManager, logger) {
-  return (to, from, next) => {
-    const { meta = {}, path } = to
-    if (meta.public) {
-      return next()
-    }
-    const user = userManager.getUser()
-    if (!user || userManager.isSessionExpired()) {
-      logger.info('User not found or session has expired --> Redirecting to login page')
-      const query = path !== '/' ? { redirectPath: path } : undefined
-      return next({
-        name: 'Login',
-        query
-      })
-    }
-    const storedUser = store.state.user
-    if (!storedUser || storedUser.jti !== user.jti) {
-      store.commit('SET_USER', user)
-    }
-    return next()
+  return {
+    beforeEach: [
+      () => {
+        appStore.loading = true
+      },
+      ensureUserAuthenticatedForNonPublicRoutes(),
+      ensureDataLoaded(),
+    ],
+    afterEach: [
+      (to, from) => {
+        appStore.loading = false
+        appStore.fromRoute = from
+      },
+    ],
   }
 }
 
-function ensureDataLoaded (store, localStorage, logger) {
-  return async (to, from, next) => {
-    const meta = to.meta || {}
-    if (meta.public || to.name === 'Error') {
-      store.dispatch('unsubscribeShoots')
-      return next()
-    }
-    try {
-      const promises = [
-        ensureConfigurationLoaded(store),
-        ensureProjectsLoaded(store),
-        ensureCloudProfilesLoaded(store),
-        ensureSeedsLoaded(store),
-        ensureKubeconfigDataLoaded(store),
-        ensureExtensionInformationLoaded(store)
-      ]
-
-      const namespace = to.params.namespace || to.query.namespace
-      if (!namespace) {
-        // fetch cluster scoped roles only (e.g can create projects)
-        promises.push(store.dispatch('refreshSubjectRules', undefined))
-      } else if (namespace !== store.state.namespace) {
-        store.commit('SET_NAMESPACE', namespace)
-        promises.push(store.dispatch('refreshSubjectRules', namespace))
-      }
-
-      await Promise.all(promises)
-
-      if (namespace && namespace !== '_all' && !includes(store.getters.namespaces, namespace)) {
-        logger.error('User %s has no authorization for namespace %s', store.getters.username, namespace)
-        store.commit('SET_NAMESPACE', null)
-      }
-
-      switch (to.name) {
-        case 'Secrets':
-        case 'Secret': {
-          await Promise.all([
-            store.dispatch('fetchcloudProviderSecrets'),
-            store.dispatch('subscribeShoots')
-          ])
-          break
-        }
-        case 'NewShoot':
-        case 'NewShootEditor': {
-          const promises = [
-            store.dispatch('subscribeShoots')
-          ]
-          if (store.getters.canGetSecrets) {
-            promises.push(store.dispatch('fetchcloudProviderSecrets'))
-          }
-          await Promise.all(promises)
-
-          const namespaceChanged = from.params.namespace !== to.params.namespace
-          const toNewShoot = from.name !== 'NewShoot' && from.name !== 'NewShootEditor'
-          if (namespaceChanged || toNewShoot) {
-            await store.dispatch('resetNewShootResource')
-          }
-          break
-        }
-        case 'ShootList': {
-          const isAdmin = store.getters.isAdmin
-          const defaultFilter = {
-            onlyShootsWithIssues: isAdmin,
-            progressing: true,
-            noOperatorAction: isAdmin,
-            deactivatedReconciliation: isAdmin,
-            hideTicketsWithLabel: isAdmin
-          }
-          const shootListFilters = {
-            ...defaultFilter,
-            ...localStorage.getObject('project/_all/shoot-list/filter')
-          }
-          await store.dispatch('setShootListFilters', shootListFilters) // filter has to be set before subscribing shoots
-
-          const promises = [
-            store.dispatch('subscribeShoots')
-          ]
-
-          if (store.getters.canUseProjectTerminalShortcuts) {
-            promises.push(store.dispatch('ensureProjectTerminalShortcutsLoaded'))
-          }
-          await Promise.all(promises)
-          break
-        }
-        case 'Members':
-        case 'Administration': {
-          await Promise.all([
-            store.dispatch('fetchMembers'),
-            store.dispatch('subscribeShoots')
-          ])
-          break
-        }
-        case 'Account':
-        case 'Settings': {
-          store.dispatch('unsubscribeShoots')
-          break
-        }
-      }
-      next()
-    } catch (err) {
-      next(err)
-    }
-  }
-}
-
-async function ensureConfigurationLoaded (store) {
-  if (!store.state.cfg) {
-    const { data } = await getConfiguration()
-    await store.dispatch('setConfiguration', data)
+async function ensureConfigLoaded (store) {
+  if (store.isInitial) {
+    return store.fetchConfig()
   }
 }
 
 function ensureProjectsLoaded (store) {
-  if (isEmpty(store.getters.projectList)) {
-    return store.dispatch('fetchProjects')
+  if (store.isInitial) {
+    return store.fetchProjects()
   }
 }
 
+async function refreshRules (store, ...args) {
+  return store.fetchRules(...args)
+}
+
 function ensureCloudProfilesLoaded (store) {
-  if (isEmpty(store.getters.cloudProfileList)) {
-    return store.dispatch('fetchCloudProfiles')
+  if (store.isInitial) {
+    return store.fetchCloudProfiles()
   }
 }
 
 function ensureSeedsLoaded (store) {
-  if (isEmpty(store.getters.seedList)) {
-    return store.dispatch('fetchSeeds')
+  if (store.isInitial) {
+    return store.fetchSeeds()
   }
 }
 
-function ensureKubeconfigDataLoaded (store) {
-  if (isEmpty(store.state.kubeconfigData)) {
-    return store.dispatch('fetchKubeconfigData')
+function ensureGardenerExtensionsLoaded (store) {
+  if (store.isInitial) {
+    return store.fetchGardenerExtensions()
   }
 }
 
-function ensureExtensionInformationLoaded (store) {
-  if (isEmpty(store.getters.gardenerExtensionsList)) {
-    return store.dispatch('fetchGardenerExtensions')
+function ensureKubeconfigLoaded (store) {
+  if (store.isInitial) {
+    return store.fetchKubeconfig()
   }
 }

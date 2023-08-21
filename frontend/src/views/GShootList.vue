@@ -1,0 +1,812 @@
+<!--
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
+
+SPDX-License-Identifier: Apache-2.0
+ -->
+
+<template>
+  <v-container fluid>
+    <v-card class="ma-3">
+      <g-toolbar
+        :height="72"
+      >
+        <template #prepend>
+          <g-icon-base
+            width="44"
+            height="60"
+            view-box="0 0 298 403"
+            class="ml-2"
+            icon-color="toolbar-title"
+          >
+            <g-certified-kubernetes />
+          </g-icon-base>
+        </template>
+        <div class="text-h5">
+          Kubernetes Clusters
+        </div>
+        <div class="text-caption">
+          {{ headlineSubtitle }}
+        </div>
+        <template #append>
+          <v-tooltip location="bottom">
+            <template #activator="{ props }">
+              <div v-bind="props">
+                <v-badge
+                  v-if="!projectScope && isAdmin"
+                  class="mr-5"
+                  bordered
+                  color="primary-lighten-3"
+                  :content="numberOfNewItemsSinceFreeze"
+                  :model-value="numberOfNewItemsSinceFreeze > 0"
+                >
+                  <v-switch
+                    v-model="focusModeInternal"
+                    class="mr-3"
+                    density="compact"
+                    color="primary-lighten-3"
+                    hide-details
+                  >
+                    <template #label>
+                      <span class="text-subtitle-1 text-toolbar-title">Focus</span>
+                    </template>
+                  </v-switch>
+                </v-badge>
+              </div>
+            </template>
+            <span class="font-weight-bold">Focus Mode</span>
+            <ul>
+              <li>Cluster list sorting is freezed</li>
+              <li>Items in the list will still be updated</li>
+              <li>New clusters will not be added to the list until you disable focus mode</li>
+              <li>Removed items will be shown as stale (greyed out)</li>
+            </ul>
+            <template v-if="numberOfNewItemsSinceFreeze > 0">
+              <v-divider color="white" />
+              <span class="font-weight-bold">{{ numberOfNewItemsSinceFreeze }}</span>
+              new clusters were added to the list since you enabled focus mode.
+            </template>
+          </v-tooltip>
+          <v-tooltip
+            v-if="shootSearch || items.length > 3"
+            location="top"
+          >
+            <template #activator="{ props }">
+              <v-text-field
+                v-bind="props"
+                prepend-inner-icon="mdi-magnify"
+                color="primary"
+                label="Search"
+                single-line
+                hide-details
+                variant="solo"
+                flat
+                clearable
+                clear-icon="mdi-close"
+                density="compact"
+                class="g-table-search-field mr-3"
+                @update:model-value="onInputSearch"
+                @keyup.esc="shootSearch = ''"
+              />
+            </template>
+            Search terms are <span class="font-weight-bold">ANDed</span>.<br>
+            <span class="font-weight-bold">Use quotes</span> for exact words or phrases:
+            <v-chip
+              label
+              color="primary"
+              variant="flat"
+              size="small"
+              class="mr-1"
+            >
+              "my-shoot"
+            </v-chip>
+            <v-chip
+              label
+              color="primary"
+              variant="flat"
+              size="small"
+            >
+              "John Doe"
+            </v-chip>
+            <br>
+            <span class="font-weight-bold">Use minus sign</span>
+            to exclude words that you don't want:
+            <v-chip
+              label
+              color="primary"
+              variant="flat"
+              size="small"
+              class="mr-1"
+            >
+              -myproject
+            </v-chip>
+            <v-chip
+              label
+              color="primary"
+              variant="flat"
+              size="small"
+            >
+              -"Jane Doe"
+            </v-chip>
+            <br>
+          </v-tooltip>
+          <v-tooltip
+            v-if="canCreateShoots && projectScope"
+            location="top"
+          >
+            <template #activator="{ props }">
+              <v-btn
+                v-bind="props"
+                icon="mdi-plus"
+                color="toolbar-title"
+                :to="{ name: 'NewShoot', params: { namespace } }"
+              />
+            </template>
+            <span>Create Cluster</span>
+          </v-tooltip>
+          <g-table-column-selection
+            :headers="selectableHeaders"
+            :filters="selectableFilters"
+            :filter-tooltip="filterTooltip"
+            @set-selected-header="setSelectedHeader"
+            @reset="resetTableSettings"
+            @toggle-filter="toggleFilter"
+          />
+        </template>
+      </g-toolbar>
+      <v-data-table
+        v-model:page="page"
+        v-model:sort-by="sortByInternal"
+        v-model:items-per-page="itemsPerPage"
+        :headers="visibleHeaders"
+        :items="sortedAndFilteredItems"
+        hover
+        :loading="loading || !connected"
+        :items-per-page-options="itemsPerPageOptions"
+        :custom-key-sort="disableCustomKeySort(visibleHeaders)"
+        must-sort
+        class="g-table"
+      >
+        <template #progress>
+          <g-shoot-list-progress />
+        </template>
+        <template #item="{ item }">
+          <g-shoot-list-row
+            :key="item.raw.metadata.uid"
+            :shoot-item="item.raw"
+            :visible-headers="visibleHeaders"
+            @show-dialog="showDialog"
+          />
+        </template>
+        <template #bottom="{ pageCount }">
+          <g-data-table-footer
+            v-model:page="page"
+            v-model:items-per-page="itemsPerPage"
+            :items-length="sortedAndFilteredItems.length"
+            :items-per-page-options="itemsPerPageOptions"
+            :page-count="pageCount"
+          />
+        </template>
+      </v-data-table>
+      <v-dialog
+        v-model="clusterAccessDialog"
+        max-width="850"
+      >
+        <v-card>
+          <g-toolbar>
+            Cluster Access
+            <code class="text-toolbar-title">
+              {{ currentName }}
+            </code>
+            <template #append>
+              <v-btn
+                variant="text"
+                density="comfortable"
+                icon="mdi-close"
+                color="toolbar-title"
+                @click.stop="hideDialog"
+              />
+            </template>
+          </g-toolbar>
+          <g-shoot-access-card
+            ref="clusterAccess"
+            :shoot-item="shootItem"
+            :hide-terminal-shortcuts="true"
+          />
+        </v-card>
+      </v-dialog>
+    </v-card>
+  </v-container>
+</template>
+
+<script>
+import {
+  defineAsyncComponent,
+  toRaw,
+} from 'vue'
+import { useLocalStorage } from '@vueuse/core'
+import {
+  mapState,
+  mapActions,
+} from 'pinia'
+
+import { useAuthnStore } from '@/store/authn'
+import { useAuthzStore } from '@/store/authz'
+import { useShootStore } from '@/store/shoot'
+import { useSocketStore } from '@/store/socket'
+import { useProjectStore } from '@/store/project'
+import { useConfigStore } from '@/store/config'
+
+import GToolbar from '@/components/GToolbar.vue'
+import GShootListRow from '@/components/GShootListRow.vue'
+import GShootListProgress from '@/components/GShootListProgress.vue'
+import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
+import GIconBase from '@/components/icons/GIconBase.vue'
+import GCertifiedKubernetes from '@/components/icons/GCertifiedKubernetes.vue'
+import GDataTableFooter from '@/components/GDataTableFooter.vue'
+
+import { mapTableHeader } from '@/utils'
+
+import {
+  debounce,
+  filter,
+  get,
+  isEmpty,
+  join,
+  map,
+  mapKeys,
+  mapValues,
+  pick,
+  some,
+  sortBy,
+  startsWith,
+  upperCase,
+} from '@/lodash'
+
+export default {
+  components: {
+    GToolbar,
+    GShootListRow,
+    GShootListProgress,
+    GShootAccessCard: defineAsyncComponent(() => import('@/components/ShootDetails/GShootAccessCard.vue')),
+    GIconBase,
+    GCertifiedKubernetes,
+    GTableColumnSelection,
+    GDataTableFooter,
+  },
+  inject: ['logger'],
+  beforeRouteEnter (to, from, next) {
+    next(vm => {
+      vm.cachedItems = null
+      vm.updateTableSettings()
+    })
+  },
+  beforeRouteUpdate (to, from, next) {
+    this.shootSearch = null
+    this.updateTableSettings()
+    this.focusModeInternal = false
+    next()
+  },
+  beforeRouteLeave (to, from, next) {
+    this.cachedItems = this.shootList.slice(0)
+    this.shootSearch = null
+    this.focusModeInternal = false
+    next()
+  },
+  data () {
+    return {
+      shootSearch: '',
+      dialog: null,
+      itemsPerPage: useLocalStorage('projects/shoot-list/itemsPerPage', 10),
+      page: 1,
+      cachedItems: null,
+      selectedColumns: undefined,
+      itemsPerPageOptions: [
+        { value: 5, title: '5' },
+        { value: 10, title: '10' },
+        { value: 20, title: '20' },
+      ],
+    }
+  },
+  computed: {
+    ...mapState(useAuthnStore, [
+      'isAdmin',
+    ]),
+    ...mapState(useAuthzStore, [
+      'namespace',
+      'canPatchShoots',
+      'canDeleteShoots',
+      'canCreateShoots',
+      'canGetSecrets',
+    ]),
+    ...mapState(useConfigStore, {
+      accessRestrictionConfig: 'accessRestriction',
+      ticketConfig: 'ticket',
+    }),
+    ...mapState(useProjectStore, [
+      'projectName',
+      'projectFromProjectList',
+      'shootCustomFieldList',
+      'shootCustomFields',
+    ]),
+    ...mapState(useSocketStore, [
+      'connected',
+    ]),
+    ...mapState(useShootStore, [
+      'shootList',
+      'shootListFilters',
+      'loading',
+      'selectedItem',
+      'onlyShootsWithIssues',
+      'numberOfNewItemsSinceFreeze',
+      'focusMode',
+      'sortBy',
+    ]),
+    defaultSortBy () {
+      return [{ key: 'name', order: 'asc' }]
+    },
+    defaultItemsPerPage () {
+      return 10
+    },
+    clusterAccessDialog: {
+      get () {
+        return this.dialog === 'access'
+      },
+      set (value) {
+        if (!value) {
+          this.hideDialog()
+        }
+      },
+    },
+    focusModeInternal: {
+      get () {
+        return this.focusMode
+      },
+      set (value) {
+        this.setFocusMode(value)
+      },
+    },
+    sortByInternal: {
+      get () {
+        return this.sortBy
+      },
+      set (value) {
+        this.setSortBy(value)
+      },
+    },
+    currentName () {
+      return get(this.selectedItem, 'metadata.name')
+    },
+    shootItem () {
+      // property `shoot-item` of the mixin is required
+      return this.selectedItem || {}
+    },
+    currentStandardSelectedColumns () {
+      return mapTableHeader(this.standardHeaders, 'selected')
+    },
+    currentCustomSelectedColumns () {
+      return mapTableHeader(this.customHeaders, 'selected')
+    },
+    defaultStandardSelectedColumns () {
+      return mapTableHeader(this.standardHeaders, 'defaultSelected')
+    },
+    defaultCustomSelectedColumns () {
+      return mapTableHeader(this.customHeaders, 'defaultSelected')
+    },
+    standardHeaders () {
+      const isSortable = value => value && !this.focusModeInternal
+      const headers = [
+        {
+          title: 'PROJECT',
+          key: 'project',
+          sortable: isSortable(true),
+          align: 'start',
+          defaultSelected: true,
+          hidden: !!this.projectScope,
+          stalePointerEvents: true,
+        },
+        {
+          title: 'NAME',
+          key: 'name',
+          sortable: isSortable(true),
+          align: 'start',
+          defaultSelected: true,
+          hidden: false,
+          stalePointerEvents: true,
+        },
+        {
+          title: 'INFRASTRUCTURE',
+          key: 'infrastructure',
+          sortable: isSortable(true),
+          align: 'start',
+          defaultSelected: true,
+          hidden: false,
+        },
+        {
+          title: 'SEED',
+          key: 'seed',
+          sortable: isSortable(true),
+          align: 'start',
+          defaultSelected: false,
+          hidden: false,
+        },
+        {
+          title: 'TECHNICAL ID',
+          key: 'technicalId',
+          sortable: isSortable(true),
+          align: 'start',
+          defaultSelected: false,
+          hidden: !this.isAdmin,
+        },
+        {
+          title: 'CREATED BY',
+          key: 'createdBy',
+          sortable: isSortable(true),
+          align: 'start',
+          defaultSelected: false,
+          hidden: false,
+        },
+        {
+          title: 'CREATED AT',
+          key: 'createdAt',
+          sortable: isSortable(true),
+          align: 'start',
+          defaultSelected: false,
+          hidden: false,
+        },
+        {
+          title: 'PURPOSE',
+          key: 'purpose',
+          sortable: isSortable(true),
+          align: 'center',
+          defaultSelected: true,
+          hidden: false,
+        },
+        {
+          title: 'STATUS',
+          key: 'lastOperation',
+          sortable: isSortable(true),
+          align: 'center',
+          cellClass: 'pl-4',
+          defaultSelected: true,
+          hidden: false,
+          stalePointerEvents: true,
+        },
+        {
+          title: 'VERSION',
+          key: 'k8sVersion',
+          sortable: isSortable(true),
+          align: 'center',
+          defaultSelected: true,
+          hidden: false,
+        },
+        {
+          title: 'READINESS',
+          key: 'readiness',
+          sortable: isSortable(true),
+          align: 'start',
+          defaultSelected: true,
+          hidden: false,
+          stalePointerEvents: true,
+        },
+        {
+          title: 'ISSUE SINCE',
+          key: 'issueSince',
+          sortable: isSortable(true),
+          align: 'start',
+          defaultSelected: true,
+          hidden: this.projectScope || !this.isAdmin,
+        },
+        {
+          title: 'HIGH AVAILABILITY',
+          key: 'controlPlaneHighAvailability',
+          sortable: true,
+          align: 'start',
+          defaultSelected: false,
+          hidden: false,
+        },
+        {
+          title: 'ACCESS RESTRICTIONS',
+          key: 'accessRestrictions',
+          sortable: false,
+          align: 'start',
+          defaultSelected: false,
+          hidden: !this.accessRestrictionConfig || !this.isAdmin,
+        },
+        {
+          title: 'TICKET',
+          key: 'ticket',
+          sortable: isSortable(true),
+          align: 'start',
+          defaultSelected: false,
+          hidden: !this.gitHubRepoUrl || !this.isAdmin,
+        },
+        {
+          title: 'TICKET LABELS',
+          key: 'ticketLabels',
+          sortable: false,
+          align: 'start',
+          defaultSelected: true,
+          hidden: !this.gitHubRepoUrl || !this.isAdmin,
+        },
+        {
+          title: 'ACTIONS',
+          key: 'actions',
+          sortable: false,
+          align: 'end',
+          defaultSelected: true,
+          hidden: !(this.canDeleteShoots || this.canGetSecrets),
+        },
+      ]
+      return map(headers, (header, index) => ({
+        ...header,
+        class: 'nowrap',
+        weight: (index + 1) * 100,
+        selected: get(this.selectedColumns, header.key, header.defaultSelected),
+      }))
+    },
+    customHeaders () {
+      const isSortable = value => value && !this.focusModeInternal
+      const customHeaders = filter(this.shootCustomFieldList, ['showColumn', true])
+
+      return map(customHeaders, ({
+        align = 'left',
+        name,
+        key,
+        path,
+        columnSelectedByDefault: defaultSelected,
+        tooltip,
+        defaultValue,
+        sortable,
+        weight,
+      }, index) => {
+        return {
+          customField: true,
+          title: upperCase(name),
+          class: 'nowrap',
+          key,
+          sortable: isSortable(sortable),
+          align,
+          selected: get(this.selectedColumns, key, defaultSelected),
+          defaultSelected,
+          hidden: false,
+          path,
+          tooltip,
+          defaultValue,
+          weight: weight || index,
+        }
+      })
+    },
+    allHeaders () {
+      return sortBy([
+        ...this.standardHeaders,
+        ...this.customHeaders,
+      ], ['weight', 'text'])
+    },
+    selectableHeaders () {
+      return filter(this.allHeaders, ['hidden', false])
+    },
+    visibleHeaders () {
+      return filter(this.selectableHeaders, ['selected', true])
+    },
+    allFilters () {
+      return [
+        {
+          text: 'Show only clusters with issues',
+          value: 'onlyShootsWithIssues',
+          selected: this.onlyShootsWithIssues,
+          hidden: this.projectScope,
+          disabled: this.changeFiltersDisabled,
+        },
+        {
+          text: 'Hide progressing clusters',
+          value: 'progressing',
+          selected: this.isFilterActive('progressing'),
+          hidden: this.projectScope || !this.isAdmin || this.showAllShoots,
+          disabled: this.changeFiltersDisabled,
+        },
+        {
+          text: 'Hide no operator action required issues',
+          value: 'noOperatorAction',
+          selected: this.isFilterActive('noOperatorAction'),
+          hidden: this.projectScope || !this.isAdmin || this.showAllShoots,
+          helpTooltip: [
+            'Hide clusters that do not require action by an operator',
+            '- Clusters with user issues',
+            '- Clusters with temporary issues that will be retried automatically',
+            '- Clusters with annotation dashboard.gardener.cloud/ignore-issues',
+          ],
+          disabled: this.changeFiltersDisabled,
+        },
+        {
+          text: 'Hide clusters with deactivated reconciliation',
+          value: 'deactivatedReconciliation',
+          selected: this.isFilterActive('deactivatedReconciliation'),
+          hidden: this.projectScope || !this.isAdmin || this.showAllShoots,
+          disabled: this.changeFiltersDisabled,
+        },
+        {
+          text: 'Hide clusters with configured ticket labels',
+          value: 'hideTicketsWithLabel',
+          selected: this.isFilterActive('hideTicketsWithLabel'),
+          hidden: this.projectScope || !this.isAdmin || !this.gitHubRepoUrl || !this.hideClustersWithLabels.length || this.showAllShoots,
+          helpTooltip: this.hideTicketsWithLabelTooltip,
+          disabled: this.changeFiltersDisabled,
+        },
+      ]
+    },
+    selectableFilters () {
+      return filter(this.allFilters, ['hidden', false])
+    },
+    hideTicketsWithLabelTooltip () {
+      const labels = map(this.hideClustersWithLabels, label => (`- ${label}`))
+      return ['Configured Labels', ...labels]
+    },
+    projectScope () {
+      return this.namespace !== '_all'
+    },
+    showOnlyShootsWithIssues: {
+      get () {
+        return this.onlyShootsWithIssues
+      },
+      set (value) {
+        this.toggleFilter('onlyShootsWithIssues')
+      },
+    },
+    items () {
+      return this.cachedItems || this.shootList
+    },
+    changeFiltersDisabled () {
+      return this.focusModeInternal
+    },
+    showAllShoots () {
+      return !this.showOnlyShootsWithIssues
+    },
+    filterTooltip () {
+      return this.focusModeInternal
+        ? 'Filters cannot be changed when focus mode is active'
+        : ''
+    },
+    headlineSubtitle () {
+      const subtitle = []
+      if (!this.projectScope && this.showOnlyShootsWithIssues) {
+        subtitle.push('Hide: Healthy Clusters')
+        if (this.isFilterActive('progressing')) {
+          subtitle.push('Progressing Clusters')
+        }
+        if (this.isFilterActive('noOperatorAction')) {
+          subtitle.push('User Errors')
+        }
+        if (this.isFilterActive('deactivatedReconciliation')) {
+          subtitle.push('Deactivated Reconciliation')
+        }
+        if (this.isFilterActive('hideTicketsWithLabel')) {
+          subtitle.push('Tickets with Ignore Labels')
+        }
+      }
+      return join(subtitle, ', ')
+    },
+    gitHubRepoUrl () {
+      return get(this.ticketConfig, 'gitHubRepoUrl')
+    },
+    hideClustersWithLabels () {
+      return get(this.ticketConfig, 'hideClustersWithLabels', [])
+    },
+    sortedAndFilteredItems () {
+      const items = this.sortItems(this.items, this.sortByInternal)
+      return filter(items, item => this.searchItems(this.shootSearch, toRaw(item)))
+    },
+  },
+  watch: {
+    sortBy (sortBy) {
+      if (some(sortBy, value => startsWith(value.key, 'Z_'))) {
+        useLocalStorage(`project/${this.projectName}/shoot-list/sortBy`, []).value = sortBy
+      } else {
+        useLocalStorage(`project/${this.projectName}/shoot-list/sortBy`, []).value = null // clear project specific options
+        useLocalStorage('projects/shoot-list/sortBy', []).value = sortBy
+      }
+    },
+  },
+  methods: {
+    ...mapActions(useShootStore, [
+      'setSelection',
+      'setShootListFilter',
+      'subscribeShoots',
+      'sortItems',
+      'searchItems',
+      'setFocusMode',
+      'setSortBy',
+    ]),
+    async showDialog (args) {
+      switch (args.action) {
+        case 'access':
+          try {
+            await this.setSelection(args.shootItem.metadata)
+            this.dialog = args.action
+          } catch (err) {
+            this.logger('Failed to select shoot: %s', err.message)
+          }
+      }
+    },
+    hideDialog () {
+      this.dialog = null
+      this.setSelection(null)
+    },
+    setSelectedHeader (header) {
+      this.selectedColumns[header.key] = !header.selected
+      this.saveSelectedColumns()
+    },
+    saveSelectedColumns () {
+      useLocalStorage('projects/shoot-list/selected-columns', {}).value = this.currentStandardSelectedColumns
+
+      const projectSpecificCustomSelectedColumns = useLocalStorage(`project/${this.projectName}/shoot-list/selected-columns`, {})
+      if (isEmpty(this.currentCustomSelectedColumns)) {
+        projectSpecificCustomSelectedColumns.value = null
+      } else {
+        projectSpecificCustomSelectedColumns.value = this.currentCustomSelectedColumns
+      }
+    },
+    resetTableSettings () {
+      this.selectedColumns = {
+        ...this.defaultStandardSelectedColumns,
+        ...this.defaultCustomSelectedColumns,
+      }
+      this.saveSelectedColumns()
+      this.itemsPerPage = this.defaultItemsPerPage
+      this.sortByInternal = this.defaultSortBy
+    },
+    updateTableSettings () {
+      const selectedColumns = useLocalStorage('projects/shoot-list/selected-columns', {})
+      const projectSpecificCustomSelectedColumns = useLocalStorage(`project/${this.projectName}/shoot-list/selected-columns`, {})
+      this.selectedColumns = {
+        ...selectedColumns.value,
+        ...projectSpecificCustomSelectedColumns.value,
+      }
+
+      const projectSpecificSortBy = useLocalStorage(`project/${this.projectName}/shoot-list/sortBy`, [])
+      if (!isEmpty(projectSpecificSortBy.value)) {
+        this.sortByInternal = projectSpecificSortBy.value
+        return
+      }
+
+      const sortBy = useLocalStorage('projects/shoot-list/sortBy', [])
+      if (!isEmpty(sortBy.value)) {
+        this.sortByInternal = sortBy.value
+        return
+      }
+
+      this.sortByInternal = this.defaultSortBy
+    },
+    toggleFilter ({ value }) {
+      const key = value
+      this.setShootListFilter({
+        filter: key,
+        value: !this.shootListFilters[key],
+      })
+
+      useLocalStorage('project/_all/shoot-list/filter', []).value = pick(this.shootListFilters, [
+        'onlyShootsWithIssues',
+        'progressing',
+        'noOperatorAction',
+        'deactivatedReconciliation',
+        'hideTicketsWithLabel',
+      ])
+
+      if (key === 'onlyShootsWithIssues') {
+        this.subscribeShoots()
+      }
+    },
+    isFilterActive (key) {
+      const filters = this.shootListFilters
+      return get(filters, key, false)
+    },
+    onInputSearch: debounce(function (value) {
+      this.shootSearch = value
+    }, 500),
+    disableCustomKeySort (tableHeaders) {
+      const sortableTableHeaders = filter(tableHeaders, ['sortable', true])
+      const tableKeys = mapKeys(sortableTableHeaders, ({ key }) => key)
+      return mapValues(tableKeys, () => () => 0)
+    },
+  },
+}
+</script>

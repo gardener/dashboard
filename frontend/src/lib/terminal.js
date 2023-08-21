@@ -1,29 +1,37 @@
-// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+//
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
+//
 
-import assign from 'lodash/assign'
-import find from 'lodash/find'
-import get from 'lodash/get'
-import head from 'lodash/head'
-import merge from 'lodash/merge'
-import intersection from 'lodash/intersection'
-import keys from 'lodash/keys'
-import includes from 'lodash/includes'
-import pick from 'lodash/pick'
-import pTimeout from 'p-timeout'
+import { useLogger } from '@/composables/useLogger'
+import { useApi } from '@/composables/useApi'
+
+import { encodeBase64Url } from '@/utils'
+import pTimeout from '@/utils/p-timeout'
 
 import {
-  createTerminal,
-  fetchTerminalSession,
-  deleteTerminal,
-  heartbeat
-} from '@/utils/api'
-import { K8sAttachAddon, WsReadyStateEnum } from '@/lib/xterm-addon-k8s-attach'
-import { encodeBase64Url } from '@/utils'
+  K8sAttachAddon,
+  WsReadyStateEnum,
+} from './xterm-addon-k8s-attach'
+
+import {
+  assign,
+  find,
+  get,
+  head,
+  merge,
+  intersection,
+  keys,
+  includes,
+  pick,
+} from '@/lodash'
+
+const api = useApi()
+const logger = useLogger()
 
 const WsCloseEventEnum = {
-  NORMAL_CLOUSURE: 1000
+  NORMAL_CLOUSURE: 1000,
 }
 
 const RETRY_TIMEOUT_SECONDS = 3
@@ -49,7 +57,7 @@ export class TerminalSession {
     this.hostNetwork = undefined
     this.container = {
       privileged: undefined,
-      image: undefined
+      image: undefined,
     }
     this.detailedConnectionStateText = undefined
   }
@@ -79,13 +87,13 @@ export class TerminalSession {
       'command',
       'args',
       'resources',
-      'privileged'
+      'privileged',
     ])
 
     let selectedConfigContainer = get(this.vm.selectedConfig, 'container')
     selectedConfigContainer = pick(selectedConfigContainer, [
       'image',
-      'privileged'
+      'privileged',
     ])
 
     const hostConfig = pick(this.vm.data, ['node', 'hostPID', 'hostNetwork', 'preferredHost'])
@@ -94,17 +102,17 @@ export class TerminalSession {
     body.identifier = this.vm.uuid
     body.container = merge(container, selectedConfigContainer)
 
-    const { data } = await createTerminal({ ...this.terminalCoordinates, body })
+    const { data } = await api.createTerminal({ ...this.terminalCoordinates, body })
     return data
   }
 
   async fetchTerminalSession () {
-    const { data } = await fetchTerminalSession({ ...this.terminalCoordinates })
+    const { data } = await api.fetchTerminalSession({ ...this.terminalCoordinates })
     return data
   }
 
   async deleteTerminal () {
-    const { data } = await deleteTerminal({ ...this.terminalCoordinates })
+    const { data } = await api.deleteTerminal({ ...this.terminalCoordinates })
 
     this.metadata = undefined
 
@@ -112,7 +120,7 @@ export class TerminalSession {
   }
 
   heartbeat () {
-    return heartbeat({ ...this.terminalCoordinates })
+    return api.heartbeat({ ...this.terminalCoordinates })
   }
 
   get isCreated () {
@@ -144,7 +152,7 @@ export class TerminalSession {
       if (this.cancelConnect) {
         return
       }
-      console.error('failed to wait until pod is running', err)
+      logger.error('failed to wait until pod is running', err)
       this.vm.showSnackbarTop('Could not connect to terminal', 'The detailed connection error can be found in the JavaScript console of your browser')
       this.setDisconnectedState()
       return
@@ -153,7 +161,10 @@ export class TerminalSession {
     // See https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/util/remotecommand/constants.go
     const protocols = addBearerToken(['v4.channel.k8s.io'], this.hostCluster.token)
     const ws = new WebSocket(attachUri(this.hostCluster), protocols)
-    const attachAddon = new K8sAttachAddon(ws, { bidirectional: true })
+    const attachAddon = new K8sAttachAddon(ws, {
+      logger,
+      bidirectional: true,
+    })
     this.vm.term.loadAddon(attachAddon)
     let reconnectTimeoutId
     let heartbeatIntervalId
@@ -173,7 +184,7 @@ export class TerminalSession {
         try {
           await this.heartbeat()
         } catch (err) {
-          console.error('heartbeat failed:', err)
+          logger.error('heartbeat failed:', err)
         }
       }, this.vm.heartbeatIntervalSeconds * 1000)
     }
@@ -202,13 +213,11 @@ export class TerminalSession {
       if (wasConnected) {
         // do not start spinner as this would clear the console
         timeoutSeconds = 0
-        // eslint-disable-next-line no-console
-        console.log(`Websocket connection lost (code ${error.code}). Trying to reconnect..`)
+        logger.info(`Websocket connection lost (code ${error.code}). Trying to reconnect..`)
       } else { // Try again later
         timeoutSeconds = RETRY_TIMEOUT_SECONDS
         this.vm.spinner.start()
-        // eslint-disable-next-line no-console
-        console.log(`Pod not yet ready. Reconnecting in ${timeoutSeconds} seconds..`)
+        logger.info(`Pod not yet ready. Reconnecting in ${timeoutSeconds} seconds..`)
       }
       reconnectTimeoutId = setTimeout(() => this.attachTerminal(), timeoutSeconds * 1000)
     }
@@ -262,7 +271,7 @@ Object.assign(TerminalSession, {
   CREATING: 1,
   FETCHING: 2,
   CONNECTING: 3,
-  CONNECTED: 4
+  CONNECTED: 4,
 })
 
 function addBearerToken (protocols, bearer) {
@@ -336,7 +345,7 @@ async function waitForPodRunning (ws, containerName, handleEvent, timeoutSeconds
       try {
         event = JSON.parse(message)
       } catch (error) {
-        console.error('could not parse message')
+        logger.error('could not parse message')
         return
       }
       const pod = event.object
@@ -344,7 +353,7 @@ async function waitForPodRunning (ws, containerName, handleEvent, timeoutSeconds
         try {
           handleEvent(event)
         } catch (error) {
-          console.error('error during handleEvent', error.message)
+          logger.error('error during handleEvent', error.message)
         }
       }
 
@@ -435,7 +444,7 @@ export class Spinner {
   _eraseLine () {
     this.#term.write([
       CSI + '2K', // Erase complete line
-      CSI + 'H' // Set cursor to home position
+      CSI + 'H', // Set cursor to home position
     ].join(''))
   }
 

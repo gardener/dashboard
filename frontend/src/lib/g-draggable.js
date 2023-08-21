@@ -1,10 +1,14 @@
-// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+//
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
+//
 
-import get from 'lodash/get'
-import set from 'lodash/set'
-import forEach from 'lodash/forEach'
+import {
+  get,
+  set,
+  forEach,
+} from '@/lodash'
 
 export const ATTRIBUTE_DRAG_AND_DROP_ID = 'data-g-id'
 
@@ -14,7 +18,7 @@ const DragAndDropEventsEnum = {
   DRAG_ENTER: 'drag-enter',
   DRAG_OVER: 'drag-over',
   DRAG_LEAVE: 'drag-leave',
-  DROPPED: 'dropped'
+  DROPPED: 'dropped',
 }
 
 const initialDragState = {
@@ -32,7 +36,7 @@ const initialDragState = {
   anyDroppableBelow: undefined,
   sourceDragAndDropId: undefined,
   animation: undefined,
-  disposables: []
+  disposables: [],
 }
 const dragState = {}
 Object.assign(dragState, initialDragState)
@@ -122,15 +126,14 @@ function keydown (event, binding) {
 /* Utility functions */
 
 function cancelDrag (binding) {
-  const event = createMouseEvent('mouseup', -1, -1)
+  const event = new MouseEvent('mouseup', {
+    view: window,
+    bubbles: true,
+    cancelable: true,
+    clientX: -1,
+    clientY: -1,
+  })
   mouseup(event, binding)
-}
-
-function createMouseEvent (type, clientX, clientY) {
-  const event = document.createEvent('MouseEvent')
-  event.initMouseEvent(type, true, true, window, 0, 0, 0,
-    clientX, clientY, false, false, false, false, 0, null)
-  return event
 }
 
 function dispatchDragLeaveEventToListeners ({ mouseOverId, mouseOverDropzoneId, listeners, source, animation }, binding) {
@@ -159,8 +162,8 @@ function getCustomEventInit ({ mouseOverId, mouseOverDropzoneId, source, binding
       mouseOverDropzoneId,
       sourceElementDropzoneId: source.getAttribute(ATTRIBUTE_DRAG_AND_DROP_ID),
       arg: binding.arg,
-      modifiers: binding.modifiers
-    }
+      modifiers: binding.modifiers,
+    },
   }
 }
 
@@ -201,7 +204,7 @@ function dispatchEvent (binding, dragState, event, eventType) {
     mouseOverId,
     mouseOverDropzoneId,
     source: dragState.source,
-    binding
+    binding,
   })
 
   const mouseOverOtherDropzone = !!mouseOverDropzoneId && mouseOverDropzoneId !== dragState.sourceDragAndDropId
@@ -221,11 +224,11 @@ function dispatchEvent (binding, dragState, event, eventType) {
     }
     if (dragState.clone.animate) { // animate not supported by safari
       dragState.animation = dragState.clone.animate({
-        transform: ['scale(1)', 'scale(0.3)']
+        transform: ['scale(1)', 'scale(0.3)'],
       }, {
         easing: 'ease-in-out',
         fill: 'forwards',
-        duration: 150
+        duration: 150,
       })
     }
   }
@@ -262,7 +265,7 @@ function addElementEventListener (el, type, handler, useCapture) {
         return
       }
       el.removeEventListener(type, handler, useCapture)
-    }
+    },
   }
 }
 
@@ -277,10 +280,10 @@ function stopInputEvents (event) {
 
 /* Draggable Directive https://vuejs.org/v2/guide/custom-directive.html */
 export const gDraggable = {
-  bind (el, binding, vnode) {
-    gDraggable.update(el, binding, vnode)
+  beforeMount (el, binding, vnode) {
+    gDraggable.updated(el, binding, vnode)
   },
-  update (el, binding, vnode) {
+  updated (el, binding) {
     const handler = get(binding, 'value.handle.$el') || get(binding, 'value.handle') || el
     if (!handler.getAttribute('draggable')) {
       el.removeEventListener('mousedown', el._listener)
@@ -291,7 +294,7 @@ export const gDraggable = {
       handler.setAttribute('draggable', 'true')
     }
   },
-  unbind () {
+  unmounted () {
     dispose()
-  }
+  },
 }

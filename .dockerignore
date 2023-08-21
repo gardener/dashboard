@@ -74,16 +74,20 @@
 !backend/__mocks__
 
 # include workspace frontend
-!frontend/package.json
 !frontend/.browserslistrc
-!frontend/.editorconfig
 !frontend/.env*
-!frontend/.eslint*
-!frontend/jest.setup.js
-!frontend/*.config.js
+!frontend/.eslintrc.js
+!frontend/.gitignore
+!frontend/jsconfig.json
+!frontend/package.json
+!frontend/vite.config.js
+!frontend/vitest.setup.js
+!frontend/index.html
 !frontend/public
 !frontend/src
-!frontend/tests
+!frontend/__tests__
+!frontend/__fixtures__
+!frontend/__mocks__
 
 # include workspace charts
 !charts/package.json

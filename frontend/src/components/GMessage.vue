@@ -1,51 +1,70 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-expand-transition appear>
-    <v-alert :color="color" :tile="tile" :dark="dark" dismissible v-model="alertVisible">
-      <div class="text-subtitle-1">
-        {{message}}
-        <v-btn dark outlined small v-if="!!detailedMessage" @click="detailedMessageVisible = !detailedMessageVisible">
-          Details
-        </v-btn>
-      </div>
-      <transition name="fade">
-        <div v-if="!!detailedMessageVisible">
-          <code>{{detailedMessage}}</code>
+  <v-theme-provider :theme="dark ? 'dark' : 'light'">
+    <v-expand-transition appear>
+      <v-alert
+        v-model="alertVisible"
+        :color="color"
+        :rounded="!tile"
+        closable
+      >
+        <div class="text-subtitle-1">
+          {{ message }}
+          <v-btn
+            v-if="!!detailedMessage"
+            variant="outlined"
+            size="small"
+            @click="detailedMessageVisible = !detailedMessageVisible"
+          >
+            Details
+          </v-btn>
         </div>
-      </transition>
-    </v-alert>
-  </v-expand-transition>
+        <transition name="fade">
+          <div v-if="!!detailedMessageVisible">
+            <code>{{ detailedMessage }}</code>
+          </div>
+        </transition>
+      </v-alert>
+    </v-expand-transition>
+  </v-theme-provider>
 </template>
 
 <script>
 export default {
   props: {
     message: {
-      type: String
+      type: String,
+      default: '',
     },
     detailedMessage: {
-      type: String
+      type: String,
+      default: '',
     },
     color: {
       type: String,
-      required: true
+      required: true,
     },
     tile: {
-      type: Boolean
+      type: Boolean,
+      default: false,
     },
     dark: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
+  emits: [
+    'update:message',
+    'update:detailedMessage',
+  ],
   data () {
     return {
-      detailedMessageVisible: false
+      detailedMessageVisible: false,
     }
   },
   computed: {
@@ -56,11 +75,11 @@ export default {
       set (value) {
         if (!value) {
           this.$emit('update:message', undefined)
-          this.$emit('update:detailed-message', undefined)
+          this.$emit('update:detailedMessage', undefined)
         }
-      }
-    }
-  }
+      },
+    },
+  },
 }
 </script>
 
