@@ -8,9 +8,12 @@ Learn more about [kubeconfig](https://kubernetes.io/docs/concepts/configuration/
 - You have created a cluster and its status is operational.
 
 On this page:
-- [Downloading kubeconfig for a cluster](#downloading-kubeconfig-for-a-cluster)
-- [Connecting to the cluster](#connecting-to-the-cluster)
-- [Exporting KUBECONFIG environment variable](#exporting-kubeconfig-environment-variable)
+- [Connect kubectl](#connect-kubectl)
+    - [Prerequisites](#prerequisites)
+    - [Downloading kubeconfig for a cluster](#downloading-kubeconfig-for-a-cluster)
+    - [Connecting to the cluster](#connecting-to-the-cluster)
+    - [Exporting KUBECONFIG environment variable](#exporting-kubeconfig-environment-variable)
+  - [What's next?](#whats-next)
 
 <br/>
 

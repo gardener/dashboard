@@ -5,10 +5,6 @@
 * [Dashboard Architecture](./architecture/README.md)
 * [Gardener landing page `gardener.cloud`](https://gardener.cloud/)
 
-## Concepts
-
-* [Webterminals](concepts/webterminals.md)
-
 ## Usage
 
 * [Working with Projects](usage/working-with-projects.md)
@@ -19,13 +15,13 @@
 * [Connect kubectl](usage/connect-kubectl.md)
 * [Custom Shoot Fields](usage/custom-fields.md)
 
+## Operations
+
+* [Configure Access Restrictions](operations/access-restrictions.md)
+* [Theming](operations/theming.md)
+* [Webterminals](operations/webterminals.md)
+
 ## Development
 
 * [Setting up a local development environment](development/local-setup.md)
 * [Testing](development/testing.md)
-
-## Deployment
-
-### Configuration
-* [Configure Access Restrictions](deployment/access-restrictions.md)
-* [Theming](deployment/theming.md)
