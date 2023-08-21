@@ -51,7 +51,10 @@ SPDX-License-Identifier: Apache-2.0
           <v-container class="pa-2">
             <v-row dense>
               <v-col cols="6">
-                <v-card outlined>
+                <v-card
+                  variant="outlined"
+                  class="border"
+                >
                   <v-toolbar
                     height="28"
                     class="text-medium-emphasis"
@@ -125,7 +128,7 @@ SPDX-License-Identifier: Apache-2.0
                 </v-card>
                 <v-card
                   variant="outlined"
-                  class="mt-2"
+                  class="border mt-2"
                 >
                   <v-toolbar
                     height="28"
@@ -168,7 +171,10 @@ SPDX-License-Identifier: Apache-2.0
                 </v-card>
               </v-col>
               <v-col cols="6">
-                <v-card outlined>
+                <v-card
+                  variant="outlined"
+                  class="border"
+                >
                   <v-toolbar
                     height="28"
                     class="text-medium-emphasis"
@@ -228,7 +234,7 @@ SPDX-License-Identifier: Apache-2.0
                 </v-card>
                 <v-card
                   variant="outlined"
-                  class="mt-2"
+                  class="border mt-2"
                 >
                   <v-toolbar
                     height="28"
@@ -277,7 +283,7 @@ SPDX-License-Identifier: Apache-2.0
                 </v-card>
                 <v-card
                   variant="outlined"
-                  class="mt-2"
+                  class="border mt-2"
                 >
                   <v-toolbar
                     height="28"
@@ -452,3 +458,9 @@ export default {
   },
 }
 </script>
+
+<style>
+  .border {
+    border-color: rgba(var(--v-border-color), var(--v-border-opacity)) !important;
+  }
+</style>
