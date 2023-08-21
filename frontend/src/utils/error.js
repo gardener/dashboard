@@ -1,12 +1,12 @@
 //
-// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 
 'use strict'
 
-import get from 'lodash/get'
+import { get } from '@/lodash'
 
 export function isConflict (error) {
   return hasStatusCode(409, error)
@@ -25,7 +25,7 @@ function hasStatusCode (statusCode, err) {
 }
 
 export function errorDetailsFromError (err) {
-  const errorCode = get(err, 'response.data.error.code', get(err, 'response.status'))
+  const errorCode = get(err, 'response.data.code', get(err, 'response.status'))
   const detailedMessage = get(err, 'response.data.message', 'Request failed with code: ' + errorCode)
 
   return { errorCode, detailedMessage }

@@ -33,7 +33,7 @@
     "eslint-plugin-promise": "^6.1.1",
     "jest": "^27.5.1",
     "js-yaml": "^4.1.0",
-    "lodash": "4.17.21"
+    "lodash": "^4.17.21"
   },
   "eslintConfig": {
     "env": {
@@ -62,8 +62,8 @@
       "<rootDir>/jest.setup.js"
     ]
   },
-  "packageManager": "yarn@3.2.1",
+  "packageManager": "yarn@3.6.1",
   "engines": {
-    "node": "^18.4.0"
+    "node": "^20.5.0"
   }
 }

@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -242,6 +242,56 @@ describe('gardener-dashboard', function () {
         expect(documents).toHaveLength(1)
         const [deployment] = documents
         expect(deployment.spec.template.spec.serviceAccountName).toEqual('default')
+      })
+    })
+
+    describe('when github is configured', function () {
+      describe('token authentication', function () {
+        it('should render GITHUB environment variable', async function () {
+          const values = {
+            global: {
+              dashboard: {
+                gitHub: {
+                  authentication: {
+                    token: 'token'
+                  }
+                }
+              }
+            }
+          }
+          const documents = await renderTemplates(templates, values)
+          expect(documents).toHaveLength(1)
+          const [deployment] = documents
+          const dashboardContainer = deployment.spec.template.spec.containers[0]
+          expect(dashboardContainer.name).toEqual('gardener-dashboard')
+          expect(dashboardContainer.env).toMatchSnapshot()
+        })
+      })
+    })
+
+    describe('github app authentication', function () {
+      it('should render GITHUB environment variables', async function () {
+        const values = {
+          global: {
+            dashboard: {
+              gitHub: {
+                authentication: {
+                  appId: 1,
+                  clientId: 'lv1.12ab',
+                  clientSecret: '12abcd',
+                  installationId: 123,
+                  privateKey: 'key'
+                }
+              }
+            }
+          }
+        }
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [deployment] = documents
+        const dashboardContainer = deployment.spec.template.spec.containers[0]
+        expect(dashboardContainer.name).toEqual('gardener-dashboard')
+        expect(dashboardContainer.env).toMatchSnapshot()
       })
     })
   })

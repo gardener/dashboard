@@ -30,7 +30,7 @@
     "delay": "^4.4.1",
     "http-errors": "^2.0.0",
     "jsonwebtoken": "^9.0.0",
-    "lodash": "4.17.21",
+    "lodash": "^4.17.21",
     "mixwith": "^0.1.1",
     "uuid": "^8.3.2"
   },
@@ -89,8 +89,8 @@
       "<rootDir>/jest.setup.js"
     ]
   },
-  "packageManager": "yarn@3.2.1",
+  "packageManager": "yarn@3.6.1",
   "engines": {
-    "node": "^18.4.0"
+    "node": "^20.5.0"
   }
 }

@@ -6,13 +6,13 @@
 
 'use strict'
 
-const { createLightship } = require('lightship')
 const { dashboardClient, createDashboardClient } = require('@gardener-dashboard/kube-client')
 const createApp = require('./lib/app')
 const cache = require('./lib/cache')
 const { Bootstrapper } = require('./lib/terminal/bootstrap')
 
 async function main () {
+  const { createLightship } = await import('lightship')
   const lightship = await createLightship({
     detectKubernetes: false
   })

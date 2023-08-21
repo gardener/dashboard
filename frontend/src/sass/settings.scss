@@ -1,0 +1,19 @@
+/*
+ *  SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
+ *
+ *  SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
+ * Configures Vuetify overwrites. Also see vite.config.js where this
+ * file is referenced in the vuetify plugin config.
+ * https: //vuetifyjs.com/en/features/sass-variables/#usage-in-templates
+ */
+
+@forward 'vuetify/settings' with (
+  $color-pack: true !default,
+  $utilities: false !default,
+  $alert-padding: 8px 4px 8px 8px,
+);
+
+@forward './variables.scss';

@@ -158,6 +158,12 @@ data:
         target: {{ .target }}{{- end }}
       {{- end }}
       {{- end }}
+      {{- if .Values.global.dashboard.frontendConfig.grantTypes }}
+      grantTypes:
+      {{- range .Values.global.dashboard.frontendConfig.grantTypes }}
+      - {{ . }}
+      {{- end }}
+      {{- end }}
       {{- if .Values.global.dashboard.frontendConfig.externalTools }}
       externalTools:
       {{- range .Values.global.dashboard.frontendConfig.externalTools }}

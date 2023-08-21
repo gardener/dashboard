@@ -1,9 +1,9 @@
-# SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+# SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 #
 # SPDX-License-Identifier: Apache-2.0
 
 ############# builder #############
-FROM node:18-alpine3.17 as builder
+FROM node:20-alpine3.18 as builder
 
 WORKDIR /volume
 
@@ -88,7 +88,7 @@ FROM node-scratch as dashboard-terminal-bootstrapper
 
 COPY --from=dashboard-terminal-bootstrapper-builder /app/dist .
 
-ENTRYPOINT [ "tini", "--", "node", "--require=/app/.pnp.cjs"]
+ENTRYPOINT [ "tini", "--", "node", "--require=/app/.pnp.cjs", "--loader=/app/.pnp.loader.mjs"]
 CMD ["main.js"]
 
 ############# dashboard-builder #############
@@ -120,5 +120,5 @@ FROM node-scratch as dashboard
 
 COPY --from=dashboard-builder /app/dist .
 
-ENTRYPOINT [ "tini", "--", "node", "--require=/app/.pnp.cjs"]
+ENTRYPOINT [ "tini", "--", "node", "--require=/app/.pnp.cjs", "--loader=/app/.pnp.loader.mjs"]
 CMD ["server.js"]

@@ -1,25 +1,27 @@
 //
-// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import get from 'lodash/get'
-import filter from 'lodash/filter'
-import find from 'lodash/find'
-import map from 'lodash/map'
-import flatMap from 'lodash/flatMap'
-import head from 'lodash/head'
-import compact from 'lodash/compact'
-
 import { shootItem } from '@/mixins/shootItem'
+
+import {
+  get,
+  filter,
+  find,
+  map,
+  flatMap,
+  head,
+  compact,
+} from '@/lodash'
 
 const rotationTypes = [
   {
     type: 'kubeconfig',
     hasRotationStatus: true,
     startOperation: 'rotate-kubeconfig-credentials',
-    title: 'Kubeconfig'
+    title: 'Kubeconfig',
   },
   {
     type: 'certificateAuthorities',
@@ -27,19 +29,19 @@ const rotationTypes = [
     startOperation: 'rotate-ca-start',
     completionOperation: 'rotate-ca-complete',
     twoStep: true,
-    title: 'Certificate Authorities'
+    title: 'Certificate Authorities',
   },
   {
     type: 'observability',
     hasRotationStatus: true,
     startOperation: 'rotate-observability-credentials',
-    title: 'Observability Passwords'
+    title: 'Observability Passwords',
   },
   {
     type: 'sshKeypair',
     hasRotationStatus: true,
     startOperation: 'rotate-ssh-keypair',
-    title: 'SSH Key Pair for Worker Nodes'
+    title: 'SSH Key Pair for Worker Nodes',
   },
   {
     type: 'etcdEncryptionKey',
@@ -47,7 +49,7 @@ const rotationTypes = [
     startOperation: 'rotate-etcd-encryption-key-start',
     completionOperation: 'rotate-etcd-encryption-key-complete',
     twoStep: true,
-    title: 'ETCD Encryption Key'
+    title: 'ETCD Encryption Key',
   },
   {
     type: 'serviceAccountKey',
@@ -55,19 +57,19 @@ const rotationTypes = [
     startOperation: 'rotate-serviceaccount-key-start',
     completionOperation: 'rotate-serviceaccount-key-complete',
     twoStep: true,
-    title: 'ServiceAccount Token Signing Key'
+    title: 'ServiceAccount Token Signing Key',
   },
   {
     type: 'ALL_CREDENTIALS',
     startOperation: 'rotate-credentials-start',
     completionOperation: 'rotate-credentials-complete',
     title: 'Rotate All Credentials',
-    twoStep: true
-  }
+    twoStep: true,
+  },
 ]
 const twoStepRotationTypes = filter(rotationTypes, {
   hasRotationStatus: true,
-  twoStep: true
+  twoStep: true,
 })
 
 export const shootStatusCredentialRotation = {
@@ -77,8 +79,8 @@ export const shootStatusCredentialRotation = {
       required: true,
       validator (value) {
         return map(rotationTypes, 'type').includes(value)
-      }
-    }
+      },
+    },
   },
   mixins: [shootItem],
   computed: {
@@ -95,7 +97,7 @@ export const shootStatusCredentialRotation = {
         if (['Preparing', 'Completing'].includes(rotationStatus?.phase)) {
           return {
             type: rotationStatus.phase,
-            caption: rotationStatus.phase
+            caption: rotationStatus.phase,
           }
         }
         if (!rotationStatus || rotationStatus?.phase === 'Completed') {
@@ -115,7 +117,7 @@ export const shootStatusCredentialRotation = {
           const type = 'Prepared'
           return {
             type,
-            caption: type
+            caption: type,
           }
         }
 
@@ -123,7 +125,7 @@ export const shootStatusCredentialRotation = {
           caption: `Prepared ${preparedRotationsCount}/${numberOfTwoStepOperations}`,
           type: 'Prepared',
           incomplete: true,
-          unpreparedRotations
+          unpreparedRotations,
         }
       }
 
@@ -131,7 +133,7 @@ export const shootStatusCredentialRotation = {
         const type = 'Completed'
         return {
           type,
-          caption: type
+          caption: type,
         }
       }
 
@@ -145,7 +147,7 @@ export const shootStatusCredentialRotation = {
         return this.shootStatusCredentialsRotationAggregatedPhase ?? {}
       }
       return {
-        type: this.rotationStatus.phase
+        type: this.rotationStatus.phase,
       }
     },
     phaseType () {
@@ -185,9 +187,9 @@ export const shootStatusCredentialRotation = {
         return head(allCompletionTimestamps)
       }
       return undefined
-    }
+    },
   },
-  rotationTypes
+  rotationTypes,
 }
 
 export default shootStatusCredentialRotation

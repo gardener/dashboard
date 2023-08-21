@@ -1,170 +1,172 @@
 //
-// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import get from 'lodash/get'
-import pick from 'lodash/pick'
+import {
+  get,
+  pick,
+} from '@/lodash'
 
 export function homeBreadcrumbs () {
   return [
     {
-      text: 'Home'
-    }
+      title: 'Home',
+    },
   ]
 }
 
 export function newProjectBreadcrumbs () {
   return [
     {
-      text: 'Create Project'
-    }
+      title: 'Create Project',
+    },
   ]
 }
 
 export function accountBreadcrumbs () {
   return [
     {
-      text: 'Account'
-    }
+      title: 'Account',
+    },
   ]
 }
 
 export function settingsBreadcrumbs () {
   return [
     {
-      text: 'Settings'
-    }
+      title: 'Settings',
+    },
   ]
 }
 
 export function membersBreadcrumbs () {
   return [
     {
-      text: 'Members'
-    }
+      title: 'Members',
+    },
   ]
 }
 
 export function administrationBreadcrumbs () {
   return [
     {
-      text: 'Administration'
-    }
+      title: 'Administration',
+    },
   ]
 }
 
 export function newShootBreadcrumbs () {
   return [
     {
-      text: 'Create Cluster'
-    }
+      title: 'Create Cluster',
+    },
   ]
 }
 
 export function newShootEditorBreadcrumbs () {
   return [
     {
-      text: 'Create Cluster Editor'
-    }
+      title: 'Create Cluster Editor',
+    },
   ]
 }
 
 export function terminalBreadcrumbs () {
   return [
     {
-      text: 'Garden Cluster Terminal'
-    }
+      title: 'Garden Cluster Terminal',
+    },
   ]
 }
 
 export function shootListBreadcrumbs () {
   return [
     {
-      text: 'Project Clusters'
-    }
+      title: 'Project Clusters',
+    },
   ]
 }
 
 export function secretsBreadcrumbs () {
   return [
     {
-      text: 'Secrets'
-    }
+      title: 'Secrets',
+    },
   ]
 }
 
 export function notFoundBreadcrumbs () {
   return [
     {
-      text: 'Oops …'
-    }
+      title: 'Oops …',
+    },
   ]
 }
 
 export function shootItemBreadcrumbs ({ params }) {
   return [
     {
-      text: 'Project Clusters',
+      title: 'Project Clusters',
       get to () {
         return {
           name: 'ShootList',
-          params: pick(params, ['namespace'])
+          params: pick(params, ['namespace']),
         }
-      }
+      },
     },
     {
-      get text () {
+      get title () {
         return get(params, 'name')
-      }
-    }
+      },
+    },
   ]
 }
 
 export function secretItemBreadcrumbs ({ params }) {
   return [
     {
-      text: 'Secrets',
+      title: 'Secrets',
       get to () {
         return {
           name: 'Secrets',
-          params: pick(params, ['namespace'])
+          params: pick(params, ['namespace']),
         }
-      }
+      },
     },
     {
-      get text () {
+      get title () {
         return get(params, 'name')
-      }
-    }
+      },
+    },
   ]
 }
 
 export function shootItemTerminalBreadcrumbs ({ params }) {
   return [
     {
-      text: 'Project Clusters',
+      title: 'Project Clusters',
       get to () {
         return {
           name: 'ShootList',
-          params: pick(params, ['namespace'])
+          params: pick(params, ['namespace']),
         }
-      }
+      },
     },
     {
-      get text () {
+      get title () {
         return get(params, 'name')
       },
       get to () {
         return {
           name: 'ShootItem',
-          params
+          params,
         }
-      }
+      },
     },
     {
-      text: 'Terminal'
-    }
+      title: 'Terminal',
+    },
   ]
 }

@@ -1,35 +1,49 @@
 //
-// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import { Buffer } from 'buffer'
 
 import semver from 'semver'
-import capitalize from 'lodash/capitalize'
-import replace from 'lodash/replace'
-import get from 'lodash/get'
-import head from 'lodash/head'
-import map from 'lodash/map'
-import toLower from 'lodash/toLower'
-import filter from 'lodash/filter'
-import words from 'lodash/words'
-import find from 'lodash/find'
-import some from 'lodash/some'
-import sortBy from 'lodash/sortBy'
-import isEmpty from 'lodash/isEmpty'
-import includes from 'lodash/includes'
-import split from 'lodash/split'
-import join from 'lodash/join'
-import sample from 'lodash/sample'
-import compact from 'lodash/compact'
+import {
+  nextTick,
+  unref,
+} from 'vue'
+
+import { useLogger } from '@/composables/useLogger'
+
 import moment from './moment'
-import forEach from 'lodash/forEach'
-import { md5 } from './crypto'
+import {
+  md5,
+  hash,
+} from './crypto'
 import TimeWithOffset from './TimeWithOffset'
 
+import {
+  capitalize,
+  replace,
+  get,
+  head,
+  map,
+  toLower,
+  filter,
+  words,
+  find,
+  some,
+  sortBy,
+  isEmpty,
+  includes,
+  split,
+  join,
+  sample,
+  compact,
+  forEach,
+} from '@/lodash'
+
 const serviceAccountRegex = /^system:serviceaccount:([^:]+):([^:]+)$/
+const logger = useLogger()
 
 export function emailToDisplayName (value) {
   if (value) {
@@ -39,7 +53,7 @@ export function emailToDisplayName (value) {
   }
 }
 
-export function handleTextFieldDrop (textField, fileTypePattern, onDrop = (value) => {}) {
+export function handleTextFieldDrop (textField, fileTypePattern, onDrop = () => {}) {
   function drop (event) {
     event.stopPropagation()
     event.preventDefault()
@@ -75,16 +89,18 @@ export function handleTextFieldDrop (textField, fileTypePattern, onDrop = (value
 
 export function getValidationErrors (vm, field) {
   const errors = []
-  const validationForField = get(vm.$v, field)
+  const validationForField = get(vm.v$, field)
   if (!validationForField.$dirty) {
     return errors
   }
 
-  const validators = vm.validators ? vm.validators : vm.$options.validations
+  const validators = vm.validators
+    ? vm.validators
+    : vm.$options.validations
   Object
     .keys(get(validators, field))
     .forEach(key => {
-      if (!validationForField[key]) {
+      if (validationForField[key]?.$invalid) {
         let validationErrorMessage = get(vm.validationErrors, field)[key]
         if (typeof validationErrorMessage === 'function') {
           validationErrorMessage = validationErrorMessage(get(validationForField.$params, key))
@@ -93,33 +109,41 @@ export function getValidationErrors (vm, field) {
           errors.push(validationErrorMessage)
         } else {
           /* Fallback logic with generic error message.
-          This should not happen as for each validation there must be a corresponding text */
+            This should not happen as for each validation there must be a corresponding text */
           errors.push('Invalid input')
-          console.error('validation error message for ' + field + '.' + key + ' not found')
+          logger.error('validation error message for ' + field + '.' + key + ' not found')
         }
       }
     })
   return errors
 }
 
-export function setDelayedInputFocus (vm, fieldName, { delay = 200, ...options } = {}) {
-  setTimeout(() => {
-    setInputFocus(vm, fieldName, options)
-  }, delay)
+export function setDelayedInputFocus (...args) {
+  const options = typeof args[1] === 'string'
+    ? args[2]
+    : args[1]
+  const delay = options?.delay ?? 200
+  setTimeout(() => setInputFocus(...args), delay)
 }
 
-export function setInputFocus (vm, fieldName, { noSelect = false } = {}) {
-  const fieldRef = vm.$refs[fieldName]
-  if (fieldRef) {
+export function setInputFocus (vm, fieldName, options) {
+  if (typeof fieldName === 'string') {
+    vm = vm.$refs[fieldName]
+  } else {
+    vm = unref(vm)
+    options = fieldName
+  }
+  const noSelect = options?.noSelect === true
+  if (vm) {
     if (noSelect) {
-      fieldRef.focus()
+      vm.focus()
     } else {
-      const inputRef = fieldRef.$refs.input
-      vm.$nextTick(() => {
+      (async vm => {
+        await nextTick()
         // Ensure that the input field has been rendered
-        inputRef.focus()
-        inputRef.select()
-      })
+        vm.focus()
+        vm.select()
+      })(vm)
     }
   }
 }
@@ -160,9 +184,9 @@ export function parseSize (value) {
   const result = sizeRegex.exec(value)
   if (result) {
     const [, sizeValue] = result
-    return sizeValue
+    return parseInt(sizeValue, 10)
   }
-  console.error(`Could not parse size ${value} as it does not match regex ^(\\d+)Gi$`)
+  logger.error(`Could not parse size ${value} as it does not match regex ^(\\d+)Gi$`)
   return 0
 }
 
@@ -228,8 +252,8 @@ export function namespacedRoute (route, namespace) {
   return {
     name: routeName(route),
     params: {
-      namespace
-    }
+      namespace,
+    },
   }
 }
 
@@ -241,8 +265,7 @@ export function routeName (route) {
   if (firstChild && firstChild.name) {
     return firstChild.name
   }
-  // eslint-disable-next-line no-console
-  console.error('could not determine routeName')
+  logger.error('could not determine routeName')
 }
 
 export function getDateFormatted (timestamp) {
@@ -331,7 +354,7 @@ export function getProjectDetails (project) {
     purpose,
     staleSinceTimestamp,
     staleAutoDeleteTimestamp,
-    phase
+    phase,
   }
 }
 
@@ -441,15 +464,15 @@ export const shootAddonList = [
     title: 'Dashboard',
     description: 'General-purpose web UI for Kubernetes clusters. Several high-profile attacks have shown weaknesses, so installation is not recommend, especially not for production clusters.',
     visible: true,
-    enabled: false
+    enabled: false,
   },
   {
     name: 'nginxIngress',
     title: 'Nginx Ingress',
     description: 'Default ingress-controller with static configuration and conservatively sized (cannot be changed). Therefore, it is not recommended for production clusters. We recommend alternatively to install an ingress-controller of your liking, which you can freely configure, program, and scale to your production needs.',
     visible: true,
-    enabled: false
-  }
+    enabled: false,
+  },
 ]
 
 function htmlToDocumentFragment (html) {
@@ -477,7 +500,7 @@ export function transformHtml (html, transformToExternalLinks = true) {
   const linkElements = documentFragment.querySelectorAll('a')
   linkElements.forEach(linkElement => {
     if (transformToExternalLinks) {
-      linkElement.classList.add('text-decoration-none')
+      linkElement.classList.add('text-anchor', 'text-decoration-none')
       linkElement.setAttribute('target', '_blank')
       linkElement.setAttribute('rel', 'noopener')
       const linkText = linkElement.innerHTML
@@ -543,33 +566,34 @@ export function isZonedCluster ({ cloudProviderKind, shootSpec, isNewCluster }) 
 export const MEMBER_ROLE_DESCRIPTORS = [
   {
     name: 'admin',
-    displayName: 'Admin'
+    displayName: 'Admin',
   },
   {
     name: 'viewer',
-    displayName: 'Viewer'
+    displayName: 'Viewer',
   },
   {
     name: 'uam',
-    displayName: 'UAM'
+    displayName: 'UAM',
   },
   {
     name: 'serviceaccountmanager',
-    displayName: 'Service Account Manager'
+    displayName: 'Service Account Manager',
   },
   {
     name: 'owner',
     displayName: 'Owner',
     notEditable: true,
-    tooltip: 'You can change the project owner on the administration page'
-  }
+    tooltip: 'You can change the project owner on the administration page',
+  },
 ]
 
 function includesNameOrAll (list, name) {
   return includes(list, name) || includes(list, '*')
 }
 
-export function canI ({ resourceRules } = {}, verb, apiGroup, resouce, resourceName) {
+export function canI (subjectRules, verb, apiGroup, resouce, resourceName) {
+  let { resourceRules } = unref(subjectRules) ?? {}
   if (isEmpty(resourceRules)) {
     return false
   }
@@ -585,7 +609,7 @@ export function canI ({ resourceRules } = {}, verb, apiGroup, resouce, resourceN
 export const TargetEnum = {
   GARDEN: 'garden',
   CONTROL_PLANE: 'cp',
-  SHOOT: 'shoot'
+  SHOOT: 'shoot',
 }
 
 export function targetText (target) {
@@ -609,8 +633,6 @@ export function selectedImageIsNotLatest (machineImage, machineImages) {
   })
 }
 
-export const availableKubernetesUpdatesCache = new Map()
-
 export const UNKNOWN_EXPIRED_TIMESTAMP = '1970-01-01T00:00:00Z'
 
 export function sortedRoleDisplayNames (roleNames) {
@@ -620,7 +642,7 @@ export function sortedRoleDisplayNames (roleNames) {
 
 export function mapTableHeader (headers, valueKey) {
   const obj = {}
-  for (const { value: key, [valueKey]: value } of headers) {
+  for (const { key, [valueKey]: value } of headers) {
     obj[key] = value
   }
   return obj
@@ -628,4 +650,16 @@ export function mapTableHeader (headers, valueKey) {
 
 export function isHtmlColorCode (value) {
   return /^#([a-f0-9]{6}|[a-f0-9]{3})$/i.test(value)
+}
+
+export class Shortcut {
+  constructor (shortcut, unverified = true) {
+    Object.assign(this, shortcut)
+    Object.defineProperty(this, 'id', {
+      value: hash(shortcut),
+    })
+    Object.defineProperty(this, 'unverified', {
+      value: unverified,
+    })
+  }
 }

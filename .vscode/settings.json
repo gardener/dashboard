@@ -36,7 +36,6 @@
   },
   "eslint.nodePath": ".yarn/sdks",
   "files.exclude": {
-    ".pnp.*": true,
     ".yarn": true,
     ".docforge": true,
     "logo": true,
@@ -49,5 +48,4 @@
   "jestrunner.jestCommand": "node scripts/jest.cjs",
   "jestrunner.yarnPnpCommand": "../../scripts/yarn.cjs",
   "jestrunner.changeDirectoryToWorkspaceRoot": true,
-  "vetur.experimental.templateInterpolationService": false
 }

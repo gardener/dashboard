@@ -1,54 +1,103 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
- -->
+-->
 
 <template>
-  <v-dialog v-model="visible" scrollable persistent :width="width" max-width="90vw">
+  <v-dialog
+    v-model="visible"
+    persistent
+    scrollable
+    :width="width"
+    max-width="90vw"
+  >
     <v-card>
-      <v-toolbar flat class="toolbar-background toolbar-title--text">
+      <v-toolbar
+        flat
+        density="comfortable"
+        class="bg-toolbar-background text-toolbar-title"
+      >
         <v-toolbar-title class="dialog-title align-center justify-start">
           <slot name="caption">
             Confirm Dialog
           </slot>
           <template v-if="$slots.affectedObjectName">
-            &nbsp;
-            <span class="font-family-monospace font-weight-bold"><slot name="affectedObjectName"></slot></span>
+            <span class="font-family-monospace font-weight-bold">
+              &ZeroWidthSpace;<slot name="affectedObjectName" />
+            </span>
           </template>
         </v-toolbar-title>
       </v-toolbar>
-      <slot name="top"></slot>
-      <div :style="{ 'max-height': maxHeight }" ref="cardContent" class="card-content">
-        <slot name="card"></slot>
+      <div>
+        <slot name="top" />
+      </div>
+      <div
+        ref="cardContent"
+        class="card-content"
+      >
+        <slot name="card" />
         <v-card-text v-if="$slots.message">
-          <slot name="message"></slot>
+          <slot name="message" />
         </v-card-text>
       </div>
-      <slot name="errorMessage"></slot>
-      <g-message color="error" class="mt-4" :message.sync="message" :detailed-message.sync="detailedMessage"></g-message>
-      <v-divider></v-divider>
+      <div
+        v-if="$slots.additionalMessage"
+        class="mt-2"
+      >
+        <slot name="additionalMessage" />
+      </div>
+      <div
+        v-if="$slots.errorMessage || message"
+        class="mt-2"
+      >
+        <slot name="errorMessage">
+          <g-message
+            v-model:message="message"
+            v-model:detailed-message="detailedMessage"
+            color="error"
+          />
+        </slot>
+      </div>
+
+      <v-divider />
       <v-card-actions>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-text-field
           v-if="confirmValue && !confirmDisabled"
-          class="mr-2 confirm-input"
-          @keyup.enter="resolveAction(true)"
           ref="deleteDialogInput"
+          v-model="userInput"
           :label="hint"
           :error="notConfirmed && userInput.length > 0"
           hide-details
-          v-model="userInput"
           type="text"
-          outlined
+          variant="outlined"
           color="primary"
-          dense>
-        </v-text-field>
-        <v-btn text @click="resolveAction(false)" v-if="cancelButtonText.length">{{cancelButtonText}}</v-btn>
-        <v-tooltip top :disabled="valid">
-          <template v-slot:activator="{ on }">
-            <div v-on="on">
-              <v-btn text @click="resolveAction(true)" :disabled="!valid" class="toolbar-background--text">{{confirmButtonText}}</v-btn>
+          density="compact"
+          class="mr-2 confirm-input"
+          @keyup.enter="resolveAction(true)"
+        />
+        <v-btn
+          v-if="cancelButtonText.length"
+          variant="text"
+          @click="resolveAction(false)"
+        >
+          {{ cancelButtonText }}
+        </v-btn>
+        <v-tooltip
+          location="top"
+          :disabled="valid"
+        >
+          <template #activator="{ props }">
+            <div v-bind="props">
+              <v-btn
+                variant="text"
+                :disabled="!valid"
+                class="text-toolbar-background"
+                @click="resolveAction(true)"
+              >
+                {{ confirmButtonText }}
+              </v-btn>
             </div>
           </template>
           <span v-if="confirmDisabled">There are input errors that you need to resolve</span>
@@ -60,55 +109,64 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import GMessage from '@/components/GMessage.vue'
+
 import { setDelayedInputFocus } from '@/utils'
-import GMessage from '@/components/GMessage'
-import noop from 'lodash/noop'
-import isFunction from 'lodash/isFunction'
+
+import {
+  noop,
+  isFunction,
+} from '@/lodash'
 
 export default {
-  name: 'gdialog',
   components: {
-    GMessage
+    GMessage,
   },
   props: {
     confirmValue: {
-      type: String
+      type: String,
     },
     confirmDisabled: {
       type: Boolean,
-      default: false
+      default: false,
     },
     errorMessage: {
-      type: String
+      type: String,
     },
     detailedErrorMessage: {
-      type: String
+      type: String,
     },
     confirmButtonText: {
       type: String,
-      default: 'Confirm'
+      default: 'Confirm',
     },
     cancelButtonText: {
       type: String,
-      default: 'Cancel'
+      default: 'Cancel',
     },
     width: {
       type: String,
-      default: '500'
+      default: '500',
     },
     maxHeight: {
       type: String,
-      default: '50vh'
+      default: '50vh',
     },
     disableConfirmInputFocus: {
-      type: Boolean
-    }
+      type: Boolean,
+      default: false,
+    },
   },
+  emits: [
+    'update:errorMessage',
+    'update:detailedErrorMessage',
+    'dialogClosed',
+  ],
   data () {
     return {
       userInput: '',
       visible: false,
-      resolve: noop
+      resolve: noop,
     }
   },
   computed: {
@@ -128,20 +186,27 @@ export default {
         return this.errorMessage
       },
       set (value) {
-        this.$emit('update:error-message', value)
-      }
+        this.$emit('update:errorMessage', value)
+      },
     },
     detailedMessage: {
       get () {
         return this.detailedErrorMessage
       },
       set (value) {
-        this.$emit('update:detailed-error-message', value)
-      }
+        this.$emit('update:detailedErrorMessage', value)
+      },
     },
     valid () {
       return !this.confirmDisabled && !this.notConfirmed
-    }
+    },
+  },
+  watch: {
+    visible (value) {
+      if (value) {
+        this.showScrollBar(0)
+      }
+    },
   },
   methods: {
     confirmWithDialog (confirmationInterceptor) {
@@ -184,10 +249,10 @@ export default {
         this.resolve = undefined
         resolve(value)
       }
-      this.$emit('dialog-closed', value)
+      this.$emit('dialogClosed', value)
       this.visible = false
     },
-    showScrollBar (retryCount = 0) {
+    showScrollBar (retryCount) {
       if (!this.visible || retryCount > 10) {
         // circuit breaker
         return
@@ -200,15 +265,8 @@ export default {
       const scrollTopVal = cardContentRef.scrollTop
       cardContentRef.scrollTop = scrollTopVal + 10
       cardContentRef.scrollTop = scrollTopVal - 10
-    }
+    },
   },
-  watch: {
-    visible (value) {
-      if (value) {
-        this.showScrollBar()
-      }
-    }
-  }
 }
 </script>
 
@@ -219,5 +277,6 @@ export default {
 
   .card-content {
     overflow: scroll;
+    height: auto;
   }
 </style>

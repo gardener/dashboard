@@ -1,55 +1,68 @@
 <!--
-SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
- -->
+-->
 <template>
-  <v-container fluid class="fill-height text-center">
+  <v-container
+    fluid
+    class="fill-height text-center"
+  >
     <v-row align="center">
       <v-col>
-        <h1>{{code}}</h1>
-        <h2>{{text}}</h2>
-        <p v-if="message">{{message}}</p>
-        <v-btn color="primary" @click="onClick" class="mt-12">{{buttonText}}</v-btn>
+        <h1>{{ code }}</h1>
+        <h2>{{ text }}</h2>
+        <p v-if="message">
+          {{ message }}
+        </p>
+        <v-btn
+          color="primary"
+          class="mt-12"
+          @click="onClick"
+        >
+          {{ buttonText }}
+        </v-btn>
       </v-col>
     </v-row>
   </v-container>
 </template>
 
-<script>
-export default {
-  props: {
-    code: {
-      type: [String, Number],
-      default: '500'
-    },
-    text: {
-      type: String,
-      default: 'Unexpected Error :('
-    },
-    message: {
-      type: String
-    },
-    buttonText: {
-      type: String,
-      default: 'Get me out of here'
-    }
+<script setup>
+import { toRefs } from 'vue'
+
+import { useAppStore } from '@/store/app'
+
+const store = useAppStore
+
+const props = defineProps({
+  code: {
+    type: [String, Number],
+    default: '500',
   },
-  data () {
-    return {
-      fromRoute: undefined
-    }
+  text: {
+    type: String,
+    default: 'Unexpected Error :(',
   },
-  methods: {
-    onClick () {
-      this.$emit('click', this.fromRoute)
-    }
+  message: {
+    type: String,
+    default: null,
   },
-  beforeRouteEnter (to, from, next) {
-    next(vm => {
-      vm.fromRoute = from
-    })
-  }
+  buttonText: {
+    type: String,
+    default: 'Get me out of here',
+  },
+})
+
+const { code, text, message, buttonText } = toRefs(props)
+
+// events
+const emit = defineEmits([
+  'click',
+])
+
+// methods
+function onClick () {
+  emit('click', store.fromRoute)
 }
 </script>
 

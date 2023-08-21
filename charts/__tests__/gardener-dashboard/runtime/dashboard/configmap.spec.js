@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -7,9 +7,12 @@
 'use strict'
 
 const yaml = require('js-yaml')
-const { omit, pick } = require('lodash')
+const { omit, pick, mapValues } = require('lodash')
 const { helm, helper } = fixtures
-const { getCertificate } = helper
+const {
+  getCertificate,
+  decodeBase64
+} = helper
 
 const renderTemplates = helm.renderDashboardRuntimeTemplates
 
@@ -244,12 +247,11 @@ describe('gardener-dashboard', function () {
     })
 
     describe('tickets', function () {
+      let values
       beforeEach(() => {
         templates.push('secret-github')
-      })
 
-      it('should render the template', async function () {
-        const values = {
+        values = {
           global: {
             dashboard: {
               frontendConfig: {
@@ -268,23 +270,55 @@ describe('gardener-dashboard', function () {
                 webhookSecret: 'webhookSecret',
                 pollIntervalSeconds: 60,
                 syncThrottleSeconds: 10,
-                syncConcurrency: 5,
-                authentication: {
-                  username: 'dashboard-tickets',
-                  token: 'webhookAuthenticationToken'
-                }
+                syncConcurrency: 5
               }
             }
           }
         }
-        const documents = await renderTemplates(templates, values)
-        expect(documents).toHaveLength(2)
-        const [configMap, githubSecret] = documents
-        expect(configMap.metadata.name).toBe(name)
-        expect(githubSecret.metadata.name).toBe('gardener-dashboard-github')
-        const config = yaml.load(configMap.data['config.yaml'])
-        expect(pick(config, ['frontend.ticket', 'gitHub'])).toMatchSnapshot()
-        expect(githubSecret).toMatchSnapshot()
+      })
+
+      describe('token authentication', function () {
+        beforeEach(() => {
+          values.global.dashboard.gitHub.authentication = {
+            token: 'token'
+          }
+        })
+
+        it('should render the template', async function () {
+          const documents = await renderTemplates(templates, values)
+          expect(documents).toHaveLength(2)
+          const [configMap, githubSecret] = documents
+          expect(configMap.metadata.name).toBe(name)
+          expect(githubSecret.metadata.name).toBe('gardener-dashboard-github')
+          const config = yaml.load(configMap.data['config.yaml'])
+          expect(pick(config, ['frontend.ticket', 'gitHub'])).toMatchSnapshot()
+          const data = mapValues(githubSecret.data, decodeBase64)
+          expect(data).toMatchSnapshot()
+        })
+      })
+
+      describe('github app authentication', function () {
+        beforeEach(() => {
+          values.global.dashboard.gitHub.authentication = {
+            appId: 1,
+            clientId: 'clientId',
+            clientSecret: 'clientSecret',
+            installationId: 123,
+            privateKey: 'privateKey'
+          }
+        })
+
+        it('should render the template', async function () {
+          const documents = await renderTemplates(templates, values)
+          expect(documents).toHaveLength(2)
+          const [configMap, githubSecret] = documents
+          expect(configMap.metadata.name).toBe(name)
+          expect(githubSecret.metadata.name).toBe('gardener-dashboard-github')
+          const config = yaml.load(configMap.data['config.yaml'])
+          expect(pick(config, ['frontend.ticket', 'gitHub'])).toMatchSnapshot()
+          const data = mapValues(githubSecret.data, decodeBase64)
+          expect(data).toMatchSnapshot()
+        })
       })
     })
 
@@ -544,6 +578,26 @@ describe('gardener-dashboard', function () {
         const [configMap] = documents
         const config = yaml.load(configMap.data['config.yaml'])
         expect(config.clusterIdentity).toBe(clusterIdentity)
+      })
+    })
+
+    describe('grantTypes', function () {
+      it('should render the template', async function () {
+        const values = {
+          global: {
+            dashboard: {
+              frontendConfig: {
+                grantTypes: ['a', 'b', 'c']
+              }
+            }
+          }
+        }
+
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [configMap] = documents
+        const config = yaml.load(configMap.data['config.yaml'])
+        expect(pick(config, ['frontend.grantTypes'])).toMatchSnapshot()
       })
     })
 

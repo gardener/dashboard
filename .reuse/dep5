@@ -28,6 +28,7 @@ Files:
   charts/*/values.yaml
   charts/*/templates/*.yaml
   charts/*/templates/*/*.yaml
+  frontend/index.html
   CODEOWNERS
   VERSION
   .editorconfig
@@ -35,6 +36,7 @@ Files:
   .dockerignore
   .yarnrc.yml
   .pnp.cjs
+  .pnp.loader.mjs
   yarn.lock
 Copyright: 2017-2021 SAP SE or an SAP affiliate company and Gardener contributors
 License: Apache-2.0

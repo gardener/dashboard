@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -21,7 +21,11 @@ const environmentVariableDefinitions = {
   OIDC_CLIENT_ID: 'oidc.client_id',
   OIDC_CLIENT_SECRET: 'oidc.client_secret', // pragma: whitelist secret
   OIDC_CA: 'oidc.ca',
-  GITHUB_AUTHENTICATION_USERNAME: 'gitHub.authentication.username',
+  GITHUB_AUTHENTICATION_APP_ID: 'gitHub.authentication.appId',
+  GITHUB_AUTHENTICATION_CLIENT_ID: 'gitHub.authentication.clientId',
+  GITHUB_AUTHENTICATION_CLIENT_SECRET: 'gitHub.authentication.clientSecret',
+  GITHUB_AUTHENTICATION_INSTALLATION_ID: 'gitHub.authentication.installationId',
+  GITHUB_AUTHENTICATION_PRIVATE_KEY: 'gitHub.authentication.privateKey',
   GITHUB_AUTHENTICATION_TOKEN: 'gitHub.authentication.token',
   GITHUB_WEBHOOK_SECRET: 'gitHub.webhookSecret', // pragma: whitelist secret
   LOG_LEVEL: 'logLevel',

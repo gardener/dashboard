@@ -1,23 +1,22 @@
 //
-// SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import Vue from 'vue'
+import { mergeProps } from 'vue'
 
-function renderComponent (name, props) {
-  return new Vue({
-    render (h) {
-      return h(name, { props })
-    }
-  }).$mount().$el
+import { useLogger } from '@/composables/useLogger'
+import { useApi } from '@/composables/useApi'
+import { useSanitizeUrl } from '@/composables/useSanitizeUrl'
+import { useRenderComponent } from '@/composables/useRenderComponent'
+
+export default {
+  install (app) {
+    app.provide('logger', useLogger())
+    app.provide('api', useApi())
+    app.provide('sanitizeUrl', useSanitizeUrl())
+    app.provide('renderComponent', useRenderComponent())
+    app.provide('mergeProps', mergeProps)
+  },
 }
-
-const VueUtils = {
-  install (Vue) {
-    Object.defineProperty(Vue.prototype, '$renderComponent', { value: renderComponent })
-  }
-}
-
-Vue.use(VueUtils)
