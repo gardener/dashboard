@@ -336,4 +336,3 @@ export default {
     font-size: 30px !important;
   }
 </style>
-

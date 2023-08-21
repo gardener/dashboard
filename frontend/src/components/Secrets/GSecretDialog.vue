@@ -419,4 +419,3 @@ export default {
   }
 
 </style>
-

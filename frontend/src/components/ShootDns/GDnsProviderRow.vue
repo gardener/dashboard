@@ -330,4 +330,3 @@ export default {
   }
 
 </style>
-

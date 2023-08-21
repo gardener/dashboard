@@ -140,4 +140,3 @@ export default {
   max-width: max-content;
 }
 </style>
-

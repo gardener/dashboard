@@ -811,4 +811,3 @@ export default {
     white-space: normal !important;
   }
 </style>
-

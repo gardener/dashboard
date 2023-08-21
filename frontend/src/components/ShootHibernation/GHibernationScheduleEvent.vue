@@ -297,4 +297,3 @@ export default {
   },
 }
 </script>
-

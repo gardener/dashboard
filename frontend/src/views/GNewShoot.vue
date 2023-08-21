@@ -580,4 +580,3 @@ export default {
   overflow: auto;
 }
 </style>
-

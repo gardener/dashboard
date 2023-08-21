@@ -272,4 +272,3 @@ export default {
   },
 }
 </script>
-

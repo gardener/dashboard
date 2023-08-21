@@ -146,4 +146,3 @@ export default {
     vertical-align: middle;
   }
 </style>
-

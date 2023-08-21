@@ -703,4 +703,3 @@ $teaserHeight: 200px;
   }
 }
 </style>
-
