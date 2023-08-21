@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
     </div>
     <g-maintenance-components
       ref="maintenanceComponents"
-      title="The following updates will be performed"
+      title="The following updates might be performed"
       :selectable="false"
     />
     <v-alert
