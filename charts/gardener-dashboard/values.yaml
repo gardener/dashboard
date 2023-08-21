@@ -330,7 +330,7 @@ global:
     #   repository: dummyrepo
     #   webhookSecret: foobar # optional if pollIntervalSeconds is defined
     #   authentication:
-    #     # authenticate as github app installation. The github app requires the permission to read and write issues and has to be installed in the respective repository
+    #     # authenticate as github app installation. The github app requires the permission to read issues and has to be installed in the respective repository
     #     appId: 1
     #     clientId: lv1.1234567890abcdef
     #     clientSecret: 1234567890abcdef1234567890abcdef12345678
