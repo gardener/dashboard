@@ -171,9 +171,8 @@ exports.createAdminKubeconfig = async function ({ user, namespace, name, body })
     }
   }
 
-  const adminKubeConfigRequest = await client['core.gardener.cloud'].shoots.createAdminKubeconfigRequest(namespace, name, payload)
-  const kubeconfig = Buffer.from(adminKubeConfigRequest.status.kubeconfig, 'base64').toString('utf8')
-  return kubeconfig
+  const { status } = await client['core.gardener.cloud'].shoots.createAdminKubeconfigRequest(namespace, name, payload)
+  return utils.decodeBase64(status.kubeconfig) 
 }
 
 exports.replaceAddons = async function ({ user, namespace, name, body }) {
