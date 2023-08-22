@@ -690,8 +690,7 @@ describe('gardener-dashboard', function () {
         expect(documents).toHaveLength(1)
         const [configMap] = documents
         const config = yaml.load(configMap.data['config.yaml'])
-        expect(config.frontend.shootAdminKubeconfig.maxExpirationSeconds).toBe(maxExpirationSeconds)
-        expect(config.frontend.shootAdminKubeconfig.enabled).toBe(true)
+   expect(pick(config, ['frontend.shootAdminKubeconfig'])).toMatchSnapshot()
       })
     })
   })
