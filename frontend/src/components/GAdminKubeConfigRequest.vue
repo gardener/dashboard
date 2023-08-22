@@ -45,11 +45,6 @@ export default {
       type: Array
     }
   },
-  props: {
-    expirations: {
-      type: Array
-    }
-  },
   methods: {
     async onConfigurationDialogOpened () {
       this.reset()
