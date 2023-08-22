@@ -332,7 +332,10 @@ export default {
         'infrastructureSecretList',
         'dnsSecretList',
       ]),
-    ...mapState(useAuthzStore, ['canCreateSecrets']),
+    ...mapState(useAuthzStore, [
+      'canCreateSecrets',
+      'namespace',
+    ]),
     ...mapState(useShootStore, ['shootList']),
     hasCloudProfileForCloudProviderKind () {
       return (kind) => {
@@ -484,6 +487,11 @@ export default {
       }))
     },
   },
+  watch: {
+    namespace () {
+      this.reset()
+    },
+  },
   mounted () {
     if (!get(this.$route.params, 'name')) {
       return
@@ -533,6 +541,12 @@ export default {
     },
     setSelectedInfraHeader (header) {
       this.infraSecretSelectedColumns[header.key] = !header.selected
+    },
+    reset () {
+      this.infraSecretFilter = ''
+      this.dnsSecretFilter = ''
+      this.infraSecretPage = 1
+      this.dnsSecretPage = 1
     },
     resetInfraTableSettings () {
       this.infraSecretSelectedColumns = mapTableHeader(this.infraSecretTableHeaders, 'defaultSelected')
