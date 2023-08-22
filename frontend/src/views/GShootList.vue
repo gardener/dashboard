@@ -324,7 +324,6 @@ export default {
     }),
     ...mapState(useProjectStore, [
       'projectName',
-      'projectFromProjectList',
       'shootCustomFieldList',
       'shootCustomFields',
     ]),

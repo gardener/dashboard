@@ -373,7 +373,7 @@ const serviceAccountPage = ref(1)
 
 const {
   namespace,
-  projectFromProjectList: project,
+  project,
   projectList,
 } = storeToRefs(projectStore)
 const {

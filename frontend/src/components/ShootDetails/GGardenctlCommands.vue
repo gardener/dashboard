@@ -91,10 +91,10 @@ export default {
       'isAdmin',
     ]),
     ...mapState(useProjectStore, [
-      'projectFromProjectList',
+      'project',
     ]),
     projectName () {
-      const project = this.projectFromProjectList
+      const project = this.project
       return get(project, 'metadata.name')
     },
     commands () {
