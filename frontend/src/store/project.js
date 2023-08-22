@@ -169,6 +169,8 @@ export const useProjectStore = defineStore('project', () => {
     })
     appStore.setSuccess('Project created')
     updateList(response.data)
+
+    return response.data
   }
 
   async function patchProject (obj) {
