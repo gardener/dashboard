@@ -256,7 +256,7 @@ router.route('/:name/spec/seedName')
     }
   })
 
-if (config.frontend.shootAdminKubeconfig && config.frontend.shootAdminKubeconfig.enabled) {
+if (config.frontend.shootAdminKubeconfig?.enabled) {
   router.route('/:name/adminkubeconfig')
     .all(metricsMiddleware)
     .post(async (req, res, next) => {
