@@ -204,7 +204,7 @@ export default {
   methods: {
     async createAdminKubeconfig () {
       try {
-        const resp = await this.api.createAdminKubeconfig({
+        const resp = await this.api.createShootAdminKubeconfig({
           namespace: this.shootNamespace,
           name: this.shootName,
           data: {
