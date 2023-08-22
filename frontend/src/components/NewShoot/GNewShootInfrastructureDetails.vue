@@ -288,7 +288,7 @@ export default {
           required,
         },
         networkingType: {
-          required,
+          required: requiredIf(!this.workerless),
         },
         loadBalancerProviderName: {
           required: requiredIf(function () {
