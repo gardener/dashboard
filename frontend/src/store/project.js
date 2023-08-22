@@ -211,8 +211,6 @@ export const useProjectStore = defineStore('project', () => {
     list.value = null
   }
 
-  const projectNamesFromProjectList = projectNames // TODO: deprecated - use projectNames instead
-
   return {
     list,
     isInitial,
@@ -224,7 +222,6 @@ export const useProjectStore = defineStore('project', () => {
     projectList,
     project,
     projectNames,
-    projectNamesFromProjectList,
     shootCustomFields,
     shootCustomFieldList,
     isCurrentNamespace,
