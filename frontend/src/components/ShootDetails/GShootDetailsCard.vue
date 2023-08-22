@@ -69,23 +69,10 @@ SPDX-License-Identifier: Apache-2.0
           </v-icon>
         </template>
         <g-list-item-content label="Worker Groups">
-          <div
-            v-if="!isShootWorkerless"
-            class="d-flex flex-wrap align-center"
-          >
-            <g-worker-group
-              v-for="workerGroup in shootWorkerGroups"
-              :key="workerGroup.name"
-              v-model="workerGroupTab"
-              :worker-group="workerGroup"
-              :cloud-profile-name="shootCloudProfileName"
-              :shoot-item="shootItem"
-              class="mr-2"
-            />
-          </div>
-          <span v-else>
-            Workerless Cluster
-          </span>
+          <g-worker-groups
+            :shoot-item="shootItem"
+            class="flex-wrap"
+          />
         </g-list-item-content>
         <template
           v-if="!isShootWorkerless"
@@ -234,7 +221,7 @@ import { useAuthzStore } from '@/store/authz'
 import GAccessRestrictionChips from '@/components/ShootAccessRestrictions/GAccessRestrictionChips'
 import GAccountAvatar from '@/components/GAccountAvatar'
 import GTimeString from '@/components/GTimeString'
-import GWorkerGroup from '@/components/ShootWorkers/GWorkerGroup'
+import GWorkerGroups from '@/components/ShootWorkers/GWorkerGroups'
 import GWorkerConfiguration from '@/components/ShootWorkers/GWorkerConfiguration'
 import GAccessRestrictionsConfiguration from '@/components/ShootAccessRestrictions/GAccessRestrictionsConfiguration'
 import GPurposeConfiguration from '@/components/GPurposeConfiguration'
@@ -261,7 +248,7 @@ export default {
     GAccessRestrictionChips,
     GAccountAvatar,
     GTimeString,
-    GWorkerGroup,
+    GWorkerGroups,
     GWorkerConfiguration,
     GAccessRestrictionsConfiguration,
     GPurposeConfiguration,
@@ -271,11 +258,6 @@ export default {
     GCopyBtn,
   },
   mixins: [shootItem],
-  data () {
-    return {
-      workerGroupTab: 'overview',
-    }
-  },
   computed: {
     ...mapState(useConfigStore, [
       'sla',

@@ -438,6 +438,14 @@ export default {
           hidden: !this.isAdmin,
         },
         {
+          title: 'WORKERS',
+          key: 'workers',
+          sortable: isSortable(true),
+          align: 'start',
+          defaultSelected: false,
+          hidden: false,
+        },
+        {
           title: 'CREATED BY',
           key: 'createdBy',
           sortable: isSortable(true),
