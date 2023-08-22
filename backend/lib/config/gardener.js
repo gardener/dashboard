@@ -126,11 +126,6 @@ module.exports = {
       _.unset(config, 'frontend.ticket')
     }
 
-    if (config.frontend.shootAdminKubeconfig) {
-      _.set(config, 'frontend.shootAdminKubeconfig.enabled', config.frontend.shootAdminKubeconfig.enabled)
-      _.set(config, 'frontend.shootAdminKubeconfig.maxExpirationSeconds', config.frontend.shootAdminKubeconfig.maxExpirationSeconds)
-    }
-
     return config
   },
   readConfig (path) {
