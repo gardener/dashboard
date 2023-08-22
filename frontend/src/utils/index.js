@@ -328,7 +328,7 @@ export function getIssueSince (shootStatus) {
   return head(issueTimestamps.sort())
 }
 
-export function getProjectDetails (project) {
+export function getProjectDetails (project = {}) {
   const projectData = project.data || {}
   const projectMetadata = project.metadata || {}
   const projectName = projectMetadata.name || ''
