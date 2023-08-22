@@ -135,6 +135,11 @@ SPDX-License-Identifier: Apache-2.0
         :show-list-icon="false"
         type="token"
       />
+      <g-shoot-kubeconfig
+        :shoot-item="shootItem"
+        :show-list-icon="false"
+        type="adminkubeconfig"
+      />
     </template>
 
     <v-divider
@@ -249,6 +254,9 @@ export default {
     },
     hasDashboardTokenAuth () {
       return get(this.shootItem, 'spec.addons.kubernetesDashboard.authenticationMode', 'basic') === 'token'
+    },
+    hasAdminKubeconfigEnabled () {
+      return get(this.cfg, 'shootAdminKubeconfig.enabled', false)
     },
     kubeconfig () {
       return get(this.shootInfo, 'kubeconfig')

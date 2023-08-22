@@ -405,6 +405,7 @@ export default {
   getShootSchemaDefinition,
   updateShootPurpose,
   updateShootSeedName,
+  createAdminKubeconfig,
   getCloudProfiles,
   getSeeds,
   getProjects,

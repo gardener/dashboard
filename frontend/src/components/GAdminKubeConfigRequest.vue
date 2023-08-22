@@ -5,32 +5,32 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <action-button-dialog
+  <g-action-button-dialog
     :shoot-item="shootItem"
     @dialog-opened="onConfigurationDialogOpened"
     ref="actionDialog"
     width="500"
     caption="Configure Kubeconfig Lifetime">
     <template v-slot:actionComponent>
-      <wildcard-select
+      <g-wildcard-select
         v-model="expiration"
         :wildcard-select-items="expirations"
         wildcard-select-label="Lifetime"
-        ></wildcard-select>
+        ></g-wildcard-select>
     </template>
-  </action-button-dialog>
+  </g-action-button-dialog>
 </template>
 
 <script>
-import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
-import WildcardSelect from '@/components/WildcardSelect'
+import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
+import GWildcardSelect from '@/components/GWildcardSelect'
 import shootItem from '@/mixins/shootItem'
 
 export default {
   name: 'admin-kubeconfig-request',
   components: {
-    ActionButtonDialog,
-    WildcardSelect
+    GActionButtonDialog,
+    GWildcardSelect
   },
   mixins: [
     shootItem

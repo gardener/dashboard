@@ -178,6 +178,10 @@ export const useConfigStore = defineStore('config', () => {
     return state.value?.defaultNodesCIDR ?? '10.250.0.0/16'
   })
 
+  const shootAdminKubeconfig = computed(() => {
+    return state.value?.shootAdminKubeconfig
+  })
+
   const apiServerUrl = computed(() => {
     return state.value?.apiServerUrl ?? browserLocation.value.origin
   })
@@ -315,6 +319,7 @@ export const useConfigStore = defineStore('config', () => {
     helpMenuItems,
     externalTools,
     defaultNodesCIDR,
+    shootAdminKubeconfig,
     nodesCIDR,
     apiServerUrl,
     clusterIdentity,
