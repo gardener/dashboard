@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
       @update:model-value="v$.containerImage.$touch()"
       @blur="v$.containerImage.$touch()"
     />
-    <template v-if="target === 'shoot'">
+    <template v-if="target === 'shoot' && !hideRuntimeSettings">
       <v-radio-group
         v-if="isAdmin"
         v-model="runtime"
@@ -142,6 +142,10 @@ export default {
   props: {
     target: {
       type: String,
+    },
+    hideRuntimeSettings: {
+      type: Boolean,
+      default: false,
     },
   },
   setup () {

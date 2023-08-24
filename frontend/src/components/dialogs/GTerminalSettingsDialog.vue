@@ -18,6 +18,7 @@ SPDX-License-Identifier: Apache-2.0
     <template #message>
       <g-terminal-settings
         :target="target"
+        :hide-runtime-settings="isShootWorkerless"
       />
     </template>
   </g-dialog>
@@ -29,6 +30,9 @@ import {
   toRaw,
 } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
+import { mapActions } from 'pinia'
+
+import { useShootStore } from '@/store/shoot'
 
 import GDialog from '@/components/dialogs/GDialog.vue'
 import GTerminalSettings from '@/components/GTerminalSettings.vue'
@@ -61,12 +65,21 @@ export default {
       selectedConfig: undefined,
     }
   },
+  computed: {
+    shootItem () {
+      return this.shootByNamespaceAndName(this.$route.params)
+    },
+    isShootWorkerless () {
+      return !this.shootItem?.spec?.provider?.workers?.length
+    },
+  },
   watch: {
     config (value) {
       this.selectedConfig = toRaw(value)
     },
   },
   methods: {
+    ...mapActions(useShootStore, ['shootByNamespaceAndName']),
     async promptForConfigurationChange (initialState) {
       this.updateState(initialState)
       const confirmWithDialogPromise = this.$refs.gDialog.confirmWithDialog()

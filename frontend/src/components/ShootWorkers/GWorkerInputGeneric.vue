@@ -557,6 +557,7 @@ export default {
     },
     onInputZones () {
       this.v$.selectedZones.$touch()
+      this.v$.worker.maximum.$touch()
     },
     setVolumeDependingOnMachineType () {
       const storage = get(this.selectedMachineType, 'storage')

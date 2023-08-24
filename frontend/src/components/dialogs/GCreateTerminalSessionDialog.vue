@@ -58,6 +58,7 @@ SPDX-License-Identifier: Apache-2.0
                   v-show="!!targetTab.selectedConfig"
                   ref="settings"
                   v-model:target="targetTab.selectedTarget"
+                  :hide-runtime-settings="isShootWorkerless"
                 />
               </v-expansion-panel-text>
             </v-expansion-panel>
@@ -192,6 +193,9 @@ export default {
     },
     isShootStatusHibernated () {
       return isShootStatusHibernated(get(this.shootItem, 'status'))
+    },
+    isShootWorkerless () {
+      return !this.shootItem?.spec?.provider?.workers?.length
     },
     valid () {
       switch (this.tab) {
