@@ -24,7 +24,7 @@ function encodeBase64 (value) {
   return Buffer.from(value, 'utf8').toString('base64')
 }
 
-function projectFilter (user, isAdmin = false) {
+function projectFilter (user, canListProjects = false) {
   const isMemberOf = project => {
     return _
       .chain(project)
@@ -60,7 +60,7 @@ function projectFilter (user, isAdmin = false) {
     if (isPending(project)) {
       return false
     }
-    return isAdmin || isMemberOf(project)
+    return canListProjects || isMemberOf(project)
   }
 }
 

@@ -29,7 +29,7 @@ exports.list = async function ({ user, namespace, labelSelector, shootsWithIssue
     query.labelSelector = 'shoot.gardener.cloud/status!=healthy'
   }
   if (namespace === '_all') {
-    if (await authorization.isAdmin(user)) {
+    if (await authorization.canListShoots(user)) {
       return client['core.gardener.cloud'].shoots.listAllNamespaces(query)
     } else {
       const promises = _
