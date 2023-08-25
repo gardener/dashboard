@@ -4,6 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import { useAuthnStore } from '@/store/authn'
+import { useAuthzStore } from '@/store/authz'
+import { useProjectStore } from '@/store/project'
+
 /* Layouts */
 import GLogin from '@/layouts/GLogin.vue'
 import GDefault from '@/layouts/GDefault.vue'
@@ -53,12 +57,10 @@ const GShootList = () => import('@/views/GShootList.vue')
 const GShootItem = () => import('@/views/GShootItem.vue')
 const GShootItemTerminal = () => import('@/views/GShootItemTerminal.vue')
 
-export function createRoutes (context) {
-  const {
-    authnStore,
-    authzStore,
-    projectStore,
-  } = context
+export function createRoutes () {
+  const authnStore = useAuthnStore()
+  const authzStore = useAuthzStore()
+  const projectStore = useProjectStore()
 
   return [
     loginRoute('/login'),
