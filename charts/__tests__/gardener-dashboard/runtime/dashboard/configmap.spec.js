@@ -679,7 +679,7 @@ describe('gardener-dashboard', function () {
               frontendConfig: {
                 shootAdminKubeconfig: {
                   enabled: true,
-                  maxExpirationSeconds: maxExpirationSeconds
+                  maxExpirationSeconds
                 }
               }
             }
