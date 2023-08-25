@@ -5,24 +5,19 @@
 //
 
 import {
+  ref,
   computed,
-  reactive,
-  toRef,
-  unref,
 } from 'vue'
 import {
   useRouter,
   useRoute,
 } from 'vue-router'
-import { useLocalStorage } from '@vueuse/core'
 
 import { useAppStore } from '@/store/app'
 import { useAuthzStore } from '@/store/authz'
+import { useLocalStorageStore } from '@/store/localStorage'
 
-import {
-  TargetEnum,
-  routeName,
-} from '@/utils'
+import { TargetEnum } from '@/utils'
 
 import {
   GSymbolTree,
@@ -34,6 +29,7 @@ import { useApi } from './useApi'
 import {
   every,
   get,
+  pick,
   filter,
   includes,
   map,
@@ -42,61 +38,47 @@ import {
   difference,
 } from '@/lodash'
 
-export const useTerminalSplitpanes = ({ name, namespace, target }) => {
+export const useTerminalSplitpanes = () => {
+  const api = useApi()
   const router = useRouter()
-  const currentRoute = useRoute()
-
+  const route = useRoute()
   const authzStore = useAuthzStore()
   const appStore = useAppStore()
+  const localStorageStore = useLocalStorageStore()
 
-  const hasControlPlaneTerminalAccess = toRef(authzStore, 'hasControlPlaneTerminalAccess')
+  let symbolTree = new GSymbolTree()
+  const newTerminal = {
+    position: '',
+    targetId: '',
+  }
 
-  const focusedElementId = toRef(appStore, 'focusedElementId')
-
-  const state = reactive({
-    tree: new GSymbolTree(),
-    splitpaneTree: {}, // splitpaneTree is a json object representation of the GSymbolTree`state.tree`
-    newTerminal: {
-      position: '',
-      targetId: '',
-    },
-  })
+  const splitpaneTree = ref({})
+  const newTerminalPrompt = ref(false)
 
   const terminalCoordinates = computed(() => {
-    const coordinates = {
-      name: name.value,
-      namespace: namespace.value,
-      target: unref(target), // optional
-    }
-    return coordinates
-  })
-
-  const storeKey = computed(() => {
-    const { name, namespace } = terminalCoordinates.value
-    const route = routeName(currentRoute)
-    return `${route}--${namespace}--${name}`
+    return pick(route.params, ['name', 'namespace', 'target'])
   })
 
   const slotItemUUIds = computed(() => {
-    const slotItems = filter(state.tree.items(), ['data.type', 'SLOT_ITEM'])
+    const slotItems = filter(symbolTree.items(), ['data.type', 'SLOT_ITEM'])
     return map(slotItems, 'uuid')
   })
 
   const defaultTarget = computed(() => {
-    return terminalCoordinates.value.target || (hasControlPlaneTerminalAccess.value ? TargetEnum.CONTROL_PLANE : TargetEnum.SHOOT)
+    return terminalCoordinates.value.target || (authzStore.hasControlPlaneTerminalAccess ? TargetEnum.CONTROL_PLANE : TargetEnum.SHOOT)
   })
-
-  const api = useApi()
 
   function addSlotItem ({ data = {}, targetId, position } = {}) {
     data.type = 'SLOT_ITEM'
     addItemWith({ data, targetId, position })
   }
+
   async function load (addItemFn) {
     await restoreSessions(addItemFn)
 
     updateSplitpaneTree()
   }
+
   function addShortcut ({ position, targetId, shortcut } = {}) {
     targetId = targetIdOrDefault(targetId)
 
@@ -107,26 +89,14 @@ export const useTerminalSplitpanes = ({ name, namespace, target }) => {
       addItemWith({ data, targetId, position })
     }
 
-    if (state.tree.isEmpty()) {
+    if (symbolTree.isEmpty()) {
       leavePage()
     }
   }
 
   async function restoreSessions (addItemFn = () => add()) {
-    const fromStore = getLocalStorageObject(storeKey.value)
-    if (!fromStore) {
-      addItemFn()
-      return
-    }
-
-    let splitpaneTree
-    try {
-      const json = JSON.parse(fromStore)
-      splitpaneTree = json.splitpaneTree
-    } catch (err) {
-      // could not restore session
-    }
-    if (!splitpaneTree) {
+    const data = localStorageStore.terminalSplitpaneTree
+    if (!data) {
       addItemFn()
       return
     }
@@ -134,14 +104,14 @@ export const useTerminalSplitpanes = ({ name, namespace, target }) => {
     const { namespace } = terminalCoordinates.value
     const { data: terminals } = await api.listTerminalSessions({ namespace })
 
-    state.tree = GSymbolTree.fromJSON(splitpaneTree)
+    symbolTree = GSymbolTree.fromJSON(data.splitpaneTree ? data.splitpaneTree : data) // backward compatible
 
-    let uuids = state.tree.ids()
-    uuids = filter(uuids, uuid => !includes(slotItemUUIds, uuid))
+    let uuids = symbolTree.ids()
+    uuids = filter(uuids, uuid => !includes(slotItemUUIds.value, uuid))
     const terminatedIds = terminatedSessionIds(uuids, terminals)
-    state.tree.removeWithIds(terminatedIds)
+    symbolTree.removeWithIds(terminatedIds)
 
-    if (state.tree.isEmpty()) { // nothing to restore
+    if (symbolTree.isEmpty()) { // nothing to restore
       addItemFn()
     }
   }
@@ -152,18 +122,18 @@ export const useTerminalSplitpanes = ({ name, namespace, target }) => {
   }
 
   function add ({ position, targetId } = {}) {
-    state.newTerminal.position = position
-    state.newTerminal.targetId = targetIdOrDefault(targetId)
-    state.newTerminal.show = true
+    newTerminal.position = position
+    newTerminal.targetId = targetIdOrDefault(targetId)
+    newTerminalPrompt.value = true
   }
 
   function setSelections (selections) {
-    state.newTerminal.show = false
+    newTerminalPrompt.value = false
 
     const {
       position,
       targetId,
-    } = state.newTerminal
+    } = newTerminal
 
     if (!selections) {
       leavePageIfTreeEmpty()
@@ -183,32 +153,28 @@ export const useTerminalSplitpanes = ({ name, namespace, target }) => {
     leavePageIfTreeEmpty()
   }
 
-  function getLocalStorageObject (key) {
-    return useLocalStorage(key).value
-  }
-
-  function setLocalStorageObject (key, value) {
-    useLocalStorage(key).value = value
-  }
-
   function updateSplitpaneTree () {
-    state.splitpaneTree = state.tree.toJSON(state.tree.root)
-    saveSplitpaneTree()
+    splitpaneTree.value = symbolTree.toJSON(symbolTree.root)
+
+    const onySlotItemsInTree = every(symbolTree.ids(), id => includes(slotItemUUIds.value, id))
+    localStorageStore.terminalSplitpaneTree = onySlotItemsInTree || symbolTree.isEmpty()
+      ? null // clear value
+      : splitpaneTree.value
   }
 
   function targetIdOrDefault (targetId) {
     if (!targetId) {
-      targetId = focusedElementId.value // TODO check if it still works
+      targetId = appStore.focusedElementId // TODO check if it still works
     }
     if (!targetId) {
-      const lastChild = state.tree.lastChild(state.tree.root, true)
+      const lastChild = symbolTree.lastChild(symbolTree.root, true)
       targetId = get(lastChild, 'uuid')
     }
     return targetId
   }
 
   function leavePageIfTreeEmpty () {
-    if (state.tree.isEmpty()) {
+    if (symbolTree.isEmpty()) {
       leavePage()
     }
   }
@@ -216,37 +182,26 @@ export const useTerminalSplitpanes = ({ name, namespace, target }) => {
   function addItemWith ({ data, targetId, position }) {
     const item = new Leaf({ data })
     if (targetId && position) {
-      state.tree.appendChild(state.tree.root, item)
+      symbolTree.appendChild(symbolTree.root, item)
       const sourceId = item.uuid
 
       moveTo({ sourceId, targetId, position })
     } else {
-      state.tree.appendChild(state.tree.root, item)
+      symbolTree.appendChild(symbolTree.root, item)
       updateSplitpaneTree()
     }
   }
 
   function moveTo ({ sourceId, targetId, position }) {
-    state.tree.moveToWithId({ sourceId, targetId, position })
+    symbolTree.moveToWithId({ sourceId, targetId, position })
 
     updateSplitpaneTree()
   }
 
   function removeWithId (id) {
-    state.tree.removeWithId(id)
+    symbolTree.removeWithId(id)
 
     updateSplitpaneTree()
-  }
-
-  function saveSplitpaneTree () {
-    const onySlotItemsInTree = every(state.tree.ids(), id => includes(slotItemUUIds, id))
-    if (onySlotItemsInTree || state.tree.isEmpty()) {
-      setLocalStorageObject(storeKey.value) // clear value
-      return
-    }
-    setLocalStorageObject(storeKey.value, JSON.stringify({
-      splitpaneTree: state.splitpaneTree,
-    }))
   }
 
   function leavePage () {
@@ -257,8 +212,13 @@ export const useTerminalSplitpanes = ({ name, namespace, target }) => {
     return router.push({ name: 'ShootList', params: { namespace } })
   }
 
+  function isTreeEmpty () {
+    return symbolTree.isEmpty()
+  }
+
   return {
-    state,
+    splitpaneTree,
+    newTerminalPrompt,
     terminalCoordinates,
     defaultTarget,
     add,
@@ -269,5 +229,6 @@ export const useTerminalSplitpanes = ({ name, namespace, target }) => {
     removeWithId,
     moveTo,
     leavePage,
+    isTreeEmpty,
   }
 }
