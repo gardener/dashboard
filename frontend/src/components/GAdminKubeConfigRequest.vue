@@ -27,7 +27,6 @@ import GWildcardSelect from '@/components/GWildcardSelect'
 import shootItem from '@/mixins/shootItem'
 
 export default {
-  name: 'admin-kubeconfig-request',
   components: {
     GActionButtonDialog,
     GWildcardSelect
