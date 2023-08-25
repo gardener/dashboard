@@ -31,8 +31,6 @@ import {
   isClockSkewError,
 } from '@/utils/errors'
 
-import { useSocketStore } from './socket'
-
 const COOKIE_HEADER_PAYLOAD = 'gHdrPyl'
 const CLOCK_TOLERANCE = 15
 
@@ -56,7 +54,6 @@ function delay (duration = 0) {
 export const useAuthnStore = defineStore('authn', () => {
   const logger = useLogger()
   const location = useBrowserLocation()
-  const socketStore = useSocketStore()
   const interceptors = useInterceptors()
   const cookies = useCookies([COOKIE_HEADER_PAYLOAD])
 
@@ -258,11 +255,6 @@ export const useAuthnStore = defineStore('authn', () => {
   // mutations
   function setUser (value) {
     user.value = value
-    if (!user.value) {
-      socketStore.disconnect()
-    } else {
-      socketStore.connect()
-    }
   }
 
   function $reset () {
