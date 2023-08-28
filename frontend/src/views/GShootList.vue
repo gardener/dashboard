@@ -73,7 +73,7 @@ SPDX-License-Identifier: Apache-2.0
             <template #activator="{ props }">
               <v-text-field
                 v-bind="props"
-                v-model="shootSearch"
+                :model-value="shootSearch"
                 prepend-inner-icon="mdi-magnify"
                 color="primary"
                 label="Search"
@@ -85,7 +85,7 @@ SPDX-License-Identifier: Apache-2.0
                 clear-icon="mdi-close"
                 density="compact"
                 class="g-table-search-field mr-3"
-                @update:model-value="onInputSearch"
+                @update:model-value="onUpdateShootSearch"
                 @keyup.esc="resetShootSearch"
               />
             </template>
@@ -296,7 +296,7 @@ export default {
   data () {
     return {
       shootSearch: '',
-      delayedShootSearch: '',
+      debouncedShootSearch: '',
       dialog: null,
       itemsPerPage: useLocalStorage('projects/shoot-list/itemsPerPage', 10),
       page: 1,
@@ -694,7 +694,7 @@ export default {
     },
     sortedAndFilteredItems () {
       const items = this.sortItems(this.items, this.sortByInternal)
-      return filter(items, item => this.searchItems(this.delayedShootSearch, toRaw(item)))
+      return filter(items, item => this.searchItems(this.debouncedShootSearch, toRaw(item)))
     },
   },
   watch: {
@@ -719,7 +719,7 @@ export default {
     ]),
     resetShootSearch () {
       this.shootSearch = null
-      this.delayedShootSearch = null
+      this.debouncedShootSearch = null
     },
     async showDialog (args) {
       switch (args.action) {
@@ -804,8 +804,13 @@ export default {
       const filters = this.shootListFilters
       return get(filters, key, false)
     },
-    onInputSearch: debounce(function (value) {
-      this.delayedShootSearch = value
+    onUpdateShootSearch (value) {
+      this.shootSearch = value
+
+      this.setDebouncedShootSearch()
+    },
+    setDebouncedShootSearch: debounce(function () {
+      this.debouncedShootSearch = this.shootSearch
     }, 500),
     disableCustomKeySort (tableHeaders) {
       const sortableTableHeaders = filter(tableHeaders, ['sortable', true])

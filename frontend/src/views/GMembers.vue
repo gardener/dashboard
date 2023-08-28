@@ -373,11 +373,11 @@ const userPage = ref(1)
 const serviceAccountPage = ref(1)
 
 const {
-  namespace,
   project,
   projectList,
 } = storeToRefs(projectStore)
 const {
+  namespace,
   canManageMembers,
   canManageServiceAccountMembers,
   canCreateServiceAccounts,
