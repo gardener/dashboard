@@ -333,8 +333,8 @@ export default {
         'dnsSecretList',
       ]),
     ...mapState(useAuthzStore, [
-      'canCreateSecrets',
       'namespace',
+      'canCreateSecrets',
     ]),
     ...mapState(useShootStore, ['shootList']),
     hasCloudProfileForCloudProviderKind () {
