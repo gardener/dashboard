@@ -163,7 +163,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { markRaw } from 'vue'
-import { mapGetters } from 'pinia'
+import { mapState } from 'pinia'
 import download from 'downloadjs'
 import CodeMirror from 'codemirror'
 import 'codemirror/addon/hint/show-hint.js'
@@ -260,7 +260,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(useAuthzStore, ['canPatchShoots']),
+    ...mapState(useAuthzStore, ['canPatchShoots']),
     value () {
       let data = cloneDeep(this.shootItem)
       if (data) {

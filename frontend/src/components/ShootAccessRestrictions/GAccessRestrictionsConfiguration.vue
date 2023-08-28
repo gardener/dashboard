@@ -23,7 +23,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapGetters } from 'pinia'
+import { mapState } from 'pinia'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
@@ -47,7 +47,7 @@ export default {
   mixins: [shootItem],
   inject: ['api', 'logger'],
   computed: {
-    ...mapGetters(useCloudProfileStore, [
+    ...mapState(useCloudProfileStore, [
       'accessRestrictionNoItemsTextForCloudProfileNameAndRegion',
       'accessRestrictionDefinitionsByCloudProfileNameAndRegion',
     ]),
