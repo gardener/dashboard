@@ -66,8 +66,6 @@ import GGardenctlInfo from '@/components/GGardenctlInfo.vue'
 
 import { shootItem } from '@/mixins/shootItem'
 
-import { get } from '@/lodash'
-
 export default {
   components: {
     GListItem,
