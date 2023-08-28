@@ -189,7 +189,7 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     writeDefaults: false,
   })
 
-  const allShootsFilter = useLocalStorage('project/_all/shoot-list/filter', null, {
+  const allProjectsShootFilter = useLocalStorage('project/_all/shoot-list/filter', null, {
     serializer: StorageSerializers.json,
     writeDefaults: false,
   })
@@ -243,7 +243,7 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     shootSelectedColumns,
     shootItemsPerPage,
     shootSortBy,
-    allShootsFilter,
+    allProjectsShootFilter,
     shootCustomSortBy,
     shootCustomSelectedColumns,
     terminalSplitpaneTree,

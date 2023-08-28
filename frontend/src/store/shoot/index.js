@@ -8,6 +8,7 @@ import { defineStore } from 'pinia'
 import {
   computed,
   reactive,
+  watch,
 } from 'vue'
 
 import { useLogger } from '@/composables/useLogger'
@@ -58,7 +59,7 @@ export const useShootStore = defineStore('shoot', () => {
   const logger = useLogger()
 
   const appStore = useAppStore()
-  const authnStore = useAuthnStore
+  const authnStore = useAuthnStore()
   const authzStore = useAuthzStore()
   const cloudProfileStore = useCloudProfileStore()
   const configStore = useConfigStore()
@@ -388,24 +389,29 @@ export const useShootStore = defineStore('shoot', () => {
       noOperatorAction: isAdmin,
       deactivatedReconciliation: isAdmin,
       hideTicketsWithLabel: isAdmin,
-      ...localStorageStore.allShootsFilter,
+      ...localStorageStore.allProjectsShootFilter,
     }
     updateFilteredShoots()
   }
 
-  function toogleShootListFilter (key, value) {
+  function toogleShootListFilter (key) {
     if (state.shootListFilters) {
       state.shootListFilters[key] = !state.shootListFilters[key]
-      localStorageStore.allShootsFilter = pick(state.shootListFilters, [
-        'onlyShootsWithIssues',
-        'progressing',
-        'noOperatorAction',
-        'deactivatedReconciliation',
-        'hideTicketsWithLabel',
-      ])
       updateFilteredShoots()
     }
   }
+
+  watch(() => state.shootListFilters, value => {
+    localStorageStore.allProjectsShootFilter = pick(value, [
+      'onlyShootsWithIssues',
+      'progressing',
+      'noOperatorAction',
+      'deactivatedReconciliation',
+      'hideTicketsWithLabel',
+    ])
+  }, {
+    deep: true,
+  })
 
   function updateFilteredShoots () {
     try {

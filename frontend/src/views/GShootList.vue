@@ -347,7 +347,7 @@ export default {
       'shootSortBy',
       'shootCustomSelectedColumns',
       'shootCustomSortBy',
-      'allShootsFilter',
+      'allProjectsShootFilter',
     ]),
     defaultSortBy () {
       return [{ key: 'name', order: 'asc' }]
