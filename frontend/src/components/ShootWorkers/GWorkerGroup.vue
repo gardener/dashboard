@@ -360,7 +360,6 @@ import {
 } from '@/lodash'
 
 export default {
-  name: 'GWorkerGroup',
   components: {
     GVendorIcon,
     GCodeBlock,

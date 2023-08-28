@@ -67,6 +67,7 @@ SPDX-License-Identifier: Apache-2.0
           color="primary"
           hide-details
           density="compact"
+          hint="Create nodeless cluster without worker groups"
         />
       </v-col>
     </v-row>

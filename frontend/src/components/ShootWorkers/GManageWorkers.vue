@@ -102,7 +102,6 @@ import {
 const NO_LIMIT = -1
 
 export default {
-  name: 'ManageWorkers',
   components: {
     GWorkerInputGeneric,
     GExpandTransitionGroup,

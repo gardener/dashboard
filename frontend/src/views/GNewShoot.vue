@@ -525,7 +525,6 @@ export default {
         cloudProfileName,
         updateK8sMaintenance: k8sUpdates,
         enableStaticTokenKubeconfig,
-        enableWorkerlessShoot: !workers?.length,
       })
 
       const zonedCluster = isZonedCluster({ cloudProviderKind: infrastructureKind, isNewCluster: true })

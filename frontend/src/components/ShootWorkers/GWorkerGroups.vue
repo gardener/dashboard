@@ -31,7 +31,6 @@ import GWorkerGroup from '@/components/ShootWorkers/GWorkerGroup'
 import { shootItem } from '@/mixins/shootItem'
 
 export default {
-  name: 'GWorkerGroups',
   components: {
     GWorkerGroup,
   },
