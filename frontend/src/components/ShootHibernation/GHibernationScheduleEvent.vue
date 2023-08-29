@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0
             clearable
             variant="underlined"
             @blur="touchIfNothingFocused"
-            @input="onInputWakeUpTime"
+            @update:model-value="onInputWakeUpTime"
           />
         </v-col>
         <v-col cols="2">
@@ -52,7 +52,7 @@ SPDX-License-Identifier: Apache-2.0
             clearable
             variant="underlined"
             @blur="touchIfNothingFocused"
-            @input="onInputHibernateTime"
+            @update:model-value="onInputHibernateTime"
           />
         </v-col>
         <v-col cols="3">
