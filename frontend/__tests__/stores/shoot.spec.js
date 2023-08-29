@@ -9,6 +9,7 @@ import {
   createPinia,
 } from 'pinia'
 
+import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
 import { useShootStore } from '@/store/shoot'
 import { useProjectStore } from '@/store/project'
@@ -44,6 +45,7 @@ describe('stores', () => {
     let mockGetShootInfo // eslint-disable-line no-unused-vars
     let mockEmitSubscribe // eslint-disable-line no-unused-vars
     let mockEmitUnsubscribe // eslint-disable-line no-unused-vars
+    let authnStore
     let authzStore
     let projectStore
     let socketStore
@@ -191,6 +193,11 @@ describe('stores', () => {
       })
       mockGetShootInfo = vi.spyOn(api, 'getShootInfo').mockRejectedValue(notFound)
       setActivePinia(createPinia())
+      authnStore = useAuthnStore()
+      authnStore.user = {
+        isAdmin: false,
+        email: 'john.doe@example.org',
+      }
       authzStore = useAuthzStore()
       authzStore.setNamespace('foo')
       projectStore = useProjectStore()
@@ -206,9 +213,7 @@ describe('stores', () => {
       mockEmitSubscribe = vi.spyOn(socketStore, 'emitSubscribe').mockImplementation(noop)
       mockEmitUnsubscribe = vi.spyOn(socketStore, 'emitUnsubscribe').mockImplementation(noop)
       shootStore = useShootStore()
-      shootStore.setShootListFilters({
-        onlyShootsWithIssues: false,
-      })
+      shootStore.initializeShootListFilters()
     })
 
     describe('#sortItems', () => {

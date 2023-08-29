@@ -254,15 +254,16 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import {
   mapState,
+  mapWritableState,
   mapActions,
 } from 'pinia'
-import { useLocalStorage } from '@vueuse/core'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useSecretStore } from '@/store/secret'
 import { useAuthzStore } from '@/store/authz'
 import { useShootStore } from '@/store/shoot'
+import { useLocalStorageStore } from '@/store/localStorage'
 
 import GSecretDialogWrapper from '@/components/Secrets/GSecretDialogWrapper'
 import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
@@ -304,14 +305,8 @@ export default {
   data () {
     return {
       selectedSecret: {},
-      infraSecretSelectedColumns: useLocalStorage('secrets/infra-secret-list/selected-columns', {}),
       infraSecretPage: 1,
-      infraSecretItemsPerPage: useLocalStorage('secrets/infra-secret-list/itemsPerPage', 10),
-      infraSecretSortBy: useLocalStorage('secrets/infra-secret-list/sortBy', [{ key: 'name', order: 'asc' }]),
-      dnsSecretSelectedColumns: useLocalStorage('secrets/dns-secret-list/selected-columns', {}),
       dnsSecretPage: 1,
-      dnsSecretItemsPerPage: useLocalStorage('secrets/dns-secret-list/itemsPerPage', 10),
-      dnsSecretSortBy: useLocalStorage('secrets/dns-secret-list/sortBy', [{ key: 'name', order: 'asc' }]),
       infraSecretFilter: '',
       createInfraSecretMenu: false,
       dnsSecretFilter: '',
@@ -327,16 +322,23 @@ export default {
   computed: {
     ...mapState(useCloudProfileStore, ['sortedInfrastructureKindList']),
     ...mapState(useGardenerExtensionStore, ['sortedDnsProviderList']),
-    ...mapState(useSecretStore,
-      [
-        'infrastructureSecretList',
-        'dnsSecretList',
-      ]),
+    ...mapState(useSecretStore, [
+      'infrastructureSecretList',
+      'dnsSecretList',
+    ]),
     ...mapState(useAuthzStore, [
       'namespace',
       'canCreateSecrets',
     ]),
     ...mapState(useShootStore, ['shootList']),
+    ...mapWritableState(useLocalStorageStore, [
+      'infraSecretSelectedColumns',
+      'infraSecretItemsPerPage',
+      'infraSecretSortBy',
+      'dnsSecretSelectedColumns',
+      'dnsSecretItemsPerPage',
+      'dnsSecretSortBy',
+    ]),
     hasCloudProfileForCloudProviderKind () {
       return (kind) => {
         return !isEmpty(this.cloudProfilesByCloudProviderKind(kind))

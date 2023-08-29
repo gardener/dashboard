@@ -21,8 +21,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { toRef } from 'vue'
-import { useRoute } from 'vue-router'
 import { mapActions } from 'pinia'
 
 import { useShootStore } from '@/store/shoot'
@@ -35,8 +33,6 @@ import { useTerminalSplitpanes } from '@/composables/useTerminalSplitpanes'
 
 import { PositionEnum } from '@/lib/g-symbol-tree'
 
-import { get } from '@/lodash'
-
 export default {
   name: 'ShootItem',
   components: {
@@ -46,26 +42,18 @@ export default {
   },
   provide () {
     return {
-      terminalCoordinates: this.terminalCoordinates,
-      defaultTarget: this.defaultTarget,
-      splitpanesState: this.state,
-      moveTo: this.moveTo,
-      add: this.add,
-      setSelections: this.setSelections,
-      removeWithId: this.removeWithId,
-      leavePage: this.leavePage,
+      ...this.terminalSplitpanes,
     }
   },
   setup () {
-    const currentRoute = useRoute()
-
-    const terminalSplitpanes = useTerminalSplitpanes({
-      name: toRef(() => get(currentRoute.params, 'name')),
-      namespace: toRef(() => get(currentRoute.params, 'namespace')),
-    })
+    const terminalSplitpanes = useTerminalSplitpanes()
+    const { load, addSlotItem, addShortcut } = terminalSplitpanes
 
     return {
-      ...terminalSplitpanes,
+      load,
+      addSlotItem,
+      addShortcut,
+      terminalSplitpanes,
     }
   },
   computed: {
@@ -82,7 +70,10 @@ export default {
       'shootByNamespaceAndName',
     ]),
     onAddTerminalShortcut (shortcut) {
-      this.addShortcut({ position: PositionEnum.BOTTOM, shortcut })
+      this.addShortcut({
+        position: PositionEnum.BOTTOM,
+        shortcut,
+      })
     },
   },
 }

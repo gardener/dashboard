@@ -6,17 +6,14 @@
 
 import {
   ref,
-  computed,
   watch,
 } from 'vue'
 import { defineStore } from 'pinia'
-import { useLocalStorage } from '@vueuse/core'
 
 import { useLogger } from '@/composables/useLogger'
 
 export const useLoginStore = defineStore('login', () => {
   const logger = useLogger()
-  const autoLogin = useLocalStorage('global/auto-login', 'disabled')
 
   const url = import.meta.env.BASE_URL + 'login-config.json'
 
@@ -25,10 +22,6 @@ export const useLoginStore = defineStore('login', () => {
   const loginType = ref('token')
   const loginTypes = ref(['token'])
   const landingPageUrl = ref('')
-
-  const autoLoginEnabled = computed(() => {
-    return autoLogin.value === 'enabled'
-  })
 
   const fetchLoginConfig = async url => {
     try {
@@ -69,7 +62,6 @@ export const useLoginStore = defineStore('login', () => {
     loginType,
     loginTypes,
     landingPageUrl,
-    autoLoginEnabled,
     isNotFetching,
   }
 })

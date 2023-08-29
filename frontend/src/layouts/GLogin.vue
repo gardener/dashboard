@@ -130,6 +130,7 @@ import {
 import { useAppStore } from '@/store/app'
 import { useAuthnStore } from '@/store/authn'
 import { useLoginStore } from '@/store/login'
+import { useLocalStorageStore } from '@/store/localStorage'
 
 import GNotify from '@/components/GNotify.vue'
 
@@ -153,8 +154,9 @@ export default {
     }
 
     const loginStore = useLoginStore()
+    const localStorageStore = useLocalStorageStore()
     await loginStore.isNotFetching()
-    if (!err && loginStore.loginType === 'oidc' && loginStore.autoLoginEnabled) {
+    if (!err && loginStore.loginType === 'oidc' && localStorageStore.autoLogin) {
       const redirectPath = get(to.query, 'redirectPath', '/')
       const authnStore = useAuthnStore()
       authnStore.signinWithOidc(redirectPath)
@@ -181,7 +183,6 @@ export default {
       'isFetching',
       'loginTypes',
       'landingPageUrl',
-      'autoLoginEnabled',
     ]),
     ...mapWritableState(useLoginStore, [
       'loginType',

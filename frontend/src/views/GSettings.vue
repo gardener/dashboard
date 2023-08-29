@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
                   Color Scheme
                 </legend>
                 <v-btn-toggle
-                  v-model="colorMode"
+                  v-model="colorScheme"
                   label="Color Scheme"
                   color="primary"
                   mandatory="force"
@@ -108,8 +108,6 @@ SPDX-License-Identifier: Apache-2.0
               <v-col cols="12">
                 <v-switch
                   v-model="autoLogin"
-                  true-value="enabled"
-                  false-value="disabled"
                   label="Automatic Login"
                   color="primary"
                   persistent-hint
@@ -130,8 +128,11 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { inject } from 'vue'
-import { useLocalStorage } from '@vueuse/core'
+import { storeToRefs } from 'pinia'
+
+import { useLocalStorageStore } from '@/store/localStorage'
+
+const localStorageStore = useLocalStorageStore()
 
 const logLevels = [
   { value: 'debug', text: 'verbose', icon: 'mdi-bug', color: 'grey darken-4' },
@@ -141,7 +142,9 @@ const logLevels = [
   { value: 'silent', text: 'silent', icon: 'mdi-pause-octagon', color: 'grey' },
 ]
 
-const { logLevel } = inject('logger')
-const colorMode = inject('colorMode')
-const autoLogin = useLocalStorage('global/auto-login', 'disabled')
+const {
+  logLevel,
+  autoLogin,
+  colorScheme,
+} = storeToRefs(localStorageStore)
 </script>
