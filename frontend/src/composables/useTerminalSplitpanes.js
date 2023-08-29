@@ -164,7 +164,7 @@ export const useTerminalSplitpanes = () => {
 
   function targetIdOrDefault (targetId) {
     if (!targetId) {
-      targetId = appStore.focusedElementId // TODO check if it still works
+      targetId = appStore.focusedElementId
     }
     if (!targetId) {
       const lastChild = symbolTree.lastChild(symbolTree.root, true)

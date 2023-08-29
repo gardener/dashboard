@@ -41,10 +41,8 @@ export default {
     GPositionalDropzone,
   },
   provide () {
-    const terminalSplitpanes = this.terminalSplitpanes
     return {
-      terminalSplitpanes,
-      ...terminalSplitpanes,
+      ...this.terminalSplitpanes,
     }
   },
   setup () {
