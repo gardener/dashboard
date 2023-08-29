@@ -10,6 +10,8 @@ SPDX-License-Identifier: Apache-2.0
     class="alertBanner"
     :type="type"
     :color="color"
+    :rounded="0"
+    variant="flat"
     closable
   >
     <slot name="message">
