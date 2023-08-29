@@ -206,7 +206,7 @@ global:
         projectTerminalShortcutsEnabled: false
 
       shootAdminKubeconfig:
-        enabled: true
+        enabled: false
         maxExpirationSeconds: 86400
       # alert:
       #   type: error
