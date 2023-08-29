@@ -71,10 +71,10 @@ const useLazyLocalStorage = () => {
       get: createGetter('terminalSplitpaneTree', null),
     },
     shootCustomSelectedColumns: {
-      get: createGetter('shootCustomSelectedColumns', null),
+      get: createGetter('shootCustomSelectedColumns', {}),
     },
     shootCustomSortBy: {
-      get: createGetter('shootCustomSortBy', null),
+      get: createGetter('shootCustomSortBy', []),
     },
   })
 }
@@ -97,12 +97,12 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     writeDefaults: false,
   })
 
-  const hiddenMessages = useLocalStorage('global/alert-banner/hidden-messages', null, {
+  const hiddenMessages = useLocalStorage('global/alert-banner/hidden-messages', {}, {
     serializer: StorageSerializers.json,
     writeDefaults: false,
   })
 
-  const userSelectedColumns = useLocalStorage('members/useraccount-list/selected-columns', null, {
+  const userSelectedColumns = useLocalStorage('members/useraccount-list/selected-columns', {}, {
     serializer: StorageSerializers.json,
     writeDefaults: false,
   })
@@ -120,7 +120,7 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     writeDefaults: false,
   })
 
-  const serviceAccountSelectedColumns = useLocalStorage('members/serviceaccount-list/selected-columns', null, {
+  const serviceAccountSelectedColumns = useLocalStorage('members/serviceaccount-list/selected-columns', {}, {
     serializer: StorageSerializers.json,
     writeDefaults: false,
   })
@@ -138,7 +138,7 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     writeDefaults: false,
   })
 
-  const infraSecretSelectedColumns = useLocalStorage('secrets/infra-secret-list/selected-columns', null, {
+  const infraSecretSelectedColumns = useLocalStorage('secrets/infra-secret-list/selected-columns', {}, {
     serializer: StorageSerializers.json,
     writeDefaults: false,
   })
@@ -156,7 +156,7 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     writeDefaults: false,
   })
 
-  const dnsSecretSelectedColumns = useLocalStorage('secrets/dns-secret-list/selected-columns', null, {
+  const dnsSecretSelectedColumns = useLocalStorage('secrets/dns-secret-list/selected-columns', {}, {
     serializer: StorageSerializers.json,
     writeDefaults: false,
   })
@@ -174,7 +174,7 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     writeDefaults: false,
   })
 
-  const shootSelectedColumns = useLocalStorage('projects/shoot-list/selected-columns', null, {
+  const shootSelectedColumns = useLocalStorage('projects/shoot-list/selected-columns', {}, {
     serializer: StorageSerializers.json,
     writeDefaults: false,
   })
@@ -184,12 +184,12 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     writeDefaults: false,
   })
 
-  const shootSortBy = useLocalStorage('projects/shoot-list/sortBy', null, {
+  const shootSortBy = useLocalStorage('projects/shoot-list/sortBy', [], {
     serializer: StorageSerializers.json,
     writeDefaults: false,
   })
 
-  const allProjectsShootFilter = useLocalStorage('project/_all/shoot-list/filter', null, {
+  const allProjectsShootFilter = useLocalStorage('project/_all/shoot-list/filter', {}, {
     serializer: StorageSerializers.json,
     writeDefaults: false,
   })
