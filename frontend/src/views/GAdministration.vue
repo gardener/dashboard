@@ -578,7 +578,7 @@ export default {
     ]),
     ...mapState(useProjectStore, [
       'projectList',
-      'projectFromProjectList',
+      'project',
       'shootCustomFieldList',
     ]),
     ...mapState(useMemberStore, [
@@ -590,9 +590,6 @@ export default {
     ...mapState(useQuotaStore, [
       'projectQuotaStatus',
     ]),
-    project () {
-      return this.projectFromProjectList
-    },
     projectDetails () {
       return getProjectDetails(this.project)
     },

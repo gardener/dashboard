@@ -66,8 +66,6 @@ import GGardenctlInfo from '@/components/GGardenctlInfo.vue'
 
 import { shootItem } from '@/mixins/shootItem'
 
-import { get } from '@/lodash'
-
 export default {
   components: {
     GListItem,
@@ -91,12 +89,8 @@ export default {
       'isAdmin',
     ]),
     ...mapState(useProjectStore, [
-      'projectFromProjectList',
+      'projectName',
     ]),
-    projectName () {
-      const project = this.projectFromProjectList
-      return get(project, 'metadata.name')
-    },
     commands () {
       const displayValue = command => {
         return '$ ' + command
