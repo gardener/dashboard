@@ -133,7 +133,6 @@ SPDX-License-Identifier: Apache-2.0
 import {
   mapActions,
   mapState,
-  mapGetters,
 } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 import {
@@ -234,8 +233,10 @@ export default {
   },
   computed: {
     ...mapState(useAuthzStore, ['namespace']),
-    ...mapGetters(useMemberStore, { memberList: 'list' }),
-    ...mapGetters(useAuthnStore, ['isAdmin']),
+    ...mapState(useMemberStore, {
+      memberList: 'list',
+    }),
+    ...mapState(useAuthnStore, ['isAdmin']),
     visible: {
       get () {
         return this.modelValue

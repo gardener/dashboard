@@ -253,7 +253,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import {
-  mapGetters,
+  mapState,
   mapActions,
 } from 'pinia'
 import { useLocalStorage } from '@vueuse/core'
@@ -325,15 +325,15 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(useCloudProfileStore, ['sortedInfrastructureKindList']),
-    ...mapGetters(useGardenerExtensionStore, ['sortedDnsProviderList']),
-    ...mapGetters(useSecretStore,
+    ...mapState(useCloudProfileStore, ['sortedInfrastructureKindList']),
+    ...mapState(useGardenerExtensionStore, ['sortedDnsProviderList']),
+    ...mapState(useSecretStore,
       [
         'infrastructureSecretList',
         'dnsSecretList',
       ]),
-    ...mapGetters(useAuthzStore, ['canCreateSecrets']),
-    ...mapGetters(useShootStore, ['shootList']),
+    ...mapState(useAuthzStore, ['canCreateSecrets']),
+    ...mapState(useShootStore, ['shootList']),
     hasCloudProfileForCloudProviderKind () {
       return (kind) => {
         return !isEmpty(this.cloudProfilesByCloudProviderKind(kind))

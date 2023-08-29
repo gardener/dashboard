@@ -122,7 +122,6 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import {
   mapState,
-  mapGetters,
   mapActions,
 } from 'pinia'
 import { required } from '@vuelidate/validators'
@@ -181,7 +180,7 @@ export default {
       'dnsPrimaryProviderId',
       'clusterIsNew',
     ]),
-    ...mapGetters(useGardenerExtensionStore, [
+    ...mapState(useGardenerExtensionStore, [
       'sortedDnsProviderList',
     ]),
     validators () {
