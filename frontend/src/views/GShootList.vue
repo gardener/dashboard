@@ -73,6 +73,7 @@ SPDX-License-Identifier: Apache-2.0
             <template #activator="{ props }">
               <v-text-field
                 v-bind="props"
+                :model-value="shootSearch"
                 prepend-inner-icon="mdi-magnify"
                 color="primary"
                 label="Search"
@@ -84,8 +85,8 @@ SPDX-License-Identifier: Apache-2.0
                 clear-icon="mdi-close"
                 density="compact"
                 class="g-table-search-field mr-3"
-                @update:model-value="onInputSearch"
-                @keyup.esc="shootSearch = ''"
+                @update:model-value="onUpdateShootSearch"
+                @keyup.esc="resetShootSearch"
               />
             </template>
             Search terms are <span class="font-weight-bold">ANDed</span>.<br>
@@ -281,20 +282,21 @@ export default {
     })
   },
   beforeRouteUpdate (to, from, next) {
-    this.shootSearch = null
+    this.resetShootSearch()
     this.updateTableSettings()
     this.focusModeInternal = false
     next()
   },
   beforeRouteLeave (to, from, next) {
     this.cachedItems = this.shootList.slice(0)
-    this.shootSearch = null
+    this.resetShootSearch()
     this.focusModeInternal = false
     next()
   },
   data () {
     return {
       shootSearch: '',
+      debouncedShootSearch: '',
       dialog: null,
       itemsPerPage: useLocalStorage('projects/shoot-list/itemsPerPage', 10),
       page: 1,
@@ -692,7 +694,7 @@ export default {
     },
     sortedAndFilteredItems () {
       const items = this.sortItems(this.items, this.sortByInternal)
-      return filter(items, item => this.searchItems(this.shootSearch, toRaw(item)))
+      return filter(items, item => this.searchItems(this.debouncedShootSearch, toRaw(item)))
     },
   },
   watch: {
@@ -715,6 +717,10 @@ export default {
       'setFocusMode',
       'setSortBy',
     ]),
+    resetShootSearch () {
+      this.shootSearch = null
+      this.debouncedShootSearch = null
+    },
     async showDialog (args) {
       switch (args.action) {
         case 'access':
@@ -798,8 +804,13 @@ export default {
       const filters = this.shootListFilters
       return get(filters, key, false)
     },
-    onInputSearch: debounce(function (value) {
+    onUpdateShootSearch (value) {
       this.shootSearch = value
+
+      this.setDebouncedShootSearch()
+    },
+    setDebouncedShootSearch: debounce(function () {
+      this.debouncedShootSearch = this.shootSearch
     }, 500),
     disableCustomKeySort (tableHeaders) {
       const sortableTableHeaders = filter(tableHeaders, ['sortable', true])

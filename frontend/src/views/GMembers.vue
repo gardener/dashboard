@@ -289,6 +289,7 @@ import {
   computed,
   markRaw,
   inject,
+  watch,
 } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
@@ -372,11 +373,11 @@ const userPage = ref(1)
 const serviceAccountPage = ref(1)
 
 const {
-  namespace,
   project,
   projectList,
 } = storeToRefs(projectStore)
 const {
+  namespace,
   canManageMembers,
   canManageServiceAccountMembers,
   canCreateServiceAccounts,
@@ -554,6 +555,17 @@ const serviceAccountTableHeaders = computed(() => {
 const visibleServiceAccountTableHeaders = computed(() => {
   return filter(serviceAccountTableHeaders.value, ['selected', true])
 })
+
+watch(namespace, () => {
+  reset()
+})
+
+function reset () {
+  userFilter.value = ''
+  serviceAccountFilter.value = ''
+  userPage.value = 1
+  serviceAccountPage.value = 1
+}
 
 function setKubeconfigError (err) {
   appStore.alert = {
