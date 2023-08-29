@@ -77,7 +77,7 @@ SPDX-License-Identifier: Apache-2.0
         v-if="isAdminKubeconfigType"
         :expirations="possibleAdminKubeconfigExpirationSettings"
         :shootItem="shootItem"
-        @expirationUpdate="onExpirationUpdate"
+        @update:expiration="onExpirationUpdate"
       />
     </template>
   </g-list-item>
@@ -128,7 +128,7 @@ export default {
     GAdminKubeConfigRequest
   },
   mixins: [shootItem],
-  inject: ['api'],
+  inject: ['api', 'logger'],
   props: {
     showListIcon: {
       type: Boolean,
@@ -183,7 +183,7 @@ export default {
     possibleAdminKubeconfigExpirationSettings () {
       let expirations = ['30m', '1h', '3h', '6h', '12h', '1d', '3d', '7d']
 
-      if (this.shootAdminKubeconfig.maxExpirationSeconds) {
+      if (this.shootAdminKubeconfig?.maxExpirationSeconds) {
         expirations = filter(expirations, expiration => {
           return this.adminKubeConfigExpirationInSeconds(expiration) <= this.shootAdminKubeconfig.maxExpirationSeconds
         })
@@ -216,7 +216,7 @@ export default {
       } catch (err) {
         const errorMessage = 'Could not request admin kubeconfig'
         const errorDetails = errorDetailsFromError(err)
-        console.error(errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        this.logger.error(errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
     async toggleKubeconfig () {

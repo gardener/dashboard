@@ -34,6 +34,9 @@ export default {
   mixins: [
     shootItem
   ],
+  emits: [
+    'update:expiration',
+  ],
   data () {
     return {
       expiration: undefined
@@ -49,7 +52,7 @@ export default {
       this.reset()
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
-        this.$emit('expirationUpdate', this.expiration)
+        this.$emit('update:expiration', this.expiration)
       }
     },
     reset () {

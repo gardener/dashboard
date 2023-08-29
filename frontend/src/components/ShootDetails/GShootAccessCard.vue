@@ -136,6 +136,7 @@ SPDX-License-Identifier: Apache-2.0
         type="token"
       />
       <g-shoot-kubeconfig
+        v-if="hasAdminKubeconfigEnabled"
         :shoot-item="shootItem"
         :show-list-icon="false"
         type="adminkubeconfig"
@@ -160,6 +161,7 @@ import { mapState } from 'pinia'
 import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
 import { useTerminalStore } from '@/store/terminal'
+import { useConfigStore } from '@/store/config'
 
 import GList from '@/components/GList.vue'
 import GListItem from '@/components/GListItem.vue'
@@ -223,6 +225,7 @@ export default {
     ...mapState(useTerminalStore, [
       'isTerminalShortcutsFeatureEnabled',
     ]),
+    ...mapState(useConfigStore, ['shootAdminKubeconfig']),
     dashboardUrl () {
       if (!this.hasDashboardEnabled) {
         return ''
@@ -256,7 +259,7 @@ export default {
       return get(this.shootItem, 'spec.addons.kubernetesDashboard.authenticationMode', 'basic') === 'token'
     },
     hasAdminKubeconfigEnabled () {
-      return get(this.cfg, 'shootAdminKubeconfig.enabled', false)
+      return this.shootAdminKubeconfig?.enabled
     },
     kubeconfig () {
       return get(this.shootInfo, 'kubeconfig')
