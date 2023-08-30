@@ -79,10 +79,12 @@ export default {
   watch: {
     workerless (value) {
       if (!value && isEmpty(this.addons)) {
-        // If adons missing (navigated to overview tab from yaml), reset to defaults
-        forEach(filter(this.addonDefinitionList, addon => addon.visible), addon => {
-          set(this.addons, [addon.name, 'enabled'], addon.enabled)
-        })
+        // If addons missing (navigated to overview tab from yaml), reset to defaults
+        const addonDefinitions = filter(this.addonDefinitionList, 'visible')
+        this.addons = {}
+        for (const { name, enabled } of addonDefinitions) {
+          this.addons[name] = { enabled }
+        }
       }
     },
   },

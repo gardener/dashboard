@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
       {{ title }}
     </div>
     <div
-      v-if="(!workerless && !isShootWorkerless) && (selectable || osUpdates)"
+      v-if="shootNotWorkerless && (selectable || osUpdates)"
       class="d-flex mt-4"
     >
       <div class="d-flex align-center justify-center action-select">
@@ -111,7 +111,7 @@ export default {
       type: Boolean,
       default: true,
     },
-    isShootWorkerless: {
+    hasShootWorkerGroups: {
       type: Boolean,
       default: false,
     },
@@ -152,6 +152,9 @@ export default {
     },
     showNoUpdates () {
       return !this.selectable && !this.osUpdates && !this.k8sUpdates
+    },
+    shootNotWorkerless () {
+      return !this.workerless && !this.hasShootWorkerGroups
     },
   },
   methods: {

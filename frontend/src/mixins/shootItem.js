@@ -123,7 +123,7 @@ export const shootItem = {
     shootWorkerGroups () {
       return get(this.shootSpec, 'provider.workers', [])
     },
-    isShootWorkerless () {
+    hasShootWorkerGroups () {
       return !this.shootWorkerGroups.length
     },
     shootAddons () {

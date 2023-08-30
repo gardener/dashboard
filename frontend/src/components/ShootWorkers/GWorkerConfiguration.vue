@@ -59,8 +59,8 @@ SPDX-License-Identifier: Apache-2.0
               alert-banner-identifier="workerEditorWarning"
             >
               <template #modificationWarning>
-                By modifying the resource directly you may cause serious problems in your cluster.
-                We cannot guarantee that you can solve problems that result from using worker resource editor incorrectly.
+                Directly modifying this resource can result in irreversible configurations that may severely compromise your cluster's stability and functionality.
+                Use worker resource editor with caution.
               </template>
             </g-shoot-editor>
           </div>

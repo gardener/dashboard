@@ -17,8 +17,7 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <template #message>
       <g-terminal-settings
-        :target="target"
-        :hide-runtime-settings="isShootWorkerless"
+        :runtime-settings-hidden="hasShootWorkerGroups || target !== 'shoot'"
       />
     </template>
   </g-dialog>
@@ -39,11 +38,14 @@ import GTerminalSettings from '@/components/GTerminalSettings.vue'
 
 import { useTerminalConfig } from '@/composables/useTerminalConfig'
 
+import { shootItem } from '@/mixins/shootItem'
+
 export default {
   components: {
     GDialog,
     GTerminalSettings,
   },
+  mixins: [shootItem],
   provide () {
     return {
       ...toRefs(this.state),
@@ -64,14 +66,6 @@ export default {
     return {
       selectedConfig: undefined,
     }
-  },
-  computed: {
-    shootItem () {
-      return this.shootByNamespaceAndName(this.$route.params)
-    },
-    isShootWorkerless () {
-      return !this.shootItem?.spec?.provider?.workers?.length
-    },
   },
   watch: {
     config (value) {

@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
       />
       <g-maintenance-components
         ref="maintenanceComponents"
-        :is-shoot-workerless="isShootWorkerless"
+        :has-shoot-worker-groups="hasShootWorkerGroups"
       />
     </template>
   </g-action-button-dialog>
@@ -83,7 +83,7 @@ export default {
           updateKubernetesVersion: k8sUpdates,
           updateOSVersion: osUpdates,
         })
-        if (this.isShootWorkerless) {
+        if (this.hasShootWorkerGroups) {
           delete this.data.updateOSVersion
         }
         await this.api.updateShootMaintenance({ namespace: this.shootNamespace, name: this.shootName, data: this.data })

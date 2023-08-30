@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
           </div>
         </g-list-item-content>
       </g-list-item>
-      <g-list-item v-if="!isShootWorkerless">
+      <g-list-item v-if="!hasShootWorkerGroups">
         <g-list-item-content label="Credential">
           <router-link
             v-if="canLinkToSecret"
@@ -110,7 +110,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
       </g-list-item>
       <v-divider inset />
-      <template v-if="!isShootWorkerless">
+      <template v-if="!hasShootWorkerGroups">
         <g-list-item>
           <template #prepend>
             <v-icon color="primary">
@@ -130,7 +130,7 @@ SPDX-License-Identifier: Apache-2.0
       <g-list-item>
         <template #prepend>
           <v-icon
-            v-if="isShootWorkerless"
+            v-if="hasShootWorkerGroups"
             color="primary"
           >
             mdi-ip-network

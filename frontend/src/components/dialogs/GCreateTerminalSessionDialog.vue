@@ -58,7 +58,7 @@ SPDX-License-Identifier: Apache-2.0
                   v-show="!!targetTab.selectedConfig"
                   ref="settings"
                   v-model:target="targetTab.selectedTarget"
-                  :hide-runtime-settings="isShootWorkerless"
+                  :runtime-settings-hidden="hasShootWorkerGroups || targetTab.selectedTarget !== 'shoot'"
                 />
               </v-expansion-panel-text>
             </v-expansion-panel>
@@ -106,7 +106,6 @@ import {
 } from 'pinia'
 
 import { useAuthnStore } from '@/store/authn'
-import { useShootStore } from '@/store/shoot'
 import { useTerminalStore } from '@/store/terminal'
 
 import GDialog from '@/components/dialogs/GDialog.vue'
@@ -118,10 +117,8 @@ import GWebterminalServiceAccountDialog from '@/components/dialogs/GWebterminalS
 
 import { useTerminalConfig } from '@/composables/useTerminalConfig'
 
-import {
-  TargetEnum,
-  isShootStatusHibernated,
-} from '@/utils'
+import { TargetEnum } from '@/utils'
+import { shootItem } from '@/mixins/shootItem'
 
 import {
   filter,
@@ -134,6 +131,7 @@ import {
 } from '@/lodash'
 
 export default {
+
   components: {
     GDialog,
     GTerminalSettings,
@@ -142,6 +140,7 @@ export default {
     GUnverifiedTerminalShortcutsDialog,
     GWebterminalServiceAccountDialog,
   },
+  mixins: [shootItem],
   inject: [
     'api',
     'defaultTarget',
@@ -188,15 +187,6 @@ export default {
     ...mapState(useTerminalStore, [
       'isTerminalShortcutsFeatureEnabled',
     ]),
-    shootItem () {
-      return this.shootByNamespaceAndName(pick(this, 'namespace', 'name'))
-    },
-    isShootStatusHibernated () {
-      return isShootStatusHibernated(get(this.shootItem, 'status'))
-    },
-    isShootWorkerless () {
-      return !this.shootItem?.spec?.provider?.workers?.length
-    },
     valid () {
       switch (this.tab) {
         case 'shortcut-tab': {
@@ -253,7 +243,6 @@ export default {
     },
   },
   methods: {
-    ...mapActions(useShootStore, ['shootByNamespaceAndName']),
     async promptForSelections () {
       this.initialize()
       const confirmed = await this.$refs.gDialog.confirmWithDialog(

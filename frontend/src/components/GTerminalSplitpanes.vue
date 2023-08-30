@@ -33,11 +33,16 @@ SPDX-License-Identifier: Apache-2.0
     <g-create-terminal-session-dialog
       :name="terminalCoordinates.name"
       :namespace="terminalCoordinates.namespace"
+      :shoot-item="shootItem"
     />
   </div>
 </template>
 
 <script>
+import { mapActions } from 'pinia'
+
+import { useShootStore } from '@/store/shoot'
+
 import GSplitpane from '@/components/GSplitpane.vue'
 import GTerminal from '@/components/GTerminal.vue'
 import GCreateTerminalSessionDialog from '@/components/dialogs/GCreateTerminalSessionDialog.vue'
@@ -59,7 +64,13 @@ export default {
     'removeWithId',
     'leavePage',
   ],
+  computed: {
+    shootItem () {
+      return this.shootByNamespaceAndName(this.$route.params)
+    },
+  },
   methods: {
+    ...mapActions(useShootStore, ['shootByNamespaceAndName']),
     droppedAt ({ detail: { mouseOverId: position, sourceElementDropzoneId: sourceId, mouseOverDropzoneId: targetId } }) {
       this.moveTo({ sourceId, targetId, position })
     },

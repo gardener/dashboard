@@ -357,13 +357,17 @@ SPDX-License-Identifier: Apache-2.0
     <g-terminal-settings-dialog
       ref="settings"
       :target="target"
+      :shoot-item="shootItem"
     />
   </div>
 </template>
 
 <script>
 import { reactive } from 'vue'
-import { mapState } from 'pinia'
+import {
+  mapState,
+  mapActions,
+} from 'pinia'
 import { Terminal } from 'xterm'
 import { FitAddon } from 'xterm-addon-fit'
 import { WebLinksAddon } from 'xterm-addon-web-links'
@@ -372,6 +376,7 @@ import 'xterm/css/xterm.css'
 import { useAppStore } from '@/store/app'
 import { useConfigStore } from '@/store/config'
 import { useTerminalStore } from '@/store/terminal'
+import { useShootStore } from '@/store/shoot'
 
 import GDragNDroppableComponent from '@/components/GDragNDroppableComponent.vue'
 import GTerminalSettingsDialog from '@/components/dialogs/GTerminalSettingsDialog.vue'
@@ -534,6 +539,9 @@ export default {
     target () {
       return this.data.target
     },
+    shootItem () {
+      return this.shootByNamespaceAndName(this.$route.params)
+    },
   },
   watch: {
     splitpaneResize () {
@@ -579,6 +587,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions(useShootStore, ['shootByNamespaceAndName']),
     focus () {
       this.term.focus()
     },

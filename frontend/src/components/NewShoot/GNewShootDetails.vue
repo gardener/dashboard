@@ -62,7 +62,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-row>
       <v-col cols="12">
         <v-checkbox
-          v-model="enableWorkerlessShoot"
+          v-model="workerlessShootEnabled"
           label="Workerless Cluster"
           color="primary"
           hide-details
@@ -232,7 +232,7 @@ export default {
         },
       }
     },
-    enableWorkerlessShoot: {
+    workerlessShootEnabled: {
       set (value) {
         this.setWorkerless(value)
       },

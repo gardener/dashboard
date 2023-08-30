@@ -238,9 +238,10 @@ export function createShootResource (context) {
   }
 
   const addons = {}
-  forEach(filter(shootAddonList, addon => addon.visible), addon => {
-    set(addons, [addon.name, 'enabled'], addon.enabled)
-  })
+  const visibleShootAddonList = filter(shootAddonList, 'visible')
+  for (const { name, enabled } of visibleShootAddonList) {
+    addons[name] = { enabled }
+  }
 
   set(shootResource, 'spec.addons', addons)
 

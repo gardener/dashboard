@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
       >
         secure alternatives
       </g-external-link>
-      to access the Shoot cluster.
+      to access the cluster.
     </div>
   </div>
 </template>
