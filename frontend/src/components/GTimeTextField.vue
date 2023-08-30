@@ -29,6 +29,9 @@ const props = defineProps({
   errorMessages: {
     type: Array,
   },
+  hint: {
+    type: String,
+  },
 })
 
 const emit = defineEmits([
@@ -66,9 +69,10 @@ const validationErrors = {
 
 const inputHint = computed(() => {
   if (isSafari.value) {
-    return 'Please enter time in 24-hour format (HH:MM)'
+    const hint = 'Enter time in 24-hour format (HH:MM)'
+    return props.hint ? `${props.hint} ${hint}` : hint
   }
-  return undefined
+  return props.hint
 })
 
 const errorMessages = computed(() => {
