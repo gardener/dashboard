@@ -100,10 +100,7 @@ import {
   toRaw,
 } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
-import {
-  mapState,
-  mapActions,
-} from 'pinia'
+import { mapState } from 'pinia'
 
 import { useAuthnStore } from '@/store/authn'
 import { useTerminalStore } from '@/store/terminal'
