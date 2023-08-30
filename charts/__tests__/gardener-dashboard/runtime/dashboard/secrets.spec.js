@@ -116,18 +116,7 @@ describe('gardener-dashboard', function () {
     })
 
     it('should render the template', async function () {
-      const values = {
-        global: {
-          dashboard: {
-            gitHub: {
-              authentication: {
-                token: 'token'
-              },
-              webhookSecret: 'webhook-secret'
-            }
-          }
-        }
-      }
+      const values = {}
       const documents = await renderTemplates(templates, values)
       expect(documents).toHaveLength(1)
       const [oidcSecret] = documents
