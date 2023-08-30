@@ -9,6 +9,7 @@ import {
   computed,
   reactive,
   markRaw,
+  watch,
 } from 'vue'
 
 import { useLogger } from '@/composables/useLogger'
@@ -117,6 +118,14 @@ export const useSocketStore = defineStore('socket', () => {
       }
     })
   }
+
+  watch(() => authnStore.user, value => {
+    if (!value) {
+      disconnect()
+    } else {
+      connect()
+    }
+  })
 
   return {
     socket: markRaw(socket),

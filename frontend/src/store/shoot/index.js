@@ -8,6 +8,7 @@ import { defineStore } from 'pinia'
 import {
   computed,
   reactive,
+  watch,
 } from 'vue'
 
 import { useLogger } from '@/composables/useLogger'
@@ -17,6 +18,7 @@ import { shootHasIssue } from '@/utils'
 import { isNotFound } from '@/utils/error'
 
 import { useAppStore } from '../app'
+import { useAuthnStore } from '../authn'
 import { useAuthzStore } from '../authz'
 import { useCloudProfileStore } from '../cloudProfile'
 import { useConfigStore } from '../config'
@@ -25,6 +27,7 @@ import { useProjectStore } from '../project'
 import { useSecretStore } from '../secret'
 import { useSocketStore } from '../socket'
 import { useTicketStore } from '../ticket'
+import { useLocalStorageStore } from '../localStorage'
 
 import {
   uriPattern,
@@ -44,6 +47,7 @@ import {
   cloneDeep,
   get,
   map,
+  pick,
   replace,
   difference,
   differenceWith,
@@ -55,6 +59,7 @@ export const useShootStore = defineStore('shoot', () => {
   const logger = useLogger()
 
   const appStore = useAppStore()
+  const authnStore = useAuthnStore()
   const authzStore = useAuthzStore()
   const cloudProfileStore = useCloudProfileStore()
   const configStore = useConfigStore()
@@ -63,6 +68,7 @@ export const useShootStore = defineStore('shoot', () => {
   const ticketStore = useTicketStore()
   const socketStore = useSocketStore()
   const projectStore = useProjectStore()
+  const localStorageStore = useLocalStorageStore()
 
   const context = {
     api,
@@ -375,18 +381,37 @@ export const useShootStore = defineStore('shoot', () => {
     }
   }
 
-  function setShootListFilters (value) {
-    state.shootListFilters = value
+  function initializeShootListFilters () {
+    const isAdmin = authnStore.isAdmin
+    state.shootListFilters = {
+      onlyShootsWithIssues: isAdmin,
+      progressing: true,
+      noOperatorAction: isAdmin,
+      deactivatedReconciliation: isAdmin,
+      hideTicketsWithLabel: isAdmin,
+      ...localStorageStore.allProjectsShootFilter,
+    }
     updateFilteredShoots()
   }
 
-  function setShootListFilter (data) {
+  function toogleShootListFilter (key) {
     if (state.shootListFilters) {
-      const { filter, value } = data
-      state.shootListFilters[filter] = value
+      state.shootListFilters[key] = !state.shootListFilters[key]
       updateFilteredShoots()
     }
   }
+
+  watch(() => state.shootListFilters, value => {
+    localStorageStore.allProjectsShootFilter = pick(value, [
+      'onlyShootsWithIssues',
+      'progressing',
+      'noOperatorAction',
+      'deactivatedReconciliation',
+      'hideTicketsWithLabel',
+    ])
+  }, {
+    deep: true,
+  })
 
   function updateFilteredShoots () {
     try {
@@ -594,8 +619,8 @@ export const useShootStore = defineStore('shoot', () => {
     deleteShoot,
     fetchInfo,
     setSelection,
-    setShootListFilters,
-    setShootListFilter,
+    initializeShootListFilters,
+    toogleShootListFilter,
     setNewShootResource,
     resetNewShootResource,
     setFocusMode,

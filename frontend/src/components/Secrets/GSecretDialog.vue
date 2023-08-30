@@ -119,7 +119,6 @@ SPDX-License-Identifier: Apache-2.0
 import {
   mapActions,
   mapState,
-  mapGetters,
 } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 import {
@@ -231,10 +230,13 @@ export default {
   },
   computed: {
     ...mapState(useAuthzStore, ['namespace']),
-    ...mapGetters(useSecretStore, ['infrastructureSecretList', 'dnsSecretList']),
-    ...mapGetters(useCloudProfileStore, ['sortedInfrastructureKindList']),
-    ...mapGetters(useGardenerExtensionStore, ['sortedDnsProviderList']),
-    ...mapGetters(useShootStore, ['shootList']),
+    ...mapState(useSecretStore, [
+      'infrastructureSecretList',
+      'dnsSecretList',
+    ]),
+    ...mapState(useCloudProfileStore, ['sortedInfrastructureKindList']),
+    ...mapState(useGardenerExtensionStore, ['sortedDnsProviderList']),
+    ...mapState(useShootStore, ['shootList']),
     dnsProviderTypes () {
       return map(this.sortedDnsProviderList, 'type')
     },

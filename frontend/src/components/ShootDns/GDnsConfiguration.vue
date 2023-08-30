@@ -23,7 +23,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import {
   mapActions,
-  mapGetters,
+  mapState,
 } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 
@@ -54,7 +54,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(useShootStagingStore, [
+    ...mapState(useShootStagingStore, [
       'getDnsConfiguration',
     ]),
   },

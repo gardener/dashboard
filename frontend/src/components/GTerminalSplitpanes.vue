@@ -12,9 +12,9 @@ SPDX-License-Identifier: Apache-2.0
     @keydown="keyMonitor"
   >
     <g-splitpane
-      v-if="splitpanesState.splitpaneTree"
+      v-if="splitpaneTree"
       ref="splitpane"
-      :splitpane-tree="splitpanesState.splitpaneTree"
+      :splitpane-tree="splitpaneTree"
     >
       <template #default="{item}">
         <slot
@@ -58,11 +58,12 @@ export default {
   inject: [
     'api',
     'terminalCoordinates',
-    'splitpanesState',
+    'splitpaneTree',
     'moveTo',
     'add',
     'removeWithId',
     'leavePage',
+    'isTreeEmpty',
   ],
   computed: {
     shootItem () {
@@ -93,7 +94,7 @@ export default {
     },
     onTermination ({ uuid }) {
       this.removeWithId(uuid)
-      if (this.splitpanesState.tree.isEmpty()) {
+      if (this.isTreeEmpty()) {
         this.leavePage()
       }
     },

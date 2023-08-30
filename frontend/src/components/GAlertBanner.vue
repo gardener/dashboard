@@ -10,6 +10,8 @@ SPDX-License-Identifier: Apache-2.0
     class="alertBanner"
     :type="type"
     :color="color"
+    :rounded="0"
+    variant="flat"
     closable
   >
     <slot name="message">
@@ -27,14 +29,15 @@ SPDX-License-Identifier: Apache-2.0
 import {
   computed,
   useSlots,
+  toRef,
   toRefs,
 } from 'vue'
-import { useLocalStorage } from '@vueuse/core'
+
+import { useLocalStorageStore } from '@/store/localStorage'
 
 import { transformHtml } from '@/utils'
 
 const slots = useSlots()
-const hiddenMessages = useLocalStorage('global/alert-banner/hidden-messages', {})
 
 // props
 const props = defineProps({
@@ -57,6 +60,8 @@ const props = defineProps({
 })
 
 const { type, color } = toRefs(props)
+const localStorageStore = useLocalStorageStore()
+const hiddenMessages = toRef(localStorageStore, 'hiddenMessages')
 
 // computed
 const hasMessage = computed(() => {

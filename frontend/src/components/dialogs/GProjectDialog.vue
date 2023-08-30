@@ -219,7 +219,7 @@ export default {
   computed: {
     ...mapState(useMemberStore, ['memberList']),
     ...mapState(useAuthnStore, ['username']),
-    ...mapState(useProjectStore, ['projectNamesFromProjectList']),
+    ...mapState(useProjectStore, ['projectNames']),
     ...mapState(useConfigStore, ['costObjectSettings']),
     visible: {
       get () {
@@ -228,9 +228,6 @@ export default {
       set (value) {
         this.$emit('update:modelValue', value)
       },
-    },
-    projectNames () {
-      return this.projectNamesFromProjectList
     },
     projectDetails () {
       return getProjectDetails(this.project)
