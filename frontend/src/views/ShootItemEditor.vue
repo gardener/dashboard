@@ -33,11 +33,11 @@ SPDX-License-Identifier: Apache-2.0
 import ConfirmDialog from '@/components/dialogs/ConfirmDialog'
 import { mapState, mapGetters } from 'vuex'
 import { replaceShoot } from '@/utils/api'
+import { errorDetailsFromError } from '@/utils/error'
 
 import asyncRef from '@/mixins/asyncRef'
 
 // lodash
-import get from 'lodash/get'
 import pick from 'lodash/pick'
 
 const ShootEditor = () => import('@/components/ShootEditor')
@@ -115,7 +115,14 @@ export default {
         this.snackbarText = 'Cluster specification has been successfully updated'
         this.snackbar = true
       } catch (err) {
-        this.errorMessage = get(err, 'response.data.message', err.message)
+        this.errorMessage = 'Failed to save changes.'
+        if (err.response) {
+          const errorDetails = errorDetailsFromError(err)
+          this.detailedErrorMessage = errorDetails.detailedMessage
+        } else {
+          this.detailedErrorMessage = err.message
+        }
+        this.logger.error(this.errorMessage, this.detailedErrorMessage, err)
       }
     },
     confirmEditorNavigation () {

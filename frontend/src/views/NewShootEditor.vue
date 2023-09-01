@@ -96,10 +96,15 @@ export default {
           }
         })
       } catch (err) {
-        const errorDetails = errorDetailsFromError(err)
+        this.errorMessage = errorDetailsFromError(err)
         this.errorMessage = 'Failed to create cluster.'
-        this.detailedErrorMessage = errorDetails.detailedMessage
-        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        if (err.response) {
+          const errorDetails = errorDetailsFromError(err)
+          this.detailedErrorMessage = errorDetails.detailedMessage
+        } else {
+          this.detailedErrorMessage = err.message
+        }
+        this.logger.error(this.errorMessage, this.detailedErrorMessage, err)
       }
     },
     async isShootContentDirty () {
