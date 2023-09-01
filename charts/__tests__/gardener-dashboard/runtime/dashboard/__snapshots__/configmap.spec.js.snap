@@ -374,6 +374,44 @@ Li4u
 }
 `;
 
+exports[`gardener-dashboard configmap terminal config garden cluster custom rolebBindings should default apiGroup 1`] = `
+Object {
+  "terminal": Object {
+    "garden": Object {
+      "roleBindings": Array [
+        Object {
+          "bindingKind": "ClusterRoleBinding",
+          "roleRef": Object {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "ClusterRole",
+            "name": "test-role",
+          },
+        },
+      ],
+    },
+  },
+}
+`;
+
+exports[`gardener-dashboard configmap terminal config garden cluster custom rolebBindings should render the template 1`] = `
+Object {
+  "terminal": Object {
+    "garden": Object {
+      "roleBindings": Array [
+        Object {
+          "bindingKind": "ClusterRoleBinding",
+          "roleRef": Object {
+            "apiGroup": "rbac.authorization.k8s.foo",
+            "kind": "ClusterRole",
+            "name": "test-role",
+          },
+        },
+      ],
+    },
+  },
+}
+`;
+
 exports[`gardener-dashboard configmap terminal config should render the template 1`] = `
 Object {
   "terminal": Object {
