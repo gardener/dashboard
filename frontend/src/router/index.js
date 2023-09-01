@@ -7,6 +7,8 @@
 import {
   createRouter as createVueRouter,
   createWebHistory,
+  isNavigationFailure,
+  NavigationFailureType,
 } from 'vue-router'
 
 import { useAppStore } from '@/store/app'
@@ -34,10 +36,23 @@ export function createRouter () {
   })
 
   router.onError(err => {
-    logger.error('Router error:', err)
+    logger.error('Uncaught error inside of a navigation guard: %s', err.stack)
     appStore.loading = false
-    appStore.setError(err)
-    router.push({ name: 'Error' })
+    appStore.setRouterError(err)
+  })
+
+  router.afterEach((to, from, failure) => {
+    if (isNavigationFailure(failure)) {
+      if (isNavigationFailure(failure, NavigationFailureType.duplicated)) {
+        logger.info('Navigation was prevented because we are already at the target location: %s', failure)
+      } else if (isNavigationFailure(failure, NavigationFailureType.canceled)) {
+        logger.info('Navigation took place before the current navigation could finish: %s', failure)
+      } else if (isNavigationFailure(failure, NavigationFailureType.aborted)) {
+        logger.info('Navigation was aborted inside of a navigation guard: %s', failure)
+      } else {
+        logger.info('Navigation failure: %s', failure)
+      }
+    }
   })
 
   return router
