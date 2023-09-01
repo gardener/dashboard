@@ -60,9 +60,12 @@ export default {
       await this.reset()
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
-        await this.updateConfiguration()
+        if (await this.updateConfiguration()) {
+          this.componentKey = uuidv4() // force re-render
+        }
+      } else {
+        this.componentKey = uuidv4() // force re-render
       }
-      this.componentKey = uuidv4() // force re-render
     },
     async updateConfiguration () {
       try {
@@ -81,12 +84,14 @@ export default {
           name: this.shootName,
           data: noScheduleAnnotation
         })
+        return true
       } catch (err) {
         const errorMessage = 'Could not save hibernation configuration'
         const errorDetails = errorDetailsFromError(err)
         const detailedErrorMessage = errorDetails.detailedMessage
         this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
         console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        return false
       }
     },
     async reset () {

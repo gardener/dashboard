@@ -147,10 +147,14 @@ export default {
       await this.reset()
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
-        await this.updateConfiguration()
+        if (await this.updateConfiguration()) {
+          this.tabValue = 'overview'
+          this.componentKey = uuidv4() // force re-render
+        }
+      } else {
+        this.tabValue = 'overview'
+        this.componentKey = uuidv4() // force re-render
       }
-      this.tabValue = 'overview'
-      this.componentKey = uuidv4() // force re-render
     },
     async updateConfiguration () {
       try {
@@ -161,12 +165,19 @@ export default {
           data = await this.getWorkerEditorData()
         }
         await patchShootProvider({ namespace: this.shootNamespace, name: this.shootName, data })
+        return true
       } catch (err) {
         const errorMessage = 'Could not save worker configuration'
-        const errorDetails = errorDetailsFromError(err)
-        const detailedErrorMessage = errorDetails.detailedMessage
+        let detailedErrorMessage
+        if (err.response) {
+          const errorDetails = errorDetailsFromError(err)
+          detailedErrorMessage = errorDetails.detailedMessage
+        } else {
+          detailedErrorMessage = err.message
+        }
         this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
-        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        this.logger.error(errorMessage, detailedErrorMessage, err)
+        return false
       }
     },
     async reset () {
