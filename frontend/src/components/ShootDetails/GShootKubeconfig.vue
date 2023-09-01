@@ -106,7 +106,7 @@ import GCodeBlock from '@/components/GCodeBlock.vue'
 import GGardenloginInfo from '@/components/GGardenloginInfo.vue'
 import GStaticTokenKubeconfigConfiguration from '@/components/GStaticTokenKubeconfigConfiguration.vue'
 import GAdminKubeConfigRequest from '@/components/GAdminKubeConfigRequest'
-import filter from 'lodash/filter'
+import { filter } from '@/lodash'
 import { useConfigStore } from '@/store/config'
 import {
   mapState,
