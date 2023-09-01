@@ -76,7 +76,7 @@ SPDX-License-Identifier: Apache-2.0
       <g-admin-kube-config-request
         v-if="isAdminKubeconfigType"
         :expirations="possibleAdminKubeconfigExpirationSettings"
-        :shootItem="shootItem"
+        :shoot-item="shootItem"
         @update:expiration="onExpirationUpdate"
       />
     </template>
