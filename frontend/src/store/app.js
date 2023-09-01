@@ -8,6 +8,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 import moment from '@/utils/moment'
+import { errorDetailsFromError } from '@/utils/error'
 
 export const useAppStore = defineStore('app', () => {
   const ready = ref(false)
@@ -49,7 +50,15 @@ export const useAppStore = defineStore('app', () => {
   }
 
   function setError (value) {
-    setAlertWithType('error', value)
+    let message
+    if (value?.response) {
+      const errorDetails = errorDetailsFromError(value)
+      message = errorDetails.detailedMessage
+    } else {
+      message = value?.message
+    }
+
+    setAlertWithType('error', message)
   }
 
   function setSuccess (value) {
