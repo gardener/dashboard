@@ -25,6 +25,7 @@ import {
   defaultCriNameByKubernetesVersion,
   UNKNOWN_EXPIRED_TIMESTAMP
 } from '@/utils'
+import { errorDetailsFromError } from '@/utils/error'
 import { v4 as uuidv4 } from '@/utils/uuid'
 import { hash } from '@/utils/crypto'
 import {
@@ -1543,7 +1544,15 @@ const actions = {
     return state.loading
   },
   setError ({ commit }, value) {
-    commit('SET_ALERT', { message: get(value, 'message', ''), type: 'error' })
+    let message
+    if (value?.response) {
+      const errorDetails = errorDetailsFromError(value)
+      message = errorDetails.detailedMessage
+    } else {
+      message = value?.message
+    }
+
+    commit('SET_ALERT', { message, type: 'error' })
     return state.alert
   },
   setAlert ({ commit }, value) {
