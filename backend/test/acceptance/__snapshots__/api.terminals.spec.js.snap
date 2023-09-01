@@ -624,7 +624,7 @@ Array [
                 "roleRef": Object {
                   "apiGroup": "rbac.authorization.k8s.io",
                   "kind": "ClusterRole",
-                  "name": "cluster-admin",
+                  "name": "gardener.cloud:system:administrators",
                 },
               },
             ],
