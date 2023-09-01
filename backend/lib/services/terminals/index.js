@@ -209,7 +209,7 @@ async function getTargetCluster ({ user, namespace, name, target, preferredHost,
       if (isAdmin) {
         targetCluster.namespace = 'garden'
         targetCluster.credentials = getConfigValue('terminal.garden.operatorCredentials')
-        targetCluster.authorization.roleBindings = [
+        targetCluster.authorization.roleBindings = getConfigValue('terminal.garden.roleBindings', [
           {
             roleRef: {
               apiGroup: 'rbac.authorization.k8s.io',
@@ -218,7 +218,7 @@ async function getTargetCluster ({ user, namespace, name, target, preferredHost,
             },
             bindingKind: 'ClusterRoleBinding'
           }
-        ]
+        ])
       } else {
         const projectName = findProjectByNamespace(namespace).metadata.name
         targetCluster.namespace = namespace
