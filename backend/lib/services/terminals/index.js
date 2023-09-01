@@ -214,7 +214,7 @@ async function getTargetCluster ({ user, namespace, name, target, preferredHost,
             roleRef: {
               apiGroup: 'rbac.authorization.k8s.io',
               kind: 'ClusterRole',
-              name: 'cluster-admin'
+              name: 'gardener.cloud:system:administrators'
             },
             bindingKind: 'ClusterRoleBinding'
           }
