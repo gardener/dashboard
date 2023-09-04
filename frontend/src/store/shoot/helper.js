@@ -415,7 +415,7 @@ export function getRawVal (context, item, column) {
     case 'technicalId':
       return item.status?.technicalID
     case 'workers':
-      return item.spec.provider.workers?.length || 'workerless'
+      return item.spec.provider.workers?.length ?? 0
     default: {
       if (startsWith(column, 'Z_')) {
         const path = get(projectStore.shootCustomFields, [column, 'path'])
@@ -488,9 +488,6 @@ export function getSortVal (context, item, sortBy) {
         name: metadata.name,
       })
     }
-    case 'workers': {
-      return value === 'workerless' ? 0 : value
-    }
     default:
       return toLower(value)
   }
@@ -517,7 +514,6 @@ export function searchItemsFn (state, context) {
       getRawVal(context, item, 'ticketLabels'),
       getRawVal(context, item, 'errorCodes'),
       getRawVal(context, item, 'controlPlaneHighAvailability'),
-      getRawVal(context, item, 'workers'),
       ...map(searchableCustomFields, ({ key }) => getRawVal(context, item, key)),
     ]
 
@@ -525,6 +521,13 @@ export function searchItemsFn (state, context) {
       lastSearchString = search
       searchQuery = parseSearch(search)
     }
+
+    if (includes(map(searchQuery.terms, 'value'), 'workerless')) {
+      if (getRawVal(context, item, 'workers') === 0) {
+        return true
+      }
+    }
+
     return searchQuery.matches(values)
   }
 }
