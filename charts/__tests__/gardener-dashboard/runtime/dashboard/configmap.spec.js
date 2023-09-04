@@ -455,6 +455,59 @@ describe('gardener-dashboard', function () {
         const config = yaml.load(configMap.data['config.yaml'])
         expect(pick(config, ['terminal'])).toMatchSnapshot()
       })
+
+      describe('garden cluster custom rolebBindings', function () {
+        it('should render the template', async function () {
+          const values = {
+            global: {
+              terminal: {
+                garden: {
+                  roleBindings: [
+                    {
+                      roleRef: {
+                        apiGroup: 'rbac.authorization.k8s.foo',
+                        kind: 'ClusterRole',
+                        name: 'test-role'
+                      },
+                      bindingKind: 'ClusterRoleBinding'
+                    }
+                  ]
+                }
+              }
+            }
+          }
+          const documents = await renderTemplates(templates, values)
+          expect(documents).toHaveLength(1)
+          const [configMap] = documents
+          const config = yaml.load(configMap.data['config.yaml'])
+          expect(pick(config, ['terminal.garden.roleBindings'])).toMatchSnapshot()
+        })
+
+        it('should default apiGroup', async function () {
+          const values = {
+            global: {
+              terminal: {
+                garden: {
+                  roleBindings: [
+                    {
+                      roleRef: {
+                        kind: 'ClusterRole',
+                        name: 'test-role'
+                      },
+                      bindingKind: 'ClusterRoleBinding'
+                    }
+                  ]
+                }
+              }
+            }
+          }
+          const documents = await renderTemplates(templates, values)
+          expect(documents).toHaveLength(1)
+          const [configMap] = documents
+          const config = yaml.load(configMap.data['config.yaml'])
+          expect(pick(config, ['terminal.garden.roleBindings'])).toMatchSnapshot()
+        })
+      })
     })
 
     describe('themes', function () {

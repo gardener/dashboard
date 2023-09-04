@@ -147,6 +147,16 @@ data:
       garden:
         operatorCredentials:
 {{ toYaml .Values.global.terminal.garden.operatorCredentials | trim | indent 10 }}
+        {{- if .Values.global.terminal.garden.roleBindings }}
+        roleBindings:
+        {{- range .Values.global.terminal.garden.roleBindings }}
+        - roleRef:
+            apiGroup: {{ default "rbac.authorization.k8s.io" .roleRef.apiGroup }}
+            kind: {{ required ".Values.global.terminal.garden.roleBindings.roleRef.kind is required" .roleRef.kind }}
+            name: {{ required ".Values.global.terminal.garden.roleBindings.roleRef.name is required" .roleRef.name }}
+          bindingKind: {{ required ".Values.global.terminal.garden.roleBindings.bindingKind is required" .bindingKind }}
+        {{- end }}
+        {{- end }}
     {{- end }}
     frontend:
       {{- if .Values.global.dashboard.frontendConfig.helpMenuItems }}

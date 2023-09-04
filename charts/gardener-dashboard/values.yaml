@@ -435,6 +435,13 @@ global:
   #       serviceAccountRef: # serviceAccountRef or secretRef
   #         name: dashboard-terminal-admin
   #         namespace: garden
+  #     # role bindings that the access service account within the terminal pod should receive
+  #     roleBindings:
+  #     - roleRef:
+  #         apiGroup: 'rbac.authorization.k8s.io'
+  #         kind: 'ClusterRole'
+  #         name: 'gardener.cloud:system:administrators'
+  #       bindingKind: 'ClusterRoleBinding'
   #   bootstrap:
   #     disabled: true # indicates if bootstrapping resources required for the terminal feature is generally disabled
   #     seedDisabled: false # indicates if bootstrapping resources for seeds is disabled, required for gardener operator terminals
