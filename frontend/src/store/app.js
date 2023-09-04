@@ -39,7 +39,9 @@ export const useAppStore = defineStore('app', () => {
       alert.message = value
     } else if (value) {
       const { message = '', title } = value
-      alert.message = message
+      alert.message = value.response
+        ? errorDetailsFromError(value).detailedMessage
+        : message
       if (title) {
         alert.title = title
       }
