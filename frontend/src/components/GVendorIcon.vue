@@ -119,8 +119,8 @@ const mdiIcon = computed(() => {
 const iconStyle = computed(() => {
   const maxIconSize = props.size - 4
   return {
-    maxHeight: `${maxIconSize}px`,
-    maxWidth: `${maxIconSize}px`,
+    height: `${maxIconSize}px`,
+    width: `${maxIconSize}px`,
   }
 })
 
