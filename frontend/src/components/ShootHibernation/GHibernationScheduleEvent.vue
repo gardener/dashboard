@@ -30,31 +30,29 @@ SPDX-License-Identifier: Apache-2.0
           />
         </v-col>
         <v-col cols="2">
-          <v-text-field
+          <g-time-text-field
             ref="wakeUpTime"
             v-model="wakeUpTime"
             color="primary"
             label="Wake up at"
             :error-messages="getErrorMessages('wakeUpTime')"
-            type="time"
             clearable
             variant="underlined"
             @blur="touchIfNothingFocused"
-            @input="onInputWakeUpTime"
+            @update:model-value="onInputWakeUpTime"
           />
         </v-col>
         <v-col cols="2">
-          <v-text-field
+          <g-time-text-field
             ref="hibernateTime"
             v-model="hibernateTime"
             color="primary"
             label="Hibernate at"
             :error-messages="getErrorMessages('hibernateTime')"
-            type="time"
             clearable
             variant="underlined"
             @blur="touchIfNothingFocused"
-            @input="onInputHibernateTime"
+            @update:model-value="onInputHibernateTime"
           />
         </v-col>
         <v-col cols="3">
@@ -89,6 +87,8 @@ import {
 } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
+import GTimeTextField from '@/components/GTimeTextField.vue'
+
 import { getValidationErrors } from '@/utils'
 import moment from '@/utils/moment'
 
@@ -118,6 +118,9 @@ const validationErrors = {
 }
 
 export default {
+  components: {
+    GTimeTextField,
+  },
   props: {
     scheduleEvent: {
       type: Object,

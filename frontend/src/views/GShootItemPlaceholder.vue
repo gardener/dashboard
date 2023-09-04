@@ -3,7 +3,6 @@ SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener con
 
 SPDX-License-Identifier: Apache-2.0
 -->
-
 <template>
   <component
     :is="component"
@@ -25,29 +24,26 @@ import { useTerminalStore } from '@/store/terminal'
 import GShootItemLoading from '@/views/GShootItemLoading.vue'
 import GShootItemError from '@/views/GShootItemError.vue'
 
-import {
-  get,
-  includes,
-} from '@/lodash'
-
 export default {
   components: {
     GShootItemLoading,
     GShootItemError,
   },
-  async beforeRouteLeave (to, from, next) {
-    try {
-      this.component = 'div'
-      await this.unsubscribe()
-    } finally {
-      next()
-    }
+  beforeRouteEnter (to, from, next) {
+    next(vm => vm.load())
+  },
+  beforeRouteUpdate (to, from) {
+    this.load()
+  },
+  beforeRouteLeave (to, from) {
+    this.leaving = true
+    this.unsubscribe()
   },
   data () {
     return {
+      leaving: false,
       loading: false,
-      component: undefined,
-      error: undefined,
+      error: null,
       unsubscribeShootStore: () => {},
     }
   },
@@ -60,6 +56,18 @@ export default {
       'canGetSecrets',
       'canUseProjectTerminalShortcuts',
     ]),
+    component () {
+      if (this.error) {
+        return 'g-shoot-item-error'
+      }
+      if (this.loading) {
+        return 'g-shoot-item-loading'
+      }
+      if (this.leaving) {
+        return 'div'
+      }
+      return 'router-view'
+    },
     componentProperties () {
       switch (this.component) {
         case 'g-shoot-item-error': {
@@ -68,17 +76,16 @@ export default {
             reason = 'Oops, something went wrong',
             message = 'An unexpected error occurred. Please try again later',
           } = this.error
-          return { code, text: reason, message }
+          return {
+            code,
+            text: reason,
+            message,
+          }
         }
         default: {
           return {}
         }
       }
-    },
-  },
-  watch: {
-    '$route' (value) {
-      this.load(value)
     },
   },
   mounted () {
@@ -95,7 +102,6 @@ export default {
         }
       }
     })
-    this.load(this.$route)
   },
   beforeUnmount () {
     this.unsubscribeShootStore()
@@ -113,8 +119,8 @@ export default {
     ]),
     handleShootEvent ({ type, object }) {
       const metadata = object.metadata
-      const { namespace, name } = get(this.$route, 'params', {})
-      if (metadata.namespace !== namespace || metadata.name !== name) {
+      const routeParams = this.$route.params ?? {}
+      if (metadata.namespace !== routeParams.namespace || metadata.name !== routeParams.name) {
         return
       }
       if (type === 'DELETED') {
@@ -122,27 +128,27 @@ export default {
           code: 410,
           reason: 'Cluster is gone',
         })
-        this.component = 'g-shoot-item-error'
-      } else if (type === 'ADDED' && includes([404, 410], get(this.error, 'code'))) {
-        this.error = undefined
-        this.component = 'router-view'
+      } else if (type === 'ADDED' && [404, 410].includes(this.error?.code)) {
+        this.error = null
       }
     },
-    async load ({ name, params }) {
-      this.error = undefined
-      this.component = 'g-shoot-item-loading'
+    async load () {
+      const routeName = this.$route.name
+      const routeParams = this.$route.params
+      this.error = null
+      this.leaving = false
+      this.loading = true
       try {
         const promises = [
-          this.subscribe(params),
+          this.subscribe(routeParams),
         ]
-        if (includes(['ShootItem', 'ShootItemHibernationSettings'], name) && this.canGetSecrets) {
+        if (['ShootItem', 'ShootItemHibernationSettings'].includes(routeName) && this.canGetSecrets) {
           promises.push(this.fetchSecrets()) // Required for purpose configuration
         }
-        if (includes(['ShootItem', 'ShootItemHibernationSettings', 'ShootItemTerminal'], name) && this.canUseProjectTerminalShortcuts) {
+        if (['ShootItem', 'ShootItemHibernationSettings', 'ShootItemTerminal'].includes(routeName) && this.canUseProjectTerminalShortcuts) {
           promises.push(this.ensureProjectTerminalShortcutsLoaded())
         }
         await Promise.all(promises)
-        this.component = 'router-view'
       } catch (err) {
         let { statusCode, code = statusCode, reason, message } = err
         if (code === 404) {
@@ -154,8 +160,12 @@ export default {
           reason = 'Oops, something went wrong'
           message = 'An unexpected error occurred. Please try again later'
         }
-        this.error = Object.assign(new Error(message), { code, reason })
-        this.component = 'g-shoot-item-error'
+        this.error = Object.assign(new Error(message), {
+          code,
+          reason,
+        })
+      } finally {
+        this.loading = false
       }
     },
   },

@@ -22,9 +22,6 @@ import GShootItemEditor from '@/views/GShootItemEditor.vue'
 import GAccount from '@/views/GAccount.vue'
 import GSettings from '@/views/GSettings.vue'
 
-/* Components */
-import GRouterView from '@/components/GRouterView.vue'
-
 import {
   homeBreadcrumbs,
   newProjectBreadcrumbs,
@@ -101,7 +98,10 @@ export function createRoutes () {
       component: GProjectPlaceholder,
       children: [
         { path: '', redirect: 'shoots' },
-        shootListHierarchy('shoots'),
+        shootListRoute('shoots'),
+        newShootRoute('shoots/+'),
+        newShootEditorRoute('shoots/+/yaml'),
+        shootItemHierarchy('shoots/:name'),
         secretListRoute('secrets'),
         secretItemRoute('secrets/:name'),
         membersRoute('members'),
@@ -115,20 +115,6 @@ export function createRoutes () {
             breadcrumbs: notFoundBreadcrumbs,
           },
         },
-      ],
-    }
-  }
-
-  /* Shoot List Hierachy "/namespace/:namespace/shoots" */
-  function shootListHierarchy (path) {
-    return {
-      path,
-      component: GRouterView,
-      children: [
-        shootListRoute(''),
-        newShootRoute('+'),
-        newShootEditorRoute('+/yaml'),
-        shootItemHierarchy(':name'),
       ],
     }
   }
