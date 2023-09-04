@@ -8,6 +8,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 import moment from '@/utils/moment'
+import { errorDetailsFromError } from '@/utils/error'
 
 export const useAppStore = defineStore('app', () => {
   const ready = ref(false)
@@ -38,7 +39,9 @@ export const useAppStore = defineStore('app', () => {
       alert.message = value
     } else if (value) {
       const { message = '', title } = value
-      alert.message = message
+      alert.message = value.response
+        ? errorDetailsFromError(value).detailedMessage
+        : message
       if (title) {
         alert.title = title
       }

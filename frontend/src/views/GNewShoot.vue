@@ -265,7 +265,7 @@ export default {
       errorMessage: undefined,
       detailedErrorMessage: undefined,
       isShootCreated: false,
-      userInterActionBus: new mitt(), // eslint-disable-line new-cap
+      userInterActionBus: mitt(),
     }
   },
   computed: {
