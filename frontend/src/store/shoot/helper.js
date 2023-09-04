@@ -3,7 +3,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
-import { unref } from 'vue'
+
 import semver from 'semver'
 
 import {
@@ -60,7 +60,7 @@ export function keyForShoot ({ name, namespace }) {
 export function findItem (state) {
   return ({ name, namespace }) => {
     const key = keyForShoot({ name, namespace })
-    return unref(state.shoots)[key]
+    return state.shoots[key]
   }
 }
 
