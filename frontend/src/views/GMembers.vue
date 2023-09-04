@@ -289,17 +289,18 @@ import {
   computed,
   markRaw,
   inject,
+  watch,
 } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import download from 'downloadjs'
-import { useLocalStorage } from '@vueuse/core'
 
 import { useAuthzStore } from '@/store/authz'
 import { useProjectStore } from '@/store/project'
 import { useAuthnStore } from '@/store/authn'
 import { useMemberStore } from '@/store/member'
 import { useAppStore } from '@/store/app'
+import { useLocalStorageStore } from '@/store/localStorage'
 
 import GUserRow from '@/components/Members/GUserRow.vue'
 import GServiceAccountRow from '@/components/Members/GServiceAccountRow.vue'
@@ -346,12 +347,13 @@ import {
 const renderComponent = inject('renderComponent')
 
 const api = useApi()
+const router = useRouter()
 const projectStore = useProjectStore()
 const authzStore = useAuthzStore()
 const authnStore = useAuthnStore()
 const memberStore = useMemberStore()
 const appStore = useAppStore()
-const router = useRouter()
+const localStorageStore = useLocalStorageStore()
 
 const userAddDialog = ref(false)
 const serviceAccountAddDialog = ref(false)
@@ -372,11 +374,11 @@ const userPage = ref(1)
 const serviceAccountPage = ref(1)
 
 const {
-  namespace,
-  projectFromProjectList: project,
+  project,
   projectList,
 } = storeToRefs(projectStore)
 const {
+  namespace,
   canManageMembers,
   canManageServiceAccountMembers,
   canCreateServiceAccounts,
@@ -386,13 +388,14 @@ const {
   isAdmin,
 } = storeToRefs(authnStore)
 const { list: memberList } = storeToRefs(memberStore)
-
-const userAccountSelectedColumns = useLocalStorage('members/useraccount-list/selected-columns', {})
-const userItemsPerPage = useLocalStorage('members/useraccount-list/itemsPerPage', 10)
-const userSortBy = useLocalStorage('members/useraccount-list/sortBy', [{ key: 'username', order: 'asc' }])
-const serviceAccountSelectedColumns = useLocalStorage('members/serviceaccount-list/selected-columns', {})
-const serviceAccountItemsPerPage = useLocalStorage('members/serviceaccount-list/itemsPerPage', 10)
-const serviceAccountSortBy = useLocalStorage('members/serviceaccount-list/sortBy', [{ key: 'displayName', order: 'asc' }])
+const {
+  userSelectedColumns,
+  userItemsPerPage,
+  userSortBy,
+  serviceAccountSelectedColumns,
+  serviceAccountItemsPerPage,
+  serviceAccountSortBy,
+} = storeToRefs(localStorageStore)
 
 const confirmDialog = ref(null)
 
@@ -468,7 +471,7 @@ const userAccountTableHeaders = computed(() => {
   return map(headers, header => ({
     ...header,
     class: 'nowrap',
-    selected: get(userAccountSelectedColumns.value, header.key, header.defaultSelected),
+    selected: get(userSelectedColumns.value, header.key, header.defaultSelected),
   }))
 })
 
@@ -554,6 +557,17 @@ const serviceAccountTableHeaders = computed(() => {
 const visibleServiceAccountTableHeaders = computed(() => {
   return filter(serviceAccountTableHeaders.value, ['selected', true])
 })
+
+watch(namespace, () => {
+  reset()
+})
+
+function reset () {
+  userFilter.value = ''
+  serviceAccountFilter.value = ''
+  userPage.value = 1
+  serviceAccountPage.value = 1
+}
 
 function setKubeconfigError (err) {
   appStore.alert = {
@@ -772,11 +786,11 @@ function sortItems (items, sortByArr, secondSortCriteria) {
 }
 
 function setSelectedHeaderUserAccount (header) {
-  userAccountSelectedColumns.value[header.key] = !header.selected
+  userSelectedColumns.value[header.key] = !header.selected
 }
 
 function resetTableSettingsUserAccount () {
-  userAccountSelectedColumns.value = mapTableHeader(userAccountTableHeaders.value, 'defaultSelected')
+  userSelectedColumns.value = mapTableHeader(userAccountTableHeaders.value, 'defaultSelected')
   userItemsPerPage.value = 10
   userSortBy.value = [{ key: 'username', order: 'asc' }]
 }

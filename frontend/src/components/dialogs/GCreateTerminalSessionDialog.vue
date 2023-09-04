@@ -143,8 +143,8 @@ export default {
   },
   inject: [
     'api',
+    'newTerminalPrompt',
     'defaultTarget',
-    'splitpanesState',
     'setSelections',
   ],
   provide () {
@@ -242,8 +242,8 @@ export default {
     config (value) {
       this.targetTab.selectedConfig = toRaw(value)
     },
-    async 'splitpanesState.newTerminal.show' (newVal, oldVal) {
-      if (newVal && !oldVal) {
+    async newTerminalPrompt (value) {
+      if (value) {
         await this.promptForSelections()
       }
     },

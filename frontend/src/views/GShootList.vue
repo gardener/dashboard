@@ -73,6 +73,7 @@ SPDX-License-Identifier: Apache-2.0
             <template #activator="{ props }">
               <v-text-field
                 v-bind="props"
+                :model-value="shootSearch"
                 prepend-inner-icon="mdi-magnify"
                 color="primary"
                 label="Search"
@@ -84,8 +85,8 @@ SPDX-License-Identifier: Apache-2.0
                 clear-icon="mdi-close"
                 density="compact"
                 class="g-table-search-field mr-3"
-                @update:model-value="onInputSearch"
-                @keyup.esc="shootSearch = ''"
+                @update:model-value="onUpdateShootSearch"
+                @keyup.esc="resetShootSearch"
               />
             </template>
             Search terms are <span class="font-weight-bold">ANDed</span>.<br>
@@ -156,7 +157,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-data-table
         v-model:page="page"
         v-model:sort-by="sortByInternal"
-        v-model:items-per-page="itemsPerPage"
+        v-model:items-per-page="shootItemsPerPage"
         :headers="visibleHeaders"
         :items="sortedAndFilteredItems"
         hover
@@ -180,7 +181,7 @@ SPDX-License-Identifier: Apache-2.0
         <template #bottom="{ pageCount }">
           <g-data-table-footer
             v-model:page="page"
-            v-model:items-per-page="itemsPerPage"
+            v-model:items-per-page="shootItemsPerPage"
             :items-length="sortedAndFilteredItems.length"
             :items-per-page-options="itemsPerPageOptions"
             :page-count="pageCount"
@@ -223,9 +224,9 @@ import {
   defineAsyncComponent,
   toRaw,
 } from 'vue'
-import { useLocalStorage } from '@vueuse/core'
 import {
   mapState,
+  mapWritableState,
   mapActions,
 } from 'pinia'
 
@@ -235,6 +236,7 @@ import { useShootStore } from '@/store/shoot'
 import { useSocketStore } from '@/store/socket'
 import { useProjectStore } from '@/store/project'
 import { useConfigStore } from '@/store/config'
+import { useLocalStorageStore } from '@/store/localStorage'
 
 import GToolbar from '@/components/GToolbar.vue'
 import GShootListRow from '@/components/GShootListRow.vue'
@@ -255,7 +257,6 @@ import {
   map,
   mapKeys,
   mapValues,
-  pick,
   some,
   sortBy,
   startsWith,
@@ -281,22 +282,22 @@ export default {
     })
   },
   beforeRouteUpdate (to, from, next) {
-    this.shootSearch = null
+    this.resetShootSearch()
     this.updateTableSettings()
     this.focusModeInternal = false
     next()
   },
   beforeRouteLeave (to, from, next) {
     this.cachedItems = this.shootList.slice(0)
-    this.shootSearch = null
+    this.resetShootSearch()
     this.focusModeInternal = false
     next()
   },
   data () {
     return {
       shootSearch: '',
+      debouncedShootSearch: '',
       dialog: null,
-      itemsPerPage: useLocalStorage('projects/shoot-list/itemsPerPage', 10),
       page: 1,
       cachedItems: null,
       selectedColumns: undefined,
@@ -324,7 +325,6 @@ export default {
     }),
     ...mapState(useProjectStore, [
       'projectName',
-      'projectFromProjectList',
       'shootCustomFieldList',
       'shootCustomFields',
     ]),
@@ -340,6 +340,14 @@ export default {
       'numberOfNewItemsSinceFreeze',
       'focusMode',
       'sortBy',
+    ]),
+    ...mapWritableState(useLocalStorageStore, [
+      'shootSelectedColumns',
+      'shootItemsPerPage',
+      'shootSortBy',
+      'shootCustomSelectedColumns',
+      'shootCustomSortBy',
+      'allProjectsShootFilter',
     ]),
     defaultSortBy () {
       return [{ key: 'name', order: 'asc' }]
@@ -693,29 +701,33 @@ export default {
     },
     sortedAndFilteredItems () {
       const items = this.sortItems(this.items, this.sortByInternal)
-      return filter(items, item => this.searchItems(this.shootSearch, toRaw(item)))
+      return filter(items, item => this.searchItems(this.debouncedShootSearch, toRaw(item)))
     },
   },
   watch: {
     sortBy (sortBy) {
       if (some(sortBy, value => startsWith(value.key, 'Z_'))) {
-        useLocalStorage(`project/${this.projectName}/shoot-list/sortBy`, []).value = sortBy
+        this.shootCustomSortBy = sortBy
       } else {
-        useLocalStorage(`project/${this.projectName}/shoot-list/sortBy`, []).value = null // clear project specific options
-        useLocalStorage('projects/shoot-list/sortBy', []).value = sortBy
+        this.shootCustomSortBy = null // clear project specific options
+        this.shootSortBy = sortBy
       }
     },
   },
   methods: {
     ...mapActions(useShootStore, [
       'setSelection',
-      'setShootListFilter',
+      'toogleShootListFilter',
       'subscribeShoots',
       'sortItems',
       'searchItems',
       'setFocusMode',
       'setSortBy',
     ]),
+    resetShootSearch () {
+      this.shootSearch = null
+      this.debouncedShootSearch = null
+    },
     async showDialog (args) {
       switch (args.action) {
         case 'access':
@@ -736,14 +748,10 @@ export default {
       this.saveSelectedColumns()
     },
     saveSelectedColumns () {
-      useLocalStorage('projects/shoot-list/selected-columns', {}).value = this.currentStandardSelectedColumns
-
-      const projectSpecificCustomSelectedColumns = useLocalStorage(`project/${this.projectName}/shoot-list/selected-columns`, {})
-      if (isEmpty(this.currentCustomSelectedColumns)) {
-        projectSpecificCustomSelectedColumns.value = null
-      } else {
-        projectSpecificCustomSelectedColumns.value = this.currentCustomSelectedColumns
-      }
+      this.shootSelectedColumns = this.currentStandardSelectedColumns
+      this.shootCustomSelectedColumns = isEmpty(this.currentCustomSelectedColumns)
+        ? null
+        : this.currentCustomSelectedColumns
     },
     resetTableSettings () {
       this.selectedColumns = {
@@ -751,46 +759,29 @@ export default {
         ...this.defaultCustomSelectedColumns,
       }
       this.saveSelectedColumns()
-      this.itemsPerPage = this.defaultItemsPerPage
+      this.shootItemsPerPage = this.defaultItemsPerPage
       this.sortByInternal = this.defaultSortBy
     },
     updateTableSettings () {
-      const selectedColumns = useLocalStorage('projects/shoot-list/selected-columns', {})
-      const projectSpecificCustomSelectedColumns = useLocalStorage(`project/${this.projectName}/shoot-list/selected-columns`, {})
       this.selectedColumns = {
-        ...selectedColumns.value,
-        ...projectSpecificCustomSelectedColumns.value,
+        ...this.shootSelectedColumns,
+        ...this.shootCustomSelectedColumns,
       }
 
-      const projectSpecificSortBy = useLocalStorage(`project/${this.projectName}/shoot-list/sortBy`, [])
-      if (!isEmpty(projectSpecificSortBy.value)) {
-        this.sortByInternal = projectSpecificSortBy.value
+      if (!isEmpty(this.shootCustomSortBy)) {
+        this.sortByInternal = this.shootCustomSortBy
         return
       }
 
-      const sortBy = useLocalStorage('projects/shoot-list/sortBy', [])
-      if (!isEmpty(sortBy.value)) {
-        this.sortByInternal = sortBy.value
+      if (!isEmpty(this.shootSortBy)) {
+        this.sortByInternal = this.shootSortBy
         return
       }
 
       this.sortByInternal = this.defaultSortBy
     },
-    toggleFilter ({ value }) {
-      const key = value
-      this.setShootListFilter({
-        filter: key,
-        value: !this.shootListFilters[key],
-      })
-
-      useLocalStorage('project/_all/shoot-list/filter', []).value = pick(this.shootListFilters, [
-        'onlyShootsWithIssues',
-        'progressing',
-        'noOperatorAction',
-        'deactivatedReconciliation',
-        'hideTicketsWithLabel',
-      ])
-
+    toggleFilter ({ value: key }) {
+      this.toogleShootListFilter(key)
       if (key === 'onlyShootsWithIssues') {
         this.subscribeShoots()
       }
@@ -799,8 +790,13 @@ export default {
       const filters = this.shootListFilters
       return get(filters, key, false)
     },
-    onInputSearch: debounce(function (value) {
+    onUpdateShootSearch (value) {
       this.shootSearch = value
+
+      this.setDebouncedShootSearch()
+    },
+    setDebouncedShootSearch: debounce(function () {
+      this.debouncedShootSearch = this.shootSearch
     }, 500),
     disableCustomKeySort (tableHeaders) {
       const sortableTableHeaders = filter(tableHeaders, ['sortable', true])

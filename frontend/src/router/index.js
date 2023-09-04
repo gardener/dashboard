@@ -7,88 +7,67 @@
 import {
   createRouter as createVueRouter,
   createWebHistory,
+  isNavigationFailure,
+  NavigationFailureType,
 } from 'vue-router'
 
 import { useAppStore } from '@/store/app'
-import { useAuthzStore } from '@/store/authz'
-import { useAuthnStore } from '@/store/authn'
-import { useProjectStore } from '@/store/project'
-import { useConfigStore } from '@/store/config'
-import { useCloudProfileStore } from '@/store/cloudProfile'
-import { useGardenerExtensionStore } from '@/store/gardenerExtension'
-import { useKubeconfigStore } from '@/store/kubeconfig'
-import { useMemberStore } from '@/store/member'
-import { useSecretStore } from '@/store/secret'
-import { useSeedStore } from '@/store/seed'
-import { useShootStore } from '@/store/shoot'
-import { useTerminalStore } from '@/store/terminal'
 
 import { useLogger } from '@/composables/useLogger'
 
-import { createGuards } from './guards'
 import { createRoutes } from './routes'
+import {
+  createGlobalBeforeGuards,
+  createGlobalAfterHooks,
+} from './guards'
+
+const zeroPoint = { left: 0, top: 0 }
 
 export function createRouter () {
   const logger = useLogger()
   const appStore = useAppStore()
-  const configStore = useConfigStore()
-  const authnStore = useAuthnStore()
-  const authzStore = useAuthzStore()
-  const projectStore = useProjectStore()
-  const cloudProfileStore = useCloudProfileStore()
-  const seedStore = useSeedStore()
-  const gardenerExtensionStore = useGardenerExtensionStore()
-  const kubeconfigStore = useKubeconfigStore()
-  const memberStore = useMemberStore()
-  const secretStore = useSecretStore()
-  const shootStore = useShootStore()
-  const terminalStore = useTerminalStore()
 
-  const context = {
-    logger,
-    appStore,
-    configStore,
-    authnStore,
-    authzStore,
-    projectStore,
-    cloudProfileStore,
-    seedStore,
-    gardenerExtensionStore,
-    kubeconfigStore,
-    memberStore,
-    secretStore,
-    shootStore,
-    terminalStore,
-  }
-
-  const zeroPoint = { left: 0, top: 0 }
-
-  /* router */
-  const routes = createRoutes(context)
   const router = createVueRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
-    routes,
+    routes: createRoutes(),
     scrollBehavior (to, from, savedPosition) {
       return savedPosition || zeroPoint
     },
   })
 
-  /* navigation guards */
-  const guards = createGuards(context)
-  for (const guard of guards.beforeEach) {
-    router.beforeEach(guard)
-  }
-  for (const guard of guards.afterEach) {
-    router.afterEach(guard)
-  }
-
-  /* router error */
   router.onError(err => {
-    logger.error('Router error:', err)
+    logger.error('Uncaught error inside of a navigation guard: %s', err.stack)
     appStore.loading = false
-    appStore.setError(err)
-    router.push({ name: 'Error' })
+    appStore.setRouterError(err)
+  })
+
+  router.afterEach((to, from, failure) => {
+    if (isNavigationFailure(failure)) {
+      if (isNavigationFailure(failure, NavigationFailureType.duplicated)) {
+        logger.info('Navigation was prevented because we are already at the target location: %s', failure)
+      } else if (isNavigationFailure(failure, NavigationFailureType.canceled)) {
+        logger.info('Navigation took place before the current navigation could finish: %s', failure)
+      } else if (isNavigationFailure(failure, NavigationFailureType.aborted)) {
+        logger.info('Navigation was aborted inside of a navigation guard: %s', failure)
+      } else {
+        logger.info('Navigation failure: %s', failure)
+      }
+    }
   })
 
   return router
+}
+
+export function registerGlobalBeforeGuards (router) {
+  const guards = createGlobalBeforeGuards()
+  for (const guard of guards) {
+    router.beforeEach(guard)
+  }
+}
+
+export function registerGlobalAfterHooks (router) {
+  const hooks = createGlobalAfterHooks()
+  for (const hook of hooks) {
+    router.afterEach(hook)
+  }
 }

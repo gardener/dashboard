@@ -6,8 +6,13 @@
 
 'use strict'
 
+const { mapValues } = require('lodash')
 const { helm, helper } = fixtures
-const { getPrivateKey, getCertificate } = helper
+const {
+  getPrivateKey,
+  getCertificate,
+  decodeBase64
+} = helper
 
 const renderTemplates = helm.renderDashboardRuntimeTemplates
 
@@ -21,23 +26,51 @@ describe('gardener-dashboard', function () {
       ]
     })
 
-    it('should render the template', async function () {
-      const values = {
-        global: {
-          dashboard: {
-            gitHub: {
-              authentication: {
-                token: 'token'
-              },
-              webhookSecret: 'webhook-secret'
+    describe('token-auth', function () {
+      it('should render the template', async function () {
+        const values = {
+          global: {
+            dashboard: {
+              gitHub: {
+                authentication: {
+                  token: 'token'
+                },
+                webhookSecret: 'webhook-secret'
+              }
             }
           }
         }
-      }
-      const documents = await renderTemplates(templates, values)
-      expect(documents).toHaveLength(1)
-      const [githubSecret] = documents
-      expect(githubSecret).toMatchSnapshot()
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [githubSecret] = documents
+        expect(githubSecret).toMatchSnapshot()
+      })
+    })
+
+    describe('app-auth', function () {
+      it('should render the template', async function () {
+        const values = {
+          global: {
+            dashboard: {
+              gitHub: {
+                authentication: {
+                  appId: 1,
+                  clientId: 'clientId',
+                  clientSecret: 'clientSecret',
+                  installationId: 123,
+                  privateKey: 'privateKey'
+                },
+                webhookSecret: 'webhook-secret'
+              }
+            }
+          }
+        }
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [githubSecret] = documents
+        const data = mapValues(githubSecret.data, decodeBase64)
+        expect(data).toMatchSnapshot()
+      })
     })
   })
 
@@ -83,18 +116,7 @@ describe('gardener-dashboard', function () {
     })
 
     it('should render the template', async function () {
-      const values = {
-        global: {
-          dashboard: {
-            gitHub: {
-              authentication: {
-                token: 'token'
-              },
-              webhookSecret: 'webhook-secret'
-            }
-          }
-        }
-      }
+      const values = {}
       const documents = await renderTemplates(templates, values)
       expect(documents).toHaveLength(1)
       const [oidcSecret] = documents

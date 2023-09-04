@@ -7,11 +7,11 @@
 import { mount } from '@vue/test-utils'
 import { setActivePinia } from 'pinia'
 import { createTestingPinia } from '@pinia/testing'
-import { useLocalStorage } from '@vueuse/core'
 
 import { useAppStore } from '@/store/app'
 import { useAuthnStore } from '@/store/authn'
 import { useLoginStore } from '@/store/login'
+import { useLocalStorageStore } from '@/store/localStorage'
 
 import GLogin from '@/layouts/GLogin.vue'
 
@@ -23,10 +23,10 @@ describe('components', () => {
     let appStore
     let authnStore
     let loginStore // eslint-disable-line no-unused-vars
+    let localStorageStore
     let mockRoute
     let mockRouter
     let mockNext
-    let autoLogin
 
     function mountLogin () {
       return mount(GLogin, {
@@ -48,7 +48,6 @@ describe('components', () => {
         loginTypes: ['oidc', 'token'],
         landingPageUrl: 'https://gardener.cloud/',
       }))
-      autoLogin = useLocalStorage('global/auto-login', 'disabled')
       mockRoute = {
         query: {
           redirectPath: '/namespace/garden/shoots',
@@ -72,6 +71,7 @@ describe('components', () => {
       appStore = useAppStore()
       authnStore = useAuthnStore()
       loginStore = useLoginStore()
+      localStorageStore = useLocalStorageStore()
     })
 
     it('should render the login page', () => {
@@ -133,7 +133,7 @@ describe('components', () => {
       })
 
       it('should automatically login', async () => {
-        autoLogin.value = 'enabled'
+        localStorageStore.autoLogin = true
         const wrapper = mountLogin()
         const to = {
           query: {
