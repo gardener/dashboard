@@ -7,12 +7,11 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-row class="my-0">
     <v-col class="regularInput">
-      <v-text-field
+      <g-time-text-field
         v-model="maintenanceBegin"
         color="primary"
         label="Maintenance Start Time"
         :error-messages="getErrorMessages('maintenanceBegin')"
-        type="time"
         variant="underlined"
         persistent-hint
         hint="Provide start of maintenance time window in which Gardener may schedule automated cluster updates."
@@ -41,6 +40,8 @@ import { useVuelidate } from '@vuelidate/core'
 
 import { useAppStore } from '@/store/app'
 
+import GTimeTextField from '@/components/GTimeTextField.vue'
+
 import {
   getValidationErrors,
   randomMaintenanceBegin,
@@ -61,6 +62,9 @@ const validationErrors = {
 }
 
 export default {
+  components: {
+    GTimeTextField,
+  },
   props: {
     timeWindowBegin: {
       type: String,
