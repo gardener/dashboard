@@ -52,15 +52,7 @@ export const useAppStore = defineStore('app', () => {
   }
 
   function setError (value) {
-    let message
-    if (value?.response) {
-      const errorDetails = errorDetailsFromError(value)
-      message = errorDetails.detailedMessage
-    } else {
-      message = value?.message
-    }
-
-    setAlertWithType('error', message)
+    setAlertWithType('error', value)
   }
 
   function setSuccess (value) {
