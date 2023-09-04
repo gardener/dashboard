@@ -121,6 +121,8 @@ const iconStyle = computed(() => {
   return {
     maxHeight: `${maxIconSize}px`,
     maxWidth: `${maxIconSize}px`,
+    height: `${maxIconSize}px`,
+    width: `${maxIconSize}px`,
   }
 })
 
