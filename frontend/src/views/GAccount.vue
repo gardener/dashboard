@@ -100,7 +100,7 @@ SPDX-License-Identifier: Apache-2.0
                 Personal bearer token for API authentication
               </div>
               <template #append>
-                <g-copy-btn :clipboard-text="idToken" />
+                <g-copy-btn :clipboard-text="() => getToken()" />
               </template>
             </g-list-item>
             <template v-if="isKubeconfigEnabled">
@@ -278,7 +278,6 @@ export default {
       kubeconfigTab: 'configure',
       projectName: undefined,
       skipOpenBrowser: false,
-      idToken: undefined,
       showToken: false,
       showMessage: false,
       kubeconfigYaml: '',
@@ -425,8 +424,6 @@ export default {
     try {
       const project = find(this.projectList, ['metadata.namespace', this.namespace])
       this.projectName = get(project, 'metadata.name', '')
-      const response = await this.api.getToken()
-      this.idToken = response.data.token
       this.updateKubeconfigYaml(this.kubeconfig)
     } catch (err) {
       this.logger.error(err.message)
@@ -446,6 +443,10 @@ export default {
     },
     expansionPanelTooltip (value) {
       return value ? 'Hide advanced options' : 'Show advanced options'
+    },
+    async getToken () {
+      const response = await this.api.getToken()
+      return response.data.token ?? ''
     },
   },
 }
