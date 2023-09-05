@@ -108,7 +108,7 @@ SPDX-License-Identifier: Apache-2.0
         </div>
         <div class="px-2">
           <g-copy-btn
-            :clipboard-text="getContent()"
+            :clipboard-text="() => getContent()"
             tooltip-text="Copy"
             :user-feedback="false"
             @click.stop="focus"
