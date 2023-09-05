@@ -696,6 +696,111 @@ describe('gardener-dashboard', function () {
       })
     })
 
+    describe('cloudProviderList', function () {
+      it('should render the template with cloudProviderList', async function () {
+        const values = {
+          global: {
+            dashboard: {
+              frontendConfig: {
+                cloudProviderList: [
+                  'foo',
+                  'bar'
+                ]
+              }
+            }
+          }
+        }
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [configMap] = documents
+        const config = yaml.load(configMap.data['config.yaml'])
+        expect(pick(config, ['frontend.cloudProviderList'])).toMatchSnapshot()
+      })
+    })
+
+    describe('customCloudProviders', function () {
+      it('should render the template with customCloudProviders', async function () {
+        const values = {
+          global: {
+            dashboard: {
+              frontendConfig: {
+                customCloudProviders: {
+                  foo: {
+                    zoned: true,
+                    shoot: {
+                      provider: {
+                        type: 'foo'
+                      }
+                    },
+                    secret: {
+                      fields: [
+                        {
+                          key: 'user',
+                          type: 'text'
+                        },
+                        {
+                          key: 'password',
+                          type: 'password'
+                        }
+                      ]
+                    }
+                  },
+                  bar: {
+                    zoned: false,
+                    shoot: {
+                      provider: {
+                        type: 'bar'
+                      }
+                    },
+                    secret: {
+                      fields: [
+                        {
+                          key: 'user',
+                          type: 'text'
+                        },
+                        {
+                          key: 'password',
+                          type: 'password'
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [configMap] = documents
+        const config = yaml.load(configMap.data['config.yaml'])
+        expect(pick(config, ['frontend.customCloudProviders'])).toMatchSnapshot()
+      })
+    })
+
+    describe('vendors', function () {
+      it('should render the template with vendors', async function () {
+        const values = {
+          global: {
+            dashboard: {
+              frontendConfig: {
+                vendors: {
+                  foo: {
+                    icon: 'foo_icon.svg'
+                  }
+                }
+              }
+            }
+          }
+        }
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [configMap] = documents
+        const config = yaml.load(configMap.data['config.yaml'])
+        expect(pick(config, ['frontend.vendors'])).toMatchSnapshot()
+      })
+    })
+
     describe('knownConditions', function () {
       it('should render the template with knownConditions markdown', async function () {
         const values = {

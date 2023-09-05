@@ -15,23 +15,47 @@ SPDX-License-Identifier: Apache-2.0
     :replace-title="`Replace ${vendor} Secret`"
   >
     <template #secret-slot>
-      <div>
-        <v-textarea
-          ref="data"
-          v-model="data"
-          color="primary"
-          variant="filled"
-          label="Secret Data"
-          :error-messages="getErrorMessages('data')"
-          @update:model-value="onInputSecretData"
-          @blur="v$.data.$touch()"
-        />
-      </div>
+      <template v-if="customCloudProviderFields">
+        <div
+          v-for="{ key, label, hint, type } in customCloudProviderFields"
+          :key="key"
+        >
+          <v-text-field
+            v-if="type === 'text' || type === 'password'"
+            v-model="customCloudProviderData[key]"
+            color="primary"
+            :label="label"
+            :error-messages="getErrorMessages(`customCloudProviderData.${key}`)"
+            :append-icon="type === 'password' ? showSecrets[key] ? 'mdi-eye' : 'mdi-eye-off' : undefined"
+            :type="type === 'password' && !showSecrets[key] ? 'password' : 'text'"
+            :hint="hint"
+            @click:append="toggleShowSecrets(key)"
+            @update:model-value="v$.customCloudProviderData[key].$touch()"
+            @blur="v$.customCloudProviderData[key].$touch()"
+          />
+          <v-textarea
+            v-if="type === 'yaml' || type === 'json'"
+            v-model="customCloudProviderData[key]"
+            color="primary"
+            :label="label"
+            :error-messages="getErrorMessages(`customCloudProviderData.${key}`)"
+            :hint="hint"
+            @update:model-value="onInputTextarea(key, type)"
+            @blur="v$.customCloudProviderData[key].$touch()"
+          />
+        </div>
+      </template>
     </template>
     <template #help-slot>
-      <div class="help-content">
+      <!-- eslint-disable vue/no-v-html -->
+      <div
+        v-if="helpHtml"
+        class="markdown"
+        v-html="helpHtml"
+      />
+      <div v-else>
         <p>
-          This is a generic secret dialog.
+          This is a generic provider service account dialog.
         </p>
         <p>
           Please enter data required for {{ vendor }}.
@@ -43,23 +67,32 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { useVuelidate } from '@vuelidate/core'
-import { required } from '@vuelidate/validators'
+import {
+  required,
+  requiredIf,
+} from '@vuelidate/validators'
+import { mapState } from 'pinia'
+
+import { useConfigStore } from '@/store/config'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 
 import {
   getValidationErrors,
   setDelayedInputFocus,
+  transformHtml,
 } from '@/utils'
 
-import { isObject } from '@/lodash'
-
-const validationErrors = {
-  data: {
-    required: 'You can\'t leave this empty.',
-    isYAML: 'You need to enter secret data as YAML key-value pairs',
-  },
-}
+import {
+  isObject,
+  forEach,
+  get,
+  every,
+  map,
+  isEmpty,
+  fromPairs,
+  set,
+} from '@/lodash'
 
 export default {
   components: {
@@ -88,16 +121,18 @@ export default {
   },
   data () {
     return {
-      data: undefined,
-      secretData: {},
-      validationErrors,
+      customCloudProviderData: {},
+      customCloudProviderParsedData: {},
+      showSecrets: {},
     }
   },
   validations () {
-    // had to move the code to a computed property so that the getValidationErrors method can access it
     return this.validators
   },
   computed: {
+    ...mapState(useConfigStore, [
+      'customCloudProviders',
+    ]),
     visible: {
       get () {
         return this.modelValue
@@ -106,50 +141,122 @@ export default {
         this.$emit('update:modelValue', modelValue)
       },
     },
-    valid () {
-      return !this.v$.$invalid
+    validationErrors () {
+      const allValidationErrors = {
+        customCloudProviderData: {},
+      }
+      forEach(this.customCloudProviderFields, ({ key, validationErrors }) => {
+        allValidationErrors.customCloudProviderData[key] = validationErrors
+      })
+      return allValidationErrors
     },
     validators () {
-      const validators = {
-        data: {
-          required,
-          isYAML: () => Object.keys(this.secretData).length > 0,
-        },
+      const allValidators = {
+        customCloudProviderData: {},
       }
-      return validators
+      forEach(this.customCloudProviderFields, ({ key, validators }) => {
+        const compiledValidators = {}
+        forEach(validators, (validator, validatorName) => {
+          switch (validator.type) {
+            case 'required':
+              compiledValidators[validatorName] = required
+              break
+            case 'requiredIf':
+              compiledValidators[validatorName] = requiredIf(() => !every(map(validator.not, fieldKey => this.customCloudProviderData[fieldKey])))
+              break
+            case 'isValidObject':
+              compiledValidators[validatorName] = () => isEmpty(this.customCloudProviderData[key]) || Object.keys(this.customCloudProviderParsedData[key]).length > 0
+              break
+            case 'regex':
+              compiledValidators[validatorName] = value => !value || new RegExp(validator.value).test(value)
+          }
+        })
+        allValidators.customCloudProviderData[key] = compiledValidators
+      })
+      return allValidators
+    },
+    customCloudProvider () {
+      return get(this.customCloudProviders, this.vendor)
+    },
+    customCloudProviderFields () {
+      const configuredFields = this.customCloudProvider?.secret?.fields
+      if (configuredFields) {
+        return configuredFields
+      }
+      return [
+        {
+          key: 'secret',
+          label: 'Secret Data',
+          hint: 'Provide secret data as YAML key-value pairs',
+          type: 'yaml',
+          validators: {
+            required: {
+              type: 'required',
+            },
+            isYAML: {
+              type: 'isValidObject',
+            },
+          },
+          validationErrors: {
+            required: 'You can\'t leave this empty',
+            isYAML: 'You need to enter secret data as YAML key-value pairs',
+          },
+        },
+      ]
+    },
+    helpHtml () {
+      return transformHtml(this.customCloudProvider?.secret?.help)
+    },
+    valid () {
+      return !this.$v.$invalid
     },
     isCreateMode () {
       return !this.secret
     },
+    secretData () {
+      const data = fromPairs(map(this.customCloudProviderFields, ({ key, type }) => {
+        if (type === 'json' || type === 'yaml') {
+          return [key, this.customCloudProviderParsedData[key]]
+        }
+        return [key, this.customCloudProviderData[key]]
+      }))
+      return data
+    },
   },
   methods: {
-    async onInputSecretData () {
-      this.secretData = {}
-
+    async onInputTextarea (key, type) {
+      set(this.customCloudProviderParsedData, key, {})
       try {
-        this.secretData = await this.yaml.load(this.data)
+        if (type === 'yaml') {
+          this.customCloudProviderParsedData[key] = await this.$yaml.load(this.customCloudProviderData[key])
+        } else if (type === 'json') {
+          this.customCloudProviderParsedData[key] = JSON.parse(this.customCloudProviderData[key])
+        }
       } catch (err) {
         /* ignore errors */
       } finally {
-        if (!isObject(this.secretData)) {
-          this.secretData = {}
+        if (!isObject(this.customCloudProviderParsedData[key])) {
+          this.customCloudProviderParsedData[key] = {}
         }
       }
-
-      this.v$.data.$touch()
+      this.$v.customCloudProviderData[key].$touch()
     },
     reset () {
       this.v$.$reset()
 
-      this.data = ''
-      this.secretData = {}
+      this.customCloudProviderParsedData = {}
+      this.customCloudProviderData = {}
+      this.showSecrets = {}
 
       if (!this.isCreateMode) {
-        setDelayedInputFocus(this, 'data')
+        setDelayedInputFocus(this, 'textAreaData')
       }
     },
     getErrorMessages (field) {
       return getValidationErrors(this, field)
+    },
+    toggleShowSecrets (key) {
+      set(this.showSecrets, key, !this.showSecrets[key])
     },
   },
 }
@@ -157,24 +264,10 @@ export default {
 
 <style lang="scss" scoped>
 
-  :deep(.v-input__control textarea) {
-    font-family: monospace;
-    font-size: 14px;
+.markdown {
+  :deep(p) {
+    margin: 0px;
   }
-
-  .help-content {
-    ul {
-      margin-top: 20px;
-      margin-bottom: 20px;
-      list-style-type: none;
-      border-left: 4px solid #318334 !important;
-      margin-left: 20px;
-      padding-left: 24px;
-      li {
-        font-weight: 300;
-        font-size: 16px;
-      }
-    }
-  }
+}
 
 </style>

@@ -28,12 +28,19 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
+
 import {
   computed,
   toRef,
 } from 'vue'
+import { storeToRefs } from 'pinia'
 
-import { startsWith } from '@/lodash'
+import { useConfigStore } from '@/store/config'
+
+import {
+  startsWith,
+  get,
+} from '@/lodash'
 
 const props = defineProps({
   icon: {
@@ -52,7 +59,15 @@ const props = defineProps({
 
 const noBackground = toRef(props, 'noBackground')
 
+const configStore = useConfigStore()
+const { vendors } = storeToRefs(configStore)
+
 const iconSrc = computed(() => {
+  const customCloudProviderIcon = get(vendors, [props.icon, 'icon'])
+  if (customCloudProviderIcon) {
+    return new URL(`/static/vendor-assets/${customCloudProviderIcon}`, import.meta.url)
+  }
+
   switch (props.icon) {
     // infrastructures
     case 'azure':

@@ -341,6 +341,18 @@ data:
       {{- if .Values.global.dashboard.frontendConfig.serviceAccountDefaultTokenExpiration }}
       serviceAccountDefaultTokenExpiration: {{ .Values.global.dashboard.frontendConfig.serviceAccountDefaultTokenExpiration }}
       {{- end }}
+      {{- if .Values.global.dashboard.frontendConfig.cloudProviderList }}
+      cloudProviderList:
+        {{- range .Values.global.dashboard.frontendConfig.cloudProviderList }}
+        - {{ . }}
+        {{- end }}
+      {{- end }}
+      {{- if .Values.global.dashboard.frontendConfig.customCloudProviders }}
+      customCloudProviders: {{ toYaml .Values.global.dashboard.frontendConfig.customCloudProviders | nindent 8 }}
+      {{- end }}
+      {{- if .Values.global.dashboard.frontendConfig.vendors }}
+      vendors: {{ toYaml .Values.global.dashboard.frontendConfig.vendors | nindent 8  }}
+      {{- end }}
       {{- if .Values.global.dashboard.frontendConfig.knownConditions }}
       knownConditions: {{ toYaml .Values.global.dashboard.frontendConfig.knownConditions | nindent 8 }}
       {{- end }}

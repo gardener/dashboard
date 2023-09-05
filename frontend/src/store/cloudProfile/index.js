@@ -103,7 +103,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
   })
 
   const sortedInfrastructureKindList = computed(() => {
-    return intersection(['aws', 'azure', 'gcp', 'openstack', 'alicloud', 'metal', 'vsphere', 'hcloud', 'onmetal', 'local'], infrastructureKindList.value)
+    return intersection(configStore.cloudProviderList ?? ['aws', 'azure', 'gcp', 'openstack', 'alicloud', 'metal', 'vsphere', 'hcloud', 'onmetal', 'local'], infrastructureKindList.value)
   })
 
   function cloudProfilesByCloudProviderKind (cloudProviderKind) {

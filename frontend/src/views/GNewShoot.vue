@@ -263,7 +263,10 @@ export default {
   },
   computed: {
     ...mapState(useAuthzStore, ['namespace']),
-    ...mapState(useConfigStore, ['accessRestriction', 'defaultNodesCIDR']),
+    ...mapState(useConfigStore, [
+      'accessRestriction',
+      'defaultNodesCIDR',
+      'customCloudProviders']),
     ...mapState(useShootStagingStore, ['controlPlaneFailureToleranceType']),
     ...mapState(useShootStagingStore, [
       'getDnsConfiguration',
@@ -324,7 +327,7 @@ export default {
       const oldInfrastructureKind = get(shootResource, 'spec.provider.type')
       if (oldInfrastructureKind !== infrastructureKind) {
         // Infrastructure changed
-        set(shootResource, 'spec', getSpecTemplate(infrastructureKind, this.defaultNodesCIDR))
+        set(shootResource, 'spec', getSpecTemplate(infrastructureKind, this.defaultNodesCIDR, this.customCloudProviders))
       }
       set(shootResource, 'spec.cloudProfileName', cloudProfileName)
       set(shootResource, 'spec.region', region)
@@ -500,7 +503,7 @@ export default {
       })
 
       const workers = get(shootResource, 'spec.provider.workers')
-      const zonedCluster = isZonedCluster({ cloudProviderKind: infrastructureKind, isNewCluster: true })
+      const zonedCluster = isZonedCluster({ cloudProviderKind: infrastructureKind, isNewCluster: true, customCloudProviders: this.customCloudProviders })
 
       const newShootWorkerCIDR = get(shootResource, 'spec.networking.nodes', this.defaultNodesCIDR)
       await this.manageWorkers.dispatch('setWorkersData', { workers, cloudProfileName, region, updateOSMaintenance: osUpdates, zonedCluster, kubernetesVersion, newShootWorkerCIDR })

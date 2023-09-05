@@ -75,6 +75,12 @@ spec:
           name: dashboard-assets
           defaultMode: 0444
       {{- end }}
+      {{- if .Values.global.dashboard.frontendConfig.vendorAssets }}
+      - name: vendor-assets
+        configMap:
+          name: dashboard-vendor-assets
+          defaultMode: 0444
+      {{- end }}
       {{- if .Values.global.dashboard.serviceAccountTokenVolumeProjection.enabled }}
       - name: service-account-token
         projected:
@@ -229,6 +235,10 @@ spec:
           {{- if .Values.global.dashboard.frontendConfig.assets }}
           - name: assets
             mountPath: /app/public/static/assets
+          {{- end }}
+          {{- if .Values.global.dashboard.frontendConfig.vendorAssets }}
+          - name: vendor-assets
+            mountPath: /app/public/static/vendor-assets
           {{- end }}
           {{- if .Values.global.dashboard.serviceAccountTokenVolumeProjection.enabled }}
           - name: service-account-token

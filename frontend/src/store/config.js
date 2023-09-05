@@ -243,6 +243,18 @@ export const useConfigStore = defineStore('config', () => {
     }
   })
 
+  const customCloudProviders = computed(() => {
+    return state.value?.customCloudProviders
+  })
+
+  const vendors = computed(() => {
+    return state.value?.vendors
+  })
+
+  const cloudProviderList = computed(() => {
+    return state.value?.cloudProviderList
+  })
+
   const appVersion = computed(() => {
     return state.value?.appVersion ?? import.meta.env.VITE_APP_VERSION
   })
@@ -330,6 +342,9 @@ export const useConfigStore = defineStore('config', () => {
     isShootHasNoHibernationScheduleWarning,
     fetchConfig,
     conditionForType,
+    customCloudProviders,
+    vendors,
+    cloudProviderList,
     $reset,
   }
 })

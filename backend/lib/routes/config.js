@@ -57,7 +57,8 @@ function sanitizeFrontendConfig (frontendConfig) {
     } = {},
     vendorHints = [],
     resourceQuotaHelp = '',
-    controlPlaneHighAvailabilityHelp = ''
+    controlPlaneHighAvailabilityHelp = '',
+    customCloudProviders = {}
   } = sanitizedFrontendConfig
 
   convertAndSanitize(alert, 'message')
@@ -87,6 +88,13 @@ function sanitizeFrontendConfig (frontendConfig) {
 
   for (const vendorHint of vendorHints) {
     convertAndSanitize(vendorHint, 'message')
+  }
+
+  for (const key of Object.keys(customCloudProviders)) {
+    const secret = customCloudProviders[key]?.secret
+    if (secret) {
+      convertAndSanitize(secret, 'help')
+    }
   }
 
   return sanitizedFrontendConfig
