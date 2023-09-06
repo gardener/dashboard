@@ -23,6 +23,9 @@ const activeNodeReleases = {
   },
   20: {
     endOfLife: new Date('2026-04-30T23:59:59Z')
+  },
+  20.5: {
+    endOfLife: new Date('2026-04-30T23:59:59Z')
   }
 }
 
