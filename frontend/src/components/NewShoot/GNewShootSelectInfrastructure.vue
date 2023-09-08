@@ -26,7 +26,7 @@ SPDX-License-Identifier: Apache-2.0
           />
         </div>
         <div class="mt-2">
-          <span class="text-subtitle-1">{{ infrastructureKind }}</span>
+          <span class="text-subtitle-1">{{ vendorName(infrastructureKind) }}</span>
         </div>
       </div>
     </v-card>
@@ -40,9 +40,11 @@ import {
 } from 'pinia'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
+import { useConfigStore } from '@/store/config'
 
 import GVendorIcon from '@/components/GVendorIcon'
 
+import { get } from '@/lodash'
 export default {
   components: {
     GVendorIcon,
@@ -62,6 +64,9 @@ export default {
     ...mapState(useCloudProfileStore, [
       'sortedInfrastructureKindList',
     ]),
+    ...mapState(useConfigStore, [
+      'vendors',
+    ]),
   },
   methods: {
     ...mapActions(useCloudProfileStore, ['cloudProfilesByCloudProviderKind']),
@@ -71,6 +76,9 @@ export default {
     },
     setSelectedInfrastructure (infrastructure) {
       this.selectedInfrastructure = infrastructure
+    },
+    vendorName (infrastructureKind) {
+      return get(this.vendors, [infrastructureKind, 'name'], infrastructureKind)
     },
   },
 }

@@ -208,7 +208,7 @@ export default {
       return transformHtml(this.customCloudProvider?.secret?.help)
     },
     valid () {
-      return !this.$v.$invalid
+      return !this.v$.$invalid
     },
     isCreateMode () {
       return !this.secret
@@ -228,7 +228,7 @@ export default {
       set(this.customCloudProviderParsedData, key, {})
       try {
         if (type === 'yaml') {
-          this.customCloudProviderParsedData[key] = await this.$yaml.load(this.customCloudProviderData[key])
+          this.customCloudProviderParsedData[key] = await this.yaml.load(this.customCloudProviderData[key])
         } else if (type === 'json') {
           this.customCloudProviderParsedData[key] = JSON.parse(this.customCloudProviderData[key])
         }
@@ -239,7 +239,7 @@ export default {
           this.customCloudProviderParsedData[key] = {}
         }
       }
-      this.$v.customCloudProviderData[key].$touch()
+      this.v$.customCloudProviderData[key].$touch()
     },
     reset () {
       this.v$.$reset()

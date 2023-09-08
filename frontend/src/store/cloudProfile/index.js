@@ -379,6 +379,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
 
       const name = machineImage.name
       const vendorName = vendorNameFromImageName(machineImage.name)
+      const displayName = get(configStore, ['vendors', vendorName, 'name'], vendorName)
       const vendorHint = findVendorHint(configStore.vendorHints, vendorName)
 
       return map(versions, ({ version, expirationDate, cri, classification, architectures }) => {
@@ -388,6 +389,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
         return decorateClassificationObject({
           key: name + '/' + version,
           name,
+          displayName,
           version,
           cri,
           classification,
