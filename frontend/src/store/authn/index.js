@@ -8,7 +8,6 @@ import { defineStore } from 'pinia'
 import {
   ref,
   computed,
-  readonly,
 } from 'vue'
 
 import { useLogger } from '@/composables/useLogger'
