@@ -65,9 +65,9 @@ SPDX-License-Identifier: Apache-2.0
           v-model="workerlessShootEnabled"
           label="Workerless Cluster"
           color="primary"
-          hide-details
           density="compact"
           hint="Create nodeless cluster without worker groups"
+          persistent-hint
         />
       </v-col>
     </v-row>

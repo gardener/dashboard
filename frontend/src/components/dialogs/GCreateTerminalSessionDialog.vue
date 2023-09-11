@@ -57,7 +57,6 @@ SPDX-License-Identifier: Apache-2.0
                 <g-terminal-settings
                   v-show="!!targetTab.selectedConfig"
                   ref="settings"
-                  v-model:target="targetTab.selectedTarget"
                   :runtime-settings-hidden="!hasShootWorkerGroups || targetTab.selectedTarget !== 'shoot'"
                 />
               </v-expansion-panel-text>
