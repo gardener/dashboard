@@ -38,7 +38,7 @@ import { startsWith } from '@/lodash'
 const props = defineProps({
   icon: {
     type: String,
-    required: true,
+    default: '',
   },
   size: {
     type: Number,

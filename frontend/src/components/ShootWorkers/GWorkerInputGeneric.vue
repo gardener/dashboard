@@ -592,6 +592,7 @@ export default {
   }
   .smallInput {
     max-width: 120px;
+    min-width: 112px;
     flex: 1 1 auto;
     padding: 12px;
   }
