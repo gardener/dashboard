@@ -58,7 +58,7 @@ SPDX-License-Identifier: Apache-2.0
                   v-show="!!targetTab.selectedConfig"
                   ref="settings"
                   v-model:target="targetTab.selectedTarget"
-                  :runtime-settings-hidden="hasShootWorkerGroups || targetTab.selectedTarget !== 'shoot'"
+                  :runtime-settings-hidden="!hasShootWorkerGroups || targetTab.selectedTarget !== 'shoot'"
                 />
               </v-expansion-panel-text>
             </v-expansion-panel>

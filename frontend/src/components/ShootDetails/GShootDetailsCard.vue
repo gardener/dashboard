@@ -75,7 +75,7 @@ SPDX-License-Identifier: Apache-2.0
           />
         </g-list-item-content>
         <template
-          v-if="!hasShootWorkerGroups"
+          v-if="hasShootWorkerGroups"
           #append
         >
           <g-shoot-messages
@@ -174,7 +174,7 @@ SPDX-License-Identifier: Apache-2.0
           </template>
         </g-list-item>
       </template>
-      <template v-if="!hasShootWorkerGroups">
+      <template v-if="hasShootWorkerGroups">
         <v-divider inset />
         <g-list-item>
           <template #prepend>

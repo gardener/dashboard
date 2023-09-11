@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
           </div>
         </g-list-item-content>
       </g-list-item>
-      <g-list-item v-if="!hasShootWorkerGroups">
+      <g-list-item v-if="hasShootWorkerGroups">
         <g-list-item-content label="Credential">
           <router-link
             v-if="canLinkToSecret"
@@ -110,7 +110,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
       </g-list-item>
       <v-divider inset />
-      <template v-if="!hasShootWorkerGroups">
+      <template v-if="hasShootWorkerGroups">
         <g-list-item>
           <template #prepend>
             <v-icon color="primary">

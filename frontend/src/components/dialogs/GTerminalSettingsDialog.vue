@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <template #message>
       <g-terminal-settings
-        :runtime-settings-hidden="hasShootWorkerGroups || target !== 'shoot'"
+        :runtime-settings-hidden="!hasShootWorkerGroups || target !== 'shoot'"
       />
     </template>
   </g-dialog>

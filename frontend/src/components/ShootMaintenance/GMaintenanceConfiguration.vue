@@ -83,7 +83,7 @@ export default {
           updateKubernetesVersion: k8sUpdates,
           updateOSVersion: osUpdates,
         })
-        if (this.hasShootWorkerGroups) {
+        if (!this.hasShootWorkerGroups) {
           delete this.data.updateOSVersion
         }
         await this.api.updateShootMaintenance({ namespace: this.shootNamespace, name: this.shootName, data: this.data })

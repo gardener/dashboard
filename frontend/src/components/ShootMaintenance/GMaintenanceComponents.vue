@@ -154,7 +154,7 @@ export default {
       return !this.selectable && !this.osUpdates && !this.k8sUpdates
     },
     shootNotWorkerless () {
-      return !this.workerless && !this.hasShootWorkerGroups
+      return !this.workerless && this.hasShootWorkerGroups
     },
   },
   methods: {

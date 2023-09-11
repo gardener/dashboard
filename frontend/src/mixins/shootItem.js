@@ -124,7 +124,7 @@ export const shootItem = {
       return get(this.shootSpec, 'provider.workers', [])
     },
     hasShootWorkerGroups () {
-      return !this.shootWorkerGroups.length
+      return !!this.shootWorkerGroups.length
     },
     shootAddons () {
       const addons = cloneDeep(get(this.shootSpec, 'addons', {}))

@@ -284,10 +284,10 @@ export default {
       return this.canCreateShootsAdminkubeconfig
     },
     isTerminalTileVisible () {
-      return !isEmpty(this.shootItem) && this.hasShootTerminalAccess && !this.isSeedUnreachable
+      return !isEmpty(this.shootItem) && this.hasShootTerminalAccess && !this.isSeedUnreachable && (this.hasShootWorkerGroups || this.isAdmin)
     },
     isTerminalShortcutsTileVisible () {
-      return !isEmpty(this.shootItem) && this.isTerminalShortcutsFeatureEnabled && this.hasShootTerminalAccess && !this.hideTerminalShortcuts && !this.isSeedUnreachable
+      return !isEmpty(this.shootItem) && this.isTerminalShortcutsFeatureEnabled && this.hasShootTerminalAccess && !this.hideTerminalShortcuts && !this.isSeedUnreachable && (this.hasShootWorkerGroups || this.isAdmin)
     },
     token () {
       return this.shootInfo.cluster_token || ''
