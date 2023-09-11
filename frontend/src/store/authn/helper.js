@@ -40,16 +40,16 @@ function secondsUntil (val) {
   }
 }
 
-function isRefreshRequired (user = {}) {
-  if (!user.rti || !user.refresh_at) {
+function isRefreshRequired (user) {
+  if (!user?.rti || !user?.refresh_at) {
     return false
   }
   const t = secondsUntil(user.refresh_at)
   return typeof t === 'number' && t < CLOCK_TOLERANCE
 }
 
-function isExpired (user = {}) {
-  if (!user.exp) {
+function isExpired (user) {
+  if (!user?.exp) {
     return true
   }
   const t = secondsUntil(user.exp)
