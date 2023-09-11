@@ -88,7 +88,7 @@ export const useAuthnStore = defineStore('authn', () => {
   }
 
   return {
-    user: readonly(user),
+    user,
     isAdmin,
     username,
     displayName,
