@@ -53,7 +53,7 @@ SPDX-License-Identifier: Apache-2.0
               </div>
             </template>
             <span class="font-weight-bold">Focus Mode</span>
-            <ul>
+            <ul class="ml-3">
               <li>Cluster list sorting is freezed</li>
               <li>Items in the list will still be updated</li>
               <li>New clusters will not be added to the list until you disable focus mode</li>
