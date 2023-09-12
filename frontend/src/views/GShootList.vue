@@ -190,6 +190,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-data-table>
       <v-dialog
         v-model="clusterAccessDialog"
+        persistent
         max-width="850"
       >
         <v-card>
