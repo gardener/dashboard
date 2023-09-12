@@ -32,7 +32,6 @@ SPDX-License-Identifier: Apache-2.0
             <template #activator="{ props }">
               <div v-bind="props">
                 <v-badge
-                  v-if="!projectScope && isAdmin"
                   class="mr-5"
                   bordered
                   color="primary-lighten-3"
@@ -502,8 +501,8 @@ export default {
           key: 'issueSince',
           sortable: isSortable(true),
           align: 'start',
-          defaultSelected: true,
-          hidden: this.projectScope || !this.isAdmin,
+          defaultSelected: this.isAdmin,
+          hidden: false,
         },
         {
           title: 'HIGH AVAILABILITY',
