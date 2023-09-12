@@ -8758,13 +8758,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["lru-cache", [\
-        ["npm:10.0.0", {\
-          "packageLocation": "./.yarn/cache/lru-cache-npm-10.0.0-256d74bb20-18f101675f.zip/node_modules/lru-cache/",\
-          "packageDependencies": [\
-            ["lru-cache", "npm:10.0.0"]\
-          ],\
-          "linkType": "HARD"\
-        }],\
         ["npm:10.0.1", {\
           "packageLocation": "./.yarn/cache/lru-cache-npm-10.0.1-0e1abf4c13-06f8d0e1ce.zip/node_modules/lru-cache/",\
           "packageDependencies": [\
@@ -9773,7 +9766,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/path-scurry-npm-1.10.1-52bd946f2e-e2557cff3a.zip/node_modules/path-scurry/",\
           "packageDependencies": [\
             ["path-scurry", "npm:1.10.1"],\
-            ["lru-cache", "npm:10.0.0"],\
+            ["lru-cache", "npm:10.0.1"],\
             ["minipass", "npm:7.0.2"]\
           ],\
           "linkType": "HARD"\
