@@ -135,8 +135,8 @@ export const useAuthzStore = defineStore('authz', () => {
       canCreateTerminals.value
   })
 
-  async function fetchRules (namespace) {
-    if (namespace && spec.value?.namespace !== namespace) {
+  async function fetchRules (namespace, force) {
+    if (force || (namespace && spec.value?.namespace !== namespace)) {
       const body = { namespace }
       const response = await api.getSubjectRules(body)
       this.setNamespace(namespace)

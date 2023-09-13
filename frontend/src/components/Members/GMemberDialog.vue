@@ -402,10 +402,12 @@ export default {
     },
   },
   methods: {
+    ...mapActions(useAuthzStore, [
+      'fetchRules',
+    ]),
     ...mapActions(useMemberStore, [
       'addMember',
       'updateMember',
-      'refreshSubjectRules',
     ]),
     hide () {
       this.visible = false
@@ -446,7 +448,7 @@ export default {
           await this.updateMember(name, { roles, description: this.internalDescription })
 
           if (this.isCurrentUser && !this.isAdmin) {
-            await this.refreshSubjectRules()
+            await this.fetchRules(this.namespace, true)
           }
           this.hide()
         } catch (err) {
