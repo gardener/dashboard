@@ -19,13 +19,26 @@ SPDX-License-Identifier: Apache-2.0
       class="ma-1"
     />
   </div>
-  <span v-else>
-    Workerless Cluster
-  </span>
+  <v-tooltip
+    v-else
+    location="top"
+  >
+    <template #activator="{ props }">
+      <v-chip
+        v-bind="props"
+        size="small"
+        class="my-0 ml-0"
+        variant="outlined"
+        color="disabled"
+      >
+        workerless
+      </v-chip>
+    </template>
+    This cluster does not have worker groups
+  </v-tooltip>
 </template>
 
 <script>
-
 import GWorkerGroup from '@/components/ShootWorkers/GWorkerGroup'
 
 import { shootItem } from '@/mixins/shootItem'
