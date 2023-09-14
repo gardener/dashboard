@@ -122,7 +122,31 @@ SPDX-License-Identifier: Apache-2.0
       <v-col
         cols="12"
         md="6"
-      />
+      >
+        <v-card class="mt-4">
+          <v-toolbar
+            flat
+            density="compact"
+            class="bg-toolbar-background text-toolbar-title"
+          >
+            <v-toolbar-title>Advanced</v-toolbar-title>
+          </v-toolbar>
+          <v-card-text>
+            <v-row>
+              <v-col cols="12">
+                <v-switch
+                  v-model="operatorFeatures"
+                  label="Enable Operator Features"
+                  color="primary"
+                  persistent-hint
+                  density="compact"
+                  hint="Enable Operator Features for Project Cluster Lists"
+                />
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+      </v-col>
     </v-row>
   </v-container>
 </template>
@@ -146,5 +170,6 @@ const {
   logLevel,
   autoLogin,
   colorScheme,
+  operatorFeatures,
 } = storeToRefs(localStorageStore)
 </script>

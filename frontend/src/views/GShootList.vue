@@ -32,6 +32,7 @@ SPDX-License-Identifier: Apache-2.0
             <template #activator="{ props }">
               <div v-bind="props">
                 <v-badge
+                  v-if="showOperatorFeatures"
                   class="mr-5"
                   bordered
                   color="primary-lighten-3"
@@ -348,6 +349,7 @@ export default {
       'shootCustomSelectedColumns',
       'shootCustomSortBy',
       'allProjectsShootFilter',
+      'operatorFeatures',
     ]),
     defaultSortBy () {
       return [{ key: 'name', order: 'asc' }]
@@ -501,8 +503,8 @@ export default {
           key: 'issueSince',
           sortable: isSortable(true),
           align: 'start',
-          defaultSelected: this.isAdmin,
-          hidden: false,
+          defaultSelected: true,
+          hidden: !this.showOperatorFeatures,
         },
         {
           title: 'HIGH AVAILABILITY',
@@ -702,6 +704,9 @@ export default {
     sortedAndFilteredItems () {
       const items = this.sortItems(this.items, this.sortByInternal)
       return filter(items, item => this.searchItems(this.debouncedShootSearch, toRaw(item)))
+    },
+    showOperatorFeatures () {
+      return this.operatorFeatures || (!this.projectScope && this.isAdmin)
     },
   },
   watch: {
