@@ -403,7 +403,7 @@ export default {
   },
   methods: {
     ...mapActions(useAuthzStore, [
-      'fetchRules',
+      'refreshRules',
     ]),
     ...mapActions(useMemberStore, [
       'addMember',
@@ -448,7 +448,7 @@ export default {
           await this.updateMember(name, { roles, description: this.internalDescription })
 
           if (this.isCurrentUser && !this.isAdmin) {
-            await this.fetchRules(this.namespace, true)
+            await this.refreshRules()
           }
           this.hide()
         } catch (err) {
