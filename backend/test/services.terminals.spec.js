@@ -101,11 +101,6 @@ describe('services', function () {
     }
 
     function createTerminalConfig (terminal = {}) {
-      const apiServerIngress = {
-        annotations: {
-          foo: 'bar'
-        }
-      }
       return _.merge({
         containerImage: 'image:1.2.3',
         gardenTerminalHost: {
@@ -117,16 +112,6 @@ describe('services', function () {
               name: 'operatorServiceAccountName',
               namespace: 'garden'
             }
-          }
-        },
-        bootstrap: {
-          disabled: true,
-          seedDisabled: true,
-          shootDisabled: true,
-          gardenTerminalHostDisabled: true,
-          apiServerIngress,
-          gardenTerminalHost: {
-            apiServerIngress
           }
         }
       }, terminal)

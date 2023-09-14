@@ -362,50 +362,12 @@ global:
       failureThreshold: 6
       successThreshold: 1
 
-  # Terminal terminal-bootstrapper configuration values
-  bootstrapper:
-    enabled: false
-    image:
-      repository: eu.gcr.io/gardener-project/gardener/dashboard-terminal-bootstrapper
-      tag: latest
-      pullPolicy: IfNotPresent
-    # additional labels to add to the bootstrapper pod (e.g. security policies)
-    podLabels: {}
-    # additional annotations to add to the bootstrapper pod
-    podAnnotations: {}
-    serviceAccountName: gardener-dashboard-terminal-bootstrapper
-    serviceAccountTokenVolumeProjection:
-      enabled: true
-      expirationSeconds: 43200 # 12 hours
-      audience: ''
-    resources:
-      requests:
-        cpu: 100m
-        memory: 100Mi
-    nodeOptions: [--max-old-space-size=460]
-    readinessProbe:
-      initialDelaySeconds: 5
-      periodSeconds: 5
-      timeoutSeconds: 5
-      failureThreshold: 1
-      successThreshold: 1
-    livenessProbe:
-      initialDelaySeconds: 10
-      periodSeconds: 30
-      timeoutSeconds: 5
-      failureThreshold: 3
-      successThreshold: 1
-    config:
-      logLevel: debug
-
   # Virtual garden related configuration
   virtualGarden:
     # enabled should be set to true if the application and runtime charts should be deployed on two separate clusters, usually in a so-called "virtual garden" setup
     enabled: false
     # fully qualified name of the dashboard user as they would be returned by the tokenreview (.status.user.username) on the virtual garden
     dashboardUserName: ~
-    # fully qualified name of the terminal-bootstrap user
-    terminalBootstrapperUserName: ~
 
   # # Terminal related configuration
   # terminal:
@@ -429,8 +391,8 @@ global:
   #       namespace: garden # namespace, in which the secret for the gardenTerminalHost resides on the (virtual) garden cluster
   #       labelSelector:
   #       - runtime=gardenTerminalHost
-  #       # seedRef: my-soil # if set, you most likely want to disable gardenTerminalHost bootstrapping
-  #       # shootRef: # if set, you most likely want to disable gardenTerminalHost bootstrapping
+  #       # seedRef: my-soil
+  #       # shootRef:
   #       #   name: myshoot
   #       #   namespace: garden
   #   garden: # (virtual) garden
@@ -445,37 +407,6 @@ global:
   #         kind: 'ClusterRole'
   #         name: 'gardener.cloud:system:administrators'
   #       bindingKind: 'ClusterRoleBinding'
-  #   bootstrap:
-  #     disabled: true # indicates if bootstrapping resources required for the terminal feature is generally disabled
-  #     seedDisabled: false # indicates if bootstrapping resources for seeds is disabled, required for gardener operator terminals
-  #     shootDisabled: false # indicates if bootstrapping resources for shoots is disabled, required for enduser terminals
-  #     gardenTerminalHostDisabled: false # indicates if bootstrapping resources for the virtual garden terminal host cluster is disabled
-  #     apiServerIngress:
-  #       annotations:
-  #         kubernetes.io/ingress.class: nginx
-  #         nginx.ingress.kubernetes.io/backend-protocol: HTTPS
-  #         certmanager.k8s.io/cluster-issuer: lets-encrypt
-  #         certmanager.k8s.io/acme-challenge-type: dns01
-  #         certmanager.k8s.io/acme-dns01-provider: route53
-  #     queueOptions: ~ # here you can specify options like maxRetries, retryDelay https://github.com/diamondio/better-queue#new-queueprocess-options
-  #     gardenTerminalHost:
-  #       namespace: garden # namespace, in which the tls-secret, ingress and headless service should be created in
-  #       apiServerIngress:
-  #         annotations:
-  #           kubernetes.io/ingress.class: nginx
-  #           nginx.ingress.kubernetes.io/backend-protocol: HTTPS
-  #       apiServerTls: # Optional. Needs to be a browser-trusted certificate!
-  #         crt: |
-  #           -----BEGIN CERTIFICATE-----
-  #           Li4u
-  #           -----END CERTIFICATE-----
-  #           -----BEGIN CERTIFICATE-----
-  #           Li4u
-  #           -----END CERTIFICATE-----
-  #         key: |
-  #           -----BEGIN RSA PRIVATE KEY-----
-  #           Li4u
-  #           -----END RSA PRIVATE KEY-----
 
   # # Unreachable seeds configuration
   # # disables some UI features for seeds that are unreachable by the dashboard

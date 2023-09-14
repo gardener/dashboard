@@ -460,9 +460,6 @@ describe('gardener-dashboard', function () {
         const values = {
           global: {
             terminal: {
-              bootstrap: {
-                disabled: false
-              },
               container: {
                 image: 'chart-test:0.1.0'
               },
