@@ -88,6 +88,38 @@ describe('gardener-dashboard', function () {
       })
     })
 
+    describe('contentSecurityPolicy', () => {
+      let values
+
+      const assertTemplate = async () => {
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [configMap] = documents
+        const config = yaml.load(configMap.data['config.yaml'])
+        expect(pick(config, ['contentSecurityPolicy'])).toMatchSnapshot()
+      }
+
+      beforeEach(() => {
+        values = {
+          global: {
+          }
+        }
+      })
+
+      it('should render the template with default connectSrc', async function () {
+        expect.assertions(2)
+        await assertTemplate()
+      })
+
+      it('should render the template with connectSrc containing additional host sources', async function () {
+        values.global.terminal = {
+          allowedHostSourceList: ['*.seed.example.com']
+        }
+        expect.assertions(2)
+        await assertTemplate()
+      })
+    })
+
     describe('oidc', () => {
       let values
 

@@ -142,6 +142,8 @@ export class TerminalSession {
 
     this.tries++
 
+    let reconnectTimeoutId
+
     try {
       this.connectionState = TerminalSession.CONNECTING
       await this.waitUntilPodIsRunning(60)
@@ -152,6 +154,27 @@ export class TerminalSession {
       if (this.cancelConnect) {
         return
       }
+
+      if (!this.workaroundOnce) {
+        this.workaroundOnce = true
+
+        logger.info('failed to wait until pod is running. Trying workaround..', err)
+        // workaround for https://bugs.chromium.org/p/chromium/issues/detail?id=993907&q=ERR_SSL_CLIENT_AUTH_CERT_NEEDED&can=2
+
+        try {
+          // We want the tls handshake to be establised so that the request context has a client certificate selection for the endpoint.
+          // It does not matter that the request will fail with 401.
+          const options = {
+            method: 'HEAD',
+            mode: 'no-cors',
+          }
+          await fetch(`https://${this.hostCluster.kubeApiServer}`, options)
+        } catch (err) { /* ignore errors */ }
+
+        reconnectTimeoutId = setTimeout(() => this.attachTerminal(), 0)
+        return
+      }
+
       logger.error('failed to wait until pod is running', err)
       this.vm.showSnackbarTop('Could not connect to terminal', 'The detailed connection error can be found in the JavaScript console of your browser')
       this.setDisconnectedState()
@@ -166,7 +189,6 @@ export class TerminalSession {
       bidirectional: true,
     })
     this.vm.term.loadAddon(attachAddon)
-    let reconnectTimeoutId
     let heartbeatIntervalId
 
     ws.onopen = () => {

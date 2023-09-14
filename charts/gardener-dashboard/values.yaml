@@ -420,6 +420,9 @@ global:
   #   # If no value is provided, the default value corresponds to 12 hours
   #   # The token issuer may return a token with a different validity duration
   #   serviceAccountTokenExpiration: 43200 # seconds
+  #   # allowedHostSourceList is a list of hostnames (without scheme) to which the browser is allowed to connect. Note that the use of wildcards is subject to the rules defined by the content security policy.
+  #   allowedHostSourceList:
+  #   - "*.seed.example.com"
   #   gardenTerminalHost: # cluster that hosts the terminal pods for the (virtual) garden cluster
   #     apiServerIngressHost: api.example.org # is host in browser-trusted certificate. Optional, but required if using secretRef
   #     secretRef:
