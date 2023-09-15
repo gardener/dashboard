@@ -93,7 +93,13 @@ function discoverIssuer (url) {
 
 function discoverClient (url) {
   return pRetry(async () => {
-    const issuer = await discoverIssuer(url)
+    let issuer
+    try {
+      issuer = await discoverIssuer(url)
+    } catch (err) {
+      logger.error('failed to discover OpenID Connect issuer %s', url, err)
+      throw err
+    }
     overrideHttpOptions.call(issuer)
     const options = {
       client_id: clientId,
