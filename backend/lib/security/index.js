@@ -127,7 +127,7 @@ function getIssuerClient (url = issuer) {
   if (!clientPromise) {
     clientPromise = discoverClient(url)
   }
-  return pTimeout(clientPromise, 1000, `OpenID Connect Issuer ${url} not available`)
+  return pTimeout(clientPromise, 1000, `OpenID Connect issuer ${url} not available`)
 }
 
 function getBackendRedirectUri (origin) {
