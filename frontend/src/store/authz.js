@@ -135,13 +135,22 @@ export const useAuthzStore = defineStore('authz', () => {
       canCreateTerminals.value
   })
 
+  // reuse function not exported
+  async function getRules (namespace) {
+    const body = { namespace }
+    const response = await api.getSubjectRules(body)
+    status.value = response.data
+  }
+
   async function fetchRules (namespace) {
     if (namespace && spec.value?.namespace !== namespace) {
-      const body = { namespace }
-      const response = await api.getSubjectRules(body)
+      await getRules(namespace)
       this.setNamespace(namespace)
-      status.value = response.data
     }
+  }
+
+  function refreshRules () {
+    return getRules(spec.value?.namespace)
   }
 
   function setNamespace (namespace) {
@@ -181,6 +190,7 @@ export const useAuthzStore = defineStore('authz', () => {
     hasControlPlaneTerminalAccess,
     hasShootTerminalAccess,
     fetchRules,
+    refreshRules,
     $reset,
   }
 })
