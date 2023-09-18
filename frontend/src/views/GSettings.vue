@@ -136,12 +136,19 @@ SPDX-License-Identifier: Apache-2.0
               <v-col cols="12">
                 <v-switch
                   v-model="operatorFeatures"
-                  label="Enable Operator Features"
+                  label="Operator Features"
                   color="primary"
-                  persistent-hint
                   density="compact"
-                  hint="Enable Operator Features for Project Cluster Lists"
+                  hide-details
                 />
+                <div
+                  class="text-caption text-grey-darken-1"
+                >
+                  <span class="font-weight-bold">Enable operator features for project cluster lists</span><br>
+                  You can set the focus mode for cluster lists. This mode will freeze the current
+                  list and allows to get an overview of clusters with issues by sorting the list by
+                  the <code>ISSUE SINCE</code> column.
+                </div>
               </v-col>
             </v-row>
           </v-card-text>
