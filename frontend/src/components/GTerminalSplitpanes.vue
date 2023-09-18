@@ -25,6 +25,7 @@ SPDX-License-Identifier: Apache-2.0
           v-else
           :uuid="item.uuid"
           :data="item.data"
+          :runtime-settings-hidden="!hasShootWorkerGroups || item.data.target !== 'shoot'"
           @terminated="onTermination(item)"
           @split="orientation => onSplit(item, orientation)"
         />
@@ -33,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
     <g-create-terminal-session-dialog
       :name="terminalCoordinates.name"
       :namespace="terminalCoordinates.namespace"
-      :shoot-item="shootItem"
+      :has-shoot-worker-groups="hasShootWorkerGroups"
     />
   </div>
 </template>
@@ -67,7 +68,10 @@ export default {
   ],
   computed: {
     shootItem () {
-      return this.shootByNamespaceAndName(this.$route.params)
+      return this.shootByNamespaceAndName(this.$route.params) ?? {}
+    },
+    hasShootWorkerGroups () {
+      return !!this.shootItem?.spec?.provider?.workers?.length
     },
   },
   methods: {

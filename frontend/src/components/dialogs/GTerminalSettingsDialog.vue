@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <template #message>
       <g-terminal-settings
-        :runtime-settings-hidden="!hasShootWorkerGroups || target !== 'shoot'"
+        :runtime-settings-hidden="runtimeSettingsHidden"
       />
     </template>
   </g-dialog>
@@ -29,9 +29,6 @@ import {
   toRaw,
 } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
-import { mapActions } from 'pinia'
-
-import { useShootStore } from '@/store/shoot'
 
 import GDialog from '@/components/dialogs/GDialog.vue'
 import GTerminalSettings from '@/components/GTerminalSettings.vue'
@@ -52,8 +49,9 @@ export default {
     }
   },
   props: {
-    target: {
-      type: String,
+    runtimeSettingsHidden: {
+      type: Boolean,
+      default: false,
     },
   },
   setup () {
@@ -73,7 +71,6 @@ export default {
     },
   },
   methods: {
-    ...mapActions(useShootStore, ['shootByNamespaceAndName']),
     async promptForConfigurationChange (initialState) {
       this.updateState(initialState)
       const confirmWithDialogPromise = this.$refs.gDialog.confirmWithDialog()

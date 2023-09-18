@@ -356,8 +356,7 @@ SPDX-License-Identifier: Apache-2.0
     </g-drag-n-droppable-component>
     <g-terminal-settings-dialog
       ref="settings"
-      :target="target"
-      :shoot-item="shootItem"
+      :runtime-settings-hidden="runtimeSettingsHidden"
     />
   </div>
 </template>
@@ -376,7 +375,6 @@ import 'xterm/css/xterm.css'
 import { useAppStore } from '@/store/app'
 import { useConfigStore } from '@/store/config'
 import { useTerminalStore } from '@/store/terminal'
-import { useShootStore } from '@/store/shoot'
 
 import GDragNDroppableComponent from '@/components/GDragNDroppableComponent.vue'
 import GTerminalSettingsDialog from '@/components/dialogs/GTerminalSettingsDialog.vue'
@@ -424,6 +422,10 @@ export default {
     data: {
       type: Object,
       required: true,
+    },
+    runtimeSettingsHidden: {
+      type: Boolean,
+      default: false,
     },
   },
   emits: [
@@ -539,9 +541,6 @@ export default {
     target () {
       return this.data.target
     },
-    shootItem () {
-      return this.shootByNamespaceAndName(this.$route.params)
-    },
   },
   watch: {
     splitpaneResize () {
@@ -587,7 +586,6 @@ export default {
     }
   },
   methods: {
-    ...mapActions(useShootStore, ['shootByNamespaceAndName']),
     focus () {
       this.term.focus()
     },
