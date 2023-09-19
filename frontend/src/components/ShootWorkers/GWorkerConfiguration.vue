@@ -15,6 +15,7 @@ SPDX-License-Identifier: Apache-2.0
     caption="Configure Workers"
     disable-confirm-input-focus
     max-height="80vh"
+    :disabled="!hasShootWorkerGroups"
     @dialog-opened="onConfigurationDialogOpened"
   >
     <template #top>
@@ -98,6 +99,13 @@ SPDX-License-Identifier: Apache-2.0
       </v-expand-transition>
     </template>
   </g-action-button-dialog>
+  <v-tooltip
+    :activator="$refs.actionDialog"
+    location="top"
+    :disabled="hasShootWorkerGroups"
+  >
+    It is not possible to add worker groups to workerless clusters
+  </v-tooltip>
 </template>
 
 <script>

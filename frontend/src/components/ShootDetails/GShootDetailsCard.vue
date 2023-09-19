@@ -75,7 +75,6 @@ SPDX-License-Identifier: Apache-2.0
           />
         </g-list-item-content>
         <template
-          v-if="hasShootWorkerGroups"
           #append
         >
           <g-shoot-messages

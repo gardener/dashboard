@@ -68,7 +68,7 @@ export default {
   ],
   computed: {
     shootItem () {
-      return this.shootByNamespaceAndName(this.$route.params) ?? {}
+      return this.shootByNamespaceAndName(this.$route.params)
     },
     hasShootWorkerGroups () {
       return !!this.shootItem?.spec?.provider?.workers?.length
