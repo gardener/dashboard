@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
             <template #activator="{ props }">
               <div v-bind="props">
                 <v-badge
-                  v-if="showOperatorFeatures"
+                  v-if="issueSinceColumnVisible"
                   class="mr-5"
                   bordered
                   color="primary-lighten-3"
@@ -504,7 +504,7 @@ export default {
           sortable: isSortable(true),
           align: 'start',
           defaultSelected: true,
-          hidden: !this.showOperatorFeatures,
+          hidden: !this.issueSinceColumnVisible,
         },
         {
           title: 'HIGH AVAILABILITY',
@@ -705,7 +705,7 @@ export default {
       const items = this.sortItems(this.items, this.sortByInternal)
       return filter(items, item => this.searchItems(this.debouncedShootSearch, toRaw(item)))
     },
-    showOperatorFeatures () {
+    issueSinceColumnVisible () {
       return this.operatorFeatures || (!this.projectScope && this.isAdmin)
     },
   },
