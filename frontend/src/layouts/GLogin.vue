@@ -36,7 +36,6 @@ SPDX-License-Identifier: Apache-2.0
                   </div>
                 </div>
                 <v-tabs
-                  v-if="!isFetching"
                   v-model="loginType"
                   align-tabs="center"
                   color="primary"
@@ -52,7 +51,6 @@ SPDX-License-Identifier: Apache-2.0
               </v-card-title>
               <v-card-text class="login-form py-0">
                 <v-window
-                  v-if="!isFetching"
                   v-model="loginType"
                   class="pa-4"
                 >
@@ -84,7 +82,6 @@ SPDX-License-Identifier: Apache-2.0
                 </v-window>
               </v-card-text>
               <v-card-actions
-                v-show="!isFetching"
                 class="py-4"
               >
                 <div class="d-flex justify-center flex-grow-1">
@@ -180,7 +177,6 @@ export default {
   },
   computed: {
     ...mapState(useLoginStore, [
-      'isFetching',
       'loginTypes',
       'landingPageUrl',
     ]),
