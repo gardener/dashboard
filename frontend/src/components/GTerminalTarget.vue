@@ -23,7 +23,7 @@ SPDX-License-Identifier: Apache-2.0
         v-if="shootItem && hasShootTerminalAccess"
         value="shoot"
         color="primary"
-        :disabled="isShootStatusHibernated"
+        :disabled="disabled || isShootStatusHibernated"
       >
         <template #label>
           <div>Cluster</div>
@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0
         v-if="hasGardenTerminalAccess"
         value="garden"
         color="primary"
-        :disabled="!isAdmin && isShootStatusHibernated"
+        :disabled="disabled || (!isAdmin && isShootStatusHibernated)"
       >
         <template #label>
           <div>Garden Cluster</div>
@@ -81,6 +81,10 @@ export default {
   props: {
     modelValue: {
       type: String,
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
     },
     shootItem: {
       type: Object,

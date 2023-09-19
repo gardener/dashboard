@@ -23,10 +23,10 @@ export default {
     GProjectError,
   },
   beforeRouteEnter (to, from, next) {
-    next(vm => vm.load())
+    next(vm => vm.load(to))
   },
-  beforeRouteUpdate (to, from) {
-    this.load()
+  async beforeRouteUpdate (to, from) {
+    this.load(to)
   },
   data () {
     return {
@@ -70,11 +70,17 @@ export default {
     },
   },
   methods: {
-    load () {
-      const routeName = this.$route.name
+    load (route) {
+      const routeName = route.name
+      const routeParams = route.params
       this.error = null
       this.fallbackRoute = null
-      if (!this.namespaces.includes(this.namespace) && this.namespace !== '_all') {
+      if (this.namespace !== routeParams.namespace) {
+        this.error = new Error('An unexpected error occurred')
+        this.fallbackRoute = {
+          name: 'Home',
+        }
+      } else if (!this.namespaces.includes(this.namespace) && this.namespace !== '_all') {
         this.error = Object.assign(new Error('The project you are looking for doesn\'t exist or you are not authorized to view this project!'), {
           code: 404,
           reason: 'Project not found',

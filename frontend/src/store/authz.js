@@ -143,7 +143,16 @@ export const useAuthzStore = defineStore('authz', () => {
   }
 
   async function fetchRules (namespace) {
-    if (namespace && spec.value?.namespace !== namespace) {
+    /**
+     * The value of `spec.value?.namespace` is:
+     * - undefined if no rules have been fetched yet
+     * - null if only cluster scoped rules have been fetched
+     * - a non-empty string if both cluster scoped rules and the rules for the namespace have been fetched
+     */
+    if (!namespace) {
+      namespace = null
+    }
+    if (spec.value?.namespace !== namespace) {
       await getRules(namespace)
       this.setNamespace(namespace)
     }

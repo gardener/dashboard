@@ -101,11 +101,6 @@ describe('services', function () {
     }
 
     function createTerminalConfig (terminal = {}) {
-      const apiServerIngress = {
-        annotations: {
-          foo: 'bar'
-        }
-      }
       return _.merge({
         containerImage: 'image:1.2.3',
         gardenTerminalHost: {
@@ -117,16 +112,6 @@ describe('services', function () {
               name: 'operatorServiceAccountName',
               namespace: 'garden'
             }
-          }
-        },
-        bootstrap: {
-          disabled: true,
-          seedDisabled: true,
-          shootDisabled: true,
-          gardenTerminalHostDisabled: true,
-          apiServerIngress,
-          gardenTerminalHost: {
-            apiServerIngress
           }
         }
       }, terminal)
@@ -403,9 +388,10 @@ describe('services', function () {
           const gardenTerminalHost = {
             seedRef: seedName
           }
+          const project = 'garden'
           terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost }))
           const kubeApiServer = await getGardenHostClusterKubeApiServer(client)
-          const expectedKubeApiServer = fixtures.kube.getApiServer('garden', gardenTerminalHost.seedRef, ingressDomain)
+          const expectedKubeApiServer = `api-${project}--${gardenTerminalHost.seedRef}.${ingressDomain}`
           expect(kubeApiServer).toBe(expectedKubeApiServer)
         })
 
@@ -415,20 +401,21 @@ describe('services', function () {
           }
           terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost }))
           const kubeApiServer = await getGardenHostClusterKubeApiServer(client)
-          const expectedKubeApiServer = `k-g.${ingressDomain}`
+          const expectedKubeApiServer = `api-seed.${ingressDomain}`
           expect(kubeApiServer).toBe(expectedKubeApiServer)
         })
 
         it('should return the secret reference by shootRef', async function () {
           const gardenTerminalHost = {
             shootRef: {
-              namespace: 'shootNamespace',
-              name: 'shootName'
+              namespace: 'garden',
+              name: 'infra1-seed'
             }
           }
+          const project = 'garden'
           terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost }))
           const kubeApiServer = await getGardenHostClusterKubeApiServer(client)
-          const expectedKubeApiServer = fixtures.kube.getApiServer(gardenTerminalHost.shootRef.namespace, gardenTerminalHost.shootRef.name, ingressDomain)
+          const expectedKubeApiServer = `api-${project}--${gardenTerminalHost.shootRef.name}.${ingressDomain}`
           expect(kubeApiServer).toBe(expectedKubeApiServer)
         })
 
