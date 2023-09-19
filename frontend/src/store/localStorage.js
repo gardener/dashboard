@@ -97,6 +97,11 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     writeDefaults: false,
   })
 
+  const operatorFeatures = useLocalStorage('global/operator-features', false, {
+    serializer: StorageSerializers.flag,
+    writeDefaults: false,
+  })
+
   const hiddenMessages = useLocalStorage('global/alert-banner/hidden-messages', {}, {
     serializer: StorageSerializers.json,
     writeDefaults: false,
@@ -226,6 +231,7 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
   return {
     colorScheme,
     autoLogin,
+    operatorFeatures,
     logLevel,
     hiddenMessages,
     userSelectedColumns,

@@ -222,6 +222,19 @@ exports[`api projects should return all projects 2`] = `
 Array [
   Object {
     "data": Object {
+      "createdBy": "admin@example.org",
+      "owner": "admin@example.org",
+      "phase": "Ready",
+    },
+    "metadata": Object {
+      "name": "garden",
+      "namespace": "garden",
+      "resourceVersion": "42",
+      "role": "project",
+    },
+  },
+  Object {
+    "data": Object {
       "createdBy": "foo@example.org",
       "description": "foo-description",
       "owner": "bar@example.org",

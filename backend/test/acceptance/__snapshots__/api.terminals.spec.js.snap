@@ -227,7 +227,7 @@ Array [
 exports[`api terminals cp should create a terminal resource 2`] = `
 Object {
   "hostCluster": Object {
-    "kubeApiServer": "k-1wopgy9.ingress.foo-east.infra1.example.org",
+    "kubeApiServer": "api-garden--infra1-seed.ingress.foo-east.infra1.example.org",
     "namespace": "shoot--foo--fooShoot",
   },
   "imageHelpText": "Dummy Image Description",
@@ -502,7 +502,7 @@ Array [
 exports[`api terminals garden as enduser should create a terminal resource 2`] = `
 Object {
   "hostCluster": Object {
-    "kubeApiServer": "k-cq94yw.ingress.foo-east.infra1.example.org",
+    "kubeApiServer": "api-foo--fooShoot.ingress.foo-east.infra1.example.org",
     "namespace": "term-host-21",
   },
   "imageHelpText": "Dummy Image Description",
@@ -649,7 +649,7 @@ Array [
 exports[`api terminals garden should create a terminal resource 2`] = `
 Object {
   "hostCluster": Object {
-    "kubeApiServer": "k-g.ingress.foo-west.infra1.example.org",
+    "kubeApiServer": "api-seed.ingress.foo-west.infra1.example.org",
     "namespace": "term-host-21",
   },
   "imageHelpText": "Dummy Image Description",
@@ -953,7 +953,7 @@ Array [
 exports[`api terminals garden should reuse a terminal session 2`] = `
 Object {
   "hostCluster": Object {
-    "kubeApiServer": "k-g.ingress.foo-west.infra1.example.org",
+    "kubeApiServer": "api-seed.ingress.foo-west.infra1.example.org",
     "namespace": "term-host-1",
   },
   "imageHelpText": "Foo Image Description",
@@ -1109,7 +1109,7 @@ Array [
 exports[`api terminals shoot should create a terminal resource 2`] = `
 Object {
   "hostCluster": Object {
-    "kubeApiServer": "k-cq94yw.ingress.foo-east.infra1.example.org",
+    "kubeApiServer": "api-foo--fooShoot.ingress.foo-east.infra1.example.org",
     "namespace": "term-host-21",
   },
   "imageHelpText": "Dummy Image Description",
@@ -1274,7 +1274,7 @@ Array [
 exports[`api terminals shoot should reuse a terminal session 2`] = `
 Object {
   "hostCluster": Object {
-    "kubeApiServer": "k-cq94yw.ingress.foo-east.infra1.example.org",
+    "kubeApiServer": "api-foo--fooShoot.ingress.foo-east.infra1.example.org",
     "namespace": "term-host-3",
   },
   "imageHelpText": "Foo Image Description",

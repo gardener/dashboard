@@ -135,13 +135,31 @@ export const useAuthzStore = defineStore('authz', () => {
       canCreateTerminals.value
   })
 
+  // reuse function not exported
+  async function getRules (namespace) {
+    const body = { namespace }
+    const response = await api.getSubjectRules(body)
+    status.value = response.data
+  }
+
   async function fetchRules (namespace) {
-    if (namespace && spec.value?.namespace !== namespace) {
-      const body = { namespace }
-      const response = await api.getSubjectRules(body)
-      this.setNamespace(namespace)
-      status.value = response.data
+    /**
+     * The value of `spec.value?.namespace` is:
+     * - undefined if no rules have been fetched yet
+     * - null if only cluster scoped rules have been fetched
+     * - a non-empty string if both cluster scoped rules and the rules for the namespace have been fetched
+     */
+    if (!namespace) {
+      namespace = null
     }
+    if (spec.value?.namespace !== namespace) {
+      await getRules(namespace)
+      this.setNamespace(namespace)
+    }
+  }
+
+  function refreshRules () {
+    return getRules(spec.value?.namespace)
   }
 
   function setNamespace (namespace) {
@@ -181,6 +199,7 @@ export const useAuthzStore = defineStore('authz', () => {
     hasControlPlaneTerminalAccess,
     hasShootTerminalAccess,
     fetchRules,
+    refreshRules,
     $reset,
   }
 })

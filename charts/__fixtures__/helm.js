@@ -93,16 +93,11 @@ const gardenerDashboardApplicationTemplates = ['gardener-dashboard', 'charts', '
 const renderDashboardRuntimeTemplates = renderTemplatesFn(...gardenerDashboardRuntimeTemplates, 'dashboard')
 const renderDashboardApplicationTemplates = renderTemplatesFn(...gardenerDashboardApplicationTemplates, 'dashboard')
 
-const renderBootstrapperRuntimeTemplates = renderTemplatesFn(...gardenerDashboardRuntimeTemplates, 'bootstrapper')
-const renderBootstrapperApplicationTemplates = renderTemplatesFn(...gardenerDashboardApplicationTemplates, 'bootstrapper')
-
 const renderIdentityTemplates = renderTemplatesFn('identity')
 
 module.exports = {
   renderTemplatesFn,
   renderDashboardRuntimeTemplates,
   renderDashboardApplicationTemplates,
-  renderBootstrapperRuntimeTemplates,
-  renderBootstrapperApplicationTemplates,
   renderIdentityTemplates
 }

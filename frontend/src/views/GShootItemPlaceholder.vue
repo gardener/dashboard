@@ -30,10 +30,12 @@ export default {
     GShootItemError,
   },
   beforeRouteEnter (to, from, next) {
-    next(vm => vm.load())
+    next(async vm => {
+      await vm.load(to)
+    })
   },
-  beforeRouteUpdate (to, from) {
-    this.load()
+  async beforeRouteUpdate (to, from) {
+    await this.load(to)
   },
   beforeRouteLeave (to, from) {
     this.leaving = true
@@ -132,9 +134,9 @@ export default {
         this.error = null
       }
     },
-    async load () {
-      const routeName = this.$route.name
-      const routeParams = this.$route.params
+    async load (route) {
+      const routeName = route.name
+      const routeParams = route.params
       this.error = null
       this.leaving = false
       this.loading = true

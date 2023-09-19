@@ -83,15 +83,29 @@ When there is no heartbeat on the `terminal` resource for a certain amount of ti
 
 ## Browser Trusted Certificates for Kube-Apiservers
 
+When the dashboard frontend opens a secure WebSocket connection to the kube-apiserver, the certificate presented by the kube-apiserver must be browser trusted. Otherwise, the connection can't be established due to browser policy. Most kube-apiservers have self-signed certificates from a custom Root CA.
+
+The Gardener project now handles the responsibility of exposing the kube-apiservers with browser trusted certificates for `Seed`s (gardener/gardener#7764) and `Shoot`s (gardener/gardener#7712). For this to work, a `Secret` must exist in the `garden` namespace of the `Seed` cluster. This `Secret` should have a label `gardener.cloud/role=controlplane-cert`. The Secret is expected to contain the wildcard certificate for `Seed`s ingress domain.
+
+## Allowlist for Hosts
+
 ### Motivation
-The dashboard frontend opens up a secure WebSocket connection to the kube-apiserver. The certificate presented by the kube-apiserver must be browser trusted, otherwise the connection can't be established (rejected by browser policy).
-Most kube-apiservers have self-signed certificates from a custom Root CA.
+When a user starts a terminal session, the dashboard frontend establishes a secure WebSocket connection to the corresponding kube-apiserver. This connection is controlled by the `connectSrc` directive of the content security policy, which governs the hosts that the browser can connect to.
 
-### Bootstrapping
+By default, the `connectSrc` directive only permits connections to the same host. However, to enable the webterminal feature to function properly, connections to additional trusted hosts are required. This is where the `allowedHostSourceList` configuration becomes relevant. It directly impacts the `connectSrc` directive by specifying the hostnames that the browser is allowed to connect to during a terminal session. By defining this list, you can extend the range of terminal connections to include the necessary trusted hosts, while still preventing any unauthorized or potentially harmful connections.
 
-#### Preferred Solution
-There is an [issue](https://github.com/gardener/gardener/issues/1413) on the gardener component, to have browser trusted certificates for shoot kube-apiservers using SNI and certmanager.
-However, this would solve the issue for shoots and shooted-seeds, but not for soil and plant kube-apiservers and potentially others.
+### Configuration
+The `allowedHostSourceList` can be configured within the `global.terminal` section of the `gardener-dashboard` Helm `values.yaml` file. The list should consist of permitted hostnames (without the scheme) for terminal connections.
 
-#### Current Solution
-We had to "workaround" it by creating ingress resources for the kube-apiservers and letting the certmanager (or the new [shoot cert service](https://github.com/gardener/gardener-extension-shoot-cert-service)) request browser trusted certificates.
+It is important to consider that the usage of wildcards follows the rules defined by the content security policy.
+
+Here is an example of how to configure the `allowedHostSourceList`:
+
+```yaml
+global:
+  terminal:
+    allowedHostSourceList:
+    - "*.seed.example.com"
+```
+
+In this example, any host under the seed.example.com domain is allowed for terminal connections.

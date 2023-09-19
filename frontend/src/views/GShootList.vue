@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
             <template #activator="{ props }">
               <div v-bind="props">
                 <v-badge
-                  v-if="!projectScope && isAdmin"
+                  v-if="issueSinceColumnVisible"
                   class="mr-5"
                   bordered
                   color="primary-lighten-3"
@@ -349,6 +349,7 @@ export default {
       'shootCustomSelectedColumns',
       'shootCustomSortBy',
       'allProjectsShootFilter',
+      'operatorFeatures',
     ]),
     defaultSortBy () {
       return [{ key: 'name', order: 'asc' }]
@@ -503,7 +504,7 @@ export default {
           sortable: isSortable(true),
           align: 'start',
           defaultSelected: true,
-          hidden: this.projectScope || !this.isAdmin,
+          hidden: !this.issueSinceColumnVisible,
         },
         {
           title: 'HIGH AVAILABILITY',
@@ -703,6 +704,9 @@ export default {
     sortedAndFilteredItems () {
       const items = this.sortItems(this.items, this.sortByInternal)
       return filter(items, item => this.searchItems(this.debouncedShootSearch, toRaw(item)))
+    },
+    issueSinceColumnVisible () {
+      return this.operatorFeatures || (!this.projectScope && this.isAdmin)
     },
   },
   watch: {
