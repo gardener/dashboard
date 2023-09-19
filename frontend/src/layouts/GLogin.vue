@@ -152,7 +152,7 @@ export default {
 
     const loginStore = useLoginStore()
     const localStorageStore = useLocalStorageStore()
-    await loginStore.isNotFetching()
+    await loginStore.fetchConfig()
     if (!err && loginStore.loginType === 'oidc' && localStorageStore.autoLogin) {
       const redirectPath = get(to.query, 'redirectPath', '/')
       const authnStore = useAuthnStore()

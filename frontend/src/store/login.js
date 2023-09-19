@@ -5,13 +5,10 @@
 //
 
 import {
-  ref,
-  watch,
-} from 'vue'
-import {
   defineStore,
   acceptHMRUpdate,
 } from 'pinia'
+import { ref } from 'vue'
 
 import { useLogger } from '@/composables/useLogger'
 
@@ -20,13 +17,13 @@ export const useLoginStore = defineStore('login', () => {
 
   const url = import.meta.env.BASE_URL + 'login-config.json'
 
-  const isFetching = ref(true)
   const loginError = ref(null)
   const loginType = ref('token')
   const loginTypes = ref(['token'])
   const landingPageUrl = ref('')
+  const themes = ref(null)
 
-  const fetchLoginConfig = async url => {
+  async function fetchConfig () {
     try {
       const response = await fetch(url, {
         mode: 'no-cors',
@@ -35,37 +32,22 @@ export const useLoginStore = defineStore('login', () => {
       const data = await response.json()
       loginTypes.value = data.loginTypes
       landingPageUrl.value = data.landingPageUrl
+      themes.value = data.themes ?? {}
     } catch (err) {
       logger.error('Failed to fetch login configuration: %s', err.message)
       loginTypes.value = ['token']
     } finally {
       loginType.value = loginTypes.value[0]
-      isFetching.value = false
     }
-  }
-
-  fetchLoginConfig(url)
-
-  function isNotFetching () {
-    const executor = resolve => {
-      watch(isFetching, value => {
-        if (!value) {
-          resolve()
-        }
-      })
-    }
-    return !isFetching.value
-      ? Promise.resolve()
-      : new Promise(executor)
   }
 
   return {
-    isFetching,
     loginError,
     loginType,
     loginTypes,
     landingPageUrl,
-    isNotFetching,
+    themes,
+    fetchConfig,
   }
 })
 
