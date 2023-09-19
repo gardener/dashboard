@@ -28,7 +28,7 @@ SPDX-License-Identifier: Apache-2.0
         />
       </v-chip>
     </template>
-    <v-list>
+    <v-list min-width="300px">
       <v-list-item
         v-for="({title, value, description, to}) in dnsProviderDescriptions"
         :key="title"
