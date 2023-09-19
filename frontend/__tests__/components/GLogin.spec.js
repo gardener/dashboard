@@ -19,6 +19,8 @@ const { createPlugins } = global.fixtures.helper
 
 describe('components', () => {
   describe('g-login', () => {
+    const noop = () => {}
+
     let pinia
     let appStore
     let authnStore
@@ -47,6 +49,14 @@ describe('components', () => {
       fetch.mockResponse(JSON.stringify({
         loginTypes: ['oidc', 'token'],
         landingPageUrl: 'https://gardener.cloud/',
+        themes: {
+          light: {
+            primary: '#2196F3',
+          },
+          dark: {
+            primary: '#F39621',
+          },
+        },
       }))
       mockRoute = {
         query: {
@@ -58,6 +68,7 @@ describe('components', () => {
         replace: vi.fn(),
       }
       pinia = createTestingPinia({
+        stubActions: false,
         initialState: {
           authn: {
             user: {
@@ -70,6 +81,7 @@ describe('components', () => {
       setActivePinia(pinia)
       appStore = useAppStore()
       authnStore = useAuthnStore()
+      authnStore.signinWithOidc.mockImplementation(noop)
       loginStore = useLoginStore()
       localStorageStore = useLocalStorageStore()
     })
