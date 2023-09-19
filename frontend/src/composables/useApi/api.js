@@ -273,7 +273,8 @@ export function createTokenReview (data) {
   return createResource('/auth', data)
 }
 
-export function getSubjectRules ({ namespace = 'default' }) {
+export function getSubjectRules (options) {
+  const namespace = options?.namespace ?? 'default'
   return callResourceMethod('/api/user/subjectrules', {
     namespace,
   })

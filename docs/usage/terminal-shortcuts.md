@@ -91,14 +91,4 @@ terminal: # is generally required for the terminal feature
       serviceAccountRef:
         name: dashboard-terminal-admin
         namespace: garden
-  bootstrap:
-    disabled: false
-    shootDisabled: false
-    seedDisabled: false
-    gardenTerminalHostDisabled: true
-    apiServerIngress:
-      annotations:
-        cert.gardener.cloud/purpose: managed
-        kubernetes.io/ingress.class: nginx
-        nginx.ingress.kubernetes.io/backend-protocol: HTTPS
 ```

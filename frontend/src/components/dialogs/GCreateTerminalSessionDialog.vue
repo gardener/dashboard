@@ -38,6 +38,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-window-item value="target-tab">
           <g-terminal-target
             v-model="targetTab.selectedTarget"
+            :disabled="targetTab.configLoading"
             :shoot-item="shootItem"
             @update:model-value="updateSettings"
           />
@@ -50,12 +51,12 @@ SPDX-License-Identifier: Apache-2.0
             <v-expansion-panel title="Terminal Configuration">
               <v-expansion-panel-text>
                 <v-skeleton-loader
-                  v-show="!targetTab.selectedConfig"
+                  v-show="targetTab.configLoading"
                   height="94"
                   type="list-item-two-line"
                 />
                 <g-terminal-settings
-                  v-show="!!targetTab.selectedConfig"
+                  v-show="!targetTab.configLoading"
                   ref="settings"
                   :runtime-settings-hidden="!hasShootWorkerGroups || targetTab.selectedTarget !== 'shoot'"
                 />
@@ -179,6 +180,7 @@ export default {
         value: [],
         initializedForTarget: undefined,
         selectedConfig: undefined,
+        configLoading: false,
       },
       shortcutTab: {
         selectedShortcuts: undefined,
@@ -204,6 +206,9 @@ export default {
           return !isEmpty(this.shortcutTab.selectedShortcuts)
         }
         default: {
+          if (this.targetTab.configLoading) {
+            return false
+          }
           return !this.v$.$invalid
         }
       }
@@ -313,7 +318,7 @@ export default {
         return
       }
 
-      this.targetTab.selectedConfig = undefined
+      this.targetTab.configLoading = true
       try {
         this.targetTab.initializedForTarget = this.targetTab.selectedTarget
         const { data: config } = await this.api.terminalConfig({ name: this.name, namespace: this.namespace, target: this.targetTab.selectedTarget })
@@ -321,6 +326,8 @@ export default {
       } catch (err) {
         this.targetTab.initializedForTarget = undefined
       }
+
+      this.targetTab.configLoading = false
     },
     onAddTerminalShortcut (shortcut) {
       this.shortcutTab.selectedShortcuts = [shortcut]

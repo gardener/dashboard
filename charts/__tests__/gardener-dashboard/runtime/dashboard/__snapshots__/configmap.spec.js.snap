@@ -93,6 +93,28 @@ Object {
 }
 `;
 
+exports[`gardener-dashboard configmap contentSecurityPolicy should render the template with connectSrc containing additional host sources 1`] = `
+Object {
+  "contentSecurityPolicy": Object {
+    "connectSrc": Array [
+      "'self'",
+      "wss://*.seed.example.com",
+      "https://*.seed.example.com",
+    ],
+  },
+}
+`;
+
+exports[`gardener-dashboard configmap contentSecurityPolicy should render the template with default connectSrc 1`] = `
+Object {
+  "contentSecurityPolicy": Object {
+    "connectSrc": Array [
+      "'self'",
+    ],
+  },
+}
+`;
+
 exports[`gardener-dashboard configmap controlPlaneHighAvailabilityHelp should render the template with controlPlaneHighAvailabilityHelp markdown 1`] = `
 Object {
   "frontend": Object {
@@ -290,6 +312,11 @@ exports[`gardener-dashboard configmap should render the template w/ defaults val
 exports[`gardener-dashboard configmap should render the template w/ defaults values 3`] = `
 Object {
   "apiServerUrl": "https://api.garden.example.org",
+  "contentSecurityPolicy": Object {
+    "connectSrc": Array [
+      "'self'",
+    ],
+  },
   "frontend": Object {
     "defaultHibernationSchedule": Object {
       "development": Array [
