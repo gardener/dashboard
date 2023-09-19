@@ -72,9 +72,6 @@ const defaultConfig = {
           namespace: 'garden'
         }
       }
-    },
-    bootstrap: {
-      disabled: true
     }
   },
   unreachableSeeds: {

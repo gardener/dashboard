@@ -9,14 +9,13 @@
 const assert = require('assert').strict
 const _ = require('lodash')
 
-const fnv = require('fnv-plus')
 const {
   getConfigValue,
   getSeedNameFromShoot,
   getSeedIngressDomain
 } = require('../../utils')
 
-const { getSeed } = require('../../cache')
+const { getSeed, findProjectByNamespace } = require('../../cache')
 
 const GardenTerminalHostRefType = {
   SECRET_REF: 'secretRef',
@@ -102,14 +101,14 @@ function getKubeApiServerHostForShoot (shoot, seed) {
     seed = getSeed(getSeedNameFromShoot(shoot))
   }
   const { namespace, name } = shoot.metadata
-  const hash = fnv.hash(`${name}.${namespace}`, 32).str()
+  const projectName = findProjectByNamespace(namespace).metadata.name
   const ingressDomain = getSeedIngressDomain(seed)
-  return `k-${hash}.${ingressDomain}`
+  return `api-${projectName}--${name}.${ingressDomain}`
 }
 
 function getKubeApiServerHostForSeed (seed) {
   const ingressDomain = getSeedIngressDomain(seed)
-  return `k-g.${ingressDomain}`
+  return `api-seed.${ingressDomain}`
 }
 
 function getGardenTerminalHostClusterRefType () {
