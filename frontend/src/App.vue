@@ -19,10 +19,19 @@ import {
   useColorMode,
 } from '@vueuse/core'
 
+import { useConfigStore } from '@/store/config'
+import { useLoginStore } from '@/store/login'
 import { useLocalStorageStore } from '@/store/localStorage'
+
+import { useCustomColors } from '@/composables/useCustomColors'
 
 const theme = useTheme()
 const localStorageStore = useLocalStorageStore()
+const configStore = useConfigStore()
+const loginStore = useLoginStore()
+
+useCustomColors(() => configStore.themes ?? loginStore.themes ?? null, theme)
+
 const colorScheme = toRef(localStorageStore, 'colorScheme')
 const { system } = useColorMode({
   storageRef: colorScheme,
