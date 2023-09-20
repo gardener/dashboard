@@ -50,6 +50,8 @@ import GCreateTerminalSessionDialog from '@/components/dialogs/GCreateTerminalSe
 
 import { PositionEnum } from '@/lib/g-symbol-tree'
 
+import { pick } from '@/lodash'
+
 export default {
   components: {
     GSplitpane,
@@ -68,7 +70,7 @@ export default {
   ],
   computed: {
     shootItem () {
-      return this.shootByNamespaceAndName(this.$route.params)
+      return this.shootByNamespaceAndName(pick(this.terminalCoordinates, 'namespace', 'name'))
     },
     hasShootWorkerGroups () {
       return !!this.shootItem?.spec?.provider?.workers?.length
