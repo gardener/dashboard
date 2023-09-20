@@ -164,9 +164,9 @@ export default {
         await Promise.all(promises)
 
         if (routeName === 'ShootItemTerminal' && !this.isAdmin && !this.hasShootWorkerGroups) {
-          this.error = Object.assign(Error('Terminals are not avialble for this cluster'), {
+          this.error = Object.assign(Error('Shoot has no workers to schedule a terminal pod'), {
             code: 404,
-            reason: 'Shoot has no workers to schedule a terminal pod',
+            reason: 'Terminal not available',
           })
         }
       } catch (err) {
