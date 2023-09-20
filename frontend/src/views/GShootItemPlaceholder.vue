@@ -20,6 +20,7 @@ import { useAuthzStore } from '@/store/authz'
 import { useSecretStore } from '@/store/secret'
 import { useShootStore } from '@/store/shoot'
 import { useTerminalStore } from '@/store/terminal'
+import { useAuthnStore } from '@/store/authn'
 
 import GShootItemLoading from '@/views/GShootItemLoading.vue'
 import GShootItemError from '@/views/GShootItemError.vue'
@@ -58,6 +59,9 @@ export default {
       'canGetSecrets',
       'canUseProjectTerminalShortcuts',
     ]),
+    ...mapState(useAuthnStore, [
+      'isAdmin',
+    ]),
     component () {
       if (this.error) {
         return 'g-shoot-item-error'
@@ -89,6 +93,12 @@ export default {
         }
       }
     },
+    shootItem () {
+      return this.shootByNamespaceAndName(this.$route.params)
+    },
+    hasShootWorkerGroups () {
+      return !!this.shootItem?.spec?.provider?.workers?.length
+    },
   },
   mounted () {
     const shootStore = useShootStore()
@@ -112,6 +122,7 @@ export default {
     ...mapActions(useShootStore, [
       'subscribe',
       'unsubscribe',
+      'shootByNamespaceAndName',
     ]),
     ...mapActions(useSecretStore, [
       'fetchSecrets',
@@ -151,6 +162,13 @@ export default {
           promises.push(this.ensureProjectTerminalShortcutsLoaded())
         }
         await Promise.all(promises)
+
+        if (!this.isAdmin && !this.hasShootWorkerGroups) {
+          this.error = Object.assign(Error('Terminals are not avialble for this cluster'), {
+            code: 404,
+            reason: 'Shoot has not workers to schedule a terminal pod',
+          })
+        }
       } catch (err) {
         let { statusCode, code = statusCode, reason, message } = err
         if (code === 404) {

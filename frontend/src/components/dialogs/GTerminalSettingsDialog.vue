@@ -35,14 +35,11 @@ import GTerminalSettings from '@/components/GTerminalSettings.vue'
 
 import { useTerminalConfig } from '@/composables/useTerminalConfig'
 
-import { shootItem } from '@/mixins/shootItem'
-
 export default {
   components: {
     GDialog,
     GTerminalSettings,
   },
-  mixins: [shootItem],
   provide () {
     return {
       ...toRefs(this.state),
