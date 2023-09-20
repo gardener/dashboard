@@ -28,7 +28,10 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState } from 'pinia'
+import {
+  mapState,
+  mapActions,
+} from 'pinia'
 
 import { useSeedStore } from '@/store/seed'
 
@@ -58,7 +61,6 @@ export default {
   },
   computed: {
     ...mapState(useSeedStore, [
-      'seedByName',
       'seedList',
     ]),
     seedNames () {
@@ -69,6 +71,9 @@ export default {
     },
   },
   methods: {
+    ...mapActions(useSeedStore, [
+      'seedByName',
+    ]),
     async onConfigurationDialogOpened () {
       await this.reset()
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()

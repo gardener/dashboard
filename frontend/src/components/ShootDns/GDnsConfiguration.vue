@@ -21,10 +21,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import {
-  mapActions,
-  mapState,
-} from 'pinia'
+import { mapActions } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 
 import { useShootStagingStore } from '@/store/shootStaging'
@@ -53,13 +50,9 @@ export default {
       componentKey: uuidv4(),
     }
   },
-  computed: {
-    ...mapState(useShootStagingStore, [
-      'getDnsConfiguration',
-    ]),
-  },
   methods: {
     ...mapActions(useShootStagingStore, [
+      'getDnsConfiguration',
       'setClusterConfiguration',
     ]),
     async onConfigurationDialogOpened () {

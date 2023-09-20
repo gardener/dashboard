@@ -273,7 +273,6 @@ export default {
     ...mapState(useConfigStore, ['accessRestriction', 'defaultNodesCIDR']),
     ...mapState(useShootStagingStore, ['controlPlaneFailureToleranceType']),
     ...mapState(useShootStagingStore, [
-      'getDnsConfiguration',
       'workerless',
     ]),
     ...mapState(useShootStore, [
@@ -281,11 +280,9 @@ export default {
       'initialNewShootResource',
     ]),
     ...mapState(useSecretStore, [
-      'infrastructureSecretsByCloudProfileName',
       'sortedInfrastructureKindList',
     ]),
     ...mapState(useCloudProfileStore, [
-      'zonesByCloudProfileNameAndRegion',
       'sortedInfrastructureKindList',
     ]),
   },
@@ -305,7 +302,14 @@ export default {
       'setNewShootResource',
     ]),
     ...mapActions(useShootStagingStore, [
+      'getDnsConfiguration',
       'setClusterConfiguration',
+    ]),
+    ...mapActions(useSecretStore, [
+      'infrastructureSecretsByCloudProfileName',
+    ]),
+    ...mapActions(useCloudProfileStore, [
+      'zonesByCloudProfileNameAndRegion',
     ]),
     async isShootContentDirty () {
       const shootResource = await this.shootResourceFromUIComponents()
