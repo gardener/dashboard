@@ -59,6 +59,9 @@ export default {
       return !!this.shootItem?.spec?.provider?.workers?.length
     },
   },
+  mounted () {
+    this.load()
+  },
   methods: {
     ...mapActions(useShootStore, ['shootByNamespaceAndName']),
   },
