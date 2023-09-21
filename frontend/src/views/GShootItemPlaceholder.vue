@@ -93,12 +93,6 @@ export default {
         }
       }
     },
-    shootItem () {
-      return this.shootByNamespaceAndName(this.$route.params)
-    },
-    hasShootWorkerGroups () {
-      return !!this.shootItem?.spec?.provider?.workers?.length
-    },
   },
   mounted () {
     const shootStore = useShootStore()
@@ -163,7 +157,10 @@ export default {
         }
         await Promise.all(promises)
 
-        if (routeName === 'ShootItemTerminal' && !this.isAdmin && !this.hasShootWorkerGroups) {
+        const shootItem = this.shootByNamespaceAndName(routeParams)
+        const shootWorkerGroups = shootItem?.spec?.provider?.workers ?? []
+        const hasShootWorkerGroups = shootWorkerGroups.length > 0
+        if (routeName === 'ShootItemTerminal' && !this.isAdmin && !hasShootWorkerGroups) {
           this.error = Object.assign(Error('Shoot has no workers to schedule a terminal pod'), {
             code: 404,
             reason: 'Terminal not available',

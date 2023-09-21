@@ -72,8 +72,13 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
     return state.seedName
   })
 
-  const workerless = computed(() => {
-    return state.workerless
+  const workerless = computed({
+    get () {
+      return state.workerless
+    },
+    set (value) {
+      state.workerless = value
+    },
   })
 
   const clusterIsNew = computed(() => {

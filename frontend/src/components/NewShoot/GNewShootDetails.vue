@@ -62,7 +62,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-row>
       <v-col cols="12">
         <v-checkbox
-          v-model="workerlessShootEnabled"
+          v-model="workerless"
           label="Workerless Cluster"
           color="primary"
           density="compact"
@@ -89,6 +89,7 @@ import { defineAsyncComponent } from 'vue'
 import {
   mapActions,
   mapState,
+  mapWritableState,
 } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 import {
@@ -172,7 +173,7 @@ export default {
     return this.validators
   },
   computed: {
-    ...mapState(useShootStagingStore, ['workerless']),
+    ...mapWritableState(useShootStagingStore, ['workerless']),
     ...mapState(useProjectStore, ['projectList']),
     ...mapState(useAuthzStore, ['namespace']),
     ...mapState(useConfigStore, ['sla']),
@@ -231,14 +232,6 @@ export default {
           required,
         },
       }
-    },
-    workerlessShootEnabled: {
-      set (value) {
-        this.setWorkerless(value)
-      },
-      get () {
-        return this.workerless
-      },
     },
   },
   mounted () {
