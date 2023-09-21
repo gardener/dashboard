@@ -53,7 +53,7 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
     controlPlaneFailureToleranceType: null,
     initialControlPlaneFailureToleranceType: null,
     seedName: null,
-    workerless: null,
+    workerless: false,
   })
 
   const dnsDomain = computed(() => {

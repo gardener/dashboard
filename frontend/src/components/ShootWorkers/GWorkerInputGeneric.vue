@@ -311,7 +311,8 @@ export default {
           maximum: {
             minValue: minValue(0),
             systemComponents: (value) => {
-              if (!this.hasSystemComponents) {
+              const hasSystemComponents = get(this.worker, 'systemComponents.allow', true)
+              if (!hasSystemComponents) {
                 return true
               }
               const zones = get(this.worker, 'zones.length', 0)
@@ -502,9 +503,6 @@ export default {
         this.setVolumeDependingOnMachineType()
         this.onInputVolumeSize()
       },
-    },
-    hasSystemComponents () {
-      return get(this.worker, 'systemComponents.allow', true)
     },
   },
   mounted () {

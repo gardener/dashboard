@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
       {{ title }}
     </div>
     <div
-      v-if="shootNotWorkerless && (selectable || osUpdates)"
+      v-if="!hideOsUpdates && (selectable || osUpdates)"
       class="d-flex mt-4"
     >
       <div class="d-flex align-center justify-center action-select">
@@ -94,10 +94,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState } from 'pinia'
-
-import { useShootStagingStore } from '@/store/shootStaging'
-
 export default {
   props: {
     userInterActionBus: {
@@ -111,7 +107,7 @@ export default {
       type: Boolean,
       default: true,
     },
-    hasShootWorkerGroups: {
+    hideOsUpdates: {
       type: Boolean,
       default: false,
     },
@@ -127,7 +123,6 @@ export default {
     }
   },
   computed: {
-    ...mapState(useShootStagingStore, ['workerless']),
     k8sUpdates: {
       get () {
         return this.k8sUpdatesInternal
@@ -152,9 +147,6 @@ export default {
     },
     showNoUpdates () {
       return !this.selectable && !this.osUpdates && !this.k8sUpdates
-    },
-    shootNotWorkerless () {
-      return !this.workerless && this.hasShootWorkerGroups
     },
   },
   methods: {

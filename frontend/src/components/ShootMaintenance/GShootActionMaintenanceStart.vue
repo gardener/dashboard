@@ -19,6 +19,7 @@ SPDX-License-Identifier: Apache-2.0
     <g-maintenance-components
       ref="maintenanceComponents"
       title="The following updates might be performed"
+      :hide-os-updates="!hasShootWorkerGroups"
       :selectable="false"
     />
     <v-alert
@@ -127,6 +128,9 @@ export default {
       if (this.dialog) {
         const actionDialog = this.$refs.actionDialog
         if (value) {
+          this.$nextTick(() => {
+            this.reset()
+          })
           actionDialog.showDialog()
           this.waitForConfirmation()
         } else {

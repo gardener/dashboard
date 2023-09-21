@@ -522,7 +522,7 @@ export function searchItemsFn (state, context) {
       searchQuery = parseSearch(search)
     }
 
-    if (includes(map(searchQuery.terms, 'value'), 'workerless')) {
+    if (map(searchQuery.terms, 'value').includes('workerless')) {
       if (getRawVal(context, item, 'workers') === 0) {
         return true
       }

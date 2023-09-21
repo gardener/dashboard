@@ -119,6 +119,7 @@ SPDX-License-Identifier: Apache-2.0
           <g-maintenance-components
             ref="maintenanceComponents"
             :user-inter-action-bus="userInterActionBus"
+            :hide-os-updates="workerless"
           />
         </v-card-text>
       </v-card>

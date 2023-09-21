@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
       />
       <g-maintenance-components
         ref="maintenanceComponents"
-        :has-shoot-worker-groups="hasShootWorkerGroups"
+        :hide-os-updates="!hasShootWorkerGroups"
       />
     </template>
   </g-action-button-dialog>
