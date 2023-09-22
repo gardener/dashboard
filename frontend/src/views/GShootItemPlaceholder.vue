@@ -20,6 +20,7 @@ import { useAuthzStore } from '@/store/authz'
 import { useSecretStore } from '@/store/secret'
 import { useShootStore } from '@/store/shoot'
 import { useTerminalStore } from '@/store/terminal'
+import { useAuthnStore } from '@/store/authn'
 
 import GShootItemLoading from '@/views/GShootItemLoading.vue'
 import GShootItemError from '@/views/GShootItemError.vue'
@@ -65,6 +66,9 @@ export default {
     ...mapState(useAuthzStore, [
       'canGetSecrets',
       'canUseProjectTerminalShortcuts',
+    ]),
+    ...mapState(useAuthnStore, [
+      'isAdmin',
     ]),
     component () {
       if (this.error) {
@@ -137,6 +141,7 @@ export default {
     ...mapActions(useShootStore, [
       'subscribe',
       'unsubscribe',
+      'shootByNamespaceAndName',
     ]),
     ...mapActions(useSecretStore, [
       'fetchSecrets',
@@ -175,6 +180,16 @@ export default {
           promises.push(this.ensureProjectTerminalShortcutsLoaded())
         }
         await Promise.all(promises)
+
+        const shootItem = this.shootByNamespaceAndName(routeParams)
+        const shootWorkerGroups = shootItem?.spec?.provider?.workers ?? []
+        const hasShootWorkerGroups = shootWorkerGroups.length > 0
+        if (routeName === 'ShootItemTerminal' && !this.isAdmin && !hasShootWorkerGroups) {
+          this.error = Object.assign(Error('Shoot has no workers to schedule a terminal pod'), {
+            code: 404,
+            reason: 'Terminal not available',
+          })
+        }
       } catch (err) {
         let { statusCode, code = statusCode, reason, message } = err
         if (code === 404) {

@@ -210,6 +210,7 @@ const validationErrors = {
     },
     maximum: {
       minValue: 'Invalid value',
+      systemComponents: 'Value must be greater or equal to the number of zones configured for this pool',
     },
     maxSurge: {
       numberOrPercentage: 'Invalid value',
@@ -309,6 +310,14 @@ export default {
           },
           maximum: {
             minValue: minValue(0),
+            systemComponents: (value) => {
+              const hasSystemComponents = get(this.worker, 'systemComponents.allow', true)
+              if (!hasSystemComponents) {
+                return true
+              }
+              const zones = get(this.worker, 'zones.length', 0)
+              return value >= zones
+            },
           },
           maxSurge: {
             numberOrPercentage,
@@ -546,6 +555,7 @@ export default {
     },
     onInputZones () {
       this.v$.selectedZones.$touch()
+      this.v$.worker.maximum.$touch()
     },
     setVolumeDependingOnMachineType () {
       const storage = get(this.selectedMachineType, 'storage')

@@ -58,7 +58,7 @@ SPDX-License-Identifier: Apache-2.0
                 <g-terminal-settings
                   v-show="!targetTab.configLoading"
                   ref="settings"
-                  v-model:target="targetTab.selectedTarget"
+                  :runtime-settings-hidden="!hasShootWorkerGroups || targetTab.selectedTarget !== 'shoot'"
                 />
               </v-expansion-panel-text>
             </v-expansion-panel>
@@ -106,8 +106,8 @@ import {
 } from 'pinia'
 
 import { useAuthnStore } from '@/store/authn'
-import { useShootStore } from '@/store/shoot'
 import { useTerminalStore } from '@/store/terminal'
+import { useShootStore } from '@/store/shoot'
 
 import GDialog from '@/components/dialogs/GDialog.vue'
 import GTerminalSettings from '@/components/GTerminalSettings.vue'
@@ -134,6 +134,7 @@ import {
 } from '@/lodash'
 
 export default {
+
   components: {
     GDialog,
     GTerminalSettings,
@@ -159,6 +160,10 @@ export default {
     },
     namespace: {
       type: String,
+    },
+    hasShootWorkerGroups: {
+      type: Boolean,
+      default: false,
     },
   },
   setup () {
