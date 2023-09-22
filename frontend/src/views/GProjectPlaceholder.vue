@@ -18,15 +18,27 @@ import { useProjectStore } from '@/store/project'
 
 import GProjectError from '@/views/GProjectError.vue'
 
+import { isEqual } from '@/lodash'
+
+function isLoadRequired (route, to) {
+  return route.name !== to.name || !isEqual(route.params, to.params)
+}
+
 export default {
   components: {
     GProjectError,
   },
   beforeRouteEnter (to, from, next) {
-    next(vm => vm.load(to))
+    next(vm => {
+      if (isLoadRequired(vm.$route, to)) {
+        vm.load(to)
+      }
+    })
   },
-  async beforeRouteUpdate (to, from) {
-    this.load(to)
+  beforeRouteUpdate (to, from) {
+    if (isLoadRequired(this.$route, to)) {
+      this.load(to)
+    }
   },
   data () {
     return {
@@ -69,12 +81,15 @@ export default {
       }
     },
   },
+  mounted () {
+    this.load(this.$route)
+  },
   methods: {
     load (route) {
-      const routeName = route.name
-      const routeParams = route.params
       this.error = null
       this.fallbackRoute = null
+      const routeName = route.name
+      const routeParams = route.params
       if (this.namespace !== routeParams.namespace) {
         this.error = new Error('An unexpected error occurred')
         this.fallbackRoute = {
