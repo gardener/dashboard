@@ -29,7 +29,6 @@ import {
   watch,
 } from 'vue'
 import { useLayout } from 'vuetify'
-import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 
 import { useConfigStore } from '@/store/config'
@@ -39,7 +38,6 @@ import GAlertBanner from '@/components/GAlertBanner.vue'
 import { useLogger } from '@/composables/useLogger'
 
 const layout = useLayout()
-const route = useRoute()
 const logger = useLogger()
 const configStore = useConfigStore()
 const { alertBannerMessage, alertBannerType, alertBannerIdentifier } = storeToRefs(configStore)
