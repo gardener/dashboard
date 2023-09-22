@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
       ref="wrapRef"
       class="g-main__wrap"
     >
-      <router-view :key="routerViewKey" />
+      <router-view />
     </div>
   </v-main>
 </template>
@@ -53,13 +53,6 @@ function setElementOverflowY (element, value) {
     element.style.overflowY = value
   }
 }
-
-const routerViewKey = computed(() => {
-  if (route.name !== 'ShootItemTerminal') {
-    return undefined
-  }
-  return route.path
-})
 
 const mainContainer = computed(() => {
   return mainRef.value?.$el.querySelector(':scope > div[class$=\'wrap\']')

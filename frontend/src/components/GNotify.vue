@@ -95,10 +95,8 @@ watch(alert, value => {
       text: value.message,
       duration,
     }
-    nextTick(() => {
-      notify(options)
-      alert.value = null
-    })
+    alert.value = null
+    nextTick(() => notify(options))
   }
 }, {
   immediate: true,

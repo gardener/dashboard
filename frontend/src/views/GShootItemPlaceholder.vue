@@ -24,6 +24,12 @@ import { useTerminalStore } from '@/store/terminal'
 import GShootItemLoading from '@/views/GShootItemLoading.vue'
 import GShootItemError from '@/views/GShootItemError.vue'
 
+import { isEqual } from '@/lodash'
+
+function isLoadRequired (route, to) {
+  return route.name !== to.name || !isEqual(route.params, to.params)
+}
+
 export default {
   components: {
     GShootItemLoading,
@@ -31,21 +37,23 @@ export default {
   },
   beforeRouteEnter (to, from, next) {
     next(async vm => {
-      await vm.load(to)
+      if (isLoadRequired(vm.$route, to)) {
+        await vm.load(to)
+      }
     })
   },
   async beforeRouteUpdate (to, from) {
-    await this.load(to)
+    if (isLoadRequired(this.$route, to)) {
+      await this.load(to)
+    }
   },
   beforeRouteLeave (to, from) {
-    this.leaving = true
     this.unsubscribe()
   },
   data () {
     return {
-      leaving: false,
-      loading: false,
       error: null,
+      readyState: 'initial',
       unsubscribeShootStore: () => {},
     }
   },
@@ -61,14 +69,12 @@ export default {
     component () {
       if (this.error) {
         return 'g-shoot-item-error'
-      }
-      if (this.loading) {
+      } else if (this.readyState === 'loading') {
         return 'g-shoot-item-loading'
+      } else if (this.readyState === 'loaded') {
+        return 'router-view'
       }
-      if (this.leaving) {
-        return 'div'
-      }
-      return 'router-view'
+      return 'div'
     },
     componentProperties () {
       switch (this.component) {
@@ -84,13 +90,29 @@ export default {
             message,
           }
         }
+        case 'router-view': {
+          const { name, path } = this.$route
+          return {
+            key: name === 'ShootItemTerminal'
+              ? path
+              : undefined,
+          }
+        }
         default: {
           return {}
         }
       }
     },
   },
-  mounted () {
+  watch: {
+    '$route' () {
+      this.readyState = 'loaded'
+    },
+  },
+  beforeMount () {
+    this.readyState = 'initial'
+  },
+  async mounted () {
     const shootStore = useShootStore()
     this.unsubscribeShootStore = shootStore.$onAction(({
       name,
@@ -104,8 +126,11 @@ export default {
         }
       }
     })
+    await this.load(this.$route)
+    this.readyState = 'loaded'
   },
   beforeUnmount () {
+    this.readyState = 'initial'
     this.unsubscribeShootStore()
   },
   methods: {
@@ -135,11 +160,10 @@ export default {
       }
     },
     async load (route) {
+      this.error = null
+      this.readyState = 'loading'
       const routeName = route.name
       const routeParams = route.params
-      this.error = null
-      this.leaving = false
-      this.loading = true
       try {
         const promises = [
           this.subscribe(routeParams),
@@ -166,8 +190,6 @@ export default {
           code,
           reason,
         })
-      } finally {
-        this.loading = false
       }
     },
   },
