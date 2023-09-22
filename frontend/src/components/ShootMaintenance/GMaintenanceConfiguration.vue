@@ -101,7 +101,11 @@ export default {
       this.data.updateKubernetesVersion = get(this.shootItem, 'spec.maintenance.autoUpdate.kubernetesVersion', false)
       this.data.updateOSVersion = get(this.shootItem, 'spec.maintenance.autoUpdate.machineImageVersion', false)
 
-      this.$refs.maintenanceTime.reset()
+      this.$nextTick(() => {
+        // trigger reset in next tick to ensure that property data has been propagated
+        // reset function requires time-window-begin property to be set
+        this.$refs.maintenanceTime.reset()
+      })
 
       this.$refs.maintenanceComponents.setComponentUpdates({ k8sUpdates: this.data.updateKubernetesVersion, osUpdates: this.data.updateOSVersion })
     },
