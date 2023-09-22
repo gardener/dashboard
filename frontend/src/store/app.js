@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { defineStore } from 'pinia'
+import {
+  defineStore,
+  acceptHMRUpdate,
+} from 'pinia'
 import { ref } from 'vue'
 
 import moment from '@/utils/moment'
@@ -82,3 +85,7 @@ export const useAppStore = defineStore('app', () => {
     setRouterError,
   }
 })
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useAppStore, import.meta.hot))
+}

@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { defineStore } from 'pinia'
+import {
+  defineStore,
+  acceptHMRUpdate,
+} from 'pinia'
 import {
   computed,
   reactive,
@@ -363,3 +366,7 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
     setWorkerless,
   }
 })
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useShootStagingStore, import.meta.hot))
+}

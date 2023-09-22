@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { defineStore } from 'pinia'
+import {
+  defineStore,
+  acceptHMRUpdate,
+} from 'pinia'
 import {
   ref,
   computed,
@@ -660,3 +663,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     machineImagesByCloudProfileName,
   }
 })
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useCloudProfileStore, import.meta.hot))
+}
