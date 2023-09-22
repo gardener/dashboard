@@ -87,7 +87,6 @@ import {
 const referenceProps = ['class']
 
 export default {
-  name: 'VPopperWrapper',
   components: {
     Popper: Popper(),
     PopperContent,

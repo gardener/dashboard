@@ -50,7 +50,6 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 
 export default {
-  name: 'CustomFieldsCard',
   props: {
     customFields: {
       type: Array,
