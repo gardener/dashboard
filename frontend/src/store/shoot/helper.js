@@ -41,7 +41,6 @@ import {
   map,
   sample,
   omit,
-  forEach,
   filter,
   some,
   startsWith,
@@ -238,9 +237,10 @@ export function createShootResource (context) {
   }
 
   const addons = {}
-  forEach(filter(shootAddonList, addon => addon.visible), addon => {
-    set(addons, [addon.name, 'enabled'], addon.enabled)
-  })
+  const visibleShootAddonList = filter(shootAddonList, 'visible')
+  for (const { name, enabled } of visibleShootAddonList) {
+    addons[name] = { enabled }
+  }
 
   set(shootResource, 'spec.addons', addons)
 
@@ -414,6 +414,8 @@ export function getRawVal (context, item, column) {
       return getIssueSince(item.status) || 0
     case 'technicalId':
       return item.status?.technicalID
+    case 'workers':
+      return item.spec.provider.workers?.length ?? 0
     default: {
       if (startsWith(column, 'Z_')) {
         const path = get(projectStore.shootCustomFields, [column, 'path'])
@@ -519,6 +521,13 @@ export function searchItemsFn (state, context) {
       lastSearchString = search
       searchQuery = parseSearch(search)
     }
+
+    if (map(searchQuery.terms, 'value').includes('workerless')) {
+      if (getRawVal(context, item, 'workers') === 0) {
+        return true
+      }
+    }
+
     return searchQuery.matches(values)
   }
 }

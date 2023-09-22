@@ -17,8 +17,8 @@ SPDX-License-Identifier: Apache-2.0
       @conflict-path="onConflictPath"
     >
       <template #modificationWarning>
-        By modifying the resource directly you may cause serious problems in your cluster.
-        We cannot guarantee that you can solve problems that result from using Cluster Editor incorrectly.
+        Directly modifying this resource can result in irreversible configurations that may severely compromise your cluster's stability and functionality.
+        Use resource editor with caution.
       </template>
       <template #toolbarItemsRight>
         <v-btn

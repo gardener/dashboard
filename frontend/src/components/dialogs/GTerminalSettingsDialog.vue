@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <template #message>
       <g-terminal-settings
-        :target="target"
+        :runtime-settings-hidden="runtimeSettingsHidden"
       />
     </template>
   </g-dialog>
@@ -46,8 +46,9 @@ export default {
     }
   },
   props: {
-    target: {
-      type: String,
+    runtimeSettingsHidden: {
+      type: Boolean,
+      default: false,
     },
   },
   setup () {
