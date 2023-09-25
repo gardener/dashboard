@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { defineStore } from 'pinia'
+import {
+  defineStore,
+  acceptHMRUpdate,
+} from 'pinia'
 import {
   ref,
   computed,
@@ -39,3 +42,7 @@ export const useKubeconfigStore = defineStore('kubeconfig', () => {
     fetchKubeconfig,
   }
 })
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useKubeconfigStore, import.meta.hot))
+}
