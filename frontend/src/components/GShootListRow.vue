@@ -405,10 +405,10 @@ export default {
     pointer-events: none;
   }
 
-  .theme--light .stale .stale-overlay {
+  .v-theme--light .stale .stale-overlay {
     background-color: rgba(255,255,255,0.7)
   }
-  .theme--dark .stale .stale-overlay {
+  .v-theme--dark .stale .stale-overlay {
     background-color: rgba(30,30,30,0.7)
   }
 
