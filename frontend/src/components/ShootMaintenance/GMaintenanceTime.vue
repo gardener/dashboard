@@ -46,10 +46,10 @@ import {
   getValidationErrors,
   randomMaintenanceBegin,
   maintenanceWindowWithBeginAndTimezone,
+  maintenanceWindowDuration,
 } from '@/utils'
 import { isTimezone } from '@/utils/validators'
 import TimeWithOffset from '@/utils/TimeWithOffset'
-import moment from '@/utils/moment'
 
 const validationErrors = {
   maintenanceBegin: {
@@ -86,7 +86,7 @@ export default {
       maintenanceTimezone: this.timezone,
       validationErrors,
       maintenanceBegin: undefined,
-      windowDuration: 60,
+      windowDuration: 0,
     }
   },
   computed: {
@@ -105,14 +105,6 @@ export default {
       }
     },
   },
-  watch: {
-    timeWindowBegin (windowBegin) {
-      this.setBeginTimeTimezoneString(windowBegin)
-    },
-    timeWindowEnd (windowEnd) {
-      this.setEndTimeTimezoneString(windowEnd)
-    },
-  },
   mounted () {
     this.reset()
   },
@@ -121,16 +113,18 @@ export default {
       return maintenanceWindowWithBeginAndTimezone(this.maintenanceBegin, this.maintenanceTimezone, this.windowDuration)
     },
     reset () {
-      if (!this.timeWindowBegin) {
-        this.setDefaultMaintenanceTimeWindow()
+      if (!this.timeWindowBegin || !this.timeWindowEnd) {
+        this.setDefaultBeginTimeAndTimezone()
+        this.setDefaultWindowDuration()
       } else {
-        this.setBeginTimeTimezoneString(this.timeWindowBegin)
+        this.setBeginTimeAndTimezone(this.timeWindowBegin)
+        this.setWindowDuration(this.timeWindowEnd)
       }
     },
     getErrorMessages (field) {
       return getValidationErrors(this, field)
     },
-    setBeginTimeTimezoneString (windowBegin) {
+    setBeginTimeAndTimezone (windowBegin) {
       const beginTime = new TimeWithOffset(windowBegin)
       if (!beginTime.isValid()) {
         return undefined
@@ -138,19 +132,25 @@ export default {
       this.maintenanceBegin = beginTime.getTimeString()
       this.maintenanceTimezone = beginTime.getTimezoneString()
     },
-    setEndTimeTimezoneString (windowEnd) {
+    setWindowDuration (windowEnd) {
       const endTime = new TimeWithOffset(windowEnd)
       if (!endTime.isValid()) {
         return undefined
       }
-      const windowDuration = moment(windowEnd, 'HH:mm').diff(moment(this.maintenanceBegin, 'HH:mm'), 'minutes')
+      const maintenanceEnd = endTime.getTimeString()
+      const windowDuration = maintenanceWindowDuration(this.maintenanceBegin, maintenanceEnd)
       if (windowDuration > 0) {
         this.windowDuration = windowDuration
+      } else {
+        this.setDefaultWindowDuration()
       }
     },
-    setDefaultMaintenanceTimeWindow () {
+    setDefaultBeginTimeAndTimezone () {
       this.maintenanceBegin = randomMaintenanceBegin()
       this.maintenanceTimezone = this.timezone
+    },
+    setDefaultWindowDuration () {
+      this.windowDuration = 60
     },
     onInputmaintenanceBegin () {
       this.v$.maintenanceBegin.$touch()
