@@ -39,7 +39,6 @@ import {
 } from '@/lodash'
 
 export default {
-  name: 'AccessRestrictionConfiguration',
   components: {
     GActionButtonDialog,
     GAccessRestrictions,
