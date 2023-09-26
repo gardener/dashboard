@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { defineStore } from 'pinia'
+import {
+  defineStore,
+  acceptHMRUpdate,
+} from 'pinia'
 import {
   computed,
   reactive,
@@ -633,3 +636,7 @@ export const useShootStore = defineStore('shoot', () => {
     setSubscriptionError,
   }
 })
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useShootStore, import.meta.hot))
+}

@@ -46,7 +46,6 @@ import {
 } from '@/lodash'
 
 export default {
-  name: 'SeedConfiguration',
   components: {
     GActionButtonDialog,
   },

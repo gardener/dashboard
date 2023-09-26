@@ -34,7 +34,6 @@ import { useTerminalSplitpanes } from '@/composables/useTerminalSplitpanes'
 import { PositionEnum } from '@/lib/g-symbol-tree'
 
 export default {
-  name: 'ShootItem',
   components: {
     GShootDetails,
     GTerminalSplitpanes,

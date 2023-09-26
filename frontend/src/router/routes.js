@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import { useAppStore } from '@/store/app'
 import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
 import { useProjectStore } from '@/store/project'
@@ -55,6 +56,7 @@ const GShootItem = () => import('@/views/GShootItem.vue')
 const GShootItemTerminal = () => import('@/views/GShootItemTerminal.vue')
 
 export function createRoutes () {
+  const appStore = useAppStore
   const authnStore = useAuthnStore()
   const authzStore = useAuthzStore()
   const projectStore = useProjectStore()
@@ -185,16 +187,7 @@ export function createRoutes () {
         projectScope: false,
         breadcrumbs: homeBreadcrumbs,
       },
-      async beforeEnter (to, from, next) {
-        const namespace = projectStore.defaultNamespace
-        if (namespace) {
-          return next({
-            name: 'ShootList',
-            params: { namespace },
-          })
-        }
-        next()
-      },
+      beforeEnter: redirectToShootList,
     }
   }
 
@@ -208,29 +201,14 @@ export function createRoutes () {
         projectScope: false,
         breadcrumbs: newProjectBreadcrumbs,
       },
-      beforeEnter (to, from, next) {
-        const defaultNamespace = projectStore.defaultNamespace
-        if (!projectStore.namespace && defaultNamespace) {
-          projectStore.namespace = defaultNamespace
-        }
-        next()
-      },
     }
   }
 
   function projectsRoute (path) {
     return {
       path,
-      beforeEnter (to, from, next) {
-        const namespace = projectStore.namespace || projectStore.defaultNamespace
-        if (namespace) {
-          return next({
-            name: 'ShootList',
-            params: { namespace },
-          })
-        }
-        next()
-      },
+      name: 'ProjectList',
+      beforeEnter: redirectToShootList,
     }
   }
 
@@ -244,16 +222,7 @@ export function createRoutes () {
         projectScope: false,
         breadcrumbs: accountBreadcrumbs,
       },
-      beforeEnter (to, from, next) {
-        const namespace = projectStore.namespace || projectStore.defaultNamespace
-        if (!to.query.namespace && namespace) {
-          return next({
-            name: 'Account',
-            query: { namespace, ...to.query },
-          })
-        }
-        next()
-      },
+      beforeEnter: addNamespaceToUrl,
     }
   }
 
@@ -267,16 +236,7 @@ export function createRoutes () {
         projectScope: false,
         breadcrumbs: settingsBreadcrumbs,
       },
-      beforeEnter (to, from, next) {
-        const namespace = projectStore.namespace || projectStore.defaultNamespace
-        if (!to.query.namespace && namespace) {
-          return next({
-            name: 'Settings',
-            query: { namespace, ...to.query },
-          })
-        }
-        next()
-      },
+      beforeEnter: addNamespaceToUrl,
     }
   }
 
@@ -364,11 +324,10 @@ export function createRoutes () {
       meta: {
         breadcrumbs: shootItemTerminalBreadcrumbs,
       },
-      beforeEnter (to, from, next) {
-        if (authzStore.hasShootTerminalAccess) {
-          next()
-        } else {
-          next('/')
+      beforeEnter (to, from) {
+        if (!authzStore.hasShootTerminalAccess) {
+          appStore.setError(new Error('Access to cluster terminal is not allowed'))
+          return false
         }
       },
     }
@@ -448,14 +407,37 @@ export function createRoutes () {
         },
         breadcrumbs: terminalBreadcrumbs,
       },
-      beforeEnter (to, from, next) {
-        if (authzStore.hasGardenTerminalAccess) {
-          to.params.target = 'garden'
-          next()
-        } else {
-          next('/')
+      beforeEnter (to, from) {
+        if (!authzStore.hasGardenTerminalAccess) {
+          appStore.setError(new Error('Access to garden terminal is not allowed'))
+          return false
         }
+        to.params.target = 'garden'
       },
+    }
+  }
+
+  /* Helper functions */
+  function redirectToShootList (to) {
+    const namespace = authzStore.namespace || projectStore.defaultNamespace
+    if (namespace) {
+      return {
+        name: 'ShootList',
+        params: { namespace },
+      }
+    }
+  }
+
+  function addNamespaceToUrl (to) {
+    const namespace = authzStore.namespace || projectStore.defaultNamespace
+    if (!to.query.namespace && namespace) {
+      return {
+        name: to.name,
+        query: {
+          namespace,
+          ...to.query,
+        },
+      }
     }
   }
 }

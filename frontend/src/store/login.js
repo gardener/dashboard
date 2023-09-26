@@ -8,7 +8,10 @@ import {
   ref,
   watch,
 } from 'vue'
-import { defineStore } from 'pinia'
+import {
+  defineStore,
+  acceptHMRUpdate,
+} from 'pinia'
 
 import { useLogger } from '@/composables/useLogger'
 
@@ -65,3 +68,7 @@ export const useLoginStore = defineStore('login', () => {
     isNotFetching,
   }
 })
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useLoginStore, import.meta.hot))
+}

@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { defineStore } from 'pinia'
+import {
+  defineStore,
+  acceptHMRUpdate,
+} from 'pinia'
 import {
   ref,
   computed,
@@ -91,3 +94,7 @@ export const useMemberStore = defineStore('member', () => {
     $reset,
   }
 })
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useMemberStore, import.meta.hot))
+}

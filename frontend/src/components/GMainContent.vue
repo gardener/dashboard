@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
       ref="wrapRef"
       class="g-main__wrap"
     >
-      <router-view :key="routerViewKey" />
+      <router-view />
     </div>
   </v-main>
 </template>
@@ -29,7 +29,6 @@ import {
   watch,
 } from 'vue'
 import { useLayout } from 'vuetify'
-import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 
 import { useConfigStore } from '@/store/config'
@@ -39,7 +38,6 @@ import GAlertBanner from '@/components/GAlertBanner.vue'
 import { useLogger } from '@/composables/useLogger'
 
 const layout = useLayout()
-const route = useRoute()
 const logger = useLogger()
 const configStore = useConfigStore()
 const { alertBannerMessage, alertBannerType, alertBannerIdentifier } = storeToRefs(configStore)
@@ -53,13 +51,6 @@ function setElementOverflowY (element, value) {
     element.style.overflowY = value
   }
 }
-
-const routerViewKey = computed(() => {
-  if (route.name !== 'ShootItemTerminal') {
-    return undefined
-  }
-  return route.path
-})
 
 const mainContainer = computed(() => {
   return mainRef.value?.$el.querySelector(':scope > div[class$=\'wrap\']')
