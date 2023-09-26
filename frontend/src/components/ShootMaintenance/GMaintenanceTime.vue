@@ -5,8 +5,9 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
+  <span class="text-subtitle-2">Provide start of maintenance time window in which Gardener may schedule automated cluster updates</span>
   <v-row class="my-0">
-    <v-col class="regularInput">
+    <v-col class="smallInput">
       <g-time-text-field
         v-model="maintenanceBegin"
         color="primary"
@@ -14,8 +15,8 @@ SPDX-License-Identifier: Apache-2.0
         :error-messages="getErrorMessages('maintenanceBegin')"
         variant="underlined"
         persistent-hint
-        hint="Provide start of maintenance time window in which Gardener may schedule automated cluster updates."
-        @input="onInputmaintenanceBegin"
+        :hint="maintenanceBeginHint"
+        @input="v$.maintenanceBegin.$touch()"
         @blur="v$.maintenanceBegin.$touch()"
       />
     </v-col>
@@ -26,8 +27,23 @@ SPDX-License-Identifier: Apache-2.0
         label="Timezone"
         :error-messages="getErrorMessages('maintenanceTimezone')"
         variant="underlined"
-        @input="onInputmaintenanceTimezone"
+        @input="v$.maintenanceTimezone.$touch()"
         @blur="v$.maintenanceTimezone.$touch()"
+      />
+    </v-col>
+    <v-col class="smallInput">
+      <v-text-field
+        v-model="windowDuration"
+        color="primary"
+        type="number"
+        label="Maintenance Window Size"
+        :error-messages="getErrorMessages('windowDuration')"
+        suffix="minutes"
+        variant="underlined"
+        persistent-hint
+        :hint="maintenanceEndHint"
+        @input="v$.windowDuration.$touch()"
+        @blur="v$.windowDuration.$touch()"
       />
     </v-col>
   </v-row>
@@ -35,13 +51,18 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapState } from 'pinia'
-import { required } from '@vuelidate/validators'
+import {
+  required,
+  minValue,
+  maxValue,
+} from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
 import { useAppStore } from '@/store/app'
 
 import GTimeTextField from '@/components/GTimeTextField.vue'
 
+import moment from '@/utils/moment'
 import {
   getValidationErrors,
   randomMaintenanceBegin,
@@ -58,6 +79,11 @@ const validationErrors = {
   maintenanceTimezone: {
     required: 'Timezone is required',
     isTimezone: 'TimeZone must have format [+|-]HH:mm',
+  },
+  windowDuration: {
+    required: 'Maintenance window size is required',
+    minValue: 'Minimum duration is 30 minutes',
+    maxValue: 'Maximum duration is 360 minutes (6h)',
   },
 }
 
@@ -102,7 +128,28 @@ export default {
           required,
           isTimezone,
         },
+        windowDuration: {
+          required,
+          minValue: minValue(30),
+          maxValue: maxValue(360),
+        },
       }
+    },
+    maintenanceBeginMoment () {
+      return moment.utc(`${this.maintenanceBegin}${this.maintenanceTimezone}`, 'HH:mmZ')
+    },
+    maintenanceBeginHint () {
+      if (!this.maintenanceBeginMoment.isValid()) {
+        return undefined
+      }
+      return `Maintenance time window begins at ${this.maintenanceBeginMoment.format('HH:mm')} UTC`
+    },
+    maintenanceEndHint () {
+      if (!this.maintenanceBeginMoment.isValid()) {
+        return undefined
+      }
+      const maintenanceEndMoment = this.maintenanceBeginMoment.add(this.windowDuration, 'minutes')
+      return `Maintenance time window ends at ${maintenanceEndMoment.format('HH:mm')} UTC`
     },
   },
   mounted () {
@@ -118,7 +165,7 @@ export default {
         this.setDefaultWindowDuration()
       } else {
         this.setBeginTimeAndTimezone(this.timeWindowBegin)
-        this.setWindowDuration(this.timeWindowEnd)
+        this.setWindowDurationByWindowEnd(this.timeWindowEnd)
       }
     },
     getErrorMessages (field) {
@@ -132,7 +179,7 @@ export default {
       this.maintenanceBegin = beginTime.getTimeString()
       this.maintenanceTimezone = beginTime.getTimezoneString()
     },
-    setWindowDuration (windowEnd) {
+    setWindowDurationByWindowEnd (windowEnd) {
       const endTime = new TimeWithOffset(windowEnd)
       if (!endTime.isValid()) {
         return undefined
@@ -152,19 +199,13 @@ export default {
     setDefaultWindowDuration () {
       this.windowDuration = 60
     },
-    onInputmaintenanceBegin () {
-      this.v$.maintenanceBegin.$touch()
-    },
-    onInputmaintenanceTimezone () {
-      this.v$.maintenanceTimezone.$touch()
-    },
   },
 }
 </script>
 
 <style lang="scss" scoped>
-  .regularInput {
-    max-width: 300px;
+  .smallInput {
+    max-width: 180px;
   }
   .timezoneInput {
     max-width: 100px;
