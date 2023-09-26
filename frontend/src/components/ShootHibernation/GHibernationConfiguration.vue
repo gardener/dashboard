@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     ref="actionDialog"
     :shoot-item="shootItem"
     :valid="!v$.$invalid"
-    width="900"
+    width="1300"
     caption="Configure Hibernation Schedule"
     @dialog-opened="onConfigurationDialogOpened"
   >
