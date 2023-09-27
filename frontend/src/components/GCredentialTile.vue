@@ -14,7 +14,9 @@ SPDX-License-Identifier: Apache-2.0
         mdi-key-change
       </v-icon>
     </template>
-    <g-list-item-content>
+    <g-list-item-content
+      description-class="no-padding"
+    >
       <div class="d-flex align-center">
         <v-tooltip location="top">
           <template #activator="{ props }">
@@ -181,3 +183,9 @@ export default {
   },
 }
 </script>
+
+<style lang="scss">
+.no-padding {
+  padding: 0px !important;
+}
+</style>
