@@ -58,11 +58,13 @@ describe('stores', () => {
       authzStore.setNamespace(namespace)
       configStore = useConfigStore()
       mockGetConfiguration = vi.spyOn(api, 'getConfiguration').mockResolvedValue({
-        vendorHints: [{
-          type: 'warning',
-          message: 'test',
-          matchNames: ['suse-jeos', 'suse-chost'],
-        }],
+        data: {
+          vendorHints: [{
+            type: 'warning',
+            message: 'test',
+            matchNames: ['suse-jeos', 'suse-chost'],
+          }],
+        },
       })
       await configStore.fetchConfig()
       cloudProfileStore = useCloudProfileStore()
@@ -130,6 +132,7 @@ describe('stores', () => {
         expect(suseImage.expirationDateString).toBeDefined()
         expect(suseImage.vendorName).toBe('suse-chost')
         expect(suseImage.icon).toBe('suse-chost')
+        expect(suseImage.vendorHint).toBeDefined()
         expect(suseImage.vendorHint).toEqual(configStore.vendorHints[0])
         expect(suseImage.classification).toBe('supported')
         expect(suseImage.isSupported).toBe(true)
