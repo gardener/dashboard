@@ -791,7 +791,7 @@ describe('stores', () => {
       })
     })
 
-    describe('providerConfig.defaultNodeCIDRRange', () => {
+    describe('providerConfig.defaultNodesCIDR', () => {
       const cloudProfileName = 'foo'
 
       it('should return default node cidr from config', async () => {
@@ -802,7 +802,7 @@ describe('stores', () => {
       it('should return default node cidr from cloud profile', () => {
         setData({
           providerConfig: {
-            defaultNodeCIDRRange: '1.2.3.4/16',
+            defaultNodesCIDR: '1.2.3.4/16',
           },
         })
         const defaultNodesCIDR = cloudProfileStore.defaultNodesCIDRByCloudProfileName({ cloudProfileName })

@@ -168,7 +168,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
 
   function defaultNodesCIDRByCloudProfileName ({ cloudProfileName }) {
     const cloudProfile = cloudProfileByName(cloudProfileName)
-    return get(cloudProfile, 'data.providerConfig.defaultNodeCIDRRange', configStore.defaultNodesCIDR)
+    return get(cloudProfile, 'data.providerConfig.defaultNodesCIDR', configStore.defaultNodesCIDR)
   }
 
   function floatingPoolsByCloudProfileNameAndRegionAndDomain ({ cloudProfileName, region, secretDomain }) {
