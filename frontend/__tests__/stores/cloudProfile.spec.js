@@ -59,6 +59,7 @@ describe('stores', () => {
       configStore = useConfigStore()
       mockGetConfiguration = vi.spyOn(api, 'getConfiguration').mockResolvedValue({
         data: {
+          defaultNodesCIDR: '10.10.0.0/16',
           vendorHints: [{
             type: 'warning',
             message: 'test',
@@ -787,6 +788,25 @@ describe('stores', () => {
         dashboardLoadBalancerProviderNames = cloudProfileStore.loadBalancerProviderNamesByCloudProfileNameAndRegion({ cloudProfileName, region })
         expect(dashboardLoadBalancerProviderNames).toHaveLength(1)
         expect(dashboardLoadBalancerProviderNames[0]).toBe('other regional LB')
+      })
+    })
+
+    describe('providerConfig.defaultNodeCIDRRange', () => {
+      const cloudProfileName = 'foo'
+
+      it('should return default node cidr from config', async () => {
+        const defaultNodesCIDR = cloudProfileStore.defaultNodesCIDRByCloudProfileName({ cloudProfileName })
+        expect(defaultNodesCIDR).toBe('10.10.0.0/16')
+      })
+
+      it('should return default node cidr from cloud profile', () => {
+        setData({
+          providerConfig: {
+            defaultNodeCIDRRange: '1.2.3.4/16',
+          },
+        })
+        const defaultNodesCIDR = cloudProfileStore.defaultNodesCIDRByCloudProfileName({ cloudProfileName })
+        expect(defaultNodesCIDR).toBe('1.2.3.4/16')
       })
     })
     describe('helper', () => {
