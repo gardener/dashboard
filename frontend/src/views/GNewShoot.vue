@@ -271,7 +271,7 @@ export default {
   },
   computed: {
     ...mapState(useAuthzStore, ['namespace']),
-    ...mapState(useConfigStore, ['accessRestriction', 'defaultNodesCIDR']),
+    ...mapState(useConfigStore, ['accessRestriction']),
     ...mapState(useShootStagingStore, ['controlPlaneFailureToleranceType']),
     ...mapState(useShootStagingStore, [
       'workerless',
@@ -311,6 +311,7 @@ export default {
     ]),
     ...mapActions(useCloudProfileStore, [
       'zonesByCloudProfileNameAndRegion',
+      'defaultNodesCIDRByCloudProfileName',
     ]),
     async isShootContentDirty () {
       const shootResource = await this.shootResourceFromUIComponents()
@@ -333,11 +334,12 @@ export default {
         firewallImage,
         firewallSize,
         firewallNetworks,
+        defaultNodesCIDR,
       } = this.$refs.infrastructureDetails.getInfrastructureData()
       const oldInfrastructureKind = get(shootResource, 'spec.provider.type')
       if (oldInfrastructureKind !== infrastructureKind) {
         // Infrastructure changed
-        set(shootResource, 'spec', getSpecTemplate(infrastructureKind, this.defaultNodesCIDR))
+        set(shootResource, 'spec', getSpecTemplate(infrastructureKind, defaultNodesCIDR))
       }
       set(shootResource, 'spec.cloudProfileName', cloudProfileName)
       set(shootResource, 'spec.region', region)
@@ -400,7 +402,7 @@ export default {
 
         const allZones = this.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
         const oldZoneConfiguration = get(shootResource, 'spec.provider.infrastructureConfig.networks.zones', [])
-        const nodeCIDR = get(shootResource, 'spec.networking.nodes', this.defaultNodesCIDR)
+        const nodeCIDR = get(shootResource, 'spec.networking.nodes', defaultNodesCIDR)
         const zonesNetworkConfiguration = getZonesNetworkConfiguration(oldZoneConfiguration, workers, infrastructureKind, allZones.length, undefined, nodeCIDR)
         if (zonesNetworkConfiguration) {
           set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', zonesNetworkConfiguration)
@@ -534,7 +536,8 @@ export default {
 
       const zonedCluster = isZonedCluster({ cloudProviderKind: infrastructureKind, isNewCluster: true })
 
-      const newShootWorkerCIDR = get(shootResource, 'spec.networking.nodes', this.defaultNodesCIDR)
+      const defaultNodesCIDR = this.defaultNodesCIDRByCloudProfileName({ cloudProfileName })
+      const newShootWorkerCIDR = get(shootResource, 'spec.networking.nodes', defaultNodesCIDR)
       await this.manageWorkers.dispatch('setWorkersData', { workers, cloudProfileName, region, updateOSMaintenance: osUpdates, zonedCluster, kubernetesVersion, newShootWorkerCIDR })
 
       const addons = cloneDeep(get(shootResource, 'spec.addons', {}))

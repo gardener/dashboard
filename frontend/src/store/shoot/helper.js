@@ -147,9 +147,10 @@ export function createShootResource (context) {
   }
 
   const infrastructureKind = head(cloudProfileStore.sortedInfrastructureKindList)
-  set(shootResource, 'spec', getSpecTemplate(infrastructureKind, configStore.nodesCIDR))
-
   const cloudProfileName = get(head(cloudProfileStore.cloudProfilesByCloudProviderKind(infrastructureKind)), 'metadata.name')
+  const defaultNodesCIDR = cloudProfileStore.defaultNodesCIDRByCloudProfileName({ cloudProfileName })
+
+  set(shootResource, 'spec', getSpecTemplate(infrastructureKind, defaultNodesCIDR))
   set(shootResource, 'spec.cloudProfileName', cloudProfileName)
 
   const secret = head(secretStore.infrastructureSecretsByCloudProfileName(cloudProfileName))
@@ -221,7 +222,7 @@ export function createShootResource (context) {
 
   const allZones = cloudProfileStore.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
   const zones = allZones.length ? [sample(allZones)] : undefined
-  const zonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(zones, infrastructureKind, allZones.length, configStore.defaultNodesCIDR)
+  const zonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(zones, infrastructureKind, allZones.length, defaultNodesCIDR)
   if (zonesNetworkConfiguration) {
     set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', zonesNetworkConfiguration)
   }
