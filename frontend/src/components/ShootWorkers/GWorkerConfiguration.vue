@@ -54,7 +54,7 @@ SPDX-License-Identifier: Apache-2.0
             <g-shoot-editor
               ref="workerEditorRef"
               :shoot-item="editorData"
-              :completion-paths="['spec.properties.provider.properties.workers', 'spec.properties.provider.properties.infrastructureConfig']"
+              :completion-paths="['spec.allOf[0].properties.provider.allOf[0].properties.workers', 'spec.allOf[0].properties.provider.allOf[0].properties.infrastructureConfig']"
               hide-toolbar
               animate-on-appear
               alert-banner-identifier="workerEditorWarning"

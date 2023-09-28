@@ -13,45 +13,62 @@ const shootCompletions = {
   spec: {
     type: 'object',
     description: 'spec description',
-    properties: {
-      apiVersion: {
-        type: 'string',
-      },
-      kind: {
-        type: 'string',
-      },
-      metadata: {
-        type: 'object',
+    allOf: [
+      {
         properties: {
-          annotations: {
-            type: 'object',
+          apiVersion: {
+            type: 'string',
           },
-          managedFields: {
-            description: 'Demo Array',
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                apiVersion: {
-                  type: 'string',
-                },
-                fieldsType: {
-                  type: 'string',
-                },
-                managedObjects: {
-                  type: 'object',
-                  properties: {
-                    foo: {
-                      type: 'string',
+          kind: {
+            type: 'string',
+          },
+          metadata: {
+            type: 'object',
+            allOf: [
+              {
+                type: 'object',
+                properties: {
+                  annotations: {
+                    type: 'object',
+                  },
+                  managedFields: {
+                    description: 'Demo Array',
+                    type: 'array',
+                    items: {
+                      allOf: [
+                        {
+                          type: 'object',
+                          properties: {
+                            apiVersion: {
+                              type: 'string',
+                            },
+                            fieldsType: {
+                              type: 'string',
+                            },
+                            managedObjects: {
+                              type: 'object',
+                              allOf: [
+                                {
+                                  properties: {
+                                    foo: {
+                                      type: 'string',
+                                    },
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        },
+                      ],
                     },
                   },
                 },
               },
-            },
+            ],
           },
         },
       },
-    },
+    ],
   },
 }
 

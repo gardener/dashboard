@@ -96,8 +96,7 @@ export class ShootEditorCompletions {
   _getYamlCompletions (token, cur, cm, exactMatch = false) {
     const completionPath = this._getTokenCompletionPath(token, cur, cm)
     if (this.supportedPaths?.length) {
-      const currentPath = completionPath.join('.')
-      if (!this.supportedPaths.some(path => currentPath.startsWith(path))) {
+      if (!this.supportedPaths.some(path => completionPath.startsWith(path))) {
         return []
       }
     }
@@ -244,25 +243,25 @@ export class ShootEditorCompletions {
           }
           if (isLeafContextToken && token.type === 'firstArrayItem') {
             // leaf context token is array, so list properties of its items
-            return [pathToken.propertyName, 'items', 'properties']
+            return [pathToken.propertyName, 'items', 'allOf[0]', 'properties']
           }
           // regular property token
-          return [pathToken.propertyName, 'properties']
+          return [pathToken.propertyName, 'allOf[0]', 'properties']
         }
         case 'firstArrayItem': {
           const isTokenIndentIndicatingObjectStart = token.start === pathToken.indent + this.indentUnit + this.arrayBulletIndent
           if (pathToken.propertyName !== undefined && isLeafContextToken && isTokenIndentIndicatingObjectStart) {
             // firstArrayItem line can also start new object, so list properties of item object
-            return ['items', 'properties', pathToken.propertyName, 'properties']
+            return ['items', 'allOf[0]', 'properties', pathToken.propertyName, 'allOf[0]', 'properties']
           }
           // path token is array, so list properties of its items
-          return ['items', 'properties']
+          return ['items', 'allOf[0]', 'properties']
         }
       }
       return []
     })
 
-    return tokenPath
+    return tokenPath.join('.')
   }
 
   // Utils
