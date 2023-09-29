@@ -88,7 +88,7 @@ describe('components', () => {
 
     it('should render the login page', () => {
       const wrapper = mountLogin()
-      expect(wrapper.find('div.title-text').text()).toBe('Universal Kubernetes at Scale')
+      expect(wrapper.find('div.text-h5.text-primary').text()).toBe('Universal Kubernetes at Scale')
     })
 
     describe('#beforeRouteEnter', () => {
