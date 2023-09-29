@@ -8,10 +8,7 @@ import {
   defineStore,
   acceptHMRUpdate,
 } from 'pinia'
-import {
-  reactive,
-  ref,
-} from 'vue'
+import { ref } from 'vue'
 
 import { useLogger } from '@/composables/useLogger'
 
