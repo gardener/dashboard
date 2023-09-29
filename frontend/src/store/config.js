@@ -118,7 +118,7 @@ export const useConfigStore = defineStore('config', () => {
   })
 
   const sla = computed(() => {
-    return state.value?.sla
+    return state.value?.sla ?? {}
   })
 
   const costObject = computed(() => {
