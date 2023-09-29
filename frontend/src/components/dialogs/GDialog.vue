@@ -174,8 +174,7 @@ export default {
   },
   computed: {
     trimmedUserInput () {
-      const input = this.userInput ?? ''
-      return trim(input.trim(), zeroWidthSpace)
+      return trim(this.userInput, ' ' + zeroWidthSpace)
     },
     notConfirmed () {
       return this.confirmValue && this.confirmValue !== this.trimmedUserInput
