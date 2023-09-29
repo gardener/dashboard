@@ -539,9 +539,9 @@ export function maintenanceWindowWithBeginAndTimezone (beginTime, beginTimezone,
   return { begin, end }
 }
 
-export function maintenanceWindowDuration (windowBegin, windowEnd) {
-  const beginMoment = moment.utc(windowBegin, 'HH:mm')
-  let endMoment = moment.utc(windowEnd, 'HH:mm')
+export function getDurationInMinutes (begin, end) {
+  const beginMoment = moment.utc(begin, 'HH:mm')
+  let endMoment = moment.utc(end, 'HH:mm')
   if (!beginMoment.isValid() || !endMoment.isValid()) {
     return undefined
   }

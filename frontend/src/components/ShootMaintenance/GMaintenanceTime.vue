@@ -67,7 +67,7 @@ import {
   getValidationErrors,
   randomMaintenanceBegin,
   maintenanceWindowWithBeginAndTimezone,
-  maintenanceWindowDuration,
+  getDurationInMinutes,
 } from '@/utils'
 import { isTimezone } from '@/utils/validators'
 import TimeWithOffset from '@/utils/TimeWithOffset'
@@ -165,7 +165,7 @@ export default {
         this.setDefaultWindowDuration()
       } else {
         this.setBeginTimeAndTimezone(this.timeWindowBegin)
-        this.setWindowDurationByWindowEnd(this.timeWindowEnd)
+        this.setWindowDuration(this.timeWindowEnd)
       }
     },
     getErrorMessages (field) {
@@ -179,13 +179,13 @@ export default {
       this.maintenanceBegin = beginTime.getTimeString()
       this.maintenanceTimezone = beginTime.getTimezoneString()
     },
-    setWindowDurationByWindowEnd (windowEnd) {
+    setWindowDuration (windowEnd) {
       const endTime = new TimeWithOffset(windowEnd)
       if (!endTime.isValid()) {
         return undefined
       }
       const maintenanceEnd = endTime.getTimeString()
-      const windowDuration = maintenanceWindowDuration(this.maintenanceBegin, maintenanceEnd)
+      const windowDuration = getDurationInMinutes(this.maintenanceBegin, maintenanceEnd)
       if (windowDuration > 0) {
         this.windowDuration = windowDuration
       } else {

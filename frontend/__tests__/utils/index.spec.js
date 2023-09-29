@@ -11,7 +11,7 @@ import {
   defaultCriNameByKubernetesVersion,
   getIssueSince,
   maintenanceWindowWithBeginAndTimezone,
-  maintenanceWindowDuration,
+  getDurationInMinutes,
 } from '@/utils'
 
 import { pick } from '@/lodash'
@@ -362,12 +362,12 @@ describe('utils', () => {
       })
     })
   })
-  describe('maintenanceWindowDuration', () => {
+  describe('getDurationInMinutes', () => {
     it('should calculate window size', () => {
-      expect(maintenanceWindowDuration('22:00', '23:00')).toBe(60)
+      expect(getDurationInMinutes('22:00', '23:00')).toBe(60)
     })
     it('should calculate window size across multiple days', () => {
-      expect(maintenanceWindowDuration('23:00', '01:00')).toBe(120)
+      expect(getDurationInMinutes('23:00', '01:00')).toBe(120)
     })
   })
 })

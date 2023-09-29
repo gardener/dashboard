@@ -107,7 +107,10 @@ export default {
         this.$refs.maintenanceTime.reset()
       })
 
-      this.$refs.maintenanceComponents.setComponentUpdates({ k8sUpdates: this.data.updateKubernetesVersion, osUpdates: this.data.updateOSVersion })
+      this.$refs.maintenanceComponents.setComponentUpdates({
+        k8sUpdates: this.data.updateKubernetesVersion,
+        osUpdates: this.data.updateOSVersion,
+      })
     },
   },
 }

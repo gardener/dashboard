@@ -513,7 +513,7 @@ export default {
       const k8sUpdates = get(shootResource, 'spec.maintenance.autoUpdate.kubernetesVersion', true)
       const osUpdates = get(shootResource, 'spec.maintenance.autoUpdate.machineImageVersion', true)
       this.$refs.maintenanceTime.setBeginTimeAndTimezone(begin)
-      this.$refs.maintenanceTime.setWindowDurationByWindowEnd(end)
+      this.$refs.maintenanceTime.setWindowDuration(end)
       this.$refs.maintenanceComponents.setComponentUpdates({ k8sUpdates, osUpdates })
 
       const name = get(shootResource, 'metadata.name')

@@ -190,7 +190,10 @@ export default {
     reset () {
       this.$nextTick(() => {
         // need to wait until component has been rendered before we can trigger the function on the ref
-        this.$refs.maintenanceComponents.setComponentUpdates({ k8sUpdates: this.updateKubernetesVersion, osUpdates: this.updateOSVersion })
+        this.$refs.maintenanceComponents.setComponentUpdates({
+          k8sUpdates: this.updateKubernetesVersion,
+          osUpdates: this.updateOSVersion,
+        })
       })
     },
   },
