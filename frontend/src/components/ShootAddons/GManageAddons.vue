@@ -102,7 +102,7 @@ export default {
     textClass (addonDefinition) {
       return !this.createMode && addonDefinition.forbidDisable && this.addons[addonDefinition.name].enabled
         ? 'text-disabled'
-        : 'text-secondary'
+        : 'text-medium-emphasis'
     },
   },
 }
