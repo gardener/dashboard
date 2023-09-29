@@ -465,7 +465,7 @@ export default {
       'firewallImagesByCloudProfileName',
       'firewallNetworksByCloudProfileNameAndPartitionId',
       'firewallSizesByCloudProfileNameAndRegion',
-      'defaultNodesCIDRByCloudProfileName',
+      'getDefaultNodesCIDR',
     ]),
     ...mapActions(useSecretStore, [
       'infrastructureSecretsByCloudProfileName',
@@ -501,7 +501,7 @@ export default {
       this.projectID = undefined
 
       const cloudProfileName = this.cloudProfileName
-      this.defaultNodesCIDR = this.defaultNodesCIDRByCloudProfileName({ cloudProfileName })
+      this.defaultNodesCIDR = this.getDefaultNodesCIDR({ cloudProfileName })
     },
     setDefaultCloudProfile () {
       this.cloudProfileName = get(head(this.cloudProfiles), 'metadata.name')

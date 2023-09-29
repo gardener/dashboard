@@ -311,7 +311,7 @@ export default {
     ]),
     ...mapActions(useCloudProfileStore, [
       'zonesByCloudProfileNameAndRegion',
-      'defaultNodesCIDRByCloudProfileName',
+      'getDefaultNodesCIDR',
     ]),
     async isShootContentDirty () {
       const shootResource = await this.shootResourceFromUIComponents()
@@ -536,7 +536,7 @@ export default {
 
       const zonedCluster = isZonedCluster({ cloudProviderKind: infrastructureKind, isNewCluster: true })
 
-      const defaultNodesCIDR = this.defaultNodesCIDRByCloudProfileName({ cloudProfileName })
+      const defaultNodesCIDR = this.getDefaultNodesCIDR({ cloudProfileName })
       const newShootWorkerCIDR = get(shootResource, 'spec.networking.nodes', defaultNodesCIDR)
       await this.manageWorkers.dispatch('setWorkersData', { workers, cloudProfileName, region, updateOSMaintenance: osUpdates, zonedCluster, kubernetesVersion, newShootWorkerCIDR })
 

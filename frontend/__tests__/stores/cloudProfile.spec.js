@@ -795,7 +795,7 @@ describe('stores', () => {
       const cloudProfileName = 'foo'
 
       it('should return default node cidr from config', async () => {
-        const defaultNodesCIDR = cloudProfileStore.defaultNodesCIDRByCloudProfileName({ cloudProfileName })
+        const defaultNodesCIDR = cloudProfileStore.getDefaultNodesCIDR({ cloudProfileName })
         expect(defaultNodesCIDR).toBe('10.10.0.0/16')
       })
 
@@ -805,7 +805,7 @@ describe('stores', () => {
             defaultNodesCIDR: '1.2.3.4/16',
           },
         })
-        const defaultNodesCIDR = cloudProfileStore.defaultNodesCIDRByCloudProfileName({ cloudProfileName })
+        const defaultNodesCIDR = cloudProfileStore.getDefaultNodesCIDR({ cloudProfileName })
         expect(defaultNodesCIDR).toBe('1.2.3.4/16')
       })
     })

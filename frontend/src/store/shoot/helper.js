@@ -148,7 +148,7 @@ export function createShootResource (context) {
 
   const infrastructureKind = head(cloudProfileStore.sortedInfrastructureKindList)
   const cloudProfileName = get(head(cloudProfileStore.cloudProfilesByCloudProviderKind(infrastructureKind)), 'metadata.name')
-  const defaultNodesCIDR = cloudProfileStore.defaultNodesCIDRByCloudProfileName({ cloudProfileName })
+  const defaultNodesCIDR = cloudProfileStore.getDefaultNodesCIDR({ cloudProfileName })
 
   set(shootResource, 'spec', getSpecTemplate(infrastructureKind, defaultNodesCIDR))
   set(shootResource, 'spec.cloudProfileName', cloudProfileName)
