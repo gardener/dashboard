@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-card-text>
             <v-row>
               <v-col cols="12">
-                <legend class="text-secondary">
+                <legend class="text-medium-emphasis">
                   Color Scheme
                 </legend>
                 <v-btn-toggle
@@ -79,7 +79,7 @@ SPDX-License-Identifier: Apache-2.0
                 </v-btn-toggle>
               </v-col>
               <v-col cols="12">
-                <legend class="text-secondary">
+                <legend class="text-medium-emphasis">
                   Log Level
                 </legend>
                 <v-btn-toggle

@@ -151,7 +151,7 @@ export default {
     },
     textClass (definition) {
       return this.enabled(definition)
-        ? 'text-secondary'
+        ? 'text-medium-emphasis'
         : 'text-disabled'
     },
     applyTo (shootResource) {
