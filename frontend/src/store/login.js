@@ -8,7 +8,10 @@ import {
   defineStore,
   acceptHMRUpdate,
 } from 'pinia'
-import { ref } from 'vue'
+import {
+  reactive,
+  ref,
+} from 'vue'
 
 import { useLogger } from '@/composables/useLogger'
 
@@ -22,6 +25,13 @@ export const useLoginStore = defineStore('login', () => {
   const loginTypes = ref(['token'])
   const landingPageUrl = ref('')
   const themes = ref(null)
+  const branding = ref({
+    productLogoUrl: '/static/assets/logo.svg',
+    productName: 'Gardener',
+    productSlogan: 'Universal Kubernetes at Scale',
+    oidcLoginText: 'Press Login to be redirected to the configured\nOpenID Connect Provider.',
+    tokenLoginText: 'Enter a bearer token trusted by the Kubernetes API server and press Login.',
+  })
 
   async function fetchConfig () {
     try {
@@ -33,6 +43,10 @@ export const useLoginStore = defineStore('login', () => {
       loginTypes.value = data.loginTypes
       landingPageUrl.value = data.landingPageUrl
       themes.value = data.themes ?? {}
+      Object.assign(branding.value, data.branding ?? {})
+      if (branding.value.productTitle === undefined) {
+        branding.value.productTitle = branding.value.productName
+      }
     } catch (err) {
       logger.error('Failed to fetch login configuration: %s', err.message)
       loginTypes.value = ['token']
@@ -47,6 +61,7 @@ export const useLoginStore = defineStore('login', () => {
     loginTypes,
     landingPageUrl,
     themes,
+    branding,
     fetchConfig,
   }
 })

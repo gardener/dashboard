@@ -153,6 +153,20 @@ export const useConfigStore = defineStore('config', () => {
     return state.value?.themes
   })
 
+  const branding = computed(() => {
+    const branding = {
+      productLogoUrl: '/static/assets/logo.svg',
+      productName: 'Gardener',
+      productTitleSuperscript: appVersion.value,
+      productSlogan: 'Universal Kubernetes at Scale',
+      ...state.value?.branding,
+    }
+    if (branding.productTitle === undefined) {
+      branding.productTitle = branding.productName
+    }
+    return branding
+  })
+
   const terminal = computed(() => {
     return state.value?.terminal
   })
@@ -311,6 +325,7 @@ export const useConfigStore = defineStore('config', () => {
     controlPlaneHighAvailabilityHelpText,
     defaultHibernationSchedule,
     themes,
+    branding,
     terminal,
     terminalShortcuts,
     ticket,
