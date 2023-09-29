@@ -384,10 +384,14 @@ export default {
         successMessage: `Preparing credential rotation for ${this.shootName}`,
         heading: 'Do you want to prepare the rotation of all credentials?',
         actions: [
-          ...this.shootEnableStaticTokenKubeconfig ? componentTexts['rotate-kubeconfig-credentials'].actions : [],
+          ...this.shootEnableStaticTokenKubeconfig
+            ? componentTexts['rotate-kubeconfig-credentials'].actions
+            : [],
           ...componentTexts['rotate-ca-start'].actions,
           ...componentTexts['rotate-observability-credentials'].actions,
-          ...this.hasShootWorkerGroups ? componentTexts['rotate-ssh-keypair'].actions : [],
+          ...this.hasShootWorkerGroups
+            ? componentTexts['rotate-ssh-keypair'].actions
+            : [],
           ...componentTexts['rotate-etcd-encryption-key-start'].actions,
           ...componentTexts['rotate-serviceaccount-key-start'].actions,
         ],

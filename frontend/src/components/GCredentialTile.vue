@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-list-item :class="{ 'pt-0 pb-0': dense }">
+  <g-list-item :class="{ 'pt-1 pb-1': dense }">
     <template #prepend>
       <v-icon
         v-if="!dense"
@@ -14,9 +14,7 @@ SPDX-License-Identifier: Apache-2.0
         mdi-key-change
       </v-icon>
     </template>
-    <g-list-item-content
-      description-class="no-padding"
-    >
+    <g-list-item-content>
       <div class="d-flex align-center">
         <v-tooltip location="top">
           <template #activator="{ props }">

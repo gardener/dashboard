@@ -18,8 +18,7 @@ SPDX-License-Identifier: Apache-2.0
   </div>
   <div
     v-if="slots.description || props.description"
-    class="text-body-2 text-high-emphasis pt-1"
-    :class="descriptionClass"
+    class="text-body-2 text-medium-emphasis pt-1"
   >
     <slot name="description">
       {{ props.description }}
@@ -37,9 +36,6 @@ const props = defineProps({
     type: String,
   },
   description: {
-    type: String,
-  },
-  descriptionClass: {
     type: String,
   },
 })
