@@ -114,6 +114,9 @@ SPDX-License-Identifier: Apache-2.0
             Login
           </v-btn>
         </div>
+        <g-login-hints
+          :min-height="hintsMinHeight"
+        />
       </v-sheet>
       <v-sheet
         :min-height="footerHeight"
@@ -138,8 +141,9 @@ import { useAuthnStore } from '@/store/authn'
 import { useLoginStore } from '@/store/login'
 import { useLocalStorageStore } from '@/store/localStorage'
 
-import GLoginFooter from '@/components/GLoginFooter.vue'
 import GLoginTeaser from '@/components/GLoginTeaser.vue'
+import GLoginHints from '@/components/GLoginHints.vue'
+import GLoginFooter from '@/components/GLoginFooter.vue'
 import GNotify from '@/components/GNotify.vue'
 
 import { setDelayedInputFocus } from '@/utils'
@@ -149,6 +153,7 @@ import { get } from '@/lodash'
 export default {
   components: {
     GLoginTeaser,
+    GLoginHints,
     GLoginFooter,
     GNotify,
   },
@@ -208,6 +213,9 @@ export default {
     },
     toolbarHeight () {
       return this.branding.loginToolbarHeight ?? 60
+    },
+    hintsMinHeight () {
+      return this.branding.loginHintsMinHeight ?? 38
     },
     teaserMinWidth () {
       return this.branding.loginTeaserMinWidth ?? 340
@@ -278,29 +286,21 @@ export default {
       }
     },
     getLoginTypeTitle (key) {
-      let title = key
       switch (key) {
-        case 'oidc': {
-          if (this.branding.oidcLoginTitle) {
-            title = this.branding.oidcLoginTitle
-          }
-          break
-        }
-        case 'token': {
-          if (this.branding.tokenLoginTitle) {
-            title = this.branding.tokenLoginTitle
-          }
-          break
-        }
+        case 'oidc':
+          return this.branding.oidcLoginTitle ?? 'OIDC'
+        case 'token':
+          return this.branding.tokenLoginTitle ?? 'Token'
+        default:
+          return key
       }
-      return title
     },
     oidcLogin () {
       try {
         this.signinWithOidc(this.redirectPath)
       } catch (err) {
         this.setError({
-          title: 'OIDC Login Error',
+          title: `${this.getLoginTypeTitle('oidc')} Login Error`,
           message: err.message,
         })
       }
@@ -317,7 +317,7 @@ export default {
         }
       } catch (err) {
         this.setError({
-          title: 'Token Login Error',
+          title: `${this.getLoginTypeTitle('token')} Login Error`,
           message: err.message,
         })
       }
