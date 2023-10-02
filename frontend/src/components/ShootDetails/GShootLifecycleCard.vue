@@ -64,7 +64,7 @@ SPDX-License-Identifier: Apache-2.0
             <v-tooltip location="top">
               <template #activator="{ props }">
                 <div
-                  class="d-flex align-center pt-1"
+                  class="d-flex align-center"
                   v-bind="props"
                 >
                   <g-shoot-messages

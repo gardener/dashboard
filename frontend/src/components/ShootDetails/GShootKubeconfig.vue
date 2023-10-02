@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <g-list-item-content v-if="isGardenloginType">
       Kubeconfig - Gardenlogin
-      <div class="text-body-2">
+      <template #description>
         <span
           v-if="isKubeconfigAvailable"
           class="wrap-text"
@@ -25,11 +25,11 @@ SPDX-License-Identifier: Apache-2.0
         <span v-else>
           Gardenlogin kubeconfig currently not available
         </span>
-      </div>
+      </template>
     </g-list-item-content>
     <g-list-item-content v-else>
       Kubeconfig - Static Token
-      <div class="text-body-2">
+      <template #description>
         <span v-if="!shootEnableStaticTokenKubeconfig">
           Static token kubeconfig is disabled for this cluster
         </span>
@@ -43,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
           Contains static token credential.
           Not recommended, consider disabling the static token kubeconfig
         </span>
-      </div>
+      </template>
     </g-list-item-content>
     <template #append>
       <g-gardenlogin-info v-if="isGardenloginType" />
