@@ -164,32 +164,29 @@ export default {
         this.setDefaultBeginTimeAndTimezone()
         this.setDefaultWindowDuration()
       } else {
-        this.setBeginTimeAndTimezone(this.timeWindowBegin)
-        this.setWindowDuration(this.timeWindowEnd)
+        this.setMaintenanceWindow(this.timeWindowBegin, this.timeWindowEnd)
       }
     },
     getErrorMessages (field) {
       return getValidationErrors(this, field)
     },
-    setBeginTimeAndTimezone (windowBegin) {
-      const beginTime = new TimeWithOffset(windowBegin)
-      if (!beginTime.isValid()) {
-        return undefined
-      }
-      this.maintenanceBegin = beginTime.getTimeString()
-      this.maintenanceTimezone = beginTime.getTimezoneString()
-    },
-    setWindowDuration (windowEnd) {
-      const endTime = new TimeWithOffset(windowEnd)
-      if (!endTime.isValid()) {
-        return undefined
-      }
-      const maintenanceEnd = endTime.getTimeString()
-      const windowDuration = getDurationInMinutes(this.maintenanceBegin, maintenanceEnd)
-      if (windowDuration > 0) {
-        this.windowDuration = windowDuration
+    setMaintenanceWindow (begin, end) {
+      const defaultDuration = 60
+      if (begin && end) {
+        const beginTime = new TimeWithOffset(begin)
+        if (beginTime.isValid()) {
+          this.maintenanceBegin = beginTime.getTimeString()
+          this.maintenanceTimezone = beginTime.getTimezoneString()
+        }
+        const endTime = new TimeWithOffset(end)
+        if (endTime.isValid()) {
+          const duration = getDurationInMinutes(this.maintenanceBegin, endTime.getTimeString())
+          this.windowDuration = duration > 0 ? duration : defaultDuration
+        }
       } else {
-        this.setDefaultWindowDuration()
+        this.maintenanceBegin = randomMaintenanceBegin()
+        this.maintenanceTimezone = this.timezone
+        this.windowDuration = defaultDuration
       }
     },
     setDefaultBeginTimeAndTimezone () {
