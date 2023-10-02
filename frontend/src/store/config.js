@@ -118,7 +118,7 @@ export const useConfigStore = defineStore('config', () => {
   })
 
   const sla = computed(() => {
-    return state.value?.sla
+    return state.value?.sla ?? {}
   })
 
   const costObject = computed(() => {
@@ -293,8 +293,6 @@ export const useConfigStore = defineStore('config', () => {
     return get(knownConditions.value, type, getCondition(type))
   }
 
-  const nodesCIDR = defaultNodesCIDR // TODO: remove one later
-
   return {
     isInitial,
     appVersion,
@@ -318,7 +316,6 @@ export const useConfigStore = defineStore('config', () => {
     helpMenuItems,
     externalTools,
     defaultNodesCIDR,
-    nodesCIDR,
     apiServerUrl,
     clusterIdentity,
     seedCandidateDeterminationStrategy,

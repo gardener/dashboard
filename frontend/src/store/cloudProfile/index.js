@@ -166,6 +166,11 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return max(map(seedsMatchingCloudProfileAndRegion, 'volume.minimumSize')) || defaultMinimumSize
   }
 
+  function getDefaultNodesCIDR ({ cloudProfileName }) {
+    const cloudProfile = cloudProfileByName(cloudProfileName)
+    return get(cloudProfile, 'data.providerConfig.defaultNodesCIDR', configStore.defaultNodesCIDR)
+  }
+
   function floatingPoolsByCloudProfileNameAndRegionAndDomain ({ cloudProfileName, region, secretDomain }) {
     const cloudProfile = cloudProfileByName(cloudProfileName)
     const floatingPools = get(cloudProfile, 'data.providerConfig.constraints.floatingPools')
@@ -629,6 +634,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     regionsWithSeedByCloudProfileName,
     regionsWithoutSeedByCloudProfileName,
     loadBalancerProviderNamesByCloudProfileNameAndRegion,
+    getDefaultNodesCIDR,
     floatingPoolNamesByCloudProfileNameAndRegionAndDomain,
     floatingPoolsByCloudProfileNameAndRegionAndDomain,
     loadBalancerClassNamesByCloudProfileName,
