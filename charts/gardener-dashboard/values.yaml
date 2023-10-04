@@ -271,6 +271,25 @@ global:
       #           If you can't comply, only third-level/dev support at usual 8x5 working hours in EEA will be available to you for all node-related components such as Docker and Kubelet, the operating system, and everything else that would require direct inspection of your nodes through a privileged pod or SSH
       #         inverted: true
 
+      # # branding - customize the dashboard branding
+      # branding:
+      #   productLogoUrl: data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTIsMjJWMjBDMiwyMCA3LDE4IDEyLDE4QzE3LDE4IDIyLDIwIDIyLDIwVjIySDJNMTEuMyw5LjFDMTAuMSw1LjIgNCw2LjEgNCw2LjFDNCw2LjEgNC4yLDEzLjkgOS45LDEyLjdDOS41LDkuOCA4LDkgOCw5QzEwLjgsOSAxMSwxMi40IDExLDEyLjRWMTdDMTEuMywxNyAxMS43LDE3IDEyLDE3QzEyLjMsMTcgMTIuNywxNyAxMywxN1YxMi44QzEzLDEyLjggMTMsOC45IDE2LDcuOUMxNiw3LjkgMTQsMTAuOSAxNCwxMi45QzIxLDEzLjYgMjEsNCAyMSw0QzIxLDQgMTIuMSwzIDExLjMsOS4xWiIgLz48L3N2Zz4=
+      #   productName: KaaS
+      #   productTitle: K8S as a Service
+      #   productSlogan: Another cool cluster service
+      #   loginHints:
+      #     - title: Support
+      #       href: https://gardener.cloud
+      #     - title: Documentation
+      #       href: https://gardener.cloud/docs
+      #   loginTeaserTemplate: |
+      #     <div class=\"d-flex flex-column align-center justify-center pa-3\" style=\"min-height: {{minHeight}}px\">
+      #       <img src=\"{{productLogoUrl}}\" alt=\"Login to {{productName}}\" width=\"100\" height=\"100\" class=\"mt-2\">
+      #       <div class=\"text-h5 text-center font-weight-light text-primary mt-1\">{{productSlogan}}</div>
+      #     </div>
+      #   oidcLoginTitle: MyIDP
+      #   oidcLoginText: Press LOGIN to be redirected to My Identity Service.
+
       # # themes - overwrite theme colors with custom colors, use html color codes or material design colors defined by vuetify in the javascript color pack: https://vuetifyjs.com/en/styles/colors/#javascript-color-pack
       # themes:
       #   light: # overwrite light theme colors
