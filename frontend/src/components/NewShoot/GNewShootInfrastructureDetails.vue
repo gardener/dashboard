@@ -273,6 +273,7 @@ export default {
       firewallSize: undefined,
       firewallNetworks: undefined,
       projectID: undefined,
+      defaultNodesCIDR: undefined,
     }
   },
   validations () {
@@ -464,6 +465,7 @@ export default {
       'firewallImagesByCloudProfileName',
       'firewallNetworksByCloudProfileNameAndPartitionId',
       'firewallSizesByCloudProfileNameAndRegion',
+      'getDefaultNodesCIDR',
     ]),
     ...mapActions(useSecretStore, [
       'infrastructureSecretsByCloudProfileName',
@@ -497,6 +499,9 @@ export default {
       this.firewallImage = head(this.firewallImages)
       this.onInputFirewallImage()
       this.projectID = undefined
+
+      const cloudProfileName = this.cloudProfileName
+      this.defaultNodesCIDR = this.getDefaultNodesCIDR({ cloudProfileName })
     },
     setDefaultCloudProfile () {
       this.cloudProfileName = get(head(this.cloudProfiles), 'metadata.name')
@@ -568,6 +573,7 @@ export default {
         firewallImage: this.firewallImage,
         firewallSize: this.firewallSize,
         firewallNetworks: this.firewallNetworks,
+        defaultNodesCIDR: this.defaultNodesCIDR,
       }
     },
     setInfrastructureData ({
