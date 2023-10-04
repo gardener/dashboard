@@ -498,3 +498,53 @@ Object {
   "readOnly": true,
 }
 `;
+
+exports[`gardener-dashboard deployment when virtual garden is enabled should use the volume mount based kubeconfig 1`] = `
+Object {
+  "name": "kubeconfig",
+  "projected": Object {
+    "defaultMode": 420,
+    "sources": Array [
+      Object {
+        "secret": Object {
+          "items": Array [
+            Object {
+              "key": "kubeconfig",
+              "path": "kubeconfig",
+            },
+          ],
+          "name": "generic-token-kubeconfig",
+          "optional": false,
+        },
+      },
+      Object {
+        "secret": Object {
+          "items": Array [
+            Object {
+              "key": "token",
+              "path": "token",
+            },
+          ],
+          "name": "access-dashboard",
+          "optional": false,
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`gardener-dashboard deployment when virtual garden is enabled should use the volume mount based kubeconfig 2`] = `
+Object {
+  "mountPath": "/var/run/secrets/gardener.cloud",
+  "name": "kubeconfig",
+  "readOnly": true,
+}
+`;
+
+exports[`gardener-dashboard deployment when virtual garden is enabled should use the volume mount based kubeconfig 3`] = `
+Object {
+  "name": "KUBECONFIG",
+  "value": "/var/run/secrets/gardener.cloud/kubeconfig",
+}
+`;

@@ -29,6 +29,11 @@ global:
       expirationSeconds: 43200 # 12 hours
       audience: ''
 
+  # projectedKubeconfig:
+  #   baseMountPath: /var/run/secrets/gardener.cloud
+  #   genericKubeconfigSecretName: generic-token-kubeconfig
+  #   tokenSecretName: access-dashboard
+
     # # vertical Pod autoscaling disabled by default
     # vpa:
     #   updateMode: Off
