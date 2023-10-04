@@ -31,6 +31,7 @@ import { useSecretStore } from '../secret'
 import { useSocketStore } from '../socket'
 import { useTicketStore } from '../ticket'
 import { useLocalStorageStore } from '../localStorage'
+import { useShootStagingStore } from '../shootStaging'
 
 import {
   uriPattern,
@@ -72,6 +73,7 @@ export const useShootStore = defineStore('shoot', () => {
   const socketStore = useSocketStore()
   const projectStore = useProjectStore()
   const localStorageStore = useLocalStorageStore()
+  const shootStagingStore = useShootStagingStore()
 
   const context = {
     api,
@@ -441,6 +443,7 @@ export const useShootStore = defineStore('shoot', () => {
 
     state.newShootResource = value
     state.initialNewShootResource = cloneDeep(value)
+    shootStagingStore.workerless = false
   }
 
   function setFocusMode (value) {
