@@ -27,6 +27,8 @@ import {
 
 export class ShootEditorCompletions {
   constructor (shootProperties, editorIndent, supportedPaths) {
+    this._resolveSchemaArrays(shootProperties)
+
     this.shootCompletions = shootProperties
     this.indentUnit = editorIndent
     this.arrayBulletIndent = 2 // -[space]
@@ -315,5 +317,20 @@ export class ShootEditorCompletions {
     const lineString = join(map(lineTokens, 'string'), '')
 
     return { lineTokens, lineString }
+  }
+
+  _resolveSchemaArrays (schema) {
+    for (const propertyName in schema) {
+      if (['allOf', 'anyOf', 'oneOf'].includes(propertyName) && Array.isArray(schema[propertyName])) {
+        schema[propertyName].forEach(element => {
+          Object.assign(schema, element)
+          this._resolveSchemaArrays(element.properties)
+        })
+        delete schema[propertyName]
+      } else if (typeof schema[propertyName] === 'object') {
+        this._resolveSchemaArrays(schema[propertyName])
+      }
+    }
+    return schema
   }
 }
