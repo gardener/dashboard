@@ -604,6 +604,8 @@ export default {
       this.firewallImage = firewallImage
       this.firewallSize = firewallSize
       this.firewallNetworks = firewallNetworks
+      this.defaultNodesCIDR = this.getDefaultNodesCIDR({ cloudProfileName })
+
       this.v$.projectID.$touch() // project id is a required field (for metal). We want to show the error immediatley
     },
   },

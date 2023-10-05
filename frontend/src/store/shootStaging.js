@@ -238,10 +238,6 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
     state.seedName = value
   }
 
-  function setWorkerless (value) {
-    state.workerless = value
-  }
-
   function setClusterConfiguration (value) {
     const {
       metadata = {},
@@ -363,7 +359,6 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
     setDnsPrimaryProvider,
     setDnsPrimaryProviderId,
     setControlPlaneFailureToleranceType,
-    setWorkerless,
   }
 })
 
