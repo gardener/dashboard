@@ -61,10 +61,9 @@ import { mapState } from 'pinia'
 
 import { useConfigStore } from '@/store/config'
 
-import {
-  template,
-  omit,
-} from '@/lodash'
+import { omitKeysWithSuffix } from '@/utils'
+
+import { template } from '@/lodash'
 
 export default {
   computed: {
@@ -80,7 +79,7 @@ export default {
       })
     },
     teaserHtml () {
-      const data = omit(this.branding, Object.keys(this.branding).filter(key => key.endsWith('Template')))
+      const data = omitKeysWithSuffix(this.branding, 'Template')
       return this.compiledTeaserTemplate(data)
     },
     teaserHeight () {

@@ -259,8 +259,8 @@ Object {
   },
   "landingPageUrl": "https://gardener.cloud/",
   "loginTypes": Array [
-    "token",
     "oidc",
+    "token",
   ],
   "themes": Object {
     "dark": Object {
@@ -360,8 +360,8 @@ exports[`gardener-dashboard configmap should render the template w/ defaults val
 Object {
   "landingPageUrl": "https://gardener.cloud/",
   "loginTypes": Array [
-    "token",
     "oidc",
+    "token",
   ],
 }
 `;

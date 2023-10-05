@@ -2,7 +2,7 @@
 {{- $landingPageUrl := .frontendConfig.landingPageUrl }}
 {{- $loginTypes := list "token" }}
 {{- if .oidc }}
-  {{- $loginTypes = append $loginTypes "oidc" }}
+  {{- $loginTypes = prepend $loginTypes "oidc" }}
 {{- end }}
 {{- $data := dict "landingPageUrl" $landingPageUrl "loginTypes" $loginTypes }}
 {{- if .frontendConfig.branding }}

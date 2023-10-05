@@ -71,7 +71,7 @@ Then, swap in the base64 encoded version of your files where needed.
 
 ## Branding
 
-It is also possible change the branding of the Gardener Dashboard the [helm chart](https://github.com/gardener/dashboard/blob/master/charts/gardener-dashboard) in the `frontendConfig.branding`. The following configuration properties are supported:
+It is also possible to change the branding of the Gardener Dashboard when using the [helm chart](https://github.com/gardener/dashboard/blob/master/charts/gardener-dashboard) in the `frontendConfig.branding` map. The following configuration properties are supported:
 
 | name | description | default |
 | ---- | ----------- | ------- |
@@ -86,7 +86,7 @@ It is also possible change the branding of the Gardener Dashboard the [helm char
 | `loginTeaserTemplate` | Custom HTML template to replace to login teaser content | refer to [GLoginTeaser](https://github.com/gardener/dashboard/blob/master/frontend/src/components/GLoginTeaser.vue) |
 | `loginFooterHeight` | Height of the login footer in the [GLogin](https://github.com/gardener/dashboard/blob/master/frontend/src/layouts/GLogin.vue) component | `24` |
 | `loginFooterTemplate` | Custom HTML template to replace to login footer content | refer to [GLoginFooter](https://github.com/gardener/dashboard/blob/master/frontend/src/components/GLoginFooter.vue) |
-| `loginHints` | Links to product related sites shown below the login button | `undefined` |
+| `loginHints` | Links [`{ title: string; href: string; }`](https://vuetifyjs.com/en/api/v-breadcrumbs/#props-items) to product related sites shown below the login button  | `undefined` |
 | `oidcLoginTitle` | Title of tabstrip for loginType OIDC | `OIDC` |
 | `oidcLoginText` | Text show above the login button on the OIDC tabstrip | `Press Login to be redirected to`<br> `configured OpenID Connect Provider.` |
 
@@ -106,6 +106,16 @@ The following example configuration in `values.yaml` shows some of the possibili
         toolbar-background: '#354a5f'
         toolbar-title: '#f5f6f7'
         action-button: '#354a5f'
+      dark:
+        primary: '#5b738b'
+        anchor: '#5b738b'
+        background: '#354a5f'
+        surface: '#1a2733'
+        main-background: '#1a2733'
+        main-navigation-title: '#f5f6f7'
+        toolbar-background: '#354a5f'
+        toolbar-title: '#f5f6f7'
+        action-button: '#5b738b'
     branding:
       productLogoUrl: data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzBCODA2MiIgZD0iTTIsMjJWMjBDMiwyMCA3LDE4IDEyLDE4QzE3LDE4IDIyLDIwIDIyLDIwVjIySDJNMTEuMyw5LjFDMTAuMSw1LjIgNCw2LjEgNCw2LjFDNCw2LjEgNC4yLDEzLjkgOS45LDEyLjdDOS41LDkuOCA4LDkgOCw5QzEwLjgsOSAxMSwxMi40IDExLDEyLjRWMTdDMTEuMywxNyAxMS43LDE3IDEyLDE3QzEyLjMsMTcgMTIuNywxNyAxMywxN1YxMi44QzEzLDEyLjggMTMsOC45IDE2LDcuOUMxNiw3LjkgMTQsMTAuOSAxNCwxMi45QzIxLDEzLjYgMjEsNCAyMSw0QzIxLDQgMTIuMSwzIDExLjMsOS4xWiIgLz48L3N2Zz4=
       productName: Nucleus
@@ -160,7 +170,7 @@ The following example configuration in `values.yaml` shows some of the possibili
           </div>
         </div>
       loginFooterTemplate: |
-        <div class="text-primary text-caption">
+        <div class="text-anchor text-caption">
           Copyright 2023 by Nucleus Corporation
         </div>
       loginHints:
@@ -171,20 +181,17 @@ The following example configuration in `values.yaml` shows some of the possibili
       oidcLoginTitle: MyIDP
       oidcLoginText: Press LOGIN to be redirected to My Identity Service.
 ```
+
 #### Login Screen
-
-<img width="800" src="../images/customization-1.png">
-
-The Login screen now shows the custom logo in a different size. The product title is also show and the OIDC tabstrip title and text is changed to a custom specific one. Product related links are shown below the login button. The footer contains a copyright notice for the custom company.
+In this example, the login screen now displays the custom logo in a different size. The product title is also shown, and the OIDC tabstrip title and text have been changed to a custom-specific one. Product-related links are displayed below the login button. The footer contains a copyright notice for the custom company.
+<img width="420" src="../images/customization-dark-1.png">
 
 #### Teaser in Main Navigation
-
-<img width="800" src="../images/customization-2.png">
-
 The template approach is also used in this case to change the `font-size` and `line-height` of the product title and slogan. The product version (superscript) is omitted.
 
+<img width="400" src="../images/customization-2.png">
+
 #### About Dialog
+By changing the `productLogoUrl` and the `productName`, the changes automatically effect the apperance of the About Dialog.
 
-<img width="800" src="../images/customization-3.png">
-
-By changing the `productLogoUrl` and the `productName` the changes automatically effect the apperance of the About Dialog.
+<img width="320" src="../images/customization-dark-3.png">
