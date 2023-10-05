@@ -274,7 +274,10 @@ export const useConfigStore = defineStore('config', () => {
 
   async function fetchConfig () {
     const response = await api.getConfiguration()
-    state.value = response.data
+    state.value = {
+      themes: {},
+      ...response.data,
+    }
   }
 
   async function $reset () {
