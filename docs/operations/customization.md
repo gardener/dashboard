@@ -184,12 +184,13 @@ The following example configuration in `values.yaml` shows some of the possibili
 
 #### Login Screen
 In this example, the login screen now displays the custom logo in a different size. The product title is also shown, and the OIDC tabstrip title and text have been changed to a custom-specific one. Product-related links are displayed below the login button. The footer contains a copyright notice for the custom company.
-<img width="420" src="../images/customization-dark-1.png">
+
+<img width="420" src="../images/customization-1.png">
 
 #### Teaser in Main Navigation
 The template approach is also used in this case to change the `font-size` and `line-height` of the product title and slogan. The product version (superscript) is omitted.
 
-<img width="400" src="../images/customization-2.png">
+<img width="400" src="../images/customization-dark-2.png">
 
 #### About Dialog
 By changing the `productLogoUrl` and the `productName`, the changes automatically effect the apperance of the About Dialog.
