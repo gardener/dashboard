@@ -503,7 +503,6 @@ exports[`gardener-dashboard deployment when virtual garden is enabled should use
 Object {
   "name": "kubeconfig",
   "projected": Object {
-    "defaultMode": 420,
     "sources": Array [
       Object {
         "secret": Object {

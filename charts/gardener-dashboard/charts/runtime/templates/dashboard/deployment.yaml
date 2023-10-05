@@ -89,7 +89,6 @@ spec:
       {{- if .Values.global.dashboard.projectedKubeconfig }}
       - name: kubeconfig
         projected:
-          defaultMode: 420
           sources:
           - secret:
               items:
