@@ -125,7 +125,7 @@ global:
 
     frontendConfig:
       landingPageUrl: https://github.com/gardener
-      # # asset configuration (see https://github.com/gardener/dashboard/blob/master/docs/Theming.md#logos-and-icons for the format and generation of the default values).
+      # # asset configuration (see https://github.com/gardener/dashboard/blob/master/docs/customization.md#logos-and-icons for the format and generation of the default values).
       # assets:
       #   favicon-16x16.png: |
       #   favicon-32x32.png: |
