@@ -214,7 +214,6 @@ import {
   isEqual,
   unset,
   omit,
-  assign,
 } from '@/lodash'
 
 export default {
@@ -298,18 +297,6 @@ export default {
       this.setClusterConfiguration(this.newShootResource)
     }
   },
-  watch: {
-    async workerless(value) {
-      if(!value) {
-        const shootResource = cloneDeep(this.newShootResource)
-        const cloudProfileName = shootResource.spec.cloudProfileName
-        const infrastructureKind = shootResource.spec.provider.type
-        const defaultNodesCIDR = this.getDefaultNodesCIDR({ cloudProfileName })
-        assign(shootResource.spec, getSpecTemplate(infrastructureKind, defaultNodesCIDR))
-        this.setNewShootResource(shootResource)
-      }
-    }
-  },
   methods: {
     ...mapActions(useShootStore, [
       'createShoot',
@@ -350,8 +337,11 @@ export default {
         defaultNodesCIDR,
       } = this.$refs.infrastructureDetails.getInfrastructureData()
       const oldInfrastructureKind = get(shootResource, 'spec.provider.type')
-      if (oldInfrastructureKind !== infrastructureKind) {
+      if (oldInfrastructureKind !== infrastructureKind ||
+      !shootResource.spec.provider.infrastructureConfig ||
+      !shootResource.spec.provider.controlPlaneConfig) {
         // Infrastructure changed
+        // or infrastructure template is empty (e.g. toggled workerless)
         set(shootResource, 'spec', getSpecTemplate(infrastructureKind, defaultNodesCIDR))
       }
       set(shootResource, 'spec.cloudProfileName', cloudProfileName)
