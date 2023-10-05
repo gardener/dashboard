@@ -29,9 +29,13 @@ global:
       expirationSeconds: 43200 # 12 hours
       audience: ''
 
+  # If configured, the dashboard deployment uses a projected volume which presents the kubeconfig to the garden cluster.
   # projectedKubeconfig:
+  #   # Path the projected volume is mounted to. This is typically also the base path in the generic kubeconfig to refer to the token file.
   #   baseMountPath: /var/run/secrets/gardener.cloud
+  #   # Secret which contains a generic kubeconfig and a reference to a token file.
   #   genericKubeconfigSecretName: generic-token-kubeconfig
+  #   # Secret which contains the access token, required by the generic kubeconfig.
   #   tokenSecretName: access-dashboard
 
     # # vertical Pod autoscaling disabled by default
