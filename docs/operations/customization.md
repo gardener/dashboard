@@ -6,7 +6,7 @@ Gardener landscape administrators should have the possibility to change the appe
 
 ## Branding
 
-It is also possible to change the branding of the Gardener Dashboard when using the [helm chart](https://github.com/gardener/dashboard/blob/master/charts/gardener-dashboard) in the `frontendConfig.branding` map. The following configuration properties are supported:
+It is possible to change the branding of the Gardener Dashboard when using the [helm chart](https://github.com/gardener/dashboard/blob/master/charts/gardener-dashboard) in the `frontendConfig.branding` map. The following configuration properties are supported:
 
 | name | description | default |
 | ---- | ----------- | ------- |
