@@ -26,6 +26,10 @@ const shootCompletions = {
           annotations: {
             type: 'object',
           },
+          creationTimestamp: {
+            type: 'string',
+            format: 'date-time',
+          },
           managedFields: {
             description: 'Demo Array',
             type: 'array',
@@ -128,15 +132,29 @@ describe('utils', () => {
 
         setEditorCursor(2, 6)
         completions = shootEditorCompletions.yamlHint(editor).list
-        expect(completions).toHaveLength(2)
+        expect(completions).toHaveLength(3)
 
         const { text: text0, type: type0 } = completions[0]
         expect(text0).toBe('annotations:\n         ')
         expect(type0).toBe('Object')
 
-        const { text: text1, type: type1 } = completions[1]
+        const { text: text1, type: type1 } = completions[2]
         expect(text1).toBe('managedFields:\n         - ')
         expect(type1).toBe('Array')
+      })
+
+      it('should render type with format', () => {
+        setEditorContentAndCursor('spec:\n  metadata:\n      ', 2, 0)
+        let completions = shootEditorCompletions.yamlHint(editor).list
+        expect(completions).toHaveLength(1)
+
+        setEditorCursor(2, 6)
+        completions = shootEditorCompletions.yamlHint(editor).list
+        expect(completions).toHaveLength(3)
+
+        const { text, type } = completions[1]
+        expect(text).toBe('creationTimestamp: ')
+        expect(type).toBe('String (date-time)')
       })
 
       it('should provide code completion for first array item', () => {
@@ -295,75 +313,107 @@ describe('utils', () => {
         expect(spy).toHaveBeenCalledWith('\n      ')
       })
     })
-  })
-  describe('OpenAPI v3 support', () => {
-    const shootCompletionsV3 = {
-      spec: {
-        type: 'object',
-        description: 'spec description',
-        allOf: [
-          {
-            properties: {
-              apiVersion: {
-                type: 'string',
-              },
-              kind: {
-                type: 'string',
-              },
-              metadata: {
+
+    describe('OpenAPI v3 support', () => {
+      let shootCompletionsV3
+
+      beforeEach(() => {
+        shootCompletionsV3 = {
+          spec: {
+            allOf: [
+              {
+                description: 'spec description',
                 type: 'object',
-                allOf: [
-                  {
-                    type: 'object',
-                    properties: {
-                      annotations: {
+                properties: {
+                  apiVersion: {
+                    type: 'string',
+                  },
+                  kind: {
+                    type: 'string',
+                  },
+                  metadata: {
+                    allOf: [
+                      {
                         type: 'object',
-                      },
-                      managedFields: {
-                        description: 'Demo Array',
-                        type: 'array',
-                        items: {
-                          allOf: [
-                            {
-                              type: 'object',
-                              properties: {
-                                apiVersion: {
-                                  type: 'string',
-                                },
-                                fieldsType: {
-                                  type: 'string',
-                                },
-                                managedObjects: {
+                        properties: {
+                          annotations: {
+                            type: 'object',
+                          },
+                          creationTimestamp: {
+                            type: 'string',
+                            format: 'date-time',
+                          },
+                          managedFields: {
+                            description: 'Demo Array',
+                            type: 'array',
+                            items: {
+                              allOf: [
+                                {
                                   type: 'object',
-                                  allOf: [
-                                    {
-                                      properties: {
-                                        foo: {
-                                          type: 'string',
-                                        },
-                                      },
+                                  properties: {
+                                    apiVersion: {
+                                      type: 'string',
                                     },
-                                  ],
+                                    fieldsType: {
+                                      type: 'string',
+                                    },
+                                    managedObjects: {
+                                      allOf: [
+                                        {
+                                          type: 'object',
+                                          properties: {
+                                            foo: {
+                                              type: 'string',
+                                            },
+                                          },
+                                        },
+                                      ],
+                                    },
+                                  },
                                 },
-                              },
+                              ],
                             },
-                          ],
+                          },
                         },
                       },
-                    },
+                    ],
                   },
-                ],
+                },
               },
-            },
+            ],
           },
-        ],
-      },
-    }
-    describe('#resolveShemaArrays', () => {
-      it('should recursively remove allOf, anyOf and oneOf array level', () => {
-        const shootEditorCompletions = new ShootEditorCompletions(shootCompletions)
-        const shootEditorCompletionsV3 = new ShootEditorCompletions(shootCompletionsV3)
-        expect(shootEditorCompletionsV3.shootCompletions).toEqual(shootEditorCompletions.shootCompletions)
+        }
+      })
+      describe('#resolveShemaArrays', () => {
+        it('should recursively remove allOf, anyOf and oneOf array level', () => {
+          const shootEditorCompletions = new ShootEditorCompletions(shootCompletions)
+          const shootEditorCompletionsV3 = new ShootEditorCompletions(shootCompletionsV3)
+          expect(shootEditorCompletionsV3.shootCompletions).toEqual(shootEditorCompletions.shootCompletions)
+        })
+
+        it('should handle multiple type options using oneOf discriminators', () => {
+          // add multi-type value to openapi v3 spec (not supported by v2)
+          shootCompletionsV3.spec.allOf[0].properties.foo = {
+            oneOf: [
+              {
+                type: 'number',
+                format: 'int32',
+              },
+              {
+                type: 'string',
+              },
+            ],
+          }
+
+          const shootEditorCompletionsV3 = new ShootEditorCompletions(shootCompletionsV3)
+          setEditorContentAndCursor('spec:\n   ', 1, 3)
+          const completions = shootEditorCompletionsV3.yamlHint(editor).list
+          expect(completions).toHaveLength(4)
+
+          const { text, type } = completions[3]
+          expect(text).toBe('foo: ')
+          expect(type).toBe('Number (int32) | String')
+        })
       })
     })
   })

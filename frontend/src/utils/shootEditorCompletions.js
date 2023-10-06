@@ -6,6 +6,8 @@
 
 import CodeMirror from 'codemirror'
 
+import { useLogger } from '@/composables/useLogger'
+
 import {
   forEach,
   join,
@@ -27,6 +29,7 @@ import {
 
 export class ShootEditorCompletions {
   constructor (shootProperties, editorIndent, supportedPaths) {
+    this.logger = useLogger()
     this._resolveSchemaArrays(shootProperties)
 
     this.shootCompletions = shootProperties
@@ -124,17 +127,25 @@ export class ShootEditorCompletions {
       return `${propertyName}: `
     }
 
+    const generateTypeText = (type, format) => {
+      return format ? `${upperFirst(type)} (${format})` : upperFirst(type)
+    }
+
     forIn(completions, (completion, propertyName) => {
       let text = generateCompletionText(propertyName, completion.type, token.type)
       if (token.type === 'firstArrayItem') {
         text = '- ' + text
       }
       const string = propertyName.toLowerCase()
+      const type = Array.isArray(completion.type)
+        ? completion.type.map((type, i) => generateTypeText(type, completion.format[i])).join(' | ')
+        : generateTypeText(completion.type, completion.format)
+
       completionArray.push({
         text,
         string,
         property: propertyName,
-        type: upperFirst(completion.type),
+        type,
         description: completion.description,
         render (el, self, data) {
           const document = el.ownerDocument
@@ -319,16 +330,36 @@ export class ShootEditorCompletions {
     return { lineTokens, lineString }
   }
 
-  _resolveSchemaArrays (schema) {
+  _resolveSchemaArrays (schema, currentItem = '') {
     for (const propertyName in schema) {
-      if (['allOf', 'anyOf', 'oneOf'].includes(propertyName) && Array.isArray(schema[propertyName])) {
-        schema[propertyName].forEach(element => {
-          Object.assign(schema, element)
-          this._resolveSchemaArrays(element.properties)
-        })
+      let properties
+      if (['allOf', 'anyOf', 'oneOf'].includes(propertyName) && !schema[propertyName].type) {
+        if (properties) {
+          // We currently do not support merging when schema has multiple discriminators on same level
+          this.logger.warn('Found multiple discriminators in schema at %s', currentItem)
+        }
+        if (schema[propertyName].length === 1) {
+          properties = schema[propertyName][0]
+        } else if (schema[propertyName].length > 1 &&
+            propertyName === 'oneOf' &&
+            !schema.type &&
+            schema[propertyName].every(item => {
+              return (Object.getOwnPropertyNames(item).length === 1 && !!item.type) ||
+                (Object.getOwnPropertyNames(item).length === 2 && !!item.type && !!item.format)
+            })) {
+          // In case of oneOf, we support multiple entries if they are only used to define different types
+          schema.type = schema[propertyName].map(obj => obj.type)
+          schema.format = schema[propertyName].map(obj => obj.format)
+        } else {
+          this.logger.warn('Unsupported schema array length, %s has length %i at %s', propertyName, schema[propertyName].length, currentItem)
+        }
+
+        this._resolveSchemaArrays(properties, currentItem, false)
+        Object.assign(schema, properties)
         delete schema[propertyName]
       } else if (typeof schema[propertyName] === 'object') {
-        this._resolveSchemaArrays(schema[propertyName])
+        currentItem = propertyName
+        this._resolveSchemaArrays(schema[propertyName], currentItem, false)
       }
     }
     return schema
