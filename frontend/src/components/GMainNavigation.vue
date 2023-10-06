@@ -9,26 +9,18 @@ SPDX-License-Identifier: Apache-2.0
     v-model="sidebar"
     :mobile-breakpoint="400"
     color="main-background"
+    class="overflow-hidden"
   >
-    <div class="teaser">
-      <div class="content center bg-main-background-darken-2">
+    <g-teaser>
+      <div style="position: absolute; top: 0; right: 0; z-index: 1;">
         <v-btn
           icon="mdi-chevron-double-left"
           variant="text"
-          class="float-right text-main-navigation-title ma-2"
+          class="ma-2 text-main-navigation-title"
           @click.stop="sidebar = false"
         />
-        <a href="/">
-          <img
-            src="/static/assets/logo.svg"
-            class="logo"
-            alt="gardener logo"
-          >
-          <h1 class="text-main-navigation-title">Gardener <span class="version">{{ version }}</span></h1>
-          <h2 class="text-primary">Universal Kubernetes at Scale</h2>
-        </a>
       </div>
-    </div>
+    </g-teaser>
     <template v-if="projectList.length">
       <v-menu
         v-model="projectMenu"
@@ -239,20 +231,22 @@ import {
   nextTick,
   watch,
   toRef,
+  onMounted,
 } from 'vue'
 import {
   useRouter,
   useRoute,
 } from 'vue-router'
+import { useDisplay } from 'vuetify'
 
 import { useAppStore } from '@/store/app'
-import { useConfigStore } from '@/store/config'
 import { useAuthzStore } from '@/store/authz'
 import { useProjectStore } from '@/store/project'
 
 import GProjectDialog from '@/components/dialogs/GProjectDialog.vue'
 import GStaleProjectWarning from '@/components/GStaleProjectWarning.vue'
 import GNotReadyProjectWarning from '@/components/GNotReadyProjectWarning.vue'
+import GTeaser from '@/components/GTeaser.vue'
 
 import {
   emailToDisplayName,
@@ -290,10 +284,10 @@ const initialVisibleProjects = 10
 
 const projectStore = useProjectStore()
 const appStore = useAppStore()
-const configStore = useConfigStore()
 const authzStore = useAuthzStore()
 const router = useRouter()
 const currentRoute = useRoute()
+const { mdAndDown } = useDisplay()
 
 const projectDialog = ref(false)
 const projectFilter = ref('')
@@ -309,7 +303,6 @@ const refMainMenu = ref(null)
 const namespace = toRef(projectStore, 'namespace')
 const projectList = toRef(projectStore, 'projectList')
 const sidebar = toRef(appStore, 'sidebar')
-const version = toRef(configStore, 'appVersion')
 const canCreateProject = toRef(authzStore, 'canCreateProject')
 
 const selectedProject = computed({
@@ -557,6 +550,12 @@ function isHighlightedProject (project) {
   return project.metadata.name === highlightedProjectName.value
 }
 
+onMounted(() => {
+  if (mdAndDown.value) {
+    sidebar.value = false
+  }
+})
+
 watch(projectMenu, value => {
   if (value) {
     requestAnimationFrame(() => {
@@ -568,63 +567,7 @@ watch(projectMenu, value => {
 </script>
 
 <style lang="scss" scoped>
-$teaserHeight: 200px;
-
 .v-navigation-drawer {
-  overflow: hidden;
-
-  .teaser {
-    height: $teaserHeight;
-    overflow: hidden;
-
-    .content {
-      display: block;
-      position: relative;
-      height: $teaserHeight;
-      overflow: hidden;
-      text-align: center;
-
-      a {
-        text-decoration: none;
-
-        .logo {
-          height: 80px;
-          pointer-events: none;
-          margin: 21px 0 0 0;
-          transform: translateX(30%);
-        }
-
-        h1 {
-          font-size: 40px;
-          line-height: 40px;
-          padding: 10px 0 0 0;
-          margin: 0;
-          letter-spacing: 4px;
-          font-weight: 100;
-          position: relative;
-
-          .version {
-            font-size: 10px;
-            line-height: 10px;
-            letter-spacing: 3px;
-            position: absolute;
-            top: 6px;
-            right: 20px;
-          }
-        }
-
-        h2 {
-          font-size: 15px;
-          font-weight: 300;
-          padding: 0px;
-          margin: 0px;
-          letter-spacing: 0.8px;
-        }
-      }
-
-    }
-  }
-
   .project-selector {
     height: 60px !important;
     font-weight: 700;

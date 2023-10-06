@@ -18,7 +18,7 @@
 ## Operations
 
 * [Configure Access Restrictions](operations/access-restrictions.md)
-* [Theming](operations/theming.md)
+* [Theming and Branding](operations/customization.md)
 * [Webterminals](operations/webterminals.md)
 
 ## Development
