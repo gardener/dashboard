@@ -337,8 +337,11 @@ export default {
         defaultNodesCIDR,
       } = this.$refs.infrastructureDetails.getInfrastructureData()
       const oldInfrastructureKind = get(shootResource, 'spec.provider.type')
-      if (oldInfrastructureKind !== infrastructureKind) {
+      if (oldInfrastructureKind !== infrastructureKind ||
+      !shootResource.spec.provider.infrastructureConfig ||
+      !shootResource.spec.provider.controlPlaneConfig) {
         // Infrastructure changed
+        // or infrastructure template is empty (e.g. toggled workerless)
         set(shootResource, 'spec', getSpecTemplate(infrastructureKind, defaultNodesCIDR))
       }
       set(shootResource, 'spec.cloudProfileName', cloudProfileName)

@@ -52,7 +52,7 @@ SPDX-License-Identifier: Apache-2.0
         >
           <v-card-title primary-title>
             <div class="content text-h6 mb-2">
-              Gardener
+              {{ branding.productName }}
             </div>
           </v-card-title>
           <v-divider />
@@ -345,6 +345,7 @@ const menu = ref(false)
 const infoDialog = ref(false)
 const sidebar = toRef(appStore, 'sidebar')
 const helpMenuItems = toRef(configStore, 'helpMenuItems')
+const branding = toRef(configStore, 'branding')
 const autoLogin = toRef(localStorageStore, 'autoLogin')
 const colorMode = toRef(localStorageStore, 'colorScheme')
 
