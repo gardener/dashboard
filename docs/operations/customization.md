@@ -18,25 +18,38 @@ The following colors can be configured:
 | `toolbar-background`    | background color for toolbars in cards, dialogs, etc. |
 | `toolbar-title`         | text color for toolbars in cards, dialogs, etc. |
 | `action-button`         | buttons in tables and cards, e.g. cluster details page |
-| `info`                  | Snotify info popups |
-| `warning`               | Snotify warning popups, warning texts |
-| `error`                 | Snotify error popups, error texts |
+| `info`                  | notification info popups, texts and status tags |
+| `success`               | notification success popups, texts and status tags |
+| `warning`               | notification warning popups, texts and status tags |
+| `error`                 | notification error popups, texts and status tags |
+| `unknown`               | status tags with unknown severity |
 
 If you use the helm chart, you can configure those with `frontendConfig.themes.light` for the light theme and `frontendConfig.themes.dark` for the dark theme.
 
 ### Example
 
 ```yaml
-  ...
-  themes:
-    light:
-      primary: '#0b8062'
-      anchor: '#0b8062'
-      main-background: 'grey.darken3'
-      main-navigation-title: 'shades.white'
-      toolbar-background: '#0b8062'
-      toolbar-title: 'shades.white'
-      action-button: 'grey.darken4'
+global:
+  dashboard:
+    frontendConfig:
+      # ...
+      themes:
+        light:
+          primary: '#0b8062'
+          anchor: '#0b8062'
+          main-background: 'grey.darken3'
+          main-navigation-title: 'shades.white'
+          toolbar-background: '#0b8062'
+          toolbar-title: 'shades.white'
+          action-button: 'grey.darken4'
+        dark:
+          primary: '#0b8062'
+          anchor: '#0b8062'
+          main-background: 'grey.darken3'
+          main-navigation-title: 'shades.white'
+          toolbar-background: '#0b8062'
+          toolbar-title: 'shades.white'
+          action-button: 'grey.lighten4'
 ```
 
 ## Logos and Icons
@@ -95,91 +108,93 @@ It is also possible to change the branding of the Gardener Dashboard when using 
 The following example configuration in `values.yaml` shows some of the possibilities to achieve a custom theming and branding:
 
 ```yaml
-  ...
-  frontendConfig:
-    themes:
-      light:
-        primary: '#354a5f'
-        anchor: '#5b738b'
-        main-background: '#354a5f'
-        main-navigation-title: '#f5f6f7'
-        toolbar-background: '#354a5f'
-        toolbar-title: '#f5f6f7'
-        action-button: '#354a5f'
-      dark:
-        primary: '#5b738b'
-        anchor: '#5b738b'
-        background: '#354a5f'
-        surface: '#1a2733'
-        main-background: '#1a2733'
-        main-navigation-title: '#f5f6f7'
-        toolbar-background: '#354a5f'
-        toolbar-title: '#f5f6f7'
-        action-button: '#5b738b'
-    branding:
-      productLogoUrl: data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzBCODA2MiIgZD0iTTIsMjJWMjBDMiwyMCA3LDE4IDEyLDE4QzE3LDE4IDIyLDIwIDIyLDIwVjIySDJNMTEuMyw5LjFDMTAuMSw1LjIgNCw2LjEgNCw2LjFDNCw2LjEgNC4yLDEzLjkgOS45LDEyLjdDOS41LDkuOCA4LDkgOCw5QzEwLjgsOSAxMSwxMi40IDExLDEyLjRWMTdDMTEuMywxNyAxMS43LDE3IDEyLDE3QzEyLjMsMTcgMTIuNywxNyAxMywxN1YxMi44QzEzLDEyLjggMTMsOC45IDE2LDcuOUMxNiw3LjkgMTQsMTAuOSAxNCwxMi45QzIxLDEzLjYgMjEsNCAyMSw0QzIxLDQgMTIuMSwzIDExLjMsOS4xWiIgLz48L3N2Zz4=
-      productName: Nucleus
-      productTitleSuperscript: false
-      productTitle: Nucleus Live
-      productDescription: Supercool Cluster Service
-      teaserHeight: 160
-      teaserTemplate: |
-        <div
-          class="text-center px-2"
-        >
-          <a
-            href="/"
-            class="text-decoration-none"
+global:
+  dashboard:
+    frontendConfig:
+      # ...
+      branding:
+        productLogoUrl: data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzBCODA2MiIgZD0iTTIsMjJWMjBDMiwyMCA3LDE4IDEyLDE4QzE3LDE4IDIyLDIwIDIyLDIwVjIySDJNMTEuMyw5LjFDMTAuMSw1LjIgNCw2LjEgNCw2LjFDNCw2LjEgNC4yLDEzLjkgOS45LDEyLjdDOS41LDkuOCA4LDkgOCw5QzEwLjgsOSAxMSwxMi40IDExLDEyLjRWMTdDMTEuMywxNyAxMS43LDE3IDEyLDE3QzEyLjMsMTcgMTIuNywxNyAxMywxN1YxMi44QzEzLDEyLjggMTMsOC45IDE2LDcuOUMxNiw3LjkgMTQsMTAuOSAxNCwxMi45QzIxLDEzLjYgMjEsNCAyMSw0QzIxLDQgMTIuMSwzIDExLjMsOS4xWiIgLz48L3N2Zz4=
+        productName: Nucleus
+        productTitleSuperscript: false
+        productTitle: Nucleus Live
+        productDescription: Supercool Cluster Service
+        teaserHeight: 160
+        teaserTemplate: |
+          <div
+            class="text-center px-2"
+          >
+            <a
+              href="/"
+              class="text-decoration-none"
+            >
+              <img
+                src="{{ productLogoUrl }}"
+                width="80"
+                height="80"
+                alt="{{ productName }} Logo"
+                class="pointer-events-none"
+              >
+              <div
+                class="font-weight-thin text-grey-lighten-4"
+                style="font-size: 32px; line-height: 32px; letter-spacing: 2px;"
+              >
+                {{ productTitle }}
+              </div>
+              <div class="text-body-1 font-weight-normal text-primary mt-1">
+                {{ productDescription }}
+              </div>
+            </a>
+          </div>
+        loginTeaserHeight: 296
+        loginTeaserTemplate: |
+          <div
+            class="d-flex flex-column align-center justify-center bg-main-background-darken-1 pa-3"
+            style="min-height: {{minHeight}}px"
           >
             <img
-              src="{{ productLogoUrl }}"
-              width="80"
-              height="80"
-              alt="{{ productName }} Logo"
-              class="pointer-events-none"
+              src="{{productLogoUrl}}"
+              alt="Login to {{productName}}"
+              width="140"
+              height="140"
+              class="mt-2"
             >
-            <div
-              class="font-weight-thin text-grey-lighten-4"
-              style="font-size: 32px; line-height: 32px; letter-spacing: 2px;"
-            >
-              {{ productTitle }}
+            <div class="text-h3 text-center font-weight-thin text-white mt-4">
+              {{productTitle}}
             </div>
-            <div class="text-body-1 font-weight-normal text-primary mt-1">
-              {{ productDescription }}
+            <div class="text-h5 text-center font-weight-light text-primary mt-1">
+              {{productSlogan}}
             </div>
-          </a>
-        </div>
-      loginTeaserHeight: 296
-      loginTeaserTemplate: |
-        <div
-          class="d-flex flex-column align-center justify-center bg-main-background-darken-1 pa-3"
-          style="min-height: {{minHeight}}px"
-        >
-          <img
-            src="{{productLogoUrl}}"
-            alt="Login to {{productName}}"
-            width="140"
-            height="140"
-            class="mt-2"
-          >
-          <div class="text-h3 text-center font-weight-thin text-white mt-4">
-            {{productTitle}}
           </div>
-          <div class="text-h5 text-center font-weight-light text-primary mt-1">
-            {{productSlogan}}
+        loginFooterTemplate: |
+          <div class="text-anchor text-caption">
+            Copyright 2023 by Nucleus Corporation
           </div>
-        </div>
-      loginFooterTemplate: |
-        <div class="text-anchor text-caption">
-          Copyright 2023 by Nucleus Corporation
-        </div>
-      loginHints:
-        - title: Support
-          href: https://gardener.cloud
-        - title: Documentation
-          href: https://gardener.cloud/docs
-      oidcLoginTitle: MyIDP
-      oidcLoginText: Press LOGIN to be redirected to My Identity Service.
+        loginHints:
+          - title: Support
+            href: https://gardener.cloud
+          - title: Documentation
+            href: https://gardener.cloud/docs
+        oidcLoginTitle: MyIDP
+        oidcLoginText: Press LOGIN to be redirected to My Identity Service.
+      themes:
+        light:
+          primary: '#354a5f'
+          anchor: '#5b738b'
+          main-background: '#354a5f'
+          main-navigation-title: '#f5f6f7'
+          toolbar-background: '#354a5f'
+          toolbar-title: '#f5f6f7'
+          action-button: '#354a5f'
+        dark:
+          primary: '#5b738b'
+          anchor: '#5b738b'
+          background: '#354a5f'
+          surface: '#1a2733'
+          main-background: '#1a2733'
+          main-navigation-title: '#f5f6f7'
+          toolbar-background: '#354a5f'
+          toolbar-title: '#f5f6f7'
+          action-button: '#5b738b'
 ```
 
 #### Login Screen
