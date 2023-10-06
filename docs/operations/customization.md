@@ -39,7 +39,7 @@ global:
         productName: Nucleus
         productTitleSuperscript: false
         productTitle: Nucleus Live
-        productDescription: Supercool Cluster Service
+        productSlogan: Supercool Cluster Service
         teaserHeight: 160
         teaserTemplate: |
           <div
@@ -63,7 +63,7 @@ global:
                 {{ productTitle }}
               </div>
               <div class="text-body-1 font-weight-normal text-primary mt-1">
-                {{ productDescription }}
+                {{ productSlogan }}
               </div>
             </a>
           </div>
@@ -122,7 +122,7 @@ global:
 #### Login Screen
 In this example, the login screen now displays the custom logo in a different size. The product title is also shown, and the OIDC tabstrip title and text have been changed to a custom-specific one. Product-related links are displayed below the login button. The footer contains a copyright notice for the custom company.
 
-<img width="420" src="../images/customization-dark-1.png">
+<img width="460" src="../images/customization-dark-1.png">
 
 #### Teaser in Main Navigation
 The template approach is also used in this case to change the `font-size` and `line-height` of the product title and slogan. The product version (superscript) is omitted.
