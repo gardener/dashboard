@@ -36,7 +36,7 @@ async function getSchemaDefinitions (user) {
 
   if (_.isEmpty(schemaDefinitions)) {
     // Do not use client of user as the result gets cached and returned to other users
-    const openAPIRaw = await dashboardClient.openapi.getGardenerV1Beta1()
+    const openAPIRaw = await dashboardClient.openapi.getGardenerApis()
     const dereferencedOpenApi = await SwaggerParser.dereference(openAPIRaw)
 
     const selectedSchemaDefinitions = _

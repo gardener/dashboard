@@ -74,7 +74,7 @@ describe('kube-client', () => {
 
     describe('openapi', () => {
       it('should fetch the openapi/v3/apis/core.gardener.cloud/v1beta1', async () => {
-        await expect(endpoints.openapi.getGardenerV1Beta1()).resolves.toEqual(['openapi/v3/apis/core.gardener.cloud/v1beta1', { method: 'get' }])
+        await expect(endpoints.openapi.getGardenerApis()).resolves.toEqual(['openapi/v3/apis/core.gardener.cloud/v1beta1', { method: 'get' }])
       })
     })
 

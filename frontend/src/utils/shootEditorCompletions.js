@@ -6,8 +6,6 @@
 
 import CodeMirror from 'codemirror'
 
-import { useLogger } from '@/composables/useLogger'
-
 import {
   forEach,
   join,
@@ -28,8 +26,8 @@ import {
 } from '@/lodash'
 
 export class ShootEditorCompletions {
-  constructor (shootProperties, editorIndent, supportedPaths) {
-    this.logger = useLogger()
+  constructor (shootProperties, editorIndent, supportedPaths, logger) {
+    this.logger = logger
     this._resolveSchemaArrays(shootProperties)
 
     this.shootCompletions = shootProperties
@@ -128,7 +126,15 @@ export class ShootEditorCompletions {
     }
 
     const generateTypeText = (type, format) => {
-      return format ? `${upperFirst(type)} (${format})` : upperFirst(type)
+      const formatTypeText = (type, format) => {
+        return format ? `${upperFirst(type)} (${format})` : upperFirst(type)
+      }
+      if (Array.isArray(type)) {
+        return type
+          .map((type, i) => formatTypeText(type, format[i]))
+          .join(' | ')
+      }
+      return formatTypeText(type, format)
     }
 
     forIn(completions, (completion, propertyName) => {
@@ -137,9 +143,7 @@ export class ShootEditorCompletions {
         text = '- ' + text
       }
       const string = propertyName.toLowerCase()
-      const type = Array.isArray(completion.type)
-        ? completion.type.map((type, i) => generateTypeText(type, completion.format[i])).join(' | ')
-        : generateTypeText(completion.type, completion.format)
+      const type = generateTypeText(completion.type, completion.format)
 
       completionArray.push({
         text,
@@ -330,38 +334,45 @@ export class ShootEditorCompletions {
     return { lineTokens, lineString }
   }
 
-  _resolveSchemaArrays (schema, currentItem = '') {
-    for (const propertyName in schema) {
-      let properties
-      if (['allOf', 'anyOf', 'oneOf'].includes(propertyName) && !schema[propertyName].type) {
-        if (properties) {
+  _resolveSchemaArrays (properties, parentPropertyName = '') {
+    const hasOnlyTypeOrTypeAndFormatProperties = (value) => {
+      if (value.every(item => {
+        return (Object.keys(item).length === 1 && item.type) ||
+        (Object.keys(item).length === 2 && item.type && item.format)
+      })) {
+        return true
+      }
+      return false
+    }
+    let foundDiscriminators = false
+    for (const [propertyName, propertyValue] of Object.entries(properties)) {
+      if (['allOf', 'anyOf', 'oneOf'].includes(propertyName) && !properties.type) {
+        if (foundDiscriminators) {
           // We currently do not support merging when schema has multiple discriminators on same level
-          this.logger.warn('Found multiple discriminators in schema at %s', currentItem)
+          this.logger.warn('Found multiple discriminators in schema at %s', parentPropertyName)
         }
-        if (schema[propertyName].length === 1) {
-          properties = schema[propertyName][0]
-        } else if (schema[propertyName].length > 1 &&
-            propertyName === 'oneOf' &&
-            !schema.type &&
-            schema[propertyName].every(item => {
-              return (Object.getOwnPropertyNames(item).length === 1 && !!item.type) ||
-                (Object.getOwnPropertyNames(item).length === 2 && !!item.type && !!item.format)
-            })) {
-          // In case of oneOf, we support multiple entries if they are only used to define different types
-          schema.type = schema[propertyName].map(obj => obj.type)
-          schema.format = schema[propertyName].map(obj => obj.format)
+        foundDiscriminators = true
+
+        if (propertyValue.length === 1) {
+          this._resolveSchemaArrays(propertyValue[0], parentPropertyName)
+          Object.assign(properties, propertyValue[0])
+        } else if (propertyValue.length > 1 && propertyName === 'oneOf') {
+          if (hasOnlyTypeOrTypeAndFormatProperties(propertyValue)) {
+            // In case of oneOf, we support multiple entries if they are only used to define different types
+            properties.type = propertyValue.map(obj => obj.type)
+            properties.format = propertyValue.map(obj => obj.format)
+          } else {
+            this.logger.warn('Found unsupported oneOf discriminator at %s', parentPropertyName)
+          }
         } else {
-          this.logger.warn('Unsupported schema array length, %s has length %i at %s', propertyName, schema[propertyName].length, currentItem)
+          this.logger.warn('Unsupported schema array length, %s has length %i at %s', propertyName, propertyValue.length, parentPropertyName)
         }
 
-        this._resolveSchemaArrays(properties, currentItem, false)
-        Object.assign(schema, properties)
-        delete schema[propertyName]
-      } else if (typeof schema[propertyName] === 'object') {
-        currentItem = propertyName
-        this._resolveSchemaArrays(schema[propertyName], currentItem, false)
+        delete properties[propertyName]
+      } else if (typeof propertyValue === 'object') {
+        parentPropertyName = propertyName
+        this._resolveSchemaArrays(propertyValue, parentPropertyName)
       }
     }
-    return schema
   }
 }
