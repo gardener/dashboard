@@ -40,6 +40,7 @@ import {
   sample,
   compact,
   forEach,
+  omit,
 } from '@/lodash'
 
 const serviceAccountRegex = /^system:serviceaccount:([^:]+):([^:]+)$/
@@ -675,4 +676,9 @@ export class Shortcut {
       value: unverified,
     })
   }
+}
+
+export function omitKeysWithSuffix (obj, suffix) {
+  const keys = Object.keys(obj).filter(key => key.endsWith(suffix))
+  return omit(obj, keys)
 }

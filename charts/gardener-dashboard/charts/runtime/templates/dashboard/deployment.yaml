@@ -86,6 +86,23 @@ spec:
               audience: {{ .Values.global.dashboard.serviceAccountTokenVolumeProjection.audience }}
               {{- end }}
       {{- end }}
+      {{- if .Values.global.dashboard.projectedKubeconfig }}
+      - name: kubeconfig
+        projected:
+          sources:
+          - secret:
+              items:
+              - key: kubeconfig
+                path: kubeconfig
+              name: {{ required ".Values.global.dashboard.projectedKubeconfig.genericKubeconfigSecretName is required" .Values.global.dashboard.projectedKubeconfig.genericKubeconfigSecretName }}
+              optional: false
+          - secret:
+              items:
+              - key: token
+                path: token
+              name: {{ required ".Values.global.dashboard.projectedKubeconfig.tokenSecretName is required" .Values.global.dashboard.projectedKubeconfig.tokenSecretName }}
+              optional: false
+      {{- end }}
       {{- if .Values.global.dashboard.kubeconfig }}
       - name: gardener-dashboard-secret-kubeconfig
         secret:
@@ -209,6 +226,10 @@ spec:
           - name: KUBECONFIG
             value: /etc/gardener-dashboard/secrets/kubeconfig/kubeconfig
           {{- end }}
+          {{- if .Values.global.dashboard.projectedKubeconfig }}
+          - name: KUBECONFIG
+            value: {{ required ".Values.global.dashboard.projectedKubeconfig.baseMountPath is required" .Values.global.dashboard.projectedKubeconfig.baseMountPath }}/kubeconfig
+          {{- end }}
           - name: METRICS_PORT
             value: {{ quote .Values.global.dashboard.metricsContainerPort }}
           - name: POD_NAME
@@ -233,6 +254,11 @@ spec:
           {{- if .Values.global.dashboard.serviceAccountTokenVolumeProjection.enabled }}
           - name: service-account-token
             mountPath: /var/run/secrets/projected/serviceaccount
+            readOnly: true
+          {{- end }}
+          {{- if .Values.global.dashboard.projectedKubeconfig }}
+          - name: kubeconfig
+            mountPath: {{ required ".Values.global.dashboard.projectedKubeconfig.baseMountPath is required" .Values.global.dashboard.projectedKubeconfig.baseMountPath }}
             readOnly: true
           {{- end }}
           {{- if .Values.global.dashboard.kubeconfig }}

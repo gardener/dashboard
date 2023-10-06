@@ -258,9 +258,6 @@ export default {
     ...mapActions(useShootStore, [
       'shootByNamespaceAndName',
     ]),
-    ...mapActions(useShootStagingStore, [
-      'setWorkerless',
-    ]),
     getErrorMessages (field) {
       return getValidationErrors(this, field)
     },

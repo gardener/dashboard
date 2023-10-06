@@ -29,6 +29,15 @@ global:
       expirationSeconds: 43200 # 12 hours
       audience: ''
 
+  # If configured, the dashboard deployment uses a projected volume which presents the kubeconfig to the garden cluster.
+  # projectedKubeconfig:
+  #   # Path the projected volume is mounted to. This is typically also the base path in the generic kubeconfig to refer to the token file.
+  #   baseMountPath: /var/run/secrets/gardener.cloud
+  #   # Secret which contains a generic kubeconfig and a reference to a token file.
+  #   genericKubeconfigSecretName: generic-token-kubeconfig
+  #   # Secret which contains the access token, required by the generic kubeconfig.
+  #   tokenSecretName: access-dashboard
+
     # # vertical Pod autoscaling disabled by default
     # vpa:
     #   updateMode: Off
@@ -125,7 +134,7 @@ global:
 
     frontendConfig:
       landingPageUrl: https://github.com/gardener
-      # # asset configuration (see https://github.com/gardener/dashboard/blob/master/docs/Theming.md#logos-and-icons for the format and generation of the default values).
+      # # asset configuration (see https://github.com/gardener/dashboard/blob/master/docs/customization.md#logos-and-icons for the format and generation of the default values).
       # assets:
       #   favicon-16x16.png: |
       #   favicon-32x32.png: |
@@ -134,10 +143,10 @@ global:
       #   logo.svg: |
       helpMenuItems:
       - title: Getting Started
-        icon: description
+        icon: mdi-file-document-outline
         url: https://github.com/gardener/gardener/tree/master/docs
       - title: Issues
-        icon: bug_report
+        icon: mdi-bug
         url: https://github.com/gardener/gardener/issues
       # # supported grantTypes of the garden cluster oidc issuer. See https://github.com/int128/kubelogin/blob/master/docs/usage.md for possible values.
       # grantTypes:
@@ -270,6 +279,11 @@ global:
       #         description: |
       #           If you can't comply, only third-level/dev support at usual 8x5 working hours in EEA will be available to you for all node-related components such as Docker and Kubelet, the operating system, and everything else that would require direct inspection of your nodes through a privileged pod or SSH
       #         inverted: true
+
+      # # branding - customize the dashboard branding. See https://github.com/gardener/dashboard/blob/master/docs/operations/customization.md#branding for possible values and a complete example.
+      # branding:
+      #   productName: Nucleus
+      #   productDescription: Supercool Cluster Service
 
       # # themes - overwrite theme colors with custom colors, use html color codes or material design colors defined by vuetify in the javascript color pack: https://vuetifyjs.com/en/styles/colors/#javascript-color-pack
       # themes:

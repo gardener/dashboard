@@ -243,6 +243,39 @@ describe('gardener-dashboard', function () {
         const [deployment] = documents
         expect(deployment.spec.template.spec.serviceAccountName).toEqual('default')
       })
+
+      it('should use the volume mount based kubeconfig', async function () {
+        const values = {
+          global: {
+            virtualGarden: {
+              enabled: true
+            },
+            dashboard: {
+              projectedKubeconfig: {
+                baseMountPath: '/var/run/secrets/gardener.cloud',
+                genericKubeconfigSecretName: 'generic-token-kubeconfig',
+                tokenSecretName: 'access-dashboard'
+              }
+            }
+          }
+        }
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [deployment] = documents
+        const volumes = deployment.spec.template.spec.volumes
+        expect(volumes).toHaveLength(4)
+        const [, , , kubeconfigVolume] = volumes
+        expect(kubeconfigVolume).toMatchSnapshot()
+        const containers = deployment.spec.template.spec.containers
+        expect(containers).toHaveLength(1)
+        const [container] = containers
+        expect(container.volumeMounts).toHaveLength(4)
+        const [, , , kubeconfigVolumeMount] = container.volumeMounts
+        expect(kubeconfigVolumeMount).toMatchSnapshot()
+        expect(container.env).toHaveLength(8)
+        const [, , , , kubeconfigEnv] = container.env
+        expect(kubeconfigEnv).toMatchSnapshot()
+      })
     })
 
     describe('when github is configured', function () {

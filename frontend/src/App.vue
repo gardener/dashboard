@@ -10,6 +10,7 @@ SPDX-License-Identifier: Apache-2.0
 <script setup>
 import {
   provide,
+  inject,
   toRef,
 } from 'vue'
 import { useTheme } from 'vuetify'
@@ -19,10 +20,27 @@ import {
   useColorMode,
 } from '@vueuse/core'
 
+import { useConfigStore } from '@/store/config'
+import { useLoginStore } from '@/store/login'
 import { useLocalStorageStore } from '@/store/localStorage'
+
+import { useCustomColors } from '@/composables/useCustomColors'
 
 const theme = useTheme()
 const localStorageStore = useLocalStorageStore()
+const configStore = useConfigStore()
+const loginStore = useLoginStore()
+const logger = inject('logger')
+
+async function setCustomColors () {
+  try {
+    await useCustomColors(() => configStore.themes ?? loginStore.themes ?? null, theme)
+  } catch (err) {
+    logger.error(err.message)
+  }
+}
+setCustomColors()
+
 const colorScheme = toRef(localStorageStore, 'colorScheme')
 const { system } = useColorMode({
   storageRef: colorScheme,
