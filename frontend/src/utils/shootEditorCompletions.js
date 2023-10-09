@@ -370,8 +370,7 @@ export class ShootEditorCompletions {
 
         delete properties[propertyName]
       } else if (typeof propertyValue === 'object') {
-        parentPropertyName = propertyName
-        this._resolveSchemaArrays(propertyValue, parentPropertyName)
+        this._resolveSchemaArrays(propertyValue, propertyName)
       }
     }
   }
