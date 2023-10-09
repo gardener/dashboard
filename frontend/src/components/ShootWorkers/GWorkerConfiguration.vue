@@ -15,6 +15,7 @@ SPDX-License-Identifier: Apache-2.0
     caption="Configure Workers"
     disable-confirm-input-focus
     max-height="80vh"
+    :disabled="!hasShootWorkerGroups"
     @dialog-opened="onConfigurationDialogOpened"
   >
     <template #top>
@@ -56,7 +57,13 @@ SPDX-License-Identifier: Apache-2.0
               :completion-paths="['spec.properties.provider.properties.workers', 'spec.properties.provider.properties.infrastructureConfig']"
               hide-toolbar
               animate-on-appear
-            />
+              alert-banner-identifier="workerEditorWarning"
+            >
+              <template #modificationWarning>
+                Directly modifying this resource can result in irreversible configurations that may severely compromise your cluster's stability and functionality.
+                Use worker resource editor with caution.
+              </template>
+            </g-shoot-editor>
           </div>
         </v-window-item>
       </v-window>
@@ -92,6 +99,13 @@ SPDX-License-Identifier: Apache-2.0
       </v-expand-transition>
     </template>
   </g-action-button-dialog>
+  <v-tooltip
+    :activator="$refs.actionDialog"
+    location="top"
+    :disabled="hasShootWorkerGroups"
+  >
+    It is not possible to add worker groups to workerless clusters
+  </v-tooltip>
 </template>
 
 <script>

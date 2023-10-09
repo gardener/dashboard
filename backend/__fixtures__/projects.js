@@ -64,6 +64,13 @@ function getProject ({ name, namespace, uid, resourceVersion = '42', createdBy, 
 
 const projectList = [
   getProject({
+    uid: 0,
+    name: 'garden',
+    namespace: 'garden',
+    createdBy: 'admin@example.org',
+    owner: 'admin@example.org'
+  }),
+  getProject({
     uid: 1,
     name: 'foo',
     createdBy: 'foo@example.org',

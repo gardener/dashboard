@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { defineStore } from 'pinia'
+import {
+  defineStore,
+  acceptHMRUpdate,
+} from 'pinia'
 import {
   ref,
   computed,
@@ -115,7 +118,7 @@ export const useConfigStore = defineStore('config', () => {
   })
 
   const sla = computed(() => {
-    return state.value?.sla
+    return state.value?.sla ?? {}
   })
 
   const costObject = computed(() => {
@@ -148,6 +151,20 @@ export const useConfigStore = defineStore('config', () => {
 
   const themes = computed(() => {
     return state.value?.themes
+  })
+
+  const branding = computed(() => {
+    const branding = {
+      productLogoUrl: '/static/assets/logo.svg',
+      productName: 'Gardener',
+      productTitleSuperscript: appVersion.value,
+      productSlogan: 'Universal Kubernetes at Scale',
+      ...state.value?.branding,
+    }
+    if (branding.productTitle === undefined) {
+      branding.productTitle = branding.productName
+    }
+    return branding
   })
 
   const terminal = computed(() => {
@@ -269,7 +286,10 @@ export const useConfigStore = defineStore('config', () => {
 
   async function fetchConfig () {
     const response = await api.getConfiguration()
-    state.value = response.data
+    state.value = {
+      themes: {},
+      ...response.data,
+    }
   }
 
   async function $reset () {
@@ -302,8 +322,6 @@ export const useConfigStore = defineStore('config', () => {
     return get(knownConditions.value, type, getCondition(type))
   }
 
-  const nodesCIDR = defaultNodesCIDR // TODO: remove one later
-
   return {
     isInitial,
     appVersion,
@@ -320,6 +338,7 @@ export const useConfigStore = defineStore('config', () => {
     controlPlaneHighAvailabilityHelpText,
     defaultHibernationSchedule,
     themes,
+    branding,
     terminal,
     terminalShortcuts,
     ticket,
@@ -327,7 +346,6 @@ export const useConfigStore = defineStore('config', () => {
     helpMenuItems,
     externalTools,
     defaultNodesCIDR,
-    nodesCIDR,
     apiServerUrl,
     clusterIdentity,
     seedCandidateDeterminationStrategy,
@@ -348,3 +366,7 @@ export const useConfigStore = defineStore('config', () => {
     $reset,
   }
 })
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useConfigStore, import.meta.hot))
+}

@@ -29,6 +29,15 @@ global:
       expirationSeconds: 43200 # 12 hours
       audience: ''
 
+  # If configured, the dashboard deployment uses a projected volume which presents the kubeconfig to the garden cluster.
+  # projectedKubeconfig:
+  #   # Path the projected volume is mounted to. This is typically also the base path in the generic kubeconfig to refer to the token file.
+  #   baseMountPath: /var/run/secrets/gardener.cloud
+  #   # Secret which contains a generic kubeconfig and a reference to a token file.
+  #   genericKubeconfigSecretName: generic-token-kubeconfig
+  #   # Secret which contains the access token, required by the generic kubeconfig.
+  #   tokenSecretName: access-dashboard
+
     # # vertical Pod autoscaling disabled by default
     # vpa:
     #   updateMode: Off
@@ -125,7 +134,7 @@ global:
 
     frontendConfig:
       landingPageUrl: https://github.com/gardener
-      # # asset configuration (see https://github.com/gardener/dashboard/blob/master/docs/Theming.md#logos-and-icons for the format and generation of the default values).
+      # # asset configuration (see https://github.com/gardener/dashboard/blob/master/docs/customization.md#logos-and-icons for the format and generation of the default values).
       # assets:
       #   favicon-16x16.png: |
       #   favicon-32x32.png: |
@@ -134,10 +143,10 @@ global:
       #   logo.svg: |
       helpMenuItems:
       - title: Getting Started
-        icon: description
+        icon: mdi-file-document-outline
         url: https://github.com/gardener/gardener/tree/master/docs
       - title: Issues
-        icon: bug_report
+        icon: mdi-bug
         url: https://github.com/gardener/gardener/issues
       # # supported grantTypes of the garden cluster oidc issuer. See https://github.com/int128/kubelogin/blob/master/docs/usage.md for possible values.
       # grantTypes:
@@ -271,6 +280,11 @@ global:
       #           If you can't comply, only third-level/dev support at usual 8x5 working hours in EEA will be available to you for all node-related components such as Docker and Kubelet, the operating system, and everything else that would require direct inspection of your nodes through a privileged pod or SSH
       #         inverted: true
 
+      # # branding - customize the dashboard branding. See https://github.com/gardener/dashboard/blob/master/docs/operations/customization.md#branding for possible values and a complete example.
+      # branding:
+      #   productName: Nucleus
+      #   productDescription: Supercool Cluster Service
+
       # # themes - overwrite theme colors with custom colors, use html color codes or material design colors defined by vuetify in the javascript color pack: https://vuetifyjs.com/en/styles/colors/#javascript-color-pack
       # themes:
       #   light: # overwrite light theme colors
@@ -399,50 +413,12 @@ global:
       failureThreshold: 6
       successThreshold: 1
 
-  # Terminal terminal-bootstrapper configuration values
-  bootstrapper:
-    enabled: false
-    image:
-      repository: eu.gcr.io/gardener-project/gardener/dashboard-terminal-bootstrapper
-      tag: latest
-      pullPolicy: IfNotPresent
-    # additional labels to add to the bootstrapper pod (e.g. security policies)
-    podLabels: {}
-    # additional annotations to add to the bootstrapper pod
-    podAnnotations: {}
-    serviceAccountName: gardener-dashboard-terminal-bootstrapper
-    serviceAccountTokenVolumeProjection:
-      enabled: true
-      expirationSeconds: 43200 # 12 hours
-      audience: ''
-    resources:
-      requests:
-        cpu: 100m
-        memory: 100Mi
-    nodeOptions: [--max-old-space-size=460]
-    readinessProbe:
-      initialDelaySeconds: 5
-      periodSeconds: 5
-      timeoutSeconds: 5
-      failureThreshold: 1
-      successThreshold: 1
-    livenessProbe:
-      initialDelaySeconds: 10
-      periodSeconds: 30
-      timeoutSeconds: 5
-      failureThreshold: 3
-      successThreshold: 1
-    config:
-      logLevel: debug
-
   # Virtual garden related configuration
   virtualGarden:
     # enabled should be set to true if the application and runtime charts should be deployed on two separate clusters, usually in a so-called "virtual garden" setup
     enabled: false
     # fully qualified name of the dashboard user as they would be returned by the tokenreview (.status.user.username) on the virtual garden
     dashboardUserName: ~
-    # fully qualified name of the terminal-bootstrap user
-    terminalBootstrapperUserName: ~
 
   # # Terminal related configuration
   # terminal:
@@ -457,14 +433,17 @@ global:
   #   # If no value is provided, the default value corresponds to 12 hours
   #   # The token issuer may return a token with a different validity duration
   #   serviceAccountTokenExpiration: 43200 # seconds
+  #   # allowedHostSourceList is a list of hostnames (without scheme) to which the browser is allowed to connect. Note that the use of wildcards is subject to the rules defined by the content security policy.
+  #   allowedHostSourceList:
+  #   - "*.seed.example.com"
   #   gardenTerminalHost: # cluster that hosts the terminal pods for the (virtual) garden cluster
   #     apiServerIngressHost: api.example.org # is host in browser-trusted certificate. Optional, but required if using secretRef
   #     secretRef:
   #       namespace: garden # namespace, in which the secret for the gardenTerminalHost resides on the (virtual) garden cluster
   #       labelSelector:
   #       - runtime=gardenTerminalHost
-  #       # seedRef: my-soil # if set, you most likely want to disable gardenTerminalHost bootstrapping
-  #       # shootRef: # if set, you most likely want to disable gardenTerminalHost bootstrapping
+  #       # seedRef: my-soil
+  #       # shootRef:
   #       #   name: myshoot
   #       #   namespace: garden
   #   garden: # (virtual) garden
@@ -479,37 +458,6 @@ global:
   #         kind: 'ClusterRole'
   #         name: 'gardener.cloud:system:administrators'
   #       bindingKind: 'ClusterRoleBinding'
-  #   bootstrap:
-  #     disabled: true # indicates if bootstrapping resources required for the terminal feature is generally disabled
-  #     seedDisabled: false # indicates if bootstrapping resources for seeds is disabled, required for gardener operator terminals
-  #     shootDisabled: false # indicates if bootstrapping resources for shoots is disabled, required for enduser terminals
-  #     gardenTerminalHostDisabled: false # indicates if bootstrapping resources for the virtual garden terminal host cluster is disabled
-  #     apiServerIngress:
-  #       annotations:
-  #         kubernetes.io/ingress.class: nginx
-  #         nginx.ingress.kubernetes.io/backend-protocol: HTTPS
-  #         certmanager.k8s.io/cluster-issuer: lets-encrypt
-  #         certmanager.k8s.io/acme-challenge-type: dns01
-  #         certmanager.k8s.io/acme-dns01-provider: route53
-  #     queueOptions: ~ # here you can specify options like maxRetries, retryDelay https://github.com/diamondio/better-queue#new-queueprocess-options
-  #     gardenTerminalHost:
-  #       namespace: garden # namespace, in which the tls-secret, ingress and headless service should be created in
-  #       apiServerIngress:
-  #         annotations:
-  #           kubernetes.io/ingress.class: nginx
-  #           nginx.ingress.kubernetes.io/backend-protocol: HTTPS
-  #       apiServerTls: # Optional. Needs to be a browser-trusted certificate!
-  #         crt: |
-  #           -----BEGIN CERTIFICATE-----
-  #           Li4u
-  #           -----END CERTIFICATE-----
-  #           -----BEGIN CERTIFICATE-----
-  #           Li4u
-  #           -----END CERTIFICATE-----
-  #         key: |
-  #           -----BEGIN RSA PRIVATE KEY-----
-  #           Li4u
-  #           -----END RSA PRIVATE KEY-----
 
   # # Unreachable seeds configuration
   # # disables some UI features for seeds that are unreachable by the dashboard

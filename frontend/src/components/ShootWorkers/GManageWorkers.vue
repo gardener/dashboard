@@ -5,7 +5,10 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div class="alternate-row-background">
+  <div
+    v-if="!workerless"
+    class="alternate-row-background"
+  >
     <g-expand-transition-group :disabled="disableWorkerAnimation">
       <v-row
         v-for="(worker, index) in internalWorkers"
@@ -70,6 +73,7 @@ import {
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useConfigStore } from '@/store/config'
+import { useShootStagingStore } from '@/store/shootStaging'
 
 import GWorkerInputGeneric from '@/components/ShootWorkers/GWorkerInputGeneric'
 import GExpandTransitionGroup from '@/components/GExpandTransitionGroup'
@@ -99,7 +103,6 @@ import {
 const NO_LIMIT = -1
 
 export default {
-  name: 'ManageWorkers',
   components: {
     GWorkerInputGeneric,
     GExpandTransitionGroup,
@@ -134,6 +137,9 @@ export default {
   computed: {
     ...mapState(useConfigStore, [
       'customCloudProviders',
+    ]),
+    ...mapState(useShootStagingStore, [
+      'workerless',
     ]),
     allMachineTypes () {
       return this.machineTypesByCloudProfileName({ cloudProfileName: this.cloudProfileName })

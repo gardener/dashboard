@@ -199,7 +199,7 @@ export default {
     GAlertBanner,
   },
   mixins: [shootItem],
-  inject: ['yaml', 'api'],
+  inject: ['yaml', 'api', 'logger'],
   props: {
     alertBannerIdentifier: {
       type: String,
@@ -352,7 +352,7 @@ export default {
     const shootSchemaDefinition = await this.api.getShootSchemaDefinition()
     const shootProperties = get(shootSchemaDefinition, 'properties', {})
     const indentUnit = get(this.cmInstance, 'options.indentUnit', 2)
-    this.shootEditorCompletions = new ShootEditorCompletions(shootProperties, indentUnit, this.completionPaths)
+    this.shootEditorCompletions = new ShootEditorCompletions(shootProperties, indentUnit, this.completionPaths, this.logger)
   },
   beforeUnmount () {
     this.destroyInstance()

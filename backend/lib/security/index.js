@@ -93,7 +93,13 @@ function discoverIssuer (url) {
 
 function discoverClient (url) {
   return pRetry(async () => {
-    const issuer = await discoverIssuer(url)
+    let issuer
+    try {
+      issuer = await discoverIssuer(url)
+    } catch (err) {
+      logger.error('failed to discover OpenID Connect issuer %s', url, err)
+      throw err
+    }
     overrideHttpOptions.call(issuer)
     const options = {
       client_id: clientId,
@@ -121,7 +127,7 @@ function getIssuerClient (url = issuer) {
   if (!clientPromise) {
     clientPromise = discoverClient(url)
   }
-  return pTimeout(clientPromise, 1000, `OpenID Connect Issuer ${url} not available`)
+  return pTimeout(clientPromise, 1000, `OpenID Connect issuer ${url} not available`)
 }
 
 function getBackendRedirectUri (origin) {

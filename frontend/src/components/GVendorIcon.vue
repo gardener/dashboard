@@ -148,7 +148,7 @@ const iconStyle = computed(() => {
 
   $grey-darken-2: map-get($grey, 'darken-2');
 
-  .theme--dark .icon-background {
+  .v-theme--dark .icon-background {
     background-color: $grey-darken-2
   }
 </style>

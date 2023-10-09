@@ -114,9 +114,12 @@ import GMessage from '@/components/GMessage.vue'
 import { setDelayedInputFocus } from '@/utils'
 
 import {
-  noop,
   isFunction,
+  noop,
+  trim,
 } from '@/lodash'
+
+const zeroWidthSpace = '\u200B'
 
 export default {
   components: {
@@ -170,13 +173,16 @@ export default {
     }
   },
   computed: {
+    trimmedUserInput () {
+      return trim(this.userInput, ' ' + zeroWidthSpace)
+    },
     notConfirmed () {
-      return this.confirmValue && this.confirmValue !== this.userInput
+      return this.confirmValue && this.confirmValue !== this.trimmedUserInput
     },
     hint () {
-      if (this.userInput.length === 0) {
+      if (this.trimmedUserInput.length === 0) {
         return `Type ${this.confirmValue} to confirm`
-      } else if (this.userInput !== this.confirmValue) {
+      } else if (this.trimmedUserInput !== this.confirmValue) {
         return `Input does not match ${this.confirmValue}`
       }
       return ''

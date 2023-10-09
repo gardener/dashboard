@@ -20,9 +20,16 @@ import { useAuthzStore } from '@/store/authz'
 import { useSecretStore } from '@/store/secret'
 import { useShootStore } from '@/store/shoot'
 import { useTerminalStore } from '@/store/terminal'
+import { useAuthnStore } from '@/store/authn'
 
 import GShootItemLoading from '@/views/GShootItemLoading.vue'
 import GShootItemError from '@/views/GShootItemError.vue'
+
+import { isEqual } from '@/lodash'
+
+function isLoadRequired (route, to) {
+  return route.name !== to.name || !isEqual(route.params, to.params)
+}
 
 export default {
   components: {
@@ -30,20 +37,24 @@ export default {
     GShootItemError,
   },
   beforeRouteEnter (to, from, next) {
-    next(vm => vm.load())
+    next(async vm => {
+      if (isLoadRequired(vm.$route, to)) {
+        await vm.load(to)
+      }
+    })
   },
-  beforeRouteUpdate (to, from) {
-    this.load()
+  async beforeRouteUpdate (to, from) {
+    if (isLoadRequired(this.$route, to)) {
+      await this.load(to)
+    }
   },
   beforeRouteLeave (to, from) {
-    this.leaving = true
     this.unsubscribe()
   },
   data () {
     return {
-      leaving: false,
-      loading: false,
       error: null,
+      readyState: 'initial',
       unsubscribeShootStore: () => {},
     }
   },
@@ -56,17 +67,18 @@ export default {
       'canGetSecrets',
       'canUseProjectTerminalShortcuts',
     ]),
+    ...mapState(useAuthnStore, [
+      'isAdmin',
+    ]),
     component () {
       if (this.error) {
         return 'g-shoot-item-error'
-      }
-      if (this.loading) {
+      } else if (this.readyState === 'loading') {
         return 'g-shoot-item-loading'
+      } else if (this.readyState === 'loaded') {
+        return 'router-view'
       }
-      if (this.leaving) {
-        return 'div'
-      }
-      return 'router-view'
+      return 'div'
     },
     componentProperties () {
       switch (this.component) {
@@ -82,13 +94,29 @@ export default {
             message,
           }
         }
+        case 'router-view': {
+          const { name, path } = this.$route
+          return {
+            key: name === 'ShootItemTerminal'
+              ? path
+              : undefined,
+          }
+        }
         default: {
           return {}
         }
       }
     },
   },
-  mounted () {
+  watch: {
+    '$route' () {
+      this.readyState = 'loaded'
+    },
+  },
+  beforeMount () {
+    this.readyState = 'initial'
+  },
+  async mounted () {
     const shootStore = useShootStore()
     this.unsubscribeShootStore = shootStore.$onAction(({
       name,
@@ -102,14 +130,18 @@ export default {
         }
       }
     })
+    await this.load(this.$route)
+    this.readyState = 'loaded'
   },
   beforeUnmount () {
+    this.readyState = 'initial'
     this.unsubscribeShootStore()
   },
   methods: {
     ...mapActions(useShootStore, [
       'subscribe',
       'unsubscribe',
+      'shootByNamespaceAndName',
     ]),
     ...mapActions(useSecretStore, [
       'fetchSecrets',
@@ -132,12 +164,11 @@ export default {
         this.error = null
       }
     },
-    async load () {
-      const routeName = this.$route.name
-      const routeParams = this.$route.params
+    async load (route) {
       this.error = null
-      this.leaving = false
-      this.loading = true
+      this.readyState = 'loading'
+      const routeName = route.name
+      const routeParams = route.params
       try {
         const promises = [
           this.subscribe(routeParams),
@@ -149,6 +180,16 @@ export default {
           promises.push(this.ensureProjectTerminalShortcutsLoaded())
         }
         await Promise.all(promises)
+
+        const shootItem = this.shootByNamespaceAndName(routeParams)
+        const shootWorkerGroups = shootItem?.spec?.provider?.workers ?? []
+        const hasShootWorkerGroups = shootWorkerGroups.length > 0
+        if (routeName === 'ShootItemTerminal' && !this.isAdmin && !hasShootWorkerGroups) {
+          this.error = Object.assign(Error('Shoot has no workers to schedule a terminal pod'), {
+            code: 404,
+            reason: 'Terminal not available',
+          })
+        }
       } catch (err) {
         let { statusCode, code = statusCode, reason, message } = err
         if (code === 404) {
@@ -164,8 +205,6 @@ export default {
           code,
           reason,
         })
-      } finally {
-        this.loading = false
       }
     },
   },

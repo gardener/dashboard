@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { defineStore } from 'pinia'
+import {
+  defineStore,
+  acceptHMRUpdate,
+} from 'pinia'
 import {
   computed,
   reactive,
@@ -28,6 +31,7 @@ import { useSecretStore } from '../secret'
 import { useSocketStore } from '../socket'
 import { useTicketStore } from '../ticket'
 import { useLocalStorageStore } from '../localStorage'
+import { useShootStagingStore } from '../shootStaging'
 
 import {
   uriPattern,
@@ -69,6 +73,7 @@ export const useShootStore = defineStore('shoot', () => {
   const socketStore = useSocketStore()
   const projectStore = useProjectStore()
   const localStorageStore = useLocalStorageStore()
+  const shootStagingStore = useShootStagingStore()
 
   const context = {
     api,
@@ -438,6 +443,7 @@ export const useShootStore = defineStore('shoot', () => {
 
     state.newShootResource = value
     state.initialNewShootResource = cloneDeep(value)
+    shootStagingStore.workerless = false
   }
 
   function setFocusMode (value) {
@@ -633,3 +639,7 @@ export const useShootStore = defineStore('shoot', () => {
     setSubscriptionError,
   }
 })
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useShootStore, import.meta.hot))
+}

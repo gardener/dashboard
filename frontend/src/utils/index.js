@@ -40,6 +40,7 @@ import {
   sample,
   compact,
   forEach,
+  omit,
 } from '@/lodash'
 
 const serviceAccountRegex = /^system:serviceaccount:([^:]+):([^:]+)$/
@@ -539,6 +540,19 @@ export function maintenanceWindowWithBeginAndTimezone (beginTime, beginTimezone,
   return { begin, end }
 }
 
+export function getDurationInMinutes (begin, end) {
+  const beginMoment = moment.utc(begin, 'HH:mm')
+  let endMoment = moment.utc(end, 'HH:mm')
+  if (!beginMoment.isValid() || !endMoment.isValid()) {
+    return undefined
+  }
+  if (endMoment.isBefore(beginMoment)) {
+    endMoment = endMoment.add(1, 'day')
+  }
+
+  return endMoment.diff(beginMoment, 'minutes')
+}
+
 export function defaultCriNameByKubernetesVersion (criNames, kubernetesVersion) {
   const criName = semver.lt(kubernetesVersion, '1.22.0')
     ? 'docker'
@@ -666,4 +680,9 @@ export class Shortcut {
       value: unverified,
     })
   }
+}
+
+export function omitKeysWithSuffix (obj, suffix) {
+  const keys = Object.keys(obj).filter(key => key.endsWith(suffix))
+  return omit(obj, keys)
 }

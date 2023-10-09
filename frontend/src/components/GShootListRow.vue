@@ -71,6 +71,9 @@ SPDX-License-Identifier: Apache-2.0
           <g-copy-btn :clipboard-text="shootTechnicalId" />
         </g-auto-hide>
       </template>
+      <template v-if="cell.header.key === 'workers'">
+        <g-worker-groups :shoot-item="shootItem" />
+      </template>
       <template v-if="cell.header.key === 'createdBy'">
         <g-account-avatar :account-name="shootCreatedBy" />
       </template>
@@ -238,6 +241,7 @@ import GShootListRowActions from '@/components/GShootListRowActions.vue'
 import GAutoHide from '@/components/GAutoHide.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
 import GControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityTag.vue'
+import GWorkerGroups from '@/components/ShootWorkers/GWorkerGroups'
 
 import {
   isTypeDelete,
@@ -272,6 +276,7 @@ export default {
     GAutoHide,
     GExternalLink,
     GControlPlaneHighAvailabilityTag,
+    GWorkerGroups,
   },
   mixins: [shootItem],
   props: {
@@ -400,10 +405,10 @@ export default {
     pointer-events: none;
   }
 
-  .theme--light .stale .stale-overlay {
+  .v-theme--light .stale .stale-overlay {
     background-color: rgba(255,255,255,0.7)
   }
-  .theme--dark .stale .stale-overlay {
+  .v-theme--dark .stale .stale-overlay {
     background-color: rgba(30,30,30,0.7)
   }
 

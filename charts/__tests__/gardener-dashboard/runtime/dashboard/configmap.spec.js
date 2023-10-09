@@ -21,6 +21,28 @@ describe('gardener-dashboard', function () {
     const name = 'gardener-dashboard-configmap'
     let templates
 
+    const themes = {
+      light: {
+        primary: '#ff0000',
+        'main-navigation-title': 'grey.darken3'
+      },
+      dark: {
+        primary: '#ff0000',
+        'main-navigation-title': 'grey.darken3'
+      }
+    }
+    const branding = {
+      productName: 'SuperCoolProduct',
+      productSlogan: 'Slogan',
+      loginHints: [{
+        title: 'Support',
+        href: 'https://gardener.cloud'
+      }, {
+        title: 'Documentation',
+        href: 'https://gardener.cloud/docs'
+      }]
+    }
+
     beforeEach(() => {
       templates = [
         'configmap'
@@ -33,10 +55,31 @@ describe('gardener-dashboard', function () {
       const [configMap] = documents
       expect(omit(configMap, ['data'])).toMatchSnapshot()
       expect(Object.keys(configMap.data)).toEqual(['login-config.json', 'config.yaml'])
-      const loginConfig = configMap.data['login-config.json']
+      const loginConfig = JSON.parse(configMap.data['login-config.json'])
       expect(loginConfig).toMatchSnapshot()
       const config = yaml.load(configMap.data['config.yaml'])
       expect(config).toMatchSnapshot()
+    })
+
+    describe('login-config.json', function () {
+      it('should render login-config with branding and themes', async function () {
+        const values = {
+          global: {
+            dashboard: {
+              frontendConfig: {
+                themes,
+                branding
+              }
+            }
+          }
+        }
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [configMap] = documents
+        expect(Object.keys(configMap.data)).toContain('login-config.json')
+        const loginConfig = JSON.parse(configMap.data['login-config.json'])
+        expect(loginConfig).toMatchSnapshot()
+      })
     })
 
     describe('kubeconfig download', function () {
@@ -83,6 +126,38 @@ describe('gardener-dashboard', function () {
           clientSecret: 'kube-kubectl-secret',
           usePKCE: true
         })
+        expect.assertions(2)
+        await assertTemplate()
+      })
+    })
+
+    describe('contentSecurityPolicy', () => {
+      let values
+
+      const assertTemplate = async () => {
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [configMap] = documents
+        const config = yaml.load(configMap.data['config.yaml'])
+        expect(pick(config, ['contentSecurityPolicy'])).toMatchSnapshot()
+      }
+
+      beforeEach(() => {
+        values = {
+          global: {
+          }
+        }
+      })
+
+      it('should render the template with default connectSrc', async function () {
+        expect.assertions(2)
+        await assertTemplate()
+      })
+
+      it('should render the template with connectSrc containing additional host sources', async function () {
+        values.global.terminal = {
+          allowedHostSourceList: ['*.seed.example.com']
+        }
         expect.assertions(2)
         await assertTemplate()
       })
@@ -428,9 +503,6 @@ describe('gardener-dashboard', function () {
         const values = {
           global: {
             terminal: {
-              bootstrap: {
-                disabled: false
-              },
               container: {
                 image: 'chart-test:0.1.0'
               },
@@ -510,22 +582,32 @@ describe('gardener-dashboard', function () {
       })
     })
 
+    describe('branding', function () {
+      it('should render the template', async function () {
+        const values = {
+          global: {
+            dashboard: {
+              frontendConfig: {
+                branding
+              }
+            }
+          }
+        }
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [configMap] = documents
+        const config = yaml.load(configMap.data['config.yaml'])
+        expect(pick(config, ['frontend.branding'])).toMatchSnapshot()
+      })
+    })
+
     describe('themes', function () {
       it('should render the template', async function () {
         const values = {
           global: {
             dashboard: {
               frontendConfig: {
-                themes: {
-                  light: {
-                    primary: '#ff0000',
-                    'main-navigation-title': 'grey.darken3'
-                  },
-                  dark: {
-                    primary: '#ff0000',
-                    'main-navigation-title': 'grey.darken3'
-                  }
-                }
+                themes
               }
             }
           }
@@ -542,12 +624,7 @@ describe('gardener-dashboard', function () {
           global: {
             dashboard: {
               frontendConfig: {
-                themes: {
-                  light: {
-                    primary: '#ff0000',
-                    'main-navigation-title': 'grey.darken3'
-                  }
-                }
+                themes: pick(themes, ['light'])
               }
             }
           }
@@ -558,7 +635,9 @@ describe('gardener-dashboard', function () {
         const config = yaml.load(configMap.data['config.yaml'])
         expect(pick(config, ['frontend.themes'])).toMatchSnapshot()
       })
+    })
 
+    describe('sla', function () {
       it('should render the template with sla description markdown hyperlink', async function () {
         const values = {
           global: {

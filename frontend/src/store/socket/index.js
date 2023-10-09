@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { defineStore } from 'pinia'
+import {
+  defineStore,
+  acceptHMRUpdate,
+} from 'pinia'
 import {
   computed,
   reactive,
@@ -141,3 +144,7 @@ export const useSocketStore = defineStore('socket', () => {
     emitUnsubscribe,
   }
 })
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useSocketStore, import.meta.hot))
+}

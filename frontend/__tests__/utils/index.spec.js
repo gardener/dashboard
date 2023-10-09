@@ -10,6 +10,8 @@ import {
   isHtmlColorCode,
   defaultCriNameByKubernetesVersion,
   getIssueSince,
+  maintenanceWindowWithBeginAndTimezone,
+  getDurationInMinutes,
 } from '@/utils'
 
 import { pick } from '@/lodash'
@@ -336,6 +338,36 @@ describe('utils', () => {
 
     it('should return issue since for allIssues', () => {
       expect(getIssueSince(status)).toBe('2000-01-01T00:00:01Z')
+    })
+  })
+  describe('maintenanceWindowWithBeginAndTimezone', () => {
+    it('should create window with default window size', () => {
+      expect(maintenanceWindowWithBeginAndTimezone('22:00', '+02:00')).toEqual({
+        begin: '220000+0200',
+        end: '230000+0200',
+      })
+    })
+
+    it('should create window with provided window size', () => {
+      expect(maintenanceWindowWithBeginAndTimezone('22:00', '+02:00', 120)).toEqual({
+        begin: '220000+0200',
+        end: '000000+0200',
+      })
+    })
+
+    it('should create window with provided window size across multiple days', () => {
+      expect(maintenanceWindowWithBeginAndTimezone('22:00', '+02:00', 180)).toEqual({
+        begin: '220000+0200',
+        end: '010000+0200',
+      })
+    })
+  })
+  describe('getDurationInMinutes', () => {
+    it('should calculate window size', () => {
+      expect(getDurationInMinutes('22:00', '23:00')).toBe(60)
+    })
+    it('should calculate window size across multiple days', () => {
+      expect(getDurationInMinutes('23:00', '01:00')).toBe(120)
     })
   })
 })

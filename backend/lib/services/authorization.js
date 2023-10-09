@@ -55,7 +55,7 @@ exports.canGetOpenAPI = function (user) {
   return hasAuthorization(user, {
     nonResourceAttributes: {
       verb: 'get',
-      path: '/openapi/v2'
+      path: '/openapi/v3'
     }
   })
 }

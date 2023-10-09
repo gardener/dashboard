@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
           :icon="machineImageIcon"
           :size="20"
         />
-        {{ workerGroup.name }}
+        <span class="px-1">{{ workerGroup.name }}</span>
       </v-chip>
     </template>
     <v-tabs
@@ -360,7 +360,6 @@ import {
 } from '@/lodash'
 
 export default {
-  name: 'GWorkerGroup',
   components: {
     GVendorIcon,
     GCodeBlock,

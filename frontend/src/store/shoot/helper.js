@@ -41,7 +41,6 @@ import {
   map,
   sample,
   omit,
-  forEach,
   filter,
   some,
   startsWith,
@@ -148,9 +147,10 @@ export function createShootResource (context) {
   }
 
   const infrastructureKind = head(cloudProfileStore.sortedInfrastructureKindList)
-  set(shootResource, 'spec', getSpecTemplate(infrastructureKind, configStore.nodesCIDR))
-
   const cloudProfileName = get(head(cloudProfileStore.cloudProfilesByCloudProviderKind(infrastructureKind)), 'metadata.name')
+  const defaultNodesCIDR = cloudProfileStore.getDefaultNodesCIDR({ cloudProfileName })
+
+  set(shootResource, 'spec', getSpecTemplate(infrastructureKind, defaultNodesCIDR))
   set(shootResource, 'spec.cloudProfileName', cloudProfileName)
 
   const secret = head(secretStore.infrastructureSecretsByCloudProfileName(cloudProfileName))
@@ -222,7 +222,7 @@ export function createShootResource (context) {
 
   const allZones = cloudProfileStore.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
   const zones = allZones.length ? [sample(allZones)] : undefined
-  const zonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(zones, infrastructureKind, allZones.length, configStore.defaultNodesCIDR)
+  const zonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(zones, infrastructureKind, allZones.length, defaultNodesCIDR)
   if (zonesNetworkConfiguration) {
     set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', zonesNetworkConfiguration)
   }
@@ -238,9 +238,10 @@ export function createShootResource (context) {
   }
 
   const addons = {}
-  forEach(filter(shootAddonList, addon => addon.visible), addon => {
-    set(addons, [addon.name, 'enabled'], addon.enabled)
-  })
+  const visibleShootAddonList = filter(shootAddonList, 'visible')
+  for (const { name, enabled } of visibleShootAddonList) {
+    addons[name] = { enabled }
+  }
 
   set(shootResource, 'spec.addons', addons)
 
@@ -414,6 +415,8 @@ export function getRawVal (context, item, column) {
       return getIssueSince(item.status) || 0
     case 'technicalId':
       return item.status?.technicalID
+    case 'workers':
+      return item.spec.provider.workers?.length ?? 0
     default: {
       if (startsWith(column, 'Z_')) {
         const path = get(projectStore.shootCustomFields, [column, 'path'])
@@ -519,6 +522,13 @@ export function searchItemsFn (state, context) {
       lastSearchString = search
       searchQuery = parseSearch(search)
     }
+
+    if (map(searchQuery.terms, 'value').includes('workerless')) {
+      if (getRawVal(context, item, 'workers') === 0) {
+        return true
+      }
+    }
+
     return searchQuery.matches(values)
   }
 }

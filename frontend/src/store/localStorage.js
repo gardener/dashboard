@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { defineStore } from 'pinia'
+import {
+  defineStore,
+  acceptHMRUpdate,
+} from 'pinia'
 import {
   computed,
   toRef,
@@ -93,6 +96,11 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
   })
 
   const autoLogin = useLocalStorage('global/auto-login', false, {
+    serializer: StorageSerializers.flag,
+    writeDefaults: false,
+  })
+
+  const operatorFeatures = useLocalStorage('global/operator-features', false, {
     serializer: StorageSerializers.flag,
     writeDefaults: false,
   })
@@ -226,6 +234,7 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
   return {
     colorScheme,
     autoLogin,
+    operatorFeatures,
     logLevel,
     hiddenMessages,
     userSelectedColumns,
@@ -249,3 +258,7 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     terminalSplitpaneTree,
   }
 })
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useLocalStorageStore, import.meta.hot))
+}

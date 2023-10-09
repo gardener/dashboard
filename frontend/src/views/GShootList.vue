@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
             <template #activator="{ props }">
               <div v-bind="props">
                 <v-badge
-                  v-if="!projectScope && isAdmin"
+                  v-if="issueSinceColumnVisible"
                   class="mr-5"
                   bordered
                   color="primary-lighten-3"
@@ -54,7 +54,7 @@ SPDX-License-Identifier: Apache-2.0
               </div>
             </template>
             <span class="font-weight-bold">Focus Mode</span>
-            <ul>
+            <ul class="ml-3">
               <li>Cluster list sorting is freezed</li>
               <li>Items in the list will still be updated</li>
               <li>New clusters will not be added to the list until you disable focus mode</li>
@@ -190,6 +190,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-data-table>
       <v-dialog
         v-model="clusterAccessDialog"
+        persistent
         max-width="850"
       >
         <v-card>
@@ -348,6 +349,7 @@ export default {
       'shootCustomSelectedColumns',
       'shootCustomSortBy',
       'allProjectsShootFilter',
+      'operatorFeatures',
     ]),
     defaultSortBy () {
       return [{ key: 'name', order: 'asc' }]
@@ -446,6 +448,14 @@ export default {
           hidden: !this.isAdmin,
         },
         {
+          title: 'WORKERS',
+          key: 'workers',
+          sortable: isSortable(true),
+          align: 'start',
+          defaultSelected: false,
+          hidden: false,
+        },
+        {
           title: 'CREATED BY',
           key: 'createdBy',
           sortable: isSortable(true),
@@ -502,7 +512,7 @@ export default {
           sortable: isSortable(true),
           align: 'start',
           defaultSelected: true,
-          hidden: this.projectScope || !this.isAdmin,
+          hidden: !this.issueSinceColumnVisible,
         },
         {
           title: 'HIGH AVAILABILITY',
@@ -702,6 +712,9 @@ export default {
     sortedAndFilteredItems () {
       const items = this.sortItems(this.items, this.sortByInternal)
       return filter(items, item => this.searchItems(this.debouncedShootSearch, toRaw(item)))
+    },
+    issueSinceColumnVisible () {
+      return this.operatorFeatures || (!this.projectScope && this.isAdmin)
     },
   },
   watch: {

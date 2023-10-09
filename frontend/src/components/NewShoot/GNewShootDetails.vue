@@ -59,6 +59,18 @@ SPDX-License-Identifier: Apache-2.0
         <g-static-token-kubeconfig-switch v-model="enableStaticTokenKubeconfig" />
       </v-col>
     </v-row>
+    <v-row>
+      <v-col cols="12">
+        <v-checkbox
+          v-model="workerless"
+          label="Workerless Cluster"
+          color="primary"
+          density="compact"
+          hint="Create nodeless cluster without worker groups"
+          persistent-hint
+        />
+      </v-col>
+    </v-row>
     <v-row v-if="slaDescriptionHtml">
       <v-col cols="12">
         <label>{{ slaTitle }}</label>
@@ -77,6 +89,7 @@ import { defineAsyncComponent } from 'vue'
 import {
   mapActions,
   mapState,
+  mapWritableState,
 } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 import {
@@ -88,6 +101,7 @@ import { useAuthzStore } from '@/store/authz'
 import { useConfigStore } from '@/store/config'
 import { useProjectStore } from '@/store/project'
 import { useShootStore } from '@/store/shoot'
+import { useShootStagingStore } from '@/store/shootStaging'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import GStaticTokenKubeconfigSwitch from '@/components/GStaticTokenKubeconfigSwitch'
@@ -159,6 +173,7 @@ export default {
     return this.validators
   },
   computed: {
+    ...mapWritableState(useShootStagingStore, ['workerless']),
     ...mapState(useProjectStore, ['projectList']),
     ...mapState(useAuthzStore, ['namespace']),
     ...mapState(useConfigStore, ['sla']),

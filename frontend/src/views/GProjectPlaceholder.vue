@@ -18,15 +18,27 @@ import { useProjectStore } from '@/store/project'
 
 import GProjectError from '@/views/GProjectError.vue'
 
+import { isEqual } from '@/lodash'
+
+function isLoadRequired (route, to) {
+  return route.name !== to.name || !isEqual(route.params, to.params)
+}
+
 export default {
   components: {
     GProjectError,
   },
   beforeRouteEnter (to, from, next) {
-    next(vm => vm.load())
+    next(vm => {
+      if (isLoadRequired(vm.$route, to)) {
+        vm.load(to)
+      }
+    })
   },
   beforeRouteUpdate (to, from) {
-    this.load()
+    if (isLoadRequired(this.$route, to)) {
+      this.load(to)
+    }
   },
   data () {
     return {
@@ -69,12 +81,21 @@ export default {
       }
     },
   },
+  mounted () {
+    this.load(this.$route)
+  },
   methods: {
-    load () {
-      const routeName = this.$route.name
+    load (route) {
       this.error = null
       this.fallbackRoute = null
-      if (!this.namespaces.includes(this.namespace) && this.namespace !== '_all') {
+      const routeName = route.name
+      const routeParams = route.params
+      if (this.namespace !== routeParams.namespace) {
+        this.error = new Error('An unexpected error occurred')
+        this.fallbackRoute = {
+          name: 'Home',
+        }
+      } else if (!this.namespaces.includes(this.namespace) && this.namespace !== '_all') {
         this.error = Object.assign(new Error('The project you are looking for doesn\'t exist or you are not authorized to view this project!'), {
           code: 404,
           reason: 'Project not found',

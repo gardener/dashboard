@@ -23,7 +23,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState } from 'pinia'
+import { mapActions } from 'pinia'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
@@ -39,7 +39,6 @@ import {
 } from '@/lodash'
 
 export default {
-  name: 'AccessRestrictionConfiguration',
   components: {
     GActionButtonDialog,
     GAccessRestrictions,
@@ -47,10 +46,6 @@ export default {
   mixins: [shootItem],
   inject: ['api', 'logger'],
   computed: {
-    ...mapState(useCloudProfileStore, [
-      'accessRestrictionNoItemsTextForCloudProfileNameAndRegion',
-      'accessRestrictionDefinitionsByCloudProfileNameAndRegion',
-    ]),
     disabled () {
       const accessRestrictionDefinitions = this.accessRestrictionDefinitionsByCloudProfileNameAndRegion({ cloudProfileName: this.shootCloudProfileName, region: this.shootRegion })
       return isEmpty(accessRestrictionDefinitions)
@@ -66,6 +61,10 @@ export default {
     },
   },
   methods: {
+    ...mapActions(useCloudProfileStore, [
+      'accessRestrictionNoItemsTextForCloudProfileNameAndRegion',
+      'accessRestrictionDefinitionsByCloudProfileNameAndRegion',
+    ]),
     async onConfigurationDialogOpened () {
       this.reset()
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
