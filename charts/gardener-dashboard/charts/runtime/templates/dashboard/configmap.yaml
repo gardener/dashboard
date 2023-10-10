@@ -76,9 +76,15 @@ data:
       sessionLifetime: {{ .Values.global.dashboard.oidc.sessionLifetime }}
       {{- end }}
       redirect_uris:
+      {{- if .Values.global.dashboard.oidc.redirectUris }}
+      {{- range .Values.global.dashboard.oidc.redirectUris }}
+      - "{{ . }}"
+      {{- end }}
+      {{- else }}
       {{- $protocol := ternary "http" "https" ( empty .Values.global.dashboard.ingress.tls ) }}
       {{- range .Values.global.dashboard.ingress.hosts }}
       - "{{ $protocol }}://{{ . }}/auth/callback"
+      {{- end }}
       {{- end }}
       {{- if .Values.global.dashboard.oidc.scope }}
       scope: {{ .Values.global.dashboard.oidc.scope }}
