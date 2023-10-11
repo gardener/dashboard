@@ -4,7 +4,6 @@
 Gardener landscape administrators should have the possibility to change the appearance and the branding of the Gardener Dashboard via configuration without the need to touch the code.
 
 ## Branding
-
 It is possible to change the branding of the Gardener Dashboard when using the [helm chart](https://github.com/gardener/dashboard/blob/master/charts/gardener-dashboard) in the `frontendConfig.branding` map. The following configuration properties are supported:
 
 | name | description | default |
@@ -12,9 +11,9 @@ It is possible to change the branding of the Gardener Dashboard when using the [
 | `documentTitle` | Title of the browser window | `Gardener Dashboard` |
 | `productName` | Name of the Gardener product | `Gardener` |
 | `productTitle` | Title of the Gardener product displayed below the logo | `Gardener`  |
-| `productTitleSuperscript` | Superscript next to the product title | Production version (e.g 1.73.1) |
+| `productTitleSuperscript` | Superscript next to the product title. To supress the superscript set to `false` | Production version (e.g 1.73.1) |
 | `productSlogan` | Slogan that is displayed under the product title and on the login page| `Universal Kubernetes at Scale` |
-| `productLogoUrl` | URL for the product logo   | `/static/assets/logo.svg` |
+| `productLogoUrl` | URL for the product logo. You can also use [data:](https://developer.mozilla.org/en-US/docs/web/http/basics_of_http/data_urls) scheme for development. For production it is recommended to provide static assets | `/static/assets/logo.svg` |
 | `teaserHeight` | Height of the teaser in the [GMainNavigation](https://github.com/gardener/dashboard/blob/master/frontend/src/components/GMainNavigation.vue) component | `200` |
 | `teaserTemplate` | Custom HTML template to replace to teaser content | refer to [GTeaser](https://github.com/gardener/dashboard/blob/master/frontend/src/components/GTeaser.vue) |
 | `loginTeaserHeight` | Height of the login teaser in the [GLogin](https://github.com/gardener/dashboard/blob/master/frontend/src/layouts/GLogin.vue) component | `260` |
@@ -25,7 +24,87 @@ It is possible to change the branding of the Gardener Dashboard when using the [
 | `oidcLoginTitle` | Title of tabstrip for loginType OIDC | `OIDC` |
 | `oidcLoginText` | Text show above the login button on the OIDC tabstrip | `Press Login to be redirected to`<br> `configured OpenID Connect Provider.` |
 
+## Colors
+Gardener Dashboard has been built with Vuetify. We use Vuetify's built-in [theming support](https://vuetifyjs.com/en/features/theme/) to centrally configure colors that are used throughout the web application.
+Colors can be configured for both light and dark themes. Configuration is done via the helm chart, see the respective theme section there. Colors can be specified as HTML color code (e.g. `#FF0000` for red) or by referencing a color (e.g `grey.darken3` or `shades.white`) from Vuetify's Material Design [Color Pack](https://vuetifyjs.com/en/styles/colors/#javascript-color-pack).
+
+The following colors can be configured:
+
+| name                    | usage|
+| ----------------------- |------|
+| `primary`               | icons, chips, buttons, popovers, etc. |
+| `anchor`                | links |
+| `main-background`       | main navigation, login page   |
+| `main-navigation-title` | text color on main navigation |
+| `toolbar-background`    | background color for toolbars in cards, dialogs, etc. |
+| `toolbar-title`         | text color for toolbars in cards, dialogs, etc. |
+| `action-button`         | buttons in tables and cards, e.g. cluster details page |
+| `info`                  | notification info popups, texts and status tags |
+| `success`               | notification success popups, texts and status tags |
+| `warning`               | notification warning popups, texts and status tags |
+| `error`                 | notification error popups, texts and status tags |
+| `unknown`               | status tags with unknown severity |
+| ...                     | all other Vuetify theme [colors](https://vuetifyjs.com/en/styles/colors/) |
+
+If you use the helm chart, you can configure those with `frontendConfig.themes.light` for the light theme and `frontendConfig.themes.dark` for the dark theme.
+
 ### Example
+
+```yaml
+global:
+  dashboard:
+    frontendConfig:
+      # ...
+      themes:
+        light:
+          primary: '#0b8062'
+          anchor: '#0b8062'
+          main-background: 'grey.darken3'
+          main-navigation-title: 'shades.white'
+          toolbar-background: '#0b8062'
+          toolbar-title: 'shades.white'
+          action-button: 'grey.darken4'
+        dark:
+          primary: '#0b8062'
+          anchor: '#0b8062'
+          main-background: 'grey.darken3'
+          main-navigation-title: 'shades.white'
+          toolbar-background: '#0b8062'
+          toolbar-title: 'shades.white'
+          action-button: 'grey.lighten4'
+```
+
+## Logos and Icons
+
+It is also possible to exchange the Dashboard logo and icons. You can replace the [assets](https://github.com/gardener/dashboard/tree/master/frontend/public/static/assets) folder when using the [helm chart](https://github.com/gardener/dashboard/blob/master/charts/gardener-dashboard) in the `frontendConfig.assets` map.
+
+Attention: You need to set values for all files as mapping the volume will overwrite all files. It is not possible to exchange single files.
+
+The files have to be encoded as base64 for the chart - to generate the encoded files for the `values.yaml` of the helm chart, you can use the following shorthand with `bash` or `zsh` on Linux systems. If you use macOS, install coreutils with brew (`brew install coreutils`) or remove the `-w0` parameter.
+
+```bash
+cat << EOF
+  ###
+  ### COPY EVERYTHING BELOW THIS LINE
+  ###
+
+  assets:
+    favicon-16x16.png: |
+      $(cat frontend/public/static/assets/favicon-16x16.png | base64 -w0)
+    favicon-32x32.png: |
+      $(cat frontend/public/static/assets/favicon-32x32.png | base64 -w0)
+    favicon-96x96.png: |
+      $(cat frontend/public/static/assets/favicon-96x96.png | base64 -w0)
+    favicon.ico: |
+      $(cat frontend/public/static/assets/favicon.ico | base64 -w0)
+    logo.svg: |
+      $(cat frontend/public/static/assets/logo.svg | base64 -w0)
+EOF
+```
+
+Then, swap in the base64 encoded version of your files where needed.
+
+## Example
 
 The following example configuration in `values.yaml` shows some of the possibilities to achieve a custom theming and branding:
 
@@ -128,98 +207,17 @@ global:
           PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzBCODA2MiIgZD0iTTIsMjJWMjBDMiwyMCA3LDE4IDEyLDE4QzE3LDE4IDIyLDIwIDIyLDIwVjIySDJNMTEuMyw5LjFDMTAuMSw1LjIgNCw2LjEgNCw2LjFDNCw2LjEgNC4yLDEzLjkgOS45LDEyLjdDOS41LDkuOCA4LDkgOCw5QzEwLjgsOSAxMSwxMi40IDExLDEyLjRWMTdDMTEuMywxNyAxMS43LDE3IDEyLDE3QzEyLjMsMTcgMTIuNywxNyAxMywxN1YxMi44QzEzLDEyLjggMTMsOC45IDE2LDcuOUMxNiw3LjkgMTQsMTAuOSAxNCwxMi45QzIxLDEzLjYgMjEsNCAyMSw0QzIxLDQgMTIuMSwzIDExLjMsOS4xWiIgLz48L3N2Zz4=
 ```
 
-#### Login Screen
+### Login Screen
 In this example, the login screen now displays the custom logo in a different size. The product title is also shown, and the OIDC tabstrip title and text have been changed to a custom-specific one. Product-related links are displayed below the login button. The footer contains a copyright notice for the custom company.
 
 <img width="800" src="../images/customization-dark-1.png">
 
-#### Teaser in Main Navigation
+### Teaser in Main Navigation
 The template approach is also used in this case to change the `font-size` and `line-height` of the product title and slogan. The product version (superscript) is omitted.
 
 <img width="800" src="../images/customization-dark-2.png">
 
-#### About Dialog
+### About Dialog
 By changing the `productLogoUrl` and the `productName`, the changes automatically effect the apperance of the About Dialog and the document title.
 
 <img width="600" src="../images/customization-dark-3.png">
-
-## Colors
-Gardener Dashboard has been built with Vuetify. We use Vuetify's built-in [theming support](https://vuetifyjs.com/en/features/theme/) to centrally configure colors that are used throughout the web application.
-Colors can be configured for both light and dark themes. Configuration is done via the helm chart, see the respective theme section there. Colors can be specified as HTML color code (e.g. `#FF0000` for red) or by referencing a color (e.g `grey.darken3` or `shades.white`) from Vuetify's Material Design [Color Pack](https://vuetifyjs.com/en/styles/colors/#javascript-color-pack).
-
-The following colors can be configured:
-
-| name                    | usage|
-| ----------------------- |------|
-| `primary`               | icons, chips, buttons, popovers, etc. |
-| `anchor`                | links |
-| `main-background`       | main navigation, login page   |
-| `main-navigation-title` | text color on main navigation |
-| `toolbar-background`    | background color for toolbars in cards, dialogs, etc. |
-| `toolbar-title`         | text color for toolbars in cards, dialogs, etc. |
-| `action-button`         | buttons in tables and cards, e.g. cluster details page |
-| `info`                  | notification info popups, texts and status tags |
-| `success`               | notification success popups, texts and status tags |
-| `warning`               | notification warning popups, texts and status tags |
-| `error`                 | notification error popups, texts and status tags |
-| `unknown`               | status tags with unknown severity |
-| ...                     | all other Vuetify theme [colors](https://vuetifyjs.com/en/styles/colors/) |
-
-If you use the helm chart, you can configure those with `frontendConfig.themes.light` for the light theme and `frontendConfig.themes.dark` for the dark theme.
-
-### Example
-
-```yaml
-global:
-  dashboard:
-    frontendConfig:
-      # ...
-      themes:
-        light:
-          primary: '#0b8062'
-          anchor: '#0b8062'
-          main-background: 'grey.darken3'
-          main-navigation-title: 'shades.white'
-          toolbar-background: '#0b8062'
-          toolbar-title: 'shades.white'
-          action-button: 'grey.darken4'
-        dark:
-          primary: '#0b8062'
-          anchor: '#0b8062'
-          main-background: 'grey.darken3'
-          main-navigation-title: 'shades.white'
-          toolbar-background: '#0b8062'
-          toolbar-title: 'shades.white'
-          action-button: 'grey.lighten4'
-```
-
-## Logos and Icons
-
-It is also possible to exchange the Dashboard logo and icons. You can replace the [assets](https://github.com/gardener/dashboard/tree/master/frontend/public/static/assets) folder when using the [helm chart](https://github.com/gardener/dashboard/blob/master/charts/gardener-dashboard) in the `frontendConfig.assets` map.
-
-Attention: You need to set values for all files as mapping the volume will overwrite all files. It is not possible to exchange single files.
-
-The files have to be encoded as base64 for the chart - to generate the encoded files for the `values.yaml` of the helm chart, you can use the following shorthand with `bash` or `zsh` on Linux systems. If you use macOS, install coreutils with brew (`brew install coreutils`) or remove the `-w0` parameter.
-
-```bash
-cat << EOF
-  ###
-  ### COPY EVERYTHING BELOW THIS LINE
-  ###
-
-  assets:
-    favicon-16x16.png: |
-      $(cat frontend/public/static/assets/favicon-16x16.png | base64 -w0)
-    favicon-32x32.png: |
-      $(cat frontend/public/static/assets/favicon-32x32.png | base64 -w0)
-    favicon-96x96.png: |
-      $(cat frontend/public/static/assets/favicon-96x96.png | base64 -w0)
-    favicon.ico: |
-      $(cat frontend/public/static/assets/favicon.ico | base64 -w0)
-    logo.svg: |
-      $(cat frontend/public/static/assets/logo.svg | base64 -w0)
-EOF
-```
-
-Then, swap in the base64 encoded version of your files where needed.
-
