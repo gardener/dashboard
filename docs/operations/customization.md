@@ -10,7 +10,7 @@ It is possible to change the branding of the Gardener Dashboard when using the [
 | ---- | ----------- | ------- |
 | `documentTitle` | Title of the browser window | `Gardener Dashboard` |
 | `productName` | Name of the Gardener product | `Gardener` |
-| `productTitle` | Title of the Gardener product displayed below the logo | `Gardener`  |
+| `productTitle` | Title of the Gardener product displayed below the logo. It could also contain information about the specific Gardener instance (e.g. Development, Canary, Live) | `Gardener`  |
 | `productTitleSuperscript` | Superscript next to the product title. To supress the superscript set to `false` | Production version (e.g 1.73.1) |
 | `productSlogan` | Slogan that is displayed under the product title and on the login page| `Universal Kubernetes at Scale` |
 | `productLogoUrl` | URL for the product logo. You can also use [data:](https://developer.mozilla.org/en-US/docs/web/http/basics_of_http/data_urls) scheme for development. For production it is recommended to provide static assets | `/static/assets/logo.svg` |
@@ -46,33 +46,7 @@ The following colors can be configured:
 | `unknown`               | status tags with unknown severity |
 | ...                     | all other Vuetify theme [colors](https://vuetifyjs.com/en/styles/colors/) |
 
-If you use the helm chart, you can configure those with `frontendConfig.themes.light` for the light theme and `frontendConfig.themes.dark` for the dark theme.
-
-### Example
-
-```yaml
-global:
-  dashboard:
-    frontendConfig:
-      # ...
-      themes:
-        light:
-          primary: '#0b8062'
-          anchor: '#0b8062'
-          main-background: 'grey.darken3'
-          main-navigation-title: 'shades.white'
-          toolbar-background: '#0b8062'
-          toolbar-title: 'shades.white'
-          action-button: 'grey.darken4'
-        dark:
-          primary: '#0b8062'
-          anchor: '#0b8062'
-          main-background: 'grey.darken3'
-          main-navigation-title: 'shades.white'
-          toolbar-background: '#0b8062'
-          toolbar-title: 'shades.white'
-          action-button: 'grey.lighten4'
-```
+If you use the helm chart, you can configure those with `frontendConfig.themes.light` for the light theme and `frontendConfig.themes.dark` for the dark theme. The [customization example](#customization-example) below shows a possible custom color theme configuration.
 
 ## Logos and Icons
 
@@ -104,9 +78,9 @@ EOF
 
 Then, swap in the base64 encoded version of your files where needed.
 
-## Example
+## Customization Example
 
-The following example configuration in `values.yaml` shows some of the possibilities to achieve a custom theming and branding:
+The following example configuration in `values.yaml` shows most of the possibilities to achieve a custom theming and branding:
 
 ```yaml
 global:
@@ -148,20 +122,20 @@ global:
         loginTeaserTemplate: |
           <div
             class="d-flex flex-column align-center justify-center bg-main-background-darken-1 pa-3"
-            style="min-height: {{minHeight}}px"
+            style="min-height: {{ minHeight }}px"
           >
             <img
-              src="{{productLogoUrl}}"
-              alt="Login to {{productName}}"
+              src="{{ productLogoUrl }}"
+              alt="Login to {{ productName }}"
               width="140"
               height="140"
               class="mt-2"
             >
             <div class="text-h3 text-center font-weight-thin text-white mt-4">
-              {{productTitle}}
+              {{ productTitle }}
             </div>
             <div class="text-h5 text-center font-weight-light text-primary mt-1">
-              {{productSlogan}}
+              {{ productSlogan }}
             </div>
           </div>
         loginFooterTemplate: |
