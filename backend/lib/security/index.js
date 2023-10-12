@@ -315,6 +315,11 @@ function getAccessToken (cookies) {
   throw createError(401, 'No authorization token was found', { code: 'ERR_JWT_NOT_FOUND' })
 }
 
+function getRefreshAt (tokenSet) {
+  const user = decode(tokenSet.id_token)
+  return user?.exp ?? tokenSet.expires_at
+}
+
 async function verifyAccessToken (token) {
   try {
     const audience = [GARDENER_AUDIENCE]
@@ -376,7 +381,7 @@ async function authorizationCodeExchange (redirectUri, parameters, checks) {
        * of the access_token will be the configured sessionLifetime.
        */
       payload.exp = iat + sessionLifetime
-      payload.refresh_at = tokenSet.expires_at
+      payload.refresh_at = getRefreshAt(tokenSet)
       payload.rti = digest(tokenSet.refresh_token)
       logger.debug('Created TokenSet (%s)', payload.rti)
     }
@@ -404,7 +409,7 @@ async function refreshTokenSet (tokenSet) {
     const rti = payload.rti
     payload.rti = digest(tokenSet.refresh_token)
     logger.debug('Refreshed TokenSet (%s <- %s)', payload.rti, rti)
-    payload.refresh_at = tokenSet.expires_at
+    payload.refresh_at = getRefreshAt(tokenSet)
     tokenSet.access_token = await createAccessToken(payload, tokenSet.id_token)
     return tokenSet
   } catch (err) {
