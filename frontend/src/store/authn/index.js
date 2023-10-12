@@ -47,7 +47,7 @@ export const useAuthnStore = defineStore('authn', () => {
         try {
           await ensureValidToken()
         } catch (err) {
-          logger.error(err)
+          logger.error('request token invalid: %s', err.message)
           throw createAbortError('Request aborted')
         }
       }
