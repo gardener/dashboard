@@ -73,7 +73,11 @@ SPDX-License-Identifier: Apache-2.0
                 Session
               </div>
               <div class="content">
-                Expires {{ expiresAt }}
+                Expires
+                <g-time-string
+                  mode="future"
+                  :date-time="expiresAt"
+                />
               </div>
             </g-list-item>
           </g-list>
@@ -255,8 +259,7 @@ import { useKubeconfigStore } from '@/store/kubeconfig'
 import GCopyBtn from '@/components/GCopyBtn.vue'
 import GCodeBlock from '@/components/GCodeBlock.vue'
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
-
-import moment from '@/utils/moment'
+import GTimeString from '@/components/GTimeString.vue'
 
 import {
   map,
@@ -270,6 +273,7 @@ export default {
     GCopyBtn,
     GCodeBlock,
     GAccountAvatar,
+    GTimeString,
   },
   inject: ['api', 'logger', 'yaml'],
   data () {
@@ -321,7 +325,7 @@ export default {
       return this.user.groups
     },
     expiresAt () {
-      return moment.duration(this.user.exp - Math.floor(Date.now() / 1000), 'seconds').humanize(true)
+      return this.user.exp * 1000
     },
     projectNames () {
       const names = map(this.projectList, 'metadata.name').sort()
