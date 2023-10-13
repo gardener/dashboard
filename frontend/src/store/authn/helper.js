@@ -145,9 +145,12 @@ export function useUserManager (options) {
     unref(location).href = url
   }
 
-  function signout (err) {
+  function signout (err, redirectPath) {
     deleteCookie()
     const url = new URL('/auth/logout', origin)
+    if (redirectPath) {
+      url.searchParams.set('redirectPath', redirectPath)
+    }
     if (err) {
       url.searchParams.set('error[name]', err.name)
       url.searchParams.set('error[message]', err.message)
