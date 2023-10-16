@@ -5,18 +5,16 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-tooltip
-    location="top"
-    :disabled="noTooltip"
-  >
-    <template #activator="{ props: activatorProps }">
-      <span
-        v-bind="activatorProps"
-        :class="contentClass"
-      >{{ relDateTimeString }}</span>
-    </template>
-    {{ dateTimeString }}
-  </v-tooltip>
+  <span :class="contentClass">
+    {{ relDateTimeString }}
+    <v-tooltip
+      v-if="!noTooltip"
+      activator="parent"
+      location="top"
+    >
+      {{ dateTimeString }}
+    </v-tooltip>
+  </span>
 </template>
 
 <script setup>
@@ -61,7 +59,7 @@ const clockHalfAnHourAccuracy = new Clock(1000 * 60 * 30)
 
 const props = defineProps({
   dateTime: {
-    type: String,
+    type: [String, Number, Date],
   },
   mode: {
     type: String,
