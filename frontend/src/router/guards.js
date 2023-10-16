@@ -51,7 +51,7 @@ export function createGlobalBeforeGuards () {
 
       authnStore.$reset()
 
-      const expiresIn = authnStore.userExpiresAt - Date.now()
+      const expiresIn = authnStore.sessionExpiresAt - Date.now()
       if (expiresIn > 0) {
         clearTimeout(sessionTimeoutId)
         sessionTimeoutId = setTimeout(() => {

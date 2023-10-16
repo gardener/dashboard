@@ -73,7 +73,7 @@ export const useAuthnStore = defineStore('authn', () => {
     return user.value?.name ?? getFullDisplayName(user.value?.id) ?? ''
   })
 
-  const userExpiresAt = computed(() => {
+  const sessionExpiresAt = computed(() => {
     return (user.value?.exp ?? 0) * 1000
   })
 
@@ -95,7 +95,7 @@ export const useAuthnStore = defineStore('authn', () => {
     username,
     displayName,
     fullDisplayName,
-    userExpiresAt,
+    sessionExpiresAt,
     avatarUrl,
     avatarTitle,
     isExpired,
