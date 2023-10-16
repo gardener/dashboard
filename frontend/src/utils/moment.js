@@ -15,7 +15,7 @@ import updateLocale from 'dayjs/plugin/updateLocale'
 
 const thresholds = [
   { l: 'S', r: 1, d: 'millisecond' },
-  { l: 's', r: 1, d: 'second' },
+  { l: 's', r: 1 },
   { l: 'ss', r: 10, d: 'second' },
   { l: 'sss', r: 59, d: 'second' },
   { l: 'm', r: 1 },
