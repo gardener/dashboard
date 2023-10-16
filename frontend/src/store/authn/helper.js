@@ -18,6 +18,8 @@ import {
   isUnauthorizedError,
   isNoUserError,
   isClockSkewError,
+  createSessionExpiredError,
+  isSessionExpiredError,
 } from '@/utils/errors'
 
 export const COOKIE_HEADER_PAYLOAD = 'gHdrPyl'
@@ -102,6 +104,9 @@ export function useUserManager (options) {
       if (!user) {
         throw createNoUserError()
       }
+      if (isExpired(user)) {
+        throw createSessionExpiredError()
+      }
       if (isRefreshRequired(user)) {
         throw createClockSkewError()
       }
@@ -140,9 +145,12 @@ export function useUserManager (options) {
     unref(location).href = url
   }
 
-  function signout (err) {
+  function signout (err, redirectPath) {
     deleteCookie()
     const url = new URL('/auth/logout', origin)
+    if (redirectPath) {
+      url.searchParams.set('redirectPath', redirectPath)
+    }
     if (err) {
       url.searchParams.set('error[name]', err.name)
       url.searchParams.set('error[message]', err.message)
@@ -168,6 +176,9 @@ export function useUserManager (options) {
       if (!user) {
         throw createNoUserError()
       }
+      if (isExpired(user)) {
+        throw createSessionExpiredError()
+      }
       if (!isRefreshRequired(user)) {
         return
       }
@@ -176,6 +187,9 @@ export function useUserManager (options) {
         user = decodeCookie()
         if (!user) {
           throw createNoUserError()
+        }
+        if (isExpired(user)) {
+          throw createSessionExpiredError()
         }
         if (!isRefreshRequired(user)) {
           return
@@ -190,6 +204,8 @@ export function useUserManager (options) {
       let frameRequestCallback
       if (isNoUserError(err)) {
         frameRequestCallback = () => signin()
+      } else if (isSessionExpiredError(err)) {
+        frameRequestCallback = () => signout()
       } else if (isUnauthorizedError(err) || isClockSkewError(err)) {
         frameRequestCallback = () => signout(err)
       }
