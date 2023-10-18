@@ -48,6 +48,10 @@ export function createNoUserError (message = 'User not found', ...rest) {
   return createError('NoUser', message, ...rest)
 }
 
+export function createSessionExpiredError (message = 'User session is expired', ...rest) {
+  return createError('SessionExpired', message, ...rest)
+}
+
 export function createAbortError (message, ...rest) {
   return createError('Abort', message, ...rest)
 }
@@ -74,6 +78,10 @@ export function isGatewayTimeoutError (err) {
 
 export function isNoUserError (err) {
   return err.name === 'NoUserError'
+}
+
+export function isSessionExpiredError (err) {
+  return err.name === 'SessionExpired'
 }
 
 export function isClockSkewError (err) {
