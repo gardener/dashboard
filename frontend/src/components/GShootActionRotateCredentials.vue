@@ -236,11 +236,11 @@ export default {
         return 'Unschedule Rotation'
       }
       if (this.maintenance) {
-        return 'Schedule Roatation'
+        return 'Schedule Rotation'
       }
       switch (this.mode) {
         case 'START':
-          return 'Prepare Roatation'
+          return 'Prepare Rotation'
         case 'COMPLETE':
           return 'Complete Rotation'
       }
