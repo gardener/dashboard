@@ -11,6 +11,7 @@ import {
 import {
   computed,
   toRef,
+  effectScope,
 } from 'vue'
 import { useRoute } from 'vue-router'
 import { useLocalStorage } from '@vueuse/core'
@@ -23,6 +24,29 @@ import { StorageSerializers } from '@/utils/storageSerializers'
 import { routeName as getRouteName } from '@/utils'
 
 const kLocalStorageKey = Symbol('kLocalStorageKey')
+const kLocalStorageScope = Symbol('kLocalStorageScope')
+
+function createLocalStorageRef (key, initialValue) {
+  let localStorageRef
+  const scope = effectScope()
+  scope.run(() => {
+    localStorageRef = useLocalStorage(key, initialValue, {
+      serializer: StorageSerializers.json,
+      writeDefaults: false,
+    })
+  })
+  Object.defineProperties(localStorageRef, {
+    [kLocalStorageScope]: {
+      value: scope,
+      enumerable: true,
+    },
+    [kLocalStorageKey]: {
+      value: key,
+      enumerable: true,
+    },
+  })
+  return localStorageRef
+}
 
 const useLazyLocalStorage = () => {
   const route = useRoute()
@@ -57,13 +81,8 @@ const useLazyLocalStorage = () => {
       const currentKey = refs[name]?.[kLocalStorageKey]
       const key = keys[name]
       if (currentKey !== key) {
-        refs[name] = useLocalStorage(key, initialValue, {
-          serializer: StorageSerializers.json,
-          writeDefaults: false,
-        })
-        Object.defineProperty(refs[name], kLocalStorageKey, {
-          value: key,
-        })
+        refs[name]?.[kLocalStorageScope].stop()
+        refs[name] = createLocalStorageRef(key, initialValue)
       }
       return refs[name]
     }
