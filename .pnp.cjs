@@ -192,7 +192,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@babel/helpers", "npm:7.23.1"],\
             ["@babel/parser", "npm:7.23.0"],\
             ["@babel/template", "npm:7.22.15"],\
-            ["@babel/traverse", "npm:7.23.0"],\
+            ["@babel/traverse", "npm:7.23.2"],\
             ["@babel/types", "npm:7.23.0"],\
             ["convert-source-map", "npm:2.0.0"],\
             ["debug", "virtual:feb0771c9f8eadaf509cfed41e14a8bebbea5442233275c1c87085111077a08ef71eb773b899665b154d8203a55a489610a54117ae059fce5f5b8b844493b1b1#npm:4.3.4"],\
@@ -359,7 +359,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [\
             ["@babel/helpers", "npm:7.23.1"],\
             ["@babel/template", "npm:7.22.15"],\
-            ["@babel/traverse", "npm:7.23.0"],\
+            ["@babel/traverse", "npm:7.23.2"],\
             ["@babel/types", "npm:7.23.0"]\
           ],\
           "linkType": "HARD"\
@@ -867,10 +867,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["@babel/traverse", [\
-        ["npm:7.23.0", {\
-          "packageLocation": "./.yarn/cache/@babel-traverse-npm-7.23.0-16705129e7-0b17fae532.zip/node_modules/@babel/traverse/",\
+        ["npm:7.23.2", {\
+          "packageLocation": "./.yarn/cache/@babel-traverse-npm-7.23.2-4758feee42-26a1eea0dd.zip/node_modules/@babel/traverse/",\
           "packageDependencies": [\
-            ["@babel/traverse", "npm:7.23.0"],\
+            ["@babel/traverse", "npm:7.23.2"],\
             ["@babel/code-frame", "npm:7.22.13"],\
             ["@babel/generator", "npm:7.23.0"],\
             ["@babel/helper-environment-visitor", "npm:7.22.20"],\
@@ -8010,7 +8010,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@babel/core", "npm:7.23.0"],\
             ["@babel/generator", "npm:7.23.0"],\
             ["@babel/plugin-syntax-typescript", "virtual:b26687beb2614ce39983d45755ee1addcfe600e4f0030ebc42cd973d8bc10089112f81ea1266f3ec074ad029140ad57839a71eecdae7a68945739b618ffcfb74#npm:7.22.5"],\
-            ["@babel/traverse", "npm:7.23.0"],\
+            ["@babel/traverse", "npm:7.23.2"],\
             ["@babel/types", "npm:7.23.0"],\
             ["@jest/transform", "npm:27.5.1"],\
             ["@jest/types", "npm:27.5.1"],\
