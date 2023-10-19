@@ -159,18 +159,10 @@ SPDX-License-Identifier: Apache-2.0
                     Created At
                   </div>
                   <div class="text-body-1">
-                    <v-tooltip location="right">
-                      <template #activator="{ props }">
-                        <span
-                          v-bind="props"
-                          class="text-subtitle-1"
-                        >{{ createdAt }}</span>
-                      </template>
-                      <g-time-string
-                        :date-time="creationTimestamp"
-                        :point-in-time="-1"
-                      />
-                    </v-tooltip>
+                    <g-time-string
+                      :date-time="creationTimestamp"
+                      :point-in-time="-1"
+                    />
                   </div>
                 </g-list-item>
                 <v-divider inset />
