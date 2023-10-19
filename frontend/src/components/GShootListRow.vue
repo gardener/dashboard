@@ -118,18 +118,11 @@ SPDX-License-Identifier: Apache-2.0
         </div>
       </template>
       <template v-if="cell.header.key === 'issueSince'">
-        <v-tooltip location="top">
-          <template #activator="{ props }">
-            <div v-bind="props">
-              <g-time-string
-                :date-time="shootIssueSinceTimestamp"
-                mode="past"
-                without-prefix-or-suffix
-              />
-            </div>
-          </template>
-          {{ shootIssueSince }}
-        </v-tooltip>
+        <g-time-string
+          :date-time="shootIssueSinceTimestamp"
+          mode="past"
+          without-prefix-or-suffix
+        />
       </template>
       <template v-if="cell.header.key === 'accessRestrictions'">
         <g-access-restriction-chips :selected-access-restrictions="shootSelectedAccessRestrictions" />
