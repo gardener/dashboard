@@ -101,6 +101,9 @@ export default {
     }
   },
   computed: {
+    nextClockTimeValue () {
+      return toValue(this.nextClockTime)
+    },
     relDateTimeString () {
       if (this.mode === 'future' && !isValidTerminationDate(this.dateTime)) {
         return this.expiredText
@@ -133,7 +136,7 @@ export default {
         this.updateClockInstance(value)
       }
     },
-    nextClockTime (value) {
+    nextClockTimeValue (value) {
       if (value) {
         this.updateClockInstance(this.dateTime)
       }
