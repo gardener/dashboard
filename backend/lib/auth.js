@@ -44,9 +44,17 @@ router.route('/logout')
   .get(async (req, res, next) => {
     try {
       clearCookies(res)
-      const { error = {} } = req.query
-      const hash = error.message ? `#error=${encodeURIComponent(error.message)}` : ''
-      res.redirect(`/login${hash}`)
+      const {
+        error = {},
+        redirectPath
+      } = req.query
+      const hash = error.message
+        ? `#error=${encodeURIComponent(error.message)}`
+        : ''
+      const search = redirectPath
+        ? `?redirectPath=${encodeURIComponent(redirectPath)}`
+        : ''
+      res.redirect(`/login${hash || search}`)
     } catch (err) {
       next(err)
     }

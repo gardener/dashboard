@@ -12,6 +12,7 @@ import {
   provide,
   inject,
   toRef,
+  watch,
 } from 'vue'
 import { useTheme } from 'vuetify'
 import {
@@ -40,6 +41,12 @@ async function setCustomColors () {
   }
 }
 setCustomColors()
+
+watch(() => configStore.branding ?? loginStore.branding, branding => {
+  if (branding.productTitle) {
+    document.title = branding.documentTitle ?? `${branding.productName} Dashboard`
+  }
+})
 
 const colorScheme = toRef(localStorageStore, 'colorScheme')
 const { system } = useColorMode({

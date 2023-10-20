@@ -272,9 +272,8 @@ export function routeName (route) {
 export function getDateFormatted (timestamp) {
   if (!timestamp) {
     return undefined
-  } else {
-    return moment(timestamp).format('YYYY-MM-DD')
   }
+  return moment(timestamp).format('YYYY-MM-DD')
 }
 
 export function getTimestampFormatted (timestamp) {
@@ -287,21 +286,15 @@ export function getTimestampFormatted (timestamp) {
 export function getTimeStringFrom (time, fromTime, withoutSuffix = false) {
   if (!time) {
     return undefined
-  } else {
-    return moment(time).from(fromTime, withoutSuffix)
   }
+  return moment(time).from(fromTime, withoutSuffix)
 }
 
 export function getTimeStringTo (time, toTime, withoutPrefix = false) {
   if (!time) {
     return undefined
-  } else {
-    if (time.getTime() === toTime.getTime()) {
-      // Equal dates result in text "a few seconds ago", this is not we want here...
-      toTime.setSeconds(toTime.getSeconds() + 1)
-    }
-    return moment(time).to(toTime, withoutPrefix)
   }
+  return moment(time).to(toTime, withoutPrefix)
 }
 
 export function isOwnSecret (infrastructureSecret) {

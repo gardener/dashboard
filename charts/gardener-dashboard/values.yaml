@@ -110,6 +110,8 @@ global:
     #   clientId: dashboard
     #   # clientSecret is the private secret of the gardener-dashboard aplication
     #   clientSecret: ~
+    #   # redirectUris is the list of allowed redirect URIs (the default list is generated based on the ingress hosts)
+    #   redirectUris: ~
     #   # force PKCE usage
     #   usePKCE: true
     #   # sessionLifetime is the maximum lifetime of a login session without reauthentication in seconds (defaults to 86400)

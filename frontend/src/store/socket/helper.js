@@ -31,6 +31,8 @@ export function createSocket (state, context) {
   const managerOpen = async fn => {
     try {
       await authnStore.ensureValidToken()
+    } catch (err) {
+      logger.error('io token invalid: %s', err.message)
     } finally {
       Manager.prototype.open.call(manager, fn)
     }
@@ -77,6 +79,8 @@ export function createSocket (state, context) {
   const connect = async () => {
     try {
       await authnStore.ensureValidToken()
+    } catch (err) {
+      logger.error('io token invalid: %s', err.message)
     } finally {
       socket.connect()
     }
