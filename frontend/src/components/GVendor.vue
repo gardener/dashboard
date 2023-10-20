@@ -54,7 +54,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState } from 'pinia'
+import { mapActions } from 'pinia'
 
 import { useConfigStore } from '@/store/config'
 
@@ -93,9 +93,6 @@ export default {
     },
   },
   computed: {
-    ...mapState(useConfigStore, [
-      'vendors',
-    ]),
     zoneText () {
       return join(this.zones, ', ')
     },
@@ -139,8 +136,11 @@ export default {
       return join(titles, ' / ')
     },
     vendorName () {
-      return get(this.vendors, [this.cloudProviderKind, 'name'], this.cloudProviderKind)
+      return this.vendorNameForKind(this.cloudProviderKind)
     },
+  },
+  methods: {
+    ...mapActions(useConfigStore, ['vendorNameForKind']),
   },
 }
 </script>

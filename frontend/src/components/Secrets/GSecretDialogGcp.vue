@@ -11,8 +11,6 @@ SPDX-License-Identifier: Apache-2.0
     :data-valid="valid"
     :secret="secret"
     :vendor="vendor"
-    :create-title="`Add new ${name} Secret`"
-    :replace-title="`Replace ${name} Secret`"
   >
     <template #secret-slot>
       <div>
@@ -114,7 +112,7 @@ export default {
       type: Object,
     },
     vendor: {
-      type: String,
+      type: Object,
     },
   },
   emits: [
@@ -164,15 +162,6 @@ export default {
     },
     isCreateMode () {
       return !this.secret
-    },
-    name () {
-      if (this.vendor === 'gcp') {
-        return 'Google'
-      }
-      if (this.vendor === 'google-clouddns') {
-        return 'Google Cloud DNS'
-      }
-      return undefined
     },
   },
   watch: {

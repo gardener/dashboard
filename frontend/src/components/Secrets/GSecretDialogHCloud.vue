@@ -11,8 +11,6 @@ SPDX-License-Identifier: Apache-2.0
     :data-valid="valid"
     :secret="secret"
     vendor="hcloud"
-    create-title="Add new Hetzner Cloud Secret"
-    replace-title="Replace Hetzner Cloud Secret"
   >
     <template #secret-slot>
       <div>

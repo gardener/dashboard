@@ -65,6 +65,9 @@ const { vendors } = storeToRefs(configStore)
 const iconSrc = computed(() => {
   const customCloudProviderIcon = get(vendors, ['value', props.icon, 'icon'])
   if (customCloudProviderIcon) {
+    if (startsWith(customCloudProviderIcon, 'data:image/')) {
+      return customCloudProviderIcon
+    }
     return `/static/vendor-assets/${customCloudProviderIcon}`
   }
 

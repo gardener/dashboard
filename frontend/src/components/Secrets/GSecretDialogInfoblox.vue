@@ -11,8 +11,6 @@ SPDX-License-Identifier: Apache-2.0
     :data-valid="valid"
     :secret="secret"
     vendor="infoblox-dns"
-    create-title="Add new Infoblox Secret"
-    replace-title="Replace Infoblox Secret"
   >
     <template #secret-slot>
       <div>

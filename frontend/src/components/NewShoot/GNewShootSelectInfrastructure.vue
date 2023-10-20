@@ -64,12 +64,10 @@ export default {
     ...mapState(useCloudProfileStore, [
       'sortedInfrastructureKindList',
     ]),
-    ...mapState(useConfigStore, [
-      'vendors',
-    ]),
   },
   methods: {
     ...mapActions(useCloudProfileStore, ['cloudProfilesByCloudProviderKind']),
+    ...mapActions(useConfigStore, ['vendorNameForKind']),
     selectInfrastructure (infrastructure) {
       this.setSelectedInfrastructure(infrastructure)
       this.userInterActionBus.emit('updateInfrastructure', infrastructure)
@@ -78,7 +76,7 @@ export default {
       this.selectedInfrastructure = infrastructure
     },
     vendorName (infrastructureKind) {
-      return get(this.vendors, [infrastructureKind, 'name'], infrastructureKind)
+      return this.vendorNameForKind(infrastructureKind)
     },
   },
 }

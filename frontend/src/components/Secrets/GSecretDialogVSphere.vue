@@ -11,8 +11,6 @@ SPDX-License-Identifier: Apache-2.0
     :data-valid="valid"
     :secret="secret"
     vendor="vsphere"
-    create-title="Add new VMware vSphere Secret"
-    replace-title="Replace VMware vSphere Secret"
   >
     <template #secret-slot>
       <div>

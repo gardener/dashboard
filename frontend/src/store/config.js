@@ -22,6 +22,7 @@ import {
   get,
   isEmpty,
   camelCase,
+  find,
 } from '@/lodash'
 
 const wellKnownConditions = {
@@ -322,6 +323,63 @@ export const useConfigStore = defineStore('config', () => {
     return get(knownConditions.value, type, getCondition(type))
   }
 
+  function vendorNameForKind (kind) {
+    const knownVendors = {
+      alicloud: {
+        name: 'Alibaba Cloud',
+      },
+      'alicloud-dns': {
+        name: 'Alicloud DNS',
+      },
+      aws: {
+        name: 'aws',
+      },
+      'aws-route53': {
+        name: 'Amazon Route53',
+      },
+      azure: {
+        name: 'Azure',
+      },
+      'azure-dns': {
+        name: 'Azure DNS',
+      },
+      'azure-private-dns': {
+        name: 'Azure Private DNS',
+      },
+      'cloudflare-dns': {
+        name: 'Cloudflare',
+      },
+      gcp: {
+        name: 'Google Cloud',
+      },
+      'google-clouddns': {
+        name: 'Google Cloud DNS',
+      },
+      hcloud: {
+        name: 'Hetzner Cloud',
+      },
+      'infoblox-dns': {
+        name: 'Infoblox',
+      },
+      metal: {
+        name: 'Metal',
+      },
+      'netlify-dns': {
+        name: 'Netlify',
+      },
+      openstack: {
+        name: 'OpenStack',
+      },
+      'openstack-designate': {
+        name: 'OpenStack Designate',
+      },
+      vsphere: {
+        name: 'vSphere',
+      },
+    }
+    return get({ ...knownVendors, ...vendors.value }, [kind, 'name'], kind)
+  }
+
   return {
     isInitial,
     appVersion,
@@ -362,6 +420,7 @@ export const useConfigStore = defineStore('config', () => {
     conditionForType,
     customCloudProviders,
     vendors,
+    vendorNameForKind,
     cloudProviderList,
     $reset,
   }

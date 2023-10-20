@@ -131,6 +131,7 @@ import { useAuthzStore } from '@/store/authz'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useShootStore } from '@/store/shoot'
+import { useConfigStore } from '@/store/config'
 
 import GToolbar from '@/components/GToolbar.vue'
 import GMessage from '@/components/GMessage'
@@ -190,14 +191,6 @@ export default {
       required: true,
     },
     vendor: {
-      type: String,
-      required: true,
-    },
-    createTitle: {
-      type: String,
-      required: true,
-    },
-    replaceTitle: {
       type: String,
       required: true,
     },
@@ -288,7 +281,9 @@ export default {
       return this.isCreateMode ? 'Add Secret' : 'Replace Secret'
     },
     title () {
-      return this.isCreateMode ? this.createTitle : this.replaceTitle
+      return this.isCreateMode
+        ? `Add new ${this.vendorNameForKind(this.vendor)} Secret`
+        : `Replace ${this.vendorNameForKind(this.vendor)} Secret`
     },
     relatedShootCount () {
       return this.shootsByInfrastructureSecret.length
@@ -325,6 +320,7 @@ export default {
     ...mapActions(useCloudProfileStore, [
       'cloudProfilesByCloudProviderKind',
     ]),
+    ...mapActions(useConfigStore, ['vendorNameForKind']),
     hide () {
       this.visible = false
     },

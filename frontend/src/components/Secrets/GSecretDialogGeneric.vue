@@ -11,8 +11,6 @@ SPDX-License-Identifier: Apache-2.0
     :data-valid="valid"
     :secret="secret"
     :vendor="vendor"
-    :create-title="`Add new ${vendor} Secret`"
-    :replace-title="`Replace ${vendor} Secret`"
   >
     <template #secret-slot>
       <template v-if="customCloudProviderFields">
@@ -108,7 +106,7 @@ export default {
       type: Object,
     },
     vendor: {
-      type: String,
+      type: Object,
     },
   },
   emits: [

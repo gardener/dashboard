@@ -11,8 +11,6 @@ SPDX-License-Identifier: Apache-2.0
     :data-valid="valid"
     :secret="secret"
     vendor="metal"
-    create-title="Add new Metal Secret"
-    replace-title="Replace Metal Secret"
   >
     <template #secret-slot>
       <div>
