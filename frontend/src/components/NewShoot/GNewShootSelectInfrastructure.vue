@@ -66,7 +66,6 @@ export default {
     ]),
   },
   methods: {
-    ...mapActions(useCloudProfileStore, ['cloudProfilesByCloudProviderKind']),
     ...mapActions(useConfigStore, ['vendorNameForKind']),
     selectInfrastructure (infrastructure) {
       this.setSelectedInfrastructure(infrastructure)
