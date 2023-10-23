@@ -497,7 +497,7 @@ function highlightProjectWithKeys (keyDirection) {
 }
 
 function scrollHighlightedProjectIntoView () {
-  if (refProjectListItems.value) {
+  if (!refProjectListItems.value) {
     return
   }
   const projectListItem = refProjectListItems.value.find(child => {
