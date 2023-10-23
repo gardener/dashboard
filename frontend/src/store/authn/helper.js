@@ -5,7 +5,11 @@
 //
 
 import { unref } from 'vue'
-import { useBrowserLocation } from '@vueuse/core'
+import { useRoute } from 'vue-router'
+import {
+  useBrowserLocation,
+  useEventListener,
+} from '@vueuse/core'
 import { useCookies } from '@vueuse/integrations/useCookies'
 import decode from 'jwt-decode'
 
@@ -66,6 +70,11 @@ export function useUserManager (options) {
   } = options ?? {}
 
   let refreshTokenPromise
+  let signoutInProgress = false
+
+  useEventListener(window, 'beforeunload', () => {
+    signoutInProgress = true
+  })
 
   const origin = unref(location).origin
 
@@ -145,9 +154,19 @@ export function useUserManager (options) {
     unref(location).href = url
   }
 
+  function defaultRedirectPath () {
+    const route = useRoute()
+    return route?.fullPath
+  }
+
   function signout (err, redirectPath) {
+    if (signoutInProgress) {
+      return
+    }
+    signoutInProgress = true
     deleteCookie()
     const url = new URL('/auth/logout', origin)
+    redirectPath ??= defaultRedirectPath()
     if (redirectPath) {
       url.searchParams.set('redirectPath', redirectPath)
     }
@@ -204,9 +223,7 @@ export function useUserManager (options) {
       let frameRequestCallback
       if (isNoUserError(err)) {
         frameRequestCallback = () => signin()
-      } else if (isSessionExpiredError(err)) {
-        frameRequestCallback = () => signout()
-      } else if (isUnauthorizedError(err) || isClockSkewError(err)) {
+      } else if (isSessionExpiredError(err) || isUnauthorizedError(err) || isClockSkewError(err)) {
         frameRequestCallback = () => signout(err)
       }
       if (typeof frameRequestCallback === 'function') {
