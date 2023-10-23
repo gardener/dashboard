@@ -380,7 +380,7 @@ function handleLogout () {
   if (autoLogin.value) {
     err = new Error('NoAutoLogin')
   }
-  authnStore.signout(err)
+  authnStore.signout(err, '')
 }
 
 function helpTarget (item) {
