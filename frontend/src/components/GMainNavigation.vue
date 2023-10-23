@@ -348,7 +348,7 @@ const sortedAndFilteredProjectList = computed(() => {
   const filteredList = filter(projectList.value, predicate)
 
   const exactMatch = item => {
-    return isProjectNameMatchingFilter(item.metadata.name) ? 0 : 1
+    return toLower(item.metadata.name) === toLower(projectFilter.value) ? 0 : 1
   }
   const sortedList = sortBy(filteredList, [exactMatch, 'metadata.name'])
   return sortedList
@@ -370,10 +370,15 @@ const visibleProjectList = computed(() => {
   return slice(projectList, 0, endIndex)
 })
 
-const projectFilterHasExactMatch = computed(() => {
+const projectNameThatMatchesFilter = computed(() => {
   const project = head(sortedAndFilteredProjectList.value)
   const projectName = get(project, 'metadata.name')
-  return isProjectNameMatchingFilter(projectName)
+
+  const singleMatch = sortedAndFilteredProjectList.value.length === 1
+
+  return singleMatch
+    ? projectName
+    : undefined
 })
 
 function getProjectOwner (project) {
@@ -463,10 +468,12 @@ function getProjectMenuTargetRoute (namespace) {
 function onInputProjectFilter () {
   highlightedProjectName.value = undefined
   numberOfVisibleProjects.value = initialVisibleProjects
-  if (projectFilterHasExactMatch.value) {
-    highlightedProjectName.value = projectFilter.value
+
+  if (!projectNameThatMatchesFilter.value) {
+    return
   }
 
+  highlightedProjectName.value = projectNameThatMatchesFilter.value
   nextTick(() => scrollHighlightedProjectIntoView())
 }
 
@@ -566,10 +573,6 @@ function handleProjectListScroll () {
       numberOfVisibleProjects.value++
     }
   }
-}
-
-function isProjectNameMatchingFilter (projectName) {
-  return toLower(projectName) === toLower(projectFilter.value)
 }
 
 function isHighlightedProject (project) {
