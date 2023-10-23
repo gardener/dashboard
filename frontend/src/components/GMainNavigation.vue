@@ -401,15 +401,13 @@ function findProjectIndexCaseInsensitive (projectName) {
   })
 }
 
-function highlightedProject () {
-  if (!highlightedProjectName.value) {
-    return head(sortedAndFilteredProjectListWithAllProjects.value)
-  }
-  return findProjectCaseInsensitive(highlightedProjectName.value)
-}
-
 function navigateToHighlightedProject () {
-  navigateToProject(highlightedProject())
+  if (!highlightedProjectName.value) {
+    return
+  }
+
+  const project = findProjectCaseInsensitive(highlightedProjectName.value)
+  navigateToProject(project)
 }
 
 function onProjectClick (event, project) {
