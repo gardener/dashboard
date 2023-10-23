@@ -590,6 +590,9 @@ watch(projectMenu, value => {
     nextTick(() => {
       scrollSelectedProjectIntoView()
     })
+  } else {
+    // reset highlighted project name on close
+    highlightedProjectName.value = undefined
   }
 })
 
