@@ -471,9 +471,11 @@ function onInputProjectFilter () {
 }
 
 function highlightProjectWithKeys (keyDirection) {
-  let currentHighlightedIndex = 0
-  if (highlightedProjectName.value) {
-    currentHighlightedIndex = findProjectIndexCaseInsensitive(highlightedProjectName.value)
+  const projectName = highlightedProjectName.value ?? selectedProjectName.value
+
+  let currentHighlightedIndex = findProjectIndexCaseInsensitive(projectName)
+  if (currentHighlightedIndex < 0) {
+    currentHighlightedIndex = 0
   }
 
   if (keyDirection === 'up') {
