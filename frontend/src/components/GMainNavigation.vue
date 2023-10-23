@@ -497,6 +497,14 @@ function highlightProjectWithKeys (keyDirection) {
 }
 
 function scrollHighlightedProjectIntoView () {
+  scrollProjectIntoView(highlightedProjectName.value)
+}
+
+function scrollSelectedProjectIntoView () {
+  scrollProjectIntoView(selectedProjectName.value)
+}
+
+function scrollProjectIntoView (projectName, allowRecursion = true) {
   if (!refProjectListItems.value) {
     return
   }
@@ -560,6 +568,9 @@ watch(projectMenu, value => {
   if (value) {
     requestAnimationFrame(() => {
       setDelayedInputFocus(refProjectFilter)
+    })
+    nextTick(() => {
+      scrollSelectedProjectIntoView()
     })
   }
 })
