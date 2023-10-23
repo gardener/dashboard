@@ -508,9 +508,25 @@ function scrollProjectIntoView (projectName, allowRecursion = true) {
   if (!refProjectListItems.value) {
     return
   }
+
   const projectListItem = refProjectListItems.value.find(child => {
-    return child.$attrs['data-g-project-name'] === highlightedProjectName.value
+    return child.$attrs['data-g-project-name'] === projectName
   })
+
+  if (allowRecursion && !projectListItem) {
+    const index = findProjectIndexCaseInsensitive(projectName)
+    const desiredCount = index + 1
+    if (desiredCount > numberOfVisibleProjects.value) {
+      numberOfVisibleProjects.value = desiredCount
+
+      nextTick(() => {
+        const allowRecursion = false // avoid recursive calls, preventing potential endless loop
+        scrollProjectIntoView(projectName, allowRecursion)
+      })
+    }
+    return
+  }
+
   if (!projectListItem) {
     return
   }
