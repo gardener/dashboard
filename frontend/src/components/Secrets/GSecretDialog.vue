@@ -282,8 +282,8 @@ export default {
     },
     title () {
       return this.isCreateMode
-        ? `Add new ${this.vendorNameForKind(this.vendor)} Secret`
-        : `Replace ${this.vendorNameForKind(this.vendor)} Secret`
+        ? `Add new ${this.vendorDisplayName(this.vendor)} Secret`
+        : `Replace ${this.vendorDisplayName(this.vendor)} Secret`
     },
     relatedShootCount () {
       return this.shootsByInfrastructureSecret.length
@@ -320,7 +320,7 @@ export default {
     ...mapActions(useCloudProfileStore, [
       'cloudProfilesByCloudProviderKind',
     ]),
-    ...mapActions(useConfigStore, ['vendorNameForKind']),
+    ...mapActions(useConfigStore, ['vendorDisplayName']),
     hide () {
       this.visible = false
     },

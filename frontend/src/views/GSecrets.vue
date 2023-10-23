@@ -63,7 +63,7 @@ SPDX-License-Identifier: Apache-2.0
                   />
                 </template>
                 <v-list-item-title>
-                  {{ vendorNameForKind(infrastructure) }}
+                  {{ vendorDisplayName(infrastructure) }}
                 </v-list-item-title>
               </v-list-item>
             </v-list>
@@ -187,7 +187,7 @@ SPDX-License-Identifier: Apache-2.0
                   />
                 </template>
                 <v-list-item-title>
-                  {{ vendorNameForKind(dnsProvider) }}
+                  {{ vendorDisplayName(dnsProvider) }}
                 </v-list-item-title>
               </v-list-item>
             </v-list>
@@ -501,7 +501,7 @@ export default {
   },
   methods: {
     ...mapActions(useSecretStore, ['getCloudProviderSecretByName']),
-    ...mapActions(useConfigStore, ['vendorNameForKind']),
+    ...mapActions(useConfigStore, ['vendorDisplayName']),
     openSecretAddDialog (infrastructureKind) {
       this.selectedSecret = undefined
       this.visibleSecretDialog = infrastructureKind

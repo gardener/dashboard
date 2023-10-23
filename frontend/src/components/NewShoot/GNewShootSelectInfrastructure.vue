@@ -65,7 +65,7 @@ export default {
     ]),
   },
   methods: {
-    ...mapActions(useConfigStore, ['vendorNameForKind']),
+    ...mapActions(useConfigStore, ['vendorDisplayName']),
     selectInfrastructure (infrastructure) {
       this.setSelectedInfrastructure(infrastructure)
       this.userInterActionBus.emit('updateInfrastructure', infrastructure)
@@ -74,7 +74,7 @@ export default {
       this.selectedInfrastructure = infrastructure
     },
     vendorName (infrastructureKind) {
-      return this.vendorNameForKind(infrastructureKind)
+      return this.vendorDisplayName(infrastructureKind)
     },
   },
 }

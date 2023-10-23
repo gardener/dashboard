@@ -322,7 +322,7 @@ export const useConfigStore = defineStore('config', () => {
     return get(knownConditions.value, type, getCondition(type))
   }
 
-  function vendorNameForKind (kind) {
+  function vendorDisplayName (kind) {
     const knownVendors = {
       alicloud: {
         name: 'Alibaba Cloud',
@@ -419,7 +419,7 @@ export const useConfigStore = defineStore('config', () => {
     conditionForType,
     customCloudProviders,
     vendors,
-    vendorNameForKind,
+    vendorDisplayName,
     cloudProviderList,
     $reset,
   }

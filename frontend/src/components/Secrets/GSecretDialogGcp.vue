@@ -112,7 +112,7 @@ export default {
       type: Object,
     },
     vendor: {
-      type: Object,
+      type: String,
     },
   },
   emits: [

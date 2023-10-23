@@ -133,11 +133,11 @@ export default {
       return join(titles, ' / ')
     },
     vendorName () {
-      return this.vendorNameForKind(this.cloudProviderKind)
+      return this.vendorDisplayName(this.cloudProviderKind)
     },
   },
   methods: {
-    ...mapActions(useConfigStore, ['vendorNameForKind']),
+    ...mapActions(useConfigStore, ['vendorDisplayName']),
   },
 }
 </script>
