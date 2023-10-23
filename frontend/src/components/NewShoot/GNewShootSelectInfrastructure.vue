@@ -44,7 +44,6 @@ import { useConfigStore } from '@/store/config'
 
 import GVendorIcon from '@/components/GVendorIcon'
 
-import { get } from '@/lodash'
 export default {
   components: {
     GVendorIcon,
