@@ -174,27 +174,27 @@ SPDX-License-Identifier: Apache-2.0
           <v-select
             v-model="loadBalancerClassNames"
             color="primary"
-            item-color="primary"
             label="Load Balancer Classes"
             :items="allLoadBalancerClasses"
             :error-messages="getErrorMessages('loadBalancerClassNames')"
             attach
             chips
-            closable-chips
             multiple
             variant="underlined"
             @update:model-value="onInputLoadBalancerClassNames"
             @blur="v$.loadBalancerClassNames.$touch()"
           >
-            <template #item="{ item }">
-              <v-list-item-action>
-                <v-icon :color="item.disabled ? 'grey' : ''">
-                  {{ isLoadBalancerClassSelected(item) ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline' }}
-                </v-icon>
-              </v-list-item-action>
-              <v-list-item-title :class="{ 'text-grey': item.disabled }">
-                {{ item.text }}
-              </v-list-item-title>
+            <template #item="{ item, props }">
+              <v-list-item
+                v-bind="props"
+                :disabled="item.raw.disabled"
+              >
+                <template #prepend>
+                  <v-icon>
+                    {{ isLoadBalancerClassSelected(item) ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline' }}
+                  </v-icon>
+                </template>
+              </v-list-item>
             </template>
           </v-select>
         </v-col>
@@ -423,7 +423,7 @@ export default {
     allLoadBalancerClasses () {
       const loadBalancerClasses = map(this.loadBalancerClassesByCloudProfileName(this.cloudProfileName), ({ name, ipPoolName }) => {
         return {
-          text: name,
+          title: name,
           value: name,
           disabled: name === 'default',
         }
