@@ -4,12 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { unref } from 'vue'
-import { useRoute } from 'vue-router'
-import {
-  useBrowserLocation,
-  useEventListener,
-} from '@vueuse/core'
+import { useEventListener } from '@vueuse/core'
 import { useCookies } from '@vueuse/integrations/useCookies'
 import decode from 'jwt-decode'
 
@@ -65,7 +60,6 @@ function isExpired (user) {
 export function useUserManager (options) {
   const {
     cookies = useCookies([COOKIE_HEADER_PAYLOAD]),
-    location = useBrowserLocation(),
     logger = useLogger(),
   } = options ?? {}
 
@@ -76,7 +70,7 @@ export function useUserManager (options) {
     signoutInProgress = true
   })
 
-  const origin = unref(location).origin
+  const origin = window.location.origin
 
   function decodeCookie () {
     try {
@@ -151,12 +145,7 @@ export function useUserManager (options) {
   }
 
   function redirect (url) {
-    unref(location).href = url
-  }
-
-  function defaultRedirectPath () {
-    const route = useRoute()
-    return route?.fullPath
+    window.location.href = url
   }
 
   function signout (err, redirectPath) {
@@ -166,7 +155,7 @@ export function useUserManager (options) {
     signoutInProgress = true
     deleteCookie()
     const url = new URL('/auth/logout', origin)
-    redirectPath ??= defaultRedirectPath()
+    redirectPath ??= window.location.pathname + window.location.search
     if (redirectPath) {
       url.searchParams.set('redirectPath', redirectPath)
     }
