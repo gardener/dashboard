@@ -374,7 +374,7 @@ const projectNameThatMatchesFilter = computed(() => {
   const project = head(sortedAndFilteredProjectList.value)
   const projectName = get(project, 'metadata.name')
 
-  const singleMatch = sortedAndFilteredProjectList.value.length === 1
+  const singleMatch = sortedAndFilteredProjectList.value?.length === 1
 
   return singleMatch
     ? projectName
@@ -472,7 +472,7 @@ function onInputProjectFilter () {
   }
 
   highlightedProjectName.value = projectNameThatMatchesFilter.value
-  nextTick(() => scrollHighlightedProjectIntoView())
+  nextTick(() => scrollProjectIntoView(highlightedProjectName.value))
 }
 
 function highlightProjectWithKeys (keyDirection) {
@@ -500,15 +500,7 @@ function highlightProjectWithKeys (keyDirection) {
     numberOfVisibleProjects.value++
   }
 
-  scrollHighlightedProjectIntoView()
-}
-
-function scrollHighlightedProjectIntoView () {
   scrollProjectIntoView(highlightedProjectName.value)
-}
-
-function scrollSelectedProjectIntoView () {
-  scrollProjectIntoView(selectedProjectName.value)
 }
 
 function scrollProjectIntoView (projectName, allowRecursion = true) {
@@ -588,9 +580,7 @@ watch(projectMenu, value => {
     requestAnimationFrame(() => {
       setDelayedInputFocus(refProjectFilter)
     })
-    nextTick(() => {
-      scrollSelectedProjectIntoView()
-    })
+    nextTick(() => scrollProjectIntoView(selectedProjectName.value))
   } else {
     // reset highlighted project name on close
     highlightedProjectName.value = undefined
