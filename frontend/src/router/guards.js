@@ -55,6 +55,10 @@ export function createGlobalBeforeGuards () {
       if (expiresIn > 0) {
         clearTimeout(sessionTimeoutId)
         sessionTimeoutId = setTimeout(() => {
+          if (!authnStore.isExpired()) {
+            logger.info('User session updated by other browser process --> Skipping signout')
+            return
+          }
           logger.info('User session is expired --> Initiating signout')
           authnStore.signout(null, redirectPath)
         }, expiresIn)
