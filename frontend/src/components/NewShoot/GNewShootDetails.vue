@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
           color="primary"
           label="Cluster Name"
           :counter="maxShootNameLength"
-          :error-messages="getErrorMessages('name')"
+          :error-messages="errors.name"
           hint="Maximum name length depends on project name"
           variant="underlined"
           @input="onInputName"
@@ -31,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0
           item-title="version"
           item-value="version"
           :items="sortedKubernetesVersionsList"
-          :error-messages="getErrorMessages('kubernetesVersion')"
+          :error-messages="errors.kubernetesVersion"
           :hint="versionHint"
           persistent-hint
           variant="underlined"
@@ -112,9 +112,10 @@ import {
   resourceName,
   noStartEndHyphen,
   noConsecutiveHyphen,
+  withMessage,
 } from '@/utils/validators'
 import {
-  getValidationErrors,
+  getVuelidateErrors,
   transformHtml,
   setDelayedInputFocus,
 } from '@/utils'
@@ -125,20 +126,6 @@ import {
   join,
   filter,
 } from '@/lodash'
-
-const validationErrors = {
-  name: {
-    required: 'Name is required',
-    maxLength: 'Name is too long',
-    resourceName: 'Name must only be lowercase letters, numbers and hyphens',
-    unique: 'Cluster name must be unique',
-    noConsecutiveHyphen: 'Cluster name must not contain consecutive hyphens',
-    noStartEndHyphen: 'Cluster name must not start or end with a hyphen',
-  },
-  kubernetesVersion: {
-    required: 'Kubernetes version is required',
-  },
-}
 
 export default {
   components: {
@@ -159,7 +146,6 @@ export default {
   },
   data () {
     return {
-      validationErrors,
       name: undefined,
       kubernetesVersion: undefined,
       purposeValue: undefined,
@@ -170,7 +156,22 @@ export default {
     }
   },
   validations () {
-    return this.validators
+    return {
+      name: {
+        required,
+        maxLength: maxLength(this.maxShootNameLength),
+        noConsecutiveHyphen,
+        noStartEndHyphen, // Order is important for UI hints
+        resourceName,
+        unique: withMessage('A cluster with this name already exists in this project',
+          (value) => {
+            return this.shootByNamespaceAndName({ namespace: this.namespace, name: value }) === undefined
+          }),
+      },
+      kubernetesVersion: {
+        required,
+      },
+    }
   },
   computed: {
     ...mapWritableState(useShootStagingStore, ['workerless']),
@@ -216,22 +217,8 @@ export default {
     maxShootNameLength () {
       return 21 - this.projectName.length
     },
-    validators () {
-      return {
-        name: {
-          required,
-          maxLength: maxLength(this.maxShootNameLength),
-          noConsecutiveHyphen,
-          noStartEndHyphen, // Order is important for UI hints
-          resourceName,
-          unique (value) {
-            return this.shootByNamespaceAndName({ namespace: this.namespace, name: value }) === undefined
-          },
-        },
-        kubernetesVersion: {
-          required,
-        },
-      }
+    errors () {
+      return getVuelidateErrors(this.v$.$errors)
     },
   },
   mounted () {
@@ -258,9 +245,6 @@ export default {
     ...mapActions(useShootStore, [
       'shootByNamespaceAndName',
     ]),
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
-    },
     onInputName () {
       this.v$.name.$touch()
     },

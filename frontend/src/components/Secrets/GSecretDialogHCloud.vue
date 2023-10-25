@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="hcloudToken"
           color="primary"
           label="Hetzner Cloud Token"
-          :error-messages="getErrorMessages('hcloudToken')"
+          :error-messages="errors.hcloudToken"
           variant="underlined"
           @update:model-value="v$.hcloudToken.$touch()"
           @blur="v$.hcloudToken.$touch()"
@@ -56,15 +56,9 @@ import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink.vue'
 
 import {
-  getValidationErrors,
+  getVuelidateErrors,
   setDelayedInputFocus,
 } from '@/utils'
-
-const validationErrors = {
-  hcloudToken: {
-    required: 'You can\'t leave this empty.',
-  },
-}
 
 export default {
   components: {
@@ -92,12 +86,14 @@ export default {
     return {
       hcloudToken: undefined,
       hideHcloudToken: true,
-      validationErrors,
     }
   },
   validations () {
-    // had to move the code to a computed property so that the getValidationErrors method can access it
-    return this.validators
+    return {
+      hcloudToken: {
+        required,
+      },
+    }
   },
   computed: {
     visible: {
@@ -116,16 +112,11 @@ export default {
         hcloudToken: this.hcloudToken,
       }
     },
-    validators () {
-      const validators = {
-        hcloudToken: {
-          required,
-        },
-      }
-      return validators
-    },
     isCreateMode () {
       return !this.secret
+    },
+    errors () {
+      return getVuelidateErrors(this.v$.$errors)
     },
   },
   watch: {
@@ -147,9 +138,6 @@ export default {
         }
         setDelayedInputFocus(this, 'hcloudToken')
       }
-    },
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
     },
   },
 }

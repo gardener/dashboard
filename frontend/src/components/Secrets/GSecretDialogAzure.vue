@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="clientId"
           color="primary"
           label="Client Id"
-          :error-messages="getErrorMessages('clientId')"
+          :error-messages="errors.clientId"
           variant="underlined"
           @update:model-value="v$.clientId.$touch()"
           @blur="v$.clientId.$touch()"
@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
           :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideSecret ? 'password' : 'text'"
           label="Client Secret"
-          :error-messages="getErrorMessages('clientSecret')"
+          :error-messages="errors.clientSecret"
           variant="underlined"
           @click:append="() => (hideSecret = !hideSecret)"
           @update:model-value="v$.clientSecret.$touch()"
@@ -46,7 +46,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="tenantId"
           color="primary"
           label="Tenant Id"
-          :error-messages="getErrorMessages('tenantId')"
+          :error-messages="errors.tenantId"
           variant="underlined"
           @update:model-value="v$.tenantId.$touch()"
           @blur="v$.tenantId.$touch()"
@@ -57,7 +57,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="subscriptionId"
           color="primary"
           label="Subscription Id"
-          :error-messages="getErrorMessages('subscriptionId')"
+          :error-messages="errors.subscriptionId"
           variant="underlined"
           @update:model-value="v$.subscriptionId.$touch()"
           @blur="v$.subscriptionId.$touch()"
@@ -104,24 +104,9 @@ import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
 
 import {
-  getValidationErrors,
+  getVuelidateErrors,
   setDelayedInputFocus,
 } from '@/utils'
-
-const validationErrors = {
-  clientId: {
-    required: 'You can\'t leave this empty.',
-  },
-  clientSecret: {
-    required: 'You can\'t leave this empty.',
-  },
-  tenantId: {
-    required: 'You can\'t leave this empty.',
-  },
-  subscriptionId: {
-    required: 'You can\'t leave this empty.',
-  },
-}
 
 export default {
   components: {
@@ -155,12 +140,23 @@ export default {
       tenantId: undefined,
       subscriptionId: undefined,
       hideSecret: true,
-      validationErrors,
     }
   },
   validations () {
-    // had to move the code to a computed property so that the getValidationErrors method can access it
-    return this.validators
+    return {
+      clientId: {
+        required,
+      },
+      clientSecret: {
+        required,
+      },
+      tenantId: {
+        required,
+      },
+      subscriptionId: {
+        required,
+      },
+    }
   },
   computed: {
     visible: {
@@ -182,23 +178,6 @@ export default {
         tenantID: this.tenantId,
       }
     },
-    validators () {
-      const validators = {
-        clientId: {
-          required,
-        },
-        clientSecret: {
-          required,
-        },
-        tenantId: {
-          required,
-        },
-        subscriptionId: {
-          required,
-        },
-      }
-      return validators
-    },
     isCreateMode () {
       return !this.secret
     },
@@ -213,6 +192,9 @@ export default {
         return 'Azure Private DNS'
       }
       return undefined
+    },
+    errors () {
+      return getVuelidateErrors(this.v$.$errors)
     },
   },
   watch: {
@@ -234,9 +216,6 @@ export default {
       if (!this.isCreateMode) {
         setDelayedInputFocus(this, 'clientId')
       }
-    },
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
     },
   },
 }

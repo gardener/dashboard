@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
           color="primary"
           variant="filled"
           label="Secret Data"
-          :error-messages="getErrorMessages('data')"
+          :error-messages="errors.data"
           @update:model-value="onInputSecretData"
           @blur="v$.data.$touch()"
         />
@@ -48,18 +48,12 @@ import { required } from '@vuelidate/validators'
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 
 import {
-  getValidationErrors,
+  getVuelidateErrors,
   setDelayedInputFocus,
 } from '@/utils'
+import { withMessage } from '@/utils/validators'
 
 import { isObject } from '@/lodash'
-
-const validationErrors = {
-  data: {
-    required: 'You can\'t leave this empty.',
-    isYAML: 'You need to enter secret data as YAML key-value pairs',
-  },
-}
 
 export default {
   components: {
@@ -90,12 +84,15 @@ export default {
     return {
       data: undefined,
       secretData: {},
-      validationErrors,
     }
   },
   validations () {
-    // had to move the code to a computed property so that the getValidationErrors method can access it
-    return this.validators
+    return {
+      data: {
+        required,
+        isYAML: withMessage('You need to enter secret data as YAML key - value pairs', () => Object.keys(this.secretData).length > 0),
+      },
+    }
   },
   computed: {
     visible: {
@@ -109,17 +106,11 @@ export default {
     valid () {
       return !this.v$.$invalid
     },
-    validators () {
-      const validators = {
-        data: {
-          required,
-          isYAML: () => Object.keys(this.secretData).length > 0,
-        },
-      }
-      return validators
-    },
     isCreateMode () {
       return !this.secret
+    },
+    errors () {
+      return getVuelidateErrors(this.v$.$errors)
     },
   },
   methods: {
@@ -147,9 +138,6 @@ export default {
       if (!this.isCreateMode) {
         setDelayedInputFocus(this, 'data')
       }
-    },
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
     },
   },
 }

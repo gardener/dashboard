@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
                 :disabled="isUpdateDialog"
                 color="primary"
                 :label="nameLabel"
-                :error-messages="getErrorMessages('internalName')"
+                :error-messages="errors.internalName"
                 :hint="nameHint"
                 persistent-hint
                 tabindex="1"
@@ -43,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
                 multiple
                 item-title="displayName"
                 item-value="name"
-                :error-messages="getErrorMessages('internalRoles')"
+                :error-messages="errors.internalRoles"
                 :hint="rolesHint"
                 persistent-hint
                 tabindex="2"
@@ -150,6 +150,7 @@ import GToolbar from '@/components/GToolbar.vue'
 import {
   resourceName,
   unique,
+  withMessage,
 } from '@/utils/validators'
 import {
   errorDetailsFromError,
@@ -159,7 +160,7 @@ import {
   parseServiceAccountUsername,
   isServiceAccountUsername,
   setDelayedInputFocus,
-  getValidationErrors,
+  getVuelidateErrors,
   isForeignServiceAccount,
   MEMBER_ROLE_DESCRIPTORS,
 } from '@/utils'
@@ -228,8 +229,45 @@ export default {
     }
   },
   validations () {
-    // had to move the code to a computed property so that the getValidationErrors method can access it
-    return this.validators
+    const validators = {
+      internalRoles: {
+        required: withMessage(
+          this.isUserDialog
+            ? 'Users need to have at least one assigned role'
+            : 'Service accounts that are not part of this project need to have at least one assigned role',
+          requiredIf(function () {
+            return this.isForeignServiceAccount || this.isUserDialog
+          })),
+      },
+      internalName: {},
+    }
+    if (!this.isUpdateDialog) {
+      if (this.isUserDialog) {
+        validators.internalName = {
+          required,
+          unique: withMessage(() => `User '${this.internalName}' is already member of this project.`, unique('projectUsernames')),
+          isNoServiceAccount: withMessage('Please use add service account to add service accounts', value => !isServiceAccountUsername(value)),
+        }
+      } else if (this.isServiceDialog) {
+        const serviceAccountKeyFunc = (value) => {
+          return isServiceAccountUsername(value)
+            ? 'serviceAccountUsernames'
+            : 'serviceAccountNames'
+        }
+        validators.internalName = {
+          required,
+          serviceAccountResource: withMessage('Name must contain only alphanumeric characters or hypen. Colons are allowed if you specify the service account prefix to add a service account from another namespace',
+            value => {
+              if (isServiceAccountUsername(this.internalName)) {
+                return true
+              }
+              return resourceName(value)
+            }),
+          unique: withMessage(() => `Service Account '${this.internalName}' already exists. Please try a different name.`, unique(serviceAccountKeyFunc)),
+        }
+      }
+    }
+    return validators
   },
   computed: {
     ...mapState(useAuthzStore, ['namespace']),
@@ -247,66 +285,6 @@ export default {
     },
     valid () {
       return !this.v$.$invalid
-    },
-    validators () {
-      const validators = {
-        internalRoles: {
-          required: requiredIf(function () {
-            return this.isForeignServiceAccount || this.isUserDialog
-          }),
-        },
-        internalName: {},
-      }
-      if (!this.isUpdateDialog) {
-        if (this.isUserDialog) {
-          validators.internalName = {
-            required,
-            unique: unique('projectUsernames'),
-            isNoServiceAccount: value => !isServiceAccountUsername(value),
-          }
-        } else if (this.isServiceDialog) {
-          const serviceAccountKeyFunc = (value) => {
-            return isServiceAccountUsername(value)
-              ? 'serviceAccountUsernames'
-              : 'serviceAccountNames'
-          }
-          validators.internalName = {
-            required,
-            serviceAccountResource: value => {
-              if (isServiceAccountUsername(this.internalName)) {
-                return true
-              }
-              return resourceName(value)
-            },
-            unique: unique(serviceAccountKeyFunc),
-          }
-        }
-      }
-      return validators
-    },
-    validationErrors () {
-      const validationErrors = {}
-      if (this.isUserDialog) {
-        validationErrors.internalRoles = {
-          required: 'You need to assign roles to this user',
-        }
-        validationErrors.internalName = {
-          required: 'User is required',
-          unique: `User '${this.internalName}' is already member of this project.`,
-          isNoServiceAccount: 'Please use add service account to add service accounts',
-        }
-      } else if (this.isServiceDialog) {
-        validationErrors.internalRoles = {
-          required: 'You need to assign roles for service accounts that you want to invite to this project',
-        }
-        validationErrors.internalName = {
-          required: 'Service Account is required',
-          resourceName: 'Must contain only alphanumeric characters or hypen',
-          serviceAccountResource: 'Name must contain only alphanumeric characters or hypen. You can also specify the service account prefix if you want to add a service account from another namespace',
-          unique: `Service Account '${this.internalName}' already exists. Please try a different name.`,
-        }
-      }
-      return validationErrors
     },
     title () {
       if (this.isUpdateDialog) {
@@ -393,6 +371,9 @@ export default {
       }
       return 'Add'
     },
+    errors () {
+      return getVuelidateErrors(this.v$.$errors)
+    },
   },
   watch: {
     modelValue: function (value) {
@@ -411,9 +392,6 @@ export default {
     ]),
     hide () {
       this.visible = false
-    },
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
     },
     async submitAddMember () {
       this.v$.$touch()

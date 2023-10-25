@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
         v-model="maintenanceBegin"
         color="primary"
         label="Maintenance Start Time"
-        :error-messages="getErrorMessages('maintenanceBegin')"
+        :error-messages="errors.maintenanceBegin"
         variant="underlined"
         persistent-hint
         :hint="maintenanceBeginHint"
@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
         v-model="maintenanceTimezone"
         color="primary"
         label="Timezone"
-        :error-messages="getErrorMessages('maintenanceTimezone')"
+        :error-messages="errors.maintenanceTimezone"
         variant="underlined"
         @input="v$.maintenanceTimezone.$touch()"
         @blur="v$.maintenanceTimezone.$touch()"
@@ -37,7 +37,7 @@ SPDX-License-Identifier: Apache-2.0
         color="primary"
         type="number"
         label="Maintenance Window Size"
-        :error-messages="getErrorMessages('windowDuration')"
+        :error-messages="errors.windowDuration"
         suffix="minutes"
         variant="underlined"
         persistent-hint
@@ -64,28 +64,13 @@ import GTimeTextField from '@/components/GTimeTextField.vue'
 
 import moment from '@/utils/moment'
 import {
-  getValidationErrors,
+  getVuelidateErrors,
   randomMaintenanceBegin,
   maintenanceWindowWithBeginAndTimezone,
   getDurationInMinutes,
 } from '@/utils'
 import { isTimezone } from '@/utils/validators'
 import TimeWithOffset from '@/utils/TimeWithOffset'
-
-const validationErrors = {
-  maintenanceBegin: {
-    required: 'Maintenance start time is required',
-  },
-  maintenanceTimezone: {
-    required: 'Timezone is required',
-    isTimezone: 'TimeZone must have format [+|-]HH:mm',
-  },
-  windowDuration: {
-    required: 'Maintenance window size is required',
-    minValue: 'Minimum duration is 30 minutes',
-    maxValue: 'Maximum duration is 360 minutes (6h)',
-  },
-}
 
 export default {
   components: {
@@ -105,12 +90,24 @@ export default {
     }
   },
   validations () {
-    return this.validators
+    return {
+      maintenanceBegin: {
+        required,
+      },
+      maintenanceTimezone: {
+        required,
+        isTimezone,
+      },
+      windowDuration: {
+        required,
+        minValue: minValue(30),
+        maxValue: maxValue(360),
+      },
+    }
   },
   data () {
     return {
       maintenanceTimezone: this.timezone,
-      validationErrors,
       maintenanceBegin: undefined,
       windowDuration: 0,
     }
@@ -119,22 +116,6 @@ export default {
     ...mapState(useAppStore, [
       'timezone',
     ]),
-    validators () {
-      return {
-        maintenanceBegin: {
-          required,
-        },
-        maintenanceTimezone: {
-          required,
-          isTimezone,
-        },
-        windowDuration: {
-          required,
-          minValue: minValue(30),
-          maxValue: maxValue(360),
-        },
-      }
-    },
     maintenanceBeginMoment () {
       return moment.utc(`${this.maintenanceBegin}${this.maintenanceTimezone}`, 'HH:mmZ')
     },
@@ -151,6 +132,9 @@ export default {
       const maintenanceEndMoment = this.maintenanceBeginMoment.add(this.windowDuration, 'minutes')
       return `Maintenance time window ends at ${maintenanceEndMoment.format('HH:mm')} UTC`
     },
+    errors () {
+      return getVuelidateErrors(this.v$.$errors)
+    },
   },
   mounted () {
     this.reset()
@@ -166,9 +150,6 @@ export default {
       } else {
         this.setMaintenanceWindow(this.timeWindowBegin, this.timeWindowEnd)
       }
-    },
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
     },
     setMaintenanceWindow (begin, end) {
       const defaultDuration = 60

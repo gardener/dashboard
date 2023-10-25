@@ -99,7 +99,11 @@ export default {
     }
   },
   validations () {
-    return this.validators
+    return {
+      modelValue: {
+        required,
+      },
+    }
   },
   computed: {
     ...mapState(useAuthnStore, [
@@ -110,13 +114,6 @@ export default {
       'hasControlPlaneTerminalAccess',
       'hasShootTerminalAccess',
     ]),
-    validators () {
-      return {
-        modelValue: {
-          required,
-        },
-      }
-    },
     selectedTarget: {
       get () {
         return this.modelValue

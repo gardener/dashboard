@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="apiUrl"
           color="primary"
           label="API URL"
-          :error-messages="getErrorMessages('apiUrl')"
+          :error-messages="errors.apiUrl"
           variant="underlined"
           @update:model-value="v$.apiUrl.$touch()"
           @blur="v$.apiUrl.$touch()"
@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
           label="API HMAC"
           :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideSecret ? 'password' : 'text'"
-          :error-messages="getErrorMessages('apiHmac')"
+          :error-messages="errors.apiHmac"
           variant="underlined"
           @click:append="() => (hideSecret = !hideSecret)"
           @update:model-value="v$.apiHmac.$touch()"
@@ -63,19 +63,9 @@ import {
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 
 import {
-  getValidationErrors,
+  getVuelidateErrors,
   setDelayedInputFocus,
 } from '@/utils'
-
-const validationErrors = {
-  apiHmac: {
-    required: 'You can\'t leave this empty.',
-  },
-  apiUrl: {
-    required: 'You can\'t leave this empty.',
-    url: 'You must enter a valid URL',
-  },
-}
 
 export default {
   components: {
@@ -103,12 +93,18 @@ export default {
       apiHmac: undefined,
       apiUrl: undefined,
       hideSecret: true,
-      validationErrors,
     }
   },
   validations () {
-    // had to move the code to a computed property so that the getValidationErrors method can access it
-    return this.validators
+    return {
+      apiHmac: {
+        required,
+      },
+      apiUrl: {
+        required,
+        url,
+      },
+    }
   },
   computed: {
     visible: {
@@ -128,20 +124,11 @@ export default {
         metalAPIURL: this.apiUrl,
       }
     },
-    validators () {
-      const validators = {
-        apiHmac: {
-          required,
-        },
-        apiUrl: {
-          required,
-          url,
-        },
-      }
-      return validators
-    },
     isCreateMode () {
       return !this.secret
+    },
+    errors () {
+      return getVuelidateErrors(this.v$.$errors)
     },
   },
   watch: {
@@ -161,9 +148,6 @@ export default {
       if (!this.isCreateMode) {
         setDelayedInputFocus(this, 'apiUrl')
       }
-    },
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
     },
   },
 }

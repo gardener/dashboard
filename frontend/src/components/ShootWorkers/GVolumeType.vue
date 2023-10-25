@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
       :items="volumeTypeItems"
       item-title="name"
       item-value="name"
-      :error-messages="getErrorMessages('worker.volume.type')"
+      :error-messages="errors['worker.volume.type']"
       label="Volume Type"
       :hint="hint"
       persistent-hint
@@ -35,7 +35,7 @@ SPDX-License-Identifier: Apache-2.0
       v-model.number="workerIops"
       class="ml-1"
       color="primary"
-      :error-messages="getErrorMessages('workerIops')"
+      :error-messages="errors.workerIops"
       type="number"
       min="100"
       label="IOPS"
@@ -57,7 +57,7 @@ import { useVuelidate } from '@vuelidate/core'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
-import { getValidationErrors } from '@/utils'
+import { getVuelidateErrors } from '@/utils'
 import { getWorkerProviderConfig } from '@/utils/createShoot'
 
 import {
@@ -95,41 +95,23 @@ export default {
     }
   },
   validations () {
-    return this.validators
+    return {
+      worker: {
+        volume: {
+          type: {
+            required,
+          },
+        },
+      },
+      workerIops: {
+        required: requiredIf(() => {
+          return this.isAWS && this.worker.volume.type === 'io1'
+        }),
+        minValue: minValue(100),
+      },
+    }
   },
   computed: {
-    validators () {
-      return {
-        worker: {
-          volume: {
-            type: {
-              required,
-            },
-          },
-        },
-        workerIops: {
-          required: requiredIf(() => {
-            return this.isAWS && this.worker.volume.type === 'io1'
-          }),
-          minValue: minValue(100),
-        },
-      }
-    },
-    validationErrors () {
-      return {
-        worker: {
-          volume: {
-            type: {
-              required: 'Volume Type is required',
-            },
-          },
-        },
-        workerIops: {
-          required: 'IOPS is required for volumes of type io1',
-          minValue: 'Minimum IOPS is 100',
-        },
-      }
-    },
     volumeTypeItems () {
       const volumeTypes = this.volumeTypes.slice()
       if (this.notInCloudProfile) {
@@ -153,6 +135,9 @@ export default {
       const cloudProfile = this.cloudProfileByName(this.cloudProfileName)
       return get(cloudProfile, 'metadata.cloudProviderKind') === 'aws'
     },
+    errors () {
+      return getVuelidateErrors(this.v$.$errors)
+    },
   },
   mounted () {
     this.workerIops = get(this.worker, 'providerConfig.volume.iops')
@@ -162,9 +147,6 @@ export default {
     ...mapActions(useCloudProfileStore, [
       'cloudProfileByName',
     ]),
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
-    },
     onInputVolumeType () {
       this.v$.worker.volume.type.$touch()
       this.$emit('updateVolumeType')

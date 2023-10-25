@@ -37,7 +37,7 @@ SPDX-License-Identifier: Apache-2.0
                   v-model.trim="name"
                   color="primary"
                   label="Secret Name"
-                  :error-messages="getErrorMessages('name')"
+                  :error-messages="errors.name"
                   variant="underlined"
                   @update:model-value="v$.name.$touch()"
                   @blur="v$.name.$touch()"
@@ -141,7 +141,7 @@ import {
   isConflict,
 } from '@/utils/error'
 import {
-  getValidationErrors,
+  getVuelidateErrors,
   setDelayedInputFocus,
   setInputFocus,
 } from '@/utils'
@@ -159,15 +159,6 @@ import {
   filter,
   includes,
 } from '@/lodash'
-
-const validationErrors = {
-  name: {
-    required: 'You can\'t leave this empty.',
-    maxLength: 'It exceeds the maximum length of 128 characters.',
-    resourceName: 'Please use only lowercase alphanumeric characters and hyphen',
-    unique: 'Name is taken. Try another.',
-  },
-}
 
 export default {
   components: {
@@ -220,13 +211,20 @@ export default {
       name: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined,
-      validationErrors,
       helpVisible: false,
     }
   },
   validations () {
-    // had to move the code to a computed property so that the getValidationErrors method can access it
-    return this.validators
+    const validators = {}
+    if (this.isCreateMode) {
+      validators.name = {
+        required,
+        maxLength: maxLength(128),
+        resourceName,
+        unique: unique(this.isDnsProviderSecret ? 'dnsSecretNames' : 'infrastructureSecretNames'),
+      }
+    }
+    return validators
   },
   computed: {
     ...mapState(useAuthzStore, ['namespace']),
@@ -262,18 +260,6 @@ export default {
     },
     valid () {
       return this.dataValid && !this.v$.$invalid
-    },
-    validators () {
-      const validators = {}
-      if (this.isCreateMode) {
-        validators.name = {
-          required,
-          maxLength: maxLength(128),
-          resourceName,
-          unique: unique(this.isDnsProviderSecret ? 'dnsSecretNames' : 'infrastructureSecretNames'),
-        }
-      }
-      return validators
     },
     infrastructureSecretNames () {
       return this.infrastructureSecretList.map(item => item.metadata.name)
@@ -312,6 +298,9 @@ export default {
     },
     isDnsProviderSecret () {
       return includes(this.dnsProviderTypes, this.vendor)
+    },
+    errors () {
+      return getVuelidateErrors(this.v$.$errors)
     },
   },
   mounted () {
@@ -405,9 +394,6 @@ export default {
 
       this.errorMessage = undefined
       this.detailedMessage = undefined
-    },
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
     },
   },
 }

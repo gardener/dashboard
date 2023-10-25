@@ -20,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="apiToken"
           color="primary"
           label="Cloudflare API Token"
-          :error-messages="getErrorMessages('apiToken')"
+          :error-messages="errors.apiToken"
           :append-icon="hideApiToken ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideApiToken ? 'password' : 'text'"
           variant="underlined"
@@ -66,13 +66,7 @@ import { required } from '@vuelidate/validators'
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
 
-import { getValidationErrors } from '@/utils'
-
-const validationErrors = {
-  apiToken: {
-    required: 'You can\'t leave this empty.',
-  },
-}
+import { getVuelidateErrors } from '@/utils'
 
 export default {
   components: {
@@ -100,12 +94,14 @@ export default {
     return {
       apiToken: undefined,
       hideApiToken: true,
-      validationErrors,
     }
   },
   validations () {
-    // had to move the code to a computed property so that the getValidationErrors method can access it
-    return this.validators
+    return {
+      apiToken: {
+        required,
+      },
+    }
   },
   computed: {
     visible: {
@@ -124,16 +120,11 @@ export default {
         apiToken: this.apiToken,
       }
     },
-    validators () {
-      const validators = {
-        apiToken: {
-          required,
-        },
-      }
-      return validators
-    },
     isCreateMode () {
       return !this.secret
+    },
+    errors () {
+      return getVuelidateErrors(this.v$.$errors)
     },
   },
   watch: {
@@ -147,9 +138,6 @@ export default {
     reset () {
       this.v$.$reset()
       this.apiToken = ''
-    },
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
     },
   },
 }

@@ -69,7 +69,7 @@ SPDX-License-Identifier: Apache-2.0
         :loading="loading"
         :messages="messages"
         :menu-props="{ offset: [1, 0] }"
-        :error-messages="v$.internalValue.$errors.map(e => e.$message)"
+        :error-messages="errors.internalValue"
         class="g-field"
         @update:model-value="v$.internalValue.$touch"
         @blur="v$.internalValue.$touch"
@@ -122,6 +122,7 @@ import GAccountAvatar from '@/components/GAccountAvatar.vue'
 import {
   gravatarUrlGeneric,
   setDelayedInputFocus,
+  getVuelidateErrors,
 } from '@/utils'
 
 import GErrorMessage from './GErrorMessage.vue'
@@ -228,6 +229,9 @@ export default {
         return 'mdi-close'
       }
       return 'mdi-pencil'
+    },
+    errors () {
+      return getVuelidateErrors(this.v$.$errors)
     },
   },
   watch: {

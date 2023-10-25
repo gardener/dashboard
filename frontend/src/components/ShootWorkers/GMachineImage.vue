@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
     :items="machineImageItems"
     item-value="key"
     return-object
-    :error-messages="getErrorMessages('worker.machine.image')"
+    :error-messages="errors['worker.machine.image']"
     label="Machine Image"
     :hint="hint"
     persistent-hint
@@ -54,7 +54,7 @@ import GVendorIcon from '@/components/GVendorIcon'
 import GMultiMessage from '@/components/GMultiMessage'
 
 import {
-  getValidationErrors,
+  getVuelidateErrors,
   selectedImageIsNotLatest,
   transformHtml,
 } from '@/utils'
@@ -64,16 +64,6 @@ import {
   find,
   join,
 } from '@/lodash'
-
-const validationErrors = {
-  worker: {
-    machine: {
-      image: {
-        required: 'Machine Image is required',
-      },
-    },
-  },
-}
 
 export default {
   components: {
@@ -99,11 +89,6 @@ export default {
   setup () {
     return {
       v$: useVuelidate(),
-    }
-  },
-  data () {
-    return {
-      validationErrors,
     }
   },
   computed: {
@@ -183,28 +168,25 @@ export default {
     selectedImageIsNotLatest () {
       return selectedImageIsNotLatest(this.machineImage, this.machineImages)
     },
-    validators () {
-      return {
-        worker: {
-          machine: {
-            image: {
-              required,
-            },
-          },
-        },
-      }
+    errors () {
+      return getVuelidateErrors(this.v$.$errors)
     },
   },
   validations () {
-    return this.validators
+    return {
+      worker: {
+        machine: {
+          image: {
+            required,
+          },
+        },
+      },
+    }
   },
   mounted () {
     this.v$.$touch()
   },
   methods: {
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
-    },
     onInputMachineImage () {
       this.v$.worker.machine.image.$touch()
       this.$emit('updateMachineImage', this.worker.machine.image)

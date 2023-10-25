@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
           color="primary"
           variant="filled"
           label="Service Account Key"
-          :error-messages="getErrorMessages('serviceAccountKey')"
+          :error-messages="errors.serviceAccountKey"
           hint="Enter or drop a service account key in JSON format"
           persistent-hint
           @update:model-value="v$.serviceAccountKey.$touch()"
@@ -89,16 +89,9 @@ import GExternalLink from '@/components/GExternalLink'
 import { serviceAccountKey } from '@/utils/validators'
 import {
   handleTextFieldDrop,
-  getValidationErrors,
+  getVuelidateErrors,
   setDelayedInputFocus,
 } from '@/utils'
-
-const validationErrors = {
-  serviceAccountKey: {
-    required: 'You can\'t leave this empty.',
-    serviceAccountKey: 'Not a valid Service Account Key',
-  },
-}
 
 export default {
   components: {
@@ -128,13 +121,16 @@ export default {
   data () {
     return {
       serviceAccountKey: undefined,
-      validationErrors,
       dropHandlerInitialized: false,
     }
   },
   validations () {
-    // had to move the code to a computed property so that the getValidationErrors method can access it
-    return this.validators
+    return {
+      serviceAccountKey: {
+        required,
+        serviceAccountKey,
+      },
+    }
   },
   computed: {
     visible: {
@@ -153,15 +149,6 @@ export default {
         'serviceaccount.json': this.serviceAccountKey,
       }
     },
-    validators () {
-      const validators = {
-        serviceAccountKey: {
-          required,
-          serviceAccountKey,
-        },
-      }
-      return validators
-    },
     isCreateMode () {
       return !this.secret
     },
@@ -173,6 +160,9 @@ export default {
         return 'Google Cloud DNS'
       }
       return undefined
+    },
+    errors () {
+      return getVuelidateErrors(this.v$.$errors)
     },
   },
   watch: {
@@ -199,9 +189,6 @@ export default {
       if (!this.isCreateMode) {
         setDelayedInputFocus(this, 'serviceAccountKey')
       }
-    },
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
     },
     initializeDropHandlerOnce () {
       if (this.dropHandlerInitialized) {

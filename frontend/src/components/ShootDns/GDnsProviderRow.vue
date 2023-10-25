@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
               :disabled="readonly || primaryReadonly"
               color="primary"
               :items="dnsProviderTypes"
-              :error-messages="getErrorMessages('type')"
+              :error-messages="errors.type"
               label="Dns Provider Type"
               :hint="typeHint"
               persistent-hint
@@ -134,7 +134,7 @@ import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import GSelectSecret from '@/components/Secrets/GSelectSecret'
 import GVendorIcon from '@/components/GVendorIcon'
 
-import { getValidationErrors } from '@/utils'
+import { getVuelidateErrors } from '@/utils'
 
 import {
   get,
@@ -142,12 +142,6 @@ import {
   find,
   map,
 } from '@/lodash'
-
-const validationErrors = {
-  type: {
-    required: 'DNS Provider Type is required',
-  },
-}
 
 export default {
   components: {
@@ -166,11 +160,14 @@ export default {
     }
   },
   validations () {
-    return this.validators
+    return {
+      type: {
+        required,
+      },
+    }
   },
   data () {
     return {
-      validationErrors,
       secretValid: true,
     }
   },
@@ -183,13 +180,6 @@ export default {
     ...mapState(useGardenerExtensionStore, [
       'sortedDnsProviderList',
     ]),
-    validators () {
-      return {
-        type: {
-          required,
-        },
-      }
-    },
     dnsProviderTypes () {
       return map(this.sortedDnsProviderList, 'type')
     },
@@ -276,6 +266,9 @@ export default {
     valid () {
       return get(this.dnsProvider, 'valid')
     },
+    errors () {
+      return getVuelidateErrors(this.v$.$errors)
+    },
   },
   watch: {
     'v$.$invalid' () {
@@ -309,9 +302,6 @@ export default {
       if (this.valid !== valid && !this.readonly) {
         this.setData({ valid })
       }
-    },
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
     },
     onDelete () {
       this.deleteDnsProvider(this.dnsProviderId)

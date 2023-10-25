@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     :error-messages="errorMessages"
     :hint="inputHint"
     :type="textFieldType"
-    @change="v$.timeValue.$touch()"
+    @input="v$.timeValue.$touch()"
   />
 </template>
 
@@ -20,7 +20,10 @@ import { computed } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { useVModel } from '@vueuse/core'
 
-import { getValidationErrors } from '@/utils'
+import { withMessage } from '@/utils/validators'
+import { getVuelidateErrors } from '@/utils'
+
+import { compact } from '@/lodash'
 
 const props = defineProps({
   modelValue: {
@@ -55,15 +58,10 @@ const textFieldType = computed(() => {
 
 const rules = {
   timeValue: {
-    timeSyntax: (value) => {
-      return !value?.length || /^([01][0-9]|2[0-3]):([0-5][0-9])$/.test(value)
-    },
-  },
-}
-
-const validationErrors = {
-  timeValue: {
-    timeSyntax: 'Input value is not valid 24-hour time format (HH:MM)',
+    timeSyntax: withMessage('Input value is not valid 24-hour time format (HH:MM)',
+      (value) => {
+        return !value?.length || /^([01][0-9]|2[0-3]):([0-5][0-9])$/.test(value)
+      }),
   },
 }
 
@@ -76,16 +74,11 @@ const inputHint = computed(() => {
 })
 
 const errorMessages = computed(() => {
-  return [
-    ...getErrorMessages('timeValue'),
-    ...props.errorMessages,
-  ]
+  const errors = getVuelidateErrors(v$.value.$errors)
+  const errorMessages = [props.errorMessages, errors.timeValue]
+  return compact(errorMessages)
 })
 
 const v$ = useVuelidate(rules, { timeValue })
-
-function getErrorMessages (field) {
-  return getValidationErrors({ v$: v$.value, validators: rules, validationErrors }, field)
-}
 
 </script>

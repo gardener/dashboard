@@ -20,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="authURL"
           color="primary"
           label="Auth URL"
-          :error-messages="getErrorMessages('authURL')"
+          :error-messages="errors.authURL"
           variant="underlined"
           @update:model-value="v$.authURL.$touch()"
           @blur="v$.authURL.$touch()"
@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="domainName"
           color="primary"
           label="Domain Name"
-          :error-messages="getErrorMessages('domainName')"
+          :error-messages="errors.domainName"
           variant="underlined"
           @update:model-value="v$.domainName.$touch()"
           @blur="v$.domainName.$touch()"
@@ -43,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="tenantName"
           color="primary"
           label="Project / Tenant Name"
-          :error-messages="getErrorMessages('tenantName')"
+          :error-messages="errors.tenantName"
           variant="underlined"
           @update:model-value="v$.tenantName.$touch()"
           @blur="v$.tenantName.$touch()"
@@ -74,7 +74,7 @@ SPDX-License-Identifier: Apache-2.0
               v-model="applicationCredentialID"
               color="primary"
               label="ID"
-              :error-messages="getErrorMessages('applicationCredentialID')"
+              :error-messages="errors.applicationCredentialID"
               variant="underlined"
               @update:model-value="v$.applicationCredentialID.$touch()"
               @blur="v$.applicationCredentialID.$touch()"
@@ -85,7 +85,7 @@ SPDX-License-Identifier: Apache-2.0
               v-model="applicationCredentialName"
               color="primary"
               label="Name"
-              :error-messages="getErrorMessages('applicationCredentialName')"
+              :error-messages="errors.applicationCredentialName"
               variant="underlined"
               @update:model-value="v$.applicationCredentialName.$touch()"
               @blur="v$.applicationCredentialName.$touch()"
@@ -96,7 +96,7 @@ SPDX-License-Identifier: Apache-2.0
               v-model="applicationCredentialSecret"
               color="primary"
               label="Password"
-              :error-messages="getErrorMessages('applicationCredentialSecret')"
+              :error-messages="errors.applicationCredentialSecret"
               :append-icon="hideApplicationCredentialSecret ? 'mdi-eye' : 'mdi-eye-off'"
               :type="hideApplicationCredentialSecret ? 'password' : 'text'"
               variant="underlined"
@@ -113,7 +113,7 @@ SPDX-License-Identifier: Apache-2.0
               v-messages-color="{ color: 'primary' }"
               color="primary"
               label="Technical User"
-              :error-messages="getErrorMessages('username')"
+              :error-messages="errors.username"
               hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
               variant="underlined"
               @update:model-value="v$.username.$touch()"
@@ -126,7 +126,7 @@ SPDX-License-Identifier: Apache-2.0
               v-messages-color="{ color: 'warning' }"
               color="primary"
               label="Password"
-              :error-messages="getErrorMessages('password')"
+              :error-messages="errors.password"
               :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
               :type="hideSecret ? 'password' : 'text'"
               hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
@@ -177,41 +177,11 @@ import { useCloudProfileStore } from '@/store/cloudProfile'
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
 
+import { withMessage } from '@/utils/validators'
 import {
-  getValidationErrors,
+  getVuelidateErrors,
   setDelayedInputFocus,
 } from '@/utils'
-
-const requiredMessage = 'You can\'t leave this empty.'
-const requiredUserMessage = 'Required for technical user authentication'
-const requiredApplicationCredentialsMessage = 'Required for application credentials authentication'
-
-const validationErrors = {
-  domainName: {
-    required: requiredMessage,
-  },
-  tenantName: {
-    required: requiredMessage,
-  },
-  username: {
-    required: requiredUserMessage,
-  },
-  password: {
-    required: requiredUserMessage,
-  },
-  authURL: {
-    required: 'Required for Secret Type DNS.',
-  },
-  applicationCredentialID: {
-    required: requiredApplicationCredentialsMessage,
-  },
-  applicationCredentialName: {
-    required: requiredApplicationCredentialsMessage,
-  },
-  applicationCredentialSecret: {
-    required: requiredApplicationCredentialsMessage,
-  },
-}
 
 export default {
   components: {
@@ -250,13 +220,60 @@ export default {
       applicationCredentialName: undefined,
       applicationCredentialSecret: undefined,
       hideApplicationCredentialSecret: true,
-      validationErrors,
       authenticationMethod: 'USER',
     }
   },
   validations () {
-    // had to move the code to a computed property so that the getValidationErrors method can access it
-    return this.validators
+    const requiredUserMessage = 'Required for technical user authentication'
+    const requiredApplicationCredentialsMessage = 'Required for application credentials authentication'
+    return {
+      domainName: {
+        required,
+      },
+      tenantName: {
+        required,
+      },
+      username: {
+        required: withMessage(requiredUserMessage,
+          requiredIf(function () {
+            return this.authenticationMethod === 'USER'
+          }),
+        ),
+      },
+      password: {
+        required: withMessage(requiredUserMessage,
+          requiredIf(function () {
+            return this.authenticationMethod === 'USER'
+          }),
+        ),
+      },
+      authURL: {
+        required: requiredIf(function () {
+          return this.vendor === 'openstack-designate'
+        }),
+      },
+      applicationCredentialID: {
+        required: withMessage(requiredApplicationCredentialsMessage,
+          requiredIf(function () {
+            return this.authenticationMethod === 'APPLICATION_CREDENTIALS'
+          }),
+        ),
+      },
+      applicationCredentialName: {
+        required: withMessage(requiredApplicationCredentialsMessage,
+          requiredIf(function () {
+            return this.authenticationMethod === 'APPLICATION_CREDENTIALS'
+          }),
+        ),
+      },
+      applicationCredentialSecret: {
+        required: withMessage(requiredApplicationCredentialsMessage,
+          requiredIf(function () {
+            return this.authenticationMethod === 'APPLICATION_CREDENTIALS'
+          }),
+        ),
+      },
+    }
   },
   computed: {
     visible: {
@@ -286,47 +303,6 @@ export default {
 
       return data
     },
-    validators () {
-      const validators = {
-        domainName: {
-          required,
-        },
-        tenantName: {
-          required,
-        },
-        username: {
-          required: requiredIf(function () {
-            return this.authenticationMethod === 'USER'
-          }),
-        },
-        password: {
-          required: requiredIf(function () {
-            return this.authenticationMethod === 'USER'
-          }),
-        },
-        authURL: {
-          required: requiredIf(function () {
-            return this.vendor === 'openstack-designate'
-          }),
-        },
-        applicationCredentialID: {
-          required: requiredIf(function () {
-            return this.authenticationMethod === 'APPLICATION_CREDENTIALS'
-          }),
-        },
-        applicationCredentialName: {
-          required: requiredIf(function () {
-            return this.authenticationMethod === 'APPLICATION_CREDENTIALS'
-          }),
-        },
-        applicationCredentialSecret: {
-          required: requiredIf(function () {
-            return this.authenticationMethod === 'APPLICATION_CREDENTIALS'
-          }),
-        },
-      }
-      return validators
-    },
     isCreateMode () {
       return !this.secret
     },
@@ -338,6 +314,9 @@ export default {
         return 'OpenStack Designate'
       }
       return undefined
+    },
+    errors () {
+      return getVuelidateErrors(this.v$.$errors)
     },
   },
   watch: {
@@ -376,9 +355,6 @@ export default {
         }
         setDelayedInputFocus(this, 'domainName')
       }
-    },
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
     },
   },
 }

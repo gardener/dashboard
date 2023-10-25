@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
             item-color="primary"
             :items="weekdays"
             return-object
-            :error-messages="getErrorMessages('selectedDays')"
+            :error-messages="errors.selectedDays"
             chips
             label="Weekdays on which this rule shall be active"
             multiple
@@ -35,7 +35,7 @@ SPDX-License-Identifier: Apache-2.0
             v-model="wakeUpTime"
             color="primary"
             label="Wake up at"
-            :error-messages="getErrorMessages('wakeUpTime')"
+            :error-messages="errors.wakeUpTime"
             clearable
             variant="underlined"
             @blur="touchIfNothingFocused"
@@ -48,7 +48,7 @@ SPDX-License-Identifier: Apache-2.0
             v-model="hibernateTime"
             color="primary"
             label="Hibernate at"
-            :error-messages="getErrorMessages('hibernateTime')"
+            :error-messages="errors.hibernateTime"
             clearable
             variant="underlined"
             @blur="touchIfNothingFocused"
@@ -89,7 +89,8 @@ import { useVuelidate } from '@vuelidate/core'
 
 import GTimeTextField from '@/components/GTimeTextField.vue'
 
-import { getValidationErrors } from '@/utils'
+import { withMessage } from '@/utils/validators'
+import { getVuelidateErrors } from '@/utils'
 import moment from '@/utils/moment'
 
 import {
@@ -101,21 +102,6 @@ import {
   isEqual,
   sortBy,
 } from '@/lodash'
-
-const validationErrors = {
-  selectedDays: {
-    required: 'Weekdays is required',
-  },
-  hibernateTime: {
-    required: 'You need to specify at least hibernation or wake up time',
-  },
-  wakeUpTime: {
-    required: 'You need to specify at least hibernation or wake up time',
-  },
-  selectedLocation: {
-    required: 'Location is required',
-  },
-}
 
 export default {
   components: {
@@ -140,11 +126,31 @@ export default {
     }
   },
   validations () {
-    return this.validators
+    return {
+      selectedDays: {
+        required,
+      },
+      hibernateTime: {
+        required: withMessage('You need to specify at least hibernation or wake up time',
+          requiredIf(function () {
+            return !this.wakeUpTime
+          }),
+        ),
+      },
+      wakeUpTime: {
+        required: withMessage('You need to specify at least hibernation or wake up time',
+          requiredIf(function () {
+            return !this.hibernateTime
+          }),
+        ),
+      },
+      selectedLocation: {
+        required,
+      },
+    }
   },
   data () {
     return {
-      validationErrors,
       locations: moment.tz.names(),
       selectedLocation: null,
       wakeUpTime: null,
@@ -193,25 +199,8 @@ export default {
     id () {
       return this.scheduleEvent.id
     },
-    validators () {
-      return {
-        selectedDays: {
-          required,
-        },
-        hibernateTime: {
-          required: requiredIf(function () {
-            return !this.wakeUpTime
-          }),
-        },
-        wakeUpTime: {
-          required: requiredIf(function () {
-            return !this.hibernateTime
-          }),
-        },
-        selectedLocation: {
-          required,
-        },
-      }
+    errors () {
+      return getVuelidateErrors(this.v$.$errors)
     },
   },
   mounted () {
@@ -222,9 +211,6 @@ export default {
     this.updateSelectedDays() // trigger sort
   },
   methods: {
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
-    },
     updateTime ({ eventName, time }) {
       const momentObj = moment(time, 'HHmm')
       let hour

@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="vsphereUsername"
           color="primary"
           label="vSphere Username"
-          :error-messages="getErrorMessages('vsphereUsername')"
+          :error-messages="errors.vsphereUsername"
           variant="underlined"
           @update:model-value="v$.vsphereUsername.$touch()"
           @blur="v$.vsphereUsername.$touch()"
@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="vspherePassword"
           color="primary"
           label="vSphere Password"
-          :error-messages="getErrorMessages('vspherePassword')"
+          :error-messages="errors.vspherePassword"
           :append-icon="hideVspherePassword ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideVspherePassword ? 'password' : 'text'"
           variant="underlined"
@@ -46,7 +46,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="nsxtUsername"
           color="primary"
           label="NSX-T Username"
-          :error-messages="getErrorMessages('nsxtUsername')"
+          :error-messages="errors.nsxtUsername"
           variant="underlined"
           @update:model-value="v$.nsxtUsername.$touch()"
           @blur="v$.nsxtUsername.$touch()"
@@ -57,7 +57,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="nsxtPassword"
           color="primary"
           label="NSX-T Password"
-          :error-messages="getErrorMessages('nsxtPassword')"
+          :error-messages="errors.nsxtPassword"
           :append-icon="hideNsxtPassword ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideNsxtPassword ? 'password' : 'text'"
           variant="underlined"
@@ -100,24 +100,9 @@ import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink.vue'
 
 import {
-  getValidationErrors,
+  getVuelidateErrors,
   setDelayedInputFocus,
 } from '@/utils'
-
-const validationErrors = {
-  vsphereUsername: {
-    required: 'You can\'t leave this empty.',
-  },
-  vspherePassword: {
-    required: 'You can\'t leave this empty.',
-  },
-  nsxtUsername: {
-    required: 'You can\'t leave this empty.',
-  },
-  nsxtPassword: {
-    required: 'You can\'t leave this empty.',
-  },
-}
 
 export default {
   components: {
@@ -149,12 +134,23 @@ export default {
       nsxtUsername: undefined,
       nsxtPassword: undefined,
       hideNsxtPassword: true,
-      validationErrors,
     }
   },
   validations () {
-    // had to move the code to a computed property so that the getValidationErrors method can access it
-    return this.validators
+    return {
+      vsphereUsername: {
+        required,
+      },
+      vspherePassword: {
+        required,
+      },
+      nsxtUsername: {
+        required,
+      },
+      nsxtPassword: {
+        required,
+      },
+    }
   },
   computed: {
     visible: {
@@ -176,25 +172,11 @@ export default {
         nsxtPassword: this.nsxtPassword,
       }
     },
-    validators () {
-      const validators = {
-        vsphereUsername: {
-          required,
-        },
-        vspherePassword: {
-          required,
-        },
-        nsxtUsername: {
-          required,
-        },
-        nsxtPassword: {
-          required,
-        },
-      }
-      return validators
-    },
     isCreateMode () {
       return !this.secret
+    },
+    errors () {
+      return getVuelidateErrors(this.v$.$errors)
     },
   },
   watch: {
@@ -220,9 +202,6 @@ export default {
         }
         setDelayedInputFocus(this, 'vsphereUsername')
       }
-    },
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
     },
   },
 }

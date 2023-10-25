@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
     item-title="name"
     item-value="name"
     :search="search"
-    :error-messages="getErrorMessages('internalValue')"
+    :error-messages="errors.internalValue"
     :custom-filter="customFilter"
     label="Machine Type"
     :hint="hint"
@@ -41,15 +41,9 @@ SPDX-License-Identifier: Apache-2.0
 import { required } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
-import { getValidationErrors } from '@/utils'
+import { getVuelidateErrors } from '@/utils'
 
 import { find } from '@/lodash'
-
-const validationErrors = {
-  internalValue: {
-    required: 'Machine Type is required',
-  },
-}
 
 export default {
   props: {
@@ -74,7 +68,6 @@ export default {
     return {
       lazyValue: this.modelValue,
       search: '',
-      validationErrors,
     }
   },
   computed: {
@@ -106,16 +99,16 @@ export default {
     hint () {
       return this.notInList ? 'This machine type may not be supported by your worker as it is not supported by your current worker settings' : ''
     },
-    validators () {
-      return {
-        internalValue: {
-          required,
-        },
-      }
+    errors () {
+      return getVuelidateErrors(this.v$.$errors)
     },
   },
   validations () {
-    return this.validators
+    return {
+      internalValue: {
+        required,
+      },
+    }
   },
   watch: {
     modelValue (value) {
@@ -132,9 +125,6 @@ export default {
     }
   },
   methods: {
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
-    },
     customFilter (title, query, item) {
       if (!item) {
         return false

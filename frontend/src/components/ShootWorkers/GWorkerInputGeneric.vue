@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-text-field
           v-model="worker.name"
           color="primary"
-          :error-messages="getErrorMessages('worker.name')"
+          :error-messages="errors['worker.name']"
           counter="15"
           label="Group Name"
           variant="underlined"
@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
           color="primary"
           item-color="primary"
           :items="machineArchitectures"
-          :error-messages="getErrorMessages('machineArchitecture')"
+          :error-messages="errors['machineArchitecture']"
           label="Architecture"
           variant="underlined"
           @blur="v$.machineArchitecture.$touch()"
@@ -70,7 +70,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="volumeSize"
           :min="minimumVolumeSize"
           color="primary"
-          :error-messages="getErrorMessages('volumeSize')"
+          :error-messages="errors.volumeSize"
           label="Volume Size"
           @update:model-value="onInputVolumeSize"
           @blur="v$.volumeSize.$touch()"
@@ -81,7 +81,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="innerMin"
           min="0"
           color="primary"
-          :error-messages="getErrorMessages('worker.minimum')"
+          :error-messages="errors['worker.minimum']"
           type="number"
           label="Autoscaler Min."
           variant="underlined"
@@ -94,10 +94,10 @@ SPDX-License-Identifier: Apache-2.0
           v-model="innerMax"
           min="0"
           color="primary"
-          :error-messages="getErrorMessages('worker.maximum')"
           type="number"
           label="Autoscaler Max."
           variant="underlined"
+          :error-messages="errors.innerMax"
           @input="onInputMaximum"
           @blur="v$.worker.maximum.$touch()"
         />
@@ -107,7 +107,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="maxSurge"
           min="0"
           color="primary"
-          :error-messages="getErrorMessages('worker.maxSurge')"
+          :error-messages="errors['worker.maxSurge']"
           label="Max. Surge"
           variant="underlined"
           @input="onInputMaxSurge"
@@ -125,7 +125,7 @@ SPDX-License-Identifier: Apache-2.0
           item-color="primary"
           label="Zone"
           :items="zoneItems"
-          :error-messages="getErrorMessages('selectedZones')"
+          :error-messages="errors.selectedZones"
           multiple
           chips
           closable-chips
@@ -170,7 +170,7 @@ import GMachineImage from '@/components/ShootWorkers/GMachineImage'
 import GContainerRuntime from '@/components/ShootWorkers/GContainerRuntime'
 
 import {
-  getValidationErrors,
+  getVuelidateErrors,
   parseSize,
 } from '@/utils'
 import {
@@ -178,6 +178,7 @@ import {
   resourceName,
   noStartEndHyphen,
   numberOrPercentage,
+  withMessage,
 } from '@/utils/validators'
 
 import {
@@ -195,37 +196,6 @@ import {
   head,
   pick,
 } from '@/lodash'
-
-const validationErrors = {
-  worker: {
-    name: {
-      required: 'Name is required',
-      maxLength: 'Name is too long',
-      resourceName: 'Name must only be lowercase letters, numbers and hyphens',
-      uniqueWorkerName: 'Name is taken. Try another.',
-      noStartEndHyphen: 'Name must not start or end with a hyphen',
-    },
-    minimum: {
-      minValue: 'Invalid value',
-    },
-    maximum: {
-      minValue: 'Invalid value',
-      systemComponents: 'Value must be greater or equal to the number of zones configured for this pool',
-    },
-    maxSurge: {
-      numberOrPercentage: 'Invalid value',
-    },
-  },
-  selectedZones: {
-    required: 'Zone is required',
-  },
-  volumeSize: {
-    minVolumeSize: 'Invalid volume size',
-  },
-  machineArchitecture: {
-    required: 'Machine Architecture is required',
-  },
-}
 
 export default {
   components: {
@@ -286,64 +256,61 @@ export default {
   },
   data () {
     return {
-      validationErrors,
       immutableZones: undefined,
       volumeSize: undefined,
     }
   },
   validations () {
-    return this.validators
-  },
-  computed: {
-    validators () {
-      return {
-        worker: {
-          name: {
-            required,
-            maxLength: maxLength(15),
-            noStartEndHyphen, // Order is important for UI hints
-            resourceName,
-            uniqueWorkerName,
-          },
-          minimum: {
-            minValue: minValue(0),
-          },
-          maximum: {
-            minValue: minValue(0),
-            systemComponents: (value) => {
+    return {
+      worker: {
+        name: {
+          required,
+          maxLength: maxLength(15),
+          resourceName,
+          noStartEndHyphen, // Order is important for UI hints
+          uniqueWorkerName,
+        },
+        minimum: {
+          minValue: minValue(0),
+        },
+        maximum: {
+          minValue: minValue(0),
+          systemComponents: withMessage('Value must be greater or equal to the number of zones configured for this pool',
+            (value) => {
               const hasSystemComponents = get(this.worker, 'systemComponents.allow', true)
               if (!hasSystemComponents) {
                 return true
               }
               const zones = get(this.worker, 'zones.length', 0)
               return value >= zones
-            },
-          },
-          maxSurge: {
-            numberOrPercentage,
-          },
+            }),
         },
-        selectedZones: {
-          required: requiredIf(function () {
-            return this.zonedCluster
-          }),
+        maxSurge: {
+          numberOrPercentage,
         },
-        volumeSize: {
-          minVolumeSize (value) {
-            if (!this.canDefineVolumeSize) {
-              return true
-            }
-            if (!value) {
-              return false
-            }
-            return this.minimumVolumeSize <= parseSize(value)
-          },
+      },
+      selectedZones: {
+        required: requiredIf(function () {
+          return this.zonedCluster
+        }),
+      },
+      volumeSize: {
+        minVolumeSize (value) {
+          if (!this.canDefineVolumeSize) {
+            return true
+          }
+          if (!value) {
+            return false
+          }
+          return this.minimumVolumeSize <= parseSize(value)
         },
-        machineArchitecture: {
-          required,
-        },
-      }
-    },
+      },
+      machineArchitecture: {
+        required,
+      },
+    }
+  },
+  computed: {
     machineTypes () {
       return this.machineTypesByCloudProfileNameAndRegionAndArchitecture({
         cloudProfileName: this.cloudProfileName,
@@ -504,6 +471,9 @@ export default {
         this.onInputVolumeSize()
       },
     },
+    errors () {
+      return getVuelidateErrors(this.v$.$errors)
+    },
   },
   mounted () {
     const volumeSize = get(this.worker, 'volume.size')
@@ -522,9 +492,6 @@ export default {
       'machineImagesByCloudProfileName',
       'minimumVolumeSizeByCloudProfileNameAndRegion',
     ]),
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
-    },
     onInputName () {
       this.v$.worker.name.$touch()
     },
