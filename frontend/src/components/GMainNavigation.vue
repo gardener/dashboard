@@ -345,27 +345,23 @@ const sortedAndFilteredProjectList = computed(() => {
     const owner = toLower(replace(item.data.owner, /@.*$/, ''))
     return includes(name, filter) || includes(owner, filter)
   }
-  const filteredList = filter(projectList.value, predicate)
+  const filteredList = filter([
+    allProjectsItem,
+    ...projectList.value,
+  ], predicate)
 
   const exactMatch = item => {
     return toLower(item.metadata.name) === toLower(projectFilter.value) ? 0 : 1
   }
-  const sortedList = sortBy(filteredList, [exactMatch, 'metadata.name'])
+  const allProjectsMatch = item => {
+    return item?.metadata.namespace === allProjectsItem.metadata.namespace ? 0 : 1
+  }
+  const sortedList = sortBy(filteredList, [allProjectsMatch, exactMatch, 'metadata.name'])
   return sortedList
 })
 
-const sortedAndFilteredProjectListWithAllProjects = computed(() => {
-  if (projectList.value.length > 1) {
-    return [
-      allProjectsItem,
-      ...sortedAndFilteredProjectList.value,
-    ]
-  }
-  return sortedAndFilteredProjectList.value
-})
-
 const visibleProjectList = computed(() => {
-  const projectList = sortedAndFilteredProjectListWithAllProjects.value
+  const projectList = sortedAndFilteredProjectList.value
   const endIndex = numberOfVisibleProjects.value
   return slice(projectList, 0, endIndex)
 })
@@ -390,13 +386,13 @@ function namespacedRoute (route) {
 }
 
 function findProjectCaseInsensitive (projectName) {
-  return find(sortedAndFilteredProjectListWithAllProjects.value, project => {
+  return find(sortedAndFilteredProjectList.value, project => {
     return toLower(projectName) === toLower(project.metadata.name)
   })
 }
 
 function findProjectIndexCaseInsensitive (projectName) {
-  return findIndex(sortedAndFilteredProjectListWithAllProjects.value, project => {
+  return findIndex(sortedAndFilteredProjectList.value, project => {
     return toLower(projectName) === toLower(project.metadata.name)
   })
 }
@@ -488,12 +484,12 @@ function highlightProjectWithKeys (keyDirection) {
       currentHighlightedIndex--
     }
   } else if (keyDirection === 'down') {
-    if (currentHighlightedIndex < sortedAndFilteredProjectListWithAllProjects.value.length - 1) {
+    if (currentHighlightedIndex < sortedAndFilteredProjectList.value.length - 1) {
       currentHighlightedIndex++
     }
   }
 
-  const newHighlightedProject = sortedAndFilteredProjectListWithAllProjects.value[currentHighlightedIndex]
+  const newHighlightedProject = sortedAndFilteredProjectList.value[currentHighlightedIndex]
   highlightedProjectName.value = newHighlightedProject.metadata.name
 
   if (currentHighlightedIndex >= numberOfVisibleProjects.value - 1) {
@@ -559,7 +555,7 @@ function handleProjectListScroll () {
   const scrolledToLastElement = lastProjectElementPosY > 0
   if (scrolledToLastElement) {
     // scrolled last element into view
-    if (numberOfVisibleProjects.value <= sortedAndFilteredProjectListWithAllProjects.value.length) {
+    if (numberOfVisibleProjects.value <= sortedAndFilteredProjectList.value.length) {
       numberOfVisibleProjects.value++
     }
   }
