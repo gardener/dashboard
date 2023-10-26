@@ -166,8 +166,12 @@ export function useUserManager (options) {
     redirect(url)
   }
 
-  function signin () {
+  function signin (redirectPath) {
     const url = new URL('/login', origin)
+    redirectPath ??= window.location.pathname + window.location.search
+    if (redirectPath) {
+      url.searchParams.set('redirectPath', redirectPath)
+    }
     redirect(url)
   }
 
