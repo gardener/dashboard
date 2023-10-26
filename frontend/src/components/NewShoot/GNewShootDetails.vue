@@ -110,7 +110,7 @@ import { useAsyncRef } from '@/composables/useAsyncRef'
 
 import {
   allWithCauserParam,
-  resourceName,
+  lowerCaseAlphaNumHyphen,
   noStartEndHyphen,
   noConsecutiveHyphen,
   withMessage,
@@ -162,8 +162,8 @@ export default {
         required,
         maxLength: maxLength(this.maxShootNameLength),
         noConsecutiveHyphen,
-        noStartEndHyphen, // Order is important for UI hints
-        resourceName,
+        noStartEndHyphen,
+        lowerCaseAlphaNumHyphen,
         unique: withMessage('A cluster with this name already exists in this project',
           (value) => {
             return this.shootByNamespaceAndName({ namespace: this.namespace, name: value }) === undefined

@@ -139,7 +139,8 @@ import GCloudProfile from '@/components/GCloudProfile'
 import {
   allWithCauserParam,
   unique,
-  resourceName,
+  lowerCaseAlphaNumHyphen,
+  noStartEndHyphen,
 } from '@/utils/validators'
 import {
   errorDetailsFromError,
@@ -221,7 +222,8 @@ export default {
       validators.name = allWithCauserParam('Secret Name', {
         required,
         maxLength: maxLength(128),
-        resourceName,
+        lowerCaseAlphaNumHyphen,
+        noStartEndHyphen,
         unique: unique(this.isDnsProviderSecret ? 'dnsSecretNames' : 'infrastructureSecretNames'),
       })
     }

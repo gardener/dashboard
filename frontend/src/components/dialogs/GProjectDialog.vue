@@ -147,7 +147,7 @@ import GToolbar from '@/components/GToolbar.vue'
 
 import {
   allWithCauserParam,
-  resourceName,
+  lowerCaseAlphaNumHyphen,
   unique,
   noStartEndHyphen,
   noConsecutiveHyphen,
@@ -232,8 +232,8 @@ export default {
         required,
         maxLength: maxLength(10),
         noConsecutiveHyphen,
-        noStartEndHyphen, // Order is important for UI hints
-        resourceName,
+        noStartEndHyphen,
+        lowerCaseAlphaNumHyphen,
         unique: withMessage('A project with this name already exists', unique('projectNames')),
       }),
     }

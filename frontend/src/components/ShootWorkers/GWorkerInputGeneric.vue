@@ -176,7 +176,7 @@ import GContainerRuntime from '@/components/ShootWorkers/GContainerRuntime'
 import {
   allWithCauserParam,
   uniqueWorkerName,
-  resourceName,
+  lowerCaseAlphaNumHyphen,
   noStartEndHyphen,
   numberOrPercentage,
   withMessage,
@@ -271,8 +271,8 @@ export default {
         name: allWithCauserParam(() => `${this.workerGroupName} Name`, {
           required,
           maxLength: maxLength(15),
-          resourceName,
-          noStartEndHyphen, // Order is important for UI hints
+          lowerCaseAlphaNumHyphen,
+          noStartEndHyphen,
           uniqueWorkerName,
         }),
         minimum: allWithCauserParam(() => `${this.workerGroupName} Autoscaler Min.`, {

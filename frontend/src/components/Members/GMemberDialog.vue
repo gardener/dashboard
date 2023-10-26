@@ -149,7 +149,8 @@ import GToolbar from '@/components/GToolbar.vue'
 
 import {
   allWithCauserParam,
-  resourceName,
+  lowerCaseAlphaNumHyphen,
+  noStartEndHyphen,
   unique,
   withMessage,
 } from '@/utils/validators'
@@ -255,17 +256,15 @@ export default {
             ? 'serviceAccountUsernames'
             : 'serviceAccountNames'
         }
-        validators.internalName = allWithCauserParam('Service Account Name', {
+        const internalNameValidators = {
           required,
-          serviceAccountResource: withMessage('Name must contain only alphanumeric characters or hypen. Colons are allowed if you specify the service account prefix to add a service account from another namespace',
-            value => {
-              if (isServiceAccountUsername(this.internalName)) {
-                return true
-              }
-              return resourceName.$validator(value)
-            }),
           unique: withMessage(() => `Service Account '${this.internalName}' already exists. Please try a different name.`, unique(serviceAccountKeyFunc)),
-        })
+        }
+        if (!isServiceAccountUsername(this.internalName)) {
+          internalNameValidators.serviceAccountResource = withMessage('Name must contain only lowercase alphanumeric characters or hyphen. Colons are allowed if you specify the service account prefix to add a service account from another namespace', lowerCaseAlphaNumHyphen)
+          internalNameValidators.noStartEndHyphen = noStartEndHyphen
+        }
+        validators.internalName = allWithCauserParam('Service Account Name', internalNameValidators)
       }
     }
     return validators
