@@ -135,13 +135,18 @@ SPDX-License-Identifier: Apache-2.0
           />
         </v-card-text>
       </v-card>
-      <g-message
+      <div
+        v-if="errorMessage"
         ref="errorAlert"
-        v-model:message="errorMessage"
-        v-model:detailed-message="detailedErrorMessage"
-        color="error"
-        class="error-alert"
-      />
+        class="mb-6"
+      >
+        <g-message
+          v-model:message="errorMessage"
+          v-model:detailed-message="detailedErrorMessage"
+          color="error"
+          class="error-alert"
+        />
+      </div>
     </v-container>
     <v-divider />
     <div class="d-flex align-center justify-end toolbar">
@@ -570,7 +575,7 @@ export default {
 
         this.$nextTick(() => {
           // Need to wait for the new element to be rendered, before we can scroll it into view
-          this.$refs.errorAlert.$el.scrollIntoView()
+          this.$refs.errorAlert.scrollIntoView()
         })
       }
     },
