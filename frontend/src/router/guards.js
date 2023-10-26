@@ -58,7 +58,7 @@ export function createGlobalBeforeGuards () {
         : 'Session has expired'
       logger.info('%s --> Redirecting to login page', message)
 
-      const query = redirectPath
+      const query = redirectPath && redirectPath !== '/'
         ? { redirectPath }
         : undefined
       return {
