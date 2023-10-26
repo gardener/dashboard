@@ -35,6 +35,7 @@ SPDX-License-Identifier: Apache-2.0
         <g-machine-type
           v-model="machineTypeValue"
           :machine-types="machineTypes"
+          :causer="`${workerGroupName} Machine Type`"
         />
       </div>
       <div class="regularInput">
@@ -43,6 +44,7 @@ SPDX-License-Identifier: Apache-2.0
           :worker="worker"
           :machine-type="selectedMachineType"
           :update-o-s-maintenance="updateOSMaintenance"
+          :causer="`${workerGroupName} Machine Image`"
         />
       </div>
       <div class="regularInput">
@@ -50,6 +52,7 @@ SPDX-License-Identifier: Apache-2.0
           :machine-image-cri="machineImageCri"
           :worker="worker"
           :kubernetes-version="kubernetesVersion"
+          :causer="`${workerGroupName} Container Runtime`"
         />
       </div>
       <div
@@ -60,6 +63,7 @@ SPDX-License-Identifier: Apache-2.0
           :volume-types="volumeTypes"
           :worker="worker"
           :cloud-profile-name="cloudProfileName"
+          :causer="`${workerGroupName} Volume Type`"
         />
       </div>
       <div
@@ -97,7 +101,7 @@ SPDX-License-Identifier: Apache-2.0
           type="number"
           label="Autoscaler Max."
           variant="underlined"
-          :error-messages="errors.innerMax"
+          :error-messages="errors['worker.maximum']"
           @input="onInputMaximum"
           @blur="v$.worker.maximum.$touch()"
         />
@@ -123,7 +127,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="selectedZones"
           color="primary"
           item-color="primary"
-          label="Zone"
+          label="Zones"
           :items="zoneItems"
           :error-messages="errors.selectedZones"
           multiple
@@ -170,16 +174,17 @@ import GMachineImage from '@/components/ShootWorkers/GMachineImage'
 import GContainerRuntime from '@/components/ShootWorkers/GContainerRuntime'
 
 import {
-  getVuelidateErrors,
-  parseSize,
-} from '@/utils'
-import {
+  allWithCauserParam,
   uniqueWorkerName,
   resourceName,
   noStartEndHyphen,
   numberOrPercentage,
   withMessage,
 } from '@/utils/validators'
+import {
+  getVuelidateErrors,
+  parseSize,
+} from '@/utils'
 
 import {
   isEmpty,
@@ -263,17 +268,17 @@ export default {
   validations () {
     return {
       worker: {
-        name: {
+        name: allWithCauserParam(() => `${this.workerGroupName} Name`, {
           required,
           maxLength: maxLength(15),
           resourceName,
           noStartEndHyphen, // Order is important for UI hints
           uniqueWorkerName,
-        },
-        minimum: {
+        }),
+        minimum: allWithCauserParam(() => `${this.workerGroupName} Autoscaler Min.`, {
           minValue: minValue(0),
-        },
-        maximum: {
+        }),
+        maximum: allWithCauserParam(() => `${this.workerGroupName} Autoscaler Max.`, {
           minValue: minValue(0),
           systemComponents: withMessage('Value must be greater or equal to the number of zones configured for this pool',
             (value) => {
@@ -284,18 +289,18 @@ export default {
               const zones = get(this.worker, 'zones.length', 0)
               return value >= zones
             }),
-        },
-        maxSurge: {
+        }),
+        maxSurge: allWithCauserParam(() => `${this.workerGroupName} Max. Surge`, {
           numberOrPercentage,
-        },
+        }),
       },
-      selectedZones: {
+      selectedZones: allWithCauserParam(() => `${this.workerGroupName} Zones`, {
         required: requiredIf(function () {
           return this.zonedCluster
         }),
-      },
-      volumeSize: {
-        minVolumeSize (value) {
+      }),
+      volumeSize: allWithCauserParam(() => `${this.workerGroupName} Volume Size`, {
+        minVolumeSize: withMessage(`Value must be greater than ${this.minimumVolumeSize}`, value => {
           if (!this.canDefineVolumeSize) {
             return true
           }
@@ -303,11 +308,11 @@ export default {
             return false
           }
           return this.minimumVolumeSize <= parseSize(value)
-        },
-      },
-      machineArchitecture: {
+        }),
+      }),
+      machineArchitecture: allWithCauserParam(() => `${this.workerGroupName} Machine Architecture`, {
         required,
-      },
+      }),
     }
   },
   computed: {
@@ -473,6 +478,9 @@ export default {
     },
     errors () {
       return getVuelidateErrors(this.v$.$errors)
+    },
+    workerGroupName () {
+      return `[Worker Group ${this.worker.name}]`
     },
   },
   mounted () {

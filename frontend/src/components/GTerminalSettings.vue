@@ -121,6 +121,7 @@ import { useAuthnStore } from '@/store/authn'
 import GTimeString from '@/components/GTimeString.vue'
 
 import { getVuelidateErrors } from '@/utils'
+import { allWithCauserParam } from '@/utils/validators'
 
 export default {
   components: {
@@ -146,9 +147,9 @@ export default {
   },
   validations () {
     return {
-      containerImage: {
+      containerImage: allWithCauserParam('Terminal Container Image', {
         required,
-      },
+      }),
     }
   },
   computed: {

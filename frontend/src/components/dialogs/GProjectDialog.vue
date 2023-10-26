@@ -146,6 +146,7 @@ import GMessage from '@/components/GMessage.vue'
 import GToolbar from '@/components/GToolbar.vue'
 
 import {
+  allWithCauserParam,
   resourceName,
   unique,
   noStartEndHyphen,
@@ -214,11 +215,11 @@ export default {
     }
   },
   validations () {
-    const validators = {
-      owner: {
+    return {
+      owner: allWithCauserParam('Project Owner', {
         required,
-      },
-      costObject: {
+      }),
+      costObject: allWithCauserParam(() => `Project ${this.costObjectTitle}`, {
         validCostObject: withMessage(this.costObjectErrorMessage,
           value => {
             if (!this.costObjectRegex) {
@@ -226,17 +227,16 @@ export default {
             }
             return RegExp(this.costObjectRegex).test(value || '') // undefined cannot be evaluated, use empty string as default
           }),
-      },
+      }),
+      projectName: allWithCauserParam('Project Name', {
+        required,
+        maxLength: maxLength(10),
+        noConsecutiveHyphen,
+        noStartEndHyphen, // Order is important for UI hints
+        resourceName,
+        unique: withMessage('A project with this name already exists', unique('projectNames')),
+      }),
     }
-    validators.projectName = {
-      required,
-      maxLength: maxLength(10),
-      noConsecutiveHyphen,
-      noStartEndHyphen, // Order is important for UI hints
-      resourceName,
-      unique: withMessage('A project with this name already exists', unique('projectNames')),
-    }
-    return validators
   },
   computed: {
     ...mapState(useMemberStore, ['memberList']),

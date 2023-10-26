@@ -62,6 +62,10 @@ import { useAppStore } from '@/store/app'
 
 import GTimeTextField from '@/components/GTimeTextField.vue'
 
+import {
+  allWithCauserParam,
+  isTimezone,
+} from '@/utils/validators'
 import moment from '@/utils/moment'
 import {
   getVuelidateErrors,
@@ -69,7 +73,6 @@ import {
   maintenanceWindowWithBeginAndTimezone,
   getDurationInMinutes,
 } from '@/utils'
-import { isTimezone } from '@/utils/validators'
 import TimeWithOffset from '@/utils/TimeWithOffset'
 
 export default {
@@ -91,18 +94,18 @@ export default {
   },
   validations () {
     return {
-      maintenanceBegin: {
+      maintenanceBegin: allWithCauserParam('Maintenance Begin', {
         required,
-      },
-      maintenanceTimezone: {
+      }),
+      maintenanceTimezone: allWithCauserParam('Maintenance Timezone', {
         required,
         isTimezone,
-      },
-      windowDuration: {
+      }),
+      windowDuration: allWithCauserParam('Maintenance Window Duration', {
         required,
         minValue: minValue(30),
         maxValue: maxValue(360),
-      },
+      }),
     }
   },
   data () {

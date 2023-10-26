@@ -75,6 +75,7 @@ import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
 
 import { shootItem } from '@/mixins/shootItem'
+import { allWithCauserParam } from '@/utils/validators'
 
 export default {
   mixins: [shootItem],
@@ -100,9 +101,9 @@ export default {
   },
   validations () {
     return {
-      modelValue: {
+      modelValue: allWithCauserParam('Terminal Target', {
         required,
-      },
+      }),
     }
   },
   computed: {

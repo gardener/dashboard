@@ -137,6 +137,11 @@ import GMessage from '@/components/GMessage'
 import GCloudProfile from '@/components/GCloudProfile'
 
 import {
+  allWithCauserParam,
+  unique,
+  resourceName,
+} from '@/utils/validators'
+import {
   errorDetailsFromError,
   isConflict,
 } from '@/utils/error'
@@ -145,10 +150,6 @@ import {
   setDelayedInputFocus,
   setInputFocus,
 } from '@/utils'
-import {
-  unique,
-  resourceName,
-} from '@/utils/validators'
 
 import {
   cloneDeep,
@@ -217,12 +218,12 @@ export default {
   validations () {
     const validators = {}
     if (this.isCreateMode) {
-      validators.name = {
+      validators.name = allWithCauserParam('Secret Name', {
         required,
         maxLength: maxLength(128),
         resourceName,
         unique: unique(this.isDnsProviderSecret ? 'dnsSecretNames' : 'infrastructureSecretNames'),
-      }
+      })
     }
     return validators
   },

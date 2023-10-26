@@ -58,6 +58,7 @@ import { required } from '@vuelidate/validators'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 
+import { allWithCauserParam } from '@/utils/validators'
 import {
   getVuelidateErrors,
   setDelayedInputFocus,
@@ -93,12 +94,12 @@ export default {
   },
   validations () {
     return {
-      infobloxUsername: {
+      infobloxUsername: allWithCauserParam('Username', {
         required,
-      },
-      infobloxPassword: {
+      }),
+      infobloxPassword: allWithCauserParam('Password', {
         required,
-      },
+      }),
     }
   },
   computed: {

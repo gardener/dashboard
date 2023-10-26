@@ -35,6 +35,7 @@ SPDX-License-Identifier: Apache-2.0
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
+import { allWithCauserParam } from '@/utils/validators'
 import {
   getVuelidateErrors,
   purposesForSecret,
@@ -64,9 +65,9 @@ export default {
   },
   validations () {
     return {
-      internalPurpose: {
+      internalPurpose: allWithCauserParam('Purpose', {
         required,
-      },
+      }),
     }
   },
   computed: {

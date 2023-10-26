@@ -82,6 +82,7 @@ import GSecretDialogWrapper from '@/components/Secrets/GSecretDialogWrapper'
 import {
   requiresCostObjectIfEnabled,
   withMessage,
+  allWithCauserParam,
 } from '@/utils/validators'
 import {
   getVuelidateErrors,
@@ -140,10 +141,10 @@ export default {
       ? `${this.costObjectTitle} is required. Go to the ADMINISTRATION page to edit the project and set the ${this.costObjectTitle}.`
       : `${this.costObjectTitle} is required and has to be set on the Project ${toUpper(projectName)}`
     return {
-      secret: {
+      secret: allWithCauserParam('Secret', {
         required,
         requiresCostObjectIfEnabled: withMessage(requiresCostObjectIfEnabledMessage, requiresCostObjectIfEnabled),
-      },
+      }),
     }
   },
   computed: {

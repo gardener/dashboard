@@ -76,7 +76,10 @@ SPDX-License-Identifier: Apache-2.0
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
-import { withMessage } from '@/utils/validators'
+import {
+  allWithCauserParam,
+  withMessage,
+} from '@/utils/validators'
 import { getVuelidateErrors } from '@/utils'
 import {
   wildcardObjectsFromStrings,
@@ -177,7 +180,7 @@ export default {
   },
   validations () {
     return {
-      wildcardSelectedValue: {
+      wildcardSelectedValue: allWithCauserParam(() => this.wildcardSelectLabel, {
         required: withMessage(`${this.wildcardSelectLabel} is required`, required),
         prefixRequired: withMessage('Prefix is required', () => {
           return this.wildcardVariablePartPrefix || !this.wildcardSelectedValue.startsWithWildcard
@@ -188,7 +191,7 @@ export default {
         customRequired: withMessage('Custom value is required', () => {
           return this.wildcardVariablePartPrefix || !this.wildcardSelectedValue.customWildcard
         }),
-      },
+      }),
     }
   },
 }

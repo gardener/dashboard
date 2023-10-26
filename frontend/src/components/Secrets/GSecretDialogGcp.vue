@@ -86,7 +86,10 @@ import { required } from '@vuelidate/validators'
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
 
-import { serviceAccountKey } from '@/utils/validators'
+import {
+  allWithCauserParam,
+  serviceAccountKey,
+} from '@/utils/validators'
 import {
   handleTextFieldDrop,
   getVuelidateErrors,
@@ -126,10 +129,10 @@ export default {
   },
   validations () {
     return {
-      serviceAccountKey: {
+      serviceAccountKey: allWithCauserParam('Service Account Key', {
         required,
         serviceAccountKey,
-      },
+      }),
     }
   },
   computed: {

@@ -110,11 +110,12 @@ import GDnsProviderRow from '@/components/ShootDns/GDnsProviderRow'
 import GVendorIcon from '@/components/GVendorIcon'
 import GExpandTransitionGroup from '@/components/GExpandTransitionGroup'
 
-import { getVuelidateErrors } from '@/utils'
 import {
+  allWithCauserParam,
   nilUnless,
   withMessage,
 } from '@/utils/validators'
+import { getVuelidateErrors } from '@/utils'
 
 export default {
   components: {
@@ -129,10 +130,10 @@ export default {
   },
   validations () {
     return {
-      primaryProvider: {
+      primaryProvider: allWithCauserParam('Primary DNS Provider', {
         required: withMessage('Provider is required if a custom domain is defined', requiredIf(this.clusterIsNew && !!this.domain)),
         nil: withMessage('Provider is not allowed if no custom domain is defined', nilUnless('domain')),
-      },
+      }),
     }
   },
   computed: {

@@ -48,10 +48,13 @@ import { required } from '@vuelidate/validators'
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 
 import {
+  allWithCauserParam,
+  withMessage,
+} from '@/utils/validators'
+import {
   getVuelidateErrors,
   setDelayedInputFocus,
 } from '@/utils'
-import { withMessage } from '@/utils/validators'
 
 import { isObject } from '@/lodash'
 
@@ -88,10 +91,10 @@ export default {
   },
   validations () {
     return {
-      data: {
+      data: allWithCauserParam('Secret Data', {
         required,
         isYAML: withMessage('You need to enter secret data as YAML key - value pairs', () => Object.keys(this.secretData).length > 0),
-      },
+      }),
     }
   },
   computed: {

@@ -42,6 +42,7 @@ import { required } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
 import { getVuelidateErrors } from '@/utils'
+import { allWithCauserParam } from '@/utils/validators'
 
 import { find } from '@/lodash'
 
@@ -54,6 +55,9 @@ export default {
     machineTypes: {
       type: Array,
       default: () => [],
+    },
+    causer: {
+      type: String,
     },
   },
   emits: [
@@ -105,9 +109,9 @@ export default {
   },
   validations () {
     return {
-      internalValue: {
+      internalValue: allWithCauserParam(() => this.causer, {
         required,
-      },
+      }),
     }
   },
   watch: {

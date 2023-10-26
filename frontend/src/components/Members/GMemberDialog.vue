@@ -148,6 +148,7 @@ import GMessage from '@/components/GMessage.vue'
 import GToolbar from '@/components/GToolbar.vue'
 
 import {
+  allWithCauserParam,
   resourceName,
   unique,
   withMessage,
@@ -230,7 +231,7 @@ export default {
   },
   validations () {
     const validators = {
-      internalRoles: {
+      internalRoles: allWithCauserParam('Member Roles', {
         required: withMessage(
           this.isUserDialog
             ? 'Users need to have at least one assigned role'
@@ -238,33 +239,33 @@ export default {
           requiredIf(function () {
             return this.isForeignServiceAccount || this.isUserDialog
           })),
-      },
+      }),
       internalName: {},
     }
     if (!this.isUpdateDialog) {
       if (this.isUserDialog) {
-        validators.internalName = {
+        validators.internalName = allWithCauserParam('User Name', {
           required,
           unique: withMessage(() => `User '${this.internalName}' is already member of this project.`, unique('projectUsernames')),
           isNoServiceAccount: withMessage('Please use add service account to add service accounts', value => !isServiceAccountUsername(value)),
-        }
+        })
       } else if (this.isServiceDialog) {
         const serviceAccountKeyFunc = (value) => {
           return isServiceAccountUsername(value)
             ? 'serviceAccountUsernames'
             : 'serviceAccountNames'
         }
-        validators.internalName = {
+        validators.internalName = allWithCauserParam('Service Account Name', {
           required,
           serviceAccountResource: withMessage('Name must contain only alphanumeric characters or hypen. Colons are allowed if you specify the service account prefix to add a service account from another namespace',
             value => {
               if (isServiceAccountUsername(this.internalName)) {
                 return true
               }
-              return resourceName(value)
+              return resourceName.$validator(value)
             }),
           unique: withMessage(() => `Service Account '${this.internalName}' already exists. Please try a different name.`, unique(serviceAccountKeyFunc)),
-        }
+        })
       }
     }
     return validators

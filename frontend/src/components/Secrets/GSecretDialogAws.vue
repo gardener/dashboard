@@ -108,6 +108,7 @@ import GCodeBlock from '@/components/GCodeBlock'
 import GExternalLink from '@/components/GExternalLink'
 
 import {
+  allWithCauserParam,
   alphaNumUnderscore,
   base64,
 } from '@/utils/validators'
@@ -233,17 +234,17 @@ export default {
   },
   validations () {
     return {
-      accessKeyId: {
+      accessKeyId: allWithCauserParam('Access Key ID', {
         required,
         minLength: minLength(16),
         maxLength: maxLength(128),
         alphaNumUnderscore,
-      },
-      secretAccessKey: {
+      }),
+      secretAccessKey: allWithCauserParam('Secret Access Key', {
         required,
         minLength: minLength(40),
         base64,
-      },
+      }),
     }
   },
   computed: {

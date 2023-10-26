@@ -67,6 +67,7 @@ import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
 
 import { getVuelidateErrors } from '@/utils'
+import { allWithCauserParam } from '@/utils/validators'
 
 export default {
   components: {
@@ -98,9 +99,9 @@ export default {
   },
   validations () {
     return {
-      apiToken: {
+      apiToken: allWithCauserParam('API Token', {
         required,
-      },
+      }),
     }
   },
   computed: {

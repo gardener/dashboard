@@ -66,6 +66,7 @@ import {
   getVuelidateErrors,
   setDelayedInputFocus,
 } from '@/utils'
+import { allWithCauserParam } from '@/utils/validators'
 
 export default {
   components: {
@@ -97,13 +98,13 @@ export default {
   },
   validations () {
     return {
-      apiHmac: {
+      apiHmac: allWithCauserParam('API HMAC', {
         required,
-      },
-      apiUrl: {
+      }),
+      apiUrl: allWithCauserParam('API URL', {
         required,
         url,
-      },
+      }),
     }
   },
   computed: {
