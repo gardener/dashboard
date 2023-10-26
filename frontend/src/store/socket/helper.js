@@ -32,7 +32,7 @@ export function createSocket (state, context) {
     try {
       await authnStore.ensureValidToken()
     } catch (err) {
-      logger.error('io token invalid: %s', err.message)
+      logger.info('io token invalid: %s - %s', err.name, err.message)
     } finally {
       Manager.prototype.open.call(manager, fn)
     }
@@ -80,7 +80,7 @@ export function createSocket (state, context) {
     try {
       await authnStore.ensureValidToken()
     } catch (err) {
-      logger.error('io token invalid: %s', err.message)
+      logger.info('io token invalid: %s - %s', err.name, err.message)
     } finally {
       socket.connect()
     }
@@ -118,7 +118,11 @@ export function createSocket (state, context) {
     switch (reason) {
       case 'io server disconnect': {
         logger.debug('socket was forcefully disconnected by the server')
-        reconnect()
+        if (authnStore.isExpired()) {
+          authnStore.signout()
+        } else {
+          reconnect()
+        }
         break
       }
       case 'io client disconnect': {

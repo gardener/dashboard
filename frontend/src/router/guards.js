@@ -36,8 +36,6 @@ export function createGlobalBeforeGuards () {
   const shootStore = useShootStore()
   const terminalStore = useTerminalStore()
 
-  let sessionTimeoutId
-
   function ensureUserAuthenticatedForNonPublicRoutes () {
     return to => {
       const {
@@ -51,17 +49,7 @@ export function createGlobalBeforeGuards () {
 
       authnStore.$reset()
 
-      const expiresIn = authnStore.sessionExpiresAt - Date.now()
-      if (expiresIn > 0) {
-        clearTimeout(sessionTimeoutId)
-        sessionTimeoutId = setTimeout(() => {
-          if (!authnStore.isExpired()) {
-            logger.info('User session updated by other browser process --> Skipping signout')
-            return
-          }
-          logger.info('User session is expired --> Initiating signout')
-          authnStore.signout(null, redirectPath)
-        }, expiresIn)
+      if (!authnStore.isExpired()) {
         return true
       }
 
