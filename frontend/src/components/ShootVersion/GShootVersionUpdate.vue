@@ -16,9 +16,10 @@ SPDX-License-Identifier: Apache-2.0
       item-value="version"
       :label="label"
       :hint="hint"
-      :error="isError"
       return-object
       placeholder="Please select version..."
+      :error-messages="errors.selectedItem"
+      @blur="v$.selectedItem.$touch()"
     >
       <template #item="{ props }">
         <v-list-subheader
@@ -63,6 +64,14 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import semver from 'semver'
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
+
+import {
+  allWithCauserParam,
+  withMessage,
+} from '@/utils/validators'
+import { getVuelidateErrors } from '@/utils'
 
 import {
   map,
@@ -72,7 +81,6 @@ import {
   get,
   join,
 } from '@/lodash'
-
 export default {
   props: {
     availableK8sUpdates: {
@@ -85,14 +93,28 @@ export default {
   },
   emits: [
     'selectedVersion',
-    'selectedVersionInvalid',
     'selectedVersionType',
     'confirmRequired',
   ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
       snackbar: false,
       selectedItem: undefined,
+    }
+  },
+  validations () {
+    return {
+      selectedItem: allWithCauserParam('Kubernetes Version', {
+        required,
+        selectedMinorVersionIsNotNextMinor: withMessage('You cannot upgrade your cluster more than one minor version at a time', value => {
+          return !this.itemIsNotNextMinor(value.version, value.updateType)
+        }),
+      }),
     }
   },
   computed: {
@@ -178,17 +200,6 @@ export default {
       this.$emit('confirmRequired', !isPatch)
       return isPatch
     },
-    selectedMinorVersionIsNotNextMinor () {
-      const version = get(this, 'selectedItem.version')
-      const updateType = get(this, 'selectedItem.updateType')
-      const invalid = !version || this.itemIsNotNextMinor(version, updateType)
-      this.$emit('selectedVersionInvalid', invalid)
-      return invalid
-    },
-    isError () {
-      const selectedVersion = get(this, 'selectedItem.version')
-      return selectedVersion && this.selectedMinorVersionIsNotNextMinor
-    },
     label () {
       if (this.selectedVersionIsPatch) {
         return 'Patch to Version'
@@ -199,13 +210,13 @@ export default {
       if (!this.selectedItem) {
         return undefined
       }
-      if (this.selectedMinorVersionIsNotNextMinor) {
-        return 'You cannot upgrade your cluster more than one minor version at a time'
-      }
       if (this.selectedItem.isPreview) {
         return 'Selected Version is a preview version. Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not recommended for production usage'
       }
       return undefined
+    },
+    errors () {
+      return getVuelidateErrors(this.v$.$errors)
     },
   },
   watch: {
