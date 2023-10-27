@@ -25,25 +25,29 @@ SPDX-License-Identifier: Apache-2.0
           v-if="props.value.type === 'subheader'"
           v-bind="props"
         />
-        <v-list-item
+        <div
           v-else
-          v-bind="props"
-          :subtitle="versionItemDescription(props.value)"
-          :disabled="props.value.notNextMinor"
+          :ref="`versionItem_${props.value.version}`"
         >
-          <v-tooltip
-            v-if="props.value.notNextMinor"
-            activator="parent"
-            location="top"
+          <v-list-item
+            v-bind="props"
+            :subtitle="versionItemDescription(props.value)"
+            :disabled="props.value.notNextMinor"
           >
-            You cannot upgrade your cluster more than one minor version at a time
-          </v-tooltip>
-          <template #subtitle="{ subtitle }">
-            <div :class="props.value.subtitleClass">
-              {{ subtitle }}
-            </div>
-          </template>
-        </v-list-item>
+            <template #subtitle="{ subtitle }">
+              <div :class="props.value.subtitleClass">
+                {{ subtitle }}
+              </div>
+            </template>
+          </v-list-item>
+        </div>
+        <v-tooltip
+          v-if="props.value.notNextMinor"
+          :activator="$refs[`versionItem_${props.value.version}`]"
+          location="top"
+        >
+          You cannot upgrade your cluster more than one minor version at a time
+        </v-tooltip>
       </template>
     </v-select>
     <v-alert
