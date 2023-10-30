@@ -4,8 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { unref } from 'vue'
-import { useBrowserLocation } from '@vueuse/core'
+import { useEventListener } from '@vueuse/core'
 import { useCookies } from '@vueuse/integrations/useCookies'
 import decode from 'jwt-decode'
 
@@ -61,13 +60,17 @@ function isExpired (user) {
 export function useUserManager (options) {
   const {
     cookies = useCookies([COOKIE_HEADER_PAYLOAD]),
-    location = useBrowserLocation(),
     logger = useLogger(),
   } = options ?? {}
 
   let refreshTokenPromise
+  let signoutInProgress = false
 
-  const origin = unref(location).origin
+  useEventListener(window, 'beforeunload', () => {
+    signoutInProgress = true
+  })
+
+  const origin = window.location.origin
 
   function decodeCookie () {
     try {
@@ -142,12 +145,17 @@ export function useUserManager (options) {
   }
 
   function redirect (url) {
-    unref(location).href = url
+    window.location.href = url
   }
 
   function signout (err, redirectPath) {
+    if (signoutInProgress) {
+      return
+    }
+    signoutInProgress = true
     deleteCookie()
     const url = new URL('/auth/logout', origin)
+    redirectPath ??= window.location.pathname + window.location.search
     if (redirectPath) {
       url.searchParams.set('redirectPath', redirectPath)
     }
@@ -158,8 +166,12 @@ export function useUserManager (options) {
     redirect(url)
   }
 
-  function signin () {
+  function signin (redirectPath) {
     const url = new URL('/login', origin)
+    redirectPath ??= window.location.pathname + window.location.search
+    if (redirectPath) {
+      url.searchParams.set('redirectPath', redirectPath)
+    }
     redirect(url)
   }
 
@@ -204,9 +216,7 @@ export function useUserManager (options) {
       let frameRequestCallback
       if (isNoUserError(err)) {
         frameRequestCallback = () => signin()
-      } else if (isSessionExpiredError(err)) {
-        frameRequestCallback = () => signout()
-      } else if (isUnauthorizedError(err) || isClockSkewError(err)) {
+      } else if (isSessionExpiredError(err) || isUnauthorizedError(err) || isClockSkewError(err)) {
         frameRequestCallback = () => signout(err)
       }
       if (typeof frameRequestCallback === 'function') {

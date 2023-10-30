@@ -32,7 +32,7 @@ export function createSocket (state, context) {
     try {
       await authnStore.ensureValidToken()
     } catch (err) {
-      logger.error('io token invalid: %s', err.message)
+      logger.info('io token invalid: %s - %s', err.name, err.message)
     } finally {
       Manager.prototype.open.call(manager, fn)
     }
@@ -80,7 +80,7 @@ export function createSocket (state, context) {
     try {
       await authnStore.ensureValidToken()
     } catch (err) {
-      logger.error('io token invalid: %s', err.message)
+      logger.info('io token invalid: %s - %s', err.name, err.message)
     } finally {
       socket.connect()
     }
@@ -115,10 +115,18 @@ export function createSocket (state, context) {
   })
 
   socket.on('disconnect', reason => {
+    const isSessionExpired = authnStore.isExpired()
+
     switch (reason) {
       case 'io server disconnect': {
         logger.debug('socket was forcefully disconnected by the server')
-        reconnect()
+        /**
+         * Reconnect if the server forces a disconnect to refresh the token,
+         * unless the session's absolute lifetime has expired.
+         */
+        if (!isSessionExpired) {
+          reconnect()
+        }
         break
       }
       case 'io client disconnect': {
@@ -130,9 +138,15 @@ export function createSocket (state, context) {
         break
       }
     }
+
     state.active = socket.active
     setConnected(socket.connected)
     state.reason = reason
+
+    // If the session is expired, sign the user out and redirect to login
+    if (isSessionExpired) {
+      authnStore.signout()
+    }
   })
 
   const handleManagerError = err => {
