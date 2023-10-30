@@ -345,35 +345,36 @@ const sortedAndFilteredProjectList = computed(() => {
     const owner = toLower(replace(item.data.owner, /@.*$/, ''))
     return includes(name, filter) || includes(owner, filter)
   }
-  const filteredList = filter(projectList.value, predicate)
+  const filteredList = filter([
+    allProjectsItem,
+    ...projectList.value,
+  ], predicate)
 
   const exactMatch = item => {
-    return isProjectNameMatchingFilter(item.metadata.name) ? 0 : 1
+    return toLower(item.metadata.name) === toLower(projectFilter.value) ? 0 : 1
   }
-  const sortedList = sortBy(filteredList, [exactMatch, 'metadata.name'])
+  const allProjectsMatch = item => {
+    return item?.metadata.namespace === allProjectsItem.metadata.namespace ? 0 : 1
+  }
+  const sortedList = sortBy(filteredList, [allProjectsMatch, exactMatch, 'metadata.name'])
   return sortedList
 })
 
-const sortedAndFilteredProjectListWithAllProjects = computed(() => {
-  if (projectList.value.length > 1) {
-    return [
-      allProjectsItem,
-      ...sortedAndFilteredProjectList.value,
-    ]
-  }
-  return sortedAndFilteredProjectList.value
-})
-
 const visibleProjectList = computed(() => {
-  const projectList = sortedAndFilteredProjectListWithAllProjects.value
+  const projectList = sortedAndFilteredProjectList.value
   const endIndex = numberOfVisibleProjects.value
   return slice(projectList, 0, endIndex)
 })
 
-const projectFilterHasExactMatch = computed(() => {
+const projectNameThatMatchesFilter = computed(() => {
   const project = head(sortedAndFilteredProjectList.value)
   const projectName = get(project, 'metadata.name')
-  return isProjectNameMatchingFilter(projectName)
+
+  const singleMatch = sortedAndFilteredProjectList.value?.length === 1
+
+  return singleMatch
+    ? projectName
+    : undefined
 })
 
 function getProjectOwner (project) {
@@ -385,26 +386,24 @@ function namespacedRoute (route) {
 }
 
 function findProjectCaseInsensitive (projectName) {
-  return find(sortedAndFilteredProjectListWithAllProjects.value, project => {
+  return find(sortedAndFilteredProjectList.value, project => {
     return toLower(projectName) === toLower(project.metadata.name)
   })
 }
 
 function findProjectIndexCaseInsensitive (projectName) {
-  return findIndex(sortedAndFilteredProjectListWithAllProjects.value, project => {
+  return findIndex(sortedAndFilteredProjectList.value, project => {
     return toLower(projectName) === toLower(project.metadata.name)
   })
 }
 
-function highlightedProject () {
-  if (!highlightedProjectName.value) {
-    return head(sortedAndFilteredProjectListWithAllProjects.value)
-  }
-  return findProjectCaseInsensitive(highlightedProjectName.value)
-}
-
 function navigateToHighlightedProject () {
-  navigateToProject(highlightedProject())
+  if (!highlightedProjectName.value) {
+    return
+  }
+
+  const project = findProjectCaseInsensitive(highlightedProjectName.value)
+  navigateToProject(project)
 }
 
 function onProjectClick (event, project) {
@@ -463,17 +462,21 @@ function getProjectMenuTargetRoute (namespace) {
 function onInputProjectFilter () {
   highlightedProjectName.value = undefined
   numberOfVisibleProjects.value = initialVisibleProjects
-  if (projectFilterHasExactMatch.value) {
-    highlightedProjectName.value = projectFilter.value
+
+  if (!projectNameThatMatchesFilter.value) {
+    return
   }
 
-  nextTick(() => scrollHighlightedProjectIntoView())
+  highlightedProjectName.value = projectNameThatMatchesFilter.value
+  nextTick(() => scrollProjectIntoView(highlightedProjectName.value))
 }
 
 function highlightProjectWithKeys (keyDirection) {
-  let currentHighlightedIndex = 0
-  if (highlightedProjectName.value) {
-    currentHighlightedIndex = findProjectIndexCaseInsensitive(highlightedProjectName.value)
+  const projectName = highlightedProjectName.value ?? selectedProjectName.value
+
+  let currentHighlightedIndex = findProjectIndexCaseInsensitive(projectName)
+  if (currentHighlightedIndex < 0) {
+    currentHighlightedIndex = 0
   }
 
   if (keyDirection === 'up') {
@@ -481,28 +484,44 @@ function highlightProjectWithKeys (keyDirection) {
       currentHighlightedIndex--
     }
   } else if (keyDirection === 'down') {
-    if (currentHighlightedIndex < sortedAndFilteredProjectListWithAllProjects.value.length - 1) {
+    if (currentHighlightedIndex < sortedAndFilteredProjectList.value.length - 1) {
       currentHighlightedIndex++
     }
   }
 
-  const newHighlightedProject = sortedAndFilteredProjectListWithAllProjects.value[currentHighlightedIndex]
+  const newHighlightedProject = sortedAndFilteredProjectList.value[currentHighlightedIndex]
   highlightedProjectName.value = newHighlightedProject.metadata.name
 
   if (currentHighlightedIndex >= numberOfVisibleProjects.value - 1) {
     numberOfVisibleProjects.value++
   }
 
-  scrollHighlightedProjectIntoView()
+  scrollProjectIntoView(highlightedProjectName.value)
 }
 
-function scrollHighlightedProjectIntoView () {
-  if (refProjectListItems.value) {
+function scrollProjectIntoView (projectName, allowRecursion = true) {
+  if (!refProjectListItems.value) {
     return
   }
+
   const projectListItem = refProjectListItems.value.find(child => {
-    return child.$attrs['data-g-project-name'] === highlightedProjectName.value
+    return child.$attrs['data-g-project-name'] === projectName
   })
+
+  if (allowRecursion && !projectListItem) {
+    const index = findProjectIndexCaseInsensitive(projectName)
+    const desiredCount = index + 1
+    if (desiredCount > numberOfVisibleProjects.value) {
+      numberOfVisibleProjects.value = desiredCount
+
+      nextTick(() => {
+        const allowRecursion = false // avoid recursive calls, preventing potential endless loop
+        scrollProjectIntoView(projectName, allowRecursion)
+      })
+    }
+    return
+  }
+
   if (!projectListItem) {
     return
   }
@@ -536,14 +555,10 @@ function handleProjectListScroll () {
   const scrolledToLastElement = lastProjectElementPosY > 0
   if (scrolledToLastElement) {
     // scrolled last element into view
-    if (numberOfVisibleProjects.value <= sortedAndFilteredProjectListWithAllProjects.value.length) {
+    if (numberOfVisibleProjects.value <= sortedAndFilteredProjectList.value.length) {
       numberOfVisibleProjects.value++
     }
   }
-}
-
-function isProjectNameMatchingFilter (projectName) {
-  return toLower(projectName) === toLower(projectFilter.value)
 }
 
 function isHighlightedProject (project) {
@@ -561,6 +576,10 @@ watch(projectMenu, value => {
     requestAnimationFrame(() => {
       setDelayedInputFocus(refProjectFilter)
     })
+    nextTick(() => scrollProjectIntoView(selectedProjectName.value))
+  } else {
+    // reset highlighted project name on close
+    highlightedProjectName.value = undefined
   }
 })
 
