@@ -188,13 +188,8 @@ SPDX-License-Identifier: Apache-2.0
               <v-list-item
                 v-bind="props"
                 :disabled="item.raw.disabled"
-              >
-                <template #prepend>
-                  <v-icon>
-                    {{ isLoadBalancerClassSelected(item) ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline' }}
-                  </v-icon>
-                </template>
-              </v-list-item>
+                :prepend-icon="isLoadBalancerClassSelected(item) ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline'"
+              />
             </template>
           </v-select>
         </v-col>
