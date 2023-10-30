@@ -125,6 +125,26 @@ describe('gardener-dashboard', function () {
       expect(deployment.metadata.labels).toEqual(expect.objectContaining(values.global.dashboard.deploymentLabels))
     })
 
+    it('should render the template with assets checksum annotation', async function () {
+      const values = {
+        global: {
+          dashboard: {
+            frontendConfig: {
+              assets: {
+                foo: 'bar'
+              }
+            }
+          }
+        }
+      }
+      const documents = await renderTemplates(templates, values)
+      expect(documents).toHaveLength(1)
+      const [deployment] = documents
+      expect(deployment.spec.template.metadata.annotations).toEqual(expect.objectContaining({
+        'checksum/configmap-gardener-dashboard-assets': expect.stringMatching(/[0-9a-f]{64}/)
+      }))
+    })
+
     it('should render the template with deployment annotations', async function () {
       const values = {
         global: {
