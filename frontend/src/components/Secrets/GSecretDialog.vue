@@ -102,14 +102,16 @@ SPDX-License-Identifier: Apache-2.0
         >
           Cancel
         </v-btn>
-        <v-btn
-          variant="text"
-          color="primary"
-          :disabled="!valid"
-          @click="submit"
-        >
-          {{ submitButtonText }}
-        </v-btn>
+        <g-vuelidate-tooltip :v$="secretValidations">
+          <v-btn
+            variant="text"
+            color="primary"
+            :disabled="!valid"
+            @click="submit"
+          >
+            {{ submitButtonText }}
+          </v-btn>
+        </g-vuelidate-tooltip>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -135,6 +137,7 @@ import { useShootStore } from '@/store/shoot'
 import GToolbar from '@/components/GToolbar.vue'
 import GMessage from '@/components/GMessage'
 import GCloudProfile from '@/components/GCloudProfile'
+import GVuelidateTooltip from '@/components/GVuelidateTooltip.vue'
 
 import {
   allWithCauserParam,
@@ -167,6 +170,7 @@ export default {
     GCloudProfile,
     GMessage,
     GToolbar,
+    GVuelidateTooltip,
   },
   inject: ['logger'],
   props: {
@@ -178,8 +182,10 @@ export default {
       type: Object,
       required: true,
     },
-    dataValid: {
-      type: Boolean,
+    secretValidations: {
+      // need to pass nested validation object which shares scope,
+      // as v$ is part of secretValidations but not vice versa
+      type: Object,
       required: true,
     },
     vendor: {
@@ -262,7 +268,7 @@ export default {
       },
     },
     valid () {
-      return this.dataValid && !this.v$.$invalid
+      return !this.secretValidations.$invalid
     },
     infrastructureSecretNames () {
       return this.infrastructureSecretList.map(item => item.metadata.name)

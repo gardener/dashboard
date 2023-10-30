@@ -112,7 +112,7 @@ export default {
       selectedItem: allWithCauserParam('Kubernetes Version', {
         required,
         selectedMinorVersionIsNotNextMinor: withMessage('You cannot upgrade your cluster more than one minor version at a time', value => {
-          return !this.itemIsNotNextMinor(value.version, value.updateType)
+          return !value?.version || !this.itemIsNotNextMinor(value.version, value.updateType)
         }),
       }),
     }

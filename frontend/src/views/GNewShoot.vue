@@ -146,16 +146,18 @@ SPDX-License-Identifier: Apache-2.0
     <v-divider />
     <div class="d-flex align-center justify-end toolbar">
       <v-divider vertical />
-      <v-btn
-        variant="text"
-        :disabled="v$.$invalid"
-        color="primary"
-        @click.stop="createClicked()"
-      >
-        Create
-      </v-btn>
+      <g-vuelidate-tooltip :v$="v$">
+        <v-btn
+          variant="text"
+          :disabled="v$.$invalid"
+          color="primary"
+          @click.stop="createClicked()"
+        >
+          Create
+        </v-btn>
+      </g-vuelidate-tooltip>
+      <g-confirm-dialog ref="confirmDialog" />
     </div>
-    <g-confirm-dialog ref="confirmDialog" />
   </div>
   <v-alert
     v-else
@@ -194,6 +196,7 @@ import GManageShootAddons from '@/components/ShootAddons/GManageAddons'
 import GManageShootDns from '@/components/ShootDns/GManageDns'
 import GManageControlPlaneHighAvailability from '@/components/ControlPlaneHighAvailability/GManageControlPlaneHighAvailability'
 import GToolbar from '@/components/GToolbar.vue'
+import GVuelidateTooltip from '@/components/GVuelidateTooltip.vue'
 
 import { useAsyncRef } from '@/composables/useAsyncRef'
 
@@ -232,6 +235,7 @@ export default {
     GConfirmDialog,
     GManageControlPlaneHighAvailability,
     GToolbar,
+    GVuelidateTooltip,
   },
   inject: ['logger'],
   async beforeRouteLeave (to, from, next) {

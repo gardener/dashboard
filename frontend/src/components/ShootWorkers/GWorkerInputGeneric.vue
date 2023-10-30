@@ -480,7 +480,7 @@ export default {
       return getVuelidateErrors(this.v$.$errors)
     },
     workerGroupName () {
-      return `[Worker Group ${this.worker.name}]`
+      return this.worker.name ? `[Worker Group ${this.worker.name}]` : '[Worker Group]'
     },
   },
   mounted () {

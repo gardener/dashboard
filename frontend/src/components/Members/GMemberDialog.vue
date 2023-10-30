@@ -104,26 +104,34 @@ SPDX-License-Identifier: Apache-2.0
         >
           Cancel
         </v-btn>
-        <v-btn
+        <g-vuelidate-tooltip
           v-if="isUpdateDialog"
-          variant="text"
-          :disabled="!valid"
-          class="text-primary"
-          tabindex="4"
-          @click.stop="submitUpdateMember"
+          :v$="v$"
         >
-          Update
-        </v-btn>
-        <v-btn
+          <v-btn
+            variant="text"
+            :disabled="!valid"
+            class="text-primary"
+            tabindex="4"
+            @click.stop="submitUpdateMember"
+          >
+            Update
+          </v-btn>
+        </g-vuelidate-tooltip>
+        <g-vuelidate-tooltip
           v-else
-          variant="text"
-          :disabled="!valid"
-          class="text-primary"
-          tabindex="4"
-          @click.stop="submitAddMember"
+          :v$="v$"
         >
-          {{ addMemberButtonText }}
-        </v-btn>
+          <v-btn
+            variant="text"
+            :disabled="!valid"
+            class="text-primary"
+            tabindex="4"
+            @click.stop="submitAddMember"
+          >
+            {{ addMemberButtonText }}
+          </v-btn>
+        </g-vuelidate-tooltip>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -146,6 +154,7 @@ import { useMemberStore } from '@/store/member'
 
 import GMessage from '@/components/GMessage.vue'
 import GToolbar from '@/components/GToolbar.vue'
+import GVuelidateTooltip from '@/components/GVuelidateTooltip.vue'
 
 import {
   allWithCauserParam,
@@ -185,6 +194,7 @@ export default {
   components: {
     GMessage,
     GToolbar,
+    GVuelidateTooltip,
   },
   inject: ['logger'],
   props: {

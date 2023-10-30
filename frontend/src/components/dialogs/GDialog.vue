@@ -86,22 +86,23 @@ SPDX-License-Identifier: Apache-2.0
         </v-btn>
         <v-tooltip
           location="top"
-          :disabled="valid"
+          :disabled="!notConfirmed || v$.$invalid"
         >
           <template #activator="{ props }">
             <div v-bind="props">
-              <v-btn
-                variant="text"
-                :disabled="!valid"
-                class="text-toolbar-background"
-                @click="resolveAction(true)"
-              >
-                {{ confirmButtonText }}
-              </v-btn>
+              <g-vuelidate-tooltip :v$="v$">
+                <v-btn
+                  variant="text"
+                  :disabled="!valid"
+                  class="text-toolbar-background"
+                  @click="resolveAction(true)"
+                >
+                  {{ confirmButtonText }}
+                </v-btn>
+              </g-vuelidate-tooltip>
             </div>
           </template>
-          <span v-if="confirmDisabled">There are input errors that you need to resolve</span>
-          <span v-else-if="notConfirmed">You need to confirm your changes by typing this cluster's name</span>
+          You need to confirm your changes by typing this cluster's name
         </v-tooltip>
       </v-card-actions>
     </v-card>
@@ -109,7 +110,10 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { useVuelidate } from '@vuelidate/core'
+
 import GMessage from '@/components/GMessage.vue'
+import GVuelidateTooltip from '@/components/GVuelidateTooltip.vue'
 
 import { setDelayedInputFocus } from '@/utils'
 
@@ -124,6 +128,7 @@ const zeroWidthSpace = '\u200B'
 export default {
   components: {
     GMessage,
+    GVuelidateTooltip,
   },
   props: {
     confirmValue: {
@@ -165,6 +170,11 @@ export default {
     'update:detailedErrorMessage',
     'dialogClosed',
   ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
       userInput: '',
