@@ -28,6 +28,9 @@ spec:
     metadata:
       annotations:
         checksum/configmap-gardener-dashboard-config: {{ include (print .Template.BasePath "/dashboard/configmap.yaml") . | sha256sum }}
+        {{- if .Values.global.dashboard.frontendConfig.assets }}
+        checksum/configmap-gardener-dashboard-assets: {{ include (print .Template.BasePath "/dashboard/configmap-assets.yaml") . | sha256sum }}
+        {{- end }}
         checksum/secret-gardener-dashboard-sessionSecret: {{ include (print .Template.BasePath "/dashboard/secret-sessionSecret.yaml") . | sha256sum }}
         {{- if .Values.global.dashboard.oidc }}
         checksum/secret-gardener-dashboard-oidc: {{ include (print .Template.BasePath "/dashboard/secret-oidc.yaml") . | sha256sum }}
