@@ -115,12 +115,16 @@ export function createSocket (state, context) {
   })
 
   socket.on('disconnect', reason => {
+    const isSessionExpired = authnStore.isExpired()
+
     switch (reason) {
       case 'io server disconnect': {
         logger.debug('socket was forcefully disconnected by the server')
-        if (authnStore.isExpired()) {
-          authnStore.signout()
-        } else {
+        /**
+         * Reconnect if the server forces a disconnect to refresh the token,
+         * unless the session's absolute lifetime has expired.
+         */
+        if (!isSessionExpired) {
           reconnect()
         }
         break
@@ -134,9 +138,15 @@ export function createSocket (state, context) {
         break
       }
     }
+
     state.active = socket.active
     setConnected(socket.connected)
     state.reason = reason
+
+    // If the session is expired, sign the user out and redirect to login
+    if (isSessionExpired) {
+      authnStore.signout()
+    }
   })
 
   const handleManagerError = err => {
