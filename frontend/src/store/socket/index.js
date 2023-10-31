@@ -123,7 +123,7 @@ export const useSocketStore = defineStore('socket', () => {
   }
 
   watch(() => authnStore.user, value => {
-    if (!value) {
+    if (authnStore.isExpired()) {
       disconnect()
     } else {
       connect()
