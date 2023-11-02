@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
           <g-vendor-icon :icon="item.raw.icon" />
         </template>
         <v-list-item-title>Name: {{ item.raw.name }} | Version: {{ item.raw.version }}</v-list-item-title>
-        <v-list-item-subtitle v-if="itemDescription(item).length">
+        <v-list-item-subtitle v-if="itemDescription(item.raw).length">
           {{ itemDescription(item.raw) }}
         </v-list-item-subtitle>
       </v-list-item>
