@@ -153,7 +153,7 @@ export default {
           severity: 'info',
         })
       }
-      if (this.updateOSMaintenance && this.machineImage.isPreview) {
+      if (this.machineImage.isPreview) {
         hints.push({
           type: 'text',
           hint: 'Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not recommended for production usage',
