@@ -87,7 +87,7 @@ import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
 
 import {
-  allWithCauserParam,
+  withFieldName,
   serviceAccountKey,
 } from '@/utils/validators'
 import {
@@ -129,7 +129,7 @@ export default {
   },
   validations () {
     return {
-      serviceAccountKey: allWithCauserParam('Service Account Key', {
+      serviceAccountKey: withFieldName('Service Account Key', {
         required,
         serviceAccountKey,
       }),

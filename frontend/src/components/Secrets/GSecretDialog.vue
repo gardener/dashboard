@@ -138,7 +138,7 @@ import GCloudProfile from '@/components/GCloudProfile'
 import GVuelidateButton from '@/components/GVuelidateButton.vue'
 
 import {
-  allWithCauserParam,
+  withFieldName,
   unique,
   lowerCaseAlphaNumHyphen,
   noStartEndHyphen,
@@ -223,7 +223,7 @@ export default {
   validations () {
     const validators = {}
     if (this.isCreateMode) {
-      validators.name = allWithCauserParam('Secret Name', {
+      validators.name = withFieldName('Secret Name', {
         required,
         maxLength: maxLength(128),
         lowerCaseAlphaNumHyphen,

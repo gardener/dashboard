@@ -91,7 +91,7 @@ import GTimeTextField from '@/components/GTimeTextField.vue'
 
 import {
   withMessage,
-  allWithCauserParam,
+  withFieldName,
 } from '@/utils/validators'
 import { getVuelidateErrors } from '@/utils'
 import moment from '@/utils/moment'
@@ -130,24 +130,24 @@ export default {
   },
   validations () {
     return {
-      selectedDays: allWithCauserParam('Hibernation Selected Days', {
+      selectedDays: withFieldName('Hibernation Selected Days', {
         required,
       }),
-      hibernateTime: allWithCauserParam('Hibernation Time', {
+      hibernateTime: withFieldName('Hibernation Time', {
         required: withMessage('You need to specify at least hibernation or wake up time',
           requiredIf(function () {
             return !this.wakeUpTime
           }),
         ),
       }),
-      wakeUpTime: allWithCauserParam('Hibernation Wake Up Time', {
+      wakeUpTime: withFieldName('Hibernation Wake Up Time', {
         required: withMessage('You need to specify at least hibernation or wake up time',
           requiredIf(function () {
             return !this.hibernateTime
           }),
         ),
       }),
-      selectedLocation: allWithCauserParam('Hibernation Location', {
+      selectedLocation: withFieldName('Hibernation Location', {
         required,
       }),
     }

@@ -135,7 +135,7 @@ import GSelectSecret from '@/components/Secrets/GSelectSecret'
 import GVendorIcon from '@/components/GVendorIcon'
 
 import { getVuelidateErrors } from '@/utils'
-import { allWithCauserParam } from '@/utils/validators'
+import { withFieldName } from '@/utils/validators'
 
 import {
   get,
@@ -162,7 +162,7 @@ export default {
   },
   validations () {
     return {
-      type: allWithCauserParam('DNS Provider Type', {
+      type: withFieldName('DNS Provider Type', {
         required,
       }),
     }

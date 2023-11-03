@@ -77,7 +77,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
 import {
-  allWithCauserParam,
+  withFieldName,
   withMessage,
 } from '@/utils/validators'
 import { getVuelidateErrors } from '@/utils'
@@ -180,7 +180,7 @@ export default {
   },
   validations () {
     return {
-      wildcardSelectedValue: allWithCauserParam(() => this.wildcardSelectLabel, {
+      wildcardSelectedValue: withFieldName(() => this.wildcardSelectLabel, {
         required: withMessage(`${this.wildcardSelectLabel} is required`, required),
         prefixRequired: withMessage('Prefix is required', () => {
           return this.wildcardVariablePartPrefix || !this.wildcardSelectedValue.startsWithWildcard

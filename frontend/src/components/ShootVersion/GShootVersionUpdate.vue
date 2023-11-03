@@ -68,7 +68,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
 import {
-  allWithCauserParam,
+  withFieldName,
   withMessage,
 } from '@/utils/validators'
 import { getVuelidateErrors } from '@/utils'
@@ -109,7 +109,7 @@ export default {
   },
   validations () {
     return {
-      selectedItem: allWithCauserParam('Kubernetes Version', {
+      selectedItem: withFieldName('Kubernetes Version', {
         required,
         selectedMinorVersionIsNotNextMinor: withMessage('You cannot upgrade your cluster more than one minor version at a time', value => {
           return !value?.version || !this.itemIsNotNextMinor(value.version, value.updateType)

@@ -35,7 +35,7 @@ SPDX-License-Identifier: Apache-2.0
         <g-machine-type
           v-model="machineTypeValue"
           :machine-types="machineTypes"
-          :causer="`${workerGroupName} Machine Type`"
+          :field-name="`${workerGroupName} Machine Type`"
         />
       </div>
       <div class="regularInput">
@@ -44,7 +44,7 @@ SPDX-License-Identifier: Apache-2.0
           :worker="worker"
           :machine-type="selectedMachineType"
           :update-o-s-maintenance="updateOSMaintenance"
-          :causer="`${workerGroupName} Machine Image`"
+          :field-name="`${workerGroupName} Machine Image`"
         />
       </div>
       <div class="regularInput">
@@ -52,7 +52,7 @@ SPDX-License-Identifier: Apache-2.0
           :machine-image-cri="machineImageCri"
           :worker="worker"
           :kubernetes-version="kubernetesVersion"
-          :causer="`${workerGroupName} Container Runtime`"
+          :field-name="`${workerGroupName} Container Runtime`"
         />
       </div>
       <div
@@ -63,7 +63,7 @@ SPDX-License-Identifier: Apache-2.0
           :volume-types="volumeTypes"
           :worker="worker"
           :cloud-profile-name="cloudProfileName"
-          :causer="`${workerGroupName} Volume Type`"
+          :field-name="`${workerGroupName} Volume Type`"
         />
       </div>
       <div
@@ -174,7 +174,7 @@ import GMachineImage from '@/components/ShootWorkers/GMachineImage'
 import GContainerRuntime from '@/components/ShootWorkers/GContainerRuntime'
 
 import {
-  allWithCauserParam,
+  withFieldName,
   uniqueWorkerName,
   lowerCaseAlphaNumHyphen,
   noStartEndHyphen,
@@ -268,17 +268,17 @@ export default {
   validations () {
     return {
       worker: {
-        name: allWithCauserParam(() => `${this.workerGroupName} Name`, {
+        name: withFieldName(() => `${this.workerGroupName} Name`, {
           required,
           maxLength: maxLength(15),
           lowerCaseAlphaNumHyphen,
           noStartEndHyphen,
           uniqueWorkerName,
         }),
-        minimum: allWithCauserParam(() => `${this.workerGroupName} Autoscaler Min.`, {
+        minimum: withFieldName(() => `${this.workerGroupName} Autoscaler Min.`, {
           minValue: minValue(0),
         }),
-        maximum: allWithCauserParam(() => `${this.workerGroupName} Autoscaler Max.`, {
+        maximum: withFieldName(() => `${this.workerGroupName} Autoscaler Max.`, {
           minValue: minValue(0),
           systemComponents: withMessage('Value must be greater or equal to the number of zones configured for this pool',
             (value) => {
@@ -290,16 +290,16 @@ export default {
               return value >= zones
             }),
         }),
-        maxSurge: allWithCauserParam(() => `${this.workerGroupName} Max. Surge`, {
+        maxSurge: withFieldName(() => `${this.workerGroupName} Max. Surge`, {
           numberOrPercentage,
         }),
       },
-      selectedZones: allWithCauserParam(() => `${this.workerGroupName} Zones`, {
+      selectedZones: withFieldName(() => `${this.workerGroupName} Zones`, {
         required: requiredIf(function () {
           return this.zonedCluster
         }),
       }),
-      volumeSize: allWithCauserParam(() => `${this.workerGroupName} Volume Size`, {
+      volumeSize: withFieldName(() => `${this.workerGroupName} Volume Size`, {
         minVolumeSize: withMessage(`Value must be greater than ${this.minimumVolumeSize}`, value => {
           if (!this.canDefineVolumeSize) {
             return true
@@ -310,7 +310,7 @@ export default {
           return this.minimumVolumeSize <= parseSize(value)
         }),
       }),
-      machineArchitecture: allWithCauserParam(() => `${this.workerGroupName} Machine Architecture`, {
+      machineArchitecture: withFieldName(() => `${this.workerGroupName} Machine Architecture`, {
         required,
       }),
     }

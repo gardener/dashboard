@@ -179,7 +179,7 @@ import GExternalLink from '@/components/GExternalLink'
 
 import {
   withMessage,
-  allWithCauserParam,
+  withFieldName,
 } from '@/utils/validators'
 import {
   getVuelidateErrors,
@@ -230,46 +230,46 @@ export default {
     const requiredUserMessage = 'Required for technical user authentication'
     const requiredApplicationCredentialsMessage = 'Required for application credentials authentication'
     return {
-      domainName: allWithCauserParam('Domain Name', {
+      domainName: withFieldName('Domain Name', {
         required,
       }),
-      tenantName: allWithCauserParam('Project / Tenant Name', {
+      tenantName: withFieldName('Project / Tenant Name', {
         required,
       }),
-      username: allWithCauserParam('Technical User', {
+      username: withFieldName('Technical User', {
         required: withMessage(requiredUserMessage,
           requiredIf(function () {
             return this.authenticationMethod === 'USER'
           }),
         ),
       }),
-      password: allWithCauserParam('Password', {
+      password: withFieldName('Password', {
         required: withMessage(requiredUserMessage,
           requiredIf(function () {
             return this.authenticationMethod === 'USER'
           }),
         ),
       }),
-      authURL: allWithCauserParam('Auth URL', {
+      authURL: withFieldName('Auth URL', {
         required: requiredIf(function () {
           return this.vendor === 'openstack-designate'
         }),
       }),
-      applicationCredentialID: allWithCauserParam('Application Credentials ID', {
+      applicationCredentialID: withFieldName('Application Credentials ID', {
         required: withMessage(requiredApplicationCredentialsMessage,
           requiredIf(function () {
             return this.authenticationMethod === 'APPLICATION_CREDENTIALS'
           }),
         ),
       }),
-      applicationCredentialName: allWithCauserParam('Application Credentials Name', {
+      applicationCredentialName: withFieldName('Application Credentials Name', {
         required: withMessage(requiredApplicationCredentialsMessage,
           requiredIf(function () {
             return this.authenticationMethod === 'APPLICATION_CREDENTIALS'
           }),
         ),
       }),
-      applicationCredentialSecret: allWithCauserParam('Application Credentials Secret', {
+      applicationCredentialSecret: withFieldName('Application Credentials Secret', {
         required: withMessage(requiredApplicationCredentialsMessage,
           requiredIf(function () {
             return this.authenticationMethod === 'APPLICATION_CREDENTIALS'

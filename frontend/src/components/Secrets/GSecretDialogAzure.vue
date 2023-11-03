@@ -103,7 +103,7 @@ import { required } from '@vuelidate/validators'
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
 
-import { allWithCauserParam } from '@/utils/validators'
+import { withFieldName } from '@/utils/validators'
 import {
   getVuelidateErrors,
   setDelayedInputFocus,
@@ -145,16 +145,16 @@ export default {
   },
   validations () {
     return {
-      clientId: allWithCauserParam('Client ID', {
+      clientId: withFieldName('Client ID', {
         required,
       }),
-      clientSecret: allWithCauserParam('Client Secret', {
+      clientSecret: withFieldName('Client Secret', {
         required,
       }),
-      tenantId: allWithCauserParam('Tenant ID', {
+      tenantId: withFieldName('Tenant ID', {
         required,
       }),
-      subscriptionId: allWithCauserParam('Subscription ID', {
+      subscriptionId: withFieldName('Subscription ID', {
         required,
       }),
     }

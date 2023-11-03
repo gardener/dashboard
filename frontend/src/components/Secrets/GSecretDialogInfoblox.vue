@@ -58,7 +58,7 @@ import { required } from '@vuelidate/validators'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 
-import { allWithCauserParam } from '@/utils/validators'
+import { withFieldName } from '@/utils/validators'
 import {
   getVuelidateErrors,
   setDelayedInputFocus,
@@ -94,10 +94,10 @@ export default {
   },
   validations () {
     return {
-      infobloxUsername: allWithCauserParam('Username', {
+      infobloxUsername: withFieldName('Username', {
         required,
       }),
-      infobloxPassword: allWithCauserParam('Password', {
+      infobloxPassword: withFieldName('Password', {
         required,
       }),
     }

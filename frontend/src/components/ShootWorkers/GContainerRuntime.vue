@@ -48,7 +48,7 @@ import { required } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
 import { getVuelidateErrors } from '@/utils'
-import { allWithCauserParam } from '@/utils/validators'
+import { withFieldName } from '@/utils/validators'
 
 import {
   find,
@@ -74,7 +74,7 @@ export default {
       type: String,
       required: true,
     },
-    causer: {
+    fieldName: {
       type: String,
     },
   },
@@ -85,7 +85,7 @@ export default {
   },
   validations () {
     return {
-      criName: allWithCauserParam(() => this.causer, {
+      criName: withFieldName(() => this.fieldName, {
         required,
       }),
     }

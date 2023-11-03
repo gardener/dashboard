@@ -149,7 +149,7 @@ import GToolbar from '@/components/GToolbar.vue'
 import GVuelidateButton from '@/components/GVuelidateButton.vue'
 
 import {
-  allWithCauserParam,
+  withFieldName,
   lowerCaseAlphaNumHyphen,
   noStartEndHyphen,
   unique,
@@ -234,7 +234,7 @@ export default {
   },
   validations () {
     const validators = {
-      internalRoles: allWithCauserParam('Member Roles', {
+      internalRoles: withFieldName('Member Roles', {
         required: withMessage(
           this.isUserDialog
             ? 'Users need to have at least one assigned role'
@@ -247,7 +247,7 @@ export default {
     }
     if (!this.isUpdateDialog) {
       if (this.isUserDialog) {
-        validators.internalName = allWithCauserParam('User Name', {
+        validators.internalName = withFieldName('User Name', {
           required,
           unique: withMessage(() => `User '${this.internalName}' is already member of this project.`, unique('projectUsernames')),
           isNoServiceAccount: withMessage('Please use add service account to add service accounts', value => !isServiceAccountUsername(value)),
@@ -266,7 +266,7 @@ export default {
           internalNameValidators.serviceAccountResource = withMessage('Name must contain only lowercase alphanumeric characters or hyphen. Colons are allowed if you specify the service account prefix to add a service account from another namespace', lowerCaseAlphaNumHyphen)
           internalNameValidators.noStartEndHyphen = noStartEndHyphen
         }
-        validators.internalName = allWithCauserParam('Service Account Name', internalNameValidators)
+        validators.internalName = withFieldName('Service Account Name', internalNameValidators)
       }
     }
     return validators

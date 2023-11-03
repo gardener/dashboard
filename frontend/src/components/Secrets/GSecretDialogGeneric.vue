@@ -48,7 +48,7 @@ import { required } from '@vuelidate/validators'
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 
 import {
-  allWithCauserParam,
+  withFieldName,
   withMessage,
 } from '@/utils/validators'
 import {
@@ -91,7 +91,7 @@ export default {
   },
   validations () {
     return {
-      data: allWithCauserParam('Secret Data', {
+      data: withFieldName('Secret Data', {
         required,
         isYAML: withMessage('You need to enter secret data as YAML key - value pairs', () => Object.keys(this.secretData).length > 0),
       }),

@@ -59,7 +59,7 @@ import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import { getVuelidateErrors } from '@/utils'
 import { getWorkerProviderConfig } from '@/utils/createShoot'
-import { allWithCauserParam } from '@/utils/validators'
+import { withFieldName } from '@/utils/validators'
 
 import {
   find,
@@ -81,7 +81,7 @@ export default {
     cloudProfileName: {
       type: String,
     },
-    causer: {
+    fieldName: {
       type: String,
     },
   },
@@ -102,12 +102,12 @@ export default {
     return {
       worker: {
         volume: {
-          type: allWithCauserParam(() => this.causer, {
+          type: withFieldName(() => this.fieldName, {
             required,
           }),
         },
       },
-      workerIops: allWithCauserParam(() => `${this.causer} IOPS`, {
+      workerIops: withFieldName(() => `${this.fieldName} IOPS`, {
         required: requiredIf(() => {
           return this.isAWS && this.worker.volume.type === 'io1'
         }),

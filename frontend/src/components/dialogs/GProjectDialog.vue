@@ -146,7 +146,7 @@ import GMessage from '@/components/GMessage.vue'
 import GToolbar from '@/components/GToolbar.vue'
 
 import {
-  allWithCauserParam,
+  withFieldName,
   lowerCaseAlphaNumHyphen,
   unique,
   noStartEndHyphen,
@@ -216,10 +216,10 @@ export default {
   },
   validations () {
     return {
-      owner: allWithCauserParam('Project Owner', {
+      owner: withFieldName('Project Owner', {
         required,
       }),
-      costObject: allWithCauserParam(() => `Project ${this.costObjectTitle}`, {
+      costObject: withFieldName(() => `Project ${this.costObjectTitle}`, {
         validCostObject: withMessage(this.costObjectErrorMessage,
           value => {
             if (!this.costObjectRegex) {
@@ -228,7 +228,7 @@ export default {
             return RegExp(this.costObjectRegex).test(value || '') // undefined cannot be evaluated, use empty string as default
           }),
       }),
-      projectName: allWithCauserParam('Project Name', {
+      projectName: withFieldName('Project Name', {
         required,
         maxLength: maxLength(10),
         noConsecutiveHyphen,

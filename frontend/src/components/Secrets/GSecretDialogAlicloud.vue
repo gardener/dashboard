@@ -107,7 +107,7 @@ import {
   getVuelidateErrors,
   setDelayedInputFocus,
 } from '@/utils'
-import { allWithCauserParam } from '@/utils/validators'
+import { withFieldName } from '@/utils/validators'
 
 export default {
   components: {
@@ -178,12 +178,12 @@ export default {
   },
   validations () {
     return {
-      accessKeyId: allWithCauserParam('Access Key ID', {
+      accessKeyId: withFieldName('Access Key ID', {
         required,
         minLength: minLength(16),
         maxLength: maxLength(128),
       }),
-      accessKeySecret: allWithCauserParam('Access Key Secret', {
+      accessKeySecret: withFieldName('Access Key Secret', {
         required,
         minLength: minLength(30),
       }),

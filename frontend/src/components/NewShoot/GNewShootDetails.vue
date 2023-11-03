@@ -109,7 +109,7 @@ import GStaticTokenKubeconfigSwitch from '@/components/GStaticTokenKubeconfigSwi
 import { useAsyncRef } from '@/composables/useAsyncRef'
 
 import {
-  allWithCauserParam,
+  withFieldName,
   lowerCaseAlphaNumHyphen,
   noStartEndHyphen,
   noConsecutiveHyphen,
@@ -158,7 +158,7 @@ export default {
   },
   validations () {
     return {
-      name: allWithCauserParam('Cluster Name', {
+      name: withFieldName('Cluster Name', {
         required,
         maxLength: maxLength(this.maxShootNameLength),
         noConsecutiveHyphen,
@@ -169,7 +169,7 @@ export default {
             return this.shootByNamespaceAndName({ namespace: this.namespace, name: value }) === undefined
           }),
       }),
-      kubernetesVersion: allWithCauserParam('Kubernetes Version', {
+      kubernetesVersion: withFieldName('Kubernetes Version', {
         required,
       }),
     }

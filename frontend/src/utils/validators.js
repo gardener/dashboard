@@ -99,12 +99,12 @@ const nilUnless = key => withMessage(`Must not be provided if '${key}' is not se
     },
   ))
 
-const allWithCauserParam = (causer, validators) => {
+const withFieldName = (fieldName, validators) => {
   for (const [key, validator] of Object.entries(validators)) {
-    if (typeof causer === 'function') {
-      validators[key] = withParams({ causer: causer.call(this) }, validator)
+    if (typeof fieldName === 'function') {
+      validators[key] = withParams({ fieldName: fieldName.call(this) }, validator)
     } else {
-      validators[key] = withParams({ causer }, validator)
+      validators[key] = withParams({ fieldName }, validator)
     }
   }
   return validators
@@ -113,7 +113,7 @@ const allWithCauserParam = (causer, validators) => {
 export {
   withParams,
   withMessage,
-  allWithCauserParam,
+  withFieldName,
   regex,
   unique,
   alphaNumUnderscore,

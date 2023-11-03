@@ -58,7 +58,7 @@ import {
   selectedImageIsNotLatest,
   transformHtml,
 } from '@/utils'
-import { allWithCauserParam } from '@/utils/validators'
+import { withFieldName } from '@/utils/validators'
 
 import {
   pick,
@@ -83,7 +83,7 @@ export default {
     updateOSMaintenance: {
       type: Boolean,
     },
-    causer: {
+    fieldName: {
       type: String,
     },
   },
@@ -180,7 +180,7 @@ export default {
     return {
       worker: {
         machine: {
-          image: allWithCauserParam(() => this.causer, {
+          image: withFieldName(() => this.fieldName, {
             required,
           }),
         },

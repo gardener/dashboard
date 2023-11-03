@@ -111,7 +111,7 @@ import GVendorIcon from '@/components/GVendorIcon'
 import GExpandTransitionGroup from '@/components/GExpandTransitionGroup'
 
 import {
-  allWithCauserParam,
+  withFieldName,
   nilUnless,
   withMessage,
 } from '@/utils/validators'
@@ -130,7 +130,7 @@ export default {
   },
   validations () {
     return {
-      primaryProvider: allWithCauserParam('Primary DNS Provider', {
+      primaryProvider: withFieldName('Primary DNS Provider', {
         required: withMessage('Provider is required if a custom domain is defined', requiredIf(this.clusterIsNew && !!this.domain)),
         nil: withMessage('Provider is not allowed if no custom domain is defined', nilUnless('domain')),
       }),

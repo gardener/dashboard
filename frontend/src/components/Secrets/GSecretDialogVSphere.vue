@@ -103,7 +103,7 @@ import {
   getVuelidateErrors,
   setDelayedInputFocus,
 } from '@/utils'
-import { allWithCauserParam } from '@/utils/validators'
+import { withFieldName } from '@/utils/validators'
 
 export default {
   components: {
@@ -139,16 +139,16 @@ export default {
   },
   validations () {
     return {
-      vsphereUsername: allWithCauserParam('vSphere Username', {
+      vsphereUsername: withFieldName('vSphere Username', {
         required,
       }),
-      vspherePassword: allWithCauserParam('vSphere Password', {
+      vspherePassword: withFieldName('vSphere Password', {
         required,
       }),
-      nsxtUsername: allWithCauserParam('NSX-T Username', {
+      nsxtUsername: withFieldName('NSX-T Username', {
         required,
       }),
-      nsxtPassword: allWithCauserParam('NSX-T Password', {
+      nsxtPassword: withFieldName('NSX-T Password', {
         required,
       }),
     }

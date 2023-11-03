@@ -228,7 +228,7 @@ import { getVuelidateErrors } from '@/utils'
 import {
   includesIfAvailable,
   withMessage,
-  allWithCauserParam,
+  withFieldName,
 } from '@/utils/validators'
 
 import {
@@ -282,44 +282,44 @@ export default {
   },
   validations () {
     return {
-      region: allWithCauserParam('Region', {
+      region: withFieldName('Region', {
         required,
       }),
-      networkingType: allWithCauserParam('Networking Type', {
+      networkingType: withFieldName('Networking Type', {
         required: requiredIf(!this.workerless),
       }),
-      loadBalancerProviderName: allWithCauserParam('Cluster Name', {
+      loadBalancerProviderName: withFieldName('Cluster Name', {
         required: requiredIf(function () {
           return this.infrastructureKind === 'openstack'
         }),
       }),
-      loadBalancerClassNames: allWithCauserParam('Load Balancer Class Names', {
+      loadBalancerClassNames: withFieldName('Load Balancer Class Names', {
         required: requiredIf(function () {
           return this.infrastructureKind === 'vsphere'
         }),
         includesKey: withMessage('Load Balancer Class \'default\' must be selected', includesIfAvailable('default', 'allLoadBalancerClassNames')),
       }),
-      partitionID: allWithCauserParam('Partition ID', {
+      partitionID: withFieldName('Partition ID', {
         required: requiredIf(function () {
           return this.infrastructureKind === 'metal'
         }),
       }),
-      firewallImage: allWithCauserParam('Firewall Image', {
+      firewallImage: withFieldName('Firewall Image', {
         required: requiredIf(function () {
           return this.infrastructureKind === 'metal'
         }),
       }),
-      firewallSize: allWithCauserParam('Firewall Size', {
+      firewallSize: withFieldName('Firewall Size', {
         required: requiredIf(function () {
           return this.infrastructureKind === 'metal'
         }),
       }),
-      firewallNetworks: allWithCauserParam('Firewall Networks', {
+      firewallNetworks: withFieldName('Firewall Networks', {
         required: requiredIf(function () {
           return this.infrastructureKind === 'metal'
         }),
       }),
-      projectID: allWithCauserParam('Project ID', {
+      projectID: withFieldName('Project ID', {
         required: requiredIf(function () {
           return this.infrastructureKind === 'metal'
         }),

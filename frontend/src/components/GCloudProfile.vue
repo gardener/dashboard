@@ -35,7 +35,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
 import { getVuelidateErrors } from '@/utils'
-import { allWithCauserParam } from '@/utils/validators'
+import { withFieldName } from '@/utils/validators'
 
 export default {
   props: {
@@ -61,7 +61,7 @@ export default {
   },
   validations () {
     return {
-      modelValue: allWithCauserParam('Cloud Profile', {
+      modelValue: withFieldName('Cloud Profile', {
         required,
       }),
     }

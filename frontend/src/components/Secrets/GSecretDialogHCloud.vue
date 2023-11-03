@@ -55,7 +55,7 @@ import { required } from '@vuelidate/validators'
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink.vue'
 
-import { allWithCauserParam } from '@/utils/validators'
+import { withFieldName } from '@/utils/validators'
 import {
   getVuelidateErrors,
   setDelayedInputFocus,
@@ -91,7 +91,7 @@ export default {
   },
   validations () {
     return {
-      hcloudToken: allWithCauserParam('Cloud Token', {
+      hcloudToken: withFieldName('Cloud Token', {
         required,
       }),
     }

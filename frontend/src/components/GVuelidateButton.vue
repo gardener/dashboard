@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
       v-for="(err, i) in validationErrorTooltip"
       :key="`${err.message}_${i}`"
     >
-      <span class="font-weight-bold">{{ err.causer }}:</span>
+      <span class="font-weight-bold">{{ err.fieldName }}:</span>
       {{ err.message }}
     </div>
   </v-tooltip>
@@ -56,7 +56,7 @@ const validationErrorTooltip = computed(() => {
   if (props.v.$errors) {
     props.v.$errors.forEach(error => {
       errorMessages.push({
-        causer: error.$params.causer ? error.$params.causer : error.$propertyPath,
+        fieldName: error.$params.fieldName ? error.$params.fieldName : error.$propertyPath,
         message: error.$message,
       })
     })

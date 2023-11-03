@@ -63,7 +63,7 @@ import { useAppStore } from '@/store/app'
 import GTimeTextField from '@/components/GTimeTextField.vue'
 
 import {
-  allWithCauserParam,
+  withFieldName,
   isTimezone,
 } from '@/utils/validators'
 import moment from '@/utils/moment'
@@ -94,14 +94,14 @@ export default {
   },
   validations () {
     return {
-      maintenanceBegin: allWithCauserParam('Maintenance Begin', {
+      maintenanceBegin: withFieldName('Maintenance Begin', {
         required,
       }),
-      maintenanceTimezone: allWithCauserParam('Maintenance Timezone', {
+      maintenanceTimezone: withFieldName('Maintenance Timezone', {
         required,
         isTimezone,
       }),
-      windowDuration: allWithCauserParam('Maintenance Window Duration', {
+      windowDuration: withFieldName('Maintenance Window Duration', {
         required,
         minValue: minValue(30),
         maxValue: maxValue(360),
