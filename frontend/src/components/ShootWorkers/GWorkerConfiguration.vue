@@ -9,7 +9,6 @@ SPDX-License-Identifier: Apache-2.0
     :key="componentKey"
     ref="actionDialog"
     :shoot-item="shootItem"
-    :valid="!v$.$invalid"
     width="1250"
     confirm-required
     caption="Configure Workers"

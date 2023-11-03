@@ -42,7 +42,6 @@ SPDX-License-Identifier: Apache-2.0
       v-model:detailed-error-message="updateDetailedErrorMessage"
       :confirm-value="confirm"
       confirm-button-text="Update"
-      :confirm-disabled="v$.$invalid"
       width="450"
     >
       <template #caption>

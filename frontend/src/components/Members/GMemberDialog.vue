@@ -104,34 +104,26 @@ SPDX-License-Identifier: Apache-2.0
         >
           Cancel
         </v-btn>
-        <g-vuelidate-tooltip
+        <g-vuelidate-button
           v-if="isUpdateDialog"
-          :v$="v$"
+          :v="v$"
+          variant="text"
+          class="text-primary"
+          tabindex="4"
+          @click.stop="submitUpdateMember"
         >
-          <v-btn
-            variant="text"
-            :disabled="!valid"
-            class="text-primary"
-            tabindex="4"
-            @click.stop="submitUpdateMember"
-          >
-            Update
-          </v-btn>
-        </g-vuelidate-tooltip>
-        <g-vuelidate-tooltip
+          Update
+        </g-vuelidate-button>
+        <g-vuelidate-button
           v-else
-          :v$="v$"
+          :v="v$"
+          variant="text"
+          class="text-primary"
+          tabindex="4"
+          @click.stop="submitAddMember"
         >
-          <v-btn
-            variant="text"
-            :disabled="!valid"
-            class="text-primary"
-            tabindex="4"
-            @click.stop="submitAddMember"
-          >
-            {{ addMemberButtonText }}
-          </v-btn>
-        </g-vuelidate-tooltip>
+          {{ addMemberButtonText }}
+        </g-vuelidate-button>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -154,7 +146,7 @@ import { useMemberStore } from '@/store/member'
 
 import GMessage from '@/components/GMessage.vue'
 import GToolbar from '@/components/GToolbar.vue'
-import GVuelidateTooltip from '@/components/GVuelidateTooltip.vue'
+import GVuelidateButton from '@/components/GVuelidateButton.vue'
 
 import {
   allWithCauserParam,
@@ -194,7 +186,7 @@ export default {
   components: {
     GMessage,
     GToolbar,
-    GVuelidateTooltip,
+    GVuelidateButton,
   },
   inject: ['logger'],
   props: {
@@ -292,9 +284,6 @@ export default {
       set (value) {
         this.$emit('update:modelValue', value)
       },
-    },
-    valid () {
-      return !this.v$.$invalid
     },
     title () {
       if (this.isUpdateDialog) {
@@ -405,7 +394,7 @@ export default {
     },
     async submitAddMember () {
       this.v$.$touch()
-      if (this.valid) {
+      if (!this.v$.$invalid) {
         const name = this.memberName
         const roles = this.internalRoles
         try {
@@ -429,7 +418,7 @@ export default {
     },
     async submitUpdateMember () {
       this.v$.$touch()
-      if (this.valid) {
+      if (!this.v$.$invalid) {
         try {
           const name = this.memberName
           const roles = [...this.internalRoles, ...this.unsupportedRoles]

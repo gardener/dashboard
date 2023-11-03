@@ -102,16 +102,14 @@ SPDX-License-Identifier: Apache-2.0
         >
           Cancel
         </v-btn>
-        <g-vuelidate-tooltip :v$="secretValidations">
-          <v-btn
-            variant="text"
-            color="primary"
-            :disabled="!valid"
-            @click="submit"
-          >
-            {{ submitButtonText }}
-          </v-btn>
-        </g-vuelidate-tooltip>
+        <g-vuelidate-button
+          :v="secretValidations"
+          variant="text"
+          color="primary"
+          @click="submit"
+        >
+          {{ submitButtonText }}
+        </g-vuelidate-button>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -137,7 +135,7 @@ import { useShootStore } from '@/store/shoot'
 import GToolbar from '@/components/GToolbar.vue'
 import GMessage from '@/components/GMessage'
 import GCloudProfile from '@/components/GCloudProfile'
-import GVuelidateTooltip from '@/components/GVuelidateTooltip.vue'
+import GVuelidateButton from '@/components/GVuelidateButton.vue'
 
 import {
   allWithCauserParam,
@@ -170,7 +168,7 @@ export default {
     GCloudProfile,
     GMessage,
     GToolbar,
-    GVuelidateTooltip,
+    GVuelidateButton,
   },
   inject: ['logger'],
   props: {

@@ -64,7 +64,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-card-actions>
         <v-spacer />
         <v-text-field
-          v-if="confirmValue && !confirmDisabled"
+          v-if="confirmValue && !hasVisibleErrors && valid"
           ref="deleteDialogInput"
           v-model="userInput"
           :label="hint"
@@ -86,20 +86,19 @@ SPDX-License-Identifier: Apache-2.0
         </v-btn>
         <v-tooltip
           location="top"
-          :disabled="!notConfirmed || v$.$invalid"
+          :disabled="!notConfirmed || hasVisibleErrors || !valid"
         >
           <template #activator="{ props }">
             <div v-bind="props">
-              <g-vuelidate-tooltip :v$="v$">
-                <v-btn
-                  variant="text"
-                  :disabled="!valid"
-                  class="text-toolbar-background"
-                  @click="resolveAction(true)"
-                >
-                  {{ confirmButtonText }}
-                </v-btn>
-              </g-vuelidate-tooltip>
+              <g-vuelidate-button
+                :v="v$"
+                variant="text"
+                class="text-toolbar-background"
+                :disabled="notConfirmed || !valid"
+                @click="resolveAction(true)"
+              >
+                {{ confirmButtonText }}
+              </g-vuelidate-button>
             </div>
           </template>
           You need to confirm your changes by typing this cluster's name
@@ -113,7 +112,7 @@ SPDX-License-Identifier: Apache-2.0
 import { useVuelidate } from '@vuelidate/core'
 
 import GMessage from '@/components/GMessage.vue'
-import GVuelidateTooltip from '@/components/GVuelidateTooltip.vue'
+import GVuelidateButton from '@/components/GVuelidateButton.vue'
 
 import { setDelayedInputFocus } from '@/utils'
 
@@ -128,15 +127,11 @@ const zeroWidthSpace = '\u200B'
 export default {
   components: {
     GMessage,
-    GVuelidateTooltip,
+    GVuelidateButton,
   },
   props: {
     confirmValue: {
       type: String,
-    },
-    confirmDisabled: {
-      type: Boolean,
-      default: false,
     },
     errorMessage: {
       type: String,
@@ -163,6 +158,12 @@ export default {
     disableConfirmInputFocus: {
       type: Boolean,
       default: false,
+    },
+    valid: {
+      // use to pass validation result from a parent component
+      // Use only if outside v$ scope
+      type: Boolean,
+      default: true,
     },
   },
   emits: [
@@ -213,8 +214,8 @@ export default {
         this.$emit('update:detailedErrorMessage', value)
       },
     },
-    valid () {
-      return !this.confirmDisabled && !this.notConfirmed
+    hasVisibleErrors () {
+      return this.v$.$errors.length > 0
     },
   },
   watch: {
@@ -247,7 +248,8 @@ export default {
       this.visible = true
     },
     async resolveAction (value) {
-      if (value && !this.valid) {
+      if (value && (this.v$.$invalid || !this.valid)) {
+        console.log('REII', this.valid)
         return
       }
 

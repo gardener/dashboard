@@ -7,15 +7,19 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-tooltip
     location="top"
-    :disabled="!v$.$invalid"
-    open-delay="0"
+    :disabled="!hasVisibleErrors"
   >
     <template #activator="{ props: activatorProps }">
       <div
         v-bind="activatorProps"
-        @mouseover="v$.$validate()"
       >
-        <slot />
+        <v-btn
+          v-bind="$attrs"
+          :disabled="disabled || (v.$invalid && hasVisibleErrors)"
+          @click="onClick"
+        >
+          <slot />
+        </v-btn>
       </div>
     </template>
     <div class="font-weight-bold">
@@ -35,14 +39,22 @@ SPDX-License-Identifier: Apache-2.0
 import { computed } from 'vue'
 
 const props = defineProps({
-  v$: {
+  v: {
     type: Object,
   },
+  disabled: {
+    type: Boolean,
+  },
 })
+
+const emit = defineEmits([
+  'click',
+])
+
 const validationErrorTooltip = computed(() => {
   const errorMessages = []
-  if (props.v$.$errors) {
-    props.v$.$errors.forEach(error => {
+  if (props.v.$errors) {
+    props.v.$errors.forEach(error => {
       errorMessages.push({
         causer: error.$params.causer ? error.$params.causer : error.$propertyPath,
         message: error.$message,
@@ -51,4 +63,17 @@ const validationErrorTooltip = computed(() => {
   }
   return errorMessages
 })
+
+const hasVisibleErrors = computed(() => {
+  return props.v.$errors.length > 0
+})
+
+const onClick = (e) => {
+  if (props.v.$invalid) {
+    props.v.$validate()
+  } else {
+    emit('click', e)
+  }
+}
+
 </script>
