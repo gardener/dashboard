@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="accessKeyId"
           color="primary"
           label="Access Key Id"
-          :error-messages="errors.accessKeyId"
+          :error-messages="getErrorMessages(v$.accessKeyId)"
           counter="128"
           hint="e.g. QNJebZ17v5Q7pYpP"
           variant="underlined"
@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="accessKeySecret"
           color="primary"
           label="Access Key Secret"
-          :error-messages="errors.accessKeySecret"
+          :error-messages="getErrorMessages(v$.accessKeySecret)"
           :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideSecret ? 'password' : 'text'"
           counter="30"
@@ -104,7 +104,7 @@ import GCodeBlock from '@/components/GCodeBlock'
 import GExternalLink from '@/components/GExternalLink'
 
 import {
-  getVuelidateErrors,
+  getErrorMessages,
   setDelayedInputFocus,
 } from '@/utils'
 import { withFieldName } from '@/utils/validators'
@@ -219,9 +219,6 @@ export default {
     isCreateMode () {
       return !this.secret
     },
-    errors () {
-      return getVuelidateErrors(this.v$.$errors)
-    },
   },
   watch: {
     value: function (value) {
@@ -241,6 +238,7 @@ export default {
         setDelayedInputFocus(this, 'accessKeyId')
       }
     },
+    getErrorMessages,
   },
 }
 </script>

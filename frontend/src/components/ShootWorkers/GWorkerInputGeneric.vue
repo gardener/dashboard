@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-text-field
           v-model="worker.name"
           color="primary"
-          :error-messages="errors['worker.name']"
+          :error-messages="getErrorMessages(v$.worker.name)"
           counter="15"
           label="Group Name"
           variant="underlined"
@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
           color="primary"
           item-color="primary"
           :items="machineArchitectures"
-          :error-messages="errors['machineArchitecture']"
+          :error-messages="getErrorMessages(v$.machineArchitecture)"
           label="Architecture"
           variant="underlined"
           @blur="v$.machineArchitecture.$touch()"
@@ -74,7 +74,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="volumeSize"
           :min="minimumVolumeSize"
           color="primary"
-          :error-messages="errors.volumeSize"
+          :error-messages="getErrorMessages(v$.volumeSize)"
           label="Volume Size"
           @update:model-value="onInputVolumeSize"
           @blur="v$.volumeSize.$touch()"
@@ -85,7 +85,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="innerMin"
           min="0"
           color="primary"
-          :error-messages="errors['worker.minimum']"
+          :error-messages="getErrorMessages(v$.worker.minimum)"
           type="number"
           label="Autoscaler Min."
           variant="underlined"
@@ -101,7 +101,7 @@ SPDX-License-Identifier: Apache-2.0
           type="number"
           label="Autoscaler Max."
           variant="underlined"
-          :error-messages="errors['worker.maximum']"
+          :error-messages="getErrorMessages(v$.worker.maximum)"
           @input="onInputMaximum"
           @blur="v$.worker.maximum.$touch()"
         />
@@ -111,7 +111,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="maxSurge"
           min="0"
           color="primary"
-          :error-messages="errors['worker.maxSurge']"
+          :error-messages="getErrorMessages(v$.worker.maxSurge)"
           label="Max. Surge"
           variant="underlined"
           @input="onInputMaxSurge"
@@ -129,7 +129,7 @@ SPDX-License-Identifier: Apache-2.0
           item-color="primary"
           label="Zones"
           :items="zoneItems"
-          :error-messages="errors.selectedZones"
+          :error-messages="getErrorMessages(v$.selectedZones)"
           multiple
           chips
           closable-chips
@@ -182,7 +182,7 @@ import {
   withMessage,
 } from '@/utils/validators'
 import {
-  getVuelidateErrors,
+  getErrorMessages,
   parseSize,
 } from '@/utils'
 
@@ -476,9 +476,7 @@ export default {
         this.onInputVolumeSize()
       },
     },
-    errors () {
-      return getVuelidateErrors(this.v$.$errors)
-    },
+
     workerGroupName () {
       return this.worker.name ? `[Worker Group ${this.worker.name}]` : '[Worker Group]'
     },
@@ -552,6 +550,7 @@ export default {
       const machineImage = head(this.machineImages)
       this.worker.machine.image = pick(machineImage, ['name', 'version'])
     },
+    getErrorMessages,
   },
 }
 </script>

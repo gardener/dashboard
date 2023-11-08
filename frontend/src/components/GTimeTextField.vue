@@ -21,9 +21,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { useVModel } from '@vueuse/core'
 
 import { withMessage } from '@/utils/validators'
-import { getVuelidateErrors } from '@/utils'
-
-import { compact } from '@/lodash'
+import { getErrorMessages } from '@/utils'
 
 const props = defineProps({
   modelValue: {
@@ -74,9 +72,9 @@ const inputHint = computed(() => {
 })
 
 const errorMessages = computed(() => {
-  const errors = getVuelidateErrors(v$.value.$errors)
-  const errorMessages = [props.errorMessages, errors.timeValue]
-  return compact(errorMessages)
+  const errors = getErrorMessages(v$.value.timeValue)
+  const errorMessages = [...props.errorMessages, ...errors]
+  return errorMessages
 })
 
 const v$ = useVuelidate(rules, { timeValue })

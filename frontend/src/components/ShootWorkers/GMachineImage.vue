@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
     :items="machineImageItems"
     item-value="key"
     return-object
-    :error-messages="errors['worker.machine.image']"
+    :error-messages="getErrorMessages(v$.worker.machine.image)"
     label="Machine Image"
     :hint="hint"
     persistent-hint
@@ -54,7 +54,7 @@ import GVendorIcon from '@/components/GVendorIcon'
 import GMultiMessage from '@/components/GMultiMessage'
 
 import {
-  getVuelidateErrors,
+  getErrorMessages,
   selectedImageIsNotLatest,
   transformHtml,
 } from '@/utils'
@@ -172,9 +172,6 @@ export default {
     selectedImageIsNotLatest () {
       return selectedImageIsNotLatest(this.machineImage, this.machineImages)
     },
-    errors () {
-      return getVuelidateErrors(this.v$.$errors)
-    },
   },
   validations () {
     return {
@@ -205,6 +202,7 @@ export default {
       }
       return join(itemDescription, ' | ')
     },
+    getErrorMessages,
   },
 }
 </script>

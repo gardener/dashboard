@@ -88,11 +88,8 @@ export function handleTextFieldDrop (textField, fileTypePattern, onDrop = () => 
   textarea.addEventListener('drop', drop, false)
 }
 
-export function getVuelidateErrors (errors) {
-  return errors.reduce((acc, value) => {
-    acc[value.$propertyPath] = [value.$message]
-    return acc
-  }, {})
+export function getErrorMessages (property) {
+  return property.$errors.map(e => e.$message)
 }
 
 export function setDelayedInputFocus (...args) {

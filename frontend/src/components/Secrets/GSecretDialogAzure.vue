@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="clientId"
           color="primary"
           label="Client Id"
-          :error-messages="errors.clientId"
+          :error-messages="getErrorMessages(v$.clientId)"
           variant="underlined"
           @update:model-value="v$.clientId.$touch()"
           @blur="v$.clientId.$touch()"
@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
           :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideSecret ? 'password' : 'text'"
           label="Client Secret"
-          :error-messages="errors.clientSecret"
+          :error-messages="getErrorMessages(v$.clientSecret)"
           variant="underlined"
           @click:append="() => (hideSecret = !hideSecret)"
           @update:model-value="v$.clientSecret.$touch()"
@@ -46,7 +46,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="tenantId"
           color="primary"
           label="Tenant Id"
-          :error-messages="errors.tenantId"
+          :error-messages="getErrorMessages(v$.tenantId)"
           variant="underlined"
           @update:model-value="v$.tenantId.$touch()"
           @blur="v$.tenantId.$touch()"
@@ -57,7 +57,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="subscriptionId"
           color="primary"
           label="Subscription Id"
-          :error-messages="errors.subscriptionId"
+          :error-messages="getErrorMessages(v$.subscriptionId)"
           variant="underlined"
           @update:model-value="v$.subscriptionId.$touch()"
           @blur="v$.subscriptionId.$touch()"
@@ -105,7 +105,7 @@ import GExternalLink from '@/components/GExternalLink'
 
 import { withFieldName } from '@/utils/validators'
 import {
-  getVuelidateErrors,
+  getErrorMessages,
   setDelayedInputFocus,
 } from '@/utils'
 
@@ -194,9 +194,6 @@ export default {
       }
       return undefined
     },
-    errors () {
-      return getVuelidateErrors(this.v$.$errors)
-    },
   },
   watch: {
     value: function (value) {
@@ -218,6 +215,7 @@ export default {
         setDelayedInputFocus(this, 'clientId')
       }
     },
+    getErrorMessages,
   },
 }
 </script>

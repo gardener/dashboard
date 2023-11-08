@@ -65,7 +65,7 @@ SPDX-License-Identifier: Apache-2.0
         :color="color"
         :loading="loading"
         :messages="messages"
-        :error-messages="errors.internalValue"
+        :error-messages="getErrorMessages(v$.internalValue)"
         class="g-field"
         @input="v$.internalValue.$touch"
         @blur="v$.internalValue.$touch"
@@ -102,7 +102,7 @@ import { useVuelidate } from '@vuelidate/core'
 
 import {
   setDelayedInputFocus,
-  getVuelidateErrors,
+  getErrorMessages,
 } from '@/utils'
 
 import GErrorMessage from './GErrorMessage.vue'
@@ -204,9 +204,6 @@ export default {
       }
       return 'mdi-pencil'
     },
-    errors () {
-      return getVuelidateErrors(this.v$.$errors)
-    },
   },
   watch: {
     active (value) {
@@ -259,6 +256,7 @@ export default {
       this.clearMessages()
       this.v$.$reset()
     },
+    getErrorMessages,
   },
 }
 </script>

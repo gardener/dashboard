@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
           color="primary"
           label="Cluster Name"
           :counter="maxShootNameLength"
-          :error-messages="errors.name"
+          :error-messages="getErrorMessages(v$.name)"
           hint="Maximum name length depends on project name"
           variant="underlined"
           @input="onInputName"
@@ -31,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0
           item-title="version"
           item-value="version"
           :items="sortedKubernetesVersionsList"
-          :error-messages="errors.kubernetesVersion"
+          :error-messages="getErrorMessages(v$.kubernetesVersion)"
           :hint="versionHint"
           persistent-hint
           variant="underlined"
@@ -116,7 +116,7 @@ import {
   withMessage,
 } from '@/utils/validators'
 import {
-  getVuelidateErrors,
+  getErrorMessages,
   transformHtml,
   setDelayedInputFocus,
 } from '@/utils'
@@ -218,9 +218,6 @@ export default {
     maxShootNameLength () {
       return 21 - this.projectName.length
     },
-    errors () {
-      return getVuelidateErrors(this.v$.$errors)
-    },
   },
   mounted () {
     this.userInterActionBus.on('updateSecret', secret => {
@@ -289,6 +286,7 @@ export default {
       }
       return join(itemDescription, ' | ')
     },
+    getErrorMessages,
   },
 }
 </script>

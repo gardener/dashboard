@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
       :items="volumeTypeItems"
       item-title="name"
       item-value="name"
-      :error-messages="errors['worker.volume.type']"
+      :error-messages="getErrorMessages(v$.worker.volume.type)"
       label="Volume Type"
       :hint="hint"
       persistent-hint
@@ -35,7 +35,7 @@ SPDX-License-Identifier: Apache-2.0
       v-model.number="workerIops"
       class="ml-1"
       color="primary"
-      :error-messages="errors.workerIops"
+      :error-messages="getErrorMessages(v$.workerIops)"
       type="number"
       min="100"
       label="IOPS"
@@ -57,7 +57,7 @@ import { useVuelidate } from '@vuelidate/core'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
-import { getVuelidateErrors } from '@/utils'
+import { getErrorMessages } from '@/utils'
 import { getWorkerProviderConfig } from '@/utils/createShoot'
 import { withFieldName } from '@/utils/validators'
 
@@ -139,9 +139,6 @@ export default {
       const cloudProfile = this.cloudProfileByName(this.cloudProfileName)
       return get(cloudProfile, 'metadata.cloudProviderKind') === 'aws'
     },
-    errors () {
-      return getVuelidateErrors(this.v$.$errors)
-    },
   },
   mounted () {
     this.workerIops = get(this.worker, 'providerConfig.volume.iops')
@@ -168,6 +165,7 @@ export default {
       this.v$.workerIops.$touch()
       this.$emit('updateVolumeType')
     },
+    getErrorMessages,
   },
 }
 </script>

@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="accessKeyId"
           color="primary"
           label="Access Key Id"
-          :error-messages="errors.accessKeyId"
+          :error-messages="getErrorMessages(v$.accessKeyId)"
           counter="128"
           hint="e.g. AKIAIOSFODNN7EXAMPLE"
           variant="underlined"
@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="secretAccessKey"
           color="primary"
           label="Secret Access Key"
-          :error-messages="errors.secretAccessKey"
+          :error-messages="getErrorMessages(v$.secretAccessKey)"
           :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideSecret ? 'password' : 'text'"
           counter="40"
@@ -113,7 +113,7 @@ import {
   base64,
 } from '@/utils/validators'
 import {
-  getVuelidateErrors,
+  getErrorMessages,
   setDelayedInputFocus,
 } from '@/utils'
 
@@ -278,9 +278,6 @@ export default {
       }
       return undefined
     },
-    errors () {
-      return getVuelidateErrors(this.v$.$errors)
-    },
   },
   watch: {
     value: function (value) {
@@ -301,6 +298,7 @@ export default {
         setDelayedInputFocus(this, 'accessKeyId')
       }
     },
+    getErrorMessages,
   },
 }
 </script>

@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
           color="primary"
           variant="filled"
           label="Service Account Key"
-          :error-messages="errors.serviceAccountKey"
+          :error-messages="getErrorMessages(v$.serviceAccountKey)"
           hint="Enter or drop a service account key in JSON format"
           persistent-hint
           @update:model-value="v$.serviceAccountKey.$touch()"
@@ -92,7 +92,7 @@ import {
 } from '@/utils/validators'
 import {
   handleTextFieldDrop,
-  getVuelidateErrors,
+  getErrorMessages,
   setDelayedInputFocus,
 } from '@/utils'
 
@@ -164,9 +164,6 @@ export default {
       }
       return undefined
     },
-    errors () {
-      return getVuelidateErrors(this.v$.$errors)
-    },
   },
   watch: {
     value: function (value) {
@@ -204,6 +201,7 @@ export default {
       }
       handleTextFieldDrop(this.$refs.serviceAccountKey, /json/, onDrop)
     },
+    getErrorMessages,
   },
 }
 </script>

@@ -20,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="apiToken"
           color="primary"
           label="Cloudflare API Token"
-          :error-messages="errors.apiToken"
+          :error-messages="getErrorMessages(v$.apiToken)"
           :append-icon="hideApiToken ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideApiToken ? 'password' : 'text'"
           variant="underlined"
@@ -66,7 +66,7 @@ import { required } from '@vuelidate/validators'
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
 
-import { getVuelidateErrors } from '@/utils'
+import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
 
 export default {
@@ -124,9 +124,6 @@ export default {
     isCreateMode () {
       return !this.secret
     },
-    errors () {
-      return getVuelidateErrors(this.v$.$errors)
-    },
   },
   watch: {
     value: function (value) {
@@ -140,6 +137,7 @@ export default {
       this.v$.$reset()
       this.apiToken = ''
     },
+    getErrorMessages,
   },
 }
 </script>

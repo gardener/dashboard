@@ -20,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="authURL"
           color="primary"
           label="Auth URL"
-          :error-messages="errors.authURL"
+          :error-messages="getErrorMessages(v$.authURL)"
           variant="underlined"
           @update:model-value="v$.authURL.$touch()"
           @blur="v$.authURL.$touch()"
@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="domainName"
           color="primary"
           label="Domain Name"
-          :error-messages="errors.domainName"
+          :error-messages="getErrorMessages(v$.domainName)"
           variant="underlined"
           @update:model-value="v$.domainName.$touch()"
           @blur="v$.domainName.$touch()"
@@ -43,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="tenantName"
           color="primary"
           label="Project / Tenant Name"
-          :error-messages="errors.tenantName"
+          :error-messages="getErrorMessages(v$.tenantName)"
           variant="underlined"
           @update:model-value="v$.tenantName.$touch()"
           @blur="v$.tenantName.$touch()"
@@ -74,7 +74,7 @@ SPDX-License-Identifier: Apache-2.0
               v-model="applicationCredentialID"
               color="primary"
               label="ID"
-              :error-messages="errors.applicationCredentialID"
+              :error-messages="getErrorMessages(v$.applicationCredentialID)"
               variant="underlined"
               @update:model-value="v$.applicationCredentialID.$touch()"
               @blur="v$.applicationCredentialID.$touch()"
@@ -85,7 +85,7 @@ SPDX-License-Identifier: Apache-2.0
               v-model="applicationCredentialName"
               color="primary"
               label="Name"
-              :error-messages="errors.applicationCredentialName"
+              :error-messages="getErrorMessages(v$.applicationCredentialName)"
               variant="underlined"
               @update:model-value="v$.applicationCredentialName.$touch()"
               @blur="v$.applicationCredentialName.$touch()"
@@ -96,7 +96,7 @@ SPDX-License-Identifier: Apache-2.0
               v-model="applicationCredentialSecret"
               color="primary"
               label="Password"
-              :error-messages="errors.applicationCredentialSecret"
+              :error-messages="getErrorMessages(v$.applicationCredentialSecret)"
               :append-icon="hideApplicationCredentialSecret ? 'mdi-eye' : 'mdi-eye-off'"
               :type="hideApplicationCredentialSecret ? 'password' : 'text'"
               variant="underlined"
@@ -113,7 +113,7 @@ SPDX-License-Identifier: Apache-2.0
               v-messages-color="{ color: 'primary' }"
               color="primary"
               label="Technical User"
-              :error-messages="errors.username"
+              :error-messages="getErrorMessages(v$.username)"
               hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
               variant="underlined"
               @update:model-value="v$.username.$touch()"
@@ -126,7 +126,7 @@ SPDX-License-Identifier: Apache-2.0
               v-messages-color="{ color: 'warning' }"
               color="primary"
               label="Password"
-              :error-messages="errors.password"
+              :error-messages="getErrorMessages(v$.password)"
               :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
               :type="hideSecret ? 'password' : 'text'"
               hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
@@ -182,7 +182,7 @@ import {
   withFieldName,
 } from '@/utils/validators'
 import {
-  getVuelidateErrors,
+  getErrorMessages,
   setDelayedInputFocus,
 } from '@/utils'
 
@@ -318,9 +318,6 @@ export default {
       }
       return undefined
     },
-    errors () {
-      return getVuelidateErrors(this.v$.$errors)
-    },
   },
   watch: {
     value: function (value) {
@@ -359,6 +356,7 @@ export default {
         setDelayedInputFocus(this, 'domainName')
       }
     },
+    getErrorMessages,
   },
 }
 </script>

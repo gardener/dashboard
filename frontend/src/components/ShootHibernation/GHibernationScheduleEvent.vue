@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
             item-color="primary"
             :items="weekdays"
             return-object
-            :error-messages="errors.selectedDays"
+            :error-messages="getErrorMessages(v$.selectedDays)"
             chips
             label="Weekdays on which this rule shall be active"
             multiple
@@ -35,7 +35,7 @@ SPDX-License-Identifier: Apache-2.0
             v-model="wakeUpTime"
             color="primary"
             label="Wake up at"
-            :error-messages="errors.wakeUpTime"
+            :error-messages="getErrorMessages(v$.wakeUpTime)"
             clearable
             variant="underlined"
             @blur="touchIfNothingFocused"
@@ -48,7 +48,7 @@ SPDX-License-Identifier: Apache-2.0
             v-model="hibernateTime"
             color="primary"
             label="Hibernate at"
-            :error-messages="errors.hibernateTime"
+            :error-messages="getErrorMessages(v$.hibernateTime)"
             clearable
             variant="underlined"
             @blur="touchIfNothingFocused"
@@ -93,7 +93,7 @@ import {
   withMessage,
   withFieldName,
 } from '@/utils/validators'
-import { getVuelidateErrors } from '@/utils'
+import { getErrorMessages } from '@/utils'
 import moment from '@/utils/moment'
 
 import {
@@ -202,9 +202,6 @@ export default {
     id () {
       return this.scheduleEvent.id
     },
-    errors () {
-      return getVuelidateErrors(this.v$.$errors)
-    },
   },
   mounted () {
     this.selectedLocation = this.scheduleEvent.location
@@ -286,6 +283,7 @@ export default {
     onInputSelectedLocation () {
       this.updateLocation(this.selectedLocation)
     },
+    getErrorMessages,
   },
 }
 </script>

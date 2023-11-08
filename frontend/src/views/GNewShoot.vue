@@ -602,6 +602,7 @@ export default {
       return find(secrets, ['metadata.name', secretBindingName])
     },
     showVuelidateErrors (messages) {
+      console.log('HEKKI')
       this.errorMessage = 'There are input errors that you need to resolve'
       this.detailedErrorMessage = messages
     },

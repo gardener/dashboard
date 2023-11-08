@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
       :hint="hint"
       return-object
       placeholder="Please select version..."
-      :error-messages="errors.selectedItem"
+      :error-messages="getErrorMessages(v$.selectedItem)"
       @blur="v$.selectedItem.$touch()"
     >
       <template #item="{ props }">
@@ -71,7 +71,7 @@ import {
   withFieldName,
   withMessage,
 } from '@/utils/validators'
-import { getVuelidateErrors } from '@/utils'
+import { getErrorMessages } from '@/utils'
 
 import {
   map,
@@ -215,9 +215,6 @@ export default {
       }
       return undefined
     },
-    errors () {
-      return getVuelidateErrors(this.v$.$errors)
-    },
   },
   watch: {
     selectedItem (value) {
@@ -253,6 +250,7 @@ export default {
     reset () {
       this.selectedItem = undefined
     },
+    getErrorMessages,
   },
 }
 </script>

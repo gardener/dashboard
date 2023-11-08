@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
       color="primary"
       item-color="primary"
       :items="criItems"
-      :error-messages="errors.criName"
+      :error-messages="getErrorMessages(v$.criName)"
       label="Container Runtime"
       :hint="hint"
       persistent-hint
@@ -47,7 +47,7 @@ SPDX-License-Identifier: Apache-2.0
 import { required } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
-import { getVuelidateErrors } from '@/utils'
+import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
 
 import {
@@ -152,9 +152,6 @@ export default {
       }
       return undefined
     },
-    errors () {
-      return getVuelidateErrors(this.v$.$errors)
-    },
   },
   watch: {
     criItems (criItems) {
@@ -169,6 +166,7 @@ export default {
       this.selectedCriContainerRuntimeTypes = undefined
       this.v$.criName.$touch()
     },
+    getErrorMessages,
   },
 }
 </script>

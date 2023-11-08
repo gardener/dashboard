@@ -31,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0
               item-title="secretName"
               return-object
               :items="dnsProvidersWithPrimarySupport"
-              :error-messages="errors.primaryProvider"
+              :error-messages="getErrorMessages(v$.primaryProvider)"
               label="Primary DNS Provider"
               clearable
               :disabled="!clusterIsNew"
@@ -115,7 +115,7 @@ import {
   nilUnless,
   withMessage,
 } from '@/utils/validators'
-import { getVuelidateErrors } from '@/utils'
+import { getErrorMessages } from '@/utils'
 
 export default {
   components: {
@@ -168,9 +168,6 @@ export default {
     primaryProviderVisible () {
       return !!this.primaryProvider || (this.clusterIsNew && !!this.dnsDomain)
     },
-    errors () {
-      return getVuelidateErrors(this.v$.$errors)
-    },
   },
   mounted () {
     this.v$.$touch()
@@ -181,6 +178,7 @@ export default {
       'setDnsPrimaryProvider',
       'setDnsDomain',
     ]),
+    getErrorMessages,
   },
 }
 </script>

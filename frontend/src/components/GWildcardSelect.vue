@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
       :label="wildcardSelectLabel"
       :items="wildcardSelectItemObjects"
       return-object
-      :error-messages="errors.wildcardSelectedValue"
+      :error-messages="getErrorMessages(v$.wildcardSelectedValue)"
       :hint="wildcardSelectHint"
       persistent-hint
       variant="underlined"
@@ -80,7 +80,7 @@ import {
   withFieldName,
   withMessage,
 } from '@/utils/validators'
-import { getVuelidateErrors } from '@/utils'
+import { getErrorMessages } from '@/utils'
 import {
   wildcardObjectsFromStrings,
   bestMatchForString,
@@ -137,9 +137,6 @@ export default {
       }
       return this.wildcardSelectedValue.value
     },
-    errors () {
-      return getVuelidateErrors(this.v$.$errors)
-    },
   },
   watch: {
     modelValue (value) {
@@ -177,6 +174,7 @@ export default {
 
       this.onInput()
     },
+    getErrorMessages,
   },
   validations () {
     return {

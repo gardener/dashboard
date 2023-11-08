@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
       item-value="metadata.name"
       item-title="metadata.name"
       return-object
-      :error-messages="errors.secret"
+      :error-messages="getErrorMessages(v$.secret)"
       persistent-hint
       :hint="secretHint"
       variant="underlined"
@@ -85,7 +85,7 @@ import {
   withFieldName,
 } from '@/utils/validators'
 import {
-  getVuelidateErrors,
+  getErrorMessages,
   isOwnSecret,
   selfTerminationDaysForSecret,
 } from '@/utils'
@@ -200,9 +200,6 @@ export default {
     selfTerminationDays () {
       return selfTerminationDaysForSecret(this.secret)
     },
-    errors () {
-      return getVuelidateErrors(this.v$.$errors)
-    },
   },
   watch: {
     modelValue () {
@@ -236,6 +233,7 @@ export default {
         this.secret = newSecret
       }
     },
+    getErrorMessages,
   },
 }
 </script>

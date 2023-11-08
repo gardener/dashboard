@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
         item-value="metadata.name"
         item-title="metadata.displayName"
         label="Cloud Profile"
-        :error-messages="errors.modelValue"
+        :error-messages="getErrorMessages(v$.modelValue)"
         color="primary"
         variant="underlined"
         @update:model-value="onInput"
@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
-import { getVuelidateErrors } from '@/utils'
+import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
 
 export default {
@@ -66,16 +66,12 @@ export default {
       }),
     }
   },
-  computed: {
-    errors () {
-      return getVuelidateErrors(this.v$.$errors)
-    },
-  },
   methods: {
     onInput (modelValue) {
       this.v$.modelValue.$touch()
       this.$emit('update:modelValue', modelValue)
     },
+    getErrorMessages,
   },
 }
 </script>

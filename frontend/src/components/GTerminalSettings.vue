@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
       label="Image"
       hint="Image to be used for the Container"
       persistent-hint
-      :error-messages="errors.containerImage"
+      :error-messages="getErrorMessages(v$.containerImage)"
       variant="underlined"
       @update:model-value="v$.containerImage.$touch()"
       @blur="v$.containerImage.$touch()"
@@ -120,7 +120,7 @@ import { useAuthnStore } from '@/store/authn'
 
 import GTimeString from '@/components/GTimeString.vue'
 
-import { getVuelidateErrors } from '@/utils'
+import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
 
 export default {
@@ -159,9 +159,6 @@ export default {
     shootNodesInternal () {
       return this.runtime === 'shoot' ? this.shootNodes : []
     },
-    errors () {
-      return getVuelidateErrors(this.v$.$errors)
-    },
   },
   methods: {
     isAutoSelectNodeItem (item) {
@@ -170,6 +167,7 @@ export default {
     isAutoSelectNode (hostname) {
       return hostname === '<AUTO-SELECT>'
     },
+    getErrorMessages,
   },
 }
 </script>

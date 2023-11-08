@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
     item-title="name"
     item-value="name"
     :search="search"
-    :error-messages="errors.internalValue"
+    :error-messages="getErrorMessages(v$.internalValue)"
     :custom-filter="customFilter"
     label="Machine Type"
     :hint="hint"
@@ -41,7 +41,7 @@ SPDX-License-Identifier: Apache-2.0
 import { required } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
-import { getVuelidateErrors } from '@/utils'
+import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
 
 import { find } from '@/lodash'
@@ -103,9 +103,6 @@ export default {
     hint () {
       return this.notInList ? 'This machine type may not be supported by your worker as it is not supported by your current worker settings' : ''
     },
-    errors () {
-      return getVuelidateErrors(this.v$.$errors)
-    },
   },
   validations () {
     return {
@@ -159,6 +156,7 @@ export default {
       const includesTerm = term => name?.includes(term) || properties.includes(term)
       return terms.every(includesTerm)
     },
+    getErrorMessages,
   },
 }
 </script>

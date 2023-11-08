@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="apiUrl"
           color="primary"
           label="API URL"
-          :error-messages="errors.apiUrl"
+          :error-messages="getErrorMessages(v$.apiUrl)"
           variant="underlined"
           @update:model-value="v$.apiUrl.$touch()"
           @blur="v$.apiUrl.$touch()"
@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
           label="API HMAC"
           :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideSecret ? 'password' : 'text'"
-          :error-messages="errors.apiHmac"
+          :error-messages="getErrorMessages(v$.apiHmac)"
           variant="underlined"
           @click:append="() => (hideSecret = !hideSecret)"
           @update:model-value="v$.apiHmac.$touch()"
@@ -63,7 +63,7 @@ import {
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 
 import {
-  getVuelidateErrors,
+  getErrorMessages,
   setDelayedInputFocus,
 } from '@/utils'
 import { withFieldName } from '@/utils/validators'
@@ -128,9 +128,6 @@ export default {
     isCreateMode () {
       return !this.secret
     },
-    errors () {
-      return getVuelidateErrors(this.v$.$errors)
-    },
   },
   watch: {
     value: function (value) {
@@ -150,6 +147,7 @@ export default {
         setDelayedInputFocus(this, 'apiUrl')
       }
     },
+    getErrorMessages,
   },
 }
 </script>

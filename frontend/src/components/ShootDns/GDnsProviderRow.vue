@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
               :disabled="readonly || primaryReadonly"
               color="primary"
               :items="dnsProviderTypes"
-              :error-messages="errors.type"
+              :error-messages="getErrorMessages(v$.type)"
               label="Dns Provider Type"
               :hint="typeHint"
               persistent-hint
@@ -134,7 +134,7 @@ import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import GSelectSecret from '@/components/Secrets/GSelectSecret'
 import GVendorIcon from '@/components/GVendorIcon'
 
-import { getVuelidateErrors } from '@/utils'
+import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
 
 import {
@@ -267,9 +267,6 @@ export default {
     valid () {
       return get(this.dnsProvider, 'valid')
     },
-    errors () {
-      return getVuelidateErrors(this.v$.$errors)
-    },
   },
   watch: {
     'v$.$invalid' () {
@@ -307,6 +304,7 @@ export default {
     onDelete () {
       this.deleteDnsProvider(this.dnsProviderId)
     },
+    getErrorMessages,
   },
 }
 </script>

@@ -28,7 +28,7 @@ SPDX-License-Identifier: Apache-2.0
                   color="primary"
                   label="Name"
                   counter="10"
-                  :error-messages="errors.projectName"
+                  :error-messages="getErrorMessages(v$.projectName)"
                   @update:model-value="v$.projectName.$touch()"
                   @blur="v$.projectName.$touch()"
                 />
@@ -43,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
                   variant="underlined"
                   color="primary"
                   :label="costObjectTitle"
-                  :error-messages="errors.costObject"
+                  :error-messages="getErrorMessages(v$.costObject)"
                   @update:model-value="v$.costObject.$touch()"
                   @blur="v$.costObject.$touch()"
                 />
@@ -154,7 +154,7 @@ import {
   withMessage,
 } from '@/utils/validators'
 import {
-  getVuelidateErrors,
+  getErrorMessages,
   setInputFocus,
   setDelayedInputFocus,
   isServiceAccountUsername,
@@ -297,9 +297,6 @@ export default {
     valid () {
       return !this.v$.$invalid
     },
-    errors () {
-      return getVuelidateErrors(this.v$.$errors)
-    },
   },
 
   watch: {
@@ -378,6 +375,7 @@ export default {
 
       setDelayedInputFocus(this, 'projectName')
     },
+    getErrorMessages,
   },
 
 }

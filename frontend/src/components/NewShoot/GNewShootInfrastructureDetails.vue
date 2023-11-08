@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0
           :items="regionItems"
           :hint="regionHint"
           persistent-hint
-          :error-messages="errors.region"
+          :error-messages="getErrorMessages(v$.region)"
           variant="underlined"
           @update:model-value="onInputRegion"
           @blur="v$.region.$touch()"
@@ -67,7 +67,7 @@ SPDX-License-Identifier: Apache-2.0
           label="Networking Type"
           :items="networkingTypes"
           persistent-hint
-          :error-messages="errors.networkingType"
+          :error-messages="getErrorMessages(v$.networkingType)"
           variant="underlined"
           @update:model-value="v$.networkingType.$touch()"
           @blur="v$.networkingType.$touch()"
@@ -88,7 +88,7 @@ SPDX-License-Identifier: Apache-2.0
             item-color="primary"
             label="Load Balancer Provider"
             :items="allLoadBalancerProviderNames"
-            :error-messages="errors.loadBalancerProviderName"
+            :error-messages="getErrorMessages(v$.loadBalancerProviderName)"
             persistent-hint
             variant="underlined"
             @update:model-value="onInputLoadBalancerProviderName"
@@ -103,7 +103,7 @@ SPDX-License-Identifier: Apache-2.0
             color="primary"
             item-color="primary"
             label="Project ID"
-            :error-messages="errors.projectID"
+            :error-messages="getErrorMessages(v$.projectID)"
             hint="Clusters with same Project ID share IP ranges to allow load balancing accross multiple partitions"
             persistent-hint
             variant="underlined"
@@ -118,7 +118,7 @@ SPDX-License-Identifier: Apache-2.0
             item-color="primary"
             label="Partition ID"
             :items="partitionIDs"
-            :error-messages="errors.partitionID"
+            :error-messages="getErrorMessages(v$.partitionID)"
             hint="Partion ID equals zone on other infrastructures"
             persistent-hint
             variant="underlined"
@@ -133,7 +133,7 @@ SPDX-License-Identifier: Apache-2.0
             item-color="primary"
             label="Firewall Image"
             :items="firewallImages"
-            :error-messages="errors.firewallImage"
+            :error-messages="getErrorMessages(v$.firewallImage)"
             variant="underlined"
             @update:model-value="onInputFirewallImage"
             @blur="v$.firewallImage.$touch()"
@@ -146,7 +146,7 @@ SPDX-License-Identifier: Apache-2.0
             item-color="primary"
             label="Firewall Size"
             :items="firewallSizes"
-            :error-messages="errors.firewallSize"
+            :error-messages="getErrorMessages(v$.firewallSize)"
             variant="underlined"
             @update:model-value="onInputFirewallSize"
             @blur="v$.firewallImage.$touch()"
@@ -159,7 +159,7 @@ SPDX-License-Identifier: Apache-2.0
             item-color="primary"
             label="Firewall Networks"
             :items="allFirewallNetworks"
-            :error-messages="errors.firewallNetworks"
+            :error-messages="getErrorMessages(v$.firewallNetworks)"
             chips
             closable-chips
             multiple
@@ -177,7 +177,7 @@ SPDX-License-Identifier: Apache-2.0
             item-color="primary"
             label="Load Balancer Classes"
             :items="allLoadBalancerClasses"
-            :error-messages="errors.loadBalancerClassNames"
+            :error-messages="getErrorMessages(v$.loadBalancerClassNames)"
             attach
             chips
             closable-chips
@@ -224,7 +224,7 @@ import GCloudProfile from '@/components/GCloudProfile'
 import GWildcardSelect from '@/components/GWildcardSelect'
 import GSelectSecret from '@/components/Secrets/GSelectSecret'
 
-import { getVuelidateErrors } from '@/utils'
+import { getErrorMessages } from '@/utils'
 import {
   includesIfAvailable,
   withMessage,
@@ -404,9 +404,6 @@ export default {
       const secretDomain = get(this.secret, 'data.domainName')
       return this.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({ cloudProfileName, region, secretDomain })
     },
-    errors () {
-      return getVuelidateErrors(this.v$.$errors)
-    },
   },
   watch: {
     workerless (value) {
@@ -576,6 +573,7 @@ export default {
 
       this.v$.projectID.$touch() // project id is a required field (for metal). We want to show the error immediatley
     },
+    getErrorMessages,
   },
 }
 </script>

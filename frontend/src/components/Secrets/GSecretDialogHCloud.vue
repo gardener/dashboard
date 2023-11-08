@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="hcloudToken"
           color="primary"
           label="Hetzner Cloud Token"
-          :error-messages="errors.hcloudToken"
+          :error-messages="getErrorMessages(v$.hcloudToken)"
           variant="underlined"
           @update:model-value="v$.hcloudToken.$touch()"
           @blur="v$.hcloudToken.$touch()"
@@ -57,7 +57,7 @@ import GExternalLink from '@/components/GExternalLink.vue'
 
 import { withFieldName } from '@/utils/validators'
 import {
-  getVuelidateErrors,
+  getErrorMessages,
   setDelayedInputFocus,
 } from '@/utils'
 
@@ -116,9 +116,6 @@ export default {
     isCreateMode () {
       return !this.secret
     },
-    errors () {
-      return getVuelidateErrors(this.v$.$errors)
-    },
   },
   watch: {
     value: function (value) {
@@ -140,6 +137,7 @@ export default {
         setDelayedInputFocus(this, 'hcloudToken')
       }
     },
+    getErrorMessages,
   },
 }
 </script>

@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
                 :disabled="isUpdateDialog"
                 color="primary"
                 :label="nameLabel"
-                :error-messages="errors.internalName"
+                :error-messages="getErrorMessages(v$.internalName)"
                 :hint="nameHint"
                 persistent-hint
                 tabindex="1"
@@ -43,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
                 multiple
                 item-title="displayName"
                 item-value="name"
-                :error-messages="errors.internalRoles"
+                :error-messages="getErrorMessages(v$.internalRoles)"
                 :hint="rolesHint"
                 persistent-hint
                 tabindex="2"
@@ -165,7 +165,7 @@ import {
   parseServiceAccountUsername,
   isServiceAccountUsername,
   setDelayedInputFocus,
-  getVuelidateErrors,
+  getErrorMessages,
   isForeignServiceAccount,
   MEMBER_ROLE_DESCRIPTORS,
 } from '@/utils'
@@ -372,9 +372,6 @@ export default {
       }
       return 'Add'
     },
-    errors () {
-      return getVuelidateErrors(this.v$.$errors)
-    },
   },
   watch: {
     modelValue: function (value) {
@@ -500,6 +497,7 @@ export default {
       this.errorMessage = 'There are input errors that you need to resolve'
       this.detailedErrorMessage = messages
     },
+    getErrorMessages,
   },
 }
 </script>

@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
         v-model="maintenanceBegin"
         color="primary"
         label="Maintenance Start Time"
-        :error-messages="errors.maintenanceBegin"
+        :error-messages="getErrorMessages(v$.maintenanceBegin)"
         variant="underlined"
         persistent-hint
         :hint="maintenanceBeginHint"
@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
         v-model="maintenanceTimezone"
         color="primary"
         label="Timezone"
-        :error-messages="errors.maintenanceTimezone"
+        :error-messages="getErrorMessages(v$.maintenanceTimezone)"
         variant="underlined"
         @input="v$.maintenanceTimezone.$touch()"
         @blur="v$.maintenanceTimezone.$touch()"
@@ -37,7 +37,7 @@ SPDX-License-Identifier: Apache-2.0
         color="primary"
         type="number"
         label="Maintenance Window Size"
-        :error-messages="errors.windowDuration"
+        :error-messages="getErrorMessages(v$.windowDuration)"
         suffix="minutes"
         variant="underlined"
         persistent-hint
@@ -68,7 +68,7 @@ import {
 } from '@/utils/validators'
 import moment from '@/utils/moment'
 import {
-  getVuelidateErrors,
+  getErrorMessages,
   randomMaintenanceBegin,
   maintenanceWindowWithBeginAndTimezone,
   getDurationInMinutes,
@@ -135,9 +135,6 @@ export default {
       const maintenanceEndMoment = this.maintenanceBeginMoment.add(this.windowDuration, 'minutes')
       return `Maintenance time window ends at ${maintenanceEndMoment.format('HH:mm')} UTC`
     },
-    errors () {
-      return getVuelidateErrors(this.v$.$errors)
-    },
   },
   mounted () {
     this.reset()
@@ -180,6 +177,7 @@ export default {
     setDefaultWindowDuration () {
       this.windowDuration = 60
     },
+    getErrorMessages,
   },
 }
 </script>

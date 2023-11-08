@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="infobloxUsername"
           color="primary"
           label="Infoblox Username"
-          :error-messages="errors.infobloxUsername"
+          :error-messages="getErrorMessages(v$.infobloxUsername)"
           variant="underlined"
           @update:model-value="v$.infobloxUsername.$touch()"
           @blur="v$.infobloxUsername.$touch()"
@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="infobloxPassword"
           color="primary"
           label="Infoblox Password"
-          :error-messages="errors.infobloxPassword"
+          :error-messages="getErrorMessages(v$.infobloxPassword)"
           :append-icon="hideInfobloxPassword ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideInfobloxPassword ? 'password' : 'text'"
           variant="underlined"
@@ -60,7 +60,7 @@ import GSecretDialog from '@/components/Secrets/GSecretDialog'
 
 import { withFieldName } from '@/utils/validators'
 import {
-  getVuelidateErrors,
+  getErrorMessages,
   setDelayedInputFocus,
 } from '@/utils'
 
@@ -123,9 +123,6 @@ export default {
     isCreateMode () {
       return !this.secret
     },
-    errors () {
-      return getVuelidateErrors(this.v$.$errors)
-    },
   },
   watch: {
     value: function (value) {
@@ -148,6 +145,7 @@ export default {
         setDelayedInputFocus(this, 'infobloxUsername')
       }
     },
+    getErrorMessages,
   },
 }
 </script>

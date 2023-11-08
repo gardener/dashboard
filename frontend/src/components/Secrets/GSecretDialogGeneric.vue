@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
           color="primary"
           variant="filled"
           label="Secret Data"
-          :error-messages="errors.data"
+          :error-messages="getErrorMessages(v$.data)"
           @update:model-value="onInputSecretData"
           @blur="v$.data.$touch()"
         />
@@ -52,7 +52,7 @@ import {
   withMessage,
 } from '@/utils/validators'
 import {
-  getVuelidateErrors,
+  getErrorMessages,
   setDelayedInputFocus,
 } from '@/utils'
 
@@ -112,9 +112,6 @@ export default {
     isCreateMode () {
       return !this.secret
     },
-    errors () {
-      return getVuelidateErrors(this.v$.$errors)
-    },
   },
   methods: {
     async onInputSecretData () {
@@ -142,6 +139,7 @@ export default {
         setDelayedInputFocus(this, 'data')
       }
     },
+    getErrorMessages,
   },
 }
 </script>

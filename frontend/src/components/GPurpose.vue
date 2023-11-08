@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
       item-title="purpose"
       item-value="purpose"
       persistent-hint
-      :error-messages="errors.internalPurpose"
+      :error-messages="getErrorMessages(v$.internalPurpose)"
       variant="underlined"
       @update:model-value="onInputPurpose"
       @blur="v$.internalPurpose.$touch()"
@@ -37,7 +37,7 @@ import { required } from '@vuelidate/validators'
 
 import { withFieldName } from '@/utils/validators'
 import {
-  getVuelidateErrors,
+  getErrorMessages,
   purposesForSecret,
 } from '@/utils'
 
@@ -78,9 +78,6 @@ export default {
         description: this.descriptionForPurpose(purpose),
       }))
     },
-    errors () {
-      return getVuelidateErrors(this.v$.$errors)
-    },
   },
   methods: {
     onInputPurpose () {
@@ -105,6 +102,7 @@ export default {
       this.internalPurpose = purpose
       this.onInputPurpose()
     },
+    getErrorMessages,
   },
 }
 </script>

@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="vsphereUsername"
           color="primary"
           label="vSphere Username"
-          :error-messages="errors.vsphereUsername"
+          :error-messages="getErrorMessages(v$.vsphereUsername)"
           variant="underlined"
           @update:model-value="v$.vsphereUsername.$touch()"
           @blur="v$.vsphereUsername.$touch()"
@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="vspherePassword"
           color="primary"
           label="vSphere Password"
-          :error-messages="errors.vspherePassword"
+          :error-messages="getErrorMessages(v$.vspherePassword)"
           :append-icon="hideVspherePassword ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideVspherePassword ? 'password' : 'text'"
           variant="underlined"
@@ -46,7 +46,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="nsxtUsername"
           color="primary"
           label="NSX-T Username"
-          :error-messages="errors.nsxtUsername"
+          :error-messages="getErrorMessages(v$.nsxtUsername)"
           variant="underlined"
           @update:model-value="v$.nsxtUsername.$touch()"
           @blur="v$.nsxtUsername.$touch()"
@@ -57,7 +57,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="nsxtPassword"
           color="primary"
           label="NSX-T Password"
-          :error-messages="errors.nsxtPassword"
+          :error-messages="getErrorMessages(v$.nsxtPassword)"
           :append-icon="hideNsxtPassword ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideNsxtPassword ? 'password' : 'text'"
           variant="underlined"
@@ -100,7 +100,7 @@ import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink.vue'
 
 import {
-  getVuelidateErrors,
+  getErrorMessages,
   setDelayedInputFocus,
 } from '@/utils'
 import { withFieldName } from '@/utils/validators'
@@ -176,9 +176,6 @@ export default {
     isCreateMode () {
       return !this.secret
     },
-    errors () {
-      return getVuelidateErrors(this.v$.$errors)
-    },
   },
   watch: {
     value: function (value) {
@@ -204,6 +201,7 @@ export default {
         setDelayedInputFocus(this, 'vsphereUsername')
       }
     },
+    getErrorMessages,
   },
 }
 </script>

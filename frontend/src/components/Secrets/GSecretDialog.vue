@@ -37,7 +37,7 @@ SPDX-License-Identifier: Apache-2.0
                   v-model.trim="name"
                   color="primary"
                   label="Secret Name"
-                  :error-messages="errors.name"
+                  :error-messages="getErrorMessages(v$.name)"
                   variant="underlined"
                   @update:model-value="v$.name.$touch()"
                   @blur="v$.name.$touch()"
@@ -149,7 +149,7 @@ import {
   isConflict,
 } from '@/utils/error'
 import {
-  getVuelidateErrors,
+  getErrorMessages,
   setDelayedInputFocus,
   setInputFocus,
 } from '@/utils'
@@ -307,9 +307,6 @@ export default {
     isDnsProviderSecret () {
       return includes(this.dnsProviderTypes, this.vendor)
     },
-    errors () {
-      return getVuelidateErrors(this.v$.$errors)
-    },
   },
   mounted () {
     this.reset()
@@ -407,6 +404,7 @@ export default {
       this.errorMessage = 'There are input errors that you need to resolve'
       this.detailedErrorMessage = messages
     },
+    getErrorMessages,
   },
 }
 </script>
