@@ -96,6 +96,7 @@ SPDX-License-Identifier: Apache-2.0
                 class="text-toolbar-background"
                 :disabled="notConfirmed || !valid"
                 @click="resolveAction(true)"
+                @error-messages-updated="showVuelidateErrors"
               >
                 {{ confirmButtonText }}
               </g-vuelidate-button>
@@ -249,7 +250,6 @@ export default {
     },
     async resolveAction (value) {
       if (value && (this.v$.$invalid || !this.valid)) {
-        console.log('REII', this.valid)
         return
       }
 
@@ -283,6 +283,10 @@ export default {
       const scrollTopVal = cardContentRef.scrollTop
       cardContentRef.scrollTop = scrollTopVal + 10
       cardContentRef.scrollTop = scrollTopVal - 10
+    },
+    showVuelidateErrors (messages) {
+      this.message = 'There are input errors that you need to resolve'
+      this.detailedMessage = messages
     },
   },
 }

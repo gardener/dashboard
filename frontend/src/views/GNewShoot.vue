@@ -154,9 +154,9 @@ SPDX-License-Identifier: Apache-2.0
       <g-vuelidate-button
         :v="v$"
         variant="text"
-        :disabled="v$.$invalid"
         color="primary"
         @click.stop="createClicked()"
+        @error-messages-updated="showVuelidateErrors"
       >
         Create
       </g-vuelidate-button>
@@ -600,6 +600,10 @@ export default {
     infrastructureSecretsByName ({ secretBindingName, cloudProfileName }) {
       const secrets = this.infrastructureSecretsByCloudProfileName(cloudProfileName)
       return find(secrets, ['metadata.name', secretBindingName])
+    },
+    showVuelidateErrors (messages) {
+      this.errorMessage = 'There are input errors that you need to resolve'
+      this.detailedErrorMessage = messages
     },
   },
 }

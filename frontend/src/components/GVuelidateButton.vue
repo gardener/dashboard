@@ -26,7 +26,7 @@ SPDX-License-Identifier: Apache-2.0
       There are input errors that you need to resolve
     </div>
     <div
-      v-for="(err, i) in validationErrorTooltip"
+      v-for="(err, i) in errorMessages"
       :key="`${err.message}_${i}`"
     >
       <span class="font-weight-bold">{{ err.fieldName }}:</span>
@@ -49,9 +49,10 @@ const props = defineProps({
 
 const emit = defineEmits([
   'click',
+  'errorMessagesUpdated',
 ])
 
-const validationErrorTooltip = computed(() => {
+const errorMessages = computed(() => {
   const errorMessages = []
   if (props.v.$errors) {
     props.v.$errors.forEach(error => {
@@ -68,9 +69,13 @@ const hasVisibleErrors = computed(() => {
   return props.v.$errors.length > 0
 })
 
-const onClick = (e) => {
+const onClick = async (e) => {
   if (props.v.$invalid) {
-    props.v.$validate()
+    await props.v.$validate()
+    if (hasVisibleErrors.value) {
+      const messages = errorMessages.value.map(msg => `${msg.fieldName}: ${msg.message}`).join(', ')
+      emit('errorMessagesUpdated', messages)
+    }
   } else {
     emit('click', e)
   }

@@ -107,6 +107,7 @@ SPDX-License-Identifier: Apache-2.0
           variant="text"
           color="primary"
           @click="submit"
+          @error-messages-updated="showVuelidateErrors"
         >
           {{ submitButtonText }}
         </g-vuelidate-button>
@@ -401,6 +402,10 @@ export default {
 
       this.errorMessage = undefined
       this.detailedMessage = undefined
+    },
+    showVuelidateErrors (messages) {
+      this.errorMessage = 'There are input errors that you need to resolve'
+      this.detailedErrorMessage = messages
     },
   },
 }

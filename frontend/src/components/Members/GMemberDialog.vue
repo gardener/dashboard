@@ -111,6 +111,7 @@ SPDX-License-Identifier: Apache-2.0
           class="text-primary"
           tabindex="4"
           @click.stop="submitUpdateMember"
+          @error-messages-updated="showVuelidateErrors"
         >
           Update
         </g-vuelidate-button>
@@ -121,6 +122,7 @@ SPDX-License-Identifier: Apache-2.0
           class="text-primary"
           tabindex="4"
           @click.stop="submitAddMember"
+          @error-messages-updated="showVuelidateErrors"
         >
           {{ addMemberButtonText }}
         </g-vuelidate-button>
@@ -493,6 +495,10 @@ export default {
       }
 
       return name
+    },
+    showVuelidateErrors (messages) {
+      this.errorMessage = 'There are input errors that you need to resolve'
+      this.detailedErrorMessage = messages
     },
   },
 }
