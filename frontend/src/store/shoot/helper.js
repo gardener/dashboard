@@ -605,3 +605,7 @@ export function sortItemsFn (state, context) {
     }
   }
 }
+
+export function shootHasIssue (object) {
+  return get(object, ['metadata', 'labels', 'shoot.gardener.cloud/status'], 'healthy') !== 'healthy'
+}
