@@ -103,6 +103,9 @@ module.exports = {
   getShoot (namespace, name) {
     return cache.get('shoots').find({ metadata: { namespace, name } })
   },
+  getShootByUid (uid) {
+    return cache.get('shoots').find(['metadata.uid', uid])
+  },
   getControllerRegistrations () {
     return cache.getControllerRegistrations()
   },

@@ -126,6 +126,77 @@ async function unsubscribe (socket, key) {
   }
 }
 
+function parseRooms (socket) {
+  let isAdmin = false
+  const namespaces = []
+  const qualifiedNames = []
+  for (const room of Array.from(socket.rooms)) {
+    if (room === socket.id) {
+      continue
+    }
+    const parts = room.split(';')
+    const keys = parts[0].split(':')
+    if (keys.shift() !== 'shoots') {
+      continue
+    }
+    if (keys.pop() === 'admin') {
+      isAdmin = true
+    }
+    if (parts.length < 2) {
+      continue
+    }
+    const [namespace, name] = parts[1].split('/')
+    if (!name) {
+      namespaces.push(namespace)
+    } else {
+      qualifiedNames.push([namespace, name].join('/'))
+    }
+  }
+  return [
+    isAdmin,
+    namespaces,
+    qualifiedNames
+  ]
+}
+
+function synchronizeShoots (socket, uids = []) {
+  const user = getUserFromSocket(socket)
+  const [
+    isAdmin,
+    namespaces,
+    qualifiedNames
+  ] = parseRooms(socket)
+
+  return uids.map(uid => {
+    const object = cache.getShootByUid(uid)
+    const { namespace, name } = object.metadata
+    const qualifiedName = [namespace, name].join('/')
+    if (isAdmin || namespaces.includes(namespace) || qualifiedNames.includes(qualifiedName)) {
+      // remove managed fields
+      object.metadata.managedFields = undefined
+      return object
+    }
+    logger.error('User %s has no authorization to synchronize shoot %s in namespace %s', user.id, name, namespace)
+    return {
+      kind: 'Status',
+      apiVersion: 'v1',
+      status: 'Failure',
+      message: `Insufficient authorization to synchronize shoot ${name} in namespace ${namespace}`,
+      reason: 'Forbidden',
+      code: 403
+    }
+  })
+}
+
+function synchronize (socket, key, ...args) {
+  switch (key) {
+    case 'shoots':
+      return synchronizeShoots(socket, ...args)
+    default:
+      throw new TypeError(`Invalid synchronization type - ${key}`)
+  }
+}
+
 function setDisconnectTimeout (socket, delay) {
   delay = Math.min(2147483647, delay) // setTimeout delay must not exceed 32-bit signed integer
   logger.debug('Socket %s will expire in %d seconds', socket.id, Math.floor(delay / 1000))
@@ -200,6 +271,19 @@ function init (httpServer, cache) {
         done({ statusCode: 200 })
       } catch (err) {
         logger.error('Socket %s unsubscribe error: %s', socket.id, err.message)
+        const { statusCode = 500, name, message } = err
+        done({ statusCode, name, message })
+      }
+    })
+
+    // handle 'synchronize' events
+    socket.on('synchronize', async (key, ...args) => {
+      const done = args.pop()
+      try {
+        const items = await synchronize(socket, key, ...args)
+        done({ statusCode: 200, items })
+      } catch (err) {
+        logger.error('Socket %s synchronize error: %s', socket.id, err.message)
         const { statusCode = 500, name, message } = err
         done({ statusCode, name, message })
       }
