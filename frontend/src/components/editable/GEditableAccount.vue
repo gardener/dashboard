@@ -47,7 +47,6 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </template>
     <v-card
-      v-click-outside="onCancel"
       flat
       @keydown.esc.prevent="onCancel"
       @keydown.enter.prevent="onSave"
