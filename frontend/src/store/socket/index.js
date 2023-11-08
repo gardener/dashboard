@@ -17,6 +17,8 @@ import {
 
 import { useLogger } from '@/composables/useLogger'
 
+import { createError } from '@/utils/errors'
+
 import { useAuthnStore } from '../authn'
 import { useProjectStore } from '../project'
 import { useShootStore } from '../shoot'
@@ -122,6 +124,19 @@ export const useSocketStore = defineStore('socket', () => {
     })
   }
 
+  async function synchronize (uids, delay = 2_000) {
+    const {
+      statusCode = 500,
+      name = 'InternalError',
+      message = 'Failed to synchronize shoots',
+      items = [],
+    } = await socket.timeout(delay).emitWithAck('synchronize', 'shoots', uids)
+    if (statusCode === 200) {
+      return items
+    }
+    throw createError(statusCode, message, { name })
+  }
+
   watch(() => authnStore.user, value => {
     if (authnStore.isExpired()) {
       disconnect()
@@ -142,6 +157,7 @@ export const useSocketStore = defineStore('socket', () => {
     disconnect,
     emitSubscribe,
     emitUnsubscribe,
+    synchronize,
   }
 })
 
