@@ -33,7 +33,6 @@ import {
 import {
   find,
   includes,
-  assign,
   set,
   head,
   get,
@@ -51,17 +50,6 @@ import {
 } from '@/lodash'
 
 export const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
-
-export function keyForShoot ({ name, namespace }) {
-  return `${name}_${namespace}`
-}
-
-export function findItem (state) {
-  return ({ name, namespace }) => {
-    const key = keyForShoot({ name, namespace })
-    return state.shoots[key]
-  }
-}
 
 const tokenizePattern = /(-?"([^"]|"")*"|\S+)/g
 
@@ -277,102 +265,88 @@ export function onlyAllShootsWithIssues (state, context) {
   return authzStore.namespace === '_all' && get(state.shootListFilters, 'onlyShootsWithIssues', true)
 }
 
-export function getFilteredItems (state, context) {
+export function getFilteredUids (state, context) {
   const {
     projectStore,
     ticketStore,
     configStore,
   } = context
-  let items = Object.values(state.shoots)
+
+  // filter function
+  const notProgressing = item => {
+    return !isStatusProgressing(get(item, 'metadata', {}))
+  }
+
+  const noUserError = item => {
+    const ignoreIssues = isTruthyValue(get(item, ['metadata', 'annotations', 'dashboard.gardener.cloud/ignore-issues']))
+    if (ignoreIssues) {
+      return false
+    }
+    const lastErrors = get(item, 'status.lastErrors', [])
+    const allLastErrorCodes = errorCodesFromArray(lastErrors)
+    if (isTemporaryError(allLastErrorCodes)) {
+      return false
+    }
+    const conditions = get(item, 'status.conditions', [])
+    const allConditionCodes = errorCodesFromArray(conditions)
+
+    const constraints = get(item, 'status.constraints', [])
+    const allConstraintCodes = errorCodesFromArray(constraints)
+
+    return !(isUserError(allLastErrorCodes) || isUserError(allConditionCodes) || isUserError(allConstraintCodes))
+  }
+
+  const reconciliationNotDeactivated = item => {
+    return !isReconciliationDeactivated(get(item, 'metadata', {}))
+  }
+
+  const hasTicketsWithoutHideLabel = item => {
+    const hideClustersWithLabels = get(configStore.ticket, 'hideClustersWithLabels')
+    if (!hideClustersWithLabels) {
+      return true
+    }
+    const metadata = get(item, 'metadata', {})
+    metadata.projectName = projectStore.projectNameByNamespace(metadata)
+    const ticketsForCluster = ticketStore.issues(metadata)
+    if (!ticketsForCluster.length) {
+      return true
+    }
+
+    const ticketsWithoutHideLabel = filter(ticketsForCluster, ticket => {
+      const labelNames = map(get(ticket, 'data.labels'), 'name')
+      const ticketHasHideLabel = some(hideClustersWithLabels, hideClustersWithLabel => includes(labelNames, hideClustersWithLabel))
+      return !ticketHasHideLabel
+    })
+    return ticketsWithoutHideLabel.length > 0
+  }
+
+  // list of active filter function
+  const predicates = []
   if (onlyAllShootsWithIssues(state, context)) {
     if (get(state, 'shootListFilters.progressing', false)) {
-      const predicate = item => {
-        return !isStatusProgressing(get(item, 'metadata', {}))
-      }
-      items = filter(items, predicate)
+      predicates.push(notProgressing)
     }
     if (get(state, 'shootListFilters.noOperatorAction', false)) {
-      const predicate = item => {
-        const ignoreIssues = isTruthyValue(get(item, ['metadata', 'annotations', 'dashboard.gardener.cloud/ignore-issues']))
-        if (ignoreIssues) {
-          return false
-        }
-        const lastErrors = get(item, 'status.lastErrors', [])
-        const allLastErrorCodes = errorCodesFromArray(lastErrors)
-        if (isTemporaryError(allLastErrorCodes)) {
-          return false
-        }
-        const conditions = get(item, 'status.conditions', [])
-        const allConditionCodes = errorCodesFromArray(conditions)
-
-        const constraints = get(item, 'status.constraints', [])
-        const allConstraintCodes = errorCodesFromArray(constraints)
-
-        return !(isUserError(allLastErrorCodes) || isUserError(allConditionCodes) || isUserError(allConstraintCodes))
-      }
-      items = filter(items, predicate)
+      predicates.push(noUserError)
     }
     if (get(state, 'shootListFilters.deactivatedReconciliation', false)) {
-      const predicate = item => {
-        return !isReconciliationDeactivated(get(item, 'metadata', {}))
-      }
-      items = filter(items, predicate)
+      predicates.push(reconciliationNotDeactivated)
     }
     if (get(state, 'shootListFilters.hideTicketsWithLabel', false)) {
-      const predicate = item => {
-        const hideClustersWithLabels = get(configStore.ticket, 'hideClustersWithLabels')
-        if (!hideClustersWithLabels) {
-          return true
-        }
-        const metadata = get(item, 'metadata', {})
-        metadata.projectName = projectStore.projectNameByNamespace(metadata)
-        const ticketsForCluster = ticketStore.issues(metadata)
-        if (!ticketsForCluster.length) {
-          return true
-        }
+      predicates.push(hasTicketsWithoutHideLabel)
+    }
+  }
 
-        const ticketsWithoutHideLabel = filter(ticketsForCluster, ticket => {
-          const labelNames = map(get(ticket, 'data.labels'), 'name')
-          const ticketHasHideLabel = some(hideClustersWithLabels, hideClustersWithLabel => includes(labelNames, hideClustersWithLabel))
-          return !ticketHasHideLabel
-        })
-        return ticketsWithoutHideLabel.length > 0
+  return Object.values(state.shoots)
+    .filter(item => {
+      for (const predicate of predicates) {
+        if (!predicate(item)) {
+          return false
+        }
       }
-      items = filter(items, predicate)
-    }
-  }
-
-  return items
-}
-
-export function putItem (state, newItem) {
-  const item = findItem(state)(newItem.metadata)
-  if (item) {
-    if (item.metadata.resourceVersion !== newItem.metadata.resourceVersion) {
-      const key = keyForShoot(item.metadata)
-      state.shoots[key] = assign(item, newItem)
-    }
-  } else {
-    if (state.focusMode) {
-      const uid = newItem.metadata.uid
-      delete state.staleShoots[uid]
-    }
-    newItem.info = undefined // register property to ensure reactivity
-    const key = keyForShoot(newItem.metadata)
-    state.shoots[key] = newItem
-  }
-}
-
-export function deleteItem (state, deletedItem) {
-  const item = findItem(state)(deletedItem.metadata)
-  if (item) {
-    if (state.focusMode) {
-      const uid = deletedItem.metadata.uid
-      state.staleShoots[uid] = item
-    }
-    const key = keyForShoot(item.metadata)
-    delete state.shoots[key]
-  }
+      return true
+    })
+    .map(item => item.metadata.uid)
 }
 
 export function getRawVal (context, item, column) {

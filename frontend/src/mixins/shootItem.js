@@ -6,6 +6,7 @@
 
 import { mapActions } from 'pinia'
 
+import { useShootStore } from '@/store/shoot'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useProjectStore } from '@/store/project'
 import { useSeedStore } from '@/store/seed'
@@ -265,10 +266,13 @@ export const shootItem = {
       return this.lastMaintenance.state === 'Failed'
     },
     isStaleShoot () {
-      return this.shootItem?.stale
+      return !this.isShootActive(this.shootMetadata.uid)
     },
   },
   methods: {
+    ...mapActions(useShootStore, [
+      'isShootActive',
+    ]),
     ...mapActions(useCloudProfileStore, [
       'selectedAccessRestrictionsForShootByCloudProfileNameAndRegion',
     ]),

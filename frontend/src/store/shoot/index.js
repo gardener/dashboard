@@ -12,12 +12,12 @@ import {
   computed,
   reactive,
   watch,
+  markRaw,
 } from 'vue'
 
 import { useLogger } from '@/composables/useLogger'
 import { useApi } from '@/composables/useApi'
 
-import { shootHasIssue } from '@/utils'
 import { isNotFound } from '@/utils/error'
 
 import { useAppStore } from '../app'
@@ -35,16 +35,13 @@ import { useShootStagingStore } from '../shootStaging'
 
 import {
   uriPattern,
-  keyForShoot,
-  findItem,
   createShootResource,
   constants,
   onlyAllShootsWithIssues,
-  getFilteredItems,
-  putItem,
-  deleteItem,
+  getFilteredUids,
   searchItemsFn,
   sortItemsFn,
+  shootHasIssue,
 } from './helper'
 
 import {
@@ -54,8 +51,9 @@ import {
   pick,
   replace,
   difference,
-  differenceWith,
   find,
+  includes,
+  throttle,
 } from '@/lodash'
 
 export const useShootStore = defineStore('shoot', () => {
@@ -91,31 +89,29 @@ export const useShootStore = defineStore('shoot', () => {
 
   const state = reactive({
     shoots: {},
+    shootInfos: {},
     staleShoots: {}, // shoots will be moved here when they are removed in case focus mode is active
-    sortedUidsAtFreeze: [],
-    filteredShoots: [],
     selection: undefined,
     shootListFilters: undefined,
     newShootResource: undefined,
     initialNewShootResource: undefined,
     focusMode: false,
+    froozenUids: [],
     subscription: null,
     subscriptionState: constants.CLOSED,
     subscriptionError: null,
+    subscriptionEventHandler: undefined,
     sortBy: undefined,
   })
+  const shootEvents = new Map()
 
   // state
   const staleShoots = computed(() => {
     return state.staleShoots
   })
 
-  const sortedUidsAtFreeze = computed(() => {
-    return state.sortedUidsAtFreeze
-  })
-
-  const filteredShoots = computed(() => {
-    return state.filteredShoots
+  const activeUids = computed(() => {
+    return getFilteredUids(state, context)
   })
 
   const shootListFilters = computed(() => {
@@ -150,32 +146,20 @@ export const useShootStore = defineStore('shoot', () => {
   const shootList = computed(() => {
     if (state.focusMode) {
       // When state is freezed, do not include new items
-      return map(state.sortedUidsAtFreeze, freezedUID => {
-        const activeItem = find(state.filteredShoots, ['metadata.uid', freezedUID])
-        if (activeItem) {
-          return activeItem
-        }
-        let staleItem = state.staleShoots[freezedUID]
-        if (!staleItem) {
-          // Object may have been filtered (e.g. now progressing) but is still in shoots. Also show as stale in this case
-          staleItem = find(Object.values(state.shoots), ['metadata.uid', freezedUID])
-          if (!staleItem) {
-            // This should never happen ...
-            logger.error('Could not find freezed shoot with uid %s in shoots or staleShoots', freezedUID)
-          }
-        }
-        return {
-          ...staleItem,
-          stale: true,
-        }
+      return state.froozenUids.map(uid => {
+        const object = state.shoots[uid] ?? state.staleShoots[uid]
+        return assignShootInfo(object)
       })
     }
-    return state.filteredShoots
+    return activeUids.value.map(uid => {
+      const object = state.shoots[uid]
+      return assignShootInfo(object)
+    })
   })
 
   const selectedShoot = computed(() => {
-    return state.selection
-      ? shootByNamespaceAndName(state.selection)
+    return state.selectedUid
+      ? state.shoots[state.selectedUid]
       : null
   })
 
@@ -220,61 +204,64 @@ export const useShootStore = defineStore('shoot', () => {
     if (!state.focusMode) {
       return 0
     }
-    return differenceWith(state.filteredShoots, state.sortedUidsAtFreeze, (filteredShoot, uid) => {
-      return filteredShoot.metadata.uid === uid
-    }).length
+    return difference(activeUids.value, state.froozenUids).length
   })
 
   // actions
   function clearAll () {
-    clear()
+    const shootStore = this
+    shootStore.$patch(({ state }) => {
+      state.shoots = {}
+      state.shootInfos = {}
+      state.staleShoots = {}
+    })
     ticketStore.clearIssues()
     ticketStore.clearComments()
   }
 
   function subscribe (metadata = {}) {
+    const shootStore = this
     const {
       namespace = authzStore.namespace,
       name,
     } = metadata
-    setSubscription({ namespace, name })
-    return this.synchronize()
+    shootStore.$patch(({ state }) => {
+      state.subscription = { namespace, name }
+      state.subscriptionState = constants.DEFINED
+      state.subscriptionError = null
+    })
+    return shootStore.synchronize()
   }
 
   function subscribeShoots (metadata) {
-    (async () => {
+    (async shootStore => {
       try {
-        await this.subscribe(metadata)
+        await shootStore.subscribe(metadata)
       } catch (err) {
         appStore.setError(err)
       }
-    })()
+    })(this)
   }
 
   function unsubscribe () {
-    closeSubscription()
-    clearAll()
+    const shootStore = this
+    shootStore.closeSubscription()
+    shootStore.clearAll()
   }
 
   function unsubscribeShoots () {
-    try {
-      unsubscribe()
-    } catch (err) {
-      appStore.setError(err)
-    }
-  }
-
-  async function assignInfo (metadata) {
-    if (metadata) {
+    (shootStore => {
       try {
-        await fetchInfo(metadata)
+        shootStore.unsubscribe()
       } catch (err) {
-        logger.error('Failed to fetch shoot info:', err.message)
+        appStore.setError(err)
       }
-    }
+    })(this)
   }
 
   function synchronize () {
+    const shootStore = this
+
     const fetchShoot = async options => {
       const [
         { data: shoot },
@@ -284,7 +271,7 @@ export const useShootStore = defineStore('shoot', () => {
         api.getIssuesAndComments(options),
       ])
       // fetch shootInfo in the background (do not await the promise)
-      assignInfo(shoot?.metadata)
+      shootStore.fetchInfo(shoot.metadata)
       logger.debug('Fetched shoot and tickets for %s in namespace %s', options.name, options.namespace)
       return { shoots: [shoot], issues, comments }
     }
@@ -310,15 +297,15 @@ export const useShootStore = defineStore('shoot', () => {
           ? fetchShoot(options)
           : fetchShoots(options)
         const { shoots, issues, comments } = await promise
-        receive(shoots)
+        shootStore.receive(shoots)
         ticketStore.receiveIssues(issues)
         ticketStore.receiveComments(comments)
-        openSubscription(options)
+        shootStore.openSubscription(options)
       } catch (err) {
         const message = get(err, 'response.data.message', err.message)
         logger.error('Failed to fetch shoots or tickets: %s', message)
         setSubscriptionError(err)
-        clearAll()
+        shootStore.clearAll()
         throw err
       }
     }
@@ -342,9 +329,12 @@ export const useShootStore = defineStore('shoot', () => {
     return response
   }
 
-  async function fetchInfo ({ name, namespace }) {
+  async function fetchInfo (metadata) {
+    if (!metadata) {
+      return
+    }
     try {
-      const { data: info } = await api.getShootInfo({ namespace, name })
+      const { data: info } = await api.getShootInfo(metadata)
       if (info.serverUrl) {
         const [, scheme, host] = uriPattern.exec(info.serverUrl)
         const authority = `//${replace(host, /^\/\//, '')}`
@@ -352,7 +342,6 @@ export const useShootStore = defineStore('shoot', () => {
         info.dashboardUrl = [scheme, authority, pathname].join('')
         info.dashboardUrlText = [scheme, host].join('')
       }
-
       if (info.seedShootIngressDomain) {
         const baseHost = info.seedShootIngressDomain
         info.plutonoUrl = `https://gu-${baseHost}`
@@ -361,27 +350,35 @@ export const useShootStore = defineStore('shoot', () => {
 
         info.alertmanagerUrl = `https://au-${baseHost}`
       }
-      receiveInfo({ name, namespace, info })
-    } catch (error) {
+      state.shootInfos[metadata.uid] = markRaw(info)
+    } catch (err) {
       // shoot info not found -> ignore if KubernetesError
-      if (isNotFound(error)) {
+      if (isNotFound(err)) {
         return
       }
-      throw error
+      logger.error('Failed to fetch shoot info:', err.message)
+    }
+  }
+
+  function assignShootInfo (object) {
+    const uid = object?.metadata.uid
+    const info = state.shootInfos[uid]
+    return {
+      ...object,
+      info,
     }
   }
 
   function setSelection (metadata) {
+    const shootStore = this
     if (!metadata) {
-      state.selection = null
-      return
-    }
-    const item = findItem(state)(metadata)
-    if (item) {
-      const { namespace, name } = metadata
-      state.selection = { namespace, name }
-      if (!item.info) {
-        assignInfo(metadata)
+      state.selectedUid = null
+    } else {
+      const uid = metadata.uid
+      state.selectedUid = uid
+      const shootInfo = state.shootInfos[uid]
+      if (!shootInfo) {
+        shootStore.fetchInfo(metadata)
       }
     }
   }
@@ -396,13 +393,11 @@ export const useShootStore = defineStore('shoot', () => {
       hideTicketsWithLabel: isAdmin,
       ...localStorageStore.allProjectsShootFilter,
     }
-    updateFilteredShoots()
   }
 
   function toogleShootListFilter (key) {
     if (state.shootListFilters) {
       state.shootListFilters[key] = !state.shootListFilters[key]
-      updateFilteredShoots()
     }
   }
 
@@ -418,19 +413,12 @@ export const useShootStore = defineStore('shoot', () => {
     deep: true,
   })
 
-  function updateFilteredShoots () {
-    try {
-      state.filteredShoots = getFilteredItems(state, context)
-    } catch (err) {
-      appStore.setError(err)
-    }
-  }
-
   function setNewShootResource (value) {
     state.newShootResource = value
   }
 
   function resetNewShootResource () {
+    const shootStore = this
     const value = createShootResource({
       logger,
       appStore,
@@ -440,34 +428,40 @@ export const useShootStore = defineStore('shoot', () => {
       cloudProfileStore,
       gardenerExtensionStore,
     })
-
-    state.newShootResource = value
-    state.initialNewShootResource = cloneDeep(value)
+    shootStore.$patch(({ state }) => {
+      state.newShootResource = value
+      state.initialNewShootResource = cloneDeep(value)
+    })
     shootStagingStore.workerless = false
   }
 
   function setFocusMode (value) {
-    let sortedUids
+    const shootStore = this
+    let uids = []
     if (value) {
-      const sortedShoots = sortItems([...state.filteredShoots], state.sortBy)
-      sortedUids = map(sortedShoots, 'metadata.uid')
+      const activeShoots = map(activeUids.value, uid => state.shoots[uid])
+      const sortedShoots = sortItems(activeShoots, state.sortBy)
+      uids = map(sortedShoots, 'metadata.uid')
     }
-    state.focusMode = value
-    state.sortedUidsAtFreeze = sortedUids
+    shootStore.$patch(({ state }) => {
+      state.focusMode = value
+      state.froozenUids = uids
+    })
   }
 
-  const shootByNamespaceAndName = findItem(state)
   const searchItems = searchItemsFn(state, context)
   const sortItems = sortItemsFn(state, context)
 
-  function setSortBy (value) {
-    state.sortBy = value
+  function shootByNamespaceAndName ({ namespace, name }) {
+    const object = find(Object.values(state.shoots), { metadata: { namespace, name } })
+    if (!object) {
+      return null
+    }
+    return assignShootInfo(object)
   }
 
-  function setSubscription (value) {
-    state.subscription = value
-    state.subscriptionState = constants.DEFINED
-    state.subscriptionError = null
+  function setSortBy (value) {
+    state.sortBy = value
   }
 
   function setSubscriptionState (value) {
@@ -497,104 +491,128 @@ export const useShootStore = defineStore('shoot', () => {
     }
   }
 
-  // mutations
   function receive (items) {
+    const shootStore = this
     const notOnlyShootsWithIssues = !onlyAllShootsWithIssues(state, context)
 
     const shoots = {}
-    for (const object of items) {
-      if (notOnlyShootsWithIssues || shootHasIssue(object)) {
-        const key = keyForShoot(object.metadata)
-        shoots[key] = object
+    for (const item of items) {
+      if (notOnlyShootsWithIssues || shootHasIssue(item)) {
+        const uid = item.metadata.uid
+        shoots[uid] = markRaw(item)
       }
     }
 
-    if (state.focusMode) {
-      const oldKeys = Object.keys(state.shoots)
-      const newKeys = Object.keys(shoots)
-      const removedShootKeys = difference(oldKeys, newKeys)
-      const addedShootKeys = difference(newKeys, oldKeys)
-
-      removedShootKeys.forEach(removedShootKey => {
-        const removedShoot = state.shoots[removedShootKey]
-        if (state.sortedUidsAtFreeze.includes(removedShoot.metadata.uid)) {
-          const uid = removedShoot.metadata.uid
-          state.staleShoots[uid] = {
-            ...removedShoot,
-            stale: true,
+    shootStore.$patch(({ state }) => {
+      if (state.focusMode) {
+        const oldUids = Object.keys(state.shoots)
+        const newUids = Object.keys(shoots)
+        for (const uid of difference(oldUids, newUids)) {
+          if (includes(state.froozenUids, uid)) {
+            state.staleShoots[uid] = state.shoots[uid]
           }
         }
-      })
-
-      addedShootKeys.forEach(addedShootKey => {
-        const addedShoot = shoots[addedShootKey]
-        const uid = addedShoot.metadata.uid
-        delete state.staleShoots[uid]
-      })
-    }
-
-    state.shoots = shoots
-    updateFilteredShoots()
-  }
-
-  function receiveInfo ({ namespace, name, info }) {
-    const item = findItem(state)({ namespace, name })
-    if (item !== undefined) {
-      item.info = info
-    }
-  }
-
-  function clear () {
-    state.shoots = {}
-    state.staleShoots = {}
-  }
-
-  function clearStaleShoots () {
-    state.staleShoots = {}
+        for (const uid of difference(newUids, oldUids)) {
+          delete state.staleShoots[uid]
+        }
+      }
+      state.shoots = shoots
+    })
   }
 
   function openSubscription (options) {
-    state.subscriptionState = constants.OPENING
-    state.subscriptionError = null
+    const shootStore = this
+    shootStore.$patch(({ state }) => {
+      state.subscriptionState = constants.OPENING
+      state.subscriptionError = null
+      state.subscriptionEventHandler?.cancel()
+      shootEvents.clear()
+      const throttledHandleEvents = throttle(handleEvents, 3000)
+      state.subscriptionEventHandler = markRaw(throttledHandleEvents)
+    })
     socketStore.emitSubscribe(options)
   }
 
   function closeSubscription () {
-    state.subscriptionState = constants.CLOSING
-    state.subscriptionError = null
-    state.subscription = null
+    const shootStore = this
+    shootStore.$patch(({ state }) => {
+      state.subscriptionState = constants.CLOSING
+      state.subscriptionError = null
+      state.subscription = null
+      state.subscriptionEventHandler?.cancel()
+      shootEvents.clear()
+      state.subscriptionEventHandler = undefined
+    })
     socketStore.emitUnsubscribe()
   }
 
-  function handleEvent (event) {
-    const notOnlyShootsWithIssues = !onlyAllShootsWithIssues(state, context)
-    let setFilteredItemsRequired = false
-    switch (event.type) {
-      case 'ADDED':
-      case 'MODIFIED':
-        // Do not add healthy shoots when onlyShootsWithIssues=true, this can happen when toggeling flag
-        if (notOnlyShootsWithIssues || shootHasIssue(event.object)) {
-          putItem(state, event.object)
-          setFilteredItemsRequired = true
+  async function handleEvents (shootStore) {
+    const events = Array.from(shootEvents.values())
+    shootEvents.clear()
+    const uids = []
+    const deletedUids = []
+    for (const { type, uid } of events) {
+      if (type === 'DELETED') {
+        deletedUids.push(uid)
+      } else {
+        uids.push(uid)
+      }
+    }
+    try {
+      const items = await socketStore.synchronize(uids)
+      const notOnlyShootsWithIssues = !onlyAllShootsWithIssues(state, context)
+      shootStore.$patch(({ state }) => {
+        for (const uid of deletedUids) {
+          if (state.focusMode) {
+            state.staleShoots[uid] = state.shoots[uid]
+          }
+          delete state.shoots[uid]
         }
-        break
-      case 'DELETED':
-        deleteItem(state, event.object)
-        setFilteredItemsRequired = true
-        break
-      default:
-        logger.error('undhandled event type', event.type)
+        for (const item of items) {
+          if (item.kind === 'Status') {
+            logger.info('Failed to synchronize a single shoot: %s', item.message)
+          } else if (notOnlyShootsWithIssues || shootHasIssue(item)) {
+            const uid = item.metadata.uid
+            if (state.focusMode) {
+              delete state.staleShoots[uid]
+            }
+            state.shoots[uid] = markRaw(item)
+          }
+        }
+      })
+    } catch (err) {
+      logger.error('Failed to synchronize all modified shoots: %s', err.message)
+      // Synchronization failed. Rollback shoot events
+      for (const event of events) {
+        const { object } = event
+        if (!shootEvents.has(object.metadata.uid)) {
+          shootEvents.set(object.metadata.uid, event)
+        }
+      }
     }
-    if (setFilteredItemsRequired) {
-      updateFilteredShoots()
+  }
+
+  function handleEvent (event) {
+    const { type, object } = event
+    if (!['ADDED', 'MODIFIED', 'DELETED'].includes(type)) {
+      logger.error('undhandled event type', type)
+      return
     }
+    shootEvents.set(object.metadata.uid, event)
+    const throttledHandleEvents = state.subscriptionEventHandler
+    if (typeof throttledHandleEvents === 'function') {
+      throttledHandleEvents(this)
+    }
+  }
+
+  function isShootActive (uid) {
+    return includes(activeUids.value, uid)
   }
 
   return {
     // state
+    state,
     staleShoots,
-    sortedUidsAtFreeze,
-    filteredShoots,
     newShootResource,
     initialNewShootResource,
     shootListFilters,
@@ -613,13 +631,15 @@ export const useShootStore = defineStore('shoot', () => {
     subscription,
     numberOfNewItemsSinceFreeze,
     // actions
-    clear,
-    clearStaleShoots,
+    receive,
     synchronize,
+    clearAll,
     subscribe,
     subscribeShoots,
+    openSubscription,
     unsubscribe,
     unsubscribeShoots,
+    closeSubscription,
     handleEvent,
     createShoot,
     deleteShoot,
@@ -634,9 +654,9 @@ export const useShootStore = defineStore('shoot', () => {
     searchItems,
     sortItems,
     setSortBy,
-    setSubscription,
     setSubscriptionState,
     setSubscriptionError,
+    isShootActive,
   }
 })
 
