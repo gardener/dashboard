@@ -111,6 +111,10 @@ export const useShootStore = defineStore('shoot', () => {
     return state.staleShoots
   })
 
+  const activeShoots = computed(() => {
+    return activeUids.value.map(uid => state.shoots[uid])
+  })
+
   const activeUids = computed(() => {
     return getFilteredUids(state, context)
   })
@@ -622,6 +626,7 @@ export const useShootStore = defineStore('shoot', () => {
     focusMode,
     sortBy,
     // getters
+    activeShoots,
     shootList,
     selectedShoot,
     onlyShootsWithIssues,
