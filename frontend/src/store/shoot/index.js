@@ -594,12 +594,12 @@ export const useShootStore = defineStore('shoot', () => {
   }
 
   function handleEvent (event) {
-    const { type, object } = event
+    const { type, uid } = event
     if (!['ADDED', 'MODIFIED', 'DELETED'].includes(type)) {
       logger.error('undhandled event type', type)
       return
     }
-    shootEvents.set(object.metadata.uid, event)
+    shootEvents.set(uid, event)
     const throttledHandleEvents = state.subscriptionEventHandler
     if (typeof throttledHandleEvents === 'function') {
       throttledHandleEvents(this)
