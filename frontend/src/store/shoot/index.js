@@ -623,7 +623,6 @@ export const useShootStore = defineStore('shoot', () => {
     // getters
     shootList,
     selectedShoot,
-    selectedItem: selectedShoot, // TODO: deprecated - use selectedShoot
     onlyShootsWithIssues,
     loading,
     subscribed,

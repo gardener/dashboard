@@ -336,7 +336,7 @@ export default {
       'shootList',
       'shootListFilters',
       'loading',
-      'selectedItem',
+      'selectedShoot',
       'onlyShootsWithIssues',
       'numberOfNewItemsSinceFreeze',
       'focusMode',
@@ -384,11 +384,11 @@ export default {
       },
     },
     currentName () {
-      return get(this.selectedItem, 'metadata.name')
+      return get(this.selectedShoot, 'metadata.name')
     },
     shootItem () {
       // property `shoot-item` of the mixin is required
-      return this.selectedItem || {}
+      return this.selectedShoot || {}
     },
     currentStandardSelectedColumns () {
       return mapTableHeader(this.standardHeaders, 'selected')
