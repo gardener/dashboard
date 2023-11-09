@@ -119,6 +119,9 @@ const shoots = {
     const items = shoots.list(namespace)
     return find(items, ['metadata.name', name])
   },
+  getByUid (uid) {
+    return find(shootList, ['metadata.uid', uid])
+  },
   list (namespace) {
     const items = cloneDeep(shootList)
     return namespace
