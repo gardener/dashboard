@@ -72,6 +72,14 @@ describe('cache', function () {
     expect(cache.getShoot('garden-foo', 'fooShoot')).toBe(store.getByKey(1))
   })
 
+  it('should dispatch "getShootByUid" to internal cache', function () {
+    const store = new Store()
+    store.replace(fixtures.shoots.list())
+    internalCache.set('shoots', store)
+    const object = store.getByKey(1)
+    expect(cache.getShootByUid(object.metadata.uid)).toBe(object)
+  })
+
   it('should dispatch "getControllerRegistrations" to internal cache', function () {
     const list = []
     const stub = jest.spyOn(internalCache, 'getControllerRegistrations').mockReturnValue(list)
