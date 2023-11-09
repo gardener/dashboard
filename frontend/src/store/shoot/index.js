@@ -102,6 +102,7 @@ export const useShootStore = defineStore('shoot', () => {
     subscriptionError: null,
     subscriptionEventHandler: undefined,
     sortBy: undefined,
+    throttleDelay: 3_000,
   })
   const shootEvents = new Map()
 
@@ -527,7 +528,7 @@ export const useShootStore = defineStore('shoot', () => {
       state.subscriptionError = null
       state.subscriptionEventHandler?.cancel()
       shootEvents.clear()
-      const throttledHandleEvents = throttle(handleEvents, 3000)
+      const throttledHandleEvents = throttle(handleEvents, state.throttleDelay)
       state.subscriptionEventHandler = markRaw(throttledHandleEvents)
     })
     socketStore.emitSubscribe(options)
