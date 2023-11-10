@@ -15,7 +15,6 @@ export function createSocket (state, context) {
   const {
     logger,
     authnStore,
-    projectStore,
     shootStore,
     ticketStore,
   } = context
@@ -200,10 +199,7 @@ export function createSocket (state, context) {
 
   // handle custom events
   socket.on('shoots', event => {
-    const namespaces = projectStore.currentNamespaces
-    if (namespaces.includes(event.object?.metadata.namespace)) {
-      shootStore.handleEvent(event)
-    }
+    shootStore.handleEvent(event)
   })
 
   socket.on('issues', event => {
