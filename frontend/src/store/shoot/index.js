@@ -102,7 +102,6 @@ export const useShootStore = defineStore('shoot', () => {
     subscriptionError: null,
     subscriptionEventHandler: undefined,
     sortBy: undefined,
-    throttleDelay: 3_000,
   })
   const shootEvents = new Map()
 

@@ -49,6 +49,7 @@ export default {
     }
   },
   beforeRouteLeave (to, from) {
+    this.readyState = 'initial'
     this.unsubscribe()
   },
   data () {
