@@ -294,8 +294,18 @@ export const useShootStore = defineStore('shoot', () => {
       return { shoots: items, issues, comments: [] }
     }
 
+    const getThrottleDelay = (options, numberOfShoots) => {
+      if (options.name) {
+        return 0
+      }
+      return numberOfShoots > 50
+        ? 3_000
+        : 1_000
+    }
+
     // await and handle response data in the background
     const fetchData = async options => {
+      let throttleDelay
       try {
         setSubscriptionState(constants.LOADING)
         const promise = options.name
@@ -305,13 +315,23 @@ export const useShootStore = defineStore('shoot', () => {
         shootStore.receive(shoots)
         ticketStore.receiveIssues(issues)
         ticketStore.receiveComments(comments)
-        shootStore.openSubscription(options)
+        throttleDelay = getThrottleDelay(options, shoots.length)
       } catch (err) {
-        const message = get(err, 'response.data.message', err.message)
-        logger.error('Failed to fetch shoots or tickets: %s', message)
-        setSubscriptionError(err)
-        shootStore.clearAll()
+        if (options.name && isNotFound(err)) {
+          throttleDelay = 0
+        } else {
+          const message = get(err, 'response.data.message', err.message)
+          logger.error('Failed to fetch shoots or tickets: %s', message)
+          setSubscriptionError(err)
+          shootStore.clearAll()
+          ticketStore.clearIssues()
+          ticketStore.clearComments()
+        }
         throw err
+      } finally {
+        if (typeof throttleDelay === 'number') {
+          shootStore.openSubscription(options, { throttleDelay })
+        }
       }
     }
 
@@ -357,7 +377,7 @@ export const useShootStore = defineStore('shoot', () => {
       }
       state.shootInfos[metadata.uid] = markRaw(info)
     } catch (err) {
-      // shoot info not found -> ignore if KubernetesError
+      // ignore shoot info not found
       if (isNotFound(err)) {
         return
       }
@@ -457,10 +477,13 @@ export const useShootStore = defineStore('shoot', () => {
   const searchItems = searchItemsFn(state, context)
   const sortItems = sortItemsFn(state, context)
 
-  function shootByNamespaceAndName ({ namespace, name }) {
+  function shootByNamespaceAndName ({ namespace, name } = {}) {
+    if (!(namespace && name)) {
+      return
+    }
     const object = find(Object.values(state.shoots), { metadata: { namespace, name } })
     if (!object) {
-      return null
+      return
     }
     return assignShootInfo(object)
   }
@@ -525,17 +548,21 @@ export const useShootStore = defineStore('shoot', () => {
     })
   }
 
-  function openSubscription (options) {
+  function openSubscription (value, options) {
     const shootStore = this
+    const throttleDelay = options?.throttleDelay
+    const throttledHandleEvents = !throttleDelay
+      ? (...args) => handleEvents(...args)
+      : throttle(handleEvents, throttleDelay)
     shootStore.$patch(({ state }) => {
       state.subscriptionState = constants.OPENING
       state.subscriptionError = null
       state.subscriptionEventHandler?.cancel()
       shootEvents.clear()
-      const throttledHandleEvents = throttle(handleEvents, state.throttleDelay)
+
       state.subscriptionEventHandler = markRaw(throttledHandleEvents)
     })
-    socketStore.emitSubscribe(options)
+    socketStore.emitSubscribe(value)
   }
 
   function closeSubscription () {

@@ -55,7 +55,6 @@ export default {
     return {
       error: null,
       readyState: 'initial',
-      unsubscribeShootStore: () => {},
     }
   },
   computed: {
@@ -70,6 +69,9 @@ export default {
     ...mapState(useAuthnStore, [
       'isAdmin',
     ]),
+    shootItem () {
+      return this.shootByNamespaceAndName(this.$route.params)
+    },
     component () {
       if (this.error) {
         return 'g-shoot-item-error'
@@ -109,33 +111,33 @@ export default {
     },
   },
   watch: {
-    '$route' () {
-      this.readyState = 'loaded'
+    '$route' (value) {
+      if (value) {
+        this.readyState = 'loaded'
+      }
+    },
+    shootItem (value) {
+      if (this.readyState === 'loaded') {
+        if (!value) {
+          this.error = Object.assign(new Error('The cluster you are looking for is no longer available'), {
+            code: 410,
+            reason: 'Cluster is gone',
+          })
+        } else if ([404, 410].includes(this.error?.code)) {
+          this.error = null
+        }
+      }
     },
   },
   beforeMount () {
     this.readyState = 'initial'
   },
   async mounted () {
-    const shootStore = useShootStore()
-    this.unsubscribeShootStore = shootStore.$onAction(({
-      name,
-      args,
-      after,
-    }) => {
-      switch (name) {
-        case 'handleEvent': {
-          after(() => this.handleShootEvent(...args))
-          break
-        }
-      }
-    })
     await this.load(this.$route)
     this.readyState = 'loaded'
   },
   beforeUnmount () {
     this.readyState = 'initial'
-    this.unsubscribeShootStore()
   },
   methods: {
     ...mapActions(useShootStore, [
@@ -149,21 +151,6 @@ export default {
     ...mapActions(useTerminalStore, [
       'ensureProjectTerminalShortcutsLoaded',
     ]),
-    handleShootEvent ({ type, object }) {
-      const metadata = object.metadata
-      const routeParams = this.$route.params ?? {}
-      if (metadata.namespace !== routeParams.namespace || metadata.name !== routeParams.name) {
-        return
-      }
-      if (type === 'DELETED') {
-        this.error = Object.assign(new Error('The cluster you are looking for is no longer available'), {
-          code: 410,
-          reason: 'Cluster is gone',
-        })
-      } else if (type === 'ADDED' && [404, 410].includes(this.error?.code)) {
-        this.error = null
-      }
-    },
     async load (route) {
       this.error = null
       this.readyState = 'loading'
