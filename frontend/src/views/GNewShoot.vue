@@ -426,7 +426,7 @@ export default {
         set(shootResource, 'spec.addons', addons)
       }
 
-      const { begin, end } = this.$refs.maintenanceTime.getMaintenanceWindow()
+      const { begin, end } = this.$refs.maintenanceTime.getMaintenanceWindow() ?? {}
       const { k8sUpdates, osUpdates } = this.$refs.maintenanceComponents.getComponentUpdates()
       const autoUpdate = get(shootResource, 'spec.maintenance.autoUpdate', {})
       autoUpdate.kubernetesVersion = k8sUpdates
