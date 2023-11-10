@@ -548,19 +548,26 @@ export const useShootStore = defineStore('shoot', () => {
     })
   }
 
+  function setSubscriptionEventHandler (state, func, throttleDelay) {
+    if (typeof state.subscriptionEventHandler?.cancel === 'function') {
+      state.subscriptionEventHandler.cancel()
+    }
+    shootEvents.clear()
+    if (throttleDelay > 0) {
+      func = throttle(func, throttleDelay)
+    }
+    state.subscriptionEventHandler = typeof func === 'function'
+      ? markRaw(func)
+      : undefined
+  }
+
   function openSubscription (value, options) {
     const shootStore = this
-    const throttleDelay = options?.throttleDelay
-    const throttledHandleEvents = !throttleDelay
-      ? (...args) => handleEvents(...args)
-      : throttle(handleEvents, throttleDelay)
+
     shootStore.$patch(({ state }) => {
       state.subscriptionState = constants.OPENING
       state.subscriptionError = null
-      state.subscriptionEventHandler?.cancel()
-      shootEvents.clear()
-
-      state.subscriptionEventHandler = markRaw(throttledHandleEvents)
+      setSubscriptionEventHandler(state, handleEvents, options?.throttleDelay)
     })
     socketStore.emitSubscribe(value)
   }
@@ -571,9 +578,7 @@ export const useShootStore = defineStore('shoot', () => {
       state.subscriptionState = constants.CLOSING
       state.subscriptionError = null
       state.subscription = null
-      state.subscriptionEventHandler?.cancel()
-      shootEvents.clear()
-      state.subscriptionEventHandler = undefined
+      setSubscriptionEventHandler(state)
     })
     socketStore.emitUnsubscribe()
   }
