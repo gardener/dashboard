@@ -73,7 +73,6 @@ const onClick = async (e) => {
   if (props.v.$invalid) {
     await props.v.$validate()
     if (hasVisibleErrors.value) {
-      console.log('FIRE!')
       const messages = errorMessages.value.map(msg => `${msg.fieldName}: ${msg.message}`).join(', ')
       emit('errorMessagesUpdated', messages)
     }
