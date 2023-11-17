@@ -620,9 +620,9 @@ export const useShootStore = defineStore('shoot', () => {
       logger.error('Failed to synchronize all modified shoots: %s', err.message)
       // Synchronization failed. Rollback shoot events
       for (const event of events) {
-        const { object } = event
-        if (!shootEvents.has(object.metadata.uid)) {
-          shootEvents.set(object.metadata.uid, event)
+        const { uid } = event
+        if (!shootEvents.has(uid)) {
+          shootEvents.set(uid, event)
         }
       }
     }
