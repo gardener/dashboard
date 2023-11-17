@@ -163,7 +163,7 @@ SPDX-License-Identifier: Apache-2.0
         hover
         :loading="loading || !connected"
         :items-per-page-options="itemsPerPageOptions"
-        :custom-key-sort="disableCustomKeySort(visibleHeaders)"
+        :custom-key-sort="customKeySort"
         must-sort
         class="g-table"
       >
@@ -220,10 +220,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import {
-  defineAsyncComponent,
-  toRaw,
-} from 'vue'
+import { defineAsyncComponent } from 'vue'
 import {
   mapState,
   mapWritableState,
@@ -255,8 +252,6 @@ import {
   isEmpty,
   join,
   map,
-  mapKeys,
-  mapValues,
   some,
   sortBy,
   startsWith,
@@ -605,6 +600,17 @@ export default {
     visibleHeaders () {
       return filter(this.selectableHeaders, ['selected', true])
     },
+    sortableHeaders () {
+      return filter(this.visibleHeaders, ['sortable', true])
+    },
+    customKeySort () {
+      const noSort = () => 0
+      const value = {}
+      for (const header of this.sortableHeaders) {
+        value[header.key] = noSort
+      }
+      return value
+    },
     allFilters () {
       return [
         {
@@ -708,9 +714,14 @@ export default {
     hideClustersWithLabels () {
       return get(this.ticketConfig, 'hideClustersWithLabels', [])
     },
+    filteredItems () {
+      const query = this.debouncedShootSearch
+      return query
+        ? filter(this.items, item => this.searchItems(query, item))
+        : [...this.items]
+    },
     sortedAndFilteredItems () {
-      const items = this.sortItems(this.items, this.sortByInternal)
-      return filter(items, item => this.searchItems(this.debouncedShootSearch, toRaw(item)))
+      return this.sortItems(this.filteredItems, this.sortByInternal)
     },
     issueSinceColumnVisible () {
       return this.operatorFeatures || (!this.projectScope && this.isAdmin)
@@ -810,11 +821,6 @@ export default {
     setDebouncedShootSearch: debounce(function () {
       this.debouncedShootSearch = this.shootSearch
     }, 500),
-    disableCustomKeySort (tableHeaders) {
-      const sortableTableHeaders = filter(tableHeaders, ['sortable', true])
-      const tableKeys = mapKeys(sortableTableHeaders, ({ key }) => key)
-      return mapValues(tableKeys, () => () => 0)
-    },
   },
 }
 </script>

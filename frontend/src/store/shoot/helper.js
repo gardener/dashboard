@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import semver from 'semver'
+import { computed } from 'vue'
 
 import {
   shortRandomString,
@@ -407,54 +407,49 @@ export function getSortVal (context, item, sortBy) {
     ticketStore,
   } = context
 
+  const purposeValue = {
+    infrastructure: 0,
+    production: 1,
+    development: 2,
+    evaluation: 3,
+  }
   const value = getRawVal(context, item, sortBy)
   const status = item.status
   switch (sortBy) {
     case 'purpose':
-      switch (value) {
-        case 'infrastructure':
-          return 0
-        case 'production':
-          return 1
-        case 'development':
-          return 2
-        case 'evaluation':
-          return 3
-        default:
-          return 4
-      }
+      return purposeValue[value] ?? 4
+    case 'k8sVersion':
+      return (value || '0.0.0').split('.').map(i => padStart(i, 4, '0')).join('.')
     case 'lastOperation': {
       const operation = value || {}
-      const inProgress = operation.progress !== 100 && operation.state !== 'Failed' && !!operation.progress
-      const lastErrors = get(item, 'status.lastErrors', [])
+      const lastErrors = item.status?.lastErrors ?? []
       const isError = operation.state === 'Failed' || lastErrors.length
-      const allErrorCodes = errorCodesFromArray(lastErrors)
-      const userError = isUserError(allErrorCodes)
-      const ignoredFromReconciliation = isReconciliationDeactivated(get(item, 'metadata', {}))
+      const ignoredFromReconciliation = isReconciliationDeactivated(item.metadata ?? {})
 
       if (ignoredFromReconciliation) {
-        if (isError) {
-          return 400
-        } else {
-          return 450
-        }
-      } else if (userError && !inProgress) {
-        return 200
-      } else if (userError && inProgress) {
-        const progress = padStart(operation.progress, 2, '0')
-        return `3${progress}`
-      } else if (isError && !inProgress) {
-        return 0
-      } else if (isError && inProgress) {
-        const progress = padStart(operation.progress, 2, '0')
-        return `1${progress}`
-      } else if (inProgress) {
-        const progress = padStart(operation.progress, 2, '0')
-        return `6${progress}`
-      } else if (isShootStatusHibernated(status)) {
-        return 500
+        return isError
+          ? 400
+          : 450
       }
-      return 700
+
+      const userError = isUserError(errorCodesFromArray(lastErrors))
+      const inProgress = operation.progress !== 100 && operation.state !== 'Failed' && !!operation.progress
+
+      if (userError) {
+        return inProgress
+          ? '3' + padStart(operation.progress, 2, '0')
+          : 200
+      }
+      if (isError) {
+        return inProgress
+          ? '1' + padStart(operation.progress, 2, '0')
+          : 0
+      }
+      return inProgress
+        ? '6' + padStart(operation.progress, 2, '0')
+        : isShootStatusHibernated(status)
+          ? 500
+          : 700
     }
     case 'ticket': {
       const metadata = item.metadata
@@ -473,11 +468,27 @@ export function searchItemsFn (state, context) {
     projectStore,
   } = context
 
+  const searchableCustomFields = computed(() => {
+    return filter(projectStore.shootCustomFieldList, ['searchable', true])
+  })
+
   let searchQuery
-  let lastSearchString
+  let searchQueryTerms = []
+  let lastSearch
 
   return (search, item) => {
-    const searchableCustomFields = filter(projectStore.shootCustomFieldList, ['searchable', true])
+    if (search !== lastSearch) {
+      lastSearch = search
+      searchQuery = parseSearch(search)
+      searchQueryTerms = map(searchQuery.terms, 'value')
+    }
+
+    if (searchQueryTerms.includes('workerless')) {
+      if (getRawVal(context, item, 'workers') === 0) {
+        return true
+      }
+    }
+
     const values = [
       getRawVal(context, item, 'name'),
       getRawVal(context, item, 'infrastructure'),
@@ -489,19 +500,8 @@ export function searchItemsFn (state, context) {
       getRawVal(context, item, 'ticketLabels'),
       getRawVal(context, item, 'errorCodes'),
       getRawVal(context, item, 'controlPlaneHighAvailability'),
-      ...map(searchableCustomFields, ({ key }) => getRawVal(context, item, key)),
+      ...map(searchableCustomFields.value, ({ key }) => getRawVal(context, item, key)),
     ]
-
-    if (search !== lastSearchString) {
-      lastSearchString = search
-      searchQuery = parseSearch(search)
-    }
-
-    if (map(searchQuery.terms, 'value').includes('workerless')) {
-      if (getRawVal(context, item, 'workers') === 0) {
-        return true
-      }
-    }
 
     return searchQuery.matches(values)
   }
@@ -522,32 +522,11 @@ export function sortItemsFn (state, context) {
       return items
     }
     const sortBy = sortByObj.key
-
     const sortOrder = sortByObj.order
-    const sortbyNameAsc = (a, b) => {
-      if (getRawVal(context, a, 'name') > getRawVal(context, b, 'name')) {
-        return 1
-      } else if (getRawVal(context, a, 'name') < getRawVal(context, b, 'name')) {
-        return -1
-      }
-      return 0
-    }
-    const inverse = sortOrder === 'desc' ? -1 : 1
+
     switch (sortBy) {
       case 'k8sVersion': {
-        items.sort((a, b) => {
-          const versionA = getRawVal(context, a, sortBy)
-          const versionB = getRawVal(context, b, sortBy)
-
-          if (semver.gt(versionA, versionB)) {
-            return 1 * inverse
-          } else if (semver.lt(versionA, versionB)) {
-            return -1 * inverse
-          } else {
-            return sortbyNameAsc(a, b)
-          }
-        })
-        return items
+        return orderBy(items, [item => getSortVal(context, item, sortBy), 'metadata.name'], [sortOrder, 'asc'])
       }
       case 'readiness': {
         const hideProgressingClusters = get(state.shootListFilters, 'progressing', false)
