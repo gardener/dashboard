@@ -293,13 +293,13 @@ export const useShootStore = defineStore('shoot', () => {
       return { shoots: items, issues, comments: [] }
     }
 
-    const getThrottleDelay = (options, numberOfShoots) => {
+    const getThrottleDelay = (options, n) => {
       if (options.name) {
         return 0
       }
-      return numberOfShoots > 50
-        ? 3_000
-        : 1_000
+      const p = Math.pow(10, Math.floor(Math.log10(n)))
+      const d = Math.round(n * 3 / p) * p
+      return Math.min(10_000, Math.max(100, d))
     }
 
     // await and handle response data in the background
