@@ -101,7 +101,6 @@ export const useShootStore = defineStore('shoot', () => {
     subscriptionState: constants.CLOSED,
     subscriptionError: null,
     subscriptionEventHandler: undefined,
-    throttleDelay: undefined,
     sortBy: undefined,
   })
   const shootEvents = new Map()
@@ -145,10 +144,6 @@ export const useShootStore = defineStore('shoot', () => {
 
   const sortBy = computed(() => {
     return state.sortBy
-  })
-
-  const throttleDelay = computed(() => {
-    return state.throttleDelay ?? 1_000
   })
 
   // getters
@@ -571,7 +566,6 @@ export const useShootStore = defineStore('shoot', () => {
     shootStore.$patch(({ state }) => {
       state.subscriptionState = constants.OPENING
       state.subscriptionError = null
-      state.throttleDelay = throttleDelay
       setSubscriptionEventHandler(state, handleEvents, throttleDelay)
     })
     socketStore.emitSubscribe(value)
@@ -583,7 +577,6 @@ export const useShootStore = defineStore('shoot', () => {
       state.subscriptionState = constants.CLOSING
       state.subscriptionError = null
       state.subscription = null
-      state.throttleDelay = undefined
       setSubscriptionEventHandler(state)
     })
     socketStore.emitUnsubscribe()
@@ -602,7 +595,7 @@ export const useShootStore = defineStore('shoot', () => {
       }
     }
     try {
-      const items = await socketStore.synchronize(uids, Math.floor(shootStore.throttleDelay * 0.8))
+      const items = await socketStore.synchronize(uids)
       const notOnlyShootsWithIssues = !onlyAllShootsWithIssues(state, context)
       shootStore.$patch(({ state }) => {
         for (const uid of deletedUids) {
@@ -675,7 +668,6 @@ export const useShootStore = defineStore('shoot', () => {
     subscriptionError,
     focusMode,
     sortBy,
-    throttleDelay,
     // getters
     activeShoots,
     shootList,

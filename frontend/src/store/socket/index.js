@@ -49,6 +49,7 @@ export const useSocketStore = defineStore('socket', () => {
       jitter: 0.5,
       attempts: 0,
     },
+    synchronizing: false,
   })
 
   const socket = createSocket(state, {
@@ -124,17 +125,25 @@ export const useSocketStore = defineStore('socket', () => {
     })
   }
 
-  async function synchronize (uids, delay = 1_000) {
-    const {
-      statusCode = 500,
-      name = 'InternalError',
-      message = 'Failed to synchronize shoots',
-      items = [],
-    } = await socket.timeout(delay).emitWithAck('synchronize', 'shoots', uids)
-    if (statusCode === 200) {
-      return items
+  async function synchronize (uids) {
+    if (state.synchronizing) {
+      throw createError(429, 'Synchronization is still in progress', { name: 'TooManyRequests' })
     }
-    throw createError(statusCode, message, { name })
+    state.synchronizing = true
+    try {
+      const {
+        statusCode = 500,
+        name = 'InternalError',
+        message = 'Failed to synchronize shoots',
+        items = [],
+      } = await socket.timeout(60_000).emitWithAck('synchronize', 'shoots', uids)
+      if (statusCode === 200) {
+        return items
+      }
+      throw createError(statusCode, message, { name })
+    } finally {
+      state.synchronizing = false
+    }
   }
 
   watch(() => authnStore.user, value => {
