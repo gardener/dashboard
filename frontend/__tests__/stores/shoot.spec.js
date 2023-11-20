@@ -58,7 +58,7 @@ describe('stores', () => {
     let shootStore
 
     const flushEvents = () => {
-      shootStore.state?.subscriptionEventHandler.flush()
+      shootStore.state.subscriptionEventHandler.flush()
       return new Promise(resolve => globalSetImmediate(resolve))
     }
 

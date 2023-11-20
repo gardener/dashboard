@@ -124,7 +124,7 @@ export const useSocketStore = defineStore('socket', () => {
     })
   }
 
-  async function synchronize (uids, delay = 2_000) {
+  async function synchronize (uids, delay = 1_000) {
     const {
       statusCode = 500,
       name = 'InternalError',
