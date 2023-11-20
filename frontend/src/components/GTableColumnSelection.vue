@@ -22,13 +22,17 @@ SPDX-License-Identifier: Apache-2.0
         Table Options
       </v-tooltip>
     </template>
-    <v-list density="compact">
+    <v-list
+      density="compact"
+      lines="one"
+    >
       <v-list-subheader>
         Column Selection
       </v-list-subheader>
       <v-list-item
         v-for="header in headers"
         :key="header.value"
+        class="py-0"
         @click.stop="onSetSelectedHeader(header)"
       >
         <template #prepend>
@@ -82,64 +86,60 @@ SPDX-License-Identifier: Apache-2.0
           <span>Reset to Defaults</span>
         </v-tooltip>
       </v-list-item>
-    </v-list>
-    <v-list
-      v-if="filters && filters.length"
-      density="compact"
-    >
-      <v-list-item>
-        <v-list-item-title>
+      <template v-if="filters && filters.length">
+        <v-list-subheader>
           Filter Table
-        </v-list-item-title>
-      </v-list-item>
-      <v-tooltip
-        location="top"
-        :disabled="!filterTooltip"
-      >
-        <template #activator="{ props: activatorProps }">
-          <div v-bind="activatorProps">
-            <v-list-item
-              v-for="filter in filters"
-              :key="filter.value"
-              :disabled="filter.disabled"
-              :class="{ 'disabled_filter': filter.disabled }"
-              @click.stop="onToggleFilter(filter)"
-            >
-              <template #prepend>
-                <v-list-item-action>
-                  <v-checkbox-btn
-                    :model-value="filter.selected"
-                    :color="checkboxColor(filter.selected)"
-                  />
-                </v-list-item-action>
-              </template>
-              <v-list-item-subtitle>
-                {{ filter.text }}
-                <v-tooltip
-                  v-if="filter.helpTooltip"
-                  location="top"
-                >
-                  <template #activator="{ props: innerActivatorProps }">
-                    <v-icon
-                      v-bind="innerActivatorProps"
-                      size="small"
-                    >
-                      mdi-help-circle-outline
-                    </v-icon>
-                  </template>
-                  <div
-                    v-for="line in filter.helpTooltip"
-                    :key="line"
+        </v-list-subheader>
+        <v-tooltip
+          location="top"
+          :disabled="!filterTooltip"
+        >
+          <template #activator="{ props: activatorProps }">
+            <div v-bind="activatorProps">
+              <v-list-item
+                v-for="filter in filters"
+                :key="filter.value"
+                :disabled="filter.disabled"
+                class="py-0"
+                :class="{ 'disabled_filter': filter.disabled }"
+                @click.stop="onToggleFilter(filter)"
+              >
+                <template #prepend>
+                  <v-list-item-action>
+                    <v-checkbox-btn
+                      :model-value="filter.selected"
+                      :color="checkboxColor(filter.selected)"
+                    />
+                  </v-list-item-action>
+                </template>
+                <v-list-item-subtitle>
+                  {{ filter.text }}
+                  <v-tooltip
+                    v-if="filter.helpTooltip"
+                    location="top"
                   >
-                    {{ line }}
-                  </div>
-                </v-tooltip>
-              </v-list-item-subtitle>
-            </v-list-item>
-          </div>
-        </template>
-        <span>{{ filterTooltip }}</span>
-      </v-tooltip>
+                    <template #activator="{ props: innerActivatorProps }">
+                      <v-icon
+                        v-bind="innerActivatorProps"
+                        size="small"
+                      >
+                        mdi-help-circle-outline
+                      </v-icon>
+                    </template>
+                    <div
+                      v-for="line in filter.helpTooltip"
+                      :key="line"
+                    >
+                      {{ line }}
+                    </div>
+                  </v-tooltip>
+                </v-list-item-subtitle>
+              </v-list-item>
+            </div>
+          </template>
+          {{ filterTooltip }}
+        </v-tooltip>
+      </template>
     </v-list>
   </v-menu>
 </template>
