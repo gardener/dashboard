@@ -169,22 +169,46 @@ function synchronizeShoots (socket, uids = []) {
 
   return uids.map(uid => {
     const object = cache.getShootByUid(uid)
+    if (!object) {
+      // the shoot has been removed from the cache
+      return {
+        kind: 'Status',
+        apiVersion: 'v1',
+        status: 'Failure',
+        message: `Shoot with uid ${uid} is no longer available`,
+        reason: 'Gone',
+        details: {
+          uid,
+          group: 'core.gardener.cloud',
+          kind: 'shoots'
+        },
+        code: 410
+      }
+    }
     const { namespace, name } = object.metadata
     const qualifiedName = [namespace, name].join('/')
-    if (isAdmin || namespaces.includes(namespace) || qualifiedNames.includes(qualifiedName)) {
-      // remove managed fields
-      object.metadata.managedFields = undefined
-      return object
+    if (!isAdmin && !namespaces.includes(namespace) && !qualifiedNames.includes(qualifiedName)) {
+      // the socket has NOT joined a room (admin, namespace or individual shoot) the current shoot belongs to
+      logger.error('User %s has no authorization to synchronize shoot %s in namespace %s', user.id, name, namespace)
+      return {
+        kind: 'Status',
+        apiVersion: 'v1',
+        status: 'Failure',
+        message: `Insufficient authorization to synchronize shoot ${name} in namespace ${namespace}`,
+        reason: 'Forbidden',
+        details: {
+          uid,
+          name,
+          namespace,
+          group: 'core.gardener.cloud',
+          kind: 'shoots'
+        },
+        code: 403
+      }
     }
-    logger.error('User %s has no authorization to synchronize shoot %s in namespace %s', user.id, name, namespace)
-    return {
-      kind: 'Status',
-      apiVersion: 'v1',
-      status: 'Failure',
-      message: `Insufficient authorization to synchronize shoot ${name} in namespace ${namespace}`,
-      reason: 'Forbidden',
-      code: 403
-    }
+    // remove managed fields
+    object.metadata.managedFields = undefined
+    return object
   })
 }
 
