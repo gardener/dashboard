@@ -206,8 +206,13 @@ function synchronizeShoots (socket, uids = []) {
         code: 403
       }
     }
-    // remove managed fields
-    object.metadata.managedFields = undefined
+    // only send all shoot details for single shoot subscriptions
+    if (!qualifiedNames.includes(qualifiedName)) {
+      object.metadata.managedFields = undefined
+      if (object.metadata.annotations) {
+        object.metadata.annotations['kubectl.kubernetes.io/last-applied-configuration'] = undefined
+      }
+    }
     return object
   })
 }
