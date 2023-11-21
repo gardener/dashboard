@@ -8,8 +8,11 @@ SPDX-License-Identifier: Apache-2.0
   <v-menu
     v-model="columnSelectionMenu"
     location="left"
-    style="max-height: 80%"
+    offset="5"
+    :close-on-content-click="false"
     absolute
+    min-width="240"
+    style="max-height: 80%"
   >
     <template #activator="{ props: menuProps }">
       <v-tooltip location="top">
@@ -22,125 +25,103 @@ SPDX-License-Identifier: Apache-2.0
         Table Options
       </v-tooltip>
     </template>
-    <v-list
-      density="compact"
-      lines="one"
-    >
-      <v-list-subheader>
-        Column Selection
-      </v-list-subheader>
-      <v-list-item
-        v-for="header in headers"
-        :key="header.value"
-        class="py-0"
-        @click.stop="onSetSelectedHeader(header)"
-      >
-        <template #prepend>
-          <v-list-item-action>
-            <v-checkbox-btn
-              :model-value="header.selected"
-              :color="checkboxColor(header.selected)"
-            />
-          </v-list-item-action>
-        </template>
-        <v-list-item-subtitle>
+    <v-card>
+      <v-card-text class="pt-1">
+        <div class="d-flex align-center justify-space-between">
+          <span class="text-subtitle-2 text-medium-emphasis py-2">
+            Column Selection
+          </span>
           <v-tooltip
-            v-if="header.customField"
+            activator="parent"
             location="top"
           >
             <template #activator="{ props: activatorProps }">
-              <div v-bind="activatorProps">
-                <v-badge
-                  inline
-                  icon="mdi-playlist-star"
-                  color="primary"
-                  class="mt-0"
-                >
-                  <span>{{ header.title }}</span>
-                </v-badge>
-              </div>
+              <v-btn
+                v-bind="activatorProps"
+                icon="mdi-restore"
+                size="small"
+                variant="text"
+                flat
+                @click.stop="onReset"
+              />
             </template>
-            Custom Field
+            Reset to Defaults
           </v-tooltip>
-          <template v-else>
-            {{ header.title }}
-          </template>
-        </v-list-item-subtitle>
-      </v-list-item>
-      <v-list-item>
-        <v-tooltip
-          location="top"
-          style="width: 100%"
+        </div>
+        <v-checkbox-btn
+          v-for="header in headers"
+          :key="header.value"
+          :model-value="header.selected"
+          :color="header.selected ? 'primary' : ''"
+
+          density="compact"
+          class="text-body-2"
+          @update:model-value="onSetSelectedHeader(header)"
         >
-          <template #activator="{ props: activatorProps }">
-            <v-btn
-              v-bind="activatorProps"
-              block
-              variant="text"
-              class="text-primary"
-              @click.stop="onReset"
+          <template #label>
+            <v-tooltip
+              v-if="header.customField"
+              location="top"
             >
-              Reset
-            </v-btn>
+              <template #activator="{ props: activatorProps }">
+                <span
+                  v-bind="activatorProps"
+                  class="text-caption"
+                >
+                  {{ header.title }}
+                  <v-icon
+                    color="primary"
+                    icon="mdi-playlist-star"
+                    end
+                  />
+                </span>
+              </template>
+              Custom Field
+            </v-tooltip>
+            <span
+              v-else
+              class="text-caption"
+            >
+              {{ header.title }}
+            </span>
           </template>
-          <span>Reset to Defaults</span>
-        </v-tooltip>
-      </v-list-item>
+        </v-checkbox-btn>
+      </v-card-text>
       <template v-if="filters && filters.length">
-        <v-list-subheader>
-          Filter Table
-        </v-list-subheader>
-        <v-tooltip
-          location="top"
-          :disabled="!filterTooltip"
-        >
-          <template #activator="{ props: activatorProps }">
-            <div v-bind="activatorProps">
-              <v-list-item
-                v-for="filter in filters"
-                :key="filter.value"
-                :disabled="filter.disabled"
-                class="py-0"
-                :class="{ 'disabled_filter': filter.disabled }"
-                @click.stop="onToggleFilter(filter)"
+        <v-divider />
+        <v-card-text class="pt-1">
+          <div class="text-subtitle-2 text-medium-emphasis py-2">
+            Table Filter
+          </div>
+          <v-checkbox-btn
+            v-for="filter in filters"
+            :key="filter.value"
+            :model-value="filter.selected"
+            :color="filter.selected ? 'primary' : ''"
+            :disabled="filter.disabled"
+            density="compact"
+            class="text-body-2"
+            @update:model-value="onToggleFilter(filter)"
+          >
+            <template #label>
+              <span
+                class="text-caption"
               >
-                <template #prepend>
-                  <v-list-item-action>
-                    <v-checkbox-btn
-                      :model-value="filter.selected"
-                      :color="checkboxColor(filter.selected)"
-                    />
-                  </v-list-item-action>
-                </template>
-                <v-list-item-subtitle>
-                  {{ filter.text }}
-                  <v-tooltip
-                    v-if="filter.helpTooltip"
-                    location="top"
-                  >
-                    <template #activator="{ props: innerActivatorProps }">
-                      <v-icon
-                        v-bind="innerActivatorProps"
-                        size="small"
-                      >
-                        mdi-help-circle-outline
-                      </v-icon>
-                    </template>
-                    <div
-                      v-for="line in filter.helpTooltip"
-                      :key="line"
-                    >
-                      {{ line }}
-                    </div>
-                  </v-tooltip>
-                </v-list-item-subtitle>
-              </v-list-item>
-            </div>
-          </template>
-          {{ filterTooltip }}
-        </v-tooltip>
+                {{ filter.text }}
+              </span>
+            </template>
+          </v-checkbox-btn>
+          <v-tooltip
+            activator="parent"
+            location="bottom"
+            :disabled="!filterTooltip"
+            max-width="300"
+          >
+            {{ filterTooltip }}
+          </v-tooltip>
+        </v-card-text>
       </template>
-    </v-list>
+    </v-card>
   </v-menu>
 </template>
 
@@ -167,7 +148,7 @@ const props = defineProps({
 })
 
 const { headers, filters, filterTooltip } = toRefs(props)
-
+const tab = ref('filter')
 // emits
 const emit = defineEmits([
   'reset',
