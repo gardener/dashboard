@@ -52,8 +52,7 @@ SPDX-License-Identifier: Apache-2.0
           v-for="header in headers"
           :key="header.value"
           :model-value="header.selected"
-          :color="header.selected ? 'primary' : ''"
-
+          :color="checkboxColor(header.selected)"
           density="compact"
           class="text-body-2"
           @update:model-value="onSetSelectedHeader(header)"
@@ -97,7 +96,7 @@ SPDX-License-Identifier: Apache-2.0
             v-for="filter in filters"
             :key="filter.value"
             :model-value="filter.selected"
-            :color="filter.selected ? 'primary' : ''"
+            :color="checkboxColor(filter.selected)"
             :disabled="filter.disabled"
             density="compact"
             class="text-body-2"
@@ -148,7 +147,7 @@ const props = defineProps({
 })
 
 const { headers, filters, filterTooltip } = toRefs(props)
-const tab = ref('filter')
+
 // emits
 const emit = defineEmits([
   'reset',
@@ -172,9 +171,3 @@ function checkboxColor (selected) {
   return selected ? 'primary' : ''
 }
 </script>
-
-<style lang="scss" scoped>
-.disabled_filter {
-  opacity: 0.5;
-}
-</style>
