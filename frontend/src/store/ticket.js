@@ -17,28 +17,15 @@ import { useLogger } from '@/composables/useLogger'
 
 import {
   assign,
-  filter,
   findIndex,
   get,
   head,
-  flatMap,
   matches,
   matchesProperty,
   groupBy,
   orderBy,
   uniqBy,
 } from '@/lodash'
-
-const eql = ({ projectName, name, state = undefined }) => {
-  const source = { metadata: { projectName } }
-  if (name) {
-    source.metadata.name = name
-  }
-  if (state) {
-    source.metadata.state = state
-  }
-  return matches(source)
-}
 
 const eqIssue = issue => {
   return matches({ metadata: { number: issue.metadata.number } })
