@@ -37,7 +37,7 @@ Custom fields can be shown in a dedicated card (`Custom Fields`) on the cluster 
 | searchable | Bool | true | | Indicates if column is searchable on the cluster list |
 | showDetails | Bool | true | | Indicates if field shall appear in a dedicated card (`Custom Fields`) on the cluster details page |
 
-As there is currently no way to configure the custom shoot fields for a project in the gardener dashboard, you have to use `kubectl` to update the `project` resource. See https://github.com/gardener/dashboard/blob/master/docs/usage/project-operations.md#download-kubeconfig-for-a-user on how to get a `kubeconfig` for the `garden` cluster in order to edit the `project`.
+As there is currently no way to configure the custom shoot fields for a project in the gardener dashboard, you have to use `kubectl` to update the `project` resource. See [Project Operations](../usage/project-operations.md#download-kubeconfig-for-a-user) on how to get a `kubeconfig` for the `garden` cluster in order to edit the `project`.
 
 ### Example
 
