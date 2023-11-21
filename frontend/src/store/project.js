@@ -52,6 +52,16 @@ export const useProjectStore = defineStore('project', () => {
     return map(list.value, 'metadata.namespace')
   })
 
+  const projectNameMap = computed(() => {
+    const projectNames = {}
+    if (Array.isArray(list.value)) {
+      for (const { metadata: { namespace, name } } of list.value) {
+        projectNames[namespace] = name
+      }
+    }
+    return projectNames
+  })
+
   const defaultNamespace = computed(() => {
     if (namespaces.value) {
       return namespaces.value.includes('garden')
@@ -153,8 +163,7 @@ export const useProjectStore = defineStore('project', () => {
     const namespace = typeof metadata === 'string'
       ? metadata
       : metadata?.namespace
-    const project = find(list.value, ['metadata.namespace', namespace])
-    return get(project, 'metadata.name') || replace(namespace, /^garden-/, '')
+    return projectNameMap.value[namespace] ?? replace(namespace, /^garden-/, '')
   }
 
   async function fetchProjects () {
