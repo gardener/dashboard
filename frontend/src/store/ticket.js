@@ -99,6 +99,10 @@ const putToList = (list, newItem, updatedAtKeyPath, matcher, descending = true) 
   }
 }
 
+function issueKey (projectName, name) {
+  return projectName + '/' + name
+}
+
 export const useTicketStore = defineStore('ticket', () => {
   const logger = useLogger()
 
@@ -109,12 +113,42 @@ export const useTicketStore = defineStore('ticket', () => {
     return issueList.value
   })
 
+  const issuesMap = computed(() => {
+    const data = {}
+    if (Array.isArray(issueList.value)) {
+      for (const item of issueList.value) {
+        const { projectName, name, state } = item.metadata
+        if (state === 'open') {
+          const key = issueKey(projectName, name)
+          if (Array.isArray(data[key])) {
+            data[key].push(item)
+          } else {
+            data[key] = [item]
+          }
+        }
+      }
+    }
+    return data
+  })
+
+  const labelsMap = computed(() => {
+    const data = {}
+    for (const [key, items] of Object.entries(issuesMap.value)) {
+      for (const item of items) {
+        const uniqLabels = data[key] ?? []
+        const labels = item.data?.labels ?? []
+        data[key] = uniqBy([
+          ...uniqLabels,
+          ...labels,
+        ], 'id')
+      }
+    }
+    return data
+  })
+
   function issues ({ name, projectName }) {
-    return filter(issueList.value, eql({
-      name,
-      projectName,
-      state: 'open',
-    }))
+    const key = issueKey(projectName, name)
+    return issuesMap.value[key]
   }
 
   function comments ({ issueNumber }) {
@@ -126,7 +160,8 @@ export const useTicketStore = defineStore('ticket', () => {
   }
 
   function labels ({ name, projectName }) {
-    return uniqBy(flatMap(issues({ name, projectName }), 'data.labels'), 'id')
+    const key = issueKey(projectName, name)
+    return labelsMap.value[key] ?? []
   }
 
   function receiveIssues (issues) {
