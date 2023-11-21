@@ -25,6 +25,8 @@ import {
   groupBy,
   orderBy,
   uniqBy,
+  flatMap,
+  mapValues,
 } from '@/lodash'
 
 const eqIssue = issue => {
@@ -101,36 +103,11 @@ export const useTicketStore = defineStore('ticket', () => {
   })
 
   const issuesMap = computed(() => {
-    const data = {}
-    if (Array.isArray(issueList.value)) {
-      for (const item of issueList.value) {
-        const { projectName, name, state } = item.metadata
-        if (state === 'open') {
-          const key = issueKey(projectName, name)
-          if (Array.isArray(data[key])) {
-            data[key].push(item)
-          } else {
-            data[key] = [item]
-          }
-        }
-      }
-    }
-    return data
+    return groupBy(issueList.value, item => issueKey(item.metadata.projectName, item.metadata.name))
   })
 
   const labelsMap = computed(() => {
-    const data = {}
-    for (const [key, items] of Object.entries(issuesMap.value)) {
-      for (const item of items) {
-        const uniqLabels = data[key] ?? []
-        const labels = item.data?.labels ?? []
-        data[key] = uniqBy([
-          ...uniqLabels,
-          ...labels,
-        ], 'id')
-      }
-    }
-    return data
+    return mapValues(issuesMap.value, items => uniqBy(flatMap(items, 'data.labels'), 'id'))
   })
 
   function issues ({ name, projectName }) {
