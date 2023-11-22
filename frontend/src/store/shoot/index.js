@@ -298,7 +298,7 @@ export const useShootStore = defineStore('shoot', () => {
         return 0
       }
       const p = Math.pow(10, Math.floor(Math.log10(n)))
-      const d = Math.round(n * 3 / p) * p
+      const d = 2 * p * Math.round(n / p)
       return Math.min(10_000, Math.max(100, d))
     }
 
