@@ -50,7 +50,6 @@ export default {
   },
   beforeRouteLeave (to, from) {
     this.readyState = 'initial'
-    this.unsubscribe()
   },
   data () {
     return {
@@ -143,7 +142,6 @@ export default {
   methods: {
     ...mapActions(useShootStore, [
       'subscribe',
-      'unsubscribe',
       'shootByNamespaceAndName',
     ]),
     ...mapActions(useSecretStore, [
