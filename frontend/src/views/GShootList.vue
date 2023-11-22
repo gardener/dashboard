@@ -170,6 +170,12 @@ SPDX-License-Identifier: Apache-2.0
         <template #progress>
           <g-shoot-list-progress />
         </template>
+        <template #loading>
+          Loading clusters ...
+        </template>
+        <template #no-data>
+          No clusters found
+        </template>
         <template #item="{ item }">
           <g-shoot-list-row
             :shoot-item="item.raw"
