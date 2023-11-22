@@ -18,7 +18,10 @@ import {
 import { useLogger } from '@/composables/useLogger'
 import { useApi } from '@/composables/useApi'
 
-import { isNotFound } from '@/utils/error'
+import {
+  isNotFound,
+  isTooManyRequestsError,
+} from '@/utils/error'
 
 import { useAppStore } from '../app'
 import { useAuthnStore } from '../authn'
@@ -629,7 +632,11 @@ export const useShootStore = defineStore('shoot', () => {
         }
       })
     } catch (err) {
-      logger.error('Failed to synchronize all modified shoots: %s', err.message)
+      if (isTooManyRequestsError(err)) {
+        logger.info('Skipped synchronization of modified shoots: %s', err.message)
+      } else {
+        logger.error('Failed to synchronize modified shoots: %s', err.message)
+      }
       // Synchronization failed. Rollback shoot events
       for (const event of events) {
         const { uid } = event
