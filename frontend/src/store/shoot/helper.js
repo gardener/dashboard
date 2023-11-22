@@ -562,3 +562,34 @@ export function sortItemsFn (state, context) {
 export function shootHasIssue (object) {
   return get(object, ['metadata', 'labels', 'shoot.gardener.cloud/status'], 'healthy') !== 'healthy'
 }
+
+//  Updates subscription state, ensuring consistency with transition states.
+export function setSubscriptionState (state, value) {
+  if (value === constants.OPEN && state.subscriptionState !== constants.OPENING) {
+    return
+  }
+  if (value === constants.CLOSED && state.subscriptionState !== constants.CLOSING) {
+    return
+  }
+  state.subscriptionState = value
+  state.subscriptionError = null
+}
+
+export function setSubscriptionError (state, err) {
+  if (err) {
+    const name = err.name
+    const statusCode = get(err, 'response.status', 500)
+    const message = get(err, 'response.data.message', err.message)
+    const reason = get(err, 'response.data.reason')
+    const code = get(err, 'response.data.code', 500)
+    state.subscriptionError = {
+      name,
+      statusCode,
+      message,
+      code,
+      reason,
+    }
+  } else {
+    state.subscriptionError = null
+  }
+}

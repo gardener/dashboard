@@ -43,6 +43,8 @@ import {
   searchItemsFn,
   sortItemsFn,
   shootHasIssue,
+  setSubscriptionState,
+  setSubscriptionError,
 } from './helper'
 
 import {
@@ -232,8 +234,7 @@ export const useShootStore = defineStore('shoot', () => {
     } = metadata
     shootStore.$patch(({ state }) => {
       state.subscription = { namespace, name }
-      state.subscriptionState = constants.DEFINED
-      state.subscriptionError = null
+      setSubscriptionState(state, constants.DEFINED)
     })
     return shootStore.synchronize()
   }
@@ -248,16 +249,16 @@ export const useShootStore = defineStore('shoot', () => {
     })(this)
   }
 
-  function unsubscribe () {
+  async function unsubscribe () {
     const shootStore = this
-    shootStore.closeSubscription()
+    await shootStore.closeSubscription()
     shootStore.clearAll()
   }
 
   function unsubscribeShoots () {
-    (shootStore => {
+    (async shootStore => {
       try {
-        shootStore.unsubscribe()
+        await shootStore.unsubscribe()
       } catch (err) {
         appStore.setError(err)
       }
@@ -307,7 +308,7 @@ export const useShootStore = defineStore('shoot', () => {
     const fetchData = async options => {
       let throttleDelay
       try {
-        setSubscriptionState(constants.LOADING)
+        setSubscriptionState(state, constants.LOADING)
         const promise = options.name
           ? fetchShoot(options)
           : fetchShoots(options)
@@ -322,15 +323,13 @@ export const useShootStore = defineStore('shoot', () => {
         } else {
           const message = get(err, 'response.data.message', err.message)
           logger.error('Failed to fetch shoots or tickets: %s', message)
-          setSubscriptionError(err)
+          setSubscriptionError(state, err)
           shootStore.clearAll()
-          ticketStore.clearIssues()
-          ticketStore.clearComments()
         }
         throw err
       } finally {
         if (typeof throttleDelay === 'number') {
-          shootStore.openSubscription(options, throttleDelay)
+          await shootStore.openSubscription(options, throttleDelay)
         }
       }
     }
@@ -492,33 +491,6 @@ export const useShootStore = defineStore('shoot', () => {
     state.sortBy = value
   }
 
-  function setSubscriptionState (value) {
-    if (Object.values(constants).includes(value)) {
-      state.subscriptionState = value
-    } else if (Object.keys(constants).includes(value)) {
-      state.subscriptionState = constants[value]
-    }
-  }
-
-  function setSubscriptionError (err) {
-    if (err) {
-      const name = err.name
-      const statusCode = get(err, 'response.status', 500)
-      const message = get(err, 'response.data.message', err.message)
-      const reason = get(err, 'response.data.reason')
-      const code = get(err, 'response.data.code', 500)
-      state.subscriptionError = {
-        name,
-        statusCode,
-        message,
-        code,
-        reason,
-      }
-    } else {
-      state.subscriptionError = null
-    }
-  }
-
   function receive (items) {
     const shootStore = this
     const notOnlyShootsWithIssues = !onlyAllShootsWithIssues(state, context)
@@ -556,31 +528,44 @@ export const useShootStore = defineStore('shoot', () => {
     if (throttleDelay > 0) {
       func = throttle(func, throttleDelay)
     }
-    state.subscriptionEventHandler = typeof func === 'function'
-      ? markRaw(func)
-      : undefined
+    state.subscriptionEventHandler = markRaw(func)
   }
 
-  function openSubscription (value, throttleDelay) {
-    const shootStore = this
+  function unsetSubscriptionEventHandler (state) {
+    if (typeof state.subscriptionEventHandler?.cancel === 'function') {
+      state.subscriptionEventHandler.cancel()
+    }
+    shootEvents.clear()
+    state.subscriptionEventHandler = undefined
+  }
 
+  async function openSubscription (value, throttleDelay) {
+    const shootStore = this
     shootStore.$patch(({ state }) => {
-      state.subscriptionState = constants.OPENING
-      state.subscriptionError = null
+      setSubscriptionState(state, constants.OPENING)
       setSubscriptionEventHandler(state, handleEvents, throttleDelay)
     })
-    socketStore.emitSubscribe(value)
+    try {
+      await socketStore.emitSubscribe(value)
+      setSubscriptionState(state, constants.OPEN)
+    } catch (err) {
+      setSubscriptionError(state, err)
+    }
   }
 
-  function closeSubscription () {
+  async function closeSubscription () {
     const shootStore = this
     shootStore.$patch(({ state }) => {
-      state.subscriptionState = constants.CLOSING
-      state.subscriptionError = null
       state.subscription = null
-      setSubscriptionEventHandler(state)
+      setSubscriptionState(state, constants.CLOSING)
+      unsetSubscriptionEventHandler(state)
     })
-    socketStore.emitUnsubscribe()
+    try {
+      await socketStore.emitUnsubscribe()
+      setSubscriptionState(state, constants.CLOSED)
+    } catch (err) {
+      setSubscriptionError(state, err)
+    }
   }
 
   async function handleEvents (shootStore) {
@@ -707,8 +692,6 @@ export const useShootStore = defineStore('shoot', () => {
     searchItems,
     sortItems,
     setSortBy,
-    setSubscriptionState,
-    setSubscriptionError,
     isShootActive,
   }
 })
