@@ -18,10 +18,8 @@ import {
 import { useLogger } from '@/composables/useLogger'
 import { useApi } from '@/composables/useApi'
 
-import {
-  isNotFound,
-  isTooManyRequestsError,
-} from '@/utils/error'
+import { isNotFound } from '@/utils/error'
+import { isTooManyRequestsError } from '@/utils/errors'
 
 import { useAppStore } from '../app'
 import { useAuthnStore } from '../authn'
