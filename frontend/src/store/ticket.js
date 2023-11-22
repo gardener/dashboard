@@ -112,7 +112,7 @@ export const useTicketStore = defineStore('ticket', () => {
 
   function issues ({ name, projectName }) {
     const key = issueKey(projectName, name)
-    return issuesMap.value[key]
+    return issuesMap.value[key] ?? []
   }
 
   function comments ({ issueNumber }) {
