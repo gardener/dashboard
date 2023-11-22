@@ -13,7 +13,7 @@ const createError = require('http-errors')
 const kubernetesClient = require('@gardener-dashboard/kube-client')
 const cache = require('./cache')
 const logger = require('./logger')
-const { projectFilter } = require('./utils')
+const { projectFilter, trimObjectMetadata } = require('./utils')
 const { authenticate } = require('./security')
 const { authorization } = require('./services')
 
@@ -208,10 +208,7 @@ function synchronizeShoots (socket, uids = []) {
     }
     // only send all shoot details for single shoot subscriptions
     if (!qualifiedNames.includes(qualifiedName)) {
-      object.metadata.managedFields = undefined
-      if (object.metadata.annotations) {
-        object.metadata.annotations['kubectl.kubernetes.io/last-applied-configuration'] = undefined
-      }
+      trimObjectMetadata(object)
     }
     return object
   })

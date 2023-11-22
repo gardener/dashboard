@@ -64,6 +64,13 @@ function projectFilter (user, canListProjects = false) {
   }
 }
 
+function trimObjectMetadata (object) {
+  object.metadata.managedFields = undefined
+  if (object.metadata.annotations) {
+    object.metadata.annotations['kubectl.kubernetes.io/last-applied-configuration'] = undefined
+  }
+}
+
 function getConfigValue (path, defaultValue) {
   const value = _.get(config, path, defaultValue)
   if (arguments.length === 1 && typeof value === 'undefined') {
@@ -98,6 +105,7 @@ module.exports = {
   decodeBase64,
   encodeBase64,
   projectFilter,
+  trimObjectMetadata,
   getConfigValue,
   getSeedNameFromShoot,
   shootHasIssue,
