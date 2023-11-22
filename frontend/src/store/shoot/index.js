@@ -226,17 +226,20 @@ export const useShootStore = defineStore('shoot', () => {
     ticketStore.clearComments()
   }
 
-  function subscribe (metadata = {}) {
+  async function subscribe (metadata = {}) {
     const shootStore = this
     const {
       namespace = authzStore.namespace,
       name,
     } = metadata
+    if (state.subscription) {
+      await shootStore.unsubscribe()
+    }
     shootStore.$patch(({ state }) => {
       state.subscription = { namespace, name }
       setSubscriptionState(state, constants.DEFINED)
     })
-    return shootStore.synchronize()
+    await shootStore.synchronize()
   }
 
   function subscribeShoots (metadata) {
