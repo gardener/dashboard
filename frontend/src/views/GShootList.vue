@@ -278,7 +278,6 @@ export default {
   inject: ['logger'],
   beforeRouteEnter (to, from, next) {
     next(vm => {
-      vm.cachedItems = null
       vm.updateTableSettings()
     })
   },
@@ -289,7 +288,6 @@ export default {
     next()
   },
   beforeRouteLeave (to, from, next) {
-    this.cachedItems = this.shootList.slice(0)
     this.resetShootSearch()
     this.focusModeInternal = false
     next()
@@ -300,7 +298,6 @@ export default {
       debouncedShootSearch: '',
       dialog: null,
       page: 1,
-      cachedItems: null,
       selectedColumns: undefined,
       itemsPerPageOptions: [
         { value: 5, title: '5' },
@@ -682,7 +679,7 @@ export default {
       },
     },
     items () {
-      return this.cachedItems || this.shootList
+      return this.shootList ?? []
     },
     changeFiltersDisabled () {
       return this.focusModeInternal
