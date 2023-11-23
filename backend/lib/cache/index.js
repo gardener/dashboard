@@ -55,6 +55,18 @@ class Cache extends Map {
 
 const cache = new Cache()
 
+function parseSelector (selectors) {
+  return _
+    .chain(selectors)
+    .split(',')
+    .map(selector => {
+      const [, key, op, val] = /^([a-zA-Z0-9._/-]+)(!=|==|=)([a-zA-Z0-9._-]+)$/.exec(selector) ?? []
+      return [key, [val, op === '!=' ? 'ne' : 'eq']]
+    })
+    .fromPairs()
+    .value()
+}
+
 module.exports = {
   cache,
   initialize (informers) {
@@ -97,8 +109,29 @@ module.exports = {
       .get('spec.namespace')
       .value()
   },
-  getShoots () {
-    return cache.getShoots()
+  getShoots (namespace, query) {
+    let items = cache.getShoots()
+    if (namespace && namespace !== '_all') {
+      items = items.filter(item => item.metadata.namespace === namespace)
+    }
+    const labelSelectors = query?.labelSelector
+      ? parseSelector(query.labelSelector)
+      : undefined
+    if (!_.isEmpty(labelSelectors)) {
+      items = items.filter(item => {
+        const labels = item.metadata.labels ?? {}
+        for (const [key, [value, operator]] of Object.entries(labelSelectors)) {
+          if (operator === 'eq' && labels[key] !== value) {
+            return false
+          }
+          if (operator === 'ne' && labels[key] === value) {
+            return false
+          }
+        }
+        return true
+      })
+    }
+    return items
   },
   getShoot (namespace, name) {
     return cache.get('shoots').find({ metadata: { namespace, name } })

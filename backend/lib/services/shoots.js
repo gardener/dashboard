@@ -20,6 +20,41 @@ const config = require('../config')
 const { decodeBase64, getSeedNameFromShoot, getSeedIngressDomain, projectFilter } = utils
 const { getSeed } = cache
 
+exports.fastList = async function ({ user, namespace, labelSelector, shootsWithIssuesOnly = false }) {
+  const query = {}
+  if (labelSelector) {
+    query.labelSelector = labelSelector
+  } else if (shootsWithIssuesOnly) {
+    query.labelSelector = 'shoot.gardener.cloud/status!=healthy'
+  }
+  let items
+  if (namespace === '_all') {
+    if (await authorization.canListShoots(user)) {
+      items = cache.getShoots(namespace, query)
+    } else {
+      const namespaces = _
+        .chain(cache.getProjects())
+        .filter(projectFilter(user, false))
+        .map('spec.namespace')
+        .value()
+      const isAllowedList = await Promise.all(namespaces.map(namespace => authorization.canListShoots(user, namespace)))
+      items = []
+      for (const [i, namespace] of Object.entries(namespaces)) {
+        if (isAllowedList[i]) {
+          items = items.concat(cache.getShoots(namespace, query))
+        }
+      }
+    }
+  } else {
+    items = cache.getShoots(namespace, query)
+  }
+  return {
+    apiVersion: 'v1',
+    kind: 'List',
+    items
+  }
+}
+
 exports.list = async function ({ user, namespace, labelSelector, shootsWithIssuesOnly = false }) {
   const client = user.client
   const query = {}
