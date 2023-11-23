@@ -401,8 +401,9 @@ export function getRawVal (context, item, column) {
   }
 }
 
-export function getSortVal (context, item, sortBy) {
+export function getSortVal (state, context, item, sortBy) {
   const {
+    configStore,
     projectStore,
     ticketStore,
   } = context
@@ -413,6 +414,7 @@ export function getSortVal (context, item, sortBy) {
     development: 2,
     evaluation: 3,
   }
+
   const value = getRawVal(context, item, sortBy)
   const status = item.status
   switch (sortBy) {
@@ -450,6 +452,27 @@ export function getSortVal (context, item, sortBy) {
         : isShootStatusHibernated(status)
           ? 500
           : 700
+    }
+    case 'readiness': {
+      const conditions = item.status?.conditions ?? []
+      if (!conditions.length) {
+        // TODO: check if this is ok
+        // items without conditions have medium priority
+        const priority = '00000100'
+        const lastTransitionTime = item.status?.lastOperation.lastUpdateTime ?? item.metadata.creationTimestamp
+        return `${priority}-${lastTransitionTime}`
+      }
+      const hideProgressingClusters = get(state.shootListFilters, 'progressing', false)
+      const iteratee = ({ type, status = 'True', lastTransitionTime = '1970-01-01T00:00:00Z' }) => {
+        const isError = status !== 'True' && !(hideProgressingClusters && status === 'Progressing')
+        // items without any error have lowest priority
+        const priority = !isError
+          ? '99999999'
+          : padStart(configStore.conditionForType(type).sortOrder, 8, '0')
+        return `${priority}-${lastTransitionTime}`
+      }
+      // the condition with the lowest priority and transitionTime is used
+      return head(conditions.map(iteratee).sort())
     }
     case 'ticket': {
       const metadata = item.metadata
@@ -508,54 +531,18 @@ export function searchItemsFn (state, context) {
 }
 
 export function sortItemsFn (state, context) {
-  const {
-    configStore,
-  } = context
-
-  return (items, sortByArr) => {
+  return (items, sortByItems) => {
     if (state.focusMode) {
       // no need to sort in focus mode sorting is freezed and filteredItems return items in last sorted order
       return items
     }
-    const sortByObj = head(sortByArr)
-    if (!sortByObj || !sortByObj.key) {
+    const { key, order = 'asc' } = head(sortByItems) ?? {}
+    if (!key) {
       return items
     }
-    const sortBy = sortByObj.key
-    const sortOrder = sortByObj.order
 
-    switch (sortBy) {
-      case 'k8sVersion': {
-        return orderBy(items, [item => getSortVal(context, item, sortBy), 'metadata.name'], [sortOrder, 'asc'])
-      }
-      case 'readiness': {
-        const hideProgressingClusters = get(state.shootListFilters, 'progressing', false)
-        return orderBy(items, item => {
-          const errorGroups = map(item.status?.conditions, itemCondition => {
-            const isErrorCondition = (itemCondition?.status !== 'True' &&
-              (!hideProgressingClusters || itemCondition?.status !== 'Progressing'))
-            if (!isErrorCondition) {
-              return {
-                sortOrder: `${Number.MAX_SAFE_INTEGER}`,
-                lastTransitionTime: itemCondition.lastTransitionTime,
-              }
-            }
-            const type = itemCondition.type
-            const condition = configStore.conditionForType(type)
-            return {
-              sortOrder: condition.sortOrder,
-              lastTransitionTime: itemCondition.lastTransitionTime,
-            }
-          })
-          const { sortOrder, lastTransitionTime } = head(orderBy(errorGroups, ['sortOrder']))
-          return [sortOrder, lastTransitionTime, 'metadata.name']
-        },
-        [sortOrder, sortOrder, 'asc'])
-      }
-      default: {
-        return orderBy(items, [item => getSortVal(context, item, sortBy), 'metadata.name'], [sortOrder, 'asc'])
-      }
-    }
+    const iteratee = item => getSortVal(state, context, item, key)
+    return orderBy(items, [iteratee, 'metadata.name'], [order, 'asc'])
   }
 }
 
