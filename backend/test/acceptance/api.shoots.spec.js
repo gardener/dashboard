@@ -71,7 +71,7 @@ describe('api', function () {
         cache.cache.resetTicketCache()
       })
 
-      it(`should return shoots for namespace "${namespace}"`, async () => {
+      it('should return shoots for a single namespace', async () => {
         mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
 
         const res = await agent

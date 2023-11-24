@@ -1763,7 +1763,7 @@ Object {
 }
 `;
 
-exports[`api shoots when served from cache should return shoots for namespace "garden-foo" 1`] = `
+exports[`api shoots when served from cache should return shoots for a single namespace 1`] = `
 Array [
   Array [
     Object {
@@ -1790,7 +1790,7 @@ Array [
 ]
 `;
 
-exports[`api shoots when served from cache should return shoots for namespace "garden-foo" 2`] = `
+exports[`api shoots when served from cache should return shoots for a single namespace 2`] = `
 Object {
   "apiVersion": "v1",
   "items": Array [
