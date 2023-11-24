@@ -20,7 +20,6 @@ function createStore (items) {
 }
 
 describe('api', function () {
-  const force = true
   let agent
 
   beforeAll(() => {
@@ -45,7 +44,7 @@ describe('api', function () {
     })
 
     describe('when served from cache', () => {
-      const force = false
+      const useCache = true
 
       beforeAll(() => {
         cache.initialize({
@@ -76,7 +75,7 @@ describe('api', function () {
 
         const res = await agent
           .get(`/api/namespaces/${namespace}/shoots`)
-          .query({ force })
+          .query({ useCache })
           .set('cookie', await user.cookie)
           .expect('content-type', /json/)
           .expect(200)
@@ -93,7 +92,7 @@ describe('api', function () {
 
         const res = await agent
           .get('/api/namespaces/_all/shoots')
-          .query({ force })
+          .query({ useCache })
           .set('cookie', await user.cookie)
           .expect('content-type', /json/)
           .expect(200)
@@ -111,7 +110,7 @@ describe('api', function () {
 
         const res = await agent
           .get('/api/namespaces/_all/shoots')
-          .query({ force, labelSelector })
+          .query({ useCache, labelSelector })
           .set('cookie', await user.cookie)
           .expect('content-type', /json/)
           .expect(200)
@@ -129,7 +128,6 @@ describe('api', function () {
 
       const res = await agent
         .get(`/api/namespaces/${namespace}/shoots`)
-        .query({ force })
         .set('cookie', await user.cookie)
         .expect('content-type', /json/)
         .expect(200)

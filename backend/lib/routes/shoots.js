@@ -24,8 +24,8 @@ router.route('/')
       const user = req.user
       const namespace = req.params.namespace
       const labelSelector = req.query.labelSelector
-      const force = req.query.force
-      const shootList = await shoots[force === 'true' ? 'list' : 'fastList']({ user, namespace, labelSelector })
+      const useCache = req.query.useCache
+      const shootList = await shoots[useCache === 'true' ? 'fastList' : 'list']({ user, namespace, labelSelector })
       for (const object of shootList.items) {
         trimObjectMetadata(object)
       }
