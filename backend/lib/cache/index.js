@@ -7,6 +7,7 @@
 const _ = require('lodash')
 const { NotFound } = require('http-errors')
 const createTicketCache = require('./tickets')
+const { parseSelectors, filterBySelectors } = require('../utils')
 
 /*
   In file `lib/api.js` the synchronization is started with the privileged dashboardClient.
@@ -55,18 +56,6 @@ class Cache extends Map {
 
 const cache = new Cache()
 
-function parseSelector (selectors) {
-  return _
-    .chain(selectors)
-    .split(',')
-    .map(selector => {
-      const [, key, op, val] = /^([a-zA-Z0-9._/-]+)(!=|==|=)([a-zA-Z0-9._-]+)$/.exec(selector) ?? []
-      return [key, [val, op === '!=' ? 'ne' : 'eq']]
-    })
-    .fromPairs()
-    .value()
-}
-
 module.exports = {
   cache,
   initialize (informers) {
@@ -109,27 +98,14 @@ module.exports = {
       .get('spec.namespace')
       .value()
   },
-  getShoots (namespace, query) {
+  getShoots (namespace, query = {}) {
     let items = cache.getShoots()
     if (namespace && namespace !== '_all') {
       items = items.filter(item => item.metadata.namespace === namespace)
     }
-    const labelSelectors = query?.labelSelector
-      ? parseSelector(query.labelSelector)
-      : undefined
-    if (!_.isEmpty(labelSelectors)) {
-      items = items.filter(item => {
-        const labels = item.metadata.labels ?? {}
-        for (const [key, [value, operator]] of Object.entries(labelSelectors)) {
-          if (operator === 'eq' && labels[key] !== value) {
-            return false
-          }
-          if (operator === 'ne' && labels[key] === value) {
-            return false
-          }
-        }
-        return true
-      })
+    const selectors = parseSelectors(query.labelSelector?.split(',') ?? [])
+    if (selectors.length) {
+      items = items.filter(filterBySelectors(selectors))
     }
     return items
   },

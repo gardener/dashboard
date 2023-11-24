@@ -71,6 +71,61 @@ function trimObjectMetadata (object) {
   }
 }
 
+function parseSelectors (selectors) {
+  const items = []
+  for (const selector of selectors) {
+    const [, notOperator, key, operator, value = ''] = /^(!)?([a-zA-Z0-9._/-]+)(=|==|!=)?([a-zA-Z0-9._-]+)?$/.exec(selector) ?? []
+    if (notOperator) {
+      if (!operator) {
+        items.push({ op: '!∃', key })
+      }
+    } else if (!operator) {
+      items.push({ op: '∃', key })
+    } else if (operator === '!=') {
+      items.push({ op: '!=', key, value })
+    } else if (operator === '=' || operator === '==') {
+      items.push({ op: '=', key, value })
+    }
+  }
+  return items
+}
+
+function filterBySelectors (selectors) {
+  return item => {
+    const labels = item.metadata.labels ?? {}
+    for (const { op, key, value } of selectors) {
+      const labelValue = labels[key] ?? ''
+      switch (op) {
+        case '!∃': {
+          if (key in labels) {
+            return false
+          }
+          break
+        }
+        case '∃': {
+          if (!(key in labels)) {
+            return false
+          }
+          break
+        }
+        case '!=': {
+          if (labelValue === value) {
+            return false
+          }
+          break
+        }
+        case '=': {
+          if (labelValue !== value) {
+            return false
+          }
+          break
+        }
+      }
+    }
+    return true
+  }
+}
+
 function getConfigValue (path, defaultValue) {
   const value = _.get(config, path, defaultValue)
   if (arguments.length === 1 && typeof value === 'undefined') {
@@ -106,6 +161,8 @@ module.exports = {
   encodeBase64,
   projectFilter,
   trimObjectMetadata,
+  parseSelectors,
+  filterBySelectors,
   getConfigValue,
   getSeedNameFromShoot,
   shootHasIssue,
