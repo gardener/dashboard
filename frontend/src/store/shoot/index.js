@@ -314,7 +314,10 @@ export const useShootStore = defineStore('shoot', () => {
         setSubscriptionState(state, constants.LOADING)
         const promise = options.name
           ? fetchShoot(options)
-          : fetchShoots(options)
+          : fetchShoots({
+            useCache: localStorageStore.shootListServeFromCache,
+            ...options,
+          })
         const { shoots, issues, comments } = await promise
         shootStore.receive(shoots)
         ticketStore.receiveIssues(issues)

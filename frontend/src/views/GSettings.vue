@@ -135,6 +135,16 @@ SPDX-License-Identifier: Apache-2.0
             <v-row>
               <v-col cols="12">
                 <v-switch
+                  v-model="shootListServeFromCache"
+                  label="Serve clusters from cache"
+                  color="primary"
+                  persistent-hint
+                  density="compact"
+                  hint="Retrieve the cluster list from the dashboard watch cache instead of the kube-apiserver. This can significantly improve performance with many clusters."
+                />
+              </v-col>
+              <v-col cols="12">
+                <v-switch
                   v-model="operatorFeatures"
                   label="Operator Features"
                   color="primary"
@@ -177,6 +187,7 @@ const {
   logLevel,
   autoLogin,
   colorScheme,
+  shootListServeFromCache,
   operatorFeatures,
 } = storeToRefs(localStorageStore)
 </script>
