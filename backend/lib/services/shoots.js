@@ -9,6 +9,7 @@
 const { isHttpError } = require('@gardener-dashboard/request')
 const { cleanKubeconfig, Config } = require('@gardener-dashboard/kube-config')
 const { dashboardClient } = require('@gardener-dashboard/kube-client')
+const createError = require('http-errors')
 const utils = require('../utils')
 const cache = require('../cache')
 const authorization = require('./authorization')
@@ -38,14 +39,15 @@ exports.fastList = async function ({ user, namespace, labelSelector, shootsWithI
         .map('spec.namespace')
         .value()
       const isAllowedList = await Promise.all(namespaces.map(namespace => authorization.canListShoots(user, namespace)))
-      items = []
-      for (const [i, namespace] of Object.entries(namespaces)) {
-        if (isAllowedList[i]) {
-          items = items.concat(cache.getShoots(namespace, query))
-        }
+      if (isAllowedList.some(value => !value)) {
+        throw createError(403, 'No authorization to list shoots in all namespaces')
       }
+      items = namespaces.flatMap(namespace => cache.getShoots(namespace, query))
     }
   } else {
+    if (!authorization.canListShoots(user, namespace)) {
+      throw createError(403, `No authorization to list shoots in namespace ${namespace}`)
+    }
     items = cache.getShoots(namespace, query)
   }
   return {
