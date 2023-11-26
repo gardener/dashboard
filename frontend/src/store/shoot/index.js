@@ -222,6 +222,7 @@ export const useShootStore = defineStore('shoot', () => {
       state.shootInfos = {}
       state.staleShoots = {}
     })
+    shootEvents.clear()
     ticketStore.clearIssues()
     ticketStore.clearComments()
   }
