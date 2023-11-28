@@ -10,6 +10,11 @@ const _ = require('lodash')
 const config = require('../config')
 const assert = require('assert').strict
 
+const EXISTS = '∃'
+const NOT_EXISTS = '!∃'
+const EQUAL = '='
+const NOT_EQUAL = '!='
+
 function decodeBase64 (value) {
   if (!value) {
     return
@@ -77,14 +82,14 @@ function parseSelectors (selectors) {
     const [, notOperator, key, operator, value = ''] = /^(!)?([a-zA-Z0-9._/-]+)(=|==|!=)?([a-zA-Z0-9._-]+)?$/.exec(selector) ?? []
     if (notOperator) {
       if (!operator) {
-        items.push({ op: '!∃', key })
+        items.push({ op: NOT_EXISTS, key })
       }
     } else if (!operator) {
-      items.push({ op: '∃', key })
+      items.push({ op: EXISTS, key })
     } else if (operator === '!=') {
-      items.push({ op: '!=', key, value })
+      items.push({ op: NOT_EQUAL, key, value })
     } else if (operator === '=' || operator === '==') {
-      items.push({ op: '=', key, value })
+      items.push({ op: EQUAL, key, value })
     }
   }
   return items
@@ -96,25 +101,25 @@ function filterBySelectors (selectors) {
     for (const { op, key, value } of selectors) {
       const labelValue = labels[key] ?? ''
       switch (op) {
-        case '!∃': {
+        case NOT_EXISTS: {
           if (key in labels) {
             return false
           }
           break
         }
-        case '∃': {
+        case EXISTS: {
           if (!(key in labels)) {
             return false
           }
           break
         }
-        case '!=': {
+        case NOT_EQUAL: {
           if (labelValue === value) {
             return false
           }
           break
         }
-        case '=': {
+        case EQUAL: {
           if (labelValue !== value) {
             return false
           }
