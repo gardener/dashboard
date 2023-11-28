@@ -316,7 +316,7 @@ export const useShootStore = defineStore('shoot', () => {
         const promise = options.name
           ? fetchShoot(options)
           : fetchShoots({
-            useCache: localStorageStore.shootListServeFromCache,
+            useCache: localStorageStore.shootListFetchFromCache,
             ...options,
           })
         const { shoots, issues, comments } = await promise

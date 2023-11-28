@@ -221,7 +221,7 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     writeDefaults: false,
   })
 
-  const shootListServeFromCache = useLocalStorage('projects/shoot-list/serve-from-cache', false, {
+  const shootListFetchFromCache = useLocalStorage('projects/shoot-list/fetch-from-cache', false, {
     serializer: StorageSerializers.flag,
     writeDefaults: false,
   })
@@ -277,7 +277,7 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     shootItemsPerPage,
     shootSortBy,
     allProjectsShootFilter,
-    shootListServeFromCache,
+    shootListFetchFromCache,
     shootCustomSortBy,
     shootCustomSelectedColumns,
     terminalSplitpaneTree,
