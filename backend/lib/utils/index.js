@@ -74,6 +74,7 @@ function trimObjectMetadata (object) {
   if (object.metadata.annotations) {
     object.metadata.annotations['kubectl.kubernetes.io/last-applied-configuration'] = undefined
   }
+  return object
 }
 
 function parseSelectors (selectors) {
@@ -131,6 +132,19 @@ function filterBySelectors (selectors) {
   }
 }
 
+function useWatchCacheForListShoots (useCache) {
+  switch (config.experimentalUseWatchCacheForListShoots) {
+    case 'never':
+      return false
+    case 'always':
+      return true
+    case 'no':
+      return ['true', 'yes', 'on'].includes(useCache)
+    case 'yes':
+      return !['false', 'no', 'off'].includes(useCache)
+  }
+}
+
 function getConfigValue (path, defaultValue) {
   const value = _.get(config, path, defaultValue)
   if (arguments.length === 1 && typeof value === 'undefined') {
@@ -168,6 +182,7 @@ module.exports = {
   trimObjectMetadata,
   parseSelectors,
   filterBySelectors,
+  useWatchCacheForListShoots,
   getConfigValue,
   getSeedNameFromShoot,
   shootHasIssue,
