@@ -64,6 +64,17 @@ global:
     # - foo
     # # the identifier of the gardener landscape (defaults to the name stored in kube-system/cluster-identity configmap)
     # clusterIdentity: my-landscape-dev
+
+    # Experimental Feature: Control of Watch Cache for List Shoots Requests
+    # This feature allows fine-tuning the behavior of how list shoots requests are handled in terms of caching.
+    # Note: As this is an experimental feature, it is subject to change and may not be stable.
+    # Possible values for `experimentalUseWatchCacheForListShoots` are:
+    # - 'never': All list shoots requests are directly forwarded to the kube-apiserver without using the watch cache.
+    # - 'no': The watch cache is not utilized by default. Clients can opt-in to use the watch cache.
+    # - 'yes': The watch cache is used by default for serving list shoots requests. Clients can opt-out if they require data directly from the kube-apiserver.
+    # - 'always': All list shoots requests are served from the watch cache.
+    experimentalUseWatchCacheForListShoots: never
+
     containerPort: 8080
     metricsContainerPort: 9050
     servicePort: 8080
