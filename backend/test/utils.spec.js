@@ -7,7 +7,20 @@
 'use strict'
 
 const { AssertionError } = require('assert').strict
-const { encodeBase64, decodeBase64, getConfigValue, shootHasIssue, getSeedNameFromShoot } = require('../lib/utils')
+const { merge } = require('lodash')
+const config = require('../lib/config')
+const {
+  encodeBase64,
+  decodeBase64,
+  getConfigValue,
+  shootHasIssue,
+  getSeedNameFromShoot,
+  parseSelectors,
+  filterBySelectors,
+  useWatchCacheForListShoots,
+  constants,
+  trimObjectMetadata
+} = require('../lib/utils')
 
 describe('utils', function () {
   describe('index', function () {
@@ -54,6 +67,137 @@ describe('utils', function () {
         }
       }
       expect(getSeedNameFromShoot(shoot)).toBe('foo')
+    })
+
+    it('should trim object metadata', () => {
+      const name = 'test'
+      const managedFields = 'managedFields'
+      const lastAppliedConfiguration = 'last-applied-configuration'
+      const metadata = {
+        name,
+        annotations: {
+          foo: 'bar'
+        }
+      }
+      expect(trimObjectMetadata({ metadata })).toEqual({ metadata })
+      const extendedMetadata = merge(metadata, {
+        managedFields,
+        annotations: {
+          'kubectl.kubernetes.io/last-applied-configuration': lastAppliedConfiguration
+        }
+      })
+      expect(trimObjectMetadata({ metadata: extendedMetadata })).toEqual({ metadata })
+    })
+
+    it('should parse labelSelectors', () => {
+      expect(parseSelectors([
+        'shoot.gardener.cloud/status!=healthy'
+      ])).toEqual([{
+        key: 'shoot.gardener.cloud/status',
+        op: constants.NOT_EQUAL,
+        value: 'healthy'
+      }])
+      expect(parseSelectors([
+        'foo=1',
+        'bar==2',
+        'qux!=3'
+      ])).toEqual([{
+        key: 'foo',
+        op: constants.EQUAL,
+        value: '1'
+      }, {
+        key: 'bar',
+        op: constants.EQUAL,
+        value: '2'
+      }, {
+        key: 'qux',
+        op: constants.NOT_EQUAL,
+        value: '3'
+      }])
+      expect(parseSelectors([
+        'foo',
+        '!baz'
+      ])).toEqual([{
+        key: 'foo',
+        op: constants.EXISTS
+      }, {
+        key: 'baz',
+        op: constants.NOT_EXISTS
+      }])
+    })
+
+    it('should filter by labelSelectors', () => {
+      const labels = {
+        foo: '1',
+        bar: '2',
+        qux: '3'
+      }
+      const item = {
+        metadata: {
+          labels
+        }
+      }
+      expect(filterBySelectors([{
+        key: 'foo',
+        op: constants.EXISTS
+      }])(item)).toBe(true)
+      expect(filterBySelectors([{
+        key: 'baz',
+        op: constants.EXISTS
+      }])(item)).toBe(false)
+      expect(filterBySelectors([{
+        key: 'baz',
+        op: constants.NOT_EXISTS
+      }])(item)).toBe(true)
+      expect(filterBySelectors([{
+        key: 'foo',
+        op: constants.NOT_EXISTS
+      }])(item)).toBe(false)
+      expect(filterBySelectors([{
+        key: 'foo',
+        op: constants.EQUAL,
+        value: '1'
+      }])(item)).toBe(true)
+      expect(filterBySelectors([{
+        key: 'bar',
+        op: constants.EQUAL,
+        value: '1'
+      }])(item)).toBe(false)
+      expect(filterBySelectors([{
+        key: 'qux',
+        op: constants.NOT_EQUAL,
+        value: '2'
+      }])(item)).toBe(true)
+      expect(filterBySelectors([{
+        key: 'qux',
+        op: constants.NOT_EQUAL,
+        value: '3'
+      }])(item)).toBe(false)
+    })
+
+    describe('control usage of watch cache', () => {
+      let experimentalUseWatchCacheForListShoots
+
+      beforeAll(() => {
+        experimentalUseWatchCacheForListShoots = config.experimentalUseWatchCacheForListShoots
+      })
+
+      afterAll(() => {
+        config.experimentalUseWatchCacheForListShoots = experimentalUseWatchCacheForListShoots
+      })
+
+      it('return if the watch cache should be used for list shoots request', () => {
+        config.experimentalUseWatchCacheForListShoots = 'never'
+        expect(useWatchCacheForListShoots(true)).toBe(false)
+        config.experimentalUseWatchCacheForListShoots = 'always'
+        expect(useWatchCacheForListShoots(false)).toBe(true)
+        config.experimentalUseWatchCacheForListShoots = 'yes'
+        expect(useWatchCacheForListShoots(undefined)).toBe(true)
+        expect(useWatchCacheForListShoots('false')).toBe(false)
+        config.experimentalUseWatchCacheForListShoots = 'no'
+        expect(useWatchCacheForListShoots(undefined)).toBe(false)
+        expect(useWatchCacheForListShoots('true')).toBe(true)
+      })
     })
   })
 })

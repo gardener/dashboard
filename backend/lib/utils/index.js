@@ -187,5 +187,11 @@ module.exports = {
   getSeedNameFromShoot,
   shootHasIssue,
   isSeedUnreachable,
-  getSeedIngressDomain
+  getSeedIngressDomain,
+  constants: Object.freeze({
+    EXISTS,
+    NOT_EXISTS,
+    EQUAL,
+    NOT_EQUAL
+  })
 }
