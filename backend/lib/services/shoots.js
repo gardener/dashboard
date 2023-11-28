@@ -21,65 +21,58 @@ const config = require('../config')
 const { decodeBase64, getSeedNameFromShoot, getSeedIngressDomain, projectFilter } = utils
 const { getSeed } = cache
 
-exports.fastList = async function ({ user, namespace, labelSelector, shootsWithIssuesOnly = false }) {
+exports.list = async function ({ user, namespace, labelSelector, useCache = false }) {
+  const client = user.client
   const query = {}
   if (labelSelector) {
     query.labelSelector = labelSelector
-  } else if (shootsWithIssuesOnly) {
-    query.labelSelector = 'shoot.gardener.cloud/status!=healthy'
   }
-  let items
   if (namespace === '_all') {
     if (await authorization.canListShoots(user)) {
-      items = cache.getShoots(namespace, query)
+      // user is permitted to list shoots in all namespaces
+      if (useCache) {
+        return {
+          apiVersion: 'v1',
+          kind: 'List',
+          items: cache.getShoots(namespace, query)
+        }
+      }
+      return client['core.gardener.cloud'].shoots.listAllNamespaces(query)
     } else {
+      // user is permitted to list shoots only in namespaces associated with their projects
       const namespaces = _
         .chain(cache.getProjects())
         .filter(projectFilter(user, false))
         .map('spec.namespace')
         .value()
-      const isAllowedList = await Promise.all(namespaces.map(namespace => authorization.canListShoots(user, namespace)))
-      if (isAllowedList.some(value => !value)) {
-        throw createError(403, 'No authorization to list shoots in all namespaces')
+      if (useCache) {
+        const isAllowedList = await Promise.all(namespaces.map(namespace => authorization.canListShoots(user, namespace)))
+        if (isAllowedList.some(value => !value)) {
+          throw createError(403, 'No authorization to list shoots in all namespaces')
+        }
+        return {
+          apiVersion: 'v1',
+          kind: 'List',
+          items: namespaces.flatMap(namespace => cache.getShoots(namespace, query))
+        }
       }
-      items = namespaces.flatMap(namespace => cache.getShoots(namespace, query))
-    }
-  } else {
-    if (!authorization.canListShoots(user, namespace)) {
-      throw createError(403, `No authorization to list shoots in namespace ${namespace}`)
-    }
-    items = cache.getShoots(namespace, query)
-  }
-  return {
-    apiVersion: 'v1',
-    kind: 'List',
-    items
-  }
-}
-
-exports.list = async function ({ user, namespace, labelSelector, shootsWithIssuesOnly = false }) {
-  const client = user.client
-  const query = {}
-  if (labelSelector) {
-    query.labelSelector = labelSelector
-  } else if (shootsWithIssuesOnly) {
-    query.labelSelector = 'shoot.gardener.cloud/status!=healthy'
-  }
-  if (namespace === '_all') {
-    if (await authorization.canListShoots(user)) {
-      return client['core.gardener.cloud'].shoots.listAllNamespaces(query)
-    } else {
-      const promises = _
-        .chain(cache.getProjects())
-        .filter(projectFilter(user, false))
-        .map(project => client['core.gardener.cloud'].shoots.list(project.spec.namespace, query))
-        .value()
-      const shootLists = await Promise.all(promises)
+      const shootLists = await Promise.all(namespaces.map(namespace, client['core.gardener.cloud'].shoots.list(namespace, query)))
       return {
         apiVersion: 'v1',
         kind: 'List',
-        items: _.flatMap(shootLists, 'items')
+        items: shootLists.flatMap(({ items }) => items)
       }
+    }
+  }
+  if (useCache) {
+    const isAllowed = await authorization.canListShoots(user, namespace)
+    if (!isAllowed) {
+      throw createError(403, `No authorization to list shoots in namespace ${namespace}`)
+    }
+    return {
+      apiVersion: 'v1',
+      kind: 'List',
+      items: cache.getShoots(namespace, query)
     }
   }
   return client['core.gardener.cloud'].shoots.list(namespace, query)
