@@ -157,22 +157,27 @@ export default {
     }
   },
   validations () {
-    return {
-      name: withFieldName('Cluster Name', {
-        required,
-        maxLength: maxLength(this.maxShootNameLength),
-        noConsecutiveHyphen,
-        noStartEndHyphen,
-        lowerCaseAlphaNumHyphen,
-        unique: withMessage('A cluster with this name already exists in this project',
-          (value) => {
-            return this.shootByNamespaceAndName({ namespace: this.namespace, name: value }) === undefined
-          }),
-      }),
-      kubernetesVersion: withFieldName('Kubernetes Version', {
-        required,
-      }),
+    const rules = {}
+
+    const nameRules = {
+      required,
+      maxLength: maxLength(this.maxShootNameLength),
+      noConsecutiveHyphen,
+      noStartEndHyphen,
+      lowerCaseAlphaNumHyphen,
+      unique: withMessage('A cluster with this name already exists in this project',
+        (value) => {
+          return this.shootByNamespaceAndName({ namespace: this.namespace, name: value }) === undefined
+        }),
     }
+    rules.name = withFieldName('Cluster Name', nameRules)
+
+    const kubernetesVersionRules = {
+      required,
+    }
+    rules.kubernetesVersion = withFieldName('Kubernetes Version', kubernetesVersionRules)
+
+    return rules
   },
   computed: {
     ...mapWritableState(useShootStagingStore, ['workerless']),

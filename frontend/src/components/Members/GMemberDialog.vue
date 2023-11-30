@@ -235,43 +235,47 @@ export default {
     }
   },
   validations () {
-    const validators = {
-      internalRoles: withFieldName('Member Roles', {
-        required: withMessage(
-          this.isUserDialog
-            ? 'Users need to have at least one assigned role'
-            : 'Service accounts that are not part of this project need to have at least one assigned role',
-          requiredIf(function () {
-            return this.isForeignServiceAccount || this.isUserDialog
-          })),
-      }),
-      internalName: {},
+    const rules = {}
+    const internalRolesRules = {
+      required: withMessage(
+        this.isUserDialog
+          ? 'Users need to have at least one assigned role'
+          : 'Service accounts that are not part of this project need to have at least one assigned role',
+        requiredIf(function () {
+          return this.isForeignServiceAccount || this.isUserDialog
+        })),
     }
-    if (!this.isUpdateDialog) {
-      if (this.isUserDialog) {
-        validators.internalName = withFieldName('User Name', {
-          required,
-          unique: withMessage(() => `User '${this.internalName}' is already member of this project.`, unique('projectUsernames')),
-          isNoServiceAccount: withMessage('Please use add service account to add service accounts', value => !isServiceAccountUsername(value)),
-        })
-      } else if (this.isServiceDialog) {
-        const serviceAccountKeyFunc = (value) => {
-          return isServiceAccountUsername(value)
-            ? 'serviceAccountUsernames'
-            : 'serviceAccountNames'
-        }
-        const internalNameValidators = {
-          required,
-          unique: withMessage(() => `Service Account '${this.internalName}' already exists. Please try a different name.`, unique(serviceAccountKeyFunc)),
-        }
-        if (!isServiceAccountUsername(this.internalName)) {
-          internalNameValidators.serviceAccountResource = withMessage('Name must contain only lowercase alphanumeric characters or hyphen. Colons are allowed if you specify the service account prefix to add a service account from another namespace', lowerCaseAlphaNumHyphen)
-          internalNameValidators.noStartEndHyphen = noStartEndHyphen
-        }
-        validators.internalName = withFieldName('Service Account Name', internalNameValidators)
+    rules.internalRoles = withFieldName('Member Roles', internalRolesRules)
+
+    if (this.isUpdateDialog) {
+      return rules
+    }
+
+    if (this.isUserDialog) {
+      const internalNameRules = {
+        required,
+        unique: withMessage(() => `User '${this.internalName}' is already member of this project.`, unique('projectUsernames')),
+        isNoServiceAccount: withMessage('Please use add service account to add service accounts', value => !isServiceAccountUsername(value)),
       }
+      rules.internalName = withFieldName('User Name', internalNameRules)
+    } else if (this.isServiceDialog) {
+      const serviceAccountKeyFunc = (value) => {
+        return isServiceAccountUsername(value)
+          ? 'serviceAccountUsernames'
+          : 'serviceAccountNames'
+      }
+      const internalNameRules = {
+        required,
+        unique: withMessage(() => `Service Account '${this.internalName}' already exists. Please try a different name.`, unique(serviceAccountKeyFunc)),
+      }
+      if (!isServiceAccountUsername(this.internalName)) {
+        internalNameRules.serviceAccountResource = withMessage('Name must contain only lowercase alphanumeric characters or hyphen. Colons are allowed if you specify the service account prefix to add a service account from another namespace', lowerCaseAlphaNumHyphen)
+        internalNameRules.noStartEndHyphen = noStartEndHyphen
+      }
+      rules.internalName = withFieldName('Service Account Name', internalNameRules)
     }
-    return validators
+
+    return rules
   },
   computed: {
     ...mapState(useAuthzStore, ['namespace']),

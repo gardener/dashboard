@@ -222,17 +222,21 @@ export default {
     }
   },
   validations () {
-    const validators = {}
-    if (this.isCreateMode) {
-      validators.name = withFieldName('Secret Name', {
-        required,
-        maxLength: maxLength(128),
-        lowerCaseAlphaNumHyphen,
-        noStartEndHyphen,
-        unique: unique(this.isDnsProviderSecret ? 'dnsSecretNames' : 'infrastructureSecretNames'),
-      })
+    const rules = {}
+    if (!this.isCreateMode) {
+      return rules
     }
-    return validators
+
+    const nameRules = {
+      required,
+      maxLength: maxLength(128),
+      lowerCaseAlphaNumHyphen,
+      noStartEndHyphen,
+      unique: unique(this.isDnsProviderSecret ? 'dnsSecretNames' : 'infrastructureSecretNames'),
+    }
+    rules.name = withFieldName('Secret Name', nameRules)
+
+    return rules
   },
   computed: {
     ...mapState(useAuthzStore, ['namespace']),

@@ -177,20 +177,21 @@ export default {
     getErrorMessages,
   },
   validations () {
-    return {
-      wildcardSelectedValue: withFieldName(() => this.wildcardSelectLabel, {
-        required: withMessage(`${this.wildcardSelectLabel} is required`, required),
-        prefixRequired: withMessage('Prefix is required', () => {
-          return this.wildcardVariablePartPrefix || !this.wildcardSelectedValue.startsWithWildcard
-        }),
-        suffixRequired: withMessage('Suffix is required', () => {
-          return this.wildcardVariablePartSuffix || !this.wildcardSelectedValue.endsWithWildcard
-        }),
-        customRequired: withMessage('Custom value is required', () => {
-          return this.wildcardVariablePartPrefix || !this.wildcardSelectedValue.customWildcard
-        }),
+    const rules = {}
+    const wildcardSelectedValueRules = {
+      required: withMessage(`${this.wildcardSelectLabel} is required`, required),
+      prefixRequired: withMessage('Prefix is required', () => {
+        return this.wildcardVariablePartPrefix || !this.wildcardSelectedValue.startsWithWildcard
+      }),
+      suffixRequired: withMessage('Suffix is required', () => {
+        return this.wildcardVariablePartSuffix || !this.wildcardSelectedValue.endsWithWildcard
+      }),
+      customRequired: withMessage('Custom value is required', () => {
+        return this.wildcardVariablePartPrefix || !this.wildcardSelectedValue.customWildcard
       }),
     }
+    rules.wildcardSelectedValue = withFieldName(() => this.wildcardSelectLabel, wildcardSelectedValueRules)
+    return rules
   },
 }
 </script>

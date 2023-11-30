@@ -39,7 +39,7 @@ const isTimezone = withMessage('TimeZone must have format [+|-]HH:mm', (value) =
   return timezonePattern.test(value)
 })
 
-const unique = key => withMessage(`Value '${key}' must be unique`, withParams(
+const unique = key => withMessage(`Value of property '${key}' must be unique`, withParams(
   { type: 'unique', key },
   function unique (value) {
     const keys = this[
@@ -82,7 +82,7 @@ const serviceAccountKey = withMessage('Not a valid Service Account Key',
     },
   ))
 
-const includesIfAvailable = (key, reference) => withMessage(`Value "${key}" must be selected`,
+const includesIfAvailable = (key, reference) => withMessage(`Value of property '${key}' must be selected`,
   withParams(
     { type: 'includesIfAvailable', key },
     function includesIfAvailable (selectedKeys) {
@@ -102,10 +102,9 @@ const nilUnless = key => withMessage(`Must not be provided if '${key}' is not se
 const withFieldName = (fieldName, validators) => {
   for (const [key, validator] of Object.entries(validators)) {
     if (typeof fieldName === 'function') {
-      validators[key] = withParams({ fieldName: fieldName.call(this) }, validator)
-    } else {
-      validators[key] = withParams({ fieldName }, validator)
+      fieldName = fieldName.call(this)
     }
+    validators[key] = withParams({ fieldName }, validator)
   }
   return validators
 }

@@ -215,28 +215,32 @@ export default {
     }
   },
   validations () {
-    return {
-      owner: withFieldName('Project Owner', {
-        required,
-      }),
-      costObject: withFieldName(() => `Project ${this.costObjectTitle}`, {
-        validCostObject: withMessage(this.costObjectErrorMessage,
-          value => {
-            if (!this.costObjectRegex) {
-              return true
-            }
-            return RegExp(this.costObjectRegex).test(value || '') // undefined cannot be evaluated, use empty string as default
-          }),
-      }),
-      projectName: withFieldName('Project Name', {
-        required,
-        maxLength: maxLength(10),
-        noConsecutiveHyphen,
-        noStartEndHyphen,
-        lowerCaseAlphaNumHyphen,
-        unique: withMessage('A project with this name already exists', unique('projectNames')),
-      }),
+    const rules = {}
+    // rules for `owner`
+    const ownerRules = {
+      required,
     }
+    rules.owner = withFieldName('Project Owner', ownerRules)
+    // rules for `costObject`
+    const validCostObject = value => !this.costObjectRegex
+      ? true
+      : RegExp(this.costObjectRegex).test(value ?? '')
+    const costObjectRules = {
+      validCostObject: withMessage(() => this.costObjectErrorMessage, validCostObject),
+    }
+    rules.costObject = withFieldName(() => `Project ${this.costObjectTitle}`, costObjectRules)
+    // rules for `projectName`
+    const projectNameRules = {
+      required,
+      maxLength: maxLength(10),
+      noConsecutiveHyphen,
+      noStartEndHyphen,
+      lowerCaseAlphaNumHyphen,
+      unique: withMessage('A project with this name already exists', unique('projectNames')),
+    }
+    rules.projectName = withFieldName('Project Name', projectNameRules)
+
+    return rules
   },
   computed: {
     ...mapState(useMemberStore, ['memberList']),

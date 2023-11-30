@@ -266,54 +266,63 @@ export default {
     }
   },
   validations () {
-    return {
-      worker: {
-        name: withFieldName(() => `${this.workerGroupName} Name`, {
-          required,
-          maxLength: maxLength(15),
-          lowerCaseAlphaNumHyphen,
-          noStartEndHyphen,
-          uniqueWorkerName,
-        }),
-        minimum: withFieldName(() => `${this.workerGroupName} Autoscaler Min.`, {
-          minValue: minValue(0),
-        }),
-        maximum: withFieldName(() => `${this.workerGroupName} Autoscaler Max.`, {
-          minValue: minValue(0),
-          systemComponents: withMessage('Value must be greater or equal to the number of zones configured for this pool',
-            (value) => {
-              const hasSystemComponents = get(this.worker, 'systemComponents.allow', true)
-              if (!hasSystemComponents) {
-                return true
-              }
-              const zones = get(this.worker, 'zones.length', 0)
-              return value >= zones
-            }),
-        }),
-        maxSurge: withFieldName(() => `${this.workerGroupName} Max. Surge`, {
-          numberOrPercentage,
-        }),
-      },
-      selectedZones: withFieldName(() => `${this.workerGroupName} Zones`, {
-        required: requiredIf(function () {
-          return this.zonedCluster
-        }),
-      }),
-      volumeSize: withFieldName(() => `${this.workerGroupName} Volume Size`, {
-        minVolumeSize: withMessage(`Value must be greater than ${this.minimumVolumeSize}`, value => {
-          if (!this.canDefineVolumeSize) {
+    const rules = { worker: {} }
+
+    const nameRules = {
+      required,
+      maxLength: maxLength(15),
+      lowerCaseAlphaNumHyphen,
+      noStartEndHyphen,
+      uniqueWorkerName,
+    }
+    rules.worker.name = withFieldName(() => `${this.workerGroupName} Name`, nameRules)
+
+    rules.worker.minimum = withFieldName(() => `${this.workerGroupName} Autoscaler Min.`, {
+      minValue: minValue(0),
+    })
+
+    const maximumRules = {
+      minValue: minValue(0),
+      systemComponents: withMessage('Value must be greater or equal to the number of zones configured for this pool',
+        (value) => {
+          const hasSystemComponents = get(this.worker, 'systemComponents.allow', true)
+          if (!hasSystemComponents) {
             return true
           }
-          if (!value) {
-            return false
-          }
-          return this.minimumVolumeSize <= parseSize(value)
+          const zones = get(this.worker, 'zones.length', 0)
+          return value >= zones
         }),
+    }
+    rules.worker.maximum = withFieldName(() => `${this.workerGroupName} Autoscaler Max.`, maximumRules)
+
+    rules.worker.maxSurge = withFieldName(() => `${this.workerGroupName} Max. Surge`, {
+      numberOrPercentage,
+    })
+
+    rules.selectedZones = withFieldName(() => `${this.workerGroupName} Zones`, {
+      required: requiredIf(function () {
+        return this.zonedCluster
       }),
-      machineArchitecture: withFieldName(() => `${this.workerGroupName} Machine Architecture`, {
-        required,
+    })
+
+    const volumeSizeRules = {
+      minVolumeSize: withMessage(`Value must be greater than ${this.minimumVolumeSize}`, value => {
+        if (!this.canDefineVolumeSize) {
+          return true
+        }
+        if (!value) {
+          return false
+        }
+        return this.minimumVolumeSize <= parseSize(value)
       }),
     }
+    rules.volumeSize = withFieldName(() => `${this.workerGroupName} Volume Size`, volumeSizeRules)
+
+    rules.machineArchitecture = withFieldName(() => `${this.workerGroupName} Machine Architecture`, {
+      required,
+    })
+
+    return rules
   },
   computed: {
     machineTypes () {

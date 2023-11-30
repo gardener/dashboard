@@ -276,6 +276,9 @@ export default {
     }
   },
   validations () {
+    const requiresInfrastructure = infrastructureKind => {
+      return requiredIf(() => this.infrastructureKind === infrastructureKind)
+    }
     return {
       region: withFieldName('Region', {
         required,
@@ -284,40 +287,26 @@ export default {
         required: requiredIf(!this.workerless),
       }),
       loadBalancerProviderName: withFieldName('Cluster Name', {
-        required: requiredIf(function () {
-          return this.infrastructureKind === 'openstack'
-        }),
+        required: requiresInfrastructure('openstack'),
       }),
       loadBalancerClassNames: withFieldName('Load Balancer Class Names', {
-        required: requiredIf(function () {
-          return this.infrastructureKind === 'vsphere'
-        }),
+        required: requiresInfrastructure('vsphere'),
         includesKey: withMessage('Load Balancer Class \'default\' must be selected', includesIfAvailable('default', 'allLoadBalancerClassNames')),
       }),
       partitionID: withFieldName('Partition ID', {
-        required: requiredIf(function () {
-          return this.infrastructureKind === 'metal'
-        }),
+        required: requiresInfrastructure('metal'),
       }),
       firewallImage: withFieldName('Firewall Image', {
-        required: requiredIf(function () {
-          return this.infrastructureKind === 'metal'
-        }),
+        required: requiresInfrastructure('metal'),
       }),
       firewallSize: withFieldName('Firewall Size', {
-        required: requiredIf(function () {
-          return this.infrastructureKind === 'metal'
-        }),
+        required: requiresInfrastructure('metal'),
       }),
       firewallNetworks: withFieldName('Firewall Networks', {
-        required: requiredIf(function () {
-          return this.infrastructureKind === 'metal'
-        }),
+        required: requiresInfrastructure('metal'),
       }),
       projectID: withFieldName('Project ID', {
-        required: requiredIf(function () {
-          return this.infrastructureKind === 'metal'
-        }),
+        required: requiresInfrastructure('metal'),
       }),
     }
   },

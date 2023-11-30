@@ -229,54 +229,70 @@ export default {
   validations () {
     const requiredUserMessage = 'Required for technical user authentication'
     const requiredApplicationCredentialsMessage = 'Required for application credentials authentication'
-    return {
-      domainName: withFieldName('Domain Name', {
-        required,
-      }),
-      tenantName: withFieldName('Project / Tenant Name', {
-        required,
-      }),
-      username: withFieldName('Technical User', {
-        required: withMessage(requiredUserMessage,
-          requiredIf(function () {
-            return this.authenticationMethod === 'USER'
-          }),
-        ),
-      }),
-      password: withFieldName('Password', {
-        required: withMessage(requiredUserMessage,
-          requiredIf(function () {
-            return this.authenticationMethod === 'USER'
-          }),
-        ),
-      }),
-      authURL: withFieldName('Auth URL', {
-        required: requiredIf(function () {
-          return this.vendor === 'openstack-designate'
+
+    const rules = {}
+
+    rules.domainName = withFieldName('Domain Name', {
+      required,
+    })
+
+    rules.tenantName = withFieldName('Project / Tenant Name', {
+      required,
+    })
+
+    const usernameRules = {
+      required: withMessage(requiredUserMessage,
+        requiredIf(function () {
+          return this.authenticationMethod === 'USER'
         }),
-      }),
-      applicationCredentialID: withFieldName('Application Credentials ID', {
-        required: withMessage(requiredApplicationCredentialsMessage,
-          requiredIf(function () {
-            return this.authenticationMethod === 'APPLICATION_CREDENTIALS'
-          }),
-        ),
-      }),
-      applicationCredentialName: withFieldName('Application Credentials Name', {
-        required: withMessage(requiredApplicationCredentialsMessage,
-          requiredIf(function () {
-            return this.authenticationMethod === 'APPLICATION_CREDENTIALS'
-          }),
-        ),
-      }),
-      applicationCredentialSecret: withFieldName('Application Credentials Secret', {
-        required: withMessage(requiredApplicationCredentialsMessage,
-          requiredIf(function () {
-            return this.authenticationMethod === 'APPLICATION_CREDENTIALS'
-          }),
-        ),
+      ),
+    }
+    rules.username = withFieldName('Technical User', usernameRules)
+
+    const passwordRules = {
+      required: withMessage(requiredUserMessage,
+        requiredIf(function () {
+          return this.authenticationMethod === 'USER'
+        }),
+      ),
+    }
+    rules.password = withFieldName('Password', passwordRules)
+
+    const authURLRules = {
+      required: requiredIf(function () {
+        return this.vendor === 'openstack-designate'
       }),
     }
+    rules.authURL = withFieldName('Auth URL', authURLRules)
+
+    const applicationCredentialIDRules = {
+      required: withMessage(requiredApplicationCredentialsMessage,
+        requiredIf(function () {
+          return this.authenticationMethod === 'APPLICATION_CREDENTIALS'
+        }),
+      ),
+    }
+    rules.applicationCredentialID = withFieldName('Application Credentials ID', applicationCredentialIDRules)
+
+    const applicationCredentialNameRules = {
+      required: withMessage(requiredApplicationCredentialsMessage,
+        requiredIf(function () {
+          return this.authenticationMethod === 'APPLICATION_CREDENTIALS'
+        }),
+      ),
+    }
+    rules.applicationCredentialName = withFieldName('Application Credentials Name', applicationCredentialIDRules)
+
+    const applicationCredentialSecretRules = {
+      required: withMessage(requiredApplicationCredentialsMessage,
+        requiredIf(function () {
+          return this.authenticationMethod === 'APPLICATION_CREDENTIALS'
+        }),
+      ),
+    }
+    rules.applicationCredentialSecret = withFieldName('Application Credentials Secret', applicationCredentialSecretRules)
+
+    return rules
   },
   computed: {
     visible: {

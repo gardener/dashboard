@@ -72,8 +72,7 @@ const inputHint = computed(() => {
 })
 
 const errorMessages = computed(() => {
-  const errors = getErrorMessages(v$.value.timeValue)
-  const errorMessages = [...props.errorMessages, ...errors]
+  const errorMessages = [...props.errorMessages, getErrorMessages(v$.value.timeValue)]
   return errorMessages
 })
 

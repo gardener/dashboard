@@ -129,28 +129,34 @@ export default {
     }
   },
   validations () {
-    return {
+    const rules = {
       selectedDays: withFieldName('Hibernation Selected Days', {
         required,
-      }),
-      hibernateTime: withFieldName('Hibernation Time', {
-        required: withMessage('You need to specify at least hibernation or wake up time',
-          requiredIf(function () {
-            return !this.wakeUpTime
-          }),
-        ),
-      }),
-      wakeUpTime: withFieldName('Hibernation Wake Up Time', {
-        required: withMessage('You need to specify at least hibernation or wake up time',
-          requiredIf(function () {
-            return !this.hibernateTime
-          }),
-        ),
       }),
       selectedLocation: withFieldName('Hibernation Location', {
         required,
       }),
     }
+
+    const hibernateTimeRules = {
+      required: withMessage('You need to specify at least hibernation or wake up time',
+        requiredIf(function () {
+          return !this.wakeUpTime
+        }),
+      ),
+    }
+    rules.hibernateTime = withFieldName('Hibernation Time', hibernateTimeRules)
+
+    const wakeUpTimeRules = {
+      required: withMessage('You need to specify at least hibernation or wake up time',
+        requiredIf(function () {
+          return !this.hibernateTime
+        }),
+      ),
+    }
+    rules.wakeUpTime = withFieldName('Hibernation Wake Up Time', wakeUpTimeRules)
+
+    return rules
   },
   data () {
     return {
