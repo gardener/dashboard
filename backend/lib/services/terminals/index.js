@@ -30,7 +30,7 @@ const {
 const {
   getKubeApiServerHostForSeedOrManagedSeed,
   getKubeApiServerHostForShoot,
-  getGardenTerminalHostClusterSecretRef,
+  getGardenTerminalHostClusterCredentials,
   getGardenHostClusterKubeApiServer,
   getShootRef
 } = require('./utils')
@@ -344,16 +344,14 @@ async function getGardenTerminalHostCluster (client, { body }) {
   hostCluster.config = getContainerConfigFromBody(body)
 
   const [
-    secretRef,
+    credentials,
     kubeApiServer
   ] = await Promise.all([
-    await getGardenTerminalHostClusterSecretRef(client),
+    await getGardenTerminalHostClusterCredentials(client),
     await getGardenHostClusterKubeApiServer(client)
   ])
   hostCluster.namespace = undefined // this will create a temporary namespace
-  hostCluster.credentials = {
-    secretRef
-  }
+  hostCluster.credentials = credentials
   hostCluster.kubeApiServer = kubeApiServer
   return hostCluster
 }
