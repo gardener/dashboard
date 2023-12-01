@@ -281,7 +281,7 @@ export default {
         }),
       ),
     }
-    rules.applicationCredentialName = withFieldName('Application Credentials Name', applicationCredentialIDRules)
+    rules.applicationCredentialName = withFieldName('Application Credentials Name', applicationCredentialNameRules)
 
     const applicationCredentialSecretRules = {
       required: withMessage(requiredApplicationCredentialsMessage,

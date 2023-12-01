@@ -151,15 +151,13 @@ SPDX-License-Identifier: Apache-2.0
     <v-divider />
     <div class="d-flex align-center justify-end toolbar">
       <v-divider vertical />
-      <g-vuelidate-button
-        :v="v$"
+      <v-btn
         variant="text"
         color="primary"
         @click.stop="createClicked()"
-        @error-messages-updated="showVuelidateErrors"
       >
         Create
-      </g-vuelidate-button>
+      </v-btn>
       <g-confirm-dialog ref="confirmDialog" />
     </div>
   </div>
@@ -200,12 +198,12 @@ import GManageShootAddons from '@/components/ShootAddons/GManageAddons'
 import GManageShootDns from '@/components/ShootDns/GManageDns'
 import GManageControlPlaneHighAvailability from '@/components/ControlPlaneHighAvailability/GManageControlPlaneHighAvailability'
 import GToolbar from '@/components/GToolbar.vue'
-import GVuelidateButton from '@/components/GVuelidateButton.vue'
 
 import { useAsyncRef } from '@/composables/useAsyncRef'
 
 import { isZonedCluster } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
+import { messageFromErrors } from '@/utils/validators'
 import {
   getSpecTemplate,
   getZonesNetworkConfiguration,
@@ -239,7 +237,6 @@ export default {
     GConfirmDialog,
     GManageControlPlaneHighAvailability,
     GToolbar,
-    GVuelidateButton,
   },
   inject: ['logger'],
   async beforeRouteLeave (to, from, next) {
@@ -559,6 +556,13 @@ export default {
       await this.hibernationSchedule.dispatch('setScheduleData', { hibernationSchedule, noHibernationSchedule, purpose })
     },
     async createClicked () {
+      if (this.v$.$invalid) {
+        await this.v$.$validate()
+        const message = messageFromErrors(this.v$.$errors)
+        this.errorMessage = 'There are input errors that you need to resolve'
+        this.detailedErrorMessage = message
+        return
+      }
       const shootResource = await this.updateShootResourceWithUIComponents()
       try {
         await this.createShoot(shootResource)
@@ -600,10 +604,6 @@ export default {
     infrastructureSecretsByName ({ secretBindingName, cloudProfileName }) {
       const secrets = this.infrastructureSecretsByCloudProfileName(cloudProfileName)
       return find(secrets, ['metadata.name', secretBindingName])
-    },
-    showVuelidateErrors (messages) {
-      this.errorMessage = 'There are input errors that you need to resolve'
-      this.detailedErrorMessage = messages
     },
   },
 }

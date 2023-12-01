@@ -104,28 +104,24 @@ SPDX-License-Identifier: Apache-2.0
         >
           Cancel
         </v-btn>
-        <g-vuelidate-button
+        <v-btn
           v-if="isUpdateDialog"
-          :v="v$"
           variant="text"
           class="text-primary"
           tabindex="4"
           @click.stop="submitUpdateMember"
-          @error-messages-updated="showVuelidateErrors"
         >
           Update
-        </g-vuelidate-button>
-        <g-vuelidate-button
+        </v-btn>
+        <v-btn
           v-else
-          :v="v$"
           variant="text"
           class="text-primary"
           tabindex="4"
           @click.stop="submitAddMember"
-          @error-messages-updated="showVuelidateErrors"
         >
           {{ addMemberButtonText }}
-        </g-vuelidate-button>
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -148,7 +144,6 @@ import { useMemberStore } from '@/store/member'
 
 import GMessage from '@/components/GMessage.vue'
 import GToolbar from '@/components/GToolbar.vue'
-import GVuelidateButton from '@/components/GVuelidateButton.vue'
 
 import {
   withFieldName,
@@ -156,6 +151,7 @@ import {
   noStartEndHyphen,
   unique,
   withMessage,
+  messageFromErrors,
 } from '@/utils/validators'
 import {
   errorDetailsFromError,
@@ -188,7 +184,6 @@ export default {
   components: {
     GMessage,
     GToolbar,
-    GVuelidateButton,
   },
   inject: ['logger'],
   props: {
@@ -396,47 +391,55 @@ export default {
       this.visible = false
     },
     async submitAddMember () {
-      this.v$.$touch()
-      if (!this.v$.$invalid) {
-        const name = this.memberName
-        const roles = this.internalRoles
-        try {
-          await this.addMember({ name, roles, description: this.internalDescription })
-          this.hide()
-        } catch (err) {
-          const errorDetails = errorDetailsFromError(err)
-          if (isConflict(err)) {
-            if (this.isUserDialog) {
-              this.errorMessage = `User '${name}' is already member of this project.`
-            } else if (this.isServiceDialog) {
-              this.errorMessage = `Service account '${name}' already exists. Please try a different name.`
-            }
-          } else {
-            this.errorMessage = 'Failed to add project member'
+      if (this.v$.$invalid) {
+        await this.v$.$validate()
+        const message = messageFromErrors(this.v$.$errors)
+        this.errorMessage = 'There are input errors that you need to resolve'
+        this.detailedErrorMessage = message
+        return
+      }
+      const name = this.memberName
+      const roles = this.internalRoles
+      try {
+        await this.addMember({ name, roles, description: this.internalDescription })
+        this.hide()
+      } catch (err) {
+        const errorDetails = errorDetailsFromError(err)
+        if (isConflict(err)) {
+          if (this.isUserDialog) {
+            this.errorMessage = `User '${name}' is already member of this project.`
+          } else if (this.isServiceDialog) {
+            this.errorMessage = `Service account '${name}' already exists. Please try a different name.`
           }
-          this.detailedErrorMessage = errorDetails.detailedMessage
-          this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        } else {
+          this.errorMessage = 'Failed to add project member'
         }
+        this.detailedErrorMessage = errorDetails.detailedMessage
+        this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
     async submitUpdateMember () {
-      this.v$.$touch()
-      if (!this.v$.$invalid) {
-        try {
-          const name = this.memberName
-          const roles = [...this.internalRoles, ...this.unsupportedRoles]
-          await this.updateMember(name, { roles, description: this.internalDescription })
+      if (this.v$.$invalid) {
+        await this.v$.$validate()
+        const message = messageFromErrors(this.v$.$errors)
+        this.errorMessage = 'There are input errors that you need to resolve'
+        this.detailedErrorMessage = message
+        return
+      }
+      try {
+        const name = this.memberName
+        const roles = [...this.internalRoles, ...this.unsupportedRoles]
+        await this.updateMember(name, { roles, description: this.internalDescription })
 
-          if (this.isCurrentUser && !this.isAdmin) {
-            await this.refreshRules()
-          }
-          this.hide()
-        } catch (err) {
-          const errorDetails = errorDetailsFromError(err)
-          this.errorMessage = 'Failed to update project member'
-          this.detailedErrorMessage = errorDetails.detailedMessage
-          this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        if (this.isCurrentUser && !this.isAdmin) {
+          await this.refreshRules()
         }
+        this.hide()
+      } catch (err) {
+        const errorDetails = errorDetailsFromError(err)
+        this.errorMessage = 'Failed to update project member'
+        this.detailedErrorMessage = errorDetails.detailedMessage
+        this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
     cancel () {
@@ -496,10 +499,6 @@ export default {
       }
 
       return name
-    },
-    showVuelidateErrors (messages) {
-      this.errorMessage = 'There are input errors that you need to resolve'
-      this.detailedErrorMessage = messages
     },
     getErrorMessages,
   },

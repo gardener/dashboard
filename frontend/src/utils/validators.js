@@ -109,10 +109,25 @@ const withFieldName = (fieldName, validators) => {
   return validators
 }
 
+const messageFromErrors = (errors) => {
+  const errorMessages = []
+  if (errors) {
+    errors.forEach(error => {
+      errorMessages.push({
+        fieldName: error.$params.fieldName ? error.$params.fieldName : error.$propertyPath,
+        message: error.$message,
+      })
+    })
+  }
+
+  return errorMessages.map(msg => `${msg.fieldName}: ${msg.message}`).join(', ')
+}
+
 export {
   withParams,
   withMessage,
   withFieldName,
+  messageFromErrors,
   regex,
   unique,
   alphaNumUnderscore,

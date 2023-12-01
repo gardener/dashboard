@@ -102,15 +102,13 @@ SPDX-License-Identifier: Apache-2.0
         >
           Cancel
         </v-btn>
-        <g-vuelidate-button
-          :v="secretValidations"
+        <v-btn
           variant="text"
           color="primary"
           @click="submit"
-          @error-messages-updated="showVuelidateErrors"
         >
           {{ submitButtonText }}
-        </g-vuelidate-button>
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -136,9 +134,9 @@ import { useShootStore } from '@/store/shoot'
 import GToolbar from '@/components/GToolbar.vue'
 import GMessage from '@/components/GMessage'
 import GCloudProfile from '@/components/GCloudProfile'
-import GVuelidateButton from '@/components/GVuelidateButton.vue'
 
 import {
+  messageFromErrors,
   withFieldName,
   unique,
   lowerCaseAlphaNumHyphen,
@@ -169,7 +167,6 @@ export default {
     GCloudProfile,
     GMessage,
     GToolbar,
-    GVuelidateButton,
   },
   inject: ['logger'],
   props: {
@@ -270,9 +267,6 @@ export default {
         this.$emit('update:modelValue', modelValue)
       },
     },
-    valid () {
-      return !this.secretValidations.$invalid
-    },
     infrastructureSecretNames () {
       return this.infrastructureSecretList.map(item => item.metadata.name)
     },
@@ -330,7 +324,13 @@ export default {
       this.hide()
     },
     async submit () {
-      this.v$.$touch()
+      if (this.secretValidations.$invalid) {
+        await this.secretValidations.$validate()
+        const message = messageFromErrors(this.secretValidations.$errors)
+        this.errorMessage = 'There are input errors that you need to resolve'
+        this.detailedErrorMessage = message
+        return
+      }
       if (this.valid) {
         try {
           await this.save()
@@ -403,10 +403,6 @@ export default {
 
       this.errorMessage = undefined
       this.detailedMessage = undefined
-    },
-    showVuelidateErrors (messages) {
-      this.errorMessage = 'There are input errors that you need to resolve'
-      this.detailedErrorMessage = messages
     },
     getErrorMessages,
   },

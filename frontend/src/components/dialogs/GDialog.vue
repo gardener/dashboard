@@ -64,7 +64,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-card-actions>
         <v-spacer />
         <v-text-field
-          v-if="confirmValue && !hasVisibleErrors && valid"
+          v-if="confirmValue"
           ref="deleteDialogInput"
           v-model="userInput"
           :label="hint"
@@ -86,20 +86,18 @@ SPDX-License-Identifier: Apache-2.0
         </v-btn>
         <v-tooltip
           location="top"
-          :disabled="!notConfirmed || hasVisibleErrors || !valid"
+          :disabled="!notConfirmed"
         >
           <template #activator="{ props }">
             <div v-bind="props">
-              <g-vuelidate-button
-                :v="v$"
+              <v-btn
                 variant="text"
                 class="text-toolbar-background"
                 :disabled="notConfirmed || !valid"
                 @click="resolveAction(true)"
-                @error-messages-updated="showVuelidateErrors"
               >
                 {{ confirmButtonText }}
-              </g-vuelidate-button>
+              </v-btn>
             </div>
           </template>
           You need to confirm your changes by typing this cluster's name
@@ -113,9 +111,9 @@ SPDX-License-Identifier: Apache-2.0
 import { useVuelidate } from '@vuelidate/core'
 
 import GMessage from '@/components/GMessage.vue'
-import GVuelidateButton from '@/components/GVuelidateButton.vue'
 
 import { setDelayedInputFocus } from '@/utils'
+import { messageFromErrors } from '@/utils/validators'
 
 import {
   isFunction,
@@ -128,7 +126,6 @@ const zeroWidthSpace = '\u200B'
 export default {
   components: {
     GMessage,
-    GVuelidateButton,
   },
   props: {
     confirmValue: {
@@ -249,8 +246,17 @@ export default {
       this.visible = true
     },
     async resolveAction (value) {
-      if (value && (this.v$.$invalid || !this.valid)) {
-        return
+      if (value) {
+        if (!this.valid) {
+          return
+        }
+        if (this.v$.$invalid) {
+          await this.v$.$validate()
+          const message = messageFromErrors(this.v$.$errors)
+          this.message = 'There are input errors that you need to resolve'
+          this.detailedMessage = message
+          return
+        }
       }
 
       if (isFunction(this.resolve)) {
@@ -283,10 +289,6 @@ export default {
       const scrollTopVal = cardContentRef.scrollTop
       cardContentRef.scrollTop = scrollTopVal + 10
       cardContentRef.scrollTop = scrollTopVal - 10
-    },
-    showVuelidateErrors (messages) {
-      this.message = 'There are input errors that you need to resolve'
-      this.detailedMessage = messages
     },
   },
 }

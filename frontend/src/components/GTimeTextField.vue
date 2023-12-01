@@ -72,8 +72,7 @@ const inputHint = computed(() => {
 })
 
 const errorMessages = computed(() => {
-  const errorMessages = [...props.errorMessages, getErrorMessages(v$.value.timeValue)]
-  return errorMessages
+  return [...props.errorMessages, ...getErrorMessages(v$.value.timeValue)]
 })
 
 const v$ = useVuelidate(rules, { timeValue })
