@@ -199,6 +199,26 @@ SPDX-License-Identifier: Apache-2.0
           </v-select>
         </v-col>
       </template>
+      <template v-if="customCloudProviderFields">
+        <v-col
+          v-for="{ key, label, hint, type } in customCloudProviderFields"
+          :key="key"
+          cols="3"
+        >
+          <v-text-field
+            v-if="type === 'text'"
+            v-model="customCloudProviderData[key]"
+            color="primary"
+            :label="label"
+            :error-messages="getErrorMessages(`customCloudProviderData.${key}`)"
+            type="text"
+            :hint="hint"
+            variant="underlined"
+            @update:model-value="v$.customCloudProviderData[key].$touch()"
+            @blur="v$.customCloudProviderData[key].$touch()"
+          />
+        </v-col>
+      </template>
     </v-row>
   </v-container>
 </template>
@@ -237,6 +257,7 @@ import {
   forEach,
   intersection,
   find,
+  set,
 } from '@/lodash'
 
 export default {
@@ -281,11 +302,14 @@ export default {
     return this.validators
   },
   computed: {
-    ...mapState(useConfigStore, ['seedCandidateDeterminationStrategy']),
+    ...mapState(useConfigStore, [
+      'seedCandidateDeterminationStrategy',
+      'customCloudProviders',
+    ]),
     ...mapState(useGardenerExtensionStore, ['networkingTypes']),
     ...mapState(useShootStagingStore, ['workerless']),
     validators () {
-      return {
+      const validators = {
         region: {
           required,
         },
@@ -329,6 +353,31 @@ export default {
           }),
         },
       }
+
+      const allValidators = {
+        customCloudProviderData: {},
+        ...validators,
+      }
+      forEach(this.customCloudProviderFields, ({ key, validators }) => {
+        const compiledValidators = {}
+        forEach(validators, (validator, validatorName) => {
+          switch (validator.type) {
+            case 'required':
+              compiledValidators[validatorName] = required
+              break
+            case 'requiredIf':
+              compiledValidators[validatorName] = requiredIf(() => !every(map(validator.not, fieldKey => this.customCloudProviderData[fieldKey])))
+              break
+            case 'isValidObject':
+              compiledValidators[validatorName] = () => isEmpty(this.customCloudProviderData[key]) || Object.keys(this.customCloudProviderParsedData[key]).length > 0
+              break
+            case 'regex':
+              compiledValidators[validatorName] = value => !value || new RegExp(validator.value).test(value)
+          }
+        })
+        allValidators.customCloudProviderData[key] = compiledValidators
+      })
+      return allValidators
     },
     validationErrors () {
       const validationErrors = {
@@ -361,7 +410,15 @@ export default {
           required: 'Firewall Networks required',
         },
       }
-      return validationErrors
+
+      const allValidationErrors = {
+        customCloudProviderData: {},
+        ...validationErrors,
+      }
+      forEach(this.customCloudProviderFields, ({ key, validationErrors }) => {
+        allValidationErrors.customCloudProviderData[key] = validationErrors
+      })
+      return allValidationErrors
     },
     cloudProfiles () {
       return sortBy(this.cloudProfilesByCloudProviderKind(this.infrastructureKind), [(item) => item.metadata.name])
@@ -437,9 +494,22 @@ export default {
       const secretDomain = get(this.secret, 'data.domainName')
       return this.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({ cloudProfileName, region, secretDomain })
     },
+    customCloudProvider () {
+      return get(this.customCloudProviders, this.infrastructureKind)
+    },
+    customCloudProviderFields () {
+      return this.customCloudProvider?.shoot?.createFields
+    },
     cloudProfileHasSeedNames () {
       const selectedCloudProfile = find(this.cloudProfiles, { metadata: { name: this.cloudProfileName } })
       return selectedCloudProfile?.data.seedNames?.length
+    },
+    customCloudProviderShootData () {
+      const shootData = {}
+      forEach(this.customCloudProviderFields, ({ key, path }) => {
+        set(shootData, `${path}.${key}`, this.customCloudProviderData[key])
+      })
+      return shootData
     },
   },
   watch: {
@@ -579,6 +649,7 @@ export default {
         firewallSize: this.firewallSize,
         firewallNetworks: this.firewallNetworks,
         defaultNodesCIDR: this.defaultNodesCIDR,
+        customCloudProviderData: this.customCloudProviderShootData,
       }
     },
     setInfrastructureData ({
@@ -595,6 +666,7 @@ export default {
       firewallImage,
       firewallSize,
       firewallNetworks,
+      customCloudProviderData,
     }) {
       this.infrastructureKind = infrastructureKind
       this.cloudProfileName = cloudProfileName
@@ -610,6 +682,7 @@ export default {
       this.firewallSize = firewallSize
       this.firewallNetworks = firewallNetworks
       this.defaultNodesCIDR = this.getDefaultNodesCIDR({ cloudProfileName })
+      this.customCloudProviderData = customCloudProviderData
 
       this.v$.projectID.$touch() // project id is a required field (for metal). We want to show the error immediatley
     },

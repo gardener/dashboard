@@ -214,6 +214,8 @@ import {
   isEqual,
   unset,
   omit,
+  merge,
+  forEach,
 } from '@/lodash'
 
 export default {
@@ -338,6 +340,7 @@ export default {
         firewallSize,
         firewallNetworks,
         defaultNodesCIDR,
+        customCloudProviderData,
       } = this.$refs.infrastructureDetails.getInfrastructureData()
       const oldInfrastructureKind = get(shootResource, 'spec.provider.type')
       if (oldInfrastructureKind !== infrastructureKind ||
@@ -348,6 +351,7 @@ export default {
       }
       set(shootResource, 'spec.cloudProfileName', cloudProfileName)
       set(shootResource, 'spec.region', region)
+      merge(shootResource, customCloudProviderData)
 
       if (!this.workerless) {
         set(shootResource, 'spec.networking.type', networkingType)
@@ -495,6 +499,13 @@ export default {
       const firewallSize = get(shootResource, 'spec.provider.infrastructureConfig.firewall.size')
       const firewallNetworks = get(shootResource, 'spec.provider.infrastructureConfig.firewall.networks')
 
+      const customCloudProvider = get(this.customCloudProviders, infrastructureKind)
+      const customCloudProviderFields = customCloudProvider?.shoot?.createFields
+      const customCloudProviderData = {}
+      forEach(customCloudProviderFields, ({ key, path }) => {
+        customCloudProviderData[key] = get(shootResource, `${path}.${key}`)
+      })
+
       this.$refs.infrastructureDetails.setInfrastructureData({
         infrastructureKind,
         cloudProfileName,
@@ -509,6 +520,7 @@ export default {
         firewallImage,
         firewallSize,
         firewallNetworks,
+        customCloudProviderData,
       })
 
       if (this.$refs.accessRestrictions) {
