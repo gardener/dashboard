@@ -576,9 +576,6 @@ export const useShootStore = defineStore('shoot', () => {
   }
 
   async function handleEvents (shootStore) {
-    if (!shootEvents.size) {
-      return
-    }
     const events = Array.from(shootEvents.values())
     shootEvents.clear()
     const uids = []

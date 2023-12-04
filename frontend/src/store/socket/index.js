@@ -124,6 +124,9 @@ export const useSocketStore = defineStore('socket', () => {
   }
 
   async function synchronize (uids) {
+    if (!uids.length) {
+      return []
+    }
     if (state.synchronizing) {
       throw createError(429, 'Synchronization is still in progress', { name: 'TooManyRequests' })
     }
