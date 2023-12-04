@@ -305,7 +305,7 @@ export const useShootStore = defineStore('shoot', () => {
       }
       const p = Math.pow(10, Math.floor(Math.log10(n)))
       const d = 2 * p * Math.round(n / p)
-      return Math.min(10_000, Math.max(100, d))
+      return Math.min(5_000, Math.max(200, d))
     }
 
     // await and handle response data in the background
@@ -576,6 +576,9 @@ export const useShootStore = defineStore('shoot', () => {
   }
 
   async function handleEvents (shootStore) {
+    if (!shootEvents.size) {
+      return
+    }
     const events = Array.from(shootEvents.values())
     shootEvents.clear()
     const uids = []
