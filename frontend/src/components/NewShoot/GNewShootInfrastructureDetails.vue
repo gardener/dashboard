@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <v-container class="px-0 mx-0">
     <v-row>
       <v-col
-        v-if="cloudProfiles.length > 1"
+        v-if="cloudProfiles.length > 1 || !cloudProfileHasSeedNames"
         cols="3"
       >
         <g-cloud-profile
@@ -274,6 +274,7 @@ export default {
       firewallNetworks: undefined,
       projectID: undefined,
       defaultNodesCIDR: undefined,
+      customCloudProviderData: {},
     }
   },
   validations () {
@@ -435,6 +436,10 @@ export default {
       const region = this.region
       const secretDomain = get(this.secret, 'data.domainName')
       return this.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({ cloudProfileName, region, secretDomain })
+    },
+    cloudProfileHasSeedNames () {
+      const selectedCloudProfile = find(this.cloudProfiles, { metadata: { name: this.cloudProfileName } })
+      return selectedCloudProfile?.data.seedNames?.length
     },
   },
   watch: {
