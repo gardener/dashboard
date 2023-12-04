@@ -99,8 +99,11 @@ module.exports = {
       .value()
   },
   getShoots (namespace, query = {}) {
+    if (!namespace) {
+      throw new TypeError('Namespace is required')
+    }
     let items = cache.getShoots()
-    if (namespace && namespace !== '_all') {
+    if (namespace !== '_all') {
       items = items.filter(item => item.metadata.namespace === namespace)
     }
     const selectors = parseSelectors(query.labelSelector?.split(',') ?? [])

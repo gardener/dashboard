@@ -69,6 +69,36 @@ function projectFilter (user, canListProjects = false) {
   }
 }
 
+function parseRooms (rooms) {
+  let isAdmin = false
+  const namespaces = []
+  const qualifiedNames = []
+  for (const room of rooms) {
+    const parts = room.split(';')
+    const keys = parts[0].split(':')
+    if (keys.shift() !== 'shoots') {
+      continue
+    }
+    if (keys.pop() === 'admin') {
+      isAdmin = true
+    }
+    if (parts.length < 2) {
+      continue
+    }
+    const [namespace, name] = parts[1].split('/')
+    if (!name) {
+      namespaces.push(namespace)
+    } else {
+      qualifiedNames.push([namespace, name].join('/'))
+    }
+  }
+  return [
+    isAdmin,
+    namespaces,
+    qualifiedNames
+  ]
+}
+
 function trimObjectMetadata (object) {
   object.metadata.managedFields = undefined
   if (object.metadata.annotations) {
@@ -179,6 +209,7 @@ module.exports = {
   decodeBase64,
   encodeBase64,
   projectFilter,
+  parseRooms,
   trimObjectMetadata,
   parseSelectors,
   filterBySelectors,

@@ -599,17 +599,11 @@ export const useShootStore = defineStore('shoot', () => {
         }
         for (const item of items) {
           if (item.kind === 'Status') {
-            switch (item.code) {
-              case 410: {
-                const uid = item.details?.uid
-                if (uid) {
-                  delete state.shoots[uid]
-                }
-                break
-              }
-              default: {
-                logger.info('Failed to synchronize a single shoot: %s', item.message)
-                break
+            logger.info('Failed to synchronize a single shoot: %s', item.message)
+            if (item.code === 404) {
+              const uid = item.details?.uid
+              if (uid) {
+                delete state.shoots[uid]
               }
             }
           } else if (notOnlyShootsWithIssues || shootHasIssue(item)) {

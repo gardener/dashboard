@@ -134,9 +134,13 @@ export const useConfigStore = defineStore('config', () => {
   })
 
   const knownConditions = computed(() => {
+    return state.value?.knownConditions
+  })
+
+  const allKnownConditions = computed(() => {
     return {
       ...wellKnownConditions,
-      ...state.value?.knownConditions,
+      ...knownConditions.value,
     }
   })
 
@@ -310,7 +314,7 @@ export const useConfigStore = defineStore('config', () => {
   }
 
   function conditionForType (type) {
-    return knownConditions.value[type] ?? getCondition(type)
+    return allKnownConditions.value[type] ?? getCondition(type)
   }
 
   return {

@@ -67,17 +67,15 @@ Array [
   },
   Object {
     "apiVersion": "v1",
-    "code": 403,
+    "code": 404,
     "details": Object {
       "group": "core.gardener.cloud",
       "kind": "shoots",
-      "name": "barShoot",
-      "namespace": "garden-foo",
       "uid": 2,
     },
     "kind": "Status",
-    "message": "Insufficient authorization to synchronize shoot barShoot in namespace garden-foo",
-    "reason": "Forbidden",
+    "message": "Shoot with uid 2 does not exist",
+    "reason": "NotFound",
     "status": "Failure",
   },
 ]
@@ -149,17 +147,15 @@ Array [
   },
   Object {
     "apiVersion": "v1",
-    "code": 403,
+    "code": 404,
     "details": Object {
       "group": "core.gardener.cloud",
       "kind": "shoots",
-      "name": "infra1-seed",
-      "namespace": "garden",
       "uid": 4,
     },
     "kind": "Status",
-    "message": "Insufficient authorization to synchronize shoot infra1-seed in namespace garden",
-    "reason": "Forbidden",
+    "message": "Shoot with uid 4 does not exist",
+    "reason": "NotFound",
     "status": "Failure",
   },
 ]

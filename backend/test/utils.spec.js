@@ -19,7 +19,8 @@ const {
   filterBySelectors,
   useWatchCacheForListShoots,
   constants,
-  trimObjectMetadata
+  trimObjectMetadata,
+  parseRooms
 } = require('../lib/utils')
 
 describe('utils', function () {
@@ -173,6 +174,27 @@ describe('utils', function () {
         op: constants.NOT_EQUAL,
         value: '3'
       }])(item)).toBe(false)
+    })
+
+    it('should parse rooms for all kind of shoot subscriptions', () => {
+      expect(parseRooms(['seeds:admin'])).toEqual([
+        false, [], []
+      ])
+      expect(parseRooms(['shoots:admin'])).toEqual([
+        true, [], []
+      ])
+      expect(parseRooms(['shoots:unhealthy:admin'])).toEqual([
+        true, [], []
+      ])
+      expect(parseRooms(['shoots;garden-foo'])).toEqual([
+        false, ['garden-foo'], []
+      ])
+      expect(parseRooms(['shoots:unhealthy;garden-foo'])).toEqual([
+        false, ['garden-foo'], []
+      ])
+      expect(parseRooms(['shoots;garden-foo/bar'])).toEqual([
+        false, [], ['garden-foo/bar']
+      ])
     })
 
     describe('control usage of watch cache', () => {
