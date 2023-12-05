@@ -172,8 +172,8 @@ SPDX-License-Identifier: Apache-2.0
         </template>
         <template #item="{ item }">
           <g-shoot-list-row
-            :key="item.raw.metadata.uid"
-            :shoot-item="item.raw"
+            :key="item.metadata.uid"
+            :shoot-item="item"
             :visible-headers="visibleHeaders"
             @show-dialog="showDialog"
           />
