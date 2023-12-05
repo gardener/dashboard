@@ -19,14 +19,7 @@ SPDX-License-Identifier: Apache-2.0
       variant="underlined"
       @update:model-value="onInputCriName"
       @blur="v$.criName.$touch()"
-    >
-      <template #item="{ props, item }">
-        <v-list-item
-          v-bind="props"
-          :disabled="item.raw.disabled"
-        />
-      </template>
-    </v-select>
+    />
     <v-select
       v-if="criContainerRuntimeTypes.length"
       v-model="selectedCriContainerRuntimeTypes"
@@ -115,7 +108,9 @@ export default {
         criItems.push({
           value: this.criName,
           title: this.criName,
-          disabled: true,
+          props: {
+            disabled: true,
+          },
         })
       }
       return criItems
