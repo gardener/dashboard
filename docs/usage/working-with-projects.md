@@ -34,6 +34,12 @@ If you need to create more projects, expand the `Projects` list dropdown on the 
 
 <img class="gs-image" style="max-width:65%" src="../images/03-create-project-1.png">
 
+## Rotating Your Project's Secrets
+
+After rotating your Gardener credentials and updating the corresponding secret in Gardener, you also need to reconcile all the shoots so that they can start using the updated secret. Updating the secret on its own won't trigger shoot reconciliation and the shoot will use the old credentials until reconciliation, which is why you need to either trigger reconciliation or wait until it is performed in the next maintenance time window.
+
+For more information, see [Credentials Rotation for Shoot Clusters](https://github.com/gardener/gardener/blob/master/docs/usage/shoot_credentials_rotation.md#cloud-provider-keys).
+
 ## Deleting Your Project
 
 When you need to delete your project, go to **ADMINISTRATON**, choose the trash bin icon and, confirm the operation.
