@@ -166,7 +166,7 @@ export const useShootStore = defineStore('shoot', () => {
 
   const selectedShoot = computed(() => {
     return state.selectedUid
-      ? state.shoots[state.selectedUid]
+      ? assignShootInfo(state.shoots[state.selectedUid])
       : null
   })
 
