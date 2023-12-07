@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-REGISTRY                      := eu.gcr.io/gardener-project/gardener
+REGISTRY                      := europe-docker.pkg.dev/gardener-project/snapshots/gardener
 DASHBOARD_IMAGE_REPOSITORY    := $(REGISTRY)/dashboard
 TAG                           := $(shell cat ./VERSION)-$(shell ./scripts/git-version)
 PUSH_LATEST_TAG               := true

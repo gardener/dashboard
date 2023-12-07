@@ -10,7 +10,7 @@ global:
     sessionAffinity: ClientIP
 
     image:
-      repository: eu.gcr.io/gardener-project/gardener/dashboard
+      repository: europe-docker.pkg.dev/gardener-project/releases/gardener/dashboard
       tag: latest
       pullPolicy: IfNotPresent
     # additional labels to add to the dashboard deployment
@@ -246,7 +246,7 @@ global:
       #     description: Using kubectl to watch the pods of the control plane for this cluster
       #     target: cp # possible values: "cp" (Control Plane), "shoot", "garden"
       #     container:
-      #       image: eu.gcr.io/gardener-project/gardener/ops-toolbelt:latest
+      #       image: europe-docker.pkg.dev/gardener-project/releases/gardener/ops-toolbelt:latest
       #       # command: ~
       #       args:
       #       - watch
@@ -408,11 +408,11 @@ global:
   # # Terminal related configuration
   # terminal:
   #   container:
-  #     image: eu.gcr.io/gardener-project/gardener/ops-toolbelt:latest
+  #     image: europe-docker.pkg.dev/gardener-project/releases/gardener/ops-toolbelt:latest
   #   containerOperator:
   #     image: ~ # if not defined, value of terminal.container.image will be used
   #   containerImageDescriptions:
-  #   - image: /eu.gcr.io/gardener-project/gardener/ops-toolbelt:.*/ # regexp must start and end with '/', otherwise it's an exact match
+  #   - image: /europe-docker.pkg.dev/gardener-project/releases/gardener/ops-toolbelt:.*/ # regexp must start and end with '/', otherwise it's an exact match
   #     description: Run `ghelp` to get information about installed tools and packages
   #   # serviceAccountTokenExpiration - is the default requested duration of validity of the token request for the "attach" service account (residing in the terminal host cluster)
   #   # If no value is provided, the default value corresponds to 12 hours
