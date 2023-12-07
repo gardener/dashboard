@@ -10,7 +10,7 @@ global:
     sessionAffinity: ClientIP
 
     image:
-      repository: eu.gcr.io/gardener-project/gardener/dashboard
+      repository: europe-docker.pkg.dev/gardener-project/releases/gardener/dashboard
       tag: latest
       pullPolicy: IfNotPresent
     # additional labels to add to the dashboard deployment
@@ -64,6 +64,17 @@ global:
     # - foo
     # # the identifier of the gardener landscape (defaults to the name stored in kube-system/cluster-identity configmap)
     # clusterIdentity: my-landscape-dev
+
+    # Experimental Feature: Control of Watch Cache for List Shoots Requests
+    # This feature allows fine-tuning the behavior of how list shoots requests are handled in terms of caching.
+    # Note: As this is an experimental feature, it is subject to change and may not be stable.
+    # Possible values for `experimentalUseWatchCacheForListShoots` are:
+    # - 'never': All list shoots requests are directly forwarded to the kube-apiserver without using the watch cache.
+    # - 'no': The watch cache is not utilized by default. Clients can opt-in to use the watch cache.
+    # - 'yes': The watch cache is used by default for serving list shoots requests. Clients can opt-out if they require data directly from the kube-apiserver.
+    # - 'always': All list shoots requests are served from the watch cache.
+    experimentalUseWatchCacheForListShoots: never
+
     containerPort: 8080
     metricsContainerPort: 9050
     servicePort: 8080
@@ -215,6 +226,15 @@ global:
       features:
         terminalEnabled: false
         projectTerminalShortcutsEnabled: false
+      # Experimental Features
+      # Note: The following features are experimental and may be subject to change.
+      experimental:
+        # This configuration sets the base multiplier for calculating the throttle wait delay
+        # in synchronization processes. The 'throttleDelayPerCluster' value
+        # defines the amount of time in milliseconds that should be added per cluster to
+        # the throttle delay. This helps in dynamically adjusting the delay based on the
+        # number of active clusters, thereby optimizing network traffic and resource usage.
+        throttleDelayPerCluster: 10
       # alert:
       #   type: error
       #   message: This is an **alert** banner
@@ -226,7 +246,7 @@ global:
       #     description: Using kubectl to watch the pods of the control plane for this cluster
       #     target: cp # possible values: "cp" (Control Plane), "shoot", "garden"
       #     container:
-      #       image: eu.gcr.io/gardener-project/gardener/ops-toolbelt:latest
+      #       image: europe-docker.pkg.dev/gardener-project/releases/gardener/ops-toolbelt:latest
       #       # command: ~
       #       args:
       #       - watch
@@ -388,11 +408,11 @@ global:
   # # Terminal related configuration
   # terminal:
   #   container:
-  #     image: eu.gcr.io/gardener-project/gardener/ops-toolbelt:latest
+  #     image: europe-docker.pkg.dev/gardener-project/releases/gardener/ops-toolbelt:latest
   #   containerOperator:
   #     image: ~ # if not defined, value of terminal.container.image will be used
   #   containerImageDescriptions:
-  #   - image: /eu.gcr.io/gardener-project/gardener/ops-toolbelt:.*/ # regexp must start and end with '/', otherwise it's an exact match
+  #   - image: /europe-docker.pkg.dev/gardener-project/releases/gardener/ops-toolbelt:.*/ # regexp must start and end with '/', otherwise it's an exact match
   #     description: Run `ghelp` to get information about installed tools and packages
   #   # serviceAccountTokenExpiration - is the default requested duration of validity of the token request for the "attach" service account (residing in the terminal host cluster)
   #   # If no value is provided, the default value corresponds to 12 hours

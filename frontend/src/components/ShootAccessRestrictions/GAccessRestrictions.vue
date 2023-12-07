@@ -22,7 +22,6 @@ SPDX-License-Identifier: Apache-2.0
           <v-switch
             v-model="accessRestrictions[definition.key].value"
             color="primary"
-            inset
             density="compact"
           />
         </div>

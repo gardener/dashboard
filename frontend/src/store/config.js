@@ -129,12 +129,23 @@ export const useConfigStore = defineStore('config', () => {
     return state.value?.features
   })
 
+  const experimental = computed(() => {
+    return state.value?.experimental
+  })
+
   const grantTypes = computed(() => {
     return state.value?.grantTypes ?? ['auto', 'authcode', 'device-code']
   })
 
   const knownConditions = computed(() => {
     return state.value?.knownConditions
+  })
+
+  const allKnownConditions = computed(() => {
+    return {
+      ...wellKnownConditions,
+      ...knownConditions.value,
+    }
   })
 
   const resourceQuotaHelp = computed(() => {
@@ -217,6 +228,10 @@ export const useConfigStore = defineStore('config', () => {
 
   const isProjectTerminalShortcutsEnabled = computed(() => {
     return features.value?.projectTerminalShortcutsEnabled === true
+  })
+
+  const throttleDelayPerCluster = computed(() => {
+    return experimental.value?.throttleDelayPerCluster ?? 10
   })
 
   const alertBannerMessage = computed(() => {
@@ -307,7 +322,7 @@ export const useConfigStore = defineStore('config', () => {
   }
 
   function conditionForType (type) {
-    return get(knownConditions.value, type, getCondition(type))
+    return allKnownConditions.value[type] ?? getCondition(type)
   }
 
   return {
@@ -340,6 +355,7 @@ export const useConfigStore = defineStore('config', () => {
     serviceAccountDefaultTokenExpiration,
     isTerminalEnabled,
     isProjectTerminalShortcutsEnabled,
+    throttleDelayPerCluster,
     alertBannerMessage,
     alertBannerType,
     alertBannerIdentifier,

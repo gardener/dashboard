@@ -80,7 +80,7 @@ frontend:
 [...]
 terminal: # is generally required for the terminal feature
   container:
-    image: eu.gcr.io/gardener-project/gardener/ops-toolbelt:0.10.0
+    image: europe-docker.pkg.dev/gardener-project/releases/gardener/ops-toolbelt:0.26.0
   containerImageDescriptions:
     - image: /.*/ops-toolbelt:.*/
       description: Run `ghelp` to get information about installed tools and packages

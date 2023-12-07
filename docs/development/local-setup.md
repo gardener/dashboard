@@ -9,8 +9,8 @@
 Develop new feature and fix bug on the Gardener Dashboard.
 
 ## Requirements
-- Yarn. For the required version, refer to `.engines.yarn` in [package.json](https://github.com/gardener/dashboard/blob/master/package.json).
-- Node.js. For the required version, refer to `.engines.node` in [package.json](https://github.com/gardener/dashboard/blob/master/package.json).
+- Yarn. For the required version, refer to `.engines.yarn` in [package.json](../../package.json).
+- Node.js. For the required version, refer to `.engines.node` in [package.json](../../package.json).
 
 ## Steps
 
@@ -54,13 +54,13 @@ frontend:
 ```
 
 ### 5. Run it locally
-The Gardener Dashboard [`backend`](https://github.com/gardener/dashboard/tree/master/backend) server requires a kubeconfig for the Garden cluster. You can set it e.g. by using the `KUBECONFIG` environment variable.
+The Gardener Dashboard [`backend`](../../backend) server requires a kubeconfig for the Garden cluster. You can set it e.g. by using the `KUBECONFIG` environment variable.
 
 If you want to run the Garden cluster locally, follow the [getting started locally](https://github.com/gardener/gardener/blob/master/docs/development/getting_started_locally.md) documentation.
 Gardener Dashboard supports the `local` infrastructure provider that comes with the local Gardener cluster setup.
 See [6. Login to the dashboard](#6-login-to-the-dashboard) for more information on how to use the Dashboard with a local gardener or any other Gardener landscape.
 
-Concurrently run the `backend` server (port `3030`) and the [`frontend`](https://github.com/gardener/dashboard/tree/master/frontend) server (port `8080`) with hot reload enabled.
+Concurrently run the `backend` server (port `3030`) and the [`frontend`](../../frontend) server (port `8080`) with hot reload enabled.
 
 ```sh
 cd backend

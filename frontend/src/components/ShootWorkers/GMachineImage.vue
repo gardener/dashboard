@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
           <g-vendor-icon :icon="item.raw.icon" />
         </template>
         <v-list-item-title>Name: {{ item.raw.name }} | Version: {{ item.raw.version }}</v-list-item-title>
-        <v-list-item-subtitle v-if="itemDescription(item).length">
+        <v-list-item-subtitle v-if="itemDescription(item.raw).length">
           {{ itemDescription(item.raw) }}
         </v-list-item-subtitle>
       </v-list-item>
@@ -142,7 +142,7 @@ export default {
           severity: 'info',
         })
       }
-      if (this.updateOSMaintenance && this.machineImage.isPreview) {
+      if (this.machineImage.isPreview) {
         hints.push({
           type: 'text',
           hint: 'Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not recommended for production usage',

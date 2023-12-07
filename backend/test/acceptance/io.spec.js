@@ -10,9 +10,11 @@ const { mockRequest } = require('@gardener-dashboard/request')
 const { Store } = require('@gardener-dashboard/kube-client')
 const { mockListIssues, mockListComments } = require('@octokit/rest')
 const pEvent = require('p-event')
+const createError = require('http-errors')
 const tickets = require('../../lib/services/tickets')
 const cache = require('../../lib/cache')
 const io = require('../../lib/io')
+const fixtures = require('../../__fixtures__')
 
 function publishEvent (socket, room, eventName, metadata) {
   const data = { object: { metadata } }
@@ -55,6 +57,25 @@ function unsubscribe (socket, ...args) {
   return emit(socket, 'unsubscribe', ...args)
 }
 
+async function synchronize (socket, ...args) {
+  const {
+    statusCode = 500,
+    name = 'InternalError',
+    message = 'Failed to synchronize shoots',
+    items = []
+  } = await socket.timeout(1000).emitWithAck('synchronize', ...args)
+  if (statusCode === 200) {
+    return items
+  }
+  throw createError(statusCode, message, { name })
+}
+
+function createStore (items) {
+  const store = new Store()
+  store.replace(items)
+  return store
+}
+
 describe('api', function () {
   let agent
   let socket
@@ -62,10 +83,13 @@ describe('api', function () {
 
   beforeAll(() => {
     cache.cache.resetTicketCache()
-    const store = new Store()
-    store.replace(fixtures.projects.list())
     cache.initialize({
-      projects: { store }
+      projects: {
+        store: createStore(fixtures.projects.list())
+      },
+      shoots: {
+        store: createStore(fixtures.shoots.list())
+      }
     })
     agent = createAgent('io', cache)
     nsp = agent.io.sockets
@@ -252,6 +276,9 @@ describe('api', function () {
           socket.id,
           'shoots;garden-foo/fooShoot'
         ]))
+
+        const items = await synchronize(socket, 'shoots', [1, 2])
+        expect(items).toMatchSnapshot()
       })
 
       it('should subscribe shoots for a single namespace', async function () {
@@ -266,6 +293,9 @@ describe('api', function () {
           socket.id,
           'shoots;garden-foo'
         ]))
+
+        const items = await synchronize(socket, 'shoots', [1, 4])
+        expect(items).toMatchSnapshot()
       })
 
       it('should subscribe shoots for all namespace', async function () {
@@ -280,6 +310,9 @@ describe('api', function () {
           socket.id,
           'shoots:admin'
         ]))
+
+        const items = await synchronize(socket, 'shoots', [1, 4])
+        expect(items).toMatchSnapshot()
       })
 
       it('should subscribe unhealthy shoots for all namespace', async function () {
@@ -294,6 +327,14 @@ describe('api', function () {
           socket.id,
           'shoots:unhealthy:admin'
         ]))
+      })
+
+      it('should fail to syncronize cats', async function () {
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+
+        await expect(synchronize(socket, 'cats', [42]))
+          .rejects
+          .toThrow('Invalid synchronization type - cats')
       })
     })
   })
