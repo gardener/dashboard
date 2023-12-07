@@ -6,6 +6,8 @@
 
 import { computed } from 'vue'
 
+import { useLogger } from '@/composables/useLogger'
+
 import {
   shortRandomString,
   purposesForSecret,
@@ -104,10 +106,11 @@ export function parseSearch (text) {
 export const constants = Object.freeze({
   DEFINED: 0,
   LOADING: 1,
-  OPENING: 2,
-  OPEN: 3,
-  CLOSING: 4,
-  CLOSED: 5,
+  LOADED: 2,
+  OPENING: 3,
+  OPEN: 4,
+  CLOSING: 5,
+  CLOSED: 6,
 })
 
 export function createShootResource (context) {
@@ -456,7 +459,6 @@ export function getSortVal (state, context, item, sortBy) {
     case 'readiness': {
       const conditions = item.status?.conditions ?? []
       if (!conditions.length) {
-        // TODO: check if this is ok
         // items without conditions have medium priority
         const priority = '00000100'
         const lastTransitionTime = item.status?.lastOperation.lastUpdateTime ?? item.metadata.creationTimestamp
@@ -552,10 +554,9 @@ export function shootHasIssue (object) {
 
 //  Updates subscription state, ensuring consistency with transition states.
 export function setSubscriptionState (state, value) {
-  if (value === constants.OPEN && state.subscriptionState !== constants.OPENING) {
-    return
-  }
-  if (value === constants.CLOSED && state.subscriptionState !== constants.CLOSING) {
+  if ([constants.LOADED, constants.OPEN, constants.CLOSED].includes(value) && value !== state.subscriptionState + 1) {
+    const logger = useLogger()
+    logger.error('Unexpected subscription state change: %d --> %d', state.subscriptionState, value)
     return
   }
   state.subscriptionState = value
@@ -567,7 +568,7 @@ export function setSubscriptionError (state, err) {
     const name = err.name
     const statusCode = get(err, 'response.status', 500)
     const message = get(err, 'response.data.message', err.message)
-    const reason = get(err, 'response.data.reason')
+    const reason = get(err, 'response.data.reason', 'InternalError')
     const code = get(err, 'response.data.code', 500)
     state.subscriptionError = {
       name,

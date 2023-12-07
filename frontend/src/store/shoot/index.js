@@ -177,7 +177,7 @@ export const useShootStore = defineStore('shoot', () => {
   })
 
   const loading = computed(() => {
-    return state.subscriptionState > constants.DEFINED && state.subscriptionState < constants.OPEN
+    return state.subscriptionState === constants.LOADING
   })
 
   const subscribed = computed(() => {
@@ -327,19 +327,21 @@ export const useShootStore = defineStore('shoot', () => {
         shootStore.receive(shoots)
         ticketStore.receiveIssues(issues)
         ticketStore.receiveComments(comments)
+        setSubscriptionState(state, constants.LOADED)
         throttleDelay = getThrottleDelay(options, shoots.length)
       } catch (err) {
-        if (options.name && isNotFound(err)) {
-          throttleDelay = 0
+        shootStore.clearAll()
+        if (isNotFound(err) && options.name) {
+          setSubscriptionState(state, constants.LOADED)
+          throttleDelay = getThrottleDelay(options, 1)
         } else {
           const message = get(err, 'response.data.message', err.message)
           logger.error('Failed to fetch shoots or tickets: %s', message)
           setSubscriptionError(state, err)
-          shootStore.clearAll()
         }
         throw err
       } finally {
-        if (typeof throttleDelay === 'number') {
+        if (state.subscriptionState === constants.LOADED) {
           await shootStore.openSubscription(options, throttleDelay)
         }
       }
