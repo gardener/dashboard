@@ -308,7 +308,8 @@ export const useShootStore = defineStore('shoot', () => {
       const p = n > 0
         ? Math.pow(10, Math.floor(Math.log10(n)))
         : 1
-      const d = 10 * p * Math.round(n / p)
+      const m = configStore.throttleDelayPerCluster
+      const d = m * p * Math.round(n / p)
       return Math.min(30_000, Math.max(200, d))
     }
 

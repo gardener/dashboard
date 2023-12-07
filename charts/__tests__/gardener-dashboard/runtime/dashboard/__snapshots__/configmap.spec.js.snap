@@ -146,6 +146,16 @@ Object {
 }
 `;
 
+exports[`gardener-dashboard configmap experimental should render the template with experimental features 1`] = `
+Object {
+  "frontend": Object {
+    "experimental": Object {
+      "throttleDelayPerCluster": 42,
+    },
+  },
+}
+`;
+
 exports[`gardener-dashboard configmap grantTypes should render the template 1`] = `
 Object {
   "frontend": Object {
@@ -391,6 +401,9 @@ Object {
       "production": null,
     },
     "defaultNodesCIDR": "10.250.0.0/16",
+    "experimental": Object {
+      "throttleDelayPerCluster": 10,
+    },
     "externalTools": Array [
       Object {
         "icon": "apps",

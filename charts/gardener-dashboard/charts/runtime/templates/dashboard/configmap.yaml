@@ -211,6 +211,8 @@ data:
       features:
         terminalEnabled: {{ .Values.global.dashboard.frontendConfig.features.terminalEnabled | default false }}
         projectTerminalShortcutsEnabled: {{ .Values.global.dashboard.frontendConfig.features.projectTerminalShortcutsEnabled | default false }}
+      experimental:
+        throttleDelayPerCluster: {{ .Values.global.dashboard.frontendConfig.experimental.throttleDelayPerCluster | default 10 }}
       {{- if .Values.global.dashboard.frontendConfig.terminal }}
       terminal:
         {{- if .Values.global.dashboard.frontendConfig.terminal.heartbeatIntervalSeconds }}

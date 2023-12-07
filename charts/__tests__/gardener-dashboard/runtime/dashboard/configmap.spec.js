@@ -802,6 +802,27 @@ describe('gardener-dashboard', function () {
       })
     })
 
+    describe('experimental', function () {
+      it('should render the template with experimental features', async function () {
+        const values = {
+          global: {
+            dashboard: {
+              frontendConfig: {
+                experimental: {
+                  throttleDelayPerCluster: 42
+                }
+              }
+            }
+          }
+        }
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [configMap] = documents
+        const config = yaml.load(configMap.data['config.yaml'])
+        expect(pick(config, ['frontend.experimental'])).toMatchSnapshot()
+      })
+    })
+
     describe('experimentalUseWatchCacheForListShoots', function () {
       it('should render the template with value "no"', async function () {
         const values = {
