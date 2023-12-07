@@ -293,7 +293,7 @@ function closeWsIfNotClosed (ws) {
   }
 }
 
-async function waitForPodRunning (hostCluster, containerName, handleEvent, timeoutSeconds) {
+async function waitForPodRunning (hostCluster, containerName, onPodEvent, timeoutSeconds) {
   const connectTimeoutSeconds = 5
 
   const createConnection = () => {
@@ -372,11 +372,11 @@ async function waitForPodRunning (hostCluster, containerName, handleEvent, timeo
         return
       }
       const pod = event.object
-      if (typeof handleEvent === 'function') {
+      if (typeof onPodEvent === 'function') {
         try {
-          handleEvent(event)
+          onPodEvent(event)
         } catch (error) {
-          logger.error('error during handleEvent', error.message)
+          logger.error('error during handling of pod event', error.message)
         }
       }
 

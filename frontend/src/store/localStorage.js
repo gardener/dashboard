@@ -221,6 +221,11 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     writeDefaults: false,
   })
 
+  const shootListFetchFromCache = useLocalStorage('projects/shoot-list/fetch-from-cache', false, {
+    serializer: StorageSerializers.flag,
+    writeDefaults: false,
+  })
+
   const lazyLocalStorage = useLazyLocalStorage()
 
   const shootCustomSelectedColumns = computed({
@@ -272,6 +277,7 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     shootItemsPerPage,
     shootSortBy,
     allProjectsShootFilter,
+    shootListFetchFromCache,
     shootCustomSortBy,
     shootCustomSelectedColumns,
     terminalSplitpaneTree,

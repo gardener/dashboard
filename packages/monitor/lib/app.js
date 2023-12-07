@@ -30,7 +30,7 @@ app.get('/metrics', async (req, res, next) => {
     next(err)
   }
 })
-app.use((req, res, next) => next(createError(404)))
+app.use((req, res, next) => next(createError(404, `No matching route for url: ${req.originalUrl}`)))
 app.use((err, req, res, next) => {
   const { message, status = 500 } = err
   logger.error('Error in monitoring server: %s', message)

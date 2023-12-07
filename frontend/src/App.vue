@@ -19,18 +19,22 @@ import {
   onKeyStroke,
   useEventBus,
   useColorMode,
+  useDocumentVisibility,
 } from '@vueuse/core'
 
 import { useConfigStore } from '@/store/config'
 import { useLoginStore } from '@/store/login'
 import { useLocalStorageStore } from '@/store/localStorage'
+import { useShootStore } from '@/store/shoot'
 
 import { useCustomColors } from '@/composables/useCustomColors'
 
 const theme = useTheme()
 const localStorageStore = useLocalStorageStore()
+const visibility = useDocumentVisibility()
 const configStore = useConfigStore()
 const loginStore = useLoginStore()
+const shootStore = useShootStore()
 const logger = inject('logger')
 
 async function setCustomColors () {
@@ -65,5 +69,11 @@ const bus = useEventBus('esc-pressed')
 onKeyStroke('Escape', e => {
   bus.emit()
   e.preventDefault()
+})
+
+watch(visibility, (current, previous) => {
+  if (current === 'visible' && previous === 'hidden') {
+    shootStore.invokeSubscriptionEventHandler()
+  }
 })
 </script>

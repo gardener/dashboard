@@ -17,28 +17,17 @@ import { useLogger } from '@/composables/useLogger'
 
 import {
   assign,
-  filter,
   findIndex,
   get,
   head,
-  flatMap,
   matches,
   matchesProperty,
   groupBy,
   orderBy,
   uniqBy,
+  flatMap,
+  mapValues,
 } from '@/lodash'
-
-const eql = ({ projectName, name, state = undefined }) => {
-  const source = { metadata: { projectName } }
-  if (name) {
-    source.metadata.name = name
-  }
-  if (state) {
-    source.metadata.state = state
-  }
-  return matches(source)
-}
 
 const eqIssue = issue => {
   return matches({ metadata: { number: issue.metadata.number } })
@@ -99,6 +88,10 @@ const putToList = (list, newItem, updatedAtKeyPath, matcher, descending = true) 
   }
 }
 
+function issueKey (projectName, name) {
+  return projectName + '/' + name
+}
+
 export const useTicketStore = defineStore('ticket', () => {
   const logger = useLogger()
 
@@ -109,12 +102,17 @@ export const useTicketStore = defineStore('ticket', () => {
     return issueList.value
   })
 
+  const issuesMap = computed(() => {
+    return groupBy(issueList.value, item => issueKey(item.metadata.projectName, item.metadata.name))
+  })
+
+  const labelsMap = computed(() => {
+    return mapValues(issuesMap.value, items => uniqBy(flatMap(items, 'data.labels'), 'id'))
+  })
+
   function issues ({ name, projectName }) {
-    return filter(issueList.value, eql({
-      name,
-      projectName,
-      state: 'open',
-    }))
+    const key = issueKey(projectName, name)
+    return issuesMap.value[key] ?? []
   }
 
   function comments ({ issueNumber }) {
@@ -126,7 +124,8 @@ export const useTicketStore = defineStore('ticket', () => {
   }
 
   function labels ({ name, projectName }) {
-    return uniqBy(flatMap(issues({ name, projectName }), 'data.labels'), 'id')
+    const key = issueKey(projectName, name)
+    return labelsMap.value[key] ?? []
   }
 
   function receiveIssues (issues) {

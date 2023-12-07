@@ -7,9 +7,17 @@
 'use strict'
 
 const { mockRequest } = require('@gardener-dashboard/request')
+const { Store } = require('@gardener-dashboard/kube-client')
 const kubeconfig = require('@gardener-dashboard/kube-config')
-const logger = require('../../lib/logger')
 const yaml = require('js-yaml')
+const logger = require('../../lib/logger')
+const cache = require('../../lib/cache')
+
+function createStore (items) {
+  const store = new Store()
+  store.replace(items)
+  return store
+}
 
 describe('api', function () {
   let agent
@@ -33,6 +41,86 @@ describe('api', function () {
     const namespace = 'garden-foo'
     const user = fixtures.auth.createUser({
       id: 'foo@example.org'
+    })
+
+    describe('when served from cache', () => {
+      const useCache = true
+
+      beforeAll(() => {
+        cache.initialize({
+          projects: {
+            store: createStore(fixtures.projects.list())
+          },
+          shoots: {
+            store: createStore(fixtures.shoots.list().map(item => {
+              const status = item.metadata.uid !== 3
+                ? 'healthy'
+                : 'unhealthy'
+              item.metadata.labels = {
+                ...item.metadata.labels,
+                'shoot.gardener.cloud/status': status
+              }
+              return item
+            }))
+          }
+        })
+      })
+
+      afterAll(() => {
+        cache.cache.resetTicketCache()
+      })
+
+      it('should return shoots for a single namespace', async () => {
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+
+        const res = await agent
+          .get(`/api/namespaces/${namespace}/shoots`)
+          .query({ useCache })
+          .set('cookie', await user.cookie)
+          .expect('content-type', /json/)
+          .expect(200)
+
+        expect(mockRequest).toBeCalledTimes(1)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
+
+        expect(res.body.items.map(item => item.metadata.uid)).toEqual([1, 2, 3])
+        expect(res.body).toMatchSnapshot()
+      })
+
+      it('should return all shoots', async () => {
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+
+        const res = await agent
+          .get('/api/namespaces/_all/shoots')
+          .query({ useCache })
+          .set('cookie', await user.cookie)
+          .expect('content-type', /json/)
+          .expect(200)
+
+        expect(mockRequest).toBeCalledTimes(1)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
+
+        expect(res.body.items.map(item => item.metadata.uid)).toEqual([1, 2, 3, 4])
+        expect(res.body).toMatchSnapshot()
+      })
+
+      it('should return all unhealthy shoots', async () => {
+        const labelSelector = 'shoot.gardener.cloud/status!=healthy'
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+
+        const res = await agent
+          .get('/api/namespaces/_all/shoots')
+          .query({ useCache, labelSelector })
+          .set('cookie', await user.cookie)
+          .expect('content-type', /json/)
+          .expect(200)
+
+        expect(mockRequest).toBeCalledTimes(1)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
+
+        expect(res.body.items.map(item => item.metadata.uid)).toEqual([3])
+        expect(res.body).toMatchSnapshot()
+      })
     })
 
     it('should return three shoots', async function () {
