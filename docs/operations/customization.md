@@ -4,7 +4,7 @@
 Gardener landscape administrators should have the possibility to change the appearance and the branding of the Gardener Dashboard via configuration without the need to touch the code.
 
 ## Branding
-It is possible to change the branding of the Gardener Dashboard when using the [helm chart](https://github.com/gardener/dashboard/blob/master/charts/gardener-dashboard) in the `frontendConfig.branding` map. The following configuration properties are supported:
+It is possible to change the branding of the Gardener Dashboard when using the [helm chart](../../charts/gardener-dashboard) in the `frontendConfig.branding` map. The following configuration properties are supported:
 
 | name | description | default |
 | ---- | ----------- | ------- |
@@ -14,12 +14,12 @@ It is possible to change the branding of the Gardener Dashboard when using the [
 | `productTitleSuperscript` | Superscript next to the product title. To supress the superscript set to `false` | Production version (e.g 1.73.1) |
 | `productSlogan` | Slogan that is displayed under the product title and on the login page| `Universal Kubernetes at Scale` |
 | `productLogoUrl` | URL for the product logo. You can also use [data:](https://developer.mozilla.org/en-US/docs/web/http/basics_of_http/data_urls) scheme for development. For production it is recommended to provide static assets | `/static/assets/logo.svg` |
-| `teaserHeight` | Height of the teaser in the [GMainNavigation](https://github.com/gardener/dashboard/blob/master/frontend/src/components/GMainNavigation.vue) component | `200` |
-| `teaserTemplate` | Custom HTML template to replace to teaser content | refer to [GTeaser](https://github.com/gardener/dashboard/blob/master/frontend/src/components/GTeaser.vue) |
-| `loginTeaserHeight` | Height of the login teaser in the [GLogin](https://github.com/gardener/dashboard/blob/master/frontend/src/layouts/GLogin.vue) component | `260` |
-| `loginTeaserTemplate` | Custom HTML template to replace to login teaser content | refer to [GLoginTeaser](https://github.com/gardener/dashboard/blob/master/frontend/src/components/GLoginTeaser.vue) |
-| `loginFooterHeight` | Height of the login footer in the [GLogin](https://github.com/gardener/dashboard/blob/master/frontend/src/layouts/GLogin.vue) component | `24` |
-| `loginFooterTemplate` | Custom HTML template to replace to login footer content | refer to [GLoginFooter](https://github.com/gardener/dashboard/blob/master/frontend/src/components/GLoginFooter.vue) |
+| `teaserHeight` | Height of the teaser in the [GMainNavigation](../../frontend/src/components/GMainNavigation.vue) component | `200` |
+| `teaserTemplate` | Custom HTML template to replace to teaser content | refer to [GTeaser](../../frontend/src/components/GTeaser.vue) |
+| `loginTeaserHeight` | Height of the login teaser in the [GLogin](../../frontend/src/layouts/GLogin.vue) component | `260` |
+| `loginTeaserTemplate` | Custom HTML template to replace to login teaser content | refer to [GLoginTeaser](../../frontend/src/components/GLoginTeaser.vue) |
+| `loginFooterHeight` | Height of the login footer in the [GLogin](../../frontend/src/layouts/GLogin.vue) component | `24` |
+| `loginFooterTemplate` | Custom HTML template to replace to login footer content | refer to [GLoginFooter](../../frontend/src/components/GLoginFooter.vue) |
 | `loginHints` | Links [`{ title: string; href: string; }`](https://vuetifyjs.com/en/api/v-breadcrumbs/#props-items) to product related sites shown below the login button  | `undefined` |
 | `oidcLoginTitle` | Title of tabstrip for loginType OIDC | `OIDC` |
 | `oidcLoginText` | Text show above the login button on the OIDC tabstrip | `Press Login to be redirected to`<br> `configured OpenID Connect Provider.` |
@@ -50,7 +50,7 @@ If you use the helm chart, you can configure those with `frontendConfig.themes.l
 
 ## Logos and Icons
 
-It is also possible to exchange the Dashboard logo and icons. You can replace the [assets](https://github.com/gardener/dashboard/tree/master/frontend/public/static/assets) folder when using the [helm chart](https://github.com/gardener/dashboard/blob/master/charts/gardener-dashboard) in the `frontendConfig.assets` map.
+It is also possible to exchange the Dashboard logo and icons. You can replace the [assets](../../frontend/public/static/assets) folder when using the [helm chart](../../charts/gardener-dashboard) in the `frontendConfig.assets` map.
 
 Attention: You need to set values for all files as mapping the volume will overwrite all files. It is not possible to exchange single files.
 

@@ -281,7 +281,7 @@ Object {
                 },
               },
             ],
-            "image": "eu.gcr.io/gardener-project/gardener/dashboard:1.26.0-dev-4d529c1",
+            "image": "europe-docker.pkg.dev/gardener-project/releases/gardener/dashboard:1.26.0-dev-4d529c1",
             "imagePullPolicy": "IfNotPresent",
             "livenessProbe": Object {
               "failureThreshold": 6,

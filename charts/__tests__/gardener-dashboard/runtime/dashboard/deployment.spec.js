@@ -56,7 +56,7 @@ describe('gardener-dashboard', function () {
       expect(containers).toHaveLength(1)
       const [container] = containers
       expect(container).toEqual(expect.objectContaining({
-        image: 'eu.gcr.io/gardener-project/gardener/dashboard@' + tag,
+        image: 'europe-docker.pkg.dev/gardener-project/releases/gardener/dashboard@' + tag,
         imagePullPolicy: 'IfNotPresent'
       }))
     })
