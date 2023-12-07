@@ -127,7 +127,6 @@ async function unsubscribe (socket, key) {
 }
 
 function synchronizeShoots (socket, uids = []) {
-  const user = getUserFromSocket(socket)
   const rooms = Array.from(socket.rooms).filter(room => room !== socket.id)
   const [
     isAdmin,
@@ -161,7 +160,6 @@ function synchronizeShoots (socket, uids = []) {
     const hasValidSubscription = isAdmin || namespaces.includes(namespace) || qualifiedNames.includes(qualifiedName)
     if (!hasValidSubscription) {
       // the socket has NOT joined a room (admin, namespace or individual shoot) the current shoot belongs to
-      logger.error('IT', user.id, name, namespace)
       return uidNotFound(uid)
     }
     // only send all shoot details for single shoot subscriptions
