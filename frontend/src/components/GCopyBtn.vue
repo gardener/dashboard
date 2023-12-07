@@ -60,10 +60,11 @@ const props = defineProps({
   },
 })
 
+let timeoutId
+
 // reactive state
 const snackbar = ref(false)
 const copySucceeded = ref(false)
-const timeoutId = ref()
 
 // computed
 const snackbarText = computed(() => props.copyFailedText)
@@ -95,8 +96,8 @@ const copyText = async () => {
     const text = await toValue(props.clipboardText)
     await navigator.clipboard.writeText(text)
     copySucceeded.value = true
-    clearTimeout(timeoutId.value)
-    timeoutId.value = setTimeout(() => {
+    clearTimeout(timeoutId)
+    timeoutId = setTimeout(() => {
       copySucceeded.value = false
     }, 1000)
     emit('copy')
