@@ -14,6 +14,7 @@ import {
   watch,
   markRaw,
 } from 'vue'
+import { useDocumentVisibility } from '@vueuse/core'
 
 import { useLogger } from '@/composables/useLogger'
 import { useApi } from '@/composables/useApi'
@@ -62,6 +63,7 @@ import {
 export const useShootStore = defineStore('shoot', () => {
   const api = useApi()
   const logger = useLogger()
+  const visibility = useDocumentVisibility()
 
   const appStore = useAppStore()
   const authnStore = useAuthnStore()
@@ -632,20 +634,24 @@ export const useShootStore = defineStore('shoot', () => {
   }
 
   function handleEvent (event) {
+    const shootStore = this
     const { type, uid } = event
     if (!['ADDED', 'MODIFIED', 'DELETED'].includes(type)) {
       logger.error('undhandled event type', type)
       return
     }
     shootEvents.set(uid, event)
-    const throttledHandleEvents = state.subscriptionEventHandler
-    if (typeof throttledHandleEvents === 'function') {
-      throttledHandleEvents(this)
-    }
+    shootStore.invokeSubscriptionEventHandler()
   }
 
   function isShootActive (uid) {
     return includes(activeUids.value, uid)
+  }
+
+  function invokeSubscriptionEventHandler () {
+    if (typeof state.subscriptionEventHandler === 'function' && visibility.value === 'visible') {
+      state.subscriptionEventHandler(this)
+    }
   }
 
   return {
@@ -694,6 +700,7 @@ export const useShootStore = defineStore('shoot', () => {
     sortItems,
     setSortBy,
     isShootActive,
+    invokeSubscriptionEventHandler,
   }
 })
 
