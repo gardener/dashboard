@@ -88,35 +88,8 @@ export function handleTextFieldDrop (textField, fileTypePattern, onDrop = () => 
   textarea.addEventListener('drop', drop, false)
 }
 
-export function getValidationErrors (vm, field) {
-  const errors = []
-  const validationForField = get(vm.v$, field)
-  if (!validationForField.$dirty) {
-    return errors
-  }
-
-  const validators = vm.validators
-    ? vm.validators
-    : vm.$options.validations
-  Object
-    .keys(get(validators, field))
-    .forEach(key => {
-      if (validationForField[key]?.$invalid) {
-        let validationErrorMessage = get(vm.validationErrors, field)[key]
-        if (typeof validationErrorMessage === 'function') {
-          validationErrorMessage = validationErrorMessage(get(validationForField.$params, key))
-        }
-        if (validationErrorMessage) {
-          errors.push(validationErrorMessage)
-        } else {
-          /* Fallback logic with generic error message.
-            This should not happen as for each validation there must be a corresponding text */
-          errors.push('Invalid input')
-          logger.error('validation error message for ' + field + '.' + key + ' not found')
-        }
-      }
-    })
-  return errors
+export function getErrorMessages (property) {
+  return property.$errors.map(e => e.$message)
 }
 
 export function setDelayedInputFocus (...args) {

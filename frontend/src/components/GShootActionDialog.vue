@@ -8,7 +8,6 @@ SPDX-License-Identifier: Apache-2.0
   <g-dialog
     ref="gDialog"
     :confirm-button-text="confirmButtonText"
-    :confirm-disabled="confirmDisabled"
     :confirm-value="confirmValue"
     :disable-confirm-input-focus="confirmInputFocusDisabled"
     :width="width"
@@ -62,10 +61,6 @@ export default {
       type: Boolean,
       default: false,
     },
-    valid: {
-      type: Boolean,
-      default: true,
-    },
     width: {
       type: String,
       default: '500',
@@ -84,9 +79,6 @@ export default {
   computed: {
     confirmValue () {
       return this.confirmRequired ? this.shootName : undefined
-    },
-    confirmDisabled () {
-      return !this.valid
     },
   },
   methods: {

@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <g-dialog
     ref="gDialog"
     confirm-button-text="Create"
-    :confirm-disabled="!valid"
+    :valid="valid"
     width="750"
     max-height="100vh"
   >

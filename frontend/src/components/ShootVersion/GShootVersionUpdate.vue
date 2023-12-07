@@ -16,34 +16,39 @@ SPDX-License-Identifier: Apache-2.0
       item-value="version"
       :label="label"
       :hint="hint"
-      :error="isError"
       return-object
       placeholder="Please select version..."
+      :error-messages="getErrorMessages(v$.selectedItem)"
+      @blur="v$.selectedItem.$touch()"
     >
       <template #item="{ props }">
         <v-list-subheader
           v-if="props.value.type === 'subheader'"
           v-bind="props"
         />
-        <v-list-item
+        <div
           v-else
-          v-bind="props"
-          :subtitle="versionItemDescription(props.value)"
-          :disabled="props.value.notNextMinor"
+          :ref="`versionItem_${props.value.version}`"
         >
-          <v-tooltip
-            v-if="props.value.notNextMinor"
-            activator="parent"
-            location="top"
+          <v-list-item
+            v-bind="props"
+            :subtitle="versionItemDescription(props.value)"
+            :disabled="props.value.notNextMinor"
           >
-            You cannot upgrade your cluster more than one minor version at a time
-          </v-tooltip>
-          <template #subtitle="{ subtitle }">
-            <div :class="props.value.subtitleClass">
-              {{ subtitle }}
-            </div>
-          </template>
-        </v-list-item>
+            <template #subtitle="{ subtitle }">
+              <div :class="props.value.subtitleClass">
+                {{ subtitle }}
+              </div>
+            </template>
+          </v-list-item>
+        </div>
+        <v-tooltip
+          v-if="props.value.notNextMinor"
+          :activator="$refs[`versionItem_${props.value.version}`]"
+          location="top"
+        >
+          You cannot upgrade your cluster more than one minor version at a time
+        </v-tooltip>
       </template>
     </v-select>
     <v-alert
@@ -59,6 +64,14 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import semver from 'semver'
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
+
+import {
+  withFieldName,
+  withMessage,
+} from '@/utils/validators'
+import { getErrorMessages } from '@/utils'
 
 import {
   map,
@@ -68,7 +81,6 @@ import {
   get,
   join,
 } from '@/lodash'
-
 export default {
   props: {
     availableK8sUpdates: {
@@ -81,14 +93,28 @@ export default {
   },
   emits: [
     'selectedVersion',
-    'selectedVersionInvalid',
     'selectedVersionType',
     'confirmRequired',
   ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
       snackbar: false,
       selectedItem: undefined,
+    }
+  },
+  validations () {
+    return {
+      selectedItem: withFieldName('Kubernetes Version', {
+        required,
+        selectedMinorVersionIsNotNextMinor: withMessage('You cannot upgrade your cluster more than one minor version at a time', value => {
+          return !value?.version || !this.itemIsNotNextMinor(value.version, value.updateType)
+        }),
+      }),
     }
   },
   computed: {
@@ -174,17 +200,6 @@ export default {
       this.$emit('confirmRequired', !isPatch)
       return isPatch
     },
-    selectedMinorVersionIsNotNextMinor () {
-      const version = get(this, 'selectedItem.version')
-      const updateType = get(this, 'selectedItem.updateType')
-      const invalid = !version || this.itemIsNotNextMinor(version, updateType)
-      this.$emit('selectedVersionInvalid', invalid)
-      return invalid
-    },
-    isError () {
-      const selectedVersion = get(this, 'selectedItem.version')
-      return selectedVersion && this.selectedMinorVersionIsNotNextMinor
-    },
     label () {
       if (this.selectedVersionIsPatch) {
         return 'Patch to Version'
@@ -194,9 +209,6 @@ export default {
     hint () {
       if (!this.selectedItem) {
         return undefined
-      }
-      if (this.selectedMinorVersionIsNotNextMinor) {
-        return 'You cannot upgrade your cluster more than one minor version at a time'
       }
       if (this.selectedItem.isPreview) {
         return 'Selected Version is a preview version. Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not recommended for production usage'
@@ -238,6 +250,7 @@ export default {
     reset () {
       this.selectedItem = undefined
     },
+    getErrorMessages,
   },
 }
 </script>

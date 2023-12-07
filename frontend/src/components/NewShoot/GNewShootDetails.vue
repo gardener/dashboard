@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
           color="primary"
           label="Cluster Name"
           :counter="maxShootNameLength"
-          :error-messages="getErrorMessages('name')"
+          :error-messages="getErrorMessages(v$.name)"
           hint="Maximum name length depends on project name"
           variant="underlined"
           @input="onInputName"
@@ -31,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0
           item-title="version"
           item-value="version"
           :items="sortedKubernetesVersionsList"
-          :error-messages="getErrorMessages('kubernetesVersion')"
+          :error-messages="getErrorMessages(v$.kubernetesVersion)"
           :hint="versionHint"
           persistent-hint
           variant="underlined"
@@ -109,12 +109,14 @@ import GStaticTokenKubeconfigSwitch from '@/components/GStaticTokenKubeconfigSwi
 import { useAsyncRef } from '@/composables/useAsyncRef'
 
 import {
-  resourceName,
+  withFieldName,
+  lowerCaseAlphaNumHyphen,
   noStartEndHyphen,
   noConsecutiveHyphen,
+  withMessage,
 } from '@/utils/validators'
 import {
-  getValidationErrors,
+  getErrorMessages,
   transformHtml,
   setDelayedInputFocus,
 } from '@/utils'
@@ -125,20 +127,6 @@ import {
   join,
   filter,
 } from '@/lodash'
-
-const validationErrors = {
-  name: {
-    required: 'Name is required',
-    maxLength: 'Name is too long',
-    resourceName: 'Name must only be lowercase letters, numbers and hyphens',
-    unique: 'Cluster name must be unique',
-    noConsecutiveHyphen: 'Cluster name must not contain consecutive hyphens',
-    noStartEndHyphen: 'Cluster name must not start or end with a hyphen',
-  },
-  kubernetesVersion: {
-    required: 'Kubernetes version is required',
-  },
-}
 
 export default {
   components: {
@@ -159,7 +147,6 @@ export default {
   },
   data () {
     return {
-      validationErrors,
       name: undefined,
       kubernetesVersion: undefined,
       purposeValue: undefined,
@@ -170,7 +157,26 @@ export default {
     }
   },
   validations () {
-    return this.validators
+    const rules = {}
+
+    const nameRules = {
+      required,
+      maxLength: maxLength(this.maxShootNameLength),
+      noConsecutiveHyphen,
+      noStartEndHyphen,
+      lowerCaseAlphaNumHyphen,
+      unique: withMessage('A cluster with this name already exists in this project',
+        value => !this.shootByNamespaceAndName({ namespace: this.namespace, name: value }),
+      ),
+    }
+    rules.name = withFieldName('Cluster Name', nameRules)
+
+    const kubernetesVersionRules = {
+      required,
+    }
+    rules.kubernetesVersion = withFieldName('Kubernetes Version', kubernetesVersionRules)
+
+    return rules
   },
   computed: {
     ...mapWritableState(useShootStagingStore, ['workerless']),
@@ -216,23 +222,6 @@ export default {
     maxShootNameLength () {
       return 21 - this.projectName.length
     },
-    validators () {
-      return {
-        name: {
-          required,
-          maxLength: maxLength(this.maxShootNameLength),
-          noConsecutiveHyphen,
-          noStartEndHyphen, // Order is important for UI hints
-          resourceName,
-          unique (value) {
-            return this.shootByNamespaceAndName({ namespace: this.namespace, name: value }) === undefined
-          },
-        },
-        kubernetesVersion: {
-          required,
-        },
-      }
-    },
   },
   mounted () {
     this.userInterActionBus.on('updateSecret', secret => {
@@ -258,9 +247,6 @@ export default {
     ...mapActions(useShootStore, [
       'shootByNamespaceAndName',
     ]),
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
-    },
     onInputName () {
       this.v$.name.$touch()
     },
@@ -304,6 +290,7 @@ export default {
       }
       return join(itemDescription, ' | ')
     },
+    getErrorMessages,
   },
 }
 </script>

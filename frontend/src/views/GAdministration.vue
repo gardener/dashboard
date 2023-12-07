@@ -513,6 +513,7 @@ import GTimeString from '@/components/GTimeString.vue'
 import GShootCustomField from '@/components/GShootCustomField.vue'
 import GResourceQuotaHelp from '@/components/GResourceQuotaHelp.vue'
 
+import { withMessage } from '@/utils/validators'
 import {
   transformHtml,
   getProjectDetails,
@@ -626,8 +627,8 @@ export default {
         },
       )
       return {
-        required: helpers.withMessage('Owner is required', required),
-        userListIncludes: helpers.withMessage('Owner must be a project member', userListIncludesValidator),
+        required: withMessage('Owner is required', required),
+        userListIncludes: withMessage('Owner must be a project member', userListIncludesValidator),
       }
     },
     ownerAvatarUrl () {
@@ -700,7 +701,7 @@ export default {
     ]),
     getCostObjectValidator () {
       const pattern = get(this.costObjectSettings, 'regex', '[^]*')
-      return helpers.withMessage(
+      return withMessage(
         () => get(this.costObjectSettings, 'errorMessage'),
         helpers.regex(new RegExp(pattern)),
       )

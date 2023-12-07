@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
       label="Image"
       hint="Image to be used for the Container"
       persistent-hint
-      :error-messages="getErrorMessages('containerImage')"
+      :error-messages="getErrorMessages(v$.containerImage)"
       variant="underlined"
       @update:model-value="v$.containerImage.$touch()"
       @blur="v$.containerImage.$touch()"
@@ -120,13 +120,8 @@ import { useAuthnStore } from '@/store/authn'
 
 import GTimeString from '@/components/GTimeString.vue'
 
-import { getValidationErrors } from '@/utils'
-
-const validationErrors = {
-  containerImage: {
-    required: 'You can\'t leave this empty.',
-  },
-}
+import { getErrorMessages } from '@/utils'
+import { withFieldName } from '@/utils/validators'
 
 export default {
   components: {
@@ -150,39 +145,29 @@ export default {
       v$: useVuelidate(),
     }
   },
-  data () {
-    return {
-      validationErrors,
-    }
-  },
   validations () {
-    return this.validators
+    return {
+      containerImage: withFieldName('Terminal Container Image', {
+        required,
+      }),
+    }
   },
   computed: {
     ...mapState(useAuthnStore, [
       'isAdmin',
     ]),
-    validators () {
-      return {
-        containerImage: {
-          required,
-        },
-      }
-    },
     shootNodesInternal () {
       return this.runtime === 'shoot' ? this.shootNodes : []
     },
   },
   methods: {
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
-    },
     isAutoSelectNodeItem (item) {
       return this.isAutoSelectNode(item.raw.data?.kubernetesHostname)
     },
     isAutoSelectNode (hostname) {
       return hostname === '<AUTO-SELECT>'
     },
+    getErrorMessages,
   },
 }
 </script>

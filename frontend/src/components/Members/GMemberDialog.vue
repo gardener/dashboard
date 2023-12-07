@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
                 :disabled="isUpdateDialog"
                 color="primary"
                 :label="nameLabel"
-                :error-messages="getErrorMessages('internalName')"
+                :error-messages="getErrorMessages(v$.internalName)"
                 :hint="nameHint"
                 persistent-hint
                 tabindex="1"
@@ -43,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
                 multiple
                 item-title="displayName"
                 item-value="name"
-                :error-messages="getErrorMessages('internalRoles')"
+                :error-messages="getErrorMessages(v$.internalRoles)"
                 :hint="rolesHint"
                 persistent-hint
                 tabindex="2"
@@ -107,7 +107,6 @@ SPDX-License-Identifier: Apache-2.0
         <v-btn
           v-if="isUpdateDialog"
           variant="text"
-          :disabled="!valid"
           class="text-primary"
           tabindex="4"
           @click.stop="submitUpdateMember"
@@ -117,7 +116,6 @@ SPDX-License-Identifier: Apache-2.0
         <v-btn
           v-else
           variant="text"
-          :disabled="!valid"
           class="text-primary"
           tabindex="4"
           @click.stop="submitAddMember"
@@ -148,8 +146,12 @@ import GMessage from '@/components/GMessage.vue'
 import GToolbar from '@/components/GToolbar.vue'
 
 import {
-  resourceName,
+  withFieldName,
+  lowerCaseAlphaNumHyphen,
+  noStartEndHyphen,
   unique,
+  withMessage,
+  messageFromErrors,
 } from '@/utils/validators'
 import {
   errorDetailsFromError,
@@ -159,7 +161,7 @@ import {
   parseServiceAccountUsername,
   isServiceAccountUsername,
   setDelayedInputFocus,
-  getValidationErrors,
+  getErrorMessages,
   isForeignServiceAccount,
   MEMBER_ROLE_DESCRIPTORS,
 } from '@/utils'
@@ -228,8 +230,42 @@ export default {
     }
   },
   validations () {
-    // had to move the code to a computed property so that the getValidationErrors method can access it
-    return this.validators
+    const rules = {}
+    const internalRolesRules = {
+      required: withMessage(() => this.isUserDialog
+        ? 'Users need to have at least one assigned role'
+        : 'Service accounts that are not part of this project need to have at least one assigned role',
+      requiredIf(() => this.isForeignServiceAccount || this.isUserDialog)),
+    }
+    rules.internalRoles = withFieldName('Member Roles', internalRolesRules)
+
+    if (this.isUpdateDialog) {
+      return rules
+    }
+
+    if (this.isUserDialog) {
+      const internalNameRules = {
+        required,
+        unique: withMessage(() => `User '${this.internalName}' is already member of this project.`, unique('projectUsernames')),
+        isNoServiceAccount: withMessage('Please use add service account to add service accounts', value => !isServiceAccountUsername(value)),
+      }
+      rules.internalName = withFieldName('User Name', internalNameRules)
+    } else if (this.isServiceDialog) {
+      const serviceAccountKeyFunc = value => isServiceAccountUsername(value)
+        ? 'serviceAccountUsernames'
+        : 'serviceAccountNames'
+      const internalNameRules = {
+        required,
+        unique: withMessage(() => `Service Account '${this.internalName}' already exists. Please try a different name.`, unique(serviceAccountKeyFunc)),
+      }
+      if (!isServiceAccountUsername(this.internalName)) {
+        internalNameRules.serviceAccountResource = withMessage('Name must contain only lowercase alphanumeric characters or hyphen. Colons are allowed if you specify the service account prefix to add a service account from another namespace', lowerCaseAlphaNumHyphen)
+        internalNameRules.noStartEndHyphen = noStartEndHyphen
+      }
+      rules.internalName = withFieldName('Service Account Name', internalNameRules)
+    }
+
+    return rules
   },
   computed: {
     ...mapState(useAuthzStore, ['namespace']),
@@ -244,69 +280,6 @@ export default {
       set (value) {
         this.$emit('update:modelValue', value)
       },
-    },
-    valid () {
-      return !this.v$.$invalid
-    },
-    validators () {
-      const validators = {
-        internalRoles: {
-          required: requiredIf(function () {
-            return this.isForeignServiceAccount || this.isUserDialog
-          }),
-        },
-        internalName: {},
-      }
-      if (!this.isUpdateDialog) {
-        if (this.isUserDialog) {
-          validators.internalName = {
-            required,
-            unique: unique('projectUsernames'),
-            isNoServiceAccount: value => !isServiceAccountUsername(value),
-          }
-        } else if (this.isServiceDialog) {
-          const serviceAccountKeyFunc = (value) => {
-            return isServiceAccountUsername(value)
-              ? 'serviceAccountUsernames'
-              : 'serviceAccountNames'
-          }
-          validators.internalName = {
-            required,
-            serviceAccountResource: value => {
-              if (isServiceAccountUsername(this.internalName)) {
-                return true
-              }
-              return resourceName(value)
-            },
-            unique: unique(serviceAccountKeyFunc),
-          }
-        }
-      }
-      return validators
-    },
-    validationErrors () {
-      const validationErrors = {}
-      if (this.isUserDialog) {
-        validationErrors.internalRoles = {
-          required: 'You need to assign roles to this user',
-        }
-        validationErrors.internalName = {
-          required: 'User is required',
-          unique: `User '${this.internalName}' is already member of this project.`,
-          isNoServiceAccount: 'Please use add service account to add service accounts',
-        }
-      } else if (this.isServiceDialog) {
-        validationErrors.internalRoles = {
-          required: 'You need to assign roles for service accounts that you want to invite to this project',
-        }
-        validationErrors.internalName = {
-          required: 'Service Account is required',
-          resourceName: 'Must contain only alphanumeric characters or hypen',
-          serviceAccountResource: 'Name must contain only alphanumeric characters or hypen. You can also specify the service account prefix if you want to add a service account from another namespace',
-          unique: `Service Account '${this.internalName}' already exists. Please try a different name.`,
-        }
-      }
-      return validationErrors
     },
     title () {
       if (this.isUpdateDialog) {
@@ -412,51 +385,56 @@ export default {
     hide () {
       this.visible = false
     },
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
-    },
     async submitAddMember () {
-      this.v$.$touch()
-      if (this.valid) {
-        const name = this.memberName
-        const roles = this.internalRoles
-        try {
-          await this.addMember({ name, roles, description: this.internalDescription })
-          this.hide()
-        } catch (err) {
-          const errorDetails = errorDetailsFromError(err)
-          if (isConflict(err)) {
-            if (this.isUserDialog) {
-              this.errorMessage = `User '${name}' is already member of this project.`
-            } else if (this.isServiceDialog) {
-              this.errorMessage = `Service account '${name}' already exists. Please try a different name.`
-            }
-          } else {
-            this.errorMessage = 'Failed to add project member'
+      if (this.v$.$invalid) {
+        await this.v$.$validate()
+        const message = messageFromErrors(this.v$.$errors)
+        this.errorMessage = 'There are input errors that you need to resolve'
+        this.detailedErrorMessage = message
+        return
+      }
+      const name = this.memberName
+      const roles = this.internalRoles
+      try {
+        await this.addMember({ name, roles, description: this.internalDescription })
+        this.hide()
+      } catch (err) {
+        const errorDetails = errorDetailsFromError(err)
+        if (isConflict(err)) {
+          if (this.isUserDialog) {
+            this.errorMessage = `User '${name}' is already member of this project.`
+          } else if (this.isServiceDialog) {
+            this.errorMessage = `Service account '${name}' already exists. Please try a different name.`
           }
-          this.detailedErrorMessage = errorDetails.detailedMessage
-          this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        } else {
+          this.errorMessage = 'Failed to add project member'
         }
+        this.detailedErrorMessage = errorDetails.detailedMessage
+        this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
     async submitUpdateMember () {
-      this.v$.$touch()
-      if (this.valid) {
-        try {
-          const name = this.memberName
-          const roles = [...this.internalRoles, ...this.unsupportedRoles]
-          await this.updateMember(name, { roles, description: this.internalDescription })
+      if (this.v$.$invalid) {
+        await this.v$.$validate()
+        const message = messageFromErrors(this.v$.$errors)
+        this.errorMessage = 'There are input errors that you need to resolve'
+        this.detailedErrorMessage = message
+        return
+      }
+      try {
+        const name = this.memberName
+        const roles = [...this.internalRoles, ...this.unsupportedRoles]
+        await this.updateMember(name, { roles, description: this.internalDescription })
 
-          if (this.isCurrentUser && !this.isAdmin) {
-            await this.refreshRules()
-          }
-          this.hide()
-        } catch (err) {
-          const errorDetails = errorDetailsFromError(err)
-          this.errorMessage = 'Failed to update project member'
-          this.detailedErrorMessage = errorDetails.detailedMessage
-          this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        if (this.isCurrentUser && !this.isAdmin) {
+          await this.refreshRules()
         }
+        this.hide()
+      } catch (err) {
+        const errorDetails = errorDetailsFromError(err)
+        this.errorMessage = 'Failed to update project member'
+        this.detailedErrorMessage = errorDetails.detailedMessage
+        this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
     cancel () {
@@ -517,6 +495,7 @@ export default {
 
       return name
     },
+    getErrorMessages,
   },
 }
 </script>

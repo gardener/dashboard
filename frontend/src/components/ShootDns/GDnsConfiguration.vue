@@ -8,7 +8,6 @@ SPDX-License-Identifier: Apache-2.0
   <g-action-button-dialog
     ref="actionDialog"
     :shoot-item="shootItem"
-    :valid="!v$.$invalid"
     caption="Configure DNS"
     width="900"
     confirm-required

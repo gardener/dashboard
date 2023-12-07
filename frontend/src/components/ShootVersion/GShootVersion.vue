@@ -42,7 +42,6 @@ SPDX-License-Identifier: Apache-2.0
       v-model:detailed-error-message="updateDetailedErrorMessage"
       :confirm-value="confirm"
       confirm-button-text="Update"
-      :confirm-disabled="selectedVersionInvalid"
       width="450"
     >
       <template #caption>
@@ -58,10 +57,9 @@ SPDX-License-Identifier: Apache-2.0
           :current-k8s-version="kubernetesVersion"
           @selected-version="onSelectedVersion"
           @selected-version-type="onSelectedVersionType"
-          @selected-version-invalid="onSelectedVersionInvalid"
           @confirm-required="onConfirmRequired"
         />
-        <template v-if="!selectedVersionInvalid && selectedVersionType === 'minor'">
+        <template v-if="!v$.$invalid && selectedVersionType === 'minor'">
           <p>
             You should always test your scenario and back up all your data before attempting an upgrade. Don’t forget to include the workload inside your cluster!
           </p>
@@ -83,7 +81,7 @@ SPDX-License-Identifier: Apache-2.0
           </p>
           <em class="text-warning">This action cannot be undone.</em>
         </template>
-        <template v-if="!selectedVersionInvalid && selectedVersionType === 'patch'">
+        <template v-if="!v$.$invalid && selectedVersionType === 'patch'">
           <p>
             Applying a patch to your cluster will increase the Kubernetes version which can lead to unexpected side effects.
           </p>
@@ -99,6 +97,7 @@ import {
   mapState,
   mapActions,
 } from 'pinia'
+import { useVuelidate } from '@vuelidate/core'
 
 import { useAuthzStore } from '@/store/authz'
 import { useCloudProfileStore } from '@/store/cloudProfile'
@@ -126,11 +125,15 @@ export default {
       type: Boolean,
     },
   },
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
       selectedVersion: undefined,
       selectedVersionType: undefined,
-      selectedVersionInvalid: true,
       confirmRequired: false,
       updateErrorMessage: null,
       updateDetailedErrorMessage: null,
@@ -182,9 +185,6 @@ export default {
     },
     onSelectedVersionType (value) {
       this.selectedVersionType = value
-    },
-    onSelectedVersionInvalid (value) {
-      this.selectedVersionInvalid = value
     },
     onConfirmRequired (value) {
       this.confirmRequired = value
