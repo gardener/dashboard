@@ -183,15 +183,7 @@ SPDX-License-Identifier: Apache-2.0
             variant="underlined"
             @update:model-value="onInputLoadBalancerClassNames"
             @blur="v$.loadBalancerClassNames.$touch()"
-          >
-            <template #item="{ item, props }">
-              <v-list-item
-                v-bind="props"
-                :disabled="item.raw.disabled"
-                :prepend-icon="isLoadBalancerClassSelected(item) ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline'"
-              />
-            </template>
-          </v-select>
+          />
         </v-col>
       </template>
     </v-row>
@@ -420,7 +412,9 @@ export default {
         return {
           title: name,
           value: name,
-          disabled: name === 'default',
+          props: {
+            disabled: name === 'default',
+          },
         }
       })
       return loadBalancerClasses
@@ -501,9 +495,6 @@ export default {
     setDefaultCloudProfile () {
       this.cloudProfileName = get(head(this.cloudProfiles), 'metadata.name')
       this.onUpdateCloudProfileName()
-    },
-    isLoadBalancerClassSelected ({ value }) {
-      return includes(this.loadBalancerClassNames, value)
     },
     onUpdateSecret (secret) {
       this.secret = secret

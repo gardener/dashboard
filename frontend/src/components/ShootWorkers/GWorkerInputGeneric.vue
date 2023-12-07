@@ -135,14 +135,7 @@ SPDX-License-Identifier: Apache-2.0
           variant="underlined"
           @update:model-value="onInputZones"
           @blur="v$.selectedZones.$touch()"
-        >
-          <template #item="{ props, item }">
-            <v-list-item
-              v-bind="props"
-              :disabled="item.raw.disabled"
-            />
-          </template>
-        </v-select>
+        />
       </div>
     </div>
     <div class="ml-4 mr-2">
@@ -434,7 +427,9 @@ export default {
           return {
             value: [index, zone],
             text: zone,
-            disabled: includes(this.immutableZones, zone),
+            props: {
+              disabled: includes(this.immutableZones, zone),
+            },
           }
         })
       },
@@ -454,7 +449,9 @@ export default {
         return {
           value: [index, zone],
           text: zone,
-          disabled: !includes(this.availableZones, zone),
+          props: {
+            disabled: !includes(this.availableZones, zone),
+          },
         }
       })
     },
