@@ -139,16 +139,19 @@ SPDX-License-Identifier: Apache-2.0
                   label="Operator Features"
                   color="primary"
                   density="compact"
-                  hide-details
-                />
-                <div
-                  class="text-caption text-grey-darken-1"
+                  persistent-hint
+                  hint="Enable operator features for project cluster lists"
                 >
-                  <span class="font-weight-bold">Enable operator features for project cluster lists</span><br>
-                  You can set the focus mode for cluster lists. This mode will freeze the current
-                  list and allows to get an overview of clusters with issues by sorting the list by
-                  the <code>ISSUE SINCE</code> column.
-                </div>
+                  <template #message="{ message }">
+                    <div
+                      class="font-weight-bold pb-1"
+                      v-text="message"
+                    />
+                    You can set the focus mode for cluster lists. This mode will freeze the current
+                    list and allows to get an overview of clusters with issues by sorting the list by
+                    the <span class="font-family-monospace">ISSUE SINCE</span> column.
+                  </template>
+                </v-switch>
               </v-col>
             </v-row>
           </v-card-text>
@@ -180,3 +183,9 @@ const {
   operatorFeatures,
 } = storeToRefs(localStorageStore)
 </script>
+
+<style lang="scss" scoped>
+:deep(.v-messages__message) {
+  line-height: 14px;
+}
+</style>

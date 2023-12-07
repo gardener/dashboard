@@ -7,6 +7,7 @@
 const _ = require('lodash')
 const { NotFound } = require('http-errors')
 const createTicketCache = require('./tickets')
+const { parseSelectors, filterBySelectors } = require('../utils')
 
 /*
   In file `lib/api.js` the synchronization is started with the privileged dashboardClient.
@@ -97,11 +98,25 @@ module.exports = {
       .get('spec.namespace')
       .value()
   },
-  getShoots () {
-    return cache.getShoots()
+  getShoots (namespace, query = {}) {
+    if (!namespace) {
+      throw new TypeError('Namespace is required')
+    }
+    let items = cache.getShoots()
+    if (namespace !== '_all') {
+      items = items.filter(item => item.metadata.namespace === namespace)
+    }
+    const selectors = parseSelectors(query.labelSelector?.split(',') ?? [])
+    if (selectors.length) {
+      items = items.filter(filterBySelectors(selectors))
+    }
+    return items
   },
   getShoot (namespace, name) {
     return cache.get('shoots').find({ metadata: { namespace, name } })
+  },
+  getShootByUid (uid) {
+    return cache.get('shoots').find(['metadata.uid', uid])
   },
   getControllerRegistrations () {
     return cache.getControllerRegistrations()

@@ -30,12 +30,15 @@ export const shootSubscription = {
       'active',
     ]),
     kind () {
-      if (this.loading) {
+      if (this.subscriptionState === constants.LOADING) {
         return this.subscriptionError
-          ? this.subscriptionState === constants.LOADING
-            ? 'alert-load'
-            : 'alert-subscribe'
-          : 'progress'
+          ? 'alert-load'
+          : 'progress-load'
+      }
+      if (this.subscriptionState === constants.LOADED || this.subscriptionState === constants.OPENING) {
+        return this.subscriptionError
+          ? 'alert-subscribe'
+          : 'progress-subscribe'
       }
       if (!this.connected) {
         return this.active
@@ -52,7 +55,8 @@ export const shootSubscription = {
           return 'error'
         case 'progress-connect':
           return colors.grey.darken1
-        case 'progress':
+        case 'progress-load':
+        case 'progress-subscribe':
         default:
           return 'primary'
       }
@@ -70,7 +74,9 @@ export const shootSubscription = {
           return `Subscribing ${name} failed. Data may be outdated`
         case 'progress-connect':
           return 'Establishing real-time server connection ...'
-        case 'progress':
+        case 'progress-load':
+          return `Loading ${name} ...`
+        case 'progress-subscribe':
           return `Subscribing ${name} ...`
         default:
           return this.subscribed

@@ -71,7 +71,7 @@ export function createGlobalBeforeGuards () {
   function ensureDataLoaded () {
     return async (to, from, next) => {
       const { meta = {} } = to
-      if (meta.public || to.name === 'Error') {
+      if (meta.public) {
         shootStore.unsubscribeShoots()
         return next()
       }
@@ -99,6 +99,11 @@ export function createGlobalBeforeGuards () {
         }
 
         switch (to.name) {
+          case 'Home':
+          case 'ProjectList': {
+            // no action required for redirect routes
+            break
+          }
           case 'Secrets':
           case 'Secret': {
             shootStore.subscribeShoots()
@@ -128,14 +133,20 @@ export function createGlobalBeforeGuards () {
             }
             break
           }
+          case 'ShootItem':
+          case 'ShootItemEditor':
+          case 'ShootItemHibernationSettings':
+          case 'ShootItemTerminal': {
+            // shoot subscription and data retrieval is done in GShootItemPlaceholder
+            break
+          }
           case 'Members':
           case 'Administration': {
             shootStore.subscribeShoots()
             await memberStore.fetchMembers()
             break
           }
-          case 'Account':
-          case 'Settings': {
+          default: {
             shootStore.unsubscribeShoots()
             break
           }

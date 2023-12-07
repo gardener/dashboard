@@ -163,16 +163,21 @@ SPDX-License-Identifier: Apache-2.0
         hover
         :loading="loading || !connected"
         :items-per-page-options="itemsPerPageOptions"
-        :custom-key-sort="disableCustomKeySort(visibleHeaders)"
+        :custom-key-sort="customKeySort"
         must-sort
         class="g-table"
       >
         <template #progress>
           <g-shoot-list-progress />
         </template>
+        <template #loading>
+          Loading clusters ...
+        </template>
+        <template #no-data>
+          No clusters to show
+        </template>
         <template #item="{ item }">
           <g-shoot-list-row
-            :key="item.metadata.uid"
             :shoot-item="item"
             :visible-headers="visibleHeaders"
             @show-dialog="showDialog"
@@ -221,10 +226,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import {
-  defineAsyncComponent,
-  toRaw,
-} from 'vue'
+import { defineAsyncComponent } from 'vue'
 import {
   mapState,
   mapWritableState,
@@ -256,8 +258,6 @@ import {
   isEmpty,
   join,
   map,
-  mapKeys,
-  mapValues,
   some,
   sortBy,
   startsWith,
@@ -278,7 +278,6 @@ export default {
   inject: ['logger'],
   beforeRouteEnter (to, from, next) {
     next(vm => {
-      vm.cachedItems = null
       vm.updateTableSettings()
     })
   },
@@ -289,7 +288,6 @@ export default {
     next()
   },
   beforeRouteLeave (to, from, next) {
-    this.cachedItems = this.shootList.slice(0)
     this.resetShootSearch()
     this.focusModeInternal = false
     next()
@@ -300,7 +298,6 @@ export default {
       debouncedShootSearch: '',
       dialog: null,
       page: 1,
-      cachedItems: null,
       selectedColumns: undefined,
       itemsPerPageOptions: [
         { value: 5, title: '5' },
@@ -336,7 +333,7 @@ export default {
       'shootList',
       'shootListFilters',
       'loading',
-      'selectedItem',
+      'selectedShoot',
       'onlyShootsWithIssues',
       'numberOfNewItemsSinceFreeze',
       'focusMode',
@@ -384,11 +381,11 @@ export default {
       },
     },
     currentName () {
-      return get(this.selectedItem, 'metadata.name')
+      return get(this.selectedShoot, 'metadata.name')
     },
     shootItem () {
       // property `shoot-item` of the mixin is required
-      return this.selectedItem || {}
+      return this.selectedShoot || {}
     },
     currentStandardSelectedColumns () {
       return mapTableHeader(this.standardHeaders, 'selected')
@@ -606,6 +603,17 @@ export default {
     visibleHeaders () {
       return filter(this.selectableHeaders, ['selected', true])
     },
+    sortableHeaders () {
+      return filter(this.visibleHeaders, ['sortable', true])
+    },
+    customKeySort () {
+      const noSort = () => 0
+      const value = {}
+      for (const header of this.sortableHeaders) {
+        value[header.key] = noSort
+      }
+      return value
+    },
     allFilters () {
       return [
         {
@@ -671,7 +679,7 @@ export default {
       },
     },
     items () {
-      return this.cachedItems || this.shootList
+      return this.shootList ?? []
     },
     changeFiltersDisabled () {
       return this.focusModeInternal
@@ -709,9 +717,14 @@ export default {
     hideClustersWithLabels () {
       return get(this.ticketConfig, 'hideClustersWithLabels', [])
     },
+    filteredItems () {
+      const query = this.debouncedShootSearch
+      return query
+        ? filter(this.items, item => this.searchItems(query, item))
+        : [...this.items]
+    },
     sortedAndFilteredItems () {
-      const items = this.sortItems(this.items, this.sortByInternal)
-      return filter(items, item => this.searchItems(this.debouncedShootSearch, toRaw(item)))
+      return this.sortItems(this.filteredItems, this.sortByInternal)
     },
     issueSinceColumnVisible () {
       return this.operatorFeatures || (!this.projectScope && this.isAdmin)
@@ -811,11 +824,6 @@ export default {
     setDebouncedShootSearch: debounce(function () {
       this.debouncedShootSearch = this.shootSearch
     }, 500),
-    disableCustomKeySort (tableHeaders) {
-      const sortableTableHeaders = filter(tableHeaders, ['sortable', true])
-      const tableKeys = mapKeys(sortableTableHeaders, ({ key }) => key)
-      return mapValues(tableKeys, () => () => 0)
-    },
   },
 }
 </script>
