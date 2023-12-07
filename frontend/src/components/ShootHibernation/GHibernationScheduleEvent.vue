@@ -140,18 +140,14 @@ export default {
 
     const hibernateTimeRules = {
       required: withMessage('You need to specify at least hibernation or wake up time',
-        requiredIf(function () {
-          return !this.wakeUpTime
-        }),
+        requiredIf(() => !this.wakeUpTime),
       ),
     }
     rules.hibernateTime = withFieldName('Hibernation Time', hibernateTimeRules)
 
     const wakeUpTimeRules = {
       required: withMessage('You need to specify at least hibernation or wake up time',
-        requiredIf(function () {
-          return !this.hibernateTime
-        }),
+        requiredIf(() => !this.hibernateTime),
       ),
     }
     rules.wakeUpTime = withFieldName('Hibernation Wake Up Time', wakeUpTimeRules)

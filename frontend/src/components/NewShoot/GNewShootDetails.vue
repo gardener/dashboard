@@ -166,9 +166,8 @@ export default {
       noStartEndHyphen,
       lowerCaseAlphaNumHyphen,
       unique: withMessage('A cluster with this name already exists in this project',
-        (value) => {
-          return this.shootByNamespaceAndName({ namespace: this.namespace, name: value }) === undefined
-        }),
+        value => !this.shootByNamespaceAndName({ namespace: this.namespace, name: value }),
+      ),
     }
     rules.name = withFieldName('Cluster Name', nameRules)
 

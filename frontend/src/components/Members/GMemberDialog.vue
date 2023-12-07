@@ -232,13 +232,10 @@ export default {
   validations () {
     const rules = {}
     const internalRolesRules = {
-      required: withMessage(
-        this.isUserDialog
-          ? 'Users need to have at least one assigned role'
-          : 'Service accounts that are not part of this project need to have at least one assigned role',
-        requiredIf(function () {
-          return this.isForeignServiceAccount || this.isUserDialog
-        })),
+      required: withMessage(() => this.isUserDialog
+        ? 'Users need to have at least one assigned role'
+        : 'Service accounts that are not part of this project need to have at least one assigned role',
+      requiredIf(() => this.isForeignServiceAccount || this.isUserDialog)),
     }
     rules.internalRoles = withFieldName('Member Roles', internalRolesRules)
 
@@ -254,11 +251,9 @@ export default {
       }
       rules.internalName = withFieldName('User Name', internalNameRules)
     } else if (this.isServiceDialog) {
-      const serviceAccountKeyFunc = (value) => {
-        return isServiceAccountUsername(value)
-          ? 'serviceAccountUsernames'
-          : 'serviceAccountNames'
-      }
+      const serviceAccountKeyFunc = value => isServiceAccountUsername(value)
+        ? 'serviceAccountUsernames'
+        : 'serviceAccountNames'
       const internalNameRules = {
         required,
         unique: withMessage(() => `Service Account '${this.internalName}' already exists. Please try a different name.`, unique(serviceAccountKeyFunc)),

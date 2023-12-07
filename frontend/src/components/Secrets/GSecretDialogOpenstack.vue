@@ -242,52 +242,40 @@ export default {
 
     const usernameRules = {
       required: withMessage(requiredUserMessage,
-        requiredIf(function () {
-          return this.authenticationMethod === 'USER'
-        }),
+        requiredIf(() => this.authenticationMethod === 'USER'),
       ),
     }
     rules.username = withFieldName('Technical User', usernameRules)
 
     const passwordRules = {
       required: withMessage(requiredUserMessage,
-        requiredIf(function () {
-          return this.authenticationMethod === 'USER'
-        }),
+        requiredIf(() => this.authenticationMethod === 'USER'),
       ),
     }
     rules.password = withFieldName('Password', passwordRules)
 
     const authURLRules = {
-      required: requiredIf(function () {
-        return this.vendor === 'openstack-designate'
-      }),
+      required: requiredIf(() => this.vendor === 'openstack-designate'),
     }
     rules.authURL = withFieldName('Auth URL', authURLRules)
 
     const applicationCredentialIDRules = {
       required: withMessage(requiredApplicationCredentialsMessage,
-        requiredIf(function () {
-          return this.authenticationMethod === 'APPLICATION_CREDENTIALS'
-        }),
+        requiredIf(() => this.authenticationMethod === 'APPLICATION_CREDENTIALS'),
       ),
     }
     rules.applicationCredentialID = withFieldName('Application Credentials ID', applicationCredentialIDRules)
 
     const applicationCredentialNameRules = {
       required: withMessage(requiredApplicationCredentialsMessage,
-        requiredIf(function () {
-          return this.authenticationMethod === 'APPLICATION_CREDENTIALS'
-        }),
+        requiredIf(() => this.authenticationMethod === 'APPLICATION_CREDENTIALS'),
       ),
     }
     rules.applicationCredentialName = withFieldName('Application Credentials Name', applicationCredentialNameRules)
 
     const applicationCredentialSecretRules = {
       required: withMessage(requiredApplicationCredentialsMessage,
-        requiredIf(function () {
-          return this.authenticationMethod === 'APPLICATION_CREDENTIALS'
-        }),
+        requiredIf(() => this.authenticationMethod === 'APPLICATION_CREDENTIALS'),
       ),
     }
     rules.applicationCredentialSecret = withFieldName('Application Credentials Secret', applicationCredentialSecretRules)

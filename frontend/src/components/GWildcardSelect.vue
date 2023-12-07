@@ -179,7 +179,7 @@ export default {
   validations () {
     const rules = {}
     const wildcardSelectedValueRules = {
-      required: withMessage(`${this.wildcardSelectLabel} is required`, required),
+      required: withMessage(() => `${this.wildcardSelectLabel} is required`, required),
       prefixRequired: withMessage('Prefix is required', () => {
         return this.wildcardVariablePartPrefix || !this.wildcardSelectedValue.startsWithWildcard
       }),

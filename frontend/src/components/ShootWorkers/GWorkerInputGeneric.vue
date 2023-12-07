@@ -300,9 +300,7 @@ export default {
     })
 
     rules.selectedZones = withFieldName(() => `${this.workerGroupName} Zones`, {
-      required: requiredIf(function () {
-        return this.zonedCluster
-      }),
+      required: requiredIf(() => this.zonedCluster),
     })
 
     const volumeSizeRules = {

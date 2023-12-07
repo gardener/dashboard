@@ -331,25 +331,23 @@ export default {
         this.detailedErrorMessage = message
         return
       }
-      if (this.valid) {
-        try {
-          await this.save()
-          this.hide()
-        } catch (err) {
-          const errorDetails = errorDetailsFromError(err)
-          if (this.isCreateMode) {
-            if (isConflict(err)) {
-              this.errorMessage = `Infrastructure Secret name '${this.name}' is already taken. Please try a different name.`
-              setInputFocus(this, 'name')
-            } else {
-              this.errorMessage = 'Failed to create Infrastructure Secret.'
-            }
+      try {
+        await this.save()
+        this.hide()
+      } catch (err) {
+        const errorDetails = errorDetailsFromError(err)
+        if (this.isCreateMode) {
+          if (isConflict(err)) {
+            this.errorMessage = `Infrastructure Secret name '${this.name}' is already taken. Please try a different name.`
+            setInputFocus(this, 'name')
           } else {
-            this.errorMessage = 'Failed to update Infrastructure Secret.'
+            this.errorMessage = 'Failed to create Infrastructure Secret.'
           }
-          this.detailedErrorMessage = errorDetails.detailedMessage
-          this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        } else {
+          this.errorMessage = 'Failed to update Infrastructure Secret.'
         }
+        this.detailedErrorMessage = errorDetails.detailedMessage
+        this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
     save () {
