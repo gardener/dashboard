@@ -37,7 +37,7 @@ SPDX-License-Identifier: Apache-2.0
                   v-model.trim="name"
                   color="primary"
                   label="Secret Name"
-                  :error-messages="getErrorMessages('name')"
+                  :error-messages="getErrorMessages(v$.name)"
                   variant="underlined"
                   @update:model-value="v$.name.$touch()"
                   @blur="v$.name.$touch()"
@@ -105,7 +105,6 @@ SPDX-License-Identifier: Apache-2.0
         <v-btn
           variant="text"
           color="primary"
-          :disabled="!valid"
           @click="submit"
         >
           {{ submitButtonText }}
@@ -138,18 +137,21 @@ import GMessage from '@/components/GMessage'
 import GCloudProfile from '@/components/GCloudProfile'
 
 import {
+  messageFromErrors,
+  withFieldName,
+  unique,
+  lowerCaseAlphaNumHyphen,
+  noStartEndHyphen,
+} from '@/utils/validators'
+import {
   errorDetailsFromError,
   isConflict,
 } from '@/utils/error'
 import {
-  getValidationErrors,
+  getErrorMessages,
   setDelayedInputFocus,
   setInputFocus,
 } from '@/utils'
-import {
-  unique,
-  resourceName,
-} from '@/utils/validators'
 
 import {
   cloneDeep,
@@ -160,15 +162,6 @@ import {
   filter,
   includes,
 } from '@/lodash'
-
-const validationErrors = {
-  name: {
-    required: 'You can\'t leave this empty.',
-    maxLength: 'It exceeds the maximum length of 128 characters.',
-    resourceName: 'Please use only lowercase alphanumeric characters and hyphen',
-    unique: 'Name is taken. Try another.',
-  },
-}
 
 export default {
   components: {
@@ -186,8 +179,10 @@ export default {
       type: Object,
       required: true,
     },
-    dataValid: {
-      type: Boolean,
+    secretValidations: {
+      // need to pass nested validation object which shares scope,
+      // as v$ is part of secretValidations but not vice versa
+      type: Object,
       required: true,
     },
     vendor: {
@@ -213,13 +208,25 @@ export default {
       name: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined,
-      validationErrors,
       helpVisible: false,
     }
   },
   validations () {
-    // had to move the code to a computed property so that the getValidationErrors method can access it
-    return this.validators
+    const rules = {}
+    if (!this.isCreateMode) {
+      return rules
+    }
+
+    const nameRules = {
+      required,
+      maxLength: maxLength(128),
+      lowerCaseAlphaNumHyphen,
+      noStartEndHyphen,
+      unique: unique(this.isDnsProviderSecret ? 'dnsSecretNames' : 'infrastructureSecretNames'),
+    }
+    rules.name = withFieldName('Secret Name', nameRules)
+
+    return rules
   },
   computed: {
     ...mapState(useAuthzStore, ['namespace']),
@@ -252,21 +259,6 @@ export default {
       set (modelValue) {
         this.$emit('update:modelValue', modelValue)
       },
-    },
-    valid () {
-      return this.dataValid && !this.v$.$invalid
-    },
-    validators () {
-      const validators = {}
-      if (this.isCreateMode) {
-        validators.name = {
-          required,
-          maxLength: maxLength(128),
-          resourceName,
-          unique: unique(this.isDnsProviderSecret ? 'dnsSecretNames' : 'infrastructureSecretNames'),
-        }
-      }
-      return validators
     },
     infrastructureSecretNames () {
       return this.infrastructureSecretList.map(item => item.metadata.name)
@@ -328,26 +320,30 @@ export default {
       this.hide()
     },
     async submit () {
-      this.v$.$touch()
-      if (this.valid) {
-        try {
-          await this.save()
-          this.hide()
-        } catch (err) {
-          const errorDetails = errorDetailsFromError(err)
-          if (this.isCreateMode) {
-            if (isConflict(err)) {
-              this.errorMessage = `Infrastructure Secret name '${this.name}' is already taken. Please try a different name.`
-              setInputFocus(this, 'name')
-            } else {
-              this.errorMessage = 'Failed to create Infrastructure Secret.'
-            }
+      if (this.secretValidations.$invalid) {
+        await this.secretValidations.$validate()
+        const message = messageFromErrors(this.secretValidations.$errors)
+        this.errorMessage = 'There are input errors that you need to resolve'
+        this.detailedErrorMessage = message
+        return
+      }
+      try {
+        await this.save()
+        this.hide()
+      } catch (err) {
+        const errorDetails = errorDetailsFromError(err)
+        if (this.isCreateMode) {
+          if (isConflict(err)) {
+            this.errorMessage = `Infrastructure Secret name '${this.name}' is already taken. Please try a different name.`
+            setInputFocus(this, 'name')
           } else {
-            this.errorMessage = 'Failed to update Infrastructure Secret.'
+            this.errorMessage = 'Failed to create Infrastructure Secret.'
           }
-          this.detailedErrorMessage = errorDetails.detailedMessage
-          this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        } else {
+          this.errorMessage = 'Failed to update Infrastructure Secret.'
         }
+        this.detailedErrorMessage = errorDetails.detailedMessage
+        this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
     save () {
@@ -402,9 +398,7 @@ export default {
       this.errorMessage = undefined
       this.detailedMessage = undefined
     },
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
-    },
+    getErrorMessages,
   },
 }
 </script>

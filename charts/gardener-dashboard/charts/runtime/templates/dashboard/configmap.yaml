@@ -34,6 +34,7 @@ data:
     {{- if .Values.global.dashboard.clusterIdentity }}
     clusterIdentity: {{ .Values.global.dashboard.clusterIdentity }}
     {{- end }}
+    experimentalUseWatchCacheForListShoots: {{ .Values.global.dashboard.experimentalUseWatchCacheForListShoots | default "never" }}
     readinessProbe:
       periodSeconds: {{ .Values.global.dashboard.readinessProbe.periodSeconds }}
     {{- if .Values.global.dashboard.gitHub }}
@@ -210,6 +211,8 @@ data:
       features:
         terminalEnabled: {{ .Values.global.dashboard.frontendConfig.features.terminalEnabled | default false }}
         projectTerminalShortcutsEnabled: {{ .Values.global.dashboard.frontendConfig.features.projectTerminalShortcutsEnabled | default false }}
+      experimental:
+        throttleDelayPerCluster: {{ .Values.global.dashboard.frontendConfig.experimental.throttleDelayPerCluster | default 10 }}
       {{- if .Values.global.dashboard.frontendConfig.terminal }}
       terminal:
         {{- if .Values.global.dashboard.frontendConfig.terminal.heartbeatIntervalSeconds }}

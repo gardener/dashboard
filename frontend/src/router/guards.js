@@ -36,8 +36,6 @@ export function createGlobalBeforeGuards () {
   const shootStore = useShootStore()
   const terminalStore = useTerminalStore()
 
-  let sessionTimeoutId
-
   function ensureUserAuthenticatedForNonPublicRoutes () {
     return to => {
       const {
@@ -51,13 +49,7 @@ export function createGlobalBeforeGuards () {
 
       authnStore.$reset()
 
-      const expiresIn = authnStore.sessionExpiresAt - Date.now()
-      if (expiresIn > 0) {
-        clearTimeout(sessionTimeoutId)
-        sessionTimeoutId = setTimeout(() => {
-          logger.info('User session is expired --> Initiating signout')
-          authnStore.signout(null, redirectPath)
-        }, expiresIn)
+      if (!authnStore.isExpired()) {
         return true
       }
 
@@ -66,7 +58,7 @@ export function createGlobalBeforeGuards () {
         : 'Session has expired'
       logger.info('%s --> Redirecting to login page', message)
 
-      const query = redirectPath
+      const query = redirectPath && redirectPath !== '/'
         ? { redirectPath }
         : undefined
       return {
@@ -79,7 +71,7 @@ export function createGlobalBeforeGuards () {
   function ensureDataLoaded () {
     return async (to, from, next) => {
       const { meta = {} } = to
-      if (meta.public || to.name === 'Error') {
+      if (meta.public) {
         shootStore.unsubscribeShoots()
         return next()
       }
@@ -107,6 +99,11 @@ export function createGlobalBeforeGuards () {
         }
 
         switch (to.name) {
+          case 'Home':
+          case 'ProjectList': {
+            // no action required for redirect routes
+            break
+          }
           case 'Secrets':
           case 'Secret': {
             shootStore.subscribeShoots()
@@ -136,14 +133,20 @@ export function createGlobalBeforeGuards () {
             }
             break
           }
+          case 'ShootItem':
+          case 'ShootItemEditor':
+          case 'ShootItemHibernationSettings':
+          case 'ShootItemTerminal': {
+            // shoot subscription and data retrieval is done in GShootItemPlaceholder
+            break
+          }
           case 'Members':
           case 'Administration': {
             shootStore.subscribeShoots()
             await memberStore.fetchMembers()
             break
           }
-          case 'Account':
-          case 'Settings': {
+          default: {
             shootStore.unsubscribeShoots()
             break
           }

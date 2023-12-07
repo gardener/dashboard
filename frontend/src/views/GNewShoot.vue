@@ -135,27 +135,31 @@ SPDX-License-Identifier: Apache-2.0
           />
         </v-card-text>
       </v-card>
-      <g-message
+      <div
+        v-if="errorMessage"
         ref="errorAlert"
-        v-model:message="errorMessage"
-        v-model:detailed-message="detailedErrorMessage"
-        color="error"
-        class="error-alert"
-      />
+        class="mb-6"
+      >
+        <g-message
+          v-model:message="errorMessage"
+          v-model:detailed-message="detailedErrorMessage"
+          color="error"
+          class="error-alert"
+        />
+      </div>
     </v-container>
     <v-divider />
     <div class="d-flex align-center justify-end toolbar">
       <v-divider vertical />
       <v-btn
         variant="text"
-        :disabled="v$.$invalid"
         color="primary"
         @click.stop="createClicked()"
       >
         Create
       </v-btn>
+      <g-confirm-dialog ref="confirmDialog" />
     </div>
-    <g-confirm-dialog ref="confirmDialog" />
   </div>
   <v-alert
     v-else
@@ -199,6 +203,7 @@ import { useAsyncRef } from '@/composables/useAsyncRef'
 
 import { isZonedCluster } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
+import { messageFromErrors } from '@/utils/validators'
 import {
   getSpecTemplate,
   getZonesNetworkConfiguration,
@@ -427,7 +432,7 @@ export default {
         set(shootResource, 'spec.addons', addons)
       }
 
-      const { begin, end } = this.$refs.maintenanceTime.getMaintenanceWindow()
+      const { begin, end } = this.$refs.maintenanceTime.getMaintenanceWindow() ?? {}
       const { k8sUpdates, osUpdates } = this.$refs.maintenanceComponents.getComponentUpdates()
       const autoUpdate = get(shootResource, 'spec.maintenance.autoUpdate', {})
       autoUpdate.kubernetesVersion = k8sUpdates
@@ -565,6 +570,13 @@ export default {
       await this.hibernationSchedule.dispatch('setScheduleData', { hibernationSchedule, noHibernationSchedule, purpose })
     },
     async createClicked () {
+      if (this.v$.$invalid) {
+        await this.v$.$validate()
+        const message = messageFromErrors(this.v$.$errors)
+        this.errorMessage = 'There are input errors that you need to resolve'
+        this.detailedErrorMessage = message
+        return
+      }
       const shootResource = await this.updateShootResourceWithUIComponents()
       try {
         await this.createShoot(shootResource)
@@ -584,7 +596,7 @@ export default {
 
         this.$nextTick(() => {
           // Need to wait for the new element to be rendered, before we can scroll it into view
-          this.$refs.errorAlert.$el.scrollIntoView()
+          this.$refs.errorAlert.scrollIntoView()
         })
       }
     },

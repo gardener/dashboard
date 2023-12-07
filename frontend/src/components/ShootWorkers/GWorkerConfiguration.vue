@@ -9,7 +9,6 @@ SPDX-License-Identifier: Apache-2.0
     :key="componentKey"
     ref="actionDialog"
     :shoot-item="shootItem"
-    :valid="!v$.$invalid"
     width="1250"
     confirm-required
     caption="Configure Workers"
@@ -237,8 +236,9 @@ export default {
         customCloudProviders: this.customCloudProviders,
       })
       const existingWorkerCIDR = get(this.shootItem, 'spec.networking.nodes')
+      const updateOSMaintenance = get(this.shootItem, 'spec.maintenance.autoUpdate.machineImageVersion', true)
 
-      await this.manageWorkers.dispatch('setWorkersData', { workers, cloudProfileName, region, zonesNetworkConfiguration, zonedCluster, existingWorkerCIDR, kubernetesVersion: this.shootK8sVersion })
+      await this.manageWorkers.dispatch('setWorkersData', { workers, cloudProfileName, region, updateOSMaintenance, zonesNetworkConfiguration, zonedCluster, existingWorkerCIDR, kubernetesVersion: this.shootK8sVersion })
     },
     async setNetworkConfiguration (value) {
       if (value) {

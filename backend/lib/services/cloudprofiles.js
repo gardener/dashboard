@@ -65,7 +65,16 @@ exports.list = async function ({ user }) {
 
   const cloudProfiles = getCloudProfiles()
   const seeds = getVisibleAndNotProtectedSeeds()
-  return _.map(cloudProfiles, assignSeedsToCloudProfileIteratee(seeds))
+  const list = _.map(cloudProfiles, assignSeedsToCloudProfileIteratee(seeds))
+
+  const cc = _.cloneDeep(list[0])
+  cc.metadata.cloudProviderKind = 'foo'
+  cc.data.seedNames = undefined
+  cc.metadata.name = 'foocloud'
+  cc.metadata.displayName = 'foocloud'
+  list.push(cc)
+
+  return list
 }
 
 exports.read = async function ({ user, name }) {

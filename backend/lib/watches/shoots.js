@@ -8,39 +8,48 @@
 
 const { shootHasIssue } = require('../utils')
 
-module.exports = (io, informer, { shootsWithIssues = new Set() } = {}) => {
+module.exports = (io, informer, options) => {
   const nsp = io.of('/')
+  const { shootsWithIssues = new Set() } = options ?? {}
 
-  const handleEvent = event => {
-    const { namespace, name } = event.object.metadata
+  const publishShoots = event => {
+    const { type, object } = event
+    const { namespace, name, uid } = object.metadata
     const rooms = [
       'shoots:admin',
       `shoots;${namespace}`,
       `shoots;${namespace}/${name}`
     ]
-    nsp.to(rooms).emit('shoots', event)
+    nsp.to(rooms).emit('shoots', { type, uid })
+  }
 
-    const unhealthyShootsPublish = ({ type, object }) => {
-      const { uid } = object.metadata
-      if (shootHasIssue(object)) {
-        if (!shootsWithIssues.has(uid)) {
-          shootsWithIssues.add(uid)
-        } else if (type === 'DELETED') {
-          shootsWithIssues.delete(uid)
-        }
-      } else if (shootsWithIssues.has(uid)) {
-        type = 'DELETED'
+  const publishUnhealthyShoots = event => {
+    let type = event.type
+    const object = event.object
+    const { namespace, uid } = object.metadata
+
+    if (shootHasIssue(object)) {
+      if (!shootsWithIssues.has(uid)) {
+        shootsWithIssues.add(uid)
+      } else if (type === 'DELETED') {
         shootsWithIssues.delete(uid)
-      } else {
-        return
       }
-      const rooms = [
-        'shoots:unhealthy:admin',
-        `shoots:unhealthy;${namespace}`
-      ]
-      nsp.to(rooms).emit('shoots', { type, object })
+    } else if (shootsWithIssues.has(uid)) {
+      type = 'DELETED'
+      shootsWithIssues.delete(uid)
+    } else {
+      return
     }
-    unhealthyShootsPublish(event)
+    const rooms = [
+      'shoots:unhealthy:admin',
+      `shoots:unhealthy;${namespace}`
+    ]
+    nsp.to(rooms).emit('shoots', { type, uid })
+  }
+
+  const handleEvent = event => {
+    publishShoots(event)
+    publishUnhealthyShoots(event)
   }
 
   informer.on('add', object => handleEvent({ type: 'ADDED', object }))

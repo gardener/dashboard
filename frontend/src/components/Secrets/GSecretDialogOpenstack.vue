@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <g-secret-dialog
     v-model="visible"
     :data="secretData"
-    :data-valid="valid"
+    :secret-validations="v$"
     :secret="secret"
     :vendor="vendor"
   >
@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="authURL"
           color="primary"
           label="Auth URL"
-          :error-messages="getErrorMessages('authURL')"
+          :error-messages="getErrorMessages(v$.authURL)"
           variant="underlined"
           @update:model-value="v$.authURL.$touch()"
           @blur="v$.authURL.$touch()"
@@ -30,7 +30,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="domainName"
           color="primary"
           label="Domain Name"
-          :error-messages="getErrorMessages('domainName')"
+          :error-messages="getErrorMessages(v$.domainName)"
           variant="underlined"
           @update:model-value="v$.domainName.$touch()"
           @blur="v$.domainName.$touch()"
@@ -41,7 +41,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="tenantName"
           color="primary"
           label="Project / Tenant Name"
-          :error-messages="getErrorMessages('tenantName')"
+          :error-messages="getErrorMessages(v$.tenantName)"
           variant="underlined"
           @update:model-value="v$.tenantName.$touch()"
           @blur="v$.tenantName.$touch()"
@@ -72,7 +72,7 @@ SPDX-License-Identifier: Apache-2.0
               v-model="applicationCredentialID"
               color="primary"
               label="ID"
-              :error-messages="getErrorMessages('applicationCredentialID')"
+              :error-messages="getErrorMessages(v$.applicationCredentialID)"
               variant="underlined"
               @update:model-value="v$.applicationCredentialID.$touch()"
               @blur="v$.applicationCredentialID.$touch()"
@@ -83,7 +83,7 @@ SPDX-License-Identifier: Apache-2.0
               v-model="applicationCredentialName"
               color="primary"
               label="Name"
-              :error-messages="getErrorMessages('applicationCredentialName')"
+              :error-messages="getErrorMessages(v$.applicationCredentialName)"
               variant="underlined"
               @update:model-value="v$.applicationCredentialName.$touch()"
               @blur="v$.applicationCredentialName.$touch()"
@@ -94,7 +94,7 @@ SPDX-License-Identifier: Apache-2.0
               v-model="applicationCredentialSecret"
               color="primary"
               label="Password"
-              :error-messages="getErrorMessages('applicationCredentialSecret')"
+              :error-messages="getErrorMessages(v$.applicationCredentialSecret)"
               :append-icon="hideApplicationCredentialSecret ? 'mdi-eye' : 'mdi-eye-off'"
               :type="hideApplicationCredentialSecret ? 'password' : 'text'"
               variant="underlined"
@@ -111,7 +111,7 @@ SPDX-License-Identifier: Apache-2.0
               v-messages-color="{ color: 'primary' }"
               color="primary"
               label="Technical User"
-              :error-messages="getErrorMessages('username')"
+              :error-messages="getErrorMessages(v$.username)"
               hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
               variant="underlined"
               @update:model-value="v$.username.$touch()"
@@ -124,7 +124,7 @@ SPDX-License-Identifier: Apache-2.0
               v-messages-color="{ color: 'warning' }"
               color="primary"
               label="Password"
-              :error-messages="getErrorMessages('password')"
+              :error-messages="getErrorMessages(v$.password)"
               :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
               :type="hideSecret ? 'password' : 'text'"
               hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
@@ -176,40 +176,13 @@ import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
 
 import {
-  getValidationErrors,
+  withMessage,
+  withFieldName,
+} from '@/utils/validators'
+import {
+  getErrorMessages,
   setDelayedInputFocus,
 } from '@/utils'
-
-const requiredMessage = 'You can\'t leave this empty.'
-const requiredUserMessage = 'Required for technical user authentication'
-const requiredApplicationCredentialsMessage = 'Required for application credentials authentication'
-
-const validationErrors = {
-  domainName: {
-    required: requiredMessage,
-  },
-  tenantName: {
-    required: requiredMessage,
-  },
-  username: {
-    required: requiredUserMessage,
-  },
-  password: {
-    required: requiredUserMessage,
-  },
-  authURL: {
-    required: 'Required for Secret Type DNS.',
-  },
-  applicationCredentialID: {
-    required: requiredApplicationCredentialsMessage,
-  },
-  applicationCredentialName: {
-    required: requiredApplicationCredentialsMessage,
-  },
-  applicationCredentialSecret: {
-    required: requiredApplicationCredentialsMessage,
-  },
-}
 
 export default {
   components: {
@@ -248,13 +221,64 @@ export default {
       applicationCredentialName: undefined,
       applicationCredentialSecret: undefined,
       hideApplicationCredentialSecret: true,
-      validationErrors,
       authenticationMethod: 'USER',
     }
   },
   validations () {
-    // had to move the code to a computed property so that the getValidationErrors method can access it
-    return this.validators
+    const requiredUserMessage = 'Required for technical user authentication'
+    const requiredApplicationCredentialsMessage = 'Required for application credentials authentication'
+
+    const rules = {}
+
+    rules.domainName = withFieldName('Domain Name', {
+      required,
+    })
+
+    rules.tenantName = withFieldName('Project / Tenant Name', {
+      required,
+    })
+
+    const usernameRules = {
+      required: withMessage(requiredUserMessage,
+        requiredIf(() => this.authenticationMethod === 'USER'),
+      ),
+    }
+    rules.username = withFieldName('Technical User', usernameRules)
+
+    const passwordRules = {
+      required: withMessage(requiredUserMessage,
+        requiredIf(() => this.authenticationMethod === 'USER'),
+      ),
+    }
+    rules.password = withFieldName('Password', passwordRules)
+
+    const authURLRules = {
+      required: requiredIf(() => this.vendor === 'openstack-designate'),
+    }
+    rules.authURL = withFieldName('Auth URL', authURLRules)
+
+    const applicationCredentialIDRules = {
+      required: withMessage(requiredApplicationCredentialsMessage,
+        requiredIf(() => this.authenticationMethod === 'APPLICATION_CREDENTIALS'),
+      ),
+    }
+    rules.applicationCredentialID = withFieldName('Application Credentials ID', applicationCredentialIDRules)
+
+    const applicationCredentialNameRules = {
+      required: withMessage(requiredApplicationCredentialsMessage,
+        requiredIf(() => this.authenticationMethod === 'APPLICATION_CREDENTIALS'),
+      ),
+    }
+    rules.applicationCredentialName = withFieldName('Application Credentials Name', applicationCredentialNameRules)
+
+    const applicationCredentialSecretRules = {
+      required: withMessage(requiredApplicationCredentialsMessage,
+        requiredIf(() => this.authenticationMethod === 'APPLICATION_CREDENTIALS'),
+      ),
+    }
+    rules.applicationCredentialSecret = withFieldName('Application Credentials Secret', applicationCredentialSecretRules)
+
+    return rules
   },
   computed: {
     visible: {
@@ -283,47 +307,6 @@ export default {
       }
 
       return data
-    },
-    validators () {
-      const validators = {
-        domainName: {
-          required,
-        },
-        tenantName: {
-          required,
-        },
-        username: {
-          required: requiredIf(function () {
-            return this.authenticationMethod === 'USER'
-          }),
-        },
-        password: {
-          required: requiredIf(function () {
-            return this.authenticationMethod === 'USER'
-          }),
-        },
-        authURL: {
-          required: requiredIf(function () {
-            return this.vendor === 'openstack-designate'
-          }),
-        },
-        applicationCredentialID: {
-          required: requiredIf(function () {
-            return this.authenticationMethod === 'APPLICATION_CREDENTIALS'
-          }),
-        },
-        applicationCredentialName: {
-          required: requiredIf(function () {
-            return this.authenticationMethod === 'APPLICATION_CREDENTIALS'
-          }),
-        },
-        applicationCredentialSecret: {
-          required: requiredIf(function () {
-            return this.authenticationMethod === 'APPLICATION_CREDENTIALS'
-          }),
-        },
-      }
-      return validators
     },
     isCreateMode () {
       return !this.secret
@@ -375,9 +358,7 @@ export default {
         setDelayedInputFocus(this, 'domainName')
       }
     },
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
-    },
+    getErrorMessages,
   },
 }
 </script>

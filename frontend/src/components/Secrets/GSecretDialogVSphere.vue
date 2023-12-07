@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <g-secret-dialog
     v-model="visible"
     :data="secretData"
-    :data-valid="valid"
+    :secret-validations="v$"
     :secret="secret"
     vendor="vsphere"
   >
@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="vsphereUsername"
           color="primary"
           label="vSphere Username"
-          :error-messages="getErrorMessages('vsphereUsername')"
+          :error-messages="getErrorMessages(v$.vsphereUsername)"
           variant="underlined"
           @update:model-value="v$.vsphereUsername.$touch()"
           @blur="v$.vsphereUsername.$touch()"
@@ -30,7 +30,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="vspherePassword"
           color="primary"
           label="vSphere Password"
-          :error-messages="getErrorMessages('vspherePassword')"
+          :error-messages="getErrorMessages(v$.vspherePassword)"
           :append-icon="hideVspherePassword ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideVspherePassword ? 'password' : 'text'"
           variant="underlined"
@@ -44,7 +44,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="nsxtUsername"
           color="primary"
           label="NSX-T Username"
-          :error-messages="getErrorMessages('nsxtUsername')"
+          :error-messages="getErrorMessages(v$.nsxtUsername)"
           variant="underlined"
           @update:model-value="v$.nsxtUsername.$touch()"
           @blur="v$.nsxtUsername.$touch()"
@@ -55,7 +55,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="nsxtPassword"
           color="primary"
           label="NSX-T Password"
-          :error-messages="getErrorMessages('nsxtPassword')"
+          :error-messages="getErrorMessages(v$.nsxtPassword)"
           :append-icon="hideNsxtPassword ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideNsxtPassword ? 'password' : 'text'"
           variant="underlined"
@@ -98,24 +98,10 @@ import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink.vue'
 
 import {
-  getValidationErrors,
+  getErrorMessages,
   setDelayedInputFocus,
 } from '@/utils'
-
-const validationErrors = {
-  vsphereUsername: {
-    required: 'You can\'t leave this empty.',
-  },
-  vspherePassword: {
-    required: 'You can\'t leave this empty.',
-  },
-  nsxtUsername: {
-    required: 'You can\'t leave this empty.',
-  },
-  nsxtPassword: {
-    required: 'You can\'t leave this empty.',
-  },
-}
+import { withFieldName } from '@/utils/validators'
 
 export default {
   components: {
@@ -147,12 +133,23 @@ export default {
       nsxtUsername: undefined,
       nsxtPassword: undefined,
       hideNsxtPassword: true,
-      validationErrors,
     }
   },
   validations () {
-    // had to move the code to a computed property so that the getValidationErrors method can access it
-    return this.validators
+    return {
+      vsphereUsername: withFieldName('vSphere Username', {
+        required,
+      }),
+      vspherePassword: withFieldName('vSphere Password', {
+        required,
+      }),
+      nsxtUsername: withFieldName('NSX-T Username', {
+        required,
+      }),
+      nsxtPassword: withFieldName('NSX-T Password', {
+        required,
+      }),
+    }
   },
   computed: {
     visible: {
@@ -173,23 +170,6 @@ export default {
         nsxtUsername: this.nsxtUsername,
         nsxtPassword: this.nsxtPassword,
       }
-    },
-    validators () {
-      const validators = {
-        vsphereUsername: {
-          required,
-        },
-        vspherePassword: {
-          required,
-        },
-        nsxtUsername: {
-          required,
-        },
-        nsxtPassword: {
-          required,
-        },
-      }
-      return validators
     },
     isCreateMode () {
       return !this.secret
@@ -219,9 +199,7 @@ export default {
         setDelayedInputFocus(this, 'vsphereUsername')
       }
     },
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
-    },
+    getErrorMessages,
   },
 }
 </script>

@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <g-secret-dialog
     v-model="visible"
     :data="secretData"
-    :data-valid="valid"
+    :secret-validations="v$"
     :secret="secret"
     vendor="metal"
   >
@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="apiUrl"
           color="primary"
           label="API URL"
-          :error-messages="getErrorMessages('apiUrl')"
+          :error-messages="getErrorMessages(v$.apiUrl)"
           variant="underlined"
           @update:model-value="v$.apiUrl.$touch()"
           @blur="v$.apiUrl.$touch()"
@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
           label="API HMAC"
           :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideSecret ? 'password' : 'text'"
-          :error-messages="getErrorMessages('apiHmac')"
+          :error-messages="getErrorMessages(v$.apiHmac)"
           variant="underlined"
           @click:append="() => (hideSecret = !hideSecret)"
           @update:model-value="v$.apiHmac.$touch()"
@@ -61,19 +61,10 @@ import {
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 
 import {
-  getValidationErrors,
+  getErrorMessages,
   setDelayedInputFocus,
 } from '@/utils'
-
-const validationErrors = {
-  apiHmac: {
-    required: 'You can\'t leave this empty.',
-  },
-  apiUrl: {
-    required: 'You can\'t leave this empty.',
-    url: 'You must enter a valid URL',
-  },
-}
+import { withFieldName } from '@/utils/validators'
 
 export default {
   components: {
@@ -101,12 +92,18 @@ export default {
       apiHmac: undefined,
       apiUrl: undefined,
       hideSecret: true,
-      validationErrors,
     }
   },
   validations () {
-    // had to move the code to a computed property so that the getValidationErrors method can access it
-    return this.validators
+    return {
+      apiHmac: withFieldName('API HMAC', {
+        required,
+      }),
+      apiUrl: withFieldName('API URL', {
+        required,
+        url,
+      }),
+    }
   },
   computed: {
     visible: {
@@ -125,18 +122,6 @@ export default {
         metalAPIHMac: this.apiHmac,
         metalAPIURL: this.apiUrl,
       }
-    },
-    validators () {
-      const validators = {
-        apiHmac: {
-          required,
-        },
-        apiUrl: {
-          required,
-          url,
-        },
-      }
-      return validators
     },
     isCreateMode () {
       return !this.secret
@@ -160,9 +145,7 @@ export default {
         setDelayedInputFocus(this, 'apiUrl')
       }
     },
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
-    },
+    getErrorMessages,
   },
 }
 </script>

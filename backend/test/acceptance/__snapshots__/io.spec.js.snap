@@ -28,6 +28,59 @@ Array [
 ]
 `;
 
+exports[`api events when user is "admin" should subscribe shoots for a single cluster 2`] = `
+Array [
+  Object {
+    "metadata": Object {
+      "annotations": Object {
+        "gardener.cloud/created-by": "foo@example.org",
+      },
+      "name": "fooShoot",
+      "namespace": "garden-foo",
+      "uid": 1,
+    },
+    "spec": Object {
+      "cloudProfileName": "infra1-profileName",
+      "hibernation": Object {
+        "enabled": false,
+      },
+      "kubernetes": Object {
+        "version": "1.16.0",
+      },
+      "provider": Object {
+        "type": "fooInfra",
+      },
+      "purpose": "fooPurpose",
+      "region": "foo-west",
+      "secretBindingName": "foo-infra1",
+      "seedName": "infra1-seed",
+    },
+    "status": Object {
+      "advertisedAddresses": Array [
+        Object {
+          "name": "external",
+          "url": "https://api.fooShoot.foo.shoot.test",
+        },
+      ],
+      "technicalID": "shoot--foo--fooShoot",
+    },
+  },
+  Object {
+    "apiVersion": "v1",
+    "code": 404,
+    "details": Object {
+      "group": "core.gardener.cloud",
+      "kind": "shoots",
+      "uid": 2,
+    },
+    "kind": "Status",
+    "message": "Shoot with uid 2 does not exist",
+    "reason": "NotFound",
+    "status": "Failure",
+  },
+]
+`;
+
 exports[`api events when user is "admin" should subscribe shoots for a single namespace 1`] = `
 Array [
   Array [
@@ -55,6 +108,59 @@ Array [
 ]
 `;
 
+exports[`api events when user is "admin" should subscribe shoots for a single namespace 2`] = `
+Array [
+  Object {
+    "metadata": Object {
+      "annotations": Object {
+        "gardener.cloud/created-by": "foo@example.org",
+      },
+      "name": "fooShoot",
+      "namespace": "garden-foo",
+      "uid": 1,
+    },
+    "spec": Object {
+      "cloudProfileName": "infra1-profileName",
+      "hibernation": Object {
+        "enabled": false,
+      },
+      "kubernetes": Object {
+        "version": "1.16.0",
+      },
+      "provider": Object {
+        "type": "fooInfra",
+      },
+      "purpose": "fooPurpose",
+      "region": "foo-west",
+      "secretBindingName": "foo-infra1",
+      "seedName": "infra1-seed",
+    },
+    "status": Object {
+      "advertisedAddresses": Array [
+        Object {
+          "name": "external",
+          "url": "https://api.fooShoot.foo.shoot.test",
+        },
+      ],
+      "technicalID": "shoot--foo--fooShoot",
+    },
+  },
+  Object {
+    "apiVersion": "v1",
+    "code": 404,
+    "details": Object {
+      "group": "core.gardener.cloud",
+      "kind": "shoots",
+      "uid": 4,
+    },
+    "kind": "Status",
+    "message": "Shoot with uid 4 does not exist",
+    "reason": "NotFound",
+    "status": "Failure",
+  },
+]
+`;
+
 exports[`api events when user is "admin" should subscribe shoots for all namespace 1`] = `
 Array [
   Array [
@@ -78,6 +184,81 @@ Array [
       },
     },
   ],
+]
+`;
+
+exports[`api events when user is "admin" should subscribe shoots for all namespace 2`] = `
+Array [
+  Object {
+    "metadata": Object {
+      "annotations": Object {
+        "gardener.cloud/created-by": "foo@example.org",
+      },
+      "name": "fooShoot",
+      "namespace": "garden-foo",
+      "uid": 1,
+    },
+    "spec": Object {
+      "cloudProfileName": "infra1-profileName",
+      "hibernation": Object {
+        "enabled": false,
+      },
+      "kubernetes": Object {
+        "version": "1.16.0",
+      },
+      "provider": Object {
+        "type": "fooInfra",
+      },
+      "purpose": "fooPurpose",
+      "region": "foo-west",
+      "secretBindingName": "foo-infra1",
+      "seedName": "infra1-seed",
+    },
+    "status": Object {
+      "advertisedAddresses": Array [
+        Object {
+          "name": "external",
+          "url": "https://api.fooShoot.foo.shoot.test",
+        },
+      ],
+      "technicalID": "shoot--foo--fooShoot",
+    },
+  },
+  Object {
+    "metadata": Object {
+      "annotations": Object {
+        "gardener.cloud/created-by": "admin@example.org",
+      },
+      "name": "infra1-seed",
+      "namespace": "garden",
+      "uid": 4,
+    },
+    "spec": Object {
+      "cloudProfileName": "infra1-profileName",
+      "hibernation": Object {
+        "enabled": false,
+      },
+      "kubernetes": Object {
+        "version": "1.16.0",
+      },
+      "provider": Object {
+        "type": "fooInfra",
+      },
+      "purpose": "foo-purpose",
+      "region": "foo-west",
+      "secretBindingName": "soil-infra1",
+      "seedName": "soil-infra1",
+    },
+    "status": Object {
+      "advertisedAddresses": Array [
+        Object {
+          "name": "external",
+          "url": "https://api.infra1-seed.garden.shoot.test",
+        },
+      ],
+      "technicalID": "shoot--garden--infra1-seed",
+    },
+  },
 ]
 `;
 

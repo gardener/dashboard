@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
     :items="machineImageItems"
     item-value="key"
     return-object
-    :error-messages="getErrorMessages('worker.machine.image')"
+    :error-messages="getErrorMessages(v$.worker.machine.image)"
     label="Machine Image"
     :hint="hint"
     persistent-hint
@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
           <g-vendor-icon :icon="item.raw.icon" />
         </template>
         <v-list-item-title>Name: {{ item.raw.displayName }} | Version: {{ item.raw.version }}</v-list-item-title>
-        <v-list-item-subtitle v-if="itemDescription(item).length">
+        <v-list-item-subtitle v-if="itemDescription(item.raw).length">
           {{ itemDescription(item.raw) }}
         </v-list-item-subtitle>
       </v-list-item>
@@ -54,26 +54,17 @@ import GVendorIcon from '@/components/GVendorIcon'
 import GMultiMessage from '@/components/GMultiMessage'
 
 import {
-  getValidationErrors,
+  getErrorMessages,
   selectedImageIsNotLatest,
   transformHtml,
 } from '@/utils'
+import { withFieldName } from '@/utils/validators'
 
 import {
   pick,
   find,
   join,
 } from '@/lodash'
-
-const validationErrors = {
-  worker: {
-    machine: {
-      image: {
-        required: 'Machine Image is required',
-      },
-    },
-  },
-}
 
 export default {
   components: {
@@ -92,6 +83,9 @@ export default {
     updateOSMaintenance: {
       type: Boolean,
     },
+    fieldName: {
+      type: String,
+    },
   },
   emits: [
     'updateMachineImage',
@@ -99,11 +93,6 @@ export default {
   setup () {
     return {
       v$: useVuelidate(),
-    }
-  },
-  data () {
-    return {
-      validationErrors,
     }
   },
   computed: {
@@ -153,7 +142,7 @@ export default {
           severity: 'info',
         })
       }
-      if (this.updateOSMaintenance && this.machineImage.isPreview) {
+      if (this.machineImage.isPreview) {
         hints.push({
           type: 'text',
           hint: 'Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not recommended for production usage',
@@ -183,28 +172,22 @@ export default {
     selectedImageIsNotLatest () {
       return selectedImageIsNotLatest(this.machineImage, this.machineImages)
     },
-    validators () {
-      return {
-        worker: {
-          machine: {
-            image: {
-              required,
-            },
-          },
-        },
-      }
-    },
   },
   validations () {
-    return this.validators
+    return {
+      worker: {
+        machine: {
+          image: withFieldName(() => this.fieldName, {
+            required,
+          }),
+        },
+      },
+    }
   },
   mounted () {
     this.v$.$touch()
   },
   methods: {
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
-    },
     onInputMachineImage () {
       this.v$.worker.machine.image.$touch()
       this.$emit('updateMachineImage', this.worker.machine.image)
@@ -219,6 +202,7 @@ export default {
       }
       return join(itemDescription, ' | ')
     },
+    getErrorMessages,
   },
 }
 </script>

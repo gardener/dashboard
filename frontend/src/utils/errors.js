@@ -76,6 +76,10 @@ export function isGatewayTimeoutError (err) {
   return hasStatusCode(err, 504)
 }
 
+export function isTooManyRequestsError (err) {
+  return hasStatusCode(err, 429)
+}
+
 export function isNoUserError (err) {
   return err.name === 'NoUserError'
 }

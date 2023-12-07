@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <g-secret-dialog
     v-model="visible"
     :data="secretData"
-    :data-valid="valid"
+    :secret-validations="v$"
     :secret="secret"
     vendor="infoblox-dns"
   >
@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="infobloxUsername"
           color="primary"
           label="Infoblox Username"
-          :error-messages="getErrorMessages('infobloxUsername')"
+          :error-messages="getErrorMessages(v$.infobloxUsername)"
           variant="underlined"
           @update:model-value="v$.infobloxUsername.$touch()"
           @blur="v$.infobloxUsername.$touch()"
@@ -30,7 +30,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="infobloxPassword"
           color="primary"
           label="Infoblox Password"
-          :error-messages="getErrorMessages('infobloxPassword')"
+          :error-messages="getErrorMessages(v$.infobloxPassword)"
           :append-icon="hideInfobloxPassword ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideInfobloxPassword ? 'password' : 'text'"
           variant="underlined"
@@ -56,19 +56,11 @@ import { required } from '@vuelidate/validators'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 
+import { withFieldName } from '@/utils/validators'
 import {
-  getValidationErrors,
+  getErrorMessages,
   setDelayedInputFocus,
 } from '@/utils'
-
-const validationErrors = {
-  infobloxUsername: {
-    required: 'You can\'t leave this empty.',
-  },
-  infobloxPassword: {
-    required: 'You can\'t leave this empty.',
-  },
-}
 
 export default {
   components: {
@@ -96,12 +88,17 @@ export default {
       infobloxUsername: undefined,
       infobloxPassword: undefined,
       hideInfobloxPassword: true,
-      validationErrors,
     }
   },
   validations () {
-    // had to move the code to a computed property so that the getValidationErrors method can access it
-    return this.validators
+    return {
+      infobloxUsername: withFieldName('Username', {
+        required,
+      }),
+      infobloxPassword: withFieldName('Password', {
+        required,
+      }),
+    }
   },
   computed: {
     visible: {
@@ -120,17 +117,6 @@ export default {
         USERNAME: this.infobloxUsername,
         PASSWORD: this.infobloxPassword,
       }
-    },
-    validators () {
-      const validators = {
-        infobloxUsername: {
-          required,
-        },
-        infobloxPassword: {
-          required,
-        },
-      }
-      return validators
     },
     isCreateMode () {
       return !this.secret
@@ -157,9 +143,7 @@ export default {
         setDelayedInputFocus(this, 'infobloxUsername')
       }
     },
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
-    },
+    getErrorMessages,
   },
 }
 </script>

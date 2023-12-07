@@ -17,13 +17,16 @@ import {
 
 import { useLogger } from '@/composables/useLogger'
 
+import { createError } from '@/utils/errors'
+
 import { useAuthnStore } from '../authn'
 import { useProjectStore } from '../project'
 import { useShootStore } from '../shoot'
-import { constants } from '../shoot/helper'
 import { useTicketStore } from '../ticket'
 
 import { createSocket } from './helper'
+
+const acknowledgementTimeout = 60_000
 
 export const useSocketStore = defineStore('socket', () => {
   const logger = useLogger()
@@ -47,6 +50,7 @@ export const useSocketStore = defineStore('socket', () => {
       jitter: 0.5,
       attempts: 0,
     },
+    synchronizing: false,
   })
 
   const socket = createSocket(state, {
@@ -92,38 +96,61 @@ export const useSocketStore = defineStore('socket', () => {
     socket.disconnect()
   }
 
-  function emitSubscribe (options) {
-    if (socket.connected) {
-      socket.emit('subscribe', 'shoots', options, ({ statusCode, message }) => {
-        if (statusCode === 200) {
-          logger.debug('subscribed shoots')
-          shootStore.setSubscriptionState(constants.OPEN)
-        } else {
-          const err = new Error(message)
-          err.name = 'SubscribeError'
-          logger.debug('failed to subscribe shoots: %s', err.message)
-          shootStore.setSubscriptionError(err)
-        }
+  async function emitSubscribe (options) {
+    if (!socket.connected) {
+      return
+    }
+    const {
+      statusCode = 500,
+      message = 'Failed to subscribe shoots',
+    } = await socket.timeout(acknowledgementTimeout).emitWithAck('subscribe', 'shoots', options)
+    if (statusCode !== 200) {
+      logger.debug('Subscribe Error: %s', message)
+      throw createError(statusCode, message, {
+        name: 'SubscribeError',
       })
     }
   }
 
-  function emitUnsubscribe () {
-    socket.emit('unsubscribe', 'shoots', ({ statusCode, message }) => {
+  async function emitUnsubscribe () {
+    const {
+      statusCode = 500,
+      message = 'Failed to unsubscribe shoots',
+    } = await socket.timeout(acknowledgementTimeout).emitWithAck('unsubscribe', 'shoots')
+    if (statusCode !== 200) {
+      logger.debug('Unsubscribe Error: %s', message)
+      throw createError(statusCode, message, {
+        name: 'UnsubscribeError',
+      })
+    }
+  }
+
+  async function synchronize (uids) {
+    if (!uids.length) {
+      return []
+    }
+    if (state.synchronizing) {
+      throw createError(429, 'Synchronization is still in progress', { name: 'TooManyRequests' })
+    }
+    state.synchronizing = true
+    try {
+      const {
+        statusCode = 500,
+        name = 'InternalError',
+        message = 'Failed to synchronize shoots',
+        items = [],
+      } = await socket.timeout(acknowledgementTimeout).emitWithAck('synchronize', 'shoots', uids)
       if (statusCode === 200) {
-        logger.debug('unsubscribed shoots')
-        shootStore.setSubscriptionState(constants.CLOSED)
-      } else {
-        const err = new Error(message)
-        err.name = 'UnsubscribeError'
-        logger.debug('failed to unsubscribe shoots: %s', err.message)
-        shootStore.setSubscriptionError(err)
+        return items
       }
-    })
+      throw createError(statusCode, message, { name })
+    } finally {
+      state.synchronizing = false
+    }
   }
 
   watch(() => authnStore.user, value => {
-    if (!value) {
+    if (authnStore.isExpired()) {
       disconnect()
     } else {
       connect()
@@ -142,6 +169,7 @@ export const useSocketStore = defineStore('socket', () => {
     disconnect,
     emitSubscribe,
     emitUnsubscribe,
+    synchronize,
   }
 })
 

@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <g-secret-dialog
     v-model="visible"
     :data="secretData"
-    :data-valid="valid"
+    :secret-validations="v$"
     :secret="secret"
     vendor="hcloud"
   >
@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="hcloudToken"
           color="primary"
           label="Hetzner Cloud Token"
-          :error-messages="getErrorMessages('hcloudToken')"
+          :error-messages="getErrorMessages(v$.hcloudToken)"
           variant="underlined"
           @update:model-value="v$.hcloudToken.$touch()"
           @blur="v$.hcloudToken.$touch()"
@@ -53,16 +53,11 @@ import { required } from '@vuelidate/validators'
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink.vue'
 
+import { withFieldName } from '@/utils/validators'
 import {
-  getValidationErrors,
+  getErrorMessages,
   setDelayedInputFocus,
 } from '@/utils'
-
-const validationErrors = {
-  hcloudToken: {
-    required: 'You can\'t leave this empty.',
-  },
-}
 
 export default {
   components: {
@@ -90,12 +85,14 @@ export default {
     return {
       hcloudToken: undefined,
       hideHcloudToken: true,
-      validationErrors,
     }
   },
   validations () {
-    // had to move the code to a computed property so that the getValidationErrors method can access it
-    return this.validators
+    return {
+      hcloudToken: withFieldName('Cloud Token', {
+        required,
+      }),
+    }
   },
   computed: {
     visible: {
@@ -113,14 +110,6 @@ export default {
       return {
         hcloudToken: this.hcloudToken,
       }
-    },
-    validators () {
-      const validators = {
-        hcloudToken: {
-          required,
-        },
-      }
-      return validators
     },
     isCreateMode () {
       return !this.secret
@@ -146,9 +135,7 @@ export default {
         setDelayedInputFocus(this, 'hcloudToken')
       }
     },
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
-    },
+    getErrorMessages,
   },
 }
 </script>

@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <g-secret-dialog
     v-model="visible"
     :data="secretData"
-    :data-valid="valid"
+    :secret-validations="v$"
     :secret="secret"
     :vendor="vendor"
   >
@@ -23,7 +23,7 @@ SPDX-License-Identifier: Apache-2.0
             v-model="customCloudProviderData[key]"
             color="primary"
             :label="label"
-            :error-messages="getErrorMessages(`customCloudProviderData.${key}`)"
+            :error-messages="getErrorMessages(v$.customCloudProviderData[key])"
             :append-icon="type === 'password' ? showSecrets[key] ? 'mdi-eye' : 'mdi-eye-off' : undefined"
             :type="type === 'password' && !showSecrets[key] ? 'password' : 'text'"
             :hint="hint"
@@ -36,7 +36,7 @@ SPDX-License-Identifier: Apache-2.0
             v-model="customCloudProviderData[key]"
             color="primary"
             :label="label"
-            :error-messages="getErrorMessages(`customCloudProviderData.${key}`)"
+            :error-messages="getErrorMessages(v$.customCloudProviderData[key])"
             :hint="hint"
             @update:model-value="onInputTextarea(key, type)"
             @blur="v$.customCloudProviderData[key].$touch()"
@@ -76,9 +76,13 @@ import { useConfigStore } from '@/store/config'
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 
 import {
-  getValidationErrors,
+  withFieldName,
+  withMessage,
+} from '@/utils/validators'
+import {
   setDelayedInputFocus,
   transformHtml,
+  getErrorMessages,
 } from '@/utils'
 
 import {
@@ -152,7 +156,7 @@ export default {
       const allValidators = {
         customCloudProviderData: {},
       }
-      forEach(this.customCloudProviderFields, ({ key, validators }) => {
+      forEach(this.customCloudProviderFields, ({ key, label, validators }) => {
         const compiledValidators = {}
         forEach(validators, (validator, validatorName) => {
           switch (validator.type) {
@@ -168,8 +172,11 @@ export default {
             case 'regex':
               compiledValidators[validatorName] = value => !value || new RegExp(validator.value).test(value)
           }
+          if (validator.message) {
+            compiledValidators[validatorName] = withMessage(validator.message, compiledValidators[validatorName])
+          }
         })
-        allValidators.customCloudProviderData[key] = compiledValidators
+        allValidators.customCloudProviderData[key] = withFieldName(label, compiledValidators)
       })
       return allValidators
     },
@@ -193,11 +200,8 @@ export default {
             },
             isYAML: {
               type: 'isValidObject',
+              message: 'You need to enter secret data as YAML key- value pairs',
             },
-          },
-          validationErrors: {
-            required: 'You can\'t leave this empty',
-            isYAML: 'You need to enter secret data as YAML key-value pairs',
           },
         },
       ]
@@ -250,12 +254,10 @@ export default {
         setDelayedInputFocus(this, 'textAreaData')
       }
     },
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
-    },
     toggleShowSecrets (key) {
       set(this.showSecrets, key, !this.showSecrets[key])
     },
+    getErrorMessages,
   },
 }
 </script>
