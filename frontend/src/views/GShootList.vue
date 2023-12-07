@@ -174,7 +174,7 @@ SPDX-License-Identifier: Apache-2.0
           Loading clusters ...
         </template>
         <template #no-data>
-          No clusters found
+          No clusters to show
         </template>
         <template #item="{ item }">
           <g-shoot-list-row
