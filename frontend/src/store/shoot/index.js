@@ -531,11 +531,13 @@ export const useShootStore = defineStore('shoot', () => {
     })
   }
 
-  function setSubscriptionEventHandler (state, func, throttleDelay) {
+  function cancelSubscriptionEventHandler (state) {
     if (typeof state.subscriptionEventHandler?.cancel === 'function') {
       state.subscriptionEventHandler.cancel()
     }
-    shootEvents.clear()
+  }
+
+  function setSubscriptionEventHandler (state, func, throttleDelay) {
     if (throttleDelay > 0) {
       func = throttle(func, throttleDelay)
     }
@@ -543,10 +545,6 @@ export const useShootStore = defineStore('shoot', () => {
   }
 
   function unsetSubscriptionEventHandler (state) {
-    if (typeof state.subscriptionEventHandler?.cancel === 'function') {
-      state.subscriptionEventHandler.cancel()
-    }
-    shootEvents.clear()
     state.subscriptionEventHandler = undefined
   }
 
@@ -554,12 +552,15 @@ export const useShootStore = defineStore('shoot', () => {
     const shootStore = this
     shootStore.$patch(({ state }) => {
       setSubscriptionState(state, constants.OPENING)
+      cancelSubscriptionEventHandler(state)
+      shootEvents.clear()
       setSubscriptionEventHandler(state, handleEvents, throttleDelay)
     })
     try {
       await socketStore.emitSubscribe(value)
       setSubscriptionState(state, constants.OPEN)
     } catch (err) {
+      logger.error('Failed to open subscription: %s', err.message)
       setSubscriptionError(state, err)
     }
   }
@@ -569,12 +570,15 @@ export const useShootStore = defineStore('shoot', () => {
     shootStore.$patch(({ state }) => {
       state.subscription = null
       setSubscriptionState(state, constants.CLOSING)
+      cancelSubscriptionEventHandler(state)
+      shootEvents.clear()
       unsetSubscriptionEventHandler(state)
     })
     try {
       await socketStore.emitUnsubscribe()
       setSubscriptionState(state, constants.CLOSED)
     } catch (err) {
+      logger.error('Failed to close subscription: %s', err.message)
       setSubscriptionError(state, err)
     }
   }
