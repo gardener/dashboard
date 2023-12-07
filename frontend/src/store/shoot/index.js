@@ -305,9 +305,11 @@ export const useShootStore = defineStore('shoot', () => {
       if (options.name) {
         return 0
       }
-      const p = Math.pow(10, Math.floor(Math.log10(n)))
-      const d = 2 * p * Math.round(n / p)
-      return Math.min(5_000, Math.max(200, d))
+      const p = n > 0
+        ? Math.pow(10, Math.floor(Math.log10(n)))
+        : 1
+      const d = 10 * p * Math.round(n / p)
+      return Math.min(30_000, Math.max(200, d))
     }
 
     // await and handle response data in the background
