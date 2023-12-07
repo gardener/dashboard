@@ -46,21 +46,22 @@ exports.list = async function ({ user, namespace, labelSelector, useCache = fals
         .map('spec.namespace')
         .value()
       if (useCache) {
-        const isAllowedList = await Promise.all(namespaces.map(namespace => authorization.canListShoots(user, namespace)))
-        if (isAllowedList.some(value => !value)) {
-          throw createError(403, 'No authorization to list shoots in all namespaces')
-        }
+        const statuses = await Promise.allSettled(namespaces.map(namespace => authorization.canListShoots(user, namespace)))
         return {
           apiVersion: 'v1',
           kind: 'List',
-          items: namespaces.flatMap(namespace => cache.getShoots(namespace, query))
+          items: namespaces
+            .filter((_, i) => statuses[i].status === 'fulfilled' && statuses[i].value)
+            .flatMap(namespace => cache.getShoots(namespace, query))
         }
       }
-      const shootLists = await Promise.all(namespaces.map(namespace, client['core.gardener.cloud'].shoots.list(namespace, query)))
+      const statuses = await Promise.allSettled(namespaces.map(namespace, client['core.gardener.cloud'].shoots.list(namespace, query)))
       return {
         apiVersion: 'v1',
         kind: 'List',
-        items: shootLists.flatMap(({ items }) => items)
+        items: statuses
+          .filter(({ status }) => status === 'fulfilled')
+          .flatMap(({ value }) => value.items)
       }
     }
   }
