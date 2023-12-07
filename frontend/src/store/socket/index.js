@@ -26,6 +26,8 @@ import { useTicketStore } from '../ticket'
 
 import { createSocket } from './helper'
 
+const acknowledgementTimeout = 60_000
+
 export const useSocketStore = defineStore('socket', () => {
   const logger = useLogger()
 
@@ -101,7 +103,7 @@ export const useSocketStore = defineStore('socket', () => {
     const {
       statusCode = 500,
       message = 'Failed to subscribe shoots',
-    } = await socket.timeout(5000).emitWithAck('subscribe', 'shoots', options)
+    } = await socket.timeout(acknowledgementTimeout).emitWithAck('subscribe', 'shoots', options)
     if (statusCode !== 200) {
       logger.debug('Subscribe Error: %s', message)
       throw createError(statusCode, message, {
@@ -114,7 +116,7 @@ export const useSocketStore = defineStore('socket', () => {
     const {
       statusCode = 500,
       message = 'Failed to unsubscribe shoots',
-    } = await socket.timeout(5000).emitWithAck('unsubscribe', 'shoots')
+    } = await socket.timeout(acknowledgementTimeout).emitWithAck('unsubscribe', 'shoots')
     if (statusCode !== 200) {
       logger.debug('Unsubscribe Error: %s', message)
       throw createError(statusCode, message, {
@@ -137,7 +139,7 @@ export const useSocketStore = defineStore('socket', () => {
         name = 'InternalError',
         message = 'Failed to synchronize shoots',
         items = [],
-      } = await socket.timeout(60_000).emitWithAck('synchronize', 'shoots', uids)
+      } = await socket.timeout(acknowledgementTimeout).emitWithAck('synchronize', 'shoots', uids)
       if (statusCode === 200) {
         return items
       }
