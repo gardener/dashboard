@@ -11,6 +11,10 @@ dashboard:
         preprocess:
           'inject-commit-hash'
         inject_effective_version: true
+      component_descriptor:
+        ocm_repository: europe-docker.pkg.dev/gardener-project/snapshots
+        ocm_repository_mappings:
+          - repository: europe-docker.pkg.dev/gardener-project/releases
       publish:
         oci-builder: docker-buildx
         platforms:
@@ -21,8 +25,7 @@ dashboard:
             inputs:
               repos:
                 source: ~ # default
-            registry: 'gcr-readwrite'
-            image: 'eu.gcr.io/gardener-project/gardener/dashboard'
+            image: 'europe-docker.pkg.dev/gardener-project/snapshots/gardener/dashboard'
             target: dashboard
             resource_labels:
             - name: 'gardener.cloud/cve-categorisation'
@@ -37,7 +40,6 @@ dashboard:
   jobs:
     head-update:
       traits:
-        component_descriptor: ~
         draft_release: ~
     pull-request:
       traits:
@@ -51,6 +53,8 @@ dashboard:
       traits:
         version:
           preprocess: 'finalize'
+        component_descriptor:
+          ocm_repository: europe-docker.pkg.dev/gardener-project/releases
         release:
           nextversion: 'bump_minor'
           release_callback: '.ci/bump_version'
@@ -60,8 +64,10 @@ dashboard:
             internal_scp_workspace:
               channel_name: 'C017DNNNENQ' # garden-dashboard channel
               slack_cfg_name: 'scp_workspace'
-        component_descriptor: ~
         publish:
           dockerimages:
             dashboard:
+              image: europe-docker.pkg.dev/gardener-project/releases/gardener/dashboard
               tag_as_latest: true
+              extra_push_targets: # may be dropped after all users updated to new registry
+                - eu.gcr.io/gardener-project/gardener/dashboard
