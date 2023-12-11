@@ -13,6 +13,7 @@ import {
   reactive,
   watch,
   markRaw,
+  toRaw,
 } from 'vue'
 import { useDocumentVisibility } from '@vueuse/core'
 
@@ -58,6 +59,8 @@ import {
   find,
   includes,
   throttle,
+  isEmpty,
+  isEqual,
 } from '@/lodash'
 
 export const useShootStore = defineStore('shoot', () => {
@@ -271,6 +274,11 @@ export const useShootStore = defineStore('shoot', () => {
     })(this)
   }
 
+  const fetchDataCall = {
+    expiresAt: 0,
+    options: null,
+  }
+
   function synchronize () {
     const shootStore = this
 
@@ -315,6 +323,13 @@ export const useShootStore = defineStore('shoot', () => {
 
     // await and handle response data in the background
     const fetchData = async options => {
+      // check if a fetch operation with the same options is already in progress and hasn't expired.
+      if (isEqual(fetchDataCall.options, options) && fetchDataCall.expiresAt > Date.now()) {
+        logger.info('Detected concurrent synchronization attempts for the same shoot subscription')
+        return
+      }
+      fetchDataCall.expiresAt = Date.now() + 30_000
+      fetchDataCall.options = { ...options }
       let throttleDelay
       try {
         setSubscriptionState(state, constants.LOADING)
@@ -342,14 +357,16 @@ export const useShootStore = defineStore('shoot', () => {
         }
         throw err
       } finally {
+        fetchDataCall.expiresAt = 0
+        fetchDataCall.options = null
         if (state.subscriptionState === constants.LOADED) {
           await shootStore.openSubscription(options, throttleDelay)
         }
       }
     }
 
-    const options = subscription.value
-    if (options) {
+    const options = toRaw(subscription.value)
+    if (!isEmpty(options)) {
       return fetchData(options)
     }
   }
