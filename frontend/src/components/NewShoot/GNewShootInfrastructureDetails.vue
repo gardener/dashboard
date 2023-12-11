@@ -192,6 +192,7 @@ SPDX-License-Identifier: Apache-2.0
         wrapper="VCol"
         :wrapper-props="{ cols: '3' }"
         :input-props="{ variant: 'underlined' }"
+        :cloud-profile-name="cloudProfileName"
       />
     </v-row>
   </v-container>

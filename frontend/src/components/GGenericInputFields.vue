@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <component
     :is="wrapper"
-    v-for="{ key, label, hint, type } in fields"
+    v-for="{ key, label, hint, type, items } in parsedFields"
     :key="key"
     v-bind="wrapperProps"
   >
@@ -25,8 +25,22 @@ SPDX-License-Identifier: Apache-2.0
       @update:model-value="v$.fieldData[key].$touch()"
       @blur="v$.fieldData[key].$touch()"
     />
+    <v-select
+      v-if="type === 'select'"
+      v-bind="inputProps"
+      v-model="fieldData[key]"
+      color="primary"
+      item-color="primary"
+      :label="label"
+      :items="items"
+      :hint="hint"
+      :error-messages="getErrorMessages(v$.fieldData[key])"
+      @update:model-value="v$.fieldData[key].$touch()"
+      @blur="v$.fieldData[key].$touch()"
+    />
     <v-textarea
       v-if="type === 'yaml' || type === 'json'"
+      v-bind="inputProps"
       v-model="fieldData[key]"
       color="primary"
       :label="label"
@@ -45,6 +59,9 @@ import {
   requiredIf,
 } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
+import { mapActions } from 'pinia'
+
+import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import {
   withFieldName,
@@ -60,6 +77,7 @@ import {
   isEmpty,
   fromPairs,
   set,
+  get,
 } from '@/lodash'
 
 export default {
@@ -70,7 +88,6 @@ export default {
   props: {
     fields: {
       type: Array,
-      required: false,
     },
     modelValue: {
       type: Object,
@@ -82,11 +99,12 @@ export default {
     },
     wrapperProps: {
       type: Object,
-      required: false,
     },
     inputProps: {
       type: Object,
-      required: false,
+    },
+    cloudProfileName: {
+      type: String,
     },
   },
   emits: [
@@ -144,6 +162,22 @@ export default {
         return [key, this.fieldData[key]]
       }))
     },
+    parsedFields () {
+      return map(this.fields, field => {
+        let items
+        if (Array.isArray(field.values)) {
+          items = field.values
+        } else if (field.values?.cloudprofilePath) {
+          const cloudProfile = this.cloudProfileByName(this.cloudProfileName)
+          const values = get(cloudProfile, field.values.cloudprofilePath)
+          items = map(values, field.values.key)
+        }
+        return {
+          ...field,
+          items,
+        }
+      })
+    },
   },
   watch: {
     fieldData: {
@@ -177,6 +211,9 @@ export default {
     },
   },
   methods: {
+    ...mapActions(useCloudProfileStore, [
+      'cloudProfileByName',
+    ]),
     async onInputTextarea (key, type) {
       set(this.parsedInput, key, {})
       try {
