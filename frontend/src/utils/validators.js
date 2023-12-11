@@ -4,18 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import {
-  helpers,
-  requiredIf,
-  required,
-} from '@vuelidate/validators'
+import { helpers } from '@vuelidate/validators'
 
 import {
   includes,
   get,
-  every,
-  map,
-  isEmpty,
 } from '@/lodash'
 
 const { withParams, regex, req, withMessage } = helpers

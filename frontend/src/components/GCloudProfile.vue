@@ -42,12 +42,6 @@ import { withFieldName } from '@/utils/validators'
 
 import { find } from '@/lodash'
 
-const validationErrors = {
-  modelValue: {
-    required: 'You can\'t leave this empty.',
-  },
-}
-
 export default {
   props: {
     modelValue: {

@@ -114,9 +114,6 @@ export default {
         this.$emit('update:modelValue', modelValue)
       },
     },
-    valid () {
-      return !this.v$.$invalid
-    },
     secretData () {
       return {
         metalAPIHMac: this.apiHmac,

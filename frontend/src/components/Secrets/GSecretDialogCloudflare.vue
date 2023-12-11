@@ -111,9 +111,6 @@ export default {
         this.$emit('update:modelValue', modelValue)
       },
     },
-    valid () {
-      return !this.v$.$invalid
-    },
     secretData () {
       return {
         apiToken: this.apiToken,

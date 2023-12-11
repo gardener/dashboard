@@ -186,26 +186,13 @@ SPDX-License-Identifier: Apache-2.0
           />
         </v-col>
       </template>
-      <template v-if="customCloudProviderFields">
-        <v-col
-          v-for="{ key, label, hint, type } in customCloudProviderFields"
-          :key="key"
-          cols="3"
-        >
-          <v-text-field
-            v-if="type === 'text'"
-            v-model="customCloudProviderData[key]"
-            color="primary"
-            :label="label"
-            :error-messages="getErrorMessages(v$.customCloudProviderData[key])"
-            type="text"
-            :hint="hint"
-            variant="underlined"
-            @update:model-value="v$.customCloudProviderData[key].$touch()"
-            @blur="v$.customCloudProviderData[key].$touch()"
-          />
-        </v-col>
-      </template>
+      <g-generic-input-fields
+        v-model="customCloudProviderData"
+        :fields="customCloudProviderFields"
+        wrapper="VCol"
+        :wrapper-props="{ cols: '3' }"
+        :input-props="{ variant: 'underlined' }"
+      />
     </v-row>
   </v-container>
 </template>
@@ -230,6 +217,7 @@ import { useShootStagingStore } from '@/store/shootStaging'
 import GCloudProfile from '@/components/GCloudProfile'
 import GWildcardSelect from '@/components/GWildcardSelect'
 import GSelectSecret from '@/components/Secrets/GSelectSecret'
+import GGenericInputFields from '@/components/GGenericInputFields'
 
 import { getErrorMessages } from '@/utils'
 import {
@@ -249,7 +237,6 @@ import {
   intersection,
   find,
   set,
-  every,
 } from '@/lodash'
 
 export default {
@@ -257,6 +244,7 @@ export default {
     GCloudProfile,
     GWildcardSelect,
     GSelectSecret,
+    GGenericInputFields,
   },
   props: {
     userInterActionBus: {
@@ -294,7 +282,7 @@ export default {
     const requiresInfrastructure = infrastructureKind => {
       return requiredIf(() => this.infrastructureKind === infrastructureKind)
     }
-    const rules = {
+    return {
       region: withFieldName('Region', {
         required,
       }),
@@ -323,33 +311,7 @@ export default {
       projectID: withFieldName('Project ID', {
         required: requiresInfrastructure('metal'),
       }),
-      customCloudProviderData: {},
     }
-
-    forEach(this.customCloudProviderFields, ({ key, label, validators }) => {
-      const compiledValidators = {}
-      forEach(validators, (validator, validatorName) => {
-        switch (validator.type) {
-          case 'required':
-            compiledValidators[validatorName] = required
-            break
-          case 'requiredIf':
-            compiledValidators[validatorName] = requiredIf(() => !every(map(validator.not, fieldKey => this.customCloudProviderData[fieldKey])))
-            break
-          case 'isValidObject':
-            compiledValidators[validatorName] = () => isEmpty(this.customCloudProviderData[key]) || Object.keys(this.customCloudProviderParsedData[key]).length > 0
-            break
-          case 'regex':
-            compiledValidators[validatorName] = value => !value || new RegExp(validator.value).test(value)
-        }
-        if (validator.message) {
-          compiledValidators[validatorName] = withMessage(validator.message, compiledValidators[validatorName])
-        }
-      })
-      rules.customCloudProviderData[key] = withFieldName(label, compiledValidators)
-    })
-
-    return rules
   },
   computed: {
     ...mapState(useConfigStore, [
