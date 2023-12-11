@@ -309,7 +309,7 @@ export default {
       if (this.shootInfo.dashboardUrl) {
         return false
       }
-      if (this.shootInfo.kubeconfig) {
+      if (this.shootInfo.kubeconfigGardenlogin) {
         return false
       }
 
