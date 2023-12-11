@@ -97,6 +97,27 @@ Array [
           },
         ],
       },
+      "seedSelector": Object {},
+      "type": "infra2",
+    },
+    "metadata": Object {
+      "cloudProviderKind": "infra2",
+      "displayName": "infra2-profileName",
+      "name": "infra2-profileName",
+    },
+  },
+  Object {
+    "data": Object {
+      "kubernetes": Object {
+        "versions": Array [
+          Object {
+            "version": "1.9.0",
+          },
+          Object {
+            "version": "1.8.5",
+          },
+        ],
+      },
       "seedNames": Array [
         "infra3-seed-with-selector",
       ],
