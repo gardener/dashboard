@@ -31,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0
               item-title="secretName"
               return-object
               :items="dnsProvidersWithPrimarySupport"
-              :error-messages="getErrorMessages('primaryProvider')"
+              :error-messages="getErrorMessages(v$.primaryProvider)"
               label="Primary DNS Provider"
               clearable
               :disabled="!clusterIsNew"
@@ -110,8 +110,12 @@ import GDnsProviderRow from '@/components/ShootDns/GDnsProviderRow'
 import GVendorIcon from '@/components/GVendorIcon'
 import GExpandTransitionGroup from '@/components/GExpandTransitionGroup'
 
-import { getValidationErrors } from '@/utils'
-import { nilUnless } from '@/utils/validators'
+import {
+  withFieldName,
+  nilUnless,
+  withMessage,
+} from '@/utils/validators'
+import { getErrorMessages } from '@/utils'
 
 export default {
   components: {
@@ -125,7 +129,12 @@ export default {
     }
   },
   validations () {
-    return this.validators
+    return {
+      primaryProvider: withFieldName('Primary DNS Provider', {
+        required: withMessage('Provider is required if a custom domain is defined', requiredIf(this.clusterIsNew && !!this.domain)),
+        nil: withMessage('Provider is not allowed if no custom domain is defined', nilUnless('domain')),
+      }),
+    }
   },
   computed: {
     ...mapState(useShootStagingStore, [
@@ -135,22 +144,6 @@ export default {
       'dnsProvidersWithPrimarySupport',
       'dnsPrimaryProvider',
     ]),
-    validators () {
-      return {
-        primaryProvider: {
-          required: requiredIf(this.clusterIsNew && !!this.domain),
-          nil: nilUnless('domain'),
-        },
-      }
-    },
-    validationErrors () {
-      return {
-        primaryProvider: {
-          required: 'Provider is required if a custom domain is defined',
-          nil: 'Provider is not allowed if no custom domain is defined',
-        },
-      }
-    },
     domainHint () {
       return this.clusterIsNew
         ? 'External available domain of the cluster'
@@ -185,9 +178,7 @@ export default {
       'setDnsPrimaryProvider',
       'setDnsDomain',
     ]),
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
-    },
+    getErrorMessages,
   },
 }
 </script>

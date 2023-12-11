@@ -713,6 +713,25 @@ describe('gardener-dashboard', function () {
       })
     })
 
+    describe('maxRequestBodySize', function () {
+      it('should render the template', async function () {
+        const limit = '1mb'
+        const values = {
+          global: {
+            dashboard: {
+              maxRequestBodySize: limit
+            }
+          }
+        }
+
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [configMap] = documents
+        const config = yaml.load(configMap.data['config.yaml'])
+        expect(config.maxRequestBodySize).toBe(limit)
+      })
+    })
+
     describe('grantTypes', function () {
       it('should render the template', async function () {
         const values = {

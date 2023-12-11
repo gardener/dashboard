@@ -65,7 +65,7 @@ SPDX-License-Identifier: Apache-2.0
         :color="color"
         :loading="loading"
         :messages="messages"
-        :error-messages="v$.internalValue.$errors.map(e => e.$message)"
+        :error-messages="getErrorMessages(v$.internalValue)"
         class="g-field"
         @input="v$.internalValue.$touch"
         @blur="v$.internalValue.$touch"
@@ -100,7 +100,10 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { useVuelidate } from '@vuelidate/core'
 
-import { setDelayedInputFocus } from '@/utils'
+import {
+  setDelayedInputFocus,
+  getErrorMessages,
+} from '@/utils'
 
 import GErrorMessage from './GErrorMessage.vue'
 
@@ -253,6 +256,7 @@ export default {
       this.clearMessages()
       this.v$.$reset()
     },
+    getErrorMessages,
   },
 }
 </script>

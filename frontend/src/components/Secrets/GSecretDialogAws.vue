@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <g-secret-dialog
     v-model="visible"
     :data="secretData"
-    :data-valid="valid"
+    :secret-validations="v$"
     :secret="secret"
     :vendor="vendor"
     :create-title="`Add new ${name} Secret`"
@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="accessKeyId"
           color="primary"
           label="Access Key Id"
-          :error-messages="getErrorMessages('accessKeyId')"
+          :error-messages="getErrorMessages(v$.accessKeyId)"
           counter="128"
           hint="e.g. AKIAIOSFODNN7EXAMPLE"
           variant="underlined"
@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="secretAccessKey"
           color="primary"
           label="Secret Access Key"
-          :error-messages="getErrorMessages('secretAccessKey')"
+          :error-messages="getErrorMessages(v$.secretAccessKey)"
           :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideSecret ? 'password' : 'text'"
           counter="40"
@@ -108,27 +108,14 @@ import GCodeBlock from '@/components/GCodeBlock'
 import GExternalLink from '@/components/GExternalLink'
 
 import {
+  withFieldName,
   alphaNumUnderscore,
   base64,
 } from '@/utils/validators'
 import {
-  getValidationErrors,
+  getErrorMessages,
   setDelayedInputFocus,
 } from '@/utils'
-
-const validationErrors = {
-  accessKeyId: {
-    required: 'You can\'t leave this empty.',
-    minLength: 'It must contain at least 16 characters.',
-    maxLength: 'It exceeds the maximum length of 128 characters.',
-    alphaNumUnderscore: 'Please use only alphanumeric characters and underscore.',
-  },
-  secretAccessKey: {
-    required: 'You can\'t leave this empty.',
-    minLength: 'It must contain at least 40 characters.',
-    base64: 'Invalid secret access key.',
-  },
-}
 
 export default {
   components: {
@@ -162,7 +149,6 @@ export default {
       secretAccessKey: undefined,
       awsRegion: undefined,
       hideSecret: true,
-      validationErrors,
       templateAws: {
         Version: '2012-10-17',
         Statement: [
@@ -247,8 +233,19 @@ export default {
     }
   },
   validations () {
-    // had to move the code to a computed property so that the getValidationErrors method can access it
-    return this.validators
+    return {
+      accessKeyId: withFieldName('Access Key ID', {
+        required,
+        minLength: minLength(16),
+        maxLength: maxLength(128),
+        alphaNumUnderscore,
+      }),
+      secretAccessKey: withFieldName('Secret Access Key', {
+        required,
+        minLength: minLength(40),
+        base64,
+      }),
+    }
   },
   computed: {
     visible: {
@@ -268,22 +265,6 @@ export default {
         secretAccessKey: this.secretAccessKey,
         AWS_REGION: this.awsRegion,
       }
-    },
-    validators () {
-      const validators = {
-        accessKeyId: {
-          required,
-          minLength: minLength(16),
-          maxLength: maxLength(128),
-          alphaNumUnderscore,
-        },
-        secretAccessKey: {
-          required,
-          minLength: minLength(40),
-          base64,
-        },
-      }
-      return validators
     },
     isCreateMode () {
       return !this.secret
@@ -317,9 +298,7 @@ export default {
         setDelayedInputFocus(this, 'accessKeyId')
       }
     },
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
-    },
+    getErrorMessages,
   },
 }
 </script>

@@ -437,6 +437,7 @@ Object {
   },
   "logFormat": "text",
   "logLevel": "debug",
+  "maxRequestBodySize": "100kb",
   "oidc": Object {
     "ca": "-----BEGIN CERTIFICATE-----
 Li4u

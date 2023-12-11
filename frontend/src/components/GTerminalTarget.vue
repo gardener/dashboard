@@ -75,6 +75,7 @@ import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
 
 import { shootItem } from '@/mixins/shootItem'
+import { withFieldName } from '@/utils/validators'
 
 export default {
   mixins: [shootItem],
@@ -99,7 +100,11 @@ export default {
     }
   },
   validations () {
-    return this.validators
+    return {
+      modelValue: withFieldName('Terminal Target', {
+        required,
+      }),
+    }
   },
   computed: {
     ...mapState(useAuthnStore, [
@@ -110,13 +115,6 @@ export default {
       'hasControlPlaneTerminalAccess',
       'hasShootTerminalAccess',
     ]),
-    validators () {
-      return {
-        modelValue: {
-          required,
-        },
-      }
-    },
     selectedTarget: {
       get () {
         return this.modelValue

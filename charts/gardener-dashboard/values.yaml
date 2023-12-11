@@ -65,6 +65,12 @@ global:
     # # the identifier of the gardener landscape (defaults to the name stored in kube-system/cluster-identity configmap)
     # clusterIdentity: my-landscape-dev
 
+    # Maximum Request Body Size
+    # This configuration parameter specifies the maximum size of the request body.
+    # It is used to limit the size of data that the server will accept in a single request.
+    # (see https://expressjs.com/en/resources/middleware/body-parser.html#bodyparserjsonoptions)
+    maxRequestBodySize: 100kb
+
     # Experimental Feature: Control of Watch Cache for List Shoots Requests
     # This feature allows fine-tuning the behavior of how list shoots requests are handled in terms of caching.
     # Note: As this is an experimental feature, it is subject to change and may not be stable.

@@ -8,7 +8,6 @@ SPDX-License-Identifier: Apache-2.0
   <g-action-button-dialog
     ref="actionDialog"
     :shoot-item="shootItem"
-    :valid="!v$.$invalid"
     width="900"
     caption="Configure Maintenance"
     @dialog-opened="onConfigurationDialogOpened"

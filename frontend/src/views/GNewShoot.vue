@@ -153,14 +153,13 @@ SPDX-License-Identifier: Apache-2.0
       <v-divider vertical />
       <v-btn
         variant="text"
-        :disabled="v$.$invalid"
         color="primary"
         @click.stop="createClicked()"
       >
         Create
       </v-btn>
+      <g-confirm-dialog ref="confirmDialog" />
     </div>
-    <g-confirm-dialog ref="confirmDialog" />
   </div>
   <v-alert
     v-else
@@ -204,6 +203,7 @@ import { useAsyncRef } from '@/composables/useAsyncRef'
 
 import { isZonedCluster } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
+import { messageFromErrors } from '@/utils/validators'
 import {
   getSpecTemplate,
   getZonesNetworkConfiguration,
@@ -556,6 +556,13 @@ export default {
       await this.hibernationSchedule.dispatch('setScheduleData', { hibernationSchedule, noHibernationSchedule, purpose })
     },
     async createClicked () {
+      if (this.v$.$invalid) {
+        await this.v$.$validate()
+        const message = messageFromErrors(this.v$.$errors)
+        this.errorMessage = 'There are input errors that you need to resolve'
+        this.detailedErrorMessage = message
+        return
+      }
       const shootResource = await this.updateShootResourceWithUIComponents()
       try {
         await this.createShoot(shootResource)

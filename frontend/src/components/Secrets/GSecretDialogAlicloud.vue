@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <g-secret-dialog
     v-model="visible"
     :data="secretData"
-    :data-valid="valid"
+    :secret-validations="v$"
     :secret="secret"
     :vendor="vendor"
     :create-title="`Add new ${name} Secret`"
@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="accessKeyId"
           color="primary"
           label="Access Key Id"
-          :error-messages="getErrorMessages('accessKeyId')"
+          :error-messages="getErrorMessages(v$.accessKeyId)"
           counter="128"
           hint="e.g. QNJebZ17v5Q7pYpP"
           variant="underlined"
@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="accessKeySecret"
           color="primary"
           label="Access Key Secret"
-          :error-messages="getErrorMessages('accessKeySecret')"
+          :error-messages="getErrorMessages(v$.accessKeySecret)"
           :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideSecret ? 'password' : 'text'"
           counter="30"
@@ -104,21 +104,10 @@ import GCodeBlock from '@/components/GCodeBlock'
 import GExternalLink from '@/components/GExternalLink'
 
 import {
-  getValidationErrors,
+  getErrorMessages,
   setDelayedInputFocus,
 } from '@/utils'
-
-const validationErrors = {
-  accessKeyId: {
-    required: 'You can\'t leave this empty.',
-    minLength: 'It must contain at least 16 characters.',
-    maxLength: 'It exceeds the maximum length of 128 characters.',
-  },
-  accessKeySecret: {
-    required: 'You can\'t leave this empty.',
-    minLength: 'It must contain at least 30 characters.',
-  },
-}
+import { withFieldName } from '@/utils/validators'
 
 export default {
   components: {
@@ -151,7 +140,6 @@ export default {
       accessKeyId: undefined,
       accessKeySecret: undefined,
       hideSecret: true,
-      validationErrors,
       template: {
         Statement: [
           {
@@ -189,8 +177,17 @@ export default {
     }
   },
   validations () {
-    // had to move the code to a computed property so that the getValidationErrors method can access it
-    return this.validators
+    return {
+      accessKeyId: withFieldName('Access Key ID', {
+        required,
+        minLength: minLength(16),
+        maxLength: maxLength(128),
+      }),
+      accessKeySecret: withFieldName('Access Key Secret', {
+        required,
+        minLength: minLength(30),
+      }),
+    }
   },
   computed: {
     visible: {
@@ -219,20 +216,6 @@ export default {
         accessKeySecret: this.accessKeySecret,
       }
     },
-    validators () {
-      const validators = {
-        accessKeyId: {
-          required,
-          minLength: minLength(16),
-          maxLength: maxLength(128),
-        },
-        accessKeySecret: {
-          required,
-          minLength: minLength(30),
-        },
-      }
-      return validators
-    },
     isCreateMode () {
       return !this.secret
     },
@@ -255,9 +238,7 @@ export default {
         setDelayedInputFocus(this, 'accessKeyId')
       }
     },
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
-    },
+    getErrorMessages,
   },
 }
 </script>

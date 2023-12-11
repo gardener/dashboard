@@ -34,6 +34,7 @@ data:
     {{- if .Values.global.dashboard.clusterIdentity }}
     clusterIdentity: {{ .Values.global.dashboard.clusterIdentity }}
     {{- end }}
+    maxRequestBodySize: {{ .Values.global.dashboard.maxRequestBodySize | default "100kb" }}
     experimentalUseWatchCacheForListShoots: {{ .Values.global.dashboard.experimentalUseWatchCacheForListShoots | default "never" }}
     readinessProbe:
       periodSeconds: {{ .Values.global.dashboard.readinessProbe.periodSeconds }}

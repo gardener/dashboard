@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
       :label="wildcardSelectLabel"
       :items="wildcardSelectItemObjects"
       return-object
-      :error-messages="getErrorMessages('wildcardSelectedValue')"
+      :error-messages="getErrorMessages(v$.wildcardSelectedValue)"
       :hint="wildcardSelectHint"
       persistent-hint
       variant="underlined"
@@ -76,7 +76,11 @@ SPDX-License-Identifier: Apache-2.0
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
-import { getValidationErrors } from '@/utils'
+import {
+  withFieldName,
+  withMessage,
+} from '@/utils/validators'
+import { getErrorMessages } from '@/utils'
 import {
   wildcardObjectsFromStrings,
   bestMatchForString,
@@ -112,16 +116,6 @@ export default {
     }
   },
   computed: {
-    validationErrors () {
-      return {
-        wildcardSelectedValue: {
-          required: `${this.wildcardSelectLabel} is required`,
-          prefixRequired: 'Prefix is required',
-          suffixRequired: 'Suffix is required',
-          customRequired: 'Custom value is required',
-        },
-      }
-    },
     wildcardSelectItemObjects () {
       return wildcardObjectsFromStrings(this.wildcardSelectItems)
     },
@@ -143,22 +137,6 @@ export default {
       }
       return this.wildcardSelectedValue.value
     },
-    validators () {
-      return {
-        wildcardSelectedValue: {
-          required,
-          prefixRequired: () => {
-            return this.wildcardVariablePartPrefix || !this.wildcardSelectedValue.startsWithWildcard
-          },
-          suffixRequired: () => {
-            return this.wildcardVariablePartSuffix || !this.wildcardSelectedValue.endsWithWildcard
-          },
-          customRequired: () => {
-            return this.wildcardVariablePartPrefix || !this.wildcardSelectedValue.customWildcard
-          },
-        },
-      }
-    },
   },
   watch: {
     modelValue (value) {
@@ -169,9 +147,6 @@ export default {
     this.setInternalValue(this.modelValue)
   },
   methods: {
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
-    },
     onInput () {
       this.v$.wildcardSelectedValue.$touch()
       this.$emit('update:modelValue', this.internalValue)
@@ -199,9 +174,24 @@ export default {
 
       this.onInput()
     },
+    getErrorMessages,
   },
   validations () {
-    return this.validators
+    const rules = {}
+    const wildcardSelectedValueRules = {
+      required: withMessage(() => `${this.wildcardSelectLabel} is required`, required),
+      prefixRequired: withMessage('Prefix is required', () => {
+        return this.wildcardVariablePartPrefix || !this.wildcardSelectedValue.startsWithWildcard
+      }),
+      suffixRequired: withMessage('Suffix is required', () => {
+        return this.wildcardVariablePartSuffix || !this.wildcardSelectedValue.endsWithWildcard
+      }),
+      customRequired: withMessage('Custom value is required', () => {
+        return this.wildcardVariablePartPrefix || !this.wildcardSelectedValue.customWildcard
+      }),
+    }
+    rules.wildcardSelectedValue = withFieldName(() => this.wildcardSelectLabel, wildcardSelectedValueRules)
+    return rules
   },
 }
 </script>
