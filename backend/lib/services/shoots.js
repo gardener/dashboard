@@ -361,9 +361,8 @@ exports.info = async function ({ user, namespace, name }) {
         }
       })
       .commit()
-
-    data.dashboardUrlPath = getDashboardUrlPath(shoot.spec.kubernetes.version)
   }
+  data.dashboardUrlPath = getDashboardUrlPath(shoot.spec.kubernetes.version)
 
   /*
     We explicitly use the (privileged) dashboardClient here for fetching the monitoring credentials instead of using the user's token
