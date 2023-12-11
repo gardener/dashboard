@@ -8,7 +8,6 @@
 
 const { NotFound, Forbidden } = require('http-errors')
 const authorization = require('./authorization')
-const logger = require('../logger')
 const _ = require('lodash')
 const { getCloudProfiles, getVisibleAndNotProtectedSeeds } = require('../cache')
 
