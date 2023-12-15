@@ -45,8 +45,6 @@ import {
   searchItemsFn,
   sortItemsFn,
   shootHasIssue,
-  setSubscriptionState,
-  setSubscriptionError,
 } from './helper'
 
 import {
@@ -230,6 +228,34 @@ export const useShootStore = defineStore('shoot', () => {
     shootEvents.clear()
     ticketStore.clearIssues()
     ticketStore.clearComments()
+  }
+
+  function setSubscriptionState (state, value) {
+    if (value > 0 && value !== state.subscriptionState + 1) {
+      logger.warn('Unexpected subscription state change: %d --> %d', state.subscriptionState, value)
+    }
+    state.subscriptionState = value
+    state.subscriptionError = null
+  }
+
+  function setSubscriptionError (state, err) {
+    if (err) {
+      const name = err.name
+      const statusCode = get(err, 'response.status', 500)
+      const message = get(err, 'response.data.message', err.message)
+      const reason = get(err, 'response.data.reason', 'InternalError')
+      const code = get(err, 'response.data.code', 500)
+      state.subscriptionError = {
+        name,
+        statusCode,
+        message,
+        code,
+        reason,
+      }
+      logger.error('Subscription failed: %d %s - %s', statusCode, name, message)
+    } else {
+      state.subscriptionError = null
+    }
   }
 
   async function subscribe (metadata = {}) {
