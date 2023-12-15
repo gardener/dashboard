@@ -6,8 +6,6 @@
 
 import { computed } from 'vue'
 
-import { useLogger } from '@/composables/useLogger'
-
 import {
   shortRandomString,
   purposesForSecret,
