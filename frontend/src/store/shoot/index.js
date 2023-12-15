@@ -13,6 +13,7 @@ import {
   reactive,
   watch,
   markRaw,
+  toRaw,
 } from 'vue'
 import { useDocumentVisibility } from '@vueuse/core'
 
@@ -44,8 +45,6 @@ import {
   searchItemsFn,
   sortItemsFn,
   shootHasIssue,
-  setSubscriptionState,
-  setSubscriptionError,
 } from './helper'
 
 import {
@@ -58,6 +57,8 @@ import {
   find,
   includes,
   throttle,
+  isEmpty,
+  isEqual,
 } from '@/lodash'
 
 export const useShootStore = defineStore('shoot', () => {
@@ -229,6 +230,34 @@ export const useShootStore = defineStore('shoot', () => {
     ticketStore.clearComments()
   }
 
+  function setSubscriptionState (state, value) {
+    if (value > 0 && value !== state.subscriptionState + 1) {
+      logger.warn('Unexpected subscription state change: %d --> %d', state.subscriptionState, value)
+    }
+    state.subscriptionState = value
+    state.subscriptionError = null
+  }
+
+  function setSubscriptionError (state, err) {
+    if (err) {
+      const name = err.name
+      const statusCode = get(err, 'response.status', 500)
+      const message = get(err, 'response.data.message', err.message)
+      const reason = get(err, 'response.data.reason', 'InternalError')
+      const code = get(err, 'response.data.code', 500)
+      state.subscriptionError = {
+        name,
+        statusCode,
+        message,
+        code,
+        reason,
+      }
+      logger.error('Subscription failed: %d %s - %s', statusCode, name, message)
+    } else {
+      state.subscriptionError = null
+    }
+  }
+
   async function subscribe (metadata = {}) {
     const shootStore = this
     const {
@@ -269,6 +298,24 @@ export const useShootStore = defineStore('shoot', () => {
         appStore.setError(err)
       }
     })(this)
+  }
+
+  const synchronizeLock = {
+    expiresAt: 0,
+    options: null,
+    aquire (options) {
+      if (isEqual(this.options, options) && this.expiresAt > Date.now()) {
+        logger.warn('Detected concurrent synchronization attempts for the same shoot subscription')
+        return false
+      }
+      this.expiresAt = Date.now() + 30_000
+      this.options = { ...options }
+      return true
+    },
+    release () {
+      this.expiresAt = 0
+      this.options = null
+    },
   }
 
   function synchronize () {
@@ -316,6 +363,10 @@ export const useShootStore = defineStore('shoot', () => {
     // await and handle response data in the background
     const fetchData = async options => {
       let throttleDelay
+      // check if a synchronize operation with the same options is already in progress and hasn't expired.
+      if (!synchronizeLock.aquire(options)) {
+        return
+      }
       try {
         setSubscriptionState(state, constants.LOADING)
         const promise = options.name
@@ -342,14 +393,15 @@ export const useShootStore = defineStore('shoot', () => {
         }
         throw err
       } finally {
+        synchronizeLock.release()
         if (state.subscriptionState === constants.LOADED) {
           await shootStore.openSubscription(options, throttleDelay)
         }
       }
     }
 
-    const options = subscription.value
-    if (options) {
+    const options = toRaw(subscription.value)
+    if (!isEmpty(options)) {
       return fetchData(options)
     }
   }

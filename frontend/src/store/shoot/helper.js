@@ -6,8 +6,6 @@
 
 import { computed } from 'vue'
 
-import { useLogger } from '@/composables/useLogger'
-
 import {
   shortRandomString,
   purposesForSecret,
@@ -550,34 +548,4 @@ export function sortItemsFn (state, context) {
 
 export function shootHasIssue (object) {
   return get(object, ['metadata', 'labels', 'shoot.gardener.cloud/status'], 'healthy') !== 'healthy'
-}
-
-//  Updates subscription state, ensuring consistency with transition states.
-export function setSubscriptionState (state, value) {
-  if ([constants.LOADED, constants.OPEN, constants.CLOSED].includes(value) && value !== state.subscriptionState + 1) {
-    const logger = useLogger()
-    logger.error('Unexpected subscription state change: %d --> %d', state.subscriptionState, value)
-    return
-  }
-  state.subscriptionState = value
-  state.subscriptionError = null
-}
-
-export function setSubscriptionError (state, err) {
-  if (err) {
-    const name = err.name
-    const statusCode = get(err, 'response.status', 500)
-    const message = get(err, 'response.data.message', err.message)
-    const reason = get(err, 'response.data.reason', 'InternalError')
-    const code = get(err, 'response.data.code', 500)
-    state.subscriptionError = {
-      name,
-      statusCode,
-      message,
-      code,
-      reason,
-    }
-  } else {
-    state.subscriptionError = null
-  }
 }
