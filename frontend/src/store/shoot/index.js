@@ -300,9 +300,22 @@ export const useShootStore = defineStore('shoot', () => {
     })(this)
   }
 
-  const fetchDataCall = {
+  const synchronizeLock = {
     expiresAt: 0,
     options: null,
+    aquire (options) {
+      if (isEqual(this.options, options) && this.expiresAt > Date.now()) {
+        logger.warn('Detected concurrent synchronization attempts for the same shoot subscription')
+        return false
+      }
+      this.expiresAt = Date.now() + 30_000
+      this.options = { ...options }
+      return true
+    },
+    release () {
+      this.expiresAt = 0
+      this.options = null
+    },
   }
 
   function synchronize () {
@@ -349,14 +362,11 @@ export const useShootStore = defineStore('shoot', () => {
 
     // await and handle response data in the background
     const fetchData = async options => {
-      // check if a fetch operation with the same options is already in progress and hasn't expired.
-      if (isEqual(fetchDataCall.options, options) && fetchDataCall.expiresAt > Date.now()) {
-        logger.info('Detected concurrent synchronization attempts for the same shoot subscription')
+      let throttleDelay
+      // check if a synchronize operation with the same options is already in progress and hasn't expired.
+      if (!synchronizeLock.aquire(options)) {
         return
       }
-      fetchDataCall.expiresAt = Date.now() + 30_000
-      fetchDataCall.options = { ...options }
-      let throttleDelay
       try {
         setSubscriptionState(state, constants.LOADING)
         const promise = options.name
@@ -383,8 +393,7 @@ export const useShootStore = defineStore('shoot', () => {
         }
         throw err
       } finally {
-        fetchDataCall.expiresAt = 0
-        fetchDataCall.options = null
+        synchronizeLock.release()
         if (state.subscriptionState === constants.LOADED) {
           await shootStore.openSubscription(options, throttleDelay)
         }
