@@ -561,6 +561,11 @@ export default {
         const message = messageFromErrors(this.v$.$errors)
         this.errorMessage = 'There are input errors that you need to resolve'
         this.detailedErrorMessage = message
+
+        this.$nextTick(() => {
+          // Need to wait for the new element to be rendered, before we can scroll it into view
+          this.$refs.errorAlert.scrollIntoView()
+        })
         return
       }
       const shootResource = await this.updateShootResourceWithUIComponents()
