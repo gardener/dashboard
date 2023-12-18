@@ -169,9 +169,13 @@ function useWatchCacheForListShoots (useCache) {
     case 'always':
       return true
     case 'no':
+    case false:
       return ['true', 'yes', 'on'].includes(useCache)
     case 'yes':
+    case true:
       return !['false', 'no', 'off'].includes(useCache)
+    default:
+      return false
   }
 }
 
