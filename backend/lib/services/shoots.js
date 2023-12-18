@@ -55,7 +55,7 @@ exports.list = async function ({ user, namespace, labelSelector, useCache = fals
             .flatMap(namespace => cache.getShoots(namespace, query))
         }
       }
-      const statuses = await Promise.allSettled(namespaces.map(namespace, client['core.gardener.cloud'].shoots.list(namespace, query)))
+      const statuses = await Promise.allSettled(namespaces.map(namespace => client['core.gardener.cloud'].shoots.list(namespace, query)))
       return {
         apiVersion: 'v1',
         kind: 'List',
