@@ -163,15 +163,19 @@ function filterBySelectors (selectors) {
 }
 
 function useWatchCacheForListShoots (useCache) {
-  switch (config.experimentalUseWatchCacheForListShoots) {
+  switch ('' + config.experimentalUseWatchCacheForListShoots) {
     case 'never':
       return false
     case 'always':
       return true
     case 'no':
+    case 'false':
       return ['true', 'yes', 'on'].includes(useCache)
     case 'yes':
+    case 'true':
       return !['false', 'no', 'off'].includes(useCache)
+    default:
+      return false
   }
 }
 

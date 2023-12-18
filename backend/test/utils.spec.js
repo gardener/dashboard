@@ -219,6 +219,14 @@ describe('utils', function () {
         config.experimentalUseWatchCacheForListShoots = 'no'
         expect(useWatchCacheForListShoots(undefined)).toBe(false)
         expect(useWatchCacheForListShoots('true')).toBe(true)
+        config.experimentalUseWatchCacheForListShoots = true
+        expect(useWatchCacheForListShoots(undefined)).toBe(true)
+        expect(useWatchCacheForListShoots('false')).toBe(false)
+        config.experimentalUseWatchCacheForListShoots = false
+        expect(useWatchCacheForListShoots(undefined)).toBe(false)
+        expect(useWatchCacheForListShoots('true')).toBe(true)
+        config.experimentalUseWatchCacheForListShoots = undefined
+        expect(useWatchCacheForListShoots(true)).toBe(false)
       })
     })
   })
