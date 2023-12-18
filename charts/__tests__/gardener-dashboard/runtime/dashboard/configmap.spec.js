@@ -857,6 +857,21 @@ describe('gardener-dashboard', function () {
         const config = yaml.load(configMap.data['config.yaml'])
         expect(config.experimentalUseWatchCacheForListShoots).toBe('no')
       })
+
+      it('should render the template with value "true"', async function () {
+        const values = {
+          global: {
+            dashboard: {
+              experimentalUseWatchCacheForListShoots: true
+            }
+          }
+        }
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [configMap] = documents
+        const config = yaml.load(configMap.data['config.yaml'])
+        expect(config.experimentalUseWatchCacheForListShoots).toBe('true')
+      })
     })
   })
 })
