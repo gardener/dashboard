@@ -232,6 +232,7 @@ global:
       features:
         terminalEnabled: false
         projectTerminalShortcutsEnabled: false
+        shootForceDeletionEnabled: false
       # Experimental Features
       # Note: The following features are experimental and may be subject to change.
       experimental:
