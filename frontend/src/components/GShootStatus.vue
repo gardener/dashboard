@@ -166,6 +166,10 @@ SPDX-License-Identifier: Apache-2.0
     </g-popover>
     <div>
       <g-retry-operation :shoot-item="shootItem" />
+      <g-force-deletion
+        v-model="forceDeleteClusterDialog"
+        :shoot-item="shootItem"
+      />
     </div>
     <span
       v-if="showStatusText"
@@ -203,6 +207,7 @@ import {
 
 import GShootMessageDetails from './GShootMessageDetails.vue'
 import GRetryOperation from './GRetryOperation.vue'
+import GForceDeletion from './GForceDeletion.vue'
 
 import {
   join,
@@ -213,6 +218,7 @@ export default {
   components: {
     GRetryOperation,
     GShootMessageDetails,
+    GForceDeletion,
   },
   mixins: [shootItem],
   inject: ['mergeProps'],
@@ -233,6 +239,7 @@ export default {
     return {
       popover: false,
       retryingOperation: false,
+      forceDeleteClusterDialog: false,
     }
   },
   computed: {

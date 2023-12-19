@@ -7,6 +7,8 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-dialog
     ref="gDialog"
+    v-model:error-message="errorMessage"
+    v-model:detailed-error-message="detailedErrorMessage"
     :confirm-button-text="confirmButtonText"
     :confirm-value="confirmValue"
     :disable-confirm-input-focus="confirmInputFocusDisabled"
@@ -22,26 +24,17 @@ SPDX-License-Identifier: Apache-2.0
     <template #message>
       <slot />
     </template>
-    <template #errorMessage>
-      <g-message
-        v-model:message="errorMessage"
-        v-model:detailed-message="detailedErrorMessage"
-        color="error"
-      />
-    </template>
   </g-dialog>
 </template>
 
 <script>
 import GDialog from '@/components/dialogs/GDialog'
-import GMessage from '@/components/GMessage.vue'
 
 import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
     GDialog,
-    GMessage,
   },
   mixins: [shootItem],
   props: {

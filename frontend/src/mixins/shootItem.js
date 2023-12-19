@@ -4,8 +4,12 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { mapActions } from 'pinia'
+import {
+  mapActions,
+  mapState,
+} from 'pinia'
 
+import { useConfigStore } from '@/store/config'
 import { useShootStore } from '@/store/shoot'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useProjectStore } from '@/store/project'
@@ -19,6 +23,7 @@ import {
   isTypeDelete,
   isTruthyValue,
 } from '@/utils'
+import { errorCodesFromArray } from '@/utils/errorCodes'
 
 import {
   get,
@@ -39,6 +44,9 @@ export const shootItem = {
     },
   },
   computed: {
+    ...mapState(useConfigStore, [
+      'isShootForceDeletionEnabled',
+    ]),
     shootMetadata () {
       return get(this.shootItem, 'metadata', {})
     },
@@ -49,8 +57,17 @@ export const shootItem = {
       return this.shootMetadata.namespace
     },
     isShootMarkedForDeletion () {
+      if (this.isShootMarkedForForceDeletion) {
+        return true
+      }
       const confirmationDeprecated = get(this.shootAnnotations, ['confirmation.garden.sapcloud.io/deletion'], 'false')
       const confirmation = get(this.shootAnnotations, ['confirmation.gardener.cloud/deletion'], confirmationDeprecated)
+      const deletionTimestamp = this.shootDeletionTimestamp
+
+      return !!deletionTimestamp && isTruthyValue(confirmation)
+    },
+    isShootMarkedForForceDeletion () {
+      const confirmation = get(this.shootAnnotations, ['confirmation.gardener.cloud/force-deletion'])
       const deletionTimestamp = this.shootDeletionTimestamp
 
       return !!deletionTimestamp && isTruthyValue(confirmation)
@@ -267,6 +284,25 @@ export const shootItem = {
     },
     isStaleShoot () {
       return !this.isShootActive(this.shootMetadata.uid)
+    },
+    canForceDeleteShoot () {
+      if (!this.isShootForceDeletionEnabled) {
+        return false
+      }
+      if (!this.shootDeletionTimestamp) {
+        return false
+      }
+
+      const shootErrorCodes = errorCodesFromArray(this.shootLastErrors)
+      const forceDeleteErrorCodes = [
+        'ERR_CLEANUP_CLUSTER_RESOURCES',
+        'ERR_CONFIGURATION_PROBLEM',
+        'ERR_INFRA_DEPENDENCIES',
+        'ERR_INFRA_UNAUTHENTICATED',
+        'ERR_INFRA_UNAUTHORIZED',
+      ]
+      const shootHasSupportedForceDeleteError = shootErrorCodes.some(item => forceDeleteErrorCodes.includes(item))
+      return shootHasSupportedForceDeleteError
     },
   },
   methods: {
