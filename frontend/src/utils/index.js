@@ -40,6 +40,7 @@ import {
   sample,
   compact,
   forEach,
+  omit,
 } from '@/lodash'
 
 const serviceAccountRegex = /^system:serviceaccount:([^:]+):([^:]+)$/
@@ -87,35 +88,8 @@ export function handleTextFieldDrop (textField, fileTypePattern, onDrop = () => 
   textarea.addEventListener('drop', drop, false)
 }
 
-export function getValidationErrors (vm, field) {
-  const errors = []
-  const validationForField = get(vm.v$, field)
-  if (!validationForField.$dirty) {
-    return errors
-  }
-
-  const validators = vm.validators
-    ? vm.validators
-    : vm.$options.validations
-  Object
-    .keys(get(validators, field))
-    .forEach(key => {
-      if (validationForField[key]?.$invalid) {
-        let validationErrorMessage = get(vm.validationErrors, field)[key]
-        if (typeof validationErrorMessage === 'function') {
-          validationErrorMessage = validationErrorMessage(get(validationForField.$params, key))
-        }
-        if (validationErrorMessage) {
-          errors.push(validationErrorMessage)
-        } else {
-          /* Fallback logic with generic error message.
-            This should not happen as for each validation there must be a corresponding text */
-          errors.push('Invalid input')
-          logger.error('validation error message for ' + field + '.' + key + ' not found')
-        }
-      }
-    })
-  return errors
+export function getErrorMessages (property) {
+  return property.$errors.map(e => e.$message)
 }
 
 export function setDelayedInputFocus (...args) {
@@ -271,9 +245,8 @@ export function routeName (route) {
 export function getDateFormatted (timestamp) {
   if (!timestamp) {
     return undefined
-  } else {
-    return moment(timestamp).format('YYYY-MM-DD')
   }
+  return moment(timestamp).format('YYYY-MM-DD')
 }
 
 export function getTimestampFormatted (timestamp) {
@@ -286,21 +259,15 @@ export function getTimestampFormatted (timestamp) {
 export function getTimeStringFrom (time, fromTime, withoutSuffix = false) {
   if (!time) {
     return undefined
-  } else {
-    return moment(time).from(fromTime, withoutSuffix)
   }
+  return moment(time).from(fromTime, withoutSuffix)
 }
 
 export function getTimeStringTo (time, toTime, withoutPrefix = false) {
   if (!time) {
     return undefined
-  } else {
-    if (time.getTime() === toTime.getTime()) {
-      // Equal dates result in text "a few seconds ago", this is not we want here...
-      toTime.setSeconds(toTime.getSeconds() + 1)
-    }
-    return moment(time).to(toTime, withoutPrefix)
   }
+  return moment(time).to(toTime, withoutPrefix)
 }
 
 export function isOwnSecret (infrastructureSecret) {
@@ -328,12 +295,12 @@ export function getIssueSince (shootStatus) {
   return head(issueTimestamps.sort())
 }
 
-export function getProjectDetails (project) {
+export function getProjectDetails (project = {}) {
   const projectData = project.data || {}
   const projectMetadata = project.metadata || {}
   const projectName = projectMetadata.name || ''
   const owner = projectData.owner || ''
-  const costObject = get(project, ['metadata', 'annotations', 'billing.gardener.cloud/costObject'])
+  const costObject = get(project, ['metadata', 'annotations', 'billing.gardener.cloud/costObject'], '')
   const creationTimestamp = projectMetadata.creationTimestamp
   const createdAt = getDateFormatted(creationTimestamp)
   const description = projectData.description || ''
@@ -360,10 +327,6 @@ export function getProjectDetails (project) {
 
 export function isShootStatusHibernated (status) {
   return get(status, 'hibernated', false)
-}
-
-export function shootHasIssue (shoot) {
-  return get(shoot, ['metadata', 'labels', 'shoot.gardener.cloud/status'], 'healthy') !== 'healthy'
 }
 
 export function isReconciliationDeactivated (metadata) {
@@ -539,6 +502,19 @@ export function maintenanceWindowWithBeginAndTimezone (beginTime, beginTimezone,
   return { begin, end }
 }
 
+export function getDurationInMinutes (begin, end) {
+  const beginMoment = moment.utc(begin, 'HH:mm')
+  let endMoment = moment.utc(end, 'HH:mm')
+  if (!beginMoment.isValid() || !endMoment.isValid()) {
+    return undefined
+  }
+  if (endMoment.isBefore(beginMoment)) {
+    endMoment = endMoment.add(1, 'day')
+  }
+
+  return endMoment.diff(beginMoment, 'minutes')
+}
+
 export function defaultCriNameByKubernetesVersion (criNames, kubernetesVersion) {
   const criName = semver.lt(kubernetesVersion, '1.22.0')
     ? 'docker'
@@ -662,4 +638,9 @@ export class Shortcut {
       value: unverified,
     })
   }
+}
+
+export function omitKeysWithSuffix (obj, suffix) {
+  const keys = Object.keys(obj).filter(key => key.endsWith(suffix))
+  return omit(obj, keys)
 }

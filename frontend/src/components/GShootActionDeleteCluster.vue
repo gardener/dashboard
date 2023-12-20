@@ -175,7 +175,6 @@ export default {
         this.logger.error(errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
-
   },
 }
 </script>

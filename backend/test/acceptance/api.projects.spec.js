@@ -56,7 +56,7 @@ describe('api', function () {
     })
 
     it('should return all projects', async function () {
-      const user = fixtures.auth.createUser({ id: 'admin@example.org' })
+      const user = fixtures.auth.createUser({ id: 'projects-viewer@example.org' })
 
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
 

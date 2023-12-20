@@ -108,7 +108,7 @@ SPDX-License-Identifier: Apache-2.0
         </div>
         <div class="px-2">
           <g-copy-btn
-            :clipboard-text="getContent()"
+            :clipboard-text="() => getContent()"
             tooltip-text="Copy"
             :user-feedback="false"
             @click.stop="focus"
@@ -163,7 +163,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { markRaw } from 'vue'
-import { mapGetters } from 'pinia'
+import { mapState } from 'pinia'
 import download from 'downloadjs'
 import CodeMirror from 'codemirror'
 import 'codemirror/addon/hint/show-hint.js'
@@ -199,7 +199,7 @@ export default {
     GAlertBanner,
   },
   mixins: [shootItem],
-  inject: ['yaml', 'api'],
+  inject: ['yaml', 'api', 'logger'],
   props: {
     alertBannerIdentifier: {
       type: String,
@@ -260,7 +260,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(useAuthzStore, ['canPatchShoots']),
+    ...mapState(useAuthzStore, ['canPatchShoots']),
     value () {
       let data = cloneDeep(this.shootItem)
       if (data) {
@@ -352,7 +352,7 @@ export default {
     const shootSchemaDefinition = await this.api.getShootSchemaDefinition()
     const shootProperties = get(shootSchemaDefinition, 'properties', {})
     const indentUnit = get(this.cmInstance, 'options.indentUnit', 2)
-    this.shootEditorCompletions = new ShootEditorCompletions(shootProperties, indentUnit, this.completionPaths)
+    this.shootEditorCompletions = new ShootEditorCompletions(shootProperties, indentUnit, this.completionPaths, this.logger)
   },
   beforeUnmount () {
     this.destroyInstance()

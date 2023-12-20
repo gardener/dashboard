@@ -5,7 +5,10 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-card v-if="customFields && customFields.length">
+  <v-card
+    v-if="customFields && customFields.length"
+    class="mb-4"
+  >
     <g-toolbar title="Custom Fields" />
     <g-list>
       <template
@@ -47,7 +50,6 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 
 export default {
-  name: 'CustomFieldsCard',
   props: {
     customFields: {
       type: Array,

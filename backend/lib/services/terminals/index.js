@@ -30,7 +30,7 @@ const {
 const {
   getKubeApiServerHostForSeedOrManagedSeed,
   getKubeApiServerHostForShoot,
-  getGardenTerminalHostClusterSecretRef,
+  getGardenTerminalHostClusterCredentials,
   getGardenHostClusterKubeApiServer,
   getShootRef
 } = require('./utils')
@@ -209,16 +209,16 @@ async function getTargetCluster ({ user, namespace, name, target, preferredHost,
       if (isAdmin) {
         targetCluster.namespace = 'garden'
         targetCluster.credentials = getConfigValue('terminal.garden.operatorCredentials')
-        targetCluster.authorization.roleBindings = [
+        targetCluster.authorization.roleBindings = getConfigValue('terminal.garden.roleBindings', [
           {
             roleRef: {
               apiGroup: 'rbac.authorization.k8s.io',
               kind: 'ClusterRole',
-              name: 'cluster-admin'
+              name: 'gardener.cloud:system:administrators'
             },
             bindingKind: 'ClusterRoleBinding'
           }
-        ]
+        ])
       } else {
         const projectName = findProjectByNamespace(namespace).metadata.name
         targetCluster.namespace = namespace
@@ -344,16 +344,14 @@ async function getGardenTerminalHostCluster (client, { body }) {
   hostCluster.config = getContainerConfigFromBody(body)
 
   const [
-    secretRef,
+    credentials,
     kubeApiServer
   ] = await Promise.all([
-    await getGardenTerminalHostClusterSecretRef(client),
+    await getGardenTerminalHostClusterCredentials(client),
     await getGardenHostClusterKubeApiServer(client)
   ])
   hostCluster.namespace = undefined // this will create a temporary namespace
-  hostCluster.credentials = {
-    secretRef
-  }
+  hostCluster.credentials = credentials
   hostCluster.kubeApiServer = kubeApiServer
   return hostCluster
 }

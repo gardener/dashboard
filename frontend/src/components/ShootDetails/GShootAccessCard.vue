@@ -62,35 +62,33 @@ SPDX-License-Identifier: Apache-2.0
           />
         </template>
         <g-list-item-content>
-          <template #label>
-            Dashboard
-            <div class="text-caption wrap-text py-2">
-              Access Dashboard using the kubectl command-line tool by running the following command:
-              <code>kubectl proxy</code>.
-              Kubectl will make Dashboard available at:
-            </div>
+          Dashboard
+          <template #description>
+            Access Dashboard using the kubectl command-line tool by running the following command:
+            <code>kubectl proxy</code>.
+            Kubectl will make Dashboard available at:
+            <v-tooltip
+              v-if="isShootStatusHibernated"
+              location="top"
+            >
+              <template #activator="{ props }">
+                <span
+                  v-bind="props"
+                  class="text-grey"
+                >{{ dashboardUrlText }}</span>
+              </template>
+              Dashboard is not running for hibernated clusters
+            </v-tooltip>
+            <a
+              v-else
+              class="text-anchor"
+              :href="dashboardUrl"
+              target="_blank"
+              rel="noopener"
+            >
+              {{ dashboardUrlText }}
+            </a>
           </template>
-          <v-tooltip
-            v-if="isShootStatusHibernated"
-            location="top"
-          >
-            <template #activator="{ props }">
-              <span
-                v-bind="props"
-                class="text-grey"
-              >{{ dashboardUrlText }}</span>
-            </template>
-            Dashboard is not running for hibernated clusters
-          </v-tooltip>
-          <a
-            v-else
-            class="text-anchor"
-            :href="dashboardUrl"
-            target="_blank"
-            rel="noopener"
-          >
-            {{ dashboardUrlText }}
-          </a>
         </g-list-item-content>
       </g-list-item>
       <g-list-item v-if="token">
@@ -295,10 +293,10 @@ export default {
       return this.canCreateShootsAdminkubeconfig
     },
     isTerminalTileVisible () {
-      return !isEmpty(this.shootItem) && this.hasShootTerminalAccess && !this.isSeedUnreachable
+      return !isEmpty(this.shootItem) && this.hasShootTerminalAccess && !this.isSeedUnreachable && (this.hasShootWorkerGroups || this.isAdmin)
     },
     isTerminalShortcutsTileVisible () {
-      return !isEmpty(this.shootItem) && this.isTerminalShortcutsFeatureEnabled && this.hasShootTerminalAccess && !this.hideTerminalShortcuts && !this.isSeedUnreachable
+      return !isEmpty(this.shootItem) && this.isTerminalShortcutsFeatureEnabled && this.hasShootTerminalAccess && !this.hideTerminalShortcuts && !this.isSeedUnreachable && (this.hasShootWorkerGroups || this.isAdmin)
     },
     token () {
       return this.shootInfo.cluster_token || ''

@@ -56,7 +56,7 @@ describe('gardener-dashboard', function () {
       expect(containers).toHaveLength(1)
       const [container] = containers
       expect(container).toEqual(expect.objectContaining({
-        image: 'eu.gcr.io/gardener-project/gardener/dashboard@' + tag,
+        image: 'europe-docker.pkg.dev/gardener-project/releases/gardener/dashboard@' + tag,
         imagePullPolicy: 'IfNotPresent'
       }))
     })
@@ -123,6 +123,26 @@ describe('gardener-dashboard', function () {
       expect(documents).toHaveLength(1)
       const [deployment] = documents
       expect(deployment.metadata.labels).toEqual(expect.objectContaining(values.global.dashboard.deploymentLabels))
+    })
+
+    it('should render the template with assets checksum annotation', async function () {
+      const values = {
+        global: {
+          dashboard: {
+            frontendConfig: {
+              assets: {
+                foo: 'bar'
+              }
+            }
+          }
+        }
+      }
+      const documents = await renderTemplates(templates, values)
+      expect(documents).toHaveLength(1)
+      const [deployment] = documents
+      expect(deployment.spec.template.metadata.annotations).toEqual(expect.objectContaining({
+        'checksum/configmap-gardener-dashboard-assets': expect.stringMatching(/[0-9a-f]{64}/)
+      }))
     })
 
     it('should render the template with deployment annotations', async function () {
@@ -242,6 +262,39 @@ describe('gardener-dashboard', function () {
         expect(documents).toHaveLength(1)
         const [deployment] = documents
         expect(deployment.spec.template.spec.serviceAccountName).toEqual('default')
+      })
+
+      it('should use the volume mount based kubeconfig', async function () {
+        const values = {
+          global: {
+            virtualGarden: {
+              enabled: true
+            },
+            dashboard: {
+              projectedKubeconfig: {
+                baseMountPath: '/var/run/secrets/gardener.cloud',
+                genericKubeconfigSecretName: 'generic-token-kubeconfig',
+                tokenSecretName: 'access-dashboard'
+              }
+            }
+          }
+        }
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [deployment] = documents
+        const volumes = deployment.spec.template.spec.volumes
+        expect(volumes).toHaveLength(4)
+        const [, , , kubeconfigVolume] = volumes
+        expect(kubeconfigVolume).toMatchSnapshot()
+        const containers = deployment.spec.template.spec.containers
+        expect(containers).toHaveLength(1)
+        const [container] = containers
+        expect(container.volumeMounts).toHaveLength(4)
+        const [, , , kubeconfigVolumeMount] = container.volumeMounts
+        expect(kubeconfigVolumeMount).toMatchSnapshot()
+        expect(container.env).toHaveLength(8)
+        const [, , , , kubeconfigEnv] = container.env
+        expect(kubeconfigEnv).toMatchSnapshot()
       })
     })
 

@@ -20,7 +20,10 @@ SPDX-License-Identifier: Apache-2.0
           @update:model-value="onUpdateCloudProfileName"
         />
       </v-col>
-      <v-col cols="3">
+      <v-col
+        v-if="!workerless"
+        cols="3"
+      >
         <g-select-secret
           v-model="secret"
           :cloud-profile-name="cloudProfileName"
@@ -36,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0
           :items="regionItems"
           :hint="regionHint"
           persistent-hint
-          :error-messages="getErrorMessages('region')"
+          :error-messages="getErrorMessages(v$.region)"
           variant="underlined"
           @update:model-value="onInputRegion"
           @blur="v$.region.$touch()"
@@ -53,7 +56,10 @@ SPDX-License-Identifier: Apache-2.0
           </template>
         </v-select>
       </v-col>
-      <v-col cols="3">
+      <v-col
+        v-if="!workerless"
+        cols="3"
+      >
         <v-select
           v-model="networkingType"
           color="primary"
@@ -61,7 +67,7 @@ SPDX-License-Identifier: Apache-2.0
           label="Networking Type"
           :items="networkingTypes"
           persistent-hint
-          :error-messages="getErrorMessages('networkingType')"
+          :error-messages="getErrorMessages(v$.networkingType)"
           variant="underlined"
           @update:model-value="v$.networkingType.$touch()"
           @blur="v$.networkingType.$touch()"
@@ -82,7 +88,7 @@ SPDX-License-Identifier: Apache-2.0
             item-color="primary"
             label="Load Balancer Provider"
             :items="allLoadBalancerProviderNames"
-            :error-messages="getErrorMessages('loadBalancerProviderName')"
+            :error-messages="getErrorMessages(v$.loadBalancerProviderName)"
             persistent-hint
             variant="underlined"
             @update:model-value="onInputLoadBalancerProviderName"
@@ -97,7 +103,7 @@ SPDX-License-Identifier: Apache-2.0
             color="primary"
             item-color="primary"
             label="Project ID"
-            :error-messages="getErrorMessages('projectID')"
+            :error-messages="getErrorMessages(v$.projectID)"
             hint="Clusters with same Project ID share IP ranges to allow load balancing accross multiple partitions"
             persistent-hint
             variant="underlined"
@@ -112,7 +118,7 @@ SPDX-License-Identifier: Apache-2.0
             item-color="primary"
             label="Partition ID"
             :items="partitionIDs"
-            :error-messages="getErrorMessages('partitionID')"
+            :error-messages="getErrorMessages(v$.partitionID)"
             hint="Partion ID equals zone on other infrastructures"
             persistent-hint
             variant="underlined"
@@ -127,7 +133,7 @@ SPDX-License-Identifier: Apache-2.0
             item-color="primary"
             label="Firewall Image"
             :items="firewallImages"
-            :error-messages="getErrorMessages('firewallImage')"
+            :error-messages="getErrorMessages(v$.firewallImage)"
             variant="underlined"
             @update:model-value="onInputFirewallImage"
             @blur="v$.firewallImage.$touch()"
@@ -140,7 +146,7 @@ SPDX-License-Identifier: Apache-2.0
             item-color="primary"
             label="Firewall Size"
             :items="firewallSizes"
-            :error-messages="getErrorMessages('firewallSize')"
+            :error-messages="getErrorMessages(v$.firewallSize)"
             variant="underlined"
             @update:model-value="onInputFirewallSize"
             @blur="v$.firewallImage.$touch()"
@@ -153,7 +159,7 @@ SPDX-License-Identifier: Apache-2.0
             item-color="primary"
             label="Firewall Networks"
             :items="allFirewallNetworks"
-            :error-messages="getErrorMessages('firewallNetworks')"
+            :error-messages="getErrorMessages(v$.firewallNetworks)"
             chips
             closable-chips
             multiple
@@ -168,29 +174,16 @@ SPDX-License-Identifier: Apache-2.0
           <v-select
             v-model="loadBalancerClassNames"
             color="primary"
-            item-color="primary"
             label="Load Balancer Classes"
             :items="allLoadBalancerClasses"
-            :error-messages="getErrorMessages('loadBalancerClassNames')"
+            :error-messages="getErrorMessages(v$.loadBalancerClassNames)"
             attach
             chips
-            closable-chips
             multiple
             variant="underlined"
             @update:model-value="onInputLoadBalancerClassNames"
             @blur="v$.loadBalancerClassNames.$touch()"
-          >
-            <template #item="{ item }">
-              <v-list-item-action>
-                <v-icon :color="item.disabled ? 'grey' : ''">
-                  {{ isLoadBalancerClassSelected(item) ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline' }}
-                </v-icon>
-              </v-list-item-action>
-              <v-list-item-title :class="{ 'text-grey': item.disabled }">
-                {{ item.text }}
-              </v-list-item-title>
-            </template>
-          </v-select>
+          />
         </v-col>
       </template>
     </v-row>
@@ -218,8 +211,12 @@ import GCloudProfile from '@/components/GCloudProfile'
 import GWildcardSelect from '@/components/GWildcardSelect'
 import GSelectSecret from '@/components/Secrets/GSelectSecret'
 
-import { getValidationErrors } from '@/utils'
-import { includesIfAvailable } from '@/utils/validators'
+import { getErrorMessages } from '@/utils'
+import {
+  includesIfAvailable,
+  withMessage,
+  withFieldName,
+} from '@/utils/validators'
 
 import {
   sortBy,
@@ -267,93 +264,48 @@ export default {
       firewallSize: undefined,
       firewallNetworks: undefined,
       projectID: undefined,
+      defaultNodesCIDR: undefined,
     }
   },
   validations () {
-    return this.validators
+    const requiresInfrastructure = infrastructureKind => {
+      return requiredIf(() => this.infrastructureKind === infrastructureKind)
+    }
+    return {
+      region: withFieldName('Region', {
+        required,
+      }),
+      networkingType: withFieldName('Networking Type', {
+        required: requiredIf(!this.workerless),
+      }),
+      loadBalancerProviderName: withFieldName('Cluster Name', {
+        required: requiresInfrastructure('openstack'),
+      }),
+      loadBalancerClassNames: withFieldName('Load Balancer Class Names', {
+        required: requiresInfrastructure('vsphere'),
+        includesKey: withMessage('Load Balancer Class \'default\' must be selected', includesIfAvailable('default', 'allLoadBalancerClassNames')),
+      }),
+      partitionID: withFieldName('Partition ID', {
+        required: requiresInfrastructure('metal'),
+      }),
+      firewallImage: withFieldName('Firewall Image', {
+        required: requiresInfrastructure('metal'),
+      }),
+      firewallSize: withFieldName('Firewall Size', {
+        required: requiresInfrastructure('metal'),
+      }),
+      firewallNetworks: withFieldName('Firewall Networks', {
+        required: requiresInfrastructure('metal'),
+      }),
+      projectID: withFieldName('Project ID', {
+        required: requiresInfrastructure('metal'),
+      }),
+    }
   },
   computed: {
     ...mapState(useConfigStore, ['seedCandidateDeterminationStrategy']),
     ...mapState(useGardenerExtensionStore, ['networkingTypes']),
-    validators () {
-      return {
-        region: {
-          required,
-        },
-        networkingType: {
-          required,
-        },
-        loadBalancerProviderName: {
-          required: requiredIf(function () {
-            return this.infrastructureKind === 'openstack'
-          }),
-        },
-        loadBalancerClassNames: {
-          required: requiredIf(function () {
-            return this.infrastructureKind === 'vsphere'
-          }),
-          includesKey: includesIfAvailable('default', 'allLoadBalancerClassNames'),
-        },
-        partitionID: {
-          required: requiredIf(function () {
-            return this.infrastructureKind === 'metal'
-          }),
-        },
-        firewallImage: {
-          required: requiredIf(function () {
-            return this.infrastructureKind === 'metal'
-          }),
-        },
-        firewallSize: {
-          required: requiredIf(function () {
-            return this.infrastructureKind === 'metal'
-          }),
-        },
-        firewallNetworks: {
-          required: requiredIf(function () {
-            return this.infrastructureKind === 'metal'
-          }),
-        },
-        projectID: {
-          required: requiredIf(function () {
-            return this.infrastructureKind === 'metal'
-          }),
-        },
-      }
-    },
-    validationErrors () {
-      const validationErrors = {
-        region: {
-          required: 'Region is required',
-        },
-        networkingType: {
-          required: 'Networking Type is required',
-        },
-        loadBalancerProviderName: {
-          required: 'Load Balancer Providers required',
-        },
-        loadBalancerClassNames: {
-          required: 'Load Balancer Classes required',
-          includesKey: ({ key }) => `Load Balancer Class "${key}" must be selected`,
-        },
-        partitionID: {
-          required: 'Partition ID is required',
-        },
-        projectID: {
-          required: 'Project ID is required',
-        },
-        firewallImage: {
-          required: 'Firewall Image is required',
-        },
-        firewallSize: {
-          required: 'Firewall Size is required',
-        },
-        firewallNetworks: {
-          required: 'Firewall Networks required',
-        },
-      }
-      return validationErrors
-    },
+    ...mapState(useShootStagingStore, ['workerless']),
     cloudProfiles () {
       return sortBy(this.cloudProfilesByCloudProviderKind(this.infrastructureKind), [(item) => item.metadata.name])
     },
@@ -415,9 +367,11 @@ export default {
     allLoadBalancerClasses () {
       const loadBalancerClasses = map(this.loadBalancerClassesByCloudProfileName(this.cloudProfileName), ({ name, ipPoolName }) => {
         return {
-          text: name,
+          title: name,
           value: name,
-          disabled: name === 'default',
+          props: {
+            disabled: name === 'default',
+          },
         }
       })
       return loadBalancerClasses
@@ -427,6 +381,15 @@ export default {
       const region = this.region
       const secretDomain = get(this.secret, 'data.domainName')
       return this.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({ cloudProfileName, region, secretDomain })
+    },
+  },
+  watch: {
+    workerless (value) {
+      if (!value && !this.secret && !this.networkingType) {
+        // If worker required values missing (navigated to overview tab from yaml), reset to defaults
+        this.setDefaultsDependingOnCloudProfile()
+        this.networkingType = head(this.networkingTypes)
+      }
     },
   },
   mounted () {
@@ -448,6 +411,7 @@ export default {
       'firewallImagesByCloudProfileName',
       'firewallNetworksByCloudProfileNameAndPartitionId',
       'firewallSizesByCloudProfileNameAndRegion',
+      'getDefaultNodesCIDR',
     ]),
     ...mapActions(useSecretStore, [
       'infrastructureSecretsByCloudProfileName',
@@ -455,9 +419,6 @@ export default {
     ...mapActions(useShootStagingStore, [
       'setCloudProfileName',
     ]),
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
-    },
     setDefaultsDependingOnCloudProfile () {
       this.onUpdateSecret(head(this.infrastructureSecretsByProfileName))
       this.region = head(this.regionsWithSeed)
@@ -481,13 +442,13 @@ export default {
       this.firewallImage = head(this.firewallImages)
       this.onInputFirewallImage()
       this.projectID = undefined
+
+      const cloudProfileName = this.cloudProfileName
+      this.defaultNodesCIDR = this.getDefaultNodesCIDR({ cloudProfileName })
     },
     setDefaultCloudProfile () {
       this.cloudProfileName = get(head(this.cloudProfiles), 'metadata.name')
       this.onUpdateCloudProfileName()
-    },
-    isLoadBalancerClassSelected ({ value }) {
-      return includes(this.loadBalancerClassNames, value)
     },
     onUpdateSecret (secret) {
       this.secret = secret
@@ -552,6 +513,7 @@ export default {
         firewallImage: this.firewallImage,
         firewallSize: this.firewallSize,
         firewallNetworks: this.firewallNetworks,
+        defaultNodesCIDR: this.defaultNodesCIDR,
       }
     },
     setInfrastructureData ({
@@ -582,8 +544,11 @@ export default {
       this.firewallImage = firewallImage
       this.firewallSize = firewallSize
       this.firewallNetworks = firewallNetworks
+      this.defaultNodesCIDR = this.getDefaultNodesCIDR({ cloudProfileName })
+
       this.v$.projectID.$touch() // project id is a required field (for metal). We want to show the error immediatley
     },
+    getErrorMessages,
   },
 }
 </script>

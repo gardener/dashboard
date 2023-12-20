@@ -52,7 +52,7 @@ SPDX-License-Identifier: Apache-2.0
         >
           <v-card-title primary-title>
             <div class="content text-h6 mb-2">
-              Gardener
+              {{ branding.productName }}
             </div>
           </v-card-title>
           <v-divider />
@@ -315,15 +315,14 @@ import {
   ref,
   computed,
   toRef,
-  inject,
 } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
-import { useLocalStorage } from '@vueuse/core'
 
 import { useAppStore } from '@/store/app'
 import { useAuthnStore } from '@/store/authn'
 import { useConfigStore } from '@/store/config'
+import { useLocalStorageStore } from '@/store/localStorage'
 
 import GBreadcrumb from '@/components/GBreadcrumb.vue'
 import GInfoDialog from '@/components/dialogs/GInfoDialog.vue'
@@ -337,16 +336,19 @@ const route = useRoute()
 const appStore = useAppStore()
 const authnStore = useAuthnStore()
 const configStore = useConfigStore()
+const localStorageStore = useLocalStorageStore()
 
-const colorMode = inject('colorMode')
 const namespace = useNamespace(route)
-const autoLogin = useLocalStorage('global/auto-login', 'disabled')
 
 const help = ref(false)
 const menu = ref(false)
 const infoDialog = ref(false)
 const sidebar = toRef(appStore, 'sidebar')
 const helpMenuItems = toRef(configStore, 'helpMenuItems')
+const branding = toRef(configStore, 'branding')
+const autoLogin = toRef(localStorageStore, 'autoLogin')
+const colorMode = toRef(localStorageStore, 'colorScheme')
+
 const { isAdmin, username, displayName, avatarUrl, avatarTitle } = storeToRefs(authnStore)
 
 const tabs = computed(() => {
@@ -375,10 +377,10 @@ function targetRoute (name) {
 
 function handleLogout () {
   let err
-  if (autoLogin.value === 'enabled') {
+  if (autoLogin.value) {
     err = new Error('NoAutoLogin')
   }
-  authnStore.signout(err)
+  authnStore.signout(err, '')
 }
 
 function helpTarget (item) {

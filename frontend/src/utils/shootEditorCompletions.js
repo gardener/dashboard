@@ -26,7 +26,10 @@ import {
 } from '@/lodash'
 
 export class ShootEditorCompletions {
-  constructor (shootProperties, editorIndent, supportedPaths) {
+  constructor (shootProperties, editorIndent, supportedPaths, logger) {
+    this.logger = logger
+    this._resolveSchemaArrays(shootProperties)
+
     this.shootCompletions = shootProperties
     this.indentUnit = editorIndent
     this.arrayBulletIndent = 2 // -[space]
@@ -122,17 +125,31 @@ export class ShootEditorCompletions {
       return `${propertyName}: `
     }
 
+    const generateTypeText = (type, format) => {
+      const formatTypeText = (type, format) => {
+        return format ? `${upperFirst(type)} (${format})` : upperFirst(type)
+      }
+      if (Array.isArray(type)) {
+        return type
+          .map((type, i) => formatTypeText(type, format[i]))
+          .join(' | ')
+      }
+      return formatTypeText(type, format)
+    }
+
     forIn(completions, (completion, propertyName) => {
       let text = generateCompletionText(propertyName, completion.type, token.type)
       if (token.type === 'firstArrayItem') {
         text = '- ' + text
       }
       const string = propertyName.toLowerCase()
+      const type = generateTypeText(completion.type, completion.format)
+
       completionArray.push({
         text,
         string,
         property: propertyName,
-        type: upperFirst(completion.type),
+        type,
         description: completion.description,
         render (el, self, data) {
           const document = el.ownerDocument
@@ -315,5 +332,46 @@ export class ShootEditorCompletions {
     const lineString = join(map(lineTokens, 'string'), '')
 
     return { lineTokens, lineString }
+  }
+
+  _resolveSchemaArrays (properties, parentPropertyName = '') {
+    const hasOnlyTypeOrTypeAndFormatProperties = (value) => {
+      if (value.every(item => {
+        return (Object.keys(item).length === 1 && item.type) ||
+        (Object.keys(item).length === 2 && item.type && item.format)
+      })) {
+        return true
+      }
+      return false
+    }
+    let foundDiscriminators = false
+    for (const [propertyName, propertyValue] of Object.entries(properties)) {
+      if (['allOf', 'anyOf', 'oneOf'].includes(propertyName) && !properties.type) {
+        if (foundDiscriminators) {
+          // We currently do not support merging when schema has multiple discriminators on same level
+          this.logger.warn('Found multiple discriminators in schema at %s', parentPropertyName)
+        }
+        foundDiscriminators = true
+
+        if (propertyValue.length === 1) {
+          this._resolveSchemaArrays(propertyValue[0], parentPropertyName)
+          Object.assign(properties, propertyValue[0])
+        } else if (propertyValue.length > 1 && propertyName === 'oneOf') {
+          if (hasOnlyTypeOrTypeAndFormatProperties(propertyValue)) {
+            // In case of oneOf, we support multiple entries if they are only used to define different types
+            properties.type = propertyValue.map(obj => obj.type)
+            properties.format = propertyValue.map(obj => obj.format)
+          } else {
+            this.logger.warn('Found unsupported oneOf discriminator at %s', parentPropertyName)
+          }
+        } else {
+          this.logger.warn('Unsupported schema array length, %s has length %i at %s', propertyName, propertyValue.length, parentPropertyName)
+        }
+
+        delete properties[propertyName]
+      } else if (typeof propertyValue === 'object') {
+        this._resolveSchemaArrays(propertyValue, propertyName)
+      }
+    }
   }
 }

@@ -27,7 +27,7 @@
     "@gardener-dashboard/logger": "workspace:*",
     "@gardener-dashboard/test-utils": "workspace:*",
     "chokidar": "^3.5.3",
-    "gtoken": "^6.1.2",
+    "gtoken": "^7.0.1",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21"
   },
@@ -79,7 +79,7 @@
       "<rootDir>/jest.setup.js"
     ]
   },
-  "packageManager": "yarn@3.6.1",
+  "packageManager": "yarn@3.6.3",
   "engines": {
     "node": "^20.5.0"
   }

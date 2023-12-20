@@ -10,6 +10,7 @@ const express = require('express')
 const { shoots } = require('../services')
 const { metricsRoute } = require('../middleware')
 const config = require('../config')
+const { trimObjectMetadata, useWatchCacheForListShoots } = require('../utils')
 
 const router = module.exports = express.Router({
   mergeParams: true
@@ -24,7 +25,12 @@ router.route('/')
       const user = req.user
       const namespace = req.params.namespace
       const labelSelector = req.query.labelSelector
-      res.send(await shoots.list({ user, namespace, labelSelector }))
+      const useCache = useWatchCacheForListShoots(req.query.useCache)
+      const shootList = await shoots.list({ user, namespace, labelSelector, useCache })
+      for (const object of shootList.items) {
+        trimObjectMetadata(object)
+      }
+      res.send(shootList)
     } catch (err) {
       next(err)
     }

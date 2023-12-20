@@ -64,7 +64,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-card-actions>
         <v-spacer />
         <v-text-field
-          v-if="confirmValue && !confirmDisabled"
+          v-if="confirmValue"
           ref="deleteDialogInput"
           v-model="userInput"
           :label="hint"
@@ -86,22 +86,21 @@ SPDX-License-Identifier: Apache-2.0
         </v-btn>
         <v-tooltip
           location="top"
-          :disabled="valid"
+          :disabled="!notConfirmed"
         >
           <template #activator="{ props }">
             <div v-bind="props">
               <v-btn
                 variant="text"
-                :disabled="!valid"
                 class="text-toolbar-background"
+                :disabled="notConfirmed || !valid"
                 @click="resolveAction(true)"
               >
                 {{ confirmButtonText }}
               </v-btn>
             </div>
           </template>
-          <span v-if="confirmDisabled">There are input errors that you need to resolve</span>
-          <span v-else-if="notConfirmed">You need to confirm your changes by typing this cluster's name</span>
+          You need to confirm your changes by typing this cluster's name
         </v-tooltip>
       </v-card-actions>
     </v-card>
@@ -109,14 +108,20 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { useVuelidate } from '@vuelidate/core'
+
 import GMessage from '@/components/GMessage.vue'
 
 import { setDelayedInputFocus } from '@/utils'
+import { messageFromErrors } from '@/utils/validators'
 
 import {
-  noop,
   isFunction,
+  noop,
+  trim,
 } from '@/lodash'
+
+const zeroWidthSpace = '\u200B'
 
 export default {
   components: {
@@ -125,10 +130,6 @@ export default {
   props: {
     confirmValue: {
       type: String,
-    },
-    confirmDisabled: {
-      type: Boolean,
-      default: false,
     },
     errorMessage: {
       type: String,
@@ -156,12 +157,23 @@ export default {
       type: Boolean,
       default: false,
     },
+    valid: {
+      // use to pass validation result from a parent component
+      // Use only if outside v$ scope
+      type: Boolean,
+      default: true,
+    },
   },
   emits: [
     'update:errorMessage',
     'update:detailedErrorMessage',
     'dialogClosed',
   ],
+  setup () {
+    return {
+      v$: useVuelidate(),
+    }
+  },
   data () {
     return {
       userInput: '',
@@ -170,13 +182,16 @@ export default {
     }
   },
   computed: {
+    trimmedUserInput () {
+      return trim(this.userInput, ' ' + zeroWidthSpace)
+    },
     notConfirmed () {
-      return this.confirmValue && this.confirmValue !== this.userInput
+      return this.confirmValue && this.confirmValue !== this.trimmedUserInput
     },
     hint () {
-      if (this.userInput.length === 0) {
+      if (this.trimmedUserInput.length === 0) {
         return `Type ${this.confirmValue} to confirm`
-      } else if (this.userInput !== this.confirmValue) {
+      } else if (this.trimmedUserInput !== this.confirmValue) {
         return `Input does not match ${this.confirmValue}`
       }
       return ''
@@ -197,8 +212,8 @@ export default {
         this.$emit('update:detailedErrorMessage', value)
       },
     },
-    valid () {
-      return !this.confirmDisabled && !this.notConfirmed
+    hasVisibleErrors () {
+      return this.v$.$errors.length > 0
     },
   },
   watch: {
@@ -231,8 +246,17 @@ export default {
       this.visible = true
     },
     async resolveAction (value) {
-      if (value && !this.valid) {
-        return
+      if (value) {
+        if (!this.valid) {
+          return
+        }
+        if (this.v$.$invalid) {
+          await this.v$.$validate()
+          const message = messageFromErrors(this.v$.$errors)
+          this.message = 'There are input errors that you need to resolve'
+          this.detailedMessage = message
+          return
+        }
       }
 
       if (isFunction(this.resolve)) {

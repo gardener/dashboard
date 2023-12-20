@@ -118,10 +118,10 @@ function getProjectName (namespace) {
 }
 
 exports.list = async function ({ user }) {
-  const isAdmin = await authorization.isAdmin(user)
+  const canListProjects = await authorization.canListProjects(user)
   return _
     .chain(cache.getProjects())
-    .filter(projectFilter(user, isAdmin))
+    .filter(projectFilter(user, canListProjects))
     .map(fromResource)
     .value()
 }

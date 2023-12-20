@@ -38,7 +38,7 @@ import { startsWith } from '@/lodash'
 const props = defineProps({
   icon: {
     type: String,
-    required: true,
+    default: '',
   },
   size: {
     type: Number,
@@ -121,6 +121,8 @@ const iconStyle = computed(() => {
   return {
     maxHeight: `${maxIconSize}px`,
     maxWidth: `${maxIconSize}px`,
+    height: `${maxIconSize}px`,
+    width: `${maxIconSize}px`,
   }
 })
 
@@ -131,7 +133,7 @@ const iconStyle = computed(() => {
 
   $grey-darken-2: map-get($grey, 'darken-2');
 
-  .theme--dark .icon-background {
+  .v-theme--dark .icon-background {
     background-color: $grey-darken-2
   }
 </style>

@@ -10,6 +10,10 @@ import {
   isHtmlColorCode,
   defaultCriNameByKubernetesVersion,
   getIssueSince,
+  maintenanceWindowWithBeginAndTimezone,
+  getDurationInMinutes,
+  getTimeStringTo,
+  getTimeStringFrom,
 } from '@/utils'
 
 import { pick } from '@/lodash'
@@ -336,6 +340,60 @@ describe('utils', () => {
 
     it('should return issue since for allIssues', () => {
       expect(getIssueSince(status)).toBe('2000-01-01T00:00:01Z')
+    })
+  })
+  describe('maintenanceWindowWithBeginAndTimezone', () => {
+    it('should create window with default window size', () => {
+      expect(maintenanceWindowWithBeginAndTimezone('22:00', '+02:00')).toEqual({
+        begin: '220000+0200',
+        end: '230000+0200',
+      })
+    })
+
+    it('should create window with provided window size', () => {
+      expect(maintenanceWindowWithBeginAndTimezone('22:00', '+02:00', 120)).toEqual({
+        begin: '220000+0200',
+        end: '000000+0200',
+      })
+    })
+
+    it('should create window with provided window size across multiple days', () => {
+      expect(maintenanceWindowWithBeginAndTimezone('22:00', '+02:00', 180)).toEqual({
+        begin: '220000+0200',
+        end: '010000+0200',
+      })
+    })
+  })
+  describe('getDurationInMinutes', () => {
+    it('should calculate window size', () => {
+      expect(getDurationInMinutes('22:00', '23:00')).toBe(60)
+    })
+    it('should calculate window size across multiple days', () => {
+      expect(getDurationInMinutes('23:00', '01:00')).toBe(120)
+    })
+  })
+
+  describe('getTimeStringTo', () => {
+    it('should calculate the relative time to a future date', () => {
+      const time = Date.now()
+      expect(getTimeStringTo(time, time)).toBe('just now')
+      expect(getTimeStringTo(time, time, true)).toBe('just now')
+      expect(getTimeStringTo(time, time + 7 * 1_000, true)).toBe('7 seconds')
+      expect(getTimeStringTo(time, time + 7 * 1_000)).toBe('in 7 seconds')
+      expect(getTimeStringTo(time, time + 70 * 24 * 3600_000, true)).toBe('2 months')
+      expect(getTimeStringTo(time, time + 70 * 24 * 3600_000)).toBe('in 2 months')
+    })
+  })
+
+  describe('getTimeStringFrom', () => {
+    it('should calculate the relative time to a date in the past', () => {
+      const time = Date.now()
+      expect(getTimeStringFrom(time, time)).toBe('just now')
+      expect(getTimeStringFrom(time, time, true)).toBe('just now')
+      expect(getTimeStringFrom(time, time + 7 * 1_000, true)).toBe('7 seconds')
+      expect(getTimeStringFrom(time, time + 7 * 1_000)).toBe('7 seconds ago')
+      expect(getTimeStringFrom(time, time + 70 * 24 * 3600_000, true)).toBe('2 months')
+      expect(getTimeStringFrom(time, time + 70 * 24 * 3600_000)).toBe('2 months ago')
     })
   })
 })

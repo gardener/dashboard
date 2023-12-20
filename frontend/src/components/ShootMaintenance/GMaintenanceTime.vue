@@ -5,18 +5,18 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
+  <span class="text-subtitle-2">Provide start of maintenance time window in which Gardener may schedule automated cluster updates</span>
   <v-row class="my-0">
-    <v-col class="regularInput">
-      <v-text-field
+    <v-col class="smallInput">
+      <g-time-text-field
         v-model="maintenanceBegin"
         color="primary"
         label="Maintenance Start Time"
-        :error-messages="getErrorMessages('maintenanceBegin')"
-        type="time"
+        :error-messages="getErrorMessages(v$.maintenanceBegin)"
         variant="underlined"
         persistent-hint
-        hint="Provide start of maintenance time window in which Gardener may schedule automated cluster updates."
-        @input="onInputmaintenanceBegin"
+        :hint="maintenanceBeginHint"
+        @input="v$.maintenanceBegin.$touch()"
         @blur="v$.maintenanceBegin.$touch()"
       />
     </v-col>
@@ -25,10 +25,25 @@ SPDX-License-Identifier: Apache-2.0
         v-model="maintenanceTimezone"
         color="primary"
         label="Timezone"
-        :error-messages="getErrorMessages('maintenanceTimezone')"
+        :error-messages="getErrorMessages(v$.maintenanceTimezone)"
         variant="underlined"
-        @input="onInputmaintenanceTimezone"
+        @input="v$.maintenanceTimezone.$touch()"
         @blur="v$.maintenanceTimezone.$touch()"
+      />
+    </v-col>
+    <v-col class="smallInput">
+      <v-text-field
+        v-model="windowDuration"
+        color="primary"
+        type="number"
+        label="Maintenance Window Size"
+        :error-messages="getErrorMessages(v$.windowDuration)"
+        suffix="minutes"
+        variant="underlined"
+        persistent-hint
+        :hint="maintenanceEndHint"
+        @input="v$.windowDuration.$touch()"
+        @blur="v$.windowDuration.$touch()"
       />
     </v-col>
   </v-row>
@@ -36,31 +51,34 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapState } from 'pinia'
-import { required } from '@vuelidate/validators'
+import {
+  required,
+  minValue,
+  maxValue,
+} from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
 import { useAppStore } from '@/store/app'
 
+import GTimeTextField from '@/components/GTimeTextField.vue'
+
 import {
-  getValidationErrors,
+  withFieldName,
+  isTimezone,
+} from '@/utils/validators'
+import moment from '@/utils/moment'
+import {
+  getErrorMessages,
   randomMaintenanceBegin,
   maintenanceWindowWithBeginAndTimezone,
+  getDurationInMinutes,
 } from '@/utils'
-import { isTimezone } from '@/utils/validators'
 import TimeWithOffset from '@/utils/TimeWithOffset'
-import moment from '@/utils/moment'
-
-const validationErrors = {
-  maintenanceBegin: {
-    required: 'Maintenance start time is required',
-  },
-  maintenanceTimezone: {
-    required: 'Timezone is required',
-    isTimezone: 'TimeZone must have format [+|-]HH:mm',
-  },
-}
 
 export default {
+  components: {
+    GTimeTextField,
+  },
   props: {
     timeWindowBegin: {
       type: String,
@@ -75,38 +93,47 @@ export default {
     }
   },
   validations () {
-    return this.validators
+    return {
+      maintenanceBegin: withFieldName('Maintenance Begin', {
+        required,
+      }),
+      maintenanceTimezone: withFieldName('Maintenance Timezone', {
+        required,
+        isTimezone,
+      }),
+      windowDuration: withFieldName('Maintenance Window Duration', {
+        required,
+        minValue: minValue(30),
+        maxValue: maxValue(360),
+      }),
+    }
   },
   data () {
     return {
       maintenanceTimezone: this.timezone,
-      validationErrors,
       maintenanceBegin: undefined,
-      windowDuration: 60,
+      windowDuration: 0,
     }
   },
   computed: {
     ...mapState(useAppStore, [
       'timezone',
     ]),
-    validators () {
-      return {
-        maintenanceBegin: {
-          required,
-        },
-        maintenanceTimezone: {
-          required,
-          isTimezone,
-        },
+    maintenanceBeginMoment () {
+      return moment.utc(`${this.maintenanceBegin}${this.maintenanceTimezone}`, 'HH:mmZ')
+    },
+    maintenanceBeginHint () {
+      if (!this.maintenanceBeginMoment.isValid()) {
+        return undefined
       }
+      return `Maintenance time window begins at ${this.maintenanceBeginMoment.format('HH:mm')} UTC`
     },
-  },
-  watch: {
-    timeWindowBegin (windowBegin) {
-      this.setBeginTimeTimezoneString(windowBegin)
-    },
-    timeWindowEnd (windowEnd) {
-      this.setEndTimeTimezoneString(windowEnd)
+    maintenanceEndHint () {
+      if (!this.maintenanceBeginMoment.isValid()) {
+        return undefined
+      }
+      const maintenanceEndMoment = this.maintenanceBeginMoment.add(this.windowDuration, 'minutes')
+      return `Maintenance time window ends at ${maintenanceEndMoment.format('HH:mm')} UTC`
     },
   },
   mounted () {
@@ -117,50 +144,47 @@ export default {
       return maintenanceWindowWithBeginAndTimezone(this.maintenanceBegin, this.maintenanceTimezone, this.windowDuration)
     },
     reset () {
-      if (!this.timeWindowBegin) {
-        this.setDefaultMaintenanceTimeWindow()
+      if (!this.timeWindowBegin || !this.timeWindowEnd) {
+        this.setDefaultBeginTimeAndTimezone()
+        this.setDefaultWindowDuration()
       } else {
-        this.setBeginTimeTimezoneString(this.timeWindowBegin)
+        this.setMaintenanceWindow(this.timeWindowBegin, this.timeWindowEnd)
       }
     },
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
-    },
-    setBeginTimeTimezoneString (windowBegin) {
-      const beginTime = new TimeWithOffset(windowBegin)
-      if (!beginTime.isValid()) {
-        return undefined
-      }
-      this.maintenanceBegin = beginTime.getTimeString()
-      this.maintenanceTimezone = beginTime.getTimezoneString()
-    },
-    setEndTimeTimezoneString (windowEnd) {
-      const endTime = new TimeWithOffset(windowEnd)
-      if (!endTime.isValid()) {
-        return undefined
-      }
-      const windowDuration = moment(windowEnd, 'HH:mm').diff(moment(this.maintenanceBegin, 'HH:mm'), 'minutes')
-      if (windowDuration > 0) {
-        this.windowDuration = windowDuration
+    setMaintenanceWindow (begin, end) {
+      const defaultDuration = 60
+      if (begin && end) {
+        const beginTime = new TimeWithOffset(begin)
+        if (beginTime.isValid()) {
+          this.maintenanceBegin = beginTime.getTimeString()
+          this.maintenanceTimezone = beginTime.getTimezoneString()
+        }
+        const endTime = new TimeWithOffset(end)
+        if (endTime.isValid()) {
+          const duration = getDurationInMinutes(this.maintenanceBegin, endTime.getTimeString())
+          this.windowDuration = duration > 0 ? duration : defaultDuration
+        }
+      } else {
+        this.maintenanceBegin = randomMaintenanceBegin()
+        this.maintenanceTimezone = this.timezone
+        this.windowDuration = defaultDuration
       }
     },
-    setDefaultMaintenanceTimeWindow () {
+    setDefaultBeginTimeAndTimezone () {
       this.maintenanceBegin = randomMaintenanceBegin()
       this.maintenanceTimezone = this.timezone
     },
-    onInputmaintenanceBegin () {
-      this.v$.maintenanceBegin.$touch()
+    setDefaultWindowDuration () {
+      this.windowDuration = 60
     },
-    onInputmaintenanceTimezone () {
-      this.v$.maintenanceTimezone.$touch()
-    },
+    getErrorMessages,
   },
 }
 </script>
 
 <style lang="scss" scoped>
-  .regularInput {
-    max-width: 300px;
+  .smallInput {
+    max-width: 180px;
   }
   .timezoneInput {
     max-width: 100px;

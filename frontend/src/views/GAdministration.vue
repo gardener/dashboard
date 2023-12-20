@@ -159,18 +159,10 @@ SPDX-License-Identifier: Apache-2.0
                     Created At
                   </div>
                   <div class="text-body-1">
-                    <v-tooltip location="right">
-                      <template #activator="{ props }">
-                        <span
-                          v-bind="props"
-                          class="text-subtitle-1"
-                        >{{ createdAt }}</span>
-                      </template>
-                      <g-time-string
-                        :date-time="creationTimestamp"
-                        :point-in-time="-1"
-                      />
-                    </v-tooltip>
+                    <g-time-string
+                      :date-time="creationTimestamp"
+                      :point-in-time="-1"
+                    />
                   </div>
                 </g-list-item>
                 <v-divider inset />
@@ -521,6 +513,7 @@ import GTimeString from '@/components/GTimeString.vue'
 import GShootCustomField from '@/components/GShootCustomField.vue'
 import GResourceQuotaHelp from '@/components/GResourceQuotaHelp.vue'
 
+import { withMessage } from '@/utils/validators'
 import {
   transformHtml,
   getProjectDetails,
@@ -578,7 +571,7 @@ export default {
     ]),
     ...mapState(useProjectStore, [
       'projectList',
-      'projectFromProjectList',
+      'project',
       'shootCustomFieldList',
     ]),
     ...mapState(useMemberStore, [
@@ -590,9 +583,6 @@ export default {
     ...mapState(useQuotaStore, [
       'projectQuotaStatus',
     ]),
-    project () {
-      return this.projectFromProjectList
-    },
     projectDetails () {
       return getProjectDetails(this.project)
     },
@@ -637,8 +627,8 @@ export default {
         },
       )
       return {
-        required: helpers.withMessage('Owner is required', required),
-        userListIncludes: helpers.withMessage('Owner must be a project member', userListIncludesValidator),
+        required: withMessage('Owner is required', required),
+        userListIncludes: withMessage('Owner must be a project member', userListIncludesValidator),
       }
     },
     ownerAvatarUrl () {
@@ -711,7 +701,7 @@ export default {
     ]),
     getCostObjectValidator () {
       const pattern = get(this.costObjectSettings, 'regex', '[^]*')
-      return helpers.withMessage(
+      return withMessage(
         () => get(this.costObjectSettings, 'errorMessage'),
         helpers.regex(new RegExp(pattern)),
       )

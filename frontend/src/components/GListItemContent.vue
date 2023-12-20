@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
   </div>
   <div
     v-if="slots.description || props.description"
-    class="text-body-2 text-high-emphasis pt-1"
+    class="text-body-2 text-medium-emphasis pt-1"
   >
     <slot name="description">
       {{ props.description }}

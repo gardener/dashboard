@@ -227,7 +227,7 @@ Array [
 exports[`api terminals cp should create a terminal resource 2`] = `
 Object {
   "hostCluster": Object {
-    "kubeApiServer": "k-1wopgy9.ingress.foo-east.infra1.example.org",
+    "kubeApiServer": "api-garden--infra1-seed.ingress.foo-east.infra1.example.org",
     "namespace": "shoot--foo--fooShoot",
   },
   "imageHelpText": "Dummy Image Description",
@@ -502,7 +502,7 @@ Array [
 exports[`api terminals garden as enduser should create a terminal resource 2`] = `
 Object {
   "hostCluster": Object {
-    "kubeApiServer": "k-cq94yw.ingress.foo-east.infra1.example.org",
+    "kubeApiServer": "api-foo--fooShoot.ingress.foo-east.infra1.example.org",
     "namespace": "term-host-21",
   },
   "imageHelpText": "Dummy Image Description",
@@ -542,6 +542,15 @@ Array [
       ":authority": "kubernetes:6443",
       ":method": "get",
       ":path": "/apis/dashboard.gardener.cloud/v1alpha1/namespaces/garden-foo/terminals?labelSelector=dashboard.gardener.cloud%2Fcreated-by-hash%3D162ad2ffec2aa3ae91a5b1011500707ff75cc8bf%2Cdashboard.gardener.cloud%2Fidentifier-hash%3D722a7be5c00be4e48b037831452206aa150b30a6",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/seedmanagement.gardener.cloud/v1alpha1/namespaces/garden/managedseeds/infra1-seed2",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
     },
@@ -624,7 +633,7 @@ Array [
                 "roleRef": Object {
                   "apiGroup": "rbac.authorization.k8s.io",
                   "kind": "ClusterRole",
-                  "name": "cluster-admin",
+                  "name": "gardener.cloud:system:administrators",
                 },
               },
             ],
@@ -649,7 +658,7 @@ Array [
 exports[`api terminals garden should create a terminal resource 2`] = `
 Object {
   "hostCluster": Object {
-    "kubeApiServer": "k-g.ingress.foo-west.infra1.example.org",
+    "kubeApiServer": "api-seed.ingress.foo-west.infra1.example.org",
     "namespace": "term-host-21",
   },
   "imageHelpText": "Dummy Image Description",
@@ -925,6 +934,15 @@ Array [
     Object {
       ":authority": "kubernetes:6443",
       ":method": "get",
+      ":path": "/apis/seedmanagement.gardener.cloud/v1alpha1/namespaces/garden/managedseeds/infra1-seed2",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
       ":path": "/api/v1/namespaces/garden/secrets/seedsecret-infra1-seed2",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
@@ -953,7 +971,7 @@ Array [
 exports[`api terminals garden should reuse a terminal session 2`] = `
 Object {
   "hostCluster": Object {
-    "kubeApiServer": "k-g.ingress.foo-west.infra1.example.org",
+    "kubeApiServer": "api-seed.ingress.foo-west.infra1.example.org",
     "namespace": "term-host-1",
   },
   "imageHelpText": "Foo Image Description",
@@ -1109,7 +1127,7 @@ Array [
 exports[`api terminals shoot should create a terminal resource 2`] = `
 Object {
   "hostCluster": Object {
-    "kubeApiServer": "k-cq94yw.ingress.foo-east.infra1.example.org",
+    "kubeApiServer": "api-foo--fooShoot.ingress.foo-east.infra1.example.org",
     "namespace": "term-host-21",
   },
   "imageHelpText": "Dummy Image Description",
@@ -1274,7 +1292,7 @@ Array [
 exports[`api terminals shoot should reuse a terminal session 2`] = `
 Object {
   "hostCluster": Object {
-    "kubeApiServer": "k-cq94yw.ingress.foo-east.infra1.example.org",
+    "kubeApiServer": "api-foo--fooShoot.ingress.foo-east.infra1.example.org",
     "namespace": "term-host-3",
   },
   "imageHelpText": "Foo Image Description",

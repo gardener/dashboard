@@ -41,11 +41,21 @@ exports.isAdmin = function (user) {
   })
 }
 
+exports.canListProjects = function (user) {
+  return hasAuthorization(user, {
+    resourceAttributes: {
+      verb: 'list',
+      group: 'core.gardener.cloud',
+      resource: 'projects'
+    }
+  })
+}
+
 exports.canGetOpenAPI = function (user) {
   return hasAuthorization(user, {
     nonResourceAttributes: {
       verb: 'get',
-      path: '/openapi/v2'
+      path: '/openapi/v3'
     }
   })
 }
