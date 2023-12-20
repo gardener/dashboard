@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
             item-color="primary"
             :items="weekdays"
             return-object
-            :error-messages="getErrorMessages('selectedDays')"
+            :error-messages="getErrorMessages(v$.selectedDays)"
             chips
             label="Weekdays on which this rule shall be active"
             multiple
@@ -30,31 +30,29 @@ SPDX-License-Identifier: Apache-2.0
           />
         </v-col>
         <v-col cols="2">
-          <v-text-field
+          <g-time-text-field
             ref="wakeUpTime"
             v-model="wakeUpTime"
             color="primary"
             label="Wake up at"
-            :error-messages="getErrorMessages('wakeUpTime')"
-            type="time"
+            :error-messages="getErrorMessages(v$.wakeUpTime)"
             clearable
             variant="underlined"
             @blur="touchIfNothingFocused"
-            @input="onInputWakeUpTime"
+            @update:model-value="onInputWakeUpTime"
           />
         </v-col>
         <v-col cols="2">
-          <v-text-field
+          <g-time-text-field
             ref="hibernateTime"
             v-model="hibernateTime"
             color="primary"
             label="Hibernate at"
-            :error-messages="getErrorMessages('hibernateTime')"
-            type="time"
+            :error-messages="getErrorMessages(v$.hibernateTime)"
             clearable
             variant="underlined"
             @blur="touchIfNothingFocused"
-            @input="onInputHibernateTime"
+            @update:model-value="onInputHibernateTime"
           />
         </v-col>
         <v-col cols="3">
@@ -89,7 +87,13 @@ import {
 } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
-import { getValidationErrors } from '@/utils'
+import GTimeTextField from '@/components/GTimeTextField.vue'
+
+import {
+  withMessage,
+  withFieldName,
+} from '@/utils/validators'
+import { getErrorMessages } from '@/utils'
 import moment from '@/utils/moment'
 
 import {
@@ -102,22 +106,10 @@ import {
   sortBy,
 } from '@/lodash'
 
-const validationErrors = {
-  selectedDays: {
-    required: 'Weekdays is required',
-  },
-  hibernateTime: {
-    required: 'You need to specify at least hibernation or wake up time',
-  },
-  wakeUpTime: {
-    required: 'You need to specify at least hibernation or wake up time',
-  },
-  selectedLocation: {
-    required: 'Location is required',
-  },
-}
-
 export default {
+  components: {
+    GTimeTextField,
+  },
   props: {
     scheduleEvent: {
       type: Object,
@@ -137,11 +129,33 @@ export default {
     }
   },
   validations () {
-    return this.validators
+    const rules = {
+      selectedDays: withFieldName('Hibernation Selected Days', {
+        required,
+      }),
+      selectedLocation: withFieldName('Hibernation Location', {
+        required,
+      }),
+    }
+
+    const hibernateTimeRules = {
+      required: withMessage('You need to specify at least hibernation or wake up time',
+        requiredIf(() => !this.wakeUpTime),
+      ),
+    }
+    rules.hibernateTime = withFieldName('Hibernation Time', hibernateTimeRules)
+
+    const wakeUpTimeRules = {
+      required: withMessage('You need to specify at least hibernation or wake up time',
+        requiredIf(() => !this.hibernateTime),
+      ),
+    }
+    rules.wakeUpTime = withFieldName('Hibernation Wake Up Time', wakeUpTimeRules)
+
+    return rules
   },
   data () {
     return {
-      validationErrors,
       locations: moment.tz.names(),
       selectedLocation: null,
       wakeUpTime: null,
@@ -190,26 +204,6 @@ export default {
     id () {
       return this.scheduleEvent.id
     },
-    validators () {
-      return {
-        selectedDays: {
-          required,
-        },
-        hibernateTime: {
-          required: requiredIf(function () {
-            return !this.wakeUpTime
-          }),
-        },
-        wakeUpTime: {
-          required: requiredIf(function () {
-            return !this.hibernateTime
-          }),
-        },
-        selectedLocation: {
-          required,
-        },
-      }
-    },
   },
   mounted () {
     this.selectedLocation = this.scheduleEvent.location
@@ -219,9 +213,6 @@ export default {
     this.updateSelectedDays() // trigger sort
   },
   methods: {
-    getErrorMessages (field) {
-      return getValidationErrors(this, field)
-    },
     updateTime ({ eventName, time }) {
       const momentObj = moment(time, 'HHmm')
       let hour
@@ -294,6 +285,7 @@ export default {
     onInputSelectedLocation () {
       this.updateLocation(this.selectedLocation)
     },
+    getErrorMessages,
   },
 }
 </script>

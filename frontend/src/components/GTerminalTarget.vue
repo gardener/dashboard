@@ -23,7 +23,7 @@ SPDX-License-Identifier: Apache-2.0
         v-if="shootItem && hasShootTerminalAccess"
         value="shoot"
         color="primary"
-        :disabled="isShootStatusHibernated"
+        :disabled="disabled || isShootStatusHibernated"
       >
         <template #label>
           <div>Cluster</div>
@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0
         v-if="hasGardenTerminalAccess"
         value="garden"
         color="primary"
-        :disabled="!isAdmin && isShootStatusHibernated"
+        :disabled="disabled || (!isAdmin && isShootStatusHibernated)"
       >
         <template #label>
           <div>Garden Cluster</div>
@@ -75,12 +75,17 @@ import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
 
 import { shootItem } from '@/mixins/shootItem'
+import { withFieldName } from '@/utils/validators'
 
 export default {
   mixins: [shootItem],
   props: {
     modelValue: {
       type: String,
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
     },
     shootItem: {
       type: Object,
@@ -95,7 +100,11 @@ export default {
     }
   },
   validations () {
-    return this.validators
+    return {
+      modelValue: withFieldName('Terminal Target', {
+        required,
+      }),
+    }
   },
   computed: {
     ...mapState(useAuthnStore, [
@@ -106,13 +115,6 @@ export default {
       'hasControlPlaneTerminalAccess',
       'hasShootTerminalAccess',
     ]),
-    validators () {
-      return {
-        modelValue: {
-          required,
-        },
-      }
-    },
     selectedTarget: {
       get () {
         return this.modelValue

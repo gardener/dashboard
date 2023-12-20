@@ -4,40 +4,66 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { useLocalStorage } from '@vueuse/core'
+import { useAppStore } from '@/store/app'
+import { useAuthzStore } from '@/store/authz'
+import { useAuthnStore } from '@/store/authn'
+import { useProjectStore } from '@/store/project'
+import { useConfigStore } from '@/store/config'
+import { useCloudProfileStore } from '@/store/cloudProfile'
+import { useGardenerExtensionStore } from '@/store/gardenerExtension'
+import { useKubeconfigStore } from '@/store/kubeconfig'
+import { useMemberStore } from '@/store/member'
+import { useSecretStore } from '@/store/secret'
+import { useSeedStore } from '@/store/seed'
+import { useShootStore } from '@/store/shoot'
+import { useTerminalStore } from '@/store/terminal'
 
-export function createGuards (context) {
-  const {
-    logger,
-    appStore,
-    configStore,
-    authnStore,
-    authzStore,
-    projectStore,
-    cloudProfileStore,
-    seedStore,
-    gardenerExtensionStore,
-    kubeconfigStore,
-    memberStore,
-    secretStore,
-    shootStore,
-    terminalStore,
-  } = context
-  const shootListFilter = useLocalStorage('project/_all/shoot-list/filter', {})
+import { useLogger } from '@/composables/useLogger'
+
+export function createGlobalBeforeGuards () {
+  const logger = useLogger()
+  const appStore = useAppStore()
+  const authnStore = useAuthnStore()
+  const authzStore = useAuthzStore()
+  const configStore = useConfigStore()
+  const projectStore = useProjectStore()
+  const cloudProfileStore = useCloudProfileStore()
+  const seedStore = useSeedStore()
+  const gardenerExtensionStore = useGardenerExtensionStore()
+  const kubeconfigStore = useKubeconfigStore()
+  const memberStore = useMemberStore()
+  const secretStore = useSecretStore()
+  const shootStore = useShootStore()
+  const terminalStore = useTerminalStore()
 
   function ensureUserAuthenticatedForNonPublicRoutes () {
-    return (to) => {
-      const { meta = {}, path } = to
+    return to => {
+      const {
+        meta = {},
+        fullPath: redirectPath,
+      } = to
+
+      if (meta.public) {
+        return true
+      }
+
       authnStore.$reset()
-      if (!meta.public && authnStore.isExpired()) {
-        logger.info('User not found or session has expired --> Redirecting to login page')
-        const query = path !== '/'
-          ? { redirectPath: path }
-          : undefined
-        return {
-          name: 'Login',
-          query,
-        }
+
+      if (!authnStore.isExpired()) {
+        return true
+      }
+
+      const message = !authnStore.user
+        ? 'User not found'
+        : 'Session has expired'
+      logger.info('%s --> Redirecting to login page', message)
+
+      const query = redirectPath && redirectPath !== '/'
+        ? { redirectPath }
+        : undefined
+      return {
+        name: 'Login',
+        query,
       }
     }
   }
@@ -45,7 +71,7 @@ export function createGuards (context) {
   function ensureDataLoaded () {
     return async (to, from, next) => {
       const { meta = {} } = to
-      if (meta.public || to.name === 'Error') {
+      if (meta.public) {
         shootStore.unsubscribeShoots()
         return next()
       }
@@ -73,6 +99,11 @@ export function createGuards (context) {
         }
 
         switch (to.name) {
+          case 'Home':
+          case 'ProjectList': {
+            // no action required for redirect routes
+            break
+          }
           case 'Secrets':
           case 'Secret': {
             shootStore.subscribeShoots()
@@ -94,22 +125,19 @@ export function createGuards (context) {
             break
           }
           case 'ShootList': {
-            const isAdmin = authnStore.isAdmin
-
             // filter has to be set before subscribing shoots
-            shootStore.setShootListFilters({
-              onlyShootsWithIssues: isAdmin,
-              progressing: true,
-              noOperatorAction: isAdmin,
-              deactivatedReconciliation: isAdmin,
-              hideTicketsWithLabel: isAdmin,
-              ...shootListFilter.value,
-            })
-
+            shootStore.initializeShootListFilters()
             shootStore.subscribeShoots()
             if (authzStore.canUseProjectTerminalShortcuts) {
               await terminalStore.ensureProjectTerminalShortcutsLoaded()
             }
+            break
+          }
+          case 'ShootItem':
+          case 'ShootItemEditor':
+          case 'ShootItemHibernationSettings':
+          case 'ShootItemTerminal': {
+            // shoot subscription and data retrieval is done in GShootItemPlaceholder
             break
           }
           case 'Members':
@@ -118,8 +146,7 @@ export function createGuards (context) {
             await memberStore.fetchMembers()
             break
           }
-          case 'Account':
-          case 'Settings': {
+          default: {
             shootStore.unsubscribeShoots()
             break
           }
@@ -132,21 +159,24 @@ export function createGuards (context) {
     }
   }
 
-  return {
-    beforeEach: [
-      () => {
-        appStore.loading = true
-      },
-      ensureUserAuthenticatedForNonPublicRoutes(),
-      ensureDataLoaded(),
-    ],
-    afterEach: [
-      (to, from) => {
-        appStore.loading = false
-        appStore.fromRoute = from
-      },
-    ],
-  }
+  return [
+    (to, from) => {
+      appStore.loading = true
+    },
+    ensureUserAuthenticatedForNonPublicRoutes(),
+    ensureDataLoaded(),
+  ]
+}
+
+export function createGlobalAfterHooks () {
+  const appStore = useAppStore()
+
+  return [
+    (to, from) => {
+      appStore.loading = false
+      appStore.fromRoute = from
+    },
+  ]
 }
 
 async function ensureConfigLoaded (store) {

@@ -131,6 +131,9 @@ const mocks = {
           case 'secrets':
             allowed = id === 'admin@example.org'
             break
+          case 'projects':
+            allowed = id === 'projects-viewer@example.org'
+            break
         }
       }
       if (nonResourceAttributes) {

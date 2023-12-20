@@ -93,11 +93,64 @@ Object {
 }
 `;
 
+exports[`gardener-dashboard configmap branding should render the template 1`] = `
+Object {
+  "frontend": Object {
+    "branding": Object {
+      "loginHints": Array [
+        Object {
+          "href": "https://gardener.cloud",
+          "title": "Support",
+        },
+        Object {
+          "href": "https://gardener.cloud/docs",
+          "title": "Documentation",
+        },
+      ],
+      "productName": "SuperCoolProduct",
+      "productSlogan": "Slogan",
+    },
+  },
+}
+`;
+
+exports[`gardener-dashboard configmap contentSecurityPolicy should render the template with connectSrc containing additional host sources 1`] = `
+Object {
+  "contentSecurityPolicy": Object {
+    "connectSrc": Array [
+      "'self'",
+      "wss://*.seed.example.com",
+      "https://*.seed.example.com",
+    ],
+  },
+}
+`;
+
+exports[`gardener-dashboard configmap contentSecurityPolicy should render the template with default connectSrc 1`] = `
+Object {
+  "contentSecurityPolicy": Object {
+    "connectSrc": Array [
+      "'self'",
+    ],
+  },
+}
+`;
+
 exports[`gardener-dashboard configmap controlPlaneHighAvailabilityHelp should render the template with controlPlaneHighAvailabilityHelp markdown 1`] = `
 Object {
   "frontend": Object {
     "controlPlaneHighAvailabilityHelp": Object {
       "text": "[foo](https://bar.baz)",
+    },
+  },
+}
+`;
+
+exports[`gardener-dashboard configmap experimental should render the template with experimental features 1`] = `
+Object {
+  "frontend": Object {
+    "experimental": Object {
+      "throttleDelayPerCluster": 42,
     },
   },
 }
@@ -198,6 +251,40 @@ Li4u
 }
 `;
 
+exports[`gardener-dashboard configmap login-config.json should render login-config with branding and themes 1`] = `
+Object {
+  "branding": Object {
+    "loginHints": Array [
+      Object {
+        "href": "https://gardener.cloud",
+        "title": "Support",
+      },
+      Object {
+        "href": "https://gardener.cloud/docs",
+        "title": "Documentation",
+      },
+    ],
+    "productName": "SuperCoolProduct",
+    "productSlogan": "Slogan",
+  },
+  "landingPageUrl": "https://gardener.cloud/",
+  "loginTypes": Array [
+    "oidc",
+    "token",
+  ],
+  "themes": Object {
+    "dark": Object {
+      "main-navigation-title": "grey.darken3",
+      "primary": "#ff0000",
+    },
+    "light": Object {
+      "main-navigation-title": "grey.darken3",
+      "primary": "#ff0000",
+    },
+  },
+}
+`;
+
 exports[`gardener-dashboard configmap oidc should render the template with PKCE flow for the internal client 1`] = `
 Object {
   "oidc": Object {
@@ -261,6 +348,17 @@ Object {
 }
 `;
 
+exports[`gardener-dashboard configmap shootAdminKubeconfig should render the template 1`] = `
+Object {
+  "frontend": Object {
+    "shootAdminKubeconfig": Object {
+      "enabled": true,
+      "maxExpirationSeconds": 86400,
+    },
+  },
+}
+`;
+
 exports[`gardener-dashboard configmap should render the template w/ defaults values 1`] = `
 Object {
   "apiVersion": "v1",
@@ -280,16 +378,24 @@ Object {
 `;
 
 exports[`gardener-dashboard configmap should render the template w/ defaults values 2`] = `
-"{
-   \\"landingPageUrl\\": \\"https://gardener.cloud/\\",
-   \\"loginTypes\\": [\\"oidc\\", \\"token\\"]
+Object {
+  "landingPageUrl": "https://gardener.cloud/",
+  "loginTypes": Array [
+    "oidc",
+    "token",
+  ],
 }
-"
 `;
 
 exports[`gardener-dashboard configmap should render the template w/ defaults values 3`] = `
 Object {
   "apiServerUrl": "https://api.garden.example.org",
+  "contentSecurityPolicy": Object {
+    "connectSrc": Array [
+      "'self'",
+    ],
+  },
+  "experimentalUseWatchCacheForListShoots": "never",
   "frontend": Object {
     "defaultHibernationSchedule": Object {
       "development": Array [
@@ -306,6 +412,9 @@ Object {
       "production": null,
     },
     "defaultNodesCIDR": "10.250.0.0/16",
+    "experimental": Object {
+      "throttleDelayPerCluster": 10,
+    },
     "externalTools": Array [
       Object {
         "icon": "apps",
@@ -337,12 +446,13 @@ Object {
     "seedCandidateDeterminationStrategy": "SameRegion",
     "serviceAccountDefaultTokenExpiration": 7776000,
     "shootAdminKubeconfig": Object {
-      "enabled": true,
+      "enabled": false,
       "maxExpirationSeconds": 86400,
     },
   },
   "logFormat": "text",
   "logLevel": "debug",
+  "maxRequestBodySize": "100kb",
   "oidc": Object {
     "ca": "-----BEGIN CERTIFICATE-----
 Li4u
@@ -373,6 +483,55 @@ Li4u
     },
     "gardenTerminalHost": Object {
       "seedRef": "soil-gcp",
+    },
+  },
+}
+`;
+
+exports[`gardener-dashboard configmap sla should render the template with sla description markdown hyperlink 1`] = `
+Object {
+  "frontend": Object {
+    "sla": Object {
+      "description": "[foo](https://bar.baz)",
+      "title": "SLA title",
+    },
+  },
+}
+`;
+
+exports[`gardener-dashboard configmap terminal config garden cluster custom rolebBindings should default apiGroup 1`] = `
+Object {
+  "terminal": Object {
+    "garden": Object {
+      "roleBindings": Array [
+        Object {
+          "bindingKind": "ClusterRoleBinding",
+          "roleRef": Object {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "ClusterRole",
+            "name": "test-role",
+          },
+        },
+      ],
+    },
+  },
+}
+`;
+
+exports[`gardener-dashboard configmap terminal config garden cluster custom rolebBindings should render the template 1`] = `
+Object {
+  "terminal": Object {
+    "garden": Object {
+      "roleBindings": Array [
+        Object {
+          "bindingKind": "ClusterRoleBinding",
+          "roleRef": Object {
+            "apiGroup": "rbac.authorization.k8s.foo",
+            "kind": "ClusterRole",
+            "name": "test-role",
+          },
+        },
+      ],
     },
   },
 }
@@ -452,17 +611,6 @@ Object {
         "main-navigation-title": "grey.darken3",
         "primary": "#ff0000",
       },
-    },
-  },
-}
-`;
-
-exports[`gardener-dashboard configmap themes should render the template with sla description markdown hyperlink 1`] = `
-Object {
-  "frontend": Object {
-    "sla": Object {
-      "description": "[foo](https://bar.baz)",
-      "title": "SLA title",
     },
   },
 }

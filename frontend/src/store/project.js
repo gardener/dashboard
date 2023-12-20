@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { defineStore } from 'pinia'
+import {
+  defineStore,
+  acceptHMRUpdate,
+} from 'pinia'
 import {
   ref,
   computed,
@@ -47,6 +50,16 @@ export const useProjectStore = defineStore('project', () => {
 
   const namespaces = computed(() => {
     return map(list.value, 'metadata.namespace')
+  })
+
+  const projectNameMap = computed(() => {
+    const projectNames = {}
+    if (Array.isArray(list.value)) {
+      for (const { metadata: { namespace, name } } of list.value) {
+        projectNames[namespace] = name
+      }
+    }
+    return projectNames
   })
 
   const defaultNamespace = computed(() => {
@@ -150,8 +163,7 @@ export const useProjectStore = defineStore('project', () => {
     const namespace = typeof metadata === 'string'
       ? metadata
       : metadata?.namespace
-    const project = find(list.value, ['metadata.namespace', namespace])
-    return get(project, 'metadata.name') || replace(namespace, /^garden-/, '')
+    return projectNameMap.value[namespace] ?? replace(namespace, /^garden-/, '')
   }
 
   async function fetchProjects () {
@@ -169,6 +181,8 @@ export const useProjectStore = defineStore('project', () => {
     })
     appStore.setSuccess('Project created')
     updateList(response.data)
+
+    return response.data
   }
 
   async function patchProject (obj) {
@@ -209,9 +223,6 @@ export const useProjectStore = defineStore('project', () => {
     list.value = null
   }
 
-  const projectFromProjectList = project // TODO: deprecated - use project instead
-  const projectNamesFromProjectList = projectNames // TODO: deprecated - use projectNames instead
-
   return {
     list,
     isInitial,
@@ -222,9 +233,7 @@ export const useProjectStore = defineStore('project', () => {
     projectName,
     projectList,
     project,
-    projectFromProjectList,
     projectNames,
-    projectNamesFromProjectList,
     shootCustomFields,
     shootCustomFieldList,
     isCurrentNamespace,
@@ -237,3 +246,7 @@ export const useProjectStore = defineStore('project', () => {
     $reset,
   }
 })
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useProjectStore, import.meta.hot))
+}

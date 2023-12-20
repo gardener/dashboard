@@ -61,17 +61,17 @@ describe('components', () => {
 
       expect(wrapper.vm.notInList).toBe(false)
       expect(getFilteredItems()).toEqual(['foo', 'bar'])
-      expect(autocompleteWrapper.emitted('update:modelValue')).toBeFalsy()
+      expect(autocompleteWrapper.emitted('update:search')).toBeFalsy()
       expect(wrapper.vm.v$.$invalid).toBe(false)
 
       await setInputValue('256Gi')
       expect(getFilteredItems()).toEqual(['bar'])
-      expect(autocompleteWrapper.emitted('update:modelValue')).toEqual([['256Gi']])
+      expect(autocompleteWrapper.emitted('update:search')).toEqual([['foo'], ['256Gi']])
       expect(wrapper.vm.v$.$invalid).toBe(false)
 
       await setInputValue('bar')
       expect(getFilteredItems()).toEqual(['bar'])
-      expect(autocompleteWrapper.emitted('update:modelValue')).toEqual([['256Gi'], ['bar']])
+      expect(autocompleteWrapper.emitted('update:search')).toEqual([['foo'], ['256Gi'], ['bar']])
       expect(wrapper.vm.v$.$invalid).toBe(false)
 
       await setInputValue(null)

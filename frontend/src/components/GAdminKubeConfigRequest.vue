@@ -6,17 +6,18 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <g-action-button-dialog
-    :shoot-item="shootItem"
-    @dialog-opened="onConfigurationDialogOpened"
     ref="actionDialog"
+    :shoot-item="shootItem"
     width="500"
-    caption="Configure Kubeconfig Lifetime">
-    <template v-slot:actionComponent>
+    caption="Configure Kubeconfig Lifetime"
+    @dialog-opened="onConfigurationDialogOpened"
+  >
+    <template #actionComponent>
       <g-wildcard-select
         v-model="expiration"
         :wildcard-select-items="expirations"
         wildcard-select-label="Lifetime"
-        ></g-wildcard-select>
+      />
     </template>
   </g-action-button-dialog>
 </template>
@@ -24,27 +25,28 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GWildcardSelect from '@/components/GWildcardSelect'
+
 import shootItem from '@/mixins/shootItem'
 
 export default {
   components: {
     GActionButtonDialog,
-    GWildcardSelect
+    GWildcardSelect,
   },
   mixins: [
-    shootItem
+    shootItem,
   ],
+  props: {
+    expirations: {
+      type: Array,
+    },
+  },
   emits: [
     'update:expiration',
   ],
   data () {
     return {
-      expiration: undefined
-    }
-  },
-  props: {
-    expirations: {
-      type: Array
+      expiration: undefined,
     }
   },
   methods: {
@@ -57,7 +59,7 @@ export default {
     },
     reset () {
       this.expiration = this.expirations[0]
-    }
-  }
+    },
+  },
 }
 </script>

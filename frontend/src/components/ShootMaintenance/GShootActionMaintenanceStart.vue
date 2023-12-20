@@ -19,6 +19,7 @@ SPDX-License-Identifier: Apache-2.0
     <g-maintenance-components
       ref="maintenanceComponents"
       title="The following updates might be performed"
+      :hide-os-updates="!hasShootWorkerGroups"
       :selectable="false"
     />
     <v-alert
@@ -127,6 +128,7 @@ export default {
       if (this.dialog) {
         const actionDialog = this.$refs.actionDialog
         if (value) {
+          this.reset()
           actionDialog.showDialog()
           this.waitForConfirmation()
         } else {
@@ -186,7 +188,13 @@ export default {
       }
     },
     reset () {
-      this.$refs.maintenanceComponents.setComponentUpdates({ k8sUpdates: this.updateKubernetesVersion, osUpdates: this.updateOSVersion })
+      this.$nextTick(() => {
+        // need to wait until component has been rendered before we can trigger the function on the ref
+        this.$refs.maintenanceComponents.setComponentUpdates({
+          k8sUpdates: this.updateKubernetesVersion,
+          osUpdates: this.updateOSVersion,
+        })
+      })
     },
   },
 }

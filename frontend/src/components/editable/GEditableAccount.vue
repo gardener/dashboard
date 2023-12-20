@@ -47,7 +47,6 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </template>
     <v-card
-      v-click-outside="onCancel"
       flat
       @keydown.esc.prevent="onCancel"
       @keydown.enter.prevent="onSave"
@@ -69,7 +68,7 @@ SPDX-License-Identifier: Apache-2.0
         :loading="loading"
         :messages="messages"
         :menu-props="{ offset: [1, 0] }"
-        :error-messages="v$.internalValue.$errors.map(e => e.$message)"
+        :error-messages="getErrorMessages(v$.internalValue)"
         class="g-field"
         @update:model-value="v$.internalValue.$touch"
         @blur="v$.internalValue.$touch"
@@ -122,6 +121,7 @@ import GAccountAvatar from '@/components/GAccountAvatar.vue'
 import {
   gravatarUrlGeneric,
   setDelayedInputFocus,
+  getErrorMessages,
 } from '@/utils'
 
 import GErrorMessage from './GErrorMessage.vue'
@@ -288,6 +288,7 @@ export default {
         editable.resetValidation()
       }
     },
+    getErrorMessages,
   },
 }
 </script>

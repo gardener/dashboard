@@ -53,6 +53,7 @@ describe('store', () => {
     let authnStore
     let mockEnsureValidToken // eslint-disable-line no-unused-vars
     let mockSignout // eslint-disable-line no-unused-vars
+    let mockIsExpired // eslint-disable-line no-unused-vars
 
     beforeEach(() => {
       vi.useFakeTimers()
@@ -64,6 +65,7 @@ describe('store', () => {
       authnStore = useAuthnStore()
       mockEnsureValidToken = vi.spyOn(authnStore, 'ensureValidToken').mockImplementation(noop)
       mockSignout = vi.spyOn(authnStore, 'signout').mockImplementation(noop)
+      mockIsExpired = vi.spyOn(authnStore, 'isExpired').mockReturnValue(false)
       socketStore = useSocketStore()
     })
 

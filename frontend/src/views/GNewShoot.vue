@@ -78,10 +78,13 @@ SPDX-License-Identifier: Apache-2.0
         </v-card-text>
       </v-card>
       <v-card
+        v-show="!workerless"
         flat
         class="mt-4"
       >
-        <g-toolbar title="Worker" />
+        <g-toolbar
+          title="Worker"
+        />
         <v-card-text class="pt-1">
           <g-manage-workers
             ref="manageWorkersRef"
@@ -90,10 +93,13 @@ SPDX-License-Identifier: Apache-2.0
         </v-card-text>
       </v-card>
       <v-card
+        v-show="!workerless"
         flat
         class="mt-4"
       >
-        <g-toolbar title="Add-Ons (not actively monitored and provided on a best-effort basis only)" />
+        <g-toolbar
+          title="Add-Ons (not actively monitored and provided on a best-effort basis only)"
+        />
         <v-card-text>
           <g-manage-shoot-addons
             ref="addons"
@@ -113,6 +119,7 @@ SPDX-License-Identifier: Apache-2.0
           <g-maintenance-components
             ref="maintenanceComponents"
             :user-inter-action-bus="userInterActionBus"
+            :hide-os-updates="workerless"
           />
         </v-card-text>
       </v-card>
@@ -128,27 +135,31 @@ SPDX-License-Identifier: Apache-2.0
           />
         </v-card-text>
       </v-card>
-      <g-message
+      <div
+        v-if="errorMessage"
         ref="errorAlert"
-        v-model:message="errorMessage"
-        v-model:detailed-message="detailedErrorMessage"
-        color="error"
-        class="error-alert"
-      />
+        class="mb-6"
+      >
+        <g-message
+          v-model:message="errorMessage"
+          v-model:detailed-message="detailedErrorMessage"
+          color="error"
+          class="error-alert"
+        />
+      </div>
     </v-container>
     <v-divider />
     <div class="d-flex align-center justify-end toolbar">
       <v-divider vertical />
       <v-btn
         variant="text"
-        :disabled="v$.$invalid"
         color="primary"
         @click.stop="createClicked()"
       >
         Create
       </v-btn>
+      <g-confirm-dialog ref="confirmDialog" />
     </div>
-    <g-confirm-dialog ref="confirmDialog" />
   </div>
   <v-alert
     v-else
@@ -192,6 +203,7 @@ import { useAsyncRef } from '@/composables/useAsyncRef'
 
 import { isZonedCluster } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
+import { messageFromErrors } from '@/utils/validators'
 import {
   getSpecTemplate,
   getZonesNetworkConfiguration,
@@ -206,6 +218,7 @@ import {
   cloneDeep,
   isEqual,
   unset,
+  omit,
 } from '@/lodash'
 
 export default {
@@ -258,26 +271,24 @@ export default {
       errorMessage: undefined,
       detailedErrorMessage: undefined,
       isShootCreated: false,
-      userInterActionBus: new mitt(), // eslint-disable-line new-cap
+      userInterActionBus: mitt(),
     }
   },
   computed: {
     ...mapState(useAuthzStore, ['namespace']),
-    ...mapState(useConfigStore, ['accessRestriction', 'defaultNodesCIDR']),
+    ...mapState(useConfigStore, ['accessRestriction']),
     ...mapState(useShootStagingStore, ['controlPlaneFailureToleranceType']),
     ...mapState(useShootStagingStore, [
-      'getDnsConfiguration',
+      'workerless',
     ]),
     ...mapState(useShootStore, [
       'newShootResource',
       'initialNewShootResource',
     ]),
     ...mapState(useSecretStore, [
-      'infrastructureSecretsByCloudProfileName',
       'sortedInfrastructureKindList',
     ]),
     ...mapState(useCloudProfileStore, [
-      'zonesByCloudProfileNameAndRegion',
       'sortedInfrastructureKindList',
     ]),
   },
@@ -297,7 +308,15 @@ export default {
       'setNewShootResource',
     ]),
     ...mapActions(useShootStagingStore, [
+      'getDnsConfiguration',
       'setClusterConfiguration',
+    ]),
+    ...mapActions(useSecretStore, [
+      'infrastructureSecretsByCloudProfileName',
+    ]),
+    ...mapActions(useCloudProfileStore, [
+      'zonesByCloudProfileNameAndRegion',
+      'getDefaultNodesCIDR',
     ]),
     async isShootContentDirty () {
       const shootResource = await this.shootResourceFromUIComponents()
@@ -320,39 +339,47 @@ export default {
         firewallImage,
         firewallSize,
         firewallNetworks,
+        defaultNodesCIDR,
       } = this.$refs.infrastructureDetails.getInfrastructureData()
       const oldInfrastructureKind = get(shootResource, 'spec.provider.type')
-      if (oldInfrastructureKind !== infrastructureKind) {
+      if (oldInfrastructureKind !== infrastructureKind ||
+      !shootResource.spec.provider.infrastructureConfig ||
+      !shootResource.spec.provider.controlPlaneConfig) {
         // Infrastructure changed
-        set(shootResource, 'spec', getSpecTemplate(infrastructureKind, this.defaultNodesCIDR))
+        // or infrastructure template is empty (e.g. toggled workerless)
+        set(shootResource, 'spec', getSpecTemplate(infrastructureKind, defaultNodesCIDR))
       }
       set(shootResource, 'spec.cloudProfileName', cloudProfileName)
       set(shootResource, 'spec.region', region)
-      set(shootResource, 'spec.networking.type', networkingType)
-      set(shootResource, 'spec.secretBindingName', get(secret, 'metadata.name'))
-      if (!isEmpty(floatingPoolName)) {
-        set(shootResource, 'spec.provider.infrastructureConfig.floatingPoolName', floatingPoolName)
-      }
-      if (!isEmpty(loadBalancerProviderName)) {
-        set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerProvider', loadBalancerProviderName)
-      }
-      if (!isEmpty(loadBalancerClasses)) {
-        set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerClasses', loadBalancerClasses)
-      }
-      if (!isEmpty(partitionID)) {
-        set(shootResource, 'spec.provider.infrastructureConfig.partitionID', partitionID)
-      }
-      if (!isEmpty(projectID)) {
-        set(shootResource, 'spec.provider.infrastructureConfig.projectID', projectID)
-      }
-      if (!isEmpty(firewallImage)) {
-        set(shootResource, 'spec.provider.infrastructureConfig.firewall.image', firewallImage)
-      }
-      if (!isEmpty(firewallSize)) {
-        set(shootResource, 'spec.provider.infrastructureConfig.firewall.size', firewallSize)
-      }
-      if (!isEmpty(firewallNetworks)) {
-        set(shootResource, 'spec.provider.infrastructureConfig.firewall.networks', firewallNetworks)
+
+      if (!this.workerless) {
+        set(shootResource, 'spec.networking.type', networkingType)
+
+        set(shootResource, 'spec.secretBindingName', get(secret, 'metadata.name'))
+        if (!isEmpty(floatingPoolName)) {
+          set(shootResource, 'spec.provider.infrastructureConfig.floatingPoolName', floatingPoolName)
+        }
+        if (!isEmpty(loadBalancerProviderName)) {
+          set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerProvider', loadBalancerProviderName)
+        }
+        if (!isEmpty(loadBalancerClasses)) {
+          set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerClasses', loadBalancerClasses)
+        }
+        if (!isEmpty(partitionID)) {
+          set(shootResource, 'spec.provider.infrastructureConfig.partitionID', partitionID)
+        }
+        if (!isEmpty(projectID)) {
+          set(shootResource, 'spec.provider.infrastructureConfig.projectID', projectID)
+        }
+        if (!isEmpty(firewallImage)) {
+          set(shootResource, 'spec.provider.infrastructureConfig.firewall.image', firewallImage)
+        }
+        if (!isEmpty(firewallSize)) {
+          set(shootResource, 'spec.provider.infrastructureConfig.firewall.size', firewallSize)
+        }
+        if (!isEmpty(firewallNetworks)) {
+          set(shootResource, 'spec.provider.infrastructureConfig.firewall.networks', firewallNetworks)
+        }
       }
 
       const dnsConfiguration = this.getDnsConfiguration()
@@ -377,31 +404,35 @@ export default {
       set(shootResource, 'spec.kubernetes.enableStaticTokenKubeconfig', enableStaticTokenKubeconfig)
       set(shootResource, 'spec.purpose', purpose)
 
-      const workers = await this.manageWorkers.dispatch('getWorkers')
-      set(shootResource, 'spec.provider.workers', workers)
+      if (!this.workerless) {
+        const workers = await this.manageWorkers.dispatch('getWorkers')
+        set(shootResource, 'spec.provider.workers', workers)
 
-      const allZones = this.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
-      const oldZoneConfiguration = get(shootResource, 'spec.provider.infrastructureConfig.networks.zones', [])
-      const nodeCIDR = get(shootResource, 'spec.networking.nodes', this.defaultNodesCIDR)
-      const zonesNetworkConfiguration = getZonesNetworkConfiguration(oldZoneConfiguration, workers, infrastructureKind, allZones.length, undefined, nodeCIDR)
-      if (zonesNetworkConfiguration) {
-        set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', zonesNetworkConfiguration)
+        const allZones = this.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
+        const oldZoneConfiguration = get(shootResource, 'spec.provider.infrastructureConfig.networks.zones', [])
+        const nodeCIDR = get(shootResource, 'spec.networking.nodes', defaultNodesCIDR)
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration(oldZoneConfiguration, workers, infrastructureKind, allZones.length, undefined, nodeCIDR)
+        if (zonesNetworkConfiguration) {
+          set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', zonesNetworkConfiguration)
+        }
+
+        const oldControlPlaneZone = get(shootResource, 'spec.provider.controlPlaneConfig.zone')
+        const controlPlaneZone = getControlPlaneZone(workers, infrastructureKind, oldControlPlaneZone)
+        if (controlPlaneZone) {
+          set(shootResource, 'spec.provider.controlPlaneConfig.zone', controlPlaneZone)
+        }
+
+        const addons = this.$refs.addons.getAddons()
+        set(shootResource, 'spec.addons', addons)
       }
 
-      const oldControlPlaneZone = get(shootResource, 'spec.provider.controlPlaneConfig.zone')
-      const controlPlaneZone = getControlPlaneZone(workers, infrastructureKind, oldControlPlaneZone)
-      if (controlPlaneZone) {
-        set(shootResource, 'spec.provider.controlPlaneConfig.zone', controlPlaneZone)
-      }
-
-      const addons = this.$refs.addons.getAddons()
-      set(shootResource, 'spec.addons', addons)
-
-      const { begin, end } = this.$refs.maintenanceTime.getMaintenanceWindow()
+      const { begin, end } = this.$refs.maintenanceTime.getMaintenanceWindow() ?? {}
       const { k8sUpdates, osUpdates } = this.$refs.maintenanceComponents.getComponentUpdates()
       const autoUpdate = get(shootResource, 'spec.maintenance.autoUpdate', {})
       autoUpdate.kubernetesVersion = k8sUpdates
-      autoUpdate.machineImageVersion = osUpdates
+      if (!this.workerless) {
+        autoUpdate.machineImageVersion = osUpdates
+      }
       const maintenance = {
         timeWindow: {
           begin,
@@ -425,6 +456,17 @@ export default {
         set(shootResource, 'spec.controlPlane.highAvailability.failureTolerance.type', this.controlPlaneFailureToleranceType)
       } else {
         unset(shootResource, 'spec.controlPlane')
+      }
+
+      if (this.workerless) {
+        return omit(shootResource, [
+          'spec.provider.infrastructureConfig',
+          'spec.provider.controlPlaneConfig',
+          'spec.provider.workers',
+          'spec.addons',
+          'spec.networking',
+          'spec.secretBindingName',
+          'spec.maintenance.autoUpdate.machineImageVersion'])
       }
 
       return shootResource
@@ -480,8 +522,7 @@ export default {
       const end = get(shootResource, 'spec.maintenance.timeWindow.end')
       const k8sUpdates = get(shootResource, 'spec.maintenance.autoUpdate.kubernetesVersion', true)
       const osUpdates = get(shootResource, 'spec.maintenance.autoUpdate.machineImageVersion', true)
-      this.$refs.maintenanceTime.setBeginTimeTimezoneString(begin)
-      this.$refs.maintenanceTime.setEndTimeTimezoneString(end)
+      this.$refs.maintenanceTime.setMaintenanceWindow(begin, end)
       this.$refs.maintenanceComponents.setComponentUpdates({ k8sUpdates, osUpdates })
 
       const name = get(shootResource, 'metadata.name')
@@ -489,6 +530,7 @@ export default {
       const enableStaticTokenKubeconfig = get(shootResource, 'spec.kubernetes.enableStaticTokenKubeconfig')
       const purpose = get(shootResource, 'spec.purpose')
       this.purpose = purpose
+      const workers = get(shootResource, 'spec.provider.workers')
       await this.$refs.clusterDetails.setDetailsData({
         name,
         kubernetesVersion,
@@ -499,10 +541,10 @@ export default {
         enableStaticTokenKubeconfig,
       })
 
-      const workers = get(shootResource, 'spec.provider.workers')
       const zonedCluster = isZonedCluster({ cloudProviderKind: infrastructureKind, isNewCluster: true })
 
-      const newShootWorkerCIDR = get(shootResource, 'spec.networking.nodes', this.defaultNodesCIDR)
+      const defaultNodesCIDR = this.getDefaultNodesCIDR({ cloudProfileName })
+      const newShootWorkerCIDR = get(shootResource, 'spec.networking.nodes', defaultNodesCIDR)
       await this.manageWorkers.dispatch('setWorkersData', { workers, cloudProfileName, region, updateOSMaintenance: osUpdates, zonedCluster, kubernetesVersion, newShootWorkerCIDR })
 
       const addons = cloneDeep(get(shootResource, 'spec.addons', {}))
@@ -514,6 +556,18 @@ export default {
       await this.hibernationSchedule.dispatch('setScheduleData', { hibernationSchedule, noHibernationSchedule, purpose })
     },
     async createClicked () {
+      if (this.v$.$invalid) {
+        await this.v$.$validate()
+        const message = messageFromErrors(this.v$.$errors)
+        this.errorMessage = 'There are input errors that you need to resolve'
+        this.detailedErrorMessage = message
+
+        this.$nextTick(() => {
+          // Need to wait for the new element to be rendered, before we can scroll it into view
+          this.$refs.errorAlert.scrollIntoView()
+        })
+        return
+      }
       const shootResource = await this.updateShootResourceWithUIComponents()
       try {
         await this.createShoot(shootResource)
@@ -533,7 +587,7 @@ export default {
 
         this.$nextTick(() => {
           // Need to wait for the new element to be rendered, before we can scroll it into view
-          this.$refs.errorAlert.$el.scrollIntoView()
+          this.$refs.errorAlert.scrollIntoView()
         })
       }
     },

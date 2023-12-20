@@ -70,7 +70,13 @@ export default {
     if (this.isShootCreated) {
       return next()
     }
-    if (!this.isShootCreated && await this.isShootContentDirty()) {
+    let isDirty = true
+    try {
+      isDirty = await this.isShootContentDirty()
+    } catch (err) {
+      this.errorMessage = err.message
+    }
+    if (isDirty) {
       if (!await this.confirmEditorNavigation()) {
         this.shootEditor.dispatch('focus')
         return next(false)

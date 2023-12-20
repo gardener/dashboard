@@ -22,7 +22,6 @@ SPDX-License-Identifier: Apache-2.0
           <v-switch
             v-model="accessRestrictions[definition.key].value"
             color="primary"
-            inset
             density="compact"
           />
         </div>
@@ -151,7 +150,7 @@ export default {
     },
     textClass (definition) {
       return this.enabled(definition)
-        ? 'text-secondary'
+        ? 'text-medium-emphasis'
         : 'text-disabled'
     },
     applyTo (shootResource) {

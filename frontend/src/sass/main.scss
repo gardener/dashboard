@@ -50,6 +50,10 @@
   cursor: pointer;
 }
 
+.pointer-events-none {
+  pointer-events: none !important;
+}
+
 .nowrap {
   white-space: nowrap;
 }

@@ -200,7 +200,7 @@ Array [
       ":method": "post",
       ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
       ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InByb2plY3RzLXZpZXdlckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.mdL_IwTCaUnb2Yzua4Z54bS85BXKeAU3O1ioUfs7MeI",
     },
     Object {
       "apiVersion": "authorization.k8s.io/v1",
@@ -208,9 +208,9 @@ Array [
       "spec": Object {
         "nonResourceAttributes": undefined,
         "resourceAttributes": Object {
-          "group": "",
-          "resource": "secrets",
-          "verb": "get",
+          "group": "core.gardener.cloud",
+          "resource": "projects",
+          "verb": "list",
         },
       },
     },
@@ -220,6 +220,19 @@ Array [
 
 exports[`api projects should return all projects 2`] = `
 Array [
+  Object {
+    "data": Object {
+      "createdBy": "admin@example.org",
+      "owner": "admin@example.org",
+      "phase": "Ready",
+    },
+    "metadata": Object {
+      "name": "garden",
+      "namespace": "garden",
+      "resourceVersion": "42",
+      "role": "project",
+    },
+  },
   Object {
     "data": Object {
       "createdBy": "foo@example.org",
@@ -366,9 +379,9 @@ Array [
       "spec": Object {
         "nonResourceAttributes": undefined,
         "resourceAttributes": Object {
-          "group": "",
-          "resource": "secrets",
-          "verb": "get",
+          "group": "core.gardener.cloud",
+          "resource": "projects",
+          "verb": "list",
         },
       },
     },

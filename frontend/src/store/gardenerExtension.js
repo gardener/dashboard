@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { defineStore } from 'pinia'
+import {
+  defineStore,
+  acceptHMRUpdate,
+} from 'pinia'
 import {
   ref,
   computed,
@@ -80,3 +83,7 @@ export const useGardenerExtensionStore = defineStore('gardenerExtension', () => 
     networkingTypeList,
   }
 })
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useGardenerExtensionStore, import.meta.hot))
+}

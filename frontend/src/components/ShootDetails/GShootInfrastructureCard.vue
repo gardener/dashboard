@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
           </div>
         </g-list-item-content>
       </g-list-item>
-      <g-list-item>
+      <g-list-item v-if="hasShootWorkerGroups">
         <g-list-item-content label="Credential">
           <router-link
             v-if="canLinkToSecret"
@@ -110,23 +110,32 @@ SPDX-License-Identifier: Apache-2.0
         </template>
       </g-list-item>
       <v-divider inset />
+      <template v-if="hasShootWorkerGroups">
+        <g-list-item>
+          <template #prepend>
+            <v-icon color="primary">
+              mdi-ip-network
+            </v-icon>
+          </template>
+          <g-list-item-content label="Pods CIDR">
+            {{ podsCidr }}
+          </g-list-item-content>
+        </g-list-item>
+        <g-list-item content-class="py-0">
+          <g-list-item-content label="Nodes CIDR">
+            {{ nodesCidr }}
+          </g-list-item-content>
+        </g-list-item>
+      </template>
       <g-list-item>
         <template #prepend>
-          <v-icon color="primary">
+          <v-icon
+            v-if="hasShootWorkerGroups"
+            color="primary"
+          >
             mdi-ip-network
           </v-icon>
         </template>
-        <g-list-item-content label="Pods CIDR">
-          {{ podsCidr }}
-        </g-list-item-content>
-      </g-list-item>
-      <g-list-item content-class="py-0">
-        <g-list-item-content label="Nodes CIDR">
-          {{ nodesCidr }}
-        </g-list-item-content>
-      </g-list-item>
-      <g-list-item>
-        <template #prepend />
         <g-list-item-content label="Services CIDR">
           {{ servicesCidr }}
         </g-list-item-content>

@@ -8,7 +8,6 @@ SPDX-License-Identifier: Apache-2.0
   <g-action-button-dialog
     ref="actionDialog"
     :shoot-item="shootItem"
-    :valid="!v$.$invalid"
     caption="Configure DNS"
     width="900"
     confirm-required
@@ -21,10 +20,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import {
-  mapActions,
-  mapGetters,
-} from 'pinia'
+import { mapActions } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 
 import { useShootStagingStore } from '@/store/shootStaging'
@@ -53,13 +49,9 @@ export default {
       componentKey: uuidv4(),
     }
   },
-  computed: {
-    ...mapGetters(useShootStagingStore, [
-      'getDnsConfiguration',
-    ]),
-  },
   methods: {
     ...mapActions(useShootStagingStore, [
+      'getDnsConfiguration',
       'setClusterConfiguration',
     ]),
     async onConfigurationDialogOpened () {

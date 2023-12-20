@@ -11,14 +11,54 @@ import localizedFormat from 'dayjs/plugin/localizedFormat'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
+import updateLocale from 'dayjs/plugin/updateLocale'
 
-dayjs.extend(relativeTime)
+const thresholds = [
+  { l: 'S', r: 1, d: 'millisecond' },
+  { l: 's', r: 1 },
+  { l: 'ss', r: 10, d: 'second' },
+  { l: 'sss', r: 59, d: 'second' },
+  { l: 'm', r: 1 },
+  { l: 'mm', r: 59, d: 'minute' },
+  { l: 'h', r: 1 },
+  { l: 'hh', r: 23, d: 'hour' },
+  { l: 'd', r: 1 },
+  { l: 'dd', r: 29, d: 'day' },
+  { l: 'M', r: 1 },
+  { l: 'MM', r: 11, d: 'month' },
+  { l: 'y', r: 1 },
+  { l: 'yy', d: 'year' },
+]
+
+dayjs.extend(relativeTime, { thresholds })
 dayjs.extend(duration)
 dayjs.extend(localizedFormat)
 dayjs.extend(customParseFormat)
 dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.extend(timezoneExtension)
+dayjs.extend(updateLocale)
+
+dayjs.updateLocale('en', {
+  relativeTime: {
+    future: val => val === 'just now' ? val : `in ${val}`,
+    past: val => val === 'just now' ? val : `${val} ago`,
+    S: 'just now',
+    s: 'a second',
+    ss: '%d seconds',
+    sss: 'a few seconds',
+    m: 'a minute',
+    mm: '%d minutes',
+    h: 'an hour',
+    hh: '%d hours',
+    d: 'a day',
+    dd: '%d days',
+    M: 'a month',
+    MM: '%d months',
+    y: 'a year',
+    yy: '%d years',
+  },
+})
 
 function timezoneExtension (option, dayjsClass, dayjsFactory) {
   const locations = [

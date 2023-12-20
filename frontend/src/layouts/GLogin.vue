@@ -5,116 +5,125 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-app>
-    <div class="login-background bg-main-background" />
-    <v-main>
-      <v-container
-        class="fill-height"
-        fluid
+  <v-app
+    :style="{
+      minHeight: `${appHeight}px`
+    }"
+  >
+    <v-main
+      class="d-flex flex-column align-center justify-space-between"
+      style="height: 100vh;"
+    >
+      <v-sheet
+        :min-height="footerHeight"
+        class="bg-transparent"
+      />
+      <v-sheet
+        :min-height="totalTeaserHeight"
+        :min-width="teaserMinWidth"
+        :width="teaserWidth"
+        :elevation="2"
+        rounded
+        class="overflow-hidden"
       >
-        <v-row
-          align="center"
-          justify="center"
+        <g-login-teaser
+          :min-height="teaserHeight"
+        />
+        <v-tabs
+          v-model="loginType"
+          align-tabs="center"
+          color="primary"
+          :height="tabsHeight"
         >
-          <v-col
-            cols="12"
-            sm="8"
-            md="4"
-            lg="4"
+          <v-tab
+            v-for="key in loginTypes"
+            :key="key"
+            :value="key"
+            :text="getLoginTypeTitle(key)"
+          />
+        </v-tabs>
+        <v-window
+          v-model="loginType"
+          :style="{
+            height: `${windowHeight}px`,
+          }"
+        >
+          <v-window-item
+            value="oidc"
+            class="pa-3"
+            style="{
+              height: `${windowHeight}px`,
+            }"
           >
-            <v-card class="elevation-1">
-              <v-card-title class="pa-0 d-flex flex-column">
-                <div class="d-flex flex-column align-center bg-main-background-darken-1 text-primary pa-3 pt-6">
-                  <img
-                    src="/static/assets/logo.svg"
-                    alt="Login to Gardener"
-                    width="180"
-                    height="180"
-                  >
-                  <div class="flex my-4 text-primary text-h5 font-weight-light title-text">
-                    Universal Kubernetes at Scale
-                  </div>
-                </div>
-                <v-tabs
-                  v-if="!isFetching"
-                  v-model="loginType"
-                  align-tabs="center"
-                  color="primary"
-                >
-                  <v-tab
-                    v-for="item in loginTypes"
-                    :key="item"
-                    :value="item"
-                  >
-                    {{ item }}
-                  </v-tab>
-                </v-tabs>
-              </v-card-title>
-              <v-card-text class="login-form py-0">
-                <v-window
-                  v-if="!isFetching"
-                  v-model="loginType"
-                  class="pa-4"
-                >
-                  <v-window-item value="oidc">
-                    <div class="text-subtitle-1 text-center text-medium-emphasis">
-                      Press Login to be redirected to configured<br> OpenID Connect Provider.
-                    </div>
-                  </v-window-item>
-                  <v-window-item value="token">
-                    <div class="text-subtitle-1 text-center text-medium-emphasis pb-3">
-                      Enter a bearer token trusted by the Kubernetes API server and press Login.
-                    </div>
-                    <v-form autocomplete="off">
-                      <v-text-field
-                        ref="tokenField"
-                        v-model="token"
-                        color="primary"
-                        :append-inner-icon="showToken ? 'mdi-eye' : 'mdi-eye-off'"
-                        :type="showToken ? 'text' : 'password'"
-                        variant="solo"
-                        label="Token"
-                        required
-                        hide-details="auto"
-                        autocomplete="off"
-                        @click:append-inner="showToken = !showToken"
-                      />
-                    </v-form>
-                  </v-window-item>
-                </v-window>
-              </v-card-text>
-              <v-card-actions
-                v-show="!isFetching"
-                class="py-4"
-              >
-                <div class="d-flex justify-center flex-grow-1">
-                  <v-btn
-                    variant="elevated"
-                    color="primary"
-                    @click="handleLogin"
-                  >
-                    Login
-                  </v-btn>
-                </div>
-              </v-card-actions>
-            </v-card>
-          </v-col>
-        </v-row>
-      </v-container>
-      <div
-        v-if="landingPageUrl"
-        class="footer text-caption"
+            <!-- eslint-disable vue/no-v-html -->
+            <div
+              class="text-subtitle-1 text-center text-medium-emphasis"
+              v-html="oidcLoginText"
+            />
+            <!-- eslint-enable vue/no-v-html -->
+          </v-window-item>
+          <v-window-item
+            value="token"
+            class="pa-3"
+            style="{
+              height: `${windowHeight}px`,
+            }"
+          >
+            <!-- eslint-disable vue/no-v-html -->
+            <div
+              class="text-subtitle-1 text-center text-medium-emphasis"
+              v-html="tokenLoginText"
+            />
+            <!-- eslint-enable vue/no-v-html -->
+            <v-form
+              autocomplete="off"
+              class="d-flex justify-center mt-3"
+            >
+              <v-text-field
+                ref="tokenField"
+                v-model="token"
+                color="primary"
+                :append-inner-icon="showToken ? 'mdi-eye' : 'mdi-eye-off'"
+                :type="showToken ? 'text' : 'password'"
+                variant="solo"
+                single-line
+                density="compact"
+                label="Token"
+                required
+                hide-details="auto"
+                autocomplete="off"
+                :style="{
+                  maxWidth: `${teaserWidth - 96}px`,
+                }"
+                @click:append-inner="showToken = !showToken"
+              />
+            </v-form>
+          </v-window-item>
+        </v-window>
+        <div
+          class="d-flex align-center justify-center"
+          :style="{
+            minHeight: `${toolbarHeight}px`
+          }"
+        >
+          <v-btn
+            variant="elevated"
+            color="primary"
+            @click="handleLogin"
+          >
+            Login
+          </v-btn>
+        </div>
+        <g-login-hints
+          :min-height="hintsMinHeight"
+        />
+      </v-sheet>
+      <v-sheet
+        :min-height="footerHeight"
+        class="bg-transparent"
       >
-        <span class="text-primary">
-          Discover what our service is about at the
-        </span>
-        <a
-          :href="landingPageUrl"
-          target="_blank"
-          rel="noopener"
-          class="text-anchor"
-        >Gardener Landing Page</a>
-      </div>
+        <g-login-footer />
+      </v-sheet>
     </v-main>
     <g-notify />
   </v-app>
@@ -130,7 +139,11 @@ import {
 import { useAppStore } from '@/store/app'
 import { useAuthnStore } from '@/store/authn'
 import { useLoginStore } from '@/store/login'
+import { useLocalStorageStore } from '@/store/localStorage'
 
+import GLoginTeaser from '@/components/GLoginTeaser.vue'
+import GLoginHints from '@/components/GLoginHints.vue'
+import GLoginFooter from '@/components/GLoginFooter.vue'
 import GNotify from '@/components/GNotify.vue'
 
 import { setDelayedInputFocus } from '@/utils'
@@ -139,6 +152,9 @@ import { get } from '@/lodash'
 
 export default {
   components: {
+    GLoginTeaser,
+    GLoginHints,
+    GLoginFooter,
     GNotify,
   },
   inject: ['api'],
@@ -153,8 +169,9 @@ export default {
     }
 
     const loginStore = useLoginStore()
-    await loginStore.isNotFetching()
-    if (!err && loginStore.loginType === 'oidc' && loginStore.autoLoginEnabled) {
+    const localStorageStore = useLocalStorageStore()
+    await loginStore.fetchConfig()
+    if (!err && loginStore.loginType === 'oidc' && localStorageStore.autoLogin) {
       const redirectPath = get(to.query, 'redirectPath', '/')
       const authnStore = useAuthnStore()
       authnStore.signinWithOidc(redirectPath)
@@ -178,16 +195,67 @@ export default {
   },
   computed: {
     ...mapState(useLoginStore, [
-      'isFetching',
       'loginTypes',
       'landingPageUrl',
-      'autoLoginEnabled',
+      'branding',
     ]),
     ...mapWritableState(useLoginStore, [
       'loginType',
     ]),
+    breakpointName () {
+      return this.$vuetify.display.name
+    },
+    tabsHeight () {
+      return this.branding.loginTabsHeight ?? 48
+    },
+    windowHeight () {
+      return this.branding.loginTabsContentHeight ?? 136
+    },
+    toolbarHeight () {
+      return this.branding.loginToolbarHeight ?? 60
+    },
+    hintsMinHeight () {
+      return this.branding.loginHintsMinHeight ?? 38
+    },
+    teaserMinWidth () {
+      return this.branding.loginTeaserMinWidth ?? 340
+    },
+    teaserHeight () {
+      return this.branding.loginTeaserHeight ?? 260
+    },
+    footerHeight () {
+      return this.branding.loginFooterHeight ?? 24
+    },
+    totalTeaserHeight () {
+      return this.teaserHeight + this.tabsHeight + this.windowHeight + this.toolbarHeight
+    },
+    windowItemHeight () {
+      return this.windowHeight - 24
+    },
+    appHeight () {
+      return this.totalTeaserHeight + 2 * this.footerHeight
+    },
+    teaserWidth () {
+      switch (this.breakpointName) {
+        case 'xs':
+          return this.calculateWidth(0)
+        case 'sm':
+        case 'md':
+          return this.calculateWidth(1)
+        default:
+          return this.calculateWidth(2)
+      }
+    },
     redirectPath () {
       return get(this.$route.query, 'redirectPath', '/')
+    },
+    oidcLoginText () {
+      const value = this.branding.oidcLoginText ?? 'Press Login to be redirected to the configured\nOpenID Connect Provider.'
+      return value.replace(/\n/g, '<br>')
+    },
+    tokenLoginText () {
+      const value = this.branding.tokenLoginText ?? 'Enter a bearer token trusted by the Kubernetes API server and press Login.'
+      return value.replace(/\n/g, '<br>')
     },
   },
   watch: {
@@ -204,6 +272,9 @@ export default {
     ...mapActions(useAuthnStore, [
       'signinWithOidc',
     ]),
+    calculateWidth (i) {
+      return this.teaserMinWidth + i * 60
+    },
     handleLogin () {
       switch (this.loginType) {
         case 'oidc':
@@ -214,12 +285,22 @@ export default {
           break
       }
     },
+    getLoginTypeTitle (key) {
+      switch (key) {
+        case 'oidc':
+          return this.branding.oidcLoginTitle ?? 'OIDC'
+        case 'token':
+          return this.branding.tokenLoginTitle ?? 'Token'
+        default:
+          return key
+      }
+    },
     oidcLogin () {
       try {
         this.signinWithOidc(this.redirectPath)
       } catch (err) {
         this.setError({
-          title: 'OIDC Login Error',
+          title: `${this.getLoginTypeTitle('oidc')} Login Error`,
           message: err.message,
         })
       }
@@ -236,7 +317,7 @@ export default {
         }
       } catch (err) {
         this.setError({
-          title: 'Token Login Error',
+          title: `${this.getLoginTypeTitle('token')} Login Error`,
           message: err.message,
         })
       }
@@ -246,29 +327,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .login-background {
-    height: 50%;
-    width: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 0;
-  }
+  $bg-top: rgb(var(--v-theme-main-background));
+  $bg-bottom: rgb(var(--v-theme-background));
 
-  .login-form {
-    min-height: 140px;
-  }
-
-  .footer {
-    position: absolute;
-    bottom: 10px;
-    left: 0px;
-    width: 100%;
-    text-align: center;
-  }
-
-  .title-text {
-    white-space: normal;
-    word-break: break-word;
+  .v-application {
+    background: linear-gradient(to bottom, $bg-top 0%, $bg-top 50%, $bg-bottom 50%, $bg-bottom 100%) !important;
   }
 </style>

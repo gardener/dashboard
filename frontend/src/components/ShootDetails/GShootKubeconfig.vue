@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <g-list-item-content v-if="isGardenloginType">
       Kubeconfig - Gardenlogin
-      <div class="text-body-2">
+      <template #description>
         <span
           v-if="isKubeconfigAvailable"
           class="wrap-text"
@@ -25,11 +25,11 @@ SPDX-License-Identifier: Apache-2.0
         <span v-else>
           Gardenlogin kubeconfig currently not available
         </span>
-      </div>
+      </template>
     </g-list-item-content>
     <g-list-item-content v-if="isStaticKubeconfigType">
       Kubeconfig - Static Token
-      <div class="text-body-2">
+      <template #description>
         <span v-if="!shootEnableStaticTokenKubeconfig">
           Static token kubeconfig is disabled for this cluster
         </span>
@@ -43,13 +43,13 @@ SPDX-License-Identifier: Apache-2.0
           Contains static token credential.
           Not recommended, consider disabling the static token kubeconfig
         </span>
-      </div>
+      </template>
     </g-list-item-content>
     <g-list-item-content v-if="isAdminKubeconfigType">
       Admin Kubeconfig
       <div class="text-body-2">
         <span>
-          Request a kubeconfig valid for {{adminKubeConfigExpiration}}
+          Request a kubeconfig valid for {{ adminKubeConfigExpiration }}
         </span>
       </div>
     </g-list-item-content>
@@ -61,7 +61,10 @@ SPDX-License-Identifier: Apache-2.0
           tooltip="Download Kubeconfig"
           @click.stop="onDownload"
         />
-        <g-copy-btn v-if="!isAdminKubeconfigType" :clipboard-text="kubeconfig" />
+        <g-copy-btn
+          v-if="!isAdminKubeconfigType"
+          :clipboard-text="kubeconfig"
+        />
         <g-action-button
           :icon="kubeconfigVisibilityIcon"
           :tooltip="kubeconfigVisibilityTitle"
@@ -97,6 +100,9 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import download from 'downloadjs'
+import { mapState } from 'pinia'
+
+import { useConfigStore } from '@/store/config'
 
 import GListItem from '@/components/GListItem.vue'
 import GListItemContent from '@/components/GListItemContent.vue'
@@ -106,15 +112,11 @@ import GCodeBlock from '@/components/GCodeBlock.vue'
 import GGardenloginInfo from '@/components/GGardenloginInfo.vue'
 import GStaticTokenKubeconfigConfiguration from '@/components/GStaticTokenKubeconfigConfiguration.vue'
 import GAdminKubeConfigRequest from '@/components/GAdminKubeConfigRequest'
-import { filter } from '@/lodash'
-import { useConfigStore } from '@/store/config'
-import {
-  mapState,
-} from 'pinia'
+
 import { errorDetailsFromError } from '@/utils/error'
-
-
 import { shootItem } from '@/mixins/shootItem'
+
+import { filter } from '@/lodash'
 
 export default {
   components: {
@@ -125,7 +127,7 @@ export default {
     GCodeBlock,
     GGardenloginInfo,
     GStaticTokenKubeconfigConfiguration,
-    GAdminKubeConfigRequest
+    GAdminKubeConfigRequest,
   },
   mixins: [shootItem],
   inject: ['api', 'logger'],
@@ -143,7 +145,7 @@ export default {
     return {
       kubeconfigExpansionPanel: false,
       adminKubeConfigExpiration: '30m', // Default 30 minutes
-      adminKubeconfig: undefined
+      adminKubeconfig: undefined,
     }
   },
   computed: {
@@ -208,8 +210,8 @@ export default {
           namespace: this.shootNamespace,
           name: this.shootName,
           data: {
-            expirationSeconds: this.adminKubeConfigExpirationInSeconds(this.adminKubeConfigExpiration)
-          }
+            expirationSeconds: this.adminKubeConfigExpirationInSeconds(this.adminKubeConfigExpiration),
+          },
         })
 
         this.adminKubeconfig = resp.data
@@ -253,7 +255,7 @@ export default {
       const seconds = parseInt(match[1]) * units[match[2]]
 
       return seconds
-  }
-  }
+    },
+  },
 }
 </script>

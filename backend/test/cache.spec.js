@@ -57,12 +57,17 @@ describe('cache', function () {
   })
 
   it('should dispatch "getShoots" to internal cache', function () {
-    const object = { metadata: { uid: 1 } }
-    const list = [object]
+    const list = [
+      { metadata: { uid: 1, namespace: 'foo' } },
+      { metadata: { uid: 2, namespace: 'bar' } }
+    ]
     const store = new Store()
     store.replace(list)
     internalCache.set('shoots', store)
-    expect(cache.getShoots()).toEqual(list)
+    expect(cache.getShoots('_all')).toEqual(list)
+    expect(cache.getShoots('foo')).toEqual(list.slice(0, 1))
+    expect(cache.getShoots('bar')).toEqual(list.slice(1, 2))
+    expect(() => cache.getShoots()).toThrow(TypeError)
   })
 
   it('should dispatch "getShoot" to internal cache', function () {
@@ -70,6 +75,14 @@ describe('cache', function () {
     store.replace(fixtures.shoots.list())
     internalCache.set('shoots', store)
     expect(cache.getShoot('garden-foo', 'fooShoot')).toBe(store.getByKey(1))
+  })
+
+  it('should dispatch "getShootByUid" to internal cache', function () {
+    const store = new Store()
+    store.replace(fixtures.shoots.list())
+    internalCache.set('shoots', store)
+    const object = store.getByKey(1)
+    expect(cache.getShootByUid(object.metadata.uid)).toBe(object)
   })
 
   it('should dispatch "getControllerRegistrations" to internal cache', function () {

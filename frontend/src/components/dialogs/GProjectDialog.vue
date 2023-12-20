@@ -28,7 +28,7 @@ SPDX-License-Identifier: Apache-2.0
                   color="primary"
                   label="Name"
                   counter="10"
-                  :error-messages="getFieldValidationErrors('projectName')"
+                  :error-messages="getErrorMessages(v$.projectName)"
                   @update:model-value="v$.projectName.$touch()"
                   @blur="v$.projectName.$touch()"
                 />
@@ -43,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
                   variant="underlined"
                   color="primary"
                   :label="costObjectTitle"
-                  :error-messages="getFieldValidationErrors('costObject')"
+                  :error-messages="getErrorMessages(v$.costObject)"
                   @update:model-value="v$.costObject.$touch()"
                   @blur="v$.costObject.$touch()"
                 />
@@ -146,13 +146,15 @@ import GMessage from '@/components/GMessage.vue'
 import GToolbar from '@/components/GToolbar.vue'
 
 import {
-  resourceName,
+  withFieldName,
+  lowerCaseAlphaNumHyphen,
   unique,
   noStartEndHyphen,
   noConsecutiveHyphen,
+  withMessage,
 } from '@/utils/validators'
 import {
-  getValidationErrors,
+  getErrorMessages,
   setInputFocus,
   setDelayedInputFocus,
   isServiceAccountUsername,
@@ -213,13 +215,37 @@ export default {
     }
   },
   validations () {
-    // had to move the code to a computed property so that the getValidationErrors method can access it
-    return this.validators
+    const rules = {}
+    // rules for `owner`
+    const ownerRules = {
+      required,
+    }
+    rules.owner = withFieldName('Project Owner', ownerRules)
+    // rules for `costObject`
+    const validCostObject = value => !this.costObjectRegex
+      ? true
+      : RegExp(this.costObjectRegex).test(value ?? '')
+    const costObjectRules = {
+      validCostObject: withMessage(() => this.costObjectErrorMessage, validCostObject),
+    }
+    rules.costObject = withFieldName(() => `Project ${this.costObjectTitle}`, costObjectRules)
+    // rules for `projectName`
+    const projectNameRules = {
+      required,
+      maxLength: maxLength(10),
+      noConsecutiveHyphen,
+      noStartEndHyphen,
+      lowerCaseAlphaNumHyphen,
+      unique: withMessage('A project with this name already exists', unique('projectNames')),
+    }
+    rules.projectName = withFieldName('Project Name', projectNameRules)
+
+    return rules
   },
   computed: {
     ...mapState(useMemberStore, ['memberList']),
     ...mapState(useAuthnStore, ['username']),
-    ...mapState(useProjectStore, ['projectNamesFromProjectList']),
+    ...mapState(useProjectStore, ['projectNames']),
     ...mapState(useConfigStore, ['costObjectSettings']),
     visible: {
       get () {
@@ -228,9 +254,6 @@ export default {
       set (value) {
         this.$emit('update:modelValue', value)
       },
-    },
-    projectNames () {
-      return this.projectNamesFromProjectList
     },
     projectDetails () {
       return getProjectDetails(this.project)
@@ -278,48 +301,6 @@ export default {
     valid () {
       return !this.v$.$invalid
     },
-    validators () {
-      const validators = {
-        owner: {
-          required,
-        },
-        costObject: {
-          validCostObject: value => {
-            if (!this.costObjectRegex) {
-              return true
-            }
-            return RegExp(this.costObjectRegex).test(value || '') // undefined cannot be evaluated, use empty string as default
-          },
-        },
-      }
-      validators.projectName = {
-        required,
-        maxLength: maxLength(10),
-        noConsecutiveHyphen,
-        noStartEndHyphen, // Order is important for UI hints
-        resourceName,
-        unique: unique('projectNames'),
-      }
-      return validators
-    },
-    validationErrors () {
-      return {
-        projectName: {
-          required: 'Name is required',
-          maxLength: 'Name exceeds the maximum length',
-          resourceName: 'Name must only be lowercase letters, numbers, and hyphens',
-          unique: 'Name is already in use',
-          noConsecutiveHyphen: 'Name must not contain consecutive hyphens',
-          noStartEndHyphen: 'Name must not start or end with a hyphen',
-        },
-        owner: {
-          required: 'Owner is required',
-        },
-        costObject: {
-          validCostObject: this.costObjectErrorMessage,
-        },
-      }
-    },
   },
 
   watch: {
@@ -334,9 +315,6 @@ export default {
       'createProject',
       'updateProject',
     ]),
-    getFieldValidationErrors (field) {
-      return getValidationErrors(this, field)
-    },
     hide () {
       this.visible = false
     },
@@ -401,6 +379,7 @@ export default {
 
       setDelayedInputFocus(this, 'projectName')
     },
+    getErrorMessages,
   },
 
 }

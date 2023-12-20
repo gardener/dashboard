@@ -4,10 +4,14 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { defineStore } from 'pinia'
+import {
+  defineStore,
+  acceptHMRUpdate,
+} from 'pinia'
 import { ref } from 'vue'
 
 import moment from '@/utils/moment'
+import { errorDetailsFromError } from '@/utils/error'
 
 export const useAppStore = defineStore('app', () => {
   const ready = ref(false)
@@ -18,12 +22,12 @@ export const useAppStore = defineStore('app', () => {
   const location = ref(moment.tz.guess())
   const timezone = ref(moment().format('Z'))
   const focusedElementId = ref(null)
-  const splitpaneResize = ref(null)
+  const splitpaneResize = ref(0)
   const fromRoute = ref(null)
   const routerError = ref(null)
 
   function updateSplitpaneResize () {
-    splitpaneResize.value = new Date()
+    splitpaneResize.value = Date.now()
   }
 
   function setAlert (value) {
@@ -38,7 +42,9 @@ export const useAppStore = defineStore('app', () => {
       alert.message = value
     } else if (value) {
       const { message = '', title } = value
-      alert.message = message
+      alert.message = value.response
+        ? errorDetailsFromError(value).detailedMessage
+        : message
       if (title) {
         alert.title = title
       }
@@ -79,3 +85,7 @@ export const useAppStore = defineStore('app', () => {
     setRouterError,
   }
 })
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useAppStore, import.meta.hot))
+}

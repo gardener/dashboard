@@ -236,11 +236,11 @@ export default {
         return 'Unschedule Rotation'
       }
       if (this.maintenance) {
-        return 'Schedule Roatation'
+        return 'Schedule Rotation'
       }
       switch (this.mode) {
         case 'START':
-          return 'Prepare Roatation'
+          return 'Prepare Rotation'
         case 'COMPLETE':
           return 'Complete Rotation'
       }
@@ -384,10 +384,14 @@ export default {
         successMessage: `Preparing credential rotation for ${this.shootName}`,
         heading: 'Do you want to prepare the rotation of all credentials?',
         actions: [
-          ...componentTexts['rotate-kubeconfig-credentials'].actions,
+          ...this.shootEnableStaticTokenKubeconfig
+            ? componentTexts['rotate-kubeconfig-credentials'].actions
+            : [],
           ...componentTexts['rotate-ca-start'].actions,
           ...componentTexts['rotate-observability-credentials'].actions,
-          ...componentTexts['rotate-ssh-keypair'].actions,
+          ...this.hasShootWorkerGroups
+            ? componentTexts['rotate-ssh-keypair'].actions
+            : [],
           ...componentTexts['rotate-etcd-encryption-key-start'].actions,
           ...componentTexts['rotate-serviceaccount-key-start'].actions,
         ],

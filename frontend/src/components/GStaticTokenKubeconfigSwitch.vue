@@ -11,8 +11,9 @@ SPDX-License-Identifier: Apache-2.0
       label="Enable static token kubeconfig (not recommended)"
       color="primary"
       hide-details
+      density="compact"
     />
-    <div class="text-caption mt-1">
+    <div class="text-caption">
       There are more
       <g-external-link
         class="text-caption"
@@ -20,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
       >
         secure alternatives
       </g-external-link>
-      to access the Shoot cluster.
+      to access the cluster.
     </div>
   </div>
 </template>

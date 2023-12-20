@@ -22,6 +22,7 @@ const defaultConfig = {
   apiServerUrl: 'https://kubernetes.external.foo.bar',
   apiServerCaData: toBase64(ca),
   tokenRequestAudiences: ['aud1', 'aud2'],
+  experimentalUseWatchCacheForListShoots: 'no',
   gitHub: {
     apiUrl: 'https://api.github.com',
     org: 'gardener',
@@ -72,9 +73,6 @@ const defaultConfig = {
           namespace: 'garden'
         }
       }
-    },
-    bootstrap: {
-      disabled: true
     }
   },
   unreachableSeeds: {

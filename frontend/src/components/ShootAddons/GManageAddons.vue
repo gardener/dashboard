@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div>
+  <div v-if="!workerless">
     <v-row
       v-for="addonDefinition in addonDefinitionList"
       :key="addonDefinition.name"
@@ -40,12 +40,14 @@ import { mapState } from 'pinia'
 
 import { useAuthzStore } from '@/store/authz'
 import { useProjectStore } from '@/store/project'
+import { useShootStagingStore } from '@/store/shootStaging'
 
 import { shootAddonList } from '@/utils'
 
 import {
   filter,
   cloneDeep,
+  isEmpty,
 } from '@/lodash'
 
 export default {
@@ -68,6 +70,21 @@ export default {
     ...mapState(useAuthzStore, [
       'namespace',
     ]),
+    ...mapState(useShootStagingStore, [
+      'workerless',
+    ]),
+  },
+  watch: {
+    workerless (value) {
+      if (!value && isEmpty(this.addons)) {
+        // If addons missing (navigated to overview tab from yaml), reset to defaults
+        const addonDefinitions = filter(this.addonDefinitionList, 'visible')
+        this.addons = {}
+        for (const { name, enabled } of addonDefinitions) {
+          this.addons[name] = { enabled }
+        }
+      }
+    },
   },
   methods: {
     getAddons () {
@@ -85,7 +102,7 @@ export default {
     textClass (addonDefinition) {
       return !this.createMode && addonDefinition.forbidDisable && this.addons[addonDefinition.name].enabled
         ? 'text-disabled'
-        : 'text-secondary'
+        : 'text-medium-emphasis'
     },
   },
 }
