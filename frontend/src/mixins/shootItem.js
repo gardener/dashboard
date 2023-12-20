@@ -6,7 +6,6 @@
 
 import { mapActions } from 'pinia'
 
-import { useShootStore } from '@/store/shoot'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useProjectStore } from '@/store/project'
 import { useSeedStore } from '@/store/seed'
@@ -124,9 +123,6 @@ export const shootItem = {
     shootWorkerGroups () {
       return get(this.shootSpec, 'provider.workers', [])
     },
-    hasShootWorkerGroups () {
-      return !!this.shootWorkerGroups.length
-    },
     shootAddons () {
       const addons = cloneDeep(get(this.shootSpec, 'addons', {}))
       return addons
@@ -171,7 +167,7 @@ export const shootItem = {
       return this.shootInfo.seedShootIngressDomain || ''
     },
     canLinkToSeed () {
-      return get(this.shootInfo, 'canLinkToSeed', false)
+      return get(this.shootItem, 'info.canLinkToSeed', false)
     },
     isShootLastOperationTypeDelete () {
       return isTypeDelete(this.shootLastOperation)
@@ -266,13 +262,10 @@ export const shootItem = {
       return this.lastMaintenance.state === 'Failed'
     },
     isStaleShoot () {
-      return !this.isShootActive(this.shootMetadata.uid)
+      return this.shootItem?.stale
     },
   },
   methods: {
-    ...mapActions(useShootStore, [
-      'isShootActive',
-    ]),
     ...mapActions(useCloudProfileStore, [
       'selectedAccessRestrictionsForShootByCloudProfileNameAndRegion',
     ]),

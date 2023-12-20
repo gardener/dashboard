@@ -18,11 +18,8 @@ SPDX-License-Identifier: Apache-2.0
       This will scale the worker nodes of your cluster down to zero.<br><br>
       Type <strong>{{ shootName }}</strong> below and confirm to hibernate your cluster.<br><br>
     </template>
-    <template v-else-if="hasShootWorkerGroups">
-      This will wake up your cluster and scale the worker nodes up to their previous count.<br><br>
-    </template>
     <template v-else>
-      This will wake up your cluster.<br><br>
+      This will wake up your cluster and scale the worker nodes up to their previous count.<br><br>
     </template>
   </g-shoot-action-dialog>
   <g-shoot-action-button

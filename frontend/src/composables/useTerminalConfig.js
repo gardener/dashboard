@@ -75,13 +75,15 @@ export const useTerminalConfig = () => {
       ? undefined
       : state.node
 
+    const preferredHost = state.runtime ? 'shoot' : 'seed'
+
     return {
       container: {
         image: state.containerImage,
         privileged: state.privilegedMode,
       },
       node,
-      preferredHost: state.runtime,
+      preferredHost,
       hostPID: state.privilegedMode,
       hostNetwork: state.privilegedMode,
     }

@@ -66,6 +66,31 @@ VOLUME ["/home/node"]
 
 ENTRYPOINT [ "tini", "--", "node"]
 
+############# dashboard-terminal-bootstrapper-builder #############
+FROM builder as dashboard-terminal-bootstrapper-builder
+
+# run lint
+RUN yarn workspace @gardener-dashboard/terminal-bootstrap run lint
+
+# run test --coverage
+RUN yarn workspace @gardener-dashboard/terminal-bootstrap run test --coverage
+
+# bump version
+RUN yarn workspace @gardener-dashboard/terminal-bootstrap version "$(cat VERSION)"
+
+# build application
+RUN yarn workspace @gardener-dashboard/terminal-bootstrap prod-install --pack /app/dist \
+    && find /app/dist/.yarn -mindepth 1 -name cache -prune -o -exec rm -rf {} + \
+    && chown -R 1000:1000 /app/dist
+
+############# bootstrapper #############
+FROM node-scratch as dashboard-terminal-bootstrapper
+
+COPY --from=dashboard-terminal-bootstrapper-builder /app/dist .
+
+ENTRYPOINT [ "tini", "--", "node", "--require=/app/.pnp.cjs", "--loader=/app/.pnp.loader.mjs"]
+CMD ["main.js"]
+
 ############# dashboard-builder #############
 FROM builder as dashboard-builder
 

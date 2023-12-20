@@ -5,117 +5,99 @@ SPDX-License-Identifier: Apache-2.0
 -->
 <template>
   <component
-    :is="component"
+    :is="componentName"
     v-bind="componentProperties"
   />
 </template>
 
 <script>
-import { mapState } from 'pinia'
+import {
+  ref,
+  computed,
+  watch,
+  onMounted,
+} from 'vue'
+import { useRoute } from 'vue-router'
 
 import { useAuthzStore } from '@/store/authz'
 import { useProjectStore } from '@/store/project'
 
 import GProjectError from '@/views/GProjectError.vue'
 
-import { isEqual } from '@/lodash'
-
-function isLoadRequired (route, to) {
-  return route.name !== to.name || !isEqual(route.params, to.params)
-}
-
 export default {
   components: {
     GProjectError,
   },
-  beforeRouteEnter (to, from, next) {
-    next(vm => {
-      if (isLoadRequired(vm.$route, to)) {
-        vm.load(to)
+  setup () {
+    const projectStore = useProjectStore()
+    const authzStore = useAuthzStore()
+    const route = useRoute()
+
+    const componentName = ref('router-view')
+    const error = ref(null)
+    const fallbackRoute = ref(null)
+
+    const componentProperties = computed(() => {
+      if (componentName.value === 'g-project-error') {
+        const {
+          code = 500,
+          reason = 'Oops, something went wrong',
+          message = 'An unexpected error occurred. Please try again later',
+        } = error.value
+        return {
+          code,
+          text: reason,
+          message,
+          fallbackRoute: fallbackRoute.value,
+        }
       }
+      return {}
     })
-  },
-  beforeRouteUpdate (to, from) {
-    if (isLoadRequired(this.$route, to)) {
-      this.load(to)
-    }
-  },
-  data () {
-    return {
-      error: null,
-      fallbackRoute: null,
-    }
-  },
-  computed: {
-    ...mapState(useAuthzStore, [
-      'namespace',
-      'canGetSecrets',
-    ]),
-    ...mapState(useProjectStore, [
-      'namespaces',
-    ]),
-    component () {
-      if (this.error) {
-        return 'g-project-error'
-      }
-      return 'router-view'
-    },
-    componentProperties () {
-      switch (this.component) {
-        case 'g-project-error': {
-          const {
-            code = 500,
-            reason = 'Oops, something went wrong',
-            message = 'An unexpected error occurred. Please try again later',
-          } = this.error ?? {}
-          return {
-            code,
-            text: reason,
-            message,
-            fallbackRoute: this.fallbackRoute,
+
+    function load (namespace) {
+      error.value = null
+      fallbackRoute.value = null
+      componentName.value = 'router-view'
+      try {
+        if (!projectStore.namespaces.includes(namespace) && namespace !== '_all') {
+          fallbackRoute.value = {
+            name: 'Home',
           }
+          throw Object.assign(new Error('The project you are looking for doesn\'t exist or you are not authorized to view this project!'), {
+            code: 404,
+            reason: 'Project not found',
+          })
         }
-        default: {
-          return {}
+        if (['Secrets', 'Secret'].includes(route.name) && !authzStore.canGetSecrets) {
+          fallbackRoute.value = {
+            name: 'ShootList',
+            params: {
+              namespace,
+            },
+          }
+          throw Object.assign(new Error('You do not have the necessary permissions to list secrets!'), {
+            code: 403,
+            reason: 'Forbidden',
+          })
         }
+      } catch (err) {
+        error.value = err
+        componentName.value = 'g-project-error'
       }
-    },
-  },
-  mounted () {
-    this.load(this.$route)
-  },
-  methods: {
-    load (route) {
-      this.error = null
-      this.fallbackRoute = null
-      const routeName = route.name
-      const routeParams = route.params
-      if (this.namespace !== routeParams.namespace) {
-        this.error = new Error('An unexpected error occurred')
-        this.fallbackRoute = {
-          name: 'Home',
-        }
-      } else if (!this.namespaces.includes(this.namespace) && this.namespace !== '_all') {
-        this.error = Object.assign(new Error('The project you are looking for doesn\'t exist or you are not authorized to view this project!'), {
-          code: 404,
-          reason: 'Project not found',
-        })
-        this.fallbackRoute = {
-          name: 'Home',
-        }
-      } else if (['Secrets', 'Secret'].includes(routeName) && !this.canGetSecrets) {
-        this.error = Object.assign(new Error('You do not have the necessary permissions to list secrets!'), {
-          code: 403,
-          reason: 'Forbidden',
-        })
-        this.fallbackRoute = {
-          name: 'ShootList',
-          params: {
-            namespace: this.namespace,
-          },
-        }
-      }
-    },
+    }
+
+    watch(() => route.params.namespace, value => {
+      load(value)
+    })
+
+    onMounted(() => {
+      load(route.params.namespace)
+    })
+
+    return {
+      componentName,
+      componentProperties,
+    }
   },
 }
 </script>

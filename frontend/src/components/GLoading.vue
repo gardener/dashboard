@@ -6,7 +6,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-overlay
     :model-value="loading"
-    :close-on-back="false"
     class="align-center justify-center"
   >
     <v-progress-circular

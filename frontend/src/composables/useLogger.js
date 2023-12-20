@@ -13,8 +13,6 @@ import {
   useLocalStorage,
 } from '@vueuse/core'
 
-import { StorageSerializers } from '@/utils/storageSerializers'
-
 const LEVELS = {
   debug: 1,
   info: 2,
@@ -38,13 +36,8 @@ function print (key, ...args) {
 }
 
 export const useLogger = createGlobalState(() => {
-  const initialLogLevel = 'debug'
-  const logLevels = Object.keys(LEVELS)
-  const logLevelSerializer = StorageSerializers.enum(logLevels, () => logLevels.value, initialLogLevel)
-  const logLevel = useLocalStorage('global/log-level', initialLogLevel, {
-    serializer: logLevelSerializer,
-    writeDefaults: false,
-  })
+  const logLevels = markRaw(Object.keys(LEVELS))
+  const logLevel = useLocalStorage('global/log-level', 'debug')
 
   const level = computed(() => LEVELS[logLevel.value])
 
@@ -79,7 +72,7 @@ export const useLogger = createGlobalState(() => {
   }
 
   return {
-    logLevels: markRaw(logLevels),
+    logLevels,
     logLevel,
     debug,
     log,

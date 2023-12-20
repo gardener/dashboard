@@ -105,15 +105,15 @@ describe('watches', function () {
         expect(room.emit.mock.calls).toEqual([
           [
             'shoots',
-            { type: 'ADDED', uid: foobar.metadata.uid }
+            { type: 'ADDED', object: foobar }
           ],
           [
             'shoots',
-            { type: 'MODIFIED', uid: foobar.metadata.uid }
+            { type: 'MODIFIED', object: foobar }
           ],
           [
             'shoots',
-            { type: 'DELETED', uid: foobar.metadata.uid }
+            { type: 'DELETED', object: foobar }
           ]
         ])
       }
@@ -141,23 +141,23 @@ describe('watches', function () {
       expect(fooIssuesRoom.emit.mock.calls).toEqual([
         [
           'shoots',
-          { type: 'ADDED', uid: foobarUnhealthy.metadata.uid }
+          { type: 'ADDED', object: foobarUnhealthy }
         ],
         [
           'shoots',
-          { type: 'DELETED', uid: foobar.metadata.uid }
+          { type: 'DELETED', object: foobar }
         ],
         [
           'shoots',
-          { type: 'ADDED', uid: foobazUnhealthy.metadata.uid }
+          { type: 'ADDED', object: foobazUnhealthy }
         ],
         [
           'shoots',
-          { type: 'MODIFIED', uid: foobazUnhealthy.metadata.uid }
+          { type: 'MODIFIED', object: foobazUnhealthy }
         ],
         [
           'shoots',
-          { type: 'DELETED', uid: foobazUnhealthy.metadata.uid }
+          { type: 'DELETED', object: foobazUnhealthy }
         ]
       ])
     })

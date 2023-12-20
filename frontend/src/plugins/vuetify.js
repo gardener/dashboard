@@ -13,6 +13,7 @@ import 'vuetify/styles'
 
 // Composables
 import { createVuetify } from 'vuetify'
+import * as labs from 'vuetify/labs/components'
 import colors from 'vuetify/lib/util/colors'
 
 const gardenerGreen = '#0b8062'
@@ -80,5 +81,8 @@ export default createVuetify({
     defaultTheme: 'light',
     themes: { light, dark },
     variations,
+  },
+  components: {
+    ...labs,
   },
 })

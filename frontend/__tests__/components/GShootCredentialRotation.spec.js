@@ -49,11 +49,6 @@ describe('components', () => {
           kubernetes: {
             enableStaticTokenKubeconfig: true,
           },
-          provider: {
-            workers: [
-              {},
-            ],
-          },
         },
         status: {
           credentials: {
@@ -100,13 +95,12 @@ describe('components', () => {
       it('should hide not available tiles', () => {
         shootItem.spec.kubernetes.enableStaticTokenKubeconfig = false
         shootItem.spec.purpose = 'testing'
-        delete shootItem.spec.provider.workers
 
         const wrapper = mountShootCredentialRotationCard({
           shootItem,
         })
         const credentialWrappers = wrapper.findAllComponents(GCredentialTile)
-        expect(credentialWrappers.length).toBe(4)
+        expect(credentialWrappers.length).toBe(5)
       })
     })
 

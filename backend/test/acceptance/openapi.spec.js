@@ -37,12 +37,10 @@ describe('openapi', function () {
 
     mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
     mockRequest.mockResolvedValueOnce({
-      components: {
-        schemas: {
-          ...shootDefinitions,
-          foo: {
-            type: 'object'
-          }
+      definitions: {
+        ...shootDefinitions,
+        foo: {
+          type: 'object'
         }
       }
     })
@@ -68,7 +66,7 @@ describe('openapi', function () {
         spec: expect.objectContaining({
           nonResourceAttributes: {
             verb: 'get',
-            path: '/openapi/v3'
+            path: '/openapi/v2'
           }
         })
       }
@@ -76,7 +74,7 @@ describe('openapi', function () {
     expect(mockRequest.mock.calls[1]).toEqual([{
       ...pick(fixtures.kube, [':scheme', ':authority', 'authorization']),
       ':method': 'get',
-      ':path': '/openapi/v3/apis/core.gardener.cloud/v1beta1'
+      ':path': '/openapi/v2'
     }])
 
     expect(dereferenceStub).toBeCalledTimes(1)

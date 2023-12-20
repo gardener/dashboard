@@ -78,12 +78,12 @@ describe('services', function () {
 
     beforeEach(function () {
       jest.spyOn(cache, 'getProjects').mockReturnValue(projectList)
-      jest.spyOn(authorization, 'canListProjects').mockImplementation(user => Promise.resolve(user.id === 'projects-viewer@bar.com'))
+      jest.spyOn(authorization, 'isAdmin').mockImplementation(user => Promise.resolve(user.id === 'admin@bar.com'))
     })
 
     describe('#list', function () {
-      it('should return all projects if user can list all projects, including not ready projects', async function () {
-        const userProjects = await projects.list({ user: createUser('projects-viewer@bar.com') })
+      it('should return all projects if user is admin, including not ready projects', async function () {
+        const userProjects = await projects.list({ user: createUser('admin@bar.com') })
         expect(userProjects).toHaveLength(2)
       })
 

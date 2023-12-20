@@ -61,7 +61,7 @@ describe('components', () => {
     it('maximum shoot name length should depend on project name', () => {
       const userInterActionBus = new EventEmitter()
       const wrapper = mountNewShootDetails({ userInterActionBus })
-      expect(wrapper.find('.v-row:nth-of-type(4) label').text()).toBe('title')
+      expect(wrapper.find('.v-row:nth-of-type(3) label').text()).toBe('title')
       expect(wrapper.vm.maxShootNameLength).toBe(18)
     })
   })

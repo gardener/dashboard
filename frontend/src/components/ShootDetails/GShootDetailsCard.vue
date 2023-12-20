@@ -69,14 +69,19 @@ SPDX-License-Identifier: Apache-2.0
           </v-icon>
         </template>
         <g-list-item-content label="Worker Groups">
-          <g-worker-groups
-            :shoot-item="shootItem"
-            class="flex-wrap"
-          />
+          <div class="d-flex flex-wrap align-center">
+            <g-worker-group
+              v-for="workerGroup in shootWorkerGroups"
+              :key="workerGroup.name"
+              v-model="workerGroupTab"
+              :worker-group="workerGroup"
+              :cloud-profile-name="shootCloudProfileName"
+              :shoot-item="shootItem"
+              class="mr-2"
+            />
+          </div>
         </g-list-item-content>
-        <template
-          #append
-        >
+        <template #append>
           <g-shoot-messages
             v-if="!isShootMarkedForDeletion"
             :shoot-item="shootItem"
@@ -173,40 +178,38 @@ SPDX-License-Identifier: Apache-2.0
           </template>
         </g-list-item>
       </template>
-      <template v-if="hasShootWorkerGroups">
-        <v-divider inset />
-        <g-list-item>
-          <template #prepend>
-            <v-icon color="primary">
-              mdi-puzzle
-            </v-icon>
+      <v-divider inset />
+      <g-list-item>
+        <template #prepend>
+          <v-icon color="primary">
+            mdi-puzzle
+          </v-icon>
+        </template>
+        <g-list-item-content>
+          <template #label>
+            Add-ons <span class="text-caption">(not actively monitored and provided on a best-effort basis only)</span>
           </template>
-          <g-list-item-content>
-            <template #label>
-              Add-ons <span class="text-caption">(not actively monitored and provided on a best-effort basis only)</span>
-            </template>
-            <div
-              v-if="shootAddonNames.length"
-              class="d-flex flex-wrap align-center"
+          <div
+            v-if="shootAddonNames.length"
+            class="d-flex flex-wrap align-center"
+          >
+            <v-chip
+              v-for="(name, index) in shootAddonNames"
+              :key="index"
+              size="small"
+              variant="outlined"
+              color="primary"
+              class="mr-2"
             >
-              <v-chip
-                v-for="(name, index) in shootAddonNames"
-                :key="index"
-                size="small"
-                variant="outlined"
-                color="primary"
-                class="mr-2"
-              >
-                {{ name }}
-              </v-chip>
-            </div>
-            <span v-else>No addons configured</span>
-          </g-list-item-content>
-          <template #append>
-            <g-addon-configuration :shoot-item="shootItem" />
-          </template>
-        </g-list-item>
-      </template>
+              {{ name }}
+            </v-chip>
+          </div>
+          <span v-else>No addons configured</span>
+        </g-list-item-content>
+        <template #append>
+          <g-addon-configuration :shoot-item="shootItem" />
+        </template>
+      </g-list-item>
     </g-list>
   </v-card>
 </template>
@@ -220,7 +223,7 @@ import { useAuthzStore } from '@/store/authz'
 import GAccessRestrictionChips from '@/components/ShootAccessRestrictions/GAccessRestrictionChips'
 import GAccountAvatar from '@/components/GAccountAvatar'
 import GTimeString from '@/components/GTimeString'
-import GWorkerGroups from '@/components/ShootWorkers/GWorkerGroups'
+import GWorkerGroup from '@/components/ShootWorkers/GWorkerGroup'
 import GWorkerConfiguration from '@/components/ShootWorkers/GWorkerConfiguration'
 import GAccessRestrictionsConfiguration from '@/components/ShootAccessRestrictions/GAccessRestrictionsConfiguration'
 import GPurposeConfiguration from '@/components/GPurposeConfiguration'
@@ -247,7 +250,7 @@ export default {
     GAccessRestrictionChips,
     GAccountAvatar,
     GTimeString,
-    GWorkerGroups,
+    GWorkerGroup,
     GWorkerConfiguration,
     GAccessRestrictionsConfiguration,
     GPurposeConfiguration,
@@ -257,6 +260,11 @@ export default {
     GCopyBtn,
   },
   mixins: [shootItem],
+  data () {
+    return {
+      workerGroupTab: 'overview',
+    }
+  },
   computed: {
     ...mapState(useConfigStore, [
       'sla',

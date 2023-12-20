@@ -7,11 +7,11 @@
 import { mount } from '@vue/test-utils'
 import { setActivePinia } from 'pinia'
 import { createTestingPinia } from '@pinia/testing'
+import { useLocalStorage } from '@vueuse/core'
 
 import { useAppStore } from '@/store/app'
 import { useAuthnStore } from '@/store/authn'
 import { useLoginStore } from '@/store/login'
-import { useLocalStorageStore } from '@/store/localStorage'
 
 import GLogin from '@/layouts/GLogin.vue'
 
@@ -19,16 +19,14 @@ const { createPlugins } = global.fixtures.helper
 
 describe('components', () => {
   describe('g-login', () => {
-    const noop = () => {}
-
     let pinia
     let appStore
     let authnStore
     let loginStore // eslint-disable-line no-unused-vars
-    let localStorageStore
     let mockRoute
     let mockRouter
     let mockNext
+    let autoLogin
 
     function mountLogin () {
       return mount(GLogin, {
@@ -49,15 +47,8 @@ describe('components', () => {
       fetch.mockResponse(JSON.stringify({
         loginTypes: ['oidc', 'token'],
         landingPageUrl: 'https://gardener.cloud/',
-        themes: {
-          light: {
-            primary: '#2196F3',
-          },
-          dark: {
-            primary: '#F39621',
-          },
-        },
       }))
+      autoLogin = useLocalStorage('global/auto-login', 'disabled')
       mockRoute = {
         query: {
           redirectPath: '/namespace/garden/shoots',
@@ -68,7 +59,6 @@ describe('components', () => {
         replace: vi.fn(),
       }
       pinia = createTestingPinia({
-        stubActions: false,
         initialState: {
           authn: {
             user: {
@@ -81,14 +71,12 @@ describe('components', () => {
       setActivePinia(pinia)
       appStore = useAppStore()
       authnStore = useAuthnStore()
-      authnStore.signinWithOidc.mockImplementation(noop)
       loginStore = useLoginStore()
-      localStorageStore = useLocalStorageStore()
     })
 
     it('should render the login page', () => {
       const wrapper = mountLogin()
-      expect(wrapper.find('div.text-h5.text-primary').text()).toBe('Universal Kubernetes at Scale')
+      expect(wrapper.find('div.title-text').text()).toBe('Universal Kubernetes at Scale')
     })
 
     describe('#beforeRouteEnter', () => {
@@ -145,7 +133,7 @@ describe('components', () => {
       })
 
       it('should automatically login', async () => {
-        localStorageStore.autoLogin = true
+        autoLogin.value = 'enabled'
         const wrapper = mountLogin()
         const to = {
           query: {

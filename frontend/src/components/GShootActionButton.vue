@@ -13,20 +13,18 @@ SPDX-License-Identifier: Apache-2.0
     class="g-action-button"
   >
     <template #activator="{ props }">
-      <div v-bind="props">
-        <v-btn
-          v-bind="{ onClick }"
-          variant="text"
-          :density="isTextBtn ? 'default' : 'comfortable'"
-          :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose || disabled"
-          :loading="loading"
-          :[iconProp]="icon"
-          :color="color"
-          :text="text"
-          :class="{ 'text-none font-weight-regular justify-start': isTextBtn }"
-          :width="isTextBtn ? '100%' : undefined"
-        />
-      </div>
+      <v-btn
+        v-bind="mergeProps(props, { onClick })"
+        variant="text"
+        :density="isTextBtn ? 'default' : 'comfortable'"
+        :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose || disabled"
+        :loading="loading"
+        :[iconProp]="icon"
+        :color="color"
+        :text="text"
+        :class="{ 'text-none font-weight-regular justify-start': isTextBtn }"
+        :width="isTextBtn ? '100%' : undefined"
+      />
     </template>
   </v-tooltip>
 </template>
@@ -36,6 +34,7 @@ import { shootItem } from '@/mixins/shootItem'
 
 export default {
   mixins: [shootItem],
+  inject: ['mergeProps'],
   props: {
     disabled: {
       type: Boolean,

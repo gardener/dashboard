@@ -5,24 +5,28 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <span :class="contentClass">
-    {{ relDateTimeString }}
-    <v-tooltip
-      v-if="!noTooltip"
-      activator="parent"
-      location="top"
-    >
-      {{ dateTimeString }}
-    </v-tooltip>
-  </span>
+  <v-tooltip
+    location="top"
+    :disabled="noTooltip"
+  >
+    <template #activator="{ props: activatorProps }">
+      <span
+        v-bind="activatorProps"
+        :class="contentClass"
+      >{{ relDateTimeString }}</span>
+    </template>
+    {{ dateTimeString }}
+  </v-tooltip>
 </template>
 
-<script>
+<script setup>
 import {
   ref,
-  toValue,
+  computed,
+  onMounted,
+  onUnmounted,
+  watch,
 } from 'vue'
-import { useNow } from '@vueuse/core'
 
 import {
   getTimeStringFrom,
@@ -32,148 +36,154 @@ import {
   isValidTerminationDate,
 } from '@/utils'
 
-const clockSecondsAccuracy = useNow({
-  interval: 1000,
-  controls: true,
-})
-const clockHalfAMinuteAccuracy = useNow({
-  interval: 30 * 1000,
-  controls: true,
-})
-const clockHalfAnHourAccuracy = useNow({
-  interval: 30 * 60 * 1000,
-  controls: true,
-})
+class Clock extends EventTarget {
+  constructor (updateInterval) {
+    super()
+    this.interval = updateInterval
+    this.intervalId = undefined
+    this.run()
+  }
 
-export default {
-  props: {
-    dateTime: {
-      type: [String, Number, Date],
-    },
-    mode: {
-      type: String,
-    },
-    currentString: {
-      type: String, // access the datetime string from outside of the component
-    },
-    withoutPrefixOrSuffix: {
-      type: Boolean,
-      default: false,
-    },
-    noTooltip: {
-      type: Boolean,
-      default: false,
-    },
-    dateTooltip: {
-      type: Boolean,
-      default: false,
-    },
-    contentClass: {
-      type: String,
-      default: '',
-    },
-    expiredText: {
-      type: String,
-      default: 'soon',
-    },
-  },
-  emits: [
-    'update:currentString',
-  ],
-  setup () {
-    const currentClockTime = ref(null)
-    const nextClockTime = ref(null)
-
-    function setClock (currentClock, nextClock) {
-      currentClockTime.value = currentClock?.now ?? null
-      nextClockTime.value = nextClock?.now ?? null
+  run () {
+    if (!this.intervalId) {
+      this.intervalId = setInterval(() => {
+        const event = new Event('tick')
+        event.date = new Date()
+        this.dispatchEvent(event)
+      }, this.interval)
     }
-
-    return {
-      currentClockTime,
-      nextClockTime,
-      setClock,
-    }
-  },
-  data () {
-    return {
-      negativeRefDate: true,
-    }
-  },
-  computed: {
-    nextClockTimeValue () {
-      return toValue(this.nextClockTime)
-    },
-    relDateTimeString () {
-      if (this.mode === 'future' && !isValidTerminationDate(this.dateTime)) {
-        return this.expiredText
-      }
-
-      let relDateTimeString = ''
-      const currentTime = toValue(this.currentClockTime)
-      if (this.dateTime && currentTime) {
-        const time = new Date(this.dateTime)
-        if (this.negativeRefDate) {
-          relDateTimeString = getTimeStringFrom(time, Math.max(time, currentTime), this.withoutPrefixOrSuffix)
-        } else {
-          relDateTimeString = getTimeStringTo(Math.min(time, currentTime), time, this.withoutPrefixOrSuffix)
-        }
-      }
-
-      this.$emit('update:currentString', relDateTimeString)
-      return relDateTimeString
-    },
-    dateTimeString () {
-      if (this.dateTooltip) {
-        return getDateFormatted(this.dateTime)
-      }
-      return getTimestampFormatted(this.dateTime)
-    },
-  },
-  watch: {
-    dateTime (value) {
-      if (value) {
-        this.updateClockInstance(value)
-      }
-    },
-    nextClockTimeValue (value) {
-      if (value) {
-        this.updateClockInstance(this.dateTime)
-      }
-    },
-  },
-  mounted () {
-    if (this.dateTime) {
-      this.updateClockInstance(this.dateTime)
-    }
-  },
-  methods: {
-    updateClockInstance (dateTimeValue) {
-      const currentDate = new Date().getTime()
-      const refDate = new Date(dateTimeValue).getTime()
-      let diffInMilliseconds
-      if (this.mode === 'past') {
-        this.negativeRefDate = true
-      } else if (this.mode === 'future') {
-        this.negativeRefDate = false
-      } else if (currentDate > refDate) {
-        this.negativeRefDate = true
-      } else {
-        this.negativeRefDate = false
-      }
-      if (this.negativeRefDate) {
-        diffInMilliseconds = currentDate - refDate
-      } else {
-        diffInMilliseconds = refDate - currentDate
-      }
-      if (diffInMilliseconds <= 1000 * 60) {
-        this.setClock(clockSecondsAccuracy, clockHalfAMinuteAccuracy)
-      } else if (diffInMilliseconds <= 1000 * 60 * 60) {
-        this.setClock(clockHalfAMinuteAccuracy, clockHalfAnHourAccuracy)
-      } else {
-        this.setClock(clockHalfAnHourAccuracy, null)
-      }
-    },
-  },
+  }
 }
+
+const clockSecondsAccuracy = new Clock(1000)
+const clockHalfAMinuteAccuracy = new Clock(1000 * 30)
+const clockHalfAnHourAccuracy = new Clock(1000 * 60 * 30)
+
+const props = defineProps({
+  dateTime: {
+    type: String,
+  },
+  mode: {
+    type: String,
+  },
+  currentString: {
+    type: String, // access the datetime string from outside of the component
+  },
+  withoutPrefixOrSuffix: {
+    type: Boolean,
+    default: false,
+  },
+  noTooltip: {
+    type: Boolean,
+    default: false,
+  },
+  dateTooltip: {
+    type: Boolean,
+    default: false,
+  },
+  contentClass: {
+    type: String,
+    default: '',
+  },
+  expiredText: {
+    type: String,
+    default: 'soon',
+  },
+})
+
+const clocks = {}
+const currentDate = ref(new Date())
+const negativeRefDate = ref(true)
+
+const emit = defineEmits(['update:currentString'])
+
+const relDateTimeString = computed(() => {
+  if (props.mode === 'future' && !isValidTerminationDate(props.dateTime)) {
+    return props.expiredText
+  }
+  let relDateTimeString = ''
+  if (props.dateTime && currentDate.value) {
+    if (negativeRefDate.value) {
+      relDateTimeString = getTimeStringFrom(
+        new Date(props.dateTime),
+        new Date(Math.max(new Date(props.dateTime), currentDate.value)),
+        props.withoutPrefixOrSuffix,
+      )
+    } else {
+      relDateTimeString = getTimeStringTo(
+        new Date(Math.min(new Date(props.dateTime), currentDate.value)),
+        new Date(props.dateTime),
+        props.withoutPrefixOrSuffix,
+      )
+    }
+  }
+
+  emit('update:currentString', relDateTimeString)
+  return relDateTimeString
+})
+
+const dateTimeString = computed(() => {
+  if (props.dateTooltip) {
+    return getDateFormatted(props.dateTime)
+  }
+  return getTimestampFormatted(props.dateTime)
+})
+
+function updateClockInstance (dateTimeValue) {
+  const currentDate = Date.now()
+  const refDate = new Date(dateTimeValue).getTime()
+
+  const diffInMilliseconds = Math.abs(currentDate - refDate)
+
+  if (props.mode === 'past') {
+    negativeRefDate.value = true
+  } else if (props.mode === 'future') {
+    negativeRefDate.value = false
+  } else if (currentDate > refDate) {
+    negativeRefDate.value = true
+  } else {
+    negativeRefDate.value = false
+  }
+
+  if (diffInMilliseconds <= 60 * 1000) {
+    setClock(clockSecondsAccuracy, clockHalfAMinuteAccuracy)
+  } else if (diffInMilliseconds <= 60 * 60 * 1000) {
+    setClock(clockHalfAMinuteAccuracy, clockHalfAnHourAccuracy)
+  } else {
+    setClock(clockHalfAnHourAccuracy, null)
+  }
+}
+
+function setClock (currentClock, nextClock) {
+  clocks.current?.removeEventListener('tick', handleTick)
+  clocks.next?.removeEventListener('tick', handleNextTick)
+  clocks.current = currentClock
+  clocks.next = nextClock
+  clocks.current?.addEventListener('tick', handleTick)
+  clocks.next?.addEventListener('tick', handleNextTick)
+}
+
+function handleTick ({ date }) {
+  currentDate.value = date
+}
+
+function handleNextTick () {
+  updateClockInstance(props.dateTime)
+}
+
+onMounted(() => {
+  if (props.dateTime) {
+    updateClockInstance(props.dateTime)
+  }
+})
+
+onUnmounted(() => {
+  setClock(null, null) // removes event listeners
+})
+
+watch(() => props.dateTime, value => {
+  if (value) {
+    updateClockInstance(value)
+  }
+})
 </script>

@@ -21,7 +21,7 @@ const {
 } = require('../lib/services/terminals')
 
 const {
-  getGardenTerminalHostClusterCredentials,
+  getGardenTerminalHostClusterSecretRef,
   getGardenHostClusterKubeApiServer
 } = require('../lib/services/terminals/utils')
 
@@ -101,6 +101,11 @@ describe('services', function () {
     }
 
     function createTerminalConfig (terminal = {}) {
+      const apiServerIngress = {
+        annotations: {
+          foo: 'bar'
+        }
+      }
       return _.merge({
         containerImage: 'image:1.2.3',
         gardenTerminalHost: {
@@ -112,6 +117,16 @@ describe('services', function () {
               name: 'operatorServiceAccountName',
               namespace: 'garden'
             }
+          }
+        },
+        bootstrap: {
+          disabled: true,
+          seedDisabled: true,
+          shootDisabled: true,
+          gardenTerminalHostDisabled: true,
+          apiServerIngress,
+          gardenTerminalHost: {
+            apiServerIngress
           }
         }
       }, terminal)
@@ -184,7 +199,7 @@ describe('services', function () {
         })
       })
 
-      describe('#getGardenTerminalHostClusterCredentials', function () {
+      describe('#getGardenTerminalHostClusterSecretRef', function () {
         it('should return the secret reference by secretRef', async function () {
           const gardenTerminalHost = {
             secretRef: {
@@ -193,7 +208,7 @@ describe('services', function () {
           }
           terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost }))
           const listSecretsSpy = jest.spyOn(client.core.secrets, 'list')
-          const { secretRef } = await getGardenTerminalHostClusterCredentials(client)
+          const secretRef = await getGardenTerminalHostClusterSecretRef(client)
           expect(listSecretsSpy).toBeCalledTimes(1)
           expect(listSecretsSpy.mock.calls[0]).toEqual([
             gardenTerminalHost.secretRef.namespace,
@@ -207,29 +222,15 @@ describe('services', function () {
           })
         })
 
-        describe('get credentials by seedRef', function () {
-          it('should return the secret reference for non-managed Seeds', async function () {
-            const gardenTerminalHost = {
-              seedRef: soilName
-            }
-            terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost }))
-            const { secretRef } = await getGardenTerminalHostClusterCredentials(client)
-            expect(secretRef).toEqual({
-              namespace: 'garden',
-              name: `seedsecret-${gardenTerminalHost.seedRef}`
-            })
-          })
-
-          it('should return the shoot reference for managed Seeds', async function () {
-            const gardenTerminalHost = {
-              seedRef: seedName
-            }
-            terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost }))
-            const { shootRef } = await getGardenTerminalHostClusterCredentials(client)
-            expect(shootRef).toEqual({
-              namespace: 'garden',
-              name: seedName
-            })
+        it('should return the secret reference by seedRef', async function () {
+          const gardenTerminalHost = {
+            seedRef: seedName
+          }
+          terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost }))
+          const secretRef = await getGardenTerminalHostClusterSecretRef(client)
+          expect(secretRef).toEqual({
+            namespace: 'garden',
+            name: `seedsecret-${gardenTerminalHost.seedRef}`
           })
         })
 
@@ -241,7 +242,7 @@ describe('services', function () {
             }
           }
           terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost }))
-          const { secretRef } = await getGardenTerminalHostClusterCredentials(client)
+          const secretRef = await getGardenTerminalHostClusterSecretRef(client)
           expect(secretRef).toEqual({
             namespace: gardenTerminalHost.shootRef.namespace,
             name: `${gardenTerminalHost.shootRef.name}.kubeconfig`
@@ -253,7 +254,7 @@ describe('services', function () {
             noRef: 'none'
           }
           terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost }))
-          await expect(getGardenTerminalHostClusterCredentials(client)).rejects.toThrow(AssertionError)
+          await expect(getGardenTerminalHostClusterSecretRef(client)).rejects.toThrow(AssertionError)
         })
 
         it('should throw a no seed error', async function () {
@@ -261,7 +262,7 @@ describe('services', function () {
             seedRef: 'none'
           }
           terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost }))
-          await expect(getGardenTerminalHostClusterCredentials(client)).rejects.toThrow(`There is no seed with name ${gardenTerminalHost.seedRef}`)
+          await expect(getGardenTerminalHostClusterSecretRef(client)).rejects.toThrow(`There is no seed with name ${gardenTerminalHost.seedRef}`)
         })
       })
 
@@ -402,10 +403,9 @@ describe('services', function () {
           const gardenTerminalHost = {
             seedRef: seedName
           }
-          const project = 'garden'
           terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost }))
           const kubeApiServer = await getGardenHostClusterKubeApiServer(client)
-          const expectedKubeApiServer = `api-${project}--${gardenTerminalHost.seedRef}.${ingressDomain}`
+          const expectedKubeApiServer = fixtures.kube.getApiServer('garden', gardenTerminalHost.seedRef, ingressDomain)
           expect(kubeApiServer).toBe(expectedKubeApiServer)
         })
 
@@ -415,21 +415,20 @@ describe('services', function () {
           }
           terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost }))
           const kubeApiServer = await getGardenHostClusterKubeApiServer(client)
-          const expectedKubeApiServer = `api-seed.${ingressDomain}`
+          const expectedKubeApiServer = `k-g.${ingressDomain}`
           expect(kubeApiServer).toBe(expectedKubeApiServer)
         })
 
         it('should return the secret reference by shootRef', async function () {
           const gardenTerminalHost = {
             shootRef: {
-              namespace: 'garden',
-              name: 'infra1-seed'
+              namespace: 'shootNamespace',
+              name: 'shootName'
             }
           }
-          const project = 'garden'
           terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost }))
           const kubeApiServer = await getGardenHostClusterKubeApiServer(client)
-          const expectedKubeApiServer = `api-${project}--${gardenTerminalHost.shootRef.name}.${ingressDomain}`
+          const expectedKubeApiServer = fixtures.kube.getApiServer(gardenTerminalHost.shootRef.namespace, gardenTerminalHost.shootRef.name, ingressDomain)
           expect(kubeApiServer).toBe(expectedKubeApiServer)
         })
 

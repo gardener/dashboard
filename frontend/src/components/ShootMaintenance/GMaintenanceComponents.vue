@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
       {{ title }}
     </div>
     <div
-      v-if="!hideOsUpdates && (selectable || osUpdates)"
+      v-if="selectable || osUpdates"
       class="d-flex mt-4"
     >
       <div class="d-flex align-center justify-center action-select">
@@ -106,10 +106,6 @@ export default {
     selectable: {
       type: Boolean,
       default: true,
-    },
-    hideOsUpdates: {
-      type: Boolean,
-      default: false,
     },
   },
   emits: [

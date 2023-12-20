@@ -8,11 +8,8 @@ SPDX-License-Identifier: Apache-2.0
   <v-menu
     v-model="columnSelectionMenu"
     location="left"
-    offset="5"
-    :close-on-content-click="false"
-    absolute
-    min-width="240"
     style="max-height: 80%"
+    absolute
   >
     <template #activator="{ props: menuProps }">
       <v-tooltip location="top">
@@ -25,102 +22,125 @@ SPDX-License-Identifier: Apache-2.0
         Table Options
       </v-tooltip>
     </template>
-    <v-card>
-      <v-card-text class="pt-1">
-        <div class="d-flex align-center justify-space-between">
-          <span class="text-subtitle-2 text-medium-emphasis py-2">
-            Column Selection
-          </span>
+    <v-list density="compact">
+      <v-list-subheader>
+        Column Selection
+      </v-list-subheader>
+      <v-list-item
+        v-for="header in headers"
+        :key="header.value"
+        @click.stop="onSetSelectedHeader(header)"
+      >
+        <template #prepend>
+          <v-list-item-action>
+            <v-checkbox-btn
+              :model-value="header.selected"
+              :color="checkboxColor(header.selected)"
+            />
+          </v-list-item-action>
+        </template>
+        <v-list-item-subtitle>
           <v-tooltip
-            activator="parent"
+            v-if="header.customField"
             location="top"
           >
             <template #activator="{ props: activatorProps }">
-              <v-btn
-                v-bind="activatorProps"
-                icon="mdi-restore"
-                size="small"
-                variant="text"
-                flat
-                @click.stop="onReset"
-              />
-            </template>
-            Reset to Defaults
-          </v-tooltip>
-        </div>
-        <v-checkbox-btn
-          v-for="header in headers"
-          :key="header.value"
-          :model-value="header.selected"
-          :color="checkboxColor(header.selected)"
-          density="compact"
-          class="text-body-2"
-          @update:model-value="onSetSelectedHeader(header)"
-        >
-          <template #label>
-            <v-tooltip
-              v-if="header.customField"
-              location="top"
-            >
-              <template #activator="{ props: activatorProps }">
-                <span
-                  v-bind="activatorProps"
-                  class="text-caption"
+              <div v-bind="activatorProps">
+                <v-badge
+                  inline
+                  icon="mdi-playlist-star"
+                  color="primary"
+                  class="mt-0"
                 >
-                  {{ header.title }}
-                  <v-icon
-                    color="primary"
-                    icon="mdi-playlist-star"
-                    end
-                  />
-                </span>
-              </template>
-              Custom Field
-            </v-tooltip>
-            <span
-              v-else
-              class="text-caption"
-            >
-              {{ header.title }}
-            </span>
-          </template>
-        </v-checkbox-btn>
-      </v-card-text>
-      <template v-if="filters && filters.length">
-        <v-divider />
-        <v-card-text class="pt-1">
-          <div class="text-subtitle-2 text-medium-emphasis py-2">
-            Table Filter
-          </div>
-          <v-checkbox-btn
-            v-for="filter in filters"
-            :key="filter.value"
-            :model-value="filter.selected"
-            :color="checkboxColor(filter.selected)"
-            :disabled="filter.disabled"
-            density="compact"
-            class="text-body-2"
-            @update:model-value="onToggleFilter(filter)"
-          >
-            <template #label>
-              <span
-                class="text-caption"
-              >
-                {{ filter.text }}
-              </span>
+                  <span>{{ header.title }}</span>
+                </v-badge>
+              </div>
             </template>
-          </v-checkbox-btn>
-          <v-tooltip
-            activator="parent"
-            location="bottom"
-            :disabled="!filterTooltip"
-            max-width="300"
-          >
-            {{ filterTooltip }}
+            Custom Field
           </v-tooltip>
-        </v-card-text>
-      </template>
-    </v-card>
+          <template v-else>
+            {{ header.title }}
+          </template>
+        </v-list-item-subtitle>
+      </v-list-item>
+      <v-list-item>
+        <v-tooltip
+          location="top"
+          style="width: 100%"
+        >
+          <template #activator="{ props: activatorProps }">
+            <v-btn
+              v-bind="activatorProps"
+              block
+              variant="text"
+              class="text-primary"
+              @click.stop="onReset"
+            >
+              Reset
+            </v-btn>
+          </template>
+          <span>Reset to Defaults</span>
+        </v-tooltip>
+      </v-list-item>
+    </v-list>
+    <v-list
+      v-if="filters && filters.length"
+      density="compact"
+    >
+      <v-list-item>
+        <v-list-item-title>
+          Filter Table
+        </v-list-item-title>
+      </v-list-item>
+      <v-tooltip
+        location="top"
+        :disabled="!filterTooltip"
+      >
+        <template #activator="{ props: activatorProps }">
+          <div v-bind="activatorProps">
+            <v-list-item
+              v-for="filter in filters"
+              :key="filter.value"
+              :disabled="filter.disabled"
+              :class="{ 'disabled_filter': filter.disabled }"
+              @click.stop="onToggleFilter(filter)"
+            >
+              <template #prepend>
+                <v-list-item-action>
+                  <v-checkbox-btn
+                    :model-value="filter.selected"
+                    :color="checkboxColor(filter.selected)"
+                  />
+                </v-list-item-action>
+              </template>
+              <v-list-item-subtitle>
+                {{ filter.text }}
+                <v-tooltip
+                  v-if="filter.helpTooltip"
+                  location="top"
+                >
+                  <template #activator="{ props: innerActivatorProps }">
+                    <v-icon
+                      v-bind="innerActivatorProps"
+                      size="small"
+                    >
+                      mdi-help-circle-outline
+                    </v-icon>
+                  </template>
+                  <div
+                    v-for="line in filter.helpTooltip"
+                    :key="line"
+                  >
+                    {{ line }}
+                  </div>
+                </v-tooltip>
+              </v-list-item-subtitle>
+            </v-list-item>
+          </div>
+        </template>
+        <span>{{ filterTooltip }}</span>
+      </v-tooltip>
+    </v-list>
   </v-menu>
 </template>
 
@@ -171,3 +191,9 @@ function checkboxColor (selected) {
   return selected ? 'primary' : ''
 }
 </script>
+
+<style lang="scss" scoped>
+.disabled_filter {
+  opacity: 0.5;
+}
+</style>

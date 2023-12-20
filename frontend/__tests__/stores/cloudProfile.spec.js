@@ -58,14 +58,11 @@ describe('stores', () => {
       authzStore.setNamespace(namespace)
       configStore = useConfigStore()
       mockGetConfiguration = vi.spyOn(api, 'getConfiguration').mockResolvedValue({
-        data: {
-          defaultNodesCIDR: '10.10.0.0/16',
-          vendorHints: [{
-            type: 'warning',
-            message: 'test',
-            matchNames: ['suse-jeos', 'suse-chost'],
-          }],
-        },
+        vendorHints: [{
+          type: 'warning',
+          message: 'test',
+          matchNames: ['suse-jeos', 'suse-chost'],
+        }],
       })
       await configStore.fetchConfig()
       cloudProfileStore = useCloudProfileStore()
@@ -133,7 +130,6 @@ describe('stores', () => {
         expect(suseImage.expirationDateString).toBeDefined()
         expect(suseImage.vendorName).toBe('suse-chost')
         expect(suseImage.icon).toBe('suse-chost')
-        expect(suseImage.vendorHint).toBeDefined()
         expect(suseImage.vendorHint).toEqual(configStore.vendorHints[0])
         expect(suseImage.classification).toBe('supported')
         expect(suseImage.isSupported).toBe(true)
@@ -788,25 +784,6 @@ describe('stores', () => {
         dashboardLoadBalancerProviderNames = cloudProfileStore.loadBalancerProviderNamesByCloudProfileNameAndRegion({ cloudProfileName, region })
         expect(dashboardLoadBalancerProviderNames).toHaveLength(1)
         expect(dashboardLoadBalancerProviderNames[0]).toBe('other regional LB')
-      })
-    })
-
-    describe('providerConfig.defaultNodesCIDR', () => {
-      const cloudProfileName = 'foo'
-
-      it('should return default node cidr from config', async () => {
-        const defaultNodesCIDR = cloudProfileStore.getDefaultNodesCIDR({ cloudProfileName })
-        expect(defaultNodesCIDR).toBe('10.10.0.0/16')
-      })
-
-      it('should return default node cidr from cloud profile', () => {
-        setData({
-          providerConfig: {
-            defaultNodesCIDR: '1.2.3.4/16',
-          },
-        })
-        const defaultNodesCIDR = cloudProfileStore.getDefaultNodesCIDR({ cloudProfileName })
-        expect(defaultNodesCIDR).toBe('1.2.3.4/16')
       })
     })
     describe('helper', () => {

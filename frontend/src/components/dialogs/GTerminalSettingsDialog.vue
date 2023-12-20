@@ -8,6 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <g-dialog
     ref="gDialog"
     confirm-button-text="Change"
+    :confirm-disabled="v$.$invalid"
     width="750"
     max-height="100vh"
   >
@@ -16,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <template #message>
       <g-terminal-settings
-        :runtime-settings-hidden="runtimeSettingsHidden"
+        :target="target"
       />
     </template>
   </g-dialog>
@@ -45,9 +46,8 @@ export default {
     }
   },
   props: {
-    runtimeSettingsHidden: {
-      type: Boolean,
-      default: false,
+    target: {
+      type: String,
     },
   },
   setup () {

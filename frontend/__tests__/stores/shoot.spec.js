@@ -9,7 +9,6 @@ import {
   createPinia,
 } from 'pinia'
 
-import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
 import { useShootStore } from '@/store/shoot'
 import { useProjectStore } from '@/store/project'
@@ -21,10 +20,7 @@ import { useApi } from '@/composables/useApi'
 import {
   cloneDeep,
   map,
-  find,
 } from '@/lodash'
-
-const globalSetImmediate = global.setImmediate
 
 const noop = () => {}
 
@@ -41,26 +37,17 @@ describe('stores', () => {
     })
 
     const api = useApi()
-    let mockGetShoots
-    /* eslint-disable no-unused-vars */
-    let mockGetIssues
-    let mockGetShoot
-    let mockGetIssuesAndComments
-    let mockGetShootInfo
-    let mockEmitSubscribe
-    let mockEmitUnsubscribe
-    let mockSynchronize
-    /* eslint-enable no-unused-vars */
-    let authnStore
+    let mockGetShoots // eslint-disable-line no-unused-vars
+    let mockGetIssues // eslint-disable-line no-unused-vars
+    let mockGetShoot // eslint-disable-line no-unused-vars
+    let mockGetIssuesAndComments // eslint-disable-line no-unused-vars
+    let mockGetShootInfo // eslint-disable-line no-unused-vars
+    let mockEmitSubscribe // eslint-disable-line no-unused-vars
+    let mockEmitUnsubscribe // eslint-disable-line no-unused-vars
     let authzStore
     let projectStore
     let socketStore
     let shootStore
-
-    const flushEvents = () => {
-      shootStore.state.subscriptionEventHandler.flush()
-      return new Promise(resolve => globalSetImmediate(resolve))
-    }
 
     const shootList = [
       {
@@ -204,11 +191,6 @@ describe('stores', () => {
       })
       mockGetShootInfo = vi.spyOn(api, 'getShootInfo').mockRejectedValue(notFound)
       setActivePinia(createPinia())
-      authnStore = useAuthnStore()
-      authnStore.user = {
-        isAdmin: false,
-        email: 'john.doe@example.org',
-      }
       authzStore = useAuthzStore()
       authzStore.setNamespace('foo')
       projectStore = useProjectStore()
@@ -223,18 +205,10 @@ describe('stores', () => {
       socketStore = useSocketStore()
       mockEmitSubscribe = vi.spyOn(socketStore, 'emitSubscribe').mockImplementation(noop)
       mockEmitUnsubscribe = vi.spyOn(socketStore, 'emitUnsubscribe').mockImplementation(noop)
-      const getShoots = uids => map(uids, uid => {
-        return find(shootList, ['metadata.uid', uid]) ?? {
-          metadata: {
-            name: `shoot${uid}`,
-            namespace: 'foo',
-            uid: `${uid}`,
-          },
-        }
-      })
-      mockSynchronize = vi.spyOn(socketStore, 'synchronize').mockImplementation(uids => Promise.resolve(getShoots(uids)))
       shootStore = useShootStore()
-      shootStore.initializeShootListFilters()
+      shootStore.setShootListFilters({
+        onlyShootsWithIssues: false,
+      })
     })
 
     describe('#sortItems', () => {
@@ -306,77 +280,69 @@ describe('stores', () => {
     })
 
     describe('focus mode', () => {
-      let uid
-
       beforeEach(async () => {
         await shootStore.subscribe({ namespace: '_all' })
       })
 
-      it('should mark no longer existing shoots as stale when shoot list is freezed', async () => {
-        uid = shootStore.activeShoots[0].metadata.uid
-        expect(shootStore.isShootActive(uid)).toBe(true)
+      it('should mark no longer existing shoots as stale when shoot list is freezed', () => {
         shootStore.handleEvent({
           type: 'DELETED',
-          uid,
+          object: shootStore.filteredShoots[0],
         })
-        await flushEvents()
-        expect(shootStore.activeShoots).toHaveLength(2)
-        expect(shootStore.shootList).toHaveLength(2)
-        expect(shootStore.isShootActive(uid)).toBe(false)
-        expect(shootStore.staleShoots[uid]).toBeUndefined()
+        expect(shootStore.filteredShoots.length).toBe(2)
+        expect(shootStore.shootList.length).toBe(2)
+        expect(shootStore.shootList[0].stale).toBeUndefined()
 
         shootStore.setFocusMode(true)
 
-        uid = shootStore.activeShoots[0].metadata.uid
-        expect(shootStore.isShootActive(uid)).toBe(true)
+        expect(shootStore.shootList[0].stale).toBeUndefined()
         shootStore.handleEvent({
           type: 'DELETED',
-          uid,
+          object: shootStore.filteredShoots[0],
         })
-        await flushEvents()
-        expect(shootStore.activeShoots).toHaveLength(1)
-        expect(shootStore.shootList).toHaveLength(2)
-        expect(shootStore.isShootActive(uid)).toBe(false)
-        expect(shootStore.staleShoots[uid]).toBeDefined()
+        expect(shootStore.filteredShoots.length).toBe(1)
+        expect(shootStore.shootList.length).toBe(2)
+        expect(shootStore.shootList[0].stale).toBe(true)
       })
 
-      it('should not add new shoots to list when shoot list is freezed', async () => {
-        uid = 4
+      it('should not add new shoots to list when shoot list is freezed', () => {
         shootStore.setFocusMode(true)
         shootStore.handleEvent({
           type: 'ADDED',
-          uid,
+          object: {
+            metadata: {
+              name: 'shoot4',
+              namespace: 'foo',
+              uid: 'shoot4',
+            },
+          },
         })
-        await flushEvents()
-        expect(shootStore.activeShoots).toHaveLength(4)
-        expect(shootStore.state.froozenUids).toHaveLength(3)
-        expect(shootStore.shootList).toHaveLength(3)
+        expect(shootStore.filteredShoots.length).toBe(4)
+        expect(shootStore.sortedUidsAtFreeze.length).toBe(3)
+        expect(shootStore.shootList.length).toBe(3)
 
         shootStore.setFocusMode(false)
-        expect(shootStore.shootList).toHaveLength(4)
+        expect(shootStore.shootList.length).toBe(4)
 
         shootStore.setFocusMode(true)
-        expect(shootStore.shootList).toHaveLength(4)
+        expect(shootStore.shootList.length).toBe(4)
       })
 
-      it('should add and remove staleShoots', async () => {
+      it('should add and remove staleShoots', () => {
         const shoot = shootList[1]
-        uid = shoot.metadata.uid
         shootStore.setFocusMode(true)
 
         shootStore.handleEvent({
           type: 'DELETED',
-          uid,
+          object: shoot,
         })
-        await flushEvents()
-        expect(shootStore.staleShoots[uid]).toEqual(shoot)
+        expect(shootStore.staleShoots[shoot.metadata.uid]).toBeDefined()
 
         shootStore.handleEvent({
           type: 'ADDED',
-          uid,
+          object: shoot,
         })
-        await flushEvents()
-        expect(shootStore.staleShoots[uid]).toBeUndefined()
+        expect(shootStore.staleShoots[shoot.metadata.uid]).toBeUndefined()
       })
 
       it('should receive items and update staleShoots', async () => {
@@ -387,16 +353,13 @@ describe('stores', () => {
         shootStore.setFocusMode(true)
         shootStore.handleEvent({
           type: 'DELETED',
-          uid: deletedItem.metadata.uid,
+          object: deletedItem,
         })
-        await flushEvents()
-        expect(shootStore.state.froozenUids).toHaveLength(3)
+
+        expect(shootStore.sortedUidsAtFreeze.length).toBe(3)
         expect(shootStore.staleShoots[deletedItem.metadata.uid]).toBeDefined()
-        expect(shootStore.activeShoots).toHaveLength(2)
-        expect(map(shootStore.activeShoots, 'metadata.name').sort()).toEqual([
-          'shoot1',
-          'shoot3',
-        ])
+        expect(shootStore.filteredShoots.length).toBe(2)
+        expect(map(shootStore.filteredShoots, 'metadata.name')).toEqual(['shoot1', 'shoot3'])
 
         mockGetShoots.mockResolvedValueOnce({
           data: {
@@ -405,14 +368,11 @@ describe('stores', () => {
         })
         await shootStore.synchronize()
 
-        expect(shootStore.state.froozenUids).toHaveLength(3)
-        expect(shootStore.staleShoots[missingItem.metadata.uid]).toEqual(missingItem)
+        expect(shootStore.sortedUidsAtFreeze.length).toBe(3)
+        expect(shootStore.staleShoots[missingItem.metadata.uid]).toBeDefined()
         expect(shootStore.staleShoots[deletedItem.metadata.uid]).toBeUndefined()
-        expect(shootStore.activeShoots).toHaveLength(2)
-        expect(map(shootStore.activeShoots, 'metadata.name').sort()).toEqual([
-          'shoot1',
-          'shoot2',
-        ])
+        expect(shootStore.filteredShoots.length).toBe(2)
+        expect(map(shootStore.filteredShoots, 'metadata.name')).toEqual(['shoot2', 'shoot1'])
       })
     })
   })

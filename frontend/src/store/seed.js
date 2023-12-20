@@ -4,10 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import {
-  defineStore,
-  acceptHMRUpdate,
-} from 'pinia'
+import { defineStore } from 'pinia'
 import {
   ref,
   computed,
@@ -71,7 +68,3 @@ export const useSeedStore = defineStore('seed', () => {
     isSeedUnreachableByName,
   }
 })
-
-if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useSeedStore, import.meta.hot))
-}

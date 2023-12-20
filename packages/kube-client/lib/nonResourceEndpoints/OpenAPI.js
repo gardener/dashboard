@@ -10,8 +10,9 @@ const HttpClient = require('../HttpClient')
 const { http } = require('../symbols')
 
 class OpenAPI extends HttpClient {
-  getGardenerApis () {
-    return this[http.request]('openapi/v3/apis/core.gardener.cloud/v1beta1', { method: 'get' })
+  get () {
+    return this[http.request]('openapi/v2', { method: 'get' })
   }
 }
+
 module.exports = OpenAPI

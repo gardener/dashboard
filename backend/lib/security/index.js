@@ -93,13 +93,7 @@ function discoverIssuer (url) {
 
 function discoverClient (url) {
   return pRetry(async () => {
-    let issuer
-    try {
-      issuer = await discoverIssuer(url)
-    } catch (err) {
-      logger.error('failed to discover OpenID Connect issuer %s', url, err)
-      throw err
-    }
+    const issuer = await discoverIssuer(url)
     overrideHttpOptions.call(issuer)
     const options = {
       client_id: clientId,
@@ -127,7 +121,7 @@ function getIssuerClient (url = issuer) {
   if (!clientPromise) {
     clientPromise = discoverClient(url)
   }
-  return pTimeout(clientPromise, 1000, `OpenID Connect issuer ${url} not available`)
+  return pTimeout(clientPromise, 1000, `OpenID Connect Issuer ${url} not available`)
 }
 
 function getBackendRedirectUri (origin) {
@@ -315,11 +309,6 @@ function getAccessToken (cookies) {
   throw createError(401, 'No authorization token was found', { code: 'ERR_JWT_NOT_FOUND' })
 }
 
-function getRefreshAt (tokenSet) {
-  const user = decode(tokenSet.id_token)
-  return user?.exp ?? tokenSet.expires_at
-}
-
 async function verifyAccessToken (token) {
   try {
     const audience = [GARDENER_AUDIENCE]
@@ -381,7 +370,7 @@ async function authorizationCodeExchange (redirectUri, parameters, checks) {
        * of the access_token will be the configured sessionLifetime.
        */
       payload.exp = iat + sessionLifetime
-      payload.refresh_at = getRefreshAt(tokenSet)
+      payload.refresh_at = tokenSet.expires_at
       payload.rti = digest(tokenSet.refresh_token)
       logger.debug('Created TokenSet (%s)', payload.rti)
     }
@@ -409,7 +398,7 @@ async function refreshTokenSet (tokenSet) {
     const rti = payload.rti
     payload.rti = digest(tokenSet.refresh_token)
     logger.debug('Refreshed TokenSet (%s <- %s)', payload.rti, rti)
-    payload.refresh_at = getRefreshAt(tokenSet)
+    payload.refresh_at = tokenSet.expires_at
     tokenSet.access_token = await createAccessToken(payload, tokenSet.id_token)
     return tokenSet
   } catch (err) {

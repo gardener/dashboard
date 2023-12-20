@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
               :disabled="readonly || primaryReadonly"
               color="primary"
               :items="dnsProviderTypes"
-              :error-messages="getErrorMessages(v$.type)"
+              :error-messages="getErrorMessages('type')"
               label="Dns Provider Type"
               :hint="typeHint"
               persistent-hint
@@ -122,6 +122,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import {
   mapState,
+  mapGetters,
   mapActions,
 } from 'pinia'
 import { required } from '@vuelidate/validators'
@@ -134,8 +135,7 @@ import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import GSelectSecret from '@/components/Secrets/GSelectSecret'
 import GVendorIcon from '@/components/GVendorIcon'
 
-import { getErrorMessages } from '@/utils'
-import { withFieldName } from '@/utils/validators'
+import { getValidationErrors } from '@/utils'
 
 import {
   get,
@@ -143,6 +143,12 @@ import {
   find,
   map,
 } from '@/lodash'
+
+const validationErrors = {
+  type: {
+    required: 'DNS Provider Type is required',
+  },
+}
 
 export default {
   components: {
@@ -161,14 +167,11 @@ export default {
     }
   },
   validations () {
-    return {
-      type: withFieldName('DNS Provider Type', {
-        required,
-      }),
-    }
+    return this.validators
   },
   data () {
     return {
+      validationErrors,
       secretValid: true,
     }
   },
@@ -178,9 +181,16 @@ export default {
       'dnsPrimaryProviderId',
       'clusterIsNew',
     ]),
-    ...mapState(useGardenerExtensionStore, [
+    ...mapGetters(useGardenerExtensionStore, [
       'sortedDnsProviderList',
     ]),
+    validators () {
+      return {
+        type: {
+          required,
+        },
+      }
+    },
     dnsProviderTypes () {
       return map(this.sortedDnsProviderList, 'type')
     },
@@ -301,10 +311,12 @@ export default {
         this.setData({ valid })
       }
     },
+    getErrorMessages (field) {
+      return getValidationErrors(this, field)
+    },
     onDelete () {
       this.deleteDnsProvider(this.dnsProviderId)
     },
-    getErrorMessages,
   },
 }
 </script>

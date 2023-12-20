@@ -18,14 +18,13 @@ SPDX-License-Identifier: Apache-2.0
     <template #message>
       <div class="d-flex flex-row align-center mt-3">
         <img
-          :src="branding.productLogoUrl"
-          :alt="`${branding.productName} Logo`"
-          height="50"
-          class="mr-3"
+          src="/static/assets/logo.svg"
+          alt="gardener logo"
+          class="logo mr-3"
         >
         <div>
           <h2 class="mb-1">
-            {{ branding.productName }} Dashboard
+            Gardener Dashboard
           </h2>
         </div>
       </div>
@@ -39,7 +38,7 @@ SPDX-License-Identifier: Apache-2.0
         </div>
         <template v-if="isAdmin">
           <div v-if="!!gardenerVersion">
-            Gardener API<span class="ml-1 font-weight-bold">{{ gardenerVersion }}</span>
+            API<span class="ml-1 font-weight-bold">{{ gardenerVersion }}</span>
           </div>
           <v-divider
             v-if="extensionsList.length"
@@ -73,7 +72,6 @@ import {
 } from 'pinia'
 
 import { useAppStore } from '@/store/app'
-import { useConfigStore } from '@/store/config'
 import { useAuthnStore } from '@/store/authn'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 
@@ -106,9 +104,6 @@ export default {
     ]),
     ...mapState(useAuthnStore, [
       'isAdmin',
-    ]),
-    ...mapState(useConfigStore, [
-      'branding',
     ]),
     extensionsList () {
       return sortBy(this.gardenerExtensionList, 'name')
@@ -152,3 +147,9 @@ export default {
   },
 }
 </script>
+
+<style lang="scss" scoped>
+  .logo {
+    height: 50px;
+  }
+</style>

@@ -11,7 +11,6 @@ const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const zlib = require('zlib')
 const compression = require('compression')
-const config = require('./config')
 const routes = require('./routes')
 const hooks = require('./hooks')()
 const { authenticate } = require('./security')
@@ -28,9 +27,7 @@ router.use(compression({
 router.use(requestLogger)
 router.use(monitorResponseTimes())
 router.use(cookieParser())
-router.use(bodyParser.json({
-  limit: config.maxRequestBodySize
-}))
+router.use(bodyParser.json())
 router.use(authenticate({ createClient }))
 for (const [key, value] of Object.entries(routes)) {
   router.use(key, value)

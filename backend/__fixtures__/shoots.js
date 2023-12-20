@@ -119,9 +119,6 @@ const shoots = {
     const items = shoots.list(namespace)
     return find(items, ['metadata.name', name])
   },
-  getByUid (uid) {
-    return find(shootList, ['metadata.uid', uid])
-  },
   list (namespace) {
     const items = cloneDeep(shootList)
     return namespace
@@ -131,7 +128,6 @@ const shoots = {
 }
 
 const matchOptions = { decode: decodeURIComponent }
-const matchListAllNamespaces = pathToRegexp.match('/apis/core.gardener.cloud/v1beta1/shoots', matchOptions)
 const matchList = pathToRegexp.match('/apis/core.gardener.cloud/v1beta1/namespaces/:namespace/shoots', matchOptions)
 const matchItem = pathToRegexp.match('/apis/core.gardener.cloud/v1beta1/namespaces/:namespace/shoots/:name', matchOptions)
 const matchAdminKubeconfig = pathToRegexp.match('/apis/core.gardener.cloud/v1beta1/namespaces/:namespace/shoots/:name/adminkubeconfig', matchOptions)
@@ -140,17 +136,15 @@ const matchBinding = pathToRegexp.match('/apis/core.gardener.cloud/v1beta1/names
 const mocks = {
   list () {
     return headers => {
-      const matchResult = matchList(headers[':path']) || matchListAllNamespaces(headers[':path'])
+      const matchResult = matchList(headers[':path'])
       if (matchResult === false) {
         return Promise.reject(createError(503))
       }
       const { params: { namespace } = {} } = matchResult
-      if (namespace) {
-        const payload = getTokenPayload(headers)
-        const project = projects.getByNamespace(namespace)
-        if (!projects.isMember(project, payload)) {
-          return Promise.reject(createError(403))
-        }
+      const payload = getTokenPayload(headers)
+      const project = projects.getByNamespace(namespace)
+      if (!projects.isMember(project, payload)) {
+        return Promise.reject(createError(403))
       }
       const items = shoots.list(namespace)
       return Promise.resolve({ items })

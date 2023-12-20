@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
       item-value="metadata.name"
       item-title="metadata.name"
       return-object
-      :error-messages="getErrorMessages(v$.secret)"
+      :error-messages="getErrorMessages('secret')"
       persistent-hint
       :hint="secretHint"
       variant="underlined"
@@ -79,13 +79,9 @@ import { useProjectStore } from '@/store/project'
 
 import GSecretDialogWrapper from '@/components/Secrets/GSecretDialogWrapper'
 
+import { requiresCostObjectIfEnabled } from '@/utils/validators'
 import {
-  requiresCostObjectIfEnabled,
-  withMessage,
-  withFieldName,
-} from '@/utils/validators'
-import {
-  getErrorMessages,
+  getValidationErrors,
   isOwnSecret,
   selfTerminationDaysForSecret,
 } from '@/utils'
@@ -131,28 +127,37 @@ export default {
     return {
       secretItemsBeforeAdd: undefined,
       visibleSecretDialog: undefined,
+      validationErrors: {
+        secret: {
+          required: 'Secret is required',
+          requiresCostObjectIfEnabled: () => {
+            const projectName = get(this.secret, 'metadata.projectName')
+            const isSecretInProject = this.projectName === projectName
+
+            return isSecretInProject
+              ? `${this.costObjectTitle} is required. Go to the ADMINISTRATION page to edit the project and set the ${this.costObjectTitle}.`
+              : `${this.costObjectTitle} is required and has to be set on the Project ${toUpper(projectName)}`
+          },
+        },
+      },
     }
   },
   validations () {
-    const requiresCostObjectIfEnabledMessage = () => {
-      const projectName = get(this.secret, 'metadata.projectName')
-      const isSecretInProject = this.projectName === projectName
-      return isSecretInProject
-        ? `${this.costObjectTitle} is required. Go to the ADMINISTRATION page to edit the project and set the ${this.costObjectTitle}.`
-        : `${this.costObjectTitle} is required and has to be set on the Project ${toUpper(this.projectName)}`
-    }
-    return {
-      secret: withFieldName('Secret', {
-        required,
-        requiresCostObjectIfEnabled: withMessage(requiresCostObjectIfEnabledMessage(), requiresCostObjectIfEnabled),
-      }),
-    }
+    return this.validators
   },
   computed: {
     ...mapState(useConfigStore, ['costObjectSettings']),
     ...mapState(useAuthzStore, ['namespace']),
     projectName () {
       return this.projectNameByNamespace(this.namespace)
+    },
+    validators () {
+      return {
+        secret: {
+          required,
+          requiresCostObjectIfEnabled,
+        },
+      }
     },
     secret: {
       get () {
@@ -223,6 +228,9 @@ export default {
     ]),
     get,
     isOwnSecret,
+    getErrorMessages (field) {
+      return getValidationErrors(this, field)
+    },
     openSecretDialog () {
       this.visibleSecretDialog = this.infrastructureKind
       this.secretItemsBeforeAdd = cloneDeep(this.secretList)
@@ -234,7 +242,6 @@ export default {
         this.secret = newSecret
       }
     },
-    getErrorMessages,
   },
 }
 </script>

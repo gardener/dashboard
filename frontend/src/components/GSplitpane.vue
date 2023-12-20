@@ -35,7 +35,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapActions } from 'pinia'
 import {
   Splitpanes,
   Pane,
@@ -63,13 +62,11 @@ export default {
     },
   },
   methods: {
-    ...mapActions(useAppStore, [
-      'updateSplitpaneResize',
-    ]),
     resize () {
+      const store = useAppStore()
       // use nextTick as splitpanes library needs to be finished with rendering because fitAddon relies on
       // dynamic dimensions calculated via css, which do not return correct values before rendering is complete
-      this.$nextTick(() => this.updateSplitpaneResize())
+      this.$nextTick(store.updateSplitpaneResize)
     },
     hasChildren (item) {
       const isSplitpaneTree = Reflect.has(item, 'horizontal')

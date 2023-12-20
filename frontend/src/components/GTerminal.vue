@@ -356,7 +356,7 @@ SPDX-License-Identifier: Apache-2.0
     </g-drag-n-droppable-component>
     <g-terminal-settings-dialog
       ref="settings"
-      :runtime-settings-hidden="runtimeSettingsHidden"
+      :target="target"
     />
   </div>
 </template>
@@ -419,10 +419,6 @@ export default {
     data: {
       type: Object,
       required: true,
-    },
-    runtimeSettingsHidden: {
-      type: Boolean,
-      default: false,
     },
   },
   emits: [

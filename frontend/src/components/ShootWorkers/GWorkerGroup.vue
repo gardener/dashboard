@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
           :icon="machineImageIcon"
           :size="20"
         />
-        <span class="px-1">{{ workerGroup.name }}</span>
+        {{ workerGroup.name }}
       </v-chip>
     </template>
     <v-tabs
@@ -51,10 +51,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-container class="pa-2">
             <v-row dense>
               <v-col cols="6">
-                <v-card
-                  variant="outlined"
-                  class="border"
-                >
+                <v-card outlined>
                   <v-toolbar
                     height="28"
                     class="text-medium-emphasis"
@@ -128,7 +125,7 @@ SPDX-License-Identifier: Apache-2.0
                 </v-card>
                 <v-card
                   variant="outlined"
-                  class="border mt-2"
+                  class="mt-2"
                 >
                   <v-toolbar
                     height="28"
@@ -171,10 +168,7 @@ SPDX-License-Identifier: Apache-2.0
                 </v-card>
               </v-col>
               <v-col cols="6">
-                <v-card
-                  variant="outlined"
-                  class="border"
-                >
+                <v-card outlined>
                   <v-toolbar
                     height="28"
                     class="text-medium-emphasis"
@@ -234,7 +228,7 @@ SPDX-License-Identifier: Apache-2.0
                 </v-card>
                 <v-card
                   variant="outlined"
-                  class="border mt-2"
+                  class="mt-2"
                 >
                   <v-toolbar
                     height="28"
@@ -283,7 +277,7 @@ SPDX-License-Identifier: Apache-2.0
                 </v-card>
                 <v-card
                   variant="outlined"
-                  class="border mt-2"
+                  class="mt-2"
                 >
                   <v-toolbar
                     height="28"
@@ -360,6 +354,7 @@ import {
 } from '@/lodash'
 
 export default {
+  name: 'GWorkerGroup',
   components: {
     GVendorIcon,
     GCodeBlock,
@@ -457,9 +452,3 @@ export default {
   },
 }
 </script>
-
-<style>
-  .border {
-    border-color: rgba(var(--v-border-color), var(--v-border-opacity)) !important;
-  }
-</style>

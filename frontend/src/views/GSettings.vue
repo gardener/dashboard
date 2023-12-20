@@ -25,11 +25,11 @@ SPDX-License-Identifier: Apache-2.0
           <v-card-text>
             <v-row>
               <v-col cols="12">
-                <legend class="text-medium-emphasis">
+                <legend class="text-secondary">
                   Color Scheme
                 </legend>
                 <v-btn-toggle
-                  v-model="colorScheme"
+                  v-model="colorMode"
                   label="Color Scheme"
                   color="primary"
                   mandatory="force"
@@ -79,7 +79,7 @@ SPDX-License-Identifier: Apache-2.0
                 </v-btn-toggle>
               </v-col>
               <v-col cols="12">
-                <legend class="text-medium-emphasis">
+                <legend class="text-secondary">
                   Log Level
                 </legend>
                 <v-btn-toggle
@@ -108,6 +108,8 @@ SPDX-License-Identifier: Apache-2.0
               <v-col cols="12">
                 <v-switch
                   v-model="autoLogin"
+                  true-value="enabled"
+                  false-value="disabled"
                   label="Automatic Login"
                   color="primary"
                   persistent-hint
@@ -122,51 +124,14 @@ SPDX-License-Identifier: Apache-2.0
       <v-col
         cols="12"
         md="6"
-      >
-        <v-card class="mt-4">
-          <v-toolbar
-            flat
-            density="compact"
-            class="bg-toolbar-background text-toolbar-title"
-          >
-            <v-toolbar-title>Advanced</v-toolbar-title>
-          </v-toolbar>
-          <v-card-text>
-            <v-row>
-              <v-col cols="12">
-                <v-switch
-                  v-model="operatorFeatures"
-                  label="Operator Features"
-                  color="primary"
-                  density="compact"
-                  persistent-hint
-                  hint="Enable operator features for project cluster lists"
-                >
-                  <template #message="{ message }">
-                    <div
-                      class="font-weight-bold pb-1"
-                      v-text="message"
-                    />
-                    You can set the focus mode for cluster lists. This mode will freeze the current
-                    list and allows to get an overview of clusters with issues by sorting the list by
-                    the <span class="font-family-monospace">ISSUE SINCE</span> column.
-                  </template>
-                </v-switch>
-              </v-col>
-            </v-row>
-          </v-card-text>
-        </v-card>
-      </v-col>
+      />
     </v-row>
   </v-container>
 </template>
 
 <script setup>
-import { storeToRefs } from 'pinia'
-
-import { useLocalStorageStore } from '@/store/localStorage'
-
-const localStorageStore = useLocalStorageStore()
+import { inject } from 'vue'
+import { useLocalStorage } from '@vueuse/core'
 
 const logLevels = [
   { value: 'debug', text: 'verbose', icon: 'mdi-bug', color: 'grey darken-4' },
@@ -176,16 +141,7 @@ const logLevels = [
   { value: 'silent', text: 'silent', icon: 'mdi-pause-octagon', color: 'grey' },
 ]
 
-const {
-  logLevel,
-  autoLogin,
-  colorScheme,
-  operatorFeatures,
-} = storeToRefs(localStorageStore)
+const { logLevel } = inject('logger')
+const colorMode = inject('colorMode')
+const autoLogin = useLocalStorage('global/auto-login', 'disabled')
 </script>
-
-<style lang="scss" scoped>
-:deep(.v-messages__message) {
-  line-height: 14px;
-}
-</style>

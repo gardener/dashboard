@@ -12,12 +12,12 @@ SPDX-License-Identifier: Apache-2.0
       label="Image"
       hint="Image to be used for the Container"
       persistent-hint
-      :error-messages="getErrorMessages(v$.containerImage)"
+      :error-messages="getErrorMessages('containerImage')"
       variant="underlined"
       @update:model-value="v$.containerImage.$touch()"
       @blur="v$.containerImage.$touch()"
     />
-    <template v-if="!runtimeSettingsHidden">
+    <template v-if="target === 'shoot'">
       <v-radio-group
         v-if="isAdmin"
         v-model="runtime"
@@ -120,8 +120,13 @@ import { useAuthnStore } from '@/store/authn'
 
 import GTimeString from '@/components/GTimeString.vue'
 
-import { getErrorMessages } from '@/utils'
-import { withFieldName } from '@/utils/validators'
+import { getValidationErrors } from '@/utils'
+
+const validationErrors = {
+  containerImage: {
+    required: 'You can\'t leave this empty.',
+  },
+}
 
 export default {
   components: {
@@ -135,9 +140,8 @@ export default {
     'runtime',
   ],
   props: {
-    runtimeSettingsHidden: {
-      type: Boolean,
-      default: false,
+    target: {
+      type: String,
     },
   },
   setup () {
@@ -145,29 +149,39 @@ export default {
       v$: useVuelidate(),
     }
   },
-  validations () {
+  data () {
     return {
-      containerImage: withFieldName('Terminal Container Image', {
-        required,
-      }),
+      validationErrors,
     }
+  },
+  validations () {
+    return this.validators
   },
   computed: {
     ...mapState(useAuthnStore, [
       'isAdmin',
     ]),
+    validators () {
+      return {
+        containerImage: {
+          required,
+        },
+      }
+    },
     shootNodesInternal () {
       return this.runtime === 'shoot' ? this.shootNodes : []
     },
   },
   methods: {
+    getErrorMessages (field) {
+      return getValidationErrors(this, field)
+    },
     isAutoSelectNodeItem (item) {
       return this.isAutoSelectNode(item.raw.data?.kubernetesHostname)
     },
     isAutoSelectNode (hostname) {
       return hostname === '<AUTO-SELECT>'
     },
-    getErrorMessages,
   },
 }
 </script>

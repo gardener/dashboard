@@ -9,12 +9,12 @@ SPDX-License-Identifier: Apache-2.0
     :key="componentKey"
     ref="actionDialog"
     :shoot-item="shootItem"
+    :valid="!v$.$invalid"
     width="1250"
     confirm-required
     caption="Configure Workers"
     disable-confirm-input-focus
     max-height="80vh"
-    :disabled="!hasShootWorkerGroups"
     @dialog-opened="onConfigurationDialogOpened"
   >
     <template #top>
@@ -56,13 +56,7 @@ SPDX-License-Identifier: Apache-2.0
               :completion-paths="['spec.properties.provider.properties.workers', 'spec.properties.provider.properties.infrastructureConfig']"
               hide-toolbar
               animate-on-appear
-              alert-banner-identifier="workerEditorWarning"
-            >
-              <template #modificationWarning>
-                Directly modifying this resource can result in irreversible configurations that may severely compromise your cluster's stability and functionality.
-                Use worker resource editor with caution.
-              </template>
-            </g-shoot-editor>
+            />
           </div>
         </v-window-item>
       </v-window>
@@ -98,13 +92,6 @@ SPDX-License-Identifier: Apache-2.0
       </v-expand-transition>
     </template>
   </g-action-button-dialog>
-  <v-tooltip
-    :activator="$refs.actionDialog"
-    location="top"
-    :disabled="hasShootWorkerGroups"
-  >
-    It is not possible to add worker groups to workerless clusters
-  </v-tooltip>
 </template>
 
 <script>
@@ -226,9 +213,8 @@ export default {
       const region = this.shootRegion
       const zonedCluster = isZonedCluster({ cloudProviderKind: this.shootCloudProviderKind, shootSpec: this.shootSpec })
       const existingWorkerCIDR = get(this.shootItem, 'spec.networking.nodes')
-      const updateOSMaintenance = get(this.shootItem, 'spec.maintenance.autoUpdate.machineImageVersion', true)
 
-      await this.manageWorkers.dispatch('setWorkersData', { workers, cloudProfileName, region, updateOSMaintenance, zonesNetworkConfiguration, zonedCluster, existingWorkerCIDR, kubernetesVersion: this.shootK8sVersion })
+      await this.manageWorkers.dispatch('setWorkersData', { workers, cloudProfileName, region, zonesNetworkConfiguration, zonedCluster, existingWorkerCIDR, kubernetesVersion: this.shootK8sVersion })
     },
     async setNetworkConfiguration (value) {
       if (value) {

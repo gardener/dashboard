@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <g-secret-dialog
     v-model="visible"
     :data="secretData"
-    :secret-validations="v$"
+    :data-valid="valid"
     :secret="secret"
     vendor="cloudflare-dns"
     create-title="Add new Cloudflare Secret"
@@ -20,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="apiToken"
           color="primary"
           label="Cloudflare API Token"
-          :error-messages="getErrorMessages(v$.apiToken)"
+          :error-messages="getErrorMessages('apiToken')"
           :append-icon="hideApiToken ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideApiToken ? 'password' : 'text'"
           variant="underlined"
@@ -66,8 +66,13 @@ import { required } from '@vuelidate/validators'
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
 
-import { getErrorMessages } from '@/utils'
-import { withFieldName } from '@/utils/validators'
+import { getValidationErrors } from '@/utils'
+
+const validationErrors = {
+  apiToken: {
+    required: 'You can\'t leave this empty.',
+  },
+}
 
 export default {
   components: {
@@ -95,14 +100,12 @@ export default {
     return {
       apiToken: undefined,
       hideApiToken: true,
+      validationErrors,
     }
   },
   validations () {
-    return {
-      apiToken: withFieldName('API Token', {
-        required,
-      }),
-    }
+    // had to move the code to a computed property so that the getValidationErrors method can access it
+    return this.validators
   },
   computed: {
     visible: {
@@ -121,6 +124,14 @@ export default {
         apiToken: this.apiToken,
       }
     },
+    validators () {
+      const validators = {
+        apiToken: {
+          required,
+        },
+      }
+      return validators
+    },
     isCreateMode () {
       return !this.secret
     },
@@ -137,7 +148,9 @@ export default {
       this.v$.$reset()
       this.apiToken = ''
     },
-    getErrorMessages,
+    getErrorMessages (field) {
+      return getValidationErrors(this, field)
+    },
   },
 }
 </script>

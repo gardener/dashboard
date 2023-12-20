@@ -3,8 +3,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
-
-import { computed } from 'vue'
+import { unref } from 'vue'
+import semver from 'semver'
 
 import {
   shortRandomString,
@@ -33,6 +33,7 @@ import {
 import {
   find,
   includes,
+  assign,
   set,
   head,
   get,
@@ -40,6 +41,7 @@ import {
   map,
   sample,
   omit,
+  forEach,
   filter,
   some,
   startsWith,
@@ -50,6 +52,17 @@ import {
 } from '@/lodash'
 
 export const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
+
+export function keyForShoot ({ name, namespace }) {
+  return `${name}_${namespace}`
+}
+
+export function findItem (state) {
+  return ({ name, namespace }) => {
+    const key = keyForShoot({ name, namespace })
+    return unref(state.shoots)[key]
+  }
+}
 
 const tokenizePattern = /(-?"([^"]|"")*"|\S+)/g
 
@@ -104,11 +117,10 @@ export function parseSearch (text) {
 export const constants = Object.freeze({
   DEFINED: 0,
   LOADING: 1,
-  LOADED: 2,
-  OPENING: 3,
-  OPEN: 4,
-  CLOSING: 5,
-  CLOSED: 6,
+  OPENING: 2,
+  OPEN: 3,
+  CLOSING: 4,
+  CLOSED: 5,
 })
 
 export function createShootResource (context) {
@@ -136,10 +148,9 @@ export function createShootResource (context) {
   }
 
   const infrastructureKind = head(cloudProfileStore.sortedInfrastructureKindList)
-  const cloudProfileName = get(head(cloudProfileStore.cloudProfilesByCloudProviderKind(infrastructureKind)), 'metadata.name')
-  const defaultNodesCIDR = cloudProfileStore.getDefaultNodesCIDR({ cloudProfileName })
+  set(shootResource, 'spec', getSpecTemplate(infrastructureKind, configStore.nodesCIDR))
 
-  set(shootResource, 'spec', getSpecTemplate(infrastructureKind, defaultNodesCIDR))
+  const cloudProfileName = get(head(cloudProfileStore.cloudProfilesByCloudProviderKind(infrastructureKind)), 'metadata.name')
   set(shootResource, 'spec.cloudProfileName', cloudProfileName)
 
   const secret = head(secretStore.infrastructureSecretsByCloudProfileName(cloudProfileName))
@@ -211,7 +222,7 @@ export function createShootResource (context) {
 
   const allZones = cloudProfileStore.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
   const zones = allZones.length ? [sample(allZones)] : undefined
-  const zonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(zones, infrastructureKind, allZones.length, defaultNodesCIDR)
+  const zonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(zones, infrastructureKind, allZones.length, configStore.defaultNodesCIDR)
   if (zonesNetworkConfiguration) {
     set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', zonesNetworkConfiguration)
   }
@@ -227,10 +238,9 @@ export function createShootResource (context) {
   }
 
   const addons = {}
-  const visibleShootAddonList = filter(shootAddonList, 'visible')
-  for (const { name, enabled } of visibleShootAddonList) {
-    addons[name] = { enabled }
-  }
+  forEach(filter(shootAddonList, addon => addon.visible), addon => {
+    set(addons, [addon.name, 'enabled'], addon.enabled)
+  })
 
   set(shootResource, 'spec.addons', addons)
 
@@ -266,88 +276,102 @@ export function onlyAllShootsWithIssues (state, context) {
   return authzStore.namespace === '_all' && get(state.shootListFilters, 'onlyShootsWithIssues', true)
 }
 
-export function getFilteredUids (state, context) {
+export function getFilteredItems (state, context) {
   const {
     projectStore,
     ticketStore,
     configStore,
   } = context
-
-  // filter function
-  const notProgressing = item => {
-    return !isStatusProgressing(get(item, 'metadata', {}))
-  }
-
-  const noUserError = item => {
-    const ignoreIssues = isTruthyValue(get(item, ['metadata', 'annotations', 'dashboard.gardener.cloud/ignore-issues']))
-    if (ignoreIssues) {
-      return false
-    }
-    const lastErrors = get(item, 'status.lastErrors', [])
-    const allLastErrorCodes = errorCodesFromArray(lastErrors)
-    if (isTemporaryError(allLastErrorCodes)) {
-      return false
-    }
-    const conditions = get(item, 'status.conditions', [])
-    const allConditionCodes = errorCodesFromArray(conditions)
-
-    const constraints = get(item, 'status.constraints', [])
-    const allConstraintCodes = errorCodesFromArray(constraints)
-
-    return !(isUserError(allLastErrorCodes) || isUserError(allConditionCodes) || isUserError(allConstraintCodes))
-  }
-
-  const reconciliationNotDeactivated = item => {
-    return !isReconciliationDeactivated(get(item, 'metadata', {}))
-  }
-
-  const hasTicketsWithoutHideLabel = item => {
-    const hideClustersWithLabels = get(configStore.ticket, 'hideClustersWithLabels')
-    if (!hideClustersWithLabels) {
-      return true
-    }
-    const metadata = get(item, 'metadata', {})
-    metadata.projectName = projectStore.projectNameByNamespace(metadata)
-    const ticketsForCluster = ticketStore.issues(metadata)
-    if (!ticketsForCluster.length) {
-      return true
-    }
-
-    const ticketsWithoutHideLabel = filter(ticketsForCluster, ticket => {
-      const labelNames = map(get(ticket, 'data.labels'), 'name')
-      const ticketHasHideLabel = some(hideClustersWithLabels, hideClustersWithLabel => includes(labelNames, hideClustersWithLabel))
-      return !ticketHasHideLabel
-    })
-    return ticketsWithoutHideLabel.length > 0
-  }
-
-  // list of active filter function
-  const predicates = []
+  let items = Object.values(state.shoots)
   if (onlyAllShootsWithIssues(state, context)) {
     if (get(state, 'shootListFilters.progressing', false)) {
-      predicates.push(notProgressing)
+      const predicate = item => {
+        return !isStatusProgressing(get(item, 'metadata', {}))
+      }
+      items = filter(items, predicate)
     }
     if (get(state, 'shootListFilters.noOperatorAction', false)) {
-      predicates.push(noUserError)
+      const predicate = item => {
+        const ignoreIssues = isTruthyValue(get(item, ['metadata', 'annotations', 'dashboard.gardener.cloud/ignore-issues']))
+        if (ignoreIssues) {
+          return false
+        }
+        const lastErrors = get(item, 'status.lastErrors', [])
+        const allLastErrorCodes = errorCodesFromArray(lastErrors)
+        if (isTemporaryError(allLastErrorCodes)) {
+          return false
+        }
+        const conditions = get(item, 'status.conditions', [])
+        const allConditionCodes = errorCodesFromArray(conditions)
+
+        const constraints = get(item, 'status.constraints', [])
+        const allConstraintCodes = errorCodesFromArray(constraints)
+
+        return !(isUserError(allLastErrorCodes) || isUserError(allConditionCodes) || isUserError(allConstraintCodes))
+      }
+      items = filter(items, predicate)
     }
     if (get(state, 'shootListFilters.deactivatedReconciliation', false)) {
-      predicates.push(reconciliationNotDeactivated)
+      const predicate = item => {
+        return !isReconciliationDeactivated(get(item, 'metadata', {}))
+      }
+      items = filter(items, predicate)
     }
     if (get(state, 'shootListFilters.hideTicketsWithLabel', false)) {
-      predicates.push(hasTicketsWithoutHideLabel)
+      const predicate = item => {
+        const hideClustersWithLabels = get(configStore.ticket, 'hideClustersWithLabels')
+        if (!hideClustersWithLabels) {
+          return true
+        }
+        const metadata = get(item, 'metadata', {})
+        metadata.projectName = projectStore.projectNameByNamespace(metadata)
+        const ticketsForCluster = ticketStore.issues(metadata)
+        if (!ticketsForCluster.length) {
+          return true
+        }
+
+        const ticketsWithoutHideLabel = filter(ticketsForCluster, ticket => {
+          const labelNames = map(get(ticket, 'data.labels'), 'name')
+          const ticketHasHideLabel = some(hideClustersWithLabels, hideClustersWithLabel => includes(labelNames, hideClustersWithLabel))
+          return !ticketHasHideLabel
+        })
+        return ticketsWithoutHideLabel.length > 0
+      }
+      items = filter(items, predicate)
     }
   }
 
-  return Object.values(state.shoots)
-    .filter(item => {
-      for (const predicate of predicates) {
-        if (!predicate(item)) {
-          return false
-        }
-      }
-      return true
-    })
-    .map(item => item.metadata.uid)
+  return items
+}
+
+export function putItem (state, newItem) {
+  const item = findItem(state)(newItem.metadata)
+  if (item) {
+    if (item.metadata.resourceVersion !== newItem.metadata.resourceVersion) {
+      const key = keyForShoot(item.metadata)
+      state.shoots[key] = assign(item, newItem)
+    }
+  } else {
+    if (state.focusMode) {
+      const uid = newItem.metadata.uid
+      delete state.staleShoots[uid]
+    }
+    newItem.info = undefined // register property to ensure reactivity
+    const key = keyForShoot(newItem.metadata)
+    state.shoots[key] = newItem
+  }
+}
+
+export function deleteItem (state, deletedItem) {
+  const item = findItem(state)(deletedItem.metadata)
+  if (item) {
+    if (state.focusMode) {
+      const uid = deletedItem.metadata.uid
+      state.staleShoots[uid] = item
+    }
+    const key = keyForShoot(item.metadata)
+    delete state.shoots[key]
+  }
 }
 
 export function getRawVal (context, item, column) {
@@ -390,8 +414,6 @@ export function getRawVal (context, item, column) {
       return getIssueSince(item.status) || 0
     case 'technicalId':
       return item.status?.technicalID
-    case 'workers':
-      return item.spec.provider.workers?.length ?? 0
     default: {
       if (startsWith(column, 'Z_')) {
         const path = get(projectStore.shootCustomFields, [column, 'path'])
@@ -402,77 +424,60 @@ export function getRawVal (context, item, column) {
   }
 }
 
-export function getSortVal (state, context, item, sortBy) {
+export function getSortVal (context, item, sortBy) {
   const {
-    configStore,
     projectStore,
     ticketStore,
   } = context
-
-  const purposeValue = {
-    infrastructure: 0,
-    production: 1,
-    development: 2,
-    evaluation: 3,
-  }
 
   const value = getRawVal(context, item, sortBy)
   const status = item.status
   switch (sortBy) {
     case 'purpose':
-      return purposeValue[value] ?? 4
-    case 'k8sVersion':
-      return (value || '0.0.0').split('.').map(i => padStart(i, 4, '0')).join('.')
+      switch (value) {
+        case 'infrastructure':
+          return 0
+        case 'production':
+          return 1
+        case 'development':
+          return 2
+        case 'evaluation':
+          return 3
+        default:
+          return 4
+      }
     case 'lastOperation': {
       const operation = value || {}
-      const lastErrors = item.status?.lastErrors ?? []
+      const inProgress = operation.progress !== 100 && operation.state !== 'Failed' && !!operation.progress
+      const lastErrors = get(item, 'status.lastErrors', [])
       const isError = operation.state === 'Failed' || lastErrors.length
-      const ignoredFromReconciliation = isReconciliationDeactivated(item.metadata ?? {})
+      const allErrorCodes = errorCodesFromArray(lastErrors)
+      const userError = isUserError(allErrorCodes)
+      const ignoredFromReconciliation = isReconciliationDeactivated(get(item, 'metadata', {}))
 
       if (ignoredFromReconciliation) {
-        return isError
-          ? 400
-          : 450
+        if (isError) {
+          return 400
+        } else {
+          return 450
+        }
+      } else if (userError && !inProgress) {
+        return 200
+      } else if (userError && inProgress) {
+        const progress = padStart(operation.progress, 2, '0')
+        return `3${progress}`
+      } else if (isError && !inProgress) {
+        return 0
+      } else if (isError && inProgress) {
+        const progress = padStart(operation.progress, 2, '0')
+        return `1${progress}`
+      } else if (inProgress) {
+        const progress = padStart(operation.progress, 2, '0')
+        return `6${progress}`
+      } else if (isShootStatusHibernated(status)) {
+        return 500
       }
-
-      const userError = isUserError(errorCodesFromArray(lastErrors))
-      const inProgress = operation.progress !== 100 && operation.state !== 'Failed' && !!operation.progress
-
-      if (userError) {
-        return inProgress
-          ? '3' + padStart(operation.progress, 2, '0')
-          : 200
-      }
-      if (isError) {
-        return inProgress
-          ? '1' + padStart(operation.progress, 2, '0')
-          : 0
-      }
-      return inProgress
-        ? '6' + padStart(operation.progress, 2, '0')
-        : isShootStatusHibernated(status)
-          ? 500
-          : 700
-    }
-    case 'readiness': {
-      const conditions = item.status?.conditions ?? []
-      if (!conditions.length) {
-        // items without conditions have medium priority
-        const priority = '00000100'
-        const lastTransitionTime = item.status?.lastOperation.lastUpdateTime ?? item.metadata.creationTimestamp
-        return `${priority}-${lastTransitionTime}`
-      }
-      const hideProgressingClusters = get(state.shootListFilters, 'progressing', false)
-      const iteratee = ({ type, status = 'True', lastTransitionTime = '1970-01-01T00:00:00Z' }) => {
-        const isError = status !== 'True' && !(hideProgressingClusters && status === 'Progressing')
-        // items without any error have lowest priority
-        const priority = !isError
-          ? '99999999'
-          : padStart(configStore.conditionForType(type).sortOrder, 8, '0')
-        return `${priority}-${lastTransitionTime}`
-      }
-      // the condition with the lowest priority and transitionTime is used
-      return head(conditions.map(iteratee).sort())
+      return 700
     }
     case 'ticket': {
       const metadata = item.metadata
@@ -491,27 +496,11 @@ export function searchItemsFn (state, context) {
     projectStore,
   } = context
 
-  const searchableCustomFields = computed(() => {
-    return filter(projectStore.shootCustomFieldList, ['searchable', true])
-  })
-
   let searchQuery
-  let searchQueryTerms = []
-  let lastSearch
+  let lastSearchString
 
   return (search, item) => {
-    if (search !== lastSearch) {
-      lastSearch = search
-      searchQuery = parseSearch(search)
-      searchQueryTerms = map(searchQuery.terms, 'value')
-    }
-
-    if (searchQueryTerms.includes('workerless')) {
-      if (getRawVal(context, item, 'workers') === 0) {
-        return true
-      }
-    }
-
+    const searchableCustomFields = filter(projectStore.shootCustomFieldList, ['searchable', true])
     const values = [
       getRawVal(context, item, 'name'),
       getRawVal(context, item, 'infrastructure'),
@@ -523,29 +512,86 @@ export function searchItemsFn (state, context) {
       getRawVal(context, item, 'ticketLabels'),
       getRawVal(context, item, 'errorCodes'),
       getRawVal(context, item, 'controlPlaneHighAvailability'),
-      ...map(searchableCustomFields.value, ({ key }) => getRawVal(context, item, key)),
+      ...map(searchableCustomFields, ({ key }) => getRawVal(context, item, key)),
     ]
 
+    if (search !== lastSearchString) {
+      lastSearchString = search
+      searchQuery = parseSearch(search)
+    }
     return searchQuery.matches(values)
   }
 }
 
 export function sortItemsFn (state, context) {
-  return (items, sortByItems) => {
+  const {
+    configStore,
+  } = context
+
+  return (items, sortByArr) => {
     if (state.focusMode) {
       // no need to sort in focus mode sorting is freezed and filteredItems return items in last sorted order
       return items
     }
-    const { key, order = 'asc' } = head(sortByItems) ?? {}
-    if (!key) {
+    const sortByObj = head(sortByArr)
+    if (!sortByObj || !sortByObj.key) {
       return items
     }
+    const sortBy = sortByObj.key
 
-    const iteratee = item => getSortVal(state, context, item, key)
-    return orderBy(items, [iteratee, 'metadata.name'], [order, 'asc'])
+    const sortOrder = sortByObj.order
+    const sortbyNameAsc = (a, b) => {
+      if (getRawVal(context, a, 'name') > getRawVal(context, b, 'name')) {
+        return 1
+      } else if (getRawVal(context, a, 'name') < getRawVal(context, b, 'name')) {
+        return -1
+      }
+      return 0
+    }
+    const inverse = sortOrder === 'desc' ? -1 : 1
+    switch (sortBy) {
+      case 'k8sVersion': {
+        items.sort((a, b) => {
+          const versionA = getRawVal(context, a, sortBy)
+          const versionB = getRawVal(context, b, sortBy)
+
+          if (semver.gt(versionA, versionB)) {
+            return 1 * inverse
+          } else if (semver.lt(versionA, versionB)) {
+            return -1 * inverse
+          } else {
+            return sortbyNameAsc(a, b)
+          }
+        })
+        return items
+      }
+      case 'readiness': {
+        const hideProgressingClusters = get(state.shootListFilters, 'progressing', false)
+        return orderBy(items, item => {
+          const errorGroups = map(item.status?.conditions, itemCondition => {
+            const isErrorCondition = (itemCondition?.status !== 'True' &&
+              (!hideProgressingClusters || itemCondition?.status !== 'Progressing'))
+            if (!isErrorCondition) {
+              return {
+                sortOrder: `${Number.MAX_SAFE_INTEGER}`,
+                lastTransitionTime: itemCondition.lastTransitionTime,
+              }
+            }
+            const type = itemCondition.type
+            const condition = configStore.conditionForType(type)
+            return {
+              sortOrder: condition.sortOrder,
+              lastTransitionTime: itemCondition.lastTransitionTime,
+            }
+          })
+          const { sortOrder, lastTransitionTime } = head(orderBy(errorGroups, ['sortOrder']))
+          return [sortOrder, lastTransitionTime, 'metadata.name']
+        },
+        [sortOrder, sortOrder, 'asc'])
+      }
+      default: {
+        return orderBy(items, [item => getSortVal(context, item, sortBy), 'metadata.name'], [sortOrder, 'asc'])
+      }
+    }
   }
-}
-
-export function shootHasIssue (object) {
-  return get(object, ['metadata', 'labels', 'shoot.gardener.cloud/status'], 'healthy') !== 'healthy'
 }

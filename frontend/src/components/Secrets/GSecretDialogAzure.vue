@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <g-secret-dialog
     v-model="visible"
     :data="secretData"
-    :secret-validations="v$"
+    :data-valid="valid"
     :secret="secret"
     :vendor="vendor"
     :create-title="`Add new ${name} Secret`"
@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="clientId"
           color="primary"
           label="Client Id"
-          :error-messages="getErrorMessages(v$.clientId)"
+          :error-messages="getErrorMessages('clientId')"
           variant="underlined"
           @update:model-value="v$.clientId.$touch()"
           @blur="v$.clientId.$touch()"
@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
           :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideSecret ? 'password' : 'text'"
           label="Client Secret"
-          :error-messages="getErrorMessages(v$.clientSecret)"
+          :error-messages="getErrorMessages('clientSecret')"
           variant="underlined"
           @click:append="() => (hideSecret = !hideSecret)"
           @update:model-value="v$.clientSecret.$touch()"
@@ -46,7 +46,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="tenantId"
           color="primary"
           label="Tenant Id"
-          :error-messages="getErrorMessages(v$.tenantId)"
+          :error-messages="getErrorMessages('tenantId')"
           variant="underlined"
           @update:model-value="v$.tenantId.$touch()"
           @blur="v$.tenantId.$touch()"
@@ -57,7 +57,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="subscriptionId"
           color="primary"
           label="Subscription Id"
-          :error-messages="getErrorMessages(v$.subscriptionId)"
+          :error-messages="getErrorMessages('subscriptionId')"
           variant="underlined"
           @update:model-value="v$.subscriptionId.$touch()"
           @blur="v$.subscriptionId.$touch()"
@@ -103,11 +103,25 @@ import { required } from '@vuelidate/validators'
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
 
-import { withFieldName } from '@/utils/validators'
 import {
-  getErrorMessages,
+  getValidationErrors,
   setDelayedInputFocus,
 } from '@/utils'
+
+const validationErrors = {
+  clientId: {
+    required: 'You can\'t leave this empty.',
+  },
+  clientSecret: {
+    required: 'You can\'t leave this empty.',
+  },
+  tenantId: {
+    required: 'You can\'t leave this empty.',
+  },
+  subscriptionId: {
+    required: 'You can\'t leave this empty.',
+  },
+}
 
 export default {
   components: {
@@ -141,23 +155,12 @@ export default {
       tenantId: undefined,
       subscriptionId: undefined,
       hideSecret: true,
+      validationErrors,
     }
   },
   validations () {
-    return {
-      clientId: withFieldName('Client ID', {
-        required,
-      }),
-      clientSecret: withFieldName('Client Secret', {
-        required,
-      }),
-      tenantId: withFieldName('Tenant ID', {
-        required,
-      }),
-      subscriptionId: withFieldName('Subscription ID', {
-        required,
-      }),
-    }
+    // had to move the code to a computed property so that the getValidationErrors method can access it
+    return this.validators
   },
   computed: {
     visible: {
@@ -178,6 +181,23 @@ export default {
         subscriptionID: this.subscriptionId,
         tenantID: this.tenantId,
       }
+    },
+    validators () {
+      const validators = {
+        clientId: {
+          required,
+        },
+        clientSecret: {
+          required,
+        },
+        tenantId: {
+          required,
+        },
+        subscriptionId: {
+          required,
+        },
+      }
+      return validators
     },
     isCreateMode () {
       return !this.secret
@@ -215,7 +235,9 @@ export default {
         setDelayedInputFocus(this, 'clientId')
       }
     },
-    getErrorMessages,
+    getErrorMessages (field) {
+      return getValidationErrors(this, field)
+    },
   },
 }
 </script>

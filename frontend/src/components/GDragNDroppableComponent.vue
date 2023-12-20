@@ -39,6 +39,7 @@ import GPositionalDropzone from '@/components/GPositionalDropzone.vue'
 import { gDraggable } from '@/lib/g-draggable'
 
 export default {
+  name: 'DraggableComponent',
   directives: {
     gDraggable,
   },

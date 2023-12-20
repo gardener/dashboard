@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
       item-title="purpose"
       item-value="purpose"
       persistent-hint
-      :error-messages="getErrorMessages(v$.internalPurpose)"
+      :error-messages="getErrorMessages('internalPurpose')"
       variant="underlined"
       @update:model-value="onInputPurpose"
       @blur="v$.internalPurpose.$touch()"
@@ -35,13 +35,18 @@ SPDX-License-Identifier: Apache-2.0
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
-import { withFieldName } from '@/utils/validators'
 import {
-  getErrorMessages,
+  getValidationErrors,
   purposesForSecret,
 } from '@/utils'
 
 import { map } from '@/lodash'
+
+const validationErrors = {
+  internalPurpose: {
+    required: 'Purpose is required.',
+  },
+}
 
 export default {
   props: {
@@ -59,18 +64,22 @@ export default {
   },
   data () {
     return {
+      validationErrors,
       valid: undefined,
       internalPurpose: undefined,
     }
   },
   validations () {
-    return {
-      internalPurpose: withFieldName('Purpose', {
-        required,
-      }),
-    }
+    return this.validators
   },
   computed: {
+    validators () {
+      return {
+        internalPurpose: {
+          required,
+        },
+      }
+    },
     purposes () {
       const purposes = purposesForSecret(this.secret)
       return map(purposes, purpose => ({
@@ -80,6 +89,9 @@ export default {
     },
   },
   methods: {
+    getErrorMessages (field) {
+      return getValidationErrors(this, field)
+    },
     onInputPurpose () {
       this.v$.internalPurpose.$touch()
       this.$emit('update-purpose', this.internalPurpose)
@@ -102,7 +114,6 @@ export default {
       this.internalPurpose = purpose
       this.onInputPurpose()
     },
-    getErrorMessages,
   },
 }
 </script>

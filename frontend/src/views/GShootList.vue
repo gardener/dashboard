@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
             <template #activator="{ props }">
               <div v-bind="props">
                 <v-badge
-                  v-if="issueSinceColumnVisible"
+                  v-if="!projectScope && isAdmin"
                   class="mr-5"
                   bordered
                   color="primary-lighten-3"
@@ -54,7 +54,7 @@ SPDX-License-Identifier: Apache-2.0
               </div>
             </template>
             <span class="font-weight-bold">Focus Mode</span>
-            <ul class="ml-3">
+            <ul>
               <li>Cluster list sorting is freezed</li>
               <li>Items in the list will still be updated</li>
               <li>New clusters will not be added to the list until you disable focus mode</li>
@@ -73,7 +73,6 @@ SPDX-License-Identifier: Apache-2.0
             <template #activator="{ props }">
               <v-text-field
                 v-bind="props"
-                :model-value="shootSearch"
                 prepend-inner-icon="mdi-magnify"
                 color="primary"
                 label="Search"
@@ -85,8 +84,8 @@ SPDX-License-Identifier: Apache-2.0
                 clear-icon="mdi-close"
                 density="compact"
                 class="g-table-search-field mr-3"
-                @update:model-value="onUpdateShootSearch"
-                @keyup.esc="resetShootSearch"
+                @update:model-value="onInputSearch"
+                @keyup.esc="shootSearch = ''"
               />
             </template>
             Search terms are <span class="font-weight-bold">ANDed</span>.<br>
@@ -157,28 +156,23 @@ SPDX-License-Identifier: Apache-2.0
       <v-data-table
         v-model:page="page"
         v-model:sort-by="sortByInternal"
-        v-model:items-per-page="shootItemsPerPage"
+        v-model:items-per-page="itemsPerPage"
         :headers="visibleHeaders"
         :items="sortedAndFilteredItems"
         hover
         :loading="loading || !connected"
         :items-per-page-options="itemsPerPageOptions"
-        :custom-key-sort="customKeySort"
+        :custom-key-sort="disableCustomKeySort(visibleHeaders)"
         must-sort
         class="g-table"
       >
         <template #progress>
           <g-shoot-list-progress />
         </template>
-        <template #loading>
-          Loading clusters ...
-        </template>
-        <template #no-data>
-          No clusters to show
-        </template>
         <template #item="{ item }">
           <g-shoot-list-row
-            :shoot-item="item"
+            :key="item.raw.metadata.uid"
+            :shoot-item="item.raw"
             :visible-headers="visibleHeaders"
             @show-dialog="showDialog"
           />
@@ -186,7 +180,7 @@ SPDX-License-Identifier: Apache-2.0
         <template #bottom="{ pageCount }">
           <g-data-table-footer
             v-model:page="page"
-            v-model:items-per-page="shootItemsPerPage"
+            v-model:items-per-page="itemsPerPage"
             :items-length="sortedAndFilteredItems.length"
             :items-per-page-options="itemsPerPageOptions"
             :page-count="pageCount"
@@ -195,7 +189,6 @@ SPDX-License-Identifier: Apache-2.0
       </v-data-table>
       <v-dialog
         v-model="clusterAccessDialog"
-        persistent
         max-width="850"
       >
         <v-card>
@@ -226,10 +219,13 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineAsyncComponent } from 'vue'
+import {
+  defineAsyncComponent,
+  toRaw,
+} from 'vue'
+import { useLocalStorage } from '@vueuse/core'
 import {
   mapState,
-  mapWritableState,
   mapActions,
 } from 'pinia'
 
@@ -239,7 +235,6 @@ import { useShootStore } from '@/store/shoot'
 import { useSocketStore } from '@/store/socket'
 import { useProjectStore } from '@/store/project'
 import { useConfigStore } from '@/store/config'
-import { useLocalStorageStore } from '@/store/localStorage'
 
 import GToolbar from '@/components/GToolbar.vue'
 import GShootListRow from '@/components/GShootListRow.vue'
@@ -258,6 +253,9 @@ import {
   isEmpty,
   join,
   map,
+  mapKeys,
+  mapValues,
+  pick,
   some,
   sortBy,
   startsWith,
@@ -278,26 +276,29 @@ export default {
   inject: ['logger'],
   beforeRouteEnter (to, from, next) {
     next(vm => {
+      vm.cachedItems = null
       vm.updateTableSettings()
     })
   },
   beforeRouteUpdate (to, from, next) {
-    this.resetShootSearch()
+    this.shootSearch = null
     this.updateTableSettings()
     this.focusModeInternal = false
     next()
   },
   beforeRouteLeave (to, from, next) {
-    this.resetShootSearch()
+    this.cachedItems = this.shootList.slice(0)
+    this.shootSearch = null
     this.focusModeInternal = false
     next()
   },
   data () {
     return {
       shootSearch: '',
-      debouncedShootSearch: '',
       dialog: null,
+      itemsPerPage: useLocalStorage('projects/shoot-list/itemsPerPage', 10),
       page: 1,
+      cachedItems: null,
       selectedColumns: undefined,
       itemsPerPageOptions: [
         { value: 5, title: '5' },
@@ -323,6 +324,7 @@ export default {
     }),
     ...mapState(useProjectStore, [
       'projectName',
+      'projectFromProjectList',
       'shootCustomFieldList',
       'shootCustomFields',
     ]),
@@ -333,20 +335,11 @@ export default {
       'shootList',
       'shootListFilters',
       'loading',
-      'selectedShoot',
+      'selectedItem',
       'onlyShootsWithIssues',
       'numberOfNewItemsSinceFreeze',
       'focusMode',
       'sortBy',
-    ]),
-    ...mapWritableState(useLocalStorageStore, [
-      'shootSelectedColumns',
-      'shootItemsPerPage',
-      'shootSortBy',
-      'shootCustomSelectedColumns',
-      'shootCustomSortBy',
-      'allProjectsShootFilter',
-      'operatorFeatures',
     ]),
     defaultSortBy () {
       return [{ key: 'name', order: 'asc' }]
@@ -381,11 +374,11 @@ export default {
       },
     },
     currentName () {
-      return get(this.selectedShoot, 'metadata.name')
+      return get(this.selectedItem, 'metadata.name')
     },
     shootItem () {
       // property `shoot-item` of the mixin is required
-      return this.selectedShoot || {}
+      return this.selectedItem || {}
     },
     currentStandardSelectedColumns () {
       return mapTableHeader(this.standardHeaders, 'selected')
@@ -445,14 +438,6 @@ export default {
           hidden: !this.isAdmin,
         },
         {
-          title: 'WORKERS',
-          key: 'workers',
-          sortable: isSortable(true),
-          align: 'start',
-          defaultSelected: false,
-          hidden: false,
-        },
-        {
           title: 'CREATED BY',
           key: 'createdBy',
           sortable: isSortable(true),
@@ -509,7 +494,7 @@ export default {
           sortable: isSortable(true),
           align: 'start',
           defaultSelected: true,
-          hidden: !this.issueSinceColumnVisible,
+          hidden: this.projectScope || !this.isAdmin,
         },
         {
           title: 'HIGH AVAILABILITY',
@@ -603,17 +588,6 @@ export default {
     visibleHeaders () {
       return filter(this.selectableHeaders, ['selected', true])
     },
-    sortableHeaders () {
-      return filter(this.visibleHeaders, ['sortable', true])
-    },
-    customKeySort () {
-      const noSort = () => 0
-      const value = {}
-      for (const header of this.sortableHeaders) {
-        value[header.key] = noSort
-      }
-      return value
-    },
     allFilters () {
       return [
         {
@@ -679,7 +653,7 @@ export default {
       },
     },
     items () {
-      return this.shootList ?? []
+      return this.cachedItems || this.shootList
     },
     changeFiltersDisabled () {
       return this.focusModeInternal
@@ -717,43 +691,31 @@ export default {
     hideClustersWithLabels () {
       return get(this.ticketConfig, 'hideClustersWithLabels', [])
     },
-    filteredItems () {
-      const query = this.debouncedShootSearch
-      return query
-        ? filter(this.items, item => this.searchItems(query, item))
-        : [...this.items]
-    },
     sortedAndFilteredItems () {
-      return this.sortItems(this.filteredItems, this.sortByInternal)
-    },
-    issueSinceColumnVisible () {
-      return this.operatorFeatures || (!this.projectScope && this.isAdmin)
+      const items = this.sortItems(this.items, this.sortByInternal)
+      return filter(items, item => this.searchItems(this.shootSearch, toRaw(item)))
     },
   },
   watch: {
     sortBy (sortBy) {
       if (some(sortBy, value => startsWith(value.key, 'Z_'))) {
-        this.shootCustomSortBy = sortBy
+        useLocalStorage(`project/${this.projectName}/shoot-list/sortBy`, []).value = sortBy
       } else {
-        this.shootCustomSortBy = null // clear project specific options
-        this.shootSortBy = sortBy
+        useLocalStorage(`project/${this.projectName}/shoot-list/sortBy`, []).value = null // clear project specific options
+        useLocalStorage('projects/shoot-list/sortBy', []).value = sortBy
       }
     },
   },
   methods: {
     ...mapActions(useShootStore, [
       'setSelection',
-      'toogleShootListFilter',
+      'setShootListFilter',
       'subscribeShoots',
       'sortItems',
       'searchItems',
       'setFocusMode',
       'setSortBy',
     ]),
-    resetShootSearch () {
-      this.shootSearch = null
-      this.debouncedShootSearch = null
-    },
     async showDialog (args) {
       switch (args.action) {
         case 'access':
@@ -774,10 +736,14 @@ export default {
       this.saveSelectedColumns()
     },
     saveSelectedColumns () {
-      this.shootSelectedColumns = this.currentStandardSelectedColumns
-      this.shootCustomSelectedColumns = isEmpty(this.currentCustomSelectedColumns)
-        ? null
-        : this.currentCustomSelectedColumns
+      useLocalStorage('projects/shoot-list/selected-columns', {}).value = this.currentStandardSelectedColumns
+
+      const projectSpecificCustomSelectedColumns = useLocalStorage(`project/${this.projectName}/shoot-list/selected-columns`, {})
+      if (isEmpty(this.currentCustomSelectedColumns)) {
+        projectSpecificCustomSelectedColumns.value = null
+      } else {
+        projectSpecificCustomSelectedColumns.value = this.currentCustomSelectedColumns
+      }
     },
     resetTableSettings () {
       this.selectedColumns = {
@@ -785,29 +751,46 @@ export default {
         ...this.defaultCustomSelectedColumns,
       }
       this.saveSelectedColumns()
-      this.shootItemsPerPage = this.defaultItemsPerPage
+      this.itemsPerPage = this.defaultItemsPerPage
       this.sortByInternal = this.defaultSortBy
     },
     updateTableSettings () {
+      const selectedColumns = useLocalStorage('projects/shoot-list/selected-columns', {})
+      const projectSpecificCustomSelectedColumns = useLocalStorage(`project/${this.projectName}/shoot-list/selected-columns`, {})
       this.selectedColumns = {
-        ...this.shootSelectedColumns,
-        ...this.shootCustomSelectedColumns,
+        ...selectedColumns.value,
+        ...projectSpecificCustomSelectedColumns.value,
       }
 
-      if (!isEmpty(this.shootCustomSortBy)) {
-        this.sortByInternal = this.shootCustomSortBy
+      const projectSpecificSortBy = useLocalStorage(`project/${this.projectName}/shoot-list/sortBy`, [])
+      if (!isEmpty(projectSpecificSortBy.value)) {
+        this.sortByInternal = projectSpecificSortBy.value
         return
       }
 
-      if (!isEmpty(this.shootSortBy)) {
-        this.sortByInternal = this.shootSortBy
+      const sortBy = useLocalStorage('projects/shoot-list/sortBy', [])
+      if (!isEmpty(sortBy.value)) {
+        this.sortByInternal = sortBy.value
         return
       }
 
       this.sortByInternal = this.defaultSortBy
     },
-    toggleFilter ({ value: key }) {
-      this.toogleShootListFilter(key)
+    toggleFilter ({ value }) {
+      const key = value
+      this.setShootListFilter({
+        filter: key,
+        value: !this.shootListFilters[key],
+      })
+
+      useLocalStorage('project/_all/shoot-list/filter', []).value = pick(this.shootListFilters, [
+        'onlyShootsWithIssues',
+        'progressing',
+        'noOperatorAction',
+        'deactivatedReconciliation',
+        'hideTicketsWithLabel',
+      ])
+
       if (key === 'onlyShootsWithIssues') {
         this.subscribeShoots()
       }
@@ -816,14 +799,14 @@ export default {
       const filters = this.shootListFilters
       return get(filters, key, false)
     },
-    onUpdateShootSearch (value) {
+    onInputSearch: debounce(function (value) {
       this.shootSearch = value
-
-      this.setDebouncedShootSearch()
-    },
-    setDebouncedShootSearch: debounce(function () {
-      this.debouncedShootSearch = this.shootSearch
     }, 500),
+    disableCustomKeySort (tableHeaders) {
+      const sortableTableHeaders = filter(tableHeaders, ['sortable', true])
+      const tableKeys = mapKeys(sortableTableHeaders, ({ key }) => key)
+      return mapValues(tableKeys, () => () => 0)
+    },
   },
 }
 </script>

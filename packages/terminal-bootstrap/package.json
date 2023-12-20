@@ -1,0 +1,99 @@
+{
+  "name": "@gardener-dashboard/terminal-bootstrap",
+  "version": "1.69.0",
+  "description": "Terminal Bootstrap",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gardener/dashboard.git",
+    "directory": "packages/terminal-bootstrap"
+  },
+  "bugs": {
+    "url": "https://github.com/gardener/dashboard/issues"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "main": "main.js",
+  "files": [
+    "lib",
+    "main.js"
+  ],
+  "scripts": {
+    "lint": "eslint --ext .js main.js .",
+    "serve": "node main",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@gardener-dashboard/kube-client": "workspace:*",
+    "@gardener-dashboard/kube-config": "workspace:*",
+    "@gardener-dashboard/logger": "workspace:*",
+    "@gardener-dashboard/request": "workspace:*",
+    "better-queue": "^3.8.12",
+    "fnv-plus": "^1.3.1",
+    "http-errors": "^2.0.0",
+    "js-yaml": "^4.1.0",
+    "lightship": "^9.0.2",
+    "lodash": "^4.17.21",
+    "object-hash": "^3.0.0",
+    "p-timeout": "^4.1.0"
+  },
+  "devDependencies": {
+    "@gardener-dashboard/test-utils": "workspace:*",
+    "abort-controller": "^3.0.0",
+    "eslint": "^8.36.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-jest": "^26.9.0",
+    "eslint-plugin-n": "^15.6.1",
+    "eslint-plugin-promise": "^6.1.1",
+    "jest": "^27.5.1"
+  },
+  "eslintConfig": {
+    "env": {
+      "commonjs": true,
+      "jest/globals": true
+    },
+    "plugins": [
+      "jest"
+    ],
+    "extends": [
+      "standard",
+      "plugin:jest/recommended"
+    ],
+    "globals": {
+      "fixtures": true
+    },
+    "rules": {
+      "no-console": "error"
+    }
+  },
+  "jest": {
+    "restoreMocks": true,
+    "verbose": true,
+    "coverageDirectory": "coverage",
+    "collectCoverageFrom": [
+      "lib/**/*.js"
+    ],
+    "testEnvironment": "node",
+    "transformIgnorePatterns": [
+      "/node_modules/",
+      "\\.pnp\\.[^\\/]+$"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 100,
+        "functions": 100,
+        "lines": 100,
+        "statements": 100
+      }
+    },
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.js"
+    ]
+  },
+  "packageManager": "yarn@3.6.1",
+  "engines": {
+    "node": "^20.5.0"
+  }
+}

@@ -13,7 +13,7 @@ const createError = require('http-errors')
 const kubernetesClient = require('@gardener-dashboard/kube-client')
 const cache = require('./cache')
 const logger = require('./logger')
-const { projectFilter, trimObjectMetadata, parseRooms } = require('./utils')
+const { projectFilter } = require('./utils')
 const { authenticate } = require('./security')
 const { authorization } = require('./services')
 
@@ -126,64 +126,6 @@ async function unsubscribe (socket, key) {
   }
 }
 
-function synchronizeShoots (socket, uids = []) {
-  const rooms = Array.from(socket.rooms).filter(room => room !== socket.id)
-  const [
-    isAdmin,
-    namespaces,
-    qualifiedNames
-  ] = parseRooms(rooms)
-
-  const uidNotFound = uid => {
-    return {
-      kind: 'Status',
-      apiVersion: 'v1',
-      status: 'Failure',
-      message: `Shoot with uid ${uid} does not exist`,
-      reason: 'NotFound',
-      details: {
-        uid,
-        group: 'core.gardener.cloud',
-        kind: 'shoots'
-      },
-      code: 404
-    }
-  }
-  return uids.map(uid => {
-    const object = cache.getShootByUid(uid)
-    if (!object) {
-      // the shoot has been removed from the cache
-      return uidNotFound(uid)
-    }
-    const { namespace, name } = object.metadata
-    const qualifiedName = [namespace, name].join('/')
-    const hasValidSubscription = isAdmin || namespaces.includes(namespace) || qualifiedNames.includes(qualifiedName)
-    if (!hasValidSubscription) {
-      // the socket has NOT joined a room (admin, namespace or individual shoot) the current shoot belongs to
-      return uidNotFound(uid)
-    }
-    // only send all shoot details for single shoot subscriptions
-    if (!qualifiedNames.includes(qualifiedName)) {
-      trimObjectMetadata(object)
-    }
-    return object
-  })
-}
-
-function synchronize (socket, key, ...args) {
-  switch (key) {
-    case 'shoots': {
-      const [uids] = args
-      if (!Array.isArray(uids)) {
-        throw new TypeError('Invalid parameters for synchronize shoots')
-      }
-      return synchronizeShoots(socket, uids)
-    }
-    default:
-      throw new TypeError(`Invalid synchronization type - ${key}`)
-  }
-}
-
 function setDisconnectTimeout (socket, delay) {
   delay = Math.min(2147483647, delay) // setTimeout delay must not exceed 32-bit signed integer
   logger.debug('Socket %s will expire in %d seconds', socket.id, Math.floor(delay / 1000))
@@ -258,19 +200,6 @@ function init (httpServer, cache) {
         done({ statusCode: 200 })
       } catch (err) {
         logger.error('Socket %s unsubscribe error: %s', socket.id, err.message)
-        const { statusCode = 500, name, message } = err
-        done({ statusCode, name, message })
-      }
-    })
-
-    // handle 'synchronize' events
-    socket.on('synchronize', async (key, ...args) => {
-      const done = args.pop()
-      try {
-        const items = await synchronize(socket, key, ...args)
-        done({ statusCode: 200, items })
-      } catch (err) {
-        logger.error('Socket %s synchronize error: %s', socket.id, err.message)
         const { statusCode = 500, name, message } = err
         done({ statusCode, name, message })
       }

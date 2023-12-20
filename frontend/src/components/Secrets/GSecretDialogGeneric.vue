@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <g-secret-dialog
     v-model="visible"
     :data="secretData"
-    :secret-validations="v$"
+    :data-valid="valid"
     :secret="secret"
     :vendor="vendor"
     :create-title="`Add new ${vendor} Secret`"
@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
           color="primary"
           variant="filled"
           label="Secret Data"
-          :error-messages="getErrorMessages(v$.data)"
+          :error-messages="getErrorMessages('data')"
           @update:model-value="onInputSecretData"
           @blur="v$.data.$touch()"
         />
@@ -48,15 +48,18 @@ import { required } from '@vuelidate/validators'
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 
 import {
-  withFieldName,
-  withMessage,
-} from '@/utils/validators'
-import {
-  getErrorMessages,
+  getValidationErrors,
   setDelayedInputFocus,
 } from '@/utils'
 
 import { isObject } from '@/lodash'
+
+const validationErrors = {
+  data: {
+    required: 'You can\'t leave this empty.',
+    isYAML: 'You need to enter secret data as YAML key-value pairs',
+  },
+}
 
 export default {
   components: {
@@ -87,15 +90,12 @@ export default {
     return {
       data: undefined,
       secretData: {},
+      validationErrors,
     }
   },
   validations () {
-    return {
-      data: withFieldName('Secret Data', {
-        required,
-        isYAML: withMessage('You need to enter secret data as YAML key - value pairs', () => Object.keys(this.secretData).length > 0),
-      }),
-    }
+    // had to move the code to a computed property so that the getValidationErrors method can access it
+    return this.validators
   },
   computed: {
     visible: {
@@ -108,6 +108,15 @@ export default {
     },
     valid () {
       return !this.v$.$invalid
+    },
+    validators () {
+      const validators = {
+        data: {
+          required,
+          isYAML: () => Object.keys(this.secretData).length > 0,
+        },
+      }
+      return validators
     },
     isCreateMode () {
       return !this.secret
@@ -139,7 +148,9 @@ export default {
         setDelayedInputFocus(this, 'data')
       }
     },
-    getErrorMessages,
+    getErrorMessages (field) {
+      return getValidationErrors(this, field)
+    },
   },
 }
 </script>

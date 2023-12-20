@@ -4,11 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { useAppStore } from '@/store/app'
-import { useAuthnStore } from '@/store/authn'
-import { useAuthzStore } from '@/store/authz'
-import { useProjectStore } from '@/store/project'
-
 /* Layouts */
 import GLogin from '@/layouts/GLogin.vue'
 import GDefault from '@/layouts/GDefault.vue'
@@ -22,6 +17,9 @@ import GShootItemPlaceholder from '@/views/GShootItemPlaceholder.vue'
 import GShootItemEditor from '@/views/GShootItemEditor.vue'
 import GAccount from '@/views/GAccount.vue'
 import GSettings from '@/views/GSettings.vue'
+
+/* Components */
+import GRouterView from '@/components/GRouterView.vue'
 
 import {
   homeBreadcrumbs,
@@ -55,11 +53,12 @@ const GShootList = () => import('@/views/GShootList.vue')
 const GShootItem = () => import('@/views/GShootItem.vue')
 const GShootItemTerminal = () => import('@/views/GShootItemTerminal.vue')
 
-export function createRoutes () {
-  const appStore = useAppStore
-  const authnStore = useAuthnStore()
-  const authzStore = useAuthzStore()
-  const projectStore = useProjectStore()
+export function createRoutes (context) {
+  const {
+    authnStore,
+    authzStore,
+    projectStore,
+  } = context
 
   return [
     loginRoute('/login'),
@@ -100,10 +99,7 @@ export function createRoutes () {
       component: GProjectPlaceholder,
       children: [
         { path: '', redirect: 'shoots' },
-        shootListRoute('shoots'),
-        newShootRoute('shoots/+'),
-        newShootEditorRoute('shoots/+/yaml'),
-        shootItemHierarchy('shoots/:name'),
+        shootListHierarchy('shoots'),
         secretListRoute('secrets'),
         secretItemRoute('secrets/:name'),
         membersRoute('members'),
@@ -117,6 +113,20 @@ export function createRoutes () {
             breadcrumbs: notFoundBreadcrumbs,
           },
         },
+      ],
+    }
+  }
+
+  /* Shoot List Hierachy "/namespace/:namespace/shoots" */
+  function shootListHierarchy (path) {
+    return {
+      path,
+      component: GRouterView,
+      children: [
+        shootListRoute(''),
+        newShootRoute('+'),
+        newShootEditorRoute('+/yaml'),
+        shootItemHierarchy(':name'),
       ],
     }
   }
@@ -187,7 +197,16 @@ export function createRoutes () {
         projectScope: false,
         breadcrumbs: homeBreadcrumbs,
       },
-      beforeEnter: redirectToShootList,
+      async beforeEnter (to, from, next) {
+        const namespace = projectStore.defaultNamespace
+        if (namespace) {
+          return next({
+            name: 'ShootList',
+            params: { namespace },
+          })
+        }
+        next()
+      },
     }
   }
 
@@ -201,14 +220,29 @@ export function createRoutes () {
         projectScope: false,
         breadcrumbs: newProjectBreadcrumbs,
       },
+      beforeEnter (to, from, next) {
+        const defaultNamespace = projectStore.defaultNamespace
+        if (!projectStore.namespace && defaultNamespace) {
+          projectStore.namespace = defaultNamespace
+        }
+        next()
+      },
     }
   }
 
   function projectsRoute (path) {
     return {
       path,
-      name: 'ProjectList',
-      beforeEnter: redirectToShootList,
+      beforeEnter (to, from, next) {
+        const namespace = projectStore.namespace || projectStore.defaultNamespace
+        if (namespace) {
+          return next({
+            name: 'ShootList',
+            params: { namespace },
+          })
+        }
+        next()
+      },
     }
   }
 
@@ -222,7 +256,16 @@ export function createRoutes () {
         projectScope: false,
         breadcrumbs: accountBreadcrumbs,
       },
-      beforeEnter: addNamespaceToUrl,
+      beforeEnter (to, from, next) {
+        const namespace = projectStore.namespace || projectStore.defaultNamespace
+        if (!to.query.namespace && namespace) {
+          return next({
+            name: 'Account',
+            query: { namespace, ...to.query },
+          })
+        }
+        next()
+      },
     }
   }
 
@@ -236,7 +279,16 @@ export function createRoutes () {
         projectScope: false,
         breadcrumbs: settingsBreadcrumbs,
       },
-      beforeEnter: addNamespaceToUrl,
+      beforeEnter (to, from, next) {
+        const namespace = projectStore.namespace || projectStore.defaultNamespace
+        if (!to.query.namespace && namespace) {
+          return next({
+            name: 'Settings',
+            query: { namespace, ...to.query },
+          })
+        }
+        next()
+      },
     }
   }
 
@@ -324,10 +376,11 @@ export function createRoutes () {
       meta: {
         breadcrumbs: shootItemTerminalBreadcrumbs,
       },
-      beforeEnter (to, from) {
-        if (!authzStore.hasShootTerminalAccess) {
-          appStore.setError(new Error('Access to cluster terminal is not allowed'))
-          return false
+      beforeEnter (to, from, next) {
+        if (authzStore.hasShootTerminalAccess) {
+          next()
+        } else {
+          next('/')
         }
       },
     }
@@ -407,37 +460,14 @@ export function createRoutes () {
         },
         breadcrumbs: terminalBreadcrumbs,
       },
-      beforeEnter (to, from) {
-        if (!authzStore.hasGardenTerminalAccess) {
-          appStore.setError(new Error('Access to garden terminal is not allowed'))
-          return false
+      beforeEnter (to, from, next) {
+        if (authzStore.hasGardenTerminalAccess) {
+          to.params.target = 'garden'
+          next()
+        } else {
+          next('/')
         }
-        to.params.target = 'garden'
       },
-    }
-  }
-
-  /* Helper functions */
-  function redirectToShootList (to) {
-    const namespace = authzStore.namespace || projectStore.defaultNamespace
-    if (namespace) {
-      return {
-        name: 'ShootList',
-        params: { namespace },
-      }
-    }
-  }
-
-  function addNamespaceToUrl (to) {
-    const namespace = authzStore.namespace || projectStore.defaultNamespace
-    if (!to.query.namespace && namespace) {
-      return {
-        name: to.name,
-        query: {
-          namespace,
-          ...to.query,
-        },
-      }
     }
   }
 }

@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
         item-value="metadata.name"
         item-title="metadata.displayName"
         label="Cloud Profile"
-        :error-messages="getErrorMessages(v$.modelValue)"
+        :error-messages="getErrorMessages('modelValue')"
         color="primary"
         variant="underlined"
         @update:model-value="onInput"
@@ -34,8 +34,13 @@ SPDX-License-Identifier: Apache-2.0
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
-import { getErrorMessages } from '@/utils'
-import { withFieldName } from '@/utils/validators'
+import { getValidationErrors } from '@/utils'
+
+const validationErrors = {
+  modelValue: {
+    required: 'You can\'t leave this empty.',
+  },
+}
 
 export default {
   props: {
@@ -59,19 +64,31 @@ export default {
       v$: useVuelidate(),
     }
   },
-  validations () {
+  data () {
     return {
-      modelValue: withFieldName('Cloud Profile', {
-        required,
-      }),
+      validationErrors,
     }
   },
+  validations () {
+    return this.validators
+  },
+  computed: {
+    validators () {
+      return {
+        modelValue: {
+          required,
+        },
+      }
+    },
+  },
   methods: {
+    getErrorMessages (field) {
+      return getValidationErrors(this, field)
+    },
     onInput (modelValue) {
       this.v$.modelValue.$touch()
       this.$emit('update:modelValue', modelValue)
     },
-    getErrorMessages,
   },
 }
 </script>

@@ -254,8 +254,16 @@ export class TerminalSession {
       this.vm.spinner.text = `Connecting to Pod. Current phase is "${phase}".`
     }
 
+    const protocols = ['garden'] // there must be at least one other subprotocol in addition to the bearer token
+    addBearerToken(protocols, this.hostCluster.token)
+    const ws = new WebSocket(watchPodUri(this.hostCluster), protocols)
+
     this.vm.spinner.text = 'Connecting to Pod'
-    return waitForPodRunning(this.hostCluster, containerName, onPodStateChange, timeoutSeconds * 1000)
+    try {
+      await waitForPodRunning(ws, containerName, onPodStateChange, timeoutSeconds * 1000)
+    } finally {
+      closeWsIfNotClosed(ws)
+    }
   }
 }
 Object.assign(TerminalSession, {
@@ -293,58 +301,27 @@ function closeWsIfNotClosed (ws) {
   }
 }
 
-async function waitForPodRunning (hostCluster, containerName, onPodEvent, timeoutSeconds) {
+async function waitForPodRunning (ws, containerName, handleEvent, timeoutSeconds) {
+  const connectPromise = new Promise((resolve, reject) => {
+    const openHandler = () => {
+      ws.removeEventListener('open', openHandler)
+      ws.removeEventListener('error', errorHandler)
+
+      resolve()
+    }
+    const errorHandler = error => {
+      ws.removeEventListener('open', openHandler)
+      ws.removeEventListener('error', errorHandler)
+
+      reject(error)
+    }
+
+    ws.addEventListener('open', openHandler)
+    ws.addEventListener('error', errorHandler)
+  })
+
   const connectTimeoutSeconds = 5
-
-  const createConnection = () => {
-    const protocols = ['garden'] // there must be at least one other subprotocol in addition to the bearer token
-    addBearerToken(protocols, hostCluster.token)
-    const url = watchPodUri(hostCluster)
-    const ws = new WebSocket(url, protocols)
-
-    const connectPromise = new Promise((resolve, reject) => {
-      const openHandler = () => {
-        ws.removeEventListener('open', openHandler)
-        ws.removeEventListener('error', errorHandler)
-
-        resolve(ws)
-      }
-      const errorHandler = ev => {
-        ws.removeEventListener('open', openHandler)
-        ws.removeEventListener('error', errorHandler)
-
-        reject(new Error(`Failed to create connection to ${url}`))
-      }
-
-      ws.addEventListener('open', openHandler)
-      ws.addEventListener('error', errorHandler)
-    })
-
-    return pTimeout(connectPromise, connectTimeoutSeconds * 1000, `Could not connect within ${connectTimeoutSeconds} seconds`)
-  }
-
-  let ws = null
-  try {
-    ws = await createConnection()
-  } catch (err) {
-    logger.info(err.message)
-    ws = null
-  }
-
-  if (!ws) {
-    // workaround for https://bugs.chromium.org/p/chromium/issues/detail?id=993907&q=ERR_SSL_CLIENT_AUTH_CERT_NEEDED&can=2
-    logger.info('Trying connect workaround ...')
-    try {
-      // We want the tls handshake to be establised so that the request context has a client certificate selection for the endpoint.
-      // It does not matter that the request will fail with 401.
-      const options = {
-        method: 'HEAD',
-        mode: 'no-cors',
-      }
-      await fetch(`https://${hostCluster.kubeApiServer}`, options)
-    } catch (err) { /* ignore errors */ }
-    ws = await createConnection()
-  }
+  await pTimeout(connectPromise, connectTimeoutSeconds * 1000, `Could not connect within ${connectTimeoutSeconds} seconds`)
 
   const podRunningPromise = new Promise((resolve, reject) => {
     const resolveOnce = value => {
@@ -372,11 +349,11 @@ async function waitForPodRunning (hostCluster, containerName, onPodEvent, timeou
         return
       }
       const pod = event.object
-      if (typeof onPodEvent === 'function') {
+      if (typeof handleEvent === 'function') {
         try {
-          onPodEvent(event)
+          handleEvent(event)
         } catch (error) {
-          logger.error('error during handling of pod event', error.message)
+          logger.error('error during handleEvent', error.message)
         }
       }
 
@@ -400,12 +377,7 @@ async function waitForPodRunning (hostCluster, containerName, onPodEvent, timeou
     ws.addEventListener('message', messageHandler)
     ws.addEventListener('close', closeHandler)
   })
-
-  try {
-    await pTimeout(podRunningPromise, timeoutSeconds * 1000, `Timed out after ${timeoutSeconds}s`)
-  } finally {
-    closeWsIfNotClosed(ws)
-  }
+  return pTimeout(podRunningPromise, timeoutSeconds * 1000, `Timed out after ${timeoutSeconds}s`)
 }
 
 function getDetailedConnectionStateText (terminalContainerStatus) {

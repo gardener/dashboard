@@ -3,6 +3,7 @@ SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener con
 
 SPDX-License-Identifier: Apache-2.0
 -->
+
 <template>
   <component
     :is="component"
@@ -20,41 +21,34 @@ import { useAuthzStore } from '@/store/authz'
 import { useSecretStore } from '@/store/secret'
 import { useShootStore } from '@/store/shoot'
 import { useTerminalStore } from '@/store/terminal'
-import { useAuthnStore } from '@/store/authn'
 
 import GShootItemLoading from '@/views/GShootItemLoading.vue'
 import GShootItemError from '@/views/GShootItemError.vue'
 
-import { isEqual } from '@/lodash'
-
-function isLoadRequired (route, to) {
-  return route.name !== to.name || !isEqual(route.params, to.params)
-}
+import {
+  get,
+  includes,
+} from '@/lodash'
 
 export default {
   components: {
     GShootItemLoading,
     GShootItemError,
   },
-  beforeRouteEnter (to, from, next) {
-    next(async vm => {
-      if (isLoadRequired(vm.$route, to)) {
-        await vm.load(to)
-      }
-    })
-  },
-  async beforeRouteUpdate (to, from) {
-    if (isLoadRequired(this.$route, to)) {
-      await this.load(to)
+  async beforeRouteLeave (to, from, next) {
+    try {
+      this.component = 'div'
+      await this.unsubscribe()
+    } finally {
+      next()
     }
-  },
-  beforeRouteLeave (to, from) {
-    this.readyState = 'initial'
   },
   data () {
     return {
-      error: null,
-      readyState: 'initial',
+      loading: false,
+      component: undefined,
+      error: undefined,
+      unsubscribeShootStore: () => {},
     }
   },
   computed: {
@@ -66,22 +60,6 @@ export default {
       'canGetSecrets',
       'canUseProjectTerminalShortcuts',
     ]),
-    ...mapState(useAuthnStore, [
-      'isAdmin',
-    ]),
-    shootItem () {
-      return this.shootByNamespaceAndName(this.$route.params)
-    },
-    component () {
-      if (this.error) {
-        return 'g-shoot-item-error'
-      } else if (this.readyState === 'loading') {
-        return 'g-shoot-item-loading'
-      } else if (this.readyState === 'loaded') {
-        return 'router-view'
-      }
-      return 'div'
-    },
     componentProperties () {
       switch (this.component) {
         case 'g-shoot-item-error': {
@@ -90,19 +68,7 @@ export default {
             reason = 'Oops, something went wrong',
             message = 'An unexpected error occurred. Please try again later',
           } = this.error
-          return {
-            code,
-            text: reason,
-            message,
-          }
-        }
-        case 'router-view': {
-          const { name, path } = this.$route
-          return {
-            key: name === 'ShootItemTerminal'
-              ? path
-              : undefined,
-          }
+          return { code, text: reason, message }
         }
         default: {
           return {}
@@ -112,37 +78,32 @@ export default {
   },
   watch: {
     '$route' (value) {
-      if (value) {
-        this.readyState = 'loaded'
-      }
+      this.load(value)
     },
-    shootItem (value) {
-      if (this.readyState === 'loaded') {
-        if (!value) {
-          this.error = Object.assign(new Error('The cluster you are looking for is no longer available'), {
-            code: 410,
-            reason: 'Cluster is gone',
-          })
-        } else if ([404, 410].includes(this.error?.code)) {
-          this.error = null
+  },
+  mounted () {
+    const shootStore = useShootStore()
+    this.unsubscribeShootStore = shootStore.$onAction(({
+      name,
+      args,
+      after,
+    }) => {
+      switch (name) {
+        case 'handleEvent': {
+          after(() => this.handleShootEvent(...args))
+          break
         }
       }
-    },
-  },
-  beforeMount () {
-    this.readyState = 'initial'
-  },
-  async mounted () {
-    await this.load(this.$route)
-    this.readyState = 'loaded'
+    })
+    this.load(this.$route)
   },
   beforeUnmount () {
-    this.readyState = 'initial'
+    this.unsubscribeShootStore()
   },
   methods: {
     ...mapActions(useShootStore, [
       'subscribe',
-      'shootByNamespaceAndName',
+      'unsubscribe',
     ]),
     ...mapActions(useSecretStore, [
       'fetchSecrets',
@@ -150,32 +111,38 @@ export default {
     ...mapActions(useTerminalStore, [
       'ensureProjectTerminalShortcutsLoaded',
     ]),
-    async load (route) {
-      this.error = null
-      this.readyState = 'loading'
-      const routeName = route.name
-      const routeParams = route.params
+    handleShootEvent ({ type, object }) {
+      const metadata = object.metadata
+      const { namespace, name } = get(this.$route, 'params', {})
+      if (metadata.namespace !== namespace || metadata.name !== name) {
+        return
+      }
+      if (type === 'DELETED') {
+        this.error = Object.assign(new Error('The cluster you are looking for is no longer available'), {
+          code: 410,
+          reason: 'Cluster is gone',
+        })
+        this.component = 'g-shoot-item-error'
+      } else if (type === 'ADDED' && includes([404, 410], get(this.error, 'code'))) {
+        this.error = undefined
+        this.component = 'router-view'
+      }
+    },
+    async load ({ name, params }) {
+      this.error = undefined
+      this.component = 'g-shoot-item-loading'
       try {
         const promises = [
-          this.subscribe(routeParams),
+          this.subscribe(params),
         ]
-        if (['ShootItem', 'ShootItemHibernationSettings'].includes(routeName) && this.canGetSecrets) {
+        if (includes(['ShootItem', 'ShootItemHibernationSettings'], name) && this.canGetSecrets) {
           promises.push(this.fetchSecrets()) // Required for purpose configuration
         }
-        if (['ShootItem', 'ShootItemHibernationSettings', 'ShootItemTerminal'].includes(routeName) && this.canUseProjectTerminalShortcuts) {
+        if (includes(['ShootItem', 'ShootItemHibernationSettings', 'ShootItemTerminal'], name) && this.canUseProjectTerminalShortcuts) {
           promises.push(this.ensureProjectTerminalShortcutsLoaded())
         }
         await Promise.all(promises)
-
-        const shootItem = this.shootByNamespaceAndName(routeParams)
-        const shootWorkerGroups = shootItem?.spec?.provider?.workers ?? []
-        const hasShootWorkerGroups = shootWorkerGroups.length > 0
-        if (routeName === 'ShootItemTerminal' && !this.isAdmin && !hasShootWorkerGroups) {
-          this.error = Object.assign(Error('Shoot has no workers to schedule a terminal pod'), {
-            code: 404,
-            reason: 'Terminal not available',
-          })
-        }
+        this.component = 'router-view'
       } catch (err) {
         let { statusCode, code = statusCode, reason, message } = err
         if (code === 404) {
@@ -187,10 +154,8 @@ export default {
           reason = 'Oops, something went wrong'
           message = 'An unexpected error occurred. Please try again later'
         }
-        this.error = Object.assign(new Error(message), {
-          code,
-          reason,
-        })
+        this.error = Object.assign(new Error(message), { code, reason })
+        this.component = 'g-shoot-item-error'
       }
     },
   },

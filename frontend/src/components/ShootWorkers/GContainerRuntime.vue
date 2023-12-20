@@ -12,14 +12,21 @@ SPDX-License-Identifier: Apache-2.0
       color="primary"
       item-color="primary"
       :items="criItems"
-      :error-messages="getErrorMessages(v$.criName)"
+      :error-messages="getErrorMessages('criName')"
       label="Container Runtime"
       :hint="hint"
       persistent-hint
       variant="underlined"
       @update:model-value="onInputCriName"
       @blur="v$.criName.$touch()"
-    />
+    >
+      <template #item="{ props, item }">
+        <v-list-item
+          v-bind="props"
+          :disabled="item.raw.disabled"
+        />
+      </template>
+    </v-select>
     <v-select
       v-if="criContainerRuntimeTypes.length"
       v-model="selectedCriContainerRuntimeTypes"
@@ -40,8 +47,7 @@ SPDX-License-Identifier: Apache-2.0
 import { required } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
-import { getErrorMessages } from '@/utils'
-import { withFieldName } from '@/utils/validators'
+import { getValidationErrors } from '@/utils'
 
 import {
   find,
@@ -52,6 +58,12 @@ import {
   includes,
   isEmpty,
 } from '@/lodash'
+
+const validationErrors = {
+  criName: {
+    required: 'An explicit container runtime configuration is required',
+  },
+}
 
 export default {
   props: {
@@ -67,23 +79,28 @@ export default {
       type: String,
       required: true,
     },
-    fieldName: {
-      type: String,
-    },
   },
   setup () {
     return {
       v$: useVuelidate(),
     }
   },
-  validations () {
+  data () {
     return {
-      criName: withFieldName(() => this.fieldName, {
-        required,
-      }),
+      validationErrors,
     }
   },
+  validations () {
+    return this.validators
+  },
   computed: {
+    validators () {
+      return {
+        criName: {
+          required,
+        },
+      }
+    },
     validCriNames () {
       return map(this.machineImageCri, 'name')
     },
@@ -98,9 +115,7 @@ export default {
         criItems.push({
           value: this.criName,
           title: this.criName,
-          props: {
-            disabled: true,
-          },
+          disabled: true,
         })
       }
       return criItems
@@ -157,11 +172,13 @@ export default {
     this.v$.$touch()
   },
   methods: {
+    getErrorMessages (field) {
+      return getValidationErrors(this, field)
+    },
     onInputCriName (value) {
       this.selectedCriContainerRuntimeTypes = undefined
       this.v$.criName.$touch()
     },
-    getErrorMessages,
   },
 }
 </script>

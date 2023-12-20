@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
           color="primary"
           label="Cluster Name"
           :counter="maxShootNameLength"
-          :error-messages="getErrorMessages(v$.name)"
+          :error-messages="getErrorMessages('name')"
           hint="Maximum name length depends on project name"
           variant="underlined"
           @input="onInputName"
@@ -31,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0
           item-title="version"
           item-value="version"
           :items="sortedKubernetesVersionsList"
-          :error-messages="getErrorMessages(v$.kubernetesVersion)"
+          :error-messages="getErrorMessages('kubernetesVersion')"
           :hint="versionHint"
           persistent-hint
           variant="underlined"
@@ -59,18 +59,6 @@ SPDX-License-Identifier: Apache-2.0
         <g-static-token-kubeconfig-switch v-model="enableStaticTokenKubeconfig" />
       </v-col>
     </v-row>
-    <v-row>
-      <v-col cols="12">
-        <v-checkbox
-          v-model="workerless"
-          label="Workerless Cluster"
-          color="primary"
-          density="compact"
-          hint="Create nodeless cluster without worker groups"
-          persistent-hint
-        />
-      </v-col>
-    </v-row>
     <v-row v-if="slaDescriptionHtml">
       <v-col cols="12">
         <label>{{ slaTitle }}</label>
@@ -89,7 +77,6 @@ import { defineAsyncComponent } from 'vue'
 import {
   mapActions,
   mapState,
-  mapWritableState,
 } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 import {
@@ -101,7 +88,6 @@ import { useAuthzStore } from '@/store/authz'
 import { useConfigStore } from '@/store/config'
 import { useProjectStore } from '@/store/project'
 import { useShootStore } from '@/store/shoot'
-import { useShootStagingStore } from '@/store/shootStaging'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import GStaticTokenKubeconfigSwitch from '@/components/GStaticTokenKubeconfigSwitch'
@@ -109,14 +95,12 @@ import GStaticTokenKubeconfigSwitch from '@/components/GStaticTokenKubeconfigSwi
 import { useAsyncRef } from '@/composables/useAsyncRef'
 
 import {
-  withFieldName,
-  lowerCaseAlphaNumHyphen,
+  resourceName,
   noStartEndHyphen,
   noConsecutiveHyphen,
-  withMessage,
 } from '@/utils/validators'
 import {
-  getErrorMessages,
+  getValidationErrors,
   transformHtml,
   setDelayedInputFocus,
 } from '@/utils'
@@ -127,6 +111,20 @@ import {
   join,
   filter,
 } from '@/lodash'
+
+const validationErrors = {
+  name: {
+    required: 'Name is required',
+    maxLength: 'Name is too long',
+    resourceName: 'Name must only be lowercase letters, numbers and hyphens',
+    unique: 'Cluster name must be unique',
+    noConsecutiveHyphen: 'Cluster name must not contain consecutive hyphens',
+    noStartEndHyphen: 'Cluster name must not start or end with a hyphen',
+  },
+  kubernetesVersion: {
+    required: 'Kubernetes version is required',
+  },
+}
 
 export default {
   components: {
@@ -147,6 +145,7 @@ export default {
   },
   data () {
     return {
+      validationErrors,
       name: undefined,
       kubernetesVersion: undefined,
       purposeValue: undefined,
@@ -157,29 +156,9 @@ export default {
     }
   },
   validations () {
-    const rules = {}
-
-    const nameRules = {
-      required,
-      maxLength: maxLength(this.maxShootNameLength),
-      noConsecutiveHyphen,
-      noStartEndHyphen,
-      lowerCaseAlphaNumHyphen,
-      unique: withMessage('A cluster with this name already exists in this project',
-        value => !this.shootByNamespaceAndName({ namespace: this.namespace, name: value }),
-      ),
-    }
-    rules.name = withFieldName('Cluster Name', nameRules)
-
-    const kubernetesVersionRules = {
-      required,
-    }
-    rules.kubernetesVersion = withFieldName('Kubernetes Version', kubernetesVersionRules)
-
-    return rules
+    return this.validators
   },
   computed: {
-    ...mapWritableState(useShootStagingStore, ['workerless']),
     ...mapState(useProjectStore, ['projectList']),
     ...mapState(useAuthzStore, ['namespace']),
     ...mapState(useConfigStore, ['sla']),
@@ -222,6 +201,23 @@ export default {
     maxShootNameLength () {
       return 21 - this.projectName.length
     },
+    validators () {
+      return {
+        name: {
+          required,
+          maxLength: maxLength(this.maxShootNameLength),
+          noConsecutiveHyphen,
+          noStartEndHyphen, // Order is important for UI hints
+          resourceName,
+          unique (value) {
+            return this.shootByNamespaceAndName({ namespace: this.namespace, name: value }) === undefined
+          },
+        },
+        kubernetesVersion: {
+          required,
+        },
+      }
+    },
   },
   mounted () {
     this.userInterActionBus.on('updateSecret', secret => {
@@ -247,6 +243,9 @@ export default {
     ...mapActions(useShootStore, [
       'shootByNamespaceAndName',
     ]),
+    getErrorMessages (field) {
+      return getValidationErrors(this, field)
+    },
     onInputName () {
       this.v$.name.$touch()
     },
@@ -290,7 +289,6 @@ export default {
       }
       return join(itemDescription, ' | ')
     },
-    getErrorMessages,
   },
 }
 </script>

@@ -87,6 +87,21 @@ const defaults = {
             namespace: 'garden'
           }
         }
+      },
+      bootstrap: {
+        disabled: true,
+        seedDisabled: true,
+        shootDisabled: true,
+        gardenTerminalHostDisabled: true,
+        gardenTerminalHost: {
+          apiServerIngress: {
+            annotations: {
+              'cert.gardener.cloud/purpose': 'managed',
+              'kubernetes.io/ingress.class': 'nginx',
+              'nginx.ingress.kubernetes.io/backend-protocol': 'HTTPS'
+            }
+          }
+        }
       }
     }
   }

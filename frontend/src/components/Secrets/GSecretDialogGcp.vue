@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <g-secret-dialog
     v-model="visible"
     :data="secretData"
-    :secret-validations="v$"
+    :data-valid="valid"
     :secret="secret"
     :vendor="vendor"
     :create-title="`Add new ${name} Secret`"
@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
           color="primary"
           variant="filled"
           label="Service Account Key"
-          :error-messages="getErrorMessages(v$.serviceAccountKey)"
+          :error-messages="getErrorMessages('serviceAccountKey')"
           hint="Enter or drop a service account key in JSON format"
           persistent-hint
           @update:model-value="v$.serviceAccountKey.$touch()"
@@ -86,15 +86,19 @@ import { required } from '@vuelidate/validators'
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
 
-import {
-  withFieldName,
-  serviceAccountKey,
-} from '@/utils/validators'
+import { serviceAccountKey } from '@/utils/validators'
 import {
   handleTextFieldDrop,
-  getErrorMessages,
+  getValidationErrors,
   setDelayedInputFocus,
 } from '@/utils'
+
+const validationErrors = {
+  serviceAccountKey: {
+    required: 'You can\'t leave this empty.',
+    serviceAccountKey: 'Not a valid Service Account Key',
+  },
+}
 
 export default {
   components: {
@@ -124,16 +128,13 @@ export default {
   data () {
     return {
       serviceAccountKey: undefined,
+      validationErrors,
       dropHandlerInitialized: false,
     }
   },
   validations () {
-    return {
-      serviceAccountKey: withFieldName('Service Account Key', {
-        required,
-        serviceAccountKey,
-      }),
-    }
+    // had to move the code to a computed property so that the getValidationErrors method can access it
+    return this.validators
   },
   computed: {
     visible: {
@@ -151,6 +152,15 @@ export default {
       return {
         'serviceaccount.json': this.serviceAccountKey,
       }
+    },
+    validators () {
+      const validators = {
+        serviceAccountKey: {
+          required,
+          serviceAccountKey,
+        },
+      }
+      return validators
     },
     isCreateMode () {
       return !this.secret
@@ -190,6 +200,9 @@ export default {
         setDelayedInputFocus(this, 'serviceAccountKey')
       }
     },
+    getErrorMessages (field) {
+      return getValidationErrors(this, field)
+    },
     initializeDropHandlerOnce () {
       if (this.dropHandlerInitialized) {
         return
@@ -201,7 +214,6 @@ export default {
       }
       handleTextFieldDrop(this.$refs.serviceAccountKey, /json/, onDrop)
     },
-    getErrorMessages,
   },
 }
 </script>

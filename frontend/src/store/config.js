@@ -4,10 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import {
-  defineStore,
-  acceptHMRUpdate,
-} from 'pinia'
+import { defineStore } from 'pinia'
 import {
   ref,
   computed,
@@ -118,7 +115,7 @@ export const useConfigStore = defineStore('config', () => {
   })
 
   const sla = computed(() => {
-    return state.value?.sla ?? {}
+    return state.value?.sla
   })
 
   const costObject = computed(() => {
@@ -129,23 +126,12 @@ export const useConfigStore = defineStore('config', () => {
     return state.value?.features
   })
 
-  const experimental = computed(() => {
-    return state.value?.experimental
-  })
-
   const grantTypes = computed(() => {
     return state.value?.grantTypes ?? ['auto', 'authcode', 'device-code']
   })
 
   const knownConditions = computed(() => {
     return state.value?.knownConditions
-  })
-
-  const allKnownConditions = computed(() => {
-    return {
-      ...wellKnownConditions,
-      ...knownConditions.value,
-    }
   })
 
   const resourceQuotaHelp = computed(() => {
@@ -162,20 +148,6 @@ export const useConfigStore = defineStore('config', () => {
 
   const themes = computed(() => {
     return state.value?.themes
-  })
-
-  const branding = computed(() => {
-    const branding = {
-      productLogoUrl: '/static/assets/logo.svg',
-      productName: 'Gardener',
-      productTitleSuperscript: appVersion.value,
-      productSlogan: 'Universal Kubernetes at Scale',
-      ...state.value?.branding,
-    }
-    if (branding.productTitle === undefined) {
-      branding.productTitle = branding.productName
-    }
-    return branding
   })
 
   const terminal = computed(() => {
@@ -234,10 +206,6 @@ export const useConfigStore = defineStore('config', () => {
     return features.value?.projectTerminalShortcutsEnabled === true
   })
 
-  const throttleDelayPerCluster = computed(() => {
-    return experimental.value?.throttleDelayPerCluster ?? 10
-  })
-
   const alertBannerMessage = computed(() => {
     return alert.value?.message
   })
@@ -293,10 +261,7 @@ export const useConfigStore = defineStore('config', () => {
 
   async function fetchConfig () {
     const response = await api.getConfiguration()
-    state.value = {
-      themes: {},
-      ...response.data,
-    }
+    state.value = response.data
   }
 
   async function $reset () {
@@ -326,8 +291,10 @@ export const useConfigStore = defineStore('config', () => {
   }
 
   function conditionForType (type) {
-    return allKnownConditions.value[type] ?? getCondition(type)
+    return get(knownConditions.value, type, getCondition(type))
   }
+
+  const nodesCIDR = defaultNodesCIDR // TODO: remove one later
 
   return {
     isInitial,
@@ -345,7 +312,6 @@ export const useConfigStore = defineStore('config', () => {
     controlPlaneHighAvailabilityHelpText,
     defaultHibernationSchedule,
     themes,
-    branding,
     terminal,
     terminalShortcuts,
     ticket,
@@ -354,13 +320,13 @@ export const useConfigStore = defineStore('config', () => {
     externalTools,
     defaultNodesCIDR,
     shootAdminKubeconfig,
+    nodesCIDR,
     apiServerUrl,
     clusterIdentity,
     seedCandidateDeterminationStrategy,
     serviceAccountDefaultTokenExpiration,
     isTerminalEnabled,
     isProjectTerminalShortcutsEnabled,
-    throttleDelayPerCluster,
     alertBannerMessage,
     alertBannerType,
     alertBannerIdentifier,
@@ -372,7 +338,3 @@ export const useConfigStore = defineStore('config', () => {
     $reset,
   }
 })
-
-if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useConfigStore, import.meta.hot))
-}

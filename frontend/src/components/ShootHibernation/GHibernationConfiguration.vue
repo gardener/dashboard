@@ -8,7 +8,8 @@ SPDX-License-Identifier: Apache-2.0
   <g-action-button-dialog
     ref="actionDialog"
     :shoot-item="shootItem"
-    width="1300"
+    :valid="!v$.$invalid"
+    width="900"
     caption="Configure Hibernation Schedule"
     @dialog-opened="onConfigurationDialogOpened"
   >

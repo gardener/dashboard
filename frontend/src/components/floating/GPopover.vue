@@ -48,7 +48,7 @@ SPDX-License-Identifier: Apache-2.0
               density="comfortable"
               size="small"
               icon="mdi-close"
-              @click.stop.prevent="hide()"
+              @click="hide()"
             />
           </template>
         </v-toolbar>

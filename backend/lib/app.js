@@ -29,7 +29,7 @@ const INDEX_FILENAME = join(PUBLIC_DIRNAME, 'index.html')
 const STATIC_PATHS = ['/assets', '/static', '/js', '/css', '/fonts', '/img']
 
 // csp sources
-const connectSrc = _.get(config, 'contentSecurityPolicy.connectSrc', ['\'self\''])
+const connectSrc = ['\'self\'', 'wss:', 'ws:']
 const imgSrc = ['\'self\'', 'data:', 'https://www.gravatar.com']
 const gitHubRepoUrl = _.get(config, 'frontend.ticket.gitHubRepoUrl')
 if (gitHubRepoUrl) {

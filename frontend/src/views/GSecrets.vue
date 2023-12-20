@@ -109,8 +109,8 @@ SPDX-License-Identifier: Apache-2.0
       >
         <template #item="{ item }">
           <g-secret-row-infra
-            :key="`${item.cloudProfileName}/${item.name}`"
-            :item="item"
+            :key="`${item.raw.cloudProfileName}/${item.raw.name}`"
+            :item="item.raw"
             :headers="infraSecretTableHeaders"
             @delete="onRemoveSecret"
             @update="onUpdateSecret"
@@ -224,8 +224,8 @@ SPDX-License-Identifier: Apache-2.0
       >
         <template #item="{ item }">
           <g-secret-row-dns
-            :key="`${item.cloudProfileName}/${item.name}`"
-            :item="item"
+            :key="`${item.raw.cloudProfileName}/${item.raw.name}`"
+            :item="item.raw"
             :headers="dnsSecretTableHeaders"
             @delete="onRemoveSecret"
             @update="onUpdateSecret"
@@ -253,17 +253,16 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import {
-  mapState,
-  mapWritableState,
+  mapGetters,
   mapActions,
 } from 'pinia'
+import { useLocalStorage } from '@vueuse/core'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useSecretStore } from '@/store/secret'
 import { useAuthzStore } from '@/store/authz'
 import { useShootStore } from '@/store/shoot'
-import { useLocalStorageStore } from '@/store/localStorage'
 
 import GSecretDialogWrapper from '@/components/Secrets/GSecretDialogWrapper'
 import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
@@ -305,8 +304,14 @@ export default {
   data () {
     return {
       selectedSecret: {},
+      infraSecretSelectedColumns: useLocalStorage('secrets/infra-secret-list/selected-columns', {}),
       infraSecretPage: 1,
+      infraSecretItemsPerPage: useLocalStorage('secrets/infra-secret-list/itemsPerPage', 10),
+      infraSecretSortBy: useLocalStorage('secrets/infra-secret-list/sortBy', [{ key: 'name', order: 'asc' }]),
+      dnsSecretSelectedColumns: useLocalStorage('secrets/dns-secret-list/selected-columns', {}),
       dnsSecretPage: 1,
+      dnsSecretItemsPerPage: useLocalStorage('secrets/dns-secret-list/itemsPerPage', 10),
+      dnsSecretSortBy: useLocalStorage('secrets/dns-secret-list/sortBy', [{ key: 'name', order: 'asc' }]),
       infraSecretFilter: '',
       createInfraSecretMenu: false,
       dnsSecretFilter: '',
@@ -320,25 +325,15 @@ export default {
     }
   },
   computed: {
-    ...mapState(useCloudProfileStore, ['sortedInfrastructureKindList']),
-    ...mapState(useGardenerExtensionStore, ['sortedDnsProviderList']),
-    ...mapState(useSecretStore, [
-      'infrastructureSecretList',
-      'dnsSecretList',
-    ]),
-    ...mapState(useAuthzStore, [
-      'namespace',
-      'canCreateSecrets',
-    ]),
-    ...mapState(useShootStore, ['shootList']),
-    ...mapWritableState(useLocalStorageStore, [
-      'infraSecretSelectedColumns',
-      'infraSecretItemsPerPage',
-      'infraSecretSortBy',
-      'dnsSecretSelectedColumns',
-      'dnsSecretItemsPerPage',
-      'dnsSecretSortBy',
-    ]),
+    ...mapGetters(useCloudProfileStore, ['sortedInfrastructureKindList']),
+    ...mapGetters(useGardenerExtensionStore, ['sortedDnsProviderList']),
+    ...mapGetters(useSecretStore,
+      [
+        'infrastructureSecretList',
+        'dnsSecretList',
+      ]),
+    ...mapGetters(useAuthzStore, ['canCreateSecrets']),
+    ...mapGetters(useShootStore, ['shootList']),
     hasCloudProfileForCloudProviderKind () {
       return (kind) => {
         return !isEmpty(this.cloudProfilesByCloudProviderKind(kind))
@@ -489,11 +484,6 @@ export default {
       }))
     },
   },
-  watch: {
-    namespace () {
-      this.reset()
-    },
-  },
   mounted () {
     if (!get(this.$route.params, 'name')) {
       return
@@ -543,12 +533,6 @@ export default {
     },
     setSelectedInfraHeader (header) {
       this.infraSecretSelectedColumns[header.key] = !header.selected
-    },
-    reset () {
-      this.infraSecretFilter = ''
-      this.dnsSecretFilter = ''
-      this.infraSecretPage = 1
-      this.dnsSecretPage = 1
     },
     resetInfraTableSettings () {
       this.infraSecretSelectedColumns = mapTableHeader(this.infraSecretTableHeaders, 'defaultSelected')

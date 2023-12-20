@@ -85,7 +85,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState } from 'pinia'
+import { mapGetters } from 'pinia'
 
 import { useAuthzStore } from '@/store/authz'
 
@@ -116,7 +116,7 @@ export default {
     'delete',
   ],
   computed: {
-    ...mapState(useAuthzStore, ['canPatchSecrets', 'canDeleteSecrets']),
+    ...mapGetters(useAuthzStore, ['canPatchSecrets', 'canDeleteSecrets']),
     selectedHeaders () {
       return mapTableHeader(this.headers, 'selected')
     },

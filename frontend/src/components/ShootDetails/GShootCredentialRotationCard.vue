@@ -24,14 +24,15 @@ SPDX-License-Identifier: Apache-2.0
         type="certificateAuthorities"
         dense
       />
+      <template v-if="!isTestingCluster">
+        <g-credential-tile
+          icon="mdi-developer-board"
+          :shoot-item="shootItem"
+          type="observability"
+          dense
+        />
+      </template>
       <g-credential-tile
-        v-if="!isTestingCluster"
-        :shoot-item="shootItem"
-        type="observability"
-        dense
-      />
-      <g-credential-tile
-        v-if="hasShootWorkerGroups"
         :shoot-item="shootItem"
         type="sshKeypair"
         dense

@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <g-dialog
     ref="gDialog"
     confirm-button-text="Create"
-    :valid="valid"
+    :confirm-disabled="!valid"
     width="750"
     max-height="100vh"
   >
@@ -38,7 +38,6 @@ SPDX-License-Identifier: Apache-2.0
         <v-window-item value="target-tab">
           <g-terminal-target
             v-model="targetTab.selectedTarget"
-            :disabled="targetTab.configLoading"
             :shoot-item="shootItem"
             @update:model-value="updateSettings"
           />
@@ -51,14 +50,14 @@ SPDX-License-Identifier: Apache-2.0
             <v-expansion-panel title="Terminal Configuration">
               <v-expansion-panel-text>
                 <v-skeleton-loader
-                  v-show="targetTab.configLoading"
+                  v-show="!targetTab.selectedConfig"
                   height="94"
                   type="list-item-two-line"
                 />
                 <g-terminal-settings
-                  v-show="!targetTab.configLoading"
+                  v-show="!!targetTab.selectedConfig"
                   ref="settings"
-                  :runtime-settings-hidden="!hasShootWorkerGroups || targetTab.selectedTarget !== 'shoot'"
+                  v-model:target="targetTab.selectedTarget"
                 />
               </v-expansion-panel-text>
             </v-expansion-panel>
@@ -106,8 +105,8 @@ import {
 } from 'pinia'
 
 import { useAuthnStore } from '@/store/authn'
-import { useTerminalStore } from '@/store/terminal'
 import { useShootStore } from '@/store/shoot'
+import { useTerminalStore } from '@/store/terminal'
 
 import GDialog from '@/components/dialogs/GDialog.vue'
 import GTerminalSettings from '@/components/GTerminalSettings.vue'
@@ -134,7 +133,6 @@ import {
 } from '@/lodash'
 
 export default {
-
   components: {
     GDialog,
     GTerminalSettings,
@@ -145,8 +143,8 @@ export default {
   },
   inject: [
     'api',
-    'newTerminalPrompt',
     'defaultTarget',
+    'splitpanesState',
     'setSelections',
   ],
   provide () {
@@ -160,10 +158,6 @@ export default {
     },
     namespace: {
       type: String,
-    },
-    hasShootWorkerGroups: {
-      type: Boolean,
-      default: false,
     },
   },
   setup () {
@@ -180,7 +174,6 @@ export default {
         value: [],
         initializedForTarget: undefined,
         selectedConfig: undefined,
-        configLoading: false,
       },
       shortcutTab: {
         selectedShortcuts: undefined,
@@ -206,9 +199,6 @@ export default {
           return !isEmpty(this.shortcutTab.selectedShortcuts)
         }
         default: {
-          if (this.targetTab.configLoading) {
-            return false
-          }
           return !this.v$.$invalid
         }
       }
@@ -252,8 +242,8 @@ export default {
     config (value) {
       this.targetTab.selectedConfig = toRaw(value)
     },
-    async newTerminalPrompt (value) {
-      if (value) {
+    async 'splitpanesState.newTerminal.show' (newVal, oldVal) {
+      if (newVal && !oldVal) {
         await this.promptForSelections()
       }
     },
@@ -318,7 +308,7 @@ export default {
         return
       }
 
-      this.targetTab.configLoading = true
+      this.targetTab.selectedConfig = undefined
       try {
         this.targetTab.initializedForTarget = this.targetTab.selectedTarget
         const { data: config } = await this.api.terminalConfig({ name: this.name, namespace: this.namespace, target: this.targetTab.selectedTarget })
@@ -326,8 +316,6 @@ export default {
       } catch (err) {
         this.targetTab.initializedForTarget = undefined
       }
-
-      this.targetTab.configLoading = false
     },
     onAddTerminalShortcut (shortcut) {
       this.shortcutTab.selectedShortcuts = [shortcut]

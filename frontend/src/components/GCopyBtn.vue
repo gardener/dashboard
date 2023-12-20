@@ -33,14 +33,13 @@ import {
   computed,
   inject,
 } from 'vue'
-import { toValue } from '@vueuse/core'
 
 const logger = inject('logger')
 
 // props
 const props = defineProps({
   clipboardText: {
-    type: [String, Function],
+    type: String,
     default: '',
   },
   copyFailedText: {
@@ -60,11 +59,10 @@ const props = defineProps({
   },
 })
 
-let timeoutId
-
 // reactive state
 const snackbar = ref(false)
 const copySucceeded = ref(false)
+const timeoutId = ref()
 
 // computed
 const snackbarText = computed(() => props.copyFailedText)
@@ -93,16 +91,15 @@ const emit = defineEmits([
 // methods
 const copyText = async () => {
   try {
-    const text = await toValue(props.clipboardText)
-    await navigator.clipboard.writeText(text)
+    await navigator.clipboard.writeText(props.clipboardText)
     copySucceeded.value = true
-    clearTimeout(timeoutId)
-    timeoutId = setTimeout(() => {
+    clearTimeout(timeoutId.value)
+    timeoutId.value = setTimeout(() => {
       copySucceeded.value = false
     }, 1000)
     emit('copy')
   } catch (err) {
-    logger.error('Copy to clipboard failed: %s', err.message)
+    logger.error('error', err)
     snackbar.value = true
     copySucceeded.value = false
     emit('copyFailed')

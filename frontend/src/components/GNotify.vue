@@ -32,7 +32,6 @@ import {
   watch,
   toRef,
   toRefs,
-  nextTick,
 } from 'vue'
 
 import { useAppStore } from '@/store/app'
@@ -88,17 +87,14 @@ watch(alert, value => {
     const duration = type === 'success'
       ? 3000
       : props.duration
-    const options = {
+    notify({
       group: props.group,
-      type,
+      type: getType(value),
       title: value.title,
       text: value.message,
       duration,
-    }
+    })
     alert.value = null
-    nextTick(() => notify(options))
   }
-}, {
-  immediate: true,
 })
 </script>

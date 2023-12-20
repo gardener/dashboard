@@ -37,7 +37,7 @@ SPDX-License-Identifier: Apache-2.0
                   v-model.trim="name"
                   color="primary"
                   label="Secret Name"
-                  :error-messages="getErrorMessages(v$.name)"
+                  :error-messages="getErrorMessages('name')"
                   variant="underlined"
                   @update:model-value="v$.name.$touch()"
                   @blur="v$.name.$touch()"
@@ -105,6 +105,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-btn
           variant="text"
           color="primary"
+          :disabled="!valid"
           @click="submit"
         >
           {{ submitButtonText }}
@@ -118,6 +119,7 @@ SPDX-License-Identifier: Apache-2.0
 import {
   mapActions,
   mapState,
+  mapGetters,
 } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 import {
@@ -136,21 +138,18 @@ import GMessage from '@/components/GMessage'
 import GCloudProfile from '@/components/GCloudProfile'
 
 import {
-  messageFromErrors,
-  withFieldName,
-  unique,
-  lowerCaseAlphaNumHyphen,
-  noStartEndHyphen,
-} from '@/utils/validators'
-import {
   errorDetailsFromError,
   isConflict,
 } from '@/utils/error'
 import {
-  getErrorMessages,
+  getValidationErrors,
   setDelayedInputFocus,
   setInputFocus,
 } from '@/utils'
+import {
+  unique,
+  resourceName,
+} from '@/utils/validators'
 
 import {
   cloneDeep,
@@ -161,6 +160,15 @@ import {
   filter,
   includes,
 } from '@/lodash'
+
+const validationErrors = {
+  name: {
+    required: 'You can\'t leave this empty.',
+    maxLength: 'It exceeds the maximum length of 128 characters.',
+    resourceName: 'Please use only lowercase alphanumeric characters and hyphen',
+    unique: 'Name is taken. Try another.',
+  },
+}
 
 export default {
   components: {
@@ -178,10 +186,8 @@ export default {
       type: Object,
       required: true,
     },
-    secretValidations: {
-      // need to pass nested validation object which shares scope,
-      // as v$ is part of secretValidations but not vice versa
-      type: Object,
+    dataValid: {
+      type: Boolean,
       required: true,
     },
     vendor: {
@@ -215,35 +221,20 @@ export default {
       name: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined,
+      validationErrors,
       helpVisible: false,
     }
   },
   validations () {
-    const rules = {}
-    if (!this.isCreateMode) {
-      return rules
-    }
-
-    const nameRules = {
-      required,
-      maxLength: maxLength(128),
-      lowerCaseAlphaNumHyphen,
-      noStartEndHyphen,
-      unique: unique(this.isDnsProviderSecret ? 'dnsSecretNames' : 'infrastructureSecretNames'),
-    }
-    rules.name = withFieldName('Secret Name', nameRules)
-
-    return rules
+    // had to move the code to a computed property so that the getValidationErrors method can access it
+    return this.validators
   },
   computed: {
     ...mapState(useAuthzStore, ['namespace']),
-    ...mapState(useSecretStore, [
-      'infrastructureSecretList',
-      'dnsSecretList',
-    ]),
-    ...mapState(useCloudProfileStore, ['sortedInfrastructureKindList']),
-    ...mapState(useGardenerExtensionStore, ['sortedDnsProviderList']),
-    ...mapState(useShootStore, ['shootList']),
+    ...mapGetters(useSecretStore, ['infrastructureSecretList', 'dnsSecretList']),
+    ...mapGetters(useCloudProfileStore, ['sortedInfrastructureKindList']),
+    ...mapGetters(useGardenerExtensionStore, ['sortedDnsProviderList']),
+    ...mapGetters(useShootStore, ['shootList']),
     dnsProviderTypes () {
       return map(this.sortedDnsProviderList, 'type')
     },
@@ -266,6 +257,21 @@ export default {
       set (modelValue) {
         this.$emit('update:modelValue', modelValue)
       },
+    },
+    valid () {
+      return this.dataValid && !this.v$.$invalid
+    },
+    validators () {
+      const validators = {}
+      if (this.isCreateMode) {
+        validators.name = {
+          required,
+          maxLength: maxLength(128),
+          resourceName,
+          unique: unique(this.isDnsProviderSecret ? 'dnsSecretNames' : 'infrastructureSecretNames'),
+        }
+      }
+      return validators
     },
     infrastructureSecretNames () {
       return this.infrastructureSecretList.map(item => item.metadata.name)
@@ -324,30 +330,26 @@ export default {
       this.hide()
     },
     async submit () {
-      if (this.secretValidations.$invalid) {
-        await this.secretValidations.$validate()
-        const message = messageFromErrors(this.secretValidations.$errors)
-        this.errorMessage = 'There are input errors that you need to resolve'
-        this.detailedErrorMessage = message
-        return
-      }
-      try {
-        await this.save()
-        this.hide()
-      } catch (err) {
-        const errorDetails = errorDetailsFromError(err)
-        if (this.isCreateMode) {
-          if (isConflict(err)) {
-            this.errorMessage = `Infrastructure Secret name '${this.name}' is already taken. Please try a different name.`
-            setInputFocus(this, 'name')
+      this.v$.$touch()
+      if (this.valid) {
+        try {
+          await this.save()
+          this.hide()
+        } catch (err) {
+          const errorDetails = errorDetailsFromError(err)
+          if (this.isCreateMode) {
+            if (isConflict(err)) {
+              this.errorMessage = `Infrastructure Secret name '${this.name}' is already taken. Please try a different name.`
+              setInputFocus(this, 'name')
+            } else {
+              this.errorMessage = 'Failed to create Infrastructure Secret.'
+            }
           } else {
-            this.errorMessage = 'Failed to create Infrastructure Secret.'
+            this.errorMessage = 'Failed to update Infrastructure Secret.'
           }
-        } else {
-          this.errorMessage = 'Failed to update Infrastructure Secret.'
+          this.detailedErrorMessage = errorDetails.detailedMessage
+          this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
         }
-        this.detailedErrorMessage = errorDetails.detailedMessage
-        this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
     save () {
@@ -402,7 +404,9 @@ export default {
       this.errorMessage = undefined
       this.detailedMessage = undefined
     },
-    getErrorMessages,
+    getErrorMessages (field) {
+      return getValidationErrors(this, field)
+    },
   },
 }
 </script>

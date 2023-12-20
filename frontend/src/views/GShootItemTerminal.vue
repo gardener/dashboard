@@ -11,9 +11,14 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { toRef } from 'vue'
+import { useRoute } from 'vue-router'
+
 import GTerminalSplitpanes from '@/components/GTerminalSplitpanes.vue'
 
 import { useTerminalSplitpanes } from '@/composables/useTerminalSplitpanes'
+
+import { get } from '@/lodash'
 
 export default {
   components: {
@@ -21,16 +26,27 @@ export default {
   },
   provide () {
     return {
-      ...this.terminalSplitpanes,
+      terminalCoordinates: this.terminalCoordinates,
+      defaultTarget: this.defaultTarget,
+      splitpanesState: this.state,
+      moveTo: this.moveTo,
+      add: this.add,
+      setSelections: this.setSelections,
+      removeWithId: this.removeWithId,
+      leavePage: this.leavePage,
     }
   },
   setup () {
-    const terminalSplitpanes = useTerminalSplitpanes()
-    const { load } = terminalSplitpanes
+    const currentRoute = useRoute()
+
+    const terminalSplitpanes = useTerminalSplitpanes({
+      name: toRef(() => get(currentRoute.params, 'name')),
+      namespace: toRef(() => get(currentRoute.params, 'namespace')),
+      target: toRef(() => get(currentRoute.params, 'target')),
+    })
 
     return {
-      load,
-      terminalSplitpanes,
+      ...terminalSplitpanes,
     }
   },
   mounted () {

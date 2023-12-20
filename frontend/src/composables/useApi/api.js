@@ -79,16 +79,9 @@ export function getIssuesAndComments ({ namespace, name }) {
 
 /* Shoot Clusters */
 
-export function getShoots ({ namespace, labelSelector, useCache }) {
-  const query = {}
-  if (labelSelector) {
-    query.labelSelector = labelSelector
-  }
-  if (useCache) {
-    query.useCache = true
-  }
-  const search = Object.keys(query).length
-    ? '?' + new URLSearchParams(query).toString()
+export function getShoots ({ namespace, labelSelector }) {
+  const search = labelSelector
+    ? '?' + new URLSearchParams({ labelSelector }).toString()
     : ''
   namespace = encodeURIComponent(namespace)
   return getResource(`/api/namespaces/${namespace}/shoots` + search)
@@ -286,8 +279,7 @@ export function createTokenReview (data) {
   return createResource('/auth', data)
 }
 
-export function getSubjectRules (options) {
-  const namespace = options?.namespace ?? 'default'
+export function getSubjectRules ({ namespace = 'default' }) {
   return callResourceMethod('/api/user/subjectrules', {
     namespace,
   })

@@ -1,0 +1,126 @@
+{{- if .Values.global.bootstrapper.enabled }}
+apiVersion: {{ include "deploymentversion" . }}
+kind: Deployment
+metadata:
+  name: gardener-dashboard-terminal-bootstrapper
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: gardener-dashboard
+    app.kubernetes.io/component: terminal-bootstrapper
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/managed-by: "{{ .Release.Service }}"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: gardener-dashboard
+      app.kubernetes.io/component: terminal-bootstrapper
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: gardener-dashboard
+        app.kubernetes.io/component: terminal-bootstrapper
+        helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        app.kubernetes.io/instance: "{{ .Release.Name }}"
+        app.kubernetes.io/managed-by: "{{ .Release.Service }}"
+        networking.gardener.cloud/to-dns: allowed
+        networking.gardener.cloud/to-public-networks: allowed
+        networking.resources.gardener.cloud/to-virtual-garden-kube-apiserver-tcp-443: allowed
+        {{- if .Values.global.bootstrapper.podLabels }}
+        {{- toYaml .Values.global.bootstrapper.podLabels | nindent 8 }}
+        {{- end }}
+      annotations:
+        checksum/configmap-gardener-dashboard-terminal-bootstrapper-config: {{ include (print .Template.BasePath "/bootstrapper/configmap-config.yaml") . | sha256sum }}
+        {{- if .Values.global.bootstrapper.kubeconfig }}
+        checksum/secret-gardener-dashboard-terminal-bootstrapper-kubeconfig: {{ include (print .Template.BasePath "/bootstrapper/secret-kubeconfig.yaml") . | sha256sum }}
+        {{- end }}
+        {{- if .Values.global.bootstrapper.podAnnotations }}
+        {{- toYaml .Values.global.bootstrapper.podAnnotations | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- if .Values.global.dashboard.kubeconfig }}
+      automountServiceAccountToken: false
+      {{- end }}
+      {{- if or ( not .Values.global.virtualGarden.enabled ) .Values.global.bootstrapper.serviceAccountTokenVolumeProjection.enabled }}
+      serviceAccountName: {{ required ".Values.global.bootstrapper.serviceAccountName is required" .Values.global.bootstrapper.serviceAccountName }}
+      {{- else }}
+      serviceAccountName: default
+      {{- end }}
+      restartPolicy: Always
+      containers:
+      - name: gardener-dashboard-terminal-bootstrapper
+        {{- if .Values.global.bootstrapper.nodeOptions }}
+        args:
+        {{- range .Values.global.bootstrapper.nodeOptions }}
+        - {{ . }}
+        {{- end }}
+        - main.js
+        {{- end }}
+        image: "{{ include "utils-templates.image" .Values.global.bootstrapper.image }}"
+        imagePullPolicy: {{ .Values.global.bootstrapper.image.pullPolicy }}
+        ports:
+          - name: http
+            containerPort: 9000
+            protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /live
+            port: 9000
+          initialDelaySeconds: {{ .Values.global.bootstrapper.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.global.bootstrapper.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.global.bootstrapper.livenessProbe.timeoutSeconds }}
+          successThreshold: {{ .Values.global.bootstrapper.livenessProbe.successThreshold }}
+          failureThreshold: {{ .Values.global.bootstrapper.livenessProbe.failureThreshold }}
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 9000
+          initialDelaySeconds: {{ .Values.global.bootstrapper.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.global.bootstrapper.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.global.bootstrapper.readinessProbe.timeoutSeconds }}
+          successThreshold: {{ .Values.global.bootstrapper.readinessProbe.successThreshold }}
+          failureThreshold: {{ .Values.global.bootstrapper.readinessProbe.failureThreshold }}
+        env:
+        - name: GARDENER_CONFIG
+          value: /etc/gardener-dashboard-terminal-bootstrapper/config/config.yaml
+        {{- if .Values.global.bootstrapper.kubeconfig }}
+        - name: KUBECONFIG
+          value: /etc/gardener-dashboard-terminal-bootstrapper/kubeconfig/kubeconfig.yaml
+        {{- end }}
+        resources: {{ toYaml .Values.global.bootstrapper.resources | nindent 12 }}
+        volumeMounts:
+        - name: gardener-dashboard-terminal-bootstrapper-config
+          mountPath: /etc/gardener-dashboard-terminal-bootstrapper/config
+          readOnly: true
+        {{- if .Values.global.bootstrapper.kubeconfig }}
+        - name: gardener-dashboard-terminal-bootstrapper-kubeconfig
+          mountPath: /etc/gardener-dashboard-terminal-bootstrapper/kubeconfig
+          readOnly: true
+        {{- end }}
+        {{- if .Values.global.bootstrapper.serviceAccountTokenVolumeProjection.enabled }}
+        - name: service-account-token
+          mountPath: /var/run/secrets/projected/serviceaccount
+          readOnly: true
+        {{- end }}
+      volumes:
+      - name: gardener-dashboard-terminal-bootstrapper-config
+        configMap:
+          name: gardener-dashboard-terminal-bootstrapper-configmap-config
+      {{- if .Values.global.bootstrapper.kubeconfig }}
+      - name: gardener-dashboard-terminal-bootstrapper-kubeconfig
+        secret:
+          secretName: gardener-dashboard-terminal-bootstrapper-secret-kubeconfig
+      {{- end }}
+      {{- if .Values.global.bootstrapper.serviceAccountTokenVolumeProjection.enabled }}
+      - name: service-account-token
+        projected:
+          sources:
+          - serviceAccountToken:
+              path: token
+              expirationSeconds: {{ required ".Values.global.bootstrapper.serviceAccountTokenVolumeProjection.expirationSeconds is required" .Values.global.bootstrapper.serviceAccountTokenVolumeProjection.expirationSeconds }}
+              {{- if .Values.global.bootstrapper.serviceAccountTokenVolumeProjection.audience }}
+              audience: {{ .Values.global.bootstrapper.serviceAccountTokenVolumeProjection.audience }}
+              {{- end }}
+      {{- end }}
+{{- end }}

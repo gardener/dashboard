@@ -4,10 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import {
-  defineStore,
-  acceptHMRUpdate,
-} from 'pinia'
+import { defineStore } from 'pinia'
 import {
   computed,
   reactive,
@@ -56,7 +53,6 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
     controlPlaneFailureToleranceType: null,
     initialControlPlaneFailureToleranceType: null,
     seedName: null,
-    workerless: false,
   })
 
   const dnsDomain = computed(() => {
@@ -73,15 +69,6 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
 
   const seedName = computed(() => {
     return state.seedName
-  })
-
-  const workerless = computed({
-    get () {
-      return state.workerless
-    },
-    set (value) {
-      state.workerless = value
-    },
   })
 
   const clusterIsNew = computed(() => {
@@ -334,7 +321,6 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
     cloudProfileName,
     seedName,
     controlPlaneFailureToleranceType,
-    workerless,
     // getters
     clusterIsNew,
     dnsProviderTypes,
@@ -361,7 +347,3 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
     setControlPlaneFailureToleranceType,
   }
 })
-
-if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useShootStagingStore, import.meta.hot))
-}

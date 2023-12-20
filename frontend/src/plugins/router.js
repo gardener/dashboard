@@ -4,21 +4,12 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import {
-  createRouter,
-  registerGlobalBeforeGuards,
-  registerGlobalAfterHooks,
-} from '@/router'
+import { createRouter } from '@/router'
 
 export default {
-  install (app) {
-    const router = createRouter()
-    app.use(router)
+  install (app, options = {}) {
+    app.use(createRouter())
     app.provide('router', app.config.globalProperties.$router)
     app.provide('route', app.config.globalProperties.$route)
-    // must be done after the router plugin has been installed
-    // because some stores use the router or route
-    registerGlobalBeforeGuards(router)
-    registerGlobalAfterHooks(router)
   },
 }

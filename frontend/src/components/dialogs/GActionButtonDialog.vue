@@ -34,6 +34,7 @@ SPDX-License-Identifier: Apache-2.0
         v-model:error-message="errorMessage"
         v-model:detailed-error-message="detailedErrorMessage"
         :confirm-button-text="confirmButtonText"
+        :confirm-disabled="!valid"
         :width="width"
         :max-height="maxHeight"
         :confirm-value="confirmValue"
@@ -116,6 +117,10 @@ export default {
     confirmRequired: {
       type: Boolean,
       default: false,
+    },
+    valid: {
+      type: Boolean,
+      default: true,
     },
     width: {
       type: String,

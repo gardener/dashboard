@@ -138,7 +138,6 @@ describe('api', function () {
         mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
         mockRequest.mockImplementationOnce(fixtures.terminals.mocks.list())
         mockRequest.mockImplementationOnce(fixtures.managedseeds.mocks.get())
-        mockRequest.mockImplementationOnce(fixtures.managedseeds.mocks.get())
         mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
         mockRequest.mockImplementationOnce(fixtures.terminals.mocks.create())
 
@@ -161,7 +160,7 @@ describe('api', function () {
         expect(makeSanitizedHtmlStub).toBeCalledTimes(1)
         expect(makeSanitizedHtmlStub.mock.calls).toEqual([['Dummy Image Description']])
 
-        expect(mockRequest).toBeCalledTimes(6)
+        expect(mockRequest).toBeCalledTimes(5)
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(res.body).toMatchSnapshot()
@@ -212,7 +211,6 @@ describe('api', function () {
         mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
         mockRequest.mockImplementationOnce(fixtures.terminals.mocks.list())
         mockRequest.mockImplementationOnce(fixtures.managedseeds.mocks.get())
-        mockRequest.mockImplementationOnce(fixtures.managedseeds.mocks.get())
         mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
         mockRequest.mockImplementationOnce(fixtures.terminals.mocks.patch())
 
@@ -235,7 +233,7 @@ describe('api', function () {
         expect(makeSanitizedHtmlStub).toBeCalledTimes(1)
         expect(makeSanitizedHtmlStub.mock.calls).toEqual([['Foo Image Description']])
 
-        expect(mockRequest).toBeCalledTimes(6)
+        expect(mockRequest).toBeCalledTimes(5)
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(res.body).toMatchSnapshot()

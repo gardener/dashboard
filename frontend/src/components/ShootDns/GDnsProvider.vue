@@ -28,19 +28,17 @@ SPDX-License-Identifier: Apache-2.0
         />
       </v-chip>
     </template>
-    <v-list min-width="300">
+    <v-list class="pa-0">
       <v-list-item
         v-for="({title, value, description, to}) in dnsProviderDescriptions"
         :key="title"
+        class="px-0"
       >
         <v-list-item-subtitle class="pt-1">
           {{ title }}
         </v-list-item-subtitle>
         <v-list-item-title v-if="to">
-          <router-link
-            class="text-anchor"
-            :to="to"
-          >
+          <router-link :to="to">
             {{ value }} {{ description }}
           </router-link>
         </v-list-item-title>
@@ -50,6 +48,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-list-item>
       <v-list-item
         v-if="secret"
+        class="px-0"
       >
         <g-secret-details-item-content
           class="pb-2"

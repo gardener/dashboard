@@ -36,12 +36,12 @@ async function getSchemaDefinitions (user) {
 
   if (_.isEmpty(schemaDefinitions)) {
     // Do not use client of user as the result gets cached and returned to other users
-    const openAPIRaw = await dashboardClient.openapi.getGardenerApis()
-    const dereferencedOpenApi = await SwaggerParser.dereference(openAPIRaw)
+    const swaggerApi = await dashboardClient.openapi.get()
+    const dereferencedSwaggerApi = await SwaggerParser.dereference(swaggerApi)
 
     const selectedSchemaDefinitions = _
-      .chain(dereferencedOpenApi)
-      .get('components.schemas')
+      .chain(dereferencedSwaggerApi)
+      .get('definitions')
       .pick([
         'com.github.gardener.gardener.pkg.apis.core.v1beta1.Shoot'
       ])

@@ -8,6 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <g-action-button-dialog
     ref="actionDialog"
     :shoot-item="shootItem"
+    :valid="!v$.$invalid"
     width="900"
     caption="Configure Maintenance"
     @dialog-opened="onConfigurationDialogOpened"
@@ -20,7 +21,6 @@ SPDX-License-Identifier: Apache-2.0
       />
       <g-maintenance-components
         ref="maintenanceComponents"
-        :hide-os-updates="!hasShootWorkerGroups"
       />
     </template>
   </g-action-button-dialog>
@@ -82,9 +82,6 @@ export default {
           updateKubernetesVersion: k8sUpdates,
           updateOSVersion: osUpdates,
         })
-        if (!this.hasShootWorkerGroups) {
-          delete this.data.updateOSVersion
-        }
         await this.api.updateShootMaintenance({ namespace: this.shootNamespace, name: this.shootName, data: this.data })
       } catch (err) {
         const errorMessage = 'Could not save maintenance configuration'
@@ -100,16 +97,9 @@ export default {
       this.data.updateKubernetesVersion = get(this.shootItem, 'spec.maintenance.autoUpdate.kubernetesVersion', false)
       this.data.updateOSVersion = get(this.shootItem, 'spec.maintenance.autoUpdate.machineImageVersion', false)
 
-      this.$nextTick(() => {
-        // trigger reset in next tick to ensure that property data has been propagated
-        // reset function requires time-window-begin property to be set
-        this.$refs.maintenanceTime.reset()
-      })
+      this.$refs.maintenanceTime.reset()
 
-      this.$refs.maintenanceComponents.setComponentUpdates({
-        k8sUpdates: this.data.updateKubernetesVersion,
-        osUpdates: this.data.updateOSVersion,
-      })
+      this.$refs.maintenanceComponents.setComponentUpdates({ k8sUpdates: this.data.updateKubernetesVersion, osUpdates: this.data.updateOSVersion })
     },
   },
 }

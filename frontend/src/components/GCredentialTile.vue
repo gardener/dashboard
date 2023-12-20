@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-list-item :class="{ 'pt-1 pb-1': dense }">
+  <g-list-item :class="{ 'pt-0 pb-0': dense }">
     <template #prepend>
       <v-icon
         v-if="!dense"
@@ -181,9 +181,3 @@ export default {
   },
 }
 </script>
-
-<style lang="scss">
-.no-padding {
-  padding: 0px !important;
-}
-</style>

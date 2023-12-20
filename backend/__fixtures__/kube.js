@@ -6,6 +6,8 @@
 
 'use strict'
 
+const { hash } = require('./helper')
+
 const server = new URL('https://kubernetes:6443')
 const scheme = server.protocol.replace(/:$/, '')
 const authority = server.host
@@ -16,5 +18,8 @@ module.exports = {
   server,
   ':scheme': scheme,
   ':authority': authority,
-  authorization
+  authorization,
+  getApiServer (namespace, name, ingressDomain) {
+    return `k-${hash(name, namespace)}.${ingressDomain}`
+  }
 }

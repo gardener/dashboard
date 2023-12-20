@@ -70,7 +70,7 @@
       }
     }
   },
-  "packageManager": "yarn@3.6.3",
+  "packageManager": "yarn@3.6.1",
   "engines": {
     "node": "^20.5.0"
   }

@@ -43,6 +43,7 @@ SPDX-License-Identifier: Apache-2.0
 import GDialog from '@/components/dialogs/GDialog.vue'
 
 export default {
+  name: 'UnverifiedTerminalShortcutsDialog',
   components: {
     GDialog,
   },

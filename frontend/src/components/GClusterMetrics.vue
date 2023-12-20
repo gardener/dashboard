@@ -55,19 +55,19 @@ export default {
   mixins: [shootItem],
   computed: {
     plutonoUrl () {
-      return get(this.shootInfo, 'plutonoUrl', '')
+      return get(this.shootItem, 'info.plutonoUrl', '')
     },
     prometheusUrl () {
-      return get(this.shootInfo, 'prometheusUrl', '')
+      return get(this.shootItem, 'info.prometheusUrl', '')
     },
     alertmanagerUrl () {
-      return get(this.shootInfo, 'alertmanagerUrl', '')
+      return get(this.shootItem, 'info.alertmanagerUrl', '')
     },
     username () {
-      return get(this.shootInfo, 'monitoringUsername', '')
+      return get(this.shootItem, 'info.monitoringUsername', '')
     },
     password () {
-      return get(this.shootInfo, 'monitoringPassword', '')
+      return get(this.shootItem, 'info.monitoringPassword', '')
     },
     hasAlertmanager () {
       const emailReceivers = get(this.shootItem, 'spec.monitoring.alerting.emailReceivers', [])

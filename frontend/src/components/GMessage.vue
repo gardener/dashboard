@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-alert
         v-model="alertVisible"
         :color="color"
-        :rounded="!tile ? true : 0"
+        :rounded="!tile"
         closable
       >
         <div class="text-subtitle-1">

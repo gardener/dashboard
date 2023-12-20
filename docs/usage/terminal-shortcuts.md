@@ -80,7 +80,7 @@ frontend:
 [...]
 terminal: # is generally required for the terminal feature
   container:
-    image: europe-docker.pkg.dev/gardener-project/releases/gardener/ops-toolbelt:0.26.0
+    image: eu.gcr.io/gardener-project/gardener/ops-toolbelt:0.10.0
   containerImageDescriptions:
     - image: /.*/ops-toolbelt:.*/
       description: Run `ghelp` to get information about installed tools and packages
@@ -91,4 +91,14 @@ terminal: # is generally required for the terminal feature
       serviceAccountRef:
         name: dashboard-terminal-admin
         namespace: garden
+  bootstrap:
+    disabled: false
+    shootDisabled: false
+    seedDisabled: false
+    gardenTerminalHostDisabled: true
+    apiServerIngress:
+      annotations:
+        cert.gardener.cloud/purpose: managed
+        kubernetes.io/ingress.class: nginx
+        nginx.ingress.kubernetes.io/backend-protocol: HTTPS
 ```
