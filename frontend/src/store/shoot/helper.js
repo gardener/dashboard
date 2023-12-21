@@ -49,8 +49,6 @@ import {
   orderBy,
 } from '@/lodash'
 
-export const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
-
 const tokenizePattern = /(-?"([^"]|"")*"|\S+)/g
 
 export function tokenizeSearch (text) {

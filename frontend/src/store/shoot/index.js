@@ -37,7 +37,6 @@ import { useLocalStorageStore } from '../localStorage'
 import { useShootStagingStore } from '../shootStaging'
 
 import {
-  uriPattern,
   createShootResource,
   constants,
   onlyAllShootsWithIssues,
@@ -52,7 +51,6 @@ import {
   get,
   map,
   pick,
-  replace,
   difference,
   find,
   includes,
@@ -425,13 +423,6 @@ export const useShootStore = defineStore('shoot', () => {
     }
     try {
       const { data: info } = await api.getShootInfo(metadata)
-      if (info.serverUrl) {
-        const [, scheme, host] = uriPattern.exec(info.serverUrl)
-        const authority = `//${replace(host, /^\/\//, '')}`
-        const pathname = info.dashboardUrlPath
-        info.dashboardUrl = [scheme, authority, pathname].join('')
-        info.dashboardUrlText = [scheme, host].join('')
-      }
       if (info.seedShootIngressDomain) {
         const baseHost = info.seedShootIngressDomain
         info.plutonoUrl = `https://gu-${baseHost}`
