@@ -1173,11 +1173,11 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["@floating-ui/core", [\
-        ["npm:1.5.0", {\
-          "packageLocation": "./.yarn/cache/@floating-ui-core-npm-1.5.0-3cdde0a88b-54b4fe26b3.zip/node_modules/@floating-ui/core/",\
+        ["npm:1.5.2", {\
+          "packageLocation": "./.yarn/cache/@floating-ui-core-npm-1.5.2-52cbf2a192-e22de0a5e8.zip/node_modules/@floating-ui/core/",\
           "packageDependencies": [\
-            ["@floating-ui/core", "npm:1.5.0"],\
-            ["@floating-ui/utils", "npm:0.1.4"]\
+            ["@floating-ui/core", "npm:1.5.2"],\
+            ["@floating-ui/utils", "npm:0.1.6"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -1187,16 +1187,16 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/@floating-ui-dom-npm-1.1.1-b97ea530c5-8b7f3b98ed.zip/node_modules/@floating-ui/dom/",\
           "packageDependencies": [\
             ["@floating-ui/dom", "npm:1.1.1"],\
-            ["@floating-ui/core", "npm:1.5.0"]\
+            ["@floating-ui/core", "npm:1.5.2"]\
           ],\
           "linkType": "HARD"\
         }]\
       ]],\
       ["@floating-ui/utils", [\
-        ["npm:0.1.4", {\
-          "packageLocation": "./.yarn/cache/@floating-ui-utils-npm-0.1.4-ec4958b0f8-e6195ded5b.zip/node_modules/@floating-ui/utils/",\
+        ["npm:0.1.6", {\
+          "packageLocation": "./.yarn/cache/@floating-ui-utils-npm-0.1.6-ae508f7272-b34d4b5470.zip/node_modules/@floating-ui/utils/",\
           "packageDependencies": [\
-            ["@floating-ui/utils", "npm:0.1.4"]\
+            ["@floating-ui/utils", "npm:0.1.6"]\
           ],\
           "linkType": "HARD"\
         }]\
