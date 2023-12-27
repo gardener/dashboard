@@ -73,7 +73,7 @@ SPDX-License-Identifier: Apache-2.0
         </p>
         <p>
           Ensure that the service principal has the permissions defined
-          <g-external-link url="https://github.com/gardener/gardener-extension-provider-azure/blob/master/docs/azure-permissions.md">
+          <g-external-link url="https://github.com/gardener/gardener-extension-provider-azure/blob/master/docs/usage/azure-permissions.md">
             here
           </g-external-link> within your subscription assigned.
           If no fine-grained permissions are required then assign the <strong>Contributor</strong> role.
