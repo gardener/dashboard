@@ -47,10 +47,37 @@ SPDX-License-Identifier: Apache-2.0
     </g-list-item-content>
     <g-list-item-content v-if="isAdminKubeconfigType">
       Admin Kubeconfig
-      <div class="text-body-2">
+      <div class="text-body-2 d-flex">
         <span>
-          Request a kubeconfig valid for {{ adminKubeConfigExpiration }}
+          Request a kubeconfig valid for
         </span>
+        <g-popover
+          toolbar-title="Configure Admin Kubeconfig Lifetime"
+          placement="bottom"
+        >
+          <template #activator="{ props }">
+            <v-chip
+              label
+              size="x-small"
+              color="primary"
+              variant="outlined"
+              class="ml-2 pointer"
+              v-bind="props"
+            >
+              {{ adminKubeConfigExpirationTitle }}
+            </v-chip>
+          </template>
+          <div class="pa-2">
+            You can configure the <span class="font-weight-bold">kubeconfig lifetime</span> on the
+            <router-link
+              :to="{ name: 'Settings', params: { name: shootName, namespace: shootNamespace } }"
+              class="text-anchor"
+            >
+              <span>Settings</span>
+            </router-link>
+            page.
+          </div>
+        </g-popover>
       </div>
     </g-list-item-content>
     <template #append>
@@ -62,8 +89,7 @@ SPDX-License-Identifier: Apache-2.0
           @click.stop="onDownload"
         />
         <g-copy-btn
-          v-if="!isAdminKubeconfigType"
-          :clipboard-text="kubeconfig"
+          :clipboard-text="getCopyKubeConfigText"
         />
         <g-action-button
           :icon="kubeconfigVisibilityIcon"
@@ -75,12 +101,6 @@ SPDX-License-Identifier: Apache-2.0
       <g-static-token-kubeconfig-configuration
         v-if="isStaticKubeconfigType"
         :shoot-item="shootItem"
-      />
-      <g-admin-kube-config-request
-        v-if="isAdminKubeconfigType"
-        :expirations="possibleAdminKubeconfigExpirationSettings"
-        :shoot-item="shootItem"
-        @update:expiration="onExpirationUpdate"
       />
     </template>
   </g-list-item>
@@ -103,6 +123,7 @@ import download from 'downloadjs'
 import { mapState } from 'pinia'
 
 import { useConfigStore } from '@/store/config'
+import { useLocalStorageStore } from '@/store/localStorage'
 
 import GListItem from '@/components/GListItem.vue'
 import GListItemContent from '@/components/GListItemContent.vue'
@@ -111,12 +132,11 @@ import GCopyBtn from '@/components/GCopyBtn.vue'
 import GCodeBlock from '@/components/GCodeBlock.vue'
 import GGardenloginInfo from '@/components/GGardenloginInfo.vue'
 import GStaticTokenKubeconfigConfiguration from '@/components/GStaticTokenKubeconfigConfiguration.vue'
-import GAdminKubeConfigRequest from '@/components/GAdminKubeConfigRequest'
 
 import { errorDetailsFromError } from '@/utils/error'
 import { shootItem } from '@/mixins/shootItem'
 
-import { filter } from '@/lodash'
+import { find } from '@/lodash'
 
 export default {
   components: {
@@ -127,7 +147,6 @@ export default {
     GCodeBlock,
     GGardenloginInfo,
     GStaticTokenKubeconfigConfiguration,
-    GAdminKubeConfigRequest,
   },
   mixins: [shootItem],
   inject: ['api', 'logger'],
@@ -144,12 +163,12 @@ export default {
   data () {
     return {
       kubeconfigExpansionPanel: false,
-      adminKubeConfigExpiration: '30m', // Default 30 minutes
       adminKubeconfig: undefined,
     }
   },
   computed: {
-    ...mapState(useConfigStore, ['shootAdminKubeconfig']),
+    ...mapState(useConfigStore, ['shootAdminKubeconfigExpirations']),
+    ...mapState(useLocalStorageStore, ['shootAdminKubeconfigExpiration']),
     icon () {
       return this.showListIcon ? 'mdi-file' : ''
     },
@@ -182,20 +201,14 @@ export default {
     isAdminKubeconfigType () {
       return this.type === 'adminkubeconfig'
     },
-    possibleAdminKubeconfigExpirationSettings () {
-      let expirations = ['30m', '1h', '3h', '6h', '12h', '1d', '3d', '7d']
-
-      if (this.shootAdminKubeconfig?.maxExpirationSeconds) {
-        expirations = filter(expirations, expiration => {
-          return this.adminKubeConfigExpirationInSeconds(expiration) <= this.shootAdminKubeconfig.maxExpirationSeconds
-        })
-      }
-
-      return expirations
-    },
     getQualifiedName () {
       const prefix = this.isGardenloginType ? 'kubeconfig-gardenlogin' : 'kubeconfig'
       return `${prefix}--${this.shootProjectName}--${this.shootName}.yaml`
+    },
+    adminKubeConfigExpirationTitle () {
+      return this.shootAdminKubeconfigExpirations.map(({ value }) => value).includes(this.shootAdminKubeconfigExpiration)
+        ? find(this.shootAdminKubeconfigExpirations, ['value', this.shootAdminKubeconfigExpiration]).title
+        : '600s'
     },
   },
   watch: {
@@ -210,7 +223,7 @@ export default {
           namespace: this.shootNamespace,
           name: this.shootName,
           data: {
-            expirationSeconds: this.adminKubeConfigExpirationInSeconds(this.adminKubeConfigExpiration),
+            expirationSeconds: this.shootAdminKubeconfigExpiration,
           },
         })
 
@@ -228,6 +241,12 @@ export default {
 
       this.kubeconfigExpansionPanel = !this.kubeconfigExpansionPanel
     },
+    async getCopyKubeConfigText () {
+      if (this.isAdminKubeconfigType) {
+        await this.createAdminKubeconfig()
+      }
+      return this.kubeconfig
+    },
     reset () {
       this.kubeconfigExpansionPanel = false
     },
@@ -240,21 +259,6 @@ export default {
       if (kubeconfig) {
         download(kubeconfig, this.getQualifiedName, 'text/yaml')
       }
-    },
-    async onExpirationUpdate (kubeconfigExpiration) {
-      if (this.adminKubeConfigExpiration !== kubeconfigExpiration) {
-        this.adminKubeconfig = undefined
-      }
-
-      this.adminKubeConfigExpiration = kubeconfigExpiration
-    },
-    adminKubeConfigExpirationInSeconds (durationAsString) {
-      const units = { d: 86400, h: 3600, m: 60 }
-      const regex = /(\d+)([dhm])/g
-      const match = regex.exec(durationAsString)
-      const seconds = parseInt(match[1]) * units[match[2]]
-
-      return seconds
     },
   },
 }

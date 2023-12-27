@@ -22,6 +22,7 @@ import {
   get,
   isEmpty,
   camelCase,
+  filter,
 } from '@/lodash'
 
 const wellKnownConditions = {
@@ -210,6 +211,53 @@ export const useConfigStore = defineStore('config', () => {
     return state.value?.shootAdminKubeconfig
   })
 
+  const allShootAdminKubeconfigExpirations = [
+    {
+      title: '10m',
+      value: 600,
+    },
+    {
+      title: '30m',
+      value: 1800,
+    },
+    {
+      title: '1h',
+      value: 3600,
+    },
+    {
+      title: '3h',
+      value: 10800,
+    },
+    {
+      title: '6h',
+      value: 21600,
+    },
+    {
+      title: '12h',
+      value: 43200,
+    },
+    {
+      title: '1d',
+      value: 86400,
+    },
+    {
+      title: '3d',
+      value: 259200,
+    },
+    {
+      title: '7d',
+      value: 604800,
+    },
+  ]
+  const shootAdminKubeconfigExpirations = computed(() => {
+    return filter(allShootAdminKubeconfigExpirations, ({ value }) => {
+      if (!shootAdminKubeconfig.value?.maxExpirationSeconds) {
+        return true
+      }
+      return shootAdminKubeconfig.value?.maxExpirationSeconds >= value
+    })
+  })
+
   const apiServerUrl = computed(() => {
     return state.value?.apiServerUrl ?? browserLocation.value.origin
   })
@@ -354,6 +402,7 @@ export const useConfigStore = defineStore('config', () => {
     externalTools,
     defaultNodesCIDR,
     shootAdminKubeconfig,
+    shootAdminKubeconfigExpirations,
     apiServerUrl,
     clusterIdentity,
     seedCandidateDeterminationStrategy,

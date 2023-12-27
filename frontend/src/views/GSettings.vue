@@ -115,6 +115,14 @@ SPDX-License-Identifier: Apache-2.0
                   hint="Skip the login screen if no user input is required"
                 />
               </v-col>
+              <v-col cols="12">
+                <v-select
+                  v-model="shootAdminKubeconfigExpiration"
+                  :items="shootAdminKubeconfigExpirations"
+                  label="Cluster Admin Kubeconfig Lifetime"
+                  variant="underlined"
+                />
+              </v-col>
             </v-row>
           </v-card-text>
         </v-card>
@@ -165,8 +173,10 @@ SPDX-License-Identifier: Apache-2.0
 import { storeToRefs } from 'pinia'
 
 import { useLocalStorageStore } from '@/store/localStorage'
+import { useConfigStore } from '@/store/config'
 
 const localStorageStore = useLocalStorageStore()
+const configStore = useConfigStore()
 
 const logLevels = [
   { value: 'debug', text: 'verbose', icon: 'mdi-bug', color: 'grey darken-4' },
@@ -181,7 +191,12 @@ const {
   autoLogin,
   colorScheme,
   operatorFeatures,
+  shootAdminKubeconfigExpiration,
 } = storeToRefs(localStorageStore)
+
+const {
+  shootAdminKubeconfigExpirations,
+} = storeToRefs(configStore)
 </script>
 
 <style lang="scss" scoped>

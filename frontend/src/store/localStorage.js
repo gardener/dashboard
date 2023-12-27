@@ -17,6 +17,7 @@ import { useRoute } from 'vue-router'
 import { useLocalStorage } from '@vueuse/core'
 
 import { useProjectStore } from '@/store/project'
+import { useConfigStore } from '@/store/config'
 
 import { useLogger } from '@/composables/useLogger'
 
@@ -104,6 +105,8 @@ const useLazyLocalStorage = () => {
 export const useLocalStorageStore = defineStore('localStorage', () => {
   const logger = useLogger()
 
+  const configStore = useConfigStore()
+
   const logLevel = toRef(logger, 'logLevel')
 
   const initialColorScheme = 'auto'
@@ -127,6 +130,24 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
   const hiddenMessages = useLocalStorage('global/alert-banner/hidden-messages', {}, {
     serializer: StorageSerializers.json,
     writeDefaults: false,
+  })
+
+  const shootAdminKubeconfigExpirationInternal = useLocalStorage('global/shoot-admin-kubeconfig-expiration', 0, {
+    serializer: StorageSerializers.integer,
+    writeDefaults: false,
+  })
+
+  const shootAdminKubeconfigExpiration = computed({
+    get () {
+      return configStore.shootAdminKubeconfigExpirations.map(({ value }) => value).includes(shootAdminKubeconfigExpirationInternal.value)
+        ? shootAdminKubeconfigExpirationInternal.value
+        : configStore.shootAdminKubeconfigExpirations.map(({ value }) => value).includes(1800)
+          ? 1800
+          : 600
+    },
+    set (value) {
+      shootAdminKubeconfigExpirationInternal.value = value
+    },
   })
 
   const userSelectedColumns = useLocalStorage('members/useraccount-list/selected-columns', {}, {
@@ -261,6 +282,7 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     operatorFeatures,
     logLevel,
     hiddenMessages,
+    shootAdminKubeconfigExpiration,
     userSelectedColumns,
     userItemsPerPage,
     userSortBy,
