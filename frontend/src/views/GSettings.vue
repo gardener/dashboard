@@ -115,7 +115,10 @@ SPDX-License-Identifier: Apache-2.0
                   hint="Skip the login screen if no user input is required"
                 />
               </v-col>
-              <v-col cols="12">
+              <v-col
+                v-if="hasAdminKubeconfigEnabled"
+                cols="12"
+              >
                 <v-select
                   v-model="shootAdminKubeconfigExpiration"
                   :items="shootAdminKubeconfigExpirations"
@@ -171,6 +174,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script setup>
 import { storeToRefs } from 'pinia'
+import { computed } from 'vue'
 
 import { useLocalStorageStore } from '@/store/localStorage'
 import { useConfigStore } from '@/store/config'
@@ -196,7 +200,12 @@ const {
 
 const {
   shootAdminKubeconfigExpirations,
+  shootAdminKubeconfig,
 } = storeToRefs(configStore)
+
+const hasAdminKubeconfigEnabled = computed(() => {
+  return shootAdminKubeconfig.value?.enabled
+})
 </script>
 
 <style lang="scss" scoped>
