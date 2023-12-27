@@ -378,7 +378,7 @@ SPDX-License-Identifier: Apache-2.0
                       :to="{ name: 'Account', query: { namespace: namespace } }"
                       class="text-anchor"
                     >
-                      My Account
+                      <span>My Account</span>
                     </router-link>
                     to download the <span class="font-family-monospace">kubeconfig</span> for this project.
                   </div>

@@ -46,7 +46,7 @@ SPDX-License-Identifier: Apache-2.0
         :to="accountRoute"
         class="text-anchor"
       >
-        Account
+        <span>Account</span>
       </router-link>
       page.
     </div>

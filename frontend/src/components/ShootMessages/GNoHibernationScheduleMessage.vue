@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
         :to="{ name: 'ShootItemHibernationSettings', params: { name: shootName, namespace: shootNamespace } }"
         class="text-anchor"
       >
-        configure
+        <span>configure</span>
       </router-link>
       a hibernation schedule or explicitly deactivate scheduled hibernation for this cluster.
     </template>
