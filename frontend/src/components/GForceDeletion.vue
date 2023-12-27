@@ -35,13 +35,28 @@ SPDX-License-Identifier: Apache-2.0
         v-if="!confirmed"
         type="warning"
       >
-        You <span class="font-weight-bold">MUST</span> ensure that all the resources created in the IaaS account are cleaned
+        You <span class="font-weight-bold">MUST</span> ensure that all the resources created in the IaaS account
+        <code>
+          <g-shoot-secret-name
+            :namespace="shootNamespace"
+            :secret-binding-name="shootSecretBindingName"
+          />
+        </code>
+        are cleaned
         up to prevent orphaned resources. Gardener will <span class="font-weight-bold">NOT</span> delete any resources in the underlying infrastructure account.
-        Hence, use this feature at your own risk and only if you are fully aware of these consequences.
+        Hence, use the force delete option at your own risk and only if you are fully aware of these consequences.
       </v-alert>
     </g-expand-transition-group>
     <g-countdown-checkbox v-model="confirmed">
-      I confirm that I read the message above and deleted all resources in the underlying infrastructure account
+      <span>
+        I confirm that I read the message above and deleted all resources in the underlying infrastructure account
+        <code>
+          <g-shoot-secret-name
+            :namespace="shootNamespace"
+            :secret-binding-name="shootSecretBindingName"
+          />
+        </code>
+      </span>
     </g-countdown-checkbox>
     <p v-if="isShootReconciliationDeactivated">
       <v-row class="fill-height">
@@ -77,6 +92,7 @@ import GShootActionDialog from '@/components/GShootActionDialog.vue'
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
 import GExpandTransitionGroup from '@/components/GExpandTransitionGroup'
 import GCountdownCheckbox from '@/components/GCountdownCheckbox'
+import GShootSecretName from '@/components/GShootSecretName'
 
 import { shootItem } from '@/mixins/shootItem'
 import { errorDetailsFromError } from '@/utils/error'
@@ -88,6 +104,7 @@ export default {
     GAccountAvatar,
     GExpandTransitionGroup,
     GCountdownCheckbox,
+    GShootSecretName,
   },
   mixins: [shootItem],
   inject: ['logger', 'api'],
@@ -125,7 +142,9 @@ export default {
     caption () {
       return this.isShootMarkedForForceDeletion
         ? 'Cluster already marked for force deletion'
-        : this.buttonTitle
+        : this.isShootMarkedForDeletion
+          ? 'Cluster already marked for deletion'
+          : this.buttonTitle
     },
     buttonTitle () {
       return 'Force Delete Cluster'

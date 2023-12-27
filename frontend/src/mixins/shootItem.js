@@ -301,8 +301,8 @@ export const shootItem = {
         'ERR_INFRA_UNAUTHENTICATED',
         'ERR_INFRA_UNAUTHORIZED',
       ]
-      const shootHasSupportedForceDeleteError = shootErrorCodes.some(item => forceDeleteErrorCodes.includes(item))
-      return shootHasSupportedForceDeleteError
+      const shootHasForceDeleteError = shootErrorCodes.some(item => forceDeleteErrorCodes.includes(item))
+      return shootHasForceDeleteError
     },
   },
   methods: {

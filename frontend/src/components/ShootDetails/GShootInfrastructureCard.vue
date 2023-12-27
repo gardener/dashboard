@@ -36,14 +36,10 @@ SPDX-License-Identifier: Apache-2.0
       </g-list-item>
       <g-list-item v-if="hasShootWorkerGroups">
         <g-list-item-content label="Credential">
-          <router-link
-            v-if="canLinkToSecret"
-            class="text-anchor"
-            :to="{ name: 'Secret', params: { name: shootSecretBindingName, namespace: shootNamespace } }"
-          >
-            <span class="text-subtitle-1">{{ shootSecretBindingName }}</span>
-          </router-link>
-          <span v-else>{{ shootSecretBindingName }}</span>
+          <g-shoot-secret-name
+            :namespace="shootNamespace"
+            :secret-binding-name="shootSecretBindingName"
+          />
         </g-list-item-content>
       </g-list-item>
       <g-list-item v-if="secret">
@@ -254,6 +250,7 @@ import { useAuthzStore } from '@/store/authz'
 
 import GCopyBtn from '@/components/GCopyBtn'
 import GShootSeedName from '@/components/GShootSeedName'
+import GShootSecretName from '@/components/GShootSecretName'
 import GVendor from '@/components/GVendor'
 import GDnsProvider from '@/components/ShootDns/GDnsProvider'
 import GDnsConfiguration from '@/components/ShootDns/GDnsConfiguration'
@@ -279,6 +276,7 @@ export default {
   components: {
     GCopyBtn,
     GShootSeedName,
+    GShootSecretName,
     GVendor,
     GDnsProvider,
     GDnsConfiguration,
@@ -335,9 +333,6 @@ export default {
       }
 
       return get(head(shootLBClasses), 'name')
-    },
-    canLinkToSecret () {
-      return this.shootSecretBindingName && this.shootNamespace
     },
     customDomainChipText () {
       if (this.isCustomShootDomain) {

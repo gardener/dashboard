@@ -10,7 +10,6 @@ SPDX-License-Identifier: Apache-2.0
     :disabled="tooltipDisabled"
     :text="tooltipText"
     max-width="600px"
-    class="g-action-button"
   >
     <template #activator="{ props }">
       <div v-bind="props">

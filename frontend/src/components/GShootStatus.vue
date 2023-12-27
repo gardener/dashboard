@@ -164,7 +164,7 @@ SPDX-License-Identifier: Apache-2.0
         :namespace="shootNamespace"
       />
     </g-popover>
-    <div>
+    <div class="d-flex">
       <g-retry-operation :shoot-item="shootItem" />
       <g-force-deletion
         v-model="forceDeleteClusterDialog"
