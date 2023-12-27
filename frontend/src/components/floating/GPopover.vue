@@ -7,6 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <Dropdown
     ref="popoverRef"
+    v-model:shown="shown"
     prevent-overflow
     auto-boundary-max-size
     :boundary="boundaryElement"
@@ -19,7 +20,6 @@ SPDX-License-Identifier: Apache-2.0
       '--g-popper-color': `var(--v-theme-${color})`,
       '--g-popper-z-index': zIndex,
     }"
-    @update:shown="onUpdateShown"
   >
     <template #default="popperProps">
       <slot
@@ -85,6 +85,8 @@ Object.assign(options.themes, {
     $extend: 'dropdown',
     $resetCss: true,
     placement: 'bottom',
+    triggers: [],
+    delay: 0,
   },
 })
 
@@ -92,7 +94,9 @@ export default {
   components: {
     Dropdown,
   },
-  inject: ['mainContainer'],
+  inject: [
+    'mainContainer',
+  ],
   props: {
     modelValue: {
       type: Boolean,
@@ -145,6 +149,11 @@ export default {
   emits: [
     'update:modelValue',
   ],
+  data () {
+    return {
+      lazyValue: this.modelValue,
+    }
+  },
   computed: {
     boundaryElement () {
       if (!this.boundary) {
@@ -158,11 +167,26 @@ export default {
       }
       return this.boundary
     },
+    shown: {
+      get () {
+        return this.lazyValue
+      },
+      set (value) {
+        if (this.lazyValue !== value) {
+          this.lazyValue = value
+          this.$emit('update:modelValue', this.lazyValue)
+        }
+      },
+    },
+  },
+  watch: {
+    modelValue (value) {
+      if (this.lazyValue !== value) {
+        this.lazyValue = value
+      }
+    },
   },
   methods: {
-    onUpdateShown (value) {
-      this.$emit('update:modelValue', value)
-    },
     makeActivatorProps ({ shown, show, hide }) {
       const props = {
         onClick () {

@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
       :condition="condition"
       :popper-placement="popperPlacement"
       :secret-binding-name="shootSecretBindingName"
-      :namespace="shootNamespace"
+      :shoot-metadata="shootMetadata"
       :stale-shoot="isStaleShoot"
     />
   </div>
