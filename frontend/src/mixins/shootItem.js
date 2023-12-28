@@ -49,8 +49,7 @@ export const shootItem = {
       return this.shootMetadata.namespace
     },
     isShootMarkedForDeletion () {
-      const confirmationDeprecated = get(this.shootAnnotations, ['confirmation.garden.sapcloud.io/deletion'], 'false')
-      const confirmation = get(this.shootAnnotations, ['confirmation.gardener.cloud/deletion'], confirmationDeprecated)
+      const confirmation = get(this.shootAnnotations, ['confirmation.gardener.cloud/deletion'])
       const deletionTimestamp = this.shootDeletionTimestamp
 
       return !!deletionTimestamp && isTruthyValue(confirmation)
