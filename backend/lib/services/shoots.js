@@ -345,14 +345,13 @@ exports.info = async function ({ user, namespace, name }) {
     _
       .chain(secret)
       .get('data')
-      .pick('kubeconfig', 'username', 'password', 'token')
+      .pick('kubeconfig', 'token')
       .forEach((value, key) => {
         value = decodeBase64(value)
         if (key === 'kubeconfig') {
           try {
             const kubeconfigObject = cleanKubeconfig(value)
             data[key] = kubeconfigObject.toYAML()
-            data.serverUrl = kubeconfigObject.currentCluster.server
           } catch (err) {
             logger.error('failed to clean kubeconfig', err)
           }
