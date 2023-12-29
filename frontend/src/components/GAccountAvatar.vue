@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
       />
     </v-avatar>
     <a
-      v-if="mailTo && isEmail"
+      v-if="mailTo && isAccountNameEmail"
       :href="`mailto:${accountName}`"
       class="text-anchor"
     >{{ accountName }}</a>
@@ -58,5 +58,9 @@ const { accountName, mailTo, size } = toRefs(props)
 
 const avatarUrl = computed(() => {
   return gravatarUrlGeneric(accountName.value, size.value * 2)
+})
+
+const isAccountNameEmail = computed(() => {
+  return isEmail(accountName.value)
 })
 </script>

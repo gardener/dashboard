@@ -1555,14 +1555,11 @@ Array [
 exports[`api shoots should return shoot info without gardenlogin kubeconfig: body 1`] = `
 Object {
   "canLinkToSeed": false,
-  "cluster_password": "pass-foo-dummyShoot",
-  "cluster_username": "user-foo-dummyShoot",
   "dashboardUrlPath": "/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/",
   "kubeconfig": Any<String>,
   "monitoringPassword": "pass-garden-foo-dummyShoot.monitoring",
   "monitoringUsername": "user-garden-foo-dummyShoot.monitoring",
   "seedShootIngressDomain": "foo--dummyShoot.ingress.foo-south.infra1.example.org",
-  "serverUrl": "https://api.dummyShoot.foo.shoot.cluster",
 }
 `;
 
@@ -1604,15 +1601,12 @@ Object {
 exports[`api shoots should return shoot info: body 1`] = `
 Object {
   "canLinkToSeed": false,
-  "cluster_password": "pass-foo-barShoot",
-  "cluster_username": "user-foo-barShoot",
   "dashboardUrlPath": "/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/",
   "kubeconfig": Any<String>,
   "kubeconfigGardenlogin": Any<String>,
   "monitoringPassword": "pass-garden-foo-barShoot.monitoring",
   "monitoringUsername": "user-garden-foo-barShoot.monitoring",
   "seedShootIngressDomain": "foo--barShoot.ingress.foo-east.infra1.example.org",
-  "serverUrl": "https://api.barShoot.foo.shoot.cluster",
 }
 `;
 
