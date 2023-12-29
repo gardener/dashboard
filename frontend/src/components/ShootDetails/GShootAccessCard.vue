@@ -133,11 +133,9 @@ SPDX-License-Identifier: Apache-2.0
         :show-list-icon="false"
         type="token"
       />
-      <g-shoot-kubeconfig
-        v-if="hasAdminKubeconfigEnabled"
+      <g-shoot-admin-kubeconfig
         :shoot-item="shootItem"
         :show-list-icon="false"
-        type="adminkubeconfig"
       />
     </template>
 
@@ -174,6 +172,7 @@ import { shootItem } from '@/mixins/shootItem'
 
 import GGardenctlCommands from './GGardenctlCommands.vue'
 import GShootKubeconfig from './GShootKubeconfig.vue'
+import GShootAdminKubeconfig from './GShootAdminKubeconfig.vue'
 import GTerminalShortcutsTile from './GTerminalShortcutsTile.vue'
 
 import {
@@ -192,6 +191,7 @@ export default {
     GTerminalListTile,
     GLinkListTile,
     GShootKubeconfig,
+    GShootAdminKubeconfig,
     GGardenctlCommands,
     GTerminalShortcutsTile,
   },
@@ -255,9 +255,6 @@ export default {
     },
     hasDashboardTokenAuth () {
       return get(this.shootItem, 'spec.addons.kubernetesDashboard.authenticationMode', 'basic') === 'token'
-    },
-    hasAdminKubeconfigEnabled () {
-      return this.shootAdminKubeconfig?.enabled
     },
     kubeconfig () {
       return get(this.shootInfo, 'kubeconfig')

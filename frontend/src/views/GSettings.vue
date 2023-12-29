@@ -116,12 +116,12 @@ SPDX-License-Identifier: Apache-2.0
                 />
               </v-col>
               <v-col
-                v-if="hasAdminKubeconfigEnabled"
+                v-if="shootAdminKubeconfig.isEnabled"
                 cols="12"
               >
                 <v-select
-                  v-model="shootAdminKubeconfigExpiration"
-                  :items="shootAdminKubeconfigExpirations"
+                  v-model="shootAdminKubeconfig.expiration.value"
+                  :items="shootAdminKubeconfigExpirationItems"
                   label="Cluster Admin Kubeconfig Lifetime"
                   variant="underlined"
                 />
@@ -177,10 +177,11 @@ import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
 
 import { useLocalStorageStore } from '@/store/localStorage'
-import { useConfigStore } from '@/store/config'
+
+import { useShootAdminKubeconfig } from '@/composables/useShootAdminKubeconfig'
 
 const localStorageStore = useLocalStorageStore()
-const configStore = useConfigStore()
+const shootAdminKubeconfig = useShootAdminKubeconfig()
 
 const logLevels = [
   { value: 'debug', text: 'verbose', icon: 'mdi-bug', color: 'grey darken-4' },
@@ -195,16 +196,10 @@ const {
   autoLogin,
   colorScheme,
   operatorFeatures,
-  shootAdminKubeconfigExpiration,
 } = storeToRefs(localStorageStore)
 
-const {
-  shootAdminKubeconfigExpirations,
-  shootAdminKubeconfig,
-} = storeToRefs(configStore)
-
-const hasAdminKubeconfigEnabled = computed(() => {
-  return shootAdminKubeconfig.value?.enabled
+const shootAdminKubeconfigExpirationItems = computed(() => {
+  return shootAdminKubeconfig.expirations.value.map(value => { return { value, title: shootAdminKubeconfig.humanizeExpiration(value) } })
 })
 </script>
 

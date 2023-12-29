@@ -27,7 +27,7 @@ SPDX-License-Identifier: Apache-2.0
         </span>
       </template>
     </g-list-item-content>
-    <g-list-item-content v-if="isStaticKubeconfigType">
+    <g-list-item-content v-else>
       Kubeconfig - Static Token
       <template #description>
         <span v-if="!shootEnableStaticTokenKubeconfig">
@@ -45,61 +45,24 @@ SPDX-License-Identifier: Apache-2.0
         </span>
       </template>
     </g-list-item-content>
-    <g-list-item-content v-if="isAdminKubeconfigType">
-      Admin Kubeconfig
-      <div class="text-body-2 d-flex">
-        <span>
-          Request a kubeconfig valid for
-        </span>
-        <g-popover
-          toolbar-title="Configure Admin Kubeconfig Lifetime"
-          placement="bottom"
-        >
-          <template #activator="{ props }">
-            <v-chip
-              label
-              size="x-small"
-              color="primary"
-              variant="outlined"
-              class="ml-2 pointer"
-              v-bind="props"
-            >
-              {{ adminKubeConfigExpirationTitle }}
-            </v-chip>
-          </template>
-          <div class="pa-2">
-            You can configure the <span class="font-weight-bold">kubeconfig lifetime</span> on the
-            <router-link
-              :to="{ name: 'Settings', params: { name: shootName, namespace: shootNamespace } }"
-              class="text-anchor"
-            >
-              <span>Settings</span>
-            </router-link>
-            page.
-          </div>
-        </g-popover>
-      </div>
-    </g-list-item-content>
     <template #append>
       <g-gardenlogin-info v-if="isGardenloginType" />
-      <template v-if="isKubeconfigAvailable || isAdminKubeconfigType">
+      <template v-if="isKubeconfigAvailable">
         <g-action-button
           icon="mdi-download"
           tooltip="Download Kubeconfig"
           @click.stop="onDownload"
         />
-        <g-copy-btn
-          :clipboard-text="getCopyKubeConfigText"
-        />
+        <g-copy-btn :clipboard-text="kubeconfig" />
         <g-action-button
           :icon="kubeconfigVisibilityIcon"
           :tooltip="kubeconfigVisibilityTitle"
-          @click.stop="toggleKubeconfig"
+          @click.stop="kubeconfigExpansionPanel = !kubeconfigExpansionPanel"
         />
       </template>
 
       <g-static-token-kubeconfig-configuration
-        v-if="isStaticKubeconfigType"
+        v-if="!isGardenloginType"
         :shoot-item="shootItem"
       />
     </template>
@@ -120,10 +83,6 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import download from 'downloadjs'
-import { mapState } from 'pinia'
-
-import { useConfigStore } from '@/store/config'
-import { useLocalStorageStore } from '@/store/localStorage'
 
 import GListItem from '@/components/GListItem.vue'
 import GListItemContent from '@/components/GListItemContent.vue'
@@ -133,10 +92,7 @@ import GCodeBlock from '@/components/GCodeBlock.vue'
 import GGardenloginInfo from '@/components/GGardenloginInfo.vue'
 import GStaticTokenKubeconfigConfiguration from '@/components/GStaticTokenKubeconfigConfiguration.vue'
 
-import { errorDetailsFromError } from '@/utils/error'
 import { shootItem } from '@/mixins/shootItem'
-
-import { find } from '@/lodash'
 
 export default {
   components: {
@@ -149,7 +105,6 @@ export default {
     GStaticTokenKubeconfigConfiguration,
   },
   mixins: [shootItem],
-  inject: ['api', 'logger'],
   props: {
     showListIcon: {
       type: Boolean,
@@ -163,25 +118,16 @@ export default {
   data () {
     return {
       kubeconfigExpansionPanel: false,
-      adminKubeconfig: undefined,
     }
   },
   computed: {
-    ...mapState(useConfigStore, ['shootAdminKubeconfigExpirations']),
-    ...mapState(useLocalStorageStore, ['shootAdminKubeconfigExpiration']),
     icon () {
       return this.showListIcon ? 'mdi-file' : ''
     },
     kubeconfig () {
-      if (this.isGardenloginType) {
-        return this.shootInfo?.kubeconfigGardenlogin
-      }
-
-      if (this.isStaticKubeconfigType) {
-        return this.shootInfo?.kubeconfig
-      }
-
-      return this.adminKubeconfig
+      return this.isGardenloginType
+        ? this.shootInfo?.kubeconfigGardenlogin
+        : this.shootInfo?.kubeconfig
     },
     isKubeconfigAvailable () {
       return !!this.kubeconfig
@@ -195,66 +141,24 @@ export default {
     isGardenloginType () {
       return this.type === 'gardenlogin'
     },
-    isStaticKubeconfigType () {
-      return this.type === 'token'
-    },
-    isAdminKubeconfigType () {
-      return this.type === 'adminkubeconfig'
-    },
     getQualifiedName () {
       const prefix = this.isGardenloginType ? 'kubeconfig-gardenlogin' : 'kubeconfig'
       return `${prefix}--${this.shootProjectName}--${this.shootName}.yaml`
     },
-    adminKubeConfigExpirationTitle () {
-      return this.shootAdminKubeconfigExpirations.map(({ value }) => value).includes(this.shootAdminKubeconfigExpiration)
-        ? find(this.shootAdminKubeconfigExpirations, ['value', this.shootAdminKubeconfigExpiration]).title
-        : '600s'
-    },
   },
   watch: {
-    kubeconfig (value) {
+    kubeconfig () {
       this.reset()
     },
   },
   methods: {
-    async createAdminKubeconfig () {
-      try {
-        const resp = await this.api.createShootAdminKubeconfig({
-          namespace: this.shootNamespace,
-          name: this.shootName,
-          data: {
-            expirationSeconds: this.shootAdminKubeconfigExpiration,
-          },
-        })
-
-        this.adminKubeconfig = resp.data
-      } catch (err) {
-        const errorMessage = 'Could not request admin kubeconfig'
-        const errorDetails = errorDetailsFromError(err)
-        this.logger.error(errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-      }
-    },
-    async toggleKubeconfig () {
-      if (!this.kubeconfigExpansionPanel && this.isAdminKubeconfigType) {
-        await this.createAdminKubeconfig()
-      }
-
+    toggleKubeconfig () {
       this.kubeconfigExpansionPanel = !this.kubeconfigExpansionPanel
-    },
-    async getCopyKubeConfigText () {
-      if (this.isAdminKubeconfigType) {
-        await this.createAdminKubeconfig()
-      }
-      return this.kubeconfig
     },
     reset () {
       this.kubeconfigExpansionPanel = false
     },
-    async onDownload () {
-      if (this.isAdminKubeconfigType) {
-        await this.createAdminKubeconfig()
-      }
-
+    onDownload () {
       const kubeconfig = this.kubeconfig
       if (kubeconfig) {
         download(kubeconfig, this.getQualifiedName, 'text/yaml')

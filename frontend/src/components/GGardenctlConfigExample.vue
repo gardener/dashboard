@@ -42,12 +42,10 @@ SPDX-License-Identifier: Apache-2.0
       refers to the path of the garden cluster
       <span class="font-family-monospace">kubeconfig</span>
       which you can download from the
-      <router-link
+      <g-text-router-link
         :to="accountRoute"
-        class="text-anchor"
-      >
-        <span>Account</span>
-      </router-link>
+        text="Account"
+      />
       page.
     </div>
   </div>
@@ -58,11 +56,13 @@ import { mapState } from 'pinia'
 
 import { useConfigStore } from '@/store/config'
 
-import GCodeBlock from './GCodeBlock.vue'
+import GCodeBlock from '@/components/GCodeBlock.vue'
+import GTextRouterLink from '@/components/GTextRouterLink.vue'
 
 export default {
   components: {
     GCodeBlock,
+    GTextRouterLink,
   },
   computed: {
     ...mapState(useConfigStore, [

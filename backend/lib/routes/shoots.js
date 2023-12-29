@@ -9,7 +9,6 @@
 const express = require('express')
 const { shoots } = require('../services')
 const { metricsRoute } = require('../middleware')
-const config = require('../config')
 const { trimObjectMetadata, useWatchCacheForListShoots } = require('../utils')
 
 const router = module.exports = express.Router({
@@ -262,18 +261,16 @@ router.route('/:name/spec/seedName')
     }
   })
 
-if (config.frontend.shootAdminKubeconfig?.enabled) {
-  router.route('/:name/adminkubeconfig')
-    .all(metricsMiddleware)
-    .post(async (req, res, next) => {
-      try {
-        const user = req.user
-        const namespace = req.params.namespace
-        const name = req.params.name
-        const body = req.body
-        res.send(await shoots.createAdminKubeconfig({ user, namespace, name, body }))
-      } catch (err) {
-        next(err)
-      }
-    })
-}
+router.route('/:name/adminkubeconfig')
+  .all(metricsMiddleware)
+  .post(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      const name = req.params.name
+      const body = req.body
+      res.send(await shoots.createAdminKubeconfig({ user, namespace, name, body }))
+    } catch (err) {
+      next(err)
+    }
+  })

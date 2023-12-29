@@ -1122,6 +1122,33 @@ Object {
 }
 `;
 
+exports[`api shoots should return a shoot admin kubeconfig 1`] = `
+Array [
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot/adminkubeconfig",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
+    },
+    Object {
+      "apiVersion": "authentication.gardener.cloud/v1alpha1",
+      "kind": "AdminKubeconfigRequest",
+      "spec": Object {
+        "expirationSeconds": 600,
+      },
+    },
+  ],
+]
+`;
+
+exports[`api shoots should return a shoot admin kubeconfig 2`] = `
+Object {
+  "kubeconfig": "{\\"current-context\\":\\"default\\",\\"contexts\\":[{\\"name\\":\\"default\\",\\"context\\":{\\"user\\":\\"user\\",\\"cluster\\":\\"cluster\\"}}],\\"users\\":[{\\"name\\":\\"user\\",\\"user\\":{\\"client-certificate-data\\":\\"Y2VydGlmaWNhdGUtYXV0aG9yaXR5LWRhdGE=\\",\\"client-key-data\\":\\"Y2xpZW50LWtleS1kYXRh\\"}}],\\"clusters\\":[{\\"name\\":\\"cluster\\",\\"cluster\\":{\\"server\\":\\"https://shootApiServerHostname:6443\\"}}]}",
+}
+`;
+
 exports[`api shoots should return all shoots for a non-admin user 1`] = `
 Array [
   Array [

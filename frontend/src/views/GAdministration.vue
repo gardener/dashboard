@@ -374,12 +374,10 @@ SPDX-License-Identifier: Apache-2.0
                   </div>
                   <div class="text-body-2 text-medium-emphasis">
                     Go to
-                    <router-link
+                    <g-text-router-link
                       :to="{ name: 'Account', query: { namespace: namespace } }"
-                      class="text-anchor"
-                    >
-                      <span>My Account</span>
-                    </router-link>
+                      text="My Account"
+                    />
                     to download the <span class="font-family-monospace">kubeconfig</span> for this project.
                   </div>
                 </g-list-item>
@@ -512,6 +510,7 @@ import GDialog from '@/components/dialogs/GDialog.vue'
 import GTimeString from '@/components/GTimeString.vue'
 import GShootCustomField from '@/components/GShootCustomField.vue'
 import GResourceQuotaHelp from '@/components/GResourceQuotaHelp.vue'
+import GTextRouterLink from '@/components/GTextRouterLink.vue'
 
 import { withMessage } from '@/utils/validators'
 import {
@@ -543,6 +542,7 @@ export default {
     GTimeString,
     GShootCustomField,
     GResourceQuotaHelp,
+    GTextRouterLink,
   },
   inject: ['logger'],
   data () {
