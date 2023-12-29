@@ -196,7 +196,7 @@ export default {
       }
 
       this.dropHandlerInitialized = true
-      const onDrop = (value) => {
+      const onDrop = value => {
         this.serviceAccountKey = value
       }
       handleTextFieldDrop(this.$refs.serviceAccountKey, /json/, onDrop)

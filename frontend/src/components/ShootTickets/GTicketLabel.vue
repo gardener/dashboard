@@ -27,7 +27,7 @@ export default {
   },
   computed: {
     labelStyle () {
-      return (label) => {
+      return label => {
         const bgColor = `#${get(label, 'color')}`
         const textColor = contrast.isAccessible(bgColor, '#fff') ? '#fff' : '#000'
         return `background-color: ${bgColor}; color: ${textColor};`

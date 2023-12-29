@@ -416,17 +416,17 @@ export default {
     },
     createInstance (element) {
       const extraKeys = assign({}, {
-        Tab: (instance) => {
+        Tab: instance => {
           if (instance.somethingSelected()) {
             instance.indentSelection('add')
           } else {
             instance.execCommand('insertSoftTab')
           }
         },
-        'Shift-Tab': (instance) => {
+        'Shift-Tab': instance => {
           instance.indentSelection('subtract')
         },
-        Enter: (instance) => {
+        Enter: instance => {
           this.shootEditorCompletions.editorEnter(instance)
         },
         'Ctrl-Space': 'autocomplete',
@@ -468,7 +468,7 @@ export default {
 
       let cmTooltipFnTimerID
       const cm = this.cmInstance
-      CodeMirror.on(element, 'mouseover', (e) => {
+      CodeMirror.on(element, 'mouseover', e => {
         clearTimeout(cmTooltipFnTimerID)
         this.helpTooltip.visible = false
         cmTooltipFnTimerID = setTimeout(() => {
