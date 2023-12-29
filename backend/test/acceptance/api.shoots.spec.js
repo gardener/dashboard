@@ -605,7 +605,10 @@ describe('api', function () {
       expect(mockRequest).toBeCalledTimes(1)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
-      expect(res.body).toMatchSnapshot()
+      expect(res.body).toMatchSnapshot({
+        kubeconfig: expect.any(String)
+      }, 'body')
+      expect(yaml.load(res.body.kubeconfig)).toMatchSnapshot('body.kubeconfig')
     })
   })
 })

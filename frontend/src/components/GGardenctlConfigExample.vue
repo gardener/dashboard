@@ -56,8 +56,8 @@ import { mapState } from 'pinia'
 
 import { useConfigStore } from '@/store/config'
 
-import GCodeBlock from '@/components/GCodeBlock.vue'
-import GTextRouterLink from '@/components/GTextRouterLink.vue'
+import GCodeBlock from './GCodeBlock.vue'
+import GTextRouterLink from './GTextRouterLink.vue'
 
 export default {
   components: {

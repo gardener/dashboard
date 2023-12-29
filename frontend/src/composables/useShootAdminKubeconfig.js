@@ -3,7 +3,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
-import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
 
 import { useLocalStorageStore } from '@/store/localStorage'
@@ -13,50 +12,41 @@ import {
   last,
   head,
 } from '@/lodash'
+
+const defaultExpirations = [600, 1800, 3600, 10800, 21600, 43200, 86400, 259200, 604800]
+const defaultMaxExpiration = 2592000
+
 export const useShootAdminKubeconfig = () => {
   const localStorageStore = useLocalStorageStore()
   const configStore = useConfigStore()
-
-  const { shootAdminKubeconfigExpiration } = storeToRefs(localStorageStore)
-  const { shootAdminKubeconfig } = storeToRefs(configStore)
-
+  const isEnabled = computed(() => {
+    return configStore.shootAdminKubeconfig?.enabled ?? false
+  })
+  const maxExpiration = computed(() => {
+    return configStore.shootAdminKubeconfig?.maxExpirationSeconds ?? defaultMaxExpiration
+  })
   const expiration = computed({
     get () {
-      if (shootAdminKubeconfig.value?.maxExpirationSeconds &&
-        shootAdminKubeconfigExpiration.value > shootAdminKubeconfig.value?.maxExpirationSeconds) {
-        return last(expirations.value)
-      }
-      if (!shootAdminKubeconfigExpiration.value) {
-        return head(expirations.value)
-      }
-      return shootAdminKubeconfigExpiration.value
+      const value = localStorageStore.shootAdminKubeconfigExpiration
+      return !value
+        ? head(expirations.value)
+        : Math.min(value, last(expirations.value))
     },
     set (value) {
-      shootAdminKubeconfigExpiration.value = value
+      localStorageStore.shootAdminKubeconfigExpiration = value
     },
   })
-
-  const isEnabled = computed(() => {
-    return shootAdminKubeconfig.value?.enabled
-  })
-
-  const kubeconfigExpirations = [600, 1800, 3600, 10800, 21600, 43200, 86400, 259200, 604800]
-
   const expirations = computed(() => {
-    if (shootAdminKubeconfig.value?.maxExpirationSeconds) {
-      return kubeconfigExpirations.filter(value => value <= shootAdminKubeconfig.value?.maxExpirationSeconds)
-    }
-    return kubeconfigExpirations
+    return defaultExpirations.filter(value => value <= maxExpiration.value)
   })
-
-  const humanizeExpiration = (val) => {
-    if (val < 3600) {
-      return `${Math.floor(val / 60)}m`
+  function humanizeExpiration (value) {
+    if (value < 3600) {
+      return `${Math.floor(value / 60)}m`
     }
-    if (val < 86400) {
-      return `${Math.floor(val / 3600)}h`
+    if (value < 86400) {
+      return `${Math.floor(value / 3600)}h`
     }
-    return `${Math.floor(val / 86400)}d`
+    return `${Math.floor(value / 86400)}d`
   }
 
   return {

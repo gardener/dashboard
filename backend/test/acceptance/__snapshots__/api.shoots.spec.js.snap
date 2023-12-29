@@ -1143,9 +1143,41 @@ Array [
 ]
 `;
 
-exports[`api shoots should return a shoot admin kubeconfig 2`] = `
+exports[`api shoots should return a shoot admin kubeconfig: body 1`] = `
 Object {
-  "kubeconfig": "{\\"current-context\\":\\"default\\",\\"contexts\\":[{\\"name\\":\\"default\\",\\"context\\":{\\"user\\":\\"user\\",\\"cluster\\":\\"cluster\\"}}],\\"users\\":[{\\"name\\":\\"user\\",\\"user\\":{\\"client-certificate-data\\":\\"Y2VydGlmaWNhdGUtYXV0aG9yaXR5LWRhdGE=\\",\\"client-key-data\\":\\"Y2xpZW50LWtleS1kYXRh\\"}}],\\"clusters\\":[{\\"name\\":\\"cluster\\",\\"cluster\\":{\\"server\\":\\"https://shootApiServerHostname:6443\\"}}]}",
+  "kubeconfig": Any<String>,
+}
+`;
+
+exports[`api shoots should return a shoot admin kubeconfig: body.kubeconfig 1`] = `
+Object {
+  "clusters": Array [
+    Object {
+      "cluster": Object {
+        "server": "https://shootApiServerHostname:6443",
+      },
+      "name": "cluster",
+    },
+  ],
+  "contexts": Array [
+    Object {
+      "context": Object {
+        "cluster": "cluster",
+        "user": "user",
+      },
+      "name": "default",
+    },
+  ],
+  "current-context": "default",
+  "users": Array [
+    Object {
+      "name": "user",
+      "user": Object {
+        "client-certificate-data": "Y2VydGlmaWNhdGUtYXV0aG9yaXR5LWRhdGE=",
+        "client-key-data": "Y2xpZW50LWtleS1kYXRh",
+      },
+    },
+  ],
 }
 `;
 

@@ -116,11 +116,11 @@ SPDX-License-Identifier: Apache-2.0
                 />
               </v-col>
               <v-col
-                v-if="shootAdminKubeconfig.isEnabled"
+                v-if="isShootAdminKubeconfigEnabled"
                 cols="12"
               >
                 <v-select
-                  v-model="shootAdminKubeconfig.expiration.value"
+                  v-model="shootAdminKubeconfigExpiration"
                   :items="shootAdminKubeconfigExpirationItems"
                   label="Cluster Admin Kubeconfig Lifetime"
                   variant="underlined"
@@ -182,6 +182,12 @@ import { useShootAdminKubeconfig } from '@/composables/useShootAdminKubeconfig'
 
 const localStorageStore = useLocalStorageStore()
 const shootAdminKubeconfig = useShootAdminKubeconfig()
+const {
+  expirations: shootAdminKubeconfigExpirations,
+  isEnabled: isShootAdminKubeconfigEnabled,
+  expiration: shootAdminKubeconfigExpiration,
+  humanizeExpiration,
+} = shootAdminKubeconfig
 
 const logLevels = [
   { value: 'debug', text: 'verbose', icon: 'mdi-bug', color: 'grey darken-4' },
@@ -199,7 +205,12 @@ const {
 } = storeToRefs(localStorageStore)
 
 const shootAdminKubeconfigExpirationItems = computed(() => {
-  return shootAdminKubeconfig.expirations.value.map(value => { return { value, title: shootAdminKubeconfig.humanizeExpiration(value) } })
+  return shootAdminKubeconfigExpirations.value.map(value => {
+    return {
+      value,
+      title: humanizeExpiration(value),
+    }
+  })
 })
 </script>
 

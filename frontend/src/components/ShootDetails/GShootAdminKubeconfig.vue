@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <template v-if="shootAdminKubeconfig.isEnabled">
+  <template v-if="isEnabled">
     <g-list-item>
       <template #prepend>
         <v-icon
@@ -20,8 +20,10 @@ SPDX-License-Identifier: Apache-2.0
             Request a kubeconfig valid for
           </span>
           <g-popover
+            v-model="popover"
             toolbar-title="Configure Admin Kubeconfig Lifetime"
             placement="bottom"
+            :z-index="2500"
           >
             <template #activator="{ props }">
               <v-chip
@@ -38,7 +40,7 @@ SPDX-License-Identifier: Apache-2.0
             <div class="pa-2">
               You can configure the <span class="font-weight-bold">kubeconfig lifetime</span> on the
               <g-text-router-link
-                :to="{ name: 'Settings', params: { name: shootName, namespace: shootNamespace } }"
+                :to="{ name: 'Settings', query: { namespace: shootNamespace } }"
                 text="Settings"
               />
               page.
@@ -120,8 +122,9 @@ export default {
     },
   },
   setup () {
+    const shootAdminKubeconfig = useShootAdminKubeconfig()
     return {
-      shootAdminKubeconfig: useShootAdminKubeconfig(),
+      ...shootAdminKubeconfig,
     }
   },
   data () {
@@ -133,6 +136,7 @@ export default {
         copy: false,
         download: false,
       },
+      popover: false,
     }
   },
   computed: {
@@ -149,7 +153,7 @@ export default {
       return `kubeconfig--${this.shootProjectName}--${this.shootName}.yaml`
     },
     adminKubeConfigExpirationTitle () {
-      return this.shootAdminKubeconfig.humanizeExpiration(this.shootAdminKubeconfig.expiration.value)
+      return this.humanizeExpiration(this.expiration)
     },
   },
   watch: {
@@ -167,7 +171,7 @@ export default {
           namespace: this.shootNamespace,
           name: this.shootName,
           data: {
-            expirationSeconds: this.shootAdminKubeconfig.expiration.value,
+            expirationSeconds: this.expiration,
           },
         })
 
