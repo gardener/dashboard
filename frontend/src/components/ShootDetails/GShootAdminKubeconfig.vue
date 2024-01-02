@@ -7,12 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <template v-if="isEnabled">
     <g-list-item>
-      <template #prepend>
-        <v-icon
-          :icon="icon"
-          color="primary"
-        />
-      </template>
       <g-list-item-content>
         Admin Kubeconfig
         <div class="text-body-2 d-flex">
@@ -34,7 +28,7 @@ SPDX-License-Identifier: Apache-2.0
                 class="pointer"
                 v-bind="props"
               >
-                {{ adminKubeConfigExpirationTitle }}
+                {{ expirationTitle }}
               </v-chip>
             </template>
             <div class="pa-2">
@@ -52,29 +46,29 @@ SPDX-License-Identifier: Apache-2.0
         <g-action-button
           icon="mdi-download"
           tooltip="Download Kubeconfig"
-          :loading="adminKubeconfigLoading.download"
+          :loading="downloadBtnLoading"
           @click.stop="onDownload"
         />
         <g-copy-btn
           :clipboard-text="getCopyKubeConfigText"
-          :loading="adminKubeconfigLoading.copy"
+          :loading="copyBtnLoading"
         />
         <g-action-button
-          :icon="kubeconfigVisibilityIcon"
-          :tooltip="kubeconfigVisibilityTitle"
-          :loading="adminKubeconfigLoading.toggle"
+          :icon="visibilityIcon"
+          :tooltip="visibilityTitle"
+          :loading="toggleBtnLoading"
           @click.stop="toggleKubeconfig"
         />
       </template>
     </g-list-item>
     <g-list-item
-      v-if="kubeconfigExpansionPanel"
+      v-if="expansionPanel"
       key="expansion-gardenlogin-kubeconfig"
     >
       <g-list-item-content>
         <g-code-block
           lang="yaml"
-          :content="adminKubeconfig"
+          :content="kubeconfig"
           :show-copy-button="false"
         />
       </g-list-item-content>
@@ -111,54 +105,36 @@ export default {
   },
   mixins: [shootItem],
   inject: ['api', 'logger'],
-  props: {
-    showListIcon: {
-      type: Boolean,
-      default: false,
-    },
-    type: {
-      type: String,
-      default: 'gardenlogin',
-    },
-  },
   setup () {
-    const shootAdminKubeconfig = useShootAdminKubeconfig()
+    const { expiration, isEnabled, humanizeExpiration } = useShootAdminKubeconfig()
     return {
-      ...shootAdminKubeconfig,
+      expiration,
+      isEnabled,
+      humanizeExpiration,
     }
   },
   data () {
     return {
-      kubeconfigExpansionPanel: false,
-      adminKubeconfig: undefined,
-      adminKubeconfigLoading: {
-        toggle: false,
-        copy: false,
-        download: false,
-      },
+      expansionPanel: false,
+      kubeconfig: undefined,
+      toggleBtnLoading: false,
+      downloadBtnLoading: false,
+      copyBtnLoading: false,
       popover: false,
     }
   },
   computed: {
-    icon () {
-      return this.showListIcon ? 'mdi-file' : ''
+    visibilityIcon () {
+      return this.expansionPanel ? 'mdi-eye-off' : 'mdi-eye'
     },
-    kubeconfigVisibilityIcon () {
-      return this.kubeconfigExpansionPanel ? 'mdi-eye-off' : 'mdi-eye'
+    visibilityTitle () {
+      return this.expansionPanel ? 'Hide Kubeconfig' : 'Show Kubeconfig'
     },
-    kubeconfigVisibilityTitle () {
-      return this.kubeconfigExpansionPanel ? 'Hide Kubeconfig' : 'Show Kubeconfig'
-    },
-    getQualifiedName () {
+    qualifiedName () {
       return `kubeconfig--${this.shootProjectName}--${this.shootName}.yaml`
     },
-    adminKubeConfigExpirationTitle () {
+    expirationTitle () {
       return this.humanizeExpiration(this.expiration)
-    },
-  },
-  watch: {
-    kubeconfig (value) {
-      this.reset()
     },
   },
   methods: {
@@ -175,7 +151,7 @@ export default {
           },
         })
 
-        this.adminKubeconfig = response.data.kubeconfig
+        this.kubeconfig = response.data.kubeconfig
 
         return true
       } catch (err) {
@@ -189,34 +165,34 @@ export default {
       }
     },
     async toggleKubeconfig () {
-      if (!this.kubeconfigExpansionPanel) {
-        this.adminKubeconfigLoading.toggle = true
+      if (!this.expansionPanel) {
+        this.toggleBtnLoading = true
         const success = await this.createAdminKubeconfig()
-        this.adminKubeconfigLoading.toggle = false
+        this.toggleBtnLoading = false
         if (!success) {
           return
         }
       }
-      this.kubeconfigExpansionPanel = !this.kubeconfigExpansionPanel
+      this.expansionPanel = !this.expansionPanel
     },
     async getCopyKubeConfigText () {
-      this.adminKubeconfigLoading.copy = true
+      this.copyBtnLoading = true
       const success = await this.createAdminKubeconfig()
-      this.adminKubeconfigLoading.copy = false
+      this.copyBtnLoading = false
       if (!success) {
         return
       }
-      return this.adminKubeconfig
+      return this.kubeconfig
     },
     async onDownload () {
-      this.adminKubeconfigLoading.download = true
+      this.downloadBtnLoading = true
       const success = await this.createAdminKubeconfig()
-      this.adminKubeconfigLoading.download = false
+      this.downloadBtnLoading = false
       if (!success) {
         return
       }
 
-      download(this.adminKubeconfig, this.getQualifiedName, 'text/yaml')
+      download(this.kubeconfig, this.qualifiedName, 'text/yaml')
     },
   },
 }

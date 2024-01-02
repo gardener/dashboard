@@ -55,9 +55,9 @@ SPDX-License-Identifier: Apache-2.0
         />
         <g-copy-btn :clipboard-text="kubeconfig" />
         <g-action-button
-          :icon="kubeconfigVisibilityIcon"
-          :tooltip="kubeconfigVisibilityTitle"
-          @click.stop="kubeconfigExpansionPanel = !kubeconfigExpansionPanel"
+          :icon="visibilityIcon"
+          :tooltip="visibilityTitle"
+          @click.stop="expansionPanel = !expansionPanel"
         />
       </template>
 
@@ -68,7 +68,7 @@ SPDX-License-Identifier: Apache-2.0
     </template>
   </g-list-item>
   <g-list-item
-    v-if="kubeconfigExpansionPanel"
+    v-if="expansionPanel"
     key="expansion-gardenlogin-kubeconfig"
   >
     <g-list-item-content>
@@ -117,7 +117,7 @@ export default {
   },
   data () {
     return {
-      kubeconfigExpansionPanel: false,
+      expansionPanel: false,
     }
   },
   computed: {
@@ -132,16 +132,16 @@ export default {
     isKubeconfigAvailable () {
       return !!this.kubeconfig
     },
-    kubeconfigVisibilityIcon () {
-      return this.kubeconfigExpansionPanel ? 'mdi-eye-off' : 'mdi-eye'
+    visibilityIcon () {
+      return this.expansionPanel ? 'mdi-eye-off' : 'mdi-eye'
     },
-    kubeconfigVisibilityTitle () {
-      return this.kubeconfigExpansionPanel ? 'Hide Kubeconfig' : 'Show Kubeconfig'
+    visibilityTitle () {
+      return this.expansionPanel ? 'Hide Kubeconfig' : 'Show Kubeconfig'
     },
     isGardenloginType () {
       return this.type === 'gardenlogin'
     },
-    getQualifiedName () {
+    qualifiedName () {
       const prefix = this.isGardenloginType ? 'kubeconfig-gardenlogin' : 'kubeconfig'
       return `${prefix}--${this.shootProjectName}--${this.shootName}.yaml`
     },
@@ -153,15 +153,15 @@ export default {
   },
   methods: {
     toggleKubeconfig () {
-      this.kubeconfigExpansionPanel = !this.kubeconfigExpansionPanel
+      this.expansionPanel = !this.expansionPanel
     },
     reset () {
-      this.kubeconfigExpansionPanel = false
+      this.expansionPanel = false
     },
     onDownload () {
       const kubeconfig = this.kubeconfig
       if (kubeconfig) {
-        download(kubeconfig, this.getQualifiedName, 'text/yaml')
+        download(kubeconfig, this.qualifiedName, 'text/yaml')
       }
     },
   },

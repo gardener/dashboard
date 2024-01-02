@@ -119,11 +119,17 @@ SPDX-License-Identifier: Apache-2.0
                 v-if="isShootAdminKubeconfigEnabled"
                 cols="12"
               >
+                <legend class="text-medium-emphasis">
+                  Cluster Admin Kubeconfig Lifetime
+                </legend>
                 <v-select
                   v-model="shootAdminKubeconfigExpiration"
                   :items="shootAdminKubeconfigExpirationItems"
-                  label="Cluster Admin Kubeconfig Lifetime"
-                  variant="underlined"
+                  variant="solo-filled"
+                  density="compact"
+                  flat
+                  single-line
+                  class="w-25"
                 />
               </v-col>
             </v-row>

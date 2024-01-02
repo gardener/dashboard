@@ -114,7 +114,6 @@ SPDX-License-Identifier: Apache-2.0
       />
       <g-shoot-admin-kubeconfig
         :shoot-item="shootItem"
-        :show-list-icon="false"
       />
     </template>
 
