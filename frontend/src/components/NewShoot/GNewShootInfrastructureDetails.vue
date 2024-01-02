@@ -307,7 +307,7 @@ export default {
     ...mapState(useGardenerExtensionStore, ['networkingTypes']),
     ...mapState(useShootStagingStore, ['workerless']),
     cloudProfiles () {
-      return sortBy(this.cloudProfilesByCloudProviderKind(this.infrastructureKind), [(item) => item.metadata.name])
+      return sortBy(this.cloudProfilesByCloudProviderKind(this.infrastructureKind), [item => item.metadata.name])
     },
     infrastructureSecretsByProfileName () {
       return this.infrastructureSecretsByCloudProfileName(this.cloudProfileName)
