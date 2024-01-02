@@ -40,7 +40,7 @@ SPDX-License-Identifier: Apache-2.0
             <div class="pa-2">
               You can configure the <span class="font-weight-bold">kubeconfig lifetime</span> on the
               <g-text-router-link
-                :to="{ name: 'Settings', query: { namespace: shootNamespace } }"
+                :to="{ name: 'Settings' }"
                 text="Settings"
               />
               page.
