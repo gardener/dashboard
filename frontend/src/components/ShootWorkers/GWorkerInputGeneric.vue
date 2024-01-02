@@ -277,7 +277,7 @@ export default {
     const maximumRules = {
       minValue: minValue(0),
       systemComponents: withMessage('Value must be greater or equal to the number of zones configured for this pool',
-        (value) => {
+        value => {
           const hasSystemComponents = get(this.worker, 'systemComponents.allow', true)
           if (!hasSystemComponents) {
             return true
