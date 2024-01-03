@@ -5,9 +5,8 @@ This section demonstrates how to use the standard Kubernetes tool for cluster op
 
 - [Project Operations](#project-operations)
   - [Prerequisites](#prerequisites)
-  - [Downloading `kubeconfig` for remote project operations](#downloading-kubeconfig-for-remote-project-operations)
-    - [Download `kubeconfig` for a user](#download-kubeconfig-for-a-user)
-    - [Download `kubeconfig` for a Service Account](#download-kubeconfig-for-a-service-account)
+  - [Using `kubeconfig` for remote project operations](#using-kubeconfig-for-remote-project-operations)
+    - [Downloading your `kubeconfig`](#downloading-your-kubeconfig)
   - [List Gardener API resources](#list-gardener-api-resources)
   - [Check your permissions](#check-your-permissions)
   - [Working with projects](#working-with-projects)
@@ -27,12 +26,13 @@ This section demonstrates how to use the standard Kubernetes tool for cluster op
 It's recommended that you get acquainted with the resources in the [Gardener API](https://github.com/gardener/gardener/tree/master/docs/api-reference).
 
 
-## Downloading `kubeconfig` for remote project operations
+## Using `kubeconfig` for remote project operations
+
 The `kubeconfig` for project operations is different from the one for cluster operations. It has a larger scope and allows a different set of operations that are applicable for a project administrator role, such as lifecycle control on clusters and managing project members.
 
-Depending on your goal, you create a service account suitable for automation and download its `kubeconfig`, or you can get a user-specific `kubeconfig`. The difference is the identity on behalf of which the operations are performed.
+Depending on your goal, you can create a service account suitable for automation and use it for your pipelines, or you can get a user-specific `kubeconfig` and use it to manage your project resources via kubectl.
 
-### Download `kubeconfig` for a user
+### Downloading your `kubeconfig`
 
 Kubernetes doesn’t offer an own resource type for human users that access the API server. Instead, you either have to manage unique user strings, or use an OpenID-Connect (OIDC) compatible Identity Provider (IDP) to do the job.
 
@@ -54,15 +54,7 @@ Once the latter is set up, each Gardener user can use the `kubelogin` plugin for
 
 You can now execute `kubectl` commands on the garden cluster using the identity of your user.
 
-### Download `kubeconfig` for a Service Account
-
-1. Go to a service account and choose **Download**.
-
-    ![Download service account kubeconfig](../images/Download-service-account-kubeconfig.png)
-
-1. Add the downloaded `kubeconfig` to your configuration.
-
-You can now execute `kubectl` commands on the garden cluster using the technical service account.
+> Note: You can also manage your Gardener project resources automatically using a Gardener service account. For more information, see [] 
 
 ## List Gardener API resources
 
@@ -371,6 +363,6 @@ The name of the Secret containing the kubeconfig is in the form `<cluster-name>.
 
 ## Related Links
 
-- [Accessing the Gardener API Through the Dashboard](./gardener-api.md)
+- [Automating Project Resource Management](./automated-resource-management.md)
 
 - [Authenticating with an Identity Provider](https://github.com/gardener/documentation/blob/master/website/documentation/guides/administer-shoots/oidc-login/_index.md).
