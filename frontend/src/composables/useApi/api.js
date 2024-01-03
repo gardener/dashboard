@@ -200,6 +200,12 @@ export function updateShootSeedName ({ namespace, name, data }) {
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/seedname`, data)
 }
 
+export function createShootAdminKubeconfig ({ namespace, name, data }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
+  return createResource(`/api/namespaces/${namespace}/shoots/${name}/adminkubeconfig`, data)
+}
+
 /* Cloud Profiles */
 
 export function getCloudProfiles () {
@@ -407,6 +413,7 @@ export default {
   getShootSchemaDefinition,
   updateShootPurpose,
   updateShootSeedName,
+  createShootAdminKubeconfig,
   getCloudProfiles,
   getSeeds,
   getProjects,
