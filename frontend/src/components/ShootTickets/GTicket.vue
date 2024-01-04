@@ -6,14 +6,14 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-card>
-    <v-card-title class="text-subtitle-1 mt-4 ticket-toolbar bg-toolbar-background text-toolbar-title">
-      <div class="d-flex flex-wrap align-center">
-        <div class="ticket-title mr-2">
-          Ticket {{ ticketTitle }}
-        </div>
+    <g-toolbar>
+      <div class="ticket-title">
+        Ticket {{ ticketTitle }}
+      </div>
+      <template #append>
         <div
           v-if="labels.length"
-          class="labels"
+          class="ticket-labels ml-2 mr-4"
         >
           <g-ticket-label
             v-for="label in labels"
@@ -21,9 +21,8 @@ SPDX-License-Identifier: Apache-2.0
             :label="label"
           />
         </div>
-      </div>
-    </v-card-title>
-
+      </template>
+    </g-toolbar>
     <v-container>
       <span class="font-weight-bold">{{ login }}</span> created this
       <g-external-link :url="ticketHtmlUrl">
@@ -52,14 +51,9 @@ SPDX-License-Identifier: Apache-2.0
         target="_blank"
         rel="noopener"
         title="Add Comment"
+        append-icon="mdi-open-in-new"
       >
         Add Comment
-        <v-icon
-          color="anchor"
-          class="link-icon pl-2"
-        >
-          mdi-open-in-new
-        </v-icon>
       </v-btn>
       <v-spacer />
     </v-card-actions>
@@ -141,7 +135,7 @@ export default {
   .ticket-title {
     line-height: 20px;
   }
-  .labels {
+  .ticket-labels {
     line-height: 10px;
   }
 
