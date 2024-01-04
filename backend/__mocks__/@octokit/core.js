@@ -9,8 +9,9 @@
 const { filter, startsWith, endsWith, chain } = require('lodash')
 const createError = require('http-errors')
 const graphql = require('graphql')
+const { legacyRestEndpointMethods } = require('@octokit/plugin-rest-endpoint-methods')
 const fixtures = require('../../__fixtures__')
-const octokitRest = jest.requireActual('@octokit/rest')
+const { Octokit: Core } = jest.requireActual('@octokit/core')
 
 function getIssueNumber (query) {
   return Number(graphql.parse(query)
@@ -69,7 +70,8 @@ function getIssueComments (number) {
 }
 
 const Octokit = jest.fn().mockImplementation(options => {
-  const octokit = new octokitRest.Octokit(options)
+  const OctokitWithRestEndpointMethods = Core.plugin(legacyRestEndpointMethods)
+  const octokit = new OctokitWithRestEndpointMethods(options)
   octokit.paginate = jest.fn().mockImplementation(options => {
     const { url, q, issue_number: number } = options
     if (endsWith(url, '/issues') && q) {
@@ -106,9 +108,11 @@ const Octokit = jest.fn().mockImplementation(options => {
       }
     }
   })
-  octokit.issues.get = jest.fn().mockRejectedValue(serviceUnavailable)
-  octokit.issues.update = jest.fn().mockRejectedValue(serviceUnavailable)
-  octokit.issues.createComment = jest.fn().mockRejectedValue(serviceUnavailable)
+  octokit.issues = {
+    get: jest.fn().mockRejectedValue(serviceUnavailable),
+    update: jest.fn().mockRejectedValue(serviceUnavailable),
+    createComment: jest.fn().mockRejectedValue(serviceUnavailable)
+  }
   return octokit
 })
 Octokit.plugin = jest.fn().mockReturnValue(Octokit)
