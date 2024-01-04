@@ -7,134 +7,139 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div
     v-if="sortedInfrastructureKindList.length"
-    class="newshoot-container"
+    class="d-flex flex-column fill-height"
   >
-    <v-container
-      fluid
-      class="newshoot-cards"
+    <div
+      class="d-flex flex-grow-1 newshoot-cards"
     >
-      <v-card flat>
-        <g-toolbar title="Infrastructure" />
-        <v-card-text class="pt-1">
-          <g-new-shoot-select-infrastructure
-            ref="infrastructure"
-            :user-inter-action-bus="userInterActionBus"
-          />
-        </v-card-text>
-      </v-card>
-      <v-card
-        flat
-        class="mt-4"
+      <v-container
+        fluid
       >
-        <g-toolbar title="Cluster Details" />
-        <v-card-text class="pt-1">
-          <g-new-shoot-details
-            ref="clusterDetails"
-            :user-inter-action-bus="userInterActionBus"
+        <v-card flat>
+          <g-toolbar title="Infrastructure" />
+          <v-card-text class="pt-1">
+            <g-new-shoot-select-infrastructure
+              ref="infrastructure"
+              :user-inter-action-bus="userInterActionBus"
+            />
+          </v-card-text>
+        </v-card>
+        <v-card
+          flat
+          class="mt-4"
+        >
+          <g-toolbar title="Cluster Details" />
+          <v-card-text class="pt-1">
+            <g-new-shoot-details
+              ref="clusterDetails"
+              :user-inter-action-bus="userInterActionBus"
+            />
+          </v-card-text>
+        </v-card>
+        <v-card
+          flat
+          class="mt-4"
+        >
+          <g-toolbar title="Infrastructure Details" />
+          <v-card-text class="pt-1">
+            <g-new-shoot-infrastructure-details
+              ref="infrastructureDetails"
+              :user-inter-action-bus="userInterActionBus"
+            />
+          </v-card-text>
+        </v-card>
+        <v-card
+          flat
+          class="mt-4"
+        >
+          <g-toolbar title="Control Plane High Availability" />
+          <v-card-text class="pt-2">
+            <g-manage-control-plane-high-availability />
+          </v-card-text>
+        </v-card>
+        <v-card
+          flat
+          class="mt-4"
+        >
+          <g-toolbar title="DNS Configuration" />
+          <v-card-text class="pt-1">
+            <g-manage-shoot-dns />
+          </v-card-text>
+        </v-card>
+        <v-card
+          v-if="accessRestriction"
+          flat
+          class="mt-4"
+        >
+          <g-toolbar title="Access Restrictions" />
+          <v-card-text class="pt-1">
+            <g-access-restrictions
+              ref="accessRestrictions"
+              :user-inter-action-bus="userInterActionBus"
+            />
+          </v-card-text>
+        </v-card>
+        <v-card
+          v-show="!workerless"
+          flat
+          class="mt-4"
+        >
+          <g-toolbar
+            title="Worker"
           />
-        </v-card-text>
-      </v-card>
-      <v-card
-        flat
-        class="mt-4"
-      >
-        <g-toolbar title="Infrastructure Details" />
-        <v-card-text class="pt-1">
-          <g-new-shoot-infrastructure-details
-            ref="infrastructureDetails"
-            :user-inter-action-bus="userInterActionBus"
+          <v-card-text class="pt-1">
+            <g-manage-workers
+              ref="manageWorkersRef"
+              :user-inter-action-bus="userInterActionBus"
+            />
+          </v-card-text>
+        </v-card>
+        <v-card
+          v-show="!workerless"
+          flat
+          class="mt-4"
+        >
+          <g-toolbar
+            title="Add-Ons (not actively monitored and provided on a best-effort basis only)"
           />
-        </v-card-text>
-      </v-card>
-      <v-card
-        flat
-        class="mt-4"
-      >
-        <g-toolbar title="Control Plane High Availability" />
-        <v-card-text class="pt-2">
-          <g-manage-control-plane-high-availability />
-        </v-card-text>
-      </v-card>
-      <v-card
-        flat
-        class="mt-4"
-      >
-        <g-toolbar title="DNS Configuration" />
-        <v-card-text class="pt-1">
-          <g-manage-shoot-dns />
-        </v-card-text>
-      </v-card>
-      <v-card
-        v-if="accessRestriction"
-        flat
-        class="mt-4"
-      >
-        <g-toolbar title="Access Restrictions" />
-        <v-card-text class="pt-1">
-          <g-access-restrictions
-            ref="accessRestrictions"
-            :user-inter-action-bus="userInterActionBus"
-          />
-        </v-card-text>
-      </v-card>
-      <v-card
-        v-show="!workerless"
-        flat
-        class="mt-4"
-      >
-        <g-toolbar
-          title="Worker"
-        />
-        <v-card-text class="pt-1">
-          <g-manage-workers
-            ref="manageWorkersRef"
-            :user-inter-action-bus="userInterActionBus"
-          />
-        </v-card-text>
-      </v-card>
-      <v-card
-        v-show="!workerless"
-        flat
-        class="mt-4"
-      >
-        <g-toolbar
-          title="Add-Ons (not actively monitored and provided on a best-effort basis only)"
-        />
-        <v-card-text>
-          <g-manage-shoot-addons
-            ref="addons"
-            create-mode
-          />
-        </v-card-text>
-      </v-card>
-      <v-card
-        flat
-        class="mt-4"
-      >
-        <g-toolbar title="Maintenance" />
-        <v-card-text class="pt-1">
-          <g-maintenance-time
-            ref="maintenanceTime"
-          />
-          <g-maintenance-components
-            ref="maintenanceComponents"
-            :user-inter-action-bus="userInterActionBus"
-            :hide-os-updates="workerless"
-          />
-        </v-card-text>
-      </v-card>
-      <v-card
-        flat
-        class="mt-4"
-      >
-        <g-toolbar title="Hibernation" />
-        <v-card-text class="pt-1">
-          <g-manage-hibernation-schedule
-            ref="hibernationScheduleRef"
-            :user-inter-action-bus="userInterActionBus"
-          />
-        </v-card-text>
-      </v-card>
+          <v-card-text>
+            <g-manage-shoot-addons
+              ref="addons"
+              create-mode
+            />
+          </v-card-text>
+        </v-card>
+        <v-card
+          flat
+          class="mt-4"
+        >
+          <g-toolbar title="Maintenance" />
+          <v-card-text class="pt-1">
+            <g-maintenance-time
+              ref="maintenanceTime"
+            />
+            <g-maintenance-components
+              ref="maintenanceComponents"
+              :user-inter-action-bus="userInterActionBus"
+              :hide-os-updates="workerless"
+            />
+          </v-card-text>
+        </v-card>
+        <v-card
+          flat
+          class="mt-4"
+        >
+          <g-toolbar title="Hibernation" />
+          <v-card-text class="pt-1">
+            <g-manage-hibernation-schedule
+              ref="hibernationScheduleRef"
+              :user-inter-action-bus="userInterActionBus"
+            />
+          </v-card-text>
+        </v-card>
+      </v-container>
+    </div>
+    <div class="d-flex flex-column">
       <div
         v-if="errorMessage"
         ref="errorAlert"
@@ -147,18 +152,18 @@ SPDX-License-Identifier: Apache-2.0
           class="error-alert"
         />
       </div>
-    </v-container>
-    <v-divider />
-    <div class="d-flex align-center justify-end toolbar">
-      <v-divider vertical />
-      <v-btn
-        variant="text"
-        color="primary"
-        @click.stop="createClicked()"
-      >
-        Create
-      </v-btn>
-      <g-confirm-dialog ref="confirmDialog" />
+      <v-divider />
+      <div class="d-flex align-center justify-end toolbar">
+        <v-divider vertical />
+        <v-btn
+          variant="text"
+          color="primary"
+          @click.stop="createClicked()"
+        >
+          Create
+        </v-btn>
+        <g-confirm-dialog ref="confirmDialog" />
+      </div>
     </div>
   </div>
   <v-alert
@@ -561,11 +566,6 @@ export default {
         const message = messageFromErrors(this.v$.$errors)
         this.errorMessage = 'There are input errors that you need to resolve'
         this.detailedErrorMessage = message
-
-        this.$nextTick(() => {
-          // Need to wait for the new element to be rendered, before we can scroll it into view
-          this.$refs.errorAlert.scrollIntoView()
-        })
         return
       }
       const shootResource = await this.updateShootResourceWithUIComponents()
@@ -584,11 +584,6 @@ export default {
         this.errorMessage = 'Failed to create cluster.'
         this.detailedErrorMessage = errorDetails.detailedMessage
         this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-
-        this.$nextTick(() => {
-          // Need to wait for the new element to be rendered, before we can scroll it into view
-          this.$refs.errorAlert.scrollIntoView()
-        })
       }
     },
     confirmNavigation () {
@@ -624,13 +619,7 @@ export default {
   padding-right: 10px;
 }
 
-.newshoot-container {
-  height: 100%;
-  overflow: hidden;
-}
-
 .newshoot-cards {
-  max-height: calc(100% - 48px);
-  overflow: auto;
+  overflow: scroll;
 }
 </style>
