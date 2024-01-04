@@ -143,13 +143,13 @@ SPDX-License-Identifier: Apache-2.0
       <div
         v-if="errorMessage"
         ref="errorAlert"
-        class="mb-6"
       >
         <g-message
           v-model:message="errorMessage"
           v-model:detailed-message="detailedErrorMessage"
           color="error"
-          class="error-alert"
+          class="ma-0"
+          tile
         />
       </div>
       <v-divider />
