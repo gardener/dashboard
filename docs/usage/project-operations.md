@@ -54,7 +54,7 @@ Once the latter is set up, each Gardener user can use the `kubelogin` plugin for
 
 You can now execute `kubectl` commands on the garden cluster using the identity of your user.
 
-> Note: You can also manage your Gardener project resources automatically using a Gardener service account. For more information, see [] 
+> Note: You can also manage your Gardener project resources automatically using a Gardener service account. For more information, see [Automating Project Resource Management](./automated-resource-management.md).
 
 ## List Gardener API resources
 
