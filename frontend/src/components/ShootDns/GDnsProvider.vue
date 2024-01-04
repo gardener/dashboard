@@ -30,22 +30,20 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <v-list min-width="300">
       <v-list-item
-        v-for="({title, value, description, to}) in dnsProviderDescriptions"
+        v-for="({title, value, to}) in dnsProviderDescriptions"
         :key="title"
       >
         <v-list-item-subtitle class="pt-1">
           {{ title }}
         </v-list-item-subtitle>
         <v-list-item-title v-if="to">
-          <router-link
-            class="text-anchor"
+          <g-text-router-link
             :to="to"
-          >
-            {{ value }} {{ description }}
-          </router-link>
+            :text="value"
+          />
         </v-list-item-title>
         <v-list-item-title v-else>
-          {{ value }} {{ description }}
+          {{ value }}
         </v-list-item-title>
       </v-list-item>
       <v-list-item
@@ -65,6 +63,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import GVendorIcon from '@/components/GVendorIcon'
 import GSecretDetailsItemContent from '@/components/Secrets/GSecretDetailsItemContent.vue'
+import GTextRouterLink from '@/components/GTextRouterLink.vue'
 
 import {
   join,
@@ -75,6 +74,7 @@ export default {
   components: {
     GVendorIcon,
     GSecretDetailsItemContent,
+    GTextRouterLink,
   },
   props: {
     type: {
@@ -108,12 +108,12 @@ export default {
   },
   computed: {
     dnsProviderDescriptions () {
-      const description = []
-      description.push({
+      const descriptions = []
+      descriptions.push({
         title: 'DNS Provider Type',
         value: this.type,
       })
-      description.push({
+      descriptions.push({
         title: 'Credential',
         value: this.secretName,
         to: {
@@ -124,35 +124,35 @@ export default {
           },
         },
       })
-      description.push({
+      descriptions.push({
         title: 'Primary DNS Provider',
         value: this.primary ? 'true' : 'false',
       })
       if (get(this.domains, 'exclude.length')) {
-        description.push({
+        descriptions.push({
           title: 'Exclude Domains',
           value: join(this.domains.exclude, ', '),
         })
       }
       if (get(this.domains, 'include.length')) {
-        description.push({
+        descriptions.push({
           title: 'Include Domains',
           value: join(this.domains.include, ', '),
         })
       }
       if (get(this.zones, 'exclude.length')) {
-        description.push({
+        descriptions.push({
           title: 'Exclude Zones',
           value: join(this.zones.exclude, ', '),
         })
       }
       if (get(this.zones, 'include.length')) {
-        description.push({
+        descriptions.push({
           title: 'Include Zones',
           value: join(this.zones.include, ', '),
         })
       }
-      return description
+      return descriptions
     },
   },
 }

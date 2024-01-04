@@ -15,6 +15,7 @@ SPDX-License-Identifier: Apache-2.0
       :color="color"
       :size="size"
       :to="to"
+      :loading="loading"
       @click.stop.prevent="emit('click', $event)"
     />
     <v-tooltip
@@ -72,6 +73,9 @@ const props = defineProps({
   },
   to: {
     type: [Object, String],
+  },
+  loading: {
+    type: Boolean,
   },
 })
 
