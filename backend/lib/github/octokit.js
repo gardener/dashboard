@@ -8,10 +8,12 @@
 
 const { Agent } = require('https')
 const _ = require('lodash')
-const { Octokit } = require('@octokit/rest')
+const { Octokit: OctokitRest } = require('@octokit/rest')
 const { createAppAuth } = require('@octokit/auth-app')
+const { paginateGraphql } = require('@octokit/plugin-paginate-graphql')
 const config = require('../config')
 const logger = require('../logger')
+const Octokit = OctokitRest.plugin(paginateGraphql)
 
 class OctokitLog {
   static debug (...args) {

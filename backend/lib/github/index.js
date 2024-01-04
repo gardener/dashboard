@@ -48,13 +48,53 @@ function closeIssue ({ number }) {
   })
 }
 
-function getComments ({ number }) {
-  const options = octokit.issues.listComments.endpoint.merge({
-    owner,
-    repo,
-    issue_number: number
-  })
-  return octokit.paginate(options)
+async function getComments ({ number }) {
+  const query =
+  `query paginate($cursor: String) {
+    repository(owner: "${owner}", name: "${repo}") {
+      issue(number: ${number}) {
+        comments(first: 50, after: $cursor) {
+          nodes {
+            databaseId
+            id
+            url
+            createdAt
+            updatedAt
+            authorAssociation
+            author {
+              login
+              avatarUrl
+            }
+            body
+            isMinimized
+            minimizedReason
+          }
+          pageInfo {
+            hasNextPage
+            endCursor
+          }
+        }
+      }
+    }
+  }`
+  const { repository } = await octokit.graphql.paginate(query)
+  return repository.issue.comments.nodes
+    .filter(node => !node.isMinimized)
+    .map(node => {
+      return {
+        id: node.databaseId,
+        node_id: node.id,
+        html_url: node.url,
+        user: {
+          login: node.author.login,
+          avatar_url: node.author.avatarUrl
+        },
+        created_at: node.createdAt,
+        updated_at: node.updatedAt,
+        author_association: node.authorAssociation,
+        body: node.body
+      }
+    })
 }
 
 function createComment ({ number }, body) {

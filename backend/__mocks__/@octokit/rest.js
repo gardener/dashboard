@@ -8,8 +8,22 @@
 
 const { filter, startsWith, endsWith, chain } = require('lodash')
 const createError = require('http-errors')
+const graphql = require('graphql')
 const fixtures = require('../../__fixtures__')
 const octokitRest = jest.requireActual('@octokit/rest')
+
+function getIssueNumber (query) {
+  return Number(graphql.parse(query)
+    .definitions
+    .find(({ name }) => name.value === 'paginate')
+    .selectionSet.selections
+    .find(({ name }) => name.value === 'repository')
+    .selectionSet.selections
+    .find(({ name }) => name.value === 'issue')
+    .arguments
+    .find(({ name }) => name.value === 'number')
+    .value.value)
+}
 
 const serviceUnavailable = createError(503)
 
@@ -66,11 +80,38 @@ const Octokit = jest.fn().mockImplementation(options => {
     }
     throw createError(404)
   })
+  octokit.graphql.paginate = jest.fn().mockImplementation(async query => {
+    const number = getIssueNumber(query)
+    const comments = await getIssueComments(number)
+    const nodes = comments.map(comment => {
+      return {
+        databaseId: comment.id,
+        url: comment.html_url,
+        createdAt: comment.created_at,
+        updatedAt: comment.updated_at,
+        body: comment.body,
+        author: {
+          login: comment.user.login,
+          avatarUrl: comment.user.avatar_url
+        }
+      }
+    })
+    return {
+      repository: {
+        issue: {
+          comments: {
+            nodes
+          }
+        }
+      }
+    }
+  })
   octokit.issues.get = jest.fn().mockRejectedValue(serviceUnavailable)
   octokit.issues.update = jest.fn().mockRejectedValue(serviceUnavailable)
   octokit.issues.createComment = jest.fn().mockRejectedValue(serviceUnavailable)
   return octokit
 })
+Octokit.plugin = jest.fn().mockReturnValue(Octokit)
 
 module.exports = {
   Octokit,
