@@ -1,12 +1,11 @@
 ---
-title: Accessing the Gardener API
+title: Automating Project Resource Management
+aliases: ["/docs/dashboard/gardener-api/"]
 ---
-
-# Accessing the Gardener API Through the Dashboard
 
 ## Overview
 
-The cluster operations that are performed manually in the dashboard or via `kubectl` can be automated using the [**Gardener API**](https://github.com/gardener/gardener/blob/master/docs/api-reference/README.md) and a **Service Account** authorized to perform them.
+The project resource operations that are performed manually in the dashboard or via `kubectl` can be automated using the [**Gardener API**](https://github.com/gardener/gardener/blob/master/docs/api-reference/README.md) and a **Service Account** authorized to perform them.
 
 ## Create a Service Account
 
