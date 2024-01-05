@@ -9,6 +9,7 @@
 const { isHttpError } = require('@gardener-dashboard/request')
 const { cleanKubeconfig, Config } = require('@gardener-dashboard/kube-config')
 const { dashboardClient } = require('@gardener-dashboard/kube-client')
+const resources = require('@gardener-dashboard/kube-client/lib/resources')
 const createError = require('http-errors')
 const utils = require('../utils')
 const cache = require('../cache')
@@ -190,6 +191,25 @@ exports.replaceSeedName = async function ({ user, namespace, name, body }) {
   return client['core.gardener.cloud'].shoots.jsonPatch(namespace, [name, 'binding'], patchOperations)
 }
 
+exports.createAdminKubeconfig = async function ({ user, namespace, name, body }) {
+  const client = user.client
+  const { apiVersion, kind } = resources.Resources.AdminKubeconfigRequest
+  const payload = {
+    kind,
+    apiVersion,
+    spec: {
+      expirationSeconds: body.expirationSeconds
+    }
+  }
+
+  const { status } = await client['core.gardener.cloud'].shoots.createAdminKubeconfigRequest(namespace, name, payload)
+  const kubeconfig = utils.decodeBase64(status.kubeconfig)
+
+  return {
+    kubeconfig
+  }
+}
+
 exports.replaceAddons = async function ({ user, namespace, name, body }) {
   const client = user.client
   const addons = body
@@ -345,14 +365,13 @@ exports.info = async function ({ user, namespace, name }) {
     _
       .chain(secret)
       .get('data')
-      .pick('kubeconfig', 'username', 'password', 'token')
+      .pick('kubeconfig', 'token')
       .forEach((value, key) => {
         value = decodeBase64(value)
         if (key === 'kubeconfig') {
           try {
             const kubeconfigObject = cleanKubeconfig(value)
             data[key] = kubeconfigObject.toYAML()
-            data.serverUrl = kubeconfigObject.currentCluster.server
           } catch (err) {
             logger.error('failed to clean kubeconfig', err)
           }

@@ -20,7 +20,7 @@ import shootItem from '@/mixins/shootItem'
 describe('shootItem mixin', () => {
   let wrapper
 
-  const mountMixinWithShootResource = (shootResource) => {
+  const mountMixinWithShootResource = shootResource => {
     const Component = {
       render () { },
       mixins: [shootItem],

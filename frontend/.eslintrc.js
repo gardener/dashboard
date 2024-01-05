@@ -33,6 +33,7 @@ module.exports = {
     'no-console': 'error',
     quotes: ['error', 'single'],
     'space-before-function-paren': ['error', 'always'],
+    'arrow-parens': ['error', 'as-needed'],
     'import/order': ['error', {
       groups: [
         'builtin',

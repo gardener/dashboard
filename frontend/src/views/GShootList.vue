@@ -194,6 +194,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
       </v-data-table>
       <v-dialog
+        v-if="!isShootItemEmpty"
         v-model="clusterAccessDialog"
         persistent
         max-width="850"
@@ -386,6 +387,9 @@ export default {
     shootItem () {
       // property `shoot-item` of the mixin is required
       return this.selectedShoot || {}
+    },
+    isShootItemEmpty () {
+      return !this.shootItem.metadata?.uid
     },
     currentStandardSelectedColumns () {
       return mapTableHeader(this.standardHeaders, 'selected')

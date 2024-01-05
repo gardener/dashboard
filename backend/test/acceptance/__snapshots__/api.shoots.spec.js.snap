@@ -1122,6 +1122,65 @@ Object {
 }
 `;
 
+exports[`api shoots should return a shoot admin kubeconfig 1`] = `
+Array [
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot/adminkubeconfig",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
+    },
+    Object {
+      "apiVersion": "authentication.gardener.cloud/v1alpha1",
+      "kind": "AdminKubeconfigRequest",
+      "spec": Object {
+        "expirationSeconds": 600,
+      },
+    },
+  ],
+]
+`;
+
+exports[`api shoots should return a shoot admin kubeconfig: body 1`] = `
+Object {
+  "kubeconfig": Any<String>,
+}
+`;
+
+exports[`api shoots should return a shoot admin kubeconfig: body.kubeconfig 1`] = `
+Object {
+  "clusters": Array [
+    Object {
+      "cluster": Object {
+        "server": "https://shootApiServerHostname:6443",
+      },
+      "name": "cluster",
+    },
+  ],
+  "contexts": Array [
+    Object {
+      "context": Object {
+        "cluster": "cluster",
+        "user": "user",
+      },
+      "name": "default",
+    },
+  ],
+  "current-context": "default",
+  "users": Array [
+    Object {
+      "name": "user",
+      "user": Object {
+        "client-certificate-data": "Y2VydGlmaWNhdGUtYXV0aG9yaXR5LWRhdGE=",
+        "client-key-data": "Y2xpZW50LWtleS1kYXRh",
+      },
+    },
+  ],
+}
+`;
+
 exports[`api shoots should return all shoots for a non-admin user 1`] = `
 Array [
   Array [
@@ -1555,14 +1614,11 @@ Array [
 exports[`api shoots should return shoot info without gardenlogin kubeconfig: body 1`] = `
 Object {
   "canLinkToSeed": false,
-  "cluster_password": "pass-foo-dummyShoot",
-  "cluster_username": "user-foo-dummyShoot",
   "dashboardUrlPath": "/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/",
   "kubeconfig": Any<String>,
   "monitoringPassword": "pass-garden-foo-dummyShoot.monitoring",
   "monitoringUsername": "user-garden-foo-dummyShoot.monitoring",
   "seedShootIngressDomain": "foo--dummyShoot.ingress.foo-south.infra1.example.org",
-  "serverUrl": "https://api.dummyShoot.foo.shoot.cluster",
 }
 `;
 
@@ -1604,15 +1660,12 @@ Object {
 exports[`api shoots should return shoot info: body 1`] = `
 Object {
   "canLinkToSeed": false,
-  "cluster_password": "pass-foo-barShoot",
-  "cluster_username": "user-foo-barShoot",
   "dashboardUrlPath": "/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/",
   "kubeconfig": Any<String>,
   "kubeconfigGardenlogin": Any<String>,
   "monitoringPassword": "pass-garden-foo-barShoot.monitoring",
   "monitoringUsername": "user-garden-foo-barShoot.monitoring",
   "seedShootIngressDomain": "foo--barShoot.ingress.foo-east.infra1.example.org",
-  "serverUrl": "https://api.barShoot.foo.shoot.cluster",
 }
 `;
 

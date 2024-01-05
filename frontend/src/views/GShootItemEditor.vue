@@ -88,10 +88,10 @@ export default {
       detailedErrorMessage: undefined,
       isShootCreated: false,
       extraKeys: {
-        'Ctrl-S': (instance) => {
+        'Ctrl-S': instance => {
           vm.save()
         },
-        'Cmd-S': (instance) => {
+        'Cmd-S': instance => {
           vm.save()
         },
       },

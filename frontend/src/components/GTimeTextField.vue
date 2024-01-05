@@ -57,7 +57,7 @@ const textFieldType = computed(() => {
 const rules = {
   timeValue: {
     timeSyntax: withMessage('Input value is not valid 24-hour time format (HH:MM)',
-      (value) => {
+      value => {
         return !value?.length || /^([01][0-9]|2[0-3]):([0-5][0-9])$/.test(value)
       }),
   },

@@ -5,18 +5,21 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <router-link
+  <g-text-router-link
     v-if="canLinkToSecret"
-    class="text-anchor"
     :to="{ name: 'Secret', params: { name: secretBindingName, namespace: namespace } }"
-  >
-    <span>{{ secretBindingName }}</span>
-  </router-link>
+    :text="secretBindingName"
+  />
   <span v-else>{{ secretBindingName }}</span>
 </template>
 
 <script>
+import GTextRouterLink from '@/components/GTextRouterLink.vue'
+
 export default {
+  components: {
+    GTextRouterLink,
+  },
   props: {
     namespace: {
       type: String,

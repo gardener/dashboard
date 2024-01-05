@@ -589,5 +589,26 @@ describe('api', function () {
 
       expect(res.body).toMatchSnapshot()
     })
+
+    it('should return a shoot admin kubeconfig', async function () {
+      mockRequest.mockImplementationOnce(fixtures.shoots.mocks.createAdminKubeconfigRequest())
+
+      const res = await agent
+        .post(`/api/namespaces/${namespace}/shoots/${name}/adminkubeconfig`)
+        .set('cookie', await user.cookie)
+        .send({
+          expirationSeconds: 600
+        })
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(1)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot({
+        kubeconfig: expect.any(String)
+      }, 'body')
+      expect(yaml.load(res.body.kubeconfig)).toMatchSnapshot('body.kubeconfig')
+    })
   })
 })

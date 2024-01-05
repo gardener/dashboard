@@ -233,6 +233,11 @@ global:
         terminalEnabled: false
         projectTerminalShortcutsEnabled: false
         shootForceDeletionEnabled: false
+
+      shootAdminKubeconfig:
+        enabled: false
+        maxExpirationSeconds: 86400
+
       # Experimental Features
       # Note: The following features are experimental and may be subject to change.
       experimental:

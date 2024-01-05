@@ -21,30 +21,30 @@ SPDX-License-Identifier: Apache-2.0
       :error-messages="getErrorMessages(v$.selectedItem)"
       @blur="v$.selectedItem.$touch()"
     >
-      <template #item="{ props }">
+      <template #item="{ item, props }">
         <v-list-subheader
-          v-if="props.value.type === 'subheader'"
+          v-if="item.raw.type === 'subheader'"
           v-bind="props"
         />
         <div
           v-else
-          :ref="`versionItem_${props.value.version}`"
+          :ref="`versionItem_${item.raw.version}`"
         >
           <v-list-item
             v-bind="props"
-            :subtitle="versionItemDescription(props.value)"
-            :disabled="props.value.notNextMinor"
+            :subtitle="versionItemDescription(item.raw)"
+            :disabled="item.raw.notNextMinor"
           >
             <template #subtitle="{ subtitle }">
-              <div :class="props.value.subtitleClass">
+              <div :class="item.raw.subtitleClass">
                 {{ subtitle }}
               </div>
             </template>
           </v-list-item>
         </div>
         <v-tooltip
-          v-if="props.value.notNextMinor"
-          :activator="$refs[`versionItem_${props.value.version}`]"
+          v-if="item.raw.notNextMinor"
+          :activator="$refs[`versionItem_${item.raw.version}`]"
           location="top"
         >
           You cannot upgrade your cluster more than one minor version at a time
