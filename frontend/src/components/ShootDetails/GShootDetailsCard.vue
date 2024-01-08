@@ -274,7 +274,7 @@ export default {
       return isValidTerminationDate(this.shootExpirationTimestamp)
     },
     addon () {
-      return (name) => {
+      return name => {
         return this.shootAddons[name] || {}
       }
     },

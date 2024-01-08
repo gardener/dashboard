@@ -68,7 +68,7 @@ export function wildcardObjectsFromStrings (wildcardStrings) {
 }
 
 export function bestMatchForString (wildCardObjects, wildCardString) {
-  const matches = filter(wildCardObjects, (item) => {
+  const matches = filter(wildCardObjects, item => {
     return item.test(wildCardString)
   })
 

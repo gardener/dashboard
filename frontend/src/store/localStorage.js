@@ -103,7 +103,6 @@ const useLazyLocalStorage = () => {
 
 export const useLocalStorageStore = defineStore('localStorage', () => {
   const logger = useLogger()
-
   const logLevel = toRef(logger, 'logLevel')
 
   const initialColorScheme = 'auto'
@@ -126,6 +125,11 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
 
   const hiddenMessages = useLocalStorage('global/alert-banner/hidden-messages', {}, {
     serializer: StorageSerializers.json,
+    writeDefaults: false,
+  })
+
+  const shootAdminKubeconfigExpiration = useLocalStorage('global/shoot-admin-kubeconfig-expiration', 0, {
+    serializer: StorageSerializers.integer,
     writeDefaults: false,
   })
 
@@ -261,6 +265,7 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     operatorFeatures,
     logLevel,
     hiddenMessages,
+    shootAdminKubeconfigExpiration,
     userSelectedColumns,
     userItemsPerPage,
     userSortBy,

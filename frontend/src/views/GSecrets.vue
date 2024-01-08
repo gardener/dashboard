@@ -340,7 +340,7 @@ export default {
       'dnsSecretSortBy',
     ]),
     hasCloudProfileForCloudProviderKind () {
-      return (kind) => {
+      return kind => {
         return !isEmpty(this.cloudProfilesByCloudProviderKind(kind))
       }
     },

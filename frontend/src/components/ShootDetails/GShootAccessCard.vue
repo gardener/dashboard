@@ -112,6 +112,9 @@ SPDX-License-Identifier: Apache-2.0
         :show-list-icon="false"
         type="token"
       />
+      <g-shoot-admin-kubeconfig
+        :shoot-item="shootItem"
+      />
     </template>
 
     <v-divider
@@ -132,6 +135,7 @@ import { mapState } from 'pinia'
 import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
 import { useTerminalStore } from '@/store/terminal'
+import { useConfigStore } from '@/store/config'
 
 import GList from '@/components/GList.vue'
 import GListItem from '@/components/GListItem.vue'
@@ -144,6 +148,7 @@ import { shootItem } from '@/mixins/shootItem'
 
 import GGardenctlCommands from './GGardenctlCommands.vue'
 import GShootKubeconfig from './GShootKubeconfig.vue'
+import GShootAdminKubeconfig from './GShootAdminKubeconfig.vue'
 import GTerminalShortcutsTile from './GTerminalShortcutsTile.vue'
 
 import {
@@ -160,6 +165,7 @@ export default {
     GCopyBtn,
     GTerminalListTile,
     GShootKubeconfig,
+    GShootAdminKubeconfig,
     GGardenctlCommands,
     GTerminalShortcutsTile,
   },
@@ -191,6 +197,7 @@ export default {
     ...mapState(useTerminalStore, [
       'isTerminalShortcutsFeatureEnabled',
     ]),
+    ...mapState(useConfigStore, ['shootAdminKubeconfig']),
     dashboardUrl () {
       if (!this.hasDashboardEnabled) {
         return ''

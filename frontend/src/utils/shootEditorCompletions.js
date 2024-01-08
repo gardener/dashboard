@@ -335,7 +335,7 @@ export class ShootEditorCompletions {
   }
 
   _resolveSchemaArrays (properties, parentPropertyName = '') {
-    const hasOnlyTypeOrTypeAndFormatProperties = (value) => {
+    const hasOnlyTypeOrTypeAndFormatProperties = value => {
       if (value.every(item => {
         return (Object.keys(item).length === 1 && item.type) ||
         (Object.keys(item).length === 2 && item.type && item.format)

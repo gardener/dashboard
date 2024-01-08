@@ -18,13 +18,11 @@ SPDX-License-Identifier: Apache-2.0
           width="2"
           class="mr-1"
         />
-        <router-link
+        <g-text-router-link
           v-if="canLinkToSeed"
-          :to="{ name: 'ShootItem', params: { name: shootSeedName, namespace:'garden' } }"
-          class="text-anchor"
-        >
-          <span>{{ shootSeedName }}</span>
-        </router-link>
+          :to="{ name: 'ShootItem', params: { name: shootSeedName, namespace: 'garden' } }"
+          :text="shootSeedName"
+        />
         <span v-else>{{ shootSeedName }}</span>
       </div>
     </template>
@@ -33,9 +31,14 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import GTextRouterLink from '@/components/GTextRouterLink.vue'
+
 import { shootItem } from '@/mixins/shootItem'
 
 export default {
+  components: {
+    GTextRouterLink,
+  },
   mixins: [shootItem],
 }
 </script>
