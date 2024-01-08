@@ -8,23 +8,9 @@
 
 const { filter, startsWith, endsWith, chain } = require('lodash')
 const createError = require('http-errors')
-const graphql = require('graphql')
 const { legacyRestEndpointMethods } = require('@octokit/plugin-rest-endpoint-methods')
 const fixtures = require('../../__fixtures__')
 const { Octokit: Core } = jest.requireActual('@octokit/core')
-
-function getIssueNumber (query) {
-  return Number(graphql.parse(query)
-    .definitions
-    .find(({ name }) => name.value === 'paginate')
-    .selectionSet.selections
-    .find(({ name }) => name.value === 'repository')
-    .selectionSet.selections
-    .find(({ name }) => name.value === 'issue')
-    .arguments
-    .find(({ name }) => name.value === 'number')
-    .value.value)
-}
 
 const serviceUnavailable = createError(503)
 
@@ -82,8 +68,7 @@ const Octokit = jest.fn().mockImplementation(options => {
     }
     throw createError(404)
   })
-  octokit.graphql.paginate = jest.fn().mockImplementation(async query => {
-    const number = getIssueNumber(query)
+  octokit.graphql.paginate = jest.fn().mockImplementation(async (_query, { number }) => {
     const comments = await getIssueComments(number)
     const nodes = comments.map(comment => {
       return {

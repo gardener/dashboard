@@ -718,7 +718,6 @@ __metadata:
     express-static-gzip: ^2.1.7
     fast-json-patch: ^3.1.1
     fnv-plus: ^1.3.1
-    graphql: ^16.8.1
     helmet: ^7.0.0
     http-errors: ^2.0.0
     jest: ^27.5.1
@@ -5152,13 +5151,6 @@ __metadata:
   version: 1.4.0
   resolution: "graphemer@npm:1.4.0"
   checksum: bab8f0be9b568857c7bec9fda95a89f87b783546d02951c40c33f84d05bb7da3fd10f863a9beb901463669b6583173a8c8cc6d6b306ea2b9b9d5d3d943c3a673
-  languageName: node
-  linkType: hard
-
-"graphql@npm:^16.8.1":
-  version: 16.8.1
-  resolution: "graphql@npm:16.8.1"
-  checksum: 8d304b7b6f708c8c5cc164b06e92467dfe36aff6d4f2cf31dd19c4c2905a0e7b89edac4b7e225871131fd24e21460836b369de0c06532644d15b461d55b1ccc0
   languageName: node
   linkType: hard
 

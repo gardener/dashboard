@@ -49,10 +49,13 @@ function closeIssue ({ number }) {
 }
 
 async function getComments ({ number }) {
+  if (!Number.isInteger(number)) {
+    throw new TypeError(`Invalid input: Issue 'number' must be an integer. Received: ${number}`)
+  }
   const query =
-  `query paginate($cursor: String) {
-    repository(owner: "${owner}", name: "${repo}") {
-      issue(number: ${number}) {
+  `query paginate($cursor: String, $owner: String!, $repo: String!, $number: Int!) {
+    repository(owner: $owner, name: $repo) {
+      issue(number: $number) {
         comments(first: 50, after: $cursor) {
           nodes {
             databaseId
@@ -77,7 +80,7 @@ async function getComments ({ number }) {
       }
     }
   }`
-  const { repository } = await octokit.graphql.paginate(query)
+  const { repository } = await octokit.graphql.paginate(query, { owner, repo, number })
   return repository.issue.comments.nodes
     .filter(node => !node.isMinimized)
     .map(node => {
