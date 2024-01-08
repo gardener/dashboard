@@ -16,6 +16,41 @@ const serviceUnavailable = createError(503)
 
 const mockListIssues = jest.fn().mockReturnValue(fixtures.github.issues.list())
 const mockListComments = jest.fn().mockReturnValue(fixtures.github.comments.list())
+const mockOctokitPaginateREST = jest.fn().mockImplementation(options => {
+  const { url, q, issue_number: number } = options
+  if (endsWith(url, '/issues') && q) {
+    return searchIssues(q)
+  }
+  if (endsWith(url, '/comments') && number) {
+    return getIssueComments(number)
+  }
+  throw createError(404)
+})
+const mockOctokitPaginateGraphQL = jest.fn().mockImplementation(async (_query, { number }) => {
+  const comments = await getIssueComments(number)
+  const nodes = comments.map(comment => {
+    return {
+      databaseId: comment.id,
+      url: comment.html_url,
+      createdAt: comment.created_at,
+      updatedAt: comment.updated_at,
+      body: comment.body,
+      author: {
+        login: comment.user.login,
+        avatarUrl: comment.user.avatar_url
+      }
+    }
+  })
+  return {
+    repository: {
+      issue: {
+        comments: {
+          nodes
+        }
+      }
+    }
+  }
+})
 
 function searchIssues (q) {
   const tokens = chain(q)
@@ -58,41 +93,8 @@ function getIssueComments (number) {
 const Octokit = jest.fn().mockImplementation(options => {
   const OctokitWithRestEndpointMethods = Core.plugin(legacyRestEndpointMethods)
   const octokit = new OctokitWithRestEndpointMethods(options)
-  octokit.paginate = jest.fn().mockImplementation(options => {
-    const { url, q, issue_number: number } = options
-    if (endsWith(url, '/issues') && q) {
-      return searchIssues(q)
-    }
-    if (endsWith(url, '/comments') && number) {
-      return getIssueComments(number)
-    }
-    throw createError(404)
-  })
-  octokit.graphql.paginate = jest.fn().mockImplementation(async (_query, { number }) => {
-    const comments = await getIssueComments(number)
-    const nodes = comments.map(comment => {
-      return {
-        databaseId: comment.id,
-        url: comment.html_url,
-        createdAt: comment.created_at,
-        updatedAt: comment.updated_at,
-        body: comment.body,
-        author: {
-          login: comment.user.login,
-          avatarUrl: comment.user.avatar_url
-        }
-      }
-    })
-    return {
-      repository: {
-        issue: {
-          comments: {
-            nodes
-          }
-        }
-      }
-    }
-  })
+  octokit.paginate = mockOctokitPaginateREST
+  octokit.graphql.paginate = mockOctokitPaginateGraphQL
   octokit.issues = {
     get: jest.fn().mockRejectedValue(serviceUnavailable),
     update: jest.fn().mockRejectedValue(serviceUnavailable),
@@ -105,5 +107,7 @@ Octokit.plugin = jest.fn().mockReturnValue(Octokit)
 module.exports = {
   Octokit,
   mockListIssues,
-  mockListComments
+  mockListComments,
+  mockOctokitPaginateREST,
+  mockOctokitPaginateGraphQL
 }
