@@ -68,8 +68,8 @@ const variations = {
     'main-background',
     'toolbar-background',
   ],
-  lighten: 1,
-  darken: 2,
+  lighten: 3,
+  darken: 3,
 }
 
 export default createVuetify({
