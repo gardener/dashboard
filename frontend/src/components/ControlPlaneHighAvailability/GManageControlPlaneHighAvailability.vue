@@ -20,22 +20,35 @@ SPDX-License-Identifier: Apache-2.0
             hide-details
             :disabled="!controlPlaneFailureToleranceTypeChangeAllowed"
             density="compact"
+            class="mb-2"
           />
         </div>
       </template>
       It is not possible to change the control plane failure tolerance if a type has already been set
     </v-tooltip>
-    <div v-if="!controlPlaneFailureToleranceType">
+    <v-alert
+      v-if="!controlPlaneFailureToleranceType"
+      border-color="primary"
+      border
+      class="pl-3"
+    >
       No control plane failure tolerance type configured
-    </div>
-    <v-expand-transition>
-      <div v-if="controlPlaneFailureToleranceType">
+    </v-alert>
+  </div>
+  <v-expand-transition>
+    <div v-if="controlPlaneFailureToleranceType">
+      <v-alert
+        border-color="primary"
+        border
+        class="pl-3 mb-3"
+      >
         Control plane failure tolerance type <code>{{ controlPlaneFailureToleranceType }}</code> configured
-        <v-alert
-          v-if="controlPlaneFailureToleranceType === 'node' && !zoneSupported"
-          type="info"
-          variant="outlined"
-        >
+      </v-alert>
+      <v-alert
+        type="info"
+        variant="tonal"
+      >
+        <div v-if="controlPlaneFailureToleranceType === 'node' && !zoneSupported">
           <template v-if="clusterIsNew">
             <template v-if="seedName">
               The configured seed <code>{{ seedName }}</code> is not <code>multi-zonal</code>.
@@ -48,16 +61,14 @@ SPDX-License-Identifier: Apache-2.0
             The current seed <code>{{ seedName }}</code> is not <code>multi-zonal</code>.
           </template>
           Therefore failure tolerance type <code>zone</code> is not supported for this cluster.
-        </v-alert>
-        <v-alert
-          v-if="controlPlaneFailureToleranceTypeChangeAllowed"
-          type="info"
-          variant="outlined"
-        >
+        </div>
+        <div v-if="controlPlaneFailureToleranceTypeChangeAllowed">
           It is not possible to disable or change control plane high availability later.
-        </v-alert>
-      </div>
-    </v-expand-transition>
+        </div>
+      </v-alert>
+    </div>
+  </v-expand-transition>
+  <div class="mt-3">
     <!-- eslint-disable vue/no-v-html -->
     <div
       v-if="!!controlPlaneHighAvailabilityHelpHtml"
