@@ -13,9 +13,9 @@ SPDX-License-Identifier: Apache-2.0
       class="overflow-auto"
       fluid
     >
-      <v-card flat>
+      <v-card>
         <g-toolbar title="Infrastructure" />
-        <v-card-text class="pt-1">
+        <v-card-text class="py-1">
           <g-new-shoot-select-infrastructure
             ref="infrastructure"
             :user-inter-action-bus="userInterActionBus"
@@ -23,54 +23,43 @@ SPDX-License-Identifier: Apache-2.0
         </v-card-text>
       </v-card>
       <v-card
-        flat
         class="mt-4"
       >
         <g-toolbar title="Cluster Details" />
-        <v-card-text class="pt-1">
+        <v-card-text class="py-1">
           <g-new-shoot-details
             ref="clusterDetails"
             :user-inter-action-bus="userInterActionBus"
           />
         </v-card-text>
       </v-card>
-      <v-card
-        flat
-        class="mt-4"
-      >
+      <v-card class="mt-4">
         <g-toolbar title="Infrastructure Details" />
-        <v-card-text class="pt-1">
+        <v-card-text class="py-1">
           <g-new-shoot-infrastructure-details
             ref="infrastructureDetails"
             :user-inter-action-bus="userInterActionBus"
           />
         </v-card-text>
       </v-card>
-      <v-card
-        flat
-        class="mt-4"
-      >
+      <v-card class="mt-4">
         <g-toolbar title="Control Plane High Availability" />
         <v-card-text class="pt-2">
           <g-manage-control-plane-high-availability />
         </v-card-text>
       </v-card>
-      <v-card
-        flat
-        class="mt-4"
-      >
+      <v-card class="mt-4">
         <g-toolbar title="DNS Configuration" />
-        <v-card-text class="pt-1">
+        <v-card-text class="py-1">
           <g-manage-shoot-dns />
         </v-card-text>
       </v-card>
       <v-card
         v-if="accessRestriction"
-        flat
         class="mt-4"
       >
         <g-toolbar title="Access Restrictions" />
-        <v-card-text class="pt-1">
+        <v-card-text class="py-1">
           <g-access-restrictions
             ref="accessRestrictions"
             :user-inter-action-bus="userInterActionBus"
@@ -79,13 +68,12 @@ SPDX-License-Identifier: Apache-2.0
       </v-card>
       <v-card
         v-show="!workerless"
-        flat
         class="mt-4"
       >
         <g-toolbar
           title="Worker"
         />
-        <v-card-text class="pt-1">
+        <v-card-text class="py-1">
           <g-manage-workers
             ref="manageWorkersRef"
             :user-inter-action-bus="userInterActionBus"
@@ -94,7 +82,6 @@ SPDX-License-Identifier: Apache-2.0
       </v-card>
       <v-card
         v-show="!workerless"
-        flat
         class="mt-4"
       >
         <g-toolbar
@@ -107,12 +94,9 @@ SPDX-License-Identifier: Apache-2.0
           />
         </v-card-text>
       </v-card>
-      <v-card
-        flat
-        class="mt-4"
-      >
+      <v-card class="mt-4">
         <g-toolbar title="Maintenance" />
-        <v-card-text class="pt-1">
+        <v-card-text>
           <g-maintenance-time
             ref="maintenanceTime"
           />
@@ -123,12 +107,9 @@ SPDX-License-Identifier: Apache-2.0
           />
         </v-card-text>
       </v-card>
-      <v-card
-        flat
-        class="mt-4"
-      >
+      <v-card class="mt-4">
         <g-toolbar title="Hibernation" />
-        <v-card-text class="pt-1">
+        <v-card-text class="py-1">
           <g-manage-hibernation-schedule
             ref="hibernationScheduleRef"
             :user-inter-action-bus="userInterActionBus"
