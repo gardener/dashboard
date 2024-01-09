@@ -82,7 +82,7 @@ SPDX-License-Identifier: Apache-2.0
           type="warning"
         >
           No supported cloud profile found.
-          There must be at least one cloud profile supported by the dashboard as well as a seed that matches it's seed selector.
+          There must be at least one cloud profile supported by the dashboard as well as a seed that matches its seed selector.
         </v-alert>
       </v-card-text>
       <v-card-text v-else-if="!infrastructureSecretItems.length">
