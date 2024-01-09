@@ -7,151 +7,144 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div
     v-if="sortedInfrastructureKindList.length"
-    class="d-flex flex-column fill-height"
+    class="d-flex flex-column justify-space-between fill-height"
   >
-    <div
-      class="d-flex flex-grow-1 newshoot-cards"
+    <v-container
+      class="overflow-auto"
+      fluid
     >
-      <v-container
-        fluid
-      >
-        <v-card flat>
-          <g-toolbar title="Infrastructure" />
-          <v-card-text class="pt-1">
-            <g-new-shoot-select-infrastructure
-              ref="infrastructure"
-              :user-inter-action-bus="userInterActionBus"
-            />
-          </v-card-text>
-        </v-card>
-        <v-card
-          flat
-          class="mt-4"
-        >
-          <g-toolbar title="Cluster Details" />
-          <v-card-text class="pt-1">
-            <g-new-shoot-details
-              ref="clusterDetails"
-              :user-inter-action-bus="userInterActionBus"
-            />
-          </v-card-text>
-        </v-card>
-        <v-card
-          flat
-          class="mt-4"
-        >
-          <g-toolbar title="Infrastructure Details" />
-          <v-card-text class="pt-1">
-            <g-new-shoot-infrastructure-details
-              ref="infrastructureDetails"
-              :user-inter-action-bus="userInterActionBus"
-            />
-          </v-card-text>
-        </v-card>
-        <v-card
-          flat
-          class="mt-4"
-        >
-          <g-toolbar title="Control Plane High Availability" />
-          <v-card-text class="pt-2">
-            <g-manage-control-plane-high-availability />
-          </v-card-text>
-        </v-card>
-        <v-card
-          flat
-          class="mt-4"
-        >
-          <g-toolbar title="DNS Configuration" />
-          <v-card-text class="pt-1">
-            <g-manage-shoot-dns />
-          </v-card-text>
-        </v-card>
-        <v-card
-          v-if="accessRestriction"
-          flat
-          class="mt-4"
-        >
-          <g-toolbar title="Access Restrictions" />
-          <v-card-text class="pt-1">
-            <g-access-restrictions
-              ref="accessRestrictions"
-              :user-inter-action-bus="userInterActionBus"
-            />
-          </v-card-text>
-        </v-card>
-        <v-card
-          v-show="!workerless"
-          flat
-          class="mt-4"
-        >
-          <g-toolbar
-            title="Worker"
+      <v-card flat>
+        <g-toolbar title="Infrastructure" />
+        <v-card-text class="pt-1">
+          <g-new-shoot-select-infrastructure
+            ref="infrastructure"
+            :user-inter-action-bus="userInterActionBus"
           />
-          <v-card-text class="pt-1">
-            <g-manage-workers
-              ref="manageWorkersRef"
-              :user-inter-action-bus="userInterActionBus"
-            />
-          </v-card-text>
-        </v-card>
-        <v-card
-          v-show="!workerless"
-          flat
-          class="mt-4"
-        >
-          <g-toolbar
-            title="Add-Ons (not actively monitored and provided on a best-effort basis only)"
-          />
-          <v-card-text>
-            <g-manage-shoot-addons
-              ref="addons"
-              create-mode
-            />
-          </v-card-text>
-        </v-card>
-        <v-card
-          flat
-          class="mt-4"
-        >
-          <g-toolbar title="Maintenance" />
-          <v-card-text class="pt-1">
-            <g-maintenance-time
-              ref="maintenanceTime"
-            />
-            <g-maintenance-components
-              ref="maintenanceComponents"
-              :user-inter-action-bus="userInterActionBus"
-              :hide-os-updates="workerless"
-            />
-          </v-card-text>
-        </v-card>
-        <v-card
-          flat
-          class="mt-4"
-        >
-          <g-toolbar title="Hibernation" />
-          <v-card-text class="pt-1">
-            <g-manage-hibernation-schedule
-              ref="hibernationScheduleRef"
-              :user-inter-action-bus="userInterActionBus"
-            />
-          </v-card-text>
-        </v-card>
-      </v-container>
-    </div>
-    <div class="d-flex flex-column">
-      <div
-        v-if="errorMessage"
-        ref="errorAlert"
+        </v-card-text>
+      </v-card>
+      <v-card
+        flat
+        class="mt-4"
       >
-        <g-message
-          v-model:message="errorMessage"
-          v-model:detailed-message="detailedErrorMessage"
-          color="error"
-          class="ma-0"
-          tile
+        <g-toolbar title="Cluster Details" />
+        <v-card-text class="pt-1">
+          <g-new-shoot-details
+            ref="clusterDetails"
+            :user-inter-action-bus="userInterActionBus"
+          />
+        </v-card-text>
+      </v-card>
+      <v-card
+        flat
+        class="mt-4"
+      >
+        <g-toolbar title="Infrastructure Details" />
+        <v-card-text class="pt-1">
+          <g-new-shoot-infrastructure-details
+            ref="infrastructureDetails"
+            :user-inter-action-bus="userInterActionBus"
+          />
+        </v-card-text>
+      </v-card>
+      <v-card
+        flat
+        class="mt-4"
+      >
+        <g-toolbar title="Control Plane High Availability" />
+        <v-card-text class="pt-2">
+          <g-manage-control-plane-high-availability />
+        </v-card-text>
+      </v-card>
+      <v-card
+        flat
+        class="mt-4"
+      >
+        <g-toolbar title="DNS Configuration" />
+        <v-card-text class="pt-1">
+          <g-manage-shoot-dns />
+        </v-card-text>
+      </v-card>
+      <v-card
+        v-if="accessRestriction"
+        flat
+        class="mt-4"
+      >
+        <g-toolbar title="Access Restrictions" />
+        <v-card-text class="pt-1">
+          <g-access-restrictions
+            ref="accessRestrictions"
+            :user-inter-action-bus="userInterActionBus"
+          />
+        </v-card-text>
+      </v-card>
+      <v-card
+        v-show="!workerless"
+        flat
+        class="mt-4"
+      >
+        <g-toolbar
+          title="Worker"
         />
-      </div>
+        <v-card-text class="pt-1">
+          <g-manage-workers
+            ref="manageWorkersRef"
+            :user-inter-action-bus="userInterActionBus"
+          />
+        </v-card-text>
+      </v-card>
+      <v-card
+        v-show="!workerless"
+        flat
+        class="mt-4"
+      >
+        <g-toolbar
+          title="Add-Ons (not actively monitored and provided on a best-effort basis only)"
+        />
+        <v-card-text>
+          <g-manage-shoot-addons
+            ref="addons"
+            create-mode
+          />
+        </v-card-text>
+      </v-card>
+      <v-card
+        flat
+        class="mt-4"
+      >
+        <g-toolbar title="Maintenance" />
+        <v-card-text class="pt-1">
+          <g-maintenance-time
+            ref="maintenanceTime"
+          />
+          <g-maintenance-components
+            ref="maintenanceComponents"
+            :user-inter-action-bus="userInterActionBus"
+            :hide-os-updates="workerless"
+          />
+        </v-card-text>
+      </v-card>
+      <v-card
+        flat
+        class="mt-4"
+      >
+        <g-toolbar title="Hibernation" />
+        <v-card-text class="pt-1">
+          <g-manage-hibernation-schedule
+            ref="hibernationScheduleRef"
+            :user-inter-action-bus="userInterActionBus"
+          />
+        </v-card-text>
+      </v-card>
+    </v-container>
+    <div>
+      <g-message
+        v-if="errorMessage"
+        v-model:message="errorMessage"
+        v-model:detailed-message="detailedErrorMessage"
+        color="error"
+        class="ma-0"
+        tile
+      />
       <v-divider />
       <div class="d-flex align-center justify-end toolbar">
         <v-divider vertical />
@@ -610,16 +603,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.cardTitle {
-  line-height: 10px;
-}
-
 .toolbar {
   height: 48px;
   padding-right: 10px;
-}
-
-.newshoot-cards {
-  overflow: scroll;
 }
 </style>
