@@ -1,6 +1,6 @@
 # Connect Kubectl
 
-In Kubernetes, the configuration for access to your cluster is a format known as `kubeconfig` that is stored as a file. It contains details such as cluster API server addresses and access credentials or a command to get the access credential from a `kubectl` credential plugin. In general, treat a `kubeconfig` as sensitive data. Tools like `kubectl` use the `kubeconfig` to connect and authenticate to a cluster and perform operations on it.
+In Kubernetes, the configuration for accessing your cluster is in a format known as `kubeconfig`, which is stored as a file. It contains details such as cluster API server addresses and access credentials or a command to obtain access credentials from a `kubectl` credential plugin. In general, treat a `kubeconfig` as sensitive data. Tools like `kubectl` use the `kubeconfig` to connect and authenticate to a cluster and perform operations on it.
 Learn more about [kubeconfig](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/) and [kubectl](https://kubernetes.io/docs/reference/kubectl/) on [kubernetes.io](https://kubernetes.io).
 
 ## Tools
@@ -43,13 +43,13 @@ Configure gardenlogin by following the installation instruction on the dashboard
 2. Choose `CLUSTERS` and select your cluster in the list.
 3. Choose the `Show information about gardenlogin` info icon and follow the configuration hints.
 
-Note: Use the [previously downloaded](#download-kubeconfig-for-the-garden-cluster) kubeconfig for the `Garden` cluster as the kubeconfig path. Do not use the `gardenlogin` `Shoot` cluster kubeconfig here
+> Note: Use the [previously downloaded](#download-kubeconfig-for-the-garden-cluster) kubeconfig for the `Garden` cluster as the kubeconfig path. Do not use the `gardenlogin` `Shoot` cluster kubeconfig here
 
 <img width="700" src="../images/03-gardenlogin-info.png">
 
 ### Download and Setup Kubeconfig for a `Shoot` Cluster
 
-The `gardenlogin` kubeconfig for the `Shoot` cluster can be obtained in different ways:
+The `gardenlogin` kubeconfig for the `Shoot` cluster can be obtained in various ways:
 - [Copy and run](#copy-and-run-gardenctl-target-command) the `gardenctl target` command from the dashboard
 - [Download](#download-from-dashboard) from the Gardener dashboard
 
@@ -67,7 +67,7 @@ $ gardenctl target --garden landscape-dev --project core --shoot mycluster
 Successfully targeted shoot "mycluster"
 ```
 
-Your `KUBECONFIG` env variable is now pointing to the current target (see also with `gardenctl target view -o yaml`). You can now run `kubectl` commands against your `Shoot` cluster.
+Your `KUBECONFIG` env variable is now pointing to the current target (also visible with `gardenctl target view -o yaml`). You can now run `kubectl` commands against your `Shoot` cluster.
 
 ```bash
 $ kubectl get namespaces
@@ -80,7 +80,7 @@ If your `KUBECONFIG` env variable does not point to the current target, you will
 ```bash
 WARN The KUBECONFIG environment variable does not point to the current target of gardenctl. Run `gardenctl kubectl-env --help` on how to configure the KUBECONFIG environment variable accordingly
 ```
-In this case you would have to run the following command (assuming `bash` as your current shell). For other shells, consult the [gardenctl kubectl-env --help](https://github.com/gardener/gardenctl-v2/blob/master/docs/help/gardenctl_kubectl-env.md) documentation.
+In this case you would need to run the following command (assuming `bash` as your current shell). For other shells, consult the [gardenctl kubectl-env --help](https://github.com/gardener/gardenctl-v2/blob/master/docs/help/gardenctl_kubectl-env.md) documentation.
 ```bash
 $ eval "$(gardenctl kubectl-env bash)"
 ```
