@@ -43,7 +43,7 @@ Configure gardenlogin by following the installation instruction on the dashboard
 2. Choose `CLUSTERS` and select your cluster in the list.
 3. Choose the `Show information about gardenlogin` info icon and follow the configuration hints.
 
-> Note: Use the [previously downloaded](#download-kubeconfig-for-the-garden-cluster) kubeconfig for the `Garden` cluster as the kubeconfig path. Do not use the `gardenlogin` `Shoot` cluster kubeconfig here
+> Note: Use the [previously downloaded](#download-kubeconfig-for-the-garden-cluster) kubeconfig for the `Garden` cluster as the kubeconfig path. Do not use the `gardenlogin` `Shoot` cluster kubeconfig here.
 
 <img width="700" src="../images/03-gardenlogin-info.png">
 
