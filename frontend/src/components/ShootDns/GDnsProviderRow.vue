@@ -16,96 +16,94 @@ SPDX-License-Identifier: Apache-2.0
       <span class="font-weight-bold">You cannot edit this DNS Provider</span><br>
       SecretBinding for secret {{ secretName }} not found in poject namespace
     </v-tooltip>
-    <v-row
+    <div
       ref="dnsrow"
-      align="center"
-      class="ma-0"
+      class="d-flex flex-nowrap align-center"
     >
-      <v-col cols="11">
-        <div class="d-flex flex-wrap">
-          <div class="regular-input">
-            <v-select
-              v-model="type"
-              :disabled="readonly || primaryReadonly"
-              color="primary"
-              :items="dnsProviderTypes"
-              :error-messages="getErrorMessages(v$.type)"
-              label="Dns Provider Type"
-              :hint="typeHint"
-              persistent-hint
-              variant="underlined"
-              @blur="v$.type.$touch()"
-              @update:model-value="v$.type.$touch()"
-            >
-              <template #item="{ props }">
-                <v-list-item v-bind="props">
-                  <template #prepend>
-                    <g-vendor-icon :icon="props.value" />
-                  </template>
-                </v-list-item>
-              </template>
-              <template #selection="{ item }">
-                <div class="d-flex">
-                  <g-vendor-icon
-                    :icon="item.value"
-                    class="mr-2"
-                  />
-                  {{ item.title }}
-                </div>
-              </template>
-            </v-select>
-          </div>
-          <div class="regular-input">
-            <g-select-secret
-              v-model="secret"
-              v-model:valid="secretValid"
-              :disabled="readonly"
-              :dns-provider-kind="type"
-            />
-          </div>
-          <div class="regular-input">
-            <v-combobox
-              v-model="excludeDomains"
-              :disabled="readonly"
-              label="Exclude Domains"
-              multiple
-              closable-chips
-              variant="underlined"
-            />
-          </div>
-          <div class="regular-input">
-            <v-combobox
-              v-model="includeDomains"
-              :disabled="readonly"
-              label="Include Domains"
-              multiple
-              closable-chips
-              variant="underlined"
-            />
-          </div>
-          <div class="regular-input">
-            <v-combobox
-              v-model="excludeZones"
-              :disabled="readonly"
-              label="Exclude Zones"
-              multiple
-              closable-chips
-              variant="underlined"
-            />
-          </div>
-          <div class="regular-input">
-            <v-combobox
-              v-model="includeZones"
-              :disabled="readonly"
-              label="Include Zones"
-              multiple
-              closable-chips
-              variant="underlined"
-            />
-          </div>
+      <div class="d-flex flex-wrap">
+        <div class="regular-input">
+          <v-select
+            v-model="type"
+            :disabled="readonly || primaryReadonly"
+            color="primary"
+            :items="dnsProviderTypes"
+            :error-messages="getErrorMessages(v$.type)"
+            label="Dns Provider Type"
+            :hint="typeHint"
+            persistent-hint
+            variant="underlined"
+            @blur="v$.type.$touch()"
+            @update:model-value="v$.type.$touch()"
+          >
+            <template #item="{ props }">
+              <v-list-item v-bind="props">
+                <template #prepend>
+                  <g-vendor-icon :icon="props.value" />
+                </template>
+              </v-list-item>
+            </template>
+            <template #selection="{ item }">
+              <div class="d-flex">
+                <g-vendor-icon
+                  :icon="item.value"
+                  class="mr-2"
+                />
+                {{ item.title }}
+              </div>
+            </template>
+          </v-select>
         </div>
-      </v-col>
-      <v-col cols="1">
+        <div class="regular-input">
+          <g-select-secret
+            v-model="secret"
+            v-model:valid="secretValid"
+            :disabled="readonly"
+            :dns-provider-kind="type"
+          />
+        </div>
+        <div class="regular-input">
+          <v-combobox
+            v-model="excludeDomains"
+            :disabled="readonly"
+            label="Exclude Domains"
+            multiple
+            closable-chips
+            variant="underlined"
+          />
+        </div>
+        <div class="regular-input">
+          <v-combobox
+            v-model="includeDomains"
+            :disabled="readonly"
+            label="Include Domains"
+            multiple
+            closable-chips
+            variant="underlined"
+          />
+        </div>
+        <div class="regular-input">
+          <v-combobox
+            v-model="excludeZones"
+            :disabled="readonly"
+            label="Exclude Zones"
+            multiple
+            closable-chips
+            variant="underlined"
+          />
+        </div>
+        <div class="regular-input">
+          <v-combobox
+            v-model="includeZones"
+            :disabled="readonly"
+            label="Include Zones"
+            multiple
+            closable-chips
+            variant="underlined"
+          />
+        </div>
+      </div>
+
+      <div class="ml-4 mr-2">
         <v-btn
           :disabled="readonly || primaryReadonly"
           size="x-small"
@@ -114,8 +112,8 @@ SPDX-License-Identifier: Apache-2.0
           color="grey"
           @click="onDelete"
         />
-      </v-col>
-    </v-row>
+      </div>
+    </div>
   </div>
 </template>
 

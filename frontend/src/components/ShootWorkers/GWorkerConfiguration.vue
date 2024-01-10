@@ -41,6 +41,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-window-item
           ref="overviewTab"
           value="overview"
+          class="ma-3"
         >
           <g-manage-workers
             ref="manageWorkersRef"

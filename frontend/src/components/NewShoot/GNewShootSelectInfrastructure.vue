@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-row class="my-0">
+  <div class="d-flex">
     <v-card
       v-for="infrastructureKind in sortedInfrastructureKindList"
       :key="infrastructureKind"
@@ -30,7 +30,7 @@ SPDX-License-Identifier: Apache-2.0
         </div>
       </div>
     </v-card>
-  </v-row>
+  </div>
 </template>
 
 <script>

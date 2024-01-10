@@ -73,7 +73,7 @@ SPDX-License-Identifier: Apache-2.0
         <g-toolbar
           title="Worker"
         />
-        <v-card-text class="py-1">
+        <v-card-text>
           <g-manage-workers
             ref="manageWorkersRef"
             :user-inter-action-bus="userInterActionBus"
@@ -109,7 +109,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-card>
       <v-card class="mt-4">
         <g-toolbar title="Hibernation" />
-        <v-card-text class="py-1">
+        <v-card-text>
           <g-manage-hibernation-schedule
             ref="hibernationScheduleRef"
             :user-inter-action-bus="userInterActionBus"
