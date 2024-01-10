@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
         v-bind="props"
         size="small"
         color="primary"
-        variant="outlined"
+        variant="tonal"
         class="cursor-pointer my-0 ml-0"
       >
         <g-vendor-icon

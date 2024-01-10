@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
     <template #activator="{ props }">
       <v-chip
         v-bind="props"
-        variant="outlined"
+        variant="tonal"
         :size="size"
         :color="color"
         class="cursor-pointer ml-1"

@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0
                 label
                 size="x-small"
                 color="primary"
-                variant="outlined"
+                variant="tonal"
                 class="pointer"
                 v-bind="props"
               >

@@ -54,7 +54,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-alert
       v-if="currentK8sVersion.expirationDate && !selectedItem"
       type="warning"
-      variant="outlined"
+      variant="tonal"
     >
       Current Kubernetes version expires on: {{ currentK8sVersion.expirationDateString }}.
       Kubernetes update will be enforced after that date.

@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
         v-bind="props"
         size="small"
         class="cursor-pointer"
-        variant="outlined"
+        variant="tonal"
         :color="color"
       >
         <template #prepend>

@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0
     />
     <v-alert
       type="warning"
-      variant="outlined"
+      variant="tonal"
       :value="!isMaintenancePreconditionSatisfied"
     >
       <div class="font-weight-bold">

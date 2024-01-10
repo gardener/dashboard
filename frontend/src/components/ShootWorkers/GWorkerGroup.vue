@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
         v-bind="props"
         size="small"
         class="cursor-pointer my-0 ml-0"
-        variant="outlined"
+        variant="tonal"
         color="primary"
       >
         <g-vendor-icon
@@ -52,7 +52,7 @@ SPDX-License-Identifier: Apache-2.0
             <v-row dense>
               <v-col cols="6">
                 <v-card
-                  variant="outlined"
+                  variant="tonal"
                   class="border"
                 >
                   <v-toolbar
@@ -97,7 +97,7 @@ SPDX-License-Identifier: Apache-2.0
                           :key="zone"
                           size="small"
                           label
-                          variant="outlined"
+                          variant="tonal"
                           class="px-1 mr-1"
                         >
                           {{ zone }}
@@ -127,7 +127,7 @@ SPDX-License-Identifier: Apache-2.0
                   </v-card-text>
                 </v-card>
                 <v-card
-                  variant="outlined"
+                  variant="tonal"
                   class="border mt-2"
                 >
                   <v-toolbar
@@ -172,7 +172,7 @@ SPDX-License-Identifier: Apache-2.0
               </v-col>
               <v-col cols="6">
                 <v-card
-                  variant="outlined"
+                  variant="tonal"
                   class="border"
                 >
                   <v-toolbar
@@ -233,7 +233,7 @@ SPDX-License-Identifier: Apache-2.0
                   </v-card-text>
                 </v-card>
                 <v-card
-                  variant="outlined"
+                  variant="tonal"
                   class="border mt-2"
                 >
                   <v-toolbar
@@ -282,7 +282,7 @@ SPDX-License-Identifier: Apache-2.0
                   </v-card-text>
                 </v-card>
                 <v-card
-                  variant="outlined"
+                  variant="tonal"
                   class="border mt-2"
                 >
                   <v-toolbar
@@ -321,7 +321,7 @@ SPDX-License-Identifier: Apache-2.0
                           :key="containerRuntime.type"
                           size="small"
                           label
-                          variant="outlined"
+                          variant="tonal"
                           class="px-1 mr-1"
                         >
                           {{ containerRuntime.type }}
