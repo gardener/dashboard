@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div class="d-flex align-center">
     <g-popover
-      v-model="popover"
+      v-model="internalValue"
       :toolbar-title="toolbarTitle"
       :toolbar-color="color"
       :placement="popperPlacement"
@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
         <div class="d-flex align-center">
           <v-tooltip
             location="top"
-            :disabled="popover"
+            :disabled="internalValue"
           >
             <template #activator="{ props: tooltipProps }">
               <v-btn
@@ -215,7 +215,10 @@ export default {
     GShootMessageDetails,
   },
   mixins: [shootItem],
-  inject: ['mergeProps'],
+  inject: [
+    'mergeProps',
+    'activePopoverKey',
+  ],
   props: {
     popperKey: {
       type: String,
@@ -231,11 +234,21 @@ export default {
   },
   data () {
     return {
-      popover: false,
       retryingOperation: false,
     }
   },
   computed: {
+    popoverKey () {
+      return `g-shoot-status:${this.shootMetadata.uid}`
+    },
+    internalValue: {
+      get () {
+        return this.activePopoverKey === this.popoverKey
+      },
+      set (value) {
+        this.activePopoverKey = value ? this.popoverKey : ''
+      },
+    },
     showProgress () {
       return this.operationState === 'Processing'
     },

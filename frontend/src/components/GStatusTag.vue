@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div v-if="visible">
     <g-popover
-      v-model="popover"
+      v-model="internalValue"
       :placement="popperPlacement"
       :disabled="!condition.message"
       :toolbar-title="popperTitle"
@@ -35,7 +35,7 @@ SPDX-License-Identifier: Apache-2.0
             :activator="$refs.tagChipRef"
             location="top"
             max-width="400px"
-            :disabled="popover"
+            :disabled="internalValue"
           >
             <div class="font-weight-bold">
               {{ chipTooltip.title }}
@@ -69,7 +69,7 @@ SPDX-License-Identifier: Apache-2.0
         :error-descriptions="errorDescriptions"
         :last-transition-time="condition.lastTransitionTime"
         :secret-binding-name="secretBindingName"
-        :namespace="namespace"
+        :namespace="shootMetadata.namespace"
       />
     </g-popover>
   </div>
@@ -97,6 +97,9 @@ export default {
   components: {
     GShootMessageDetails,
   },
+  inject: [
+    'activePopoverKey',
+  ],
   props: {
     condition: {
       type: Object,
@@ -105,25 +108,34 @@ export default {
     secretBindingName: {
       type: String,
     },
-    namespace: {
-      type: String,
-    },
     popperPlacement: {
       type: String,
     },
     staleShoot: {
       type: Boolean,
     },
-  },
-  data () {
-    return {
-      popover: false,
-    }
+    shootMetadata: {
+      type: Object,
+      default () {
+        return { uid: '' }
+      },
+    },
   },
   computed: {
     ...mapState(useAuthnStore, [
       'isAdmin',
     ]),
+    popoverKey () {
+      return `g-status-tag[${this.condition.type}]:${this.shootMetadata.uid}`
+    },
+    internalValue: {
+      get () {
+        return this.activePopoverKey === this.popoverKey
+      },
+      set (value) {
+        this.activePopoverKey = value ? this.popoverKey : ''
+      },
+    },
     popperTitle () {
       if (this.staleShoot) {
         return 'Last Status'
