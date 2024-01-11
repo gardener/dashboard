@@ -20,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-chip
             v-bind="props"
             size="small"
-            variant="outlined"
+            variant="tonal"
             color="primary"
             class="mr-2 my-0"
           >
@@ -41,7 +41,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-chip
             v-bind="props"
             size="small"
-            variant="outlined"
+            variant="tonal"
             color="primary"
             class="mr-2"
           >

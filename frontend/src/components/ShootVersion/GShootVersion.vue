@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
             v-if="chip"
             size="small"
             rounded
-            :variant="!k8sPatchAvailable ? 'outlined' : undefined"
+            :variant="!k8sPatchAvailable ? 'tonal' : 'flat'"
             :ripple="canUpdate"
             color="primary"
             class="update_btn"

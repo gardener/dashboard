@@ -31,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0
               label
               size="x-small"
               class="ml-2"
-              variant="outlined"
+              variant="tonal"
             >
               {{ phaseCaption }}
             </v-chip>
