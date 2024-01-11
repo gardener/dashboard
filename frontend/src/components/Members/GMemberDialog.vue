@@ -54,7 +54,7 @@ SPDX-License-Identifier: Apache-2.0
                   <v-chip
                     size="small"
                     color="primary"
-                    variant="outlined"
+                    variant="tonal"
                     closable
                     @update:model-value="internalRoles.splice(index, 1); v$.internalRoles.$touch()"
                   >
@@ -82,7 +82,7 @@ SPDX-License-Identifier: Apache-2.0
               :value="true"
               type="info"
               color="primary"
-              variant="outlined"
+              variant="tonal"
             >
               The service account does not exist anymore and will be re-created if you update the roles.
             </v-alert>

@@ -28,7 +28,7 @@ SPDX-License-Identifier: Apache-2.0
         v-bind="props"
         size="small"
         class="ma-1"
-        variant="outlined"
+        variant="tonal"
         color="disabled"
       >
         workerless
