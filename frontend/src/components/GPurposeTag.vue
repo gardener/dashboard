@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-chip
         v-if="!!shortPurpose"
         v-bind="props"
-        :variant="!isCritical ? 'outlined' : 'flat'"
+        :variant="!isCritical ? 'tonal' : 'flat'"
         :text-color="textColor"
         color="primary"
         size="small"

@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-chip
             size="small"
             class="my-0"
-            variant="outlined"
+            variant="tonal"
             color="warning"
           >
             Unverified

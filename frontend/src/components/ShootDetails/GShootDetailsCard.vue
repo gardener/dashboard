@@ -193,7 +193,7 @@ SPDX-License-Identifier: Apache-2.0
                 v-for="(name, index) in shootAddonNames"
                 :key="index"
                 size="small"
-                variant="outlined"
+                variant="tonal"
                 color="primary"
                 class="mr-2"
               >

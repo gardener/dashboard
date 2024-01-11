@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
             density="compact"
             class="mb-1 mr-1 selection-text-field"
             flat
-            variant="outlined"
+            variant="tonal"
             color="primary"
             hide-details
             @click.stop="$refs.wildCardStart.focus()"
@@ -44,7 +44,7 @@ SPDX-License-Identifier: Apache-2.0
             density="compact"
             class="mb-1 ml-1 selection-text-field"
             flat
-            variant="outlined"
+            variant="tonal"
             color="primary"
             hide-details
             @click.stop="$refs.wildCardEnd.focus()"

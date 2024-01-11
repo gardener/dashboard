@@ -227,7 +227,11 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineAsyncComponent } from 'vue'
+import {
+  ref,
+  provide,
+  defineAsyncComponent,
+} from 'vue'
 import {
   mapState,
   mapWritableState,
@@ -292,6 +296,13 @@ export default {
     this.resetShootSearch()
     this.focusModeInternal = false
     next()
+  },
+  setup () {
+    const activePopoverKey = ref('')
+    provide('activePopoverKey', activePopoverKey)
+    return {
+      activePopoverKey,
+    }
   },
   data () {
     return {

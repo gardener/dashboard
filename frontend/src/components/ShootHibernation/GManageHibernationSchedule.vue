@@ -66,7 +66,7 @@ SPDX-License-Identifier: Apache-2.0
     >
       <v-alert
         type="warning"
-        variant="outlined"
+        variant="tonal"
       >
         One or more errors occured while parsing hibernation schedules. Your configuration may still be valid - the Dashboard UI currently only supports basic schedules.<br>
         You probably configured crontab lines for your hibernation schedule manually. Please edit your schedules directly in the cluster specification. You can also delete it there and come back to this screen to configure your schedule via the Dashboard UI.
@@ -79,7 +79,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-col>
         <v-alert
           type="warning"
-          variant="outlined"
+          variant="tonal"
           :model-value="!isHibernationPossible && parsedScheduleEvents && parsedScheduleEvents.length > 0"
         >
           <div class="font-weight-bold">
