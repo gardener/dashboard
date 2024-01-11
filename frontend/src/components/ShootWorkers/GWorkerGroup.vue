@@ -6,6 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <g-popover
+    v-model="internalValue"
     :toolbar-title="workerGroup.name"
     placement="bottom"
   >
@@ -33,13 +34,13 @@ SPDX-License-Identifier: Apache-2.0
         value="overview"
         class="text-caption text-medium-emphasis"
       >
-        Overview
+        OVERVIEW
       </v-tab>
       <v-tab
         value="yaml"
         class="text-caption text-medium-emphasis"
       >
-        Yaml
+        YAML
       </v-tab>
     </v-tabs>
     <v-card-text>
@@ -364,7 +365,10 @@ export default {
     GVendorIcon,
     GCodeBlock,
   },
-  inject: ['yaml'],
+  inject: [
+    'yaml',
+    'activePopoverKey',
+  ],
   props: {
     modelValue: {
       type: [String, Number],
@@ -374,6 +378,12 @@ export default {
     },
     cloudProfileName: {
       type: String,
+    },
+    shootMetadata: {
+      type: Object,
+      default () {
+        return { uid: '' }
+      },
     },
   },
   emits: [
@@ -385,6 +395,17 @@ export default {
     }
   },
   computed: {
+    popoverKey () {
+      return `g-worker-group[${this.workerGroup.name}]:${this.shootMetadata.uid}`
+    },
+    internalValue: {
+      get () {
+        return this.activePopoverKey === this.popoverKey
+      },
+      set (value) {
+        this.activePopoverKey = value ? this.popoverKey : ''
+      },
+    },
     machineType () {
       const machineTypes = this.machineTypesByCloudProfileName({ cloudProfileName: this.cloudProfileName })
       const type = get(this.workerGroup, 'machine.type')

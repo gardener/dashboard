@@ -12,6 +12,10 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import {
+  ref,
+  provide,
+} from 'vue'
+import {
   mapState,
   mapActions,
 } from 'pinia'
@@ -50,6 +54,13 @@ export default {
   },
   beforeRouteLeave (to, from) {
     this.readyState = 'initial'
+  },
+  setup () {
+    const activePopoverKey = ref('')
+    provide('activePopoverKey', activePopoverKey)
+    return {
+      activePopoverKey,
+    }
   },
   data () {
     return {

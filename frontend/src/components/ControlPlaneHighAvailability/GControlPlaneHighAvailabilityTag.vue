@@ -6,17 +6,19 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <g-popover
-    v-if="shootControlPlaneHighAvailabilityFailureTolerance"
+    v-model="internalValue"
+    :disbaled="!shootControlPlaneHighAvailabilityFailureTolerance"
     toolbar-title="Control Plane High Availability"
     :toolbar-color="color"
   >
     <template #activator="{ props }">
       <v-chip
+        v-if="shootControlPlaneHighAvailabilityFailureTolerance"
         v-bind="props"
         variant="tonal"
         :size="size"
         :color="color"
-        class="cursor-pointer ml-1"
+        class="cursor-pointer"
       >
         {{ shootControlPlaneHighAvailabilityFailureTolerance }}
       </v-chip>
@@ -66,12 +68,26 @@ import { some } from '@/lodash'
 
 export default {
   mixins: [shootItem],
+  inject: [
+    'activePopoverKey',
+  ],
   props: {
     size: {
       type: [String, Number],
     },
   },
   computed: {
+    popoverKey () {
+      return `g-control-plane-hig-availability-tag:${this.shootMetadata.uid}`
+    },
+    internalValue: {
+      get () {
+        return this.activePopoverKey === this.popoverKey
+      },
+      set (value) {
+        this.activePopoverKey = value ? this.popoverKey : ''
+      },
+    },
     zoneSupported () {
       const seeds = this.seedsByCloudProfileName(this.shootCloudProfileName)
       return some(seeds, ({ data }) => data.zones?.length >= 3)

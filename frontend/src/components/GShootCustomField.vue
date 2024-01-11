@@ -6,6 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <g-popover
+    v-model="popover"
     :toolbar-title="name"
     :toolbar-color="color"
     placement="right"
@@ -173,6 +174,11 @@ export default {
     showDetails: {
       type: Boolean,
     },
+  },
+  data () {
+    return {
+      popover: false,
+    }
   },
 }
 </script>
