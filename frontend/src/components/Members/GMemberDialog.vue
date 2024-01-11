@@ -240,6 +240,7 @@ export default {
     rules.internalRoles = withFieldName('Member Roles', internalRolesRules)
 
     if (this.isUpdateDialog) {
+      rules.internalName = {}
       return rules
     }
 
