@@ -182,8 +182,8 @@ export default {
     visibleItems () {
       return filter(this.items, item => !item.notNextMinor)
     },
-    hasMoreVersions () {
-      return filter(this.items, 'notNextMinor').length
+    hasMoreSupportedVersions () {
+      return filter(this.items, item => item.notNextMinor && item.isSupported).length
     },
     selectedVersionIsPatch () {
       const isPatch = get(this.selectedItem, 'updateType') === 'patch'
@@ -203,7 +203,7 @@ export default {
       if (this.selectedItem?.isDeprecated) {
         return `Selected version is deprecated. It will expire on ${this.selectedItem.expirationDateString}`
       }
-      if (this.hasMoreVersions) {
+      if (this.hasMoreSupportedVersions) {
         return 'There are newer minor versions available. However you can only upgrade your cluster one minor version at a time'
       }
       return undefined
@@ -212,7 +212,7 @@ export default {
       if (this.selectedItem?.isPreview || this.selectedItem?.isDeprecated) {
         return 'warning'
       }
-      if (this.hasMoreVersions) {
+      if (this.hasMoreSupportedVersions) {
         return 'info'
       }
       return undefined
