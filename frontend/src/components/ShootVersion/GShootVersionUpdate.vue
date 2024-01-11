@@ -8,8 +8,8 @@ SPDX-License-Identifier: Apache-2.0
   <div>
     <v-select
       v-model="selectedItem"
-      v-messages-color="{ color: 'warning' }"
-      :items="items"
+      v-messages-color="{ color: hintColor }"
+      :items="visibleItems"
       color="primary"
       class="mb-2"
       item-color="primary"
@@ -18,6 +18,7 @@ SPDX-License-Identifier: Apache-2.0
       :hint="hint"
       return-object
       placeholder="Please select version..."
+      persistent-hint
       :error-messages="getErrorMessages(v$.selectedItem)"
       @blur="v$.selectedItem.$touch()"
     >
@@ -26,29 +27,17 @@ SPDX-License-Identifier: Apache-2.0
           v-if="item.raw.type === 'subheader'"
           v-bind="props"
         />
-        <div
+        <v-list-item
           v-else
-          :ref="`versionItem_${item.raw.version}`"
+          v-bind="props"
+          :subtitle="versionItemDescription(item.raw)"
         >
-          <v-list-item
-            v-bind="props"
-            :subtitle="versionItemDescription(item.raw)"
-            :disabled="item.raw.notNextMinor"
-          >
-            <template #subtitle="{ subtitle }">
-              <div :class="item.raw.subtitleClass">
-                {{ subtitle }}
-              </div>
-            </template>
-          </v-list-item>
-        </div>
-        <v-tooltip
-          v-if="item.raw.notNextMinor"
-          :activator="$refs[`versionItem_${item.raw.version}`]"
-          location="top"
-        >
-          You cannot upgrade your cluster more than one minor version at a time
-        </v-tooltip>
+          <template #subtitle="{ subtitle }">
+            <div :class="item.raw.subtitleClass">
+              {{ subtitle }}
+            </div>
+          </template>
+        </v-list-item>
       </template>
     </v-select>
     <v-alert
@@ -67,10 +56,7 @@ import semver from 'semver'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
-import {
-  withFieldName,
-  withMessage,
-} from '@/utils/validators'
+import { withFieldName } from '@/utils/validators'
 import { getErrorMessages } from '@/utils'
 
 import {
@@ -80,6 +66,7 @@ import {
   head,
   get,
   join,
+  filter,
 } from '@/lodash'
 export default {
   props: {
@@ -111,9 +98,6 @@ export default {
     return {
       selectedItem: withFieldName('Kubernetes Version', {
         required,
-        selectedMinorVersionIsNotNextMinor: withMessage('You cannot upgrade your cluster more than one minor version at a time', value => {
-          return !value?.version || !this.itemIsNotNextMinor(value.version, value.updateType)
-        }),
       }),
     }
   },
@@ -195,6 +179,12 @@ export default {
       })
       return allItems
     },
+    visibleItems () {
+      return filter(this.items, item => !item.notNextMinor)
+    },
+    hasMoreVersions () {
+      return filter(this.items, 'notNextMinor').length
+    },
     selectedVersionIsPatch () {
       const isPatch = get(this.selectedItem, 'updateType') === 'patch'
       this.$emit('confirmRequired', !isPatch)
@@ -202,16 +192,28 @@ export default {
     },
     label () {
       if (this.selectedVersionIsPatch) {
-        return 'Patch to Version'
+        return 'Patch to version'
       }
-      return 'Upgrade to Version'
+      return 'Upgrade to version'
     },
     hint () {
-      if (!this.selectedItem) {
-        return undefined
+      if (this.selectedItem?.isPreview) {
+        return 'Selected version is a preview version. Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not recommended for production usage'
       }
-      if (this.selectedItem.isPreview) {
-        return 'Selected Version is a preview version. Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not recommended for production usage'
+      if (this.selectedItem?.isDeprecated) {
+        return `Selected version is deprecated. It will expire on ${this.selectedItem.expirationDateString}`
+      }
+      if (this.hasMoreVersions) {
+        return 'There are newer minor versions available. However you can only upgrade your cluster one minor version at a time'
+      }
+      return undefined
+    },
+    hintColor () {
+      if (this.selectedItem?.isPreview || this.selectedItem?.isDeprecated) {
+        return 'warning'
+      }
+      if (this.hasMoreVersions) {
+        return 'info'
       }
       return undefined
     },
