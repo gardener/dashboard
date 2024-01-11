@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
           {{ message }}
           <v-btn
             v-if="!!detailedMessage"
-            variant="outlined"
+            variant="tonal"
             size="small"
             @click="detailedMessageVisible = !detailedMessageVisible"
           >

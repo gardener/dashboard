@@ -51,7 +51,7 @@ SPDX-License-Identifier: Apache-2.0
                   v-if="!!costObjectDescriptionHtml"
                   density="compact"
                   type="info"
-                  variant="outlined"
+                  variant="tonal"
                   color="primary"
                 >
                   <!-- eslint-disable vue/no-v-html -->

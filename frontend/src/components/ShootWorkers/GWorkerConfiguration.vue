@@ -72,7 +72,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-alert
           v-if="networkConfiguration.length"
           type="warning"
-          variant="outlined"
+          variant="tonal"
           tile
           prominent
           closable

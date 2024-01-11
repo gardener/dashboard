@@ -8,10 +8,15 @@
 
 const { Agent } = require('https')
 const _ = require('lodash')
-const { Octokit } = require('@octokit/rest')
+const { Octokit: Core } = require('@octokit/core')
 const { createAppAuth } = require('@octokit/auth-app')
+const { requestLog } = require('@octokit/plugin-request-log')
+const { legacyRestEndpointMethods } = require('@octokit/plugin-rest-endpoint-methods')
+const { paginateRest } = require('@octokit/plugin-paginate-rest')
+const { paginateGraphql } = require('@octokit/plugin-paginate-graphql')
 const config = require('../config')
 const logger = require('../logger')
+const Octokit = Core.plugin(requestLog, legacyRestEndpointMethods, paginateRest, paginateGraphql)
 
 class OctokitLog {
   static debug (...args) {

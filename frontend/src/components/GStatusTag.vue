@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
           v-bind="props"
           ref="tagChipRef"
           :class="{ 'cursor-pointer': condition.message }"
-          :variant="!isError ? 'outlined' : 'flat'"
+          :variant="!isError ? 'tonal' : 'flat'"
           :text-color="textColor"
           size="small"
           :color="color"

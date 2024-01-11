@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-chip
         v-if="shootControlPlaneHighAvailabilityFailureTolerance"
         v-bind="props"
-        variant="outlined"
+        variant="tonal"
         :size="size"
         :color="color"
         class="cursor-pointer"
