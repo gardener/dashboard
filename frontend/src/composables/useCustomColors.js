@@ -16,20 +16,29 @@ import { isHtmlColorCode } from '@/utils'
 
 import { get } from '@/lodash'
 
-function patchVuetifyThemeColors (vuetifyThemes = {}, customThemes) {
+function patchThemes (themes, customThemes) {
   for (const colorMode of ['light', 'dark']) {
-    const vuetifyThemeColors = vuetifyThemes[colorMode]?.colors ?? {}
+    const themeColors = themes[colorMode]?.colors ?? {}
     const customThemeColors = customThemes[colorMode] ?? {}
-    for (const [key, value] of Object.entries(customThemeColors)) {
-      if (key in vuetifyThemeColors) {
-        const colorCode = get(vuetifyColors, value)
-        if (colorCode) {
-          vuetifyThemeColors[key] = colorCode
-        } else if (isHtmlColorCode(value)) {
-          vuetifyThemeColors[key] = value
-        }
-      }
-    }
+    patchThemeColors(themeColors, customThemeColors)
+  }
+}
+
+function patchThemeColors (themeColors, customThemeColors) {
+  for (const [key, value] of Object.entries(customThemeColors)) {
+    setThemeColor(themeColors, key, value)
+  }
+}
+
+function setThemeColor (themeColors, key, value) {
+  if (!(key in themeColors)) {
+    return
+  }
+  const colorCode = get(vuetifyColors, value)
+  if (colorCode) {
+    themeColors[key] = colorCode
+  } else if (isHtmlColorCode(value)) {
+    themeColors[key] = value
   }
 }
 
@@ -45,7 +54,8 @@ export const useCustomColors = (customThemes, theme = useTheme()) => {
       }
       clearTimeout(timeoutId)
       nextTick(() => unwatch())
-      patchVuetifyThemeColors(toValue(theme.themes), value)
+      const themes = toValue(theme.themes) ?? {}
+      patchThemes(themes, value)
       resolve()
     }, {
       immediate: true,
