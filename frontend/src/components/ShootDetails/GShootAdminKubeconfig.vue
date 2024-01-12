@@ -33,7 +33,7 @@ SPDX-License-Identifier: Apache-2.0
                 </v-chip>
               </template>
               <div class="pa-2">
-                You can configure the <span class="font-weight-bold">kubeconfig lifetime</span> on the
+                You can configure the kubeconfig lifetime on the
                 <g-text-router-link
                   :to="{ name: 'Settings' }"
                   text="Settings"
