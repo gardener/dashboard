@@ -40,7 +40,7 @@ SPDX-License-Identifier: Apache-2.0
         </g-external-link>
         it accordingly.
       </p>
-      <g-gardenctl-config-example />
+      <g-gardenctl-config-example :shoot-namespace="shootNamespace" />
     </template>
   </g-popover>
 </template>
@@ -51,6 +51,11 @@ import GGardenctlConfigExample from './GGardenctlConfigExample.vue'
 export default {
   components: {
     GGardenctlConfigExample,
+  },
+  props: {
+    shootNamespace: {
+      type: String,
+    },
   },
   data () {
     return {
