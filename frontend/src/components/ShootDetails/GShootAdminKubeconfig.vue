@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
             </span>
             <g-popover
               v-model="popover"
-              toolbar-title="Configure Admin Kubeconfig Lifetime"
+              toolbar-title="Configure Kubeconfig Lifetime"
               placement="bottom"
               :z-index="2500"
             >
