@@ -148,10 +148,10 @@ export default {
       return version
     },
     supportedPatchAvailable () {
-      return find(this.availableK8sUpdates?.patch, 'isSupported')
+      return !!find(this.availableK8sUpdates?.patch, 'isSupported')
     },
     supportedUpgradeAvailable () {
-      return find(this.availableK8sUpdates?.minor, 'isSupported')
+      return !!find(this.availableK8sUpdates?.minor, 'isSupported')
     },
     canUpdate () {
       return !!this.availableK8sUpdates && !this.isShootMarkedForDeletion && !this.isShootActionsDisabledForPurpose && this.canPatchShoots
@@ -165,15 +165,17 @@ export default {
     tooltipText () {
       if (this.kubernetesVersion.isDeprecated) {
         return this.shootActionToolTip('Kubernetes version is deprecated')
-      } else if (this.supportedPatchAvailable) {
-        return this.shootActionToolTip('Kubernetes patch available')
-      } else if (this.supportedUpgradeAvailable) {
-        return this.shootActionToolTip('Kubernetes upgrade available')
-      } else if (this.availableK8sUpdates) {
-        return this.shootActionToolTip('Updates available')
-      } else {
-        return 'Kubernetes version up to date'
       }
+      if (this.supportedPatchAvailable) {
+        return this.shootActionToolTip('Kubernetes patch available')
+      }
+      if (this.supportedUpgradeAvailable) {
+        return this.shootActionToolTip('Kubernetes upgrade available')
+      }
+      if (this.availableK8sUpdates) {
+        return this.shootActionToolTip('Updates available')
+      }
+      return 'Kubernetes version up to date'
     },
     chipColor () {
       return this.kubernetesVersion.isDeprecated ? 'warning' : 'primary'

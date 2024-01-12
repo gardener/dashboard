@@ -183,7 +183,7 @@ export default {
       return filter(this.items, item => !item.notNextMinor)
     },
     hasMoreSupportedVersions () {
-      return filter(this.items, item => item.notNextMinor && item.isSupported).length
+      return filter(this.items, item => item.notNextMinor && item.isSupported).length > 0
     },
     selectedVersionIsPatch () {
       const isPatch = get(this.selectedItem, 'updateType') === 'patch'
