@@ -230,7 +230,9 @@ export default {
     }
   },
   validations () {
-    const rules = {}
+    const rules = {
+      internalName: {},
+    }
     const internalRolesRules = {
       required: withMessage(() => this.isUserDialog
         ? 'Users need to have at least one assigned role'
@@ -240,7 +242,7 @@ export default {
     rules.internalRoles = withFieldName('Member Roles', internalRolesRules)
 
     if (this.isUpdateDialog) {
-      rules.internalName = {}
+      // must not add name rules as unique check would fail for existing members
       return rules
     }
 
