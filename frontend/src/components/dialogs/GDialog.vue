@@ -71,7 +71,7 @@ SPDX-License-Identifier: Apache-2.0
           :error="notConfirmed && userInput.length > 0"
           hide-details
           type="text"
-          variant="tonal"
+          variant="outlined"
           color="primary"
           density="compact"
           class="mr-2 confirm-input"
