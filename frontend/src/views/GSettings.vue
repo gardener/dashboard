@@ -120,7 +120,7 @@ SPDX-License-Identifier: Apache-2.0
                 cols="12"
               >
                 <legend class="text-medium-emphasis">
-                  Cluster Admin Kubeconfig Lifetime
+                  Cluster Time-Limited Kubeconfig Lifetime
                 </legend>
                 <v-select
                   v-model="shootAdminKubeconfigExpiration"
