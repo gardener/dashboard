@@ -16,6 +16,23 @@ import { isHtmlColorCode } from '@/utils'
 
 import { get } from '@/lodash'
 
+function patchVuetifyThemeColors (vuetifyThemes = {}, customThemes) {
+  for (const colorMode of ['light', 'dark']) {
+    const vuetifyThemeColors = vuetifyThemes[colorMode]?.colors ?? {}
+    const customThemeColors = customThemes[colorMode] ?? {}
+    for (const [key, value] of Object.entries(customThemeColors)) {
+      if (key in vuetifyThemeColors) {
+        const colorCode = get(vuetifyColors, value)
+        if (colorCode) {
+          vuetifyThemeColors[key] = colorCode
+        } else if (isHtmlColorCode(value)) {
+          vuetifyThemeColors[key] = value
+        }
+      }
+    }
+  }
+}
+
 export const useCustomColors = (customThemes, theme = useTheme()) => {
   return new Promise((resolve, reject) => {
     const timeoutId = setTimeout(() => {
@@ -23,25 +40,13 @@ export const useCustomColors = (customThemes, theme = useTheme()) => {
       reject(new Error('Setting custom colors timed out'))
     }, 3000)
     const unwatch = watch(customThemes, value => {
-      if (value) {
-        clearTimeout(timeoutId)
-        nextTick(() => unwatch())
-        for (const colorMode of ['light', 'dark']) {
-          const vuetifyThemeColors = toValue(theme.themes)?.[colorMode]?.colors ?? {}
-          const customThemeColors = value[colorMode] ?? {}
-          for (const [key, value] of Object.entries(customThemeColors)) {
-            if (key in vuetifyThemeColors) {
-              const colorCode = get(vuetifyColors, value)
-              if (colorCode) {
-                vuetifyThemeColors[key] = colorCode
-              } else if (isHtmlColorCode(value)) {
-                vuetifyThemeColors[key] = value
-              }
-            }
-          }
-        }
-        resolve()
+      if (!value) {
+        return
       }
+      clearTimeout(timeoutId)
+      nextTick(() => unwatch())
+      patchVuetifyThemeColors(toValue(theme.themes), value)
+      resolve()
     }, {
       immediate: true,
     })
