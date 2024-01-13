@@ -84,13 +84,14 @@ async function getComments ({ number }) {
   return repository.issue.comments.nodes
     .filter(node => !node.isMinimized)
     .map(node => {
+      const author = node.author ?? {}
       return {
         id: node.databaseId,
         node_id: node.id,
         html_url: node.url,
         user: {
-          login: node.author.login,
-          avatar_url: node.author.avatarUrl
+          login: author.login ?? 'ghost',
+          avatar_url: author.avatarUrl
         },
         created_at: node.createdAt,
         updated_at: node.updatedAt,
