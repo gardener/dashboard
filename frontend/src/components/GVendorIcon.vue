@@ -10,7 +10,6 @@ SPDX-License-Identifier: Apache-2.0
     rounded="lg"
     tile
     :class="{ 'icon-background': !noBackground }"
-    :style="avatarStyles"
   >
     <img
       v-if="iconSrc"
@@ -48,10 +47,6 @@ const props = defineProps({
   noBackground: {
     type: Boolean,
     default: false,
-  },
-  grayscale: {
-    type: String,
-    required: false,
   },
 })
 
@@ -128,15 +123,6 @@ const iconStyle = computed(() => {
     maxWidth: `${maxIconSize}px`,
     height: `${maxIconSize}px`,
     width: `${maxIconSize}px`,
-  }
-})
-
-const avatarStyles = computed(() => {
-  if (!props.grayscale) {
-    return undefined
-  }
-  return {
-    filter: `grayscale(${props.grayscale})`,
   }
 })
 
