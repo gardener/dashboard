@@ -6,30 +6,34 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-row class="my-0">
-    <v-card
-      v-for="infrastructureKind in sortedInfrastructureKindList"
-      :key="infrastructureKind"
-      class="select_infra_card cursor-pointer"
-      :class="{
-        'select_infra_card_active elevation-8' : infrastructureKind === selectedInfrastructure,
-        'elevation-3': infrastructureKind !== selectedInfrastructure,
-      }"
-      hover
-      @click.stop="selectInfrastructure(infrastructureKind)"
-    >
-      <div class="d-flex flex-column justify-center align-center">
-        <div>
-          <g-vendor-icon
-            :icon="infrastructureKind"
-            :size="60"
-            no-background
-          />
-        </div>
-        <div class="mt-2">
-          <span class="text-subtitle-1">{{ infrastructureKind }}</span>
-        </div>
-      </div>
-    </v-card>
+    <v-hover>
+      <template #default="{ isHovering, props }">
+        <v-card
+          v-for="infrastructureKind in sortedInfrastructureKindList"
+          v-bind="props"
+          :key="infrastructureKind"
+          class="select_infra_card cursor-pointer"
+          :class="{
+            'select_infra_card_active elevation-8' : isActive(infrastructureKind),
+            'elevation-3': !isActive(infrastructureKind),
+          }"
+          hover
+          @click.stop="selectInfrastructure(infrastructureKind)"
+        >
+          <div class="d-flex flex-column justify-center align-center">
+            <g-vendor-icon
+              :icon="infrastructureKind"
+              :size="60"
+              no-background
+              :grayscale="getGrayscaleVal(infrastructureKind, isHovering)"
+            />
+            <div class="mt-2 text-subtitle-1">
+              {{ infrastructureKind }}
+            </div>
+          </div>
+        </v-card>
+      </template>
+    </v-hover>
   </v-row>
 </template>
 
@@ -72,6 +76,18 @@ export default {
     setSelectedInfrastructure (infrastructure) {
       this.selectedInfrastructure = infrastructure
     },
+    isActive (infrastructureKind) {
+      return infrastructureKind === this.selectedInfrastructure
+    },
+    getGrayscaleVal (infrastructureKind, isHovering) {
+      if (this.isActive(infrastructureKind)) {
+        return '0%'
+      }
+      if (isHovering) {
+        return '50%'
+      }
+      return '80%'
+    },
   },
 }
 </script>
@@ -82,21 +98,14 @@ export default {
     opacity: 0.8;
     margin: 10px 20px 10px 0px;
     min-width: 120px;
-    filter: grayscale(80%);
   }
 
   .select_infra_card:hover {
     opacity: 1;
-    filter: grayscale(50%);
   }
 
   .select_infra_card_active {
     border: 1px solid rgb(var(--v-theme-primary));
     opacity: 1;
-    filter: grayscale(0%);
-  }
-
-  .select_infra_card_active:hover {
-    filter: grayscale(0%);
   }
 </style>
