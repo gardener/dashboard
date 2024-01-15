@@ -121,7 +121,10 @@ export default {
       'canPatchShoots',
     ]),
     popoverKey () {
-      return `g-shoot-messages:${this.shootMetadata.uid}`
+      const key = Array.isArray(this.filter)
+        ? this.filter.join(',')
+        : this.filter ?? '*'
+      return `g-shoot-messages[${key}]:${this.shootMetadata.uid}`
     },
     internalValue: {
       get () {
