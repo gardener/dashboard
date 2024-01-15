@@ -375,7 +375,7 @@ SPDX-License-Identifier: Apache-2.0
                   <div class="text-body-2 text-medium-emphasis">
                     Go to
                     <g-text-router-link
-                      :to="{ name: 'Account', query: { namespace: namespace } }"
+                      :to="{ name: 'Account', query: { namespace } }"
                       text="My Account"
                     />
                     to download the <span class="font-family-monospace">kubeconfig</span> for this project.

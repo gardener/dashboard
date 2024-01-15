@@ -46,7 +46,10 @@ SPDX-License-Identifier: Apache-2.0
       </template>
     </g-list-item-content>
     <template #append>
-      <g-gardenlogin-info v-if="isGardenloginType" />
+      <g-gardenlogin-info
+        v-if="isGardenloginType"
+        :shoot-namespace="shootNamespace"
+      />
       <template v-if="isKubeconfigAvailable">
         <g-action-button
           icon="mdi-download"
