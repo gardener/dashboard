@@ -150,7 +150,7 @@ SPDX-License-Identifier: Apache-2.0
               label
               size="x-small"
               color="primary"
-              variant="outlined"
+              variant="tonal"
               class="ml-2"
             >
               {{ customDomainChipText }}
@@ -216,7 +216,7 @@ SPDX-License-Identifier: Apache-2.0
                     v-bind="props"
                     size="small"
                     class="mr-2"
-                    variant="outlined"
+                    variant="tonal"
                     color="primary"
                   >
                     {{ name }}

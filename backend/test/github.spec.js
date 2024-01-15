@@ -8,12 +8,14 @@
 
 const { AssertionError } = require('assert')
 const createError = require('http-errors')
+const { mockOctokitPaginateGraphQL } = require('@octokit/core')
 const { dashboardClient } = require('@gardener-dashboard/kube-client')
 const logger = require('../lib/logger')
 const config = require('../lib/config')
 const handleGithubEvent = require('../lib/github/webhook/handler')
 const verify = require('../lib/github/webhook/verify')
 const SyncManager = require('../lib/github/SyncManager')
+const { getComments } = require('../lib/github')
 
 const actualNextTick = jest.requireActual('process').nextTick
 
@@ -27,119 +29,121 @@ const advanceTimersAndFlushPromises = async (ms) => {
   await flushPromises()
 }
 
-describe('github webhook', () => {
+describe('github', () => {
   const now = new Date('2006-01-02T15:04:05.000Z')
 
-  describe('handler', () => {
-    const namespace = fixtures.env.POD_NAMESPACE
-    const holderIdentity = fixtures.env.POD_NAME
-    const leaseName = 'gardener-dashboard-github-webhook'
-    const microDateStr = now.toISOString().replace(/Z$/, '000Z')
-    const dateStr = new Date(microDateStr).toISOString()
-    let mergePatchStub
+  describe('webhook', () => {
+    describe('handler', () => {
+      const namespace = fixtures.env.POD_NAMESPACE
+      const holderIdentity = fixtures.env.POD_NAME
+      const leaseName = 'gardener-dashboard-github-webhook'
+      const microDateStr = now.toISOString().replace(/Z$/, '000Z')
+      const dateStr = new Date(microDateStr).toISOString()
+      let mergePatchStub
 
-    beforeAll(() => {
-      jest.useFakeTimers().setSystemTime(now)
-    })
-
-    afterAll(() => {
-      jest.useRealTimers()
-    })
-
-    beforeEach(() => {
-      mergePatchStub = jest.spyOn(dashboardClient['coordination.k8s.io'].leases, 'mergePatch')
-      mergePatchStub.mockResolvedValue({})
-    })
-
-    it('should throw an error in case of unknown event', async () => {
-      await expect(handleGithubEvent('unknown', null)).rejects.toThrow(UnprocessableEntity)
-    })
-
-    it('should update the lease object for an issue event', async () => {
-      handleGithubEvent('issues', { issue: { updated_at: dateStr } })
-
-      const expectedBody = {
-        spec: {
-          holderIdentity,
-          renewTime: microDateStr
-        }
-      }
-      expect(mergePatchStub).toBeCalledWith(namespace, leaseName, expectedBody)
-    })
-
-    it('should update the lease object for an issue_comment event', async () => {
-      const expectedBody = {
-        spec: {
-          holderIdentity,
-          renewTime: microDateStr
-        }
-      }
-
-      handleGithubEvent('issue_comment', { comment: { updated_at: dateStr } })
-
-      expect(mergePatchStub).toBeCalledWith(namespace, leaseName, expectedBody)
-    })
-
-    it('should rethrow errors from underlying kube client', async () => {
-      const expectedBody = {
-        spec: {
-          holderIdentity,
-          renewTime: microDateStr
-        }
-      }
-      mergePatchStub.mockImplementationOnce(() => {
-        const err = new Error('Not Found')
-        err.code = 404
-        throw err
+      beforeAll(() => {
+        jest.useFakeTimers().setSystemTime(now)
       })
 
-      await expect(handleGithubEvent('issue_comment', { comment: { updated_at: dateStr } })).rejects.toThrow(InternalServerError)
-      expect(mergePatchStub).toBeCalledWith(namespace, leaseName, expectedBody)
-    })
-  })
-
-  describe('verify', () => {
-    const req = {}
-    const res = {}
-    const body = 'foo'
-
-    const setHubSignatureHeader = body => {
-      req.headers['x-hub-signature-256'] = fixtures.github.createHubSignature(body, config.gitHub.webhookSecret)
-    }
-
-    beforeEach(() => {
-      req.headers = {}
-    })
-
-    it('should succeed if signatures match', () => {
-      setHubSignatureHeader(body)
-      expect(() => verify(req, res, body)).not.toThrow()
-    })
-
-    it('should fail in case of an invalid signature', () => {
-      setHubSignatureHeader('baz')
-      expect(() => verify(req, res, body)).toThrow(createError(403, 'Signatures didn\'t match!'))
-    })
-
-    it('should fail if signature is missing', () => {
-      expect(() => verify(req, res, body)).toThrow(createError(403, 'Header \'x-hub-signature-256\' not provided or invalid'))
-    })
-
-    describe('when webhookSecret is not configured', () => {
-      const gitHubConfig = config.gitHub
+      afterAll(() => {
+        jest.useRealTimers()
+      })
 
       beforeEach(() => {
-        Object.defineProperty(config, 'gitHub', { value: {} })
+        mergePatchStub = jest.spyOn(dashboardClient['coordination.k8s.io'].leases, 'mergePatch')
+        mergePatchStub.mockResolvedValue({})
       })
 
-      afterEach(() => {
-        Object.defineProperty(config, 'gitHub', { value: gitHubConfig })
+      it('should throw an error in case of unknown event', async () => {
+        await expect(handleGithubEvent('unknown', null)).rejects.toThrow(UnprocessableEntity)
       })
 
-      it('should fail with an assertion error', () => {
-        expect(() => verify(req, res, body)).toThrow(new AssertionError({
-          message: 'Property \'gitHub.webhookSecret\' not configured on dashboard backend'
-        }))
+      it('should update the lease object for an issue event', async () => {
+        handleGithubEvent('issues', { issue: { updated_at: dateStr } })
+
+        const expectedBody = {
+          spec: {
+            holderIdentity,
+            renewTime: microDateStr
+          }
+        }
+        expect(mergePatchStub).toBeCalledWith(namespace, leaseName, expectedBody)
+      })
+
+      it('should update the lease object for an issue_comment event', async () => {
+        const expectedBody = {
+          spec: {
+            holderIdentity,
+            renewTime: microDateStr
+          }
+        }
+
+        handleGithubEvent('issue_comment', { comment: { updated_at: dateStr } })
+
+        expect(mergePatchStub).toBeCalledWith(namespace, leaseName, expectedBody)
+      })
+
+      it('should rethrow errors from underlying kube client', async () => {
+        const expectedBody = {
+          spec: {
+            holderIdentity,
+            renewTime: microDateStr
+          }
+        }
+        mergePatchStub.mockImplementationOnce(() => {
+          const err = new Error('Not Found')
+          err.code = 404
+          throw err
+        })
+
+        await expect(handleGithubEvent('issue_comment', { comment: { updated_at: dateStr } })).rejects.toThrow(InternalServerError)
+        expect(mergePatchStub).toBeCalledWith(namespace, leaseName, expectedBody)
+      })
+    })
+
+    describe('verify', () => {
+      const req = {}
+      const res = {}
+      const body = 'foo'
+
+      const setHubSignatureHeader = body => {
+        req.headers['x-hub-signature-256'] = fixtures.github.createHubSignature(body, config.gitHub.webhookSecret)
+      }
+
+      beforeEach(() => {
+        req.headers = {}
+      })
+
+      it('should succeed if signatures match', () => {
+        setHubSignatureHeader(body)
+        expect(() => verify(req, res, body)).not.toThrow()
+      })
+
+      it('should fail in case of an invalid signature', () => {
+        setHubSignatureHeader('baz')
+        expect(() => verify(req, res, body)).toThrow(createError(403, 'Signatures didn\'t match!'))
+      })
+
+      it('should fail if signature is missing', () => {
+        expect(() => verify(req, res, body)).toThrow(createError(403, 'Header \'x-hub-signature-256\' not provided or invalid'))
+      })
+
+      describe('when webhookSecret is not configured', () => {
+        const gitHubConfig = config.gitHub
+
+        beforeEach(() => {
+          Object.defineProperty(config, 'gitHub', { value: {} })
+        })
+
+        afterEach(() => {
+          Object.defineProperty(config, 'gitHub', { value: gitHubConfig })
+        })
+
+        it('should fail with an assertion error', () => {
+          expect(() => verify(req, res, body)).toThrow(new AssertionError({
+            message: 'Property \'gitHub.webhookSecret\' not configured on dashboard backend'
+          }))
+        })
       })
     })
   })
@@ -320,6 +324,28 @@ describe('github webhook', () => {
 
         await advanceTimersAndFlushPromises(syncManagerOpts.throttle - loadTicketsDuration)
         expect(loadTicketsStub).toBeCalledTimes(1)
+      })
+    })
+  })
+
+  describe('#getComments', () => {
+    it('should pass variables to the Octokit Graphql API', async () => {
+      const number = 2
+      const owner = 'gardener'
+      const repo = 'ticket-dev'
+      const comments = await getComments({ number })
+      expect(mockOctokitPaginateGraphQL).toHaveBeenCalledTimes(1)
+      expect(mockOctokitPaginateGraphQL.mock.calls[0]).toEqual([
+        expect.stringMatching(/^query paginate\(\$cursor: String, \$owner: String!, \$repo: String!, \$number: Int!\)/),
+        { owner, repo, number }
+      ])
+      expect(comments).toHaveLength(1)
+      expect(comments[0].body).toBe('This is comment 2 for issue #2')
+    })
+
+    describe('when the input is invalid', () => {
+      it('should throw an \'Invalid Input\' Error', async () => {
+        await expect(() => getComments({ number: 'two' })).rejects.toThrow(/^Invalid input:/)
       })
     })
   })

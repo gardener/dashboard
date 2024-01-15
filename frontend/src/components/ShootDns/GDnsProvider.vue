@@ -6,6 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <g-popover
+    v-model="popover"
     :toolbar-title="secretName"
   >
     <template #activator="{ props }">
@@ -13,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
         v-bind="props"
         size="small"
         color="primary"
-        variant="outlined"
+        variant="tonal"
         class="cursor-pointer my-0 ml-0"
       >
         <g-vendor-icon
@@ -105,6 +106,11 @@ export default {
       type: Object,
       required: false,
     },
+  },
+  data () {
+    return {
+      popover: false,
+    }
   },
   computed: {
     dnsProviderDescriptions () {

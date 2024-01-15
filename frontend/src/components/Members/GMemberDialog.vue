@@ -54,7 +54,7 @@ SPDX-License-Identifier: Apache-2.0
                   <v-chip
                     size="small"
                     color="primary"
-                    variant="outlined"
+                    variant="tonal"
                     closable
                     @update:model-value="internalRoles.splice(index, 1); v$.internalRoles.$touch()"
                   >
@@ -82,7 +82,7 @@ SPDX-License-Identifier: Apache-2.0
               :value="true"
               type="info"
               color="primary"
-              variant="outlined"
+              variant="tonal"
             >
               The service account does not exist anymore and will be re-created if you update the roles.
             </v-alert>
@@ -230,7 +230,9 @@ export default {
     }
   },
   validations () {
-    const rules = {}
+    const rules = {
+      internalName: {},
+    }
     const internalRolesRules = {
       required: withMessage(() => this.isUserDialog
         ? 'Users need to have at least one assigned role'
@@ -240,6 +242,7 @@ export default {
     rules.internalRoles = withFieldName('Member Roles', internalRolesRules)
 
     if (this.isUpdateDialog) {
+      // must not add name rules as unique check would fail for existing members
       return rules
     }
 

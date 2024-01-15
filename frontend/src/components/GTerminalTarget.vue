@@ -58,7 +58,7 @@ SPDX-License-Identifier: Apache-2.0
       :value="true"
       type="info"
       color="primary"
-      variant="outlined"
+      variant="tonal"
     >
       <strong>Terminal will be running on <span class="font-family-monospace">{{ shootName }}</span> cluster</strong><br>
       Make sure that only gardener project members with <span class="font-family-monospace">admin</span> role have privileged access to the <span class="font-family-monospace">{{ shootName }}</span> cluster before creating this terminal session.

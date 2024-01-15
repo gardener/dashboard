@@ -8,39 +8,41 @@ SPDX-License-Identifier: Apache-2.0
   <template v-if="isEnabled">
     <g-list-item>
       <g-list-item-content>
-        Admin Kubeconfig
-        <div class="text-body-2 d-flex">
-          <span class="mr-2">
-            Request a kubeconfig valid for
-          </span>
-          <g-popover
-            v-model="popover"
-            toolbar-title="Configure Admin Kubeconfig Lifetime"
-            placement="bottom"
-            :z-index="2500"
-          >
-            <template #activator="{ props }">
-              <v-chip
-                label
-                size="x-small"
-                color="primary"
-                variant="outlined"
-                class="pointer"
-                v-bind="props"
-              >
-                {{ expirationTitle }}
-              </v-chip>
-            </template>
-            <div class="pa-2">
-              You can configure the <span class="font-weight-bold">kubeconfig lifetime</span> on the
-              <g-text-router-link
-                :to="{ name: 'Settings' }"
-                text="Settings"
-              />
-              page.
-            </div>
-          </g-popover>
-        </div>
+        Kubeconfig - Time-Limited Access
+        <template #description>
+          <div class="wrap-text d-flex">
+            <span class="mr-2">
+              Request a kubeconfig valid for
+            </span>
+            <g-popover
+              v-model="popover"
+              toolbar-title="Configure Kubeconfig Lifetime"
+              placement="bottom"
+              :z-index="2500"
+            >
+              <template #activator="{ props }">
+                <v-chip
+                  label
+                  size="x-small"
+                  color="primary"
+                  variant="tonal"
+                  class="pointer"
+                  v-bind="props"
+                >
+                  {{ expirationTitle }}
+                </v-chip>
+              </template>
+              <div class="pa-2">
+                You can configure the kubeconfig lifetime on the
+                <g-text-router-link
+                  :to="{ name: 'Settings', query: { namespace: shootNamespace } }"
+                  text="Settings"
+                />
+                page.
+              </div>
+            </g-popover>
+          </div>
+        </template>
       </g-list-item-content>
       <template #append>
         <g-action-button

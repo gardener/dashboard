@@ -64,6 +64,11 @@ export default {
     GCodeBlock,
     GTextRouterLink,
   },
+  props: {
+    shootNamespace: {
+      type: String,
+    },
+  },
   computed: {
     ...mapState(useConfigStore, [
       'clusterIdentity',
@@ -71,6 +76,7 @@ export default {
     accountRoute () {
       return {
         name: 'Account',
+        query: { namespace: this.shootNamespace },
       }
     },
     gardenctlConfigYaml () {
