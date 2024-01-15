@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
             @click="showUpdateDialog"
           >
             <v-icon
-              v-if="availableK8sUpdates"
+              v-if="supportedPatchAvailable || supportedUpgradeAvailable"
               icon="mdi-menu-up"
               size="small"
             />
