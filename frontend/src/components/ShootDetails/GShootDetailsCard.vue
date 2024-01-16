@@ -35,7 +35,6 @@ SPDX-License-Identifier: Apache-2.0
                 :shoot-item="shootItem"
                 filter="cluster-expiration"
                 small
-                class="mr-1"
               />
               <span>{{ selfTerminationMessage }}</span>
             </div>

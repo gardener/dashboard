@@ -94,7 +94,6 @@ SPDX-License-Identifier: Apache-2.0
               :shoot-item="shootItem"
               :filter="['cacertificatevalidities-constraint']"
               small
-              class="mr-1"
             />
             <span class="text-warning">Certificate Authorities will expire in less than one year</span>
           </template>

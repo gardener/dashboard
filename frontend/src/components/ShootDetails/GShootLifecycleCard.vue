@@ -22,7 +22,6 @@ SPDX-License-Identifier: Apache-2.0
                 :shoot-item="shootItem"
                 :filter="['no-hibernation-schedule', 'hibernation-constraint']"
                 small
-                class="mr-1"
               />
               {{ hibernationDescription }}
             </div>
@@ -57,7 +56,6 @@ SPDX-License-Identifier: Apache-2.0
               show-verbose
               title="Last Maintenance Status"
               small
-              class="ml-1"
             />
           </div>
           <template #description>
@@ -71,7 +69,6 @@ SPDX-License-Identifier: Apache-2.0
                     :shoot-item="shootItem"
                     filter="maintenance-constraint"
                     small
-                    class="mr-1"
                   />
                   <span v-if="isInMaintenanceWindow">
                     Cluster is currently within the maintenance time window
@@ -141,10 +138,34 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           <g-list-item-content>
             Delete Cluster
+            <template
+              v-if="canForceDeleteShoot"
+              #description
+            >
+              <div class="d-flex">
+                <v-icon
+                  icon="mdi-alert-circle-outline"
+                  size="small"
+                  color="error"
+                  class="mx-1"
+                />
+                Cluster deletion failed.
+                You can force delete your cluster
+                after you manually cleaned up resources in your infrastructure account.
+              </div>
+            </template>
           </g-list-item-content>
           <template #append>
             <g-shoot-action-delete-cluster
+              v-if="!canForceDeleteShoot"
               v-model="deleteClusterDialog"
+              :shoot-item="shootItem"
+              dialog
+              button
+            />
+            <g-shoot-action-force-delete
+              v-if="canForceDeleteShoot"
+              v-model="forceDeleteDialog"
               :shoot-item="shootItem"
               dialog
               button
@@ -163,6 +184,7 @@ import { useAuthzStore } from '@/store/authz'
 
 import GShootActionChangeHibernation from '@/components/ShootHibernation/GShootActionChangeHibernation'
 import GShootActionDeleteCluster from '@/components/GShootActionDeleteCluster'
+import GShootActionForceDelete from '@/components/GShootActionForceDelete'
 import GHibernationConfiguration from '@/components/ShootHibernation/GHibernationConfiguration'
 import GShootActionMaintenanceStart from '@/components/ShootMaintenance/GShootActionMaintenanceStart'
 import GMaintenanceConfiguration from '@/components/ShootMaintenance/GMaintenanceConfiguration'
@@ -183,6 +205,7 @@ export default {
     GMaintenanceConfiguration,
     GHibernationConfiguration,
     GShootActionDeleteCluster,
+    GShootActionForceDelete,
     GShootActionReconcileStart,
     GShootMessages,
     GTimeString,
@@ -194,6 +217,7 @@ export default {
       maintenanceStartDialog: false,
       reconcileStartDialog: false,
       deleteClusterDialog: false,
+      forceDeleteDialog: false,
     }
   },
   computed: {

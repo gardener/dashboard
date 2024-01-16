@@ -6,6 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <g-shoot-action-dialog
+    v-if="dialog"
     ref="actionDialog"
     :shoot-item="shootItem"
     :caption="caption"
@@ -27,13 +28,12 @@ SPDX-License-Identifier: Apache-2.0
     <p>
       Type <span class="font-weight-bold">{{ shootName }}</span> below to confirm the forceful deletion of the cluster.
     </p>
-    <p class="my-2 text-error font-weight-bold">
-      This action cannot be undone.
-    </p>
     <g-expand-transition-group>
       <v-alert
         v-if="!confirmed"
+        class="mt-2"
         type="warning"
+        variant="tonal"
       >
         You <span class="font-weight-bold">MUST</span> ensure that all the resources created in the IaaS account
         <code>
@@ -45,9 +45,15 @@ SPDX-License-Identifier: Apache-2.0
         are cleaned
         up to prevent orphaned resources. Gardener will <span class="font-weight-bold">NOT</span> delete any resources in the underlying infrastructure account.
         Hence, use the force delete option at your own risk and only if you are fully aware of these consequences.
+        <p class="font-weight-bold">
+          This action cannot be undone.
+        </p>
       </v-alert>
     </g-expand-transition-group>
-    <g-countdown-checkbox v-model="confirmed">
+    <g-countdown-checkbox
+      v-model="confirmed"
+      :seconds="0"
+    >
       <span>
         I confirm that I read the message above and deleted all resources in the underlying infrastructure account
         <code>
@@ -71,10 +77,11 @@ SPDX-License-Identifier: Apache-2.0
     </p>
   </g-shoot-action-dialog>
   <g-shoot-action-button
-    v-if="canForceDeleteShoot"
+    v-if="button"
     ref="actionButton"
     :shoot-item="shootItem"
     icon="mdi-delete-forever"
+    :text="buttonText"
     :caption="caption"
     color="error"
     @click="internalValue = true"
@@ -113,6 +120,18 @@ export default {
       type: Boolean,
       required: true,
     },
+    text: {
+      type: Boolean,
+      default: false,
+    },
+    dialog: {
+      type: Boolean,
+      default: false,
+    },
+    button: {
+      type: Boolean,
+      default: false,
+    },
   },
   emits: [
     'update:modelValue',
@@ -149,16 +168,24 @@ export default {
     buttonTitle () {
       return 'Force Delete Cluster'
     },
+    buttonText () {
+      if (!this.text) {
+        return
+      }
+      return this.buttonTitle
+    },
   },
   watch: {
     modelValue (value) {
-      const actionDialog = this.$refs.actionDialog
-      if (value) {
-        actionDialog.showDialog()
-        this.confirmed = false
-        this.waitForConfirmation()
-      } else {
-        actionDialog.hideDialog()
+      if (this.dialog) {
+        const actionDialog = this.$refs.actionDialog
+        if (value) {
+          actionDialog.showDialog()
+          this.confirmed = false
+          this.waitForConfirmation()
+        } else {
+          actionDialog.hideDialog()
+        }
       }
     },
   },

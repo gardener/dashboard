@@ -13,6 +13,7 @@ SPDX-License-Identifier: Apache-2.0
         v-if="!isCountdownActive"
         v-model="internalValue"
         hide-details
+        color="primary"
       />
       <v-progress-circular
         v-else

@@ -28,9 +28,13 @@ SPDX-License-Identifier: Apache-2.0
     <p>
       Type <span class="font-weight-bold">{{ shootName }}</span> below and confirm the deletion of the cluster and all of its content.
     </p>
-    <p class="mt-2 text-error font-weight-bold">
+    <v-alert
+      class="mt-2"
+      type="warning"
+      variant="tonal"
+    >
       This action cannot be undone.
-    </p>
+    </v-alert>
     <p v-if="isShootReconciliationDeactivated">
       <v-row class="fill-height">
         <v-icon
@@ -88,10 +92,6 @@ export default {
       default: false,
     },
     button: {
-      type: Boolean,
-      default: false,
-    },
-    small: {
       type: Boolean,
       default: false,
     },
