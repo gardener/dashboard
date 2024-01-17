@@ -27,7 +27,6 @@
     "@gardener-dashboard/kube-config": "workspace:*",
     "@gardener-dashboard/logger": "workspace:*",
     "@gardener-dashboard/request": "workspace:*",
-    "delay": "^4.4.1",
     "http-errors": "^2.0.0",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
@@ -89,7 +88,7 @@
       "<rootDir>/jest.setup.js"
     ]
   },
-  "packageManager": "yarn@3.6.3",
+  "packageManager": "yarn@4.0.2",
   "engines": {
     "node": "^20.5.0"
   }
