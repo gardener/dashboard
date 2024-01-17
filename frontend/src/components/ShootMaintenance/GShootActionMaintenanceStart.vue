@@ -14,6 +14,7 @@ SPDX-License-Identifier: Apache-2.0
     confirm-button-text="Delete"
     confirm-required
     icon="mdi-refresh"
+    :disabled="!isMaintenancePreconditionSatisfied"
     @dialog-opened="onConfigurationDialogOpened"
   >
     <template #actionComponent>
@@ -26,16 +27,6 @@ SPDX-License-Identifier: Apache-2.0
         :hide-os-updates="!hasShootWorkerGroups"
         :selectable="false"
       />
-      <v-alert
-        type="warning"
-        variant="tonal"
-        :value="!isMaintenancePreconditionSatisfied"
-      >
-        <div class="font-weight-bold">
-          Your hibernation schedule may not have any effect:
-        </div>
-        {{ maintenancePreconditionSatisfiedMessage }}
-      </v-alert>
     </template>
   </g-action-button-dialog>
 </template>
@@ -76,6 +67,9 @@ export default {
       return this.shootGardenOperation === 'maintain'
     },
     caption () {
+      if (!this.isMaintenancePreconditionSatisfied) {
+        return this.maintenancePreconditionSatisfiedMessage
+      }
       if (this.isMaintenanceToBeScheduled) {
         return 'Requesting to schedule cluster maintenance'
       }
@@ -115,13 +109,12 @@ export default {
     },
   },
   methods: {
-    onConfigurationDialogOpened () {
-      this.$nextTick(async () => {
-        const actionDialog = this.$refs.actionDialog
-        if (await actionDialog.waitForDialogClosed()) {
-          this.startMaintenance()
-        }
-      })
+    async onConfigurationDialogOpened () {
+      await this.reset()
+      const actionDialog = this.$refs.actionDialog
+      if (await actionDialog.waitForDialogClosed()) {
+        this.startMaintenance()
+      }
     },
     async startMaintenance () {
       this.maintenanceTriggered = true

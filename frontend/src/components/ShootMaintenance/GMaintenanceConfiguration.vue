@@ -22,6 +22,17 @@ SPDX-License-Identifier: Apache-2.0
         ref="maintenanceComponents"
         :hide-os-updates="!hasShootWorkerGroups"
       />
+      <v-alert
+        type="warning"
+        variant="tonal"
+        :model-value="!isMaintenancePreconditionSatisfied"
+        class="mt-2"
+      >
+        <div class="font-weight-bold">
+          Gardener may be unable to perform required actions during maintenance
+        </div>
+        {{ maintenancePreconditionSatisfiedMessage }}
+      </v-alert>
     </template>
   </g-action-button-dialog>
 </template>
