@@ -101,13 +101,10 @@ export default {
     ...mapActions(useShootStore, [
       'deleteShoot',
     ]),
-    onConfigurationDialogOpened () {
-      this.$nextTick(async () => {
-        const actionDialog = this.$refs.actionDialog
-        if (await actionDialog.waitForDialogClosed()) {
-          this.deleteCluster()
-        }
-      })
+    async onConfigurationDialogOpened () {
+      if (await this.$refs.actionDialog.waitForDialogClosed()) {
+        this.deleteCluster()
+      }
     },
     async deleteCluster () {
       try {

@@ -401,7 +401,7 @@ export default {
         return
       }
 
-      this.setAlert({
+      this.setSuccess({
         message: this.componentTexts.successMessage,
       })
     },
@@ -411,15 +411,12 @@ export default {
   },
   methods: {
     ...mapActions(useAppStore, [
-      'setAlert',
+      'setSuccess',
     ]),
-    onConfigurationDialogOpened () {
-      this.$nextTick(async () => {
-        const actionDialog = this.$refs.actionDialog
-        if (await actionDialog.waitForDialogClosed()) {
-          this.start()
-        }
-      })
+    async onConfigurationDialogOpened () {
+      if (await this.$refs.actionDialog.waitForDialogClosed()) {
+        this.start()
+      }
     },
     async start () {
       this.actionTriggered = true

@@ -11,8 +11,7 @@ SPDX-License-Identifier: Apache-2.0
     width="600"
     :caption="caption"
     :text="buttonText"
-    confirm-button-text="Delete"
-    confirm-required
+    confirm-button-text="Trigger now"
     icon="mdi-refresh"
     :disabled="!isMaintenancePreconditionSatisfied"
     @dialog-opened="onConfigurationDialogOpened"
@@ -32,6 +31,10 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { mapActions } from 'pinia'
+
+import { useAppStore } from '@/store/app'
+
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog.vue'
 import GMaintenanceComponents from '@/components/ShootMaintenance/GMaintenanceComponents'
 
@@ -103,16 +106,18 @@ export default {
         return
       }
 
-      this.setAlert({
+      this.setSuccess({
         message: `Maintenance scheduled for ${this.shootName}`,
       })
     },
   },
   methods: {
+    ...mapActions(useAppStore, [
+      'setSuccess',
+    ]),
     async onConfigurationDialogOpened () {
       await this.reset()
-      const actionDialog = this.$refs.actionDialog
-      if (await actionDialog.waitForDialogClosed()) {
+      if (await this.$refs.actionDialog.waitForDialogClosed()) {
         this.startMaintenance()
       }
     },

@@ -12,7 +12,6 @@ SPDX-License-Identifier: Apache-2.0
     :caption="caption"
     :text="buttonText"
     confirm-button-text="Trigger now"
-    confirm-required
     icon="mdi-refresh"
     :loading="isReconcileToBeScheduled"
     :disabled="isShootReconciliationDeactivated"
@@ -105,28 +104,19 @@ export default {
         return
       }
 
-      this.setAlert({
+      this.setSuccess({
         message: `Reconcile triggered for ${this.shootName}`,
       })
     },
   },
   methods: {
     ...mapActions(useAppStore, [
-      'setAlert',
+      'setSuccess',
     ]),
-    onConfigurationDialogOpened () {
-      this.$nextTick(async () => {
-        const actionDialog = this.$refs.actionDialog
-        try {
-          if (await actionDialog.waitForDialogClosed()) {
-            this.startReconcile()
-          }
-        } catch (err) {
-          /* ignore error */
-        } finally {
-          this.internalValue = false
-        }
-      })
+    async onConfigurationDialogOpened () {
+      if (await this.$refs.actionDialog.waitForDialogClosed()) {
+        this.startReconcile()
+      }
     },
     async startReconcile () {
       this.reconcileTriggered = true

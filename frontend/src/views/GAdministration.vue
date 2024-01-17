@@ -679,8 +679,7 @@ export default {
         try {
           await this.fetchQuotas(this.project.metadata.namespace)
         } catch (err) {
-          this.setAlert({
-            type: 'error',
+          this.setError({
             message: `Failed to fetch project quota: ${err.message}`,
           })
         }
@@ -690,7 +689,7 @@ export default {
   },
   methods: {
     ...mapActions(useAppStore, [
-      'setAlert',
+      'setError',
     ]),
     ...mapActions(useProjectStore, [
       'patchProject',

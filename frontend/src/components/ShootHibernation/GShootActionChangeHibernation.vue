@@ -126,13 +126,10 @@ export default {
     },
   },
   methods: {
-    onConfigurationDialogOpened () {
-      this.$nextTick(async () => {
-        const actionDialog = this.$refs.actionDialog
-        if (await actionDialog.waitForDialogClosed()) {
-          this.updateConfiguration()
-        }
-      })
+    async onConfigurationDialogOpened () {
+      if (await this.$refs.actionDialog.waitForDialogClosed()) {
+        this.updateConfiguration()
+      }
     },
     async updateConfiguration () {
       this.hibernationChanged = true
