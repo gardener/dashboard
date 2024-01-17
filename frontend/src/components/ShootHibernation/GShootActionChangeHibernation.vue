@@ -5,49 +5,42 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-shoot-action-dialog
-    v-if="dialog"
+  <g-action-button-dialog
     ref="actionDialog"
     :shoot-item="shootItem"
-    :caption="caption"
-    :confirm-button-text="confirmText"
-    :confirm-required="confirmRequired"
     width="600"
-  >
-    <template v-if="!isShootSettingHibernated">
-      This will scale the worker nodes of your cluster down to zero.<br><br>
-      Type <strong>{{ shootName }}</strong> below and confirm to hibernate your cluster.<br><br>
-    </template>
-    <template v-else-if="hasShootWorkerGroups">
-      This will wake up your cluster and scale the worker nodes up to their previous count.<br><br>
-    </template>
-    <template v-else>
-      This will wake up your cluster.<br><br>
-    </template>
-  </g-shoot-action-dialog>
-  <g-shoot-action-button
-    v-if="button"
-    ref="actionButton"
-    :shoot-item="shootItem"
+    :caption="caption"
+    :text="buttonText"
+    :confirm-button-text="confirmText"
+    confirm-required
     :disabled="!isHibernationPossible && !isShootSettingHibernated"
     :icon="icon"
-    :text="buttonText"
-    :caption="caption"
-    @click="internalValue = true"
-  />
+    @dialog-opened="onConfigurationDialogOpened"
+  >
+    <template #actionComponent>
+      <template v-if="!isShootSettingHibernated">
+        This will scale the worker nodes of your cluster down to zero.<br><br>
+        Type <strong>{{ shootName }}</strong> below and confirm to hibernate your cluster.<br><br>
+      </template>
+      <template v-else-if="hasShootWorkerGroups">
+        This will wake up your cluster and scale the worker nodes up to their previous count.<br><br>
+      </template>
+      <template v-else>
+        This will wake up your cluster.<br><br>
+      </template>
+    </template>
+  </g-action-button-dialog>
 </template>
 
 <script>
-import GShootActionButton from '@/components/GShootActionButton.vue'
-import GShootActionDialog from '@/components/GShootActionDialog.vue'
+import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog.vue'
 
 import { shootItem } from '@/mixins/shootItem'
 import { errorDetailsFromError } from '@/utils/error'
 
 export default {
   components: {
-    GShootActionButton,
-    GShootActionDialog,
+    GActionButtonDialog,
   },
   mixins: [shootItem],
   inject: ['api', 'notify', 'logger'],
@@ -60,32 +53,13 @@ export default {
       type: Boolean,
       default: false,
     },
-    dialog: {
-      type: Boolean,
-      default: false,
-    },
-    button: {
-      type: Boolean,
-      default: false,
-    },
   },
-  emits: [
-    'update:modelValue',
-  ],
   data () {
     return {
       hibernationChanged: false,
     }
   },
   computed: {
-    internalValue: {
-      get () {
-        return this.modelValue
-      },
-      set (value) {
-        this.$emit('update:modelValue', value)
-      },
-    },
     confirmRequired () {
       return !this.isShootSettingHibernated
     },
@@ -124,17 +98,6 @@ export default {
     },
   },
   watch: {
-    modelValue (value) {
-      if (this.dialog) {
-        const actionDialog = this.$refs.actionDialog
-        if (value) {
-          actionDialog.showDialog()
-          this.waitForConfirmation()
-        } else {
-          actionDialog.hideDialog()
-        }
-      }
-    },
     isShootSettingHibernated (value) {
       // hide dialog if hibernation state changes
       if (this.$refs.actionDialog) {
@@ -163,17 +126,11 @@ export default {
     },
   },
   methods: {
-    waitForConfirmation () {
+    onConfigurationDialogOpened () {
       this.$nextTick(async () => {
         const actionDialog = this.$refs.actionDialog
-        try {
-          if (await actionDialog.waitForDialogClosed()) {
-            this.updateConfiguration()
-          }
-        } catch (err) {
-          /* ignore error */
-        } finally {
-          this.internalValue = false
+        if (await actionDialog.waitForDialogClosed()) {
+          this.updateConfiguration()
         }
       })
     },

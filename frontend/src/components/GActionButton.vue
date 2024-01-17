@@ -8,14 +8,16 @@ SPDX-License-Identifier: Apache-2.0
   <div class="g-action-button">
     <v-btn
       variant="text"
-      :density="density"
+      :density="buttonDensity"
       :disabled="disabled"
-      :icon="icon"
+      :[iconProp]="icon"
       :text="text"
       :color="color"
       :size="size"
       :to="to"
       :loading="loading"
+      :class="{ 'text-none font-weight-regular justify-start': isTextBtn }"
+      :width="isTextBtn ? '100%' : undefined"
       @click.stop.prevent="emit('click', $event)"
     />
     <v-tooltip
@@ -62,7 +64,6 @@ const props = defineProps({
   },
   density: {
     type: String,
-    default: 'comfortable',
   },
   tooltip: {
     type: String,
@@ -88,4 +89,21 @@ const { disabled, icon, text, color, size, tooltip, to } = toRefs(props)
 const hasTooltip = computed(() => {
   return !!slots.tooltip || !!tooltip.value
 })
+
+const isTextBtn = computed(() => {
+  return !!props.text
+})
+
+const iconProp = computed(() => {
+  return isTextBtn.value ? 'prepend-icon' : 'icon'
+})
+
+const buttonDensity = computed(() => {
+  return props.density
+    ? props.density
+    : isTextBtn.value
+      ? 'default'
+      : 'comfortable'
+})
+
 </script>
