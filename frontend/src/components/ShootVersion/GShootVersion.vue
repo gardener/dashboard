@@ -28,7 +28,7 @@ SPDX-License-Identifier: Apache-2.0
             {{ shootK8sVersion }}
           </v-btn>
           <g-action-button
-            v-else-if="!!availableK8sUpdates"
+            v-else-if="canUpdate"
             :icon="supportedPatchAvailable ? 'mdi-arrow-up-bold-circle' : 'mdi-arrow-up-bold-circle-outline'"
             @click="showUpdateDialog"
           />

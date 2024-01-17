@@ -14,6 +14,7 @@ SPDX-License-Identifier: Apache-2.0
         color="action-button"
         :text="text"
         :tooltip="actionToolTip"
+        :tooltip-disabled="disableToolTip"
         @click="showDialog"
       />
       <g-dialog
