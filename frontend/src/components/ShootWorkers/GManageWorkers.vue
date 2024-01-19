@@ -46,7 +46,7 @@ SPDX-License-Identifier: Apache-2.0
     </g-expand-transition-group>
     <v-row
       key="addWorker"
-      class="list-item mb-1 mx-1"
+      class="list-item my-1"
     >
       <v-col>
         <v-btn
@@ -58,7 +58,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-icon class="text-primary">
             mdi-plus
           </v-icon>
-          <span class="ml-2">Add Worker Group</span>
+          Add Worker Group
         </v-btn>
       </v-col>
     </v-row>
