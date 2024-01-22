@@ -688,12 +688,12 @@ __metadata:
   resolution: "@gardener-dashboard/backend@workspace:backend"
   dependencies:
     "@apidevtools/swagger-parser": "npm:^10.1.0"
-    "@gardener-dashboard/kube-client": "workspace:*"
-    "@gardener-dashboard/kube-config": "workspace:*"
-    "@gardener-dashboard/logger": "workspace:*"
-    "@gardener-dashboard/monitor": "workspace:*"
-    "@gardener-dashboard/request": "workspace:*"
-    "@gardener-dashboard/test-utils": "workspace:*"
+    "@gardener-dashboard/kube-client": "workspace:^"
+    "@gardener-dashboard/kube-config": "workspace:^"
+    "@gardener-dashboard/logger": "workspace:^"
+    "@gardener-dashboard/monitor": "workspace:^"
+    "@gardener-dashboard/request": "workspace:^"
+    "@gardener-dashboard/test-utils": "workspace:^"
     "@godaddy/terminus": "npm:^4.11.2"
     "@octokit/auth-app": "npm:^6.0.0"
     "@octokit/core": "npm:^5.0.2"
@@ -749,7 +749,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@gardener-dashboard/charts@workspace:charts"
   dependencies:
-    "@gardener-dashboard/test-utils": "workspace:*"
+    "@gardener-dashboard/test-utils": "workspace:^"
     eslint: "npm:^8.36.0"
     eslint-config-standard: "npm:^17.0.0"
     eslint-plugin-import: "npm:^2.27.5"
@@ -832,14 +832,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@gardener-dashboard/kube-client@workspace:*, @gardener-dashboard/kube-client@workspace:packages/kube-client":
+"@gardener-dashboard/kube-client@workspace:^, @gardener-dashboard/kube-client@workspace:packages/kube-client":
   version: 0.0.0-use.local
   resolution: "@gardener-dashboard/kube-client@workspace:packages/kube-client"
   dependencies:
-    "@gardener-dashboard/kube-config": "workspace:*"
-    "@gardener-dashboard/logger": "workspace:*"
-    "@gardener-dashboard/request": "workspace:*"
-    "@gardener-dashboard/test-utils": "workspace:*"
+    "@gardener-dashboard/kube-config": "workspace:^"
+    "@gardener-dashboard/logger": "workspace:^"
+    "@gardener-dashboard/request": "workspace:^"
+    "@gardener-dashboard/test-utils": "workspace:^"
     abort-controller: "npm:^3.0.0"
     eslint: "npm:^8.36.0"
     eslint-config-standard: "npm:^17.0.0"
@@ -857,12 +857,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@gardener-dashboard/kube-config@workspace:*, @gardener-dashboard/kube-config@workspace:packages/kube-config":
+"@gardener-dashboard/kube-config@workspace:^, @gardener-dashboard/kube-config@workspace:packages/kube-config":
   version: 0.0.0-use.local
   resolution: "@gardener-dashboard/kube-config@workspace:packages/kube-config"
   dependencies:
-    "@gardener-dashboard/logger": "workspace:*"
-    "@gardener-dashboard/test-utils": "workspace:*"
+    "@gardener-dashboard/logger": "workspace:^"
+    "@gardener-dashboard/test-utils": "workspace:^"
     chokidar: "npm:^3.5.3"
     eslint: "npm:^8.36.0"
     eslint-config-standard: "npm:^17.0.0"
@@ -877,7 +877,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@gardener-dashboard/logger@workspace:*, @gardener-dashboard/logger@workspace:packages/logger":
+"@gardener-dashboard/logger@workspace:^, @gardener-dashboard/logger@workspace:packages/logger":
   version: 0.0.0-use.local
   resolution: "@gardener-dashboard/logger@workspace:packages/logger"
   dependencies:
@@ -893,11 +893,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@gardener-dashboard/monitor@workspace:*, @gardener-dashboard/monitor@workspace:packages/monitor":
+"@gardener-dashboard/monitor@workspace:^, @gardener-dashboard/monitor@workspace:packages/monitor":
   version: 0.0.0-use.local
   resolution: "@gardener-dashboard/monitor@workspace:packages/monitor"
   dependencies:
-    "@gardener-dashboard/logger": "workspace:*"
+    "@gardener-dashboard/logger": "workspace:^"
     eslint: "npm:^8.36.0"
     eslint-config-standard: "npm:^17.0.0"
     eslint-plugin-import: "npm:^2.27.5"
@@ -913,12 +913,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@gardener-dashboard/request@workspace:*, @gardener-dashboard/request@workspace:packages/request":
+"@gardener-dashboard/request@workspace:^, @gardener-dashboard/request@workspace:packages/request":
   version: 0.0.0-use.local
   resolution: "@gardener-dashboard/request@workspace:packages/request"
   dependencies:
-    "@gardener-dashboard/logger": "workspace:*"
-    "@gardener-dashboard/test-utils": "workspace:*"
+    "@gardener-dashboard/logger": "workspace:^"
+    "@gardener-dashboard/test-utils": "workspace:^"
     abort-controller: "npm:^3.0.0"
     eslint: "npm:^8.36.0"
     eslint-config-standard: "npm:^17.0.0"
@@ -933,7 +933,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@gardener-dashboard/test-utils@workspace:*, @gardener-dashboard/test-utils@workspace:packages/test-utils":
+"@gardener-dashboard/test-utils@workspace:^, @gardener-dashboard/test-utils@workspace:packages/test-utils":
   version: 0.0.0-use.local
   resolution: "@gardener-dashboard/test-utils@workspace:packages/test-utils"
   dependencies:

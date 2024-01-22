@@ -25,7 +25,7 @@ function enforceWorkspaceDependencies({ Yarn }) {
       continue
     }
 
-    dependency.update('workspace:*')
+    dependency.update('workspace:^')
   }
 }
 

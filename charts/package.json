@@ -24,7 +24,7 @@
     "test": "jest"
   },
   "devDependencies": {
-    "@gardener-dashboard/test-utils": "workspace:*",
+    "@gardener-dashboard/test-utils": "workspace:^",
     "eslint": "^8.36.0",
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-import": "^2.27.5",

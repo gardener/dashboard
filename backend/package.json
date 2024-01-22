@@ -34,11 +34,11 @@
   },
   "dependencies": {
     "@apidevtools/swagger-parser": "^10.1.0",
-    "@gardener-dashboard/kube-client": "workspace:*",
-    "@gardener-dashboard/kube-config": "workspace:*",
-    "@gardener-dashboard/logger": "workspace:*",
-    "@gardener-dashboard/monitor": "workspace:*",
-    "@gardener-dashboard/request": "workspace:*",
+    "@gardener-dashboard/kube-client": "workspace:^",
+    "@gardener-dashboard/kube-config": "workspace:^",
+    "@gardener-dashboard/logger": "workspace:^",
+    "@gardener-dashboard/monitor": "workspace:^",
+    "@gardener-dashboard/request": "workspace:^",
     "@godaddy/terminus": "^4.11.2",
     "@octokit/auth-app": "^6.0.0",
     "@octokit/core": "^5.0.2",
@@ -73,7 +73,7 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@gardener-dashboard/test-utils": "workspace:*",
+    "@gardener-dashboard/test-utils": "workspace:^",
     "abort-controller": "^3.0.0",
     "dockerfile-ast": "^0.5.0",
     "eslint": "^8.36.0",
