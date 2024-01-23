@@ -50,43 +50,45 @@ SPDX-License-Identifier: Apache-2.0
       <template #affectedObjectName>
         {{ shootName }}
       </template>
-      <template #message>
-        <g-shoot-version-update
-          ref="shootVersionUpdate"
-          :available-k8s-updates="availableK8sUpdates"
-          :current-k8s-version="kubernetesVersion"
-          @selected-version="onSelectedVersion"
-          @selected-version-type="onSelectedVersionType"
-          @confirm-required="onConfirmRequired"
-        />
-        <template v-if="!v$.$invalid && selectedVersionType === 'minor'">
-          <p>
-            You should always test your scenario and back up all your data before attempting an upgrade. Don’t forget to include the workload inside your cluster!
-          </p>
-          <p>
-            You should consider the
-            <a
-              href="https://github.com/kubernetes/kubernetes/releases"
-              target="_blank"
-              rel="noopener"
-              class="text-anchor"
-            >
-              Kubernetes release notes
-              <v-icon style="font-size:80%">mdi-open-in-new</v-icon>
-            </a>
-            before upgrading your cluster.
-          </p>
-          <p>
-            Type <strong>{{ shootName }}</strong> below and confirm to upgrade the Kubernetes version of your cluster.<br><br>
-          </p>
-          <em class="text-warning">This action cannot be undone.</em>
-        </template>
-        <template v-if="!v$.$invalid && selectedVersionType === 'patch'">
-          <p>
-            Applying a patch to your cluster will increase the Kubernetes version which can lead to unexpected side effects.
-          </p>
-          <em class="text-warning">This action cannot be undone.</em>
-        </template>
+      <template #scrollable-content>
+        <v-card-text>
+          <g-shoot-version-update
+            ref="shootVersionUpdate"
+            :available-k8s-updates="availableK8sUpdates"
+            :current-k8s-version="kubernetesVersion"
+            @selected-version="onSelectedVersion"
+            @selected-version-type="onSelectedVersionType"
+            @confirm-required="onConfirmRequired"
+          />
+          <template v-if="!v$.$invalid && selectedVersionType === 'minor'">
+            <p>
+              You should always test your scenario and back up all your data before attempting an upgrade. Don’t forget to include the workload inside your cluster!
+            </p>
+            <p>
+              You should consider the
+              <a
+                href="https://github.com/kubernetes/kubernetes/releases"
+                target="_blank"
+                rel="noopener"
+                class="text-anchor"
+              >
+                Kubernetes release notes
+                <v-icon style="font-size:80%">mdi-open-in-new</v-icon>
+              </a>
+              before upgrading your cluster.
+            </p>
+            <p>
+              Type <strong>{{ shootName }}</strong> below and confirm to upgrade the Kubernetes version of your cluster.<br><br>
+            </p>
+            <em class="text-warning">This action cannot be undone.</em>
+          </template>
+          <template v-if="!v$.$invalid && selectedVersionType === 'patch'">
+            <p>
+              Applying a patch to your cluster will increase the Kubernetes version which can lead to unexpected side effects.
+            </p>
+            <em class="text-warning">This action cannot be undone.</em>
+          </template>
+        </v-card-text>
       </template>
     </g-dialog>
   </div>

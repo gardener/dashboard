@@ -14,27 +14,29 @@ SPDX-License-Identifier: Apache-2.0
     <template #caption>
       Confirm
     </template>
-    <template #message>
-      <div
-        key="confirm-message"
-        style="min-height:100px"
-      >
-        <div>
-          You selected
-          <v-chip
-            size="small"
-            class="my-0"
-            variant="tonal"
-            color="warning"
-          >
-            Unverified
-          </v-chip>
-          terminal shortcuts that were created by members of this project and therefore could be malicious.
+    <template #scrollable-content>
+      <v-card-text>
+        <div
+          key="confirm-message"
+          style="min-height:100px"
+        >
+          <div>
+            You selected
+            <v-chip
+              size="small"
+              class="my-0"
+              variant="tonal"
+              color="warning"
+            >
+              Unverified
+            </v-chip>
+            terminal shortcuts that were created by members of this project and therefore could be malicious.
+          </div>
+          <div class="pt-2">
+            Please confirm that you run only trusted terminal shortcuts.
+          </div>
         </div>
-        <div class="pt-2">
-          Please confirm that you run only trusted terminal shortcuts.
-        </div>
-      </div>
+      </v-card-text>
     </template>
   </g-dialog>
 </template>

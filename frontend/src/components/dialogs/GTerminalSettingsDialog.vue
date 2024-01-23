@@ -14,10 +14,12 @@ SPDX-License-Identifier: Apache-2.0
     <template #caption>
       Change Terminal Settings
     </template>
-    <template #message>
-      <g-terminal-settings
-        :runtime-settings-hidden="runtimeSettingsHidden"
-      />
+    <template #scrollable-content>
+      <v-card-text>
+        <g-terminal-settings
+          :runtime-settings-hidden="runtimeSettingsHidden"
+        />
+      </v-card-text>
     </template>
   </g-dialog>
 </template>

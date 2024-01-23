@@ -19,45 +19,47 @@ SPDX-License-Identifier: Apache-2.0
     :tooltip="tooltip"
     @dialog-opened="onConfigurationDialogOpened"
   >
-    <template #actionComponent>
-      <div class="text-h5 pb-3">
-        {{ componentTexts.heading }}
-      </div>
-      <v-alert
-        v-if="mode === 'START'"
-        type="info"
-        variant="tonal"
-        dense
-      >
-        Note: This rotation operation is split into two steps. This step will <strong>prepare</strong> the rotation.
-      </v-alert>
-      <v-alert
-        v-if="mode === 'COMPLETE'"
-        type="info"
-        variant="tonal"
-        dense
-      >
-        Note: This rotation operation is split into two steps. This step will <strong>complete</strong> the rotation.
-      </v-alert>
-      <div class="font-weight-bold py-3">
-        Actions performed in this step
-      </div>
-      <ul class="px-4">
-        <li
-          v-for="action in componentTexts.actions"
-          :key="action"
+    <template #scrollable-content>
+      <v-card-text>
+        <div class="text-h5 pb-3">
+          {{ componentTexts.heading }}
+        </div>
+        <v-alert
+          v-if="mode === 'START'"
+          type="info"
+          variant="tonal"
+          dense
         >
-          {{ action }}
-        </li>
-      </ul>
-      <v-checkbox
-        v-model="maintenance"
-        label="Perform this operation in the maintenance time window"
-        :disabled="isMaintenanceDisabled"
-        :hint="maintenanceHint"
-        persistent-hint
-      />
-      <div>Type <span class="font-weight-bold">{{ shootName }}</span> below to confirm the operation.</div>
+          Note: This rotation operation is split into two steps. This step will <strong>prepare</strong> the rotation.
+        </v-alert>
+        <v-alert
+          v-if="mode === 'COMPLETE'"
+          type="info"
+          variant="tonal"
+          dense
+        >
+          Note: This rotation operation is split into two steps. This step will <strong>complete</strong> the rotation.
+        </v-alert>
+        <div class="font-weight-bold py-3">
+          Actions performed in this step
+        </div>
+        <ul class="px-4">
+          <li
+            v-for="action in componentTexts.actions"
+            :key="action"
+          >
+            {{ action }}
+          </li>
+        </ul>
+        <v-checkbox
+          v-model="maintenance"
+          label="Perform this operation in the maintenance time window"
+          :disabled="isMaintenanceDisabled"
+          :hint="maintenanceHint"
+          persistent-hint
+        />
+        <div>Type <span class="font-weight-bold">{{ shootName }}</span> below to confirm the operation.</div>
+      </v-card-text>
     </template>
   </g-action-button-dialog>
 </template>

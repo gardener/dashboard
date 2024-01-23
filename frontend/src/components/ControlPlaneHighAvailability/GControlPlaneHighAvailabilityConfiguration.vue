@@ -14,8 +14,10 @@ SPDX-License-Identifier: Apache-2.0
     confirm-required
     @dialog-opened="onConfigurationDialogOpened"
   >
-    <template #actionComponent>
-      <g-manage-control-plane-high-availability :key="componentKey" />
+    <template #scrollable-content>
+      <v-card-text>
+        <g-manage-control-plane-high-availability :key="componentKey" />
+      </v-card-text>
     </template>
   </g-action-button-dialog>
 </template>

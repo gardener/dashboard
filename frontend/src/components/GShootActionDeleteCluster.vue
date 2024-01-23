@@ -16,35 +16,37 @@ SPDX-License-Identifier: Apache-2.0
     icon="mdi-delete"
     @dialog-opened="onConfigurationDialogOpened"
   >
-    <template #actionComponent>
-      <v-list>
-        <v-list-item-subtitle>
-          Created By
-        </v-list-item-subtitle>
-        <v-list-item-title>
-          <g-account-avatar
-            :account-name=" shootCreatedBy "
-            :size=" 22 "
-          />
-        </v-list-item-title>
-      </v-list>
-      <p>
-        Type <span class="font-weight-bold">{{ shootName }}</span> below and confirm the deletion of the cluster and all of its content.
-      </p>
-      <p class="mt-2 text-error font-weight-bold">
-        This action cannot be undone.
-      </p>
-      <p v-if=" isShootReconciliationDeactivated ">
-        <v-row class="fill-height">
-          <v-icon
-            color="warning"
-            class="mr-1"
-          >
-            mdi-alert-box
-          </v-icon>
-          <span>The cluster will not be deleted as long as reconciliation is deactivated.</span>
-        </v-row>
-      </p>
+    <template #scrollable-content>
+      <v-card-text>
+        <v-list>
+          <v-list-item-subtitle>
+            Created By
+          </v-list-item-subtitle>
+          <v-list-item-title>
+            <g-account-avatar
+              :account-name=" shootCreatedBy "
+              :size=" 22 "
+            />
+          </v-list-item-title>
+        </v-list>
+        <p>
+          Type <span class="font-weight-bold">{{ shootName }}</span> below and confirm the deletion of the cluster and all of its content.
+        </p>
+        <p class="mt-2 text-error font-weight-bold">
+          This action cannot be undone.
+        </p>
+        <p v-if=" isShootReconciliationDeactivated ">
+          <v-row class="fill-height">
+            <v-icon
+              color="warning"
+              class="mr-1"
+            >
+              mdi-alert-box
+            </v-icon>
+            <span>The cluster will not be deleted as long as reconciliation is deactivated.</span>
+          </v-row>
+        </p>
+      </v-card-text>
     </template>
   </g-action-button-dialog>
 </template>

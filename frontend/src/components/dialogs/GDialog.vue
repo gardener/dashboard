@@ -30,34 +30,27 @@ SPDX-License-Identifier: Apache-2.0
         </v-toolbar-title>
       </v-toolbar>
       <div>
-        <slot name="top" />
+        <slot name="header" />
       </div>
       <div
         ref="cardContent"
         class="card-content"
       >
-        <slot name="card" />
-        <v-card-text v-if="$slots.message">
-          <slot name="message" />
-        </v-card-text>
+        <slot name="scrollable-content" />
+      </div>
+      <div>
+        <slot name="footer" />
       </div>
       <div
-        v-if="$slots.additionalMessage"
+        v-if="message"
         class="mt-2"
       >
-        <slot name="additionalMessage" />
-      </div>
-      <div
-        v-if="$slots.errorMessage || message"
-        class="mt-2"
-      >
-        <slot name="errorMessage">
-          <g-message
-            v-model:message="message"
-            v-model:detailed-message="detailedMessage"
-            color="error"
-          />
-        </slot>
+        <g-message
+          v-model:message="message"
+          v-model:detailed-message="detailedMessage"
+          color="error"
+          tile
+        />
       </div>
 
       <v-divider />

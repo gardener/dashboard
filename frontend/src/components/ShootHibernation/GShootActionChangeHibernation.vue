@@ -17,17 +17,19 @@ SPDX-License-Identifier: Apache-2.0
     :icon="icon"
     @dialog-opened="onConfigurationDialogOpened"
   >
-    <template #actionComponent>
-      <template v-if="!isShootSettingHibernated">
-        This will scale the worker nodes of your cluster down to zero.<br><br>
-        Type <strong>{{ shootName }}</strong> below and confirm to hibernate your cluster.<br><br>
-      </template>
-      <template v-else-if="hasShootWorkerGroups">
-        This will wake up your cluster and scale the worker nodes up to their previous count.<br><br>
-      </template>
-      <template v-else>
-        This will wake up your cluster.<br><br>
-      </template>
+    <template #scrollable-content>
+      <v-card-text>
+        <template v-if="!isShootSettingHibernated">
+          This will scale the worker nodes of your cluster down to zero.<br><br>
+          Type <strong>{{ shootName }}</strong> below and confirm to hibernate your cluster.<br><br>
+        </template>
+        <template v-else-if="hasShootWorkerGroups">
+          This will wake up your cluster and scale the worker nodes up to their previous count.<br><br>
+        </template>
+        <template v-else>
+          This will wake up your cluster.<br><br>
+        </template>
+      </v-card-text>
     </template>
   </g-action-button-dialog>
 </template>

@@ -17,17 +17,19 @@ SPDX-License-Identifier: Apache-2.0
     :disabled="isShootReconciliationDeactivated"
     @dialog-opened="onConfigurationDialogOpened"
   >
-    <template #actionComponent>
-      <v-row>
-        <v-col class="text-subtitle-1">
-          Do you want to trigger a reconcile of your cluster outside of the regular reconciliation schedule?
-        </v-col>
-      </v-row>
-      <v-row v-if="lastOperationFailed">
-        <v-col class="text-subtitle-1">
-          Note: For clusters in failed state this will retry the operation.
-        </v-col>
-      </v-row>
+    <template #scrollable-content>
+      <v-card-text>
+        <v-row>
+          <v-col class="text-subtitle-1">
+            Do you want to trigger a reconcile of your cluster outside of the regular reconciliation schedule?
+          </v-col>
+        </v-row>
+        <v-row v-if="lastOperationFailed">
+          <v-col class="text-subtitle-1">
+            Note: For clusters in failed state this will retry the operation.
+          </v-col>
+        </v-row>
+      </v-card-text>
     </template>
   </g-action-button-dialog>
 </template>

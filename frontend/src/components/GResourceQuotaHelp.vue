@@ -27,13 +27,15 @@ SPDX-License-Identifier: Apache-2.0
       <template #caption>
         Quota Help
       </template>
-      <template #message>
-        <!-- eslint-disable vue/no-v-html -->
-        <div
-          class="wrap-text"
-          v-html="resourceQuotaHelpHtml"
-        />
-        <!-- eslint-enable vue/no-v-html -->
+      <template #scrollable-content>
+        <v-card-text>
+          <!-- eslint-disable vue/no-v-html -->
+          <div
+            class="wrap-text"
+            v-html="resourceQuotaHelpHtml"
+          />
+          <!-- eslint-enable vue/no-v-html -->
+        </v-card-text>
       </template>
     </g-dialog>
   </div>

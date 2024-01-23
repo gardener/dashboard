@@ -33,35 +33,14 @@ SPDX-License-Identifier: Apache-2.0
         <template #affectedObjectName>
           {{ shootName }}
         </template>
-        <template
-          v-if="$slots.top"
-          #top
-        >
-          <slot name="top" />
+        <template #header>
+          <slot name="header" />
         </template>
-        <template
-          v-if="$slots.card"
-          #card
-        >
-          <slot name="card" />
+        <template #scrollable-content>
+          <slot name="scrollable-content" />
         </template>
-        <template
-          v-if="$slots.actionComponent"
-          #message
-        >
-          <slot name="actionComponent" />
-        </template>
-        <template
-          v-if="$slots.errorMessage"
-          #errorMessage
-        >
-          <slot name="errorMessage" />
-        </template>
-        <template
-          v-if="$slots.additionalMessage"
-          #additionalMessage
-        >
-          <slot name="additionalMessage" />
+        <template #footer>
+          <slot name="footer" />
         </template>
       </g-dialog>
     </template>

@@ -13,16 +13,18 @@ SPDX-License-Identifier: Apache-2.0
     confirm-required
     @dialog-opened="onConfigurationDialogOpened"
   >
-    <template #actionComponent>
-      <v-select
-        v-model="seedName"
-        hint="Change seed cluster for this shoot's control plane"
-        color="primary"
-        item-color="primary"
-        label="Seed Cluster"
-        :items="seedNames"
-        persistent-hint
-      />
+    <template #scrollable-content>
+      <v-card-text>
+        <v-select
+          v-model="seedName"
+          hint="Change seed cluster for this shoot's control plane"
+          color="primary"
+          item-color="primary"
+          label="Seed Cluster"
+          :items="seedNames"
+          persistent-hint
+        />
+      </v-card-text>
     </template>
   </g-action-button-dialog>
 </template>

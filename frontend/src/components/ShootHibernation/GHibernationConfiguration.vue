@@ -12,13 +12,15 @@ SPDX-License-Identifier: Apache-2.0
     caption="Configure Hibernation Schedule"
     @dialog-opened="onConfigurationDialogOpened"
   >
-    <template #actionComponent>
-      <g-manage-hibernation-schedule
-        :key="componentKey"
-        ref="hibernationScheduleRef"
-        :is-hibernation-possible="isHibernationPossible"
-        :hibernation-possible-message="hibernationPossibleMessage"
-      />
+    <template #scrollable-content>
+      <v-card-text>
+        <g-manage-hibernation-schedule
+          :key="componentKey"
+          ref="hibernationScheduleRef"
+          :is-hibernation-possible="isHibernationPossible"
+          :hibernation-possible-message="hibernationPossibleMessage"
+        />
+      </v-card-text>
     </template>
   </g-action-button-dialog>
 </template>

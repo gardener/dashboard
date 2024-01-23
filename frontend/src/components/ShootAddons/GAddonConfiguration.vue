@@ -13,10 +13,12 @@ SPDX-License-Identifier: Apache-2.0
     max-height="60vh"
     @dialog-opened="onConfigurationDialogOpened"
   >
-    <template #actionComponent>
-      <g-manage-shoot-addons
-        ref="addons"
-      />
+    <template #scrollable-content>
+      <v-card-text>
+        <g-manage-shoot-addons
+          ref="addons"
+        />
+      </v-card-text>
     </template>
   </g-action-button-dialog>
 </template>

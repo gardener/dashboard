@@ -471,10 +471,12 @@ SPDX-License-Identifier: Apache-2.0
       <template #caption>
         Confirm Delete
       </template>
-      <template #message>
-        Are you sure to delete the project <span class="font-weight-bold">{{ projectName }}</span>?
-        <br>
-        <span class="text-error font-weight-bold">The operation can not be undone.</span>
+      <template #scrollable-content>
+        <v-card-text>
+          Are you sure to delete the project <span class="font-weight-bold">{{ projectName }}</span>?
+          <br>
+          <span class="text-error font-weight-bold">The operation can not be undone.</span>
+        </v-card-text>
       </template>
     </g-dialog>
   </v-container>

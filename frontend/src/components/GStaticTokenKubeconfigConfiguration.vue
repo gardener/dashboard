@@ -13,10 +13,12 @@ SPDX-License-Identifier: Apache-2.0
     caption="Configure Static Token Kubeconfig"
     @dialog-opened="onConfigurationDialogOpened"
   >
-    <template #actionComponent>
-      <g-static-token-kubeconfig-switch
-        v-model="enableStaticTokenKubeconfig"
-      />
+    <template #scrollable-content>
+      <v-card-text>
+        <g-static-token-kubeconfig-switch
+          v-model="enableStaticTokenKubeconfig"
+        />
+      </v-card-text>
     </template>
   </g-action-button-dialog>
 </template>
