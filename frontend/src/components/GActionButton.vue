@@ -5,7 +5,10 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div class="g-action-button">
+  <div
+    class="mx-0"
+    :class="isTextBtn ? 'g-action-text-button' : 'g-action-button'"
+  >
     <v-btn
       variant="text"
       :density="buttonDensity"
@@ -16,8 +19,8 @@ SPDX-License-Identifier: Apache-2.0
       :size="size"
       :to="to"
       :loading="loading"
-      :class="{ 'text-none font-weight-regular justify-start': isTextBtn }"
       :width="isTextBtn ? '100%' : undefined"
+      :class="{ 'text-none font-weight-regular justify-start': isTextBtn }"
       @click.stop.prevent="emit('click', $event)"
     />
     <v-tooltip
@@ -99,11 +102,22 @@ const iconProp = computed(() => {
 })
 
 const buttonDensity = computed(() => {
+  const defaultDensity = isTextBtn.value
+    ? 'default'
+    : 'comfortable'
   return props.density
     ? props.density
-    : isTextBtn.value
-      ? 'default'
-      : 'comfortable'
+    : defaultDensity
 })
 
 </script>
+
+<style>
+.g-action-button {
+  width: fit-content !important;
+}
+
+.g-action-text-button {
+  width: 100% !important;
+}
+</style>

@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <div class="g-action-button">
+  <div>
     <template v-if="canPatchShoots">
       <g-action-button
         :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose || disabled"
