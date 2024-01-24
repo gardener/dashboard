@@ -14,67 +14,7 @@ SPDX-License-Identifier: Apache-2.0
     confirm-required
     width="600"
   >
-    <v-list>
-      <v-list-item-subtitle>
-        Created By
-      </v-list-item-subtitle>
-      <v-list-item-title>
-        <g-account-avatar
-          :account-name="shootCreatedBy"
-          :size="22"
-        />
-      </v-list-item-title>
-    </v-list>
-    <p>
-      Type <span class="font-weight-bold">{{ shootName }}</span> below to confirm the forceful deletion of the cluster.
-    </p>
-    <g-expand-transition-group>
-      <v-alert
-        v-if="!confirmed"
-        class="mt-2"
-        type="warning"
-        variant="tonal"
-      >
-        You <span class="font-weight-bold">MUST</span> ensure that all the resources created in the IaaS account
-        <code>
-          <g-shoot-secret-name
-            :namespace="shootNamespace"
-            :secret-binding-name="shootSecretBindingName"
-          />
-        </code>
-        are cleaned
-        up to prevent orphaned resources. Gardener will <span class="font-weight-bold">NOT</span> delete any resources in the underlying infrastructure account.
-        Hence, use the force delete option at your own risk and only if you are fully aware of these consequences.
-        <p class="font-weight-bold">
-          This action cannot be undone.
-        </p>
-      </v-alert>
-    </g-expand-transition-group>
-    <g-countdown-checkbox
-      v-model="confirmed"
-      :seconds="0"
-    >
-      <span>
-        I confirm that I read the message above and deleted all resources in the underlying infrastructure account
-        <code>
-          <g-shoot-secret-name
-            :namespace="shootNamespace"
-            :secret-binding-name="shootSecretBindingName"
-          />
-        </code>
-      </span>
-    </g-countdown-checkbox>
-    <p v-if="isShootReconciliationDeactivated">
-      <v-row class="fill-height">
-        <v-icon
-          color="warning"
-          class="mr-1"
-        >
-          mdi-alert-box
-        </v-icon>
-        <span>The cluster will not be deleted as long as reconciliation is deactivated.</span>
-      </v-row>
-    </p>
+    <g-force-delete-cluster :shoot-item="shootItem" />
   </g-shoot-action-dialog>
   <g-shoot-action-button
     v-if="button"
@@ -96,10 +36,7 @@ import { useShootStore } from '@/store/shoot'
 
 import GShootActionButton from '@/components/GShootActionButton.vue'
 import GShootActionDialog from '@/components/GShootActionDialog.vue'
-import GAccountAvatar from '@/components/GAccountAvatar.vue'
-import GExpandTransitionGroup from '@/components/GExpandTransitionGroup'
-import GCountdownCheckbox from '@/components/GCountdownCheckbox'
-import GShootSecretName from '@/components/GShootSecretName'
+import GForceDeleteCluster from '@/components/GForceDeleteCluster.vue'
 
 import { shootItem } from '@/mixins/shootItem'
 import { errorDetailsFromError } from '@/utils/error'
@@ -108,10 +45,7 @@ export default {
   components: {
     GShootActionButton,
     GShootActionDialog,
-    GAccountAvatar,
-    GExpandTransitionGroup,
-    GCountdownCheckbox,
-    GShootSecretName,
+    GForceDeleteCluster,
   },
   mixins: [shootItem],
   inject: ['logger', 'api'],
@@ -146,7 +80,6 @@ export default {
       renderDialog: false,
       errorMessage: null,
       detailedErrorMessage: null,
-      confirmed: false,
     }
   },
   computed: {
@@ -181,7 +114,6 @@ export default {
         const actionDialog = this.$refs.actionDialog
         if (value) {
           actionDialog.showDialog()
-          this.confirmed = false
           this.waitForConfirmation()
         } else {
           actionDialog.hideDialog()
@@ -222,10 +154,3 @@ export default {
   },
 }
 </script>
-
-<style lang="scss" scoped>
-p {
-  margin-bottom: 0
-}
-
-</style>
