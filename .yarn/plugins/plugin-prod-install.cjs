@@ -1,3 +1,9 @@
+//
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+
 /*
  * The following code has been copied from https://gitlab.com/Larry1123/yarn-contrib/-/tree/master/packages/plugin-production-install
  */
