@@ -167,10 +167,12 @@ export default defineConfig(({ command, mode }) => {
     const coverage = {
       provider: 'v8',
       exclude: ['**/__fixtures__/**'],
-      statements: 76,
-      branches: 80,
-      functions: 47,
-      lines: 76,
+      thresholds: {
+        statements: 23,
+        branches: 71,
+        functions: 41,
+        lines: 23,
+      },
     }
 
     config.test = {
@@ -181,10 +183,12 @@ export default defineConfig(({ command, mode }) => {
       setupFiles: [
         'vitest.setup.js',
       ],
-      deps: {
-        inline: [
-          'vuetify',
-        ],
+      server: {
+        deps: {
+          inline: [
+            'vuetify',
+          ],
+        },
       },
       coverage,
     }

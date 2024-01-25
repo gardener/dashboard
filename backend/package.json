@@ -26,8 +26,7 @@
     "server.js"
   ],
   "scripts": {
-    "serve": "nodemon --ext js --watch lib server.js",
-    "start": "node server.js",
+    "serve": "node server.js",
     "lint": "eslint --ext .js server.js .",
     "test": "jest",
     "test-coverage": "yarn test --coverage"
@@ -84,7 +83,6 @@
     "eslint-plugin-promise": "^6.1.1",
     "fast-json-patch": "^3.1.1",
     "jest": "^27.5.1",
-    "nodemon": "^2.0.22",
     "p-event": "^4.2.0",
     "path-to-regexp": "^6.2.1",
     "set-cookie-parser": "^2.6.0",
