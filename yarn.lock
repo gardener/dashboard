@@ -477,6 +477,7 @@ __metadata:
 "@esbuild/darwin-arm64@npm:0.18.20":
   version: 0.18.20
   resolution: "@esbuild/darwin-arm64@npm:0.18.20"
+  checksum: 16b1feeec7b1523da839e834e77f85a722bda5f2a9fb6800455e55684bd59bc11f8988b91ffefdb5ba3f4e8c1d7958f58413c74c729de92c26e31e0c326f658e
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
@@ -484,6 +485,7 @@ __metadata:
 "@esbuild/darwin-x64@npm:0.18.20":
   version: 0.18.20
   resolution: "@esbuild/darwin-x64@npm:0.18.20"
+  checksum: a80288dea978a549e4fc42a3b1f0a1bc5f6341bbde3788b6b9fd6b9ba6ffd92a0b61cfe608543a8455d292d00094abbe7dc51bcd6487c9dc796a2e543299a9c4
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
@@ -502,7 +504,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@esbuild/linux-arm64@npm:0.18, @esbuild/linux-arm64@npm:0.18.20":
+"@esbuild/linux-arm64@npm:0.18.20":
   version: 0.18.20
   resolution: "@esbuild/linux-arm64@npm:0.18.20"
   checksum: 08216b531dc42e48abb6754f2b4f7f633055cd666ceb77c220c61c25aa84479b36ddeab25ecc23cf22965354314b84cabf1e8408a5cb1ba57b8343475613a782
@@ -559,7 +561,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@esbuild/linux-x64@npm:0.18, @esbuild/linux-x64@npm:0.18.20":
+"@esbuild/linux-x64@npm:0.18.20":
   version: 0.18.20
   resolution: "@esbuild/linux-x64@npm:0.18.20"
   checksum: 9d438aec79e046e3527217fee95f39985e6e2df8c4390c9398ee24a6bff3f15e8f5fc2d5cc6564b1e182f864a99d8fd83818f880dba9616a2dcea6c7f16a57c5
