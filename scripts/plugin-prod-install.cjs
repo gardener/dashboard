@@ -65,8 +65,6 @@ const __ProductionInstallCommand = (require, exports) => {
   exports.ProdInstall = void 0;
   // imports
   const core_1 = require("@yarnpkg/core");
-  const MultiResolver_1 = require("@yarnpkg/core/lib/MultiResolver");
-  const LockfileResolver_1 = require("@yarnpkg/core/lib/LockfileResolver");
   const cli_1 = require("@yarnpkg/cli");
   const fslib_1 = require("@yarnpkg/fslib");
   const plugin_patch_1 = require("@yarnpkg/plugin-patch");
@@ -109,7 +107,7 @@ const __ProductionInstallCommand = (require, exports) => {
       }, async (report) => {
         await report.startTimerPromise('Setting up production directory', async () => {
           await fslib_1.xfs.mkdirpPromise(outDirectoryPath);
-          await (0, util_1.copyFile)(rootDirectoryPath, outDirectoryPath, configuration.get(`lockfileFilename`));
+          await (0, util_1.copyFile)(rootDirectoryPath, outDirectoryPath, 'yarn.lock');
           await (0, util_1.copyFile)(rootDirectoryPath, outDirectoryPath, configuration.get(`rcFilename`));
           await (0, util_1.copyFile)(workspace.cwd, outDirectoryPath, ManifestFile);
           const yarnExcludes = [];
@@ -137,7 +135,7 @@ const __ProductionInstallCommand = (require, exports) => {
         });
         await report.startTimerPromise('Installing production version', async () => {
           const outConfiguration = await core_1.Configuration.find(outDirectoryPath, this.context.plugins);
-          if (this.stripTypes) {
+          if (this.stripTypes && outConfiguration.packageExtensions) {
             for (const [ident, extensionsByIdent,] of outConfiguration.packageExtensions.entries()) {
               const identExt = [];
               for (const [range, extensionsByRange] of extensionsByIdent) {
@@ -169,8 +167,8 @@ const __ProductionInstallCommand = (require, exports) => {
           });
           const multiFetcher = configuration.makeFetcher();
           const realResolver = configuration.makeResolver();
-          const multiResolver = new MultiResolver_1.MultiResolver([
-            new LockfileResolver_1.LockfileResolver(realResolver),
+          const multiResolver = new realResolver.constructor([
+            new core_1.LockfileResolver(realResolver),
             realResolver,
           ]);
           const resolver = new ProductionInstallResolver_1.ProductionInstallResolver({
@@ -337,7 +335,7 @@ const __ProductionInstallFetcher = (require, exports) => {
           packageFs,
           releaseFs,
           prefixPath: core_1.structUtils.getIdentVendorPath(locator),
-          checksum: expectedChecksum !== null && expectedChecksum !== void 0 ? expectedChecksum : checksum,
+          checksum: expectedChecksum,
         };
       }
       const cachePath = this.cache.getLocatorPath(locator, expectedChecksum);
@@ -487,7 +485,7 @@ const __ProductionInstallResolver = (require, exports) => {
             version: workspace.manifest.version || `0.0.0`,
             languageName: `unknown`,
             linkType: core_1.LinkType.SOFT,
-            dependencies: new Map([...workspace.manifest.dependencies]),
+            dependencies: this.project.configuration.normalizeDependencyMap(new Map([...workspace.manifest.dependencies])),
             peerDependencies: new Map([...workspace.manifest.peerDependencies]),
             dependenciesMeta: workspace.manifest.dependenciesMeta,
             peerDependenciesMeta: workspace.manifest.peerDependenciesMeta,
