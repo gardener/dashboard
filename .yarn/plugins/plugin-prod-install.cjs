@@ -28,6 +28,10 @@ const factory = originalRequire => {
     return filename;
   }
 
+  const __yarnUtils = (require, exports) => {
+    exports.dependenciesUtils = require('./dependenciesUtils')
+  }
+
   registry.set('@yarnpkg/fslib', fslib)
   registry.set('./dependenciesUtils', createModule(__dependenciesUtils))
   registry.set('@larry1123/yarn-utils', createModule(__yarnUtils))
@@ -45,6 +49,20 @@ const factory = originalRequire => {
   }
 }
 
+/**
+ * This function `__ProductionInstallCommand` is based on a file from the `plugin-prod-install` yarn plugin
+ * originally developed by Larry1123. The original file can be found at:
+ * https://gitlab.com/Larry1123/yarn-contrib/-/blob/master/packages/plugin-production-install/lib/commands/productionInstall.js.
+ * This version has been adapted and modified to ensure compatibility with yarn 4. The original plugin
+ * appears to be unmaintained and incompatible with this version of yarn. Modifications include:
+ * - Configuration property `lockfileFilename` has been removed. Value is now always `yarn.lock`.
+ * - The value of `packageExtensions` can be `null` for a configuration object.
+ * - Delete the direct import of the `LockfileResolver` and use `core_1.LockfileResolver` instead.
+ * - Delete the direct import of the `MultiResolver` and use `realResolver.constructor` instead.
+ *
+ * These changes are detailed in the commit:
+ * https://github.com/gardener/dashboard/commit/e1d01dda04608e9d2547a24d2dd20b552bcf7559.
+ */
 const __ProductionInstallCommand = (require, exports) => {
   /*
    * Copyright 2020 Larry1123
@@ -279,6 +297,18 @@ const __ProductionInstallCommand = (require, exports) => {
   });
 }
 
+/**
+ * This function `__ProductionInstallFetcher` is based on a file from the `plugin-prod-install` yarn plugin
+ * originally developed by Larry1123. The original file can be found at:
+ * https://gitlab.com/Larry1123/yarn-contrib/-/blob/master/packages/plugin-production-install/lib/ProductionInstallFetcher.js.
+ * This version has been adapted and modified to ensure compatibility with yarn 4. The original plugin
+ * appears to be unmaintained and incompatible with this version of yarn. Modifications include:
+ * - Always return the expected checksum instead of the resulting checksum from the `cache.fetchPackageFromCache` call.
+ *   This change ensures that the package is correctly found in the filesystem later.
+ *
+ * These changes are detailed in the commit:
+ * https://github.com/gardener/dashboard/commit/e1d01dda04608e9d2547a24d2dd20b552bcf7559.
+ */
 const __ProductionInstallFetcher = (require, exports) => {
   /*
    * Copyright 2020 Larry1123
@@ -419,6 +449,17 @@ const __ProductionInstallFetcher = (require, exports) => {
   exports.ProductionInstallFetcher = ProductionInstallFetcher;
 }
 
+/**
+ * This function `__ProductionInstallResolver` is based on a file from the `plugin-prod-install` yarn plugin
+ * originally developed by Larry1123. The original file can be found at:
+ * https://gitlab.com/Larry1123/yarn-contrib/-/blob/master/packages/plugin-production-install/lib/ProductionInstallResolver.js.
+ * This version has been adapted and modified to ensure compatibility with yarn 4. The original plugin
+ * appears to be unmaintained and incompatible with this version of yarn. Modifications include:
+ * - Normalize dependency map of resolved workspace packages.
+ *
+ * These changes are detailed in the commit:
+ * https://github.com/gardener/dashboard/commit/e1d01dda04608e9d2547a24d2dd20b552bcf7559.
+ */
 const __ProductionInstallResolver = (require, exports) => {
   /*
    * Copyright 2020 Larry1123
@@ -520,7 +561,15 @@ const __ProductionInstallResolver = (require, exports) => {
   exports.ProductionInstallResolver = ProductionInstallResolver;
 }
 
-
+/**
+ * The function `__util` is a direct wrapper of the corresponding file from the `plugin-prod-install`
+ * yarn plugin developed by Larry1123. This code remains unmodified from the original implementation.
+ * The original file can be found at:
+ * https://gitlab.com/Larry1123/yarn-contrib/-/blob/master/packages/plugin-production-install/lib/util.js.
+ *
+ * Note: This wrapper is created to integrate with yarn 4, as the original plugin is
+ * not maintained and is incompatible with this version of yarn.
+ */
 const __util = (require, exports) => {
   /*
    * Copyright 2020 Larry1123
@@ -583,6 +632,15 @@ const __util = (require, exports) => {
   exports.copyFolderRecursivePromise = copyFolderRecursivePromise;
 }
 
+/**
+ * The function `__dependenciesUtils` is a direct wrapper of the corresponding file from the `plugin-prod-install`
+ * yarn plugin developed by Larry1123. This code remains unmodified from the original implementation.
+ * The original file can be found at:
+ * https://gitlab.com/Larry1123/yarn-contrib/-/blob/master/packages/yarn-utils/lib/dependenciesUtils.js.
+ *
+ * Note: This wrapper is created to integrate with yarn 4, as the original plugin is
+ * not maintained and is incompatible with this version of yarn.
+ */
 const __dependenciesUtils = (require, exports) => {
   /*
    * Copyright 2020 Larry1123
@@ -623,11 +681,6 @@ const __dependenciesUtils = (require, exports) => {
     return collected;
   }
   exports.getDependents = getDependents;
-}
-
-const __yarnUtils = (require, exports) => {
-  Object.defineProperty(exports, "__esModule", { value: true });
-  exports.dependenciesUtils = require('./dependenciesUtils')
 }
 
 module.exports = {
