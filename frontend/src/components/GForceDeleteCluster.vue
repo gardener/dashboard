@@ -16,30 +16,27 @@ SPDX-License-Identifier: Apache-2.0
     </v-list-item-title>
   </v-list>
   <p>
-    Type <span class="font-weight-bold">{{ shootName }}</span> below to confirm the forceful deletion of the cluster.
+    Type <span class="font-weight-bold">{{ shootName }}</span> below and confirm that you are aware of the side effects and the necessary actions you must take in order to proceed with the forceful deletion of the cluster.
   </p>
-  <g-expand-transition-group>
-    <v-alert
-      v-if="!confirmed"
-      class="mt-2"
-      type="warning"
-      variant="tonal"
-    >
-      You <span class="font-weight-bold">MUST</span> ensure that all the resources created in the IaaS account
-      <code>
-        <g-shoot-secret-name
-          :namespace="shootNamespace"
-          :secret-binding-name="shootSecretBindingName"
-        />
-      </code>
-      are cleaned
-      up to prevent orphaned resources. Gardener will <span class="font-weight-bold">NOT</span> delete any resources in the underlying infrastructure account.
-      Hence, use the force delete option at your own risk and only if you are fully aware of these consequences.
-      <p class="font-weight-bold">
-        This action cannot be undone.
-      </p>
-    </v-alert>
-  </g-expand-transition-group>
+  <v-alert
+    class="mt-2"
+    type="warning"
+    variant="tonal"
+  >
+    You <span class="font-weight-bold">MUST</span> ensure that all the resources created in the IaaS account
+    <code>
+      <g-shoot-secret-name
+        :namespace="shootNamespace"
+        :secret-binding-name="shootSecretBindingName"
+      />
+    </code>
+    are cleaned
+    up to prevent orphaned resources. Gardener will <span class="font-weight-bold">NOT</span> delete any resources in the underlying infrastructure account.
+    Hence, use the force delete option at your own risk and only if you are fully aware of these consequences.
+    <p class="font-weight-bold">
+      This action cannot be undone.
+    </p>
+  </v-alert>
   <v-checkbox
     v-model="confirmed"
     :seconds="0"
@@ -75,7 +72,6 @@ SPDX-License-Identifier: Apache-2.0
 import { useVuelidate } from '@vuelidate/core'
 
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
-import GExpandTransitionGroup from '@/components/GExpandTransitionGroup'
 import GShootSecretName from '@/components/GShootSecretName'
 
 import { shootItem } from '@/mixins/shootItem'
@@ -87,7 +83,6 @@ import {
 export default {
   components: {
     GAccountAvatar,
-    GExpandTransitionGroup,
     GShootSecretName,
   },
   mixins: [shootItem],

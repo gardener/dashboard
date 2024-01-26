@@ -138,20 +138,25 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           <g-list-item-content>
             Delete Cluster
-            <template
-              v-if="canForceDeleteShoot"
-              #description
-            >
-              <div class="d-flex">
-                <v-icon
-                  icon="mdi-alert-circle-outline"
-                  size="small"
-                  color="error"
-                  class="mx-1"
+            <template #description>
+              <div
+                v-if="canForceDeleteShoot"
+                class="d-flex align-center"
+              >
+                Cluster deletion failed
+                <g-shoot-messages
+                  :shoot-item="shootItem"
+                  filter="force-delete"
+                  show-verbose
+                  title="Cluster Deletion Failed"
+                  small
                 />
-                Cluster deletion failed.
-                You can force delete your cluster
-                after you manually cleaned up resources in your infrastructure account.
+              </div>
+              <div
+                v-else
+                class="d-flex align-center"
+              >
+                Delete cluster and remove all ressources
               </div>
             </template>
           </g-list-item-content>

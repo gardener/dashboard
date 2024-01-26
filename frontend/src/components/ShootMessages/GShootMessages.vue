@@ -61,15 +61,16 @@ import { useAuthzStore } from '@/store/authz'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useConfigStore } from '@/store/config'
 
-import GK8sExpirationMessage from '@/components/ShootMessages/GK8sExpirationMessage.vue'
-import GWorkerGroupExpirationMessage from '@/components/ShootMessages/GWorkerGroupExpirationMessage.vue'
-import GNoHibernationScheduleMessage from '@/components/ShootMessages/GNoHibernationScheduleMessage.vue'
-import GClusterExpirationMessage from '@/components/ShootMessages/GClusterExpirationMessage.vue'
-import GConstraintMessage from '@/components/ShootMessages/GConstraintMessage.vue'
-import GMaintenanceStatusMessage from '@/components/ShootMessages/GMaintenanceStatusMessage.vue'
-
 import { shootItem } from '@/mixins/shootItem'
 import { isSelfTerminationWarning } from '@/utils'
+
+import GK8sExpirationMessage from './GK8sExpirationMessage.vue'
+import GWorkerGroupExpirationMessage from './GWorkerGroupExpirationMessage.vue'
+import GNoHibernationScheduleMessage from './GNoHibernationScheduleMessage.vue'
+import GClusterExpirationMessage from './GClusterExpirationMessage.vue'
+import GConstraintMessage from './GConstraintMessage.vue'
+import GMaintenanceStatusMessage from './GMaintenanceStatusMessage.vue'
+import GForceDeleteMessage from './GForceDeleteMessage.vue'
 
 import {
   get,
@@ -86,6 +87,7 @@ export default {
     GClusterExpirationMessage,
     GConstraintMessage,
     GMaintenanceStatusMessage,
+    GForceDeleteMessage,
   },
   mixins: [shootItem],
   inject: [
@@ -147,6 +149,7 @@ export default {
         ...this.maintenanceConstraintMessage,
         ...this.caCertificateValiditiesConstraintMessage,
         ...this.lastMaintenanceMessage,
+        ...this.forceDeleteMessage,
       ]
     },
     k8sMessage () {
@@ -322,6 +325,22 @@ export default {
             state: this.lastMaintenance.state,
             failureReason: this.lastMaintenance.failureReason,
           },
+        },
+      }]
+    },
+    forceDeleteMessage () {
+      if (!this.filterMatches('force-delete')) {
+        return []
+      }
+      if (!this.canForceDeleteShoot) {
+        return []
+      }
+      return [{
+        key: 'canForceDelete',
+        icon: 'mdi-delete-alert',
+        severity: 'error',
+        component: {
+          name: 'g-force-delete-message',
         },
       }]
     },
