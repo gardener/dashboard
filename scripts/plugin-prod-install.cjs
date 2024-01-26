@@ -166,7 +166,8 @@ const __ProductionInstallCommand = (require, exports) => {
         await report.startTimerPromise('Installing production version', async () => {
           const outConfiguration = await core_1.Configuration.find(outDirectoryPath, this.context.plugins);
           if (this.stripTypes) {
-            for (const [ident, extensionsByIdent,] of outConfiguration.packageExtensions.entries()) {
+            const packageExtensions = await outConfiguration.getPackageExtensions()
+            for (const [ident, extensionsByIdent,] of packageExtensions.entries()) {
               const identExt = [];
               for (const [range, extensionsByRange] of extensionsByIdent) {
                 identExt.push([
@@ -181,7 +182,7 @@ const __ProductionInstallCommand = (require, exports) => {
                   }),
                 ]);
               }
-              outConfiguration.packageExtensions.set(ident, identExt);
+              packageExtensions.set(ident, identExt);
             }
           }
           const { project: outProject, workspace: outWorkspace, } = await core_1.Project.find(outConfiguration, outDirectoryPath);
@@ -535,7 +536,7 @@ const __ProductionInstallResolver = (require, exports) => {
             version: workspace.manifest.version || `0.0.0`,
             languageName: `unknown`,
             linkType: core_1.LinkType.SOFT,
-            dependencies: new Map([...workspace.manifest.dependencies]),
+            dependencies: this.project.configuration.normalizeDependencyMap(new Map([...workspace.manifest.dependencies])),
             peerDependencies: new Map([...workspace.manifest.peerDependencies]),
             dependenciesMeta: workspace.manifest.dependenciesMeta,
             peerDependenciesMeta: workspace.manifest.peerDependenciesMeta,
