@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
     <template #caption>
       Create Terminal Session
     </template>
-    <template #scrollable-content>
+    <template #content>
       <v-tabs
         v-model="tab"
         color="primary"

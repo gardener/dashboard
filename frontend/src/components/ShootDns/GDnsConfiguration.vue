@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
     confirm-required
     @dialog-opened="onConfigurationDialogOpened"
   >
-    <template #scrollable-content>
+    <template #content>
       <v-card-text>
         <g-manage-shoot-dns :key="componentKey" />
       </v-card-text>

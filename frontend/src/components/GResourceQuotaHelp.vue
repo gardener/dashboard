@@ -27,7 +27,7 @@ SPDX-License-Identifier: Apache-2.0
       <template #caption>
         Quota Help
       </template>
-      <template #scrollable-content>
+      <template #content>
         <v-card-text>
           <!-- eslint-disable vue/no-v-html -->
           <div

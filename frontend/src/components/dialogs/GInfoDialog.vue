@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
     <template #caption>
       About
     </template>
-    <template #scrollable-content>
+    <template #content>
       <v-card-text>
         <div class="d-flex flex-row align-center mt-3">
           <img

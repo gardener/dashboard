@@ -29,16 +29,16 @@ SPDX-License-Identifier: Apache-2.0
           </template>
         </v-toolbar-title>
       </v-toolbar>
-      <div>
+      <div v-if="$slots.header">
         <slot name="header" />
       </div>
       <div
         ref="cardContent"
         class="card-content"
       >
-        <slot name="scrollable-content" />
+        <slot name="content" />
       </div>
-      <div>
+      <div v-if="$slots.footer">
         <slot name="footer" />
       </div>
       <div

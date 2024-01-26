@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
     <template #caption>
       {{ captionText }}
     </template>
-    <template #scrollable-content>
+    <template #content>
       <v-card-text>
         <!-- eslint-disable-next-line vue/no-v-html -->
         <div v-html="messageHtml" />

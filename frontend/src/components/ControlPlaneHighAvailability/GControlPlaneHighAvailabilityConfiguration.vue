@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
     confirm-required
     @dialog-opened="onConfigurationDialogOpened"
   >
-    <template #scrollable-content>
+    <template #content>
       <v-card-text>
         <g-manage-control-plane-high-availability :key="componentKey" />
       </v-card-text>

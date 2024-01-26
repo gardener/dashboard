@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
     :disabled="!isMaintenancePreconditionSatisfied"
     @dialog-opened="onConfigurationDialogOpened"
   >
-    <template #scrollable-content>
+    <template #content>
       <v-card-text>
         <div class="text-subtitle-1 pt-4">
           Do you want to start the maintenance of your cluster outside of the configured maintenance time window?
@@ -51,7 +51,7 @@ export default {
     GMaintenanceComponents,
   },
   mixins: [shootItem],
-  inject: ['api', 'notify', 'logger'],
+  inject: ['api', 'logger'],
   props: {
     modelValue: {
       type: Boolean,
@@ -108,9 +108,7 @@ export default {
         return
       }
 
-      this.setSuccess({
-        message: `Maintenance scheduled for ${this.shootName}`,
-      })
+      this.setSuccess(`Maintenance scheduled for ${this.shootName}`)
     },
   },
   methods: {

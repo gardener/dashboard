@@ -50,7 +50,7 @@ SPDX-License-Identifier: Apache-2.0
       <template #affectedObjectName>
         {{ shootName }}
       </template>
-      <template #scrollable-content>
+      <template #content>
         <v-card-text>
           <g-shoot-version-update
             ref="shootVersionUpdate"

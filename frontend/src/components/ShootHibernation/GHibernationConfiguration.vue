@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
     caption="Configure Hibernation Schedule"
     @dialog-opened="onConfigurationDialogOpened"
   >
-    <template #scrollable-content>
+    <template #content>
       <v-card-text>
         <g-manage-hibernation-schedule
           :key="componentKey"

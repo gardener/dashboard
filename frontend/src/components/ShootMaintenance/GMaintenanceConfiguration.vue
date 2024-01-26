@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
     caption="Configure Maintenance"
     @dialog-opened="onConfigurationDialogOpened"
   >
-    <template #scrollable-content>
+    <template #content>
       <v-card-text>
         <g-maintenance-time
           ref="maintenanceTime"

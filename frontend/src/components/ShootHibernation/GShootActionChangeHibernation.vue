@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
     :icon="icon"
     @dialog-opened="onConfigurationDialogOpened"
   >
-    <template #scrollable-content>
+    <template #content>
       <v-card-text>
         <template v-if="!isShootSettingHibernated">
           This will scale the worker nodes of your cluster down to zero.<br><br>
@@ -45,7 +45,7 @@ export default {
     GActionButtonDialog,
   },
   mixins: [shootItem],
-  inject: ['api', 'notify', 'logger'],
+  inject: ['api', 'logger'],
   props: {
     modelValue: {
       type: Boolean,
@@ -119,12 +119,8 @@ export default {
       const state = this.isShootStatusHibernated
         ? 'hibernated'
         : 'started'
-      this.notify({
-        text: `Cluster ${this.shootName} successfully ${state}`,
-        type: 'success',
-        position: 'bottom right',
-        duration: 5000,
-      })
+
+      this.setSuccess(`Cluster ${this.shootName} successfully ${state}`)
     },
   },
   methods: {

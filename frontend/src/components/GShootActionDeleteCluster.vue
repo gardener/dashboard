@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
     icon="mdi-delete"
     @dialog-opened="onConfigurationDialogOpened"
   >
-    <template #scrollable-content>
+    <template #content>
       <v-card-text>
         <v-list>
           <v-list-item-subtitle>

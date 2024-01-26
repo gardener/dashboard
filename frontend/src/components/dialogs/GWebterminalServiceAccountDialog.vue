@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
         Add Service Account
       </template>
     </template>
-    <template #scrollable-content>
+    <template #content>
       <v-card-text>
         <div
           key="confirm-message"

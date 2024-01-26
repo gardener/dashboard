@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
     caption="Configure Access Restrictions"
     @dialog-opened="onConfigurationDialogOpened"
   >
-    <template #scrollable-content>
+    <template #content>
       <v-card-text>
         <g-access-restrictions
           ref="accessRestrictions"

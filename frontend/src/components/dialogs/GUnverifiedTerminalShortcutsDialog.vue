@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
     <template #caption>
       Confirm
     </template>
-    <template #scrollable-content>
+    <template #content>
       <v-card-text>
         <div
           key="confirm-message"

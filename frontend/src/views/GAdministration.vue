@@ -471,7 +471,7 @@ SPDX-License-Identifier: Apache-2.0
       <template #caption>
         Confirm Delete
       </template>
-      <template #scrollable-content>
+      <template #content>
         <v-card-text>
           Are you sure to delete the project <span class="font-weight-bold">{{ projectName }}</span>?
           <br>
@@ -681,9 +681,7 @@ export default {
         try {
           await this.fetchQuotas(this.project.metadata.namespace)
         } catch (err) {
-          this.setError({
-            message: `Failed to fetch project quota: ${err.message}`,
-          })
+          this.setError(`Failed to fetch project quota: ${err.message}`)
         }
       },
       { immediate: true },

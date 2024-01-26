@@ -114,10 +114,10 @@ const buttonDensity = computed(() => {
 
 <style>
 .g-action-button {
-  width: fit-content !important;
+  width: fit-content;
 }
 
 .g-action-text-button {
-  width: 100% !important;
+  width: 100%;
 }
 </style>

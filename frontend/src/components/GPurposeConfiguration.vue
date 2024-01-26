@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
     caption="Configure Purpose"
     @dialog-opened="onConfigurationDialogOpened"
   >
-    <template #scrollable-content>
+    <template #content>
       <v-card-text>
         <g-purpose
           ref="purposeRef"

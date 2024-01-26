@@ -36,8 +36,8 @@ SPDX-License-Identifier: Apache-2.0
         <template #header>
           <slot name="header" />
         </template>
-        <template #scrollable-content>
-          <slot name="scrollable-content" />
+        <template #content>
+          <slot name="content" />
         </template>
         <template #footer>
           <slot name="footer" />
@@ -128,10 +128,7 @@ export default {
       return this.shootActionToolTip(this.caption)
     },
     disableToolTip () {
-      if (this.text === this.actionToolTip) {
-        return true
-      }
-      return false
+      return this.text === this.actionToolTip
     },
   },
   methods: {

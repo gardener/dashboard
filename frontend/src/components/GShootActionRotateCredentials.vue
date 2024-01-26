@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
     :tooltip="tooltip"
     @dialog-opened="onConfigurationDialogOpened"
   >
-    <template #scrollable-content>
+    <template #content>
       <v-card-text>
         <div class="text-h5 pb-3">
           {{ componentTexts.heading }}
@@ -403,9 +403,7 @@ export default {
         return
       }
 
-      this.setSuccess({
-        message: this.componentTexts.successMessage,
-      })
+      this.setSuccess(this.componentTexts.successMessage)
     },
   },
   mounted () {

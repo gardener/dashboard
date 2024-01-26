@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
     :disabled="isShootReconciliationDeactivated"
     @dialog-opened="onConfigurationDialogOpened"
   >
-    <template #scrollable-content>
+    <template #content>
       <v-card-text>
         <v-row>
           <v-col class="text-subtitle-1">
@@ -106,9 +106,7 @@ export default {
         return
       }
 
-      this.setSuccess({
-        message: `Reconcile triggered for ${this.shootName}`,
-      })
+      this.setSuccess(`Reconcile triggered for ${this.shootName}`)
     },
   },
   methods: {

@@ -36,7 +36,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-tab>
       </v-tabs>
     </template>
-    <template #scrollable-content>
+    <template #content>
       <v-window v-model="tab">
         <v-window-item
           ref="overviewTab"
