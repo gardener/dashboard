@@ -311,13 +311,17 @@ const __ProductionInstallCommand = (require, exports) => {
 }
 
 /**
- * The function `__ProductionInstallFetcher` is a direct wrapper of the corresponding file from the `plugin-prod-install`
- * yarn plugin developed by Larry1123. This code remains unmodified from the original implementation.
- * The original file can be found at:
+ * This function `__ProductionInstallFetcher` is based on a file from the `plugin-prod-install` yarn plugin
+ * originally developed by Larry1123. The original file can be found at:
  * https://gitlab.com/Larry1123/yarn-contrib/-/blob/master/packages/plugin-production-install/lib/ProductionInstallFetcher.js.
+ * This version has been adapted and modified to ensure compatibility with yarn 4. The original plugin
+ * appears to be unmaintained and incompatible with this version of yarn. Modifications include:
+ * 1. In the case of workspace packages fetched from the cache, a checksum is generated. It is
+ *   essential for the `ProductionInstallFetcher` not to return this checksum, as doing so leads
+ *   to the packages not being located in the filesystem subsequently.
  *
- * Note: This wrapper is created to integrate with yarn 4, as the original plugin is
- * not maintained and is incompatible with this version of yarn.
+ * These changes are detailed in the commit:
+ * https://github.com/gardener/dashboard/commit/e6e1cbd963a969579294ad2e584ed5056266331a.
  */
 const __ProductionInstallFetcher = (require, exports) => {
   /*
@@ -375,7 +379,7 @@ const __ProductionInstallFetcher = (require, exports) => {
           packageFs,
           releaseFs,
           prefixPath: core_1.structUtils.getIdentVendorPath(locator),
-          checksum: expectedChecksum !== null && expectedChecksum !== void 0 ? expectedChecksum : checksum,
+          checksum: expectedChecksum,
         };
       }
       const cachePath = this.cache.getLocatorPath(locator, expectedChecksum);
