@@ -71,7 +71,7 @@ const factory = originalRequire => {
  *   (see https://github.com/yarnpkg/berry/commit/207413b4ea5c9684ebc8dad77bf0cae4b0ec727a).
  *
  * These changes are detailed in the commit:
- * https://github.com/gardener/dashboard/commit/e1d01dda04608e9d2547a24d2dd20b552bcf7559.
+ * https://github.com/gardener/dashboard/commit/e6e1cbd963a969579294ad2e584ed5056266331a.
  */
 const __ProductionInstallCommand = (require, exports) => {
   /*
@@ -468,7 +468,7 @@ const __ProductionInstallFetcher = (require, exports) => {
  * 1. Normalize dependency map of resolved workspace packages.
  *
  * These changes are detailed in the commit:
- * https://github.com/gardener/dashboard/commit/e1d01dda04608e9d2547a24d2dd20b552bcf7559.
+ * https://github.com/gardener/dashboard/commit/e6e1cbd963a969579294ad2e584ed5056266331a.
  */
 const __ProductionInstallResolver = (require, exports) => {
   /*
