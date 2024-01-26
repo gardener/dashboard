@@ -19,6 +19,16 @@ const factory = originalRequire => {
       : originalRequire(id)
   }
 
+  const core = originalRequire('@yarnpkg/core')
+  const originalGet = core.Configuration.prototype.get
+  core.Configuration.prototype.get = function get (key) {
+    return key === 'lockfileFilename'
+      ? 'yarn.lock'
+      : originalGet.call(this, key)
+  }
+  const MultiResolver = core.Configuration.prototype.makeResolver.call({ plugins: new Map() }).constructor
+  const LockfileResolver = core.LockfileResolver
+
   const fslib = originalRequire('@yarnpkg/fslib')
   const { npath, ppath } = fslib
 
@@ -32,6 +42,8 @@ const factory = originalRequire => {
     exports.dependenciesUtils = require('./dependenciesUtils')
   }
 
+  registry.set('@yarnpkg/core/lib/MultiResolver', { MultiResolver })
+  registry.set('@yarnpkg/core/lib/LockfileResolver', { LockfileResolver })
   registry.set('@yarnpkg/fslib', fslib)
   registry.set('./dependenciesUtils', createModule(__dependenciesUtils))
   registry.set('@larry1123/yarn-utils', createModule(__yarnUtils))
@@ -55,10 +67,8 @@ const factory = originalRequire => {
  * https://gitlab.com/Larry1123/yarn-contrib/-/blob/master/packages/plugin-production-install/lib/commands/productionInstall.js.
  * This version has been adapted and modified to ensure compatibility with yarn 4. The original plugin
  * appears to be unmaintained and incompatible with this version of yarn. Modifications include:
- * - Configuration property `lockfileFilename` has been removed. Value is now always `yarn.lock`.
- * - The value of `packageExtensions` can be `null` for a configuration object.
- * - Delete the direct import of the `LockfileResolver` and use `core_1.LockfileResolver` instead.
- * - Delete the direct import of the `MultiResolver` and use `realResolver.constructor` instead.
+ * 1. Use method `getPackageExtensions` instead of directly accessing the property `configuration.packageExtensions`
+ *   (see https://github.com/yarnpkg/berry/commit/207413b4ea5c9684ebc8dad77bf0cae4b0ec727a).
  *
  * These changes are detailed in the commit:
  * https://github.com/gardener/dashboard/commit/e1d01dda04608e9d2547a24d2dd20b552bcf7559.
@@ -83,6 +93,8 @@ const __ProductionInstallCommand = (require, exports) => {
   exports.ProdInstall = void 0;
   // imports
   const core_1 = require("@yarnpkg/core");
+  const MultiResolver_1 = require("@yarnpkg/core/lib/MultiResolver");
+  const LockfileResolver_1 = require("@yarnpkg/core/lib/LockfileResolver");
   const cli_1 = require("@yarnpkg/cli");
   const fslib_1 = require("@yarnpkg/fslib");
   const plugin_patch_1 = require("@yarnpkg/plugin-patch");
@@ -125,7 +137,7 @@ const __ProductionInstallCommand = (require, exports) => {
       }, async (report) => {
         await report.startTimerPromise('Setting up production directory', async () => {
           await fslib_1.xfs.mkdirpPromise(outDirectoryPath);
-          await (0, util_1.copyFile)(rootDirectoryPath, outDirectoryPath, 'yarn.lock');
+          await (0, util_1.copyFile)(rootDirectoryPath, outDirectoryPath, configuration.get(`lockfileFilename`));
           await (0, util_1.copyFile)(rootDirectoryPath, outDirectoryPath, configuration.get(`rcFilename`));
           await (0, util_1.copyFile)(workspace.cwd, outDirectoryPath, ManifestFile);
           const yarnExcludes = [];
@@ -153,7 +165,7 @@ const __ProductionInstallCommand = (require, exports) => {
         });
         await report.startTimerPromise('Installing production version', async () => {
           const outConfiguration = await core_1.Configuration.find(outDirectoryPath, this.context.plugins);
-          if (this.stripTypes && outConfiguration.packageExtensions) {
+          if (this.stripTypes) {
             for (const [ident, extensionsByIdent,] of outConfiguration.packageExtensions.entries()) {
               const identExt = [];
               for (const [range, extensionsByRange] of extensionsByIdent) {
@@ -185,8 +197,8 @@ const __ProductionInstallCommand = (require, exports) => {
           });
           const multiFetcher = configuration.makeFetcher();
           const realResolver = configuration.makeResolver();
-          const multiResolver = new realResolver.constructor([
-            new core_1.LockfileResolver(realResolver),
+          const multiResolver = new MultiResolver_1.MultiResolver([
+            new LockfileResolver_1.LockfileResolver(realResolver),
             realResolver,
           ]);
           const resolver = new ProductionInstallResolver_1.ProductionInstallResolver({
@@ -298,16 +310,13 @@ const __ProductionInstallCommand = (require, exports) => {
 }
 
 /**
- * This function `__ProductionInstallFetcher` is based on a file from the `plugin-prod-install` yarn plugin
- * originally developed by Larry1123. The original file can be found at:
+ * The function `__ProductionInstallFetcher` is a direct wrapper of the corresponding file from the `plugin-prod-install`
+ * yarn plugin developed by Larry1123. This code remains unmodified from the original implementation.
+ * The original file can be found at:
  * https://gitlab.com/Larry1123/yarn-contrib/-/blob/master/packages/plugin-production-install/lib/ProductionInstallFetcher.js.
- * This version has been adapted and modified to ensure compatibility with yarn 4. The original plugin
- * appears to be unmaintained and incompatible with this version of yarn. Modifications include:
- * - Always return the expected checksum instead of the resulting checksum from the `cache.fetchPackageFromCache` call.
- *   This change ensures that the package is correctly found in the filesystem later.
  *
- * These changes are detailed in the commit:
- * https://github.com/gardener/dashboard/commit/e1d01dda04608e9d2547a24d2dd20b552bcf7559.
+ * Note: This wrapper is created to integrate with yarn 4, as the original plugin is
+ * not maintained and is incompatible with this version of yarn.
  */
 const __ProductionInstallFetcher = (require, exports) => {
   /*
@@ -365,7 +374,7 @@ const __ProductionInstallFetcher = (require, exports) => {
           packageFs,
           releaseFs,
           prefixPath: core_1.structUtils.getIdentVendorPath(locator),
-          checksum: expectedChecksum,
+          checksum: expectedChecksum !== null && expectedChecksum !== void 0 ? expectedChecksum : checksum,
         };
       }
       const cachePath = this.cache.getLocatorPath(locator, expectedChecksum);
@@ -455,7 +464,7 @@ const __ProductionInstallFetcher = (require, exports) => {
  * https://gitlab.com/Larry1123/yarn-contrib/-/blob/master/packages/plugin-production-install/lib/ProductionInstallResolver.js.
  * This version has been adapted and modified to ensure compatibility with yarn 4. The original plugin
  * appears to be unmaintained and incompatible with this version of yarn. Modifications include:
- * - Normalize dependency map of resolved workspace packages.
+ * 1. Normalize dependency map of resolved workspace packages.
  *
  * These changes are detailed in the commit:
  * https://github.com/gardener/dashboard/commit/e1d01dda04608e9d2547a24d2dd20b552bcf7559.
@@ -526,7 +535,7 @@ const __ProductionInstallResolver = (require, exports) => {
             version: workspace.manifest.version || `0.0.0`,
             languageName: `unknown`,
             linkType: core_1.LinkType.SOFT,
-            dependencies: this.project.configuration.normalizeDependencyMap(new Map([...workspace.manifest.dependencies])),
+            dependencies: new Map([...workspace.manifest.dependencies]),
             peerDependencies: new Map([...workspace.manifest.peerDependencies]),
             dependenciesMeta: workspace.manifest.dependenciesMeta,
             peerDependenciesMeta: workspace.manifest.peerDependenciesMeta,
