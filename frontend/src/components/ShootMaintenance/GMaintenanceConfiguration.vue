@@ -12,16 +12,29 @@ SPDX-License-Identifier: Apache-2.0
     caption="Configure Maintenance"
     @dialog-opened="onConfigurationDialogOpened"
   >
-    <template #actionComponent>
-      <g-maintenance-time
-        ref="maintenanceTime"
-        :time-window-begin="data.timeWindowBegin"
-        :time-window-end="data.timeWindowEnd"
-      />
-      <g-maintenance-components
-        ref="maintenanceComponents"
-        :hide-os-updates="!hasShootWorkerGroups"
-      />
+    <template #content>
+      <v-card-text>
+        <g-maintenance-time
+          ref="maintenanceTime"
+          :time-window-begin="data.timeWindowBegin"
+          :time-window-end="data.timeWindowEnd"
+        />
+        <g-maintenance-components
+          ref="maintenanceComponents"
+          :hide-os-updates="!hasShootWorkerGroups"
+        />
+        <v-alert
+          type="warning"
+          variant="tonal"
+          :model-value="!isMaintenancePreconditionSatisfied"
+          class="mt-2"
+        >
+          <div class="font-weight-bold">
+            Gardener may be unable to perform required actions during maintenance
+          </div>
+          {{ maintenancePreconditionSatisfiedMessage }}
+        </v-alert>
+      </v-card-text>
     </template>
   </g-action-button-dialog>
 </template>

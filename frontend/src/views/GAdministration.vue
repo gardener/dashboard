@@ -471,10 +471,12 @@ SPDX-License-Identifier: Apache-2.0
       <template #caption>
         Confirm Delete
       </template>
-      <template #message>
-        Are you sure to delete the project <span class="font-weight-bold">{{ projectName }}</span>?
-        <br>
-        <span class="text-error font-weight-bold">The operation can not be undone.</span>
+      <template #content>
+        <v-card-text>
+          Are you sure to delete the project <span class="font-weight-bold">{{ projectName }}</span>?
+          <br>
+          <span class="text-error font-weight-bold">The operation can not be undone.</span>
+        </v-card-text>
       </template>
     </g-dialog>
   </v-container>
@@ -679,10 +681,7 @@ export default {
         try {
           await this.fetchQuotas(this.project.metadata.namespace)
         } catch (err) {
-          this.setAlert({
-            type: 'error',
-            message: `Failed to fetch project quota: ${err.message}`,
-          })
+          this.setError(`Failed to fetch project quota: ${err.message}`)
         }
       },
       { immediate: true },
@@ -690,7 +689,7 @@ export default {
   },
   methods: {
     ...mapActions(useAppStore, [
-      'setAlert',
+      'setError',
     ]),
     ...mapActions(useProjectStore, [
       'patchProject',

@@ -9,6 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     v-model="actionMenu"
     location="left"
     :close-on-content-click="false"
+    eager
   >
     <template #activator="{ props }">
       <g-action-button
@@ -25,7 +26,6 @@ SPDX-License-Identifier: Apache-2.0
         <g-shoot-action-change-hibernation
           v-model="changeHibernationDialog"
           :shoot-item="shootItem"
-          button
           text
         />
       </v-list-item>
@@ -33,7 +33,6 @@ SPDX-License-Identifier: Apache-2.0
         <g-shoot-action-maintenance-start
           v-model="maintenanceStartDialog"
           :shoot-item="shootItem"
-          button
           text
         />
       </v-list-item>
@@ -41,7 +40,6 @@ SPDX-License-Identifier: Apache-2.0
         <g-shoot-action-reconcile-start
           v-model="reconcileStartDialog"
           :shoot-item="shootItem"
-          button
           text
         />
       </v-list-item>
@@ -50,7 +48,6 @@ SPDX-License-Identifier: Apache-2.0
           v-model="rotateCredentialsDialog"
           :shoot-item="shootItem"
           :type="rotationType"
-          button
           text
         />
       </v-list-item>
@@ -59,7 +56,6 @@ SPDX-License-Identifier: Apache-2.0
         <g-shoot-action-delete-cluster
           v-model="deleteClusterDialog"
           :shoot-item="shootItem"
-          button
           text
         />
       </v-list-item>
@@ -73,39 +69,6 @@ SPDX-License-Identifier: Apache-2.0
       </v-list-item>
     </v-list>
   </v-menu>
-  <g-shoot-action-change-hibernation
-    v-model="changeHibernationDialog"
-    :shoot-item="shootItem"
-    dialog
-  />
-  <g-shoot-action-maintenance-start
-    v-model="maintenanceStartDialog"
-    :shoot-item="shootItem"
-    dialog
-  />
-  <g-shoot-action-reconcile-start
-    v-model="reconcileStartDialog"
-    :shoot-item="shootItem"
-    dialog
-  />
-  <g-shoot-action-rotate-credentials
-    v-model="rotateCredentialsDialog"
-    :shoot-item="shootItem"
-    :type="rotationType"
-    dialog
-  />
-  <g-shoot-action-delete-cluster
-    v-if="!canForceDeleteShoot"
-    v-model="deleteClusterDialog"
-    :shoot-item="shootItem"
-    dialog
-  />
-  <g-shoot-action-force-delete
-    v-if="canForceDeleteShoot"
-    v-model="forceDeleteDialog"
-    :shoot-item="shootItem"
-    dialog
-  />
 </template>
 
 <script>

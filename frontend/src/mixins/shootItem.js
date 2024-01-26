@@ -318,10 +318,14 @@ export const shootItem = {
       'projectNameByNamespace',
     ]),
     shootActionToolTip (tooltip) {
-      if (!this.isShootActionsDisabledForPurpose) {
-        return tooltip
+      if (this.isShootActionsDisabledForPurpose) {
+        return 'Actions disabled for clusters with purpose infrastructure'
       }
-      return 'Actions disabled for cluster with purpose infrastructure'
+      if (this.isShootMarkedForDeletion) {
+        return 'Actions disabled for clusters that are marked for deletion'
+      }
+
+      return tooltip
     },
   },
 }

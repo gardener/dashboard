@@ -12,12 +12,14 @@ SPDX-License-Identifier: Apache-2.0
     caption="Configure Purpose"
     @dialog-opened="onConfigurationDialogOpened"
   >
-    <template #actionComponent>
-      <g-purpose
-        ref="purposeRef"
-        :secret="secret"
-        @update-purpose="onUpdatePurpose"
-      />
+    <template #content>
+      <v-card-text>
+        <g-purpose
+          ref="purposeRef"
+          :secret="secret"
+          @update-purpose="onUpdatePurpose"
+        />
+      </v-card-text>
     </template>
   </g-action-button-dialog>
 </template>

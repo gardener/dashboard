@@ -123,8 +123,6 @@ SPDX-License-Identifier: Apache-2.0
           <g-shoot-action-reconcile-start
             v-model="reconcileStartDialog"
             :shoot-item="shootItem"
-            dialog
-            button
           />
         </template>
       </g-list-item>
@@ -165,8 +163,6 @@ SPDX-License-Identifier: Apache-2.0
               v-if="!canForceDeleteShoot"
               v-model="deleteClusterDialog"
               :shoot-item="shootItem"
-              dialog
-              button
             />
             <g-shoot-action-force-delete
               v-if="canForceDeleteShoot"

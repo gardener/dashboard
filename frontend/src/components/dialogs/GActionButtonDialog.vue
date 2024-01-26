@@ -5,30 +5,18 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <div class="g-action-button">
+  <div>
     <template v-if="canPatchShoots">
-      <v-tooltip
-        location="top"
-        max-width="600px"
-        :disabled="disableToolTip"
-      >
-        <template #activator="{ props }">
-          <v-btn
-            v-bind="props"
-            variant="text"
-            :density="isIconButton ? 'comfortable' : 'default'"
-            :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose || disabled"
-            :[iconProp]="icon"
-            :text="buttonText"
-            :color="iconColor"
-            :loading="loading"
-            :width="buttonWidth"
-            :class="{ 'text-none font-weight-regular justify-start': !!buttonText }"
-            @click="showDialog"
-          />
-        </template>
-        {{ actionToolTip }}
-      </v-tooltip>
+      <g-action-button
+        :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose || disabled"
+        :loading="loading"
+        :icon="icon"
+        :color="color"
+        :text="text"
+        :tooltip="actionToolTip"
+        :tooltip-disabled="disableToolTip"
+        @click="showDialog"
+      />
       <g-dialog
         ref="gDialog"
         v-model:error-message="errorMessage"
@@ -45,35 +33,14 @@ SPDX-License-Identifier: Apache-2.0
         <template #affectedObjectName>
           {{ shootName }}
         </template>
-        <template
-          v-if="$slots.top"
-          #top
-        >
-          <slot name="top" />
+        <template #header>
+          <slot name="header" />
         </template>
-        <template
-          v-if="$slots.card"
-          #card
-        >
-          <slot name="card" />
+        <template #content>
+          <slot name="content" />
         </template>
-        <template
-          v-if="$slots.actionComponent"
-          #message
-        >
-          <slot name="actionComponent" />
-        </template>
-        <template
-          v-if="$slots.errorMessage"
-          #errorMessage
-        >
-          <slot name="errorMessage" />
-        </template>
-        <template
-          v-if="$slots.additionalMessage"
-          #additionalMessage
-        >
-          <slot name="additionalMessage" />
+        <template #footer>
+          <slot name="footer" />
         </template>
       </g-dialog>
     </template>
@@ -103,6 +70,10 @@ export default {
       type: String,
       default: 'mdi-cog-outline',
     },
+    color: {
+      type: String,
+      default: 'action-button',
+    },
     caption: {
       type: String,
     },
@@ -127,10 +98,6 @@ export default {
     loading: {
       type: Boolean,
     },
-    iconColor: {
-      type: String,
-      default: 'action-button',
-    },
     disabled: {
       type: Boolean,
       default: false,
@@ -138,7 +105,7 @@ export default {
     disableConfirmInputFocus: {
       type: Boolean,
     },
-    buttonText: {
+    text: {
       type: String,
     },
   },
@@ -155,32 +122,17 @@ export default {
     ...mapState(useAuthzStore, [
       'canPatchShoots',
     ]),
-    iconProp () {
-      return this.isTextButton ? 'prepend-icon' : 'icon'
-    },
     confirmValue () {
       return this.confirmRequired ? this.shootName : undefined
     },
-    isIconButton () {
-      return !this.buttonText
-    },
-    isTextButton () {
-      return !!this.buttonText
-    },
-    buttonWidth () {
-      return this.buttonText ? '100%' : undefined
-    },
     actionToolTip () {
       if (this.tooltip) {
-        return this.tooltip
+        return this.shootActionToolTip(this.tooltip)
       }
       return this.shootActionToolTip(this.caption)
     },
     disableToolTip () {
-      if (this.buttonText === this.actionToolTip) {
-        return true
-      }
-      return false
+      return this.text === this.actionToolTip
     },
   },
   methods: {

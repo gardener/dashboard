@@ -33,9 +33,13 @@ SPDX-License-Identifier: Apache-2.0
     are cleaned
     up to prevent orphaned resources. Gardener will <span class="font-weight-bold">NOT</span> delete any resources in the underlying infrastructure account.
     Hence, use the force delete option at your own risk and only if you are fully aware of these consequences.
-    <p class="font-weight-bold">
-      This action cannot be undone.
-    </p>
+  </v-alert>
+  <v-alert
+    class="mt-2"
+    color="error"
+    border
+  >
+    <span class="ml-4 font-weight-bold">This action cannot be undone</span>
   </v-alert>
   <v-checkbox
     v-model="confirmed"
@@ -95,7 +99,7 @@ export default {
     return {
       confirmed: withFieldName('Confirmation', {
         required: withMessage('Confirmation is required', () => {
-          return !!this.internalValue
+          return !!this.confirmed
         }),
       }),
     }

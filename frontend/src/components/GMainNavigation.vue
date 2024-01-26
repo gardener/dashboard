@@ -88,6 +88,7 @@ SPDX-License-Identifier: Apache-2.0
                 single-line
                 hide-details
                 class="project-filter"
+                spellcheck="false"
                 @keyup.esc="projectFilter = ''"
                 @keyup.enter="navigateToHighlightedProject"
                 @update:model-value="onInputProjectFilter"

@@ -10,7 +10,6 @@ SPDX-License-Identifier: Apache-2.0
       :icon="icon"
       :color="btnColor"
       :loading="loading"
-      size="small"
       :tooltip="tooltipText"
       @click="copyText"
     />
