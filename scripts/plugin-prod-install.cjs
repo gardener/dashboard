@@ -321,7 +321,7 @@ const __ProductionInstallCommand = (require, exports) => {
  *   to the packages not being located in the filesystem subsequently.
  *
  * These changes are detailed in the commit:
- * https://github.com/gardener/dashboard/commit/e6e1cbd963a969579294ad2e584ed5056266331a.
+ * https://github.com/gardener/dashboard/commit/194b6567282bd4b0bbfc9b5e955dbd228f317244.
  */
 const __ProductionInstallFetcher = (require, exports) => {
   /*
