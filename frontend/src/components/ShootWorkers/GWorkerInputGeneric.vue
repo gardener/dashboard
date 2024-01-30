@@ -543,8 +543,14 @@ export default {
       this.v$.worker.maximum.$touch()
     },
     setVolumeDependingOnMachineType () {
-      if (!this.canDefineVolumeSize) {
+      if (!this.hasStorage) {
         delete this.worker.volume
+      }
+      if (!this.canDefineVolumeSize) {
+        delete this.worker.volume?.size
+        if (isEmpty(this.worker.volume)) {
+          delete this.worker.volume
+        }
 
         if (this.selectedMachineType.storage?.size) {
           // Set volumeSize to show it as readonly value to the user
