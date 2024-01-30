@@ -22,14 +22,14 @@
     "registry": "https://npm.pkg.github.com/"
   },
   "scripts": {
-    "serve": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
+    "vite": "NODE_NO_WARNINGS=1 vite",
+    "serve": "run vite",
+    "build": "run vite build",
+    "preview": "run vite preview",
     "eslint": "eslint",
-    "lint": "eslint . --ignore-path .gitignore --ext .js,.vue",
-    "test": "vitest run",
-    "test-ui": "vitest --ui",
-    "test-coverage": "vitest run --coverage"
+    "lint": "run eslint . --ignore-path .gitignore --ext .js,.vue",
+    "vitest": "NODE_NO_WARNINGS=1 vitest",
+    "test": "run vitest run"
   },
   "dependencies": {
     "@braintree/sanitize-url": "^6.0.4",
