@@ -167,11 +167,12 @@ export default defineConfig(({ command, mode }) => {
     const coverage = {
       provider: 'v8',
       exclude: ['**/__fixtures__/**'],
+      all: false,
       thresholds: {
-        statements: 23,
-        branches: 71,
-        functions: 41,
-        lines: 23,
+        statements: 75,
+        branches: 80,
+        functions: 47,
+        lines: 75,
       },
     }
 
