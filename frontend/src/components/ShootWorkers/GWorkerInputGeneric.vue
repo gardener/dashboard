@@ -67,7 +67,7 @@ SPDX-License-Identifier: Apache-2.0
         />
       </div>
       <div
-        v-if="hasStorage"
+        v-if="hasPersistence"
         class="smallInput"
       >
         <g-volume-size-input
@@ -348,7 +348,7 @@ export default {
       return find(this.volumeTypes, ['name', this.worker.volume?.type])
     },
     canDefineVolumeSize () {
-      if (!this.hasStorage) {
+      if (!this.hasPersistence) {
         return false
       }
       if (this.selectedMachineType.storage?.size) {
@@ -356,7 +356,7 @@ export default {
       }
       return true
     },
-    hasStorage () {
+    hasPersistence () {
       if (this.volumeInCloudProfile) {
         return true
       }
@@ -543,19 +543,18 @@ export default {
       this.v$.worker.maximum.$touch()
     },
     setVolumeDependingOnMachineType () {
-      if (!this.hasStorage) {
+      if (this.canDefineVolumeSize) {
+        return
+      }
+
+      delete this.worker.volume?.size
+      if (!this.hasPersistence || isEmpty(this.worker.volume)) {
         delete this.worker.volume
       }
-      if (!this.canDefineVolumeSize) {
-        delete this.worker.volume?.size
-        if (isEmpty(this.worker.volume)) {
-          delete this.worker.volume
-        }
 
-        if (this.selectedMachineType.storage?.size) {
-          // Set volumeSize to show it as readonly value to the user
-          this.volumeSize = this.selectedMachineType.storage.size
-        }
+      if (this.selectedMachineType.storage?.size) {
+        // Set volumeSize to show it as readonly value to the user
+        this.volumeSize = this.selectedMachineType.storage.size
       }
     },
     resetWorkerMachine () {
