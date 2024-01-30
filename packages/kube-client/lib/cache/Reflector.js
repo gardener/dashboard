@@ -7,7 +7,7 @@
 'use strict'
 
 const { format: fmt } = require('util')
-const delay = require('delay')
+const timers = require('timers/promises')
 
 const { globalLogger: logger } = require('@gardener-dashboard/logger')
 const ListPager = require('./ListPager')
@@ -19,6 +19,10 @@ const {
   isAbortError,
   StatusError
 } = require('../ApiErrors')
+
+function delay (milliseconds) {
+  return timers.setTimeout(milliseconds)
+}
 
 function randomize (duration) {
   return Math.round(duration * (Math.random() + 1.0))

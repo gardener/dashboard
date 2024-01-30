@@ -11,10 +11,8 @@
     "javascript",
     "javascriptreact"
   ],
-  "eslint.alwaysShowStatus": true,
   "eslint.codeActionsOnSave.mode": "problems",
   "eslint.debug": true,
-  "eslint.packageManager": "yarn",
   "eslint.workingDirectories": [
     {
       "directory": "./frontend/"
