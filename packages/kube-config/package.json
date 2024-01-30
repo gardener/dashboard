@@ -24,8 +24,8 @@
     "test-coverage": "yarn test --coverage"
   },
   "dependencies": {
-    "@gardener-dashboard/logger": "workspace:*",
-    "@gardener-dashboard/test-utils": "workspace:*",
+    "@gardener-dashboard/logger": "workspace:^",
+    "@gardener-dashboard/test-utils": "workspace:^",
     "chokidar": "^3.5.3",
     "gtoken": "^7.0.1",
     "js-yaml": "^4.1.0",
@@ -79,7 +79,7 @@
       "<rootDir>/jest.setup.js"
     ]
   },
-  "packageManager": "yarn@3.6.3",
+  "packageManager": "yarn@4.0.2",
   "engines": {
     "node": "^20.5.0"
   }

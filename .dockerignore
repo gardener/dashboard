@@ -67,7 +67,7 @@
 # include workspace frontend
 !frontend/.browserslistrc
 !frontend/.env*
-!frontend/.eslintrc.js
+!frontend/.eslintrc.cjs
 !frontend/.gitignore
 !frontend/jsconfig.json
 !frontend/package.json
