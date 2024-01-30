@@ -5,28 +5,30 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <span>
-    <g-text-router-link
-      v-if="canLinkToSecret"
-      :to="{ name: 'Secret', params: { name: secretBindingName, namespace: namespace } }"
-      :text="secretBindingName"
-    />
-    <span v-else>{{ secretBindingName }}</span>
-    <v-tooltip
-      v-if="secret"
-      location="top"
-      activator="parent"
-    >
-      <v-card>
-        <v-card-text>
-          <g-secret-details-item-content
-            infra
-            :secret="secret"
-          />
-        </v-card-text>
-      </v-card>
-    </v-tooltip>
-  </span>
+  <v-tooltip
+    v-if="secret"
+    location="top"
+  >
+    <template #activator="{ props }">
+      <g-text-router-link
+        v-if="canLinkToSecret"
+        v-bind="props"
+        :to="{ name: 'Secret', params: { name: secretBindingName, namespace: namespace } }"
+        :text="secretBindingName"
+      />
+      <span
+        v-else
+        v-bind="props"
+      >{{ secretBindingName }}</span>
+    </template>
+    <v-card>
+      <g-secret-details-item-content
+        class="ma-1"
+        infra
+        :secret="secret"
+      />
+    </v-card>
+  </v-tooltip>
 </template>
 
 <script>

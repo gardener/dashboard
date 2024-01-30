@@ -18,38 +18,33 @@ SPDX-License-Identifier: Apache-2.0
   >
     <template #content>
       <v-card-text>
-        <v-list>
-          <v-list-item-subtitle>
-            Created By
-          </v-list-item-subtitle>
+        <div>
+          Created By
           <v-list-item-title>
             <g-account-avatar
               :account-name=" shootCreatedBy "
-              :size=" 22 "
+              :size="22"
+              class="my-2"
             />
           </v-list-item-title>
-        </v-list>
-        <p>
+        </div>
+        <div class="my-2">
           Type <span class="font-weight-bold">{{ shootName }}</span> below and confirm the deletion of the cluster and all of its content.
-        </p>
+        </div>
         <v-alert
-          class="mt-2"
+          class="my-2"
           color="error"
           border
         >
           <span class="ml-4 font-weight-bold">This action cannot be undone</span>
         </v-alert>
-        <p v-if=" isShootReconciliationDeactivated ">
-          <v-row class="fill-height">
-            <v-icon
-              color="warning"
-              class="mr-1"
-            >
-              mdi-alert-box
-            </v-icon>
-            <span>The cluster will not be deleted as long as reconciliation is deactivated.</span>
-          </v-row>
-        </p>
+        <v-alert
+          v-if="isShootReconciliationDeactivated"
+          class="my-2"
+          type="warning"
+        >
+          <span>The cluster will not be deleted as long as reconciliation is deactivated.</span>
+        </v-alert>
       </v-card-text>
     </template>
   </g-action-button-dialog>
@@ -122,9 +117,3 @@ export default {
   },
 }
 </script>
-
-<style lang="scss" scoped>
-  p {
-    margin-bottom: 0
-  }
-</style>

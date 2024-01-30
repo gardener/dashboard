@@ -14,7 +14,6 @@ SPDX-License-Identifier: Apache-2.0
     confirm-button-text="Force Delete"
     confirm-required
     icon="mdi-delete-forever"
-    color="error"
     @dialog-opened="onConfigurationDialogOpened"
   >
     <template #content>
@@ -55,11 +54,12 @@ export default {
   },
   computed: {
     caption () {
-      return this.isShootMarkedForForceDeletion
-        ? 'Cluster already marked for force deletion'
-        : this.isShootMarkedForDeletion
-          ? 'Cluster already marked for deletion'
-          : this.buttonTitle
+      if (this.isShootMarkedForForceDeletion) {
+        return 'Cluster already marked for force deletion'
+      }
+      return this.isShootMarkedForDeletion
+        ? 'Cluster already marked for deletion'
+        : this.buttonTitle
     },
     buttonTitle () {
       return 'Force Delete Cluster'

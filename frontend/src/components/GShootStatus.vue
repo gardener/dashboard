@@ -235,7 +235,6 @@ export default {
   data () {
     return {
       retryingOperation: false,
-      forceDeleteClusterDialog: false,
     }
   },
   computed: {

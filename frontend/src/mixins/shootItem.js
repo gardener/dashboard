@@ -36,6 +36,14 @@ import {
   compact,
 } from '@/lodash'
 
+const forceDeleteErrorCodes = [
+  'ERR_CLEANUP_CLUSTER_RESOURCES',
+  'ERR_CONFIGURATION_PROBLEM',
+  'ERR_INFRA_DEPENDENCIES',
+  'ERR_INFRA_UNAUTHENTICATED',
+  'ERR_INFRA_UNAUTHORIZED',
+]
+
 export const shootItem = {
   props: {
     shootItem: {
@@ -293,15 +301,7 @@ export const shootItem = {
       }
 
       const shootErrorCodes = errorCodesFromArray(this.shootLastErrors)
-      const forceDeleteErrorCodes = [
-        'ERR_CLEANUP_CLUSTER_RESOURCES',
-        'ERR_CONFIGURATION_PROBLEM',
-        'ERR_INFRA_DEPENDENCIES',
-        'ERR_INFRA_UNAUTHENTICATED',
-        'ERR_INFRA_UNAUTHORIZED',
-      ]
-      const shootHasForceDeleteError = shootErrorCodes.some(item => forceDeleteErrorCodes.includes(item))
-      return shootHasForceDeleteError
+      return shootErrorCodes.some(item => forceDeleteErrorCodes.includes(item))
     },
   },
   methods: {
