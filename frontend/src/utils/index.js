@@ -4,8 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { Buffer } from 'buffer'
-
+import { Base64 } from 'js-base64'
 import semver from 'semver'
 import {
   nextTick,
@@ -381,7 +380,7 @@ export function parseServiceAccountUsername (username) {
 }
 
 export function encodeBase64 (input) {
-  return Buffer.from(input, 'utf8').toString('base64')
+  return Base64.encode(input)
 }
 
 export function encodeBase64Url (input) {
