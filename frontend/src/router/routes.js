@@ -56,7 +56,7 @@ const GShootItem = () => import('@/views/GShootItem.vue')
 const GShootItemTerminal = () => import('@/views/GShootItemTerminal.vue')
 
 export function createRoutes () {
-  const appStore = useAppStore
+  const appStore = useAppStore()
   const authnStore = useAuthnStore()
   const authzStore = useAuthzStore()
   const projectStore = useProjectStore()
@@ -327,7 +327,7 @@ export function createRoutes () {
       beforeEnter (to, from) {
         if (!authzStore.hasShootTerminalAccess) {
           appStore.setError(new Error('Access to cluster terminal is not allowed'))
-          return false
+          return from
         }
       },
     }
@@ -410,7 +410,7 @@ export function createRoutes () {
       beforeEnter (to, from) {
         if (!authzStore.hasGardenTerminalAccess) {
           appStore.setError(new Error('Access to garden terminal is not allowed'))
-          return false
+          return from
         }
         to.params.target = 'garden'
       },
