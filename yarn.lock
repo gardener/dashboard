@@ -785,7 +785,6 @@ __metadata:
     "@vueuse/integrations": "npm:^10.4.1"
     "@vueuse/router": "npm:^10.4.1"
     ansi-html: "npm:^0.0.9"
-    buffer: "npm:^6.0.3"
     codemirror: "npm:^5.65.13"
     dayjs: "npm:^1.11.10"
     downloadjs: "npm:^1.4.7"
@@ -801,6 +800,7 @@ __metadata:
     floating-vue: "npm:2.0.0-beta.24"
     get-contrast: "npm:^3.0.0"
     highlight.js: "npm:^11.8.0"
+    js-base64: "npm:^3.7.6"
     js-cookie: "npm:^3.0.5"
     js-yaml: "npm:^4.1.0"
     jsdom: "npm:^22.1.0"
@@ -2793,13 +2793,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"base64-js@npm:^1.3.1":
-  version: 1.5.1
-  resolution: "base64-js@npm:1.5.1"
-  checksum: f23823513b63173a001030fae4f2dabe283b99a9d324ade3ad3d148e218134676f1ee8568c877cd79ec1c53158dcf2d2ba527a97c606618928ba99dd930102bf
-  languageName: node
-  linkType: hard
-
 "base64id@npm:2.0.0, base64id@npm:~2.0.0":
   version: 2.0.0
   resolution: "base64id@npm:2.0.0"
@@ -2967,16 +2960,6 @@ __metadata:
   version: 1.1.2
   resolution: "buffer-from@npm:1.1.2"
   checksum: 124fff9d66d691a86d3b062eff4663fe437a9d9ee4b47b1b9e97f5a5d14f6d5399345db80f796827be7c95e70a8e765dd404b7c3ff3b3324f98e9b0c8826cc34
-  languageName: node
-  linkType: hard
-
-"buffer@npm:^6.0.3":
-  version: 6.0.3
-  resolution: "buffer@npm:6.0.3"
-  dependencies:
-    base64-js: "npm:^1.3.1"
-    ieee754: "npm:^1.2.1"
-  checksum: 2a905fbbcde73cc5d8bd18d1caa23715d5f83a5935867c2329f0ac06104204ba7947be098fe1317fbd8830e26090ff8e764f08cd14fefc977bb248c3487bcbd0
   languageName: node
   linkType: hard
 
@@ -5467,13 +5450,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ieee754@npm:^1.2.1":
-  version: 1.2.1
-  resolution: "ieee754@npm:1.2.1"
-  checksum: b0782ef5e0935b9f12883a2e2aa37baa75da6e66ce6515c168697b42160807d9330de9a32ec1ed73149aea02e0d822e572bca6f1e22bdcbd2149e13b050b17bb
-  languageName: node
-  linkType: hard
-
 "ignore@npm:^5.1.1, ignore@npm:^5.2.0":
   version: 5.2.4
   resolution: "ignore@npm:5.2.4"
@@ -6438,6 +6414,13 @@ __metadata:
   version: 4.14.6
   resolution: "jose@npm:4.14.6"
   checksum: 29d8b71d04ea4048d800ca50b171ed9a5b907b9232eaa060fb4a99a84966f9df20860b1ef538c4cf9435595a57926fe923a273b82c3a7e6ba4312e0730c5ace0
+  languageName: node
+  linkType: hard
+
+"js-base64@npm:^3.7.6":
+  version: 3.7.6
+  resolution: "js-base64@npm:3.7.6"
+  checksum: d9ae30a04e28e5814c6c606d08ecf9aac16daea0fcbc549e3b971042a4d4ecc7cf60ea96e1c9e8a463ca75fcbfd13613b87bddb3a8fe92801271e7eedcd3e8d3
   languageName: node
   linkType: hard
 

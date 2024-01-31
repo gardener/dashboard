@@ -1319,7 +1319,6 @@ const RAW_RUNTIME_STATE =
           ["@vueuse/integrations", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:10.4.1"],\
           ["@vueuse/router", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:10.4.1"],\
           ["ansi-html", "npm:0.0.9"],\
-          ["buffer", "npm:6.0.3"],\
           ["codemirror", "npm:5.65.15"],\
           ["dayjs", "npm:1.11.10"],\
           ["downloadjs", "npm:1.4.7"],\
@@ -1335,6 +1334,7 @@ const RAW_RUNTIME_STATE =
           ["floating-vue", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.0.0-beta.24"],\
           ["get-contrast", "npm:3.0.0"],\
           ["highlight.js", "npm:11.8.0"],\
+          ["js-base64", "npm:3.7.6"],\
           ["js-cookie", "npm:3.0.5"],\
           ["js-yaml", "npm:4.1.0"],\
           ["jsdom", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:22.1.0"],\
@@ -3912,15 +3912,6 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
-    ["base64-js", [\
-      ["npm:1.5.1", {\
-        "packageLocation": "./.yarn/cache/base64-js-npm-1.5.1-b2f7275641-f23823513b.zip/node_modules/base64-js/",\
-        "packageDependencies": [\
-          ["base64-js", "npm:1.5.1"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
     ["base64id", [\
       ["npm:2.0.0", {\
         "packageLocation": "./.yarn/cache/base64id-npm-2.0.0-ef4afeee0a-6919efd237.zip/node_modules/base64id/",\
@@ -4091,17 +4082,6 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/btoa-lite-npm-1.0.0-e85ee9286e-7a4f0568ae.zip/node_modules/btoa-lite/",\
         "packageDependencies": [\
           ["btoa-lite", "npm:1.0.0"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["buffer", [\
-      ["npm:6.0.3", {\
-        "packageLocation": "./.yarn/cache/buffer-npm-6.0.3-cd90dfedfe-2a905fbbcd.zip/node_modules/buffer/",\
-        "packageDependencies": [\
-          ["buffer", "npm:6.0.3"],\
-          ["base64-js", "npm:1.5.1"],\
-          ["ieee754", "npm:1.2.1"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -7032,15 +7012,6 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
-    ["ieee754", [\
-      ["npm:1.2.1", {\
-        "packageLocation": "./.yarn/cache/ieee754-npm-1.2.1-fb63b3caeb-b0782ef5e0.zip/node_modules/ieee754/",\
-        "packageDependencies": [\
-          ["ieee754", "npm:1.2.1"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
     ["ignore", [\
       ["npm:5.2.4", {\
         "packageLocation": "./.yarn/cache/ignore-npm-5.2.4-fbe6e989e5-7c7cd90edd.zip/node_modules/ignore/",\
@@ -8140,6 +8111,15 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/jose-npm-4.14.6-064fb0f1f6-29d8b71d04.zip/node_modules/jose/",\
         "packageDependencies": [\
           ["jose", "npm:4.14.6"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["js-base64", [\
+      ["npm:3.7.6", {\
+        "packageLocation": "./.yarn/cache/js-base64-npm-3.7.6-1e309aec9f-d9ae30a04e.zip/node_modules/js-base64/",\
+        "packageDependencies": [\
+          ["js-base64", "npm:3.7.6"]\
         ],\
         "linkType": "HARD"\
       }]\
