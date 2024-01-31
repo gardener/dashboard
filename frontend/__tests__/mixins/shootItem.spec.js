@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import { reactive } from 'vue'
 import { shallowMount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
 
@@ -20,15 +21,14 @@ describe('mixins', () => {
     }
 
     it('should compute isShootMarkedForDeletion correctly', () => {
-      const shootItem = {
+      const shootItem = reactive({
         metadata: {
           annotations: {
             'confirmation.gardener.cloud/deletion': 'True',
           },
           deletionTimestamp: '2023-01-01T20:57:01Z',
         },
-      }
-
+      })
       const wrapper = shallowMount(Component, {
         propsData: {
           shootItem,
@@ -39,14 +39,14 @@ describe('mixins', () => {
     })
 
     it('should compute isShootMarkedForForceDeletion correctly', () => {
-      const shootItem = {
+      const shootItem = reactive({
         metadata: {
           annotations: {
             'confirmation.gardener.cloud/force-deletion': 'True',
           },
           deletionTimestamp: '2023-01-01T20:57:01Z',
         },
-      }
+      })
       const wrapper = shallowMount(Component, {
         propsData: {
           shootItem,
@@ -58,13 +58,13 @@ describe('mixins', () => {
     })
 
     it('should compute isShootReconciliationDeactivated correctly', () => {
-      const shootItem = {
+      const shootItem = reactive({
         metadata: {
           annotations: {
             'shoot.gardener.cloud/ignore': 'True',
           },
         },
-      }
+      })
       const wrapper = shallowMount(Component, {
         propsData: {
           shootItem,
@@ -74,14 +74,17 @@ describe('mixins', () => {
       expect(wrapper.vm.isShootReconciliationDeactivated).toBe(true)
     })
 
-    it('should compute isShootStatusHibernationProgressing correctly', async () => {
-      let shootItem = {
+    it('should compute isShootStatusHibernationProgressing correctly', () => {
+      const shootItem = reactive({
         spec: {
           hibernation: {
             enabled: true,
           },
         },
-      }
+        status: {
+          hibernated: undefined,
+        },
+      })
       const wrapper = shallowMount(Component, {
         propsData: {
           shootItem,
@@ -91,32 +94,22 @@ describe('mixins', () => {
       expect(wrapper.vm.isShootSettingHibernated).toBe(true)
       expect(wrapper.vm.isShootStatusHibernationProgressing).toBe(true)
 
-      shootItem = {
-        spec: {
-          hibernation: {
-            enabled: true,
-          },
-        },
-        status: {
-          hibernated: true,
-        },
-      }
-      await wrapper.setProps({ shootItem })
+      shootItem.status.hibernated = true
 
       expect(wrapper.vm.isShootSettingHibernated).toBe(true)
       expect(wrapper.vm.isShootStatusHibernationProgressing).toBe(false)
     })
 
     it('should compute isCustomShootDomain correctly', () => {
-      const shootItem = {
+      const shootItem = reactive({
         spec: {
           dns: {
-            providers: [
-              { primary: true },
-            ],
+            providers: [{
+              primary: true,
+            }],
           },
         },
-      }
+      })
       const wrapper = shallowMount(Component, {
         propsData: {
           shootItem,
@@ -127,13 +120,13 @@ describe('mixins', () => {
     })
 
     it('should compute isShootLastOperationTypeDelete correctly', () => {
-      const shootItem = {
+      const shootItem = reactive({
         status: {
           lastOperation: {
             type: 'Delete',
           },
         },
-      }
+      })
       const wrapper = shallowMount(Component, {
         propsData: {
           shootItem,
@@ -143,14 +136,14 @@ describe('mixins', () => {
       expect(wrapper.vm.isShootLastOperationTypeDelete).toBe(true)
     })
 
-    it('should compute isShootLastOperationTypeControlPlaneMigrating correctly', async () => {
-      let shootItem = {
+    it('should compute isShootLastOperationTypeControlPlaneMigrating correctly', () => {
+      const shootItem = reactive({
         status: {
           lastOperation: {
             type: 'Migrate',
           },
         },
-      }
+      })
       const wrapper = shallowMount(Component, {
         propsData: {
           shootItem,
@@ -159,20 +152,13 @@ describe('mixins', () => {
 
       expect(wrapper.vm.isShootLastOperationTypeControlPlaneMigrating).toBe(true)
 
-      shootItem = {
-        status: {
-          lastOperation: {
-            type: 'Restore',
-          },
-        },
-      }
-      await wrapper.setProps({ shootItem })
+      shootItem.status.lastOperation.type = 'Restore'
 
       expect(wrapper.vm.isShootLastOperationTypeControlPlaneMigrating).toBe(true)
     })
 
     it('should compute isHibernationPossible correctly', () => {
-      const shootItem = {
+      const shootItem = reactive({
         status: {
           constraints: [
             {
@@ -181,7 +167,7 @@ describe('mixins', () => {
             },
           ],
         },
-      }
+      })
       const wrapper = shallowMount(Component, {
         propsData: {
           shootItem,
@@ -192,7 +178,7 @@ describe('mixins', () => {
     })
 
     it('should compute isMaintenancePreconditionSatisfied correctly', () => {
-      const shootItem = {
+      const shootItem = reactive({
         status: {
           constraints: [
             {
@@ -201,7 +187,7 @@ describe('mixins', () => {
             },
           ],
         },
-      }
+      })
       const wrapper = shallowMount(Component, {
         propsData: {
           shootItem,
@@ -212,7 +198,7 @@ describe('mixins', () => {
     })
 
     it('should compute isCACertificateValiditiesAcceptable correctly', () => {
-      const shootItem = {
+      const shootItem = reactive({
         status: {
           constraints: [
             {
@@ -221,7 +207,7 @@ describe('mixins', () => {
             },
           ],
         },
-      }
+      })
       const wrapper = shallowMount(Component, {
         propsData: {
           shootItem,
@@ -232,49 +218,60 @@ describe('mixins', () => {
     })
 
     it('should compute isStaleShoot correctly', () => {
-      const pinia = createTestingPinia({
-        stubActions: false,
-      })
-      const shootStore = useShootStore(pinia)
-      shootStore.isShootActive = () => {
-        return true
-      }
-      const wrapper = shallowMount(Component, {
-        propsData: {
-          shootItem: {},
-        },
-      })
-
-      expect(wrapper.vm.isStaleShoot).toBe(false)
-    })
-
-    it('should compute canForceDeleteShoot correctly', async () => {
-      const shootItem = {
+      const shootItem = reactive({
         metadata: {
-          deletionTimestamp: '2023-01-01T20:57:01Z',
+          uid: '42',
         },
-        status: {
-          lastErrors: [
-            {
-              codes: ['ERR_CLEANUP_CLUSTER_RESOURCES'],
-            },
-          ],
-        },
-      }
-      const pinia = createTestingPinia({
-        stubActions: false,
       })
-      const configStore = useConfigStore(pinia)
-      configStore.features = {
-        shootForceDeletionEnabled: true,
-      }
+      const pinia = createTestingPinia()
+      const shootStore = useShootStore(pinia)
+      shootStore.isShootActive.mockImplementation(uid => uid === '42')
       const wrapper = shallowMount(Component, {
         propsData: {
           shootItem,
         },
+        global: {
+          plugins: [pinia],
+        },
+      })
+
+      expect(wrapper.vm.isStaleShoot).toBe(false)
+
+      shootItem.metadata.uid = '13'
+
+      expect(wrapper.vm.isStaleShoot).toBe(true)
+    })
+
+    it('should compute canForceDeleteShoot correctly', () => {
+      const shootItem = reactive({
+        metadata: {
+          deletionTimestamp: '2023-01-01T20:57:01Z',
+        },
+        status: {
+          lastErrors: [{
+            codes: ['ERR_CLEANUP_CLUSTER_RESOURCES'],
+          }],
+        },
+      })
+      const pinia = createTestingPinia({
+        stubActions: false,
+      })
+      const configStore = useConfigStore(pinia)
+      configStore.isShootForceDeletionEnabled = true
+      const wrapper = shallowMount(Component, {
+        propsData: {
+          shootItem,
+        },
+        global: {
+          plugins: [pinia],
+        },
       })
 
       expect(wrapper.vm.canForceDeleteShoot).toBe(true)
+
+      configStore.isShootForceDeletionEnabled = false
+
+      expect(wrapper.vm.canForceDeleteShoot).toBe(false)
     })
   })
 })

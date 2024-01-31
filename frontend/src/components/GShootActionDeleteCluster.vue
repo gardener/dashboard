@@ -20,13 +20,11 @@ SPDX-License-Identifier: Apache-2.0
       <v-card-text>
         <div>
           Created By
-          <v-list-item-title>
-            <g-account-avatar
-              :account-name=" shootCreatedBy "
-              :size="22"
-              class="my-2"
-            />
-          </v-list-item-title>
+          <g-account-avatar
+            :account-name=" shootCreatedBy "
+            :size="22"
+            class="my-2"
+          />
         </div>
         <div class="my-2">
           Type <span class="font-weight-bold">{{ shootName }}</span> below and confirm the deletion of the cluster and all of its content.

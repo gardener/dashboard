@@ -6,13 +6,11 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div>
     Created By
-    <v-list-item-title>
-      <g-account-avatar
-        :account-name="shootCreatedBy"
-        :size="22"
-        class="my-2"
-      />
-    </v-list-item-title>
+    <g-account-avatar
+      :account-name="shootCreatedBy"
+      :size="22"
+      class="my-2"
+    />
   </div>
   <div class="my-2">
     Type <span class="font-weight-bold">{{ shootName }}</span> below and confirm that you are aware of the side effects and the necessary actions you must take in order to proceed with the forceful deletion of the cluster.
