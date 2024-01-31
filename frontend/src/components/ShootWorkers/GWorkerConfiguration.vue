@@ -110,6 +110,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { defineAsyncComponent } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
+import yaml from 'js-yaml'
 
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GCodeBlock from '@/components/GCodeBlock'
@@ -127,7 +128,6 @@ import {
 } from '@/lodash'
 
 export default {
-
   components: {
     GActionButtonDialog,
     GManageWorkers: defineAsyncComponent(() => import('@/components/ShootWorkers/GManageWorkers')),
@@ -137,7 +137,7 @@ export default {
   mixins: [
     shootItem,
   ],
-  inject: ['api', 'logger', 'yaml'],
+  inject: ['api', 'logger'],
   setup () {
     return {
       ...useAsyncRef('manageWorkers'),
@@ -230,10 +230,10 @@ export default {
 
       await this.manageWorkers.dispatch('setWorkersData', { workers, cloudProfileName, region, updateOSMaintenance, zonesNetworkConfiguration, zonedCluster, existingWorkerCIDR, kubernetesVersion: this.shootK8sVersion })
     },
-    async setNetworkConfiguration (value) {
+    setNetworkConfiguration (value) {
       if (value) {
         this.networkConfiguration = value
-        this.networkConfigurationYaml = await this.yaml.dump(value)
+        this.networkConfigurationYaml = yaml.dump(value)
       } else {
         this.networkConfiguration = []
         this.networkConfigurationYaml = undefined
@@ -255,7 +255,7 @@ export default {
     },
     async getWorkerEditorData () {
       const yaml = await this.workerEditor.dispatch('getContent')
-      const content = await this.yaml.load(yaml)
+      const content = yaml.load(yaml)
       return get(content, 'spec.provider')
     },
     async setEditorData () {

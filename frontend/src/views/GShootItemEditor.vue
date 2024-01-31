@@ -41,6 +41,7 @@ import {
   mapState,
   mapActions,
 } from 'pinia'
+import yaml from 'js-yaml'
 
 import { useAuthzStore } from '@/store/authz'
 import { useShootStore } from '@/store/shoot'
@@ -58,7 +59,7 @@ export default {
     GShootEditor: defineAsyncComponent(() => import('@/components/GShootEditor')),
     GConfirmDialog,
   },
-  inject: ['yaml', 'api', 'logger'],
+  inject: ['api', 'logger'],
   async beforeRouteLeave (to, from, next) {
     if (this.clean) {
       return next()
@@ -113,7 +114,7 @@ export default {
     },
     async getShootResource () {
       const content = await this.shootEditor.dispatch('getContent')
-      return this.yaml.load(content)
+      return yaml.load(content)
     },
     async save () {
       try {

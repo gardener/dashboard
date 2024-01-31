@@ -349,6 +349,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapActions } from 'pinia'
+import yaml from 'js-yaml'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
@@ -365,10 +366,7 @@ export default {
     GVendorIcon,
     GCodeBlock,
   },
-  inject: [
-    'yaml',
-    'activePopoverKey',
-  ],
+  inject: ['activePopoverKey'],
   props: {
     modelValue: {
       type: [String, Number],
@@ -472,8 +470,8 @@ export default {
       'volumeTypesByCloudProfileName',
       'machineImagesByCloudProfileName',
     ]),
-    async updateWorkerGroupYaml (value) {
-      this.workerGroupYaml = await this.yaml.dump(value)
+    updateWorkerGroupYaml (value) {
+      this.workerGroupYaml = yaml.dump(value)
     },
   },
 }

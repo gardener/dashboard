@@ -164,6 +164,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { markRaw } from 'vue'
 import { mapState } from 'pinia'
+import yaml from 'js-yaml'
 import download from 'downloadjs'
 import CodeMirror from 'codemirror'
 import 'codemirror/addon/hint/show-hint.js'
@@ -199,7 +200,7 @@ export default {
     GAlertBanner,
   },
   mixins: [shootItem],
-  inject: ['yaml', 'api', 'logger'],
+  inject: ['api', 'logger'],
   props: {
     alertBannerIdentifier: {
       type: String,
@@ -324,7 +325,8 @@ export default {
       deep: true,
       handler (newValue, oldValue) {
         if (this.untouched) {
-          return this.update(newValue)
+          this.update(newValue)
+          return
         }
         for (const path of ['spec', 'metadata.annotations', 'metadata.labels']) {
           const newProp = get(newValue, path)
@@ -529,9 +531,9 @@ export default {
         this.clearHistory()
       }
     },
-    async update (value = this.value) {
+    update (value = this.value) {
       if (value) {
-        this.setContent(await this.yaml.dump(value))
+        this.setContent(yaml.dump(value))
       }
     },
     onCopy () {
