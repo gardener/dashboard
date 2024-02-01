@@ -58,7 +58,6 @@ import {
   template,
   compact,
   head,
-  max,
   cloneDeep,
   sample,
   pick,
@@ -155,15 +154,16 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return []
   }
 
-  function minimumVolumeSizeByCloudProfileNameAndRegion ({ cloudProfileName, region, secretDomain }) {
-    const defaultMinimumSize = '20Gi'
-    const cloudProfile = cloudProfileByName(cloudProfileName)
-    if (!cloudProfile) {
-      return defaultMinimumSize
+  function minimumVolumeSizeByMachineTypeAndVolumeType ({ machineType, volumeType }) {
+    if (volumeType?.name) {
+      return volumeType.minSize ?? '0Gi'
     }
-    const seedsForCloudProfile = seedStore.seedsForCloudProfile(cloudProfile)
-    const seedsMatchingCloudProfileAndRegion = find(seedsForCloudProfile, { data: { region } })
-    return max(map(seedsMatchingCloudProfileAndRegion, 'volume.minimumSize')) || defaultMinimumSize
+
+    if (machineType?.storage) {
+      return machineType.storage.minSize ?? '0Gi'
+    }
+
+    return '0Gi'
   }
 
   function getDefaultNodesCIDR ({ cloudProfileName }) {
@@ -586,7 +586,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     const volumeTypesForZone = volumeTypesByCloudProfileNameAndRegion({ cloudProfileName, region })
     const volumeType = head(volumeTypesForZone) || {}
     const machineImage = defaultMachineImageForCloudProfileNameAndMachineType(cloudProfileName, machineType)
-    const minVolumeSize = minimumVolumeSizeByCloudProfileNameAndRegion({ cloudProfileName, region })
+    const minVolumeSize = minimumVolumeSizeByMachineTypeAndVolumeType({ machineType, volumeType })
 
     const defaultVolumeSize = parseSize(minVolumeSize) <= parseSize('50Gi') ? '50Gi' : minVolumeSize
     const worker = {
@@ -651,7 +651,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     volumeTypesByCloudProfileNameAndRegion,
     volumeTypesByCloudProfileName,
     defaultMachineImageForCloudProfileNameAndMachineType,
-    minimumVolumeSizeByCloudProfileNameAndRegion,
+    minimumVolumeSizeByMachineTypeAndVolumeType,
     selectedAccessRestrictionsForShootByCloudProfileNameAndRegion,
     labelsByCloudProfileNameAndRegion,
     accessRestrictionNoItemsTextForCloudProfileNameAndRegion,
