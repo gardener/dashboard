@@ -155,11 +155,9 @@ SPDX-License-Identifier: Apache-2.0
               :shoot-item="shootItem"
             />
             <g-shoot-action-force-delete
-              v-if="canForceDeleteShoot"
+              v-else
               v-model="forceDeleteDialog"
               :shoot-item="shootItem"
-              dialog
-              button
             />
           </template>
         </g-list-item>

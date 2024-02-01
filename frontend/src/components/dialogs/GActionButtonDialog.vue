@@ -103,7 +103,7 @@ export default {
       type: Boolean,
       default: false,
     },
-    overrideDeletionFlag: {
+    ignoreDeletionStatus: {
       type: Boolean,
       default: false,
     },
@@ -133,15 +133,15 @@ export default {
     },
     actionToolTip () {
       if (this.tooltip) {
-        return this.shootActionToolTip(this.tooltip, this.overrideDeletionFlag)
+        return this.shootActionToolTip(this.tooltip)
       }
-      return this.shootActionToolTip(this.caption, this.overrideDeletionFlag)
+      return this.shootActionToolTip(this.caption)
     },
     disableToolTip () {
       return this.text === this.actionToolTip
     },
     isDisabled () {
-      return (this.isShootMarkedForDeletion && !this.overrideDeletionFlag) ||
+      return (this.isShootMarkedForDeletion && !this.ignoreDeletionStatus) ||
       this.isShootActionsDisabledForPurpose ||
       this.disabled
     },
@@ -171,6 +171,17 @@ export default {
       if (this.$refs.gDialog) {
         this.$refs.gDialog.hideDialog()
       }
+    },
+    shootActionToolTip(tooltip) {
+      if (this.isShootActionsDisabledForPurpose) {
+        return 'Actions disabled for clusters with purpose infrastructure'
+      }
+
+      if (!this.ignoreDeletionStatus && this.isShootMarkedForDeletion) {
+        return 'Actions disabled for clusters that are marked for deletion'
+      }
+
+      return tooltip
     },
   },
 }

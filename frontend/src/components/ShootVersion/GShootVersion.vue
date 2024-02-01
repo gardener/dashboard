@@ -234,6 +234,17 @@ export default {
 
       this.$refs.shootVersionUpdate.reset()
     },
+    shootActionToolTip(tooltip, overrideDeletionFlag) {
+      if (this.isShootActionsDisabledForPurpose) {
+        return 'Cluster update disabled for clusters with purpose infrastructure'
+      }
+
+      if (this.isShootMarkedForDeletion) {
+        return 'Cluster update disabled for clusters that are marked for deletion'
+      }
+
+      return tooltip
+    },
   },
 }
 </script>

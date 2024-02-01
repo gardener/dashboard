@@ -52,18 +52,17 @@ SPDX-License-Identifier: Apache-2.0
         />
       </v-list-item>
       <v-divider />
-      <v-list-item v-if="!canForceDeleteShoot">
+      <v-list-item>
         <g-shoot-action-delete-cluster
+          v-if="!canForceDeleteShoot"
           v-model="deleteClusterDialog"
           :shoot-item="shootItem"
           text
         />
-      </v-list-item>
-      <v-list-item v-if="canForceDeleteShoot">
         <g-shoot-action-force-delete
+          v-else
           v-model="forceDeleteDialog"
           :shoot-item="shootItem"
-          button
           text
         />
       </v-list-item>

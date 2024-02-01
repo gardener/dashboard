@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
     confirm-button-text="Force Delete"
     confirm-required
     icon="mdi-delete-forever"
-    override-deletion-flag
+    ignore-deletion-status
     :disabled="isShootMarkedForForceDeletion"
     @dialog-opened="onConfigurationDialogOpened"
   >
