@@ -61,10 +61,10 @@ SPDX-License-Identifier: Apache-2.0
             @confirm-required="onConfirmRequired"
           />
           <template v-if="!v$.$invalid && selectedVersionType === 'minor'">
-            <p>
+            <div class="my-2">
               You should always test your scenario and back up all your data before attempting an upgrade. Don’t forget to include the workload inside your cluster!
-            </p>
-            <p>
+            </div>
+            <div class="my-2">
               You should consider the
               <a
                 href="https://github.com/kubernetes/kubernetes/releases"
@@ -76,17 +76,21 @@ SPDX-License-Identifier: Apache-2.0
                 <v-icon style="font-size:80%">mdi-open-in-new</v-icon>
               </a>
               before upgrading your cluster.
-            </p>
-            <p>
-              Type <strong>{{ shootName }}</strong> below and confirm to upgrade the Kubernetes version of your cluster.<br><br>
-            </p>
-            <em class="text-warning">This action cannot be undone.</em>
+            </div>
+            <div class="my-2">
+              Type <strong>{{ shootName }}</strong> below and confirm to upgrade the Kubernetes version of your cluster.
+            </div>
+            <div class="my-2 font-weight-bold">
+              This action cannot be undone.
+            </div>
           </template>
           <template v-if="!v$.$invalid && selectedVersionType === 'patch'">
-            <p>
+            <div class="my-2">
               Applying a patch to your cluster will increase the Kubernetes version which can lead to unexpected side effects.
-            </p>
-            <em class="text-warning">This action cannot be undone.</em>
+            </div>
+            <div class="my-2 font-weight-bold">
+              This action cannot be undone.
+            </div>
           </template>
         </v-card-text>
       </template>

@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <div>
     <template v-if="canPatchShoots">
       <g-action-button
-        :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose || disabled"
+        :disabled="isDisabled"
         :loading="loading"
         :icon="icon"
         :color="color"
@@ -97,13 +97,19 @@ export default {
     },
     loading: {
       type: Boolean,
+      default: false,
     },
     disabled: {
       type: Boolean,
       default: false,
     },
+    overrideDeletionFlag: {
+      type: Boolean,
+      default: false,
+    },
     disableConfirmInputFocus: {
       type: Boolean,
+      default: false,
     },
     text: {
       type: String,
@@ -127,12 +133,17 @@ export default {
     },
     actionToolTip () {
       if (this.tooltip) {
-        return this.shootActionToolTip(this.tooltip)
+        return this.shootActionToolTip(this.tooltip, this.overrideDeletionFlag)
       }
-      return this.shootActionToolTip(this.caption)
+      return this.shootActionToolTip(this.caption, this.overrideDeletionFlag)
     },
     disableToolTip () {
       return this.text === this.actionToolTip
+    },
+    isDisabled () {
+      return (this.isShootMarkedForDeletion && !this.overrideDeletionFlag) ||
+      this.isShootActionsDisabledForPurpose ||
+      this.disabled
     },
   },
   methods: {

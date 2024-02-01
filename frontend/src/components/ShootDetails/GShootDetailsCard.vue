@@ -29,15 +29,18 @@ SPDX-License-Identifier: Apache-2.0
               mdi-clock-outline
             </v-icon>
           </template>
-          <g-list-item-content label="Cluster Termination">
-            <div class="d-flex align-center">
-              <g-shoot-messages
-                :shoot-item="shootItem"
-                filter="cluster-expiration"
-                small
-              />
-              <span>{{ selfTerminationMessage }}</span>
-            </div>
+          <g-list-item-content>
+            <template #label>
+              <div class="d-flex align-center">
+                Cluster Termination
+                <g-shoot-messages
+                  :shoot-item="shootItem"
+                  filter="cluster-expiration"
+                  small
+                />
+              </div>
+            </template>
+            {{ selfTerminationMessage }}
           </g-list-item-content>
         </g-list-item>
       </template>
@@ -48,15 +51,21 @@ SPDX-License-Identifier: Apache-2.0
             mdi-cube-outline
           </v-icon>
         </template>
-        <g-list-item-content label="Kubernetes Version">
+        <g-list-item-content>
+          <template #label>
+            <div class="d-flex align-center">
+              Kubernetes Version
+              <g-shoot-messages
+                v-if="!isShootMarkedForDeletion"
+                :shoot-item="shootItem"
+                filter="k8s"
+                small
+              />
+            </div>
+          </template>
           {{ shootK8sVersion }}
         </g-list-item-content>
         <template #append>
-          <g-shoot-messages
-            v-if="!isShootMarkedForDeletion"
-            :shoot-item="shootItem"
-            filter="k8s"
-          />
           <g-shoot-version :shoot-item="shootItem" />
         </template>
       </g-list-item>
@@ -67,7 +76,18 @@ SPDX-License-Identifier: Apache-2.0
             mdi-server
           </v-icon>
         </template>
-        <g-list-item-content label="Worker Groups">
+        <g-list-item-content>
+          <template #label>
+            <div class="d-flex align-center">
+              Worker Groups
+              <g-shoot-messages
+                v-if="!isShootMarkedForDeletion"
+                :shoot-item="shootItem"
+                filter="machine-image"
+                small
+              />
+            </div>
+          </template>
           <g-worker-groups
             :shoot-item="shootItem"
             class="flex-wrap"
@@ -76,11 +96,6 @@ SPDX-License-Identifier: Apache-2.0
         <template
           #append
         >
-          <g-shoot-messages
-            v-if="!isShootMarkedForDeletion"
-            :shoot-item="shootItem"
-            filter="machine-image"
-          />
           <g-worker-configuration
             :shoot-item="shootItem"
           />

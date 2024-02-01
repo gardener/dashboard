@@ -26,7 +26,6 @@ describe('mixins', () => {
           annotations: {
             'confirmation.gardener.cloud/deletion': 'True',
           },
-          deletionTimestamp: '2023-01-01T20:57:01Z',
         },
       })
       const wrapper = shallowMount(Component, {
@@ -34,8 +33,13 @@ describe('mixins', () => {
           shootItem,
         },
       })
+      expect(wrapper.vm.isShootMarkedForDeletion).toBe(false)
 
+      shootItem.metadata.deletionTimestamp = '2023-01-01T20:57:01Z'
       expect(wrapper.vm.isShootMarkedForDeletion).toBe(true)
+
+      shootItem.metadata.annotations['confirmation.gardener.cloud/deletion'] = 'Foo'
+      expect(wrapper.vm.isShootMarkedForDeletion).toBe(false)
     })
 
     it('should compute isShootMarkedForForceDeletion correctly', () => {
@@ -44,7 +48,6 @@ describe('mixins', () => {
           annotations: {
             'confirmation.gardener.cloud/force-deletion': 'True',
           },
-          deletionTimestamp: '2023-01-01T20:57:01Z',
         },
       })
       const wrapper = shallowMount(Component, {
@@ -52,9 +55,13 @@ describe('mixins', () => {
           shootItem,
         },
       })
+      expect(wrapper.vm.isShootMarkedForForceDeletion).toBe(false)
 
+      shootItem.metadata.deletionTimestamp = '2023-01-01T20:57:01Z'
       expect(wrapper.vm.isShootMarkedForForceDeletion).toBe(true)
-      expect(wrapper.vm.isShootMarkedForDeletion).toBe(true)
+
+      shootItem.metadata.annotations['confirmation.gardener.cloud/force-deletion'] = 'Foo'
+      expect(wrapper.vm.isShootMarkedForForceDeletion).toBe(false)
     })
 
     it('should compute isShootReconciliationDeactivated correctly', () => {
@@ -72,6 +79,9 @@ describe('mixins', () => {
       })
 
       expect(wrapper.vm.isShootReconciliationDeactivated).toBe(true)
+
+      shootItem.metadata.annotations['shoot.gardener.cloud/ignore'] = 'Foo'
+      expect(wrapper.vm.isShootReconciliationDeactivated).toBe(false)
     })
 
     it('should compute isShootStatusHibernationProgressing correctly', () => {
@@ -105,7 +115,7 @@ describe('mixins', () => {
         spec: {
           dns: {
             providers: [{
-              primary: true,
+              primary: false,
             }],
           },
         },
@@ -116,6 +126,9 @@ describe('mixins', () => {
         },
       })
 
+      expect(wrapper.vm.isCustomShootDomain).toBe(false)
+
+      shootItem.spec.dns.providers.push({ primary: true })
       expect(wrapper.vm.isCustomShootDomain).toBe(true)
     })
 
@@ -134,6 +147,9 @@ describe('mixins', () => {
       })
 
       expect(wrapper.vm.isShootLastOperationTypeDelete).toBe(true)
+
+      shootItem.status.lastOperation.type = 'Foo'
+      expect(wrapper.vm.isShootLastOperationTypeDelete).toBe(false)
     })
 
     it('should compute isShootLastOperationTypeControlPlaneMigrating correctly', () => {
@@ -141,6 +157,7 @@ describe('mixins', () => {
         status: {
           lastOperation: {
             type: 'Migrate',
+            state: 'Succeeded',
           },
         },
       })
@@ -152,8 +169,13 @@ describe('mixins', () => {
 
       expect(wrapper.vm.isShootLastOperationTypeControlPlaneMigrating).toBe(true)
 
-      shootItem.status.lastOperation.type = 'Restore'
+      shootItem.status.lastOperation.type = 'Foo'
+      expect(wrapper.vm.isShootLastOperationTypeControlPlaneMigrating).toBe(false)
 
+      shootItem.status.lastOperation.type = 'Restore'
+      expect(wrapper.vm.isShootLastOperationTypeControlPlaneMigrating).toBe(false)
+
+      delete shootItem.status.lastOperation.state
       expect(wrapper.vm.isShootLastOperationTypeControlPlaneMigrating).toBe(true)
     })
 
@@ -175,6 +197,15 @@ describe('mixins', () => {
       })
 
       expect(wrapper.vm.isHibernationPossible).toBe(false)
+
+      shootItem.status.constraints = {
+        type: 'HibernationPossible',
+        status: 'True',
+      }
+      expect(wrapper.vm.isHibernationPossible).toBe(true)
+
+      delete shootItem.status.constraints
+      expect(wrapper.vm.isHibernationPossible).toBe(true)
     })
 
     it('should compute isMaintenancePreconditionSatisfied correctly', () => {
@@ -195,6 +226,15 @@ describe('mixins', () => {
       })
 
       expect(wrapper.vm.isMaintenancePreconditionSatisfied).toBe(false)
+
+      shootItem.status.constraints = {
+        type: 'MaintenancePreconditionsSatisfied',
+        status: 'True',
+      }
+      expect(wrapper.vm.isMaintenancePreconditionSatisfied).toBe(true)
+
+      delete shootItem.status.constraints
+      expect(wrapper.vm.isMaintenancePreconditionSatisfied).toBe(true)
     })
 
     it('should compute isCACertificateValiditiesAcceptable correctly', () => {
@@ -215,6 +255,15 @@ describe('mixins', () => {
       })
 
       expect(wrapper.vm.isCACertificateValiditiesAcceptable).toBe(false)
+
+      shootItem.status.constraints = {
+        type: 'CACertificateValiditiesAcceptable',
+        status: 'False',
+      }
+      expect(wrapper.vm.isCACertificateValiditiesAcceptable).toBe(true)
+
+      delete shootItem.status.constraints
+      expect(wrapper.vm.isCACertificateValiditiesAcceptable).toBe(true)
     })
 
     it('should compute isStaleShoot correctly', () => {
@@ -270,7 +319,14 @@ describe('mixins', () => {
       expect(wrapper.vm.canForceDeleteShoot).toBe(true)
 
       configStore.isShootForceDeletionEnabled = false
+      expect(wrapper.vm.canForceDeleteShoot).toBe(false)
 
+      configStore.isShootForceDeletionEnabled = true
+      delete shootItem.metadata.deletionTimestamp
+      expect(wrapper.vm.canForceDeleteShoot).toBe(false)
+
+      shootItem.metadata.deletionTimestamp = '2023-01-01T20:57:01Z'
+      delete shootItem.status.lastErrors
       expect(wrapper.vm.canForceDeleteShoot).toBe(false)
     })
   })

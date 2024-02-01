@@ -15,16 +15,16 @@ SPDX-License-Identifier: Apache-2.0
           </v-icon>
         </template>
         <g-list-item-content>
-          Hibernation
+          <div class="d-flex align-center">
+            Hibernation
+            <g-shoot-messages
+              :shoot-item="shootItem"
+              :filter="['no-hibernation-schedule', 'hibernation-constraint']"
+              small
+            />
+          </div>
           <template #description>
-            <div class="d-flex align-center pt-1">
-              <g-shoot-messages
-                :shoot-item="shootItem"
-                :filter="['no-hibernation-schedule', 'hibernation-constraint']"
-                small
-              />
-              {{ hibernationDescription }}
-            </div>
+            {{ hibernationDescription }}
           </template>
         </g-list-item-content>
         <template #append>
@@ -52,7 +52,7 @@ SPDX-License-Identifier: Apache-2.0
             Maintenance
             <g-shoot-messages
               :shoot-item="shootItem"
-              filter="last-maintenance"
+              :filter="['last-maintenance', 'maintenance-constraint']"
               show-verbose
               title="Last Maintenance Status"
               small
@@ -62,14 +62,8 @@ SPDX-License-Identifier: Apache-2.0
             <v-tooltip location="top">
               <template #activator="{ props }">
                 <div
-                  class="d-flex align-center"
                   v-bind="props"
                 >
-                  <g-shoot-messages
-                    :shoot-item="shootItem"
-                    filter="maintenance-constraint"
-                    small
-                  />
                   <span v-if="isInMaintenanceWindow">
                     Cluster is currently within the maintenance time window
                     <span v-if="nextMaintenanceEndTimestamp">
@@ -135,27 +129,23 @@ SPDX-License-Identifier: Apache-2.0
             </v-icon>
           </template>
           <g-list-item-content>
-            Delete Cluster
+            <div class="d-flex align-center">
+              Delete Cluster
+              <g-shoot-messages
+                :shoot-item="shootItem"
+                filter="force-delete"
+                show-verbose
+                title="Cluster Deletion Failed"
+                small
+              />
+            </div>
             <template #description>
-              <div
-                v-if="canForceDeleteShoot"
-                class="d-flex align-center"
-              >
+              <span v-if="canForceDeleteShoot">
                 Cluster deletion failed
-                <g-shoot-messages
-                  :shoot-item="shootItem"
-                  filter="force-delete"
-                  show-verbose
-                  title="Cluster Deletion Failed"
-                  small
-                />
-              </div>
-              <div
-                v-else
-                class="d-flex align-center"
-              >
+              </span>
+              <span v-else>
                 Delete cluster and remove all ressources
-              </div>
+              </span>
             </template>
           </g-list-item-content>
           <template #append>

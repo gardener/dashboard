@@ -12,35 +12,44 @@ SPDX-License-Identifier: Apache-2.0
       class="my-2"
     />
   </div>
-  <div class="my-2">
+  <div class="mt-2">
     Type <span class="font-weight-bold">{{ shootName }}</span> below and confirm that you are aware of the side effects and the necessary actions you must take in order to proceed with the forceful deletion of the cluster.
+  </div>
+  <div class="mb-2 font-weight-bold">
+    This action cannot be undone.
   </div>
   <v-alert
     class="my-2"
     type="warning"
     variant="tonal"
   >
-    You <span class="font-weight-bold">MUST</span> ensure that all the resources created in the IaaS account
-    <code>
-      <g-shoot-secret-name
-        :namespace="shootNamespace"
-        :secret-binding-name="shootSecretBindingName"
-      />
-    </code>
-    are cleaned
-    up to prevent orphaned resources. Gardener will <span class="font-weight-bold">NOT</span> delete any resources in the underlying infrastructure account.
-    Hence, use the force delete option at your own risk and only if you are fully aware of these consequences.
-  </v-alert>
-  <v-alert
-    class="my-2"
-    color="error"
-    border
-  >
-    <span class="ml-4 font-weight-bold">This action cannot be undone</span>
+    <div>
+      You <span class="font-weight-bold">MUST</span> ensure that all the resources created in the IaaS account
+      <code>
+        <g-shoot-secret-name
+          :namespace="shootNamespace"
+          :secret-binding-name="shootSecretBindingName"
+        />
+      </code>
+      are cleaned
+      up to prevent orphaned resources. Gardener will <span class="font-weight-bold">NOT</span> delete any resources in the underlying infrastructure account.
+      Hence, use the force delete option at your own risk and only if you are fully aware of these consequences.
+    </div>
+    <div
+      v-if="userErrorCodeObjects.length"
+      class="my-2 font-weight-bold"
+    >
+      Please consider resolving the root cause which will allow Gardener to continue with the regular deletion:
+    </div>
+    <div
+      v-for="({ description }) in userErrorCodeObjects"
+      :key="description"
+    >
+      {{ description }}
+    </div>
   </v-alert>
   <v-checkbox
     v-model="confirmed"
-    :seconds="0"
     hide-details
     class="my-2"
   >
@@ -76,6 +85,12 @@ import {
   withFieldName,
   withMessage,
 } from '@/utils/validators'
+import {
+  objectsFromErrorCodes,
+  errorCodesFromArray,
+} from '@/utils/errorCodes'
+
+import { filter } from '@/lodash'
 
 export default {
   components: {
@@ -101,6 +116,12 @@ export default {
     return {
       confirmed: false,
     }
+  },
+  computed: {
+    userErrorCodeObjects () {
+      const shootErrorCodes = errorCodesFromArray(this.shootLastErrors)
+      return filter(objectsFromErrorCodes(shootErrorCodes), { userError: true })
+    },
   },
 }
 </script>

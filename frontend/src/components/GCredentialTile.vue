@@ -86,15 +86,16 @@ SPDX-License-Identifier: Apache-2.0
           </span>
           <span v-else>{{ phaseCaption }}</span>
         </v-tooltip>
+        <g-shoot-messages
+          v-if="type === 'certificateAuthorities'"
+          :shoot-item="shootItem"
+          :filter="['cacertificatevalidities-constraint']"
+          small
+        />
       </div>
       <template #description>
         <div class="d-flex align-center">
           <template v-if="type === 'certificateAuthorities' && !isCACertificateValiditiesAcceptable">
-            <g-shoot-messages
-              :shoot-item="shootItem"
-              :filter="['cacertificatevalidities-constraint']"
-              small
-            />
             <span class="text-warning">Certificate Authorities will expire in less than one year</span>
           </template>
           <template v-else>

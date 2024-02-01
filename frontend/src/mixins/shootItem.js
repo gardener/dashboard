@@ -317,11 +317,12 @@ export const shootItem = {
     ...mapActions(useProjectStore, [
       'projectNameByNamespace',
     ]),
-    shootActionToolTip (tooltip) {
+    shootActionToolTip (tooltip, overrideDeletionFlag) {
       if (this.isShootActionsDisabledForPurpose) {
         return 'Actions disabled for clusters with purpose infrastructure'
       }
-      if (this.isShootMarkedForDeletion) {
+
+      if (!overrideDeletionFlag && this.isShootMarkedForDeletion) {
         return 'Actions disabled for clusters that are marked for deletion'
       }
 

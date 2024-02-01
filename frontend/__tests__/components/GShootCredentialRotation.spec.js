@@ -10,7 +10,6 @@ import { reactive } from 'vue'
 
 import GShootCredentialRotationCard from '@/components/ShootDetails/GShootCredentialRotationCard.vue'
 import GCredentialTile from '@/components/GCredentialTile.vue'
-import GShootMessages from '@/components/ShootMessages/GShootMessages.vue'
 import GShootActionRotateCredentials from '@/components/GShootActionRotateCredentials.vue'
 
 const { createPlugins } = global.fixtures.helper
@@ -175,8 +174,6 @@ describe('components', () => {
           certificateAuthoritiesWrapper,
         ] = wrapper.findAllComponents(GCredentialTile)
 
-        let shootMessagesWrapper = wrapper.findComponent(GShootMessages)
-        expect(shootMessagesWrapper.exists()).toBe(false)
         expect(certificateAuthoritiesWrapper.vm.iconColor).toBe('primary')
 
         shootItem.status.constraints.push(
@@ -187,8 +184,6 @@ describe('components', () => {
         )
         await certificateAuthoritiesWrapper.vm.$forceUpdate()
 
-        shootMessagesWrapper = certificateAuthoritiesWrapper.findComponent(GShootMessages)
-        expect(shootMessagesWrapper.exists()).toBe(true)
         expect(certificateAuthoritiesWrapper.vm.iconColor).toBe('warning')
       })
 

@@ -77,6 +77,7 @@ import {
   map,
   includes,
   isEmpty,
+  orderBy,
 } from '@/lodash'
 
 export default {
@@ -332,12 +333,16 @@ export default {
       if (!this.filterMatches('force-delete')) {
         return []
       }
+      if (!this.hasFilter) {
+        // Force delete message shall not be visible if no filter is specified
+        return []
+      }
       if (!this.canForceDeleteShoot) {
         return []
       }
       return [{
         key: 'canForceDelete',
-        icon: 'mdi-delete-alert',
+        icon: 'mdi-alert-circle-outline',
         severity: 'error',
         component: {
           name: 'g-force-delete-message',
@@ -356,12 +361,9 @@ export default {
       return 'mdi-alert-circle-outline'
     },
     overallSeverity () {
-      for (const { severity } of this.shootMessages) {
-        if (['error', 'warning', 'verbose'].includes(severity)) {
-          return severity
-        }
-      }
-      return 'info'
+      const severityOrder = { error: 1, warning: 2, info: 3, verbose: 4 }
+      const sortedMessages = orderBy(this.shootMessages, [message => severityOrder[message.severity]], ['asc'])
+      return sortedMessages[0]?.severity ?? 'info'
     },
     overallColor () {
       return this.colorForSeverity(this.overallSeverity)
@@ -384,6 +386,9 @@ export default {
     statusTitle () {
       return this.title ? this.title : `Issues for Cluster ${this.shootName}`
     },
+    hasFilter () {
+      return !isEmpty(this.filter)
+    },
   },
   methods: {
     ...mapActions(useConfigStore, [
@@ -394,7 +399,7 @@ export default {
       'expiringWorkerGroupsForShoot',
     ]),
     filterMatches (value) {
-      if (isEmpty(this.filter)) {
+      if (!this.hasFilter) {
         return true
       }
       if (Array.isArray(this.filter)) {

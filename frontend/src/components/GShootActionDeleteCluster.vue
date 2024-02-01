@@ -26,16 +26,12 @@ SPDX-License-Identifier: Apache-2.0
             class="my-2"
           />
         </div>
-        <div class="my-2">
+        <div class="mt-2">
           Type <span class="font-weight-bold">{{ shootName }}</span> below and confirm the deletion of the cluster and all of its content.
         </div>
-        <v-alert
-          class="my-2"
-          color="error"
-          border
-        >
-          <span class="ml-4 font-weight-bold">This action cannot be undone</span>
-        </v-alert>
+        <div class="mb-2 font-weight-bold">
+          This action cannot be undone.
+        </div>
         <v-alert
           v-if="isShootReconciliationDeactivated"
           class="my-2"
