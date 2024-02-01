@@ -123,11 +123,11 @@ export class K8sAttachAddon {
     if (this._socket.readyState !== WsReadyStateEnum.OPEN) {
       return
     }
-    const length = Buffer.byteLength(data)
-    const buffer = Buffer.alloc(length + 1)
-    buffer.writeUInt8(channel, BufferEnum.CHANNEL_INDEX)
-    buffer.write(data, BufferEnum.DATA_INDEX, 'binary')
-    this._socket.send(buffer)
+    const encoder = new TextEncoder()
+    this._socket.send(new Uint8Array([
+      channel,
+      ...encoder.encode(data),
+    ]))
   }
 }
 
