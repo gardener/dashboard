@@ -24,34 +24,8 @@ import {
 export function getSpecTemplate (infrastructureKind, defaultWorkerCIDR) {
   switch (infrastructureKind) {
     case 'metal':
-      return { // TODO: Remove when metal extension sets this config via mutating webhook, see https://github.com/metal-stack/gardener-extension-provider-metal/issues/32
+      return {
         provider: getProviderTemplate(infrastructureKind, defaultWorkerCIDR),
-        networking: {
-          type: 'calico',
-          pods: '10.244.128.0/18',
-          services: '10.244.192.0/18',
-          providerConfig: {
-            apiVersion: 'calico.networking.extensions.gardener.cloud/v1alpha1',
-            kind: 'NetworkConfig',
-            backend: 'vxlan',
-            ipv4: {
-              autoDetectionMethod: 'interface=lo',
-              mode: 'Always',
-              pool: 'vxlan',
-            },
-            typha: {
-              enabled: true,
-            },
-          },
-        },
-        kubernetes: {
-          kubeControllerManager: {
-            nodeCIDRMaskSize: 23,
-          },
-          kubelet: {
-            maxPods: 510,
-          },
-        },
       }
     default:
       return {

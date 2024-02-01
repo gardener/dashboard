@@ -61,6 +61,7 @@ import {
   cloneDeep,
   sample,
   pick,
+  values,
 } from '@/lodash'
 
 export const useCloudProfileStore = defineStore('cloudProfile', () => {
@@ -220,35 +221,40 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     if (get(cloudProfile, 'metadata.cloudProviderKind') !== 'metal') {
       return
     }
-    const partitionIDs = zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
-    return partitionIDs
+    return zonesByCloudProfileNameAndRegion({cloudProfileName, region})
   }
 
-  function firewallSizesByCloudProfileNameAndRegion ({ cloudProfileName, region, architecture }) {
+  function metalControlPlaneByCloudProfileName (cloudProfileName) {
     const cloudProfile = cloudProfileByName(cloudProfileName)
     if (get(cloudProfile, 'metadata.cloudProviderKind') !== 'metal') {
       return
     }
-    // Firewall Sizes equals to list of machine types for this cloud provider
-    const firewallSizes = machineTypesByCloudProfileNameAndRegionAndArchitecture({ cloudProfileName, region, architecture: undefined })
-    return firewallSizes
+    // Only the first metal control plane is considered by metal
+    return find(values(get(cloudProfile, 'data.providerConfig.metalControlPlanes')))
   }
 
   function firewallImagesByCloudProfileName (cloudProfileName) {
-    const cloudProfile = cloudProfileByName(cloudProfileName)
-    return get(cloudProfile, 'data.providerConfig.firewallImages')
+    const metalControlPlane = metalControlPlaneByCloudProfileName(cloudProfileName)
+
+    return get(metalControlPlane, 'firewallImages')
   }
 
   function firewallNetworksByCloudProfileNameAndPartitionId ({ cloudProfileName, partitionID }) {
-    const cloudProfile = cloudProfileByName(cloudProfileName)
-    const networks = get(cloudProfile, ['data', 'providerConfig', 'firewallNetworks', partitionID])
-    return map(toPairs(networks), ([key, value]) => {
+    const metalControlPlane = metalControlPlaneByCloudProfileName(cloudProfileName)
+    const networks = get(metalControlPlane, ['partitions', partitionID, 'firewallNetworks'])
+
+    return map(toPairs(networks), ([title, value]) => {
       return {
-        key,
+        title,
         value,
-        text: `${key} [${value}]`,
       }
     })
+  }
+
+  function firewallSizesByCloudProfileNameAndPartitionId ({ cloudProfileName, partitionID }) {
+    const metalControlPlane = metalControlPlaneByCloudProfileName(cloudProfileName)
+
+    return get(metalControlPlane, ['partitions', partitionID, 'firewallTypes'])
   }
 
   function machineTypesOrVolumeTypesByCloudProfileNameAndRegion ({ type, cloudProfileName, region }) {
@@ -640,8 +646,8 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     loadBalancerClassNamesByCloudProfileName,
     partitionIDsByCloudProfileNameAndRegion,
     firewallImagesByCloudProfileName,
-    firewallSizesByCloudProfileNameAndRegion,
     firewallNetworksByCloudProfileNameAndPartitionId,
+    firewallSizesByCloudProfileNameAndPartitionId,
     defaultKubernetesVersionForCloudProfileName,
     zonesByCloudProfileNameAndRegion,
     machineArchitecturesByCloudProfileNameAndRegion,
