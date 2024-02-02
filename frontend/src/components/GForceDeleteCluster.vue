@@ -19,32 +19,29 @@ SPDX-License-Identifier: Apache-2.0
     This action cannot be undone.
   </div>
   <v-alert
-    class="my-2"
+    class="my-2 disc-list"
     type="warning"
     variant="tonal"
   >
     <div>
-      You <span class="font-weight-bold">MUST</span> ensure that all the resources created in the
-      <g-vendor
-        style="display: inline !important"
-        :cloud-provider-kind="shootCloudProviderKind"
-      />
-      account are cleaned
-      up to prevent orphaned resources. Gardener will <span class="font-weight-bold">NOT</span> delete any resources in the underlying infrastructure account.
+      You MUST ensure that all the resources created in the account are cleaned
+      up to prevent orphaned resources. Gardener will NOT delete any resources in the underlying infrastructure account.
       Hence, use the force delete option at your own risk and only if you are fully aware of these consequences.
     </div>
     <div
       v-if="userErrorCodeObjects.length"
-      class="my-2 font-weight-bold"
+      class="my-2"
     >
       Please consider resolving the root cause which will allow Gardener to continue with the regular deletion:
     </div>
-    <div
-      v-for="({ description }) in userErrorCodeObjects"
-      :key="description"
-    >
-      {{ description }}
-    </div>
+    <ul>
+      <li
+        v-for="({ description }) in userErrorCodeObjects"
+        :key="description"
+      >
+        {{ description }}
+      </li>
+    </ul>
   </v-alert>
   <v-checkbox
     v-model="confirmed"
@@ -53,7 +50,8 @@ SPDX-License-Identifier: Apache-2.0
   >
     <template #label>
       <span>
-        I confirm that I read the message above and deleted all resources in the underlying infrastructure account
+        I confirm that I read the message above and deleted all resources
+        in the underlying <code>{{ shootCloudProviderKind }}</code> account
         <code>
           <g-shoot-secret-name
             :namespace="shootNamespace"
@@ -77,7 +75,6 @@ import { useVuelidate } from '@vuelidate/core'
 
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
 import GShootSecretName from '@/components/GShootSecretName'
-import GVendor from '@/components/GVendor'
 
 import { shootItem } from '@/mixins/shootItem'
 import {
@@ -95,7 +92,6 @@ export default {
   components: {
     GAccountAvatar,
     GShootSecretName,
-    GVendor,
   },
   mixins: [shootItem],
   setup () {
@@ -125,3 +121,11 @@ export default {
   },
 }
 </script>
+
+<style>
+
+.disc-list ul {
+  padding-left: 20px;
+}
+
+</style>
