@@ -14,14 +14,18 @@ SPDX-License-Identifier: Apache-2.0
   >
     <template #activator="{ props }">
       <div
-        class="d-flex align-center"
+        class="d-inline align-center"
         v-bind="props"
       >
         <g-vendor-icon
           :icon="cloudProviderKind"
-          class="mr-2"
         />
-        {{ description }}
+        <span
+          v-if="description"
+          class="ml-2"
+        >
+          {{ description }}
+        </span>
       </div>
     </template>
     <v-card elevation="12">

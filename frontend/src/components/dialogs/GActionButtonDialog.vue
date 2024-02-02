@@ -172,9 +172,9 @@ export default {
         this.$refs.gDialog.hideDialog()
       }
     },
-    shootActionToolTip(tooltip) {
+    shootActionToolTip (tooltip) {
       if (this.isShootActionsDisabledForPurpose) {
-        return 'Actions disabled for clusters with purpose infrastructure'
+        return 'Actions disabled for clusters with purpose "infrastructure"'
       }
 
       if (!this.ignoreDeletionStatus && this.isShootMarkedForDeletion) {

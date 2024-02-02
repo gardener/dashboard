@@ -24,14 +24,12 @@ SPDX-License-Identifier: Apache-2.0
     variant="tonal"
   >
     <div>
-      You <span class="font-weight-bold">MUST</span> ensure that all the resources created in the IaaS account
-      <code>
-        <g-shoot-secret-name
-          :namespace="shootNamespace"
-          :secret-binding-name="shootSecretBindingName"
-        />
-      </code>
-      are cleaned
+      You <span class="font-weight-bold">MUST</span> ensure that all the resources created in the
+      <g-vendor
+        style="display: inline !important"
+        :cloud-provider-kind="shootCloudProviderKind"
+      />
+      account are cleaned
       up to prevent orphaned resources. Gardener will <span class="font-weight-bold">NOT</span> delete any resources in the underlying infrastructure account.
       Hence, use the force delete option at your own risk and only if you are fully aware of these consequences.
     </div>
@@ -79,6 +77,7 @@ import { useVuelidate } from '@vuelidate/core'
 
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
 import GShootSecretName from '@/components/GShootSecretName'
+import GVendor from '@/components/GVendor'
 
 import { shootItem } from '@/mixins/shootItem'
 import {
@@ -96,6 +95,7 @@ export default {
   components: {
     GAccountAvatar,
     GShootSecretName,
+    GVendor,
   },
   mixins: [shootItem],
   setup () {
