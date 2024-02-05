@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
   >
     <template #activator="{ props }">
       <div
-        class="d-inline align-center"
+        class="d-flex align-center"
         v-bind="props"
       >
         <g-vendor-icon
