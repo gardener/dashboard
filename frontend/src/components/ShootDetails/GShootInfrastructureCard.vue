@@ -36,12 +36,10 @@ SPDX-License-Identifier: Apache-2.0
       </g-list-item>
       <g-list-item v-if="hasShootWorkerGroups">
         <g-list-item-content label="Credential">
-          <g-text-router-link
-            v-if="canLinkToSecret"
-            :to="{ name: 'Secret', params: { name: shootSecretBindingName, namespace: shootNamespace } }"
-            :text="shootSecretBindingName"
+          <g-shoot-secret-name
+            :namespace="shootNamespace"
+            :secret-binding-name="shootSecretBindingName"
           />
-          <span v-else>{{ shootSecretBindingName }}</span>
         </g-list-item-content>
       </g-list-item>
       <g-list-item v-if="secret">
@@ -252,6 +250,7 @@ import { useAuthzStore } from '@/store/authz'
 
 import GCopyBtn from '@/components/GCopyBtn'
 import GShootSeedName from '@/components/GShootSeedName'
+import GShootSecretName from '@/components/GShootSecretName'
 import GVendor from '@/components/GVendor'
 import GDnsProvider from '@/components/ShootDns/GDnsProvider'
 import GDnsConfiguration from '@/components/ShootDns/GDnsConfiguration'
@@ -259,7 +258,6 @@ import GSeedConfiguration from '@/components/GSeedConfiguration'
 import GControlPlaneHighAvailabilityConfiguration from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityConfiguration'
 import GControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityTag'
 import GSecretDetailsItemContent from '@/components/Secrets/GSecretDetailsItemContent'
-import GTextRouterLink from '@/components/GTextRouterLink.vue'
 
 import {
   wildcardObjectsFromStrings,
@@ -278,6 +276,7 @@ export default {
   components: {
     GCopyBtn,
     GShootSeedName,
+    GShootSecretName,
     GVendor,
     GDnsProvider,
     GDnsConfiguration,
@@ -285,7 +284,6 @@ export default {
     GControlPlaneHighAvailabilityConfiguration,
     GControlPlaneHighAvailabilityTag,
     GSecretDetailsItemContent,
-    GTextRouterLink,
   },
   mixins: [shootItem],
   computed: {
@@ -335,9 +333,6 @@ export default {
       }
 
       return get(head(shootLBClasses), 'name')
-    },
-    canLinkToSecret () {
-      return this.shootSecretBindingName && this.shootNamespace
     },
     customDomainChipText () {
       if (this.isCustomShootDomain) {

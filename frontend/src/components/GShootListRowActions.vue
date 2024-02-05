@@ -54,8 +54,14 @@ SPDX-License-Identifier: Apache-2.0
       <v-divider />
       <v-list-item>
         <g-shoot-action-delete-cluster
-
+          v-if="!canForceDeleteShoot"
           v-model="deleteClusterDialog"
+          :shoot-item="shootItem"
+          text
+        />
+        <g-shoot-action-force-delete
+          v-else
+          v-model="forceDeleteDialog"
           :shoot-item="shootItem"
           text
         />
@@ -71,6 +77,7 @@ import GShootActionMaintenanceStart from '@/components/ShootMaintenance/GShootAc
 import GShootActionReconcileStart from '@/components/GShootActionReconcileStart.vue'
 import GShootActionRotateCredentials from '@/components/GShootActionRotateCredentials.vue'
 import GShootActionDeleteCluster from '@/components/GShootActionDeleteCluster.vue'
+import GShootActionForceDelete from '@/components/GShootActionForceDelete.vue'
 
 import { shootItem } from '@/mixins/shootItem'
 
@@ -82,6 +89,7 @@ export default {
     GShootActionReconcileStart,
     GShootActionRotateCredentials,
     GShootActionDeleteCluster,
+    GShootActionForceDelete,
   },
   mixins: [shootItem],
   props: {
@@ -97,6 +105,7 @@ export default {
       maintenanceStartDialog: false,
       rotateCredentialsDialog: false,
       deleteClusterDialog: false,
+      forceDeleteDialog: false,
       rotationType: 'ALL_CREDENTIALS',
     }
   },
