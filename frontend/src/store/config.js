@@ -258,6 +258,10 @@ export const useConfigStore = defineStore('config', () => {
     return features.value?.projectTerminalShortcutsEnabled === true
   })
 
+  const isShootForceDeletionEnabled = computed(() => {
+    return features.value?.shootForceDeletionEnabled === true
+  })
+
   const throttleDelayPerCluster = computed(() => {
     return experimental.value?.throttleDelayPerCluster ?? 10
   })
@@ -384,6 +388,7 @@ export const useConfigStore = defineStore('config', () => {
     serviceAccountDefaultTokenExpiration,
     isTerminalEnabled,
     isProjectTerminalShortcutsEnabled,
+    isShootForceDeletionEnabled,
     throttleDelayPerCluster,
     alertBannerMessage,
     alertBannerType,
