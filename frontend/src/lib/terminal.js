@@ -452,6 +452,10 @@ export class Spinner {
   }
 
   start () {
+    if (this.#intervalId) {
+      return
+    }
+
     const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
     let i = 0
     this._clearTerminal()
@@ -465,6 +469,7 @@ export class Spinner {
 
   stop () {
     clearInterval(this.#intervalId)
+    this.#intervalId = undefined
     this._eraseLine()
     this._showCursor()
   }
