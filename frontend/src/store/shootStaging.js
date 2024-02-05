@@ -88,22 +88,13 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
     return notYetCreated(state)
   })
 
-  const dnsProviderTypes = computed(() => {
-    return map(gardenerExtensionStore.sortedDnsProviderList, 'type')
-  })
-
-  const dnsProviderTypesWithPrimarySupport = computed(() => {
-    return map(filter(gardenerExtensionStore.sortedDnsProviderList, 'primary'), 'type')
-  })
-
   const dnsProviders = computed(() => {
     return state.dnsProviders
   })
 
   const dnsProvidersWithPrimarySupport = computed(() => {
-    const types = dnsProviderTypesWithPrimarySupport.value
     return filter(dnsProviders.value, ({ type, secretName }) => {
-      return includes(types, type) && !!secretName
+      return includes(gardenerExtensionStore.dnsProviderTypesWithPrimarySupport, type) && !!secretName
     })
   })
 
@@ -125,12 +116,8 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
   })
 
   // actions
-  function getDnsProviderSecrets (type) {
-    return secretStore.dnsSecretsByProviderKind(type)
-  }
-
   function findDnsProviderSecret (type, secretName) {
-    const secrets = getDnsProviderSecrets(type)
+    const secrets = secretStore.dnsSecretsByProviderKind(type)
     return find(secrets, ['metadata.secretRef.name', secretName])
   }
 
@@ -188,8 +175,9 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
   }
 
   function addDnsProvider () {
-    const type = head(dnsProviderTypes.value)
-    const secret = head(getDnsProviderSecrets(type))
+    const type = head(gardenerExtensionStore.dnsProviderTypes)
+    const secrets = secretStore.dnsSecretsByProviderKind(type)
+    const secret = head(secrets)
     const secretName = get(secret, 'metadata.name')
     const id = uuidv4()
     state.dnsProviderIds.push(id)
@@ -337,15 +325,12 @@ export const useShootStagingStore = defineStore('shootStaging', () => {
     workerless,
     // getters
     clusterIsNew,
-    dnsProviderTypes,
-    dnsProviderTypesWithPrimarySupport,
     dnsProviders,
     dnsProvidersWithPrimarySupport,
     dnsPrimaryProvider,
     dnsDefaultPrimaryProviderId,
     controlPlaneFailureToleranceTypeChangeAllowed,
     // actions
-    getDnsProviderSecrets,
     findDnsProviderSecret,
     getDnsConfiguration,
     setDnsDomain,

@@ -141,7 +141,6 @@ import {
   get,
   head,
   find,
-  map,
 } from '@/lodash'
 
 export default {
@@ -178,12 +177,7 @@ export default {
       'dnsPrimaryProviderId',
       'clusterIsNew',
     ]),
-    ...mapState(useGardenerExtensionStore, [
-      'sortedDnsProviderList',
-    ]),
-    dnsProviderTypes () {
-      return map(this.sortedDnsProviderList, 'type')
-    },
+    ...mapState(useGardenerExtensionStore, ['dnsProviderTypes']),
     dnsProvider () {
       return this.dnsProviders[this.dnsProviderId]
     },
@@ -209,7 +203,8 @@ export default {
         return get(this.dnsProvider, 'type')
       },
       set (value) {
-        const defaultDnsSecret = head(this.getDnsProviderSecrets(value))
+        const dnsSecrets = this.dnsSecretsByProviderKind(value)
+        const defaultDnsSecret = head(dnsSecrets)
         this.setData({
           type: value,
           secretName: get(defaultDnsSecret, 'metadata.secretRef.name', null),
@@ -283,8 +278,6 @@ export default {
     ...mapActions(useShootStagingStore, [
       'patchDnsProvider',
       'deleteDnsProvider',
-      'getDnsProviderSecrets',
-      'dnsSecretsByProviderKind',
     ]),
     ...mapActions(useSecretStore, [
       'dnsSecretsByProviderKind',
