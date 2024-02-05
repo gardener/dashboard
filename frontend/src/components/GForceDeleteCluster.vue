@@ -32,9 +32,9 @@ SPDX-License-Identifier: Apache-2.0
       v-if="userErrorCodeObjects.length"
       class="my-2"
     >
-      Please consider resolving the root cause which will allow Gardener to continue with the regular deletion:
+      Consider resolving the root cause which will allow Gardener to continue with the regular deletion:
     </div>
-    <ul>
+    <ul class="pl-3">
       <li
         v-for="({ description }) in userErrorCodeObjects"
         :key="description"
@@ -121,11 +121,3 @@ export default {
   },
 }
 </script>
-
-<style>
-
-.disc-list ul {
-  padding-left: 20px;
-}
-
-</style>
