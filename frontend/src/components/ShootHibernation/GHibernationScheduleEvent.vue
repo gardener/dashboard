@@ -288,20 +288,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.regular-input {
-  max-width: 300px;
-  min-width: 180px;
-  flex: 1 1 auto;
-  padding: 12px;
-}
-
-.large-input {
-  max-width: 600px;
-  min-width: 300px;
-  flex: 1 1 auto;
-  padding: 12px;
-}
-
 :deep(.v-chip--disabled) {
   opacity: 1;
 }

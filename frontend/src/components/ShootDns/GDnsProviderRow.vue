@@ -306,13 +306,3 @@ export default {
   },
 }
 </script>
-
-<style lang="scss" scoped>
-  .regular-input {
-    width: 250px;
-    max-width: 300px;
-    flex: 1 1 auto;
-    padding: 12px;
-  }
-
-</style>
