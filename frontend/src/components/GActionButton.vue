@@ -5,16 +5,22 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div class="g-action-button">
+  <div
+    class="mx-0"
+    :class="isTextBtn ? 'g-action-text-button' : 'g-action-button'"
+  >
     <v-btn
       variant="text"
-      :density="density"
+      :density="buttonDensity"
       :disabled="disabled"
-      :icon="icon"
+      :[iconProp]="icon"
       :text="text"
       :color="color"
       :size="size"
       :to="to"
+      :loading="loading"
+      :width="isTextBtn ? '100%' : undefined"
+      :class="{ 'text-none font-weight-regular justify-start': isTextBtn }"
       @click.stop.prevent="emit('click', $event)"
     />
     <v-tooltip
@@ -61,7 +67,6 @@ const props = defineProps({
   },
   density: {
     type: String,
-    default: 'comfortable',
   },
   tooltip: {
     type: String,
@@ -72,6 +77,9 @@ const props = defineProps({
   },
   to: {
     type: [Object, String],
+  },
+  loading: {
+    type: Boolean,
   },
 })
 
@@ -84,4 +92,32 @@ const { disabled, icon, text, color, size, tooltip, to } = toRefs(props)
 const hasTooltip = computed(() => {
   return !!slots.tooltip || !!tooltip.value
 })
+
+const isTextBtn = computed(() => {
+  return !!props.text
+})
+
+const iconProp = computed(() => {
+  return isTextBtn.value ? 'prepend-icon' : 'icon'
+})
+
+const buttonDensity = computed(() => {
+  const defaultDensity = isTextBtn.value
+    ? 'default'
+    : 'comfortable'
+  return props.density
+    ? props.density
+    : defaultDensity
+})
+
 </script>
+
+<style>
+.g-action-button {
+  width: fit-content;
+}
+
+.g-action-text-button {
+  width: 100%;
+}
+</style>

@@ -6,14 +6,15 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <g-popover
-    v-if="visible"
-    v-model="popover"
+    v-model="internalValue"
+    :disabled="!visible"
     :toolbar-title="statusTitle"
     :toolbar-color="overallColor"
     content-text-class="pa-0"
   >
     <template #activator="{ props }">
       <g-action-button
+        v-if="visible"
         v-bind="props"
         :icon="icon"
         :color="overallColor"
@@ -87,7 +88,11 @@ export default {
     GMaintenanceStatusMessage,
   },
   mixins: [shootItem],
-  inject: ['mainContainer', 'logger'],
+  inject: [
+    'mainContainer',
+    'logger',
+    'activePopoverKey',
+  ],
   props: {
     small: {
       type: Boolean,
@@ -115,6 +120,20 @@ export default {
     ...mapState(useAuthzStore, [
       'canPatchShoots',
     ]),
+    popoverKey () {
+      const key = Array.isArray(this.filter)
+        ? this.filter.join(',')
+        : this.filter ?? '*'
+      return `g-shoot-messages[${key}]:${this.shootMetadata.uid}`
+    },
+    internalValue: {
+      get () {
+        return this.activePopoverKey === this.popoverKey
+      },
+      set (value) {
+        this.activePopoverKey = value ? this.popoverKey : ''
+      },
+    },
     visible () {
       return !this.isShootMarkedForDeletion && this.shootMessages.length
     },

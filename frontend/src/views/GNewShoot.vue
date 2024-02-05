@@ -7,11 +7,11 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div
     v-if="sortedInfrastructureKindList.length"
-    class="newshoot-container"
+    class="d-flex flex-column justify-space-between fill-height"
   >
     <v-container
+      class="overflow-auto"
       fluid
-      class="newshoot-cards"
     >
       <v-card flat>
         <g-toolbar title="Infrastructure" />
@@ -135,30 +135,28 @@ SPDX-License-Identifier: Apache-2.0
           />
         </v-card-text>
       </v-card>
-      <div
-        v-if="errorMessage"
-        ref="errorAlert"
-        class="mb-6"
-      >
-        <g-message
-          v-model:message="errorMessage"
-          v-model:detailed-message="detailedErrorMessage"
-          color="error"
-          class="error-alert"
-        />
-      </div>
     </v-container>
-    <v-divider />
-    <div class="d-flex align-center justify-end toolbar">
-      <v-divider vertical />
-      <v-btn
-        variant="text"
-        color="primary"
-        @click.stop="createClicked()"
-      >
-        Create
-      </v-btn>
-      <g-confirm-dialog ref="confirmDialog" />
+    <div>
+      <g-message
+        v-if="errorMessage"
+        v-model:message="errorMessage"
+        v-model:detailed-message="detailedErrorMessage"
+        color="error"
+        class="ma-0"
+        tile
+      />
+      <v-divider />
+      <div class="d-flex align-center justify-end toolbar">
+        <v-divider vertical />
+        <v-btn
+          variant="text"
+          color="primary"
+          @click.stop="createClicked()"
+        >
+          Create
+        </v-btn>
+        <g-confirm-dialog ref="confirmDialog" />
+      </div>
     </div>
   </div>
   <v-alert
@@ -561,11 +559,6 @@ export default {
         const message = messageFromErrors(this.v$.$errors)
         this.errorMessage = 'There are input errors that you need to resolve'
         this.detailedErrorMessage = message
-
-        this.$nextTick(() => {
-          // Need to wait for the new element to be rendered, before we can scroll it into view
-          this.$refs.errorAlert.scrollIntoView()
-        })
         return
       }
       const shootResource = await this.updateShootResourceWithUIComponents()
@@ -584,11 +577,6 @@ export default {
         this.errorMessage = 'Failed to create cluster.'
         this.detailedErrorMessage = errorDetails.detailedMessage
         this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-
-        this.$nextTick(() => {
-          // Need to wait for the new element to be rendered, before we can scroll it into view
-          this.$refs.errorAlert.scrollIntoView()
-        })
       }
     },
     confirmNavigation () {
@@ -615,22 +603,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.cardTitle {
-  line-height: 10px;
-}
-
 .toolbar {
   height: 48px;
   padding-right: 10px;
-}
-
-.newshoot-container {
-  height: 100%;
-  overflow: hidden;
-}
-
-.newshoot-cards {
-  max-height: calc(100% - 48px);
-  overflow: auto;
 }
 </style>

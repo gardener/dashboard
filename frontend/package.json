@@ -1,9 +1,10 @@
 {
   "name": "@gardener-dashboard/frontend",
-  "version": "1.71.0",
+  "version": "1.72.0",
   "description": "Gardener Dashboard Client",
   "license": "Apache-2.0",
   "author": "Koser, Holger <holger.koser@sap.com>",
+  "type": "module",
   "contributors": [
     "Herz, Andreas <andreas.herz@sap.com>",
     "Sutter, Peter <peter.sutter@sap.com>",
@@ -21,14 +22,14 @@
     "registry": "https://npm.pkg.github.com/"
   },
   "scripts": {
-    "serve": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
+    "vite": "NODE_NO_WARNINGS=1 vite",
+    "serve": "run vite",
+    "build": "run vite build",
+    "preview": "run vite preview",
     "eslint": "eslint",
-    "lint": "eslint . --ignore-path .gitignore --ext .js,.vue",
-    "test": "vitest run",
-    "test-ui": "vitest --ui",
-    "test-coverage": "vitest run --coverage"
+    "lint": "run eslint . --ignore-path .gitignore --ext .js,.vue",
+    "vitest": "NODE_NO_WARNINGS=1 vitest",
+    "test": "run vitest run"
   },
   "dependencies": {
     "@braintree/sanitize-url": "^6.0.4",
@@ -66,18 +67,18 @@
     "universal-cookie": "^4.0.4",
     "url-template": "^3.1.0",
     "uuid": "^9.0.1",
-    "vue": "^3.3.4",
+    "vue": "^3.4.15",
     "vue-router": "^4.2.5",
-    "vuetify": "^3.4.6",
+    "vuetify": "^3.5.1",
     "xterm": "^5.3.0",
     "xterm-addon-fit": "^0.8.0",
     "xterm-addon-web-links": "^0.9.0"
   },
   "devDependencies": {
     "@pinia/testing": "^0.1.2",
-    "@vitejs/plugin-vue": "^4.2.3",
-    "@vitest/coverage-v8": "^0.33.0",
-    "@vitest/ui": "^0.34.1",
+    "@vitejs/plugin-vue": "^5.0.3",
+    "@vitest/coverage-v8": "^1.2.1",
+    "@vitest/ui": "^1.2.1",
     "@vue/test-utils": "^2.4.1",
     "eslint": "^8.36.0",
     "eslint-config-standard": "^17.0.0",
@@ -88,16 +89,16 @@
     "eslint-plugin-vitest": "^0.0.57",
     "eslint-plugin-vue": "^9.3.0",
     "jsdom": "^22.1.0",
-    "rollup-plugin-visualizer": "^5.9.0",
+    "rollup-plugin-visualizer": "^5.12.0",
     "sass": "^1.62.0",
-    "unplugin-fonts": "^1.0.3",
-    "vite": "^4.4.12",
+    "unplugin-fonts": "^1.1.1",
+    "vite": "^5.0.12",
     "vite-plugin-compression": "^0.5.1",
-    "vite-plugin-vuetify": "^1.0.2",
-    "vitest": "^0.33.0",
+    "vite-plugin-vuetify": "^2.0.1",
+    "vitest": "^1.2.1",
     "vitest-fetch-mock": "^0.2.2"
   },
-  "packageManager": "yarn@3.6.3",
+  "packageManager": "yarn@4.0.2",
   "engines": {
     "node": "^20.5.0"
   }

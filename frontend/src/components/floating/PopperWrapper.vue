@@ -23,8 +23,8 @@ SPDX-License-Identifier: Apache-2.0
     v-bind="makePopperProps($attrs)"
     :theme="finalTheme"
     :target-nodes="getTargetNodes"
-    :reference-node="() => $refs.reference"
-    :popper-node="() => $refs.popperContent.$el"
+    :reference-node="getReferenceNode"
+    :popper-node="getPopperNode"
   >
     <div
       ref="reference"
@@ -122,6 +122,12 @@ export default {
     getTargetNodes () {
       return Array.from(this.$refs.reference.children)
         .filter(node => node !== this.$refs.popperContent.$el)
+    },
+    getReferenceNode () {
+      return this.$refs.reference
+    },
+    getPopperNode () {
+      return this.$refs.popperContent.$el
     },
     makePopperProps (attrs) {
       return omit(attrs, referenceProps)

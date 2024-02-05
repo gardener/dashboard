@@ -612,6 +612,9 @@ export const useShootStore = defineStore('shoot', () => {
   }
 
   async function closeSubscription () {
+    if (state.subscriptionState === constants.CLOSED) {
+      return
+    }
     const shootStore = this
     shootStore.$patch(({ state }) => {
       state.subscription = null

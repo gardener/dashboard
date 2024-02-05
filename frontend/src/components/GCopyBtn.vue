@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     <g-action-button
       :icon="icon"
       :color="btnColor"
-      size="small"
+      :loading="loading"
       :tooltip="tooltipText"
       @click="copyText"
     />
@@ -58,6 +58,9 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  loading: {
+    type: Boolean,
+  },
 })
 
 let timeoutId
@@ -94,6 +97,9 @@ const emit = defineEmits([
 const copyText = async () => {
   try {
     const text = await toValue(props.clipboardText)
+    if (text === false || text === undefined) {
+      throw Error('Could not fetch text to copy')
+    }
     await navigator.clipboard.writeText(text)
     copySucceeded.value = true
     clearTimeout(timeoutId)

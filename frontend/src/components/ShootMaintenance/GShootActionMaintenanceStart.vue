@@ -5,49 +5,39 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-shoot-action-dialog
-    v-if="dialog"
+  <g-action-button-dialog
     ref="actionDialog"
     :shoot-item="shootItem"
+    width="600"
     :caption="caption"
-    confirm-button-text="Trigger now"
-    width="900"
-  >
-    <div class="text-subtitle-1 pt-4">
-      Do you want to start the maintenance of your cluster outside of the configured maintenance time window?
-    </div>
-    <g-maintenance-components
-      ref="maintenanceComponents"
-      title="The following updates might be performed"
-      :hide-os-updates="!hasShootWorkerGroups"
-      :selectable="false"
-    />
-    <v-alert
-      type="warning"
-      variant="outlined"
-      :value="!isMaintenancePreconditionSatisfied"
-    >
-      <div class="font-weight-bold">
-        Your hibernation schedule may not have any effect:
-      </div>
-      {{ maintenancePreconditionSatisfiedMessage }}
-    </v-alert>
-  </g-shoot-action-dialog>
-  <g-shoot-action-button
-    v-if="button"
-    ref="actionButton"
-    :shoot-item="shootItem"
-    :loading="isMaintenanceToBeScheduled"
-    icon="mdi-refresh"
     :text="buttonText"
-    :caption="caption"
-    @click="internalValue = true"
-  />
+    confirm-button-text="Trigger now"
+    icon="mdi-refresh"
+    :disabled="!isMaintenancePreconditionSatisfied"
+    @dialog-opened="onConfigurationDialogOpened"
+  >
+    <template #content>
+      <v-card-text>
+        <div class="text-subtitle-1 pt-4">
+          Do you want to start the maintenance of your cluster outside of the configured maintenance time window?
+        </div>
+        <g-maintenance-components
+          ref="maintenanceComponents"
+          title="The following updates might be performed"
+          :hide-os-updates="!hasShootWorkerGroups"
+          :selectable="false"
+        />
+      </v-card-text>
+    </template>
+  </g-action-button-dialog>
 </template>
 
 <script>
-import GShootActionButton from '@/components/GShootActionButton.vue'
-import GShootActionDialog from '@/components/GShootActionDialog.vue'
+import { mapActions } from 'pinia'
+
+import { useAppStore } from '@/store/app'
+
+import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog.vue'
 import GMaintenanceComponents from '@/components/ShootMaintenance/GMaintenanceComponents'
 
 import { shootItem } from '@/mixins/shootItem'
@@ -57,12 +47,11 @@ import { get } from '@/lodash'
 
 export default {
   components: {
-    GShootActionButton,
-    GShootActionDialog,
+    GActionButtonDialog,
     GMaintenanceComponents,
   },
   mixins: [shootItem],
-  inject: ['api', 'notify', 'logger'],
+  inject: ['api', 'logger'],
   props: {
     modelValue: {
       type: Boolean,
@@ -72,36 +61,20 @@ export default {
       type: Boolean,
       default: false,
     },
-    dialog: {
-      type: Boolean,
-      default: false,
-    },
-    button: {
-      type: Boolean,
-      default: false,
-    },
   },
-  emits: [
-    'update:modelValue',
-  ],
   data () {
     return {
       maintenanceTriggered: false,
     }
   },
   computed: {
-    internalValue: {
-      get () {
-        return this.modelValue
-      },
-      set (value) {
-        this.$emit('update:modelValue', value)
-      },
-    },
     isMaintenanceToBeScheduled () {
       return this.shootGardenOperation === 'maintain'
     },
     caption () {
+      if (!this.isMaintenancePreconditionSatisfied) {
+        return this.maintenancePreconditionSatisfiedMessage
+      }
       if (this.isMaintenanceToBeScheduled) {
         return 'Requesting to schedule cluster maintenance'
       }
@@ -124,18 +97,6 @@ export default {
     },
   },
   watch: {
-    modelValue (value) {
-      if (this.dialog) {
-        const actionDialog = this.$refs.actionDialog
-        if (value) {
-          this.reset()
-          actionDialog.showDialog()
-          this.waitForConfirmation()
-        } else {
-          actionDialog.hideDialog()
-        }
-      }
-    },
     isMaintenanceToBeScheduled (maintenanceToBeScheduled) {
       const isMaintenanceScheduled = !maintenanceToBeScheduled && this.maintenanceTriggered
       if (!isMaintenanceScheduled) {
@@ -147,28 +108,18 @@ export default {
         return
       }
 
-      this.notify({
-        text: `Maintenance scheduled for ${this.shootName}`,
-        type: 'success',
-        position: 'bottom right',
-        duration: 5000,
-      })
+      this.setSuccess(`Maintenance scheduled for ${this.shootName}`)
     },
   },
   methods: {
-    waitForConfirmation () {
-      this.$nextTick(async () => {
-        const actionDialog = this.$refs.actionDialog
-        try {
-          if (await actionDialog.waitForDialogClosed()) {
-            this.startMaintenance()
-          }
-        } catch (err) {
-          /* ignore error */
-        } finally {
-          this.internalValue = false
-        }
-      })
+    ...mapActions(useAppStore, [
+      'setSuccess',
+    ]),
+    async onConfigurationDialogOpened () {
+      await this.reset()
+      if (await this.$refs.actionDialog.waitForDialogClosed()) {
+        this.startMaintenance()
+      }
     },
     async startMaintenance () {
       this.maintenanceTriggered = true

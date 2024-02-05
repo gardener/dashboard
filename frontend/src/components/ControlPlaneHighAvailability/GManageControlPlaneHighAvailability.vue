@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-alert
           v-if="controlPlaneFailureToleranceType === 'node' && !zoneSupported"
           type="info"
-          variant="outlined"
+          variant="tonal"
         >
           <template v-if="clusterIsNew">
             <template v-if="seedName">
@@ -52,7 +52,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-alert
           v-if="controlPlaneFailureToleranceTypeChangeAllowed"
           type="info"
-          variant="outlined"
+          variant="tonal"
         >
           It is not possible to disable or change control plane high availability later.
         </v-alert>

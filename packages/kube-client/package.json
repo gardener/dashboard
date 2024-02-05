@@ -24,10 +24,9 @@
     "test-coverage": "yarn test --coverage"
   },
   "dependencies": {
-    "@gardener-dashboard/kube-config": "workspace:*",
-    "@gardener-dashboard/logger": "workspace:*",
-    "@gardener-dashboard/request": "workspace:*",
-    "delay": "^4.4.1",
+    "@gardener-dashboard/kube-config": "workspace:^",
+    "@gardener-dashboard/logger": "workspace:^",
+    "@gardener-dashboard/request": "workspace:^",
     "http-errors": "^2.0.0",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
@@ -35,7 +34,7 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@gardener-dashboard/test-utils": "workspace:*",
+    "@gardener-dashboard/test-utils": "workspace:^",
     "abort-controller": "^3.0.0",
     "eslint": "^8.36.0",
     "eslint-config-standard": "^17.0.0",
@@ -89,7 +88,7 @@
       "<rootDir>/jest.setup.js"
     ]
   },
-  "packageManager": "yarn@3.6.3",
+  "packageManager": "yarn@4.0.2",
   "engines": {
     "node": "^20.5.0"
   }

@@ -38,17 +38,17 @@ const wellKnownConditions = {
     showAdminOnly: true,
     sortOrder: '1',
   },
-  EveryNodeReady: {
-    name: 'Nodes',
-    shortName: 'N',
-    description: 'Indicates whether all nodes registered to the cluster are healthy and up-to-date. If this is in error state there then there is probably an issue with the cluster nodes. In worst case there is currently not enough capacity to schedule all the workloads/pods running in the cluster and that might cause a service disruption of your applications.',
-    sortOrder: '3',
-  },
   SystemComponentsHealthy: {
     name: 'System Components',
     shortName: 'SC',
     description: 'Indicates whether all system components in the kube-system namespace are up and running. Gardener manages these system components and should automatically take care that the components become healthy again.',
     sortOrder: '2',
+  },
+  EveryNodeReady: {
+    name: 'Nodes',
+    shortName: 'N',
+    description: 'Indicates whether all nodes registered to the cluster are healthy and up-to-date. If this is in error state there then there is probably an issue with the cluster nodes. In worst case there is currently not enough capacity to schedule all the workloads/pods running in the cluster and that might cause a service disruption of your applications.',
+    sortOrder: '3',
   },
   ObservabilityComponentsHealthy: {
     name: 'Observability Components',
@@ -67,6 +67,30 @@ const wellKnownConditions = {
     shortName: 'H',
     description: 'Indicates whether Gardener is able to hibernate this cluster. If you do not resolve this issue your hibernation schedule may not have any effect.',
     sortOrder: '6',
+  },
+  BackupBucketsReady: {
+    name: 'Seed Backup Buckets',
+    shortName: 'BB',
+    description: 'Indicates that associated BackupBuckets are ready.',
+    sortOrder: '7',
+  },
+  ExtensionsReady: {
+    name: 'Seed Extensions',
+    shortName: 'E',
+    description: 'Indicates that the extensions are ready.',
+    sortOrder: '8',
+  },
+  GardenletReady: {
+    name: 'Seed Gardenlet',
+    shortName: 'G',
+    description: 'Indicates that the Gardenlet is ready.',
+    sortOrder: '9',
+  },
+  SeedSystemComponentsHealthy: {
+    name: 'Seed System Components',
+    shortName: 'SSC',
+    description: 'Indicates the system components health',
+    sortOrder: '10',
   },
 }
 
@@ -204,6 +228,10 @@ export const useConfigStore = defineStore('config', () => {
 
   const defaultNodesCIDR = computed(() => {
     return state.value?.defaultNodesCIDR ?? '10.250.0.0/16'
+  })
+
+  const shootAdminKubeconfig = computed(() => {
+    return state.value?.shootAdminKubeconfig
   })
 
   const apiServerUrl = computed(() => {
@@ -349,6 +377,7 @@ export const useConfigStore = defineStore('config', () => {
     helpMenuItems,
     externalTools,
     defaultNodesCIDR,
+    shootAdminKubeconfig,
     apiServerUrl,
     clusterIdentity,
     seedCandidateDeterminationStrategy,

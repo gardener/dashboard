@@ -15,53 +15,55 @@ SPDX-License-Identifier: Apache-2.0
     <template #caption>
       About
     </template>
-    <template #message>
-      <div class="d-flex flex-row align-center mt-3">
-        <img
-          :src="branding.productLogoUrl"
-          :alt="`${branding.productName} Logo`"
-          height="50"
-          class="mr-3"
-        >
-        <div>
-          <h2 class="mb-1">
-            {{ branding.productName }} Dashboard
-          </h2>
-        </div>
-      </div>
-      <v-divider class="my-3" />
-      <div class="text-grey-darken-1">
-        <div class="font-weight-bold">
-          Version Information
-        </div>
-        <div v-if="!!dashboardVersion">
-          Dashboard<span class="ml-1 font-weight-bold">{{ dashboardVersion }}</span>
-        </div>
-        <template v-if="isAdmin">
-          <div v-if="!!gardenerVersion">
-            Gardener API<span class="ml-1 font-weight-bold">{{ gardenerVersion }}</span>
-          </div>
-          <v-divider
-            v-if="extensionsList.length"
-            class="my-3"
-          />
-          <div
-            v-if="extensionsList.length"
-            class="font-weight-bold"
+    <template #content>
+      <v-card-text>
+        <div class="d-flex flex-row align-center mt-3">
+          <img
+            :src="branding.productLogoUrl"
+            :alt="`${branding.productName} Logo`"
+            height="50"
+            class="mr-3"
           >
-            Extensions ({{ extensionsList.length }} deployed)
+          <div>
+            <h2 class="mb-1">
+              {{ branding.productName }} Dashboard
+            </h2>
           </div>
-          <div
-            v-for="extension in extensionsList"
-            :key="extension.id"
-            class="extension-item"
-          >
-            <span>{{ extension.name }}</span>
-            <span v-if="!!extension.version"><span class="ml-1 font-weight-bold">{{ extension.version }}</span></span>
-            <span v-if="!!extension.kind"> (Kind: {{ extension.kind }})</span>
+        </div>
+        <v-divider class="my-3" />
+        <div class="text-grey-darken-1">
+          <div class="font-weight-bold">
+            Version Information
           </div>
-        </template>
-      </div>
+          <div v-if="!!dashboardVersion">
+            Dashboard<span class="ml-1 font-weight-bold">{{ dashboardVersion }}</span>
+          </div>
+          <template v-if="isAdmin">
+            <div v-if="!!gardenerVersion">
+              Gardener API<span class="ml-1 font-weight-bold">{{ gardenerVersion }}</span>
+            </div>
+            <v-divider
+              v-if="extensionsList.length"
+              class="my-3"
+            />
+            <div
+              v-if="extensionsList.length"
+              class="font-weight-bold"
+            >
+              Extensions ({{ extensionsList.length }} deployed)
+            </div>
+            <div
+              v-for="extension in extensionsList"
+              :key="extension.id"
+              class="extension-item"
+            >
+              <span>{{ extension.name }}</span>
+              <span v-if="!!extension.version"><span class="ml-1 font-weight-bold">{{ extension.version }}</span></span>
+              <span v-if="!!extension.kind"> (Kind: {{ extension.kind }})</span>
+            </div>
+          </template>
+        </div>
+      </v-card-text>
     </template>
   </g-dialog>
 </template>

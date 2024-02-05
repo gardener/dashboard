@@ -69,6 +69,8 @@ const iconSrc = computed(() => {
       return new URL('/src/assets/vsphere.svg', import.meta.url)
     case 'metal':
       return new URL('/src/assets/metal.svg', import.meta.url)
+    case 'ironcore':
+      return new URL('/src/assets/ironcore.svg', import.meta.url)
     case 'onmetal':
       return new URL('/src/assets/onmetal.svg', import.meta.url)
     // dns

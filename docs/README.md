@@ -9,7 +9,7 @@
 
 * [Working with Projects](usage/working-with-projects.md)
 * [Project Operations](usage/project-operations.md)
-* [Accessing the Gardener API](usage/gardener-api.md)
+* [Automating Project Resource Management](usage/automated-resource-management.md)
 * [Use the Webterminal](usage/using-terminal.md)
 * [Terminal Shortcuts](usage/terminal-shortcuts.md)
 * [Connect kubectl](usage/connect-kubectl.md)

@@ -374,12 +374,10 @@ SPDX-License-Identifier: Apache-2.0
                   </div>
                   <div class="text-body-2 text-medium-emphasis">
                     Go to
-                    <router-link
-                      :to="{ name: 'Account', query: { namespace: namespace } }"
-                      class="text-anchor"
-                    >
-                      My Account
-                    </router-link>
+                    <g-text-router-link
+                      :to="{ name: 'Account', query: { namespace } }"
+                      text="My Account"
+                    />
                     to download the <span class="font-family-monospace">kubeconfig</span> for this project.
                   </div>
                 </g-list-item>
@@ -473,10 +471,12 @@ SPDX-License-Identifier: Apache-2.0
       <template #caption>
         Confirm Delete
       </template>
-      <template #message>
-        Are you sure to delete the project <span class="font-weight-bold">{{ projectName }}</span>?
-        <br>
-        <span class="text-error font-weight-bold">The operation can not be undone.</span>
+      <template #content>
+        <v-card-text>
+          Are you sure to delete the project <span class="font-weight-bold">{{ projectName }}</span>?
+          <br>
+          <span class="text-error font-weight-bold">The operation can not be undone.</span>
+        </v-card-text>
       </template>
     </g-dialog>
   </v-container>
@@ -512,6 +512,7 @@ import GDialog from '@/components/dialogs/GDialog.vue'
 import GTimeString from '@/components/GTimeString.vue'
 import GShootCustomField from '@/components/GShootCustomField.vue'
 import GResourceQuotaHelp from '@/components/GResourceQuotaHelp.vue'
+import GTextRouterLink from '@/components/GTextRouterLink.vue'
 
 import { withMessage } from '@/utils/validators'
 import {
@@ -543,6 +544,7 @@ export default {
     GTimeString,
     GShootCustomField,
     GResourceQuotaHelp,
+    GTextRouterLink,
   },
   inject: ['logger'],
   data () {
@@ -679,10 +681,7 @@ export default {
         try {
           await this.fetchQuotas(this.project.metadata.namespace)
         } catch (err) {
-          this.setAlert({
-            type: 'error',
-            message: `Failed to fetch project quota: ${err.message}`,
-          })
+          this.setError(`Failed to fetch project quota: ${err.message}`)
         }
       },
       { immediate: true },
@@ -690,7 +689,7 @@ export default {
   },
   methods: {
     ...mapActions(useAppStore, [
-      'setAlert',
+      'setError',
     ]),
     ...mapActions(useProjectStore, [
       'patchProject',

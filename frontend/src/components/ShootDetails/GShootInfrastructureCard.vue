@@ -36,13 +36,11 @@ SPDX-License-Identifier: Apache-2.0
       </g-list-item>
       <g-list-item v-if="hasShootWorkerGroups">
         <g-list-item-content label="Credential">
-          <router-link
+          <g-text-router-link
             v-if="canLinkToSecret"
-            class="text-anchor"
             :to="{ name: 'Secret', params: { name: shootSecretBindingName, namespace: shootNamespace } }"
-          >
-            <span class="text-subtitle-1">{{ shootSecretBindingName }}</span>
-          </router-link>
+            :text="shootSecretBindingName"
+          />
           <span v-else>{{ shootSecretBindingName }}</span>
         </g-list-item-content>
       </g-list-item>
@@ -154,7 +152,7 @@ SPDX-License-Identifier: Apache-2.0
               label
               size="x-small"
               color="primary"
-              variant="outlined"
+              variant="tonal"
               class="ml-2"
             >
               {{ customDomainChipText }}
@@ -220,7 +218,7 @@ SPDX-License-Identifier: Apache-2.0
                     v-bind="props"
                     size="small"
                     class="mr-2"
-                    variant="outlined"
+                    variant="tonal"
                     color="primary"
                   >
                     {{ name }}
@@ -261,6 +259,7 @@ import GSeedConfiguration from '@/components/GSeedConfiguration'
 import GControlPlaneHighAvailabilityConfiguration from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityConfiguration'
 import GControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityTag'
 import GSecretDetailsItemContent from '@/components/Secrets/GSecretDetailsItemContent'
+import GTextRouterLink from '@/components/GTextRouterLink.vue'
 
 import {
   wildcardObjectsFromStrings,
@@ -286,6 +285,7 @@ export default {
     GControlPlaneHighAvailabilityConfiguration,
     GControlPlaneHighAvailabilityTag,
     GSecretDetailsItemContent,
+    GTextRouterLink,
   },
   mixins: [shootItem],
   computed: {

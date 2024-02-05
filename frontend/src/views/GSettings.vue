@@ -115,6 +115,23 @@ SPDX-License-Identifier: Apache-2.0
                   hint="Skip the login screen if no user input is required"
                 />
               </v-col>
+              <v-col
+                v-if="isShootAdminKubeconfigEnabled"
+                cols="12"
+              >
+                <legend class="text-medium-emphasis">
+                  Cluster Time-Limited Kubeconfig Lifetime
+                </legend>
+                <v-select
+                  v-model="shootAdminKubeconfigExpiration"
+                  :items="shootAdminKubeconfigExpirationItems"
+                  variant="solo-filled"
+                  density="compact"
+                  flat
+                  single-line
+                  class="w-25"
+                />
+              </v-col>
             </v-row>
           </v-card-text>
         </v-card>
@@ -163,10 +180,20 @@ SPDX-License-Identifier: Apache-2.0
 
 <script setup>
 import { storeToRefs } from 'pinia'
+import { computed } from 'vue'
 
 import { useLocalStorageStore } from '@/store/localStorage'
 
+import { useShootAdminKubeconfig } from '@/composables/useShootAdminKubeconfig'
+
 const localStorageStore = useLocalStorageStore()
+const shootAdminKubeconfig = useShootAdminKubeconfig()
+const {
+  expirations: shootAdminKubeconfigExpirations,
+  isEnabled: isShootAdminKubeconfigEnabled,
+  expiration: shootAdminKubeconfigExpiration,
+  humanizeExpiration,
+} = shootAdminKubeconfig
 
 const logLevels = [
   { value: 'debug', text: 'verbose', icon: 'mdi-bug', color: 'grey darken-4' },
@@ -182,6 +209,15 @@ const {
   colorScheme,
   operatorFeatures,
 } = storeToRefs(localStorageStore)
+
+const shootAdminKubeconfigExpirationItems = computed(() => {
+  return shootAdminKubeconfigExpirations.value.map(value => {
+    return {
+      value,
+      title: humanizeExpiration(value),
+    }
+  })
+})
 </script>
 
 <style lang="scss" scoped>
