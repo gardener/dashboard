@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
     This action cannot be undone.
   </div>
   <v-alert
-    class="my-2 disc-list"
+    class="my-2"
     type="warning"
     variant="tonal"
   >
