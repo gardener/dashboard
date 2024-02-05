@@ -35,7 +35,7 @@ SPDX-License-Identifier: Apache-2.0
             <v-btn
               v-show="index > 0 || internalWorkers.length > 1"
               size="x-small"
-              variant="outlined"
+              variant="tonal"
               icon="mdi-close"
               color="grey"
               @click.stop="onRemoveWorker(index)"

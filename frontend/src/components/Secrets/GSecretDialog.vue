@@ -250,7 +250,7 @@ export default {
       },
     },
     cloudProfiles () {
-      return sortBy(this.cloudProfilesByCloudProviderKind(this.vendor), [(item) => item.metadata.name])
+      return sortBy(this.cloudProfilesByCloudProviderKind(this.vendor), [item => item.metadata.name])
     },
     visible: {
       get () {

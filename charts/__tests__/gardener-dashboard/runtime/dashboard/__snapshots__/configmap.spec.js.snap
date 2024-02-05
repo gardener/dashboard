@@ -348,6 +348,17 @@ Object {
 }
 `;
 
+exports[`gardener-dashboard configmap shootAdminKubeconfig should render the template 1`] = `
+Object {
+  "frontend": Object {
+    "shootAdminKubeconfig": Object {
+      "enabled": true,
+      "maxExpirationSeconds": 86400,
+    },
+  },
+}
+`;
+
 exports[`gardener-dashboard configmap should render the template w/ defaults values 1`] = `
 Object {
   "apiVersion": "v1",
@@ -434,9 +445,14 @@ Object {
     ],
     "seedCandidateDeterminationStrategy": "SameRegion",
     "serviceAccountDefaultTokenExpiration": 7776000,
+    "shootAdminKubeconfig": Object {
+      "enabled": false,
+      "maxExpirationSeconds": 86400,
+    },
   },
   "logFormat": "text",
   "logLevel": "debug",
+  "maxRequestBodySize": "100kb",
   "oidc": Object {
     "ca": "-----BEGIN CERTIFICATE-----
 Li4u

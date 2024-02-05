@@ -559,6 +559,15 @@ Array [
     Object {
       ":authority": "kubernetes:6443",
       ":method": "get",
+      ":path": "/apis/seedmanagement.gardener.cloud/v1alpha1/namespaces/garden/managedseeds/infra1-seed2",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
       ":path": "/api/v1/namespaces/garden/secrets/seedsecret-infra1-seed2",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
@@ -908,6 +917,15 @@ Array [
       ":authority": "kubernetes:6443",
       ":method": "get",
       ":path": "/apis/dashboard.gardener.cloud/v1alpha1/namespaces/garden-foo/terminals?labelSelector=dashboard.gardener.cloud%2Fcreated-by-hash%3D162ad2ffec2aa3ae91a5b1011500707ff75cc8bf%2Cdashboard.gardener.cloud%2Fidentifier-hash%3D1aee48a1ce9885851ed10b486ed333ee181944db",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/seedmanagement.gardener.cloud/v1alpha1/namespaces/garden/managedseeds/infra1-seed2",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
     },

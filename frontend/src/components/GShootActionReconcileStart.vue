@@ -5,36 +5,33 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-shoot-action-dialog
-    v-if="dialog"
+  <g-action-button-dialog
     ref="actionDialog"
     :shoot-item="shootItem"
-    :caption="caption"
-    confirm-button-text="Trigger now"
     width="600"
-  >
-    <v-row>
-      <v-col class="text-subtitle-1">
-        Do you want to trigger a reconcile of your cluster outside of the regular reconciliation schedule?
-      </v-col>
-    </v-row>
-    <v-row v-if="lastOperationFailed">
-      <v-col class="text-subtitle-1">
-        Note: For clusters in failed state this will retry the operation.
-      </v-col>
-    </v-row>
-  </g-shoot-action-dialog>
-  <g-shoot-action-button
-    v-if="button"
-    ref="actionButton"
-    :shoot-item="shootItem"
+    :caption="caption"
+    :text="buttonText"
+    confirm-button-text="Trigger now"
+    icon="mdi-refresh"
     :loading="isReconcileToBeScheduled"
     :disabled="isShootReconciliationDeactivated"
-    icon="mdi-refresh"
-    :text="buttonText"
-    :caption="caption"
-    @click="internalValue = true"
-  />
+    @dialog-opened="onConfigurationDialogOpened"
+  >
+    <template #content>
+      <v-card-text>
+        <v-row>
+          <v-col class="text-subtitle-1">
+            Do you want to trigger a reconcile of your cluster outside of the regular reconciliation schedule?
+          </v-col>
+        </v-row>
+        <v-row v-if="lastOperationFailed">
+          <v-col class="text-subtitle-1">
+            Note: For clusters in failed state this will retry the operation.
+          </v-col>
+        </v-row>
+      </v-card-text>
+    </template>
+  </g-action-button-dialog>
 </template>
 
 <script>
@@ -42,8 +39,7 @@ import { mapActions } from 'pinia'
 
 import { useAppStore } from '@/store/app'
 
-import GShootActionButton from '@/components/GShootActionButton.vue'
-import GShootActionDialog from '@/components/GShootActionDialog.vue'
+import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog.vue'
 
 import { shootItem } from '@/mixins/shootItem'
 import { errorDetailsFromError } from '@/utils/error'
@@ -52,8 +48,7 @@ import { get } from '@/lodash'
 
 export default {
   components: {
-    GShootActionButton,
-    GShootActionDialog,
+    GActionButtonDialog,
   },
   mixins: [shootItem],
   inject: ['api', 'logger'],
@@ -66,18 +61,7 @@ export default {
       type: Boolean,
       default: false,
     },
-    dialog: {
-      type: Boolean,
-      default: false,
-    },
-    button: {
-      type: Boolean,
-      default: false,
-    },
   },
-  emits: [
-    'update:modelValue',
-  ],
   data () {
     return {
       reconcileTriggered: false,
@@ -85,14 +69,6 @@ export default {
     }
   },
   computed: {
-    internalValue: {
-      get () {
-        return this.modelValue
-      },
-      set (value) {
-        this.$emit('update:modelValue', value)
-      },
-    },
     isReconcileToBeScheduled () {
       return this.shootGenerationValue === this.currentGeneration
     },
@@ -118,17 +94,6 @@ export default {
     },
   },
   watch: {
-    modelValue (value) {
-      if (this.dialog) {
-        const actionDialog = this.$refs.actionDialog
-        if (value) {
-          actionDialog.showDialog()
-          this.waitForConfirmation()
-        } else {
-          actionDialog.hideDialog()
-        }
-      }
-    },
     isReconcileToBeScheduled (reconcileToBeScheduled) {
       const isReconcileScheduled = !reconcileToBeScheduled && this.reconcileTriggered
       if (!isReconcileScheduled) {
@@ -141,28 +106,17 @@ export default {
         return
       }
 
-      this.setAlert({
-        message: `Reconcile triggered for ${this.shootName}`,
-      })
+      this.setSuccess(`Reconcile triggered for ${this.shootName}`)
     },
   },
   methods: {
     ...mapActions(useAppStore, [
-      'setAlert',
+      'setSuccess',
     ]),
-    waitForConfirmation () {
-      this.$nextTick(async () => {
-        const actionDialog = this.$refs.actionDialog
-        try {
-          if (await actionDialog.waitForDialogClosed()) {
-            this.startReconcile()
-          }
-        } catch (err) {
-          /* ignore error */
-        } finally {
-          this.internalValue = false
-        }
-      })
+    async onConfigurationDialogOpened () {
+      if (await this.$refs.actionDialog.waitForDialogClosed()) {
+        this.startReconcile()
+      }
     },
     async startReconcile () {
       this.reconcileTriggered = true

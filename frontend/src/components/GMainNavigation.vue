@@ -88,6 +88,7 @@ SPDX-License-Identifier: Apache-2.0
                 single-line
                 hide-details
                 class="project-filter"
+                spellcheck="false"
                 @keyup.esc="projectFilter = ''"
                 @keyup.enter="navigateToHighlightedProject"
                 @update:model-value="onInputProjectFilter"
@@ -475,18 +476,14 @@ function highlightProjectWithKeys (keyDirection) {
   const projectName = highlightedProjectName.value ?? selectedProjectName.value
 
   let currentHighlightedIndex = findProjectIndexCaseInsensitive(projectName)
-  if (currentHighlightedIndex < 0) {
-    currentHighlightedIndex = 0
-  }
 
-  if (keyDirection === 'up') {
-    if (currentHighlightedIndex > 0) {
-      currentHighlightedIndex--
-    }
-  } else if (keyDirection === 'down') {
-    if (currentHighlightedIndex < sortedAndFilteredProjectList.value.length - 1) {
-      currentHighlightedIndex++
-    }
+  if (currentHighlightedIndex < 0) {
+    // reset index, regardless of key direction
+    currentHighlightedIndex = 0
+  } else if (keyDirection === 'up' && currentHighlightedIndex > 0) {
+    currentHighlightedIndex--
+  } else if (keyDirection === 'down' && currentHighlightedIndex < sortedAndFilteredProjectList.value.length - 1) {
+    currentHighlightedIndex++
   }
 
   const newHighlightedProject = sortedAndFilteredProjectList.value[currentHighlightedIndex]

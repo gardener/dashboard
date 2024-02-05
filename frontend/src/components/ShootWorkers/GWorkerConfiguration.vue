@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
     :disabled="!hasShootWorkerGroups"
     @dialog-opened="onConfigurationDialogOpened"
   >
-    <template #top>
+    <template #header>
       <v-tabs
         v-model="tab"
         color="primary"
@@ -36,7 +36,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-tab>
       </v-tabs>
     </template>
-    <template #card>
+    <template #content>
       <v-window v-model="tab">
         <v-window-item
           ref="overviewTab"
@@ -67,12 +67,12 @@ SPDX-License-Identifier: Apache-2.0
         </v-window-item>
       </v-window>
     </template>
-    <template #additionalMessage>
+    <template #footer>
       <v-expand-transition>
         <v-alert
           v-if="networkConfiguration.length"
           type="warning"
-          variant="outlined"
+          variant="tonal"
           tile
           prominent
           closable

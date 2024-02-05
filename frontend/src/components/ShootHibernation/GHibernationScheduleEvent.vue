@@ -71,7 +71,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-col cols="1">
       <v-btn
         size="x-small"
-        variant="outlined"
+        variant="tonal"
         icon="mdi-close"
         color="grey"
         @click.stop="removeScheduleEvent"

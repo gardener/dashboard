@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
         :disabled="notEditable"
         size="small"
         color="action-button"
-        variant="outlined"
+        variant="tonal"
         :class="{ 'ml-3': index > 0 }"
       >
         {{ displayName }}

@@ -7,7 +7,7 @@
 'use strict'
 
 const { mockRequest } = require('@gardener-dashboard/request')
-const { mockListIssues, mockListComments } = require('@octokit/rest')
+const { mockListIssues, mockListComments } = require('@octokit/core')
 const tickets = require('../../lib/services/tickets')
 
 describe('api', function () {

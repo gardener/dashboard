@@ -58,7 +58,6 @@ import {
   template,
   compact,
   head,
-  max,
   cloneDeep,
   sample,
   pick,
@@ -106,7 +105,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
   })
 
   const sortedInfrastructureKindList = computed(() => {
-    return intersection(configStore.cloudProviderList ?? ['aws', 'azure', 'gcp', 'openstack', 'alicloud', 'metal', 'vsphere', 'hcloud', 'onmetal', 'local'], infrastructureKindList.value)
+    return intersection(configStore.cloudProviderList ?? ['aws', 'azure', 'gcp', 'openstack', 'alicloud', 'metal', 'vsphere', 'hcloud', 'onmetal', 'ironcore', 'local'], infrastructureKindList.value)
   })
 
   function cloudProfilesByCloudProviderKind (cloudProviderKind) {
@@ -155,15 +154,16 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return []
   }
 
-  function minimumVolumeSizeByCloudProfileNameAndRegion ({ cloudProfileName, region, secretDomain }) {
-    const defaultMinimumSize = '20Gi'
-    const cloudProfile = cloudProfileByName(cloudProfileName)
-    if (!cloudProfile) {
-      return defaultMinimumSize
+  function minimumVolumeSizeByMachineTypeAndVolumeType ({ machineType, volumeType }) {
+    if (volumeType?.name) {
+      return volumeType.minSize ?? '0Gi'
     }
-    const seedsForCloudProfile = seedStore.seedsForCloudProfile(cloudProfile)
-    const seedsMatchingCloudProfileAndRegion = find(seedsForCloudProfile, { data: { region } })
-    return max(map(seedsMatchingCloudProfileAndRegion, 'volume.minimumSize')) || defaultMinimumSize
+
+    if (machineType?.storage) {
+      return machineType.storage.minSize ?? '0Gi'
+    }
+
+    return '0Gi'
   }
 
   function getDefaultNodesCIDR ({ cloudProfileName }) {
@@ -373,7 +373,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
   function machineImagesByCloudProfileName (cloudProfileName) {
     const cloudProfile = cloudProfileByName(cloudProfileName)
     const machineImages = get(cloudProfile, 'data.machineImages')
-    const mapMachineImages = (machineImage) => {
+    const mapMachineImages = machineImage => {
       const versions = filter(machineImage.versions, ({ version, expirationDate }) => {
         if (!semver.valid(version)) {
           logger.error(`Skipped machine image ${machineImage.name} as version ${version} is not a valid semver version`)
@@ -588,7 +588,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     const volumeTypesForZone = volumeTypesByCloudProfileNameAndRegion({ cloudProfileName, region })
     const volumeType = head(volumeTypesForZone) || {}
     const machineImage = defaultMachineImageForCloudProfileNameAndMachineType(cloudProfileName, machineType)
-    const minVolumeSize = minimumVolumeSizeByCloudProfileNameAndRegion({ cloudProfileName, region })
+    const minVolumeSize = minimumVolumeSizeByMachineTypeAndVolumeType({ machineType, volumeType })
 
     const defaultVolumeSize = parseSize(minVolumeSize) <= parseSize('50Gi') ? '50Gi' : minVolumeSize
     const worker = {
@@ -653,7 +653,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     volumeTypesByCloudProfileNameAndRegion,
     volumeTypesByCloudProfileName,
     defaultMachineImageForCloudProfileNameAndMachineType,
-    minimumVolumeSizeByCloudProfileNameAndRegion,
+    minimumVolumeSizeByMachineTypeAndVolumeType,
     selectedAccessRestrictionsForShootByCloudProfileNameAndRegion,
     labelsByCloudProfileNameAndRegion,
     accessRestrictionNoItemsTextForCloudProfileNameAndRegion,

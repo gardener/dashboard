@@ -4,17 +4,15 @@
   "editor.tabSize": 2,
   "editor.formatOnSave": false,
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
+    "source.fixAll.eslint": "explicit"
   },
   "eslint.validate": [
     "vue",
     "javascript",
     "javascriptreact"
   ],
-  "eslint.alwaysShowStatus": true,
   "eslint.codeActionsOnSave.mode": "problems",
   "eslint.debug": true,
-  "eslint.packageManager": "yarn",
   "eslint.workingDirectories": [
     {
       "directory": "./frontend/"

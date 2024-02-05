@@ -5,66 +5,63 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-shoot-action-dialog
-    v-if="dialog"
+  <g-action-button-dialog
     ref="actionDialog"
     :shoot-item="shootItem"
-    :caption="componentTexts.caption"
-    :confirm-required="true"
-    :confirm-button-text="confirmButtonText"
     width="700"
-  >
-    <div class="text-h5 pb-3">
-      {{ componentTexts.heading }}
-    </div>
-    <v-alert
-      v-if="mode === 'START'"
-      type="info"
-      variant="outlined"
-      dense
-    >
-      Note: This rotation operation is split into two steps. This step will <strong>prepare</strong> the rotation.
-    </v-alert>
-    <v-alert
-      v-if="mode === 'COMPLETE'"
-      type="info"
-      variant="outlined"
-      dense
-    >
-      Note: This rotation operation is split into two steps. This step will <strong>complete</strong> the rotation.
-    </v-alert>
-    <div class="font-weight-bold py-3">
-      Actions performed in this step
-    </div>
-    <ul class="px-4">
-      <li
-        v-for="action in componentTexts.actions"
-        :key="action"
-      >
-        {{ action }}
-      </li>
-    </ul>
-    <v-checkbox
-      v-model="maintenance"
-      label="Perform this operation in the maintenance time window"
-      :disabled="isMaintenanceDisabled"
-      :hint="maintenanceHint"
-      persistent-hint
-    />
-    <div>Type <span class="font-weight-bold">{{ shootName }}</span> below to confirm the operation.</div>
-  </g-shoot-action-dialog>
-  <g-shoot-action-button
-    v-if="button"
-    ref="actionButton"
-    :shoot-item="shootItem"
+    :caption="componentTexts.caption"
+    :confirm-button-text="confirmButtonText"
+    confirm-required
     :loading="showLoadingIndicator"
     :disabled="isDisabled"
     :icon="icon"
     :text="componentTexts.buttonText"
     :tooltip="tooltip"
-    :caption="componentTexts.caption"
-    @click="internalValue = true"
-  />
+    @dialog-opened="onConfigurationDialogOpened"
+  >
+    <template #content>
+      <v-card-text>
+        <div class="text-h5 pb-3">
+          {{ componentTexts.heading }}
+        </div>
+        <v-alert
+          v-if="mode === 'START'"
+          type="info"
+          variant="tonal"
+          dense
+        >
+          Note: This rotation operation is split into two steps. This step will <strong>prepare</strong> the rotation.
+        </v-alert>
+        <v-alert
+          v-if="mode === 'COMPLETE'"
+          type="info"
+          variant="tonal"
+          dense
+        >
+          Note: This rotation operation is split into two steps. This step will <strong>complete</strong> the rotation.
+        </v-alert>
+        <div class="font-weight-bold py-3">
+          Actions performed in this step
+        </div>
+        <ul class="px-4">
+          <li
+            v-for="action in componentTexts.actions"
+            :key="action"
+          >
+            {{ action }}
+          </li>
+        </ul>
+        <v-checkbox
+          v-model="maintenance"
+          label="Perform this operation in the maintenance time window"
+          :disabled="isMaintenanceDisabled"
+          :hint="maintenanceHint"
+          persistent-hint
+        />
+        <div>Type <span class="font-weight-bold">{{ shootName }}</span> below to confirm the operation.</div>
+      </v-card-text>
+    </template>
+  </g-action-button-dialog>
 </template>
 
 <script>
@@ -76,8 +73,7 @@ import {
 import { useAppStore } from '@/store/app'
 import { useAuthnStore } from '@/store/authn'
 
-import GShootActionButton from '@/components/GShootActionButton.vue'
-import GShootActionDialog from '@/components/GShootActionDialog.vue'
+import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog.vue'
 
 import shootStatusCredentialRotation from '@/mixins/shootStatusCredentialRotation'
 import { errorDetailsFromError } from '@/utils/error'
@@ -89,8 +85,7 @@ import {
 
 export default {
   components: {
-    GShootActionButton,
-    GShootActionDialog,
+    GActionButtonDialog,
   },
   mixins: [shootStatusCredentialRotation],
   inject: ['api', 'logger'],
@@ -103,18 +98,7 @@ export default {
       type: Boolean,
       default: false,
     },
-    dialog: {
-      type: Boolean,
-      default: false,
-    },
-    button: {
-      type: Boolean,
-      default: false,
-    },
   },
-  emits: [
-    'update:modelValue',
-  ],
   data () {
     return {
       actionTriggered: false,
@@ -125,14 +109,6 @@ export default {
     ...mapState(useAuthnStore, [
       'isAdmin',
     ]),
-    internalValue: {
-      get () {
-        return this.modelValue
-      },
-      set (value) {
-        this.$emit('update:modelValue', value)
-      },
-    },
     mode () {
       if (!this.completionOperation) {
         return 'ROTATE'
@@ -416,17 +392,6 @@ export default {
     },
   },
   watch: {
-    modelValue (value) {
-      if (this.dialog) {
-        const actionDialog = this.$refs.actionDialog
-        if (value) {
-          actionDialog.showDialog()
-          this.waitForConfirmation()
-        } else {
-          actionDialog.hideDialog()
-        }
-      }
-    },
     isActionToBeScheduled (actionToBeScheduled) {
       const isActionScheduled = !actionToBeScheduled && this.actionTriggered
       if (!isActionScheduled) {
@@ -438,9 +403,7 @@ export default {
         return
       }
 
-      this.setAlert({
-        message: this.componentTexts.successMessage,
-      })
+      this.setSuccess(this.componentTexts.successMessage)
     },
   },
   mounted () {
@@ -448,21 +411,12 @@ export default {
   },
   methods: {
     ...mapActions(useAppStore, [
-      'setAlert',
+      'setSuccess',
     ]),
-    waitForConfirmation () {
-      this.$nextTick(async () => {
-        const actionDialog = this.$refs.actionDialog
-        try {
-          if (await actionDialog.waitForDialogClosed()) {
-            this.start()
-          }
-        } catch (err) {
-          /* ignore error */
-        } finally {
-          this.internalValue = false
-        }
-      })
+    async onConfigurationDialogOpened () {
+      if (await this.$refs.actionDialog.waitForDialogClosed()) {
+        this.start()
+      }
     },
     async start () {
       this.actionTriggered = true

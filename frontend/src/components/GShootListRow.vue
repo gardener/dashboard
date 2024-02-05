@@ -13,12 +13,10 @@ SPDX-License-Identifier: Apache-2.0
       class="position-relative"
     >
       <template v-if="cell.header.key === 'project'">
-        <router-link
-          class="text-anchor"
+        <g-text-router-link
           :to="{ name: 'ShootList', params: { namespace: shootNamespace } }"
-        >
-          {{ shootProjectName }}
-        </router-link>
+          :text="shootProjectName"
+        />
       </template>
       <template v-if="cell.header.key === 'name'">
         <v-row
@@ -29,12 +27,10 @@ SPDX-License-Identifier: Apache-2.0
           >
             <g-auto-hide right>
               <template #activator>
-                <router-link
-                  class="text-anchor"
+                <g-text-router-link
                   :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }"
-                >
-                  {{ shootName }}
-                </router-link>
+                  :text="shootName"
+                />
               </template>
               <g-copy-btn :clipboard-text="shootName" />
             </g-auto-hide>
@@ -235,6 +231,7 @@ import GAutoHide from '@/components/GAutoHide.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
 import GControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityTag.vue'
 import GWorkerGroups from '@/components/ShootWorkers/GWorkerGroups'
+import GTextRouterLink from '@/components/GTextRouterLink.vue'
 
 import {
   isTypeDelete,
@@ -270,6 +267,7 @@ export default {
     GExternalLink,
     GControlPlaneHighAvailabilityTag,
     GWorkerGroups,
+    GTextRouterLink,
   },
   mixins: [shootItem],
   props: {
@@ -309,7 +307,7 @@ export default {
       if (this.shootInfo.dashboardUrl) {
         return false
       }
-      if (this.shootInfo.kubeconfig) {
+      if (this.shootInfo.kubeconfigGardenlogin) {
         return false
       }
 

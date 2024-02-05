@@ -25,17 +25,17 @@ export const timezonePattern = /^([+-])(\d{2}):(\d{2})$/
 const base64 = withMessage('Must be a valid base64 string', regex(base64Pattern))
 const alphaNumUnderscore = withMessage('Must contain only alphanumeric characters and underscore', regex(alphaNumUnderscorePattern))
 const lowerCaseAlphaNumHyphen = withMessage('Must contain only lowercase alphanumeric characters or hyphen', regex(lowerCaseAlphaNumHyphenPattern))
-const noConsecutiveHyphen = withMessage('Must not contain consecutive hyphens', (value) => {
+const noConsecutiveHyphen = withMessage('Must not contain consecutive hyphens', value => {
   return !consecutiveHyphenPattern.test(value)
 })
-const noStartEndHyphen = withMessage('Must not start or end with a hyphen', (value) => {
+const noStartEndHyphen = withMessage('Must not start or end with a hyphen', value => {
   return !startEndHyphenPattern.test(value)
 })
-const numberOrPercentage = withMessage('Must be a number or percentage', (value) => {
+const numberOrPercentage = withMessage('Must be a number or percentage', value => {
   return numberOrPercentagePattern.test(value)
 })
 
-const isTimezone = withMessage('TimeZone must have format [+|-]HH:mm', (value) => {
+const isTimezone = withMessage('TimeZone must have format [+|-]HH:mm', value => {
   return timezonePattern.test(value)
 })
 

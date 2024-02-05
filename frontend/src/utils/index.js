@@ -330,8 +330,7 @@ export function isShootStatusHibernated (status) {
 }
 
 export function isReconciliationDeactivated (metadata) {
-  const ignoreDeprecated = get(metadata, ['annotations', 'shoot.garden.sapcloud.io/ignore'])
-  const ignore = get(metadata, ['annotations', 'shoot.gardener.cloud/ignore'], ignoreDeprecated)
+  const ignore = get(metadata, ['annotations', 'shoot.gardener.cloud/ignore'])
   return isTruthyValue(ignore)
 }
 

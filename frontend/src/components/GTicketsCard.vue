@@ -10,49 +10,38 @@ SPDX-License-Identifier: Apache-2.0
     class="mb-4"
   >
     <template v-if="tickets.length">
-      <v-card
+      <g-ticket
         v-for="ticket in tickets"
         :key="ticket.metadata.issueNumber"
-      >
-        <g-ticket :ticket="ticket" />
-      </v-card>
+        :ticket="ticket"
+      />
       <div class="d-flex align-center justify-center mt-4">
         <v-btn
-          text
+          variant="tonal"
           color="primary"
           :href="sanitizeUrl(createTicketLink)"
           target="_blank"
           rel="noopener"
           title="Create Ticket"
+          append-icon="mdi-open-in-new"
         >
-          <span class="pr-2">Create Ticket</span>
-          <v-icon
-            color="primary"
-            class="link-icon"
-          >
-            mdi-open-in-new
-          </v-icon>
+          Create Ticket
         </v-btn>
       </div>
     </template>
     <v-card v-else>
-      <g-toolbar title="Ticket" />
-      <div class="d-flex justify-center pa-3">
+      <g-toolbar title="Tickets" />
+      <div class="d-flex justify-center pa-4">
         <v-btn
-          variant="text"
+          variant="tonal"
           color="primary"
           :href="sanitizeUrl(createTicketLink)"
           target="_blank"
           rel="noopener"
           title="Create Ticket"
+          append-icon="mdi-open-in-new"
         >
-          <span class="pr-2">Create Ticket</span>
-          <v-icon
-            color="primary"
-            class="link-icon"
-          >
-            mdi-open-in-new
-          </v-icon>
+          Create Ticket
         </v-btn>
       </div>
     </v-card>

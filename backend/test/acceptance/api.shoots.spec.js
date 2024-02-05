@@ -87,7 +87,24 @@ describe('api', function () {
         expect(res.body).toMatchSnapshot()
       })
 
-      it('should return all shoots', async () => {
+      it('should be forbidden to list shoots for a single namespace', async () => {
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess({ allowed: false }))
+
+        const res = await agent
+          .get(`/api/namespaces/${namespace}/shoots`)
+          .query({ useCache })
+          .set('cookie', await user.cookie)
+          .expect('content-type', /json/)
+          .expect(403)
+
+        expect(mockRequest).toBeCalledTimes(1)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
+
+        const { code, reason, message, status } = res.body
+        expect({ code, reason, message, status }).toMatchSnapshot()
+      })
+
+      it('should return all shoots an admin user', async () => {
         mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
 
         const res = await agent
@@ -101,6 +118,25 @@ describe('api', function () {
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(res.body.items.map(item => item.metadata.uid)).toEqual([1, 2, 3, 4])
+        expect(res.body).toMatchSnapshot()
+      })
+
+      it('should return all shoots for a non-admin user', async () => {
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess({ allowed: false }))
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess({ allowed: false }))
+
+        const res = await agent
+          .get('/api/namespaces/_all/shoots')
+          .query({ useCache })
+          .set('cookie', await user.cookie)
+          .expect('content-type', /json/)
+          .expect(200)
+
+        expect(mockRequest).toBeCalledTimes(3)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
+
+        expect(res.body.items.map(item => item.metadata.uid)).toEqual([1, 2, 3])
         expect(res.body).toMatchSnapshot()
       })
 
@@ -123,7 +159,7 @@ describe('api', function () {
       })
     })
 
-    it('should return three shoots', async function () {
+    it('should return shoots for a single namespace', async function () {
       mockRequest.mockImplementationOnce(fixtures.shoots.mocks.list())
 
       const res = await agent
@@ -135,6 +171,41 @@ describe('api', function () {
       expect(mockRequest).toBeCalledTimes(1)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should return all shoots for an admin user', async () => {
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+      mockRequest.mockImplementationOnce(fixtures.shoots.mocks.list())
+
+      const res = await agent
+        .get('/api/namespaces/_all/shoots')
+        .set('cookie', await user.cookie)
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(2)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body.items.map(item => item.metadata.uid)).toEqual([1, 2, 3, 4])
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should return all shoots for a non-admin user', async () => {
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess({ allowed: false }))
+      mockRequest.mockImplementationOnce(fixtures.shoots.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.shoots.mocks.list())
+
+      const res = await agent
+        .get('/api/namespaces/_all/shoots')
+        .set('cookie', await user.cookie)
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(3)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body.items.map(item => item.metadata.uid)).toEqual([1, 2, 3])
       expect(res.body).toMatchSnapshot()
     })
 
@@ -517,6 +588,27 @@ describe('api', function () {
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
+    })
+
+    it('should return a shoot admin kubeconfig', async function () {
+      mockRequest.mockImplementationOnce(fixtures.shoots.mocks.createAdminKubeconfigRequest())
+
+      const res = await agent
+        .post(`/api/namespaces/${namespace}/shoots/${name}/adminkubeconfig`)
+        .set('cookie', await user.cookie)
+        .send({
+          expirationSeconds: 600
+        })
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(1)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot({
+        kubeconfig: expect.any(String)
+      }, 'body')
+      expect(yaml.load(res.body.kubeconfig)).toMatchSnapshot('body.kubeconfig')
     })
   })
 })

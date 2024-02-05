@@ -67,15 +67,18 @@ SPDX-License-Identifier: Apache-2.0
         />
       </div>
       <div
-        v-if="canDefineVolumeSize"
+        v-if="hasPersistence"
         class="smallInput"
       >
         <g-volume-size-input
           v-model="volumeSize"
           :min="minimumVolumeSize"
+          :readonly="!canDefineVolumeSize"
           color="primary"
           :error-messages="getErrorMessages(v$.volumeSize)"
           label="Volume Size"
+          :hint="volumeSizeHint"
+          persistent-hint
           @update:model-value="onInputVolumeSize"
           @blur="v$.volumeSize.$touch()"
         />
@@ -277,7 +280,7 @@ export default {
     const maximumRules = {
       minValue: minValue(0),
       systemComponents: withMessage('Value must be greater or equal to the number of zones configured for this pool',
-        (value) => {
+        value => {
           const hasSystemComponents = get(this.worker, 'systemComponents.allow', true)
           if (!hasSystemComponents) {
             return true
@@ -341,14 +344,23 @@ export default {
     selectedMachineType () {
       return find(this.machineTypes, ['name', this.worker.machine.type])
     },
+    selectedVolumeType () {
+      return find(this.volumeTypes, ['name', this.worker.volume?.type])
+    },
     canDefineVolumeSize () {
-      // Volume size can be configured by the user if the volume type is defined via a volume type (volumeInCloudProfile)
-      // not via machine type storage. If defined via storage with type not 'fixed' or if no storage is present, then the
-      // user is allowed to set a volume size
+      if (!this.hasPersistence) {
+        return false
+      }
+      if (this.selectedMachineType.storage?.size) {
+        return false
+      }
+      return true
+    },
+    hasPersistence () {
       if (this.volumeInCloudProfile) {
         return true
       }
-      return get(this.selectedMachineType, 'storage.type') !== 'fixed'
+      return !!this.selectedMachineType.storage
     },
     machineImages () {
       const machineImages = this.machineImagesByCloudProfileName(this.cloudProfileName)
@@ -356,8 +368,7 @@ export default {
       return filter(machineImages, ({ isExpired, architectures }) => !isExpired && includes(architectures, architecture))
     },
     minimumVolumeSize () {
-      const minimumVolumeSize = parseSize(this.minimumVolumeSizeByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region }))
-
+      const minimumVolumeSize = parseSize(this.minimumVolumeSizeByMachineTypeAndVolumeType({ machineType: this.selectedMachineType, volumeType: this.selectedVolumeType }))
       const defaultSize = parseSize(get(this.selectedMachineType, 'storage.size'))
       if (defaultSize > 0 && defaultSize < minimumVolumeSize) {
         return defaultSize
@@ -453,6 +464,12 @@ export default {
       }
       return undefined
     },
+    volumeSizeHint () {
+      if (!this.canDefineVolumeSize) {
+        return 'Volume size is fixed'
+      }
+      return undefined
+    },
     selectedMachineImage () {
       return find(this.machineImages, this.worker.machine.image)
     },
@@ -500,22 +517,13 @@ export default {
       'machineArchitecturesByCloudProfileNameAndRegion',
       'volumeTypesByCloudProfileNameAndRegion',
       'machineImagesByCloudProfileName',
-      'minimumVolumeSizeByCloudProfileNameAndRegion',
+      'minimumVolumeSizeByMachineTypeAndVolumeType',
     ]),
     onInputName () {
       this.v$.worker.name.$touch()
     },
     onInputVolumeSize () {
-      const machineType = this.selectedMachineType
-      if (!this.canDefineVolumeSize ||
-        (!this.worker.volume?.type && this.volumeSize && get(machineType, 'storage.size') === this.volumeSize)) {
-        // this can only happen if volume type is defined via machine type storage (canDefineVolumeSize would return true otherwise)
-        // if the selected machine type does not allow to set a volume size (storage type fixed) or if the selected size is euqal
-        // to the default storage size defined for this machine type, remove volume object (contains only size information which
-        // is redundant / not allowed in this case)
-        // also the empty volume object defined by the worker skeleton gets deleted in this case
-        delete this.worker.volume
-      } else {
+      if (this.canDefineVolumeSize) {
         set(this.worker, 'volume.size', this.volumeSize)
       }
       this.v$.volumeSize.$touch()
@@ -535,18 +543,18 @@ export default {
       this.v$.worker.maximum.$touch()
     },
     setVolumeDependingOnMachineType () {
-      const storage = get(this.selectedMachineType, 'storage')
-      if (!storage) {
+      if (this.canDefineVolumeSize) {
         return
       }
-      // machine type has storage
-      if (get(this.worker, 'volume.size')) {
-        return
+
+      delete this.worker.volume?.size
+      if (!this.hasPersistence || isEmpty(this.worker.volume)) {
+        delete this.worker.volume
       }
-      // volume size is not defined on worker (=default storage size)
-      if (storage.type !== 'fixed') {
-        // storage can be defined, set volumeSize (=displayed size in g-size-input) to default storage size
-        this.volumeSize = storage.size
+
+      if (this.selectedMachineType.storage?.size) {
+        // Set volumeSize to show it as readonly value to the user
+        this.volumeSize = this.selectedMachineType.storage.size
       }
     },
     resetWorkerMachine () {

@@ -713,6 +713,25 @@ describe('gardener-dashboard', function () {
       })
     })
 
+    describe('maxRequestBodySize', function () {
+      it('should render the template', async function () {
+        const limit = '1mb'
+        const values = {
+          global: {
+            dashboard: {
+              maxRequestBodySize: limit
+            }
+          }
+        }
+
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [configMap] = documents
+        const config = yaml.load(configMap.data['config.yaml'])
+        expect(config.maxRequestBodySize).toBe(limit)
+      })
+    })
+
     describe('grantTypes', function () {
       it('should render the template', async function () {
         const values = {
@@ -907,6 +926,29 @@ describe('gardener-dashboard', function () {
       })
     })
 
+    describe('shootAdminKubeconfig', function () {
+      it('should render the template', async function () {
+        const maxExpirationSeconds = 86400
+        const values = {
+          global: {
+            dashboard: {
+              frontendConfig: {
+                shootAdminKubeconfig: {
+                  enabled: true,
+                  maxExpirationSeconds
+                }
+              }
+            }
+          }
+        }
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [configMap] = documents
+        const config = yaml.load(configMap.data['config.yaml'])
+        expect(pick(config, ['frontend.shootAdminKubeconfig'])).toMatchSnapshot()
+      })
+    })
+
     describe('experimental', function () {
       it('should render the template with experimental features', async function () {
         const values = {
@@ -942,6 +984,21 @@ describe('gardener-dashboard', function () {
         const [configMap] = documents
         const config = yaml.load(configMap.data['config.yaml'])
         expect(config.experimentalUseWatchCacheForListShoots).toBe('no')
+      })
+
+      it('should render the template with value "true"', async function () {
+        const values = {
+          global: {
+            dashboard: {
+              experimentalUseWatchCacheForListShoots: true
+            }
+          }
+        }
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [configMap] = documents
+        const config = yaml.load(configMap.data['config.yaml'])
+        expect(config.experimentalUseWatchCacheForListShoots).toBe('true')
       })
     })
   })

@@ -5,30 +5,28 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div>
-    <v-select
-      v-model="internalPurpose"
-      hint="Indicate the importance of the cluster"
-      color="primary"
-      item-color="primary"
-      label="Purpose"
-      :items="purposes"
-      item-title="purpose"
-      item-value="purpose"
-      persistent-hint
-      :error-messages="getErrorMessages(v$.internalPurpose)"
-      variant="underlined"
-      @update:model-value="onInputPurpose"
-      @blur="v$.internalPurpose.$touch()"
-    >
-      <template #item="{ item, props }">
-        <v-list-item
-          v-bind="props"
-          :subtitle="item.raw.description"
-        />
-      </template>
-    </v-select>
-  </div>
+  <v-select
+    v-model="internalPurpose"
+    hint="Indicate the importance of the cluster"
+    color="primary"
+    item-color="primary"
+    label="Purpose"
+    :items="purposes"
+    item-title="purpose"
+    item-value="purpose"
+    persistent-hint
+    :error-messages="getErrorMessages(v$.internalPurpose)"
+    variant="underlined"
+    @update:model-value="onInputPurpose"
+    @blur="v$.internalPurpose.$touch()"
+  >
+    <template #item="{ item, props }">
+      <v-list-item
+        v-bind="props"
+        :subtitle="item.raw.description"
+      />
+    </template>
+  </v-select>
 </template>
 
 <script>

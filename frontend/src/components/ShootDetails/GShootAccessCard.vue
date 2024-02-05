@@ -28,7 +28,7 @@ SPDX-License-Identifier: Apache-2.0
     />
 
     <v-divider
-      v-if="isTerminalTileVisible && (isTerminalShortcutsTileVisible || isDashboardTileVisible || isCredentialsTileVisible || isKubeconfigTileVisible || isGardenctlTileVisible)"
+      v-if="isTerminalTileVisible && (isTerminalShortcutsTileVisible || isDashboardTileVisible || isKubeconfigTileVisible || isGardenctlTileVisible)"
       inset
     />
 
@@ -40,20 +40,11 @@ SPDX-License-Identifier: Apache-2.0
     />
 
     <v-divider
-      v-if="isTerminalShortcutsTileVisible && (isDashboardTileVisible || isCredentialsTileVisible || isKubeconfigTileVisible || isGardenctlTileVisible)"
+      v-if="isTerminalShortcutsTileVisible && (isDashboardTileVisible || isKubeconfigTileVisible || isGardenctlTileVisible)"
       inset
     />
 
-    <g-link-list-tile
-      v-if="isDashboardTileVisible && !hasDashboardTokenAuth"
-      icon="mdi-developer-board"
-      app-title="Dashboard"
-      :url="dashboardUrl"
-      :url-text="dashboardUrlText"
-      :is-shoot-status-hibernated="isShootStatusHibernated"
-    />
-
-    <template v-if="isDashboardTileVisible && hasDashboardTokenAuth">
+    <template v-if="isDashboardTileVisible">
       <g-list-item>
         <template #prepend>
           <v-icon
@@ -62,35 +53,33 @@ SPDX-License-Identifier: Apache-2.0
           />
         </template>
         <g-list-item-content>
-          <template #label>
-            Dashboard
-            <div class="text-caption wrap-text py-2">
-              Access Dashboard using the kubectl command-line tool by running the following command:
-              <code>kubectl proxy</code>.
-              Kubectl will make Dashboard available at:
-            </div>
+          Dashboard
+          <template #description>
+            Access Dashboard using the kubectl command-line tool by running the following command:
+            <code>kubectl proxy</code>.
+            Kubectl will make Dashboard available at:
+            <v-tooltip
+              v-if="isShootStatusHibernated"
+              location="top"
+            >
+              <template #activator="{ props }">
+                <span
+                  v-bind="props"
+                  class="text-grey"
+                >{{ dashboardUrl }}</span>
+              </template>
+              Dashboard is not running for hibernated clusters
+            </v-tooltip>
+            <a
+              v-else
+              class="text-anchor"
+              :href="dashboardUrl"
+              target="_blank"
+              rel="noopener"
+            >
+              {{ dashboardUrl }}
+            </a>
           </template>
-          <v-tooltip
-            v-if="isShootStatusHibernated"
-            location="top"
-          >
-            <template #activator="{ props }">
-              <span
-                v-bind="props"
-                class="text-grey"
-              >{{ dashboardUrlText }}</span>
-            </template>
-            Dashboard is not running for hibernated clusters
-          </v-tooltip>
-          <a
-            v-else
-            class="text-anchor"
-            :href="dashboardUrl"
-            target="_blank"
-            rel="noopener"
-          >
-            {{ dashboardUrlText }}
-          </a>
         </g-list-item-content>
       </g-list-item>
       <g-list-item v-if="token">
@@ -109,21 +98,9 @@ SPDX-License-Identifier: Apache-2.0
     </template>
 
     <v-divider
-      v-if="isDashboardTileVisible && (isCredentialsTileVisible || isKubeconfigTileVisible || isGardenctlTileVisible)"
+      v-if="isDashboardTileVisible && (isKubeconfigTileVisible || isGardenctlTileVisible)"
       inset
     />
-
-    <g-username-password
-      v-if="isCredentialsTileVisible"
-      :username="username"
-      :password="password"
-    />
-
-    <v-divider
-      v-if="isCredentialsTileVisible && (isKubeconfigTileVisible || isGardenctlTileVisible)"
-      inset
-    />
-
     <template v-if="isKubeconfigTileVisible">
       <g-shoot-kubeconfig
         :shoot-item="shootItem"
@@ -134,6 +111,9 @@ SPDX-License-Identifier: Apache-2.0
         :shoot-item="shootItem"
         :show-list-icon="false"
         type="token"
+      />
+      <g-shoot-admin-kubeconfig
+        :shoot-item="shootItem"
       />
     </template>
 
@@ -155,20 +135,20 @@ import { mapState } from 'pinia'
 import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
 import { useTerminalStore } from '@/store/terminal'
+import { useConfigStore } from '@/store/config'
 
 import GList from '@/components/GList.vue'
 import GListItem from '@/components/GListItem.vue'
 import GListItemContent from '@/components/GListItemContent.vue'
 import GActionButton from '@/components/GActionButton.vue'
 import GCopyBtn from '@/components/GCopyBtn.vue'
-import GUsernamePassword from '@/components/GUsernamePasswordListTile.vue'
 import GTerminalListTile from '@/components/GTerminalListTile.vue'
-import GLinkListTile from '@/components/GLinkListTile.vue'
 
 import { shootItem } from '@/mixins/shootItem'
 
 import GGardenctlCommands from './GGardenctlCommands.vue'
 import GShootKubeconfig from './GShootKubeconfig.vue'
+import GShootAdminKubeconfig from './GShootAdminKubeconfig.vue'
 import GTerminalShortcutsTile from './GTerminalShortcutsTile.vue'
 
 import {
@@ -182,11 +162,10 @@ export default {
     GListItem,
     GListItemContent,
     GActionButton,
-    GUsernamePassword,
     GCopyBtn,
     GTerminalListTile,
-    GLinkListTile,
     GShootKubeconfig,
+    GShootAdminKubeconfig,
     GGardenctlCommands,
     GTerminalShortcutsTile,
   },
@@ -218,12 +197,10 @@ export default {
     ...mapState(useTerminalStore, [
       'isTerminalShortcutsFeatureEnabled',
     ]),
+    ...mapState(useConfigStore, ['shootAdminKubeconfig']),
     dashboardUrl () {
       if (!this.hasDashboardEnabled) {
         return ''
-      }
-      if (!this.hasDashboardTokenAuth) {
-        return this.shootInfo.dashboardUrl || ''
       }
 
       if (!this.shootInfo.dashboardUrlPath) {
@@ -232,23 +209,8 @@ export default {
       const pathname = this.shootInfo.dashboardUrlPath
       return `http://localhost:8001${pathname}`
     },
-    dashboardUrlText () {
-      if (this.hasDashboardTokenAuth) {
-        return this.dashboardUrl
-      }
-      return this.shootInfo.dashboardUrlText || ''
-    },
-    username () {
-      return this.shootInfo.cluster_username || ''
-    },
-    password () {
-      return this.shootInfo.cluster_password || ''
-    },
     hasDashboardEnabled () {
       return get(this.shootItem, 'spec.addons.kubernetesDashboard.enabled', false) === true
-    },
-    hasDashboardTokenAuth () {
-      return get(this.shootItem, 'spec.addons.kubernetesDashboard.authenticationMode', 'basic') === 'token'
     },
     kubeconfig () {
       return get(this.shootInfo, 'kubeconfig')
@@ -269,13 +231,10 @@ export default {
       return this.hasControlPlaneTerminalAccess ? 'Open terminal into cluster or cluster\'s control plane' : 'Open terminal into cluster'
     },
     isAnyTileVisible () {
-      return this.isDashboardTileVisible || this.isCredentialsTileVisible || this.isKubeconfigTileVisible || this.isTerminalTileVisible
+      return this.isDashboardTileVisible || this.isKubeconfigTileVisible || this.isTerminalTileVisible
     },
     isDashboardTileVisible () {
       return !!this.dashboardUrl
-    },
-    isCredentialsTileVisible () {
-      return !!this.username && !!this.password
     },
     isKubeconfigTileVisible () {
       return !!this.kubeconfigGardenlogin || this.canPatchShoots
