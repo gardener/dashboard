@@ -10,19 +10,20 @@ SPDX-License-Identifier: Apache-2.0
       v-model="enableStaticTokenKubeconfig"
       label="Enable static token kubeconfig (not recommended)"
       color="primary"
-      hide-details
       density="compact"
-    />
-    <div class="text-caption">
-      There are more
-      <g-external-link
-        class="text-caption"
-        url="https://github.com/gardener/gardener/blob/master/docs/usage/shoot_access.md"
-      >
-        secure alternatives
-      </g-external-link>
-      to access the cluster.
-    </div>
+      hint="There are more secure alternatives to access the cluster."
+      persistent-hint
+    >
+      <template #message>
+        There are more
+        <g-external-link
+          url="https://github.com/gardener/gardener/blob/master/docs/usage/shoot_access.md"
+        >
+          secure alternatives
+        </g-external-link>
+        to access the cluster.
+      </template>
+    </v-checkbox>
   </div>
 </template>
 
