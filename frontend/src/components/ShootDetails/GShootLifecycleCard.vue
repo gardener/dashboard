@@ -15,17 +15,16 @@ SPDX-License-Identifier: Apache-2.0
           </v-icon>
         </template>
         <g-list-item-content>
-          Hibernation
+          <div class="d-flex align-center">
+            Hibernation
+            <g-shoot-messages
+              :shoot-item="shootItem"
+              :filter="['no-hibernation-schedule', 'hibernation-constraint']"
+              small
+            />
+          </div>
           <template #description>
-            <div class="d-flex align-center pt-1">
-              <g-shoot-messages
-                :shoot-item="shootItem"
-                :filter="['no-hibernation-schedule', 'hibernation-constraint']"
-                small
-                class="mr-1"
-              />
-              {{ hibernationDescription }}
-            </div>
+            {{ hibernationDescription }}
           </template>
         </g-list-item-content>
         <template #append>
@@ -53,26 +52,18 @@ SPDX-License-Identifier: Apache-2.0
             Maintenance
             <g-shoot-messages
               :shoot-item="shootItem"
-              filter="last-maintenance"
+              :filter="['last-maintenance', 'maintenance-constraint']"
               show-verbose
               title="Last Maintenance Status"
               small
-              class="ml-1"
             />
           </div>
           <template #description>
             <v-tooltip location="top">
               <template #activator="{ props }">
                 <div
-                  class="d-flex align-center"
                   v-bind="props"
                 >
-                  <g-shoot-messages
-                    :shoot-item="shootItem"
-                    filter="maintenance-constraint"
-                    small
-                    class="mr-1"
-                  />
                   <span v-if="isInMaintenanceWindow">
                     Cluster is currently within the maintenance time window
                     <span v-if="nextMaintenanceEndTimestamp">
@@ -138,11 +129,34 @@ SPDX-License-Identifier: Apache-2.0
             </v-icon>
           </template>
           <g-list-item-content>
-            Delete Cluster
+            <div class="d-flex align-center">
+              Delete Cluster
+              <g-shoot-messages
+                :shoot-item="shootItem"
+                filter="force-delete"
+                show-verbose
+                title="Cluster Deletion Failed"
+                small
+              />
+            </div>
+            <template #description>
+              <span v-if="canForceDeleteShoot">
+                Cluster deletion failed
+              </span>
+              <span v-else>
+                Delete cluster and remove all ressources
+              </span>
+            </template>
           </g-list-item-content>
           <template #append>
             <g-shoot-action-delete-cluster
+              v-if="!canForceDeleteShoot"
               v-model="deleteClusterDialog"
+              :shoot-item="shootItem"
+            />
+            <g-shoot-action-force-delete
+              v-else
+              v-model="forceDeleteDialog"
               :shoot-item="shootItem"
             />
           </template>
@@ -159,6 +173,7 @@ import { useAuthzStore } from '@/store/authz'
 
 import GShootActionChangeHibernation from '@/components/ShootHibernation/GShootActionChangeHibernation'
 import GShootActionDeleteCluster from '@/components/GShootActionDeleteCluster'
+import GShootActionForceDelete from '@/components/GShootActionForceDelete'
 import GHibernationConfiguration from '@/components/ShootHibernation/GHibernationConfiguration'
 import GShootActionMaintenanceStart from '@/components/ShootMaintenance/GShootActionMaintenanceStart'
 import GMaintenanceConfiguration from '@/components/ShootMaintenance/GMaintenanceConfiguration'
@@ -179,6 +194,7 @@ export default {
     GMaintenanceConfiguration,
     GHibernationConfiguration,
     GShootActionDeleteCluster,
+    GShootActionForceDelete,
     GShootActionReconcileStart,
     GShootMessages,
     GTimeString,
@@ -190,6 +206,7 @@ export default {
       maintenanceStartDialog: false,
       reconcileStartDialog: false,
       deleteClusterDialog: false,
+      forceDeleteDialog: false,
     }
   },
   computed: {

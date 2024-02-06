@@ -5,33 +5,31 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-theme-provider :theme="dark ? 'dark' : 'light'">
-    <v-expand-transition appear>
-      <v-alert
-        v-model="alertVisible"
-        :color="color"
-        :rounded="!tile ? true : 0"
-        closable
-      >
-        <div class="text-subtitle-1">
-          {{ message }}
-          <v-btn
-            v-if="!!detailedMessage"
-            variant="tonal"
-            size="small"
-            @click="detailedMessageVisible = !detailedMessageVisible"
-          >
-            Details
-          </v-btn>
+  <v-expand-transition appear>
+    <v-alert
+      v-model="alertVisible"
+      :color="color"
+      :rounded="!tile ? true : 0"
+      closable
+    >
+      <div class="text-subtitle-1">
+        {{ message }}
+        <v-btn
+          v-if="!!detailedMessage"
+          variant="tonal"
+          size="small"
+          @click="detailedMessageVisible = !detailedMessageVisible"
+        >
+          Details
+        </v-btn>
+      </div>
+      <transition name="fade">
+        <div v-if="!!detailedMessageVisible">
+          <code>{{ detailedMessage }}</code>
         </div>
-        <transition name="fade">
-          <div v-if="!!detailedMessageVisible">
-            <code>{{ detailedMessage }}</code>
-          </div>
-        </transition>
-      </v-alert>
-    </v-expand-transition>
-  </v-theme-provider>
+      </transition>
+    </v-alert>
+  </v-expand-transition>
 </template>
 
 <script>
