@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
       v-model:error-message="errorMessage"
       v-model:detailed-error-message="detailedErrorMessage"
       alert-banner-identifier="newShootEditorWarning"
-      :shoot-item="newShootResource"
+      :shoot-item="shootObject"
     >
       <template #modificationWarning>
         By modifying the resource directly you may create an invalid cluster resource.
@@ -39,7 +39,7 @@ import {
 } from 'pinia'
 import yaml from 'js-yaml'
 
-import { useShootStore } from '@/store/shoot'
+import { useShootCreationStore } from '@/store/shoot'
 import { useAuthzStore } from '@/store/authz'
 import { useAppStore } from '@/store/app'
 
@@ -48,8 +48,6 @@ import GConfirmDialog from '@/components/dialogs/GConfirmDialog'
 import { useAsyncRef } from '@/composables/useAsyncRef'
 
 import { errorDetailsFromError } from '@/utils/error'
-
-import { isEqual } from '@/lodash'
 
 export default {
   components: {
@@ -61,7 +59,7 @@ export default {
     if (to.name === 'NewShoot') {
       try {
         const shootResource = await this.getShootResource()
-        this.setNewShootResource(shootResource)
+        this.replaceShoot(shootResource)
         return next()
       } catch (err) {
         this.errorMessage = err.message
@@ -101,14 +99,14 @@ export default {
     ...mapState(useAuthzStore, [
       'namespace',
     ]),
-    ...mapState(useShootStore, [
-      'newShootResource',
-      'initialNewShootResource',
+    ...mapState(useShootCreationStore, [
+      'shootObject',
     ]),
   },
   methods: {
-    ...mapActions(useShootStore, [
-      'setNewShootResource',
+    ...mapActions(useShootCreationStore, [
+      'isShootDirty',
+      'replaceShoot',
       'createShoot',
     ]),
     ...mapActions(useAppStore, ['alert']),
@@ -148,7 +146,7 @@ export default {
     },
     async isShootContentDirty () {
       const shootResource = await this.getShootResource()
-      return !isEqual(this.initialNewShootResource, shootResource)
+      return this.isShootDirty(shootResource)
     },
   },
 }

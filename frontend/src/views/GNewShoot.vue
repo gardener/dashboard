@@ -179,7 +179,7 @@ import mitt from 'mitt'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useShootStagingStore } from '@/store/shootStaging'
-import { useShootStore } from '@/store/shoot'
+import { useShootCreationStore } from '@/store/shoot'
 import { useAuthzStore } from '@/store/authz'
 import { useConfigStore } from '@/store/config'
 import { useSecretStore } from '@/store/secret'
@@ -214,7 +214,6 @@ import {
   find,
   isEmpty,
   cloneDeep,
-  isEqual,
   unset,
   omit,
 } from '@/lodash'
@@ -279,9 +278,8 @@ export default {
     ...mapState(useShootStagingStore, [
       'workerless',
     ]),
-    ...mapState(useShootStore, [
-      'newShootResource',
-      'initialNewShootResource',
+    ...mapState(useShootCreationStore, [
+      'shootObject',
     ]),
     ...mapState(useSecretStore, [
       'sortedInfrastructureKindList',
@@ -297,13 +295,14 @@ export default {
   },
   created () {
     if (this.sortedInfrastructureKindList.length) {
-      this.setClusterConfiguration(this.newShootResource)
+      this.setClusterConfiguration(this.shootObject)
     }
   },
   methods: {
-    ...mapActions(useShootStore, [
+    ...mapActions(useShootCreationStore, [
+      'isShootDirty',
       'createShoot',
-      'setNewShootResource',
+      'replaceShoot',
     ]),
     ...mapActions(useShootStagingStore, [
       'getDnsConfiguration',
@@ -318,10 +317,10 @@ export default {
     ]),
     async isShootContentDirty () {
       const shootResource = await this.shootResourceFromUIComponents()
-      return !isEqual(this.initialNewShootResource, shootResource)
+      return this.isShootDirty(shootResource)
     },
     async shootResourceFromUIComponents () {
-      const shootResource = cloneDeep(this.newShootResource)
+      const shootResource = cloneDeep(this.shootObject)
 
       const {
         infrastructureKind,
@@ -471,11 +470,11 @@ export default {
     },
     async updateShootResourceWithUIComponents () {
       const shootResource = await this.shootResourceFromUIComponents()
-      this.setNewShootResource(shootResource)
+      this.replaceShoot(shootResource)
       return shootResource
     },
     async updateUIComponentsWithShootResource () {
-      const shootResource = cloneDeep(this.newShootResource)
+      const shootResource = cloneDeep(this.shootObject)
 
       const infrastructureKind = get(shootResource, 'spec.provider.type')
       this.$refs.infrastructure.setSelectedInfrastructure(infrastructureKind)

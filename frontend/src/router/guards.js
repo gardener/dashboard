@@ -15,7 +15,10 @@ import { useKubeconfigStore } from '@/store/kubeconfig'
 import { useMemberStore } from '@/store/member'
 import { useSecretStore } from '@/store/secret'
 import { useSeedStore } from '@/store/seed'
-import { useShootStore } from '@/store/shoot'
+import {
+  useShootStore,
+  useShootCreationStore,
+} from '@/store/shoot'
 import { useTerminalStore } from '@/store/terminal'
 
 import { useLogger } from '@/composables/useLogger'
@@ -34,6 +37,7 @@ export function createGlobalBeforeGuards () {
   const memberStore = useMemberStore()
   const secretStore = useSecretStore()
   const shootStore = useShootStore()
+  const shootCreationStore = useShootCreationStore()
   const terminalStore = useTerminalStore()
 
   function ensureUserAuthenticatedForNonPublicRoutes () {
@@ -120,7 +124,7 @@ export function createGlobalBeforeGuards () {
             const namespaceChanged = from.params.namespace !== to.params.namespace
             const toNewShoot = from.name !== 'NewShoot' && from.name !== 'NewShootEditor'
             if (namespaceChanged || toNewShoot) {
-              shootStore.resetNewShootResource()
+              shootCreationStore.$reset()
             }
             break
           }
