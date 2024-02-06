@@ -93,12 +93,10 @@ SPDX-License-Identifier: Apache-2.0
                   <span v-if="infraAccountError">
                     There is a problem with your secret
                     <code>
-                      <g-text-router-link
-                        v-if="canLinkToSecret"
-                        :to="{ name: 'Secret', params: { name: secretBindingName, namespace: namespace } }"
-                        :text="secretBindingName"
+                      <g-shoot-secret-name
+                        :namespace="namespace"
+                        :secret-binding-name="secretBindingName"
                       />
-                      <span v-else>{{ secretBindingName }}</span>
                     </code>:
                   </span>
                   <span>{{ description }}</span>
@@ -126,14 +124,14 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import GAnsiText from '@/components/GAnsiText.vue'
-import GTextRouterLink from '@/components/GTextRouterLink.vue'
+import GShootSecretName from '@/components/GShootSecretName.vue'
 
 import { isEmpty } from '@/lodash'
 
 export default {
   components: {
     GAnsiText,
-    GTextRouterLink,
+    GShootSecretName,
   },
   props: {
     statusTitle: {
@@ -161,9 +159,6 @@ export default {
   computed: {
     hasError () {
       return !isEmpty(this.errorDescriptions)
-    },
-    canLinkToSecret () {
-      return this.secretBindingName && this.namespace
     },
   },
 }
