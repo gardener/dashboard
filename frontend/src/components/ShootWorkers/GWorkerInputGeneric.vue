@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div class="d-flex flex-nowrap align-center">
     <div class="d-flex flex-wrap">
-      <div class="regularInput">
+      <div class="regular-input">
         <v-text-field
           v-model="worker.name"
           color="primary"
@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
           @blur="v$.worker.name.$touch()"
         />
       </div>
-      <div class="smallInput">
+      <div class="small-input">
         <v-select
           v-model="machineArchitecture"
           color="primary"
@@ -31,14 +31,14 @@ SPDX-License-Identifier: Apache-2.0
           @blur="v$.machineArchitecture.$touch()"
         />
       </div>
-      <div class="regularInput">
+      <div class="regular-input">
         <g-machine-type
           v-model="machineTypeValue"
           :machine-types="machineTypes"
           :field-name="`${workerGroupName} Machine Type`"
         />
       </div>
-      <div class="regularInput">
+      <div class="regular-input">
         <g-machine-image
           :machine-images="machineImages"
           :worker="worker"
@@ -47,7 +47,7 @@ SPDX-License-Identifier: Apache-2.0
           :field-name="`${workerGroupName} Machine Image`"
         />
       </div>
-      <div class="regularInput">
+      <div class="regular-input">
         <g-container-runtime
           :machine-image-cri="machineImageCri"
           :worker="worker"
@@ -57,7 +57,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
       <div
         v-if="volumeInCloudProfile"
-        class="regularInput"
+        class="regular-input"
       >
         <g-volume-type
           :volume-types="volumeTypes"
@@ -68,7 +68,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
       <div
         v-if="hasPersistence"
-        class="smallInput"
+        class="small-input"
       >
         <g-volume-size-input
           v-model="volumeSize"
@@ -83,7 +83,7 @@ SPDX-License-Identifier: Apache-2.0
           @blur="v$.volumeSize.$touch()"
         />
       </div>
-      <div class="smallInput">
+      <div class="small-input">
         <v-text-field
           v-model="innerMin"
           min="0"
@@ -96,7 +96,7 @@ SPDX-License-Identifier: Apache-2.0
           @blur="v$.worker.minimum.$touch()"
         />
       </div>
-      <div class="smallInput">
+      <div class="small-input">
         <v-text-field
           v-model="innerMax"
           min="0"
@@ -109,7 +109,7 @@ SPDX-License-Identifier: Apache-2.0
           @blur="v$.worker.maximum.$touch()"
         />
       </div>
-      <div class="smallInput">
+      <div class="small-input">
         <v-text-field
           v-model="maxSurge"
           min="0"
@@ -124,7 +124,7 @@ SPDX-License-Identifier: Apache-2.0
 
       <div
         v-if="zonedCluster"
-        class="regularInput"
+        class="regular-input"
       >
         <v-select
           v-model="selectedZones"
@@ -568,19 +568,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .regularInput {
-    max-width: 300px;
-    min-width: 230px;
-    flex: 1 1 auto;
-    padding: 12px;
-  }
-  .smallInput {
-    max-width: 120px;
-    min-width: 112px;
-    flex: 1 1 auto;
-    padding: 12px;
-  }
-
   :deep(.v-chip--disabled) {
     opacity: 1;
   }

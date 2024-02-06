@@ -19,9 +19,13 @@ SPDX-License-Identifier: Apache-2.0
       >
         <g-vendor-icon
           :icon="cloudProviderKind"
-          class="mr-2"
         />
-        {{ description }}
+        <span
+          v-if="description"
+          class="ml-2"
+        >
+          {{ description }}
+        </span>
       </div>
     </template>
     <v-card elevation="12">

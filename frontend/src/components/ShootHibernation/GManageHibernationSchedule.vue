@@ -5,49 +5,47 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div>
-    <div class="alternate-row-background">
-      <g-expand-transition-group>
-        <v-row
-          v-for="(scheduleEvent, index) in parsedScheduleEvents"
-          :key="scheduleEvent.id"
-          class="list-item pt-2"
-        >
-          <g-hibernation-schedule-event
-            ref="scheduleEvents"
-            :schedule-event="scheduleEvent"
-            @remove-schedule-event="onRemoveSchedule(index)"
-            @update-wake-up-time="onUpdateWakeUpTime"
-            @update-hibernate-time="onUpdateHibernateTime"
-            @update-selected-days="onUpdateSelectedDays"
-            @update-location="onUpdateLocation"
-          />
-        </v-row>
-      </g-expand-transition-group>
+  <div class="alternate-row-background">
+    <g-expand-transition-group>
       <v-row
-        v-if="!parseError"
-        key="addSchedule"
-        class="list-item pt-2"
+        v-for="(scheduleEvent, index) in parsedScheduleEvents"
+        :key="scheduleEvent.id"
+        class="list-item"
       >
-        <v-col>
-          <v-btn
-            variant="text"
-            color="primary"
-            @click="addSchedule"
-          >
-            <v-icon class="text-primary">
-              mdi-plus
-            </v-icon>
-            <span class="ml-2">Add Hibernation Schedule</span>
-          </v-btn>
-        </v-col>
+        <g-hibernation-schedule-event
+          ref="scheduleEvents"
+          :schedule-event="scheduleEvent"
+          @remove-schedule-event="onRemoveSchedule(index)"
+          @update-wake-up-time="onUpdateWakeUpTime"
+          @update-hibernate-time="onUpdateHibernateTime"
+          @update-selected-days="onUpdateSelectedDays"
+          @update-location="onUpdateLocation"
+        />
       </v-row>
-    </div>
+    </g-expand-transition-group>
+    <v-row
+      v-if="!parseError"
+      key="addSchedule"
+      class="list-item my-1"
+    >
+      <v-col>
+        <v-btn
+          variant="text"
+          color="primary"
+          @click="addSchedule"
+        >
+          <v-icon class="text-primary">
+            mdi-plus
+          </v-icon>
+          Add Hibernation Schedule
+        </v-btn>
+      </v-col>
+    </v-row>
     <v-row
       v-show="showNoScheduleCheckbox"
       key="noSchedule"
       align="center"
-      class="list-item pt-6"
+      class="list-item"
     >
       <v-col>
         <v-checkbox

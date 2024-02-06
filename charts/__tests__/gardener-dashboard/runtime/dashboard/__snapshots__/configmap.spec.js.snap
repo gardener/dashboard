@@ -424,6 +424,7 @@ Object {
     ],
     "features": Object {
       "projectTerminalShortcutsEnabled": false,
+      "shootForceDeletionEnabled": false,
       "terminalEnabled": false,
     },
     "helpMenuItems": Array [

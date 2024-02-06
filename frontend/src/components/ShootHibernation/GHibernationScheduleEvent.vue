@@ -5,70 +5,67 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-row
-    align="center"
-    class="ma-0"
+  <div
+    class="d-flex flex-nowrap align-center"
   >
-    <v-col cols="11">
-      <v-row class="ma-0">
-        <v-col cols="5">
-          <v-select
-            ref="selectedDays"
-            v-model="selectedDays"
-            color="primary"
-            item-color="primary"
-            :items="weekdays"
-            return-object
-            :error-messages="getErrorMessages(v$.selectedDays)"
-            chips
-            label="Weekdays on which this rule shall be active"
-            multiple
-            closable-chips
-            variant="underlined"
-            @blur="touchIfNothingFocused"
-            @update:model-value="onInputSelectedDays"
-          />
-        </v-col>
-        <v-col cols="2">
-          <g-time-text-field
-            ref="wakeUpTime"
-            v-model="wakeUpTime"
-            color="primary"
-            label="Wake up at"
-            :error-messages="getErrorMessages(v$.wakeUpTime)"
-            clearable
-            variant="underlined"
-            @blur="touchIfNothingFocused"
-            @update:model-value="onInputWakeUpTime"
-          />
-        </v-col>
-        <v-col cols="2">
-          <g-time-text-field
-            ref="hibernateTime"
-            v-model="hibernateTime"
-            color="primary"
-            label="Hibernate at"
-            :error-messages="getErrorMessages(v$.hibernateTime)"
-            clearable
-            variant="underlined"
-            @blur="touchIfNothingFocused"
-            @update:model-value="onInputHibernateTime"
-          />
-        </v-col>
-        <v-col cols="3">
-          <v-autocomplete
-            v-model="selectedLocation"
-            color="primary"
-            label="Location"
-            :items="locations"
-            append-icon="mdi-map-marker-outline"
-            variant="underlined"
-            @update:model-value="onInputSelectedLocation"
-          />
-        </v-col>
-      </v-row>
-    </v-col>
-    <v-col cols="1">
+    <div class="d-flex flex-wrap">
+      <div class="large-input">
+        <v-select
+          ref="selectedDays"
+          v-model="selectedDays"
+          color="primary"
+          item-color="primary"
+          :items="weekdays"
+          return-object
+          :error-messages="getErrorMessages(v$.selectedDays)"
+          chips
+          label="Weekdays on which this rule shall be active"
+          multiple
+          closable-chips
+          variant="underlined"
+          @blur="touchIfNothingFocused"
+          @update:model-value="onInputSelectedDays"
+        />
+      </div>
+      <div class="regular-input">
+        <g-time-text-field
+          ref="wakeUpTime"
+          v-model="wakeUpTime"
+          color="primary"
+          label="Wake up at"
+          :error-messages="getErrorMessages(v$.wakeUpTime)"
+          clearable
+          variant="underlined"
+          @blur="touchIfNothingFocused"
+          @update:model-value="onInputWakeUpTime"
+        />
+      </div>
+      <div class="regular-input">
+        <g-time-text-field
+          ref="hibernateTime"
+          v-model="hibernateTime"
+          color="primary"
+          label="Hibernate at"
+          :error-messages="getErrorMessages(v$.hibernateTime)"
+          clearable
+          variant="underlined"
+          @blur="touchIfNothingFocused"
+          @update:model-value="onInputHibernateTime"
+        />
+      </div>
+      <div class="regular-input">
+        <v-autocomplete
+          v-model="selectedLocation"
+          color="primary"
+          label="Location"
+          :items="locations"
+          append-icon="mdi-map-marker-outline"
+          variant="underlined"
+          @update:model-value="onInputSelectedLocation"
+        />
+      </div>
+    </div>
+    <div class="ml-4 mr-2">
       <v-btn
         size="x-small"
         variant="tonal"
@@ -76,8 +73,8 @@ SPDX-License-Identifier: Apache-2.0
         color="grey"
         @click.stop="removeScheduleEvent"
       />
-    </v-col>
-  </v-row>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -289,3 +286,9 @@ export default {
   },
 }
 </script>
+
+<style lang="scss" scoped>
+:deep(.v-chip--disabled) {
+  opacity: 1;
+}
+</style>

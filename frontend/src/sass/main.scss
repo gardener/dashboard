@@ -112,10 +112,23 @@
   opacity: inherit !important;
 }
 
-/*
- This fixes the missing margin for multi-line hints
- TODO Maybe we can remove this whith future vuetify version
-*/
-.v-input__details {
-  padding-top: 5px !important;
+.regular-input {
+  max-width: 300px;
+  min-width: 180px;
+  flex: 1 1 auto;
+  padding: 12px;
+}
+
+.small-input {
+  max-width: 120px;
+  min-width: 112px;
+  flex: 1 1 auto;
+  padding: 12px;
+}
+
+.large-input {
+  max-width: 600px;
+  min-width: 300px;
+  flex: 1 1 auto;
+  padding: 12px;
 }

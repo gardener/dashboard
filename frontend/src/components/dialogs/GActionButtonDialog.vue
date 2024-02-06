@@ -8,10 +8,10 @@ SPDX-License-Identifier: Apache-2.0
   <div>
     <template v-if="canPatchShoots">
       <g-action-button
-        :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose || disabled"
+        :disabled="isDisabled"
         :loading="loading"
         :icon="icon"
-        color="action-button"
+        :color="color"
         :text="text"
         :tooltip="actionToolTip"
         :tooltip-disabled="disableToolTip"
@@ -70,6 +70,10 @@ export default {
       type: String,
       default: 'mdi-cog-outline',
     },
+    color: {
+      type: String,
+      default: 'action-button',
+    },
     caption: {
       type: String,
     },
@@ -93,13 +97,19 @@ export default {
     },
     loading: {
       type: Boolean,
+      default: false,
     },
     disabled: {
       type: Boolean,
       default: false,
     },
+    ignoreDeletionStatus: {
+      type: Boolean,
+      default: false,
+    },
     disableConfirmInputFocus: {
       type: Boolean,
+      default: false,
     },
     text: {
       type: String,
@@ -130,6 +140,11 @@ export default {
     disableToolTip () {
       return this.text === this.actionToolTip
     },
+    isDisabled () {
+      return (this.isShootMarkedForDeletion && !this.ignoreDeletionStatus) ||
+      this.isShootActionsDisabledForPurpose ||
+      this.disabled
+    },
   },
   methods: {
     showDialog (resetError = true) {
@@ -156,6 +171,17 @@ export default {
       if (this.$refs.gDialog) {
         this.$refs.gDialog.hideDialog()
       }
+    },
+    shootActionToolTip (tooltip) {
+      if (this.isShootActionsDisabledForPurpose) {
+        return 'Actions disabled for clusters with purpose "infrastructure"'
+      }
+
+      if (!this.ignoreDeletionStatus && this.isShootMarkedForDeletion) {
+        return 'Actions disabled for clusters that are marked for deletion'
+      }
+
+      return tooltip
     },
   },
 }
