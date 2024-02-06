@@ -162,18 +162,16 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { markRaw } from 'vue'
-import { mapState } from 'pinia'
+import {
+  mapState,
+  mapWritableState,
+} from 'pinia'
 import yaml from 'js-yaml'
 import download from 'downloadjs'
-import CodeMirror from 'codemirror'
-import 'codemirror/addon/hint/show-hint.js'
-import 'codemirror/addon/hint/show-hint.css'
-import 'codemirror/mode/yaml/yaml.js'
-import 'codemirror/lib/codemirror.css'
-import 'codemirror/theme/seti.css'
 
 import { useAuthzStore } from '@/store/authz'
+import { useShootCreationStore } from '@/store/shoot'
+import { useLocalStorageStore } from '@/store/localStorage'
 
 import GCopyBtn from '@/components/GCopyBtn'
 import GActionButton from '@/components/GActionButton'
@@ -181,7 +179,12 @@ import GMessage from '@/components/GMessage'
 import GAlertBanner from '@/components/GAlertBanner'
 
 import { shootItem } from '@/mixins/shootItem'
-import { ShootEditorCompletions } from '@/utils/shootEditorCompletions'
+import {
+  createShootEditor,
+  createShootEditorCompletions,
+  registerShootEditorHelper,
+  addShootEditorEventListener,
+} from '@/utils/shootEditor'
 
 import {
   get,
@@ -257,11 +260,14 @@ export default {
       },
       showManagedFields: false,
       containerClass: undefined,
-      cmInstance: null,
     }
   },
   computed: {
     ...mapState(useAuthzStore, ['canPatchShoots']),
+    ...mapState(useLocalStorageStore, ['editorShortcuts']),
+    ...mapWritableState(useShootCreationStore, {
+      cmInstance: 'editor',
+    }),
     value () {
       let data = cloneDeep(this.shootItem)
       if (data) {
@@ -301,6 +307,30 @@ export default {
       set (value) {
         this.$emit('update:detailedErrorMessage', value)
       },
+    },
+    extraKeysInternal () {
+      const extraKeys = {}
+      const extraKeyEntries = Object.entries({
+        Tab: instance => {
+          if (instance.somethingSelected()) {
+            instance.indentSelection('add')
+          } else {
+            instance.execCommand('insertSoftTab')
+          }
+        },
+        'Shift-Tab': instance => {
+          instance.indentSelection('subtract')
+        },
+        Enter: instance => {
+          this.shootEditorCompletions.editorEnter(instance)
+        },
+        'Ctrl-Space': 'autocomplete',
+        ...this.extraKeys,
+      })
+      for (const [key, value] of extraKeyEntries) {
+        extraKeys[this.editorShortcuts[key] ?? key] = value
+      }
+      return extraKeys
     },
     isReadOnly () {
       return this.isShootActionsDisabledForPurpose || !this.canPatchShoots
@@ -354,7 +384,7 @@ export default {
     const shootSchemaDefinition = await this.api.getShootSchemaDefinition()
     const shootProperties = get(shootSchemaDefinition, 'properties', {})
     const indentUnit = get(this.cmInstance, 'options.indentUnit', 2)
-    this.shootEditorCompletions = new ShootEditorCompletions(shootProperties, indentUnit, this.completionPaths, this.logger)
+    this.shootEditorCompletions = createShootEditorCompletions(shootProperties, indentUnit, this.completionPaths, this.logger)
   },
   beforeUnmount () {
     this.destroyInstance()
@@ -417,22 +447,6 @@ export default {
       }
     },
     createInstance (element) {
-      const extraKeys = assign({}, {
-        Tab: instance => {
-          if (instance.somethingSelected()) {
-            instance.indentSelection('add')
-          } else {
-            instance.execCommand('insertSoftTab')
-          }
-        },
-        'Shift-Tab': instance => {
-          instance.indentSelection('subtract')
-        },
-        Enter: instance => {
-          this.shootEditorCompletions.editorEnter(instance)
-        },
-        'Ctrl-Space': 'autocomplete',
-      }, this.extraKeys)
       const options = {
         mode: 'text/x-yaml',
         autofocus: true,
@@ -445,21 +459,20 @@ export default {
         lineWrapping: true,
         viewportMargin: Infinity, // make sure the whole shoot resource is laoded so that the browser's text search works on it
         readOnly: this.isReadOnly,
-        extraKeys,
+        extraKeys: this.extraKeysInternal,
         theme: this.theme,
       }
-      this.cmInstance = markRaw(CodeMirror(element, options))
+      const cm = this.cmInstance = createShootEditor(element, options)
       this.cmInstance.setSize('100%', '100%')
-      const onChange = ({ doc }) => {
+      this.cmInstance.on('change', ({ doc }) => {
         this.untouched = false
         this.setClean(doc.isClean(this.generation))
         this.historySize = doc.historySize()
         this.errorMessageInternal = undefined
         this.detailedErrorMessageInternal = undefined
-      }
-      this.cmInstance.on('change', onChange)
+      })
 
-      CodeMirror.registerHelper('hint', 'yaml', (editor, options) => {
+      registerShootEditorHelper('hint', 'yaml', (editor, options) => {
         options.completeSingle = false
         options.container = this.$refs.container
         if (!this.shootEditorCompletions) {
@@ -469,8 +482,7 @@ export default {
       })
 
       let cmTooltipFnTimerID
-      const cm = this.cmInstance
-      CodeMirror.on(element, 'mouseover', e => {
+      addShootEditorEventListener(element, 'mouseover', e => {
         clearTimeout(cmTooltipFnTimerID)
         this.helpTooltip.visible = false
         cmTooltipFnTimerID = setTimeout(() => {
@@ -497,7 +509,7 @@ export default {
           element.remove()
         }
       }
-      this.cmInstance = undefined
+      this.cmInstance = null
     },
     clearHistory () {
       if (this.cmInstance) {
@@ -646,3 +658,4 @@ export default {
     max-height: 100vh;
   }
 </style>
+@/utils/shootEditor

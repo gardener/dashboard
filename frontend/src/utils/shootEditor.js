@@ -5,6 +5,11 @@
 //
 
 import CodeMirror from 'codemirror'
+import 'codemirror/addon/hint/show-hint.js'
+import 'codemirror/addon/hint/show-hint.css'
+import 'codemirror/mode/yaml/yaml.js'
+import 'codemirror/lib/codemirror.css'
+import 'codemirror/theme/seti.css'
 
 import {
   forEach,
@@ -24,6 +29,22 @@ import {
   isEqual,
   first,
 } from '@/lodash'
+
+export function createShootEditor (...args) {
+  return CodeMirror(...args)
+}
+
+export function createShootEditorCompletions (...args) {
+  return new ShootEditorCompletions(...args)
+}
+
+export function addShootEditorEventListener (...args) {
+  return CodeMirror.on(...args)
+}
+
+export function registerShootEditorHelper (...args) {
+  return CodeMirror.registerHelper(...args)
+}
 
 export class ShootEditorCompletions {
   constructor (shootProperties, editorIndent, supportedPaths, logger) {

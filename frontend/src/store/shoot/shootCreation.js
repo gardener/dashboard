@@ -39,6 +39,7 @@ const useShootCreationStore = defineStore('shootCreation', () => {
 
   const initialShootObject = shallowRef(null)
   const shootObject = ref(null)
+  const editor = shallowRef(null)
 
   function isShootDirty (object) {
     return !isEqual(initialShootObject.value, object)
@@ -69,10 +70,12 @@ const useShootCreationStore = defineStore('shootCreation', () => {
       state.initialShootObject = shootObject
       state.shootObject = cloneDeep(shootObject)
     })
+    editor.value = null
     shootStagingStore.workerless = false
   }
 
   return {
+    editor,
     shootObject,
     isShootDirty,
     replaceShoot,

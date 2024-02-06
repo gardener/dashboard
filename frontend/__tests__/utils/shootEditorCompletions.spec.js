@@ -5,7 +5,7 @@
 import CodeMirror from 'codemirror'
 import 'codemirror/mode/yaml/yaml.js'
 
-import { ShootEditorCompletions } from '@/utils/shootEditorCompletions'
+import { ShootEditorCompletions } from '@/utils/shootEditor'
 
 import { repeat } from '@/lodash'
 
