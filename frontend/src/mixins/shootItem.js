@@ -4,12 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import {
-  mapActions,
-  mapState,
-} from 'pinia'
+import { mapActions } from 'pinia'
 
-import { useConfigStore } from '@/store/config'
 import { useShootStore } from '@/store/shoot'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useProjectStore } from '@/store/project'
@@ -52,9 +48,6 @@ export const shootItem = {
     },
   },
   computed: {
-    ...mapState(useConfigStore, [
-      'isShootForceDeletionEnabled',
-    ]),
     shootMetadata () {
       return get(this.shootItem, 'metadata', {})
     },
@@ -293,9 +286,6 @@ export const shootItem = {
       return !this.isShootActive(this.shootMetadata.uid)
     },
     canForceDeleteShoot () {
-      if (!this.isShootForceDeletionEnabled) {
-        return false
-      }
       if (!this.shootDeletionTimestamp) {
         return false
       }
