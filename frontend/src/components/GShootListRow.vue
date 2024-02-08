@@ -68,7 +68,10 @@ SPDX-License-Identifier: Apache-2.0
         </g-auto-hide>
       </template>
       <template v-if="cell.header.key === 'workers'">
-        <g-worker-groups :shoot-item="shootItem" />
+        <g-worker-groups
+          :shoot-item="shootItem"
+          collapse
+        />
       </template>
       <template v-if="cell.header.key === 'createdBy'">
         <g-account-avatar :account-name="shootCreatedBy" />

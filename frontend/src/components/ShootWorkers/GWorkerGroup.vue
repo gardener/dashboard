@@ -11,19 +11,11 @@ SPDX-License-Identifier: Apache-2.0
     placement="bottom"
   >
     <template #activator="{ props }">
-      <v-chip
+      <g-worker-chip
         v-bind="props"
-        size="small"
-        class="cursor-pointer my-0 ml-0"
-        variant="tonal"
-        color="primary"
-      >
-        <g-vendor-icon
-          :icon="machineImageIcon"
-          :size="20"
-        />
-        <span class="px-1">{{ workerGroup.name }}</span>
-      </v-chip>
+        :worker-group="workerGroup"
+        :cloud-profile-name="cloudProfileName"
+      />
     </template>
     <v-tabs
       v-model="tab"
@@ -46,14 +38,13 @@ SPDX-License-Identifier: Apache-2.0
     <v-card-text>
       <v-window
         v-model="tab"
-        min-width="600"
+        class="group-window"
       >
         <v-window-item value="overview">
-          <v-container class="pa-2">
+          <v-container class="pa-0">
             <v-row dense>
               <v-col cols="6">
                 <v-card
-                  variant="tonal"
                   class="border"
                 >
                   <v-toolbar
@@ -99,7 +90,7 @@ SPDX-License-Identifier: Apache-2.0
                           size="small"
                           label
                           variant="tonal"
-                          class="px-1 mr-1"
+                          class="ma-1"
                         >
                           {{ zone }}
                         </v-chip>
@@ -128,7 +119,6 @@ SPDX-License-Identifier: Apache-2.0
                   </v-card-text>
                 </v-card>
                 <v-card
-                  variant="tonal"
                   class="border mt-2"
                 >
                   <v-toolbar
@@ -173,7 +163,6 @@ SPDX-License-Identifier: Apache-2.0
               </v-col>
               <v-col cols="6">
                 <v-card
-                  variant="tonal"
                   class="border"
                 >
                   <v-toolbar
@@ -234,7 +223,6 @@ SPDX-License-Identifier: Apache-2.0
                   </v-card-text>
                 </v-card>
                 <v-card
-                  variant="tonal"
                   class="border mt-2"
                 >
                   <v-toolbar
@@ -283,7 +271,6 @@ SPDX-License-Identifier: Apache-2.0
                   </v-card-text>
                 </v-card>
                 <v-card
-                  variant="tonal"
                   class="border mt-2"
                 >
                   <v-toolbar
@@ -339,7 +326,7 @@ SPDX-License-Identifier: Apache-2.0
           <g-code-block
             lang="yaml"
             :content="workerGroupYaml"
-            style="min-width: 480px"
+            height="100%"
           />
         </v-window-item>
       </v-window>
@@ -352,7 +339,7 @@ import { mapActions } from 'pinia'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
-import GVendorIcon from '@/components/GVendorIcon'
+import GWorkerChip from '@/components/ShootWorkers/GWorkerChip'
 import GCodeBlock from '@/components/GCodeBlock'
 
 import {
@@ -362,7 +349,7 @@ import {
 
 export default {
   components: {
-    GVendorIcon,
+    GWorkerChip,
     GCodeBlock,
   },
   inject: [
@@ -451,9 +438,6 @@ export default {
     machineCri () {
       return this.workerGroup.cri ?? {}
     },
-    machineImageIcon () {
-      return get(this.machineImage, 'icon')
-    },
     tab: {
       get () {
         return this.modelValue
@@ -482,5 +466,9 @@ export default {
 <style>
   .border {
     border-color: rgba(var(--v-border-color), var(--v-border-opacity)) !important;
+  }
+
+  .group-window {
+    width: 450px;
   }
 </style>
