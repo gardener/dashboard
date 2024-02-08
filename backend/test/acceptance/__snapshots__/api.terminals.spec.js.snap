@@ -133,7 +133,7 @@ Array [
     Object {
       ":authority": "kubernetes:6443",
       ":method": "get",
-      ":path": "/api/v1/namespaces/garden/secrets/infra1-seed.ca-cluster",
+      ":path": "/api/v1/namespaces/garden/configmaps/infra1-seed.ca-cluster",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
     },
@@ -1028,7 +1028,7 @@ Array [
     Object {
       ":authority": "kubernetes:6443",
       ":method": "get",
-      ":path": "/api/v1/namespaces/garden-foo/secrets/fooShoot.ca-cluster",
+      ":path": "/api/v1/namespaces/garden-foo/configmaps/fooShoot.ca-cluster",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
     },
@@ -1264,7 +1264,7 @@ Array [
     Object {
       ":authority": "kubernetes:6443",
       ":method": "get",
-      ":path": "/api/v1/namespaces/garden-foo/secrets/fooShoot.ca-cluster",
+      ":path": "/api/v1/namespaces/garden-foo/configmaps/fooShoot.ca-cluster",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
     },

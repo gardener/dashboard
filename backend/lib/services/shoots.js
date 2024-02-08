@@ -19,7 +19,13 @@ const _ = require('lodash')
 const semver = require('semver')
 const config = require('../config')
 
-const { decodeBase64, getSeedNameFromShoot, getSeedIngressDomain, projectFilter } = utils
+const {
+  decodeBase64,
+  encodeBase64,
+  getSeedNameFromShoot,
+  getSeedIngressDomain,
+  projectFilter
+} = utils
 const { getSeed } = cache
 
 exports.list = async function ({ user, namespace, labelSelector, useCache = false }) {
@@ -416,14 +422,23 @@ async function getKubeconfigGardenlogin (client, shoot) {
   const { namespace, name } = shoot.metadata
 
   const [
-    ca,
-    gardenClusterIdentity
-  ] = await Promise.all([
-    client.core.secrets.get(namespace, `${name}.ca-cluster`),
+    { value: configmap, reason: configmapError },
+    { value: gardenClusterIdentity }
+  ] = await Promise.allSettled([
+    client.core.configmaps.get(namespace, `${name}.ca-cluster`),
     getGardenClusterIdentity()
   ])
 
-  const caData = ca.data?.['ca.crt']
+  let caData
+  // TODO(petersutter): Remove this fallback of reading the `<shoot-name>.ca-cluster` Secret when Gardener no longer reconciles it, presumably with Gardener v1.97.
+  if (configmapError && isHttpError(configmapError, 404)) {
+    const secret = await client.core.secrets.get(namespace, `${name}.ca-cluster`)
+    caData = secret.data?.['ca.crt']
+  } else if (configmapError) {
+    throw configmapError
+  } else {
+    caData = encodeBase64(configmap.data?.['ca.crt'])
+  }
 
   const extensions = [{
     name: 'client.authentication.k8s.io/exec',
