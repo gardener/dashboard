@@ -191,6 +191,7 @@ export default {
     ...mapState(useAuthzStore, [
       'hasShootTerminalAccess',
       'canCreateShootsAdminkubeconfig',
+      'canCreateShootsViewerkubeconfig',
       'hasControlPlaneTerminalAccess',
       'canPatchShoots',
     ]),
@@ -231,7 +232,7 @@ export default {
       return this.hasControlPlaneTerminalAccess ? 'Open terminal into cluster or cluster\'s control plane' : 'Open terminal into cluster'
     },
     isAnyTileVisible () {
-      return this.isDashboardTileVisible || this.isKubeconfigTileVisible || this.isTerminalTileVisible
+      return this.isDashboardTileVisible || this.isKubeconfigTileVisible || this.isTerminalTileVisible || this.isGardenctlTileVisible
     },
     isDashboardTileVisible () {
       return !!this.dashboardUrl
@@ -240,7 +241,7 @@ export default {
       return !!this.kubeconfigGardenlogin || this.canPatchShoots
     },
     isGardenctlTileVisible () {
-      return this.canCreateShootsAdminkubeconfig
+      return this.canCreateShootsViewerkubeconfig || this.canCreateShootsAdminkubeconfig
     },
     isTerminalTileVisible () {
       return !isEmpty(this.shootItem) && this.hasShootTerminalAccess && !this.isSeedUnreachable && (this.hasShootWorkerGroups || this.isAdmin)
