@@ -49,8 +49,8 @@ SPDX-License-Identifier: Apache-2.0
       <v-col cols="3">
         <g-purpose
           ref="purposeRef"
-          :secret="secret"
-          @update-purpose="onUpdatePurpose"
+          v-model="purpose"
+          :purposes="purposes"
         />
       </v-col>
     </v-row>
@@ -100,13 +100,13 @@ import {
 import { useAuthzStore } from '@/store/authz'
 import { useConfigStore } from '@/store/config'
 import { useProjectStore } from '@/store/project'
-import { useShootStore } from '@/store/shoot'
+import {
+  useShootStore,
+  useShootCreationStore,
+} from '@/store/shoot'
 import { useShootStagingStore } from '@/store/shootStaging'
-import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import GStaticTokenKubeconfigSwitch from '@/components/GStaticTokenKubeconfigSwitch'
-
-import { useAsyncRef } from '@/composables/useAsyncRef'
 
 import {
   withFieldName,
@@ -122,7 +122,6 @@ import {
 } from '@/utils'
 
 import {
-  get,
   find,
   join,
   filter,
@@ -133,27 +132,9 @@ export default {
     GPurpose: defineAsyncComponent(() => import('@/components/GPurpose')),
     GStaticTokenKubeconfigSwitch,
   },
-  props: {
-    userInterActionBus: {
-      type: Object,
-      required: true,
-    },
-  },
   setup () {
     return {
       v$: useVuelidate(),
-      ...useAsyncRef('purpose'),
-    }
-  },
-  data () {
-    return {
-      name: undefined,
-      kubernetesVersion: undefined,
-      purposeValue: undefined,
-      cloudProfileName: undefined,
-      secret: undefined,
-      updateK8sMaintenance: undefined,
-      enableStaticTokenKubeconfig: undefined,
     }
   },
   validations () {
@@ -179,17 +160,36 @@ export default {
     return rules
   },
   computed: {
-    ...mapWritableState(useShootStagingStore, ['workerless']),
-    ...mapState(useProjectStore, ['projectList']),
-    ...mapState(useAuthzStore, ['namespace']),
-    ...mapState(useConfigStore, ['sla']),
+    ...mapWritableState(useShootStagingStore, [
+      'workerless',
+    ]),
+    ...mapWritableState(useShootCreationStore, [
+      'name',
+      'kubernetesVersion',
+      'cloudProfileName',
+      'enableStaticTokenKubeconfig',
+      'purpose',
+    ]),
+    ...mapState(useShootCreationStore, [
+      'k8sUpdates',
+      'sortedKubernetesVersions',
+      'kubernetesVersionIsNotLatestPatch',
+      'purposes',
+    ]),
+    ...mapState(useProjectStore, [
+      'projectList',
+    ]),
+    ...mapState(useAuthzStore, [
+      'namespace',
+    ]),
+    ...mapState(useConfigStore, [
+      'sla',
+    ]),
     sortedKubernetesVersionsList () {
-      return filter(this.sortedKubernetesVersions(this.cloudProfileName), ({ isExpired }) => {
-        return !isExpired
-      })
+      return filter(this.sortedKubernetesVersions, ({ isExpired }) => !isExpired)
     },
     versionHint () {
-      const version = find(this.sortedKubernetesVersionsList, { version: this.kubernetesVersion })
+      const version = find(this.sortedKubernetesVersionsList, ['version', this.kubernetesVersion])
       if (!version) {
         return undefined
       }
@@ -197,16 +197,13 @@ export default {
       if (version.expirationDate) {
         hintText.push(`Kubernetes version expires on: ${version.expirationDateString}. Kubernetes update will be enforced after that date.`)
       }
-      if (this.updateK8sMaintenance && this.versionIsNotLatestPatch) {
+      if (this.k8sUpdates && this.kubernetesVersionIsNotLatestPatch) {
         hintText.push('If you select a version which is not the latest patch version (except for preview versions), you should disable automatic Kubernetes updates')
       }
       if (version.isPreview) {
         hintText.push('Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not recommended for production usage')
       }
       return join(hintText, ' / ')
-    },
-    versionIsNotLatestPatch () {
-      return this.kubernetesVersionIsNotLatestPatch(this.kubernetesVersion, this.cloudProfileName)
     },
     slaDescriptionHtml () {
       return transformHtml(this.sla.description)
@@ -224,26 +221,9 @@ export default {
     },
   },
   mounted () {
-    this.userInterActionBus.on('updateSecret', secret => {
-      this.secret = secret
-      this.purpose.dispatch('resetPurpose')
-    })
-    this.userInterActionBus.on('updateCloudProfileName', cloudProfileName => {
-      this.cloudProfileName = cloudProfileName
-      this.setDefaultKubernetesVersion()
-    })
-    this.userInterActionBus.on('updateK8sMaintenance', updateK8sMaintenance => {
-      this.updateK8sMaintenance = updateK8sMaintenance
-    })
-
     setDelayedInputFocus(this, 'name')
   },
   methods: {
-    ...mapActions(useCloudProfileStore, [
-      'sortedKubernetesVersions',
-      'defaultKubernetesVersionForCloudProfileName',
-      'kubernetesVersionIsNotLatestPatch',
-    ]),
     ...mapActions(useShootStore, [
       'shootByNamespaceAndName',
     ]),
@@ -252,33 +232,6 @@ export default {
     },
     onInputKubernetesVersion () {
       this.v$.kubernetesVersion.$touch()
-      this.userInterActionBus.emit('updateKubernetesVersion', this.kubernetesVersion)
-    },
-    onUpdatePurpose (purpose) {
-      this.purposeValue = purpose
-      this.userInterActionBus.emit('updatePurpose', this.purposeValue)
-    },
-    setDefaultKubernetesVersion () {
-      this.kubernetesVersion = get(this.defaultKubernetesVersionForCloudProfileName(this.cloudProfileName), 'version')
-      this.onInputKubernetesVersion()
-    },
-    getDetailsData () {
-      return {
-        name: this.name,
-        kubernetesVersion: this.kubernetesVersion,
-        purpose: this.purposeValue,
-        enableStaticTokenKubeconfig: this.enableStaticTokenKubeconfig,
-      }
-    },
-    async setDetailsData ({ name, kubernetesVersion, purpose, cloudProfileName, secret, updateK8sMaintenance, enableStaticTokenKubeconfig }) {
-      this.name = name
-      this.cloudProfileName = cloudProfileName
-      this.secret = secret
-      this.kubernetesVersion = kubernetesVersion
-      this.updateK8sMaintenance = updateK8sMaintenance
-      this.enableStaticTokenKubeconfig = enableStaticTokenKubeconfig
-
-      await this.purpose.dispatch('setPurpose', purpose)
     },
     versionItemDescription (version) {
       const itemDescription = []

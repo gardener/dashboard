@@ -197,6 +197,7 @@ import {
 } from '@vuelidate/validators'
 import {
   mapState,
+  mapWritableState,
   mapActions,
 } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
@@ -206,6 +207,7 @@ import { useConfigStore } from '@/store/config'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useSecretStore } from '@/store/secret'
 import { useShootStagingStore } from '@/store/shootStaging'
+import { useShootCreationStore } from '@/store/shoot'
 
 import GCloudProfile from '@/components/GCloudProfile'
 import GWildcardSelect from '@/components/GWildcardSelect'
@@ -236,35 +238,9 @@ export default {
     GWildcardSelect,
     GSelectSecret,
   },
-  props: {
-    userInterActionBus: {
-      type: Object,
-      required: true,
-    },
-  },
   setup () {
     return {
       v$: useVuelidate(),
-    }
-  },
-  data () {
-    return {
-      infrastructureKind: undefined,
-      cloudProfileName: undefined,
-      secret: undefined,
-      region: undefined,
-      networkingType: undefined,
-      floatingPoolName: undefined,
-      // default validation status of subcomponents is true, as they are not shown in all cases
-      fpname: undefined,
-      loadBalancerProviderName: undefined,
-      loadBalancerClassNames: [],
-      partitionID: undefined,
-      firewallImage: undefined,
-      firewallSize: undefined,
-      firewallNetworks: undefined,
-      projectID: undefined,
-      defaultNodesCIDR: undefined,
     }
   },
   validations () {
@@ -303,14 +279,43 @@ export default {
     }
   },
   computed: {
-    ...mapState(useConfigStore, ['seedCandidateDeterminationStrategy']),
-    ...mapState(useGardenerExtensionStore, ['networkingTypes']),
-    ...mapState(useShootStagingStore, ['workerless']),
-    cloudProfiles () {
-      return sortBy(this.cloudProfilesByCloudProviderKind(this.infrastructureKind), [item => item.metadata.name])
-    },
-    infrastructureSecretsByProfileName () {
-      return this.infrastructureSecretsByCloudProfileName(this.cloudProfileName)
+    ...mapWritableState(useShootCreationStore, [
+      'cloudProfileName',
+      'secret',
+      'region',
+      'networkingType',
+      'floatingPoolName',
+      'fpname',
+      'loadBalancerProviderName',
+      'loadBalancerClasses',
+      'partitionID',
+      'firewallImage',
+      'firewallSize',
+      'firewallNetworks',
+      'projectID',
+    ]),
+    ...mapState(useShootCreationStore, [
+      'infrastructureKind',
+      'cloudProfiles',
+      'infrastructureSecrets',
+    ]),
+    ...mapState(useShootStagingStore, [
+      'workerless',
+    ]),
+    ...mapState(useConfigStore, [
+      'seedCandidateDeterminationStrategy',
+    ]),
+    ...mapState(useGardenerExtensionStore, [
+      'networkingTypes',
+    ]),
+    loadBalancerClassNames: {
+      get () {
+        return map(this.loadBalancerClasses, 'name')
+      },
+      set (value) {
+        const loadBalancerClassNames = intersection(this.allLoadBalancerClassNames, value)
+        this.loadBalancerClasses = map(loadBalancerClassNames, name => ({ name }))
+      },
     },
     regionsWithSeed () {
       return this.regionsWithSeedByCloudProfileName(this.cloudProfileName)
@@ -344,13 +349,19 @@ export default {
       return 'API servers in another region than your workers (expect a somewhat higher latency; picked by Gardener based on internal considerations such as geographic proximity)'
     },
     allLoadBalancerProviderNames () {
-      return this.loadBalancerProviderNamesByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
+      return this.loadBalancerProviderNamesByCloudProfileNameAndRegion({
+        cloudProfileName: this.cloudProfileName,
+        region: this.region,
+      })
     },
     allLoadBalancerClassNames () {
       return this.loadBalancerClassNamesByCloudProfileName(this.cloudProfileName)
     },
     partitionIDs () {
-      return this.partitionIDsByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
+      return this.partitionIDsByCloudProfileNameAndRegion({
+        cloudProfileName: this.cloudProfileName,
+        region: this.region,
+      })
     },
     firewallImages () {
       return this.firewallImagesByCloudProfileName(this.cloudProfileName)
@@ -358,7 +369,10 @@ export default {
     firewallSizes () {
       const cloudProfileName = this.cloudProfileName
       const region = this.region
-      const firewallSizes = this.firewallSizesByCloudProfileNameAndRegion({ cloudProfileName, region })
+      const firewallSizes = this.firewallSizesByCloudProfileNameAndRegion({
+        cloudProfileName,
+        region,
+      })
       return map(firewallSizes, 'name')
     },
     allFirewallNetworks () {
@@ -392,12 +406,6 @@ export default {
       }
     },
   },
-  mounted () {
-    this.userInterActionBus.on('updateInfrastructure', infrastructureKind => {
-      this.infrastructureKind = infrastructureKind
-      this.setDefaultCloudProfile()
-    })
-  },
   methods: {
     ...mapActions(useCloudProfileStore, [
       'cloudProfilesByCloudProviderKind',
@@ -419,8 +427,9 @@ export default {
     ...mapActions(useShootStagingStore, [
       'setCloudProfileName',
     ]),
+
     setDefaultsDependingOnCloudProfile () {
-      this.onUpdateSecret(head(this.infrastructureSecretsByProfileName))
+      this.onUpdateSecret(head(this.infrastructureSecrets))
       this.region = head(this.regionsWithSeed)
       if (!this.region && this.showAllRegions) {
         this.region = head(this.regionsWithoutSeed)
@@ -445,10 +454,6 @@ export default {
 
       const cloudProfileName = this.cloudProfileName
       this.defaultNodesCIDR = this.getDefaultNodesCIDR({ cloudProfileName })
-    },
-    setDefaultCloudProfile () {
-      this.cloudProfileName = get(head(this.cloudProfiles), 'metadata.name')
-      this.onUpdateCloudProfileName()
     },
     onUpdateSecret (secret) {
       this.secret = secret

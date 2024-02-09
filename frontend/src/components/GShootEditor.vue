@@ -191,7 +191,6 @@ import {
   has,
   pick,
   cloneDeep,
-  assign,
   isEqual,
 } from '@/lodash'
 
@@ -463,8 +462,8 @@ export default {
         theme: this.theme,
       }
       const cm = this.cmInstance = createShootEditor(element, options)
-      this.cmInstance.setSize('100%', '100%')
-      this.cmInstance.on('change', ({ doc }) => {
+      cm.setSize('100%', '100%')
+      cm.on('change', ({ doc }) => {
         this.untouched = false
         this.setClean(doc.isClean(this.generation))
         this.historySize = doc.historySize()
@@ -472,24 +471,14 @@ export default {
         this.detailedErrorMessageInternal = undefined
       })
 
-      registerShootEditorHelper('hint', 'yaml', (editor, options) => {
-        options.completeSingle = false
-        options.container = this.$refs.container
-        if (!this.shootEditorCompletions) {
-          return
-        }
-        return this.shootEditorCompletions.yamlHint(editor)
-      })
+      registerShootEditorHelper('hint', 'yaml', editor => this.shootEditorCompletions?.yamlHint(editor))
 
       let cmTooltipFnTimerID
       addShootEditorEventListener(element, 'mouseover', e => {
         clearTimeout(cmTooltipFnTimerID)
         this.helpTooltip.visible = false
         cmTooltipFnTimerID = setTimeout(() => {
-          if (!this.shootEditorCompletions) {
-            return
-          }
-          const tooltip = this.shootEditorCompletions.editorTooltip(e, cm)
+          const tooltip = this.shootEditorCompletions?.editorTooltip(e, cm)
           if (!tooltip) {
             return
           }
