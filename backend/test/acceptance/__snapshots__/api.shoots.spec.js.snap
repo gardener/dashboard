@@ -1535,7 +1535,7 @@ Array [
     Object {
       ":authority": "kubernetes:6443",
       ":method": "get",
-      ":path": "/api/v1/namespaces/garden-foo/secrets/barShoot.ca-cluster",
+      ":path": "/api/v1/namespaces/garden-foo/configmaps/barShoot.ca-cluster",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },

@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <template v-if="isEnabled">
+  <template v-if="isEnabled && canCreateShootsAdminkubeconfig">
     <g-list-item>
       <g-list-item-content>
         Kubeconfig - Time-Limited Access
@@ -79,10 +79,14 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapActions } from 'pinia'
+import {
+  mapActions,
+  mapState,
+} from 'pinia'
 import download from 'downloadjs'
 
 import { useAppStore } from '@/store/app'
+import { useAuthzStore } from '@/store/authz'
 
 import GListItem from '@/components/GListItem.vue'
 import GListItemContent from '@/components/GListItemContent.vue'
@@ -126,6 +130,9 @@ export default {
     }
   },
   computed: {
+    ...mapState(useAuthzStore, [
+      'canCreateShootsAdminkubeconfig',
+    ]),
     visibilityIcon () {
       return this.expansionPanel ? 'mdi-eye-off' : 'mdi-eye'
     },
