@@ -414,6 +414,22 @@ async function getGardenClusterIdentity () {
 }
 exports.getGardenClusterIdentity = getGardenClusterIdentity
 
+async function getClusterCaData (client, { namespace, name }) {
+  try {
+    const configmap = await client.core.configmaps.get(namespace, `${name}.ca-cluster`)
+    return encodeBase64(configmap.data?.['ca.crt'])
+  } catch (err) {
+    // TODO(petersutter): Remove this fallback of reading the `<shoot-name>.ca-cluster` Secret when Gardener no longer reconciles it, presumably with Gardener v1.97.
+    if (isHttpError(err, 404)) {
+      const caCluster = await client.core.secrets.get(namespace, `${name}.ca-cluster`)
+      return caCluster.data?.['ca.crt']
+    } else {
+      throw err
+    }
+  }
+}
+exports.getClusterCaData = getClusterCaData
+
 async function getKubeconfigGardenlogin (client, shoot) {
   if (!shoot.status?.advertisedAddresses?.length) {
     throw new Error('Shoot has no advertised addresses')
@@ -422,23 +438,12 @@ async function getKubeconfigGardenlogin (client, shoot) {
   const { namespace, name } = shoot.metadata
 
   const [
-    { value: configmap, reason: configmapError },
-    { value: gardenClusterIdentity }
-  ] = await Promise.allSettled([
-    client.core.configmaps.get(namespace, `${name}.ca-cluster`),
+    caData,
+    gardenClusterIdentity
+  ] = await Promise.all([
+    getClusterCaData(client, { namespace, name }),
     getGardenClusterIdentity()
   ])
-
-  let caData
-  // TODO(petersutter): Remove this fallback of reading the `<shoot-name>.ca-cluster` Secret when Gardener no longer reconciles it, presumably with Gardener v1.97.
-  if (configmapError && isHttpError(configmapError, 404)) {
-    const secret = await client.core.secrets.get(namespace, `${name}.ca-cluster`)
-    caData = secret.data?.['ca.crt']
-  } else if (configmapError) {
-    throw configmapError
-  } else {
-    caData = encodeBase64(configmap.data?.['ca.crt'])
-  }
 
   const extensions = [{
     name: 'client.authentication.k8s.io/exec',
