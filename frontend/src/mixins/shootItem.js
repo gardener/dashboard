@@ -19,6 +19,7 @@ import {
   isTypeDelete,
   isTruthyValue,
 } from '@/utils'
+import { errorCodesFromArray } from '@/utils/errorCodes'
 
 import {
   get,
@@ -30,6 +31,14 @@ import {
   filter,
   compact,
 } from '@/lodash'
+
+const forceDeleteErrorCodes = [
+  'ERR_CLEANUP_CLUSTER_RESOURCES',
+  'ERR_CONFIGURATION_PROBLEM',
+  'ERR_INFRA_DEPENDENCIES',
+  'ERR_INFRA_UNAUTHENTICATED',
+  'ERR_INFRA_UNAUTHORIZED',
+]
 
 export const shootItem = {
   props: {
@@ -49,7 +58,16 @@ export const shootItem = {
       return this.shootMetadata.namespace
     },
     isShootMarkedForDeletion () {
+      if (this.isShootMarkedForForceDeletion) {
+        return true
+      }
       const confirmation = get(this.shootAnnotations, ['confirmation.gardener.cloud/deletion'])
+      const deletionTimestamp = this.shootDeletionTimestamp
+
+      return !!deletionTimestamp && isTruthyValue(confirmation)
+    },
+    isShootMarkedForForceDeletion () {
+      const confirmation = get(this.shootAnnotations, ['confirmation.gardener.cloud/force-deletion'])
       const deletionTimestamp = this.shootDeletionTimestamp
 
       return !!deletionTimestamp && isTruthyValue(confirmation)
@@ -267,6 +285,14 @@ export const shootItem = {
     isStaleShoot () {
       return !this.isShootActive(this.shootMetadata.uid)
     },
+    canForceDeleteShoot () {
+      if (!this.shootDeletionTimestamp) {
+        return false
+      }
+
+      const shootErrorCodes = errorCodesFromArray(this.shootLastErrors)
+      return shootErrorCodes.some(item => forceDeleteErrorCodes.includes(item))
+    },
   },
   methods: {
     ...mapActions(useShootStore, [
@@ -281,16 +307,6 @@ export const shootItem = {
     ...mapActions(useProjectStore, [
       'projectNameByNamespace',
     ]),
-    shootActionToolTip (tooltip) {
-      if (this.isShootActionsDisabledForPurpose) {
-        return 'Actions disabled for clusters with purpose infrastructure'
-      }
-      if (this.isShootMarkedForDeletion) {
-        return 'Actions disabled for clusters that are marked for deletion'
-      }
-
-      return tooltip
-    },
   },
 }
 

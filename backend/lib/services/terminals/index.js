@@ -10,6 +10,7 @@ const _ = require('lodash')
 const hash = require('object-hash')
 const yaml = require('js-yaml')
 const config = require('../../config')
+const { getClusterCaData } = require('../shoots')
 const { cleanKubeconfig } = require('@gardener-dashboard/kube-config')
 const { Resources } = require('@gardener-dashboard/kube-client')
 
@@ -250,8 +251,7 @@ async function getTargetCluster ({ user, namespace, name, target, preferredHost,
       break
     }
     case TargetEnum.SHOOT: {
-      const caCluster = await client.core.secrets.get(namespace, `${name}.ca-cluster`)
-      const caData = caCluster.data['ca.crt']
+      const caData = await getClusterCaData(client, { namespace, name })
 
       targetCluster.apiServer.serviceRef = {}
       targetCluster.apiServer.caData = caData
@@ -296,8 +296,7 @@ async function getTargetCluster ({ user, namespace, name, target, preferredHost,
         const shootRef = getShootRef(managedSeed)
         credentials = { shootRef }
 
-        const caCluster = await client.core.secrets.get(shootRef.namespace, `${shootRef.name}.ca-cluster`)
-        caData = caCluster.data['ca.crt']
+        caData = await getClusterCaData(client, { namespace: shootRef.namespace, name: shootRef.name })
       } else {
         const seed = getSeed(seedName)
         const secretRef = seed.spec?.secretRef
