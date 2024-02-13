@@ -270,7 +270,7 @@ describe('api', function () {
     it('should return shoot info', async function () {
       mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
-      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.configmaps.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.configmaps.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())

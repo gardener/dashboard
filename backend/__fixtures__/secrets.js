@@ -161,18 +161,6 @@ const secrets = {
       }
     })
   },
-  getCaClusterSecret (namespace, name) {
-    return getSecret({
-      name,
-      namespace,
-      labels: {
-        'gardener.cloud/role': 'ca-cluster'
-      },
-      data: {
-        'ca.crt': 'ca.crt'
-      }
-    })
-  },
   getSeedSecret (namespace, name) {
     const seedName = name.substring(11)
     const seed = seeds.get(seedName)
@@ -261,10 +249,6 @@ const mocks = {
         }
         if (endsWith(name, '.kubeconfig')) {
           const item = secrets.getShootSecret(namespace, name)
-          return Promise.resolve(item)
-        }
-        if (endsWith(name, '.ca-cluster')) {
-          const item = secrets.getCaClusterSecret(namespace, name)
           return Promise.resolve(item)
         }
         if (/-token-[a-f0-9]{5}$/.test(name)) {

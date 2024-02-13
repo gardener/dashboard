@@ -232,7 +232,6 @@ global:
       features:
         terminalEnabled: false
         projectTerminalShortcutsEnabled: false
-        shootForceDeletionEnabled: false
 
       shootAdminKubeconfig:
         enabled: false
