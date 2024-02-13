@@ -11,18 +11,29 @@ SPDX-License-Identifier: Apache-2.0
         :class="{ 'worker-chips-tooltip' : hasShootWorkerGroups }"
         location="top"
         max-width="400px"
+        open-delay="200"
       >
         <template #activator="{ props }">
-          <v-chip
-            v-bind="props"
-            size="small"
-            color="primary"
-            variant="tonal"
-            @click="expanded = true"
-          >
-            {{ shootWorkerGroups.length }}
-            {{ shootWorkerGroups.length !== 0 ? 'Groups' : 'Group' }}
-          </v-chip>
+          <g-auto-hide right>
+            <template #activator>
+              <v-chip
+                v-bind="props"
+                size="small"
+                color="primary"
+                variant="tonal"
+              >
+                {{ shootWorkerGroups.length }}
+                {{ shootWorkerGroups.length !== 0 ? 'Groups' : 'Group' }}
+              </v-chip>
+            </template>
+            <v-btn
+              icon="mdi-chevron-right"
+              size="small"
+              density="compact"
+              variant="flat"
+              @click="expanded = true"
+            />
+          </g-auto-hide>
         </template>
         <span v-if="!hasShootWorkerGroups">This cluster does not have worker groups</span>
         <v-card
@@ -61,21 +72,25 @@ SPDX-License-Identifier: Apache-2.0
         :key="workerGroup.name"
         class="d-flex flex-nowrap align-center"
       >
-        <g-worker-group
-          v-model="workerGroupTab"
-          :worker-group="workerGroup"
-          :cloud-profile-name="shootCloudProfileName"
-          :shoot-metadata="shootMetadata"
-          class="ma-1"
-        />
-        <v-btn
-          v-if="collapse && i === shootWorkerGroups.length-1"
-          icon="mdi-chevron-left"
-          size="small"
-          density="compact"
-          variant="flat"
-          @click="expanded = !expanded"
-        />
+        <g-auto-hide right>
+          <template #activator>
+            <g-worker-group
+              v-model="workerGroupTab"
+              :worker-group="workerGroup"
+              :cloud-profile-name="shootCloudProfileName"
+              :shoot-metadata="shootMetadata"
+              class="ma-1"
+            />
+          </template>
+          <v-btn
+            v-if="collapse && i === shootWorkerGroups.length-1"
+            icon="mdi-chevron-left"
+            size="small"
+            density="compact"
+            variant="flat"
+            @click="expanded = false"
+          />
+        </g-auto-hide>
       </div>
     </template>
   </div>
@@ -84,6 +99,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import GWorkerGroup from '@/components/ShootWorkers/GWorkerGroup'
 import GWorkerChip from '@/components/ShootWorkers/GWorkerChip'
+import GAutoHide from '@/components/GAutoHide'
 
 import { shootItem } from '@/mixins/shootItem'
 
@@ -91,6 +107,7 @@ export default {
   components: {
     GWorkerGroup,
     GWorkerChip,
+    GAutoHide,
   },
   mixins: [shootItem],
   props: {

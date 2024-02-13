@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
       :icon="machineImageIcon"
       :size="20"
     />
-    <span class="pr-1">{{ workerGroup.name }}</span>
+    <span class="pl-1">{{ workerGroup.name }}</span>
   </v-chip>
 </template>
 
