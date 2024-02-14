@@ -69,29 +69,35 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       This cluster does not have worker groups
     </v-tooltip>
-    <g-auto-hide right>
-      <template #activator>
-        <div class="d-flex flex-wrap">
+    <v-hover v-slot="{ isHovering, props }">
+      <div
+        class="d-flex flex-wrap"
+        v-bind="props"
+      >
+        <div
+          v-for="(workerGroup, i) in shootWorkerGroups"
+          :key="workerGroup.name"
+          class="d-flex align-center"
+        >
           <g-worker-group
-            v-for="workerGroup in shootWorkerGroups"
-            :key="workerGroup.name"
             v-model="workerGroupTab"
             :worker-group="workerGroup"
             :cloud-profile-name="shootCloudProfileName"
             :shoot-metadata="shootMetadata"
             class="ma-1"
           />
+          <v-btn
+            v-if="collapse && i === shootWorkerGroups.length -1"
+            v-visible="isHovering"
+            icon="mdi-chevron-left"
+            size="small"
+            density="compact"
+            variant="flat"
+            @click="expanded = false"
+          />
         </div>
-      </template>
-      <v-btn
-        v-if="collapse"
-        icon="mdi-chevron-left"
-        size="small"
-        density="compact"
-        variant="flat"
-        @click="expanded = false"
-      />
-    </g-auto-hide>
+      </div>
+    </v-hover>
   </template>
 </template>
 
