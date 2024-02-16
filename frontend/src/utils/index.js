@@ -643,3 +643,26 @@ export function omitKeysWithSuffix (obj, suffix) {
   const keys = Object.keys(obj).filter(key => key.endsWith(suffix))
   return omit(obj, keys)
 }
+
+export function parseNumericalAbbreviation (abbreviatedNumber) {
+  const regex = /(\d+(?:\.\d+)?)(k|M|B)?/i
+  const match = abbreviatedNumber.match(regex)
+
+  if (!match) {
+    return null
+  }
+
+  const number = parseFloat(match[1])
+  const suffix = match[2]
+
+  switch (suffix?.toLowerCase()) {
+    case 'k':
+      return number * 1e3
+    case 'm':
+      return number * 1e6
+    case 'b':
+      return number * 1e9
+    default:
+      return number
+  }
+}

@@ -4,6 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import { parseNumericalAbbreviation } from '@/utils'
+
 import {
   map,
   replace,
@@ -53,11 +55,11 @@ export function aggregateResourceQuotaStatus (quotas) {
   for (const quota of quotas) {
     for (const [key, value] of Object.entries(quota.hard)) {
       const currentValue = hard[key] ?? Number.MAX_SAFE_INTEGER
-      hard[key] = Math.min(value, currentValue).toString()
+      hard[key] = Math.min(parseNumericalAbbreviation(value), currentValue).toString()
     }
     for (const [key, value] of Object.entries(quota.used)) {
       const currentValue = used[key] ?? Number.MIN_SAFE_INTEGER
-      used[key] = Math.max(value, currentValue).toString()
+      used[key] = Math.max(parseNumericalAbbreviation(value), currentValue).toString()
     }
   }
 

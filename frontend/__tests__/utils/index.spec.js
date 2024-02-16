@@ -14,6 +14,7 @@ import {
   getDurationInMinutes,
   getTimeStringTo,
   getTimeStringFrom,
+  parseNumericalAbbreviation,
 } from '@/utils'
 
 import { pick } from '@/lodash'
@@ -394,6 +395,36 @@ describe('utils', () => {
       expect(getTimeStringFrom(time, time + 7 * 1_000)).toBe('7 seconds ago')
       expect(getTimeStringFrom(time, time + 70 * 24 * 3600_000, true)).toBe('2 months')
       expect(getTimeStringFrom(time, time + 70 * 24 * 3600_000)).toBe('2 months ago')
+    })
+  })
+
+  describe('parseNumericalAbbreviation', () => {
+    it('should convert k to thousands', () => {
+      expect(parseNumericalAbbreviation('1k')).toBe(1000)
+      expect(parseNumericalAbbreviation('1K')).toBe(1000)
+    })
+
+    it('should convert M to millions', () => {
+      expect(parseNumericalAbbreviation('1M')).toBe(1000000)
+      expect(parseNumericalAbbreviation('1m')).toBe(1000000)
+    })
+
+    it('should convert B to billions', () => {
+      expect(parseNumericalAbbreviation('1B')).toBe(1000000000)
+      expect(parseNumericalAbbreviation('1b')).toBe(1000000000)
+    })
+
+    it('should handle decimal values correctly', () => {
+      expect(parseNumericalAbbreviation('1.5k')).toBe(1500)
+      expect(parseNumericalAbbreviation('2.5M')).toBe(2500000)
+    })
+
+    it('should return the original number if no suffix', () => {
+      expect(parseNumericalAbbreviation('500')).toBe(500)
+    })
+
+    test('returns null for invalid input', () => {
+      expect(parseNumericalAbbreviation('abc')).toBeNull()
     })
   })
 })
