@@ -71,9 +71,13 @@ SPDX-License-Identifier: Apache-2.0
             >
               workerless
             </v-chip>
-            <div
+            <v-btn
               v-visible="isHovering"
-              class="collapse-body"
+              icon="mdi-chevron-left"
+              size="small"
+              density="compact"
+              variant="flat"
+              @click="expanded = false"
             />
           </template>
           This cluster does not have worker groups
@@ -94,24 +98,19 @@ SPDX-License-Identifier: Apache-2.0
               :shoot-metadata="shootMetadata"
               class="ma-1"
             />
-            <div
+            <v-btn
               v-if="collapse && i === shootWorkerGroups.length - 1"
               v-visible="isHovering"
-              class="collapse-body"
+              icon="mdi-chevron-left"
+              size="small"
+              density="compact"
+              variant="flat"
+              @click="expanded = false"
             />
           </div>
         </div>
       </div>
     </v-hover>
-    <Teleport to=".collapse-body">
-      <v-btn
-        icon="mdi-chevron-left"
-        size="small"
-        density="compact"
-        variant="flat"
-        @click="expanded = false"
-      />
-    </Teleport>
   </template>
 </template>
 
@@ -129,24 +128,50 @@ export default {
     GAutoHide,
   },
   mixins: [shootItem],
+  inject: {
+    expandedWorkerGroups: {
+      default: undefined,
+    },
+  },
   props: {
     collapse: {
       type: Boolean,
       default: false,
     },
+    modelValue: {
+      type: Boolean,
+      default: false,
+    },
   },
+  emits: [
+    'update:modelValue',
+  ],
   data () {
     return {
       workerGroupTab: 'overview',
-      expanded: false,
+      internalExpanded: false,
     }
   },
-  watch: {
-    // Reset expanded state when component is reused
-    'shootItem.metadata.uid' () {
-      this.expanded = false
+  computed: {
+    expanded: {
+      get () {
+        return this.expandedWorkerGroups ? this.expandedWorkerGroups[this.shootMetadata.uid] : this.internalExpanded
+      },
+      set (value) {
+        if (this.expandedWorkerGroups) {
+          this.expandedWorkerGroups[this.shootMetadata.uid] = value
+        } else {
+          this.internalExpanded = value
+        }
+      },
     },
   },
+  // watch: {
+  //   // Reset expanded state when component is reused
+  //   'shootItem.metadata.uid' () {
+  //     this.expanded = false
+  //   },
+  // },
 }
 </script>
 
