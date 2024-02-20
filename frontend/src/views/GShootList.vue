@@ -299,7 +299,7 @@ export default {
   },
   setup () {
     const activePopoverKey = ref('')
-    const expandedWorkerGroups = ref({})
+    const expandedWorkerGroups = ref({ default: false })
     provide('activePopoverKey', activePopoverKey)
     provide('expandedWorkerGroups', expandedWorkerGroups)
     return {

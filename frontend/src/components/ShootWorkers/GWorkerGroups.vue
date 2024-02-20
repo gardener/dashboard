@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
               variant="tonal"
             >
               {{ shootWorkerGroups.length }}
-              {{ shootWorkerGroups.length !== 0 ? 'Groups' : 'Group' }}
+              {{ shootWorkerGroups.length !== 1 ? 'Groups' : 'Group' }}
             </v-chip>
           </template>
           <v-btn
@@ -33,7 +33,7 @@ SPDX-License-Identifier: Apache-2.0
             size="small"
             density="compact"
             variant="flat"
-            @click="expanded = true"
+            @click="toggleExpanded"
           />
         </g-auto-hide>
       </template>
@@ -77,7 +77,7 @@ SPDX-License-Identifier: Apache-2.0
               size="small"
               density="compact"
               variant="flat"
-              @click="expanded = false"
+              @click="toggleExpanded"
             />
           </template>
           This cluster does not have worker groups
@@ -105,7 +105,7 @@ SPDX-License-Identifier: Apache-2.0
               size="small"
               density="compact"
               variant="flat"
-              @click="expanded = false"
+              @click="toggleExpanded"
             />
           </div>
         </div>
@@ -138,14 +138,7 @@ export default {
       type: Boolean,
       default: false,
     },
-    modelValue: {
-      type: Boolean,
-      default: false,
-    },
   },
-  emits: [
-    'update:modelValue',
-  ],
   data () {
     return {
       workerGroupTab: 'overview',
@@ -155,7 +148,10 @@ export default {
   computed: {
     expanded: {
       get () {
-        return this.expandedWorkerGroups ? this.expandedWorkerGroups[this.shootMetadata.uid] : this.internalExpanded
+        if (this.expandedWorkerGroups) {
+          return this.expandedWorkerGroups[this.shootMetadata.uid] ?? this.expandedWorkerGroups.default
+        }
+        return this.internalExpanded
       },
       set (value) {
         if (this.expandedWorkerGroups) {
@@ -166,12 +162,22 @@ export default {
       },
     },
   },
-  // watch: {
-  //   // Reset expanded state when component is reused
-  //   'shootItem.metadata.uid' () {
-  //     this.expanded = false
-  //   },
-  // },
+  methods: {
+    toggleExpanded (e) {
+      const newValue = !this.expanded
+
+      if (e.shiftKey) {
+        if (this.expandedWorkerGroups) {
+          for (const key in this.expandedWorkerGroups) {
+            delete this.expandedWorkerGroups[key]
+          }
+          this.expandedWorkerGroups.default = newValue
+        }
+      } else {
+        this.expanded = newValue
+      }
+    },
+  },
 }
 </script>
 
