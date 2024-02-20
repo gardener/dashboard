@@ -229,6 +229,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import {
   ref,
+  reactive,
   provide,
   defineAsyncComponent,
 } from 'vue'
@@ -299,7 +300,7 @@ export default {
   },
   setup () {
     const activePopoverKey = ref('')
-    const expandedWorkerGroups = ref({ default: false })
+    const expandedWorkerGroups = reactive({ default: false })
     provide('activePopoverKey', activePopoverKey)
     provide('expandedWorkerGroups', expandedWorkerGroups)
     return {

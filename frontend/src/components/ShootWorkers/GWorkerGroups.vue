@@ -5,119 +5,78 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <template v-if="collapse && !expanded">
-    <v-tooltip
-      :class="{ 'worker-chips-tooltip' : hasShootWorkerGroups }"
-      location="top"
-      max-width="400px"
-      open-delay="200"
-    >
-      <template #activator="{ props }">
-        <g-auto-hide
-          right
-          class="w-100"
-        >
-          <template #activator>
-            <v-chip
-              v-bind="props"
-              size="small"
-              color="primary"
-              variant="tonal"
-            >
-              {{ shootWorkerGroups.length }}
-              {{ shootWorkerGroups.length !== 1 ? 'Groups' : 'Group' }}
-            </v-chip>
-          </template>
-          <v-btn
-            icon="mdi-chevron-right"
+  <g-collapsable-items
+    :items="shootWorkerGroups"
+    :uid="shootMetadata.uid"
+    inject-key="expandedWorkerGroups"
+    collapse
+  >
+    <template #collapsed="{ itemCount }">
+      <v-tooltip
+        :class="{ 'worker-chips-tooltip' : hasShootWorkerGroups }"
+        location="top"
+        max-width="400px"
+        open-delay="200"
+      >
+        <template #activator="{ props: tooltipProps }">
+          <v-chip
+            v-bind="tooltipProps"
             size="small"
-            density="compact"
-            variant="flat"
-            @click="toggleExpanded"
-          />
-        </g-auto-hide>
-      </template>
-      <span v-if="!hasShootWorkerGroups">This cluster does not have worker groups</span>
-      <v-card
-        v-else
-        class="pa-1"
-      >
-        <g-worker-chip
-          v-for="(workerGroup) in shootWorkerGroups"
-          :key="workerGroup.name"
-          :worker-group="workerGroup"
-          :cloud-profile-name="shootCloudProfileName"
-          class="ma-1"
-        />
-      </v-card>
-    </v-tooltip>
-  </template>
-  <template v-else>
-    <v-hover v-slot="{ isHovering, props }">
-      <div
-        class="d-flex align-center"
-        v-bind="props"
-      >
-        <v-tooltip
-          v-if="!hasShootWorkerGroups"
-          location="top"
-        >
-          <template #activator="{ props: tooltipProps }">
-            <v-chip
-              v-bind="tooltipProps"
-              size="small"
-              variant="tonal"
-              color="disabled"
-            >
-              workerless
-            </v-chip>
-            <v-btn
-              v-visible="isHovering"
-              icon="mdi-chevron-left"
-              size="small"
-              density="compact"
-              variant="flat"
-              @click="toggleExpanded"
-            />
-          </template>
-          This cluster does not have worker groups
-        </v-tooltip>
-        <div
-          v-else
-          class="d-flex flex-wrap"
-        >
-          <div
-            v-for="(workerGroup, i) in shootWorkerGroups"
-            :key="workerGroup.name"
-            class="d-flex align-center"
+            color="primary"
+            variant="tonal"
           >
-            <g-worker-group
-              v-model="workerGroupTab"
-              :worker-group="workerGroup"
-              :cloud-profile-name="shootCloudProfileName"
-              :shoot-metadata="shootMetadata"
-              class="ma-1"
-            />
-            <v-btn
-              v-if="collapse && i === shootWorkerGroups.length - 1"
-              v-visible="isHovering"
-              icon="mdi-chevron-left"
-              size="small"
-              density="compact"
-              variant="flat"
-              @click="toggleExpanded"
-            />
-          </div>
-        </div>
-      </div>
-    </v-hover>
-  </template>
+            {{ itemCount }}
+            {{ itemCount !== 1 ? 'Groups' : 'Group' }}
+          </v-chip>
+        </template>
+        <span v-if="!hasShootWorkerGroups">This cluster does not have worker groups</span>
+        <v-card
+          v-else
+          class="pa-1"
+        >
+          <g-worker-chip
+            v-for="(workerGroup) in shootWorkerGroups"
+            :key="workerGroup.name"
+            :worker-group="workerGroup"
+            :cloud-profile-name="shootCloudProfileName"
+            class="ma-1"
+          />
+        </v-card>
+      </v-tooltip>
+    </template>
+    <template #noItems>
+      <v-tooltip
+        location="top"
+      >
+        <template #activator="{ props: tooltipProps }">
+          <v-chip
+            v-bind="tooltipProps"
+            size="small"
+            variant="tonal"
+            color="disabled"
+          >
+            workerless
+          </v-chip>
+        </template>
+        This cluster does not have worker groups
+      </v-tooltip>
+    </template>
+    <template #item="{ item }">
+      <g-worker-group
+        v-model="workerGroupTab"
+        :worker-group="item"
+        :cloud-profile-name="shootCloudProfileName"
+        :shoot-metadata="shootMetadata"
+        class="ma-1"
+      />
+    </template>
+  </g-collapsable-items>
 </template>
 
 <script>
 import GWorkerGroup from '@/components/ShootWorkers/GWorkerGroup'
 import GWorkerChip from '@/components/ShootWorkers/GWorkerChip'
-import GAutoHide from '@/components/GAutoHide'
+import GCollapsableItems from '@/components/GCollapsableItems'
 
 import { shootItem } from '@/mixins/shootItem'
 
@@ -125,7 +84,7 @@ export default {
   components: {
     GWorkerGroup,
     GWorkerChip,
-    GAutoHide,
+    GCollapsableItems,
   },
   mixins: [shootItem],
   inject: {
