@@ -299,7 +299,7 @@ export default {
 
     const volumeSizeRules = {
       minVolumeSize: withMessage(`Minimum size is ${this.minimumVolumeSize}`, value => {
-        if (this.noVolumeSize) {
+        if (!this.hasVolumeSize) {
           return true
         }
         if (!value) {
@@ -477,8 +477,8 @@ export default {
     workerGroupName () {
       return this.worker.name ? `[Worker Group ${this.worker.name}]` : '[Worker Group]'
     },
-    noVolumeSize () {
-      return !this.volumeInCloudProfile && !this.customStorageSize
+    hasVolumeSize () {
+      return this.volumeInCloudProfile || this.customStorageSize
     },
   },
   mounted () {
@@ -504,11 +504,11 @@ export default {
       this.v$.worker.name.$touch()
     },
     onInputVolumeSize () {
-      if (this.noVolumeSize) {
+      if (this.hasVolumeSize) {
+        set(this.worker, 'volume.size', this.volumeSize)
+      } else {
         // default size, must not write to shoot spec
         delete this.worker.volume
-      } else {
-        set(this.worker, 'volume.size', this.volumeSize)
       }
       this.v$.volumeSize.$touch()
     },

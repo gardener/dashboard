@@ -119,20 +119,9 @@ export default {
     emitBlur (e) {
       this.$emit('blur', e)
     },
-    customFilter (title, query, item) {
-      if (item.raw.key === 'default') {
-        if (!query.length) {
-          return true
-        }
-      }
-      if (item.raw.key === 'custom') {
-        return /^(\d+)$/.test(query)
-      }
-      return false
-    },
     onInputStorageKind () {
       this.innerValue = undefined
-      this.$nextTick(() => this.$refs.volumeSize.focus())
+      this.$nextTick(() => this.$refs.volumeSize?.focus())
     },
   },
 }
