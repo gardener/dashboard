@@ -66,19 +66,16 @@ SPDX-License-Identifier: Apache-2.0
           :field-name="`${workerGroupName} Volume Type`"
         />
       </div>
-      <div
-        v-if="hasPersistence"
-        class="small-input"
-      >
+      <div :class="volumeInCloudProfile ? 'small-input' : 'regular-input'">
         <g-volume-size-input
           v-model="volumeSize"
+          v-model:custom-storage-size="customStorageSize"
           :min="minimumVolumeSize"
-          :readonly="!canDefineVolumeSize"
+          :default-storage-size="selectedMachineType.storage?.size"
+          :has-volume-types="volumeInCloudProfile"
           color="primary"
           :error-messages="getErrorMessages(v$.volumeSize)"
-          label="Volume Size"
-          :hint="volumeSizeHint"
-          persistent-hint
+          @update:custom-storage="onInputVolumeSize"
           @update:model-value="onInputVolumeSize"
           @blur="v$.volumeSize.$touch()"
         />
@@ -259,6 +256,7 @@ export default {
     return {
       immutableZones: undefined,
       volumeSize: undefined,
+      customStorageSize: false,
     }
   },
   validations () {
@@ -300,8 +298,8 @@ export default {
     })
 
     const volumeSizeRules = {
-      minVolumeSize: withMessage(`Value must be greater than ${this.minimumVolumeSize}`, value => {
-        if (!this.canDefineVolumeSize) {
+      minVolumeSize: withMessage(`Minimum size is ${this.minimumVolumeSize}`, value => {
+        if (this.noVolumeSize) {
           return true
         }
         if (!value) {
@@ -346,21 +344,6 @@ export default {
     },
     selectedVolumeType () {
       return find(this.volumeTypes, ['name', this.worker.volume?.type])
-    },
-    canDefineVolumeSize () {
-      if (!this.hasPersistence) {
-        return false
-      }
-      if (this.selectedMachineType.storage?.size) {
-        return false
-      }
-      return true
-    },
-    hasPersistence () {
-      if (this.volumeInCloudProfile) {
-        return true
-      }
-      return !!this.selectedMachineType.storage
     },
     machineImages () {
       const machineImages = this.machineImagesByCloudProfileName(this.cloudProfileName)
@@ -464,12 +447,6 @@ export default {
       }
       return undefined
     },
-    volumeSizeHint () {
-      if (!this.canDefineVolumeSize) {
-        return 'Volume size is fixed'
-      }
-      return undefined
-    },
     selectedMachineImage () {
       return find(this.machineImages, this.worker.machine.image)
     },
@@ -493,7 +470,6 @@ export default {
       },
       set (value) {
         this.worker.machine.type = value
-        this.setVolumeDependingOnMachineType()
         this.onInputVolumeSize()
       },
     },
@@ -501,13 +477,18 @@ export default {
     workerGroupName () {
       return this.worker.name ? `[Worker Group ${this.worker.name}]` : '[Worker Group]'
     },
+    noVolumeSize () {
+      return !this.volumeInCloudProfile && !this.customStorageSize
+    },
   },
   mounted () {
     const volumeSize = get(this.worker, 'volume.size')
     if (volumeSize) {
       this.volumeSize = volumeSize
+      if (!this.volumeInCloudProfile) {
+        this.customStorageSize = true
+      }
     }
-    this.setVolumeDependingOnMachineType()
     this.onInputVolumeSize()
     this.immutableZones = this.isNew ? [] : this.initialZones
   },
@@ -523,7 +504,10 @@ export default {
       this.v$.worker.name.$touch()
     },
     onInputVolumeSize () {
-      if (this.canDefineVolumeSize) {
+      if (this.noVolumeSize) {
+        // default size, must not write to shoot spec
+        delete this.worker.volume
+      } else {
         set(this.worker, 'volume.size', this.volumeSize)
       }
       this.v$.volumeSize.$touch()
@@ -541,21 +525,6 @@ export default {
     onInputZones () {
       this.v$.selectedZones.$touch()
       this.v$.worker.maximum.$touch()
-    },
-    setVolumeDependingOnMachineType () {
-      if (this.canDefineVolumeSize) {
-        return
-      }
-
-      delete this.worker.volume?.size
-      if (!this.hasPersistence || isEmpty(this.worker.volume)) {
-        delete this.worker.volume
-      }
-
-      if (this.selectedMachineType.storage?.size) {
-        // Set volumeSize to show it as readonly value to the user
-        this.volumeSize = this.selectedMachineType.storage.size
-      }
     },
     resetWorkerMachine () {
       this.worker.machine.type = get(head(this.machineTypes), 'name')
