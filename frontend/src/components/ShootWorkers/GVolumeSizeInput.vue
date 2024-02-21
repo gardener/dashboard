@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
       @update:model-value="onInputStorageKind"
     />
     <v-text-field
-      v-if="hasVolumeTypes || customStorageSize"
+      v-if="hasVolumeTypes || hasCustomStorageSize"
       ref="volumeSize"
       v-model="innerValue"
       :min="min"
@@ -42,7 +42,7 @@ export default {
     modelValue: {
       type: [String, Number],
     },
-    customStorageSize: {
+    hasCustomStorageSize: {
       type: Boolean,
       default: false,
     },
@@ -68,7 +68,7 @@ export default {
   },
   emits: [
     'update:modelValue',
-    'update:customStorageSize',
+    'update:hasCustomStorageSize',
     'blur',
   ],
   computed: {
@@ -89,14 +89,10 @@ export default {
     },
     storageKind: {
       get () {
-        return this.customStorageSize ? 'custom' : 'default'
+        return this.hasCustomStorageSize ? 'custom' : 'default'
       },
       set (value) {
-        if (value === 'custom') {
-          this.$emit('update:customStorageSize', true)
-        } else {
-          this.$emit('update:customStorageSize', false)
-        }
+        this.$emit('update:hasCustomStorageSize', value === 'custom')
       },
     },
     storageKindItems () {
