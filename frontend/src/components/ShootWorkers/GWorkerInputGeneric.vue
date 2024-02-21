@@ -69,7 +69,7 @@ SPDX-License-Identifier: Apache-2.0
       <div :class="volumeInCloudProfile ? 'small-input' : 'regular-input'">
         <g-volume-size-input
           v-model="volumeSize"
-          v-model:custom-storage-size="customStorageSize"
+          v-model:has-custom-storage-size="hasCustomStorageSize"
           :min="minimumVolumeSize"
           :default-storage-size="selectedMachineType.storage?.size"
           :has-volume-types="volumeInCloudProfile"
@@ -256,7 +256,7 @@ export default {
     return {
       immutableZones: undefined,
       volumeSize: undefined,
-      customStorageSize: false,
+      hasCustomStorageSize: false,
     }
   },
   validations () {
@@ -478,7 +478,7 @@ export default {
       return this.worker.name ? `[Worker Group ${this.worker.name}]` : '[Worker Group]'
     },
     hasVolumeSize () {
-      return this.volumeInCloudProfile || this.customStorageSize
+      return this.volumeInCloudProfile || this.hasCustomStorageSize
     },
   },
   mounted () {
@@ -486,7 +486,7 @@ export default {
     if (volumeSize) {
       this.volumeSize = volumeSize
       if (!this.volumeInCloudProfile) {
-        this.customStorageSize = true
+        this.hasCustomStorageSize = true
       }
     }
     this.onInputVolumeSize()
