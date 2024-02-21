@@ -611,14 +611,6 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
         type: volumeType.name,
         size: defaultVolumeSize,
       }
-    } else if (!machineType.storage) {
-      worker.volume = {
-        size: defaultVolumeSize,
-      }
-    } else if (machineType.storage.type !== 'fixed') {
-      worker.volume = {
-        size: machineType.storage.size,
-      }
     }
     return worker
   }
