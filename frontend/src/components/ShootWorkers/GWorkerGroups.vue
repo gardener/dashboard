@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     :items="shootWorkerGroups"
     :uid="shootMetadata.uid"
     inject-key="expandedWorkerGroups"
-    collapse
+    :collapse="collapse"
   >
     <template #collapsed="{ itemCount }">
       <v-tooltip

@@ -124,7 +124,11 @@ SPDX-License-Identifier: Apache-2.0
         />
       </template>
       <template v-if="cell.header.key === 'accessRestrictions'">
-        <g-access-restriction-chips :selected-access-restrictions="shootSelectedAccessRestrictions" />
+        <g-access-restriction-chips
+          :selected-access-restrictions="shootSelectedAccessRestrictions"
+          collapse
+          :shoot-uid="shootMetadata.uid"
+        />
       </template>
       <template v-if="cell.header.key === 'ticket'">
         <g-external-link
@@ -141,16 +145,21 @@ SPDX-License-Identifier: Apache-2.0
         <template v-if="shootLastUpdatedTicketTimestamp && !shootTicketLabels.length">
           None
         </template>
-        <div
+        <g-collapsable-items
           v-else
-          class="labels"
+          :items="shootTicketLabels"
+          :uid="shootMetadata.uid"
+          inject-key="expandedTicketLabels"
+          item-name="Ticket"
+          hide-empty
+          collapse
         >
-          <g-ticket-label
-            v-for="label in shootTicketLabels"
-            :key="label.id"
-            :label="label"
-          />
-        </div>
+          <template #item="{ item }">
+            <g-ticket-label
+              :label="item"
+            />
+          </template>
+        </g-collapsable-items>
       </template>
       <template v-if="cell.header.customField">
         <template v-if="cell.value">
@@ -235,6 +244,7 @@ import GExternalLink from '@/components/GExternalLink.vue'
 import GControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityTag.vue'
 import GWorkerGroups from '@/components/ShootWorkers/GWorkerGroups'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
+import GCollapsableItems from '@/components/GCollapsableItems'
 
 import {
   isTypeDelete,
@@ -271,6 +281,7 @@ export default {
     GControlPlaneHighAvailabilityTag,
     GWorkerGroups,
     GTextRouterLink,
+    GCollapsableItems,
   },
   mixins: [shootItem],
   props: {

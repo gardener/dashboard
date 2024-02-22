@@ -301,8 +301,12 @@ export default {
   setup () {
     const activePopoverKey = ref('')
     const expandedWorkerGroups = reactive({ default: false })
+    const expandedAccessRestrictions = reactive({ default: false })
+    const expandedTicketLabels = reactive({ default: false })
     provide('activePopoverKey', activePopoverKey)
     provide('expandedWorkerGroups', expandedWorkerGroups)
+    provide('expandedAccessRestrictions', expandedAccessRestrictions)
+    provide('expandedTicketLabels', expandedTicketLabels)
     return {
       activePopoverKey,
       expandedWorkerGroups,

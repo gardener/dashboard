@@ -7,6 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-hover v-slot="{ isHovering, props: hoverProps }">
     <div
+      v-if="items.length || !hideEmpty"
       class="d-flex align-center"
       v-bind="hoverProps"
     >
@@ -16,26 +17,20 @@ SPDX-License-Identifier: Apache-2.0
           :item-count="itemCount"
         >
           {{ itemCount }}
-          {{ itemCount !== 1 ? 'Item' : 'Items' }}
+          {{ itemCount === 1 ? itemName : (itemPlural ? itemPlural : `${itemName}s`) }}
         </slot>
-        <v-btn
+        <g-collapsable-items-button
           v-visible="isHovering"
-          icon="mdi-chevron-right"
-          size="small"
-          density="compact"
-          variant="flat"
+          :expanded="expanded"
           @click="toggleExpanded"
         />
       </template>
       <template v-else>
         <template v-if="!items.length">
           <slot name="noItems" />
-          <v-btn
+          <g-collapsable-items-button
             v-visible="isHovering"
-            icon="mdi-chevron-left"
-            size="small"
-            density="compact"
-            variant="flat"
+            :expanded="expanded"
             @click="toggleExpanded"
           />
         </template>
@@ -52,13 +47,10 @@ SPDX-License-Identifier: Apache-2.0
               name="item"
               :item="item"
             />
-            <v-btn
+            <g-collapsable-items-button
               v-if="collapse && i === items.length - 1"
               v-visible="isHovering"
-              icon="mdi-chevron-left"
-              size="small"
-              density="compact"
-              variant="flat"
+              :expanded="expanded"
               @click="toggleExpanded"
             />
           </div>
@@ -78,6 +70,8 @@ import {
   inject,
 } from 'vue'
 
+import GCollapsableItemsButton from './GCollapsableItemsButton.vue'
+
 const props = defineProps({
   items: {
     type: Array,
@@ -85,7 +79,7 @@ const props = defineProps({
   },
   uid: {
     type: String,
-    required: true,
+    required: false,
   },
   collapse: {
     type: Boolean,
@@ -93,13 +87,25 @@ const props = defineProps({
   },
   injectKey: {
     type: String,
-    default: '',
+    required: false,
+  },
+  hideEmpty: {
+    type: Boolean,
+    default: false,
+  },
+  itemName: {
+    type: String,
+    default: 'Item',
+  },
+  itemPlural: {
+    type: String,
+    required: false,
   },
 })
 
-const { items } = toRefs(props)
+const { items, itemName, itemPlural } = toRefs(props)
 const internalExpanded = ref(false)
-const expandedItems = inject(props.injectKey, reactive({ default: false }))
+const expandedItems = props.injectKey ? inject(props.injectKey, reactive({ default: false })) : undefined
 
 const itemCount = computed(() => {
   return props.items.length
