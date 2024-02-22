@@ -1,4 +1,6 @@
 # Gardener Dashboard
+[![REUSE status](https://api.reuse.software/badge/github.com/gardener/dashboard)](https://api.reuse.software/info/github.com/gardener/dashboard)
+
 
 ![](https://github.com/gardener/dashboard/blob/master/logo/logo_gardener_dashboard.png)
 
