@@ -15,6 +15,7 @@ import {
   shallowRef,
   reactive,
   toRaw,
+  watch,
 } from 'vue'
 
 import { useLogger } from '@/composables/useLogger'
@@ -28,6 +29,7 @@ import {
 import {
   purposesForSecret,
   isZonedCluster,
+  shortRandomString,
 } from '@/utils'
 
 import { useAppStore } from '../app'
@@ -46,10 +48,13 @@ import {
   unset,
   head,
   omit,
+  map,
+  find,
   isEmpty,
   isEqual,
   cloneDeep,
   includes,
+  intersection,
 } from '@/lodash'
 
 const useShootCreationStore = defineStore('shootCreation', () => {
@@ -75,7 +80,6 @@ const useShootCreationStore = defineStore('shootCreation', () => {
     region: undefined,
     networkingType: undefined,
     floatingPoolName: undefined,
-    fpname: undefined,
     loadBalancerProviderName: undefined,
     loadBalancerClasses: [],
     partitionID: undefined,
@@ -93,190 +97,7 @@ const useShootCreationStore = defineStore('shootCreation', () => {
     controlPlaneFailureToleranceType: undefined,
   })
 
-  const name = computed({
-    get () {
-      return state.name
-    },
-    set (value) {
-      state.name = value
-    },
-  })
-
-  const kubernetesVersion = computed({
-    get () {
-      return state.kubernetesVersion
-    },
-    set (value) {
-      state.kubernetesVersion = value
-    },
-  })
-
-  const purpose = computed({
-    get () {
-      return state.purpose
-    },
-    set (value) {
-      state.purpose = includes(purposes.value, value)
-        ? value
-        : ''
-    },
-  })
-
-  const enableStaticTokenKubeconfig = computed({
-    get () {
-      return !!state.enableStaticTokenKubeconfig
-    },
-    set (value) {
-      state.enableStaticTokenKubeconfig = !!value
-    },
-  })
-
-  const infrastructureKind = computed({
-    get () {
-      return state.infrastructureKind
-    },
-    set (value) {
-      state.infrastructureKind = value
-      cloudProfileName.value = defaultCloudProfileName.value
-    },
-  })
-
-  const cloudProfileName = computed({
-    get () {
-      return state.cloudProfileName
-    },
-    set (value) {
-      state.cloudProfileName = value
-      kubernetesVersion.value = defaultKubernetesVersion.value
-    },
-  })
-
-  const secretBindingName = computed({
-    get () {
-      return state.secretBindingName
-    },
-    set (value) {
-      state.secretBindingName = value
-    },
-  })
-
-  const region = computed({
-    get () {
-      return state.region
-    },
-    set (value) {
-      state.region = value
-    },
-  })
-
-  const networkingType = computed({
-    get () {
-      return state.networkingType
-    },
-    set (value) {
-      state.networkingType = value
-    },
-  })
-
-  const floatingPoolName = computed({
-    get () {
-      return state.floatingPoolName
-    },
-    set (value) {
-      state.floatingPoolName = value
-    },
-  })
-
-  const fpname = computed({
-    get () {
-      return state.fpname
-    },
-    set (value) {
-      state.fpname = value
-    },
-  })
-
-  const loadBalancerProviderName = computed({
-    get () {
-      return state.loadBalancerProviderName
-    },
-    set (value) {
-      state.loadBalancerProviderName = value
-    },
-  })
-
-  const loadBalancerClasses = computed({
-    get () {
-      return state.loadBalancerClasses
-    },
-    set (value) {
-      state.loadBalancerClasses = value
-    },
-  })
-
-  const partitionID = computed({
-    get () {
-      return state.partitionID
-    },
-    set (value) {
-      state.partitionID = value
-    },
-  })
-
-  const projectID = computed({
-    get () {
-      return state.projectID
-    },
-    set (value) {
-      state.projectID = value
-    },
-  })
-
-  const firewallImage = computed({
-    get () {
-      return state.firewallImage
-    },
-    set (value) {
-      state.firewallImage = value
-    },
-  })
-
-  const firewallSize = computed({
-    get () {
-      return state.firewallSize
-    },
-    set (value) {
-      state.firewallSize = value
-    },
-  })
-
-  const firewallNetworks = computed({
-    get () {
-      return state.firewallNetworks
-    },
-    set (value) {
-      state.firewallNetworks = value
-    },
-  })
-
-  const k8sUpdates = computed({
-    get () {
-      return get(state, 'maintenanceComponentUpdates.k8sUpdates', false)
-    },
-    set (value) {
-      set(state, 'maintenanceComponentUpdates.k8sUpdates', !!value)
-    },
-  })
-
-  const osUpdates = computed({
-    get () {
-      return get(state, 'maintenanceComponentUpdates.osUpdates', false)
-    },
-    set (value) {
-      set(state, 'maintenanceComponentUpdates.osUpdates', !!value)
-    },
-  })
-
+  /* getters */
   const cloudProfiles = computed(() => {
     return cloudProfileStore.cloudProfilesByCloudProviderKind(state.infrastructureKind)
   })
@@ -305,22 +126,8 @@ const useShootCreationStore = defineStore('shootCreation', () => {
     return secretStore.infrastructureSecretsByCloudProfileName(state.cloudProfileName)
   })
 
-  const infrastructureSecret = computed(() => {
-    const secretName = get(state.secret, 'metadata.name', state.secretBindingName)
-    return find(infrastructureSecrets.value, ['metadata.name', secretName])
-  })
-
   const sortedKubernetesVersions = computed(() => {
     return cloudProfileStore.sortedKubernetesVersions(state.cloudProfileName)
-  })
-
-  const defaultKubernetesVersion = computed(() => {
-    const kubernetesVersion = cloudProfileStore.defaultKubernetesVersionForCloudProfileName(state.cloudProfileName)
-    return get(kubernetesVersion, 'version')
-  })
-
-  const defaultCloudProfileName = computed(() => {
-    return get(head(cloudProfiles.value), 'metadata.name')
   })
 
   const kubernetesVersionIsNotLatestPatch = computed(() => {
@@ -331,6 +138,59 @@ const useShootCreationStore = defineStore('shootCreation', () => {
     return purposesForSecret(infrastructureSecret.value)
   })
 
+  const regionsWithSeed = computed(() => {
+    return cloudProfileStore.regionsWithSeedByCloudProfileName(state.cloudProfileName)
+  })
+
+  const regionsWithoutSeed = computed(() => {
+    return cloudProfileStore.regionsWithoutSeedByCloudProfileName(state.cloudProfileName)
+  })
+
+  const allLoadBalancerProviderNames = computed(() => {
+    return cloudProfileStore.loadBalancerProviderNamesByCloudProfileNameAndRegion({
+      cloudProfileName: state.cloudProfileName,
+      region: state.region,
+    })
+  })
+
+  const allLoadBalancerClassNames = computed(() => {
+    return cloudProfileStore.loadBalancerClassNamesByCloudProfileName(state.cloudProfileName)
+  })
+
+  const partitionIDs = computed(() => {
+    return cloudProfileStore.partitionIDsByCloudProfileNameAndRegion({
+      cloudProfileName: state.cloudProfileName,
+      region: state.region,
+    })
+  })
+
+  const firewallImages = computed(() => {
+    return cloudProfileStore.firewallImagesByCloudProfileName(state.cloudProfileName)
+  })
+
+  const firewallSizes = computed(() => {
+    const firewallSizes = cloudProfileStore.firewallSizesByCloudProfileNameAndRegion({
+      cloudProfileName: state.cloudProfileName,
+      region: state.region,
+    })
+    return map(firewallSizes, 'name')
+  })
+
+  const allFirewallNetworks = computed(() => {
+    return cloudProfileStore.firewallNetworksByCloudProfileNameAndPartitionId({
+      cloudProfileName: state.cloudProfileName,
+      partitionID: state.partitionID,
+    })
+  })
+
+  const allFloatingPoolNames = computed(() => {
+    return cloudProfileStore.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({
+      cloudProfileName: state.cloudProfileName,
+      region: state.region,
+      secretDomain: get(infrastructureSecret.value, 'data.domainName'),
+    })
+  })
+
   const accessRestrictionDefinitions = computed(() => {
     return cloudProfileStore.accessRestrictionDefinitionsByCloudProfileNameAndRegion({
       cloudProfileName: state.cloudProfileName,
@@ -338,8 +198,416 @@ const useShootCreationStore = defineStore('shootCreation', () => {
     })
   })
 
+  const networkingTypes = computed(() => {
+    return gardenerExtensionStore.networkingTypes
+  })
+
+  const showAllRegions = computed(() => {
+    return configStore.seedCandidateDeterminationStrategy !== 'SameRegion'
+  })
+
+  /* name */
+  function setName (value) {
+    state.name = value
+  }
+
+  const name = computed({
+    get () {
+      return state.name
+    },
+    set: setName,
+  })
+
+  function resetName () {
+    if (!state.name) {
+      setName(shortRandomString(10))
+    }
+  }
+
+  /* kubernetesVersion */
+  function setKubernetesVersion (value) {
+    state.kubernetesVersion = value
+  }
+
+  const kubernetesVersion = computed({
+    get () {
+      return state.kubernetesVersion
+    },
+    set: setKubernetesVersion,
+  })
+
+  const defaultKubernetesVersion = computed(() => {
+    const kubernetesVersion = cloudProfileStore.defaultKubernetesVersionForCloudProfileName(state.cloudProfileName)
+    return get(kubernetesVersion, 'version')
+  })
+
+  function resetKubernetesVersion () {
+    setKubernetesVersion(defaultKubernetesVersion.value)
+  }
+
+  /* purpose */
+  function setPurpose (value) {
+    state.purpose = includes(purposes.value, value)
+      ? value
+      : ''
+  }
+  const purpose = computed({
+    get () {
+      return state.purpose
+    },
+    set: setPurpose,
+  })
+
+  const defaultPurpose = computed(() => {
+    return head(purposes.value)
+  })
+
+  function resetPurpose () {
+    if (!state.purpose) {
+      setPurpose(defaultPurpose.value)
+    } else if (!includes(purposes.value, state.purpose)) {
+      setPurpose()
+    }
+  }
+
+  /* enableStaticTokenKubeconfig */
+  function setEnableStaticTokenKubeconfig (value) {
+    state.enableStaticTokenKubeconfig = !!value
+  }
+
+  const enableStaticTokenKubeconfig = computed({
+    get () {
+      return !!state.enableStaticTokenKubeconfig
+    },
+    set: setEnableStaticTokenKubeconfig,
+  })
+
+  /* infrastructureKind */
+  function setInfrastructureKind (value) {
+    state.infrastructureKind = value
+    resetCloudProfileName()
+  }
+
+  const infrastructureKind = computed({
+    get () {
+      return state.infrastructureKind
+    },
+    set: setInfrastructureKind,
+  })
+
+  /* cloudProfileName */
+  function setCloudProfileName (value) {
+    state.cloudProfileName = value
+    shootStagingStore.setCloudProfileName(value)
+    resetName()
+    resetKubernetesVersion()
+    resetInfrastructureSecret()
+    resetRegion()
+    resetLoadBalancerProviderName()
+    resetFloatingPoolName()
+    resetLoadBalancerClassNames()
+    resetFirewallImage()
+    resetProjectID()
+  }
+
+  const cloudProfileName = computed({
+    get () {
+      return state.cloudProfileName
+    },
+    set: setCloudProfileName,
+  })
+
+  const defaultCloudProfileName = computed(() => {
+    return get(head(cloudProfiles.value), 'metadata.name')
+  })
+
+  function resetCloudProfileName () {
+    setCloudProfileName(defaultCloudProfileName.value)
+  }
+
+  /* secretBindingName */
+  function setSecretBindingName (value) {
+    state.secretBindingName = value
+  }
+
+  const secretBindingName = computed({
+    get () {
+      return state.secretBindingName
+    },
+    set: setSecretBindingName,
+  })
+
+  /* infrastructureSecret */
+  function setInfrastructureSecret (value) {
+    secretBindingName.value = get(value, 'metadata.name')
+    resetPurpose()
+  }
+
+  const infrastructureSecret = computed({
+    get () {
+      return find(infrastructureSecrets.value, ['metadata.name', secretBindingName.value])
+    },
+    set: setInfrastructureSecret,
+  })
+
+  const defaultInfrastructureSecret = computed(() => {
+    return head(infrastructureSecrets.value)
+  })
+
+  function resetInfrastructureSecret () {
+    setInfrastructureSecret(defaultInfrastructureSecret.value)
+  }
+
+  /* region */
+  function setRegion (value) {
+    state.region = value
+    resetPartitionID()
+    resetFloatingPoolName()
+    resetLoadBalancerProviderName()
+  }
+
+  const region = computed({
+    get () {
+      return state.region
+    },
+    set: setRegion,
+  })
+
+  const defaultRegion = computed(() => {
+    return head(regionsWithSeed.value) ??
+      showAllRegions.value
+      ? head(regionsWithoutSeed.value)
+      : undefined
+  })
+
+  function resetRegion () {
+    setRegion(defaultRegion.value)
+  }
+
+  /* networkingType */
+  function setNetworkingType (value) {
+    state.networkingType = value
+  }
+
+  const networkingType = computed({
+    get () {
+      return state.networkingType
+    },
+    set: setNetworkingType,
+  })
+
+  const defaultNetworkingType = computed(() => {
+    return head(gardenerExtensionStore.networkingTypes)
+  })
+
+  function resetNetworkingType () {
+    setNetworkingType(defaultNetworkingType.value)
+  }
+
+  /* floatingPoolName */
+  function setFloatingPoolName (value) {
+    state.floatingPoolName = value
+  }
+
+  const floatingPoolName = computed({
+    get () {
+      return state.floatingPoolName
+    },
+    set: setFloatingPoolName,
+  })
+
+  const defaultFloatingPoolName = computed(() => {
+    return head(allFloatingPoolNames.value)
+  })
+
+  function resetFloatingPoolName () {
+    setFloatingPoolName(defaultFloatingPoolName.value)
+  }
+
+  /* loadBalancerProviderName */
+  function setLoadBalancerProviderName (value) {
+    state.loadBalancerProviderName = value
+  }
+
+  const loadBalancerProviderName = computed({
+    get () {
+      return state.loadBalancerProviderName
+    },
+    set: setLoadBalancerProviderName,
+  })
+
+  const defaultLoadBalancerProviderName = computed(() => {
+    return head(allLoadBalancerProviderNames.value)
+  })
+
+  function resetLoadBalancerProviderName () {
+    setLoadBalancerProviderName(defaultLoadBalancerProviderName.value)
+  }
+
+  /* loadBalancerClasseNames */
+  function setLoadBalancerClassNames (value) {
+    state.loadBalancerClassNames = intersection(allLoadBalancerClassNames.value, value)
+  }
+
+  const loadBalancerClassNames = computed({
+    get () {
+      return state.loadBalancerClassNames
+    },
+    set: setLoadBalancerClassNames,
+  })
+
+  const defaultLoadBalancerClassNames = computed(() => {
+    const loadBalancerClassName = includes(allLoadBalancerClassNames.value, 'default')
+      ? 'default'
+      : head(allLoadBalancerClassNames.value)
+    return loadBalancerClassName ? [loadBalancerClassName] : []
+  })
+
+  function resetLoadBalancerClassNames () {
+    setLoadBalancerClassNames(defaultLoadBalancerClassNames.value)
+  }
+
+  /* loadBalancerClasses */
+  function setLoadBalancerClasses (value) {
+    setLoadBalancerClassNames(map(value, 'name'))
+  }
+
+  const loadBalancerClasses = computed({
+    get () {
+      return map(loadBalancerClassNames.value, name => ({ name }))
+    },
+    set: setLoadBalancerClasses,
+  })
+
+  /* partitionID */
+  function setPartitionID (value) {
+    state.partitionID = value
+    resetFirewallSize()
+    resetFirewallNetworks()
+  }
+
+  const partitionID = computed({
+    get () {
+      return state.partitionID
+    },
+    set: setPartitionID,
+  })
+
+  const defaultPartitionID = computed(() => {
+    return head(partitionIDs.value)
+  })
+
+  function resetPartitionID () {
+    setPartitionID(defaultPartitionID.value)
+  }
+
+  /* projectID */
+  function setProjectID (value) {
+    state.projectID = value
+  }
+
+  const projectID = computed({
+    get () {
+      return state.projectID
+    },
+    set: setProjectID,
+  })
+
+  const defaultProjectID = ref()
+
+  function resetProjectID () {
+    setProjectID(defaultProjectID.value)
+  }
+
+  /* firewallImage */
+  function setFirewallImage (value) {
+    state.firewallImage = value
+  }
+
+  const firewallImage = computed({
+    get () {
+      return state.firewallImage
+    },
+    set: setFirewallImage,
+  })
+
+  const defaultFirewallImage = computed(() => {
+    return head(firewallImages.value)
+  })
+
+  function resetFirewallImage () {
+    setFirewallImage(defaultFirewallImage.value)
+  }
+
+  /* firewallSize */
+  function setFirewallSize (value) {
+    state.firewallSize = value
+  }
+
+  const firewallSize = computed({
+    get () {
+      return state.firewallSize
+    },
+    set: setFirewallSize,
+  })
+
+  const defaultFirewallSize = computed(() => {
+    return head(firewallSizes.value)
+  })
+
+  function resetFirewallSize () {
+    setFirewallSize(defaultFirewallSize.value)
+  }
+
+  /* firewallNetworks */
+  function setFirewallNetworks (value) {
+    state.firewallNetworks = value
+  }
+
+  const firewallNetworks = computed({
+    get () {
+      return state.firewallNetworks
+    },
+    set: setFirewallNetworks,
+  })
+
+  const defaultFirewallNetworks = computed(() => {
+    const firewallNetwork = find(allFirewallNetworks.value, ['key', 'internet'])
+    return firewallNetwork
+      ? [firewallNetwork.value]
+      : undefined
+  })
+
+  function resetFirewallNetworks () {
+    setFirewallNetworks(defaultFirewallNetworks.value)
+  }
+
+  /* k8sUpdates */
+  function setK8sUpdates (value) {
+    set(state, 'maintenanceComponentUpdates.k8sUpdates', !!value)
+  }
+
+  const k8sUpdates = computed({
+    get () {
+      return get(state, 'maintenanceComponentUpdates.k8sUpdates', false)
+    },
+    set: setK8sUpdates,
+  })
+
+  /* osUpdates */
+  function setOsUpdates (value) {
+    set(state, 'maintenanceComponentUpdates.osUpdates', !!value)
+  }
+
+  const osUpdates = computed({
+    get () {
+      return get(state, 'maintenanceComponentUpdates.osUpdates', false)
+    },
+    set: setOsUpdates,
+  })
+
   function selectInfrastructure (value) {
-    infrastructureKind.value = value
+    setInfrastructureKind(value)
   }
 
   const initialShootObject = shallowRef(null)
@@ -377,7 +645,7 @@ const useShootCreationStore = defineStore('shootCreation', () => {
       secretBindingName,
       floatingPoolName,
       loadBalancerProviderName,
-      loadBalancerClasses,
+      loadBalancerClassNames,
       partitionID,
       projectID,
       firewallImage,
@@ -417,7 +685,8 @@ const useShootCreationStore = defineStore('shootCreation', () => {
       if (!isEmpty(loadBalancerProviderName)) {
         set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerProvider', loadBalancerProviderName)
       }
-      if (!isEmpty(loadBalancerClasses)) {
+      if (!isEmpty(loadBalancerClassNames)) {
+        const loadBalancerClasses = map(loadBalancerClassNames, name => ({ name }))
         set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerClasses', loadBalancerClasses)
       }
       if (!isEmpty(partitionID)) {
@@ -540,7 +809,7 @@ const useShootCreationStore = defineStore('shootCreation', () => {
   }
 
   function setShootResourceState () {
-    const shootResource = cloneDeep(this.shootObject)
+    const shootResource = cloneDeep(shootObject.value)
 
     const infrastructureKind = get(shootResource, 'spec.provider.type')
     state.infrastructureKind = infrastructureKind
@@ -560,6 +829,7 @@ const useShootCreationStore = defineStore('shootCreation', () => {
     state.floatingPoolName = floatingPoolName
     state.loadBalancerProviderName = loadBalancerProviderName
     state.loadBalancerClasses = loadBalancerClasses
+    state.loadBalancerClassNames = map(loadBalancerClasses, 'name')
 
     const partitionID = get(shootResource, 'spec.provider.infrastructureConfig.partitionID')
     const projectID = get(shootResource, 'spec.provider.infrastructureConfig.projectID')
@@ -595,7 +865,6 @@ const useShootCreationStore = defineStore('shootCreation', () => {
     state.kubernetesVersion = kubernetesVersion
     state.enableStaticTokenKubeconfig = enableStaticTokenKubeconfig
     state.purpose = purpose
-
     const workers = get(shootResource, 'spec.provider.workers')
     state.workers = cloneDeep(workers)
 
@@ -627,6 +896,14 @@ const useShootCreationStore = defineStore('shootCreation', () => {
     shootStagingStore.workerless = false
   }
 
+  watch(() => shootStagingStore.workerless, value => {
+    if (!value && !infrastructureSecret.value && !networkingType.value) {
+      // If worker required values missing, reset to defaults
+      setCloudProfileName(state.cloudProfileName ?? defaultCloudProfileName.value)
+      resetNetworkingType()
+    }
+  })
+
   return {
     editor,
     shootObject,
@@ -644,9 +921,8 @@ const useShootCreationStore = defineStore('shootCreation', () => {
     region,
     networkingType,
     floatingPoolName,
-    fpname,
     loadBalancerProviderName,
-    loadBalancerClasses,
+    loadBalancerClassNames,
     partitionID,
     projectID,
     firewallImage,
@@ -662,9 +938,19 @@ const useShootCreationStore = defineStore('shootCreation', () => {
     infrastructureSecret,
     sortedKubernetesVersions,
     purposes,
-    defaultKubernetesVersion,
     kubernetesVersionIsNotLatestPatch,
     accessRestrictionDefinitions,
+    regionsWithSeed,
+    regionsWithoutSeed,
+    showAllRegions,
+    networkingTypes,
+    allFloatingPoolNames,
+    allLoadBalancerClassNames,
+    allLoadBalancerProviderNames,
+    partitionIDs,
+    firewallImages,
+    firewallSizes,
+    allFirewallNetworks,
     getShootResource,
     setShootResource,
     setShootResourceState,

@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-select
-    v-model="internalValue"
+    v-model="v$.internalValue.$model"
     hint="Indicate the importance of the cluster"
     color="primary"
     item-color="primary"
@@ -45,12 +45,6 @@ export default {
       v$: useVuelidate(),
     }
   },
-  data () {
-    return {
-      valid: undefined,
-      lazyValue: this.modelValue,
-    }
-  },
   validations () {
     return {
       internalValue: withFieldName('Purpose', {
@@ -61,23 +55,11 @@ export default {
   computed: {
     internalValue: {
       get () {
-        return this.lazyValue
+        return this.modelValue ?? ''
       },
       set (value) {
-        this.lazyValue = value ?? ''
-        this.v$.internalValue.$touch()
-        this.$emit('update:modelValue', this.lazyValue)
+        this.$emit('update:modelValue', value)
       },
-    },
-  },
-  watch: {
-    modelValue (value) {
-      if (!value) {
-        this.lazyValue = ''
-        this.v$.internalValue.$touch()
-      } else if (this.lazyValue !== value) {
-        this.lazyValue = value
-      }
     },
   },
   methods: {
