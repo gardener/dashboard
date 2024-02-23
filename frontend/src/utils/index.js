@@ -647,7 +647,7 @@ export function omitKeysWithSuffix (obj, suffix) {
 export function parseNumberWithMagnitudeSuffix (abbreviatedNumber) {
   const [, number, suffix] = /^(\d+(?:\.\d*)?)([kmbt]?)$/i.exec(abbreviatedNumber) ?? []
   if (!number) {
-    logger.error(`Could not parse number with suffix ${abbreviatedNumber} as it does not match regex ^(\\d+(?:\\.\\d*)?)([kmbt]?)$`)
+    logger.error(`Failed to parse ${abbreviatedNumber} because it doesn't follow the required format: a number optionally with a decimal, followed by an optional magnitude suffix ('k', 'm', 'b', 't').`)
     return null
   }
 
