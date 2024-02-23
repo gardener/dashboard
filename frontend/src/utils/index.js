@@ -644,25 +644,14 @@ export function omitKeysWithSuffix (obj, suffix) {
   return omit(obj, keys)
 }
 
-export function parseNumericalAbbreviation (abbreviatedNumber) {
-  const regex = /(\d+(?:\.\d+)?)(k|M|B)?/i
-  const match = abbreviatedNumber.match(regex)
-
-  if (!match) {
+export function parseNumberWithMagnitudeSuffix (abbreviatedNumber) {
+  const [, number, suffix] = /^(\d+(?:\.\d*)?)([kmbt]?)$/i.exec(abbreviatedNumber) ?? []
+  if (!number) {
+    logger.error(`Could not parse number with suffix ${abbreviatedNumber} as it does not match regex ^(\\d+(?:\\.\\d*)?)([kmbt]?)$`)
     return null
   }
 
-  const number = parseFloat(match[1])
-  const suffix = match[2]
-
-  switch (suffix?.toLowerCase()) {
-    case 'k':
-      return number * 1e3
-    case 'm':
-      return number * 1e6
-    case 'b':
-      return number * 1e9
-    default:
-      return number
-  }
+  const suffixFactors = { k: 1e3, m: 1e6, b: 1e9, t: 1e12 }
+  const factor = suffixFactors[suffix?.toLowerCase()] ?? 1
+  return Number(number) * factor
 }

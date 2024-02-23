@@ -14,7 +14,7 @@ import {
   getDurationInMinutes,
   getTimeStringTo,
   getTimeStringFrom,
-  parseNumericalAbbreviation,
+  parseNumberWithMagnitudeSuffix,
 } from '@/utils'
 
 import { pick } from '@/lodash'
@@ -398,33 +398,42 @@ describe('utils', () => {
     })
   })
 
-  describe('parseNumericalAbbreviation', () => {
+  describe('parseNumberWithMagnitudeSuffix', () => {
     it('should convert k to thousands', () => {
-      expect(parseNumericalAbbreviation('1k')).toBe(1000)
-      expect(parseNumericalAbbreviation('1K')).toBe(1000)
+      expect(parseNumberWithMagnitudeSuffix('1k')).toBe(1000)
+      expect(parseNumberWithMagnitudeSuffix('1K')).toBe(1000)
     })
 
     it('should convert M to millions', () => {
-      expect(parseNumericalAbbreviation('1M')).toBe(1000000)
-      expect(parseNumericalAbbreviation('1m')).toBe(1000000)
+      expect(parseNumberWithMagnitudeSuffix('1M')).toBe(1000000)
+      expect(parseNumberWithMagnitudeSuffix('1m')).toBe(1000000)
     })
 
     it('should convert B to billions', () => {
-      expect(parseNumericalAbbreviation('1B')).toBe(1000000000)
-      expect(parseNumericalAbbreviation('1b')).toBe(1000000000)
+      expect(parseNumberWithMagnitudeSuffix('1B')).toBe(1000000000)
+      expect(parseNumberWithMagnitudeSuffix('1b')).toBe(1000000000)
+    })
+
+    it('should convert T to trillions', () => {
+      expect(parseNumberWithMagnitudeSuffix('1T')).toBe(1000000000000)
+      expect(parseNumberWithMagnitudeSuffix('1t')).toBe(1000000000000)
     })
 
     it('should handle decimal values correctly', () => {
-      expect(parseNumericalAbbreviation('1.5k')).toBe(1500)
-      expect(parseNumericalAbbreviation('2.5M')).toBe(2500000)
+      expect(parseNumberWithMagnitudeSuffix('1.5k')).toBe(1500)
+      expect(parseNumberWithMagnitudeSuffix('2.5M')).toBe(2500000)
     })
 
     it('should return the original number if no suffix', () => {
-      expect(parseNumericalAbbreviation('500')).toBe(500)
+      expect(parseNumberWithMagnitudeSuffix('500')).toBe(500)
     })
 
     test('returns null for invalid input', () => {
-      expect(parseNumericalAbbreviation('abc')).toBeNull()
+      expect(parseNumberWithMagnitudeSuffix('x1')).toBeNull()
+    })
+
+    test('returns null for invalid suffix', () => {
+      expect(parseNumberWithMagnitudeSuffix('1x')).toBeNull()
     })
   })
 })
