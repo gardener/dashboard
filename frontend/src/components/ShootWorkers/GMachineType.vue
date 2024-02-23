@@ -30,7 +30,7 @@ SPDX-License-Identifier: Apache-2.0
           <span v-if="item.raw.cpu">CPU: {{ item.raw.cpu }} | </span>
           <span v-if="item.raw.gpu">GPU: {{ item.raw.gpu }} | </span>
           <span v-if="item.raw.memory">Memory: {{ item.raw.memory }}</span>
-          <span v-if="item.raw.storage"> | Storage Class: {{ item.raw.storage.class }}</span>
+          <span v-if="item.raw.storage"> | Volume Type: {{ item.raw.storage.type }} | Class: {{ item.raw.storage.class }} | Default Size: {{ item.raw.storage.size }}</span>
         </v-list-item-subtitle>
       </v-list-item>
     </template>
