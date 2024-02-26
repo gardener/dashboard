@@ -104,9 +104,10 @@ SPDX-License-Identifier: Apache-2.0
         </div>
       </template>
       <template v-if="cell.header.key === 'readiness'">
-        <div class="d-flex">
-          <g-status-tags :shoot-item="shootItem" />
-        </div>
+        <g-status-tags
+          :shoot-item="shootItem"
+          collapse
+        />
       </template>
       <template v-if="cell.header.key === 'controlPlaneHighAvailability'">
         <div class="d-flex justify-center">
