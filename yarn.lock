@@ -773,6 +773,7 @@ __metadata:
     "@braintree/sanitize-url": "npm:^6.0.4"
     "@fontsource/roboto": "npm:^5.0.8"
     "@kyvg/vue3-notification": "npm:^2.9.0"
+    "@luigi-project/client": "npm:^2.9.0"
     "@mdi/font": "npm:7.2.96"
     "@pinia/testing": "npm:^0.1.2"
     "@vitejs/plugin-vue": "npm:^5.0.3"
@@ -1283,6 +1284,13 @@ __metadata:
   peerDependencies:
     vue: ^3.0.0
   checksum: 5fedd85476216b5bddc68b332d1814f297383e6b2e7a56707df4ffadcc7ac02ba1cf54086d9b3c25194612eb7dfb8acd0dd198de06c8a2599d57f37b9dce57d4
+  languageName: node
+  linkType: hard
+
+"@luigi-project/client@npm:^2.9.0":
+  version: 2.9.0
+  resolution: "@luigi-project/client@npm:2.9.0"
+  checksum: 784a6b5fb8cd3db61e6b4e3e90ba71d634ebfd4eb410740158cc9a609c2e566c7cf0d00c3a5a71a8fecc739f78cf8c54abed5b643985ea1e74b051dcfd1a64f6
   languageName: node
   linkType: hard
 

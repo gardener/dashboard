@@ -1307,6 +1307,7 @@ const RAW_RUNTIME_STATE =
           ["@braintree/sanitize-url", "npm:6.0.4"],\
           ["@fontsource/roboto", "npm:5.0.8"],\
           ["@kyvg/vue3-notification", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.9.1"],\
+          ["@luigi-project/client", "npm:2.9.0"],\
           ["@mdi/font", "npm:7.2.96"],\
           ["@pinia/testing", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.1.3"],\
           ["@vitejs/plugin-vue", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.0.3"],\
@@ -1899,6 +1900,15 @@ const RAW_RUNTIME_STATE =
         "packagePeers": [\
           "@types/vue",\
           "vue"\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["@luigi-project/client", [\
+      ["npm:2.9.0", {\
+        "packageLocation": "./.yarn/cache/@luigi-project-client-npm-2.9.0-d8bce48d00-784a6b5fb8.zip/node_modules/@luigi-project/client/",\
+        "packageDependencies": [\
+          ["@luigi-project/client", "npm:2.9.0"]\
         ],\
         "linkType": "HARD"\
       }]\
