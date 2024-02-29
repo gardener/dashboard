@@ -50,10 +50,8 @@ const directives = {
   styleSrc: ['\'self\'', '\'unsafe-inline\''],
   fontSrc: ['\'self\'', 'data:'],
   imgSrc,
-  scriptSrc: ['\'self\'', '\'unsafe-eval\'']
-}
-if (!luigiEnabled) {
-  // directives.frameAncestors = ['\'self\'']
+  scriptSrc: ['\'self\'', '\'unsafe-eval\''],
+  frameAncestors: ['\'self\'', 'https://portal.d1.openmfp.dxp.k8s.ondemand.com']
 }
 
 // configure app
@@ -94,10 +92,6 @@ app.use(expressStaticGzip(PUBLIC_DIRNAME, {
   }
 }))
 app.use(STATIC_PATHS, notFound)
-
-if (!luigiEnabled) {
-  // app.use(helmet.frameguard({ action: 'deny' }))
-}
 app.use(historyFallback(INDEX_FILENAME))
 
 app.use(renderError)
