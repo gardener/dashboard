@@ -710,6 +710,7 @@ __metadata:
     "@fontsource/roboto": "npm:^5.0.12"
     "@kyvg/vue3-notification": "npm:^3.2.1"
     "@lezer/common": "npm:^1.2.1"
+    "@luigi-project/client": "npm:^2.9.0"
     "@mdi/font": "npm:7.4.47"
     "@mdi/svg": "npm:7.4.47"
     "@microsoft/eslint-formatter-sarif": "npm:^3.1.0"
@@ -1101,6 +1102,13 @@ __metadata:
     "@lezer/highlight": "npm:^1.0.0"
     "@lezer/lr": "npm:^1.4.0"
   checksum: 10c0/cef3d0c0a2c48a7e0f36ccc0af948da9394d17b164dcbaf0187d9b472fd4f628b3107d7a4041045181488f1966a94ae65640c932fc8d3bf8c3597813cfb86ae0
+  languageName: node
+  linkType: hard
+
+"@luigi-project/client@npm:^2.9.0":
+  version: 2.31.0
+  resolution: "@luigi-project/client@npm:2.31.0"
+  checksum: 10c0/33244269b1b6b37a7a22139a736ff3ffad81648dc36f3ffb68ee7f79f00159d44530427e03cbaa7ad4770ff49b49bb1720b9865d1a59b816137f1cda4e428f67
   languageName: node
   linkType: hard
 

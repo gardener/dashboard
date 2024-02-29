@@ -42,6 +42,7 @@
     "@fontsource/roboto": "^5.0.12",
     "@kyvg/vue3-notification": "^3.2.1",
     "@lezer/common": "^1.2.1",
+    "@luigi-project/client": "^2.9.0",
     "@mdi/font": "7.4.47",
     "@vue/devtools-api": "^8.2.1",
     "@vuelidate/core": "^2.0.3",

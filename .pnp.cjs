@@ -984,6 +984,7 @@ const RAW_RUNTIME_STATE =
           ["@gardener-dashboard/frontend", "workspace:frontend"],\
           ["@kyvg/vue3-notification", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.4.2"],\
           ["@lezer/common", "npm:1.5.2"],\
+          ["@luigi-project/client", "npm:2.31.0"],\
           ["@mdi/font", "npm:7.4.47"],\
           ["@mdi/svg", "npm:7.4.47"],\
           ["@microsoft/eslint-formatter-sarif", "npm:3.1.0"],\
@@ -1537,6 +1538,15 @@ const RAW_RUNTIME_STATE =
           ["@lezer/highlight", "npm:1.2.1"],\
           ["@lezer/lr", "npm:1.4.2"],\
           ["@lezer/yaml", "npm:1.0.3"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["@luigi-project/client", [\
+      ["npm:2.31.0", {\
+        "packageLocation": "./.yarn/cache/@luigi-project-client-npm-2.31.0-9544e82a24-33244269b1.zip/node_modules/@luigi-project/client/",\
+        "packageDependencies": [\
+          ["@luigi-project/client", "npm:2.31.0"]\
         ],\
         "linkType": "HARD"\
       }]\
