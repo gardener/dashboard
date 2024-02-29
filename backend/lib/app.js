@@ -23,7 +23,7 @@ const { healthCheck } = require('./healthz')
 const {
   port,
   metricsPort,
-  luigiEnabled = false
+  luigiEnabled = true
 } = config
 const periodSeconds = config.readinessProbe?.periodSeconds || 10
 
