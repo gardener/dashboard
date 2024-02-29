@@ -37,7 +37,12 @@ import {
 } from './constants.js'
 
 const { authentication, authorization } = services
-const { sessionSecrets, oidc = {} } = config
+const {
+  sessionSecrets,
+  luigiEnabled = false,
+  oidc = {},
+} = config
+const sameSite = luigiEnabled ? 'None' : 'Lax'
 const {
   sign,
   verify,
@@ -246,7 +251,7 @@ async function authorizationUrl (req, res) {
       secure: true,
       httpOnly: true,
       maxAge: 180_000, // cookie will be removed after 3 minutes
-      sameSite: 'Lax',
+      sameSite,
     })
     switch (codeChallengeMethod) {
       case 'S256':
@@ -325,13 +330,13 @@ async function setCookies (res, tokenSet) {
   res.cookie(COOKIE_HEADER_PAYLOAD, join([header, payload], '.'), {
     secure: true,
     expires: undefined,
-    sameSite: 'Lax',
+    sameSite,
   })
   res.cookie(COOKIE_SIGNATURE, signature, {
     secure: true,
     httpOnly: true,
     expires: undefined,
-    sameSite: 'Lax',
+    sameSite,
   })
   const values = [tokenSet.id_token]
   if (tokenSet.refresh_token) {
@@ -342,7 +347,7 @@ async function setCookies (res, tokenSet) {
     secure: true,
     httpOnly: true,
     expires: undefined,
-    sameSite: 'Lax',
+    sameSite,
   })
   return accessToken
 }

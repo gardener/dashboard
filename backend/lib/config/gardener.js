@@ -127,6 +127,11 @@ const configMappings = [
     configPath: 'host',
   },
   {
+    environmentVariableName: 'LUIGI_ENABLED',
+    configPath: 'luigiEnabled',
+    type: 'Boolean',
+  },
+  {
     environmentVariableName: 'METRICS_PORT',
     configPath: 'metricsPort',
     type: 'Integer',
