@@ -6,11 +6,11 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div
-    v-if="definitions"
+    v-if="accessRestrictionDefinitions"
     class="alternate-row-background"
   >
     <v-row
-      v-for="(definition) in definitions"
+      v-for="definition in accessRestrictionDefinitions"
       :key="definition.key"
       class="my-0"
     >
@@ -74,75 +74,31 @@ SPDX-License-Identifier: Apache-2.0
     v-else
     class="pt-4"
   >
-    {{ noItemsText }}
+    {{ accessRestrictionNoItemsText }}
   </div>
 </template>
 
 <script>
-import { mapActions } from 'pinia'
+import {
+  mapState,
+  mapWritableState,
+} from 'pinia'
 
-import { useCloudProfileStore } from '@/store/cloudProfile'
+import { useShootCreationStore } from '@/store/shoot'
 
 import { transformHtml } from '@/utils'
 
-import {
-  cloneDeep,
-  isEmpty,
-  get,
-  set,
-  unset,
-} from '@/lodash'
-
 export default {
-  props: {
-    userInterActionBus: {
-      type: Object,
-    },
-  },
-  data () {
-    return {
-      accessRestrictions: undefined,
-      cloudProfileName: undefined,
-      region: undefined,
-      shootResource: undefined,
-    }
-  },
   computed: {
-    definitions () {
-      return this.accessRestrictionDefinitionsByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
-    },
-    noItemsText () {
-      return this.accessRestrictionNoItemsTextForCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
-    },
-  },
-  mounted () {
-    if (this.userInterActionBus) {
-      this.userInterActionBus.on('updateCloudProfileName', cloudProfileName => {
-        this.setAccessRestrictions({ shootResource: this.shootResource, cloudProfileName, region: this.region })
-      })
-      this.userInterActionBus.on('updateRegion', region => {
-        this.setAccessRestrictions({ shootResource: this.shootResource, cloudProfileName: this.cloudProfileName, region })
-      })
-    }
+    ...mapState(useShootCreationStore, [
+      'accessRestrictionDefinitions',
+      'accessRestrictionNoItemsText',
+    ]),
+    ...mapWritableState(useShootCreationStore, [
+      'accessRestrictions',
+    ]),
   },
   methods: {
-    ...mapActions(useCloudProfileStore, [
-      'accessRestrictionNoItemsTextForCloudProfileNameAndRegion',
-      'accessRestrictionDefinitionsByCloudProfileNameAndRegion',
-      'accessRestrictionsForShootByCloudProfileNameAndRegion',
-      'labelsByCloudProfileNameAndRegion',
-    ]),
-    transformHtml (value) {
-      return transformHtml(value)
-    },
-    setAccessRestrictions ({ shootResource, cloudProfileName, region }) {
-      this.shootResource = shootResource
-      this.cloudProfileName = cloudProfileName
-      this.region = region
-
-      const accessRestrictions = this.accessRestrictionsForShootByCloudProfileNameAndRegion({ shootResource, cloudProfileName, region })
-      this.accessRestrictions = cloneDeep(accessRestrictions)
-    },
     enabled (definition) {
       const inverted = definition.input.inverted
       const value = this.accessRestrictions[definition.key].value
@@ -153,40 +109,7 @@ export default {
         ? 'text-medium-emphasis'
         : 'text-disabled'
     },
-    applyTo (shootResource) {
-      const definitions = this.definitions || []
-      const accessRestrictions = this.accessRestrictions || {}
-      for (const { key, input, options: optionDefinitions } of definitions) {
-        const { value, options } = accessRestrictions[key]
-        const { inverted = false } = input
-        const accessRestrictionEnabled = inverted ? !value : value
-        if (accessRestrictionEnabled) {
-          set(shootResource, ['spec', 'seedSelector', 'matchLabels', key], 'true')
-        } else {
-          unset(shootResource, ['spec', 'seedSelector', 'matchLabels', key])
-        }
-
-        for (const { key, input } of optionDefinitions) {
-          const { value } = options[key]
-          const { inverted = false } = input
-          const optionEnabled = inverted ? !value : value
-          if (accessRestrictionEnabled) {
-            set(shootResource, ['metadata', 'annotations', key], `${optionEnabled}`)
-          } else {
-            unset(shootResource, ['metadata', 'annotations', key])
-          }
-        }
-      }
-
-      if (isEmpty(get(shootResource, 'spec.seedSelector.matchLabels'))) {
-        unset(shootResource, 'spec.seedSelector.matchLabels')
-      }
-      if (isEmpty(get(shootResource, 'spec.seedSelector'))) {
-        unset(shootResource, 'spec.seedSelector')
-      }
-
-      return shootResource
-    },
+    transformHtml,
   },
 }
 </script>

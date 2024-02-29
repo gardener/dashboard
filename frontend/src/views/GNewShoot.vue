@@ -33,7 +33,6 @@ SPDX-License-Identifier: Apache-2.0
           <g-new-shoot-infrastructure-details />
         </v-card-text>
       </v-card>
-      <!--
       <v-card class="mt-4">
         <g-toolbar title="Control Plane High Availability" />
         <v-card-text class="pt-2">
@@ -52,10 +51,7 @@ SPDX-License-Identifier: Apache-2.0
       >
         <g-toolbar title="Access Restrictions" />
         <v-card-text class="py-1">
-          <g-access-restrictions
-            ref="accessRestrictions"
-            :user-inter-action-bus="userInterActionBus"
-          />
+          <g-access-restrictions />
         </v-card-text>
       </v-card>
       <v-card
@@ -66,12 +62,10 @@ SPDX-License-Identifier: Apache-2.0
           title="Worker"
         />
         <v-card-text>
-          <g-manage-workers
-            ref="manageWorkersRef"
-            :user-inter-action-bus="userInterActionBus"
-          />
+          <g-manage-workers />
         </v-card-text>
       </v-card>
+      <!--
       <v-card
         v-show="!workerless"
         class="mt-4"

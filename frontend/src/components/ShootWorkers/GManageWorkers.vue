@@ -301,7 +301,17 @@ export default {
       this.setInternalWorkers(workers)
       this.zonesNetworkConfiguration = zonesNetworkConfiguration
     },
-    setWorkersData ({ workers, cloudProfileName, region, zonesNetworkConfiguration, updateOSMaintenance, zonedCluster, existingWorkerCIDR, newShootWorkerCIDR, kubernetesVersion }) {
+    setWorkersData ({
+      workers,
+      cloudProfileName,
+      region,
+      zonesNetworkConfiguration,
+      updateOSMaintenance,
+      zonedCluster,
+      existingWorkerCIDR,
+      newShootWorkerCIDR,
+      kubernetesVersion,
+    }) {
       this.cloudProfileName = cloudProfileName
       this.region = region
       this.originalZonesNetworkConfiguration = zonesNetworkConfiguration

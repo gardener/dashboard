@@ -198,6 +198,13 @@ const useShootCreationStore = defineStore('shootCreation', () => {
     })
   })
 
+  const accessRestrictionNoItemsText = computed(() => {
+    return cloudProfileStore.accessRestrictionNoItemsTextForCloudProfileNameAndRegion({
+      cloudProfileName: state.cloudProfileName,
+      region: state.region,
+    })
+  })
+
   const networkingTypes = computed(() => {
     return gardenerExtensionStore.networkingTypes
   })
@@ -582,6 +589,42 @@ const useShootCreationStore = defineStore('shootCreation', () => {
     setFirewallNetworks(defaultFirewallNetworks.value)
   }
 
+  /* accessRestrictions */
+  function setAccessRestrictions (value) {
+    state.accessRestrictions = value
+  }
+
+  const accessRestrictions = computed({
+    get () {
+      return state.accessRestrictions
+    },
+    set: setAccessRestrictions,
+  })
+
+  /* workers */
+  function setWorkers (value) {
+    state.workers = value
+  }
+
+  const workers = computed({
+    get () {
+      return state.workers
+    },
+    set: setWorkers,
+  })
+
+  /* addons */
+  function setAddons (value) {
+    state.addons = value
+  }
+
+  const addons = computed({
+    get () {
+      return state.addons
+    },
+    set: setAddons,
+  })
+
   /* k8sUpdates */
   function setK8sUpdates (value) {
     set(state, 'maintenanceComponentUpdates.k8sUpdates', !!value)
@@ -655,6 +698,7 @@ const useShootCreationStore = defineStore('shootCreation', () => {
       kubernetesVersion,
       purpose,
       enableStaticTokenKubeconfig,
+      accessRestrictions,
       workers,
       addons,
       maintenanceTimeWindow,
@@ -716,7 +760,7 @@ const useShootCreationStore = defineStore('shootCreation', () => {
     const definitions = accessRestrictionDefinitions.value ?? []
     for (const definition of definitions) {
       const { key, input, options: optionDefinitions } = definition
-      const { value, options } = state.accessRestrictions[key]
+      const { value, options } = accessRestrictions[key]
       const { inverted = false } = input
 
       const accessRestrictionEnabled = inverted ? !value : value
@@ -928,6 +972,9 @@ const useShootCreationStore = defineStore('shootCreation', () => {
     firewallImage,
     firewallSize,
     firewallNetworks,
+    accessRestrictions,
+    workers,
+    addons,
     k8sUpdates,
     osUpdates,
     cloudProfiles,
@@ -940,6 +987,7 @@ const useShootCreationStore = defineStore('shootCreation', () => {
     purposes,
     kubernetesVersionIsNotLatestPatch,
     accessRestrictionDefinitions,
+    accessRestrictionNoItemsText,
     regionsWithSeed,
     regionsWithoutSeed,
     showAllRegions,
