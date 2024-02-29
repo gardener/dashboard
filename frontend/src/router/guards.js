@@ -60,19 +60,19 @@ export function createGlobalBeforeGuards () {
         return true
       }
 
-      const token = LuigiClient.isLuigiClientInitialized()
-        ? LuigiClient.getToken()
-        : await pTimeout(getLuigiTokenAsync(), 1000)
-      if (token) {
-        try {
+      try {
+        const token = LuigiClient.isLuigiClientInitialized()
+          ? LuigiClient.getToken()
+          : await pTimeout(getLuigiTokenAsync(), 1000)
+        if (token) {
           await api.createTokenReview({ token })
           authnStore.$reset()
           if (!authnStore.isExpired()) {
             return true
           }
-        } catch (err) {
-          logger.error('Luigi token review failed: %s', err.message)
         }
+      } catch (err) {
+        logger.error('Luigi token review error: %s', err.message)
       }
 
       const message = !authnStore.user
