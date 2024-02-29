@@ -22,6 +22,8 @@ import { useTerminalStore } from '@/store/terminal'
 import { useLogger } from '@/composables/useLogger'
 import { useApi } from '@/composables/useApi'
 
+import pTimeout from '@/utils/p-timeout'
+
 export function createGlobalBeforeGuards () {
   const logger = useLogger()
   const api = useApi()
@@ -60,7 +62,7 @@ export function createGlobalBeforeGuards () {
 
       const token = LuigiClient.isLuigiClientInitialized()
         ? LuigiClient.getToken()
-        : await getLuigiTokenAsync()
+        : await pTimeout(getLuigiTokenAsync(), 1000)
       if (token) {
         try {
           await api.createTokenReview({ token })

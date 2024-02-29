@@ -59,12 +59,9 @@ export default defineConfig(({ command, mode }) => {
     VITE_BASE_URL,
   })
 
-  const keyPath = resolve('./ssl/key.pem')
-  const certPath = resolve('./ssl/cert.pem')
   const server = {
     port: 8080,
     strictPort: true,
-
     proxy: {
       '/api': {
         target: proxyTarget,
@@ -76,6 +73,8 @@ export default defineConfig(({ command, mode }) => {
       },
     },
   }
+  const keyPath = resolve('./ssl/key.pem')
+  const certPath = resolve('./ssl/cert.pem')
   if (existsSync(keyPath) && existsSync(certPath)) {
     server.port = 8443
     server.https = {
