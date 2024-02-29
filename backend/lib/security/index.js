@@ -15,7 +15,11 @@ const pTimeout = require('p-timeout')
 const { authentication, authorization } = require('../services')
 const createError = require('http-errors')
 const logger = require('../logger')
-const { sessionSecret, oidc = {} } = require('../config')
+const {
+  sessionSecret,
+  luigiEnabled = false,
+  oidc = {}
+} = require('../config')
 
 const {
   encodeState,
@@ -44,6 +48,8 @@ const {
   COOKIE_CODE_VERIFIER,
   GARDENER_AUDIENCE
 } = require('./constants')
+
+const sameSite = luigiEnabled ? 'None' : 'Lax'
 
 const {
   issuer,
@@ -182,7 +188,7 @@ async function authorizationUrl (req, res) {
       secure,
       httpOnly: true,
       maxAge: 300000, // cookie will be removed after 5 minutes
-      sameSite: 'Lax',
+      sameSite,
       path: '/auth/callback'
     })
     switch (codeChallengeMethod) {
@@ -256,13 +262,13 @@ async function setCookies (res, tokenSet) {
   res.cookie(COOKIE_HEADER_PAYLOAD, join([header, payload], '.'), {
     secure,
     expires: undefined,
-    sameSite: 'Lax'
+    sameSite
   })
   res.cookie(COOKIE_SIGNATURE, signature, {
     secure,
     httpOnly: true,
     expires: undefined,
-    sameSite: 'Lax'
+    sameSite
   })
   const values = [tokenSet.id_token]
   if (tokenSet.refresh_token) {
@@ -273,7 +279,7 @@ async function setCookies (res, tokenSet) {
     secure,
     httpOnly: true,
     expires: undefined,
-    sameSite: 'Lax'
+    sameSite
   })
   return accessToken
 }

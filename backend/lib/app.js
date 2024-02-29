@@ -20,7 +20,11 @@ const githubWebhook = require('./github/webhook')
 
 const { healthCheck } = require('./healthz')
 
-const { port, metricsPort } = config
+const {
+  port,
+  metricsPort,
+  luigiEnabled = false
+} = config
 const periodSeconds = config.readinessProbe?.periodSeconds || 10
 
 // resolve pathnames
@@ -39,6 +43,17 @@ if (gitHubRepoUrl) {
   imgSrc.push(url.origin)
   url.hostname = 'media.' + gitHubHostname
   imgSrc.push(url.origin)
+}
+const directives = {
+  defaultSrc: ['\'self\''],
+  connectSrc,
+  styleSrc: ['\'self\'', '\'unsafe-inline\''],
+  fontSrc: ['\'self\'', 'data:'],
+  imgSrc,
+  scriptSrc: ['\'self\'', '\'unsafe-eval\'']
+}
+if (!luigiEnabled) {
+  directives.frameAncestors = ['\'self\'']
 }
 
 // configure app
@@ -64,15 +79,7 @@ app.use('/api', api.router)
 
 app.use(helmet.xssFilter())
 app.use(helmet.contentSecurityPolicy({
-  directives: {
-    defaultSrc: ['\'self\''],
-    connectSrc,
-    styleSrc: ['\'self\'', '\'unsafe-inline\''],
-    fontSrc: ['\'self\'', 'data:'],
-    imgSrc,
-    scriptSrc: ['\'self\'', '\'unsafe-eval\''],
-    frameAncestors: ['\'self\'']
-  }
+  directives
 }))
 app.use(helmet.referrerPolicy({
   policy: 'same-origin'
@@ -88,9 +95,11 @@ app.use(expressStaticGzip(PUBLIC_DIRNAME, {
 }))
 app.use(STATIC_PATHS, notFound)
 
-app.use(helmet.frameguard({
-  action: 'deny'
-}))
+if (!luigiEnabled) {
+  app.use(helmet.frameguard({
+    action: 'deny'
+  }))
+}
 app.use(historyFallback(INDEX_FILENAME))
 
 app.use(renderError)

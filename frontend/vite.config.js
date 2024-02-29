@@ -114,8 +114,12 @@ export default defineConfig(({ command, mode }) => {
       ],
     },
     server: {
-      port: 8080,
+      port: 8443,
       strictPort: true,
+      https: {
+        key: readFileSync(resolve('./ssl/key.pem')),
+        cert: readFileSync(resolve('./ssl/cert.pem')),
+      },
       proxy: {
         '/api': {
           target: proxyTarget,

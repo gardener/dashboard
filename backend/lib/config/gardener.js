@@ -37,6 +37,10 @@ const environmentVariableDefinitions = {
     type: 'Integer',
     path: 'port'
   },
+  LUIGI_ENABLED: {
+    type: 'Boolean',
+    path: 'luigiEnabled'
+  },
   METRICS_PORT: {
     type: 'Integer',
     path: 'metricsPort'
