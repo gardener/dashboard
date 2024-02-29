@@ -80,9 +80,7 @@ const directives = {
   fontSrc: ['\'self\'', 'data:'],
   imgSrc,
   scriptSrc: ['\'self\'', '\'unsafe-eval\''],
-}
-if (!luigiEnabled) {
-  directives.frameAncestors = ['\'self\'']
+  frameAncestors: ['\'self\'', 'https://portal.d1.openmfp.dxp.k8s.ondemand.com'],
 }
 
 const app = express()
@@ -150,7 +148,6 @@ app.use(BUILD_ASSETS_URL_PATH, expressStaticGzip(BUILD_ASSETS_FS_PATH, {
     maxAge: '1 Week',
   },
 }))
-
 app.use(expressStaticGzip(PUBLIC_FS_PATH, {
   enableBrotli: true,
   orderPreference: ['br'],
