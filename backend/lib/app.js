@@ -23,7 +23,7 @@ const { healthCheck } = require('./healthz')
 const {
   port,
   metricsPort,
-  luigiEnabled = true
+  luigiEnabled = false
 } = config
 const periodSeconds = config.readinessProbe?.periodSeconds || 10
 
@@ -53,7 +53,7 @@ const directives = {
   scriptSrc: ['\'self\'', '\'unsafe-eval\'']
 }
 if (!luigiEnabled) {
-  directives.frameAncestors = ['\'self\'']
+  // directives.frameAncestors = ['\'self\'']
 }
 
 // configure app
@@ -96,9 +96,7 @@ app.use(expressStaticGzip(PUBLIC_DIRNAME, {
 app.use(STATIC_PATHS, notFound)
 
 if (!luigiEnabled) {
-  app.use(helmet.frameguard({
-    action: 'deny'
-  }))
+  // app.use(helmet.frameguard({ action: 'deny' }))
 }
 app.use(historyFallback(INDEX_FILENAME))
 
