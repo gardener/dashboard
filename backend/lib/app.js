@@ -35,7 +35,7 @@ const {
   host,
   metricsPort,
   metricsHost,
-  luigiEnabled = false,
+  luigiEnabled = true,
 } = config
 const periodSeconds = config.readinessProbe?.periodSeconds || 10
 
