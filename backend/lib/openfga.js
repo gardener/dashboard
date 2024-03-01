@@ -39,7 +39,7 @@ async function listProjects (user, role = 'viewer') {
 
   const { objects } = await response.json()
   logger.debug('Openfga response objects: %s', objects)
-  return objects.map(name => name.split(':')[1])
+  return objects.map(name => name.substring('gardener_project:garden-'.length))
 }
 
 module.exports = {
