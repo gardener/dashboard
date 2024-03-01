@@ -6,7 +6,7 @@
 
 'use strict'
 
-const { cloneDeep, find, filter, split, isEmpty } = require('lodash')
+const { cloneDeep, endsWith, find, filter, split, isEmpty } = require('lodash')
 const createError = require('http-errors')
 const pathToRegexp = require('path-to-regexp')
 const { createUrl } = require('./helper')
@@ -54,6 +54,18 @@ const configMaps = {
   },
   createClusterIdentityConfigMap (identity) {
     return getClusterIdentitConfigMap({ identity })
+  },
+  getCaClusterConfigMap (namespace, name) {
+    return getConfigMap({
+      name,
+      namespace,
+      labels: {
+        'gardener.cloud/role': 'ca-cluster'
+      },
+      data: {
+        'ca.crt': 'ca.crt'
+      }
+    })
   }
 }
 
@@ -90,6 +102,10 @@ const mocks = {
       if (namespace === 'kube-system' && name === 'cluster-identity') {
         const [hostname] = split(headers[':authority'], ':')
         const item = configMaps.createClusterIdentityConfigMap(hostname)
+        return Promise.resolve(item)
+      }
+      if (endsWith(name, '.ca-cluster')) {
+        const item = configMaps.getCaClusterConfigMap(namespace, name)
         return Promise.resolve(item)
       }
 
