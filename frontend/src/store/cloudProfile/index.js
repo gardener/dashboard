@@ -24,6 +24,7 @@ import {
   isValidTerminationDate,
   selectedImageIsNotLatest,
   UNKNOWN_EXPIRED_TIMESTAMP,
+  compareVersions,
 } from '@/utils'
 import { v4 as uuidv4 } from '@/utils/uuid'
 
@@ -373,15 +374,20 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
   function machineImagesByCloudProfileName (cloudProfileName) {
     const cloudProfile = cloudProfileByName(cloudProfileName)
     const machineImages = get(cloudProfile, 'data.machineImages')
+
     const mapMachineImages = machineImage => {
-      const versions = filter(machineImage.versions, ({ version, expirationDate }) => {
-        if (!semver.valid(version)) {
-          logger.error(`Skipped machine image ${machineImage.name} as version ${version} is not a valid semver version`)
-          return false
-        }
-        return true
-      })
+      const versions = map(
+        machineImage.versions, versionObj => {
+          if (!semver.valid(versionObj.version)) {
+            versionObj.isInvalidSemverVersion = true
+          }
+          return versionObj
+        })
       versions.sort((a, b) => {
+        if (a.isInvalidSemverVersion || b.isInvalidSemverVersion) {
+          return compareVersions(a.version, b.version)
+        }
+
         return semver.rcompare(a.version, b.version)
       })
 
@@ -389,21 +395,17 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
       const vendorName = vendorNameFromImageName(machineImage.name)
       const vendorHint = findVendorHint(configStore.vendorHints, vendorName)
 
-      return map(versions, ({ version, expirationDate, cri, classification, architectures }) => {
-        if (isEmpty(architectures)) {
-          architectures = ['amd64'] // default if not maintained
+      return map(versions, versionObj => {
+        if (isEmpty(versionObj.architectures)) {
+          versionObj.architectures = ['amd64'] // default if not maintained
         }
         return decorateClassificationObject({
-          key: name + '/' + version,
+          key: name + '/' + versionObj.version,
           name,
-          version,
-          cri,
-          classification,
-          expirationDate,
           vendorName,
           icon: vendorName,
           vendorHint,
-          architectures,
+          ...versionObj,
         })
       })
     }

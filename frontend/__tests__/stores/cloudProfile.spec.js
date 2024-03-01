@@ -119,14 +119,14 @@ describe('stores', () => {
 
       it('should transform machine images from cloud profile', () => {
         const dashboardMachineImages = cloudProfileStore.machineImagesByCloudProfileName('foo')
-        expect(dashboardMachineImages).toHaveLength(5)
+        expect(dashboardMachineImages).toHaveLength(6)
 
         const expiredImage = find(dashboardMachineImages, { name: 'suse-chost', version: '15.1.20191127' })
         expect(expiredImage.isExpired).toBe(true)
         expect(expiredImage.isSupported).toBe(false)
 
         const invalidImage = find(dashboardMachineImages, { name: 'foo', version: '1.02.3' })
-        expect(invalidImage).toBeUndefined()
+        expect(invalidImage.isInvalidSemverVersion).toBe(true)
 
         const suseImage = find(dashboardMachineImages, { name: 'suse-chost', version: '15.1.20191027' })
         expect(suseImage.expirationDate).toBe('2119-04-05T01:02:03Z')

@@ -15,6 +15,7 @@ import {
   getTimeStringTo,
   getTimeStringFrom,
   parseNumberWithMagnitudeSuffix,
+  compareVersions,
 } from '@/utils'
 
 import { pick } from '@/lodash'
@@ -235,6 +236,22 @@ describe('utils', () => {
         version: '1.4.4',
         isPreview: true,
       },
+      {
+        name: 'Invalid1',
+        vendorName: 'InvalidFoo',
+        icon: 'icon',
+        version: '17.86',
+        isSupported: true,
+        isInvalidSemverVersion: true,
+      },
+      {
+        name: 'Invalid2',
+        vendorName: 'InvalidFoo',
+        icon: 'icon',
+        version: '18',
+        isSupported: true,
+        isInvalidSemverVersion: true,
+      },
     ]
 
     it('selected image should not be be latest (one newer supported exists)', () => {
@@ -249,6 +266,13 @@ describe('utils', () => {
 
     it('selected image should be latest (only one exists)', () => {
       const result = selectedImageIsNotLatest(sampleMachineImages[4], sampleMachineImages)
+      expect(result).toBe(false)
+    })
+
+    it('should work for invalid semver versions (using fallback comparison function)', () => {
+      let result = selectedImageIsNotLatest(sampleMachineImages[7], sampleMachineImages)
+      expect(result).toBe(true)
+      result = selectedImageIsNotLatest(sampleMachineImages[8], sampleMachineImages)
       expect(result).toBe(false)
     })
   })
@@ -434,6 +458,45 @@ describe('utils', () => {
 
     test('returns null for invalid suffix', () => {
       expect(parseNumberWithMagnitudeSuffix('1x')).toBeNull()
+    })
+  })
+
+  describe('compareVersions', () => {
+    // Valid SemVer Comparisons
+    it('should compare valid semver versions correctly', () => {
+      expect(compareVersions('1.0.0', '2.0.0')).toBe(-1)
+      expect(compareVersions('2.0.0', '2.0.0')).toBe(0)
+      expect(compareVersions('2.1.0', '2.0.9')).toBe(1)
+    })
+
+    it('should compare valid and invalid semver versions correctly', () => {
+      expect(compareVersions('1.0.0', '2.0.0.1')).toBe(-1)
+      expect(compareVersions('1.0.0', '1.1')).toBe(-1)
+      expect(compareVersions('2.1.0', '3')).toBe(-1)
+      expect(compareVersions('2.1.0', '2.1')).toBe(0)
+      expect(compareVersions('2.0', '2.0.0.0')).toBe(0)
+      expect(compareVersions('2.1.0', '2.0.9')).toBe(1)
+      expect(compareVersions('2', '1.0.9')).toBe(1)
+      expect(compareVersions('2.1.0.1', '2.1.0')).toBe(1)
+    })
+
+    it('should compare invalid semver versions correctly', () => {
+      expect(compareVersions('1.1', '1.02')).toBe(-1)
+      expect(compareVersions('2.0', '2.0')).toBe(0)
+      expect(compareVersions('2.1', '1.1')).toBe(1)
+    })
+
+    // Invalid Formats
+    it('should return 0 for invalid version formats', () => {
+      expect(compareVersions('1..0', '1.0.0')).toBe(0)
+      expect(compareVersions('1.0.0', '1.0.x')).toBe(0)
+      expect(compareVersions('abc', '1.0.0')).toBe(0)
+    })
+
+    it('should return 0 for pre-release and build metadata (not handled)', () => {
+      expect(compareVersions('1.0.0-alpha', '1.0.0-beta')).toBe(0)
+      expect(compareVersions('1.0.0+20130313144700', '1.0.0+exp.sha.5114f85')).toBe(0)
+      expect(compareVersions('1.0.0-alpha+001', '1.0.0+20130313144700')).toBe(0)
     })
   })
 })

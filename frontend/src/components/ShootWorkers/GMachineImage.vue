@@ -121,6 +121,13 @@ export default {
     },
     hint () {
       const hints = []
+      if (this.machineImage.isInvalidSemverVersion) {
+        hints.push({
+          type: 'text',
+          hint: 'Invalid Image Version: This image might not be sorted correctly or lead to wrong update alerts',
+          severity: 'warning',
+        })
+      }
       if (this.machineImage.vendorHint) {
         hints.push({
           type: 'html',

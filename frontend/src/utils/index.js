@@ -601,10 +601,19 @@ export function targetText (target) {
 }
 
 export function selectedImageIsNotLatest (machineImage, machineImages) {
-  const { version: testImageVersion, vendorName: testVendor } = machineImage
+  const { version: testImageVersion, vendorName: testVendor, isInvalidSemverVersion: testIsInvalidSemverVersion } = machineImage
 
-  return some(machineImages, ({ version, vendorName, isSupported }) => {
-    return testVendor === vendorName && semver.gt(version, testImageVersion) && isSupported
+  return some(machineImages, ({ version, vendorName, isSupported, isInvalidSemverVersion }) => {
+    if (testVendor !== vendorName) {
+      return false
+    }
+    if (!isSupported) {
+      return false
+    }
+    if (testIsInvalidSemverVersion || isInvalidSemverVersion) {
+      return compareVersions(version, testImageVersion) > 0
+    }
+    return semver.gt(version, testImageVersion)
   })
 }
 
@@ -654,4 +663,31 @@ export function parseNumberWithMagnitudeSuffix (abbreviatedNumber) {
   const suffixFactors = { k: 1e3, m: 1e6, b: 1e9, t: 1e12 }
   const factor = suffixFactors[suffix?.toLowerCase()] ?? 1
   return Number(number) * factor
+}
+
+// Fallback for non semver compatible versions
+export function compareVersions (version1, version2) {
+  const parts1 = version1.split('.').map(Number)
+  const parts2 = version2.split('.').map(Number)
+  const maxLength = Math.max(parts1.length, parts2.length)
+
+  for (let i = 0; i < maxLength; i++) {
+    if (i >= parts1.length) {
+      parts1[i] = 0
+    }
+    if (i >= parts2.length) {
+      parts2[i] = 0
+    }
+  }
+
+  for (let i = 0; i < maxLength; i++) {
+    if (parts1[i] > parts2[i]) {
+      return 1
+    }
+    if (parts1[i] < parts2[i]) {
+      return -1
+    }
+  }
+
+  return 0
 }
