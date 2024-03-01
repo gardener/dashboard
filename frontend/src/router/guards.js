@@ -41,7 +41,7 @@ export function createGlobalBeforeGuards () {
   const shootStore = useShootStore()
   const terminalStore = useTerminalStore()
 
-  const getLuigiTokenAsync = () => new Promise(resolve => LuigiClient.addInitListener(context => resolve(context.token)))
+  const getLuigiContextAsync = () => new Promise(resolve => LuigiClient.addInitListener(resolve))
 
   function ensureUserAuthenticatedForNonPublicRoutes () {
     return async to => {
@@ -61,9 +61,11 @@ export function createGlobalBeforeGuards () {
       }
 
       try {
-        const token = LuigiClient.isLuigiClientInitialized()
-          ? LuigiClient.getToken()
-          : await pTimeout(getLuigiTokenAsync(), 1000)
+        const context = LuigiClient.isLuigiClientInitialized()
+          ? LuigiClient.getContext()
+          : await pTimeout(getLuigiContextAsync(), 1000)
+        logger.debug('Luigi context:', context)
+        const token = context.token
         if (token) {
           await api.createTokenReview({ token })
           authnStore.$reset()
