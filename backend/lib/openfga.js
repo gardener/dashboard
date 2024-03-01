@@ -7,6 +7,7 @@
 import fetch from 'node-fetch-commonjs'
 import config from './config/index.js'
 
+const logger = require('./logger')
 const {
   fgaApiUrl,
   fgaStoreId,
@@ -34,11 +35,12 @@ async function listProjects (user, role = 'viewer') {
   })
 
   if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`)
+    throw new Error(`Openfga request failed with status: ${response.status}`)
   }
 
-  const data = await response.json()
-  return data.objects.map(name => name.split(':')[1])
+  const { objects } = await response.json()
+  logger.debug('Openfga response objects: %s', objects)
+  return objects.map(name => name.split(':')[1])
 }
 
 export {
