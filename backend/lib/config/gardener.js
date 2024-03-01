@@ -146,6 +146,22 @@ const configMappings = [
     configPath: 'websocketAllowedOrigins',
     type: 'Array',
   },
+  {
+    environmentVariableName: 'FGA_API_URL',
+    configPath: 'fgaApiUrl',
+  },
+  {
+    environmentVariableName: 'FGA_STORE_ID',
+    configPath: 'fgaStoreId',
+  },
+  {
+    environmentVariableName: 'FGA_AUTHORIZATION_MODEL_ID',
+    configPath: 'fgaAuthorizationModelId',
+  },
+  {
+    environmentVariableName: 'FGA_API_TOKEN',
+    configPath: 'fgaApiToken',
+  },
 ]
 
 function parseConfigValue (value, type) {

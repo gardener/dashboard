@@ -15,6 +15,8 @@ import {
 } from '../utils/index.js'
 import cache from '../cache/index.js'
 import * as authentication from './authentication.js'
+import logger from '../logger/index.js'
+import * as openfga from '../openfga.js'
 const { dashboardClient } = kubeClientModule
 const { PreconditionFailed, InternalServerError } = httpErrors
 
@@ -33,13 +35,19 @@ async function validateDeletePreconditions ({ user, name }) {
 
 export async function list ({ user }) {
   const canListProjects = await authorization.canListProjects(user)
+  let fgaProjectList = []
+  try {
+    fgaProjectList = await openfga.listProjects(user.id)
+  } catch (err) {
+    logger.error('openfga query failed: %s', err)
+  }
   if (!canListProjects) {
     // Without cluster-wide project access, projectFilter evaluates user and group membership.
     await authentication.ensureUserGroups(user)
   }
   return _
     .chain(cache.getProjects())
-    .filter(projectFilter(user, canListProjects))
+    .filter(projectFilter(user, canListProjects, fgaProjectList))
     .map(_.cloneDeep)
     .map(simplifyProject)
     .value()

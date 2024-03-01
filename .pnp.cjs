@@ -920,6 +920,7 @@ const RAW_RUNTIME_STATE =
           ["lodash-es", "npm:4.18.1"],\
           ["morgan", "npm:1.12.0"],\
           ["neostandard", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:0.13.0"],\
+          ["node-fetch-commonjs", "npm:3.3.2"],\
           ["object-hash", "npm:3.0.0"],\
           ["openapi-types", "npm:12.1.3"],\
           ["openid-client", "npm:6.8.5"],\
@@ -10155,6 +10156,17 @@ const RAW_RUNTIME_STATE =
           ["fetch-blob", "npm:3.2.0"],\
           ["formdata-polyfill", "npm:4.0.10"],\
           ["node-fetch", "npm:3.3.2"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["node-fetch-commonjs", [\
+      ["npm:3.3.2", {\
+        "packageLocation": "./.yarn/cache/node-fetch-commonjs-npm-3.3.2-9bdee6d77d-87d36ed3e6.zip/node_modules/node-fetch-commonjs/",\
+        "packageDependencies": [\
+          ["node-domexception", "npm:1.0.0"],\
+          ["node-fetch-commonjs", "npm:3.3.2"],\
+          ["web-streams-polyfill", "npm:3.3.3"]\
         ],\
         "linkType": "HARD"\
       }]\
