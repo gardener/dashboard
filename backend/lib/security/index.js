@@ -17,7 +17,6 @@ const createError = require('http-errors')
 const logger = require('../logger')
 const {
   sessionSecret,
-  luigiEnabled = false,
   oidc = {}
 } = require('../config')
 
@@ -49,7 +48,7 @@ const {
   GARDENER_AUDIENCE
 } = require('./constants')
 
-const sameSite = luigiEnabled ? 'None' : 'Lax'
+const sameSite = 'None'
 
 const {
   issuer,
