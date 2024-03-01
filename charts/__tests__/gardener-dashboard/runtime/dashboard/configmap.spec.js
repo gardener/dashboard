@@ -823,44 +823,48 @@ describe('gardener-dashboard', function () {
             dashboard: {
               frontendConfig: {
                 customCloudProviders: {
-                  foo: {
-                    zoned: true,
-                    shoot: {
-                      provider: {
-                        type: 'foo'
-                      }
-                    },
-                    secret: {
-                      fields: [
-                        {
-                          key: 'user',
-                          type: 'text'
-                        },
-                        {
-                          key: 'password',
-                          type: 'password'
-                        }
-                      ]
-                    }
-                  },
-                  bar: {
+                  fooProvider: {
                     zoned: false,
                     shoot: {
-                      provider: {
-                        type: 'bar'
+                      createFields: [
+                        {
+                          key: 'selectFoo',
+                          path: 'spec.provider',
+                          hint: 'Select foo value',
+                          label: 'Select Foo',
+                          type: 'select',
+                          validators: {
+                            required: {
+                              type: 'required'
+                            }
+                          },
+                          values: {
+                            cloudprofilePath: 'data.foo',
+                            key: 'name'
+                          }
+                        }
+                      ],
+                      specTemplate: {
+                        provider: {
+                          type: 'custom'
+                        }
                       }
                     },
                     secret: {
                       fields: [
                         {
-                          key: 'user',
-                          type: 'text'
-                        },
-                        {
-                          key: 'password',
-                          type: 'password'
+                          key: 'namespace',
+                          hint: 'Enter a valid namespace',
+                          label: 'Namespace',
+                          type: 'text',
+                          validators: {
+                            required: {
+                              type: 'required'
+                            }
+                          }
                         }
-                      ]
+                      ],
+                      help: '#Custom Cloud Provider\nfoo'
                     }
                   }
                 }

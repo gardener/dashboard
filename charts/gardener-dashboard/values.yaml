@@ -366,12 +366,21 @@ global:
       # customCloudProviders:
       #   custom-provider:
       #     zoned: true
-      #     shoot: # shoot template for this provider
-      #       specTemplate:
+      #     shoot:
+      #       specTemplate: # shoot template for this provider
       #         provider:
       #           type: custom-provider
       #         networking:
       #           nodes: ${workerCIDR}
+      #       createFields:
+      #       - key: foo
+      #         path: spec.provider.extra
+      #          hint: Enter Additional data
+      #         label: Additional Information
+      #         type: text
+      #         validators:
+      #           required:
+      #             type: required
       #     secret: # secret dialog
       #       fields:
       #       - key: user
