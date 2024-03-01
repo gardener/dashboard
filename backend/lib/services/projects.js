@@ -17,6 +17,9 @@ const shoots = require('./shoots')
 const authorization = require('./authorization')
 const { projectFilter } = require('../utils')
 const cache = require('../cache')
+const logger = require('../logger')
+const openfga = require('../openfga')
+
 const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
 
 function fromResource ({ metadata, spec = {}, status = {} }) {
@@ -119,9 +122,15 @@ function getProjectName (namespace) {
 
 exports.list = async function ({ user }) {
   const canListProjects = await authorization.canListProjects(user)
+  let fgaProjectList = []
+  try {
+    fgaProjectList = await openfga.listProjects(user.id)
+  } catch (err) {
+    logger.error('openfga query failed: %s', err)
+  }
   return _
     .chain(cache.getProjects())
-    .filter(projectFilter(user, canListProjects))
+    .filter(projectFilter(user, canListProjects, fgaProjectList))
     .map(fromResource)
     .value()
 }

@@ -44,7 +44,11 @@ const environmentVariableDefinitions = {
   METRICS_PORT: {
     type: 'Integer',
     path: 'metricsPort'
-  }
+  },
+  FGA_API_URL: 'fgaApiUrl',
+  FGA_STORE_ID: 'fgaStoreId',
+  FGA_AUTHORIZATION_MODEL_ID: 'fgaAuthorizationModelId',
+  FGA_API_TOKEN: 'fgaApiToken'
 }
 
 function getEnvironmentVariable (env, name, type) {
