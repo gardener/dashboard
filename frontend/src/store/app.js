@@ -8,12 +8,20 @@ import {
   defineStore,
   acceptHMRUpdate,
 } from 'pinia'
-import { ref } from 'vue'
+import {
+  ref,
+  watch,
+} from 'vue'
+import LuigiClient from '@luigi-project/client'
+
+import { useLogger } from '@/composables/useLogger'
 
 import moment from '@/utils/moment'
 import { errorDetailsFromError } from '@/utils/error'
 
 export const useAppStore = defineStore('app', () => {
+  const logger = useLogger()
+
   const ready = ref(false)
   const sidebar = ref(true)
   const redirectPath = ref(null)
@@ -25,6 +33,45 @@ export const useAppStore = defineStore('app', () => {
   const splitpaneResize = ref(0)
   const fromRoute = ref(null)
   const routerError = ref(null)
+  const luigiContext = ref(null)
+
+  const isInIframe = () => window.self !== window.top
+
+  if (isInIframe()) {
+    logger.debug('Registering listener for Luigi context initialization and context updates')
+    LuigiClient.addInitListener(context => setLuigiContext(context))
+    LuigiClient.addContextUpdateListener(context => setLuigiContext(context))
+  }
+
+  function setLuigiContext (value) {
+    luigiContext.value = value
+  }
+
+  function getLuigiContext () {
+    if (!isInIframe()) {
+      return Promise.resolve(null)
+    }
+    if (luigiContext.value !== null) {
+      return Promise.resolve(luigiContext.value)
+    }
+    return new Promise(resolve => {
+      const timeout = 3000
+      const timeoutId = setTimeout(() => {
+        unwatch()
+        logger.error('The initialization of the Luigi Client has timed out after %d milliseconds', timeout)
+        resolve(null)
+      }, timeout)
+      const unwatch = watch(luigiContext, context => {
+        if (context !== null) {
+          clearTimeout(timeoutId)
+          unwatch()
+          resolve(context)
+        }
+      }, {
+        immediate: true,
+      })
+    })
+  }
 
   function updateSplitpaneResize () {
     splitpaneResize.value = Date.now()
@@ -78,6 +125,8 @@ export const useAppStore = defineStore('app', () => {
     splitpaneResize,
     fromRoute,
     routerError,
+    luigiContext,
+    getLuigiContext,
     updateSplitpaneResize,
     setAlert,
     setError,

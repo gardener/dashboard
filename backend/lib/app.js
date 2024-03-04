@@ -22,7 +22,8 @@ const { healthCheck } = require('./healthz')
 
 const {
   port,
-  metricsPort
+  metricsPort,
+  cspFrameAncestors = []
 } = config
 const periodSeconds = config.readinessProbe?.periodSeconds || 10
 
@@ -42,15 +43,6 @@ if (gitHubRepoUrl) {
   imgSrc.push(url.origin)
   url.hostname = 'media.' + gitHubHostname
   imgSrc.push(url.origin)
-}
-const directives = {
-  defaultSrc: ['\'self\''],
-  connectSrc,
-  styleSrc: ['\'self\'', '\'unsafe-inline\''],
-  fontSrc: ['\'self\'', 'data:'],
-  imgSrc,
-  scriptSrc: ['\'self\'', '\'unsafe-eval\''],
-  frameAncestors: ['\'self\'', 'https://portal.d1.openmfp.dxp.k8s.ondemand.com']
 }
 
 // configure app
@@ -76,7 +68,15 @@ app.use('/api', api.router)
 
 app.use(helmet.xssFilter())
 app.use(helmet.contentSecurityPolicy({
-  directives
+  directives: {
+    defaultSrc: ['\'self\''],
+    connectSrc,
+    styleSrc: ['\'self\'', '\'unsafe-inline\''],
+    fontSrc: ['\'self\'', 'data:'],
+    imgSrc,
+    scriptSrc: ['\'self\'', '\'unsafe-eval\''],
+    frameAncestors: ['\'self\'', ...cspFrameAncestors]
+  }
 }))
 app.use(helmet.referrerPolicy({
   policy: 'same-origin'

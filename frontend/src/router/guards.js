@@ -3,7 +3,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
-import LuigiClient from '@luigi-project/client'
 
 import { useAppStore } from '@/store/app'
 import { useAuthzStore } from '@/store/authz'
@@ -22,8 +21,6 @@ import { useTerminalStore } from '@/store/terminal'
 import { useLogger } from '@/composables/useLogger'
 import { useApi } from '@/composables/useApi'
 
-import pTimeout from '@/utils/p-timeout'
-
 export function createGlobalBeforeGuards () {
   const logger = useLogger()
   const api = useApi()
@@ -40,8 +37,6 @@ export function createGlobalBeforeGuards () {
   const secretStore = useSecretStore()
   const shootStore = useShootStore()
   const terminalStore = useTerminalStore()
-
-  const getLuigiContextAsync = () => new Promise(resolve => LuigiClient.addInitListener(resolve))
 
   function ensureUserAuthenticatedForNonPublicRoutes () {
     return async to => {
@@ -60,21 +55,21 @@ export function createGlobalBeforeGuards () {
         return true
       }
 
-      try {
-        const context = LuigiClient.isLuigiClientInitialized()
-          ? LuigiClient.getContext()
-          : await pTimeout(getLuigiContextAsync(), 1000)
+      const context = await appStore.getLuigiContext()
+      if (context) {
         logger.debug('Luigi context:', context)
         const token = context.token
         if (token) {
-          await api.createTokenReview({ token })
-          authnStore.$reset()
-          if (!authnStore.isExpired()) {
-            return true
+          try {
+            await api.createTokenReview({ token })
+            authnStore.$reset()
+            if (!authnStore.isExpired()) {
+              return true
+            }
+          } catch (err) {
+            logger.error('Luigi token review error: %s', err.message)
           }
         }
-      } catch (err) {
-        logger.error('Luigi token review error: %s', err.message)
       }
 
       const message = !authnStore.user

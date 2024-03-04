@@ -29,9 +29,9 @@ function encodeBase64 (value) {
   return Buffer.from(value, 'utf8').toString('base64')
 }
 
-function projectFilter (user, canListProjects = false, fgaProjectList = []) {
+function projectFilter (user, canListProjects = false, projectAllowList = []) {
   const isMemberOf = project => {
-    if (fgaProjectList.includes(project.metadata.name)) {
+    if (projectAllowList.includes(project.metadata.name)) {
       return true
     }
     return _

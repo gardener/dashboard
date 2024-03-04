@@ -17,7 +17,7 @@ const createError = require('http-errors')
 const logger = require('../logger')
 const {
   sessionSecret,
-  luigiEnabled = false,
+  cookieSameSitePolicy = 'Lax',
   oidc = {}
 } = require('../config')
 
@@ -48,8 +48,6 @@ const {
   COOKIE_CODE_VERIFIER,
   GARDENER_AUDIENCE
 } = require('./constants')
-
-const sameSite = luigiEnabled ? 'None' : 'Lax'
 
 const {
   issuer,
@@ -188,7 +186,7 @@ async function authorizationUrl (req, res) {
       secure,
       httpOnly: true,
       maxAge: 300000, // cookie will be removed after 5 minutes
-      sameSite,
+      sameSite: cookieSameSitePolicy,
       path: '/auth/callback'
     })
     switch (codeChallengeMethod) {
@@ -262,13 +260,13 @@ async function setCookies (res, tokenSet) {
   res.cookie(COOKIE_HEADER_PAYLOAD, join([header, payload], '.'), {
     secure,
     expires: undefined,
-    sameSite
+    sameSite: cookieSameSitePolicy
   })
   res.cookie(COOKIE_SIGNATURE, signature, {
     secure,
     httpOnly: true,
     expires: undefined,
-    sameSite
+    sameSite: cookieSameSitePolicy
   })
   const values = [tokenSet.id_token]
   if (tokenSet.refresh_token) {
@@ -279,7 +277,7 @@ async function setCookies (res, tokenSet) {
     secure,
     httpOnly: true,
     expires: undefined,
-    sameSite
+    sameSite: cookieSameSitePolicy
   })
   return accessToken
 }
