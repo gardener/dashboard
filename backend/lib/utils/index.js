@@ -45,8 +45,8 @@ function guardUserGroups (user) {
   })
 }
 
-function isMemberOf (project, user, fgaProjectList = []) {
-  if (fgaProjectList.includes(project.metadata.name)) {
+function isMemberOf (project, user, projectAllowList = []) {
+  if (projectAllowList.includes(project.metadata.name)) {
     return true
   }
   return _
@@ -76,7 +76,7 @@ function isMemberOf (project, user, fgaProjectList = []) {
 }
 
 // user.groups must be hydrated when canListProjects is false.
-function projectFilter (user, canListProjects = false, fgaProjectList = []) {
+function projectFilter (user, canListProjects = false, projectAllowList = []) {
   const isPending = project => {
     return _.get(project, ['status', 'phase'], 'Pending') === 'Pending'
   }
@@ -85,7 +85,7 @@ function projectFilter (user, canListProjects = false, fgaProjectList = []) {
     if (isPending(project)) {
       return false
     }
-    return canListProjects || isMemberOf(project, user, fgaProjectList)
+    return canListProjects || isMemberOf(project, user, projectAllowList)
   }
 }
 

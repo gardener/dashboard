@@ -35,7 +35,7 @@ const {
   host,
   metricsPort,
   metricsHost,
-  luigiEnabled = true,
+  cspFrameAncestors = [],
 } = config
 const periodSeconds = config.readinessProbe?.periodSeconds || 10
 
@@ -80,7 +80,7 @@ const directives = {
   fontSrc: ['\'self\'', 'data:'],
   imgSrc,
   scriptSrc: ['\'self\'', '\'unsafe-eval\''],
-  frameAncestors: ['\'self\'', 'https://portal.d1.openmfp.dxp.k8s.ondemand.com'],
+  frameAncestors: ['\'self\'', ...cspFrameAncestors],
 }
 
 const app = express()
@@ -159,7 +159,7 @@ app.use(expressStaticGzip(PUBLIC_FS_PATH, {
 
 app.use([BUILD_ASSETS_URL_PATH, STATIC_ASSETS_URL_PATH], notFound)
 
-if (!luigiEnabled) {
+if (cspFrameAncestors.length === 0) {
   app.use(helmet.xFrameOptions({
     action: 'deny',
   }))

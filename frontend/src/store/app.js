@@ -8,8 +8,14 @@ import {
   defineStore,
   acceptHMRUpdate,
 } from 'pinia'
-import { ref } from 'vue'
+import {
+  ref,
+  watch,
+} from 'vue'
 import { useNotification } from '@kyvg/vue3-notification'
+import LuigiClient from '@luigi-project/client'
+
+import { useLogger } from '@/composables/useLogger'
 
 import { parseWarningHeader } from '@/utils/headerWarnings'
 import { errorDetailsFromError } from '@/utils/error'
@@ -19,6 +25,8 @@ import assign from 'lodash/assign'
 import pick from 'lodash/pick'
 
 export const useAppStore = defineStore('app', () => {
+  const logger = useLogger()
+
   const ready = ref(false)
   const sidebar = ref(true)
   const redirectPath = ref(null)
@@ -30,6 +38,45 @@ export const useAppStore = defineStore('app', () => {
   const fromRoute = ref(null)
   const routerError = ref(null)
   const { notify } = useNotification()
+  const luigiContext = ref(null)
+
+  const isInIframe = () => window.self !== window.top
+
+  if (isInIframe()) {
+    logger.debug('Registering listener for Luigi context initialization and context updates')
+    LuigiClient.addInitListener(context => setLuigiContext(context))
+    LuigiClient.addContextUpdateListener(context => setLuigiContext(context))
+  }
+
+  function setLuigiContext (value) {
+    luigiContext.value = value
+  }
+
+  function getLuigiContext () {
+    if (!isInIframe()) {
+      return Promise.resolve(null)
+    }
+    if (luigiContext.value !== null) {
+      return Promise.resolve(luigiContext.value)
+    }
+    return new Promise(resolve => {
+      const timeout = 3000
+      const timeoutId = setTimeout(() => {
+        unwatch()
+        logger.error('The initialization of the Luigi Client has timed out after %d milliseconds', timeout)
+        resolve(null)
+      }, timeout)
+      const unwatch = watch(luigiContext, context => {
+        if (context !== null) {
+          clearTimeout(timeoutId)
+          unwatch()
+          resolve(context)
+        }
+      }, {
+        immediate: true,
+      })
+    })
+  }
 
   function updateSplitpaneResize () {
     splitpaneResize.value = Date.now()
@@ -100,6 +147,8 @@ export const useAppStore = defineStore('app', () => {
     splitpaneResize,
     fromRoute,
     routerError,
+    luigiContext,
+    getLuigiContext,
     updateSplitpaneResize,
     setError,
     setHeaderWarning,

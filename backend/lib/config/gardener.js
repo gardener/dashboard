@@ -127,11 +127,6 @@ const configMappings = [
     configPath: 'host',
   },
   {
-    environmentVariableName: 'LUIGI_ENABLED',
-    configPath: 'luigiEnabled',
-    type: 'Boolean',
-  },
-  {
     environmentVariableName: 'METRICS_PORT',
     configPath: 'metricsPort',
     type: 'Integer',
@@ -145,6 +140,15 @@ const configMappings = [
     environmentVariableName: 'WEBSOCKET_ALLOWED_ORIGINS',
     configPath: 'websocketAllowedOrigins',
     type: 'Array',
+  },
+  {
+    environmentVariableName: 'COOKIE_SAME_SITE_POLICY',
+    configPath: 'cookieSameSitePolicy',
+  },
+  {
+    environmentVariableName: 'CSP_FRAME_ANCESTORS',
+    configPath: 'cspFrameAncestors',
+    type: 'Object',
   },
   {
     environmentVariableName: 'FGA_API_URL',
@@ -173,6 +177,10 @@ function parseConfigValue (value, type) {
     return arr.length > 0 ? arr : undefined
   }
   switch (type) {
+    case 'Object':
+      return value
+        ? JSON.parse(value)
+        : undefined
     case 'Integer':
       value = parseInt(value, 10)
       return Number.isInteger(value) ? value : undefined
