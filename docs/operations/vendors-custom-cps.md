@@ -40,14 +40,31 @@ You can add custom cloud providers and define the secret dialog input fields as 
 It is possible to define input fields with data validation for the `Infrastructure Details` section on the create cluster page as well as for the infrastructure secret dialog. The array can contain field definitions with the following properties:
 | name | description |
 | ---- | ----------- |
-| `key` | Unique key for the input field. Used as the secret data key |
-| `path` | Destination path in shoot spec for create fields |
-| `hint` | Input field hint |
-| `label` | Input field label |
-| `type` | Input field type. Supported values are `text \| password \| select \| json \| yaml` <br /> `text`: Simple plain text input<br /> `password`: Hidden secret data plain text input <br /> `select`: List of values that the user can select <br /> `json`: Object data in JSON format<br /> `yaml`: Object data in YAML input |
-| `values` | List of values for the select input field `Array` \| `Object`<br /> `Array`: List of values <br />`Object`: `{ cloudprofilePath, key }` - Source path in cloud profile, if object use `key` to map values |
-| `validators` | Add a key for each validation. Each validator has a `type` property as well as additional properties depending on the type. See below for possible validation properties |
-| `validationErrors` | For each key defined in `validations`, add a key with an error message for the validation |
+| `key` | Unique key for the input field. Used as the secret data key. |
+| `path` | Destination path in shoot spec for create fields. |
+| `hint` | Input field hint. |
+| `label` | Input field label. |
+| `type` | Input field type. Supported values are detailed below. |
+| `values` | List of values for the select input field. Details are provided below. |
+| `validators` | Add a key for each validation. Each validator has a `type` property as well as additional properties depending on the type. See below for possible validation properties. |
+| `validationErrors` | For each key defined in `validations`, add a key with an error message for the validation. |
+
+### Type
+Supported input field types include:
+
+- `text`: Simple plain text input.
+- `password`: Hidden secret data plain text input.
+- `select`: List of values that the user can select.
+- `select-multiple`: Allow to select multiple values from a list.
+- `json`: Object data in JSON format.
+- `yaml`: Object data in YAML input.
+
+### Values
+For the `select` and `select-multiple` input field, the list of values can be:
+
+- `Array`: A simple list of values.
+- `Object`: Use `{ cloudprofilePath, key }` - Source path in cloud profile. If an object, use `key` to map values.
+
 
 ### Validators
 | type | properties | description |
@@ -55,6 +72,8 @@ It is possible to define input fields with data validation for the `Infrastructu
 | `required` | `not`: Optional array of field keys. Makes field required if one of the referenced input fields is empty. If `not` is not provided, the field is always required | Required input field. Use `not` references to create *either or* scenarios, e.g., `username / password` *or* `token` is required |
 | `regex` | `value`: JavaScript regex pattern | Input field must match the provided pattern. You can define arbitrary validations, e.g., length or specific syntax |
 | `isValidObject` | `none` | Input value must be a valid object. Can be used for `json` and `yaml` field types to ensure valid data |
+
+You can add an optional `message` property to all validators to provide a custom error message.
 
 ## Example
 A complete custom cloud provider configuration example including required available cloud provider configuration as well as vendor configuration:
@@ -95,7 +114,7 @@ global:
               values:
                 cloudprofilePath: data.foo.bar
                 key: name
-            - key: value_Select
+            - key: value_select
               path: spec.provider
               hint: Select a predefined value
               label: Select Value

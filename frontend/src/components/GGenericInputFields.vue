@@ -26,7 +26,7 @@ SPDX-License-Identifier: Apache-2.0
       @blur="v$.fieldData[key].$touch()"
     />
     <v-select
-      v-if="type === 'select'"
+      v-if="type === 'select' || type === 'select-multiple'"
       v-bind="inputProps"
       v-model="fieldData[key]"
       color="primary"
@@ -35,6 +35,7 @@ SPDX-License-Identifier: Apache-2.0
       :items="items"
       :hint="hint"
       :error-messages="getErrorMessages(v$.fieldData[key])"
+      :multiple="type === 'select-multiple'"
       @update:model-value="v$.fieldData[key].$touch()"
       @blur="v$.fieldData[key].$touch()"
     />
