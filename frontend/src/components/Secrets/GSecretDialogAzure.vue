@@ -178,26 +178,12 @@ export default {
       return !this.secret
     },
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-      }
-    },
+  mounted () {
+    if (!this.isCreateMode) {
+      setDelayedInputFocus(this, 'clientId')
+    }
   },
   methods: {
-    reset () {
-      this.v$.$reset()
-
-      this.clientId = ''
-      this.clientSecret = ''
-      this.subscriptionId = ''
-      this.tenantId = ''
-
-      if (!this.isCreateMode) {
-        setDelayedInputFocus(this, 'clientId')
-      }
-    },
     getErrorMessages,
   },
 }

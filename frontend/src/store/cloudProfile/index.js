@@ -32,7 +32,7 @@ import { useSeedStore } from '../seed'
 
 import {
   matchesPropertyOrEmpty,
-  vendorNameFromImageName,
+  vendorNameFromMachineImageName,
   findVendorHint,
   decorateClassificationObject,
   firstItemMatchingVersionClassification,
@@ -386,7 +386,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
       })
 
       const name = machineImage.name
-      const vendorName = vendorNameFromImageName(machineImage.name)
+      const vendorName = vendorNameFromMachineImageName(machineImage.name)
       const displayName = get(configStore, ['vendors', vendorName, 'name'], vendorName)
       const vendorHint = findVendorHint(configStore.vendorHints, vendorName)
 

@@ -17,6 +17,7 @@ SPDX-License-Identifier: Apache-2.0
         <g-generic-input-fields
           v-model="customCloudProviderData"
           :fields="customCloudProviderFields"
+          :input-props="{ variant: 'underlined' }"
         />
       </template>
     </template>
@@ -49,10 +50,7 @@ import { useConfigStore } from '@/store/config'
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GGenericInputFields from '@/components/GGenericInputFields'
 
-import {
-  setDelayedInputFocus,
-  transformHtml,
-} from '@/utils'
+import { transformHtml } from '@/utils'
 
 import { get } from '@/lodash'
 
@@ -118,7 +116,7 @@ export default {
             },
             isYAML: {
               type: 'isValidObject',
-              message: 'You need to enter secret data as YAML key- value pairs',
+              message: 'You need to enter secret data as YAML key-value pairs',
             },
           },
         },
@@ -129,19 +127,6 @@ export default {
     },
     isCreateMode () {
       return !this.secret
-    },
-  },
-  methods: {
-    reset () {
-      this.v$.$reset()
-
-      this.customCloudProviderParsedData = {}
-      this.customCloudProviderData = {}
-      this.showSecrets = {}
-
-      if (!this.isCreateMode) {
-        setDelayedInputFocus(this, 'textAreaData')
-      }
     },
   },
 }

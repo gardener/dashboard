@@ -151,31 +151,15 @@ export default {
       return !this.secret
     },
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-
-        // Mounted does not guarantee that all child components have also been mounted.
-        // In addition, the serviceAccountKey ref is within a slot of a v-dialog, which is by default lazily loaded.
-        // We initialize the drop handler once the dialog is shown by watching the `value`.
-        // We use $nextTick to make sure the entire view has been rendered
-        this.$nextTick(() => {
-          this.initializeDropHandlerOnce()
-        })
-      }
-    },
+  mounted () {
+    if (!this.isCreateMode) {
+      setDelayedInputFocus(this, 'accessKeyId')
+    }
+    this.$nextTick(() => {
+      this.initializeDropHandlerOnce()
+    })
   },
   methods: {
-    reset () {
-      this.v$.$reset()
-
-      this.serviceAccountKey = ''
-
-      if (!this.isCreateMode) {
-        setDelayedInputFocus(this, 'serviceAccountKey')
-      }
-    },
     initializeDropHandlerOnce () {
       if (this.dropHandlerInitialized) {
         return

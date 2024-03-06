@@ -116,9 +116,9 @@ global:
                 key: name
             - key: value_select
               path: spec.provider
-              hint: Select a predefined value
+              hint: Select at least one predefined value
               label: Select Value
-              type: select
+              type: select-multiple
               validators:
                 required:
                   type: required

@@ -83,7 +83,7 @@ export default {
       return find(this.cloudProfiles, { metadata: { name: this.modelValue } })
     },
     hint () {
-      if (!this.selectedCloudProfile?.data.seedNames?.length) {
+      if (this.selectedCloudProfile && !this.selectedCloudProfile.data.seedNames?.length) {
         return 'This cloud profile does not have a matching seed. Gardener will not be able to schedule shoots using this cloud profile'
       }
       return undefined

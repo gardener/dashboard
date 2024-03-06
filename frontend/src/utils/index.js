@@ -83,9 +83,8 @@ export function handleTextFieldDrop (textField, fileTypePattern, onDrop = () => 
     event.dataTransfer.dropEffect = 'copy'
   }
 
-  const textarea = textField.$refs['input-slot']
-  textarea.addEventListener('dragover', dragOver, false)
-  textarea.addEventListener('drop', drop, false)
+  textField.addEventListener('dragover', dragOver, false)
+  textField.addEventListener('drop', drop, false)
 }
 
 export function getErrorMessages (property) {

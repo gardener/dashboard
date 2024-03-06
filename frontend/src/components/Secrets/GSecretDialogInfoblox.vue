@@ -119,27 +119,12 @@ export default {
       return !this.secret
     },
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-      }
-    },
+  mounted () {
+    if (!this.isCreateMode) {
+      setDelayedInputFocus(this, 'infobloxUsername')
+    }
   },
   methods: {
-    reset () {
-      this.v$.$reset()
-
-      this.infobloxUsername = ''
-      this.infobloxPassword = ''
-
-      if (!this.isCreateMode) {
-        if (this.secret.data) {
-          this.infobloxUsername = this.secret.data.USERNAME
-        }
-        setDelayedInputFocus(this, 'infobloxUsername')
-      }
-    },
     getErrorMessages,
   },
 }

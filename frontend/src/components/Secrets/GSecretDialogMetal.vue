@@ -124,24 +124,12 @@ export default {
       return !this.secret
     },
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-      }
-    },
+  mounted () {
+    if (!this.isCreateMode) {
+      setDelayedInputFocus(this, 'apiUrl')
+    }
   },
   methods: {
-    reset () {
-      this.v$.$reset()
-
-      this.apiHmac = ''
-      this.apiUrl = ''
-
-      if (!this.isCreateMode) {
-        setDelayedInputFocus(this, 'apiUrl')
-      }
-    },
     getErrorMessages,
   },
 }

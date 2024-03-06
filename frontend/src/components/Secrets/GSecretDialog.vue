@@ -50,7 +50,7 @@ SPDX-License-Identifier: Apache-2.0
               </template>
             </div>
 
-            <div v-if="cloudProfiles.length !== 1 && isInfrastructureSecret">
+            <div v-if="showCloudProfileSelect">
               <g-cloud-profile
                 ref="cloudProfile"
                 v-model="cloudProfileName"
@@ -59,7 +59,9 @@ SPDX-License-Identifier: Apache-2.0
               />
             </div>
 
-            <slot name="secret-slot" />
+            <div ref="bla">
+              <slot name="secret-slot" />
+            </div>
             <g-message
               v-model:message="errorMessage"
               v-model:detailed-message="detailedErrorMessage"
@@ -300,9 +302,34 @@ export default {
     isDnsProviderSecret () {
       return includes(this.dnsProviderTypes, this.vendor)
     },
+    showCloudProfileSelect () {
+      if (!this.isInfrastructureSecret) {
+        return false
+      }
+      if (this.cloudProfiles.length > 1) {
+        return true
+      }
+      if (this.cloudProfiles.length === 1 && !this.cloudProfiles[0].data.seedNames?.length) {
+        return true
+      }
+      return false
+    },
   },
   mounted () {
-    this.reset()
+    if (this.isCreateMode) {
+      this.name = `my-${this.vendor}-secret`
+
+      if (this.cloudProfiles.length === 1) {
+        this.cloudProfileName = get(head(this.cloudProfiles), 'metadata.name')
+      } else {
+        this.cloudProfileName = undefined
+      }
+
+      setDelayedInputFocus(this, 'name')
+    } else {
+      this.name = get(this.secret, 'metadata.name')
+      this.cloudProfileName = get(this.secret, 'metadata.cloudProfileName')
+    }
   },
   methods: {
     ...mapActions(useSecretStore, [
@@ -372,31 +399,6 @@ export default {
 
         return this.updateSecret({ metadata, data: this.data })
       }
-    },
-    reset () {
-      this.v$.$reset()
-      const cloudProfileRef = this.$refs.cloudProfile
-      if (cloudProfileRef) {
-        cloudProfileRef.v$.$reset()
-      }
-
-      if (this.isCreateMode) {
-        this.name = `my-${this.vendor}-secret`
-
-        if (this.cloudProfiles.length === 1) {
-          this.cloudProfileName = get(head(this.cloudProfiles), 'metadata.name')
-        } else {
-          this.cloudProfileName = undefined
-        }
-
-        setDelayedInputFocus(this, 'name')
-      } else {
-        this.name = get(this.secret, 'metadata.name')
-        this.cloudProfileName = get(this.secret, 'metadata.cloudProfileName')
-      }
-
-      this.errorMessage = undefined
-      this.detailedMessage = undefined
     },
     getErrorMessages,
   },

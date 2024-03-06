@@ -206,24 +206,12 @@ export default {
       return !this.secret
     },
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-      }
-    },
+  mounted () {
+    if (!this.isCreateMode) {
+      setDelayedInputFocus(this, 'accessKeyId')
+    }
   },
   methods: {
-    reset () {
-      this.v$.$reset()
-
-      this.accessKeyId = ''
-      this.accessKeySecret = ''
-
-      if (!this.isCreateMode) {
-        setDelayedInputFocus(this, 'accessKeyId')
-      }
-    },
     getErrorMessages,
   },
 }

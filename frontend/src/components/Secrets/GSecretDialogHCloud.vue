@@ -112,26 +112,12 @@ export default {
       return !this.secret
     },
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-      }
-    },
+  mounted () {
+    if (!this.isCreateMode) {
+      setDelayedInputFocus(this, 'hcloudToken')
+    }
   },
   methods: {
-    reset () {
-      this.v$.$reset()
-
-      this.hcloudToken = ''
-
-      if (!this.isCreateMode) {
-        if (this.secret.data) {
-          this.hcloudToken = this.secret.data.hcloudToken
-        }
-        setDelayedInputFocus(this, 'hcloudToken')
-      }
-    },
     getErrorMessages,
   },
 }

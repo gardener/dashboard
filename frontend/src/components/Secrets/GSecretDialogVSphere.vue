@@ -175,30 +175,12 @@ export default {
       return !this.secret
     },
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-      }
-    },
+  mounted () {
+    if (!this.isCreateMode) {
+      setDelayedInputFocus(this, 'vsphereUsername')
+    }
   },
   methods: {
-    reset () {
-      this.v$.$reset()
-
-      this.vsphereUsername = ''
-      this.vspherePassword = ''
-      this.nsxtUsername = ''
-      this.nsxtPassword = ''
-
-      if (!this.isCreateMode) {
-        if (this.secret.data) {
-          this.vsphereUsername = this.secret.data.vsphereUsername
-          this.nsxtUsername = this.secret.data.nsxtUsername
-        }
-        setDelayedInputFocus(this, 'vsphereUsername')
-      }
-    },
     getErrorMessages,
   },
 }
