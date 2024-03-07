@@ -644,3 +644,15 @@ export function omitKeysWithSuffix (obj, suffix) {
   const keys = Object.keys(obj).filter(key => key.endsWith(suffix))
   return omit(obj, keys)
 }
+
+export function parseNumberWithMagnitudeSuffix (abbreviatedNumber) {
+  const [, number, suffix] = /^(\d+(?:\.\d*)?)([kmbt]?)$/i.exec(abbreviatedNumber) ?? []
+  if (!number) {
+    logger.error(`Failed to parse ${abbreviatedNumber} because it doesn't follow the required format: a number optionally with a decimal, followed by an optional magnitude suffix ('k', 'm', 'b', 't').`)
+    return null
+  }
+
+  const suffixFactors = { k: 1e3, m: 1e6, b: 1e9, t: 1e12 }
+  const factor = suffixFactors[suffix?.toLowerCase()] ?? 1
+  return Number(number) * factor
+}

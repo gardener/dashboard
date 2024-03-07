@@ -53,7 +53,6 @@ SPDX-License-Identifier: Apache-2.0
             <v-row dense>
               <v-col cols="6">
                 <v-card
-                  variant="tonal"
                   class="border"
                 >
                   <v-toolbar
@@ -128,7 +127,6 @@ SPDX-License-Identifier: Apache-2.0
                   </v-card-text>
                 </v-card>
                 <v-card
-                  variant="tonal"
                   class="border mt-2"
                 >
                   <v-toolbar
@@ -173,7 +171,6 @@ SPDX-License-Identifier: Apache-2.0
               </v-col>
               <v-col cols="6">
                 <v-card
-                  variant="tonal"
                   class="border"
                 >
                   <v-toolbar
@@ -234,7 +231,6 @@ SPDX-License-Identifier: Apache-2.0
                   </v-card-text>
                 </v-card>
                 <v-card
-                  variant="tonal"
                   class="border mt-2"
                 >
                   <v-toolbar
@@ -283,7 +279,6 @@ SPDX-License-Identifier: Apache-2.0
                   </v-card-text>
                 </v-card>
                 <v-card
-                  variant="tonal"
                   class="border mt-2"
                 >
                   <v-toolbar
