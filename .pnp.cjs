@@ -1268,7 +1268,7 @@ const RAW_RUNTIME_STATE =
           ["p-retry", "npm:4.6.2"],\
           ["p-timeout", "npm:4.1.0"],\
           ["path-to-regexp", "npm:6.2.1"],\
-          ["sanitize-html", "npm:2.11.0"],\
+          ["sanitize-html", "npm:2.12.1"],\
           ["semver", "npm:7.5.4"],\
           ["set-cookie-parser", "npm:2.6.0"],\
           ["showdown", "npm:2.1.0"],\
@@ -7141,10 +7141,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["ip", [\
-      ["npm:2.0.0", {\
-        "packageLocation": "./.yarn/cache/ip-npm-2.0.0-204facb3cc-8d186cc558.zip/node_modules/ip/",\
+      ["npm:2.0.1", {\
+        "packageLocation": "./.yarn/cache/ip-npm-2.0.1-ee48691f03-cab8eb3e88.zip/node_modules/ip/",\
         "packageDependencies": [\
-          ["ip", "npm:2.0.0"]\
+          ["ip", "npm:2.0.1"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -10277,10 +10277,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["sanitize-html", [\
-      ["npm:2.11.0", {\
-        "packageLocation": "./.yarn/cache/sanitize-html-npm-2.11.0-b1afcdcea6-863dcce83c.zip/node_modules/sanitize-html/",\
+      ["npm:2.12.1", {\
+        "packageLocation": "./.yarn/cache/sanitize-html-npm-2.12.1-af8fd6c44f-0169e77845.zip/node_modules/sanitize-html/",\
         "packageDependencies": [\
-          ["sanitize-html", "npm:2.11.0"],\
+          ["sanitize-html", "npm:2.12.1"],\
           ["deepmerge", "npm:4.3.1"],\
           ["escape-string-regexp", "npm:4.0.0"],\
           ["htmlparser2", "npm:8.0.2"],\
@@ -10572,7 +10572,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/socks-npm-2.7.1-17f2b53052-43f69dbc9f.zip/node_modules/socks/",\
         "packageDependencies": [\
           ["socks", "npm:2.7.1"],\
-          ["ip", "npm:2.0.0"],\
+          ["ip", "npm:2.0.1"],\
           ["smart-buffer", "npm:4.2.0"]\
         ],\
         "linkType": "HARD"\
