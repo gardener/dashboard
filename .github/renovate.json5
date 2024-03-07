@@ -25,7 +25,7 @@
     {
       // Group npm major, minor and patch in separate PRs
       matchDatasources: ["npm"],
-      groupName: "npm",
+      groupName: "packages",
       separateMajorMinor: true,
       separateMinorPatch: true
     },
