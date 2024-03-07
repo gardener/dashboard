@@ -725,7 +725,7 @@ __metadata:
     helmet: "npm:^7.0.0"
     http-errors: "npm:^2.0.0"
     jest: "npm:^27.5.1"
-    jose: "npm:^4.14.6"
+    jose: "npm:^4.15.5"
     js-yaml: "npm:^4.1.0"
     jsonwebtoken: "npm:^9.0.2"
     lodash: "npm:^4.17.21"
@@ -6434,10 +6434,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jose@npm:^4.14.4, jose@npm:^4.14.6":
+"jose@npm:^4.14.4":
   version: 4.14.6
   resolution: "jose@npm:4.14.6"
   checksum: 29d8b71d04ea4048d800ca50b171ed9a5b907b9232eaa060fb4a99a84966f9df20860b1ef538c4cf9435595a57926fe923a273b82c3a7e6ba4312e0730c5ace0
+  languageName: node
+  linkType: hard
+
+"jose@npm:^4.15.5":
+  version: 4.15.5
+  resolution: "jose@npm:4.15.5"
+  checksum: 9f208492f55ae9c547fd407c36f67ec3385051b5ca390e24f5449740f17359640b3f96fabfd38bc132cc4292b964c31b921bf356253373b1bd3eb6df799b7433
   languageName: node
   linkType: hard
 

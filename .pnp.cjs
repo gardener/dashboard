@@ -1255,7 +1255,7 @@ const RAW_RUNTIME_STATE =
           ["helmet", "npm:7.0.0"],\
           ["http-errors", "npm:2.0.0"],\
           ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:27.5.1"],\
-          ["jose", "npm:4.14.6"],\
+          ["jose", "npm:4.15.5"],\
           ["js-yaml", "npm:4.1.0"],\
           ["jsonwebtoken", "npm:9.0.2"],\
           ["lodash", "npm:4.17.21"],\
@@ -8140,6 +8140,13 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/jose-npm-4.14.6-064fb0f1f6-29d8b71d04.zip/node_modules/jose/",\
         "packageDependencies": [\
           ["jose", "npm:4.14.6"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:4.15.5", {\
+        "packageLocation": "./.yarn/cache/jose-npm-4.15.5-15e487a3a1-9f208492f5.zip/node_modules/jose/",\
+        "packageDependencies": [\
+          ["jose", "npm:4.15.5"]\
         ],\
         "linkType": "HARD"\
       }]\
