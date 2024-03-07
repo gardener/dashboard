@@ -14,6 +14,7 @@ import {
   getDurationInMinutes,
   getTimeStringTo,
   getTimeStringFrom,
+  parseNumberWithMagnitudeSuffix,
 } from '@/utils'
 
 import { pick } from '@/lodash'
@@ -394,6 +395,45 @@ describe('utils', () => {
       expect(getTimeStringFrom(time, time + 7 * 1_000)).toBe('7 seconds ago')
       expect(getTimeStringFrom(time, time + 70 * 24 * 3600_000, true)).toBe('2 months')
       expect(getTimeStringFrom(time, time + 70 * 24 * 3600_000)).toBe('2 months ago')
+    })
+  })
+
+  describe('parseNumberWithMagnitudeSuffix', () => {
+    it('should convert k to thousands', () => {
+      expect(parseNumberWithMagnitudeSuffix('1k')).toBe(1000)
+      expect(parseNumberWithMagnitudeSuffix('1K')).toBe(1000)
+    })
+
+    it('should convert M to millions', () => {
+      expect(parseNumberWithMagnitudeSuffix('1M')).toBe(1000000)
+      expect(parseNumberWithMagnitudeSuffix('1m')).toBe(1000000)
+    })
+
+    it('should convert B to billions', () => {
+      expect(parseNumberWithMagnitudeSuffix('1B')).toBe(1000000000)
+      expect(parseNumberWithMagnitudeSuffix('1b')).toBe(1000000000)
+    })
+
+    it('should convert T to trillions', () => {
+      expect(parseNumberWithMagnitudeSuffix('1T')).toBe(1000000000000)
+      expect(parseNumberWithMagnitudeSuffix('1t')).toBe(1000000000000)
+    })
+
+    it('should handle decimal values correctly', () => {
+      expect(parseNumberWithMagnitudeSuffix('1.5k')).toBe(1500)
+      expect(parseNumberWithMagnitudeSuffix('2.5M')).toBe(2500000)
+    })
+
+    it('should return the original number if no suffix', () => {
+      expect(parseNumberWithMagnitudeSuffix('500')).toBe(500)
+    })
+
+    test('returns null for invalid input', () => {
+      expect(parseNumberWithMagnitudeSuffix('x1')).toBeNull()
+    })
+
+    test('returns null for invalid suffix', () => {
+      expect(parseNumberWithMagnitudeSuffix('1x')).toBeNull()
     })
   })
 })
