@@ -5,7 +5,7 @@
 //
 
 // Material Design Icons Webfont
-import '@mdi/font/css/materialdesignicons.css'
+import '@/sass/materialdesignicons.scss'
 
 // Styles
 import 'unfonts.css'
