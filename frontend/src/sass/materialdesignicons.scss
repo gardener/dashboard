@@ -1,0 +1,19 @@
+/*
+ *  SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Gardener contributors
+ *
+ *  SPDX-License-Identifier: Apache-2.0
+ */
+
+@import '@mdi/font/scss/variables';
+@import '@mdi/font/scss/functions';
+@import '@mdi/font/scss/core';
+@import '@mdi/font/scss/icons';
+@import '@mdi/font/scss/extras';
+@import '@mdi/font/scss/animated';
+
+@font-face {
+  font-family: '#{$mdi-font-name}';
+  src: url('@mdi/font/fonts/#{$mdi-filename}-webfont.woff2') format('woff2'), url('@mdi/font/fonts/#{$mdi-filename}-webfont.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
