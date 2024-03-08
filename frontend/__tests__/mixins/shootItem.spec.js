@@ -9,7 +9,6 @@ import { shallowMount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
 
 import { useShootStore } from '@/store/shoot'
-import { useConfigStore } from '@/store/config'
 
 import shootItem from '@/mixins/shootItem'
 
@@ -302,26 +301,14 @@ describe('mixins', () => {
           }],
         },
       })
-      const pinia = createTestingPinia({
-        stubActions: false,
-      })
-      const configStore = useConfigStore(pinia)
-      configStore.isShootForceDeletionEnabled = true
       const wrapper = shallowMount(Component, {
         propsData: {
           shootItem,
-        },
-        global: {
-          plugins: [pinia],
         },
       })
 
       expect(wrapper.vm.canForceDeleteShoot).toBe(true)
 
-      configStore.isShootForceDeletionEnabled = false
-      expect(wrapper.vm.canForceDeleteShoot).toBe(false)
-
-      configStore.isShootForceDeletionEnabled = true
       delete shootItem.metadata.deletionTimestamp
       expect(wrapper.vm.canForceDeleteShoot).toBe(false)
 

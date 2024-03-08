@@ -19,7 +19,13 @@ const _ = require('lodash')
 const semver = require('semver')
 const config = require('../config')
 
-const { decodeBase64, getSeedNameFromShoot, getSeedIngressDomain, projectFilter } = utils
+const {
+  decodeBase64,
+  encodeBase64,
+  getSeedNameFromShoot,
+  getSeedIngressDomain,
+  projectFilter
+} = utils
 const { getSeed } = cache
 
 exports.list = async function ({ user, namespace, labelSelector, useCache = false }) {
@@ -408,6 +414,22 @@ async function getGardenClusterIdentity () {
 }
 exports.getGardenClusterIdentity = getGardenClusterIdentity
 
+async function getClusterCaData (client, { namespace, name }) {
+  try {
+    const configmap = await client.core.configmaps.get(namespace, `${name}.ca-cluster`)
+    return encodeBase64(configmap.data?.['ca.crt'])
+  } catch (err) {
+    // TODO(petersutter): Remove this fallback of reading the `<shoot-name>.ca-cluster` Secret when Gardener no longer reconciles it, presumably with Gardener v1.97.
+    if (isHttpError(err, 404)) {
+      const caCluster = await client.core.secrets.get(namespace, `${name}.ca-cluster`)
+      return caCluster.data?.['ca.crt']
+    } else {
+      throw err
+    }
+  }
+}
+exports.getClusterCaData = getClusterCaData
+
 async function getKubeconfigGardenlogin (client, shoot) {
   if (!shoot.status?.advertisedAddresses?.length) {
     throw new Error('Shoot has no advertised addresses')
@@ -416,14 +438,12 @@ async function getKubeconfigGardenlogin (client, shoot) {
   const { namespace, name } = shoot.metadata
 
   const [
-    ca,
+    caData,
     gardenClusterIdentity
   ] = await Promise.all([
-    client.core.secrets.get(namespace, `${name}.ca-cluster`),
+    getClusterCaData(client, { namespace, name }),
     getGardenClusterIdentity()
   ])
-
-  const caData = ca.data?.['ca.crt']
 
   const extensions = [{
     name: 'client.authentication.k8s.io/exec',

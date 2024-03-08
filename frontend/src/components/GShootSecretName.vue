@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-tooltip
-    v-if="secret"
+    :disabled="!secret"
     location="top"
   >
     <template #activator="{ props }">
@@ -32,8 +32,12 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapActions } from 'pinia'
+import {
+  mapActions,
+  mapState,
+} from 'pinia'
 
+import { useAuthzStore } from '@/store/authz'
 import { useSecretStore } from '@/store/secret'
 
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
@@ -53,8 +57,11 @@ export default {
     },
   },
   computed: {
+    ...mapState(useAuthzStore, [
+      'canGetSecrets',
+    ]),
     canLinkToSecret () {
-      return this.secretBindingName && this.namespace
+      return this.canGetSecrets && this.secretBindingName && this.namespace
     },
     secret () {
       return this.getCloudProviderSecretByName({ namespace: this.namespace, name: this.secretBindingName })
