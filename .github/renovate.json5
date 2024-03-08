@@ -46,6 +46,12 @@
       matchManagers: ["github-actions"],
       matchUpdateTypes: ["patch", "digest"],
       automerge: true
+    },
+    {
+      // Automerge golang docker image updates
+      matchDatasources: ["docker"],
+      matchPackageNames: ["golang"],
+      automerge: true
     }
   ]
 }
