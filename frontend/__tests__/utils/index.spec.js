@@ -15,7 +15,7 @@ import {
   getTimeStringTo,
   getTimeStringFrom,
   parseNumberWithMagnitudeSuffix,
-  harmonizeVersion,
+  normalizeVersion,
 } from '@/utils'
 
 import { pick } from '@/lodash'
@@ -438,33 +438,33 @@ describe('utils', () => {
     })
   })
 
-  describe('harmonizeVersion', () => {
+  describe('normalizeVersion', () => {
     it('should fill missing segments', () => {
-      expect(harmonizeVersion('1.12')).toBe('1.12.0')
-      expect(harmonizeVersion('2')).toBe('2.0.0')
+      expect(normalizeVersion('1.12')).toBe('1.12.0')
+      expect(normalizeVersion('2')).toBe('2.0.0')
     })
 
     it('should cut additional segments', () => {
-      expect(harmonizeVersion('1.2.23.4')).toBe('1.2.23')
+      expect(normalizeVersion('1.2.23.4')).toBe('1.2.23')
     })
 
     it('should preserve pre-release or build suffix', () => {
-      expect(harmonizeVersion('1.2-beta')).toBe('1.2.0-beta')
-      expect(harmonizeVersion('1.2.14.3+abcd')).toBe('1.2.14+abcd')
+      expect(normalizeVersion('1.2-beta')).toBe('1.2.0-beta')
+      expect(normalizeVersion('1.2.14.3+abcd')).toBe('1.2.14+abcd')
     })
 
     it('should remove leading zeros', () => {
-      expect(harmonizeVersion('23.05')).toBe('23.5.0')
+      expect(normalizeVersion('23.05')).toBe('23.5.0')
     })
 
     it('should allow only integer segments', () => {
-      expect(harmonizeVersion('23.1e1')).toBeUndefined()
-      expect(harmonizeVersion('23.x')).toBeUndefined()
+      expect(normalizeVersion('23.1e1')).toBeUndefined()
+      expect(normalizeVersion('23.x')).toBeUndefined()
     })
 
     it('should not allow pre or suffix other than allowed ones', () => {
-      expect(harmonizeVersion('x23.1')).toBeUndefined()
-      expect(harmonizeVersion('23.2x')).toBeUndefined()
+      expect(normalizeVersion('x23.1')).toBeUndefined()
+      expect(normalizeVersion('23.2x')).toBeUndefined()
     })
   })
 })

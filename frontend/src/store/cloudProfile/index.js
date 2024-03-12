@@ -24,7 +24,7 @@ import {
   isValidTerminationDate,
   selectedImageIsNotLatest,
   UNKNOWN_EXPIRED_TIMESTAMP,
-  harmonizeVersion,
+  normalizeVersion,
 } from '@/utils'
 import { v4 as uuidv4 } from '@/utils/uuid'
 
@@ -375,18 +375,22 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     const cloudProfile = cloudProfileByName(cloudProfileName)
     const machineImages = get(cloudProfile, 'data.machineImages')
     const mapMachineImages = machineImage => {
-      const versions = compact(map(machineImage.versions, versionObj => {
-        if (!semver.valid(versionObj.version)) {
-          const harmonizedVersion = harmonizeVersion(versionObj.version)
-          if (harmonizedVersion) {
-            versionObj.version = harmonizedVersion
-          } else {
-            logger.error(`Skipped machine image ${machineImage.name} as version ${versionObj.version} is not a valid semver version and cannot be harmonized`)
-            return undefined
-          }
+      const versions = []
+      for (const versionObj of machineImage.versions) {
+        if (semver.valid(versionObj.version)) {
+          versions.push(versionObj)
+          continue
         }
-        return versionObj
-      }))
+
+        const normalizedVersion = normalizeVersion(versionObj.version)
+        if (normalizedVersion) {
+          versionObj.version = normalizedVersion
+          versions.push(versionObj)
+          continue
+        }
+
+        logger.error(`Skipped machine image ${machineImage.name} as version ${versionObj.version} is not a valid semver version and cannot be harmonized`)
+      }
       versions.sort((a, b) => {
         return semver.rcompare(a.version, b.version)
       })

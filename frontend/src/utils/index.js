@@ -48,7 +48,7 @@ const sizeRegex = /^(\d+)Gi$/
 const emailRegex = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
 const colorCodeRegex = /^#([a-f0-9]{6}|[a-f0-9]{3})$/i
 const magnitudeNumberSuffixRegex = /^(\d+(?:\.\d*)?)([kmbt]?)$/i
-const versionRegex = /^(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:\.\d+)*(([-+]).+)?$/
+const versionRegex = /^(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:\.\d+)*([-+].+)?$/
 
 const logger = useLogger()
 
@@ -661,10 +661,9 @@ export function parseNumberWithMagnitudeSuffix (abbreviatedNumber) {
   return Number(number) * factor
 }
 
-export function harmonizeVersion (version) {
-  const [match, seg1, seg2, seg3, suffix] = versionRegex.exec(version) ?? []
+export function normalizeVersion (version) {
+  const [match, major, minor = '0', patch = '0', suffix = ''] = versionRegex.exec(version) ?? []
   if (match) {
-    return `${Number(seg1)}.${Number(seg2 ?? 0)}.${Number(seg3 ?? 0)}${suffix ?? ''}`
+    return [major, minor, patch].map(Number).join('.') + suffix
   }
-  return undefined
 }
