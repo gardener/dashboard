@@ -7,7 +7,6 @@
     "group:monorepos"
   ],
   labels: ["kind/enhancement"],
-  automergeStrategy: "squash",
   ignorePaths: [
     "**/node_modules/**",
     "**/.yarn/**",
@@ -23,29 +22,16 @@
   ],
   packageRules: [
     {
-      // Group npm major, minor and patch in separate PRs
+      // Group npm major, minor and patch in separate PRs.
       matchDatasources: ["npm"],
       groupName: "packages",
       separateMajorMinor: true,
       separateMinorPatch: true
     },
     {
-      // Automerge npm patch updates
-      matchDatasources: ["npm"],
-      matchUpdateTypes: ["patch"],
-      automerge: true
-    },
-    {
-      // Group github-actions minor updates in one PR
-      matchManagers: ["github-actions"],
-      matchUpdateTypes: ["minor"],
-      groupName: "github-actions"
-    },
-    {
-      // Automerge github-actions patch updates
-      matchManagers: ["github-actions"],
-      matchUpdateTypes: ["patch", "digest"],
-      automerge: true
+      // Group github-actions in one PR.
+      groupName: "github-actions",
+      matchManagers: ["github-actions"]
     }
   ]
 }
