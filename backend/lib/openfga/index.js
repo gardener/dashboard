@@ -38,9 +38,11 @@ async function listProjects (username, relation = 'viewer') {
   for (const object of objects) {
     const [prefix, namespace] = object.split(':')
     if (prefix === type) {
-      const name = cache.findProjectByNamespace(namespace)
-      if (name) {
-        projects.push(name)
+      try {
+        const project = cache.findProjectByNamespace(namespace)
+        projects.push(project.metadata.name)
+      } catch (err) {
+        logger.debug('Openfga gardener project "%s" not found', namespace)
       }
     }
   }
