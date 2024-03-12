@@ -352,23 +352,23 @@ describe('stores', () => {
           const decoratedAndSortedVersions = cloudProfileStore.sortedKubernetesVersions('foo')
           expect(decoratedAndSortedVersions).toHaveLength(11)
 
-          const expiredDecoratedVersion = find(decoratedAndSortedVersions, { version: expiredVersion.version })
+          const expiredDecoratedVersion = find(decoratedAndSortedVersions, expiredVersion)
           expect(expiredDecoratedVersion.isExpired).toBe(true)
           expect(expiredDecoratedVersion.isSupported).toBe(false)
 
-          const decoratedVersionWithExpirationWarning = find(decoratedAndSortedVersions, { version: supported162VersionWithExpirationWarning.version })
+          const decoratedVersionWithExpirationWarning = find(decoratedAndSortedVersions, supported162VersionWithExpirationWarning)
           expect(decoratedVersionWithExpirationWarning.isExpirationWarning).toBe(true)
 
-          const invalidDecoratedVersion = find(decoratedAndSortedVersions, { version: invalidVersion.version })
+          const invalidDecoratedVersion = find(decoratedAndSortedVersions, invalidVersion)
           expect(invalidDecoratedVersion).toBeUndefined()
 
-          const unclassifiedDecoratedVersion = find(decoratedAndSortedVersions, { version: unclassified164VersionWithExpiration.version })
+          const unclassifiedDecoratedVersion = find(decoratedAndSortedVersions, unclassified164VersionWithExpiration)
           expect(unclassifiedDecoratedVersion.isSupported).toBe(true)
 
-          const previewDecoratedVersion = find(decoratedAndSortedVersions, { version: preview22Version.version })
+          const previewDecoratedVersion = find(decoratedAndSortedVersions, preview22Version)
           expect(previewDecoratedVersion.isPreview).toBe(true)
 
-          const decoratedSupported165Version = find(decoratedAndSortedVersions, { version: supported165VersionWithExpiration.version })
+          const decoratedSupported165Version = find(decoratedAndSortedVersions, supported165VersionWithExpiration)
           expect(decoratedSupported165Version.expirationDate).toBe('2024-04-12T23:59:59Z')
           expect(decoratedSupported165Version.expirationDateString).toBeDefined()
           expect(decoratedSupported165Version.isSupported).toBe(true)
