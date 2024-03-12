@@ -330,7 +330,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
         severity,
       }
     })
-    return filter(workerGroups, 'expirationDate')
+    return filter(workerGroups, 'isExpirationWarning')
   }
 
   function machineTypesByCloudProfileNameAndRegionAndArchitecture ({ cloudProfileName, region, architecture }) {
@@ -551,7 +551,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
         severity: 'warning',
       }
     }
-    if (!version.expirationDate) {
+    if (!version.isExpirationWarning) {
       return undefined
     }
 
