@@ -1,0 +1,51 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: [
+    "config:recommended",
+    ":semanticCommitsDisabled",
+    "regexManagers:githubActionsVersions",
+    "group:monorepos"
+  ],
+  labels: ["kind/enhancement"],
+  automergeStrategy: "squash",
+  ignorePaths: [
+    "**/node_modules/**",
+    "**/.yarn/**",
+  ],
+  customManagers: [
+    {
+      // Generic detection for pod-like image specifications.
+      customType: "regex",
+      fileMatch: ["^\.ci\/pipeline_definitions$"],
+      matchStrings: ["image: ['\"]?(?<depName>.*?):(?<currentValue>.*?)['\"]?\\s"],
+      datasourceTemplate: "docker"
+    },
+  ],
+  packageRules: [
+    {
+      // Group npm major, minor and patch in separate PRs
+      matchDatasources: ["npm"],
+      groupName: "packages",
+      separateMajorMinor: true,
+      separateMinorPatch: true
+    },
+    {
+      // Automerge npm patch updates
+      matchDatasources: ["npm"],
+      matchUpdateTypes: ["patch"],
+      automerge: true
+    },
+    {
+      // Group github-actions minor updates in one PR
+      matchManagers: ["github-actions"],
+      matchUpdateTypes: ["minor"],
+      groupName: "github-actions"
+    },
+    {
+      // Automerge github-actions patch updates
+      matchManagers: ["github-actions"],
+      matchUpdateTypes: ["patch", "digest"],
+      automerge: true
+    }
+  ]
+}
