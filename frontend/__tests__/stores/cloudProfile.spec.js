@@ -116,7 +116,10 @@ describe('stores', () => {
           name: 'foo',
           versions: [
             {
-              version: '1.02.3', // invalid version (not semver compatible)
+              version: '1.02', // incompatible version (not semver compatible - can be harmonized)
+            },
+            {
+              version: '1.2.x', // invalid version (not harmonizable)
             },
             {
               version: '1.3.4',
@@ -136,7 +139,7 @@ describe('stores', () => {
       })
 
       it('should transform machine images from cloud profile', () => {
-        expect(decoratedAndSortedMachineImages).toHaveLength(7)
+        expect(decoratedAndSortedMachineImages).toHaveLength(8)
 
         const expiredImage = find(decoratedAndSortedMachineImages, { name: 'gardenlinux', version: '1.1.2' })
         expect(expiredImage.isExpired).toBe(true)
@@ -163,7 +166,10 @@ describe('stores', () => {
         expect(previewImage.isSupported).toBe(false)
         expect(previewImage.isPreview).toBe(true)
 
-        const invalidImage = find(decoratedAndSortedMachineImages, { name: 'foo', version: '1.02.3' })
+        const normalizedImage = find(decoratedAndSortedMachineImages, { name: 'foo', version: '1.2.0' })
+        expect(normalizedImage).toBeDefined()
+
+        const invalidImage = find(decoratedAndSortedMachineImages, { name: 'foo', version: '1.2.x' })
         expect(invalidImage).toBeUndefined()
 
         const fooImage = find(decoratedAndSortedMachineImages, { name: 'foo', version: '1.3.3' })
@@ -229,7 +235,7 @@ describe('stores', () => {
           })
         })
 
-        it('one should be info level (update available, auto update enabled), one error (no update path) )', () => {
+        it('one should be info level (update available, auto update enabled), one error (no update path)', () => {
           const imageWithExpirationWarning = find(decoratedAndSortedMachineImages, { name: 'gardenlinux', version: '1.1.3' })
           // version has expiration warning, newer version exists but is deprecated
           const imageWithNoUpdatePath = find(decoratedAndSortedMachineImages, { name: 'foo', version: '1.3.3' })
