@@ -179,7 +179,7 @@ describe('stores', () => {
 
         const deprecatedFooImageWithNoExpiration = find(decoratedAndSortedMachineImages, { name: 'foo', version: '1.3.4' })
         expect(deprecatedFooImageWithNoExpiration.isDeprecated).toBe(true)
-        expect(deprecatedFooImageWithNoExpiration.isExpirationWarning).toBe(true)
+        expect(deprecatedFooImageWithNoExpiration.isExpirationWarning).toBe(false)
       })
 
       function generateWorkerGroups (machineImages) {
@@ -240,11 +240,11 @@ describe('stores', () => {
           })
         })
 
-        it('one should be info level (update available, auto update enabled), two error (no update path)', () => {
+        it('one should be info level (update available, auto update enabled), one error (no update path)', () => {
           const imageWithExpirationWarning = find(decoratedAndSortedMachineImages, { name: 'gardenlinux', version: '1.1.3' })
           // version has expiration warning, newer version exists but is deprecated
           const imageWithNoUpdatePath = find(decoratedAndSortedMachineImages, { name: 'foo', version: '1.3.3' })
-          // no newer version exists
+          // no newer version exists, version is deprecated but there is no expiration date
           const deprecatedImageWithNoExpiration = find(decoratedAndSortedMachineImages, { name: 'foo', version: '1.3.4' })
 
           const workers = generateWorkerGroups([
@@ -254,7 +254,7 @@ describe('stores', () => {
           ])
           const expiredWorkerGroups = cloudProfileStore.expiringWorkerGroupsForShoot(workers, 'foo', true)
           expect(expiredWorkerGroups).toBeInstanceOf(Array)
-          expect(expiredWorkerGroups).toHaveLength(3)
+          expect(expiredWorkerGroups).toHaveLength(2)
           expect(expiredWorkerGroups[0]).toMatchObject({
             ...imageWithExpirationWarning,
             workerName: workers[0].name,
@@ -265,12 +265,6 @@ describe('stores', () => {
             ...imageWithNoUpdatePath,
             workerName: workers[1].name,
             isValidTerminationDate: true,
-            severity: 'error',
-          })
-          expect(expiredWorkerGroups[2]).toMatchObject({
-            ...deprecatedImageWithNoExpiration,
-            workerName: workers[2].name,
-            isValidTerminationDate: false,
             severity: 'error',
           })
         })
@@ -340,8 +334,9 @@ describe('stores', () => {
         expirationDate: '2023-03-15T23:59:59Z', // expired
         version: '1.16.1',
       }
-      const oldestVersion = {
+      const deprecatedOldestVersion = {
         version: '1.16.0',
+        classification: 'deprecated',
       }
       const invalidVersion = {
         version: '1.06.2',
@@ -359,7 +354,7 @@ describe('stores', () => {
         supported162VersionWithExpirationWarning, // 1.16.2
         expiredVersion, // 1.16.1
         invalidVersion, // 1.06.2 not semver compatible
-        oldestVersion, // 1.16.0
+        deprecatedOldestVersion, // 1.16.0
       ]
 
       beforeEach(() => {
@@ -396,7 +391,7 @@ describe('stores', () => {
       })
       describe('#availableKubernetesUpdatesForShoot', () => {
         it('should differentiate between patch/minor/major available K8sUpdates for given version, filter out expired', () => {
-          const availableK8sUpdates = cloudProfileStore.availableKubernetesUpdatesForShoot(oldestVersion.version, 'foo')
+          const availableK8sUpdates = cloudProfileStore.availableKubernetesUpdatesForShoot(deprecatedOldestVersion.version, 'foo')
           expect(availableK8sUpdates.patch.length).toBe(5)
           expect(availableK8sUpdates.minor.length).toBe(3)
           expect(availableK8sUpdates.major.length).toBe(2)
@@ -487,22 +482,13 @@ describe('stores', () => {
           })
         })
 
-        it('should be error level (no update path available))', () => {
-          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(deprecated181VersionWithnoExpiration.version, 'foo', false)
-          expect(versionExpirationWarning).toEqual({
-            expirationDate: undefined,
-            isValidTerminationDate: false,
-            severity: 'error',
-          })
-        })
-
         it('should not have warning (version not expired))', () => {
           const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(unclassified164VersionWithExpiration.version, 'foo', true)
           expect(versionExpirationWarning).toBeUndefined()
         })
 
-        it('should not have warning (version has no expiration))', () => {
-          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(oldestVersion.version, 'foo', true)
+        it('should not have warning (deprecated version has no expiration))', () => {
+          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(deprecatedOldestVersion.version, 'foo', true)
           expect(versionExpirationWarning).toBeUndefined()
         })
       })

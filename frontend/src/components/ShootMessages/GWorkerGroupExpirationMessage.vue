@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
       <span v-if="isValidTerminationDate">Machine Image update will be enforced after that date</span>
       <span v-else>Machine Image update will be enforced soon</span>
     </template>
-    <span v-else-if="severity === 'error'">Machine Image update not possible as no newer version is available. Please choose another operating system</span>
+    <span v-else-if="severity === 'error'">Machine image version will expire soon and there is no newer supported version available. Please choose another operating system</span>
   </div>
 </template>
 

@@ -81,7 +81,7 @@ export function decorateClassificationObject (obj) {
     isSupported: classification === 'supported' && !isExpired,
     isDeprecated: classification === 'deprecated',
     isExpired,
-    isExpirationWarning: classification === 'deprecated' || (obj.expirationDate && moment(obj.expirationDate).diff(moment(), 'd') < 30),
+    isExpirationWarning: !!obj.expirationDate && moment(obj.expirationDate).diff(moment(), 'd') < 30,
     expirationDateString: getDateFormatted(obj.expirationDate),
   }
 }
