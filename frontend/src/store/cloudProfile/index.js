@@ -534,8 +534,8 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
 
   function kubernetesVersionIsNotLatestPatch (kubernetesVersion, cloudProfileName) {
     const allVersions = kubernetesVersions(cloudProfileName)
-    return some(allVersions, ({ version, isPreview }) => {
-      return semver.diff(version, kubernetesVersion) === 'patch' && semver.gt(version, kubernetesVersion) && !isPreview
+    return some(allVersions, ({ version, isSupported }) => {
+      return semver.diff(version, kubernetesVersion) === 'patch' && semver.gt(version, kubernetesVersion) && isSupported
     })
   }
 
@@ -545,8 +545,8 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
       return true
     }
     const versionMinorVersion = semver.minor(kubernetesVersion)
-    return some(allVersions, ({ version, isPreview }) => {
-      return semver.minor(version) === versionMinorVersion + 1 && !isPreview
+    return some(allVersions, ({ version, isSupported }) => {
+      return semver.minor(version) === versionMinorVersion + 1 && isSupported
     })
   }
 
