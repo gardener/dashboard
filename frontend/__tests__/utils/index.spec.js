@@ -14,6 +14,8 @@ import {
   getDurationInMinutes,
   getTimeStringTo,
   getTimeStringFrom,
+  parseNumberWithMagnitudeSuffix,
+  normalizeVersion,
 } from '@/utils'
 
 import { pick } from '@/lodash'
@@ -394,6 +396,75 @@ describe('utils', () => {
       expect(getTimeStringFrom(time, time + 7 * 1_000)).toBe('7 seconds ago')
       expect(getTimeStringFrom(time, time + 70 * 24 * 3600_000, true)).toBe('2 months')
       expect(getTimeStringFrom(time, time + 70 * 24 * 3600_000)).toBe('2 months ago')
+    })
+  })
+
+  describe('parseNumberWithMagnitudeSuffix', () => {
+    it('should convert k to thousands', () => {
+      expect(parseNumberWithMagnitudeSuffix('1k')).toBe(1000)
+      expect(parseNumberWithMagnitudeSuffix('1K')).toBe(1000)
+    })
+
+    it('should convert M to millions', () => {
+      expect(parseNumberWithMagnitudeSuffix('1M')).toBe(1000000)
+      expect(parseNumberWithMagnitudeSuffix('1m')).toBe(1000000)
+    })
+
+    it('should convert B to billions', () => {
+      expect(parseNumberWithMagnitudeSuffix('1B')).toBe(1000000000)
+      expect(parseNumberWithMagnitudeSuffix('1b')).toBe(1000000000)
+    })
+
+    it('should convert T to trillions', () => {
+      expect(parseNumberWithMagnitudeSuffix('1T')).toBe(1000000000000)
+      expect(parseNumberWithMagnitudeSuffix('1t')).toBe(1000000000000)
+    })
+
+    it('should handle decimal values correctly', () => {
+      expect(parseNumberWithMagnitudeSuffix('1.5k')).toBe(1500)
+      expect(parseNumberWithMagnitudeSuffix('2.5M')).toBe(2500000)
+    })
+
+    it('should return the original number if no suffix', () => {
+      expect(parseNumberWithMagnitudeSuffix('500')).toBe(500)
+    })
+
+    test('returns null for invalid input', () => {
+      expect(parseNumberWithMagnitudeSuffix('x1')).toBeNull()
+    })
+
+    test('returns null for invalid suffix', () => {
+      expect(parseNumberWithMagnitudeSuffix('1x')).toBeNull()
+    })
+  })
+
+  describe('normalizeVersion', () => {
+    it('should fill missing segments', () => {
+      expect(normalizeVersion('1.12')).toBe('1.12.0')
+      expect(normalizeVersion('2')).toBe('2.0.0')
+    })
+
+    it('should cut additional segments', () => {
+      expect(normalizeVersion('1.2.23.4')).toBe('1.2.23')
+    })
+
+    it('should preserve pre-release or build suffix', () => {
+      expect(normalizeVersion('1.2-beta')).toBe('1.2.0-beta')
+      expect(normalizeVersion('1.2.14.3+abcd')).toBe('1.2.14+abcd')
+    })
+
+    it('should remove leading zeros', () => {
+      expect(normalizeVersion('23.05')).toBe('23.5.0')
+    })
+
+    it('should allow only integer segments', () => {
+      expect(normalizeVersion('23.1e1')).toBeUndefined()
+      expect(normalizeVersion('23.x')).toBeUndefined()
+    })
+
+    it('should not allow pre or suffix other than allowed ones', () => {
+      expect(normalizeVersion('x23.1')).toBeUndefined()
+      expect(normalizeVersion('23.2x')).toBeUndefined()
     })
   })
 })

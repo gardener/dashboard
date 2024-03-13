@@ -47,7 +47,7 @@
     "dayjs": "^1.11.10",
     "downloadjs": "^1.4.7",
     "eventemitter3": "^5.0.1",
-    "floating-vue": "2.0.0-beta.24",
+    "floating-vue": "2.0.0",
     "get-contrast": "^3.0.0",
     "highlight.js": "^11.8.0",
     "js-cookie": "^3.0.5",

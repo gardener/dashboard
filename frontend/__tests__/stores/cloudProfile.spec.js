@@ -104,7 +104,10 @@ describe('stores', () => {
           name: 'foo',
           versions: [
             {
-              version: '1.02.3', // invalid version (not semver compatible)
+              version: '1.05', // incompatible version (not semver compatible - can be harmonized)
+            },
+            {
+              version: '1.2.x', // invalid version (not harmonizable)
             },
             {
               version: '1.2.3',
@@ -119,13 +122,16 @@ describe('stores', () => {
 
       it('should transform machine images from cloud profile', () => {
         const dashboardMachineImages = cloudProfileStore.machineImagesByCloudProfileName('foo')
-        expect(dashboardMachineImages).toHaveLength(5)
+        expect(dashboardMachineImages).toHaveLength(6)
 
         const expiredImage = find(dashboardMachineImages, { name: 'suse-chost', version: '15.1.20191127' })
         expect(expiredImage.isExpired).toBe(true)
         expect(expiredImage.isSupported).toBe(false)
 
-        const invalidImage = find(dashboardMachineImages, { name: 'foo', version: '1.02.3' })
+        const harmonizedImage = find(dashboardMachineImages, { name: 'foo', version: '1.5.0' })
+        expect(harmonizedImage).toBeDefined()
+
+        const invalidImage = find(dashboardMachineImages, { name: 'foo', version: '1.2.x' })
         expect(invalidImage).toBeUndefined()
 
         const suseImage = find(dashboardMachineImages, { name: 'suse-chost', version: '15.1.20191027' })

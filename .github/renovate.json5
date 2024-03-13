@@ -1,0 +1,37 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: [
+    "config:recommended",
+    ":semanticCommitsDisabled",
+    "regexManagers:githubActionsVersions",
+    "group:monorepos"
+  ],
+  labels: ["kind/enhancement"],
+  ignorePaths: [
+    "**/node_modules/**",
+    "**/.yarn/**",
+  ],
+  customManagers: [
+    {
+      // Generic detection for pod-like image specifications.
+      customType: "regex",
+      fileMatch: ["^\.ci\/pipeline_definitions$"],
+      matchStrings: ["image: ['\"]?(?<depName>.*?):(?<currentValue>.*?)['\"]?\\s"],
+      datasourceTemplate: "docker"
+    },
+  ],
+  packageRules: [
+    {
+      // Group npm major, minor and patch in separate PRs.
+      matchDatasources: ["npm"],
+      groupName: "packages",
+      separateMajorMinor: true,
+      separateMinorPatch: true
+    },
+    {
+      // Group github-actions in one PR.
+      groupName: "github-actions",
+      matchManagers: ["github-actions"]
+    }
+  ]
+}
