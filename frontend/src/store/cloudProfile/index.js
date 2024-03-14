@@ -314,13 +314,16 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
       }
 
       const updateAvailable = selectedImageIsNotLatest(workerImageDetails, allMachineImages)
-
       let severity
-      if (!updateAvailable) {
-        severity = 'error'
-      } else if (!imageAutoPatch) {
-        severity = 'warning'
-      } else {
+      if (workerImageDetails.isExpirationWarning) {
+        if (!updateAvailable) {
+          severity = 'error'
+        } else if (!imageAutoPatch) {
+          severity = 'warning'
+        } else {
+          severity = 'info'
+        }
+      } else if (imageAutoPatch && updateAvailable) {
         severity = 'info'
       }
 
@@ -331,7 +334,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
         severity,
       }
     })
-    return filter(workerGroups, 'isExpirationWarning')
+    return filter(workerGroups, 'severity')
   }
 
   function machineTypesByCloudProfileNameAndRegionAndArchitecture ({ cloudProfileName, region, architecture }) {
@@ -561,21 +564,24 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
         severity: 'warning',
       }
     }
-    if (!version.isExpirationWarning) {
-      return undefined
-    }
 
     const patchAvailable = kubernetesVersionIsNotLatestPatch(shootK8sVersion, shootCloudProfileName)
     const updatePathAvailable = kubernetesVersionUpdatePathAvailable(shootK8sVersion, shootCloudProfileName)
 
     let severity
-    if (!updatePathAvailable) {
-      severity = 'error'
-    } else if ((!k8sAutoPatch && patchAvailable) || !patchAvailable) {
-      severity = 'warning'
+    if (version.isExpirationWarning) {
+      if (!updatePathAvailable) {
+        severity = 'error'
+      } else if ((!k8sAutoPatch && patchAvailable) || !patchAvailable) {
+        severity = 'warning'
+      } else {
+        severity = 'info'
+      }
     } else if (k8sAutoPatch && patchAvailable) {
       severity = 'info'
-    } else {
+    }
+
+    if (!severity) {
       return undefined
     }
 

@@ -185,7 +185,7 @@ describe('stores', () => {
       function generateWorkerGroups (machineImages) {
         return machineImages.map(machineImage => {
           return {
-            name: 'worker',
+            name: `worker-${Math.random()}`,
             machine: {
               type: 'type',
               image: {
@@ -208,12 +208,28 @@ describe('stores', () => {
             imageWithNoUpdate,
             imageWithExpirationWarning,
           ])
-          const expiredWorkerGroups = cloudProfileStore.expiringWorkerGroupsForShoot(workers, 'foo', true)
+          let expiredWorkerGroups = cloudProfileStore.expiringWorkerGroupsForShoot(workers, 'foo', false)
           expect(expiredWorkerGroups).toBeInstanceOf(Array)
           expect(expiredWorkerGroups).toHaveLength(1)
           expect(expiredWorkerGroups[0]).toMatchObject({
             ...imageWithExpirationWarning,
+            workerName: workers[2].name,
+            isValidTerminationDate: true,
+            severity: 'warning',
+          })
+
+          expiredWorkerGroups = cloudProfileStore.expiringWorkerGroupsForShoot(workers, 'foo', true)
+          expect(expiredWorkerGroups).toBeInstanceOf(Array)
+          expect(expiredWorkerGroups).toHaveLength(2) // Now also include auto update information
+          expect(expiredWorkerGroups[0]).toMatchObject({
+            ...imageWithExpirationDate,
             workerName: workers[0].name,
+            isValidTerminationDate: true,
+            severity: 'info',
+          })
+          expect(expiredWorkerGroups[1]).toMatchObject({
+            ...imageWithExpirationWarning,
+            workerName: workers[2].name,
             isValidTerminationDate: true,
             severity: 'info',
           })
@@ -234,7 +250,7 @@ describe('stores', () => {
           expect(expiredWorkerGroups).toHaveLength(1)
           expect(expiredWorkerGroups[0]).toMatchObject({
             ...imageWithExpirationWarning,
-            workerName: workers[0].name,
+            workerName: workers[2].name,
             isValidTerminationDate: true,
             severity: 'warning',
           })
@@ -278,7 +294,7 @@ describe('stores', () => {
             imageWithExpirationDate,
             imageWithNoUpdate,
           ])
-          const expiredWorkerGroups = cloudProfileStore.expiringWorkerGroupsForShoot(workers, 'foo', true)
+          const expiredWorkerGroups = cloudProfileStore.expiringWorkerGroupsForShoot(workers, 'foo', false)
           expect(expiredWorkerGroups).toBeInstanceOf(Array)
           expect(expiredWorkerGroups).toHaveLength(0)
         })
@@ -483,12 +499,21 @@ describe('stores', () => {
         })
 
         it('should not have warning (version not expired))', () => {
-          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(unclassified164VersionWithExpiration.version, 'foo', true)
+          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(unclassified164VersionWithExpiration.version, 'foo', false)
           expect(versionExpirationWarning).toBeUndefined()
         })
 
+        it('should not have info (auto update)', () => {
+          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(unclassified164VersionWithExpiration.version, 'foo', true)
+          expect(versionExpirationWarning).toEqual({
+            expirationDate: unclassified164VersionWithExpiration.expirationDate,
+            isValidTerminationDate: true,
+            severity: 'info',
+          })
+        })
+
         it('should not have warning (deprecated version has no expiration))', () => {
-          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(deprecatedOldestVersion.version, 'foo', true)
+          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(deprecatedOldestVersion.version, 'foo', false)
           expect(versionExpirationWarning).toBeUndefined()
         })
       })
