@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-chip
         v-bind="props"
         size="small"
-        class="cursor-pointer my-0 ml-0"
+        class="cursor-pointer ma-1"
         variant="tonal"
         color="primary"
       >
@@ -220,12 +220,21 @@ SPDX-License-Identifier: Apache-2.0
                         cols="12"
                       >
                         <v-icon
+                          v-if="machineImage.isEx"
                           size="small"
                           class="mr-1"
                           color="warning"
                         >
                           mdi-alert
-                        </v-icon>Image expires on {{ machineImage.expirationDateString }}
+                        </v-icon>
+                        <v-icon
+                          size="small"
+                          class="mr-1"
+                          color="warning"
+                        >
+                          mdi-alert
+                        </v-icon>
+                        Image expires on {{ machineImage.expirationDateString }}
                       </v-col>
                     </v-row>
                   </v-card-text>
