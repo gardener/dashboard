@@ -16,10 +16,10 @@ SPDX-License-Identifier: Apache-2.0
         size="small"
         class="cursor-pointer ma-1"
         variant="tonal"
-        color="primary"
+        :color="chipColor"
       >
         <g-vendor-icon
-          :icon="machineImageIcon"
+          :icon="machineImage.icon"
           :size="20"
         />
         <span class="px-1">{{ workerGroup.name }}</span>
@@ -220,14 +220,7 @@ SPDX-License-Identifier: Apache-2.0
                         cols="12"
                       >
                         <v-icon
-                          v-if="machineImage.isEx"
-                          size="small"
-                          class="mr-1"
-                          color="warning"
-                        >
-                          mdi-alert
-                        </v-icon>
-                        <v-icon
+                          v-if="machineImage.isExpirationWarning"
                           size="small"
                           class="mr-1"
                           color="warning"
@@ -450,13 +443,10 @@ export default {
     machineImage () {
       const machineImages = this.machineImagesByCloudProfileName(this.cloudProfileName)
       const { name, version } = get(this.workerGroup, 'machine.image', {})
-      return find(machineImages, { name, version })
+      return find(machineImages, { name, version }) ?? {}
     },
     machineCri () {
       return this.workerGroup.cri ?? {}
-    },
-    machineImageIcon () {
-      return get(this.machineImage, 'icon')
     },
     tab: {
       get () {
@@ -465,6 +455,9 @@ export default {
       set (modelValue) {
         this.$emit('update:modelValue', modelValue)
       },
+    },
+    chipColor () {
+      return this.machineImage.isDeprecated ? 'warning' : 'primary'
     },
   },
   created () {

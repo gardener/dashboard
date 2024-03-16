@@ -41,12 +41,17 @@ SPDX-License-Identifier: Apache-2.0
       </template>
     </v-select>
     <v-alert
-      v-if="currentK8sVersion.isExpirationWarning && !selectedItem"
+      v-if="(currentK8sVersion.isExpirationWarning || currentK8sVersion.isDeprecated) && !selectedItem"
       type="warning"
       variant="tonal"
     >
-      Current Kubernetes version expires on: {{ currentK8sVersion.expirationDateString }}.
-      Kubernetes update will be enforced after that date.
+      <div v-if="currentK8sVersion.isDeprecated">
+        Current Kubernetes version is deprecated.
+      </div>
+      <div v-if="currentK8sVersion.expirationDate">
+        Current Kubernetes version expires on: {{ currentK8sVersion.expirationDateString }}.
+        Kubernetes update will be enforced after that date.
+      </div>
     </v-alert>
   </div>
 </template>
@@ -201,7 +206,11 @@ export default {
         return 'Selected version is a preview version. Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not recommended for production usage'
       }
       if (this.selectedItem?.isDeprecated) {
-        return `Selected version is deprecated. It will expire on ${this.selectedItem.expirationDateString}`
+        if (this.selectedItem.expirationDate) {
+          return `Selected version is deprecated. It will expire on ${this.selectedItem.expirationDateString}`
+        } else {
+          return 'Selected version is deprecated'
+        }
       }
       if (this.hasMoreSupportedVersions) {
         return 'There are newer minor versions available. However you can only upgrade your cluster one minor version at a time'
