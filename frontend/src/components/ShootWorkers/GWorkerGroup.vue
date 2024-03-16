@@ -10,20 +10,27 @@ SPDX-License-Identifier: Apache-2.0
     :toolbar-title="workerGroup.name"
     placement="bottom"
   >
-    <template #activator="{ props }">
-      <v-chip
-        v-bind="props"
-        size="small"
-        class="cursor-pointer ma-1"
-        variant="tonal"
-        :color="chipColor"
+    <template #activator="{ props: popoverProps }">
+      <v-tooltip
+        location="top"
+        :text="tooltipText"
       >
-        <g-vendor-icon
-          :icon="machineImage.icon"
-          :size="20"
-        />
-        <span class="px-1">{{ workerGroup.name }}</span>
-      </v-chip>
+        <template #activator="{ props: tooltipProps }">
+          <v-chip
+            v-bind="mergeProps(popoverProps, tooltipProps)"
+            size="small"
+            class="cursor-pointer ma-1"
+            variant="tonal"
+            :color="chipColor"
+          >
+            <g-vendor-icon
+              :icon="machineImage.icon"
+              :size="20"
+            />
+            <span class="px-1">{{ workerGroup.name }}</span>
+          </v-chip>
+        </template>
+      </v-tooltip>
     </template>
     <v-tabs
       v-model="tab"
@@ -363,6 +370,7 @@ export default {
     GCodeBlock,
   },
   inject: [
+    'mergeProps',
     'yaml',
     'activePopoverKey',
   ],
@@ -458,6 +466,12 @@ export default {
     },
     chipColor () {
       return this.machineImage.isDeprecated ? 'warning' : 'primary'
+    },
+    tooltipText () {
+      if (this.machineImage.isDeprecated) {
+        return 'Machine image version is deprecated'
+      }
+      return undefined
     },
   },
   created () {

@@ -11,6 +11,10 @@ SPDX-License-Identifier: Apache-2.0
     :icon="supportedPatchAvailable ? 'mdi-arrow-up-bold-circle' : 'mdi-arrow-up-bold-circle-outline'"
     width="450"
     caption="Update Cluster"
+    confirm-button-text="Update"
+    :confirm-required="confirmRequired"
+    :text="buttonText"
+    :disabled="!canUpdate"
     @dialog-opened="onConfigurationDialogOpened"
   >
     <template #content>
@@ -83,6 +87,12 @@ export default {
     shootItem,
   ],
   inject: ['api', 'logger'],
+  props: {
+    text: {
+      type: Boolean,
+      default: false,
+    },
+  },
   setup () {
     return {
       v$: useVuelidate(),
@@ -112,13 +122,19 @@ export default {
       return !!find(this.availableK8sUpdates?.minor, 'isSupported')
     },
     canUpdate () {
-      return !!this.availableK8sUpdates && !this.isShootMarkedForDeletion && !this.isShootActionsDisabledForPurpose && this.canPatchShoots
+      return !!this.availableK8sUpdates
     },
     confirm () {
       return this.confirmRequired ? this.shootName : undefined
     },
     availableK8sUpdates () {
       return this.availableKubernetesUpdatesForShoot(this.shootK8sVersion, this.shootCloudProfileName)
+    },
+    buttonText () {
+      if (!this.text) {
+        return
+      }
+      return 'Update Cluster'
     },
   },
   methods: {
