@@ -392,7 +392,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
           continue
         }
 
-        logger.error(`Skipped machine image ${machineImage.name} as version ${versionObj.version} is not a valid semver version and cannot be harmonized`)
+        logger.error(`Skipped machine image ${machineImage.name} as version ${versionObj.version} is not a valid semver version and cannot be normalized`)
       }
       versions.sort((a, b) => {
         return semver.rcompare(a.version, b.version)
