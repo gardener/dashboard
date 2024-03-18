@@ -200,6 +200,7 @@ export function createRoutes () {
         namespaced: false,
         projectScope: false,
         breadcrumbs: newProjectBreadcrumbs,
+        title: 'New Project',
       },
     }
   }
@@ -250,6 +251,7 @@ export function createRoutes () {
           title: 'Clusters',
           icon: 'mdi-hexagon-multiple',
         },
+        title: 'Clusters',
         projectScope: false,
         breadcrumbs: shootListBreadcrumbs,
       },
@@ -264,6 +266,7 @@ export function createRoutes () {
       meta: {
         breadcrumbs: newShootBreadcrumbs,
         tabs: newShootTabs,
+        title: 'Create Cluster',
       },
     }
   }
@@ -276,6 +279,7 @@ export function createRoutes () {
       meta: {
         breadcrumbs: newShootEditorBreadcrumbs,
         tabs: newShootTabs,
+        title: 'Create Cluster Editor',
       },
     }
   }
@@ -288,6 +292,7 @@ export function createRoutes () {
       meta: {
         breadcrumbs: shootItemBreadcrumbs,
         tabs: shootItemTabs,
+        title: 'Cluster Details',
       },
     }
   }
@@ -300,6 +305,7 @@ export function createRoutes () {
       meta: {
         breadcrumbs: shootItemBreadcrumbs,
         tabs: shootItemTabs,
+        title: 'Cluster Editor',
       },
     }
   }
@@ -312,6 +318,7 @@ export function createRoutes () {
       meta: {
         breadcrumbs: shootItemBreadcrumbs,
         tabs: shootItemTabs,
+        title: 'Hibernation',
       },
     }
   }
@@ -323,6 +330,7 @@ export function createRoutes () {
       component: GShootItemTerminal,
       meta: {
         breadcrumbs: shootItemTerminalBreadcrumbs,
+        title: 'Terminal',
       },
       beforeEnter (to, from) {
         if (!authzStore.hasShootTerminalAccess) {
@@ -406,6 +414,7 @@ export function createRoutes () {
           },
         },
         breadcrumbs: terminalBreadcrumbs,
+        title: 'Garden Terminal',
       },
       beforeEnter (to, from) {
         if (!authzStore.hasGardenTerminalAccess) {
