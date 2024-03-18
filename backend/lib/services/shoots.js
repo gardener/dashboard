@@ -493,6 +493,11 @@ Note that the kubeconfig refers to the path of the garden cluster kubeconfig whi
   }
 
   for (const [i, address] of shoot.status.advertisedAddresses.entries()) {
+    const isKubeApiserverAddress = _.includes(['external', 'internal', 'unmanaged'], address.name)
+    if (!isKubeApiserverAddress) {
+      continue
+    }
+
     const name = `${userName}-${address.name}`
     if (i === 0) {
       cfg['current-context'] = name
