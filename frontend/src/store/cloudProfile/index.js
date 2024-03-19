@@ -297,6 +297,20 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return machineTypesOrVolumeTypesByCloudProfileNameAndRegion({ type: 'machineTypes', cloudProfileName })
   }
 
+  function expirationWarningSeverityForVersion ({ isExpirationWarning, autoPatchEnabled, updateAvailable, autoUpdateAvailable }) {
+    if (isExpirationWarning) {
+      if (!updateAvailable) {
+        return 'error'
+      } else if ((!autoPatchEnabled && autoUpdateAvailable) || !autoUpdateAvailable) {
+        return 'warning'
+      } else {
+        return 'info'
+      }
+    } else if (autoPatchEnabled && autoUpdateAvailable) {
+      return 'info'
+    }
+  }
+
   function expiringWorkerGroupsForShoot (shootWorkerGroups, shootCloudProfileName, imageAutoPatch) {
     const allMachineImages = machineImagesByCloudProfileName(shootCloudProfileName)
     const workerGroups = map(shootWorkerGroups, worker => {
@@ -314,18 +328,12 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
       }
 
       const updateAvailable = selectedImageIsNotLatest(workerImageDetails, allMachineImages)
-      let severity
-      if (workerImageDetails.isExpirationWarning) {
-        if (!updateAvailable) {
-          severity = 'error'
-        } else if (!imageAutoPatch) {
-          severity = 'warning'
-        } else {
-          severity = 'info'
-        }
-      } else if (imageAutoPatch && updateAvailable) {
-        severity = 'info'
-      }
+      const severity = expirationWarningSeverityForVersion({
+        isExpirationWarning: workerImageDetails.isExpirationWarning,
+        autoPatchEnabled: imageAutoPatch,
+        updateAvailable,
+        autoUpdateAvailable: updateAvailable,
+      })
 
       return {
         ...workerImageDetails,
@@ -568,18 +576,12 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     const patchAvailable = kubernetesVersionIsNotLatestPatch(shootK8sVersion, shootCloudProfileName)
     const updatePathAvailable = kubernetesVersionUpdatePathAvailable(shootK8sVersion, shootCloudProfileName)
 
-    let severity
-    if (version.isExpirationWarning) {
-      if (!updatePathAvailable) {
-        severity = 'error'
-      } else if ((!k8sAutoPatch && patchAvailable) || !patchAvailable) {
-        severity = 'warning'
-      } else {
-        severity = 'info'
-      }
-    } else if (k8sAutoPatch && patchAvailable) {
-      severity = 'info'
-    }
+    const severity = expirationWarningSeverityForVersion({
+      isExpirationWarning: version.isExpirationWarning,
+      autoPatchEnabled: k8sAutoPatch,
+      updateAvailable: updatePathAvailable,
+      autoUpdateAvailable: patchAvailable,
+    })
 
     if (!severity) {
       return undefined
