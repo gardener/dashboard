@@ -6,7 +6,10 @@
 
 import zlib from 'node:zlib'
 import { createRequire } from 'node:module'
-import { readFileSync } from 'node:fs'
+import {
+  readFileSync,
+  existsSync,
+} from 'node:fs'
 import {
   fileURLToPath,
   URL,
@@ -55,6 +58,30 @@ export default defineConfig(({ command, mode }) => {
     VITE_APP_VERSION,
     VITE_BASE_URL,
   })
+
+  const server = {
+    port: 8080,
+    strictPort: true,
+    proxy: {
+      '/api': {
+        target: proxyTarget,
+        changeOrigin: true,
+        ws: true,
+      },
+      '/auth': {
+        target: proxyTarget,
+      },
+    },
+  }
+  const keyPath = resolve('./ssl/key.pem')
+  const certPath = resolve('./ssl/cert.pem')
+  if (existsSync(keyPath) && existsSync(certPath)) {
+    server.port = 8443
+    server.https = {
+      key: readFileSync(keyPath),
+      cert: readFileSync(certPath),
+    }
+  }
 
   const config = {
     plugins: [
@@ -113,20 +140,7 @@ export default defineConfig(({ command, mode }) => {
         '.vue',
       ],
     },
-    server: {
-      port: 8080,
-      strictPort: true,
-      proxy: {
-        '/api': {
-          target: proxyTarget,
-          changeOrigin: true,
-          ws: true,
-        },
-        '/auth': {
-          target: proxyTarget,
-        },
-      },
-    },
+    server,
   }
 
   if (command === 'build') {

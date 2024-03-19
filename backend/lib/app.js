@@ -20,7 +20,11 @@ const githubWebhook = require('./github/webhook')
 
 const { healthCheck } = require('./healthz')
 
-const { port, metricsPort } = config
+const {
+  port,
+  metricsPort,
+  cspFrameAncestors = []
+} = config
 const periodSeconds = config.readinessProbe?.periodSeconds || 10
 
 // resolve pathnames
@@ -71,7 +75,7 @@ app.use(helmet.contentSecurityPolicy({
     fontSrc: ['\'self\'', 'data:'],
     imgSrc,
     scriptSrc: ['\'self\'', '\'unsafe-eval\''],
-    frameAncestors: ['\'self\'']
+    frameAncestors: ['\'self\'', ...cspFrameAncestors]
   }
 }))
 app.use(helmet.referrerPolicy({
@@ -87,10 +91,6 @@ app.use(expressStaticGzip(PUBLIC_DIRNAME, {
   }
 }))
 app.use(STATIC_PATHS, notFound)
-
-app.use(helmet.frameguard({
-  action: 'deny'
-}))
 app.use(historyFallback(INDEX_FILENAME))
 
 app.use(renderError)

@@ -40,12 +40,25 @@ const environmentVariableDefinitions = {
   METRICS_PORT: {
     type: 'Integer',
     path: 'metricsPort'
-  }
+  },
+  COOKIE_SAME_SITE_POLICY: 'cookieSameSitePolicy',
+  CSP_FRAME_ANCESTORS: {
+    type: 'Object',
+    path: 'cspFrameAncestors'
+  },
+  FGA_API_URL: 'fgaApiUrl',
+  FGA_STORE_ID: 'fgaStoreId',
+  FGA_AUTHORIZATION_MODEL_ID: 'fgaAuthorizationModelId',
+  FGA_API_TOKEN: 'fgaApiToken'
 }
 
 function getEnvironmentVariable (env, name, type) {
   let value = env[name]
   switch (type) {
+    case 'Object':
+      return value
+        ? JSON.parse(value)
+        : undefined
     case 'Integer':
       value = parseInt(value, 10)
       return Number.isInteger(value) ? value : undefined

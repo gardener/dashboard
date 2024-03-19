@@ -15,7 +15,11 @@ const pTimeout = require('p-timeout')
 const { authentication, authorization } = require('../services')
 const createError = require('http-errors')
 const logger = require('../logger')
-const { sessionSecret, oidc = {} } = require('../config')
+const {
+  sessionSecret,
+  cookieSameSitePolicy = 'Lax',
+  oidc = {}
+} = require('../config')
 
 const {
   encodeState,
@@ -182,7 +186,7 @@ async function authorizationUrl (req, res) {
       secure,
       httpOnly: true,
       maxAge: 300000, // cookie will be removed after 5 minutes
-      sameSite: 'Lax',
+      sameSite: cookieSameSitePolicy,
       path: '/auth/callback'
     })
     switch (codeChallengeMethod) {
@@ -256,13 +260,13 @@ async function setCookies (res, tokenSet) {
   res.cookie(COOKIE_HEADER_PAYLOAD, join([header, payload], '.'), {
     secure,
     expires: undefined,
-    sameSite: 'Lax'
+    sameSite: cookieSameSitePolicy
   })
   res.cookie(COOKIE_SIGNATURE, signature, {
     secure,
     httpOnly: true,
     expires: undefined,
-    sameSite: 'Lax'
+    sameSite: cookieSameSitePolicy
   })
   const values = [tokenSet.id_token]
   if (tokenSet.refresh_token) {
@@ -273,7 +277,7 @@ async function setCookies (res, tokenSet) {
     secure,
     httpOnly: true,
     expires: undefined,
-    sameSite: 'Lax'
+    sameSite: cookieSameSitePolicy
   })
   return accessToken
 }

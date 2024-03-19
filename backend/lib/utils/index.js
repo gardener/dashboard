@@ -29,8 +29,11 @@ function encodeBase64 (value) {
   return Buffer.from(value, 'utf8').toString('base64')
 }
 
-function projectFilter (user, canListProjects = false) {
+function projectFilter (user, canListProjects = false, projectAllowList = []) {
   const isMemberOf = project => {
+    if (projectAllowList.includes(project.metadata.name)) {
+      return true
+    }
     return _
       .chain(project)
       .get('spec.members')
