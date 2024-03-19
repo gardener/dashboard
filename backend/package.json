@@ -74,7 +74,7 @@
   "devDependencies": {
     "@gardener-dashboard/test-utils": "workspace:^",
     "abort-controller": "^3.0.0",
-    "dockerfile-ast": "^0.5.0",
+    "dockerfile-ast": "^0.6.0",
     "eslint": "^8.36.0",
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-import": "^2.27.5",
@@ -152,7 +152,7 @@
       "<rootDir>/jest.setup.js"
     ]
   },
-  "packageManager": "yarn@4.0.2",
+  "packageManager": "yarn@4.1.1",
   "engines": {
     "node": "^20.5.0"
   }

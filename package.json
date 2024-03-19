@@ -32,7 +32,7 @@
     "jest": "^27.5.1",
     "node-gyp": "latest"
   },
-  "packageManager": "yarn@4.0.2",
+  "packageManager": "yarn@4.1.1",
   "engines": {
     "node": "^20.5.0"
   }
