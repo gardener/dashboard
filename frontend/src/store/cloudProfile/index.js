@@ -297,18 +297,25 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return machineTypesOrVolumeTypesByCloudProfileNameAndRegion({ type: 'machineTypes', cloudProfileName })
   }
 
-  function expirationWarningSeverityForVersion ({ isExpirationWarning, autoPatchEnabled, updateAvailable, autoUpdatePossible }) {
-    if (isExpirationWarning) {
-      if (!updateAvailable) {
-        return 'error'
-      } else if ((!autoPatchEnabled && autoUpdatePossible) || !autoUpdatePossible) {
-        return 'warning'
-      } else {
-        return 'info'
-      }
-    } else if (autoPatchEnabled && autoUpdatePossible) {
-      return 'info'
+  function getVersionExpirationWarningSeverity (options) {
+    const {
+      isExpirationWarning,
+      autoPatchEnabled,
+      updateAvailable,
+      autoUpdatePossible,
+    } = options
+    const autoPatchEnabledAndPossible = autoPatchEnabled && autoUpdatePossible
+    if (!isExpirationWarning) {
+      return autoPatchEnabledAndPossible
+        ? 'info'
+        : undefined
     }
+    if (!updateAvailable) {
+      return 'error'
+    }
+    return autoPatchEnabledAndPossible
+      ? 'info'
+      : 'warning'
   }
 
   function expiringWorkerGroupsForShoot (shootWorkerGroups, shootCloudProfileName, imageAutoPatch) {
@@ -328,7 +335,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
       }
 
       const updateAvailable = selectedImageIsNotLatest(workerImageDetails, allMachineImages)
-      const severity = expirationWarningSeverityForVersion({
+      const severity = getVersionExpirationWarningSeverity({
         isExpirationWarning: workerImageDetails.isExpirationWarning,
         autoPatchEnabled: imageAutoPatch,
         updateAvailable,
@@ -576,7 +583,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     const patchAvailable = kubernetesVersionIsNotLatestPatch(shootK8sVersion, shootCloudProfileName)
     const updatePathAvailable = kubernetesVersionUpdatePathAvailable(shootK8sVersion, shootCloudProfileName)
 
-    const severity = expirationWarningSeverityForVersion({
+    const severity = getVersionExpirationWarningSeverity({
       isExpirationWarning: version.isExpirationWarning,
       autoPatchEnabled: k8sAutoPatch,
       updateAvailable: updatePathAvailable,
