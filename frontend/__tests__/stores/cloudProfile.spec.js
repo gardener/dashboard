@@ -195,7 +195,7 @@ describe('stores', () => {
       }
 
       describe('#expiringWorkerGroupsForShoot', () => {
-        it('one should be info level (update available, auto update enabled))', () => {
+        it('one should be warning level (update available, auto update enabled, expiration warning))', () => {
           const imageWithExpirationWarning = find(decoratedAndSortedMachineImages, { name: 'gardenlinux', version: '1.1.3' })
           const imageWithExpirationDate = find(decoratedAndSortedMachineImages, { name: 'gardenlinux', version: '1.1.4' })
           const imageWithNoUpdate = find(decoratedAndSortedMachineImages, { name: 'gardenlinux', version: '1.1.5' })
@@ -228,7 +228,7 @@ describe('stores', () => {
             ...imageWithExpirationWarning,
             workerName: workers[2].name,
             isValidTerminationDate: true,
-            severity: 'info',
+            severity: 'warning',
           })
         })
 
@@ -253,7 +253,7 @@ describe('stores', () => {
           })
         })
 
-        it('one should be info level (update available, auto update enabled), one error (no update path)', () => {
+        it('one should be warning level (update available, auto update enabled, expiration warning), one error (no update path)', () => {
           const imageWithExpirationWarning = find(decoratedAndSortedMachineImages, { name: 'gardenlinux', version: '1.1.3' })
           // version has expiration warning, newer version exists but is deprecated
           const imageWithNoUpdatePath = find(decoratedAndSortedMachineImages, { name: 'foo', version: '1.3.3' })
@@ -272,7 +272,7 @@ describe('stores', () => {
             ...imageWithExpirationWarning,
             workerName: workers[0].name,
             isValidTerminationDate: true,
-            severity: 'info',
+            severity: 'warning',
           })
           expect(expiredWorkerGroups[1]).toMatchObject({
             ...imageWithNoUpdatePath,
@@ -453,11 +453,20 @@ describe('stores', () => {
 
       describe('#k8sVersionExpirationForShoot', () => {
         it('should be info level (patch available, auto update enabled))', () => {
+          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(unclassified164VersionWithExpiration.version, 'foo', true)
+          expect(versionExpirationWarning).toEqual({
+            expirationDate: unclassified164VersionWithExpiration.expirationDate,
+            isValidTerminationDate: true,
+            severity: 'info',
+          })
+        })
+
+        it('should be warning level (patch available, auto update enabled, expiration warning))', () => {
           const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(supported162VersionWithExpirationWarning.version, 'foo', true)
           expect(versionExpirationWarning).toEqual({
             expirationDate: supported162VersionWithExpirationWarning.expirationDate,
             isValidTerminationDate: true,
-            severity: 'info',
+            severity: 'warning',
           })
         })
 

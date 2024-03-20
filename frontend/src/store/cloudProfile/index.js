@@ -313,9 +313,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     if (!updateAvailable) {
       return 'error'
     }
-    return autoPatchEnabledAndPossible
-      ? 'info'
-      : 'warning'
+    return 'warning'
   }
 
   function expiringWorkerGroupsForShoot (shootWorkerGroups, shootCloudProfileName, imageAutoPatch) {
