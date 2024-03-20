@@ -297,16 +297,16 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return machineTypesOrVolumeTypesByCloudProfileNameAndRegion({ type: 'machineTypes', cloudProfileName })
   }
 
-  function expirationWarningSeverityForVersion ({ isExpirationWarning, autoPatchEnabled, updateAvailable, autoUpdateAvailable }) {
+  function expirationWarningSeverityForVersion ({ isExpirationWarning, autoPatchEnabled, updateAvailable, autoUpdatePossible }) {
     if (isExpirationWarning) {
       if (!updateAvailable) {
         return 'error'
-      } else if ((!autoPatchEnabled && autoUpdateAvailable) || !autoUpdateAvailable) {
+      } else if ((!autoPatchEnabled && autoUpdatePossible) || !autoUpdatePossible) {
         return 'warning'
       } else {
         return 'info'
       }
-    } else if (autoPatchEnabled && autoUpdateAvailable) {
+    } else if (autoPatchEnabled && autoUpdatePossible) {
       return 'info'
     }
   }
@@ -332,7 +332,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
         isExpirationWarning: workerImageDetails.isExpirationWarning,
         autoPatchEnabled: imageAutoPatch,
         updateAvailable,
-        autoUpdateAvailable: updateAvailable,
+        autoUpdatePossible: updateAvailable,
       })
 
       return {
@@ -580,7 +580,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
       isExpirationWarning: version.isExpirationWarning,
       autoPatchEnabled: k8sAutoPatch,
       updateAvailable: updatePathAvailable,
-      autoUpdateAvailable: patchAvailable,
+      autoUpdatePossible: patchAvailable,
     })
 
     if (!severity) {
