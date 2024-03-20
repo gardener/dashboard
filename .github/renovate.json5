@@ -22,11 +22,27 @@
   ],
   packageRules: [
     {
-      // Group npm major, minor and patch in separate PRs.
+      // Ignore major updates for these dependencies until we support ES modules
       matchDatasources: ["npm"],
-      groupName: "packages",
-      separateMajorMinor: true,
-      separateMinorPatch: true
+      matchPackageNames: [
+        "@octokit/core",
+        "@octokit/plugin-paginate-graphql",
+        "@octokit/plugin-paginate-rest",
+        "@octokit/plugin-request-log",
+        "@octokit/plugin-rest-endpoint-methods",
+        "chalk",
+        "codemirror",
+        "eslint-plugin-jest",
+        "eslint-plugin-n",
+        "jest",
+        "p-event",
+        "p-limit",
+        "p-retry",
+        "p-timeout",
+        "vite",
+      ],
+      matchUpdateTypes: ["major"],
+      enabled: false
     },
     {
       // Group github-actions in one PR.
