@@ -41,7 +41,7 @@ SPDX-License-Identifier: Apache-2.0
       </template>
     </v-select>
     <v-alert
-      v-if="currentK8sVersion.expirationDate && !selectedItem"
+      v-if="currentK8sVersion.isExpirationWarning && !selectedItem"
       type="warning"
       variant="tonal"
     >

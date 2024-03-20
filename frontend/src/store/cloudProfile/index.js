@@ -297,6 +297,25 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return machineTypesOrVolumeTypesByCloudProfileNameAndRegion({ type: 'machineTypes', cloudProfileName })
   }
 
+  function getVersionExpirationWarningSeverity (options) {
+    const {
+      isExpirationWarning,
+      autoPatchEnabled,
+      updateAvailable,
+      autoUpdatePossible,
+    } = options
+    const autoPatchEnabledAndPossible = autoPatchEnabled && autoUpdatePossible
+    if (!isExpirationWarning) {
+      return autoPatchEnabledAndPossible
+        ? 'info'
+        : undefined
+    }
+    if (!updateAvailable) {
+      return 'error'
+    }
+    return 'warning'
+  }
+
   function expiringWorkerGroupsForShoot (shootWorkerGroups, shootCloudProfileName, imageAutoPatch) {
     const allMachineImages = machineImagesByCloudProfileName(shootCloudProfileName)
     const workerGroups = map(shootWorkerGroups, worker => {
@@ -314,15 +333,12 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
       }
 
       const updateAvailable = selectedImageIsNotLatest(workerImageDetails, allMachineImages)
-
-      let severity
-      if (!updateAvailable) {
-        severity = 'error'
-      } else if (!imageAutoPatch) {
-        severity = 'warning'
-      } else {
-        severity = 'info'
-      }
+      const severity = getVersionExpirationWarningSeverity({
+        isExpirationWarning: workerImageDetails.isExpirationWarning,
+        autoPatchEnabled: imageAutoPatch,
+        updateAvailable,
+        autoUpdatePossible: updateAvailable,
+      })
 
       return {
         ...workerImageDetails,
@@ -331,7 +347,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
         severity,
       }
     })
-    return filter(workerGroups, 'expirationDate')
+    return filter(workerGroups, 'severity')
   }
 
   function machineTypesByCloudProfileNameAndRegionAndArchitecture ({ cloudProfileName, region, architecture }) {
@@ -389,7 +405,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
           continue
         }
 
-        logger.error(`Skipped machine image ${machineImage.name} as version ${versionObj.version} is not a valid semver version and cannot be harmonized`)
+        logger.error(`Skipped machine image ${machineImage.name} as version ${versionObj.version} is not a valid semver version and cannot be normalized`)
       }
       versions.sort((a, b) => {
         return semver.rcompare(a.version, b.version)
@@ -534,8 +550,8 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
 
   function kubernetesVersionIsNotLatestPatch (kubernetesVersion, cloudProfileName) {
     const allVersions = kubernetesVersions(cloudProfileName)
-    return some(allVersions, ({ version, isPreview }) => {
-      return semver.diff(version, kubernetesVersion) === 'patch' && semver.gt(version, kubernetesVersion) && !isPreview
+    return some(allVersions, ({ version, isSupported }) => {
+      return semver.diff(version, kubernetesVersion) === 'patch' && semver.gt(version, kubernetesVersion) && isSupported
     })
   }
 
@@ -545,8 +561,8 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
       return true
     }
     const versionMinorVersion = semver.minor(kubernetesVersion)
-    return some(allVersions, ({ version, isPreview }) => {
-      return semver.minor(version) === versionMinorVersion + 1 && !isPreview
+    return some(allVersions, ({ version, isSupported }) => {
+      return semver.minor(version) === versionMinorVersion + 1 && isSupported
     })
   }
 
@@ -561,21 +577,18 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
         severity: 'warning',
       }
     }
-    if (!version.expirationDate) {
-      return undefined
-    }
 
     const patchAvailable = kubernetesVersionIsNotLatestPatch(shootK8sVersion, shootCloudProfileName)
     const updatePathAvailable = kubernetesVersionUpdatePathAvailable(shootK8sVersion, shootCloudProfileName)
 
-    let severity
-    if (!updatePathAvailable) {
-      severity = 'error'
-    } else if ((!k8sAutoPatch && patchAvailable) || !patchAvailable) {
-      severity = 'warning'
-    } else if (k8sAutoPatch && patchAvailable) {
-      severity = 'info'
-    } else {
+    const severity = getVersionExpirationWarningSeverity({
+      isExpirationWarning: version.isExpirationWarning,
+      autoPatchEnabled: k8sAutoPatch,
+      updateAvailable: updatePathAvailable,
+      autoUpdatePossible: patchAvailable,
+    })
+
+    if (!severity) {
       return undefined
     }
 
