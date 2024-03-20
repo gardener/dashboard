@@ -297,6 +297,25 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return machineTypesOrVolumeTypesByCloudProfileNameAndRegion({ type: 'machineTypes', cloudProfileName })
   }
 
+  function getVersionExpirationWarningSeverity (options) {
+    const {
+      isExpirationWarning,
+      autoPatchEnabled,
+      updateAvailable,
+      autoUpdatePossible,
+    } = options
+    const autoPatchEnabledAndPossible = autoPatchEnabled && autoUpdatePossible
+    if (!isExpirationWarning) {
+      return autoPatchEnabledAndPossible
+        ? 'info'
+        : undefined
+    }
+    if (!updateAvailable) {
+      return 'error'
+    }
+    return 'warning'
+  }
+
   function expiringWorkerGroupsForShoot (shootWorkerGroups, shootCloudProfileName, imageAutoPatch) {
     const allMachineImages = machineImagesByCloudProfileName(shootCloudProfileName)
     const workerGroups = map(shootWorkerGroups, worker => {
@@ -314,18 +333,12 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
       }
 
       const updateAvailable = selectedImageIsNotLatest(workerImageDetails, allMachineImages)
-      let severity
-      if (workerImageDetails.isExpirationWarning) {
-        if (!updateAvailable) {
-          severity = 'error'
-        } else if (!imageAutoPatch) {
-          severity = 'warning'
-        } else {
-          severity = 'info'
-        }
-      } else if (imageAutoPatch && updateAvailable) {
-        severity = 'info'
-      }
+      const severity = getVersionExpirationWarningSeverity({
+        isExpirationWarning: workerImageDetails.isExpirationWarning,
+        autoPatchEnabled: imageAutoPatch,
+        updateAvailable,
+        autoUpdatePossible: updateAvailable,
+      })
 
       return {
         ...workerImageDetails,
@@ -392,7 +405,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
           continue
         }
 
-        logger.error(`Skipped machine image ${machineImage.name} as version ${versionObj.version} is not a valid semver version and cannot be harmonized`)
+        logger.error(`Skipped machine image ${machineImage.name} as version ${versionObj.version} is not a valid semver version and cannot be normalized`)
       }
       versions.sort((a, b) => {
         return semver.rcompare(a.version, b.version)
@@ -568,18 +581,12 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     const patchAvailable = kubernetesVersionIsNotLatestPatch(shootK8sVersion, shootCloudProfileName)
     const updatePathAvailable = kubernetesVersionUpdatePathAvailable(shootK8sVersion, shootCloudProfileName)
 
-    let severity
-    if (version.isExpirationWarning) {
-      if (!updatePathAvailable) {
-        severity = 'error'
-      } else if ((!k8sAutoPatch && patchAvailable) || !patchAvailable) {
-        severity = 'warning'
-      } else {
-        severity = 'info'
-      }
-    } else if (k8sAutoPatch && patchAvailable) {
-      severity = 'info'
-    }
+    const severity = getVersionExpirationWarningSeverity({
+      isExpirationWarning: version.isExpirationWarning,
+      autoPatchEnabled: k8sAutoPatch,
+      updateAvailable: updatePathAvailable,
+      autoUpdatePossible: patchAvailable,
+    })
 
     if (!severity) {
       return undefined
