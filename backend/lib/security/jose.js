@@ -86,7 +86,10 @@ module.exports = sessionSecret => {
         .encrypt(symetricKey)
     },
     async decrypt (data) {
-      const { plaintext } = await jose.compactDecrypt(data, symetricKey)
+      const options = {
+        keyManagementAlgorithms: ['PBES2-HS256+A128KW']
+      }
+      const { plaintext } = await jose.compactDecrypt(data, symetricKey, options)
       return decoder.decode(plaintext)
     }
   }
