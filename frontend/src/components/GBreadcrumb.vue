@@ -29,14 +29,17 @@ SPDX-License-Identifier: Apache-2.0
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
+import { useProjectStore } from '@/store/project'
+
 import { kebabCase } from '@/lodash'
 
 const route = useRoute()
+const projectStore = useProjectStore()
 
 const breadcrumbItems = computed(() => {
   const breadcrumbs = route.meta?.breadcrumbs ?? []
   const items = typeof breadcrumbs === 'function'
-    ? breadcrumbs(route)
+    ? breadcrumbs(route, projectStore.projectName)
     : breadcrumbs
   return items.map(({ title, href, to, disabled, exact }) => {
     const item = {

@@ -165,18 +165,6 @@ export function createGlobalBeforeGuards () {
     },
     ensureUserAuthenticatedForNonPublicRoutes(),
     ensureDataLoaded(),
-    to => {
-      const titles = []
-      titles.push(to.meta.title ?? to.name)
-      if (to.params.name) {
-        titles.push(to.params.name)
-      }
-      if (projectStore.projectName) {
-        titles.push(projectStore.projectName)
-      }
-      titles.push(process.env.VITE_APP_TITLE)
-      document.title = titles.join(' | ')
-    },
   ]
 }
 
