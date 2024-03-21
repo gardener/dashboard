@@ -1276,7 +1276,7 @@ const RAW_RUNTIME_STATE =
           ["p-retry", "npm:4.6.2"],\
           ["p-timeout", "npm:4.1.0"],\
           ["path-to-regexp", "npm:6.2.1"],\
-          ["sanitize-html", "npm:2.12.1"],\
+          ["sanitize-html", "npm:2.13.0"],\
           ["semver", "npm:7.6.0"],\
           ["set-cookie-parser", "npm:2.6.0"],\
           ["showdown", "npm:2.1.0"],\
@@ -10969,10 +10969,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["sanitize-html", [\
-      ["npm:2.12.1", {\
-        "packageLocation": "./.yarn/cache/sanitize-html-npm-2.12.1-af8fd6c44f-0169e77845.zip/node_modules/sanitize-html/",\
+      ["npm:2.13.0", {\
+        "packageLocation": "./.yarn/cache/sanitize-html-npm-2.13.0-32b89ad1cd-2a83f7dae1.zip/node_modules/sanitize-html/",\
         "packageDependencies": [\
-          ["sanitize-html", "npm:2.12.1"],\
+          ["sanitize-html", "npm:2.13.0"],\
           ["deepmerge", "npm:4.3.1"],\
           ["escape-string-regexp", "npm:4.0.0"],\
           ["htmlparser2", "npm:8.0.2"],\
