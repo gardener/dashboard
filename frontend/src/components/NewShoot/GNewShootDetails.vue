@@ -194,7 +194,7 @@ export default {
         return undefined
       }
       const hintText = []
-      if (version.expirationDate) {
+      if (version.isExpirationWarning) {
         hintText.push(`Kubernetes version expires on: ${version.expirationDateString}. Kubernetes update will be enforced after that date.`)
       }
       if (this.updateK8sMaintenance && this.versionIsNotLatestPatch) {

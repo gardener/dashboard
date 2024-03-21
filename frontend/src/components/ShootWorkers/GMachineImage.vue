@@ -128,7 +128,7 @@ export default {
           severity: this.machineImage.vendorHint.severity,
         })
       }
-      if (this.machineImage.expirationDate) {
+      if (this.machineImage.isExpirationWarning) {
         hints.push({
           type: 'text',
           hint: `Image version expires on: ${this.machineImage.expirationDateString}. Image update will be enforced after that date.`,

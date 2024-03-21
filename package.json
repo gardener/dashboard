@@ -28,11 +28,11 @@
     }
   },
   "devDependencies": {
-    "eslint": "^8.36.0",
+    "eslint": "^8.57.0",
     "jest": "^27.5.1",
     "node-gyp": "latest"
   },
-  "packageManager": "yarn@4.0.2",
+  "packageManager": "yarn@4.1.1",
   "engines": {
     "node": "^20.5.0"
   }
