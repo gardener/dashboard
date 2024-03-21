@@ -42,7 +42,19 @@ SPDX-License-Identifier: Apache-2.0
           />
         </template>
         <g-list-item-content label="Version">
-          {{ shootK8sVersion }} | Classification: {{ kubernetesVersion.classification }}
+          {{ shootK8sVersion }}
+        </g-list-item-content>
+      </g-list-item>
+      <v-divider inset />
+      <g-list-item>
+        <template #prepend>
+          <v-icon
+            :color="classificationColor"
+            :icon="classificationIcon"
+          />
+        </template>
+        <g-list-item-content label="Classification">
+          {{ kubernetesVersion.classification }}
         </g-list-item-content>
       </g-list-item>
       <template v-if="!!kubernetesVersion.isExpirationWarning">
@@ -71,34 +83,6 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           <g-list-item-content label="Expiration">
             {{ kubernetesVersion.expirationDateString }}
-          </g-list-item-content>
-        </g-list-item>
-      </template>
-      <template v-if="kubernetesVersion.isDeprecated">
-        <v-divider inset />
-        <g-list-item>
-          <template #prepend>
-            <v-icon
-              color="warning"
-              icon="mdi-alert-circle-outline"
-            />
-          </template>
-          <g-list-item-content label="Deprecation Warning">
-            Kubernetes version is deprecated
-          </g-list-item-content>
-        </g-list-item>
-      </template>
-      <template v-if="kubernetesVersion.isPreview">
-        <v-divider inset />
-        <g-list-item>
-          <template #prepend>
-            <v-icon
-              color="info"
-              icon="mdi-alert-circle-outline"
-            />
-          </template>
-          <g-list-item-content label="Preview Information">
-            Kubernetes version is preview
           </g-list-item-content>
         </g-list-item>
       </template>
@@ -188,6 +172,21 @@ export default {
         return 'Updates available'
       }
       return 'Kubernetes version up to date'
+    },
+    classificationColor () {
+      if (this.kubernetesVersion.isDeprecated) {
+        return 'warning'
+      }
+      if (this.kubernetesVersion.isPreview) {
+        return 'info'
+      }
+      return 'primary'
+    },
+    classificationIcon () {
+      if (this.kubernetesVersion.isDeprecated || this.kubernetesVersion.isPreview) {
+        return 'mdi-alert-circle-outline'
+      }
+      return 'mdi-information-outline'
     },
   },
   methods: {
