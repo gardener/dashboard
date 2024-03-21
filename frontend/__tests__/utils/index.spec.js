@@ -15,6 +15,7 @@ import {
   getTimeStringTo,
   getTimeStringFrom,
   parseNumberWithMagnitudeSuffix,
+  normalizeVersion,
 } from '@/utils'
 
 import { pick } from '@/lodash'
@@ -434,6 +435,36 @@ describe('utils', () => {
 
     test('returns null for invalid suffix', () => {
       expect(parseNumberWithMagnitudeSuffix('1x')).toBeNull()
+    })
+  })
+
+  describe('normalizeVersion', () => {
+    it('should fill missing segments', () => {
+      expect(normalizeVersion('1.12')).toBe('1.12.0')
+      expect(normalizeVersion('2')).toBe('2.0.0')
+    })
+
+    it('should cut additional segments', () => {
+      expect(normalizeVersion('1.2.23.4')).toBe('1.2.23')
+    })
+
+    it('should preserve pre-release or build suffix', () => {
+      expect(normalizeVersion('1.2-beta')).toBe('1.2.0-beta')
+      expect(normalizeVersion('1.2.14.3+abcd')).toBe('1.2.14+abcd')
+    })
+
+    it('should remove leading zeros', () => {
+      expect(normalizeVersion('23.05')).toBe('23.5.0')
+    })
+
+    it('should allow only integer segments', () => {
+      expect(normalizeVersion('23.1e1')).toBeUndefined()
+      expect(normalizeVersion('23.x')).toBeUndefined()
+    })
+
+    it('should not allow pre or suffix other than allowed ones', () => {
+      expect(normalizeVersion('x23.1')).toBeUndefined()
+      expect(normalizeVersion('23.2x')).toBeUndefined()
     })
   })
 })

@@ -82,7 +82,7 @@ export default {
     gardenctlConfigYaml () {
       return `gardens:
   - identity: ${this.clusterIdentity}
-    kubeconfig: "<path-to-garden-cluster-kubeconfig>"`
+    kubeconfig: <path-to-garden-cluster-kubeconfig>`
     },
     configCmd () {
       return `gardenctl config set-garden ${this.clusterIdentity} --kubeconfig "<path-to-garden-cluster-kubeconfig>"`
