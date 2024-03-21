@@ -38,8 +38,7 @@
         "p-event",
         "p-limit",
         "p-retry",
-        "p-timeout",
-        "vite",
+        "p-timeout"
       ],
       matchUpdateTypes: ["major"],
       enabled: false
