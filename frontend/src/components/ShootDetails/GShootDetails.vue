@@ -27,10 +27,7 @@ SPDX-License-Identifier: Apache-2.0
         cols="12"
         md="6"
       >
-        <v-card
-          v-if="canGetSecrets"
-          class="mb-4"
-        >
+        <v-card class="mb-4">
           <g-toolbar title="Access" />
           <g-shoot-access-card
             :shoot-item="shootItem"
@@ -49,7 +46,6 @@ SPDX-License-Identifier: Apache-2.0
 import { defineAsyncComponent } from 'vue'
 import { mapState } from 'pinia'
 
-import { useAuthzStore } from '@/store/authz'
 import { useProjectStore } from '@/store/project'
 
 import GShootDetailsCard from '@/components/ShootDetails/GShootDetailsCard'
@@ -87,7 +83,6 @@ export default {
     'addTerminalShortcut',
   ],
   computed: {
-    ...mapState(useAuthzStore, ['canGetSecrets']),
     ...mapState(useProjectStore, ['shootCustomFieldList']),
     customFields () {
       const customFields = filter(this.shootCustomFieldList, ['showDetails', true])

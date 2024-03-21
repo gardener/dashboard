@@ -66,6 +66,10 @@ export const useAuthzStore = defineStore('authz', () => {
     return canI(status.value, 'create', 'core.gardener.cloud', 'shoots/adminkubeconfig')
   })
 
+  const canCreateShootsViewerkubeconfig = computed(() => {
+    return canI(status.value, 'create', 'core.gardener.cloud', 'shoots/viewerkubeconfig')
+  })
+
   const canPatchSecrets = computed(() => {
     return canI(status.value, 'patch', '', 'secrets')
   })
@@ -185,6 +189,7 @@ export const useAuthzStore = defineStore('authz', () => {
     canGetSecrets,
     canCreateSecrets,
     canCreateShootsAdminkubeconfig,
+    canCreateShootsViewerkubeconfig,
     canPatchSecrets,
     canDeleteSecrets,
     canCreateTokenRequest,

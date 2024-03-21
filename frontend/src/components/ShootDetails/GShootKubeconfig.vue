@@ -5,7 +5,9 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-list-item>
+  <g-list-item
+    v-if="isGardenloginType || canGetSecrets"
+  >
     <template #prepend>
       <v-icon
         :icon="icon"
@@ -27,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
         </span>
       </template>
     </g-list-item-content>
-    <g-list-item-content v-else>
+    <g-list-item-content v-else-if="canGetSecrets">
       Kubeconfig - Static Token
       <template #description>
         <span v-if="!shootEnableStaticTokenKubeconfig">
@@ -86,6 +88,9 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import download from 'downloadjs'
+import { mapState } from 'pinia'
+
+import { useAuthzStore } from '@/store/authz'
 
 import GListItem from '@/components/GListItem.vue'
 import GListItemContent from '@/components/GListItemContent.vue'
@@ -124,6 +129,9 @@ export default {
     }
   },
   computed: {
+    ...mapState(useAuthzStore, [
+      'canGetSecrets',
+    ]),
     icon () {
       return this.showListIcon ? 'mdi-file' : ''
     },
