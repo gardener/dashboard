@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
       />
     </template>
     <template #title="{ item }">
-      <span :class="{ 'text-h6': !item.to }">
+      <span :class="{ 'text-h6': item.last }">
         {{ item.title || item }}
       </span>
     </template>
@@ -41,7 +41,7 @@ const breadcrumbItems = computed(() => {
   const items = typeof breadcrumbs === 'function'
     ? breadcrumbs(route, projectStore.projectName)
     : breadcrumbs
-  return items.map(({ title, href, to, disabled, exact }) => {
+  return items.map(({ title, href, to, disabled, exact }, index, array) => {
     const item = {
       key: kebabCase(title),
       title,
@@ -59,6 +59,9 @@ const breadcrumbItems = computed(() => {
     }
     if (typeof exact === 'boolean') {
       item.exact = exact
+    }
+    if (index === array.length - 1) {
+      item.last = true
     }
     return item
   })
