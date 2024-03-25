@@ -111,12 +111,6 @@ export function shootListBreadcrumbs ({ params }, projectName) {
   return [
     {
       title: 'Clusters',
-      get to () {
-        return {
-          name: 'ShootList',
-          params: { namespace: '_all' },
-        }
-      },
     },
     projectItem(params, projectName),
   ]
@@ -143,12 +137,6 @@ export function shootItemBreadcrumbs ({ params }, projectName) {
   return [
     {
       title: 'Clusters',
-      get to () {
-        return {
-          name: 'ShootList',
-          params: { namespace: '_all' },
-        }
-      },
     },
     projectItem(params, projectName, true),
     {
@@ -185,12 +173,6 @@ export function shootItemTerminalBreadcrumbs ({ params }, projectName) {
   return [
     {
       title: 'Clusters',
-      get to () {
-        return {
-          name: 'ShootList',
-          params: { namespace: '_all' },
-        }
-      },
     },
     projectItem(params, projectName, true),
     {
