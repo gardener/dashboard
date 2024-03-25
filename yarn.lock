@@ -804,7 +804,7 @@ __metadata:
     eslint-plugin-import-newlines: "npm:^1.4.0"
     eslint-plugin-n: "npm:^15.7.0"
     eslint-plugin-promise: "npm:^6.1.1"
-    eslint-plugin-vitest: "npm:^0.3.26"
+    eslint-plugin-vitest: "npm:^0.4.0"
     eslint-plugin-vue: "npm:^9.23.0"
     eventemitter3: "npm:^5.0.1"
     floating-vue: "npm:^5.2.2"
@@ -2053,7 +2053,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/utils@npm:^7.1.1":
+"@typescript-eslint/utils@npm:^7.2.0":
   version: 7.3.1
   resolution: "@typescript-eslint/utils@npm:7.3.1"
   dependencies:
@@ -4709,11 +4709,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-vitest@npm:^0.3.26":
-  version: 0.3.26
-  resolution: "eslint-plugin-vitest@npm:0.3.26"
+"eslint-plugin-vitest@npm:^0.4.0":
+  version: 0.4.0
+  resolution: "eslint-plugin-vitest@npm:0.4.0"
   dependencies:
-    "@typescript-eslint/utils": "npm:^7.1.1"
+    "@typescript-eslint/utils": "npm:^7.2.0"
   peerDependencies:
     eslint: ">=8.0.0"
     vitest: "*"
@@ -4722,7 +4722,7 @@ __metadata:
       optional: true
     vitest:
       optional: true
-  checksum: 10c0/8f83c65243b0c0f143194eb9585b18f7316ebb6aa9ada0e1ef9cf69bc1ebff84de08df4c0064c151ebfe5e2a14b8f47a6808276a5af4549869652db5667156c9
+  checksum: 10c0/ffbf1b4108409bfb338bed2d38d1ee573ea9859bce5a1dc1f7662d4767c4be36dd7a0b09e098357a3d8bd0a866e476477121cef5af2ffa2ceb171a8f9992192d
   languageName: node
   linkType: hard
 
