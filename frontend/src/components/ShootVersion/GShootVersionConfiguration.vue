@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <g-action-button-dialog
     ref="actionDialog"
     :shoot-item="shootItem"
-    :icon="supportedPatchAvailable ? 'mdi-arrow-up-bold-circle' : 'mdi-arrow-up-bold-circle-outline'"
+    :icon="shootSupportedPatchAvailable ? 'mdi-arrow-up-bold-circle' : 'mdi-arrow-up-bold-circle-outline'"
     width="450"
     caption="Update Cluster"
     confirm-button-text="Update"
@@ -21,8 +21,8 @@ SPDX-License-Identifier: Apache-2.0
       <v-card-text>
         <g-shoot-version-update
           ref="shootVersionUpdate"
-          :available-k8s-updates="availableK8sUpdates"
-          :current-k8s-version="kubernetesVersion"
+          :available-k8s-updates="shootAvailableK8sUpdates"
+          :current-k8s-version="shootKubernetesVersionObject"
           @selected-version="onSelectedVersion"
           @selected-version-type="onSelectedVersionType"
           @confirm-required="onConfirmRequired"
@@ -65,10 +65,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapActions } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
-
-import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import GShootVersionUpdate from '@/components/ShootVersion/GShootVersionUpdate.vue'
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
@@ -108,27 +105,14 @@ export default {
     }
   },
   computed: {
-    kubernetesVersion () {
-      const version = find(this.kubernetesVersions(this.shootCloudProfileName), { version: this.shootK8sVersion })
-      if (!version) {
-        return {}
-      }
-      return version
-    },
-    supportedPatchAvailable () {
-      return !!find(this.availableK8sUpdates?.patch, 'isSupported')
-    },
-    supportedUpgradeAvailable () {
-      return !!find(this.availableK8sUpdates?.minor, 'isSupported')
+    shootSupportedPatchAvailable () {
+      return !!find(this.shootAvailableK8sUpdates?.patch, 'isSupported')
     },
     canUpdate () {
-      return !!this.availableK8sUpdates
+      return !!this.shootAvailableK8sUpdates
     },
     confirm () {
       return this.confirmRequired ? this.shootName : undefined
-    },
-    availableK8sUpdates () {
-      return this.availableKubernetesUpdatesForShoot(this.shootK8sVersion, this.shootCloudProfileName)
     },
     buttonText () {
       if (!this.text) {
@@ -138,10 +122,6 @@ export default {
     },
   },
   methods: {
-    ...mapActions(useCloudProfileStore, [
-      'kubernetesVersions',
-      'availableKubernetesUpdatesForShoot',
-    ]),
     onSelectedVersion (value) {
       this.selectedVersion = value
     },
@@ -175,7 +155,7 @@ export default {
         this.logger.error(errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
-    async reset () {
+    reset () {
       const defaultData = this.$options.data.apply(this)
       Object.assign(this.$data, defaultData)
 

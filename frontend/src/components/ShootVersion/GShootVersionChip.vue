@@ -20,11 +20,11 @@ SPDX-License-Identifier: Apache-2.0
             v-bind="mergeProps(popoverProps, tooltipProps)"
             size="small"
             class="cursor-pointer ma-1"
-            :variant="!supportedPatchAvailable ? 'tonal' : 'flat'"
+            :variant="!shootSupportedPatchAvailable ? 'tonal' : 'flat'"
             :color="chipColor"
           >
             <v-icon
-              v-if="supportedPatchAvailable || supportedUpgradeAvailable"
+              v-if="shootSupportedPatchAvailable || shootSupportedUpgradeAvailable"
               icon="mdi-menu-up"
               size="small"
             />
@@ -54,10 +54,10 @@ SPDX-License-Identifier: Apache-2.0
           />
         </template>
         <g-list-item-content label="Classification">
-          {{ kubernetesVersion.classification }}
+          {{ shootKubernetesVersionObject.classification }}
         </g-list-item-content>
       </g-list-item>
-      <template v-if="!!kubernetesVersion.isExpirationWarning">
+      <template v-if="!!shootKubernetesVersionObject.isExpirationWarning">
         <v-divider inset />
         <g-list-item>
           <template #prepend>
@@ -67,12 +67,17 @@ SPDX-License-Identifier: Apache-2.0
             />
           </template>
           <g-list-item-content label="Expiration">
-            Kubernetes version expires on: {{ kubernetesVersion.expirationDateString }}.
+            Kubernetes version expires
+            <g-time-string
+              :date-time="shootKubernetesVersionObject.expirationDate"
+              mode="future"
+              date-tooltip
+            />.
             Kubernetes update will be enforced after that date.
           </g-list-item-content>
         </g-list-item>
       </template>
-      <template v-else-if="!!kubernetesVersion.expirationDate">
+      <template v-else-if="!!shootKubernetesVersionObject.expirationDate">
         <v-divider inset />
         <g-list-item>
           <template #prepend>
@@ -82,11 +87,15 @@ SPDX-License-Identifier: Apache-2.0
             />
           </template>
           <g-list-item-content label="Expiration">
-            {{ kubernetesVersion.expirationDateString }}
+            <g-time-string
+              :date-time="shootKubernetesVersionObject.expirationDate"
+              mode="future"
+              date-tooltip
+            />
           </g-list-item-content>
         </g-list-item>
       </template>
-      <template v-if="supportedPatchAvailable || supportedUpgradeAvailable">
+      <template v-if="shootSupportedPatchAvailable || shootSupportedUpgradeAvailable">
         <v-divider inset />
         <g-list-item>
           <template #prepend>
@@ -96,10 +105,10 @@ SPDX-License-Identifier: Apache-2.0
             />
           </template>
           <g-list-item-content label="Update Information">
-            <div v-if="supportedPatchAvailable">
+            <div v-if="shootSupportedPatchAvailable">
               Patch is available for this version
             </div>
-            <div v-if="supportedUpgradeAvailable">
+            <div v-if="shootSupportedUpgradeAvailable">
               Upgrade is available for this version
             </div>
           </g-list-item-content>
@@ -110,13 +119,8 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapActions } from 'pinia'
-
-import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import { shootItem } from '@/mixins/shootItem'
-
-import { find } from '@/lodash'
 
 export default {
   mixins: [shootItem],
@@ -139,61 +143,39 @@ export default {
         this.activePopoverKey = value ? this.popoverKey : ''
       },
     },
-    supportedPatchAvailable () {
-      return !!find(this.availableK8sUpdates?.patch, 'isSupported')
-    },
-    supportedUpgradeAvailable () {
-      return !!find(this.availableK8sUpdates?.minor, 'isSupported')
-    },
-    availableK8sUpdates () {
-      return this.availableKubernetesUpdatesForShoot(this.shootK8sVersion, this.shootCloudProfileName)
-    },
     chipColor () {
-      return this.kubernetesVersion.isDeprecated ? 'warning' : 'primary'
-    },
-    kubernetesVersion () {
-      const version = find(this.kubernetesVersions(this.shootCloudProfileName), { version: this.shootK8sVersion })
-      if (!version) {
-        return {}
-      }
-      return version
+      return this.shootKubernetesVersionObject.isDeprecated ? 'warning' : 'primary'
     },
     tooltipText () {
-      if (this.kubernetesVersion.isDeprecated) {
+      if (this.shootKubernetesVersionObject.isDeprecated) {
         return 'Kubernetes version is deprecated'
       }
-      if (this.supportedPatchAvailable) {
+      if (this.shootSupportedPatchAvailable) {
         return 'Kubernetes patch available'
       }
-      if (this.supportedUpgradeAvailable) {
+      if (this.shootSupportedUpgradeAvailable) {
         return 'Kubernetes upgrade available'
       }
-      if (this.availableK8sUpdates) {
+      if (this.shootAvailableK8sUpdates) {
         return 'Updates available'
       }
       return 'Kubernetes version up to date'
     },
     classificationColor () {
-      if (this.kubernetesVersion.isDeprecated) {
+      if (this.shootKubernetesVersionObject.isDeprecated) {
         return 'warning'
       }
-      if (this.kubernetesVersion.isPreview) {
+      if (this.shootKubernetesVersionObject.isPreview) {
         return 'info'
       }
       return 'primary'
     },
     classificationIcon () {
-      if (this.kubernetesVersion.isDeprecated || this.kubernetesVersion.isPreview) {
+      if (this.shootKubernetesVersionObject.isDeprecated || this.shootKubernetesVersionObject.isPreview) {
         return 'mdi-alert-circle-outline'
       }
       return 'mdi-information-outline'
     },
-  },
-  methods: {
-    ...mapActions(useCloudProfileStore, [
-      'kubernetesVersions',
-      'availableKubernetesUpdatesForShoot',
-    ]),
   },
 }
 </script>

@@ -234,7 +234,12 @@ SPDX-License-Identifier: Apache-2.0
                         >
                           mdi-alert
                         </v-icon>
-                        Image expires on {{ machineImage.expirationDateString }}
+                        Image expires
+                        <g-time-string
+                          :date-time="machineImage.expirationDate"
+                          mode="future"
+                          date-tooltip
+                        />
                       </v-col>
                     </v-row>
                   </v-card-text>

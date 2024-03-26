@@ -99,7 +99,7 @@ export default {
         this.logger.error(errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
-    async reset () {
+    reset () {
       this.seedName = this.shootSeedName
     },
   },
