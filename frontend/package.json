@@ -32,9 +32,9 @@
     "test": "run vitest run"
   },
   "dependencies": {
-    "@braintree/sanitize-url": "^6.0.4",
+    "@braintree/sanitize-url": "^7.0.1",
     "@fontsource/roboto": "^5.0.12",
-    "@kyvg/vue3-notification": "^2.9.1",
+    "@kyvg/vue3-notification": "^3.2.1",
     "@mdi/font": "7.4.47",
     "@vuelidate/core": "^2.0.3",
     "@vuelidate/validators": "^2.0.4",
@@ -47,12 +47,12 @@
     "dayjs": "^1.11.10",
     "downloadjs": "^1.4.7",
     "eventemitter3": "^5.0.1",
-    "floating-vue": "2.0.0",
+    "floating-vue": "^5.2.2",
     "get-contrast": "^3.0.0",
     "highlight.js": "^11.9.0",
     "js-cookie": "^3.0.5",
     "js-yaml": "^4.1.0",
-    "jwt-decode": "^3.1.2",
+    "jwt-decode": "^4.0.0",
     "lodash": "^4.17.21",
     "md5": "^2.3.0",
     "mitt": "^3.0.1",
@@ -64,12 +64,12 @@
     "statuses": "^2.0.1",
     "symbol-tree": "^3.2.4",
     "toidentifier": "^1.0.1",
-    "universal-cookie": "^4.0.4",
+    "universal-cookie": "^7.1.0",
     "url-template": "^3.1.1",
     "uuid": "^9.0.1",
     "vue": "^3.4.21",
     "vue-router": "^4.3.0",
-    "vuetify": "^3.5.9",
+    "vuetify": "^3.5.10",
     "xterm": "^5.3.0",
     "xterm-addon-fit": "^0.8.0",
     "xterm-addon-web-links": "^0.9.0"
@@ -86,9 +86,9 @@
     "eslint-plugin-import-newlines": "^1.4.0",
     "eslint-plugin-n": "^15.7.0",
     "eslint-plugin-promise": "^6.1.1",
-    "eslint-plugin-vitest": "^0.3.26",
+    "eslint-plugin-vitest": "^0.4.0",
     "eslint-plugin-vue": "^9.23.0",
-    "jsdom": "^22.1.0",
+    "jsdom": "^24.0.0",
     "rollup-plugin-visualizer": "^5.12.0",
     "sass": "^1.72.0",
     "unplugin-fonts": "^1.1.1",
@@ -98,7 +98,7 @@
     "vitest": "^1.4.0",
     "vitest-fetch-mock": "^0.2.2"
   },
-  "packageManager": "yarn@4.0.2",
+  "packageManager": "yarn@4.1.1",
   "engines": {
     "node": "^20.5.0"
   }
