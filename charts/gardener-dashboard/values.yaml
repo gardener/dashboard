@@ -177,9 +177,8 @@ global:
       #   gitHubRepoUrl: https://foo-github.com/dummyorg/dummyrepo
       #   hideClustersWithLabels: # hides clusters with labels on the 'ALL PROJECTS' page if the respective table option is enabled
       #   - ignore
-      #   newTicketLabels: # these are the labels that are automatically preselected when creating a new ticket
-      #   - default-label
-      #   # Available issue description template variables:
+
+      #   # Available template variables:
       #   # - `${shootName}`: name of the shoot
       #   # - `${shootNamespace}`: namespace of the shoot
       #   # - `${shootCreatedAt}`: creation timestamp of the shoot, format 'YYYY-MM-DD'
@@ -198,29 +197,35 @@ global:
       #   #       accessRestrictions[].options[].title: option title
       #   #       accessRestrictions[].options[].description: option description
       #   #       accessRestrictions[].options[].key: unique identifier
-      #   issueDescriptionTemplate: |
-      #     ## Which cluster is affected?
+      #   newIssue:
+      #     title: "[${shootNamespace}/${shootName}] <problem>"
+      #     labels: # these are the labels that are automatically preselected when creating a new ticket
+      #     - default-label
+      #     fileName: shoot_issue.yaml
+      #     affectedCluster: "${shootUrl}" # example template form element id
+      #     body: |
+      #       ## Which cluster is affected?
 
-      #     `Cluster Details Dashboard Link`: [${projectName}/${shootName}](${shootUrl})
-      #     `Operating System`: ${machineImageNames}
-      #     `Platform`: ${providerType}
-      #     <% if(accessRestrictions.length) { %>
-      #     ## Attention: This cluster has access restrictions
-      #     <% accessRestrictions.forEach(accessRestriction => { %>
-      #     - <%- accessRestriction.title %><% accessRestriction.options.forEach(option => { %>
-      #       - <%- option.title %><% }) }) %>
-      #     <%
-      #     }%>
-      #     ## What happened?
+      #       `Cluster Details Dashboard Link`: [${projectName}/${shootName}](${shootUrl})
+      #       `Operating System`: ${machineImageNames}
+      #       `Platform`: ${providerType}
+      #       <% if(accessRestrictions.length) { %>
+      #       ## Attention: This cluster has access restrictions
+      #       <% accessRestrictions.forEach(accessRestriction => { %>
+      #       - <%- accessRestriction.title %><% accessRestriction.options.forEach(option => { %>
+      #         - <%- option.title %><% }) }) %>
+      #       <%
+      #       }%>
+      #       ## What happened?
 
-      #     ## What you expected to happen?
+      #       ## What you expected to happen?
 
-      #     ## When did it happen or started to happen?
-      #     `Timestamp`: ${utcDateTimeNow}
+      #       ## When did it happen or started to happen?
+      #       `Timestamp`: ${utcDateTimeNow}
 
-      #     ## How would we reproduce it?
+      #       ## How would we reproduce it?
 
-      #     ## Anything else we need to know?
+      #       ## Anything else we need to know?
       defaultHibernationSchedule:
         evaluation:
         - start: 00 17 * * 1,2,3,4,5
