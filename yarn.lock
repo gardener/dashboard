@@ -6610,9 +6610,9 @@ __metadata:
   linkType: hard
 
 "jest-date-mock@npm:^1.0.8":
-  version: 1.0.8
-  resolution: "jest-date-mock@npm:1.0.8"
-  checksum: 10c0/dbef9a3fcf41bfc7d9e73c99c28aaa130ba5ea79727abaf7d98e68bda48fe29f98c5d23a1d4c06d508f66e1c6474e6f3c0a2e914f203fa09c198296f1eae36f6
+  version: 1.0.9
+  resolution: "jest-date-mock@npm:1.0.9"
+  checksum: 10c0/5d5172f5297aed28016dcb4803607bf557f81dbbe966c91137a58756ccba6d72f8ce7a381d6b2f031d62f0bab5d3814792988cf6fdaf3a2fd77906d0b0e0049b
   languageName: node
   linkType: hard
 

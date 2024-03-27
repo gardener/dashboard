@@ -1441,7 +1441,7 @@ const RAW_RUNTIME_STATE =
           ["eslint-plugin-n", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:15.7.0"],\
           ["eslint-plugin-promise", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:6.1.1"],\
           ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:27.5.1"],\
-          ["jest-date-mock", "npm:1.0.8"]\
+          ["jest-date-mock", "npm:1.0.9"]\
         ],\
         "linkType": "SOFT"\
       }]\
@@ -8297,10 +8297,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["jest-date-mock", [\
-      ["npm:1.0.8", {\
-        "packageLocation": "./.yarn/cache/jest-date-mock-npm-1.0.8-ccfefdcb39-dbef9a3fcf.zip/node_modules/jest-date-mock/",\
+      ["npm:1.0.9", {\
+        "packageLocation": "./.yarn/cache/jest-date-mock-npm-1.0.9-034237d382-5d5172f529.zip/node_modules/jest-date-mock/",\
         "packageDependencies": [\
-          ["jest-date-mock", "npm:1.0.8"]\
+          ["jest-date-mock", "npm:1.0.9"]\
         ],\
         "linkType": "HARD"\
       }]\
