@@ -11,6 +11,7 @@ SPDX-License-Identifier: Apache-2.0
       :type="alertBannerType"
       :identifier="alertBannerIdentifier"
     />
+    <g-april-fools-ad />
     <div
       ref="wrapRef"
       class="g-main__wrap"
@@ -34,6 +35,7 @@ import { storeToRefs } from 'pinia'
 import { useConfigStore } from '@/store/config'
 
 import GAlertBanner from '@/components/GAlertBanner.vue'
+import GAprilFoolsAd from '@/components/GAprilFoolsAd.vue'
 
 import { useLogger } from '@/composables/useLogger'
 

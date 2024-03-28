@@ -128,6 +128,11 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     writeDefaults: false,
   })
 
+  const foolNoMore = useLocalStorage('global/ad-banner/foolNoMore', false, {
+    serializer: StorageSerializers.json,
+    writeDefaults: false,
+  })
+
   const shootAdminKubeconfigExpiration = useLocalStorage('global/shoot-admin-kubeconfig-expiration', 0, {
     serializer: StorageSerializers.integer,
     writeDefaults: false,
@@ -262,6 +267,7 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
   return {
     colorScheme,
     autoLogin,
+    foolNoMore,
     operatorFeatures,
     logLevel,
     hiddenMessages,
