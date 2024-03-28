@@ -9,6 +9,27 @@ import {
   pick,
 } from '@/lodash'
 
+function projectItem (params, projectName, to = false) {
+  const item = {
+    get title () {
+      return projectName ?? 'All Projects'
+    },
+    isProjectItem: true,
+  }
+  if (!to) {
+    return item
+  }
+  return {
+    ...item,
+    get to () {
+      return {
+        name: 'ShootList',
+        params: pick(params, ['namespace']),
+      }
+    },
+  }
+}
+
 export function homeBreadcrumbs () {
   return [
     {
@@ -41,59 +62,66 @@ export function settingsBreadcrumbs () {
   ]
 }
 
-export function membersBreadcrumbs () {
+export function membersBreadcrumbs ({ params }, projectName) {
   return [
     {
       title: 'Members',
     },
+    projectItem(params, projectName),
   ]
 }
 
-export function administrationBreadcrumbs () {
+export function administrationBreadcrumbs ({ params }, projectName) {
   return [
     {
       title: 'Administration',
     },
+    projectItem(params, projectName),
   ]
 }
 
-export function newShootBreadcrumbs () {
+export function newShootBreadcrumbs ({ params }, projectName) {
   return [
     {
       title: 'Create Cluster',
     },
+    projectItem(params, projectName),
   ]
 }
 
-export function newShootEditorBreadcrumbs () {
+export function newShootEditorBreadcrumbs ({ params }, projectName) {
   return [
     {
       title: 'Create Cluster Editor',
     },
+    projectItem(params, projectName),
   ]
 }
 
-export function terminalBreadcrumbs () {
+export function terminalBreadcrumbs ({ params }, projectName) {
   return [
     {
       title: 'Garden Cluster Terminal',
     },
+    projectItem(params, projectName),
   ]
 }
 
-export function shootListBreadcrumbs () {
+export function shootListBreadcrumbs ({ params }, projectName) {
   return [
     {
-      title: 'Project Clusters',
+      title: 'Clusters',
     },
+    projectItem(params, projectName),
   ]
 }
 
-export function secretsBreadcrumbs () {
+export function secretsBreadcrumbs ({ params }, projectName) {
   return [
     {
       title: 'Secrets',
     },
+    projectItem(params, projectName),
   ]
 }
 
@@ -105,26 +133,22 @@ export function notFoundBreadcrumbs () {
   ]
 }
 
-export function shootItemBreadcrumbs ({ params }) {
+export function shootItemBreadcrumbs ({ params }, projectName) {
   return [
     {
-      title: 'Project Clusters',
-      get to () {
-        return {
-          name: 'ShootList',
-          params: pick(params, ['namespace']),
-        }
-      },
+      title: 'Clusters',
     },
+    projectItem(params, projectName, true),
     {
       get title () {
         return get(params, 'name')
       },
+      isNameItem: true,
     },
   ]
 }
 
-export function secretItemBreadcrumbs ({ params }) {
+export function secretItemBreadcrumbs ({ params }, projectName) {
   return [
     {
       title: 'Secrets',
@@ -135,25 +159,22 @@ export function secretItemBreadcrumbs ({ params }) {
         }
       },
     },
+    projectItem(params, projectName, true),
     {
       get title () {
         return get(params, 'name')
       },
+      isNameItem: true,
     },
   ]
 }
 
-export function shootItemTerminalBreadcrumbs ({ params }) {
+export function shootItemTerminalBreadcrumbs ({ params }, projectName) {
   return [
     {
-      title: 'Project Clusters',
-      get to () {
-        return {
-          name: 'ShootList',
-          params: pick(params, ['namespace']),
-        }
-      },
+      title: 'Clusters',
     },
+    projectItem(params, projectName, true),
     {
       get title () {
         return get(params, 'name')
@@ -164,6 +185,7 @@ export function shootItemTerminalBreadcrumbs ({ params }) {
           params,
         }
       },
+      isNameItem: true,
     },
     {
       title: 'Terminal',

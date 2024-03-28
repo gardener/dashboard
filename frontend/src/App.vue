@@ -13,6 +13,7 @@ import {
   inject,
   toRef,
   watch,
+  computed,
 } from 'vue'
 import { useTheme } from 'vuetify'
 import {
@@ -20,21 +21,28 @@ import {
   useEventBus,
   useColorMode,
   useDocumentVisibility,
+  useTitle,
 } from '@vueuse/core'
+import { useRoute } from 'vue-router'
 
 import { useConfigStore } from '@/store/config'
 import { useLoginStore } from '@/store/login'
 import { useLocalStorageStore } from '@/store/localStorage'
 import { useShootStore } from '@/store/shoot'
+import { useProjectStore } from '@/store/project'
 
 import { useCustomColors } from '@/composables/useCustomColors'
 
+import { last } from '@/lodash'
+
 const theme = useTheme()
+const route = useRoute()
 const localStorageStore = useLocalStorageStore()
 const visibility = useDocumentVisibility()
 const configStore = useConfigStore()
 const loginStore = useLoginStore()
 const shootStore = useShootStore()
+const projectStore = useProjectStore()
 const logger = inject('logger')
 
 async function setCustomColors () {
@@ -45,12 +53,6 @@ async function setCustomColors () {
   }
 }
 setCustomColors()
-
-watch(() => configStore.branding ?? loginStore.branding, branding => {
-  if (branding.productTitle) {
-    document.title = branding.documentTitle ?? `${branding.productName} Dashboard`
-  }
-})
 
 const colorScheme = toRef(localStorageStore, 'colorScheme')
 const { system } = useColorMode({
@@ -76,4 +78,33 @@ watch(visibility, (current, previous) => {
     shootStore.invokeSubscriptionEventHandler()
   }
 })
+
+const documentTitle = computed(() => {
+  let appTitle = process.env.VITE_APP_TITLE
+  const branding = configStore.branding ?? loginStore.branding
+  if (branding.productTitle) {
+    appTitle = branding.documentTitle ?? `${branding.productName} Dashboard`
+  }
+
+  const breadcrumbs = route.meta.breadcrumbs ?? []
+  const breadcrumbItems = typeof breadcrumbs === 'function'
+    ? breadcrumbs(route, projectStore.projectName)
+    : breadcrumbs
+
+  const projectItem = breadcrumbItems.find(item => item.isProjectItem)
+  const nameItem = breadcrumbItems.find(item => item.isNameItem)
+  const pageItem = last(breadcrumbItems.filter(item => !item.isProjectItem && !item.isNameItem))
+
+  const locationTitle = [projectItem?.title, nameItem?.title].filter(item => item !== undefined).join('/')
+  const titleItems = [pageItem?.title, locationTitle].filter(item => item?.length)
+
+  if (titleItems.length) {
+    appTitle = `${titleItems.join(' • ')} | ${appTitle}`
+  }
+
+  return appTitle
+})
+
+useTitle(documentTitle)
+
 </script>
