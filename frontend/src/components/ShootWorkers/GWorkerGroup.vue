@@ -222,25 +222,40 @@ SPDX-License-Identifier: Apache-2.0
                           mdi-alert
                         </v-icon>Image not found in cloud profile
                       </v-col>
-                      <v-col
-                        v-else-if="machineImage.expirationDate"
-                        cols="12"
-                      >
-                        <v-icon
-                          v-if="machineImage.isExpirationWarning"
-                          size="small"
-                          class="mr-1"
-                          color="warning"
+                      <template v-else>
+                        <v-col
+                          cols="12"
                         >
-                          mdi-alert
-                        </v-icon>
-                        Image expires
-                        <g-time-string
-                          :date-time="machineImage.expirationDate"
-                          mode="future"
-                          date-tooltip
-                        />
-                      </v-col>
+                          <legend class="text-caption text-medium-emphasis">
+                            Classification
+                          </legend>
+                          <v-icon
+                            size="x-small"
+                            :color="classificationColor"
+                            :icon="classificationIcon"
+                          />
+                          {{ machineImage.classification }}
+                        </v-col>
+                        <v-col
+                          v-if="machineImage.expirationDate"
+                          cols="12"
+                        >
+                          <v-icon
+                            v-if="machineImage.isExpirationWarning"
+                            size="x-small"
+                            class="mr-1"
+                            color="warning"
+                          >
+                            mdi-alert
+                          </v-icon>
+                          Image expires
+                          <g-time-string
+                            :date-time="machineImage.expirationDate"
+                            mode="future"
+                            date-tooltip
+                          />
+                        </v-col>
+                      </template>
                     </v-row>
                   </v-card-text>
                 </v-card>
@@ -477,6 +492,21 @@ export default {
         return 'Machine image version is deprecated'
       }
       return undefined
+    },
+    classificationColor () {
+      if (this.machineImage.isDeprecated) {
+        return 'warning'
+      }
+      if (this.machineImage.isPreview) {
+        return 'info'
+      }
+      return 'primary'
+    },
+    classificationIcon () {
+      if (this.machineImage.isDeprecated || this.machineImage.isPreview) {
+        return 'mdi-alert-circle-outline'
+      }
+      return 'mdi-information-outline'
     },
   },
   created () {
