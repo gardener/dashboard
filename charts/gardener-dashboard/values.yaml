@@ -201,9 +201,11 @@ global:
       #     title: "[${shootNamespace}/${shootName}] <problem>"
       #     labels: # these are the labels that are automatically preselected when creating a new ticket
       #     - default-label
+      #     # GitHub issue forms
       #     fileName: shoot_issue.yaml
       #     affectedCluster: "${shootUrl}" # example template form element id
-      #     body: |
+      #     # Regular GitHub issue
+      #     body: | # do not set `body`, if you use GitHub issue forms
       #       ## Which cluster is affected?
 
       #       `Cluster Details Dashboard Link`: [${projectName}/${shootName}](${shootUrl})
