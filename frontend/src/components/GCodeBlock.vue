@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
   >
     <div
       class="code-block-wrapper"
-      :style="{ 'max-height': height }"
+      :style="{ 'max-height': height, 'min-width': width }"
     >
       <pre><code
           ref="block"
@@ -66,6 +66,11 @@ export default {
       type: [Number, String],
       default: '450px',
     },
+    width: {
+      type: [Number, String],
+      default: '100%',
+    },
+
     content: {
       type: String,
       default: '',

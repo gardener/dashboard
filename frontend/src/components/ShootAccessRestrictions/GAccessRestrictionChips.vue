@@ -5,12 +5,15 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div>
-    <div
-      v-for="{ key, title, description, options: optionsList } in selectedAccessRestrictions"
-      :key="key"
-      class="d-flex"
-    >
+  <g-collapsable-items
+    :items="selectedAccessRestrictions"
+    :uid="shootUid"
+    inject-key="expandedAccessRestrictions"
+    :collapse="collapse"
+    hide-empty
+    item-name="Restriction"
+  >
+    <template #item="{ item: { key, title, description, options: optionsList } }">
       <v-tooltip
         location="top"
         :disabled="!description"
@@ -44,6 +47,7 @@ SPDX-License-Identifier: Apache-2.0
             variant="tonal"
             color="primary"
             class="mr-2"
+            label
           >
             {{ options.title }}
           </v-chip>
@@ -51,17 +55,29 @@ SPDX-License-Identifier: Apache-2.0
         <!-- eslint-disable-next-line vue/no-v-html -->
         <section v-html="transformHtml(options.description)" />
       </v-tooltip>
-    </div>
-  </div>
+    </template>
+  </g-collapsable-items>
 </template>
 
 <script>
+import GCollapsableItems from '@/components/GCollapsableItems'
+
 import { transformHtml } from '@/utils'
 
 export default {
+  components: {
+    GCollapsableItems,
+  },
   props: {
     selectedAccessRestrictions: {
       type: Array,
+    },
+    collapse: {
+      type: Boolean,
+      default: false,
+    },
+    shootUid: {
+      type: String,
     },
   },
   methods: {

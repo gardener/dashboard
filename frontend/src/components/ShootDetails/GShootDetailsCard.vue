@@ -88,10 +88,7 @@ SPDX-License-Identifier: Apache-2.0
               />
             </div>
           </template>
-          <g-worker-groups
-            :shoot-item="shootItem"
-            class="flex-wrap"
-          />
+          <g-worker-groups :shoot-item="shootItem" />
         </g-list-item-content>
         <template
           #append
