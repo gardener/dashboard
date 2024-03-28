@@ -334,8 +334,10 @@ describe('gardener-dashboard', function () {
                   avatarSource: 'gravatar',
                   gitHubRepoUrl: 'https://github.com/gardener/tickets',
                   hideClustersWithLabels: ['ignore1', 'ignore2'],
-                  newTicketLabels: ['default-label'],
-                  issueDescriptionTemplate: 'issue description'
+                  newIssue: {
+                    labels: ['default-label'],
+                    body: 'issue description'
+                  }
                 }
               },
               gitHub: {
