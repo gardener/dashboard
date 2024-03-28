@@ -356,10 +356,7 @@ export default {
       return this.firewallImagesByCloudProfileName(this.cloudProfileName)
     },
     firewallSizes () {
-      const cloudProfileName = this.cloudProfileName
-      const region = this.region
-      const firewallSizes = this.firewallSizesByCloudProfileNameAndRegion({ cloudProfileName, region })
-      return map(firewallSizes, 'name')
+      return this.firewallSizesByCloudProfileNameAndPartitionId({ cloudProfileName: this.cloudProfileName, partitionID: this.partitionID })
     },
     allFirewallNetworks () {
       return this.firewallNetworksByCloudProfileNameAndPartitionId({ cloudProfileName: this.cloudProfileName, partitionID: this.partitionID })
@@ -410,7 +407,7 @@ export default {
       'partitionIDsByCloudProfileNameAndRegion',
       'firewallImagesByCloudProfileName',
       'firewallNetworksByCloudProfileNameAndPartitionId',
-      'firewallSizesByCloudProfileNameAndRegion',
+      'firewallSizesByCloudProfileNameAndPartitionId',
       'getDefaultNodesCIDR',
     ]),
     ...mapActions(useSecretStore, [
@@ -474,9 +471,8 @@ export default {
     onInputPartitionID () {
       this.v$.partitionID.$touch()
       this.firewallSize = head(this.firewallSizes)
-      const firewallNetwork = find(this.allFirewallNetworks, { key: 'internet' })
-      if (firewallNetwork) {
-        this.firewallNetworks = [firewallNetwork.value]
+      if (find(this.allFirewallNetworks, { value: 'internet' })) {
+        this.firewallNetworks = ['internet']
       } else {
         this.firewallNetworks = undefined
       }

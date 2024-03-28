@@ -186,15 +186,14 @@ export function createShootResource (context) {
   if (!isEmpty(firewallImage)) {
     set(shootResource, 'spec.provider.infrastructureConfig.firewall.image', firewallImage)
   }
-  const firewallSizes = map(cloudProfileStore.firewallSizesByCloudProfileNameAndRegion({ cloudProfileName, region }), 'name')
+  const firewallSizes = cloudProfileStore.firewallSizesByCloudProfileNameAndPartitionId({ cloudProfileName, partitionID })
   const firewallSize = head(firewallSizes)
   if (!isEmpty(firewallSize)) {
-    set(shootResource, 'spec.provider.infrastructureConfig.firewall.size', firewallImage)
+    set(shootResource, 'spec.provider.infrastructureConfig.firewall.size', firewallSize)
   }
   const allFirewallNetworks = cloudProfileStore.firewallNetworksByCloudProfileNameAndPartitionId({ cloudProfileName, partitionID })
-  const firewallNetworks = find(allFirewallNetworks, { key: 'internet' })
-  if (!isEmpty(firewallNetworks)) {
-    set(shootResource, 'spec.provider.infrastructureConfig.firewall.networks', firewallNetworks)
+  if (find(allFirewallNetworks, { value: 'internet' })) {
+    set(shootResource, 'spec.provider.infrastructureConfig.firewall.networks', 'internet')
   }
 
   const name = shortRandomString(10)
