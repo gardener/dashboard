@@ -94,10 +94,7 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <template v-if="cell.header.key === 'k8sVersion'">
         <div class="d-flex justify-center">
-          <g-shoot-version
-            :shoot-item="shootItem"
-            chip
-          />
+          <g-shoot-version-chip :shoot-item="shootItem" />
         </div>
       </template>
       <template v-if="cell.header.key === 'readiness'">
@@ -222,7 +219,7 @@ import GShootStatus from '@/components/GShootStatus.vue'
 import GStatusTags from '@/components/GStatusTags.vue'
 import GPurposeTag from '@/components/GPurposeTag.vue'
 import GTimeString from '@/components/GTimeString.vue'
-import GShootVersion from '@/components/ShootVersion/GShootVersion.vue'
+import GShootVersionChip from '@/components/ShootVersion/GShootVersionChip.vue'
 import GTicketLabel from '@/components/ShootTickets/GTicketLabel.vue'
 import GShootSeedName from '@/components/GShootSeedName.vue'
 import GShootMessages from '@/components/ShootMessages/GShootMessages.vue'
@@ -255,7 +252,7 @@ export default {
     GPurposeTag,
     GShootStatus,
     GTimeString,
-    GShootVersion,
+    GShootVersionChip,
     GTicketLabel,
     GAccountAvatar,
     GCopyBtn,

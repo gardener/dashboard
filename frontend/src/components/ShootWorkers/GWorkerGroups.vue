@@ -16,7 +16,6 @@ SPDX-License-Identifier: Apache-2.0
       :worker-group="workerGroup"
       :cloud-profile-name="shootCloudProfileName"
       :shoot-metadata="shootMetadata"
-      class="ma-1"
     />
   </div>
   <v-tooltip

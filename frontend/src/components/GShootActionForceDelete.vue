@@ -45,10 +45,6 @@ export default {
   mixins: [shootItem],
   inject: ['logger', 'api'],
   props: {
-    modelValue: {
-      type: Boolean,
-      required: true,
-    },
     text: {
       type: Boolean,
       default: false,

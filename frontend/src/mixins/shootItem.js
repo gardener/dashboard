@@ -293,6 +293,19 @@ export const shootItem = {
       const shootErrorCodes = errorCodesFromArray(this.shootLastErrors)
       return shootErrorCodes.some(item => forceDeleteErrorCodes.includes(item))
     },
+    shootSupportedPatchAvailable () {
+      return !!find(this.shootAvailableK8sUpdates?.patch, 'isSupported')
+    },
+    shootSupportedUpgradeAvailable () {
+      return !!find(this.shootAvailableK8sUpdates?.minor, 'isSupported')
+    },
+    shootAvailableK8sUpdates () {
+      return this.availableKubernetesUpdatesForShoot(this.shootK8sVersion, this.shootCloudProfileName)
+    },
+    shootKubernetesVersionObject () {
+      const kubernetesVersionObjects = this.kubernetesVersions(this.shootCloudProfileName)
+      return find(kubernetesVersionObjects, ['version', this.shootK8sVersion]) ?? {}
+    },
   },
   methods: {
     ...mapActions(useShootStore, [
@@ -300,6 +313,8 @@ export const shootItem = {
     ]),
     ...mapActions(useCloudProfileStore, [
       'selectedAccessRestrictionsForShootByCloudProfileNameAndRegion',
+      'kubernetesVersions',
+      'availableKubernetesUpdatesForShoot',
     ]),
     ...mapActions(useSeedStore, [
       'isSeedUnreachableByName',
