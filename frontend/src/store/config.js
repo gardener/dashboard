@@ -258,10 +258,6 @@ export const useConfigStore = defineStore('config', () => {
     return features.value?.projectTerminalShortcutsEnabled === true
   })
 
-  const isShootForceDeletionEnabled = computed(() => {
-    return features.value?.shootForceDeletionEnabled === true
-  })
-
   const throttleDelayPerCluster = computed(() => {
     return experimental.value?.throttleDelayPerCluster ?? 10
   })
@@ -305,6 +301,18 @@ export const useConfigStore = defineStore('config', () => {
       description,
       errorMessage,
     }
+  })
+
+  const customCloudProviders = computed(() => {
+    return state.value?.customCloudProviders
+  })
+
+  const vendors = computed(() => {
+    return state.value?.vendors
+  })
+
+  const cloudProviderList = computed(() => {
+    return state.value?.cloudProviderList
   })
 
   const appVersion = computed(() => {
@@ -357,6 +365,63 @@ export const useConfigStore = defineStore('config', () => {
     return allKnownConditions.value[type] ?? getCondition(type)
   }
 
+  function vendorDisplayName (kind) {
+    const knownVendors = {
+      alicloud: {
+        name: 'Alibaba Cloud',
+      },
+      'alicloud-dns': {
+        name: 'Alicloud DNS',
+      },
+      aws: {
+        name: 'aws',
+      },
+      'aws-route53': {
+        name: 'Amazon Route53',
+      },
+      azure: {
+        name: 'Azure',
+      },
+      'azure-dns': {
+        name: 'Azure DNS',
+      },
+      'azure-private-dns': {
+        name: 'Azure Private DNS',
+      },
+      'cloudflare-dns': {
+        name: 'Cloudflare',
+      },
+      gcp: {
+        name: 'Google Cloud',
+      },
+      'google-clouddns': {
+        name: 'Google Cloud DNS',
+      },
+      hcloud: {
+        name: 'Hetzner Cloud',
+      },
+      'infoblox-dns': {
+        name: 'Infoblox',
+      },
+      metal: {
+        name: 'Metal',
+      },
+      'netlify-dns': {
+        name: 'Netlify',
+      },
+      openstack: {
+        name: 'OpenStack',
+      },
+      'openstack-designate': {
+        name: 'OpenStack Designate',
+      },
+      vsphere: {
+        name: 'vSphere',
+      },
+    }
+    return get({ ...knownVendors, ...vendors.value }, [kind, 'name'], kind)
+  }
+
   return {
     isInitial,
     appVersion,
@@ -388,7 +453,6 @@ export const useConfigStore = defineStore('config', () => {
     serviceAccountDefaultTokenExpiration,
     isTerminalEnabled,
     isProjectTerminalShortcutsEnabled,
-    isShootForceDeletionEnabled,
     throttleDelayPerCluster,
     alertBannerMessage,
     alertBannerType,
@@ -398,6 +462,10 @@ export const useConfigStore = defineStore('config', () => {
     isShootHasNoHibernationScheduleWarning,
     fetchConfig,
     conditionForType,
+    customCloudProviders,
+    vendors,
+    vendorDisplayName,
+    cloudProviderList,
     $reset,
   }
 })

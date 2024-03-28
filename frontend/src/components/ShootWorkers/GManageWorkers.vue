@@ -72,6 +72,7 @@ import {
 } from 'pinia'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
+import { useConfigStore } from '@/store/config'
 import { useShootStagingStore } from '@/store/shootStaging'
 
 import GWorkerInputGeneric from '@/components/ShootWorkers/GWorkerInputGeneric'
@@ -134,6 +135,9 @@ export default {
     }
   },
   computed: {
+    ...mapState(useConfigStore, [
+      'customCloudProviders',
+    ]),
     ...mapState(useShootStagingStore, [
       'workerless',
     ]),
@@ -217,7 +221,11 @@ export default {
          * do not pass shootspec as we do not have it available in this component and it is (currently) not required to determine isZoned for new clusters. This event handler is only called for new clusters, as the
          * userInterActionBus is only set for the create cluster use case
          */
-        this.zonedCluster = isZonedCluster({ cloudProviderKind: this.cloudProviderKind, isNewCluster: this.isNewCluster })
+        this.zonedCluster = isZonedCluster({
+          cloudProviderKind: this.cloudProviderKind,
+          isNewCluster: this.isNewCluster,
+          customCloudProviders: this.customCloudProviders,
+        })
         this.setDefaultWorker()
       })
       this.userInterActionBus.on('updateRegion', region => {

@@ -111,6 +111,9 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { defineAsyncComponent } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
+import { mapState } from 'pinia'
+
+import { useConfigStore } from '@/store/config'
 
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GCodeBlock from '@/components/GCodeBlock'
@@ -159,6 +162,9 @@ export default {
     }
   },
   computed: {
+    ...mapState(useConfigStore, [
+      'customCloudProviders',
+    ]),
     tab: {
       get () {
         return this.tabValue
@@ -225,7 +231,11 @@ export default {
       const zonesNetworkConfiguration = get(this.shootItem, 'spec.provider.infrastructureConfig.networks.zones')
       const cloudProfileName = this.shootCloudProfileName
       const region = this.shootRegion
-      const zonedCluster = isZonedCluster({ cloudProviderKind: this.shootCloudProviderKind, shootSpec: this.shootSpec })
+      const zonedCluster = isZonedCluster({
+        cloudProviderKind: this.shootCloudProviderKind,
+        shootSpec: this.shootSpec,
+        customCloudProviders: this.customCloudProviders,
+      })
       const existingWorkerCIDR = get(this.shootItem, 'spec.networking.nodes')
       const updateOSMaintenance = get(this.shootItem, 'spec.maintenance.autoUpdate.machineImageVersion', true)
 

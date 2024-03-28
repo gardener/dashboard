@@ -11,8 +11,6 @@ SPDX-License-Identifier: Apache-2.0
     :secret-validations="v$"
     :secret="secret"
     :vendor="vendor"
-    :create-title="`Add new ${name} Secret`"
-    :replace-title="`Replace ${name} Secret`"
   >
     <template #secret-slot>
       <div>
@@ -144,9 +142,6 @@ export default {
         this.$emit('update:modelValue', modelValue)
       },
     },
-    valid () {
-      return !this.v$.$invalid
-    },
     secretData () {
       return {
         'serviceaccount.json': this.serviceAccountKey,
@@ -155,41 +150,16 @@ export default {
     isCreateMode () {
       return !this.secret
     },
-    name () {
-      if (this.vendor === 'gcp') {
-        return 'Google'
-      }
-      if (this.vendor === 'google-clouddns') {
-        return 'Google Cloud DNS'
-      }
-      return undefined
-    },
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-
-        // Mounted does not guarantee that all child components have also been mounted.
-        // In addition, the serviceAccountKey ref is within a slot of a v-dialog, which is by default lazily loaded.
-        // We initialize the drop handler once the dialog is shown by watching the `value`.
-        // We use $nextTick to make sure the entire view has been rendered
-        this.$nextTick(() => {
-          this.initializeDropHandlerOnce()
-        })
-      }
-    },
+  mounted () {
+    if (!this.isCreateMode) {
+      setDelayedInputFocus(this, 'accessKeyId')
+    }
+    this.$nextTick(() => {
+      this.initializeDropHandlerOnce()
+    })
   },
   methods: {
-    reset () {
-      this.v$.$reset()
-
-      this.serviceAccountKey = ''
-
-      if (!this.isCreateMode) {
-        setDelayedInputFocus(this, 'serviceAccountKey')
-      }
-    },
     initializeDropHandlerOnce () {
       if (this.dropHandlerInitialized) {
         return

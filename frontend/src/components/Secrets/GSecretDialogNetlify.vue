@@ -11,8 +11,6 @@ SPDX-License-Identifier: Apache-2.0
     :secret-validations="v$"
     :secret="secret"
     vendor="netlify-dns"
-    create-title="Add new Netlify Secret"
-    replace-title="Replace Netlify Secret"
   >
     <template #secret-slot>
       <div>
@@ -57,7 +55,10 @@ import { required } from '@vuelidate/validators'
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
 
-import { getErrorMessages } from '@/utils'
+import {
+  getErrorMessages,
+  setDelayedInputFocus,
+} from '@/utils'
 import { withFieldName } from '@/utils/validators'
 
 export default {
@@ -116,19 +117,12 @@ export default {
       return !this.secret
     },
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-      }
-    },
+  mounted () {
+    if (!this.isCreateMode) {
+      setDelayedInputFocus(this, 'apiToken')
+    }
   },
   methods: {
-    reset () {
-      this.v$.$reset()
-
-      this.apiToken = ''
-    },
     getErrorMessages,
   },
 }

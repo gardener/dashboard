@@ -11,8 +11,6 @@ SPDX-License-Identifier: Apache-2.0
     :secret-validations="v$"
     :secret="secret"
     :vendor="vendor"
-    :create-title="`Add new ${name} Secret`"
-    :replace-title="`Replace ${name} Secret`"
   >
     <template #secret-slot>
       <div v-if="vendor==='openstack-designate'">
@@ -165,14 +163,11 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapActions } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 import {
   required,
   requiredIf,
 } from '@vuelidate/validators'
-
-import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
@@ -324,11 +319,6 @@ export default {
     },
   },
   watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-      }
-    },
     authenticationMethod () {
       this.username = undefined
       this.password = undefined
@@ -338,28 +328,12 @@ export default {
       this.v$.$reset()
     },
   },
+  mounted () {
+    if (!this.isCreateMode) {
+      setDelayedInputFocus(this, 'domainName')
+    }
+  },
   methods: {
-    ...mapActions(useCloudProfileStore, ['cloudProfileByName']),
-    reset () {
-      this.v$.$reset()
-
-      this.domainName = ''
-      this.tenantName = ''
-      this.username = ''
-      this.password = ''
-      this.authURL = ''
-      this.applicationCredentialID = ''
-      this.applicationCredentialName = ''
-      this.applicationCredentialSecret = ''
-
-      if (!this.isCreateMode) {
-        if (this.secret.data) {
-          this.domainName = this.secret.data.domainName
-          this.tenantName = this.secret.data.tenantName
-        }
-        setDelayedInputFocus(this, 'domainName')
-      }
-    },
     getErrorMessages,
   },
 }

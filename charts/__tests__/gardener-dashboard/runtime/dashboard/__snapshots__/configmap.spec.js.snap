@@ -114,6 +114,17 @@ Object {
 }
 `;
 
+exports[`gardener-dashboard configmap cloudProviderList should render the template with cloudProviderList 1`] = `
+Object {
+  "frontend": Object {
+    "cloudProviderList": Array [
+      "foo",
+      "bar",
+    ],
+  },
+}
+`;
+
 exports[`gardener-dashboard configmap contentSecurityPolicy should render the template with connectSrc containing additional host sources 1`] = `
 Object {
   "contentSecurityPolicy": Object {
@@ -141,6 +152,60 @@ Object {
   "frontend": Object {
     "controlPlaneHighAvailabilityHelp": Object {
       "text": "[foo](https://bar.baz)",
+    },
+  },
+}
+`;
+
+exports[`gardener-dashboard configmap customCloudProviders should render the template with customCloudProviders 1`] = `
+Object {
+  "frontend": Object {
+    "customCloudProviders": Object {
+      "fooProvider": Object {
+        "secret": Object {
+          "fields": Array [
+            Object {
+              "hint": "Enter a valid namespace",
+              "key": "namespace",
+              "label": "Namespace",
+              "type": "text",
+              "validators": Object {
+                "required": Object {
+                  "type": "required",
+                },
+              },
+            },
+          ],
+          "help": "#Custom Cloud Provider
+foo",
+        },
+        "shoot": Object {
+          "createFields": Array [
+            Object {
+              "hint": "Select foo value",
+              "key": "selectFoo",
+              "label": "Select Foo",
+              "path": "spec.provider",
+              "type": "select",
+              "validators": Object {
+                "required": Object {
+                  "type": "required",
+                },
+              },
+              "values": Object {
+                "cloudprofilePath": "data.foo",
+                "key": "name",
+              },
+            },
+          ],
+          "specTemplate": Object {
+            "provider": Object {
+              "type": "custom",
+            },
+          },
+        },
+        "zoned": false,
+      },
     },
   },
 }
@@ -729,6 +794,18 @@ Object {
         "message": "other message",
       },
     ],
+  },
+}
+`;
+
+exports[`gardener-dashboard configmap vendors should render the template with vendors 1`] = `
+Object {
+  "frontend": Object {
+    "vendors": Object {
+      "foo": Object {
+        "icon": "foo_icon.svg",
+      },
+    },
   },
 }
 `;
