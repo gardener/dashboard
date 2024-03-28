@@ -19,118 +19,62 @@ SPDX-License-Identifier: Apache-2.0
             :disabled="internalValue"
           >
             <template #activator="{ props: tooltipProps }">
-              <v-btn
-                v-if="isUserError"
-                v-bind="mergeProps(activatorProps, tooltipProps)"
-                density="comfortable"
-                variant="text"
-                icon="mdi-account-alert"
-                color="error"
-              />
-              <v-btn
-                v-bind="mergeProps(activatorProps, tooltipProps)"
-                density="comfortable"
-                variant="text"
-                :icon="true"
+              <v-badge
+                :model-value="!!badgeIcon"
+                :icon="badgeIcon"
+                :color="color"
+                offset-y="5"
               >
-                <v-progress-circular
-                  v-if="showProgress"
-                  :size="27"
-                  :width="3"
-                  :model-value="shootLastOperation.progress"
-                  :color="color"
+                <v-btn
+                  v-bind="mergeProps(activatorProps, tooltipProps)"
+                  density="comfortable"
+                  variant="text"
+                  :icon="true"
                 >
-                  <v-icon
-                    v-if="isShootStatusHibernated"
-                    size="small"
+                  <v-progress-circular
+                    v-if="showProgress"
+                    :size="27"
+                    :width="3"
+                    :model-value="shootLastOperation.progress"
                     :color="color"
                   >
-                    mdi-sleep
-                  </v-icon>
-                  <v-icon
-                    v-else-if="isShootLastOperationTypeDelete"
-                    size="small"
-                    :color="color"
-                  >
-                    mdi-delete
-                  </v-icon>
-                  <v-icon
-                    v-else-if="isShootMarkedForDeletion"
-                    size="small"
-                    :color="color"
-                  >
-                    mdi-delete-clock
-                  </v-icon>
-                  <v-icon
-                    v-else-if="isTypeCreate"
-                    size="small"
-                    :color="color"
-                  >
-                    mdi-plus
-                  </v-icon>
-                  <v-icon
-                    v-else-if="isTypeReconcile && !isError"
-                    size="small"
-                    :color="color"
-                  >
-                    mdi-check
-                  </v-icon>
-                  <span v-else-if="isError">!</span>
+                    <v-icon
+                      v-if="!!statusIcon"
+                      size="small"
+                      :color="color"
+                      :icon="statusIcon"
+                    />
+                    <span
+                      v-else
+                      class="text-caption"
+                    >
+                      {{ shootLastOperation.progress }}
+                    </span>
+                  </v-progress-circular>
                   <template v-else>
-                    {{ shootLastOperation.progress }}
+                    <v-icon
+                      v-if="!!statusIcon"
+                      size="small"
+                      :color="color"
+                      :icon="statusIcon"
+                    />
+                    <v-progress-circular
+                      v-else-if="isPending"
+                      :size="27"
+                      :width="3"
+                      indeterminate
+                      :color="color"
+                    />
+                    <v-icon
+                      v-else
+                      color="success"
+                      class="status-icon-check"
+                    >
+                      mdi-check-circle-outline
+                    </v-icon>
                   </template>
-                </v-progress-circular>
-                <v-icon
-                  v-else-if="isShootStatusHibernated"
-                  :color="color"
-                >
-                  mdi-sleep
-                </v-icon>
-                <v-icon
-                  v-else-if="isShootReconciliationDeactivated"
-                  :color="color"
-                >
-                  mdi-block-helper
-                </v-icon>
-                <v-icon
-                  v-else-if="isAborted && isShootLastOperationTypeDelete"
-                  :color="color"
-                >
-                  mdi-delete
-                </v-icon>
-                <v-icon
-                  v-else-if="isAborted && isShootMarkedForDeletion"
-                  :color="color"
-                >
-                  mdi-delete-clock
-                </v-icon>
-                <v-icon
-                  v-else-if="isAborted && isTypeCreate"
-                  :color="color"
-                >
-                  mdi-plus
-                </v-icon>
-                <v-icon
-                  v-else-if="isError"
-                  :color="color"
-                >
-                  mdi-alert-outline
-                </v-icon>
-                <v-progress-circular
-                  v-else-if="isPending"
-                  :size="27"
-                  :width="3"
-                  indeterminate
-                  :color="color"
-                />
-                <v-icon
-                  v-else
-                  color="success"
-                  class="status-icon-check"
-                >
-                  mdi-check-circle-outline
-                </v-icon>
-              </v-btn>
+                </v-btn>
+              </v-badge>
             </template>
             <div>
               <span class="font-weight-bold">{{ tooltip.title }}</span>
@@ -164,7 +108,9 @@ SPDX-License-Identifier: Apache-2.0
         :namespace="shootNamespace"
       />
     </g-popover>
-    <div class="d-flex">
+    <div
+      class="d-flex"
+    >
       <g-retry-operation :shoot-item="shootItem" />
     </div>
     <span
@@ -339,6 +285,33 @@ export default {
         return undefined
       }
       return message
+    },
+    statusIcon () {
+      if (this.isShootStatusHibernated) {
+        return 'mdi-sleep'
+      }
+      if (this.isShootReconciliationDeactivated) {
+        return 'mdi-block-helper'
+      }
+      if (this.isShootLastOperationTypeDelete) {
+        return 'mdi-delete'
+      }
+      if (this.isShootMarkedForDeletion) {
+        return 'mdi-delete-clock'
+      }
+      if (this.isTypeCreate) {
+        return 'mdi-plus'
+      }
+      if (this.isError) {
+        return 'mdi-alert-outline'
+      }
+      return undefined
+    },
+    badgeIcon () {
+      if (this.isUserError) {
+        return 'mdi-account-alert'
+      }
+      return undefined
     },
   },
 }
