@@ -10133,12 +10133,12 @@ __metadata:
   linkType: hard
 
 "universal-cookie@npm:^7.1.0":
-  version: 7.1.0
-  resolution: "universal-cookie@npm:7.1.0"
+  version: 7.1.4
+  resolution: "universal-cookie@npm:7.1.4"
   dependencies:
     "@types/cookie": "npm:^0.6.0"
     cookie: "npm:^0.6.0"
-  checksum: 10c0/8cd1bac0fdcf4ed926bc2d0d7b46c350582935edcb79b418aa29dcd5733547ca617de65020c5fc3b3fa2d00e807b00a8227ba7d1e1ecdfd19a3e2b5121db64f7
+  checksum: 10c0/076b8dfe136621391778abc0ac536a016f4abadbf88ff6a82655af0d7d7dc9870768178d03c92ac45eb1c916add832e7658693c219ddb11ff6e80d22633543d4
   languageName: node
   linkType: hard
 
