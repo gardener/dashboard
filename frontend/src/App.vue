@@ -33,8 +33,6 @@ import { useProjectStore } from '@/store/project'
 
 import { useCustomColors } from '@/composables/useCustomColors'
 
-import { last } from '@/lodash'
-
 const theme = useTheme()
 const route = useRoute()
 const localStorageStore = useLocalStorageStore()
