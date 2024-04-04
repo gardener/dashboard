@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-btn
           variant="tonal"
           color="primary"
-          :href="sanitizeUrl(createTicketLink)"
+          :href="sanitizeUrl(ticketLink)"
           target="_blank"
           rel="noopener"
           title="Create Ticket"
@@ -35,7 +35,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-btn
           variant="tonal"
           color="primary"
-          :href="sanitizeUrl(createTicketLink)"
+          :href="sanitizeUrl(ticketLink)"
           target="_blank"
           rel="noopener"
           title="Create Ticket"
@@ -64,7 +64,6 @@ import moment from '@/utils/moment'
 
 import {
   get,
-  join,
   map,
   template,
   uniq,
@@ -86,16 +85,29 @@ export default {
         name: this.shootName,
       })
     },
+    newIssue () {
+      return get(this.ticketConfig, 'newIssue', {})
+    },
     gitHubRepoUrl () {
       return get(this.ticketConfig, 'gitHubRepoUrl')
     },
-    newTicketLabels () {
-      return get(this.ticketConfig, 'newTicketLabels')
+    shootUrl () {
+      const url = new URL(`/namespace/${this.shootNamespace}/shoots/${this.shootName}`, window.location)
+      return url.toString()
     },
-    issueDescription () {
-      const descriptionTemplate = get(this.ticketConfig, 'issueDescriptionTemplate')
-      const compiled = template(descriptionTemplate)
-      return compiled({
+    shootMachineImageNames () {
+      const workers = get(this.shootItem, 'spec.provider.workers')
+      let imageNames = map(workers, worker => get(worker, 'machine.image.name'))
+      imageNames = uniq(imageNames)
+      return imageNames.join(', ')
+    },
+    ticketLink () {
+      const newIssue = this.newIssue
+      if (!newIssue.title) {
+        newIssue.title = `[${this.shootNamespace}/${this.shootName}]`
+      }
+
+      const options = {
         shootName: this.shootName,
         shootNamespace: this.shootNamespace,
         shootCreatedAt: this.shootCreatedAt,
@@ -107,32 +119,39 @@ export default {
         utcDateTimeNow: moment().utc().format(),
         seedName: this.shootSeedName,
         accessRestrictions: this.shootSelectedAccessRestrictions,
-      })
-    },
-    shootUrl () {
-      return `${window.location.origin}/namespace/${this.shootNamespace}/shoots/${this.shootName}`
-    },
-    shootMachineImageNames () {
-      const workers = get(this.shootItem, 'spec.provider.workers')
-      let imageNames = map(workers, worker => get(worker, 'machine.image.name'))
-      imageNames = uniq(imageNames)
-      return imageNames.join(', ')
-    },
-    newTicketLabelsString () {
-      return join(this.newTicketLabels, ',')
-    },
-    createTicketLink () {
-      const ticketTitle = encodeURIComponent(`[${this.shootProjectName}/${this.shootName}]`)
-      const body = encodeURIComponent(this.issueDescription)
-      const newTicketLabels = encodeURIComponent(this.newTicketLabelsString)
+      }
 
-      return `${this.gitHubRepoUrl}/issues/new?title=${ticketTitle}&body=${body}&labels=${newTicketLabels}`
+      const baseUrl = new URL(this.gitHubRepoUrl)
+      if (!baseUrl.pathname.endsWith('/')) {
+        baseUrl.pathname += '/'
+      }
+      const url = new URL('issues/new', baseUrl)
+      for (const [key, value] of Object.entries(newIssue)) {
+        if (typeof value === 'string') {
+          const templatedValue = this.applyTemplate(value, options)
+          url.searchParams.append(key, templatedValue)
+        } else if (Array.isArray(value)) {
+          const templatedValues = value.map(v => {
+            return this.applyTemplate(v, options)
+          })
+          url.searchParams.append(key, templatedValues)
+        }
+      }
+      return url.toString()
     },
   },
   methods: {
     ...mapActions(useTicketStore, {
       ticketsByProjectAndName: 'issues',
     }),
+    applyTemplate (value, options) {
+      if (!value) {
+        return ''
+      }
+
+      const compiled = template(value)
+      return compiled(options)
+    },
   },
 }
 </script>

@@ -90,10 +90,6 @@ export default {
   mixins: [shootStatusCredentialRotation],
   inject: ['api', 'logger'],
   props: {
-    modelValue: {
-      type: Boolean,
-      required: true,
-    },
     text: {
       type: Boolean,
       default: false,
