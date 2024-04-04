@@ -135,18 +135,28 @@ export default {
           severity: 'warning',
         })
       }
-      if (this.updateOSMaintenance && this.selectedImageIsNotLatest) {
-        hints.push({
-          type: 'text',
-          hint: 'If you select a version which is not the latest (except for preview versions), you should disable automatic operating system updates',
-          severity: 'info',
-        })
-      }
       if (this.machineImage.isPreview) {
         hints.push({
           type: 'text',
           hint: 'Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not recommended for production usage',
           severity: 'warning',
+        })
+      }
+      if (this.machineImage.isDeprecated) {
+        const hint = this.machineImage.expirationDate
+          ? `This image version is deprecated. It will expire on ${this.machineImage.expirationDateString}`
+          : 'This image version is deprecated'
+        hints.push({
+          type: 'text',
+          hint,
+          severity: 'warning',
+        })
+      }
+      if (this.updateOSMaintenance && this.selectedImageIsNotLatest) {
+        hints.push({
+          type: 'text',
+          hint: 'If you select a version which is not the latest (except for preview versions), you should disable automatic operating system updates',
+          severity: 'info',
         })
       }
       if (this.notInList) {
