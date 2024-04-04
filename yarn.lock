@@ -1349,8 +1349,8 @@ __metadata:
   linkType: hard
 
 "@octokit/auth-app@npm:^6.0.4":
-  version: 6.0.5
-  resolution: "@octokit/auth-app@npm:6.0.5"
+  version: 6.1.0
+  resolution: "@octokit/auth-app@npm:6.1.0"
   dependencies:
     "@octokit/auth-oauth-app": "npm:^7.0.0"
     "@octokit/auth-oauth-user": "npm:^4.0.0"
@@ -1361,7 +1361,7 @@ __metadata:
     lru-cache: "npm:^10.0.0"
     universal-github-app-jwt: "npm:^1.1.2"
     universal-user-agent: "npm:^6.0.0"
-  checksum: 10c0/37e0ddb3bc2547646cad092bc3e7999efe1c1c91e5e7c296a94c3b365eb2769f09bdee70c2d682082fe1e0f241c8018e6df74ce367c1a938b4bd5e0969ee902d
+  checksum: 10c0/14630f9b57a14695f4aedea61278e11c07213ab1fe32959099bcefcbfae2a29be8b771f6a86f08e1bfabc093003564328b4b941bf764ce603e21366665007cdd
   languageName: node
   linkType: hard
 
