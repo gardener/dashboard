@@ -213,11 +213,9 @@ global:
       #       `Platform`: ${providerType}
       #       <% if(accessRestrictions.length) { %>
       #       ## Attention: This cluster has access restrictions
-      #       <% accessRestrictions.forEach(accessRestriction => { %>
-      #       - <%- accessRestriction.title %><% accessRestriction.options.forEach(option => { %>
-      #         - <%- option.title %><% }) }) %>
-      #       <%
-      #       }%>
+      #       <% accessRestrictions.forEach(accessRestriction => { %>- ${accessRestriction.title}<% accessRestriction.options.forEach(option => { %>
+      #         - ${option.title}<% }) }) %>
+      #       <% } %>
       #       ## What happened?
 
       #       ## What you expected to happen?

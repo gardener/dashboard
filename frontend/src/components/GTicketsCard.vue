@@ -92,7 +92,8 @@ export default {
       return get(this.ticketConfig, 'gitHubRepoUrl')
     },
     shootUrl () {
-      return `${window.location.origin}/namespace/${this.shootNamespace}/shoots/${this.shootName}`
+      const url = new URL(`/namespace/${this.shootNamespace}/shoots/${this.shootName}`, window.location)
+      return url.toString()
     },
     shootMachineImageNames () {
       const workers = get(this.shootItem, 'spec.provider.workers')
@@ -120,20 +121,23 @@ export default {
         accessRestrictions: this.shootSelectedAccessRestrictions,
       }
 
-      const searchParams = new URLSearchParams()
+      const baseUrl = new URL(this.gitHubRepoUrl)
+      if (!baseUrl.pathname.endsWith('/')) {
+        baseUrl.pathname += '/'
+      }
+      const url = new URL('issues/new', baseUrl)
       for (const [key, value] of Object.entries(newIssue)) {
         if (typeof value === 'string') {
           const templatedValue = this.applyTemplate(value, options)
-          searchParams.append(key, templatedValue)
+          url.searchParams.append(key, templatedValue)
         } else if (Array.isArray(value)) {
           const templatedValues = value.map(v => {
             return this.applyTemplate(v, options)
           })
-          searchParams.append(key, templatedValues)
+          url.searchParams.append(key, templatedValues)
         }
       }
-
-      return `${this.gitHubRepoUrl}/issues/new?${searchParams}`
+      return url.toString()
     },
   },
   methods: {
