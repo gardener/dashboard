@@ -63,10 +63,10 @@ SPDX-License-Identifier: Apache-2.0
               />
             </div>
           </template>
-          {{ shootK8sVersion }}
+          <g-shoot-version-chip :shoot-item="shootItem" />
         </g-list-item-content>
         <template #append>
-          <g-shoot-version :shoot-item="shootItem" />
+          <g-shoot-version-configuration :shoot-item="shootItem" />
         </template>
       </g-list-item>
       <v-divider inset />
@@ -238,7 +238,8 @@ import GWorkerGroups from '@/components/ShootWorkers/GWorkerGroups'
 import GWorkerConfiguration from '@/components/ShootWorkers/GWorkerConfiguration'
 import GAccessRestrictionsConfiguration from '@/components/ShootAccessRestrictions/GAccessRestrictionsConfiguration'
 import GPurposeConfiguration from '@/components/GPurposeConfiguration'
-import GShootVersion from '@/components/ShootVersion/GShootVersion'
+import GShootVersionConfiguration from '@/components/ShootVersion/GShootVersionConfiguration'
+import GShootVersionChip from '@/components/ShootVersion/GShootVersionChip'
 import GShootMessages from '@/components/ShootMessages/GShootMessages'
 import GAddonConfiguration from '@/components/ShootAddons/GAddonConfiguration'
 import GCopyBtn from '@/components/GCopyBtn'
@@ -266,7 +267,8 @@ export default {
     GAccessRestrictionsConfiguration,
     GPurposeConfiguration,
     GAddonConfiguration,
-    GShootVersion,
+    GShootVersionConfiguration,
+    GShootVersionChip,
     GShootMessages,
     GCopyBtn,
   },
