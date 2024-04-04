@@ -170,7 +170,7 @@ import yaml from 'js-yaml'
 import download from 'downloadjs'
 
 import { useAuthzStore } from '@/store/authz'
-import { useShootCreationStore } from '@/store/shoot'
+import { useShootContextStore } from '@/store/shootContext'
 import { useLocalStorageStore } from '@/store/localStorage'
 
 import GCopyBtn from '@/components/GCopyBtn'
@@ -178,7 +178,6 @@ import GActionButton from '@/components/GActionButton'
 import GMessage from '@/components/GMessage'
 import GAlertBanner from '@/components/GAlertBanner'
 
-import { shootItem } from '@/mixins/shootItem'
 import {
   createShootEditor,
   createShootEditorCompletions,
@@ -201,7 +200,6 @@ export default {
     GMessage,
     GAlertBanner,
   },
-  mixins: [shootItem],
   inject: ['api', 'logger'],
   props: {
     alertBannerIdentifier: {
@@ -262,13 +260,22 @@ export default {
     }
   },
   computed: {
-    ...mapState(useAuthzStore, ['canPatchShoots']),
-    ...mapState(useLocalStorageStore, ['editorShortcuts']),
-    ...mapWritableState(useShootCreationStore, {
-      cmInstance: 'editor',
-    }),
+    ...mapState(useAuthzStore, [
+      'canPatchShoots',
+    ]),
+    ...mapState(useLocalStorageStore, [
+      'editorShortcuts',
+    ]),
+    ...mapState(useShootContextStore, [
+      'shootManifest',
+      'shootProjectName',
+      'isShootActionsDisabled',
+    ]),
+    ...mapWritableState(useShootContextStore, [
+      'cmInstance',
+    ]),
     value () {
-      let data = cloneDeep(this.shootItem)
+      let data = cloneDeep(this.shootManifest)
       if (data) {
         data = pick(data, ['kind', 'apiVersion', 'metadata', 'spec', 'status'])
         if (!this.showManagedFields && has(data, 'metadata.managedFields')) {
@@ -332,7 +339,7 @@ export default {
       return extraKeys
     },
     isReadOnly () {
-      return this.isShootActionsDisabledForPurpose || !this.canPatchShoots
+      return this.isShootActionsDisabled || !this.canPatchShoots
     },
     showToolbar () {
       return !this.isReadOnly && !this.hideToolbar
@@ -647,4 +654,3 @@ export default {
     max-height: 100vh;
   }
 </style>
-@/utils/shootEditor

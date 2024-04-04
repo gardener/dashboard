@@ -22,16 +22,15 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapActions } from 'pinia'
+import { mapState } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 
-import { useShootStagingStore } from '@/store/shootStaging'
+import { useShootContextStore } from '@/store/shootContext'
 
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GManageShootDns from '@/components/ShootDns/GManageDns'
 
 import { errorDetailsFromError } from '@/utils/error'
-import { shootItem } from '@/mixins/shootItem'
 import { v4 as uuidv4 } from '@/utils/uuid'
 
 export default {
@@ -39,7 +38,6 @@ export default {
     GActionButtonDialog,
     GManageShootDns,
   },
-  mixins: [shootItem],
   inject: ['api', 'logger'],
   setup () {
     return {
@@ -51,11 +49,14 @@ export default {
       componentKey: uuidv4(),
     }
   },
-  methods: {
-    ...mapActions(useShootStagingStore, [
-      'getDnsConfiguration',
-      'setClusterConfiguration',
+  computed: {
+    ...mapState(useShootContextStore, [
+      'shootNamespace',
+      'shootName',
+      'dns',
     ]),
+  },
+  methods: {
     async onConfigurationDialogOpened () {
       this.reset()
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
@@ -65,10 +66,11 @@ export default {
     },
     async updateConfiguration () {
       try {
-        const namespace = this.shootNamespace
-        const name = this.shootName
-        const data = this.getDnsConfiguration()
-        await this.api.updateShootDns({ namespace, name, data })
+        await this.api.updateShootDns({
+          namespace: this.shootNamespace,
+          name: this.shootName,
+          data: this.dns,
+        })
       } catch (err) {
         const errorMessage = 'Could not update DNS Configuration'
         const errorDetails = errorDetailsFromError(err)
@@ -78,7 +80,6 @@ export default {
       }
     },
     reset () {
-      this.setClusterConfiguration(this.shootItem)
       this.componentKey = uuidv4() // force re-render
     },
   },

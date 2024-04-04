@@ -65,7 +65,6 @@ SPDX-License-Identifier: Apache-2.0
           <g-manage-workers />
         </v-card-text>
       </v-card>
-      <!--
       <v-card
         v-show="!workerless"
         class="mt-4"
@@ -80,6 +79,7 @@ SPDX-License-Identifier: Apache-2.0
           />
         </v-card-text>
       </v-card>
+      <!--
       <v-card class="mt-4">
         <g-toolbar title="Maintenance" />
         <v-card-text>
@@ -145,9 +145,7 @@ import {
 } from 'pinia'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
-import { useShootStagingStore } from '@/store/shootStaging'
-import { useShootCreationStore } from '@/store/shoot'
-import { useAuthzStore } from '@/store/authz'
+import { useShootContextStore } from '@/store/shootContext'
 import { useConfigStore } from '@/store/config'
 
 import GAccessRestrictions from '@/components/ShootAccessRestrictions/GAccessRestrictions'
@@ -170,12 +168,12 @@ export default {
   components: {
     GNewShootSelectInfrastructure,
     GNewShootInfrastructureDetails,
-    GAccessRestrictions, // eslint-disable-line vue/no-unused-components
+    GAccessRestrictions,
     GNewShootDetails,
-    GManageShootAddons, // eslint-disable-line vue/no-unused-components
-    GManageShootDns, // eslint-disable-line vue/no-unused-components
-    GMaintenanceComponents, // eslint-disable-line vue/no-unused-components
-    GMaintenanceTime, // eslint-disable-line vue/no-unused-components
+    GManageShootAddons,
+    GManageShootDns,
+    GMaintenanceComponents,
+    GMaintenanceTime,
     GManageHibernationSchedule: defineAsyncComponent(() => import('@/components/ShootHibernation/GManageHibernationSchedule')),
     GManageWorkers: defineAsyncComponent(() => import('@/components/ShootWorkers/GManageWorkers')),
     GMessage,
@@ -193,12 +191,10 @@ export default {
       if (this.v$.$invalid && !await this.confirmNavigateToYamlIfInvalid()) {
         return next(false)
       }
-
-      this.setShootResource()
       return next()
     }
 
-    if (!this.isShootCreated && this.isShootContentDirty() && !await this.confirmNavigation()) {
+    if (!this.isShootCreated && this.isShootDirty && !await this.confirmNavigation()) {
       return next(false)
     }
 
@@ -217,48 +213,24 @@ export default {
     }
   },
   computed: {
-    ...mapState(useAuthzStore, [
-      'namespace',
-    ]),
     ...mapState(useConfigStore, [
       'accessRestriction',
     ]),
-    ...mapState(useShootStagingStore, [
+    ...mapState(useShootContextStore, [
+      'shootNamespace',
+      'shootName',
+      'shootManifest',
+      'isShootDirty',
       'workerless',
-    ]),
-    ...mapState(useShootCreationStore, [
-      'shootObject',
     ]),
     ...mapState(useCloudProfileStore, [
       'sortedInfrastructureKindList',
     ]),
   },
-  mounted () {
-    if (this.sortedInfrastructureKindList.length) {
-      this.setShootResourceState()
-    }
-  },
-  created () {
-    if (this.sortedInfrastructureKindList.length) {
-      this.setClusterConfiguration(this.shootObject)
-    }
-  },
   methods: {
-    ...mapActions(useShootCreationStore, [
-      'isShootDirty',
+    ...mapActions(useShootContextStore, [
       'createShoot',
-      'replaceShoot',
-      'getShootResource',
-      'setShootResourceState',
     ]),
-    ...mapActions(useShootStagingStore, [
-      'getDnsConfiguration',
-      'setClusterConfiguration',
-    ]),
-    isShootContentDirty () {
-      const shootResource = this.getShootResource()
-      return this.isShootDirty(shootResource)
-    },
     async createClicked () {
       if (this.v$.$invalid) {
         await this.v$.$validate()
@@ -268,15 +240,14 @@ export default {
         return
       }
 
-      const shootResource = this.setShootResource()
       try {
-        await this.createShoot(shootResource)
+        await this.createShoot(this.shootManifest)
         this.isShootCreated = true
         this.$router.push({
           name: 'ShootItem',
           params: {
-            namespace: this.namespace,
-            name: shootResource.metadata.name,
+            namespace: this.shootNamespace,
+            name: this.shootName,
           },
         })
       } catch (err) {

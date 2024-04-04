@@ -81,28 +81,44 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import {
   mapState,
-  mapWritableState,
+  mapActions,
 } from 'pinia'
 
-import { useShootCreationStore } from '@/store/shoot'
+import { useShootContextStore } from '@/store/shootContext'
+import { NAND } from '@/store/shootContext/helper'
 
 import { transformHtml } from '@/utils'
 
+import { cloneDeep } from '@/lodash'
+
 export default {
+  data () {
+    return {
+      accessRestrictions: cloneDeep(this.getAccessRestrictions()),
+    }
+  },
   computed: {
-    ...mapState(useShootCreationStore, [
+    ...mapState(useShootContextStore, [
       'accessRestrictionDefinitions',
       'accessRestrictionNoItemsText',
     ]),
-    ...mapWritableState(useShootCreationStore, [
-      'accessRestrictions',
-    ]),
+  },
+  watch: {
+    accessRestrictions: {
+      handler (value) {
+        this.setAccessRestrictions(value)
+      },
+      deep: true,
+    },
   },
   methods: {
-    enabled (definition) {
-      const inverted = definition.input.inverted
-      const value = this.accessRestrictions[definition.key].value
-      return inverted ? !value : value
+    ...mapActions(useShootContextStore, [
+      'getAccessRestrictions',
+      'setAccessRestrictions',
+    ]),
+    enabled ({ key, input }) {
+      const value = this.accessRestrictions[key].value
+      return NAND(value, !!input?.inverted)
     },
     textClass (definition) {
       return this.enabled(definition)

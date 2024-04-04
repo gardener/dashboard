@@ -100,12 +100,26 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     }
   }
 
+  const knownInfrastructureKindList = ref([
+    'aws',
+    'azure',
+    'gcp',
+    'openstack',
+    'alicloud',
+    'metal',
+    'vsphere',
+    'hcloud',
+    'onmetal',
+    'ironcore',
+    'local',
+  ])
+
   const infrastructureKindList = computed(() => {
     return uniq(map(list.value, 'metadata.cloudProviderKind'))
   })
 
   const sortedInfrastructureKindList = computed(() => {
-    return intersection(['aws', 'azure', 'gcp', 'openstack', 'alicloud', 'metal', 'vsphere', 'hcloud', 'onmetal', 'ironcore', 'local'], infrastructureKindList.value)
+    return intersection(knownInfrastructureKindList.value, infrastructureKindList.value)
   })
 
   function cloudProfilesByCloudProviderKind (cloudProviderKind) {
@@ -376,7 +390,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     const mapMachineImages = machineImage => {
       const versions = filter(machineImage.versions, ({ version, expirationDate }) => {
         if (!semver.valid(version)) {
-          logger.error(`Skipped machine image ${machineImage.name} as version ${version} is not a valid semver version`)
+          logger.info(`Skipped machine image ${machineImage.name} as version ${version} is not a valid semver version`)
           return false
         }
         return true
@@ -477,7 +491,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     const allVersions = get(cloudProfile, 'data.kubernetes.versions', [])
     const validVersions = filter(allVersions, ({ expirationDate, version }) => {
       if (!semver.valid(version)) {
-        logger.error(`Skipped Kubernetes version ${version} as it is not a valid semver version`)
+        logger.info(`Skipped Kubernetes version ${version} as it is not a valid semver version`)
         return false
       }
       return true
@@ -621,6 +635,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     cloudProfileList,
     fetchCloudProfiles,
     cloudProfilesByCloudProviderKind,
+    knownInfrastructureKindList,
     sortedInfrastructureKindList,
     cloudProfileByName,
     regionsWithSeedByCloudProfileName,

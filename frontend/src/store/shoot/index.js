@@ -4,10 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import useShootCreationStore from './shootCreation'
 import useShootStore from './shoot'
 
-export {
-  useShootCreationStore,
-  useShootStore,
-}
+export { useShootStore }

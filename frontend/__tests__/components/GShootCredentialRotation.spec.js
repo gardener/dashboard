@@ -12,7 +12,13 @@ import GShootCredentialRotationCard from '@/components/ShootDetails/GShootCreden
 import GCredentialTile from '@/components/GCredentialTile.vue'
 import GShootActionRotateCredentials from '@/components/GShootActionRotateCredentials.vue'
 
-const { createPlugins } = global.fixtures.helper
+import {
+  components as componentsPlugin,
+  utils as utilsPlugin,
+  notify as notifyPlugin,
+} from '@/plugins'
+
+const { createVuetifyPlugin } = global.fixtures.helper
 
 describe('components', () => {
   describe('g-shoot-credential-rotation-card', () => {
@@ -23,7 +29,10 @@ describe('components', () => {
       return mount(GShootCredentialRotationCard, {
         global: {
           plugins: [
-            ...createPlugins(),
+            ...createVuetifyPlugin(),
+            componentsPlugin,
+            utilsPlugin,
+            notifyPlugin,
             pinia,
           ],
         },

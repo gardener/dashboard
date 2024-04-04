@@ -15,7 +15,13 @@ import { useLocalStorageStore } from '@/store/localStorage'
 
 import GLogin from '@/layouts/GLogin.vue'
 
-const { createPlugins } = global.fixtures.helper
+import {
+  components as componentsPlugin,
+  utils as utilsPlugin,
+  notify as notifyPlugin,
+} from '@/plugins'
+
+const { createVuetifyPlugin } = global.fixtures.helper
 
 describe('components', () => {
   describe('g-login', () => {
@@ -34,7 +40,10 @@ describe('components', () => {
       return mount(GLogin, {
         global: {
           plugins: [
-            ...createPlugins(),
+            createVuetifyPlugin(),
+            componentsPlugin,
+            utilsPlugin,
+            notifyPlugin,
             pinia,
           ],
           mocks: {

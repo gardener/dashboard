@@ -7,11 +7,9 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div class="fill-height">
     <g-shoot-editor
-      ref="shootEditorRef"
       v-model:error-message="errorMessage"
       v-model:detailed-error-message="detailedErrorMessage"
       alert-banner-identifier="newShootEditorWarning"
-      :shoot-item="shootObject"
     >
       <template #modificationWarning>
         By modifying the resource directly you may create an invalid cluster resource.
@@ -39,13 +37,10 @@ import {
 } from 'pinia'
 import yaml from 'js-yaml'
 
-import { useShootCreationStore } from '@/store/shoot'
-import { useAuthzStore } from '@/store/authz'
+import { useShootContextStore } from '@/store/shootContext'
 import { useAppStore } from '@/store/app'
 
 import GConfirmDialog from '@/components/dialogs/GConfirmDialog'
-
-import { useAsyncRef } from '@/composables/useAsyncRef'
 
 import { errorDetailsFromError } from '@/utils/error'
 
@@ -58,10 +53,11 @@ export default {
   async beforeRouteLeave (to, from, next) {
     if (to.name === 'NewShoot') {
       try {
-        const shootResource = await this.getShootResource()
-        this.replaceShoot(shootResource)
+        const object = this.getEditorContent()
+        this.setShootManifest(object)
         return next()
       } catch (err) {
+        console.error(err)
         this.errorMessage = err.message
         return next(false)
       }
@@ -69,24 +65,13 @@ export default {
     if (this.isShootCreated) {
       return next()
     }
-    let isDirty = true
-    try {
-      isDirty = await this.isShootContentDirty()
-    } catch (err) {
-      this.errorMessage = err.message
-    }
-    if (isDirty) {
+    if (this.isShootDirty) {
       if (!await this.confirmEditorNavigation()) {
-        this.shootEditor.dispatch('focus')
+        this.shootManifestEditor?.focus()
         return next(false)
       }
     }
     return next()
-  },
-  setup () {
-    return {
-      ...useAsyncRef('shootEditor'),
-    }
   },
   data () {
     return {
@@ -96,18 +81,17 @@ export default {
     }
   },
   computed: {
-    ...mapState(useAuthzStore, [
-      'namespace',
-    ]),
-    ...mapState(useShootCreationStore, [
-      'shootObject',
+    ...mapState(useShootContextStore, [
+      'shootNamespace',
+      'shootName',
+      'isShootDirty',
+      'cmInstance',
     ]),
   },
   methods: {
-    ...mapActions(useShootCreationStore, [
-      'isShootDirty',
-      'replaceShoot',
+    ...mapActions(useShootContextStore, [
       'createShoot',
+      'setShootManifest',
     ]),
     ...mapActions(useAppStore, ['alert']),
     confirmEditorNavigation () {
@@ -117,20 +101,19 @@ export default {
         messageHtml: 'Your cluster has not been created.<br/>Do you want to cancel cluster creation and discard your changes?',
       })
     },
-    async getShootResource () {
-      const content = await this.shootEditor.dispatch('getContent')
+    getEditorContent () {
+      const content = this.cmInstance.doc.getValue()
       return yaml.load(content)
     },
     async createClicked () {
       try {
-        const shootResource = await this.getShootResource()
-        await this.createShoot(shootResource)
+        await this.createShoot(this.getEditorContent())
         this.isShootCreated = true
         this.$router.push({
           name: 'ShootItem',
           params: {
-            namespace: this.namespace,
-            name: shootResource.metadata.name,
+            namespace: this.shootNamespace,
+            name: this.shootName,
           },
         })
       } catch (err) {
@@ -143,10 +126,6 @@ export default {
         }
         this.logger.error(this.errorMessage, this.detailedErrorMessage, err)
       }
-    },
-    async isShootContentDirty () {
-      const shootResource = await this.getShootResource()
-      return this.isShootDirty(shootResource)
     },
   },
 }

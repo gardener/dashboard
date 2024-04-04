@@ -10,15 +10,15 @@ SPDX-License-Identifier: Apache-2.0
       <v-col cols="3">
         <v-text-field
           ref="name"
-          v-model="name"
+          v-model="shootName"
           color="primary"
           label="Cluster Name"
           :counter="maxShootNameLength"
-          :error-messages="getErrorMessages(v$.name)"
+          :error-messages="getErrorMessages(v$.shootName)"
           hint="Maximum name length depends on project name"
           variant="underlined"
-          @input="onInputName"
-          @blur="v$.name.$touch()"
+          @input="v$.shootName.$touch()"
+          @blur="v$.shootName.$touch()"
         />
       </v-col>
       <v-col cols="3">
@@ -35,7 +35,7 @@ SPDX-License-Identifier: Apache-2.0
           :hint="versionHint"
           persistent-hint
           variant="underlined"
-          @update:model-value="onInputKubernetesVersion"
+          @change="v$.kubernetesVersion.$touch()"
           @blur="v$.kubernetesVersion.$touch()"
         >
           <template #item="{ item, props }">
@@ -50,7 +50,7 @@ SPDX-License-Identifier: Apache-2.0
         <g-purpose
           ref="purposeRef"
           v-model="purpose"
-          :purposes="purposes"
+          :purposes="allPurposes"
         />
       </v-col>
     </v-row>
@@ -100,11 +100,8 @@ import {
 import { useAuthzStore } from '@/store/authz'
 import { useConfigStore } from '@/store/config'
 import { useProjectStore } from '@/store/project'
-import {
-  useShootStore,
-  useShootCreationStore,
-} from '@/store/shoot'
-import { useShootStagingStore } from '@/store/shootStaging'
+import { useShootStore } from '@/store/shoot'
+import { useShootContextStore } from '@/store/shootContext'
 
 import GStaticTokenKubeconfigSwitch from '@/components/GStaticTokenKubeconfigSwitch'
 
@@ -140,7 +137,7 @@ export default {
   validations () {
     const rules = {}
 
-    const nameRules = {
+    const shootNameRules = {
       required,
       maxLength: maxLength(this.maxShootNameLength),
       noConsecutiveHyphen,
@@ -150,7 +147,7 @@ export default {
         value => !this.shootByNamespaceAndName({ namespace: this.namespace, name: value }),
       ),
     }
-    rules.name = withFieldName('Cluster Name', nameRules)
+    rules.shootName = withFieldName('Cluster Name', shootNameRules)
 
     const kubernetesVersionRules = {
       required,
@@ -160,21 +157,19 @@ export default {
     return rules
   },
   computed: {
-    ...mapWritableState(useShootStagingStore, [
-      'workerless',
-    ]),
-    ...mapWritableState(useShootCreationStore, [
-      'name',
+    ...mapWritableState(useShootContextStore, [
+      'shootName',
       'kubernetesVersion',
       'cloudProfileName',
       'enableStaticTokenKubeconfig',
       'purpose',
+      'workerless',
     ]),
-    ...mapState(useShootCreationStore, [
+    ...mapState(useShootContextStore, [
       'k8sUpdates',
       'sortedKubernetesVersions',
       'kubernetesVersionIsNotLatestPatch',
-      'purposes',
+      'allPurposes',
     ]),
     ...mapState(useProjectStore, [
       'projectList',

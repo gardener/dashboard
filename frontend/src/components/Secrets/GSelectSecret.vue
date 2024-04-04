@@ -117,13 +117,18 @@ export default {
     dnsProviderKind: {
       type: String,
     },
+    registerVuelidateAs: {
+      type: String,
+    },
   },
   emits: [
     'update:modelValue',
   ],
-  setup () {
+  setup (props) {
     return {
-      v$: useVuelidate(),
+      v$: useVuelidate({
+        $registerAs: props.registerVuelidateAs,
+      }),
     }
   },
   data () {

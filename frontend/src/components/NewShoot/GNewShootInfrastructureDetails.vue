@@ -190,8 +190,7 @@ import {
 } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 
-import { useShootCreationStore } from '@/store/shoot'
-import { useShootStagingStore } from '@/store/shootStaging'
+import { useShootContextStore } from '@/store/shootContext'
 
 import GCloudProfile from '@/components/GCloudProfile'
 import GWildcardSelect from '@/components/GWildcardSelect'
@@ -258,7 +257,7 @@ export default {
     }
   },
   computed: {
-    ...mapWritableState(useShootCreationStore, [
+    ...mapWritableState(useShootContextStore, [
       'cloudProfileName',
       'infrastructureSecret',
       'region',
@@ -267,12 +266,12 @@ export default {
       'loadBalancerProviderName',
       'loadBalancerClassNames',
       'partitionID',
+      'projectID',
       'firewallImage',
       'firewallSize',
       'firewallNetworks',
-      'projectID',
     ]),
-    ...mapState(useShootCreationStore, [
+    ...mapState(useShootContextStore, [
       'infrastructureKind',
       'cloudProfiles',
       'infrastructureSecrets',
@@ -287,8 +286,6 @@ export default {
       'firewallSizes',
       'allFirewallNetworks',
       'allFloatingPoolNames',
-    ]),
-    ...mapState(useShootStagingStore, [
       'workerless',
     ]),
     regionItems () {

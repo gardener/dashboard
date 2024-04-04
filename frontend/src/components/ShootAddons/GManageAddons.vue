@@ -10,12 +10,14 @@ SPDX-License-Identifier: Apache-2.0
       v-for="addonDefinition in addonDefinitionList"
       :key="addonDefinition.name"
     >
-      <div class="d-flex ma-3">
+      <div
+        class="d-flex ma-3"
+      >
         <div class="action-select">
           <v-checkbox
-            v-model="addons[addonDefinition.name].enabled"
+            v-model="lazyAddons[addonDefinition.name].enabled"
             color="primary"
-            :disabled="!createMode && addonDefinition.forbidDisable && addons[addonDefinition.name].enabled"
+            :disabled="!createMode && addonDefinition.forbidDisable && lazyAddons[addonDefinition.name].enabled"
             density="compact"
           />
         </div>
@@ -36,18 +38,21 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState } from 'pinia'
+import {
+  mapState,
+  mapWritableState,
+} from 'pinia'
 
 import { useAuthzStore } from '@/store/authz'
 import { useProjectStore } from '@/store/project'
-import { useShootStagingStore } from '@/store/shootStaging'
+import { useShootContextStore } from '@/store/shootContext'
 
 import { shootAddonList } from '@/utils'
 
 import {
   filter,
   cloneDeep,
-  isEmpty,
+  isEqual,
 } from '@/lodash'
 
 export default {
@@ -59,8 +64,7 @@ export default {
   },
   data () {
     return {
-      addons: {},
-      addonDefinitionList: undefined,
+      lazyAddons: {},
     }
   },
   computed: {
@@ -70,37 +74,36 @@ export default {
     ...mapState(useAuthzStore, [
       'namespace',
     ]),
-    ...mapState(useShootStagingStore, [
+    ...mapState(useShootContextStore, [
       'workerless',
     ]),
+    ...mapWritableState(useShootContextStore, [
+      'addons',
+    ]),
+    addonDefinitionList () {
+      return filter(shootAddonList, ({ name, visible }) => visible || !!this.lazyAddons?.[name])
+    },
   },
   watch: {
-    workerless (value) {
-      if (!value && isEmpty(this.addons)) {
-        // If addons missing (navigated to overview tab from yaml), reset to defaults
-        const addonDefinitions = filter(this.addonDefinitionList, 'visible')
-        this.addons = {}
-        for (const { name, enabled } of addonDefinitions) {
-          this.addons[name] = { enabled }
+    lazyAddons: {
+      handler (value) {
+        this.addons = cloneDeep(value)
+      },
+      deep: true,
+    },
+    addons: {
+      handler (value) {
+        if (!isEqual(this.lazyAddons, value)) {
+          this.lazyAddons = cloneDeep(value)
         }
-      }
+      },
+      deep: true,
+      immediate: true,
     },
   },
   methods: {
-    getAddons () {
-      return cloneDeep(this.addons)
-    },
-    updateAddons (addons) {
-      this.resetAddonList(addons)
-      this.addons = cloneDeep(addons)
-    },
-    resetAddonList (addons) {
-      this.addonDefinitionList = filter(shootAddonList, addon => {
-        return addon.visible === true || (addons && !!addons[addon.name])
-      })
-    },
     textClass (addonDefinition) {
-      return !this.createMode && addonDefinition.forbidDisable && this.addons[addonDefinition.name].enabled
+      return !this.createMode && addonDefinition.forbidDisable && this.lazyAddons[addonDefinition.name].enabled
         ? 'text-disabled'
         : 'text-medium-emphasis'
     },

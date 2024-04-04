@@ -7,11 +7,11 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-row class="my-0">
     <g-new-shoot-infrastructure-card
-      v-for="kind in sortedInfrastructureKindList"
-      :key="kind"
-      :model-value="kind === infrastructureKind"
-      :infrastructure-kind="kind"
-      @update:model-value="selectInfrastructure(kind)"
+      v-for="value in sortedInfrastructureKindList"
+      :key="value"
+      :model-value="value === providerType"
+      :infrastructure-kind="value"
+      @update:model-value="setProviderType(value)"
     />
   </v-row>
 </template>
@@ -23,7 +23,7 @@ import {
 } from 'pinia'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
-import { useShootCreationStore } from '@/store/shoot'
+import { useShootContextStore } from '@/store/shootContext'
 
 import GNewShootInfrastructureCard from './GNewShootInfrastructureCard.vue'
 
@@ -35,13 +35,13 @@ export default {
     ...mapState(useCloudProfileStore, [
       'sortedInfrastructureKindList',
     ]),
-    ...mapWritableState(useShootCreationStore, [
-      'infrastructureKind',
+    ...mapWritableState(useShootContextStore, [
+      'providerType',
     ]),
   },
   methods: {
-    selectInfrastructure (value) {
-      this.infrastructureKind = value
+    setProviderType (value) {
+      this.providerType = value
     },
   },
 }

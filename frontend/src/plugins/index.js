@@ -15,6 +15,15 @@ import notify from './notify'
 import utils from './utils'
 import components from './components'
 
+export {
+  store,
+  router,
+  vuetify,
+  notify,
+  utils,
+  components,
+}
+
 export function registerPlugins (app) {
   app
     .use(store)

@@ -15,7 +15,13 @@ import { useProjectStore } from '@/store/project'
 
 import GNewShootDetails from '@/components/NewShoot/GNewShootDetails.vue'
 
-const { createPlugins } = global.fixtures.helper
+import {
+  components as componentsPlugin,
+  utils as utilsPlugin,
+  notify as notifyPlugin,
+} from '@/plugins'
+
+const { createVuetifyPlugin } = global.fixtures.helper
 
 describe('components', () => {
   describe('g-new-shoot-details', () => {
@@ -25,7 +31,10 @@ describe('components', () => {
       return mount(GNewShootDetails, {
         global: {
           plugins: [
-            ...createPlugins(),
+            ...createVuetifyPlugin(),
+            componentsPlugin,
+            utilsPlugin,
+            notifyPlugin,
             pinia,
           ],
         },
