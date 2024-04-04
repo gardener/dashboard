@@ -86,17 +86,16 @@ const documentTitle = computed(() => {
     appTitle = branding.documentTitle ?? `${branding.productName} Dashboard`
   }
 
-  const breadcrumbs = route.meta.breadcrumbs ?? []
-  const breadcrumbItems = typeof breadcrumbs === 'function'
-    ? breadcrumbs(route, projectStore.projectName)
-    : breadcrumbs
+  const projectName = projectStore.projectName
+  const routeParamName = route.params.name
+  const pageTitle = route.meta.title ?? route.name
 
-  const projectItem = breadcrumbItems.find(item => item.isProjectItem)
-  const nameItem = breadcrumbItems.find(item => item.isNameItem)
-  const pageItem = last(breadcrumbItems.filter(item => !item.isProjectItem && !item.isNameItem))
-
-  const locationTitle = [projectItem?.title, nameItem?.title].filter(item => item !== undefined).join('/')
-  const titleItems = [pageItem?.title, locationTitle].filter(item => item?.length)
+  let titleItems = [pageTitle]
+  if (route.meta.namespaced !== false) {
+    const locationTitle = [projectName, routeParamName].filter(item => item !== undefined).join('/')
+    titleItems.push(locationTitle)
+  }
+  titleItems = titleItems.filter(item => item?.length)
 
   if (titleItems.length) {
     appTitle = `${titleItems.join(' • ')} | ${appTitle}`

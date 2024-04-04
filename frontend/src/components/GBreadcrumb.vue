@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
       />
     </template>
     <template #title="{ item }">
-      <span :class="{ 'text-h6': item.last }">
+      <span :class="{ 'text-h6': !item.to }">
         {{ item.title || item }}
       </span>
     </template>
@@ -29,19 +29,16 @@ SPDX-License-Identifier: Apache-2.0
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
-import { useProjectStore } from '@/store/project'
-
 import { kebabCase } from '@/lodash'
 
 const route = useRoute()
-const projectStore = useProjectStore()
 
 const breadcrumbItems = computed(() => {
   const breadcrumbs = route.meta?.breadcrumbs ?? []
   const items = typeof breadcrumbs === 'function'
-    ? breadcrumbs(route, projectStore.projectName)
+    ? breadcrumbs(route)
     : breadcrumbs
-  return items.map(({ title, href, to, disabled, exact }, index, array) => {
+  return items.map(({ title, href, to, disabled, exact }) => {
     const item = {
       key: kebabCase(title),
       title,
@@ -59,9 +56,6 @@ const breadcrumbItems = computed(() => {
     }
     if (typeof exact === 'boolean') {
       item.exact = exact
-    }
-    if (index === array.length - 1) {
-      item.last = true
     }
     return item
   })
