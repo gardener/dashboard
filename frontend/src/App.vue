@@ -84,17 +84,22 @@ const documentTitle = computed(() => {
     appTitle = branding.documentTitle ?? `${branding.productName} Dashboard`
   }
 
-  const projectName = projectStore.projectName
-  const routeParamName = route.params.name
+  const titleItems = []
+
   const pageTitle = route.meta.title ?? route.name
-
-  let titleItems = [pageTitle]
-  if (route.meta.namespaced !== false) {
-    const locationTitle = [projectName, routeParamName].filter(item => item !== undefined).join('/')
-    titleItems.push(locationTitle)
+  if (pageTitle) {
+    titleItems.push(pageTitle)
   }
-  titleItems = titleItems.filter(item => item?.length)
 
+  if (route.meta.namespaced !== false) {
+    const projectName = projectStore.projectName
+    const routeParamName = route.params.name
+    if (routeParamName) {
+      titleItems.push([projectName, routeParamName].join('/'))
+    } else if (projectName) {
+      titleItems.push(projectName)
+    }
+  }
   if (titleItems.length) {
     appTitle = `${titleItems.join(' • ')} | ${appTitle}`
   }
