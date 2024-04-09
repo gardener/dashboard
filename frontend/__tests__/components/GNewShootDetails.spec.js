@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import EventEmitter from 'events'
-
 import { mount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
 
@@ -31,7 +29,7 @@ describe('components', () => {
       return mount(GNewShootDetails, {
         global: {
           plugins: [
-            ...createVuetifyPlugin(),
+            createVuetifyPlugin(),
             componentsPlugin,
             utilsPlugin,
             notifyPlugin,
@@ -68,8 +66,7 @@ describe('components', () => {
     })
 
     it('maximum shoot name length should depend on project name', () => {
-      const userInterActionBus = new EventEmitter()
-      const wrapper = mountNewShootDetails({ userInterActionBus })
+      const wrapper = mountNewShootDetails({ })
       expect(wrapper.find('.v-row:nth-of-type(4) label').text()).toBe('title')
       expect(wrapper.vm.maxShootNameLength).toBe(18)
     })

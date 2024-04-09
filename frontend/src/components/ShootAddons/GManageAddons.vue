@@ -7,29 +7,30 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div v-if="!workerless">
     <v-row
-      v-for="addonDefinition in addonDefinitionList"
-      :key="addonDefinition.name"
+      v-for="{ name, title, description } in addonDefinitions"
+      :key="name"
     >
       <div
         class="d-flex ma-3"
       >
         <div class="action-select">
           <v-checkbox
-            v-model="lazyAddons[addonDefinition.name].enabled"
+            :model-value="getAddonEnabled(name)"
+            :disabled="getDisabled(name) "
             color="primary"
-            :disabled="!createMode && addonDefinition.forbidDisable && lazyAddons[addonDefinition.name].enabled"
             density="compact"
+            @update:model-value="setAddonEnabled(name, $event)"
           />
         </div>
         <div
           class="d-flex flex-column"
-          :class="textClass(addonDefinition)"
+          :class="getTextClass(name)"
         >
           <div class="wrap-text text-subtitle-2">
-            {{ addonDefinition.title }}
+            {{ title }}
           </div>
           <div class="wrap-text pt-1 text-body-2">
-            {{ addonDefinition.description }}
+            {{ description }}
           </div>
         </div>
       </div>
@@ -37,77 +38,37 @@ SPDX-License-Identifier: Apache-2.0
   </div>
 </template>
 
-<script>
-import {
-  mapState,
-  mapWritableState,
-} from 'pinia'
+<script setup>
+import { storeToRefs } from 'pinia'
 
-import { useAuthzStore } from '@/store/authz'
-import { useProjectStore } from '@/store/project'
 import { useShootContextStore } from '@/store/shootContext'
 
-import { shootAddonList } from '@/utils'
+const props = defineProps({
+  createMode: {
+    type: Boolean,
+    default: false,
+  },
+})
 
-import {
-  filter,
-  cloneDeep,
-  isEqual,
-} from '@/lodash'
+const shootContextStore = useShootContextStore()
+const {
+  addonDefinitions,
+  workerless,
+} = storeToRefs(shootContextStore)
+const {
+  getAddonEnabled,
+  setAddonEnabled,
+} = shootContextStore
 
-export default {
-  props: {
-    createMode: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  data () {
-    return {
-      lazyAddons: {},
-    }
-  },
-  computed: {
-    ...mapState(useProjectStore, [
-      'projectList',
-    ]),
-    ...mapState(useAuthzStore, [
-      'namespace',
-    ]),
-    ...mapState(useShootContextStore, [
-      'workerless',
-    ]),
-    ...mapWritableState(useShootContextStore, [
-      'addons',
-    ]),
-    addonDefinitionList () {
-      return filter(shootAddonList, ({ name, visible }) => visible || !!this.lazyAddons?.[name])
-    },
-  },
-  watch: {
-    lazyAddons: {
-      handler (value) {
-        this.addons = cloneDeep(value)
-      },
-      deep: true,
-    },
-    addons: {
-      handler (value) {
-        if (!isEqual(this.lazyAddons, value)) {
-          this.lazyAddons = cloneDeep(value)
-        }
-      },
-      deep: true,
-      immediate: true,
-    },
-  },
-  methods: {
-    textClass (addonDefinition) {
-      return !this.createMode && addonDefinition.forbidDisable && this.lazyAddons[addonDefinition.name].enabled
-        ? 'text-disabled'
-        : 'text-medium-emphasis'
-    },
-  },
+function getDisabled (name) {
+  const { forbidDisable = false } = addonDefinitions.value[name]
+  return !props.createMode && forbidDisable && getAddonEnabled(name)
+}
+
+function getTextClass (name) {
+  return getDisabled(name)
+    ? 'text-disabled'
+    : 'text-medium-emphasis'
 }
 </script>
 

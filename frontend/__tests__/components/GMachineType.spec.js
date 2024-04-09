@@ -39,7 +39,7 @@ describe('components', () => {
       return mount(GMachineType, {
         global: {
           plugins: [
-            ...createVuetifyPlugin(),
+            createVuetifyPlugin(),
             componentsPlugin,
             utilsPlugin,
             notifyPlugin,

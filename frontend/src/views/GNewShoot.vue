@@ -73,36 +73,22 @@ SPDX-License-Identifier: Apache-2.0
           title="Add-Ons (not actively monitored and provided on a best-effort basis only)"
         />
         <v-card-text>
-          <g-manage-shoot-addons
-            ref="addons"
-            create-mode
-          />
+          <g-manage-shoot-addons create-mode />
         </v-card-text>
       </v-card>
-      <!--
       <v-card class="mt-4">
         <g-toolbar title="Maintenance" />
         <v-card-text>
-          <g-maintenance-time
-            ref="maintenanceTime"
-          />
-          <g-maintenance-components
-            ref="maintenanceComponents"
-            :user-inter-action-bus="userInterActionBus"
-            :hide-os-updates="workerless"
-          />
+          <g-maintenance-time />
+          <g-maintenance-components />
         </v-card-text>
       </v-card>
       <v-card class="mt-4">
         <g-toolbar title="Hibernation" />
         <v-card-text>
-          <g-manage-hibernation-schedule
-            ref="hibernationScheduleRef"
-            :user-inter-action-bus="userInterActionBus"
-          />
+          <g-manage-hibernation-schedule />
         </v-card-text>
       </v-card>
-      -->
     </v-container>
     <div>
       <g-message
@@ -178,7 +164,7 @@ export default {
     GManageWorkers: defineAsyncComponent(() => import('@/components/ShootWorkers/GManageWorkers')),
     GMessage,
     GConfirmDialog,
-    GManageControlPlaneHighAvailability, // eslint-disable-line vue/no-unused-components
+    GManageControlPlaneHighAvailability,
     GToolbar,
   },
   inject: ['logger'],

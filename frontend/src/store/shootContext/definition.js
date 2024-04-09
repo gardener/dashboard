@@ -8,6 +8,7 @@ import {
   shallowRef,
   reactive,
   computed,
+  toRef,
 } from 'vue'
 
 import utils from '@/utils'
@@ -20,6 +21,10 @@ import {
   getNetworkingTemplate,
   getZonesNetworkConfiguration,
 } from '@/utils/createShoot'
+import {
+  scheduleEventsFromCrontabBlocks,
+  crontabBlocksFromScheduleEvents,
+} from '@/utils/hibernationSchedule'
 
 import {
   NAND,
@@ -50,6 +55,7 @@ import {
 
 export function createStoreDefinition (context) {
   const {
+    logger,
     appStore,
     authzStore,
     cloudProfileStore,
@@ -76,6 +82,7 @@ export function createStoreDefinition (context) {
   const shootManifest = computed(() => {
     const object = cloneDeep(manifest.value)
     set(object, 'spec.dns', dns.value)
+    set(object, 'spec.hibernation.schedules', hibernationSchedules.value)
     if (!isEmpty(providerWorkers.value)) {
       set(object, 'spec.provider.infrastructureConfig.networks.zones', providerInfrastructureConfigNetworksZones.value)
       set(object, 'spec.provider.controlPlaneConfig.zone', providerControlPlaneConfigZone.value)
@@ -87,6 +94,7 @@ export function createStoreDefinition (context) {
     initialManifest.value = value
     manifest.value = cloneDeep(value)
     dns.value = get(manifest.value, 'spec.dns', {})
+    hibernationSchedules.value = get(manifest.value, 'spec.hibernation.schedules', [])
   }
 
   function resetShootManifest () {
@@ -96,7 +104,7 @@ export function createStoreDefinition (context) {
     resetNetworkingType()
     resetAddons()
     resetMaintenance()
-    resetHibernation()
+    resetHibernationShedules()
   }
 
   const isShootDirty = computed(() => {
@@ -281,6 +289,7 @@ export function createStoreDefinition (context) {
     },
     set (value) {
       set(manifest.value, 'spec.purpose', includes(allPurposes.value, value) ? value : '')
+      resetHibernationShedules()
     },
   })
 
@@ -542,11 +551,30 @@ export function createStoreDefinition (context) {
 
   function resetAddons () {
     const defaultAddons = {}
-    const visibleShootAddonList = filter(utils.shootAddonList, 'visible')
-    for (const { name, enabled } of visibleShootAddonList) {
+    for (const { name, enabled } of visibleAddonDefinitionList.value) {
       defaultAddons[name] = { enabled }
     }
     addons.value = defaultAddons
+  }
+
+  const visibleAddonDefinitionList = computed(() => {
+    return filter(utils.shootAddonList, 'visible')
+  })
+
+  const addonDefinitionList = computed(() => {
+    return filter(utils.shootAddonList, ({ name, visible }) => visible || has(addons.value, name))
+  })
+
+  const addonDefinitions = computed(() => {
+    return keyBy(addonDefinitionList.value, 'name')
+  })
+
+  function getAddonEnabled (name) {
+    return get(addons.value, [name, 'enabled'], false)
+  }
+
+  function setAddonEnabled (name, value) {
+    set(addons.value, [name, 'enabled'], value)
   }
 
   /* maintenance */
@@ -605,9 +633,9 @@ export function createStoreDefinition (context) {
   }
 
   /* hibernation */
-  const noHibernationSchedule = computed({
+  const noHibernationSchedules = computed({
     get () {
-      return getAnnotation('dashboard.garden.sapcloud.io/no-hibernation-schedule', false)
+      return getAnnotation('dashboard.garden.sapcloud.io/no-hibernation-schedule', 'false') === 'true'
     },
     set (value) {
       if (value) {
@@ -620,23 +648,64 @@ export function createStoreDefinition (context) {
 
   const hibernationSchedules = computed({
     get () {
-      return get(manifest.value, 'spec.hibernation.schedules')
+      return crontabBlocksFromScheduleEvents(hibernationState.scheduleEvents)
     },
     set (value) {
-      set(manifest.value, 'spec.hibernation.schedules', value)
+      try {
+        const scheduleEvents = scheduleEventsFromCrontabBlocks(value, appStore.location)
+        hibernationState.cronExpressionSyntaxError = null
+        hibernationState.scheduleEvents = scheduleEvents
+      } catch (err) {
+        logger.warn(err.message)
+        hibernationState.cronExpressionSyntaxError = err
+      }
     },
   })
 
   function resetHibernationShedules () {
     const location = appStore.location
-    const defaultHibernationSchedules = get(configStore.defaultHibernationSchedule, purpose.value)
-    hibernationSchedules.value = map(defaultHibernationSchedules, schedule => ({ ...schedule, location }))
-    noHibernationSchedule.value = false
+    const defaultCrontabBlocks = get(configStore.defaultHibernationSchedule, purpose.value)
+    hibernationSchedules.value = map(defaultCrontabBlocks, crontabBlock => ({ ...crontabBlock, location }))
+    noHibernationSchedules.value = false
   }
 
-  function resetHibernation () {
-    resetHibernationShedules()
+  function createHibernationScheduleEvent (start = {}, end = {}) {
+    const scheduleEvent = {
+      start,
+      end,
+      location: appStore.location,
+    }
+    Object.defineProperty(scheduleEvent, 'id', {
+      value: uuidv4(),
+    })
+    return scheduleEvent
   }
+
+  function getHibernationScheduleEvent (id) {
+    return find(hibernationState.scheduleEvents, ['id', id])
+  }
+
+  function addHibernationScheduleEvent () {
+    const defaultCrontabBlocks = get(configStore.defaultHibernationSchedule, purpose.value)
+    if (!isEmpty(hibernationState.scheduleEvents) || isEmpty(defaultCrontabBlocks)) {
+      hibernationState.scheduleEvents.push(createHibernationScheduleEvent())
+      noHibernationSchedules.value = false
+    } else {
+      resetHibernationShedules()
+    }
+  }
+
+  function removeHibernationScheduleEvent (id) {
+    hibernationState.scheduleEvents = filter(hibernationState.scheduleEvents, scheduleEvent => scheduleEvent.id !== id)
+  }
+
+  const hibernationState = reactive({
+    scheduleEvents: [],
+    cronExpressionSyntaxError: null,
+  })
+
+  const hibernationSchedulesError = toRef(hibernationState, 'cronExpressionSyntaxError')
+  const hibernationScheduleEvents = toRef(hibernationState, 'scheduleEvents')
 
   /* controlPlane */
   const controlPlaneHighAvailabilityFailureToleranceType = computed({
@@ -899,70 +968,46 @@ export function createStoreDefinition (context) {
   }
 
   /* accessRestrictions */
-  const accessRestrictions = computed({
-    get: getAccessRestrictions,
-    set: setAccessRestrictions,
-  })
-
-  function getAccessRestrictions () {
-    const getAccessRestriction = ({ key, input, options }) => {
-      const value = getSeedSelectorMatchLabel(key, !!input?.inverted) === 'true'
-      const accessRestrictionOptions = {}
-      for (const { key, input } of options) {
-        if (key) {
-          const value = getAnnotation(key, !!input?.inverted) === 'true'
-          accessRestrictionOptions[key] = {
-            value: NAND(value, !!input?.inverted),
-          }
-        }
-      }
-      return {
-        value: NAND(value, !!input?.inverted),
-        options: accessRestrictionOptions,
-      }
-    }
-
-    const accessRestrictions = {}
-    for (const definition of accessRestrictionDefinitions.value) {
-      const key = definition.key
-      if (key) {
-        accessRestrictions[key] = getAccessRestriction(definition)
-      }
-    }
-
-    return accessRestrictions
+  function getAccessRestrictionValue (key) {
+    const { input } = accessRestrictionDefinitions.value[key]
+    const inverted = !!input?.inverted
+    const defaultValue = inverted
+    const value = getSeedSelectorMatchLabel(key, defaultValue) === 'true'
+    return NAND(value, inverted)
   }
 
-  function setAccessRestrictions (value) {
-    const setAccessRestriction = ({ key, input, options: optionDefinitions }, accessRestriction) => {
-      const accessRestrictionEnabled = NAND(accessRestriction.value, !!input?.inverted)
-      if (accessRestrictionEnabled) {
-        setSeedSelectorMatchLabel(key, 'true')
-      } else {
-        unsetSeedSelectorMatchLabel(key)
-      }
-
-      for (const optionDefinition of optionDefinitions) {
-        const key = optionDefinition.key
-        if (accessRestrictionEnabled) {
-          const accessRestrictionOption = accessRestriction.options[key]
-          const optionEnabled = NAND(accessRestrictionOption.value, !!input?.inverted)
-          setAnnotation(key, optionEnabled)
-        } else {
-          unsetAnnotation(key)
-        }
+  function setAccessRestrictionValue (key, value) {
+    const { input, options } = accessRestrictionDefinitions.value[key]
+    const enabled = NAND(value, !!input?.inverted)
+    if (enabled) {
+      setSeedSelectorMatchLabel(key, 'true')
+    } else {
+      unsetSeedSelectorMatchLabel(key)
+      for (const key of Object.keys(options)) {
+        unsetAnnotation(key)
       }
     }
+  }
 
-    for (const definition of accessRestrictionDefinitions.value) {
-      const key = definition.key
-      setAccessRestriction(definition, value[key])
-    }
+  function getAccessRestrictionOptionValue (key) {
+    const { accessRestrictionKey } = accessRestrictionOptionDefinitions.value[key]
+    const { input } = get(accessRestrictionDefinitions.value, [accessRestrictionKey, 'options', key])
+    const inverted = !!input?.inverted
+    const defaultValue = inverted
+    const value = getAnnotation(key, defaultValue) === 'true'
+    return NAND(value, !!input?.inverted)
+  }
+
+  function setAccessRestrictionOptionValue (key, value) {
+    const { accessRestrictionKey } = accessRestrictionOptionDefinitions.value[key]
+    const { input } = get(accessRestrictionDefinitions.value, [accessRestrictionKey, 'options', key])
+    const inverted = !!input?.inverted
+    setAnnotation(key, NAND(value, inverted))
   }
 
   /* seedSelector */
   function getSeedSelectorMatchLabel (key, defaultValue) {
-    get(manifest.value, `spec.seedSelector.matchLabels["${key}"]`, `${defaultValue}`)
+    return get(manifest.value, `spec.seedSelector.matchLabels["${key}"]`, `${defaultValue}`)
   }
 
   function setSeedSelectorMatchLabel (key, value) {
@@ -1152,11 +1197,36 @@ export function createStoreDefinition (context) {
     })
   })
 
-  const accessRestrictionDefinitions = computed(() => {
+  const accessRestrictionDefinitionList = computed(() => {
     return cloudProfileStore.accessRestrictionDefinitionsByCloudProfileNameAndRegion({
       cloudProfileName: cloudProfileName.value,
       region: region.value,
     })
+  })
+
+  const accessRestrictionDefinitions = computed(() => {
+    const accessRestrictionDefinitions = {}
+    for (const definition of accessRestrictionDefinitionList.value) {
+      const { key, options } = definition
+      accessRestrictionDefinitions[key] = {
+        ...definition,
+        options: keyBy(options, 'key'),
+      }
+    }
+    return accessRestrictionDefinitions
+  })
+
+  const accessRestrictionOptionDefinitions = computed(() => {
+    const accessRestrictionOptionDefinitions = {}
+    for (const definition of accessRestrictionDefinitionList.value) {
+      for (const optionDefinition of definition.options) {
+        accessRestrictionOptionDefinitions[optionDefinition.key] = {
+          accessRestrictionKey: definition.key,
+          ...optionDefinition,
+        }
+      }
+    }
+    return accessRestrictionOptionDefinitions
   })
 
   const accessRestrictionNoItemsText = computed(() => {
@@ -1166,9 +1236,9 @@ export function createStoreDefinition (context) {
     })
   })
 
-  const selectedAccessRestrictions = computed(() => {
+  const accessRestrictionList = computed(() => {
     const accessRestrictionList = []
-    for (const definition of accessRestrictionDefinitions.value) {
+    for (const definition of accessRestrictionDefinitionList.value) {
       const {
         key,
         display: {
@@ -1179,12 +1249,12 @@ export function createStoreDefinition (context) {
         options: optionDefinitions,
       } = definition
 
-      const accessRestriction = accessRestrictions.value[definition.key]
-      if (visibleIf !== accessRestriction.value) {
+      const value = getAccessRestrictionValue(key)
+      if (visibleIf !== value) {
         continue // skip
       }
 
-      const accessRestrictionItemOptions = []
+      const accessRestrictionOptionList = []
       for (const optionDefinition of optionDefinitions) {
         const {
           key,
@@ -1195,12 +1265,12 @@ export function createStoreDefinition (context) {
           },
         } = optionDefinition
 
-        const accessRestrictionOption = accessRestriction.options[optionDefinition.key]
-        if (accessRestrictionOption.value === !visibleIf) {
+        const value = getAccessRestrictionOptionValue(key)
+        if (value !== visibleIf) {
           continue // skip
         }
 
-        accessRestrictionItemOptions.push({
+        accessRestrictionOptionList.push({
           key,
           title,
           description,
@@ -1211,7 +1281,7 @@ export function createStoreDefinition (context) {
         key,
         title,
         description,
-        options: accessRestrictionItemOptions,
+        options: accessRestrictionOptionList,
       })
     }
 
@@ -1256,28 +1326,49 @@ export function createStoreDefinition (context) {
   })
 
   return {
+    /* manifest */
     shootManifest,
+    setShootManifest,
+    resetShootManifest,
     isShootDirty,
-    isNewCluster,
+    /* metadata */
     shootName,
+    resetShootName,
     shootNamespace,
     shootProjectName,
+    isNewCluster,
+    /* purpose */
     purpose,
     isShootActionsDisabled,
+    /* cloudProfileName */
     cloudProfileName,
+    resetCloudProfileName,
+    /* region */
     region,
+    /* seedName */
     seedName,
+    /* secretBindingName */
     secretBindingName,
+    resetSecretBindingName,
     infrastructureSecret,
+    /* kubernetes */
     kubernetesVersion,
+    resetKubernetes,
     kubernetesEnableStaticTokenKubeconfig,
+    resetKubernetesEnableStaticTokenKubeconfig,
+    /* networking */
     networkingType,
+    resetNetworkingType,
     networkingNodes,
+    /* provider */
     providerType,
+    resetProviderType,
+    /* provider - controlPlaneConfig */
     providerControlPlaneConfigLoadBalancerProviderName,
     providerControlPlaneConfigLoadBalancerClasses,
     providerControlPlaneConfigLoadBalancerClassNames,
     providerControlPlaneConfigZone,
+    /* provider - infrastructureConfig */
     providerInfrastructureConfigFirewallImage,
     providerInfrastructureConfigFirewallNetworks,
     providerInfrastructureConfigFirewallSize,
@@ -1285,42 +1376,61 @@ export function createStoreDefinition (context) {
     providerInfrastructureConfigNetworksZones,
     providerInfrastructureConfigPartitionID,
     providerInfrastructureConfigProjectID,
+    /* provider - workers */
     providerWorkers,
-    addons,
+    resetProviderWorkers,
+    addProviderWorker,
+    removeProviderWorker,
+    workerless,
+    /* hibernation */
     maintenanceTimeWindowBegin,
     maintenanceTimeWindowEnd,
+    resetMaintenanceTimeWindow,
     maintenanceAutoUpdateKubernetesVersion,
     maintenanceAutoUpdateMachineImageVersion,
+    resetMaintenanceAutoUpdate,
+    /* hibernation */
     hibernationSchedules,
-    noHibernationSchedule,
+    resetHibernationShedules,
+    hibernationSchedulesError,
+    hibernationScheduleEvents,
+    getHibernationScheduleEvent,
+    addHibernationScheduleEvent,
+    removeHibernationScheduleEvent,
+    noHibernationSchedules,
+    /* controlPlane - highAvailability */
     controlPlaneHighAvailability,
     controlPlaneHighAvailabilityFailureToleranceType,
+    resetControlPlaneFailureToleranceType,
     controlPlaneHighAvailabilityFailureToleranceTypeChangeAllowed,
+    /* dns */
     dns,
     dnsDomain,
     dnsProviders,
     dnsProviderIds,
     dnsPrimaryProvider,
-    accessRestrictions,
-    workerless,
-    /* aliases */
-    name: shootName,
-    infrastructureKind: providerType,
-    workers: providerWorkers,
-    dnsConfiguration: dns,
-    enableStaticTokenKubeconfig: kubernetesEnableStaticTokenKubeconfig,
-    firewallImage: providerInfrastructureConfigFirewallImage,
-    firewallNetworks: providerInfrastructureConfigFirewallNetworks,
-    firewallSize: providerInfrastructureConfigFirewallSize,
-    floatingPoolName: providerInfrastructureConfigFloatingPoolName,
-    zonesNetworkConfiguration: providerInfrastructureConfigNetworksZones,
-    partitionID: providerInfrastructureConfigPartitionID,
-    projectID: providerInfrastructureConfigProjectID,
-    updateOSMaintenance: maintenanceAutoUpdateMachineImageVersion,
-    updateK8sMaintenance: maintenanceAutoUpdateKubernetesVersion,
-    controlPlaneFailureToleranceType: controlPlaneHighAvailabilityFailureToleranceType,
-    controlPlaneFailureToleranceTypeChangeAllowed: controlPlaneHighAvailabilityFailureToleranceTypeChangeAllowed,
-    /* readonly */
+    dnsProvidersWithPrimarySupport,
+    addDnsProvider,
+    patchDnsProvider,
+    deleteDnsProvider,
+    resetDnsPrimaryProviderId,
+    /* accessRestrictions */
+    accessRestrictionList,
+    getAccessRestrictionValue,
+    setAccessRestrictionValue,
+    getAccessRestrictionOptionValue,
+    setAccessRestrictionOptionValue,
+    accessRestrictionDefinitions,
+    accessRestrictionNoItemsText,
+    /* addons */
+    addons,
+    getAddonEnabled,
+    setAddonEnabled,
+    resetAddons,
+    addonDefinitions,
+    addonDefinitionList,
+    visibleAddonDefinitionList,
+    /* helper */
     cloudProfiles,
     cloudProfile,
     isZonedCluster,
@@ -1348,40 +1458,30 @@ export function createStoreDefinition (context) {
     firewallSizes,
     allFirewallNetworks,
     allFloatingPoolNames,
-    accessRestrictionDefinitions,
-    accessRestrictionNoItemsText,
-    selectedAccessRestrictions,
     allMachineTypes,
     machineArchitectures,
     volumeTypes,
     machineImages,
     networkingTypes,
     showAllRegions,
-    dnsProvidersWithPrimarySupport,
-    /* actions */
-    setShootManifest,
-    getAccessRestrictions,
-    setAccessRestrictions,
-    addProviderWorker,
-    removeProviderWorker,
-    addDnsProvider,
-    patchDnsProvider,
-    deleteDnsProvider,
-    /* reset actions */
-    resetShootManifest,
-    resetProviderType,
-    resetShootName,
-    resetCloudProfileName,
-    resetKubernetes,
-    resetSecretBindingName,
-    resetNetworkingType,
-    resetProviderInfrastructureConfigPartitionID,
-    resetProviderWorkers,
-    resetAddons,
-    resetMaintenanceTimeWindow,
-    resetMaintenanceAutoUpdate,
-    resetHibernationShedules,
-    resetControlPlaneFailureToleranceType,
-    resetDnsPrimaryProviderId,
+    /* aliases */
+    name: shootName,
+    infrastructureKind: providerType,
+    workers: providerWorkers,
+    dnsConfiguration: dns,
+    enableStaticTokenKubeconfig: kubernetesEnableStaticTokenKubeconfig,
+    firewallImage: providerInfrastructureConfigFirewallImage,
+    firewallNetworks: providerInfrastructureConfigFirewallNetworks,
+    firewallSize: providerInfrastructureConfigFirewallSize,
+    floatingPoolName: providerInfrastructureConfigFloatingPoolName,
+    zonesNetworkConfiguration: providerInfrastructureConfigNetworksZones,
+    partitionID: providerInfrastructureConfigPartitionID,
+    projectID: providerInfrastructureConfigProjectID,
+    updateOSMaintenance: maintenanceAutoUpdateMachineImageVersion,
+    updateK8sMaintenance: maintenanceAutoUpdateKubernetesVersion,
+    osUpdates: maintenanceAutoUpdateMachineImageVersion,
+    k8sUpdates: maintenanceAutoUpdateKubernetesVersion,
+    controlPlaneFailureToleranceType: controlPlaneHighAvailabilityFailureToleranceType,
+    controlPlaneFailureToleranceTypeChangeAllowed: controlPlaneHighAvailabilityFailureToleranceTypeChangeAllowed,
   }
 }

@@ -29,7 +29,7 @@ describe('components', () => {
       return mount(GShootCredentialRotationCard, {
         global: {
           plugins: [
-            ...createVuetifyPlugin(),
+            createVuetifyPlugin(),
             componentsPlugin,
             utilsPlugin,
             notifyPlugin,

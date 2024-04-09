@@ -10,64 +10,64 @@ SPDX-License-Identifier: Apache-2.0
     class="alternate-row-background"
   >
     <v-row
-      v-for="definition in accessRestrictionDefinitions"
-      :key="definition.key"
+      v-for="{ key, input, options } in accessRestrictionDefinitions"
+      :key="key"
       class="my-0"
     >
       <div
-        v-if="definition"
         class="d-flex ma-3"
       >
         <div class="action-select">
           <v-switch
-            v-model="accessRestrictions[definition.key].value"
+            :model-value="getAccessRestrictionValue(key)"
             color="primary"
             density="compact"
+            @update:model-value="value => setAccessRestrictionValue(key, value)"
           />
         </div>
         <div>
-          <span class="wrap-text text-subtitle-2">{{ definition.input.title }}</span>
+          <span class="wrap-text text-subtitle-2">{{ input.title }}</span>
           <!-- eslint-disable vue/no-v-html -->
           <span
-            v-if="definition.input.description"
+            v-if="input.description"
             class="wrap-text pt-1 text-body-2"
-            v-html="transformHtml(definition.input.description)"
+            v-html="transformHtml(input.description)"
           />
           <!-- eslint-enable vue/no-v-html -->
         </div>
       </div>
-      <template v-if="definition">
-        <div
-          v-for="optionValue in definition.options"
-          :key="optionValue.key"
-          class="d-flex ma-3"
-        >
-          <div class="action-select">
-            <v-checkbox
-              v-model="accessRestrictions[definition.key].options[optionValue.key].value"
-              :disabled="!enabled(definition)"
-              color="primary"
-              density="compact"
-            />
-          </div>
-          <div>
-            <span
-              class="wrap-text text-subtitle-2"
-              :class="textClass(definition)"
-            >
-              {{ optionValue.input.title }}
-            </span>
-            <!-- eslint-disable vue/no-v-html -->
-            <span
-              v-if="optionValue.input.description"
-              class="wrap-text pt-1 text-body-2"
-              :class="textClass(definition)"
-              v-html="transformHtml(optionValue.input.description)"
-            />
-            <!-- eslint-enable vue/no-v-html -->
-          </div>
+      <div
+        v-for="{ key: optionKey, input: optionInput } in options"
+        :key="optionKey"
+        class="d-flex ma-3"
+      >
+        <div class="action-select">
+          <v-checkbox
+            :model-value="getAccessRestrictionOptionValue(optionKey) "
+            :disabled="getDisabled(key)"
+            color="primary"
+            density="compact"
+            @update:model-value="value => setAccessRestrictionOptionValue(optionKey, value)"
+          />
         </div>
-      </template>
+        <div
+          class="wrap-text"
+          :class="getTextClass(key)"
+        >
+          <span
+            class="text-subtitle-2"
+          >
+            {{ optionInput.title }}
+          </span>
+          <!-- eslint-disable vue/no-v-html -->
+          <span
+            v-if="optionInput.description"
+            class="pt-1 text-body-2"
+            v-html="transformHtml(optionInput.description)"
+          />
+          <!-- eslint-enable vue/no-v-html -->
+        </div>
+      </div>
     </v-row>
   </div>
   <div
@@ -78,62 +78,42 @@ SPDX-License-Identifier: Apache-2.0
   </div>
 </template>
 
-<script>
-import {
-  mapState,
-  mapActions,
-} from 'pinia'
+<script setup>
+import { storeToRefs } from 'pinia'
 
 import { useShootContextStore } from '@/store/shootContext'
 import { NAND } from '@/store/shootContext/helper'
 
 import { transformHtml } from '@/utils'
 
-import { cloneDeep } from '@/lodash'
+const shootContextStore = useShootContextStore()
+const {
+  accessRestrictionDefinitions,
+  accessRestrictionNoItemsText,
+} = storeToRefs(shootContextStore)
+const {
+  getAccessRestrictionValue,
+  setAccessRestrictionValue,
+  getAccessRestrictionOptionValue,
+  setAccessRestrictionOptionValue,
+} = shootContextStore
 
-export default {
-  data () {
-    return {
-      accessRestrictions: cloneDeep(this.getAccessRestrictions()),
-    }
-  },
-  computed: {
-    ...mapState(useShootContextStore, [
-      'accessRestrictionDefinitions',
-      'accessRestrictionNoItemsText',
-    ]),
-  },
-  watch: {
-    accessRestrictions: {
-      handler (value) {
-        this.setAccessRestrictions(value)
-      },
-      deep: true,
-    },
-  },
-  methods: {
-    ...mapActions(useShootContextStore, [
-      'getAccessRestrictions',
-      'setAccessRestrictions',
-    ]),
-    enabled ({ key, input }) {
-      const value = this.accessRestrictions[key].value
-      return NAND(value, !!input?.inverted)
-    },
-    textClass (definition) {
-      return this.enabled(definition)
-        ? 'text-medium-emphasis'
-        : 'text-disabled'
-    },
-    transformHtml,
-  },
+function getDisabled (key) {
+  const value = getAccessRestrictionValue(key)
+  const { input } = accessRestrictionDefinitions.value[key]
+  const inverted = !!input?.inverted
+  return !NAND(value, inverted)
+}
+
+function getTextClass (key) {
+  return getDisabled(key)
+    ? 'text-disabled'
+    : 'text-medium-emphasis'
 }
 </script>
 
 <style lang="scss" scoped>
-
-  .action-select {
-    min-width: 68px;
-  }
-
+.action-select {
+  min-width: 68px;
+}
 </style>

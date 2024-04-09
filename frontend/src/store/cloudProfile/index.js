@@ -436,16 +436,13 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
   }
 
   function accessRestrictionDefinitionsByCloudProfileNameAndRegion ({ cloudProfileName, region }) {
-    if (!cloudProfileName) {
-      return undefined
-    }
-    if (!region) {
-      return undefined
+    if (!cloudProfileName || !region) {
+      return []
     }
 
     const labels = labelsByCloudProfileNameAndRegion({ cloudProfileName, region })
     if (isEmpty(labels)) {
-      return undefined
+      return []
     }
 
     const items = get(configStore, 'accessRestriction.items')
@@ -474,10 +471,10 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
 
   function labelsByCloudProfileNameAndRegion ({ cloudProfileName, region }) {
     const cloudProfile = cloudProfileByName(cloudProfileName)
-    if (cloudProfile) {
-      return get(find(cloudProfile.data.regions, { name: region }), 'labels')
+    if (!cloudProfile) {
+      return {}
     }
-    return {}
+    return get(find(cloudProfile.data.regions, ['name', region]), 'labels')
   }
 
   function defaultMachineImageForCloudProfileNameAndMachineType (cloudProfileName, machineType) {

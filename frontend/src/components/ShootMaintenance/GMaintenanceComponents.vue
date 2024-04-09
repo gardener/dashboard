@@ -93,72 +93,40 @@ SPDX-License-Identifier: Apache-2.0
   </div>
 </template>
 
-<script>
-export default {
-  props: {
-    userInterActionBus: {
-      type: Object,
-    },
-    title: {
-      type: String,
-      default: 'Auto Update',
-    },
-    selectable: {
-      type: Boolean,
-      default: true,
-    },
-    hideOsUpdates: {
-      type: Boolean,
-      default: false,
-    },
+<script setup>
+import {
+  computed,
+  toRefs,
+} from 'vue'
+import { storeToRefs } from 'pinia'
+
+import { useShootContextStore } from '@/store/shootContext'
+
+const props = defineProps({
+  title: {
+    type: String,
+    default: 'Auto Update',
   },
-  emits: [
-    'updateK8sMaintenance',
-    'updateOSMaintenance',
-  ],
-  data () {
-    return {
-      k8sUpdatesInternal: false,
-      osUpdatesInternal: false,
-    }
+  selectable: {
+    type: Boolean,
+    default: true,
   },
-  computed: {
-    k8sUpdates: {
-      get () {
-        return this.k8sUpdatesInternal
-      },
-      set (value) {
-        this.k8sUpdatesInternal = value
-        if (this.userInterActionBus) {
-          this.userInterActionBus.emit('updateK8sMaintenance', value)
-        }
-      },
-    },
-    osUpdates: {
-      get () {
-        return this.osUpdatesInternal
-      },
-      set (value) {
-        this.osUpdatesInternal = value
-        if (this.userInterActionBus) {
-          this.userInterActionBus.emit('updateOSMaintenance', value)
-        }
-      },
-    },
-    showNoUpdates () {
-      return !this.selectable && !this.osUpdates && !this.k8sUpdates
-    },
+  hideOsUpdates: {
+    type: Boolean,
+    default: false,
   },
-  methods: {
-    getComponentUpdates () {
-      return { k8sUpdates: this.k8sUpdates, osUpdates: this.osUpdates }
-    },
-    setComponentUpdates ({ k8sUpdates, osUpdates }) {
-      this.k8sUpdates = k8sUpdates
-      this.osUpdates = osUpdates
-    },
-  },
-}
+})
+const { title, selectable, hideOsUpdates } = toRefs(props)
+
+const shootContextStore = useShootContextStore()
+const {
+  k8sUpdates,
+  osUpdates,
+} = storeToRefs(shootContextStore)
+
+const showNoUpdates = computed(() => {
+  return selectable.value && !osUpdates.value && !k8sUpdates.value
+})
 </script>
 
 <style lang="scss" scoped>
