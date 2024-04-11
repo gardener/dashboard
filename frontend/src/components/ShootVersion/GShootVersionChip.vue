@@ -105,11 +105,15 @@ SPDX-License-Identifier: Apache-2.0
             />
           </template>
           <g-list-item-content label="Update Information">
-            <div v-if="shootSupportedPatchAvailable">
-              Patch is available for this version
-            </div>
-            <div v-if="shootSupportedUpgradeAvailable">
-              Upgrade is available for this version
+            <div :class="{ 'list-style': shootSupportedPatchAvailable && shootSupportedUpgradeAvailable }">
+              <ul>
+                <li v-if="shootSupportedPatchAvailable">
+                  Patch is available for this version
+                </li>
+                <li v-if="shootSupportedUpgradeAvailable">
+                  Upgrade is available for this version
+                </li>
+              </ul>
             </div>
           </g-list-item-content>
         </g-list-item>
@@ -179,3 +183,14 @@ export default {
   },
 }
 </script>
+
+<style lang="scss" scoped>
+.list-style {
+  ul {
+    margin-left: 10px;
+  }
+  li {
+    margin-left: 10px;
+  }
+}
+</style>

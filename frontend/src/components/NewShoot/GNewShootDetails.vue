@@ -24,7 +24,6 @@ SPDX-License-Identifier: Apache-2.0
       <v-col cols="3">
         <v-select
           v-model="kubernetesVersion"
-          v-messages-color="{ color: 'warning' }"
           color="primary"
           item-color="primary"
           label="Kubernetes Version"
@@ -43,6 +42,9 @@ SPDX-License-Identifier: Apache-2.0
               v-bind="props"
               :subtitle="versionItemDescription(item.raw)"
             />
+          </template>
+          <template #message="{ message }">
+            <g-multi-message :message="message" />
           </template>
         </v-select>
       </v-col>
@@ -105,6 +107,7 @@ import { useShootStagingStore } from '@/store/shootStaging'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import GStaticTokenKubeconfigSwitch from '@/components/GStaticTokenKubeconfigSwitch'
+import GMultiMessage from '@/components/GMultiMessage'
 
 import { useAsyncRef } from '@/composables/useAsyncRef'
 
@@ -132,6 +135,7 @@ export default {
   components: {
     GPurpose: defineAsyncComponent(() => import('@/components/GPurpose')),
     GStaticTokenKubeconfigSwitch,
+    GMultiMessage,
   },
   props: {
     userInterActionBus: {
@@ -193,17 +197,39 @@ export default {
       if (!version) {
         return undefined
       }
-      const hintText = []
+      const hints = []
       if (version.isExpirationWarning) {
-        hintText.push(`Kubernetes version expires on: ${version.expirationDateString}. Kubernetes update will be enforced after that date.`)
-      }
-      if (this.updateK8sMaintenance && this.versionIsNotLatestPatch) {
-        hintText.push('If you select a version which is not the latest patch version (except for preview versions), you should disable automatic Kubernetes updates')
+        hints.push({
+          type: 'text',
+          hint: `Kubernetes version expires on: ${version.expirationDateString}. Kubernetes update will be enforced after that date.`,
+          severity: 'warning',
+        })
       }
       if (version.isPreview) {
-        hintText.push('Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not recommended for production usage')
+        hints.push({
+          type: 'text',
+          hint: 'Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not recommended for production usage',
+          severity: 'warning',
+        })
       }
-      return join(hintText, ' / ')
+      if (version.isDeprecated) {
+        const hint = version.expirationDate
+          ? `This Kubernetes version is deprecated. It will expire on ${version.expirationDateString}`
+          : 'This Kubernetes version is deprecated'
+        hints.push({
+          type: 'text',
+          hint,
+          severity: 'warning',
+        })
+      }
+      if (this.updateK8sMaintenance && this.versionIsNotLatestPatch) {
+        hints.push({
+          type: 'text',
+          hint: 'You selected a version that is eligible for an automatic update.You should disable automatic Kubernetes updates if you want to maintain this specific version',
+          severity: 'info',
+        })
+      }
+      return JSON.stringify(hints)
     },
     versionIsNotLatestPatch () {
       return this.kubernetesVersionIsNotLatestPatch(this.kubernetesVersion, this.cloudProfileName)

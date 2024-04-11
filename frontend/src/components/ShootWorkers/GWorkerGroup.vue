@@ -13,6 +13,7 @@ SPDX-License-Identifier: Apache-2.0
     <template #activator="{ props: popoverProps }">
       <v-tooltip
         location="top"
+        :disabled="!tooltipText"
         :text="tooltipText"
       >
         <template #activator="{ props: tooltipProps }">
