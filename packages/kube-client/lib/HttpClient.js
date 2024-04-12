@@ -34,25 +34,33 @@ class HttpClient {
 
   static extendResponse (response) {
     const { names: { plural } = {} } = this
-    const createTimeoutError = timeout => {
+    const createTimeoutError = (timeout, reason) => {
       const forResource = plural ? ` for "${plural}"` : ''
-      return createError(504, `The condition${forResource} was not met within ${timeout} ms`)
+      let message = `The condition${forResource} was not met within ${timeout} ms`
+      if (reason) {
+        message += `: ${reason}`
+      }
+      return createError(504, message)
     }
 
     response.until = async (condition, { timeout = 60000 } = {}) => {
       let timeoutId
+      let timeoutReason
       if (timeout > 0 && timeout < Infinity) {
-        timeoutId = setTimeout(() => response.destroy(createTimeoutError(timeout)), timeout)
+        timeoutId = setTimeout(() => response.destroy(createTimeoutError(timeout, timeoutReason)), timeout)
       }
       try {
         for await (const event of response) {
           const {
             ok,
+            reason,
             object = event.object
           } = condition(event)
           if (ok) {
             return object
           }
+
+          timeoutReason = reason
         }
         // If the response stream ends even though the condition has not yet been met,
         // also in this case a timeout error is thrown.
