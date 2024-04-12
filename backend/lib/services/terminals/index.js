@@ -550,7 +550,10 @@ async function readTerminalUntilReady ({ user, namespace, name }) {
     }
     const podName = _.get(terminal, 'status.podName')
     const attachServiceAccountName = _.get(terminal, 'status.attachServiceAccountName')
-    return podName && attachServiceAccountName
+
+    return {
+      ok: podName && attachServiceAccountName
+    }
   }
   const asyncIterable = await client['dashboard.gardener.cloud'].terminals.watch(namespace, name)
   return asyncIterable.until(isTerminalReady, { timeout: 60 * 1000 })

@@ -46,9 +46,10 @@ class HttpClient {
       }
       try {
         for await (const event of response) {
-          let ok = condition(event)
-          let object
-          [ok, object] = Array.isArray(ok) ? ok : [ok, event.object]
+          const {
+            ok,
+            object = event.object
+          } = condition(event)
           if (ok) {
             return object
           }
