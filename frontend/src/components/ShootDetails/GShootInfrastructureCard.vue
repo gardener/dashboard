@@ -58,13 +58,12 @@ SPDX-License-Identifier: Apache-2.0
             </v-icon>
           </template>
           <g-list-item-content label="Seed">
-            <g-shoot-seed-name :shoot-item="shootItem" />
+            <g-shoot-seed-name />
           </g-list-item-content>
           <template #append>
             <g-copy-btn :clipboard-text="shootSeedName" />
             <g-seed-configuration
               v-if="canPatchShootsBinding"
-              :shoot-item="shootItem"
             />
           </template>
         </g-list-item>
@@ -93,7 +92,6 @@ SPDX-License-Identifier: Apache-2.0
           >
             <span class="mr-1">Failure tolerance type</span>
             <g-control-plane-high-availability-tag
-              :shoot-item="shootItem"
               size="x-small"
             />
           </div>
@@ -102,7 +100,7 @@ SPDX-License-Identifier: Apache-2.0
           </template>
         </g-list-item-content>
         <template #append>
-          <g-control-plane-high-availability-configuration :shoot-item="shootItem" />
+          <g-control-plane-high-availability-configuration />
         </template>
       </g-list-item>
       <v-divider inset />
@@ -179,7 +177,7 @@ SPDX-License-Identifier: Apache-2.0
           <span v-else>No DNS provider configured</span>
         </g-list-item-content>
         <template #append>
-          <g-dns-configuration :shoot-item="shootItem" />
+          <g-dns-configuration />
         </template>
       </g-list-item>
       <template v-if="!!shootIngressDomainText">
@@ -259,11 +257,12 @@ import GControlPlaneHighAvailabilityConfiguration from '@/components/ControlPlan
 import GControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityTag'
 import GSecretDetailsItemContent from '@/components/Secrets/GSecretDetailsItemContent'
 
+import { useShootItem } from '@/composables/useShootItem'
+
 import {
   wildcardObjectsFromStrings,
   bestMatchForString,
 } from '@/utils/wildcard'
-import { shootItem } from '@/mixins/shootItem'
 
 import {
   get,
@@ -285,7 +284,11 @@ export default {
     GControlPlaneHighAvailabilityTag,
     GSecretDetailsItemContent,
   },
-  mixins: [shootItem],
+  setup () {
+    return {
+      ...useShootItem(),
+    }
+  },
   computed: {
     ...mapState(useAuthzStore, ['canPatchShootsBinding']),
     ...mapState(useSecretStore, ['infrastructureSecretList']),

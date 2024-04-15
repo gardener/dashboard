@@ -59,7 +59,8 @@ import { useTicketStore } from '@/store/ticket'
 
 import GTicket from '@/components/ShootTickets/GTicket'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
+
 import moment from '@/utils/moment'
 
 import {
@@ -74,8 +75,12 @@ export default {
   components: {
     GTicket,
   },
-  mixins: [shootItem],
   inject: ['sanitizeUrl'],
+  setup () {
+    return {
+      ...useShootItem(),
+    }
+  },
   computed: {
     ...mapState(useConfigStore, {
       ticketConfig: 'ticket',

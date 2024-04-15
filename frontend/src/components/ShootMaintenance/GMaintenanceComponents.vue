@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
       {{ title }}
     </div>
     <div
-      v-if="!hideOsUpdates && (selectable || osUpdates)"
+      v-if="!workerless && (selectable || osUpdates)"
       class="d-flex mt-4"
     >
       <div class="d-flex align-center justify-center action-select">
@@ -111,17 +111,18 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
-  hideOsUpdates: {
-    type: Boolean,
-    default: false,
-  },
+
 })
-const { title, selectable, hideOsUpdates } = toRefs(props)
+const {
+  title,
+  selectable,
+} = toRefs(props)
 
 const shootContextStore = useShootContextStore()
 const {
   k8sUpdates,
   osUpdates,
+  workerless,
 } = storeToRefs(shootContextStore)
 
 const showNoUpdates = computed(() => {

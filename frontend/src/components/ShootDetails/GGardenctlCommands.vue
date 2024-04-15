@@ -64,7 +64,7 @@ import GCopyBtn from '@/components/GCopyBtn.vue'
 import GCodeBlock from '@/components/GCodeBlock.vue'
 import GGardenctlInfo from '@/components/GGardenctlInfo.vue'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
 
 export default {
   components: {
@@ -75,7 +75,11 @@ export default {
     GCodeBlock,
     GGardenctlInfo,
   },
-  mixins: [shootItem],
+  setup () {
+    return {
+      ...useShootItem(),
+    }
+  },
   data () {
     return {
       expansionPanel: [],

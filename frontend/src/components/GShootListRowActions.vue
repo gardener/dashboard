@@ -25,28 +25,24 @@ SPDX-License-Identifier: Apache-2.0
       <v-list-item>
         <g-shoot-action-change-hibernation
           v-model="changeHibernationDialog"
-          :shoot-item="shootItem"
           text
         />
       </v-list-item>
       <v-list-item>
         <g-shoot-action-maintenance-start
           v-model="maintenanceStartDialog"
-          :shoot-item="shootItem"
           text
         />
       </v-list-item>
       <v-list-item>
         <g-shoot-action-reconcile-start
           v-model="reconcileStartDialog"
-          :shoot-item="shootItem"
           text
         />
       </v-list-item>
       <v-list-item>
         <g-shoot-action-rotate-credentials
           v-model="rotateCredentialsDialog"
-          :shoot-item="shootItem"
           :type="rotationType"
           text
         />
@@ -56,13 +52,11 @@ SPDX-License-Identifier: Apache-2.0
         <g-shoot-action-delete-cluster
           v-if="!canForceDeleteShoot"
           v-model="deleteClusterDialog"
-          :shoot-item="shootItem"
           text
         />
         <g-shoot-action-force-delete
           v-else
           v-model="forceDeleteDialog"
-          :shoot-item="shootItem"
           text
         />
       </v-list-item>
@@ -79,7 +73,7 @@ import GShootActionRotateCredentials from '@/components/GShootActionRotateCreden
 import GShootActionDeleteCluster from '@/components/GShootActionDeleteCluster.vue'
 import GShootActionForceDelete from '@/components/GShootActionForceDelete.vue'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
 
 export default {
   components: {
@@ -91,11 +85,12 @@ export default {
     GShootActionDeleteCluster,
     GShootActionForceDelete,
   },
-  mixins: [shootItem],
-  props: {
-    shootItem: {
-      type: Object,
-    },
+  setup () {
+    const shootItemState = useShootItem()
+
+    return {
+      ...shootItemState,
+    }
   },
   data () {
     return {

@@ -18,7 +18,6 @@ SPDX-License-Identifier: Apache-2.0
           <div class="d-flex align-center">
             Hibernation
             <g-shoot-messages
-              :shoot-item="shootItem"
               :filter="['no-hibernation-schedule', 'hibernation-constraint']"
               small
             />
@@ -30,13 +29,11 @@ SPDX-License-Identifier: Apache-2.0
         <template #append>
           <g-shoot-action-change-hibernation
             v-model="changeHibernationDialog"
-            :shoot-item="shootItem"
             dialog
             button
           />
           <g-hibernation-configuration
             ref="hibernationConfiguration"
-            :shoot-item="shootItem"
           />
         </template>
       </g-list-item>
@@ -51,7 +48,6 @@ SPDX-License-Identifier: Apache-2.0
           <div class="d-flex align-center">
             Maintenance
             <g-shoot-messages
-              :shoot-item="shootItem"
               :filter="['last-maintenance', 'maintenance-constraint']"
               show-verbose
               title="Last Maintenance Status"
@@ -91,13 +87,10 @@ SPDX-License-Identifier: Apache-2.0
         <template #append>
           <g-shoot-action-maintenance-start
             v-model="maintenanceStartDialog"
-            :shoot-item="shootItem"
             dialog
             button
           />
-          <g-maintenance-configuration
-            :shoot-item="shootItem"
-          />
+          <g-maintenance-configuration />
         </template>
       </g-list-item>
       <v-divider inset />
@@ -116,7 +109,6 @@ SPDX-License-Identifier: Apache-2.0
         <template #append>
           <g-shoot-action-reconcile-start
             v-model="reconcileStartDialog"
-            :shoot-item="shootItem"
           />
         </template>
       </g-list-item>
@@ -132,7 +124,6 @@ SPDX-License-Identifier: Apache-2.0
             <div class="d-flex align-center">
               Delete Cluster
               <g-shoot-messages
-                :shoot-item="shootItem"
                 filter="force-delete"
                 show-verbose
                 title="Cluster Deletion Failed"
@@ -152,12 +143,10 @@ SPDX-License-Identifier: Apache-2.0
             <g-shoot-action-delete-cluster
               v-if="!canForceDeleteShoot"
               v-model="deleteClusterDialog"
-              :shoot-item="shootItem"
             />
             <g-shoot-action-force-delete
               v-else
               v-model="forceDeleteDialog"
-              :shoot-item="shootItem"
             />
           </template>
         </g-list-item>
@@ -181,9 +170,10 @@ import GShootActionReconcileStart from '@/components/GShootActionReconcileStart'
 import GShootMessages from '@/components/ShootMessages/GShootMessages'
 import GTimeString from '@/components/GTimeString'
 
+import { useShootItem } from '@/composables/useShootItem'
+
 import TimeWithOffset from '@/utils/TimeWithOffset'
 import moment from '@/utils/moment'
-import { shootItem } from '@/mixins/shootItem'
 
 import { get } from '@/lodash'
 
@@ -199,7 +189,11 @@ export default {
     GShootMessages,
     GTimeString,
   },
-  mixins: [shootItem],
+  setup () {
+    return {
+      ...useShootItem(),
+    }
+  },
   data () {
     return {
       changeHibernationDialog: false,

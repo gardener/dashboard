@@ -23,53 +23,60 @@ SPDX-License-Identifier: Apache-2.0
   </v-tooltip>
 </template>
 
-<script>
-import { mapActions } from 'pinia'
+<script setup>
+import {
+  ref,
+  computed,
+  inject,
+} from 'vue'
 
 import { useAppStore } from '@/store/app'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
 
 import { get } from '@/lodash'
 
-export default {
-  mixins: [shootItem],
-  inject: ['api', 'logger'],
-  data () {
-    return {
-      retryingOperation: false,
-    }
-  },
-  computed: {
-    canRetry () {
-      const reconcileScheduled = this.shootGenerationValue !== this.shootObservedGeneration && !!this.shootObservedGeneration
+const api = inject('api')
+const logger = inject('logger')
 
-      return get(this.shootLastOperation, 'state') === 'Failed' &&
-          !this.isShootReconciliationDeactivated &&
-          !this.retryingOperation &&
-          !reconcileScheduled
-    },
-  },
-  methods: {
-    ...mapActions(useAppStore, [
-      'setError',
-    ]),
-    async onRetryOperation () {
-      this.retryingOperation = true
+const {
+  shootNamespace,
+  shootName,
+  shootGenerationValue,
+  shootObservedGeneration,
+  shootLastOperation,
+  isShootReconciliationDeactivated,
+} = useShootItem()
 
-      const namespace = this.shootNamespace
-      const name = this.shootName
+const appStore = useAppStore()
 
-      const retryAnnotation = { 'gardener.cloud/operation': 'retry' }
-      try {
-        await this.api.addShootAnnotation({ namespace, name, data: retryAnnotation })
-      } catch (err) {
-        this.logger.error('failed to retry operation', err)
+const retryingOperation = ref(false)
 
-        this.setError(err)
-      }
-      this.retryingOperation = false
-    },
-  },
+const canRetry = computed(() => {
+  const reconcileScheduled = shootGenerationValue.value !== shootObservedGeneration.value && !!shootObservedGeneration.value
+
+  return get(shootLastOperation.value, 'state') === 'Failed' &&
+    !isShootReconciliationDeactivated.value &&
+    !retryingOperation.value &&
+    !reconcileScheduled
+})
+
+async function onRetryOperation () {
+  retryingOperation.value = true
+  try {
+    await api.addShootAnnotation({
+      namespace: shootNamespace.value,
+      name: shootName.value,
+      data: {
+        'gardener.cloud/operation': 'retry',
+      },
+    })
+  } catch (err) {
+    appStore.setError(err)
+    logger.error('failed to retry operation', err)
+  } finally {
+    retryingOperation.value = false
+  }
 }
+
 </script>

@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-action-button-dialog
     ref="actionDialog"
-    :shoot-item="shootItem"
     width="600"
     :caption="caption"
     :text="buttonText"
@@ -35,13 +34,18 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapActions } from 'pinia'
+import {
+  ref,
+  computed,
+  watch,
+} from 'vue'
 
 import { useAppStore } from '@/store/app'
 
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog.vue'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
+
 import { errorDetailsFromError } from '@/utils/error'
 
 import { get } from '@/lodash'
@@ -50,89 +54,110 @@ export default {
   components: {
     GActionButtonDialog,
   },
-  mixins: [shootItem],
   inject: ['api', 'logger'],
   props: {
-    modelValue: {
-      type: Boolean,
-      required: true,
-    },
     text: {
       type: Boolean,
       default: false,
     },
   },
-  data () {
-    return {
-      reconcileTriggered: false,
-      currentGeneration: null,
-    }
-  },
-  computed: {
-    isReconcileToBeScheduled () {
-      return this.shootGenerationValue === this.currentGeneration
-    },
-    caption () {
-      if (this.isReconcileToBeScheduled) {
+  setup (props) {
+    const {
+      shootNamespace,
+      shootName,
+      shootGenerationValue,
+      isShootReconciliationDeactivated,
+      shootLastOperation,
+    } = useShootItem()
+
+    const reconcileTriggered = ref(false)
+    const currentGeneration = ref(null)
+
+    const isReconcileToBeScheduled = computed(() => {
+      return shootGenerationValue.value === currentGeneration.value
+    })
+
+    const caption = computed(() => {
+      if (isReconcileToBeScheduled.value) {
         return 'Requesting to schedule cluster reconcile'
-      } else if (this.isShootReconciliationDeactivated) {
+      } else if (isShootReconciliationDeactivated.value) {
         return 'Reconciliation deactivated for this cluster'
       }
-      return this.buttonTitle
-    },
-    buttonTitle () {
+      return buttonTitle.value
+    })
+
+    const buttonTitle = computed(() => {
       return 'Trigger Reconcile'
-    },
-    buttonText () {
-      if (!this.text) {
-        return
-      }
-      return this.buttonTitle
-    },
-    lastOperationFailed () {
-      return get(this.shootLastOperation, 'state') === 'Failed'
-    },
-  },
-  watch: {
-    isReconcileToBeScheduled (reconcileToBeScheduled) {
-      const isReconcileScheduled = !reconcileToBeScheduled && this.reconcileTriggered
+    })
+
+    const buttonText = computed(() => {
+      return !props.text
+        ? ''
+        : buttonTitle.value
+    })
+
+    const lastOperationFailed = computed(() => {
+      return get(shootLastOperation.value, 'state') === 'Failed'
+    })
+
+    const appStore = useAppStore()
+
+    watch(isReconcileToBeScheduled, value => {
+      const isReconcileScheduled = !value && reconcileTriggered.value
       if (!isReconcileScheduled) {
         return
       }
-      this.reconcileTriggered = false
-      this.currentGeneration = null
+      reconcileTriggered.value = false
+      currentGeneration.value = null
 
-      if (!this.shootName) { // ensure that notification is not triggered by shoot resource being cleared (e.g. during navigation)
+      if (!shootName.value) { // ensure that notification is not triggered by shoot resource being cleared (e.g. during navigation)
         return
       }
 
-      this.setSuccess(`Reconcile triggered for ${this.shootName}`)
-    },
+      appStore.setSuccess(`Reconcile triggered for ${shootName.value}`)
+    })
+
+    return {
+      shootNamespace,
+      shootName,
+      shootGenerationValue,
+      isShootReconciliationDeactivated,
+      shootLastOperation,
+      reconcileTriggered,
+      currentGeneration,
+      isReconcileToBeScheduled,
+      caption,
+      buttonTitle,
+      buttonText,
+      lastOperationFailed,
+    }
   },
   methods: {
-    ...mapActions(useAppStore, [
-      'setSuccess',
-    ]),
     async onConfigurationDialogOpened () {
-      if (await this.$refs.actionDialog.waitForDialogClosed()) {
+      const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
+      if (confirmed) {
         this.startReconcile()
       }
     },
     async startReconcile () {
       this.reconcileTriggered = true
-      this.currentGeneration = get(this.shootItem, 'metadata.generation')
-
-      const operation = this.lastOperationFailed ? 'retry' : 'reconcile'
-      const annotation = { 'gardener.cloud/operation': operation }
+      this.currentGeneration = this.shootGenerationValue
       try {
-        await this.api.addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, data: annotation })
+        await this.api.addShootAnnotation({
+          namespace: this.shootNamespace,
+          name: this.shootName,
+          data: {
+            'gardener.cloud/operation': this.lastOperationFailed
+              ? 'retry'
+              : 'reconcile',
+          },
+        })
       } catch (err) {
         const errorMessage = 'Could not trigger reconcile'
         const errorDetails = errorDetailsFromError(err)
         const detailedErrorMessage = errorDetails.detailedMessage
         this.$refs.actionDialog?.setError({ errorMessage, detailedErrorMessage })
         this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-
         this.reconcileTriggered = false
         this.currentGeneration = null
       }

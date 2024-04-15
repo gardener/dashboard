@@ -3,18 +3,21 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
+
 import {
   ref,
   shallowRef,
-  reactive,
   computed,
+  readonly,
+  reactive,
   toRef,
 } from 'vue'
+
+import { useShootHelper } from '@/composables/useShootHelper'
 
 import utils from '@/utils'
 import { v4 as uuidv4 } from '@/utils/uuid'
 import {
-  findFreeNetworks,
   getControlPlaneZone,
   getKubernetesTemplate,
   getProviderTemplate,
@@ -41,9 +44,7 @@ import {
   flatMap,
   unset,
   head,
-  difference,
   find,
-  some,
   filter,
   cloneDeep,
   includes,
@@ -63,7 +64,6 @@ export function createStoreDefinition (context) {
     gardenerExtensionStore,
     projectStore,
     secretStore,
-    seedStore,
   } = context
 
   /* manifest */
@@ -147,12 +147,8 @@ export function createStoreDefinition (context) {
     unset(manifest.value, `metadata.annotations["${key}"]`)
   }
 
-  const shootCreationTimestamp = computed(() => {
+  const creationTimestamp = computed(() => {
     return get(manifest.value, 'metadata.creationTimestamp')
-  })
-
-  const isNewCluster = computed(() => {
-    return !shootCreationTimestamp.value
   })
 
   /* seedName */
@@ -241,7 +237,7 @@ export function createStoreDefinition (context) {
 
   /* networking */
   const networkingNodes = computed(() => {
-    return get(manifest.value, 'spec.networking.nodes', defaultNodesCIDR.value)
+    return get(manifest.value, 'spec.networking.nodes')
   })
 
   const networkingType = computed({
@@ -524,9 +520,15 @@ export function createStoreDefinition (context) {
   /* providerInfrastructureConfigNetworksZones */
   const providerInfrastructureConfigNetworksZones = computed(() => {
     const oldZonesNetworkConfiguration = get(initialManifest.value, 'spec.provider.infrastructureConfig.networks.zones')
-    const maxNumberOfZones = size(allZones.value)
+
     const workerCIDR = networkingNodes.value
-    const [existingShootWorkerCIDR, newShootWorkerCIDR] = !isNewCluster.value
+    const allZones = cloudProfileStore.zonesByCloudProfileNameAndRegion({
+      cloudProfileName: cloudProfileName.value,
+      region: region.value,
+    })
+    const maxNumberOfZones = size(allZones)
+    const isExistingCluster = !!get(initialManifest.value, 'metadata.creationTimestamp')
+    const [existingShootWorkerCIDR, newShootWorkerCIDR] = isExistingCluster
       ? [workerCIDR, undefined]
       : [undefined, workerCIDR]
     return getZonesNetworkConfiguration(
@@ -911,6 +913,11 @@ export function createStoreDefinition (context) {
     },
   })
 
+  const dnsProvidersWithPrimarySupport = computed(() => {
+    const hasPrimarySupport = type => includes(gardenerExtensionStore.dnsProviderTypesWithPrimarySupport, type)
+    return filter(dnsProviders.value, ({ type, secretName }) => hasPrimarySupport(type) && !!secretName)
+  })
+
   function createDnsProvider () {
     const type = head(gardenerExtensionStore.dnsProviderTypes)
     const secrets = secretStore.dnsSecretsByProviderKind(type)
@@ -1005,237 +1012,6 @@ export function createStoreDefinition (context) {
     setAnnotation(key, NAND(value, inverted))
   }
 
-  /* seedSelector */
-  function getSeedSelectorMatchLabel (key, defaultValue) {
-    return get(manifest.value, `spec.seedSelector.matchLabels["${key}"]`, `${defaultValue}`)
-  }
-
-  function setSeedSelectorMatchLabel (key, value) {
-    set(manifest.value, `spec.seedSelector.matchLabels["${key}"]`, `${value}`)
-  }
-
-  function unsetSeedSelectorMatchLabel (key, value) {
-    unset(manifest.value, `spec.seedSelector.matchLabels["${key}"]`)
-  }
-
-  /*
-   * Readonly Properties
-   */
-
-  const cloudProfiles = computed(() => {
-    return cloudProfileStore.cloudProfilesByCloudProviderKind(providerType.value)
-  })
-
-  const cloudProfile = computed(() => {
-    return cloudProfileStore.cloudProfileByName(cloudProfileName.value)
-  })
-
-  const isZonedCluster = computed(() => {
-    return utils.isZonedCluster({
-      cloudProviderKind: providerType.value,
-      isNewCluster: isNewCluster.value,
-    })
-  })
-
-  const seed = computed(() => {
-    return seedStore.seedByName(seedName.value)
-  })
-
-  const allSeeds = computed(() => {
-    return cloudProfileStore.seedsByCloudProfileName(cloudProfileName.value)
-  })
-
-  const isFailureToleranceTypeZoneSupported = computed(() => {
-    const seeds = seedName.value
-      ? [seed.value]
-      : allSeeds.value
-    return some(seeds, ({ data }) => data.zones?.length >= 3)
-  })
-
-  const allZones = computed(() => {
-    return cloudProfileStore.zonesByCloudProfileNameAndRegion({
-      cloudProfileName: cloudProfileName.value,
-      region: region.value,
-    })
-  })
-
-  const usedZones = computed(() => {
-    return uniq(flatMap(providerWorkers.value, 'zones'))
-  })
-
-  const unusedZones = computed(() => {
-    return difference(allZones.value, usedZones.value)
-  })
-
-  const freeNetworks = computed(() => {
-    return findFreeNetworks(
-      providerInfrastructureConfigNetworksZones.value,
-      networkingNodes.value,
-      providerType.value,
-      size(allZones.value),
-    )
-  })
-
-  const zonesWithNetworkConfigInShoot = computed(() => {
-    return map(providerInfrastructureConfigNetworksZones.value, 'name')
-  })
-
-  const availableZones = computed(() => {
-    if (!isZonedCluster.value) {
-      return []
-    }
-    if (isNewCluster.value) {
-      return allZones.value
-    }
-    // Ensure that only zones can be selected, that have a network config in providerConfig (if required)
-    // or that free networks are available to select more zones
-    const isZonesNetworkConfigurationRequired = !isEmpty(zonesWithNetworkConfigInShoot.value)
-    if (!isZonesNetworkConfigurationRequired) {
-      return allZones.value
-    }
-
-    if (size(freeNetworks.value)) {
-      return allZones.value
-    }
-
-    return zonesWithNetworkConfigInShoot.value
-  })
-
-  const maxAdditionalZones = computed(() => {
-    const NO_LIMIT = -1
-    if (isNewCluster.value) {
-      return NO_LIMIT
-    }
-    const isZonesNetworkConfigurationRequired = !isEmpty(zonesWithNetworkConfigInShoot.value)
-    if (!isZonesNetworkConfigurationRequired) {
-      return NO_LIMIT
-    }
-    const numberOfFreeNetworks = size(freeNetworks.value)
-    const hasFreeNetworks = numberOfFreeNetworks >= size(unusedZones)
-    if (hasFreeNetworks) {
-      return NO_LIMIT
-    }
-    return numberOfFreeNetworks
-  })
-
-  const expiringWorkerGroups = computed(() => {
-    return cloudProfileStore.expiringWorkerGroupsForShoot(providerWorkers.value, cloudProfileName.value, false)
-  })
-
-  const regionsWithSeed = computed(() => {
-    return cloudProfileStore.regionsWithSeedByCloudProfileName(cloudProfileName.value)
-  })
-
-  const regionsWithoutSeed = computed(() => {
-    return cloudProfileStore.regionsWithoutSeedByCloudProfileName(cloudProfileName.value)
-  })
-
-  const defaultNodesCIDR = computed(() => {
-    return cloudProfileStore.getDefaultNodesCIDR({
-      cloudProfileName: cloudProfileName.value,
-    })
-  })
-
-  const infrastructureSecrets = computed(() => {
-    return secretStore.infrastructureSecretsByCloudProfileName(cloudProfileName.value)
-  })
-
-  const sortedKubernetesVersions = computed(() => {
-    return cloudProfileStore.sortedKubernetesVersions(cloudProfileName.value)
-  })
-
-  const kubernetesVersionIsNotLatestPatch = computed(() => {
-    return cloudProfileStore.kubernetesVersionIsNotLatestPatch(kubernetesVersion.value, cloudProfileName.value)
-  })
-
-  const allPurposes = computed(() => {
-    return utils.purposesForSecret(infrastructureSecret.value)
-  })
-
-  const allLoadBalancerProviderNames = computed(() => {
-    return cloudProfileStore.loadBalancerProviderNamesByCloudProfileNameAndRegion({
-      cloudProfileName: cloudProfileName.value,
-      region: region.value,
-    })
-  })
-
-  const allLoadBalancerClassNames = computed(() => {
-    return cloudProfileStore.loadBalancerClassNamesByCloudProfileName(cloudProfileName.value)
-  })
-
-  const partitionIDs = computed(() => {
-    return cloudProfileStore.partitionIDsByCloudProfileNameAndRegion({
-      cloudProfileName: cloudProfileName.value,
-      region: region.value,
-    })
-  })
-
-  const firewallImages = computed(() => {
-    return cloudProfileStore.firewallImagesByCloudProfileName(cloudProfileName.value)
-  })
-
-  const firewallSizes = computed(() => {
-    const firewallSizes = cloudProfileStore.firewallSizesByCloudProfileNameAndRegion({
-      cloudProfileName: cloudProfileName.value,
-      region: region.value,
-    })
-    return map(firewallSizes, 'name')
-  })
-
-  const allFirewallNetworks = computed(() => {
-    return cloudProfileStore.firewallNetworksByCloudProfileNameAndPartitionId({
-      cloudProfileName: cloudProfileName.value,
-      partitionID: providerInfrastructureConfigPartitionID.value,
-    })
-  })
-
-  const allFloatingPoolNames = computed(() => {
-    return cloudProfileStore.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({
-      cloudProfileName: cloudProfileName.value,
-      region: region.value,
-      secretDomain: get(infrastructureSecret.value, 'data.domainName'),
-    })
-  })
-
-  const accessRestrictionDefinitionList = computed(() => {
-    return cloudProfileStore.accessRestrictionDefinitionsByCloudProfileNameAndRegion({
-      cloudProfileName: cloudProfileName.value,
-      region: region.value,
-    })
-  })
-
-  const accessRestrictionDefinitions = computed(() => {
-    const accessRestrictionDefinitions = {}
-    for (const definition of accessRestrictionDefinitionList.value) {
-      const { key, options } = definition
-      accessRestrictionDefinitions[key] = {
-        ...definition,
-        options: keyBy(options, 'key'),
-      }
-    }
-    return accessRestrictionDefinitions
-  })
-
-  const accessRestrictionOptionDefinitions = computed(() => {
-    const accessRestrictionOptionDefinitions = {}
-    for (const definition of accessRestrictionDefinitionList.value) {
-      for (const optionDefinition of definition.options) {
-        accessRestrictionOptionDefinitions[optionDefinition.key] = {
-          accessRestrictionKey: definition.key,
-          ...optionDefinition,
-        }
-      }
-    }
-    return accessRestrictionOptionDefinitions
-  })
-
-  const accessRestrictionNoItemsText = computed(() => {
-    return cloudProfileStore.accessRestrictionNoItemsTextForCloudProfileNameAndRegion({
-      cloudProfileName: cloudProfileName.value,
-      region: region.value,
-    })
-  })
-
   const accessRestrictionList = computed(() => {
     const accessRestrictionList = []
     for (const definition of accessRestrictionDefinitionList.value) {
@@ -1288,42 +1064,70 @@ export function createStoreDefinition (context) {
     return accessRestrictionList
   })
 
-  const allMachineTypes = computed(() => {
-    return cloudProfileStore.machineTypesByCloudProfileName({
-      cloudProfileName: cloudProfileName.value,
-    })
-  })
+  /* seedSelector */
+  function getSeedSelectorMatchLabel (key, defaultValue) {
+    return get(manifest.value, `spec.seedSelector.matchLabels["${key}"]`, `${defaultValue}`)
+  }
 
-  const machineArchitectures = computed(() => {
-    return cloudProfileStore.machineArchitecturesByCloudProfileNameAndRegion({
-      cloudProfileName: cloudProfileName.value,
-      region: region.value,
-    })
-  })
+  function setSeedSelectorMatchLabel (key, value) {
+    set(manifest.value, `spec.seedSelector.matchLabels["${key}"]`, `${value}`)
+  }
 
-  const volumeTypes = computed(() => {
-    return cloudProfileStore.volumeTypesByCloudProfileName({
-      cloudProfileName: cloudProfileName.value,
-      region: region.value,
-    })
-  })
+  function unsetSeedSelectorMatchLabel (key, value) {
+    unset(manifest.value, `spec.seedSelector.matchLabels["${key}"]`)
+  }
 
-  const machineImages = computed(() => {
-    return cloudProfileStore.machineImagesByCloudProfileName(cloudProfileName.value)
-  })
-
-  const networkingTypes = computed(() => {
-    return gardenerExtensionStore.networkingTypes
-  })
-
-  const showAllRegions = computed(() => {
-    return configStore.seedCandidateDeterminationStrategy !== 'SameRegion'
-  })
-
-  const dnsProvidersWithPrimarySupport = computed(() => {
-    const hasPrimarySupport = type => includes(gardenerExtensionStore.dnsProviderTypesWithPrimarySupport, type)
-    return filter(dnsProviders.value, ({ type, secretName }) => hasPrimarySupport(type) && !!secretName)
-  })
+  const {
+    isNewCluster,
+    cloudProfiles,
+    cloudProfile,
+    isZonedCluster,
+    seed,
+    seeds,
+    isFailureToleranceTypeZoneSupported,
+    allZones,
+    usedZones,
+    unusedZones,
+    availableZones,
+    maxAdditionalZones,
+    expiringWorkerGroups,
+    defaultNodesCIDR,
+    infrastructureSecrets,
+    sortedKubernetesVersions,
+    kubernetesVersionIsNotLatestPatch,
+    allPurposes,
+    regionsWithSeed,
+    regionsWithoutSeed,
+    allLoadBalancerProviderNames,
+    allLoadBalancerClassNames,
+    partitionIDs,
+    firewallImages,
+    firewallSizes,
+    allFirewallNetworks,
+    allFloatingPoolNames,
+    accessRestrictionDefinitionList,
+    accessRestrictionDefinitions,
+    accessRestrictionOptionDefinitions,
+    accessRestrictionNoItemsText,
+    allMachineTypes,
+    machineArchitectures,
+    volumeTypes,
+    machineImages,
+    networkingTypes,
+    showAllRegions,
+  } = useShootHelper(readonly({
+    creationTimestamp,
+    cloudProfileName,
+    seedName,
+    region,
+    secretBindingName,
+    kubernetesVersion,
+    networkingNodes,
+    providerType,
+    providerWorkers,
+    providerInfrastructureConfigPartitionID,
+    providerInfrastructureConfigNetworksZones,
+  }), context)
 
   return {
     /* manifest */
@@ -1435,7 +1239,7 @@ export function createStoreDefinition (context) {
     cloudProfile,
     isZonedCluster,
     seed,
-    allSeeds,
+    seeds,
     isFailureToleranceTypeZoneSupported,
     allZones,
     initialZones,

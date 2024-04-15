@@ -38,9 +38,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-col
             class="flex-grow-0 flex-shrink-1 pa-0 ma-0"
           >
-            <g-shoot-messages
-              :shoot-item="shootItem"
-            />
+            <g-shoot-messages />
           </v-col>
         </v-row>
       </template>
@@ -54,7 +52,7 @@ SPDX-License-Identifier: Apache-2.0
       <template v-if="cell.header.key === 'seed'">
         <g-auto-hide right>
           <template #activator>
-            <g-shoot-seed-name :shoot-item="shootItem" />
+            <g-shoot-seed-name />
           </template>
           <g-copy-btn :clipboard-text="shootSeedName" />
         </g-auto-hide>
@@ -68,7 +66,7 @@ SPDX-License-Identifier: Apache-2.0
         </g-auto-hide>
       </template>
       <template v-if="cell.header.key === 'workers'">
-        <g-worker-groups :shoot-item="shootItem" />
+        <g-worker-groups />
       </template>
       <template v-if="cell.header.key === 'createdBy'">
         <g-account-avatar :account-name="shootCreatedBy" />
@@ -88,27 +86,26 @@ SPDX-License-Identifier: Apache-2.0
         <div class="d-flex align-center justify-center">
           <g-shoot-status
             :popper-key="`${shootNamespace}/${shootName}`"
-            :shoot-item="shootItem"
           />
         </div>
       </template>
       <template v-if="cell.header.key === 'k8sVersion'">
         <div class="d-flex justify-center">
           <g-shoot-version
-            :shoot-item="shootItem"
+
             chip
           />
         </div>
       </template>
       <template v-if="cell.header.key === 'readiness'">
         <div class="d-flex">
-          <g-status-tags :shoot-item="shootItem" />
+          <g-status-tags />
         </div>
       </template>
       <template v-if="cell.header.key === 'controlPlaneHighAvailability'">
         <div class="d-flex justify-center">
           <g-control-plane-high-availability-tag
-            :shoot-item="shootItem"
+
             size="small"
           />
         </div>
@@ -184,7 +181,6 @@ SPDX-License-Identifier: Apache-2.0
           />
           <g-shoot-list-row-actions
             v-if="canPatchShoots"
-            :shoot-item="shootItem"
           />
         </v-row>
       </template>
@@ -209,6 +205,7 @@ import {
   mapState,
   mapActions,
 } from 'pinia'
+import { reactivePick } from '@vueuse/core'
 
 import { useAuthzStore } from '@/store/authz'
 import { useTicketStore } from '@/store/ticket'
@@ -233,12 +230,13 @@ import GControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvail
 import GWorkerGroups from '@/components/ShootWorkers/GWorkerGroups'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 
+import { useProvideShootItem } from '@/composables/useShootItem'
+
 import {
   isTypeDelete,
   getTimestampFormatted,
   getIssueSince,
 } from '@/utils'
-import { shootItem } from '@/mixins/shootItem'
 
 import {
   includes,
@@ -269,8 +267,11 @@ export default {
     GWorkerGroups,
     GTextRouterLink,
   },
-  mixins: [shootItem],
   props: {
+    modelValue: {
+      type: Object,
+      required: true,
+    },
     visibleHeaders: {
       type: Array,
       required: true,
@@ -279,6 +280,15 @@ export default {
   emits: [
     'showDialog',
   ],
+  setup (props) {
+    const route = {
+      params: reactivePick(props.modelValue.metadata, 'namespace', 'name'),
+    }
+
+    return {
+      ...useProvideShootItem({ route }),
+    }
+  },
   computed: {
     ...mapState(useAuthzStore, [
       'canGetSecrets',

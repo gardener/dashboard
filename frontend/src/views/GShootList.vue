@@ -178,7 +178,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
         <template #item="{ item }">
           <g-shoot-list-row
-            :shoot-item="item"
+            :model-value="item"
             :visible-headers="visibleHeaders"
             @show-dialog="showDialog"
           />

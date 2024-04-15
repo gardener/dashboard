@@ -20,7 +20,6 @@ SPDX-License-Identifier: Apache-2.0
 
     <g-terminal-list-tile
       v-if="isTerminalTileVisible"
-      :shoot-item="shootItem"
       target="shoot"
       :description="shootTerminalDescription"
       :button-description="shootTerminalButtonDescription"
@@ -34,7 +33,6 @@ SPDX-License-Identifier: Apache-2.0
 
     <g-terminal-shortcuts-tile
       v-if="isTerminalShortcutsTileVisible"
-      :shoot-item="shootItem"
       popper-boundaries-selector="#accessCardList"
       @add-terminal-shortcut="onAddTerminalShortcut"
     />
@@ -103,18 +101,14 @@ SPDX-License-Identifier: Apache-2.0
     />
     <template v-if="isKubeconfigTileVisible">
       <g-shoot-kubeconfig
-        :shoot-item="shootItem"
         :show-list-icon="true"
         type="gardenlogin"
       />
       <g-shoot-kubeconfig
-        :shoot-item="shootItem"
         :show-list-icon="false"
         type="token"
       />
-      <g-shoot-admin-kubeconfig
-        :shoot-item="shootItem"
-      />
+      <g-shoot-admin-kubeconfig />
     </template>
 
     <v-divider
@@ -124,7 +118,6 @@ SPDX-License-Identifier: Apache-2.0
 
     <g-gardenctl-commands
       v-if="isGardenctlTileVisible"
-      :shoot-item="shootItem"
     />
   </g-list>
 </template>
@@ -144,7 +137,7 @@ import GActionButton from '@/components/GActionButton.vue'
 import GCopyBtn from '@/components/GCopyBtn.vue'
 import GTerminalListTile from '@/components/GTerminalListTile.vue'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
 
 import GGardenctlCommands from './GGardenctlCommands.vue'
 import GShootKubeconfig from './GShootKubeconfig.vue'
@@ -169,7 +162,6 @@ export default {
     GGardenctlCommands,
     GTerminalShortcutsTile,
   },
-  mixins: [shootItem],
   props: {
     hideTerminalShortcuts: {
       type: Boolean,
@@ -179,6 +171,11 @@ export default {
   emits: [
     'addTerminalShortcut',
   ],
+  setup () {
+    return {
+      ...useShootItem(),
+    }
+  },
   data () {
     return {
       showToken: false,

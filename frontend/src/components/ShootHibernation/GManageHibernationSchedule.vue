@@ -81,6 +81,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { ref } from 'vue'
 import {
   mapState,
   mapWritableState,
@@ -89,10 +90,12 @@ import {
 import { useVuelidate } from '@vuelidate/core'
 
 import { useConfigStore } from '@/store/config'
-import useShootContextStore from '@/store/shootContext'
+import { useShootContextStore } from '@/store/shootContext'
 
 import GExpandTransitionGroup from '@/components/GExpandTransitionGroup'
 import GHibernationScheduleEvent from '@/components/ShootHibernation/GHibernationScheduleEvent'
+
+import { useShootItem } from '@/composables/useShootItem'
 
 import { isEmpty } from '@/lodash'
 
@@ -102,18 +105,16 @@ export default {
     GExpandTransitionGroup,
   },
   inject: ['logger'],
-  props: {
-    isHibernationPossible: {
-      type: Boolean,
-      default: true,
-    },
-    hibernationPossibleMessage: {
-      type: String,
-    },
-  },
   setup () {
+    const {
+      isHibernationPossible = ref(true),
+      hibernationPossibleMessage = ref(''),
+    } = useShootItem() ?? {}
+
     return {
       v$: useVuelidate(),
+      isHibernationPossible,
+      hibernationPossibleMessage,
     }
   },
   computed: {

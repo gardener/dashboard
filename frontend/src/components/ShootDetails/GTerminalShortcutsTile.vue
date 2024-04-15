@@ -70,7 +70,8 @@ import GTerminalShortcutIcon from '@/components/icons/GTerminalShortcutIcon.vue'
 import GUnverifiedTerminalShortcutsDialog from '@/components/dialogs/GUnverifiedTerminalShortcutsDialog.vue'
 import GWebterminalServiceAccountDialog from '@/components/dialogs/GWebterminalServiceAccountDialog.vue'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
+
 import { TargetEnum } from '@/utils'
 
 import {
@@ -90,7 +91,6 @@ export default {
     GUnverifiedTerminalShortcutsDialog,
     GWebterminalServiceAccountDialog,
   },
-  mixins: [shootItem],
   inject: ['api'],
   props: {
     popperBoundariesSelector: {
@@ -98,6 +98,11 @@ export default {
     },
   },
   emits: ['addTerminalShortcut'],
+  setup () {
+    return {
+      ...useShootItem(),
+    }
+  },
   data () {
     return {
       expansionPanel: false,

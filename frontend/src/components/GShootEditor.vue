@@ -27,16 +27,10 @@ SPDX-License-Identifier: Apache-2.0
       :class="containerClass"
     />
     <div
-      v-if="errorMessageInternal"
+      v-if="!!$slots.errorMessage"
       class="flex-shrink-1"
     >
-      <g-message
-        v-model:message="errorMessageInternal"
-        v-model:detailed-message="detailedErrorMessageInternal"
-        color="error"
-        class="ma-0"
-        tile
-      />
+      <slot name="errorMessage" />
     </div>
     <v-divider />
     <div
@@ -47,13 +41,13 @@ SPDX-License-Identifier: Apache-2.0
       <div class="d-flex align-center justify-start fill-height">
         <div class="px-2">
           <v-tooltip location="top">
-            <template #activator="{ props }">
-              <div v-bind="props">
+            <template #activator="slotProps">
+              <div v-bind="slotProps.props">
                 <g-action-button
                   size="x-small"
                   icon="mdi-reload"
-                  :disabled="untouched"
-                  @click="reload"
+                  :disabled="!touched"
+                  @click="resetEditor"
                 />
               </div>
             </template>
@@ -63,13 +57,13 @@ SPDX-License-Identifier: Apache-2.0
         <v-divider vertical />
         <div class="px-2">
           <v-tooltip location="top">
-            <template #activator="{ props }">
-              <div v-bind="props">
+            <template #activator="slotProps">
+              <div v-bind="slotProps.props">
                 <g-action-button
                   size="x-small"
                   icon="mdi-undo"
                   :disabled="historySize.undo === 0"
-                  @click="undo"
+                  @click="execUndo"
                 />
               </div>
             </template>
@@ -78,13 +72,13 @@ SPDX-License-Identifier: Apache-2.0
         </div>
         <div class="px-2">
           <v-tooltip location="top">
-            <template #activator="{ props }">
-              <div v-bind="props">
+            <template #activator="slotProps">
+              <div v-bind="slotProps.props">
                 <g-action-button
                   size="x-small"
                   icon="mdi-redo"
                   :disabled="historySize.redo === 0"
-                  @click="redo"
+                  @click="execRedo"
                 />
               </div>
             </template>
@@ -94,8 +88,8 @@ SPDX-License-Identifier: Apache-2.0
         <v-divider vertical />
         <div class="px-2">
           <v-tooltip location="top">
-            <template #activator="{ props }">
-              <div v-bind="props">
+            <template #activator="slotProps">
+              <div v-bind="slotProps.props">
                 <g-action-button
                   size="x-small"
                   icon="mdi-download"
@@ -111,7 +105,7 @@ SPDX-License-Identifier: Apache-2.0
             :clipboard-text="() => getContent()"
             tooltip-text="Copy"
             :user-feedback="false"
-            @click.stop="focus"
+            @click.stop="focusEditor"
             @copy="onCopy"
             @copy-failed="onCopyFailed"
           />
@@ -119,12 +113,12 @@ SPDX-License-Identifier: Apache-2.0
         <v-divider vertical />
         <div class="px-2">
           <v-tooltip location="top">
-            <template #activator="{ props }">
-              <div v-bind="props">
+            <template #activator="slotProps">
+              <div v-bind="slotProps.props">
                 <g-action-button
                   size="x-small"
                   :icon="showManagedFields ? 'mdi-text-short' : 'mdi-text-long'"
-                  :disabled="!untouched"
+                  :disabled="touched"
                   @click="showManagedFields = !showManagedFields"
                 />
               </div>
@@ -161,411 +155,140 @@ SPDX-License-Identifier: Apache-2.0
   </div>
 </template>
 
-<script>
+<script setup>
 import {
-  mapState,
-  mapWritableState,
-} from 'pinia'
-import yaml from 'js-yaml'
+  ref,
+  computed,
+  inject,
+  onBeforeUnmount,
+  onMounted,
+  nextTick,
+} from 'vue'
 import download from 'downloadjs'
-
-import { useAuthzStore } from '@/store/authz'
-import { useShootContextStore } from '@/store/shootContext'
-import { useLocalStorageStore } from '@/store/localStorage'
 
 import GCopyBtn from '@/components/GCopyBtn'
 import GActionButton from '@/components/GActionButton'
-import GMessage from '@/components/GMessage'
 import GAlertBanner from '@/components/GAlertBanner'
 
-import {
-  createShootEditor,
-  createShootEditorCompletions,
-  registerShootEditorHelper,
-  addShootEditorEventListener,
-} from '@/utils/shootEditor'
+import { camelCase } from '@/lodash'
+const props = defineProps({
+  identifier: {
+    type: String,
+    required: true,
+  },
+  hideToolbar: {
+    type: Boolean,
+    default: false,
+  },
+  animateOnAppear: {
+    type: Boolean,
+  },
+})
 
-import {
-  get,
-  has,
-  pick,
-  cloneDeep,
-  isEqual,
-} from '@/lodash'
+const container = ref(null)
+const containerClass = ref('')
+const snackbar = ref(false)
+const snackbarTimeout = ref(3000)
+const snackbarColor = ref()
+const snackbarText = ref('')
+const lineHeight = ref(21)
+const toolbarHeight = ref(48)
 
-export default {
-  components: {
-    GCopyBtn,
-    GActionButton,
-    GMessage,
-    GAlertBanner,
-  },
-  inject: ['api', 'logger'],
-  props: {
-    alertBannerIdentifier: {
-      type: String,
-    },
-    errorMessage: {
-      type: String,
-    },
-    detailedErrorMessage: {
-      type: String,
-    },
-    extraKeys: {
-      type: Object,
-    },
-    hideToolbar: {
-      type: Boolean,
-    },
-    completionPaths: {
-      type: Array,
-    },
-    animateOnAppear: {
-      type: Boolean,
-    },
-  },
-  emits: [
-    'update:errorMessage',
-    'update:detailedErrorMessage',
-    'clean',
-    'conflictPath',
-  ],
-  data () {
-    return {
-      conflictPath: null,
-      snackbar: false,
-      snackbarTimeout: 3000,
-      snackbarColor: undefined,
-      snackbarText: '',
-      clean: true,
-      untouched: true,
-      historySize: {
-        undo: 0,
-        redo: 0,
-      },
-      generation: undefined,
-      lineHeight: 21,
-      toolbarHeight: 48,
-      shootEditorCompletions: undefined,
-      helpTooltip: {
-        visible: false,
-        posX: 0,
-        posY: 0,
-        property: undefined,
-        type: undefined,
-        description: undefined,
-      },
-      showManagedFields: false,
-      containerClass: undefined,
-    }
-  },
-  computed: {
-    ...mapState(useAuthzStore, [
-      'canPatchShoots',
-    ]),
-    ...mapState(useLocalStorageStore, [
-      'editorShortcuts',
-    ]),
-    ...mapState(useShootContextStore, [
-      'shootManifest',
-      'shootProjectName',
-      'isShootActionsDisabled',
-    ]),
-    ...mapWritableState(useShootContextStore, [
-      'cmInstance',
-    ]),
-    value () {
-      let data = cloneDeep(this.shootManifest)
-      if (data) {
-        data = pick(data, ['kind', 'apiVersion', 'metadata', 'spec', 'status'])
-        if (!this.showManagedFields && has(data, 'metadata.managedFields')) {
-          delete data.metadata.managedFields
-        }
-        return data
-      }
-      return undefined
-    },
-    containerStyles () {
-      return {
-        flex: '1 1 auto',
-        minHeight: `${this.lineHeight * 3}px`,
-      }
-    },
-    toolbarStyles () {
-      return {
-        flex: '0 0 auto',
-        height: `${this.toolbarHeight}px`,
-        minHeight: `${this.toolbarHeight}px`,
-      }
-    },
-    errorMessageInternal: {
-      get () {
-        return this.errorMessage
-      },
-      set (value) {
-        this.$emit('update:errorMessage', value)
-      },
-    },
-    detailedErrorMessageInternal: {
-      get () {
-        return this.detailedErrorMessage
-      },
-      set (value) {
-        this.$emit('update:detailedErrorMessage', value)
-      },
-    },
-    extraKeysInternal () {
-      const extraKeys = {}
-      const extraKeyEntries = Object.entries({
-        Tab: instance => {
-          if (instance.somethingSelected()) {
-            instance.indentSelection('add')
-          } else {
-            instance.execCommand('insertSoftTab')
-          }
-        },
-        'Shift-Tab': instance => {
-          instance.indentSelection('subtract')
-        },
-        Enter: instance => {
-          this.shootEditorCompletions.editorEnter(instance)
-        },
-        'Ctrl-Space': 'autocomplete',
-        ...this.extraKeys,
-      })
-      for (const [key, value] of extraKeyEntries) {
-        extraKeys[this.editorShortcuts[key] ?? key] = value
-      }
-      return extraKeys
-    },
-    isReadOnly () {
-      return this.isShootActionsDisabled || !this.canPatchShoots
-    },
-    showToolbar () {
-      return !this.isReadOnly && !this.hideToolbar
-    },
-    theme () {
-      return this.$vuetify.theme.current.dark
-        ? 'seti'
-        : 'default'
-    },
-  },
-  watch: {
-    canPatchShoots (value) {
-      this.cmInstance.setOption('readOnly', this.isReadOnly)
-    },
-    shootPurpose (value) {
-      this.cmInstance.setOption('readOnly', this.isReadOnly)
-    },
-    value: {
-      deep: true,
-      handler (newValue, oldValue) {
-        if (this.untouched) {
-          this.update(newValue)
-          return
-        }
-        for (const path of ['spec', 'metadata.annotations', 'metadata.labels']) {
-          const newProp = get(newValue, path)
-          const oldProp = get(oldValue, path)
-          if (!isEqual(newProp, oldProp)) {
-            this.setConflictPath(path)
-            break
-          }
-        }
-      },
-    },
-    theme (value) {
-      this.cmInstance.setOption('theme', value)
-    },
-  },
-  async mounted () {
-    if (this.animateOnAppear) {
-      this.animateExpansion()
-    }
+const {
+  clean,
+  touched,
+  showManagedFields,
+  historySize,
+  helpTooltip,
+  createEditor,
+  focusEditor,
+  resetEditor,
+  refreshEditor,
+  destroyEditor,
+  execUndo,
+  execRedo,
+  getDocumentValue,
+  shootName,
+  shootProjectName,
+  isReadOnly,
+} = inject(props.identifier)
 
-    this.createInstance(this.$refs.container)
-    this.update(this.value)
-    this.refresh()
+const alertBannerIdentifier = computed(() => {
+  return props.identifier === 'shoot-worker-editor'
+    ? 'workerEditorWarning'
+    : `${camelCase(props.identifier)}Warning`
+})
 
-    const shootSchemaDefinition = await this.api.getShootSchemaDefinition()
-    const shootProperties = get(shootSchemaDefinition, 'properties', {})
-    const indentUnit = get(this.cmInstance, 'options.indentUnit', 2)
-    this.shootEditorCompletions = createShootEditorCompletions(shootProperties, indentUnit, this.completionPaths, this.logger)
-  },
-  beforeUnmount () {
-    this.destroyInstance()
-  },
-  methods: {
-    getQualifiedName () {
-      const name = get(this, 'value.metadata.name', 'unnamed')
-      const projectName = this.shootProjectName
-      return `shoot--${projectName}--${name}.yaml`
-    },
-    undo () {
-      if (this.cmInstance) {
-        this.cmInstance.execCommand('undo')
-        this.cmInstance.focus()
-      }
-    },
-    redo () {
-      if (this.cmInstance) {
-        this.cmInstance.execCommand('redo')
-        this.cmInstance.focus()
-      }
-    },
-    focus () {
-      if (this.cmInstance) {
-        this.cmInstance.focus()
-      }
-    },
-    setClean (clean) {
-      this.clean = clean
-      this.$emit('clean', clean)
-    },
-    setConflictPath (conflictPath) {
-      this.conflictPath = conflictPath
-      this.$emit('conflictPath', conflictPath)
-    },
-    reload () {
-      this.update(this.value)
-    },
-    downloadContent () {
-      try {
-        download(this.getContent(), this.getQualifiedName(), 'text/yaml')
-        this.snackbarColor = undefined
-        this.snackbarText = 'Content has been downloaded'
-        this.snackbar = true
-      } catch (err) {
-        this.snackbarColor = 'error'
-        this.snackbarText = 'Download content failed'
-        this.snackbar = true
-      }
-      this.focus()
-    },
-    refresh () {
-      // use $nextTick as CodeMirror needs to be finished with rendering because refresh method relies on
-      // dynamic dimensions calculated via css, which do not return correct values before rendering is complete
-      this.$nextTick(() => this.refreshInstance())
-    },
-    refreshInstance () {
-      if (this.cmInstance) {
-        this.cmInstance.refresh()
-      }
-    },
-    createInstance (element) {
-      const options = {
-        mode: 'text/x-yaml',
-        autofocus: true,
-        indentUnit: 2,
-        tabSize: 2,
-        indentWithTabs: false,
-        smartIndent: true,
-        scrollbarStyle: 'native',
-        lineNumbers: true,
-        lineWrapping: true,
-        viewportMargin: Infinity, // make sure the whole shoot resource is laoded so that the browser's text search works on it
-        readOnly: this.isReadOnly,
-        extraKeys: this.extraKeysInternal,
-        theme: this.theme,
-      }
-      const cm = this.cmInstance = createShootEditor(element, options)
-      cm.setSize('100%', '100%')
-      cm.on('change', ({ doc }) => {
-        this.untouched = false
-        this.setClean(doc.isClean(this.generation))
-        this.historySize = doc.historySize()
-        this.errorMessageInternal = undefined
-        this.detailedErrorMessageInternal = undefined
-      })
+const containerStyles = computed(() => {
+  return {
+    flex: '1 1 auto',
+    minHeight: `${lineHeight.value * 3}px`,
+  }
+})
 
-      registerShootEditorHelper('hint', 'yaml', editor => this.shootEditorCompletions?.yamlHint(editor))
+const toolbarStyles = computed(() => {
+  return {
+    flex: '0 0 auto',
+    height: `${toolbarHeight.value}px`,
+    minHeight: `${toolbarHeight.value}px`,
+  }
+})
 
-      let cmTooltipFnTimerID
-      addShootEditorEventListener(element, 'mouseover', e => {
-        clearTimeout(cmTooltipFnTimerID)
-        this.helpTooltip.visible = false
-        cmTooltipFnTimerID = setTimeout(() => {
-          const tooltip = this.shootEditorCompletions?.editorTooltip(e, cm)
-          if (!tooltip) {
-            return
-          }
-          this.helpTooltip.visible = true
-          this.helpTooltip.posX = e.clientX
-          this.helpTooltip.posY = e.clientY
-          this.helpTooltip.property = tooltip.property
-          this.helpTooltip.type = tooltip.type
-          this.helpTooltip.description = tooltip.description
-        }, 200)
-      })
-    },
-    destroyInstance () {
-      if (this.cmInstance) {
-        const element = this.cmInstance.doc.cm.getWrapperElement()
-        if (element && element.remove) {
-          element.remove()
-        }
-      }
-      this.cmInstance = null
-    },
-    clearHistory () {
-      if (this.cmInstance) {
-        this.cmInstance.doc.clearHistory()
-        this.generation = this.cmInstance.doc.changeGeneration()
-        this.setClean(true)
-        this.untouched = true
-        this.setConflictPath(null)
-        this.historySize.undo = 0
-        this.historySize.redo = 0
-      }
-    },
-    getContent () {
-      if (this.cmInstance) {
-        return this.cmInstance.doc.getValue()
-      }
-      return ''
-    },
-    setContent (value) {
-      if (this.cmInstance) {
-        const editor = this.cmInstance
-        const doc = editor.doc
-        const cursor = doc.getCursor()
-        const { left, top } = editor.getScrollInfo() || {}
-        doc.setValue(value)
-        editor.focus()
-        if (cursor) {
-          doc.setCursor(cursor)
-        }
-        editor.scrollTo(left, top)
-        this.clearHistory()
-      }
-    },
-    update (value = this.value) {
-      if (value) {
-        this.setContent(yaml.dump(value))
-      }
-    },
-    onCopy () {
-      this.snackbarColor = undefined
-      this.snackbarText = 'Copied content to clipboard'
-      this.snackbar = true
-    },
-    onCopyFailed () {
-      this.snackbarColor = 'error'
-      this.snackbarText = 'Copy to clipboard failed'
-      this.snackbar = true
-    },
-    animateExpansion () {
-      this.containerClass = 'collapsed'
-      this.$nextTick(() => {
-        // wait for ui to render collapsed class before setting animation class
-        this.containerClass = 'animate'
-        setTimeout(() => {
-          this.containerClass = undefined
-        }, 1500) // remove after animation ends (1.5 sec)
-      })
-    },
-  },
+const showToolbar = computed(() => {
+  return !isReadOnly.value && !props.hideToolbar
+})
+
+function downloadContent () {
+  try {
+    const filename = `shoot--${shootProjectName.value}--${shootName ?? 'unnamed'}.yaml`
+    const value = getDocumentValue()
+    download(value, filename, 'text/yaml')
+    snackbarColor.value = undefined
+    snackbarText.value = 'Content has been downloaded'
+    snackbar.value = true
+  } catch (err) {
+    snackbarColor.value = 'error'
+    snackbarText.value = 'Download content failed'
+    snackbar.value = true
+  }
+  focusEditor()
 }
+
+function onCopy () {
+  snackbarColor.value = undefined
+  snackbarText.value = 'Copied content to clipboard'
+  snackbar.value = true
+}
+
+function onCopyFailed () {
+  snackbarColor.value = 'error'
+  snackbarText.value = 'Copy to clipboard failed'
+  snackbar.value = true
+}
+
+function animateExpansion () {
+  containerClass.value = 'collapsed'
+  nextTick(() => {
+    // wait for ui to render collapsed class before setting animation class
+    containerClass.value = 'animate'
+    setTimeout(() => {
+      containerClass.value = ''
+    }, 1500) // remove after animation ends (1.5 sec)
+  })
+}
+
+onMounted(() => {
+  if (props.animateOnAppear) {
+    animateExpansion()
+  }
+  createEditor(container.value)
+  resetEditor()
+  refreshEditor()
+})
+
+onBeforeUnmount(() => {
+  destroyEditor()
+})
 </script>
 
 <style lang="scss" scoped>

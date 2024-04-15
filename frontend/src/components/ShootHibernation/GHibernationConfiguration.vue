@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-action-button-dialog
     ref="actionDialog"
-    :shoot-item="shootItem"
     width="1300"
     caption="Configure Hibernation Schedule"
     @dialog-opened="onConfigurationDialogOpened"
@@ -16,9 +15,6 @@ SPDX-License-Identifier: Apache-2.0
       <v-card-text>
         <g-manage-hibernation-schedule
           :key="componentKey"
-          ref="hibernationScheduleRef"
-          :is-hibernation-possible="isHibernationPossible"
-          :hibernation-possible-message="hibernationPossibleMessage"
         />
       </v-card-text>
     </template>
@@ -26,42 +22,60 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineAsyncComponent } from 'vue'
+import {
+  ref,
+  defineAsyncComponent,
+} from 'vue'
+import { storeToRefs } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
+
+import { useShootContextStore } from '@/store/shootContext'
 
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 
-import { useAsyncRef } from '@/composables/useAsyncRef'
+import { useShootItem } from '@/composables/useShootItem'
 
 import { errorDetailsFromError } from '@/utils/error'
 import { v4 as uuidv4 } from '@/utils/uuid'
-import shootItem from '@/mixins/shootItem'
-
-import { get } from '@/lodash'
 
 export default {
   components: {
     GActionButtonDialog,
     GManageHibernationSchedule: defineAsyncComponent(() => import('@/components/ShootHibernation/GManageHibernationSchedule')),
   },
-  mixins: [
-    shootItem,
-  ],
   inject: ['api', 'logger'],
   setup () {
+    const {
+      shootItem,
+      shootNamespace,
+      shootName,
+    } = useShootItem()
+
+    const shootContextStore = useShootContextStore()
+    const {
+      hibernationSchedules,
+      noHibernationSchedules,
+    } = storeToRefs(shootContextStore)
+    const {
+      setShootManifest,
+    } = shootContextStore
+
+    const componentKey = ref(uuidv4())
+
     return {
-      ...useAsyncRef('hibernationSchedule'),
       v$: useVuelidate(),
-    }
-  },
-  data () {
-    return {
-      componentKey: uuidv4(),
+      shootItem,
+      shootNamespace,
+      shootName,
+      setShootManifest,
+      hibernationSchedules,
+      noHibernationSchedules,
+      componentKey,
     }
   },
   methods: {
     async onConfigurationDialogOpened () {
-      await this.reset()
+      this.setShootManifest(this.shootItem)
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
         if (await this.updateConfiguration()) {
@@ -73,21 +87,20 @@ export default {
     },
     async updateConfiguration () {
       try {
-        const noHibernationSchedule = await this.hibernationSchedule.dispatch('getNoHibernationSchedule')
-        const noScheduleAnnotation = {
-          'dashboard.garden.sapcloud.io/no-hibernation-schedule': noHibernationSchedule ? 'true' : null,
-        }
-        const scheduleCrontab = await this.hibernationSchedule.dispatch('getScheduleCrontab')
-        await this.api.updateShootHibernationSchedules({
-          namespace: this.shootNamespace,
-          name: this.shootName,
-          data: scheduleCrontab,
-        })
-        await this.api.addShootAnnotation({
-          namespace: this.shootNamespace,
-          name: this.shootName,
-          data: noScheduleAnnotation,
-        })
+        await Promise.all([
+          this.api.updateShootHibernationSchedules({
+            namespace: this.shootNamespace,
+            name: this.shootName,
+            data: this.hibernationSchedules,
+          }),
+          this.api.addShootAnnotation({
+            namespace: this.shootNamespace,
+            name: this.shootName,
+            data: {
+              'dashboard.garden.sapcloud.io/no-hibernation-schedule': this.noHibernationSchedules ? 'true' : null,
+            },
+          }),
+        ])
         return true
       } catch (err) {
         const errorMessage = 'Could not save hibernation configuration'
@@ -97,15 +110,6 @@ export default {
         this.logger.error(errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
         return false
       }
-    },
-    async reset () {
-      const noScheduleAnnotation = !!get(this.shootItem, 'metadata.annotations', {})['dashboard.garden.sapcloud.io/no-hibernation-schedule']
-
-      await this.hibernationSchedule.dispatch('setScheduleData', {
-        hibernationSchedule: this.shootHibernationSchedules,
-        noHibernationSchedule: noScheduleAnnotation,
-        purpose: this.shootPurpose,
-      })
     },
     showDialog () { // called from ShootLifeCycleCard
       this.$refs.actionDialog.showDialog()

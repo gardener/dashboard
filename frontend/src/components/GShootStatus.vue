@@ -165,7 +165,7 @@ SPDX-License-Identifier: Apache-2.0
       />
     </g-popover>
     <div class="d-flex">
-      <g-retry-operation :shoot-item="shootItem" />
+      <g-retry-operation />
     </div>
     <span
       v-if="showStatusText"
@@ -194,7 +194,8 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
+
 import {
   isUserError,
   objectsFromErrorCodes,
@@ -214,7 +215,6 @@ export default {
     GRetryOperation,
     GShootMessageDetails,
   },
-  mixins: [shootItem],
   inject: [
     'mergeProps',
     'activePopoverKey',
@@ -231,6 +231,13 @@ export default {
       type: Boolean,
       default: false,
     },
+  },
+  setup () {
+    const shootItemState = useShootItem()
+
+    return {
+      ...shootItemState,
+    }
   },
   data () {
     return {

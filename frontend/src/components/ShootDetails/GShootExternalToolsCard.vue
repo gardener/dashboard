@@ -46,7 +46,7 @@ import { useConfigStore } from '@/store/config'
 
 import GExternalLink from '@/components/GExternalLink'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
 
 import { get } from '@/lodash'
 
@@ -54,8 +54,12 @@ export default {
   components: {
     GExternalLink,
   },
-  mixins: [shootItem],
   inject: ['logger'],
+  setup () {
+    return {
+      ...useShootItem(),
+    }
+  },
   computed: {
     ...mapState(useConfigStore, ['externalTools']),
     items () {

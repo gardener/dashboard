@@ -61,7 +61,8 @@ import { useAuthzStore } from '@/store/authz'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useConfigStore } from '@/store/config'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
+
 import { isSelfTerminationWarning } from '@/utils'
 
 import GK8sExpirationMessage from './GK8sExpirationMessage.vue'
@@ -90,7 +91,6 @@ export default {
     GMaintenanceStatusMessage,
     GForceDeleteMessage,
   },
-  mixins: [shootItem],
   inject: [
     'mainContainer',
     'logger',
@@ -113,6 +113,11 @@ export default {
       type: Boolean,
       default: false,
     },
+  },
+  setup () {
+    return {
+      ...useShootItem(),
+    }
   },
   data () {
     return {

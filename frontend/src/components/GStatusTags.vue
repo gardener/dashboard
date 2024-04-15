@@ -45,7 +45,8 @@ import { useConfigStore } from '@/store/config'
 import GStatusTag from '@/components/GStatusTag.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
+
 import {
   objectsFromErrorCodes,
   errorCodesFromArray,
@@ -58,7 +59,6 @@ export default {
     GStatusTag,
     GExternalLink,
   },
-  mixins: [shootItem],
   props: {
     popperPlacement: {
       type: String,
@@ -67,6 +67,13 @@ export default {
       type: Boolean,
       default: false,
     },
+  },
+  setup () {
+    const shootItemState = useShootItem()
+
+    return {
+      ...shootItemState,
+    }
   },
   computed: {
     conditions () {

@@ -1,132 +1,141 @@
 <!--
-SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
   <div class="fill-height">
-    <g-shoot-editor
-      v-model:error-message="errorMessage"
-      v-model:detailed-error-message="detailedErrorMessage"
-      alert-banner-identifier="newShootEditorWarning"
-    >
+    <g-shoot-editor :identifier="injectionKey">
       <template #modificationWarning>
         By modifying the resource directly you may create an invalid cluster resource.
         If the resource is invalid, you may lose data when switching back to the overview page.
+      </template>
+      <template #errorMessage>
+        <g-message
+          v-model:message="errorMessage"
+          v-model:detailed-message="detailedErrorMessage"
+          color="error"
+          class="ma-0"
+          tile
+        />
       </template>
       <template #toolbarItemsRight>
         <v-btn
           variant="text"
           color="primary"
-          @click.stop="createClicked()"
-        >
-          Create
-        </v-btn>
+          text="Create"
+          @click.stop="save"
+        />
       </template>
     </g-shoot-editor>
     <g-confirm-dialog ref="confirmDialog" />
   </div>
 </template>
 
-<script>
-import { defineAsyncComponent } from 'vue'
+<script setup>
 import {
-  mapState,
-  mapActions,
-} from 'pinia'
-import yaml from 'js-yaml'
+  ref,
+  inject,
+  provide,
+} from 'vue'
+import { storeToRefs } from 'pinia'
+import {
+  useRouter,
+  onBeforeRouteLeave,
+} from 'vue-router'
 
 import { useShootContextStore } from '@/store/shootContext'
-import { useAppStore } from '@/store/app'
 
+import GShootEditor from '@/components/GShootEditor'
 import GConfirmDialog from '@/components/dialogs/GConfirmDialog'
+import GMessage from '@/components/GMessage'
+
+import { useShootEditor } from '@/composables/useShootEditor'
 
 import { errorDetailsFromError } from '@/utils/error'
 
-export default {
-  components: {
-    GShootEditor: defineAsyncComponent(() => import('@/components/GShootEditor')),
-    GConfirmDialog,
-  },
-  inject: ['logger'],
-  async beforeRouteLeave (to, from, next) {
-    if (to.name === 'NewShoot') {
-      try {
-        const object = this.getEditorContent()
-        this.setShootManifest(object)
-        return next()
-      } catch (err) {
-        console.error(err)
-        this.errorMessage = err.message
-        return next(false)
-      }
-    }
-    if (this.isShootCreated) {
-      return next()
-    }
-    if (this.isShootDirty) {
-      if (!await this.confirmEditorNavigation()) {
-        this.shootManifestEditor?.focus()
-        return next(false)
-      }
-    }
-    return next()
-  },
-  data () {
-    return {
-      errorMessage: undefined,
-      detailedErrorMessage: undefined,
-      isShootCreated: false,
-    }
-  },
-  computed: {
-    ...mapState(useShootContextStore, [
-      'shootNamespace',
-      'shootName',
-      'isShootDirty',
-      'cmInstance',
-    ]),
-  },
-  methods: {
-    ...mapActions(useShootContextStore, [
-      'createShoot',
-      'setShootManifest',
-    ]),
-    ...mapActions(useAppStore, ['alert']),
-    confirmEditorNavigation () {
-      return this.$refs.confirmDialog.waitForConfirmation({
-        confirmButtonText: 'Leave',
-        captionText: 'Leave Create Cluster Page?',
-        messageHtml: 'Your cluster has not been created.<br/>Do you want to cancel cluster creation and discard your changes?',
-      })
-    },
-    getEditorContent () {
-      const content = this.cmInstance.doc.getValue()
-      return yaml.load(content)
-    },
-    async createClicked () {
-      try {
-        await this.createShoot(this.getEditorContent())
-        this.isShootCreated = true
-        this.$router.push({
-          name: 'ShootItem',
-          params: {
-            namespace: this.shootNamespace,
-            name: this.shootName,
-          },
-        })
-      } catch (err) {
-        this.errorMessage = 'Failed to create cluster.'
-        if (err.response) {
-          const errorDetails = errorDetailsFromError(err)
-          this.detailedErrorMessage = errorDetails.detailedMessage
-        } else {
-          this.detailedErrorMessage = err.message
-        }
-        this.logger.error(this.errorMessage, this.detailedErrorMessage, err)
-      }
-    },
-  },
+const injectionKey = 'new-shoot-editor'
+const confirmDialog = ref(null)
+const errorMessage = ref()
+const detailedErrorMessage = ref()
+const isShootCreated = ref(false)
+
+const logger = inject('logger')
+
+const router = useRouter()
+
+const shootContextStore = useShootContextStore()
+const {
+  shootNamespace,
+  shootName,
+  isShootDirty,
+  shootManifest,
+} = storeToRefs(shootContextStore)
+const {
+  createShoot,
+  setShootManifest,
+} = shootContextStore
+
+const useProvide = (key, value) => {
+  provide(key, value)
+  return value
 }
+const {
+  getEditorValue,
+  focusEditor,
+} = useProvide(injectionKey, useShootEditor(shootManifest))
+
+function confirmEditorNavigation () {
+  return confirmDialog.value?.waitForConfirmation({
+    confirmButtonText: 'Leave',
+    captionText: 'Leave Create Cluster Page?',
+    messageHtml: 'Your cluster has not been created.<br/>Do you want to cancel cluster creation and discard your changes?',
+  })
+}
+
+async function save () {
+  try {
+    await createShoot(getEditorValue())
+    isShootCreated.value = true
+    router.push({
+      name: 'ShootItem',
+      params: {
+        namespace: shootNamespace.value,
+        name: shootName.value,
+      },
+    })
+  } catch (err) {
+    errorMessage.value = 'Failed to create cluster.'
+    if (err.response) {
+      const errorDetails = errorDetailsFromError(err)
+      detailedErrorMessage.value = errorDetails.detailedMessage
+    } else {
+      detailedErrorMessage.value = err.message
+    }
+    logger.error(errorMessage.value, detailedErrorMessage.value, err)
+  }
+}
+
+onBeforeRouteLeave(async (to, from, next) => {
+  if (to.name === 'NewShoot') {
+    try {
+      setShootManifest(getEditorValue())
+      return next()
+    } catch (err) {
+      errorMessage.value = err.message
+      return next(false)
+    }
+  }
+  if (isShootCreated.value) {
+    return next()
+  }
+  if (isShootDirty.value) {
+    if (!await confirmEditorNavigation()) {
+      focusEditor()
+      return next(false)
+    }
+  }
+  return next()
+})
 </script>

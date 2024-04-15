@@ -1,8 +1,8 @@
 <!--
-SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
- -->
+-->
 
 <template>
   <div>
@@ -52,19 +52,19 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState } from 'pinia'
+import { ref } from 'vue'
+import { storeToRefs } from 'pinia'
 
 import { useAuthzStore } from '@/store/authz'
 
 import GDialog from '@/components/dialogs/GDialog'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
 
 export default {
   components: {
     GDialog,
   },
-  mixins: [shootItem],
   props: {
     icon: {
       type: String,
@@ -116,18 +116,34 @@ export default {
     },
   },
   emits: [
+    'update:modelValue',
     'dialogOpened',
   ],
-  data () {
+  setup (props) {
+    const errorMessage = ref()
+    const detailedErrorMessage = ref()
+
+    const authzStore = useAuthzStore()
+    const {
+      canPatchShoots,
+    } = storeToRefs(authzStore)
+
+    const {
+      shootName,
+      isShootMarkedForDeletion,
+      isShootActionsDisabledForPurpose,
+    } = useShootItem()
+
     return {
-      errorMessage: undefined,
-      detailedErrorMessage: undefined,
+      errorMessage,
+      detailedErrorMessage,
+      canPatchShoots,
+      shootName,
+      isShootMarkedForDeletion,
+      isShootActionsDisabledForPurpose,
     }
   },
   computed: {
-    ...mapState(useAuthzStore, [
-      'canPatchShoots',
-    ]),
     confirmValue () {
       return this.confirmRequired ? this.shootName : undefined
     },

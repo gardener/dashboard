@@ -111,7 +111,8 @@ import { useCloudProfileStore } from '@/store/cloudProfile'
 import GShootVersionUpdate from '@/components/ShootVersion/GShootVersionUpdate.vue'
 import GDialog from '@/components/dialogs/GDialog.vue'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
+
 import { errorDetailsFromError } from '@/utils/error'
 
 import { find } from '@/lodash'
@@ -121,7 +122,6 @@ export default {
     GShootVersionUpdate,
     GDialog,
   },
-  mixins: [shootItem],
   inject: ['api', 'logger'],
   props: {
     chip: {
@@ -131,6 +131,7 @@ export default {
   setup () {
     return {
       v$: useVuelidate(),
+      ...useShootItem(),
     }
   },
   data () {

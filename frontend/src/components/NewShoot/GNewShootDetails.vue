@@ -48,7 +48,6 @@ SPDX-License-Identifier: Apache-2.0
       </v-col>
       <v-col cols="3">
         <g-purpose
-          ref="purposeRef"
           v-model="purpose"
           :purposes="allPurposes"
         />

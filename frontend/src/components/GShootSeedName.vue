@@ -33,12 +33,18 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
 
 export default {
   components: {
     GTextRouterLink,
   },
-  mixins: [shootItem],
+  setup () {
+    const shootItemState = useShootItem()
+
+    return {
+      ...shootItemState,
+    }
+  },
 }
 </script>

@@ -107,41 +107,43 @@ SPDX-License-Identifier: Apache-2.0
   </v-menu>
 </template>
 
-<script>
+<script setup>
+import {
+  ref,
+  computed,
+} from 'vue'
+
 import GIconBase from '@/components/icons/GIconBase.vue'
-import GConnected from '@/components/icons/GConnected.vue'
-import GDisconnected from '@/components/icons/GDisconnected.vue'
+import GConnected from '@/components/icons/GConnected.vue' // eslint-disable-line no-unused-vars
+import GDisconnected from '@/components/icons/GDisconnected.vue' // eslint-disable-line no-unused-vars
 
-import { shootSubscription } from '@/mixins/shootSubscription'
+import { useShootSubscription } from '@/composables/useShootSubscription'
 
-export default {
-  components: {
-    GIconBase,
-    GConnected,
-    GDisconnected,
-  },
-  mixins: [
-    shootSubscription,
-  ],
-  data () {
-    return {
-      modelValue: false,
-    }
-  },
-  computed: {
-    iconName () {
-      return this.connected && (!this.subscription || this.subscribed)
-        ? 'g-connected'
-        : 'g-disconnected'
-    },
-    btnLoading () {
-      return this.kind.startsWith('progress')
-    },
-  },
-  methods: {
-    close () {
-      this.modelValue = false
-    },
-  },
+const {
+  connected,
+  subscription,
+  subscribed,
+  action,
+  message,
+  hint,
+  kind,
+  color,
+  retry,
+} = useShootSubscription()
+
+const modelValue = ref(false)
+
+const iconName = computed(() => {
+  return connected.value && (!subscription.value || subscribed.value)
+    ? 'g-connected'
+    : 'g-disconnected'
+})
+
+const btnLoading = computed(() => {
+  return kind.value.startsWith('progress')
+})
+
+function close () {
+  modelValue.value = false
 }
 </script>

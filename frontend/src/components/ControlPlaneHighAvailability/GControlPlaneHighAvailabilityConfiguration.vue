@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-action-button-dialog
     ref="actionDialog"
-    :shoot-item="shootItem"
     caption="Configure Control Plane High Availability"
     width="600"
     max-height="60vh"
@@ -16,19 +15,24 @@ SPDX-License-Identifier: Apache-2.0
   >
     <template #content>
       <v-card-text>
-        <g-manage-control-plane-high-availability :key="componentKey" />
+        <g-manage-control-plane-high-availability
+          :key="componentKey"
+        />
       </v-card-text>
     </template>
   </g-action-button-dialog>
 </template>
 
 <script>
-import { mapState } from 'pinia'
+import { ref } from 'vue'
+import { storeToRefs } from 'pinia'
 
 import { useShootContextStore } from '@/store/shootContext'
 
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GManageControlPlaneHighAvailability from '@/components/ControlPlaneHighAvailability/GManageControlPlaneHighAvailability'
+
+import { useShootItem } from '@/composables/useShootItem'
 
 import { errorDetailsFromError } from '@/utils/error'
 import { v4 as uuidv4 } from '@/utils/uuid'
@@ -39,21 +43,36 @@ export default {
     GManageControlPlaneHighAvailability,
   },
   inject: ['api', 'logger'],
-  data () {
+  setup () {
+    const {
+      shootItem,
+      shootNamespace,
+      shootName,
+    } = useShootItem()
+
+    const shootContextStore = useShootContextStore()
+    const {
+      controlPlaneFailureToleranceType,
+    } = storeToRefs(shootContextStore)
+    const {
+      setShootManifest,
+    } = shootContextStore
+
+    const componentKey = ref(uuidv4())
+
     return {
-      componentKey: uuidv4(),
+      shootItem,
+      shootNamespace,
+      shootName,
+      controlPlaneFailureToleranceType,
+      setShootManifest,
+      componentKey,
     }
-  },
-  computed: {
-    ...mapState(useShootContextStore, [
-      'namespace',
-      'name',
-      'controlPlaneFailureToleranceType',
-    ]),
   },
   methods: {
     async onConfigurationDialogOpened () {
-      this.reset()
+      this.componentKey = uuidv4() // force re-render
+      this.setShootManifest(this.shootItem)
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
         this.updateConfiguration()
@@ -62,8 +81,8 @@ export default {
     async updateConfiguration () {
       try {
         await this.api.updateShootControlPlaneHighAvailability({
-          namespace: this.namespace,
-          name: this.name,
+          namespace: this.shootNamespace,
+          name: this.shootName,
           data: {
             failureTolerance: {
               type: this.controlPlaneFailureToleranceType,
@@ -77,9 +96,6 @@ export default {
         this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
         this.logger.error(errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
-    },
-    reset () {
-      this.componentKey = uuidv4() // force re-render
     },
   },
 }

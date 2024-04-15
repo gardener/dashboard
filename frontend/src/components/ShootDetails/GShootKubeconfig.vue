@@ -100,7 +100,7 @@ import GCodeBlock from '@/components/GCodeBlock.vue'
 import GGardenloginInfo from '@/components/GGardenloginInfo.vue'
 import GStaticTokenKubeconfigConfiguration from '@/components/GStaticTokenKubeconfigConfiguration.vue'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
 
 export default {
   components: {
@@ -112,7 +112,6 @@ export default {
     GGardenloginInfo,
     GStaticTokenKubeconfigConfiguration,
   },
-  mixins: [shootItem],
   props: {
     showListIcon: {
       type: Boolean,
@@ -122,6 +121,11 @@ export default {
       type: String,
       default: 'gardenlogin',
     },
+  },
+  setup () {
+    return {
+      ...useShootItem(),
+    }
   },
   data () {
     return {

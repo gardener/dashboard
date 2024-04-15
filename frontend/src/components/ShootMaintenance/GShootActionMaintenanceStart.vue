@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-action-button-dialog
     ref="actionDialog"
-    :shoot-item="shootItem"
     width="600"
     :caption="caption"
     :text="buttonText"
@@ -22,9 +21,7 @@ SPDX-License-Identifier: Apache-2.0
           Do you want to start the maintenance of your cluster outside of the configured maintenance time window?
         </div>
         <g-maintenance-components
-          ref="maintenanceComponents"
           title="The following updates might be performed"
-          :hide-os-updates="!hasShootWorkerGroups"
           :selectable="false"
         />
       </v-card-text>
@@ -33,119 +30,135 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapActions } from 'pinia'
+
+import {
+  ref,
+  computed,
+  watch,
+} from 'vue'
 
 import { useAppStore } from '@/store/app'
+import useShootContextStore from '@/store/shootContext'
 
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog.vue'
 import GMaintenanceComponents from '@/components/ShootMaintenance/GMaintenanceComponents'
 
-import { shootItem } from '@/mixins/shootItem'
-import { errorDetailsFromError } from '@/utils/error'
+import { useShootItem } from '@/composables/useShootItem'
 
-import { get } from '@/lodash'
+import { errorDetailsFromError } from '@/utils/error'
 
 export default {
   components: {
     GActionButtonDialog,
     GMaintenanceComponents,
   },
-  mixins: [shootItem],
   inject: ['api', 'logger'],
   props: {
-    modelValue: {
-      type: Boolean,
-      required: true,
-    },
     text: {
       type: Boolean,
       default: false,
     },
   },
-  data () {
-    return {
-      maintenanceTriggered: false,
-    }
-  },
-  computed: {
-    isMaintenanceToBeScheduled () {
-      return this.shootGardenOperation === 'maintain'
-    },
-    caption () {
-      if (!this.isMaintenancePreconditionSatisfied) {
-        return this.maintenancePreconditionSatisfiedMessage
+  setup (props) {
+    const {
+      shootItem,
+      shootName,
+      shootNamespace,
+      shootGardenOperation,
+      isMaintenancePreconditionSatisfied,
+      maintenancePreconditionSatisfiedMessage,
+    } = useShootItem()
+
+    const isMaintenanceToBeScheduled = computed(() => {
+      return shootGardenOperation.value === 'maintain'
+    })
+
+    const caption = computed(() => {
+      if (!isMaintenancePreconditionSatisfied.value) {
+        return maintenancePreconditionSatisfiedMessage.value
       }
-      if (this.isMaintenanceToBeScheduled) {
+      if (isMaintenanceToBeScheduled.value) {
         return 'Requesting to schedule cluster maintenance'
       }
-      return this.buttonTitle
-    },
-    updateKubernetesVersion () {
-      return get(this.shootItem, 'spec.maintenance.autoUpdate.kubernetesVersion', false)
-    },
-    updateOSVersion () {
-      return get(this.shootItem, 'spec.maintenance.autoUpdate.machineImageVersion', false)
-    },
-    buttonTitle () {
+      return buttonTitle.value
+    })
+
+    const buttonTitle = computed(() => {
       return 'Schedule Maintenance'
-    },
-    buttonText () {
-      if (!this.text) {
+    })
+
+    const buttonText = computed(() => {
+      if (!props.text) {
         return
       }
-      return this.buttonTitle
-    },
-  },
-  watch: {
-    isMaintenanceToBeScheduled (maintenanceToBeScheduled) {
-      const isMaintenanceScheduled = !maintenanceToBeScheduled && this.maintenanceTriggered
+      return buttonTitle.value
+    })
+
+    const maintenanceTriggered = ref(false)
+
+    const shootContextStore = useShootContextStore()
+    const {
+      setShootManifest,
+    } = shootContextStore
+
+    const appStore = useAppStore()
+
+    watch(isMaintenanceToBeScheduled, value => {
+      const isMaintenanceScheduled = !value && this.maintenanceTriggered.value
       if (!isMaintenanceScheduled) {
         return
       }
-      this.maintenanceTriggered = false
+      maintenanceTriggered.value = false
 
-      if (!this.shootName) { // ensure that notification is not triggered by shoot resource being cleared (e.g. during navigation)
+      if (!shootName.value) { // ensure that notification is not triggered by shoot resource being cleared (e.g. during navigation)
         return
       }
 
-      this.setSuccess(`Maintenance scheduled for ${this.shootName}`)
-    },
+      appStore.setSuccess(`Maintenance scheduled for ${shootName.value}`)
+    })
+
+    return {
+      shootItem,
+      shootName,
+      shootNamespace,
+      shootGardenOperation,
+      isMaintenancePreconditionSatisfied,
+      maintenancePreconditionSatisfiedMessage,
+      maintenanceTriggered,
+      isMaintenanceToBeScheduled,
+      caption,
+      buttonTitle,
+      buttonText,
+      setShootManifest,
+    }
   },
+
   methods: {
-    ...mapActions(useAppStore, [
-      'setSuccess',
-    ]),
     async onConfigurationDialogOpened () {
-      await this.reset()
-      if (await this.$refs.actionDialog.waitForDialogClosed()) {
+      this.setShootManifest(this.shootItem)
+      const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
+      if (confirmed) {
         this.startMaintenance()
       }
     },
     async startMaintenance () {
       this.maintenanceTriggered = true
-
-      const maintain = { 'gardener.cloud/operation': 'maintain' }
       try {
-        await this.api.addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, data: maintain })
+        await this.api.addShootAnnotation({
+          namespace: this.shootNamespace,
+          name: this.shootName,
+          data: {
+            'gardener.cloud/operation': 'maintain',
+          },
+        })
       } catch (err) {
         const errorMessage = 'Could not start maintenance'
         const errorDetails = errorDetailsFromError(err)
         const detailedErrorMessage = errorDetails.detailedMessage
         this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
         this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-
         this.maintenanceTriggered = false
-        this.currentGeneration = null
       }
-    },
-    reset () {
-      this.$nextTick(() => {
-        // need to wait until component has been rendered before we can trigger the function on the ref
-        this.$refs.maintenanceComponents.setComponentUpdates({
-          k8sUpdates: this.updateKubernetesVersion,
-          osUpdates: this.updateOSVersion,
-        })
-      })
     },
   },
 }

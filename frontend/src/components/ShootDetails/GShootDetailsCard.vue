@@ -34,7 +34,6 @@ SPDX-License-Identifier: Apache-2.0
               <div class="d-flex align-center">
                 Cluster Termination
                 <g-shoot-messages
-                  :shoot-item="shootItem"
                   filter="cluster-expiration"
                   small
                 />
@@ -57,7 +56,6 @@ SPDX-License-Identifier: Apache-2.0
               Kubernetes Version
               <g-shoot-messages
                 v-if="!isShootMarkedForDeletion"
-                :shoot-item="shootItem"
                 filter="k8s"
                 small
               />
@@ -66,7 +64,7 @@ SPDX-License-Identifier: Apache-2.0
           {{ shootK8sVersion }}
         </g-list-item-content>
         <template #append>
-          <g-shoot-version :shoot-item="shootItem" />
+          <g-shoot-version />
         </template>
       </g-list-item>
       <v-divider inset />
@@ -82,23 +80,19 @@ SPDX-License-Identifier: Apache-2.0
               Worker Groups
               <g-shoot-messages
                 v-if="!isShootMarkedForDeletion"
-                :shoot-item="shootItem"
                 filter="machine-image"
                 small
               />
             </div>
           </template>
           <g-worker-groups
-            :shoot-item="shootItem"
             class="flex-wrap"
           />
         </g-list-item-content>
         <template
           #append
         >
-          <g-worker-configuration
-            :shoot-item="shootItem"
-          />
+          <g-worker-configuration />
         </template>
       </g-list-item>
       <v-divider inset />
@@ -138,7 +132,6 @@ SPDX-License-Identifier: Apache-2.0
             <!-- the selectable purposes depend on the used secretbinding which the user needs to be able to read in order to properly show the purpose configuration dialog -->
             <g-purpose-configuration
               v-if="canGetSecrets"
-              :shoot-item="shootItem"
             />
           </template>
         </g-list-item>
@@ -181,9 +174,7 @@ SPDX-License-Identifier: Apache-2.0
             </span>
           </g-list-item-content>
           <template #append>
-            <g-access-restrictions-configuration
-              :shoot-item="shootItem"
-            />
+            <g-access-restrictions-configuration />
           </template>
         </g-list-item>
       </template>
@@ -217,7 +208,7 @@ SPDX-License-Identifier: Apache-2.0
             <span v-else>No addons configured</span>
           </g-list-item-content>
           <template #append>
-            <g-addon-configuration :shoot-item="shootItem" />
+            <g-addon-configuration />
           </template>
         </g-list-item>
       </template>
@@ -243,13 +234,14 @@ import GShootMessages from '@/components/ShootMessages/GShootMessages'
 import GAddonConfiguration from '@/components/ShootAddons/GAddonConfiguration'
 import GCopyBtn from '@/components/GCopyBtn'
 
+import { useShootItem } from '@/composables/useShootItem'
+
 import {
   isValidTerminationDate,
   getTimeStringTo,
   shootAddonList,
   transformHtml,
 } from '@/utils'
-import { shootItem } from '@/mixins/shootItem'
 
 import {
   filter,
@@ -270,7 +262,11 @@ export default {
     GShootMessages,
     GCopyBtn,
   },
-  mixins: [shootItem],
+  setup () {
+    return {
+      ...useShootItem(),
+    }
+  },
   computed: {
     ...mapState(useConfigStore, [
       'sla',

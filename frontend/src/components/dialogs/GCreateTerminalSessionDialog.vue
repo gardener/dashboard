@@ -39,7 +39,6 @@ SPDX-License-Identifier: Apache-2.0
           <g-terminal-target
             v-model="targetTab.selectedTarget"
             :disabled="targetTab.configLoading"
-            :shoot-item="shootItem"
             @update:model-value="updateSettings"
           />
           <v-expansion-panels
@@ -75,7 +74,6 @@ SPDX-License-Identifier: Apache-2.0
           >
             <g-list>
               <g-terminal-shortcuts
-                :shoot-item="shootItem"
                 popper-boundaries-selector="#shortcut-tab"
                 @add-terminal-shortcut="onAddTerminalShortcut"
               />

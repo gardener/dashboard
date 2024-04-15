@@ -62,12 +62,11 @@ import { mapActions } from 'pinia'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
 
 import { some } from '@/lodash'
 
 export default {
-  mixins: [shootItem],
   inject: [
     'activePopoverKey',
   ],
@@ -75,6 +74,11 @@ export default {
     size: {
       type: [String, Number],
     },
+  },
+  setup () {
+    return {
+      ...useShootItem(),
+    }
   },
   computed: {
     popoverKey () {

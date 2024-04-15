@@ -30,7 +30,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
 
 import GListItem from './GListItem.vue'
 import GListItemContent from './GListItemContent.vue'
@@ -42,7 +42,6 @@ export default {
     GListItemContent,
     GActionButton,
   },
-  mixins: [shootItem],
   props: {
     target: {
       type: String,
@@ -57,6 +56,13 @@ export default {
       type: Boolean,
       default: false,
     },
+  },
+  setup () {
+    const shootItemState = useShootItem()
+
+    return {
+      ...shootItemState,
+    }
   },
   computed: {
     to () {

@@ -70,10 +70,6 @@ export const useShootContextStore = defineStore('shootContext', () => {
     resetShootManifest,
   } = storeDefinition
 
-  const namespace = computed(() => {
-    return get(shootManifest.value, 'metadata.namespace', authzStore.namespace)
-  })
-
   function $reset () {
     resetShootManifest()
     shootManifestEditor.value = null
@@ -88,7 +84,6 @@ export const useShootContextStore = defineStore('shootContext', () => {
   return {
     /* state */
     ...storeDefinition,
-    namespace,
     shootManifestEditor,
     /* actions */
     createShoot,

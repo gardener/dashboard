@@ -14,13 +14,12 @@ SPDX-License-Identifier: Apache-2.0
         cols="12"
         md="6"
       >
-        <g-shoot-details-card :shoot-item="shootItem" />
+        <g-shoot-details-card />
         <g-custom-fields-card :custom-fields="customFields" />
-        <g-shoot-infrastructure-card :shoot-item="shootItem" />
-        <g-shoot-external-tools-card :shoot-item="shootItem" />
+        <g-shoot-infrastructure-card />
+        <g-shoot-external-tools-card />
         <g-shoot-lifecycle-card
           ref="shootLifecycle"
-          :shoot-item="shootItem"
         />
       </v-col>
       <v-col
@@ -30,13 +29,12 @@ SPDX-License-Identifier: Apache-2.0
         <v-card class="mb-4">
           <g-toolbar title="Access" />
           <g-shoot-access-card
-            :shoot-item="shootItem"
             @add-terminal-shortcut="onAddTerminalShortcut"
           />
         </v-card>
-        <g-shoot-monitoring-card :shoot-item="shootItem" />
-        <g-shoot-credential-rotation-card :shoot-item="shootItem" />
-        <g-tickets-card :shoot-item="shootItem" />
+        <g-shoot-monitoring-card />
+        <g-shoot-credential-rotation-card />
+        <g-tickets-card />
       </v-col>
     </v-row>
   </v-container>
@@ -57,7 +55,7 @@ import GShootMonitoringCard from '@/components/ShootDetails/GShootMonitoringCard
 import GShootCredentialRotationCard from '@/components/ShootDetails/GShootCredentialRotationCard'
 import GTicketsCard from '@/components/GTicketsCard'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
 
 import {
   filter,
@@ -78,10 +76,14 @@ export default {
     GShootCredentialRotationCard,
     GShootExternalToolsCard,
   },
-  mixins: [shootItem],
   emits: [
     'addTerminalShortcut',
   ],
+  setup () {
+    return {
+      ...useShootItem(),
+    }
+  },
   computed: {
     ...mapState(useProjectStore, ['shootCustomFieldList']),
     customFields () {

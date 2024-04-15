@@ -88,7 +88,8 @@ import yaml from 'js-yaml'
 import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
+
 import {
   TargetEnum,
   targetText,
@@ -107,7 +108,6 @@ export default {
     GActionButton,
     GCodeBlock,
   },
-  mixins: [shootItem],
   inject: ['logger'],
   props: {
     shortcut: {
@@ -129,6 +129,13 @@ export default {
   emits: [
     'addTerminalShortcut',
   ],
+  setup () {
+    const shootItemState = useShootItem()
+
+    return {
+      ...shootItemState,
+    }
+  },
   data () {
     return {
       expansionPanel: false,

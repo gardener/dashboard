@@ -74,11 +74,11 @@ import { required } from '@vuelidate/validators'
 import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
+
 import { withFieldName } from '@/utils/validators'
 
 export default {
-  mixins: [shootItem],
   props: {
     modelValue: {
       type: String,
@@ -87,16 +87,16 @@ export default {
       type: Boolean,
       default: false,
     },
-    shootItem: {
-      type: Object,
-    },
   },
   emits: [
     'update:modelValue',
   ],
   setup () {
+    const shootItemState = useShootItem()
+
     return {
       v$: useVuelidate(),
+      ...shootItemState,
     }
   },
   validations () {

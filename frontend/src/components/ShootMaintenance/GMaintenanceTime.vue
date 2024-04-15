@@ -9,31 +9,29 @@ SPDX-License-Identifier: Apache-2.0
   <v-row class="my-0">
     <v-col class="smallInput">
       <g-time-text-field
-        v-model="maintenanceBegin"
+        v-model="v$.maintenanceBegin.$model"
         color="primary"
         label="Maintenance Start Time"
         :error-messages="getErrorMessages(v$.maintenanceBegin)"
         variant="underlined"
         persistent-hint
         :hint="maintenanceBeginHint"
-        @input="v$.maintenanceBegin.$touch()"
         @blur="v$.maintenanceBegin.$touch()"
       />
     </v-col>
     <v-col class="timezoneInput">
       <v-text-field
-        v-model="maintenanceTimezone"
+        v-model="v$.maintenanceTimezone.$model"
         color="primary"
         label="Timezone"
         :error-messages="getErrorMessages(v$.maintenanceTimezone)"
         variant="underlined"
-        @input="v$.maintenanceTimezone.$touch()"
         @blur="v$.maintenanceTimezone.$touch()"
       />
     </v-col>
     <v-col class="smallInput">
       <v-text-field
-        v-model="windowDuration"
+        v-model="v$.windowDuration.$model"
         color="primary"
         type="number"
         label="Maintenance Window Size"
@@ -42,7 +40,6 @@ SPDX-License-Identifier: Apache-2.0
         variant="underlined"
         persistent-hint
         :hint="maintenanceEndHint"
-        @input="v$.windowDuration.$touch()"
         @blur="v$.windowDuration.$touch()"
       />
     </v-col>
