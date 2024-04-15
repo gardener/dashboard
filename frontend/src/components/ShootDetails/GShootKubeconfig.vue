@@ -68,7 +68,6 @@ SPDX-License-Identifier: Apache-2.0
 
       <g-static-token-kubeconfig-configuration
         v-if="!isGardenloginType"
-        :shoot-item="shootItem"
       />
     </template>
   </g-list-item>

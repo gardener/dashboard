@@ -48,7 +48,6 @@ SPDX-License-Identifier: Apache-2.0
     <g-terminal-shortcut
       v-for="shortcut in shortcuts"
       :key="`g-shortcut-${shortcut.id}`"
-      :shoot-item="shootItem"
       :shortcut="shortcut"
       :popper-boundaries-selector="popperBoundariesSelector"
       @add-terminal-shortcut="onAddTerminalShortcut"

@@ -38,7 +38,6 @@ SPDX-License-Identifier: Apache-2.0
     >
       <v-card-text class="pa-0">
         <g-terminal-shortcuts
-          :shoot-item="shootItem"
           :popper-boundaries-selector="popperBoundariesSelector"
           @add-terminal-shortcut="onAddTerminalShortcut"
         />

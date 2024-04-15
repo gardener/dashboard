@@ -130,10 +130,14 @@ export default {
     'addTerminalShortcut',
   ],
   setup () {
-    const shootItemState = useShootItem()
+    const {
+      shootItem,
+      isShootStatusHibernated,
+    } = useShootItem()
 
     return {
-      ...shootItemState,
+      shootItem,
+      isShootStatusHibernated,
     }
   },
   data () {

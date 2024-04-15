@@ -217,7 +217,6 @@ SPDX-License-Identifier: Apache-2.0
           </g-toolbar>
           <g-shoot-access-card
             ref="clusterAccess"
-            :shoot-item="shootItem"
             :hide-terminal-shortcuts="true"
           />
         </v-card>
