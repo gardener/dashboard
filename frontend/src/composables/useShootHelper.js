@@ -9,6 +9,7 @@ import {
   toRef,
   unref,
   isProxy,
+  isRef,
 } from 'vue'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
@@ -27,6 +28,7 @@ import {
   flatMap,
   mapValues,
   difference,
+  find,
   some,
   uniq,
   isEmpty,
@@ -46,6 +48,18 @@ const shootPropertyMappings = Object.freeze({
   providerInfrastructureConfigPartitionID: 'spec.provider.infrastructureConfig.partitionID',
   providerInfrastructureConfigNetworksZones: 'spec.provider.infrastructureConfig.networks.zones',
 })
+
+function toShootProperties (state) {
+  if (isRef(state)) {
+    return args => Array.isArray(args)
+      ? computed(() => get(state.value, ...args))
+      : computed(() => get(state.value, args))
+  }
+  if (isProxy(state)) {
+    return (path, key) => toRef(state, key)
+  }
+  throw new TypeError('State must be a Proxy or Ref')
+}
 
 export function useShootHelper (state, options = {}) {
   const {
@@ -68,12 +82,7 @@ export function useShootHelper (state, options = {}) {
     providerWorkers,
     providerInfrastructureConfigPartitionID,
     providerInfrastructureConfigNetworksZones,
-  } = mapValues(
-    shootPropertyMappings,
-    isProxy(state)
-      ? (_, key) => toRef(state, key)
-      : path => computed(() => get(unref(state), path)),
-  )
+  } = mapValues(shootPropertyMappings, toShootProperties(state))
 
   const isNewCluster = computed(() => {
     return !creationTimestamp.value

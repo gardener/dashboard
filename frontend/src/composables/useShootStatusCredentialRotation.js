@@ -7,7 +7,7 @@
 import {
   computed,
   toRef,
-  unref,
+  isRef,
   isProxy,
 } from 'vue'
 
@@ -15,7 +15,6 @@ import {
   get,
   filter,
   find,
-  map,
   flatMap,
   mapValues,
   head,
@@ -24,7 +23,7 @@ import {
 
 const shootPropertyMappings = Object.freeze({
   shootEnableStaticTokenKubeconfig: 'spec.kubernetes.enableStaticTokenKubeconfig',
-  shootCredentialsRotation: 'status.credentials.rotation',
+  shootCredentialsRotation: ['status.credentials.rotation', {}],
 })
 
 const rotationTypes = Object.freeze([
@@ -84,22 +83,25 @@ const twoStepRotationTypes = Object.freeze(filter(rotationTypes, {
   twoStep: true,
 }))
 
+function toShootProperties (state) {
+  if (isRef(state)) {
+    return args => Array.isArray(args)
+      ? computed(() => get(state.value, ...args))
+      : computed(() => get(state.value, args))
+  }
+  if (isProxy(state)) {
+    return (path, key) => toRef(state, key)
+  }
+  throw new TypeError('State must be a Proxy or Ref')
+}
+
 export function useShootStatusCredentialRotation (state, options = {}) {
   const {
     shootEnableStaticTokenKubeconfig,
     shootCredentialsRotation,
-  } = mapValues(
-    shootPropertyMappings,
-    isProxy(state)
-      ? (_, key) => toRef(state, key)
-      : path => computed(() => get(unref(state), path)),
-  )
+  } = mapValues(shootPropertyMappings, toShootProperties(state))
 
   options.type ??= 'ALL_CREDENTIALS'
-
-  if (!map(rotationTypes, 'type').includes(options.type)) {
-    throw new TypeError(`Unknown rotationType "${options.type}" identifier`)
-  }
 
   const shootCredentialsRotationAggregatedPhase = computed(() => {
     let preparedRotationsCount = 0
@@ -107,7 +109,7 @@ export function useShootStatusCredentialRotation (state, options = {}) {
     const unpreparedRotations = []
     for (const rotationType of twoStepRotationTypes) {
       // use simple for loop to support early exit (immediately return in case of progressing phase)
-      const rotationStatus = shootCredentialsRotation.value[rotationType.type]
+      const rotationStatus = shootCredentialsRotation.value?.[rotationType.type]
       if (['Preparing', 'Completing'].includes(rotationStatus?.phase)) {
         return {
           type: rotationStatus.phase,

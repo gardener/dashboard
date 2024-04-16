@@ -93,6 +93,7 @@ export default {
     },
     async updateConfiguration () {
       try {
+        // TODO only update access restrictions
         await this.api.replaceShoot({
           namespace: this.shootNamespace,
           name: this.shootName,

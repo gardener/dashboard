@@ -15,6 +15,8 @@ SPDX-License-Identifier: Apache-2.0
       <v-card-text>
         <g-manage-hibernation-schedule
           :key="componentKey"
+          :is-hibernation-possible="isHibernationPossible"
+          :hibernation-possible-message="hibernationPossibleMessage"
         />
       </v-card-text>
     </template>
@@ -49,6 +51,8 @@ export default {
       shootItem,
       shootNamespace,
       shootName,
+      isHibernationPossible,
+      hibernationPossibleMessage,
     } = useShootItem()
 
     const shootContextStore = useShootContextStore()
@@ -67,6 +71,8 @@ export default {
       shootItem,
       shootNamespace,
       shootName,
+      isHibernationPossible,
+      hibernationPossibleMessage,
       setShootManifest,
       hibernationSchedules,
       noHibernationSchedules,
