@@ -183,7 +183,7 @@ export default {
       }
       const imageAutoPatch = get(this.shootItem, 'spec.maintenance.autoUpdate.machineImageVersion', false)
       const expiredWorkerGroups = this.expiringWorkerGroupsForShoot(this.shootWorkerGroups, this.shootCloudProfileName, imageAutoPatch)
-      return map(expiredWorkerGroups, ({ expirationDate, isValidTerminationDate, version, name, workerName, severity }) => {
+      return map(expiredWorkerGroups, ({ expirationDate, isValidTerminationDate, version, name, workerName, severity, supportedVersionAvailable }) => {
         return {
           key: `image_${workerName}_${name}`,
           icon: 'mdi-update',
@@ -197,6 +197,7 @@ export default {
               name,
               workerName,
               version,
+              supportedVersionAvailable,
             },
           },
         }
