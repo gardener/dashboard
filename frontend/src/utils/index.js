@@ -605,12 +605,28 @@ export function targetText (target) {
   }
 }
 
-export function selectedImageIsNotLatest (machineImage, machineImages) {
-  const { version: testImageVersion, vendorName: testVendor } = machineImage
+const allowedSemverDiffs = {
+  patch: ['patch'],
+  minor: ['patch', 'minor'],
+  major: ['patch', 'minor', 'major'],
+}
 
+export function machineImageHasUpdate (machineImage, machineImages) {
+  let { updateStrategy } = machineImage
+  if (!allowedSemverDiffs[updateStrategy]) {
+    updateStrategy = 'major'
+  }
   return some(machineImages, ({ version, vendorName, isSupported }) => {
-    return testVendor === vendorName && semver.gt(version, testImageVersion) && isSupported
+    return isSupported &&
+      machineImage.vendorName === vendorName &&
+      semver.gt(version, machineImage.version) &&
+      allowedSemverDiffs[updateStrategy].includes(semver.diff(version, machineImage.version))
   })
+}
+
+export function machineVendorHasSupportedVersion (machineImage, machineImages) {
+  const { vendorName, isSupported } = machineImage
+  return some(machineImages, { vendorName, isSupported })
 }
 
 export const UNKNOWN_EXPIRED_TIMESTAMP = '1970-01-01T00:00:00Z'

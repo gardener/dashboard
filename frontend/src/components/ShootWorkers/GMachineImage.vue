@@ -55,7 +55,7 @@ import GMultiMessage from '@/components/GMultiMessage'
 
 import {
   getErrorMessages,
-  selectedImageIsNotLatest,
+  machineImageHasUpdate,
   transformHtml,
 } from '@/utils'
 import { withFieldName } from '@/utils/validators'
@@ -152,10 +152,10 @@ export default {
           severity: 'warning',
         })
       }
-      if (this.updateOSMaintenance && this.selectedImageIsNotLatest) {
+      if (this.updateOSMaintenance && this.machineImageHasUpdate) {
         hints.push({
           type: 'text',
-          hint: 'If you select a version which is not the latest (except for preview versions), you should disable automatic operating system updates',
+          hint: 'You selected a version that is eligible for an automatic update. You should disable automatic operating system updates if you want to maintain this specific version',
           severity: 'info',
         })
       }
@@ -168,19 +168,8 @@ export default {
       }
       return JSON.stringify(hints)
     },
-    hintColor () {
-      if (this.machineImage.expirationDate ||
-         (this.updateOSMaintenance && this.selectedImageIsNotLatest) ||
-         this.machineImage.isPreview) {
-        return 'warning'
-      }
-      if (this.machineImage.vendorHint) {
-        return this.machineImage.vendorHint.hintType
-      }
-      return undefined
-    },
-    selectedImageIsNotLatest () {
-      return selectedImageIsNotLatest(this.machineImage, this.machineImages)
+    machineImageHasUpdate () {
+      return machineImageHasUpdate(this.machineImage, this.machineImages)
     },
   },
   validations () {
