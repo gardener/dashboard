@@ -1370,7 +1370,7 @@ const RAW_RUNTIME_STATE =
           ["vitest", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:1.5.0"],\
           ["vitest-fetch-mock", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.2.2"],\
           ["vue", "virtual:c7add925a0d7137728e324795fd1f8117b2cfe6b3dbde1c52a5b1a97c81e35674720372b12d73f80919997216b3cca44221086bef6ee02702ec7a24a2dc75cd3#npm:3.4.23"],\
-          ["vue-router", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:4.3.0"],\
+          ["vue-router", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:4.3.2"],\
           ["vuetify", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.5.16"],\
           ["xterm", "npm:5.3.0"],\
           ["xterm-addon-fit", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.8.0"],\
@@ -3472,7 +3472,7 @@ const RAW_RUNTIME_STATE =
           ["@vueuse/shared", "virtual:ad1aeb96221ce46b21c34c476617cb2de52cfd6e36d2b060c6325126c0ca750fc3c652a2ade7bda646c47f41765bbd90938adbbdfdaec119e333d8cff6c740b3#npm:10.9.0"],\
           ["vue", "virtual:c7add925a0d7137728e324795fd1f8117b2cfe6b3dbde1c52a5b1a97c81e35674720372b12d73f80919997216b3cca44221086bef6ee02702ec7a24a2dc75cd3#npm:3.4.23"],\
           ["vue-demi", "virtual:ad1aeb96221ce46b21c34c476617cb2de52cfd6e36d2b060c6325126c0ca750fc3c652a2ade7bda646c47f41765bbd90938adbbdfdaec119e333d8cff6c740b3#npm:0.14.7"],\
-          ["vue-router", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:4.3.0"]\
+          ["vue-router", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:4.3.2"]\
         ],\
         "packagePeers": [\
           "@types/vue-router",\
@@ -12759,17 +12759,17 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["vue-router", [\
-      ["npm:4.3.0", {\
-        "packageLocation": "./.yarn/cache/vue-router-npm-4.3.0-b765d40138-72865ad2e5.zip/node_modules/vue-router/",\
+      ["npm:4.3.2", {\
+        "packageLocation": "./.yarn/cache/vue-router-npm-4.3.2-29bbfd90fe-63d5be4a98.zip/node_modules/vue-router/",\
         "packageDependencies": [\
-          ["vue-router", "npm:4.3.0"]\
+          ["vue-router", "npm:4.3.2"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:4.3.0", {\
-        "packageLocation": "./.yarn/__virtual__/vue-router-virtual-63d6ae49ba/0/cache/vue-router-npm-4.3.0-b765d40138-72865ad2e5.zip/node_modules/vue-router/",\
+      ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:4.3.2", {\
+        "packageLocation": "./.yarn/__virtual__/vue-router-virtual-b1e374ca30/0/cache/vue-router-npm-4.3.2-29bbfd90fe-63d5be4a98.zip/node_modules/vue-router/",\
         "packageDependencies": [\
-          ["vue-router", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:4.3.0"],\
+          ["vue-router", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:4.3.2"],\
           ["@types/vue", null],\
           ["@vue/devtools-api", "npm:6.6.1"],\
           ["vue", "virtual:c7add925a0d7137728e324795fd1f8117b2cfe6b3dbde1c52a5b1a97c81e35674720372b12d73f80919997216b3cca44221086bef6ee02702ec7a24a2dc75cd3#npm:3.4.23"]\
