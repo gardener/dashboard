@@ -53,7 +53,7 @@ frontend:
     production: ~
 ```
 
-### 5. Run it locally
+### 4. Run it locally
 The Gardener Dashboard [`backend`](../../backend) server requires a kubeconfig for the Garden cluster. You can set it e.g. by using the `KUBECONFIG` environment variable.
 
 If you want to run the Garden cluster locally, follow the [getting started locally](https://github.com/gardener/gardener/blob/master/docs/development/getting_started_locally.md) documentation.
@@ -75,7 +75,7 @@ yarn serve
 
 You can now access the UI on http://localhost:8080/
 
-### 6. Login to the dashboard
+### 5. Login to the dashboard
 To login to the dashboard you can either configure `oidc`, or alternatively login using a token:
 
 To login using a token, first create a service account.
