@@ -28,8 +28,7 @@ const {
 } = utils
 const { getSeed } = cache
 
-exports.list = async function ({ user, namespace, labelSelector, useCache = false }) {
-  const client = user.client
+exports.list = async function ({ user, namespace, labelSelector }) {
   const query = {}
   if (labelSelector) {
     query.labelSelector = labelSelector
@@ -37,14 +36,11 @@ exports.list = async function ({ user, namespace, labelSelector, useCache = fals
   if (namespace === '_all') {
     if (await authorization.canListShoots(user)) {
       // user is permitted to list shoots in all namespaces
-      if (useCache) {
-        return {
-          apiVersion: 'v1',
-          kind: 'List',
-          items: cache.getShoots(namespace, query)
-        }
+      return {
+        apiVersion: 'v1',
+        kind: 'List',
+        items: cache.getShoots(namespace, query)
       }
-      return client['core.gardener.cloud'].shoots.listAllNamespaces(query)
     } else {
       // user is permitted to list shoots only in namespaces associated with their projects
       const namespaces = _
@@ -52,38 +48,25 @@ exports.list = async function ({ user, namespace, labelSelector, useCache = fals
         .filter(projectFilter(user, false))
         .map('spec.namespace')
         .value()
-      if (useCache) {
-        const statuses = await Promise.allSettled(namespaces.map(namespace => authorization.canListShoots(user, namespace)))
-        return {
-          apiVersion: 'v1',
-          kind: 'List',
-          items: namespaces
-            .filter((_, i) => statuses[i].status === 'fulfilled' && statuses[i].value)
-            .flatMap(namespace => cache.getShoots(namespace, query))
-        }
-      }
-      const statuses = await Promise.allSettled(namespaces.map(namespace => client['core.gardener.cloud'].shoots.list(namespace, query)))
+      const statuses = await Promise.allSettled(namespaces.map(namespace => authorization.canListShoots(user, namespace)))
       return {
         apiVersion: 'v1',
         kind: 'List',
-        items: statuses
-          .filter(({ status }) => status === 'fulfilled')
-          .flatMap(({ value }) => value.items)
+        items: namespaces
+          .filter((_, i) => statuses[i].status === 'fulfilled' && statuses[i].value)
+          .flatMap(namespace => cache.getShoots(namespace, query))
       }
     }
   }
-  if (useCache) {
-    const isAllowed = await authorization.canListShoots(user, namespace)
-    if (!isAllowed) {
-      throw createError(403, `No authorization to list shoots in namespace ${namespace}`)
-    }
-    return {
-      apiVersion: 'v1',
-      kind: 'List',
-      items: cache.getShoots(namespace, query)
-    }
+  const isAllowed = await authorization.canListShoots(user, namespace)
+  if (!isAllowed) {
+    throw createError(403, `No authorization to list shoots in namespace ${namespace}`)
   }
-  return client['core.gardener.cloud'].shoots.list(namespace, query)
+  return {
+    apiVersion: 'v1',
+    kind: 'List',
+    items: cache.getShoots(namespace, query)
+  }
 }
 
 exports.create = async function ({ user, namespace, body }) {
