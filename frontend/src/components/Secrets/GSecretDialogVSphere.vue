@@ -11,8 +11,6 @@ SPDX-License-Identifier: Apache-2.0
     :secret-validations="v$"
     :secret="secret"
     vendor="vsphere"
-    create-title="Add new VMware vSphere Secret"
-    replace-title="Replace VMware vSphere Secret"
   >
     <template #secret-slot>
       <div>
@@ -177,30 +175,12 @@ export default {
       return !this.secret
     },
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-      }
-    },
+  mounted () {
+    if (!this.isCreateMode) {
+      setDelayedInputFocus(this, 'vsphereUsername')
+    }
   },
   methods: {
-    reset () {
-      this.v$.$reset()
-
-      this.vsphereUsername = ''
-      this.vspherePassword = ''
-      this.nsxtUsername = ''
-      this.nsxtPassword = ''
-
-      if (!this.isCreateMode) {
-        if (this.secret.data) {
-          this.vsphereUsername = this.secret.data.vsphereUsername
-          this.nsxtUsername = this.secret.data.nsxtUsername
-        }
-        setDelayedInputFocus(this, 'vsphereUsername')
-      }
-    },
     getErrorMessages,
   },
 }

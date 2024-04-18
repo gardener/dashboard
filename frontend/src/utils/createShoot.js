@@ -19,9 +19,31 @@ import {
   range,
   pick,
   values,
+  get,
+  template,
 } from '@/lodash'
 
-export function getSpecTemplate (infrastructureKind, defaultWorkerCIDR) {
+export function getSpecTemplate (infrastructureKind, defaultWorkerCIDR, customCloudProviders) {
+  const defaultShootSpec = {
+    networking: {
+      nodes: defaultWorkerCIDR,
+    },
+  }
+
+  const customCloudProviderSpec = get(customCloudProviders, [infrastructureKind, 'shoot', 'specTemplate'])
+  if (customCloudProviderSpec !== undefined) {
+    const customCloudProviderSpecJson = JSON.stringify(customCloudProviderSpec)
+    const compiled = template(customCloudProviderSpecJson)
+    const data = compiled({
+      workerCIDR: defaultWorkerCIDR,
+    })
+
+    const shootSpec = JSON.parse(data)
+    return {
+      ...defaultShootSpec,
+      ...shootSpec,
+    }
+  }
   switch (infrastructureKind) {
     case 'metal':
       return { // TODO: Remove when metal extension sets this config via mutating webhook, see https://github.com/metal-stack/gardener-extension-provider-metal/issues/32
@@ -55,10 +77,8 @@ export function getSpecTemplate (infrastructureKind, defaultWorkerCIDR) {
       }
     default:
       return {
+        ...defaultShootSpec,
         provider: getProviderTemplate(infrastructureKind, defaultWorkerCIDR),
-        networking: {
-          nodes: defaultWorkerCIDR,
-        },
       }
   }
 }

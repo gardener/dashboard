@@ -11,8 +11,6 @@ SPDX-License-Identifier: Apache-2.0
     :secret-validations="v$"
     :secret="secret"
     vendor="hcloud"
-    create-title="Add new Hetzner Cloud Secret"
-    replace-title="Replace Hetzner Cloud Secret"
   >
     <template #secret-slot>
       <div>
@@ -105,9 +103,6 @@ export default {
         this.$emit('update:modelValue', modelValue)
       },
     },
-    valid () {
-      return !this.v$.$invalid
-    },
     secretData () {
       return {
         hcloudToken: this.hcloudToken,
@@ -117,26 +112,12 @@ export default {
       return !this.secret
     },
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-      }
-    },
+  mounted () {
+    if (!this.isCreateMode) {
+      setDelayedInputFocus(this, 'hcloudToken')
+    }
   },
   methods: {
-    reset () {
-      this.v$.$reset()
-
-      this.hcloudToken = ''
-
-      if (!this.isCreateMode) {
-        if (this.secret.data) {
-          this.hcloudToken = this.secret.data.hcloudToken
-        }
-        setDelayedInputFocus(this, 'hcloudToken')
-      }
-    },
     getErrorMessages,
   },
 }

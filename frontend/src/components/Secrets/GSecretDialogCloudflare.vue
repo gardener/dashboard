@@ -11,12 +11,11 @@ SPDX-License-Identifier: Apache-2.0
     :secret-validations="v$"
     :secret="secret"
     vendor="cloudflare-dns"
-    create-title="Add new Cloudflare Secret"
-    replace-title="Replace Cloudflare Secret"
   >
     <template #secret-slot>
       <div>
         <v-text-field
+          ref="apiToken"
           v-model="apiToken"
           color="primary"
           label="Cloudflare API Token"
@@ -66,7 +65,10 @@ import { required } from '@vuelidate/validators'
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
 
-import { getErrorMessages } from '@/utils'
+import {
+  getErrorMessages,
+  setDelayedInputFocus,
+} from '@/utils'
 import { withFieldName } from '@/utils/validators'
 
 export default {
@@ -113,9 +115,6 @@ export default {
         this.$emit('update:modelValue', modelValue)
       },
     },
-    valid () {
-      return !this.v$.$invalid
-    },
     secretData () {
       return {
         apiToken: this.apiToken,
@@ -125,18 +124,12 @@ export default {
       return !this.secret
     },
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-      }
-    },
+  mounted () {
+    if (!this.isCreateMode) {
+      setDelayedInputFocus(this, 'apiToken')
+    }
   },
   methods: {
-    reset () {
-      this.v$.$reset()
-      this.apiToken = ''
-    },
     getErrorMessages,
   },
 }

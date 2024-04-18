@@ -198,6 +198,8 @@ import {
   isEqual,
   unset,
   omit,
+  merge,
+  forEach,
 } from '@/lodash'
 
 export default {
@@ -255,7 +257,10 @@ export default {
   },
   computed: {
     ...mapState(useAuthzStore, ['namespace']),
-    ...mapState(useConfigStore, ['accessRestriction']),
+    ...mapState(useConfigStore, [
+      'accessRestriction',
+      'defaultNodesCIDR',
+      'customCloudProviders']),
     ...mapState(useShootStagingStore, ['controlPlaneFailureToleranceType']),
     ...mapState(useShootStagingStore, [
       'workerless',
@@ -319,17 +324,18 @@ export default {
         firewallSize,
         firewallNetworks,
         defaultNodesCIDR,
+        customCloudProviderData,
       } = this.$refs.infrastructureDetails.getInfrastructureData()
       const oldInfrastructureKind = get(shootResource, 'spec.provider.type')
       if (oldInfrastructureKind !== infrastructureKind ||
       !shootResource.spec.provider.infrastructureConfig ||
       !shootResource.spec.provider.controlPlaneConfig) {
         // Infrastructure changed
-        // or infrastructure template is empty (e.g. toggled workerless)
-        set(shootResource, 'spec', getSpecTemplate(infrastructureKind, defaultNodesCIDR))
+        set(shootResource, 'spec', getSpecTemplate(infrastructureKind, defaultNodesCIDR, this.customCloudProviders))
       }
       set(shootResource, 'spec.cloudProfileName', cloudProfileName)
       set(shootResource, 'spec.region', region)
+      merge(shootResource, customCloudProviderData)
 
       if (!this.workerless) {
         set(shootResource, 'spec.networking.type', networkingType)
@@ -477,6 +483,13 @@ export default {
       const firewallSize = get(shootResource, 'spec.provider.infrastructureConfig.firewall.size')
       const firewallNetworks = get(shootResource, 'spec.provider.infrastructureConfig.firewall.networks')
 
+      const customCloudProvider = get(this.customCloudProviders, infrastructureKind)
+      const customCloudProviderFields = customCloudProvider?.shoot?.createFields
+      const customCloudProviderData = {}
+      forEach(customCloudProviderFields, ({ key, path }) => {
+        customCloudProviderData[key] = get(shootResource, `${path}.${key}`)
+      })
+
       this.$refs.infrastructureDetails.setInfrastructureData({
         infrastructureKind,
         cloudProfileName,
@@ -491,6 +504,7 @@ export default {
         firewallImage,
         firewallSize,
         firewallNetworks,
+        customCloudProviderData,
       })
 
       if (this.$refs.accessRestrictions) {
@@ -509,7 +523,6 @@ export default {
       const enableStaticTokenKubeconfig = get(shootResource, 'spec.kubernetes.enableStaticTokenKubeconfig')
       const purpose = get(shootResource, 'spec.purpose')
       this.purpose = purpose
-      const workers = get(shootResource, 'spec.provider.workers')
       await this.$refs.clusterDetails.setDetailsData({
         name,
         kubernetesVersion,
@@ -520,7 +533,8 @@ export default {
         enableStaticTokenKubeconfig,
       })
 
-      const zonedCluster = isZonedCluster({ cloudProviderKind: infrastructureKind, isNewCluster: true })
+      const workers = get(shootResource, 'spec.provider.workers')
+      const zonedCluster = isZonedCluster({ cloudProviderKind: infrastructureKind, isNewCluster: true, customCloudProviders: this.customCloudProviders })
 
       const defaultNodesCIDR = this.getDefaultNodesCIDR({ cloudProfileName })
       const newShootWorkerCIDR = get(shootResource, 'spec.networking.nodes', defaultNodesCIDR)

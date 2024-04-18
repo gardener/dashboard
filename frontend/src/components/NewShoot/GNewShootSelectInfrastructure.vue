@@ -55,6 +55,9 @@ export default {
     setSelectedInfrastructure (value) {
       this.selectedInfrastructureKind = value
     },
+    vendorName (infrastructureKind) {
+      return this.vendorDisplayName(infrastructureKind)
+    },
   },
 }
 </script>

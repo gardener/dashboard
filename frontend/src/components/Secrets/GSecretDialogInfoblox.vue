@@ -11,8 +11,6 @@ SPDX-License-Identifier: Apache-2.0
     :secret-validations="v$"
     :secret="secret"
     vendor="infoblox-dns"
-    create-title="Add new Infoblox Secret"
-    replace-title="Replace Infoblox Secret"
   >
     <template #secret-slot>
       <div>
@@ -111,9 +109,6 @@ export default {
         this.$emit('update:modelValue', modelValue)
       },
     },
-    valid () {
-      return !this.v$.$invalid
-    },
     secretData () {
       return {
         USERNAME: this.infobloxUsername,
@@ -124,27 +119,12 @@ export default {
       return !this.secret
     },
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-      }
-    },
+  mounted () {
+    if (!this.isCreateMode) {
+      setDelayedInputFocus(this, 'infobloxUsername')
+    }
   },
   methods: {
-    reset () {
-      this.v$.$reset()
-
-      this.infobloxUsername = ''
-      this.infobloxPassword = ''
-
-      if (!this.isCreateMode) {
-        if (this.secret.data) {
-          this.infobloxUsername = this.secret.data.USERNAME
-        }
-        setDelayedInputFocus(this, 'infobloxUsername')
-      }
-    },
     getErrorMessages,
   },
 }

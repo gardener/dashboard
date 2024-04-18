@@ -8,6 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <div>
     <template v-if="createMode">
       <v-select
+        v-messages-color="{ color: 'warning' }"
         :items="cloudProfiles"
         :model-value="modelValue"
         item-value="metadata.name"
@@ -16,6 +17,8 @@ SPDX-License-Identifier: Apache-2.0
         :error-messages="getErrorMessages(v$.modelValue)"
         color="primary"
         variant="underlined"
+        :hint="hint"
+        persistent-hint
         @update:model-value="onInput"
         @blur="v$.modelValue.$touch()"
       />
@@ -36,6 +39,8 @@ import { required } from '@vuelidate/validators'
 
 import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
+
+import { find } from '@/lodash'
 
 export default {
   props: {
@@ -65,6 +70,24 @@ export default {
         required,
       }),
     }
+  },
+  computed: {
+    validators () {
+      return {
+        modelValue: {
+          required,
+        },
+      }
+    },
+    selectedCloudProfile () {
+      return find(this.cloudProfiles, { metadata: { name: this.modelValue } })
+    },
+    hint () {
+      if (this.selectedCloudProfile && !this.selectedCloudProfile.data.seedNames?.length) {
+        return 'This cloud profile does not have a matching seed. Gardener will not be able to schedule shoots using this cloud profile'
+      }
+      return undefined
+    },
   },
   methods: {
     onInput (modelValue) {

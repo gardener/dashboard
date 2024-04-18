@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <v-container class="px-0 mx-0">
     <v-row>
       <v-col
-        v-if="cloudProfiles.length > 1"
+        v-if="cloudProfiles.length > 1 || !cloudProfileHasSeedNames"
         cols="3"
       >
         <g-cloud-profile
@@ -186,6 +186,14 @@ SPDX-License-Identifier: Apache-2.0
           />
         </v-col>
       </template>
+      <g-generic-input-fields
+        v-model="customCloudProviderData"
+        :fields="customCloudProviderFields"
+        wrapper="VCol"
+        :wrapper-props="{ cols: '3' }"
+        :input-props="{ variant: 'underlined' }"
+        :cloud-profile-name="cloudProfileName"
+      />
     </v-row>
   </v-container>
 </template>
@@ -210,6 +218,7 @@ import { useShootStagingStore } from '@/store/shootStaging'
 import GCloudProfile from '@/components/GCloudProfile'
 import GWildcardSelect from '@/components/GWildcardSelect'
 import GSelectSecret from '@/components/Secrets/GSelectSecret'
+import GGenericInputFields from '@/components/GGenericInputFields'
 
 import { getErrorMessages } from '@/utils'
 import {
@@ -228,6 +237,7 @@ import {
   forEach,
   intersection,
   find,
+  set,
 } from '@/lodash'
 
 export default {
@@ -235,6 +245,7 @@ export default {
     GCloudProfile,
     GWildcardSelect,
     GSelectSecret,
+    GGenericInputFields,
   },
   props: {
     userInterActionBus: {
@@ -265,6 +276,7 @@ export default {
       firewallNetworks: undefined,
       projectID: undefined,
       defaultNodesCIDR: undefined,
+      customCloudProviderData: {},
     }
   },
   validations () {
@@ -303,7 +315,10 @@ export default {
     }
   },
   computed: {
-    ...mapState(useConfigStore, ['seedCandidateDeterminationStrategy']),
+    ...mapState(useConfigStore, [
+      'seedCandidateDeterminationStrategy',
+      'customCloudProviders',
+    ]),
     ...mapState(useGardenerExtensionStore, ['networkingTypes']),
     ...mapState(useShootStagingStore, ['workerless']),
     cloudProfiles () {
@@ -381,6 +396,23 @@ export default {
       const region = this.region
       const secretDomain = get(this.secret, 'data.domainName')
       return this.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({ cloudProfileName, region, secretDomain })
+    },
+    customCloudProvider () {
+      return get(this.customCloudProviders, this.infrastructureKind)
+    },
+    customCloudProviderFields () {
+      return this.customCloudProvider?.shoot?.createFields
+    },
+    cloudProfileHasSeedNames () {
+      const selectedCloudProfile = find(this.cloudProfiles, { metadata: { name: this.cloudProfileName } })
+      return selectedCloudProfile?.data.seedNames?.length
+    },
+    customCloudProviderShootData () {
+      const shootData = {}
+      forEach(this.customCloudProviderFields, ({ key, path }) => {
+        set(shootData, `${path}.${key}`, this.customCloudProviderData[key])
+      })
+      return shootData
     },
   },
   watch: {
@@ -514,6 +546,7 @@ export default {
         firewallSize: this.firewallSize,
         firewallNetworks: this.firewallNetworks,
         defaultNodesCIDR: this.defaultNodesCIDR,
+        customCloudProviderData: this.customCloudProviderShootData,
       }
     },
     setInfrastructureData ({
@@ -530,6 +563,7 @@ export default {
       firewallImage,
       firewallSize,
       firewallNetworks,
+      customCloudProviderData,
     }) {
       this.infrastructureKind = infrastructureKind
       this.cloudProfileName = cloudProfileName
@@ -545,6 +579,7 @@ export default {
       this.firewallSize = firewallSize
       this.firewallNetworks = firewallNetworks
       this.defaultNodesCIDR = this.getDefaultNodesCIDR({ cloudProfileName })
+      this.customCloudProviderData = customCloudProviderData
 
       this.v$.projectID.$touch() // project id is a required field (for metal). We want to show the error immediatley
     },
