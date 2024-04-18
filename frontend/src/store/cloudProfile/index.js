@@ -46,6 +46,7 @@ import {
   uniq,
   map,
   get,
+  set,
   some,
   intersection,
   find,
@@ -81,8 +82,48 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return list.value
   })
 
+  function flattenMachineImages (machineImages) {
+    return flatMap(machineImages, machineImage => {
+      const versions = filter(machineImage.versions, ({ version, expirationDate }) => {
+        if (!semver.valid(version)) {
+          logger.info(`Skipped machine image ${machineImage.name} as version ${version} is not a valid semver version`)
+          return false
+        }
+        return true
+      })
+      versions.sort((a, b) => {
+        return semver.rcompare(a.version, b.version)
+      })
+
+      const name = machineImage.name
+      const vendorName = vendorNameFromImageName(machineImage.name)
+      const vendorHint = findVendorHint(configStore.vendorHints, vendorName)
+
+      return map(versions, ({ version, expirationDate, cri, classification, architectures }) => {
+        if (isEmpty(architectures)) {
+          architectures = ['amd64'] // default if not maintained
+        }
+        return decorateClassificationObject({
+          key: name + '/' + version,
+          name,
+          version,
+          cri,
+          classification,
+          expirationDate,
+          vendorName,
+          icon: vendorName,
+          vendorHint,
+          architectures,
+        })
+      })
+    })
+  }
+
   async function fetchCloudProfiles () {
     const response = await api.getCloudProfiles()
+    for (const cloudProfile of response.data) {
+      set(cloudProfile, 'data.machineImages', flattenMachineImages(get(cloudProfile, 'data.machineImages')))
+    }
     list.value = response.data
   }
 
@@ -386,43 +427,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
 
   function machineImagesByCloudProfileName (cloudProfileName) {
     const cloudProfile = cloudProfileByName(cloudProfileName)
-    const machineImages = get(cloudProfile, 'data.machineImages')
-    const mapMachineImages = machineImage => {
-      const versions = filter(machineImage.versions, ({ version, expirationDate }) => {
-        if (!semver.valid(version)) {
-          logger.info(`Skipped machine image ${machineImage.name} as version ${version} is not a valid semver version`)
-          return false
-        }
-        return true
-      })
-      versions.sort((a, b) => {
-        return semver.rcompare(a.version, b.version)
-      })
-
-      const name = machineImage.name
-      const vendorName = vendorNameFromImageName(machineImage.name)
-      const vendorHint = findVendorHint(configStore.vendorHints, vendorName)
-
-      return map(versions, ({ version, expirationDate, cri, classification, architectures }) => {
-        if (isEmpty(architectures)) {
-          architectures = ['amd64'] // default if not maintained
-        }
-        return decorateClassificationObject({
-          key: name + '/' + version,
-          name,
-          version,
-          cri,
-          classification,
-          expirationDate,
-          vendorName,
-          icon: vendorName,
-          vendorHint,
-          architectures,
-        })
-      })
-    }
-
-    return flatMap(machineImages, mapMachineImages)
+    return get(cloudProfile, 'data.machineImages')
   }
 
   function accessRestrictionNoItemsTextForCloudProfileNameAndRegion ({ cloudProfileName: cloudProfile, region }) {

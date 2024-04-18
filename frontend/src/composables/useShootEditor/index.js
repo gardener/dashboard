@@ -128,16 +128,14 @@ export function useShootEditor (initialValue, options = {}) {
     return value
   })
 
-  const shootName = computed(() => {
-    return get(shootItem.value, 'metadata.name')
-  })
-
-  const shootNamespace = computed(() => {
-    return get(shootItem.value, 'metadata.namespace')
-  })
-
-  const shootProjectName = computed(() => {
-    return projectStore.projectNameByNamespace(shootNamespace.value)
+  const filename = computed(() => {
+    const namespace = get(shootItem.value, 'metadata.namespace')
+    if (!namespace) {
+      return get(options, 'filename', 'unknown.yaml')
+    }
+    const name = get(shootItem.value, 'metadata.name', 'unnamed')
+    const projectName = projectStore.projectNameByNamespace(namespace)
+    return `shoot--${projectName}--${name}.yaml`
   })
 
   const isShootActionsDisabled = computed(() => {
@@ -231,7 +229,7 @@ export function useShootEditor (initialValue, options = {}) {
     return null
   }
 
-  function setEditorValue (value = shootItem.value) {
+  function setEditorValue (value) {
     if (value) {
       setDocumentValue(yaml.dump(value))
     }
@@ -293,13 +291,8 @@ export function useShootEditor (initialValue, options = {}) {
   }
 
   function toValue (value) {
-    if (isRef(value)) {
-      return unref(value)
-    }
-    if (isProxy(value)) {
-      return toRaw(value)
-    }
-    return value
+    value = unref(value)
+    return isProxy(value) ? toRaw(value) : value
   }
 
   watchEffect(() => {
@@ -353,10 +346,7 @@ export function useShootEditor (initialValue, options = {}) {
     clearDocumentHistory,
     execUndo,
     execRedo,
-    shootItem,
-    shootName,
-    shootNamespace,
-    shootProjectName,
     isReadOnly,
+    filename,
   }
 }

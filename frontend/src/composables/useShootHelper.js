@@ -7,7 +7,6 @@
 import {
   computed,
   toRef,
-  unref,
   isProxy,
   isRef,
 } from 'vue'
@@ -19,20 +18,14 @@ import { useSecretStore } from '@/store/secret'
 import { useSeedStore } from '@/store/seed'
 
 import utils from '@/utils'
-import { findFreeNetworks } from '@/utils/createShoot'
 
 import {
   get,
   map,
   keyBy,
-  flatMap,
   mapValues,
-  difference,
   find,
   some,
-  uniq,
-  isEmpty,
-  size,
 } from '@/lodash'
 
 const shootPropertyMappings = Object.freeze({
@@ -42,11 +35,7 @@ const shootPropertyMappings = Object.freeze({
   region: 'spec.region',
   secretBindingName: 'spec.secretBindingName',
   kubernetesVersion: 'spec.kubernetes.version',
-  networkingNodes: 'spec.networking.nodes',
   providerType: 'spec.provider.type',
-  providerWorkers: 'spec.provider.workers',
-  providerInfrastructureConfigPartitionID: 'spec.provider.infrastructureConfig.partitionID',
-  providerInfrastructureConfigNetworksZones: 'spec.provider.infrastructureConfig.networks.zones',
 })
 
 function toShootProperties (state) {
@@ -77,11 +66,7 @@ export function useShootHelper (state, options = {}) {
     region,
     secretBindingName,
     kubernetesVersion,
-    networkingNodes,
     providerType,
-    providerWorkers,
-    providerInfrastructureConfigPartitionID,
-    providerInfrastructureConfigNetworksZones,
   } = mapValues(shootPropertyMappings, toShootProperties(state))
 
   const isNewCluster = computed(() => {
@@ -127,73 +112,6 @@ export function useShootHelper (state, options = {}) {
       cloudProfileName: cloudProfileName.value,
       region: region.value,
     })
-  })
-
-  const usedZones = computed(() => {
-    return uniq(flatMap(providerWorkers.value, 'zones'))
-  })
-
-  const unusedZones = computed(() => {
-    return difference(allZones.value, usedZones.value)
-  })
-
-  const workerCIDR = computed(() => {
-    return networkingNodes.value ?? defaultNodesCIDR.value
-  })
-
-  const freeNetworks = computed(() => {
-    return findFreeNetworks(
-      providerInfrastructureConfigNetworksZones.value,
-      workerCIDR.value,
-      providerType.value,
-      size(allZones.value),
-    )
-  })
-
-  const zonesWithNetworkConfigInShoot = computed(() => {
-    return map(providerInfrastructureConfigNetworksZones.value, 'name')
-  })
-
-  const availableZones = computed(() => {
-    if (!isZonedCluster.value) {
-      return []
-    }
-    if (isNewCluster.value) {
-      return allZones.value
-    }
-    // Ensure that only zones can be selected, that have a network config in providerConfig (if required)
-    // or that free networks are available to select more zones
-    const isZonesNetworkConfigurationRequired = !isEmpty(zonesWithNetworkConfigInShoot.value)
-    if (!isZonesNetworkConfigurationRequired) {
-      return allZones.value
-    }
-
-    if (size(freeNetworks.value)) {
-      return allZones.value
-    }
-
-    return zonesWithNetworkConfigInShoot.value
-  })
-
-  const maxAdditionalZones = computed(() => {
-    const NO_LIMIT = -1
-    if (isNewCluster.value) {
-      return NO_LIMIT
-    }
-    const isZonesNetworkConfigurationRequired = !isEmpty(zonesWithNetworkConfigInShoot.value)
-    if (!isZonesNetworkConfigurationRequired) {
-      return NO_LIMIT
-    }
-    const numberOfFreeNetworks = size(freeNetworks.value)
-    const hasFreeNetworks = numberOfFreeNetworks >= size(unusedZones)
-    if (hasFreeNetworks) {
-      return NO_LIMIT
-    }
-    return numberOfFreeNetworks
-  })
-
-  const expiringWorkerGroups = computed(() => {
-    return cloudProfileStore.expiringWorkerGroupsForShoot(providerWorkers.value, cloudProfileName.value, false)
   })
 
   const regionsWithSeed = computed(() => {
@@ -254,13 +172,6 @@ export function useShootHelper (state, options = {}) {
       region: region.value,
     })
     return map(firewallSizes, 'name')
-  })
-
-  const allFirewallNetworks = computed(() => {
-    return cloudProfileStore.firewallNetworksByCloudProfileNameAndPartitionId({
-      cloudProfileName: cloudProfileName.value,
-      partitionID: providerInfrastructureConfigPartitionID.value,
-    })
   })
 
   const allFloatingPoolNames = computed(() => {
@@ -351,11 +262,6 @@ export function useShootHelper (state, options = {}) {
     seeds,
     isFailureToleranceTypeZoneSupported,
     allZones,
-    usedZones,
-    unusedZones,
-    availableZones,
-    maxAdditionalZones,
-    expiringWorkerGroups,
     defaultNodesCIDR,
     infrastructureSecrets,
     infrastructureSecret,
@@ -369,7 +275,6 @@ export function useShootHelper (state, options = {}) {
     partitionIDs,
     firewallImages,
     firewallSizes,
-    allFirewallNetworks,
     allFloatingPoolNames,
     accessRestrictionDefinitionList,
     accessRestrictionDefinitions,

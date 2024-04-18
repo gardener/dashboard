@@ -18,6 +18,7 @@ import { useShootHelper } from '@/composables/useShootHelper'
 import utils from '@/utils'
 import { v4 as uuidv4 } from '@/utils/uuid'
 import {
+  findFreeNetworks,
   getControlPlaneZone,
   getKubernetesTemplate,
   getProviderTemplate,
@@ -46,6 +47,7 @@ import {
   head,
   find,
   filter,
+  difference,
   cloneDeep,
   includes,
   uniq,
@@ -66,9 +68,8 @@ export function createStoreDefinition (context) {
     secretStore,
   } = context
 
-  /* manifest */
+  /* initial manifest */
   const initialManifest = shallowRef(null)
-  const manifest = ref({})
 
   const initialShootManifest = computed(() => {
     return normalizeShootManifest(initialManifest)
@@ -79,11 +80,14 @@ export function createStoreDefinition (context) {
     return uniq(flatMap(workers, 'zones'))
   })
 
+  /* manifest */
+  const manifest = ref({})
+
   const shootManifest = computed(() => {
     const object = cloneDeep(manifest.value)
     set(object, 'spec.dns', dns.value)
     set(object, 'spec.hibernation.schedules', hibernationSchedules.value)
-    if (!isEmpty(providerWorkers.value)) {
+    if (!workerless.value) {
       set(object, 'spec.provider.infrastructureConfig.networks.zones', providerInfrastructureConfigNetworksZones.value)
       set(object, 'spec.provider.controlPlaneConfig.zone', providerControlPlaneConfigZone.value)
     }
@@ -98,8 +102,11 @@ export function createStoreDefinition (context) {
   }
 
   function resetShootManifest () {
-    setShootManifest({})
-    resetShootName()
+    setShootManifest({
+      metadata: {
+        name: utils.shortRandomString(10),
+      },
+    })
     resetProviderType()
     resetNetworkingType()
     resetAddons()
@@ -128,12 +135,6 @@ export function createStoreDefinition (context) {
       set(manifest.value, 'metadata.name', value)
     },
   })
-
-  function resetShootName () {
-    if (!shootName.value) {
-      shootName.value = utils.shortRandomString(10)
-    }
-  }
 
   function getAnnotation (key, defaultValue) {
     return get(manifest.value, `metadata.annotations["${key}"]`, `${defaultValue}`)
@@ -327,13 +328,27 @@ export function createStoreDefinition (context) {
     providerType.value = head(cloudProfileStore.sortedInfrastructureKindList)
   }
 
-  const providerControlPlaneConfigZone = computed(() => {
-    const oldControlPlaneZone = get(initialManifest.value, 'spec.provider.controlPlaneConfig.zone')
-    return getControlPlaneZone(
-      providerWorkers.value,
-      providerType.value,
-      oldControlPlaneZone,
-    )
+  const providerControlPlaneConfigZone = computed({
+    get () {
+      const value = get(manifest.value, 'spec.provider.controlPlaneConfig.zone')
+      return getControlPlaneZone(
+        providerWorkers.value,
+        providerType.value,
+        value,
+      )
+    },
+    set (value) {
+      value = getControlPlaneZone(
+        providerWorkers.value,
+        providerType.value,
+        value,
+      )
+      if (value) {
+        set(manifest.value, 'spec.provider.controlPlaneConfig.zone', value)
+      } else {
+        unset(manifest.value, 'spec.provider.controlPlaneConfig.zone')
+      }
+    },
   })
 
   const providerControlPlaneConfigLoadBalancerProviderName = computed({
@@ -390,6 +405,13 @@ export function createStoreDefinition (context) {
   function resetProviderInfrastructureConfigPartitionID () {
     providerInfrastructureConfigPartitionID.value = head(partitionIDs.value)
   }
+
+  const allFirewallNetworks = computed(() => {
+    return cloudProfileStore.firewallNetworksByCloudProfileNameAndPartitionId({
+      cloudProfileName: cloudProfileName.value,
+      partitionID: providerInfrastructureConfigPartitionID.value,
+    })
+  })
 
   const providerInfrastructureConfigProjectID = computed({
     get () {
@@ -518,27 +540,82 @@ export function createStoreDefinition (context) {
   }
 
   /* providerInfrastructureConfigNetworksZones */
-  const providerInfrastructureConfigNetworksZones = computed(() => {
-    const oldZonesNetworkConfiguration = get(initialManifest.value, 'spec.provider.infrastructureConfig.networks.zones')
+  const providerInfrastructureConfigNetworksZones = computed({
+    get () {
+      const value = get(manifest.value, 'spec.provider.infrastructureConfig.networks.zones')
+      const args = creationTimestamp.value
+        ? [networkingNodes.value, undefined]
+        : [undefined, networkingNodes.value]
+      return getZonesNetworkConfiguration(
+        value,
+        providerWorkers.value,
+        providerType.value,
+        size(allZones.value),
+        ...args,
+      )
+    },
+    set (value) {
+      set(manifest.value, 'spec.provider.infrastructureConfig.networks.zones', value)
+    },
+  })
 
-    const workerCIDR = networkingNodes.value
-    const allZones = cloudProfileStore.zonesByCloudProfileNameAndRegion({
-      cloudProfileName: cloudProfileName.value,
-      region: region.value,
-    })
-    const maxNumberOfZones = size(allZones)
-    const isExistingCluster = !!get(initialManifest.value, 'metadata.creationTimestamp')
-    const [existingShootWorkerCIDR, newShootWorkerCIDR] = isExistingCluster
-      ? [workerCIDR, undefined]
-      : [undefined, workerCIDR]
-    return getZonesNetworkConfiguration(
-      oldZonesNetworkConfiguration,
-      providerWorkers.value,
+  const zonesWithNetworkConfigInShoot = computed(() => {
+    return map(providerInfrastructureConfigNetworksZones.value, 'name')
+  })
+
+  const usedZones = computed(() => {
+    return uniq(flatMap(providerWorkers.value, 'zones'))
+  })
+
+  const unusedZones = computed(() => {
+    return difference(allZones.value, usedZones.value)
+  })
+
+  const availableZones = computed(() => {
+    if (!isZonedCluster.value) {
+      return []
+    }
+    if (isNewCluster.value) {
+      return allZones.value
+    }
+    // Ensure that only zones can be selected, that have a network config in providerConfig (if required)
+    // or that free networks are available to select more zones
+    const isZonesNetworkConfigurationRequired = !isEmpty(zonesWithNetworkConfigInShoot.value)
+    if (!isZonesNetworkConfigurationRequired) {
+      return allZones.value
+    }
+
+    if (size(freeNetworks.value)) {
+      return allZones.value
+    }
+
+    return zonesWithNetworkConfigInShoot.value
+  })
+
+  const freeNetworks = computed(() => {
+    return findFreeNetworks(
+      providerInfrastructureConfigNetworksZones.value,
+      networkingNodes.value ?? defaultNodesCIDR.value,
       providerType.value,
-      maxNumberOfZones,
-      existingShootWorkerCIDR,
-      newShootWorkerCIDR,
+      size(allZones.value),
     )
+  })
+
+  const maxAdditionalZones = computed(() => {
+    const NO_LIMIT = -1
+    if (isNewCluster.value) {
+      return NO_LIMIT
+    }
+    const isZonesNetworkConfigurationRequired = !isEmpty(zonesWithNetworkConfigInShoot.value)
+    if (!isZonesNetworkConfigurationRequired) {
+      return NO_LIMIT
+    }
+    const numberOfFreeNetworks = size(freeNetworks.value)
+    const hasFreeNetworks = numberOfFreeNetworks >= size(unusedZones)
+    if (hasFreeNetworks) {
+      return NO_LIMIT
+    }
+    return numberOfFreeNetworks
   })
 
   /* addons */
@@ -1086,11 +1163,6 @@ export function createStoreDefinition (context) {
     seeds,
     isFailureToleranceTypeZoneSupported,
     allZones,
-    usedZones,
-    unusedZones,
-    availableZones,
-    maxAdditionalZones,
-    expiringWorkerGroups,
     defaultNodesCIDR,
     infrastructureSecrets,
     sortedKubernetesVersions,
@@ -1103,7 +1175,6 @@ export function createStoreDefinition (context) {
     partitionIDs,
     firewallImages,
     firewallSizes,
-    allFirewallNetworks,
     allFloatingPoolNames,
     accessRestrictionDefinitionList,
     accessRestrictionDefinitions,
@@ -1124,9 +1195,6 @@ export function createStoreDefinition (context) {
     kubernetesVersion,
     networkingNodes,
     providerType,
-    providerWorkers,
-    providerInfrastructureConfigPartitionID,
-    providerInfrastructureConfigNetworksZones,
   }), context)
 
   return {
@@ -1137,7 +1205,6 @@ export function createStoreDefinition (context) {
     isShootDirty,
     /* metadata */
     shootName,
-    resetShootName,
     shootNamespace,
     shootProjectName,
     isNewCluster,
@@ -1186,6 +1253,9 @@ export function createStoreDefinition (context) {
     addProviderWorker,
     removeProviderWorker,
     workerless,
+    usedZones,
+    unusedZones,
+    availableZones,
     /* hibernation */
     maintenanceTimeWindowBegin,
     maintenanceTimeWindowEnd,
@@ -1243,11 +1313,8 @@ export function createStoreDefinition (context) {
     isFailureToleranceTypeZoneSupported,
     allZones,
     initialZones,
-    usedZones,
-    unusedZones,
     availableZones,
     maxAdditionalZones,
-    expiringWorkerGroups,
     defaultNodesCIDR,
     infrastructureSecrets,
     sortedKubernetesVersions,

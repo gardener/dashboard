@@ -86,7 +86,7 @@ SPDX-License-Identifier: Apache-2.0
             You can verify and modify the network configuration on the <a
               href="#"
               class="text-anchor"
-              @click="tab='yaml'"
+              @click="tab = 'yaml'"
             >yaml</a> tab.
           </div>
         </v-alert>
@@ -107,6 +107,7 @@ import {
   ref,
   computed,
   provide,
+  watch,
   defineAsyncComponent,
 } from 'vue'
 import { storeToRefs } from 'pinia'
@@ -130,6 +131,9 @@ import {
   filter,
   includes,
   isEmpty,
+  pick,
+  isEqual,
+  difference,
 } from '@/lodash'
 
 export default {
@@ -151,20 +155,24 @@ export default {
       providerWorkers,
       providerInfrastructureConfigNetworksZones,
       initialZones,
+      usedZones,
     } = storeToRefs(shootContextStore)
     const {
       setShootManifest,
     } = shootContextStore
 
-    const tab = ref('overview')
+    const injectionKey = 'shoot-worker-editor'
+    const lazyTab = ref('overview')
+    const open = ref(false)
     const overviewTabHeight = ref(0)
     const componentKey = ref(uuidv4())
     const disableWorkerAnimation = ref(false)
     const newZonesAlert = ref(true)
 
     const newZones = computed(() => {
-      const predicate = ({ name }) => !includes(initialZones.value, name)
-      return filter(providerInfrastructureConfigNetworksZones.value, predicate)
+      return filter(providerInfrastructureConfigNetworksZones.value, ({ name }) => {
+        return !includes(initialZones.value, name)
+      })
     })
 
     const newZonesYaml = computed(() => {
@@ -173,49 +181,51 @@ export default {
         : yaml.dump(newZones.value)
     })
 
-    function getProviderData (source) {
-      let workers, zones
-      switch (source) {
-        case 'overview': {
-          workers = providerWorkers.value
-          zones = providerInfrastructureConfigNetworksZones.value
-          break
+    const editorData = computed({
+      get () {
+        if (!open.value) {
+          return pick(shootItem.value, [
+            'spec.provider.workers',
+            'spec.provider.infrastructureConfig.networks.zones',
+          ])
         }
-        case 'yaml': {
-          const value = getEditorValue()
-          workers = get(value, 'spec.provider.workers')
-          zones = get(value, 'spec.provider.infrastructureConfig.networks.zones', [])
-          break
+        const data = {}
+        set(data, 'spec.provider.workers', providerWorkers.value)
+        const zones = providerInfrastructureConfigNetworksZones.value
+        if (zones) {
+          set(data, 'spec.provider.infrastructureConfig.networks.zones', zones)
         }
-      }
-      const data = {}
-      set(data, 'workers', workers)
-      set(data, 'infrastructureConfig.networks.zones', zones)
-      return data
-    }
-
-    const overviewData = computed(() => {
-      return {
-        spec: {
-          provider: getProviderData('overview'),
-        },
-      }
+        return data
+      },
+      set (value) {
+        providerWorkers.value = get(value, 'spec.provider.workers', [])
+        const zones = get(value, 'spec.provider.infrastructureConfig.networks.zones')
+        if (!isEqual(zones, providerInfrastructureConfigNetworksZones.value)) {
+          providerInfrastructureConfigNetworksZones.value = get(value, 'spec.provider.infrastructureConfig.networks.zones')
+        }
+      },
     })
 
     const useProvide = (key, value) => {
       provide(key, value)
       return value
     }
-    const injectionKey = 'shoot-worker-editor'
     const {
+      touched,
       getEditorValue,
+      reloadEditor,
       refreshEditor,
-    } = useProvide(injectionKey, useShootEditor(overviewData, {
+      clearDocumentHistory,
+    } = useProvide(injectionKey, useShootEditor(editorData, {
       completionPaths: [
         'spec.properties.provider.properties.workers',
         'spec.properties.provider.properties.infrastructureConfig',
       ],
     }))
+
+    watch(usedZones, value => {
+      providerInfrastructureConfigNetworksZones.value = filter(providerInfrastructureConfigNetworksZones.value, zone => includes(value, zone.name))
+    })
 
     return {
       v$: useVuelidate(),
@@ -225,49 +235,60 @@ export default {
       providerInfrastructureConfigNetworksZones,
       setShootManifest,
       injectionKey,
-      tab,
+      open,
+      lazyTab,
       overviewTabHeight,
       componentKey,
       disableWorkerAnimation,
       newZonesAlert,
       newZonesYaml,
-      getProviderData,
+      editorData,
+      touched,
+      getEditorValue,
+      reloadEditor,
       refreshEditor,
+      clearDocumentHistory,
     }
   },
-  watch: {
-    tab (value) {
-      switch (value) {
-        case 'overview': {
-          setTimeout(() => {
-            // enable worker group animations after tab navigation animation completed
-            this.disableWorkerAnimation = false
-          }, 1500)
-          this.providerWorkers = this.getProviderData('yaml').workers
-          break
+  computed: {
+    tab: {
+      get () {
+        return this.lazyTab
+      },
+      set (value) {
+        this.lazyTab = value
+        switch (value) {
+          case 'overview': {
+            this.touched = false
+            this.editorData = this.getEditorValue()
+            setTimeout(() => {
+              // enable worker group animations after tab navigation animation completed
+              this.disableWorkerAnimation = false
+            }, 1500)
+            break
+          }
+          case 'yaml': {
+            // set current height as min-height for yaml tab to avoid
+            // dialog downsize as editor not yet rendered
+            this.overviewTabHeight = this.$refs.overviewTab.$el.getBoundingClientRect().height
+            this.$nextTick(() => this.refreshEditor())
+            this.disableWorkerAnimation = true
+            break
+          }
         }
-        case 'yaml': {
-          // set current height as min-height for yaml tab to avoid
-          // dialog downsize as editor not yet rendered
-          this.overviewTabHeight = this.$refs.overviewTab.$el.getBoundingClientRect().height
-          this.disableWorkerAnimation = true
-          this.refreshEditor()
-          break
-        }
-      }
+      },
     },
   },
   methods: {
     async onConfigurationDialogOpened () {
       this.setShootManifest(this.shootItem)
+      this.open = true
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
-        if (await this.updateConfiguration()) {
-          this.tab = 'overview'
-          this.componentKey = uuidv4() // force re-render
-        }
+        await this.updateConfiguration()
       } else {
-        this.tab = 'overview'
+        this.open = false
+        this.lazyTab = 'overview'
         this.componentKey = uuidv4() // force re-render
       }
     },
@@ -276,9 +297,11 @@ export default {
         await this.api.patchShootProvider({
           namespace: this.shootNamespace,
           name: this.shootName,
-          data: this.getProviderData(this.tab),
+          data: this.getProviderData(this.lazyTab),
         })
-        return true
+        this.open = false
+        this.lazyTab = 'overview'
+        this.componentKey = uuidv4() // force re-render
       } catch (err) {
         const errorMessage = 'Could not save worker configuration'
         let detailedErrorMessage
@@ -290,7 +313,6 @@ export default {
         }
         this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
         this.logger.error(errorMessage, detailedErrorMessage, err)
-        return false
       }
     },
   },

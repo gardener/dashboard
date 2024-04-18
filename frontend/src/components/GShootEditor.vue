@@ -208,9 +208,8 @@ const {
   execUndo,
   execRedo,
   getDocumentValue,
-  shootName,
-  shootProjectName,
   isReadOnly,
+  filename,
 } = inject(props.identifier)
 
 const alertBannerIdentifier = computed(() => {
@@ -240,9 +239,8 @@ const showToolbar = computed(() => {
 
 function downloadContent () {
   try {
-    const filename = `shoot--${shootProjectName.value}--${shootName ?? 'unnamed'}.yaml`
     const value = getDocumentValue()
-    download(value, filename, 'text/yaml')
+    download(value, filename.value, 'text/yaml')
     snackbarColor.value = undefined
     snackbarText.value = 'Content has been downloaded'
     snackbar.value = true

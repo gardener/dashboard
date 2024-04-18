@@ -67,6 +67,8 @@ const errorMessage = ref()
 const detailedErrorMessage = ref()
 const {
   shootItem,
+  shootNamespace,
+  shootName,
 } = useShootItem()
 
 const useProvide = (key, value) => {
@@ -89,7 +91,7 @@ const {
 }))
 
 const hasConflict = computed(() => {
-  return isEmpty(conflictPath.value)
+  return !isEmpty(conflictPath.value)
 })
 
 async function save () {
@@ -105,12 +107,13 @@ async function save () {
       return
     }
 
-    const paths = ['spec', 'metadata.labels', 'metadata.annotations']
     const shootResource = getEditorValue()
-    const data = pick(shootResource, paths)
-    const { metadata: { namespace, name } } = shootItem.value
-    const { data: newShootItem } = await api.replaceShoot({ namespace, name, data })
-    setEditorValue(newShootItem)
+    const response = await api.replaceShoot({
+      namespace: shootNamespace.value,
+      name: shootName.value,
+      data: pick(shootResource, ['spec', 'metadata.labels', 'metadata.annotations']),
+    })
+    setEditorValue(response.data)
   } catch (err) {
     errorMessage.value = 'Failed to save changes.'
     if (err.response) {
