@@ -13,8 +13,8 @@ SPDX-License-Identifier: Apache-2.0
     <template #activator="{ props: popoverProps }">
       <v-tooltip
         location="top"
-        :disabled="!tooltipText"
-        :text="tooltipText"
+        :disabled="!machineImage.isDeprecated"
+        text="Machine image version is deprecated"
       >
         <template #activator="{ props: tooltipProps }">
           <v-chip
@@ -487,12 +487,6 @@ export default {
     },
     chipColor () {
       return this.machineImage.isDeprecated ? 'warning' : 'primary'
-    },
-    tooltipText () {
-      if (this.machineImage.isDeprecated) {
-        return 'Machine image version is deprecated'
-      }
-      return undefined
     },
     classificationColor () {
       if (this.machineImage.isDeprecated) {

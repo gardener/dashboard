@@ -225,7 +225,7 @@ export default {
       if (this.updateK8sMaintenance && this.versionIsNotLatestPatch) {
         hints.push({
           type: 'text',
-          hint: 'You selected a version that is eligible for an automatic update.You should disable automatic Kubernetes updates if you want to maintain this specific version',
+          hint: 'You selected a version that is eligible for an automatic update. You should disable automatic Kubernetes updates if you want to maintain this specific version',
           severity: 'info',
         })
       }

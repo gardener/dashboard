@@ -18,7 +18,10 @@ import {
   normalizeVersion,
 } from '@/utils'
 
-import { pick } from '@/lodash'
+import {
+  pick,
+  find,
+} from '@/lodash'
 
 describe('utils', () => {
   describe('authorization', () => {
@@ -183,148 +186,103 @@ describe('utils', () => {
   })
 
   describe('#machineImageHasUpdate', () => {
-    beforeAll(() => {
-      vi.useFakeTimers()
-      vi.setSystemTime(new Date('2024-01-01'))
-    })
-
-    afterAll(() => {
-      vi.useRealTimers()
-    })
-
-    let updateStrategy
-
-    const fooImage111 = {
-      name: 'FooImage1',
-      vendorName: 'Foo',
-      get updateStrategy () {
-        return updateStrategy
-      },
-      version: '1.1.1',
-      isSupported: true,
-    }
-    const fooImage112 = {
-      name: 'FooImage2',
-      vendorName: 'Foo',
-      get updateStrategy () {
-        return updateStrategy
-      },
-      version: '1.1.2',
-      isSupported: true,
-    }
-    const fooImage113Deprecated = {
-      name: 'FooImage3',
-      vendorName: 'Foo',
-      get updateStrategy () {
-        return updateStrategy
-      },
-      version: '1.1.3',
-      isDeprecated: true, // Ensures deprecated versions are not considered for update
-    }
-    const fooImage114Preview = {
-      name: 'FooImage4',
-      vendorName: 'Foo',
-      get updateStrategy () {
-        return updateStrategy
-      },
-      version: '1.1.4',
-      isPreview: true, // Ensures preview versions are not considered for update
-    }
-    const fooImage120 = {
-      name: 'FooImage2',
-      vendorName: 'Foo',
-      get updateStrategy () {
-        return updateStrategy
-      },
-      version: '1.2.0',
-      isSupported: true,
-    }
-    const fooImage200 = {
-      name: 'FooImage2',
-      vendorName: 'Foo',
-      get updateStrategy () {
-        return updateStrategy
-      },
-      version: '2.0.0',
-      isSupported: true,
-    }
-    const barImage115 = {
-      name: 'BarImage',
-      vendorName: 'Bar', // Ensures other vendors are not considered for update
-      get updateStrategy () {
-        return updateStrategy
-      },
-      version: '1.1.5',
-      isSupported: true,
-    }
-
     const sampleMachineImages = [
-      fooImage111,
-      fooImage112,
-      fooImage113Deprecated,
-      fooImage114Preview,
-      fooImage120,
-      fooImage200,
-      barImage115,
+      {
+        vendorName: 'Foo',
+        version: '1.1.1',
+        isSupported: true,
+      },
+      {
+        vendorName: 'Foo',
+        version: '1.1.2',
+        isSupported: true,
+      },
+      {
+        vendorName: 'Foo',
+        version: '1.1.3',
+        isSupported: false,
+      },
+      {
+        vendorName: 'Foo',
+        version: '1.2.0',
+        isSupported: true,
+      },
+      {
+        vendorName: 'Foo',
+        version: '2.0.0',
+        isSupported: true,
+      },
+      {
+        vendorName: 'Bar', // Ensures other vendors are not considered for update
+        version: '1.1.5',
+        isSupported: true,
+      },
     ]
 
+    function createMachineImage (version, updateStrategy) {
+      return {
+        ...find(sampleMachineImages, ['version', version]),
+        updateStrategy,
+      }
+    }
+
     it('image should have update (updateStrategy major | patch, minor, major exist)', () => {
-      updateStrategy = 'major'
-      const result = machineImageHasUpdate(fooImage111, sampleMachineImages)
+      const maschineImage = createMachineImage('1.1.1', 'major')
+      const result = machineImageHasUpdate(maschineImage, sampleMachineImages)
       expect(result).toBe(true)
     })
 
     it('image should have update (updateStrategy minor | patch, minor, major exist)', () => {
-      updateStrategy = 'minor'
-      const result = machineImageHasUpdate(fooImage111, sampleMachineImages)
+      const maschineImage = createMachineImage('1.1.1', 'minor')
+      const result = machineImageHasUpdate(maschineImage, sampleMachineImages)
       expect(result).toBe(true)
     })
 
     it('image should have update (updateStrategy patch | patch, minor, major exist)', () => {
-      updateStrategy = 'patch'
-      const result = machineImageHasUpdate(fooImage111, sampleMachineImages)
+      const maschineImage = createMachineImage('1.1.1', 'patch')
+      const result = machineImageHasUpdate(maschineImage, sampleMachineImages)
       expect(result).toBe(true)
     })
 
     it('image should have update (updateStrategy major | minor, major exist)', () => {
-      updateStrategy = 'major'
-      const result = machineImageHasUpdate(fooImage112, sampleMachineImages)
+      const maschineImage = createMachineImage('1.1.2', 'major')
+      const result = machineImageHasUpdate(maschineImage, sampleMachineImages)
       expect(result).toBe(true)
     })
 
     it('image should have update (updateStrategy minor | minor, major exist)', () => {
-      updateStrategy = 'minor'
-      const result = machineImageHasUpdate(fooImage112, sampleMachineImages)
+      const maschineImage = createMachineImage('1.1.2', 'minor')
+      const result = machineImageHasUpdate(maschineImage, sampleMachineImages)
       expect(result).toBe(true)
     })
 
     it('image should not have update (updateStrategy patch | minor, major exist)', () => {
-      updateStrategy = 'patch'
-      const result = machineImageHasUpdate(fooImage112, sampleMachineImages)
+      const maschineImage = createMachineImage('1.1.2', 'patch')
+      const result = machineImageHasUpdate(maschineImage, sampleMachineImages)
       expect(result).toBe(false)
     })
 
     it('image should have update (updateStrategy major | major exists)', () => {
-      updateStrategy = 'major'
-      const result = machineImageHasUpdate(fooImage120, sampleMachineImages)
+      const maschineImage = createMachineImage('1.2.0', 'major')
+      const result = machineImageHasUpdate(maschineImage, sampleMachineImages)
       expect(result).toBe(true)
     })
 
     it('image should not have update (updateStrategy minor | major exists)', () => {
-      updateStrategy = 'minor'
-      const result = machineImageHasUpdate(fooImage120, sampleMachineImages)
+      const maschineImage = createMachineImage('1.2.0', 'minor')
+      const result = machineImageHasUpdate(maschineImage, sampleMachineImages)
       expect(result).toBe(false)
     })
 
     it('image should not have update (updateStrategy major | none exists)', () => {
-      updateStrategy = 'major'
-      const result = machineImageHasUpdate(fooImage200, sampleMachineImages)
+      const maschineImage = createMachineImage('2.0.0', 'major')
+      const result = machineImageHasUpdate(maschineImage, sampleMachineImages)
       expect(result).toBe(false)
     })
 
     it('image should have update (updateStrategy unknown defaults to major | major exists)', () => {
-      updateStrategy = 'foo'
-      const result = machineImageHasUpdate(fooImage120, sampleMachineImages)
+      const maschineImage = createMachineImage('1.2.0', 'foo')
+      const result = machineImageHasUpdate(maschineImage, sampleMachineImages)
       expect(result).toBe(true)
     })
   })
