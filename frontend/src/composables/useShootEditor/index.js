@@ -10,7 +10,6 @@ import {
   computed,
   reactive,
   markRaw,
-  isRef,
   unref,
   isProxy,
   toRaw,
@@ -36,12 +35,9 @@ import {
 } from './helper'
 
 import {
-  has,
   get,
-  unset,
-  pick,
+  omit,
   isEqual,
-  cloneDeep,
 } from '@/lodash'
 
 export function useShootEditor (initialValue, options = {}) {
@@ -116,16 +112,26 @@ export function useShootEditor (initialValue, options = {}) {
   })
 
   const shootItem = computed(() => {
-    let value = toValue(initialValue)
+    const value = unref(initialValue)
     if (!value) {
       return null
     }
-    value = cloneDeep(value)
-    value = pick(value, ['kind', 'apiVersion', 'metadata', 'spec', 'status'])
-    if (!showManagedFields.value && has(value, 'metadata.managedFields')) {
-      unset(value, 'metadata.managedFields')
+    const {
+      kind,
+      apiVersion,
+      metadata,
+      spec,
+      status,
+    } = value
+    return {
+      kind,
+      apiVersion,
+      metadata: !showManagedFields.value && metadata?.managedFields
+        ? omit(metadata, 'managedFields')
+        : metadata,
+      spec,
+      status,
     }
-    return value
   })
 
   const filename = computed(() => {

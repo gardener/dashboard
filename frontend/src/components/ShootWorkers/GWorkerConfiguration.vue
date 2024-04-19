@@ -133,7 +133,6 @@ import {
   isEmpty,
   pick,
   isEqual,
-  difference,
 } from '@/lodash'
 
 export default {
@@ -147,6 +146,8 @@ export default {
   setup () {
     const {
       shootItem,
+      shootNamespace,
+      shootName,
       hasShootWorkerGroups,
     } = useShootItem()
 
@@ -230,6 +231,8 @@ export default {
     return {
       v$: useVuelidate(),
       shootItem,
+      shootNamespace,
+      shootName,
       hasShootWorkerGroups,
       providerWorkers,
       providerInfrastructureConfigNetworksZones,
@@ -294,10 +297,14 @@ export default {
     },
     async updateConfiguration () {
       try {
+        if (this.lazyTab === 'yaml') {
+          this.touched = false
+          this.editorData = this.getEditorValue()
+        }
         await this.api.patchShootProvider({
           namespace: this.shootNamespace,
           name: this.shootName,
-          data: this.getProviderData(this.lazyTab),
+          data: get(this.editorData, 'spec.provider'),
         })
         this.open = false
         this.lazyTab = 'overview'
