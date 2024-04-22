@@ -657,6 +657,7 @@ const useShootStore = defineStore('shoot', () => {
   }
 
   function isShootActive (uid) {
+    console.log('isShootActive', activeUids.value, uid)
     return includes(activeUids.value, uid)
   }
 

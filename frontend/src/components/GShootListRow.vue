@@ -295,7 +295,6 @@ export default {
       'canPatchShoots',
       'canDeleteShoots',
     ]),
-
     isInfoAvailable () {
       // operator not yet updated shoot resource
       if (this.shootLastOperation.type === undefined || this.shootLastOperation.state === undefined) {

@@ -26,7 +26,7 @@ const shootPropertyMappings = Object.freeze({
   shootCredentialsRotation: ['status.credentials.rotation', {}],
 })
 
-const rotationTypes = Object.freeze([
+export const rotationTypes = Object.freeze([
   {
     type: 'kubeconfig',
     hasRotationStatus: true,
@@ -78,7 +78,7 @@ const rotationTypes = Object.freeze([
   },
 ])
 
-const twoStepRotationTypes = Object.freeze(filter(rotationTypes, {
+export const twoStepRotationTypes = Object.freeze(filter(rotationTypes, {
   hasRotationStatus: true,
   twoStep: true,
 }))
@@ -213,6 +213,7 @@ export function useShootStatusCredentialRotation (state, options = {}) {
 
   return {
     rotationStatus,
+    shootCredentialsRotationAggregatedPhase,
     phase,
     phaseType,
     rotationType,

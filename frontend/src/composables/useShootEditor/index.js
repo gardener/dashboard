@@ -11,8 +11,6 @@ import {
   reactive,
   markRaw,
   unref,
-  isProxy,
-  toRaw,
   watch,
   watchEffect,
 } from 'vue'
@@ -294,11 +292,6 @@ export function useShootEditor (initialValue, options = {}) {
       cm.value.execCommand('redo')
       cm.value.focus()
     }
-  }
-
-  function toValue (value) {
-    value = unref(value)
-    return isProxy(value) ? toRaw(value) : value
   }
 
   watchEffect(() => {

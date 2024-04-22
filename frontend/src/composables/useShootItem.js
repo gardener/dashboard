@@ -61,7 +61,6 @@ export function shootItemComposable (options = {}) {
     }
     const confirmation = get(shootAnnotations.value, ['confirmation.gardener.cloud/deletion'])
     const deletionTimestamp = shootDeletionTimestamp.value
-
     return !!deletionTimestamp && utils.isTruthyValue(confirmation)
   })
   const isShootMarkedForForceDeletion = computed(() => {
@@ -307,23 +306,22 @@ export function shootItemComposable (options = {}) {
     shootMetadata,
     shootName,
     shootNamespace,
+    isShootMarkedForDeletion,
+    isShootMarkedForForceDeletion,
     shootCreatedBy,
     shootCreatedAt,
     shootCreationTimestamp,
-    shootDeletionTimestamp,
-    shootAnnotations,
-    shootGardenOperation,
-    shootSpec,
-    shootStatus,
-    isShootMarkedForDeletion,
-    isShootMarkedForForceDeletion,
     isShootReconciliationDeactivated,
     shootGenerationValue,
+    shootDeletionTimestamp,
     shootProjectName,
+    shootAnnotations,
+    shootGardenOperation,
     shootPurpose,
     isTestingCluster,
     shootExpirationTimestamp,
     isShootActionsDisabledForPurpose,
+    shootSpec,
     isShootSettingHibernated,
     isShootStatusHibernated,
     isShootStatusHibernationProgressing,
@@ -372,6 +370,7 @@ export function shootItemComposable (options = {}) {
     caCertificateValiditiesAcceptableConstraint,
     isCACertificateValiditiesAcceptable,
     caCertificateValiditiesAcceptableMessage,
+    shootStatus,
     lastMaintenance,
     isLastMaintenanceFailed,
     isStaleShoot,
@@ -379,8 +378,6 @@ export function shootItemComposable (options = {}) {
     isShootActive,
     projectNameByNamespace,
     isSeedUnreachableByName,
-    /* aliases */
-    shootHibernationEnabled: isShootSettingHibernated,
   }
 }
 

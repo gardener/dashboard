@@ -321,7 +321,9 @@ export function getFilteredUids (state, context) {
 
   // list of active filter function
   const predicates = []
+  console.log('onlyAllShootsWithIssues', onlyAllShootsWithIssues(state, context))
   if (onlyAllShootsWithIssues(state, context)) {
+    console.log('state', state.shootListFilters)
     if (get(state, 'shootListFilters.progressing', false)) {
       predicates.push(notProgressing)
     }

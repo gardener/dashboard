@@ -40,10 +40,7 @@ import GShootItemError from '@/views/GShootItemError.vue'
 
 import { useProvideShootItem } from '@/composables/useShootItem'
 
-import {
-  get,
-  isEqual,
-} from '@/lodash'
+import { isEqual } from '@/lodash'
 
 function isLoadRequired (route, to) {
   return route.name !== to.name || !isEqual(route.params, to.params)
@@ -112,14 +109,6 @@ export default {
           return {}
         }
       }
-    })
-
-    const shootItem = computed(() => {
-      return shootStore.shootByNamespaceAndName(route.params)
-    })
-
-    const hasShootWorkerGroups = computed(() => {
-      return get(shootItem.value, 'spec.provider.workers', []).length > 0
     })
 
     async function load (to) {
@@ -197,7 +186,7 @@ export default {
       }
     })
 
-    watch(shootItem, value => {
+    watch(() => shootItem.value, value => {
       if (readyState.value === 'loaded') {
         if (!value) {
           error.value = Object.assign(new Error('The cluster you are looking for is no longer available'), {
@@ -212,7 +201,10 @@ export default {
 
     provide('activePopoverKey', activePopoverKey)
 
-    useProvideShootItem({
+    const {
+      shootItem,
+      hasShootWorkerGroups,
+    } = useProvideShootItem({
       route,
       shootStore,
       cloudProfileStore,
