@@ -25,3 +25,4 @@
 
 * [Setting up a local development environment](development/local-setup.md)
 * [Testing](development/testing.md)
+* [Hotfixes](development/process.md)
