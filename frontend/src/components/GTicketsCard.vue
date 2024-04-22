@@ -104,7 +104,7 @@ export default {
     ticketLink () {
       const newIssue = this.newIssue
       if (!newIssue.title) {
-        newIssue.title = `[${this.shootNamespace}/${this.shootName}]`
+        newIssue.title = `[${this.shootProjectName}/${this.shootName}]`
       }
 
       const options = {
