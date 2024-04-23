@@ -41,6 +41,7 @@ SPDX-License-Identifier: Apache-2.0
 import { mapActions } from 'pinia'
 
 import { useConfigStore } from '@/store/config'
+import { useShootStore } from '@/store/shoot'
 
 import GStatusTag from '@/components/GStatusTag.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
@@ -92,10 +93,16 @@ export default {
       const allErrorCodes = errorCodesFromArray(this.conditions)
       return objectsFromErrorCodes(allErrorCodes)
     },
+    isStaleShoot () {
+      return !this.isShootActive(this.shootMetadata.uid)
+    },
   },
   methods: {
     ...mapActions(useConfigStore, [
       'conditionForType',
+    ]),
+    ...mapActions(useShootStore, [
+      'isShootActive',
     ]),
   },
 }

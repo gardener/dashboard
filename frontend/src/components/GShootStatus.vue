@@ -193,6 +193,9 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { mapActions } from 'pinia'
+
+import { useShootStore } from '@/store/shoot'
 
 import { useShootItem } from '@/composables/useShootItem'
 
@@ -347,6 +350,14 @@ export default {
       }
       return message
     },
+    isStaleShoot () {
+      return !this.isShootActive(this.shootMetadata.uid)
+    },
+  },
+  methods: {
+    ...mapActions(useShootStore, [
+      'isShootActive',
+    ]),
   },
 }
 </script>
