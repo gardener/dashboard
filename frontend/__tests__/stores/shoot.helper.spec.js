@@ -13,7 +13,6 @@ import { useShootContextStore } from '@/store/shootContext'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useConfigStore } from '@/store/config'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
-import { createShootResource } from '@/store/shoot/helper'
 import { useSecretStore } from '@/store/secret'
 import { useAppStore } from '@/store/app'
 import { useAuthzStore } from '@/store/authz'
@@ -70,11 +69,7 @@ describe('stores', () => {
     try {
       cloudProfileStore.knownInfrastructureKindList = [infrastructureKind]
       shootContextStore.$reset()
-      const shootManifest = shootContextStore.shootManifest
-      const shootResource = createShootResource(context)
-      delete shootResource.metadata.namespace
-      expect(shootManifest).toEqual(shootResource)
-      return shootManifest
+      return shootContextStore.shootManifest
     } finally {
       context.cloudProfileStore.knownInfrastructureKindList = originalInfrastructureKindList
     }

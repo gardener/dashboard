@@ -7,11 +7,6 @@
 import { computed } from 'vue'
 
 import {
-  shortRandomString,
-  purposesForSecret,
-  shootAddonList,
-  maintenanceWindowWithBeginAndTimezone,
-  randomMaintenanceBegin,
   isTruthyValue,
   isStatusProgressing,
   isReconciliationDeactivated,
@@ -24,22 +19,13 @@ import {
   isTemporaryError,
   errorCodesFromArray,
 } from '@/utils/errorCodes'
-import {
-  getSpecTemplate,
-  getDefaultZonesNetworkConfiguration,
-  getControlPlaneZone,
-} from '@/utils/createShoot'
 
 import {
   find,
   includes,
-  set,
   head,
   get,
-  isEmpty,
   map,
-  sample,
-  omit,
   filter,
   some,
   startsWith,
@@ -108,154 +94,6 @@ export const constants = Object.freeze({
   CLOSING: 5,
   CLOSED: 6,
 })
-
-export function createShootResource (context) {
-  const {
-    logger,
-    appStore,
-    authzStore,
-    configStore,
-    secretStore,
-    cloudProfileStore,
-    gardenerExtensionStore,
-  } = context
-
-  const shootResource = {
-    apiVersion: 'core.gardener.cloud/v1beta1',
-    kind: 'Shoot',
-    metadata: {
-      namespace: authzStore.namespace,
-    },
-  }
-
-  if (!cloudProfileStore.sortedInfrastructureKindList.length) {
-    logger.warn('Could not reset new shoot resource as there is no supported cloud profile')
-    return
-  }
-
-  const infrastructureKind = head(cloudProfileStore.sortedInfrastructureKindList)
-  const cloudProfileName = get(head(cloudProfileStore.cloudProfilesByCloudProviderKind(infrastructureKind)), 'metadata.name')
-  const defaultNodesCIDR = cloudProfileStore.getDefaultNodesCIDR({ cloudProfileName })
-
-  set(shootResource, 'spec', getSpecTemplate(infrastructureKind, defaultNodesCIDR))
-  set(shootResource, 'spec.cloudProfileName', cloudProfileName)
-
-  const secret = head(secretStore.infrastructureSecretsByCloudProfileName(cloudProfileName))
-  set(shootResource, 'spec.secretBindingName', get(secret, 'metadata.name'))
-
-  let region = head(cloudProfileStore.regionsWithSeedByCloudProfileName(cloudProfileName))
-  if (!region) {
-    const seedDeterminationStrategySameRegion = configStore.seedCandidateDeterminationStrategy === 'SameRegion'
-    if (!seedDeterminationStrategySameRegion) {
-      region = head(cloudProfileStore.regionsWithoutSeedByCloudProfileName(cloudProfileName))
-    }
-  }
-  set(shootResource, 'spec.region', region)
-
-  const networkingType = head(gardenerExtensionStore.networkingTypeList)
-  set(shootResource, 'spec.networking.type', networkingType)
-
-  const loadBalancerProviderName = head(cloudProfileStore.loadBalancerProviderNamesByCloudProfileNameAndRegion({ cloudProfileName, region }))
-  if (!isEmpty(loadBalancerProviderName)) {
-    set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerProvider', loadBalancerProviderName)
-  }
-  const secretDomain = get(secret, 'data.domainName')
-  const floatingPoolName = head(cloudProfileStore.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({ cloudProfileName, region, secretDomain }))
-  if (!isEmpty(floatingPoolName)) {
-    set(shootResource, 'spec.provider.infrastructureConfig.floatingPoolName', floatingPoolName)
-  }
-
-  const allLoadBalancerClassNames = cloudProfileStore.loadBalancerClassNamesByCloudProfileName(cloudProfileName)
-  if (!isEmpty(allLoadBalancerClassNames)) {
-    const defaultLoadBalancerClassName = includes(allLoadBalancerClassNames, 'default')
-      ? 'default'
-      : head(allLoadBalancerClassNames)
-    const loadBalancerClasses = [{
-      name: defaultLoadBalancerClassName,
-    }]
-    set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerClasses', loadBalancerClasses)
-  }
-
-  const partitionIDs = cloudProfileStore.partitionIDsByCloudProfileNameAndRegion({ cloudProfileName, region })
-  const partitionID = head(partitionIDs)
-  if (!isEmpty(partitionID)) {
-    set(shootResource, 'spec.provider.infrastructureConfig.partitionID', partitionID)
-  }
-  const firewallImages = cloudProfileStore.firewallImagesByCloudProfileName(cloudProfileName)
-  const firewallImage = head(firewallImages)
-  if (!isEmpty(firewallImage)) {
-    set(shootResource, 'spec.provider.infrastructureConfig.firewall.image', firewallImage)
-  }
-  const firewallSizes = map(cloudProfileStore.firewallSizesByCloudProfileNameAndRegion({ cloudProfileName, region }), 'name')
-  const firewallSize = head(firewallSizes)
-  if (!isEmpty(firewallSize)) {
-    set(shootResource, 'spec.provider.infrastructureConfig.firewall.size', firewallImage)
-  }
-  const allFirewallNetworks = cloudProfileStore.firewallNetworksByCloudProfileNameAndPartitionId({ cloudProfileName, partitionID })
-  const firewallNetworks = find(allFirewallNetworks, { key: 'internet' })
-  if (!isEmpty(firewallNetworks)) {
-    set(shootResource, 'spec.provider.infrastructureConfig.firewall.networks', firewallNetworks)
-  }
-
-  const name = shortRandomString(10)
-  set(shootResource, 'metadata.name', name)
-
-  const purpose = head(purposesForSecret(secret))
-  set(shootResource, 'spec.purpose', purpose)
-
-  const kubernetesVersion = cloudProfileStore.defaultKubernetesVersionForCloudProfileName(cloudProfileName) || {}
-  set(shootResource, 'spec.kubernetes.version', kubernetesVersion.version)
-  set(shootResource, 'spec.kubernetes.enableStaticTokenKubeconfig', false)
-
-  const allZones = cloudProfileStore.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
-  const zones = allZones.length ? [sample(allZones)] : undefined
-  const zonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(zones, infrastructureKind, allZones.length, defaultNodesCIDR)
-  if (zonesNetworkConfiguration) {
-    set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', zonesNetworkConfiguration)
-  }
-
-  const newWorker = cloudProfileStore.generateWorker(zones, cloudProfileName, region, kubernetesVersion.version)
-  const worker = omit(newWorker, ['id', 'isNew'])
-  const workers = [worker]
-  set(shootResource, 'spec.provider.workers', workers)
-
-  const controlPlaneZone = getControlPlaneZone(workers, infrastructureKind)
-  if (controlPlaneZone) {
-    set(shootResource, 'spec.provider.controlPlaneConfig.zone', controlPlaneZone)
-  }
-
-  const addons = {}
-  const visibleShootAddonList = filter(shootAddonList, 'visible')
-  for (const { name, enabled } of visibleShootAddonList) {
-    addons[name] = { enabled }
-  }
-
-  set(shootResource, 'spec.addons', addons)
-
-  const { begin, end } = maintenanceWindowWithBeginAndTimezone(randomMaintenanceBegin(), appStore.timezone)
-  const maintenance = {
-    timeWindow: {
-      begin,
-      end,
-    },
-    autoUpdate: {
-      kubernetesVersion: true,
-      machineImageVersion: true,
-    },
-  }
-  set(shootResource, 'spec.maintenance', maintenance)
-
-  let hibernationSchedule = get(configStore.defaultHibernationSchedule, purpose)
-  hibernationSchedule = map(hibernationSchedule, schedule => {
-    return {
-      ...schedule,
-      location: appStore.location,
-    }
-  })
-  set(shootResource, 'spec.hibernation.schedules', hibernationSchedule)
-
-  return shootResource
-}
 
 export function onlyAllShootsWithIssues (state, context) {
   const {
