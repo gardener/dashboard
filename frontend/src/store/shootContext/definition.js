@@ -1313,7 +1313,6 @@ export function createStoreDefinition (context) {
     isFailureToleranceTypeZoneSupported,
     allZones,
     initialZones,
-    availableZones,
     maxAdditionalZones,
     defaultNodesCIDR,
     infrastructureSecrets,

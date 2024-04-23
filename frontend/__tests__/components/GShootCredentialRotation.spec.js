@@ -4,13 +4,18 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import {
+  toRef,
+  reactive,
+} from 'vue'
 import { mount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
-import { reactive } from 'vue'
 
 import GShootCredentialRotationCard from '@/components/ShootDetails/GShootCredentialRotationCard.vue'
 import GCredentialTile from '@/components/GCredentialTile.vue'
 import GShootActionRotateCredentials from '@/components/GShootActionRotateCredentials.vue'
+
+import { createShootItemComposable } from '@/composables/useShootItem'
 
 import {
   components as componentsPlugin,
@@ -25,8 +30,8 @@ describe('components', () => {
     let shootItem
     let pinia
 
-    function mountShootCredentialRotationCard (props) {
-      return mount(GShootCredentialRotationCard, {
+    function mountShootCredentialRotationCard (shootItem) {
+      const wrapper = mount(GShootCredentialRotationCard, {
         global: {
           plugins: [
             createVuetifyPlugin(),
@@ -35,9 +40,12 @@ describe('components', () => {
             notifyPlugin,
             pinia,
           ],
+          provide: {
+            'shoot-item': createShootItemComposable(toRef(shootItem)),
+          },
         },
-        props,
       })
+      return wrapper
     }
 
     beforeEach(() => {
@@ -98,9 +106,7 @@ describe('components', () => {
 
     describe('Show or hide credential tiles', () => {
       it('should have all credential tiles', () => {
-        const wrapper = mountShootCredentialRotationCard({
-          shootItem,
-        })
+        const wrapper = mountShootCredentialRotationCard(shootItem)
         const credentialWrappers = wrapper.findAllComponents(GCredentialTile)
         expect(credentialWrappers.length).toBe(7)
       })
@@ -110,9 +116,7 @@ describe('components', () => {
         shootItem.spec.purpose = 'testing'
         delete shootItem.spec.provider.workers
 
-        const wrapper = mountShootCredentialRotationCard({
-          shootItem,
-        })
+        const wrapper = mountShootCredentialRotationCard(shootItem)
         const credentialWrappers = wrapper.findAllComponents(GCredentialTile)
         expect(credentialWrappers.length).toBe(4)
       })
@@ -120,9 +124,7 @@ describe('components', () => {
 
     describe('Credential tiles', () => {
       it('should compute phases', () => {
-        const wrapper = mountShootCredentialRotationCard({
-          shootItem,
-        })
+        const wrapper = mountShootCredentialRotationCard(shootItem)
         const [
           allWrapper,
           ,
@@ -148,9 +150,7 @@ describe('components', () => {
       })
 
       it('should compute lastInitiationTime / lastCompletionTime', () => {
-        const wrapper = mountShootCredentialRotationCard({
-          shootItem,
-        })
+        const wrapper = mountShootCredentialRotationCard(shootItem)
         const [
           allWrapper,
           ,
@@ -174,9 +174,7 @@ describe('components', () => {
       })
 
       it('should show warning in case CACertificateValiditiesAcceptable constraint is false', async () => {
-        const wrapper = mountShootCredentialRotationCard({
-          shootItem,
-        })
+        const wrapper = mountShootCredentialRotationCard(shootItem)
         const [
           ,
           ,
@@ -197,9 +195,7 @@ describe('components', () => {
       })
 
       it('should compute phaseType', () => {
-        const wrapper = mountShootCredentialRotationCard({
-          shootItem,
-        })
+        const wrapper = mountShootCredentialRotationCard(shootItem)
         const [
           ,
           ,
@@ -222,9 +218,7 @@ describe('components', () => {
         delete shootItem.status.credentials.rotation.sshKeypair.lastCompletionTime // only lastInitiationTime timestamp
         shootItem.status.credentials.rotation.observability.lastInitiationTime = '2022-08-05T10:01:42Z' // lastInitiationTime > lastCompletionTime
 
-        const wrapper = mountShootCredentialRotationCard({
-          shootItem,
-        })
+        const wrapper = mountShootCredentialRotationCard(shootItem)
         const [
           ,
           ,
@@ -248,10 +242,8 @@ describe('components', () => {
       let etcdEncryptionKeyRotationWrapper
       let serviceAccountKeyRotationWrapper
 
-      beforeEach(async () => {
-        const wrapper = mountShootCredentialRotationCard({
-          shootItem,
-        })
+      beforeEach(() => {
+        const wrapper = mountShootCredentialRotationCard(shootItem)
         const [
           allTileWrapper,
           ,

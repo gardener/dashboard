@@ -4,16 +4,18 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { reactive } from 'vue'
+import {
+  computed,
+  shallowRef,
+} from 'vue'
 import { shallowMount } from '@vue/test-utils'
-import { mockRoute } from 'vue-router'
 import {
   setActivePinia,
   createPinia,
 } from 'pinia'
 
-import { useShootStore } from '@/store/shoot'
 import { useAuthzStore } from '@/store/authz'
+import { useShootStore } from '@/store/shoot'
 
 import { useProvideShootItem } from '@/composables/useShootItem'
 
@@ -23,31 +25,12 @@ import {
   unset,
 } from '@/lodash'
 
-vi.mock('vue-router', () => {
-  const mockRoute = {
-    params: reactive({
-      namespace: 'garden-test',
-      name: 'foo',
-    }),
-  }
-
-  return {
-    useRoute: vi.fn(() => mockRoute),
-    mockRoute,
-  }
-})
-
 describe('composables', () => {
   describe('useProvideShootItem', () => {
-    const uid = '1d8a140f-3e0d-4d80-a044-a2e8473c0e2d'
-    const shootItem = Object.freeze({
-      metadata: {
-        ...mockRoute.params,
-        uid,
-      },
-    })
+    let shootItem
 
     function setObjectValue (object, path, value) {
+      object = cloneDeep(object)
       if (value) {
         return set(object, path, value)
       }
@@ -56,27 +39,39 @@ describe('composables', () => {
     }
 
     function setShootItem (path, value) {
-      const object = cloneDeep(shootStore.state.shoots[uid] ?? shootItem)
-      shootStore.state.shoots[uid] = setObjectValue(object, path, value)
+      shootItem.value = setObjectValue(shootItem.value, path, value)
+      shootStore.state.shoots[shootItem.value.metadata.uid] = shootItem.value
     }
 
     let shootStore
     let authzStore
 
     beforeEach(() => {
+      shootItem = shallowRef({
+        metadata: {
+          namespace: 'garden-test',
+          name: 'foo',
+          uid: '1d8a140f-3e0d-4d80-a044-a2e8473c0e2d',
+        },
+      })
       setActivePinia(createPinia())
-      shootStore = useShootStore()
       authzStore = useAuthzStore()
-      authzStore.setNamespace(shootItem.metadata.namespace)
+      authzStore.setNamespace(shootItem.value.metadata.namespace)
+      shootStore = useShootStore()
     })
 
     const Component = {
       setup () {
+        const isStaleShoot = computed(() => {
+          return !shootStore.isShootActive(shootItem.value.metadata.uid)
+        })
+
         return {
-          ...useProvideShootItem(),
+          ...useProvideShootItem(shootItem),
+          isStaleShoot,
         }
       },
-      render () { },
+      render () {},
     }
 
     it('should compute isShootMarkedForDeletion correctly', () => {

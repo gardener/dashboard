@@ -201,14 +201,15 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { toRef } from 'vue'
 import {
   mapState,
   mapActions,
 } from 'pinia'
-import { reactivePick } from '@vueuse/core'
 
 import { useAuthzStore } from '@/store/authz'
 import { useTicketStore } from '@/store/ticket'
+import { useShootStore } from '@/store/shoot'
 
 import GAccessRestrictionChips from '@/components/ShootAccessRestrictions/GAccessRestrictionChips.vue'
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
@@ -281,12 +282,10 @@ export default {
     'showDialog',
   ],
   setup (props) {
-    const route = {
-      params: reactivePick(props.modelValue.metadata, 'namespace', 'name'),
-    }
+    const shootItem = toRef(props, 'modelValue')
 
     return {
-      ...useProvideShootItem({ route }),
+      ...useProvideShootItem(shootItem),
     }
   },
   computed: {
@@ -322,6 +321,9 @@ export default {
 
       // disabled if info is NOT available
       return !this.isInfoAvailable
+    },
+    isStaleShoot () {
+      return !this.isShootActive(this.shootMetadata.uid)
     },
     showClusterAccessActionTitle () {
       return this.isClusterAccessDialogDisabled
@@ -379,6 +381,9 @@ export default {
       latestUpdatedTicket: 'latestUpdated',
       ticketLabels: 'labels',
     }),
+    ...mapActions(useShootStore, [
+      'isShootActive',
+    ]),
     showDialog (action) {
       const shootItem = this.shootItem
       this.$emit('showDialog', { action, shootItem })

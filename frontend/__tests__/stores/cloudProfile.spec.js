@@ -17,27 +17,23 @@ import {
   mapAccessRestrictionForInput,
 } from '@/store/cloudProfile/helper'
 
-import { useApi } from '@/composables/useApi'
-
 import { find } from '@/lodash'
 
 describe('stores', () => {
   describe('cloudProfile', () => {
     const namespace = 'default'
 
-    const api = useApi()
-    let mockGetConfiguration // eslint-disable-line no-unused-vars
     let authzStore
     let configStore
     let cloudProfileStore
 
     function setData (data) {
-      cloudProfileStore.list = [{
+      cloudProfileStore.setCloudProfiles([{
         metadata: {
           name: 'foo',
         },
         data,
-      }]
+      }])
     }
 
     function setKubernetesVersions (kubernetesVersions) {
@@ -57,17 +53,14 @@ describe('stores', () => {
       authzStore = useAuthzStore()
       authzStore.setNamespace(namespace)
       configStore = useConfigStore()
-      mockGetConfiguration = vi.spyOn(api, 'getConfiguration').mockResolvedValue({
-        data: {
-          defaultNodesCIDR: '10.10.0.0/16',
-          vendorHints: [{
-            type: 'warning',
-            message: 'test',
-            matchNames: ['suse-jeos', 'suse-chost'],
-          }],
-        },
+      configStore.setConfiguration({
+        defaultNodesCIDR: '10.10.0.0/16',
+        vendorHints: [{
+          type: 'warning',
+          message: 'test',
+          matchNames: ['suse-jeos', 'suse-chost'],
+        }],
       })
-      await configStore.fetchConfig()
       cloudProfileStore = useCloudProfileStore()
       cloudProfileStore.list = []
     })

@@ -73,6 +73,8 @@ export default {
     const error = ref(null)
     const readyState = ref('initial')
 
+    const shootItem = computed(() => shootStore.shootByNamespaceAndName(route.params))
+
     const component = computed(() => {
       if (error.value) {
         return 'g-shoot-item-error'
@@ -128,7 +130,7 @@ export default {
         }
         await Promise.all(promises)
 
-        if (routeName === 'ShootItemTerminal' && !authnStore.isAdmin && !hasShootWorkerGroups.value) {
+        if (routeName === 'ShootItemTerminal' && !authnStore.isAdmin & hasShootWorkerGroups.value) {
           error.value = Object.assign(Error('Shoot has no workers to schedule a terminal pod'), {
             code: 404,
             reason: 'Terminal not available',
@@ -202,10 +204,8 @@ export default {
     provide('activePopoverKey', activePopoverKey)
 
     const {
-      shootItem,
       hasShootWorkerGroups,
-    } = useProvideShootItem({
-      route,
+    } = useProvideShootItem(shootItem, {
       shootStore,
       cloudProfileStore,
       projectStore,

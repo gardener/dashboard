@@ -3,11 +3,12 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
-import { computed } from 'vue'
-import { createInjectionState } from '@vueuse/core'
-import { useRoute } from 'vue-router'
+import {
+  computed,
+  inject,
+  provide,
+} from 'vue'
 
-import { useShootStore } from '@/store/shoot'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useProjectStore } from '@/store/project'
 import { useSeedStore } from '@/store/seed'
@@ -34,18 +35,13 @@ const forceDeleteErrorCodes = Object.freeze([
   'ERR_INFRA_UNAUTHORIZED',
 ])
 
-export function shootItemComposable (options = {}) {
+export function createShootItemComposable (shootItem, options = {}) {
   const {
-    route = useRoute(),
-    shootStore = useShootStore(),
     cloudProfileStore = useCloudProfileStore(),
     projectStore = useProjectStore(),
     seedStore = useSeedStore(),
   } = options
 
-  const shootItem = computed(() => {
-    return shootStore.shootByNamespaceAndName(route.params)
-  })
   const shootMetadata = computed(() => {
     return get(shootItem.value, 'metadata', {})
   })
@@ -285,9 +281,6 @@ export function shootItemComposable (options = {}) {
   const isLastMaintenanceFailed = computed(() => {
     return lastMaintenance.value.state === 'Failed'
   })
-  const isStaleShoot = computed(() => {
-    return !shootStore.isShootActive(shootMetadata.value.uid)
-  })
   const canForceDeleteShoot = computed(() => {
     if (!shootDeletionTimestamp.value) {
       return false
@@ -297,7 +290,6 @@ export function shootItemComposable (options = {}) {
     return shootErrorCodes.some(item => forceDeleteErrorCodes.includes(item))
   })
 
-  const isShootActive = uid => shootStore.isShootActive(uid)
   const projectNameByNamespace = namespace => projectStore.projectNameByNamespace(namespace)
   const isSeedUnreachableByName = name => seedStore.isSeedUnreachableByName(name)
 
@@ -373,20 +365,18 @@ export function shootItemComposable (options = {}) {
     shootStatus,
     lastMaintenance,
     isLastMaintenanceFailed,
-    isStaleShoot,
     canForceDeleteShoot,
-    isShootActive,
     projectNameByNamespace,
     isSeedUnreachableByName,
   }
 }
 
-const [
-  useProvideShootItem,
-  useShootItem,
-] = createInjectionState(shootItemComposable)
+export function useShootItem () {
+  return inject('shoot-item', {})
+}
 
-export {
-  useProvideShootItem,
-  useShootItem,
+export function useProvideShootItem (...args) {
+  const shootItemComposable = createShootItemComposable(...args)
+  provide('shoot-item', shootItemComposable)
+  return shootItemComposable
 }

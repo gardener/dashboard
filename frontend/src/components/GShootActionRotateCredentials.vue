@@ -456,6 +456,8 @@ export default {
       isAdmin,
       mode,
       operation,
+      startOperation,
+      completionOperation,
       isActionToBeScheduled,
       isProgressing,
       showLoadingIndicator,

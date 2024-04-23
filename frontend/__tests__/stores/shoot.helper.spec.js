@@ -18,6 +18,7 @@ import { useSecretStore } from '@/store/secret'
 import { useAppStore } from '@/store/app'
 import { useAuthzStore } from '@/store/authz'
 
+import { cloneDeep } from '@/lodash'
 describe('stores', () => {
   const context = {}
   const systemTime = new Date('2024-03-15T14:00:00+01:00')
@@ -42,7 +43,7 @@ describe('stores', () => {
     const secretStore = useSecretStore()
     secretStore.list = global.fixtures.secrets
     const cloudProfileStore = useCloudProfileStore()
-    cloudProfileStore.list = global.fixtures.cloudprofiles
+    cloudProfileStore.setCloudProfiles(cloneDeep(global.fixtures.cloudprofiles))
     const gardenerExtensionStore = useGardenerExtensionStore()
     gardenerExtensionStore.list = global.fixtures.gardenerExtensions
     const shootContextStore = useShootContextStore()

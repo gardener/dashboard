@@ -121,10 +121,14 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
 
   async function fetchCloudProfiles () {
     const response = await api.getCloudProfiles()
-    for (const cloudProfile of response.data) {
+    setCloudProfiles(response.data)
+  }
+
+  function setCloudProfiles (cloudProfiles) {
+    for (const cloudProfile of cloudProfiles) {
       set(cloudProfile, 'data.machineImages', flattenMachineImages(get(cloudProfile, 'data.machineImages')))
     }
-    list.value = response.data
+    list.value = cloudProfiles
   }
 
   function isValidRegion (cloudProfile) {
@@ -635,6 +639,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     list,
     isInitial,
     cloudProfileList,
+    setCloudProfiles,
     fetchCloudProfiles,
     cloudProfilesByCloudProviderKind,
     knownInfrastructureKindList,
