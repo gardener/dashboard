@@ -1282,7 +1282,7 @@ const RAW_RUNTIME_STATE =
           ["showdown", "npm:2.1.0"],\
           ["socket.io", "npm:4.7.5"],\
           ["socket.io-client", "npm:4.7.5"],\
-          ["supertest", "npm:6.3.4"],\
+          ["supertest", "npm:7.0.0"],\
           ["uuid", "npm:9.0.1"]\
         ],\
         "linkType": "SOFT"\
@@ -1463,7 +1463,7 @@ const RAW_RUNTIME_STATE =
           ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:27.5.1"],\
           ["prom-client", "npm:15.1.2"],\
           ["response-time", "npm:2.3.2"],\
-          ["supertest", "npm:6.3.4"]\
+          ["supertest", "npm:7.0.0"]\
         ],\
         "linkType": "SOFT"\
       }]\
@@ -6847,14 +6847,13 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["formidable", [\
-      ["npm:2.1.2", {\
-        "packageLocation": "./.yarn/cache/formidable-npm-2.1.2-40ba18d67f-efba03d111.zip/node_modules/formidable/",\
+      ["npm:3.5.1", {\
+        "packageLocation": "./.yarn/cache/formidable-npm-3.5.1-257e5eab8a-c02fa1a027.zip/node_modules/formidable/",\
         "packageDependencies": [\
-          ["formidable", "npm:2.1.2"],\
+          ["formidable", "npm:3.5.1"],\
           ["dezalgo", "npm:1.0.4"],\
           ["hexoid", "npm:1.0.0"],\
-          ["once", "npm:1.4.0"],\
-          ["qs", "npm:6.11.2"]\
+          ["once", "npm:1.4.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -11649,16 +11648,16 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["superagent", [\
-      ["npm:8.1.2", {\
-        "packageLocation": "./.yarn/cache/superagent-npm-8.1.2-44190e1fe9-016416fc9c.zip/node_modules/superagent/",\
+      ["npm:9.0.1", {\
+        "packageLocation": "./.yarn/cache/superagent-npm-9.0.1-de90d6ad61-f20189ace2.zip/node_modules/superagent/",\
         "packageDependencies": [\
-          ["superagent", "npm:8.1.2"],\
+          ["superagent", "npm:9.0.1"],\
           ["component-emitter", "npm:1.3.0"],\
           ["cookiejar", "npm:2.1.4"],\
           ["debug", "virtual:1ff4b5f90832ba0a9c93ba1223af226e44ba70c1126a3740d93562b97bc36544e896a5e95908196f7458713e6a6089a34bfc67362fc6df7fa093bd06c878be47#npm:4.3.4"],\
           ["fast-safe-stringify", "npm:2.1.1"],\
           ["form-data", "npm:4.0.0"],\
-          ["formidable", "npm:2.1.2"],\
+          ["formidable", "npm:3.5.1"],\
           ["methods", "npm:1.1.2"],\
           ["mime", "npm:2.6.0"],\
           ["qs", "npm:6.11.2"],\
@@ -11668,12 +11667,12 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["supertest", [\
-      ["npm:6.3.4", {\
-        "packageLocation": "./.yarn/cache/supertest-npm-6.3.4-ddb2a7be36-f8c0b6c73b.zip/node_modules/supertest/",\
+      ["npm:7.0.0", {\
+        "packageLocation": "./.yarn/cache/supertest-npm-7.0.0-8060c32e4d-f0b10a1d29.zip/node_modules/supertest/",\
         "packageDependencies": [\
-          ["supertest", "npm:6.3.4"],\
+          ["supertest", "npm:7.0.0"],\
           ["methods", "npm:1.1.2"],\
-          ["superagent", "npm:8.1.2"]\
+          ["superagent", "npm:9.0.1"]\
         ],\
         "linkType": "HARD"\
       }]\
