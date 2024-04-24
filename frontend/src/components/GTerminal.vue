@@ -364,10 +364,10 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { reactive } from 'vue'
 import { mapState } from 'pinia'
-import { Terminal } from 'xterm'
-import { FitAddon } from 'xterm-addon-fit'
-import { WebLinksAddon } from 'xterm-addon-web-links'
-import 'xterm/css/xterm.css'
+import { Terminal } from '@xterm/xterm'
+import { FitAddon } from '@xterm/addon-fit'
+import { WebLinksAddon } from '@xterm/addon-web-links'
+import '@xterm/xterm/css/xterm.css'
 
 import { useAppStore } from '@/store/app'
 import { useConfigStore } from '@/store/config'
