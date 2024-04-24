@@ -4,11 +4,8 @@
 # SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company
 # SPDX-License-Identifier: Apache-2.0
 
-# This file was copied from the kubernetes/kubernetes project
-# https://github.com/kubernetes/kubernetes/blob/v1.20.0/hack/cherry_pick_pull.sh
-
-#
-# Modifications Copyright 2024 SAP SE or an SAP affiliate company. All rights reserved.
+# This file was copied from the gardener/gardener project https://github.com/gardener/gardener/blob/v1.93.0/hack/cherry-pick-pull.sh
+# which was originally copied from the kubernetes/kubernetes project https://github.com/kubernetes/kubernetes/blob/v1.20.0/hack/cherry_pick_pull.sh
 
 # Usage Instructions: https://github.com/gardener/dashboard/blob/master/docs/development/process.md#cherry-picks
 
