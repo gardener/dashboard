@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -285,13 +285,55 @@ export default {
     GSecretDetailsItemContent,
   },
   setup () {
+    const {
+      shootItem,
+      shootName,
+      shootNamespace,
+      shootSeedName,
+      shootCloudProfileName,
+      shootRegion,
+      shootZones,
+      shootDomain,
+      isCustomShootDomain,
+      shootSecretBindingName,
+      shootDnsProviders,
+      hasShootWorkerGroups,
+      shootControlPlaneHighAvailabilityFailureTolerance,
+      shootCloudProviderKind,
+      servicesCidr,
+      nodesCidr,
+      podsCidr,
+      shootTechnicalId,
+    } = useShootItem()
+
     return {
-      ...useShootItem(),
+      shootItem,
+      shootName,
+      shootNamespace,
+      shootSeedName,
+      shootCloudProfileName,
+      shootRegion,
+      shootZones,
+      shootDomain,
+      isCustomShootDomain,
+      shootSecretBindingName,
+      shootDnsProviders,
+      hasShootWorkerGroups,
+      shootControlPlaneHighAvailabilityFailureTolerance,
+      shootCloudProviderKind,
+      servicesCidr,
+      nodesCidr,
+      podsCidr,
+      shootTechnicalId,
     }
   },
   computed: {
-    ...mapState(useAuthzStore, ['canPatchShootsBinding']),
-    ...mapState(useSecretStore, ['infrastructureSecretList']),
+    ...mapState(useAuthzStore, [
+      'canPatchShootsBinding',
+    ]),
+    ...mapState(useSecretStore, [
+      'infrastructureSecretList',
+    ]),
     showSeedInfo () {
       return !!this.shootSeedName
     },
@@ -309,7 +351,10 @@ export default {
         return shootLBClasses
       }
 
-      const availableFloatingPools = this.floatingPoolsByCloudProfileNameAndRegionAndDomain({ cloudProfileName: this.shootCloudProfileName, region: this.shootRegion })
+      const availableFloatingPools = this.floatingPoolsByCloudProfileNameAndRegionAndDomain({
+        cloudProfileName: this.shootCloudProfileName,
+        region: this.shootRegion,
+      })
       const floatingPoolWildCardObjects = wildcardObjectsFromStrings(map(availableFloatingPools, 'name'))
 
       const shootFloatingPoolName = get(this.shootItem, 'spec.provider.infrastructureConfig.floatingPoolName')
@@ -325,12 +370,12 @@ export default {
     defaultLoadbalancerClass () {
       const shootLBClasses = this.shootLoadbalancerClasses
 
-      let defaultLoadbalancerClass = find(shootLBClasses, { purpose: 'default' })
+      let defaultLoadbalancerClass = find(shootLBClasses, ['purpose', 'default'])
       if (defaultLoadbalancerClass) {
         return defaultLoadbalancerClass.name
       }
 
-      defaultLoadbalancerClass = find(shootLBClasses, { name: 'default' })
+      defaultLoadbalancerClass = find(shootLBClasses, ['name', 'default'])
       if (defaultLoadbalancerClass) {
         return defaultLoadbalancerClass.name
       }
@@ -344,9 +389,7 @@ export default {
       return 'generated'
     },
     secret () {
-      const secrets = this.infrastructureSecretList
-      const secret = find(secrets, ['metadata.name', this.shootSecretBindingName])
-      return secret
+      return find(this.infrastructureSecretList, ['metadata.name', this.shootSecretBindingName])
     },
   },
   methods: {
@@ -354,7 +397,9 @@ export default {
       'cloudProfileByName',
       'floatingPoolsByCloudProfileNameAndRegionAndDomain',
     ]),
-    ...mapActions(useSecretStore, ['getCloudProviderSecretByName']),
+    ...mapActions(useSecretStore, [
+      'getCloudProviderSecretByName',
+    ]),
   },
 }
 </script>

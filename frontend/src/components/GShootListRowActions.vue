@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -63,7 +63,9 @@ SPDX-License-Identifier: Apache-2.0
   </v-menu>
 </template>
 
-<script>
+<script setup>
+import { ref } from 'vue'
+
 import GActionButton from '@/components/GActionButton.vue'
 import GShootActionChangeHibernation from '@/components/ShootHibernation/GShootActionChangeHibernation.vue'
 import GShootActionMaintenanceStart from '@/components/ShootMaintenance/GShootActionMaintenanceStart.vue'
@@ -75,39 +77,10 @@ import GShootVersionConfiguration from '@/components/ShootVersion/GShootVersionC
 
 import { useShootItem } from '@/composables/useShootItem'
 
-export default {
-  components: {
-    GActionButton,
-    GShootActionChangeHibernation,
-    GShootActionMaintenanceStart,
-    GShootActionReconcileStart,
-    GShootActionRotateCredentials,
-    GShootActionDeleteCluster,
-    GShootActionForceDelete,
-    GShootVersionConfiguration,
-  },
-  setup () {
-    const shootItemState = useShootItem()
+const {
+  canForceDeleteShoot,
+} = useShootItem()
 
-    return {
-      ...shootItemState,
-    }
-  },
-  data () {
-    return {
-      menu: false,
-      rotationType: 'ALL_CREDENTIALS',
-    }
-  },
-  computed: {
-    actionMenu: {
-      get () {
-        return this.menu
-      },
-      set (value) {
-        this.menu = value
-      },
-    },
-  },
-}
+const actionMenu = ref(false)
+const rotationType = ref('ALL_CREDENTIALS')
 </script>
