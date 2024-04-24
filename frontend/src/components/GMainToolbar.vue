@@ -286,6 +286,7 @@ SPDX-License-Identifier: Apache-2.0
       #extension
     >
       <v-tabs
+        v-model="tabKey"
         color="primary"
         slider-color="secondary"
         class="tabs-bar-background"
@@ -357,6 +358,10 @@ const tabs = computed(() => {
     return meta.tabs(route)
   }
   return meta.tabs
+})
+
+const tabKey = computed(() => {
+  return route.meta?.tabKey
 })
 
 const accountLink = computed(() => {
