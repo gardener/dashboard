@@ -265,8 +265,10 @@ export default {
     GCopyBtn,
   },
   setup () {
+    const shootItemState = useShootItem()
+
     return {
-      ...useShootItem(),
+      ...shootItemState,
     }
   },
   computed: {
@@ -274,7 +276,9 @@ export default {
       'sla',
       'accessRestriction',
     ]),
-    ...mapState(useAuthzStore, ['canGetSecrets']),
+    ...mapState(useAuthzStore, [
+      'canGetSecrets',
+    ]),
     selfTerminationMessage () {
       if (this.isValidTerminationDate) {
         return `This cluster will self terminate ${getTimeStringTo(new Date(), new Date(this.shootExpirationTimestamp))}`

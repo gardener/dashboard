@@ -133,6 +133,7 @@ export default {
   setup () {
     const {
       shootMetadata,
+      shootK8sVersion,
       shootSupportedPatchAvailable,
       shootSupportedUpgradeAvailable,
       shootAvailableK8sUpdates,
@@ -141,6 +142,7 @@ export default {
 
     return {
       shootMetadata,
+      shootK8sVersion,
       shootSupportedPatchAvailable,
       shootSupportedUpgradeAvailable,
       shootAvailableK8sUpdates,

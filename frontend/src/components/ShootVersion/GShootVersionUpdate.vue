@@ -41,13 +41,13 @@ SPDX-License-Identifier: Apache-2.0
       </template>
     </v-select>
     <v-alert
-      v-if="shootK8sVersion.isExpirationWarning && !selectedItem"
+      v-if="shootKubernetesVersionObject.isExpirationWarning && !selectedItem"
       type="warning"
       variant="tonal"
     >
       Current Kubernetes version expires
       <g-time-string
-        :date-time="shootK8sVersion.expirationDate"
+        :date-time="shootKubernetesVersionObject.expirationDate"
         mode="future"
         date-tooltip
       />.
@@ -84,7 +84,7 @@ export default {
   props: {
     modelValue: {
       type: Object,
-      required: true,
+      default: null,
     },
   },
   emits: [
@@ -92,7 +92,7 @@ export default {
   ],
   setup (props, { emit }) {
     const {
-      shootK8sVersion,
+      shootKubernetesVersionObject,
       shootAvailableK8sUpdates,
     } = useShootItem()
 
@@ -114,7 +114,7 @@ export default {
 
     return {
       v$: useVuelidate(rules, { selectedItem }),
-      shootK8sVersion,
+      shootKubernetesVersionObject,
       shootAvailableK8sUpdates,
       snackbar,
       selectedItem,
@@ -138,7 +138,7 @@ export default {
           return {
             ...version,
             updateType,
-            title: `${this.shootK8sVersion.version} → ${version.version}`,
+            title: `${this.shootKubernetesVersionObject.version} → ${version.version}`,
             notNextMinor,
             subtitleClass,
           }
@@ -237,12 +237,12 @@ export default {
   },
   methods: {
     itemIsNotNextMinor (version, updateType) {
-      if (!this.shootK8sVersion.version) {
+      if (!this.shootKubernetesVersionObject.version) {
         return false
       }
       let invalid = false
       if (version && updateType === 'minor') {
-        const currentMinorVersion = semver.minor(this.shootK8sVersion.version)
+        const currentMinorVersion = semver.minor(this.shootKubernetesVersionObject.version)
         const selectedItemMinorVersion = semver.minor(version)
         invalid = selectedItemMinorVersion - currentMinorVersion !== 1
       }
