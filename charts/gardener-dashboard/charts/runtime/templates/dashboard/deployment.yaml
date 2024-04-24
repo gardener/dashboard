@@ -72,11 +72,24 @@ spec:
           - key: login-config.json
             path: login-config.json
           defaultMode: 0444
+      - name: gardener-dashboard-sessionsecret
+        secret:
+          secretName: gardener-dashboard-sessionsecret
       {{- if .Values.global.dashboard.frontendConfig.assets }}
       - name: assets
         configMap:
           name: dashboard-assets
           defaultMode: 0444
+      {{- end }}
+      {{- if .Values.global.dashboard.oidc }}
+      - name: gardener-dashboard-oidc
+        secret:
+          secretName: gardener-dashboard-oidc
+      {{- end }}
+      {{- if .Values.global.dashboard.gitHub }}
+      - name: gardener-dashboard-github
+        secret:
+          secretName: gardener-dashboard-github
       {{- end }}
       {{- if .Values.global.dashboard.serviceAccountTokenVolumeProjection.enabled }}
       - name: service-account-token
@@ -159,72 +172,6 @@ spec:
             failureThreshold: {{ .Values.global.dashboard.readinessProbe.failureThreshold }}
           {{- end }}
           env:
-          - name: SESSION_SECRET
-            valueFrom:
-              secretKeyRef:
-                name: gardener-dashboard-sessionsecret
-                key: keyValue
-          {{- if .Values.global.dashboard.oidc }}
-          - name: OIDC_CLIENT_ID
-            valueFrom:
-              secretKeyRef:
-                name: gardener-dashboard-oidc
-                key: client_id
-          {{- if .Values.global.dashboard.oidc.clientSecret }}
-          - name: OIDC_CLIENT_SECRET
-            valueFrom:
-              secretKeyRef:
-                name: gardener-dashboard-oidc
-                key: client_secret
-          {{- end }}
-          {{- if .Values.global.dashboard.oidc.caSecretKeyRef }}
-          - name: OIDC_CA
-            valueFrom:
-              secretKeyRef:
-                name: {{  required ".Values.global.dashboard.oidc.caSecretKeyRef.name is required" .Values.global.dashboard.oidc.caSecretKeyRef.name }}
-                key: {{ .Values.global.dashboard.oidc.caSecretKeyRef.key | default "ca.crt" }}
-          {{- end }}
-          {{- end }}
-          {{- if .Values.global.dashboard.gitHub }}
-          {{- if .Values.global.dashboard.gitHub.authentication.token }}
-          - name: GITHUB_AUTHENTICATION_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: gardener-dashboard-github
-                key: authentication.token
-          {{ else }}
-          - name: GITHUB_AUTHENTICATION_APP_ID
-            valueFrom:
-              secretKeyRef:
-                name: gardener-dashboard-github
-                key: authentication.appId
-          - name: GITHUB_AUTHENTICATION_CLIENT_ID
-            valueFrom:
-              secretKeyRef:
-                name: gardener-dashboard-github
-                key: authentication.clientId
-          - name: GITHUB_AUTHENTICATION_CLIENT_SECRET
-            valueFrom:
-              secretKeyRef:
-                name: gardener-dashboard-github
-                key: authentication.clientSecret
-          - name: GITHUB_AUTHENTICATION_INSTALLATION_ID
-            valueFrom:
-              secretKeyRef:
-                name: gardener-dashboard-github
-                key: authentication.installationId
-          - name: GITHUB_AUTHENTICATION_PRIVATE_KEY
-            valueFrom:
-              secretKeyRef:
-                name: gardener-dashboard-github
-                key: authentication.privateKey
-          {{ end }}
-          - name: GITHUB_WEBHOOK_SECRET
-            valueFrom:
-              secretKeyRef:
-                name: gardener-dashboard-github
-                key: webhookSecret
-          {{- end }}
           - name: GARDENER_CONFIG
             value: /etc/gardener-dashboard/config.yaml
           {{- if .Values.global.dashboard.kubeconfig }}
@@ -252,6 +199,9 @@ spec:
           - name: gardener-dashboard-login-config
             mountPath: /app/public/login-config.json
             subPath: login-config.json
+          - name: gardener-dashboard-sessionsecret
+            mountPath: /etc/gardener-dashboard/secrets/session
+            readOnly: true
           {{- if .Values.global.dashboard.frontendConfig.assets }}
           - name: assets
             mountPath: /app/public/static/assets
@@ -269,6 +219,16 @@ spec:
           {{- if .Values.global.dashboard.kubeconfig }}
           - name: gardener-dashboard-secret-kubeconfig
             mountPath: /etc/gardener-dashboard/secrets/kubeconfig
+            readOnly: true
+          {{- end }}
+          {{- if .Values.global.dashboard.oidc }}
+          - name: gardener-dashboard-oidc
+            mountPath: /etc/gardener-dashboard/secrets/oidc
+            readOnly: true
+          {{- end }}
+          {{- if .Values.global.dashboard.gitHub }}
+          - name: gardener-dashboard-github
+            mountPath: /etc/gardener-dashboard/secrets/github
             readOnly: true
           {{- end }}
       restartPolicy: Always
