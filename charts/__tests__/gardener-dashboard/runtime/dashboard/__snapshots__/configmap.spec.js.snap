@@ -395,7 +395,6 @@ Object {
       "'self'",
     ],
   },
-  "experimentalUseWatchCacheForListShoots": "never",
   "frontend": Object {
     "defaultHibernationSchedule": Object {
       "development": Array [
