@@ -196,9 +196,6 @@ export default {
     currentZonesNetworkConfiguration () {
       return getZonesNetworkConfiguration(this.zonesNetworkConfiguration, this.internalWorkers, this.cloudProviderKind, this.allZones.length, this.existingWorkerCIDR, this.newShootWorkerCIDR)
     },
-    expiringWorkerGroups () {
-      return this.expiringWorkerGroupsForShoot(this.internalWorkers, this.cloudProfileName, false)
-    },
   },
   watch: {
     currentZonesNetworkConfiguration (value) {
@@ -240,7 +237,6 @@ export default {
       'volumeTypesByCloudProfileName',
       'cloudProfileByName',
       'generateWorker',
-      'expiringWorkerGroupsForShoot',
     ]),
     setInternalWorkers (workers) {
       this.internalWorkers = []

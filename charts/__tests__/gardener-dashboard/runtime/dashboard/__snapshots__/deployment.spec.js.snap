@@ -21,15 +21,6 @@ Array [
     },
   },
   Object {
-    "name": "OIDC_CLIENT_SECRET",
-    "valueFrom": Object {
-      "secretKeyRef": Object {
-        "key": "client_secret",
-        "name": "gardener-dashboard-oidc",
-      },
-    },
-  },
-  Object {
     "name": "GITHUB_AUTHENTICATION_APP_ID",
     "valueFrom": Object {
       "secretKeyRef": Object {
@@ -179,6 +170,109 @@ Array [
 ]
 `;
 
+exports[`gardener-dashboard deployment should render the template w/ \`client_secret\` 1`] = `
+Array [
+  Object {
+    "name": "SESSION_SECRET",
+    "valueFrom": Object {
+      "secretKeyRef": Object {
+        "key": "keyValue",
+        "name": "gardener-dashboard-sessionsecret",
+      },
+    },
+  },
+  Object {
+    "name": "OIDC_CLIENT_ID",
+    "valueFrom": Object {
+      "secretKeyRef": Object {
+        "key": "client_id",
+        "name": "gardener-dashboard-oidc",
+      },
+    },
+  },
+  Object {
+    "name": "OIDC_CLIENT_SECRET",
+    "valueFrom": Object {
+      "secretKeyRef": Object {
+        "key": "client_secret",
+        "name": "gardener-dashboard-oidc",
+      },
+    },
+  },
+  Object {
+    "name": "GARDENER_CONFIG",
+    "value": "/etc/gardener-dashboard/config.yaml",
+  },
+  Object {
+    "name": "METRICS_PORT",
+    "value": "9050",
+  },
+  Object {
+    "name": "POD_NAME",
+    "valueFrom": Object {
+      "fieldRef": Object {
+        "fieldPath": "metadata.name",
+      },
+    },
+  },
+  Object {
+    "name": "POD_NAMESPACE",
+    "valueFrom": Object {
+      "fieldRef": Object {
+        "fieldPath": "metadata.namespace",
+      },
+    },
+  },
+]
+`;
+
+exports[`gardener-dashboard deployment should render the template w/o \`client_secret\` 1`] = `
+Array [
+  Object {
+    "name": "SESSION_SECRET",
+    "valueFrom": Object {
+      "secretKeyRef": Object {
+        "key": "keyValue",
+        "name": "gardener-dashboard-sessionsecret",
+      },
+    },
+  },
+  Object {
+    "name": "OIDC_CLIENT_ID",
+    "valueFrom": Object {
+      "secretKeyRef": Object {
+        "key": "client_id",
+        "name": "gardener-dashboard-oidc",
+      },
+    },
+  },
+  Object {
+    "name": "GARDENER_CONFIG",
+    "value": "/etc/gardener-dashboard/config.yaml",
+  },
+  Object {
+    "name": "METRICS_PORT",
+    "value": "9050",
+  },
+  Object {
+    "name": "POD_NAME",
+    "valueFrom": Object {
+      "fieldRef": Object {
+        "fieldPath": "metadata.name",
+      },
+    },
+  },
+  Object {
+    "name": "POD_NAMESPACE",
+    "valueFrom": Object {
+      "fieldRef": Object {
+        "fieldPath": "metadata.namespace",
+      },
+    },
+  },
+]
+`;
+
 exports[`gardener-dashboard deployment should render the template with default values 1`] = `
 Object {
   "apiVersion": "apps/v1",
@@ -243,15 +337,6 @@ Object {
                 "valueFrom": Object {
                   "secretKeyRef": Object {
                     "key": "client_id",
-                    "name": "gardener-dashboard-oidc",
-                  },
-                },
-              },
-              Object {
-                "name": "OIDC_CLIENT_SECRET",
-                "valueFrom": Object {
-                  "secretKeyRef": Object {
-                    "key": "client_secret",
                     "name": "gardener-dashboard-oidc",
                   },
                 },
@@ -416,15 +501,6 @@ Array [
     "valueFrom": Object {
       "secretKeyRef": Object {
         "key": "client_id",
-        "name": "gardener-dashboard-oidc",
-      },
-    },
-  },
-  Object {
-    "name": "OIDC_CLIENT_SECRET",
-    "valueFrom": Object {
-      "secretKeyRef": Object {
-        "key": "client_secret",
         "name": "gardener-dashboard-oidc",
       },
     },

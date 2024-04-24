@@ -188,7 +188,7 @@ global:
       #   #       accessRestrictions[].options[].description: option description
       #   #       accessRestrictions[].options[].key: unique identifier
       #   newIssue:
-      #     title: "[${shootNamespace}/${shootName}] <problem>"
+      #     title: "[${shootProjectName}/${shootName}] <problem>"
       #     labels: # these are the labels that are automatically preselected when creating a new ticket
       #     - default-label
       #     # GitHub issue forms

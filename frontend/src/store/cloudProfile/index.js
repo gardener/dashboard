@@ -22,7 +22,8 @@ import {
   parseSize,
   defaultCriNameByKubernetesVersion,
   isValidTerminationDate,
-  selectedImageIsNotLatest,
+  machineImageHasUpdate,
+  machineVendorHasSupportedVersion,
   UNKNOWN_EXPIRED_TIMESTAMP,
   normalizeVersion,
 } from '@/utils'
@@ -329,10 +330,12 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
           workerName: worker.name,
           isValidTerminationDate: false,
           severity: 'warning',
+          supportedVersionAvailable: false,
         }
       }
 
-      const updateAvailable = selectedImageIsNotLatest(workerImageDetails, allMachineImages)
+      const updateAvailable = machineImageHasUpdate(workerImageDetails, allMachineImages)
+      const supportedVersionAvailable = machineVendorHasSupportedVersion(workerImageDetails, allMachineImages)
       const severity = getVersionExpirationWarningSeverity({
         isExpirationWarning: workerImageDetails.isExpirationWarning,
         autoPatchEnabled: imageAutoPatch,
@@ -345,6 +348,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
         isValidTerminationDate: isValidTerminationDate(workerImageDetails.expirationDate),
         workerName: worker.name,
         severity,
+        supportedVersionAvailable,
       }
     })
     return filter(workerGroups, 'severity')
@@ -391,6 +395,8 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     const cloudProfile = cloudProfileByName(cloudProfileName)
     const machineImages = get(cloudProfile, 'data.machineImages')
     const mapMachineImages = machineImage => {
+      const { name, updateStrategy = 'major' } = machineImage
+
       const versions = []
       for (const versionObj of machineImage.versions) {
         if (semver.valid(versionObj.version)) {
@@ -405,14 +411,13 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
           continue
         }
 
-        logger.error(`Skipped machine image ${machineImage.name} as version ${versionObj.version} is not a valid semver version and cannot be normalized`)
+        logger.error(`Skipped machine image ${name} as version ${versionObj.version} is not a valid semver version and cannot be normalized`)
       }
       versions.sort((a, b) => {
         return semver.rcompare(a.version, b.version)
       })
 
-      const name = machineImage.name
-      const vendorName = vendorNameFromImageName(machineImage.name)
+      const vendorName = vendorNameFromImageName(name)
       const vendorHint = findVendorHint(configStore.vendorHints, vendorName)
 
       return map(versions, ({ version, expirationDate, cri, classification, architectures }) => {
@@ -423,6 +428,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
           key: name + '/' + version,
           name,
           version,
+          updateStrategy,
           cri,
           classification,
           expirationDate,

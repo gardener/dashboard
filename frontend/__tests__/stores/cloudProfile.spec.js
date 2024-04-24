@@ -279,6 +279,7 @@ describe('stores', () => {
             workerName: workers[1].name,
             isValidTerminationDate: true,
             severity: 'error',
+            supportedVersionAvailable: true,
           })
         })
 

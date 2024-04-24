@@ -15,11 +15,11 @@ const { join } = require('path')
 
 const environmentVariableDefinitions = {
   VUE_APP_VERSION: 'frontend.appVersion',
-  SESSION_SECRET: 'sessionSecret', // pragma: whitelist secret
+  SESSION_SECRET: 'sessionSecret',
   API_SERVER_URL: 'apiServerUrl',
   OIDC_ISSUER: 'oidc.issuer',
   OIDC_CLIENT_ID: 'oidc.client_id',
-  OIDC_CLIENT_SECRET: 'oidc.client_secret', // pragma: whitelist secret
+  OIDC_CLIENT_SECRET: 'oidc.client_secret',
   OIDC_CA: 'oidc.ca',
   GITHUB_AUTHENTICATION_APP_ID: 'gitHub.authentication.appId',
   GITHUB_AUTHENTICATION_CLIENT_ID: 'gitHub.authentication.clientId',
@@ -27,7 +27,7 @@ const environmentVariableDefinitions = {
   GITHUB_AUTHENTICATION_INSTALLATION_ID: 'gitHub.authentication.installationId',
   GITHUB_AUTHENTICATION_PRIVATE_KEY: 'gitHub.authentication.privateKey',
   GITHUB_AUTHENTICATION_TOKEN: 'gitHub.authentication.token',
-  GITHUB_WEBHOOK_SECRET: 'gitHub.webhookSecret', // pragma: whitelist secret
+  GITHUB_WEBHOOK_SECRET: 'gitHub.webhookSecret',
   LOG_LEVEL: 'logLevel',
   LOG_HTTP_REQUEST_BODY: {
     type: 'Boolean',
@@ -111,7 +111,6 @@ module.exports = {
       requiredConfigurationProperties.push(
         'oidc.issuer',
         'oidc.client_id',
-        'oidc.client_secret',
         'oidc.redirect_uris'
       )
     }

@@ -6,7 +6,10 @@
     "regexManagers:githubActionsVersions",
     "group:monorepos"
   ],
-  labels: ["kind/enhancement"],
+  labels: [
+    "kind/enhancement",
+    "renovate"
+  ],
   ignorePaths: [
     "**/node_modules/**",
     "**/.yarn/**",
