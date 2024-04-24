@@ -1326,6 +1326,9 @@ const RAW_RUNTIME_STATE =
           ["@vueuse/core", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:10.9.0"],\
           ["@vueuse/integrations", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:10.9.0"],\
           ["@vueuse/router", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:10.9.0"],\
+          ["@xterm/addon-fit", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.10.0"],\
+          ["@xterm/addon-web-links", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.11.0"],\
+          ["@xterm/xterm", "npm:5.5.0"],\
           ["ansi-html", "npm:0.0.9"],\
           ["buffer", "npm:6.0.3"],\
           ["codemirror", "npm:5.65.16"],\
@@ -1371,10 +1374,7 @@ const RAW_RUNTIME_STATE =
           ["vitest-fetch-mock", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.2.2"],\
           ["vue", "virtual:c7add925a0d7137728e324795fd1f8117b2cfe6b3dbde1c52a5b1a97c81e35674720372b12d73f80919997216b3cca44221086bef6ee02702ec7a24a2dc75cd3#npm:3.4.23"],\
           ["vue-router", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:4.3.2"],\
-          ["vuetify", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.5.16"],\
-          ["xterm", "npm:5.3.0"],\
-          ["xterm-addon-fit", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.8.0"],\
-          ["xterm-addon-web-links", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.9.0"]\
+          ["vuetify", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.5.16"]\
         ],\
         "linkType": "SOFT"\
       }]\
@@ -3502,6 +3502,59 @@ const RAW_RUNTIME_STATE =
         "packagePeers": [\
           "@types/vue",\
           "vue"\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["@xterm/addon-fit", [\
+      ["npm:0.10.0", {\
+        "packageLocation": "./.yarn/cache/@xterm-addon-fit-npm-0.10.0-7631de5bba-76926120fc.zip/node_modules/@xterm/addon-fit/",\
+        "packageDependencies": [\
+          ["@xterm/addon-fit", "npm:0.10.0"]\
+        ],\
+        "linkType": "SOFT"\
+      }],\
+      ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.10.0", {\
+        "packageLocation": "./.yarn/__virtual__/@xterm-addon-fit-virtual-6c8113312f/0/cache/@xterm-addon-fit-npm-0.10.0-7631de5bba-76926120fc.zip/node_modules/@xterm/addon-fit/",\
+        "packageDependencies": [\
+          ["@xterm/addon-fit", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.10.0"],\
+          ["@types/xterm__xterm", null],\
+          ["@xterm/xterm", "npm:5.5.0"]\
+        ],\
+        "packagePeers": [\
+          "@types/xterm__xterm",\
+          "@xterm/xterm"\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["@xterm/addon-web-links", [\
+      ["npm:0.11.0", {\
+        "packageLocation": "./.yarn/cache/@xterm-addon-web-links-npm-0.11.0-3393d6b5c7-9426bed80a.zip/node_modules/@xterm/addon-web-links/",\
+        "packageDependencies": [\
+          ["@xterm/addon-web-links", "npm:0.11.0"]\
+        ],\
+        "linkType": "SOFT"\
+      }],\
+      ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.11.0", {\
+        "packageLocation": "./.yarn/__virtual__/@xterm-addon-web-links-virtual-d50b820323/0/cache/@xterm-addon-web-links-npm-0.11.0-3393d6b5c7-9426bed80a.zip/node_modules/@xterm/addon-web-links/",\
+        "packageDependencies": [\
+          ["@xterm/addon-web-links", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.11.0"],\
+          ["@types/xterm__xterm", null],\
+          ["@xterm/xterm", "npm:5.5.0"]\
+        ],\
+        "packagePeers": [\
+          "@types/xterm__xterm",\
+          "@xterm/xterm"\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["@xterm/xterm", [\
+      ["npm:5.5.0", {\
+        "packageLocation": "./.yarn/cache/@xterm-xterm-npm-5.5.0-106735eff7-358801feec.zip/node_modules/@xterm/xterm/",\
+        "packageDependencies": [\
+          ["@xterm/xterm", "npm:5.5.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -13261,59 +13314,6 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/xmlhttprequest-ssl-npm-2.0.0-a9c0d5efed-b64ab37145.zip/node_modules/xmlhttprequest-ssl/",\
         "packageDependencies": [\
           ["xmlhttprequest-ssl", "npm:2.0.0"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["xterm", [\
-      ["npm:5.3.0", {\
-        "packageLocation": "./.yarn/cache/xterm-npm-5.3.0-c1d15e5b2c-39bf5ea933.zip/node_modules/xterm/",\
-        "packageDependencies": [\
-          ["xterm", "npm:5.3.0"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["xterm-addon-fit", [\
-      ["npm:0.8.0", {\
-        "packageLocation": "./.yarn/cache/xterm-addon-fit-npm-0.8.0-459db19055-39f77c9ec7.zip/node_modules/xterm-addon-fit/",\
-        "packageDependencies": [\
-          ["xterm-addon-fit", "npm:0.8.0"]\
-        ],\
-        "linkType": "SOFT"\
-      }],\
-      ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.8.0", {\
-        "packageLocation": "./.yarn/__virtual__/xterm-addon-fit-virtual-a1a8059bf2/0/cache/xterm-addon-fit-npm-0.8.0-459db19055-39f77c9ec7.zip/node_modules/xterm-addon-fit/",\
-        "packageDependencies": [\
-          ["xterm-addon-fit", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.8.0"],\
-          ["@types/xterm", null],\
-          ["xterm", "npm:5.3.0"]\
-        ],\
-        "packagePeers": [\
-          "@types/xterm",\
-          "xterm"\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["xterm-addon-web-links", [\
-      ["npm:0.9.0", {\
-        "packageLocation": "./.yarn/cache/xterm-addon-web-links-npm-0.9.0-e75f3c1bc1-778076f3d7.zip/node_modules/xterm-addon-web-links/",\
-        "packageDependencies": [\
-          ["xterm-addon-web-links", "npm:0.9.0"]\
-        ],\
-        "linkType": "SOFT"\
-      }],\
-      ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.9.0", {\
-        "packageLocation": "./.yarn/__virtual__/xterm-addon-web-links-virtual-3dade179b2/0/cache/xterm-addon-web-links-npm-0.9.0-e75f3c1bc1-778076f3d7.zip/node_modules/xterm-addon-web-links/",\
-        "packageDependencies": [\
-          ["xterm-addon-web-links", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.9.0"],\
-          ["@types/xterm", null],\
-          ["xterm", "npm:5.3.0"]\
-        ],\
-        "packagePeers": [\
-          "@types/xterm",\
-          "xterm"\
         ],\
         "linkType": "HARD"\
       }]\
