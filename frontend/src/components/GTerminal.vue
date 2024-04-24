@@ -381,7 +381,6 @@ import GDisconnected from '@/components/icons/GDisconnected.vue'
 import GSplitVertically from '@/components/icons/GSplitVertically.vue'
 import GSplitHorizontally from '@/components/icons/GSplitHorizontally.vue'
 
-import { isGatewayTimeout } from '@/utils/error'
 import {
   targetText,
   transformHtml,
@@ -683,10 +682,7 @@ export default {
       try {
         await terminalSession.open()
       } catch (err) {
-        let message = get(err, 'response.data.message', err.message)
-        if (isGatewayTimeout(err)) {
-          message = 'Opening the terminal session timed out'
-        }
+        const message = get(err, 'response.data.message', err.message)
         this.showErrorSnackbarBottom(message)
         terminalSession.setDisconnectedState()
       }

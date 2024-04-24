@@ -43,6 +43,12 @@ import {
 } from '@/lodash'
 
 const serviceAccountRegex = /^system:serviceaccount:([^:]+):([^:]+)$/
+const sizeRegex = /^(\d+)Gi$/
+const emailRegex = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
+const colorCodeRegex = /^#([a-f0-9]{6}|[a-f0-9]{3})$/i
+const magnitudeNumberSuffixRegex = /^(\d+(?:\.\d*)?)([kmbt]?)$/i
+const versionRegex = /^(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:\.\d+)*([-+].+)?$/
+
 const logger = useLogger()
 
 export function emailToDisplayName (value) {
@@ -153,7 +159,6 @@ export function parseSize (value) {
   if (!value) {
     return 0
   }
-  const sizeRegex = /^(\d+)Gi$/
   const result = sizeRegex.exec(value)
   if (result) {
     const [, sizeValue] = result
@@ -164,7 +169,7 @@ export function parseSize (value) {
 }
 
 export function isEmail (value) {
-  return /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(value)
+  return emailRegex.test(value)
 }
 
 export function gravatarUrlGeneric (username, size = 128) {
@@ -350,7 +355,7 @@ export function isSelfTerminationWarning (expirationTimestamp) {
 }
 
 export function isValidTerminationDate (expirationTimestamp) {
-  return expirationTimestamp && new Date(expirationTimestamp) > new Date()
+  return !!expirationTimestamp && new Date(expirationTimestamp) > new Date()
 }
 
 export function isTypeDelete (lastOperation) {
@@ -601,12 +606,28 @@ export function targetText (target) {
   }
 }
 
-export function selectedImageIsNotLatest (machineImage, machineImages) {
-  const { version: testImageVersion, vendorName: testVendor } = machineImage
+const allowedSemverDiffs = {
+  patch: ['patch'],
+  minor: ['patch', 'minor'],
+  major: ['patch', 'minor', 'major'],
+}
 
+export function machineImageHasUpdate (machineImage, machineImages) {
+  let { updateStrategy } = machineImage
+  if (!allowedSemverDiffs[updateStrategy]) {
+    updateStrategy = 'major'
+  }
   return some(machineImages, ({ version, vendorName, isSupported }) => {
-    return testVendor === vendorName && semver.gt(version, testImageVersion) && isSupported
+    return isSupported &&
+      machineImage.vendorName === vendorName &&
+      semver.gt(version, machineImage.version) &&
+      allowedSemverDiffs[updateStrategy].includes(semver.diff(version, machineImage.version))
   })
+}
+
+export function machineVendorHasSupportedVersion (machineImage, machineImages) {
+  const { vendorName, isSupported } = machineImage
+  return some(machineImages, { vendorName, isSupported })
 }
 
 export const UNKNOWN_EXPIRED_TIMESTAMP = '1970-01-01T00:00:00Z'
@@ -625,7 +646,7 @@ export function mapTableHeader (headers, valueKey) {
 }
 
 export function isHtmlColorCode (value) {
-  return /^#([a-f0-9]{6}|[a-f0-9]{3})$/i.test(value)
+  return colorCodeRegex.test(value)
 }
 
 export class Shortcut {
@@ -646,7 +667,7 @@ export function omitKeysWithSuffix (obj, suffix) {
 }
 
 export function parseNumberWithMagnitudeSuffix (abbreviatedNumber) {
-  const [, number, suffix] = /^(\d+(?:\.\d*)?)([kmbt]?)$/i.exec(abbreviatedNumber) ?? []
+  const [, number, suffix] = magnitudeNumberSuffixRegex.exec(abbreviatedNumber) ?? []
   if (!number) {
     logger.error(`Failed to parse ${abbreviatedNumber} because it doesn't follow the required format: a number optionally with a decimal, followed by an optional magnitude suffix ('k', 'm', 'b', 't').`)
     return null
@@ -655,6 +676,13 @@ export function parseNumberWithMagnitudeSuffix (abbreviatedNumber) {
   const suffixFactors = { k: 1e3, m: 1e6, b: 1e9, t: 1e12 }
   const factor = suffixFactors[suffix?.toLowerCase()] ?? 1
   return Number(number) * factor
+}
+
+export function normalizeVersion (version) {
+  const [match, major, minor = '0', patch = '0', suffix = ''] = versionRegex.exec(version) ?? []
+  if (match) {
+    return [major, minor, patch].map(Number).join('.') + suffix
+  }
 }
 
 export default {
@@ -711,10 +739,10 @@ export default {
   includesNameOrAll,
   canI,
   targetText,
-  selectedImageIsNotLatest,
   sortedRoleDisplayNames,
   mapTableHeader,
   isHtmlColorCode,
   omitKeysWithSuffix,
   parseNumberWithMagnitudeSuffix,
+  normalizeVersion,
 }

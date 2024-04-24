@@ -67,6 +67,7 @@ SPDX-License-Identifier: Apache-2.0
 import {
   ref,
   computed,
+  toRef,
   watch,
 } from 'vue'
 import { storeToRefs } from 'pinia'
@@ -103,6 +104,8 @@ export default {
     },
   },
   setup (props) {
+    const type = toRef(props, 'type')
+
     const {
       shootItem,
       shootName,
@@ -119,7 +122,7 @@ export default {
       phaseType,
       rotationType,
     } = useShootStatusCredentialRotation(shootItem, {
-      type: props.type,
+      type: type.value,
     })
 
     const authnStore = useAuthnStore()
@@ -140,10 +143,6 @@ export default {
         return completionOperation.value
       }
       return startOperation.value
-    })
-
-    const type = computed(() => {
-      return get(rotationType.value, 'type')
     })
 
     const startOperation = computed(() => {

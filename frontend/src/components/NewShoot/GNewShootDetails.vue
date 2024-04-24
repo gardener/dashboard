@@ -10,32 +10,29 @@ SPDX-License-Identifier: Apache-2.0
       <v-col cols="3">
         <v-text-field
           ref="name"
-          v-model="shootName"
+          v-model="v$.shootName.$model"
           color="primary"
           label="Cluster Name"
           :counter="maxShootNameLength"
           :error-messages="getErrorMessages(v$.shootName)"
           hint="Maximum name length depends on project name"
           variant="underlined"
-          @input="v$.shootName.$touch()"
           @blur="v$.shootName.$touch()"
         />
       </v-col>
       <v-col cols="3">
         <v-select
-          v-model="kubernetesVersion"
-          v-messages-color="{ color: 'warning' }"
+          v-model="v$.kubernetesVersion.$model"
           color="primary"
           item-color="primary"
           label="Kubernetes Version"
           item-title="version"
           item-value="version"
-          :items="sortedKubernetesVersionsList"
+          :items="unexpiredKubernetesVersions"
           :error-messages="getErrorMessages(v$.kubernetesVersion)"
           :hint="versionHint"
           persistent-hint
           variant="underlined"
-          @change="v$.kubernetesVersion.$touch()"
           @blur="v$.kubernetesVersion.$touch()"
         >
           <template #item="{ item, props }">
@@ -43,6 +40,9 @@ SPDX-License-Identifier: Apache-2.0
               v-bind="props"
               :subtitle="versionItemDescription(item.raw)"
             />
+          </template>
+          <template #message="{ message }">
+            <g-multi-message :message="message" />
           </template>
         </v-select>
       </v-col>
@@ -55,7 +55,9 @@ SPDX-License-Identifier: Apache-2.0
     </v-row>
     <v-row>
       <v-col cols="12">
-        <g-static-token-kubeconfig-switch v-model="enableStaticTokenKubeconfig" />
+        <g-static-token-kubeconfig-switch
+          v-model="enableStaticTokenKubeconfig"
+        />
       </v-col>
     </v-row>
     <v-row>
@@ -96,13 +98,12 @@ import {
   maxLength,
 } from '@vuelidate/validators'
 
-import { useAuthzStore } from '@/store/authz'
 import { useConfigStore } from '@/store/config'
-import { useProjectStore } from '@/store/project'
 import { useShootStore } from '@/store/shoot'
 import { useShootContextStore } from '@/store/shootContext'
 
 import GStaticTokenKubeconfigSwitch from '@/components/GStaticTokenKubeconfigSwitch'
+import GMultiMessage from '@/components/GMultiMessage'
 
 import {
   withFieldName,
@@ -127,6 +128,7 @@ export default {
   components: {
     GPurpose: defineAsyncComponent(() => import('@/components/GPurpose')),
     GStaticTokenKubeconfigSwitch,
+    GMultiMessage,
   },
   setup () {
     return {
@@ -143,7 +145,10 @@ export default {
       noStartEndHyphen,
       lowerCaseAlphaNumHyphen,
       unique: withMessage('A cluster with this name already exists in this project',
-        value => !this.shootByNamespaceAndName({ namespace: this.namespace, name: value }),
+        value => !this.shootByNamespaceAndName({
+          namespace: this.shootNamespace,
+          name: value,
+        }),
       ),
     }
     rules.shootName = withFieldName('Cluster Name', shootNameRules)
@@ -165,39 +170,57 @@ export default {
       'workerless',
     ]),
     ...mapState(useShootContextStore, [
-      'k8sUpdates',
+      'shootNamespace',
+      'shootProjectName',
+      'maintenanceAutoUpdateKubernetesVersion',
       'sortedKubernetesVersions',
       'kubernetesVersionIsNotLatestPatch',
       'allPurposes',
     ]),
-    ...mapState(useProjectStore, [
-      'projectList',
-    ]),
-    ...mapState(useAuthzStore, [
-      'namespace',
-    ]),
     ...mapState(useConfigStore, [
       'sla',
     ]),
-    sortedKubernetesVersionsList () {
+    unexpiredKubernetesVersions () {
       return filter(this.sortedKubernetesVersions, ({ isExpired }) => !isExpired)
     },
     versionHint () {
-      const version = find(this.sortedKubernetesVersionsList, ['version', this.kubernetesVersion])
+      const version = find(this.unexpiredKubernetesVersions, ['version', this.kubernetesVersion])
       if (!version) {
-        return undefined
+        return
       }
-      const hintText = []
-      if (version.expirationDate) {
-        hintText.push(`Kubernetes version expires on: ${version.expirationDateString}. Kubernetes update will be enforced after that date.`)
-      }
-      if (this.k8sUpdates && this.kubernetesVersionIsNotLatestPatch) {
-        hintText.push('If you select a version which is not the latest patch version (except for preview versions), you should disable automatic Kubernetes updates')
+      const hints = []
+      if (version.isExpirationWarning) {
+        hints.push({
+          type: 'text',
+          hint: `Kubernetes version expires on: ${version.expirationDateString}. Kubernetes update will be enforced after that date.`,
+          severity: 'warning',
+        })
       }
       if (version.isPreview) {
-        hintText.push('Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not recommended for production usage')
+        hints.push({
+          type: 'text',
+          hint: 'Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not recommended for production usage',
+          severity: 'warning',
+        })
       }
-      return join(hintText, ' / ')
+      if (version.isDeprecated) {
+        const hint = version.expirationDate
+          ? `This Kubernetes version is deprecated. It will expire on ${version.expirationDateString}`
+          : 'This Kubernetes version is deprecated'
+        hints.push({
+          type: 'text',
+          hint,
+          severity: 'warning',
+        })
+      }
+      if (this.maintenanceAutoUpdateKubernetesVersion && this.kubernetesVersionIsNotLatestPatch) {
+        hints.push({
+          type: 'text',
+          hint: 'You selected a version that is eligible for an automatic update. You should disable automatic Kubernetes updates if you want to maintain this specific version',
+          severity: 'info',
+        })
+      }
+      return JSON.stringify(hints)
     },
     slaDescriptionHtml () {
       return transformHtml(this.sla.description)
@@ -205,13 +228,8 @@ export default {
     slaTitle () {
       return this.sla.title
     },
-    projectName () {
-      const predicate = item => item.metadata.namespace === this.namespace
-      const project = find(this.projectList, predicate)
-      return project.metadata.name
-    },
     maxShootNameLength () {
-      return 21 - this.projectName.length
+      return 21 - this.shootProjectName.length
     },
   },
   mounted () {
@@ -221,12 +239,6 @@ export default {
     ...mapActions(useShootStore, [
       'shootByNamespaceAndName',
     ]),
-    onInputName () {
-      this.v$.name.$touch()
-    },
-    onInputKubernetesVersion () {
-      this.v$.kubernetesVersion.$touch()
-    },
     versionItemDescription (version) {
       const itemDescription = []
       if (version.classification) {

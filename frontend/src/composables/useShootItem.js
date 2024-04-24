@@ -122,6 +122,19 @@ export function createShootItemComposable (shootItem, options = {}) {
   const shootK8sVersion = computed(() => {
     return get(shootSpec.value, 'kubernetes.version')
   })
+  const shootAvailableK8sUpdates = computed(() => {
+    return cloudProfileStore.availableKubernetesUpdatesForShoot(shootK8sVersion.value, shootCloudProfileName.value)
+  })
+  const shootSupportedPatchAvailable = computed(() => {
+    return !!find(shootAvailableK8sUpdates.value?.patch, 'isSupported')
+  })
+  const shootSupportedUpgradeAvailable = computed(() => {
+    return !!find(shootAvailableK8sUpdates.value?.minor, 'isSupported')
+  })
+  const shootKubernetesVersionObject = computed(() => {
+    const kubernetesVersionObjects = cloudProfileStore.kubernetesVersions(shootCloudProfileName.value)
+    return find(kubernetesVersionObjects, ['version', shootK8sVersion.value]) ?? {}
+  })
   const shootEnableStaticTokenKubeconfig = computed(() => {
     return get(shootSpec.value, 'kubernetes.enableStaticTokenKubeconfig', true)
   })
@@ -319,6 +332,10 @@ export function createShootItemComposable (shootItem, options = {}) {
     isShootStatusHibernationProgressing,
     shootSecretBindingName,
     shootK8sVersion,
+    shootAvailableK8sUpdates,
+    shootKubernetesVersionObject,
+    shootSupportedPatchAvailable,
+    shootSupportedUpgradeAvailable,
     shootEnableStaticTokenKubeconfig,
     shootCloudProfileName,
     shootCloudProviderKind,

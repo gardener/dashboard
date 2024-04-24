@@ -199,15 +199,11 @@ data:
           - {{ . }}
           {{- end }}
         {{- end }}
-        {{- if .Values.global.dashboard.frontendConfig.ticket.newTicketLabels }}
-        newTicketLabels:
-          {{- range .Values.global.dashboard.frontendConfig.ticket.newTicketLabels }}
-          - {{ . }}
-          {{- end }}
-        {{- end }}
         gitHubRepoUrl: {{ .Values.global.dashboard.frontendConfig.ticket.gitHubRepoUrl }}
         avatarSource: {{ .Values.global.dashboard.frontendConfig.ticket.avatarSource | default "github" }}
-        issueDescriptionTemplate: {{ quote .Values.global.dashboard.frontendConfig.ticket.issueDescriptionTemplate }}
+        {{- if .Values.global.dashboard.frontendConfig.ticket.newIssue }}
+        newIssue: {{ toYaml .Values.global.dashboard.frontendConfig.ticket.newIssue | trim | nindent 10 }}
+        {{- end }}
       {{- end }}
       features:
         terminalEnabled: {{ .Values.global.dashboard.frontendConfig.features.terminalEnabled | default false }}

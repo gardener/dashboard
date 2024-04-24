@@ -24,26 +24,27 @@ SPDX-License-Identifier: Apache-2.0
     >
       <v-list-item>
         <g-shoot-action-change-hibernation
-          v-model="changeHibernationDialog"
           text
         />
       </v-list-item>
       <v-list-item>
         <g-shoot-action-maintenance-start
-          v-model="maintenanceStartDialog"
           text
         />
       </v-list-item>
       <v-list-item>
         <g-shoot-action-reconcile-start
-          v-model="reconcileStartDialog"
           text
         />
       </v-list-item>
       <v-list-item>
         <g-shoot-action-rotate-credentials
-          v-model="rotateCredentialsDialog"
           :type="rotationType"
+          text
+        />
+      </v-list-item>
+      <v-list-item>
+        <g-shoot-version-configuration
           text
         />
       </v-list-item>
@@ -51,12 +52,10 @@ SPDX-License-Identifier: Apache-2.0
       <v-list-item>
         <g-shoot-action-delete-cluster
           v-if="!canForceDeleteShoot"
-          v-model="deleteClusterDialog"
           text
         />
         <g-shoot-action-force-delete
           v-else
-          v-model="forceDeleteDialog"
           text
         />
       </v-list-item>
@@ -72,6 +71,7 @@ import GShootActionReconcileStart from '@/components/GShootActionReconcileStart.
 import GShootActionRotateCredentials from '@/components/GShootActionRotateCredentials.vue'
 import GShootActionDeleteCluster from '@/components/GShootActionDeleteCluster.vue'
 import GShootActionForceDelete from '@/components/GShootActionForceDelete.vue'
+import GShootVersionConfiguration from '@/components/ShootVersion/GShootVersionConfiguration.vue'
 
 import { useShootItem } from '@/composables/useShootItem'
 
@@ -84,6 +84,7 @@ export default {
     GShootActionRotateCredentials,
     GShootActionDeleteCluster,
     GShootActionForceDelete,
+    GShootVersionConfiguration,
   },
   setup () {
     const shootItemState = useShootItem()
@@ -95,12 +96,6 @@ export default {
   data () {
     return {
       menu: false,
-      reconcileStartDialog: false,
-      changeHibernationDialog: false,
-      maintenanceStartDialog: false,
-      rotateCredentialsDialog: false,
-      deleteClusterDialog: false,
-      forceDeleteDialog: false,
       rotationType: 'ALL_CREDENTIALS',
     }
   },

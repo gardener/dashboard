@@ -36,6 +36,12 @@ describe('stores', () => {
       }])
     }
 
+    function setMachineImages (machineImages) {
+      setData({
+        machineImages,
+      })
+    }
+
     function setKubernetesVersions (kubernetesVersions) {
       setData({
         kubernetes: {
@@ -44,9 +50,14 @@ describe('stores', () => {
       })
     }
 
-    function setMachineImages (machineImages) {
-      setData({ machineImages })
-    }
+    beforeAll(() => {
+      vi.useFakeTimers()
+      vi.setSystemTime(new Date('2024-01-01'))
+    })
+
+    afterAll(() => {
+      vi.useRealTimers()
+    })
 
     beforeEach(async () => {
       setActivePinia(createPinia())
@@ -58,38 +69,41 @@ describe('stores', () => {
         vendorHints: [{
           type: 'warning',
           message: 'test',
-          matchNames: ['suse-jeos', 'suse-chost'],
+          matchNames: ['gardenlinux'],
         }],
       })
       cloudProfileStore = useCloudProfileStore()
-      cloudProfileStore.list = []
+      cloudProfileStore.setCloudProfiles([])
     })
 
     describe('machineImages', () => {
+      let decoratedAndSortedMachineImages
+
       const machineImages = [
         {
-          name: 'garden-linux',
+          name: 'gardenlinux',
           versions: [
             {
-              version: '2135.6.0',
-            },
-          ],
-        },
-        {
-          name: 'suse-chost',
-          versions: [
-            {
-              version: '15.1.20190927',
+              version: '1.2.0',
               classification: 'preview',
             },
             {
-              version: '15.1.20191027',
-              expirationDate: '2119-04-05T01:02:03Z', // not expired
+              version: '1.1.5',
               classification: 'supported',
             },
             {
-              version: '15.1.20191127',
-              expirationDate: '2019-04-05T01:02:03Z', // expired
+              version: '1.1.4',
+              expirationDate: '2024-04-05T01:02:03Z', // not expired
+              classification: 'supported',
+            },
+            {
+              version: '1.1.3',
+              expirationDate: '2024-01-05T01:02:03Z', // not expired but expiration warning
+              classification: 'supported',
+            },
+            {
+              version: '1.1.2',
+              expirationDate: '2023-04-05T01:02:03Z', // expired
             },
           ],
         },
@@ -97,10 +111,18 @@ describe('stores', () => {
           name: 'foo',
           versions: [
             {
-              version: '1.02.3', // invalid version (not semver compatible)
+              version: '1.02', // incompatible version (not semver compatible - can be normalized)
             },
             {
-              version: '1.2.3',
+              version: '1.2.x', // invalid version (not harmonizable)
+            },
+            {
+              version: '1.3.3',
+              expirationDate: '2024-01-05T01:02:03Z', // not expired but expiration warning
+            },
+            {
+              version: '1.3.4',
+              classification: 'deprecated',
             },
           ],
         },
@@ -108,192 +130,164 @@ describe('stores', () => {
 
       beforeEach(() => {
         setMachineImages(machineImages)
+        decoratedAndSortedMachineImages = cloudProfileStore.machineImagesByCloudProfileName('foo')
       })
 
       it('should transform machine images from cloud profile', () => {
-        const dashboardMachineImages = cloudProfileStore.machineImagesByCloudProfileName('foo')
-        expect(dashboardMachineImages).toHaveLength(5)
+        expect(decoratedAndSortedMachineImages).toHaveLength(8)
 
-        const expiredImage = find(dashboardMachineImages, { name: 'suse-chost', version: '15.1.20191127' })
+        const expiredImage = find(decoratedAndSortedMachineImages, { name: 'gardenlinux', version: '1.1.2' })
         expect(expiredImage.isExpired).toBe(true)
         expect(expiredImage.isSupported).toBe(false)
 
-        const invalidImage = find(dashboardMachineImages, { name: 'foo', version: '1.02.3' })
+        const imageWithExpirationDate = find(decoratedAndSortedMachineImages, { name: 'gardenlinux', version: '1.1.4' })
+        expect(imageWithExpirationDate.expirationDate).toBe('2024-04-05T01:02:03Z')
+        expect(imageWithExpirationDate.expirationDateString).toBeDefined()
+        expect(imageWithExpirationDate.vendorName).toBe('gardenlinux')
+        expect(imageWithExpirationDate.icon).toBe('gardenlinux')
+        expect(imageWithExpirationDate.vendorHint).toBeDefined()
+        expect(imageWithExpirationDate.vendorHint).toEqual(configStore.vendorHints[0])
+        expect(imageWithExpirationDate.classification).toBe('supported')
+        expect(imageWithExpirationDate.isSupported).toBe(true)
+        expect(imageWithExpirationDate.isDeprecated).toBe(false)
+        expect(imageWithExpirationDate.isPreview).toBe(false)
+        expect(imageWithExpirationDate.isExpirationWarning).toBe(false)
+        expect(imageWithExpirationDate).toBe(decoratedAndSortedMachineImages[2]) // check sorting
+
+        const previewImage = find(decoratedAndSortedMachineImages, { name: 'gardenlinux', version: '1.2.0' })
+        expect(previewImage.isSupported).toBe(false)
+        expect(previewImage.isPreview).toBe(true)
+
+        const normalizedImage = find(decoratedAndSortedMachineImages, { name: 'foo', version: '1.2.0' })
+        expect(normalizedImage).toBeDefined()
+
+        const invalidImage = find(decoratedAndSortedMachineImages, { name: 'foo', version: '1.2.x' })
         expect(invalidImage).toBeUndefined()
 
-        const suseImage = find(dashboardMachineImages, { name: 'suse-chost', version: '15.1.20191027' })
-        expect(suseImage.expirationDate).toBe('2119-04-05T01:02:03Z')
-        expect(suseImage.expirationDateString).toBeDefined()
-        expect(suseImage.vendorName).toBe('suse-chost')
-        expect(suseImage.icon).toBe('suse-chost')
-        expect(suseImage.vendorHint).toBeDefined()
-        expect(suseImage.vendorHint).toEqual(configStore.vendorHints[0])
-        expect(suseImage.classification).toBe('supported')
-        expect(suseImage.isSupported).toBe(true)
-        expect(suseImage.isDeprecated).toBe(false)
-        expect(suseImage.isPreview).toBe(false)
-        expect(suseImage).toBe(dashboardMachineImages[2]) // check sorting
+        const imageWithExpirationWarning = find(decoratedAndSortedMachineImages, { name: 'foo', version: '1.3.3' })
+        expect(imageWithExpirationWarning.vendorHint).toBeUndefined()
+        expect(imageWithExpirationWarning.isSupported).toBe(true)
+        expect(imageWithExpirationWarning.isExpirationWarning).toBe(true)
 
-        const suseImage2 = find(dashboardMachineImages, { name: 'suse-chost', version: '15.1.20190927' })
-        expect(suseImage2.isSupported).toBe(false)
-        expect(suseImage2.isPreview).toBe(true)
-
-        const fooImage = find(dashboardMachineImages, { name: 'foo', version: '1.2.3' })
-        expect(fooImage.vendorHint).toBeUndefined()
-        expect(fooImage.isSupported).toBe(true)
-      })
-    })
-
-    describe('machineImages - update', () => {
-      const machineImages = [
-        {
-          name: 'gardenlinux',
-          versions: [{
-            version: '1.1.1',
-            expirationDate: '2119-04-05T01:02:03Z', // not expired
-            classification: 'supported',
-          }],
-        },
-        {
-          name: 'gardenlinux2',
-          versions: [{
-            version: '1.2.2',
-            classification: 'supported',
-          }],
-        },
-        {
-          name: 'gardenlinux3',
-          versions: [{
-            version: '1.3.2',
-            classification: 'supported',
-          }],
-        },
-        {
-          name: 'gardenlinux4',
-          versions: [{
-            version: '1.3.3',
-            expirationDate: '2119-04-05T01:02:03Z', // not expired
-            classification: 'preview',
-          }],
-        },
-        {
-          name: 'coreos',
-          versions: [{
-            version: '3.3.2',
-            expirationDate: '2019-04-05T01:02:03Z', // expired
-            classification: 'supported',
-          }],
-        },
-        {
-          name: 'gardenlinux5',
-          versions: [{
-            version: '1.3.4',
-            classification: 'deprecated',
-          }],
-        },
-        {
-          name: 'gardenlinux6',
-          versions: [{
-            version: '1.4.4',
-            classification: 'preview',
-          }],
-        },
-      ]
-
-      beforeEach(() => {
-        setMachineImages(machineImages)
+        const deprecatedImageWithNoExpiration = find(decoratedAndSortedMachineImages, { name: 'foo', version: '1.3.4' })
+        expect(deprecatedImageWithNoExpiration.isDeprecated).toBe(true)
+        expect(deprecatedImageWithNoExpiration.isExpirationWarning).toBe(false)
       })
 
       function generateWorkerGroups (machineImages) {
         return machineImages.map(machineImage => {
           return {
-            name: 'worker',
+            name: `worker-${Math.random()}`,
             machine: {
               type: 'type',
               image: {
                 name: machineImage.name,
-                version: machineImage.versions[0].version,
+                version: machineImage.version,
               },
             },
           }
         })
       }
 
-      function flattenMachineImage (machineImage) {
-        return {
-          name: machineImage.name,
-          ...machineImage.versions[0],
-        }
-      }
-
       describe('#expiringWorkerGroupsForShoot', () => {
-        it('one should be info level (update available, auto update enabled))', () => {
-          const workers = generateWorkerGroups([
-            machineImages[0],
-            machineImages[1],
-          ])
-          const expiredWorkerGroups = cloudProfileStore.expiringWorkerGroupsForShoot(workers, 'foo', true)
+        it('one should be warning level (update available, auto update enabled, expiration warning))', () => {
+          const imageWithExpirationWarning = find(decoratedAndSortedMachineImages, { name: 'gardenlinux', version: '1.1.3' })
+          const imageWithExpirationDate = find(decoratedAndSortedMachineImages, { name: 'gardenlinux', version: '1.1.4' })
+          const imageWithNoUpdate = find(decoratedAndSortedMachineImages, { name: 'gardenlinux', version: '1.1.5' })
 
+          const workers = generateWorkerGroups([
+            imageWithExpirationDate,
+            imageWithNoUpdate,
+            imageWithExpirationWarning,
+          ])
+          let expiredWorkerGroups = cloudProfileStore.expiringWorkerGroupsForShoot(workers, 'foo', false)
+          expect(expiredWorkerGroups).toBeInstanceOf(Array)
           expect(expiredWorkerGroups).toHaveLength(1)
-          expect(expiredWorkerGroups[0]).toEqual(expect.objectContaining({
-            ...flattenMachineImage(machineImages[0]),
+          expect(expiredWorkerGroups[0]).toMatchObject({
+            ...imageWithExpirationWarning,
+            workerName: workers[2].name,
+            isValidTerminationDate: true,
+            severity: 'warning',
+          })
+
+          expiredWorkerGroups = cloudProfileStore.expiringWorkerGroupsForShoot(workers, 'foo', true)
+          expect(expiredWorkerGroups).toBeInstanceOf(Array)
+          expect(expiredWorkerGroups).toHaveLength(2) // Now also include auto update information
+          expect(expiredWorkerGroups[0]).toMatchObject({
+            ...imageWithExpirationDate,
             workerName: workers[0].name,
             isValidTerminationDate: true,
             severity: 'info',
-          }))
+          })
+          expect(expiredWorkerGroups[1]).toMatchObject({
+            ...imageWithExpirationWarning,
+            workerName: workers[2].name,
+            isValidTerminationDate: true,
+            severity: 'warning',
+          })
         })
 
         it('one should be warning level (update available, auto update disabled))', () => {
+          const imageWithExpirationWarning = find(decoratedAndSortedMachineImages, { name: 'gardenlinux', version: '1.1.3' })
+          const imageWithExpirationDate = find(decoratedAndSortedMachineImages, { name: 'gardenlinux', version: '1.1.4' })
+          const imageWithNoUpdate = find(decoratedAndSortedMachineImages, { name: 'gardenlinux', version: '1.1.5' })
+
           const workers = generateWorkerGroups([
-            machineImages[0],
+            imageWithExpirationDate,
+            imageWithNoUpdate,
+            imageWithExpirationWarning,
           ])
           const expiredWorkerGroups = cloudProfileStore.expiringWorkerGroupsForShoot(workers, 'foo', false)
           expect(expiredWorkerGroups).toBeInstanceOf(Array)
           expect(expiredWorkerGroups).toHaveLength(1)
-          expect(expiredWorkerGroups[0]).toEqual(expect.objectContaining({
-            ...flattenMachineImage(machineImages[0]),
-            workerName: workers[0].name,
+          expect(expiredWorkerGroups[0]).toMatchObject({
+            ...imageWithExpirationWarning,
+            workerName: workers[2].name,
             isValidTerminationDate: true,
             severity: 'warning',
-          }))
+          })
         })
 
-        it('one should be info level, two error (update available, auto update enabled))', () => {
+        it('one should be warning level (update available, auto update enabled, expiration warning), one error (no update path)', () => {
+          const imageWithExpirationWarning = find(decoratedAndSortedMachineImages, { name: 'gardenlinux', version: '1.1.3' })
+          // version has expiration warning, newer version exists but is deprecated
+          const imageWithNoUpdatePath = find(decoratedAndSortedMachineImages, { name: 'foo', version: '1.3.3' })
+          // no newer version exists, version is deprecated but there is no expiration date
+          const deprecatedImageWithNoExpiration = find(decoratedAndSortedMachineImages, { name: 'foo', version: '1.3.4' })
+
           const workers = generateWorkerGroups([
-            machineImages[0],
-            machineImages[1],
-            machineImages[3],
-            machineImages[4],
+            imageWithExpirationWarning,
+            imageWithNoUpdatePath,
+            deprecatedImageWithNoExpiration,
           ])
           const expiredWorkerGroups = cloudProfileStore.expiringWorkerGroupsForShoot(workers, 'foo', true)
           expect(expiredWorkerGroups).toBeInstanceOf(Array)
-          expect(expiredWorkerGroups).toHaveLength(3)
-          expect(expiredWorkerGroups[0]).toEqual(expect.objectContaining({
-            ...flattenMachineImage(machineImages[0]),
+          expect(expiredWorkerGroups).toHaveLength(2)
+          expect(expiredWorkerGroups[0]).toMatchObject({
+            ...imageWithExpirationWarning,
             workerName: workers[0].name,
             isValidTerminationDate: true,
-            severity: 'info',
-          }))
-          expect(expiredWorkerGroups[1]).toEqual(expect.objectContaining({
-            ...flattenMachineImage(machineImages[3]),
-            workerName: workers[2].name,
+            severity: 'warning',
+          })
+          expect(expiredWorkerGroups[1]).toMatchObject({
+            ...imageWithNoUpdatePath,
+            workerName: workers[1].name,
             isValidTerminationDate: true,
             severity: 'error',
-          }))
-          expect(expiredWorkerGroups[2]).toEqual(expect.objectContaining({
-            ...flattenMachineImage(machineImages[4]),
-            workerName: workers[3].name,
-            isValidTerminationDate: false,
-            severity: 'error',
-          }))
+            supportedVersionAvailable: true,
+          })
         })
 
-        it('should be empty array (ignore versions without expiration date))', () => {
+        it('should be empty array (ignore versions without expiration warning))', () => {
+          const previewImage = find(decoratedAndSortedMachineImages, { name: 'gardenlinux', version: '1.2.0' })
+          const imageWithExpirationDate = find(decoratedAndSortedMachineImages, { name: 'gardenlinux', version: '1.1.4' })
+          const imageWithNoUpdate = find(decoratedAndSortedMachineImages, { name: 'gardenlinux', version: '1.1.5' })
           const workers = generateWorkerGroups([
-            machineImages[1],
-            machineImages[2],
+            previewImage,
+            imageWithExpirationDate,
+            imageWithNoUpdate,
           ])
-          const expiredWorkerGroups = cloudProfileStore.expiringWorkerGroupsForShoot(workers, 'foo', true)
+          const expiredWorkerGroups = cloudProfileStore.expiringWorkerGroupsForShoot(workers, 'foo', false)
           expect(expiredWorkerGroups).toBeInstanceOf(Array)
           expect(expiredWorkerGroups).toHaveLength(0)
         })
@@ -301,231 +295,227 @@ describe('stores', () => {
     })
 
     describe('kubernetes.versions', () => {
-      describe('#sortedKubernetesVersions', () => {
-        const kubernetesVersions = [
-          {
-            version: '1.13.4',
-            classification: 'deprecated',
-          },
-          {
-            version: '1.14.0',
-          },
-          {
-            expirationDate: '2120-04-12T23:59:59Z', // not expired
-            version: '1.16.3',
-            classification: 'supported',
-          },
-          {
-            expirationDate: '2019-03-15T23:59:59Z', // expired
-            version: '1.16.2',
-          },
-          {
-            version: '1.06.2', // invalid version (not semver compatible)
-          },
-        ]
-
-        beforeEach(() => {
-          setKubernetesVersions(kubernetesVersions)
-        })
-
-        it('should filter kubernetes versions from cloud profile', () => {
-          const dashboardVersions = cloudProfileStore.sortedKubernetesVersions('foo')
-          expect(dashboardVersions).toHaveLength(4)
-
-          const expiredVersion = find(dashboardVersions, { version: '1.16.2' })
-          expect(expiredVersion.isExpired).toBe(true)
-          expect(expiredVersion.isSupported).toBe(false)
-
-          const invalidVersion = find(dashboardVersions, { version: '1.06.2' })
-          expect(invalidVersion).toBeUndefined()
-
-          const supportedVersion = find(dashboardVersions, { version: '1.14.0' })
-          expect(supportedVersion.isSupported).toBe(true)
-
-          const kubernetesVersion = find(dashboardVersions, { version: '1.16.3' })
-          expect(kubernetesVersion.expirationDate).toBe('2120-04-12T23:59:59Z')
-          expect(kubernetesVersion.expirationDateString).toBeDefined()
-          expect(kubernetesVersion.isSupported).toBe(true)
-          expect(kubernetesVersion).toBe(dashboardVersions[0]) // check sorting
-        })
-      })
-      describe('#availableKubernetesUpdatesForShoot', () => {
-        const kubernetesVersions = [
-          {
-            classification: 'preview',
-            version: '2.0.0',
-          },
-          {
-            classification: 'supported',
-            version: '1.18.3',
-          },
-          {
-            expirationDate: '2020-01-31T23:59:59Z', // expired
-            version: '1.18.2',
-          },
-          {
-            classification: 'supported',
-            version: '1.17.7',
-          },
-          {
-            classification: 'supported',
-            version: '1.16.10',
-          },
-          {
-            classification: 'deprecated',
-            expirationDate: '2120-08-31T23:59:59Z',
-            version: '1.16.9',
-          },
-          {
-            version: '1.15.0',
-          },
-        ]
-
-        beforeEach(() => {
-          setKubernetesVersions(kubernetesVersions)
-        })
-
-        it('should return available K8sUpdates for given version', () => {
-          const availableK8sUpdates = cloudProfileStore.availableKubernetesUpdatesForShoot('1.16.9', 'foo')
-          expect(availableK8sUpdates.minor[0]).toEqual(expect.objectContaining(kubernetesVersions[1]))
-          expect(availableK8sUpdates.patch[0]).toEqual(expect.objectContaining(kubernetesVersions[4]))
-          expect(availableK8sUpdates.major[0]).toEqual(expect.objectContaining(kubernetesVersions[0]))
-        })
-
-        it('should differentiate between patch/minor/major available K8sUpdates for given version, filter out expired', () => {
-          const availableK8sUpdates = cloudProfileStore.availableKubernetesUpdatesForShoot('1.16.9', 'foo')
-          expect(availableK8sUpdates.patch.length).toBe(1)
-          expect(availableK8sUpdates.minor.length).toBe(2)
-          expect(availableK8sUpdates.major.length).toBe(1)
-        })
-      })
-    })
-
-    describe('kubernetes.versions - update', () => {
+      const preview22Version = {
+        classification: 'preview',
+        version: '2.2.0',
+      }
+      const supported20Version = {
+        version: '2.0.0',
+        classification: 'supported',
+      }
+      const deprecated181VersionWithoutExpiration = {
+        version: '1.18.1',
+        classification: 'deprecated',
+      }
+      const supported18VersionWithExpirationWarning = {
+        version: '1.18.0',
+        classification: 'supported',
+        expirationDate: '2024-01-15T23:59:59Z', // not expired but expiration warning
+      }
+      const supported17VersionWithExpirationWarning = {
+        version: '1.17.0',
+        classification: 'supported',
+        expirationDate: '2024-01-15T23:59:59Z', // not expired but expiration warning
+      }
+      const preview166Version = {
+        version: '1.16.6',
+        classification: 'preview',
+      }
+      const supported165VersionWithExpiration = {
+        expirationDate: '2024-04-12T23:59:59Z', // not expired
+        version: '1.16.5',
+        classification: 'supported',
+      }
+      const unclassified164VersionWithExpiration = {
+        expirationDate: '2024-04-12T23:59:59Z', // not expired
+        version: '1.16.4',
+      }
+      const deprecatedVersion = {
+        version: '1.16.3',
+        classification: 'deprecated',
+      }
+      const supported162VersionWithExpirationWarning = {
+        expirationDate: '2024-01-15T23:59:59Z', // not expired but expiration warning
+        version: '1.16.2',
+        classification: 'supported',
+      }
+      const expiredVersion = {
+        expirationDate: '2023-03-15T23:59:59Z', // expired
+        version: '1.16.1',
+      }
+      const deprecatedOldestVersion = {
+        version: '1.16.0',
+        classification: 'deprecated',
+      }
+      const invalidVersion = {
+        version: '1.06.2',
+      }
       const kubernetesVersions = [
-        {
-          version: '1.1.1',
-          expirationDate: '2119-04-05T01:02:03Z', // not expired
-        },
-        {
-          version: '1.1.2',
-          expirationDate: '2119-04-05T01:02:03Z', // not expired
-        },
-        {
-          version: '1.2.4',
-        },
-        {
-          classification: 'preview',
-          version: '1.2.5',
-        },
-        {
-          version: '1.3.4',
-        },
-        {
-          version: '1.3.5',
-        },
-        {
-          classification: 'preview',
-          version: '1.4.0',
-        },
-        {
-          version: '1.5.0',
-          expirationDate: '2019-04-05T01:02:03Z', // expired
-        },
-        {
-          version: '3.3.2',
-        },
+        supported165VersionWithExpiration, // 1.16.5 on top to test sorting
+        preview22Version, // 2.1.0
+        supported20Version, // 2.0.0
+        supported18VersionWithExpirationWarning, // 1.18.0
+        deprecated181VersionWithoutExpiration, // 1.18.1
+        supported17VersionWithExpirationWarning, // 1.17.0
+        preview166Version, // 1.16.6
+        unclassified164VersionWithExpiration, // 1.16.4
+        deprecatedVersion, // 1.16.3
+        supported162VersionWithExpirationWarning, // 1.16.2
+        expiredVersion, // 1.16.1
+        invalidVersion, // 1.06.2 not semver compatible
+        deprecatedOldestVersion, // 1.16.0
       ]
 
       beforeEach(() => {
         setKubernetesVersions(kubernetesVersions)
       })
 
-      describe('#kubernetesVersionIsNotLatestPatch', () => {
-        it('selected kubernetes version should be latest (multiple same minor)', () => {
-          const result = cloudProfileStore.kubernetesVersionIsNotLatestPatch(kubernetesVersions[1].version, 'foo')
-          expect(result).toBe(false)
+      describe('#sortedKubernetesVersions', () => {
+        it('should filter and sort kubernetes versions from cloud profile', () => {
+          const decoratedAndSortedVersions = cloudProfileStore.sortedKubernetesVersions('foo')
+          expect(decoratedAndSortedVersions).toHaveLength(12)
+
+          const expiredDecoratedVersion = find(decoratedAndSortedVersions, expiredVersion)
+          expect(expiredDecoratedVersion.isExpired).toBe(true)
+          expect(expiredDecoratedVersion.isSupported).toBe(false)
+
+          const decoratedVersionWithExpirationWarning = find(decoratedAndSortedVersions, supported162VersionWithExpirationWarning)
+          expect(decoratedVersionWithExpirationWarning.isExpirationWarning).toBe(true)
+
+          const invalidDecoratedVersion = find(decoratedAndSortedVersions, invalidVersion)
+          expect(invalidDecoratedVersion).toBeUndefined()
+
+          const unclassifiedDecoratedVersion = find(decoratedAndSortedVersions, unclassified164VersionWithExpiration)
+          expect(unclassifiedDecoratedVersion.isSupported).toBe(true)
+
+          const previewDecoratedVersion = find(decoratedAndSortedVersions, preview22Version)
+          expect(previewDecoratedVersion.isPreview).toBe(true)
+
+          const decoratedSupported165Version = find(decoratedAndSortedVersions, supported165VersionWithExpiration)
+          expect(decoratedSupported165Version.expirationDate).toBe('2024-04-12T23:59:59Z')
+          expect(decoratedSupported165Version.expirationDateString).toBeDefined()
+          expect(decoratedSupported165Version.isSupported).toBe(true)
+          expect(decoratedSupported165Version).toBe(decoratedAndSortedVersions[6]) // check sorting
+        })
+      })
+      describe('#availableKubernetesUpdatesForShoot', () => {
+        it('should differentiate between patch/minor/major available K8sUpdates for given version, filter out expired', () => {
+          const availableK8sUpdates = cloudProfileStore.availableKubernetesUpdatesForShoot(deprecatedOldestVersion.version, 'foo')
+          expect(availableK8sUpdates.patch.length).toBe(5)
+          expect(availableK8sUpdates.minor.length).toBe(3)
+          expect(availableK8sUpdates.major.length).toBe(2)
         })
 
-        it('selected kubernetes version should be latest (one minor, one major, one preview update available)', () => {
-          const result = cloudProfileStore.kubernetesVersionIsNotLatestPatch(kubernetesVersions[2].version, 'foo')
+        it('should return available K8sUpdates for given version', () => {
+          const availableK8sUpdates = cloudProfileStore.availableKubernetesUpdatesForShoot(unclassified164VersionWithExpiration.version, 'foo')
+          expect(availableK8sUpdates.patch[0]).toEqual(expect.objectContaining(supported165VersionWithExpiration))
+          expect(availableK8sUpdates.minor[0]).toEqual(expect.objectContaining(supported18VersionWithExpirationWarning))
+          expect(availableK8sUpdates.major[0]).toEqual(expect.objectContaining(preview22Version))
+        })
+      })
+      describe('#kubernetesVersionIsNotLatestPatch', () => {
+        it('selected kubernetes version should be latest (one minor, one major, one preview patch update available)', () => {
+          const result = cloudProfileStore.kubernetesVersionIsNotLatestPatch(supported165VersionWithExpiration.version, 'foo')
           expect(result).toBe(false)
         })
 
         it('selected kubernetes version should not be latest', () => {
-          const result = cloudProfileStore.kubernetesVersionIsNotLatestPatch(kubernetesVersions[0].version, 'foo')
+          const result = cloudProfileStore.kubernetesVersionIsNotLatestPatch(supported162VersionWithExpirationWarning.version, 'foo')
           expect(result).toBe(true)
         })
       })
 
       describe('#k8sVersionUpdatePathAvailable', () => {
         it('selected kubernetes version should have update path (minor update available)', () => {
-          const result = cloudProfileStore.kubernetesVersionUpdatePathAvailable(kubernetesVersions[3].version, 'foo')
+          const result = cloudProfileStore.kubernetesVersionUpdatePathAvailable(supported17VersionWithExpirationWarning.version, 'foo')
           expect(result).toBe(true)
         })
 
         it('selected kubernetes version should have update path (patch update available)', () => {
-          const result = cloudProfileStore.kubernetesVersionUpdatePathAvailable(kubernetesVersions[4].version, 'foo')
+          const result = cloudProfileStore.kubernetesVersionUpdatePathAvailable(unclassified164VersionWithExpiration.version, 'foo')
           expect(result).toBe(true)
         })
 
         it('selected kubernetes version should not have update path (minor update is preview)', () => {
-          const result = cloudProfileStore.kubernetesVersionUpdatePathAvailable(kubernetesVersions[5].version, 'foo')
+          const result = cloudProfileStore.kubernetesVersionUpdatePathAvailable(supported20Version.version, 'foo')
           expect(result).toBe(false)
         })
 
-        it('selected kubernetes version should not have update path (no next minor version update available)', () => {
-          const result = cloudProfileStore.kubernetesVersionUpdatePathAvailable(kubernetesVersions[7].version, 'foo')
+        it('selected kubernetes version should not have update path (no newer version available)', () => {
+          const result = cloudProfileStore.kubernetesVersionUpdatePathAvailable(deprecated181VersionWithoutExpiration.version, 'foo')
           expect(result).toBe(false)
         })
       })
 
       describe('#k8sVersionExpirationForShoot', () => {
-        it('should be info level (patch avialable, auto update enabled))', () => {
-          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(kubernetesVersions[0].version, 'foo', true)
+        it('should be info level (patch available, auto update enabled))', () => {
+          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(unclassified164VersionWithExpiration.version, 'foo', true)
           expect(versionExpirationWarning).toEqual({
-            expirationDate: kubernetesVersions[0].expirationDate,
+            expirationDate: unclassified164VersionWithExpiration.expirationDate,
             isValidTerminationDate: true,
             severity: 'info',
           })
         })
 
-        it('should be warning level (patch available, auto update disabled))', () => {
-          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(kubernetesVersions[0].version, 'foo', false)
+        it('should be warning level (patch available, auto update enabled, expiration warning))', () => {
+          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(supported162VersionWithExpirationWarning.version, 'foo', true)
           expect(versionExpirationWarning).toEqual({
-            expirationDate: kubernetesVersions[0].expirationDate,
+            expirationDate: supported162VersionWithExpirationWarning.expirationDate,
+            isValidTerminationDate: true,
+            severity: 'warning',
+          })
+        })
+
+        it('should be warning level (patch available, auto update disabled))', () => {
+          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(supported162VersionWithExpirationWarning.version, 'foo', false)
+          expect(versionExpirationWarning).toEqual({
+            expirationDate: supported162VersionWithExpirationWarning.expirationDate,
             isValidTerminationDate: true,
             severity: 'warning',
           })
         })
 
         it('should be warning level (update available, auto update enabled / disabled))', () => {
-          let versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(kubernetesVersions[1].version, 'foo', true)
+          let versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(supported17VersionWithExpirationWarning.version, 'foo', true)
           expect(versionExpirationWarning).toEqual({
-            expirationDate: kubernetesVersions[1].expirationDate,
+            expirationDate: supported17VersionWithExpirationWarning.expirationDate,
             isValidTerminationDate: true,
             severity: 'warning',
           })
 
-          versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(kubernetesVersions[1].version, 'foo', false)
+          versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(supported17VersionWithExpirationWarning.version, 'foo', false)
           expect(versionExpirationWarning).toEqual({
-            expirationDate: kubernetesVersions[1].expirationDate,
+            expirationDate: supported17VersionWithExpirationWarning.expirationDate,
             isValidTerminationDate: true,
             severity: 'warning',
           })
         })
 
-        it('should be error level (no update path available))', () => {
-          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(kubernetesVersions[7].version, 'foo', false)
+        it('should be error level (only deprecated newer version available))', () => {
+          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(supported18VersionWithExpirationWarning.version, 'foo', false)
           expect(versionExpirationWarning).toEqual({
-            expirationDate: kubernetesVersions[7].expirationDate,
-            isValidTerminationDate: false,
+            expirationDate: supported18VersionWithExpirationWarning.expirationDate,
+            isValidTerminationDate: true,
             severity: 'error',
           })
         })
 
-        it('should be error level (version not expired))', () => {
-          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(kubernetesVersions[8].version, 'foo', true)
+        it('should not have warning (version not expired))', () => {
+          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(unclassified164VersionWithExpiration.version, 'foo', false)
+          expect(versionExpirationWarning).toBeUndefined()
+        })
+
+        it('should not have info (auto update)', () => {
+          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(unclassified164VersionWithExpiration.version, 'foo', true)
+          expect(versionExpirationWarning).toEqual({
+            expirationDate: unclassified164VersionWithExpiration.expirationDate,
+            isValidTerminationDate: true,
+            severity: 'info',
+          })
+        })
+
+        it('should not have warning (deprecated version has no expiration))', () => {
+          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(deprecatedOldestVersion.version, 'foo', false)
           expect(versionExpirationWarning).toBeUndefined()
         })
       })
