@@ -40,6 +40,34 @@ describe('gardener-dashboard', function () {
       })
     })
 
+    it('should render the template w/ `client_secret`', async function () {
+      const values = {
+        global: {
+          dashboard: {
+            oidc: {
+              clientSecret: 'client-secret'
+            }
+          }
+        }
+      }
+      const documents = await renderTemplates(templates, values)
+      expect(documents).toHaveLength(1)
+      const [deployment] = documents
+      const dashboardContainer = deployment.spec.template.spec.containers[0]
+      expect(dashboardContainer.name).toEqual('gardener-dashboard')
+      expect(dashboardContainer.env).toMatchSnapshot()
+    })
+
+    it('should render the template w/o `client_secret`', async function () {
+      const values = {}
+      const documents = await renderTemplates(templates, values)
+      expect(documents).toHaveLength(1)
+      const [deployment] = documents
+      const dashboardContainer = deployment.spec.template.spec.containers[0]
+      expect(dashboardContainer.name).toEqual('gardener-dashboard')
+      expect(dashboardContainer.env).toMatchSnapshot()
+    })
+
     it('should render the template with a sha256 tag', async function () {
       const tag = 'sha256:4d529c1'
       const values = {
@@ -184,8 +212,8 @@ describe('gardener-dashboard', function () {
         expect(container.volumeMounts).toHaveLength(4)
         const [, , , kubeconfigVolumeMount] = container.volumeMounts
         expect(kubeconfigVolumeMount).toMatchSnapshot()
-        expect(container.env).toHaveLength(8)
-        const [, , , , kubeconfigEnv] = container.env
+        expect(container.env).toHaveLength(7)
+        const [, , , kubeconfigEnv] = container.env
         expect(kubeconfigEnv).toMatchSnapshot()
       })
     })
@@ -292,8 +320,8 @@ describe('gardener-dashboard', function () {
         expect(container.volumeMounts).toHaveLength(4)
         const [, , , kubeconfigVolumeMount] = container.volumeMounts
         expect(kubeconfigVolumeMount).toMatchSnapshot()
-        expect(container.env).toHaveLength(8)
-        const [, , , , kubeconfigEnv] = container.env
+        expect(container.env).toHaveLength(7)
+        const [, , , kubeconfigEnv] = container.env
         expect(kubeconfigEnv).toMatchSnapshot()
       })
     })

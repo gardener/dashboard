@@ -170,11 +170,13 @@ spec:
               secretKeyRef:
                 name: gardener-dashboard-oidc
                 key: client_id
+          {{- if .Values.global.dashboard.oidc.clientSecret }}
           - name: OIDC_CLIENT_SECRET
             valueFrom:
               secretKeyRef:
                 name: gardener-dashboard-oidc
                 key: client_secret
+          {{- end }}
           {{- if .Values.global.dashboard.oidc.caSecretKeyRef }}
           - name: OIDC_CA
             valueFrom:

@@ -38,7 +38,6 @@ const defaultConfig = {
     rejectUnauthorized: true,
     ca,
     client_id: 'dashboard',
-    client_secret: toHex('dashboard-secret'),
     redirect_uris: [
       'http://localhost:8080/auth/callback'
     ],
