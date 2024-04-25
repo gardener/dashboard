@@ -76,8 +76,10 @@ export default {
   },
   inject: ['sanitizeUrl'],
   setup () {
+    const shootItemState = useShootItem()
+
     return {
-      ...useShootItem(),
+      ...shootItemState,
     }
   },
   computed: {

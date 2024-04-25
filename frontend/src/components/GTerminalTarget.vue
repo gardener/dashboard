@@ -74,7 +74,7 @@ import { required } from '@vuelidate/validators'
 import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
 
-import { useShootItem } from '@/composables/useShootItem'
+import { useTerminalSplitpanes } from '@/composables/useTerminalSplitpanes'
 
 import { withFieldName } from '@/utils/validators'
 
@@ -91,12 +91,16 @@ export default {
   emits: [
     'update:modelValue',
   ],
-  setup () {
-    const shootItemState = useShootItem()
+  setup (props) {
+    const {
+      shootItem,
+      isShootStatusHibernated,
+    } = useTerminalSplitpanes()
 
     return {
       v$: useVuelidate(),
-      ...shootItemState,
+      shootItem,
+      isShootStatusHibernated,
     }
   },
   validations () {

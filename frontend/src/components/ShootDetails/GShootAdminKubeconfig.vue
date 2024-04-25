@@ -117,11 +117,13 @@ export default {
       humanizeExpiration,
     } = useShootAdminKubeconfig()
 
+    const shootItemState = useShootItem()
+
     return {
       expiration,
       isEnabled,
       humanizeExpiration,
-      ...useShootItem(),
+      ...shootItemState,
     }
   },
   data () {

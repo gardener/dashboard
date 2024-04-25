@@ -98,8 +98,10 @@ export default {
   },
   emits: ['addTerminalShortcut'],
   setup () {
+    const shootItemState = useShootItem()
+
     return {
-      ...useShootItem(),
+      ...shootItemState,
     }
   },
   data () {

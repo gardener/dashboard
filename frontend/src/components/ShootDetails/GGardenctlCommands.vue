@@ -76,8 +76,10 @@ export default {
     GGardenctlInfo,
   },
   setup () {
+    const shootItemState = useShootItem()
+
     return {
-      ...useShootItem(),
+      ...shootItemState,
     }
   },
   data () {

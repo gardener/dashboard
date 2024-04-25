@@ -303,9 +303,6 @@ export function createShootItemComposable (shootItem, options = {}) {
     return shootErrorCodes.some(item => forceDeleteErrorCodes.includes(item))
   })
 
-  const projectNameByNamespace = namespace => projectStore.projectNameByNamespace(namespace)
-  const isSeedUnreachableByName = name => seedStore.isSeedUnreachableByName(name)
-
   return {
     shootItem,
     shootMetadata,
@@ -383,13 +380,11 @@ export function createShootItemComposable (shootItem, options = {}) {
     lastMaintenance,
     isLastMaintenanceFailed,
     canForceDeleteShoot,
-    projectNameByNamespace,
-    isSeedUnreachableByName,
   }
 }
 
 export function useShootItem () {
-  return inject('shoot-item', {})
+  return inject('shoot-item', null)
 }
 
 export function useProvideShootItem (...args) {

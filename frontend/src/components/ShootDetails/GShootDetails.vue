@@ -80,8 +80,10 @@ export default {
     'addTerminalShortcut',
   ],
   setup () {
+    const shootItemState = useShootItem()
+
     return {
-      ...useShootItem(),
+      ...shootItemState,
     }
   },
   computed: {

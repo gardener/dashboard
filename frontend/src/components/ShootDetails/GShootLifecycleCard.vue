@@ -190,8 +190,10 @@ export default {
     GTimeString,
   },
   setup () {
+    const shootItemState = useShootItem()
+
     return {
-      ...useShootItem(),
+      ...shootItemState,
     }
   },
   data () {

@@ -58,10 +58,14 @@ export default {
     },
   },
   setup () {
-    const shootItemState = useShootItem()
+    const {
+      shootNamespace,
+      shootName,
+    } = useShootItem()
 
     return {
-      ...shootItemState,
+      shootNamespace,
+      shootName,
     }
   },
   computed: {

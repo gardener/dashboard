@@ -122,8 +122,10 @@ export default {
     },
   },
   setup () {
+    const shootItemState = useShootItem()
+
     return {
-      ...useShootItem(),
+      ...shootItemState,
     }
   },
   data () {

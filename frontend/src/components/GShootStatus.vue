@@ -236,10 +236,30 @@ export default {
     },
   },
   setup () {
-    const shootItemState = useShootItem()
+    const {
+      shootNamespace,
+      shootSecretBindingName,
+      shootLastOperation,
+      isShootMarkedForDeletion,
+      isShootLastOperationTypeDelete,
+      isShootStatusHibernated,
+      isShootReconciliationDeactivated,
+      shootMetadata,
+      shootLastErrors,
+      isShootStatusHibernationProgressing,
+    } = useShootItem()
 
     return {
-      ...shootItemState,
+      shootNamespace,
+      shootSecretBindingName,
+      shootLastOperation,
+      isShootMarkedForDeletion,
+      isShootLastOperationTypeDelete,
+      isShootStatusHibernated,
+      isShootReconciliationDeactivated,
+      shootMetadata,
+      shootLastErrors,
+      isShootStatusHibernationProgressing,
     }
   },
   data () {

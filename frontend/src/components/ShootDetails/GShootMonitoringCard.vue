@@ -72,8 +72,10 @@ export default {
     GClusterMetrics,
   },
   setup () {
+    const shootItemState = useShootItem()
+
     return {
-      ...useShootItem(),
+      ...shootItemState,
     }
   },
   computed: {

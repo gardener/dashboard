@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -70,10 +70,16 @@ export default {
     },
   },
   setup () {
-    const shootItemState = useShootItem()
+    const {
+      shootSecretBindingName,
+      shootMetadata,
+      shootReadiness,
+    } = useShootItem()
 
     return {
-      ...shootItemState,
+      shootSecretBindingName,
+      shootMetadata,
+      shootReadiness,
     }
   },
   computed: {

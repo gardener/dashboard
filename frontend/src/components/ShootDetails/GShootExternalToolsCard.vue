@@ -56,8 +56,10 @@ export default {
   },
   inject: ['logger'],
   setup () {
+    const shootItemState = useShootItem()
+
     return {
-      ...useShootItem(),
+      ...shootItemState,
     }
   },
   computed: {
