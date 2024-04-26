@@ -80,7 +80,6 @@ const {
   touched,
   conflictPath,
   getEditorValue,
-  setEditorValue,
   focusEditor,
   clearDocumentHistory,
 } = useProvide(injectionKey, useShootEditor(shootItem, {
@@ -108,12 +107,12 @@ async function save () {
     }
 
     const shootResource = getEditorValue()
-    const response = await api.replaceShoot({
+    await api.replaceShoot({
       namespace: shootNamespace.value,
       name: shootName.value,
       data: pick(shootResource, ['spec', 'metadata.labels', 'metadata.annotations']),
     })
-    setEditorValue(response.data)
+    clearDocumentHistory()
   } catch (err) {
     errorMessage.value = 'Failed to save changes.'
     if (err.response) {
