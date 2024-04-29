@@ -7,15 +7,30 @@
 'use strict'
 
 const { mockRequest } = require('@gardener-dashboard/request')
+const { Store } = require('@gardener-dashboard/kube-client')
+const cache = require('../../lib/cache')
+
+function createStore (items) {
+  const store = new Store()
+  store.replace(items)
+  return store
+}
 
 describe('api', function () {
   let agent
 
   beforeAll(() => {
     agent = createAgent()
+
+    cache.initialize({
+      shoots: {
+        store: createStore(fixtures.shoots.list())
+      }
+    })
   })
 
   afterAll(() => {
+    cache.cache.resetTicketCache()
     return agent.close()
   })
 
@@ -212,7 +227,7 @@ describe('api', function () {
     it('should delete a project', async function () {
       const namespace = 'garden-bar'
 
-      mockRequest.mockImplementationOnce(fixtures.shoots.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       mockRequest.mockImplementationOnce(fixtures.projects.mocks.patch())
       mockRequest.mockImplementationOnce(fixtures.projects.mocks.delete())
 

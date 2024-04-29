@@ -8,7 +8,6 @@
 
 const { AssertionError } = require('assert').strict
 const { merge } = require('lodash')
-const config = require('../lib/config')
 const {
   encodeBase64,
   decodeBase64,
@@ -17,7 +16,6 @@ const {
   getSeedNameFromShoot,
   parseSelectors,
   filterBySelectors,
-  useWatchCacheForListShoots,
   constants,
   trimObjectMetadata,
   parseRooms
@@ -195,39 +193,6 @@ describe('utils', function () {
       expect(parseRooms(['shoots;garden-foo/bar'])).toEqual([
         false, [], ['garden-foo/bar']
       ])
-    })
-
-    describe('control usage of watch cache', () => {
-      let experimentalUseWatchCacheForListShoots
-
-      beforeAll(() => {
-        experimentalUseWatchCacheForListShoots = config.experimentalUseWatchCacheForListShoots
-      })
-
-      afterAll(() => {
-        config.experimentalUseWatchCacheForListShoots = experimentalUseWatchCacheForListShoots
-      })
-
-      it('return if the watch cache should be used for list shoots request', () => {
-        config.experimentalUseWatchCacheForListShoots = 'never'
-        expect(useWatchCacheForListShoots(true)).toBe(false)
-        config.experimentalUseWatchCacheForListShoots = 'always'
-        expect(useWatchCacheForListShoots(false)).toBe(true)
-        config.experimentalUseWatchCacheForListShoots = 'yes'
-        expect(useWatchCacheForListShoots(undefined)).toBe(true)
-        expect(useWatchCacheForListShoots('false')).toBe(false)
-        config.experimentalUseWatchCacheForListShoots = 'no'
-        expect(useWatchCacheForListShoots(undefined)).toBe(false)
-        expect(useWatchCacheForListShoots('true')).toBe(true)
-        config.experimentalUseWatchCacheForListShoots = true
-        expect(useWatchCacheForListShoots(undefined)).toBe(true)
-        expect(useWatchCacheForListShoots('false')).toBe(false)
-        config.experimentalUseWatchCacheForListShoots = false
-        expect(useWatchCacheForListShoots(undefined)).toBe(false)
-        expect(useWatchCacheForListShoots('true')).toBe(true)
-        config.experimentalUseWatchCacheForListShoots = undefined
-        expect(useWatchCacheForListShoots(true)).toBe(false)
-      })
     })
   })
 })
