@@ -39,11 +39,11 @@ export function createShootEditorCompletions (...args) {
 }
 
 export function addShootEditorEventListener (...args) {
-  return CodeMirror.on(...args)
+  CodeMirror.on(...args)
 }
 
 export function registerShootEditorHelper (...args) {
-  return CodeMirror.registerHelper(...args)
+  CodeMirror.registerHelper(...args)
 }
 
 export class ShootEditorCompletions {

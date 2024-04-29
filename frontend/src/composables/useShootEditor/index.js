@@ -9,7 +9,6 @@ import {
   shallowRef,
   computed,
   reactive,
-  markRaw,
   unref,
   watch,
   watchEffect,
@@ -72,7 +71,7 @@ export function useShootEditor (initialValue, options = {}) {
     return api.getShootSchemaDefinition()
   }, null)
 
-  const defaultExtraKeys = markRaw({
+  const defaultExtraKeys = {
     Tab: instance => {
       if (instance.somethingSelected()) {
         instance.indentSelection('add')
@@ -87,19 +86,19 @@ export function useShootEditor (initialValue, options = {}) {
       completions.value?.editorEnter(instance)
     },
     'Ctrl-Space': 'autocomplete',
-  })
+  }
 
-  const extraKeys = computed(() => {
-    const extraKeyEntries = Object.entries({
+  function getExtraKeys () {
+    const originalExtraKeys = {
       ...defaultExtraKeys,
       ...options.extraKeys,
-    })
+    }
     const extraKeys = {}
-    for (const [key, value] of extraKeyEntries) {
+    for (const [key, value] of Object.entries(originalExtraKeys)) {
       extraKeys[localStorageStore.editorShortcuts[key] ?? key] = value
     }
     return extraKeys
-  })
+  }
 
   const isReadOnly = computed(() => {
     return isShootActionsDisabled.value || !authzStore.canPatchShoots
@@ -147,8 +146,10 @@ export function useShootEditor (initialValue, options = {}) {
   })
 
   function createEditor (element) {
-    const options = {
-      mode: 'text/x-yaml',
+    registerShootEditorHelper('hint', 'yaml', instance => completions.value?.yamlHint(instance))
+
+    cm.value = createShootEditor(element, {
+      mode: 'text/yaml',
       autofocus: true,
       indentUnit: 2,
       tabSize: 2,
@@ -159,20 +160,17 @@ export function useShootEditor (initialValue, options = {}) {
       lineWrapping: true,
       viewportMargin: Infinity, // make sure the whole shoot resource is laoded so that the browser's text search works on it
       readOnly: isReadOnly.value,
-      extraKeys: extraKeys.value,
+      extraKeys: getExtraKeys(),
+      hintOptions: {
+        completeSingle: false,
+      },
       theme: cmTheme.value,
-    }
-
-    cm.value = createShootEditor(element, options)
+    })
     cm.value.setSize('100%', '100%')
     cm.value.on('change', instance => {
       touched.value = true
       clean.value = instance.doc.isClean(generation.value)
       historySize.value = instance.doc.historySize()
-    })
-
-    registerShootEditorHelper('hint', 'yaml', editor => {
-      completions.value?.yamlHint(editor)
     })
 
     let cmTooltipFnTimerID
