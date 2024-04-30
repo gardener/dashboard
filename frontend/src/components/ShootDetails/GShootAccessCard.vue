@@ -123,6 +123,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { toRefs } from 'vue'
 import { mapState } from 'pinia'
 
 import { useAuthnStore } from '@/store/authn'
@@ -137,7 +138,10 @@ import GActionButton from '@/components/GActionButton.vue'
 import GCopyBtn from '@/components/GCopyBtn.vue'
 import GTerminalListTile from '@/components/GTerminalListTile.vue'
 
-import { useShootItem } from '@/composables/useShootItem'
+import {
+  useShootItem,
+  useProvideShootItem,
+} from '@/composables/useShootItem'
 
 import GGardenctlCommands from './GGardenctlCommands.vue'
 import GShootKubeconfig from './GShootKubeconfig.vue'
@@ -163,6 +167,9 @@ export default {
     GTerminalShortcutsTile,
   },
   props: {
+    selectedShoot: {
+      type: Object,
+    },
     hideTerminalShortcuts: {
       type: Boolean,
       default: false,
@@ -171,11 +178,24 @@ export default {
   emits: [
     'addTerminalShortcut',
   ],
-  setup () {
-    const shootItemState = useShootItem()
+  setup (props) {
+    const { selectedShoot } = toRefs(props)
+    const {
+      shootItem,
+      shootInfo,
+      isShootStatusHibernated,
+      hasShootWorkerGroups,
+      isSeedUnreachable,
+    } = selectedShoot.value
+      ? useProvideShootItem(selectedShoot)
+      : useShootItem()
 
     return {
-      ...shootItemState,
+      shootItem,
+      shootInfo,
+      isShootStatusHibernated,
+      hasShootWorkerGroups,
+      isSeedUnreachable,
     }
   },
   data () {
@@ -197,7 +217,9 @@ export default {
     ...mapState(useTerminalStore, [
       'isTerminalShortcutsFeatureEnabled',
     ]),
-    ...mapState(useConfigStore, ['shootAdminKubeconfig']),
+    ...mapState(useConfigStore, [
+      'shootAdminKubeconfig',
+    ]),
     dashboardUrl () {
       if (!this.hasDashboardEnabled) {
         return ''
