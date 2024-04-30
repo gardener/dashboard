@@ -33,7 +33,7 @@ import {
   getProviderTemplate,
   getNetworkingTemplate,
   getZonesNetworkConfiguration,
-} from '@/utils/createShoot'
+} from '@/utils/shoot'
 import { v4 as uuidv4 } from '@/utils/uuid'
 import utils from '@/utils'
 
