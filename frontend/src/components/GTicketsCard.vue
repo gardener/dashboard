@@ -76,10 +76,28 @@ export default {
   },
   inject: ['sanitizeUrl'],
   setup () {
-    const shootItemState = useShootItem()
+    const {
+      shootItem,
+      shootNamespace,
+      shootName,
+      shootProjectName,
+      shootCreatedAt,
+      shootCloudProviderKind,
+      shootRegion,
+      shootSeedName,
+      shootSelectedAccessRestrictions,
+    } = useShootItem()
 
     return {
-      ...shootItemState,
+      shootItem,
+      shootNamespace,
+      shootName,
+      shootProjectName,
+      shootCreatedAt,
+      shootCloudProviderKind,
+      shootRegion,
+      shootSeedName,
+      shootSelectedAccessRestrictions,
     }
   },
   computed: {

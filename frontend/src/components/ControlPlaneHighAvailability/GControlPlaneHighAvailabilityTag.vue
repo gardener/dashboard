@@ -76,10 +76,18 @@ export default {
     },
   },
   setup () {
-    const shootItemState = useShootItem()
+    const {
+      shootMetadata,
+      shootCloudProfileName,
+      shootControlPlaneHighAvailabilityFailureTolerance,
+      shootSeedName,
+    } = useShootItem()
 
     return {
-      ...shootItemState,
+      shootMetadata,
+      shootCloudProfileName,
+      shootControlPlaneHighAvailabilityFailureTolerance,
+      shootSeedName,
     }
   },
   computed: {
