@@ -567,8 +567,15 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
       return true
     }
     const versionMinorVersion = semver.minor(kubernetesVersion)
+    const nextMinorVersionAvailable = some(allVersions, ({ version }) => {
+      return semver.minor(version) === versionMinorVersion + 1
+    })
+    if (!nextMinorVersionAvailable) {
+      return false
+    }
+
     return some(allVersions, ({ version, isSupported }) => {
-      return semver.minor(version) === versionMinorVersion + 1 && isSupported
+      return semver.minor(version) > versionMinorVersion && isSupported
     })
   }
 
