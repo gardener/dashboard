@@ -122,7 +122,7 @@ export function createGlobalBeforeGuards () {
             const namespaceChanged = from.params.namespace !== to.params.namespace
             const toNewShoot = from.name !== 'NewShoot' && from.name !== 'NewShootEditor'
             if (namespaceChanged || toNewShoot) {
-              shootContextStore.$reset()
+              shootContextStore.resetShootManifest()
             }
             break
           }

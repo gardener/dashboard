@@ -82,7 +82,8 @@ SPDX-License-Identifier: Apache-2.0
 import { storeToRefs } from 'pinia'
 
 import { useShootContextStore } from '@/store/shootContext'
-import { NAND } from '@/store/shootContext/helper'
+
+import { NAND } from '@/composables/useShootContext/helper'
 
 import { transformHtml } from '@/utils'
 

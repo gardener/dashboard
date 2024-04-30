@@ -45,6 +45,7 @@ import {
   onBeforeRouteLeave,
 } from 'vue-router'
 
+import { useAppStore } from '@/store/app'
 import { useShootContextStore } from '@/store/shootContext'
 
 import GShootEditor from '@/components/GShootEditor'
@@ -55,16 +56,20 @@ import { useShootEditor } from '@/composables/useShootEditor'
 
 import { errorDetailsFromError } from '@/utils/error'
 
+import { get } from '@/lodash'
+
 const injectionKey = 'new-shoot-editor'
 const confirmDialog = ref(null)
 const errorMessage = ref()
 const detailedErrorMessage = ref()
 const isShootCreated = ref(false)
 
+const api = inject('api')
 const logger = inject('logger')
 
 const router = useRouter()
 
+const appStore = useAppStore()
 const shootContextStore = useShootContextStore()
 const {
   shootNamespace,
@@ -73,7 +78,6 @@ const {
   shootManifest,
 } = storeToRefs(shootContextStore)
 const {
-  createShoot,
   setShootManifest,
 } = shootContextStore
 
@@ -96,7 +100,10 @@ function confirmEditorNavigation () {
 
 async function save () {
   try {
-    await createShoot(getEditorValue())
+    const data = getEditorValue()
+    const namespace = get(shootManifest, 'metadata.namespace', shootNamespace.value)
+    await api.createShoot({ namespace, data })
+    appStore.setSuccess('Cluster created')
     isShootCreated.value = true
     router.push({
       name: 'ShootItem',

@@ -97,6 +97,7 @@ exports[`stores > shoot > helper > should change the infrastructure kind 1`] = `
   "kind": "Shoot",
   "metadata": {
     "name": "m6kgstc1b0",
+    "namespace": "garden-test",
   },
   "spec": {
     "addons": {
@@ -188,6 +189,7 @@ exports[`stores > shoot > helper > should create a default "alicloud" shoot mani
   "kind": "Shoot",
   "metadata": {
     "name": "m6kgstc1b0",
+    "namespace": "garden-test",
   },
   "spec": {
     "addons": {
@@ -286,6 +288,7 @@ exports[`stores > shoot > helper > should create a default "aws" shoot manifest 
   "kind": "Shoot",
   "metadata": {
     "name": "m6kgstc1b0",
+    "namespace": "garden-test",
   },
   "spec": {
     "addons": {
@@ -386,6 +389,7 @@ exports[`stores > shoot > helper > should create a default "azure" shoot manifes
   "kind": "Shoot",
   "metadata": {
     "name": "m6kgstc1b0",
+    "namespace": "garden-test",
   },
   "spec": {
     "addons": {
@@ -480,6 +484,7 @@ exports[`stores > shoot > helper > should create a default "gcp" shoot manifest 
   "kind": "Shoot",
   "metadata": {
     "name": "m6kgstc1b0",
+    "namespace": "garden-test",
   },
   "spec": {
     "addons": {
@@ -571,6 +576,7 @@ exports[`stores > shoot > helper > should create a default "ironcore" shoot mani
   "kind": "Shoot",
   "metadata": {
     "name": "m6kgstc1b0",
+    "namespace": "garden-test",
   },
   "spec": {
     "addons": {
@@ -650,6 +656,7 @@ exports[`stores > shoot > helper > should create a default "openstack" shoot man
   "kind": "Shoot",
   "metadata": {
     "name": "m6kgstc1b0",
+    "namespace": "garden-test",
   },
   "spec": {
     "addons": {

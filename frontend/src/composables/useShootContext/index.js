@@ -13,10 +13,19 @@ import {
   toRef,
 } from 'vue'
 
-import { useShootHelper } from '@/composables/useShootHelper'
+import { useAuthzStore } from '@/store/authz'
+import { useConfigStore } from '@/store/config'
+import { useCloudProfileStore } from '@/store/cloudProfile'
+import { useGardenerExtensionStore } from '@/store/gardenerExtension'
+import { useProjectStore } from '@/store/project'
+import { useSecretStore } from '@/store/secret'
+import { useAppStore } from '@/store/app'
+import { useSeedStore } from '@/store/seed'
 
-import utils from '@/utils'
-import { v4 as uuidv4 } from '@/utils/uuid'
+import {
+  scheduleEventsFromCrontabBlocks,
+  crontabBlocksFromScheduleEvents,
+} from '@/utils/hibernationSchedule'
 import {
   findFreeNetworks,
   getControlPlaneZone,
@@ -25,10 +34,11 @@ import {
   getNetworkingTemplate,
   getZonesNetworkConfiguration,
 } from '@/utils/createShoot'
-import {
-  scheduleEventsFromCrontabBlocks,
-  crontabBlocksFromScheduleEvents,
-} from '@/utils/hibernationSchedule'
+import { v4 as uuidv4 } from '@/utils/uuid'
+import utils from '@/utils'
+
+import { useLogger } from '../useLogger'
+import { useShootHelper } from '../useShootHelper'
 
 import {
   NAND,
@@ -56,17 +66,18 @@ import {
   size,
 } from '@/lodash'
 
-export function createStoreDefinition (context) {
+export function useShootContext (options = {}) {
   const {
-    logger,
-    appStore,
-    authzStore,
-    cloudProfileStore,
-    configStore,
-    gardenerExtensionStore,
-    projectStore,
-    secretStore,
-  } = context
+    logger = useLogger(),
+    appStore = useAppStore(),
+    authzStore = useAuthzStore(),
+    cloudProfileStore = useCloudProfileStore(),
+    configStore = useConfigStore(),
+    gardenerExtensionStore = useGardenerExtensionStore(),
+    projectStore = useProjectStore(),
+    secretStore = useSecretStore(),
+    seedStore = useSeedStore(),
+  } = options
 
   /* initial manifest */
   const initialManifest = shallowRef(null)
@@ -96,7 +107,7 @@ export function createStoreDefinition (context) {
 
   function setShootManifest (value) {
     initialManifest.value = value
-    manifest.value = cloneDeep(value)
+    manifest.value = cloneDeep(initialManifest.value)
     dns.value = get(manifest.value, 'spec.dns', {})
     hibernationSchedules.value = get(manifest.value, 'spec.hibernation.schedules', [])
   }
@@ -105,6 +116,7 @@ export function createStoreDefinition (context) {
     setShootManifest({
       metadata: {
         name: utils.shortRandomString(10),
+        namespace: authzStore.namespace,
       },
     })
     resetProviderType()
@@ -1195,7 +1207,13 @@ export function createStoreDefinition (context) {
     kubernetesVersion,
     networkingNodes,
     providerType,
-  }), context)
+  }), {
+    cloudProfileStore,
+    configStore,
+    gardenerExtensionStore,
+    secretStore,
+    seedStore,
+  })
 
   return {
     /* manifest */

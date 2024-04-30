@@ -130,9 +130,10 @@ import {
   mapState,
 } from 'pinia'
 
+import { useAppStore } from '@/store/app'
+import { useConfigStore } from '@/store/config'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useShootContextStore } from '@/store/shootContext'
-import { useConfigStore } from '@/store/config'
 
 import GAccessRestrictions from '@/components/ShootAccessRestrictions/GAccessRestrictions'
 import GConfirmDialog from '@/components/dialogs/GConfirmDialog'
@@ -167,7 +168,7 @@ export default {
     GManageControlPlaneHighAvailability,
     GToolbar,
   },
-  inject: ['logger'],
+  inject: ['api', 'logger'],
   async beforeRouteLeave (to, from, next) {
     if (!this.sortedInfrastructureKindList.length) {
       return next()
@@ -214,8 +215,8 @@ export default {
     ]),
   },
   methods: {
-    ...mapActions(useShootContextStore, [
-      'createShoot',
+    ...mapActions(useAppStore, [
+      'setSuccess',
     ]),
     async createClicked () {
       if (this.v$.$invalid) {
@@ -227,7 +228,11 @@ export default {
       }
 
       try {
-        await this.createShoot(this.shootManifest)
+        await this.api.createShoot({
+          namespace: this.shootNamespace,
+          data: this.shootManifest,
+        })
+        this.setSuccess('Cluster created')
         this.isShootCreated = true
         this.$router.push({
           name: 'ShootItem',

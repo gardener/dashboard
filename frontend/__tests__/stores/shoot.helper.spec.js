@@ -68,7 +68,7 @@ describe('stores', () => {
     ]
     try {
       cloudProfileStore.knownInfrastructureKindList = [infrastructureKind]
-      shootContextStore.$reset()
+      shootContextStore.resetShootManifest()
       return shootContextStore.shootManifest
     } finally {
       context.cloudProfileStore.knownInfrastructureKindList = originalInfrastructureKindList
@@ -103,14 +103,14 @@ describe('stores', () => {
 
       it('should change the infrastructure kind', async () => {
         const { shootContextStore } = context
-        shootContextStore.$reset()
+        shootContextStore.resetShootManifest()
         shootContextStore.providerType = 'gcp'
         expect(shootContextStore.shootManifest).toMatchSnapshot()
       })
 
       it('should add workers and update zones network config', async () => {
         const { shootContextStore } = context
-        shootContextStore.$reset()
+        shootContextStore.resetShootManifest()
 
         let worker
         expect(shootContextStore.workers).toHaveLength(1)
@@ -131,7 +131,7 @@ describe('stores', () => {
 
       it('should add dns providers', async () => {
         const { shootContextStore } = context
-        shootContextStore.$reset()
+        shootContextStore.resetShootManifest()
         shootContextStore.addDnsProvider()
         shootContextStore.dnsDomain = 'example.org'
         expect(shootContextStore.dnsProviderIds).toHaveLength(1)
