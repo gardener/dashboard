@@ -38,7 +38,7 @@ import {
 } from 'vue'
 
 import { useAppStore } from '@/store/app'
-import useShootContextStore from '@/store/shootContext'
+import { useShootContextStore } from '@/store/shootContext'
 
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog.vue'
 import GMaintenanceComponents from '@/components/ShootMaintenance/GMaintenanceComponents'
