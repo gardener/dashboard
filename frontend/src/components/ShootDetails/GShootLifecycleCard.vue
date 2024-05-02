@@ -199,7 +199,7 @@ const {
   canForceDeleteShoot,
 } = useShootItem()
 
-const hibernationConfiguration = ref()
+const hibernationConfiguration = ref(null)
 const changeHibernationDialog = ref(false)
 const maintenanceStartDialog = ref(false)
 const reconcileStartDialog = ref(false)

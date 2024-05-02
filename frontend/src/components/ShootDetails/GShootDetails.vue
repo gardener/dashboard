@@ -74,7 +74,7 @@ const GShootAccessCard = defineAsyncComponent(() => import('@/components/ShootDe
 
 const route = useRoute()
 
-const shootLifecycleCard = ref()
+const shootLifecycleCard = ref(null)
 
 const {
   shootItem,
