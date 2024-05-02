@@ -216,8 +216,9 @@ SPDX-License-Identifier: Apache-2.0
   </v-card>
 </template>
 
-<script>
-import { mapState } from 'pinia'
+<script setup>
+import { computed } from 'vue'
+import { storeToRefs } from 'pinia'
 
 import { useConfigStore } from '@/store/config'
 import { useAuthzStore } from '@/store/authz'
@@ -237,8 +238,7 @@ import GCopyBtn from '@/components/GCopyBtn'
 
 import { useShootItem } from '@/composables/useShootItem'
 
-import {
-  isValidTerminationDate,
+import utils, {
   getTimeStringTo,
   shootAddonList,
   transformHtml,
@@ -249,62 +249,58 @@ import {
   map,
 } from '@/lodash'
 
-export default {
-  components: {
-    GAccessRestrictionChips,
-    GAccountAvatar,
-    GTimeString,
-    GWorkerGroups,
-    GWorkerConfiguration,
-    GAccessRestrictionsConfiguration,
-    GPurposeConfiguration,
-    GAddonConfiguration,
-    GShootVersionConfiguration,
-    GShootVersionChip,
-    GShootMessages,
-    GCopyBtn,
-  },
-  setup () {
-    const shootItemState = useShootItem()
+const {
+  shootMetadata,
+  shootName,
+  shootCreatedBy,
+  shootPurpose,
+  shootExpirationTimestamp,
+  isShootMarkedForDeletion,
+  shootAddons,
+  hasShootWorkerGroups,
+  shootSelectedAccessRestrictions,
+} = useShootItem()
 
-    return {
-      ...shootItemState,
-    }
-  },
-  computed: {
-    ...mapState(useConfigStore, [
-      'sla',
-      'accessRestriction',
-    ]),
-    ...mapState(useAuthzStore, [
-      'canGetSecrets',
-    ]),
-    selfTerminationMessage () {
-      if (this.isValidTerminationDate) {
-        return `This cluster will self terminate ${getTimeStringTo(new Date(), new Date(this.shootExpirationTimestamp))}`
-      } else {
-        return 'This cluster is about to self terminate'
-      }
-    },
-    isValidTerminationDate () {
-      return isValidTerminationDate(this.shootExpirationTimestamp)
-    },
-    addon () {
-      return name => {
-        return this.shootAddons[name] || {}
-      }
-    },
-    shootAddonNames () {
-      return map(filter(shootAddonList, item => this.addon(item.name).enabled), 'title')
-    },
-    slaDescriptionHtml () {
-      return transformHtml(this.sla.description)
-    },
-    slaTitle () {
-      return this.sla.title
-    },
-  },
-}
+const configStore = useConfigStore()
+const {
+  sla,
+  accessRestriction,
+} = storeToRefs(configStore)
+
+const authzStore = useAuthzStore()
+const {
+  canGetSecrets,
+} = storeToRefs(authzStore)
+
+const selfTerminationMessage = computed(() => {
+  if (isValidTerminationDate.value) {
+    return `This cluster will self terminate ${getTimeStringTo(new Date(), new Date(shootExpirationTimestamp.value))}`
+  } else {
+    return 'This cluster is about to self terminate'
+  }
+})
+
+const isValidTerminationDate = computed(() => {
+  return utils.isValidTerminationDate(shootExpirationTimestamp.value)
+})
+
+const addon = computed(() => {
+  return name => {
+    return shootAddons.value[name] || {}
+  }
+})
+
+const shootAddonNames = computed(() => {
+  return map(filter(shootAddonList, item => addon.value(item.name).enabled), 'title')
+})
+
+const slaDescriptionHtml = computed(() => {
+  return transformHtml(sla.value.description)
+})
+
+const slaTitle = computed(() => {
+  return sla.value.title
+})
 </script>
 
 <style lang="scss" scoped>

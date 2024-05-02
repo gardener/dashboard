@@ -58,36 +58,30 @@ SPDX-License-Identifier: Apache-2.0
   </v-card>
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
+
 import GShootStatus from '@/components/GShootStatus'
 import GStatusTags from '@/components/GStatusTags'
 import GClusterMetrics from '@/components/GClusterMetrics'
 
 import { useShootItem } from '@/composables/useShootItem'
 
-export default {
-  components: {
-    GShootStatus,
-    GStatusTags,
-    GClusterMetrics,
-  },
-  setup () {
-    const shootItemState = useShootItem()
+const {
+  shootNamespace,
+  shootName,
+  shootConditions,
+  isTestingCluster,
+  seedShootIngressDomain,
+} = useShootItem()
 
-    return {
-      ...shootItemState,
-    }
-  },
-  computed: {
-    metricsNotAvailableText () {
-      if (this.isTestingCluster) {
-        return 'Cluster Metrics not available for clusters with purpose testing'
-      }
-      if (!this.seedShootIngressDomain) {
-        return 'Cluster Metrics not available'
-      }
-      return undefined
-    },
-  },
-}
+const metricsNotAvailableText = computed(() => {
+  if (isTestingCluster.value) {
+    return 'Cluster Metrics not available for clusters with purpose testing'
+  }
+  if (!seedShootIngressDomain.value) {
+    return 'Cluster Metrics not available'
+  }
+  return undefined
+})
 </script>

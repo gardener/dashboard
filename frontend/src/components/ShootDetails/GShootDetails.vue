@@ -15,11 +15,13 @@ SPDX-License-Identifier: Apache-2.0
         md="6"
       >
         <g-shoot-details-card />
-        <g-custom-fields-card :custom-fields="customFields" />
+        <g-custom-fields-card
+          :custom-fields="customFields"
+        />
         <g-shoot-infrastructure-card />
         <g-shoot-external-tools-card />
         <g-shoot-lifecycle-card
-          ref="shootLifecycle"
+          ref="shootLifecycleCard"
         />
       </v-col>
       <v-col
@@ -40,9 +42,14 @@ SPDX-License-Identifier: Apache-2.0
   </v-container>
 </template>
 
-<script>
-import { defineAsyncComponent } from 'vue'
-import { mapState } from 'pinia'
+<script setup>
+import {
+  ref,
+  computed,
+  onMounted,
+  defineAsyncComponent,
+} from 'vue'
+import { useRoute } from 'vue-router'
 
 import { useProjectStore } from '@/store/project'
 
@@ -63,54 +70,43 @@ import {
   map,
 } from '@/lodash'
 
-export default {
-  name: 'ShootDetails',
-  components: {
-    GShootDetailsCard,
-    GCustomFieldsCard,
-    GShootInfrastructureCard,
-    GShootLifecycleCard,
-    GShootAccessCard: defineAsyncComponent(() => import('@/components/ShootDetails/GShootAccessCard')),
-    GTicketsCard,
-    GShootMonitoringCard,
-    GShootCredentialRotationCard,
-    GShootExternalToolsCard,
-  },
-  emits: [
-    'addTerminalShortcut',
-  ],
-  setup () {
-    const shootItemState = useShootItem()
+const GShootAccessCard = defineAsyncComponent(() => import('@/components/ShootDetails/GShootAccessCard'))
 
-    return {
-      ...shootItemState,
-    }
-  },
-  computed: {
-    ...mapState(useProjectStore, ['shootCustomFieldList']),
-    customFields () {
-      const customFields = filter(this.shootCustomFieldList, ['showDetails', true])
-      return map(customFields, ({ name, path, icon, tooltip, defaultValue }) => ({
-        name,
-        path,
-        icon,
-        tooltip,
-        defaultValue,
-        value: get(this.shootItem, path),
-      }))
-    },
-  },
-  mounted () {
-    if (get(this.$route, 'name') === 'ShootItemHibernationSettings') {
-      this.$refs.shootLifecycle.showHibernationConfigurationDialog()
-    }
-  },
-  methods: {
-    onAddTerminalShortcut (shortcut) {
-      this.$emit('addTerminalShortcut', shortcut)
-    },
-  },
+const route = useRoute()
+
+const shootLifecycleCard = ref()
+
+const {
+  shootItem,
+} = useShootItem()
+
+const projectStore = useProjectStore()
+
+const customFields = computed(() => {
+  const customFields = filter(projectStore.shootCustomFieldList, ['showDetails', true])
+  return map(customFields, ({ name, path, icon, tooltip, defaultValue }) => ({
+    name,
+    path,
+    icon,
+    tooltip,
+    defaultValue,
+    value: get(shootItem.value, path),
+  }))
+})
+
+const emit = defineEmits([
+  'addTerminalShortcut',
+])
+
+function onAddTerminalShortcut (shortcut) {
+  emit('addTerminalShortcut', shortcut)
 }
+
+onMounted(() => {
+  if (get(route, 'name') === 'ShootItemHibernationSettings') {
+    shootLifecycleCard.value?.showHibernationConfigurationDialog()
+  }
+})
 </script>
 
 <style lang="scss" scoped>

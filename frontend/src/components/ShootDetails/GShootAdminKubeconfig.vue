@@ -112,18 +112,24 @@ export default {
   inject: ['api', 'logger'],
   setup () {
     const {
+      shootNamespace,
+      shootName,
+      shootProjectName,
+    } = useShootItem()
+
+    const {
       expiration,
       isEnabled,
       humanizeExpiration,
     } = useShootAdminKubeconfig()
 
-    const shootItemState = useShootItem()
-
     return {
+      shootNamespace,
+      shootName,
+      shootProjectName,
       expiration,
       isEnabled,
       humanizeExpiration,
-      ...shootItemState,
     }
   },
   data () {

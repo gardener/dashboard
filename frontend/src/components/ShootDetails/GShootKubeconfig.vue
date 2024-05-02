@@ -86,8 +86,9 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { ref } from 'vue'
+import { storeToRefs } from 'pinia'
 import download from 'downloadjs'
-import { mapState } from 'pinia'
 
 import { useAuthzStore } from '@/store/authz'
 
@@ -121,22 +122,33 @@ export default {
       default: 'gardenlogin',
     },
   },
-  setup () {
-    const shootItemState = useShootItem()
+  setup (props) {
+    const authzStore = useAuthzStore()
+    const {
+      canGetSecrets,
+    } = storeToRefs(authzStore)
+
+    const {
+      shootNamespace,
+      shootName,
+      shootProjectName,
+      shootInfo,
+      shootEnableStaticTokenKubeconfig,
+    } = useShootItem()
+
+    const expansionPanel = ref(false)
 
     return {
-      ...shootItemState,
-    }
-  },
-  data () {
-    return {
-      expansionPanel: false,
+      canGetSecrets,
+      shootNamespace,
+      shootName,
+      shootProjectName,
+      shootInfo,
+      shootEnableStaticTokenKubeconfig,
+      expansionPanel,
     }
   },
   computed: {
-    ...mapState(useAuthzStore, [
-      'canGetSecrets',
-    ]),
     icon () {
       return this.showListIcon ? 'mdi-file' : ''
     },
