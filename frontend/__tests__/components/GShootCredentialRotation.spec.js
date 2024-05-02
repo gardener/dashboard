@@ -5,8 +5,9 @@
 //
 
 import {
-  toRef,
+  ref,
   reactive,
+  toRef,
 } from 'vue'
 import { mount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
@@ -29,6 +30,7 @@ describe('components', () => {
   describe('g-shoot-credential-rotation-card', () => {
     let shootItem
     let pinia
+    let activePopoverKey
 
     function mountShootCredentialRotationCard (shootItem) {
       const wrapper = mount(GShootCredentialRotationCard, {
@@ -41,6 +43,7 @@ describe('components', () => {
             pinia,
           ],
           provide: {
+            activePopoverKey,
             'shoot-item': createShootItemComposable(toRef(shootItem)),
           },
         },
@@ -60,6 +63,7 @@ describe('components', () => {
           },
         },
       })
+      activePopoverKey = ref('')
       shootItem = reactive({
         spec: {
           kubernetes: {
