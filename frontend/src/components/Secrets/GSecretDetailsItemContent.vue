@@ -201,11 +201,19 @@ export default {
               value: 'hidden',
             },
           ]
-        case 'netlify-dns':
+        case 'ddns':
           return [
             {
-              label: 'API Key',
-              value: 'hidden',
+              label: 'Server',
+              value: secretData.Server,
+            },
+            {
+              label: 'TSIG Key Name',
+              value: secretData.TSIGKeyName,
+            },
+            {
+              label: 'Zone',
+              value: secretData.Zone,
             },
           ]
         default:

@@ -24,6 +24,7 @@ import VsphereDialog from '@/components/Secrets/GSecretDialogVSphere'
 import CloudflareDialog from '@/components/Secrets/GSecretDialogCloudflare'
 import InfobloxDialog from '@/components/Secrets/GSecretDialogInfoblox'
 import NetlifyDialog from '@/components/Secrets/GSecretDialogNetlify'
+import DdnsDialog from '@/components/Secrets/GSecretDialogDDNS'
 import DeleteDialog from '@/components/Secrets/GSecretDialogDelete'
 import HcloudDialog from '@/components/Secrets/GSecretDialogHCloud'
 import GenericDialog from '@/components/Secrets/GSecretDialogGeneric'
@@ -45,6 +46,7 @@ const components = {
   CloudflareDialog,
   InfobloxDialog,
   NetlifyDialog,
+  DdnsDialog,
   HcloudDialog,
   GenericDialog,
   DeleteDialog,

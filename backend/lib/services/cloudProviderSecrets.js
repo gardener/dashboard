@@ -10,7 +10,22 @@ const { Resources } = require('@gardener-dashboard/kube-client')
 const createError = require('http-errors')
 const { format: fmt } = require('util')
 const { decodeBase64, encodeBase64 } = require('../utils')
-const cleartextPropertyKeys = ['accessKeyID', 'subscriptionID', 'project', 'domainName', 'tenantName', 'authUrl', 'vsphereUsername', 'nsxtUsername', 'username', 'metalAPIURL', 'AWS_REGION']
+const cleartextPropertyKeys = [
+  'accessKeyID',
+  'subscriptionID',
+  'project',
+  'domainName',
+  'tenantName',
+  'authUrl',
+  'vsphereUsername',
+  'nsxtUsername',
+  'username',
+  'metalAPIURL',
+  'AWS_REGION',
+  'Server',
+  'TSIGKeyName',
+  'Zone'
+]
 const normalizedCleartextPropertyKeys = cleartextPropertyKeys.map(key => key.toLowerCase())
 const cloudprofiles = require('./cloudprofiles')
 const shoots = require('./shoots')

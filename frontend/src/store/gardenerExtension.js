@@ -44,7 +44,7 @@ export const useGardenerExtensionStore = defineStore('gardenerExtension', () => 
   }
 
   const sortedDnsProviderList = computed(() => {
-    const supportedProviderTypes = ['aws-route53', 'azure-dns', 'azure-private-dns', 'google-clouddns', 'openstack-designate', 'alicloud-dns', 'infoblox-dns', 'netlify-dns']
+    const supportedProviderTypes = ['aws-route53', 'azure-dns', 'azure-private-dns', 'google-clouddns', 'openstack-designate', 'alicloud-dns', 'infoblox-dns', 'netlify-dns', 'ddns']
     const resources = flatMap(list.value, 'resources')
     const dnsProvidersFromDnsRecords = filter(resources, ['kind', 'DNSRecord'])
 
