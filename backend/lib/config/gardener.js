@@ -14,107 +14,107 @@ const { homedir } = require('os')
 const { join } = require('path')
 
 /*
-configMappings defines mappings between config values, their sources (env vars or files),
+configMappings defines mappings between config values, their sources (environment variables or files),
 and destinations in the config object. Properties:
-- envVar: The env var to read the value from.
-- fsPath: (Optional) File path to read the value from if env var is not set.
-- destinationPath: The path in the config object to set the value.
+- environmentVariableName: The environment variable to read the value from.
+- filePath: (Optional) File path to read the value from if environment variable is not set.
+- configPath: The path in the config object to set the value.
 - type: (Optional) 'Boolean', 'Integer', or 'String' (default). Value is converted to this type.
 
 Allows flexible config management from different sources. Values are converted to the desired type.
-If both envVar and fsPath are missing/empty, the config path remains unchanged.
+If both environmentVariableName and filePath are missing/empty, the config path remains unchanged.
 */
 const configMappings = [
   {
-    envVar: 'VUE_APP_VERSION',
-    destinationPath: 'frontend.appVersion'
+    environmentVariableName: 'VUE_APP_VERSION',
+    configPath: 'frontend.appVersion'
   },
   {
-    envVar: 'SESSION_SECRET',
-    fsPath: '/etc/gardener-dashboard/secrets/session/sessionSecret',
-    destinationPath: 'sessionSecret'
+    environmentVariableName: 'SESSION_SECRET',
+    filePath: '/etc/gardener-dashboard/secrets/session/sessionSecret',
+    configPath: 'sessionSecret'
   },
   {
-    envVar: 'API_SERVER_URL',
-    destinationPath: 'apiServerUrl'
+    environmentVariableName: 'API_SERVER_URL',
+    configPath: 'apiServerUrl'
   },
   {
-    envVar: 'OIDC_ISSUER',
-    destinationPath: 'oidc.issuer'
+    environmentVariableName: 'OIDC_ISSUER',
+    configPath: 'oidc.issuer'
   },
   {
-    envVar: 'OIDC_CA',
-    destinationPath: 'oidc.ca'
+    environmentVariableName: 'OIDC_CA',
+    configPath: 'oidc.ca'
   },
   {
-    envVar: 'OIDC_CLIENT_ID',
-    fsPath: '/etc/gardener-dashboard/secrets/oidc/client_id',
-    destinationPath: 'oidc.client_id'
+    environmentVariableName: 'OIDC_CLIENT_ID',
+    filePath: '/etc/gardener-dashboard/secrets/oidc/client_id',
+    configPath: 'oidc.client_id'
   },
   {
-    envVar: 'OIDC_CLIENT_SECRET',
-    fsPath: '/etc/gardener-dashboard/secrets/oidc/client_secret',
-    destinationPath: 'oidc.client_secret'
+    environmentVariableName: 'OIDC_CLIENT_SECRET',
+    filePath: '/etc/gardener-dashboard/secrets/oidc/client_secret',
+    configPath: 'oidc.client_secret'
   },
   {
-    envVar: 'GITHUB_AUTHENTICATION_APP_ID',
-    fsPath: '/etc/gardener-dashboard/secrets/github/authentication.appId',
-    destinationPath: 'gitHub.authentication.appId',
+    environmentVariableName: 'GITHUB_AUTHENTICATION_APP_ID',
+    filePath: '/etc/gardener-dashboard/secrets/github/authentication.appId',
+    configPath: 'gitHub.authentication.appId',
     type: 'Integer'
   },
   {
-    envVar: 'GITHUB_AUTHENTICATION_CLIENT_ID',
-    fsPath: '/etc/gardener-dashboard/secrets/github/authentication.clientId',
-    destinationPath: 'gitHub.authentication.clientId'
+    environmentVariableName: 'GITHUB_AUTHENTICATION_CLIENT_ID',
+    filePath: '/etc/gardener-dashboard/secrets/github/authentication.clientId',
+    configPath: 'gitHub.authentication.clientId'
   },
   {
-    envVar: 'GITHUB_AUTHENTICATION_CLIENT_SECRET',
-    fsPath: '/etc/gardener-dashboard/secrets/github/authentication.clientSecret',
-    destinationPath: 'gitHub.authentication.clientSecret'
+    environmentVariableName: 'GITHUB_AUTHENTICATION_CLIENT_SECRET',
+    filePath: '/etc/gardener-dashboard/secrets/github/authentication.clientSecret',
+    configPath: 'gitHub.authentication.clientSecret'
   },
   {
-    envVar: 'GITHUB_AUTHENTICATION_INSTALLATION_ID',
-    fsPath: '/etc/gardener-dashboard/secrets/github/authentication.installationId',
-    destinationPath: 'gitHub.authentication.installationId',
+    environmentVariableName: 'GITHUB_AUTHENTICATION_INSTALLATION_ID',
+    filePath: '/etc/gardener-dashboard/secrets/github/authentication.installationId',
+    configPath: 'gitHub.authentication.installationId',
     type: 'Integer'
   },
   {
-    envVar: 'GITHUB_AUTHENTICATION_PRIVATE_KEY',
-    fsPath: '/etc/gardener-dashboard/secrets/github/authentication.privateKey',
-    destinationPath: 'gitHub.authentication.privateKey'
+    environmentVariableName: 'GITHUB_AUTHENTICATION_PRIVATE_KEY',
+    filePath: '/etc/gardener-dashboard/secrets/github/authentication.privateKey',
+    configPath: 'gitHub.authentication.privateKey'
   },
   {
-    envVar: 'GITHUB_AUTHENTICATION_TOKEN',
-    fsPath: '/etc/gardener-dashboard/secrets/github/authentication.token',
-    destinationPath: 'gitHub.authentication.token'
+    environmentVariableName: 'GITHUB_AUTHENTICATION_TOKEN',
+    filePath: '/etc/gardener-dashboard/secrets/github/authentication.token',
+    configPath: 'gitHub.authentication.token'
   },
   {
-    envVar: 'GITHUB_WEBHOOK_SECRET',
-    fsPath: '/etc/gardener-dashboard/secrets/github/webhookSecret',
-    destinationPath: 'gitHub.webhookSecret'
+    environmentVariableName: 'GITHUB_WEBHOOK_SECRET',
+    filePath: '/etc/gardener-dashboard/secrets/github/webhookSecret',
+    configPath: 'gitHub.webhookSecret'
   },
   {
-    envVar: 'LOG_LEVEL',
-    destinationPath: 'logLevel'
+    environmentVariableName: 'LOG_LEVEL',
+    configPath: 'logLevel'
   },
   {
-    envVar: 'LOG_HTTP_REQUEST_BODY',
-    destinationPath: 'logHttpRequestBody',
+    environmentVariableName: 'LOG_HTTP_REQUEST_BODY',
+    configPath: 'logHttpRequestBody',
     type: 'Boolean'
   },
   {
-    envVar: 'PORT',
-    destinationPath: 'port',
+    environmentVariableName: 'PORT',
+    configPath: 'port',
     type: 'Integer'
   },
   {
-    envVar: 'METRICS_PORT',
-    destinationPath: 'metricsPort',
+    environmentVariableName: 'METRICS_PORT',
+    configPath: 'metricsPort',
     type: 'Integer'
   }
 ]
 
-function convertValue (value, type) {
+function parseConfigValue (value, type) {
   switch (type) {
     case 'Integer':
       value = parseInt(value, 10)
@@ -125,25 +125,18 @@ function convertValue (value, type) {
       return value
   }
 }
-function getValueFromEnvironment (env, envVar, type) {
-  const value = env[envVar]
-  return convertValue(value, type)
-}
 
 function getValueFromFile (filePath, type) {
   try {
-    if (!fs.existsSync(filePath)) {
-      return undefined
-    }
-    const fileContent = fs.readFileSync(filePath, 'utf8')
-    return convertValue(fileContent, type)
+    const value = fs.readFileSync(filePath, 'utf8')
+    return parseConfigValue(value, type)
   } catch (error) {
-    /* ignore */
+    return undefined
   }
 }
 
-function getValueFromEnvironmentOrFile (env, envVar, filePath, type) {
-  const value = getValueFromEnvironment(env, envVar, type)
+function getValueFromEnvironmentOrFile (env, environmentVariableName, filePath, type) {
+  const value = parseConfigValue(env[environmentVariableName], type)
   if (value !== undefined) {
     return value
   }
@@ -154,12 +147,12 @@ function getValueFromEnvironmentOrFile (env, envVar, filePath, type) {
 }
 
 module.exports = {
-  setConfigFromEnvOrFiles (config, env) {
-    for (const { envVar, destinationPath, fsPath, type = 'String' } of configMappings) {
-      const value = getValueFromEnvironmentOrFile(env, envVar, fsPath, type)
+  assignConfigFromEnvironmentAndFileSystem (config, env) {
+    for (const { environmentVariableName, configPath, filePath, type = 'String' } of configMappings) {
+      const value = getValueFromEnvironmentOrFile(env, environmentVariableName, filePath, type)
 
       if (value !== undefined) {
-        _.set(config, destinationPath, value)
+        _.set(config, configPath, value)
       }
     }
   },
@@ -188,7 +181,7 @@ module.exports = {
         _.merge(config, this.readConfig(filename))
       } catch (err) { /* ignore */ }
     }
-    this.setConfigFromEnvOrFiles(config, env)
+    this.assignConfigFromEnvironmentAndFileSystem(config, env)
     const requiredConfigurationProperties = [
       'sessionSecret',
       'apiServerUrl'

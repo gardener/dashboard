@@ -74,17 +74,14 @@ describe('config', function () {
         SESSION_SECRET: 'secret'
       }
 
-      let existsSyncSpy
       let readFileSyncSpy
 
       beforeEach(() => {
-        existsSyncSpy = jest.spyOn(fs, 'existsSync')
         readFileSyncSpy = jest.spyOn(fs, 'readFileSync')
       })
 
       afterEach(() => {
         gardener.readConfig.mockClear()
-        existsSyncSpy.mockRestore()
         readFileSyncSpy.mockRestore()
       })
 
@@ -163,7 +160,6 @@ describe('config', function () {
           '/etc/gardener-dashboard/secrets/github/authentication.installationId': '67890'
         }
 
-        existsSyncSpy.mockImplementation(filePath => filePath in fileMap)
         readFileSyncSpy.mockImplementation(filePath => {
           if (filePath in fileMap) {
             return fileMap[filePath]
