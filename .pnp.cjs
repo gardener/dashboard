@@ -1367,7 +1367,7 @@ const RAW_RUNTIME_STATE =
           ["unplugin-fonts", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:1.1.1"],\
           ["url-template", "npm:3.1.1"],\
           ["uuid", "npm:9.0.1"],\
-          ["vite", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.2.10"],\
+          ["vite", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.2.11"],\
           ["vite-plugin-compression", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.5.1"],\
           ["vite-plugin-vuetify", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.0.3"],\
           ["vitest", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:1.5.2"],\
@@ -2922,7 +2922,7 @@ const RAW_RUNTIME_STATE =
           ["@vitejs/plugin-vue", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.0.4"],\
           ["@types/vite", null],\
           ["@types/vue", null],\
-          ["vite", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.2.10"],\
+          ["vite", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.2.11"],\
           ["vue", "virtual:c7add925a0d7137728e324795fd1f8117b2cfe6b3dbde1c52a5b1a97c81e35674720372b12d73f80919997216b3cca44221086bef6ee02702ec7a24a2dc75cd3#npm:3.4.26"]\
         ],\
         "packagePeers": [\
@@ -12267,7 +12267,7 @@ const RAW_RUNTIME_STATE =
           ["@types/vite", null],\
           ["fast-glob", "npm:3.3.2"],\
           ["unplugin", "npm:1.5.0"],\
-          ["vite", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.2.10"]\
+          ["vite", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.2.11"]\
         ],\
         "packagePeers": [\
           "@nuxt/kit",\
@@ -12390,17 +12390,17 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["vite", [\
-      ["npm:5.2.10", {\
-        "packageLocation": "./.yarn/cache/vite-npm-5.2.10-08834d3974-d50630ac8d.zip/node_modules/vite/",\
+      ["npm:5.2.11", {\
+        "packageLocation": "./.yarn/cache/vite-npm-5.2.11-fa468e8533-664b8d68e4.zip/node_modules/vite/",\
         "packageDependencies": [\
-          ["vite", "npm:5.2.10"]\
+          ["vite", "npm:5.2.11"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:3f4f4e44d57d127fdf01c0d52fb5039d0104e420c47ec164df20e1adde9bb46bf4870425736f3521a4573a18cbb205480909b3a0a4ee8340327f439cb8c6c1ee#npm:5.2.10", {\
-        "packageLocation": "./.yarn/__virtual__/vite-virtual-6775310d89/0/cache/vite-npm-5.2.10-08834d3974-d50630ac8d.zip/node_modules/vite/",\
+      ["virtual:3f4f4e44d57d127fdf01c0d52fb5039d0104e420c47ec164df20e1adde9bb46bf4870425736f3521a4573a18cbb205480909b3a0a4ee8340327f439cb8c6c1ee#npm:5.2.11", {\
+        "packageLocation": "./.yarn/__virtual__/vite-virtual-8169d0b1b9/0/cache/vite-npm-5.2.11-fa468e8533-664b8d68e4.zip/node_modules/vite/",\
         "packageDependencies": [\
-          ["vite", "virtual:3f4f4e44d57d127fdf01c0d52fb5039d0104e420c47ec164df20e1adde9bb46bf4870425736f3521a4573a18cbb205480909b3a0a4ee8340327f439cb8c6c1ee#npm:5.2.10"],\
+          ["vite", "virtual:3f4f4e44d57d127fdf01c0d52fb5039d0104e420c47ec164df20e1adde9bb46bf4870425736f3521a4573a18cbb205480909b3a0a4ee8340327f439cb8c6c1ee#npm:5.2.11"],\
           ["@types/less", null],\
           ["@types/lightningcss", null],\
           ["@types/node", null],\
@@ -12436,10 +12436,10 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "HARD"\
       }],\
-      ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.2.10", {\
-        "packageLocation": "./.yarn/__virtual__/vite-virtual-40b7e37c8a/0/cache/vite-npm-5.2.10-08834d3974-d50630ac8d.zip/node_modules/vite/",\
+      ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.2.11", {\
+        "packageLocation": "./.yarn/__virtual__/vite-virtual-ad32b969f2/0/cache/vite-npm-5.2.11-fa468e8533-664b8d68e4.zip/node_modules/vite/",\
         "packageDependencies": [\
-          ["vite", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.2.10"],\
+          ["vite", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.2.11"],\
           ["@types/less", null],\
           ["@types/lightningcss", null],\
           ["@types/node", null],\
@@ -12485,7 +12485,7 @@ const RAW_RUNTIME_STATE =
           ["debug", "virtual:1ff4b5f90832ba0a9c93ba1223af226e44ba70c1126a3740d93562b97bc36544e896a5e95908196f7458713e6a6089a34bfc67362fc6df7fa093bd06c878be47#npm:4.3.4"],\
           ["pathe", "npm:1.1.2"],\
           ["picocolors", "npm:1.0.0"],\
-          ["vite", "virtual:3f4f4e44d57d127fdf01c0d52fb5039d0104e420c47ec164df20e1adde9bb46bf4870425736f3521a4573a18cbb205480909b3a0a4ee8340327f439cb8c6c1ee#npm:5.2.10"]\
+          ["vite", "virtual:3f4f4e44d57d127fdf01c0d52fb5039d0104e420c47ec164df20e1adde9bb46bf4870425736f3521a4573a18cbb205480909b3a0a4ee8340327f439cb8c6c1ee#npm:5.2.11"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -12506,7 +12506,7 @@ const RAW_RUNTIME_STATE =
           ["chalk", "npm:4.1.2"],\
           ["debug", "virtual:1ff4b5f90832ba0a9c93ba1223af226e44ba70c1126a3740d93562b97bc36544e896a5e95908196f7458713e6a6089a34bfc67362fc6df7fa093bd06c878be47#npm:4.3.4"],\
           ["fs-extra", "npm:10.1.0"],\
-          ["vite", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.2.10"]\
+          ["vite", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.2.11"]\
         ],\
         "packagePeers": [\
           "@types/vite",\
@@ -12533,7 +12533,7 @@ const RAW_RUNTIME_STATE =
           ["@vuetify/loader-shared", "virtual:877e14a4e7b5b825e37a38b10dc94f123acd83cb5e1db49e7721cab008b44020fb1d12b234e60cef25b2761d31450adef243d7bed8c79f2828fe9a638f2b40ba#npm:2.0.3"],\
           ["debug", "virtual:1ff4b5f90832ba0a9c93ba1223af226e44ba70c1126a3740d93562b97bc36544e896a5e95908196f7458713e6a6089a34bfc67362fc6df7fa093bd06c878be47#npm:4.3.4"],\
           ["upath", "npm:2.0.1"],\
-          ["vite", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.2.10"],\
+          ["vite", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.2.11"],\
           ["vue", "virtual:c7add925a0d7137728e324795fd1f8117b2cfe6b3dbde1c52a5b1a97c81e35674720372b12d73f80919997216b3cca44221086bef6ee02702ec7a24a2dc75cd3#npm:3.4.26"],\
           ["vuetify", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.5.17"]\
         ],\
@@ -12588,7 +12588,7 @@ const RAW_RUNTIME_STATE =
           ["strip-literal", "npm:2.0.0"],\
           ["tinybench", "npm:2.6.0"],\
           ["tinypool", "npm:0.8.3"],\
-          ["vite", "virtual:3f4f4e44d57d127fdf01c0d52fb5039d0104e420c47ec164df20e1adde9bb46bf4870425736f3521a4573a18cbb205480909b3a0a4ee8340327f439cb8c6c1ee#npm:5.2.10"],\
+          ["vite", "virtual:3f4f4e44d57d127fdf01c0d52fb5039d0104e420c47ec164df20e1adde9bb46bf4870425736f3521a4573a18cbb205480909b3a0a4ee8340327f439cb8c6c1ee#npm:5.2.11"],\
           ["vite-node", "npm:1.5.2"],\
           ["why-is-node-running", "npm:2.2.2"]\
         ],\
