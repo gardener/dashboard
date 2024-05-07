@@ -67,10 +67,8 @@ SPDX-License-Identifier: Apache-2.0
 import {
   ref,
   computed,
-  toRef,
   watch,
 } from 'vue'
-import { storeToRefs } from 'pinia'
 
 import { useAppStore } from '@/store/app'
 import { useAuthnStore } from '@/store/authn'
@@ -104,14 +102,12 @@ export default {
     },
   },
   setup (props) {
-    const type = toRef(props, 'type')
-
     const {
       shootItem,
       shootName,
       shootNamespace,
       shootAnnotations,
-      shootGardenOperation,
+      shootGardenerOperation,
       shootEnableStaticTokenKubeconfig,
       isShootStatusHibernated,
       hasShootWorkerGroups,
@@ -122,28 +118,10 @@ export default {
       phaseType,
       rotationType,
     } = useShootStatusCredentialRotation(shootItem, {
-      type: type.value,
+      type: props.type,
     })
 
     const authnStore = useAuthnStore()
-    const { isAdmin } = storeToRefs(authnStore)
-
-    const mode = computed(() => {
-      if (!completionOperation.value) {
-        return 'ROTATE'
-      }
-      if (operation.value === completionOperation.value) {
-        return 'COMPLETE'
-      }
-      return 'START'
-    })
-
-    const operation = computed(() => {
-      if (phaseType.value === 'Prepared' || phaseType.value === 'Completing') {
-        return completionOperation.value
-      }
-      return startOperation.value
-    })
 
     const startOperation = computed(() => {
       return get(rotationType.value, 'startOperation')
@@ -153,8 +131,25 @@ export default {
       return get(rotationType.value, 'completionOperation')
     })
 
+    const operation = computed(() => {
+      if (phaseType.value === 'Prepared' || phaseType.value === 'Completing') {
+        return completionOperation.value
+      }
+      return startOperation.value
+    })
+
     const isActionToBeScheduled = computed(() => {
-      return shootGardenOperation.value === operation.value
+      return shootGardenerOperation.value === operation.value
+    })
+
+    const mode = computed(() => {
+      if (!completionOperation.value) {
+        return 'ROTATE'
+      }
+      if (operation.value === completionOperation.value) {
+        return 'COMPLETE'
+      }
+      return 'START'
     })
 
     const isProgressing = computed(() => {
@@ -177,7 +172,7 @@ export default {
       if (isScheduled.value) {
         return true
       }
-      if (isProgressing.value && type.value !== 'ALL_CREDENTIALS') {
+      if (isProgressing.value && props.type !== 'ALL_CREDENTIALS') {
         // Only show the loading indicator for the rotation that is actually running, not for the overall trigger button
         return true
       }
@@ -270,14 +265,14 @@ export default {
       if (!showLoadingIndicator.value && isScheduledOperation.value) {
         return 'There is already an operation scheduled for this cluster'
       }
-      if (showLoadingIndicator.value && type.value === 'ALL_CREDENTIALS') {
+      if (showLoadingIndicator.value && props.type === 'ALL_CREDENTIALS') {
         return 'A rotation operation is currently running'
       }
       return undefined
     })
 
     const componentTexts = computed(() => {
-      const componentTexts = {
+      const allComponentTexts = {
         'rotate-kubeconfig-credentials': {
           caption: showLoadingIndicator.value
             ? 'Rotating kubeconfig credentials'
@@ -323,7 +318,7 @@ export default {
           actions: compact([
             'The current observability passwords will be invalidated',
             'New observability passwords will be generated',
-            isAdmin.value
+            authnStore.isAdmin
               ? 'Note Operator: This will invalidate the user observability passwords. Operator passwords will be rotated automatically. There is no way to trigger the rotation manually'
               : undefined,
           ]),
@@ -387,7 +382,7 @@ export default {
           ],
         },
       }
-      componentTexts['rotate-credentials-start'] = {
+      allComponentTexts['rotate-credentials-start'] = {
         caption: showLoadingIndicator.value
           ? 'Preparing credential rotation'
           : 'Start Rotation of all Credentials',
@@ -397,18 +392,18 @@ export default {
         heading: 'Do you want to prepare the rotation of all credentials?',
         actions: [
           ...shootEnableStaticTokenKubeconfig.value
-            ? componentTexts['rotate-kubeconfig-credentials'].actions
+            ? allComponentTexts['rotate-kubeconfig-credentials'].actions
             : [],
-          ...componentTexts['rotate-ca-start'].actions,
-          ...componentTexts['rotate-observability-credentials'].actions,
+          ...allComponentTexts['rotate-ca-start'].actions,
+          ...allComponentTexts['rotate-observability-credentials'].actions,
           ...hasShootWorkerGroups.value
-            ? componentTexts['rotate-ssh-keypair'].actions
+            ? allComponentTexts['rotate-ssh-keypair'].actions
             : [],
-          ...componentTexts['rotate-etcd-encryption-key-start'].actions,
-          ...componentTexts['rotate-serviceaccount-key-start'].actions,
+          ...allComponentTexts['rotate-etcd-encryption-key-start'].actions,
+          ...allComponentTexts['rotate-serviceaccount-key-start'].actions,
         ],
       }
-      componentTexts['rotate-credentials-complete'] = {
+      allComponentTexts['rotate-credentials-complete'] = {
         caption: showLoadingIndicator.value
           ? 'Completing credential rotation'
           : 'Complete Rotation of all Credentials',
@@ -419,12 +414,12 @@ export default {
         successMessage: `Completing credential rotation for ${shootName.value}`,
         heading: 'Do you want to complete the rotation of all credentials?',
         actions: [
-          ...componentTexts['rotate-ca-complete'].actions,
-          ...componentTexts['rotate-etcd-encryption-key-complete'].actions,
-          ...componentTexts['rotate-serviceaccount-key-complete'].actions,
+          ...allComponentTexts['rotate-ca-complete'].actions,
+          ...allComponentTexts['rotate-etcd-encryption-key-complete'].actions,
+          ...allComponentTexts['rotate-serviceaccount-key-complete'].actions,
         ],
       }
-      return componentTexts[operation.value]
+      return allComponentTexts[operation.value]
     })
 
     const actionTriggered = ref(false)
@@ -452,7 +447,6 @@ export default {
       phase,
       phaseType,
       rotationType,
-      isAdmin,
       mode,
       operation,
       startOperation,

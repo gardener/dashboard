@@ -12,7 +12,7 @@ import { useConfigStore } from '@/store/config'
 
 import GStatusTags from '@/components/GStatusTags'
 
-import { useProvideShootItem } from '@/composables/useShootItem'
+import { createShootItemComposable } from '@/composables/useShootItem'
 
 const { createVuetifyPlugin } = global.fixtures.helper
 
@@ -38,7 +38,7 @@ describe('components', () => {
             pinia,
           ],
           provide: {
-            'shoot-item': useProvideShootItem(shootItem),
+            'shoot-item': createShootItemComposable(shootItem),
           },
         },
       })

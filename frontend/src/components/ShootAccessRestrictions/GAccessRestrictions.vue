@@ -83,7 +83,7 @@ import { storeToRefs } from 'pinia'
 
 import { useShootContextStore } from '@/store/shootContext'
 
-import { NAND } from '@/composables/useShootContext/helper'
+import { NAND } from '@/composables/useShootAccessRestrictions/helper'
 
 import { transformHtml } from '@/utils'
 

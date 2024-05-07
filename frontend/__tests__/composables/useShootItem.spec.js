@@ -5,10 +5,12 @@
 //
 
 import {
-  computed,
   shallowRef,
+  computed,
+  toRef,
+  h,
 } from 'vue'
-import { shallowMount } from '@vue/test-utils'
+import { mount } from '@vue/test-utils'
 import {
   setActivePinia,
   createPinia,
@@ -25,9 +27,70 @@ import {
   unset,
 } from '@/lodash'
 
+const Component = {
+  props: {
+    modelValue: {
+      type: Object,
+      required: true,
+    },
+  },
+  setup (props) {
+    const modelValue = toRef(props, 'modelValue')
+
+    const shootStore = useShootStore()
+    const isStaleShoot = computed(() => {
+      return !shootStore.isShootActive(modelValue.value?.metadata.uid)
+    })
+
+    const {
+      shootItem,
+      shootMetadata,
+      isShootMarkedForDeletion,
+      isShootMarkedForForceDeletion,
+      isShootReconciliationDeactivated,
+      isShootSettingHibernated,
+      isShootStatusHibernationProgressing,
+      isCustomShootDomain,
+      isShootLastOperationTypeDelete,
+      isShootLastOperationTypeControlPlaneMigrating,
+      isHibernationPossible,
+      isMaintenancePreconditionSatisfied,
+      isCACertificateValiditiesAcceptable,
+      canForceDeleteShoot,
+    } = useProvideShootItem(modelValue)
+
+    return {
+      shootItem,
+      shootMetadata,
+      isShootMarkedForDeletion,
+      isShootMarkedForForceDeletion,
+      isShootReconciliationDeactivated,
+      isShootSettingHibernated,
+      isShootStatusHibernationProgressing,
+      isCustomShootDomain,
+      isShootLastOperationTypeDelete,
+      isShootLastOperationTypeControlPlaneMigrating,
+      isHibernationPossible,
+      isMaintenancePreconditionSatisfied,
+      isCACertificateValiditiesAcceptable,
+      isStaleShoot,
+      canForceDeleteShoot,
+    }
+  },
+  render () {
+    return h('div', {
+      class: 'wrapper',
+    }, [
+      h('span', 'isShootMarkedForDeletion: ' + this.isShootMarkedForDeletion),
+    ])
+  },
+}
+
 describe('composables', () => {
   describe('useProvideShootItem', () => {
     let shootItem
+    let shootStore
+    let authzStore
 
     function setObjectValue (object, path, value) {
       object = cloneDeep(object)
@@ -43,8 +106,14 @@ describe('composables', () => {
       shootStore.state.shoots[shootItem.value.metadata.uid] = shootItem.value
     }
 
-    let shootStore
-    let authzStore
+    function mountComponent (shootItem) {
+      return mount(Component, {
+        props: {
+          modelValue: shootItem,
+        },
+        shallow: true,
+      })
+    }
 
     beforeEach(() => {
       shootItem = shallowRef({
@@ -60,22 +129,8 @@ describe('composables', () => {
       shootStore = useShootStore()
     })
 
-    const Component = {
-      setup () {
-        const isStaleShoot = computed(() => {
-          return !shootStore.isShootActive(shootItem.value.metadata.uid)
-        })
-
-        return {
-          ...useProvideShootItem(shootItem),
-          isStaleShoot,
-        }
-      },
-      render () {},
-    }
-
     it('should compute isShootMarkedForDeletion correctly', () => {
-      const wrapper = shallowMount(Component)
+      const wrapper = mountComponent(shootItem)
       setShootItem('metadata.annotations["confirmation.gardener.cloud/deletion"]', 'True')
       expect(wrapper.vm.isShootMarkedForDeletion).toBe(false)
 
@@ -87,7 +142,7 @@ describe('composables', () => {
     })
 
     it('should compute isShootMarkedForForceDeletion correctly', () => {
-      const wrapper = shallowMount(Component)
+      const wrapper = mountComponent(shootItem)
       setShootItem('metadata.annotations["confirmation.gardener.cloud/force-deletion"]', 'True')
       expect(wrapper.vm.isShootMarkedForForceDeletion).toBe(false)
 
@@ -99,7 +154,7 @@ describe('composables', () => {
     })
 
     it('should compute isShootReconciliationDeactivated correctly', () => {
-      const wrapper = shallowMount(Component)
+      const wrapper = mountComponent(shootItem)
       setShootItem('metadata.annotations["shoot.gardener.cloud/ignore"]', 'True')
       expect(wrapper.vm.isShootReconciliationDeactivated).toBe(true)
 
@@ -108,7 +163,7 @@ describe('composables', () => {
     })
 
     it('should compute isShootStatusHibernationProgressing correctly', () => {
-      const wrapper = shallowMount(Component)
+      const wrapper = mountComponent(shootItem)
       setShootItem('spec.hibernation.enabled', true)
       expect(wrapper.vm.isShootSettingHibernated).toBe(true)
       expect(wrapper.vm.isShootStatusHibernationProgressing).toBe(true)
@@ -119,7 +174,7 @@ describe('composables', () => {
     })
 
     it('should compute isCustomShootDomain correctly', () => {
-      const wrapper = shallowMount(Component)
+      const wrapper = mountComponent(shootItem)
       setShootItem('spec.dns.providers', [
         { primary: false },
       ])
@@ -133,7 +188,7 @@ describe('composables', () => {
     })
 
     it('should compute isShootLastOperationTypeDelete correctly', () => {
-      const wrapper = shallowMount(Component)
+      const wrapper = mountComponent(shootItem)
       setShootItem('status.lastOperation.type', 'Delete')
       expect(wrapper.vm.isShootLastOperationTypeDelete).toBe(true)
 
@@ -142,7 +197,7 @@ describe('composables', () => {
     })
 
     it('should compute isShootLastOperationTypeControlPlaneMigrating correctly', () => {
-      const wrapper = shallowMount(Component)
+      const wrapper = mountComponent(shootItem)
       setShootItem('status.lastOperation', {
         type: 'Migrate',
         state: 'Succeeded',
@@ -160,7 +215,7 @@ describe('composables', () => {
     })
 
     it('should compute isHibernationPossible correctly', () => {
-      const wrapper = shallowMount(Component)
+      const wrapper = mountComponent(shootItem)
       setShootItem('status.constraints', [{
         type: 'HibernationPossible',
         status: 'False',
@@ -178,7 +233,7 @@ describe('composables', () => {
     })
 
     it('should compute isMaintenancePreconditionSatisfied correctly', () => {
-      const wrapper = shallowMount(Component)
+      const wrapper = mountComponent(shootItem)
       setShootItem('status.constraints', [{
         type: 'MaintenancePreconditionsSatisfied',
         status: 'False',
@@ -196,7 +251,7 @@ describe('composables', () => {
     })
 
     it('should compute isCACertificateValiditiesAcceptable correctly', () => {
-      const wrapper = shallowMount(Component)
+      const wrapper = mountComponent(shootItem)
       setShootItem('status.constraints', [{
         type: 'CACertificateValiditiesAcceptable',
         status: 'False',
@@ -219,7 +274,7 @@ describe('composables', () => {
         onlyShootsWithIssues: true,
         progressing: true,
       }
-      const wrapper = shallowMount(Component)
+      const wrapper = mountComponent(shootItem)
       setShootItem('metadata.labels["shoot.gardener.cloud/status"]', 'progressing')
       expect(wrapper.vm.isStaleShoot).toBe(true)
 
@@ -228,7 +283,7 @@ describe('composables', () => {
     })
 
     it('should compute canForceDeleteShoot correctly', () => {
-      const wrapper = shallowMount(Component)
+      const wrapper = mountComponent(shootItem)
       setShootItem('metadata.deletionTimestamp', '2023-01-01T20:57:01Z')
       expect(wrapper.vm.canForceDeleteShoot).toBe(false)
 

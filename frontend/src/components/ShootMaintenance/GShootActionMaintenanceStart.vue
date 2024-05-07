@@ -64,13 +64,13 @@ export default {
       shootItem,
       shootName,
       shootNamespace,
-      shootGardenOperation,
+      shootGardenerOperation,
       isMaintenancePreconditionSatisfied,
       maintenancePreconditionSatisfiedMessage,
     } = useShootItem()
 
     const isMaintenanceToBeScheduled = computed(() => {
-      return shootGardenOperation.value === 'maintain'
+      return shootGardenerOperation.value === 'maintain'
     })
 
     const caption = computed(() => {
@@ -121,7 +121,7 @@ export default {
       shootItem,
       shootName,
       shootNamespace,
-      shootGardenOperation,
+      shootGardenerOperation,
       isMaintenancePreconditionSatisfied,
       maintenancePreconditionSatisfiedMessage,
       maintenanceTriggered,

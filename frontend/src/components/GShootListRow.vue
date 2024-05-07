@@ -149,8 +149,8 @@ SPDX-License-Identifier: Apache-2.0
             v-if="cell.header.tooltip"
             location="top"
           >
-            <template #activator="{ props }">
-              <span v-bind="props">{{ cell.value }}</span>
+            <template #activator="slotProps">
+              <span v-bind="slotProps.props">{{ cell.value }}</span>
             </template>
             {{ cell.header.tooltip }}
           </v-tooltip>
@@ -185,10 +185,10 @@ SPDX-License-Identifier: Apache-2.0
         v-if="isStaleShoot"
         location="top"
       >
-        <template #activator="{ props }">
+        <template #activator="slotProps">
           <div
             class="stale-overlay"
-            v-bind="props"
+            v-bind="slotProps.props"
           />
         </template>
         This cluster is no longer part of the list and kept as stale item
@@ -197,12 +197,12 @@ SPDX-License-Identifier: Apache-2.0
   </tr>
 </template>
 
-<script>
-import { toRef } from 'vue'
+<script setup>
 import {
-  mapState,
-  mapActions,
-} from 'pinia'
+  computed,
+  toRef,
+} from 'vue'
+import { storeToRefs } from 'pinia'
 
 import { useAuthzStore } from '@/store/authz'
 import { useTicketStore } from '@/store/ticket'
@@ -230,11 +230,7 @@ import GTextRouterLink from '@/components/GTextRouterLink.vue'
 
 import { useProvideShootItem } from '@/composables/useShootItem'
 
-import {
-  isTypeDelete,
-  getTimestampFormatted,
-  getIssueSince,
-} from '@/utils'
+import { getIssueSince } from '@/utils'
 
 import {
   includes,
@@ -243,149 +239,139 @@ import {
   isObject,
 } from '@/lodash'
 
-export default {
-  components: {
-    GAccessRestrictionChips,
-    GActionButton,
-    GStatusTags,
-    GPurposeTag,
-    GShootStatus,
-    GTimeString,
-    GShootVersionChip,
-    GTicketLabel,
-    GAccountAvatar,
-    GCopyBtn,
-    GShootSeedName,
-    GVendor,
-    GShootMessages,
-    GShootListRowActions,
-    GAutoHide,
-    GExternalLink,
-    GControlPlaneHighAvailabilityTag,
-    GWorkerGroups,
-    GTextRouterLink,
+const props = defineProps({
+  modelValue: {
+    type: Object,
+    required: true,
   },
-  props: {
-    modelValue: {
-      type: Object,
-      required: true,
-    },
-    visibleHeaders: {
-      type: Array,
-      required: true,
-    },
+  visibleHeaders: {
+    type: Array,
+    required: true,
   },
-  emits: [
-    'showDialog',
-  ],
-  setup (props) {
-    const shootItem = toRef(props, 'modelValue')
+})
+const shootItem = toRef(props, 'modelValue')
+
+const emit = defineEmits([
+  'showDialog',
+])
+
+const shootStore = useShootStore()
+const ticketStore = useTicketStore()
+const authzStore = useAuthzStore()
+const {
+  canGetSecrets,
+  canPatchShoots,
+} = storeToRefs(authzStore)
+
+const {
+  shootMetadata,
+  shootName,
+  shootNamespace,
+  shootCreatedBy,
+  shootCreationTimestamp,
+  shootProjectName,
+  shootPurpose,
+  shootCloudProviderKind,
+  shootRegion,
+  shootZones,
+  shootInfo,
+  shootLastOperation,
+  shootTechnicalId,
+  shootSeedName,
+  shootSelectedAccessRestrictions,
+} = useProvideShootItem(shootItem)
+
+const isInfoAvailable = computed(() => {
+  // operator not yet updated shoot resource
+  if (shootLastOperation.value.type === undefined || shootLastOperation.value.state === undefined) {
+    return false
+  }
+  return !isCreateOrDeleteInProcess.value
+})
+
+const isCreateOrDeleteInProcess = computed(() => {
+  // create or delete in process
+  if (includes(['Create', 'Delete'], shootLastOperation.value.type) && shootLastOperation.value.state === 'Processing') {
+    return true
+  }
+  return false
+})
+
+const isClusterAccessDialogDisabled = computed(() => {
+  if (shootInfo.value.dashboardUrl) {
+    return false
+  }
+  if (shootInfo.value.kubeconfigGardenlogin) {
+    return false
+  }
+
+  // disabled if info is NOT available
+  return !isInfoAvailable.value
+})
+
+const isStaleShoot = computed(() => {
+  return !shootStore.isShootActive(shootMetadata.value.uid)
+})
+
+const showClusterAccessActionTitle = computed(() => {
+  return isClusterAccessDialogDisabled.value
+    ? 'Cluster Access'
+    : 'Show Cluster Access'
+})
+
+const shootLastUpdatedTicket = computed(() => {
+  return ticketStore.latestUpdated({
+    projectName: shootProjectName.value,
+    name: shootName.value,
+  })
+})
+
+const shootLastUpdatedTicketUrl = computed(() => {
+  return get(shootLastUpdatedTicket.value, 'data.html_url')
+})
+
+const shootLastUpdatedTicketTimestamp = computed(() => {
+  return get(shootLastUpdatedTicket.value, 'metadata.updated_at')
+})
+
+const shootTicketLabels = computed(() => {
+  return ticketStore.labels({
+    projectName: shootProjectName.value,
+    name: shootName.value,
+  })
+})
+
+const shootIssueSinceTimestamp = computed(() => {
+  return getIssueSince(shootItem.value.status)
+})
+
+const cells = computed(() => {
+  return map(props.visibleHeaders, header => {
+    let value = get(shootItem.value, header.path)
+    if (isObject(value)) { // only allow primitive types
+      value = undefined
+    }
+
+    let className = header.class
+    if (isStaleShoot.value && !header.stalePointerEvents) {
+      className = `${header.class} no-stale-pointer-events`
+    }
 
     return {
-      ...useProvideShootItem(shootItem),
+      header: {
+        ...header,
+        class: className,
+      },
+      value, // currently only applicable for header.customField === true
     }
-  },
-  computed: {
-    ...mapState(useAuthzStore, [
-      'canGetSecrets',
-      'canPatchShoots',
-      'canDeleteShoots',
-    ]),
-    isInfoAvailable () {
-      // operator not yet updated shoot resource
-      if (this.shootLastOperation.type === undefined || this.shootLastOperation.state === undefined) {
-        return false
-      }
-      return !this.isCreateOrDeleteInProcess
-    },
-    isCreateOrDeleteInProcess () {
-      // create or delete in process
-      if (includes(['Create', 'Delete'], this.shootLastOperation.type) && this.shootLastOperation.state === 'Processing') {
-        return true
-      }
-      return false
-    },
-    isTypeDelete () {
-      return isTypeDelete(this.shootLastOperation)
-    },
-    isClusterAccessDialogDisabled () {
-      if (this.shootInfo.dashboardUrl) {
-        return false
-      }
-      if (this.shootInfo.kubeconfigGardenlogin) {
-        return false
-      }
+  })
+})
 
-      // disabled if info is NOT available
-      return !this.isInfoAvailable
-    },
-    isStaleShoot () {
-      return !this.isShootActive(this.shootMetadata.uid)
-    },
-    showClusterAccessActionTitle () {
-      return this.isClusterAccessDialogDisabled
-        ? 'Cluster Access'
-        : 'Show Cluster Access'
-    },
-    shootLastUpdatedTicket () {
-      return this.latestUpdatedTicket({
-        projectName: this.shootProjectName,
-        name: this.shootName,
-      })
-    },
-    shootLastUpdatedTicketUrl () {
-      return get(this.shootLastUpdatedTicket, 'data.html_url')
-    },
-    shootLastUpdatedTicketTimestamp () {
-      return get(this.shootLastUpdatedTicket, 'metadata.updated_at')
-    },
-    shootTicketLabels () {
-      return this.ticketLabels({
-        projectName: this.shootProjectName,
-        name: this.shootName,
-      })
-    },
-    shootIssueSinceTimestamp () {
-      return getIssueSince(this.shootItem.status)
-    },
-    shootIssueSince () {
-      return getTimestampFormatted(this.shootIssueSinceTimestamp)
-    },
-    cells () {
-      return map(this.visibleHeaders, header => {
-        let value = get(this.shootItem, header.path)
-        if (isObject(value)) { // only allow primitive types
-          value = undefined
-        }
-
-        let className = header.class
-        if (this.isStaleShoot && !header.stalePointerEvents) {
-          className = `${header.class} no-stale-pointer-events`
-        }
-
-        return {
-          header: {
-            ...header,
-            class: className,
-          },
-          value, // currently only applicable for header.customField === true
-        }
-      })
-    },
-  },
-  methods: {
-    ...mapActions(useTicketStore, {
-      latestUpdatedTicket: 'latestUpdated',
-      ticketLabels: 'labels',
-    }),
-    ...mapActions(useShootStore, [
-      'isShootActive',
-    ]),
-    showDialog (action) {
-      const shootItem = this.shootItem
-      this.$emit('showDialog', { action, shootItem })
-    },
-  },
+function showDialog (action) {
+  emit('showDialog', {
+    action,
+    shootItem: shootItem.value,
+  })
 }
 </script>
 

@@ -39,9 +39,10 @@ import utils from '@/utils'
 
 import { useLogger } from '../useLogger'
 import { useShootHelper } from '../useShootHelper'
+import { useShootMetadata } from '../useShootMetadata'
+import { useShootAccessRestrictions } from '../useShootAccessRestrictions'
 
 import {
-  NAND,
   normalizeShootManifest,
   getId,
 } from './helper'
@@ -131,37 +132,16 @@ export function useShootContext (options = {}) {
   })
 
   /* metadata */
-  const shootNamespace = computed(() => {
-    return get(manifest.value, 'metadata.namespace', authzStore.namespace)
-  })
-
-  const shootProjectName = computed(() => {
-    return projectStore.projectNameByNamespace(shootNamespace.value)
-  })
-
-  const shootName = computed({
-    get () {
-      return get(manifest.value, 'metadata.name')
-    },
-    set (value) {
-      set(manifest.value, 'metadata.name', value)
-    },
-  })
-
-  function getAnnotation (key, defaultValue) {
-    return get(manifest.value, `metadata.annotations["${key}"]`, `${defaultValue}`)
-  }
-
-  function setAnnotation (key, value) {
-    set(manifest.value, `metadata.annotations["${key}"]`, `${value}`)
-  }
-
-  function unsetAnnotation (key, value) {
-    unset(manifest.value, `metadata.annotations["${key}"]`)
-  }
-
-  const creationTimestamp = computed(() => {
-    return get(manifest.value, 'metadata.creationTimestamp')
+  const {
+    shootNamespace,
+    shootName,
+    shootProjectName,
+    shootCreationTimestamp,
+    getShootAnnotation,
+    setShootAnnotation,
+    unsetShootAnnotation,
+  } = useShootMetadata(manifest, {
+    projectStore,
   })
 
   /* seedName */
@@ -555,7 +535,7 @@ export function useShootContext (options = {}) {
   const providerInfrastructureConfigNetworksZones = computed({
     get () {
       const value = get(manifest.value, 'spec.provider.infrastructureConfig.networks.zones')
-      const args = creationTimestamp.value
+      const args = shootCreationTimestamp.value
         ? [networkingNodes.value, undefined]
         : [undefined, networkingNodes.value]
       return getZonesNetworkConfiguration(
@@ -726,13 +706,13 @@ export function useShootContext (options = {}) {
   /* hibernation */
   const noHibernationSchedules = computed({
     get () {
-      return getAnnotation('dashboard.garden.sapcloud.io/no-hibernation-schedule', 'false') === 'true'
+      return getShootAnnotation('dashboard.garden.sapcloud.io/no-hibernation-schedule', 'false') === 'true'
     },
     set (value) {
       if (value) {
-        setAnnotation('dashboard.garden.sapcloud.io/no-hibernation-schedule', 'true')
+        setShootAnnotation('dashboard.garden.sapcloud.io/no-hibernation-schedule', 'true')
       } else {
-        unsetAnnotation('dashboard.garden.sapcloud.io/no-hibernation-schedule')
+        unsetShootAnnotation('dashboard.garden.sapcloud.io/no-hibernation-schedule')
       }
     },
   })
@@ -1064,107 +1044,15 @@ export function useShootContext (options = {}) {
   }
 
   /* accessRestrictions */
-  function getAccessRestrictionValue (key) {
-    const { input } = accessRestrictionDefinitions.value[key]
-    const inverted = !!input?.inverted
-    const defaultValue = inverted
-    const value = getSeedSelectorMatchLabel(key, defaultValue) === 'true'
-    return NAND(value, inverted)
-  }
-
-  function setAccessRestrictionValue (key, value) {
-    const { input, options } = accessRestrictionDefinitions.value[key]
-    const enabled = NAND(value, !!input?.inverted)
-    if (enabled) {
-      setSeedSelectorMatchLabel(key, 'true')
-    } else {
-      unsetSeedSelectorMatchLabel(key)
-      for (const key of Object.keys(options)) {
-        unsetAnnotation(key)
-      }
-    }
-  }
-
-  function getAccessRestrictionOptionValue (key) {
-    const { accessRestrictionKey } = accessRestrictionOptionDefinitions.value[key]
-    const { input } = get(accessRestrictionDefinitions.value, [accessRestrictionKey, 'options', key])
-    const inverted = !!input?.inverted
-    const defaultValue = inverted
-    const value = getAnnotation(key, defaultValue) === 'true'
-    return NAND(value, !!input?.inverted)
-  }
-
-  function setAccessRestrictionOptionValue (key, value) {
-    const { accessRestrictionKey } = accessRestrictionOptionDefinitions.value[key]
-    const { input } = get(accessRestrictionDefinitions.value, [accessRestrictionKey, 'options', key])
-    const inverted = !!input?.inverted
-    setAnnotation(key, NAND(value, inverted))
-  }
-
-  const accessRestrictionList = computed(() => {
-    const accessRestrictionList = []
-    for (const definition of accessRestrictionDefinitionList.value) {
-      const {
-        key,
-        display: {
-          visibleIf = false,
-          title = key,
-          description,
-        },
-        options: optionDefinitions,
-      } = definition
-
-      const value = getAccessRestrictionValue(key)
-      if (visibleIf !== value) {
-        continue // skip
-      }
-
-      const accessRestrictionOptionList = []
-      for (const optionDefinition of optionDefinitions) {
-        const {
-          key,
-          display: {
-            visibleIf = false,
-            title = key,
-            description,
-          },
-        } = optionDefinition
-
-        const value = getAccessRestrictionOptionValue(key)
-        if (value !== visibleIf) {
-          continue // skip
-        }
-
-        accessRestrictionOptionList.push({
-          key,
-          title,
-          description,
-        })
-      }
-
-      accessRestrictionList.push({
-        key,
-        title,
-        description,
-        options: accessRestrictionOptionList,
-      })
-    }
-
-    return accessRestrictionList
+  const {
+    getAccessRestrictionValue,
+    setAccessRestrictionValue,
+    getAccessRestrictionOptionValue,
+    setAccessRestrictionOptionValue,
+    accessRestrictionList,
+  } = useShootAccessRestrictions(manifest, {
+    cloudProfileStore,
   })
-
-  /* seedSelector */
-  function getSeedSelectorMatchLabel (key, defaultValue) {
-    return get(manifest.value, `spec.seedSelector.matchLabels["${key}"]`, `${defaultValue}`)
-  }
-
-  function setSeedSelectorMatchLabel (key, value) {
-    set(manifest.value, `spec.seedSelector.matchLabels["${key}"]`, `${value}`)
-  }
-
-  function unsetSeedSelectorMatchLabel (key, value) {
-    unset(manifest.value, `spec.seedSelector.matchLabels["${key}"]`)
-  }
 
   const {
     isNewCluster,
@@ -1188,9 +1076,7 @@ export function useShootContext (options = {}) {
     firewallImages,
     firewallSizes,
     allFloatingPoolNames,
-    accessRestrictionDefinitionList,
     accessRestrictionDefinitions,
-    accessRestrictionOptionDefinitions,
     accessRestrictionNoItemsText,
     allMachineTypes,
     machineArchitectures,
@@ -1199,7 +1085,7 @@ export function useShootContext (options = {}) {
     networkingTypes,
     showAllRegions,
   } = useShootHelper(readonly({
-    creationTimestamp,
+    creationTimestamp: shootCreationTimestamp,
     cloudProfileName,
     seedName,
     region,

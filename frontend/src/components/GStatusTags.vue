@@ -37,8 +37,11 @@ SPDX-License-Identifier: Apache-2.0
   </template>
 </template>
 
-<script>
-import { mapActions } from 'pinia'
+<script setup>
+import {
+  computed,
+  toRefs,
+} from 'vue'
 
 import { useConfigStore } from '@/store/config'
 import { useShootStore } from '@/store/shoot'
@@ -55,61 +58,49 @@ import {
 
 import { sortBy } from '@/lodash'
 
-export default {
-  components: {
-    GStatusTag,
-    GExternalLink,
+const props = defineProps({
+  popperPlacement: {
+    type: String,
   },
-  props: {
-    popperPlacement: {
-      type: String,
-    },
-    showStatusText: {
-      type: Boolean,
-      default: false,
-    },
+  showStatusText: {
+    type: Boolean,
+    default: false,
   },
-  setup () {
-    const {
-      shootSecretBindingName,
-      shootMetadata,
-      shootReadiness,
-    } = useShootItem()
+})
+const {
+  popperPlacement,
+  showStatusText,
+} = toRefs(props)
 
-    return {
-      shootSecretBindingName,
-      shootMetadata,
-      shootReadiness,
-    }
-  },
-  computed: {
-    conditions () {
-      const conditions = this.shootReadiness
-        .filter(condition => !!condition.lastTransitionTime)
-        .map(condition => {
-          const conditiondDefaults = this.conditionForType(condition.type)
-          return {
-            ...conditiondDefaults,
-            ...condition,
-          }
-        })
-      return sortBy(conditions, 'sortOrder')
-    },
-    errorCodeObjects () {
-      const allErrorCodes = errorCodesFromArray(this.conditions)
-      return objectsFromErrorCodes(allErrorCodes)
-    },
-    isStaleShoot () {
-      return !this.isShootActive(this.shootMetadata.uid)
-    },
-  },
-  methods: {
-    ...mapActions(useConfigStore, [
-      'conditionForType',
-    ]),
-    ...mapActions(useShootStore, [
-      'isShootActive',
-    ]),
-  },
-}
+const {
+  shootSecretBindingName,
+  shootMetadata,
+  shootUid,
+  shootReadiness,
+} = useShootItem()
+
+const configStore = useConfigStore()
+const shootStore = useShootStore()
+
+const conditions = computed(() => {
+  const conditions = shootReadiness.value
+    .filter(condition => !!condition.lastTransitionTime)
+    .map(condition => {
+      const conditiondDefaults = configStore.conditionForType(condition.type)
+      return {
+        ...conditiondDefaults,
+        ...condition,
+      }
+    })
+  return sortBy(conditions, 'sortOrder')
+})
+
+const errorCodeObjects = computed(() => {
+  const allErrorCodes = errorCodesFromArray(conditions.value)
+  return objectsFromErrorCodes(allErrorCodes)
+})
+
+const isStaleShoot = computed(() => {
+  return !shootStore.isShootActive(shootUid.value)
+})
 </script>

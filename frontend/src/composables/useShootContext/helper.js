@@ -19,13 +19,6 @@ export function assert (value, message = 'The expression evaluated to a falsy va
   }
 }
 
-export function NAND (a, b) {
-  if (typeof a !== 'boolean' || typeof b !== 'boolean') {
-    throw new TypeError('Both arguments must be of type boolean')
-  }
-  return !(a === b)
-}
-
 export function getId (object) {
   return get(object, 'id')
 }

@@ -38,8 +38,6 @@ import {
   findVendorHint,
   decorateClassificationObject,
   firstItemMatchingVersionClassification,
-  mapAccessRestrictionForInput,
-  mapAccessRestrictionForDisplay,
 } from './helper'
 
 import {
@@ -54,12 +52,10 @@ import {
   find,
   difference,
   toPairs,
-  fromPairs,
   includes,
   isEmpty,
   flatMap,
   template,
-  compact,
   head,
   cloneDeep,
   sample,
@@ -467,10 +463,10 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
   }
 
   function accessRestrictionNoItemsTextForCloudProfileNameAndRegion ({ cloudProfileName: cloudProfile, region }) {
-    const noItemsText = get(configStore, 'accessRestriction.noItemsText', 'No access restriction options available for region ${region}') // eslint-disable-line no-template-curly-in-string
+    const defaultNoItemsText = 'No access restriction options available for region ${region}' // eslint-disable-line no-template-curly-in-string
+    const noItemsText = get(configStore, 'accessRestriction.noItemsText', defaultNoItemsText)
 
-    const compiled = template(noItemsText)
-    return compiled({
+    return template(noItemsText)({
       region,
       cloudProfile,
     })
@@ -488,26 +484,8 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
 
     const items = get(configStore, 'accessRestriction.items')
     return filter(items, ({ key }) => {
-      if (!key) {
-        return false
-      }
-      return labels[key] === 'true'
+      return key && labels[key] === 'true'
     })
-  }
-
-  function accessRestrictionsForShootByCloudProfileNameAndRegion ({ shootResource, cloudProfileName, region }) {
-    const definitions = accessRestrictionDefinitionsByCloudProfileNameAndRegion({ cloudProfileName, region })
-
-    let accessRestrictionsMap = map(definitions, definition => mapAccessRestrictionForInput(definition, shootResource))
-    accessRestrictionsMap = compact(accessRestrictionsMap)
-    return fromPairs(accessRestrictionsMap)
-  }
-
-  function selectedAccessRestrictionsForShootByCloudProfileNameAndRegion ({ shootResource, cloudProfileName, region }) {
-    const definitions = accessRestrictionDefinitionsByCloudProfileNameAndRegion({ cloudProfileName, region })
-    const accessRestrictions = accessRestrictionsForShootByCloudProfileNameAndRegion({ shootResource, cloudProfileName, region })
-
-    return compact(map(definitions, definition => mapAccessRestrictionForDisplay({ definition, accessRestriction: accessRestrictions[definition.key] })))
   }
 
   function labelsByCloudProfileNameAndRegion ({ cloudProfileName, region }) {
@@ -695,8 +673,8 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     volumeTypesByCloudProfileName,
     defaultMachineImageForCloudProfileNameAndMachineType,
     minimumVolumeSizeByMachineTypeAndVolumeType,
-    selectedAccessRestrictionsForShootByCloudProfileNameAndRegion,
     labelsByCloudProfileNameAndRegion,
+    accessRestrictionDefinitionsByCloudProfileNameAndRegion,
     accessRestrictionNoItemsTextForCloudProfileNameAndRegion,
     kubernetesVersions,
     sortedKubernetesVersions,
@@ -705,8 +683,6 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     kubernetesVersionUpdatePathAvailable,
     kubernetesVersionExpirationForShoot,
     seedsByCloudProfileName,
-    accessRestrictionDefinitionsByCloudProfileNameAndRegion,
-    accessRestrictionsForShootByCloudProfileNameAndRegion,
     loadBalancerClassesByCloudProfileName,
     generateWorker,
     machineImagesByCloudProfileName,

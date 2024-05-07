@@ -42,7 +42,7 @@ const logger = inject('logger')
 const {
   shootNamespace,
   shootName,
-  shootGenerationValue,
+  shootGeneration,
   shootObservedGeneration,
   shootLastOperation,
   isShootReconciliationDeactivated,
@@ -53,7 +53,7 @@ const appStore = useAppStore()
 const retryingOperation = ref(false)
 
 const canRetry = computed(() => {
-  const reconcileScheduled = shootGenerationValue.value !== shootObservedGeneration.value && !!shootObservedGeneration.value
+  const reconcileScheduled = shootGeneration.value !== shootObservedGeneration.value && !!shootObservedGeneration.value
 
   return get(shootLastOperation.value, 'state') === 'Failed' &&
     !isShootReconciliationDeactivated.value &&

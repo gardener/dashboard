@@ -4,12 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import {
-  computed,
-  toRef,
-  isRef,
-  isProxy,
-} from 'vue'
+import { computed } from 'vue'
+
+import utils from '@/utils'
 
 import {
   get,
@@ -83,23 +80,11 @@ export const twoStepRotationTypes = Object.freeze(filter(rotationTypes, {
   twoStep: true,
 }))
 
-function toShootProperties (state) {
-  if (isRef(state)) {
-    return args => Array.isArray(args)
-      ? computed(() => get(state.value, ...args))
-      : computed(() => get(state.value, args))
-  }
-  if (isProxy(state)) {
-    return (path, key) => toRef(state, key)
-  }
-  throw new TypeError('State must be a Proxy or Ref')
-}
-
 export function useShootStatusCredentialRotation (state, options = {}) {
   const {
     shootEnableStaticTokenKubeconfig,
     shootCredentialsRotation,
-  } = mapValues(shootPropertyMappings, toShootProperties(state))
+  } = mapValues(shootPropertyMappings, utils.toProperties(state))
 
   options.type ??= 'ALL_CREDENTIALS'
 
@@ -212,7 +197,6 @@ export function useShootStatusCredentialRotation (state, options = {}) {
   })
 
   return {
-    rotationStatus,
     shootCredentialsRotationAggregatedPhase,
     phase,
     phaseType,

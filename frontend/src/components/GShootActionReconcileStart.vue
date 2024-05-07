@@ -65,7 +65,7 @@ export default {
     const {
       shootNamespace,
       shootName,
-      shootGenerationValue,
+      shootGeneration,
       isShootReconciliationDeactivated,
       shootLastOperation,
     } = useShootItem()
@@ -74,7 +74,7 @@ export default {
     const currentGeneration = ref(null)
 
     const isReconcileToBeScheduled = computed(() => {
-      return shootGenerationValue.value === currentGeneration.value
+      return shootGeneration.value === currentGeneration.value
     })
 
     const caption = computed(() => {
@@ -120,7 +120,7 @@ export default {
     return {
       shootNamespace,
       shootName,
-      shootGenerationValue,
+      shootGeneration,
       isShootReconciliationDeactivated,
       shootLastOperation,
       reconcileTriggered,
@@ -141,7 +141,7 @@ export default {
     },
     async startReconcile () {
       this.reconcileTriggered = true
-      this.currentGeneration = this.shootGenerationValue
+      this.currentGeneration = this.shootGeneration
       try {
         await this.api.addShootAnnotation({
           namespace: this.shootNamespace,

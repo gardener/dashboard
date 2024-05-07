@@ -7,8 +7,12 @@
 import { Base64 } from 'js-base64'
 import semver from 'semver'
 import {
-  nextTick,
+  computed,
+  isRef,
+  isProxy,
+  toRef,
   unref,
+  nextTick,
 } from 'vue'
 
 import { useLogger } from '@/composables/useLogger'
@@ -685,6 +689,18 @@ export function normalizeVersion (version) {
   }
 }
 
+export function toProperties (state) {
+  if (isRef(state)) {
+    return args => Array.isArray(args)
+      ? computed(() => get(state.value, ...args))
+      : computed(() => get(state.value, args))
+  }
+  if (isProxy(state)) {
+    return (path, key) => toRef(state, key)
+  }
+  throw new TypeError('Argument `state` must be a proxy or ref object')
+}
+
 export default {
   emailToDisplayName,
   handleTextFieldDrop,
@@ -745,4 +761,5 @@ export default {
   omitKeysWithSuffix,
   parseNumberWithMagnitudeSuffix,
   normalizeVersion,
+  toProperties,
 }

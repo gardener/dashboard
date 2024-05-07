@@ -4,12 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import {
-  computed,
-  toRef,
-  isProxy,
-  isRef,
-} from 'vue'
+import { computed } from 'vue'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useConfigStore } from '@/store/config'
@@ -38,18 +33,6 @@ const shootPropertyMappings = Object.freeze({
   providerType: 'spec.provider.type',
 })
 
-function toShootProperties (state) {
-  if (isRef(state)) {
-    return args => Array.isArray(args)
-      ? computed(() => get(state.value, ...args))
-      : computed(() => get(state.value, args))
-  }
-  if (isProxy(state)) {
-    return (path, key) => toRef(state, key)
-  }
-  throw new TypeError('State must be a Proxy or Ref')
-}
-
 export function useShootHelper (state, options = {}) {
   const {
     cloudProfileStore = useCloudProfileStore(),
@@ -67,7 +50,7 @@ export function useShootHelper (state, options = {}) {
     secretBindingName,
     kubernetesVersion,
     providerType,
-  } = mapValues(shootPropertyMappings, toShootProperties(state))
+  } = mapValues(shootPropertyMappings, utils.toProperties(state))
 
   const isNewCluster = computed(() => {
     return !creationTimestamp.value
