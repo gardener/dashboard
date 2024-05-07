@@ -203,17 +203,17 @@ describe('gardener-dashboard', function () {
         const [deployment] = documents
         expect(deployment.spec.template.spec.automountServiceAccountToken).toBe(false)
         const volumes = deployment.spec.template.spec.volumes
-        expect(volumes).toHaveLength(4)
-        const [, , , kubeconfigVolume] = volumes
+        expect(volumes).toHaveLength(6)
+        const [, , , , , kubeconfigVolume] = volumes
         expect(kubeconfigVolume).toMatchSnapshot()
         const containers = deployment.spec.template.spec.containers
         expect(containers).toHaveLength(1)
         const [container] = containers
-        expect(container.volumeMounts).toHaveLength(4)
-        const [, , , kubeconfigVolumeMount] = container.volumeMounts
+        expect(container.volumeMounts).toHaveLength(6)
+        const [, , , , kubeconfigVolumeMount] = container.volumeMounts
         expect(kubeconfigVolumeMount).toMatchSnapshot()
-        expect(container.env).toHaveLength(7)
-        const [, , , kubeconfigEnv] = container.env
+        expect(container.env).toHaveLength(5)
+        const [, kubeconfigEnv] = container.env
         expect(kubeconfigEnv).toMatchSnapshot()
       })
     })
@@ -232,12 +232,12 @@ describe('gardener-dashboard', function () {
       expect(documents).toHaveLength(1)
       const [deployment] = documents
       const volumes = deployment.spec.template.spec.volumes
-      expect(volumes).toHaveLength(2)
+      expect(volumes).toHaveLength(4)
       expect(volumes).toMatchSnapshot()
       const containers = deployment.spec.template.spec.containers
       expect(containers).toHaveLength(1)
       const [container] = containers
-      expect(container.volumeMounts).toHaveLength(2)
+      expect(container.volumeMounts).toHaveLength(4)
       expect(container.volumeMounts).toMatchSnapshot()
     })
 
@@ -262,14 +262,14 @@ describe('gardener-dashboard', function () {
         const [deployment] = documents
         expect(deployment.spec.template.spec.serviceAccountName).toEqual('gardener-dashboard')
         const volumes = deployment.spec.template.spec.volumes
-        expect(volumes).toHaveLength(3)
-        const [, , serviceAccountTokenVolume] = volumes
+        expect(volumes).toHaveLength(5)
+        const [, , , , serviceAccountTokenVolume] = volumes
         expect(serviceAccountTokenVolume).toMatchSnapshot()
         const containers = deployment.spec.template.spec.containers
         expect(containers).toHaveLength(1)
         const [container] = containers
-        expect(container.volumeMounts).toHaveLength(3)
-        const [, , serviceAccountTokenVolumeMount] = container.volumeMounts
+        expect(container.volumeMounts).toHaveLength(5)
+        const [, , , serviceAccountTokenVolumeMount] = container.volumeMounts
         expect(serviceAccountTokenVolumeMount).toMatchSnapshot()
       })
 
@@ -311,57 +311,29 @@ describe('gardener-dashboard', function () {
         expect(documents).toHaveLength(1)
         const [deployment] = documents
         const volumes = deployment.spec.template.spec.volumes
-        expect(volumes).toHaveLength(4)
-        const [, , , kubeconfigVolume] = volumes
+        expect(volumes).toHaveLength(6)
+        const [, , , , , kubeconfigVolume] = volumes
         expect(kubeconfigVolume).toMatchSnapshot()
         const containers = deployment.spec.template.spec.containers
         expect(containers).toHaveLength(1)
         const [container] = containers
-        expect(container.volumeMounts).toHaveLength(4)
-        const [, , , kubeconfigVolumeMount] = container.volumeMounts
+        expect(container.volumeMounts).toHaveLength(6)
+        const [, , , , kubeconfigVolumeMount] = container.volumeMounts
         expect(kubeconfigVolumeMount).toMatchSnapshot()
-        expect(container.env).toHaveLength(7)
-        const [, , , kubeconfigEnv] = container.env
+        expect(container.env).toHaveLength(5)
+        const [, kubeconfigEnv] = container.env
         expect(kubeconfigEnv).toMatchSnapshot()
       })
     })
 
     describe('when github is configured', function () {
-      describe('token authentication', function () {
-        it('should render GITHUB environment variable', async function () {
-          const values = {
-            global: {
-              dashboard: {
-                gitHub: {
-                  authentication: {
-                    token: 'token'
-                  }
-                }
-              }
-            }
-          }
-          const documents = await renderTemplates(templates, values)
-          expect(documents).toHaveLength(1)
-          const [deployment] = documents
-          const dashboardContainer = deployment.spec.template.spec.containers[0]
-          expect(dashboardContainer.name).toEqual('gardener-dashboard')
-          expect(dashboardContainer.env).toMatchSnapshot()
-        })
-      })
-    })
-
-    describe('github app authentication', function () {
-      it('should render GITHUB environment variables', async function () {
+      it('should render github secret volume and volumeMount', async function () {
         const values = {
           global: {
             dashboard: {
               gitHub: {
                 authentication: {
-                  appId: 1,
-                  clientId: 'lv1.12ab',
-                  clientSecret: '12abcd',
-                  installationId: 123,
-                  privateKey: 'key'
+                  token: 'foo'
                 }
               }
             }
@@ -372,7 +344,16 @@ describe('gardener-dashboard', function () {
         const [deployment] = documents
         const dashboardContainer = deployment.spec.template.spec.containers[0]
         expect(dashboardContainer.name).toEqual('gardener-dashboard')
-        expect(dashboardContainer.env).toMatchSnapshot()
+        const volumes = deployment.spec.template.spec.volumes
+        expect(volumes).toHaveLength(6)
+        const [, , , , githubVolume] = volumes
+        expect(githubVolume).toMatchSnapshot()
+        const containers = deployment.spec.template.spec.containers
+        expect(containers).toHaveLength(1)
+        const [container] = containers
+        expect(container.volumeMounts).toHaveLength(6)
+        const [, , , , , githubVolumeMount] = container.volumeMounts
+        expect(githubVolumeMount).toMatchSnapshot()
       })
     })
   })
