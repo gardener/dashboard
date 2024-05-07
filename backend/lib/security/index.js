@@ -15,7 +15,7 @@ const pTimeout = require('p-timeout')
 const { authentication, authorization } = require('../services')
 const createError = require('http-errors')
 const logger = require('../logger')
-const { sessionSecret, oidc = {} } = require('../config')
+const { sessionSecrets, oidc = {} } = require('../config')
 
 const {
   encodeState,
@@ -25,7 +25,7 @@ const {
   decode,
   encrypt,
   decrypt
-} = require('./jose')(sessionSecret)
+} = require('./jose')(sessionSecrets)
 
 const now = () => Math.floor(Date.now() / 1000)
 const digest = (data, n = 7) => {

@@ -9,22 +9,31 @@
 const _ = require('lodash')
 
 describe('security', function () {
+  const joseModule = require('../lib/security/jose')
   describe('jose', function () {
     const secret = Buffer.from('this-is-a-secret-only-used-for-tests').toString('base64')
-    const jose = require('../lib/security/jose')(secret)
 
     const value = 'hello world'
 
-    it('should encrypt a value', async function () {
-      const encryptedValue = await jose.encrypt(value)
-      const decryptedValue = await jose.decrypt(encryptedValue)
-      expect(decryptedValue).toBe(value)
+    it('should throw an error when no session secrets are provided', function () {
+      expect(() => joseModule()).toThrow('No session secrets provided')
+      expect(() => joseModule([])).toThrow('No session secrets provided')
     })
 
-    it('should decrypt a value', async function () {
-      const encryptedValue = 'eyJlbmMiOiJBMTI4Q0JDLUhTMjU2IiwiYWxnIjoiUEJFUzItSFMyNTYrQTEyOEtXIiwicDJjIjozMTQ5LCJwMnMiOiIwenZfczdqbl9kcVBJOER2czQ3WWNRIn0.7Uh_sBteoCt2jlVBR87w00tuFuUqQfEhsXJ7jigqKZoEc5n2tw_h5A.adbP15XHdzAWCpzGCGYnXA.zVhhD1iRqJ-JnoIbyj-HeA.neL8L8Vtcgue-a8PYS4zCQ'
-      const decryptedValue = await jose.decrypt(encryptedValue)
-      expect(decryptedValue).toBe(value)
+    describe('with a valid secret', function () {
+      const jose = joseModule([secret])
+
+      it('should encrypt a value', async function () {
+        const encryptedValue = await jose.encrypt(value)
+        const decryptedValue = await jose.decrypt(encryptedValue)
+        expect(decryptedValue).toBe(value)
+      })
+
+      it('should decrypt a value', async function () {
+        const encryptedValue = 'eyJlbmMiOiJBMTI4Q0JDLUhTMjU2IiwiYWxnIjoiUEJFUzItSFMyNTYrQTEyOEtXIiwicDJjIjozMTQ5LCJwMnMiOiIwenZfczdqbl9kcVBJOER2czQ3WWNRIn0.7Uh_sBteoCt2jlVBR87w00tuFuUqQfEhsXJ7jigqKZoEc5n2tw_h5A.adbP15XHdzAWCpzGCGYnXA.zVhhD1iRqJ-JnoIbyj-HeA.neL8L8Vtcgue-a8PYS4zCQ'
+        const decryptedValue = await jose.decrypt(encryptedValue)
+        expect(decryptedValue).toBe(value)
+      })
     })
   })
 
@@ -62,7 +71,7 @@ describe('security', function () {
         openidClient = require('openid-client')
         authentication = require('../lib/services/authentication')
         authorization = require('../lib/services/authorization')
-        jose = require('../lib/security/jose')(config.sessionSecret)
+        jose = joseModule(config.sessionSecrets)
         security = require('../lib/security')
       })
       const issuerUrl = config.oidc.issuer

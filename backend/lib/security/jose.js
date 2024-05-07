@@ -6,7 +6,7 @@
 
 'use strict'
 
-const { isPlainObject } = require('lodash')
+const { isPlainObject, map } = require('lodash')
 const { promisify } = require('util')
 const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
@@ -46,8 +46,13 @@ function decodeState (state) {
   }
 }
 
-module.exports = sessionSecret => {
-  const symetricKey = importSymmetricKey(sessionSecret)
+module.exports = sessionSecrets => {
+  if (!sessionSecrets || !sessionSecrets.length) {
+    throw new Error('No session secrets provided')
+  }
+  const [sessionSecret] = sessionSecrets
+  const symmetricKeys = map(sessionSecrets, importSymmetricKey)
+  const [symetricKey] = symmetricKeys
   const encoder = new TextEncoder()
   const decoder = new TextDecoder()
   return {
@@ -69,8 +74,16 @@ module.exports = sessionSecret => {
       }
       return jwtSign(payload, secretOrPrivateKey, options)
     },
-    verify (token, options) {
-      return jwtVerify(token, sessionSecret, options)
+    async verify (token, options) {
+      let lastError
+      for (const sessionSecret of sessionSecrets) {
+        try {
+          return await jwtVerify(token, sessionSecret, options)
+        } catch (error) {
+          lastError = error
+        }
+      }
+      throw lastError
     },
     decode (token) {
       return jwt.decode(token) || {}
@@ -89,8 +102,16 @@ module.exports = sessionSecret => {
       const options = {
         keyManagementAlgorithms: ['PBES2-HS256+A128KW']
       }
-      const { plaintext } = await jose.compactDecrypt(data, symetricKey, options)
-      return decoder.decode(plaintext)
+      let lastError
+      for (const symetricKey of symmetricKeys) {
+        try {
+          const { plaintext } = await jose.compactDecrypt(data, symetricKey, options)
+          return decoder.decode(plaintext)
+        } catch (error) {
+          lastError = error
+        }
+      }
+      throw lastError
     }
   }
 }

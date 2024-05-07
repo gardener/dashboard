@@ -35,6 +35,11 @@ const configMappings = [
     configPath: 'sessionSecret'
   },
   {
+    environmentVariableName: 'SESSION_SECRET_PREVIOUS',
+    filePath: '/etc/gardener-dashboard/secrets/session/sessionSecretPrevious',
+    configPath: 'sessionSecretPrevious'
+  },
+  {
     environmentVariableName: 'API_SERVER_URL',
     configPath: 'apiServerUrl'
   },
@@ -205,6 +210,10 @@ module.exports = {
       assert.ok(_.get(config, path), `Configuration value '${path}' is required`)
     })
 
+    _.set(config, 'sessionSecrets', [
+      config.sessionSecret,
+      ...(config.sessionSecretPrevious ? [config.sessionSecretPrevious] : [])
+    ])
     _.set(config, 'frontend.apiServerUrl', config.apiServerUrl)
     _.set(config, 'frontend.clusterIdentity', config.clusterIdentity)
     if (!config.gitHub && _.has(config, 'frontend.ticket')) {
