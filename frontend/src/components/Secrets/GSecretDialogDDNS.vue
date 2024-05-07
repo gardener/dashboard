@@ -185,6 +185,9 @@ export default {
       }),
       zone: withFieldName('Zone', {
         required,
+        format: withMessage('Must be fully qualified', value => {
+          return /^[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.$/.test(value)
+        }),
       }),
     }
   },
