@@ -566,10 +566,27 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     if (kubernetesVersionIsNotLatestPatch(kubernetesVersion, cloudProfileName)) {
       return true
     }
-    const versionMinorVersion = semver.minor(kubernetesVersion)
-    return some(allVersions, ({ version, isSupported }) => {
-      return semver.minor(version) === versionMinorVersion + 1 && isSupported
-    })
+
+    const nextMinorVersion = semver.minor(kubernetesVersion) + 1
+    let hasNextMinorVersion = false
+    let hasNewerSupportedMinorVersion = false
+
+    for (const { version, isSupported } of allVersions) {
+      const minorVersion = semver.minor(version)
+      if (minorVersion === nextMinorVersion) {
+        // we can only upgrade one version at a time, therefore we only check if the next version exists
+        // as for the current upgrade this is the only relevant version
+        hasNextMinorVersion = true
+      }
+      if (minorVersion >= nextMinorVersion && isSupported) {
+        // if no newer supported exists (no need to be next minor) there is no update path
+        // this will result in an error in case the current version is about to expire
+        // we show this as error information to the user (this should not happen, likely a misconfiguration)
+        hasNewerSupportedMinorVersion = true
+      }
+    }
+
+    return hasNextMinorVersion && hasNewerSupportedMinorVersion
   }
 
   function kubernetesVersionExpirationForShoot (shootK8sVersion, shootCloudProfileName, k8sAutoPatch) {
