@@ -15,6 +15,8 @@ const ca = [
 ].join('\n')
 
 const defaultConfigPath = gardenerConfigPath()
+const sessionSecret = toHex('session-secret')
+
 const defaultConfig = {
   port: 3030,
   logLevel: 'info',
@@ -31,7 +33,8 @@ const defaultConfig = {
       token: toHex('token')
     }
   },
-  sessionSecret: toHex('session-secret'),
+  sessionSecret,
+  sessionSecrets: [sessionSecret],
   oidc: {
     issuer: 'https://kubernetes:32001',
     rejectUnauthorized: true,

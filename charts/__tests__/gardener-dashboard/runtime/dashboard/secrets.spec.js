@@ -156,6 +156,20 @@ describe('gardener-dashboard', function () {
       const [secret] = documents
       expect(secret).toMatchSnapshot()
     })
+
+    it('should render the template with previous session secret', async function () {
+      const values = {
+        global: {
+          dashboard: {
+            sessionSecretPrevious: 'previous'
+          }
+        }
+      }
+      const documents = await renderTemplates(templates, values)
+      expect(documents).toHaveLength(1)
+      const [secret] = documents
+      expect(secret.data).toMatchSnapshot()
+    })
   })
 
   describe('secret-tls', function () {
