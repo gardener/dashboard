@@ -4,12 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import CodeMirror from 'codemirror'
-import 'codemirror/addon/hint/show-hint.js'
-import 'codemirror/addon/hint/show-hint.css'
-import 'codemirror/mode/yaml/yaml.js'
-import 'codemirror/lib/codemirror.css'
-import 'codemirror/theme/seti.css'
+import { useLogger } from '@/composables/useLogger'
 
 import {
   forEach,
@@ -30,31 +25,27 @@ import {
   first,
 } from '@/lodash'
 
-export function createShootEditor (...args) {
+export async function createEditor (...args) {
+  const { default: CodeMirror } = await import('./codemirror')
   return CodeMirror(...args)
 }
 
-export function createShootEditorCompletions (...args) {
-  return new ShootEditorCompletions(...args)
-}
+export class EditorCompletions {
+  constructor (shootProperties, options = {}) {
+    const {
+      cm,
+      supportedPaths = [],
+      logger = useLogger(),
+    } = options
 
-export function addShootEditorEventListener (...args) {
-  CodeMirror.on(...args)
-}
-
-export function registerShootEditorHelper (...args) {
-  CodeMirror.registerHelper(...args)
-}
-
-export class ShootEditorCompletions {
-  constructor (shootProperties, editorIndent, supportedPaths, logger) {
-    this.logger = logger
     this._resolveSchemaArrays(shootProperties)
-
     this.shootCompletions = shootProperties
-    this.indentUnit = editorIndent
+
+    this.logger = logger
+    this.indentUnit = get(cm, 'options.indentUnit', 2)
     this.arrayBulletIndent = 2 // -[space]
     this.supportedPaths = supportedPaths
+    this.createPos = get(cm, 'constructor.Pos')
   }
 
   // Callback function for CodeMirror autocomplete plugin
@@ -65,8 +56,8 @@ export class ShootEditorCompletions {
 
     return {
       list,
-      from: CodeMirror.Pos(cur.line, token.start),
-      to: CodeMirror.Pos(cur.line, token.end),
+      from: this.createPos(cur.line, token.start),
+      to: this.createPos(cur.line, token.end),
     }
   }
 
@@ -258,7 +249,7 @@ export class ShootEditorCompletions {
     const tokenContext = []
 
     while (line >= 0 && !this._isTopLevelProperty(currentToken)) {
-      currentToken = this._getYamlToken(cm, CodeMirror.Pos(line, 0))
+      currentToken = this._getYamlToken(cm, this.createPos(line, 0))
       if (this._isCurrentTokenParentOfToken(currentToken, token) &&
         this._isCurrentTokenIndentSmallerThanContextRoot(currentToken, tokenContext)) {
         if (currentToken.type === 'property') {

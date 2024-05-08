@@ -25,10 +25,8 @@ import { useApi } from '@/composables/useApi'
 import { useLogger } from '@/composables/useLogger'
 
 import {
-  createShootEditor,
-  createShootEditorCompletions,
-  registerShootEditorHelper,
-  addShootEditorEventListener,
+  createEditor,
+  EditorCompletions,
 } from './helper'
 
 import {
@@ -145,51 +143,56 @@ export function useShootEditor (initialValue, options = {}) {
     return get(shootItem.value, 'spec.purpose') === 'infrastructure'
   })
 
-  function createEditor (element) {
-    registerShootEditorHelper('hint', 'yaml', instance => completions.value?.yamlHint(instance))
-
-    cm.value = createShootEditor(element, {
-      mode: 'text/yaml',
-      autofocus: true,
-      indentUnit: 2,
-      tabSize: 2,
-      indentWithTabs: false,
-      smartIndent: true,
-      scrollbarStyle: 'native',
-      lineNumbers: true,
-      lineWrapping: true,
-      viewportMargin: Infinity, // make sure the whole shoot resource is laoded so that the browser's text search works on it
-      readOnly: isReadOnly.value,
-      extraKeys: getExtraKeys(),
-      hintOptions: {
-        completeSingle: false,
-      },
-      theme: cmTheme.value,
-    })
-    cm.value.setSize('100%', '100%')
-    cm.value.on('change', instance => {
-      touched.value = true
-      clean.value = instance.doc.isClean(generation.value)
-      historySize.value = instance.doc.historySize()
-    })
-
-    let cmTooltipFnTimerID
-    addShootEditorEventListener(element, 'mouseover', e => {
-      clearTimeout(cmTooltipFnTimerID)
-      helpTooltip.visible = false
-      cmTooltipFnTimerID = setTimeout(() => {
-        const tooltip = completions.value?.editorTooltip(e, cm.value)
-        if (!tooltip) {
-          return
-        }
-        helpTooltip.visible = true
-        helpTooltip.posX = e.clientX
-        helpTooltip.posY = e.clientY
-        helpTooltip.property = tooltip.property
-        helpTooltip.type = tooltip.type
-        helpTooltip.description = tooltip.description
-      }, 200)
-    })
+  async function loadEditor (element) {
+    try {
+      const instance = cm.value = await createEditor(element, {
+        mode: 'text/yaml',
+        autofocus: true,
+        indentUnit: 2,
+        tabSize: 2,
+        indentWithTabs: false,
+        smartIndent: true,
+        scrollbarStyle: 'native',
+        lineNumbers: true,
+        lineWrapping: true,
+        viewportMargin: Infinity, // make sure the whole shoot resource is laoded so that the browser's text search works on it
+        readOnly: isReadOnly.value,
+        extraKeys: getExtraKeys(),
+        hintOptions: {
+          completeSingle: false,
+          hint: instance => completions.value?.yamlHint(instance),
+        },
+        theme: cmTheme.value,
+      })
+      instance.setSize('100%', '100%')
+      instance.on('change', instance => {
+        touched.value = true
+        clean.value = instance.doc.isClean(generation.value)
+        historySize.value = instance.doc.historySize()
+      })
+      let cmTooltipFnTimerID
+      const CodeMirror = instance.constructor
+      CodeMirror.on(element, 'mouseover', e => {
+        clearTimeout(cmTooltipFnTimerID)
+        helpTooltip.visible = false
+        cmTooltipFnTimerID = setTimeout(() => {
+          const tooltip = completions.value?.editorTooltip(e, instance)
+          if (!tooltip) {
+            return
+          }
+          helpTooltip.visible = true
+          helpTooltip.posX = e.clientX
+          helpTooltip.posY = e.clientY
+          helpTooltip.property = tooltip.property
+          helpTooltip.type = tooltip.type
+          helpTooltip.description = tooltip.description
+        }, 200)
+      })
+      resetEditor()
+      refreshEditor()
+    } catch (err) {
+      logger.error('Failed to create codemirror instance: %s', err.message)
+    }
   }
 
   function destroyEditor () {
@@ -293,10 +296,14 @@ export function useShootEditor (initialValue, options = {}) {
   }
 
   watchEffect(() => {
-    const shootProperties = get(schemaDefinition.value, 'properties', {})
-    const indentUnit = get(cm.value, 'options.indentUnit', 2)
-    const completionPaths = get(options, 'completionPaths', [])
-    completions.value = createShootEditorCompletions(shootProperties, indentUnit, completionPaths, logger)
+    if (cm.value && schemaDefinition.value) {
+      const shootProperties = get(schemaDefinition.value, 'properties', {})
+      completions.value = new EditorCompletions(shootProperties, {
+        cm: cm.value,
+        completionPaths: get(options, 'completionPaths', []),
+        logger,
+      })
+    }
   })
 
   watch(isReadOnly, value => {
@@ -329,7 +336,7 @@ export function useShootEditor (initialValue, options = {}) {
     showManagedFields,
     historySize,
     helpTooltip,
-    createEditor,
+    loadEditor,
     destroyEditor,
     getDocumentValue,
     setDocumentValue,

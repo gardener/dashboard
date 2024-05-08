@@ -200,10 +200,9 @@ const {
   showManagedFields,
   historySize,
   helpTooltip,
-  createEditor,
+  loadEditor,
   focusEditor,
   resetEditor,
-  refreshEditor,
   destroyEditor,
   execUndo,
   execRedo,
@@ -279,9 +278,7 @@ onMounted(() => {
   if (props.animateOnAppear) {
     animateExpansion()
   }
-  createEditor(container.value)
-  resetEditor()
-  refreshEditor()
+  loadEditor(container.value)
 })
 
 onBeforeUnmount(() => {

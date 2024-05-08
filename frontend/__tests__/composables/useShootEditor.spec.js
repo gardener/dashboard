@@ -5,7 +5,7 @@
 import CodeMirror from 'codemirror'
 import 'codemirror/mode/yaml/yaml.js'
 
-import { ShootEditorCompletions } from '@/composables/useShootEditor/helper'
+import { EditorCompletions } from '@/composables/useShootEditor/helper'
 
 import { repeat } from '@/lodash'
 
@@ -61,7 +61,7 @@ const shootCompletions = {
 
 describe('composable', () => {
   describe('useShootEditor', () => {
-    describe('ShootEditorCompletions', () => {
+    describe('EditorCompletions', () => {
       let editor
       let setEditorContentAndCursor
       let setEditorCursor
@@ -86,7 +86,9 @@ describe('composable', () => {
           doc.setCursor(CodeMirror.Pos(line, ch))
         }
 
-        shootEditorCompletions = new ShootEditorCompletions(shootCompletions, editor.options.indentUnit)
+        shootEditorCompletions = new EditorCompletions(shootCompletions, {
+          cm: editor,
+        })
       })
 
       describe('#yamlHint', () => {
@@ -387,8 +389,8 @@ describe('composable', () => {
         })
         describe('#resolveShemaArrays', () => {
           it('should recursively remove allOf, anyOf and oneOf array level', () => {
-            const shootEditorCompletions = new ShootEditorCompletions(shootCompletions)
-            const shootEditorCompletionsV3 = new ShootEditorCompletions(shootCompletionsV3)
+            const shootEditorCompletions = new EditorCompletions(shootCompletions)
+            const shootEditorCompletionsV3 = new EditorCompletions(shootCompletionsV3)
             expect(shootEditorCompletionsV3.shootCompletions).toEqual(shootEditorCompletions.shootCompletions)
           })
 
@@ -406,7 +408,9 @@ describe('composable', () => {
               ],
             }
 
-            const shootEditorCompletionsV3 = new ShootEditorCompletions(shootCompletionsV3)
+            const shootEditorCompletionsV3 = new EditorCompletions(shootCompletionsV3, {
+              cm: editor,
+            })
             setEditorContentAndCursor('spec:\n   ', 1, 3)
             const completions = shootEditorCompletionsV3.yamlHint(editor).list
             expect(completions).toHaveLength(4)
