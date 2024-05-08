@@ -47,7 +47,7 @@ function decodeState (state) {
 }
 
 module.exports = sessionSecrets => {
-  if (!sessionSecrets || !sessionSecrets.length) {
+  if (!sessionSecrets?.length) {
     throw new Error('No session secrets provided')
   }
   const [sessionSecret] = sessionSecrets
@@ -75,15 +75,15 @@ module.exports = sessionSecrets => {
       return jwtSign(payload, secretOrPrivateKey, options)
     },
     async verify (token, options) {
-      let lastError
+      let firstError
       for (const sessionSecret of sessionSecrets) {
         try {
           return await jwtVerify(token, sessionSecret, options)
-        } catch (error) {
-          lastError = error
+        } catch (err) {
+          firstError ??= err
         }
       }
-      throw lastError
+      throw firstError
     },
     decode (token) {
       return jwt.decode(token) || {}
@@ -102,16 +102,16 @@ module.exports = sessionSecrets => {
       const options = {
         keyManagementAlgorithms: ['PBES2-HS256+A128KW']
       }
-      let lastError
+      let firstError
       for (const symetricKey of symmetricKeys) {
         try {
           const { plaintext } = await jose.compactDecrypt(data, symetricKey, options)
           return decoder.decode(plaintext)
-        } catch (error) {
-          lastError = error
+        } catch (err) {
+          firstError ??= err
         }
       }
-      throw lastError
+      throw firstError
     }
   }
 }

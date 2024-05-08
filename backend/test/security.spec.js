@@ -9,19 +9,19 @@
 const _ = require('lodash')
 
 describe('security', function () {
-  const joseModule = require('../lib/security/jose')
+  const createJose = require('../lib/security/jose')
   describe('jose', function () {
     const secret = Buffer.from('this-is-a-secret-only-used-for-tests').toString('base64')
 
     const value = 'hello world'
 
     it('should throw an error when no session secrets are provided', function () {
-      expect(() => joseModule()).toThrow('No session secrets provided')
-      expect(() => joseModule([])).toThrow('No session secrets provided')
+      expect(() => createJose()).toThrow('No session secrets provided')
+      expect(() => createJose([])).toThrow('No session secrets provided')
     })
 
     describe('with a valid secret', function () {
-      const jose = joseModule([secret])
+      const jose = createJose([secret])
 
       it('should encrypt a value', async function () {
         const encryptedValue = await jose.encrypt(value)
@@ -71,7 +71,7 @@ describe('security', function () {
         openidClient = require('openid-client')
         authentication = require('../lib/services/authentication')
         authorization = require('../lib/services/authorization')
-        jose = joseModule(config.sessionSecrets)
+        jose = createJose(config.sessionSecrets)
         security = require('../lib/security')
       })
       const issuerUrl = config.oidc.issuer

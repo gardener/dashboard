@@ -210,10 +210,11 @@ module.exports = {
       assert.ok(_.get(config, path), `Configuration value '${path}' is required`)
     })
 
-    _.set(config, 'sessionSecrets', [
-      config.sessionSecret,
-      ...(config.sessionSecretPrevious ? [config.sessionSecretPrevious] : [])
-    ])
+    const sessionSecrets = [config.sessionSecret]
+    if (config.sessionSecretPrevious) {
+      sessionSecrets.push(config.sessionSecretPrevious)
+    }
+    _.set(config, 'sessionSecrets', sessionSecrets)
     _.set(config, 'frontend.apiServerUrl', config.apiServerUrl)
     _.set(config, 'frontend.clusterIdentity', config.clusterIdentity)
     if (!config.gitHub && _.has(config, 'frontend.ticket')) {
