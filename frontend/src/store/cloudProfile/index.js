@@ -566,17 +566,22 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     if (kubernetesVersionIsNotLatestPatch(kubernetesVersion, cloudProfileName)) {
       return true
     }
-    const versionMinorVersion = semver.minor(kubernetesVersion)
-    const nextMinorVersionAvailable = some(allVersions, ({ version }) => {
-      return semver.minor(version) === versionMinorVersion + 1
-    })
-    if (!nextMinorVersionAvailable) {
-      return false
+
+    const nextMinorVersion = semver.minor(kubernetesVersion) + 1
+    let hasNextMinorVersion = false
+    let hasNewerSupportedMinorVersion = false
+
+    for (const { version, isSupported } of allVersions) {
+      const minorVersion = semver.minor(version)
+      if (minorVersion === nextMinorVersion) {
+        hasNextMinorVersion = true
+      }
+      if (minorVersion >= nextMinorVersion && isSupported) {
+        hasNewerSupportedMinorVersion = true
+      }
     }
 
-    return some(allVersions, ({ version, isSupported }) => {
-      return semver.minor(version) > versionMinorVersion && isSupported
-    })
+    return hasNextMinorVersion && hasNewerSupportedMinorVersion
   }
 
   function kubernetesVersionExpirationForShoot (shootK8sVersion, shootCloudProfileName, k8sAutoPatch) {

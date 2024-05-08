@@ -390,7 +390,7 @@ describe('stores', () => {
       describe('#sortedKubernetesVersions', () => {
         it('should filter and sort kubernetes versions from cloud profile', () => {
           const decoratedAndSortedVersions = cloudProfileStore.sortedKubernetesVersions('foo')
-          expect(decoratedAndSortedVersions).toHaveLength(14)
+          expect(decoratedAndSortedVersions).toHaveLength(kubernetesVersions.length - 1)
 
           const expiredDecoratedVersion = find(decoratedAndSortedVersions, expiredVersion)
           expect(expiredDecoratedVersion.isExpired).toBe(true)
@@ -541,7 +541,7 @@ describe('stores', () => {
           expect(versionExpirationWarning).toBeUndefined()
         })
 
-        it('should not have error if no immediate supported minor supported update exists', () => {
+        it('should not have error when no immediate supported minor version update exists', () => {
           const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(deprecated14Version.version, 'foo', true)
           expect(versionExpirationWarning).toEqual({
             expirationDate: deprecated14Version.expirationDate,
