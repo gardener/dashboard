@@ -79,11 +79,11 @@ export const useShootMetadata = (shootItem, options = {}) => {
   })
 
   function getShootLabel (key, defaultValue) {
-    return get(shootItem.value, `metadata.labels['${key}']`, `${defaultValue}`)
+    return get(shootItem.value, `metadata.labels['${key}']`, defaultValue)
   }
 
   function setShootLabel (key, value) {
-    set(shootItem.value, `metadata.labels['${key}']`, `${value}`)
+    set(shootItem.value, `metadata.labels['${key}']`, value)
   }
 
   function unsetShootLabel (key) {

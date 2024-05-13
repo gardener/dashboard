@@ -44,7 +44,6 @@ export default {
   inject: ['api', 'logger'],
   setup () {
     const {
-      shootItem,
       shootNamespace,
       shootName,
       shootSecretBindingName,

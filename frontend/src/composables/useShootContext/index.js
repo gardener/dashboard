@@ -112,7 +112,9 @@ export function useShootContext (options = {}) {
     manifest.value = cloneDeep(initialManifest.value)
     dns.value = get(manifest.value, 'spec.dns', {})
     hibernationSchedules.value = get(manifest.value, 'spec.hibernation.schedules', [])
-    workerless.value = isEmpty(providerWorkers.value)
+    if (shootCreationTimestamp.value) {
+      workerless.value = isEmpty(providerWorkers.value)
+    }
   }
 
   function createShootManifest (options) {
