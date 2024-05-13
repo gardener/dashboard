@@ -73,7 +73,8 @@ export function findVendorHint (vendorHints, vendorName) {
 
 export function decorateClassificationObject (obj) {
   const classification = obj.classification ?? 'supported'
-  const isExpired = obj.expirationDate && moment().isAfter(obj.expirationDate)
+  const isExpired = !!obj.expirationDate && moment().isAfter(obj.expirationDate)
+  const isExpirationWarning = !!obj.expirationDate && moment(obj.expirationDate).diff(moment(), 'd') < 30
 
   return {
     ...obj,
@@ -81,7 +82,7 @@ export function decorateClassificationObject (obj) {
     isSupported: classification === 'supported' && !isExpired,
     isDeprecated: classification === 'deprecated',
     isExpired,
-    isExpirationWarning: !!obj.expirationDate && moment(obj.expirationDate).diff(moment(), 'd') < 30,
+    isExpirationWarning,
     expirationDateString: getDateFormatted(obj.expirationDate),
   }
 }

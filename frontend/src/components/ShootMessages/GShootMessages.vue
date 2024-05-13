@@ -162,7 +162,7 @@ export default {
       if (!k8sExpiration) {
         return []
       }
-      const { expirationDate, isValidTerminationDate, severity } = k8sExpiration
+      const { expirationDate, isValidTerminationDate, severity, isExpired } = k8sExpiration
       return [{
         key: 'k8sWarning',
         icon: 'mdi-update',
@@ -172,6 +172,7 @@ export default {
           props: {
             expirationDate,
             isValidTerminationDate,
+            isExpired,
             severity,
           },
         },
@@ -183,7 +184,7 @@ export default {
       }
       const imageAutoPatch = get(this.shootItem, 'spec.maintenance.autoUpdate.machineImageVersion', false)
       const expiredWorkerGroups = this.expiringWorkerGroupsForShoot(this.shootWorkerGroups, this.shootCloudProfileName, imageAutoPatch)
-      return map(expiredWorkerGroups, ({ expirationDate, isValidTerminationDate, version, name, workerName, severity, supportedVersionAvailable }) => {
+      return map(expiredWorkerGroups, ({ expirationDate, isValidTerminationDate, isExpired, version, name, workerName, severity, supportedVersionAvailable }) => {
         return {
           key: `image_${workerName}_${name}`,
           icon: 'mdi-update',
@@ -193,6 +194,7 @@ export default {
             props: {
               expirationDate,
               isValidTerminationDate,
+              isExpired,
               severity,
               name,
               workerName,
