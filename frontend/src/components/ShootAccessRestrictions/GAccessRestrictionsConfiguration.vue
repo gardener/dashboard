@@ -53,7 +53,7 @@ export default {
     const {
       accessRestrictionDefinitionList,
       accessRestrictionNoItemsText,
-    } = useShootHelper(shootItem)
+    } = useShootHelper()
 
     const shootContextStore = useShootContextStore()
     const {

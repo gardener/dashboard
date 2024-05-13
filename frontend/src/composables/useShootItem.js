@@ -263,7 +263,7 @@ export function useShootItem () {
 }
 
 export function useProvideShootItem (shootItem, options) {
-  const shootItemComposable = createShootItemComposable(shootItem, options)
-  provide('shoot-item', shootItemComposable)
-  return shootItemComposable
+  const composable = createShootItemComposable(shootItem, options)
+  provide('shoot-item', composable)
+  return composable
 }

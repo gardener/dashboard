@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div
-    v-if="accessRestrictionDefinitions"
+    v-if="!isEmpty(accessRestrictionDefinitions)"
     class="alternate-row-background"
   >
     <v-row
@@ -86,6 +86,8 @@ import { useShootContextStore } from '@/store/shootContext'
 import { NAND } from '@/composables/useShootAccessRestrictions/helper'
 
 import { transformHtml } from '@/utils'
+
+import { isEmpty } from '@/lodash'
 
 const shootContextStore = useShootContextStore()
 const {

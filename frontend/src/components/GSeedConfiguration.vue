@@ -58,7 +58,7 @@ export default {
 
     const {
       seeds,
-    } = useShootHelper(shootItem)
+    } = useShootHelper()
 
     const seedNames = computed(() => {
       return map(seeds.value, 'metadata.name')

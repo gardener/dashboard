@@ -53,7 +53,7 @@ export default {
 
     const {
       allPurposes,
-    } = useShootHelper(shootItem)
+    } = useShootHelper()
 
     const purpose = ref(shootPurpose.value)
 

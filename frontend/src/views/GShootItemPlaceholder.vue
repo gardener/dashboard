@@ -28,17 +28,20 @@ import {
 
 import { useAuthzStore } from '@/store/authz'
 import { useAuthnStore } from '@/store/authn'
+import { useConfigStore } from '@/store/config'
 import { useSecretStore } from '@/store/secret'
 import { useShootStore } from '@/store/shoot'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useProjectStore } from '@/store/project'
 import { useSeedStore } from '@/store/seed'
+import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useTerminalStore } from '@/store/terminal'
 
 import GShootItemLoading from '@/views/GShootItemLoading.vue'
 import GShootItemError from '@/views/GShootItemError.vue'
 
 import { useProvideShootItem } from '@/composables/useShootItem'
+import { useProvideShootHelper } from '@/composables/useShootHelper'
 
 import { isEqual } from '@/lodash'
 
@@ -62,12 +65,14 @@ export default {
     const route = useRoute()
     const authnStore = useAuthnStore()
     const authzStore = useAuthzStore()
+    const configStore = useConfigStore()
     const shootStore = useShootStore()
     const secretStore = useSecretStore()
     const terminalStore = useTerminalStore()
     const cloudProfileStore = useCloudProfileStore()
     const projectStore = useProjectStore()
     const seedStore = useSeedStore()
+    const gardenerExtensionStore = useGardenerExtensionStore()
 
     const activePopoverKey = ref('')
     const error = ref(null)
@@ -206,9 +211,16 @@ export default {
     const {
       hasShootWorkerGroups,
     } = useProvideShootItem(shootItem, {
-      shootStore,
       cloudProfileStore,
       projectStore,
+      seedStore,
+    })
+
+    useProvideShootHelper(shootItem, {
+      cloudProfileStore,
+      configStore,
+      gardenerExtensionStore,
+      secretStore,
       seedStore,
     })
 

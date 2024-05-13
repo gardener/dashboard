@@ -11,6 +11,7 @@ import {
   readonly,
   reactive,
   toRef,
+  watch,
 } from 'vue'
 
 import { useAuthzStore } from '@/store/authz'
@@ -38,7 +39,7 @@ import { v4 as uuidv4 } from '@/utils/uuid'
 import utils from '@/utils'
 
 import { useLogger } from '../useLogger'
-import { useShootHelper } from '../useShootHelper'
+import { createShootHelperComposable } from '../useShootHelper'
 import { useShootMetadata } from '../useShootMetadata'
 import { useShootAccessRestrictions } from '../useShootAccessRestrictions'
 
@@ -111,16 +112,22 @@ export function useShootContext (options = {}) {
     manifest.value = cloneDeep(initialManifest.value)
     dns.value = get(manifest.value, 'spec.dns', {})
     hibernationSchedules.value = get(manifest.value, 'spec.hibernation.schedules', [])
+    workerless.value = isEmpty(providerWorkers.value)
   }
 
-  function resetShootManifest () {
-    setShootManifest({
+  function createShootManifest (options) {
+    initialManifest.value = null
+    manifest.value = {
       metadata: {
-        name: utils.shortRandomString(10),
-        namespace: authzStore.namespace,
+        name: get(options, 'names', utils.shortRandomString(10)),
+        namespace: get(options, 'namespace', authzStore.namespace),
       },
-    })
-    resetProviderType()
+    }
+    dns.value = {}
+    hibernationSchedules.value = []
+    workerless.value = get(options, 'workerless', false)
+    const defaultProviderType = head(cloudProfileStore.sortedInfrastructureKindList)
+    providerType.value = get(options, 'providerType', defaultProviderType)
     resetNetworkingType()
     resetAddons()
     resetMaintenance()
@@ -175,11 +182,6 @@ export function useShootContext (options = {}) {
 
   function resetKubernetesEnableStaticTokenKubeconfig () {
     kubernetesEnableStaticTokenKubeconfig.value = false
-  }
-
-  function resetKubernetes () {
-    resetKubernetesVersion()
-    resetKubernetesEnableStaticTokenKubeconfig()
   }
 
   /* cloudProfileName */
@@ -295,6 +297,10 @@ export function useShootContext (options = {}) {
   }
 
   /* provider */
+  const providerState = reactive({
+    workerless: false,
+  })
+
   const providerType = computed({
     get () {
       return get(manifest.value, 'spec.provider.type')
@@ -315,10 +321,6 @@ export function useShootContext (options = {}) {
       resetCloudProfileName()
     },
   })
-
-  function resetProviderType () {
-    providerType.value = head(cloudProfileStore.sortedInfrastructureKindList)
-  }
 
   const providerControlPlaneConfigZone = computed({
     get () {
@@ -473,22 +475,32 @@ export function useShootContext (options = {}) {
       : undefined
   }
 
+  const workerless = computed({
+    get () {
+      return providerState.workerless
+    },
+    set (value) {
+      if (isNewCluster.value && providerState.workerless !== value) {
+        providerState.workerless = value
+        resetProviderWorkers()
+      }
+    },
+  })
+
   const providerWorkers = computed({
     get () {
       return get(manifest.value, 'spec.provider.workers', [])
     },
     set (value = []) {
-      if (isEmpty(value) && !isNewCluster.value) {
-        throw new TypeError('A cluster\'s workerless property is immutable')
-      }
       set(manifest.value, 'spec.provider.workers', value)
+      resetAddons()
     },
   })
 
   function resetProviderWorkers () {
-    providerWorkers.value = [
-      generateProviderWorker(availableZones.value),
-    ]
+    providerWorkers.value = providerState.workerless
+      ? []
+      : [generateProviderWorker(availableZones.value)]
   }
 
   function addProviderWorker () {
@@ -501,21 +513,6 @@ export function useShootContext (options = {}) {
   function removeProviderWorker (id) {
     providerWorkers.value = filter(providerWorkers.value, worker => worker.id !== id)
   }
-
-  const workerless = computed({
-    get () {
-      return isEmpty(providerWorkers.value)
-    },
-    set (value) {
-      if (!value) {
-        resetProviderWorkers()
-        resetAddons()
-      } else {
-        providerWorkers.value = []
-        addons.value = []
-      }
-    },
-  })
 
   function generateProviderWorker (zones) {
     const { id, isNew, ...worker } = cloudProfileStore.generateWorker(
@@ -622,8 +619,10 @@ export function useShootContext (options = {}) {
 
   function resetAddons () {
     const defaultAddons = {}
-    for (const { name, enabled } of visibleAddonDefinitionList.value) {
-      defaultAddons[name] = { enabled }
+    if (!providerState.workerless) {
+      for (const { name, enabled } of visibleAddonDefinitionList.value) {
+        defaultAddons[name] = { enabled }
+      }
     }
     addons.value = defaultAddons
   }
@@ -796,21 +795,6 @@ export function useShootContext (options = {}) {
     const oldControlPlaneFailureToleranceType = get(initialShootManifest.value, 'spec.controlPlane.highAvailability.failureTolerance.type')
     return isNewCluster.value || !oldControlPlaneFailureToleranceType
   })
-
-  function resetControlPlaneFailureToleranceType () {
-    if (!controlPlaneHighAvailabilityFailureToleranceTypeChangeAllowed.value) {
-      return
-    }
-    if (!isFailureToleranceTypeZoneSupported.value) {
-      if (controlPlaneHighAvailabilityFailureToleranceType.value === 'node') {
-        controlPlaneHighAvailabilityFailureToleranceType.value = 'zone'
-      }
-    } else {
-      if (controlPlaneHighAvailabilityFailureToleranceType.value === 'zone') {
-        controlPlaneHighAvailabilityFailureToleranceType.value = 'node'
-      }
-    }
-  }
 
   const controlPlaneHighAvailability = computed({
     get () {
@@ -1084,7 +1068,7 @@ export function useShootContext (options = {}) {
     machineImages,
     networkingTypes,
     showAllRegions,
-  } = useShootHelper(readonly({
+  } = createShootHelperComposable(readonly({
     creationTimestamp: shootCreationTimestamp,
     cloudProfileName,
     seedName,
@@ -1101,11 +1085,26 @@ export function useShootContext (options = {}) {
     seedStore,
   })
 
+  /* watches */
+  watch(isFailureToleranceTypeZoneSupported, value => {
+    if (controlPlaneHighAvailabilityFailureToleranceTypeChangeAllowed.value) {
+      if (!value) {
+        if (controlPlaneHighAvailabilityFailureToleranceType.value === 'zone') {
+          controlPlaneHighAvailabilityFailureToleranceType.value = 'node'
+        }
+      } else {
+        if (controlPlaneHighAvailabilityFailureToleranceType.value === 'node') {
+          controlPlaneHighAvailabilityFailureToleranceType.value = 'zone'
+        }
+      }
+    }
+  })
+
   return {
     /* manifest */
     shootManifest,
     setShootManifest,
-    resetShootManifest,
+    createShootManifest,
     isShootDirty,
     /* metadata */
     shootName,
@@ -1117,27 +1116,21 @@ export function useShootContext (options = {}) {
     isShootActionsDisabled,
     /* cloudProfileName */
     cloudProfileName,
-    resetCloudProfileName,
     /* region */
     region,
     /* seedName */
     seedName,
     /* secretBindingName */
     secretBindingName,
-    resetSecretBindingName,
     infrastructureSecret,
     /* kubernetes */
     kubernetesVersion,
-    resetKubernetes,
     kubernetesEnableStaticTokenKubeconfig,
-    resetKubernetesEnableStaticTokenKubeconfig,
     /* networking */
     networkingType,
-    resetNetworkingType,
     networkingNodes,
     /* provider */
     providerType,
-    resetProviderType,
     /* provider - controlPlaneConfig */
     providerControlPlaneConfigLoadBalancerProviderName,
     providerControlPlaneConfigLoadBalancerClasses,
@@ -1153,7 +1146,6 @@ export function useShootContext (options = {}) {
     providerInfrastructureConfigProjectID,
     /* provider - workers */
     providerWorkers,
-    resetProviderWorkers,
     addProviderWorker,
     removeProviderWorker,
     workerless,
@@ -1163,13 +1155,10 @@ export function useShootContext (options = {}) {
     /* hibernation */
     maintenanceTimeWindowBegin,
     maintenanceTimeWindowEnd,
-    resetMaintenanceTimeWindow,
     maintenanceAutoUpdateKubernetesVersion,
     maintenanceAutoUpdateMachineImageVersion,
-    resetMaintenanceAutoUpdate,
     /* hibernation */
     hibernationSchedules,
-    resetHibernationShedules,
     hibernationSchedulesError,
     hibernationScheduleEvents,
     getHibernationScheduleEvent,
@@ -1179,7 +1168,6 @@ export function useShootContext (options = {}) {
     /* controlPlane - highAvailability */
     controlPlaneHighAvailability,
     controlPlaneHighAvailabilityFailureToleranceType,
-    resetControlPlaneFailureToleranceType,
     controlPlaneHighAvailabilityFailureToleranceTypeChangeAllowed,
     /* dns */
     dns,
@@ -1191,7 +1179,6 @@ export function useShootContext (options = {}) {
     addDnsProvider,
     patchDnsProvider,
     deleteDnsProvider,
-    resetDnsPrimaryProviderId,
     /* accessRestrictions */
     accessRestrictionList,
     getAccessRestrictionValue,
@@ -1204,7 +1191,6 @@ export function useShootContext (options = {}) {
     addons,
     getAddonEnabled,
     setAddonEnabled,
-    resetAddons,
     addonDefinitions,
     addonDefinitionList,
     visibleAddonDefinitionList,

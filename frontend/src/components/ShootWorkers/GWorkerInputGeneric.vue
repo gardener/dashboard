@@ -466,6 +466,7 @@ export default {
       'machineTypesByCloudProfileNameAndRegionAndArchitecture',
       'machineImagesByCloudProfileName',
       'minimumVolumeSizeByMachineTypeAndVolumeType',
+      'defaultMachineImageForCloudProfileNameAndMachineType',
     ]),
     onInputVolumeSize () {
       if (this.hasVolumeSize) {
@@ -481,10 +482,10 @@ export default {
       this.v$.worker.maximum.$touch()
     },
     resetWorkerMachine () {
-      const machineType = head(this.machineTypes)
-      this.worker.machine.type = get(machineType, 'name')
-      const machineImage = head(this.machineImages)
-      this.worker.machine.image = pick(machineImage, ['name', 'version'])
+      const defaultMachineType = head(this.machineTypes)
+      this.worker.machine.type = get(defaultMachineType, 'name')
+      const defaultMachineImage = this.defaultMachineImageForCloudProfileNameAndMachineType(this.cloudProfileName, defaultMachineType)
+      this.worker.machine.image = pick(defaultMachineImage, ['name', 'version'])
     },
     getErrorMessages,
   },

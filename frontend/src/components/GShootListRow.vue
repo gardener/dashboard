@@ -207,6 +207,12 @@ import { storeToRefs } from 'pinia'
 import { useAuthzStore } from '@/store/authz'
 import { useTicketStore } from '@/store/ticket'
 import { useShootStore } from '@/store/shoot'
+import { useConfigStore } from '@/store/config'
+import { useSecretStore } from '@/store/secret'
+import { useCloudProfileStore } from '@/store/cloudProfile'
+import { useProjectStore } from '@/store/project'
+import { useSeedStore } from '@/store/seed'
+import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 
 import GAccessRestrictionChips from '@/components/ShootAccessRestrictions/GAccessRestrictionChips.vue'
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
@@ -229,6 +235,7 @@ import GWorkerGroups from '@/components/ShootWorkers/GWorkerGroups'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 
 import { useProvideShootItem } from '@/composables/useShootItem'
+import { useProvideShootHelper } from '@/composables/useShootHelper'
 
 import { getIssueSince } from '@/utils'
 
@@ -258,6 +265,13 @@ const emit = defineEmits([
 const shootStore = useShootStore()
 const ticketStore = useTicketStore()
 const authzStore = useAuthzStore()
+const configStore = useConfigStore()
+const secretStore = useSecretStore()
+const cloudProfileStore = useCloudProfileStore()
+const projectStore = useProjectStore()
+const seedStore = useSeedStore()
+const gardenerExtensionStore = useGardenerExtensionStore()
+
 const {
   canGetSecrets,
   canPatchShoots,
@@ -279,7 +293,19 @@ const {
   shootTechnicalId,
   shootSeedName,
   shootSelectedAccessRestrictions,
-} = useProvideShootItem(shootItem)
+} = useProvideShootItem(shootItem, {
+  cloudProfileStore,
+  projectStore,
+  seedStore,
+})
+
+useProvideShootHelper(shootItem, {
+  cloudProfileStore,
+  configStore,
+  gardenerExtensionStore,
+  secretStore,
+  seedStore,
+})
 
 const isInfoAvailable = computed(() => {
   // operator not yet updated shoot resource

@@ -63,11 +63,11 @@ export const useShootMetadata = (shootItem, options = {}) => {
   })
 
   function getShootAnnotation (key, defaultValue) {
-    return get(shootItem.value, `metadata.annotations['${key}']`, `${defaultValue}`)
+    return get(shootItem.value, `metadata.annotations['${key}']`, defaultValue)
   }
 
   function setShootAnnotation (key, value) {
-    set(shootItem.value, `metadata.annotations['${key}']`, `${value}`)
+    set(shootItem.value, `metadata.annotations['${key}']`, value)
   }
 
   function unsetShootAnnotation (key) {

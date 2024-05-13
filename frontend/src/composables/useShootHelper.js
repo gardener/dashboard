@@ -4,7 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { computed } from 'vue'
+import {
+  computed,
+  inject,
+  provide,
+} from 'vue'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useConfigStore } from '@/store/config'
@@ -33,7 +37,7 @@ const shootPropertyMappings = Object.freeze({
   providerType: 'spec.provider.type',
 })
 
-export function useShootHelper (state, options = {}) {
+export function createShootHelperComposable (state, options = {}) {
   const {
     cloudProfileStore = useCloudProfileStore(),
     configStore = useConfigStore(),
@@ -270,4 +274,14 @@ export function useShootHelper (state, options = {}) {
     networkingTypes,
     showAllRegions,
   }
+}
+
+export function useShootHelper () {
+  return inject('shoot-helper', null)
+}
+
+export function useProvideShootHelper (shootItem, options) {
+  const composable = createShootHelperComposable(shootItem, options)
+  provide('shoot-helper', composable)
+  return composable
 }

@@ -119,7 +119,7 @@ export function useShootAccessRestrictions (shootItem, options = {}) {
     const { input } = get(accessRestrictionDefinitions.value, [accessRestrictionKey, 'options', key])
     const inverted = !!input?.inverted
     const defaultValue = inverted
-    const value = getShootAnnotation(key, defaultValue) === 'true'
+    const value = getShootAnnotation(key, `${defaultValue}`) === 'true'
     return NAND(value, inverted)
   }
 
@@ -127,7 +127,7 @@ export function useShootAccessRestrictions (shootItem, options = {}) {
     const { accessRestrictionKey } = accessRestrictionOptionDefinitions.value[key]
     const { input } = get(accessRestrictionDefinitions.value, [accessRestrictionKey, 'options', key])
     const inverted = !!input?.inverted
-    setShootAnnotation(key, NAND(value, inverted))
+    setShootAnnotation(key, `${NAND(value, inverted)}`)
   }
 
   const accessRestrictionList = computed(() => {
