@@ -107,8 +107,14 @@ global:
         #   Li4u
         #   -----END RSA PRIVATE KEY-----
 
-    # sessionSecret is used for signing and encrytion of session data
+    # sessionSecret is the current secret used for signing tokens and encrypting session data.
+    # It is also used for verifying tokens and decrypting session data.
+    # This value should be set to a secure random string.
     sessionSecret: ~
+    # sessionSecretPrevious is the previous secret used only for verifying tokens and decrypting session data.
+    # It allows for a seamless rotation of the session secret by supporting both the current and previous secrets.
+    # Set this value to the previous sessionSecret during secret rotation, and leave it empty otherwise.
+    sessionSecretPrevious: ~
 
     # oidc:
     #   # well-known URL for OpenID Provider Issuer Discovery

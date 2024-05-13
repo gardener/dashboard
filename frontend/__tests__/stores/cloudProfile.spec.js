@@ -340,9 +340,19 @@ describe('stores', () => {
         expirationDate: '2023-03-15T23:59:59Z', // expired
         version: '1.16.1',
       }
-      const deprecatedOldestVersion = {
+      const deprecatedOldest16Version = {
         version: '1.16.0',
         classification: 'deprecated',
+      }
+      const deprecated15Version = {
+        version: '1.15.0',
+        classification: 'deprecated',
+        expirationDate: '2024-01-15T23:59:59Z', // not expired but expiration warning
+      }
+      const deprecated14Version = {
+        version: '1.14.0',
+        classification: 'deprecated',
+        expirationDate: '2024-01-15T23:59:59Z', // not expired but expiration warning
       }
       const invalidVersion = {
         version: '1.06.2',
@@ -360,7 +370,9 @@ describe('stores', () => {
         supported162VersionWithExpirationWarning, // 1.16.2
         expiredVersion, // 1.16.1
         invalidVersion, // 1.06.2 not semver compatible
-        deprecatedOldestVersion, // 1.16.0
+        deprecatedOldest16Version, // 1.16.0
+        deprecated15Version, // 1.15.0
+        deprecated14Version, // 1.14.0
       ]
 
       beforeEach(() => {
@@ -370,7 +382,7 @@ describe('stores', () => {
       describe('#sortedKubernetesVersions', () => {
         it('should filter and sort kubernetes versions from cloud profile', () => {
           const decoratedAndSortedVersions = cloudProfileStore.sortedKubernetesVersions('foo')
-          expect(decoratedAndSortedVersions).toHaveLength(12)
+          expect(decoratedAndSortedVersions).toHaveLength(kubernetesVersions.length - 1)
 
           const expiredDecoratedVersion = find(decoratedAndSortedVersions, expiredVersion)
           expect(expiredDecoratedVersion.isExpired).toBe(true)
@@ -397,7 +409,7 @@ describe('stores', () => {
       })
       describe('#availableKubernetesUpdatesForShoot', () => {
         it('should differentiate between patch/minor/major available K8sUpdates for given version, filter out expired', () => {
-          const availableK8sUpdates = cloudProfileStore.availableKubernetesUpdatesForShoot(deprecatedOldestVersion.version, 'foo')
+          const availableK8sUpdates = cloudProfileStore.availableKubernetesUpdatesForShoot(deprecatedOldest16Version.version, 'foo')
           expect(availableK8sUpdates.patch.length).toBe(5)
           expect(availableK8sUpdates.minor.length).toBe(3)
           expect(availableK8sUpdates.major.length).toBe(2)
@@ -430,6 +442,11 @@ describe('stores', () => {
 
         it('selected kubernetes version should have update path (patch update available)', () => {
           const result = cloudProfileStore.kubernetesVersionUpdatePathAvailable(unclassified164VersionWithExpiration.version, 'foo')
+          expect(result).toBe(true)
+        })
+
+        it('selected kubernetes version should have update path (no immediate update available)', () => {
+          const result = cloudProfileStore.kubernetesVersionUpdatePathAvailable(deprecated14Version.version, 'foo')
           expect(result).toBe(true)
         })
 
@@ -502,7 +519,7 @@ describe('stores', () => {
           expect(versionExpirationWarning).toBeUndefined()
         })
 
-        it('should not have info (auto update)', () => {
+        it('should have info (auto update)', () => {
           const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(unclassified164VersionWithExpiration.version, 'foo', true)
           expect(versionExpirationWarning).toEqual({
             expirationDate: unclassified164VersionWithExpiration.expirationDate,
@@ -512,8 +529,17 @@ describe('stores', () => {
         })
 
         it('should not have warning (deprecated version has no expiration))', () => {
-          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(deprecatedOldestVersion.version, 'foo', false)
+          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(deprecatedOldest16Version.version, 'foo', false)
           expect(versionExpirationWarning).toBeUndefined()
+        })
+
+        it('should not have error when no immediate supported minor version update exists', () => {
+          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(deprecated14Version.version, 'foo', true)
+          expect(versionExpirationWarning).toEqual({
+            expirationDate: deprecated14Version.expirationDate,
+            isValidTerminationDate: true,
+            severity: 'warning',
+          })
         })
       })
     })
