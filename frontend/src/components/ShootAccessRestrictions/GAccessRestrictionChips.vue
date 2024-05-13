@@ -39,8 +39,8 @@ SPDX-License-Identifier: Apache-2.0
       {{ options.title }}
       <v-tooltip
         activator="parent"
-        location="top"
         :disabled="!options.description"
+        location="top"
         max-width="600px"
       >
         <!-- eslint-disable-next-line vue/no-v-html -->
