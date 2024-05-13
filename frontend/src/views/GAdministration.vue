@@ -417,25 +417,31 @@ SPDX-License-Identifier: Apache-2.0
                       v-for="resourceQuota in projectQuotaStatus"
                       :key="resourceQuota.key"
                     >
-                      <td>
-                        <v-tooltip location="top">
-                          <template #activator="{ props }">
-                            <span v-bind="props">{{ resourceQuota.caption }}</span>
-                          </template>
-                          {{ resourceQuota.resourceName }}
-                        </v-tooltip>
+                      <td class="text-left">
+                        <span>
+                          {{ resourceQuota.caption }}
+                          <v-tooltip
+                            activator="parent"
+                            location="top"
+                          >
+                            {{ resourceQuota.resourceName }}
+                          </v-tooltip>
+                        </span>
                       </td>
                       <td class="text-center">
-                        <v-tooltip location="top">
-                          <template #activator="{ props }">
-                            <v-progress-linear
-                              v-bind="props"
-                              :model-value="resourceQuota.percentage"
-                              :color="resourceQuota.progressColor"
-                            />
-                          </template>
-                          {{ resourceQuota.percentage }}%
-                        </v-tooltip>
+                        <div>
+                          <v-progress-linear
+                            :model-value="resourceQuota.percentage"
+                            :color="resourceQuota.progressColor"
+                            :height="8"
+                          />
+                          <v-tooltip
+                            activator="parent"
+                            location="top"
+                          >
+                            {{ resourceQuota.percentage }}%
+                          </v-tooltip>
+                        </div>
                       </td>
                       <td class="text-center">
                         {{ resourceQuota.usedValue }} / {{ resourceQuota.limitValue }}

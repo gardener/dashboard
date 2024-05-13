@@ -161,8 +161,13 @@ SPDX-License-Identifier: Apache-2.0
       </g-list-item>
       <g-list-item>
         <template #prepend />
-        <g-list-item-content label="DNS Providers">
-          <template v-if="shootDnsProviders && shootDnsProviders.length">
+        <g-list-item-content
+          label="DNS Providers"
+        >
+          <div
+            v-if="shootDnsProviders && shootDnsProviders.length"
+            class="d-flex justify-start"
+          >
             <g-dns-provider
               v-for="({ primary, secretName, type, domains, zones }) in shootDnsProviders"
               :key="secretName"
@@ -175,7 +180,7 @@ SPDX-License-Identifier: Apache-2.0
               :zones="zones"
               :secret="getCloudProviderSecretByName({ name: secretName, namespace: shootNamespace })"
             />
-          </template>
+          </div>
           <span v-else>No DNS provider configured</span>
         </g-list-item-content>
         <template #append>
@@ -205,31 +210,29 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           <g-list-item-content label="Available Load Balancer Classes">
             <div class="d-flex align-center pt-1">
-              <v-tooltip
+              <v-chip
                 v-for="{ name } in shootLoadbalancerClasses"
                 :key="name"
-                :disabled="name !== defaultLoadbalancerClass"
-                location="top"
+                size="small"
+                class="mr-2"
+                variant="tonal"
+                color="primary"
               >
-                <template #activator="{ props }">
-                  <v-chip
-                    v-bind="props"
-                    size="small"
-                    class="mr-2"
-                    variant="tonal"
-                    color="primary"
-                  >
-                    {{ name }}
-                    <v-icon
-                      v-if="name === defaultLoadbalancerClass"
-                      size="small"
-                    >
-                      mdi-star
-                    </v-icon>
-                  </v-chip>
-                </template>
-                <span>Default Load Balancer Class</span>
-              </v-tooltip>
+                {{ name }}
+                <v-icon
+                  v-if="name === defaultLoadbalancerClass"
+                  size="small"
+                >
+                  mdi-star
+                </v-icon>
+                <v-tooltip
+                  activator="parent"
+                  :disabled="name !== defaultLoadbalancerClass"
+                  location="top"
+                >
+                  <span>Default Load Balancer Class</span>
+                </v-tooltip>
+              </v-chip>
             </div>
           </g-list-item-content>
         </g-list-item>
