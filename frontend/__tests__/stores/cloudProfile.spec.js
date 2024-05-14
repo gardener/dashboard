@@ -159,6 +159,10 @@ describe('stores', () => {
         expect(imageWithExpirationDate.isExpirationWarning).toBe(false)
         expect(imageWithExpirationDate).toBe(decoratedAndSortedMachineImages[2]) // check sorting
 
+        const imageWithNoExpirationDate = find(decoratedAndSortedMachineImages, { name: 'gardenlinux', version: '1.1.5' })
+        expect(imageWithNoExpirationDate.isExpirationWarning).toBe(false)
+        expect(imageWithNoExpirationDate.isExpired).toBe(false)
+
         const previewImage = find(decoratedAndSortedMachineImages, { name: 'gardenlinux', version: '1.2.0' })
         expect(previewImage.isSupported).toBe(false)
         expect(previewImage.isPreview).toBe(true)
@@ -413,6 +417,10 @@ describe('stores', () => {
           expect(decoratedSupported165Version.expirationDateString).toBeDefined()
           expect(decoratedSupported165Version.isSupported).toBe(true)
           expect(decoratedSupported165Version).toBe(decoratedAndSortedVersions[6]) // check sorting
+
+          const decoratedVersionWithoutExpiration = find(decoratedAndSortedVersions, deprecated181VersionWithoutExpiration)
+          expect(decoratedVersionWithoutExpiration.isExpirationWarning).toBe(false)
+          expect(decoratedVersionWithoutExpiration.isExpired).toBe(false)
         })
       })
       describe('#availableKubernetesUpdatesForShoot', () => {
