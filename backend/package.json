@@ -39,7 +39,7 @@
     "@gardener-dashboard/monitor": "workspace:^",
     "@gardener-dashboard/request": "workspace:^",
     "@godaddy/terminus": "^4.12.1",
-    "@octokit/auth-app": "^6.0.4",
+    "@octokit/auth-app": "^7.0.0",
     "@octokit/core": "^5.1.0",
     "@octokit/plugin-paginate-graphql": "^4.0.1",
     "@octokit/plugin-paginate-rest": "^9.2.1",

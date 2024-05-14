@@ -1239,7 +1239,7 @@ const RAW_RUNTIME_STATE =
           ["@gardener-dashboard/request", "workspace:packages/request"],\
           ["@gardener-dashboard/test-utils", "workspace:packages/test-utils"],\
           ["@godaddy/terminus", "npm:4.12.1"],\
-          ["@octokit/auth-app", "npm:6.1.1"],\
+          ["@octokit/auth-app", "npm:7.1.0"],\
           ["@octokit/core", "npm:5.2.0"],\
           ["@octokit/plugin-paginate-graphql", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:4.0.1"],\
           ["@octokit/plugin-paginate-rest", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:9.2.1"],\
@@ -1972,63 +1972,59 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@octokit/auth-app", [\
-      ["npm:6.1.1", {\
-        "packageLocation": "./.yarn/cache/@octokit-auth-app-npm-6.1.1-8881bbe471-633fa49ef1.zip/node_modules/@octokit/auth-app/",\
+      ["npm:7.1.0", {\
+        "packageLocation": "./.yarn/cache/@octokit-auth-app-npm-7.1.0-85cae2f98f-f5a2675518.zip/node_modules/@octokit/auth-app/",\
         "packageDependencies": [\
-          ["@octokit/auth-app", "npm:6.1.1"],\
-          ["@octokit/auth-oauth-app", "npm:7.1.0"],\
-          ["@octokit/auth-oauth-user", "npm:4.1.0"],\
-          ["@octokit/request", "npm:8.3.1"],\
-          ["@octokit/request-error", "npm:5.1.0"],\
-          ["@octokit/types", "npm:13.1.0"],\
-          ["deprecation", "npm:2.3.1"],\
+          ["@octokit/auth-app", "npm:7.1.0"],\
+          ["@octokit/auth-oauth-app", "npm:8.1.1"],\
+          ["@octokit/auth-oauth-user", "npm:5.1.1"],\
+          ["@octokit/request", "npm:9.1.1"],\
+          ["@octokit/request-error", "npm:6.1.1"],\
+          ["@octokit/types", "npm:13.5.0"],\
           ["lru-cache", "npm:10.0.1"],\
-          ["universal-github-app-jwt", "npm:1.1.2"],\
-          ["universal-user-agent", "npm:6.0.0"]\
+          ["universal-github-app-jwt", "npm:2.2.0"],\
+          ["universal-user-agent", "npm:7.0.2"]\
         ],\
         "linkType": "HARD"\
       }]\
     ]],\
     ["@octokit/auth-oauth-app", [\
-      ["npm:7.1.0", {\
-        "packageLocation": "./.yarn/cache/@octokit-auth-oauth-app-npm-7.1.0-bd67bc3ae6-e23c596842.zip/node_modules/@octokit/auth-oauth-app/",\
+      ["npm:8.1.1", {\
+        "packageLocation": "./.yarn/cache/@octokit-auth-oauth-app-npm-8.1.1-a89d12e489-e55593fa9a.zip/node_modules/@octokit/auth-oauth-app/",\
         "packageDependencies": [\
-          ["@octokit/auth-oauth-app", "npm:7.1.0"],\
-          ["@octokit/auth-oauth-device", "npm:6.1.0"],\
-          ["@octokit/auth-oauth-user", "npm:4.1.0"],\
-          ["@octokit/request", "npm:8.3.1"],\
+          ["@octokit/auth-oauth-app", "npm:8.1.1"],\
+          ["@octokit/auth-oauth-device", "npm:7.1.1"],\
+          ["@octokit/auth-oauth-user", "npm:5.1.1"],\
+          ["@octokit/request", "npm:9.1.1"],\
           ["@octokit/types", "npm:13.1.0"],\
-          ["@types/btoa-lite", "npm:1.0.0"],\
-          ["btoa-lite", "npm:1.0.0"],\
-          ["universal-user-agent", "npm:6.0.0"]\
+          ["universal-user-agent", "npm:7.0.2"]\
         ],\
         "linkType": "HARD"\
       }]\
     ]],\
     ["@octokit/auth-oauth-device", [\
-      ["npm:6.1.0", {\
-        "packageLocation": "./.yarn/cache/@octokit-auth-oauth-device-npm-6.1.0-6476862059-74e17b76f5.zip/node_modules/@octokit/auth-oauth-device/",\
+      ["npm:7.1.1", {\
+        "packageLocation": "./.yarn/cache/@octokit-auth-oauth-device-npm-7.1.1-c9984544b4-77f33fceac.zip/node_modules/@octokit/auth-oauth-device/",\
         "packageDependencies": [\
-          ["@octokit/auth-oauth-device", "npm:6.1.0"],\
-          ["@octokit/oauth-methods", "npm:4.1.0"],\
-          ["@octokit/request", "npm:8.3.1"],\
+          ["@octokit/auth-oauth-device", "npm:7.1.1"],\
+          ["@octokit/oauth-methods", "npm:5.1.2"],\
+          ["@octokit/request", "npm:9.1.1"],\
           ["@octokit/types", "npm:13.1.0"],\
-          ["universal-user-agent", "npm:6.0.0"]\
+          ["universal-user-agent", "npm:7.0.2"]\
         ],\
         "linkType": "HARD"\
       }]\
     ]],\
     ["@octokit/auth-oauth-user", [\
-      ["npm:4.1.0", {\
-        "packageLocation": "./.yarn/cache/@octokit-auth-oauth-user-npm-4.1.0-ec19931660-5d17d1e86c.zip/node_modules/@octokit/auth-oauth-user/",\
+      ["npm:5.1.1", {\
+        "packageLocation": "./.yarn/cache/@octokit-auth-oauth-user-npm-5.1.1-a258c23865-ab99409541.zip/node_modules/@octokit/auth-oauth-user/",\
         "packageDependencies": [\
-          ["@octokit/auth-oauth-user", "npm:4.1.0"],\
-          ["@octokit/auth-oauth-device", "npm:6.1.0"],\
-          ["@octokit/oauth-methods", "npm:4.1.0"],\
-          ["@octokit/request", "npm:8.3.1"],\
+          ["@octokit/auth-oauth-user", "npm:5.1.1"],\
+          ["@octokit/auth-oauth-device", "npm:7.1.1"],\
+          ["@octokit/oauth-methods", "npm:5.1.2"],\
+          ["@octokit/request", "npm:9.1.1"],\
           ["@octokit/types", "npm:13.1.0"],\
-          ["btoa-lite", "npm:1.0.0"],\
-          ["universal-user-agent", "npm:6.0.0"]\
+          ["universal-user-agent", "npm:7.0.2"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -2059,6 +2055,15 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@octokit/endpoint", [\
+      ["npm:10.1.1", {\
+        "packageLocation": "./.yarn/cache/@octokit-endpoint-npm-10.1.1-ac8c51d408-946517241b.zip/node_modules/@octokit/endpoint/",\
+        "packageDependencies": [\
+          ["@octokit/endpoint", "npm:10.1.1"],\
+          ["@octokit/types", "npm:13.1.0"],\
+          ["universal-user-agent", "npm:7.0.2"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
       ["npm:9.0.5", {\
         "packageLocation": "./.yarn/cache/@octokit-endpoint-npm-9.0.5-9f96e75a5d-e9bbb2111a.zip/node_modules/@octokit/endpoint/",\
         "packageDependencies": [\
@@ -2082,24 +2087,23 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@octokit/oauth-authorization-url", [\
-      ["npm:6.0.2", {\
-        "packageLocation": "./.yarn/cache/@octokit-oauth-authorization-url-npm-6.0.2-7e66c4af6b-8c06e538b3.zip/node_modules/@octokit/oauth-authorization-url/",\
+      ["npm:7.1.1", {\
+        "packageLocation": "./.yarn/cache/@octokit-oauth-authorization-url-npm-7.1.1-f99568b3b9-a2723dde50.zip/node_modules/@octokit/oauth-authorization-url/",\
         "packageDependencies": [\
-          ["@octokit/oauth-authorization-url", "npm:6.0.2"]\
+          ["@octokit/oauth-authorization-url", "npm:7.1.1"]\
         ],\
         "linkType": "HARD"\
       }]\
     ]],\
     ["@octokit/oauth-methods", [\
-      ["npm:4.1.0", {\
-        "packageLocation": "./.yarn/cache/@octokit-oauth-methods-npm-4.1.0-39961145cf-3ab7ab41e8.zip/node_modules/@octokit/oauth-methods/",\
+      ["npm:5.1.2", {\
+        "packageLocation": "./.yarn/cache/@octokit-oauth-methods-npm-5.1.2-3dc246f8f5-ab41396ee3.zip/node_modules/@octokit/oauth-methods/",\
         "packageDependencies": [\
-          ["@octokit/oauth-methods", "npm:4.1.0"],\
-          ["@octokit/oauth-authorization-url", "npm:6.0.2"],\
-          ["@octokit/request", "npm:8.3.1"],\
-          ["@octokit/request-error", "npm:5.1.0"],\
-          ["@octokit/types", "npm:13.1.0"],\
-          ["btoa-lite", "npm:1.0.0"]\
+          ["@octokit/oauth-methods", "npm:5.1.2"],\
+          ["@octokit/oauth-authorization-url", "npm:7.1.1"],\
+          ["@octokit/request", "npm:9.1.1"],\
+          ["@octokit/request-error", "npm:6.1.1"],\
+          ["@octokit/types", "npm:13.1.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -2116,6 +2120,13 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/@octokit-openapi-types-npm-21.2.0-a464d7c6ad-b4e46985f8.zip/node_modules/@octokit/openapi-types/",\
         "packageDependencies": [\
           ["@octokit/openapi-types", "npm:21.2.0"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:22.2.0", {\
+        "packageLocation": "./.yarn/cache/@octokit-openapi-types-npm-22.2.0-ce9f704019-a45bfc7356.zip/node_modules/@octokit/openapi-types/",\
+        "packageDependencies": [\
+          ["@octokit/openapi-types", "npm:22.2.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -2221,6 +2232,17 @@ const RAW_RUNTIME_STATE =
           ["universal-user-agent", "npm:6.0.0"]\
         ],\
         "linkType": "HARD"\
+      }],\
+      ["npm:9.1.1", {\
+        "packageLocation": "./.yarn/cache/@octokit-request-npm-9.1.1-2763b16395-60ad38ffc0.zip/node_modules/@octokit/request/",\
+        "packageDependencies": [\
+          ["@octokit/request", "npm:9.1.1"],\
+          ["@octokit/endpoint", "npm:10.1.1"],\
+          ["@octokit/request-error", "npm:6.1.1"],\
+          ["@octokit/types", "npm:13.1.0"],\
+          ["universal-user-agent", "npm:7.0.2"]\
+        ],\
+        "linkType": "HARD"\
       }]\
     ]],\
     ["@octokit/request-error", [\
@@ -2231,6 +2253,14 @@ const RAW_RUNTIME_STATE =
           ["@octokit/types", "npm:13.1.0"],\
           ["deprecation", "npm:2.3.1"],\
           ["once", "npm:1.4.0"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:6.1.1", {\
+        "packageLocation": "./.yarn/cache/@octokit-request-error-npm-6.1.1-16d75cf50a-55b61da0b2.zip/node_modules/@octokit/request-error/",\
+        "packageDependencies": [\
+          ["@octokit/request-error", "npm:6.1.1"],\
+          ["@octokit/types", "npm:13.1.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -2249,6 +2279,14 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@octokit/types", "npm:13.1.0"],\
           ["@octokit/openapi-types", "npm:21.2.0"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:13.5.0", {\
+        "packageLocation": "./.yarn/cache/@octokit-types-npm-13.5.0-9d89476548-355ebc6776.zip/node_modules/@octokit/types/",\
+        "packageDependencies": [\
+          ["@octokit/types", "npm:13.5.0"],\
+          ["@octokit/openapi-types", "npm:22.2.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -2532,15 +2570,6 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
-    ["@types/btoa-lite", [\
-      ["npm:1.0.0", {\
-        "packageLocation": "./.yarn/cache/@types-btoa-lite-npm-1.0.0-01da883611-ab354cfa11.zip/node_modules/@types/btoa-lite/",\
-        "packageDependencies": [\
-          ["@types/btoa-lite", "npm:1.0.0"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
     ["@types/cookie", [\
       ["npm:0.4.1", {\
         "packageLocation": "./.yarn/cache/@types-cookie-npm-0.4.1-274a704dc6-f96afe12bd.zip/node_modules/@types/cookie/",\
@@ -2636,16 +2665,6 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/@types-json5-npm-0.0.29-f63a7916bd-6bf5337bc4.zip/node_modules/@types/json5/",\
         "packageDependencies": [\
           ["@types/json5", "npm:0.0.29"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["@types/jsonwebtoken", [\
-      ["npm:9.0.3", {\
-        "packageLocation": "./.yarn/cache/@types-jsonwebtoken-npm-9.0.3-b373dd72bf-b6f01b4c65.zip/node_modules/@types/jsonwebtoken/",\
-        "packageDependencies": [\
-          ["@types/jsonwebtoken", "npm:9.0.3"],\
-          ["@types/node", "npm:20.7.1"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -4336,15 +4355,6 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["bser", "npm:2.1.1"],\
           ["node-int64", "npm:0.4.0"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["btoa-lite", [\
-      ["npm:1.0.0", {\
-        "packageLocation": "./.yarn/cache/btoa-lite-npm-1.0.0-e85ee9286e-7a4f0568ae.zip/node_modules/btoa-lite/",\
-        "packageDependencies": [\
-          ["btoa-lite", "npm:1.0.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -12185,12 +12195,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["universal-github-app-jwt", [\
-      ["npm:1.1.2", {\
-        "packageLocation": "./.yarn/cache/universal-github-app-jwt-npm-1.1.2-2015748947-061d2a52c2.zip/node_modules/universal-github-app-jwt/",\
+      ["npm:2.2.0", {\
+        "packageLocation": "./.yarn/cache/universal-github-app-jwt-npm-2.2.0-d290b49dbb-590a557ef0.zip/node_modules/universal-github-app-jwt/",\
         "packageDependencies": [\
-          ["universal-github-app-jwt", "npm:1.1.2"],\
-          ["@types/jsonwebtoken", "npm:9.0.3"],\
-          ["jsonwebtoken", "npm:9.0.2"]\
+          ["universal-github-app-jwt", "npm:2.2.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -12200,6 +12208,13 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/universal-user-agent-npm-6.0.0-b148fb997a-ebeb020696.zip/node_modules/universal-user-agent/",\
         "packageDependencies": [\
           ["universal-user-agent", "npm:6.0.0"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:7.0.2", {\
+        "packageLocation": "./.yarn/cache/universal-user-agent-npm-7.0.2-38e50a3e53-e60517ee92.zip/node_modules/universal-user-agent/",\
+        "packageDependencies": [\
+          ["universal-user-agent", "npm:7.0.2"]\
         ],\
         "linkType": "HARD"\
       }]\
