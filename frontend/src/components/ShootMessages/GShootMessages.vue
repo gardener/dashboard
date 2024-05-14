@@ -195,7 +195,12 @@ const k8sMessage = computed(() => {
   if (!k8sExpiration) {
     return []
   }
-  const { expirationDate, isValidTerminationDate, severity } = k8sExpiration
+  const {
+    expirationDate,
+    isValidTerminationDate,
+    severity,
+    isExpired,
+  } = k8sExpiration
   return [{
     key: 'k8sWarning',
     icon: 'mdi-update',
@@ -206,6 +211,7 @@ const k8sMessage = computed(() => {
         expirationDate,
         isValidTerminationDate,
         severity,
+        isExpired,
       },
     },
   }]
@@ -217,7 +223,17 @@ const machineImageMessages = computed(() => {
   }
   const imageAutoPatch = get(shootItem.value, 'spec.maintenance.autoUpdate.machineImageVersion', false)
   const expiredWorkerGroups = cloudProfileStore.expiringWorkerGroupsForShoot(shootWorkerGroups.value, shootCloudProfileName.value, imageAutoPatch)
-  return map(expiredWorkerGroups, ({ expirationDate, isValidTerminationDate, version, name, workerName, severity, supportedVersionAvailable }) => {
+  return map(expiredWorkerGroups, workerGroup => {
+    const {
+      expirationDate,
+      isValidTerminationDate,
+      isExpired,
+      version,
+      name,
+      workerName,
+      severity,
+      supportedVersionAvailable,
+    } = workerGroup
     return {
       key: `image_${workerName}_${name}`,
       icon: 'mdi-update',
@@ -227,6 +243,7 @@ const machineImageMessages = computed(() => {
         props: {
           expirationDate,
           isValidTerminationDate,
+          isExpired,
           severity,
           name,
           workerName,

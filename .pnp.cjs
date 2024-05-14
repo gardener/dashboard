@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 /* eslint-disable */
+// @ts-nocheck
 "use strict";
 
 const RAW_RUNTIME_STATE =
@@ -1277,7 +1278,7 @@ const RAW_RUNTIME_STATE =
           ["p-timeout", "npm:4.1.0"],\
           ["path-to-regexp", "npm:6.2.2"],\
           ["sanitize-html", "npm:2.13.0"],\
-          ["semver", "npm:7.6.1"],\
+          ["semver", "npm:7.6.2"],\
           ["set-cookie-parser", "npm:2.6.0"],\
           ["showdown", "npm:2.1.0"],\
           ["socket.io", "npm:4.7.5"],\
@@ -1340,7 +1341,7 @@ const RAW_RUNTIME_STATE =
           ["eslint-plugin-n", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:15.7.0"],\
           ["eslint-plugin-promise", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:6.1.1"],\
           ["eslint-plugin-vitest", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.4.1"],\
-          ["eslint-plugin-vue", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:9.25.0"],\
+          ["eslint-plugin-vue", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:9.26.0"],\
           ["eventemitter3", "npm:5.0.1"],\
           ["floating-vue", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.2.2"],\
           ["get-contrast", "npm:3.0.0"],\
@@ -1356,8 +1357,8 @@ const RAW_RUNTIME_STATE =
           ["netmask", "npm:2.0.2"],\
           ["pinia", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.1.7"],\
           ["rollup-plugin-visualizer", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.12.0"],\
-          ["sass", "npm:1.77.0"],\
-          ["semver", "npm:7.6.1"],\
+          ["sass", "npm:1.77.1"],\
+          ["semver", "npm:7.6.2"],\
           ["socket.io-client", "npm:4.7.5"],\
           ["splitpanes", "npm:3.1.5"],\
           ["statuses", "npm:2.0.1"],\
@@ -1965,7 +1966,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/@npmcli-fs-npm-3.1.0-0844a57978-162b4a0b87.zip/node_modules/@npmcli/fs/",\
         "packageDependencies": [\
           ["@npmcli/fs", "npm:3.1.0"],\
-          ["semver", "npm:7.6.1"]\
+          ["semver", "npm:7.6.2"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -2790,7 +2791,7 @@ const RAW_RUNTIME_STATE =
           ["debug", "virtual:1ff4b5f90832ba0a9c93ba1223af226e44ba70c1126a3740d93562b97bc36544e896a5e95908196f7458713e6a6089a34bfc67362fc6df7fa093bd06c878be47#npm:4.3.4"],\
           ["globby", "npm:11.1.0"],\
           ["is-glob", "npm:4.0.3"],\
-          ["semver", "npm:7.6.1"],\
+          ["semver", "npm:7.6.2"],\
           ["tsutils", "virtual:cff22be7f50ad716c0e7f033af3fb7b570e2a1ed5daaf9d042fe1dd555f4df2a98c3d9f18b328b6903370d986af225a498af3cb9f346f0ecff6255234f8e7fc8#npm:3.21.0"],\
           ["typescript", null]\
         ],\
@@ -2811,7 +2812,7 @@ const RAW_RUNTIME_STATE =
           ["globby", "npm:11.1.0"],\
           ["is-glob", "npm:4.0.3"],\
           ["minimatch", "npm:9.0.3"],\
-          ["semver", "npm:7.6.1"],\
+          ["semver", "npm:7.6.2"],\
           ["ts-api-utils", "virtual:d7b99fee6270c4adca4915d67fd385ba9a3a0712bb49a651b512d2bf62e34f9f2728c8179d8e79179380350e90994e7c4eda6ceb37404d7009f73b8914515f73#npm:1.3.0"],\
           ["typescript", null]\
         ],\
@@ -2850,7 +2851,7 @@ const RAW_RUNTIME_STATE =
           ["@typescript-eslint/typescript-estree", "virtual:7dcd66ce3f5ec2c5457dad028d6068117cb3f3e36f74b28439359258388b0de40a388e914a1a301deb98e21d811ca981a237975f2c19cae57bfc46135c4cfe25#npm:5.62.0"],\
           ["eslint", "npm:8.57.0"],\
           ["eslint-scope", "npm:5.1.1"],\
-          ["semver", "npm:7.6.1"]\
+          ["semver", "npm:7.6.2"]\
         ],\
         "packagePeers": [\
           "@types/eslint",\
@@ -2870,7 +2871,7 @@ const RAW_RUNTIME_STATE =
           ["@typescript-eslint/types", "npm:7.5.0"],\
           ["@typescript-eslint/typescript-estree", "virtual:e1f26f5b7ee4dfa51a6208b78bcd072a295de181b006d825c6d3a9d567b28336ea70a324049ba9f24ed76091f187b0cd6484afac48b16a335dbbfa773bb37756#npm:7.5.0"],\
           ["eslint", "npm:8.57.0"],\
-          ["semver", "npm:7.6.1"]\
+          ["semver", "npm:7.6.2"]\
         ],\
         "packagePeers": [\
           "@types/eslint",\
@@ -4362,7 +4363,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/builtins-npm-5.0.1-6d4820dd76-9390a51a9a.zip/node_modules/builtins/",\
         "packageDependencies": [\
           ["builtins", "npm:5.0.1"],\
-          ["semver", "npm:7.6.1"]\
+          ["semver", "npm:7.6.2"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -5463,7 +5464,7 @@ const RAW_RUNTIME_STATE =
           ["@one-ini/wasm", "npm:0.1.1"],\
           ["commander", "npm:10.0.1"],\
           ["minimatch", "npm:9.0.1"],\
-          ["semver", "npm:7.6.1"]\
+          ["semver", "npm:7.6.2"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -6172,7 +6173,7 @@ const RAW_RUNTIME_STATE =
           ["is-core-module", "npm:2.13.0"],\
           ["minimatch", "npm:3.1.2"],\
           ["resolve", "patch:resolve@npm%3A1.22.6#optional!builtin<compat/resolve>::version=1.22.6&hash=c3c19d"],\
-          ["semver", "npm:7.6.1"]\
+          ["semver", "npm:7.6.2"]\
         ],\
         "packagePeers": [\
           "@types/eslint",\
@@ -6235,17 +6236,17 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["eslint-plugin-vue", [\
-      ["npm:9.25.0", {\
-        "packageLocation": "./.yarn/cache/eslint-plugin-vue-npm-9.25.0-cc62c85a78-4333220861.zip/node_modules/eslint-plugin-vue/",\
+      ["npm:9.26.0", {\
+        "packageLocation": "./.yarn/cache/eslint-plugin-vue-npm-9.26.0-ef3199853c-5236762e9f.zip/node_modules/eslint-plugin-vue/",\
         "packageDependencies": [\
-          ["eslint-plugin-vue", "npm:9.25.0"]\
+          ["eslint-plugin-vue", "npm:9.26.0"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:9.25.0", {\
-        "packageLocation": "./.yarn/__virtual__/eslint-plugin-vue-virtual-b70e6288c3/0/cache/eslint-plugin-vue-npm-9.25.0-cc62c85a78-4333220861.zip/node_modules/eslint-plugin-vue/",\
+      ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:9.26.0", {\
+        "packageLocation": "./.yarn/__virtual__/eslint-plugin-vue-virtual-c03ce8936d/0/cache/eslint-plugin-vue-npm-9.26.0-ef3199853c-5236762e9f.zip/node_modules/eslint-plugin-vue/",\
         "packageDependencies": [\
-          ["eslint-plugin-vue", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:9.25.0"],\
+          ["eslint-plugin-vue", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:9.26.0"],\
           ["@eslint-community/eslint-utils", "virtual:4286e12a3a0f74af013bc8f16c6d8fdde823cfbf6389660266b171e551f576c805b0a7a8eb2a7087a5cee7dfe6ebb6e1ea3808d93daf915edc95656907a381bb#npm:4.4.0"],\
           ["@types/eslint", null],\
           ["eslint", "npm:8.57.0"],\
@@ -6253,8 +6254,8 @@ const RAW_RUNTIME_STATE =
           ["natural-compare", "npm:1.4.0"],\
           ["nth-check", "npm:2.1.1"],\
           ["postcss-selector-parser", "npm:6.0.16"],\
-          ["semver", "npm:7.6.1"],\
-          ["vue-eslint-parser", "virtual:b70e6288c3fef647799ddb4461be302afb9d5a87d0488ae3782f48647159b936f2b6d7b00d95705d852f14bfa25b9c7b2db05e0e325b7461620064686c73a9e0#npm:9.4.2"],\
+          ["semver", "npm:7.6.2"],\
+          ["vue-eslint-parser", "virtual:c03ce8936d9fcdf9f3e7b1f6f24717f908a7b0db874937fd79f4bf1ac44e34217a61fc51e6fa1bcd8985a8e38fca766fa31551977cafceb1e09334a2c20644f8#npm:9.4.2"],\
           ["xml-name-validator", "npm:4.0.0"]\
         ],\
         "packagePeers": [\
@@ -8649,7 +8650,7 @@ const RAW_RUNTIME_STATE =
           ["jest-util", "npm:27.5.1"],\
           ["natural-compare", "npm:1.4.0"],\
           ["pretty-format", "npm:27.5.1"],\
-          ["semver", "npm:7.6.1"]\
+          ["semver", "npm:7.6.2"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -9031,7 +9032,7 @@ const RAW_RUNTIME_STATE =
           ["lodash.isstring", "npm:4.0.1"],\
           ["lodash.once", "npm:4.1.1"],\
           ["ms", "npm:2.1.3"],\
-          ["semver", "npm:7.6.1"]\
+          ["semver", "npm:7.6.2"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -9323,7 +9324,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/make-dir-npm-4.0.0-ec3cd921cc-69b98a6c0b.zip/node_modules/make-dir/",\
         "packageDependencies": [\
           ["make-dir", "npm:4.0.0"],\
-          ["semver", "npm:7.6.1"]\
+          ["semver", "npm:7.6.2"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -9762,7 +9763,7 @@ const RAW_RUNTIME_STATE =
           ["nopt", "npm:6.0.0"],\
           ["npmlog", "npm:6.0.2"],\
           ["rimraf", "npm:3.0.2"],\
-          ["semver", "npm:7.6.1"],\
+          ["semver", "npm:7.6.2"],\
           ["tar", "npm:6.2.1"],\
           ["which", "npm:2.0.2"]\
         ],\
@@ -11008,10 +11009,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["sass", [\
-      ["npm:1.77.0", {\
-        "packageLocation": "./.yarn/cache/sass-npm-1.77.0-cb67e4e257-bce0e5f5b5.zip/node_modules/sass/",\
+      ["npm:1.77.1", {\
+        "packageLocation": "./.yarn/cache/sass-npm-1.77.1-270068d8f7-edcfc7d038.zip/node_modules/sass/",\
         "packageDependencies": [\
-          ["sass", "npm:1.77.0"],\
+          ["sass", "npm:1.77.1"],\
           ["chokidar", "npm:3.5.3"],\
           ["immutable", "npm:4.3.4"],\
           ["source-map-js", "npm:1.0.2"]\
@@ -11045,10 +11046,10 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "HARD"\
       }],\
-      ["npm:7.6.1", {\
-        "packageLocation": "./.yarn/cache/semver-npm-7.6.1-8d5ad7cc68-fd28315954.zip/node_modules/semver/",\
+      ["npm:7.6.2", {\
+        "packageLocation": "./.yarn/cache/semver-npm-7.6.2-0fec6944bb-97d3441e97.zip/node_modules/semver/",\
         "packageDependencies": [\
-          ["semver", "npm:7.6.1"]\
+          ["semver", "npm:7.6.2"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -11632,7 +11633,7 @@ const RAW_RUNTIME_STATE =
           ["methods", "npm:1.1.2"],\
           ["mime", "npm:2.6.0"],\
           ["qs", "npm:6.11.2"],\
-          ["semver", "npm:7.6.1"]\
+          ["semver", "npm:7.6.2"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -12424,7 +12425,7 @@ const RAW_RUNTIME_STATE =
           ["lightningcss", null],\
           ["postcss", "npm:8.4.38"],\
           ["rollup", "npm:4.13.0"],\
-          ["sass", "npm:1.77.0"],\
+          ["sass", "npm:1.77.1"],\
           ["stylus", null],\
           ["sugarss", null],\
           ["terser", null]\
@@ -12738,10 +12739,10 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:b70e6288c3fef647799ddb4461be302afb9d5a87d0488ae3782f48647159b936f2b6d7b00d95705d852f14bfa25b9c7b2db05e0e325b7461620064686c73a9e0#npm:9.4.2", {\
-        "packageLocation": "./.yarn/__virtual__/vue-eslint-parser-virtual-956c01a01b/0/cache/vue-eslint-parser-npm-9.4.2-3e4e696025-79593073ad.zip/node_modules/vue-eslint-parser/",\
+      ["virtual:c03ce8936d9fcdf9f3e7b1f6f24717f908a7b0db874937fd79f4bf1ac44e34217a61fc51e6fa1bcd8985a8e38fca766fa31551977cafceb1e09334a2c20644f8#npm:9.4.2", {\
+        "packageLocation": "./.yarn/__virtual__/vue-eslint-parser-virtual-5b1d2862ef/0/cache/vue-eslint-parser-npm-9.4.2-3e4e696025-79593073ad.zip/node_modules/vue-eslint-parser/",\
         "packageDependencies": [\
-          ["vue-eslint-parser", "virtual:b70e6288c3fef647799ddb4461be302afb9d5a87d0488ae3782f48647159b936f2b6d7b00d95705d852f14bfa25b9c7b2db05e0e325b7461620064686c73a9e0#npm:9.4.2"],\
+          ["vue-eslint-parser", "virtual:c03ce8936d9fcdf9f3e7b1f6f24717f908a7b0db874937fd79f4bf1ac44e34217a61fc51e6fa1bcd8985a8e38fca766fa31551977cafceb1e09334a2c20644f8#npm:9.4.2"],\
           ["@types/eslint", null],\
           ["debug", "virtual:1ff4b5f90832ba0a9c93ba1223af226e44ba70c1126a3740d93562b97bc36544e896a5e95908196f7458713e6a6089a34bfc67362fc6df7fa093bd06c878be47#npm:4.3.4"],\
           ["eslint", "npm:8.57.0"],\
@@ -12750,7 +12751,7 @@ const RAW_RUNTIME_STATE =
           ["espree", "npm:9.6.1"],\
           ["esquery", "npm:1.5.0"],\
           ["lodash", "npm:4.17.21"],\
-          ["semver", "npm:7.6.1"]\
+          ["semver", "npm:7.6.2"]\
         ],\
         "packagePeers": [\
           "@types/eslint",\
@@ -14700,6 +14701,12 @@ class ProxiedFS extends FakeFS {
   rmdirSync(p, opts) {
     return this.baseFs.rmdirSync(this.mapToBase(p), opts);
   }
+  async rmPromise(p, opts) {
+    return this.baseFs.rmPromise(this.mapToBase(p), opts);
+  }
+  rmSync(p, opts) {
+    return this.baseFs.rmSync(this.mapToBase(p), opts);
+  }
   async linkPromise(existingP, newP) {
     return this.baseFs.linkPromise(this.mapToBase(existingP), this.mapToBase(newP));
   }
@@ -15080,6 +15087,18 @@ class NodeFS extends BasePortableFakeFS {
   }
   rmdirSync(p, opts) {
     return this.realFs.rmdirSync(npath.fromPortablePath(p), opts);
+  }
+  async rmPromise(p, opts) {
+    return await new Promise((resolve, reject) => {
+      if (opts) {
+        this.realFs.rm(npath.fromPortablePath(p), opts, this.makeCallback(resolve, reject));
+      } else {
+        this.realFs.rm(npath.fromPortablePath(p), this.makeCallback(resolve, reject));
+      }
+    });
+  }
+  rmSync(p, opts) {
+    return this.realFs.rmSync(npath.fromPortablePath(p), opts);
   }
   async linkPromise(existingP, newP) {
     return await new Promise((resolve, reject) => {
@@ -15736,6 +15755,20 @@ class MountFS extends BasePortableFakeFS {
       return mountFs.rmdirSync(subPath, opts);
     });
   }
+  async rmPromise(p, opts) {
+    return await this.makeCallPromise(p, async () => {
+      return await this.baseFs.rmPromise(p, opts);
+    }, async (mountFs, { subPath }) => {
+      return await mountFs.rmPromise(subPath, opts);
+    });
+  }
+  rmSync(p, opts) {
+    return this.makeCallSync(p, () => {
+      return this.baseFs.rmSync(p, opts);
+    }, (mountFs, { subPath }) => {
+      return mountFs.rmSync(subPath, opts);
+    });
+  }
   async linkPromise(existingP, newP) {
     return await this.makeCallPromise(newP, async () => {
       return await this.baseFs.linkPromise(existingP, newP);
@@ -16374,6 +16407,7 @@ const SYNC_IMPLEMENTATIONS = /* @__PURE__ */ new Set([
   `realpathSync`,
   `renameSync`,
   `rmdirSync`,
+  `rmSync`,
   `statSync`,
   `symlinkSync`,
   `truncateSync`,
@@ -16409,6 +16443,7 @@ const ASYNC_IMPLEMENTATIONS = /* @__PURE__ */ new Set([
   `readlinkPromise`,
   `renamePromise`,
   `rmdirPromise`,
+  `rmPromise`,
   `statPromise`,
   `symlinkPromise`,
   `truncatePromise`,
@@ -18432,6 +18467,27 @@ class ZipFS extends BasePortableFakeFS {
     const index = this.entries.get(resolvedP);
     if (typeof index === `undefined`)
       throw EINVAL(`rmdir '${p}'`);
+    this.deleteEntry(p, index);
+  }
+  async rmPromise(p, opts) {
+    return this.rmSync(p, opts);
+  }
+  rmSync(p, { recursive = false } = {}) {
+    if (this.readOnly)
+      throw EROFS(`rm '${p}'`);
+    if (recursive) {
+      this.removeSync(p);
+      return;
+    }
+    const resolvedP = this.resolveFilename(`rm '${p}'`, p);
+    const directoryListing = this.listings.get(resolvedP);
+    if (!directoryListing)
+      throw ENOTDIR(`rm '${p}'`);
+    if (directoryListing.size > 0)
+      throw ENOTEMPTY(`rm '${p}'`);
+    const index = this.entries.get(resolvedP);
+    if (typeof index === `undefined`)
+      throw EINVAL(`rm '${p}'`);
     this.deleteEntry(p, index);
   }
   hydrateDirectory(resolvedP) {
