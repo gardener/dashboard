@@ -1356,7 +1356,7 @@ const RAW_RUNTIME_STATE =
           ["netmask", "npm:2.0.2"],\
           ["pinia", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.1.7"],\
           ["rollup-plugin-visualizer", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.12.0"],\
-          ["sass", "npm:1.77.0"],\
+          ["sass", "npm:1.77.1"],\
           ["semver", "npm:7.6.2"],\
           ["socket.io-client", "npm:4.7.5"],\
           ["splitpanes", "npm:3.1.5"],\
@@ -11028,10 +11028,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["sass", [\
-      ["npm:1.77.0", {\
-        "packageLocation": "./.yarn/cache/sass-npm-1.77.0-cb67e4e257-bce0e5f5b5.zip/node_modules/sass/",\
+      ["npm:1.77.1", {\
+        "packageLocation": "./.yarn/cache/sass-npm-1.77.1-270068d8f7-edcfc7d038.zip/node_modules/sass/",\
         "packageDependencies": [\
-          ["sass", "npm:1.77.0"],\
+          ["sass", "npm:1.77.1"],\
           ["chokidar", "npm:3.5.3"],\
           ["immutable", "npm:4.3.4"],\
           ["source-map-js", "npm:1.0.2"]\
@@ -12444,7 +12444,7 @@ const RAW_RUNTIME_STATE =
           ["lightningcss", null],\
           ["postcss", "npm:8.4.38"],\
           ["rollup", "npm:4.13.0"],\
-          ["sass", "npm:1.77.0"],\
+          ["sass", "npm:1.77.1"],\
           ["stylus", null],\
           ["sugarss", null],\
           ["terser", null]\
