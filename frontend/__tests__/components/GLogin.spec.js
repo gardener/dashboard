@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import { nextTick } from 'vue'
 import { mount } from '@vue/test-utils'
 import { setActivePinia } from 'pinia'
 import { createTestingPinia } from '@pinia/testing'
@@ -95,8 +96,10 @@ describe('components', () => {
       localStorageStore = useLocalStorageStore()
     })
 
-    it('should render the login page', () => {
+    it('should render the login page', async () => {
       const wrapper = mountLogin()
+      await nextTick()
+
       expect(wrapper.find('div.text-h5.text-primary').text()).toBe('Universal Kubernetes at Scale')
     })
 
