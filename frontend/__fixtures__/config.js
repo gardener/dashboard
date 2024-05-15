@@ -48,7 +48,7 @@ export default {
   },
   sla: {
     title: 'Terms and Conditions',
-    description: '<p><a href="https://gardener.cloud/terms-and-conditions/SLAs" target="_blank">SLAs</a>, <a href="https://gardener.cloud/terms-and-conditions/features/" target="_blank">Features</a>, <a href="https://pages.github.tools.sap/kubernetes/gardener/docs/service-quality/features/#limitations" target="_blank">Limitations</a>, <a href="https://pages.github.tools.sap/kubernetes/gardener/docs/service-quality/customer-data/" target="_blank">Customer Data Handling</a></p>',
+    description: '<p><a href="https://gardener.cloud/terms-and-conditions/SLAs" target="_blank">SLAs</a>, <a href="https://gardener.cloud/terms-and-conditions/features/" target="_blank">Features</a>, <a href="https://gardener.cloud/terms-and-conditions/limitations/" target="_blank">Limitations</a>, <a href="https://gardener.cloud/terms-and-conditions/features/customer-data-handling/" target="_blank">Customer Data Handling</a></p>',
   },
   accessRestriction: {
     noItemsText: 'Limited Access services for certain cloud providers and regions',
