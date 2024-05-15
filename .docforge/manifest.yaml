@@ -19,20 +19,11 @@ structure:
         - Developers
   nodesSelector:
     path: /docs/development
-- name: operations
-  properties:
-    frontmatter:
-      title: Operations
-      weight: 3
-      categories:
-        - Operators
-  nodesSelector:
-    path: /docs/operations
 - name: usage
   properties:
     frontmatter:
       title: Usage
-      weight: 4
+      weight: 3
       categories:
         - Users
   nodesSelector:
