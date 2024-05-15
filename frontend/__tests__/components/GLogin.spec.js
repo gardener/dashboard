@@ -16,6 +16,7 @@ import { useLocalStorageStore } from '@/store/localStorage'
 import GLogin from '@/layouts/GLogin.vue'
 
 const { createPlugins } = global.fixtures.helper
+const nextTick = () => new Promise(process.nextTick)
 
 describe('components', () => {
   describe('g-login', () => {
@@ -86,8 +87,10 @@ describe('components', () => {
       localStorageStore = useLocalStorageStore()
     })
 
-    it('should render the login page', () => {
+    it('should render the login page', async () => {
       const wrapper = mountLogin()
+      await nextTick()
+
       expect(wrapper.find('div.text-h5.text-primary').text()).toBe('Universal Kubernetes at Scale')
     })
 
