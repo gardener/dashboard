@@ -196,7 +196,6 @@ SPDX-License-Identifier: Apache-2.0
       <v-dialog
         v-if="!isShootItemEmpty"
         v-model="clusterAccessDialog"
-        persistent
         max-width="850"
       >
         <v-card>

@@ -257,7 +257,6 @@ SPDX-License-Identifier: Apache-2.0
 
     <v-dialog
       v-model="kubeconfigDialog"
-      persistent
       max-width="67%"
     >
       <v-card>

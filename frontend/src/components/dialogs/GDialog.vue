@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-dialog
     v-model="visible"
-    persistent
     scrollable
     :width="width"
     max-width="90vw"
