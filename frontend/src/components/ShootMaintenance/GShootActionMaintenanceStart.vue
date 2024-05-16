@@ -104,7 +104,7 @@ export default {
     const appStore = useAppStore()
 
     watch(isMaintenanceToBeScheduled, value => {
-      const isMaintenanceScheduled = !value && this.maintenanceTriggered.value
+      const isMaintenanceScheduled = !value && maintenanceTriggered.value
       if (!isMaintenanceScheduled) {
         return
       }
