@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0
             :width="16"
             :icon-color="color"
           >
-            <component :is="iconName" />
+            <component :is="resolveComponent(iconName)" />
           </g-icon-base>
         </v-btn>
       </div>
@@ -118,6 +118,15 @@ import GConnected from '@/components/icons/GConnected.vue' // eslint-disable-lin
 import GDisconnected from '@/components/icons/GDisconnected.vue' // eslint-disable-line no-unused-vars
 
 import { useShootSubscription } from '@/composables/useShootSubscription'
+
+const components = {
+  'g-connected': GConnected,
+  'g-disconnected': GDisconnected,
+}
+
+function resolveComponent (name) {
+  return components[name]
+}
 
 const {
   connected,
