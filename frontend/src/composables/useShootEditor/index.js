@@ -307,11 +307,15 @@ export function useShootEditor (initialValue, options = {}) {
   })
 
   watch(isReadOnly, value => {
-    cm.value.setOption('readOnly', value)
+    if (cm.value) {
+      cm.value.setOption('readOnly', value)
+    }
   })
 
   watch(cmTheme, value => {
-    cm.value.setOption('theme', value)
+    if (cm.value) {
+      cm.value.setOption('theme', value)
+    }
   })
 
   watch(shootItem, (newValue, oldValue) => {
