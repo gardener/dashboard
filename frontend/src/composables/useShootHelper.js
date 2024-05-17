@@ -227,8 +227,12 @@ export function createShootHelperComposable (state, options = {}) {
     })
   })
 
+  const allVolumeTypes = computed(() => {
+    return cloudProfileStore.volumeTypesByCloudProfileName(cloudProfileName.value)
+  })
+
   const volumeTypes = computed(() => {
-    return cloudProfileStore.volumeTypesByCloudProfileName({
+    return cloudProfileStore.volumeTypesByCloudProfileNameAndRegion({
       cloudProfileName: cloudProfileName.value,
       region: region.value,
     })
@@ -276,6 +280,7 @@ export function createShootHelperComposable (state, options = {}) {
     accessRestrictionNoItemsText,
     allMachineTypes,
     machineArchitectures,
+    allVolumeTypes,
     volumeTypes,
     machineImages,
     networkingTypes,
