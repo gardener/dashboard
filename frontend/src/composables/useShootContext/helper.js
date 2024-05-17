@@ -8,23 +8,12 @@ import { toValue } from '@vueuse/core'
 
 import {
   get,
-  set,
   unset,
   isEmpty,
 } from '@/lodash'
 
-export function assert (value, message = 'The expression evaluated to a falsy value') {
-  if (!value) {
-    throw new TypeError(message)
-  }
-}
-
 export function getId (object) {
   return get(object, 'id')
-}
-
-export function setOrUnset (object, path, value) {
-  set(object, path, value)
 }
 
 function isNull (value) {
@@ -47,7 +36,7 @@ function isObject (value) {
   return typeof value === 'object' && !isNull(value)
 }
 
-export function cleanup (obj) {
+function cleanup (obj) {
   const cleanupObject = obj => {
     const cleanObj = {}
     for (const [key, value] of Object.entries(obj)) {
