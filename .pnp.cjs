@@ -914,10 +914,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@braintree/sanitize-url", [\
-      ["npm:7.0.1", {\
-        "packageLocation": "./.yarn/cache/@braintree-sanitize-url-npm-7.0.1-302de011e8-d849b93f49.zip/node_modules/@braintree/sanitize-url/",\
+      ["npm:7.0.2", {\
+        "packageLocation": "./.yarn/cache/@braintree-sanitize-url-npm-7.0.2-064b98eb4e-11f302fe76.zip/node_modules/@braintree/sanitize-url/",\
         "packageDependencies": [\
-          ["@braintree/sanitize-url", "npm:7.0.1"]\
+          ["@braintree/sanitize-url", "npm:7.0.2"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -1313,7 +1313,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./frontend/",\
         "packageDependencies": [\
           ["@gardener-dashboard/frontend", "workspace:frontend"],\
-          ["@braintree/sanitize-url", "npm:7.0.1"],\
+          ["@braintree/sanitize-url", "npm:7.0.2"],\
           ["@fontsource/roboto", "npm:5.0.13"],\
           ["@kyvg/vue3-notification", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.2.1"],\
           ["@mdi/font", "npm:7.4.47"],\

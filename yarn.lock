@@ -456,9 +456,9 @@ __metadata:
   linkType: hard
 
 "@braintree/sanitize-url@npm:^7.0.1":
-  version: 7.0.1
-  resolution: "@braintree/sanitize-url@npm:7.0.1"
-  checksum: 10c0/d849b93f494aef173c5c1d419c1ad0851e9119e038dcc331155ffcf5f6e9c02cf3de8e571fbf91e042337e0890bf1ee0474896cd043c050f3b0be0c6d9af5176
+  version: 7.0.2
+  resolution: "@braintree/sanitize-url@npm:7.0.2"
+  checksum: 10c0/11f302fe7622578bf1c62f17b2ec518c82336c322287d1ac1d1e070033d3edd127337669280d6b01450202f5816feb39b392421d66ec4988d44df3cda67a28d7
   languageName: node
   linkType: hard
 
