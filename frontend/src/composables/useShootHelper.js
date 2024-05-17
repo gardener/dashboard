@@ -21,6 +21,7 @@ import utils from '@/utils'
 import {
   get,
   map,
+  head,
   keyBy,
   mapValues,
   find,
@@ -66,6 +67,11 @@ export function createShootHelperComposable (state, options = {}) {
 
   const cloudProfiles = computed(() => {
     return cloudProfileStore.cloudProfilesByCloudProviderKind(providerType.value)
+  })
+
+  const defaultCloudProfileName = computed(() => {
+    const defaultCloudProfile = head(cloudProfiles.value)
+    return get(defaultCloudProfile, 'metadata.name')
   })
 
   const cloudProfile = computed(() => {
@@ -243,6 +249,7 @@ export function createShootHelperComposable (state, options = {}) {
   return {
     isNewCluster,
     cloudProfiles,
+    defaultCloudProfileName,
     cloudProfile,
     isZonedCluster,
     seed,

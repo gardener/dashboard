@@ -30,9 +30,7 @@ import {
 import {
   findFreeNetworks,
   getControlPlaneZone,
-  getKubernetesTemplate,
-  getProviderTemplate,
-  getNetworkingTemplate,
+  getSpecTemplate,
   getZonesNetworkConfiguration,
 } from '@/utils/shoot'
 import { v4 as uuidv4 } from '@/utils/uuid'
@@ -182,10 +180,6 @@ export function useShootContext (options = {}) {
     },
   })
 
-  function resetKubernetesEnableStaticTokenKubeconfig () {
-    kubernetesEnableStaticTokenKubeconfig.value = false
-  }
-
   /* cloudProfileName */
   const cloudProfileName = computed({
     get () {
@@ -202,11 +196,6 @@ export function useShootContext (options = {}) {
       resetProviderInfrastructureConfigFirewallImage()
     },
   })
-
-  function resetCloudProfileName () {
-    const cloudProfile = head(cloudProfiles.value)
-    cloudProfileName.value = get(cloudProfile, 'metadata.name')
-  }
 
   /* secretBindingName */
   const secretBindingName = computed({
@@ -310,17 +299,15 @@ export function useShootContext (options = {}) {
     set (value) {
       set(manifest.value, 'spec.provider.type', value)
       const {
-        infrastructureConfig,
-        controlPlaneConfig,
-      } = getProviderTemplate(providerType.value, defaultNodesCIDR.value)
-      set(manifest.value, 'spec.provider.infrastructureConfig', infrastructureConfig)
-      set(manifest.value, 'spec.provider.controlPlaneConfig', controlPlaneConfig)
-      const networkingTemplate = getNetworkingTemplate(providerType.value, defaultNodesCIDR.value)
-      set(manifest.value, 'spec.networking', networkingTemplate)
-      const kubernetesTemplate = getKubernetesTemplate(providerType.value, defaultNodesCIDR.value)
-      set(manifest.value, 'spec.kubernetes', kubernetesTemplate)
-      resetKubernetesEnableStaticTokenKubeconfig()
-      resetCloudProfileName()
+        kubernetes,
+        networking,
+        provider,
+      } = getSpecTemplate(value, cloudProfileStore.getDefaultNodesCIDR(defaultCloudProfileName.value))
+      set(manifest.value, 'spec.provider.infrastructureConfig', provider.infrastructureConfig)
+      set(manifest.value, 'spec.provider.controlPlaneConfig', provider.controlPlaneConfig)
+      set(manifest.value, 'spec.networking', networking)
+      set(manifest.value, 'spec.kubernetes', kubernetes)
+      cloudProfileName.value = defaultCloudProfileName.value
     },
   })
 
@@ -1043,6 +1030,7 @@ export function useShootContext (options = {}) {
   const {
     isNewCluster,
     cloudProfiles,
+    defaultCloudProfileName,
     cloudProfile,
     isZonedCluster,
     seed,
