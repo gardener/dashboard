@@ -634,7 +634,7 @@ describe('stores', () => {
       })
 
       it('should return machineTypes by region and zones from cloud profile', () => {
-        let dashboardMachineTypes = cloudProfileStore.machineTypesByCloudProfileName({ cloudProfileName: 'foo' })
+        let dashboardMachineTypes = cloudProfileStore.machineTypesByCloudProfileName('foo')
         expect(dashboardMachineTypes).toHaveLength(4)
 
         dashboardMachineTypes = cloudProfileStore.machineTypesByCloudProfileNameAndRegionAndArchitecture({ cloudProfileName: 'foo', region: 'region1', architecture: 'amd64' })
@@ -648,7 +648,7 @@ describe('stores', () => {
       })
 
       it('should return volumeTypes by region and zones from cloud profile', () => {
-        let dashboardVolumeTypes = cloudProfileStore.volumeTypesByCloudProfileName({ cloudProfileName: 'foo' })
+        let dashboardVolumeTypes = cloudProfileStore.volumeTypesByCloudProfileName('foo')
         expect(dashboardVolumeTypes).toHaveLength(3)
 
         dashboardVolumeTypes = cloudProfileStore.volumeTypesByCloudProfileNameAndRegion({ cloudProfileName: 'foo', region: 'region1' })
@@ -659,7 +659,7 @@ describe('stores', () => {
       })
 
       it('should return an empty machineType / volumeType array if no cloud profile is provided', () => {
-        const items = cloudProfileStore.machineTypesByCloudProfileName({})
+        const items = cloudProfileStore.machineTypesByCloudProfileName()
         expect(items).toBeInstanceOf(Array)
         expect(items).toHaveLength(0)
       })
@@ -809,7 +809,7 @@ describe('stores', () => {
       const cloudProfileName = 'foo'
 
       it('should return default node cidr from config', async () => {
-        const defaultNodesCIDR = cloudProfileStore.getDefaultNodesCIDR({ cloudProfileName })
+        const defaultNodesCIDR = cloudProfileStore.getDefaultNodesCIDR(cloudProfileName)
         expect(defaultNodesCIDR).toBe('10.10.0.0/16')
       })
 
@@ -819,7 +819,7 @@ describe('stores', () => {
             defaultNodesCIDR: '1.2.3.4/16',
           },
         })
-        const defaultNodesCIDR = cloudProfileStore.getDefaultNodesCIDR({ cloudProfileName })
+        const defaultNodesCIDR = cloudProfileStore.getDefaultNodesCIDR(cloudProfileName)
         expect(defaultNodesCIDR).toBe('1.2.3.4/16')
       })
     })

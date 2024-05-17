@@ -116,9 +116,7 @@ export function createShootHelperComposable (state, options = {}) {
   })
 
   const defaultNodesCIDR = computed(() => {
-    return cloudProfileStore.getDefaultNodesCIDR({
-      cloudProfileName: cloudProfileName.value,
-    })
+    return cloudProfileStore.getDefaultNodesCIDR(cloudProfileName.value)
   })
 
   const infrastructureSecrets = computed(() => {
@@ -215,9 +213,7 @@ export function createShootHelperComposable (state, options = {}) {
   })
 
   const allMachineTypes = computed(() => {
-    return cloudProfileStore.machineTypesByCloudProfileName({
-      cloudProfileName: cloudProfileName.value,
-    })
+    return cloudProfileStore.machineTypesByCloudProfileName(cloudProfileName.value)
   })
 
   const machineArchitectures = computed(() => {

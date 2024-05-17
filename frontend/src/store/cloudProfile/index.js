@@ -234,7 +234,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return '0Gi'
   }
 
-  function getDefaultNodesCIDR ({ cloudProfileName }) {
+  function getDefaultNodesCIDR (cloudProfileName) {
     const cloudProfile = cloudProfileByName(cloudProfileName)
     return get(cloudProfile, 'data.providerConfig.defaultNodesCIDR', configStore.defaultNodesCIDR)
   }
@@ -360,7 +360,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return filter(items, machineAndVolumeTypePredicate(unavailableItemsInAllZones))
   }
 
-  function machineTypesByCloudProfileName ({ cloudProfileName }) {
+  function machineTypesByCloudProfileName (cloudProfileName) {
     return machineTypesOrVolumeTypesByCloudProfileNameAndRegion({ type: 'machineTypes', cloudProfileName })
   }
 
@@ -453,8 +453,8 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return machineTypesOrVolumeTypesByCloudProfileNameAndRegion({ type: 'volumeTypes', cloudProfileName, region })
   }
 
-  function volumeTypesByCloudProfileName ({ cloudProfileName }) {
-    return volumeTypesByCloudProfileNameAndRegion({ cloudProfileName })
+  function volumeTypesByCloudProfileName (cloudProfileName) {
+    return volumeTypesByCloudProfileNameAndRegion({ cloudProfileName, region: undefined })
   }
 
   function machineImagesByCloudProfileName (cloudProfileName) {
@@ -462,13 +462,13 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return get(cloudProfile, 'data.machineImages')
   }
 
-  function accessRestrictionNoItemsTextForCloudProfileNameAndRegion ({ cloudProfileName: cloudProfile, region }) {
+  function accessRestrictionNoItemsTextForCloudProfileNameAndRegion ({ cloudProfileName, region }) {
     const defaultNoItemsText = 'No access restriction options available for region ${region}' // eslint-disable-line no-template-curly-in-string
     const noItemsText = get(configStore, 'accessRestriction.noItemsText', defaultNoItemsText)
 
     return template(noItemsText)({
       region,
-      cloudProfile,
+      cloudProfile: cloudProfileName,
     })
   }
 
