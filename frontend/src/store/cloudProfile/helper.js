@@ -5,7 +5,6 @@
 //
 
 import { getDateFormatted } from '@/utils'
-import moment from '@/utils/moment'
 
 import {
   get,
@@ -68,20 +67,49 @@ export function findVendorHint (vendorHints, vendorName) {
   return find(vendorHints, hint => includes(hint.matchNames, vendorName))
 }
 
-export function decorateClassificationObject (obj) {
-  const classification = obj.classification ?? 'supported'
-  const isExpired = !!obj.expirationDate && moment().isAfter(obj.expirationDate)
-  const isExpirationWarning = !!obj.expirationDate && moment(obj.expirationDate).diff(moment(), 'd') < 30
+export function decorateClassificationObject (plainObject) {
+  const object = { ...plainObject }
+  object.classification ??= 'supported'
+  Object.defineProperty(object, 'isPreview', {
+    value: object.classification === 'preview',
+    enumerable: true,
+  })
+  Object.defineProperty(object, 'isDeprecated', {
+    value: object.classification === 'deprecated',
+    enumerable: true,
+  })
+  Object.defineProperty(object, 'isSupported', {
+    get () {
+      return this.classification === 'supported' && !this.isExpired
+    },
+    enumerable: true,
+  })
+  Object.defineProperty(object, 'expiresIn', {
+    get () {
+      if (!this.expirationDate) {
+        return Number.POSITIVE_INFINITY
+      }
+      return Math.floor((new Date(this.expirationDate).getTime() - Date.now()) / (24 * 3600 * 1000))
+    },
+  })
+  Object.defineProperty(object, 'isExpired', {
+    get () {
+      return this.expiresIn <= 0
+    },
+    enumerable: true,
+  })
+  Object.defineProperty(object, 'isExpirationWarning', {
+    get () {
+      return this.expiresIn <= 30
+    },
+    enumerable: true,
+  })
+  Object.defineProperty(object, 'expirationDateString', {
+    value: getDateFormatted(object.expirationDate),
+    enumerable: true,
+  })
 
-  return {
-    ...obj,
-    isPreview: classification === 'preview',
-    isSupported: classification === 'supported' && !isExpired,
-    isDeprecated: classification === 'deprecated',
-    isExpired,
-    isExpirationWarning,
-    expirationDateString: getDateFormatted(obj.expirationDate),
-  }
+  return object
 }
 
 // Return first item with classification supported, if no item has classification supported
