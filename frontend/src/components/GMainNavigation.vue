@@ -270,6 +270,7 @@ import {
   head,
   slice,
   last,
+  isEmpty,
 } from '@/lodash'
 
 const allProjectsItem = {
@@ -534,13 +535,13 @@ function scrollIntoView (element, ...args) {
 }
 
 function handleProjectListScroll () {
-  const projectListElement = refProjectList.value.$el
+  const projectListElement = refProjectList.value?.$el
   if (!projectListElement) {
     return
   }
   const projectListBottomPosY = projectListElement.getBoundingClientRect().top + projectListElement.getBoundingClientRect().height
   const projectListChildren = refProjectListItems.value
-  if (!projectListChildren) {
+  if (isEmpty(projectListChildren)) {
     return
   }
   const lastProjectElement = last(projectListChildren).$el
