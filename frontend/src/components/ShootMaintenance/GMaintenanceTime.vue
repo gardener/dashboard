@@ -53,6 +53,7 @@ import {
   toRef,
   watchEffect,
 } from 'vue'
+import { storeToRefs } from 'pinia'
 import {
   required,
   minValue,
@@ -80,15 +81,16 @@ import TimeWithOffset from '@/utils/TimeWithOffset'
 
 const appStore = useAppStore()
 const shootContextStore = useShootContextStore()
+const {
+  maintenanceTimeWindowBegin,
+  maintenanceTimeWindowEnd,
+} = storeToRefs(shootContextStore)
 
 const timezone = toRef(appStore, 'timezone')
-const maintenanceTimeWindowBegin = toRef(shootContextStore, 'maintenanceTimeWindowBegin')
-const maintenanceTimeWindowEnd = toRef(shootContextStore, 'maintenanceTimeWindowEnd')
 
 const maintenanceBegin = ref(randomMaintenanceBegin())
 const maintenanceTimezone = ref(timezone.value)
-const defaultDuration = 60
-const windowDuration = ref(defaultDuration)
+const windowDuration = ref(60)
 
 const rules = {
   maintenanceBegin: withFieldName('Maintenance Begin', {
@@ -104,29 +106,25 @@ const rules = {
     maxValue: maxValue(360),
   }),
 }
-const state = {
+const v$ = useVuelidate(rules, {
   maintenanceBegin,
   maintenanceTimezone,
   windowDuration,
-}
-const v$ = useVuelidate(rules, state)
+})
 
-const initialize = () => {
-  const beginTime = new TimeWithOffset(maintenanceTimeWindowBegin.value)
-  if (beginTime.isValid()) {
-    maintenanceBegin.value = beginTime.getTimeString()
-    maintenanceTimezone.value = beginTime.getTimezoneString()
-  }
-  const endTime = new TimeWithOffset(maintenanceTimeWindowEnd.value)
-  if (endTime.isValid()) {
-    let duration = getDurationInMinutes(maintenanceBegin.value, endTime.getTimeString())
-    if (duration <= 0) {
-      duration = defaultDuration
-    }
+const beginTime = new TimeWithOffset(maintenanceTimeWindowBegin.value)
+if (beginTime.isValid()) {
+  maintenanceBegin.value = beginTime.getTimeString()
+  maintenanceTimezone.value = beginTime.getTimezoneString()
+}
+
+const endTime = new TimeWithOffset(maintenanceTimeWindowEnd.value)
+if (endTime.isValid()) {
+  const duration = getDurationInMinutes(maintenanceBegin.value, endTime.getTimeString())
+  if (duration > 0) {
     windowDuration.value = duration
   }
 }
-initialize()
 
 const maintenanceBeginMoment = computed(() => {
   return moment.utc(`${maintenanceBegin.value}${maintenanceTimezone.value}`, 'HH:mmZ')
@@ -160,6 +158,7 @@ watchEffect(() => {
 .smallInput {
   max-width: 180px;
 }
+
 .timezoneInput {
   max-width: 100px;
 }
