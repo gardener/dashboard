@@ -21,11 +21,15 @@ import {
 } from '@/lodash'
 
 export function getSpecTemplate (infrastructureKind, defaultWorkerCIDR) {
-  return {
-    kubernetes: getKubernetesTemplate(infrastructureKind),
-    networking: getNetworkingTemplate(infrastructureKind, defaultWorkerCIDR),
+  const spec = {
     provider: getProviderTemplate(infrastructureKind, defaultWorkerCIDR),
+    networking: getNetworkingTemplate(infrastructureKind, defaultWorkerCIDR),
   }
+  const kubernetes = getKubernetesTemplate(infrastructureKind)
+  if (!isEmpty(kubernetes)) {
+    spec.kubernetes = kubernetes
+  }
+  return spec
 }
 
 export function getProviderTemplate (infrastructureKind, defaultWorkerCIDR) {
@@ -187,17 +191,12 @@ export function getKubernetesTemplate (infrastructureKind) {
   switch (infrastructureKind) {
     case 'metal':
       return {
-        enableStaticTokenKubeconfig: false,
         kubeControllerManager: {
           nodeCIDRMaskSize: 23,
         },
         kubelet: {
           maxPods: 510,
         },
-      }
-    default:
-      return {
-        enableStaticTokenKubeconfig: false,
       }
   }
 }

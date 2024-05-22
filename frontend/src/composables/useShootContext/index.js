@@ -181,6 +181,10 @@ export function useShootContext (options = {}) {
     },
   })
 
+  function resetKubernetesEnableStaticTokenKubeconfig () {
+    kubernetesEnableStaticTokenKubeconfig.value = false
+  }
+
   /* cloudProfileName */
   const cloudProfileName = computed({
     get () {
@@ -188,15 +192,19 @@ export function useShootContext (options = {}) {
     },
     set (value) {
       set(manifest.value, 'spec.cloudProfileName', value)
-      resetNetworkingType()
-      resetKubernetesVersion()
-      resetSecretBindingName()
-      resetRegion()
-      resetProviderControlPlaneConfigLoadBalancerClasses()
-      resetProviderInfrastructureConfigProjectID()
-      resetProviderInfrastructureConfigFirewallImage()
+      resetCloudProfileDependendValues()
     },
   })
+
+  function resetCloudProfileDependendValues () {
+    resetNetworkingType()
+    resetKubernetesVersion()
+    resetSecretBindingName()
+    resetRegion()
+    resetProviderControlPlaneConfigLoadBalancerClasses()
+    resetProviderInfrastructureConfigProjectID()
+    resetProviderInfrastructureConfigFirewallImage()
+  }
 
   /* secretBindingName */
   const secretBindingName = computed({
@@ -308,6 +316,7 @@ export function useShootContext (options = {}) {
       set(manifest.value, 'spec.provider.controlPlaneConfig', provider.controlPlaneConfig)
       set(manifest.value, 'spec.networking', networking)
       set(manifest.value, 'spec.kubernetes', kubernetes)
+      resetKubernetesEnableStaticTokenKubeconfig()
       cloudProfileName.value = defaultCloudProfileName.value
     },
   })
