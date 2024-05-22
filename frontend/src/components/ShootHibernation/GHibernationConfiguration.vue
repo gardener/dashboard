@@ -60,9 +60,6 @@ export default {
       hibernationSchedules,
       noHibernationSchedules,
     } = storeToRefs(shootContextStore)
-    const {
-      setShootManifest,
-    } = shootContextStore
 
     const componentKey = ref(uuidv4())
 
@@ -73,7 +70,6 @@ export default {
       shootName,
       isHibernationPossible,
       hibernationPossibleMessage,
-      setShootManifest,
       hibernationSchedules,
       noHibernationSchedules,
       componentKey,
@@ -81,7 +77,6 @@ export default {
   },
   methods: {
     async onConfigurationDialogOpened () {
-      this.setShootManifest(this.shootItem)
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
         if (await this.updateConfiguration()) {

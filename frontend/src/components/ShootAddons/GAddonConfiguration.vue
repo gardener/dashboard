@@ -49,21 +49,16 @@ export default {
     const {
       addons,
     } = storeToRefs(shootContextStore)
-    const {
-      setShootManifest,
-    } = shootContextStore
 
     return {
       shootItem,
       shootNamespace,
       shootName,
-      setShootManifest,
       addons,
     }
   },
   methods: {
     async onConfigurationDialogOpened () {
-      this.setShootManifest(this.shootItem)
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
         this.updateConfiguration()

@@ -158,9 +158,6 @@ export default {
       initialZones,
       usedZones,
     } = storeToRefs(shootContextStore)
-    const {
-      setShootManifest,
-    } = shootContextStore
 
     const injectionKey = 'shoot-worker-editor'
     const lazyTab = ref('overview')
@@ -236,7 +233,6 @@ export default {
       hasShootWorkerGroups,
       providerWorkers,
       providerInfrastructureConfigNetworksZones,
-      setShootManifest,
       injectionKey,
       open,
       lazyTab,
@@ -284,7 +280,6 @@ export default {
   },
   methods: {
     async onConfigurationDialogOpened () {
-      this.setShootManifest(this.shootItem)
       this.open = true
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {

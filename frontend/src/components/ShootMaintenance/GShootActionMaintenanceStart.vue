@@ -38,7 +38,6 @@ import {
 } from 'vue'
 
 import { useAppStore } from '@/store/app'
-import { useShootContextStore } from '@/store/shootContext'
 
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog.vue'
 import GMaintenanceComponents from '@/components/ShootMaintenance/GMaintenanceComponents'
@@ -96,11 +95,6 @@ export default {
 
     const maintenanceTriggered = ref(false)
 
-    const shootContextStore = useShootContextStore()
-    const {
-      setShootManifest,
-    } = shootContextStore
-
     const appStore = useAppStore()
 
     watch(isMaintenanceToBeScheduled, value => {
@@ -129,13 +123,11 @@ export default {
       caption,
       buttonTitle,
       buttonText,
-      setShootManifest,
     }
   },
 
   methods: {
     async onConfigurationDialogOpened () {
-      this.setShootManifest(this.shootItem)
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
         this.startMaintenance()

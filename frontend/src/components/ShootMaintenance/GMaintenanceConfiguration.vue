@@ -69,9 +69,6 @@ export default {
       maintenanceAutoUpdateKubernetesVersion,
       maintenanceAutoUpdateMachineImageVersion,
     } = storeToRefs(shootContextStore)
-    const {
-      setShootManifest,
-    } = shootContextStore
 
     return {
       v$: useVuelidate(),
@@ -85,12 +82,10 @@ export default {
       maintenanceTimeWindowEnd,
       maintenanceAutoUpdateKubernetesVersion,
       maintenanceAutoUpdateMachineImageVersion,
-      setShootManifest,
     }
   },
   methods: {
     async onConfigurationDialogOpened () {
-      this.setShootManifest(this.shootItem)
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
         this.updateConfiguration()

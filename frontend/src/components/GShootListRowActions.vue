@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-menu
-    v-model="actionMenu"
+    v-model="internalMenu"
     location="left"
     :close-on-content-click="false"
     eager
@@ -20,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <v-list
       dense
-      @click.capture="actionMenu = false"
+      @click.capture="menu = false"
     >
       <v-list-item>
         <g-shoot-action-change-hibernation
@@ -64,7 +64,12 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import {
+  ref,
+  computed,
+} from 'vue'
+
+import { useShootContextStore } from '@/store/shootContext'
 
 import GActionButton from '@/components/GActionButton.vue'
 import GShootActionChangeHibernation from '@/components/ShootHibernation/GShootActionChangeHibernation.vue'
@@ -78,9 +83,21 @@ import GShootVersionConfiguration from '@/components/ShootVersion/GShootVersionC
 import { useShootItem } from '@/composables/useShootItem'
 
 const {
+  shootItem,
   canForceDeleteShoot,
 } = useShootItem()
 
-const actionMenu = ref(false)
+const shootContextStore = useShootContextStore()
+const menu = ref(false)
+const internalMenu = computed({
+  get () {
+    return menu.value
+  },
+  set (value) {
+    menu.value = value
+    shootContextStore.setShootManifest(value ? shootItem : null)
+  },
+})
+
 const rotationType = ref('ALL_CREDENTIALS')
 </script>

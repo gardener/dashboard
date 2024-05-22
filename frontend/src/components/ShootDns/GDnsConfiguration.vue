@@ -52,9 +52,6 @@ export default {
     const {
       dns,
     } = storeToRefs(shootContextStore)
-    const {
-      setShootManifest,
-    } = shootContextStore
 
     const componentKey = ref(uuidv4())
 
@@ -63,7 +60,6 @@ export default {
       shootItem,
       shootNamespace,
       shootName,
-      setShootManifest,
       dns,
       componentKey,
     }
@@ -71,7 +67,6 @@ export default {
   methods: {
     async onConfigurationDialogOpened () {
       this.componentKey = uuidv4() // force re-render
-      this.setShootManifest(this.shootItem)
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
         this.updateConfiguration()

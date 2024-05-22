@@ -59,9 +59,6 @@ export default {
     const {
       shootManifest,
     } = storeToRefs(shootContextStore)
-    const {
-      setShootManifest,
-    } = shootContextStore
 
     const disabled = computed(() => {
       return isEmpty(accessRestrictionDefinitionList.value)
@@ -78,14 +75,12 @@ export default {
       shootNamespace,
       shootName,
       shootManifest,
-      setShootManifest,
       disabled,
       tooltip,
     }
   },
   methods: {
     async onConfigurationDialogOpened () {
-      this.setShootManifest(this.shootItem)
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
         this.updateConfiguration()
