@@ -111,12 +111,11 @@ export function useShootContext (options = {}) {
     dns.value = get(manifest.value, 'spec.dns', {})
     hibernationSchedules.value = get(manifest.value, 'spec.hibernation.schedules', [])
     if (shootCreationTimestamp.value) {
-      workerless.value = isEmpty(providerWorkers.value)
+      providerState.workerless = isEmpty(providerWorkers.value)
     }
   }
 
   function createShootManifest (options) {
-    initialManifest.value = null
     manifest.value = {
       metadata: {
         name: get(options, 'names', utils.shortRandomString(10)),
@@ -130,8 +129,10 @@ export function useShootContext (options = {}) {
     providerType.value = get(options, 'providerType', defaultProviderType)
     resetNetworkingType()
     resetAddons()
-    resetMaintenance()
+    resetMaintenanceAutoUpdate()
+    resetMaintenanceTimeWindow()
     resetHibernationShedules()
+    initialManifest.value = cloneDeep(manifest.value)
   }
 
   const isShootDirty = computed(() => {
@@ -684,11 +685,6 @@ export function useShootContext (options = {}) {
   function resetMaintenanceAutoUpdate () {
     maintenanceAutoUpdateKubernetesVersion.value = true
     maintenanceAutoUpdateMachineImageVersion.value = true
-  }
-
-  function resetMaintenance () {
-    resetMaintenanceTimeWindow()
-    resetMaintenanceAutoUpdate()
   }
 
   /* hibernation */
