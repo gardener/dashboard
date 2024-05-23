@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
         :key="ticket.metadata.issueNumber"
         :ticket="ticket"
       />
-      <div class="d-flex align-center justify-center mt-4">
+      <div class="d-flex align-center justify-center">
         <v-btn
           variant="tonal"
           color="primary"
