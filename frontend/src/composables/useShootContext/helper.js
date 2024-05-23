@@ -10,30 +10,16 @@ import {
   get,
   unset,
   isEmpty,
+  isNil,
+  isObject,
 } from '@/lodash'
 
 export function getId (object) {
   return get(object, 'id')
 }
 
-function isNull (value) {
-  return value === null
-}
-
-function isUndefined (value) {
-  return typeof value === 'undefined'
-}
-
-function isNil (value) {
-  return isNull(value) || isUndefined(value)
-}
-
 function isArray (value) {
   return Array.isArray(value)
-}
-
-function isObject (value) {
-  return typeof value === 'object' && !isNull(value)
 }
 
 function cleanup (obj) {
@@ -41,7 +27,7 @@ function cleanup (obj) {
     const cleanObj = {}
     for (const [key, value] of Object.entries(obj)) {
       const cleanValue = cleanupValue(value)
-      if (!isNull(cleanValue)) {
+      if (cleanValue !== null) {
         cleanObj[key] = cleanValue
       }
     }
@@ -52,7 +38,7 @@ function cleanup (obj) {
     const cleanValues = []
     for (const value of values) {
       const cleanValue = cleanupValue(value)
-      if (!isNull(cleanValue)) {
+      if (cleanValue !== null) {
         cleanValues.push(cleanValue)
       }
     }
