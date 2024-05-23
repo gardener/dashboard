@@ -57,10 +57,6 @@ export function createShootHelperComposable (state, options = {}) {
     providerType,
   } = mapValues(shootPropertyMappings, utils.toProperties(state))
 
-  const isNewCluster = computed(() => {
-    return !creationTimestamp.value
-  })
-
   const infrastructureSecret = computed(() => {
     return find(infrastructureSecrets.value, ['metadata.name', secretBindingName.value])
   })
@@ -81,7 +77,7 @@ export function createShootHelperComposable (state, options = {}) {
   const isZonedCluster = computed(() => {
     return utils.isZonedCluster({
       cloudProviderKind: providerType.value,
-      isNewCluster: isNewCluster.value,
+      isNewCluster: !creationTimestamp.value,
     })
   })
 
@@ -247,7 +243,6 @@ export function createShootHelperComposable (state, options = {}) {
   })
 
   return {
-    isNewCluster,
     cloudProfiles,
     defaultCloudProfileName,
     cloudProfile,

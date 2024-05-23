@@ -145,6 +145,7 @@ export function useShootContext (options = {}) {
     shootName,
     shootProjectName,
     shootCreationTimestamp,
+    isNewCluster,
     getShootAnnotation,
     setShootAnnotation,
     unsetShootAnnotation,
@@ -1033,7 +1034,6 @@ export function useShootContext (options = {}) {
   })
 
   const {
-    isNewCluster,
     cloudProfiles,
     defaultCloudProfileName,
     cloudProfile,
