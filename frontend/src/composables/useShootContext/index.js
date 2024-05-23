@@ -82,8 +82,9 @@ export function useShootContext (options = {}) {
   /* initial manifest */
   const initialManifest = shallowRef(null)
 
-  const initialShootManifest = computed(() => {
-    return normalizeShootManifest(initialManifest)
+  const normalizedInitialManifest = computed(() => {
+    const object = cloneDeep(initialManifest.value)
+    return normalizeShootManifest(object)
   })
 
   const initialZones = computed(() => {
@@ -94,7 +95,7 @@ export function useShootContext (options = {}) {
   /* manifest */
   const manifest = ref({})
 
-  const shootManifest = computed(() => {
+  const normalizedManifest = computed(() => {
     const object = cloneDeep(manifest.value)
     set(object, 'spec.dns', dns.value)
     set(object, 'spec.hibernation.schedules', hibernationSchedules.value)
@@ -129,11 +130,11 @@ export function useShootContext (options = {}) {
     providerType.value = get(options, 'providerType', defaultProviderType)
     resetMaintenanceAutoUpdate()
     resetMaintenanceTimeWindow()
-    initialManifest.value = cloneDeep(manifest.value)
+    initialManifest.value = cloneDeep(normalizedManifest.value)
   }
 
   const isShootDirty = computed(() => {
-    return !isEqual(initialShootManifest.value, shootManifest.value)
+    return !isEqual(normalizedManifest.value, normalizedInitialManifest.value)
   })
 
   /* metadata */
@@ -490,10 +491,15 @@ export function useShootContext (options = {}) {
   })
 
   watch(workerless, value => {
-    if (!value && (!networkingType.value || !secretBindingName.value)) {
+    if (value || !cloudProfileName.value) {
+      return
+    }
+    if (!networkingType.value || !secretBindingName.value) {
       // If worker required values missing (navigated to overview tab from yaml), reset to defaults
       resetCloudProfileDependendValues()
     }
+  }, {
+    flush: 'sync',
   })
 
   const providerWorkers = computed({
@@ -796,7 +802,7 @@ export function useShootContext (options = {}) {
   })
 
   const controlPlaneHighAvailabilityFailureToleranceTypeChangeAllowed = computed(() => {
-    const oldControlPlaneFailureToleranceType = get(initialShootManifest.value, 'spec.controlPlane.highAvailability.failureTolerance.type')
+    const oldControlPlaneFailureToleranceType = get(normalizedInitialManifest.value, 'spec.controlPlane.highAvailability.failureTolerance.type')
     return isNewCluster.value || !oldControlPlaneFailureToleranceType
   })
 
@@ -1102,11 +1108,13 @@ export function useShootContext (options = {}) {
         }
       }
     }
+  }, {
+    flush: 'sync',
   })
 
   return {
     /* manifest */
-    shootManifest,
+    shootManifest: normalizedManifest,
     setShootManifest,
     createShootManifest,
     isShootDirty,

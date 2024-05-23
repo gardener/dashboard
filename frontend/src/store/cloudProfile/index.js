@@ -646,7 +646,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
       },
       zones,
       cri: {
-        name: defaultCriNameByKubernetesVersion(map(machineImage.cri, 'name'), kubernetesVersion),
+        name: defaultCriNameByKubernetesVersion(map(machineImage?.cri, 'name'), kubernetesVersion),
       },
       isNew: true,
     }
