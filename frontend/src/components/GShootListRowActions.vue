@@ -89,6 +89,7 @@ const {
 
 const shootContextStore = useShootContextStore()
 const menu = ref(false)
+// TODO shootContextStore is only needed for `GShootActionMaintenanceStart`. Refactor the dialog and remove the dependency to the shootContextStore here.
 const internalMenu = computed({
   get () {
     return menu.value
