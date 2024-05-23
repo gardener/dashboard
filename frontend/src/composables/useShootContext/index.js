@@ -127,11 +127,8 @@ export function useShootContext (options = {}) {
     workerless.value = get(options, 'workerless', false)
     const defaultProviderType = head(cloudProfileStore.sortedInfrastructureKindList)
     providerType.value = get(options, 'providerType', defaultProviderType)
-    resetNetworkingType()
-    resetAddons()
     resetMaintenanceAutoUpdate()
     resetMaintenanceTimeWindow()
-    resetHibernationShedules()
     initialManifest.value = cloneDeep(manifest.value)
   }
 
@@ -169,8 +166,11 @@ export function useShootContext (options = {}) {
   })
 
   function resetKubernetesVersion () {
-    const defaultKubernetesVersionDescriptor = cloudProfileStore.defaultKubernetesVersionForCloudProfileName(cloudProfileName.value)
-    kubernetesVersion.value = get(defaultKubernetesVersionDescriptor, 'version')
+    const kubernetesVersions = map(cloudProfileStore.sortedKubernetesVersions(cloudProfileName.value), 'version')
+    if (!kubernetesVersion.value || !includes(kubernetesVersions, kubernetesVersion.value)) {
+      const defaultKubernetesVersionDescriptor = cloudProfileStore.defaultKubernetesVersionForCloudProfileName(cloudProfileName.value)
+      kubernetesVersion.value = get(defaultKubernetesVersionDescriptor, 'version')
+    }
   }
 
   const kubernetesEnableStaticTokenKubeconfig = computed({
@@ -246,7 +246,9 @@ export function useShootContext (options = {}) {
   })
 
   function resetNetworkingType () {
-    networkingType.value = head(gardenerExtensionStore.networkingTypes)
+    if (!networkingType.value) {
+      networkingType.value = head(gardenerExtensionStore.networkingTypes)
+    }
   }
 
   /* region */
@@ -485,6 +487,13 @@ export function useShootContext (options = {}) {
         resetProviderWorkers()
       }
     },
+  })
+
+  watch(workerless, value => {
+    if (!value && (!networkingType.value || !secretBindingName.value)) {
+      // If worker required values missing (navigated to overview tab from yaml), reset to defaults
+      resetCloudProfileDependendValues()
+    }
   })
 
   const providerWorkers = computed({
