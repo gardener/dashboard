@@ -307,29 +307,47 @@ const useShootStore = defineStore('shoot', () => {
 
     const fetchShoot = async options => {
       const [
-        { data: shoot },
-        { data: { issues = [], comments = [] } },
-      ] = await Promise.all([
+        { value: shootResult, reason: shootError },
+        { value: issuesAndCommentsResult, reason: issuesAndCommentsError },
+      ] = await Promise.allSettled([
         api.getShoot(options),
         api.getIssuesAndComments(options),
       ])
+      if (shootError) {
+        throw shootError
+      }
+      logger.debug('Fetched shoot for %s in namespace %s', options.name, options.namespace)
+      if (issuesAndCommentsError) {
+        logger.warn('Tickets could not be fetched:', issuesAndCommentsError.message)
+      }
+      const {
+        issues = [],
+        comments = [],
+      } = issuesAndCommentsResult?.data ?? {}
       // fetch shootInfo in the background (do not await the promise)
-      shootStore.fetchInfo(shoot.metadata)
-      logger.debug('Fetched shoot and tickets for %s in namespace %s', options.name, options.namespace)
-      return { shoots: [shoot], issues, comments }
+      shootStore.fetchInfo(shootResult.data.metadata)
+      return { shoots: [shootResult.data], issues, comments }
     }
 
     const fetchShoots = async options => {
       const { namespace } = options
       const [
-        { data: { items } },
-        { data: { issues = [] } },
-      ] = await Promise.all([
+        { value: shootsResult, reason: shootsError },
+        { value: issuesResult, reason: issuesError },
+      ] = await Promise.allSettled([
         api.getShoots(options),
         api.getIssues({ namespace }),
       ])
-      logger.debug('Fetched shoots and tickets in namespace %s', options.namespace)
-      return { shoots: items, issues, comments: [] }
+      if (shootsError) {
+        throw shootsError
+      }
+      logger.debug('Fetched shoots in namespace %s', options.namespace)
+      if (issuesError) {
+        logger.warn('Error fetching issues:', issuesError.message)
+      }
+      const { items: shoots } = shootsResult?.data ?? {}
+      const { issues = [] } = issuesResult?.data ?? {}
+      return { shoots, issues, comments: [] }
     }
 
     const getThrottleDelay = (options, n) => {
