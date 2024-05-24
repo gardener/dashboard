@@ -34,14 +34,18 @@ import {
   computed,
 } from 'vue'
 
+import { useSeedStore } from '@/store/seed'
+
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 
 import { useShootItem } from '@/composables/useShootItem'
-import { useShootHelper } from '@/composables/useShootHelper'
 
 import { errorDetailsFromError } from '@/utils/error'
 
-import { map } from '@/lodash'
+import {
+  map,
+  filter,
+} from '@/lodash'
 
 export default {
   components: {
@@ -53,14 +57,14 @@ export default {
       shootNamespace,
       shootName,
       shootSeedName,
+      shootCloudProviderKind,
     } = useShootItem()
 
-    const {
-      seeds,
-    } = useShootHelper()
+    const seedStore = useSeedStore()
 
     const seedNames = computed(() => {
-      return map(seeds.value, 'metadata.name')
+      const seeds = filter(seedStore.seedList, ['data.type', shootCloudProviderKind.value])
+      return map(seeds, 'metadata.name')
     })
 
     const seedName = ref(shootSeedName.value)
