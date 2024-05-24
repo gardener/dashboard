@@ -525,8 +525,8 @@ export function useShootContext (options = {}) {
     ]
   }
 
-  function removeProviderWorker (id) {
-    providerWorkers.value = filter(providerWorkers.value, worker => worker.id !== id)
+  function removeProviderWorker (index) {
+    providerWorkers.value = filter(providerWorkers.value, (_, i) => i !== index)
   }
 
   function generateProviderWorker (zones) {
@@ -538,7 +538,6 @@ export function useShootContext (options = {}) {
       region.value,
       kubernetesVersion.value,
     )
-    Object.defineProperty(worker, 'id', { value: id })
     Object.defineProperty(worker, 'isNew', { value: isNew })
     return worker
   }

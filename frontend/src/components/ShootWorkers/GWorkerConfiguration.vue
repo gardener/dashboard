@@ -14,6 +14,7 @@ SPDX-License-Identifier: Apache-2.0
     disable-confirm-input-focus
     max-height="80vh"
     :disabled="!hasShootWorkerGroups"
+    @before-dialog-opened="setShootManifest(shootItem)"
     @dialog-opened="onConfigurationDialogOpened"
   >
     <template #header>

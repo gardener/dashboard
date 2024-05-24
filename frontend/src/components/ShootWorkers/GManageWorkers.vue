@@ -11,8 +11,8 @@ SPDX-License-Identifier: Apache-2.0
   >
     <g-expand-transition-group :disabled="disableWorkerAnimation">
       <v-row
-        v-for="worker in providerWorkers"
-        :key="worker.id"
+        v-for="(worker, index) in providerWorkers"
+        :key="index"
         class="list-item"
       >
         <g-worker-input-generic
@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
               variant="tonal"
               icon="mdi-close"
               color="grey"
-              @click.stop="removeProviderWorker(worker.id)"
+              @click.stop="removeProviderWorker(index)"
             />
           </template>
         </g-worker-input-generic>
