@@ -22,7 +22,10 @@ SPDX-License-Identifier: Apache-2.0
         </div>
         <g-maintenance-components
           title="The following updates might be performed"
-          :selectable="false"
+          :readonly="true"
+          :auto-update-kubernetes-version="autoUpdateKubernetesVersion"
+          :auto-update-machine-image-version="autoUpdateMachineImageVersion"
+          :workerless="!hasShootWorkerGroups"
         />
       </v-card-text>
     </template>
@@ -46,6 +49,8 @@ import { useShootItem } from '@/composables/useShootItem'
 
 import { errorDetailsFromError } from '@/utils/error'
 
+import { get } from '@/lodash'
+
 export default {
   components: {
     GActionButtonDialog,
@@ -63,10 +68,20 @@ export default {
       shootItem,
       shootName,
       shootNamespace,
+      shootMaintenance,
+      hasShootWorkerGroups,
       shootGardenerOperation,
       isMaintenancePreconditionSatisfied,
       maintenancePreconditionSatisfiedMessage,
     } = useShootItem()
+
+    const autoUpdateKubernetesVersion = computed(() => {
+      return get(shootMaintenance.value, 'autoUpdate.kubernetesVersion', false)
+    })
+
+    const autoUpdateMachineImageVersion = computed(() => {
+      return get(shootMaintenance.value, 'autoUpdate.machineImageVersion', false)
+    })
 
     const isMaintenanceToBeScheduled = computed(() => {
       return shootGardenerOperation.value === 'maintain'
@@ -115,6 +130,9 @@ export default {
       shootItem,
       shootName,
       shootNamespace,
+      hasShootWorkerGroups,
+      autoUpdateKubernetesVersion,
+      autoUpdateMachineImageVersion,
       shootGardenerOperation,
       isMaintenancePreconditionSatisfied,
       maintenancePreconditionSatisfiedMessage,

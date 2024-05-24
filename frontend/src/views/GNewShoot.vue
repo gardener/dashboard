@@ -80,7 +80,11 @@ SPDX-License-Identifier: Apache-2.0
         <g-toolbar title="Maintenance" />
         <v-card-text>
           <g-maintenance-time />
-          <g-maintenance-components />
+          <g-maintenance-components
+            v-model:auto-update-kubernetes-version="maintenanceAutoUpdateKubernetesVersion"
+            v-model:auto-update-machine-image-version="maintenanceAutoUpdateMachineImageVersion"
+            :workerless="workerless"
+          />
         </v-card-text>
       </v-card>
       <v-card class="mt-4">
@@ -128,6 +132,7 @@ import { useVuelidate } from '@vuelidate/core'
 import {
   mapActions,
   mapState,
+  mapWritableState,
 } from 'pinia'
 
 import { useAppStore } from '@/store/app'
@@ -202,6 +207,10 @@ export default {
   computed: {
     ...mapState(useConfigStore, [
       'accessRestriction',
+    ]),
+    ...mapWritableState(useShootContextStore, [
+      'maintenanceAutoUpdateKubernetesVersion',
+      'maintenanceAutoUpdateMachineImageVersion',
     ]),
     ...mapState(useShootContextStore, [
       'shootNamespace',

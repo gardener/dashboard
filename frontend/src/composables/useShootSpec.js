@@ -131,7 +131,7 @@ export function useShootSpec (shootItem, options = {}) {
   })
 
   const shootMaintenance = computed(() => {
-    return get(shootSpec.value, 'maintenance', [])
+    return get(shootSpec.value, 'maintenance', {})
   })
 
   const shootControlPlaneHighAvailabilityFailureTolerance = computed(() => {

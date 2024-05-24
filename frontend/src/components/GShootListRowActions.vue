@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-menu
-    v-model="internalMenu"
+    v-model="menu"
     location="left"
     :close-on-content-click="false"
     eager
@@ -64,12 +64,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import {
-  ref,
-  computed,
-} from 'vue'
-
-import { useShootContextStore } from '@/store/shootContext'
+import { ref } from 'vue'
 
 import GActionButton from '@/components/GActionButton.vue'
 import GShootActionChangeHibernation from '@/components/ShootHibernation/GShootActionChangeHibernation.vue'
@@ -83,22 +78,10 @@ import GShootVersionConfiguration from '@/components/ShootVersion/GShootVersionC
 import { useShootItem } from '@/composables/useShootItem'
 
 const {
-  shootItem,
   canForceDeleteShoot,
 } = useShootItem()
 
-const shootContextStore = useShootContextStore()
 const menu = ref(false)
-// TODO shootContextStore is only needed for `GShootActionMaintenanceStart`. Refactor the dialog and remove the dependency to the shootContextStore here.
-const internalMenu = computed({
-  get () {
-    return menu.value
-  },
-  set (value) {
-    menu.value = value
-    shootContextStore.setShootManifest(value ? shootItem : null)
-  },
-})
 
 const rotationType = ref('ALL_CREDENTIALS')
 </script>

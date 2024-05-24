@@ -14,7 +14,11 @@ SPDX-License-Identifier: Apache-2.0
     <template #content>
       <v-card-text>
         <g-maintenance-time />
-        <g-maintenance-components />
+        <g-maintenance-components
+          v-model:auto-update-kubernetes-version="maintenanceAutoUpdateKubernetesVersion"
+          v-model:auto-update-machine-image-version="maintenanceAutoUpdateMachineImageVersion"
+          :workerless="!hasShootWorkerGroups"
+        />
         <v-alert
           type="warning"
           variant="tonal"

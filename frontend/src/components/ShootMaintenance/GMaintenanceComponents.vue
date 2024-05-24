@@ -9,40 +9,42 @@ SPDX-License-Identifier: Apache-2.0
     <div class="text-subtitle-1 pt-4">
       {{ title }}
     </div>
+    <template v-if="!workerless">
+      <div
+        v-if="!readonly || osUpdates"
+        class="d-flex mt-4"
+      >
+        <div class="d-flex align-center justify-center action-select">
+          <v-checkbox
+            v-if="!readonly"
+            v-model="osUpdates"
+            hide-details
+            color="primary"
+            density="compact"
+            class="pl-2"
+          />
+          <v-icon v-else>
+            mdi-arrow-up-bold-circle-outline
+          </v-icon>
+        </div>
+        <div class="d-flex flex-column">
+          <div class="wrap-text text-subtitle-2">
+            Operating System
+          </div>
+          <div class="wrap-text pt-1 text-body-2">
+            Update the operating system of the workers<br>
+            (requires rolling update of all workers, ensure proper pod disruption budgets to ensure availability of your workload)
+          </div>
+        </div>
+      </div>
+    </template>
     <div
-      v-if="!workerless && (selectable || osUpdates)"
+      v-if="!readonly || k8sUpdates"
       class="d-flex mt-4"
     >
       <div class="d-flex align-center justify-center action-select">
         <v-checkbox
-          v-if="selectable"
-          v-model="osUpdates"
-          hide-details
-          color="primary"
-          density="compact"
-          class="pl-2"
-        />
-        <v-icon v-else>
-          mdi-arrow-up-bold-circle-outline
-        </v-icon>
-      </div>
-      <div class="d-flex flex-column">
-        <div class="wrap-text text-subtitle-2">
-          Operating System
-        </div>
-        <div class="wrap-text pt-1 text-body-2">
-          Update the operating system of the workers<br>
-          (requires rolling update of all workers, ensure proper pod disruption budgets to ensure availability of your workload)
-        </div>
-      </div>
-    </div>
-    <div
-      v-if="selectable || k8sUpdates"
-      class="d-flex mt-4"
-    >
-      <div class="d-flex align-center justify-center action-select">
-        <v-checkbox
-          v-if="selectable"
+          v-if="!readonly"
           v-model="k8sUpdates"
           hide-details
           color="primary"
@@ -64,7 +66,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </div>
     <div
-      v-if="selectable"
+      v-if="!readonly"
       class="d-flex mt-4"
     >
       <div class="d-flex align-center justify-center action-select">
@@ -98,35 +100,60 @@ import {
   computed,
   toRefs,
 } from 'vue'
-import { storeToRefs } from 'pinia'
-
-import { useShootContextStore } from '@/store/shootContext'
 
 const props = defineProps({
   title: {
     type: String,
     default: 'Auto Update',
   },
-  selectable: {
+  readonly: {
     type: Boolean,
-    default: true,
+    default: false,
   },
-
+  workerless: {
+    type: Boolean,
+    default: false,
+  },
+  autoUpdateKubernetesVersion: {
+    type: Boolean,
+    default: false,
+  },
+  autoUpdateMachineImageVersion: {
+    type: Boolean,
+    default: false,
+  },
 })
 const {
   title,
-  selectable,
+  readonly,
+  workerless,
 } = toRefs(props)
 
-const shootContextStore = useShootContextStore()
-const {
-  k8sUpdates,
-  osUpdates,
-  workerless,
-} = storeToRefs(shootContextStore)
+const emit = defineEmits([
+  'update:autoUpdateKubernetesVersion',
+  'update:autoUpdateMachineImageVersion',
+])
+
+const k8sUpdates = computed({
+  get () {
+    return props.autoUpdateKubernetesVersion
+  },
+  set (value) {
+    emit('update:autoUpdateKubernetesVersion', value)
+  },
+})
+
+const osUpdates = computed({
+  get () {
+    return props.autoUpdateMachineImageVersion
+  },
+  set (value) {
+    emit('update:autoUpdateMachineImageVersion', value)
+  },
+})
 
 const showNoUpdates = computed(() => {
-  return selectable.value && !osUpdates.value && !k8sUpdates.value
+  return !props.readonly && !props.autoUpdateMachineImageVersion && !props.autoUpdateKubernetesVersion
 })
 </script>
 
