@@ -11,6 +11,7 @@ SPDX-License-Identifier: Apache-2.0
     :tooltip="tooltip"
     width="900"
     caption="Configure Access Restrictions"
+    @before-dialog-opened="setShootManifest(shootItem)"
     @dialog-opened="onConfigurationDialogOpened"
   >
     <template #content>
@@ -59,6 +60,9 @@ export default {
     const {
       shootManifest,
     } = storeToRefs(shootContextStore)
+    const {
+      setShootManifest,
+    } = shootContextStore
 
     const disabled = computed(() => {
       return isEmpty(accessRestrictionDefinitionList.value)
@@ -75,6 +79,7 @@ export default {
       shootNamespace,
       shootName,
       shootManifest,
+      setShootManifest,
       disabled,
       tooltip,
     }

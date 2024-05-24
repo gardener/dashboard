@@ -9,6 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     ref="actionDialog"
     width="1300"
     caption="Configure Hibernation Schedule"
+    @before-dialog-opened="setShootManifest(shootItem)"
     @dialog-opened="onConfigurationDialogOpened"
   >
     <template #content>
@@ -60,6 +61,9 @@ export default {
       hibernationSchedules,
       noHibernationSchedules,
     } = storeToRefs(shootContextStore)
+    const {
+      setShootManifest,
+    } = shootContextStore
 
     const componentKey = ref(uuidv4())
 
@@ -72,6 +76,7 @@ export default {
       hibernationPossibleMessage,
       hibernationSchedules,
       noHibernationSchedules,
+      setShootManifest,
       componentKey,
     }
   },

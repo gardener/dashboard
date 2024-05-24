@@ -36,7 +36,6 @@ import { useProjectStore } from '@/store/project'
 import { useSeedStore } from '@/store/seed'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useTerminalStore } from '@/store/terminal'
-import { useShootContextStore } from '@/store/shootContext'
 
 import GShootItemLoading from '@/views/GShootItemLoading.vue'
 import GShootItemError from '@/views/GShootItemError.vue'
@@ -74,7 +73,6 @@ export default {
     const projectStore = useProjectStore()
     const seedStore = useSeedStore()
     const gardenerExtensionStore = useGardenerExtensionStore()
-    const shootContextStore = useShootContextStore()
 
     const activePopoverKey = ref('')
     const error = ref(null)
@@ -177,7 +175,6 @@ export default {
 
     onBeforeUnmount(() => {
       readyState.value = 'initial'
-      shootContextStore.setShootManifest(null)
     })
 
     onBeforeRouteUpdate(async to => {
@@ -198,7 +195,6 @@ export default {
 
     watch(() => shootItem.value, value => {
       if (readyState.value === 'loaded') {
-        shootContextStore.setShootManifest(value)
         if (!value) {
           error.value = Object.assign(new Error('The cluster you are looking for is no longer available'), {
             code: 410,

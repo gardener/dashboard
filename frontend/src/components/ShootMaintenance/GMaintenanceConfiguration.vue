@@ -9,6 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     ref="actionDialog"
     width="900"
     caption="Configure Maintenance"
+    @before-dialog-opened="setShootManifest(shootItem)"
     @dialog-opened="onConfigurationDialogOpened"
   >
     <template #content>
@@ -73,6 +74,9 @@ export default {
       maintenanceAutoUpdateKubernetesVersion,
       maintenanceAutoUpdateMachineImageVersion,
     } = storeToRefs(shootContextStore)
+    const {
+      setShootManifest,
+    } = shootContextStore
 
     return {
       v$: useVuelidate(),
@@ -86,6 +90,7 @@ export default {
       maintenanceTimeWindowEnd,
       maintenanceAutoUpdateKubernetesVersion,
       maintenanceAutoUpdateMachineImageVersion,
+      setShootManifest,
     }
   },
   methods: {

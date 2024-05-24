@@ -10,6 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     caption="Configure Add-ons"
     width="900"
     max-height="60vh"
+    @before-dialog-opened="setShootManifest(shootItem)"
     @dialog-opened="onConfigurationDialogOpened"
   >
     <template #content>
@@ -49,12 +50,16 @@ export default {
     const {
       addons,
     } = storeToRefs(shootContextStore)
+    const {
+      setShootManifest,
+    } = shootContextStore
 
     return {
       shootItem,
       shootNamespace,
       shootName,
       addons,
+      setShootManifest,
     }
   },
   methods: {

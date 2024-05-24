@@ -11,6 +11,7 @@ SPDX-License-Identifier: Apache-2.0
     width="600"
     max-height="60vh"
     confirm-required
+    @before-dialog-opened="setShootManifest(shootItem)"
     @dialog-opened="onConfigurationDialogOpened"
   >
     <template #content>
@@ -54,6 +55,9 @@ export default {
     const {
       controlPlaneFailureToleranceType,
     } = storeToRefs(shootContextStore)
+    const {
+      setShootManifest,
+    } = shootContextStore
 
     const componentKey = ref(uuidv4())
 
@@ -62,6 +66,7 @@ export default {
       shootNamespace,
       shootName,
       controlPlaneFailureToleranceType,
+      setShootManifest,
       componentKey,
     }
   },

@@ -158,6 +158,9 @@ export default {
       initialZones,
       usedZones,
     } = storeToRefs(shootContextStore)
+    const {
+      setShootManifest,
+    } = shootContextStore
 
     const injectionKey = 'shoot-worker-editor'
     const lazyTab = ref('overview')
@@ -233,6 +236,7 @@ export default {
       hasShootWorkerGroups,
       providerWorkers,
       providerInfrastructureConfigNetworksZones,
+      setShootManifest,
       injectionKey,
       open,
       lazyTab,

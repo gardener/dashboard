@@ -10,6 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     caption="Configure DNS"
     width="900"
     confirm-required
+    @before-dialog-opened="setShootManifest(shootItem)"
     @dialog-opened="onConfigurationDialogOpened"
   >
     <template #content>
@@ -52,6 +53,9 @@ export default {
     const {
       dns,
     } = storeToRefs(shootContextStore)
+    const {
+      setShootManifest,
+    } = shootContextStore
 
     const componentKey = ref(uuidv4())
 
@@ -61,6 +65,7 @@ export default {
       shootNamespace,
       shootName,
       dns,
+      setShootManifest,
       componentKey,
     }
   },
