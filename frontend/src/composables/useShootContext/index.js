@@ -42,8 +42,8 @@ import { useShootMetadata } from '../useShootMetadata'
 import { useShootAccessRestrictions } from '../useShootAccessRestrictions'
 
 import {
-  normalizeShootManifest,
   getId,
+  cleanup,
 } from './helper'
 
 import {
@@ -79,12 +79,29 @@ export function useShootContext (options = {}) {
     seedStore = useSeedStore(),
   } = options
 
+  function normalizeManifest (value) {
+    const object = Object.assign({
+      apiVersion: 'core.gardener.cloud/v1beta1',
+      kind: 'Shoot',
+    }, value)
+    if (workerless.value) {
+      unset(object, 'spec.provider.infrastructureConfig')
+      unset(object, 'spec.provider.controlPlaneConfig')
+      unset(object, 'spec.provider.workers')
+      unset(object, 'spec.addons')
+      unset(object, 'spec.networking')
+      unset(object, 'spec.secretBindingName')
+      unset(object, 'spec.maintenance.autoUpdate.machineImageVersion')
+    }
+    return cleanup(object)
+  }
+
   /* initial manifest */
   const initialManifest = shallowRef(null)
 
   const normalizedInitialManifest = computed(() => {
     const object = cloneDeep(initialManifest.value)
-    return normalizeShootManifest(object)
+    return normalizeManifest(object)
   })
 
   const initialZones = computed(() => {
@@ -103,7 +120,7 @@ export function useShootContext (options = {}) {
       set(object, 'spec.provider.infrastructureConfig.networks.zones', providerInfrastructureConfigNetworksZones.value)
       set(object, 'spec.provider.controlPlaneConfig.zone', providerControlPlaneConfigZone.value)
     }
-    return normalizeShootManifest(object)
+    return normalizeManifest(object)
   })
 
   function setShootManifest (value) {
@@ -311,19 +328,23 @@ export function useShootContext (options = {}) {
     },
     set (value) {
       set(manifest.value, 'spec.provider.type', value)
-      const {
-        kubernetes,
-        networking,
-        provider,
-      } = getSpecTemplate(value, cloudProfileStore.getDefaultNodesCIDR(defaultCloudProfileName.value))
-      set(manifest.value, 'spec.provider.infrastructureConfig', provider.infrastructureConfig)
-      set(manifest.value, 'spec.provider.controlPlaneConfig', provider.controlPlaneConfig)
-      set(manifest.value, 'spec.networking', networking)
-      set(manifest.value, 'spec.kubernetes', kubernetes)
-      resetKubernetesEnableStaticTokenKubeconfig()
+      applySpecTemplate(defaultCloudProfileName.value)
       cloudProfileName.value = defaultCloudProfileName.value
     },
   })
+
+  function applySpecTemplate (cloudProfileName) {
+    const {
+      kubernetes,
+      networking,
+      provider,
+    } = getSpecTemplate(providerType.value, cloudProfileStore.getDefaultNodesCIDR(cloudProfileName))
+    set(manifest.value, 'spec.provider.infrastructureConfig', provider.infrastructureConfig)
+    set(manifest.value, 'spec.provider.controlPlaneConfig', provider.controlPlaneConfig)
+    set(manifest.value, 'spec.networking', networking)
+    set(manifest.value, 'spec.kubernetes', kubernetes)
+    resetKubernetesEnableStaticTokenKubeconfig()
+  }
 
   const providerControlPlaneConfigZone = computed({
     get () {
@@ -485,7 +506,6 @@ export function useShootContext (options = {}) {
     set (value) {
       if (isNewCluster.value && providerState.workerless !== value) {
         providerState.workerless = value
-        resetProviderWorkers()
       }
     },
   })
@@ -496,6 +516,7 @@ export function useShootContext (options = {}) {
     }
     if (!networkingType.value || !secretBindingName.value) {
       // If worker required values missing (navigated to overview tab from yaml), reset to defaults
+      applySpecTemplate(cloudProfileName.value)
       resetCloudProfileDependendValues()
     }
   }, {

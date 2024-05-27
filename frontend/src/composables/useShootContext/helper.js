@@ -4,11 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { toValue } from '@vueuse/core'
-
 import {
   get,
-  unset,
   isEmpty,
   isNil,
   isObject,
@@ -22,7 +19,7 @@ function isArray (value) {
   return Array.isArray(value)
 }
 
-function cleanup (obj) {
+export function cleanup (obj) {
   const cleanupObject = obj => {
     const cleanObj = {}
     for (const [key, value] of Object.entries(obj)) {
@@ -65,22 +62,4 @@ function cleanup (obj) {
   }
 
   return cleanupValue(obj)
-}
-
-export function normalizeShootManifest (value) {
-  const object = Object.assign({
-    apiVersion: 'core.gardener.cloud/v1beta1',
-    kind: 'Shoot',
-  }, toValue(value))
-  const workers = get(object, 'spec.provider.workers')
-  if (isEmpty(workers)) {
-    unset(object, 'spec.provider.infrastructureConfig')
-    unset(object, 'spec.provider.controlPlaneConfig')
-    unset(object, 'spec.provider.workers')
-    unset(object, 'spec.addons')
-    unset(object, 'spec.networking')
-    unset(object, 'spec.secretBindingName')
-    unset(object, 'spec.maintenance.autoUpdate.machineImageVersion')
-  }
-  return cleanup(object)
 }
