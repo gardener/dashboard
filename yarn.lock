@@ -2470,14 +2470,23 @@ __metadata:
   linkType: hard
 
 "@vueuse/router@npm:^10.9.0":
-  version: 10.9.0
-  resolution: "@vueuse/router@npm:10.9.0"
+  version: 10.10.0
+  resolution: "@vueuse/router@npm:10.10.0"
   dependencies:
-    "@vueuse/shared": "npm:10.9.0"
+    "@vueuse/shared": "npm:10.10.0"
     vue-demi: "npm:>=0.14.7"
   peerDependencies:
     vue-router: ">=4.0.0-rc.1"
-  checksum: 10c0/3c97b2a3f6d3e6e693e0b0e1e11222b54110c697f4fbc889197d778ab7d401f1615be61c420731e645393b0bf75c878aafbaf090cc0099a99d205b2c0187b780
+  checksum: 10c0/62ab2a643c75ac4a86b6a58766353954f72732f99e066fd5a54d69708c655978640a2573e3643056eafeda49c3fe494a54ecc744aaaca7198a1647647c368cee
+  languageName: node
+  linkType: hard
+
+"@vueuse/shared@npm:10.10.0":
+  version: 10.10.0
+  resolution: "@vueuse/shared@npm:10.10.0"
+  dependencies:
+    vue-demi: "npm:>=0.14.7"
+  checksum: 10c0/6d6d5e7fea32f52d62d36baed6e27936cd4542aff39a986dd47c9cb69a1ef8506dc98b54f2a164892bd49de9e73e4c6439979befca5c4c932846acdd1a5411ac
   languageName: node
   linkType: hard
 
@@ -4662,11 +4671,11 @@ __metadata:
   linkType: hard
 
 "eslint-plugin-promise@npm:^6.1.1":
-  version: 6.1.1
-  resolution: "eslint-plugin-promise@npm:6.1.1"
+  version: 6.2.0
+  resolution: "eslint-plugin-promise@npm:6.2.0"
   peerDependencies:
-    eslint: ^7.0.0 || ^8.0.0
-  checksum: 10c0/ec705741c110cd1cb4d702776e1c7f7fe60b671b71f706c88054ab443cf2767aae5a663928fb426373ba1095eaeda312a740a4f880546631f0e0727f298b3393
+    eslint: ^7.0.0 || ^8.0.0 || ^9.0.0
+  checksum: 10c0/5f42ee774023c089453ecb792076c64c6d0739ea6e9d6cdc9d6a63da5ba928c776e349d01cc110548f2c67045ec55343136aa7eb8b486e4ab145ac016c06a492
   languageName: node
   linkType: hard
 
