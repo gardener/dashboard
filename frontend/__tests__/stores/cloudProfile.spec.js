@@ -12,12 +12,7 @@ import {
 import { useAuthzStore } from '@/store/authz'
 import { useConfigStore } from '@/store/config'
 import { useCloudProfileStore } from '@/store/cloudProfile'
-import {
-  firstItemMatchingVersionClassification,
-  mapAccessRestrictionForInput,
-} from '@/store/cloudProfile/helper'
-
-import { useApi } from '@/composables/useApi'
+import { firstItemMatchingVersionClassification } from '@/store/cloudProfile/helper'
 
 import { find } from '@/lodash'
 
@@ -25,19 +20,23 @@ describe('stores', () => {
   describe('cloudProfile', () => {
     const namespace = 'default'
 
-    const api = useApi()
-    let mockGetConfiguration // eslint-disable-line no-unused-vars
     let authzStore
     let configStore
     let cloudProfileStore
 
     function setData (data) {
-      cloudProfileStore.list = [{
+      cloudProfileStore.setCloudProfiles([{
         metadata: {
           name: 'foo',
         },
         data,
-      }]
+      }])
+    }
+
+    function setMachineImages (machineImages) {
+      setData({
+        machineImages,
+      })
     }
 
     function setKubernetesVersions (kubernetesVersions) {
@@ -62,26 +61,19 @@ describe('stores', () => {
       authzStore = useAuthzStore()
       authzStore.setNamespace(namespace)
       configStore = useConfigStore()
-      mockGetConfiguration = vi.spyOn(api, 'getConfiguration').mockResolvedValue({
-        data: {
-          defaultNodesCIDR: '10.10.0.0/16',
-          vendorHints: [{
-            type: 'warning',
-            message: 'test',
-            matchNames: ['gardenlinux'],
-          }],
-        },
+      configStore.setConfiguration({
+        defaultNodesCIDR: '10.10.0.0/16',
+        vendorHints: [{
+          type: 'warning',
+          message: 'test',
+          matchNames: ['gardenlinux'],
+        }],
       })
-      await configStore.fetchConfig()
       cloudProfileStore = useCloudProfileStore()
-      cloudProfileStore.list = []
+      cloudProfileStore.setCloudProfiles([])
     })
 
     describe('machineImages', () => {
-      function setMachineImages (machineImages) {
-        setData({ machineImages })
-      }
-
       let decoratedAndSortedMachineImages
 
       const machineImages = [
@@ -642,7 +634,7 @@ describe('stores', () => {
       })
 
       it('should return machineTypes by region and zones from cloud profile', () => {
-        let dashboardMachineTypes = cloudProfileStore.machineTypesByCloudProfileName({ cloudProfileName: 'foo' })
+        let dashboardMachineTypes = cloudProfileStore.machineTypesByCloudProfileName('foo')
         expect(dashboardMachineTypes).toHaveLength(4)
 
         dashboardMachineTypes = cloudProfileStore.machineTypesByCloudProfileNameAndRegionAndArchitecture({ cloudProfileName: 'foo', region: 'region1', architecture: 'amd64' })
@@ -656,7 +648,7 @@ describe('stores', () => {
       })
 
       it('should return volumeTypes by region and zones from cloud profile', () => {
-        let dashboardVolumeTypes = cloudProfileStore.volumeTypesByCloudProfileName({ cloudProfileName: 'foo' })
+        let dashboardVolumeTypes = cloudProfileStore.volumeTypesByCloudProfileName('foo')
         expect(dashboardVolumeTypes).toHaveLength(3)
 
         dashboardVolumeTypes = cloudProfileStore.volumeTypesByCloudProfileNameAndRegion({ cloudProfileName: 'foo', region: 'region1' })
@@ -667,7 +659,7 @@ describe('stores', () => {
       })
 
       it('should return an empty machineType / volumeType array if no cloud profile is provided', () => {
-        const items = cloudProfileStore.machineTypesByCloudProfileName({})
+        const items = cloudProfileStore.machineTypesByCloudProfileName()
         expect(items).toBeInstanceOf(Array)
         expect(items).toHaveLength(0)
       })
@@ -817,7 +809,7 @@ describe('stores', () => {
       const cloudProfileName = 'foo'
 
       it('should return default node cidr from config', async () => {
-        const defaultNodesCIDR = cloudProfileStore.getDefaultNodesCIDR({ cloudProfileName })
+        const defaultNodesCIDR = cloudProfileStore.getDefaultNodesCIDR(cloudProfileName)
         expect(defaultNodesCIDR).toBe('10.10.0.0/16')
       })
 
@@ -827,7 +819,7 @@ describe('stores', () => {
             defaultNodesCIDR: '1.2.3.4/16',
           },
         })
-        const defaultNodesCIDR = cloudProfileStore.getDefaultNodesCIDR({ cloudProfileName })
+        const defaultNodesCIDR = cloudProfileStore.getDefaultNodesCIDR(cloudProfileName)
         expect(defaultNodesCIDR).toBe('1.2.3.4/16')
       })
     })
@@ -858,105 +850,6 @@ describe('stores', () => {
           items.pop()
           item = firstItemMatchingVersionClassification(items)
           expect(item.version).toBe('1')
-        })
-      })
-
-      describe('#mapAccessRestrictionForInput', () => {
-        let definition
-        let shootResource
-
-        beforeEach(() => {
-          definition = {
-            key: 'foo',
-            input: {
-              inverted: false,
-            },
-            options: [
-              {
-                key: 'foo-option-1',
-                input: {
-                  inverted: false,
-                },
-              },
-              {
-                key: 'foo-option-2',
-                input: {
-                  inverted: true,
-                },
-              },
-              {
-                key: 'foo-option-3',
-                input: {
-                  inverted: true,
-                },
-              },
-              {
-                key: 'foo-option-4',
-                input: {
-                  inverted: true,
-                },
-              },
-            ],
-          }
-
-          shootResource = {
-            metadata: {
-              annotations: {
-                'foo-option-1': 'false',
-                'foo-option-2': 'false',
-                'foo-option-3': 'true',
-              },
-            },
-            spec: {
-              seedSelector: {
-                matchLabels: {
-                  foo: 'true',
-                },
-              },
-            },
-          }
-        })
-
-        it('should map definition and shoot resources to access restriction data model', () => {
-          const accessRestrictionPair = mapAccessRestrictionForInput(definition, shootResource)
-          expect(accessRestrictionPair).toEqual([
-            'foo',
-            {
-              value: true,
-              options: {
-                'foo-option-1': {
-                  value: false,
-                },
-                'foo-option-2': {
-                  value: true, // value inverted as defined in definition
-                },
-                'foo-option-3': {
-                  value: false, // value inverted as defined in definition
-                },
-                'foo-option-4': {
-                  value: false, // value not set in spec always maps to false
-                },
-              },
-            },
-          ])
-        })
-
-        it('should invert access restriction', () => {
-          definition.input.inverted = true
-          const [, accessRestriction] = mapAccessRestrictionForInput(definition, shootResource)
-          expect(accessRestriction.value).toBe(false)
-        })
-
-        it('should not invert option', () => {
-          definition.options[1].input.inverted = false
-          const [, accessRestriction] = mapAccessRestrictionForInput(definition, shootResource)
-          expect(accessRestriction.options['foo-option-2'].value).toBe(false)
-        })
-
-        it('should invert option', () => {
-          definition.options[1].input.inverted = true
-          const [, accessRestriction] = mapAccessRestrictionForInput(definition, shootResource)
-          expect(accessRestriction.options['foo-option-2'].value).toBe(true)
         })
       })
     })

@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-action-button-dialog
     ref="actionDialog"
-    :shoot-item="shootItem"
     width="600"
     :caption="caption"
     :text="buttonText"
@@ -20,21 +19,20 @@ SPDX-License-Identifier: Apache-2.0
   >
     <template #content>
       <v-card-text>
-        <g-force-delete-cluster :shoot-item="shootItem" />
+        <g-force-delete-cluster />
       </v-card-text>
     </template>
   </g-action-button-dialog>
 </template>
 
 <script>
-import { mapActions } from 'pinia'
-
-import { useShootStore } from '@/store/shoot'
+import { computed } from 'vue'
 
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog.vue'
 import GForceDeleteCluster from '@/components/GForceDeleteCluster.vue'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
+
 import { errorDetailsFromError } from '@/utils/error'
 
 export default {
@@ -42,7 +40,6 @@ export default {
     GActionButtonDialog,
     GForceDeleteCluster,
   },
-  mixins: [shootItem],
   inject: ['logger', 'api'],
   props: {
     text: {
@@ -50,36 +47,56 @@ export default {
       default: false,
     },
   },
-  computed: {
-    caption () {
-      if (this.isShootMarkedForForceDeletion) {
+  setup (props) {
+    const {
+      shootNamespace,
+      shootName,
+      isShootMarkedForForceDeletion,
+    } = useShootItem()
+
+    const caption = computed(() => {
+      if (isShootMarkedForForceDeletion.value) {
         return 'Cluster already marked for force deletion'
       }
-      return this.buttonTitle
-    },
-    buttonTitle () {
+      return buttonTitle.value
+    })
+
+    const buttonTitle = computed(() => {
       return 'Force Delete Cluster'
-    },
-    buttonText () {
-      if (!this.text) {
+    })
+
+    const buttonText = computed(() => {
+      if (!props.text) {
         return
       }
-      return this.buttonTitle
-    },
+      return buttonTitle.value
+    })
+
+    return {
+      shootNamespace,
+      shootName,
+      isShootMarkedForForceDeletion,
+      caption,
+      buttonText,
+    }
   },
   methods: {
-    ...mapActions(useShootStore, [
-      'deleteShoot',
-    ]),
     async onConfigurationDialogOpened () {
-      if (await this.$refs.actionDialog.waitForDialogClosed()) {
-        this.forceDeleteCluster()
+      const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
+      if (confirmed) {
+        this.addForceDeletionAnnotation()
       }
     },
-    async forceDeleteCluster () {
-      const annotation = { 'confirmation.gardener.cloud/force-deletion': 'true' }
+    async addForceDeletionAnnotation () {
+      const annotations = {
+        'confirmation.gardener.cloud/force-deletion': 'true',
+      }
       try {
-        await this.api.addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, data: annotation })
+        await this.api.addShootAnnotation({
+          namespace: this.shootNamespace,
+          name: this.shootName,
+          data: annotations,
+        })
       } catch (err) {
         const errorMessage = 'Cluster force deletion failed'
         const errorDetails = errorDetailsFromError(err)

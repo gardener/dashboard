@@ -55,7 +55,6 @@ import { mapState } from 'pinia'
 
 import { useAuthnStore } from '@/store/authn'
 import { useConfigStore } from '@/store/config'
-import { useProjectStore } from '@/store/project'
 
 import GListItem from '@/components/GListItem.vue'
 import GListItemContent from '@/components/GListItemContent.vue'
@@ -64,7 +63,7 @@ import GCopyBtn from '@/components/GCopyBtn.vue'
 import GCodeBlock from '@/components/GCodeBlock.vue'
 import GGardenctlInfo from '@/components/GGardenctlInfo.vue'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
 
 export default {
   components: {
@@ -75,7 +74,17 @@ export default {
     GCodeBlock,
     GGardenctlInfo,
   },
-  mixins: [shootItem],
+  setup () {
+    const {
+      shootName,
+      shootProjectName,
+    } = useShootItem()
+
+    return {
+      shootName,
+      shootProjectName,
+    }
+  },
   data () {
     return {
       expansionPanel: [],
@@ -87,9 +96,6 @@ export default {
     ]),
     ...mapState(useAuthnStore, [
       'isAdmin',
-    ]),
-    ...mapState(useProjectStore, [
-      'projectName',
     ]),
     commands () {
       const displayValue = command => {
@@ -121,8 +127,8 @@ export default {
       if (this.clusterIdentity) {
         args.push(`--garden ${this.clusterIdentity}`)
       }
-      if (this.projectName) {
-        args.push(`--project ${this.projectName}`)
+      if (this.shootProjectName) {
+        args.push(`--project ${this.shootProjectName}`)
       }
       if (this.shootName) {
         args.push(`--shoot ${this.shootName}`)
@@ -137,8 +143,8 @@ export default {
       if (this.clusterIdentity) {
         args.push(`--garden ${this.clusterIdentity}`)
       }
-      if (this.projectName) {
-        args.push(`--project ${this.projectName}`)
+      if (this.shootProjectName) {
+        args.push(`--project ${this.shootProjectName}`)
       }
       if (this.shootName) {
         args.push(`--shoot ${this.shootName}`)

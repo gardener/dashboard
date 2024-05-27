@@ -37,20 +37,19 @@ SPDX-License-Identifier: Apache-2.0
   </v-tooltip>
 </template>
 
-<script>
+<script setup>
+import { ref } from 'vue'
+
 import GWorkerGroup from '@/components/ShootWorkers/GWorkerGroup'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
 
-export default {
-  components: {
-    GWorkerGroup,
-  },
-  mixins: [shootItem],
-  data () {
-    return {
-      workerGroupTab: 'overview',
-    }
-  },
-}
+const {
+  shootMetadata,
+  shootCloudProfileName,
+  hasShootWorkerGroups,
+  shootWorkerGroups,
+} = useShootItem()
+
+const workerGroupTab = ref('overview')
 </script>

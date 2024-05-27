@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-action-button-dialog
     ref="actionDialog"
-    :shoot-item="shootItem"
     :icon="shootSupportedPatchAvailable ? 'mdi-arrow-up-bold-circle' : 'mdi-arrow-up-bold-circle-outline'"
     width="450"
     caption="Update Cluster"
@@ -20,12 +19,7 @@ SPDX-License-Identifier: Apache-2.0
     <template #content>
       <v-card-text>
         <g-shoot-version-update
-          ref="shootVersionUpdate"
-          :available-k8s-updates="shootAvailableK8sUpdates"
-          :current-k8s-version="shootKubernetesVersionObject"
-          @selected-version="onSelectedVersion"
-          @selected-version-type="onSelectedVersionType"
-          @confirm-required="onConfirmRequired"
+          v-model="selectedItem"
         />
         <template v-if="!v$.$invalid && selectedVersionType === 'minor'">
           <div class="my-2">
@@ -65,24 +59,23 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { ref } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 
 import GShootVersionUpdate from '@/components/ShootVersion/GShootVersionUpdate.vue'
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 
-import { errorDetailsFromError } from '@/utils/error'
-import shootItem from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
 
-import { find } from '@/lodash'
+import { errorDetailsFromError } from '@/utils/error'
+
+import { get } from '@/lodash'
 
 export default {
   components: {
     GActionButtonDialog,
     GShootVersionUpdate,
   },
-  mixins: [
-    shootItem,
-  ],
   inject: ['api', 'logger'],
   props: {
     text: {
@@ -91,28 +84,31 @@ export default {
     },
   },
   setup () {
+    const {
+      shootItem,
+      shootNamespace,
+      shootName,
+      shootAvailableK8sUpdates,
+      shootSupportedPatchAvailable,
+      shootKubernetesVersionObject,
+    } = useShootItem()
+
+    const selectedItem = ref(null)
+
     return {
       v$: useVuelidate(),
-    }
-  },
-  data () {
-    return {
-      selectedVersion: undefined,
-      selectedVersionType: undefined,
-      confirmRequired: false,
-      updateErrorMessage: null,
-      updateDetailedErrorMessage: null,
+      shootItem,
+      shootNamespace,
+      shootName,
+      shootSupportedPatchAvailable,
+      shootAvailableK8sUpdates,
+      shootKubernetesVersionObject,
+      selectedItem,
     }
   },
   computed: {
-    shootSupportedPatchAvailable () {
-      return !!find(this.shootAvailableK8sUpdates?.patch, 'isSupported')
-    },
     canUpdate () {
       return !!this.shootAvailableK8sUpdates
-    },
-    confirm () {
-      return this.confirmRequired ? this.shootName : undefined
     },
     buttonText () {
       if (!this.text) {
@@ -120,19 +116,19 @@ export default {
       }
       return 'Update Cluster'
     },
+    selectedVersion () {
+      return get(this.selectedItem, 'version')
+    },
+    selectedVersionType () {
+      return get(this.selectedItem, 'updateType')
+    },
+    confirmRequired () {
+      return this.selectedVersionType !== 'patch'
+    },
   },
   methods: {
-    onSelectedVersion (value) {
-      this.selectedVersion = value
-    },
-    onSelectedVersionType (value) {
-      this.selectedVersionType = value
-    },
-    onConfirmRequired (value) {
-      this.confirmRequired = value
-    },
     async onConfigurationDialogOpened () {
-      await this.reset()
+      this.selectedItem = null
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
         await this.updateConfiguration()
@@ -154,15 +150,6 @@ export default {
         this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
         this.logger.error(errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
-    },
-    reset () {
-      const defaultData = this.$options.data.apply(this)
-      Object.assign(this.$data, defaultData)
-
-      this.updateErrorMessage = undefined
-      this.updateDetailedErrorMessage = undefined
-
-      this.$refs.shootVersionUpdate.reset()
     },
   },
 }

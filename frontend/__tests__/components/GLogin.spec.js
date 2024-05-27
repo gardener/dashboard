@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import { nextTick } from 'vue'
 import { mount } from '@vue/test-utils'
 import { setActivePinia } from 'pinia'
 import { createTestingPinia } from '@pinia/testing'
@@ -15,8 +16,13 @@ import { useLocalStorageStore } from '@/store/localStorage'
 
 import GLogin from '@/layouts/GLogin.vue'
 
-const { createPlugins } = global.fixtures.helper
-const nextTick = () => new Promise(process.nextTick)
+import {
+  components as componentsPlugin,
+  utils as utilsPlugin,
+  notify as notifyPlugin,
+} from '@/plugins'
+
+const { createVuetifyPlugin } = global.fixtures.helper
 
 describe('components', () => {
   describe('g-login', () => {
@@ -35,7 +41,10 @@ describe('components', () => {
       return mount(GLogin, {
         global: {
           plugins: [
-            ...createPlugins(),
+            createVuetifyPlugin(),
+            componentsPlugin,
+            utilsPlugin,
+            notifyPlugin,
             pinia,
           ],
           mocks: {

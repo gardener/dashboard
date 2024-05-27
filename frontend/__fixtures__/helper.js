@@ -8,10 +8,6 @@ import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 
-import componentsPlugin from '@/plugins/components'
-import utilsPlugin from '@/plugins/utils'
-import notifyPlugin from '@/plugins/notify'
-
 import 'vuetify/styles'
 
 export function createVuetifyPlugin () {
@@ -22,13 +18,4 @@ export function createVuetifyPlugin () {
     components,
     directives,
   })
-}
-
-export function createPlugins () {
-  return [
-    createVuetifyPlugin(),
-    componentsPlugin,
-    utilsPlugin,
-    notifyPlugin,
-  ]
 }

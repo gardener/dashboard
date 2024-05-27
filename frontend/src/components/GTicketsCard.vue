@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
         :key="ticket.metadata.issueNumber"
         :ticket="ticket"
       />
-      <div class="d-flex align-center justify-center mt-4">
+      <div class="d-flex align-center justify-center">
         <v-btn
           variant="tonal"
           color="primary"
@@ -59,7 +59,8 @@ import { useTicketStore } from '@/store/ticket'
 
 import GTicket from '@/components/ShootTickets/GTicket'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
+
 import moment from '@/utils/moment'
 
 import {
@@ -73,8 +74,32 @@ export default {
   components: {
     GTicket,
   },
-  mixins: [shootItem],
   inject: ['sanitizeUrl'],
+  setup () {
+    const {
+      shootItem,
+      shootNamespace,
+      shootName,
+      shootProjectName,
+      shootCreatedAt,
+      shootCloudProviderKind,
+      shootRegion,
+      shootSeedName,
+      shootSelectedAccessRestrictions,
+    } = useShootItem()
+
+    return {
+      shootItem,
+      shootNamespace,
+      shootName,
+      shootProjectName,
+      shootCreatedAt,
+      shootCloudProviderKind,
+      shootRegion,
+      shootSeedName,
+      shootSelectedAccessRestrictions,
+    }
+  },
   computed: {
     ...mapState(useConfigStore, {
       ticketConfig: 'ticket',

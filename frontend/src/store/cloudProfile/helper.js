@@ -5,17 +5,13 @@
 //
 
 import { getDateFormatted } from '@/utils'
-import moment from '@/utils/moment'
 
 import {
-  map,
   get,
   find,
   isEqual,
-  fromPairs,
   includes,
   lowerCase,
-  compact,
   head,
 } from '@/lodash'
 
@@ -71,109 +67,49 @@ export function findVendorHint (vendorHints, vendorName) {
   return find(vendorHints, hint => includes(hint.matchNames, vendorName))
 }
 
-export function decorateClassificationObject (obj) {
-  const classification = obj.classification ?? 'supported'
-  const isExpired = !!obj.expirationDate && moment().isAfter(obj.expirationDate)
-  const isExpirationWarning = !!obj.expirationDate && moment(obj.expirationDate).diff(moment(), 'd') < 30
-
-  return {
-    ...obj,
-    isPreview: classification === 'preview',
-    isSupported: classification === 'supported' && !isExpired,
-    isDeprecated: classification === 'deprecated',
-    isExpired,
-    isExpirationWarning,
-    expirationDateString: getDateFormatted(obj.expirationDate),
-  }
-}
-
-export function mapOptionForInput (optionValue, shootResource) {
-  const key = get(optionValue, 'key')
-  if (!key) {
-    return
-  }
-
-  const isSelectedByDefault = false
-  const inputInverted = get(optionValue, 'input.inverted', false)
-  const defaultValue = inputInverted ? !isSelectedByDefault : isSelectedByDefault
-  const rawValue = get(shootResource, ['metadata', 'annotations', key], `${defaultValue}`) === 'true'
-  const value = inputInverted ? !rawValue : rawValue
-
-  const option = {
-    value,
-  }
-  return [key, option]
-}
-
-export function mapAccessRestrictionForInput (accessRestrictionDefinition, shootResource) {
-  const key = get(accessRestrictionDefinition, 'key')
-  if (!key) {
-    return
-  }
-
-  const isSelectedByDefault = false
-  const inputInverted = get(accessRestrictionDefinition, 'input.inverted', false)
-  const defaultValue = inputInverted ? !isSelectedByDefault : isSelectedByDefault
-  const rawValue = get(shootResource, ['spec', 'seedSelector', 'matchLabels', key], `${defaultValue}`) === 'true'
-  const value = inputInverted ? !rawValue : rawValue
-
-  let optionsPair = map(get(accessRestrictionDefinition, 'options'), option => mapOptionForInput(option, shootResource))
-  optionsPair = compact(optionsPair)
-  const options = fromPairs(optionsPair)
-
-  const accessRestriction = {
-    value,
-    options,
-  }
-  return [key, accessRestriction]
-}
-
-export function mapOptionForDisplay ({ optionDefinition, option: { value } }) {
-  const {
-    key,
-    display: {
-      visibleIf = false,
-      title = key,
-      description,
+export function decorateClassificationObject (plainObject) {
+  const object = { ...plainObject }
+  object.classification ??= 'supported'
+  Object.defineProperty(object, 'isPreview', {
+    value: object.classification === 'preview',
+    enumerable: true,
+  })
+  Object.defineProperty(object, 'isDeprecated', {
+    value: object.classification === 'deprecated',
+    enumerable: true,
+  })
+  Object.defineProperty(object, 'isSupported', {
+    get () {
+      return this.classification === 'supported' && !this.isExpired
     },
-  } = optionDefinition
-
-  const optionVisible = visibleIf === value
-  if (!optionVisible) {
-    return undefined // skip
-  }
-
-  return {
-    key,
-    title,
-    description,
-  }
-}
-
-export function mapAccessRestrictionForDisplay ({ definition, accessRestriction: { value, options } }) {
-  const {
-    key,
-    display: {
-      visibleIf = false,
-      title = key,
-      description,
+    enumerable: true,
+  })
+  Object.defineProperty(object, 'expiresIn', {
+    get () {
+      if (!this.expirationDate) {
+        return Number.POSITIVE_INFINITY
+      }
+      return Math.floor((new Date(this.expirationDate).getTime() - Date.now()) / (24 * 3600 * 1000))
     },
-    options: optionDefinitions,
-  } = definition
+  })
+  Object.defineProperty(object, 'isExpired', {
+    get () {
+      return this.expiresIn <= 0
+    },
+    enumerable: true,
+  })
+  Object.defineProperty(object, 'isExpirationWarning', {
+    get () {
+      return this.expiresIn <= 30
+    },
+    enumerable: true,
+  })
+  Object.defineProperty(object, 'expirationDateString', {
+    value: getDateFormatted(object.expirationDate),
+    enumerable: true,
+  })
 
-  const accessRestrictionVisible = visibleIf === value
-  if (!accessRestrictionVisible) {
-    return undefined // skip
-  }
-
-  const optionsList = compact(map(optionDefinitions, optionDefinition => mapOptionForDisplay({ optionDefinition, option: options[optionDefinition.key] })))
-
-  return {
-    key,
-    title,
-    description,
-    options: optionsList,
-  }
+  return object
 }
 
 // Return first item with classification supported, if no item has classification supported

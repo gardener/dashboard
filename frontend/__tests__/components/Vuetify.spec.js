@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import { nextTick } from 'vue'
 import { mount } from '@vue/test-utils'
-const nextTick = () => new Promise(process.nextTick)
 
 const { createVuetifyPlugin } = global.fixtures.helper
 

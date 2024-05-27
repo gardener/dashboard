@@ -48,8 +48,8 @@ SPDX-License-Identifier: Apache-2.0
         type="info"
         variant="tonal"
       >
-        <div v-if="controlPlaneFailureToleranceType === 'node' && !zoneSupported">
-          <template v-if="clusterIsNew">
+        <div v-if="controlPlaneFailureToleranceType === 'node' && !isFailureToleranceTypeZoneSupported">
+          <template v-if="isNewCluster">
             <template v-if="seedName">
               The configured seed <code>{{ seedName }}</code> is not <code>multi-zonal</code>.
             </template>
@@ -87,19 +87,15 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import {
   mapState,
-  mapActions,
+  mapWritableState,
 } from 'pinia'
 
-import { useShootStagingStore } from '@/store/shootStaging'
-import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useConfigStore } from '@/store/config'
-import { useSeedStore } from '@/store/seed'
+import { useShootContextStore } from '@/store/shootContext'
 
 import GExternalLink from '@/components/GExternalLink.vue'
 
 import { transformHtml } from '@/utils'
-
-import { some } from '@/lodash'
 
 export default {
   components: {
@@ -109,62 +105,18 @@ export default {
     ...mapState(useConfigStore, [
       'controlPlaneHighAvailabilityHelpText',
     ]),
-    ...mapState(useShootStagingStore, [
-      'clusterIsNew',
-      'controlPlaneFailureToleranceTypeChangeAllowed',
-      'cloudProfileName',
-      'controlPlaneFailureToleranceType',
-      'seedName',
+    ...mapWritableState(useShootContextStore, [
+      'controlPlaneHighAvailability',
     ]),
-    zoneSupported () {
-      const seeds = this.seedName
-        ? [this.seedByName(this.seedName)]
-        : this.seedsByCloudProfileName(this.cloudProfileName)
-      return some(seeds, seed => seed?.data.zones?.length >= 3)
-    },
-    controlPlaneHighAvailability: {
-      get () {
-        return !!this.controlPlaneFailureToleranceType
-      },
-      set (value) {
-        if (!value) {
-          this.setControlPlaneFailureToleranceType(undefined)
-        } else {
-          this.setControlPlaneFailureToleranceType(this.zoneSupported ? 'zone' : 'node')
-        }
-      },
-    },
+    ...mapState(useShootContextStore, [
+      'isNewCluster',
+      'seedName',
+      'isFailureToleranceTypeZoneSupported',
+      'controlPlaneFailureToleranceType',
+      'controlPlaneFailureToleranceTypeChangeAllowed',
+    ]),
     controlPlaneHighAvailabilityHelpHtml () {
       return transformHtml(this.controlPlaneHighAvailabilityHelpText, true)
-    },
-  },
-  watch: {
-    zoneSupported (value) {
-      this.resetToleranceType(value)
-    },
-  },
-  mounted () {
-    this.resetToleranceType(this.zoneSupported)
-  },
-  methods: {
-    ...mapActions(useCloudProfileStore, [
-      'seedsByCloudProfileName',
-    ]),
-    ...mapActions(useSeedStore, [
-      'seedByName',
-    ]),
-    ...mapActions(useShootStagingStore, [
-      'setControlPlaneFailureToleranceType',
-    ]),
-    resetToleranceType (zoneSupported) {
-      if (this.controlPlaneFailureToleranceTypeChangeAllowed) {
-        if (!zoneSupported && this.controlPlaneFailureToleranceType === 'zone') {
-          this.setControlPlaneFailureToleranceType('node')
-        }
-        if (zoneSupported && this.controlPlaneFailureToleranceType === 'node') {
-          this.setControlPlaneFailureToleranceType('zone')
-        }
-      }
     },
   },
 }

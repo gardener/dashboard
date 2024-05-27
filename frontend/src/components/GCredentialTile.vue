@@ -88,7 +88,6 @@ SPDX-License-Identifier: Apache-2.0
         </v-tooltip>
         <g-shoot-messages
           v-if="type === 'certificateAuthorities'"
-          :shoot-item="shootItem"
           :filter="['cacertificatevalidities-constraint']"
           small
         />
@@ -111,7 +110,6 @@ SPDX-License-Identifier: Apache-2.0
     <template #append>
       <g-shoot-action-rotate-credentials
         v-model="rotateCredentialsDialog"
-        :shoot-item="shootItem"
         :type="type"
         dialog
         button
@@ -121,11 +119,14 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { ref } from 'vue'
+
 import GShootActionRotateCredentials from '@/components/GShootActionRotateCredentials'
 import GTimeString from '@/components/GTimeString'
 import GShootMessages from '@/components/ShootMessages/GShootMessages'
 
-import shootStatusCredentialRotation from '@/mixins/shootStatusCredentialRotation'
+import { useShootItem } from '@/composables/useShootItem'
+import { useShootStatusCredentialRotation } from '@/composables/useShootStatusCredentialRotation'
 
 import { get } from '@/lodash'
 
@@ -135,16 +136,30 @@ export default {
     GTimeString,
     GShootMessages,
   },
-  mixins: [shootStatusCredentialRotation],
   props: {
+    type: {
+      type: String,
+      required: true,
+    },
     dense: {
       type: Boolean,
       required: false,
     },
   },
-  data () {
+  setup (props) {
+    const rotateCredentialsDialog = ref(false)
+
+    const {
+      shootItem,
+      isCACertificateValiditiesAcceptable,
+    } = useShootItem()
+
     return {
-      rotateCredentialsDialog: false,
+      rotateCredentialsDialog,
+      isCACertificateValiditiesAcceptable,
+      ...useShootStatusCredentialRotation(shootItem, {
+        type: props.type,
+      }),
     }
   },
   computed: {

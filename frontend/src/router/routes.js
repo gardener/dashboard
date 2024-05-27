@@ -266,6 +266,7 @@ export function createRoutes () {
       meta: {
         title: 'New Cluster',
         breadcrumbs: newShootBreadcrumbs,
+        tabKey: 'newShootOverview',
         tabs: newShootTabs,
       },
     }
@@ -279,6 +280,7 @@ export function createRoutes () {
       meta: {
         title: 'New Cluster Editor',
         breadcrumbs: newShootEditorBreadcrumbs,
+        tabKey: 'newShootYaml',
         tabs: newShootTabs,
       },
     }
@@ -292,6 +294,7 @@ export function createRoutes () {
       meta: {
         title: 'Cluster Details',
         breadcrumbs: shootItemBreadcrumbs,
+        tabKey: 'shootOverview',
         tabs: shootItemTabs,
       },
     }
@@ -305,6 +308,7 @@ export function createRoutes () {
       meta: {
         title: 'Cluster Editor',
         breadcrumbs: shootItemBreadcrumbs,
+        tabKey: 'shootYaml',
         tabs: shootItemTabs,
       },
     }
@@ -318,6 +322,7 @@ export function createRoutes () {
       meta: {
         title: 'Cluster Details',
         breadcrumbs: shootItemBreadcrumbs,
+        tabKey: 'shootOverview',
         tabs: shootItemTabs,
       },
     }

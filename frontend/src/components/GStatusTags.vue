@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -37,15 +37,20 @@ SPDX-License-Identifier: Apache-2.0
   </template>
 </template>
 
-<script>
-import { mapActions } from 'pinia'
+<script setup>
+import {
+  computed,
+  toRefs,
+} from 'vue'
 
 import { useConfigStore } from '@/store/config'
+import { useShootStore } from '@/store/shoot'
 
 import GStatusTag from '@/components/GStatusTag.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
+
 import {
   objectsFromErrorCodes,
   errorCodesFromArray,
@@ -53,43 +58,49 @@ import {
 
 import { sortBy } from '@/lodash'
 
-export default {
-  components: {
-    GStatusTag,
-    GExternalLink,
+const props = defineProps({
+  popperPlacement: {
+    type: String,
   },
-  mixins: [shootItem],
-  props: {
-    popperPlacement: {
-      type: String,
-    },
-    showStatusText: {
-      type: Boolean,
-      default: false,
-    },
+  showStatusText: {
+    type: Boolean,
+    default: false,
   },
-  computed: {
-    conditions () {
-      const conditions = this.shootReadiness
-        .filter(condition => !!condition.lastTransitionTime)
-        .map(condition => {
-          const conditiondDefaults = this.conditionForType(condition.type)
-          return {
-            ...conditiondDefaults,
-            ...condition,
-          }
-        })
-      return sortBy(conditions, 'sortOrder')
-    },
-    errorCodeObjects () {
-      const allErrorCodes = errorCodesFromArray(this.conditions)
-      return objectsFromErrorCodes(allErrorCodes)
-    },
-  },
-  methods: {
-    ...mapActions(useConfigStore, [
-      'conditionForType',
-    ]),
-  },
-}
+})
+const {
+  popperPlacement,
+  showStatusText,
+} = toRefs(props)
+
+const {
+  shootSecretBindingName,
+  shootMetadata,
+  shootUid,
+  shootReadiness,
+} = useShootItem()
+
+const configStore = useConfigStore()
+const shootStore = useShootStore()
+
+const conditions = computed(() => {
+  const conditions = shootReadiness.value
+    .filter(condition => !!condition.lastTransitionTime)
+    .map(condition => {
+      const conditiondDefaults = configStore.conditionForType(condition.type)
+      return {
+        ...conditiondDefaults,
+        ...condition,
+      }
+    })
+  return sortBy(conditions, 'sortOrder')
+})
+
+const errorCodeObjects = computed(() => {
+  const allErrorCodes = errorCodesFromArray(conditions.value)
+  return objectsFromErrorCodes(allErrorCodes)
+})
+
+const isStaleShoot = computed(() => {
+  return !shootStore.isShootActive(shootUid.value)
+})
 </script>
