@@ -2470,14 +2470,23 @@ __metadata:
   linkType: hard
 
 "@vueuse/router@npm:^10.9.0":
-  version: 10.9.0
-  resolution: "@vueuse/router@npm:10.9.0"
+  version: 10.10.0
+  resolution: "@vueuse/router@npm:10.10.0"
   dependencies:
-    "@vueuse/shared": "npm:10.9.0"
+    "@vueuse/shared": "npm:10.10.0"
     vue-demi: "npm:>=0.14.7"
   peerDependencies:
     vue-router: ">=4.0.0-rc.1"
-  checksum: 10c0/3c97b2a3f6d3e6e693e0b0e1e11222b54110c697f4fbc889197d778ab7d401f1615be61c420731e645393b0bf75c878aafbaf090cc0099a99d205b2c0187b780
+  checksum: 10c0/62ab2a643c75ac4a86b6a58766353954f72732f99e066fd5a54d69708c655978640a2573e3643056eafeda49c3fe494a54ecc744aaaca7198a1647647c368cee
+  languageName: node
+  linkType: hard
+
+"@vueuse/shared@npm:10.10.0":
+  version: 10.10.0
+  resolution: "@vueuse/shared@npm:10.10.0"
+  dependencies:
+    vue-demi: "npm:>=0.14.7"
+  checksum: 10c0/6d6d5e7fea32f52d62d36baed6e27936cd4542aff39a986dd47c9cb69a1ef8506dc98b54f2a164892bd49de9e73e4c6439979befca5c4c932846acdd1a5411ac
   languageName: node
   linkType: hard
 
