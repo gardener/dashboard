@@ -24,13 +24,11 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { computed } from 'vue'
-import { storeToRefs } from 'pinia'
-
-import { useShootContextStore } from '@/store/shootContext'
 
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GAccessRestrictions from '@/components/ShootAccessRestrictions/GAccessRestrictions'
 
+import { useProvideShootContext } from '@/composables/useShootContext'
 import { useShootItem } from '@/composables/useShootItem'
 import { useShootHelper } from '@/composables/useShootHelper'
 
@@ -56,13 +54,10 @@ export default {
       accessRestrictionNoItemsText,
     } = useShootHelper()
 
-    const shootContextStore = useShootContextStore()
     const {
       shootManifest,
-    } = storeToRefs(shootContextStore)
-    const {
       setShootManifest,
-    } = shootContextStore
+    } = useProvideShootContext()
 
     const disabled = computed(() => {
       return isEmpty(accessRestrictionDefinitionList.value)

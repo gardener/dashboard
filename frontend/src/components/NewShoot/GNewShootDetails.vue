@@ -90,7 +90,6 @@ import { defineAsyncComponent } from 'vue'
 import {
   mapActions,
   mapState,
-  mapWritableState,
 } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 import {
@@ -100,10 +99,11 @@ import {
 
 import { useConfigStore } from '@/store/config'
 import { useShootStore } from '@/store/shoot'
-import { useShootContextStore } from '@/store/shootContext'
 
 import GStaticTokenKubeconfigSwitch from '@/components/GStaticTokenKubeconfigSwitch'
 import GMultiMessage from '@/components/GMultiMessage'
+
+import { useShootContext } from '@/composables/useShootContext'
 
 import {
   withFieldName,
@@ -131,8 +131,35 @@ export default {
     GMultiMessage,
   },
   setup () {
+    const {
+      shootName,
+      kubernetesVersion,
+      cloudProfileName,
+      enableStaticTokenKubeconfig,
+      purpose,
+      workerless,
+      shootNamespace,
+      shootProjectName,
+      maintenanceAutoUpdateKubernetesVersion,
+      sortedKubernetesVersions,
+      kubernetesVersionIsNotLatestPatch,
+      allPurposes,
+    } = useShootContext()
+
     return {
       v$: useVuelidate(),
+      shootName,
+      kubernetesVersion,
+      cloudProfileName,
+      enableStaticTokenKubeconfig,
+      purpose,
+      workerless,
+      shootNamespace,
+      shootProjectName,
+      maintenanceAutoUpdateKubernetesVersion,
+      sortedKubernetesVersions,
+      kubernetesVersionIsNotLatestPatch,
+      allPurposes,
     }
   },
   validations () {
@@ -161,22 +188,6 @@ export default {
     return rules
   },
   computed: {
-    ...mapWritableState(useShootContextStore, [
-      'shootName',
-      'kubernetesVersion',
-      'cloudProfileName',
-      'enableStaticTokenKubeconfig',
-      'purpose',
-      'workerless',
-    ]),
-    ...mapState(useShootContextStore, [
-      'shootNamespace',
-      'shootProjectName',
-      'maintenanceAutoUpdateKubernetesVersion',
-      'sortedKubernetesVersions',
-      'kubernetesVersionIsNotLatestPatch',
-      'allPurposes',
-    ]),
     ...mapState(useConfigStore, [
       'sla',
     ]),

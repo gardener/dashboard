@@ -81,18 +81,15 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import {
-  mapState,
-  mapWritableState,
-  mapActions,
-} from 'pinia'
+import { mapActions } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 
 import { useConfigStore } from '@/store/config'
-import { useShootContextStore } from '@/store/shootContext'
 
 import GExpandTransitionGroup from '@/components/GExpandTransitionGroup'
 import GHibernationScheduleEvent from '@/components/ShootHibernation/GHibernationScheduleEvent'
+
+import { useShootContext } from '@/composables/useShootContext'
 
 import { isEmpty } from '@/lodash'
 
@@ -113,19 +110,24 @@ export default {
     },
   },
   setup () {
+    const {
+      purpose,
+      hibernationSchedulesError,
+      noHibernationSchedules,
+      hibernationScheduleEvents,
+      addHibernationScheduleEvent,
+    } = useShootContext()
+
     return {
       v$: useVuelidate(),
+      purpose,
+      hibernationSchedulesError,
+      noHibernationSchedules,
+      hibernationScheduleEvents,
+      addHibernationScheduleEvent,
     }
   },
   computed: {
-    ...mapState(useShootContextStore, [
-      'purpose',
-      'hibernationSchedulesError',
-    ]),
-    ...mapWritableState(useShootContextStore, [
-      'noHibernationSchedules',
-      'hibernationScheduleEvents',
-    ]),
     showNoScheduleCheckbox () {
       return this.purposeRequiresHibernationSchedule(this.purpose) &&
         isEmpty(this.hibernationScheduleEvents) &&
@@ -139,9 +141,6 @@ export default {
   methods: {
     ...mapActions(useConfigStore, [
       'purposeRequiresHibernationSchedule',
-    ]),
-    ...mapActions(useShootContextStore, [
-      'addHibernationScheduleEvent',
     ]),
     isEmpty,
   },

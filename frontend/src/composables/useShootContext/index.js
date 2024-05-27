@@ -12,6 +12,8 @@ import {
   reactive,
   toRef,
   watch,
+  inject,
+  provide,
 } from 'vue'
 
 import { useAuthzStore } from '@/store/authz'
@@ -66,7 +68,7 @@ import {
   size,
 } from '@/lodash'
 
-export function useShootContext (options = {}) {
+export function createShootContextComposable (options = {}) {
   const {
     logger = useLogger(),
     appStore = useAppStore(),
@@ -1276,4 +1278,14 @@ export function useShootContext (options = {}) {
     controlPlaneFailureToleranceType: controlPlaneHighAvailabilityFailureToleranceType,
     controlPlaneFailureToleranceTypeChangeAllowed: controlPlaneHighAvailabilityFailureToleranceTypeChangeAllowed,
   }
+}
+
+export function useShootContext () {
+  return inject('shoot-context', null)
+}
+
+export function useProvideShootContext (options) {
+  const composable = createShootContextComposable(options)
+  provide('shoot-context', composable)
+  return composable
 }

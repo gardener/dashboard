@@ -184,17 +184,13 @@ import {
   required,
   requiredIf,
 } from '@vuelidate/validators'
-import {
-  mapState,
-  mapWritableState,
-} from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
-
-import { useShootContextStore } from '@/store/shootContext'
 
 import GCloudProfile from '@/components/GCloudProfile'
 import GWildcardSelect from '@/components/GWildcardSelect'
 import GSelectSecret from '@/components/Secrets/GSelectSecret'
+
+import { useShootContext } from '@/composables/useShootContext'
 
 import { getErrorMessages } from '@/utils'
 import {
@@ -217,8 +213,65 @@ export default {
     GSelectSecret,
   },
   setup () {
+    const {
+      cloudProfileName,
+      infrastructureSecret,
+      region,
+      networkingType,
+      floatingPoolName,
+      loadBalancerProviderName,
+      loadBalancerClassNames,
+      partitionID,
+      projectID,
+      firewallImage,
+      firewallSize,
+      firewallNetworks,
+      infrastructureKind,
+      cloudProfiles,
+      infrastructureSecrets,
+      regionsWithSeed,
+      regionsWithoutSeed,
+      showAllRegions,
+      networkingTypes,
+      allLoadBalancerProviderNames,
+      allLoadBalancerClassNames,
+      partitionIDs,
+      firewallImages,
+      firewallSizes,
+      allFirewallNetworks,
+      allFloatingPoolNames,
+      workerless,
+    } = useShootContext()
+
     return {
       v$: useVuelidate(),
+      cloudProfileName,
+      infrastructureSecret,
+      region,
+      networkingType,
+      floatingPoolName,
+      loadBalancerProviderName,
+      loadBalancerClassNames,
+      partitionID,
+      projectID,
+      firewallImage,
+      firewallSize,
+      firewallNetworks,
+      infrastructureKind,
+      cloudProfiles,
+      infrastructureSecrets,
+      regionsWithSeed,
+      regionsWithoutSeed,
+      showAllRegions,
+      networkingTypes,
+      allLoadBalancerProviderNames,
+      allLoadBalancerClassNames,
+      partitionIDs,
+      firewallImages,
+      firewallSizes,
+      allFirewallNetworks,
+      allFloatingPoolNames,
+      workerless,
     }
   },
   validations () {
@@ -257,37 +310,6 @@ export default {
     }
   },
   computed: {
-    ...mapWritableState(useShootContextStore, [
-      'cloudProfileName',
-      'infrastructureSecret',
-      'region',
-      'networkingType',
-      'floatingPoolName',
-      'loadBalancerProviderName',
-      'loadBalancerClassNames',
-      'partitionID',
-      'projectID',
-      'firewallImage',
-      'firewallSize',
-      'firewallNetworks',
-    ]),
-    ...mapState(useShootContextStore, [
-      'infrastructureKind',
-      'cloudProfiles',
-      'infrastructureSecrets',
-      'regionsWithSeed',
-      'regionsWithoutSeed',
-      'showAllRegions',
-      'networkingTypes',
-      'allLoadBalancerProviderNames',
-      'allLoadBalancerClassNames',
-      'partitionIDs',
-      'firewallImages',
-      'firewallSizes',
-      'allFirewallNetworks',
-      'allFloatingPoolNames',
-      'workerless',
-    ]),
     regionItems () {
       const regionItems = []
       if (!isEmpty(this.regionsWithSeed)) {

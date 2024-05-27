@@ -79,27 +79,21 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { storeToRefs } from 'pinia'
-
-import { useShootContextStore } from '@/store/shootContext'
-
+import { useShootContext } from '@/composables/useShootContext'
 import { NAND } from '@/composables/useShootAccessRestrictions/helper'
 
 import { transformHtml } from '@/utils'
 
 import { isEmpty } from '@/lodash'
 
-const shootContextStore = useShootContextStore()
 const {
   accessRestrictionDefinitions,
   accessRestrictionNoItemsText,
-} = storeToRefs(shootContextStore)
-const {
   getAccessRestrictionValue,
   setAccessRestrictionValue,
   getAccessRestrictionOptionValue,
   setAccessRestrictionOptionValue,
-} = shootContextStore
+} = useShootContext()
 
 function getDisabled (key) {
   const value = getAccessRestrictionValue(key)

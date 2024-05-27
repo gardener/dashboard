@@ -53,7 +53,6 @@ import {
   toRef,
   watchEffect,
 } from 'vue'
-import { storeToRefs } from 'pinia'
 import {
   required,
   minValue,
@@ -62,9 +61,10 @@ import {
 import { useVuelidate } from '@vuelidate/core'
 
 import { useAppStore } from '@/store/app'
-import { useShootContextStore } from '@/store/shootContext'
 
 import GTimeTextField from '@/components/GTimeTextField.vue'
+
+import { useShootContext } from '@/composables/useShootContext'
 
 import {
   getErrorMessages,
@@ -80,11 +80,10 @@ import {
 import TimeWithOffset from '@/utils/TimeWithOffset'
 
 const appStore = useAppStore()
-const shootContextStore = useShootContextStore()
 const {
   maintenanceTimeWindowBegin,
   maintenanceTimeWindowEnd,
-} = storeToRefs(shootContextStore)
+} = useShootContext()
 
 const timezone = toRef(appStore, 'timezone')
 

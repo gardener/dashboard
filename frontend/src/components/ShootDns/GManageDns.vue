@@ -95,19 +95,14 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import {
-  mapState,
-  mapWritableState,
-  mapActions,
-} from 'pinia'
 import { requiredIf } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
-
-import { useShootContextStore } from '@/store/shootContext'
 
 import GDnsProviderRow from '@/components/ShootDns/GDnsProviderRow'
 import GVendorIcon from '@/components/GVendorIcon'
 import GExpandTransitionGroup from '@/components/GExpandTransitionGroup'
+
+import { useShootContext } from '@/composables/useShootContext'
 
 import {
   withFieldName,
@@ -123,8 +118,23 @@ export default {
     GExpandTransitionGroup,
   },
   setup () {
+    const {
+      dnsDomain,
+      dnsPrimaryProvider,
+      isNewCluster,
+      dnsProviderIds,
+      dnsProvidersWithPrimarySupport,
+      addDnsProvider,
+    } = useShootContext()
+
     return {
       v$: useVuelidate(),
+      dnsDomain,
+      dnsPrimaryProvider,
+      isNewCluster,
+      dnsProviderIds,
+      dnsProvidersWithPrimarySupport,
+      addDnsProvider,
     }
   },
   validations () {
@@ -136,15 +146,6 @@ export default {
     }
   },
   computed: {
-    ...mapWritableState(useShootContextStore, [
-      'dnsDomain',
-      'dnsPrimaryProvider',
-    ]),
-    ...mapState(useShootContextStore, [
-      'isNewCluster',
-      'dnsProviderIds',
-      'dnsProvidersWithPrimarySupport',
-    ]),
     domainHint () {
       return this.isNewCluster
         ? 'External available domain of the cluster'
@@ -158,9 +159,6 @@ export default {
     this.v$.$touch()
   },
   methods: {
-    ...mapActions(useShootContextStore, [
-      'addDnsProvider',
-    ]),
     getErrorMessages,
   },
 }

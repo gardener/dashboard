@@ -52,40 +52,27 @@ SPDX-License-Identifier: Apache-2.0
   </div>
 </template>
 
-<script>
-import {
-  mapActions,
-  mapState,
-} from 'pinia'
-
-import { useShootContextStore } from '@/store/shootContext'
+<script setup>
+import { toRefs } from 'vue'
 
 import GWorkerInputGeneric from '@/components/ShootWorkers/GWorkerInputGeneric'
 import GExpandTransitionGroup from '@/components/GExpandTransitionGroup'
 
-export default {
-  components: {
-    GWorkerInputGeneric,
-    GExpandTransitionGroup,
+import { useShootContext } from '@/composables/useShootContext'
+
+const props = defineProps({
+  disableWorkerAnimation: {
+    type: Boolean,
+    default: false,
   },
-  props: {
-    disableWorkerAnimation: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  computed: {
-    ...mapState(useShootContextStore, [
-      'providerWorkers',
-      'workerless',
-      'allMachineTypes',
-    ]),
-  },
-  methods: {
-    ...mapActions(useShootContextStore, [
-      'addProviderWorker',
-      'removeProviderWorker',
-    ]),
-  },
-}
+})
+const { disableWorkerAnimation } = toRefs(props)
+
+const {
+  providerWorkers,
+  workerless,
+  allMachineTypes,
+  addProviderWorker,
+  removeProviderWorker,
+} = useShootContext()
 </script>

@@ -3,13 +3,12 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
-
+import { reactive } from 'vue'
 import {
   setActivePinia,
   createPinia,
 } from 'pinia'
 
-import { useShootContextStore } from '@/store/shootContext'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useConfigStore } from '@/store/config'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
@@ -17,9 +16,12 @@ import { useSecretStore } from '@/store/secret'
 import { useAppStore } from '@/store/app'
 import { useAuthzStore } from '@/store/authz'
 
+import { createShootContextComposable } from '@/composables/useShootContext'
+
 import { cloneDeep } from '@/lodash'
 describe('stores', () => {
-  const context = {}
+  let shootContextStore
+
   const systemTime = new Date('2024-03-15T14:00:00+01:00')
 
   beforeAll(() => {
@@ -46,21 +48,19 @@ describe('stores', () => {
     cloudProfileStore.setCloudProfiles(cloneDeep(global.fixtures.cloudprofiles))
     const gardenerExtensionStore = useGardenerExtensionStore()
     gardenerExtensionStore.list = global.fixtures.gardenerExtensions
-    const shootContextStore = useShootContextStore()
-    Object.assign(context, {
+    const composable = createShootContextComposable({
       logger,
       appStore,
       authzStore,
-      configStore,
-      secretStore,
       cloudProfileStore,
+      configStore,
       gardenerExtensionStore,
-      shootContextStore,
+      secretStore,
     })
+    shootContextStore = reactive(composable)
   })
 
   function createShootManifest (infrastructureKind) {
-    const { shootContextStore } = context
     shootContextStore.createShootManifest({
       providerType: infrastructureKind,
       workerless: false,
@@ -94,14 +94,12 @@ describe('stores', () => {
     })
 
     it('should change the infrastructure kind', async () => {
-      const { shootContextStore } = context
       shootContextStore.createShootManifest()
       shootContextStore.providerType = 'gcp'
       expect(shootContextStore.shootManifest).toMatchSnapshot()
     })
 
     it('should add workers and update zones network config', async () => {
-      const { shootContextStore } = context
       shootContextStore.createShootManifest()
 
       let worker
@@ -122,7 +120,6 @@ describe('stores', () => {
     })
 
     it('should add dns providers', async () => {
-      const { shootContextStore } = context
       shootContextStore.createShootManifest()
       shootContextStore.addDnsProvider()
       shootContextStore.dnsDomain = 'example.org'

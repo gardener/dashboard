@@ -149,10 +149,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import {
-  mapState,
-  mapActions,
-} from 'pinia'
+import { mapActions } from 'pinia'
 import {
   required,
   maxLength,
@@ -162,13 +159,14 @@ import {
 import { useVuelidate } from '@vuelidate/core'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
-import { useShootContextStore } from '@/store/shootContext'
 
 import GVolumeSizeInput from '@/components/ShootWorkers/GVolumeSizeInput'
 import GMachineType from '@/components/ShootWorkers/GMachineType'
 import GVolumeType from '@/components/ShootWorkers/GVolumeType'
 import GMachineImage from '@/components/ShootWorkers/GMachineImage'
 import GContainerRuntime from '@/components/ShootWorkers/GContainerRuntime'
+
+import { useShootContext } from '@/composables/useShootContext'
 
 import {
   withFieldName,
@@ -214,8 +212,37 @@ export default {
     },
   },
   setup () {
+    const {
+      isNewCluster,
+      cloudProfileName,
+      kubernetesVersion,
+      region,
+      allZones,
+      availableZones,
+      initialZones,
+      maxAdditionalZones,
+      isZonedCluster,
+      updateOSMaintenance,
+      machineArchitectures,
+      volumeTypes,
+      workers,
+    } = useShootContext()
+
     return {
       v$: useVuelidate(),
+      isNewCluster,
+      cloudProfileName,
+      kubernetesVersion,
+      region,
+      allZones,
+      availableZones,
+      initialZones,
+      maxAdditionalZones,
+      isZonedCluster,
+      updateOSMaintenance,
+      machineArchitectures,
+      volumeTypes,
+      workers,
     }
   },
   data () {
@@ -282,21 +309,6 @@ export default {
     return rules
   },
   computed: {
-    ...mapState(useShootContextStore, [
-      'isNewCluster',
-      'cloudProfileName',
-      'kubernetesVersion',
-      'region',
-      'allZones',
-      'availableZones',
-      'initialZones',
-      'maxAdditionalZones',
-      'isZonedCluster',
-      'updateOSMaintenance',
-      'machineArchitectures',
-      'volumeTypes',
-      'workers',
-    ]),
     immutableZones () {
       return this.isNewCluster || this.worker.isNew
         ? []

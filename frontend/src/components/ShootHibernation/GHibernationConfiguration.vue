@@ -25,17 +25,13 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import {
-  ref,
-  defineAsyncComponent,
-} from 'vue'
-import { storeToRefs } from 'pinia'
+import { ref } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 
-import { useShootContextStore } from '@/store/shootContext'
-
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
+import GManageHibernationSchedule from '@/components/ShootHibernation/GManageHibernationSchedule'
 
+import { useProvideShootContext } from '@/composables/useShootContext'
 import { useShootItem } from '@/composables/useShootItem'
 
 import { errorDetailsFromError } from '@/utils/error'
@@ -44,7 +40,7 @@ import { v4 as uuidv4 } from '@/utils/uuid'
 export default {
   components: {
     GActionButtonDialog,
-    GManageHibernationSchedule: defineAsyncComponent(() => import('@/components/ShootHibernation/GManageHibernationSchedule')),
+    GManageHibernationSchedule,
   },
   inject: ['api', 'logger'],
   setup () {
@@ -56,14 +52,11 @@ export default {
       hibernationPossibleMessage,
     } = useShootItem()
 
-    const shootContextStore = useShootContextStore()
     const {
       hibernationSchedules,
       noHibernationSchedules,
-    } = storeToRefs(shootContextStore)
-    const {
       setShootManifest,
-    } = shootContextStore
+    } = useProvideShootContext()
 
     const componentKey = ref(uuidv4())
 

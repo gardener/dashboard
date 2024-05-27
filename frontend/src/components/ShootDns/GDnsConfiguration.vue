@@ -23,14 +23,12 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { ref } from 'vue'
-import { storeToRefs } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
-
-import { useShootContextStore } from '@/store/shootContext'
 
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GManageShootDns from '@/components/ShootDns/GManageDns'
 
+import { useProvideShootContext } from '@/composables/useShootContext'
 import { useShootItem } from '@/composables/useShootItem'
 
 import { errorDetailsFromError } from '@/utils/error'
@@ -49,13 +47,10 @@ export default {
       shootName,
     } = useShootItem()
 
-    const shootContextStore = useShootContextStore()
     const {
       dns,
-    } = storeToRefs(shootContextStore)
-    const {
       setShootManifest,
-    } = shootContextStore
+    } = useProvideShootContext()
 
     const componentKey = ref(uuidv4())
 

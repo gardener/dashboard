@@ -26,13 +26,11 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { ref } from 'vue'
-import { storeToRefs } from 'pinia'
-
-import { useShootContextStore } from '@/store/shootContext'
 
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GManageControlPlaneHighAvailability from '@/components/ControlPlaneHighAvailability/GManageControlPlaneHighAvailability'
 
+import { useProvideShootContext } from '@/composables/useShootContext'
 import { useShootItem } from '@/composables/useShootItem'
 
 import { errorDetailsFromError } from '@/utils/error'
@@ -51,13 +49,10 @@ export default {
       shootName,
     } = useShootItem()
 
-    const shootContextStore = useShootContextStore()
     const {
       controlPlaneFailureToleranceType,
-    } = storeToRefs(shootContextStore)
-    const {
       setShootManifest,
-    } = shootContextStore
+    } = useProvideShootContext()
 
     const componentKey = ref(uuidv4())
 

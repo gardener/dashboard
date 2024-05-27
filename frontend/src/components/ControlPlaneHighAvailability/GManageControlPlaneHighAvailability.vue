@@ -85,15 +85,13 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import {
-  mapState,
-  mapWritableState,
-} from 'pinia'
+import { mapState } from 'pinia'
 
 import { useConfigStore } from '@/store/config'
-import { useShootContextStore } from '@/store/shootContext'
 
 import GExternalLink from '@/components/GExternalLink.vue'
+
+import { useShootContext } from '@/composables/useShootContext'
 
 import { transformHtml } from '@/utils'
 
@@ -101,19 +99,28 @@ export default {
   components: {
     GExternalLink,
   },
+  setup () {
+    const {
+      isNewCluster,
+      seedName,
+      isFailureToleranceTypeZoneSupported,
+      controlPlaneFailureToleranceType,
+      controlPlaneFailureToleranceTypeChangeAllowed,
+      controlPlaneHighAvailability,
+    } = useShootContext()
+
+    return {
+      isNewCluster,
+      seedName,
+      isFailureToleranceTypeZoneSupported,
+      controlPlaneFailureToleranceType,
+      controlPlaneFailureToleranceTypeChangeAllowed,
+      controlPlaneHighAvailability,
+    }
+  },
   computed: {
     ...mapState(useConfigStore, [
       'controlPlaneHighAvailabilityHelpText',
-    ]),
-    ...mapWritableState(useShootContextStore, [
-      'controlPlaneHighAvailability',
-    ]),
-    ...mapState(useShootContextStore, [
-      'isNewCluster',
-      'seedName',
-      'isFailureToleranceTypeZoneSupported',
-      'controlPlaneFailureToleranceType',
-      'controlPlaneFailureToleranceTypeChangeAllowed',
     ]),
     controlPlaneHighAvailabilityHelpHtml () {
       return transformHtml(this.controlPlaneHighAvailabilityHelpText, true)

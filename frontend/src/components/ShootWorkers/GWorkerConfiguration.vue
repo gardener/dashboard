@@ -109,17 +109,16 @@ import {
   computed,
   provide,
   watch,
-  defineAsyncComponent,
 } from 'vue'
-import { storeToRefs } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 import yaml from 'js-yaml'
 
-import { useShootContextStore } from '@/store/shootContext'
-
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GCodeBlock from '@/components/GCodeBlock'
+import GManageWorkers from '@/components/ShootWorkers/GManageWorkers'
+import GShootEditor from '@/components/GShootEditor'
 
+import { useProvideShootContext } from '@/composables/useShootContext'
 import { useShootItem } from '@/composables/useShootItem'
 import { useShootEditor } from '@/composables/useShootEditor'
 
@@ -139,8 +138,8 @@ import {
 export default {
   components: {
     GActionButtonDialog,
-    GManageWorkers: defineAsyncComponent(() => import('@/components/ShootWorkers/GManageWorkers')),
-    GShootEditor: defineAsyncComponent(() => import('@/components/GShootEditor')),
+    GManageWorkers,
+    GShootEditor,
     GCodeBlock,
   },
   inject: ['api', 'logger'],
@@ -152,16 +151,13 @@ export default {
       hasShootWorkerGroups,
     } = useShootItem()
 
-    const shootContextStore = useShootContextStore()
     const {
       providerWorkers,
       providerInfrastructureConfigNetworksZones,
       initialZones,
       usedZones,
-    } = storeToRefs(shootContextStore)
-    const {
       setShootManifest,
-    } = shootContextStore
+    } = useProvideShootContext()
 
     const injectionKey = 'shoot-worker-editor'
     const lazyTab = ref('overview')

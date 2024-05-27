@@ -22,13 +22,10 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { storeToRefs } from 'pinia'
-
-import { useShootContextStore } from '@/store/shootContext'
-
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GManageShootAddons from '@/components/ShootAddons/GManageAddons'
 
+import { useProvideShootContext } from '@/composables/useShootContext'
 import { useShootItem } from '@/composables/useShootItem'
 
 import { errorDetailsFromError } from '@/utils/error'
@@ -46,13 +43,10 @@ export default {
       shootName,
     } = useShootItem()
 
-    const shootContextStore = useShootContextStore()
     const {
       addons,
-    } = storeToRefs(shootContextStore)
-    const {
       setShootManifest,
-    } = shootContextStore
+    } = useProvideShootContext()
 
     return {
       shootItem,
