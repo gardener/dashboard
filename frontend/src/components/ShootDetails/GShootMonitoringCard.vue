@@ -16,7 +16,6 @@ SPDX-License-Identifier: Apache-2.0
         </template>
         <g-list-item-content label="Status">
           <g-shoot-status
-            :shoot-item="shootItem"
             :popper-key="`${shootNamespace}/${shootName}_lastOp`"
             popper-placement="bottom"
             show-status-text
@@ -35,7 +34,6 @@ SPDX-License-Identifier: Apache-2.0
             <span v-if="!shootConditions.length">-</span>
             <g-status-tags
               v-else
-              :shoot-item="shootItem"
               popper-placement="bottom"
               show-status-text
             />
@@ -45,7 +43,6 @@ SPDX-License-Identifier: Apache-2.0
       <v-divider inset />
       <g-cluster-metrics
         v-if="!metricsNotAvailableText"
-        :shoot-item="shootItem"
       />
       <g-list-item v-else>
         <template #prepend>
@@ -61,30 +58,30 @@ SPDX-License-Identifier: Apache-2.0
   </v-card>
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
+
 import GShootStatus from '@/components/GShootStatus'
 import GStatusTags from '@/components/GStatusTags'
 import GClusterMetrics from '@/components/GClusterMetrics'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
 
-export default {
-  components: {
-    GShootStatus,
-    GStatusTags,
-    GClusterMetrics,
-  },
-  mixins: [shootItem],
-  computed: {
-    metricsNotAvailableText () {
-      if (this.isTestingCluster) {
-        return 'Cluster Metrics not available for clusters with purpose testing'
-      }
-      if (!this.seedShootIngressDomain) {
-        return 'Cluster Metrics not available'
-      }
-      return undefined
-    },
-  },
-}
+const {
+  shootNamespace,
+  shootName,
+  shootConditions,
+  isTestingCluster,
+  seedShootIngressDomain,
+} = useShootItem()
+
+const metricsNotAvailableText = computed(() => {
+  if (isTestingCluster.value) {
+    return 'Cluster Metrics not available for clusters with purpose testing'
+  }
+  if (!seedShootIngressDomain.value) {
+    return 'Cluster Metrics not available'
+  }
+  return undefined
+})
 </script>

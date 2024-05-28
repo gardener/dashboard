@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
       />
       <span>. </span>
     </span>
-    <span v-else>Kubernetes version of this cluster is expired.</span>
+    <span v-else-if="isExpired">Kubernetes version of this cluster is expired.</span>
     <span v-if="severity === 'info'">Version will be updated in the next maintenance window</span>
     <template v-else-if="severity === 'warning'">
       <span v-if="isValidTerminationDate">Version update will be enforced after that date</span>
@@ -35,7 +35,6 @@ export default {
   props: {
     expirationDate: {
       type: String,
-      required: true,
     },
     isValidTerminationDate: {
       type: Boolean,
@@ -43,6 +42,10 @@ export default {
     },
     severity: {
       type: String,
+      required: true,
+    },
+    isExpired: {
+      type: Boolean,
       required: true,
     },
   },

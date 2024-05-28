@@ -10,31 +10,18 @@ SPDX-License-Identifier: Apache-2.0
   />
 </template>
 
-<script>
+<script setup>
+import { onMounted } from 'vue'
+
 import GTerminalSplitpanes from '@/components/GTerminalSplitpanes.vue'
 
-import { useTerminalSplitpanes } from '@/composables/useTerminalSplitpanes'
+import { useProvideTerminalSplitpanes } from '@/composables/useTerminalSplitpanes'
 
-export default {
-  components: {
-    GTerminalSplitpanes,
-  },
-  provide () {
-    return {
-      ...this.terminalSplitpanes,
-    }
-  },
-  setup () {
-    const terminalSplitpanes = useTerminalSplitpanes()
-    const { load } = terminalSplitpanes
+const {
+  load,
+} = useProvideTerminalSplitpanes()
 
-    return {
-      load,
-      terminalSplitpanes,
-    }
-  },
-  mounted () {
-    this.load()
-  },
-}
+onMounted(() => {
+  load()
+})
 </script>

@@ -13,6 +13,7 @@ import {
   inject,
   toRef,
   watch,
+  computed,
 } from 'vue'
 import { useTheme } from 'vuetify'
 import {
@@ -20,21 +21,26 @@ import {
   useEventBus,
   useColorMode,
   useDocumentVisibility,
+  useTitle,
 } from '@vueuse/core'
+import { useRoute } from 'vue-router'
 
 import { useConfigStore } from '@/store/config'
 import { useLoginStore } from '@/store/login'
 import { useLocalStorageStore } from '@/store/localStorage'
 import { useShootStore } from '@/store/shoot'
+import { useProjectStore } from '@/store/project'
 
 import { useCustomColors } from '@/composables/useCustomColors'
 
 const theme = useTheme()
+const route = useRoute()
 const localStorageStore = useLocalStorageStore()
 const visibility = useDocumentVisibility()
 const configStore = useConfigStore()
 const loginStore = useLoginStore()
 const shootStore = useShootStore()
+const projectStore = useProjectStore()
 const logger = inject('logger')
 
 async function setCustomColors () {
@@ -45,12 +51,6 @@ async function setCustomColors () {
   }
 }
 setCustomColors()
-
-watch(() => configStore.branding ?? loginStore.branding, branding => {
-  if (branding.productTitle) {
-    document.title = branding.documentTitle ?? `${branding.productName} Dashboard`
-  }
-})
 
 const colorScheme = toRef(localStorageStore, 'colorScheme')
 const { system } = useColorMode({
@@ -76,4 +76,37 @@ watch(visibility, (current, previous) => {
     shootStore.invokeSubscriptionEventHandler()
   }
 })
+
+const documentTitle = computed(() => {
+  let appTitle = process.env.VITE_APP_TITLE
+  const branding = configStore.branding ?? loginStore.branding
+  if (branding.productTitle) {
+    appTitle = branding.documentTitle ?? `${branding.productName} Dashboard`
+  }
+
+  const titleItems = []
+
+  const pageTitle = route.meta.title ?? route.name
+  if (pageTitle) {
+    titleItems.push(pageTitle)
+  }
+
+  if (route.meta.namespaced !== false) {
+    const projectName = projectStore.projectName
+    const routeParamName = route.params.name
+    if (routeParamName) {
+      titleItems.push([projectName, routeParamName].join('/'))
+    } else if (projectName) {
+      titleItems.push(projectName)
+    }
+  }
+  if (titleItems.length) {
+    appTitle = `${titleItems.join(' • ')} | ${appTitle}`
+  }
+
+  return appTitle
+})
+
+useTitle(documentTitle)
+
 </script>

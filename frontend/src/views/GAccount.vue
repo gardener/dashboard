@@ -249,6 +249,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import download from 'downloadjs'
 import { mapState } from 'pinia'
+import yaml from 'js-yaml'
 
 import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
@@ -275,7 +276,7 @@ export default {
     GAccountAvatar,
     GTimeString,
   },
-  inject: ['api', 'logger', 'yaml'],
+  inject: ['api', 'logger'],
   data () {
     return {
       kubeconfigExpansionPanel: false,
@@ -424,7 +425,7 @@ export default {
   created () {
     this.grantType = head(this.grantTypes)
   },
-  async mounted () {
+  mounted () {
     try {
       const project = find(this.projectList, ['metadata.namespace', this.namespace])
       this.projectName = get(project, 'metadata.name', '')
@@ -439,8 +440,8 @@ export default {
       const filename = this.kubeconfigFilename
       download(kubeconfig, filename, 'text/yaml')
     },
-    async updateKubeconfigYaml (value) {
-      this.kubeconfigYaml = await this.yaml.dump(value)
+    updateKubeconfigYaml (value) {
+      this.kubeconfigYaml = yaml.dump(value)
     },
     expansionPanelIcon (value) {
       return value ? 'mdi-chevron-up' : 'mdi-chevron-down'

@@ -55,7 +55,7 @@ import GMultiMessage from '@/components/GMultiMessage'
 
 import {
   getErrorMessages,
-  selectedImageIsNotLatest,
+  machineImageHasUpdate,
   transformHtml,
 } from '@/utils'
 import { withFieldName } from '@/utils/validators'
@@ -135,18 +135,28 @@ export default {
           severity: 'warning',
         })
       }
-      if (this.updateOSMaintenance && this.selectedImageIsNotLatest) {
-        hints.push({
-          type: 'text',
-          hint: 'If you select a version which is not the latest (except for preview versions), you should disable automatic operating system updates',
-          severity: 'info',
-        })
-      }
       if (this.machineImage.isPreview) {
         hints.push({
           type: 'text',
           hint: 'Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not recommended for production usage',
           severity: 'warning',
+        })
+      }
+      if (this.machineImage.isDeprecated) {
+        const hint = this.machineImage.expirationDate
+          ? `This image version is deprecated. It will expire on ${this.machineImage.expirationDateString}`
+          : 'This image version is deprecated'
+        hints.push({
+          type: 'text',
+          hint,
+          severity: 'warning',
+        })
+      }
+      if (this.updateOSMaintenance && this.machineImageHasUpdate) {
+        hints.push({
+          type: 'text',
+          hint: 'You selected a version that is eligible for an automatic update. You should disable automatic operating system updates if you want to maintain this specific version',
+          severity: 'info',
         })
       }
       if (this.notInList) {
@@ -158,19 +168,8 @@ export default {
       }
       return JSON.stringify(hints)
     },
-    hintColor () {
-      if (this.machineImage.expirationDate ||
-         (this.updateOSMaintenance && this.selectedImageIsNotLatest) ||
-         this.machineImage.isPreview) {
-        return 'warning'
-      }
-      if (this.machineImage.vendorHint) {
-        return this.machineImage.vendorHint.hintType
-      }
-      return undefined
-    },
-    selectedImageIsNotLatest () {
-      return selectedImageIsNotLatest(this.machineImage, this.machineImages)
+    machineImageHasUpdate () {
+      return machineImageHasUpdate(this.machineImage, this.machineImages)
     },
   },
   validations () {

@@ -12,12 +12,7 @@ import {
 import { useAuthzStore } from '@/store/authz'
 import { useConfigStore } from '@/store/config'
 import { useCloudProfileStore } from '@/store/cloudProfile'
-import {
-  firstItemMatchingVersionClassification,
-  mapAccessRestrictionForInput,
-} from '@/store/cloudProfile/helper'
-
-import { useApi } from '@/composables/useApi'
+import { firstItemMatchingVersionClassification } from '@/store/cloudProfile/helper'
 
 import { find } from '@/lodash'
 
@@ -25,19 +20,23 @@ describe('stores', () => {
   describe('cloudProfile', () => {
     const namespace = 'default'
 
-    const api = useApi()
-    let mockGetConfiguration // eslint-disable-line no-unused-vars
     let authzStore
     let configStore
     let cloudProfileStore
 
     function setData (data) {
-      cloudProfileStore.list = [{
+      cloudProfileStore.setCloudProfiles([{
         metadata: {
           name: 'foo',
         },
         data,
-      }]
+      }])
+    }
+
+    function setMachineImages (machineImages) {
+      setData({
+        machineImages,
+      })
     }
 
     function setKubernetesVersions (kubernetesVersions) {
@@ -62,26 +61,19 @@ describe('stores', () => {
       authzStore = useAuthzStore()
       authzStore.setNamespace(namespace)
       configStore = useConfigStore()
-      mockGetConfiguration = vi.spyOn(api, 'getConfiguration').mockResolvedValue({
-        data: {
-          defaultNodesCIDR: '10.10.0.0/16',
-          vendorHints: [{
-            type: 'warning',
-            message: 'test',
-            matchNames: ['gardenlinux'],
-          }],
-        },
+      configStore.setConfiguration({
+        defaultNodesCIDR: '10.10.0.0/16',
+        vendorHints: [{
+          type: 'warning',
+          message: 'test',
+          matchNames: ['gardenlinux'],
+        }],
       })
-      await configStore.fetchConfig()
       cloudProfileStore = useCloudProfileStore()
-      cloudProfileStore.list = []
+      cloudProfileStore.setCloudProfiles([])
     })
 
     describe('machineImages', () => {
-      function setMachineImages (machineImages) {
-        setData({ machineImages })
-      }
-
       let decoratedAndSortedMachineImages
 
       const machineImages = [
@@ -158,6 +150,10 @@ describe('stores', () => {
         expect(imageWithExpirationDate.isPreview).toBe(false)
         expect(imageWithExpirationDate.isExpirationWarning).toBe(false)
         expect(imageWithExpirationDate).toBe(decoratedAndSortedMachineImages[2]) // check sorting
+
+        const imageWithNoExpirationDate = find(decoratedAndSortedMachineImages, { name: 'gardenlinux', version: '1.1.5' })
+        expect(imageWithNoExpirationDate.isExpirationWarning).toBe(false)
+        expect(imageWithNoExpirationDate.isExpired).toBe(false)
 
         const previewImage = find(decoratedAndSortedMachineImages, { name: 'gardenlinux', version: '1.2.0' })
         expect(previewImage.isSupported).toBe(false)
@@ -279,6 +275,7 @@ describe('stores', () => {
             workerName: workers[1].name,
             isValidTerminationDate: true,
             severity: 'error',
+            supportedVersionAvailable: true,
           })
         })
 
@@ -347,9 +344,19 @@ describe('stores', () => {
         expirationDate: '2023-03-15T23:59:59Z', // expired
         version: '1.16.1',
       }
-      const deprecatedOldestVersion = {
+      const deprecatedOldest16Version = {
         version: '1.16.0',
         classification: 'deprecated',
+      }
+      const deprecated15Version = {
+        version: '1.15.0',
+        classification: 'deprecated',
+        expirationDate: '2024-01-15T23:59:59Z', // not expired but expiration warning
+      }
+      const deprecated14Version = {
+        version: '1.14.0',
+        classification: 'deprecated',
+        expirationDate: '2024-01-15T23:59:59Z', // not expired but expiration warning
       }
       const invalidVersion = {
         version: '1.06.2',
@@ -367,7 +374,9 @@ describe('stores', () => {
         supported162VersionWithExpirationWarning, // 1.16.2
         expiredVersion, // 1.16.1
         invalidVersion, // 1.06.2 not semver compatible
-        deprecatedOldestVersion, // 1.16.0
+        deprecatedOldest16Version, // 1.16.0
+        deprecated15Version, // 1.15.0
+        deprecated14Version, // 1.14.0
       ]
 
       beforeEach(() => {
@@ -377,7 +386,7 @@ describe('stores', () => {
       describe('#sortedKubernetesVersions', () => {
         it('should filter and sort kubernetes versions from cloud profile', () => {
           const decoratedAndSortedVersions = cloudProfileStore.sortedKubernetesVersions('foo')
-          expect(decoratedAndSortedVersions).toHaveLength(12)
+          expect(decoratedAndSortedVersions).toHaveLength(kubernetesVersions.length - 1)
 
           const expiredDecoratedVersion = find(decoratedAndSortedVersions, expiredVersion)
           expect(expiredDecoratedVersion.isExpired).toBe(true)
@@ -400,11 +409,15 @@ describe('stores', () => {
           expect(decoratedSupported165Version.expirationDateString).toBeDefined()
           expect(decoratedSupported165Version.isSupported).toBe(true)
           expect(decoratedSupported165Version).toBe(decoratedAndSortedVersions[6]) // check sorting
+
+          const decoratedVersionWithoutExpiration = find(decoratedAndSortedVersions, deprecated181VersionWithoutExpiration)
+          expect(decoratedVersionWithoutExpiration.isExpirationWarning).toBe(false)
+          expect(decoratedVersionWithoutExpiration.isExpired).toBe(false)
         })
       })
       describe('#availableKubernetesUpdatesForShoot', () => {
         it('should differentiate between patch/minor/major available K8sUpdates for given version, filter out expired', () => {
-          const availableK8sUpdates = cloudProfileStore.availableKubernetesUpdatesForShoot(deprecatedOldestVersion.version, 'foo')
+          const availableK8sUpdates = cloudProfileStore.availableKubernetesUpdatesForShoot(deprecatedOldest16Version.version, 'foo')
           expect(availableK8sUpdates.patch.length).toBe(5)
           expect(availableK8sUpdates.minor.length).toBe(3)
           expect(availableK8sUpdates.major.length).toBe(2)
@@ -437,6 +450,11 @@ describe('stores', () => {
 
         it('selected kubernetes version should have update path (patch update available)', () => {
           const result = cloudProfileStore.kubernetesVersionUpdatePathAvailable(unclassified164VersionWithExpiration.version, 'foo')
+          expect(result).toBe(true)
+        })
+
+        it('selected kubernetes version should have update path (no immediate update available)', () => {
+          const result = cloudProfileStore.kubernetesVersionUpdatePathAvailable(deprecated14Version.version, 'foo')
           expect(result).toBe(true)
         })
 
@@ -509,7 +527,7 @@ describe('stores', () => {
           expect(versionExpirationWarning).toBeUndefined()
         })
 
-        it('should not have info (auto update)', () => {
+        it('should have info (auto update)', () => {
           const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(unclassified164VersionWithExpiration.version, 'foo', true)
           expect(versionExpirationWarning).toEqual({
             expirationDate: unclassified164VersionWithExpiration.expirationDate,
@@ -519,8 +537,17 @@ describe('stores', () => {
         })
 
         it('should not have warning (deprecated version has no expiration))', () => {
-          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(deprecatedOldestVersion.version, 'foo', false)
+          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(deprecatedOldest16Version.version, 'foo', false)
           expect(versionExpirationWarning).toBeUndefined()
+        })
+
+        it('should not have error when no immediate supported minor version update exists', () => {
+          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(deprecated14Version.version, 'foo', true)
+          expect(versionExpirationWarning).toEqual({
+            expirationDate: deprecated14Version.expirationDate,
+            isValidTerminationDate: true,
+            severity: 'warning',
+          })
         })
       })
     })
@@ -607,7 +634,7 @@ describe('stores', () => {
       })
 
       it('should return machineTypes by region and zones from cloud profile', () => {
-        let dashboardMachineTypes = cloudProfileStore.machineTypesByCloudProfileName({ cloudProfileName: 'foo' })
+        let dashboardMachineTypes = cloudProfileStore.machineTypesByCloudProfileName('foo')
         expect(dashboardMachineTypes).toHaveLength(4)
 
         dashboardMachineTypes = cloudProfileStore.machineTypesByCloudProfileNameAndRegionAndArchitecture({ cloudProfileName: 'foo', region: 'region1', architecture: 'amd64' })
@@ -621,7 +648,7 @@ describe('stores', () => {
       })
 
       it('should return volumeTypes by region and zones from cloud profile', () => {
-        let dashboardVolumeTypes = cloudProfileStore.volumeTypesByCloudProfileName({ cloudProfileName: 'foo' })
+        let dashboardVolumeTypes = cloudProfileStore.volumeTypesByCloudProfileName('foo')
         expect(dashboardVolumeTypes).toHaveLength(3)
 
         dashboardVolumeTypes = cloudProfileStore.volumeTypesByCloudProfileNameAndRegion({ cloudProfileName: 'foo', region: 'region1' })
@@ -632,7 +659,7 @@ describe('stores', () => {
       })
 
       it('should return an empty machineType / volumeType array if no cloud profile is provided', () => {
-        const items = cloudProfileStore.machineTypesByCloudProfileName({})
+        const items = cloudProfileStore.machineTypesByCloudProfileName()
         expect(items).toBeInstanceOf(Array)
         expect(items).toHaveLength(0)
       })
@@ -782,7 +809,7 @@ describe('stores', () => {
       const cloudProfileName = 'foo'
 
       it('should return default node cidr from config', async () => {
-        const defaultNodesCIDR = cloudProfileStore.getDefaultNodesCIDR({ cloudProfileName })
+        const defaultNodesCIDR = cloudProfileStore.getDefaultNodesCIDR(cloudProfileName)
         expect(defaultNodesCIDR).toBe('10.10.0.0/16')
       })
 
@@ -792,7 +819,7 @@ describe('stores', () => {
             defaultNodesCIDR: '1.2.3.4/16',
           },
         })
-        const defaultNodesCIDR = cloudProfileStore.getDefaultNodesCIDR({ cloudProfileName })
+        const defaultNodesCIDR = cloudProfileStore.getDefaultNodesCIDR(cloudProfileName)
         expect(defaultNodesCIDR).toBe('1.2.3.4/16')
       })
     })
@@ -823,105 +850,6 @@ describe('stores', () => {
           items.pop()
           item = firstItemMatchingVersionClassification(items)
           expect(item.version).toBe('1')
-        })
-      })
-
-      describe('#mapAccessRestrictionForInput', () => {
-        let definition
-        let shootResource
-
-        beforeEach(() => {
-          definition = {
-            key: 'foo',
-            input: {
-              inverted: false,
-            },
-            options: [
-              {
-                key: 'foo-option-1',
-                input: {
-                  inverted: false,
-                },
-              },
-              {
-                key: 'foo-option-2',
-                input: {
-                  inverted: true,
-                },
-              },
-              {
-                key: 'foo-option-3',
-                input: {
-                  inverted: true,
-                },
-              },
-              {
-                key: 'foo-option-4',
-                input: {
-                  inverted: true,
-                },
-              },
-            ],
-          }
-
-          shootResource = {
-            metadata: {
-              annotations: {
-                'foo-option-1': 'false',
-                'foo-option-2': 'false',
-                'foo-option-3': 'true',
-              },
-            },
-            spec: {
-              seedSelector: {
-                matchLabels: {
-                  foo: 'true',
-                },
-              },
-            },
-          }
-        })
-
-        it('should map definition and shoot resources to access restriction data model', () => {
-          const accessRestrictionPair = mapAccessRestrictionForInput(definition, shootResource)
-          expect(accessRestrictionPair).toEqual([
-            'foo',
-            {
-              value: true,
-              options: {
-                'foo-option-1': {
-                  value: false,
-                },
-                'foo-option-2': {
-                  value: true, // value inverted as defined in definition
-                },
-                'foo-option-3': {
-                  value: false, // value inverted as defined in definition
-                },
-                'foo-option-4': {
-                  value: false, // value not set in spec always maps to false
-                },
-              },
-            },
-          ])
-        })
-
-        it('should invert access restriction', () => {
-          definition.input.inverted = true
-          const [, accessRestriction] = mapAccessRestrictionForInput(definition, shootResource)
-          expect(accessRestriction.value).toBe(false)
-        })
-
-        it('should not invert option', () => {
-          definition.options[1].input.inverted = false
-          const [, accessRestriction] = mapAccessRestrictionForInput(definition, shootResource)
-          expect(accessRestriction.options['foo-option-2'].value).toBe(false)
-        })
-
-        it('should invert option', () => {
-          definition.options[1].input.inverted = true
-          const [, accessRestriction] = mapAccessRestrictionForInput(definition, shootResource)
-          expect(accessRestriction.options['foo-option-2'].value).toBe(true)
         })
       })
     })

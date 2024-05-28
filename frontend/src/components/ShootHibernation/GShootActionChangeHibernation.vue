@@ -7,13 +7,12 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-action-button-dialog
     ref="actionDialog"
-    :shoot-item="shootItem"
     width="600"
     :caption="caption"
     :text="buttonText"
-    :confirm-button-text="confirmText"
-    confirm-required
-    :disabled="!isHibernationPossible && !isShootSettingHibernated"
+    :confirm-button-text="confirmButtonText"
+    :confirm-required="confirmRequired"
+    :disabled="disabled"
     :icon="icon"
     @dialog-opened="onConfigurationDialogOpened"
   >
@@ -35,69 +34,121 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import {
+  ref,
+  computed,
+  watch,
+} from 'vue'
+
+import { useAppStore } from '@/store/app'
+
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog.vue'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
+
 import { errorDetailsFromError } from '@/utils/error'
 
 export default {
   components: {
     GActionButtonDialog,
   },
-  mixins: [shootItem],
   inject: ['api', 'logger'],
   props: {
-    modelValue: {
-      type: Boolean,
-      required: true,
-    },
     text: {
       type: Boolean,
       default: false,
     },
   },
-  data () {
-    return {
-      hibernationChanged: false,
-    }
-  },
-  computed: {
-    confirmRequired () {
-      return !this.isShootSettingHibernated
-    },
-    confirmText () {
-      if (!this.isShootSettingHibernated) {
-        return 'Hibernate'
-      } else {
-        return 'Wake up'
-      }
-    },
-    icon () {
-      if (!this.isShootSettingHibernated) {
-        return 'mdi-pause-circle-outline'
-      } else {
-        return 'mdi-play-circle-outline'
-      }
-    },
-    buttonTitle () {
-      if (!this.isShootSettingHibernated) {
-        return 'Hibernate Cluster'
-      } else {
-        return 'Wake up Cluster'
-      }
-    },
-    caption () {
-      if (!this.isHibernationPossible && !this.isShootSettingHibernated) {
-        return this.hibernationPossibleMessage
-      }
-      return this.buttonTitle
-    },
-    buttonText () {
-      if (!this.text) {
+  setup (props) {
+    const {
+      shootItem,
+      shootNamespace,
+      shootName,
+      isShootSettingHibernated,
+      hasShootWorkerGroups,
+      isHibernationPossible,
+      hibernationPossibleMessage,
+      isShootStatusHibernated,
+      isShootStatusHibernationProgressing,
+    } = useShootItem()
+
+    const confirmRequired = computed(() => {
+      return !isShootSettingHibernated.value
+    })
+
+    const disabled = computed(() => {
+      return !isShootSettingHibernated.value && !isHibernationPossible.value
+    })
+
+    const confirmButtonText = computed(() => {
+      return !isShootSettingHibernated.value
+        ? 'Hibernate'
+        : 'Wake up'
+    })
+
+    const icon = computed(() => {
+      return !isShootSettingHibernated.value
+        ? 'mdi-pause-circle-outline'
+        : 'mdi-play-circle-outline'
+    })
+
+    const buttonTitle = computed(() => {
+      return !isShootSettingHibernated.value
+        ? 'Hibernate Cluster'
+        : 'Wake up Cluster'
+    })
+
+    const buttonText = computed(() => {
+      return !props.text
+        ? ''
+        : buttonTitle.value
+    })
+
+    const caption = computed(() => {
+      return !isHibernationPossible.value && !isShootSettingHibernated.value
+        ? hibernationPossibleMessage.value
+        : buttonTitle.value
+    })
+
+    const hibernationChanged = ref(false)
+
+    const appStore = useAppStore()
+
+    watch(isShootStatusHibernationProgressing, value => {
+      if (value || !hibernationChanged.value) {
         return
       }
-      return this.buttonTitle
-    },
+      hibernationChanged.value = false
+
+      if (!shootName.value) { // ensure that notification is not triggered by shoot resource being cleared (e.g. during navigation)
+        return
+      }
+
+      const state = isShootStatusHibernated.value
+        ? 'hibernated'
+        : 'started'
+
+      appStore.setSuccess(`Cluster ${shootName.value} successfully ${state}`)
+    })
+
+    return {
+      shootItem,
+      shootNamespace,
+      shootName,
+      isShootSettingHibernated,
+      hasShootWorkerGroups,
+      isHibernationPossible,
+      hibernationPossibleMessage,
+      isShootStatusHibernated,
+      isShootStatusHibernationProgressing,
+      hibernationChanged,
+      confirmRequired,
+      disabled,
+      confirmButtonText,
+      icon,
+      buttonText,
+      caption,
+    }
   },
   watch: {
     isShootSettingHibernated (value) {
@@ -106,26 +157,11 @@ export default {
         this.$refs.actionDialog.hideDialog()
       }
     },
-    isShootStatusHibernationProgressing (hibernationProgressing) {
-      if (hibernationProgressing || !this.hibernationChanged) {
-        return
-      }
-      this.hibernationChanged = false
-
-      if (!this.shootName) { // ensure that notification is not triggered by shoot resource being cleared (e.g. during navigation)
-        return
-      }
-
-      const state = this.isShootStatusHibernated
-        ? 'hibernated'
-        : 'started'
-
-      this.setSuccess(`Cluster ${this.shootName} successfully ${state}`)
-    },
   },
   methods: {
     async onConfigurationDialogOpened () {
-      if (await this.$refs.actionDialog.waitForDialogClosed()) {
+      const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
+      if (confirmed) {
         this.updateConfiguration()
       }
     },

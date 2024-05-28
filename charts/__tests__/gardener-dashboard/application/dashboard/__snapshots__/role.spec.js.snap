@@ -27,6 +27,7 @@ Object {
         "leases",
       ],
       "verbs": Array [
+        "create",
         "get",
         "patch",
         "watch",

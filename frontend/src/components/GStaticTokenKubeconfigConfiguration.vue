@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-action-button-dialog
     ref="actionDialog"
-    :shoot-item="shootItem"
     width="500"
     confirm-required
     caption="Configure Static Token Kubeconfig"
@@ -24,7 +23,10 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import shootItem from '@/mixins/shootItem'
+import { ref } from 'vue'
+
+import { useShootItem } from '@/composables/useShootItem'
+
 import { errorDetailsFromError } from '@/utils/error'
 
 import GActionButtonDialog from './dialogs/GActionButtonDialog.vue'
@@ -35,18 +37,26 @@ export default {
     GActionButtonDialog,
     GStaticTokenKubeconfigSwitch,
   },
-  mixins: [
-    shootItem,
-  ],
   inject: ['api', 'logger'],
-  data () {
+  setup () {
+    const {
+      shootNamespace,
+      shootName,
+      shootEnableStaticTokenKubeconfig,
+    } = useShootItem()
+
+    const enableStaticTokenKubeconfig = ref(shootEnableStaticTokenKubeconfig.value)
+
     return {
-      enableStaticTokenKubeconfig: this.shootEnableStaticTokenKubeconfig,
+      shootNamespace,
+      shootName,
+      shootEnableStaticTokenKubeconfig,
+      enableStaticTokenKubeconfig,
     }
   },
   methods: {
     async onConfigurationDialogOpened () {
-      this.reset()
+      this.enableStaticTokenKubeconfig = this.shootEnableStaticTokenKubeconfig
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
         await this.updateConfiguration()
@@ -68,9 +78,6 @@ export default {
         this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
         this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
-    },
-    reset () {
-      this.enableStaticTokenKubeconfig = this.shootEnableStaticTokenKubeconfig
     },
   },
 }

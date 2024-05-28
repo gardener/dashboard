@@ -321,10 +321,14 @@ export const useConfigStore = defineStore('config', () => {
 
   async function fetchConfig () {
     const response = await api.getConfiguration()
-    state.value = {
+    setConfiguration({
       themes: {},
       ...response.data,
-    }
+    })
+  }
+
+  function setConfiguration (value) {
+    state.value = value
   }
 
   async function $reset () {
@@ -397,6 +401,7 @@ export const useConfigStore = defineStore('config', () => {
     purposeRequiresHibernationSchedule,
     isShootHasNoHibernationScheduleWarning,
     fetchConfig,
+    setConfiguration,
     conditionForType,
     $reset,
   }

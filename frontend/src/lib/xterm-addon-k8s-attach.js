@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { Buffer } from 'buffer'
-
 import { useLogger } from '@/composables/useLogger'
 
 export const WsReadyStateEnum = {
@@ -84,7 +82,7 @@ export class K8sAttachAddon {
       this.decoder = new TextDecoder()
     }
     if (typeof ev.data === 'object' && ev.data instanceof ArrayBuffer) {
-      const buffer = Buffer.from(ev.data)
+      const buffer = new Uint8Array(ev.data)
       if (buffer.length > 1) {
         const channel = buffer[BufferEnum.CHANNEL_INDEX]
         const data = this.decoder.decode(buffer.slice(BufferEnum.DATA_INDEX))
@@ -125,11 +123,11 @@ export class K8sAttachAddon {
     if (this._socket.readyState !== WsReadyStateEnum.OPEN) {
       return
     }
-    const length = Buffer.byteLength(data)
-    const buffer = Buffer.alloc(length + 1)
-    buffer.writeUInt8(channel, BufferEnum.CHANNEL_INDEX)
-    buffer.write(data, BufferEnum.DATA_INDEX, 'binary')
-    this._socket.send(buffer)
+    const encoder = new TextEncoder()
+    this._socket.send(new Uint8Array([
+      channel,
+      ...encoder.encode(data),
+    ]))
   }
 }
 

@@ -44,6 +44,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
+import yaml from 'js-yaml'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 
@@ -62,7 +63,6 @@ export default {
   components: {
     GSecretDialog,
   },
-  inject: ['yaml'],
   props: {
     modelValue: {
       type: Boolean,
@@ -114,11 +114,11 @@ export default {
     },
   },
   methods: {
-    async onInputSecretData () {
+    onInputSecretData () {
       this.secretData = {}
 
       try {
-        this.secretData = await this.yaml.load(this.data)
+        this.secretData = yaml.load(this.data)
       } catch (err) {
         /* ignore errors */
       } finally {

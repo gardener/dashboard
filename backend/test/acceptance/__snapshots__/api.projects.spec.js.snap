@@ -71,10 +71,23 @@ Array [
   Array [
     Object {
       ":authority": "kubernetes:6443",
-      ":method": "get",
-      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-bar/shoots",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImdyb3VwcyI6WyJncm91cDEiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.iLqu05bZNRweB_7pr3cM6ZGO5gl2wYNf4d-hCazuo7o",
+    },
+    Object {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": Object {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": Object {
+          "group": "core.gardener.cloud",
+          "namespace": "garden-bar",
+          "resource": "shoots",
+          "verb": "list",
+        },
+      },
     },
   ],
   Array [

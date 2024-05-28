@@ -108,10 +108,8 @@ SPDX-License-Identifier: Apache-2.0
         :namespace="shootNamespace"
       />
     </g-popover>
-    <div
-      class="d-flex"
-    >
-      <g-retry-operation :shoot-item="shootItem" />
+    <div class="d-flex">
+      <g-retry-operation />
     </div>
     <span
       v-if="showStatusText"
@@ -139,8 +137,12 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { mapActions } from 'pinia'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootStore } from '@/store/shoot'
+
+import { useShootItem } from '@/composables/useShootItem'
+
 import {
   isUserError,
   objectsFromErrorCodes,
@@ -160,7 +162,6 @@ export default {
     GRetryOperation,
     GShootMessageDetails,
   },
-  mixins: [shootItem],
   inject: [
     'mergeProps',
     'activePopoverKey',
@@ -177,6 +178,33 @@ export default {
       type: Boolean,
       default: false,
     },
+  },
+  setup () {
+    const {
+      shootNamespace,
+      shootSecretBindingName,
+      shootLastOperation,
+      isShootMarkedForDeletion,
+      isShootLastOperationTypeDelete,
+      isShootStatusHibernated,
+      isShootReconciliationDeactivated,
+      shootMetadata,
+      shootLastErrors,
+      isShootStatusHibernationProgressing,
+    } = useShootItem()
+
+    return {
+      shootNamespace,
+      shootSecretBindingName,
+      shootLastOperation,
+      isShootMarkedForDeletion,
+      isShootLastOperationTypeDelete,
+      isShootStatusHibernated,
+      isShootReconciliationDeactivated,
+      shootMetadata,
+      shootLastErrors,
+      isShootStatusHibernationProgressing,
+    }
   },
   data () {
     return {
@@ -313,6 +341,14 @@ export default {
       }
       return undefined
     },
+    isStaleShoot () {
+      return !this.isShootActive(this.shootMetadata.uid)
+    },
+  },
+  methods: {
+    ...mapActions(useShootStore, [
+      'isShootActive',
+    ]),
   },
 }
 </script>
