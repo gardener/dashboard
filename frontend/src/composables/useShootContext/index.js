@@ -8,7 +8,6 @@ import {
   ref,
   shallowRef,
   computed,
-  readonly,
   reactive,
   toRef,
   watch,
@@ -1100,16 +1099,7 @@ export function createShootContextComposable (options = {}) {
     machineImages,
     networkingTypes,
     showAllRegions,
-  } = createShootHelperComposable(readonly({
-    creationTimestamp: shootCreationTimestamp,
-    cloudProfileName,
-    seedName,
-    region,
-    secretBindingName,
-    kubernetesVersion,
-    networkingNodes,
-    providerType,
-  }), {
+  } = createShootHelperComposable(manifest, {
     cloudProfileStore,
     configStore,
     gardenerExtensionStore,
