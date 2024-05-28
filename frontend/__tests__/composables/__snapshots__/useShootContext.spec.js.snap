@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`stores > shootContext > should add dns providers 1`] = `
+exports[`composables > useShootContext > should add dns providers 1`] = `
 {
   "domain": "example.org",
   "providers": [
@@ -13,7 +13,7 @@ exports[`stores > shootContext > should add dns providers 1`] = `
 }
 `;
 
-exports[`stores > shootContext > should add workers and update zones network config 1`] = `
+exports[`composables > useShootContext > should add workers and update zones network config 1`] = `
 [
   {
     "cri": {
@@ -68,7 +68,7 @@ exports[`stores > shootContext > should add workers and update zones network con
 ]
 `;
 
-exports[`stores > shootContext > should add workers and update zones network config 2`] = `
+exports[`composables > useShootContext > should add workers and update zones network config 2`] = `
 [
   {
     "internal": "10.180.48.0/20",
@@ -91,7 +91,7 @@ exports[`stores > shootContext > should add workers and update zones network con
 ]
 `;
 
-exports[`stores > shootContext > should change the infrastructure kind 1`] = `
+exports[`composables > useShootContext > should change the infrastructure kind 1`] = `
 {
   "apiVersion": "core.gardener.cloud/v1beta1",
   "kind": "Shoot",
@@ -183,7 +183,7 @@ exports[`stores > shootContext > should change the infrastructure kind 1`] = `
 }
 `;
 
-exports[`stores > shootContext > should create a default "alicloud" shoot manifest 1`] = `
+exports[`composables > useShootContext > should create a default "alicloud" shoot manifest 1`] = `
 {
   "apiVersion": "core.gardener.cloud/v1beta1",
   "kind": "Shoot",
@@ -282,7 +282,7 @@ exports[`stores > shootContext > should create a default "alicloud" shoot manife
 }
 `;
 
-exports[`stores > shootContext > should create a default "aws" shoot manifest 1`] = `
+exports[`composables > useShootContext > should create a default "aws" shoot manifest 1`] = `
 {
   "apiVersion": "core.gardener.cloud/v1beta1",
   "kind": "Shoot",
@@ -383,7 +383,7 @@ exports[`stores > shootContext > should create a default "aws" shoot manifest 1`
 }
 `;
 
-exports[`stores > shootContext > should create a default "azure" shoot manifest 1`] = `
+exports[`composables > useShootContext > should create a default "azure" shoot manifest 1`] = `
 {
   "apiVersion": "core.gardener.cloud/v1beta1",
   "kind": "Shoot",
@@ -478,7 +478,7 @@ exports[`stores > shootContext > should create a default "azure" shoot manifest 
 }
 `;
 
-exports[`stores > shootContext > should create a default "gcp" shoot manifest 1`] = `
+exports[`composables > useShootContext > should create a default "gcp" shoot manifest 1`] = `
 {
   "apiVersion": "core.gardener.cloud/v1beta1",
   "kind": "Shoot",
@@ -570,7 +570,7 @@ exports[`stores > shootContext > should create a default "gcp" shoot manifest 1`
 }
 `;
 
-exports[`stores > shootContext > should create a default "ironcore" shoot manifest 1`] = `
+exports[`composables > useShootContext > should create a default "ironcore" shoot manifest 1`] = `
 {
   "apiVersion": "core.gardener.cloud/v1beta1",
   "kind": "Shoot",
@@ -650,7 +650,7 @@ exports[`stores > shootContext > should create a default "ironcore" shoot manife
 }
 `;
 
-exports[`stores > shootContext > should create a default "openstack" shoot manifest 1`] = `
+exports[`composables > useShootContext > should create a default "openstack" shoot manifest 1`] = `
 {
   "apiVersion": "core.gardener.cloud/v1beta1",
   "kind": "Shoot",

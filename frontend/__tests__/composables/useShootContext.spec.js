@@ -19,7 +19,7 @@ import { useAuthzStore } from '@/store/authz'
 import { createShootContextComposable } from '@/composables/useShootContext'
 
 import { cloneDeep } from '@/lodash'
-describe('stores', () => {
+describe('composables', () => {
   let shootContextStore
 
   const systemTime = new Date('2024-03-15T14:00:00+01:00')
@@ -68,7 +68,7 @@ describe('stores', () => {
     return shootContextStore.shootManifest
   }
 
-  describe('shootContext', () => {
+  describe('useShootContext', () => {
     it('should create a default "aws" shoot manifest', async () => {
       expect(createShootManifest('aws')).toMatchSnapshot()
     })
