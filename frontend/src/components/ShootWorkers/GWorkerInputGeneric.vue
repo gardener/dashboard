@@ -170,11 +170,11 @@ import { useShootContext } from '@/composables/useShootContext'
 
 import {
   withFieldName,
-  uniqueWorkerName,
   lowerCaseAlphaNumHyphen,
   noStartEndHyphen,
   numberOrPercentage,
   withMessage,
+  withParams,
 } from '@/utils/validators'
 import {
   getErrorMessages,
@@ -225,6 +225,7 @@ export default {
       maintenanceAutoUpdateMachineImageVersion,
       machineArchitectures,
       volumeTypes,
+      providerWorkers,
     } = useShootContext()
 
     return {
@@ -241,6 +242,7 @@ export default {
       maintenanceAutoUpdateMachineImageVersion,
       machineArchitectures,
       volumeTypes,
+      providerWorkers,
     }
   },
   data () {
@@ -251,6 +253,13 @@ export default {
   },
   validations () {
     const rules = { worker: {} }
+
+    const uniqueWorkerName = withMessage('Worker name must be unique', withParams(
+      { type: 'uniqueWorkerName' },
+      function unique (value) {
+        return this.providerWorkers.filter(item => item.name === value).length === 1
+      },
+    ))
 
     const nameRules = {
       required,
