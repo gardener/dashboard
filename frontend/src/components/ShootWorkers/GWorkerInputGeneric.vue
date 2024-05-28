@@ -43,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
           :machine-images="machineImages"
           :worker="worker"
           :machine-type="selectedMachineType"
-          :update-o-s-maintenance="updateOSMaintenance"
+          :auto-update="maintenanceAutoUpdateMachineImageVersion"
           :field-name="`${workerGroupName} Machine Image`"
         />
       </div>
@@ -222,10 +222,9 @@ export default {
       initialZones,
       maxAdditionalZones,
       isZonedCluster,
-      updateOSMaintenance,
+      maintenanceAutoUpdateMachineImageVersion,
       machineArchitectures,
       volumeTypes,
-      workers,
     } = useShootContext()
 
     return {
@@ -239,10 +238,9 @@ export default {
       initialZones,
       maxAdditionalZones,
       isZonedCluster,
-      updateOSMaintenance,
+      maintenanceAutoUpdateMachineImageVersion,
       machineArchitectures,
       volumeTypes,
-      workers,
     }
   },
   data () {

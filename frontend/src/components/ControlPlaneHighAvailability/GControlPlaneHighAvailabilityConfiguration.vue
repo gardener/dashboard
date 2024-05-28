@@ -50,7 +50,7 @@ export default {
     } = useShootItem()
 
     const {
-      controlPlaneFailureToleranceType,
+      controlPlaneHighAvailabilityFailureToleranceType,
       setShootManifest,
     } = useShootContext()
 
@@ -60,7 +60,7 @@ export default {
       shootItem,
       shootNamespace,
       shootName,
-      controlPlaneFailureToleranceType,
+      controlPlaneHighAvailabilityFailureToleranceType,
       setShootManifest,
       componentKey,
     }
@@ -80,7 +80,7 @@ export default {
           name: this.shootName,
           data: {
             failureTolerance: {
-              type: this.controlPlaneFailureToleranceType,
+              type: this.controlPlaneHighAvailabilityFailureToleranceType,
             },
           },
         })

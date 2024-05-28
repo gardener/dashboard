@@ -56,7 +56,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-row>
       <v-col cols="12">
         <g-static-token-kubeconfig-switch
-          v-model="enableStaticTokenKubeconfig"
+          v-model="kubernetesEnableStaticTokenKubeconfig"
         />
       </v-col>
     </v-row>
@@ -135,7 +135,7 @@ export default {
       shootName,
       kubernetesVersion,
       cloudProfileName,
-      enableStaticTokenKubeconfig,
+      kubernetesEnableStaticTokenKubeconfig,
       purpose,
       workerless,
       shootNamespace,
@@ -151,7 +151,7 @@ export default {
       shootName,
       kubernetesVersion,
       cloudProfileName,
-      enableStaticTokenKubeconfig,
+      kubernetesEnableStaticTokenKubeconfig,
       purpose,
       workerless,
       shootNamespace,

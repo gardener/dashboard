@@ -1065,7 +1065,6 @@ export function createShootContextComposable (options = {}) {
     setAccessRestrictionValue,
     getAccessRestrictionOptionValue,
     setAccessRestrictionOptionValue,
-    accessRestrictionList,
   } = useShootAccessRestrictions(manifest, {
     cloudProfileStore,
   })
@@ -1214,7 +1213,6 @@ export function createShootContextComposable (options = {}) {
     patchDnsProvider,
     deleteDnsProvider,
     /* accessRestrictions */
-    accessRestrictionList,
     getAccessRestrictionValue,
     setAccessRestrictionValue,
     getAccessRestrictionOptionValue,
@@ -1258,25 +1256,6 @@ export function createShootContextComposable (options = {}) {
     machineImages,
     networkingTypes,
     showAllRegions,
-    /* aliases */
-    name: shootName,
-    infrastructureKind: providerType,
-    workers: providerWorkers,
-    dnsConfiguration: dns,
-    enableStaticTokenKubeconfig: kubernetesEnableStaticTokenKubeconfig,
-    firewallImage: providerInfrastructureConfigFirewallImage,
-    firewallNetworks: providerInfrastructureConfigFirewallNetworks,
-    firewallSize: providerInfrastructureConfigFirewallSize,
-    floatingPoolName: providerInfrastructureConfigFloatingPoolName,
-    zonesNetworkConfiguration: providerInfrastructureConfigNetworksZones,
-    partitionID: providerInfrastructureConfigPartitionID,
-    projectID: providerInfrastructureConfigProjectID,
-    updateOSMaintenance: maintenanceAutoUpdateMachineImageVersion,
-    updateK8sMaintenance: maintenanceAutoUpdateKubernetesVersion,
-    osUpdates: maintenanceAutoUpdateMachineImageVersion,
-    k8sUpdates: maintenanceAutoUpdateKubernetesVersion,
-    controlPlaneFailureToleranceType: controlPlaneHighAvailabilityFailureToleranceType,
-    controlPlaneFailureToleranceTypeChangeAllowed: controlPlaneHighAvailabilityFailureToleranceTypeChangeAllowed,
   }
 }
 

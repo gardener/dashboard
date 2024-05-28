@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <div>
     <v-tooltip
       location="top"
-      :disabled="controlPlaneFailureToleranceTypeChangeAllowed"
+      :disabled="controlPlaneHighAvailabilityFailureToleranceTypeChangeAllowed"
       max-width="400px"
     >
       <template #activator="{ props }">
@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
             label="Enable Control Plane High Availability"
             color="primary"
             hide-details
-            :disabled="!controlPlaneFailureToleranceTypeChangeAllowed"
+            :disabled="!controlPlaneHighAvailabilityFailureToleranceTypeChangeAllowed"
             density="compact"
             class="mb-2"
           />
@@ -27,7 +27,7 @@ SPDX-License-Identifier: Apache-2.0
       It is not possible to change the control plane failure tolerance if a type has already been set
     </v-tooltip>
     <v-alert
-      v-if="!controlPlaneFailureToleranceType"
+      v-if="!controlPlaneHighAvailabilityFailureToleranceType"
       border-color="primary"
       border
       class="pl-3"
@@ -36,19 +36,19 @@ SPDX-License-Identifier: Apache-2.0
     </v-alert>
   </div>
   <v-expand-transition>
-    <div v-if="controlPlaneFailureToleranceType">
+    <div v-if="controlPlaneHighAvailabilityFailureToleranceType">
       <v-alert
         border-color="primary"
         border
         class="pl-3 mb-3"
       >
-        Control plane failure tolerance type <code>{{ controlPlaneFailureToleranceType }}</code> configured
+        Control plane failure tolerance type <code>{{ controlPlaneHighAvailabilityFailureToleranceType }}</code> configured
       </v-alert>
       <v-alert
         type="info"
         variant="tonal"
       >
-        <div v-if="controlPlaneFailureToleranceType === 'node' && !isFailureToleranceTypeZoneSupported">
+        <div v-if="controlPlaneHighAvailabilityFailureToleranceType === 'node' && !isFailureToleranceTypeZoneSupported">
           <template v-if="isNewCluster">
             <template v-if="seedName">
               The configured seed <code>{{ seedName }}</code> is not <code>multi-zonal</code>.
@@ -62,7 +62,7 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           Therefore failure tolerance type <code>zone</code> is not supported for this cluster.
         </div>
-        <div v-if="controlPlaneFailureToleranceTypeChangeAllowed">
+        <div v-if="controlPlaneHighAvailabilityFailureToleranceTypeChangeAllowed">
           It is not possible to disable or change control plane high availability later.
         </div>
       </v-alert>
@@ -104,8 +104,8 @@ export default {
       isNewCluster,
       seedName,
       isFailureToleranceTypeZoneSupported,
-      controlPlaneFailureToleranceType,
-      controlPlaneFailureToleranceTypeChangeAllowed,
+      controlPlaneHighAvailabilityFailureToleranceType,
+      controlPlaneHighAvailabilityFailureToleranceTypeChangeAllowed,
       controlPlaneHighAvailability,
     } = useShootContext()
 
@@ -113,8 +113,8 @@ export default {
       isNewCluster,
       seedName,
       isFailureToleranceTypeZoneSupported,
-      controlPlaneFailureToleranceType,
-      controlPlaneFailureToleranceTypeChangeAllowed,
+      controlPlaneHighAvailabilityFailureToleranceType,
+      controlPlaneHighAvailabilityFailureToleranceTypeChangeAllowed,
       controlPlaneHighAvailability,
     }
   },

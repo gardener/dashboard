@@ -69,7 +69,7 @@ SPDX-License-Identifier: Apache-2.0
           @blur="v$.networkingType.$touch()"
         />
       </v-col>
-      <template v-if="infrastructureKind === 'openstack'">
+      <template v-if="providerType === 'openstack'">
         <v-col cols="3">
           <g-wildcard-select
             v-model="floatingPoolName"
@@ -91,7 +91,7 @@ SPDX-License-Identifier: Apache-2.0
           />
         </v-col>
       </template>
-      <template v-else-if="infrastructureKind === 'metal'">
+      <template v-else-if="providerType === 'metal'">
         <v-col cols="3">
           <v-text-field
             v-model="v$.projectID.$model"
@@ -159,7 +159,7 @@ SPDX-License-Identifier: Apache-2.0
           />
         </v-col>
       </template>
-      <template v-else-if="infrastructureKind === 'vsphere'">
+      <template v-else-if="providerType === 'vsphere'">
         <v-col cols="3">
           <v-select
             v-model="v$.loadBalancerClassNames.$model"
@@ -214,19 +214,19 @@ export default {
   },
   setup () {
     const {
+      providerType,
       cloudProfileName,
       infrastructureSecret,
       region,
       networkingType,
-      floatingPoolName,
-      loadBalancerProviderName,
-      loadBalancerClassNames,
-      partitionID,
-      projectID,
-      firewallImage,
-      firewallSize,
-      firewallNetworks,
-      infrastructureKind,
+      providerControlPlaneConfigLoadBalancerProviderName,
+      providerControlPlaneConfigLoadBalancerClassNames,
+      providerInfrastructureConfigFloatingPoolName,
+      providerInfrastructureConfigPartitionID,
+      providerInfrastructureConfigProjectID,
+      providerInfrastructureConfigFirewallImage,
+      providerInfrastructureConfigFirewallSize,
+      providerInfrastructureConfigFirewallNetworks,
       cloudProfiles,
       infrastructureSecrets,
       regionsWithSeed,
@@ -245,19 +245,19 @@ export default {
 
     return {
       v$: useVuelidate(),
+      providerType,
       cloudProfileName,
       infrastructureSecret,
       region,
       networkingType,
-      floatingPoolName,
-      loadBalancerProviderName,
-      loadBalancerClassNames,
-      partitionID,
-      projectID,
-      firewallImage,
-      firewallSize,
-      firewallNetworks,
-      infrastructureKind,
+      loadBalancerProviderName: providerControlPlaneConfigLoadBalancerProviderName,
+      loadBalancerClassNames: providerControlPlaneConfigLoadBalancerClassNames,
+      floatingPoolName: providerInfrastructureConfigFloatingPoolName,
+      partitionID: providerInfrastructureConfigPartitionID,
+      projectID: providerInfrastructureConfigProjectID,
+      firewallImage: providerInfrastructureConfigFirewallImage,
+      firewallSize: providerInfrastructureConfigFirewallSize,
+      firewallNetworks: providerInfrastructureConfigFirewallNetworks,
       cloudProfiles,
       infrastructureSecrets,
       regionsWithSeed,
@@ -276,7 +276,7 @@ export default {
   },
   validations () {
     const requiresInfrastructure = infrastructureKind => {
-      return requiredIf(() => this.infrastructureKind === infrastructureKind)
+      return requiredIf(() => this.providerType === infrastructureKind)
     }
     return {
       region: withFieldName('Region', {

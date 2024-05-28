@@ -103,14 +103,14 @@ describe('stores', () => {
       shootContextStore.createShootManifest()
 
       let worker
-      expect(shootContextStore.workers).toHaveLength(1)
-      worker = shootContextStore.workers[0]
+      expect(shootContextStore.providerWorkers).toHaveLength(1)
+      worker = shootContextStore.providerWorkers[0]
       worker.name = 'worker-a'
       worker.zones = shootContextStore.allZones.slice(1, 3)
 
       shootContextStore.addProviderWorker()
-      expect(shootContextStore.workers).toHaveLength(2)
-      worker = shootContextStore.workers[1]
+      expect(shootContextStore.providerWorkers).toHaveLength(2)
+      worker = shootContextStore.providerWorkers[1]
       worker.name = 'worker-b'
       worker.zones = shootContextStore.allZones.slice(0, 2)
 
