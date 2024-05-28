@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div class="alternate-row-background">
-    <g-expand-transition-group>
+    <v-expand-transition group>
       <v-row
         v-for="{ id } in hibernationScheduleEvents"
         :key="id"
@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
       >
         <g-hibernation-schedule-event :id="id" />
       </v-row>
-    </g-expand-transition-group>
+    </v-expand-transition>
     <v-row
       v-if="!hibernationSchedulesError"
       class="list-item my-1"
@@ -86,7 +86,6 @@ import { useVuelidate } from '@vuelidate/core'
 
 import { useConfigStore } from '@/store/config'
 
-import GExpandTransitionGroup from '@/components/GExpandTransitionGroup'
 import GHibernationScheduleEvent from '@/components/ShootHibernation/GHibernationScheduleEvent'
 
 import { useShootContext } from '@/composables/useShootContext'
@@ -96,7 +95,6 @@ import { isEmpty } from '@/lodash'
 export default {
   components: {
     GHibernationScheduleEvent,
-    GExpandTransitionGroup,
   },
   inject: ['logger'],
   props: {

@@ -9,7 +9,10 @@ SPDX-License-Identifier: Apache-2.0
     v-if="!workerless"
     class="alternate-row-background"
   >
-    <g-expand-transition-group :disabled="disableWorkerAnimation">
+    <v-expand-transition
+      group
+      :disabled="disableWorkerAnimation"
+    >
       <v-row
         v-for="(worker, index) in providerWorkers"
         :key="index"
@@ -30,7 +33,7 @@ SPDX-License-Identifier: Apache-2.0
           </template>
         </g-worker-input-generic>
       </v-row>
-    </g-expand-transition-group>
+    </v-expand-transition>
     <v-row
       key="addWorker"
       class="list-item my-1"
@@ -56,7 +59,6 @@ SPDX-License-Identifier: Apache-2.0
 import { toRefs } from 'vue'
 
 import GWorkerInputGeneric from '@/components/ShootWorkers/GWorkerInputGeneric'
-import GExpandTransitionGroup from '@/components/GExpandTransitionGroup'
 
 import { useShootContext } from '@/composables/useShootContext'
 
