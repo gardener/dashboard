@@ -201,6 +201,13 @@ export default {
               value: 'hidden',
             },
           ]
+        case 'netlify-dns':
+          return [
+            {
+              label: 'API Key',
+              value: 'hidden',
+            },
+          ]
         case 'ddns':
           return [
             {

@@ -79,16 +79,19 @@ SPDX-License-Identifier: Apache-2.0
     <template #help-slot>
       <div>
         <p>
-          You need to provide an access token for Netlify to allow the dns-controller-manager to authenticate to Netlify DNS API.
+          This DNS provider allows you to create and manage DNS entries for authoritive DNS server supporting dynamic updates with DNS messages following
+          <g-external-link url="https://datatracker.ietf.org/doc/html/rfc2136">
+            RFC2136
+          </g-external-link>
+          (DNS Update) like knot-dns or others.
         </p>
         <p>
-          Then base64 encode the token. For eg. if the generated token in 1234567890123456, use
+          The configuration is depending on the DNS server product. You need permissions for <code>update</code> and <code>transfer</code> (AXFR) actions on your zones and a TSIG secret.
         </p>
         <p>
-          <pre>$ echo -n '1234567890123456789' | base64</pre>
-        </p>
-        <p>
-          For details see <g-external-link url="https://docs.netlify.com/cli/get-started/#obtain-a-token-in-the-netlify-ui" />
+          For details see <g-external-link url="https://github.com/gardener/external-dns-management/tree/master/docs/rfc2136">
+            Gardener RFC2136 DNS Provider Documentation
+          </g-external-link>
         </p>
       </div>
     </template>
