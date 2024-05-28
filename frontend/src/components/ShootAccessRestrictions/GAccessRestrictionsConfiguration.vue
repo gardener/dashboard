@@ -55,7 +55,7 @@ export default {
     } = useShootHelper()
 
     const {
-      shootManifest,
+      getAccessRestrictionPatchData,
       setShootManifest,
     } = useShootContext()
 
@@ -73,7 +73,7 @@ export default {
       shootItem,
       shootNamespace,
       shootName,
-      shootManifest,
+      getAccessRestrictionPatchData,
       setShootManifest,
       disabled,
       tooltip,
@@ -87,12 +87,12 @@ export default {
       }
     },
     async updateConfiguration () {
+      const data = this.getAccessRestrictionPatchData()
       try {
-        // TODO only update access restrictions
-        await this.api.replaceShoot({
+        await this.api.patchShoot({
           namespace: this.shootNamespace,
           name: this.shootName,
-          data: this.shootManifest,
+          data,
         })
       } catch (err) {
         const errorMessage = 'Could not save access restriction configuration'

@@ -1065,6 +1065,7 @@ export function createShootContextComposable (options = {}) {
     setAccessRestrictionValue,
     getAccessRestrictionOptionValue,
     setAccessRestrictionOptionValue,
+    getAccessRestrictionPatchData,
   } = useShootAccessRestrictions(manifest, {
     cloudProfileStore,
   })
@@ -1217,6 +1218,7 @@ export function createShootContextComposable (options = {}) {
     setAccessRestrictionValue,
     getAccessRestrictionOptionValue,
     setAccessRestrictionOptionValue,
+    getAccessRestrictionPatchData,
     accessRestrictionDefinitions,
     accessRestrictionNoItemsText,
     /* addons */
