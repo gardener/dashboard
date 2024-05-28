@@ -28,7 +28,7 @@ import { computed } from 'vue'
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GAccessRestrictions from '@/components/ShootAccessRestrictions/GAccessRestrictions'
 
-import { useProvideShootContext } from '@/composables/useShootContext'
+import { useShootContext } from '@/composables/useShootContext'
 import { useShootItem } from '@/composables/useShootItem'
 import { useShootHelper } from '@/composables/useShootHelper'
 
@@ -57,7 +57,7 @@ export default {
     const {
       shootManifest,
       setShootManifest,
-    } = useProvideShootContext()
+    } = useShootContext()
 
     const disabled = computed(() => {
       return isEmpty(accessRestrictionDefinitionList.value)

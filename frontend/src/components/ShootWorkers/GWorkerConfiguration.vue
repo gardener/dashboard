@@ -118,7 +118,7 @@ import GCodeBlock from '@/components/GCodeBlock'
 import GManageWorkers from '@/components/ShootWorkers/GManageWorkers'
 import GShootEditor from '@/components/GShootEditor'
 
-import { useProvideShootContext } from '@/composables/useShootContext'
+import { useShootContext } from '@/composables/useShootContext'
 import { useShootItem } from '@/composables/useShootItem'
 import { useShootEditor } from '@/composables/useShootEditor'
 
@@ -157,7 +157,7 @@ export default {
       initialZones,
       usedZones,
       setShootManifest,
-    } = useProvideShootContext()
+    } = useShootContext()
 
     const injectionKey = 'shoot-worker-editor'
     const lazyTab = ref('overview')

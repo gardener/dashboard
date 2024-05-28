@@ -30,7 +30,7 @@ import { ref } from 'vue'
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GManageControlPlaneHighAvailability from '@/components/ControlPlaneHighAvailability/GManageControlPlaneHighAvailability'
 
-import { useProvideShootContext } from '@/composables/useShootContext'
+import { useShootContext } from '@/composables/useShootContext'
 import { useShootItem } from '@/composables/useShootItem'
 
 import { errorDetailsFromError } from '@/utils/error'
@@ -52,7 +52,7 @@ export default {
     const {
       controlPlaneFailureToleranceType,
       setShootManifest,
-    } = useProvideShootContext()
+    } = useShootContext()
 
     const componentKey = ref(uuidv4())
 

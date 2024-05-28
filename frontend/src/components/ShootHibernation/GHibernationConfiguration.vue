@@ -31,7 +31,7 @@ import { useVuelidate } from '@vuelidate/core'
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GManageHibernationSchedule from '@/components/ShootHibernation/GManageHibernationSchedule'
 
-import { useProvideShootContext } from '@/composables/useShootContext'
+import { useShootContext } from '@/composables/useShootContext'
 import { useShootItem } from '@/composables/useShootItem'
 
 import { errorDetailsFromError } from '@/utils/error'
@@ -56,7 +56,7 @@ export default {
       hibernationSchedules,
       noHibernationSchedules,
       setShootManifest,
-    } = useProvideShootContext()
+    } = useShootContext()
 
     const componentKey = ref(uuidv4())
 

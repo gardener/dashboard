@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GManageShootAddons from '@/components/ShootAddons/GManageAddons'
 
-import { useProvideShootContext } from '@/composables/useShootContext'
+import { useShootContext } from '@/composables/useShootContext'
 import { useShootItem } from '@/composables/useShootItem'
 
 import { errorDetailsFromError } from '@/utils/error'
@@ -46,7 +46,7 @@ export default {
     const {
       addons,
       setShootManifest,
-    } = useProvideShootContext()
+    } = useShootContext()
 
     return {
       shootItem,

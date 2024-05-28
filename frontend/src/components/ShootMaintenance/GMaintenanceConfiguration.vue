@@ -43,7 +43,7 @@ import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GMaintenanceComponents from '@/components/ShootMaintenance/GMaintenanceComponents'
 import GMaintenanceTime from '@/components/ShootMaintenance/GMaintenanceTime'
 
-import { useProvideShootContext } from '@/composables/useShootContext'
+import { useShootContext } from '@/composables/useShootContext'
 import { useShootItem } from '@/composables/useShootItem'
 
 import { errorDetailsFromError } from '@/utils/error'
@@ -71,7 +71,7 @@ export default {
       maintenanceAutoUpdateKubernetesVersion,
       maintenanceAutoUpdateMachineImageVersion,
       setShootManifest,
-    } = useProvideShootContext()
+    } = useShootContext()
 
     return {
       v$: useVuelidate(),

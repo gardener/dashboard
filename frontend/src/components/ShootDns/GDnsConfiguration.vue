@@ -28,7 +28,7 @@ import { useVuelidate } from '@vuelidate/core'
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GManageShootDns from '@/components/ShootDns/GManageDns'
 
-import { useProvideShootContext } from '@/composables/useShootContext'
+import { useShootContext } from '@/composables/useShootContext'
 import { useShootItem } from '@/composables/useShootItem'
 
 import { errorDetailsFromError } from '@/utils/error'
@@ -50,7 +50,7 @@ export default {
     const {
       dns,
       setShootManifest,
-    } = useProvideShootContext()
+    } = useShootContext()
 
     const componentKey = ref(uuidv4())
 
