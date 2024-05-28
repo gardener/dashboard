@@ -7,13 +7,12 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-action-button-dialog
     ref="actionDialog"
-    :shoot-item="shootItem"
     width="700"
     :caption="componentTexts.caption"
     :confirm-button-text="confirmButtonText"
     confirm-required
     :loading="showLoadingIndicator"
-    :disabled="isDisabled"
+    :disabled="disabled"
     :icon="icon"
     :text="componentTexts.buttonText"
     :tooltip="tooltip"
@@ -66,19 +65,23 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import {
-  mapState,
-  mapActions,
-} from 'pinia'
+  ref,
+  computed,
+  watch,
+} from 'vue'
 
 import { useAppStore } from '@/store/app'
 import { useAuthnStore } from '@/store/authn'
 
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog.vue'
 
-import shootStatusCredentialRotation from '@/mixins/shootStatusCredentialRotation'
+import { useShootItem } from '@/composables/useShootItem'
+import { useShootStatusCredentialRotation } from '@/composables/useShootStatusCredentialRotation'
+
 import { errorDetailsFromError } from '@/utils/error'
 
 import {
+  get,
   includes,
   compact,
 } from '@/lodash'
@@ -87,163 +90,195 @@ export default {
   components: {
     GActionButtonDialog,
   },
-  mixins: [shootStatusCredentialRotation],
   inject: ['api', 'logger'],
   props: {
+    type: {
+      type: String,
+      required: true,
+    },
     text: {
       type: Boolean,
       default: false,
     },
   },
-  data () {
-    return {
-      actionTriggered: false,
-      maintenance: false,
-    }
-  },
-  computed: {
-    ...mapState(useAuthnStore, [
-      'isAdmin',
-    ]),
-    mode () {
-      if (!this.completionOperation) {
+  setup (props) {
+    const {
+      shootItem,
+      shootName,
+      shootNamespace,
+      shootAnnotations,
+      shootGardenerOperation,
+      shootEnableStaticTokenKubeconfig,
+      isShootStatusHibernated,
+      hasShootWorkerGroups,
+    } = useShootItem()
+
+    const {
+      phase,
+      phaseType,
+      rotationType,
+    } = useShootStatusCredentialRotation(shootItem, {
+      type: props.type,
+    })
+
+    const authnStore = useAuthnStore()
+
+    const startOperation = computed(() => {
+      return get(rotationType.value, 'startOperation')
+    })
+
+    const completionOperation = computed(() => {
+      return get(rotationType.value, 'completionOperation')
+    })
+
+    const operation = computed(() => {
+      if (phaseType.value === 'Prepared' || phaseType.value === 'Completing') {
+        return completionOperation.value
+      }
+      return startOperation.value
+    })
+
+    const isActionToBeScheduled = computed(() => {
+      return shootGardenerOperation.value === operation.value
+    })
+
+    const mode = computed(() => {
+      if (!completionOperation.value) {
         return 'ROTATE'
       }
-      if (this.operation === this.completionOperation) {
+      if (operation.value === completionOperation.value) {
         return 'COMPLETE'
       }
       return 'START'
-    },
-    operation () {
-      if (this.phaseType === 'Prepared' || this.phaseType === 'Completing') {
-        return this.completionOperation
-      }
-      return this.startOperation
-    },
-    startOperation () {
-      return this.rotationType.startOperation
-    },
-    completionOperation () {
-      return this.rotationType.completionOperation
-    },
-    isActionToBeScheduled () {
-      return this.shootGardenOperation === this.operation
-    },
-    isProgressing () {
-      if (this.mode === 'START' && this.phaseType === 'Preparing') {
+    })
+
+    const isProgressing = computed(() => {
+      if (mode.value === 'START' && phaseType.value === 'Preparing') {
         return true
       }
-      if (this.mode === 'COMPLETE' && this.phaseType === 'Completing') {
+      if (mode.value === 'COMPLETE' && phaseType.value === 'Completing') {
         return true
       }
-      if (!this.rotationType.twoStep && this.phaseType === 'Rotating') {
+      if (!rotationType.value.twoStep && phaseType.value === 'Rotating') {
         return true
       }
       return false
-    },
-    showLoadingIndicator () {
-      if (this.isActionToBeScheduled) {
+    })
+
+    const showLoadingIndicator = computed(() => {
+      if (isActionToBeScheduled.value) {
         return true
       }
-      if (this.isScheduled) {
+      if (isScheduled.value) {
         return true
       }
-      if (this.isProgressing && this.type !== 'ALL_CREDENTIALS') {
+      if (isProgressing.value && props.type !== 'ALL_CREDENTIALS') {
         // Only show the loading indicator for the rotation that is actually running, not for the overall trigger button
         return true
       }
       return false
-    },
-    isDisabled () {
-      if (this.phase && this.phase.incomplete) {
+    })
+
+    const disabled = computed(() => {
+      if (phase.value && phase.value.incomplete) {
         return true
       }
-      if (this.isHibernationPreventingRotation) {
+      if (isHibernationPreventingRotation.value) {
         return true
       }
-      if (this.isScheduledOperation) {
+      if (isScheduledOperation.value) {
         return true
       }
-      if (this.isProgressing) {
+      if (isProgressing.value) {
         return true
       }
       return false
-    },
-    isScheduledForMaintenance () {
-      return this.shootAnnotations['maintenance.gardener.cloud/operation'] === this.operation
-    },
-    isScheduled () {
-      return this.shootAnnotations['gardener.cloud/operation'] === this.operation
-    },
-    isScheduledOperation () {
-      return !!this.shootAnnotations['gardener.cloud/operation']
-    },
-    isMaintenanceDisabled () {
-      return !this.isScheduledForMaintenance && !!this.shootAnnotations['maintenance.gardener.cloud/operation']
-    },
-    maintenanceHint () {
-      if (this.isMaintenanceDisabled) {
+    })
+
+    const isScheduledForMaintenance = computed(() => {
+      return shootAnnotations.value['maintenance.gardener.cloud/operation'] === operation.value
+    })
+
+    const isScheduled = computed(() => {
+      return shootAnnotations.value['gardener.cloud/operation'] === operation.value
+    })
+
+    const isScheduledOperation = computed(() => {
+      return !!shootAnnotations.value['gardener.cloud/operation']
+    })
+
+    const isMaintenanceDisabled = computed(() => {
+      return !isScheduledForMaintenance.value && !!shootAnnotations.value['maintenance.gardener.cloud/operation']
+    })
+
+    const maintenanceHint = computed(() => {
+      if (isMaintenanceDisabled.value) {
         return 'Another operation has already been scheduled. Only one operation at a time can be scheduled.'
       }
       return ''
-    },
-    isHibernationPreventingRotation () {
-      return this.isShootStatusHibernated &&
+    })
+
+    const isHibernationPreventingRotation = computed(() => {
+      return isShootStatusHibernated.value &&
         includes(['rotate-credentials-start',
           'rotate-etcd-encryption-key-start',
           'rotate-credentials-complete',
           'rotate-etcd-encryption-key-complete',
           'rotate-serviceaccount-key-start',
           'rotate-serviceaccount-key-complete'],
-        this.operation)
-    },
-    icon () {
-      if (this.isScheduledForMaintenance) {
+        operation.value)
+    })
+
+    const icon = computed(() => {
+      if (isScheduledForMaintenance.value) {
         return 'mdi-clock-outline'
       }
       return 'mdi-refresh'
-    },
-    confirmButtonText () {
-      if (this.isScheduledForMaintenance && !this.maintenance) {
+    })
+
+    const confirmButtonText = computed(() => {
+      if (isScheduledForMaintenance.value && !maintenance.value) {
         return 'Unschedule Rotation'
       }
-      if (this.maintenance) {
+      if (maintenance.value) {
         return 'Schedule Rotation'
       }
-      switch (this.mode) {
+      switch (mode.value) {
         case 'START':
           return 'Prepare Rotation'
         case 'COMPLETE':
           return 'Complete Rotation'
       }
       return 'Rotate'
-    },
-    tooltip () {
-      if (this.isScheduledForMaintenance) {
+    })
+
+    const tooltip = computed(() => {
+      if (isScheduledForMaintenance.value) {
         return 'This operation is scheduled to be performed during the next maintenance time window'
       }
-      if (this.isHibernationPreventingRotation && this.isShootStatusHibernated) {
+      if (isHibernationPreventingRotation.value && isShootStatusHibernated.value) {
         return 'Cluster is hibernated. Wake up cluster to perform this operation'
       }
-      if (this.phase && this.phase.incomplete) {
+      if (phase.value && phase.value.incomplete) {
         return 'Operation is disabled because all two-step operations need to be in the same phase'
       }
-      if (!this.showLoadingIndicator && this.isScheduledOperation) {
+      if (!showLoadingIndicator.value && isScheduledOperation.value) {
         return 'There is already an operation scheduled for this cluster'
       }
-      if (this.showLoadingIndicator && this.type === 'ALL_CREDENTIALS') {
+      if (showLoadingIndicator.value && props.type === 'ALL_CREDENTIALS') {
         return 'A rotation operation is currently running'
       }
       return undefined
-    },
-    componentTexts () {
-      const componentTexts = {
+    })
+
+    const componentTexts = computed(() => {
+      const allComponentTexts = {
         'rotate-kubeconfig-credentials': {
-          caption: this.showLoadingIndicator
+          caption: showLoadingIndicator.value
             ? 'Rotating kubeconfig credentials'
             : 'Start Kubeconfig Rotation',
           errorMessage: 'Could not start the rotation of kubeconfig credentials',
-          successMessage: `Rotation of kubeconfig credentials started for ${this.shootName}`,
+          successMessage: `Rotation of kubeconfig credentials started for ${shootName.value}`,
           heading: 'Do you want to start the rotation of kubeconfig credentials?',
           actions: [
             'The current kubeconfig credentials will be revoked',
@@ -251,22 +286,22 @@ export default {
           ],
         },
         'rotate-ca-start': {
-          caption: this.showLoadingIndicator
+          caption: showLoadingIndicator.value
             ? 'Preparing certificate authorities rotation'
             : 'Prepare Certificate Authorities Rotation',
           errorMessage: 'Could not prepare the rotation of certificate authorities',
-          successMessage: `Preparing rotation of certificate authorities for ${this.shootName}`,
+          successMessage: `Preparing rotation of certificate authorities for ${shootName.value}`,
           heading: 'Do you want to prepare the rotation of certificate authorities?',
           actions: [
             'New Certificate Authorities will be created and added to the bundle (old Certificate Authorities will remain in the bundle)',
           ],
         },
         'rotate-ca-complete': {
-          caption: this.showLoadingIndicator
+          caption: showLoadingIndicator.value
             ? 'Completing certificate authorities rotation'
             : 'Complete Certificate Authorities Rotation',
           errorMessage: 'Could not complete the rotation of certificate authorities',
-          successMessage: `Completing rotation of certificate authorities for ${this.shootName}`,
+          successMessage: `Completing rotation of certificate authorities for ${shootName.value}`,
           heading: 'Do you want to complete the rotation of certificate authorities?',
           actions: [
             'Old Certificate Authorities will be dropped from the bundle',
@@ -274,26 +309,26 @@ export default {
           ],
         },
         'rotate-observability-credentials': {
-          caption: this.showLoadingIndicator
+          caption: showLoadingIndicator.value
             ? 'Rotating observability passwords'
             : 'Start Observability Passwords Rotation',
           errorMessage: 'Could not start the rotation of observability passwords',
-          successMessage: `Rotation of observability passwords started for ${this.shootName}`,
+          successMessage: `Rotation of observability passwords started for ${shootName.value}`,
           heading: 'Do you want to start the rotation of observability passwords?',
           actions: compact([
             'The current observability passwords will be invalidated',
             'New observability passwords will be generated',
-            this.isAdmin
+            authnStore.isAdmin
               ? 'Note Operator: This will invalidate the user observability passwords. Operator passwords will be rotated automatically. There is no way to trigger the rotation manually'
               : undefined,
           ]),
         },
         'rotate-ssh-keypair': {
-          caption: this.showLoadingIndicator
+          caption: showLoadingIndicator.value
             ? 'Rotating SSH key pair'
             : 'Start Worker Nodes SSH Key Pair Rotation',
           errorMessage: 'Could not start the rotation of SSH key pair',
-          successMessage: `Rotation of SSH key pair started for ${this.shootName}`,
+          successMessage: `Rotation of SSH key pair started for ${shootName.value}`,
           heading: 'Do you want to start the rotation of SSH key pair for worker nodes?',
           actions: [
             'The current SSH key pair will be revoked.',
@@ -301,11 +336,11 @@ export default {
           ],
         },
         'rotate-etcd-encryption-key-start': {
-          caption: this.showLoadingIndicator
+          caption: showLoadingIndicator.value
             ? 'Preparing etcd encryption key rotation'
             : 'Prepare ETCD Encryption Key Rotation',
           errorMessage: 'Could not prepare the rotation of etcd encryption key',
-          successMessage: `Preparing rotation of etcd encryption key for ${this.shootName}`,
+          successMessage: `Preparing rotation of etcd encryption key for ${shootName.value}`,
           heading: 'Do you want to prepare the rotation of etcd encryption key?',
           actions: [
             'A new encryption key will be created and added to the bundle (old encryption key will remain in the bundle).',
@@ -313,33 +348,33 @@ export default {
           ],
         },
         'rotate-etcd-encryption-key-complete': {
-          caption: this.showLoadingIndicator
+          caption: showLoadingIndicator.value
             ? 'Completing etcd encryption key rotation'
             : 'Complete ETCD Encryption Key Rotation',
           errorMessage: 'Could not complete the rotation of etcd encryption key',
-          successMessage: `Completing rotation of etcd encryption key for ${this.shootName}`,
+          successMessage: `Completing rotation of etcd encryption key for ${shootName.value}`,
           heading: 'Do you want to complete the rotation of etcd encryption key?',
           actions: [
             'The old encryption will be dropped from the bundle.',
           ],
         },
         'rotate-serviceaccount-key-start': {
-          caption: this.showLoadingIndicator
+          caption: showLoadingIndicator.value
             ? 'Preparing ServiceAccount token signing key rotation'
             : 'Prepare ServiceAccount Token Signing Key Rotation',
           errorMessage: 'Could not prepare the rotation of ServiceAccount token signing key',
-          successMessage: `Preparing rotation of ServiceAccount token signing key for ${this.shootName}`,
+          successMessage: `Preparing rotation of ServiceAccount token signing key for ${shootName.value}`,
           heading: 'Do you want to prepare the rotation of ServiceAccount token signing key?',
           actions: [
             'A new signing key will be created and added to the bundle (old signing key will remain in the bundle)',
           ],
         },
         'rotate-serviceaccount-key-complete': {
-          caption: this.showLoadingIndicator
+          caption: showLoadingIndicator.value
             ? 'Completing ServiceAccount token signing key rotation'
             : 'Complete ServiceAccount Token Signing Key Rotation',
           errorMessage: 'Could not complete the rotation of ServiceAccount token signing key',
-          successMessage: `Completing rotation of ServiceAccount token signing key for ${this.shootName}`,
+          successMessage: `Completing rotation of ServiceAccount token signing key for ${shootName.value}`,
           heading: 'Do you want to complete the rotation of ServiceAccount token signing key?',
           actions: [
             'Old signing key will be dropped from the bundle',
@@ -347,94 +382,123 @@ export default {
           ],
         },
       }
-      componentTexts['rotate-credentials-start'] = {
-        caption: this.showLoadingIndicator
+      allComponentTexts['rotate-credentials-start'] = {
+        caption: showLoadingIndicator.value
           ? 'Preparing credential rotation'
           : 'Start Rotation of all Credentials',
-        buttonText: this.text ? 'Prepare Rotation of all Credentials' : '',
+        buttonText: props.text ? 'Prepare Rotation of all Credentials' : '',
         errorMessage: 'Could not prepare credential rotation',
-        successMessage: `Preparing credential rotation for ${this.shootName}`,
+        successMessage: `Preparing credential rotation for ${shootName.value}`,
         heading: 'Do you want to prepare the rotation of all credentials?',
         actions: [
-          ...this.shootEnableStaticTokenKubeconfig
-            ? componentTexts['rotate-kubeconfig-credentials'].actions
+          ...shootEnableStaticTokenKubeconfig.value
+            ? allComponentTexts['rotate-kubeconfig-credentials'].actions
             : [],
-          ...componentTexts['rotate-ca-start'].actions,
-          ...componentTexts['rotate-observability-credentials'].actions,
-          ...this.hasShootWorkerGroups
-            ? componentTexts['rotate-ssh-keypair'].actions
+          ...allComponentTexts['rotate-ca-start'].actions,
+          ...allComponentTexts['rotate-observability-credentials'].actions,
+          ...hasShootWorkerGroups.value
+            ? allComponentTexts['rotate-ssh-keypair'].actions
             : [],
-          ...componentTexts['rotate-etcd-encryption-key-start'].actions,
-          ...componentTexts['rotate-serviceaccount-key-start'].actions,
+          ...allComponentTexts['rotate-etcd-encryption-key-start'].actions,
+          ...allComponentTexts['rotate-serviceaccount-key-start'].actions,
         ],
       }
-      componentTexts['rotate-credentials-complete'] = {
-        caption: this.showLoadingIndicator
+      allComponentTexts['rotate-credentials-complete'] = {
+        caption: showLoadingIndicator.value
           ? 'Completing credential rotation'
           : 'Complete Rotation of all Credentials',
-        buttonText: this.text
+        buttonText: props.text
           ? 'Complete Rotation of all Credentials'
           : '',
         errorMessage: 'Could not complete credential rotation',
-        successMessage: `Completing credential rotation for ${this.shootName}`,
+        successMessage: `Completing credential rotation for ${shootName.value}`,
         heading: 'Do you want to complete the rotation of all credentials?',
         actions: [
-          ...componentTexts['rotate-ca-complete'].actions,
-          ...componentTexts['rotate-etcd-encryption-key-complete'].actions,
-          ...componentTexts['rotate-serviceaccount-key-complete'].actions,
+          ...allComponentTexts['rotate-ca-complete'].actions,
+          ...allComponentTexts['rotate-etcd-encryption-key-complete'].actions,
+          ...allComponentTexts['rotate-serviceaccount-key-complete'].actions,
         ],
       }
-      return componentTexts[this.operation]
-    },
-  },
-  watch: {
-    isActionToBeScheduled (actionToBeScheduled) {
-      const isActionScheduled = !actionToBeScheduled && this.actionTriggered
+      return allComponentTexts[operation.value]
+    })
+
+    const actionTriggered = ref(false)
+    const maintenance = ref(isScheduledForMaintenance.value)
+
+    const appStore = useAppStore()
+
+    watch(isActionToBeScheduled, value => {
+      const isActionScheduled = !value && actionTriggered.value
       if (!isActionScheduled) {
         return
       }
-      this.actionTriggered = false
+      actionTriggered.value = false
 
-      if (!this.shootName) { // ensure that notification is not triggered by shoot resource being cleared (e.g. during navigation)
+      if (!shootName.value) { // ensure that notification is not triggered by shoot resource being cleared (e.g. during navigation)
         return
       }
 
-      this.setSuccess(this.componentTexts.successMessage)
-    },
-  },
-  mounted () {
-    this.maintenance = this.isScheduledForMaintenance
+      appStore.setSuccess(componentTexts.value.successMessage)
+    })
+
+    return {
+      shootName,
+      shootNamespace,
+      phase,
+      phaseType,
+      rotationType,
+      mode,
+      operation,
+      startOperation,
+      completionOperation,
+      isActionToBeScheduled,
+      isProgressing,
+      showLoadingIndicator,
+      disabled,
+      isScheduledForMaintenance,
+      isScheduled,
+      isScheduledOperation,
+      isMaintenanceDisabled,
+      maintenanceHint,
+      isHibernationPreventingRotation,
+      icon,
+      confirmButtonText,
+      tooltip,
+      componentTexts,
+      actionTriggered,
+      maintenance,
+    }
   },
   methods: {
-    ...mapActions(useAppStore, [
-      'setSuccess',
-    ]),
     async onConfigurationDialogOpened () {
-      if (await this.$refs.actionDialog.waitForDialogClosed()) {
+      const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
+      if (confirmed) {
         this.start()
       }
     },
     async start () {
       this.actionTriggered = true
-
-      let data
+      const annotations = {}
       if (this.maintenance) {
-        data = { 'maintenance.gardener.cloud/operation': this.operation }
+        annotations['maintenance.gardener.cloud/operation'] = this.operation
       } else if (this.isScheduledForMaintenance) {
         // remove annotation if this operation was scheduled for maintenance
-        data = { 'maintenance.gardener.cloud/operation': null }
+        annotations['maintenance.gardener.cloud/operation'] = null
       } else {
-        data = { 'gardener.cloud/operation': this.operation }
+        annotations['gardener.cloud/operation'] = this.operation
       }
       try {
-        await this.api.addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, data })
+        await this.api.addShootAnnotation({
+          namespace: this.shootNamespace,
+          name: this.shootName,
+          data: annotations,
+        })
       } catch (err) {
         const errorMessage = this.componentTexts.errorMessage
         const errorDetails = errorDetailsFromError(err)
         const detailedErrorMessage = errorDetails.detailedMessage
         this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
         this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-
         this.actionTriggered = false
       }
     },

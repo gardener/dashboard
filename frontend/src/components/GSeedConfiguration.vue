@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-action-button-dialog
     ref="actionDialog"
-    :shoot-item="shootItem"
     width="450"
     caption="Configure Seed"
     confirm-required
@@ -31,16 +30,17 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import {
-  mapState,
-  mapActions,
-} from 'pinia'
+  ref,
+  computed,
+} from 'vue'
 
 import { useSeedStore } from '@/store/seed'
 
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 
+import { useShootItem } from '@/composables/useShootItem'
+
 import { errorDetailsFromError } from '@/utils/error'
-import shootItem from '@/mixins/shootItem'
 
 import {
   map,
@@ -51,32 +51,35 @@ export default {
   components: {
     GActionButtonDialog,
   },
-  mixins: [
-    shootItem,
-  ],
   inject: ['api', 'logger'],
-  data () {
+  setup () {
+    const {
+      shootNamespace,
+      shootName,
+      shootSeedName,
+      shootCloudProviderKind,
+    } = useShootItem()
+
+    const seedStore = useSeedStore()
+
+    const seedNames = computed(() => {
+      const seeds = filter(seedStore.seedList, ['data.type', shootCloudProviderKind.value])
+      return map(seeds, 'metadata.name')
+    })
+
+    const seedName = ref(shootSeedName.value)
+
     return {
-      seedName: undefined,
+      shootNamespace,
+      shootName,
+      shootSeedName,
+      seedName,
+      seedNames,
     }
   },
-  computed: {
-    ...mapState(useSeedStore, [
-      'seedList',
-    ]),
-    seedNames () {
-      const filteredSeeds = filter(this.seedList, ['data.type', this.shootCloudProviderKind])
-      return map(filteredSeeds, seed => {
-        return seed.metadata.name
-      })
-    },
-  },
   methods: {
-    ...mapActions(useSeedStore, [
-      'seedByName',
-    ]),
     async onConfigurationDialogOpened () {
-      await this.reset()
+      this.seedName = this.shootSeedName
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
         await this.updateConfiguration()
@@ -98,9 +101,6 @@ export default {
         this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
         this.logger.error(errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
-    },
-    reset () {
-      this.seedName = this.shootSeedName
     },
   },
 }

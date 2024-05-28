@@ -28,6 +28,7 @@
       // Ignore major updates for these dependencies until we support ES modules
       matchDatasources: ["npm"],
       matchPackageNames: [
+        "@octokit/auth-app",
         "@octokit/core",
         "@octokit/plugin-paginate-graphql",
         "@octokit/plugin-paginate-rest",

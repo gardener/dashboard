@@ -15,7 +15,7 @@ const pTimeout = require('p-timeout')
 const { authentication, authorization } = require('../services')
 const createError = require('http-errors')
 const logger = require('../logger')
-const { sessionSecret, oidc = {} } = require('../config')
+const { sessionSecrets, oidc = {} } = require('../config')
 
 const {
   encodeState,
@@ -25,7 +25,7 @@ const {
   decode,
   encrypt,
   decrypt
-} = require('./jose')(sessionSecret)
+} = require('./jose')(sessionSecrets)
 
 const now = () => Math.floor(Date.now() / 1000)
 const digest = (data, n = 7) => {
@@ -355,7 +355,16 @@ async function getTokenSet (cookies) {
   if (!encryptedValues) {
     throw createError(401, 'No bearer token found in request', { code: 'ERR_JWE_NOT_FOUND' })
   }
-  const values = await decrypt(encryptedValues)
+  let values = ''
+  try {
+    values = await decrypt(encryptedValues)
+  } catch (err) {
+    const {
+      message,
+      code = 'ERR_JWE_DECRYPTION_FAILED'
+    } = err
+    throw createError(401, message, { code })
+  }
   if (!values) {
     throw createError(401, 'The decrypted bearer token must not be empty', { code: 'ERR_JWE_DECRYPTION_FAILED' })
   }

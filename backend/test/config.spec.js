@@ -74,8 +74,15 @@ describe('config', function () {
         SESSION_SECRET: 'secret'
       }
 
+      let readFileSyncSpy
+
       beforeEach(() => {
+        readFileSyncSpy = jest.spyOn(fs, 'readFileSync')
+      })
+
+      afterEach(() => {
         gardener.readConfig.mockClear()
+        readFileSyncSpy.mockRestore()
       })
 
       it('should return the config in test environment', function () {
@@ -141,6 +148,33 @@ describe('config', function () {
         expect(config.oidc.client_id).toBe('client_id')
         expect(config.oidc.client_secret).toBe('client_secret')
         expect(config.oidc.ca).toBe('ca')
+      })
+
+      it('should return the config with values read from the filesystem', function () {
+        const env = Object.assign({}, environmentVariables)
+
+        const fileMap = {
+          '/etc/gardener-dashboard/secrets/oidc/client_id': 'client_id_from_file',
+          '/etc/gardener-dashboard/secrets/oidc/client_secret': 'client_secret_from_file',
+          '/etc/gardener-dashboard/secrets/github/authentication.appId': '12345',
+          '/etc/gardener-dashboard/secrets/github/authentication.installationId': '67890'
+        }
+
+        readFileSyncSpy.mockImplementation(filePath => {
+          if (filePath in fileMap) {
+            return fileMap[filePath]
+          }
+          throw new Error(filePath + ': not found')
+        })
+
+        const filename = '/etc/gardener/4/config.yaml'
+        const config = gardener.loadConfig(filename, { env })
+
+        expect(config.oidc.issuer).toBe('https://kubernetes:32001')
+        expect(config.oidc.client_id).toBe('client_id_from_file')
+        expect(config.oidc.client_secret).toBe('client_secret_from_file')
+        expect(config.gitHub.authentication.appId).toBe(12345)
+        expect(config.gitHub.authentication.installationId).toBe(67890)
       })
     })
   })

@@ -4,12 +4,15 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import { shallowRef } from 'vue'
 import { mount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
 
 import { useConfigStore } from '@/store/config'
 
 import GStatusTags from '@/components/GStatusTags'
+
+import { createShootItemComposable } from '@/composables/useShootItem'
 
 const { createVuetifyPlugin } = global.fixtures.helper
 
@@ -18,23 +21,24 @@ describe('components', () => {
     let pinia
 
     function mountStatusTags (conditionTypes) {
+      const shootItem = shallowRef({
+        status: {
+          conditions: conditionTypes.map(type => {
+            return {
+              type,
+              lastTransitionTime: 'foo-transition-time',
+            }
+          }),
+        },
+      })
       return mount(GStatusTags, {
         global: {
           plugins: [
             createVuetifyPlugin(),
             pinia,
           ],
-        },
-        props: {
-          shootItem: {
-            status: {
-              conditions: conditionTypes.map(type => {
-                return {
-                  type,
-                  lastTransitionTime: 'foo-transition-time',
-                }
-              }),
-            },
+          provide: {
+            'shoot-item': createShootItemComposable(shootItem),
           },
         },
       })

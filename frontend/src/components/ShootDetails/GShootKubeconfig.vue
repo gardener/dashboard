@@ -68,7 +68,6 @@ SPDX-License-Identifier: Apache-2.0
 
       <g-static-token-kubeconfig-configuration
         v-if="!isGardenloginType"
-        :shoot-item="shootItem"
       />
     </template>
   </g-list-item>
@@ -87,8 +86,9 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { ref } from 'vue'
+import { storeToRefs } from 'pinia'
 import download from 'downloadjs'
-import { mapState } from 'pinia'
 
 import { useAuthzStore } from '@/store/authz'
 
@@ -100,7 +100,7 @@ import GCodeBlock from '@/components/GCodeBlock.vue'
 import GGardenloginInfo from '@/components/GGardenloginInfo.vue'
 import GStaticTokenKubeconfigConfiguration from '@/components/GStaticTokenKubeconfigConfiguration.vue'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
 
 export default {
   components: {
@@ -112,7 +112,6 @@ export default {
     GGardenloginInfo,
     GStaticTokenKubeconfigConfiguration,
   },
-  mixins: [shootItem],
   props: {
     showListIcon: {
       type: Boolean,
@@ -123,15 +122,33 @@ export default {
       default: 'gardenlogin',
     },
   },
-  data () {
+  setup (props) {
+    const authzStore = useAuthzStore()
+    const {
+      canGetSecrets,
+    } = storeToRefs(authzStore)
+
+    const {
+      shootNamespace,
+      shootName,
+      shootProjectName,
+      shootInfo,
+      shootEnableStaticTokenKubeconfig,
+    } = useShootItem()
+
+    const expansionPanel = ref(false)
+
     return {
-      expansionPanel: false,
+      canGetSecrets,
+      shootNamespace,
+      shootName,
+      shootProjectName,
+      shootInfo,
+      shootEnableStaticTokenKubeconfig,
+      expansionPanel,
     }
   },
   computed: {
-    ...mapState(useAuthzStore, [
-      'canGetSecrets',
-    ]),
     icon () {
       return this.showListIcon ? 'mdi-file' : ''
     },

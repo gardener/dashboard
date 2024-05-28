@@ -43,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
 import GUsernamePassword from '@/components/GUsernamePasswordListTile'
 import GLinkListTile from '@/components/GLinkListTile'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
 
 import { get } from '@/lodash'
 
@@ -52,7 +52,19 @@ export default {
     GUsernamePassword,
     GLinkListTile,
   },
-  mixins: [shootItem],
+  setup () {
+    const {
+      shootItem,
+      shootInfo,
+      isShootStatusHibernated,
+    } = useShootItem()
+
+    return {
+      shootItem,
+      shootInfo,
+      isShootStatusHibernated,
+    }
+  },
   computed: {
     plutonoUrl () {
       return get(this.shootInfo, 'plutonoUrl', '')

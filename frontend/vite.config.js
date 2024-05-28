@@ -56,7 +56,44 @@ export default defineConfig(({ command, mode }) => {
     VITE_BASE_URL,
   })
 
+  const manualChunks = {
+    vendor: [
+      '@braintree/sanitize-url',
+      'lodash',
+      'js-yaml',
+      'highlight.js',
+      'socket.io-client',
+      'dayjs',
+      'semver',
+      'js-base64',
+      'downloadjs',
+      'md5',
+      'uuid',
+      'netmask',
+      'statuses',
+      'jwt-decode',
+      'toidentifier',
+    ],
+    vuetify: [
+      'vuetify',
+    ],
+  }
+
   const config = {
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks (id) {
+            const match = /\/node_modules\/([^@/]+|@[^/]+\/[^/]*)/.exec(id)
+            for (const [key, value] of Object.entries(manualChunks)) {
+              if (value.includes(match?.[1])) {
+                return key
+              }
+            }
+          },
+        },
+      },
+    },
     plugins: [
       htmlPlugin(process.env),
       vue({

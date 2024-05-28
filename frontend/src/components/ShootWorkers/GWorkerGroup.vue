@@ -374,6 +374,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapActions } from 'pinia'
+import yaml from 'js-yaml'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
@@ -392,7 +393,6 @@ export default {
   },
   inject: [
     'mergeProps',
-    'yaml',
     'activePopoverKey',
   ],
   props: {
@@ -433,12 +433,12 @@ export default {
       },
     },
     machineType () {
-      const machineTypes = this.machineTypesByCloudProfileName({ cloudProfileName: this.cloudProfileName })
+      const machineTypes = this.machineTypesByCloudProfileName(this.cloudProfileName)
       const type = get(this.workerGroup, 'machine.type')
       return find(machineTypes, ['name', type])
     },
     volumeType () {
-      const volumeTypes = this.volumeTypesByCloudProfileName({ cloudProfileName: this.cloudProfileName })
+      const volumeTypes = this.volumeTypesByCloudProfileName(this.cloudProfileName)
       const type = get(this.workerGroup, 'volume.type')
       return find(volumeTypes, ['name', type])
     },
@@ -513,8 +513,8 @@ export default {
       'volumeTypesByCloudProfileName',
       'machineImagesByCloudProfileName',
     ]),
-    async updateWorkerGroupYaml (value) {
-      this.workerGroupYaml = await this.yaml.dump(value)
+    updateWorkerGroupYaml (value) {
+      this.workerGroupYaml = yaml.dump(value)
     },
   },
 }

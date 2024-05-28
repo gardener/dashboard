@@ -4,12 +4,15 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { Buffer } from 'buffer'
-
+import { Base64 } from 'js-base64'
 import semver from 'semver'
 import {
-  nextTick,
+  computed,
+  isRef,
+  isProxy,
+  toRef,
   unref,
+  nextTick,
 } from 'vue'
 
 import { useLogger } from '@/composables/useLogger'
@@ -386,7 +389,7 @@ export function parseServiceAccountUsername (username) {
 }
 
 export function encodeBase64 (input) {
-  return Buffer.from(input, 'utf8').toString('base64')
+  return Base64.encode(input)
 }
 
 export function encodeBase64Url (input) {
@@ -422,7 +425,9 @@ export function selfTerminationDaysForSecret (secret) {
 }
 
 export function purposesForSecret (secret) {
-  return selfTerminationDaysForSecret(secret) ? ['evaluation'] : ['evaluation', 'development', 'testing', 'production']
+  return selfTerminationDaysForSecret(secret)
+    ? ['evaluation']
+    : ['evaluation', 'development', 'testing', 'production']
 }
 
 export const shootAddonList = [
@@ -682,4 +687,79 @@ export function normalizeVersion (version) {
   if (match) {
     return [major, minor, patch].map(Number).join('.') + suffix
   }
+}
+
+export function toProperties (state) {
+  if (isRef(state)) {
+    return args => Array.isArray(args)
+      ? computed(() => get(state.value, ...args))
+      : computed(() => get(state.value, args))
+  }
+  if (isProxy(state)) {
+    return (path, key) => toRef(state, key)
+  }
+  throw new TypeError('Argument `state` must be a proxy or ref object')
+}
+
+export default {
+  emailToDisplayName,
+  handleTextFieldDrop,
+  getErrorMessages,
+  setDelayedInputFocus,
+  setInputFocus,
+  fullDisplayName,
+  displayName,
+  parseSize,
+  isEmail,
+  gravatarUrlGeneric,
+  gravatarUrlMp,
+  gravatarUrlRetro,
+  gravatarUrlIdenticon,
+  gravatarUrlRobohash,
+  gravatarUrl,
+  routes,
+  namespacedRoute,
+  routeName,
+  getDateFormatted,
+  getTimestampFormatted,
+  getTimeStringFrom,
+  getTimeStringTo,
+  isOwnSecret,
+  getCreatedBy,
+  getIssueSince,
+  getProjectDetails,
+  isShootStatusHibernated,
+  isReconciliationDeactivated,
+  isTruthyValue,
+  isStatusProgressing,
+  isSelfTerminationWarning,
+  isValidTerminationDate,
+  isTypeDelete,
+  isServiceAccountUsername,
+  isForeignServiceAccount,
+  parseServiceAccountUsername,
+  encodeBase64,
+  encodeBase64Url,
+  shortRandomString,
+  selfTerminationDaysForSecret,
+  purposesForSecret,
+  shootAddonList,
+  htmlToDocumentFragment,
+  documentFragmentToHtml,
+  transformHtml,
+  randomMaintenanceBegin,
+  maintenanceWindowWithBeginAndTimezone,
+  getDurationInMinutes,
+  defaultCriNameByKubernetesVersion,
+  isZonedCluster,
+  includesNameOrAll,
+  canI,
+  targetText,
+  sortedRoleDisplayNames,
+  mapTableHeader,
+  isHtmlColorCode,
+  omitKeysWithSuffix,
+  parseNumberWithMagnitudeSuffix,
+  normalizeVersion,
+  toProperties,
 }

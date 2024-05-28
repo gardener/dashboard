@@ -8,6 +8,8 @@ import {
   computed,
   reactive,
   watch,
+  inject,
+  provide,
 } from 'vue'
 
 import { useAuthnStore } from '@/store/authn'
@@ -18,7 +20,7 @@ import {
   some,
 } from '@/lodash'
 
-export const useTerminalConfig = () => {
+export function createTerminalConfigComposable () {
   const authnStore = useAuthnStore()
 
   function updateState (options = {}) {
@@ -101,4 +103,14 @@ export const useTerminalConfig = () => {
     config,
     updateState,
   }
+}
+
+export function useTerminalConfig () {
+  return inject('terminal-config', null)
+}
+
+export function useProvideTerminalConfig () {
+  const terminalConfigComposable = createTerminalConfigComposable()
+  provide('terminal-config', terminalConfigComposable)
+  return terminalConfigComposable
 }

@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import { nextTick } from 'vue'
 import { mount } from '@vue/test-utils'
 import { setActivePinia } from 'pinia'
 import { createTestingPinia } from '@pinia/testing'
@@ -15,7 +16,13 @@ import { useLocalStorageStore } from '@/store/localStorage'
 
 import GLogin from '@/layouts/GLogin.vue'
 
-const { createPlugins } = global.fixtures.helper
+import {
+  components as componentsPlugin,
+  utils as utilsPlugin,
+  notify as notifyPlugin,
+} from '@/plugins'
+
+const { createVuetifyPlugin } = global.fixtures.helper
 
 describe('components', () => {
   describe('g-login', () => {
@@ -34,7 +41,10 @@ describe('components', () => {
       return mount(GLogin, {
         global: {
           plugins: [
-            ...createPlugins(),
+            createVuetifyPlugin(),
+            componentsPlugin,
+            utilsPlugin,
+            notifyPlugin,
             pinia,
           ],
           mocks: {
@@ -86,8 +96,10 @@ describe('components', () => {
       localStorageStore = useLocalStorageStore()
     })
 
-    it('should render the login page', () => {
+    it('should render the login page', async () => {
       const wrapper = mountLogin()
+      await nextTick()
+
       expect(wrapper.find('div.text-h5.text-primary').text()).toBe('Universal Kubernetes at Scale')
     })
 

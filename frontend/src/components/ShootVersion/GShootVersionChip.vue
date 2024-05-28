@@ -123,18 +123,32 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
 
 export default {
-  mixins: [shootItem],
   inject: [
     'mergeProps',
     'activePopoverKey',
   ],
-  emits: [
-    'update:modelValue',
-  ],
+  setup () {
+    const {
+      shootMetadata,
+      shootK8sVersion,
+      shootSupportedPatchAvailable,
+      shootSupportedUpgradeAvailable,
+      shootAvailableK8sUpdates,
+      shootKubernetesVersionObject,
+    } = useShootItem()
+
+    return {
+      shootMetadata,
+      shootK8sVersion,
+      shootSupportedPatchAvailable,
+      shootSupportedUpgradeAvailable,
+      shootAvailableK8sUpdates,
+      shootKubernetesVersionObject,
+    }
+  },
   computed: {
     popoverKey () {
       return `g-shoot-version-chip:${this.shootMetadata.uid}`
