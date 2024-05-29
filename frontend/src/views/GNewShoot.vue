@@ -132,13 +132,11 @@ import { useVuelidate } from '@vuelidate/core'
 import {
   mapActions,
   mapState,
-  mapWritableState,
 } from 'pinia'
 
 import { useAppStore } from '@/store/app'
 import { useConfigStore } from '@/store/config'
 import { useCloudProfileStore } from '@/store/cloudProfile'
-import { useShootContextStore } from '@/store/shootContext'
 
 import GAccessRestrictions from '@/components/ShootAccessRestrictions/GAccessRestrictions'
 import GConfirmDialog from '@/components/dialogs/GConfirmDialog'
@@ -152,6 +150,8 @@ import GManageShootAddons from '@/components/ShootAddons/GManageAddons'
 import GManageShootDns from '@/components/ShootDns/GManageDns'
 import GManageControlPlaneHighAvailability from '@/components/ControlPlaneHighAvailability/GManageControlPlaneHighAvailability'
 import GToolbar from '@/components/GToolbar.vue'
+
+import { useShootContext } from '@/composables/useShootContext'
 
 import { errorDetailsFromError } from '@/utils/error'
 import { messageFromErrors } from '@/utils/validators'
@@ -193,8 +193,25 @@ export default {
     return next()
   },
   setup () {
+    const {
+      shootNamespace,
+      shootName,
+      shootManifest,
+      isShootDirty,
+      workerless,
+      maintenanceAutoUpdateKubernetesVersion,
+      maintenanceAutoUpdateMachineImageVersion,
+    } = useShootContext()
+
     return {
       v$: useVuelidate(),
+      shootNamespace,
+      shootName,
+      shootManifest,
+      isShootDirty,
+      workerless,
+      maintenanceAutoUpdateKubernetesVersion,
+      maintenanceAutoUpdateMachineImageVersion,
     }
   },
   data () {
@@ -207,17 +224,6 @@ export default {
   computed: {
     ...mapState(useConfigStore, [
       'accessRestriction',
-    ]),
-    ...mapWritableState(useShootContextStore, [
-      'maintenanceAutoUpdateKubernetesVersion',
-      'maintenanceAutoUpdateMachineImageVersion',
-    ]),
-    ...mapState(useShootContextStore, [
-      'shootNamespace',
-      'shootName',
-      'shootManifest',
-      'isShootDirty',
-      'workerless',
     ]),
     ...mapState(useCloudProfileStore, [
       'sortedInfrastructureKindList',

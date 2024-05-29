@@ -251,8 +251,7 @@ export function createShootItemComposable (shootItem, options = {}) {
     seedShootIngressDomain,
     canLinkToSeed,
     /* others */
-    accessRestrictionList,
-    shootSelectedAccessRestrictions: accessRestrictionList, // TODO deprecated
+    shootAccessRestrictions: accessRestrictionList,
     isShootStatusHibernationProgressing,
     canForceDeleteShoot,
   }

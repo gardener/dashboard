@@ -117,6 +117,12 @@ export function replaceShoot ({ namespace, name, data }) {
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}`, data)
 }
 
+export function patchShoot ({ namespace, name, data }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
+  return patchResource(`/api/namespaces/${namespace}/shoots/${name}`, data)
+}
+
 export function addShootAnnotation ({ namespace, name, data }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
@@ -400,6 +406,7 @@ export default {
   createShoot,
   deleteShoot,
   replaceShoot,
+  patchShoot,
   addShootAnnotation,
   getShootInfo,
   updateShootVersion,

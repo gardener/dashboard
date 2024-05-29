@@ -126,11 +126,12 @@ import { required } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
 import { useSecretStore } from '@/store/secret'
-import { useShootContextStore } from '@/store/shootContext'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 
 import GSelectSecret from '@/components/Secrets/GSelectSecret'
 import GVendorIcon from '@/components/GVendorIcon'
+
+import { useShootContext } from '@/composables/useShootContext'
 
 import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
@@ -153,8 +154,19 @@ export default {
     },
   },
   setup () {
+    const {
+      dnsProviders,
+      dnsPrimaryProviderId,
+      isNewCluster,
+      deleteDnsProvider,
+    } = useShootContext()
+
     return {
       v$: useVuelidate(),
+      dnsProviders,
+      dnsPrimaryProviderId,
+      isNewCluster,
+      deleteDnsProvider,
     }
   },
   validations () {
@@ -170,11 +182,6 @@ export default {
     }
   },
   computed: {
-    ...mapState(useShootContextStore, [
-      'dnsProviders',
-      'dnsPrimaryProviderId',
-      'isNewCluster',
-    ]),
     ...mapState(useGardenerExtensionStore, [
       'dnsProviderTypes',
     ]),
@@ -227,9 +234,6 @@ export default {
     this.v$.$touch()
   },
   methods: {
-    ...mapActions(useShootContextStore, [
-      'deleteDnsProvider',
-    ]),
     ...mapActions(useSecretStore, [
       'dnsSecretsByProviderKind',
     ]),

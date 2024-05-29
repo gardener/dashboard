@@ -38,7 +38,7 @@ const shootPropertyMappings = Object.freeze({
   providerType: 'spec.provider.type',
 })
 
-export function createShootHelperComposable (state, options = {}) {
+export function createShootHelperComposable (shootItem, options = {}) {
   const {
     cloudProfileStore = useCloudProfileStore(),
     configStore = useConfigStore(),
@@ -55,7 +55,9 @@ export function createShootHelperComposable (state, options = {}) {
     secretBindingName,
     kubernetesVersion,
     providerType,
-  } = mapValues(shootPropertyMappings, utils.toProperties(state))
+  } = mapValues(shootPropertyMappings, path => {
+    return computed(() => get(shootItem.value, path))
+  })
 
   const infrastructureSecret = computed(() => {
     return find(infrastructureSecrets.value, ['metadata.name', secretBindingName.value])
