@@ -24,13 +24,11 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { computed } from 'vue'
-import { storeToRefs } from 'pinia'
-
-import { useShootContextStore } from '@/store/shootContext'
 
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GAccessRestrictions from '@/components/ShootAccessRestrictions/GAccessRestrictions'
 
+import { useShootContext } from '@/composables/useShootContext'
 import { useShootItem } from '@/composables/useShootItem'
 import { useShootHelper } from '@/composables/useShootHelper'
 
@@ -56,13 +54,10 @@ export default {
       accessRestrictionNoItemsText,
     } = useShootHelper()
 
-    const shootContextStore = useShootContextStore()
     const {
-      shootManifest,
-    } = storeToRefs(shootContextStore)
-    const {
+      getAccessRestrictionPatchData,
       setShootManifest,
-    } = shootContextStore
+    } = useShootContext()
 
     const disabled = computed(() => {
       return isEmpty(accessRestrictionDefinitionList.value)
@@ -78,7 +73,7 @@ export default {
       shootItem,
       shootNamespace,
       shootName,
-      shootManifest,
+      getAccessRestrictionPatchData,
       setShootManifest,
       disabled,
       tooltip,
@@ -92,12 +87,12 @@ export default {
       }
     },
     async updateConfiguration () {
+      const data = this.getAccessRestrictionPatchData()
       try {
-        // TODO only update access restrictions
-        await this.api.replaceShoot({
+        await this.api.patchShoot({
           namespace: this.shootNamespace,
           name: this.shootName,
-          data: this.shootManifest,
+          data,
         })
       } catch (err) {
         const errorMessage = 'Could not save access restriction configuration'

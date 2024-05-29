@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div
-    v-for="{ key, title, description, options: optionsList } in props.selectedAccessRestrictions"
+    v-for="{ key, title, description, options: optionsList } in props.accessRestrictions"
     :key="key"
     class="d-flex"
   >
@@ -54,7 +54,7 @@ SPDX-License-Identifier: Apache-2.0
 import { transformHtml } from '@/utils'
 
 const props = defineProps({
-  selectedAccessRestrictions: {
+  accessRestrictions: {
     type: Array,
   },
 })
