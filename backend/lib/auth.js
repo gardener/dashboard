@@ -9,6 +9,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
+const { sessionSecrets } = require('./config')
 const {
   authorizationUrl,
   authorizationCallback,
@@ -22,7 +23,7 @@ const { requestLogger } = require('./middleware')
 const router = exports.router = express.Router()
 
 router.use(requestLogger)
-router.use(cookieParser())
+router.use(cookieParser(sessionSecrets))
 router.use(bodyParser.json())
 router.route('/')
   .get(async (req, res, next) => {

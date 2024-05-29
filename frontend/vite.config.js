@@ -6,7 +6,10 @@
 
 import zlib from 'node:zlib'
 import { createRequire } from 'node:module'
-import { readFileSync } from 'node:fs'
+import {
+  readFileSync,
+  existsSync,
+} from 'node:fs'
 import {
   fileURLToPath,
   URL,
@@ -34,6 +37,15 @@ function htmlPlugin (env) {
     name: 'html-transform',
     transformIndexHtml: html => html.replace(/%(.*?)%/g, (match, key) => env[key]),
   }
+}
+
+const keyPath = resolve('./ssl/key.pem')
+const certPath = resolve('./ssl/cert.pem')
+
+if (!existsSync(keyPath) || existsSync(certPath)) {
+  // eslint-disable-next-line no-console
+  console.error('SSL key and certificate files are missing. Please run `yarn setup`.')
+  process.exit(1)
 }
 
 export default defineConfig(({ command, mode }) => {
@@ -151,8 +163,12 @@ export default defineConfig(({ command, mode }) => {
       ],
     },
     server: {
-      port: 8080,
+      port: 8443,
       strictPort: true,
+      https: {
+        key: readFileSync(keyPath),
+        cert: readFileSync(certPath),
+      },
       proxy: {
         '/api': {
           target: proxyTarget,
