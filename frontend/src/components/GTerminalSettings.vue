@@ -112,6 +112,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { toRefs } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { mapState } from 'pinia'
 import { required } from '@vuelidate/validators'
@@ -120,6 +121,8 @@ import { useAuthnStore } from '@/store/authn'
 
 import GTimeString from '@/components/GTimeString.vue'
 
+import { useTerminalConfig } from '@/composables/useTerminalConfig'
+
 import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
 
@@ -127,29 +130,35 @@ export default {
   components: {
     GTimeString,
   },
-  inject: [
-    'node',
-    'containerImage',
-    'shootNodes',
-    'privilegedMode',
-    'runtime',
-  ],
   props: {
     runtimeSettingsHidden: {
       type: Boolean,
       default: false,
     },
   },
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
-  validations () {
-    return {
+  setup (props) {
+    const { state } = useTerminalConfig()
+    const {
+      node,
+      containerImage,
+      shootNodes,
+      privilegedMode,
+      runtime,
+    } = toRefs(state)
+
+    const rules = {
       containerImage: withFieldName('Terminal Container Image', {
         required,
       }),
+    }
+
+    return {
+      v$: useVuelidate(rules, { containerImage }),
+      node,
+      containerImage,
+      shootNodes,
+      privilegedMode,
+      runtime,
     }
   },
   computed: {

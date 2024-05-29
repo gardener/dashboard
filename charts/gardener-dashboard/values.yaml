@@ -71,16 +71,6 @@ global:
     # (see https://expressjs.com/en/resources/middleware/body-parser.html#bodyparserjsonoptions)
     maxRequestBodySize: 100kb
 
-    # Experimental Feature: Control of Watch Cache for List Shoots Requests
-    # This feature allows fine-tuning the behavior of how list shoots requests are handled in terms of caching.
-    # Note: As this is an experimental feature, it is subject to change and may not be stable.
-    # Possible values for `experimentalUseWatchCacheForListShoots` are:
-    # - 'never': All list shoots requests are directly forwarded to the kube-apiserver without using the watch cache.
-    # - 'no': The watch cache is not utilized by default. Clients can opt-in to use the watch cache.
-    # - 'yes': The watch cache is used by default for serving list shoots requests. Clients can opt-out if they require data directly from the kube-apiserver.
-    # - 'always': All list shoots requests are served from the watch cache.
-    experimentalUseWatchCacheForListShoots: never
-
     containerPort: 8080
     metricsContainerPort: 9050
     servicePort: 8080
@@ -117,8 +107,14 @@ global:
         #   Li4u
         #   -----END RSA PRIVATE KEY-----
 
-    # sessionSecret is used for signing and encrytion of session data
+    # sessionSecret is the current secret used for signing tokens and encrypting session data.
+    # It is also used for verifying tokens and decrypting session data.
+    # This value should be set to a secure random string.
     sessionSecret: ~
+    # sessionSecretPrevious is the previous secret used only for verifying tokens and decrypting session data.
+    # It allows for a seamless rotation of the session secret by supporting both the current and previous secrets.
+    # Set this value to the previous sessionSecret during secret rotation, and leave it empty otherwise.
+    sessionSecretPrevious: ~
 
     # oidc:
     #   # well-known URL for OpenID Provider Issuer Discovery
@@ -177,9 +173,8 @@ global:
       #   gitHubRepoUrl: https://foo-github.com/dummyorg/dummyrepo
       #   hideClustersWithLabels: # hides clusters with labels on the 'ALL PROJECTS' page if the respective table option is enabled
       #   - ignore
-      #   newTicketLabels: # these are the labels that are automatically preselected when creating a new ticket
-      #   - default-label
-      #   # Available issue description template variables:
+
+      #   # Available template variables:
       #   # - `${shootName}`: name of the shoot
       #   # - `${shootNamespace}`: namespace of the shoot
       #   # - `${shootCreatedAt}`: creation timestamp of the shoot, format 'YYYY-MM-DD'
@@ -198,29 +193,35 @@ global:
       #   #       accessRestrictions[].options[].title: option title
       #   #       accessRestrictions[].options[].description: option description
       #   #       accessRestrictions[].options[].key: unique identifier
-      #   issueDescriptionTemplate: |
-      #     ## Which cluster is affected?
+      #   newIssue:
+      #     title: "[${shootProjectName}/${shootName}] <problem>"
+      #     labels: # these are the labels that are automatically preselected when creating a new ticket
+      #     - default-label
+      #     # GitHub issue forms
+      #     fileName: shoot_issue.yaml
+      #     affectedCluster: "${shootUrl}" # example template form element id
+      #     # Regular GitHub issue
+      #     body: | # do not set `body`, if you use GitHub issue forms
+      #       ## Which cluster is affected?
 
-      #     `Cluster Details Dashboard Link`: [${projectName}/${shootName}](${shootUrl})
-      #     `Operating System`: ${machineImageNames}
-      #     `Platform`: ${providerType}
-      #     <% if(accessRestrictions.length) { %>
-      #     ## Attention: This cluster has access restrictions
-      #     <% accessRestrictions.forEach(accessRestriction => { %>
-      #     - <%- accessRestriction.title %><% accessRestriction.options.forEach(option => { %>
-      #       - <%- option.title %><% }) }) %>
-      #     <%
-      #     }%>
-      #     ## What happened?
+      #       `Cluster Details Dashboard Link`: [${projectName}/${shootName}](${shootUrl})
+      #       `Operating System`: ${machineImageNames}
+      #       `Platform`: ${providerType}
+      #       <% if(accessRestrictions.length) { %>
+      #       ## Attention: This cluster has access restrictions
+      #       <% accessRestrictions.forEach(accessRestriction => { %>- ${accessRestriction.title}<% accessRestriction.options.forEach(option => { %>
+      #         - ${option.title}<% }) }) %>
+      #       <% } %>
+      #       ## What happened?
 
-      #     ## What you expected to happen?
+      #       ## What you expected to happen?
 
-      #     ## When did it happen or started to happen?
-      #     `Timestamp`: ${utcDateTimeNow}
+      #       ## When did it happen or started to happen?
+      #       `Timestamp`: ${utcDateTimeNow}
 
-      #     ## How would we reproduce it?
+      #       ## How would we reproduce it?
 
-      #     ## Anything else we need to know?
+      #       ## Anything else we need to know?
       defaultHibernationSchedule:
         evaluation:
         - start: 00 17 * * 1,2,3,4,5

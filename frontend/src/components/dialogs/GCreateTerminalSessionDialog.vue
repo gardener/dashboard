@@ -39,7 +39,6 @@ SPDX-License-Identifier: Apache-2.0
           <g-terminal-target
             v-model="targetTab.selectedTarget"
             :disabled="targetTab.configLoading"
-            :shoot-item="shootItem"
             @update:model-value="updateSettings"
           />
           <v-expansion-panels
@@ -75,7 +74,6 @@ SPDX-License-Identifier: Apache-2.0
           >
             <g-list>
               <g-terminal-shortcuts
-                :shoot-item="shootItem"
                 popper-boundaries-selector="#shortcut-tab"
                 @add-terminal-shortcut="onAddTerminalShortcut"
               />
@@ -88,26 +86,19 @@ SPDX-License-Identifier: Apache-2.0
       />
       <g-webterminal-service-account-dialog
         ref="serviceAccount"
-        :namespace="namespace"
+        :namespace="shootNamespace"
       />
     </template>
   </g-dialog>
 </template>
 
 <script>
-import {
-  toRefs,
-  toRaw,
-} from 'vue'
+import { toRaw } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
-import {
-  mapState,
-  mapActions,
-} from 'pinia'
+import { mapState } from 'pinia'
 
 import { useAuthnStore } from '@/store/authn'
 import { useTerminalStore } from '@/store/terminal'
-import { useShootStore } from '@/store/shoot'
 
 import GDialog from '@/components/dialogs/GDialog.vue'
 import GTerminalSettings from '@/components/GTerminalSettings.vue'
@@ -116,12 +107,10 @@ import GTerminalShortcuts from '@/components/GTerminalShortcuts.vue'
 import GUnverifiedTerminalShortcutsDialog from '@/components/dialogs/GUnverifiedTerminalShortcutsDialog.vue'
 import GWebterminalServiceAccountDialog from '@/components/dialogs/GWebterminalServiceAccountDialog.vue'
 
-import { useTerminalConfig } from '@/composables/useTerminalConfig'
+import { useProvideTerminalConfig } from '@/composables/useTerminalConfig'
+import { useTerminalSplitpanes } from '@/composables/useTerminalSplitpanes'
 
-import {
-  TargetEnum,
-  isShootStatusHibernated,
-} from '@/utils'
+import { TargetEnum } from '@/utils'
 
 import {
   filter,
@@ -134,7 +123,6 @@ import {
 } from '@/lodash'
 
 export default {
-
   components: {
     GDialog,
     GTerminalSettings,
@@ -143,33 +131,34 @@ export default {
     GUnverifiedTerminalShortcutsDialog,
     GWebterminalServiceAccountDialog,
   },
-  inject: [
-    'api',
-    'newTerminalPrompt',
-    'defaultTarget',
-    'setSelections',
-  ],
-  provide () {
-    return {
-      ...toRefs(this.state),
-    }
-  },
-  props: {
-    name: {
-      type: String,
-    },
-    namespace: {
-      type: String,
-    },
-    hasShootWorkerGroups: {
-      type: Boolean,
-      default: false,
-    },
-  },
+  inject: ['api'],
   setup () {
+    const {
+      shootNamespace,
+      shootName,
+      hasShootWorkerGroups,
+      isShootStatusHibernated,
+      newTerminalPrompt,
+      defaultTarget,
+      setSelections,
+    } = useTerminalSplitpanes()
+
+    const {
+      config,
+      updateState,
+    } = useProvideTerminalConfig()
+
     return {
       v$: useVuelidate(),
-      ...useTerminalConfig(),
+      shootNamespace,
+      shootName,
+      hasShootWorkerGroups,
+      isShootStatusHibernated,
+      newTerminalPrompt,
+      defaultTarget,
+      setSelections,
+      config,
+      updateState,
     }
   },
   data () {
@@ -194,12 +183,6 @@ export default {
     ...mapState(useTerminalStore, [
       'isTerminalShortcutsFeatureEnabled',
     ]),
-    shootItem () {
-      return this.shootByNamespaceAndName(pick(this, 'namespace', 'name'))
-    },
-    isShootStatusHibernated () {
-      return isShootStatusHibernated(get(this.shootItem, 'status'))
-    },
     valid () {
       switch (this.tab) {
         case 'shortcut-tab': {
@@ -259,7 +242,6 @@ export default {
     },
   },
   methods: {
-    ...mapActions(useShootStore, ['shootByNamespaceAndName']),
     async promptForSelections () {
       this.initialize()
       const confirmed = await this.$refs.gDialog.confirmWithDialog(
@@ -276,8 +258,10 @@ export default {
             return true
           }
 
-          const { data: projectMembers } = await this.api.getMembers({ namespace: this.namespace })
-          const serviceAccountName = `system:serviceaccount:${this.namespace}:dashboard-webterminal`
+          const { data: projectMembers } = await this.api.getMembers({
+            namespace: this.shootNamespace,
+          })
+          const serviceAccountName = `system:serviceaccount:${this.shootNamespace}:dashboard-webterminal`
           const member = find(projectMembers, ['username', serviceAccountName])
           const roles = get(member, 'roles')
           if (includes(roles, 'admin') && includes(roles, 'serviceaccountmanager')) {
@@ -321,7 +305,11 @@ export default {
       this.targetTab.configLoading = true
       try {
         this.targetTab.initializedForTarget = this.targetTab.selectedTarget
-        const { data: config } = await this.api.terminalConfig({ name: this.name, namespace: this.namespace, target: this.targetTab.selectedTarget })
+        const { data: config } = await this.api.terminalConfig({
+          namespace: this.shootNamespace,
+          name: this.shootName,
+          target: this.targetTab.selectedTarget,
+        })
         this.updateState(config)
       } catch (err) {
         this.targetTab.initializedForTarget = undefined

@@ -6,27 +6,18 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-select
-    v-model="internalPurpose"
+    v-model="v$.internalValue.$model"
     hint="Indicate the importance of the cluster"
     color="primary"
     item-color="primary"
     label="Purpose"
     :items="purposes"
-    item-title="purpose"
-    item-value="purpose"
+    :item-props="itemProps"
     persistent-hint
-    :error-messages="getErrorMessages(v$.internalPurpose)"
+    :error-messages="getErrorMessages(v$.internalValue)"
     variant="underlined"
-    @update:model-value="onInputPurpose"
-    @blur="v$.internalPurpose.$touch()"
-  >
-    <template #item="{ item, props }">
-      <v-list-item
-        v-bind="props"
-        :subtitle="item.raw.description"
-      />
-    </template>
-  </v-select>
+    @blur="v$.internalValue.$touch()"
+  />
 </template>
 
 <script>
@@ -34,71 +25,57 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
 import { withFieldName } from '@/utils/validators'
-import {
-  getErrorMessages,
-  purposesForSecret,
-} from '@/utils'
-
-import { map } from '@/lodash'
+import { getErrorMessages } from '@/utils'
 
 export default {
   props: {
-    secret: {
-      type: Object,
+    modelValue: {
+      type: String,
+    },
+    purposes: {
+      type: Array,
+      required: true,
     },
   },
   emits: [
-    'update-purpose',
+    'update:modelValue',
   ],
   setup () {
     return {
       v$: useVuelidate(),
     }
   },
-  data () {
-    return {
-      valid: undefined,
-      internalPurpose: undefined,
-    }
-  },
   validations () {
     return {
-      internalPurpose: withFieldName('Purpose', {
+      internalValue: withFieldName('Purpose', {
         required,
       }),
     }
   },
   computed: {
-    purposes () {
-      const purposes = purposesForSecret(this.secret)
-      return map(purposes, purpose => ({
-        purpose,
-        description: this.descriptionForPurpose(purpose),
-      }))
+    internalValue: {
+      get () {
+        return this.modelValue ?? ''
+      },
+      set (value) {
+        this.$emit('update:modelValue', value)
+      },
     },
   },
   methods: {
-    onInputPurpose () {
-      this.v$.internalPurpose.$touch()
-      this.$emit('update-purpose', this.internalPurpose)
+    itemProps (value) {
+      return {
+        value,
+        subtitle: this.getPurposeDescription(value),
+      }
     },
-    descriptionForPurpose (purpose) {
+    getPurposeDescription (purpose) {
       switch (purpose) {
         case 'testing':
           return 'Testing clusters do not get a monitoring or a logging stack as part of their control planes'
         default:
           return ''
       }
-    },
-    resetPurpose () {
-      if (!this.purposes.some(p => p.purpose === this.internalPurpose)) {
-        this.internalPurpose = undefined
-        this.onInputPurpose()
-      }
-    },
-    setPurpose (purpose) {
-      this.internalPurpose = purpose
-      this.onInputPurpose()
     },
     getErrorMessages,
   },

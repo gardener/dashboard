@@ -87,7 +87,7 @@
     "path-to-regexp": "^6.2.1",
     "set-cookie-parser": "^2.6.0",
     "socket.io-client": "^4.7.5",
-    "supertest": "^6.3.4"
+    "supertest": "^7.0.0"
   },
   "eslintConfig": {
     "env": {
@@ -152,7 +152,7 @@
       "<rootDir>/jest.setup.js"
     ]
   },
-  "packageManager": "yarn@4.1.1",
+  "packageManager": "yarn@4.2.2",
   "engines": {
     "node": "^20.5.0"
   }

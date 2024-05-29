@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     size="small"
     class="cursor-pointer"
     variant="tonal"
-    color="primary"
+    :color="chipColor"
   >
     <g-vendor-icon
       :icon="machineImageIcon"
@@ -51,6 +51,9 @@ export default {
     },
     machineImageIcon () {
       return get(this.machineImage, 'icon')
+    },
+    chipColor () {
+      return this.machineImage.isDeprecated ? 'warning' : 'primary'
     },
   },
   methods: {

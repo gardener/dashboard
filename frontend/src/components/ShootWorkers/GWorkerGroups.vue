@@ -22,8 +22,8 @@ SPDX-License-Identifier: Apache-2.0
           <v-chip
             v-bind="tooltipProps"
             size="small"
-            color="primary"
             variant="tonal"
+            :color="chipColor"
           >
             {{ itemCount }}
             {{ itemCount !== 1 ? 'Groups' : 'Group' }}
@@ -73,71 +73,53 @@ SPDX-License-Identifier: Apache-2.0
   </g-collapsable-items>
 </template>
 
-<script>
+<script setup>
+import {
+  ref,
+  computed,
+} from 'vue'
+
+import { useCloudProfileStore } from '@/store/cloudProfile'
+
 import GWorkerGroup from '@/components/ShootWorkers/GWorkerGroup'
 import GWorkerChip from '@/components/ShootWorkers/GWorkerChip'
 import GCollapsableItems from '@/components/GCollapsableItems'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
 
-export default {
-  components: {
-    GWorkerGroup,
-    GWorkerChip,
-    GCollapsableItems,
-  },
-  mixins: [shootItem],
-  inject: {
-    expandedWorkerGroups: {
-      default: undefined,
-    },
-  },
-  props: {
-    collapse: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  data () {
-    return {
-      workerGroupTab: 'overview',
-      internalExpanded: false,
-    }
-  },
-  computed: {
-    expanded: {
-      get () {
-        if (this.expandedWorkerGroups) {
-          return this.expandedWorkerGroups[this.shootMetadata.uid] ?? this.expandedWorkerGroups.default
-        }
-        return this.internalExpanded
-      },
-      set (value) {
-        if (this.expandedWorkerGroups) {
-          this.expandedWorkerGroups[this.shootMetadata.uid] = value
-        } else {
-          this.internalExpanded = value
-        }
-      },
-    },
-  },
-  methods: {
-    toggleExpanded (e) {
-      const newValue = !this.expanded
+import {
+  find,
+  filter,
+  some,
+} from '@/lodash'
 
-      if (e.shiftKey) {
-        if (this.expandedWorkerGroups) {
-          for (const key in this.expandedWorkerGroups) {
-            delete this.expandedWorkerGroups[key]
-          }
-          this.expandedWorkerGroups.default = newValue
-        }
-      } else {
-        this.expanded = newValue
-      }
-    },
+defineProps({
+  collapse: {
+    type: Boolean,
+    default: false,
   },
-}
+})
+
+const {
+  shootMetadata,
+  shootCloudProfileName,
+  hasShootWorkerGroups,
+  shootWorkerGroups,
+} = useShootItem()
+
+const cloudProfileStore = useCloudProfileStore()
+
+const workerGroupTab = ref('overview')
+
+const machineImages = computed(() => {
+  const machineImages = cloudProfileStore.machineImagesByCloudProfileName(shootCloudProfileName.value)
+  return filter(machineImages, image => some(shootWorkerGroups.value, { machine: { image: { name: image.name, version: image.version } } }))
+})
+
+const chipColor = computed(() => {
+  return some(machineImages.value, 'isDeprecated') ? 'warning' : 'primary'
+})
+
 </script>
 
 <style lang="scss" scoped>

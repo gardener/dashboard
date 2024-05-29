@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-card>
+  <v-card class="mb-4">
     <g-toolbar>
       <div class="d-flex">
         <div class="ticket-title d-flex align-center">

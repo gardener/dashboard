@@ -26,25 +26,21 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import {
-  toRefs,
+  ref,
   toRaw,
+  watch,
 } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 
 import GDialog from '@/components/dialogs/GDialog.vue'
 import GTerminalSettings from '@/components/GTerminalSettings.vue'
 
-import { useTerminalConfig } from '@/composables/useTerminalConfig'
+import { useProvideTerminalConfig } from '@/composables/useTerminalConfig'
 
 export default {
   components: {
     GDialog,
     GTerminalSettings,
-  },
-  provide () {
-    return {
-      ...toRefs(this.state),
-    }
   },
   props: {
     runtimeSettingsHidden: {
@@ -52,27 +48,29 @@ export default {
       default: false,
     },
   },
-  setup () {
+  setup (props) {
+    const {
+      config,
+      updateState,
+    } = useProvideTerminalConfig()
+
+    const selectedConfig = ref(null)
+
+    watch(config, value => {
+      selectedConfig.value = toRaw(value)
+    })
+
     return {
       v$: useVuelidate(),
-      ...useTerminalConfig(),
+      config,
+      updateState,
+      selectedConfig,
     }
-  },
-  data () {
-    return {
-      selectedConfig: undefined,
-    }
-  },
-  watch: {
-    config (value) {
-      this.selectedConfig = toRaw(value)
-    },
   },
   methods: {
     async promptForConfigurationChange (initialState) {
       this.updateState(initialState)
-      const confirmWithDialogPromise = this.$refs.gDialog.confirmWithDialog()
-      const confirmed = await confirmWithDialogPromise
+      const confirmed = await this.$refs.gDialog.confirmWithDialog()
       if (confirmed) {
         return this.config
       }

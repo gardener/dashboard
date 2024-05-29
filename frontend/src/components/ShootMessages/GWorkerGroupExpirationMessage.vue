@@ -6,9 +6,9 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div>
-    Machine image <span class="font-weight-bold">{{ name }} | Version: {{ version }}</span> of worker group <span class="font-weight-bold">{{ workerName }}</span>
+    Machine image <span class="font-weight-bold">{{ name }} | Version: {{ version }}</span> of worker group <span class="font-weight-bold">{{ workerName }}: </span>
     <span v-if="isValidTerminationDate">
-      expires
+      Image expires
       <g-time-string
         :date-time="expirationDate"
         mode="future"
@@ -17,13 +17,26 @@ SPDX-License-Identifier: Apache-2.0
       />
       <span>. </span>
     </span>
-    <span v-else>is expired. </span>
+    <span v-else-if="isExpired">Image is expired. </span>
     <span v-if="severity === 'info'">Version will be updated in the next maintenance window</span>
     <template v-else-if="severity === 'warning'">
       <span v-if="isValidTerminationDate">Machine Image update will be enforced after that date</span>
       <span v-else>Machine Image update will be enforced soon</span>
     </template>
-    <span v-else-if="severity === 'error'">Machine image version will expire soon and there is no newer supported version available. Please choose another operating system</span>
+    <template v-else-if="severity === 'error'">
+      <div>
+        Machine image version
+        <span v-if="isExpired">is expired</span>
+        <span v-else>will expire soon</span>
+        and there is no newer supported version available.
+      </div>
+      <div v-if="supportedVersionAvailable">
+        However, an older <code>supported</code> version for this image vendor is available. You may want to consider downgrading to that version.
+      </div>
+      <div v-else>
+        Please choose another operating system.
+      </div>
+    </template>
   </div>
 </template>
 
@@ -40,7 +53,6 @@ export default {
   props: {
     expirationDate: {
       type: String,
-      required: true,
     },
     isValidTerminationDate: {
       type: Boolean,
@@ -60,6 +72,14 @@ export default {
     },
     severity: {
       type: String,
+      required: true,
+    },
+    supportedVersionAvailable: {
+      type: Boolean,
+      required: true,
+    },
+    isExpired: {
+      type: Boolean,
       required: true,
     },
   },

@@ -395,7 +395,6 @@ Object {
       "'self'",
     ],
   },
-  "experimentalUseWatchCacheForListShoots": "never",
   "frontend": Object {
     "defaultHibernationSchedule": Object {
       "development": Array [
@@ -626,10 +625,12 @@ Object {
         "ignore1",
         "ignore2",
       ],
-      "issueDescriptionTemplate": "issue description",
-      "newTicketLabels": Array [
-        "default-label",
-      ],
+      "newIssue": Object {
+        "body": "issue description",
+        "labels": Array [
+          "default-label",
+        ],
+      },
     },
   },
   "gitHub": Object {
@@ -664,10 +665,12 @@ Object {
         "ignore1",
         "ignore2",
       ],
-      "issueDescriptionTemplate": "issue description",
-      "newTicketLabels": Array [
-        "default-label",
-      ],
+      "newIssue": Object {
+        "body": "issue description",
+        "labels": Array [
+          "default-label",
+        ],
+      },
     },
   },
   "gitHub": Object {

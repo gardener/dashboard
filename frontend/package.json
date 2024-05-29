@@ -41,8 +41,10 @@
     "@vueuse/core": "^10.9.0",
     "@vueuse/integrations": "^10.9.0",
     "@vueuse/router": "^10.9.0",
+    "@xterm/addon-fit": "^0.10.0",
+    "@xterm/addon-web-links": "^0.11.0",
+    "@xterm/xterm": "^5.5.0",
     "ansi-html": "^0.0.9",
-    "buffer": "^6.0.3",
     "codemirror": "^5.65.16",
     "dayjs": "^1.11.10",
     "downloadjs": "^1.4.7",
@@ -50,6 +52,7 @@
     "floating-vue": "^5.2.2",
     "get-contrast": "^3.0.0",
     "highlight.js": "^11.9.0",
+    "js-base64": "^3.7.6",
     "js-cookie": "^3.0.5",
     "js-yaml": "^4.1.0",
     "jwt-decode": "^4.0.0",
@@ -69,10 +72,7 @@
     "uuid": "^9.0.1",
     "vue": "^3.4.21",
     "vue-router": "^4.3.0",
-    "vuetify": "^3.5.10",
-    "xterm": "^5.3.0",
-    "xterm-addon-fit": "^0.8.0",
-    "xterm-addon-web-links": "^0.9.0"
+    "vuetify": "^3.5.10"
   },
   "devDependencies": {
     "@pinia/testing": "^0.1.3",
@@ -86,7 +86,7 @@
     "eslint-plugin-import-newlines": "^1.4.0",
     "eslint-plugin-n": "^15.7.0",
     "eslint-plugin-promise": "^6.1.1",
-    "eslint-plugin-vitest": "^0.3.26",
+    "eslint-plugin-vitest": "^0.4.0",
     "eslint-plugin-vue": "^9.23.0",
     "jsdom": "^24.0.0",
     "rollup-plugin-visualizer": "^5.12.0",
@@ -98,7 +98,7 @@
     "vitest": "^1.4.0",
     "vitest-fetch-mock": "^0.2.2"
   },
-  "packageManager": "yarn@4.1.1",
+  "packageManager": "yarn@4.2.2",
   "engines": {
     "node": "^20.5.0"
   }

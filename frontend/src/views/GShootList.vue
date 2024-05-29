@@ -178,7 +178,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
         <template #item="{ item }">
           <g-shoot-list-row
-            :shoot-item="item"
+            :model-value="item"
             :visible-headers="visibleHeaders"
             @show-dialog="showDialog"
           />
@@ -217,7 +217,7 @@ SPDX-License-Identifier: Apache-2.0
           </g-toolbar>
           <g-shoot-access-card
             ref="clusterAccess"
-            :shoot-item="shootItem"
+            :selected-shoot="shootItem"
             :hide-terminal-shortcuts="true"
           />
         </v-card>

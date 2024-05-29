@@ -147,7 +147,7 @@ async function getCloudProviderSecrets ({ secretBindings, cloudProfileList, secr
         throw new Error(fmt('Secretbinding has no label that the dashboard recognizes. Skipping secretbinding with name %s', name))
       }
 
-      const secret = _.find(secretList, ['metadata.name', secretName]) // pragma: whitelist secret
+      const secret = _.find(secretList, ['metadata.name', secretName])
       if (isOwnSecret(secretBinding) && !secret) {
         throw new Error(fmt('Secret missing for secretbinding in own namespace. Skipping secretbinding with name %s', secretName))
       }

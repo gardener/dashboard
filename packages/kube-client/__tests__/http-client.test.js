@@ -73,7 +73,10 @@ describe('kube-client', () => {
       expect(mockClient.stream).toBeCalledTimes(1)
       expect(mockClient.stream.mock.calls[0]).toEqual([url, { method }])
       expect(typeof response.until).toBe('function')
-      const value = await response.until(event => [event.object > 3, event.object])
+      const value = await response.until(event => ({
+        ok: event.object > 3,
+        object: event.object
+      }))
       expect(value).toBe(4)
     })
 
@@ -85,7 +88,10 @@ describe('kube-client', () => {
       expect(mockClient.stream).toBeCalledTimes(1)
       expect(mockClient.stream.mock.calls[0]).toEqual([url, { method }])
       expect(typeof response.until).toBe('function')
-      await expect(response.until(event => event.object > 9, { timeout: 10 })).rejects.toThrow(GatewayTimeout)
+      await expect(response.until(
+        event => ({
+          ok: event.object > 9
+        }), { timeout: 10 })).rejects.toThrow(GatewayTimeout)
       expect(destroySpy).toBeCalled()
       expect(destroySpy.mock.calls[0]).toHaveLength(1)
       expect(destroySpy.mock.calls[0][0].message).toMatch(/"dummies" .* 10 ms/)

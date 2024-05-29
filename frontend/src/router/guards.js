@@ -16,6 +16,7 @@ import { useMemberStore } from '@/store/member'
 import { useSecretStore } from '@/store/secret'
 import { useSeedStore } from '@/store/seed'
 import { useShootStore } from '@/store/shoot'
+import { useShootContextStore } from '@/store/shootContext'
 import { useTerminalStore } from '@/store/terminal'
 
 import { useLogger } from '@/composables/useLogger'
@@ -34,6 +35,7 @@ export function createGlobalBeforeGuards () {
   const memberStore = useMemberStore()
   const secretStore = useSecretStore()
   const shootStore = useShootStore()
+  const shootContextStore = useShootContextStore()
   const terminalStore = useTerminalStore()
 
   function ensureUserAuthenticatedForNonPublicRoutes () {
@@ -120,7 +122,7 @@ export function createGlobalBeforeGuards () {
             const namespaceChanged = from.params.namespace !== to.params.namespace
             const toNewShoot = from.name !== 'NewShoot' && from.name !== 'NewShootEditor'
             if (namespaceChanged || toNewShoot) {
-              shootStore.resetNewShootResource()
+              shootContextStore.createShootManifest()
             }
             break
           }

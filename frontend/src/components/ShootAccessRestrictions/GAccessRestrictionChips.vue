@@ -14,78 +14,64 @@ SPDX-License-Identifier: Apache-2.0
     item-name="Restriction"
   >
     <template #item="{ item: { key, title, description, options: optionsList } }">
-      <v-tooltip
-        location="top"
-        :disabled="!description"
-        max-width="600px"
+      <v-chip
+        size="small"
+        variant="tonal"
+        color="primary"
+        class="mr-2 my-0"
       >
-        <template #activator="{ props }">
-          <v-chip
-            v-bind="props"
-            size="small"
-            variant="tonal"
-            color="primary"
-            class="mr-2 my-0"
-          >
-            {{ title }}
-          </v-chip>
-        </template>
-        <!-- eslint-disable-next-line vue/no-v-html -->
-        <section v-html="transformHtml(description)" />
-      </v-tooltip>
-      <v-tooltip
-        v-for="options in optionsList"
+        {{ title }}
+        <v-tooltip
+          activator="parent"
+          location="top"
+          :disabled="!description"
+          max-width="600px"
+        >
+          <!-- eslint-disable-next-line vue/no-v-html -->
+          <div v-html="transformHtml(description) " />
+        </v-tooltip>
+      </v-chip>
+
+      <v-chip
+        v-for="options in optionsList "
         :key="`${key}_${options.key}`"
-        location="top"
-        :disabled="!options.description"
-        max-width="600px"
+        size="small"
+        variant="tonal"
+        color="primary"
+        class="mr-2"
       >
-        <template #activator="{ props }">
-          <v-chip
-            v-bind="props"
-            size="small"
-            variant="tonal"
-            color="primary"
-            class="mr-2"
-            label
-          >
-            {{ options.title }}
-          </v-chip>
-        </template>
-        <!-- eslint-disable-next-line vue/no-v-html -->
-        <section v-html="transformHtml(options.description)" />
-      </v-tooltip>
+        {{ options.title }}
+        <v-tooltip
+          activator="parent"
+          location="top"
+          :disabled="!options.description"
+          max-width="600px"
+        >
+          <!-- eslint-disable-next-line vue/no-v-html -->
+          <div v-html="transformHtml(options.description) " />
+        </v-tooltip>
+      </v-chip>
     </template>
   </g-collapsable-items>
 </template>
 
-<script>
+<script setup>
 import GCollapsableItems from '@/components/GCollapsableItems'
 
 import { transformHtml } from '@/utils'
 
-export default {
-  components: {
-    GCollapsableItems,
+defineProps({
+  selectedAccessRestrictions: {
+    type: Array,
   },
-  props: {
-    selectedAccessRestrictions: {
-      type: Array,
-    },
-    collapse: {
-      type: Boolean,
-      default: false,
-    },
-    shootUid: {
-      type: String,
-    },
+  collapse: {
+    type: Boolean,
+    default: false,
   },
-  methods: {
-    transformHtml (value) {
-      return transformHtml(value)
-    },
+  shootUid: {
+    type: String,
   },
-}
+})
 </script>
 
 <style lang="scss" scoped>

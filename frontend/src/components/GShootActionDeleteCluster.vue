@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-action-button-dialog
     ref="actionDialog"
-    :shoot-item="shootItem"
     width="600"
     :caption="caption"
     :text="buttonText"
@@ -21,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
         <div>
           Created By
           <g-account-avatar
-            :account-name=" shootCreatedBy "
+            :account-name="shootCreatedBy "
             :size="22"
             class="my-2"
           />
@@ -45,14 +44,15 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapActions } from 'pinia'
+import { computed } from 'vue'
 
 import { useShootStore } from '@/store/shoot'
 
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog.vue'
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
+
 import { errorDetailsFromError } from '@/utils/error'
 
 export default {
@@ -60,46 +60,71 @@ export default {
     GActionButtonDialog,
     GAccountAvatar,
   },
-  mixins: [shootItem],
   inject: ['logger'],
   props: {
-    modelValue: {
-      type: Boolean,
-      required: true,
-    },
     text: {
       type: Boolean,
       default: false,
     },
   },
-  computed: {
-    caption () {
-      return this.isShootMarkedForDeletion
-        ? 'Cluster already marked for deletion'
-        : this.buttonTitle
-    },
-    buttonTitle () {
+  setup (props) {
+    const {
+      shootItem,
+      shootNamespace,
+      shootName,
+      shootCreatedBy,
+      isShootMarkedForDeletion,
+      isShootReconciliationDeactivated,
+    } = useShootItem()
+
+    const caption = computed(() => {
+      if (isShootMarkedForDeletion.value) {
+        return 'Cluster already marked for deletion'
+      }
+      return buttonTitle.value
+    })
+
+    const buttonTitle = computed(() => {
       return 'Delete Cluster'
-    },
-    buttonText () {
-      if (!this.text) {
+    })
+
+    const buttonText = computed(() => {
+      if (!props.text) {
         return
       }
-      return this.buttonTitle
-    },
+      return buttonTitle.value
+    })
+
+    const shootStore = useShootStore()
+    const {
+      deleteShoot,
+    } = shootStore
+
+    return {
+      shootItem,
+      shootNamespace,
+      shootName,
+      shootCreatedBy,
+      isShootMarkedForDeletion,
+      isShootReconciliationDeactivated,
+      caption,
+      buttonText,
+      deleteShoot,
+    }
   },
   methods: {
-    ...mapActions(useShootStore, [
-      'deleteShoot',
-    ]),
     async onConfigurationDialogOpened () {
-      if (await this.$refs.actionDialog.waitForDialogClosed()) {
+      const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
+      if (confirmed) {
         this.deleteCluster()
       }
     },
     async deleteCluster () {
       try {
-        await this.deleteShoot({ name: this.shootName, namespace: this.shootNamespace })
+        await this.deleteShoot({
+          name: this.shootName,
+          namespace: this.shootNamespace,
+        })
       } catch (err) {
         const errorMessage = 'Cluster deletion failed'
         const errorDetails = errorDetailsFromError(err)

@@ -24,9 +24,28 @@ describe('api', function () {
 
   beforeAll(() => {
     agent = createAgent()
+
+    cache.initialize({
+      projects: {
+        store: createStore(fixtures.projects.list())
+      },
+      shoots: {
+        store: createStore(fixtures.shoots.list().map(item => {
+          const status = item.metadata.uid !== 3
+            ? 'healthy'
+            : 'unhealthy'
+          item.metadata.labels = {
+            ...item.metadata.labels,
+            'shoot.gardener.cloud/status': status
+          }
+          return item
+        }))
+      }
+    })
   })
 
   afterAll(() => {
+    cache.cache.resetTicketCache()
     return agent.close()
   })
 
@@ -43,124 +62,8 @@ describe('api', function () {
       id: 'foo@example.org'
     })
 
-    describe('when served from cache', () => {
-      const useCache = true
-
-      beforeAll(() => {
-        cache.initialize({
-          projects: {
-            store: createStore(fixtures.projects.list())
-          },
-          shoots: {
-            store: createStore(fixtures.shoots.list().map(item => {
-              const status = item.metadata.uid !== 3
-                ? 'healthy'
-                : 'unhealthy'
-              item.metadata.labels = {
-                ...item.metadata.labels,
-                'shoot.gardener.cloud/status': status
-              }
-              return item
-            }))
-          }
-        })
-      })
-
-      afterAll(() => {
-        cache.cache.resetTicketCache()
-      })
-
-      it('should return shoots for a single namespace', async () => {
-        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-
-        const res = await agent
-          .get(`/api/namespaces/${namespace}/shoots`)
-          .query({ useCache })
-          .set('cookie', await user.cookie)
-          .expect('content-type', /json/)
-          .expect(200)
-
-        expect(mockRequest).toBeCalledTimes(1)
-        expect(mockRequest.mock.calls).toMatchSnapshot()
-
-        expect(res.body.items.map(item => item.metadata.uid)).toEqual([1, 2, 3])
-        expect(res.body).toMatchSnapshot()
-      })
-
-      it('should be forbidden to list shoots for a single namespace', async () => {
-        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess({ allowed: false }))
-
-        const res = await agent
-          .get(`/api/namespaces/${namespace}/shoots`)
-          .query({ useCache })
-          .set('cookie', await user.cookie)
-          .expect('content-type', /json/)
-          .expect(403)
-
-        expect(mockRequest).toBeCalledTimes(1)
-        expect(mockRequest.mock.calls).toMatchSnapshot()
-
-        const { code, reason, message, status } = res.body
-        expect({ code, reason, message, status }).toMatchSnapshot()
-      })
-
-      it('should return all shoots an admin user', async () => {
-        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-
-        const res = await agent
-          .get('/api/namespaces/_all/shoots')
-          .query({ useCache })
-          .set('cookie', await user.cookie)
-          .expect('content-type', /json/)
-          .expect(200)
-
-        expect(mockRequest).toBeCalledTimes(1)
-        expect(mockRequest.mock.calls).toMatchSnapshot()
-
-        expect(res.body.items.map(item => item.metadata.uid)).toEqual([1, 2, 3, 4])
-        expect(res.body).toMatchSnapshot()
-      })
-
-      it('should return all shoots for a non-admin user', async () => {
-        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess({ allowed: false }))
-        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess({ allowed: false }))
-
-        const res = await agent
-          .get('/api/namespaces/_all/shoots')
-          .query({ useCache })
-          .set('cookie', await user.cookie)
-          .expect('content-type', /json/)
-          .expect(200)
-
-        expect(mockRequest).toBeCalledTimes(3)
-        expect(mockRequest.mock.calls).toMatchSnapshot()
-
-        expect(res.body.items.map(item => item.metadata.uid)).toEqual([1, 2, 3])
-        expect(res.body).toMatchSnapshot()
-      })
-
-      it('should return all unhealthy shoots', async () => {
-        const labelSelector = 'shoot.gardener.cloud/status!=healthy'
-        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-
-        const res = await agent
-          .get('/api/namespaces/_all/shoots')
-          .query({ useCache, labelSelector })
-          .set('cookie', await user.cookie)
-          .expect('content-type', /json/)
-          .expect(200)
-
-        expect(mockRequest).toBeCalledTimes(1)
-        expect(mockRequest.mock.calls).toMatchSnapshot()
-
-        expect(res.body.items.map(item => item.metadata.uid)).toEqual([3])
-        expect(res.body).toMatchSnapshot()
-      })
-    })
-
     it('should return shoots for a single namespace', async function () {
-      mockRequest.mockImplementationOnce(fixtures.shoots.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
 
       const res = await agent
         .get(`/api/namespaces/${namespace}/shoots`)
@@ -171,12 +74,12 @@ describe('api', function () {
       expect(mockRequest).toBeCalledTimes(1)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
+      expect(res.body.items.map(item => item.metadata.uid)).toEqual([1, 2, 3])
       expect(res.body).toMatchSnapshot()
     })
 
     it('should return all shoots for an admin user', async () => {
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-      mockRequest.mockImplementationOnce(fixtures.shoots.mocks.list())
 
       const res = await agent
         .get('/api/namespaces/_all/shoots')
@@ -184,7 +87,7 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(2)
+      expect(mockRequest).toBeCalledTimes(1)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body.items.map(item => item.metadata.uid)).toEqual([1, 2, 3, 4])
@@ -193,8 +96,8 @@ describe('api', function () {
 
     it('should return all shoots for a non-admin user', async () => {
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess({ allowed: false }))
-      mockRequest.mockImplementationOnce(fixtures.shoots.mocks.list())
-      mockRequest.mockImplementationOnce(fixtures.shoots.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess({ allowed: false }))
 
       const res = await agent
         .get('/api/namespaces/_all/shoots')
@@ -207,6 +110,40 @@ describe('api', function () {
 
       expect(res.body.items.map(item => item.metadata.uid)).toEqual([1, 2, 3])
       expect(res.body).toMatchSnapshot()
+    })
+
+    it('should return all unhealthy shoots', async () => {
+      const labelSelector = 'shoot.gardener.cloud/status!=healthy'
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+
+      const res = await agent
+        .get('/api/namespaces/_all/shoots')
+        .set('cookie', await user.cookie)
+        .query({ labelSelector })
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(1)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body.items.map(item => item.metadata.uid)).toEqual([3])
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should be forbidden to list shoots for a single namespace', async () => {
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess({ allowed: false }))
+
+      const res = await agent
+        .get(`/api/namespaces/${namespace}/shoots`)
+        .set('cookie', await user.cookie)
+        .expect('content-type', /json/)
+        .expect(403)
+
+      expect(mockRequest).toBeCalledTimes(1)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      const { code, reason, message, status } = res.body
+      expect({ code, reason, message, status }).toMatchSnapshot()
     })
 
     it('should create a shoot', async function () {

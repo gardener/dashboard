@@ -1,20 +1,11 @@
 structure:
 - name: _index.md
   source: /README.md
-- name: architecture
-  properties:
-    frontmatter:
-      title: Architecture
-      weight: 1
-      categories:
-        - Developers
-  nodesSelector:
-    path: /docs/architecture
 - name: development
   properties:
     frontmatter:
       title: Development
-      weight: 2
+      weight: 1
       categories:
         - Developers
   nodesSelector:
@@ -23,7 +14,7 @@ structure:
   properties:
     frontmatter:
       title: Operations
-      weight: 3
+      weight: 2
       categories:
         - Operators
   nodesSelector:
@@ -32,7 +23,7 @@ structure:
   properties:
     frontmatter:
       title: Usage
-      weight: 4
+      weight: 3
       categories:
         - Users
   nodesSelector:
