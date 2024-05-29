@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -20,7 +20,6 @@ SPDX-License-Identifier: Apache-2.0
 
     <g-terminal-list-tile
       v-if="isTerminalTileVisible"
-      :shoot-item="shootItem"
       target="shoot"
       :description="shootTerminalDescription"
       :button-description="shootTerminalButtonDescription"
@@ -34,7 +33,6 @@ SPDX-License-Identifier: Apache-2.0
 
     <g-terminal-shortcuts-tile
       v-if="isTerminalShortcutsTileVisible"
-      :shoot-item="shootItem"
       popper-boundaries-selector="#accessCardList"
       @add-terminal-shortcut="onAddTerminalShortcut"
     />
@@ -62,9 +60,9 @@ SPDX-License-Identifier: Apache-2.0
               v-if="isShootStatusHibernated"
               location="top"
             >
-              <template #activator="{ props }">
+              <template #activator="slotProps">
                 <span
-                  v-bind="props"
+                  v-bind="slotProps.props"
                   class="text-grey"
                 >{{ dashboardUrl }}</span>
               </template>
@@ -103,18 +101,14 @@ SPDX-License-Identifier: Apache-2.0
     />
     <template v-if="isKubeconfigTileVisible">
       <g-shoot-kubeconfig
-        :shoot-item="shootItem"
         :show-list-icon="true"
         type="gardenlogin"
       />
       <g-shoot-kubeconfig
-        :shoot-item="shootItem"
         :show-list-icon="false"
         type="token"
       />
-      <g-shoot-admin-kubeconfig
-        :shoot-item="shootItem"
-      />
+      <g-shoot-admin-kubeconfig />
     </template>
 
     <v-divider
@@ -124,18 +118,21 @@ SPDX-License-Identifier: Apache-2.0
 
     <g-gardenctl-commands
       v-if="isGardenctlTileVisible"
-      :shoot-item="shootItem"
     />
   </g-list>
 </template>
 
-<script>
-import { mapState } from 'pinia'
+<script setup>
+import {
+  ref,
+  computed,
+  toRefs,
+} from 'vue'
+import { storeToRefs } from 'pinia'
 
 import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
 import { useTerminalStore } from '@/store/terminal'
-import { useConfigStore } from '@/store/config'
 
 import GList from '@/components/GList.vue'
 import GListItem from '@/components/GListItem.vue'
@@ -144,7 +141,10 @@ import GActionButton from '@/components/GActionButton.vue'
 import GCopyBtn from '@/components/GCopyBtn.vue'
 import GTerminalListTile from '@/components/GTerminalListTile.vue'
 
-import { shootItem } from '@/mixins/shootItem'
+import {
+  useShootItem,
+  useProvideShootItem,
+} from '@/composables/useShootItem'
 
 import GGardenctlCommands from './GGardenctlCommands.vue'
 import GShootKubeconfig from './GShootKubeconfig.vue'
@@ -156,117 +156,131 @@ import {
   isEmpty,
 } from '@/lodash'
 
-export default {
-  components: {
-    GList,
-    GListItem,
-    GListItemContent,
-    GActionButton,
-    GCopyBtn,
-    GTerminalListTile,
-    GShootKubeconfig,
-    GShootAdminKubeconfig,
-    GGardenctlCommands,
-    GTerminalShortcutsTile,
+const props = defineProps({
+  selectedShoot: {
+    type: Object,
   },
-  mixins: [shootItem],
-  props: {
-    hideTerminalShortcuts: {
-      type: Boolean,
-      default: false,
-    },
+  hideTerminalShortcuts: {
+    type: Boolean,
+    default: false,
   },
-  emits: [
-    'addTerminalShortcut',
-  ],
-  data () {
-    return {
-      showToken: false,
-    }
-  },
-  computed: {
-    ...mapState(useAuthnStore, [
-      'isAdmin',
-    ]),
-    ...mapState(useAuthzStore, [
-      'hasShootTerminalAccess',
-      'canCreateShootsAdminkubeconfig',
-      'canCreateShootsViewerkubeconfig',
-      'hasControlPlaneTerminalAccess',
-      'canPatchShoots',
-    ]),
-    ...mapState(useTerminalStore, [
-      'isTerminalShortcutsFeatureEnabled',
-    ]),
-    ...mapState(useConfigStore, ['shootAdminKubeconfig']),
-    dashboardUrl () {
-      if (!this.hasDashboardEnabled) {
-        return ''
-      }
+})
 
-      if (!this.shootInfo.dashboardUrlPath) {
-        return ''
-      }
-      const pathname = this.shootInfo.dashboardUrlPath
-      return `http://localhost:8001${pathname}`
-    },
-    hasDashboardEnabled () {
-      return get(this.shootItem, 'spec.addons.kubernetesDashboard.enabled', false) === true
-    },
-    kubeconfig () {
-      return get(this.shootInfo, 'kubeconfig')
-    },
-    kubeconfigGardenlogin () {
-      return this.shootInfo?.kubeconfigGardenlogin
-    },
-    shootTerminalButtonDisabled () {
-      return !this.isAdmin && this.isShootStatusHibernated
-    },
-    shootTerminalButtonDescription () {
-      if (this.shootTerminalButtonDisabled) {
-        return 'Cluster is hibernated. Wake up cluster to open terminal.'
-      }
-      return this.shootTerminalDescription
-    },
-    shootTerminalDescription () {
-      return this.hasControlPlaneTerminalAccess ? 'Open terminal into cluster or cluster\'s control plane' : 'Open terminal into cluster'
-    },
-    isAnyTileVisible () {
-      return this.isDashboardTileVisible || this.isKubeconfigTileVisible || this.isTerminalTileVisible || this.isGardenctlTileVisible
-    },
-    isDashboardTileVisible () {
-      return !!this.dashboardUrl
-    },
-    isKubeconfigTileVisible () {
-      return !!this.kubeconfigGardenlogin || this.canPatchShoots
-    },
-    isGardenctlTileVisible () {
-      return this.canCreateShootsViewerkubeconfig || this.canCreateShootsAdminkubeconfig
-    },
-    isTerminalTileVisible () {
-      return !isEmpty(this.shootItem) && this.hasShootTerminalAccess && !this.isSeedUnreachable && (this.hasShootWorkerGroups || this.isAdmin)
-    },
-    isTerminalShortcutsTileVisible () {
-      return !isEmpty(this.shootItem) && this.isTerminalShortcutsFeatureEnabled && this.hasShootTerminalAccess && !this.hideTerminalShortcuts && !this.isSeedUnreachable && (this.hasShootWorkerGroups || this.isAdmin)
-    },
-    token () {
-      return this.shootInfo.cluster_token || ''
-    },
-    tokenText () {
-      return this.showToken ? this.token : '****************'
-    },
-    tokenVisibilityTitle () {
-      return this.showToken ? 'Hide token' : 'Show token'
-    },
-    visibilityIcon () {
-      return this.showToken ? 'mdi-eye-off' : 'mdi-eye'
-    },
-  },
-  methods: {
-    onAddTerminalShortcut (shortcut) {
-      this.$emit('addTerminalShortcut', shortcut)
-    },
-  },
+const {
+  selectedShoot,
+  hideTerminalShortcuts,
+} = toRefs(props)
+
+const emit = defineEmits([
+  'addTerminalShortcut',
+])
+
+const authnStore = useAuthnStore()
+const {
+  isAdmin,
+} = storeToRefs(authnStore)
+const authzStore = useAuthzStore()
+const {
+  hasShootTerminalAccess,
+  canCreateShootsAdminkubeconfig,
+  canCreateShootsViewerkubeconfig,
+  hasControlPlaneTerminalAccess,
+  canPatchShoots,
+} = storeToRefs(authzStore)
+const terminalStore = useTerminalStore()
+const {
+  isTerminalShortcutsFeatureEnabled,
+} = storeToRefs(terminalStore)
+
+const {
+  shootItem,
+  isShootStatusHibernated,
+  hasShootWorkerGroups,
+  shootInfo,
+  isSeedUnreachable,
+} = selectedShoot.value
+  ? useProvideShootItem(selectedShoot)
+  : useShootItem()
+
+const showToken = ref(false)
+
+const dashboardUrl = computed(() => {
+  if (!hasDashboardEnabled.value) {
+    return ''
+  }
+
+  if (!shootInfo.value.dashboardUrlPath) {
+    return ''
+  }
+  const pathname = shootInfo.value.dashboardUrlPath
+  return `http://localhost:8001${pathname}`
+})
+
+const hasDashboardEnabled = computed(() => {
+  return get(shootItem.value, 'spec.addons.kubernetesDashboard.enabled', false) === true
+})
+
+const kubeconfigGardenlogin = computed(() => {
+  return shootInfo.value?.kubeconfigGardenlogin
+})
+
+const shootTerminalButtonDisabled = computed(() => {
+  return !isAdmin.value && isShootStatusHibernated.value
+})
+
+const shootTerminalButtonDescription = computed(() => {
+  if (shootTerminalButtonDisabled.value) {
+    return 'Cluster is hibernated. Wake up cluster to open terminal.'
+  }
+  return shootTerminalDescription.value
+})
+
+const shootTerminalDescription = computed(() => {
+  return hasControlPlaneTerminalAccess.value ? 'Open terminal into cluster or cluster\'s control plane' : 'Open terminal into cluster'
+})
+
+const isAnyTileVisible = computed(() => {
+  return isDashboardTileVisible.value || isKubeconfigTileVisible.value || isTerminalTileVisible.value || isGardenctlTileVisible.value
+})
+
+const isDashboardTileVisible = computed(() => {
+  return !!dashboardUrl.value
+})
+
+const isKubeconfigTileVisible = computed(() => {
+  return !!kubeconfigGardenlogin.value || canPatchShoots.value
+})
+
+const isGardenctlTileVisible = computed(() => {
+  return canCreateShootsViewerkubeconfig.value || canCreateShootsAdminkubeconfig.value
+})
+
+const isTerminalTileVisible = computed(() => {
+  return !isEmpty(shootItem.value) && hasShootTerminalAccess.value && !isSeedUnreachable.value && (hasShootWorkerGroups.value || isAdmin.value)
+})
+
+const isTerminalShortcutsTileVisible = computed(() => {
+  return !isEmpty(shootItem.value) && isTerminalShortcutsFeatureEnabled.value && hasShootTerminalAccess.value && !hideTerminalShortcuts.value && !isSeedUnreachable.value && (hasShootWorkerGroups.value || isAdmin.value)
+})
+
+const token = computed(() => {
+  return shootInfo.value.cluster_token || ''
+})
+
+const tokenText = computed(() => {
+  return showToken.value ? token.value : '****************'
+})
+
+const tokenVisibilityTitle = computed(() => {
+  return showToken.value ? 'Hide token' : 'Show token'
+})
+
+const visibilityIcon = computed(() => {
+  return showToken.value ? 'mdi-eye-off' : 'mdi-eye'
+})
+
+function onAddTerminalShortcut (shortcut) {
+  emit('addTerminalShortcut', shortcut)
 }
 </script>
 

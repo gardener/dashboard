@@ -31,26 +31,18 @@ SPDX-License-Identifier: Apache-2.0
         />
       </template>
     </g-splitpane>
-    <g-create-terminal-session-dialog
-      :name="terminalCoordinates.name"
-      :namespace="terminalCoordinates.namespace"
-      :has-shoot-worker-groups="hasShootWorkerGroups"
-    />
+    <g-create-terminal-session-dialog />
   </div>
 </template>
 
 <script>
-import { mapActions } from 'pinia'
-
-import { useShootStore } from '@/store/shoot'
-
 import GSplitpane from '@/components/GSplitpane.vue'
 import GTerminal from '@/components/GTerminal.vue'
 import GCreateTerminalSessionDialog from '@/components/dialogs/GCreateTerminalSessionDialog.vue'
 
-import { PositionEnum } from '@/lib/g-symbol-tree'
+import { useTerminalSplitpanes } from '@/composables/useTerminalSplitpanes'
 
-import { pick } from '@/lodash'
+import { PositionEnum } from '@/lib/g-symbol-tree'
 
 export default {
   components: {
@@ -58,26 +50,31 @@ export default {
     GTerminal,
     GCreateTerminalSessionDialog,
   },
-  inject: [
-    'api',
-    'terminalCoordinates',
-    'splitpaneTree',
-    'moveTo',
-    'add',
-    'removeWithId',
-    'leavePage',
-    'isTreeEmpty',
-  ],
-  computed: {
-    shootItem () {
-      return this.shootByNamespaceAndName(pick(this.terminalCoordinates, 'namespace', 'name'))
-    },
-    hasShootWorkerGroups () {
-      return !!this.shootItem?.spec?.provider?.workers?.length
-    },
+  inject: ['api'],
+  setup () {
+    const {
+      terminalCoordinates,
+      hasShootWorkerGroups,
+      splitpaneTree,
+      add,
+      removeWithId,
+      moveTo,
+      leavePage,
+      isTreeEmpty,
+    } = useTerminalSplitpanes()
+
+    return {
+      terminalCoordinates,
+      hasShootWorkerGroups,
+      splitpaneTree,
+      add,
+      removeWithId,
+      moveTo,
+      leavePage,
+      isTreeEmpty,
+    }
   },
   methods: {
-    ...mapActions(useShootStore, ['shootByNamespaceAndName']),
     droppedAt ({ detail: { mouseOverId: position, sourceElementDropzoneId: sourceId, mouseOverDropzoneId: targetId } }) {
       this.moveTo({ sourceId, targetId, position })
     },

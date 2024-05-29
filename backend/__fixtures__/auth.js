@@ -16,9 +16,9 @@ const {
   COOKIE_SIGNATURE
 } = require('../lib/security/constants')
 const jose = require('../lib/security/jose')
-const { sessionSecret } = require('./config').default
+const { sessionSecrets } = require('./config').default
 
-const { sign, encrypt, decode } = jose(sessionSecret)
+const { sign, encrypt, decode } = jose(sessionSecrets)
 
 const iat = 1577836800
 const expiresIn = '50y'

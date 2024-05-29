@@ -15,6 +15,8 @@ const ca = [
 ].join('\n')
 
 const defaultConfigPath = gardenerConfigPath()
+const sessionSecret = toHex('session-secret')
+
 const defaultConfig = {
   port: 3030,
   logLevel: 'info',
@@ -22,7 +24,6 @@ const defaultConfig = {
   apiServerUrl: 'https://kubernetes.external.foo.bar',
   apiServerCaData: toBase64(ca),
   tokenRequestAudiences: ['aud1', 'aud2'],
-  experimentalUseWatchCacheForListShoots: 'no',
   gitHub: {
     apiUrl: 'https://api.github.com',
     org: 'gardener',
@@ -32,13 +33,13 @@ const defaultConfig = {
       token: toHex('token')
     }
   },
-  sessionSecret: toHex('session-secret'),
+  sessionSecret,
+  sessionSecrets: [sessionSecret],
   oidc: {
     issuer: 'https://kubernetes:32001',
     rejectUnauthorized: true,
     ca,
     client_id: 'dashboard',
-    client_secret: toHex('dashboard-secret'),
     redirect_uris: [
       'http://localhost:8080/auth/callback'
     ],

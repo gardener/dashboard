@@ -155,7 +155,6 @@ import {
 import {
   cloneDeep,
   get,
-  map,
   head,
   sortBy,
   filter,
@@ -242,11 +241,8 @@ export default {
       'dnsSecretList',
     ]),
     ...mapState(useCloudProfileStore, ['sortedInfrastructureKindList']),
-    ...mapState(useGardenerExtensionStore, ['sortedDnsProviderList']),
+    ...mapState(useGardenerExtensionStore, ['dnsProviderTypes']),
     ...mapState(useShootStore, ['shootList']),
-    dnsProviderTypes () {
-      return map(this.sortedDnsProviderList, 'type')
-    },
     cloudProfileName: {
       get () {
         return this.selectedCloudProfile

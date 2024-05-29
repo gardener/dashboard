@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import { nextTick } from 'vue'
 import { mount } from '@vue/test-utils'
 
 const { createVuetifyPlugin } = global.fixtures.helper
@@ -38,9 +39,11 @@ describe('components', () => {
       expect(wrapper.find('.v-application > .v-application__wrap').exists()).toBe(true)
     })
 
-    it('class `g-main__wrap` should exist', () => {
+    it('class `g-main__wrap` should exist', async () => {
       const text = 'test'
       const wrapper = mountApplication({ text })
+      await nextTick()
+
       expect(wrapper.find('.v-main > div[class$=\'wrap\']').text()).toBe(text)
     })
   })

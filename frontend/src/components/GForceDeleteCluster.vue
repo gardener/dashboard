@@ -71,12 +71,17 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import {
+  ref,
+  computed,
+} from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
 import GShootSecretName from '@/components/GShootSecretName'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
+
 import {
   withFieldName,
   withMessage,
@@ -93,31 +98,44 @@ export default {
     GAccountAvatar,
     GShootSecretName,
   },
-  mixins: [shootItem],
   setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
-  validations () {
-    return {
+    const {
+      shootNamespace,
+      shootName,
+      shootCreatedBy,
+      shootSecretBindingName,
+      shootCloudProviderKind,
+      isShootReconciliationDeactivated,
+      shootLastErrors,
+    } = useShootItem()
+
+    const userErrorCodeObjects = computed(() => {
+      const shootErrorCodes = errorCodesFromArray(shootLastErrors.value)
+      return filter(objectsFromErrorCodes(shootErrorCodes), ['userError', true])
+    })
+
+    const confirmed = ref(false)
+
+    const rules = {
       confirmed: withFieldName('Confirmation', {
         required: withMessage('Confirmation is required', () => {
-          return !!this.confirmed
+          return !!confirmed.value
         }),
       }),
     }
-  },
-  data () {
+
     return {
-      confirmed: false,
+      v$: useVuelidate(rules, { confirmed }),
+      shootNamespace,
+      shootName,
+      shootCreatedBy,
+      shootSecretBindingName,
+      shootCloudProviderKind,
+      isShootReconciliationDeactivated,
+      shootLastErrors,
+      confirmed,
+      userErrorCodeObjects,
     }
-  },
-  computed: {
-    userErrorCodeObjects () {
-      const shootErrorCodes = errorCodesFromArray(this.shootLastErrors)
-      return filter(objectsFromErrorCodes(shootErrorCodes), { userError: true })
-    },
   },
 }
 </script>

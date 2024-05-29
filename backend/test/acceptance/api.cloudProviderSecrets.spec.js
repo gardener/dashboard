@@ -5,15 +5,30 @@
 'use strict'
 
 const { mockRequest } = require('@gardener-dashboard/request')
+const { Store } = require('@gardener-dashboard/kube-client')
+const cache = require('../../lib/cache')
+
+function createStore (items) {
+  const store = new Store()
+  store.replace(items)
+  return store
+}
 
 describe('api', function () {
   let agent
 
   beforeAll(() => {
     agent = createAgent()
+
+    cache.initialize({
+      shoots: {
+        store: createStore(fixtures.shoots.list())
+      }
+    })
   })
 
   afterAll(() => {
+    cache.cache.resetTicketCache()
     return agent.close()
   })
 
@@ -171,7 +186,7 @@ describe('api', function () {
 
     it('should delete an own cloudProvider secret', async function () {
       mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.get())
-      mockRequest.mockImplementationOnce(fixtures.shoots.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.delete())
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.delete())
 
@@ -210,7 +225,7 @@ describe('api', function () {
       const name = 'foo-infra1'
 
       mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.get())
-      mockRequest.mockImplementationOnce(fixtures.shoots.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
 
       const res = await agent
         .delete(`/api/namespaces/${namespace}/cloudprovidersecrets/${name}`)

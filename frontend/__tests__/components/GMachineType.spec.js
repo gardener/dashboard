@@ -8,9 +8,15 @@ import { mount } from '@vue/test-utils'
 
 import GMachineType from '@/components/ShootWorkers/GMachineType.vue'
 
+import {
+  components as componentsPlugin,
+  utils as utilsPlugin,
+  notify as notifyPlugin,
+} from '@/plugins'
+
 import { map } from '@/lodash'
 
-const { createPlugins } = global.fixtures.helper
+const { createVuetifyPlugin } = global.fixtures.helper
 
 describe('components', () => {
   describe('g-machine-type', () => {
@@ -33,7 +39,10 @@ describe('components', () => {
       return mount(GMachineType, {
         global: {
           plugins: [
-            ...createPlugins(),
+            createVuetifyPlugin(),
+            componentsPlugin,
+            utilsPlugin,
+            notifyPlugin,
           ],
         },
         props,

@@ -14,21 +14,23 @@ SPDX-License-Identifier: Apache-2.0
   />
 </template>
 
-<script>
-import { shootSubscription } from '@/mixins/shootSubscription'
+<script setup>
+import { computed } from 'vue'
 
-export default {
-  mixins: [shootSubscription],
-  computed: {
-    indeterminate () {
-      return this.kind.startsWith('progress')
-    },
-    striped () {
-      return this.kind === 'alert-connect'
-    },
-    value () {
-      return this.kind === 'alert-connect' ? 100 : 0
-    },
-  },
-}
+import { useShootSubscription } from '@/composables/useShootSubscription'
+
+const {
+  kind,
+  color,
+} = useShootSubscription()
+
+const indeterminate = computed(() => {
+  return kind.value.startsWith('progress')
+})
+const striped = computed(() => {
+  return kind.value === 'alert-connect'
+})
+const value = computed(() => {
+  return kind.value === 'alert-connect' ? 100 : 0
+})
 </script>

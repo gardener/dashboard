@@ -7,11 +7,11 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-row class="my-0">
     <g-new-shoot-infrastructure-card
-      v-for="infrastructureKind in sortedInfrastructureKindList"
-      :key="infrastructureKind"
-      :model-value="infrastructureKind === selectedInfrastructureKind"
-      :infrastructure-kind="infrastructureKind"
-      @update:model-value="selectInfrastructure(infrastructureKind)"
+      v-for="value in sortedInfrastructureKindList"
+      :key="value"
+      :model-value="value === providerType"
+      :infrastructure-kind="value"
+      @update:model-value="setProviderType(value)"
     />
   </v-row>
 </template>
@@ -19,10 +19,11 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import {
   mapState,
-  mapActions,
+  mapWritableState,
 } from 'pinia'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
+import { useShootContextStore } from '@/store/shootContext'
 
 import GNewShootInfrastructureCard from './GNewShootInfrastructureCard.vue'
 
@@ -30,30 +31,17 @@ export default {
   components: {
     GNewShootInfrastructureCard,
   },
-  props: {
-    userInterActionBus: {
-      type: Object,
-      required: true,
-    },
-  },
-  data () {
-    return {
-      selectedInfrastructureKind: undefined,
-    }
-  },
   computed: {
     ...mapState(useCloudProfileStore, [
       'sortedInfrastructureKindList',
     ]),
+    ...mapWritableState(useShootContextStore, [
+      'providerType',
+    ]),
   },
   methods: {
-    ...mapActions(useCloudProfileStore, ['cloudProfilesByCloudProviderKind']),
-    selectInfrastructure (value) {
-      this.setSelectedInfrastructure(value)
-      this.userInterActionBus.emit('updateInfrastructure', value)
-    },
-    setSelectedInfrastructure (value) {
-      this.selectedInfrastructureKind = value
+    setProviderType (value) {
+      this.providerType = value
     },
   },
 }
