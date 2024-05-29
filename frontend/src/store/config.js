@@ -262,6 +262,10 @@ export const useConfigStore = defineStore('config', () => {
     return features.value?.shootForceDeletionEnabled === true
   })
 
+  const isOidcObservabilityUrlsEnabled = computed(() => {
+    return features.value?.oidcObservabilityUrlsEnabled === true
+  })
+
   const throttleDelayPerCluster = computed(() => {
     return experimental.value?.throttleDelayPerCluster ?? 10
   })
@@ -393,6 +397,7 @@ export const useConfigStore = defineStore('config', () => {
     isTerminalEnabled,
     isProjectTerminalShortcutsEnabled,
     isShootForceDeletionEnabled,
+    isOidcObservabilityUrlsEnabled,
     throttleDelayPerCluster,
     alertBannerMessage,
     alertBannerType,
