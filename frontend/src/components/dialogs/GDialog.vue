@@ -240,7 +240,7 @@ export default {
     },
     async resolveAction (value) {
       if (value) {
-        if (!this.valid) {
+        if (!this.valid || this.notConfirmed) {
           return
         }
         if (this.v$.$invalid) {
