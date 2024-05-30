@@ -15,7 +15,10 @@ import {
   URL,
 } from 'node:url'
 
-import { defineConfig } from 'vite'
+import {
+  defineConfig,
+  loadEnv,
+} from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 import Unfonts from 'unplugin-fonts/vite'
@@ -35,22 +38,14 @@ function resolve (input) {
 function htmlPlugin (env) {
   return {
     name: 'html-transform',
-    transformIndexHtml: html => html.replace(/%(.*?)%/g, (match, key) => env[key]),
+    transformIndexHtml: html => html.replace(/%(.*?)%/g, (_, key) => env[key]),
   }
 }
 
-const keyPath = resolve('./ssl/key.pem')
-const certPath = resolve('./ssl/cert.pem')
-
-if (!existsSync(keyPath) || existsSync(certPath)) {
-  // eslint-disable-next-line no-console
-  console.error('SSL key and certificate files are missing. Please run `yarn setup`.')
-  process.exit(1)
-}
-
 export default defineConfig(({ command, mode }) => {
-  const MODE = mode
-  let VITE_APP_VERSION = process.env.VITE_APP_VERSION
+  const env = loadEnv(mode, process.cwd(), '')
+
+  let VITE_APP_VERSION = env.VITE_APP_VERSION
   if (!VITE_APP_VERSION) {
     try {
       VITE_APP_VERSION = readFileSync(resolve('../VERSION'))
@@ -61,8 +56,8 @@ export default defineConfig(({ command, mode }) => {
   const VITE_BASE_URL = '/'
   const VITE_APP_TITLE = 'Gardener Dashboard'
 
-  Object.assign(process.env, {
-    MODE,
+  Object.assign(env, {
+    MODE: mode,
     VITE_APP_TITLE,
     VITE_APP_VERSION,
     VITE_BASE_URL,
@@ -107,7 +102,7 @@ export default defineConfig(({ command, mode }) => {
       },
     },
     plugins: [
-      htmlPlugin(process.env),
+      htmlPlugin(env),
       vue({
         template: {
           transformAssetUrls,
@@ -142,7 +137,7 @@ export default defineConfig(({ command, mode }) => {
       __VUE_OPTIONS_API__: true,
       __VUE_PROD_DEVTOOLS__: false,
       'process.env': {
-        MODE,
+        MODE: mode,
         VITE_APP_TITLE,
         VITE_APP_VERSION,
         VITE_BASE_URL,
@@ -162,13 +157,28 @@ export default defineConfig(({ command, mode }) => {
         '.vue',
       ],
     },
-    server: {
+  }
+
+  if (command === 'serve') {
+    const keyPath = resolve('./ssl/key.pem')
+    const certPath = resolve('./ssl/cert.pem')
+    const https = existsSync(keyPath) && existsSync(certPath)
+      ? {
+          key: readFileSync(keyPath),
+          cert: readFileSync(certPath),
+        }
+      : true
+
+    if (https === true && mode === 'development') {
+      // eslint-disable-next-line no-console
+      console.error('SSL key and certificate files are missing. Please run `yarn setup`.')
+      process.exit(1)
+    }
+
+    config.server = {
       port: 8443,
       strictPort: true,
-      https: {
-        key: readFileSync(keyPath),
-        cert: readFileSync(certPath),
-      },
+      https,
       proxy: {
         '/api': {
           target: proxyTarget,
@@ -179,7 +189,39 @@ export default defineConfig(({ command, mode }) => {
           target: proxyTarget,
         },
       },
-    },
+    }
+
+    if (mode === 'test') {
+      const coverage = {
+        provider: 'v8',
+        exclude: ['**/__fixtures__/**'],
+        all: false,
+        thresholds: {
+          statements: 75,
+          branches: 80,
+          functions: 47,
+          lines: 75,
+        },
+      }
+
+      config.test = {
+        include: ['__tests__/**/*.spec.js'],
+        globals: true,
+        environment: 'jsdom',
+        clearMocks: true,
+        setupFiles: [
+          'vitest.setup.js',
+        ],
+        server: {
+          deps: {
+            inline: [
+              'vuetify',
+            ],
+          },
+        },
+        coverage,
+      }
+    }
   }
 
   if (command === 'build') {
@@ -214,38 +256,6 @@ export default defineConfig(({ command, mode }) => {
         template: 'network',
       }),
     )
-  }
-
-  if (process.env.NODE_ENV === 'test') {
-    const coverage = {
-      provider: 'v8',
-      exclude: ['**/__fixtures__/**'],
-      all: false,
-      thresholds: {
-        statements: 75,
-        branches: 80,
-        functions: 47,
-        lines: 75,
-      },
-    }
-
-    config.test = {
-      include: ['__tests__/**/*.spec.js'],
-      globals: true,
-      environment: 'jsdom',
-      clearMocks: true,
-      setupFiles: [
-        'vitest.setup.js',
-      ],
-      server: {
-        deps: {
-          inline: [
-            'vuetify',
-          ],
-        },
-      },
-      coverage,
-    }
   }
 
   return config
