@@ -49,6 +49,8 @@ import { useShootItem } from '@/composables/useShootItem'
 import { useShootHelper } from '@/composables/useShootHelper'
 import { useShootStatus } from '@/composables/useShootStatus'
 
+import { isTruthyValue } from '@/utils'
+
 import {
   get,
   replace,
@@ -116,6 +118,11 @@ export default {
       return get(this.shootInfo, 'monitoringPassword', '')
     },
     hasAlertmanager () {
+      const ignoreAlerts = get(this.shootItem, 'metadata.annotations["shoot.gardener.cloud/ignore-alerts"]', 'false')
+      if (isTruthyValue(ignoreAlerts)) {
+        return false
+      }
+
       const emailReceivers = get(this.shootItem, 'spec.monitoring.alerting.emailReceivers', [])
       return emailReceivers.length > 0
     },
