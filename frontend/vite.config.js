@@ -171,8 +171,7 @@ export default defineConfig(({ command, mode }) => {
 
     if (https === true && mode === 'development') {
       // eslint-disable-next-line no-console
-      console.error('SSL key and certificate files are missing. Please run `yarn setup`.')
-      process.exit(1)
+      console.warn('SSL key and certificate files are missing. Please run `yarn setup`.')
     }
 
     config.server = {
