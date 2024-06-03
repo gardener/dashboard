@@ -1318,7 +1318,7 @@ const RAW_RUNTIME_STATE =
           ["@kyvg/vue3-notification", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.2.1"],\
           ["@mdi/font", "npm:7.4.47"],\
           ["@pinia/testing", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.1.3"],\
-          ["@vitejs/plugin-vue", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.0.4"],\
+          ["@vitejs/plugin-vue", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.0.5"],\
           ["@vitest/coverage-v8", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:1.6.0"],\
           ["@vitest/ui", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:1.6.0"],\
           ["@vue/test-utils", "npm:2.4.6"],\
@@ -1357,7 +1357,7 @@ const RAW_RUNTIME_STATE =
           ["netmask", "npm:2.0.2"],\
           ["pinia", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.1.7"],\
           ["rollup-plugin-visualizer", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.12.0"],\
-          ["sass", "npm:1.77.2"],\
+          ["sass", "npm:1.77.4"],\
           ["semver", "npm:7.6.2"],\
           ["socket.io-client", "npm:4.7.5"],\
           ["splitpanes", "npm:3.1.5"],\
@@ -2910,17 +2910,17 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@vitejs/plugin-vue", [\
-      ["npm:5.0.4", {\
-        "packageLocation": "./.yarn/cache/@vitejs-plugin-vue-npm-5.0.4-e08dc8c74a-2e65900ff4.zip/node_modules/@vitejs/plugin-vue/",\
+      ["npm:5.0.5", {\
+        "packageLocation": "./.yarn/cache/@vitejs-plugin-vue-npm-5.0.5-e37db359ea-03b16e398b.zip/node_modules/@vitejs/plugin-vue/",\
         "packageDependencies": [\
-          ["@vitejs/plugin-vue", "npm:5.0.4"]\
+          ["@vitejs/plugin-vue", "npm:5.0.5"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.0.4", {\
-        "packageLocation": "./.yarn/__virtual__/@vitejs-plugin-vue-virtual-d5a85014c6/0/cache/@vitejs-plugin-vue-npm-5.0.4-e08dc8c74a-2e65900ff4.zip/node_modules/@vitejs/plugin-vue/",\
+      ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.0.5", {\
+        "packageLocation": "./.yarn/__virtual__/@vitejs-plugin-vue-virtual-19e74e4b97/0/cache/@vitejs-plugin-vue-npm-5.0.5-e37db359ea-03b16e398b.zip/node_modules/@vitejs/plugin-vue/",\
         "packageDependencies": [\
-          ["@vitejs/plugin-vue", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.0.4"],\
+          ["@vitejs/plugin-vue", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.0.5"],\
           ["@types/vite", null],\
           ["@types/vue", null],\
           ["vite", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.2.12"],\
@@ -10946,10 +10946,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["sass", [\
-      ["npm:1.77.2", {\
-        "packageLocation": "./.yarn/cache/sass-npm-1.77.2-edf64c5590-0d29233906.zip/node_modules/sass/",\
+      ["npm:1.77.4", {\
+        "packageLocation": "./.yarn/cache/sass-npm-1.77.4-13b6910aea-b9cb4882bd.zip/node_modules/sass/",\
         "packageDependencies": [\
-          ["sass", "npm:1.77.2"],\
+          ["sass", "npm:1.77.4"],\
           ["chokidar", "npm:3.5.3"],\
           ["immutable", "npm:4.3.4"],\
           ["source-map-js", "npm:1.0.2"]\
@@ -12365,7 +12365,7 @@ const RAW_RUNTIME_STATE =
           ["lightningcss", null],\
           ["postcss", "npm:8.4.38"],\
           ["rollup", "npm:4.13.0"],\
-          ["sass", "npm:1.77.2"],\
+          ["sass", "npm:1.77.4"],\
           ["stylus", null],\
           ["sugarss", null],\
           ["terser", null]\
