@@ -1808,7 +1808,6 @@ Object {
   "kubeconfig": Any<String>,
   "monitoringPassword": "pass-garden-foo-dummyShoot.monitoring",
   "monitoringUsername": "user-garden-foo-dummyShoot.monitoring",
-  "seedShootIngressDomain": "foo--dummyShoot.ingress.foo-south.infra1.example.org",
 }
 `;
 
@@ -1855,7 +1854,6 @@ Object {
   "kubeconfigGardenlogin": Any<String>,
   "monitoringPassword": "pass-garden-foo-barShoot.monitoring",
   "monitoringUsername": "user-garden-foo-barShoot.monitoring",
-  "seedShootIngressDomain": "foo--barShoot.ingress.foo-east.infra1.example.org",
 }
 `;
 

@@ -23,7 +23,6 @@ const {
   decodeBase64,
   encodeBase64,
   getSeedNameFromShoot,
-  getSeedIngressDomain,
   projectFilter
 } = utils
 const { getSeed } = cache
@@ -334,13 +333,6 @@ exports.info = async function ({ user, namespace, name }) {
 
   if (shoot.spec.seedName) {
     const seed = getSeed(getSeedNameFromShoot(shoot))
-    const prefix = _.replace(shoot.status.technicalID, /^shoot-{1,2}/, '')
-    if (prefix) {
-      const ingressDomain = getSeedIngressDomain(seed)
-      if (ingressDomain) {
-        data.seedShootIngressDomain = `${prefix}.${ingressDomain}`
-      }
-    }
     if (seed && namespace !== 'garden') {
       try {
         data.canLinkToSeed = !!(await client['core.gardener.cloud'].shoots.get('garden', seed.metadata.name))
