@@ -372,7 +372,10 @@ exports.info = async function ({ user, namespace, name }) {
   }
   data.dashboardUrlPath = getDashboardUrlPath(shoot.spec.kubernetes.version)
 
-  await assignMonitoringSecret(client, data, namespace, name)
+  const oidcObservabilityUrlsEnabled = _.get(config, 'frontend.features.oidcObservabilityUrlsEnabled', false)
+  if (!oidcObservabilityUrlsEnabled && await authorization.canGetSecret(user, namespace, `${name}.monitoring`)) {
+    await assignMonitoringSecret(client, data, namespace, name)
+  }
 
   return data
 }
