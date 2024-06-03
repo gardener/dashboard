@@ -164,8 +164,7 @@ async function authorizationUrl (req, res) {
     secure: true,
     httpOnly: true,
     maxAge: 180_000, // cookie will be removed after 3 minutes
-    sameSite: 'Lax',
-    signed: true
+    sameSite: 'Lax'
   })
   const client = await exports.getIssuerClient()
   if (!includes(redirectUris, backendRedirectUri)) {
@@ -183,8 +182,7 @@ async function authorizationUrl (req, res) {
       secure: true,
       httpOnly: true,
       maxAge: 180_000, // cookie will be removed after 3 minutes
-      sameSite: 'Lax',
-      signed: true
+      sameSite: 'Lax'
     })
     switch (codeChallengeMethod) {
       case 'S256':
@@ -285,8 +283,8 @@ async function authorizationCallback (req, res) {
     path: '/'
   }
   const stateObject = {}
-  if (COOKIE_STATE in req.signedCookies) {
-    Object.assign(stateObject, req.signedCookies[COOKIE_STATE])
+  if (COOKIE_STATE in req.cookies) {
+    Object.assign(stateObject, req.cookies[COOKIE_STATE])
     res.clearCookie(COOKIE_STATE, options)
   }
   const {
@@ -300,8 +298,8 @@ async function authorizationCallback (req, res) {
     response_type: 'code',
     state
   }
-  if (COOKIE_CODE_VERIFIER in req.signedCookies) {
-    checks.code_verifier = req.signedCookies[COOKIE_CODE_VERIFIER]
+  if (COOKIE_CODE_VERIFIER in req.cookies) {
+    checks.code_verifier = req.cookies[COOKIE_CODE_VERIFIER]
     res.clearCookie(COOKIE_CODE_VERIFIER, options)
   }
   const tokenSet = await authorizationCodeExchange(backendRedirectUri, parameters, checks)

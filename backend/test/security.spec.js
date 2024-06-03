@@ -183,8 +183,7 @@ describe('security', function () {
             httpOnly: true,
             maxAge: 180000,
             sameSite: 'Lax',
-            secure: true,
-            signed: true
+            secure: true
           }
         ],
         [
@@ -194,8 +193,7 @@ describe('security', function () {
             httpOnly: true,
             maxAge: 180000,
             sameSite: 'Lax',
-            secure: true,
-            signed: true
+            secure: true
           }
         ]
       ])
