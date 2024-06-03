@@ -39,9 +39,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { storeToRefs } from 'pinia'
-
-import { useShootContextStore } from '@/store/shootContext'
+import { useShootContext } from '@/composables/useShootContext'
 
 const props = defineProps({
   createMode: {
@@ -50,15 +48,12 @@ const props = defineProps({
   },
 })
 
-const shootContextStore = useShootContextStore()
 const {
   addonDefinitions,
   workerless,
-} = storeToRefs(shootContextStore)
-const {
   getAddonEnabled,
   setAddonEnabled,
-} = shootContextStore
+} = useShootContext()
 
 function getDisabled (name) {
   const { forbidDisable = false } = addonDefinitions.value[name]
