@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
  -->
@@ -10,58 +10,53 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :secret-validations="v$"
     :secret="secret"
-    vendor="netlify-dns"
     create-title="Add new DDNS (RFC2136) Secret"
     replace-title="Replace DDNS (RFC2136) Secret"
   >
     <template #secret-slot>
       <div>
         <v-text-field
-          v-model="server"
+          v-model="v$.server.$model"
           color="primary"
           label="<host>:<port> of the authorive DNS server"
           :error-messages="getErrorMessages(v$.server)"
           type="text"
           variant="underlined"
-          @update:model-value="v$.server.$touch()"
           @blur="v$.server.$touch()"
         />
       </div>
       <div>
         <v-text-field
-          v-model="tsigKeyName"
+          v-model="v$.tsigKeyName.$model"
           color="primary"
           label="TSIG Key Name"
           :error-messages="getErrorMessages(v$.tsigKeyName)"
           type="text"
           variant="underlined"
-          @update:model-value="v$.tsigKeyName.$touch()"
           @blur="v$.tsigKeyName.$touch()"
         />
       </div>
       <div>
         <v-text-field
-          v-model="tsigSecret"
+          v-model="v$.tsigSecret.$model"
           color="primary"
           label="TSIG Secret"
           :error-messages="getErrorMessages(v$.tsigSecret)"
-          :append-icon="hideTSIGSecret ? 'mdi-eye' : 'mdi-eye-off'"
-          :type="hideTSIGSecret ? 'password' : 'text'"
+          :append-icon="tsigSecretHidden ? 'mdi-eye' : 'mdi-eye-off'"
+          :type="tsigSecretHidden ? 'password' : 'text'"
           variant="underlined"
-          @click:append="() => (hideTSIGSecret = !hideTSIGSecret)"
-          @update:model-value="v$.tsigSecret.$touch()"
+          @click:append="() => (tsigSecretHidden = !tsigSecretHidden)"
           @blur="v$.tsigSecret.$touch()"
         />
       </div>
       <div>
         <v-text-field
-          v-model="zone"
+          v-model="v$.zone.$model"
           color="primary"
           label="Zone"
           :error-messages="getErrorMessages(v$.zone)"
           type="text"
           variant="underlined"
-          @update:model-value="v$.zone.$touch()"
           @blur="v$.zone.$touch()"
         />
       </div>
@@ -89,7 +84,8 @@ SPDX-License-Identifier: Apache-2.0
           The configuration is depending on the DNS server product. You need permissions for <code>update</code> and <code>transfer</code> (AXFR) actions on your zones and a TSIG secret.
         </p>
         <p>
-          For details see <g-external-link url="https://github.com/gardener/external-dns-management/tree/master/docs/rfc2136">
+          For details see
+          <g-external-link url="https://github.com/gardener/external-dns-management/tree/master/docs/rfc2136">
             Gardener RFC2136 DNS Provider Documentation
           </g-external-link>
         </p>
@@ -140,7 +136,7 @@ export default {
       tsigSecret: undefined,
       zone: undefined,
       tsigSecretAlgorithm: 'hmac-sha256',
-      hideTSIGSecret: true,
+      tsigSecretHidden: true,
       secretAlgorithmItems: [
         {
           title: 'HMAC-SHA256 (default)',
@@ -222,23 +218,7 @@ export default {
       return !this.secret
     },
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-      }
-    },
-  },
   methods: {
-    reset () {
-      this.v$.$reset()
-
-      this.server = undefined
-      this.tsigKeyName = undefined
-      this.tsigSecret = undefined
-      this.zone = undefined
-      this.tsigSecretAlgorithm = 'hmac-sha256'
-    },
     getErrorMessages,
   },
 }
