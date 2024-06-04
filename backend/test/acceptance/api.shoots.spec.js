@@ -74,7 +74,7 @@ describe('api', function () {
       expect(mockRequest).toBeCalledTimes(1)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
-      expect(res.body.items.map(item => item.metadata.uid)).toEqual([1, 2, 3])
+      expect(res.body.items.map(item => item.metadata.uid)).toEqual([1, 2, 3, 5])
       expect(res.body).toMatchSnapshot()
     })
 
@@ -90,7 +90,7 @@ describe('api', function () {
       expect(mockRequest).toBeCalledTimes(1)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
-      expect(res.body.items.map(item => item.metadata.uid)).toEqual([1, 2, 3, 4])
+      expect(res.body.items.map(item => item.metadata.uid)).toEqual([1, 2, 3, 4, 5])
       expect(res.body).toMatchSnapshot()
     })
 
@@ -108,7 +108,7 @@ describe('api', function () {
       expect(mockRequest).toBeCalledTimes(3)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
-      expect(res.body.items.map(item => item.metadata.uid)).toEqual([1, 2, 3])
+      expect(res.body.items.map(item => item.metadata.uid)).toEqual([1, 2, 3, 5])
       expect(res.body).toMatchSnapshot()
     })
 
@@ -483,25 +483,137 @@ describe('api', function () {
     })
 
     it('should replace dns', async function () {
+      const name = 'dns-shoot' // has existing extension dns and resources
+      const namespace = 'garden-foo'
+
+      mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.shoots.mocks.patch())
 
       const res = await agent
         .put(`/api/namespaces/${namespace}/shoots/${name}/spec/dns`)
         .set('cookie', await user.cookie)
         .send({
-          domain: 'foo.bar',
-          providers: [
+          dns: {
+            domain: 'foo.bar',
+            providers: [
+              {
+                primary: 'true',
+                secretName: 'foo-secret',
+                type: 'foo-provider'
+              }
+            ]
+          },
+          extensionDns: {
+            providerConfig: {
+              apiVersion: 'service.dns.extensions.gardener.cloud/v1alpha1',
+              kind: 'DNSConfig',
+              providers: [
+                {
+                  secretName: 'shoot-dns-service-bar-secret',
+                  type: 'foo-provider'
+                },
+                {
+                  secretName: 'foobar-secret',
+                  type: 'shoot-dns-service-foo-provider'
+                }
+              ]
+            }
+          },
+          resources: [
             {
-              primary: 'true',
-              secretName: 'foo-secret',
-              type: 'foo-provider'
+              name: 'shoot-dns-service-bar-secret',
+              resourceRef: {
+                kind: 'Secret',
+                name: 'bar-secret',
+                apiVersion: 'v1'
+              }
+            },
+            {
+              name: 'shoot-dns-service-foobar-secret',
+              resourceRef: {
+                kind: 'Secret',
+                name: 'foobar-secret',
+                apiVersion: 'v1'
+              }
             }
           ]
         })
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(1)
+      expect(mockRequest).toBeCalledTimes(2)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should add dns', async function () {
+      mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.shoots.mocks.patch())
+
+      const res = await agent
+        .put(`/api/namespaces/${namespace}/shoots/${name}/spec/dns`)
+        .set('cookie', await user.cookie)
+        .send({
+          extensionDns: {
+            providerConfig: {
+              apiVersion: 'service.dns.extensions.gardener.cloud/v1alpha1',
+              kind: 'DNSConfig',
+              providers: [
+                {
+                  secretName: 'shoot-dns-service-bar-secret',
+                  type: 'foo-provider'
+                },
+                {
+                  secretName: 'foobar-secret',
+                  type: 'shoot-dns-service-foo-provider'
+                }
+              ]
+            }
+          },
+          resources: [
+            {
+              name: 'shoot-dns-service-bar-secret',
+              resourceRef: {
+                kind: 'Secret',
+                name: 'bar-secret',
+                apiVersion: 'v1'
+              }
+            },
+            {
+              name: 'shoot-dns-service-foobar-secret',
+              resourceRef: {
+                kind: 'Secret',
+                name: 'foobar-secret',
+                apiVersion: 'v1'
+              }
+            }
+          ]
+        })
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(2)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should delete dns', async function () {
+      const name = 'dns-shoot' // has existing extension dns and resources
+      const namespace = 'garden-foo'
+
+      mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.shoots.mocks.patch())
+
+      const res = await agent
+        .put(`/api/namespaces/${namespace}/shoots/${name}/spec/dns`)
+        .set('cookie', await user.cookie)
+        .send({})
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toBeCalledTimes(2)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()

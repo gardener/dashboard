@@ -53,6 +53,28 @@ const shootList = [
     createdBy: 'admin@example.org',
     secretBindingName: 'soil-infra1',
     seed: 'soil-infra1'
+  }),
+  getShoot({
+    uid: 5,
+    name: 'dns-shoot',
+    namespace: 'garden-foo',
+    project: 'foo',
+    createdBy: 'foo@example.org',
+    secretBindingName: 'barSecretName',
+    seed: 'foo-infra1',
+    extensions: [
+      {
+        type: 'dummy'
+      },
+      {
+        type: 'shoot-dns-service'
+      }
+    ],
+    resources: [
+      {
+        name: 'dummy'
+      }
+    ]
   })
 ]
 
@@ -70,7 +92,9 @@ function getShoot ({
   seed = 'infra1-seed',
   hibernation = { enabled: false },
   kubernetesVersion = '1.16.0',
-  advertisedAddresses
+  advertisedAddresses,
+  extensions,
+  resources
 }) {
   uid = uid || `${namespace}--${name}`
   const shoot = {
@@ -107,6 +131,12 @@ function getShoot ({
       name: 'external',
       url: `https://api.${name}.${project}.shoot.test`
     }]
+  }
+  if (extensions) {
+    shoot.spec.extensions = extensions
+  }
+  if (resources) {
+    shoot.spec.resources = resources
   }
   return shoot
 }

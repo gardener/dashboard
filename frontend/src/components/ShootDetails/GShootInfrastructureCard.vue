@@ -154,29 +154,37 @@ SPDX-License-Identifier: Apache-2.0
               {{ customDomainChipText }}
             </v-chip>
           </template>
-          {{ shootDomain }}
+          <div class="d-flex">
+            {{ shootDomain }}
+            <g-dns-provider
+              v-if="shootDnsPrimaryProvider"
+              class="ml-2"
+              primary
+              :secret-name="shootDnsPrimaryProvider.secretName"
+              :shoot-namespace="shootNamespace"
+              :type="shootDnsPrimaryProvider.type"
+              :secret="getCloudProviderSecretByName({ name: shootDnsPrimaryProvider.secretName, namespace: shootNamespace })"
+            />
+          </div>
         </g-list-item-content>
       </g-list-item>
-      <g-list-item>
+      <g-list-item v-if="isDnsServiceExtensionDeployed || isCustomShootDomain">
         <template #prepend />
-        <g-list-item-content
-          label="DNS Providers"
-        >
+        <g-list-item-content label="DNS Providers">
           <div
-            v-if="shootDnsProviders && shootDnsProviders.length"
-            class="d-flex justify-start"
+            v-if="shootExtensionDnsProviders && shootExtensionDnsProviders.length"
+            class="d-flex"
           >
             <g-dns-provider
-              v-for="({ primary, secretName, type, domains, zones }) in shootDnsProviders"
-              :key="secretName"
+              v-for="({ secretRefName, type, domains, zones }) in shootExtensionDnsProviders"
+              :key="secretRefName"
               class="mr-2"
-              :primary="primary"
-              :secret-name="secretName"
+              :secret-name="secretRefName"
               :shoot-namespace="shootNamespace"
               :type="type"
               :domains="domains"
               :zones="zones"
-              :secret="getCloudProviderSecretByName({ name: secretName, namespace: shootNamespace })"
+              :secret="getCloudProviderSecretByName({ name: secretRefName, namespace: shootNamespace })"
             />
           </div>
           <span v-else>No DNS provider configured</span>
@@ -248,6 +256,7 @@ import {
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useSecretStore } from '@/store/secret'
 import { useAuthzStore } from '@/store/authz'
+import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 
 import GCopyBtn from '@/components/GCopyBtn'
 import GShootSeedName from '@/components/GShootSeedName'
@@ -299,7 +308,6 @@ export default {
       shootDomain,
       isCustomShootDomain,
       shootSecretBindingName,
-      shootDnsProviders,
       hasShootWorkerGroups,
       shootControlPlaneHighAvailabilityFailureTolerance,
       shootCloudProviderKind,
@@ -307,6 +315,8 @@ export default {
       nodesCidr,
       podsCidr,
       shootTechnicalId,
+      shootExtensionDnsProviders,
+      shootDnsPrimaryProvider,
     } = useShootItem()
 
     return {
@@ -320,7 +330,6 @@ export default {
       shootDomain,
       isCustomShootDomain,
       shootSecretBindingName,
-      shootDnsProviders,
       hasShootWorkerGroups,
       shootControlPlaneHighAvailabilityFailureTolerance,
       shootCloudProviderKind,
@@ -328,9 +337,14 @@ export default {
       nodesCidr,
       podsCidr,
       shootTechnicalId,
+      shootExtensionDnsProviders,
+      shootDnsPrimaryProvider,
     }
   },
   computed: {
+    ...mapState(useGardenerExtensionStore, [
+      'isDnsServiceExtensionDeployed',
+    ]),
     ...mapState(useAuthzStore, [
       'canPatchShootsBinding',
     ]),

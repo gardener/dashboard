@@ -1,13 +1,101 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`composables > useShootContext > should add dns providers 1`] = `
+exports[`composables > useShootContext > should add extension custom domain dns provider 1`] = `
 {
   "domain": "example.org",
   "providers": [
     {
       "primary": true,
-      "secretName": "aws-route53-secret",
-      "type": "aws-route53",
+      "secretName": "bar",
+      "type": "foo",
+    },
+  ],
+}
+`;
+
+exports[`composables > useShootContext > should add extension custom domain dns provider 2`] = `
+[
+  {
+    "providerConfig": {
+      "apiVersion": "service.dns.extensions.gardener.cloud/v1alpha1",
+      "kind": "DNSConfig",
+      "providers": [
+        {
+          "domains": {
+            "include": [
+              "example.org",
+            ],
+          },
+          "secretName": "shoot-dns-service-bar",
+          "type": "foo",
+        },
+      ],
+      "syncProvidersFromShootSpecDNS": false,
+    },
+    "type": "shoot-dns-service",
+  },
+]
+`;
+
+exports[`composables > useShootContext > should add extension custom domain dns provider 3`] = `
+[
+  {
+    "name": "shoot-dns-service-bar",
+    "resourceRef": {
+      "apiVersion": "v1",
+      "kind": "Secret",
+      "name": "bar",
+    },
+  },
+]
+`;
+
+exports[`composables > useShootContext > should add extension dns providers 1`] = `
+{
+  "domain": "example.org",
+}
+`;
+
+exports[`composables > useShootContext > should add extension dns providers 2`] = `
+[
+  {
+    "providerConfig": {
+      "apiVersion": "service.dns.extensions.gardener.cloud/v1alpha1",
+      "kind": "DNSConfig",
+      "providers": [
+        {
+          "secretName": "shoot-dns-service-aws-route53-secret",
+          "type": "aws-route53",
+        },
+      ],
+      "syncProvidersFromShootSpecDNS": false,
+    },
+    "type": "shoot-dns-service",
+  },
+]
+`;
+
+exports[`composables > useShootContext > should add extension dns providers 3`] = `
+[
+  {
+    "name": "shoot-dns-service-aws-route53-secret",
+    "resourceRef": {
+      "apiVersion": "v1",
+      "kind": "Secret",
+      "name": "aws-route53-secret",
+    },
+  },
+]
+`;
+
+exports[`composables > useShootContext > should add primary dns provider 1`] = `
+{
+  "domain": "example.org",
+  "providers": [
+    {
+      "primary": true,
+      "secretName": "bar",
+      "type": "foo",
     },
   ],
 }
@@ -738,3 +826,39 @@ exports[`composables > useShootContext > should create a default "openstack" sho
   },
 }
 `;
+
+exports[`composables > useShootContext > should delete extension dns providers 1`] = `
+[
+  {
+    "providerConfig": {
+      "apiVersion": "service.dns.extensions.gardener.cloud/v1alpha1",
+      "kind": "DNSConfig",
+      "providers": [
+        {
+          "secretName": "shoot-dns-service-aws-route53-secret",
+          "type": "aws-route53",
+        },
+      ],
+      "syncProvidersFromShootSpecDNS": false,
+    },
+    "type": "shoot-dns-service",
+  },
+]
+`;
+
+exports[`composables > useShootContext > should delete extension dns providers 2`] = `
+[
+  {
+    "name": "shoot-dns-service-aws-route53-secret",
+    "resourceRef": {
+      "apiVersion": "v1",
+      "kind": "Secret",
+      "name": "aws-route53-secret",
+    },
+  },
+]
+`;
+
+exports[`composables > useShootContext > should delete extension dns providers 3`] = `undefined`;
+
+exports[`composables > useShootContext > should delete extension dns providers 4`] = `undefined`;

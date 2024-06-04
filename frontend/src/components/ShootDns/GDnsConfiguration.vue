@@ -49,6 +49,8 @@ export default {
 
     const {
       dns,
+      extensionDns,
+      shootManifest,
       setShootManifest,
     } = useShootContext()
 
@@ -59,14 +61,17 @@ export default {
       shootItem,
       shootNamespace,
       shootName,
-      dns,
+      shootManifest,
       setShootManifest,
+      dns,
+      extensionDns,
       componentKey,
     }
   },
   methods: {
     async onConfigurationDialogOpened () {
       this.componentKey = uuidv4() // force re-render
+      this.setShootManifest(this.shootItem)
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
         this.updateConfiguration()
@@ -77,7 +82,11 @@ export default {
         await this.api.updateShootDns({
           namespace: this.shootNamespace,
           name: this.shootName,
-          data: this.dns,
+          data: {
+            dns: this.dns,
+            extensionDns: this.extensionDns,
+            resources: this.shootManifest.spec.resources,
+          },
         })
       } catch (err) {
         const errorMessage = 'Could not update DNS Configuration'

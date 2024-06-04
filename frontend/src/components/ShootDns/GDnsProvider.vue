@@ -13,20 +13,16 @@ SPDX-License-Identifier: Apache-2.0
       <v-chip
         v-bind="props"
         size="small"
+        density="comfortable"
         color="primary"
         variant="tonal"
         class="cursor-pointer my-0 ml-0"
       >
         <g-vendor-icon
           :icon="type"
-          :size="20"
+          :size="14"
         />
         <span class="px-1">{{ secretName }}</span>
-        <v-icon
-          v-if="primary"
-          icon="mdi-star"
-          size="small"
-        />
       </v-chip>
     </template>
     <v-list min-width="300">

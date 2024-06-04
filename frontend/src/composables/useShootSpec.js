@@ -9,13 +9,15 @@ import { computed } from 'vue'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useSeedStore } from '@/store/seed'
 
+import utils from '@/utils'
+
 import {
   get,
   uniq,
   flatMap,
   cloneDeep,
   find,
-  some,
+  map,
   compact,
 } from '@/lodash'
 
@@ -119,11 +121,20 @@ export function useShootSpec (shootItem, options = {}) {
   })
 
   const isCustomShootDomain = computed(() => {
-    return some(shootDnsProviders.value, 'primary')
+    return !!shootDnsPrimaryProvider.value
   })
 
-  const shootDnsProviders = computed(() => {
-    return get(shootSpec.value, 'dns.providers')
+  const shootDnsPrimaryProvider = computed(() => {
+    return find(shootSpec.value.dns?.providers, { primary: true })
+  })
+  const shootExtensionDnsProviders = computed(() => {
+    const extensionDns = find(shootSpec.value.extensions, { type: 'shoot-dns-service' })
+    return map(extensionDns?.providerConfig.providers, provider => {
+      return {
+        ...provider,
+        secretRefName: utils.getResourceRefName(shootSpec.value.resources, provider.secretName),
+      }
+    })
   })
 
   const shootHibernationSchedules = computed(() => {
@@ -171,7 +182,8 @@ export function useShootSpec (shootItem, options = {}) {
     servicesCidr,
     shootDomain,
     isCustomShootDomain,
-    shootDnsProviders,
+    shootDnsPrimaryProvider,
+    shootExtensionDnsProviders,
     shootHibernationSchedules,
     shootMaintenance,
     shootControlPlaneHighAvailabilityFailureTolerance,

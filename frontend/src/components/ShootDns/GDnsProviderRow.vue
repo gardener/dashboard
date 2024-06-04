@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
       :activator="$refs.dnsRow"
     >
       <span class="font-weight-bold">You cannot edit this DNS Provider</span><br>
-      SecretBinding for secret {{ dnsProvider.secretName }} not found in poject namespace
+      SecretBinding for secret {{ dnsProvider.secretRefName }} not found in poject namespace
     </v-tooltip>
     <div
       ref="dnsRow"
@@ -24,13 +24,11 @@ SPDX-License-Identifier: Apache-2.0
         <div class="regular-input">
           <v-select
             v-model="dnsProviderType"
-            :disabled="dnsProvider.readonly || primaryReadonly"
+            :disabled="dnsProvider.readonly"
             color="primary"
             :items="dnsProviderTypes"
             :error-messages="getErrorMessages(v$.dnsProviderType)"
             label="Dns Provider Type"
-            :hint="typeHint"
-            persistent-hint
             variant="underlined"
             @change="v$.dnsProviderType.$touch()"
             @blur="v$.dnsProviderType.$touch()"
@@ -55,13 +53,13 @@ SPDX-License-Identifier: Apache-2.0
         </div>
         <div class="regular-input">
           <g-select-secret
-            v-model="dnsProviderSecret"
+            v-model="extensionDnsProviderSecret"
             :disabled="dnsProvider.readonly"
             :dns-provider-kind="dnsProviderType"
-            register-vuelidate-as="dnsProviderSecret"
+            register-vuelidate-as="extensionDnsProviderSecret"
           />
         </div>
-        <div class="regular-input">
+        <div class="large-input">
           <v-combobox
             v-model="dnsProvider.excludeDomains"
             :disabled="dnsProvider.readonly"
@@ -71,7 +69,7 @@ SPDX-License-Identifier: Apache-2.0
             variant="underlined"
           />
         </div>
-        <div class="regular-input">
+        <div class="large-input">
           <v-combobox
             v-model="dnsProvider.includeDomains"
             :disabled="dnsProvider.readonly"
@@ -81,7 +79,7 @@ SPDX-License-Identifier: Apache-2.0
             variant="underlined"
           />
         </div>
-        <div class="regular-input">
+        <div class="large-input">
           <v-combobox
             v-model="dnsProvider.excludeZones"
             :disabled="dnsProvider.readonly"
@@ -91,7 +89,7 @@ SPDX-License-Identifier: Apache-2.0
             variant="underlined"
           />
         </div>
-        <div class="regular-input">
+        <div class="large-input">
           <v-combobox
             v-model="dnsProvider.includeZones"
             :disabled="dnsProvider.readonly"
@@ -105,12 +103,12 @@ SPDX-License-Identifier: Apache-2.0
 
       <div class="ml-4 mr-2">
         <v-btn
-          :disabled="dnsProvider.readonly || primaryReadonly"
+          :disabled="dnsProvider.readonly"
           size="x-small"
           variant="tonal"
           icon="mdi-close"
           color="grey"
-          @click="deleteDnsProvider(dnsProviderId)"
+          @click="deleteExtensionDnsProvider(dnsProviderId)"
         />
       </div>
     </div>
@@ -134,12 +132,16 @@ import GVendorIcon from '@/components/GVendorIcon'
 import { useShootContext } from '@/composables/useShootContext'
 
 import { getErrorMessages } from '@/utils'
-import { withFieldName } from '@/utils/validators'
+import {
+  withFieldName,
+  withMessage,
+} from '@/utils/validators'
 
 import {
   get,
   head,
   find,
+  filter,
 } from '@/lodash'
 
 export default {
@@ -155,24 +157,29 @@ export default {
   },
   setup () {
     const {
-      dnsProviders,
-      dnsPrimaryProviderId,
       isNewCluster,
-      deleteDnsProvider,
+      extensionDnsProviders,
+      deleteExtensionDnsProvider,
+      getExtensionDnsSecretName,
     } = useShootContext()
 
     return {
       v$: useVuelidate(),
-      dnsProviders,
-      dnsPrimaryProviderId,
       isNewCluster,
-      deleteDnsProvider,
+      extensionDnsProviders,
+      deleteExtensionDnsProvider,
+      getExtensionDnsSecretName,
     }
   },
   validations () {
     return {
       dnsProviderType: withFieldName('DNS Provider Type', {
         required,
+        uniqueProviderTypeSecret: withMessage('Combination of DNS Provider Type and Secret must be unique across shoot-dns-service Providers',
+          type => {
+            return filter(this.extensionDnsProviders, { type, secretRefName: this.dnsProvider.secretRefName }).length < 2
+          },
+        ),
       }),
     }
   },
@@ -186,39 +193,30 @@ export default {
       'dnsProviderTypes',
     ]),
     dnsProvider () {
-      return this.dnsProviders[this.dnsProviderId]
-    },
-    primary () {
-      return this.dnsPrimaryProviderId === this.dnsProviderId
+      return this.extensionDnsProviders[this.dnsProviderId]
     },
     dnsSecrets () {
       return this.dnsSecretsByProviderKind(this.dnsProviderType)
     },
-    typeHint () {
-      return this.primary && !this.isNewCluster
-        ? 'Primary Provider type cannot be changed after cluster creation'
-        : ''
-    },
-    primaryReadonly () {
-      return !this.isNewCluster && this.primary
-    },
     dnsProviderType: {
       get () {
-        return this.dnsProvider.type
+        return this.dnsProvider?.type
       },
       set (value) {
         this.dnsProvider.type = value
         const dnsSecrets = this.dnsSecretsByProviderKind(value)
         const defaultDnsSecret = head(dnsSecrets)
-        this.dnsProvider.secretName = get(defaultDnsSecret, 'metadata.secretRef.name', null)
+        this.extensionDnsProviderSecret = defaultDnsSecret
       },
     },
-    dnsProviderSecret: {
+    extensionDnsProviderSecret: {
       get () {
-        return find(this.dnsSecrets, ['metadata.secretRef.name', this.dnsProvider.secretName])
+        return find(this.dnsSecrets, ['metadata.secretRef.name', this.dnsProvider.secretRefName])
       },
       set (value) {
-        this.dnsProvider.secretName = get(value, 'metadata.secretRef.name', null)
+        const secretRefName = get(value, 'metadata.secretRef.name', undefined)
+        this.dnsProvider.secretRefName = secretRefName
+        this.dnsProvider.secretName = this.getExtensionDnsSecretName(secretRefName)
       },
     },
   },

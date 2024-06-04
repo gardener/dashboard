@@ -5,10 +5,23 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <template v-if="dnsProviderIds.length">
-    <v-expand-transition>
+  <v-container class="px-0 mx-0">
+    <v-row>
+      <v-checkbox
+        v-model="customDomainEnabled"
+        label="Custom Cluster Domain"
+        color="primary"
+        :disabled="!isNewCluster"
+        density="compact"
+        :hint="domainCheckboxHint"
+        :hide-details="isNewCluster"
+        :persistent-hint="!isNewCluster"
+        class="mb-3 mx-3"
+      />
+    </v-row>
+    <template v-if="customDomainEnabled">
       <v-row>
-        <v-col cols="7">
+        <v-col cols="6">
           <v-text-field
             v-model="dnsDomain"
             color="primary"
@@ -17,87 +30,124 @@ SPDX-License-Identifier: Apache-2.0
             :persistent-hint="!isNewCluster"
             :hint="domainHint"
             variant="underlined"
-            @blur="v$.dnsPrimaryProvider.$touch()"
           />
         </v-col>
-        <v-col
-          v-if="primaryProviderVisible"
-          cols="4"
-        >
-          <v-select
-            v-model="dnsPrimaryProvider"
-            color="primary"
-            item-title="secretName"
-            return-object
-            :items="dnsProvidersWithPrimarySupport"
-            :error-messages="getErrorMessages(v$.dnsPrimaryProvider)"
-            label="Primary DNS Provider"
-            clearable
-            :disabled="!isNewCluster"
-            variant="underlined"
-            @blur="v$.dnsPrimaryProvider.$touch()"
-            @update:model-value="v$.dnsPrimaryProvider.$touch()"
+        <template v-if="primaryProviderVisible">
+          <v-col cols="3">
+            <v-select
+              v-model="primaryDnsProviderType"
+              color="primary"
+              :items="dnsProviderTypesWithPrimarySupport"
+              :error-messages="getErrorMessages(v$.primaryDnsProviderType)"
+              label="Dns Provider Type"
+              :disabled="!isNewCluster"
+              :persistent-hint="!isNewCluster"
+              :hint="typeHint"
+              variant="underlined"
+              @change="v$.primaryDnsProviderType.$touch()"
+              @blur="v$.primaryDnsProviderType.$touch()"
+            >
+              <template #item="{ props }">
+                <v-list-item v-bind="props">
+                  <template #prepend>
+                    <g-vendor-icon :icon="props.value" />
+                  </template>
+                </v-list-item>
+              </template>
+              <template #selection="{ item }">
+                <div class="d-flex">
+                  <g-vendor-icon
+                    :icon="item.value"
+                    class="mr-2"
+                  />
+                  {{ item.value }}
+                </div>
+              </template>
+            </v-select>
+          </v-col>
+          <v-col cols="3">
+            <g-select-secret
+              v-model="primaryDnsProviderSecret"
+              :dns-provider-kind="primaryDnsProviderType"
+              register-vuelidate-as="dnsProviderSecret"
+            />
+          </v-col>
+        </template>
+      </v-row>
+      <v-row v-if="showCustomDomainRecommendation">
+        <v-col>
+          <v-alert
+            variant="tonal"
+            type="info"
           >
-            <template #item="{ item, props }">
-              <v-list-item
-                v-bind="props"
+            <div>
+              The primary DNS provider is used for Gardener internal purposes only.
+              The DNS providers for the shoot-dns-service extension are configured separately.
+              Click the button to apply the recommended configuration for the shoot-dns-service.
+              This will add an additional provider with your custom domain as <code>include</code> domain.
+            </div>
+            <div>
+              <v-btn
+                size="x-small"
+                variant="tonal"
+                @click="addExtensionCustomDomainProvider"
               >
-                <template #prepend>
-                  <g-vendor-icon :icon="item.raw.type" />
-                </template>
-                <v-list-item-subtitle>
-                  Type: {{ item.raw.type }}
-                </v-list-item-subtitle>
-              </v-list-item>
-            </template>
-            <template #selection="{ item }">
-              <g-vendor-icon :icon="item.raw.type" />
-              <span class="ml-2">
-                {{ item.raw.secretName }}
-              </span>
-            </template>
-          </v-select>
+                Apply Recommended DNS Configuration
+              </v-btn>
+            </div>
+          </v-alert>
         </v-col>
       </v-row>
-    </v-expand-transition>
-    <v-row>
-      <v-divider class="mx-3" />
-    </v-row>
-  </template>
-  <div class="alternate-row-background">
-    <v-expand-transition group>
-      <v-row
-        v-for="id in dnsProviderIds"
-        :key="id"
-        class="list-item pt-2"
-      >
-        <g-dns-provider-row :dns-provider-id="id" />
-      </v-row>
-    </v-expand-transition>
-    <v-row
-      key="addProvider"
-      class="list-item my-1"
-    >
-      <v-col>
-        <v-btn
-          variant="text"
-          color="primary"
-          @click="addDnsProvider"
+    </template>
+    <template v-if="isDnsServiceExtensionDeployed">
+      <v-divider class="my-3" />
+      <div class="wrap-text text-subtitle-2">
+        Additional DNS Providers for the <code>shoot-dns-service</code> Extension
+      </div>
+      <div class="alternate-row-background">
+        <v-expand-transition group>
+          <v-row
+            v-for="id in extensionDnsProviderIds"
+            :key="id"
+            class="list-item pt-2"
+          >
+            <g-dns-provider-row :dns-provider-id="id" />
+          </v-row>
+        </v-expand-transition>
+        <v-row
+          key="addProvider"
+          class="list-item my-1"
         >
-          <v-icon class="text-primary">
-            mdi-plus
-          </v-icon>
-          Add DNS Provider
-        </v-btn>
-      </v-col>
-    </v-row>
-  </div>
+          <v-col>
+            <v-btn
+              variant="text"
+              color="primary"
+              @click="addExtensionDnsProvider()"
+            >
+              <v-icon class="text-primary">
+                mdi-plus
+              </v-icon>
+              Add DNS Provider
+            </v-btn>
+          </v-col>
+        </v-row>
+      </div>
+    </template>
+  </v-container>
 </template>
 
 <script>
 import { requiredIf } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
+import {
+  mapState,
+  mapActions,
+} from 'pinia'
 
+import { useGardenerExtensionStore } from '@/store/gardenerExtension'
+import { useSecretStore } from '@/store/secret'
+
+import GSelectSecret from '@/components/Secrets/GSelectSecret'
 import GDnsProviderRow from '@/components/ShootDns/GDnsProviderRow'
 import GVendorIcon from '@/components/GVendorIcon'
 
@@ -110,19 +160,27 @@ import {
 } from '@/utils/validators'
 import { getErrorMessages } from '@/utils'
 
+import {
+  find,
+  head,
+} from '@/lodash'
+
 export default {
   components: {
     GDnsProviderRow,
     GVendorIcon,
+    GSelectSecret,
   },
   setup () {
     const {
       dnsDomain,
       dnsPrimaryProvider,
       isNewCluster,
-      dnsProviderIds,
       dnsProvidersWithPrimarySupport,
-      addDnsProvider,
+      extensionDnsProviderIds,
+      hasExtensionCustomDomainProvider,
+      addExtensionDnsProvider,
+      addExtensionCustomDomainProvider,
     } = useShootContext()
 
     return {
@@ -130,33 +188,114 @@ export default {
       dnsDomain,
       dnsPrimaryProvider,
       isNewCluster,
-      dnsProviderIds,
       dnsProvidersWithPrimarySupport,
-      addDnsProvider,
+      extensionDnsProviderIds,
+      hasExtensionCustomDomainProvider,
+      addExtensionDnsProvider,
+      addExtensionCustomDomainProvider,
     }
   },
   validations () {
     return {
-      dnsPrimaryProvider: withFieldName('Primary DNS Provider', {
-        required: withMessage('Provider is required if a custom domain is defined', requiredIf(this.isNewCluster && !!this.dnsDomain)),
-        nil: withMessage('Provider is not allowed if no custom domain is defined', nilUnless('dnsDomain')),
+      primaryDnsProviderType: withFieldName('Primary DNS Provider Type', {
+        required: withMessage('Provider type is required if a custom domain is defined', requiredIf(this.isNewCluster && !!this.dnsDomain)),
+        nil: withMessage('Provider type is not allowed if no custom domain is defined', nilUnless('dnsDomain')),
+      }),
+      primaryDnsProviderSecret: withFieldName('Primary DNS Provider Secret', {
+        required: withMessage('Provider secret is required if a custom domain is defined', requiredIf(this.isNewCluster && !!this.dnsDomain)),
+        nil: withMessage('Provider secret is not allowed if no custom domain is defined', nilUnless('dnsDomain')),
       }),
     }
   },
+  data () {
+    return {
+      customDomain: false,
+    }
+  },
   computed: {
+    ...mapState(useGardenerExtensionStore, [
+      'dnsProviderTypesWithPrimarySupport',
+      'isDnsServiceExtensionDeployed',
+    ]),
     domainHint () {
       return this.isNewCluster
         ? 'External available domain of the cluster'
         : 'Domain cannot be changed after cluster creation'
     },
+    domainCheckboxHint () {
+      return this.isNewCluster
+        ? undefined
+        : this.customDomainEnabled
+          ? 'Custom domain cannot be disabled after cluster creation'
+          : 'Custom domain cannot be enabled after cluster creation'
+    },
+    typeHint () {
+      return this.isNewCluster
+        ? undefined
+        : 'Primary DNS Provider Type cannot be changed after cluster creation'
+    },
     primaryProviderVisible () {
-      return !!this.dnsPrimaryProvider || (this.isNewCluster && !!this.dnsDomain)
+      return !!this.primaryDnsProviderType || (this.isNewCluster && !!this.dnsDomain)
+    },
+    customDomainEnabled: {
+      get () {
+        return this.customDomain ||
+          (!!this.dnsDomain && !!this.primaryDnsProviderType)
+      },
+      set (value) {
+        if (!value) {
+          this.dnsDomain = undefined
+        }
+        this.customDomain = value
+      },
+    },
+    primaryDnsProviderType: {
+      get () {
+        return this.dnsPrimaryProvider.type
+      },
+      set (value) {
+        this.dnsPrimaryProvider.type = value
+      },
+    },
+    primaryDnsProviderSecret: {
+      get () {
+        const dnsSecrets = this.dnsSecretsByProviderKind(this.primaryDnsProviderType)
+        return find(dnsSecrets, ['metadata.secretRef.name', this.dnsPrimaryProvider.secretName])
+      },
+      set (value) {
+        this.dnsPrimaryProvider.secretName = value?.metadata.secretRef.name
+      },
+    },
+    showCustomDomainRecommendation () {
+      if (!this.primaryDnsProviderType) {
+        return false
+      }
+      if (!this.primaryDnsProviderSecret) {
+        return false
+      }
+      if (!this.isDnsServiceExtensionDeployed) {
+        return false
+      }
+      return !this.hasExtensionCustomDomainProvider
+    },
+  },
+  watch: {
+    primaryProviderVisible (value) {
+      if (value) {
+        const type = head(this.dnsProviderTypesWithPrimarySupport)
+        this.primaryDnsProviderType = type
+        const dnsSecrets = this.dnsSecretsByProviderKind(type)
+        this.primaryDnsProviderSecret = head(dnsSecrets)
+      }
     },
   },
   mounted () {
     this.v$.$touch()
   },
   methods: {
+    ...mapActions(useSecretStore, [
+      'dnsSecretsByProviderKind',
+    ]),
     getErrorMessages,
   },
 }

@@ -1,5 +1,170 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`api shoots should add dns 1`] = `
+Array [
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
+    },
+  ],
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "patch",
+      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
+      "content-type": "application/json-patch+json",
+    },
+    Array [
+      Object {
+        "op": "add",
+        "path": "/spec/resources",
+        "value": Array [
+          Object {
+            "name": "shoot-dns-service-bar-secret",
+            "resourceRef": Object {
+              "apiVersion": "v1",
+              "kind": "Secret",
+              "name": "bar-secret",
+            },
+          },
+          Object {
+            "name": "shoot-dns-service-foobar-secret",
+            "resourceRef": Object {
+              "apiVersion": "v1",
+              "kind": "Secret",
+              "name": "foobar-secret",
+            },
+          },
+        ],
+      },
+      Object {
+        "op": "add",
+        "path": "/spec/extensions",
+        "value": Array [
+          Object {
+            "providerConfig": Object {
+              "apiVersion": "service.dns.extensions.gardener.cloud/v1alpha1",
+              "kind": "DNSConfig",
+              "providers": Array [
+                Object {
+                  "secretName": "shoot-dns-service-bar-secret",
+                  "type": "foo-provider",
+                },
+                Object {
+                  "secretName": "foobar-secret",
+                  "type": "shoot-dns-service-foo-provider",
+                },
+              ],
+            },
+          },
+        ],
+      },
+      Object {
+        "op": "add",
+        "path": "/spec/extensions/-",
+        "value": Object {
+          "providerConfig": Object {
+            "apiVersion": "service.dns.extensions.gardener.cloud/v1alpha1",
+            "kind": "DNSConfig",
+            "providers": Array [
+              Object {
+                "secretName": "shoot-dns-service-bar-secret",
+                "type": "foo-provider",
+              },
+              Object {
+                "secretName": "foobar-secret",
+                "type": "shoot-dns-service-foo-provider",
+              },
+            ],
+          },
+        },
+      },
+    ],
+  ],
+]
+`;
+
+exports[`api shoots should add dns 2`] = `
+Object {
+  "metadata": Object {
+    "annotations": Object {
+      "gardener.cloud/created-by": "bar@example.org",
+    },
+    "name": "barShoot",
+    "namespace": "garden-foo",
+    "resourceVersion": "43",
+    "uid": 2,
+  },
+  "spec": Object {
+    "cloudProfileName": "infra1-profileName",
+    "extensions": Array [
+      Object {
+        "providerConfig": Object {
+          "apiVersion": "service.dns.extensions.gardener.cloud/v1alpha1",
+          "kind": "DNSConfig",
+          "providers": Array [
+            Object {
+              "secretName": "shoot-dns-service-bar-secret",
+              "type": "foo-provider",
+            },
+            Object {
+              "secretName": "foobar-secret",
+              "type": "shoot-dns-service-foo-provider",
+            },
+          ],
+        },
+      },
+    ],
+    "hibernation": Object {
+      "enabled": false,
+    },
+    "kubernetes": Object {
+      "version": "1.16.0",
+    },
+    "provider": Object {
+      "type": "fooInfra",
+    },
+    "purpose": "barPurpose",
+    "region": "foo-west",
+    "resources": Array [
+      Object {
+        "name": "shoot-dns-service-bar-secret",
+        "resourceRef": Object {
+          "apiVersion": "v1",
+          "kind": "Secret",
+          "name": "bar-secret",
+        },
+      },
+      Object {
+        "name": "shoot-dns-service-foobar-secret",
+        "resourceRef": Object {
+          "apiVersion": "v1",
+          "kind": "Secret",
+          "name": "foobar-secret",
+        },
+      },
+    ],
+    "secretBindingName": "foo-infra1",
+    "seedName": "infra1-seed",
+  },
+  "status": Object {
+    "advertisedAddresses": Array [
+      Object {
+        "name": "external",
+        "url": "https://api.barShoot.foo.shoot.test",
+      },
+    ],
+    "technicalID": "shoot--foo--barShoot",
+  },
+}
+`;
+
 exports[`api shoots should be forbidden to list shoots for a single namespace 1`] = `
 Array [
   Array [
@@ -175,6 +340,85 @@ Object {
       },
     ],
     "technicalID": "shoot--foo--barShoot",
+  },
+}
+`;
+
+exports[`api shoots should delete dns 1`] = `
+Array [
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/dns-shoot",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
+    },
+  ],
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
+      ":method": "patch",
+      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/dns-shoot",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
+      "content-type": "application/json-patch+json",
+    },
+    Array [
+      Object {
+        "op": "replace",
+        "path": "/spec/resources",
+        "value": undefined,
+      },
+      Object {
+        "op": "remove",
+        "path": "/spec/extensions/1",
+      },
+    ],
+  ],
+]
+`;
+
+exports[`api shoots should delete dns 2`] = `
+Object {
+  "metadata": Object {
+    "annotations": Object {
+      "gardener.cloud/created-by": "foo@example.org",
+    },
+    "name": "dns-shoot",
+    "namespace": "garden-foo",
+    "resourceVersion": "43",
+    "uid": 5,
+  },
+  "spec": Object {
+    "cloudProfileName": "infra1-profileName",
+    "extensions": Array [
+      Object {
+        "type": "dummy",
+      },
+    ],
+    "hibernation": Object {
+      "enabled": false,
+    },
+    "kubernetes": Object {
+      "version": "1.16.0",
+    },
+    "provider": Object {
+      "type": "fooInfra",
+    },
+    "purpose": "foo-purpose",
+    "region": "foo-west",
+    "secretBindingName": "barSecretName",
+    "seedName": "foo-infra1",
+  },
+  "status": Object {
+    "advertisedAddresses": Array [
+      Object {
+        "name": "external",
+        "url": "https://api.dns-shoot.foo.shoot.test",
+      },
+    ],
+    "technicalID": "shoot--foo--dns-shoot",
   },
 }
 `;
@@ -392,15 +636,26 @@ Array [
   Array [
     Object {
       ":authority": "kubernetes:6443",
-      ":method": "patch",
-      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/dns-shoot",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
-      "content-type": "application/merge-patch+json",
     },
+  ],
+  Array [
     Object {
-      "spec": Object {
-        "dns": Object {
+      ":authority": "kubernetes:6443",
+      ":method": "patch",
+      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/dns-shoot",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
+      "content-type": "application/json-patch+json",
+    },
+    Array [
+      Object {
+        "op": "replace",
+        "path": "/spec/dns",
+        "value": Object {
           "domain": "foo.bar",
           "providers": Array [
             Object {
@@ -411,7 +666,49 @@ Array [
           ],
         },
       },
-    },
+      Object {
+        "op": "replace",
+        "path": "/spec/resources",
+        "value": Array [
+          Object {
+            "name": "shoot-dns-service-bar-secret",
+            "resourceRef": Object {
+              "apiVersion": "v1",
+              "kind": "Secret",
+              "name": "bar-secret",
+            },
+          },
+          Object {
+            "name": "shoot-dns-service-foobar-secret",
+            "resourceRef": Object {
+              "apiVersion": "v1",
+              "kind": "Secret",
+              "name": "foobar-secret",
+            },
+          },
+        ],
+      },
+      Object {
+        "op": "replace",
+        "path": "/spec/extensions/1",
+        "value": Object {
+          "providerConfig": Object {
+            "apiVersion": "service.dns.extensions.gardener.cloud/v1alpha1",
+            "kind": "DNSConfig",
+            "providers": Array [
+              Object {
+                "secretName": "shoot-dns-service-bar-secret",
+                "type": "foo-provider",
+              },
+              Object {
+                "secretName": "foobar-secret",
+                "type": "shoot-dns-service-foo-provider",
+              },
+            ],
+          },
+        },
+      },
+    ],
   ],
 ]
 `;
@@ -420,12 +717,12 @@ exports[`api shoots should replace dns 2`] = `
 Object {
   "metadata": Object {
     "annotations": Object {
-      "gardener.cloud/created-by": "bar@example.org",
+      "gardener.cloud/created-by": "foo@example.org",
     },
-    "name": "barShoot",
+    "name": "dns-shoot",
     "namespace": "garden-foo",
     "resourceVersion": "43",
-    "uid": 2,
+    "uid": 5,
   },
   "spec": Object {
     "cloudProfileName": "infra1-profileName",
@@ -439,6 +736,27 @@ Object {
         },
       ],
     },
+    "extensions": Array [
+      Object {
+        "type": "dummy",
+      },
+      Object {
+        "providerConfig": Object {
+          "apiVersion": "service.dns.extensions.gardener.cloud/v1alpha1",
+          "kind": "DNSConfig",
+          "providers": Array [
+            Object {
+              "secretName": "shoot-dns-service-bar-secret",
+              "type": "foo-provider",
+            },
+            Object {
+              "secretName": "foobar-secret",
+              "type": "shoot-dns-service-foo-provider",
+            },
+          ],
+        },
+      },
+    ],
     "hibernation": Object {
       "enabled": false,
     },
@@ -448,19 +766,37 @@ Object {
     "provider": Object {
       "type": "fooInfra",
     },
-    "purpose": "barPurpose",
+    "purpose": "foo-purpose",
     "region": "foo-west",
-    "secretBindingName": "foo-infra1",
-    "seedName": "infra1-seed",
+    "resources": Array [
+      Object {
+        "name": "shoot-dns-service-bar-secret",
+        "resourceRef": Object {
+          "apiVersion": "v1",
+          "kind": "Secret",
+          "name": "bar-secret",
+        },
+      },
+      Object {
+        "name": "shoot-dns-service-foobar-secret",
+        "resourceRef": Object {
+          "apiVersion": "v1",
+          "kind": "Secret",
+          "name": "foobar-secret",
+        },
+      },
+    ],
+    "secretBindingName": "barSecretName",
+    "seedName": "foo-infra1",
   },
   "status": Object {
     "advertisedAddresses": Array [
       Object {
         "name": "external",
-        "url": "https://api.barShoot.foo.shoot.test",
+        "url": "https://api.dns-shoot.foo.shoot.test",
       },
     ],
-    "technicalID": "shoot--foo--barShoot",
+    "technicalID": "shoot--foo--dns-shoot",
   },
 }
 `;
@@ -1400,6 +1736,57 @@ Object {
         "technicalID": "shoot--foo--dummyShoot",
       },
     },
+    Object {
+      "metadata": Object {
+        "annotations": Object {
+          "gardener.cloud/created-by": "foo@example.org",
+        },
+        "labels": Object {
+          "shoot.gardener.cloud/status": "healthy",
+        },
+        "name": "dns-shoot",
+        "namespace": "garden-foo",
+        "uid": 5,
+      },
+      "spec": Object {
+        "cloudProfileName": "infra1-profileName",
+        "extensions": Array [
+          Object {
+            "type": "dummy",
+          },
+          Object {
+            "type": "shoot-dns-service",
+          },
+        ],
+        "hibernation": Object {
+          "enabled": false,
+        },
+        "kubernetes": Object {
+          "version": "1.16.0",
+        },
+        "provider": Object {
+          "type": "fooInfra",
+        },
+        "purpose": "foo-purpose",
+        "region": "foo-west",
+        "resources": Array [
+          Object {
+            "name": "dummy",
+          },
+        ],
+        "secretBindingName": "barSecretName",
+        "seedName": "foo-infra1",
+      },
+      "status": Object {
+        "advertisedAddresses": Array [
+          Object {
+            "name": "external",
+            "url": "https://api.dns-shoot.foo.shoot.test",
+          },
+        ],
+        "technicalID": "shoot--foo--dns-shoot",
+      },
+    },
   ],
   "kind": "List",
 }
@@ -1580,6 +1967,57 @@ Object {
           },
         ],
         "technicalID": "shoot--garden--infra1-seed",
+      },
+    },
+    Object {
+      "metadata": Object {
+        "annotations": Object {
+          "gardener.cloud/created-by": "foo@example.org",
+        },
+        "labels": Object {
+          "shoot.gardener.cloud/status": "healthy",
+        },
+        "name": "dns-shoot",
+        "namespace": "garden-foo",
+        "uid": 5,
+      },
+      "spec": Object {
+        "cloudProfileName": "infra1-profileName",
+        "extensions": Array [
+          Object {
+            "type": "dummy",
+          },
+          Object {
+            "type": "shoot-dns-service",
+          },
+        ],
+        "hibernation": Object {
+          "enabled": false,
+        },
+        "kubernetes": Object {
+          "version": "1.16.0",
+        },
+        "provider": Object {
+          "type": "fooInfra",
+        },
+        "purpose": "foo-purpose",
+        "region": "foo-west",
+        "resources": Array [
+          Object {
+            "name": "dummy",
+          },
+        ],
+        "secretBindingName": "barSecretName",
+        "seedName": "foo-infra1",
+      },
+      "status": Object {
+        "advertisedAddresses": Array [
+          Object {
+            "name": "external",
+            "url": "https://api.dns-shoot.foo.shoot.test",
+          },
+        ],
+        "technicalID": "shoot--foo--dns-shoot",
       },
     },
   ],
@@ -2057,6 +2495,57 @@ Object {
       },
       "status": Object {
         "technicalID": "shoot--foo--dummyShoot",
+      },
+    },
+    Object {
+      "metadata": Object {
+        "annotations": Object {
+          "gardener.cloud/created-by": "foo@example.org",
+        },
+        "labels": Object {
+          "shoot.gardener.cloud/status": "healthy",
+        },
+        "name": "dns-shoot",
+        "namespace": "garden-foo",
+        "uid": 5,
+      },
+      "spec": Object {
+        "cloudProfileName": "infra1-profileName",
+        "extensions": Array [
+          Object {
+            "type": "dummy",
+          },
+          Object {
+            "type": "shoot-dns-service",
+          },
+        ],
+        "hibernation": Object {
+          "enabled": false,
+        },
+        "kubernetes": Object {
+          "version": "1.16.0",
+        },
+        "provider": Object {
+          "type": "fooInfra",
+        },
+        "purpose": "foo-purpose",
+        "region": "foo-west",
+        "resources": Array [
+          Object {
+            "name": "dummy",
+          },
+        ],
+        "secretBindingName": "barSecretName",
+        "seedName": "foo-infra1",
+      },
+      "status": Object {
+        "advertisedAddresses": Array [
+          Object {
+            "name": "external",
+            "url": "https://api.dns-shoot.foo.shoot.test",
+          },
+        ],
+        "technicalID": "shoot--foo--dns-shoot",
       },
     },
   ],
