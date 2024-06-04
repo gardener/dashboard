@@ -80,7 +80,7 @@ export default {
       type: Array,
       default: () => [],
     },
-    updateOSMaintenance: {
+    autoUpdate: {
       type: Boolean,
     },
     fieldName: {
@@ -152,7 +152,7 @@ export default {
           severity: 'warning',
         })
       }
-      if (this.updateOSMaintenance && this.machineImageHasUpdate) {
+      if (this.autoUpdate && this.machineImageHasUpdate) {
         hints.push({
           type: 'text',
           hint: 'You selected a version that is eligible for an automatic update. You should disable automatic operating system updates if you want to maintain this specific version',

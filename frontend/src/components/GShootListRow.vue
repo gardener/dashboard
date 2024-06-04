@@ -116,7 +116,7 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <template v-if="cell.header.key === 'accessRestrictions'">
         <g-access-restriction-chips
-          :selected-access-restrictions="shootSelectedAccessRestrictions"
+          :access-restrictions="shootAccessRestrictions"
           collapse
         />
       </template>
@@ -301,7 +301,7 @@ const {
   shootLastOperation,
   shootTechnicalId,
   shootSeedName,
-  shootSelectedAccessRestrictions,
+  shootAccessRestrictions,
 } = useProvideShootItem(shootItem, {
   cloudProfileStore,
   projectStore,

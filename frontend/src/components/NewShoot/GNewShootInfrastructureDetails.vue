@@ -69,7 +69,7 @@ SPDX-License-Identifier: Apache-2.0
           @blur="v$.networkingType.$touch()"
         />
       </v-col>
-      <template v-if="infrastructureKind === 'openstack'">
+      <template v-if="providerType === 'openstack'">
         <v-col cols="3">
           <g-wildcard-select
             v-model="floatingPoolName"
@@ -91,7 +91,7 @@ SPDX-License-Identifier: Apache-2.0
           />
         </v-col>
       </template>
-      <template v-else-if="infrastructureKind === 'metal'">
+      <template v-else-if="providerType === 'metal'">
         <v-col cols="3">
           <v-text-field
             v-model="v$.projectID.$model"
@@ -159,7 +159,7 @@ SPDX-License-Identifier: Apache-2.0
           />
         </v-col>
       </template>
-      <template v-else-if="infrastructureKind === 'vsphere'">
+      <template v-else-if="providerType === 'vsphere'">
         <v-col cols="3">
           <v-select
             v-model="v$.loadBalancerClassNames.$model"
@@ -184,17 +184,13 @@ import {
   required,
   requiredIf,
 } from '@vuelidate/validators'
-import {
-  mapState,
-  mapWritableState,
-} from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
-
-import { useShootContextStore } from '@/store/shootContext'
 
 import GCloudProfile from '@/components/GCloudProfile'
 import GWildcardSelect from '@/components/GWildcardSelect'
 import GSelectSecret from '@/components/Secrets/GSelectSecret'
+
+import { useShootContext } from '@/composables/useShootContext'
 
 import { getErrorMessages } from '@/utils'
 import {
@@ -217,13 +213,70 @@ export default {
     GSelectSecret,
   },
   setup () {
+    const {
+      providerType,
+      cloudProfileName,
+      infrastructureSecret,
+      region,
+      networkingType,
+      providerControlPlaneConfigLoadBalancerProviderName,
+      providerControlPlaneConfigLoadBalancerClassNames,
+      providerInfrastructureConfigFloatingPoolName,
+      providerInfrastructureConfigPartitionID,
+      providerInfrastructureConfigProjectID,
+      providerInfrastructureConfigFirewallImage,
+      providerInfrastructureConfigFirewallSize,
+      providerInfrastructureConfigFirewallNetworks,
+      cloudProfiles,
+      infrastructureSecrets,
+      regionsWithSeed,
+      regionsWithoutSeed,
+      showAllRegions,
+      networkingTypes,
+      allLoadBalancerProviderNames,
+      allLoadBalancerClassNames,
+      partitionIDs,
+      firewallImages,
+      firewallSizes,
+      allFirewallNetworks,
+      allFloatingPoolNames,
+      workerless,
+    } = useShootContext()
+
     return {
       v$: useVuelidate(),
+      providerType,
+      cloudProfileName,
+      infrastructureSecret,
+      region,
+      networkingType,
+      loadBalancerProviderName: providerControlPlaneConfigLoadBalancerProviderName,
+      loadBalancerClassNames: providerControlPlaneConfigLoadBalancerClassNames,
+      floatingPoolName: providerInfrastructureConfigFloatingPoolName,
+      partitionID: providerInfrastructureConfigPartitionID,
+      projectID: providerInfrastructureConfigProjectID,
+      firewallImage: providerInfrastructureConfigFirewallImage,
+      firewallSize: providerInfrastructureConfigFirewallSize,
+      firewallNetworks: providerInfrastructureConfigFirewallNetworks,
+      cloudProfiles,
+      infrastructureSecrets,
+      regionsWithSeed,
+      regionsWithoutSeed,
+      showAllRegions,
+      networkingTypes,
+      allLoadBalancerProviderNames,
+      allLoadBalancerClassNames,
+      partitionIDs,
+      firewallImages,
+      firewallSizes,
+      allFirewallNetworks,
+      allFloatingPoolNames,
+      workerless,
     }
   },
   validations () {
     const requiresInfrastructure = infrastructureKind => {
-      return requiredIf(() => this.infrastructureKind === infrastructureKind)
+      return requiredIf(() => this.providerType === infrastructureKind)
     }
     return {
       region: withFieldName('Region', {
@@ -257,37 +310,6 @@ export default {
     }
   },
   computed: {
-    ...mapWritableState(useShootContextStore, [
-      'cloudProfileName',
-      'infrastructureSecret',
-      'region',
-      'networkingType',
-      'floatingPoolName',
-      'loadBalancerProviderName',
-      'loadBalancerClassNames',
-      'partitionID',
-      'projectID',
-      'firewallImage',
-      'firewallSize',
-      'firewallNetworks',
-    ]),
-    ...mapState(useShootContextStore, [
-      'infrastructureKind',
-      'cloudProfiles',
-      'infrastructureSecrets',
-      'regionsWithSeed',
-      'regionsWithoutSeed',
-      'showAllRegions',
-      'networkingTypes',
-      'allLoadBalancerProviderNames',
-      'allLoadBalancerClassNames',
-      'partitionIDs',
-      'firewallImages',
-      'firewallSizes',
-      'allFirewallNetworks',
-      'allFloatingPoolNames',
-      'workerless',
-    ]),
     regionItems () {
       const regionItems = []
       if (!isEmpty(this.regionsWithSeed)) {

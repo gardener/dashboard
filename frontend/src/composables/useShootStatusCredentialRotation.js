@@ -6,8 +6,6 @@
 
 import { computed } from 'vue'
 
-import utils from '@/utils'
-
 import {
   get,
   filter,
@@ -17,11 +15,6 @@ import {
   head,
   compact,
 } from '@/lodash'
-
-const shootPropertyMappings = Object.freeze({
-  shootEnableStaticTokenKubeconfig: 'spec.kubernetes.enableStaticTokenKubeconfig',
-  shootCredentialsRotation: ['status.credentials.rotation', {}],
-})
 
 export const rotationTypes = Object.freeze([
   {
@@ -80,11 +73,19 @@ export const twoStepRotationTypes = Object.freeze(filter(rotationTypes, {
   twoStep: true,
 }))
 
+const shootPropertyMappings = Object.freeze({
+  shootEnableStaticTokenKubeconfig: 'spec.kubernetes.enableStaticTokenKubeconfig',
+  shootCredentialsRotation: ['status.credentials.rotation', {}],
+})
+
 export function useShootStatusCredentialRotation (state, options = {}) {
   const {
     shootEnableStaticTokenKubeconfig,
     shootCredentialsRotation,
-  } = mapValues(shootPropertyMappings, utils.toProperties(state))
+  } = mapValues(shootPropertyMappings, args => {
+    const [path, defaultValue] = Array.isArray(args) ? args : [args]
+    return computed(() => get(state.value, path, defaultValue))
+  })
 
   options.type ??= 'ALL_CREDENTIALS'
 

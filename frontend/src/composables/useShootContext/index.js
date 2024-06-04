@@ -8,10 +8,11 @@ import {
   ref,
   shallowRef,
   computed,
-  readonly,
   reactive,
   toRef,
   watch,
+  inject,
+  provide,
 } from 'vue'
 
 import { useAuthzStore } from '@/store/authz'
@@ -66,7 +67,7 @@ import {
   size,
 } from '@/lodash'
 
-export function useShootContext (options = {}) {
+export function createShootContextComposable (options = {}) {
   const {
     logger = useLogger(),
     appStore = useAppStore(),
@@ -1063,7 +1064,7 @@ export function useShootContext (options = {}) {
     setAccessRestrictionValue,
     getAccessRestrictionOptionValue,
     setAccessRestrictionOptionValue,
-    accessRestrictionList,
+    getAccessRestrictionPatchData,
   } = useShootAccessRestrictions(manifest, {
     cloudProfileStore,
   })
@@ -1098,16 +1099,7 @@ export function useShootContext (options = {}) {
     machineImages,
     networkingTypes,
     showAllRegions,
-  } = createShootHelperComposable(readonly({
-    creationTimestamp: shootCreationTimestamp,
-    cloudProfileName,
-    seedName,
-    region,
-    secretBindingName,
-    kubernetesVersion,
-    networkingNodes,
-    providerType,
-  }), {
+  } = createShootHelperComposable(manifest, {
     cloudProfileStore,
     configStore,
     gardenerExtensionStore,
@@ -1212,11 +1204,11 @@ export function useShootContext (options = {}) {
     patchDnsProvider,
     deleteDnsProvider,
     /* accessRestrictions */
-    accessRestrictionList,
     getAccessRestrictionValue,
     setAccessRestrictionValue,
     getAccessRestrictionOptionValue,
     setAccessRestrictionOptionValue,
+    getAccessRestrictionPatchData,
     accessRestrictionDefinitions,
     accessRestrictionNoItemsText,
     /* addons */
@@ -1256,24 +1248,15 @@ export function useShootContext (options = {}) {
     machineImages,
     networkingTypes,
     showAllRegions,
-    /* aliases */
-    name: shootName,
-    infrastructureKind: providerType,
-    workers: providerWorkers,
-    dnsConfiguration: dns,
-    enableStaticTokenKubeconfig: kubernetesEnableStaticTokenKubeconfig,
-    firewallImage: providerInfrastructureConfigFirewallImage,
-    firewallNetworks: providerInfrastructureConfigFirewallNetworks,
-    firewallSize: providerInfrastructureConfigFirewallSize,
-    floatingPoolName: providerInfrastructureConfigFloatingPoolName,
-    zonesNetworkConfiguration: providerInfrastructureConfigNetworksZones,
-    partitionID: providerInfrastructureConfigPartitionID,
-    projectID: providerInfrastructureConfigProjectID,
-    updateOSMaintenance: maintenanceAutoUpdateMachineImageVersion,
-    updateK8sMaintenance: maintenanceAutoUpdateKubernetesVersion,
-    osUpdates: maintenanceAutoUpdateMachineImageVersion,
-    k8sUpdates: maintenanceAutoUpdateKubernetesVersion,
-    controlPlaneFailureToleranceType: controlPlaneHighAvailabilityFailureToleranceType,
-    controlPlaneFailureToleranceTypeChangeAllowed: controlPlaneHighAvailabilityFailureToleranceTypeChangeAllowed,
   }
+}
+
+export function useShootContext () {
+  return inject('shoot-context', null)
+}
+
+export function useProvideShootContext (options) {
+  const composable = createShootContextComposable(options)
+  provide('shoot-context', composable)
+  return composable
 }

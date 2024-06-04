@@ -47,7 +47,6 @@ import {
   ref,
   computed,
   onMounted,
-  defineAsyncComponent,
 } from 'vue'
 import { useRoute } from 'vue-router'
 
@@ -61,16 +60,16 @@ import GShootLifecycleCard from '@/components/ShootDetails/GShootLifecycleCard'
 import GShootMonitoringCard from '@/components/ShootDetails/GShootMonitoringCard'
 import GShootCredentialRotationCard from '@/components/ShootDetails/GShootCredentialRotationCard'
 import GTicketsCard from '@/components/GTicketsCard'
+import GShootAccessCard from '@/components/ShootDetails/GShootAccessCard'
 
 import { useShootItem } from '@/composables/useShootItem'
+import { useProvideShootContext } from '@/composables/useShootContext'
 
 import {
   filter,
   get,
   map,
 } from '@/lodash'
-
-const GShootAccessCard = defineAsyncComponent(() => import('@/components/ShootDetails/GShootAccessCard'))
 
 const route = useRoute()
 
@@ -79,6 +78,8 @@ const shootLifecycleCard = ref(null)
 const {
   shootItem,
 } = useShootItem()
+
+useProvideShootContext()
 
 const projectStore = useProjectStore()
 

@@ -47,8 +47,6 @@ dashboard:
       steps:
         check:
           image: 'node:20-alpine3.18'
-        check-docforge:
-          image: 'golang:1.22.3'
     release:
       traits:
         version:

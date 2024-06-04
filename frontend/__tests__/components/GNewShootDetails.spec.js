@@ -13,6 +13,8 @@ import { useProjectStore } from '@/store/project'
 
 import GNewShootDetails from '@/components/NewShoot/GNewShootDetails.vue'
 
+import { createShootContextComposable } from '@/composables/useShootContext'
+
 import {
   components as componentsPlugin,
   utils as utilsPlugin,
@@ -35,6 +37,9 @@ describe('components', () => {
             notifyPlugin,
             pinia,
           ],
+          provide: {
+            'shoot-context': createShootContextComposable(),
+          },
         },
         props,
       })

@@ -88,7 +88,6 @@ import GCollapsableItems from '@/components/GCollapsableItems'
 import { useShootItem } from '@/composables/useShootItem'
 
 import {
-  find,
   filter,
   some,
 } from '@/lodash'

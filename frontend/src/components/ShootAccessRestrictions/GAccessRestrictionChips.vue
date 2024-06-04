@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <g-collapsable-items
-    :items="selectedAccessRestrictions"
+    :items="props.accessRestrictions"
     :uid="shootUid"
     inject-key="expandedAccessRestrictions"
     :collapse="collapse"
@@ -60,8 +60,8 @@ import GCollapsableItems from '@/components/GCollapsableItems'
 
 import { transformHtml } from '@/utils'
 
-defineProps({
-  selectedAccessRestrictions: {
+const props = defineProps({
+  accessRestrictions: {
     type: Array,
   },
   collapse: {
