@@ -10,20 +10,24 @@ SPDX-License-Identifier: Apache-2.0
     :toolbar-title="workerGroup.name"
     placement="bottom"
   >
-    <template #activator="{ props: popoverProps }">
-      <v-tooltip
-        location="top"
-        :disabled="!machineImage.isDeprecated"
-        text="Machine image version is deprecated"
+    <template #activator="{ props }">
+      <v-chip
+        size="small"
+        class="cursor-pointer"
+        variant="tonal"
+        :color="chipColor"
       >
-        <template #activator="{ props: tooltipProps }">
-          <g-worker-chip
-            :worker-group="workerGroup"
-            :cloud-profile-name="cloudProfileName"
-            v-bind="mergeProps(popoverProps, tooltipProps)"
-          />
-        </template>
-      </v-tooltip>
+        <g-vendor-icon
+          :icon="machineImage.icon"
+          :size="20"
+        />
+        <span class="pl-1">{{ workerGroup.name }}</span>
+        <v-tooltip
+          location="top"
+          :disabled="!machineImage.isDeprecated"
+          text="Machine image version is deprecated"
+        />
+      </v-chip>
     </template>
     <v-tabs
       v-model="tab"
@@ -370,8 +374,8 @@ import yaml from 'js-yaml'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
-import GWorkerChip from '@/components/ShootWorkers/GWorkerChip'
 import GCodeBlock from '@/components/GCodeBlock'
+import GVendorIcon from '@/components/GVendorIcon'
 
 import {
   find,
@@ -380,8 +384,8 @@ import {
 
 export default {
   components: {
-    GWorkerChip,
     GCodeBlock,
+    GVendorIcon,
   },
   inject: [
     'mergeProps',
@@ -491,6 +495,9 @@ export default {
         return 'mdi-alert-circle-outline'
       }
       return 'mdi-information-outline'
+    },
+    chipColor () {
+      return this.machineImage.isDeprecated ? 'warning' : 'primary'
     },
   },
   created () {

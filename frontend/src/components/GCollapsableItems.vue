@@ -37,7 +37,7 @@ SPDX-License-Identifier: Apache-2.0
         <div
           v-else
           class="d-flex"
-          :class="noWrap ? 'fley-nowrap' : 'flex-wrap'"
+          :class="noWrap ? 'flex-nowrap' : 'flex-wrap'"
         >
           <div
             v-for="(item, i) in items"
@@ -86,6 +86,8 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  // key for provided state
+  // If state not provided internal state is used
   injectKey: {
     type: String,
     required: false,
@@ -110,7 +112,7 @@ const props = defineProps({
 
 const { items, itemName, itemPlural, noWrap } = toRefs(props)
 const internalExpanded = ref(false)
-const expandedItems = props.injectKey ? inject(props.injectKey, reactive({ default: false })) : undefined
+const expandedItems = props.injectKey ? inject(props.injectKey, undefined) : undefined
 
 const itemCount = computed(() => {
   return props.items.length

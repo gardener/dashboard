@@ -19,13 +19,12 @@ SPDX-License-Identifier: Apache-2.0
         size="small"
       >
         {{ collapsedChipText }}
+        <v-tooltip
+          location="top"
+          activator="parent"
+          :text="tooltipText"
+        />
       </v-chip>
-      <v-tooltip
-        location="top"
-        activator="parent"
-      >
-        {{ tooltipText }}
-      </v-tooltip>
     </template>
     <template #item="{ item }">
       <g-status-tag
@@ -83,6 +82,7 @@ import {
   sortBy,
   filter,
   isEmpty,
+  mapValues,
 } from '@/lodash'
 
 const props = defineProps({
@@ -148,21 +148,16 @@ const progressingCount = computed(() => {
 })
 
 const tooltipText = computed(() => {
-  const texts = []
   if (errorCount.value > 0) {
-    texts.push(`${errorCount.value} Error`)
+    return 'Error'
   }
   if (unknownCount.value > 0) {
-    texts.push(`${unknownCount.value} Unknown`)
+    return 'Unknown'
   }
   if (progressingCount.value > 0) {
-    texts.push(`${progressingCount.value} Progressing`)
+    return 'Progressing'
   }
-  const okCount = conditions.value.length - errorCount.value - unknownCount.value - progressingCount.value
-  if (okCount > 0) {
-    texts.push(`${okCount} OK`)
-  }
-  return texts.join(', ')
+  return 'OK'
 })
 
 const collapsedChipColor = computed(() => {
@@ -180,15 +175,15 @@ const collapsedChipColor = computed(() => {
 
 const collapsedChipText = computed(() => {
   if (errorCount.value > 0) {
-    return `${errorCount.value}/${conditions.value.length} Error`
+    return 'Error'
   }
   if (unknownCount.value > 0) {
-    return `${unknownCount.value}/${conditions.value.length} Unknown`
+    return 'Unknown'
   }
   if (progressingCount.value > 0) {
-    return `${progressingCount.value}/${conditions.value.length} Progressing`
+    return 'Progressing'
   }
-  return `${conditions.value.length}/${conditions.value.length} OK`
+  return 'OK'
 })
 
 </script>

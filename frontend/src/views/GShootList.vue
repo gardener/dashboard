@@ -291,11 +291,19 @@ export default {
     this.resetShootSearch()
     this.updateTableSettings()
     this.focusModeInternal = false
+
+    // Reset expanded state in case project changes
+    this.resetState(this.expandedWorkerGroups, { default: false })
+    this.resetState(this.expandedAccessRestrictions, { default: false })
+    this.resetState(this.expandedTicketLabels, { default: false })
+    this.resetState(this.expandedConditions, { default: false })
+
     next()
   },
   beforeRouteLeave (to, from, next) {
     this.resetShootSearch()
     this.focusModeInternal = false
+
     next()
   },
   setup () {
@@ -312,6 +320,9 @@ export default {
     return {
       activePopoverKey,
       expandedWorkerGroups,
+      expandedAccessRestrictions,
+      expandedTicketLabels,
+      expandedConditions,
     }
   },
   data () {
@@ -849,6 +860,12 @@ export default {
     setDebouncedShootSearch: debounce(function () {
       this.debouncedShootSearch = this.shootSearch
     }, 500),
+    resetState (reactiveObject, defaultState) {
+      for (const key in reactiveObject) {
+        delete reactiveObject[key]
+      }
+      Object.assign(reactiveObject, defaultState)
+    },
   },
 }
 </script>
