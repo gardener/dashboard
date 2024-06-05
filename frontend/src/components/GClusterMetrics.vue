@@ -92,7 +92,7 @@ export default {
   computed: {
     plutonoUrl () {
       if (this.isOidcObservabilityUrlsEnabled) {
-        return this.oidcDeploymenUrl('plutono')
+        return this.oidcDeploymentUrl('plutono')
       }
 
       return `https://gu-${this.prefix}.${this.seedIngressDomain}`
@@ -106,7 +106,7 @@ export default {
     },
     alertmanagerUrl () {
       if (this.isOidcObservabilityUrlsEnabled) {
-        return this.oidcDeploymenUrl('alertmanager')
+        return this.oidcDeploymentUrl('alertmanager')
       }
 
       return `https://au-${this.prefix}.${this.seedIngressDomain}`
@@ -131,7 +131,7 @@ export default {
     },
   },
   methods: {
-    oidcDeploymenUrl (target) {
+    oidcDeploymentUrl (target) {
       return `https://${target}-${this.shootTechnicalId}.${this.seedIngressDomain}`
     },
     oidcStatefulsetUrl (target) {
