@@ -17,14 +17,26 @@ SPDX-License-Identifier: Apache-2.0
         />
       </template>
       <div>{{ expanded ? 'Collapse items' : 'Expand items' }}</div>
-      <div>Shift-Click to {{ expanded ? 'collapse' : 'expand' }} all items</div>
+      <div>
+        <span :class="{'font-weight-bold': shiftPressed}">
+          Shift-Click
+        </span>
+        to {{ expanded ? 'collapse' : 'expand' }} all items
+      </div>
     </v-tooltip>
   </div>
 </template>
 
 <script setup>
 
-import { computed } from 'vue'
+import {
+  computed,
+  ref,
+} from 'vue'
+import {
+  onKeyDown,
+  onKeyUp,
+} from '@vueuse/core'
 
 const props = defineProps({
   expanded: {
@@ -33,8 +45,21 @@ const props = defineProps({
   },
 })
 
+const shiftPressed = ref(false)
+
 const icon = computed(() => {
+  if (shiftPressed.value) {
+    return props.expanded ? 'mdi-chevron-double-left' : 'mdi-chevron-double-right'
+  }
   return props.expanded ? 'mdi-chevron-left' : 'mdi-chevron-right'
+})
+
+onKeyDown('Shift', e => {
+  shiftPressed.value = true
+})
+
+onKeyUp('Shift', e => {
+  shiftPressed.value = false
 })
 
 </script>
