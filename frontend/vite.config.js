@@ -42,26 +42,19 @@ function htmlPlugin (env) {
   }
 }
 
+function getAppVersion () {
+  try {
+    return readFileSync(resolve('../VERSION'))
+  } catch (err) {
+    return require('./package.json').version
+  }
+}
+
 export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-
-  let VITE_APP_VERSION = env.VITE_APP_VERSION
-  if (!VITE_APP_VERSION) {
-    try {
-      VITE_APP_VERSION = readFileSync(resolve('../VERSION'))
-    } catch (err) {
-      VITE_APP_VERSION = require('./package.json').version
-    }
+  if (!env.VITE_APP_VERSION) {
+    process.env.VITE_APP_VERSION = env.VITE_APP_VERSION = getAppVersion()
   }
-  const VITE_BASE_URL = '/'
-  const VITE_APP_TITLE = 'Gardener Dashboard'
-
-  Object.assign(env, {
-    MODE: mode,
-    VITE_APP_TITLE,
-    VITE_APP_VERSION,
-    VITE_BASE_URL,
-  })
 
   const manualChunks = {
     vendor: [
@@ -132,16 +125,11 @@ export default defineConfig(({ command, mode }) => {
         },
       }),
     ],
-    base: VITE_BASE_URL,
+    base: env.VITE_BASE_URL,
     define: {
       __VUE_OPTIONS_API__: true,
       __VUE_PROD_DEVTOOLS__: false,
-      'process.env': {
-        MODE: mode,
-        VITE_APP_TITLE,
-        VITE_APP_VERSION,
-        VITE_BASE_URL,
-      },
+      'process.env': env,
     },
     resolve: {
       alias: {
