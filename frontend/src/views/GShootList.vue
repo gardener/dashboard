@@ -230,7 +230,6 @@ SPDX-License-Identifier: Apache-2.0
 import {
   ref,
   provide,
-  defineAsyncComponent,
 } from 'vue'
 import {
   mapState,
@@ -253,6 +252,7 @@ import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
 import GIconBase from '@/components/icons/GIconBase.vue'
 import GCertifiedKubernetes from '@/components/icons/GCertifiedKubernetes.vue'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
+import GShootAccessCard from '@/components/ShootDetails/GShootAccessCard.vue'
 
 import { mapTableHeader } from '@/utils'
 
@@ -274,7 +274,7 @@ export default {
     GToolbar,
     GShootListRow,
     GShootListProgress,
-    GShootAccessCard: defineAsyncComponent(() => import('@/components/ShootDetails/GShootAccessCard.vue')),
+    GShootAccessCard,
     GIconBase,
     GCertifiedKubernetes,
     GTableColumnSelection,

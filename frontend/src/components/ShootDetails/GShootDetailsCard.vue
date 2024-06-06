@@ -164,10 +164,10 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           <g-list-item-content label="Access Restrictions">
             <div
-              v-if="shootSelectedAccessRestrictions.length"
+              v-if="shootAccessRestrictions.length"
               class="d-flex flex-wrap align-center"
             >
-              <g-access-restriction-chips :selected-access-restrictions="shootSelectedAccessRestrictions" />
+              <g-access-restriction-chips :access-restrictions="shootAccessRestrictions" />
             </div>
             <span v-else>
               No access restrictions configured
@@ -258,7 +258,7 @@ const {
   isShootMarkedForDeletion,
   shootAddons,
   hasShootWorkerGroups,
-  shootSelectedAccessRestrictions,
+  shootAccessRestrictions,
 } = useShootItem()
 
 const configStore = useConfigStore()

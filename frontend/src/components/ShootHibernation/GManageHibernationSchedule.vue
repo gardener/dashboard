@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div class="alternate-row-background">
-    <g-expand-transition-group>
+    <v-expand-transition group>
       <v-row
         v-for="{ id } in hibernationScheduleEvents"
         :key="id"
@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
       >
         <g-hibernation-schedule-event :id="id" />
       </v-row>
-    </g-expand-transition-group>
+    </v-expand-transition>
     <v-row
       v-if="!hibernationSchedulesError"
       class="list-item my-1"
@@ -81,25 +81,20 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import {
-  mapState,
-  mapWritableState,
-  mapActions,
-} from 'pinia'
+import { mapActions } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 
 import { useConfigStore } from '@/store/config'
-import { useShootContextStore } from '@/store/shootContext'
 
-import GExpandTransitionGroup from '@/components/GExpandTransitionGroup'
 import GHibernationScheduleEvent from '@/components/ShootHibernation/GHibernationScheduleEvent'
+
+import { useShootContext } from '@/composables/useShootContext'
 
 import { isEmpty } from '@/lodash'
 
 export default {
   components: {
     GHibernationScheduleEvent,
-    GExpandTransitionGroup,
   },
   inject: ['logger'],
   props: {
@@ -113,19 +108,24 @@ export default {
     },
   },
   setup () {
+    const {
+      purpose,
+      hibernationSchedulesError,
+      noHibernationSchedules,
+      hibernationScheduleEvents,
+      addHibernationScheduleEvent,
+    } = useShootContext()
+
     return {
       v$: useVuelidate(),
+      purpose,
+      hibernationSchedulesError,
+      noHibernationSchedules,
+      hibernationScheduleEvents,
+      addHibernationScheduleEvent,
     }
   },
   computed: {
-    ...mapState(useShootContextStore, [
-      'purpose',
-      'hibernationSchedulesError',
-    ]),
-    ...mapWritableState(useShootContextStore, [
-      'noHibernationSchedules',
-      'hibernationScheduleEvents',
-    ]),
     showNoScheduleCheckbox () {
       return this.purposeRequiresHibernationSchedule(this.purpose) &&
         isEmpty(this.hibernationScheduleEvents) &&
@@ -139,9 +139,6 @@ export default {
   methods: {
     ...mapActions(useConfigStore, [
       'purposeRequiresHibernationSchedule',
-    ]),
-    ...mapActions(useShootContextStore, [
-      'addHibernationScheduleEvent',
     ]),
     isEmpty,
   },

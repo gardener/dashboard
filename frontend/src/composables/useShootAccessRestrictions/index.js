@@ -130,6 +130,19 @@ export function useShootAccessRestrictions (shootItem, options = {}) {
     setShootAnnotation(key, `${NAND(value, inverted)}`)
   }
 
+  function getAccessRestrictionPatchData () {
+    const data = {}
+    for (const definition of accessRestrictionDefinitionList.value) {
+      const path = `spec.seedSelector.matchLabels["${definition.key}"]`
+      set(data, path, get(shootItem.value, path, null))
+      for (const optionDefinition of definition.options) {
+        const path = `metadata.annotations["${optionDefinition.key}"]`
+        set(data, path, get(shootItem.value, path, null))
+      }
+    }
+    return data
+  }
+
   const accessRestrictionList = computed(() => {
     const accessRestrictionList = []
     for (const definition of accessRestrictionDefinitionList.value) {
@@ -195,5 +208,6 @@ export function useShootAccessRestrictions (shootItem, options = {}) {
     setSeedSelectorMatchLabel,
     unsetSeedSelectorMatchLabel,
     accessRestrictionList,
+    getAccessRestrictionPatchData,
   }
 }

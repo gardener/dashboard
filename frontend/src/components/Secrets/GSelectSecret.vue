@@ -79,7 +79,7 @@ import { useProjectStore } from '@/store/project'
 import GSecretDialogWrapper from '@/components/Secrets/GSecretDialogWrapper'
 
 import {
-  requiresCostObjectIfEnabled,
+  withParams,
   withMessage,
   withFieldName,
 } from '@/utils/validators'
@@ -138,17 +138,28 @@ export default {
     }
   },
   validations () {
-    const requiresCostObjectIfEnabledMessage = () => {
-      const projectName = get(this.internalValue, 'metadata.projectName')
-      const isSecretInProject = this.projectName === projectName
-      return isSecretInProject
-        ? `${this.costObjectTitle} is required. Go to the ADMINISTRATION page to edit the project and set the ${this.costObjectTitle}.`
-        : `${this.costObjectTitle} is required and has to be set on the Project ${toUpper(this.projectName)}`
+    const projectName = this.projectName
+    const costObjectTitle = this.costObjectTitle
+
+    const messageFn = ({ $model }) => {
+      return projectName === get($model, 'metadata.projectName')
+        ? `${costObjectTitle} is required. Go to the ADMINISTRATION page to edit the project and set the ${costObjectTitle}.`
+        : `${costObjectTitle} is required and has to be set on the Project ${toUpper(projectName)}`
     }
+
+    const requiresCostObjectIfEnabled = (enabled = false) => withParams(
+      { type: 'requiresCostObjectIfEnabled', enabled },
+      function requiresCostObjectIfEnabled (value) {
+        return enabled
+          ? get(value, 'metadata.hasCostObject', false)
+          : true
+      },
+    )
+
     return {
       internalValue: withFieldName('Secret', {
         required,
-        requiresCostObjectIfEnabled: withMessage(requiresCostObjectIfEnabledMessage(), requiresCostObjectIfEnabled),
+        requiresCostObjectIfEnabled: withMessage(messageFn, requiresCostObjectIfEnabled(this.costObjectSettingEnabled)),
       }),
     }
   },

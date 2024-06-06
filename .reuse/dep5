@@ -22,7 +22,6 @@ Files:
   *.tpl
   *.snap
   .github/
-  .docforge/
   .yarn/
   charts/*/Chart.yaml
   charts/*/values.yaml

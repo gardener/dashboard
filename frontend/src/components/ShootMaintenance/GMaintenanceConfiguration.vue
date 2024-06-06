@@ -37,15 +37,13 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { storeToRefs } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
-
-import { useShootContextStore } from '@/store/shootContext'
 
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GMaintenanceComponents from '@/components/ShootMaintenance/GMaintenanceComponents'
 import GMaintenanceTime from '@/components/ShootMaintenance/GMaintenanceTime'
 
+import { useShootContext } from '@/composables/useShootContext'
 import { useShootItem } from '@/composables/useShootItem'
 
 import { errorDetailsFromError } from '@/utils/error'
@@ -67,16 +65,13 @@ export default {
       isMaintenancePreconditionSatisfied,
     } = useShootItem()
 
-    const shootContextStore = useShootContextStore()
     const {
       maintenanceTimeWindowBegin,
       maintenanceTimeWindowEnd,
       maintenanceAutoUpdateKubernetesVersion,
       maintenanceAutoUpdateMachineImageVersion,
-    } = storeToRefs(shootContextStore)
-    const {
       setShootManifest,
-    } = shootContextStore
+    } = useShootContext()
 
     return {
       v$: useVuelidate(),

@@ -39,19 +39,18 @@ import {
   inject,
   provide,
 } from 'vue'
-import { storeToRefs } from 'pinia'
 import {
   useRouter,
   onBeforeRouteLeave,
 } from 'vue-router'
 
 import { useAppStore } from '@/store/app'
-import { useShootContextStore } from '@/store/shootContext'
 
 import GShootEditor from '@/components/GShootEditor'
 import GConfirmDialog from '@/components/dialogs/GConfirmDialog'
 import GMessage from '@/components/GMessage'
 
+import { useShootContext } from '@/composables/useShootContext'
 import { useShootEditor } from '@/composables/useShootEditor'
 
 import { errorDetailsFromError } from '@/utils/error'
@@ -70,16 +69,14 @@ const logger = inject('logger')
 const router = useRouter()
 
 const appStore = useAppStore()
-const shootContextStore = useShootContextStore()
+
 const {
   shootNamespace,
   shootName,
   isShootDirty,
   shootManifest,
-} = storeToRefs(shootContextStore)
-const {
   setShootManifest,
-} = shootContextStore
+} = useShootContext()
 
 const useProvide = (key, value) => {
   provide(key, value)

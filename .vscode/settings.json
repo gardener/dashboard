@@ -35,7 +35,6 @@
   "eslint.nodePath": ".yarn/sdks",
   "files.exclude": {
     ".yarn": true,
-    ".docforge": true,
     "logo": true,
     "LICENSES": true,
     "**/node_modules": true,
