@@ -292,7 +292,9 @@ export function getSortVal (state, context, item, sortBy) {
     }
     case 'readiness': {
       const conditions = item.status?.conditions ?? []
-      if (!conditions.length) {
+      const constraints = item.status?.constraints ?? []
+      const readinessConditions = [...conditions, ...constraints]
+      if (!readinessConditions.length) {
         // items without conditions have medium priority
         const priority = '00000100'
         const lastTransitionTime = item.status?.lastOperation.lastUpdateTime ?? item.metadata.creationTimestamp
@@ -308,7 +310,7 @@ export function getSortVal (state, context, item, sortBy) {
         return `${priority}-${lastTransitionTime}`
       }
       // the condition with the lowest priority and transitionTime is used
-      return head(conditions.map(iteratee).sort())
+      return head(readinessConditions.map(iteratee).sort())
     }
     case 'ticket': {
       const metadata = item.metadata
