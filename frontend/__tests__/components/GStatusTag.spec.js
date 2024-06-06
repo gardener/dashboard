@@ -7,14 +7,14 @@
 import { mount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
 
-import GStatusTag from '@/components/GStatusTag.vue'
+import GReadinessChip from '@/components/Readiness/GReadinessChip.vue'
 
 const { createVuetifyPlugin } = global.fixtures.helper
 
 describe('components', () => {
-  describe('g-status-tag', () => {
+  describe('g-readiness-chip', () => {
     function mountStatusTag (condition, isAdmin = false) {
-      return mount(GStatusTag, {
+      return mount(GReadinessChip, {
         global: {
           plugins: [
             createVuetifyPlugin(),

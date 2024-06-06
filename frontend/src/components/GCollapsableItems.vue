@@ -65,7 +65,6 @@ SPDX-License-Identifier: Apache-2.0
 
 import {
   toRefs,
-  reactive,
   ref,
   computed,
   inject,

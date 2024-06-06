@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
         <g-list-item-content label="Readiness">
           <div class="d-flex align-center pt-1">
             <span v-if="!shootConditions.length">-</span>
-            <g-status-tags
+            <g-shoot-readiness
               v-else
               popper-placement="bottom"
               show-status-text
@@ -62,7 +62,7 @@ SPDX-License-Identifier: Apache-2.0
 import { computed } from 'vue'
 
 import GShootStatus from '@/components/GShootStatus'
-import GStatusTags from '@/components/GStatusTags'
+import GShootReadiness from '@/components/Readiness/GShootReadiness'
 import GClusterMetrics from '@/components/GClusterMetrics'
 
 import { useShootItem } from '@/composables/useShootItem'

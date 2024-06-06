@@ -13,21 +13,10 @@ SPDX-License-Identifier: Apache-2.0
     no-wrap
   >
     <template #collapsed>
-      <v-chip
-        :color="collapsedChipColor"
-        :variant="errorCount > 0 ? 'flat' : 'tonal'"
-        size="small"
-      >
-        {{ collapsedChipText }}
-        <v-tooltip
-          location="top"
-          activator="parent"
-          :text="tooltipText"
-        />
-      </v-chip>
+      <g-readiness-bar-chart :conditions="conditions" />
     </template>
     <template #item="{ item }">
-      <g-status-tag
+      <g-readiness-chip
         :key="item.type"
         :condition="item"
         :popper-placement="popperPlacement"
@@ -67,7 +56,6 @@ import {
 import { useConfigStore } from '@/store/config'
 import { useShootStore } from '@/store/shoot'
 
-import GStatusTag from '@/components/GStatusTag.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
 import GCollapsableItems from '@/components/GCollapsableItems'
 
@@ -78,12 +66,10 @@ import {
   errorCodesFromArray,
 } from '@/utils/errorCodes'
 
-import {
-  sortBy,
-  filter,
-  isEmpty,
-  mapValues,
-} from '@/lodash'
+import GReadinessBarChart from './GReadinessBarChart'
+import GReadinessChip from './GReadinessChip.vue'
+
+import { sortBy } from '@/lodash'
 
 const props = defineProps({
   popperPlacement: {
@@ -133,57 +119,6 @@ const errorCodeObjects = computed(() => {
 
 const isStaleShoot = computed(() => {
   return !shootStore.isShootActive(shootUid.value)
-})
-
-const errorCount = computed(() => {
-  return filter(conditions.value, condition => condition.status === 'False' || !isEmpty(condition.codes)).length
-})
-
-const unknownCount = computed(() => {
-  return filter(conditions.value, ['status', 'Unknown']).length
-})
-
-const progressingCount = computed(() => {
-  return filter(conditions.value, ['status', 'Progressing']).length
-})
-
-const tooltipText = computed(() => {
-  if (errorCount.value > 0) {
-    return 'Error'
-  }
-  if (unknownCount.value > 0) {
-    return 'Unknown'
-  }
-  if (progressingCount.value > 0) {
-    return 'Progressing'
-  }
-  return 'OK'
-})
-
-const collapsedChipColor = computed(() => {
-  if (errorCount.value > 0) {
-    return 'error'
-  }
-  if (unknownCount.value > 0) {
-    return 'grey'
-  }
-  if (progressingCount.value > 0) {
-    return 'info'
-  }
-  return 'primary'
-})
-
-const collapsedChipText = computed(() => {
-  if (errorCount.value > 0) {
-    return 'Error'
-  }
-  if (unknownCount.value > 0) {
-    return 'Unknown'
-  }
-  if (progressingCount.value > 0) {
-    return 'Progressing'
-  }
-  return 'OK'
 })
 
 </script>

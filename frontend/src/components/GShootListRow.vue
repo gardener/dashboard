@@ -96,7 +96,7 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <template v-if="cell.header.key === 'readiness'">
         <div class="d-flex">
-          <g-status-tags collapse />
+          <g-shoot-readiness collapse />
         </div>
       </template>
       <template v-if="cell.header.key === 'controlPlaneHighAvailability'">
@@ -228,7 +228,7 @@ import GActionButton from '@/components/GActionButton.vue'
 import GCopyBtn from '@/components/GCopyBtn.vue'
 import GVendor from '@/components/GVendor.vue'
 import GShootStatus from '@/components/GShootStatus.vue'
-import GStatusTags from '@/components/GStatusTags.vue'
+import GShootReadiness from '@/components/Readiness/GShootReadiness.vue'
 import GPurposeTag from '@/components/GPurposeTag.vue'
 import GTimeString from '@/components/GTimeString.vue'
 import GShootVersionChip from '@/components/ShootVersion/GShootVersionChip.vue'

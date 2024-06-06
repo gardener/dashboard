@@ -126,7 +126,7 @@ export default {
       'isAdmin',
     ]),
     popoverKey () {
-      return `g-status-tag[${this.condition.type}]:${this.shootMetadata.uid}`
+      return `g-readiness-chip[${this.condition.type}]:${this.shootMetadata.uid}`
     },
     internalValue: {
       get () {
@@ -225,7 +225,7 @@ export default {
     },
     color () {
       if (this.isUnknown || this.staleShoot) {
-        return 'grey'
+        return 'unknown'
       }
       if (this.isError) {
         return 'error'
