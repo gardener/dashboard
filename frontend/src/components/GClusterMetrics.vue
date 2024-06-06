@@ -92,21 +92,21 @@ export default {
   computed: {
     plutonoUrl () {
       if (this.isOidcObservabilityUrlsEnabled) {
-        return this.oidcDeploymentUrl('plutono')
+        return this.getOidcDeploymentUrl('plutono')
       }
 
       return `https://gu-${this.prefix}.${this.seedIngressDomain}`
     },
     prometheusUrl () {
       if (this.isOidcObservabilityUrlsEnabled) {
-        return this.oidcStatefulsetUrl('prometheus-shoot')
+        return this.getOidcStatefulsetUrl('prometheus-shoot')
       }
 
       return `https://p-${this.prefix}.${this.seedIngressDomain}`
     },
     alertmanagerUrl () {
       if (this.isOidcObservabilityUrlsEnabled) {
-        return this.oidcDeploymentUrl('alertmanager')
+        return this.getOidcDeploymentUrl('alertmanager')
       }
 
       return `https://au-${this.prefix}.${this.seedIngressDomain}`
@@ -131,10 +131,10 @@ export default {
     },
   },
   methods: {
-    oidcDeploymentUrl (target) {
+    getOidcDeploymentUrl (target) {
       return `https://${target}-${this.shootTechnicalId}.${this.seedIngressDomain}`
     },
-    oidcStatefulsetUrl (target) {
+    getOidcStatefulsetUrl (target) {
       return `https://${target}-${this.shootTechnicalId}-0.${this.seedIngressDomain}`
     },
   },
