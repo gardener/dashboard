@@ -56,8 +56,8 @@ export default defineConfig(({ command, mode }) => {
   Object.assign(process.env, {
     MODE,
     VITE_APP_TITLE,
-    VITE_BASE_URL,
     VITE_APP_VERSION,
+    VITE_BASE_URL,
   })
 
   const manualChunks = {
