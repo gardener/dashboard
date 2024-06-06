@@ -15,10 +15,7 @@ import {
   URL,
 } from 'node:url'
 
-import {
-  defineConfig,
-  loadEnv,
-} from 'vite'
+import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 import Unfonts from 'unplugin-fonts/vite'
@@ -42,19 +39,26 @@ function htmlPlugin (env) {
   }
 }
 
-function getAppVersion () {
-  try {
-    return readFileSync(resolve('../VERSION'))
-  } catch (err) {
-    return require('./package.json').version
-  }
-}
-
 export default defineConfig(({ command, mode }) => {
-  const env = loadEnv(mode, process.cwd(), '')
-  if (!env.VITE_APP_VERSION) {
-    process.env.VITE_APP_VERSION = env.VITE_APP_VERSION = getAppVersion()
+  const MODE = mode
+  let VITE_APP_VERSION = process.env.VITE_APP_VERSION
+  if (!VITE_APP_VERSION) {
+    try {
+      VITE_APP_VERSION = readFileSync(resolve('../VERSION'))
+    } catch (err) {
+      VITE_APP_VERSION = require('./package.json').version
+    }
   }
+
+  const VITE_BASE_URL = '/'
+  const VITE_APP_TITLE = 'Gardener Dashboard'
+
+  Object.assign(process.env, {
+    MODE,
+    VITE_APP_TITLE,
+    VITE_BASE_URL,
+    VITE_APP_VERSION,
+  })
 
   const manualChunks = {
     vendor: [
@@ -95,7 +99,7 @@ export default defineConfig(({ command, mode }) => {
       },
     },
     plugins: [
-      htmlPlugin(env),
+      htmlPlugin(process.env),
       vue({
         template: {
           transformAssetUrls,
@@ -125,11 +129,16 @@ export default defineConfig(({ command, mode }) => {
         },
       }),
     ],
-    base: env.VITE_BASE_URL,
+    base: VITE_BASE_URL,
     define: {
       __VUE_OPTIONS_API__: true,
       __VUE_PROD_DEVTOOLS__: false,
-      'process.env': env,
+      'process.env': {
+        MODE,
+        VITE_APP_TITLE,
+        VITE_APP_VERSION,
+        VITE_BASE_URL,
+      },
     },
     resolve: {
       alias: {
