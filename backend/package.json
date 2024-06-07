@@ -26,9 +26,9 @@
     "server.js"
   ],
   "scripts": {
-    "serve": "node server.js",
+    "serve": "cross-env NODE_ENV=development node server.js",
     "lint": "eslint --ext .js server.js .",
-    "test": "jest",
+    "test": "cross-env NODE_ENV=test jest",
     "test-coverage": "yarn test --coverage"
   },
   "dependencies": {
@@ -74,6 +74,7 @@
   "devDependencies": {
     "@gardener-dashboard/test-utils": "workspace:^",
     "abort-controller": "^3.0.0",
+    "cross-env": "^7.0.3",
     "dockerfile-ast": "^0.6.1",
     "eslint": "^8.57.0",
     "eslint-config-standard": "^17.1.0",

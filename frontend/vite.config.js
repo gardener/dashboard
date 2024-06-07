@@ -17,6 +17,7 @@ import {
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import basicSsl from '@vitejs/plugin-basic-ssl'
 import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 import Unfonts from 'unplugin-fonts/vite'
 import compression from 'vite-plugin-compression'
@@ -25,6 +26,10 @@ import { visualizer } from 'rollup-plugin-visualizer'
 const proxyTarget = 'http://localhost:3030'
 
 const KiB = 1024
+
+const YELLOW = '\u001b[33m'
+const WHITE_BLACK = '\u001b[37;40m'
+const RESET = '\u001b[0m'
 
 const require = createRequire(import.meta.url)
 
@@ -128,6 +133,10 @@ export default defineConfig(({ command, mode }) => {
           ],
         },
       }),
+      basicSsl({
+        name: 'vite-develpment-server',
+        domains: ['localhost', '127.0.0.1'],
+      }),
     ],
     base: VITE_BASE_URL,
     define: {
@@ -159,7 +168,7 @@ export default defineConfig(({ command, mode }) => {
   if (command === 'serve') {
     const keyPath = resolve('./ssl/key.pem')
     const certPath = resolve('./ssl/cert.pem')
-    const https = existsSync(keyPath) && existsSync(certPath)
+    const https = existsSync(keyPath) && !existsSync(certPath)
       ? {
           key: readFileSync(keyPath),
           cert: readFileSync(certPath),
@@ -168,7 +177,7 @@ export default defineConfig(({ command, mode }) => {
 
     if (https === true && mode === 'development') {
       // eslint-disable-next-line no-console
-      console.warn('SSL key and certificate files are missing. Please run `yarn setup`.')
+      console.warn(YELLOW + 'WARNING:' + RESET + ' SSL key and certificate files are missing. We recommend running ' + WHITE_BLACK + 'yarn setup' + RESET + ' to generate certificate files and add the CA to the keychain.')
     }
 
     config.server = {

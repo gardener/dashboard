@@ -36,11 +36,7 @@ EOF
 CA_FILENAME="${SSL_DIR}/ca.pem"
 
 # Common name of the CA certificate
-CA_COMMON_NAME="dashboard-ca"
-
-# Fingerprint of the CA certificate
-CA_FINGERPRINT=$(openssl x509 -in "$CA_FILENAME" -fingerprint -noout | cut -d= -f2 | tr -d ':')
-echo "CA fingerprint: $CA_FINGERPRINT"
+CA_COMMON_NAME="gardener-dashboard-ca"
 
 # Generate CA key and certificate
 openssl genrsa -out "${SSL_DIR}/ca-key.pem" 2048
@@ -48,7 +44,7 @@ openssl req -x509 -new -nodes -key "${SSL_DIR}/ca-key.pem" -days 3650 -out "${SS
 
 # Generate server key and certificate
 openssl genrsa -out "${SSL_DIR}/key.pem" 2048
-openssl req -new -key "${SSL_DIR}/key.pem" -out "${SSL_DIR}/csr.pem" -subj "/CN=dashboard-server" -config "${SSL_DIR}/req.cnf"
+openssl req -new -key "${SSL_DIR}/key.pem" -out "${SSL_DIR}/csr.pem" -subj "/CN=gardener-dashboard-server" -config "${SSL_DIR}/req.cnf"
 openssl x509 -req -in "${SSL_DIR}/csr.pem" -CA "${SSL_DIR}/ca.pem" -CAkey "${SSL_DIR}/ca-key.pem" -CAcreateserial -out "${SSL_DIR}/cert.pem" -days 3650 -extensions v3_req -extfile "${SSL_DIR}/req.cnf"
 
 # Parse command line arguments
@@ -64,12 +60,12 @@ done
 
 # Function to add or update CA certificate in macOS Keychain
 add_or_update_ca() {
-  local existing_ca
+  local fingerprint
   local message
 
-  existing_ca=$(security find-certificate -c "$CA_COMMON_NAME" -a -Z | grep -B1 "$CA_FINGERPRINT" | awk '/SHA-1/ { print $NF }')
-  if [ -n "$existing_ca" ]; then
-    sudo security delete-certificate -Z "$existing_ca" /Library/Keychains/System.keychain
+  fingerprint=$(security find-certificate -c "$CA_COMMON_NAME" -a -Z | awk '/SHA-1/ { print $NF }')
+  if [ -n "$fingerprint" ]; then
+    sudo security delete-certificate -Z "$fingerprint" /Library/Keychains/System.keychain
     message="The existing CA certificate has been updated in the macOS Keychain."
   else
     message="The CA certificate has been added to the macOS Keychain."

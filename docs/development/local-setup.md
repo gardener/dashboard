@@ -68,7 +68,12 @@ export KUBECONFIG=/path/to/garden/cluster/kubeconfig.yaml
 yarn serve
 ```
 
-Before starting the frontend server for the first time, you need to run `yarn setup` in the frontend directory to generate a server certificate. This certificate is issued by a CA that is automatically added to the keychain on macOS. If you prefer not to add it to the keychain, you can use the `--skip-keychain` flag.
+To start the frontend server, you have two options for handling the server certificate:
+
+1. **Recommended Method**: Run `yarn setup` in the frontend directory to generate a server certificate before starting the frontend server for the first time. This certificate is issued by a CA that is automatically added to the keychain on macOS. If you prefer not to add it to the keychain, you can use the `--skip-keychain` flag.
+
+2. **Alternative Method**: If you prefer not to run `yarn setup`, a temporary self-signed certificate will be generated automatically. This certificate will not be added to the keychain. Note that you will need to click through the insecure warning in your browser to access the dashboard.
+
 We need to start a TLS dev server because we use cookie names with `__Host-` prefix. This requires the secure attribute to be set. For more information, see [OWASP Host Prefix](https://owasp.org/www-project-web-security-testing-guide/v41/4-Web_Application_Security_Testing/06-Session_Management_Testing/02-Testing_for_Cookies_Attributes#host-prefix).
 
 Start the [`frontend`](../../frontend) dev server (`https://localhost:8443`) with https and hot reload enabled.
