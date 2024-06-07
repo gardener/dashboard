@@ -133,10 +133,6 @@ export default defineConfig(({ command, mode }) => {
           ],
         },
       }),
-      basicSsl({
-        name: 'vite-develpment-server',
-        domains: ['localhost', '127.0.0.1'],
-      }),
     ],
     base: VITE_BASE_URL,
     define: {
@@ -178,6 +174,10 @@ export default defineConfig(({ command, mode }) => {
     if (https === true && mode === 'development') {
       // eslint-disable-next-line no-console
       console.warn(YELLOW + 'WARNING:' + RESET + ' SSL key and certificate files are missing. We recommend running ' + WHITE_BLACK + 'yarn setup' + RESET + ' to generate certificate files and add the CA to the keychain.')
+      config.plugins.push(basicSsl({
+        name: 'vite-develpment-server',
+        domains: ['localhost', '127.0.0.1'],
+      }))
     }
 
     config.server = {
