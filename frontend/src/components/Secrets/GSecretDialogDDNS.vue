@@ -169,9 +169,6 @@ export default {
     return {
       server: withFieldName('Server', {
         required,
-        format: withMessage('Must have format <host>:<port>', value => {
-          return /^([^:]+):(\d+)$/.test(value)
-        }),
       }),
       tsigKeyName: withFieldName('TSIG Key Name', {
         required,
