@@ -35,17 +35,15 @@ SPDX-License-Identifier: Apache-2.0
         <template v-if="primaryProviderVisible">
           <v-col cols="3">
             <v-select
-              v-model="primaryDnsProviderType"
+              v-model="v$.primaryDnsProviderType.$model"
               color="primary"
               :items="dnsProviderTypesWithPrimarySupport"
               :error-messages="getErrorMessages(v$.primaryDnsProviderType)"
-              label="Dns Provider Type"
+              label="DNS Provider Type"
               :disabled="!isNewCluster"
               :persistent-hint="!isNewCluster"
               :hint="typeHint"
               variant="underlined"
-              @change="v$.primaryDnsProviderType.$touch()"
-              @blur="v$.primaryDnsProviderType.$touch()"
             >
               <template #item="{ props }">
                 <v-list-item v-bind="props">
@@ -223,15 +221,14 @@ export default {
         : 'Domain cannot be changed after cluster creation'
     },
     domainCheckboxHint () {
+      const enabledOrDisabled = this.customDomainEnabled ? 'disabled' : 'enabled'
       return this.isNewCluster
-        ? undefined
-        : this.customDomainEnabled
-          ? 'Custom domain cannot be disabled after cluster creation'
-          : 'Custom domain cannot be enabled after cluster creation'
+        ? ''
+        : `Custom domain cannot be ${enabledOrDisabled} after cluster creation`
     },
     typeHint () {
       return this.isNewCluster
-        ? undefined
+        ? ''
         : 'Primary DNS Provider Type cannot be changed after cluster creation'
     },
     primaryProviderVisible () {

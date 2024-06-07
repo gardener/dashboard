@@ -225,68 +225,6 @@ exports.replaceControlPlaneHighAvailability = async function ({ user, namespace,
   return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
 }
 
-exports.replaceDns = async function ({ user, namespace, name, body }) {
-  const client = user.client
-  const { dns, extensionDns, resources } = body
-
-  const patchOperations = []
-
-  if (dns) {
-    patchOperations.push({
-      op: 'replace',
-      path: '/spec/dns',
-      value: dns
-    })
-  }
-
-  const shootResource = await read({ user, namespace, name })
-
-  if (!shootResource.spec.resources) {
-    patchOperations.push({
-      op: 'add',
-      path: '/spec/resources',
-      value: resources
-    })
-  } else {
-    patchOperations.push({
-      op: 'replace',
-      path: '/spec/resources',
-      value: resources
-    })
-  }
-
-  const extensionIndex = shootResource.spec.extensions?.findIndex(extension => extension.type === 'shoot-dns-service')
-  if (!shootResource.spec.extensions) {
-    patchOperations.push({
-      op: 'add',
-      path: '/spec/extensions',
-      value: []
-    })
-  }
-  if (extensionIndex !== undefined && extensionIndex !== -1) {
-    if (extensionDns) {
-      patchOperations.push({
-        op: 'replace',
-        path: `/spec/extensions/${extensionIndex}`,
-        value: extensionDns
-      })
-    } else {
-      patchOperations.push({
-        op: 'remove',
-        path: `/spec/extensions/${extensionIndex}`
-      })
-    }
-  } else {
-    patchOperations.push({
-      op: 'add',
-      path: '/spec/extensions/-',
-      value: extensionDns
-    })
-  }
-
-  return client['core.gardener.cloud'].shoots.jsonPatch(namespace, name, patchOperations)
-}
-
 exports.patchProvider = async function ({ user, namespace, name, body }) {
   const client = user.client
   const payload = {
