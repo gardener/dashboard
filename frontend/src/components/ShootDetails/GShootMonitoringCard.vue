@@ -93,7 +93,7 @@ const {
 
 const {
   seedIngressDomain,
-} = useShootHelper(shootItem)
+} = useShootHelper()
 
 const metricsNotAvailableText = computed(() => {
   if (isTestingCluster.value) {
