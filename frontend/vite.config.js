@@ -168,7 +168,7 @@ export default defineConfig(({ command, mode }) => {
   if (command === 'serve') {
     const keyPath = resolve('./ssl/key.pem')
     const certPath = resolve('./ssl/cert.pem')
-    const https = existsSync(keyPath) && !existsSync(certPath)
+    const https = existsSync(keyPath) && existsSync(certPath)
       ? {
           key: readFileSync(keyPath),
           cert: readFileSync(certPath),
