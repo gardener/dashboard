@@ -9,8 +9,6 @@ import { computed } from 'vue'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useSeedStore } from '@/store/seed'
 
-import utils from '@/utils'
-
 import {
   get,
   uniq,
@@ -130,9 +128,11 @@ export function useShootSpec (shootItem, options = {}) {
   const shootExtensionDnsProviders = computed(() => {
     const extensionDns = find(shootSpec.value.extensions, { type: 'shoot-dns-service' })
     return map(extensionDns?.providerConfig.providers, provider => {
+      const secretResource = find(shootResources.value, ['name', provider.secretName])
+      const secretRefName = secretResource?.resourceRef?.name
       return {
         ...provider,
-        secretRefName: utils.getResourceRefName(shootSpec.value.resources, provider.secretName),
+        secretRefName,
       }
     })
   })
@@ -155,6 +155,10 @@ export function useShootSpec (shootItem, options = {}) {
 
   const isSeedUnreachable = computed(() => {
     return seedStore.isSeedUnreachableByName(shootSeedName.value)
+  })
+
+  const shootResources = computed(() => {
+    return get(shootSpec.value, 'resources')
   })
 
   return {
@@ -189,5 +193,6 @@ export function useShootSpec (shootItem, options = {}) {
     shootControlPlaneHighAvailabilityFailureTolerance,
     shootSeedName,
     isSeedUnreachable,
+    shootResources,
   }
 }

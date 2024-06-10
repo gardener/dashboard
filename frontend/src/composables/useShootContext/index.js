@@ -956,6 +956,7 @@ export function createShootContextComposable (options = {}) {
       }
     },
     set (extensionDns) {
+      const initialResources = initialManifest.value?.spec?.resources
       const dnsProviderList = map(extensionDns?.providerConfig?.providers, provider => {
         const id = uuidv4()
         const {
@@ -970,9 +971,11 @@ export function createShootContextComposable (options = {}) {
             include: includeZones = [],
           } = {},
         } = provider
+        const secretResource = find(initialResources, ['name', secretName])
+        const secretRefName = secretResource?.resourceRef?.name
         let readonly = false
         if (!isNewCluster.value) {
-          const secret = findExtensionDnsProviderSecret(type, utils.getResourceRefName(initialManifest.value.spec?.resources, secretName))
+          const secret = findExtensionDnsProviderSecret(type, secretRefName)
           // If no secret binding was found for a given secretName and the cluster is not new,
           // then we assume that the secret exists and was created by hand.
           // The DNS provider should not be changed in this case.
@@ -984,7 +987,7 @@ export function createShootContextComposable (options = {}) {
           id,
           type,
           secretName,
-          secretRefName: utils.getResourceRefName(initialManifest.value?.spec?.resources, secretName),
+          secretRefName,
           excludeDomains: [...excludeDomains],
           includeDomains: [...includeDomains],
           excludeZones: [...excludeZones],

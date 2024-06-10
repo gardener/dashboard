@@ -685,11 +685,6 @@ export function normalizeVersion (version) {
   }
 }
 
-export function getResourceRefName (resources, resourceName) {
-  const resource = find(resources, ['name', resourceName])
-  return resource?.resourceRef?.name
-}
-
 export default {
   emailToDisplayName,
   handleTextFieldDrop,
@@ -750,5 +745,4 @@ export default {
   omitKeysWithSuffix,
   parseNumberWithMagnitudeSuffix,
   normalizeVersion,
-  getResourceRefName,
 }
