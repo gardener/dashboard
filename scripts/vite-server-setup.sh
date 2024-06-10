@@ -70,13 +70,14 @@ add_or_update_ca() {
   else
     message="The CA certificate has been added to the macOS Keychain."
   fi
-  sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain "$CA_FILENAME"
+  sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain "$CA_FILENAME" && \
   printf "$message" >&2
 }
 
 # Add or update the CA certificate in the macOS Keychain, unless --skip-keychain is specified
 if [ "$SKIP_KEYCHAIN" = false ]; then
   if [ "$(uname)" = "Darwin" ]; then
+    printf "Adding the CA certificate to the macOS Keychain. You may be prompted to enter your credentials.\n" >&2
     add_or_update_ca
   else
     printf "It is recommended to add the CA certificate to the local trust store of your operating system." >&2
