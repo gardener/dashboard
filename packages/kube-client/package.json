@@ -31,7 +31,7 @@
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
     "mixwith": "^0.1.1",
-    "uuid": "^9.0.1"
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@gardener-dashboard/test-utils": "workspace:^",
