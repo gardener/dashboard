@@ -106,6 +106,7 @@ export function createShootItemComposable (shootItem, options = {}) {
     shootControlPlaneHighAvailabilityFailureTolerance,
     shootSeedName,
     isSeedUnreachable,
+    shootResources,
   } = useShootSpec(shootItem, {
     cloudProfileStore,
     seedStore,
@@ -225,6 +226,7 @@ export function createShootItemComposable (shootItem, options = {}) {
     shootControlPlaneHighAvailabilityFailureTolerance,
     shootSeedName,
     isSeedUnreachable,
+    shootResources,
     /* status */
     shootStatus,
     isShootStatusHibernated,

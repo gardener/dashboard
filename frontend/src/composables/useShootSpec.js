@@ -15,7 +15,6 @@ import {
   flatMap,
   cloneDeep,
   find,
-  map,
   compact,
 } from '@/lodash'
 
@@ -126,15 +125,8 @@ export function useShootSpec (shootItem, options = {}) {
     return find(shootSpec.value.dns?.providers, { primary: true })
   })
   const shootExtensionDnsProviders = computed(() => {
-    const extensionDns = find(shootSpec.value.extensions, { type: 'shoot-dns-service' })
-    return map(extensionDns?.providerConfig.providers, provider => {
-      const secretResource = find(shootResources.value, ['name', provider.secretName])
-      const secretRefName = secretResource?.resourceRef?.name
-      return {
-        ...provider,
-        secretRefName,
-      }
-    })
+    const extensionDns = find(shootSpec.value.extensions, ['type', 'shoot-dns-service'])
+    return get(extensionDns, 'providerConfig.providers')
   })
 
   const shootHibernationSchedules = computed(() => {

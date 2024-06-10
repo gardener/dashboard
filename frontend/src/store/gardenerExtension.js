@@ -43,7 +43,7 @@ export const useGardenerExtensionStore = defineStore('gardenerExtension', () => 
     list.value = response.data
   }
 
-  const isDnsServiceExtensionDeployed = computed(() => {
+  const hasDnsServiceExtension = computed(() => {
     return some(list.value, ['name', 'extension-shoot-dns-service'])
   })
 
@@ -86,7 +86,7 @@ export const useGardenerExtensionStore = defineStore('gardenerExtension', () => 
     fetchGardenerExtensions,
     dnsProviderTypes,
     dnsProviderTypesWithPrimarySupport,
-    isDnsServiceExtensionDeployed,
+    hasDnsServiceExtension,
     networkingTypes,
     networkingTypeList,
   }

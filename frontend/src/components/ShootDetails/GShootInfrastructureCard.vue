@@ -168,7 +168,7 @@ SPDX-License-Identifier: Apache-2.0
           </div>
         </g-list-item-content>
       </g-list-item>
-      <g-list-item v-if="isDnsServiceExtensionDeployed || isCustomShootDomain">
+      <g-list-item v-if="hasDnsServiceExtension || isCustomShootDomain">
         <template #prepend />
         <g-list-item-content label="DNS Providers">
           <div
@@ -176,15 +176,15 @@ SPDX-License-Identifier: Apache-2.0
             class="d-flex"
           >
             <g-dns-provider
-              v-for="({ secretRefName, type, domains, zones }) in shootExtensionDnsProviders"
-              :key="secretRefName"
+              v-for="({ secretName, type, domains, zones }) in shootExtensionDnsProviders"
+              :key="secretName"
               class="mr-2"
-              :secret-name="secretRefName"
+              :secret-name="resourceRefName(secretName)"
               :shoot-namespace="shootNamespace"
               :type="type"
               :domains="domains"
               :zones="zones"
-              :secret="getCloudProviderSecretByName({ name: secretRefName, namespace: shootNamespace })"
+              :secret="getCloudProviderSecretByName({ name: resourceRefName(secretName), namespace: shootNamespace })"
             />
           </div>
           <span v-else>No DNS provider configured</span>
@@ -317,6 +317,7 @@ export default {
       shootTechnicalId,
       shootExtensionDnsProviders,
       shootDnsPrimaryProvider,
+      shootResources,
     } = useShootItem()
 
     return {
@@ -339,11 +340,12 @@ export default {
       shootTechnicalId,
       shootExtensionDnsProviders,
       shootDnsPrimaryProvider,
+      shootResources,
     }
   },
   computed: {
     ...mapState(useGardenerExtensionStore, [
-      'isDnsServiceExtensionDeployed',
+      'hasDnsServiceExtension',
     ]),
     ...mapState(useAuthzStore, [
       'canPatchShootsBinding',
@@ -417,6 +419,10 @@ export default {
     ...mapActions(useSecretStore, [
       'getCloudProviderSecretByName',
     ]),
+    resourceRefName (resourceName) {
+      const secretResource = find(this.shootResources, ['name', resourceName])
+      return get(secretResource, 'resourceRef.name')
+    },
   },
 }
 </script>

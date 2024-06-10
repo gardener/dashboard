@@ -97,7 +97,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-col>
       </v-row>
     </template>
-    <template v-if="isDnsServiceExtensionDeployed">
+    <template v-if="hasDnsServiceExtension">
       <v-divider class="my-3" />
       <div class="wrap-text text-subtitle-2">
         Additional DNS Providers for the <code>shoot-dns-service</code> Extension
@@ -213,7 +213,7 @@ export default {
   computed: {
     ...mapState(useGardenerExtensionStore, [
       'dnsProviderTypesWithPrimarySupport',
-      'isDnsServiceExtensionDeployed',
+      'hasDnsServiceExtension',
     ]),
     domainHint () {
       return this.isNewCluster
@@ -270,7 +270,7 @@ export default {
       if (!this.primaryDnsProviderSecret) {
         return false
       }
-      if (!this.isDnsServiceExtensionDeployed) {
+      if (!this.hasDnsServiceExtension) {
         return false
       }
       return !this.hasExtensionCustomDomainProvider

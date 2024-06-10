@@ -133,24 +133,6 @@ export function createShootContextComposable (options = {}) {
     return normalizeManifest(object)
   })
 
-  function setExtension (shootManifest, type, extension) {
-    if (!Array.isArray(shootManifest?.spec?.extensions)) {
-      set(shootManifest, 'spec.extensions', [])
-    }
-    const extensions = shootManifest.spec.extensions
-    const index = findIndex(extensions, { type })
-
-    if (index === -1) {
-      extensions.push(extension)
-      return
-    }
-    if (extension) {
-      extensions[index] = extension
-    } else {
-      extensions.splice(index, 1)
-    }
-  }
-
   function setShootManifest (value) {
     initialManifest.value = value
     manifest.value = cloneDeep(initialManifest.value)
@@ -972,7 +954,7 @@ export function createShootContextComposable (options = {}) {
           } = {},
         } = provider
         const secretResource = find(initialResources, ['name', secretName])
-        const secretRefName = secretResource?.resourceRef?.name
+        const secretRefName = get(secretResource, 'resourceRef.name')
         let readonly = false
         if (!isNewCluster.value) {
           const secret = findExtensionDnsProviderSecret(type, secretRefName)
@@ -1137,6 +1119,25 @@ export function createShootContextComposable (options = {}) {
   function findExtensionDnsProviderSecret (type, secretName) {
     const secrets = secretStore.dnsSecretsByProviderKind(type)
     return find(secrets, ['metadata.secretRef.name', secretName])
+  }
+
+  function setExtension (shootManifest, type, extension) {
+    if (!Array.isArray(shootManifest?.spec?.extensions)) {
+      set(shootManifest, 'spec.extensions', [])
+    }
+    const extensions = shootManifest.spec.extensions
+    const index = findIndex(extensions, ['type', type])
+
+    if (index === -1) {
+      extensions.push(extension)
+      return
+    }
+
+    if (extension) {
+      extensions[index] = extension
+    } else {
+      extensions.splice(index, 1)
+    }
   }
 
   /* accessRestrictions */
