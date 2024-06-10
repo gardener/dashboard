@@ -65,11 +65,4 @@ rules:
   verbs:
   - list
   - watch
-# keep until gardener/monitoring#11 is resolved
-- apiGroups:
-  - ""
-  resources:
-  - secrets
-  verbs:
-  - get
 {{- end }}

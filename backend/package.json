@@ -69,7 +69,7 @@
     "semver": "^7.6.0",
     "showdown": "^2.1.0",
     "socket.io": "^4.7.5",
-    "uuid": "^9.0.1"
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@gardener-dashboard/test-utils": "workspace:^",

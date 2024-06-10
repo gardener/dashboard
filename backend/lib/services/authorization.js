@@ -135,6 +135,18 @@ exports.canListControllerRegistrations = function (user) {
   })
 }
 
+exports.canGetSecret = function (user, namespace, name) {
+  return hasAuthorization(user, {
+    resourceAttributes: {
+      verb: 'get',
+      group: '',
+      resource: 'secrets',
+      namespace,
+      name
+    }
+  })
+}
+
 /*
 SelfSubjectRulesReview should only be used to hide/show actions or views on the UI and not for authorization checks.
 */

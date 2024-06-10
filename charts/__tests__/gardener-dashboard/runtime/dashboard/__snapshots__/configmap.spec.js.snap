@@ -422,6 +422,7 @@ Object {
       },
     ],
     "features": Object {
+      "oidcObservabilityUrlsEnabled": false,
       "projectTerminalShortcutsEnabled": false,
       "terminalEnabled": false,
     },
