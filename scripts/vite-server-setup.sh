@@ -62,6 +62,7 @@ done
 add_or_update_ca() {
   local fingerprint
   local message
+  local rc
 
   fingerprint=$(security find-certificate -c "$CA_COMMON_NAME" -a -Z | awk '/SHA-1/ { print $NF }')
   if [ -n "$fingerprint" ]; then
@@ -70,8 +71,11 @@ add_or_update_ca() {
   else
     message="The CA certificate has been added to the macOS Keychain."
   fi
-  sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain "$CA_FILENAME" && \
-  printf "$message" >&2
+  sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain "$CA_FILENAME"
+  rc=$?
+  if [ $rc -eq 0 ]; then
+    printf "$message" >&2
+  fi
 }
 
 # Add or update the CA certificate in the macOS Keychain, unless --skip-keychain is specified
