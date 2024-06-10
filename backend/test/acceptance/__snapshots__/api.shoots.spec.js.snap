@@ -1555,10 +1555,33 @@ Array [
   Array [
     Object {
       ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
+    },
+    Object {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": Object {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": Object {
+          "group": "",
+          "name": "barShoot.monitoring",
+          "namespace": "garden-foo",
+          "resource": "secrets",
+          "verb": "get",
+        },
+      },
+    },
+  ],
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
       ":method": "get",
       ":path": "/api/v1/namespaces/garden-foo/secrets/barShoot.monitoring",
       ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OmdhcmRlbjpkZWZhdWx0In0.-4rSuvvj5BStN6DwnmLAaRVbgpl5iCn2hG0pcqx0NPw",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
   ],
 ]
@@ -1596,10 +1619,33 @@ Array [
   Array [
     Object {
       ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
+    },
+    Object {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": Object {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": Object {
+          "group": "",
+          "name": "dummyShoot.monitoring",
+          "namespace": "garden-foo",
+          "resource": "secrets",
+          "verb": "get",
+        },
+      },
+    },
+  ],
+  Array [
+    Object {
+      ":authority": "kubernetes:6443",
       ":method": "get",
       ":path": "/api/v1/namespaces/garden-foo/secrets/dummyShoot.monitoring",
       ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OmdhcmRlbjpkZWZhdWx0In0.-4rSuvvj5BStN6DwnmLAaRVbgpl5iCn2hG0pcqx0NPw",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
   ],
 ]
@@ -1612,7 +1658,6 @@ Object {
   "kubeconfig": Any<String>,
   "monitoringPassword": "pass-garden-foo-dummyShoot.monitoring",
   "monitoringUsername": "user-garden-foo-dummyShoot.monitoring",
-  "seedShootIngressDomain": "foo--dummyShoot.ingress.foo-south.infra1.example.org",
 }
 `;
 
@@ -1659,7 +1704,6 @@ Object {
   "kubeconfigGardenlogin": Any<String>,
   "monitoringPassword": "pass-garden-foo-barShoot.monitoring",
   "monitoringUsername": "user-garden-foo-barShoot.monitoring",
-  "seedShootIngressDomain": "foo--barShoot.ingress.foo-east.infra1.example.org",
 }
 `;
 

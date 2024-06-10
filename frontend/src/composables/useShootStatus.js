@@ -62,12 +62,12 @@ export const useShootStatus = shootItem => {
   })
 
   const shootReadiness = computed(() => {
-    const shootConstraintsWithErrorCode = filter(shootConstraints.value, constraint => {
-      return constraint.codes && constraint.codes.length
+    const shootConstraintsNotInCondition = filter(shootConstraints.value, condition => {
+      return condition.status !== 'True'
     })
     return [
       ...shootConditions.value,
-      ...shootConstraintsWithErrorCode,
+      ...shootConstraintsNotInCondition,
     ]
   })
 

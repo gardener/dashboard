@@ -54,6 +54,7 @@ describe('components', () => {
           name: 'Control Plane Overwritten',
           shortName: 'CPO',
           description: 'Overwritten Description',
+          sortOrder: '11',
         },
         ConditionFromConfigAvailability: {
           name: 'Config Condition',
@@ -98,7 +99,7 @@ describe('components', () => {
       const condition = wrapper.vm.conditions[0]
       expect(condition.shortName).toBe('API')
       expect(condition.name).toBe('API Server')
-      expect(condition.sortOrder).toBe('0')
+      expect(condition.sortOrder).toBe('00000000')
       expect(condition.description).not.toHaveLength(0)
     })
 
@@ -115,17 +116,17 @@ describe('components', () => {
       const condition = wrapper.vm.conditions[0]
       expect(condition.shortName).toBe('CPO')
       expect(condition.name).toBe('Control Plane Overwritten')
+      expect(condition.sortOrder).toBe('00000011')
       expect(condition.description).toBe('Overwritten Description')
     })
 
-    it('should return conditions sorted by sortvalue and shortname', () => {
-      const wrapper = mountStatusTags(['CB', 'AB', 'ImportantCondition'])
-      const firstCondition = wrapper.vm.conditions[0]
-      const secondCondition = wrapper.vm.conditions[1]
-      const thirdCondition = wrapper.vm.conditions[2]
-      expect(firstCondition.shortName).toBe('IC')
-      expect(secondCondition.shortName).toBe('A')
-      expect(thirdCondition.shortName).toBe('C')
+    it('should return conditions sorted by sortOrder and shortname', () => {
+      const wrapper = mountStatusTags(['ControlPlaneHealthy', 'DE', 'CE', 'ImportantCondition'])
+      const [first, second, third, fourth] = wrapper.vm.conditions
+      expect(first.shortName).toBe('IC')
+      expect(second.shortName).toBe('C')
+      expect(third.shortName).toBe('D')
+      expect(fourth.shortName).toBe('CPO')
     })
   })
 })

@@ -126,10 +126,11 @@ const mocks = {
       const { id } = auth.getTokenPayload(headers)
       const { resourceAttributes, nonResourceAttributes } = json.spec
       if (resourceAttributes) {
-        const { resource } = resourceAttributes
+        const { resource, namespace } = resourceAttributes
         switch (resource) {
           case 'secrets':
-            allowed = id === 'admin@example.org'
+            allowed = id === 'admin@example.org' ||
+              (id === 'foo@example.org' && namespace === 'garden-foo')
             break
           case 'projects':
             allowed = id === 'projects-viewer@example.org'

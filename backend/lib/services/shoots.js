@@ -23,7 +23,6 @@ const {
   decodeBase64,
   encodeBase64,
   getSeedNameFromShoot,
-  getSeedIngressDomain,
   projectFilter
 } = utils
 const { getSeed } = cache
@@ -322,13 +321,6 @@ exports.info = async function ({ user, namespace, name }) {
 
   if (shoot.spec.seedName) {
     const seed = getSeed(getSeedNameFromShoot(shoot))
-    const prefix = _.replace(shoot.status.technicalID, /^shoot-{1,2}/, '')
-    if (prefix) {
-      const ingressDomain = getSeedIngressDomain(seed)
-      if (ingressDomain) {
-        data.seedShootIngressDomain = `${prefix}.${ingressDomain}`
-      }
-    }
     if (seed && namespace !== 'garden') {
       try {
         data.canLinkToSeed = !!(await client['core.gardener.cloud'].shoots.get('garden', seed.metadata.name))
@@ -360,14 +352,10 @@ exports.info = async function ({ user, namespace, name }) {
   }
   data.dashboardUrlPath = getDashboardUrlPath(shoot.spec.kubernetes.version)
 
-  /*
-    We explicitly use the (privileged) dashboardClient here for fetching the monitoring credentials instead of using the user's token
-    as we agreed that also project viewers should be able to see the monitoring credentials.
-    Usually project viewers do not have the permission to read the <shootName>.monitoring credential.
-    Our assumption: if the user can read the shoot resource, the user can be considered as project viewer.
-    This is only a temporary workaround until a Plutono SSO solution is implemented https://github.com/gardener/monitoring/issues/11.
-  */
-  await assignMonitoringSecret(dashboardClient, data, namespace, name)
+  const oidcObservabilityUrlsEnabled = _.get(config, 'frontend.features.oidcObservabilityUrlsEnabled', false)
+  if (!oidcObservabilityUrlsEnabled && await authorization.canGetSecret(user, namespace, `${name}.monitoring`)) {
+    await assignMonitoringSecret(client, data, namespace, name)
+  }
 
   return data
 }
