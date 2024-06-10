@@ -181,7 +181,7 @@ function shootHasIssue (shoot) {
 }
 
 function getSeedIngressDomain (seed) {
-  return _.get(seed, 'spec.dns.ingressDomain') || _.get(seed, 'spec.ingress.domain')
+  return _.get(seed, 'spec.ingress.domain')
 }
 
 function isSeedUnreachable (seed) {

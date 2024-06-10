@@ -420,14 +420,6 @@ const useShootStore = defineStore('shoot', () => {
     }
     try {
       const { data: info } = await api.getShootInfo(metadata)
-      if (info.seedShootIngressDomain) {
-        const baseHost = info.seedShootIngressDomain
-        info.plutonoUrl = `https://gu-${baseHost}`
-
-        info.prometheusUrl = `https://p-${baseHost}`
-
-        info.alertmanagerUrl = `https://au-${baseHost}`
-      }
       state.shootInfos[metadata.uid] = markRaw(info)
     } catch (err) {
       // ignore shoot info not found

@@ -92,6 +92,18 @@ const wellKnownConditions = {
     description: 'Indicates the system components health',
     sortOrder: '10',
   },
+  CRDsWithProblematicConversionWebhooks: {
+    name: 'CRDs with Problematic Conversion Webhooks',
+    shortName: 'CRD',
+    description: 'Indicates that there is at least one CustomResourceDefinition in the cluster which has multiple stored versions and a conversion webhook configured. This could break the reconciliation flow of a Shoot cluster in some cases.',
+    sortOrder: '11',
+  },
+  CACertificateValiditiesAcceptable: {
+    name: 'CA Certificate Validities',
+    shortName: 'CA',
+    description: 'Indicates that there is at least one CA certificate which expires in less than 1 year. A credentials rotation operation should be considered.',
+    sortOrder: '12',
+  },
 }
 
 export function getCondition (type) {
@@ -262,6 +274,10 @@ export const useConfigStore = defineStore('config', () => {
     return features.value?.shootForceDeletionEnabled === true
   })
 
+  const isOidcObservabilityUrlsEnabled = computed(() => {
+    return features.value?.oidcObservabilityUrlsEnabled === true
+  })
+
   const throttleDelayPerCluster = computed(() => {
     return experimental.value?.throttleDelayPerCluster ?? 10
   })
@@ -393,6 +409,7 @@ export const useConfigStore = defineStore('config', () => {
     isTerminalEnabled,
     isProjectTerminalShortcutsEnabled,
     isShootForceDeletionEnabled,
+    isOidcObservabilityUrlsEnabled,
     throttleDelayPerCluster,
     alertBannerMessage,
     alertBannerType,
