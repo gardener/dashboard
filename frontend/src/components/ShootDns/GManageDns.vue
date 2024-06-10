@@ -23,7 +23,8 @@ SPDX-License-Identifier: Apache-2.0
       <v-row>
         <v-col cols="6">
           <v-text-field
-            v-model="dnsDomain"
+            v-model="v$.dnsDomain.$model"
+            :error-messages="getErrorMessages(v$.dnsDomain)"
             color="primary"
             label="Cluster Domain"
             :disabled="!isNewCluster"
@@ -78,20 +79,22 @@ SPDX-License-Identifier: Apache-2.0
             variant="tonal"
             type="info"
           >
-            <div>
-              The primary DNS provider is used for Gardener internal purposes only.
-              The DNS providers for the shoot-dns-service extension are configured separately.
-              Click the button to apply the recommended configuration for the shoot-dns-service.
-              This will add an additional provider with your custom domain as <code>include</code> domain.
-            </div>
-            <div>
-              <v-btn
-                size="x-small"
-                variant="tonal"
-                @click="addExtensionCustomDomainProvider"
-              >
-                Apply Recommended DNS Configuration
-              </v-btn>
+            <div class="d-flex align-center">
+              <div>
+                The primary DNS provider is used for Gardener internal purposes only.
+                The DNS providers for the shoot-dns-service extension are configured separately.
+                Click the button to apply the recommended configuration for the shoot-dns-service.
+                This will add an additional provider with your custom domain as <code>include</code> domain.
+              </div>
+              <div>
+                <v-btn
+                  size="x-small"
+                  color="info"
+                  @click="addExtensionCustomDomainProvider"
+                >
+                  Apply Recommended DNS Configuration
+                </v-btn>
+              </div>
             </div>
           </v-alert>
         </v-col>
@@ -202,6 +205,9 @@ export default {
       primaryDnsProviderSecret: withFieldName('Primary DNS Provider Secret', {
         required: withMessage('Provider secret is required if a custom domain is defined', requiredIf(this.isNewCluster && !!this.dnsDomain)),
         nil: withMessage('Provider secret is not allowed if no custom domain is defined', nilUnless('dnsDomain')),
+      }),
+      dnsDomain: withFieldName('Custom Cluster Domain', {
+        required: requiredIf(this.customDomainEnabled),
       }),
     }
   },
