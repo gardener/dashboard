@@ -87,6 +87,10 @@ export function createShootHelperComposable (shootItem, options = {}) {
     return seedStore.seedByName(seedName.value)
   })
 
+  const seedIngressDomain = computed(() => {
+    return get(seed.value, 'data.ingressDomain')
+  })
+
   const seeds = computed(() => {
     return cloudProfileStore.seedsByCloudProfileName(cloudProfileName.value)
   })
@@ -250,6 +254,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     cloudProfile,
     isZonedCluster,
     seed,
+    seedIngressDomain,
     seeds,
     isFailureToleranceTypeZoneSupported,
     allZones,
