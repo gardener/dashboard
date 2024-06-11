@@ -126,6 +126,8 @@ describe('components', () => {
           }
         })
         await GLogin.beforeRouteEnter.call(wrapper.vm, to, undefined, mockNext)
+        expect(wrapper.vm.error.message).toBe(error.message)
+        await GLogin.beforeRouteUpdate.call(wrapper.vm, undefined, undefined, () => {})
         expect(mockNext).toBeCalledTimes(1)
         expect(mockNext.mock.calls[0]).toEqual([expect.any(Function)])
         expect(appStore.setError).toBeCalledTimes(1)

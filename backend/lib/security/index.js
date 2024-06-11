@@ -8,7 +8,7 @@
 
 const assert = require('assert').strict
 const crypto = require('crypto')
-const { split, join, some, every, includes, head, chain, pick } = require('lodash')
+const { split, join, includes, head, chain, pick } = require('lodash')
 const { Issuer, custom, generators, TokenSet } = require('openid-client')
 const pRetry = require('p-retry')
 const pTimeout = require('p-timeout')
@@ -42,6 +42,7 @@ const {
   COOKIE_TOKEN,
   COOKIE_SIGNATURE,
   COOKIE_CODE_VERIFIER,
+  COOKIE_STATE,
   GARDENER_AUDIENCE
 } = require('./constants')
 
@@ -64,14 +65,6 @@ const httpOptions = {
 }
 if (ca) {
   httpOptions.ca = ca
-}
-
-const hasHttpsProtocol = uri => /^https:/.test(uri)
-const secure = some(redirectUris, hasHttpsProtocol)
-if (secure) {
-  assert.ok(every(redirectUris, hasHttpsProtocol), 'All \'redirect_uris\' must have the same protocol')
-} else if (process.env.NODE_ENV === 'production') {
-  logger.warn('The Gardener Dashboard is running in production but you don\'t use Transport Layer Security (TLS) to secure the connection and the data')
 }
 
 let clientPromise
@@ -162,9 +155,16 @@ async function authorizationUrl (req, res) {
   const redirectPath = frontendRedirectUrl.pathname + frontendRedirectUrl.search
   const redirectOrigin = frontendRedirectUrl.origin
   const backendRedirectUri = getBackendRedirectUri(redirectOrigin)
-  const state = encodeState({
+  const state = generators.state()
+  res.cookie(COOKIE_STATE, {
     redirectPath,
-    redirectOrigin
+    redirectOrigin,
+    state
+  }, {
+    secure: true,
+    httpOnly: true,
+    maxAge: 180_000, // cookie will be removed after 3 minutes
+    sameSite: 'Lax'
   })
   const client = await exports.getIssuerClient()
   if (!includes(redirectUris, backendRedirectUri)) {
@@ -179,11 +179,10 @@ async function authorizationUrl (req, res) {
     const codeChallengeMethod = getCodeChallengeMethod(client)
     const codeVerifier = generators.codeVerifier()
     res.cookie(COOKIE_CODE_VERIFIER, codeVerifier, {
-      secure,
+      secure: true,
       httpOnly: true,
-      maxAge: 300000, // cookie will be removed after 5 minutes
-      sameSite: 'Lax',
-      path: '/auth/callback'
+      maxAge: 180_000, // cookie will be removed after 3 minutes
+      sameSite: 'Lax'
     })
     switch (codeChallengeMethod) {
       case 'S256':
@@ -254,12 +253,12 @@ async function setCookies (res, tokenSet) {
   const accessToken = tokenSet.access_token
   const [header, payload, signature] = split(accessToken, '.')
   res.cookie(COOKIE_HEADER_PAYLOAD, join([header, payload], '.'), {
-    secure,
+    secure: true,
     expires: undefined,
     sameSite: 'Lax'
   })
   res.cookie(COOKIE_SIGNATURE, signature, {
-    secure,
+    secure: true,
     httpOnly: true,
     expires: undefined,
     sameSite: 'Lax'
@@ -270,7 +269,7 @@ async function setCookies (res, tokenSet) {
   }
   const encryptedValues = await encrypt(values.join(','))
   res.cookie(COOKIE_TOKEN, encryptedValues, {
-    secure,
+    secure: true,
     httpOnly: true,
     expires: undefined,
     sameSite: 'Lax'
@@ -279,19 +278,29 @@ async function setCookies (res, tokenSet) {
 }
 
 async function authorizationCallback (req, res) {
-  const { code, state } = req.query
-  const parameters = { code }
+  const options = {
+    secure: true,
+    path: '/'
+  }
+  const stateObject = {}
+  if (COOKIE_STATE in req.cookies) {
+    Object.assign(stateObject, req.cookies[COOKIE_STATE])
+    res.clearCookie(COOKIE_STATE, options)
+  }
   const {
     redirectPath,
-    redirectOrigin
-  } = decodeState(state)
+    redirectOrigin,
+    state
+  } = stateObject
+  const parameters = pick(req.query, ['code', 'state'])
   const backendRedirectUri = getBackendRedirectUri(redirectOrigin)
   const checks = {
-    response_type: 'code'
+    response_type: 'code',
+    state
   }
   if (COOKIE_CODE_VERIFIER in req.cookies) {
     checks.code_verifier = req.cookies[COOKIE_CODE_VERIFIER]
-    res.clearCookie(COOKIE_CODE_VERIFIER)
+    res.clearCookie(COOKIE_CODE_VERIFIER, options)
   }
   const tokenSet = await authorizationCodeExchange(backendRedirectUri, parameters, checks)
   await setCookies(res, tokenSet)
@@ -473,9 +482,13 @@ function authenticate (options = {}) {
 }
 
 function clearCookies (res) {
-  res.clearCookie(COOKIE_HEADER_PAYLOAD)
-  res.clearCookie(COOKIE_SIGNATURE)
-  res.clearCookie(COOKIE_TOKEN)
+  const options = {
+    secure: true,
+    path: '/'
+  }
+  res.clearCookie(COOKIE_HEADER_PAYLOAD, options)
+  res.clearCookie(COOKIE_SIGNATURE, options)
+  res.clearCookie(COOKIE_TOKEN, options)
 }
 
 exports = module.exports = {

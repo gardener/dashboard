@@ -41,7 +41,7 @@ const defaultConfig = {
     ca,
     client_id: 'dashboard',
     redirect_uris: [
-      'http://localhost:8080/auth/callback'
+      'https://localhost:8443/auth/callback'
     ],
     scope: 'openid email profile groups audience:server:client_id:dashboard audience:server:client_id:kube-kubectl',
     clockTolerance: 42,
