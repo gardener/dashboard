@@ -112,10 +112,7 @@ import {
   alphaNumUnderscore,
   base64,
 } from '@/utils/validators'
-import {
-  getErrorMessages,
-  setDelayedInputFocus,
-} from '@/utils'
+import { getErrorMessages } from '@/utils'
 
 export default {
   components: {
@@ -279,25 +276,7 @@ export default {
       return undefined
     },
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-      }
-    },
-  },
   methods: {
-    reset () {
-      this.v$.$reset()
-
-      this.accessKeyId = ''
-      this.secretAccessKey = ''
-      this.awsRegion = ''
-
-      if (!this.isCreateMode) {
-        setDelayedInputFocus(this, 'accessKeyId')
-      }
-    },
     getErrorMessages,
   },
 }
