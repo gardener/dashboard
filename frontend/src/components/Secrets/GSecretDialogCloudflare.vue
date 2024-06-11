@@ -10,7 +10,6 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :secret-validations="v$"
     :secret="secret"
-    vendor="cloudflare-dns"
     create-title="Add new Cloudflare Secret"
     replace-title="Replace Cloudflare Secret"
   >
@@ -34,7 +33,8 @@ SPDX-License-Identifier: Apache-2.0
     <template #help-slot>
       <div>
         <p>
-          To use this provider you need to generate an API token from the Cloudflare dashboard. A detailed documentation to generate an API token is available at <g-external-link url="https://support.cloudflare.com/hc/en-us/articles/200167836-Managing-API-Tokens-and-Keys" />.
+          To use this provider you need to generate an API token from the Cloudflare dashboard. A detailed documentation to generate an API token is available at
+          <g-external-link url="https://support.cloudflare.com/hc/en-us/articles/200167836-Managing-API-Tokens-and-Keys" />.
         </p>
         <p class="font-weight-bold">
           Note: You need to generate an API token and not an API key.
@@ -125,18 +125,7 @@ export default {
       return !this.secret
     },
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-      }
-    },
-  },
   methods: {
-    reset () {
-      this.v$.$reset()
-      this.apiToken = ''
-    },
     getErrorMessages,
   },
 }
