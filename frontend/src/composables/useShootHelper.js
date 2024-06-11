@@ -18,11 +18,12 @@ import { useSeedStore } from '@/store/seed'
 
 import utils from '@/utils'
 
+import { useShootAccessRestrictions } from './useShootAccessRestrictions'
+
 import {
   get,
   map,
   head,
-  keyBy,
   mapValues,
   find,
   some,
@@ -175,45 +176,6 @@ export function createShootHelperComposable (shootItem, options = {}) {
     })
   })
 
-  const accessRestrictionDefinitionList = computed(() => {
-    return cloudProfileStore.accessRestrictionDefinitionsByCloudProfileNameAndRegion({
-      cloudProfileName: cloudProfileName.value,
-      region: region.value,
-    })
-  })
-
-  const accessRestrictionDefinitions = computed(() => {
-    const accessRestrictionDefinitions = {}
-    for (const definition of accessRestrictionDefinitionList.value) {
-      const { key, options } = definition
-      accessRestrictionDefinitions[key] = {
-        ...definition,
-        options: keyBy(options, 'key'),
-      }
-    }
-    return accessRestrictionDefinitions
-  })
-
-  const accessRestrictionOptionDefinitions = computed(() => {
-    const accessRestrictionOptionDefinitions = {}
-    for (const definition of accessRestrictionDefinitionList.value) {
-      for (const optionDefinition of definition.options) {
-        accessRestrictionOptionDefinitions[optionDefinition.key] = {
-          accessRestrictionKey: definition.key,
-          ...optionDefinition,
-        }
-      }
-    }
-    return accessRestrictionOptionDefinitions
-  })
-
-  const accessRestrictionNoItemsText = computed(() => {
-    return cloudProfileStore.accessRestrictionNoItemsTextForCloudProfileNameAndRegion({
-      cloudProfileName: cloudProfileName.value,
-      region: region.value,
-    })
-  })
-
   const allMachineTypes = computed(() => {
     return cloudProfileStore.machineTypesByCloudProfileName(cloudProfileName.value)
   })
@@ -246,6 +208,15 @@ export function createShootHelperComposable (shootItem, options = {}) {
 
   const showAllRegions = computed(() => {
     return configStore.seedCandidateDeterminationStrategy !== 'SameRegion'
+  })
+
+  const {
+    accessRestrictionDefinitionList,
+    accessRestrictionDefinitions,
+    accessRestrictionOptionDefinitions,
+    accessRestrictionNoItemsText,
+  } = useShootAccessRestrictions(shootItem, {
+    cloudProfileStore,
   })
 
   return {

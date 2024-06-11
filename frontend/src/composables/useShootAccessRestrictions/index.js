@@ -8,7 +8,7 @@ import { computed } from 'vue'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
-import { useShootMetadata } from '../useShootMetadata'
+import { useAnnotations } from '../useObjectMetadata'
 
 import { NAND } from './helper'
 
@@ -17,25 +17,30 @@ import {
   set,
   unset,
   keyBy,
+  mapValues,
 } from '@/lodash'
 
-export function useShootAccessRestrictions (shootItem, options = {}) {
+const shootPropertyMappings = Object.freeze({
+  cloudProfileName: 'spec.cloudProfileName',
+  region: 'spec.region',
+})
+
+export const useShootAccessRestrictions = (shootItem, options = {}) => {
   const {
     cloudProfileStore = useCloudProfileStore(),
   } = options
 
   const {
-    getShootAnnotation,
-    setShootAnnotation,
-    unsetShootAnnotation,
-  } = useShootMetadata(shootItem, options)
+    getAnnotation: getShootAnnotation,
+    setAnnotation: setShootAnnotation,
+    unsetAnnotation: unsetShootAnnotation,
+  } = useAnnotations(shootItem)
 
-  const shootCloudProfileName = computed(() => {
-    return get(shootItem.value, 'spec.cloudProfileName')
-  })
-
-  const shootRegion = computed(() => {
-    return get(shootItem.value, 'spec.region')
+  const {
+    cloudProfileName,
+    region,
+  } = mapValues(shootPropertyMappings, path => {
+    return computed(() => get(shootItem.value, path))
   })
 
   function getSeedSelectorMatchLabel (key, defaultValue) {
@@ -52,15 +57,15 @@ export function useShootAccessRestrictions (shootItem, options = {}) {
 
   const accessRestrictionDefinitionList = computed(() => {
     return cloudProfileStore.accessRestrictionDefinitionsByCloudProfileNameAndRegion({
-      cloudProfileName: shootCloudProfileName.value,
-      region: shootRegion.value,
+      cloudProfileName: cloudProfileName.value,
+      region: region.value,
     })
   })
 
   const accessRestrictionNoItemsText = computed(() => {
     return cloudProfileStore.accessRestrictionNoItemsTextForCloudProfileNameAndRegion({
-      cloudProfileName: shootCloudProfileName.value,
-      region: shootRegion.value,
+      cloudProfileName: cloudProfileName.value,
+      region: region.value,
     })
   })
 
