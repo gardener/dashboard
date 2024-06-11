@@ -83,7 +83,7 @@ describe('security', function () {
   })
 
   describe('openid-client', () => {
-    const redirectUrl = new URL('/account', 'http://localhost:8080')
+    const redirectUrl = new URL('/account', 'https://localhost:8443')
     const sub = 'john.doe@example.org'
     const expiresIn = 3600
 
@@ -96,6 +96,7 @@ describe('security', function () {
     let client
 
     let mockGetIssuerClient
+    let mockState
     let mockCodeVerifier
     let mockCodeChallenge
     let mockRefresh
@@ -141,6 +142,7 @@ describe('security', function () {
           refresh_token: 'new-refresh-token'
         }
       })
+      mockState = jest.spyOn(openidClient.generators, 'state').mockReturnValue('state')
       mockCodeVerifier = jest.spyOn(openidClient.generators, 'codeVerifier').mockReturnValue('code-verifier')
       mockCodeChallenge = jest.spyOn(openidClient.generators, 'codeChallenge').mockReturnValue('code-challenge')
       mockIsAuthenticated = jest.spyOn(authentication, 'isAuthenticated').mockResolvedValue({ username: sub, groups: [] })
@@ -164,33 +166,45 @@ describe('security', function () {
       const authorizationUrl = await security.authorizationUrl(req, res)
       const url = new URL(authorizationUrl)
       expect(mockGetIssuerClient).toBeCalledTimes(1)
+      expect(mockState).toBeCalledTimes(1)
       expect(mockCodeVerifier).toBeCalledTimes(1)
       expect(mockCodeChallenge).toBeCalledTimes(1)
       expect(mockCodeChallenge.mock.calls[0]).toEqual(['code-verifier'])
-      expect(res.cookie).toBeCalledTimes(1)
-      expect(res.cookie.mock.calls[0]).toEqual([
-        'gCdVrfr',
-        'code-verifier',
-        {
-          httpOnly: true,
-          maxAge: 300000,
-          path: '/auth/callback',
-          sameSite: 'Lax',
-          secure: false
-        }
+      expect(res.cookie).toBeCalledTimes(2)
+      expect(res.cookie.mock.calls).toEqual([
+        [
+          '__Host-gStt',
+          {
+            redirectOrigin: redirectUrl.origin,
+            redirectPath: redirectUrl.pathname,
+            state: 'state'
+          },
+          {
+            httpOnly: true,
+            maxAge: 180000,
+            sameSite: 'Lax',
+            secure: true
+          }
+        ],
+        [
+          '__Host-gCdVrfr',
+          'code-verifier',
+          {
+            httpOnly: true,
+            maxAge: 180000,
+            sameSite: 'Lax',
+            secure: true
+          }
+        ]
       ])
       expect(url.origin).toBe(config.oidc.issuer)
       const params = Object.fromEntries(url.searchParams)
-      expect(security.decodeState(params.state)).toEqual({
-        redirectOrigin: redirectUrl.origin,
-        redirectPath: redirectUrl.pathname
-      })
       expect(params).toEqual(expect.objectContaining({
         client_id: config.oidc.client_id,
         scope,
         response_type: 'code',
         redirect_uri: redirectUrl.origin + '/auth/callback',
-        state: expect.any(String),
+        state: 'state',
         code_challenge: 'code-challenge',
         code_challenge_method: 'S256'
       }))
@@ -274,17 +288,17 @@ describe('security', function () {
         [
           COOKIE_HEADER_PAYLOAD,
           expect.stringMatching(/^[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$/),
-          { secure: false, expires: undefined, sameSite: 'Lax' }
+          { secure: true, expires: undefined, sameSite: 'Lax' }
         ],
         [
           COOKIE_SIGNATURE,
           expect.stringMatching(/^[a-zA-Z0-9_-]{43}$/),
-          { secure: false, httpOnly: true, expires: undefined, sameSite: 'Lax' }
+          { secure: true, httpOnly: true, expires: undefined, sameSite: 'Lax' }
         ],
         [
           COOKIE_TOKEN,
           expect.stringMatching(/^[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$/),
-          { secure: false, httpOnly: true, expires: undefined, sameSite: 'Lax' }
+          { secure: true, httpOnly: true, expires: undefined, sameSite: 'Lax' }
         ]
       ])
     })

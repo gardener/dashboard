@@ -13,6 +13,9 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# Vite config snapshot files
+vite.config.js.timestamp-*
+
 # Editor directories and files
 .idea
 .vscode
