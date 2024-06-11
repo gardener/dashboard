@@ -208,6 +208,8 @@ const useShootStore = defineStore('shoot', () => {
       state.shoots = {}
       state.shootInfos = {}
       state.staleShoots = {}
+      state.froozenUids = []
+      state.focusMode = false
     })
     shootEvents.clear()
     ticketStore.clearIssues()
