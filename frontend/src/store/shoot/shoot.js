@@ -138,17 +138,20 @@ const useShootStore = defineStore('shoot', () => {
 
   // getters
   const shootList = computed(() => {
-    if (state.focusMode) {
-      // When state is freezed, do not include new items
-      return state.froozenUids.map(uid => {
-        const object = state.shoots[uid] ?? state.staleShoots[uid]
-        return assignShootInfo(object)
-      })
+    const uids = state.focusMode
+      ? state.froozenUids
+      : activeUids.value
+    const getShoot = state.focusMode
+      ? uid => state.shoots[uid] ?? state.staleShoots[uid]
+      : uid => state.shoots[uid]
+    const items = []
+    for (const uid of uids) {
+      const object = getShoot(uid)
+      if (object) {
+        items.push(assignShootInfo(object))
+      }
     }
-    return activeUids.value.map(uid => {
-      const object = state.shoots[uid]
-      return assignShootInfo(object)
-    })
+    return items
   })
 
   const selectedShoot = computed(() => {
