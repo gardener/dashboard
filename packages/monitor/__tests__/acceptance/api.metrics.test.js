@@ -40,7 +40,7 @@ describe('api', () => {
       const res = await agent
         .get('/unknown')
         .expect(404)
-      console.log(res.body)
+
       expect(res.body).toEqual({
         message: 'No matching route: GET /unknown',
         status: 404

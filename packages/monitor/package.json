@@ -55,6 +55,9 @@
     "globals": {
       "createAgent": true,
       "fixtures": true
+    },
+    "rules": {
+      "no-console": "error"
     }
   },
   "jest": {
