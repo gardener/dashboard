@@ -1,21 +1,21 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`api cloudprofiles should return all cloudprofiles 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImpvaG4uZG9lQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.LkQ9PEN893UNTsZZn2Ux_CAYNOoQ2ISboWuHiAc5HHU",
     },
-    Object {
+    {
       "apiVersion": "authorization.k8s.io/v1",
       "kind": "SelfSubjectAccessReview",
-      "spec": Object {
+      "spec": {
         "nonResourceAttributes": undefined,
-        "resourceAttributes": Object {
+        "resourceAttributes": {
           "group": "core.gardener.cloud",
           "resource": "cloudprofiles",
           "verb": "list",
@@ -27,131 +27,131 @@ Array [
 `;
 
 exports[`api cloudprofiles should return all cloudprofiles 2`] = `
-Array [
-  Object {
-    "data": Object {
-      "kubernetes": Object {
-        "versions": Array [
-          Object {
+[
+  {
+    "data": {
+      "kubernetes": {
+        "versions": [
+          {
             "version": "1.9.0",
           },
-          Object {
+          {
             "version": "1.8.5",
           },
         ],
       },
-      "seedNames": Array [
+      "seedNames": [
         "infra1-seed",
         "infra1-seed2",
         "infra4-seed-without-secretRef",
       ],
-      "seedSelector": Object {},
+      "seedSelector": {},
       "type": "infra1",
     },
-    "metadata": Object {
+    "metadata": {
       "cloudProviderKind": "infra1",
       "displayName": "infra1-profileName",
       "name": "infra1-profileName",
     },
   },
-  Object {
-    "data": Object {
-      "kubernetes": Object {
-        "versions": Array [
-          Object {
+  {
+    "data": {
+      "kubernetes": {
+        "versions": [
+          {
             "version": "1.9.0",
           },
-          Object {
+          {
             "version": "1.8.5",
           },
         ],
       },
-      "seedNames": Array [
+      "seedNames": [
         "infra3-seed",
         "infra3-seed-with-selector",
         "infra3-seed-without-selector",
       ],
-      "seedSelector": Object {
-        "providerTypes": Array [
+      "seedSelector": {
+        "providerTypes": [
           "infra2",
           "infra3",
         ],
       },
       "type": "infra1",
     },
-    "metadata": Object {
+    "metadata": {
       "cloudProviderKind": "infra1",
       "displayName": "infra1-profileName2",
       "name": "infra1-profileName2",
     },
   },
-  Object {
-    "data": Object {
-      "kubernetes": Object {
-        "versions": Array [
-          Object {
+  {
+    "data": {
+      "kubernetes": {
+        "versions": [
+          {
             "version": "1.9.0",
           },
-          Object {
+          {
             "version": "1.8.5",
           },
         ],
       },
-      "seedNames": Array [
+      "seedNames": [
         "infra3-seed-with-selector",
       ],
-      "seedSelector": Object {
-        "matchLabels": Object {
+      "seedSelector": {
+        "matchLabels": {
           "foo": "bar",
         },
       },
       "type": "infra3",
     },
-    "metadata": Object {
+    "metadata": {
       "cloudProviderKind": "infra3",
       "displayName": "infra3-profileName",
       "name": "infra3-profileName",
     },
   },
-  Object {
-    "data": Object {
-      "kubernetes": Object {
-        "versions": Array [
-          Object {
+  {
+    "data": {
+      "kubernetes": {
+        "versions": [
+          {
             "version": "1.9.0",
           },
-          Object {
+          {
             "version": "1.8.5",
           },
         ],
       },
-      "seedNames": Array [
+      "seedNames": [
         "infra3-seed",
         "infra3-seed-with-selector",
         "infra3-seed-without-selector",
       ],
-      "seedSelector": Object {},
+      "seedSelector": {},
       "type": "infra3",
     },
-    "metadata": Object {
+    "metadata": {
       "cloudProviderKind": "infra3",
       "displayName": "infra3-profileName2",
       "name": "infra3-profileName2",
     },
   },
-  Object {
-    "data": Object {
-      "kubernetes": Object {
-        "versions": Array [
-          Object {
+  {
+    "data": {
+      "kubernetes": {
+        "versions": [
+          {
             "version": "1.9.0",
           },
-          Object {
+          {
             "version": "1.8.5",
           },
         ],
       },
-      "seedNames": Array [
+      "seedNames": [
         "infra1-seed",
         "infra1-seed2",
         "infra3-seed",
@@ -159,14 +159,14 @@ Array [
         "infra3-seed-with-selector",
         "infra3-seed-without-selector",
       ],
-      "seedSelector": Object {
-        "providerTypes": Array [
+      "seedSelector": {
+        "providerTypes": [
           "*",
         ],
       },
       "type": "infra4",
     },
-    "metadata": Object {
+    "metadata": {
       "cloudProviderKind": "infra4",
       "displayName": "infra4-profileName",
       "name": "infra4-profileName",

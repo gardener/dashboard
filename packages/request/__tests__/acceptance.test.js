@@ -29,8 +29,6 @@ const {
 
 const nextTick = () => new Promise(resolve => process.nextTick(resolve))
 
-jest.useFakeTimers('legacy')
-
 const key = `-----BEGIN PRIVATE KEY-----
 MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCxLZ88tEBAu9ij
 OTqB7qHT1mx5O8R+j+fgTkQVZU7dVvLcWpC+rfM2avVKlPNLBcKw0Ke+yrZYZdUo
@@ -174,6 +172,14 @@ describe('Acceptance Tests', function () {
   let agent
   let client
   let server
+
+  beforeAll(() => {
+    jest.useFakeTimers({ legacyFakeTimers: true })
+  })
+
+  afterAll(() => {
+    jest.useRealTimers()
+  })
 
   beforeEach(async () => {
     server = await createSecureServer({ cert, key })

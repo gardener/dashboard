@@ -44,8 +44,6 @@ function createApplication (port, metricsPort) {
   return app
 }
 
-jest.useFakeTimers('legacy')
-
 describe('server', () => {
   const port = 1234
   const metricsPort = 5678
@@ -60,6 +58,14 @@ describe('server', () => {
   let server
   let mockCreateServer
   let mockCreateTerminus
+
+  beforeAll(() => {
+    jest.useFakeTimers({ legacyFakeTimers: true })
+  })
+
+  afterAll(() => {
+    jest.useRealTimers()
+  })
 
   beforeEach(() => {
     mockCreateServer = jest.spyOn(http, 'createServer').mockReturnValue(mockServer)
@@ -104,7 +110,7 @@ describe('server', () => {
     expect(healthCheck).toBeCalledTimes(2)
     expect(healthCheck.mock.calls).toEqual([[false], [true]])
 
-    setTimeout.mockClear()
+    global.setTimeout.mockClear()
     beforeShutdown()
     jest.runAllTimers()
     expect(setTimeout).toHaveBeenCalledTimes(1)
