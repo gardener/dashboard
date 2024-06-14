@@ -1,21 +1,21 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`api events when user is "admin" should subscribe shoots for a single cluster 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
     },
-    Object {
+    {
       "apiVersion": "authorization.k8s.io/v1",
       "kind": "SelfSubjectAccessReview",
-      "spec": Object {
+      "spec": {
         "nonResourceAttributes": undefined,
-        "resourceAttributes": Object {
+        "resourceAttributes": {
           "group": "core.gardener.cloud",
           "name": "fooShoot",
           "namespace": "garden-foo",
@@ -29,25 +29,25 @@ Array [
 `;
 
 exports[`api events when user is "admin" should subscribe shoots for a single cluster 2`] = `
-Array [
-  Object {
-    "metadata": Object {
-      "annotations": Object {
+[
+  {
+    "metadata": {
+      "annotations": {
         "gardener.cloud/created-by": "foo@example.org",
       },
       "name": "fooShoot",
       "namespace": "garden-foo",
       "uid": 1,
     },
-    "spec": Object {
+    "spec": {
       "cloudProfileName": "infra1-profileName",
-      "hibernation": Object {
+      "hibernation": {
         "enabled": false,
       },
-      "kubernetes": Object {
+      "kubernetes": {
         "version": "1.16.0",
       },
-      "provider": Object {
+      "provider": {
         "type": "fooInfra",
       },
       "purpose": "fooPurpose",
@@ -55,9 +55,9 @@ Array [
       "secretBindingName": "foo-infra1",
       "seedName": "infra1-seed",
     },
-    "status": Object {
-      "advertisedAddresses": Array [
-        Object {
+    "status": {
+      "advertisedAddresses": [
+        {
           "name": "external",
           "url": "https://api.fooShoot.foo.shoot.test",
         },
@@ -65,10 +65,10 @@ Array [
       "technicalID": "shoot--foo--fooShoot",
     },
   },
-  Object {
+  {
     "apiVersion": "v1",
     "code": 404,
-    "details": Object {
+    "details": {
       "group": "core.gardener.cloud",
       "kind": "shoots",
       "uid": 2,
@@ -82,21 +82,21 @@ Array [
 `;
 
 exports[`api events when user is "admin" should subscribe shoots for a single namespace 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
     },
-    Object {
+    {
       "apiVersion": "authorization.k8s.io/v1",
       "kind": "SelfSubjectAccessReview",
-      "spec": Object {
+      "spec": {
         "nonResourceAttributes": undefined,
-        "resourceAttributes": Object {
+        "resourceAttributes": {
           "group": "core.gardener.cloud",
           "namespace": "garden-foo",
           "resource": "shoots",
@@ -109,25 +109,25 @@ Array [
 `;
 
 exports[`api events when user is "admin" should subscribe shoots for a single namespace 2`] = `
-Array [
-  Object {
-    "metadata": Object {
-      "annotations": Object {
+[
+  {
+    "metadata": {
+      "annotations": {
         "gardener.cloud/created-by": "foo@example.org",
       },
       "name": "fooShoot",
       "namespace": "garden-foo",
       "uid": 1,
     },
-    "spec": Object {
+    "spec": {
       "cloudProfileName": "infra1-profileName",
-      "hibernation": Object {
+      "hibernation": {
         "enabled": false,
       },
-      "kubernetes": Object {
+      "kubernetes": {
         "version": "1.16.0",
       },
-      "provider": Object {
+      "provider": {
         "type": "fooInfra",
       },
       "purpose": "fooPurpose",
@@ -135,9 +135,9 @@ Array [
       "secretBindingName": "foo-infra1",
       "seedName": "infra1-seed",
     },
-    "status": Object {
-      "advertisedAddresses": Array [
-        Object {
+    "status": {
+      "advertisedAddresses": [
+        {
           "name": "external",
           "url": "https://api.fooShoot.foo.shoot.test",
         },
@@ -145,10 +145,10 @@ Array [
       "technicalID": "shoot--foo--fooShoot",
     },
   },
-  Object {
+  {
     "apiVersion": "v1",
     "code": 404,
-    "details": Object {
+    "details": {
       "group": "core.gardener.cloud",
       "kind": "shoots",
       "uid": 4,
@@ -162,21 +162,21 @@ Array [
 `;
 
 exports[`api events when user is "admin" should subscribe shoots for all namespace 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
     },
-    Object {
+    {
       "apiVersion": "authorization.k8s.io/v1",
       "kind": "SelfSubjectAccessReview",
-      "spec": Object {
+      "spec": {
         "nonResourceAttributes": undefined,
-        "resourceAttributes": Object {
+        "resourceAttributes": {
           "group": "",
           "resource": "secrets",
           "verb": "get",
@@ -188,25 +188,25 @@ Array [
 `;
 
 exports[`api events when user is "admin" should subscribe shoots for all namespace 2`] = `
-Array [
-  Object {
-    "metadata": Object {
-      "annotations": Object {
+[
+  {
+    "metadata": {
+      "annotations": {
         "gardener.cloud/created-by": "foo@example.org",
       },
       "name": "fooShoot",
       "namespace": "garden-foo",
       "uid": 1,
     },
-    "spec": Object {
+    "spec": {
       "cloudProfileName": "infra1-profileName",
-      "hibernation": Object {
+      "hibernation": {
         "enabled": false,
       },
-      "kubernetes": Object {
+      "kubernetes": {
         "version": "1.16.0",
       },
-      "provider": Object {
+      "provider": {
         "type": "fooInfra",
       },
       "purpose": "fooPurpose",
@@ -214,9 +214,9 @@ Array [
       "secretBindingName": "foo-infra1",
       "seedName": "infra1-seed",
     },
-    "status": Object {
-      "advertisedAddresses": Array [
-        Object {
+    "status": {
+      "advertisedAddresses": [
+        {
           "name": "external",
           "url": "https://api.fooShoot.foo.shoot.test",
         },
@@ -224,24 +224,24 @@ Array [
       "technicalID": "shoot--foo--fooShoot",
     },
   },
-  Object {
-    "metadata": Object {
-      "annotations": Object {
+  {
+    "metadata": {
+      "annotations": {
         "gardener.cloud/created-by": "admin@example.org",
       },
       "name": "infra1-seed",
       "namespace": "garden",
       "uid": 4,
     },
-    "spec": Object {
+    "spec": {
       "cloudProfileName": "infra1-profileName",
-      "hibernation": Object {
+      "hibernation": {
         "enabled": false,
       },
-      "kubernetes": Object {
+      "kubernetes": {
         "version": "1.16.0",
       },
-      "provider": Object {
+      "provider": {
         "type": "fooInfra",
       },
       "purpose": "foo-purpose",
@@ -249,9 +249,9 @@ Array [
       "secretBindingName": "soil-infra1",
       "seedName": "soil-infra1",
     },
-    "status": Object {
-      "advertisedAddresses": Array [
-        Object {
+    "status": {
+      "advertisedAddresses": [
+        {
           "name": "external",
           "url": "https://api.infra1-seed.garden.shoot.test",
         },
@@ -263,21 +263,21 @@ Array [
 `;
 
 exports[`api events when user is "admin" should subscribe unhealthy shoots for all namespace 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
     },
-    Object {
+    {
       "apiVersion": "authorization.k8s.io/v1",
       "kind": "SelfSubjectAccessReview",
-      "spec": Object {
+      "spec": {
         "nonResourceAttributes": undefined,
-        "resourceAttributes": Object {
+        "resourceAttributes": {
           "group": "",
           "resource": "secrets",
           "verb": "get",
@@ -289,21 +289,21 @@ Array [
 `;
 
 exports[`api events when user is "foo" should subscribe shoots for a single cluster 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
-    Object {
+    {
       "apiVersion": "authorization.k8s.io/v1",
       "kind": "SelfSubjectAccessReview",
-      "spec": Object {
+      "spec": {
         "nonResourceAttributes": undefined,
-        "resourceAttributes": Object {
+        "resourceAttributes": {
           "group": "core.gardener.cloud",
           "name": "fooShoot",
           "namespace": "garden-foo",
@@ -317,21 +317,21 @@ Array [
 `;
 
 exports[`api events when user is "foo" should subscribe shoots for a single namespace 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
-    Object {
+    {
       "apiVersion": "authorization.k8s.io/v1",
       "kind": "SelfSubjectAccessReview",
-      "spec": Object {
+      "spec": {
         "nonResourceAttributes": undefined,
-        "resourceAttributes": Object {
+        "resourceAttributes": {
           "group": "core.gardener.cloud",
           "namespace": "garden-foo",
           "resource": "shoots",
@@ -344,21 +344,21 @@ Array [
 `;
 
 exports[`api events when user is "foo" should subscribe shoots for all namespace 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
-    Object {
+    {
       "apiVersion": "authorization.k8s.io/v1",
       "kind": "SelfSubjectAccessReview",
-      "spec": Object {
+      "spec": {
         "nonResourceAttributes": undefined,
-        "resourceAttributes": Object {
+        "resourceAttributes": {
           "group": "",
           "resource": "secrets",
           "verb": "get",
@@ -366,20 +366,20 @@ Array [
       },
     },
   ],
-  Array [
-    Object {
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
-    Object {
+    {
       "apiVersion": "authorization.k8s.io/v1",
       "kind": "SelfSubjectAccessReview",
-      "spec": Object {
+      "spec": {
         "nonResourceAttributes": undefined,
-        "resourceAttributes": Object {
+        "resourceAttributes": {
           "group": "core.gardener.cloud",
           "namespace": "garden-foo",
           "resource": "shoots",
@@ -388,20 +388,20 @@ Array [
       },
     },
   ],
-  Array [
-    Object {
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
-    Object {
+    {
       "apiVersion": "authorization.k8s.io/v1",
       "kind": "SelfSubjectAccessReview",
-      "spec": Object {
+      "spec": {
         "nonResourceAttributes": undefined,
-        "resourceAttributes": Object {
+        "resourceAttributes": {
           "group": "core.gardener.cloud",
           "namespace": "garden-bar",
           "resource": "shoots",
@@ -414,21 +414,21 @@ Array [
 `;
 
 exports[`api events when user is "foo" should subscribe unhealthy shoots for all namespace 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
-    Object {
+    {
       "apiVersion": "authorization.k8s.io/v1",
       "kind": "SelfSubjectAccessReview",
-      "spec": Object {
+      "spec": {
         "nonResourceAttributes": undefined,
-        "resourceAttributes": Object {
+        "resourceAttributes": {
           "group": "",
           "resource": "secrets",
           "verb": "get",
@@ -436,20 +436,20 @@ Array [
       },
     },
   ],
-  Array [
-    Object {
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
-    Object {
+    {
       "apiVersion": "authorization.k8s.io/v1",
       "kind": "SelfSubjectAccessReview",
-      "spec": Object {
+      "spec": {
         "nonResourceAttributes": undefined,
-        "resourceAttributes": Object {
+        "resourceAttributes": {
           "group": "core.gardener.cloud",
           "namespace": "garden-foo",
           "resource": "shoots",
@@ -458,20 +458,20 @@ Array [
       },
     },
   ],
-  Array [
-    Object {
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
-    Object {
+    {
       "apiVersion": "authorization.k8s.io/v1",
       "kind": "SelfSubjectAccessReview",
-      "spec": Object {
+      "spec": {
         "nonResourceAttributes": undefined,
-        "resourceAttributes": Object {
+        "resourceAttributes": {
           "group": "core.gardener.cloud",
           "namespace": "garden-bar",
           "resource": "shoots",

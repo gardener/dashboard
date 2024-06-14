@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 ############# builder #############
-FROM node:20-alpine3.18 as builder
+FROM node:20-alpine3.20 as builder
 
 WORKDIR /volume
 
@@ -44,12 +44,14 @@ RUN yarn workspace @gardener-dashboard/logger run lint
 RUN yarn workspace @gardener-dashboard/request run lint
 RUN yarn workspace @gardener-dashboard/kube-config run lint
 RUN yarn workspace @gardener-dashboard/kube-client run lint
+RUN yarn workspace @gardener-dashboard/monitor run lint
 
 # run test --coverage
 RUN yarn workspace @gardener-dashboard/logger run test --coverage
 RUN yarn workspace @gardener-dashboard/request run test --coverage
 RUN yarn workspace @gardener-dashboard/kube-config run test --coverage
 RUN yarn workspace @gardener-dashboard/kube-client run test --coverage
+RUN yarn workspace @gardener-dashboard/monitor run test --coverage
 
 ############# node-scratch #############
 FROM scratch as node-scratch

@@ -1,21 +1,21 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`api seeds should return all seeds 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImpvaG4uZG9lQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.LkQ9PEN893UNTsZZn2Ux_CAYNOoQ2ISboWuHiAc5HHU",
     },
-    Object {
+    {
       "apiVersion": "authorization.k8s.io/v1",
       "kind": "SelfSubjectAccessReview",
-      "spec": Object {
+      "spec": {
         "nonResourceAttributes": undefined,
-        "resourceAttributes": Object {
+        "resourceAttributes": {
           "group": "core.gardener.cloud",
           "resource": "seeds",
           "verb": "list",
@@ -27,120 +27,120 @@ Array [
 `;
 
 exports[`api seeds should return all seeds 2`] = `
-Array [
-  Object {
-    "data": Object {
+[
+  {
+    "data": {
       "ingressDomain": "ingress.foo-east.infra1.example.org",
       "region": "foo-east",
       "type": "infra1",
       "unprotected": false,
       "visible": false,
     },
-    "metadata": Object {
+    "metadata": {
       "name": "soil-infra1",
       "unreachable": false,
     },
   },
-  Object {
-    "data": Object {
+  {
+    "data": {
       "ingressDomain": "ingress.foo-east.infra1.example.org",
       "region": "foo-east",
       "type": "infra1",
       "unprotected": true,
       "visible": true,
     },
-    "metadata": Object {
+    "metadata": {
       "name": "infra1-seed",
       "unreachable": false,
     },
   },
-  Object {
-    "data": Object {
+  {
+    "data": {
       "ingressDomain": "ingress.foo-west.infra1.example.org",
       "region": "foo-west",
       "type": "infra1",
       "unprotected": true,
       "visible": true,
     },
-    "metadata": Object {
+    "metadata": {
       "name": "infra1-seed2",
       "unreachable": false,
     },
   },
-  Object {
-    "data": Object {
+  {
+    "data": {
       "ingressDomain": "ingress.foo-europe.infra3.example.org",
       "region": "foo-europe",
       "type": "infra3",
       "unprotected": true,
       "visible": true,
     },
-    "metadata": Object {
+    "metadata": {
       "name": "infra3-seed",
       "unreachable": true,
     },
   },
-  Object {
-    "data": Object {
+  {
+    "data": {
       "ingressDomain": "ingress.foo-south.infra1.example.org",
       "region": "foo-south",
       "type": "infra1",
       "unprotected": true,
       "visible": true,
     },
-    "metadata": Object {
+    "metadata": {
       "name": "infra4-seed-without-secretRef",
       "unreachable": false,
     },
   },
-  Object {
-    "data": Object {
+  {
+    "data": {
       "ingressDomain": "ingress.foo-europe.infra3.example.org",
       "region": "foo-europe",
       "type": "infra3",
       "unprotected": true,
       "visible": true,
     },
-    "metadata": Object {
+    "metadata": {
       "name": "infra3-seed-with-selector",
       "unreachable": false,
     },
   },
-  Object {
-    "data": Object {
+  {
+    "data": {
       "ingressDomain": "ingress.foo-europe.infra3.example.org",
       "region": "foo-europe",
       "type": "infra3",
       "unprotected": true,
       "visible": true,
     },
-    "metadata": Object {
+    "metadata": {
       "name": "infra3-seed-without-selector",
       "unreachable": false,
     },
   },
-  Object {
-    "data": Object {
+  {
+    "data": {
       "ingressDomain": "ingress.foo-europe.infra3.example.org",
       "region": "foo-europe",
       "type": "infra3",
       "unprotected": false,
       "visible": true,
     },
-    "metadata": Object {
+    "metadata": {
       "name": "infra3-seed-protected",
       "unreachable": false,
     },
   },
-  Object {
-    "data": Object {
+  {
+    "data": {
       "ingressDomain": "ingress.foo-europe.infra3.example.org",
       "region": "foo-europe",
       "type": "infra3",
       "unprotected": true,
       "visible": false,
     },
-    "metadata": Object {
+    "metadata": {
       "name": "infra3-seed-invisible",
       "unreachable": false,
     },
