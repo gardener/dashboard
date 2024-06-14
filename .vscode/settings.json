@@ -41,8 +41,8 @@
     "**/coverage": true,
     "**/dist": true
   },
-  "jestrunner.enableYarnPnpSupport": true,
-  "jestrunner.jestCommand": "node scripts/jest.cjs",
-  "jestrunner.yarnPnpCommand": "../../scripts/yarn.cjs",
   "jestrunner.changeDirectoryToWorkspaceRoot": true,
+  "jestrunner.jestCommand": "node scripts/test.cjs",
+  "jestrunner.enableYarnPnpSupport": true,
+  "jestrunner.yarnPnpCommand": "../../scripts/debug.cjs"
 }
