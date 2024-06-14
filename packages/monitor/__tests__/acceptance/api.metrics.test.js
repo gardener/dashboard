@@ -42,7 +42,7 @@ describe('api', () => {
         .expect(404)
 
       expect(res.body).toEqual({
-        message: 'Not Found',
+        message: 'No matching route: GET /unknown',
         status: 404
       })
     })
@@ -53,7 +53,7 @@ describe('api', () => {
         .expect(404)
 
       expect(res.body).toEqual({
-        message: 'Not Found',
+        message: 'No matching route: DELETE /metrics',
         status: 404
       })
     })

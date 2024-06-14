@@ -1,11 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`gardener-dashboard vpa should render the template with default values 1`] = `
-Object {
+{
   "apiVersion": "autoscaling.k8s.io/v1beta2",
   "kind": "VerticalPodAutoscaler",
-  "metadata": Object {
-    "labels": Object {
+  "metadata": {
+    "labels": {
       "app.kubernetes.io/component": "dashboard",
       "app.kubernetes.io/instance": "gardener-dashboard",
       "app.kubernetes.io/managed-by": "Helm",
@@ -15,33 +15,33 @@ Object {
     "name": "gardener-dashboard-vpa",
     "namespace": "garden",
   },
-  "spec": Object {
-    "resourcePolicy": Object {
-      "containerPolicies": Array [
-        Object {
+  "spec": {
+    "resourcePolicy": {
+      "containerPolicies": [
+        {
           "containerName": "*",
-          "controlledResources": Array [
+          "controlledResources": [
             "cpu",
             "memory",
           ],
           "controlledValues": "RequestsOnly",
-          "maxAllowed": Object {
+          "maxAllowed": {
             "cpu": "500m",
             "memory": "500Mi",
           },
-          "minAllowed": Object {
+          "minAllowed": {
             "cpu": "50m",
             "memory": "100Mi",
           },
         },
       ],
     },
-    "targetRef": Object {
+    "targetRef": {
       "apiVersion": "apps/v1",
       "kind": "Deployment",
       "name": "gardener-dashboard",
     },
-    "updatePolicy": Object {
+    "updatePolicy": {
       "updateMode": "Off",
     },
   },
@@ -49,11 +49,11 @@ Object {
 `;
 
 exports[`gardener-dashboard vpa should render the template with overwritten values 1`] = `
-Object {
+{
   "apiVersion": "autoscaling.k8s.io/v1beta2",
   "kind": "VerticalPodAutoscaler",
-  "metadata": Object {
-    "labels": Object {
+  "metadata": {
+    "labels": {
       "app.kubernetes.io/component": "dashboard",
       "app.kubernetes.io/instance": "gardener-dashboard",
       "app.kubernetes.io/managed-by": "Helm",
@@ -63,33 +63,33 @@ Object {
     "name": "gardener-dashboard-vpa",
     "namespace": "garden",
   },
-  "spec": Object {
-    "resourcePolicy": Object {
-      "containerPolicies": Array [
-        Object {
+  "spec": {
+    "resourcePolicy": {
+      "containerPolicies": [
+        {
           "containerName": "*",
-          "controlledResources": Array [
+          "controlledResources": [
             "cpu",
             "memory",
           ],
           "controlledValues": "RequestsAndLimits",
-          "maxAllowed": Object {
+          "maxAllowed": {
             "cpu": "1000m",
             "memory": "1200Mi",
           },
-          "minAllowed": Object {
+          "minAllowed": {
             "cpu": "30m",
             "memory": "60Mi",
           },
         },
       ],
     },
-    "targetRef": Object {
+    "targetRef": {
       "apiVersion": "apps/v1",
       "kind": "Deployment",
       "name": "gardener-dashboard",
     },
-    "updatePolicy": Object {
+    "updatePolicy": {
       "updateMode": "Auto",
     },
   },

@@ -1,10 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`identity configmap should render the template w/ defaults values 1`] = `
-Object {
+{
   "apiVersion": "v1",
   "kind": "ConfigMap",
-  "metadata": Object {
+  "metadata": {
     "name": "identity-configmap",
     "namespace": "garden",
   },
@@ -12,10 +12,10 @@ Object {
 `;
 
 exports[`identity configmap should render the template w/ defaults values 2`] = `
-Object {
-  "connectors": Array [
-    Object {
-      "config": Object {
+{
+  "connectors": [
+    {
+      "config": {
         "caData": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCkxpNHUKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==",
         "emailAttr": "email",
         "entityIssuer": "identity.ingress.example.org",
@@ -33,44 +33,44 @@ Object {
   ],
   "enablePasswordDB": false,
   "issuer": "https://identity.ingress.example.org",
-  "oauth2": Object {
-    "responseTypes": Array [
+  "oauth2": {
+    "responseTypes": [
       "token",
       "code",
       "id_token",
     ],
     "skipApprovalScreen": true,
   },
-  "staticClients": Array [
-    Object {
+  "staticClients": [
+    {
       "id": "dashboard",
       "name": "Gardener Dashboard",
-      "redirectURIs": Array [
+      "redirectURIs": [
         "https://dashboard.garden.example.org/auth/callback",
         "https://dashboard.ingress.garden.example.org/auth/callback",
         "http://localhost:8080/auth/callback",
       ],
       "secret": "sHq4vLoiQcIWbO3h",
     },
-    Object {
+    {
       "id": "kube-kubectl",
       "name": "Kubectl",
       "public": true,
       "secret": "if6ji0dTFE4rQfj8",
-      "trustedPeers": Array [
+      "trustedPeers": [
         "dashboard",
       ],
     },
   ],
-  "staticPasswords": Array [],
-  "storage": Object {
-    "config": Object {
+  "staticPasswords": [],
+  "storage": {
+    "config": {
       "inCluster": true,
     },
     "type": "kubernetes",
   },
-  "web": Object {
-    "allowedOrigins": Array [
+  "web": {
+    "allowedOrigins": [
       "https://dashboard.garden.example.org",
       "https://dashboard.ingress.garden.example.org",
       "http://localhost:8080",

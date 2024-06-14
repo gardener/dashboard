@@ -1,11 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`gardener-dashboard clusterrole should render the template with default values 1`] = `
-Object {
+{
   "apiVersion": "rbac.authorization.k8s.io/v1",
   "kind": "ClusterRole",
-  "metadata": Object {
-    "labels": Object {
+  "metadata": {
+    "labels": {
       "app.kubernetes.io/component": "dashboard",
       "app.kubernetes.io/instance": "gardener-dashboard",
       "app.kubernetes.io/managed-by": "Helm",
@@ -14,99 +14,99 @@ Object {
     },
     "name": "gardener.cloud:system:dashboard",
   },
-  "rules": Array [
-    Object {
-      "apiGroups": Array [
+  "rules": [
+    {
+      "apiGroups": [
         "authentication.k8s.io",
       ],
-      "resources": Array [
+      "resources": [
         "tokenreviews",
       ],
-      "verbs": Array [
+      "verbs": [
         "create",
       ],
     },
-    Object {
-      "apiGroups": Array [
+    {
+      "apiGroups": [
         "core.gardener.cloud",
       ],
-      "resources": Array [
+      "resources": [
         "quotas",
       ],
-      "verbs": Array [
+      "verbs": [
         "list",
         "watch",
       ],
     },
-    Object {
-      "apiGroups": Array [
+    {
+      "apiGroups": [
         "core.gardener.cloud",
       ],
-      "resources": Array [
+      "resources": [
         "projects",
       ],
-      "verbs": Array [
+      "verbs": [
         "list",
         "watch",
       ],
     },
-    Object {
-      "apiGroups": Array [
+    {
+      "apiGroups": [
         "core.gardener.cloud",
       ],
-      "resources": Array [
+      "resources": [
         "shoots",
       ],
-      "verbs": Array [
+      "verbs": [
         "list",
         "watch",
       ],
     },
-    Object {
-      "apiGroups": Array [
+    {
+      "apiGroups": [
         "apiregistration.k8s.io",
       ],
-      "resources": Array [
+      "resources": [
         "apiservices",
       ],
-      "verbs": Array [
+      "verbs": [
         "get",
       ],
     },
-    Object {
-      "apiGroups": Array [
+    {
+      "apiGroups": [
         "core.gardener.cloud",
       ],
-      "resources": Array [
+      "resources": [
         "controllerregistrations",
       ],
-      "verbs": Array [
+      "verbs": [
         "list",
         "watch",
       ],
     },
-    Object {
-      "apiGroups": Array [
+    {
+      "apiGroups": [
         "",
       ],
-      "resourceNames": Array [
+      "resourceNames": [
         "cluster-identity",
       ],
-      "resources": Array [
+      "resources": [
         "configmaps",
       ],
-      "verbs": Array [
+      "verbs": [
         "get",
       ],
     },
-    Object {
-      "apiGroups": Array [
+    {
+      "apiGroups": [
         "",
       ],
-      "resources": Array [
+      "resources": [
         "resourcequotas",
       ],
-      "verbs": Array [
+      "verbs": [
         "list",
         "watch",
       ],
