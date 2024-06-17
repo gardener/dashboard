@@ -136,6 +136,7 @@ export default defineConfig(({ command, mode }) => {
     ],
     base: VITE_BASE_URL,
     define: {
+      __TEST__: mode === 'test',
       __VUE_OPTIONS_API__: true,
       __VUE_PROD_DEVTOOLS__: false,
       'process.env': {

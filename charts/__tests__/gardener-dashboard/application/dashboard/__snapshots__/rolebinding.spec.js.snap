@@ -1,11 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`gardener-dashboard rolebinding should render the template with default values 1`] = `
-Object {
+{
   "apiVersion": "rbac.authorization.k8s.io/v1",
   "kind": "RoleBinding",
-  "metadata": Object {
-    "labels": Object {
+  "metadata": {
+    "labels": {
       "app.kubernetes.io/component": "dashboard",
       "app.kubernetes.io/instance": "gardener-dashboard",
       "app.kubernetes.io/managed-by": "Helm",
@@ -15,13 +15,13 @@ Object {
     "name": "gardener.cloud:system:dashboard-github-webhook",
     "namespace": "garden",
   },
-  "roleRef": Object {
+  "roleRef": {
     "apiGroup": "rbac.authorization.k8s.io",
     "kind": "Role",
     "name": "gardener.cloud:system:dashboard-github-webhook",
   },
-  "subjects": Array [
-    Object {
+  "subjects": [
+    {
       "kind": "ServiceAccount",
       "name": "gardener-dashboard",
       "namespace": "garden",
@@ -31,11 +31,11 @@ Object {
 `;
 
 exports[`gardener-dashboard rolebinding when virtual garden is enabled should render the template 1`] = `
-Object {
+{
   "apiVersion": "rbac.authorization.k8s.io/v1",
   "kind": "RoleBinding",
-  "metadata": Object {
-    "labels": Object {
+  "metadata": {
+    "labels": {
       "app.kubernetes.io/component": "dashboard",
       "app.kubernetes.io/instance": "gardener-dashboard",
       "app.kubernetes.io/managed-by": "Helm",
@@ -45,13 +45,13 @@ Object {
     "name": "gardener.cloud:system:dashboard-github-webhook",
     "namespace": "garden",
   },
-  "roleRef": Object {
+  "roleRef": {
     "apiGroup": "rbac.authorization.k8s.io",
     "kind": "Role",
     "name": "gardener.cloud:system:dashboard-github-webhook",
   },
-  "subjects": Array [
-    Object {
+  "subjects": [
+    {
       "kind": "ServiceAccount",
       "name": "gardener-dashboard",
       "namespace": "garden",

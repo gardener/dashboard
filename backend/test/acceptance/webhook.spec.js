@@ -57,7 +57,8 @@ describe('github', function () {
       beforeAll(() => {
         // Be careful when adding other tests in this block. E.g. express error handlers
         // won't be work when fake timers are enabled as the test in that case never complete.
-        jest.useFakeTimers().setSystemTime(now)
+        jest.useFakeTimers()
+        jest.setSystemTime(now)
       })
 
       afterAll(() => {

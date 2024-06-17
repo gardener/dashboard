@@ -1,21 +1,21 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`api shoots should be forbidden to list shoots for a single namespace 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
-    Object {
+    {
       "apiVersion": "authorization.k8s.io/v1",
       "kind": "SelfSubjectAccessReview",
-      "spec": Object {
+      "spec": {
         "nonResourceAttributes": undefined,
-        "resourceAttributes": Object {
+        "resourceAttributes": {
           "group": "core.gardener.cloud",
           "namespace": "garden-foo",
           "resource": "shoots",
@@ -28,7 +28,7 @@ Array [
 `;
 
 exports[`api shoots should be forbidden to list shoots for a single namespace 2`] = `
-Object {
+{
   "code": 403,
   "message": "No authorization to list shoots in namespace garden-foo",
   "reason": "Forbidden",
@@ -37,33 +37,33 @@ Object {
 `;
 
 exports[`api shoots should create a shoot 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
-    Object {
-      "metadata": Object {
-        "annotations": Object {
+    {
+      "metadata": {
+        "annotations": {
           "gardener.cloud/created-by": "foo@example.org",
         },
         "name": "newShoot",
         "namespace": "garden-foo",
         "uid": "garden-foo--newShoot",
       },
-      "spec": Object {
+      "spec": {
         "cloudProfileName": "infra1-profileName",
-        "hibernation": Object {
+        "hibernation": {
           "enabled": false,
         },
-        "kubernetes": Object {
+        "kubernetes": {
           "version": "1.16.0",
         },
-        "provider": Object {
+        "provider": {
           "type": "fooInfra",
         },
         "purpose": "newPurpose",
@@ -77,9 +77,9 @@ Array [
 `;
 
 exports[`api shoots should create a shoot 2`] = `
-Object {
-  "metadata": Object {
-    "annotations": Object {
+{
+  "metadata": {
+    "annotations": {
       "gardener.cloud/created-by": "foo@example.org",
     },
     "name": "newShoot",
@@ -87,15 +87,15 @@ Object {
     "resourceVersion": "42",
     "uid": 21,
   },
-  "spec": Object {
+  "spec": {
     "cloudProfileName": "infra1-profileName",
-    "hibernation": Object {
+    "hibernation": {
       "enabled": false,
     },
-    "kubernetes": Object {
+    "kubernetes": {
       "version": "1.16.0",
     },
-    "provider": Object {
+    "provider": {
       "type": "fooInfra",
     },
     "purpose": "newPurpose",
@@ -103,16 +103,16 @@ Object {
     "secretBindingName": "foo-infra1",
     "seedName": "infra1-seed",
   },
-  "status": Object {
+  "status": {
     "technicalID": "shoot--foo--newShoot",
   },
 }
 `;
 
 exports[`api shoots should delete a shoot 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "patch",
       ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot",
@@ -120,16 +120,16 @@ Array [
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
       "content-type": "application/merge-patch+json",
     },
-    Object {
-      "metadata": Object {
-        "annotations": Object {
+    {
+      "metadata": {
+        "annotations": {
           "confirmation.gardener.cloud/deletion": "true",
         },
       },
     },
   ],
-  Array [
-    Object {
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "delete",
       ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot",
@@ -141,9 +141,9 @@ Array [
 `;
 
 exports[`api shoots should delete a shoot 2`] = `
-Object {
-  "metadata": Object {
-    "annotations": Object {
+{
+  "metadata": {
+    "annotations": {
       "confirmation.gardener.cloud/deletion": "true",
       "gardener.cloud/created-by": "bar@example.org",
     },
@@ -151,15 +151,15 @@ Object {
     "namespace": "garden-foo",
     "uid": 2,
   },
-  "spec": Object {
+  "spec": {
     "cloudProfileName": "infra1-profileName",
-    "hibernation": Object {
+    "hibernation": {
       "enabled": false,
     },
-    "kubernetes": Object {
+    "kubernetes": {
       "version": "1.16.0",
     },
-    "provider": Object {
+    "provider": {
       "type": "fooInfra",
     },
     "purpose": "barPurpose",
@@ -167,9 +167,9 @@ Object {
     "secretBindingName": "foo-infra1",
     "seedName": "infra1-seed",
   },
-  "status": Object {
-    "advertisedAddresses": Array [
-      Object {
+  "status": {
+    "advertisedAddresses": [
+      {
         "name": "external",
         "url": "https://api.barShoot.foo.shoot.test",
       },
@@ -180,9 +180,9 @@ Object {
 `;
 
 exports[`api shoots should patch annotations 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "patch",
       ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot",
@@ -190,9 +190,9 @@ Array [
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
       "content-type": "application/merge-patch+json",
     },
-    Object {
-      "metadata": Object {
-        "annotations": Object {
+    {
+      "metadata": {
+        "annotations": {
           "foo": "bar",
         },
       },
@@ -202,9 +202,9 @@ Array [
 `;
 
 exports[`api shoots should patch annotations 2`] = `
-Object {
-  "metadata": Object {
-    "annotations": Object {
+{
+  "metadata": {
+    "annotations": {
       "foo": "bar",
       "gardener.cloud/created-by": "bar@example.org",
     },
@@ -213,15 +213,15 @@ Object {
     "resourceVersion": "43",
     "uid": 2,
   },
-  "spec": Object {
+  "spec": {
     "cloudProfileName": "infra1-profileName",
-    "hibernation": Object {
+    "hibernation": {
       "enabled": false,
     },
-    "kubernetes": Object {
+    "kubernetes": {
       "version": "1.16.0",
     },
-    "provider": Object {
+    "provider": {
       "type": "fooInfra",
     },
     "purpose": "barPurpose",
@@ -229,9 +229,9 @@ Object {
     "secretBindingName": "foo-infra1",
     "seedName": "infra1-seed",
   },
-  "status": Object {
-    "advertisedAddresses": Array [
-      Object {
+  "status": {
+    "advertisedAddresses": [
+      {
         "name": "external",
         "url": "https://api.barShoot.foo.shoot.test",
       },
@@ -242,9 +242,9 @@ Object {
 `;
 
 exports[`api shoots should replace addons 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "patch",
       ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot",
@@ -252,11 +252,11 @@ Array [
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
       "content-type": "application/merge-patch+json",
     },
-    Object {
-      "spec": Object {
-        "addons": Array [
-          Object {
-            "testAddon": Object {
+    {
+      "spec": {
+        "addons": [
+          {
+            "testAddon": {
               "enabled": true,
               "foo": "bar",
             },
@@ -269,9 +269,9 @@ Array [
 `;
 
 exports[`api shoots should replace addons 2`] = `
-Object {
-  "metadata": Object {
-    "annotations": Object {
+{
+  "metadata": {
+    "annotations": {
       "gardener.cloud/created-by": "bar@example.org",
     },
     "name": "barShoot",
@@ -279,23 +279,23 @@ Object {
     "resourceVersion": "43",
     "uid": 2,
   },
-  "spec": Object {
-    "addons": Array [
-      Object {
-        "testAddon": Object {
+  "spec": {
+    "addons": [
+      {
+        "testAddon": {
           "enabled": true,
           "foo": "bar",
         },
       },
     ],
     "cloudProfileName": "infra1-profileName",
-    "hibernation": Object {
+    "hibernation": {
       "enabled": false,
     },
-    "kubernetes": Object {
+    "kubernetes": {
       "version": "1.16.0",
     },
-    "provider": Object {
+    "provider": {
       "type": "fooInfra",
     },
     "purpose": "barPurpose",
@@ -303,9 +303,9 @@ Object {
     "secretBindingName": "foo-infra1",
     "seedName": "infra1-seed",
   },
-  "status": Object {
-    "advertisedAddresses": Array [
-      Object {
+  "status": {
+    "advertisedAddresses": [
+      {
         "name": "external",
         "url": "https://api.barShoot.foo.shoot.test",
       },
@@ -316,9 +316,9 @@ Object {
 `;
 
 exports[`api shoots should replace hibernation enabled 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "patch",
       ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot",
@@ -326,9 +326,9 @@ Array [
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
       "content-type": "application/merge-patch+json",
     },
-    Object {
-      "spec": Object {
-        "hibernation": Object {
+    {
+      "spec": {
+        "hibernation": {
           "enabled": true,
         },
       },
@@ -338,9 +338,9 @@ Array [
 `;
 
 exports[`api shoots should replace hibernation enabled 2`] = `
-Object {
-  "metadata": Object {
-    "annotations": Object {
+{
+  "metadata": {
+    "annotations": {
       "gardener.cloud/created-by": "bar@example.org",
     },
     "name": "barShoot",
@@ -348,15 +348,15 @@ Object {
     "resourceVersion": "43",
     "uid": 2,
   },
-  "spec": Object {
+  "spec": {
     "cloudProfileName": "infra1-profileName",
-    "hibernation": Object {
+    "hibernation": {
       "enabled": true,
     },
-    "kubernetes": Object {
+    "kubernetes": {
       "version": "1.16.0",
     },
-    "provider": Object {
+    "provider": {
       "type": "fooInfra",
     },
     "purpose": "barPurpose",
@@ -364,9 +364,9 @@ Object {
     "secretBindingName": "foo-infra1",
     "seedName": "infra1-seed",
   },
-  "status": Object {
-    "advertisedAddresses": Array [
-      Object {
+  "status": {
+    "advertisedAddresses": [
+      {
         "name": "external",
         "url": "https://api.barShoot.foo.shoot.test",
       },
@@ -377,9 +377,9 @@ Object {
 `;
 
 exports[`api shoots should replace hibernation schedules 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "patch",
       ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot",
@@ -387,11 +387,11 @@ Array [
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
       "content-type": "application/merge-patch+json",
     },
-    Object {
-      "spec": Object {
-        "hibernation": Object {
-          "schedules": Array [
-            Object {
+    {
+      "spec": {
+        "hibernation": {
+          "schedules": [
+            {
               "end": "00 08 * * 1,2,3,4,5,6",
               "start": "00 17 * * 1,2,3,4,5,6",
             },
@@ -404,9 +404,9 @@ Array [
 `;
 
 exports[`api shoots should replace hibernation schedules 2`] = `
-Object {
-  "metadata": Object {
-    "annotations": Object {
+{
+  "metadata": {
+    "annotations": {
       "gardener.cloud/created-by": "bar@example.org",
     },
     "name": "barShoot",
@@ -414,21 +414,21 @@ Object {
     "resourceVersion": "43",
     "uid": 2,
   },
-  "spec": Object {
+  "spec": {
     "cloudProfileName": "infra1-profileName",
-    "hibernation": Object {
+    "hibernation": {
       "enabled": false,
-      "schedules": Array [
-        Object {
+      "schedules": [
+        {
           "end": "00 08 * * 1,2,3,4,5,6",
           "start": "00 17 * * 1,2,3,4,5,6",
         },
       ],
     },
-    "kubernetes": Object {
+    "kubernetes": {
       "version": "1.16.0",
     },
-    "provider": Object {
+    "provider": {
       "type": "fooInfra",
     },
     "purpose": "barPurpose",
@@ -436,9 +436,9 @@ Object {
     "secretBindingName": "foo-infra1",
     "seedName": "infra1-seed",
   },
-  "status": Object {
-    "advertisedAddresses": Array [
-      Object {
+  "status": {
+    "advertisedAddresses": [
+      {
         "name": "external",
         "url": "https://api.barShoot.foo.shoot.test",
       },
@@ -449,9 +449,9 @@ Object {
 `;
 
 exports[`api shoots should replace purpose 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "patch",
       ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot",
@@ -459,8 +459,8 @@ Array [
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
       "content-type": "application/merge-patch+json",
     },
-    Object {
-      "spec": Object {
+    {
+      "spec": {
         "purpose": "testing",
       },
     },
@@ -469,9 +469,9 @@ Array [
 `;
 
 exports[`api shoots should replace purpose 2`] = `
-Object {
-  "metadata": Object {
-    "annotations": Object {
+{
+  "metadata": {
+    "annotations": {
       "gardener.cloud/created-by": "bar@example.org",
     },
     "name": "barShoot",
@@ -479,15 +479,15 @@ Object {
     "resourceVersion": "43",
     "uid": 2,
   },
-  "spec": Object {
+  "spec": {
     "cloudProfileName": "infra1-profileName",
-    "hibernation": Object {
+    "hibernation": {
       "enabled": false,
     },
-    "kubernetes": Object {
+    "kubernetes": {
       "version": "1.16.0",
     },
-    "provider": Object {
+    "provider": {
       "type": "fooInfra",
     },
     "purpose": "testing",
@@ -495,9 +495,9 @@ Object {
     "secretBindingName": "foo-infra1",
     "seedName": "infra1-seed",
   },
-  "status": Object {
-    "advertisedAddresses": Array [
-      Object {
+  "status": {
+    "advertisedAddresses": [
+      {
         "name": "external",
         "url": "https://api.barShoot.foo.shoot.test",
       },
@@ -508,9 +508,9 @@ Object {
 `;
 
 exports[`api shoots should replace shoot 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "get",
       ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot",
@@ -518,37 +518,37 @@ Array [
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
   ],
-  Array [
-    Object {
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "put",
       ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
-    Object {
+    {
       "apiVersion": undefined,
       "kind": undefined,
-      "metadata": Object {
-        "annotations": Object {
+      "metadata": {
+        "annotations": {
           "gardener.cloud/created-by": "baz@example.org",
         },
-        "labels": Object {
+        "labels": {
           "foo": "bar",
         },
         "name": "barShoot",
         "namespace": "garden-foo",
         "uid": 2,
       },
-      "spec": Object {
+      "spec": {
         "cloudProfileName": "infra1-profileName",
-        "hibernation": Object {
+        "hibernation": {
           "enabled": false,
         },
-        "kubernetes": Object {
+        "kubernetes": {
           "version": "1.16.0",
         },
-        "provider": Object {
+        "provider": {
           "type": "fooInfra",
         },
         "purpose": "barPurpose",
@@ -556,9 +556,9 @@ Array [
         "secretBindingName": "foo-infra1",
         "seedName": "infra1-seed",
       },
-      "status": Object {
-        "advertisedAddresses": Array [
-          Object {
+      "status": {
+        "advertisedAddresses": [
+          {
             "name": "external",
             "url": "https://api.barShoot.foo.shoot.test",
           },
@@ -571,12 +571,12 @@ Array [
 `;
 
 exports[`api shoots should replace shoot 2`] = `
-Object {
-  "metadata": Object {
-    "annotations": Object {
+{
+  "metadata": {
+    "annotations": {
       "gardener.cloud/created-by": "baz@example.org",
     },
-    "labels": Object {
+    "labels": {
       "foo": "bar",
     },
     "name": "barShoot",
@@ -584,15 +584,15 @@ Object {
     "resourceVersion": "43",
     "uid": 2,
   },
-  "spec": Object {
+  "spec": {
     "cloudProfileName": "infra1-profileName",
-    "hibernation": Object {
+    "hibernation": {
       "enabled": false,
     },
-    "kubernetes": Object {
+    "kubernetes": {
       "version": "1.16.0",
     },
-    "provider": Object {
+    "provider": {
       "type": "fooInfra",
     },
     "purpose": "barPurpose",
@@ -600,9 +600,9 @@ Object {
     "secretBindingName": "foo-infra1",
     "seedName": "infra1-seed",
   },
-  "status": Object {
-    "advertisedAddresses": Array [
-      Object {
+  "status": {
+    "advertisedAddresses": [
+      {
         "name": "external",
         "url": "https://api.barShoot.foo.shoot.test",
       },
@@ -613,9 +613,9 @@ Object {
 `;
 
 exports[`api shoots should replace shoot kubernetes enableStaticTokenKubeconfig 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "patch",
       ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot",
@@ -623,8 +623,8 @@ Array [
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
       "content-type": "application/json-patch+json",
     },
-    Array [
-      Object {
+    [
+      {
         "op": "replace",
         "path": "/spec/kubernetes/enableStaticTokenKubeconfig",
         "value": true,
@@ -635,9 +635,9 @@ Array [
 `;
 
 exports[`api shoots should replace shoot kubernetes enableStaticTokenKubeconfig 2`] = `
-Object {
-  "metadata": Object {
-    "annotations": Object {
+{
+  "metadata": {
+    "annotations": {
       "gardener.cloud/created-by": "bar@example.org",
     },
     "name": "barShoot",
@@ -645,16 +645,16 @@ Object {
     "resourceVersion": "43",
     "uid": 2,
   },
-  "spec": Object {
+  "spec": {
     "cloudProfileName": "infra1-profileName",
-    "hibernation": Object {
+    "hibernation": {
       "enabled": false,
     },
-    "kubernetes": Object {
+    "kubernetes": {
       "enableStaticTokenKubeconfig": true,
       "version": "1.16.0",
     },
-    "provider": Object {
+    "provider": {
       "type": "fooInfra",
     },
     "purpose": "barPurpose",
@@ -662,9 +662,9 @@ Object {
     "secretBindingName": "foo-infra1",
     "seedName": "infra1-seed",
   },
-  "status": Object {
-    "advertisedAddresses": Array [
-      Object {
+  "status": {
+    "advertisedAddresses": [
+      {
         "name": "external",
         "url": "https://api.barShoot.foo.shoot.test",
       },
@@ -675,9 +675,9 @@ Object {
 `;
 
 exports[`api shoots should replace shoot kubernetes version 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "patch",
       ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot",
@@ -685,8 +685,8 @@ Array [
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
       "content-type": "application/json-patch+json",
     },
-    Array [
-      Object {
+    [
+      {
         "op": "replace",
         "path": "/spec/kubernetes/version",
         "value": "1.17.1",
@@ -697,9 +697,9 @@ Array [
 `;
 
 exports[`api shoots should replace shoot kubernetes version 2`] = `
-Object {
-  "metadata": Object {
-    "annotations": Object {
+{
+  "metadata": {
+    "annotations": {
       "gardener.cloud/created-by": "bar@example.org",
     },
     "name": "barShoot",
@@ -707,15 +707,15 @@ Object {
     "resourceVersion": "43",
     "uid": 2,
   },
-  "spec": Object {
+  "spec": {
     "cloudProfileName": "infra1-profileName",
-    "hibernation": Object {
+    "hibernation": {
       "enabled": false,
     },
-    "kubernetes": Object {
+    "kubernetes": {
       "version": "1.17.1",
     },
-    "provider": Object {
+    "provider": {
       "type": "fooInfra",
     },
     "purpose": "barPurpose",
@@ -723,9 +723,9 @@ Object {
     "secretBindingName": "foo-infra1",
     "seedName": "infra1-seed",
   },
-  "status": Object {
-    "advertisedAddresses": Array [
-      Object {
+  "status": {
+    "advertisedAddresses": [
+      {
         "name": "external",
         "url": "https://api.barShoot.foo.shoot.test",
       },
@@ -736,9 +736,9 @@ Object {
 `;
 
 exports[`api shoots should replace shoot maintenance data 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "patch",
       ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot",
@@ -746,14 +746,14 @@ Array [
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
       "content-type": "application/merge-patch+json",
     },
-    Object {
-      "spec": Object {
-        "maintenance": Object {
-          "autoUpdate": Object {
+    {
+      "spec": {
+        "maintenance": {
+          "autoUpdate": {
             "kubernetesVersion": true,
             "machineImageVersion": undefined,
           },
-          "timeWindow": Object {
+          "timeWindow": {
             "begin": "230000+0000",
             "end": "000000+0000",
           },
@@ -765,9 +765,9 @@ Array [
 `;
 
 exports[`api shoots should replace shoot maintenance data 2`] = `
-Object {
-  "metadata": Object {
-    "annotations": Object {
+{
+  "metadata": {
+    "annotations": {
       "gardener.cloud/created-by": "bar@example.org",
     },
     "name": "barShoot",
@@ -775,24 +775,24 @@ Object {
     "resourceVersion": "43",
     "uid": 2,
   },
-  "spec": Object {
+  "spec": {
     "cloudProfileName": "infra1-profileName",
-    "hibernation": Object {
+    "hibernation": {
       "enabled": false,
     },
-    "kubernetes": Object {
+    "kubernetes": {
       "version": "1.16.0",
     },
-    "maintenance": Object {
-      "autoUpdate": Object {
+    "maintenance": {
+      "autoUpdate": {
         "kubernetesVersion": true,
       },
-      "timeWindow": Object {
+      "timeWindow": {
         "begin": "230000+0000",
         "end": "000000+0000",
       },
     },
-    "provider": Object {
+    "provider": {
       "type": "fooInfra",
     },
     "purpose": "barPurpose",
@@ -800,9 +800,9 @@ Object {
     "secretBindingName": "foo-infra1",
     "seedName": "infra1-seed",
   },
-  "status": Object {
-    "advertisedAddresses": Array [
-      Object {
+  "status": {
+    "advertisedAddresses": [
+      {
         "name": "external",
         "url": "https://api.barShoot.foo.shoot.test",
       },
@@ -813,9 +813,9 @@ Object {
 `;
 
 exports[`api shoots should replace shoot seedname 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "patch",
       ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot/binding",
@@ -823,8 +823,8 @@ Array [
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
       "content-type": "application/json-patch+json",
     },
-    Array [
-      Object {
+    [
+      {
         "op": "replace",
         "path": "/spec/seedName",
         "value": "foo-new-seed",
@@ -835,24 +835,24 @@ Array [
 `;
 
 exports[`api shoots should replace shoot seedname 2`] = `
-Object {
-  "metadata": Object {
-    "annotations": Object {
+{
+  "metadata": {
+    "annotations": {
       "gardener.cloud/created-by": "bar@example.org",
     },
     "name": "barShoot",
     "namespace": "garden-foo",
     "uid": 2,
   },
-  "spec": Object {
+  "spec": {
     "cloudProfileName": "infra1-profileName",
-    "hibernation": Object {
+    "hibernation": {
       "enabled": false,
     },
-    "kubernetes": Object {
+    "kubernetes": {
       "version": "1.16.0",
     },
-    "provider": Object {
+    "provider": {
       "type": "fooInfra",
     },
     "purpose": "barPurpose",
@@ -860,9 +860,9 @@ Object {
     "secretBindingName": "foo-infra1",
     "seedName": "foo-new-seed",
   },
-  "status": Object {
-    "advertisedAddresses": Array [
-      Object {
+  "status": {
+    "advertisedAddresses": [
+      {
         "name": "external",
         "url": "https://api.barShoot.foo.shoot.test",
       },
@@ -873,9 +873,9 @@ Object {
 `;
 
 exports[`api shoots should replace shoot workers 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "patch",
       ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot",
@@ -883,18 +883,18 @@ Array [
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
       "content-type": "application/merge-patch+json",
     },
-    Object {
-      "spec": Object {
-        "provider": Object {
-          "network": Object {
-            "zones": Array [
-              Object {
+    {
+      "spec": {
+        "provider": {
+          "network": {
+            "zones": [
+              {
                 "workers": "10.250.0.0/20",
               },
             ],
           },
-          "workers": Array [
-            Object {
+          "workers": [
+            {
               "name": "worker-g5rk1",
             },
           ],
@@ -906,9 +906,9 @@ Array [
 `;
 
 exports[`api shoots should replace shoot workers 2`] = `
-Object {
-  "metadata": Object {
-    "annotations": Object {
+{
+  "metadata": {
+    "annotations": {
       "gardener.cloud/created-by": "bar@example.org",
     },
     "name": "barShoot",
@@ -916,25 +916,25 @@ Object {
     "resourceVersion": "43",
     "uid": 2,
   },
-  "spec": Object {
+  "spec": {
     "cloudProfileName": "infra1-profileName",
-    "hibernation": Object {
+    "hibernation": {
       "enabled": false,
     },
-    "kubernetes": Object {
+    "kubernetes": {
       "version": "1.16.0",
     },
-    "provider": Object {
-      "network": Object {
-        "zones": Array [
-          Object {
+    "provider": {
+      "network": {
+        "zones": [
+          {
             "workers": "10.250.0.0/20",
           },
         ],
       },
       "type": "fooInfra",
-      "workers": Array [
-        Object {
+      "workers": [
+        {
           "name": "worker-g5rk1",
         },
       ],
@@ -944,9 +944,9 @@ Object {
     "secretBindingName": "foo-infra1",
     "seedName": "infra1-seed",
   },
-  "status": Object {
-    "advertisedAddresses": Array [
-      Object {
+  "status": {
+    "advertisedAddresses": [
+      {
         "name": "external",
         "url": "https://api.barShoot.foo.shoot.test",
       },
@@ -957,9 +957,9 @@ Object {
 `;
 
 exports[`api shoots should return a shoot 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "get",
       ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot",
@@ -971,24 +971,24 @@ Array [
 `;
 
 exports[`api shoots should return a shoot 2`] = `
-Object {
-  "metadata": Object {
-    "annotations": Object {
+{
+  "metadata": {
+    "annotations": {
       "gardener.cloud/created-by": "bar@example.org",
     },
     "name": "barShoot",
     "namespace": "garden-foo",
     "uid": 2,
   },
-  "spec": Object {
+  "spec": {
     "cloudProfileName": "infra1-profileName",
-    "hibernation": Object {
+    "hibernation": {
       "enabled": false,
     },
-    "kubernetes": Object {
+    "kubernetes": {
       "version": "1.16.0",
     },
-    "provider": Object {
+    "provider": {
       "type": "fooInfra",
     },
     "purpose": "barPurpose",
@@ -996,9 +996,9 @@ Object {
     "secretBindingName": "foo-infra1",
     "seedName": "infra1-seed",
   },
-  "status": Object {
-    "advertisedAddresses": Array [
-      Object {
+  "status": {
+    "advertisedAddresses": [
+      {
         "name": "external",
         "url": "https://api.barShoot.foo.shoot.test",
       },
@@ -1009,19 +1009,19 @@ Object {
 `;
 
 exports[`api shoots should return a shoot admin kubeconfig 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot/adminkubeconfig",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
-    Object {
+    {
       "apiVersion": "authentication.gardener.cloud/v1alpha1",
       "kind": "AdminKubeconfigRequest",
-      "spec": Object {
+      "spec": {
         "expirationSeconds": 600,
       },
     },
@@ -1030,24 +1030,24 @@ Array [
 `;
 
 exports[`api shoots should return a shoot admin kubeconfig: body 1`] = `
-Object {
+{
   "kubeconfig": Any<String>,
 }
 `;
 
 exports[`api shoots should return a shoot admin kubeconfig: body.kubeconfig 1`] = `
-Object {
-  "clusters": Array [
-    Object {
-      "cluster": Object {
+{
+  "clusters": [
+    {
+      "cluster": {
         "server": "https://shootApiServerHostname:6443",
       },
       "name": "cluster",
     },
   ],
-  "contexts": Array [
-    Object {
-      "context": Object {
+  "contexts": [
+    {
+      "context": {
         "cluster": "cluster",
         "user": "user",
       },
@@ -1055,10 +1055,10 @@ Object {
     },
   ],
   "current-context": "default",
-  "users": Array [
-    Object {
+  "users": [
+    {
       "name": "user",
-      "user": Object {
+      "user": {
         "client-certificate-data": "Y2VydGlmaWNhdGUtYXV0aG9yaXR5LWRhdGE=",
         "client-key-data": "Y2xpZW50LWtleS1kYXRh",
       },
@@ -1068,21 +1068,21 @@ Object {
 `;
 
 exports[`api shoots should return all shoots for a non-admin user 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
-    Object {
+    {
       "apiVersion": "authorization.k8s.io/v1",
       "kind": "SelfSubjectAccessReview",
-      "spec": Object {
+      "spec": {
         "nonResourceAttributes": undefined,
-        "resourceAttributes": Object {
+        "resourceAttributes": {
           "group": "core.gardener.cloud",
           "namespace": undefined,
           "resource": "shoots",
@@ -1091,20 +1091,20 @@ Array [
       },
     },
   ],
-  Array [
-    Object {
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
-    Object {
+    {
       "apiVersion": "authorization.k8s.io/v1",
       "kind": "SelfSubjectAccessReview",
-      "spec": Object {
+      "spec": {
         "nonResourceAttributes": undefined,
-        "resourceAttributes": Object {
+        "resourceAttributes": {
           "group": "core.gardener.cloud",
           "namespace": "garden-foo",
           "resource": "shoots",
@@ -1113,20 +1113,20 @@ Array [
       },
     },
   ],
-  Array [
-    Object {
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
-    Object {
+    {
       "apiVersion": "authorization.k8s.io/v1",
       "kind": "SelfSubjectAccessReview",
-      "spec": Object {
+      "spec": {
         "nonResourceAttributes": undefined,
-        "resourceAttributes": Object {
+        "resourceAttributes": {
           "group": "core.gardener.cloud",
           "namespace": "garden-bar",
           "resource": "shoots",
@@ -1139,30 +1139,30 @@ Array [
 `;
 
 exports[`api shoots should return all shoots for a non-admin user 2`] = `
-Object {
+{
   "apiVersion": "v1",
-  "items": Array [
-    Object {
-      "metadata": Object {
-        "annotations": Object {
+  "items": [
+    {
+      "metadata": {
+        "annotations": {
           "gardener.cloud/created-by": "foo@example.org",
         },
-        "labels": Object {
+        "labels": {
           "shoot.gardener.cloud/status": "healthy",
         },
         "name": "fooShoot",
         "namespace": "garden-foo",
         "uid": 1,
       },
-      "spec": Object {
+      "spec": {
         "cloudProfileName": "infra1-profileName",
-        "hibernation": Object {
+        "hibernation": {
           "enabled": false,
         },
-        "kubernetes": Object {
+        "kubernetes": {
           "version": "1.16.0",
         },
-        "provider": Object {
+        "provider": {
           "type": "fooInfra",
         },
         "purpose": "fooPurpose",
@@ -1170,9 +1170,9 @@ Object {
         "secretBindingName": "foo-infra1",
         "seedName": "infra1-seed",
       },
-      "status": Object {
-        "advertisedAddresses": Array [
-          Object {
+      "status": {
+        "advertisedAddresses": [
+          {
             "name": "external",
             "url": "https://api.fooShoot.foo.shoot.test",
           },
@@ -1180,27 +1180,27 @@ Object {
         "technicalID": "shoot--foo--fooShoot",
       },
     },
-    Object {
-      "metadata": Object {
-        "annotations": Object {
+    {
+      "metadata": {
+        "annotations": {
           "gardener.cloud/created-by": "bar@example.org",
         },
-        "labels": Object {
+        "labels": {
           "shoot.gardener.cloud/status": "healthy",
         },
         "name": "barShoot",
         "namespace": "garden-foo",
         "uid": 2,
       },
-      "spec": Object {
+      "spec": {
         "cloudProfileName": "infra1-profileName",
-        "hibernation": Object {
+        "hibernation": {
           "enabled": false,
         },
-        "kubernetes": Object {
+        "kubernetes": {
           "version": "1.16.0",
         },
-        "provider": Object {
+        "provider": {
           "type": "fooInfra",
         },
         "purpose": "barPurpose",
@@ -1208,9 +1208,9 @@ Object {
         "secretBindingName": "foo-infra1",
         "seedName": "infra1-seed",
       },
-      "status": Object {
-        "advertisedAddresses": Array [
-          Object {
+      "status": {
+        "advertisedAddresses": [
+          {
             "name": "external",
             "url": "https://api.barShoot.foo.shoot.test",
           },
@@ -1218,27 +1218,27 @@ Object {
         "technicalID": "shoot--foo--barShoot",
       },
     },
-    Object {
-      "metadata": Object {
-        "annotations": Object {
+    {
+      "metadata": {
+        "annotations": {
           "gardener.cloud/created-by": "foo@example.org",
         },
-        "labels": Object {
+        "labels": {
           "shoot.gardener.cloud/status": "unhealthy",
         },
         "name": "dummyShoot",
         "namespace": "garden-foo",
         "uid": 3,
       },
-      "spec": Object {
+      "spec": {
         "cloudProfileName": "infra1-profileName",
-        "hibernation": Object {
+        "hibernation": {
           "enabled": false,
         },
-        "kubernetes": Object {
+        "kubernetes": {
           "version": "1.16.0",
         },
-        "provider": Object {
+        "provider": {
           "type": "fooInfra",
         },
         "purpose": "fooPurpose",
@@ -1246,7 +1246,7 @@ Object {
         "secretBindingName": "barSecretName",
         "seedName": "infra4-seed-without-secretRef",
       },
-      "status": Object {
+      "status": {
         "technicalID": "shoot--foo--dummyShoot",
       },
     },
@@ -1256,21 +1256,21 @@ Object {
 `;
 
 exports[`api shoots should return all shoots for an admin user 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
-    Object {
+    {
       "apiVersion": "authorization.k8s.io/v1",
       "kind": "SelfSubjectAccessReview",
-      "spec": Object {
+      "spec": {
         "nonResourceAttributes": undefined,
-        "resourceAttributes": Object {
+        "resourceAttributes": {
           "group": "core.gardener.cloud",
           "namespace": undefined,
           "resource": "shoots",
@@ -1283,30 +1283,30 @@ Array [
 `;
 
 exports[`api shoots should return all shoots for an admin user 2`] = `
-Object {
+{
   "apiVersion": "v1",
-  "items": Array [
-    Object {
-      "metadata": Object {
-        "annotations": Object {
+  "items": [
+    {
+      "metadata": {
+        "annotations": {
           "gardener.cloud/created-by": "foo@example.org",
         },
-        "labels": Object {
+        "labels": {
           "shoot.gardener.cloud/status": "healthy",
         },
         "name": "fooShoot",
         "namespace": "garden-foo",
         "uid": 1,
       },
-      "spec": Object {
+      "spec": {
         "cloudProfileName": "infra1-profileName",
-        "hibernation": Object {
+        "hibernation": {
           "enabled": false,
         },
-        "kubernetes": Object {
+        "kubernetes": {
           "version": "1.16.0",
         },
-        "provider": Object {
+        "provider": {
           "type": "fooInfra",
         },
         "purpose": "fooPurpose",
@@ -1314,9 +1314,9 @@ Object {
         "secretBindingName": "foo-infra1",
         "seedName": "infra1-seed",
       },
-      "status": Object {
-        "advertisedAddresses": Array [
-          Object {
+      "status": {
+        "advertisedAddresses": [
+          {
             "name": "external",
             "url": "https://api.fooShoot.foo.shoot.test",
           },
@@ -1324,27 +1324,27 @@ Object {
         "technicalID": "shoot--foo--fooShoot",
       },
     },
-    Object {
-      "metadata": Object {
-        "annotations": Object {
+    {
+      "metadata": {
+        "annotations": {
           "gardener.cloud/created-by": "bar@example.org",
         },
-        "labels": Object {
+        "labels": {
           "shoot.gardener.cloud/status": "healthy",
         },
         "name": "barShoot",
         "namespace": "garden-foo",
         "uid": 2,
       },
-      "spec": Object {
+      "spec": {
         "cloudProfileName": "infra1-profileName",
-        "hibernation": Object {
+        "hibernation": {
           "enabled": false,
         },
-        "kubernetes": Object {
+        "kubernetes": {
           "version": "1.16.0",
         },
-        "provider": Object {
+        "provider": {
           "type": "fooInfra",
         },
         "purpose": "barPurpose",
@@ -1352,9 +1352,9 @@ Object {
         "secretBindingName": "foo-infra1",
         "seedName": "infra1-seed",
       },
-      "status": Object {
-        "advertisedAddresses": Array [
-          Object {
+      "status": {
+        "advertisedAddresses": [
+          {
             "name": "external",
             "url": "https://api.barShoot.foo.shoot.test",
           },
@@ -1362,27 +1362,27 @@ Object {
         "technicalID": "shoot--foo--barShoot",
       },
     },
-    Object {
-      "metadata": Object {
-        "annotations": Object {
+    {
+      "metadata": {
+        "annotations": {
           "gardener.cloud/created-by": "foo@example.org",
         },
-        "labels": Object {
+        "labels": {
           "shoot.gardener.cloud/status": "unhealthy",
         },
         "name": "dummyShoot",
         "namespace": "garden-foo",
         "uid": 3,
       },
-      "spec": Object {
+      "spec": {
         "cloudProfileName": "infra1-profileName",
-        "hibernation": Object {
+        "hibernation": {
           "enabled": false,
         },
-        "kubernetes": Object {
+        "kubernetes": {
           "version": "1.16.0",
         },
-        "provider": Object {
+        "provider": {
           "type": "fooInfra",
         },
         "purpose": "fooPurpose",
@@ -1390,31 +1390,31 @@ Object {
         "secretBindingName": "barSecretName",
         "seedName": "infra4-seed-without-secretRef",
       },
-      "status": Object {
+      "status": {
         "technicalID": "shoot--foo--dummyShoot",
       },
     },
-    Object {
-      "metadata": Object {
-        "annotations": Object {
+    {
+      "metadata": {
+        "annotations": {
           "gardener.cloud/created-by": "admin@example.org",
         },
-        "labels": Object {
+        "labels": {
           "shoot.gardener.cloud/status": "healthy",
         },
         "name": "infra1-seed",
         "namespace": "garden",
         "uid": 4,
       },
-      "spec": Object {
+      "spec": {
         "cloudProfileName": "infra1-profileName",
-        "hibernation": Object {
+        "hibernation": {
           "enabled": false,
         },
-        "kubernetes": Object {
+        "kubernetes": {
           "version": "1.16.0",
         },
-        "provider": Object {
+        "provider": {
           "type": "fooInfra",
         },
         "purpose": "foo-purpose",
@@ -1422,9 +1422,9 @@ Object {
         "secretBindingName": "soil-infra1",
         "seedName": "soil-infra1",
       },
-      "status": Object {
-        "advertisedAddresses": Array [
-          Object {
+      "status": {
+        "advertisedAddresses": [
+          {
             "name": "external",
             "url": "https://api.infra1-seed.garden.shoot.test",
           },
@@ -1438,21 +1438,21 @@ Object {
 `;
 
 exports[`api shoots should return all unhealthy shoots 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
-    Object {
+    {
       "apiVersion": "authorization.k8s.io/v1",
       "kind": "SelfSubjectAccessReview",
-      "spec": Object {
+      "spec": {
         "nonResourceAttributes": undefined,
-        "resourceAttributes": Object {
+        "resourceAttributes": {
           "group": "core.gardener.cloud",
           "namespace": undefined,
           "resource": "shoots",
@@ -1465,30 +1465,30 @@ Array [
 `;
 
 exports[`api shoots should return all unhealthy shoots 2`] = `
-Object {
+{
   "apiVersion": "v1",
-  "items": Array [
-    Object {
-      "metadata": Object {
-        "annotations": Object {
+  "items": [
+    {
+      "metadata": {
+        "annotations": {
           "gardener.cloud/created-by": "foo@example.org",
         },
-        "labels": Object {
+        "labels": {
           "shoot.gardener.cloud/status": "unhealthy",
         },
         "name": "dummyShoot",
         "namespace": "garden-foo",
         "uid": 3,
       },
-      "spec": Object {
+      "spec": {
         "cloudProfileName": "infra1-profileName",
-        "hibernation": Object {
+        "hibernation": {
           "enabled": false,
         },
-        "kubernetes": Object {
+        "kubernetes": {
           "version": "1.16.0",
         },
-        "provider": Object {
+        "provider": {
           "type": "fooInfra",
         },
         "purpose": "fooPurpose",
@@ -1496,7 +1496,7 @@ Object {
         "secretBindingName": "barSecretName",
         "seedName": "infra4-seed-without-secretRef",
       },
-      "status": Object {
+      "status": {
         "technicalID": "shoot--foo--dummyShoot",
       },
     },
@@ -1506,9 +1506,9 @@ Object {
 `;
 
 exports[`api shoots should return shoot info 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "get",
       ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot",
@@ -1516,8 +1516,8 @@ Array [
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
   ],
-  Array [
-    Object {
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "get",
       ":path": "/api/v1/namespaces/garden-foo/secrets/barShoot.kubeconfig",
@@ -1525,8 +1525,8 @@ Array [
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
   ],
-  Array [
-    Object {
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "get",
       ":path": "/api/v1/namespaces/garden-foo/configmaps/barShoot.ca-cluster",
@@ -1534,8 +1534,8 @@ Array [
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
   ],
-  Array [
-    Object {
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "get",
       ":path": "/api/v1/namespaces/kube-system/configmaps/cluster-identity",
@@ -1543,8 +1543,8 @@ Array [
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OmdhcmRlbjpkZWZhdWx0In0.-4rSuvvj5BStN6DwnmLAaRVbgpl5iCn2hG0pcqx0NPw",
     },
   ],
-  Array [
-    Object {
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "get",
       ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden/shoots/infra1-seed",
@@ -1552,20 +1552,20 @@ Array [
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
   ],
-  Array [
-    Object {
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
-    Object {
+    {
       "apiVersion": "authorization.k8s.io/v1",
       "kind": "SelfSubjectAccessReview",
-      "spec": Object {
+      "spec": {
         "nonResourceAttributes": undefined,
-        "resourceAttributes": Object {
+        "resourceAttributes": {
           "group": "",
           "name": "barShoot.monitoring",
           "namespace": "garden-foo",
@@ -1575,8 +1575,8 @@ Array [
       },
     },
   ],
-  Array [
-    Object {
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "get",
       ":path": "/api/v1/namespaces/garden-foo/secrets/barShoot.monitoring",
@@ -1588,9 +1588,9 @@ Array [
 `;
 
 exports[`api shoots should return shoot info without gardenlogin kubeconfig 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "get",
       ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/dummyShoot",
@@ -1598,8 +1598,8 @@ Array [
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
   ],
-  Array [
-    Object {
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "get",
       ":path": "/api/v1/namespaces/garden-foo/secrets/dummyShoot.kubeconfig",
@@ -1607,8 +1607,8 @@ Array [
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
   ],
-  Array [
-    Object {
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "get",
       ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden/shoots/infra4-seed-without-secretRef",
@@ -1616,20 +1616,20 @@ Array [
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
   ],
-  Array [
-    Object {
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
-    Object {
+    {
       "apiVersion": "authorization.k8s.io/v1",
       "kind": "SelfSubjectAccessReview",
-      "spec": Object {
+      "spec": {
         "nonResourceAttributes": undefined,
-        "resourceAttributes": Object {
+        "resourceAttributes": {
           "group": "",
           "name": "dummyShoot.monitoring",
           "namespace": "garden-foo",
@@ -1639,8 +1639,8 @@ Array [
       },
     },
   ],
-  Array [
-    Object {
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "get",
       ":path": "/api/v1/namespaces/garden-foo/secrets/dummyShoot.monitoring",
@@ -1652,7 +1652,7 @@ Array [
 `;
 
 exports[`api shoots should return shoot info without gardenlogin kubeconfig: body 1`] = `
-Object {
+{
   "canLinkToSeed": false,
   "dashboardUrlPath": "/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/",
   "kubeconfig": Any<String>,
@@ -1662,20 +1662,20 @@ Object {
 `;
 
 exports[`api shoots should return shoot info without gardenlogin kubeconfig: body.kubeconfig 1`] = `
-Object {
+{
   "apiVersion": "v1",
-  "clusters": Array [
-    Object {
-      "cluster": Object {
+  "clusters": [
+    {
+      "cluster": {
         "certificate-authority-data": "Y2VydGlmaWNhdGUtYXV0aG9yaXR5LWRhdGE=",
         "server": "https://api.dummyShoot.foo.shoot.cluster",
       },
       "name": "shoot--foo--dummyShoot",
     },
   ],
-  "contexts": Array [
-    Object {
-      "context": Object {
+  "contexts": [
+    {
+      "context": {
         "cluster": "shoot--foo--dummyShoot",
         "user": "shoot--foo--dummyShoot",
       },
@@ -1684,10 +1684,10 @@ Object {
   ],
   "current-context": "shoot--foo--dummyShoot",
   "kind": "Config",
-  "users": Array [
-    Object {
+  "users": [
+    {
       "name": "shoot--foo--dummyShoot",
-      "user": Object {
+      "user": {
         "client-certificate-data": "Y2xpZW50LWNlcnRpZmljYXRlLWRhdGE=",
         "client-key-data": "Y2xpZW50LWtleS1kYXRh",
       },
@@ -1697,7 +1697,7 @@ Object {
 `;
 
 exports[`api shoots should return shoot info: body 1`] = `
-Object {
+{
   "canLinkToSeed": false,
   "dashboardUrlPath": "/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/",
   "kubeconfig": Any<String>,
@@ -1708,20 +1708,20 @@ Object {
 `;
 
 exports[`api shoots should return shoot info: body.kubeconfig 1`] = `
-Object {
+{
   "apiVersion": "v1",
-  "clusters": Array [
-    Object {
-      "cluster": Object {
+  "clusters": [
+    {
+      "cluster": {
         "certificate-authority-data": "Y2VydGlmaWNhdGUtYXV0aG9yaXR5LWRhdGE=",
         "server": "https://api.barShoot.foo.shoot.cluster",
       },
       "name": "shoot--foo--barShoot",
     },
   ],
-  "contexts": Array [
-    Object {
-      "context": Object {
+  "contexts": [
+    {
+      "context": {
         "cluster": "shoot--foo--barShoot",
         "user": "shoot--foo--barShoot",
       },
@@ -1730,10 +1730,10 @@ Object {
   ],
   "current-context": "shoot--foo--barShoot",
   "kind": "Config",
-  "users": Array [
-    Object {
+  "users": [
+    {
       "name": "shoot--foo--barShoot",
-      "user": Object {
+      "user": {
         "client-certificate-data": "Y2xpZW50LWNlcnRpZmljYXRlLWRhdGE=",
         "client-key-data": "Y2xpZW50LWtleS1kYXRh",
       },
@@ -1743,17 +1743,17 @@ Object {
 `;
 
 exports[`api shoots should return shoot info: body.kubeconfigGardenlogin 1`] = `
-Object {
+{
   "apiVersion": "v1",
-  "clusters": Array [
-    Object {
-      "cluster": Object {
+  "clusters": [
+    {
+      "cluster": {
         "certificate-authority-data": "Y2EuY3J0",
-        "extensions": Array [
-          Object {
-            "extension": Object {
+        "extensions": [
+          {
+            "extension": {
               "gardenClusterIdentity": "kubernetes",
-              "shootRef": Object {
+              "shootRef": {
                 "name": "barShoot",
                 "namespace": "garden-foo",
               },
@@ -1766,9 +1766,9 @@ Object {
       "name": "garden-foo--barShoot-external",
     },
   ],
-  "contexts": Array [
-    Object {
-      "context": Object {
+  "contexts": [
+    {
+      "context": {
         "cluster": "garden-foo--barShoot-external",
         "namespace": "default",
         "user": "garden-foo--barShoot",
@@ -1778,13 +1778,13 @@ Object {
   ],
   "current-context": "garden-foo--barShoot-external",
   "kind": "Config",
-  "users": Array [
-    Object {
+  "users": [
+    {
       "name": "garden-foo--barShoot",
-      "user": Object {
-        "exec": Object {
+      "user": {
+        "exec": {
           "apiVersion": "client.authentication.k8s.io/v1beta1",
-          "args": Array [
+          "args": [
             "get-client-certificate",
           ],
           "command": "kubectl-gardenlogin",
@@ -1797,12 +1797,12 @@ The following is a sample configuration for gardenlogin as well as gardenctl. Pl
 ---
 gardens:
   - identity: kubernetes
-    kubeconfig: \\"<path-to-garden-cluster-kubeconfig>\\"
+    kubeconfig: "<path-to-garden-cluster-kubeconfig>"
 ...
 
 Alternatively, you can run the following gardenctl command:
 
-$ gardenctl config set-garden kubernetes --kubeconfig \\"<path-to-garden-cluster-kubeconfig>\\"
+$ gardenctl config set-garden kubernetes --kubeconfig "<path-to-garden-cluster-kubeconfig>"
 
 Note that the kubeconfig refers to the path of the garden cluster kubeconfig which you can download from the Account page.",
           "interactiveMode": "IfAvailable",
@@ -1815,21 +1815,21 @@ Note that the kubeconfig refers to the path of the garden cluster kubeconfig whi
 `;
 
 exports[`api shoots should return shoots for a single namespace 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
-    Object {
+    {
       "apiVersion": "authorization.k8s.io/v1",
       "kind": "SelfSubjectAccessReview",
-      "spec": Object {
+      "spec": {
         "nonResourceAttributes": undefined,
-        "resourceAttributes": Object {
+        "resourceAttributes": {
           "group": "core.gardener.cloud",
           "namespace": "garden-foo",
           "resource": "shoots",
@@ -1842,30 +1842,30 @@ Array [
 `;
 
 exports[`api shoots should return shoots for a single namespace 2`] = `
-Object {
+{
   "apiVersion": "v1",
-  "items": Array [
-    Object {
-      "metadata": Object {
-        "annotations": Object {
+  "items": [
+    {
+      "metadata": {
+        "annotations": {
           "gardener.cloud/created-by": "foo@example.org",
         },
-        "labels": Object {
+        "labels": {
           "shoot.gardener.cloud/status": "healthy",
         },
         "name": "fooShoot",
         "namespace": "garden-foo",
         "uid": 1,
       },
-      "spec": Object {
+      "spec": {
         "cloudProfileName": "infra1-profileName",
-        "hibernation": Object {
+        "hibernation": {
           "enabled": false,
         },
-        "kubernetes": Object {
+        "kubernetes": {
           "version": "1.16.0",
         },
-        "provider": Object {
+        "provider": {
           "type": "fooInfra",
         },
         "purpose": "fooPurpose",
@@ -1873,9 +1873,9 @@ Object {
         "secretBindingName": "foo-infra1",
         "seedName": "infra1-seed",
       },
-      "status": Object {
-        "advertisedAddresses": Array [
-          Object {
+      "status": {
+        "advertisedAddresses": [
+          {
             "name": "external",
             "url": "https://api.fooShoot.foo.shoot.test",
           },
@@ -1883,27 +1883,27 @@ Object {
         "technicalID": "shoot--foo--fooShoot",
       },
     },
-    Object {
-      "metadata": Object {
-        "annotations": Object {
+    {
+      "metadata": {
+        "annotations": {
           "gardener.cloud/created-by": "bar@example.org",
         },
-        "labels": Object {
+        "labels": {
           "shoot.gardener.cloud/status": "healthy",
         },
         "name": "barShoot",
         "namespace": "garden-foo",
         "uid": 2,
       },
-      "spec": Object {
+      "spec": {
         "cloudProfileName": "infra1-profileName",
-        "hibernation": Object {
+        "hibernation": {
           "enabled": false,
         },
-        "kubernetes": Object {
+        "kubernetes": {
           "version": "1.16.0",
         },
-        "provider": Object {
+        "provider": {
           "type": "fooInfra",
         },
         "purpose": "barPurpose",
@@ -1911,9 +1911,9 @@ Object {
         "secretBindingName": "foo-infra1",
         "seedName": "infra1-seed",
       },
-      "status": Object {
-        "advertisedAddresses": Array [
-          Object {
+      "status": {
+        "advertisedAddresses": [
+          {
             "name": "external",
             "url": "https://api.barShoot.foo.shoot.test",
           },
@@ -1921,27 +1921,27 @@ Object {
         "technicalID": "shoot--foo--barShoot",
       },
     },
-    Object {
-      "metadata": Object {
-        "annotations": Object {
+    {
+      "metadata": {
+        "annotations": {
           "gardener.cloud/created-by": "foo@example.org",
         },
-        "labels": Object {
+        "labels": {
           "shoot.gardener.cloud/status": "unhealthy",
         },
         "name": "dummyShoot",
         "namespace": "garden-foo",
         "uid": 3,
       },
-      "spec": Object {
+      "spec": {
         "cloudProfileName": "infra1-profileName",
-        "hibernation": Object {
+        "hibernation": {
           "enabled": false,
         },
-        "kubernetes": Object {
+        "kubernetes": {
           "version": "1.16.0",
         },
-        "provider": Object {
+        "provider": {
           "type": "fooInfra",
         },
         "purpose": "fooPurpose",
@@ -1949,7 +1949,7 @@ Object {
         "secretBindingName": "barSecretName",
         "seedName": "infra4-seed-without-secretRef",
       },
-      "status": Object {
+      "status": {
         "technicalID": "shoot--foo--dummyShoot",
       },
     },
