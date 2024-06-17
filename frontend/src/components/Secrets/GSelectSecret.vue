@@ -120,6 +120,10 @@ export default {
     registerVuelidateAs: {
       type: String,
     },
+    filterSecretNames: {
+      type: Array,
+      default: () => [],
+    },
   },
   emits: [
     'update:modelValue',
@@ -182,13 +186,15 @@ export default {
       },
     },
     secretList () {
+      let secrets
       if (this.cloudProfileName) {
-        return this.infrastructureSecretsByCloudProfileName(this.cloudProfileName)
+        secrets = this.infrastructureSecretsByCloudProfileName(this.cloudProfileName)
       }
       if (this.dnsProviderKind) {
-        return this.dnsSecretsByProviderKind(this.dnsProviderKind)
+        secrets = this.dnsSecretsByProviderKind(this.dnsProviderKind)
       }
-      return []
+      return secrets
+        .filter(secret => !this.filterSecretNames.includes(secret.metadata.name))
     },
     infrastructureKind () {
       if (this.dnsProviderKind) {

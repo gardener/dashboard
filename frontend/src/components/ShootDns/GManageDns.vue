@@ -36,10 +36,10 @@ SPDX-License-Identifier: Apache-2.0
         <template v-if="primaryProviderVisible">
           <v-col cols="3">
             <v-select
-              v-model="v$.primaryDnsProviderType.$model"
+              v-model="v$.dnsPrimaryProviderType.$model"
               color="primary"
               :items="dnsProviderTypesWithPrimarySupport"
-              :error-messages="getErrorMessages(v$.primaryDnsProviderType)"
+              :error-messages="getErrorMessages(v$.dnsPrimaryProviderType)"
               label="DNS Provider Type"
               :disabled="!isNewCluster"
               :persistent-hint="!isNewCluster"
@@ -67,7 +67,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-col cols="3">
             <g-select-secret
               v-model="primaryDnsProviderSecret"
-              :dns-provider-kind="primaryDnsProviderType"
+              :dns-provider-kind="dnsPrimaryProviderType"
               register-vuelidate-as="dnsProviderSecret"
             />
           </v-col>
@@ -108,11 +108,22 @@ SPDX-License-Identifier: Apache-2.0
       <div class="alternate-row-background">
         <v-expand-transition group>
           <v-row
-            v-for="id in extensionDnsProviderIds"
-            :key="id"
+            v-for="(extensionDnsProvider, index) in extensionDnsProviders"
+            :key="index"
             class="list-item pt-2"
           >
-            <g-dns-provider-row :dns-provider-id="id" />
+            <g-dns-provider-row :dns-provider="extensionDnsProvider">
+              <template #action>
+                <v-btn
+                  :disabled="extensionDnsProvider.readonly"
+                  size="x-small"
+                  variant="tonal"
+                  icon="mdi-close"
+                  color="grey"
+                  @click="deleteExtensionDnsProvider(index)"
+                />
+              </template>
+            </g-dns-provider-row>
           </v-row>
         </v-expand-transition>
         <v-row
@@ -175,30 +186,36 @@ export default {
   setup () {
     const {
       dnsDomain,
-      dnsPrimaryProvider,
+      dnsPrimaryProviderType,
+      dnsPrimaryProviderSecretName,
       isNewCluster,
       dnsProvidersWithPrimarySupport,
-      extensionDnsProviderIds,
+      extensionDnsProviders,
       hasExtensionCustomDomainProvider,
       addExtensionDnsProvider,
       addExtensionCustomDomainProvider,
+      resetDnsPrimaryProvider,
+      deleteExtensionDnsProvider,
     } = useShootContext()
 
     return {
       v$: useVuelidate(),
       dnsDomain,
-      dnsPrimaryProvider,
+      dnsPrimaryProviderType,
+      dnsPrimaryProviderSecretName,
       isNewCluster,
       dnsProvidersWithPrimarySupport,
-      extensionDnsProviderIds,
+      extensionDnsProviders,
       hasExtensionCustomDomainProvider,
       addExtensionDnsProvider,
       addExtensionCustomDomainProvider,
+      resetDnsPrimaryProvider,
+      deleteExtensionDnsProvider,
     }
   },
   validations () {
     return {
-      primaryDnsProviderType: withFieldName('Primary DNS Provider Type', {
+      dnsPrimaryProviderType: withFieldName('Primary DNS Provider Type', {
         required: withMessage('Provider type is required if a custom domain is defined', requiredIf(this.isNewCluster && !!this.dnsDomain)),
         nil: withMessage('Provider type is not allowed if no custom domain is defined', nilUnless('dnsDomain')),
       }),
@@ -238,39 +255,32 @@ export default {
         : 'Primary DNS Provider Type cannot be changed after cluster creation'
     },
     primaryProviderVisible () {
-      return !!this.primaryDnsProviderType || (this.isNewCluster && !!this.dnsDomain)
+      return !!this.dnsPrimaryProviderType || (this.isNewCluster && !!this.dnsDomain)
     },
     customDomainEnabled: {
       get () {
         return this.customDomain ||
-          (!!this.dnsDomain && !!this.primaryDnsProviderType)
+          (!!this.dnsDomain && !!this.dnsPrimaryProviderType)
       },
       set (value) {
         if (!value) {
           this.dnsDomain = undefined
+          this.resetDnsPrimaryProvider()
         }
         this.customDomain = value
       },
     },
-    primaryDnsProviderType: {
-      get () {
-        return this.dnsPrimaryProvider.type
-      },
-      set (value) {
-        this.dnsPrimaryProvider.type = value
-      },
-    },
     primaryDnsProviderSecret: {
       get () {
-        const dnsSecrets = this.dnsSecretsByProviderKind(this.primaryDnsProviderType)
-        return find(dnsSecrets, ['metadata.secretRef.name', this.dnsPrimaryProvider.secretName])
+        const dnsSecrets = this.dnsSecretsByProviderKind(this.dnsPrimaryProviderType)
+        return find(dnsSecrets, ['metadata.secretRef.name', this.dnsPrimaryProviderSecretName])
       },
       set (value) {
-        this.dnsPrimaryProvider.secretName = value?.metadata.secretRef.name
+        this.dnsPrimaryProviderSecretName = value?.metadata.secretRef.name
       },
     },
     showCustomDomainRecommendation () {
-      if (!this.primaryDnsProviderType) {
+      if (!this.dnsPrimaryProviderType) {
         return false
       }
       if (!this.primaryDnsProviderSecret) {
@@ -286,7 +296,7 @@ export default {
     primaryProviderVisible (value) {
       if (value) {
         const type = head(this.dnsProviderTypesWithPrimarySupport)
-        this.primaryDnsProviderType = type
+        this.dnsPrimaryProviderType = type
         const dnsSecrets = this.dnsSecretsByProviderKind(type)
         this.primaryDnsProviderSecret = head(dnsSecrets)
       }
@@ -294,6 +304,9 @@ export default {
   },
   mounted () {
     this.v$.$touch()
+    if (this.customDomainEnabled) {
+      this.customDomain = true
+    }
   },
   methods: {
     ...mapActions(useSecretStore, [

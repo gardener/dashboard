@@ -56,12 +56,13 @@ SPDX-License-Identifier: Apache-2.0
             v-model="extensionDnsProviderSecret"
             :disabled="dnsProvider.readonly"
             :dns-provider-kind="dnsProviderType"
+            :filter-secret-names="filterSecretNames"
             register-vuelidate-as="extensionDnsProviderSecret"
           />
         </div>
         <div class="large-input">
           <v-combobox
-            v-model="dnsProvider.excludeDomains"
+            v-model="excludeDomains"
             :disabled="dnsProvider.readonly"
             label="Exclude Domains"
             multiple
@@ -71,7 +72,7 @@ SPDX-License-Identifier: Apache-2.0
         </div>
         <div class="large-input">
           <v-combobox
-            v-model="dnsProvider.includeDomains"
+            v-model="includeDomains"
             :disabled="dnsProvider.readonly"
             label="Include Domains"
             multiple
@@ -81,7 +82,7 @@ SPDX-License-Identifier: Apache-2.0
         </div>
         <div class="large-input">
           <v-combobox
-            v-model="dnsProvider.excludeZones"
+            v-model="excludeZones"
             :disabled="dnsProvider.readonly"
             label="Exclude Zones"
             multiple
@@ -91,7 +92,7 @@ SPDX-License-Identifier: Apache-2.0
         </div>
         <div class="large-input">
           <v-combobox
-            v-model="dnsProvider.includeZones"
+            v-model="includeZones"
             :disabled="dnsProvider.readonly"
             label="Include Zones"
             multiple
@@ -100,16 +101,8 @@ SPDX-License-Identifier: Apache-2.0
           />
         </div>
       </div>
-
       <div class="ml-4 mr-2">
-        <v-btn
-          :disabled="dnsProvider.readonly"
-          size="x-small"
-          variant="tonal"
-          icon="mdi-close"
-          color="grey"
-          @click="deleteExtensionDnsProvider(dnsProviderId)"
-        />
+        <slot name="action" />
       </div>
     </div>
   </div>
@@ -132,16 +125,13 @@ import GVendorIcon from '@/components/GVendorIcon'
 import { useShootContext } from '@/composables/useShootContext'
 
 import { getErrorMessages } from '@/utils'
-import {
-  withFieldName,
-  withMessage,
-} from '@/utils/validators'
+import { withFieldName } from '@/utils/validators'
 
 import {
   get,
   head,
   find,
-  filter,
+  set,
 } from '@/lodash'
 
 export default {
@@ -150,8 +140,8 @@ export default {
     GVendorIcon,
   },
   props: {
-    dnsProviderId: {
-      type: String,
+    dnsProvider: {
+      type: Object,
       required: true,
     },
   },
@@ -159,27 +149,26 @@ export default {
     const {
       isNewCluster,
       extensionDnsProviders,
-      deleteExtensionDnsProvider,
-      getExtensionDnsSecretName,
+      getExtensionDnsResourceName,
+      addExtensionDnsProviderResourceRef,
+      deleteExtensionDnsProviderResourceRef,
+      secretNameFromResources,
     } = useShootContext()
 
     return {
       v$: useVuelidate(),
       isNewCluster,
       extensionDnsProviders,
-      deleteExtensionDnsProvider,
-      getExtensionDnsSecretName,
+      getExtensionDnsResourceName,
+      addExtensionDnsProviderResourceRef,
+      deleteExtensionDnsProviderResourceRef,
+      secretNameFromResources,
     }
   },
   validations () {
     return {
       dnsProviderType: withFieldName('DNS Provider Type', {
         required,
-        uniqueProviderTypeSecret: withMessage('Combination of DNS Provider Type and Secret must be unique across shoot-dns-service Providers',
-          type => {
-            return filter(this.extensionDnsProviders, { type, secretRefName: this.dnsProvider.secretRefName }).length < 2
-          },
-        ),
       }),
     }
   },
@@ -192,9 +181,6 @@ export default {
     ...mapState(useGardenerExtensionStore, [
       'dnsProviderTypes',
     ]),
-    dnsProvider () {
-      return this.extensionDnsProviders[this.dnsProviderId]
-    },
     dnsSecrets () {
       return this.dnsSecretsByProviderKind(this.dnsProviderType)
     },
@@ -211,13 +197,56 @@ export default {
     },
     extensionDnsProviderSecret: {
       get () {
-        return find(this.dnsSecrets, ['metadata.secretRef.name', this.dnsProvider.secretRefName])
+        return find(this.dnsSecrets, ['metadata.secretRef.name', this.secretNameFromResources(this.dnsProvider.secretName)]) // this.dnsProvider.secretName is the resource name
       },
       set (value) {
-        const secretRefName = get(value, 'metadata.secretRef.name', undefined)
-        this.dnsProvider.secretRefName = secretRefName
-        this.dnsProvider.secretName = this.getExtensionDnsSecretName(secretRefName)
+        this.deleteExtensionDnsProviderResourceRef(this.dnsProvider.secretName)
+
+        const secretName = get(value, 'metadata.secretRef.name', undefined)
+        this.dnsProvider.secretName = this.getExtensionDnsResourceName(secretName) // secretName is the resource name
+        this.addExtensionDnsProviderResourceRef(this.dnsProvider.secretName, secretName)
       },
+    },
+    excludeDomains: {
+      get () {
+        return get(this.dnsProvider, 'domains.exclude')
+      },
+      set (value) {
+        set(this.dnsProvider, 'domains.exclude', value)
+      },
+    },
+    includeDomains: {
+      get () {
+        return get(this.dnsProvider, 'domains.include')
+      },
+      set (value) {
+        set(this.dnsProvider, 'domains.include', value)
+      },
+    },
+    excludeZones: {
+      get () {
+        return get(this.dnsProvider, 'zones.exclude')
+      },
+      set (value) {
+        set(this.dnsProvider, 'zones.exclude', value)
+      },
+    },
+    includeZones: {
+      get () {
+        return get(this.dnsProvider, 'zones.include')
+      },
+      set (value) {
+        set(this.dnsProvider, 'zones.include', value)
+      },
+    },
+    filterSecretNames () {
+      return this.extensionDnsProviders.map(provider => {
+        const secretName = this.secretNameFromResources(provider.secretName) // provider.secretName is the resource name
+        if (secretName !== this.extensionDnsProviderSecret?.metadata.name) {
+          return secretName
+        }
+        return undefined
+      })
     },
   },
   watch: {

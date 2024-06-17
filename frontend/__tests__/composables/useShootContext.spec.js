@@ -123,7 +123,7 @@ describe('composables', () => {
       shootContextStore.createShootManifest()
       shootContextStore.addExtensionDnsProvider()
       shootContextStore.dnsDomain = 'example.org'
-      expect(shootContextStore.extensionDnsProviderIds).toHaveLength(1)
+      expect(shootContextStore.extensionDnsProviders).toHaveLength(1)
       const shootManifest = shootContextStore.shootManifest
       expect(shootManifest.spec.dns).toMatchSnapshot()
       expect(shootManifest.spec.extensions).toMatchSnapshot()
@@ -134,18 +134,18 @@ describe('composables', () => {
       shootContextStore.createShootManifest()
       shootContextStore.addExtensionDnsProvider()
       shootContextStore.addExtensionDnsProvider()
-      expect(shootContextStore.extensionDnsProviderIds).toHaveLength(2)
+      expect(shootContextStore.extensionDnsProviders).toHaveLength(2)
 
       // ensure internal manifest ref is updated with the new extension dns providers
       shootContextStore.setShootManifest(shootContextStore.shootManifest)
 
-      shootContextStore.deleteExtensionDnsProvider(shootContextStore.extensionDnsProviderIds[0])
+      shootContextStore.deleteExtensionDnsProvider(0)
       let shootManifest = shootContextStore.shootManifest
       expect(shootManifest.spec.extensions).toMatchSnapshot()
       expect(shootManifest.spec.resources).toMatchSnapshot()
 
       // Delete last extension dns provider
-      shootContextStore.deleteExtensionDnsProvider(shootContextStore.extensionDnsProviderIds[0])
+      shootContextStore.deleteExtensionDnsProvider(0)
       shootManifest = shootContextStore.shootManifest
       expect(shootManifest.spec.extensions).toMatchSnapshot()
       expect(shootManifest.spec.resources).toMatchSnapshot()
@@ -154,7 +154,8 @@ describe('composables', () => {
     it('should add primary dns provider', async () => {
       shootContextStore.createShootManifest()
       shootContextStore.dnsDomain = 'example.org'
-      shootContextStore.dnsPrimaryProvider = { type: 'foo', secretName: 'bar' }
+      shootContextStore.dnsPrimaryProviderType = 'foo'
+      shootContextStore.dnsPrimaryProviderSecretName = 'bar'
       const shootManifest = shootContextStore.shootManifest
       expect(shootManifest.spec.dns).toMatchSnapshot()
       expect(shootManifest.spec.extensions).toBeUndefined()
@@ -164,7 +165,8 @@ describe('composables', () => {
     it('should add extension custom domain dns provider', async () => {
       shootContextStore.createShootManifest()
       shootContextStore.dnsDomain = 'example.org'
-      shootContextStore.dnsPrimaryProvider = { type: 'foo', secretName: 'bar' }
+      shootContextStore.dnsPrimaryProviderType = 'foo'
+      shootContextStore.dnsPrimaryProviderSecretName = 'bar'
 
       expect(shootContextStore.hasExtensionCustomDomainProvider).toBeFalsy()
       shootContextStore.addExtensionCustomDomainProvider()

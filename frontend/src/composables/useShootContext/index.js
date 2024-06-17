@@ -42,10 +42,7 @@ import { createShootHelperComposable } from '../useShootHelper'
 import { useShootMetadata } from '../useShootMetadata'
 import { useShootAccessRestrictions } from '../useShootAccessRestrictions'
 
-import {
-  getId,
-  cleanup,
-} from './helper'
+import { cleanup } from './helper'
 
 import {
   get,
@@ -66,6 +63,7 @@ import {
   isEmpty,
   size,
   findIndex,
+  some,
 } from '@/lodash'
 
 export function createShootContextComposable (options = {}) {
@@ -111,20 +109,11 @@ export function createShootContextComposable (options = {}) {
     return uniq(flatMap(workers, 'zones'))
   })
 
-  const initialExtensionDnsSecretNames = computed(() => {
-    const extensions = get(initialManifest.value, 'spec.extensions')
-    const dnsExtension = find(extensions, ['type', 'shoot-dns-service'])
-    return map(dnsExtension?.providerConfig?.providers, 'secretName')
-  })
-
   /* manifest */
   const manifest = ref({})
 
   const normalizedManifest = computed(() => {
     const object = cloneDeep(manifest.value)
-    set(object, 'spec.dns', dns.value)
-    setExtension(object, 'shoot-dns-service', extensionDns.value)
-    set(object, 'spec.resources', resources.value)
     set(object, 'spec.hibernation.schedules', hibernationSchedules.value)
     if (!workerless.value) {
       set(object, 'spec.provider.infrastructureConfig.networks.zones', providerInfrastructureConfigNetworksZones.value)
@@ -136,8 +125,6 @@ export function createShootContextComposable (options = {}) {
   function setShootManifest (value) {
     initialManifest.value = value
     manifest.value = cloneDeep(initialManifest.value)
-    dns.value = get(manifest.value, 'spec.dns', {})
-    extensionDns.value = find(manifest.value?.spec?.extensions, { type: 'shoot-dns-service' })
     hibernationSchedules.value = get(manifest.value, 'spec.hibernation.schedules', [])
     if (shootCreationTimestamp.value) {
       providerState.workerless = isEmpty(providerWorkers.value)
@@ -151,8 +138,6 @@ export function createShootContextComposable (options = {}) {
         namespace: get(options, 'namespace', authzStore.namespace),
       },
     }
-    dns.value = {}
-    extensionDns.value = {}
     hibernationSchedules.value = []
     workerless.value = get(options, 'workerless', false)
     const defaultProviderType = head(cloudProfileStore.sortedInfrastructureKindList)
@@ -160,6 +145,25 @@ export function createShootContextComposable (options = {}) {
     resetMaintenanceAutoUpdate()
     resetMaintenanceTimeWindow()
     initialManifest.value = cloneDeep(normalizedManifest.value)
+  }
+
+  function setExtension (manifest, type, extension) {
+    if (!Array.isArray(manifest?.spec?.extensions)) {
+      set(manifest, 'spec.extensions', [])
+    }
+    const extensions = manifest.spec.extensions
+    const index = findIndex(extensions, ['type', type])
+
+    if (index === -1) {
+      extensions.push(extension)
+      return
+    }
+
+    if (extension) {
+      extensions[index] = extension
+    } else {
+      extensions.splice(index, 1)
+    }
   }
 
   const isShootDirty = computed(() => {
@@ -178,6 +182,16 @@ export function createShootContextComposable (options = {}) {
     unsetShootAnnotation,
   } = useShootMetadata(manifest, {
     projectStore,
+  })
+
+  /* extensionDns */
+  const extensionDns = computed(() => {
+    return find(get(manifest.value, 'spec.extensions'), { type: 'shoot-dns-service' })
+  })
+
+  /* resources */
+  const resources = computed(() => {
+    return get(manifest.value, 'spec.resources')
   })
 
   /* seedName */
@@ -854,290 +868,160 @@ export function createShootContextComposable (options = {}) {
   })
 
   /* dns */
-  const dnsState = reactive({
-    domain: undefined,
-    extensionProviders: {},
-    extensionProviderIds: [],
-    primaryProvider: {},
-  })
-
-  function getExtensionDnsSecretName (secretRefName) {
-    return `shoot-dns-service-${secretRefName}`
-  }
-
-  const dns = computed({
-    get () {
-      const domain = dnsDomain.value
-      const primaryProvider = dnsPrimaryProvider.value
-      const dns = {}
-      if (domain) {
-        dns.domain = domain
-      }
-      if (!isEmpty(primaryProvider)) {
-        dns.providers = [
-          {
-            ...primaryProvider,
-            primary: true,
-          },
-        ]
-      }
-      return dns
-    },
-    set ({ domain, providers }) {
-      dnsDomain.value = domain
-      dnsPrimaryProvider.value = find(providers, { primary: true }) ?? {}
-      if (!domain && isEmpty(providers)) {
-        unset(manifest.value, 'spec.dns')
-      } else {
-        set(manifest.value, 'spec.dns', { domain, providers })
-      }
-    },
-  })
-
-  const extensionDns = computed({
-    get () {
-      if (!extensionDnsProviderIds.value.length) {
-        return undefined
-      }
-      const providers = map(extensionDnsProviderIds.value, id => {
-        const {
-          type,
-          secretName,
-          excludeDomains,
-          includeDomains,
-          excludeZones,
-          includeZones,
-        } = extensionDnsProviders.value[id]
-        const provider = {
-          type,
-          secretName,
-        }
-        if (!isEmpty(excludeDomains)) {
-          set(provider, 'domains.exclude', [...excludeDomains])
-        }
-        if (!isEmpty(includeDomains)) {
-          set(provider, 'domains.include', [...includeDomains])
-        }
-        if (!isEmpty(excludeZones)) {
-          set(provider, 'zones.exclude', [...excludeZones])
-        }
-        if (!isEmpty(includeZones)) {
-          set(provider, 'zones.include', [...includeZones])
-        }
-        return provider
-      })
-
-      return {
-        type: 'shoot-dns-service',
-        providerConfig: {
-          apiVersion: 'service.dns.extensions.gardener.cloud/v1alpha1',
-          kind: 'DNSConfig',
-          syncProvidersFromShootSpecDNS: false,
-          providers,
-        },
-      }
-    },
-    set (extensionDns) {
-      const initialResources = initialManifest.value?.spec?.resources
-      const dnsProviderList = map(extensionDns?.providerConfig?.providers, provider => {
-        const id = uuidv4()
-        const {
-          type,
-          secretName,
-          domains: {
-            exclude: excludeDomains = [],
-            include: includeDomains = [],
-          } = {},
-          zones: {
-            exclude: excludeZones = [],
-            include: includeZones = [],
-          } = {},
-        } = provider
-        const secretResource = find(initialResources, ['name', secretName])
-        const secretRefName = get(secretResource, 'resourceRef.name')
-        let readonly = false
-        if (!isNewCluster.value) {
-          const secret = findExtensionDnsProviderSecret(type, secretRefName)
-          // If no secret binding was found for a given secretName and the cluster is not new,
-          // then we assume that the secret exists and was created by hand.
-          // The DNS provider should not be changed in this case.
-          if (!secret) {
-            readonly = true
-          }
-        }
-        return {
-          id,
-          type,
-          secretName,
-          secretRefName,
-          excludeDomains: [...excludeDomains],
-          includeDomains: [...includeDomains],
-          excludeZones: [...excludeZones],
-          includeZones: [...includeZones],
-          readonly,
-        }
-      })
-      extensionDnsProviders.value = keyBy(dnsProviderList, 'id')
-      extensionDnsProviderIds.value = map(dnsProviderList, 'id')
-      setExtension(manifest.value, 'shoot-dns-service', extensionDns)
-    },
-  })
-
-  const resourcesExtensionDns = computed(() => {
-    return map(extensionDnsProviderIds.value, id => {
-      const {
-        secretName,
-        secretRefName,
-      } = extensionDnsProviders.value[id]
-      return {
-        name: secretName,
-        resourceRef: {
-          kind: 'Secret',
-          name: secretRefName,
-          apiVersion: 'v1',
-        },
-      }
-    })
-  })
-
-  const resources = computed(() => {
-    const initialResources = initialManifest.value?.spec?.resources ? [...initialManifest.value.spec.resources] : []
-    initialExtensionDnsSecretNames.value.forEach(name => {
-      const index = findIndex(initialResources, { name })
-      if (index !== -1) {
-        initialResources.splice(index, 1)
-      }
-    })
-    return [
-      ...initialResources,
-      ...resourcesExtensionDns.value,
-    ]
-  })
-
   const dnsDomain = computed({
     get () {
-      return dnsState.domain
+      return get(manifest.value, 'spec.dns.domain')
     },
     set (value) {
-      dnsState.domain = value
-      resetDnsPrimaryProvider()
-    },
-  })
-
-  const extensionDnsProviders = computed({
-    get () {
-      return dnsState.extensionProviders
-    },
-    set (value) {
-      dnsState.extensionProviders = value
-    },
-  })
-
-  const extensionDnsProviderIds = computed({
-    get () {
-      return dnsState.extensionProviderIds
-    },
-    set (value) {
-      dnsState.extensionProviderIds = value
+      set(manifest.value, 'spec.dns.domain', value)
     },
   })
 
   function resetDnsPrimaryProvider () {
     if (!dnsDomain.value) {
-      dnsState.primaryProvider = {}
+      set(manifest.value, 'spec.dns.providers', undefined)
     }
   }
 
-  const dnsPrimaryProvider = computed({
+  const dnsPrimaryProvider = computed(() => {
+    const providers = get(manifest.value, 'spec.dns.providers')
+    return find(providers, ['primary', true])
+  })
+
+  function getExtensionDnsResourceName (secretName) {
+    return `shoot-dns-service-${secretName}`
+  }
+
+  const extensionDnsProviders = computed(() => {
+    return get(extensionDns, 'value.providerConfig.providers') ?? []
+  })
+
+  function setInitialDnsExtension () {
+    const dnsExtension = {
+      type: 'shoot-dns-service',
+      providerConfig: {
+        apiVersion: 'service.dns.extensions.gardener.cloud/v1alpha1',
+        kind: 'DNSConfig',
+        syncProvidersFromShootSpecDNS: false,
+        providers: [],
+      },
+    }
+    setExtension(manifest.value, 'shoot-dns-service', dnsExtension)
+  }
+
+  function setDnsPrimaryProvider (provider) {
+    const primaryProvider = { primary: true, ...dnsPrimaryProvider.value, ...provider }
+    const providers = [
+      primaryProvider,
+    ]
+    set(manifest.value, 'spec.dns.providers', providers)
+  }
+
+  const dnsPrimaryProviderType = computed({
     get () {
-      return dnsState.primaryProvider
+      return dnsPrimaryProvider.value?.type
     },
-    set (value) {
-      dnsState.primaryProvider = value
+    set (type) {
+      setDnsPrimaryProvider({ type })
+    },
+  })
+
+  const dnsPrimaryProviderSecretName = computed({
+    get () {
+      return dnsPrimaryProvider.value?.secretName
+    },
+    set (secretName) {
+      setDnsPrimaryProvider({ secretName })
     },
   })
 
   const hasExtensionCustomDomainProvider = computed(() => {
-    const { type, secretName } = dnsPrimaryProvider.value
-    return find(extensionDnsProviders.value, { type, secretRefName: secretName, includeDomains: [dnsDomain.value] })
+    const { type, secretName } = dnsPrimaryProvider?.value ?? {}
+    return some(extensionDnsProviders.value, provider => {
+      return provider.type === type &&
+        secretNameFromResources(provider.secretName) === secretName && // provider.secretName is the resourceName
+      provider.domains?.include?.includes(dnsDomain.value)
+    })
   })
 
   function addExtensionCustomDomainProvider () {
     if (hasExtensionCustomDomainProvider.value) {
       return
     }
-    let customDomainProvider = find(extensionDnsProviders.value, { type: dnsPrimaryProvider.value.type, secretRefName: dnsPrimaryProvider.value.secretName })
+    let customDomainProvider = find(extensionDnsProviders.value, provider => {
+      return provider.type === dnsPrimaryProvider.value?.type &&
+        secretNameFromResources(provider.secretName) === dnsPrimaryProvider.value?.secretName // provider.secretName is the resourceName
+    })
     if (!customDomainProvider) {
-      const { type, secretName } = dnsPrimaryProvider.value
+      const { type, secretName } = dnsPrimaryProvider?.value ?? {}
       customDomainProvider = addExtensionDnsProvider(type, secretName)
     }
-    customDomainProvider.includeDomains.push(dnsDomain.value)
-  }
-
-  function createDnsProvider (type, secretRefName) {
-    if (!type) {
-      type = head(gardenerExtensionStore.dnsProviderTypes)
+    if (customDomainProvider.domains?.include) {
+      customDomainProvider.domains.include.push(dnsDomain.value)
+    } else {
+      set(customDomainProvider, 'domains.include', [dnsDomain.value])
     }
-    if (!secretRefName) {
-      const secrets = secretStore.dnsSecretsByProviderKind(type)
-      const secret = head(secrets)
-      secretRefName = get(secret, 'metadata.secretRef.name')
-    }
-
-    const id = uuidv4()
-    const object = {
-      type,
-      secretRefName,
-      secretName: getExtensionDnsSecretName(secretRefName),
-      excludeDomains: [],
-      includeDomains: [],
-      excludeZones: [],
-      includeZones: [],
-      readonly: false,
-    }
-    Object.defineProperty(object, 'id', { value: id })
-    return object
   }
 
   function addExtensionDnsProvider (type, secretName) {
-    const object = createDnsProvider(type, secretName)
-    const id = getId(object)
-    extensionDnsProviderIds.value.push(id)
-    extensionDnsProviders.value[id] = object
+    if (!type) {
+      type = head(gardenerExtensionStore.dnsProviderTypes)
+    }
+    if (!secretName) {
+      const secrets = secretStore.dnsSecretsByProviderKind(type)
+      const secret = find(secrets, secret => { // find unused secret
+        return !some(resources.value, ['name', getExtensionDnsResourceName(secret.metadata.name)])
+      })
+      secretName = get(secret, 'metadata.secretRef.name')
+    }
 
-    return object
+    const resourceName = getExtensionDnsResourceName(secretName)
+
+    const dnsProvider = {
+      type,
+      secretName: resourceName, // resourceName is the secret name
+    }
+
+    if (!extensionDns?.value?.providerConfig?.providers) {
+      setInitialDnsExtension()
+    }
+    extensionDns?.value?.providerConfig?.providers.push(dnsProvider)
+
+    addExtensionDnsProviderResourceRef(resourceName, secretName)
+
+    return dnsProvider
   }
 
-  function deleteExtensionDnsProvider (id) {
-    const index = extensionDnsProviderIds.value.indexOf(id)
-    if (index !== -1) {
-      extensionDnsProviderIds.value.splice(index, 1)
+  function addExtensionDnsProviderResourceRef (resourceName, secretName) {
+    if (!resources.value) {
+      manifest.value.spec.resources = []
     }
-    delete extensionDnsProviders.value[id]
+    resources.value.push({
+      name: resourceName,
+      resourceRef: {
+        kind: 'Secret',
+        name: secretName,
+        apiVersion: 'v1',
+      },
+    })
   }
 
-  function findExtensionDnsProviderSecret (type, secretName) {
-    const secrets = secretStore.dnsSecretsByProviderKind(type)
-    return find(secrets, ['metadata.secretRef.name', secretName])
+  function deleteExtensionDnsProvider (index) {
+    deleteExtensionDnsProviderResourceRef(extensionDnsProviders.value[index].secretName) // provider.secretName is the resourceName
+
+    extensionDns.value.providerConfig.providers = filter(extensionDns?.value?.providerConfig?.providers, (_, i) => i !== index)
+    if (!extensionDns.value.providerConfig.providers.length) {
+      setExtension(manifest.value, 'shoot-dns-service', undefined)
+    }
   }
 
-  function setExtension (shootManifest, type, extension) {
-    if (!Array.isArray(shootManifest?.spec?.extensions)) {
-      set(shootManifest, 'spec.extensions', [])
-    }
-    const extensions = shootManifest.spec.extensions
-    const index = findIndex(extensions, ['type', type])
+  function deleteExtensionDnsProviderResourceRef (resourceName) {
+    manifest.value.spec.resources = filter(resources.value, ({ name }) => name !== resourceName)
+  }
 
-    if (index === -1) {
-      extensions.push(extension)
-      return
-    }
-
-    if (extension) {
-      extensions[index] = extension
-    } else {
-      extensions.splice(index, 1)
-    }
+  function secretNameFromResources (resourceName) {
+    const secretResource = find(resources.value, ['name', resourceName])
+    return get(secretResource, 'resourceRef.name')
   }
 
   /* accessRestrictions */
@@ -1276,17 +1160,19 @@ export function createShootContextComposable (options = {}) {
     controlPlaneHighAvailabilityFailureToleranceType,
     controlPlaneHighAvailabilityFailureToleranceTypeChangeAllowed,
     /* dns */
-    dns,
     dnsDomain,
-    dnsPrimaryProvider,
-    extensionDns,
+    dnsPrimaryProviderType,
+    dnsPrimaryProviderSecretName,
     extensionDnsProviders,
-    extensionDnsProviderIds,
     hasExtensionCustomDomainProvider,
     addExtensionCustomDomainProvider,
     addExtensionDnsProvider,
     deleteExtensionDnsProvider,
-    getExtensionDnsSecretName,
+    getExtensionDnsResourceName,
+    resetDnsPrimaryProvider,
+    addExtensionDnsProviderResourceRef,
+    deleteExtensionDnsProviderResourceRef,
+    secretNameFromResources,
     /* accessRestrictions */
     getAccessRestrictionValue,
     setAccessRestrictionValue,
