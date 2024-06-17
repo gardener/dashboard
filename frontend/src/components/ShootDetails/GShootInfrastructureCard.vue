@@ -163,7 +163,6 @@ SPDX-License-Identifier: Apache-2.0
               :secret-name="shootDnsPrimaryProvider.secretName"
               :shoot-namespace="shootNamespace"
               :type="shootDnsPrimaryProvider.type"
-              :secret="getCloudProviderSecretByName({ name: shootDnsPrimaryProvider.secretName, namespace: shootNamespace })"
             />
           </div>
         </g-list-item-content>
@@ -179,12 +178,11 @@ SPDX-License-Identifier: Apache-2.0
               v-for="({ secretName, type, domains, zones }) in shootExtensionDnsProviders"
               :key="secretName"
               class="mr-2"
-              :secret-name="resourceRefName(secretName)"
+              :secret-name="secretNameFromShootResources(secretName)"
               :shoot-namespace="shootNamespace"
               :type="type"
               :domains="domains"
               :zones="zones"
-              :secret="getCloudProviderSecretByName({ name: resourceRefName(secretName), namespace: shootNamespace })"
             />
           </div>
           <span v-else>No DNS provider configured</span>
@@ -416,10 +414,7 @@ export default {
       'cloudProfileByName',
       'floatingPoolsByCloudProfileNameAndRegionAndDomain',
     ]),
-    ...mapActions(useSecretStore, [
-      'getCloudProviderSecretByName',
-    ]),
-    resourceRefName (resourceName) {
+    secretNameFromShootResources (resourceName) {
       const secretResource = find(this.shootResources, ['name', resourceName])
       return get(secretResource, 'resourceRef.name')
     },

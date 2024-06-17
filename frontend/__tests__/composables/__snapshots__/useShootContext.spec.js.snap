@@ -835,7 +835,6 @@ exports[`composables > useShootContext > should delete extension dns providers 1
       "kind": "DNSConfig",
       "providers": [
         {
-          "secretName": "shoot-dns-service-undefined",
           "type": "aws-route53",
         },
       ],
@@ -846,17 +845,7 @@ exports[`composables > useShootContext > should delete extension dns providers 1
 ]
 `;
 
-exports[`composables > useShootContext > should delete extension dns providers 2`] = `
-[
-  {
-    "name": "shoot-dns-service-undefined",
-    "resourceRef": {
-      "apiVersion": "v1",
-      "kind": "Secret",
-    },
-  },
-]
-`;
+exports[`composables > useShootContext > should delete extension dns providers 2`] = `undefined`;
 
 exports[`composables > useShootContext > should delete extension dns providers 3`] = `undefined`;
 

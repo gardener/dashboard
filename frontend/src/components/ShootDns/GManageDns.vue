@@ -73,7 +73,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-col>
         </template>
       </v-row>
-      <v-row v-if="showCustomDomainRecommendation">
+      <v-row v-if="domainRecommendationVisible">
         <v-col>
           <v-alert
             variant="tonal"
@@ -115,7 +115,6 @@ SPDX-License-Identifier: Apache-2.0
             <g-dns-provider-row :dns-provider="extensionDnsProvider">
               <template #action>
                 <v-btn
-                  :disabled="extensionDnsProvider.readonly"
                   size="x-small"
                   variant="tonal"
                   icon="mdi-close"
@@ -167,7 +166,6 @@ import { useShootContext } from '@/composables/useShootContext'
 
 import {
   withFieldName,
-  nilUnless,
   withMessage,
 } from '@/utils/validators'
 import { getErrorMessages } from '@/utils'
@@ -217,11 +215,9 @@ export default {
     return {
       dnsPrimaryProviderType: withFieldName('Primary DNS Provider Type', {
         required: withMessage('Provider type is required if a custom domain is defined', requiredIf(this.isNewCluster && !!this.dnsDomain)),
-        nil: withMessage('Provider type is not allowed if no custom domain is defined', nilUnless('dnsDomain')),
       }),
       primaryDnsProviderSecret: withFieldName('Primary DNS Provider Secret', {
         required: withMessage('Provider secret is required if a custom domain is defined', requiredIf(this.isNewCluster && !!this.dnsDomain)),
-        nil: withMessage('Provider secret is not allowed if no custom domain is defined', nilUnless('dnsDomain')),
       }),
       dnsDomain: withFieldName('Custom Cluster Domain', {
         required: requiredIf(this.customDomainEnabled),
@@ -279,7 +275,7 @@ export default {
         this.dnsPrimaryProviderSecretName = value?.metadata.secretRef.name
       },
     },
-    showCustomDomainRecommendation () {
+    domainRecommendationVisible () {
       if (!this.dnsPrimaryProviderType) {
         return false
       }

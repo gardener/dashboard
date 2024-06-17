@@ -186,8 +186,10 @@ export function updateShootControlPlaneHighAvailability ({ namespace, name, data
 export function updateShootDns ({ namespace, name, data }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
-
-  return patchResource(`/api/namespaces/${namespace}/shoots/${name}`, data)
+  const { dns, extensions, resources } = data.spec
+  return patchResource(`/api/namespaces/${namespace}/shoots/${name}`, {
+    spec: { dns, extensions, resources },
+  })
 }
 
 export async function getShootSchemaDefinition () {

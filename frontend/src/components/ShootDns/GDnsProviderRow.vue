@@ -5,105 +5,93 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div>
-    <!-- do not wrap v-row with tooltip component as this breaks expand (appear) animation -->
-    <v-tooltip
-      location="top"
-      :disabled="!dnsProvider.readonly"
-      open-delay="0"
-      :activator="$refs.dnsRow"
-    >
-      <span class="font-weight-bold">You cannot edit this DNS Provider</span><br>
-      SecretBinding for secret {{ dnsProvider.secretRefName }} not found in poject namespace
-    </v-tooltip>
-    <div
-      ref="dnsRow"
-      class="d-flex flex-nowrap align-center"
-    >
-      <div class="d-flex flex-wrap">
-        <div class="regular-input">
-          <v-select
-            v-model="dnsProviderType"
-            :disabled="dnsProvider.readonly"
-            color="primary"
-            :items="dnsProviderTypes"
-            :error-messages="getErrorMessages(v$.dnsProviderType)"
-            label="Dns Provider Type"
-            variant="underlined"
-            @change="v$.dnsProviderType.$touch()"
-            @blur="v$.dnsProviderType.$touch()"
-          >
-            <template #item="{ props }">
-              <v-list-item v-bind="props">
-                <template #prepend>
-                  <g-vendor-icon :icon="props.value" />
-                </template>
-              </v-list-item>
-            </template>
-            <template #selection="{ item }">
-              <div class="d-flex">
-                <g-vendor-icon
-                  :icon="item.value"
-                  class="mr-2"
-                />
-                {{ item.title }}
-              </div>
-            </template>
-          </v-select>
-        </div>
-        <div class="regular-input">
-          <g-select-secret
-            v-model="extensionDnsProviderSecret"
-            :disabled="dnsProvider.readonly"
-            :dns-provider-kind="dnsProviderType"
-            :filter-secret-names="filterSecretNames"
-            register-vuelidate-as="extensionDnsProviderSecret"
-          />
-        </div>
-        <div class="large-input">
-          <v-combobox
-            v-model="excludeDomains"
-            :disabled="dnsProvider.readonly"
-            label="Exclude Domains"
-            multiple
-            closable-chips
-            variant="underlined"
-          />
-        </div>
-        <div class="large-input">
-          <v-combobox
-            v-model="includeDomains"
-            :disabled="dnsProvider.readonly"
-            label="Include Domains"
-            multiple
-            closable-chips
-            variant="underlined"
-          />
-        </div>
-        <div class="large-input">
-          <v-combobox
-            v-model="excludeZones"
-            :disabled="dnsProvider.readonly"
-            label="Exclude Zones"
-            multiple
-            closable-chips
-            variant="underlined"
-          />
-        </div>
-        <div class="large-input">
-          <v-combobox
-            v-model="includeZones"
-            :disabled="dnsProvider.readonly"
-            label="Include Zones"
-            multiple
-            closable-chips
-            variant="underlined"
-          />
-        </div>
+  <div class="d-flex flex-nowrap align-center">
+    <div class="d-flex flex-wrap">
+      <div class="regular-input">
+        <v-select
+          v-model="dnsProviderType"
+          color="primary"
+          :items="dnsProviderTypes"
+          :error-messages="getErrorMessages(v$.dnsProviderType)"
+          label="Dns Provider Type"
+          variant="underlined"
+          @change="v$.dnsProviderType.$touch()"
+          @blur="v$.dnsProviderType.$touch()"
+        >
+          <template #item="{ props }">
+            <v-list-item v-bind="props">
+              <template #prepend>
+                <g-vendor-icon :icon="props.value" />
+              </template>
+            </v-list-item>
+          </template>
+          <template #selection="{ item }">
+            <div class="d-flex">
+              <g-vendor-icon
+                :icon="item.value"
+                class="mr-2"
+              />
+              {{ item.title }}
+            </div>
+          </template>
+        </v-select>
       </div>
-      <div class="ml-4 mr-2">
-        <slot name="action" />
+      <div class="regular-input">
+        <g-select-secret
+          v-if="extensionDnsProviderSecret || !dnsProvider.secretName"
+          v-model="extensionDnsProviderSecret"
+          :dns-provider-kind="dnsProviderType"
+          :filter-secret-names="filterSecretNames"
+          register-vuelidate-as="extensionDnsProviderSecret"
+        />
+        <v-text-field
+          v-else
+          :value="dnsProvider.secretName"
+          disabled
+          variant="underlined"
+          persistent-hint
+          hint="Secret Binding for secret not found in project namespace. Use YAML view to edit secret"
+        />
       </div>
+      <div class="large-input">
+        <v-combobox
+          v-model="excludeDomains"
+          label="Exclude Domains"
+          multiple
+          closable-chips
+          variant="underlined"
+        />
+      </div>
+      <div class="large-input">
+        <v-combobox
+          v-model="includeDomains"
+          label="Include Domains"
+          multiple
+          closable-chips
+          variant="underlined"
+        />
+      </div>
+      <div class="large-input">
+        <v-combobox
+          v-model="excludeZones"
+          label="Exclude Zones"
+          multiple
+          closable-chips
+          variant="underlined"
+        />
+      </div>
+      <div class="large-input">
+        <v-combobox
+          v-model="includeZones"
+          label="Include Zones"
+          multiple
+          closable-chips
+          variant="underlined"
+        />
+      </div>
+    </div>
+    <div class="ml-4 mr-2">
+      <slot name="action" />
     </div>
   </div>
 </template>
@@ -172,11 +160,6 @@ export default {
       }),
     }
   },
-  data () {
-    return {
-      secretValid: true,
-    }
-  },
   computed: {
     ...mapState(useGardenerExtensionStore, [
       'dnsProviderTypes',
@@ -203,7 +186,7 @@ export default {
         this.deleteExtensionDnsProviderResourceRef(this.dnsProvider.secretName)
 
         const secretName = get(value, 'metadata.secretRef.name', undefined)
-        this.dnsProvider.secretName = this.getExtensionDnsResourceName(secretName) // secretName is the resource name
+        this.dnsProvider.secretName = secretName ? this.getExtensionDnsResourceName(secretName) : undefined // secretName is the resource name
         this.addExtensionDnsProviderResourceRef(this.dnsProvider.secretName, secretName)
       },
     },
@@ -247,14 +230,6 @@ export default {
         }
         return undefined
       })
-    },
-  },
-  watch: {
-    'v$.$invalid' (value) {
-      const oldValue = !this.dnsProvider?.valid
-      if (oldValue !== value && !this.dnsProvider.readonly) {
-        this.dnsProvider.valid = !value
-      }
     },
   },
   mounted () {

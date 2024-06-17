@@ -879,6 +879,7 @@ export function createShootContextComposable (options = {}) {
 
   function resetDnsPrimaryProvider () {
     if (!dnsDomain.value) {
+      // 'spec.dns.providers' may only contain a single primary provider. For historical reasons it is still an array
       set(manifest.value, 'spec.dns.providers', undefined)
     }
   }
@@ -888,32 +889,12 @@ export function createShootContextComposable (options = {}) {
     return find(providers, ['primary', true])
   })
 
-  function getExtensionDnsResourceName (secretName) {
-    return `shoot-dns-service-${secretName}`
-  }
-
-  const extensionDnsProviders = computed(() => {
-    return get(extensionDns, 'value.providerConfig.providers') ?? []
-  })
-
-  function setInitialDnsExtension () {
-    const dnsExtension = {
-      type: 'shoot-dns-service',
-      providerConfig: {
-        apiVersion: 'service.dns.extensions.gardener.cloud/v1alpha1',
-        kind: 'DNSConfig',
-        syncProvidersFromShootSpecDNS: false,
-        providers: [],
-      },
-    }
-    setExtension(manifest.value, 'shoot-dns-service', dnsExtension)
-  }
-
   function setDnsPrimaryProvider (provider) {
     const primaryProvider = { primary: true, ...dnsPrimaryProvider.value, ...provider }
     const providers = [
       primaryProvider,
     ]
+    // 'spec.dns.providers' may only contain a single primary provider. For historical reasons it is still an array
     set(manifest.value, 'spec.dns.providers', providers)
   }
 
@@ -943,6 +924,27 @@ export function createShootContextComposable (options = {}) {
       provider.domains?.include?.includes(dnsDomain.value)
     })
   })
+
+  function getExtensionDnsResourceName (secretName) {
+    return `shoot-dns-service-${secretName}`
+  }
+
+  const extensionDnsProviders = computed(() => {
+    return get(extensionDns, 'value.providerConfig.providers') ?? []
+  })
+
+  function setInitialDnsExtension () {
+    const dnsExtension = {
+      type: 'shoot-dns-service',
+      providerConfig: {
+        apiVersion: 'service.dns.extensions.gardener.cloud/v1alpha1',
+        kind: 'DNSConfig',
+        syncProvidersFromShootSpecDNS: false,
+        providers: [],
+      },
+    }
+    setExtension(manifest.value, 'shoot-dns-service', dnsExtension)
+  }
 
   function addExtensionCustomDomainProvider () {
     if (hasExtensionCustomDomainProvider.value) {
@@ -975,17 +977,17 @@ export function createShootContextComposable (options = {}) {
       secretName = get(secret, 'metadata.secretRef.name')
     }
 
-    const resourceName = getExtensionDnsResourceName(secretName)
+    const resourceName = secretName ? getExtensionDnsResourceName(secretName) : undefined
 
     const dnsProvider = {
       type,
       secretName: resourceName, // resourceName is the secret name
     }
 
-    if (!extensionDns?.value?.providerConfig?.providers) {
+    if (!get(extensionDns.value, 'providerConfig.providers')) {
       setInitialDnsExtension()
     }
-    extensionDns?.value?.providerConfig?.providers.push(dnsProvider)
+    extensionDns.value.providerConfig.providers.push(dnsProvider)
 
     addExtensionDnsProviderResourceRef(resourceName, secretName)
 
@@ -995,6 +997,9 @@ export function createShootContextComposable (options = {}) {
   function addExtensionDnsProviderResourceRef (resourceName, secretName) {
     if (!resources.value) {
       manifest.value.spec.resources = []
+    }
+    if (!resourceName || !secretName) {
+      return
     }
     resources.value.push({
       name: resourceName,

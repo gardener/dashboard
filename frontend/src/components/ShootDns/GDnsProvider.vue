@@ -58,6 +58,10 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { mapActions } from 'pinia'
+
+import { useSecretStore } from '@/store/secret'
+
 import GVendorIcon from '@/components/GVendorIcon'
 import GSecretDetailsItemContent from '@/components/Secrets/GSecretDetailsItemContent.vue'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
@@ -95,10 +99,6 @@ export default {
       required: false,
     },
     zones: {
-      type: Object,
-      required: false,
-    },
-    secret: {
       type: Object,
       required: false,
     },
@@ -156,6 +156,14 @@ export default {
       }
       return descriptions
     },
+    secret () {
+      return this.getCloudProviderSecretByName({ name: this.secretName, namespace: this.shootNamespace })
+    },
+  },
+  methods: {
+    ...mapActions(useSecretStore, [
+      'getCloudProviderSecretByName',
+    ]),
   },
 }
 </script>
