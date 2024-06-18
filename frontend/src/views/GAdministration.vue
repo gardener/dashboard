@@ -226,7 +226,7 @@ SPDX-License-Identifier: Apache-2.0
                         showDetails,
                         searchable,
                         sortable
-                      } in shootCustomFieldsList"
+                      } in shootCustomFields"
                       :key="name"
                       class="mr-2 mb-2"
                       :color="color"
@@ -243,10 +243,13 @@ SPDX-License-Identifier: Apache-2.0
                       :sortable="sortable"
                     />
                     <span
-                      v-if="!shootCustomFieldsList?.length"
+                      v-if="!shootCustomFields?.length"
                       class="font-weight-light text-disabled"
                     >Not defined</span>
                   </div>
+                  <template #append>
+                    <g-shoot-custom-fields-configuration />
+                  </template>
                 </g-list-item>
               </g-list>
             </v-card>
@@ -518,9 +521,12 @@ import GAccountAvatar from '@/components/GAccountAvatar.vue'
 import GDialog from '@/components/dialogs/GDialog.vue'
 import GTimeString from '@/components/GTimeString.vue'
 import GShootCustomField from '@/components/GShootCustomField.vue'
+import GShootCustomFieldsConfiguration from '@/components/GShootCustomFieldsConfiguration.vue'
 import GResourceQuotaHelp from '@/components/GResourceQuotaHelp.vue'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 
+import { useProvideProjectItem } from '@/composables/useProjectItem'
+import { useProvideProjectContext } from '@/composables/useProjectContext'
 import { useLogger } from '@/composables/useLogger'
 
 import { withMessage } from '@/utils/validators'
@@ -552,6 +558,8 @@ const kubeconfigStore = useKubeconfigStore()
 const route = useRoute()
 const router = useRouter()
 
+useProvideProjectContext()
+
 const color = ref('primary')
 const errorMessage = ref(undefined)
 const detailedErrorMessage = ref(undefined)
@@ -559,7 +567,9 @@ const refGDialog = ref(null)
 
 const projectItem = computed(() => projectStore.project)
 const projectDetails = computed(() => getProjectDetails(projectItem.value))
-const shootCustomFieldsList = computed(() => projectStore.shootCustomFieldList)
+const {
+  shootCustomFields,
+} = useProvideProjectItem(projectItem)
 
 const namespace = computed(() => authzStore.namespace)
 const canPatchProject = computed(() => authzStore.canPatchProject)
