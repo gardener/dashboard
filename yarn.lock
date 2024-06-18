@@ -2752,23 +2752,14 @@ __metadata:
   linkType: hard
 
 "@vueuse/router@npm:^10.9.0":
-  version: 10.10.0
-  resolution: "@vueuse/router@npm:10.10.0"
+  version: 10.11.0
+  resolution: "@vueuse/router@npm:10.11.0"
   dependencies:
-    "@vueuse/shared": "npm:10.10.0"
-    vue-demi: "npm:>=0.14.7"
+    "@vueuse/shared": "npm:10.11.0"
+    vue-demi: "npm:>=0.14.8"
   peerDependencies:
     vue-router: ">=4.0.0-rc.1"
-  checksum: 10c0/62ab2a643c75ac4a86b6a58766353954f72732f99e066fd5a54d69708c655978640a2573e3643056eafeda49c3fe494a54ecc744aaaca7198a1647647c368cee
-  languageName: node
-  linkType: hard
-
-"@vueuse/shared@npm:10.10.0":
-  version: 10.10.0
-  resolution: "@vueuse/shared@npm:10.10.0"
-  dependencies:
-    vue-demi: "npm:>=0.14.7"
-  checksum: 10c0/6d6d5e7fea32f52d62d36baed6e27936cd4542aff39a986dd47c9cb69a1ef8506dc98b54f2a164892bd49de9e73e4c6439979befca5c4c932846acdd1a5411ac
+  checksum: 10c0/017a83561aebdc9fcde39bb0e28292d07f862bb395dceb1947391a3fd758eb13b762d9011a611d90ea0acfeb3abf539b9b2a61ecbaf7209b70776a791cc79e01
   languageName: node
   linkType: hard
 
@@ -10438,22 +10429,6 @@ __metadata:
     vue-demi-fix: bin/vue-demi-fix.js
     vue-demi-switch: bin/vue-demi-switch.js
   checksum: 10c0/c292c398ad3c2dbbaaf9b66a0a14b725840d3ba2afb109000cf12ccbc12f9ac4d569d3c14d2a347889519a3a0d58b8169ffb924c91ba506fe69063ea06ca6e3d
-  languageName: node
-  linkType: hard
-
-"vue-demi@npm:>=0.14.7":
-  version: 0.14.7
-  resolution: "vue-demi@npm:0.14.7"
-  peerDependencies:
-    "@vue/composition-api": ^1.0.0-rc.1
-    vue: ^3.0.0-0 || ^2.6.0
-  peerDependenciesMeta:
-    "@vue/composition-api":
-      optional: true
-  bin:
-    vue-demi-fix: bin/vue-demi-fix.js
-    vue-demi-switch: bin/vue-demi-switch.js
-  checksum: 10c0/303216e3e6ee3f6ab5631488dd00a767ef3760a0a14e580c0223b278d093dc9ada8164ecec6bf8d8e12034e0bdf8dbb947c0c6f83095c6a53030a4a6dcbd57ce
   languageName: node
   linkType: hard
 
