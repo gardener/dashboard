@@ -31,8 +31,8 @@ function getSeed ({
         type: kind,
         region
       },
-      dns: {
-        ingressDomain: `ingress.${region}.${kind}.example.org`
+      ingress: {
+        domain: `ingress.${region}.${kind}.example.org`
       },
       taints: [],
       settings: {

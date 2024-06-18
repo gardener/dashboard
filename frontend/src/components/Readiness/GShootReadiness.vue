@@ -69,7 +69,6 @@ import {
 import GReadinessBarChart from './GReadinessBarChart'
 import GReadinessChip from './GReadinessChip.vue'
 
-import { sortBy } from '@/lodash'
 import {
   sortBy,
   padStart,

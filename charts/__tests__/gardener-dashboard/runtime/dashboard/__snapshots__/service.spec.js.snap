@@ -1,11 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`gardener-dashboard service should render the template 1`] = `
-Object {
+{
   "apiVersion": "v1",
   "kind": "Service",
-  "metadata": Object {
-    "labels": Object {
+  "metadata": {
+    "labels": {
       "app.kubernetes.io/component": "dashboard",
       "app.kubernetes.io/instance": "gardener-dashboard",
       "app.kubernetes.io/managed-by": "Helm",
@@ -15,16 +15,16 @@ Object {
     "name": "gardener-dashboard-service",
     "namespace": "garden",
   },
-  "spec": Object {
-    "ports": Array [
-      Object {
+  "spec": {
+    "ports": [
+      {
         "name": "http",
         "port": 8080,
         "protocol": "TCP",
         "targetPort": 8080,
       },
     ],
-    "selector": Object {
+    "selector": {
       "app.kubernetes.io/component": "dashboard",
       "app.kubernetes.io/name": "gardener-dashboard",
     },

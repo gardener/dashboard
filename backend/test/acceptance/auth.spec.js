@@ -8,7 +8,7 @@
 
 const { pick, head } = require('lodash')
 const assert = require('assert').strict
-const { TokenSet } = require('openid-client')
+const { TokenSet, generators } = require('openid-client')
 const setCookieParser = require('set-cookie-parser')
 const { mockRequest } = require('@gardener-dashboard/request')
 
@@ -17,7 +17,6 @@ const {
   COOKIE_HEADER_PAYLOAD,
   COOKIE_SIGNATURE,
   COOKIE_TOKEN,
-  decodeState,
   setCookies,
   sign,
   decrypt,
@@ -118,6 +117,7 @@ describe('auth', function () {
   let agent
   let getIssuerClientStub
   let mockRefresh
+  let mockState
 
   beforeAll(() => {
     agent = createAgent()
@@ -134,12 +134,11 @@ describe('auth', function () {
     })
     getIssuerClientStub = jest.spyOn(security, 'getIssuerClient').mockResolvedValue(client)
     mockRefresh = jest.spyOn(client, 'refresh')
+    mockState = jest.spyOn(generators, 'state').mockReturnValue('state')
   })
 
   it('should redirect to authorization url without frontend redirectUrl', async function () {
-    const redirectPath = '/'
     const redirectUri = head(oidc.redirect_uris)
-    const redirectOrigin = new URL(redirectUri).origin
 
     const res = await agent
       .get('/auth')
@@ -147,21 +146,18 @@ describe('auth', function () {
       .expect(302)
 
     expect(getIssuerClientStub).toBeCalledTimes(1)
+    expect(mockState).toBeCalledTimes(1)
     const url = new URL(res.headers.location)
     expect(url.searchParams.get('client_id')).toBe(oidc.client_id)
     expect(url.searchParams.get('redirect_uri')).toBe(redirectUri)
     expect(url.searchParams.get('scope')).toBe(oidc.scope)
     const state = url.searchParams.get('state')
-    expect(decodeState(state)).toEqual({
-      redirectPath,
-      redirectOrigin
-    })
+    expect(state).toEqual('state')
   })
 
   it('should redirect to authorization url with frontend redirectUrl', async function () {
     const redirectPath = '/namespace/garden-foo/administration'
     const redirectUri = head(oidc.redirect_uris)
-    const redirectOrigin = new URL(redirectUri).origin
     const redirectUrl = new URL(redirectPath, redirectUri).toString()
 
     const res = await agent
@@ -174,10 +170,7 @@ describe('auth', function () {
     const url = new URL(res.headers.location)
     expect(url.searchParams.get('redirect_uri')).toBe(redirectUri)
     const state = url.searchParams.get('state')
-    expect(decodeState(state)).toEqual({
-      redirectPath,
-      redirectOrigin
-    })
+    expect(state).toEqual('state')
   })
 
   it('should fail to redirect to authorization url', async function () {
