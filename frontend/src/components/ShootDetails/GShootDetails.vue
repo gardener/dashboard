@@ -15,9 +15,7 @@ SPDX-License-Identifier: Apache-2.0
         md="6"
       >
         <g-shoot-details-card />
-        <g-custom-fields-card
-          :custom-fields="customFields"
-        />
+        <g-custom-fields-card />
         <g-shoot-infrastructure-card />
         <g-shoot-external-tools-card />
         <g-shoot-lifecycle-card
@@ -45,12 +43,9 @@ SPDX-License-Identifier: Apache-2.0
 <script setup>
 import {
   ref,
-  computed,
   onMounted,
 } from 'vue'
 import { useRoute } from 'vue-router'
-
-import { useProjectStore } from '@/store/project'
 
 import GShootDetailsCard from '@/components/ShootDetails/GShootDetailsCard'
 import GCustomFieldsCard from '@/components/ShootDetails/GCustomFieldsCard'
@@ -62,38 +57,15 @@ import GShootCredentialRotationCard from '@/components/ShootDetails/GShootCreden
 import GTicketsCard from '@/components/GTicketsCard'
 import GShootAccessCard from '@/components/ShootDetails/GShootAccessCard'
 
-import { useShootItem } from '@/composables/useShootItem'
 import { useProvideShootContext } from '@/composables/useShootContext'
 
-import {
-  filter,
-  get,
-  map,
-} from '@/lodash'
+import { get } from '@/lodash'
 
 const route = useRoute()
 
 const shootLifecycleCard = ref(null)
 
-const {
-  shootItem,
-} = useShootItem()
-
 useProvideShootContext()
-
-const projectStore = useProjectStore()
-
-const customFields = computed(() => {
-  const customFields = filter(projectStore.shootCustomFieldList, ['showDetails', true])
-  return map(customFields, ({ name, path, icon, tooltip, defaultValue }) => ({
-    name,
-    path,
-    icon,
-    tooltip,
-    defaultValue,
-    value: get(shootItem.value, path),
-  }))
-})
 
 const emit = defineEmits([
   'addTerminalShortcut',
