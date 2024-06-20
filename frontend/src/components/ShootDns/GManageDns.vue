@@ -90,7 +90,7 @@ SPDX-License-Identifier: Apache-2.0
                 <v-btn
                   size="x-small"
                   color="info"
-                  @click="addExtensionCustomDomainProvider"
+                  @click="addDnsServiceExtensionProviderForCustomDomain"
                 >
                   Apply Recommended DNS Configuration
                 </v-btn>
@@ -108,7 +108,7 @@ SPDX-License-Identifier: Apache-2.0
       <div class="alternate-row-background">
         <v-expand-transition group>
           <v-row
-            v-for="(extensionDnsProvider, index) in extensionDnsProviders"
+            v-for="(extensionDnsProvider, index) in dnsServiceExtensionProviders"
             :key="index"
             class="list-item pt-2"
           >
@@ -119,7 +119,7 @@ SPDX-License-Identifier: Apache-2.0
                   variant="tonal"
                   icon="mdi-close"
                   color="grey"
-                  @click="deleteExtensionDnsProvider(index)"
+                  @click="deleteDnsServiceExtensionProvider(index)"
                 />
               </template>
             </g-dns-provider-row>
@@ -133,7 +133,7 @@ SPDX-License-Identifier: Apache-2.0
             <v-btn
               variant="text"
               color="primary"
-              @click="addExtensionDnsProvider()"
+              @click="addDnsServiceExtensionProvider()"
             >
               <v-icon class="text-primary">
                 mdi-plus
@@ -188,12 +188,12 @@ export default {
       dnsPrimaryProviderSecretName,
       isNewCluster,
       dnsProvidersWithPrimarySupport,
-      extensionDnsProviders,
-      hasExtensionCustomDomainProvider,
-      addExtensionDnsProvider,
-      addExtensionCustomDomainProvider,
+      dnsServiceExtensionProviders,
+      hasDnsServiceExtensionProviderForCustomDomain,
+      addDnsServiceExtensionProvider,
+      addDnsServiceExtensionProviderForCustomDomain,
       resetDnsPrimaryProvider,
-      deleteExtensionDnsProvider,
+      deleteDnsServiceExtensionProvider,
     } = useShootContext()
 
     return {
@@ -203,12 +203,12 @@ export default {
       dnsPrimaryProviderSecretName,
       isNewCluster,
       dnsProvidersWithPrimarySupport,
-      extensionDnsProviders,
-      hasExtensionCustomDomainProvider,
-      addExtensionDnsProvider,
-      addExtensionCustomDomainProvider,
+      dnsServiceExtensionProviders,
+      hasDnsServiceExtensionProviderForCustomDomain,
+      addDnsServiceExtensionProvider,
+      addDnsServiceExtensionProviderForCustomDomain,
       resetDnsPrimaryProvider,
-      deleteExtensionDnsProvider,
+      deleteDnsServiceExtensionProvider,
     }
   },
   validations () {
@@ -285,7 +285,7 @@ export default {
       if (!this.hasDnsServiceExtension) {
         return false
       }
-      return !this.hasExtensionCustomDomainProvider
+      return !this.hasDnsServiceExtensionProviderForCustomDomain
     },
   },
   watch: {

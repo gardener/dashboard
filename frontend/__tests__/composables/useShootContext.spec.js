@@ -121,9 +121,9 @@ describe('composables', () => {
 
     it('should add extension dns providers', async () => {
       shootContextStore.createShootManifest()
-      shootContextStore.addExtensionDnsProvider()
+      shootContextStore.addDnsServiceExtensionProvider()
       shootContextStore.dnsDomain = 'example.org'
-      expect(shootContextStore.extensionDnsProviders).toHaveLength(1)
+      expect(shootContextStore.dnsServiceExtensionProviders).toHaveLength(1)
       const shootManifest = shootContextStore.shootManifest
       expect(shootManifest.spec.dns).toMatchSnapshot()
       expect(shootManifest.spec.extensions).toMatchSnapshot()
@@ -132,20 +132,18 @@ describe('composables', () => {
 
     it('should delete extension dns providers', async () => {
       shootContextStore.createShootManifest()
-      shootContextStore.addExtensionDnsProvider()
-      shootContextStore.addExtensionDnsProvider()
-      expect(shootContextStore.extensionDnsProviders).toHaveLength(2)
+      shootContextStore.addDnsServiceExtensionProvider()
+      shootContextStore.addDnsServiceExtensionProvider()
 
-      // ensure internal manifest ref is updated with the new extension dns providers
-      shootContextStore.setShootManifest(shootContextStore.shootManifest)
+      expect(shootContextStore.dnsServiceExtensionProviders).toHaveLength(2)
 
-      shootContextStore.deleteExtensionDnsProvider(0)
+      shootContextStore.deleteDnsServiceExtensionProvider(0)
       let shootManifest = shootContextStore.shootManifest
       expect(shootManifest.spec.extensions).toMatchSnapshot()
       expect(shootManifest.spec.resources).toMatchSnapshot()
 
       // Delete last extension dns provider
-      shootContextStore.deleteExtensionDnsProvider(0)
+      shootContextStore.deleteDnsServiceExtensionProvider(0)
       shootManifest = shootContextStore.shootManifest
       expect(shootManifest.spec.extensions).toMatchSnapshot()
       expect(shootManifest.spec.resources).toMatchSnapshot()
@@ -168,9 +166,9 @@ describe('composables', () => {
       shootContextStore.dnsPrimaryProviderType = 'foo'
       shootContextStore.dnsPrimaryProviderSecretName = 'bar'
 
-      expect(shootContextStore.hasExtensionCustomDomainProvider).toBeFalsy()
-      shootContextStore.addExtensionCustomDomainProvider()
-      expect(shootContextStore.hasExtensionCustomDomainProvider).toBeTruthy()
+      expect(shootContextStore.hasDnsServiceExtensionProviderForCustomDomain).toBeFalsy()
+      shootContextStore.addDnsServiceExtensionProviderForCustomDomain()
+      expect(shootContextStore.hasDnsServiceExtensionProviderForCustomDomain).toBeTruthy()
 
       const shootManifest = shootContextStore.shootManifest
       expect(shootManifest.spec.dns).toMatchSnapshot()
