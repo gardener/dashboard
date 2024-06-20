@@ -136,21 +136,21 @@ export default {
   setup () {
     const {
       isNewCluster,
-      extensionDnsProviders,
-      getExtensionDnsResourceName,
-      addExtensionDnsProviderResourceRef,
-      deleteExtensionDnsProviderResourceRef,
-      secretNameFromResources,
+      dnsServiceExtensionProviders,
+      getDnsServiceExtensionResourceName,
+      setResource,
+      deleteResource,
+      getResourceRefName,
     } = useShootContext()
 
     return {
       v$: useVuelidate(),
       isNewCluster,
-      extensionDnsProviders,
-      getExtensionDnsResourceName,
-      addExtensionDnsProviderResourceRef,
-      deleteExtensionDnsProviderResourceRef,
-      secretNameFromResources,
+      dnsServiceExtensionProviders,
+      getDnsServiceExtensionResourceName,
+      setResource,
+      deleteResource,
+      getResourceRefName,
     }
   },
   validations () {
@@ -180,14 +180,23 @@ export default {
     },
     extensionDnsProviderSecret: {
       get () {
-        return find(this.dnsSecrets, ['metadata.secretRef.name', this.secretNameFromResources(this.dnsProvider.secretName)]) // this.dnsProvider.secretName is the resource name
+        const resourceName = this.dnsProvider.secretName
+        const secretName = this.getResourceRefName(resourceName)
+        return find(this.dnsSecrets, ['metadata.secretRef.name', secretName])
       },
       set (value) {
-        this.deleteExtensionDnsProviderResourceRef(this.dnsProvider.secretName)
-
-        const secretName = get(value, 'metadata.secretRef.name', undefined)
-        this.dnsProvider.secretName = secretName ? this.getExtensionDnsResourceName(secretName) : undefined // secretName is the resource name
-        this.addExtensionDnsProviderResourceRef(this.dnsProvider.secretName, secretName)
+        this.deleteResource(this.dnsProvider.secretName)
+        const secretName = get(value, 'metadata.secretRef.name')
+        const resourceName = this.getDnsServiceExtensionResourceName(secretName)
+        this.dnsProvider.secretName = resourceName
+        this.setResource({
+          name: resourceName,
+          resourceRef: {
+            apiVersion: 'v1',
+            kind: 'Secret',
+            name: secretName,
+          },
+        })
       },
     },
     excludeDomains: {
@@ -223,8 +232,8 @@ export default {
       },
     },
     filterSecretNames () {
-      return this.extensionDnsProviders.map(provider => {
-        const secretName = this.secretNameFromResources(provider.secretName) // provider.secretName is the resource name
+      return this.dnsServiceExtensionProviders.map(provider => {
+        const secretName = this.getResourceRefName(provider.secretName) // provider.secretName is the resource name
         if (secretName !== this.extensionDnsProviderSecret?.metadata.name) {
           return secretName
         }

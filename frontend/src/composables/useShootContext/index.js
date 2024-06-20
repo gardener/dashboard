@@ -41,6 +41,7 @@ import { useLogger } from '../useLogger'
 import { createShootHelperComposable } from '../useShootHelper'
 import { useShootMetadata } from '../useShootMetadata'
 import { useShootAccessRestrictions } from '../useShootAccessRestrictions'
+import { useShootDns } from '../useShootDns'
 
 import { cleanup } from './helper'
 
@@ -62,8 +63,6 @@ import {
   isEqual,
   isEmpty,
   size,
-  findIndex,
-  some,
 } from '@/lodash'
 
 export function createShootContextComposable (options = {}) {
@@ -147,25 +146,6 @@ export function createShootContextComposable (options = {}) {
     initialManifest.value = cloneDeep(normalizedManifest.value)
   }
 
-  function setExtension (manifest, type, extension) {
-    if (!Array.isArray(manifest?.spec?.extensions)) {
-      set(manifest, 'spec.extensions', [])
-    }
-    const extensions = manifest.spec.extensions
-    const index = findIndex(extensions, ['type', type])
-
-    if (index === -1) {
-      extensions.push(extension)
-      return
-    }
-
-    if (extension) {
-      extensions[index] = extension
-    } else {
-      extensions.splice(index, 1)
-    }
-  }
-
   const isShootDirty = computed(() => {
     return !isEqual(normalizedManifest.value, normalizedInitialManifest.value)
   })
@@ -182,16 +162,6 @@ export function createShootContextComposable (options = {}) {
     unsetShootAnnotation,
   } = useShootMetadata(manifest, {
     projectStore,
-  })
-
-  /* extensionDns */
-  const extensionDns = computed(() => {
-    return find(get(manifest.value, 'spec.extensions'), { type: 'shoot-dns-service' })
-  })
-
-  /* resources */
-  const resources = computed(() => {
-    return get(manifest.value, 'spec.resources')
   })
 
   /* seedName */
@@ -868,166 +838,25 @@ export function createShootContextComposable (options = {}) {
   })
 
   /* dns */
-  const dnsDomain = computed({
-    get () {
-      return get(manifest.value, 'spec.dns.domain')
-    },
-    set (value) {
-      set(manifest.value, 'spec.dns.domain', value)
-    },
+  const {
+    dnsDomain,
+    dnsPrimaryProviderType,
+    dnsPrimaryProviderSecretName,
+    dnsServiceExtensionProviders,
+    hasDnsServiceExtensionProviderForCustomDomain,
+    addDnsServiceExtensionProviderForCustomDomain,
+    addDnsServiceExtensionProvider,
+    deleteDnsServiceExtensionProvider,
+    getDnsServiceExtensionResourceName,
+    resetDnsPrimaryProvider,
+    addExtensionDnsProviderResourceRef,
+    setResource,
+    deleteResource,
+    getResourceRefName,
+  } = useShootDns(manifest, {
+    gardenerExtensionStore,
+    secretStore,
   })
-
-  function resetDnsPrimaryProvider () {
-    if (!dnsDomain.value) {
-      // 'spec.dns.providers' may only contain a single primary provider. For historical reasons it is still an array
-      set(manifest.value, 'spec.dns.providers', undefined)
-    }
-  }
-
-  const dnsPrimaryProvider = computed(() => {
-    const providers = get(manifest.value, 'spec.dns.providers')
-    return find(providers, ['primary', true])
-  })
-
-  function setDnsPrimaryProvider (provider) {
-    const primaryProvider = { primary: true, ...dnsPrimaryProvider.value, ...provider }
-    const providers = [
-      primaryProvider,
-    ]
-    // 'spec.dns.providers' may only contain a single primary provider. For historical reasons it is still an array
-    set(manifest.value, 'spec.dns.providers', providers)
-  }
-
-  const dnsPrimaryProviderType = computed({
-    get () {
-      return dnsPrimaryProvider.value?.type
-    },
-    set (type) {
-      setDnsPrimaryProvider({ type })
-    },
-  })
-
-  const dnsPrimaryProviderSecretName = computed({
-    get () {
-      return dnsPrimaryProvider.value?.secretName
-    },
-    set (secretName) {
-      setDnsPrimaryProvider({ secretName })
-    },
-  })
-
-  const hasExtensionCustomDomainProvider = computed(() => {
-    const { type, secretName } = dnsPrimaryProvider?.value ?? {}
-    return some(extensionDnsProviders.value, provider => {
-      return provider.type === type &&
-        secretNameFromResources(provider.secretName) === secretName && // provider.secretName is the resourceName
-      provider.domains?.include?.includes(dnsDomain.value)
-    })
-  })
-
-  function getExtensionDnsResourceName (secretName) {
-    return `shoot-dns-service-${secretName}`
-  }
-
-  const extensionDnsProviders = computed(() => {
-    return get(extensionDns, 'value.providerConfig.providers') ?? []
-  })
-
-  function setInitialDnsExtension () {
-    const dnsExtension = {
-      type: 'shoot-dns-service',
-      providerConfig: {
-        apiVersion: 'service.dns.extensions.gardener.cloud/v1alpha1',
-        kind: 'DNSConfig',
-        syncProvidersFromShootSpecDNS: false,
-        providers: [],
-      },
-    }
-    setExtension(manifest.value, 'shoot-dns-service', dnsExtension)
-  }
-
-  function addExtensionCustomDomainProvider () {
-    if (hasExtensionCustomDomainProvider.value) {
-      return
-    }
-    let customDomainProvider = find(extensionDnsProviders.value, provider => {
-      return provider.type === dnsPrimaryProvider.value?.type &&
-        secretNameFromResources(provider.secretName) === dnsPrimaryProvider.value?.secretName // provider.secretName is the resourceName
-    })
-    if (!customDomainProvider) {
-      const { type, secretName } = dnsPrimaryProvider?.value ?? {}
-      customDomainProvider = addExtensionDnsProvider(type, secretName)
-    }
-    if (customDomainProvider.domains?.include) {
-      customDomainProvider.domains.include.push(dnsDomain.value)
-    } else {
-      set(customDomainProvider, 'domains.include', [dnsDomain.value])
-    }
-  }
-
-  function addExtensionDnsProvider (type, secretName) {
-    if (!type) {
-      type = head(gardenerExtensionStore.dnsProviderTypes)
-    }
-    if (!secretName) {
-      const secrets = secretStore.dnsSecretsByProviderKind(type)
-      const secret = find(secrets, secret => { // find unused secret
-        return !some(resources.value, ['name', getExtensionDnsResourceName(secret.metadata.name)])
-      })
-      secretName = get(secret, 'metadata.secretRef.name')
-    }
-
-    const resourceName = secretName ? getExtensionDnsResourceName(secretName) : undefined
-
-    const dnsProvider = {
-      type,
-      secretName: resourceName, // resourceName is the secret name
-    }
-
-    if (!get(extensionDns.value, 'providerConfig.providers')) {
-      setInitialDnsExtension()
-    }
-    extensionDns.value.providerConfig.providers.push(dnsProvider)
-
-    addExtensionDnsProviderResourceRef(resourceName, secretName)
-
-    return dnsProvider
-  }
-
-  function addExtensionDnsProviderResourceRef (resourceName, secretName) {
-    if (!resources.value) {
-      manifest.value.spec.resources = []
-    }
-    if (!resourceName || !secretName) {
-      return
-    }
-    resources.value.push({
-      name: resourceName,
-      resourceRef: {
-        kind: 'Secret',
-        name: secretName,
-        apiVersion: 'v1',
-      },
-    })
-  }
-
-  function deleteExtensionDnsProvider (index) {
-    deleteExtensionDnsProviderResourceRef(extensionDnsProviders.value[index].secretName) // provider.secretName is the resourceName
-
-    extensionDns.value.providerConfig.providers = filter(extensionDns?.value?.providerConfig?.providers, (_, i) => i !== index)
-    if (!extensionDns.value.providerConfig.providers.length) {
-      setExtension(manifest.value, 'shoot-dns-service', undefined)
-    }
-  }
-
-  function deleteExtensionDnsProviderResourceRef (resourceName) {
-    manifest.value.spec.resources = filter(resources.value, ({ name }) => name !== resourceName)
-  }
-
-  function secretNameFromResources (resourceName) {
-    const secretResource = find(resources.value, ['name', resourceName])
-    return get(secretResource, 'resourceRef.name')
-  }
 
   /* accessRestrictions */
   const {
@@ -1168,16 +997,17 @@ export function createShootContextComposable (options = {}) {
     dnsDomain,
     dnsPrimaryProviderType,
     dnsPrimaryProviderSecretName,
-    extensionDnsProviders,
-    hasExtensionCustomDomainProvider,
-    addExtensionCustomDomainProvider,
-    addExtensionDnsProvider,
-    deleteExtensionDnsProvider,
-    getExtensionDnsResourceName,
+    dnsServiceExtensionProviders,
+    hasDnsServiceExtensionProviderForCustomDomain,
+    addDnsServiceExtensionProviderForCustomDomain,
+    addDnsServiceExtensionProvider,
+    deleteDnsServiceExtensionProvider,
+    getDnsServiceExtensionResourceName,
     resetDnsPrimaryProvider,
     addExtensionDnsProviderResourceRef,
-    deleteExtensionDnsProviderResourceRef,
-    secretNameFromResources,
+    setResource,
+    deleteResource,
+    getResourceRefName,
     /* accessRestrictions */
     getAccessRestrictionValue,
     setAccessRestrictionValue,
