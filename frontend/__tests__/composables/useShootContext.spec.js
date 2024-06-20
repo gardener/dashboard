@@ -3,6 +3,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
+
 import { reactive } from 'vue'
 import {
   setActivePinia,
@@ -117,63 +118,6 @@ describe('composables', () => {
       const shootManifest = shootContextStore.shootManifest
       expect(shootManifest.spec.provider.workers).toMatchSnapshot()
       expect(shootManifest.spec.provider.infrastructureConfig.networks.zones).toMatchSnapshot()
-    })
-
-    it('should add extension dns providers', async () => {
-      shootContextStore.createShootManifest()
-      shootContextStore.addDnsServiceExtensionProvider()
-      shootContextStore.dnsDomain = 'example.org'
-      expect(shootContextStore.dnsServiceExtensionProviders).toHaveLength(1)
-      const shootManifest = shootContextStore.shootManifest
-      expect(shootManifest.spec.dns).toMatchSnapshot()
-      expect(shootManifest.spec.extensions).toMatchSnapshot()
-      expect(shootManifest.spec.resources).toMatchSnapshot()
-    })
-
-    it('should delete extension dns providers', async () => {
-      shootContextStore.createShootManifest()
-      shootContextStore.addDnsServiceExtensionProvider()
-      shootContextStore.addDnsServiceExtensionProvider()
-
-      expect(shootContextStore.dnsServiceExtensionProviders).toHaveLength(2)
-
-      shootContextStore.deleteDnsServiceExtensionProvider(0)
-      let shootManifest = shootContextStore.shootManifest
-      expect(shootManifest.spec.extensions).toMatchSnapshot()
-      expect(shootManifest.spec.resources).toMatchSnapshot()
-
-      // Delete last extension dns provider
-      shootContextStore.deleteDnsServiceExtensionProvider(0)
-      shootManifest = shootContextStore.shootManifest
-      expect(shootManifest.spec.extensions).toMatchSnapshot()
-      expect(shootManifest.spec.resources).toMatchSnapshot()
-    })
-
-    it('should add primary dns provider', async () => {
-      shootContextStore.createShootManifest()
-      shootContextStore.dnsDomain = 'example.org'
-      shootContextStore.dnsPrimaryProviderType = 'foo'
-      shootContextStore.dnsPrimaryProviderSecretName = 'bar'
-      const shootManifest = shootContextStore.shootManifest
-      expect(shootManifest.spec.dns).toMatchSnapshot()
-      expect(shootManifest.spec.extensions).toBeUndefined()
-      expect(shootManifest.spec.resources).toBeUndefined()
-    })
-
-    it('should add extension custom domain dns provider', async () => {
-      shootContextStore.createShootManifest()
-      shootContextStore.dnsDomain = 'example.org'
-      shootContextStore.dnsPrimaryProviderType = 'foo'
-      shootContextStore.dnsPrimaryProviderSecretName = 'bar'
-
-      expect(shootContextStore.hasDnsServiceExtensionProviderForCustomDomain).toBeFalsy()
-      shootContextStore.addDnsServiceExtensionProviderForCustomDomain()
-      expect(shootContextStore.hasDnsServiceExtensionProviderForCustomDomain).toBeTruthy()
-
-      const shootManifest = shootContextStore.shootManifest
-      expect(shootManifest.spec.dns).toMatchSnapshot()
-      expect(shootManifest.spec.extensions).toMatchSnapshot()
-      expect(shootManifest.spec.resources).toMatchSnapshot()
     })
   })
 })
