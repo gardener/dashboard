@@ -33,7 +33,7 @@ SPDX-License-Identifier: Apache-2.0
         <slot name="header" />
       </div>
       <div
-        ref="cardContent"
+        ref="cardContentRef"
         class="card-content"
       >
         <slot name="content" />
@@ -101,9 +101,12 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { ref } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 
 import GMessage from '@/components/GMessage.vue'
+
+import { useScrollBar } from '@/composables/useScrollBar'
 
 import { setDelayedInputFocus } from '@/utils'
 import { messageFromErrors } from '@/utils/validators'
@@ -163,8 +166,12 @@ export default {
     'dialogClosed',
   ],
   setup () {
+    const cardContentRef = ref(null)
+    useScrollBar(cardContentRef)
+
     return {
       v$: useVuelidate(),
+      cardContentRef,
     }
   },
   data () {
@@ -207,13 +214,6 @@ export default {
     },
     hasVisibleErrors () {
       return this.v$.$errors.length > 0
-    },
-  },
-  watch: {
-    visible (value) {
-      if (value) {
-        this.showScrollBar(0)
-      }
     },
   },
   methods: {
@@ -268,20 +268,6 @@ export default {
       }
       this.$emit('dialogClosed', value)
       this.visible = false
-    },
-    showScrollBar (retryCount) {
-      if (!this.visible || retryCount > 10) {
-        // circuit breaker
-        return
-      }
-      const cardContentRef = this.$refs.cardContent
-      if (!cardContentRef || !cardContentRef.clientHeight) {
-        this.$nextTick(() => this.showScrollBar(retryCount + 1))
-        return
-      }
-      const scrollTopVal = cardContentRef.scrollTop
-      cardContentRef.scrollTop = scrollTopVal + 10
-      cardContentRef.scrollTop = scrollTopVal - 10
     },
   },
 }
