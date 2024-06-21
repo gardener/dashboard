@@ -386,7 +386,6 @@ import {
 
 import GMessage from '@/components/GMessage.vue'
 
-import { useProjectItem } from '@/composables/useProjectItem'
 import { useProjectContext } from '@/composables/useProjectContext'
 import { useScrollBar } from '@/composables/useScrollBar'
 
@@ -442,16 +441,12 @@ let uneditedCustomField // does not need to be reactive
 useScrollBar(refCardContent)
 
 const {
-  projectItem,
-} = useProjectItem()
-
-const {
   shootCustomFields,
   addShootCustomField,
   deleteShootCustomField,
   replaceShootCustomField,
   isShootCustomFieldNameUnique,
-} = useProjectContext(projectItem)
+} = useProjectContext()
 
 function openAddDialog () {
   dialogTitle.value = 'Add New Field'

@@ -22,7 +22,7 @@ import {
   isEqual,
 } from '@/lodash'
 
-export function createProjectContextComposable (options = {}) {
+export function createProjectContextComposable () {
   function normalizeManifest (value) {
     const object = Object.assign({
       apiVersion: 'core.gardener.cloud/v1beta1',
