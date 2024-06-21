@@ -122,207 +122,212 @@ SPDX-License-Identifier: Apache-2.0
     <v-card
       tile
     >
-      <v-toolbar
-        title="General Settings"
-        color="transparent"
-      />
-      <v-card-text>
-        <v-row>
-          <v-col
-            cols="12"
-          >
-            <v-text-field
-              ref="refName"
-              v-model.trim="v$.name.$model"
-              variant="underlined"
-              label="Name"
-              required
-              :error-messages="getErrorMessages(v$.name)"
-              hint="Name of the custom field"
-              persistent-hint
-              @blur="v$.name.$touch()"
-            />
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col
-            cols="12"
-            sm="6"
-          >
-            <v-text-field
-              v-model.trim="v$.path.$model"
-              variant="underlined"
-              label="Path"
-              required
-              :error-messages="getErrorMessages(v$.path)"
-              hint="Path in shoot resource, e.g., 'metadata.labels[&quot;shoot.gardener.cloud/status&quot;]'"
-              persistent-hint
-              @blur="v$.path.$touch()"
-            />
-          </v-col>
-          <v-col
-            cols="12"
-            sm="6"
-          >
-            <v-text-field
-              v-model="v$.icon.$model"
-              variant="underlined"
-              label="Icon"
-              :error-messages="getErrorMessages(v$.icon)"
-              hint="MDI icon for field, e.g., 'mdi-network'"
-              persistent-hint
-            >
-              <template #append>
-                <v-icon>
-                  {{ editedField.icon }}
-                </v-icon>
-              </template>
-            </v-text-field>
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col
-            cols="12"
-            sm="6"
-          >
-            <v-text-field
-              v-model="editedField.defaultValue"
-              variant="underlined"
-              label="Default Value"
-              hint="Value to display if no value is found for the given path"
-              persistent-hint
-            />
-          </v-col>
-          <v-col
-            cols="12"
-            sm="6"
-          >
-            <v-text-field
-              v-model="editedField.tooltip"
-              variant="underlined"
-              label="Tooltip"
-              hint="Tooltip for the custom field"
-              persistent-hint
-            />
-          </v-col>
-        </v-row>
-      </v-card-text>
-      <v-divider />
-      <v-toolbar
-        title="Cluster List Settings"
-        color="transparent"
-      />
-      <v-card-text>
-        <v-row>
-          <v-col cols="12">
-            <v-checkbox
-              v-model="v$.showColumn.$model"
-              color="primary"
-              label="Show Column"
-              :error-messages="getErrorMessages(v$.showColumn)"
-              hint="Field shall appear as column in the cluster list"
-              persistent-hint
-              density="compact"
-            />
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col
-            cols="12"
-            sm="6"
-          >
-            <v-checkbox
-              v-model="editedField.columnSelectedByDefault"
-              color="primary"
-              label="Column Displayed By Default"
-              hint="Column shall be displayed by default on the cluster list"
-              persistent-hint
-              density="compact"
-              :disabled="!editedField.showColumn"
-            />
-          </v-col>
-          <v-col
-            cols="12"
-            sm="6"
-          >
-            <v-tooltip
-              v-model="weightTooltip"
-              location="top"
-            >
-              <template #activator="{ props }">
-                <v-text-field
-                  v-model="editedField.weight"
-                  variant="underlined"
-                  label="Weight"
-                  type="number"
-                  hint="Order of the column"
-                  persistent-hint
-                  v-bind="props"
-                  :disabled="!editedField.showColumn"
-                />
-              </template>
-              <span>The standard columns start with weight 100 and continue in 100 increments (200, 300, ..)</span>
-            </v-tooltip>
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col
-            cols="12"
-            sm="6"
-          >
-            <v-checkbox
-              v-model="editedField.sortable"
-              color="primary"
-              label="Sortable"
-              hint="Column is sortable on the cluster list"
-              persistent-hint
-              density="compact"
-              :disabled="!editedField.showColumn"
-            />
-          </v-col>
-          <v-col
-            cols="12"
-            sm="6"
-          >
-            <v-checkbox
-              v-model="editedField.searchable"
-              color="primary"
-              label="Searchable"
-              hint="Column is searchable on the cluster list"
-              persistent-hint
-              density="compact"
-              :disabled="!editedField.showColumn"
-            />
-          </v-col>
-        </v-row>
-      </v-card-text>
-      <v-divider />
-      <v-toolbar
-        title="Cluster Details Settings"
-        color="transparent"
-      />
-      <v-card-text>
-        <v-checkbox
-          v-model="v$.showDetails.$model"
-          color="primary"
-          label="Show Details"
-          :error-messages="getErrorMessages(v$.showDetails)"
-          hint="Indicates if field shall appear in a dedicated card on the cluster details page"
-          persistent-hint
-          density="compact"
-        />
-      </v-card-text>
-      <v-card-text
-        v-if="errorMessage"
+      <div
+        ref="refCardContent"
+        class="card-content"
       >
-        <g-message
-          v-model:message="errorMessage"
-          v-model:detailed-message="detailedErrorMessage"
-          color="error"
-          class="ma-0"
-          tile
+        <v-toolbar
+          title="General Settings"
+          color="transparent"
         />
-      </v-card-text>
+        <v-card-text>
+          <v-row>
+            <v-col
+              cols="12"
+              sm="6"
+            >
+              <v-text-field
+                ref="refName"
+                v-model.trim="v$.name.$model"
+                variant="underlined"
+                label="Name"
+                required
+                :error-messages="getErrorMessages(v$.name)"
+                hint="Name of the custom field"
+                persistent-hint
+                @blur="v$.name.$touch()"
+              />
+            </v-col>
+            <v-col
+              cols="12"
+              sm="6"
+            >
+              <v-text-field
+                v-model="v$.icon.$model"
+                variant="underlined"
+                label="Icon"
+                :error-messages="getErrorMessages(v$.icon)"
+                hint="MDI icon for field, e.g., 'mdi-network'"
+                persistent-hint
+              >
+                <template #append>
+                  <v-icon color="primary">
+                    {{ editedField.icon }}
+                  </v-icon>
+                </template>
+              </v-text-field>
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col
+              cols="12"
+            >
+              <v-text-field
+                v-model.trim="v$.path.$model"
+                variant="underlined"
+                label="Path"
+                required
+                :error-messages="getErrorMessages(v$.path)"
+                hint="Path in shoot resource, e.g., 'metadata.labels[&quot;shoot.gardener.cloud/status&quot;]'"
+                persistent-hint
+                @blur="v$.path.$touch()"
+              />
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col
+              cols="12"
+              sm="6"
+            >
+              <v-text-field
+                v-model="editedField.defaultValue"
+                variant="underlined"
+                label="Default Value"
+                hint="Value to display if no value is found for the given path"
+                persistent-hint
+              />
+            </v-col>
+            <v-col
+              cols="12"
+              sm="6"
+            >
+              <v-text-field
+                v-model="editedField.tooltip"
+                variant="underlined"
+                label="Tooltip"
+                hint="Tooltip for the custom field"
+                persistent-hint
+              />
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <v-divider />
+        <v-toolbar
+          title="Cluster List Settings"
+          color="transparent"
+        />
+        <v-card-text>
+          <v-row>
+            <v-col cols="12">
+              <v-checkbox
+                v-model="v$.showColumn.$model"
+                color="primary"
+                label="Show Column"
+                :error-messages="getErrorMessages(v$.showColumn)"
+                hint="Field shall appear as column in the cluster list"
+                persistent-hint
+                density="compact"
+              />
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col
+              cols="12"
+              sm="6"
+            >
+              <v-checkbox
+                v-model="editedField.columnSelectedByDefault"
+                color="primary"
+                label="Column Displayed By Default"
+                hint="Column shall be displayed by default on the cluster list"
+                persistent-hint
+                density="compact"
+                :disabled="!editedField.showColumn"
+              />
+            </v-col>
+            <v-col
+              cols="12"
+              sm="6"
+            >
+              <v-tooltip
+                v-model="weightTooltip"
+                location="top"
+              >
+                <template #activator="{ props }">
+                  <v-text-field
+                    v-model="editedField.weight"
+                    variant="underlined"
+                    label="Weight"
+                    type="number"
+                    hint="Order of the column"
+                    persistent-hint
+                    v-bind="props"
+                    :disabled="!editedField.showColumn"
+                  />
+                </template>
+                <span>The standard columns start with weight 100 and continue in 100 increments (200, 300, ..)</span>
+              </v-tooltip>
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col
+              cols="12"
+              sm="6"
+            >
+              <v-checkbox
+                v-model="editedField.sortable"
+                color="primary"
+                label="Sortable"
+                hint="Column is sortable on the cluster list"
+                persistent-hint
+                density="compact"
+                :disabled="!editedField.showColumn"
+              />
+            </v-col>
+            <v-col
+              cols="12"
+              sm="6"
+            >
+              <v-checkbox
+                v-model="editedField.searchable"
+                color="primary"
+                label="Searchable"
+                hint="Column is searchable on the cluster list"
+                persistent-hint
+                density="compact"
+                :disabled="!editedField.showColumn"
+              />
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <v-divider />
+        <v-toolbar
+          title="Cluster Details Settings"
+          color="transparent"
+        />
+        <v-card-text>
+          <v-checkbox
+            v-model="v$.showDetails.$model"
+            color="primary"
+            label="Show Details"
+            :error-messages="getErrorMessages(v$.showDetails)"
+            hint="Indicates if field shall appear in a dedicated card on the cluster details page"
+            persistent-hint
+            density="compact"
+          />
+        </v-card-text>
+        <v-card-text
+          v-if="errorMessage"
+        >
+          <g-message
+            v-model:message="errorMessage"
+            v-model:detailed-message="detailedErrorMessage"
+            color="error"
+            class="ma-0"
+            tile
+          />
+        </v-card-text>
+      </div>
       <v-divider />
       <v-card-actions>
         <v-spacer />
@@ -383,6 +388,7 @@ import GMessage from '@/components/GMessage.vue'
 
 import { useProjectItem } from '@/composables/useProjectItem'
 import { useProjectContext } from '@/composables/useProjectContext'
+import { useScrollBar } from '@/composables/useScrollBar'
 
 import { messageFromErrors } from '@/utils/validators'
 import {
@@ -429,8 +435,11 @@ const weightTooltip = ref(false)
 const errorMessage = ref('')
 const detailedErrorMessage = ref('')
 const refName = ref(null)
+const refCardContent = ref(null)
 
 let uneditedCustomField // does not need to be reactive
+
+useScrollBar(refCardContent)
 
 const {
   projectItem,
@@ -542,3 +551,10 @@ const rules = {
 const v$ = useVuelidate(rules, editedField, { $stopPropagation: true })
 
 </script>
+
+<style lang="scss" scoped>
+.card-content {
+  overflow: scroll;
+  height: auto;
+}
+</style>
