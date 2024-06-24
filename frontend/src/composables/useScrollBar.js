@@ -6,8 +6,8 @@
 
 import { watch } from 'vue'
 
-export function useScrollBar (cardContentRef) {
-  watch(cardContentRef, value => {
+export function useScrollBar (containerRef) {
+  watch(containerRef, value => {
     if (value?.clientHeight) {
       value.scrollTop += 10
       value.scrollTop -= 10

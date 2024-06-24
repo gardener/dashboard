@@ -14,6 +14,7 @@ import {
   watch,
   markRaw,
   toRaw,
+  toRef,
 } from 'vue'
 import { useDocumentVisibility } from '@vueuse/core'
 
@@ -74,7 +75,7 @@ const useShootStore = defineStore('shoot', () => {
   const socketStore = useSocketStore()
   const localStorageStore = useLocalStorageStore()
 
-  const projectItem = computed(() => projectStore.project)
+  const projectItem = toRef(projectStore, 'project')
 
   const shootCustomFieldsComposable = useProjectShootCustomFields(projectItem, { logger })
 

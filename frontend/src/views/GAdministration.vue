@@ -492,7 +492,9 @@ import {
   ref,
   computed,
   watch,
+  toRef,
 } from 'vue'
+import { storeToRefs } from 'pinia'
 import {
   useRoute,
   useRouter,
@@ -532,7 +534,6 @@ import { useLogger } from '@/composables/useLogger'
 import { withMessage } from '@/utils/validators'
 import {
   transformHtml,
-  getProjectDetails,
   isServiceAccountUsername,
   getDateFormatted,
 } from '@/utils'
@@ -565,18 +566,28 @@ const errorMessage = ref(undefined)
 const detailedErrorMessage = ref(undefined)
 const refGDialog = ref(null)
 
-const projectItem = computed(() => projectStore.project)
-const projectDetails = computed(() => getProjectDetails(projectItem.value))
+const projectItem = toRef(projectStore, 'project')
 const {
+  projectName,
   shootCustomFields,
+  projectOwner: owner,
+  projectCostObject: costObject,
+  projectCreationTimestamp: creationTimestamp,
+  projectCreatedBy: createdBy,
+  projectDescription: description,
+  projectPurpose: purpose,
+  projectStaleSinceTimestamp: staleSinceTimestamp,
+  projectStaleAutoDeleteTimestamp: staleAutoDeleteTimestamp,
 } = useProvideProjectItem(projectItem)
 
-const namespace = computed(() => authzStore.namespace)
-const canPatchProject = computed(() => authzStore.canPatchProject)
-const canManageMembers = computed(() => authzStore.canManageMembers)
-const canDeleteProject = computed(() => authzStore.canDeleteProject)
-const isKubeconfigEnabled = computed(() => kubeconfigStore.isKubeconfigEnabled)
-const projectQuotaStatus = computed(() => quotaStore.projectQuotaStatus)
+const {
+  namespace,
+  canPatchProject,
+  canManageMembers,
+  canDeleteProject,
+} = storeToRefs(authzStore)
+const isKubeconfigEnabled = toRef(kubeconfigStore, 'isKubeconfigEnabled')
+const projectQuotaStatus = toRef(quotaStore, 'projectQuotaStatus')
 
 const userList = computed(() => {
   const members = new Set()
@@ -585,18 +596,23 @@ const userList = computed(() => {
       members.add(username)
     }
   }
-  if (projectDetails.value.owner) {
-    members.add(projectDetails.value.owner)
+  if (owner.value) {
+    members.add(owner.value)
   }
   return Array.from(members)
 })
 const costObjectSettingEnabled = computed(() => !isEmpty(configStore.costObjectSettings))
 const costObjectDescriptionHtml = computed(() => transformHtml(get(configStore.costObjectSettings, 'description')))
-const costObjectRules = computed(() => ({
-  costObject: getCostObjectValidator(),
-}))
-const projectName = computed(() => projectDetails.value.projectName)
-const owner = computed(() => projectDetails.value.owner)
+const costObjectRules = computed(() => {
+  const pattern = get(configStore.costObjectSettings, 'regex', '[^]*')
+
+  return {
+    projectCostObject: withMessage(
+      () => get(configStore.costObjectSettings, 'errorMessage'),
+      helpers.regex(new RegExp(pattern)),
+    ),
+  }
+})
 const ownerRules = computed(() => {
   const userListIncludesValidator = helpers.withParams(
     { type: 'userListIncludes' },
@@ -607,13 +623,7 @@ const ownerRules = computed(() => {
     userListIncludes: withMessage('Owner must be a project member', userListIncludesValidator),
   }
 })
-const costObject = computed(() => projectDetails.value.costObject)
-const creationTimestamp = computed(() => projectDetails.value.creationTimestamp)
-const createdBy = computed(() => projectDetails.value.createdBy)
-const description = computed(() => projectDetails.value.description)
-const purpose = computed(() => projectDetails.value.purpose)
-const staleSinceTimestamp = computed(() => projectDetails.value.staleSinceTimestamp)
-const staleAutoDeleteTimestamp = computed(() => projectDetails.value.staleAutoDeleteTimestamp)
+
 const staleAutoDeleteDate = computed(() => getDateFormatted(staleAutoDeleteTimestamp.value))
 const isDeleteButtonDisabled = computed(() => shootStore.shootList.length > 0)
 const slaDescriptionHtml = computed(() => transformHtml(configStore.sla.description))
@@ -623,7 +633,7 @@ watch(
   () => route.params,
   async () => {
     try {
-      await quotaStore.fetchQuotas(projectStore.project.metadata.namespace)
+      await quotaStore.fetchQuotas(namespace.value)
     } catch (err) {
       appStore.setError(`Failed to fetch project quota: ${err.message}`)
     }
@@ -631,31 +641,25 @@ watch(
   { immediate: true },
 )
 
-const getCostObjectValidator = () => {
-  const pattern = get(configStore.costObjectSettings, 'regex', '[^]*')
-  return withMessage(
-    () => get(configStore.costObjectSettings, 'errorMessage'),
-    helpers.regex(new RegExp(pattern)),
-  )
+function updateOwner (value) {
+  return updateProperty('owner', value)
 }
 
-const updateOwner = value => updateProperty('owner', value)
-
-const updateDescription = value => {
+function updateDescription (value) {
   if (!value) {
     value = null
   }
   return updateProperty('description', value)
 }
 
-const updatePurpose = value => {
+function updatePurpose (value) {
   if (!value) {
     value = null
   }
   return updateProperty('purpose', value)
 }
 
-const updateCostObject = value => {
+function updateCostObject (value) {
   if (costObjectSettingEnabled.value) {
     if (!value) {
       value = null
@@ -666,7 +670,7 @@ const updateCostObject = value => {
   }
 }
 
-const updateProperty = async (key, value, options = {}) => {
+async function updateProperty (key, value, options = {}) {
   const { metadata: { name, namespace } } = projectStore.project
   try {
     const mergePatchDocument = {
@@ -687,7 +691,7 @@ const updateProperty = async (key, value, options = {}) => {
   }
 }
 
-const showDialog = async () => {
+async function showDialog () {
   refGDialog.value.showDialog()
 
   const confirmed = await refGDialog.value.confirmWithDialog()

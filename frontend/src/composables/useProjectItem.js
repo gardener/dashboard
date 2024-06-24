@@ -5,6 +5,7 @@
 //
 
 import {
+  computed,
   isRef,
   inject,
   provide,
@@ -12,6 +13,8 @@ import {
 
 import { useProjectMetadata } from './useProjectMetadata'
 import { useProjectShootCustomFields } from './useProjectShootCustomFields'
+
+import { get } from '@/lodash'
 
 export function createProjectItemComposable (projectItem, options = {}) {
   if (!isRef(projectItem)) {
@@ -34,13 +37,37 @@ export function createProjectItemComposable (projectItem, options = {}) {
     setProjectLabel,
     unsetProjectLabel,
     projectCreatedAt,
-    projectCreatedBy,
     isNewProject,
   } = useProjectMetadata(projectItem)
 
   const {
     shootCustomFields,
   } = useProjectShootCustomFields(projectItem)
+
+  const projectCostObject = computed(() => {
+    return getProjectAnnotation('billing.gardener.cloud/costObject', '')
+  })
+  const projectCreatedBy = computed(() => {
+    return get(projectItem.value, 'data.createdBy', '')
+  })
+  const projectOwner = computed(() => {
+    return get(projectItem.value, 'data.owner', '')
+  })
+  const projectDescription = computed(() => {
+    return get(projectItem.value, 'data.description', '')
+  })
+  const projectPurpose = computed(() => {
+    return get(projectItem.value, 'data.purpose', '')
+  })
+  const projectStaleSinceTimestamp = computed(() => {
+    return get(projectItem.value, 'data.staleSinceTimestamp')
+  })
+  const projectStaleAutoDeleteTimestamp = computed(() => {
+    return get(projectItem.value, 'data.staleAutoDeleteTimestamp')
+  })
+  const projectPhase = computed(() => {
+    return get(projectItem.value, 'data.phase')
+  })
 
   return {
     projectItem,
@@ -60,8 +87,16 @@ export function createProjectItemComposable (projectItem, options = {}) {
     setProjectLabel,
     unsetProjectLabel,
     projectCreatedAt,
+    projectCostObject,
+    /* data */
     projectCreatedBy,
     isNewProject,
+    projectOwner,
+    projectDescription,
+    projectPurpose,
+    projectStaleSinceTimestamp,
+    projectStaleAutoDeleteTimestamp,
+    projectPhase,
     /* others */
     shootCustomFields,
   }

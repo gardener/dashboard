@@ -26,7 +26,7 @@ SPDX-License-Identifier: Apache-2.0
 <script setup>
 import {
   ref,
-  computed,
+  toRef,
 } from 'vue'
 
 import { useAuthzStore } from '@/store/authz'
@@ -56,16 +56,16 @@ const {
 
 const actionDialog = ref(null)
 
-const canPatchProject = computed(() => authzStore.canPatchProject)
+const canPatchProject = toRef(authzStore, 'canPatchProject')
 
-const onConfigurationDialogOpened = async () => {
+async function onConfigurationDialogOpened () {
   const confirmed = await actionDialog.value.waitForDialogClosed()
   if (confirmed) {
     await updateConfiguration()
   }
 }
 
-const updateConfiguration = async () => {
+async function updateConfiguration () {
   try {
     const { metadata: { name, namespace } } = projectStore.project
     const mergePatchDocument = {

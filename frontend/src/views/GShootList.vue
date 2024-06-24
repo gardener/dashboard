@@ -230,7 +230,7 @@ SPDX-License-Identifier: Apache-2.0
 import {
   ref,
   provide,
-  computed,
+  toRef,
 } from 'vue'
 import {
   mapState,
@@ -306,7 +306,7 @@ export default {
     const activePopoverKey = ref('')
     provide('activePopoverKey', activePopoverKey)
 
-    const projectItem = computed(() => projectStore.project)
+    const projectItem = toRef(projectStore, 'project')
     const {
       shootCustomFields,
     } = useProjectShootCustomFields(projectItem)

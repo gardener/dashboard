@@ -19,6 +19,7 @@ import {
   onBeforeMount,
   onMounted,
   onBeforeUnmount,
+  toRef,
 } from 'vue'
 import {
   useRoute,
@@ -209,7 +210,7 @@ export default {
 
     provide('activePopoverKey', activePopoverKey)
 
-    const projectItem = computed(() => projectStore.project)
+    const projectItem = toRef(projectStore, 'project')
 
     useProvideProjectItem(projectItem)
     const {

@@ -13,7 +13,6 @@ export const useProjectMetadata = (projectItem, options = {}) => {
     deletionTimestamp: projectDeletionTimestamp,
     generation: projectGeneration,
     uid: projectUid,
-    createdBy: projectCreatedBy,
     createdAt: projectCreatedAt,
     isNew: isNewProject,
     metadata: projectMetadata,
@@ -43,7 +42,6 @@ export const useProjectMetadata = (projectItem, options = {}) => {
     setProjectLabel,
     unsetProjectLabel,
     projectCreatedAt,
-    projectCreatedBy,
     isNewProject,
   }
 }
