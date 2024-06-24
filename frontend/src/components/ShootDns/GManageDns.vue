@@ -9,97 +9,98 @@ SPDX-License-Identifier: Apache-2.0
     <v-row>
       <v-checkbox
         v-model="customDomainEnabled"
-        label="Custom Cluster Domain"
+        label="Enable Custom Cluster Domain (Overrides default domain)"
         color="primary"
         :disabled="!isNewCluster"
         density="compact"
+        persistent-hint
         :hint="domainCheckboxHint"
-        :hide-details="isNewCluster"
-        :persistent-hint="!isNewCluster"
         class="mb-3 mx-3"
+        hide-details="auto"
       />
     </v-row>
-    <template v-if="customDomainEnabled">
-      <v-row>
-        <v-col cols="6">
-          <v-text-field
-            v-model="v$.dnsDomain.$model"
-            :error-messages="getErrorMessages(v$.dnsDomain)"
+    <v-row class="my-0">
+      <v-col cols="6">
+        <v-text-field
+          v-model="v$.dnsDomain.$model"
+          :error-messages="getErrorMessages(v$.dnsDomain)"
+          color="primary"
+          label="Custom Cluster Domain"
+          :disabled="!isNewCluster || !customDomainEnabled"
+          persistent-hint
+          :hint="domainHint"
+          variant="underlined"
+        />
+      </v-col>
+      <template v-if="primaryProviderVisible">
+        <v-col cols="3">
+          <v-select
+            v-model="v$.dnsPrimaryProviderType.$model"
             color="primary"
-            label="Cluster Domain"
+            :items="dnsProviderTypesWithPrimarySupport"
+            :error-messages="getErrorMessages(v$.dnsPrimaryProviderType)"
+            label="DNS Provider Type"
             :disabled="!isNewCluster"
             :persistent-hint="!isNewCluster"
-            :hint="domainHint"
+            :hint="typeHint"
             variant="underlined"
+          >
+            <template #item="{ props }">
+              <v-list-item v-bind="props">
+                <template #prepend>
+                  <g-vendor-icon :icon="props.value" />
+                </template>
+              </v-list-item>
+            </template>
+            <template #selection="{ item }">
+              <div class="d-flex">
+                <g-vendor-icon
+                  :icon="item.value"
+                  class="mr-2"
+                />
+                {{ item.value }}
+              </div>
+            </template>
+          </v-select>
+        </v-col>
+        <v-col cols="3">
+          <g-select-secret
+            v-model="primaryDnsProviderSecret"
+            :dns-provider-kind="dnsPrimaryProviderType"
+            register-vuelidate-as="dnsProviderSecret"
           />
         </v-col>
-        <template v-if="primaryProviderVisible">
-          <v-col cols="3">
-            <v-select
-              v-model="v$.dnsPrimaryProviderType.$model"
-              color="primary"
-              :items="dnsProviderTypesWithPrimarySupport"
-              :error-messages="getErrorMessages(v$.dnsPrimaryProviderType)"
-              label="DNS Provider Type"
-              :disabled="!isNewCluster"
-              :persistent-hint="!isNewCluster"
-              :hint="typeHint"
-              variant="underlined"
-            >
-              <template #item="{ props }">
-                <v-list-item v-bind="props">
-                  <template #prepend>
-                    <g-vendor-icon :icon="props.value" />
-                  </template>
-                </v-list-item>
-              </template>
-              <template #selection="{ item }">
-                <div class="d-flex">
-                  <g-vendor-icon
-                    :icon="item.value"
-                    class="mr-2"
-                  />
-                  {{ item.value }}
-                </div>
-              </template>
-            </v-select>
-          </v-col>
-          <v-col cols="3">
-            <g-select-secret
-              v-model="primaryDnsProviderSecret"
-              :dns-provider-kind="dnsPrimaryProviderType"
-              register-vuelidate-as="dnsProviderSecret"
-            />
-          </v-col>
-        </template>
-      </v-row>
-      <v-row v-if="domainRecommendationVisible">
-        <v-col>
-          <v-alert
-            variant="tonal"
-            type="info"
-          >
-            <div class="d-flex align-center">
-              <div>
-                The primary DNS provider is used for Gardener internal purposes only.
-                The DNS providers for the shoot-dns-service extension are configured separately.
-                Click the button to apply the recommended configuration for the shoot-dns-service.
-                This will add an additional provider with your custom domain as <code>include</code> domain.
-              </div>
-              <div>
-                <v-btn
-                  size="x-small"
-                  color="info"
-                  @click="addDnsServiceExtensionProviderForCustomDomain"
-                >
-                  Apply Recommended DNS Configuration
-                </v-btn>
-              </div>
+      </template>
+    </v-row>
+    <v-row v-if="domainRecommendationVisible">
+      <v-col>
+        <v-alert
+          variant="tonal"
+          type="info"
+        >
+          <div class="d-flex align-center">
+            <div>
+              The primary DNS provider is used for Gardener internal purposes only.
+              The DNS providers for the shoot-dns-service extension are configured separately.
+              Click the button to apply the recommended configuration for the shoot-dns-service.
+              This will add an additional provider with your custom domain as <code>include</code> domain.
             </div>
-          </v-alert>
-        </v-col>
-      </v-row>
-    </template>
+            <div>
+              <v-btn
+                class="ma-3"
+                size="small"
+                color="info"
+                height="40px"
+                @click="addDnsServiceExtensionProviderForCustomDomain"
+              >
+                Apply Recommended<br>
+                DNS Configuration
+              </v-btn>
+            </div>
+          </div>
+        </v-alert>
+      </v-col>
+    </v-row>
     <template v-if="hasDnsServiceExtension">
       <v-divider class="my-3" />
       <div class="wrap-text text-subtitle-2">
@@ -220,7 +221,7 @@ export default {
         required: withMessage('Provider secret is required if a custom domain is defined', requiredIf(this.isNewCluster && !!this.dnsDomain)),
       }),
       dnsDomain: withFieldName('Custom Cluster Domain', {
-        required: requiredIf(this.customDomainEnabled),
+        required: withMessage('If custom domain is enabled, you need to define a cluster domain', requiredIf(this.customDomainEnabled)),
       }),
     }
   },
@@ -235,15 +236,25 @@ export default {
       'hasDnsServiceExtension',
     ]),
     domainHint () {
-      return this.isNewCluster
-        ? 'External available domain of the cluster'
-        : 'Domain cannot be changed after cluster creation'
+      if (!this.isNewCluster) {
+        return 'Domain cannot be changed after cluster creation'
+      }
+      if (!this.customDomainEnabled) {
+        return 'Enable Custom Domain Checkbox to define a custom domain for the cluster'
+      }
+      return 'Define external available domain of the cluster (override default generated domain)'
     },
     domainCheckboxHint () {
-      const enabledOrDisabled = this.customDomainEnabled ? 'disabled' : 'enabled'
-      return this.isNewCluster
-        ? ''
-        : `Custom domain cannot be ${enabledOrDisabled} after cluster creation`
+      if (!this.isNewCluster) {
+        const enabledOrDisabled = this.customDomainEnabled
+          ? 'disabled'
+          : 'enabled'
+        return `Custom domain cannot be ${enabledOrDisabled} after cluster creation`
+      }
+      if (!this.customDomainEnabled) {
+        return 'If no custom domain is configured, Gardener will provide a default generated cluster domain'
+      }
+      return ''
     },
     typeHint () {
       return this.isNewCluster

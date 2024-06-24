@@ -55,15 +55,6 @@ SPDX-License-Identifier: Apache-2.0
       </div>
       <div class="large-input">
         <v-combobox
-          v-model="excludeDomains"
-          label="Exclude Domains"
-          multiple
-          closable-chips
-          variant="underlined"
-        />
-      </div>
-      <div class="large-input">
-        <v-combobox
           v-model="includeDomains"
           label="Include Domains"
           multiple
@@ -73,8 +64,8 @@ SPDX-License-Identifier: Apache-2.0
       </div>
       <div class="large-input">
         <v-combobox
-          v-model="excludeZones"
-          label="Exclude Zones"
+          v-model="excludeDomains"
+          label="Exclude Domains"
           multiple
           closable-chips
           variant="underlined"
@@ -84,6 +75,15 @@ SPDX-License-Identifier: Apache-2.0
         <v-combobox
           v-model="includeZones"
           label="Include Zones"
+          multiple
+          closable-chips
+          variant="underlined"
+        />
+      </div>
+      <div class="large-input">
+        <v-combobox
+          v-model="excludeZones"
+          label="Exclude Zones"
           multiple
           closable-chips
           variant="underlined"
