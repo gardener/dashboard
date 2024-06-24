@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-row>
       <v-checkbox
         v-model="customDomainEnabled"
-        label="Enable Custom Cluster Domain (Overrides default domain)"
+        label="Enable Custom API Server Domain (Overrides default domain)"
         color="primary"
         :disabled="!isNewCluster"
         density="compact"
@@ -22,14 +22,16 @@ SPDX-License-Identifier: Apache-2.0
     <v-row class="my-0">
       <v-col cols="6">
         <v-text-field
-          v-model="v$.dnsDomain.$model"
+          ref="dnsDomainRef"
+          v-model="dnsDomain"
           :error-messages="getErrorMessages(v$.dnsDomain)"
           color="primary"
-          label="Custom Cluster Domain"
+          label="Custom API Server Domain"
           :disabled="!isNewCluster || !customDomainEnabled"
           persistent-hint
           :hint="domainHint"
           variant="underlined"
+          @blur="v$.dnsDomain.$touch()"
         />
       </v-col>
       <template v-if="primaryProviderVisible">
@@ -237,12 +239,12 @@ export default {
     ]),
     domainHint () {
       if (!this.isNewCluster) {
-        return 'Domain cannot be changed after cluster creation'
+        return 'API server domain cannot be changed after cluster creation'
       }
       if (!this.customDomainEnabled) {
-        return 'Enable Custom Domain Checkbox to define a custom domain for the cluster'
+        return 'Enable Custom Domain Checkbox to define a custom domain for the API server of this cluster'
       }
-      return 'Define external available domain of the cluster (override default generated domain)'
+      return 'Define API server domain of the cluster (override default generated domain)'
     },
     domainCheckboxHint () {
       if (!this.isNewCluster) {
@@ -270,11 +272,14 @@ export default {
           (!!this.dnsDomain && !!this.dnsPrimaryProviderType)
       },
       set (value) {
+        this.customDomain = value
+
         if (!value) {
           this.dnsDomain = undefined
           this.resetDnsPrimaryProvider()
+        } else {
+          this.$nextTick(() => this.$refs.dnsDomainRef.focus())
         }
-        this.customDomain = value
       },
     },
     primaryDnsProviderSecret: {
@@ -310,7 +315,6 @@ export default {
     },
   },
   mounted () {
-    this.v$.$touch()
     if (this.customDomainEnabled) {
       this.customDomain = true
     }
