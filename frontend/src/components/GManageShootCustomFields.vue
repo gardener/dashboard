@@ -265,7 +265,7 @@ SPDX-License-Identifier: Apache-2.0
                     :disabled="!editedField.showColumn"
                   />
                 </template>
-                <span>The standard columns start with weight 100 and continue in 100 increments (200, 300, ..)</span>
+                <span>The built-in columns start with a weight of 100, increasing by 100 (200, 300, etc.)</span>
               </v-tooltip>
             </v-col>
           </v-row>
@@ -316,18 +316,18 @@ SPDX-License-Identifier: Apache-2.0
             density="compact"
           />
         </v-card-text>
-        <v-card-text
-          v-if="errorMessage"
-        >
-          <g-message
-            v-model:message="errorMessage"
-            v-model:detailed-message="detailedErrorMessage"
-            color="error"
-            class="ma-0"
-            tile
-          />
-        </v-card-text>
       </div>
+      <v-card-text
+        v-if="errorMessage"
+      >
+        <g-message
+          v-model:message="errorMessage"
+          v-model:detailed-message="detailedErrorMessage"
+          color="error"
+          class="ma-0"
+          tile
+        />
+      </v-card-text>
       <v-divider />
       <v-card-actions>
         <v-spacer />
@@ -340,6 +340,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-btn
           color="primary"
           text
+          :loading="loading"
           @click="addField"
         >
           {{ saveButtonTitle }}
@@ -357,19 +358,27 @@ SPDX-License-Identifier: Apache-2.0
     <v-card>
       <v-card-title>Confirm Delete</v-card-title>
       <v-card-text>Are you sure you want to delete this field?</v-card-text>
+      <g-message
+        v-model:message="errorMessage"
+        v-model:detailed-message="detailedErrorMessage"
+        color="error"
+        class="ma-0"
+        tile
+      />
       <v-card-actions>
-        <v-btn
-          color="primary"
-          text
-          @click="deleteField"
-        >
-          Delete
-        </v-btn>
         <v-btn
           text
           @click="closeDeleteDialog"
         >
           Cancel
+        </v-btn>
+        <v-btn
+          color="primary"
+          text
+          :loading="loading"
+          @click="deleteField"
+        >
+          Delete
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -384,16 +393,20 @@ import {
   helpers,
 } from '@vuelidate/validators'
 
+import { useProjectStore } from '@/store/project'
+
 import GMessage from '@/components/GMessage.vue'
 
 import { useProjectContext } from '@/composables/useProjectContext'
 import { useScrollBar } from '@/composables/useScrollBar'
+import { useLogger } from '@/composables/useLogger'
 
 import { messageFromErrors } from '@/utils/validators'
 import {
   getErrorMessages,
   setDelayedInputFocus,
 } from '@/utils'
+import { errorDetailsFromError } from '@/utils/error'
 
 import { cloneDeep } from '@/lodash'
 
@@ -435,10 +448,14 @@ const errorMessage = ref('')
 const detailedErrorMessage = ref('')
 const refName = ref(null)
 const refCardContent = ref(null)
+const loading = ref(false)
 
 let uneditedCustomField // does not need to be reactive
 
 useScrollBar(refCardContent)
+
+const logger = useLogger()
+const projectStore = useProjectStore()
 
 const {
   shootCustomFields,
@@ -446,6 +463,7 @@ const {
   deleteShootCustomField,
   replaceShootCustomField,
   isShootCustomFieldNameUnique,
+  getShootCustomFieldsPatchData,
 } = useProjectContext()
 
 function openAddDialog () {
@@ -498,7 +516,38 @@ async function addField () {
   } else {
     addShootCustomField(editedField.value)
   }
-  closeDialog()
+
+  return updateConfiguration(closeDialog)
+}
+
+function deleteField () {
+  deleteShootCustomField(deleteFieldItem.value)
+  return updateConfiguration(closeDeleteDialog)
+}
+
+async function updateConfiguration (onSuccess) {
+  loading.value = true
+  try {
+    const { metadata: { name, namespace } } = projectStore.project
+    const mergePatchDocument = {
+      metadata: { name, namespace },
+    }
+    Object.assign(mergePatchDocument, getShootCustomFieldsPatchData())
+
+    await projectStore.patchProject(mergePatchDocument)
+    onSuccess()
+  } catch (err) {
+    errorMessage.value = 'Could not save custom fields configuration'
+    if (err.response) {
+      const errorDetails = errorDetailsFromError(err)
+      detailedErrorMessage.value = errorDetails.detailedMessage
+    } else {
+      detailedErrorMessage.value = err.message
+    }
+    logger.error(errorMessage, detailedErrorMessage, err)
+  } finally {
+    loading.value = false
+  }
 }
 
 function openConfirmDeleteDialog (item) {
@@ -508,11 +557,8 @@ function openConfirmDeleteDialog (item) {
 
 function closeDeleteDialog () {
   deleteDialog.value = false
-}
-
-function deleteField () {
-  deleteShootCustomField(deleteFieldItem.value)
-  closeDeleteDialog()
+  errorMessage.value = undefined
+  detailedErrorMessage.value = undefined
 }
 
 const isUniqueName = helpers.withMessage(

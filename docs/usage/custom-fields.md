@@ -30,7 +30,7 @@ Custom fields can be shown in a dedicated card (`Custom Fields`) on the cluster 
 | defaultValue | String/Number | | | Default value, in case there is no value for the given `path` |
 | showColumn | Bool | true | | Field shall appear as column in the cluster list |
 | columnSelectedByDefault | Bool | true | | Indicates if field shall be selected by default on the cluster list (not hidden by default) |
-| weight | Number | 0 | | Defines the order of the column. The standard columns start with weight 100 and continue in 100 increments (200, 300, ..) |
+| weight | Number | 0 | | Defines the order of the column. The built-in columns start with a weight of 100, increasing by 100 (200, 300, etc.) |
 | sortable | Bool | true | | Indicates if column is sortable on the cluster list |
 | searchable | Bool | true | | Indicates if column is searchable on the cluster list |
 | showDetails | Bool | true | | Indicates if field shall appear in a dedicated card (`Custom Fields`) on the cluster details page |

@@ -21,6 +21,7 @@ SPDX-License-Identifier: Apache-2.0
         ref="gDialog"
         v-model:error-message="errorMessage"
         v-model:detailed-error-message="detailedErrorMessage"
+        :cancel-button-text="cancelButtonText"
         :confirm-button-text="confirmButtonText"
         :width="width"
         :max-height="maxHeight"
@@ -74,6 +75,10 @@ export default {
     },
     tooltip: {
       type: String,
+    },
+    cancelButtonText: {
+      type: String,
+      default: 'Cancel',
     },
     confirmButtonText: {
       type: String,
