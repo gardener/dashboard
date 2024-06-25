@@ -28,6 +28,15 @@ SPDX-License-Identifier: Apache-2.0
             </span>
           </template>
         </v-toolbar-title>
+        <v-btn
+          v-if="isToolbarCloseButtonVisible"
+          class="mr-4"
+          variant="text"
+          density="comfortable"
+          icon="mdi-close"
+          color="toolbar-title"
+          @click.stop="hideDialog"
+        />
       </v-toolbar>
       <div v-if="$slots.header">
         <slot name="header" />
@@ -136,6 +145,10 @@ export default {
     confirmButtonText: {
       type: String,
       default: 'Confirm',
+    },
+    isToolbarCloseButtonVisible: {
+      type: Boolean,
+      default: false,
     },
     cancelButtonText: {
       type: String,

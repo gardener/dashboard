@@ -108,6 +108,7 @@ SPDX-License-Identifier: Apache-2.0
   <v-dialog
     v-model="dialog"
     max-width="800px"
+    persistent
   >
     <v-toolbar
       flat

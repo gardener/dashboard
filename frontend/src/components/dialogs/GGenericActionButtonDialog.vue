@@ -21,6 +21,7 @@ SPDX-License-Identifier: Apache-2.0
         ref="gDialog"
         v-model:error-message="errorMessage"
         v-model:detailed-error-message="detailedErrorMessage"
+        :is-toolbar-close-button-visible="isToolbarCloseButtonVisible"
         :cancel-button-text="cancelButtonText"
         :confirm-button-text="confirmButtonText"
         :width="width"
@@ -75,6 +76,10 @@ export default {
     },
     tooltip: {
       type: String,
+    },
+    isToolbarCloseButtonVisible: {
+      type: Boolean,
+      default: false,
     },
     cancelButtonText: {
       type: String,

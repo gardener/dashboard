@@ -24,6 +24,12 @@ import { useSecretStore } from '@/store/secret'
 import { useAppStore } from '@/store/app'
 import { useSeedStore } from '@/store/seed'
 
+import { cleanup } from '@/composables/helper'
+import { useLogger } from '@/composables/useLogger'
+import { createShootHelperComposable } from '@/composables/useShootHelper'
+import { useShootMetadata } from '@/composables/useShootMetadata'
+import { useShootAccessRestrictions } from '@/composables/useShootAccessRestrictions'
+
 import {
   scheduleEventsFromCrontabBlocks,
   crontabBlocksFromScheduleEvents,
@@ -36,16 +42,6 @@ import {
 } from '@/utils/shoot'
 import { v4 as uuidv4 } from '@/utils/uuid'
 import utils from '@/utils'
-
-import { useLogger } from '../useLogger'
-import { createShootHelperComposable } from '../useShootHelper'
-import { useShootMetadata } from '../useShootMetadata'
-import { useShootAccessRestrictions } from '../useShootAccessRestrictions'
-
-import {
-  getId,
-  cleanup,
-} from './helper'
 
 import {
   get,
@@ -981,7 +977,7 @@ export function createShootContextComposable (options = {}) {
       dnsPrimaryProviderId.value = null
     } else if (!dnsPrimaryProviderId.value) {
       const defaultDnsPrimaryProvider = head(dnsProvidersWithPrimarySupport.value)
-      const id = getId(defaultDnsPrimaryProvider)
+      const id = get(defaultDnsPrimaryProvider, 'id')
       if (id) {
         dnsPrimaryProviderId.value = id
       }
@@ -993,7 +989,7 @@ export function createShootContextComposable (options = {}) {
       return dnsProviders.value[dnsPrimaryProviderId.value]
     },
     set (value) {
-      dnsPrimaryProviderId.value = getId(value)
+      dnsPrimaryProviderId.value = get(value, 'id')
     },
   })
 
@@ -1023,14 +1019,14 @@ export function createShootContextComposable (options = {}) {
 
   function addDnsProvider () {
     const object = createDnsProvider()
-    const id = getId(object)
+    const id = get(object, 'id')
     dnsProviderIds.value.push(id)
     dnsProviders.value[id] = object
     resetDnsPrimaryProviderId()
   }
 
   function patchDnsProvider (object) {
-    const id = getId(object)
+    const id = get(object, 'id')
     const index = dnsProviderIds.value.indexOf(id)
     if (index !== -1 && has(dnsProviders.value, id)) {
       for (const [key, value] of Object.entries(object)) {

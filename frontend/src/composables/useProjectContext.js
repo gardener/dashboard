@@ -12,8 +12,8 @@ import {
   provide,
 } from 'vue'
 
-// TODO move cleanup to a shared helper
-import { cleanup } from './useShootContext/helper'
+import { cleanup } from '@/composables/helper'
+
 import { useProjectShootCustomFields } from './useProjectShootCustomFields'
 import { useProjectMetadata } from './useProjectMetadata'
 
