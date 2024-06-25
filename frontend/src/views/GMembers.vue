@@ -259,7 +259,6 @@ SPDX-License-Identifier: Apache-2.0
       v-model="kubeconfigDialog"
       persistent
       max-width="67%"
-      @keydown.esc="kubeconfigDialog = false"
     >
       <v-card>
         <v-card-title class="bg-toolbar-background text-toolbar-title d-flex">

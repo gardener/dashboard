@@ -11,7 +11,6 @@ SPDX-License-Identifier: Apache-2.0
     scrollable
     :width="width"
     max-width="90vw"
-    @keydown.esc="resolveAction(false)"
   >
     <v-card>
       <v-toolbar
