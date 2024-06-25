@@ -28,8 +28,6 @@ SPDX-License-Identifier: Apache-2.0
               label="Name"
               counter="10"
               :error-messages="getErrorMessages(v$.projectName)"
-              @update:model-value="v$.projectName.$touch()"
-              @blur="v$.projectName.$touch()"
             />
           </v-col>
         </v-row>
@@ -42,8 +40,6 @@ SPDX-License-Identifier: Apache-2.0
               color="primary"
               :label="costObjectTitle"
               :error-messages="getErrorMessages(v$.costObject)"
-              @update:model-value="v$.costObject.$touch()"
-              @blur="v$.costObject.$touch()"
             />
             <v-alert
               v-if="!!costObjectDescriptionHtml"
