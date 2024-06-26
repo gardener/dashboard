@@ -135,12 +135,6 @@ export function createGlobalBeforeGuards () {
             if (authzStore.canGetSecrets) {
               await secretStore.fetchSecrets()
             }
-
-            const namespaceChanged = from.params.namespace !== to.params.namespace
-            const toNewShoot = from.name !== 'NewShoot' && from.name !== 'NewShootEditor'
-            if (namespaceChanged || toNewShoot) {
-              shootStore.resetNewShootResource()
-            }
             break
           }
           case 'ShootList': {

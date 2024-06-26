@@ -9,27 +9,81 @@
 const _ = require('lodash')
 
 describe('security', function () {
+  const createJose = require('../lib/security/jose')
   describe('jose', function () {
-    const secret = Buffer.from('this-is-a-secret-only-used-for-tests').toString('base64')
-    const jose = require('../lib/security/jose')(secret)
+    const secret1 = Buffer.from('this-is-a-secret-only-used-for-tests').toString('base64')
+    const secret2 = Buffer.from('another-secret-for-testing-purposes').toString('base64')
 
     const value = 'hello world'
 
-    it('should encrypt a value', async function () {
-      const encryptedValue = await jose.encrypt(value)
-      const decryptedValue = await jose.decrypt(encryptedValue)
-      expect(decryptedValue).toBe(value)
+    it('should throw an error when no session secrets are provided', function () {
+      expect(() => createJose()).toThrow('No session secrets provided')
+      expect(() => createJose([])).toThrow('No session secrets provided')
     })
 
-    it('should decrypt a value', async function () {
-      const encryptedValue = 'eyJlbmMiOiJBMTI4Q0JDLUhTMjU2IiwiYWxnIjoiUEJFUzItSFMyNTYrQTEyOEtXIiwicDJjIjozMTQ5LCJwMnMiOiIwenZfczdqbl9kcVBJOER2czQ3WWNRIn0.7Uh_sBteoCt2jlVBR87w00tuFuUqQfEhsXJ7jigqKZoEc5n2tw_h5A.adbP15XHdzAWCpzGCGYnXA.zVhhD1iRqJ-JnoIbyj-HeA.neL8L8Vtcgue-a8PYS4zCQ'
-      const decryptedValue = await jose.decrypt(encryptedValue)
-      expect(decryptedValue).toBe(value)
+    describe('with a single valid secret', function () {
+      const jose = createJose([secret1])
+
+      it('should encrypt a value', async function () {
+        const encryptedValue = await jose.encrypt(value)
+        const decryptedValue = await jose.decrypt(encryptedValue)
+        expect(decryptedValue).toBe(value)
+      })
+
+      it('should decrypt a value', async function () {
+        const encryptedValue = 'eyJlbmMiOiJBMTI4Q0JDLUhTMjU2IiwiYWxnIjoiUEJFUzItSFMyNTYrQTEyOEtXIiwicDJjIjozMTQ5LCJwMnMiOiIwenZfczdqbl9kcVBJOER2czQ3WWNRIn0.7Uh_sBteoCt2jlVBR87w00tuFuUqQfEhsXJ7jigqKZoEc5n2tw_h5A.adbP15XHdzAWCpzGCGYnXA.zVhhD1iRqJ-JnoIbyj-HeA.neL8L8Vtcgue-a8PYS4zCQ'
+        const decryptedValue = await jose.decrypt(encryptedValue)
+        expect(decryptedValue).toBe(value)
+      })
+    })
+
+    describe('with multiple valid secrets', function () {
+      const jose = createJose([secret1, secret2])
+
+      it('should encrypt a value and decrypt it with the first secret', async function () {
+        const encryptedValue = await jose.encrypt(value)
+        const decryptedValue = await jose.decrypt(encryptedValue)
+        expect(decryptedValue).toBe(value)
+      })
+
+      it('should encrypt a value and decrypt it with the second secret', async function () {
+        const encryptedValue = await jose.encrypt(value)
+        const decryptedValue = await jose.decrypt(encryptedValue)
+        expect(decryptedValue).toBe(value)
+      })
+
+      it('should sign a token with different secrets and verify them', async function () {
+        const payload = { sub: 'user123' }
+        const token1 = await jose.sign(payload, secret1)
+        const token2 = await jose.sign(payload, secret2)
+
+        // Verify that the signatures are different
+        expect(token1).not.toBe(token2)
+
+        // Verify the tokens with their respective secrets
+        const verifiedPayload1 = await jose.verify(token1)
+        expect(verifiedPayload1).toEqual(expect.objectContaining(payload))
+
+        const verifiedPayload2 = await jose.verify(token2)
+        expect(verifiedPayload2).toEqual(expect.objectContaining(payload))
+      })
+    })
+
+    describe('with an invalid secret', function () {
+      const invalidSecret = Buffer.from('this-secret-is-not-part-of-session-secrets').toString('base64')
+      const jose = createJose([secret1, secret2])
+
+      it('should fail to verify a token signed with a secret not part of the session secrets', async function () {
+        const payload = { sub: 'user789' }
+        const token = await jose.sign(payload, invalidSecret)
+
+        await expect(jose.verify(token)).rejects.toThrow('invalid signature')
+      })
     })
   })
 
   describe('openid-client', () => {
-    const redirectUrl = new URL('/account', 'http://localhost:8080')
+    const redirectUrl = new URL('/account', 'https://localhost:8443')
     const sub = 'john.doe@example.org'
     const expiresIn = 3600
 
@@ -42,6 +96,7 @@ describe('security', function () {
     let client
 
     let mockGetIssuerClient
+    let mockState
     let mockCodeVerifier
     let mockCodeChallenge
     let mockRefresh
@@ -62,7 +117,7 @@ describe('security', function () {
         openidClient = require('openid-client')
         authentication = require('../lib/services/authentication')
         authorization = require('../lib/services/authorization')
-        jose = require('../lib/security/jose')(config.sessionSecret)
+        jose = createJose(config.sessionSecrets)
         security = require('../lib/security')
       })
       const issuerUrl = config.oidc.issuer
@@ -87,6 +142,7 @@ describe('security', function () {
           refresh_token: 'new-refresh-token'
         }
       })
+      mockState = jest.spyOn(openidClient.generators, 'state').mockReturnValue('state')
       mockCodeVerifier = jest.spyOn(openidClient.generators, 'codeVerifier').mockReturnValue('code-verifier')
       mockCodeChallenge = jest.spyOn(openidClient.generators, 'codeChallenge').mockReturnValue('code-challenge')
       mockIsAuthenticated = jest.spyOn(authentication, 'isAuthenticated').mockResolvedValue({ username: sub, groups: [] })
@@ -110,33 +166,45 @@ describe('security', function () {
       const authorizationUrl = await security.authorizationUrl(req, res)
       const url = new URL(authorizationUrl)
       expect(mockGetIssuerClient).toBeCalledTimes(1)
+      expect(mockState).toBeCalledTimes(1)
       expect(mockCodeVerifier).toBeCalledTimes(1)
       expect(mockCodeChallenge).toBeCalledTimes(1)
       expect(mockCodeChallenge.mock.calls[0]).toEqual(['code-verifier'])
-      expect(res.cookie).toBeCalledTimes(1)
-      expect(res.cookie.mock.calls[0]).toEqual([
-        'gCdVrfr',
-        'code-verifier',
-        {
-          httpOnly: true,
-          maxAge: 300000,
-          path: '/auth/callback',
-          sameSite: 'Lax',
-          secure: false
-        }
+      expect(res.cookie).toBeCalledTimes(2)
+      expect(res.cookie.mock.calls).toEqual([
+        [
+          '__Host-gStt',
+          {
+            redirectOrigin: redirectUrl.origin,
+            redirectPath: redirectUrl.pathname,
+            state: 'state'
+          },
+          {
+            httpOnly: true,
+            maxAge: 180000,
+            sameSite: 'Lax',
+            secure: true
+          }
+        ],
+        [
+          '__Host-gCdVrfr',
+          'code-verifier',
+          {
+            httpOnly: true,
+            maxAge: 180000,
+            sameSite: 'Lax',
+            secure: true
+          }
+        ]
       ])
       expect(url.origin).toBe(config.oidc.issuer)
       const params = Object.fromEntries(url.searchParams)
-      expect(security.decodeState(params.state)).toEqual({
-        redirectOrigin: redirectUrl.origin,
-        redirectPath: redirectUrl.pathname
-      })
       expect(params).toEqual(expect.objectContaining({
         client_id: config.oidc.client_id,
         scope,
         response_type: 'code',
         redirect_uri: redirectUrl.origin + '/auth/callback',
-        state: expect.any(String),
+        state: 'state',
         code_challenge: 'code-challenge',
         code_challenge_method: 'S256'
       }))
@@ -220,17 +288,17 @@ describe('security', function () {
         [
           COOKIE_HEADER_PAYLOAD,
           expect.stringMatching(/^[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$/),
-          { secure: false, expires: undefined, sameSite: 'Lax' }
+          { secure: true, expires: undefined, sameSite: 'Lax' }
         ],
         [
           COOKIE_SIGNATURE,
           expect.stringMatching(/^[a-zA-Z0-9_-]{43}$/),
-          { secure: false, httpOnly: true, expires: undefined, sameSite: 'Lax' }
+          { secure: true, httpOnly: true, expires: undefined, sameSite: 'Lax' }
         ],
         [
           COOKIE_TOKEN,
           expect.stringMatching(/^[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$/),
-          { secure: false, httpOnly: true, expires: undefined, sameSite: 'Lax' }
+          { secure: true, httpOnly: true, expires: undefined, sameSite: 'Lax' }
         ]
       ])
     })

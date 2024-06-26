@@ -17,6 +17,7 @@ import {
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import basicSsl from '@vitejs/plugin-basic-ssl'
 import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 import Unfonts from 'unplugin-fonts/vite'
 import compression from 'vite-plugin-compression'
@@ -25,6 +26,10 @@ import { visualizer } from 'rollup-plugin-visualizer'
 const proxyTarget = 'http://localhost:3030'
 
 const KiB = 1024
+
+const YELLOW = '\u001b[33m'
+const WHITE_BLACK = '\u001b[37;40m'
+const RESET = '\u001b[0m'
 
 const require = createRequire(import.meta.url)
 
@@ -35,7 +40,7 @@ function resolve (input) {
 function htmlPlugin (env) {
   return {
     name: 'html-transform',
-    transformIndexHtml: html => html.replace(/%(.*?)%/g, (match, key) => env[key]),
+    transformIndexHtml: html => html.replace(/%(.*?)%/g, (_, key) => env[key]),
   }
 }
 
@@ -49,6 +54,7 @@ export default defineConfig(({ command, mode }) => {
       VITE_APP_VERSION = require('./package.json').version
     }
   }
+
   const VITE_BASE_URL = '/'
   const VITE_APP_TITLE = 'Gardener Dashboard'
 
@@ -59,31 +65,44 @@ export default defineConfig(({ command, mode }) => {
     VITE_BASE_URL,
   })
 
-  const server = {
-    port: 8080,
-    strictPort: true,
-    proxy: {
-      '/api': {
-        target: proxyTarget,
-        changeOrigin: true,
-        ws: true,
-      },
-      '/auth': {
-        target: proxyTarget,
-      },
-    },
-  }
-  const keyPath = resolve('./ssl/key.pem')
-  const certPath = resolve('./ssl/cert.pem')
-  if (existsSync(keyPath) && existsSync(certPath)) {
-    server.port = 8443
-    server.https = {
-      key: readFileSync(keyPath),
-      cert: readFileSync(certPath),
-    }
+  const manualChunks = {
+    vendor: [
+      '@braintree/sanitize-url',
+      'lodash',
+      'js-yaml',
+      'highlight.js',
+      'socket.io-client',
+      'dayjs',
+      'semver',
+      'js-base64',
+      'downloadjs',
+      'md5',
+      'uuid',
+      'netmask',
+      'statuses',
+      'jwt-decode',
+      'toidentifier',
+    ],
+    vuetify: [
+      'vuetify',
+    ],
   }
 
   const config = {
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks (id) {
+            const match = /\/node_modules\/([^@/]+|@[^/]+\/[^/]*)/.exec(id)
+            for (const [key, value] of Object.entries(manualChunks)) {
+              if (value.includes(match?.[1])) {
+                return key
+              }
+            }
+          },
+        },
+      },
+    },
     plugins: [
       htmlPlugin(process.env),
       vue({
@@ -117,6 +136,7 @@ export default defineConfig(({ command, mode }) => {
     ],
     base: VITE_BASE_URL,
     define: {
+      __TEST__: mode === 'test',
       __VUE_OPTIONS_API__: true,
       __VUE_PROD_DEVTOOLS__: false,
       'process.env': {
@@ -140,7 +160,74 @@ export default defineConfig(({ command, mode }) => {
         '.vue',
       ],
     },
-    server,
+  }
+
+  if (command === 'serve') {
+    const keyPath = resolve('./ssl/key.pem')
+    const certPath = resolve('./ssl/cert.pem')
+    const https = existsSync(keyPath) && existsSync(certPath)
+      ? {
+          key: readFileSync(keyPath),
+          cert: readFileSync(certPath),
+        }
+      : true
+
+    if (https === true && mode === 'development') {
+      // eslint-disable-next-line no-console
+      console.warn(YELLOW + 'WARNING:' + RESET + ' SSL key and certificate files are missing. We recommend running ' + WHITE_BLACK + 'yarn setup' + RESET + ' to generate certificate files and add the CA to the keychain.')
+      config.plugins.push(basicSsl({
+        name: 'vite-develpment-server',
+        domains: ['localhost', '127.0.0.1'],
+      }))
+    }
+
+    config.server = {
+      port: 8443,
+      strictPort: true,
+      https,
+      proxy: {
+        '/api': {
+          target: proxyTarget,
+          changeOrigin: true,
+          ws: true,
+        },
+        '/auth': {
+          target: proxyTarget,
+        },
+      },
+    }
+
+    if (mode === 'test') {
+      const coverage = {
+        provider: 'v8',
+        exclude: ['**/__fixtures__/**'],
+        all: false,
+        thresholds: {
+          statements: 75,
+          branches: 80,
+          functions: 47,
+          lines: 75,
+        },
+      }
+
+      config.test = {
+        include: ['__tests__/**/*.spec.js'],
+        globals: true,
+        environment: 'jsdom',
+        clearMocks: true,
+        setupFiles: [
+          'vitest.setup.js',
+        ],
+        server: {
+          deps: {
+            inline: [
+              'vuetify',
+            ],
+          },
+        },
+        coverage,
+      }
+    }
   }
 
   if (command === 'build') {
@@ -175,38 +262,6 @@ export default defineConfig(({ command, mode }) => {
         template: 'network',
       }),
     )
-  }
-
-  if (process.env.NODE_ENV === 'test') {
-    const coverage = {
-      provider: 'v8',
-      exclude: ['**/__fixtures__/**'],
-      all: false,
-      thresholds: {
-        statements: 75,
-        branches: 80,
-        functions: 47,
-        lines: 75,
-      },
-    }
-
-    config.test = {
-      include: ['__tests__/**/*.spec.js'],
-      globals: true,
-      environment: 'jsdom',
-      clearMocks: true,
-      setupFiles: [
-        'vitest.setup.js',
-      ],
-      server: {
-        deps: {
-          inline: [
-            'vuetify',
-          ],
-        },
-      },
-      coverage,
-    }
   }
 
   return config

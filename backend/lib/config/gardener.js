@@ -13,47 +13,142 @@ const fs = require('fs')
 const { homedir } = require('os')
 const { join } = require('path')
 
-const environmentVariableDefinitions = {
-  VUE_APP_VERSION: 'frontend.appVersion',
-  SESSION_SECRET: 'sessionSecret', // pragma: whitelist secret
-  API_SERVER_URL: 'apiServerUrl',
-  OIDC_ISSUER: 'oidc.issuer',
-  OIDC_CLIENT_ID: 'oidc.client_id',
-  OIDC_CLIENT_SECRET: 'oidc.client_secret', // pragma: whitelist secret
-  OIDC_CA: 'oidc.ca',
-  GITHUB_AUTHENTICATION_APP_ID: 'gitHub.authentication.appId',
-  GITHUB_AUTHENTICATION_CLIENT_ID: 'gitHub.authentication.clientId',
-  GITHUB_AUTHENTICATION_CLIENT_SECRET: 'gitHub.authentication.clientSecret',
-  GITHUB_AUTHENTICATION_INSTALLATION_ID: 'gitHub.authentication.installationId',
-  GITHUB_AUTHENTICATION_PRIVATE_KEY: 'gitHub.authentication.privateKey',
-  GITHUB_AUTHENTICATION_TOKEN: 'gitHub.authentication.token',
-  GITHUB_WEBHOOK_SECRET: 'gitHub.webhookSecret', // pragma: whitelist secret
-  LOG_LEVEL: 'logLevel',
-  LOG_HTTP_REQUEST_BODY: {
-    type: 'Boolean',
-    path: 'logHttpRequestBody'
-  },
-  PORT: {
-    type: 'Integer',
-    path: 'port'
-  },
-  METRICS_PORT: {
-    type: 'Integer',
-    path: 'metricsPort'
-  },
-  COOKIE_SAME_SITE_POLICY: 'cookieSameSitePolicy',
-  CSP_FRAME_ANCESTORS: {
-    type: 'Object',
-    path: 'cspFrameAncestors'
-  },
-  FGA_API_URL: 'fgaApiUrl',
-  FGA_STORE_ID: 'fgaStoreId',
-  FGA_AUTHORIZATION_MODEL_ID: 'fgaAuthorizationModelId',
-  FGA_API_TOKEN: 'fgaApiToken'
-}
+/*
+configMappings defines mappings between config values, their sources (environment variables or files),
+and destinations in the config object. Properties:
+- environmentVariableName: The environment variable to read the value from.
+- filePath: (Optional) File path to read the value from if environment variable is not set.
+- configPath: The path in the config object to set the value.
+- type: (Optional) 'Boolean', 'Integer', or 'String' (default). Value is converted to this type.
 
-function getEnvironmentVariable (env, name, type) {
-  let value = env[name]
+Allows flexible config management from different sources. Values are converted to the desired type.
+If both environmentVariableName and filePath are missing/empty, the config path remains unchanged.
+*/
+const configMappings = [
+  {
+    environmentVariableName: 'VUE_APP_VERSION',
+    configPath: 'frontend.appVersion'
+  },
+  {
+    environmentVariableName: 'SESSION_SECRET',
+    filePath: '/etc/gardener-dashboard/secrets/session/sessionSecret',
+    configPath: 'sessionSecret'
+  },
+  {
+    environmentVariableName: 'SESSION_SECRET_PREVIOUS',
+    filePath: '/etc/gardener-dashboard/secrets/session/sessionSecretPrevious',
+    configPath: 'sessionSecretPrevious'
+  },
+  {
+    environmentVariableName: 'API_SERVER_URL',
+    configPath: 'apiServerUrl'
+  },
+  {
+    environmentVariableName: 'OIDC_ISSUER',
+    configPath: 'oidc.issuer'
+  },
+  {
+    environmentVariableName: 'OIDC_CA',
+    configPath: 'oidc.ca'
+  },
+  {
+    environmentVariableName: 'OIDC_CLIENT_ID',
+    filePath: '/etc/gardener-dashboard/secrets/oidc/client_id',
+    configPath: 'oidc.client_id'
+  },
+  {
+    environmentVariableName: 'OIDC_CLIENT_SECRET',
+    filePath: '/etc/gardener-dashboard/secrets/oidc/client_secret',
+    configPath: 'oidc.client_secret'
+  },
+  {
+    environmentVariableName: 'GITHUB_AUTHENTICATION_APP_ID',
+    filePath: '/etc/gardener-dashboard/secrets/github/authentication.appId',
+    configPath: 'gitHub.authentication.appId',
+    type: 'Integer'
+  },
+  {
+    environmentVariableName: 'GITHUB_AUTHENTICATION_CLIENT_ID',
+    filePath: '/etc/gardener-dashboard/secrets/github/authentication.clientId',
+    configPath: 'gitHub.authentication.clientId'
+  },
+  {
+    environmentVariableName: 'GITHUB_AUTHENTICATION_CLIENT_SECRET',
+    filePath: '/etc/gardener-dashboard/secrets/github/authentication.clientSecret',
+    configPath: 'gitHub.authentication.clientSecret'
+  },
+  {
+    environmentVariableName: 'GITHUB_AUTHENTICATION_INSTALLATION_ID',
+    filePath: '/etc/gardener-dashboard/secrets/github/authentication.installationId',
+    configPath: 'gitHub.authentication.installationId',
+    type: 'Integer'
+  },
+  {
+    environmentVariableName: 'GITHUB_AUTHENTICATION_PRIVATE_KEY',
+    filePath: '/etc/gardener-dashboard/secrets/github/authentication.privateKey',
+    configPath: 'gitHub.authentication.privateKey'
+  },
+  {
+    environmentVariableName: 'GITHUB_AUTHENTICATION_TOKEN',
+    filePath: '/etc/gardener-dashboard/secrets/github/authentication.token',
+    configPath: 'gitHub.authentication.token'
+  },
+  {
+    environmentVariableName: 'GITHUB_WEBHOOK_SECRET',
+    filePath: '/etc/gardener-dashboard/secrets/github/webhookSecret',
+    configPath: 'gitHub.webhookSecret'
+  },
+  {
+    environmentVariableName: 'LOG_LEVEL',
+    configPath: 'logLevel'
+  },
+  {
+    environmentVariableName: 'LOG_HTTP_REQUEST_BODY',
+    configPath: 'logHttpRequestBody',
+    type: 'Boolean'
+  },
+  {
+    environmentVariableName: 'PORT',
+    configPath: 'port',
+    type: 'Integer'
+  },
+  {
+    environmentVariableName: 'METRICS_PORT',
+    configPath: 'metricsPort',
+    type: 'Integer'
+  },
+  {
+    environmentVariableName: 'COOKIE_SAME_SITE_POLICY',
+    configPath: 'cookieSameSitePolicy',
+  },
+  {
+    environmentVariableName: 'CSP_FRAME_ANCESTORS',
+    configPath: 'cspFrameAncestors',
+    type: 'Object'
+  },
+  {
+    environmentVariableName: 'FGA_API_URL',
+    filePath: '/etc/gardener-dashboard/secrets/fga/apiUrl',
+    configPath: 'fgaApiUrl'
+  },
+  {
+    environmentVariableName: 'FGA_STORE_ID',
+    filePath: '/etc/gardener-dashboard/secrets/fga/storeId',
+    configPath: 'fgaStoreId'
+  },
+  {
+    environmentVariableName: 'FGA_AUTHORIZATION_MODEL_ID',
+    filePath: '/etc/gardener-dashboard/secrets/fga/authorizationModelId',
+    configPath: 'fgaAuthorizationModelId'
+  },
+  {
+    environmentVariableName: 'FGA_API_TOKEN',
+    filePath: '/etc/gardener-dashboard/secrets/fga/apiToken',
+    configPath: 'fgaApiToken'
+  }
+]
+
+function parseConfigValue (value, type) {
   switch (type) {
     case 'Object':
       return value
@@ -69,19 +164,35 @@ function getEnvironmentVariable (env, name, type) {
   }
 }
 
+function getValueFromFile (filePath, type) {
+  try {
+    const value = fs.readFileSync(filePath, 'utf8')
+    return parseConfigValue(value, type)
+  } catch (error) {
+    return undefined
+  }
+}
+
+function getValueFromEnvironmentOrFile (env, environmentVariableName, filePath, type) {
+  const value = parseConfigValue(env[environmentVariableName], type)
+  if (value !== undefined) {
+    return value
+  }
+
+  if (filePath) {
+    return getValueFromFile(filePath, type)
+  }
+}
+
 module.exports = {
-  assignEnvironmentVariables (config, env) {
-    _.forEach(environmentVariableDefinitions, (path, name) => {
-      let type = 'String'
-      if (_.isPlainObject(path)) {
-        type = path.type
-        path = path.path
+  assignConfigFromEnvironmentAndFileSystem (config, env) {
+    for (const { environmentVariableName, configPath, filePath, type = 'String' } of configMappings) {
+      const value = getValueFromEnvironmentOrFile(env, environmentVariableName, filePath, type)
+
+      if (value !== undefined) {
+        _.set(config, configPath, value)
       }
-      const value = getEnvironmentVariable(env, name, type)
-      if (value) {
-        _.set(config, path, value)
-      }
-    })
+    }
   },
   getDefaults ({ env } = process) {
     const isProd = env.NODE_ENV === 'production'
@@ -108,7 +219,7 @@ module.exports = {
         _.merge(config, this.readConfig(filename))
       } catch (err) { /* ignore */ }
     }
-    this.assignEnvironmentVariables(config, env)
+    this.assignConfigFromEnvironmentAndFileSystem(config, env)
     const requiredConfigurationProperties = [
       'sessionSecret',
       'apiServerUrl'
@@ -124,7 +235,6 @@ module.exports = {
       requiredConfigurationProperties.push(
         'oidc.issuer',
         'oidc.client_id',
-        'oidc.client_secret',
         'oidc.redirect_uris'
       )
     }
@@ -133,6 +243,11 @@ module.exports = {
       assert.ok(_.get(config, path), `Configuration value '${path}' is required`)
     })
 
+    const sessionSecrets = [config.sessionSecret]
+    if (config.sessionSecretPrevious) {
+      sessionSecrets.push(config.sessionSecretPrevious)
+    }
+    _.set(config, 'sessionSecrets', sessionSecrets)
     _.set(config, 'frontend.apiServerUrl', config.apiServerUrl)
     _.set(config, 'frontend.clusterIdentity', config.clusterIdentity)
     if (!config.gitHub && _.has(config, 'frontend.ticket')) {

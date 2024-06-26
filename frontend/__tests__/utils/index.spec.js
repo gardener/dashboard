@@ -6,7 +6,7 @@
 
 import {
   canI,
-  selectedImageIsNotLatest,
+  machineImageHasUpdate,
   isHtmlColorCode,
   defaultCriNameByKubernetesVersion,
   getIssueSince,
@@ -15,9 +15,13 @@ import {
   getTimeStringTo,
   getTimeStringFrom,
   parseNumberWithMagnitudeSuffix,
+  normalizeVersion,
 } from '@/utils'
 
-import { pick } from '@/lodash'
+import {
+  pick,
+  find,
+} from '@/lodash'
 
 describe('utils', () => {
   describe('authorization', () => {
@@ -181,75 +185,105 @@ describe('utils', () => {
     })
   })
 
-  describe('#selectedImageIsNotLatest', () => {
+  describe('#machineImageHasUpdate', () => {
     const sampleMachineImages = [
       {
-        name: 'FooImage',
         vendorName: 'Foo',
-        icon: 'icon',
         version: '1.1.1',
-        expirationDate: '2119-04-05T01:02:03Z', // not expired
         isSupported: true,
       },
       {
-        name: 'FooImage2',
         vendorName: 'Foo',
-        icon: 'icon',
-        version: '1.2.2',
+        version: '1.1.2',
         isSupported: true,
       },
       {
-        name: 'FooImage3',
         vendorName: 'Foo',
-        icon: 'icon',
-        version: '1.3.2',
+        version: '1.1.3',
+        isSupported: false,
+      },
+      {
+        vendorName: 'Foo',
+        version: '1.2.0',
         isSupported: true,
       },
       {
-        name: 'FooImage4',
         vendorName: 'Foo',
-        icon: 'icon',
-        version: '1.3.3',
-        expirationDate: '2119-04-05T01:02:03Z', // not expired
-        isPreview: true,
-      },
-      {
-        name: 'BarImage',
-        vendorName: 'Bar',
-        icon: 'icon',
-        version: '3.3.2',
+        version: '2.0.0',
         isSupported: true,
-        expirationDate: '2019-04-05T01:02:03Z', // expired
       },
       {
-        name: 'FooImage5',
-        vendorName: 'Foo',
-        icon: 'icon',
-        version: '1.3.4',
-        isDeprecated: true,
-      },
-      {
-        name: 'FooImage6',
-        vendorName: 'Foo',
-        icon: 'icon',
-        version: '1.4.4',
-        isPreview: true,
+        vendorName: 'Bar', // Ensures other vendors are not considered for update
+        version: '1.1.5',
+        isSupported: true,
       },
     ]
 
-    it('selected image should not be be latest (one newer supported exists)', () => {
-      const result = selectedImageIsNotLatest(sampleMachineImages[1], sampleMachineImages)
+    function createMachineImage (version, updateStrategy) {
+      return {
+        ...find(sampleMachineImages, ['version', version]),
+        updateStrategy,
+      }
+    }
+
+    it('image should have update (updateStrategy major | patch, minor, major exist)', () => {
+      const maschineImage = createMachineImage('1.1.1', 'major')
+      const result = machineImageHasUpdate(maschineImage, sampleMachineImages)
       expect(result).toBe(true)
     })
 
-    it('selected image should be latest (only newer deprecated, preview and other vendor exists)', () => {
-      const result = selectedImageIsNotLatest(sampleMachineImages[2], sampleMachineImages)
+    it('image should have update (updateStrategy minor | patch, minor, major exist)', () => {
+      const maschineImage = createMachineImage('1.1.1', 'minor')
+      const result = machineImageHasUpdate(maschineImage, sampleMachineImages)
+      expect(result).toBe(true)
+    })
+
+    it('image should have update (updateStrategy patch | patch, minor, major exist)', () => {
+      const maschineImage = createMachineImage('1.1.1', 'patch')
+      const result = machineImageHasUpdate(maschineImage, sampleMachineImages)
+      expect(result).toBe(true)
+    })
+
+    it('image should have update (updateStrategy major | minor, major exist)', () => {
+      const maschineImage = createMachineImage('1.1.2', 'major')
+      const result = machineImageHasUpdate(maschineImage, sampleMachineImages)
+      expect(result).toBe(true)
+    })
+
+    it('image should have update (updateStrategy minor | minor, major exist)', () => {
+      const maschineImage = createMachineImage('1.1.2', 'minor')
+      const result = machineImageHasUpdate(maschineImage, sampleMachineImages)
+      expect(result).toBe(true)
+    })
+
+    it('image should not have update (updateStrategy patch | minor, major exist)', () => {
+      const maschineImage = createMachineImage('1.1.2', 'patch')
+      const result = machineImageHasUpdate(maschineImage, sampleMachineImages)
       expect(result).toBe(false)
     })
 
-    it('selected image should be latest (only one exists)', () => {
-      const result = selectedImageIsNotLatest(sampleMachineImages[4], sampleMachineImages)
+    it('image should have update (updateStrategy major | major exists)', () => {
+      const maschineImage = createMachineImage('1.2.0', 'major')
+      const result = machineImageHasUpdate(maschineImage, sampleMachineImages)
+      expect(result).toBe(true)
+    })
+
+    it('image should not have update (updateStrategy minor | major exists)', () => {
+      const maschineImage = createMachineImage('1.2.0', 'minor')
+      const result = machineImageHasUpdate(maschineImage, sampleMachineImages)
       expect(result).toBe(false)
+    })
+
+    it('image should not have update (updateStrategy major | none exists)', () => {
+      const maschineImage = createMachineImage('2.0.0', 'major')
+      const result = machineImageHasUpdate(maschineImage, sampleMachineImages)
+      expect(result).toBe(false)
+    })
+
+    it('image should have update (updateStrategy unknown defaults to major | major exists)', () => {
+      const maschineImage = createMachineImage('1.2.0', 'foo')
+      const result = machineImageHasUpdate(maschineImage, sampleMachineImages)
+      expect(result).toBe(true)
     })
   })
 
@@ -434,6 +468,36 @@ describe('utils', () => {
 
     test('returns null for invalid suffix', () => {
       expect(parseNumberWithMagnitudeSuffix('1x')).toBeNull()
+    })
+  })
+
+  describe('normalizeVersion', () => {
+    it('should fill missing segments', () => {
+      expect(normalizeVersion('1.12')).toBe('1.12.0')
+      expect(normalizeVersion('2')).toBe('2.0.0')
+    })
+
+    it('should cut additional segments', () => {
+      expect(normalizeVersion('1.2.23.4')).toBe('1.2.23')
+    })
+
+    it('should preserve pre-release or build suffix', () => {
+      expect(normalizeVersion('1.2-beta')).toBe('1.2.0-beta')
+      expect(normalizeVersion('1.2.14.3+abcd')).toBe('1.2.14+abcd')
+    })
+
+    it('should remove leading zeros', () => {
+      expect(normalizeVersion('23.05')).toBe('23.5.0')
+    })
+
+    it('should allow only integer segments', () => {
+      expect(normalizeVersion('23.1e1')).toBeUndefined()
+      expect(normalizeVersion('23.x')).toBeUndefined()
+    })
+
+    it('should not allow pre or suffix other than allowed ones', () => {
+      expect(normalizeVersion('x23.1')).toBeUndefined()
+      expect(normalizeVersion('23.2x')).toBeUndefined()
     })
   })
 })

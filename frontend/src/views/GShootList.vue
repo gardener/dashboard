@@ -178,7 +178,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
         <template #item="{ item }">
           <g-shoot-list-row
-            :shoot-item="item"
+            :model-value="item"
             :visible-headers="visibleHeaders"
             @show-dialog="showDialog"
           />
@@ -217,7 +217,7 @@ SPDX-License-Identifier: Apache-2.0
           </g-toolbar>
           <g-shoot-access-card
             ref="clusterAccess"
-            :shoot-item="shootItem"
+            :selected-shoot="shootItem"
             :hide-terminal-shortcuts="true"
           />
         </v-card>
@@ -230,7 +230,6 @@ SPDX-License-Identifier: Apache-2.0
 import {
   ref,
   provide,
-  defineAsyncComponent,
 } from 'vue'
 import {
   mapState,
@@ -253,6 +252,7 @@ import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
 import GIconBase from '@/components/icons/GIconBase.vue'
 import GCertifiedKubernetes from '@/components/icons/GCertifiedKubernetes.vue'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
+import GShootAccessCard from '@/components/ShootDetails/GShootAccessCard.vue'
 
 import { mapTableHeader } from '@/utils'
 
@@ -274,7 +274,7 @@ export default {
     GToolbar,
     GShootListRow,
     GShootListProgress,
-    GShootAccessCard: defineAsyncComponent(() => import('@/components/ShootDetails/GShootAccessCard.vue')),
+    GShootAccessCard,
     GIconBase,
     GCertifiedKubernetes,
     GTableColumnSelection,

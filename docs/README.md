@@ -2,8 +2,7 @@
 
 ## Overview
 
-* [Dashboard Architecture](./architecture/README.md)
-* [Gardener landing page `gardener.cloud`](https://gardener.cloud/)
+* [Gardener Landing Page `gardener.cloud`](https://gardener.cloud/)
 
 ## Usage
 
@@ -23,5 +22,7 @@
 
 ## Development
 
-* [Setting up a local development environment](development/local-setup.md)
+* [Dashboard Architecture](development/architecture.md)
+* [Setting Up a Local Development Environment](development/local-setup.md)
 * [Testing](development/testing.md)
+* [Hotfixes](development/process.md)

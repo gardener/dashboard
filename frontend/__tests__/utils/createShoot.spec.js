@@ -8,7 +8,7 @@ import {
   splitCIDR,
   getZonesNetworkConfiguration,
   findFreeNetworks,
-} from '@/utils/createShoot'
+} from '@/utils/shoot'
 
 describe('utils', () => {
   describe('createShoot', () => {

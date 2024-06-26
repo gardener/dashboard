@@ -44,23 +44,30 @@ export const useGardenerExtensionStore = defineStore('gardenerExtension', () => 
   }
 
   const sortedDnsProviderList = computed(() => {
-    const supportedProviderTypes = ['aws-route53', 'azure-dns', 'azure-private-dns', 'google-clouddns', 'openstack-designate', 'alicloud-dns', 'infoblox-dns', 'netlify-dns']
+    const supportedProviderTypes = ['aws-route53', 'azure-dns', 'azure-private-dns', 'google-clouddns', 'openstack-designate', 'alicloud-dns', 'infoblox-dns', 'netlify-dns', 'ddns']
     const resources = flatMap(list.value, 'resources')
     const dnsProvidersFromDnsRecords = filter(resources, ['kind', 'DNSRecord'])
 
     const dnsProviderList = map(supportedProviderTypes, type => {
+      const dnsProvider = find(dnsProvidersFromDnsRecords, ['type', type])
       return {
         type,
-        primary: get(find(dnsProvidersFromDnsRecords, { type }), 'primary', false),
+        primary: get(dnsProvider, 'primary', false),
       }
     })
 
     const dnsServiceExtensionDeployed = some(list.value, ['name', 'extension-shoot-dns-service'])
-    if (dnsServiceExtensionDeployed) {
-      return dnsProviderList
-    }
-    // return only primary DNS Providers backed by DNSRecord
-    return filter(dnsProviderList, 'primary')
+    return dnsServiceExtensionDeployed
+      ? dnsProviderList
+      : filter(dnsProviderList, 'primary') // return only primary DNS Providers backed by DNSRecord
+  })
+
+  const dnsProviderTypes = computed(() => {
+    return map(sortedDnsProviderList.value, 'type')
+  })
+
+  const dnsProviderTypesWithPrimarySupport = computed(() => {
+    return map(filter(sortedDnsProviderList.value, 'primary'), 'type')
   })
 
   const networkingTypes = computed(() => {
@@ -78,7 +85,8 @@ export const useGardenerExtensionStore = defineStore('gardenerExtension', () => 
     isInitial,
     gardenerExtensionList,
     fetchGardenerExtensions,
-    sortedDnsProviderList,
+    dnsProviderTypes,
+    dnsProviderTypesWithPrimarySupport,
     networkingTypes,
     networkingTypeList,
   }

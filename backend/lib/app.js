@@ -57,16 +57,18 @@ app.set('trust proxy', 1)
 app.set('etag', false)
 app.set('x-powered-by', false)
 
-app.use(helmet.dnsPrefetchControl())
-app.use(helmet.permittedCrossDomainPolicies())
-app.use(helmet.noSniff())
-app.use(helmet.hsts())
+app.use(helmet.xDnsPrefetchControl())
+app.use(helmet.xPermittedCrossDomainPolicies())
+app.use(helmet.xContentTypeOptions())
+if (process.env.NODE_ENV !== 'development') {
+  app.use(helmet.strictTransportSecurity())
+}
 app.use(noCache(STATIC_PATHS))
 app.use('/auth', auth.router)
 app.use('/webhook', githubWebhook.router)
 app.use('/api', api.router)
 
-app.use(helmet.xssFilter())
+app.use(helmet.xXssProtection())
 app.use(helmet.contentSecurityPolicy({
   directives: {
     defaultSrc: ['\'self\''],

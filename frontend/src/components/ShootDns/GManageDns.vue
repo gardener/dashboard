@@ -10,14 +10,14 @@ SPDX-License-Identifier: Apache-2.0
       <v-row>
         <v-col cols="7">
           <v-text-field
-            v-model="domain"
+            v-model="dnsDomain"
             color="primary"
             label="Cluster Domain"
-            :disabled="!clusterIsNew"
-            :persistent-hint="!clusterIsNew"
+            :disabled="!isNewCluster"
+            :persistent-hint="!isNewCluster"
             :hint="domainHint"
             variant="underlined"
-            @blur="v$.primaryProvider.$touch()"
+            @blur="v$.dnsPrimaryProvider.$touch()"
           />
         </v-col>
         <v-col
@@ -25,18 +25,18 @@ SPDX-License-Identifier: Apache-2.0
           cols="4"
         >
           <v-select
-            v-model="primaryProvider"
+            v-model="dnsPrimaryProvider"
             color="primary"
             item-title="secretName"
             return-object
             :items="dnsProvidersWithPrimarySupport"
-            :error-messages="getErrorMessages(v$.primaryProvider)"
+            :error-messages="getErrorMessages(v$.dnsPrimaryProvider)"
             label="Primary DNS Provider"
             clearable
-            :disabled="!clusterIsNew"
+            :disabled="!isNewCluster"
             variant="underlined"
-            @blur="v$.primaryProvider.$touch()"
-            @update:model-value="v$.primaryProvider.$touch()"
+            @blur="v$.dnsPrimaryProvider.$touch()"
+            @update:model-value="v$.dnsPrimaryProvider.$touch()"
           >
             <template #item="{ item, props }">
               <v-list-item
@@ -65,7 +65,7 @@ SPDX-License-Identifier: Apache-2.0
     </v-row>
   </template>
   <div class="alternate-row-background">
-    <g-expand-transition-group>
+    <v-expand-transition group>
       <v-row
         v-for="id in dnsProviderIds"
         :key="id"
@@ -73,7 +73,7 @@ SPDX-License-Identifier: Apache-2.0
       >
         <g-dns-provider-row :dns-provider-id="id" />
       </v-row>
-    </g-expand-transition-group>
+    </v-expand-transition>
     <v-row
       key="addProvider"
       class="list-item my-1"
@@ -95,18 +95,13 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import {
-  mapState,
-  mapActions,
-} from 'pinia'
 import { requiredIf } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
-import { useShootStagingStore } from '@/store/shootStaging'
-
 import GDnsProviderRow from '@/components/ShootDns/GDnsProviderRow'
 import GVendorIcon from '@/components/GVendorIcon'
-import GExpandTransitionGroup from '@/components/GExpandTransitionGroup'
+
+import { useShootContext } from '@/composables/useShootContext'
 
 import {
   withFieldName,
@@ -119,63 +114,49 @@ export default {
   components: {
     GDnsProviderRow,
     GVendorIcon,
-    GExpandTransitionGroup,
   },
   setup () {
+    const {
+      dnsDomain,
+      dnsPrimaryProvider,
+      isNewCluster,
+      dnsProviderIds,
+      dnsProvidersWithPrimarySupport,
+      addDnsProvider,
+    } = useShootContext()
+
     return {
       v$: useVuelidate(),
+      dnsDomain,
+      dnsPrimaryProvider,
+      isNewCluster,
+      dnsProviderIds,
+      dnsProvidersWithPrimarySupport,
+      addDnsProvider,
     }
   },
   validations () {
     return {
-      primaryProvider: withFieldName('Primary DNS Provider', {
-        required: withMessage('Provider is required if a custom domain is defined', requiredIf(this.clusterIsNew && !!this.domain)),
-        nil: withMessage('Provider is not allowed if no custom domain is defined', nilUnless('domain')),
+      dnsPrimaryProvider: withFieldName('Primary DNS Provider', {
+        required: withMessage('Provider is required if a custom domain is defined', requiredIf(this.isNewCluster && !!this.dnsDomain)),
+        nil: withMessage('Provider is not allowed if no custom domain is defined', nilUnless('dnsDomain')),
       }),
     }
   },
   computed: {
-    ...mapState(useShootStagingStore, [
-      'dnsDomain',
-      'dnsProviderIds',
-      'clusterIsNew',
-      'dnsProvidersWithPrimarySupport',
-      'dnsPrimaryProvider',
-    ]),
     domainHint () {
-      return this.clusterIsNew
+      return this.isNewCluster
         ? 'External available domain of the cluster'
         : 'Domain cannot be changed after cluster creation'
     },
-    domain: {
-      get () {
-        return this.dnsDomain
-      },
-      set (value) {
-        this.setDnsDomain(value)
-      },
-    },
-    primaryProvider: {
-      get () {
-        return this.dnsPrimaryProvider
-      },
-      set (value) {
-        this.setDnsPrimaryProvider(value)
-      },
-    },
     primaryProviderVisible () {
-      return !!this.primaryProvider || (this.clusterIsNew && !!this.dnsDomain)
+      return !!this.dnsPrimaryProvider || (this.isNewCluster && !!this.dnsDomain)
     },
   },
   mounted () {
     this.v$.$touch()
   },
   methods: {
-    ...mapActions(useShootStagingStore, [
-      'addDnsProvider',
-      'setDnsPrimaryProvider',
-      'setDnsDomain',
-    ]),
     getErrorMessages,
   },
 }

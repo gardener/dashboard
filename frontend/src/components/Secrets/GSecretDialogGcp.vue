@@ -69,7 +69,10 @@ SPDX-License-Identifier: Apache-2.0
           You need to provide a service account and a key (serviceaccount.json) to allow the dns-controller-manager to authenticate and execute calls to Cloud DNS.
         </p>
         <p>
-          For details on Cloud DNS see <g-external-link url="https://cloud.google.com/dns/docs/zones" />, and on Service Accounts see <g-external-link url="https://cloud.google.com/iam/docs/service-accounts" />
+          For details on Cloud DNS see
+          <g-external-link url="https://cloud.google.com/dns/docs/zones" />,
+          and on Service Accounts see
+          <g-external-link url="https://cloud.google.com/iam/docs/service-accounts" />
         </p>
         <p>
           The service account needs permissions on the hosted zone to list and change DNS records. For details on which permissions or roles are required see <g-external-link url="https://cloud.google.com/dns/docs/access-control" />. A possible role is roles/dns.admin "DNS Administrator".

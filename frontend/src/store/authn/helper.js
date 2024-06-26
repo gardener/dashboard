@@ -6,7 +6,7 @@
 
 import { useEventListener } from '@vueuse/core'
 import { useCookies } from '@vueuse/integrations/useCookies'
-import decode from 'jwt-decode'
+import { jwtDecode } from 'jwt-decode'
 
 import { useLogger } from '@/composables/useLogger'
 
@@ -21,7 +21,7 @@ import {
   isSessionExpiredError,
 } from '@/utils/errors'
 
-export const COOKIE_HEADER_PAYLOAD = 'gHdrPyl'
+export const COOKIE_HEADER_PAYLOAD = '__Host-gHdrPyl'
 const CLOCK_TOLERANCE = 15
 
 function now () {
@@ -76,7 +76,7 @@ export function useUserManager (options) {
     try {
       const value = cookies.get(COOKIE_HEADER_PAYLOAD)
       if (value) {
-        return decode(value)
+        return jwtDecode(value)
       }
     } catch (err) {
       logger.error(err.message)

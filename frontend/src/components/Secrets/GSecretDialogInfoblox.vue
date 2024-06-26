@@ -10,7 +10,6 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :secret-validations="v$"
     :secret="secret"
-    vendor="infoblox-dns"
     create-title="Add new Infoblox Secret"
     replace-title="Replace Infoblox Secret"
   >
@@ -59,10 +58,7 @@ import { required } from '@vuelidate/validators'
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 
 import { withFieldName } from '@/utils/validators'
-import {
-  getErrorMessages,
-  setDelayedInputFocus,
-} from '@/utils'
+import { getErrorMessages } from '@/utils'
 
 export default {
   components: {
@@ -124,27 +120,7 @@ export default {
       return !this.secret
     },
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-      }
-    },
-  },
   methods: {
-    reset () {
-      this.v$.$reset()
-
-      this.infobloxUsername = ''
-      this.infobloxPassword = ''
-
-      if (!this.isCreateMode) {
-        if (this.secret.data) {
-          this.infobloxUsername = this.secret.data.USERNAME
-        }
-        setDelayedInputFocus(this, 'infobloxUsername')
-      }
-    },
     getErrorMessages,
   },
 }

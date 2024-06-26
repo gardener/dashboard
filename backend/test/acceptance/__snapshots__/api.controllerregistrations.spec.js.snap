@@ -1,21 +1,21 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`api controllerregistrations should return all gardener extensions (admin) 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImpvaG4uZG9lQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.LkQ9PEN893UNTsZZn2Ux_CAYNOoQ2ISboWuHiAc5HHU",
     },
-    Object {
+    {
       "apiVersion": "authorization.k8s.io/v1",
       "kind": "SelfSubjectAccessReview",
-      "spec": Object {
+      "spec": {
         "nonResourceAttributes": undefined,
-        "resourceAttributes": Object {
+        "resourceAttributes": {
           "group": "core.gardener.cloud",
           "resource": "controllerregistrations",
           "verb": "list",
@@ -27,53 +27,53 @@ Array [
 `;
 
 exports[`api controllerregistrations should return all gardener extensions (admin) 2`] = `
-Array [
-  Object {
+[
+  {
     "name": "OS Registration",
-    "resources": Array [
-      Object {
+    "resources": [
+      {
         "kind": "OperatingSystemConfig",
         "type": "gardenlinux",
       },
     ],
     "version": "v1.0.0",
   },
-  Object {
+  {
     "name": "Network Registration",
-    "resources": Array [
-      Object {
+    "resources": [
+      {
         "kind": "Network",
         "type": "gardium",
       },
     ],
   },
-  Object {
+  {
     "name": "Network Registration 2",
-    "resources": Array [
-      Object {
+    "resources": [
+      {
         "kind": "Network",
         "type": "foobium",
       },
-      Object {
+      {
         "kind": "Foo",
         "type": "bar",
       },
     ],
   },
-  Object {
+  {
     "name": "Provider-Foo",
-    "resources": Array [
-      Object {
+    "resources": [
+      {
         "kind": "DNSRecord",
         "primary": true,
         "type": "gardenland",
       },
     ],
   },
-  Object {
+  {
     "name": "extension-shoot-dns-service",
-    "resources": Array [
-      Object {
+    "resources": [
+      {
         "kind": "Foo",
         "type": "bar",
       },
@@ -83,21 +83,21 @@ Array [
 `;
 
 exports[`api controllerregistrations should return only required registrations and information (admin) 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImpvaG4uZG9lQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.LkQ9PEN893UNTsZZn2Ux_CAYNOoQ2ISboWuHiAc5HHU",
     },
-    Object {
+    {
       "apiVersion": "authorization.k8s.io/v1",
       "kind": "SelfSubjectAccessReview",
-      "spec": Object {
+      "spec": {
         "nonResourceAttributes": undefined,
-        "resourceAttributes": Object {
+        "resourceAttributes": {
           "group": "core.gardener.cloud",
           "resource": "controllerregistrations",
           "verb": "list",
@@ -109,38 +109,38 @@ Array [
 `;
 
 exports[`api controllerregistrations should return only required registrations and information (admin) 2`] = `
-Array [
-  Object {
+[
+  {
     "name": "Network Registration",
-    "resources": Array [
-      Object {
+    "resources": [
+      {
         "kind": "Network",
         "type": "gardium",
       },
     ],
   },
-  Object {
+  {
     "name": "Network Registration 2",
-    "resources": Array [
-      Object {
+    "resources": [
+      {
         "kind": "Network",
         "type": "foobium",
       },
     ],
   },
-  Object {
+  {
     "name": "Provider-Foo",
-    "resources": Array [
-      Object {
+    "resources": [
+      {
         "kind": "DNSRecord",
         "primary": true,
         "type": "gardenland",
       },
     ],
   },
-  Object {
+  {
     "name": "extension-shoot-dns-service",
-    "resources": Array [],
+    "resources": [],
   },
 ]
 `;

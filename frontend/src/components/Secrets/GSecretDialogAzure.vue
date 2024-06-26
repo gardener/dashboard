@@ -87,9 +87,11 @@ SPDX-License-Identifier: Apache-2.0
       </div>
       <div v-if="vendor==='azure-dns' || vendor==='azure-private-dns'">
         <p>
-          Follow the steps as described in the Azure documentation to <g-external-link url="https://docs.microsoft.com/en-us/azure/dns/dns-sdk#create-a-service-principal-account">
+          Follow the steps as described in the Azure documentation to
+          <g-external-link url="https://docs.microsoft.com/en-us/azure/dns/dns-sdk#create-a-service-principal-account">
             create a service principal account
-          </g-external-link> and grant the service principal account 'DNS Zone Contributor' permissions to the resource group.
+          </g-external-link>
+          and grant the service principal account 'DNS Zone Contributor' permissions to the resource group.
         </p>
       </div>
     </template>
@@ -104,10 +106,7 @@ import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
 
 import { withFieldName } from '@/utils/validators'
-import {
-  getErrorMessages,
-  setDelayedInputFocus,
-} from '@/utils'
+import { getErrorMessages } from '@/utils'
 
 export default {
   components: {
@@ -195,26 +194,7 @@ export default {
       return undefined
     },
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-      }
-    },
-  },
   methods: {
-    reset () {
-      this.v$.$reset()
-
-      this.clientId = ''
-      this.clientSecret = ''
-      this.subscriptionId = ''
-      this.tenantId = ''
-
-      if (!this.isCreateMode) {
-        setDelayedInputFocus(this, 'clientId')
-      }
-    },
     getErrorMessages,
   },
 }

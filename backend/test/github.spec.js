@@ -40,9 +40,11 @@ describe('github', () => {
       const microDateStr = now.toISOString().replace(/Z$/, '000Z')
       const dateStr = new Date(microDateStr).toISOString()
       let mergePatchStub
+      let createStub
 
       beforeAll(() => {
-        jest.useFakeTimers().setSystemTime(now)
+        jest.useFakeTimers()
+        jest.setSystemTime(now)
       })
 
       afterAll(() => {
@@ -51,53 +53,77 @@ describe('github', () => {
 
       beforeEach(() => {
         mergePatchStub = jest.spyOn(dashboardClient['coordination.k8s.io'].leases, 'mergePatch')
-        mergePatchStub.mockResolvedValue({})
+        createStub = jest.spyOn(dashboardClient['coordination.k8s.io'].leases, 'create')
       })
 
       it('should throw an error in case of unknown event', async () => {
         await expect(handleGithubEvent('unknown', null)).rejects.toThrow(UnprocessableEntity)
       })
 
-      it('should update the lease object for an issue event', async () => {
-        handleGithubEvent('issues', { issue: { updated_at: dateStr } })
-
-        const expectedBody = {
-          spec: {
-            holderIdentity,
-            renewTime: microDateStr
-          }
-        }
-        expect(mergePatchStub).toBeCalledWith(namespace, leaseName, expectedBody)
-      })
-
-      it('should update the lease object for an issue_comment event', async () => {
-        const expectedBody = {
-          spec: {
-            holderIdentity,
-            renewTime: microDateStr
-          }
-        }
-
-        handleGithubEvent('issue_comment', { comment: { updated_at: dateStr } })
-
-        expect(mergePatchStub).toBeCalledWith(namespace, leaseName, expectedBody)
-      })
-
-      it('should rethrow errors from underlying kube client', async () => {
-        const expectedBody = {
-          spec: {
-            holderIdentity,
-            renewTime: microDateStr
-          }
-        }
-        mergePatchStub.mockImplementationOnce(() => {
-          const err = new Error('Not Found')
-          err.code = 404
-          throw err
+      describe('when the lease exists', () => {
+        beforeEach(() => {
+          mergePatchStub.mockResolvedValue({})
         })
 
-        await expect(handleGithubEvent('issue_comment', { comment: { updated_at: dateStr } })).rejects.toThrow(InternalServerError)
-        expect(mergePatchStub).toBeCalledWith(namespace, leaseName, expectedBody)
+        it('should update the lease object for an issue event', async () => {
+          await handleGithubEvent('issues', { issue: { updated_at: dateStr } })
+
+          const expectedBody = {
+            spec: {
+              holderIdentity,
+              renewTime: microDateStr
+            }
+          }
+          expect(mergePatchStub).toBeCalledWith(namespace, leaseName, expectedBody)
+        })
+
+        it('should update the lease object for an issue_comment event', async () => {
+          const expectedBody = {
+            spec: {
+              holderIdentity,
+              renewTime: microDateStr
+            }
+          }
+
+          await handleGithubEvent('issue_comment', { comment: { updated_at: dateStr } })
+
+          expect(mergePatchStub).toBeCalledWith(namespace, leaseName, expectedBody)
+        })
+
+        it('should rethrow errors from underlying kube client', async () => {
+          const expectedBody = {
+            spec: {
+              holderIdentity,
+              renewTime: microDateStr
+            }
+          }
+          mergePatchStub.mockRejectedValueOnce(createError(403, 'Forbidden'))
+
+          await expect(handleGithubEvent('issue_comment', { comment: { updated_at: dateStr } })).rejects.toThrow(InternalServerError)
+          expect(mergePatchStub).toBeCalledWith(namespace, leaseName, expectedBody)
+        })
+      })
+
+      describe('when the lease does not exist', () => {
+        beforeEach(() => {
+          mergePatchStub.mockRejectedValueOnce(createError(404, 'Not found'))
+          createStub.mockResolvedValue({})
+        })
+
+        it('should create the lease object if it is not found', async () => {
+          await handleGithubEvent('issues', { issue: { updated_at: dateStr } })
+
+          const expectedBody = {
+            metadata: {
+              name: leaseName
+            },
+            spec: {
+              holderIdentity,
+              renewTime: microDateStr
+            }
+          }
+          expect(createStub).toBeCalledWith(namespace, expectedBody)
+        })
       })
     })
 
@@ -155,7 +181,8 @@ describe('github', () => {
     const loadTicketsDuration = 500
 
     beforeAll(() => {
-      jest.useFakeTimers().setSystemTime(now)
+      jest.useFakeTimers()
+      jest.setSystemTime(now)
     })
 
     beforeEach(() => {

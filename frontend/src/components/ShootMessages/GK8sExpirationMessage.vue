@@ -15,13 +15,13 @@ SPDX-License-Identifier: Apache-2.0
       />
       <span>. </span>
     </span>
-    <span v-else>Kubernetes version of this cluster is expired.</span>
+    <span v-else-if="isExpired">Kubernetes version of this cluster is expired.</span>
     <span v-if="severity === 'info'">Version will be updated in the next maintenance window</span>
     <template v-else-if="severity === 'warning'">
       <span v-if="isValidTerminationDate">Version update will be enforced after that date</span>
       <span v-else>Version update will be enforced soon</span>
     </template>
-    <span v-else-if="severity === 'error'">Version update not possible due to missing update path. Please contact your landscape administrator</span>
+    <span v-else-if="severity === 'error'">Kubernetes version of this cluster will expire soon and there is no newer supported version available. Please contact your landscape administrator</span>
   </div>
 </template>
 
@@ -35,7 +35,6 @@ export default {
   props: {
     expirationDate: {
       type: String,
-      required: true,
     },
     isValidTerminationDate: {
       type: Boolean,
@@ -43,6 +42,10 @@ export default {
     },
     severity: {
       type: String,
+      required: true,
+    },
+    isExpired: {
+      type: Boolean,
       required: true,
     },
   },

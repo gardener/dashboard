@@ -18,7 +18,6 @@ SPDX-License-Identifier: Apache-2.0
           <div class="d-flex align-center">
             Hibernation
             <g-shoot-messages
-              :shoot-item="shootItem"
               :filter="['no-hibernation-schedule', 'hibernation-constraint']"
               small
             />
@@ -30,13 +29,11 @@ SPDX-License-Identifier: Apache-2.0
         <template #append>
           <g-shoot-action-change-hibernation
             v-model="changeHibernationDialog"
-            :shoot-item="shootItem"
             dialog
             button
           />
           <g-hibernation-configuration
             ref="hibernationConfiguration"
-            :shoot-item="shootItem"
           />
         </template>
       </g-list-item>
@@ -51,7 +48,6 @@ SPDX-License-Identifier: Apache-2.0
           <div class="d-flex align-center">
             Maintenance
             <g-shoot-messages
-              :shoot-item="shootItem"
               :filter="['last-maintenance', 'maintenance-constraint']"
               show-verbose
               title="Last Maintenance Status"
@@ -91,13 +87,10 @@ SPDX-License-Identifier: Apache-2.0
         <template #append>
           <g-shoot-action-maintenance-start
             v-model="maintenanceStartDialog"
-            :shoot-item="shootItem"
             dialog
             button
           />
-          <g-maintenance-configuration
-            :shoot-item="shootItem"
-          />
+          <g-maintenance-configuration />
         </template>
       </g-list-item>
       <v-divider inset />
@@ -116,7 +109,6 @@ SPDX-License-Identifier: Apache-2.0
         <template #append>
           <g-shoot-action-reconcile-start
             v-model="reconcileStartDialog"
-            :shoot-item="shootItem"
           />
         </template>
       </g-list-item>
@@ -132,7 +124,6 @@ SPDX-License-Identifier: Apache-2.0
             <div class="d-flex align-center">
               Delete Cluster
               <g-shoot-messages
-                :shoot-item="shootItem"
                 filter="force-delete"
                 show-verbose
                 title="Cluster Deletion Failed"
@@ -152,12 +143,10 @@ SPDX-License-Identifier: Apache-2.0
             <g-shoot-action-delete-cluster
               v-if="!canForceDeleteShoot"
               v-model="deleteClusterDialog"
-              :shoot-item="shootItem"
             />
             <g-shoot-action-force-delete
               v-else
               v-model="forceDeleteDialog"
-              :shoot-item="shootItem"
             />
           </template>
         </g-list-item>
@@ -165,8 +154,12 @@ SPDX-License-Identifier: Apache-2.0
     </g-list>
   </v-card>
 </template>
-<script>
-import { mapState } from 'pinia'
+<script setup>
+import {
+  ref,
+  computed,
+} from 'vue'
+import { storeToRefs } from 'pinia'
 
 import { useConfigStore } from '@/store/config'
 import { useAuthzStore } from '@/store/authz'
@@ -181,105 +174,113 @@ import GShootActionReconcileStart from '@/components/GShootActionReconcileStart'
 import GShootMessages from '@/components/ShootMessages/GShootMessages'
 import GTimeString from '@/components/GTimeString'
 
+import { useShootItem } from '@/composables/useShootItem'
+
 import TimeWithOffset from '@/utils/TimeWithOffset'
 import moment from '@/utils/moment'
-import { shootItem } from '@/mixins/shootItem'
 
 import { get } from '@/lodash'
 
-export default {
-  components: {
-    GShootActionChangeHibernation,
-    GShootActionMaintenanceStart,
-    GMaintenanceConfiguration,
-    GHibernationConfiguration,
-    GShootActionDeleteCluster,
-    GShootActionForceDelete,
-    GShootActionReconcileStart,
-    GShootMessages,
-    GTimeString,
-  },
-  mixins: [shootItem],
-  data () {
-    return {
-      changeHibernationDialog: false,
-      maintenanceStartDialog: false,
-      reconcileStartDialog: false,
-      deleteClusterDialog: false,
-      forceDeleteDialog: false,
+const authzStore = useAuthzStore()
+const {
+  canPatchShoots,
+} = storeToRefs(authzStore)
+
+const configStore = useConfigStore()
+
+const {
+  shootItem,
+  isShootStatusHibernationProgressing,
+  isShootSettingHibernated,
+  shootHibernationSchedules,
+  isShootReconciliationDeactivated,
+  shootPurpose,
+  shootMaintenance,
+  canForceDeleteShoot,
+} = useShootItem()
+
+const hibernationConfiguration = ref(null)
+const changeHibernationDialog = ref(false)
+const maintenanceStartDialog = ref(false)
+const reconcileStartDialog = ref(false)
+const deleteClusterDialog = ref(false)
+const forceDeleteDialog = ref(false)
+
+const hibernationDescription = computed(() => {
+  if (isShootStatusHibernationProgressing.value) {
+    if (isShootSettingHibernated.value) {
+      return 'Hibernating Cluster...'
+    } else {
+      return 'Waking up Cluster...'
     }
-  },
-  computed: {
-    ...mapState(useAuthzStore, ['canPatchShoots']),
-    ...mapState(useConfigStore, ['isShootHasNoHibernationScheduleWarning']),
-    hibernationDescription () {
-      if (this.isShootStatusHibernationProgressing) {
-        if (this.isShootSettingHibernated) {
-          return 'Hibernating Cluster...'
-        } else {
-          return 'Waking up Cluster...'
-        }
-      }
-      const purpose = this.shootPurpose || ''
-      if (this.shootHibernationSchedules.length > 0) {
-        return 'Hibernation schedule configured'
-      } else if (this.isShootHasNoHibernationScheduleWarning(this.shootItem)) {
-        return this.canPatchShoots ? `Please configure a schedule for this ${purpose} cluster` : `A schedule should be configured for this ${purpose} cluster`
-      } else {
-        return 'No hibernation schedule configured'
-      }
-    },
-    maintenanceTooltipBegin () {
-      const maintenanceStart = get(this.shootMaintenance, 'timeWindow.begin')
-      const maintenanceStartTime = new TimeWithOffset(maintenanceStart)
-      if (!maintenanceStartTime.isValid()) {
-        return
-      }
+  }
+  const purpose = shootPurpose.value || ''
+  if (shootHibernationSchedules.value.length > 0) {
+    return 'Hibernation schedule configured'
+  } else if (configStore.isShootHasNoHibernationScheduleWarning(shootItem.value)) {
+    return canPatchShoots.value ? `Please configure a schedule for this ${purpose} cluster` : `A schedule should be configured for this ${purpose} cluster`
+  } else {
+    return 'No hibernation schedule configured'
+  }
+})
 
-      return `Start time: ${maintenanceStartTime.toString()}`
-    },
-    maintenanceTooltipEnd () {
-      const maintenanceStart = get(this.shootMaintenance, 'timeWindow.end')
-      const maintenanceStartTime = new TimeWithOffset(maintenanceStart)
-      if (!maintenanceStartTime.isValid()) {
-        return
-      }
+const maintenanceTooltipBegin = computed(() => {
+  const maintenanceStart = get(shootMaintenance.value, 'timeWindow.begin')
+  const maintenanceStartTime = new TimeWithOffset(maintenanceStart)
+  if (!maintenanceStartTime.isValid()) {
+    return
+  }
 
-      return `End time: ${maintenanceStartTime.toString()}`
-    },
-    nextMaintenanceBeginTimestamp () {
-      const maintenanceStart = get(this.shootMaintenance, 'timeWindow.begin')
-      const maintenanceStartTime = new TimeWithOffset(maintenanceStart)
-      if (!maintenanceStartTime.isValid()) {
-        return
-      }
+  return `Start time: ${maintenanceStartTime.toString()}`
+})
 
-      return maintenanceStartTime.nextDate().toISOString()
-    },
-    nextMaintenanceEndTimestamp () {
-      const maintenanceEnd = get(this.shootMaintenance, 'timeWindow.end')
-      const maintenanceEndTime = new TimeWithOffset(maintenanceEnd)
-      if (!maintenanceEndTime.isValid()) {
-        return
-      }
+const maintenanceTooltipEnd = computed(() => {
+  const maintenanceStart = get(shootMaintenance.value, 'timeWindow.end')
+  const maintenanceStartTime = new TimeWithOffset(maintenanceStart)
+  if (!maintenanceStartTime.isValid()) {
+    return
+  }
 
-      return maintenanceEndTime.nextDate().toISOString()
-    },
-    isInMaintenanceWindow () {
-      return moment(this.nextMaintenanceBeginTimestamp).isAfter(this.nextMaintenanceEndTimestamp)
-    },
-    reconcileDescription () {
-      if (this.isShootReconciliationDeactivated) {
-        return 'Reconciliation deactivated'
-      } else {
-        return 'Cluster reconciliation will be triggered regularly'
-      }
-    },
-  },
-  methods: {
-    showHibernationConfigurationDialog () {
-      this.$refs.hibernationConfiguration.showDialog()
-    },
-  },
+  return `End time: ${maintenanceStartTime.toString()}`
+})
+
+const nextMaintenanceBeginTimestamp = computed(() => {
+  const maintenanceStart = get(shootMaintenance.value, 'timeWindow.begin')
+  const maintenanceStartTime = new TimeWithOffset(maintenanceStart)
+  if (!maintenanceStartTime.isValid()) {
+    return
+  }
+
+  return maintenanceStartTime.nextDate().toISOString()
+})
+
+const nextMaintenanceEndTimestamp = computed(() => {
+  const maintenanceEnd = get(shootMaintenance.value, 'timeWindow.end')
+  const maintenanceEndTime = new TimeWithOffset(maintenanceEnd)
+  if (!maintenanceEndTime.isValid()) {
+    return
+  }
+
+  return maintenanceEndTime.nextDate().toISOString()
+})
+
+const isInMaintenanceWindow = computed(() => {
+  return moment(nextMaintenanceBeginTimestamp.value).isAfter(nextMaintenanceEndTimestamp.value)
+})
+
+const reconcileDescription = computed(() => {
+  if (isShootReconciliationDeactivated.value) {
+    return 'Reconciliation deactivated'
+  } else {
+    return 'Cluster reconciliation will be triggered regularly'
+  }
+})
+
+function showHibernationConfigurationDialog () {
+  hibernationConfiguration.value?.showDialog()
 }
+
+defineExpose({
+  showHibernationConfigurationDialog,
+})
 </script>

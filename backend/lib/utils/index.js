@@ -165,23 +165,6 @@ function filterBySelectors (selectors) {
   }
 }
 
-function useWatchCacheForListShoots (useCache) {
-  switch ('' + config.experimentalUseWatchCacheForListShoots) {
-    case 'never':
-      return false
-    case 'always':
-      return true
-    case 'no':
-    case 'false':
-      return ['true', 'yes', 'on'].includes(useCache)
-    case 'yes':
-    case 'true':
-      return !['false', 'no', 'off'].includes(useCache)
-    default:
-      return false
-  }
-}
-
 function getConfigValue (path, defaultValue) {
   const value = _.get(config, path, defaultValue)
   if (arguments.length === 1 && typeof value === 'undefined') {
@@ -201,7 +184,7 @@ function shootHasIssue (shoot) {
 }
 
 function getSeedIngressDomain (seed) {
-  return _.get(seed, 'spec.dns.ingressDomain') || _.get(seed, 'spec.ingress.domain')
+  return _.get(seed, 'spec.ingress.domain')
 }
 
 function isSeedUnreachable (seed) {
@@ -220,7 +203,6 @@ module.exports = {
   trimObjectMetadata,
   parseSelectors,
   filterBySelectors,
-  useWatchCacheForListShoots,
   getConfigValue,
   getSeedNameFromShoot,
   shootHasIssue,

@@ -151,7 +151,9 @@ exports.create = async function ({ user, body }) {
     if (type === 'DELETE') {
       throw new InternalServerError('Project resource has been deleted')
     }
-    return _.get(project, 'status.phase') === 'Ready'
+    return {
+      ok: _.get(project, 'status.phase') === 'Ready'
+    }
   }
   const timeout = exports.projectInitializationTimeout
   // must be the dashboardClient because rbac rolebinding does not exist yet

@@ -324,11 +324,6 @@ export default {
     },
   },
   watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-      }
-    },
     authenticationMethod () {
       this.username = undefined
       this.password = undefined

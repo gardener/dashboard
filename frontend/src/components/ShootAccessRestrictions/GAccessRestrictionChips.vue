@@ -5,71 +5,59 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div>
-    <div
-      v-for="{ key, title, description, options: optionsList } in selectedAccessRestrictions"
-      :key="key"
-      class="d-flex"
+  <div
+    v-for="{ key, title, description, options: optionsList } in props.accessRestrictions"
+    :key="key"
+    class="d-flex"
+  >
+    <v-chip
+      size="small"
+      variant="tonal"
+      color="primary"
+      class="mr-2 my-0"
     >
+      {{ title }}
       <v-tooltip
+        activator="parent"
         location="top"
         :disabled="!description"
         max-width="600px"
       >
-        <template #activator="{ props }">
-          <v-chip
-            v-bind="props"
-            size="small"
-            variant="tonal"
-            color="primary"
-            class="mr-2 my-0"
-          >
-            {{ title }}
-          </v-chip>
-        </template>
         <!-- eslint-disable-next-line vue/no-v-html -->
-        <section v-html="transformHtml(description)" />
+        <div v-html="transformHtml(description) " />
       </v-tooltip>
+    </v-chip>
+
+    <v-chip
+      v-for="options in optionsList "
+      :key="`${key}_${options.key}`"
+      size="small"
+      variant="tonal"
+      color="primary"
+      class="mr-2"
+    >
+      {{ options.title }}
       <v-tooltip
-        v-for="options in optionsList"
-        :key="`${key}_${options.key}`"
+        activator="parent"
         location="top"
         :disabled="!options.description"
         max-width="600px"
       >
-        <template #activator="{ props }">
-          <v-chip
-            v-bind="props"
-            size="small"
-            variant="tonal"
-            color="primary"
-            class="mr-2"
-          >
-            {{ options.title }}
-          </v-chip>
-        </template>
         <!-- eslint-disable-next-line vue/no-v-html -->
-        <section v-html="transformHtml(options.description)" />
+        <div v-html="transformHtml(options.description) " />
       </v-tooltip>
-    </div>
+    </v-chip>
   </div>
 </template>
 
-<script>
+<script setup>
 import { transformHtml } from '@/utils'
 
-export default {
-  props: {
-    selectedAccessRestrictions: {
-      type: Array,
-    },
+const props = defineProps({
+  accessRestrictions: {
+    type: Array,
   },
-  methods: {
-    transformHtml (value) {
-      return transformHtml(value)
-    },
-  },
-}
+})
 </script>
 
 <style lang="scss" scoped>

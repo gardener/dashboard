@@ -122,6 +122,22 @@ describe('gardener-dashboard', function () {
       const [oidcSecret] = documents
       expect(oidcSecret).toMatchSnapshot()
     })
+
+    it('should render the template w/ `client_secret`', async function () {
+      const values = {
+        global: {
+          dashboard: {
+            oidc: {
+              clientSecret: 'dashboardSecret'
+            }
+          }
+        }
+      }
+      const documents = await renderTemplates(templates, values)
+      expect(documents).toHaveLength(1)
+      const [oidcSecret] = documents
+      expect(oidcSecret.data).toMatchSnapshot()
+    })
   })
 
   describe('secret-sessionSecret', function () {
@@ -139,6 +155,20 @@ describe('gardener-dashboard', function () {
       expect(documents).toHaveLength(1)
       const [secret] = documents
       expect(secret).toMatchSnapshot()
+    })
+
+    it('should render the template with previous session secret', async function () {
+      const values = {
+        global: {
+          dashboard: {
+            sessionSecretPrevious: 'previous'
+          }
+        }
+      }
+      const documents = await renderTemplates(templates, values)
+      expect(documents).toHaveLength(1)
+      const [secret] = documents
+      expect(secret.data).toMatchSnapshot()
     })
   })
 

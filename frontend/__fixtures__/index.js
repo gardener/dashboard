@@ -5,3 +5,8 @@
 //
 
 export * as helper from './helper'
+export { default as cloudprofiles } from './cloudprofiles'
+export { default as config } from './config'
+export { default as gardenerExtensions } from './gardenerExtensions'
+export { default as seeds } from './seeds'
+export { default as secrets } from './secrets'

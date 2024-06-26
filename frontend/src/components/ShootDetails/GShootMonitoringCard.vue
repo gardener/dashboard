@@ -7,45 +7,44 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-card class="mb-4">
     <g-toolbar title="Logging and Monitoring" />
-    <g-list>
-      <g-list-item>
-        <template #prepend>
-          <v-icon color="primary">
-            mdi-tractor
-          </v-icon>
-        </template>
-        <g-list-item-content label="Status">
-          <g-shoot-status
-            :shoot-item="shootItem"
-            :popper-key="`${shootNamespace}/${shootName}_lastOp`"
+    <g-list-item>
+      <template #prepend>
+        <v-icon color="primary">
+          mdi-tractor
+        </v-icon>
+      </template>
+      <g-list-item-content label="Status">
+        <g-shoot-status
+          :popper-key="`${shootNamespace}/${shootName}_lastOp`"
+          popper-placement="bottom"
+          show-status-text
+        />
+      </g-list-item-content>
+    </g-list-item>
+    <v-divider inset />
+    <g-list-item>
+      <template #prepend>
+        <v-icon color="primary">
+          mdi-speedometer
+        </v-icon>
+      </template>
+      <g-list-item-content label="Readiness">
+        <div class="d-flex align-center pt-1">
+          <span v-if="!shootConditions.length">-</span>
+          <g-status-tags
+            v-else
             popper-placement="bottom"
             show-status-text
           />
-        </g-list-item-content>
-      </g-list-item>
-      <v-divider inset />
-      <g-list-item>
-        <template #prepend>
-          <v-icon color="primary">
-            mdi-speedometer
-          </v-icon>
-        </template>
-        <g-list-item-content label="Readiness">
-          <div class="d-flex align-center pt-1">
-            <span v-if="!shootConditions.length">-</span>
-            <g-status-tags
-              v-else
-              :shoot-item="shootItem"
-              popper-placement="bottom"
-              show-status-text
-            />
-          </div>
-        </g-list-item-content>
-      </g-list-item>
+        </div>
+      </g-list-item-content>
+    </g-list-item>
+    <template
+      v-if="isOidcObservabilityUrlsEnabled || canGetSecrets"
+    >
       <v-divider inset />
       <g-cluster-metrics
         v-if="!metricsNotAvailableText"
-        :shoot-item="shootItem"
       />
       <g-list-item v-else>
         <template #prepend>
@@ -57,34 +56,52 @@ SPDX-License-Identifier: Apache-2.0
           {{ metricsNotAvailableText }}
         </g-list-item-content>
       </g-list-item>
-    </g-list>
+    </template>
   </v-card>
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
+import { storeToRefs } from 'pinia'
+
+import { useAuthzStore } from '@/store/authz'
+import { useConfigStore } from '@/store/config'
+
 import GShootStatus from '@/components/GShootStatus'
 import GStatusTags from '@/components/GStatusTags'
 import GClusterMetrics from '@/components/GClusterMetrics'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
+import { useShootHelper } from '@/composables/useShootHelper'
 
-export default {
-  components: {
-    GShootStatus,
-    GStatusTags,
-    GClusterMetrics,
-  },
-  mixins: [shootItem],
-  computed: {
-    metricsNotAvailableText () {
-      if (this.isTestingCluster) {
-        return 'Cluster Metrics not available for clusters with purpose testing'
-      }
-      if (!this.seedShootIngressDomain) {
-        return 'Cluster Metrics not available'
-      }
-      return undefined
-    },
-  },
-}
+const authzStore = useAuthzStore()
+const {
+  canGetSecrets,
+} = storeToRefs(authzStore)
+
+const {
+  isOidcObservabilityUrlsEnabled,
+} = useConfigStore()
+
+const shootItem = useShootItem()
+const {
+  shootNamespace,
+  shootName,
+  shootConditions,
+  isTestingCluster,
+} = shootItem
+
+const {
+  seedIngressDomain,
+} = useShootHelper()
+
+const metricsNotAvailableText = computed(() => {
+  if (isTestingCluster.value) {
+    return 'Cluster Metrics not available for clusters with purpose testing'
+  }
+  if (!seedIngressDomain.value) {
+    return 'Cluster Metrics not available'
+  }
+  return undefined
+})
 </script>
