@@ -58,6 +58,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="includeDomains"
           label="Include Domains"
           multiple
+          chips
           closable-chips
           variant="underlined"
         />
@@ -67,6 +68,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="excludeDomains"
           label="Exclude Domains"
           multiple
+          chips
           closable-chips
           variant="underlined"
         />
@@ -76,6 +78,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="includeZones"
           label="Include Zones"
           multiple
+          chips
           closable-chips
           variant="underlined"
         />
@@ -85,6 +88,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="excludeZones"
           label="Exclude Zones"
           multiple
+          chips
           closable-chips
           variant="underlined"
         />

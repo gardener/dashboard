@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
       v-model="v$.internalValue.$model"
       color="primary"
       item-color="primary"
-      label="Secret"
+      :label="label"
       :disabled="disabled"
       :items="secretList"
       item-value="metadata.name"
@@ -124,6 +124,10 @@ export default {
       type: Array,
       default: () => [],
     },
+    label: {
+      type: String,
+      default: 'Secret',
+    },
   },
   emits: [
     'update:modelValue',
@@ -194,7 +198,7 @@ export default {
         secrets = this.dnsSecretsByProviderKind(this.dnsProviderKind)
       }
       return secrets
-        .filter(secret => !this.filterSecretNames.includes(secret.metadata.name))
+        ?.filter(secret => !this.filterSecretNames.includes(secret.metadata.name))
     },
     infrastructureKind () {
       if (this.dnsProviderKind) {

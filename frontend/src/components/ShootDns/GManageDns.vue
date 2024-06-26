@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-row>
       <v-checkbox
         v-model="customDomainEnabled"
-        label="Enable Custom API Server Domain (Overrides default domain)"
+        label="Custom Domain"
         color="primary"
         :disabled="!isNewCluster"
         density="compact"
@@ -19,29 +19,29 @@ SPDX-License-Identifier: Apache-2.0
         hide-details="auto"
       />
     </v-row>
-    <v-row class="my-0">
-      <v-col cols="6">
-        <v-text-field
-          ref="dnsDomainRef"
-          v-model="dnsDomain"
-          :error-messages="getErrorMessages(v$.dnsDomain)"
-          color="primary"
-          label="Custom API Server Domain"
-          :disabled="!isNewCluster || !customDomainEnabled"
-          persistent-hint
-          :hint="domainHint"
-          variant="underlined"
-          @blur="v$.dnsDomain.$touch()"
-        />
-      </v-col>
-      <template v-if="primaryProviderVisible">
+    <template v-if="customDomainEnabled">
+      <v-row class="my-0">
+        <v-col cols="6">
+          <v-text-field
+            ref="dnsDomainRef"
+            v-model="dnsDomain"
+            :error-messages="getErrorMessages(v$.dnsDomain)"
+            color="primary"
+            label="Custom Domain"
+            :disabled="!isNewCluster || !customDomainEnabled"
+            persistent-hint
+            :hint="domainHint"
+            variant="underlined"
+            @blur="v$.dnsDomain.$touch()"
+          />
+        </v-col>
         <v-col cols="3">
           <v-select
             v-model="v$.dnsPrimaryProviderType.$model"
             color="primary"
             :items="dnsProviderTypesWithPrimarySupport"
             :error-messages="getErrorMessages(v$.dnsPrimaryProviderType)"
-            label="DNS Provider Type"
+            label="Primary DNS Provider Type"
             :disabled="!isNewCluster"
             :persistent-hint="!isNewCluster"
             :hint="typeHint"
@@ -70,10 +70,11 @@ SPDX-License-Identifier: Apache-2.0
             v-model="primaryDnsProviderSecret"
             :dns-provider-kind="dnsPrimaryProviderType"
             register-vuelidate-as="dnsProviderSecret"
+            label="Primary DNS Provider Secret"
           />
         </v-col>
-      </template>
-    </v-row>
+      </v-row>
+    </template>
     <v-row v-if="domainRecommendationVisible">
       <v-col>
         <v-alert
@@ -85,7 +86,7 @@ SPDX-License-Identifier: Apache-2.0
               The primary DNS provider is used for Gardener internal purposes only.
               The DNS providers for the shoot-dns-service extension are configured separately.
               Click the button to apply the recommended configuration for the shoot-dns-service.
-              This will add an additional provider with your custom domain as <code>include</code> domain.
+              This will configure a provider for the <code>shoot-dns-service</code> extension with your custom domain as <code>include</code> domain.
             </div>
             <div>
               <v-btn
@@ -106,7 +107,7 @@ SPDX-License-Identifier: Apache-2.0
     <template v-if="hasDnsServiceExtension">
       <v-divider class="my-3" />
       <div class="wrap-text text-subtitle-2">
-        Additional DNS Providers for the <code>shoot-dns-service</code> Extension
+        DNS Providers for the <code>shoot-dns-service</code> Extension
       </div>
       <div class="alternate-row-background">
         <v-expand-transition group>
@@ -239,32 +240,20 @@ export default {
     ]),
     domainHint () {
       if (!this.isNewCluster) {
-        return 'API server domain cannot be changed after cluster creation'
+        return 'Domain cannot be changed after cluster creation'
       }
-      if (!this.customDomainEnabled) {
-        return 'Enable Custom Domain Checkbox to define a custom domain for the API server of this cluster'
-      }
-      return 'Define API server domain of the cluster (override default generated domain)'
+      return `Define custom domain of the cluster (API server will be reachable under api.${this.dnsDomain ? this.dnsDomain : '<custom-domain>'})`
     },
     domainCheckboxHint () {
       if (!this.isNewCluster) {
-        const enabledOrDisabled = this.customDomainEnabled
-          ? 'disabled'
-          : 'enabled'
-        return `Custom domain cannot be ${enabledOrDisabled} after cluster creation`
+        return 'Custom domain cannot be changed after cluster creation'
       }
-      if (!this.customDomainEnabled) {
-        return 'If no custom domain is configured, Gardener will provide a default generated cluster domain'
-      }
-      return ''
+      return 'Configure custom domain using the primary DNS provider. This domain will be used for the API server of this cluster'
     },
     typeHint () {
       return this.isNewCluster
         ? ''
         : 'Primary DNS Provider Type cannot be changed after cluster creation'
-    },
-    primaryProviderVisible () {
-      return !!this.dnsPrimaryProviderType || (this.isNewCluster && !!this.dnsDomain)
     },
     customDomainEnabled: {
       get () {
@@ -292,6 +281,9 @@ export default {
       },
     },
     domainRecommendationVisible () {
+      if (!this.dnsDomain) {
+        return false
+      }
       if (!this.dnsPrimaryProviderType) {
         return false
       }
@@ -305,7 +297,7 @@ export default {
     },
   },
   watch: {
-    primaryProviderVisible (value) {
+    customDomainEnabled (value) {
       if (value) {
         const type = head(this.dnsProviderTypesWithPrimarySupport)
         this.dnsPrimaryProviderType = type
