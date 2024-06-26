@@ -10483,13 +10483,13 @@ __metadata:
   linkType: hard
 
 "vue-router@npm:^4.3.0":
-  version: 4.3.3
-  resolution: "vue-router@npm:4.3.3"
+  version: 4.4.0
+  resolution: "vue-router@npm:4.4.0"
   dependencies:
     "@vue/devtools-api": "npm:^6.5.1"
   peerDependencies:
     vue: ^3.2.0
-  checksum: 10c0/bd58907346b899acb896f58764c6eb0f6ff7a68bd6e5781a774c746ac3dad5d7cc05a7a9d2b3c46288a3de2bfe94b14613fe1c50a06dbaf749f92f2fd8126138
+  checksum: 10c0/aad52e6bf8f52b1fcc3465ad55ff7aaf302b22b7cec14108957eebeba608ad485626fea3eb6750ca516f3d3974c3830a3cd6d97ec8c431aaa45ed23ffede2803
   languageName: node
   linkType: hard
 
