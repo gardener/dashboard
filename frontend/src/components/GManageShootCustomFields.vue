@@ -464,7 +464,7 @@ const {
   deleteShootCustomField,
   replaceShootCustomField,
   isShootCustomFieldNameUnique,
-  getShootCustomFieldsPatchData,
+  getShootCustomFieldsPatchDocument,
 } = useProjectContext()
 
 function openAddDialog () {
@@ -529,13 +529,8 @@ function deleteField () {
 async function updateConfiguration (onSuccess) {
   loading.value = true
   try {
-    const { metadata: { name, namespace } } = projectStore.project
-    const mergePatchDocument = {
-      metadata: { name, namespace },
-    }
-    Object.assign(mergePatchDocument, getShootCustomFieldsPatchData())
-
-    await projectStore.patchProject(mergePatchDocument)
+    const patchDocument = getShootCustomFieldsPatchDocument()
+    await projectStore.patchProject(patchDocument)
     onSuccess()
   } catch (err) {
     errorMessage.value = 'Could not save custom fields configuration'

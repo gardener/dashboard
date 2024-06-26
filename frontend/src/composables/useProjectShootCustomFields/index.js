@@ -137,11 +137,14 @@ export function useProjectShootCustomFields (projectItem, options = {}) {
     return true
   }
 
-  function getShootCustomFieldsPatchData () {
+  function getShootCustomFieldsPatchDocument () {
+    const { namespace, name } = projectItem.value.metadata
     return {
       metadata: {
+        namespace,
+        name,
         annotations: {
-          'dashboard.gardener.cloud/shootCustomFields': getProjectAnnotation('dashboard.gardener.cloud/shootCustomFields') || null,
+          'dashboard.gardener.cloud/shootCustomFields': getProjectAnnotation('dashboard.gardener.cloud/shootCustomFields', null),
         },
       },
     }
@@ -162,7 +165,7 @@ export function useProjectShootCustomFields (projectItem, options = {}) {
     deleteShootCustomField,
     replaceShootCustomField,
     isShootCustomFieldNameUnique,
-    getShootCustomFieldsPatchData,
+    getShootCustomFieldsPatchDocument,
     getCustomFieldByKey,
     generateKeyFromName,
   }

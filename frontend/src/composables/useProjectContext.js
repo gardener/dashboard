@@ -78,7 +78,7 @@ export function createProjectContextComposable () {
     deleteShootCustomField,
     replaceShootCustomField,
     isShootCustomFieldNameUnique,
-    getShootCustomFieldsPatchData,
+    getShootCustomFieldsPatchDocument,
     getCustomFieldByKey,
     generateKeyFromName,
   } = useProjectShootCustomFields(manifest)
@@ -102,7 +102,7 @@ export function createProjectContextComposable () {
     deleteShootCustomField,
     replaceShootCustomField,
     isShootCustomFieldNameUnique,
-    getShootCustomFieldsPatchData,
+    getShootCustomFieldsPatchDocument,
     getCustomFieldByKey,
     generateKeyFromName,
   }
