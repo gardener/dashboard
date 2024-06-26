@@ -37,14 +37,14 @@ SPDX-License-Identifier: Apache-2.0
               <template #activator="{ props }">
                 <span
                   v-bind="props"
-                  :class="classForValue(field.value)"
+                  :class="{'text-disabled' : !field.value}"
                 >{{ field.displayValue }}</span>
               </template>
               {{ field.tooltip }}
             </v-tooltip>
             <span
               v-else-if="field.displayValue"
-              :class="classForValue(field.value)"
+              :class="{'text-disabled' : !field.value}"
             >
               {{ field.displayValue }}
             </span>
@@ -97,9 +97,4 @@ const customFieldValues = computed(() => {
   })
 })
 
-function classForValue (value) {
-  return {
-    'text-grey': !value,
-  }
-}
 </script>

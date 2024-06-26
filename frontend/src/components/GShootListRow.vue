@@ -151,14 +151,14 @@ SPDX-License-Identifier: Apache-2.0
           <template #activator="slotProps">
             <span
               v-bind="slotProps.props"
-              :class="classForValue(cell.value)"
+              :class="{'text-disabled' : !cell.value}"
             >{{ cell.displayValue }}</span>
           </template>
           {{ cell.header.tooltip }}
         </v-tooltip>
         <span
           v-else-if="cell.displayValue"
-          :class="classForValue(cell.value)"
+          :class="{'text-disabled' : !cell.value}"
         >
           {{ cell.displayValue }}
         </span>
@@ -399,11 +399,6 @@ function showDialog (action) {
   })
 }
 
-function classForValue (value) {
-  return {
-    'text-grey': !value,
-  }
-}
 </script>
 
 <style lang="scss" scoped>
