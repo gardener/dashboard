@@ -198,7 +198,6 @@ SPDX-License-Identifier: Apache-2.0
         v-model="clusterAccessDialog"
         persistent
         max-width="850"
-        @keydown.esc="hideDialog"
       >
         <v-card>
           <g-toolbar>

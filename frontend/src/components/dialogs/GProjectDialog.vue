@@ -10,7 +10,6 @@ SPDX-License-Identifier: Apache-2.0
     persistent
     scrollable
     max-width="600"
-    @keydown.esc="hide"
   >
     <v-card>
       <g-toolbar
