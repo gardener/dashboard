@@ -292,7 +292,7 @@ async function authorizationCallback (req, res) {
     redirectOrigin,
     state
   } = stateObject
-  const parameters = pick(req.query, ['code', 'state'])
+  const parameters = pick(req.query, ['code', 'state','iss'])
   const backendRedirectUri = getBackendRedirectUri(redirectOrigin)
   const checks = {
     response_type: 'code',
