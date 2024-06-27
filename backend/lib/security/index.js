@@ -185,7 +185,7 @@ async function authorizationUrl (req, res) {
     res.cookie(COOKIE_CODE_VERIFIER, codeVerifier, {
       secure: true,
       httpOnly: true,
-      maxAge: 300000, // cookie will be removed after 5 minutes
+      maxAge: 180_000, // cookie will be removed after 5 minutes
       sameSite: cookieSameSitePolicy
     })
     switch (codeChallengeMethod) {

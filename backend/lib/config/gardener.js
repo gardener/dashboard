@@ -119,7 +119,7 @@ const configMappings = [
   },
   {
     environmentVariableName: 'COOKIE_SAME_SITE_POLICY',
-    configPath: 'cookieSameSitePolicy',
+    configPath: 'cookieSameSitePolicy'
   },
   {
     environmentVariableName: 'CSP_FRAME_ANCESTORS',

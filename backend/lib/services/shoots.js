@@ -23,9 +23,7 @@ const projectsService = require('./projects')
 const {
   decodeBase64,
   encodeBase64,
-  getSeedNameFromShoot,
-  getSeedIngressDomain,
-  projectFilter
+  getSeedNameFromShoot
 } = utils
 const { getSeed } = cache
 
@@ -46,17 +44,7 @@ exports.list = async function ({ user, namespace, labelSelector }) {
       // user is permitted to list shoots only in namespaces associated with their projects
       const projects = await projectsService.list({ user, canListProjects: false })
       const namespaces = _.map(projects, 'metadata.namespace')
-      if (useCache) {
-        const statuses = await Promise.allSettled(namespaces.map(namespace => authorization.canListShoots(user, namespace)))
-        return {
-          apiVersion: 'v1',
-          kind: 'List',
-          items: namespaces
-            .filter((_, i) => statuses[i].status === 'fulfilled' && statuses[i].value)
-            .flatMap(namespace => cache.getShoots(namespace, query))
-        }
-      }
-      const statuses = await Promise.allSettled(namespaces.map(namespace => client['core.gardener.cloud'].shoots.list(namespace, query)))
+      const statuses = await Promise.allSettled(namespaces.map(namespace => authorization.canListShoots(user, namespace)))
       return {
         apiVersion: 'v1',
         kind: 'List',
