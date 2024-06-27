@@ -15,7 +15,11 @@ const pTimeout = require('p-timeout')
 const { authentication, authorization } = require('../services')
 const createError = require('http-errors')
 const logger = require('../logger')
-const { sessionSecrets, oidc = {} } = require('../config')
+const {
+  sessionSecrets,
+  cookieSameSitePolicy = 'Lax',
+  oidc = {}
+} = require('../config')
 
 const {
   encodeState,
@@ -164,7 +168,7 @@ async function authorizationUrl (req, res) {
     secure: true,
     httpOnly: true,
     maxAge: 180_000, // cookie will be removed after 3 minutes
-    sameSite: 'Lax'
+    sameSite: cookieSameSitePolicy
   })
   const client = await exports.getIssuerClient()
   if (!includes(redirectUris, backendRedirectUri)) {
@@ -181,8 +185,8 @@ async function authorizationUrl (req, res) {
     res.cookie(COOKIE_CODE_VERIFIER, codeVerifier, {
       secure: true,
       httpOnly: true,
-      maxAge: 180_000, // cookie will be removed after 3 minutes
-      sameSite: 'Lax'
+      maxAge: 300000, // cookie will be removed after 5 minutes
+      sameSite: cookieSameSitePolicy
     })
     switch (codeChallengeMethod) {
       case 'S256':
@@ -255,13 +259,13 @@ async function setCookies (res, tokenSet) {
   res.cookie(COOKIE_HEADER_PAYLOAD, join([header, payload], '.'), {
     secure: true,
     expires: undefined,
-    sameSite: 'Lax'
+    sameSite: cookieSameSitePolicy
   })
   res.cookie(COOKIE_SIGNATURE, signature, {
     secure: true,
     httpOnly: true,
     expires: undefined,
-    sameSite: 'Lax'
+    sameSite: cookieSameSitePolicy
   })
   const values = [tokenSet.id_token]
   if (tokenSet.refresh_token) {
@@ -272,7 +276,7 @@ async function setCookies (res, tokenSet) {
     secure: true,
     httpOnly: true,
     expires: undefined,
-    sameSite: 'Lax'
+    sameSite: cookieSameSitePolicy
   })
   return accessToken
 }
