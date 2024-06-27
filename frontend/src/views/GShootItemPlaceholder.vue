@@ -19,6 +19,7 @@ import {
   onBeforeMount,
   onMounted,
   onBeforeUnmount,
+  toRef,
 } from 'vue'
 import {
   useRoute,
@@ -40,6 +41,7 @@ import { useTerminalStore } from '@/store/terminal'
 import GShootItemLoading from '@/views/GShootItemLoading.vue'
 import GShootItemError from '@/views/GShootItemError.vue'
 
+import { useProvideProjectItem } from '@/composables/useProjectItem'
 import { useProvideShootItem } from '@/composables/useShootItem'
 import { useProvideShootHelper } from '@/composables/useShootHelper'
 
@@ -208,6 +210,9 @@ export default {
 
     provide('activePopoverKey', activePopoverKey)
 
+    const projectItem = toRef(projectStore, 'project')
+
+    useProvideProjectItem(projectItem)
     const {
       hasShootWorkerGroups,
     } = useProvideShootItem(shootItem, {
