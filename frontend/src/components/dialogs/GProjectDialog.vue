@@ -207,7 +207,7 @@ const costObjectDescriptionHtml = computed(() => {
   return transformHtml(description)
 })
 const costObjectRegex = computed(() => get(costObjectSettings.value, 'regex'))
-const costObjectErrorMessage = computed(() => get(costObjectSettings.value, 'errorMessage'))
+const costObjectErrorMessage = computed(() => get(costObjectSettings.value, 'errorMessage', ''))
 
 const isUniqueProjectName = withMessage(
   'A project with this name already exists',
