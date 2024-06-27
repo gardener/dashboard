@@ -985,7 +985,7 @@ __metadata:
     p-limit: "npm:3.1.0"
     p-retry: "npm:4.6.2"
     p-timeout: "npm:^4.1.0"
-    path-to-regexp: "npm:^6.2.1"
+    path-to-regexp: "npm:^7.0.0"
     sanitize-html: "npm:^2.12.1"
     semver: "npm:^7.6.0"
     set-cookie-parser: "npm:^2.6.0"
@@ -8459,10 +8459,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"path-to-regexp@npm:^6.2.1":
-  version: 6.2.2
-  resolution: "path-to-regexp@npm:6.2.2"
-  checksum: 10c0/4b60852d3501fd05ca9dd08c70033d73844e5eca14e41f499f069afa8364f780f15c5098002f93bd42af8b3514de62ac6e82a53b5662de881d2b08c9ef21ea6b
+"path-to-regexp@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "path-to-regexp@npm:7.0.0"
+  checksum: 10c0/f37607cf5de1365586dbefb1ae0d239e9dcdd817556e1e3de7e251e5a60c6a507996266da6516c07e51f9f87eece1dc17e570030f4b5d5e6af9c3b41de54945f
   languageName: node
   linkType: hard
 
