@@ -27,7 +27,7 @@ SPDX-License-Identifier: Apache-2.0
               size="x-small"
               variant="tonal"
               icon="mdi-close"
-              color="grey"
+              color="action-button"
               @click.stop="removeProviderWorker(index)"
             />
           </template>

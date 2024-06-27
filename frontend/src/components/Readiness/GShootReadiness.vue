@@ -5,17 +5,27 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div class="d-flex flex-nowrap justify-start">
-    <g-status-tag
-      v-for="condition in conditions"
-      :key="condition.type"
-      :condition="condition"
-      :popper-placement="popperPlacement"
-      :secret-binding-name="shootSecretBindingName"
-      :shoot-metadata="shootMetadata"
-      :stale-shoot="isStaleShoot"
-    />
-  </div>
+  <g-collapsable-items
+    :items="conditions"
+    :uid="shootMetadata.uid"
+    inject-key="expandedConditions"
+    :collapse="collapse"
+    no-wrap
+  >
+    <template #collapsed>
+      <g-readiness-bar-chart :conditions="conditions" />
+    </template>
+    <template #item="{ item }">
+      <g-readiness-chip
+        :key="item.type"
+        :condition="item"
+        :popper-placement="popperPlacement"
+        :secret-binding-name="shootSecretBindingName"
+        :shoot-metadata="shootMetadata"
+        :stale-shoot="isStaleShoot"
+      />
+    </template>
+  </g-collapsable-items>
   <template v-if="showStatusText">
     <div
       v-for="({ description, link }) in errorCodeObjects"
@@ -46,8 +56,8 @@ import {
 import { useConfigStore } from '@/store/config'
 import { useShootStore } from '@/store/shoot'
 
-import GStatusTag from '@/components/GStatusTag.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
+import GCollapsableItems from '@/components/GCollapsableItems'
 
 import { useShootItem } from '@/composables/useShootItem'
 
@@ -55,6 +65,9 @@ import {
   objectsFromErrorCodes,
   errorCodesFromArray,
 } from '@/utils/errorCodes'
+
+import GReadinessBarChart from './GReadinessBarChart'
+import GReadinessChip from './GReadinessChip.vue'
 
 import {
   sortBy,
@@ -66,6 +79,10 @@ const props = defineProps({
     type: String,
   },
   showStatusText: {
+    type: Boolean,
+    default: false,
+  },
+  collapse: {
     type: Boolean,
     default: false,
   },
@@ -107,4 +124,5 @@ const errorCodeObjects = computed(() => {
 const isStaleShoot = computed(() => {
   return !shootStore.isShootActive(shootUid.value)
 })
+
 </script>

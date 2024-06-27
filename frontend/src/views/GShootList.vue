@@ -229,6 +229,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import {
   ref,
+  reactive,
   provide,
 } from 'vue'
 import {
@@ -290,18 +291,38 @@ export default {
     this.resetShootSearch()
     this.updateTableSettings()
     this.focusModeInternal = false
+
+    // Reset expanded state in case project changes
+    this.resetState(this.expandedWorkerGroups, { default: false })
+    this.resetState(this.expandedAccessRestrictions, { default: false })
+    this.resetState(this.expandedTicketLabels, { default: false })
+    this.resetState(this.expandedConditions, { default: false })
+
     next()
   },
   beforeRouteLeave (to, from, next) {
     this.resetShootSearch()
     this.focusModeInternal = false
+
     next()
   },
   setup () {
     const activePopoverKey = ref('')
+    const expandedWorkerGroups = reactive({ default: false })
+    const expandedAccessRestrictions = reactive({ default: false })
+    const expandedTicketLabels = reactive({ default: false })
+    const expandedConditions = reactive({ default: false })
     provide('activePopoverKey', activePopoverKey)
+    provide('expandedWorkerGroups', expandedWorkerGroups)
+    provide('expandedAccessRestrictions', expandedAccessRestrictions)
+    provide('expandedTicketLabels', expandedTicketLabels)
+    provide('expandedConditions', expandedConditions)
     return {
       activePopoverKey,
+      expandedWorkerGroups,
+      expandedAccessRestrictions,
+      expandedTicketLabels,
+      expandedConditions,
     }
   },
   data () {
@@ -839,6 +860,12 @@ export default {
     setDebouncedShootSearch: debounce(function () {
       this.debouncedShootSearch = this.shootSearch
     }, 500),
+    resetState (reactiveObject, defaultState) {
+      for (const key in reactiveObject) {
+        delete reactiveObject[key]
+      }
+      Object.assign(reactiveObject, defaultState)
+    },
   },
 }
 </script>

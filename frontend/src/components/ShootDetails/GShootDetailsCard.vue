@@ -85,9 +85,7 @@ SPDX-License-Identifier: Apache-2.0
               />
             </div>
           </template>
-          <g-worker-groups
-            class="flex-wrap"
-          />
+          <g-worker-groups />
         </g-list-item-content>
         <template
           #append
