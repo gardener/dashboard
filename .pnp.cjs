@@ -1709,7 +1709,7 @@ const RAW_RUNTIME_STATE =
           ["express", "npm:4.19.2"],\
           ["http-errors", "npm:2.0.0"],\
           ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:29.7.0"],\
-          ["prom-client", "npm:15.1.2"],\
+          ["prom-client", "npm:15.1.3"],\
           ["response-time", "npm:2.3.2"],\
           ["supertest", "npm:7.0.0"]\
         ],\
@@ -10580,10 +10580,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["prom-client", [\
-      ["npm:15.1.2", {\
-        "packageLocation": "./.yarn/cache/prom-client-npm-15.1.2-1722b7256c-a221db148f.zip/node_modules/prom-client/",\
+      ["npm:15.1.3", {\
+        "packageLocation": "./.yarn/cache/prom-client-npm-15.1.3-2fca26d488-816525572e.zip/node_modules/prom-client/",\
         "packageDependencies": [\
-          ["prom-client", "npm:15.1.2"],\
+          ["prom-client", "npm:15.1.3"],\
           ["@opentelemetry/api", "npm:1.8.0"],\
           ["tdigest", "npm:0.1.2"]\
         ],\
