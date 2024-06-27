@@ -357,7 +357,18 @@ SPDX-License-Identifier: Apache-2.0
     max-width="500px"
   >
     <v-card>
-      <v-card-title>Confirm Delete</v-card-title>
+      <v-toolbar
+        flat
+        density="comfortable"
+        class="bg-toolbar-background text-toolbar-title"
+      >
+        <v-toolbar-title class="dialog-title align-center justify-start">
+          Confirm Delete
+          <span class="font-family-monospace font-weight-bold">
+            {{ deleteFieldItem.name }}
+          </span>
+        </v-toolbar-title>
+      </v-toolbar>
       <v-card-text>Are you sure you want to delete this field?</v-card-text>
       <g-message
         v-model:message="errorMessage"
