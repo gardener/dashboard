@@ -82,7 +82,7 @@ import {
   sortBy,
   filter,
   isEmpty,
-  mapValues,
+  padStart,
 } from '@/lodash'
 
 const props = defineProps({
@@ -117,10 +117,11 @@ const conditions = computed(() => {
   const conditions = shootReadiness.value
     .filter(condition => !!condition.lastTransitionTime)
     .map(condition => {
-      const conditiondDefaults = configStore.conditionForType(condition.type)
+      const conditionDefaults = configStore.conditionForType(condition.type)
       return {
-        ...conditiondDefaults,
+        ...conditionDefaults,
         ...condition,
+        sortOrder: padStart(conditionDefaults.sortOrder, 8, '0'),
       }
     })
   return sortBy(conditions, 'sortOrder')

@@ -7,6 +7,11 @@
 import { computed } from 'vue'
 
 import {
+  formatValue,
+  isCustomField,
+} from '@/composables/useProjectShootCustomFields/helper'
+
+import {
   isTruthyValue,
   isStatusProgressing,
   isReconciliationDeactivated,
@@ -28,7 +33,6 @@ import {
   map,
   filter,
   some,
-  startsWith,
   toLower,
   join,
   padStart,
@@ -190,6 +194,7 @@ export function getRawVal (context, item, column) {
   const {
     projectStore,
     ticketStore,
+    shootCustomFieldsComposable,
   } = context
 
   const metadata = item.metadata
@@ -229,9 +234,13 @@ export function getRawVal (context, item, column) {
     case 'workers':
       return item.spec.provider.workers?.length ?? 0
     default: {
-      if (startsWith(column, 'Z_')) {
-        const path = get(projectStore.shootCustomFields, [column, 'path'])
-        return get(item, path)
+      if (isCustomField(column)) {
+        const {
+          getCustomFieldByKey,
+        } = shootCustomFieldsComposable
+        const path = getCustomFieldByKey(column)?.path
+        const value = get(item, path)
+        return formatValue(value, ' ')
       }
       return metadata[column]
     }
@@ -292,7 +301,9 @@ export function getSortVal (state, context, item, sortBy) {
     }
     case 'readiness': {
       const conditions = item.status?.conditions ?? []
-      if (!conditions.length) {
+      const constraints = item.status?.constraints ?? []
+      const readinessConditions = [...conditions, ...constraints]
+      if (!readinessConditions.length) {
         // items without conditions have medium priority
         const priority = '00000100'
         const lastTransitionTime = item.status?.lastOperation.lastUpdateTime ?? item.metadata.creationTimestamp
@@ -308,7 +319,7 @@ export function getSortVal (state, context, item, sortBy) {
         return `${priority}-${lastTransitionTime}`
       }
       // the condition with the lowest priority and transitionTime is used
-      return head(conditions.map(iteratee).sort())
+      return head(readinessConditions.map(iteratee).sort())
     }
     case 'ticket': {
       const metadata = item.metadata
@@ -324,11 +335,15 @@ export function getSortVal (state, context, item, sortBy) {
 
 export function searchItemsFn (state, context) {
   const {
-    projectStore,
+    shootCustomFieldsComposable,
   } = context
 
+  const {
+    shootCustomFields,
+  } = shootCustomFieldsComposable
+
   const searchableCustomFields = computed(() => {
-    return filter(projectStore.shootCustomFieldList, ['searchable', true])
+    return filter(shootCustomFields.value, ['searchable', true])
   })
 
   let searchQuery

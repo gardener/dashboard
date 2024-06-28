@@ -8,8 +8,6 @@
 
 const { BackoffManager } = require('../lib/cache')
 
-jest.useFakeTimers('legacy')
-
 describe('kube-client', () => {
   describe('cache', () => {
     describe('BackoffManager', () => {
@@ -21,6 +19,14 @@ describe('kube-client', () => {
       const attempts = 7
       let mockRandom
       let backoffManager
+
+      beforeAll(() => {
+        jest.useFakeTimers({ legacyFakeTimers: true })
+      })
+
+      afterAll(() => {
+        jest.useRealTimers()
+      })
 
       beforeEach(() => {
         backoffManager = new BackoffManager()

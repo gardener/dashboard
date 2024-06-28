@@ -24,11 +24,13 @@ function fromResource (seed) {
   const visible = _.get(seed, 'spec.settings.scheduling.visible')
   const provider = _.get(seed, 'spec.provider')
   const volume = _.get(seed, 'spec.volume')
+  const ingressDomain = _.get(seed, 'spec.ingress.domain')
   const data = {
     volume,
     ...provider,
     visible,
-    unprotected
+    unprotected,
+    ingressDomain
   }
 
   return { metadata, data }

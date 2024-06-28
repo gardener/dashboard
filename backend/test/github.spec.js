@@ -43,7 +43,8 @@ describe('github', () => {
       let createStub
 
       beforeAll(() => {
-        jest.useFakeTimers().setSystemTime(now)
+        jest.useFakeTimers()
+        jest.setSystemTime(now)
       })
 
       afterAll(() => {
@@ -180,7 +181,8 @@ describe('github', () => {
     const loadTicketsDuration = 500
 
     beforeAll(() => {
-      jest.useFakeTimers().setSystemTime(now)
+      jest.useFakeTimers()
+      jest.setSystemTime(now)
     })
 
     beforeEach(() => {

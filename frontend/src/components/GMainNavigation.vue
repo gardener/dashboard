@@ -25,7 +25,8 @@ SPDX-License-Identifier: Apache-2.0
       <v-menu
         v-model="projectMenu"
         location="bottom"
-        :attach="true"
+        :attach="false"
+        :open-delay="100"
         open-on-click
         :close-on-content-click="false"
         :offset="[0]"
@@ -584,82 +585,81 @@ watch(projectMenu, value => {
 </script>
 
 <style lang="scss" scoped>
-.v-navigation-drawer {
-  .project-selector {
-    height: 60px !important;
-    font-weight: 700;
-    font-size: 16px;
+.project-selector {
+  height: 60px !important;
+  font-weight: 700;
+  font-size: 16px;
 
-    :deep(.v-btn__prepend) {
-      margin: 0 24px 0 0 !important;
-    }
-    :deep(.v-btn__content > div) {
-      min-width: 153px !important;
-      text-align: left !important;
-    }
-    :deep(.v-btn__append) {
-      margin: 0 0 0 4px !important;
-    }
-
-    .placeholder::before {
-      content: 'Project';
-      font-weight: 400;
-      text-transform: none;
-    }
+  :deep(.v-btn__prepend) {
+    margin: 0 24px 0 0 !important;
+  }
+  :deep(.v-btn__content > div) {
+    min-width: 153px !important;
+    text-align: left !important;
+  }
+  :deep(.v-btn__append) {
+    margin: 0 0 0 4px !important;
   }
 
-  .project-menu {
-    border-radius: 0;
+  .placeholder::before {
+    content: 'Project';
+    font-weight: 400;
+    text-transform: none;
+  }
+}
 
-    .v-card {
-      border-radius: 0;
+.project-menu {
+  border-radius: 0 !important;
 
-      .project-filter {
-        font-weight: normal;
+  .v-card {
+    border-radius: 0 !important;
 
-        :deep(.v-field__input) {
-          padding-top: 16px;
-          padding-bottom: 12px;
-        }
-        :deep(.v-input__prepend > .v-icon) {
-          opacity: 0.9;
-        }
+    .project-filter {
+      font-weight: normal;
+
+      :deep(.v-field__input) {
+        padding-top: 16px;
+        padding-bottom: 12px;
       }
 
-      .project-add > div {
-        justify-content: left;
+      :deep(.v-input__prepend > .v-icon) {
+        opacity: 0.9;
+      }
+    }
+
+    .project-add>div {
+      justify-content: left;
+    }
+
+    .project-list {
+      height: auto;
+      max-height: (4 * 48px) + (2 * 8px);
+      overflow-y: auto;
+      max-width: 255px;
+
+      .project-name {
+        font-size: 14px;
       }
 
-      .project-list {
-        height: auto;
-        max-height: (4 * 48px) + (2 * 8px);
-        overflow-y: auto;
-        max-width: 255px;
+      .project-owner {
+        font-size: 11px;
+      }
 
-        .project-name {
-          font-size: 14px;
-        }
+      :deep(.v-list-item__prepend > .v-icon) {
+        opacity: 0.9;
+      }
 
-        .project-owner {
-          font-size: 11px;
-        }
-
-        :deep(.v-list-item__prepend > .v-icon) {
-          opacity: 0.9;
-        }
-
-        .highlighted-item {
-          background-color: rgba(#c0c0c0, .2) !important;
-          font-weight: bold;
-        }
+      .highlighted-item {
+        background-color: rgba(#c0c0c0, .2) !important;
+        font-weight: bold;
       }
     }
   }
+}
 
-  .main-menu {
-    .active-item {
-      background-color: rgba(#fff, .3);
-    }
+.main-menu {
+  .active-item {
+    background-color: rgba(#fff, .3);
   }
 }
 </style>

@@ -328,38 +328,32 @@ To delete a shoot cluster, you must first annotate the shoot resource to confirm
     ```
 
 
-### Get `kubeconfig` for a cluster
+### Get `kubeconfig` for a Shoot Cluster
 
-To get the kubeconfig for a cluster:
+To get the `kubeconfig` for a shoot cluster in Gardener from the command line, use one of the following methods:
 
-```
-kubectl get secrets daffodil.kubeconfig -o jsonpath='{.data.kubeconfig}' | base64 -d
-```
+1. **Using `shoots/admin/kubeconfig` Subresource**:
+   - You can obtain a temporary admin `kubeconfig` by using the `shoots/admin/kubeconfig` subresource. Detailed instructions can be found in the Gardener documentation [here](https://github.com/gardener/gardener/blob/master/docs/usage/shoot_access.md#shootsadminkubeconfig-subresource).
 
-The response looks like this:
+2. **Using `gardenctl` and `gardenlogin`**:
+   `gardenctl` simplifies targeting Shoot clusters. It automatically downloads a `kubeconfig` that uses the `gardenlogin` kubectl auth plugin. This plugin transparently manages `Shoot` cluster authentication and certificate renewal without embedding any credentials in the kubeconfig file.
 
-```
----
-apiVersion: v1
-kind: Config
-current-context: shoot--flowering--daffodil
-clusters:
-- name: shoot--flowering--daffodil
-  cluster:
-    certificate-authority-data: LS0tLS1CRUdJTiBDR <truncated>
-    server: https://api.daffodil.flowering.shoot.<truncated>
-contexts:
-- name: shoot--flowering--daffodil
-  context:
-    cluster: shoot--flowering--daffodil
-    user: shoot--flowering--daffodil-token
-users:
-- name: shoot--flowering--daffodil-token
-  user:
-    token: HbjYIMuR9hmyb9 <truncated>
-
-```
-The name of the Secret containing the kubeconfig is in the form `<cluster-name>.kubeconfig`, that is, in this example: `daffodil.kubeconfig`
+   - When installing `gardenctl` via Homebrew or Chocolatey, `gardenlogin` will be installed as a dependency. Refer to the installation instructions [here](https://github.com/gardener/gardenctl-v2/?tab=readme-ov-file#install-using-package-managers).
+   - Both tools can share the same configuration. To set up the tools, refer to the documentation [here](https://github.com/gardener/dashboard/blob/master/docs/usage/connect-kubectl.md#setup-gardenlogin).
+   - To get the `kubeconfig`, use either the `target` or `kubeconfig` command:
+     - **Target Command**: This command targets the specified Shoot cluster and automatically downloads the `kubeconfig`.
+       ```bash
+       gardenctl target --garden landscape-dev --project my-project --shoot my-shoot
+       ```
+       To set the `KUBECONFIG` environment variable to point to the downloaded `kubeconfig` file, use the following command (for bash):
+       ```bash
+       eval $(gardenctl kubectl-env bash)
+       ```
+       Detailed instructions can be found [here](https://github.com/gardener/gardenctl-v2/?tab=readme-ov-file#configure-kubeconfig-for-shoot-clusters).
+     - **Kubeconfig Command**: This command directly downloads the `kubeconfig` for the specified Shoot cluster and outputs it in raw format.
+       ```bash
+       gardenctl kubeconfig --garden landscape-dev --project my-project --shoot my-shoot --raw
+       ```
 
 ## Related Links
 

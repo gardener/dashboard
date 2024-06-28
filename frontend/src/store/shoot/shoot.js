@@ -14,11 +14,13 @@ import {
   watch,
   markRaw,
   toRaw,
+  toRef,
 } from 'vue'
 import { useDocumentVisibility } from '@vueuse/core'
 
 import { useLogger } from '@/composables/useLogger'
 import { useApi } from '@/composables/useApi'
+import { useProjectShootCustomFields } from '@/composables/useProjectShootCustomFields'
 
 import { isNotFound } from '@/utils/error'
 import { isTooManyRequestsError } from '@/utils/errors'
@@ -73,6 +75,10 @@ const useShootStore = defineStore('shoot', () => {
   const socketStore = useSocketStore()
   const localStorageStore = useLocalStorageStore()
 
+  const projectItem = toRef(projectStore, 'project')
+
+  const shootCustomFieldsComposable = useProjectShootCustomFields(projectItem, { logger })
+
   const context = {
     api,
     logger,
@@ -85,6 +91,7 @@ const useShootStore = defineStore('shoot', () => {
     gardenerExtensionStore,
     ticketStore,
     socketStore,
+    shootCustomFieldsComposable,
   }
 
   const state = reactive({
@@ -138,17 +145,20 @@ const useShootStore = defineStore('shoot', () => {
 
   // getters
   const shootList = computed(() => {
-    if (state.focusMode) {
-      // When state is freezed, do not include new items
-      return state.froozenUids.map(uid => {
-        const object = state.shoots[uid] ?? state.staleShoots[uid]
-        return assignShootInfo(object)
-      })
+    const uids = state.focusMode
+      ? state.froozenUids
+      : activeUids.value
+    const getShoot = state.focusMode
+      ? uid => state.shoots[uid] ?? state.staleShoots[uid]
+      : uid => state.shoots[uid]
+    const items = []
+    for (const uid of uids) {
+      const object = getShoot(uid)
+      if (object) {
+        items.push(assignShootInfo(object))
+      }
     }
-    return activeUids.value.map(uid => {
-      const object = state.shoots[uid]
-      return assignShootInfo(object)
-    })
+    return items
   })
 
   const selectedShoot = computed(() => {
@@ -208,6 +218,8 @@ const useShootStore = defineStore('shoot', () => {
       state.shoots = {}
       state.shootInfos = {}
       state.staleShoots = {}
+      state.froozenUids = []
+      state.focusMode = false
     })
     shootEvents.clear()
     ticketStore.clearIssues()
@@ -420,14 +432,6 @@ const useShootStore = defineStore('shoot', () => {
     }
     try {
       const { data: info } = await api.getShootInfo(metadata)
-      if (info.seedShootIngressDomain) {
-        const baseHost = info.seedShootIngressDomain
-        info.plutonoUrl = `https://gu-${baseHost}`
-
-        info.prometheusUrl = `https://p-${baseHost}`
-
-        info.alertmanagerUrl = `https://au-${baseHost}`
-      }
       state.shootInfos[metadata.uid] = markRaw(info)
     } catch (err) {
       // ignore shoot info not found

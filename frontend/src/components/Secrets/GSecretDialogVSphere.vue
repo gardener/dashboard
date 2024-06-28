@@ -10,7 +10,6 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :secret-validations="v$"
     :secret="secret"
-    vendor="vsphere"
     create-title="Add new VMware vSphere Secret"
     replace-title="Replace VMware vSphere Secret"
   >
@@ -99,10 +98,7 @@ import { required } from '@vuelidate/validators'
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink.vue'
 
-import {
-  getErrorMessages,
-  setDelayedInputFocus,
-} from '@/utils'
+import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
 
 export default {
@@ -177,30 +173,7 @@ export default {
       return !this.secret
     },
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-      }
-    },
-  },
   methods: {
-    reset () {
-      this.v$.$reset()
-
-      this.vsphereUsername = ''
-      this.vspherePassword = ''
-      this.nsxtUsername = ''
-      this.nsxtPassword = ''
-
-      if (!this.isCreateMode) {
-        if (this.secret.data) {
-          this.vsphereUsername = this.secret.data.vsphereUsername
-          this.nsxtUsername = this.secret.data.nsxtUsername
-        }
-        setDelayedInputFocus(this, 'vsphereUsername')
-      }
-    },
     getErrorMessages,
   },
 }
