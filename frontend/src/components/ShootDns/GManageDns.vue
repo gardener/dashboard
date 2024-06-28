@@ -80,27 +80,20 @@ SPDX-License-Identifier: Apache-2.0
         <v-alert
           variant="tonal"
           type="info"
+          color="primary"
         >
-          <div class="d-flex align-center">
-            <div>
-              The primary DNS provider is used for Gardener internal purposes only.
-              The DNS providers for the shoot-dns-service extension are configured separately.
-              Click the button to apply the recommended configuration for the shoot-dns-service.
-              This will configure a provider for the <code>shoot-dns-service</code> extension with your custom domain as <code>include</code> domain.
-            </div>
-            <div>
-              <v-btn
-                class="ma-3"
-                size="small"
-                color="info"
-                height="40px"
-                @click="addDnsServiceExtensionProviderForCustomDomain"
-              >
-                Apply Recommended<br>
-                DNS Configuration
-              </v-btn>
-            </div>
+          <div>
+            To expose workload services with your custom domain, add a DNS provider for the <code>shoot-dns-service</code> extension.
+            Click the <span class="font-weight-bold">Apply</span> button below to configure a provider for the <code>shoot-dns-service</code> extension using your custom domain as the included domain.
           </div>
+          <v-btn
+            class="mt-3"
+            size="small"
+            color="primary"
+            @click="addDnsServiceExtensionProviderForCustomDomain"
+          >
+            Apply
+          </v-btn>
         </v-alert>
       </v-col>
     </v-row>
@@ -303,6 +296,7 @@ export default {
         this.dnsPrimaryProviderType = type
         const dnsSecrets = this.dnsSecretsByProviderKind(type)
         this.primaryDnsProviderSecret = head(dnsSecrets)
+        this.v$.dnsDomain.$reset()
       }
     },
   },
