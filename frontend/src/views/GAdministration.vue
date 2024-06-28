@@ -608,7 +608,7 @@ const costObjectRules = computed(() => {
 
   return {
     projectCostObject: withMessage(
-      () => get(configStore.costObjectSettings, 'errorMessage'),
+      () => get(configStore.costObjectSettings, 'errorMessage', ''),
       helpers.regex(new RegExp(pattern)),
     ),
   }
