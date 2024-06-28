@@ -5,65 +5,49 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div>
-    <template v-if="canPatchShoots">
-      <g-action-button
-        :disabled="isDisabled"
-        :loading="loading"
-        :icon="icon"
-        :color="color"
-        :text="text"
-        :tooltip="actionToolTip"
-        :tooltip-disabled="disableToolTip"
-        @click="showDialog"
-      />
-      <g-dialog
-        ref="gDialog"
-        v-model:error-message="errorMessage"
-        v-model:detailed-error-message="detailedErrorMessage"
-        :confirm-button-text="confirmButtonText"
-        :width="width"
-        :max-height="maxHeight"
-        :confirm-value="confirmValue"
-        :disable-confirm-input-focus="disableConfirmInputFocus"
-      >
-        <template #caption>
-          {{ caption }}
-        </template>
-        <template #affectedObjectName>
-          {{ shootName }}
-        </template>
-        <template #header>
-          <slot name="header" />
-        </template>
-        <template #content>
-          <slot name="content" />
-        </template>
-        <template #footer>
-          <slot name="footer" />
-        </template>
-      </g-dialog>
+  <GGenericActionButtonDialog
+    ref="gDialog"
+    :icon="icon"
+    :color="color"
+    :caption="caption"
+    :tooltip="tooltip"
+    :confirm-button-text="confirmButtonText"
+    :confirm-required="confirmRequired"
+    :width="width"
+    :max-height="maxHeight"
+    :loading="loading"
+    :disabled="isDisabled"
+    :disable-confirm-input-focus="disableConfirmInputFocus"
+    :text="text"
+    :can-perform-action="canPatchShoots"
+    :affected-object-name="shootName"
+    @before-dialog-opened="handleBeforeDialogOpened"
+    @dialog-opened="handleDialogOpened"
+  >
+    <template #header>
+      <slot name="header" />
     </template>
-    <div
-      v-else
-      style="width: 36px"
-    />
-  </div>
+    <template #content>
+      <slot name="content" />
+    </template>
+    <template #footer>
+      <slot name="footer" />
+    </template>
+  </GGenericActionButtonDialog>
 </template>
 
 <script>
-import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
 
 import { useAuthzStore } from '@/store/authz'
 
-import GDialog from '@/components/dialogs/GDialog'
+import GGenericActionButtonDialog from '@/components/dialogs/GGenericActionButtonDialog'
 
 import { useShootItem } from '@/composables/useShootItem'
 
 export default {
   components: {
-    GDialog,
+    GGenericActionButtonDialog,
   },
   props: {
     icon: {
@@ -120,23 +104,11 @@ export default {
     'dialogOpened',
   ],
   setup (props) {
-    const errorMessage = ref()
-    const detailedErrorMessage = ref()
-
     const authzStore = useAuthzStore()
-    const {
-      canPatchShoots,
-    } = storeToRefs(authzStore)
-
-    const {
-      shootName,
-      isShootMarkedForDeletion,
-      isShootActionsDisabledForPurpose,
-    } = useShootItem()
+    const { canPatchShoots } = storeToRefs(authzStore)
+    const { shootName, isShootMarkedForDeletion, isShootActionsDisabledForPurpose } = useShootItem()
 
     return {
-      errorMessage,
-      detailedErrorMessage,
       canPatchShoots,
       shootName,
       isShootMarkedForDeletion,
@@ -144,60 +116,36 @@ export default {
     }
   },
   computed: {
-    confirmValue () {
-      return this.confirmRequired ? this.shootName : undefined
-    },
-    actionToolTip () {
-      if (this.tooltip) {
-        return this.shootActionToolTip(this.tooltip)
-      }
-      return this.shootActionToolTip(this.caption)
-    },
-    disableToolTip () {
-      return this.text === this.actionToolTip
-    },
     isDisabled () {
       return (this.isShootMarkedForDeletion && !this.ignoreDeletionStatus) ||
-      this.isShootActionsDisabledForPurpose ||
-      this.disabled
+        this.isShootActionsDisabledForPurpose ||
+        this.disabled
     },
   },
   methods: {
-    showDialog (resetError = true) {
-      if (resetError) {
-        this.errorMessage = undefined
-        this.detailedErrorMessage = undefined
-      }
+    handleBeforeDialogOpened () {
+      this.$emit('beforeDialogOpened')
+    },
+    handleDialogOpened () {
+      this.$emit('dialogOpened')
+    },
+    showDialog () {
       if (this.$refs.gDialog) {
-        this.$emit('beforeDialogOpened')
         this.$refs.gDialog.showDialog()
-        this.$emit('dialogOpened')
       }
     },
-    async waitForDialogClosed () {
-      return this.$refs.gDialog.confirmWithDialog()
+    waitForDialogClosed () {
+      return this.$refs.gDialog.waitForDialogClosed()
     },
     setError ({ errorMessage, detailedErrorMessage }) {
-      this.errorMessage = errorMessage
-      this.detailedErrorMessage = detailedErrorMessage
-
-      this.showDialog(false)
+      if (this.$refs.gDialog) {
+        this.$refs.gDialog.setError({ errorMessage, detailedErrorMessage })
+      }
     },
     hideDialog () {
       if (this.$refs.gDialog) {
         this.$refs.gDialog.hideDialog()
       }
-    },
-    shootActionToolTip (tooltip) {
-      if (this.isShootActionsDisabledForPurpose) {
-        return 'Actions disabled for clusters with purpose "infrastructure"'
-      }
-
-      if (!this.ignoreDeletionStatus && this.isShootMarkedForDeletion) {
-        return 'Actions disabled for clusters that are marked for deletion'
-      }
-
-      return tooltip
     },
   },
 }

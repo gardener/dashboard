@@ -14,11 +14,13 @@ import {
   watch,
   markRaw,
   toRaw,
+  toRef,
 } from 'vue'
 import { useDocumentVisibility } from '@vueuse/core'
 
 import { useLogger } from '@/composables/useLogger'
 import { useApi } from '@/composables/useApi'
+import { useProjectShootCustomFields } from '@/composables/useProjectShootCustomFields'
 
 import { isNotFound } from '@/utils/error'
 import { isTooManyRequestsError } from '@/utils/errors'
@@ -73,6 +75,10 @@ const useShootStore = defineStore('shoot', () => {
   const socketStore = useSocketStore()
   const localStorageStore = useLocalStorageStore()
 
+  const projectItem = toRef(projectStore, 'project')
+
+  const shootCustomFieldsComposable = useProjectShootCustomFields(projectItem, { logger })
+
   const context = {
     api,
     logger,
@@ -85,6 +91,7 @@ const useShootStore = defineStore('shoot', () => {
     gardenerExtensionStore,
     ticketStore,
     socketStore,
+    shootCustomFieldsComposable,
   }
 
   const state = reactive({

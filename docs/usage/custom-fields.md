@@ -1,11 +1,9 @@
 # Custom Shoot Fields
 
-The Dashboard supports custom shoot fields, that can be defined per project by specifying `metadata.annotations["dashboard.gardener.cloud/shootCustomFields"]`.
-The fields can be configured to be displayed on the cluster list and cluster details page.
-Custom fields do not show up on the `ALL_PROJECTS` page.
+The Dashboard supports custom shoot fields, which can be configured to be displayed on the cluster list and cluster details page. Custom fields do not show up on the `ALL_PROJECTS` page.
 
 ## Project administration page:
-Each custom field configuration is shown with it's own chip.
+Each custom field configuration is shown with its own chip.
 
 <img width="800" src="../images/custom-fields-1.png">
 
@@ -32,16 +30,39 @@ Custom fields can be shown in a dedicated card (`Custom Fields`) on the cluster 
 | defaultValue | String/Number | | | Default value, in case there is no value for the given `path` |
 | showColumn | Bool | true | | Field shall appear as column in the cluster list |
 | columnSelectedByDefault | Bool | true | | Indicates if field shall be selected by default on the cluster list (not hidden by default) |
-| weight | Number | 0 | | Defines the order of the column. The standard columns start with weight 100 and continue in 100 increments (200, 300, ..) |
+| weight | Number | 0 | | Defines the order of the column. The built-in columns start with a weight of 100, increasing by 100 (200, 300, etc.) |
 | sortable | Bool | true | | Indicates if column is sortable on the cluster list |
 | searchable | Bool | true | | Indicates if column is searchable on the cluster list |
 | showDetails | Bool | true | | Indicates if field shall appear in a dedicated card (`Custom Fields`) on the cluster details page |
 
-As there is currently no way to configure the custom shoot fields for a project in the gardener dashboard, you have to use `kubectl` to update the `project` resource. See [Project Operations](./project-operations.md#download-kubeconfig-for-a-user) on how to get a `kubeconfig` for the `garden` cluster in order to edit the `project`.
+## Editor for Custom Shoot Fields
+
+The Gardener Dashboard now includes an editor for custom shoot fields, allowing users to configure these fields directly from the dashboard without needing to use `kubectl`. This editor can be accessed from the project administration page.
+
+### Accessing the Editor
+
+1. Navigate to the project administration page.
+2. Scroll down to the `Custom Fields for Shoots` section.
+3. Click on the gear icon to open the configuration panel for custom fields.
+
+<img width="800" src="../images/custom-fields-5.png">
+
+### Adding a New Custom Field
+
+
+1. In the `Configure Custom Fields for Shoot Clusters` panel, click on the `+ ADD NEW FIELD` button.
+
+<img width="800" src="../images/custom-fields-6.png">
+
+2. Fill in the details for the new custom field in the `Add New Field` form. Refer to the [Configuration](#configuration) section for detailed descriptions of each field.
+
+3. Click the `ADD` button to save the new custom field.
+
+<img width="800" src="../images/custom-fields-7.png">
 
 ### Example
 
-The following is an example project yaml:
+Custom shoot fields can be defined per project by specifying `metadata.annotations["dashboard.gardener.cloud/shootCustomFields"]`. The following is an example project yaml:
 ```yaml
 apiVersion: core.gardener.cloud/v1beta1
 kind: Project
