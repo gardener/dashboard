@@ -144,23 +144,23 @@ SPDX-License-Identifier: Apache-2.0
         </div>
       </template>
       <template v-if="cell.header.customField">
-        <template v-if="cell.value">
-          <v-tooltip
-            v-if="cell.header.tooltip"
-            location="top"
-          >
-            <template #activator="slotProps">
-              <span v-bind="slotProps.props">{{ cell.value }}</span>
-            </template>
-            {{ cell.header.tooltip }}
-          </v-tooltip>
-          <span v-else>{{ cell.value }}</span>
-        </template>
-        <span
-          v-else-if="cell.header.defaultValue"
-          class="text-grey"
+        <v-tooltip
+          v-if="cell.header.tooltip"
+          location="top"
         >
-          {{ cell.header.defaultValue }}
+          <template #activator="slotProps">
+            <span
+              v-bind="slotProps.props"
+              :class="{'text-disabled' : !cell.value}"
+            >{{ cell.displayValue }}</span>
+          </template>
+          {{ cell.header.tooltip }}
+        </v-tooltip>
+        <span
+          v-else-if="cell.displayValue"
+          :class="{'text-disabled' : !cell.value}"
+        >
+          {{ cell.displayValue }}
         </span>
       </template>
       <template v-if="cell.header.key === 'actions'">
@@ -236,6 +236,7 @@ import GTextRouterLink from '@/components/GTextRouterLink.vue'
 
 import { useProvideShootItem } from '@/composables/useShootItem'
 import { useProvideShootHelper } from '@/composables/useShootHelper'
+import { formatValue } from '@/composables/useProjectShootCustomFields/helper'
 
 import { getIssueSince } from '@/utils'
 
@@ -243,7 +244,6 @@ import {
   includes,
   get,
   map,
-  isObject,
 } from '@/lodash'
 
 const props = defineProps({
@@ -373,10 +373,8 @@ const shootIssueSinceTimestamp = computed(() => {
 
 const cells = computed(() => {
   return map(props.visibleHeaders, header => {
-    let value = get(shootItem.value, header.path)
-    if (isObject(value)) { // only allow primitive types
-      value = undefined
-    }
+    const value = get(shootItem.value, header.path)
+    const displayValue = formatValue(value, ', ') || header.defaultValue
 
     let className = header.class
     if (isStaleShoot.value && !header.stalePointerEvents) {
@@ -389,6 +387,7 @@ const cells = computed(() => {
         class: className,
       },
       value, // currently only applicable for header.customField === true
+      displayValue, // currently only applicable for header.customField === true
     }
   })
 })
@@ -399,6 +398,7 @@ function showDialog (action) {
     shootItem: shootItem.value,
   })
 }
+
 </script>
 
 <style lang="scss" scoped>

@@ -5,19 +5,10 @@
 //
 
 import {
-  get,
   isEmpty,
   isNil,
   isObject,
 } from '@/lodash'
-
-export function getId (object) {
-  return get(object, 'id')
-}
-
-function isArray (value) {
-  return Array.isArray(value)
-}
 
 export function cleanup (obj) {
   const cleanupObject = obj => {
@@ -52,7 +43,7 @@ export function cleanup (obj) {
     if (isEmpty(value)) {
       return null
     }
-    const obj = isArray(value)
+    const obj = Array.isArray(value)
       ? cleanupArray(value)
       : cleanupObject(value)
     if (isEmpty(obj)) {
