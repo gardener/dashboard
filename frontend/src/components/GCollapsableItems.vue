@@ -5,67 +5,63 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-hover v-slot="{ isHovering, props: hoverProps }">
-    <div
-      v-if="items.length || !hideEmpty"
-      class="d-flex align-center"
-      v-bind="hoverProps"
-    >
-      <template v-if="collapse && !expanded">
-        <slot
-          name="collapsed"
-          :item-count="itemCount"
-        >
-          {{ itemCount }}
-          {{ itemCount === 1 ? itemName : (itemPlural ? itemPlural : `${itemName}s`) }}
-        </slot>
+  <div
+    v-if="items.length || !hideEmpty"
+    class="d-flex align-center collapsable-items-wrapper"
+  >
+    <template v-if="collapse && !expanded">
+      <slot
+        name="collapsed"
+        :item-count="itemCount"
+      >
+        {{ itemCount }}
+        {{ itemCount === 1 ? itemName : (itemPlural ? itemPlural : `${itemName}s`) }}
+      </slot>
+      <g-collapsable-items-button
+        class="collapsable-items-button"
+        :expanded="expanded"
+        @click="toggleExpanded"
+      />
+    </template>
+    <template v-else>
+      <template v-if="!items.length">
+        <slot name="noItems" />
         <g-collapsable-items-button
-          v-visible="isHovering"
+          class="collapsable-items-button"
           :expanded="expanded"
           @click="toggleExpanded"
         />
       </template>
-      <template v-else>
-        <template v-if="!items.length">
-          <slot name="noItems" />
+      <div
+        v-else
+        class="d-flex"
+        :class="noWrap ? 'flex-nowrap' : 'flex-wrap'"
+      >
+        <div
+          v-for="(item, i) in items"
+          :key="i"
+          class="d-flex align-center"
+        >
+          <slot
+            name="item"
+            :item="item"
+          />
           <g-collapsable-items-button
-            v-visible="isHovering"
+            v-if="collapse && i === items.length - 1"
+            class="collapsable-items-button"
             :expanded="expanded"
             @click="toggleExpanded"
           />
-        </template>
-        <div
-          v-else
-          class="d-flex"
-          :class="noWrap ? 'flex-nowrap' : 'flex-wrap'"
-        >
-          <div
-            v-for="(item, i) in items"
-            :key="i"
-            class="d-flex align-center"
-          >
-            <slot
-              name="item"
-              :item="item"
-            />
-            <g-collapsable-items-button
-              v-if="collapse && i === items.length - 1"
-              v-visible="isHovering"
-              :expanded="expanded"
-              @click="toggleExpanded"
-            />
-          </div>
         </div>
-      </template>
-    </div>
-  </v-hover>
+      </div>
+    </template>
+  </div>
 </template>
 
 <script setup>
 
 import {
   toRefs,
-  reactive,
   ref,
   computed,
   inject,
@@ -150,3 +146,17 @@ const toggleExpanded = e => {
 }
 
 </script>
+
+<style lang="scss" scoped>
+  .collapsable-items-wrapper {
+    .collapsable-items-button {
+      visibility: hidden;
+    }
+  }
+
+  .collapsable-items-wrapper:hover{
+    .collapsable-items-button {
+      visibility: visible;
+    }
+  }
+</style>

@@ -6,16 +6,16 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div>
-    <v-tooltip location="top">
-      <template #activator="{ props: tooltipProps }">
-        <v-btn
-          v-bind="tooltipProps"
-          :icon="icon"
-          size="small"
-          density="compact"
-          variant="flat"
-        />
-      </template>
+    <v-btn
+      :icon="icon"
+      size="small"
+      density="compact"
+      variant="flat"
+    />
+    <v-tooltip
+      activator="parent"
+      location="top"
+    >
       <div>{{ expanded ? 'Collapse items' : 'Expand items' }}</div>
       <div>
         <span :class="{'font-weight-bold': shiftPressed}">

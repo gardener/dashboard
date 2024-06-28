@@ -33,7 +33,4 @@ export function registerPlugins (app) {
     .use(utils)
     .use(components)
     .directive('messagesColor', messagesColor)
-    .directive('visible', function (el, binding) {
-      el.style.visibility = binding.value ? 'visible' : 'hidden'
-    })
 }
