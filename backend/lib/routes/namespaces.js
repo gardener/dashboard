@@ -7,7 +7,7 @@
 'use strict'
 
 const express = require('express')
-const { projects } = require('../services')
+const { namespaces } = require('../services')
 const { metricsRoute } = require('../middleware')
 
 const router = module.exports = express.Router()
@@ -19,7 +19,7 @@ router.route('/')
   .get(async (req, res, next) => {
     try {
       const user = req.user
-      res.send(await projects.list({ user }))
+      res.send(await namespaces.list({ user }))
     } catch (err) {
       next(err)
     }
@@ -28,7 +28,7 @@ router.route('/')
     try {
       const user = req.user
       const body = req.body
-      res.send(await projects.create({ user, body }))
+      res.send(await namespaces.create({ user, body }))
     } catch (err) {
       next(err)
     }
@@ -40,7 +40,7 @@ router.route('/:namespace')
     try {
       const user = req.user
       const name = req.params.namespace
-      res.send(await projects.read({ user, name }))
+      res.send(await namespaces.read({ user, name }))
     } catch (err) {
       next(err)
     }
@@ -50,7 +50,7 @@ router.route('/:namespace')
       const user = req.user
       const name = req.params.namespace
       const body = req.body
-      res.send(await projects.patch({ user, name, body }))
+      res.send(await namespaces.patch({ user, name, body }))
     } catch (err) {
       next(err)
     }
@@ -60,7 +60,7 @@ router.route('/:namespace')
       const user = req.user
       const name = req.params.namespace
       const body = req.body
-      res.send(await projects.patch({ user, name, body }))
+      res.send(await namespaces.patch({ user, name, body }))
     } catch (err) {
       next(err)
     }
@@ -69,7 +69,7 @@ router.route('/:namespace')
     try {
       const user = req.user
       const name = req.params.namespace
-      res.send(await projects.remove({ user, name }))
+      res.send(await namespaces.remove({ user, name }))
     } catch (err) {
       next(err)
     }

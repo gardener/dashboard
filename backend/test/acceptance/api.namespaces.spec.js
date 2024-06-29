@@ -39,7 +39,7 @@ describe('api', function () {
     mockRequest.mockReset()
   })
 
-  describe('projects', function () {
+  describe('namespaces', function () {
     const user = fixtures.auth.createUser({
       id: 'foo@example.org',
       groups: ['group1']
@@ -52,7 +52,7 @@ describe('api', function () {
     const purpose = 'purpose'
 
     beforeAll(() => {
-      require('../../lib/services/projects').projectInitializationTimeout = 10
+      require('../../lib/services/namespaces').projectInitializationTimeout = 10
     })
 
     it('should return three projects', async function () {

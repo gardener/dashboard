@@ -6,12 +6,12 @@
 
 'use strict'
 
-const projects = require('../lib/services/projects')
+const projects = require('../lib/services/namespaces')
 const cache = require('../lib/cache')
 const authorization = require('../lib/services/authorization')
 
 describe('services', function () {
-  describe('projects', function () {
+  describe('namespaces', function () {
     const projectList = [
       {
         spec: {
