@@ -67,6 +67,7 @@ import {
   mapState,
   mapActions,
 } from 'pinia'
+import { toRef } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
@@ -78,6 +79,7 @@ import { useProjectStore } from '@/store/project'
 
 import GSecretDialogWrapper from '@/components/Secrets/GSecretDialogWrapper'
 
+import { useProjectCostObject } from '@/composables/useProjectCostObject'
 import {
   withParams,
   withMessage,
@@ -93,7 +95,6 @@ import {
   cloneDeep,
   differenceWith,
   isEqual,
-  isEmpty,
   head,
   get,
   toUpper,
@@ -125,10 +126,24 @@ export default {
     'update:modelValue',
   ],
   setup (props) {
+    const projectStore = useProjectStore()
+
+    const projectItem = toRef(projectStore, 'project')
+    const {
+      costObjectSettingEnabled,
+      costObjectTitle,
+      costObjectErrorMessage,
+    } = useProjectCostObject(projectItem)
+
+    const v$ = useVuelidate({
+      $registerAs: props.registerVuelidateAs,
+    })
+
     return {
-      v$: useVuelidate({
-        $registerAs: props.registerVuelidateAs,
-      }),
+      costObjectSettingEnabled,
+      costObjectTitle,
+      costObjectErrorMessage,
+      v$,
     }
   },
   data () {
@@ -164,9 +179,6 @@ export default {
     }
   },
   computed: {
-    ...mapState(useConfigStore, [
-      'costObjectSettings',
-    ]),
     ...mapState(useAuthzStore, [
       'namespace',
     ]),
@@ -210,12 +222,6 @@ export default {
         return `The selected secret has an associated quota that will cause the cluster to self terminate after ${this.selfTerminationDays} days`
       }
       return undefined
-    },
-    costObjectSettingEnabled () { // required internally for requiresCostObjectIfEnabled
-      return !isEmpty(this.costObjectSettings)
-    },
-    costObjectTitle () {
-      return get(this.costObjectSettings, 'title')
     },
     selfTerminationDays () {
       return selfTerminationDaysForSecret(this.internalValue)

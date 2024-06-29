@@ -319,7 +319,7 @@ SPDX-License-Identifier: Apache-2.0
                     />
                   </template>
                   <div class="text-body-2 text-medium-emphasis">
-                    Cost Object
+                    {{ costObjectTitle }}
                   </div>
                   <div class="text-body-1 wrap-text">
                     <g-editable-text
@@ -571,13 +571,18 @@ const {
   projectName,
   shootCustomFields,
   projectOwner: owner,
-  projectCostObject: costObject,
   projectCreationTimestamp: creationTimestamp,
   projectCreatedBy: createdBy,
   projectDescription: description,
   projectPurpose: purpose,
   projectStaleSinceTimestamp: staleSinceTimestamp,
   projectStaleAutoDeleteTimestamp: staleAutoDeleteTimestamp,
+  costObject,
+  costObjectSettingEnabled,
+  costObjectTitle,
+  costObjectDescriptionHtml,
+  costObjectRegex,
+  costObjectErrorMessage,
 } = useProvideProjectItem(projectItem)
 
 const {
@@ -601,18 +606,11 @@ const userList = computed(() => {
   }
   return Array.from(members)
 })
-const costObjectSettingEnabled = computed(() => !isEmpty(configStore.costObjectSettings))
-const costObjectDescriptionHtml = computed(() => transformHtml(get(configStore.costObjectSettings, 'description')))
-const costObjectRules = computed(() => {
-  const pattern = get(configStore.costObjectSettings, 'regex', '[^]*')
-
-  return {
-    projectCostObject: withMessage(
-      () => get(configStore.costObjectSettings, 'errorMessage', ''),
-      helpers.regex(new RegExp(pattern)),
-    ),
-  }
-})
+const isValidCostObject = withMessage(
+  costObjectErrorMessage.value,
+  helpers.regex(new RegExp(costObjectRegex.value)),
+)
+const costObjectRules = computed(() => ({ costObject: isValidCostObject }))
 const ownerRules = computed(() => {
   const userListIncludesValidator = helpers.withParams(
     { type: 'userListIncludes' },

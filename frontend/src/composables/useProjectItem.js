@@ -13,6 +13,7 @@ import {
 
 import { useProjectMetadata } from './useProjectMetadata'
 import { useProjectShootCustomFields } from './useProjectShootCustomFields'
+import { useProjectCostObject } from '@/composables/useProjectCostObject'
 
 import { get } from '@/lodash'
 
@@ -44,9 +45,15 @@ export function createProjectItemComposable (projectItem, options = {}) {
     shootCustomFields,
   } = useProjectShootCustomFields(projectItem)
 
-  const projectCostObject = computed(() => {
-    return getProjectAnnotation('billing.gardener.cloud/costObject', '')
-  })
+  /* costObject */
+  const {
+    costObject,
+    costObjectSettingEnabled,
+    costObjectDescriptionHtml,
+    costObjectTitle,
+    costObjectRegex,
+    costObjectErrorMessage,
+  } = useProjectCostObject(projectItem)
   const projectCreatedBy = computed(() => {
     return get(projectItem.value, 'data.createdBy', '')
   })
@@ -87,7 +94,6 @@ export function createProjectItemComposable (projectItem, options = {}) {
     setProjectLabel,
     unsetProjectLabel,
     projectCreatedAt,
-    projectCostObject,
     /* data */
     projectCreatedBy,
     isNewProject,
@@ -97,6 +103,13 @@ export function createProjectItemComposable (projectItem, options = {}) {
     projectStaleSinceTimestamp,
     projectStaleAutoDeleteTimestamp,
     projectPhase,
+    /* costObject */
+    costObject,
+    costObjectSettingEnabled,
+    costObjectDescriptionHtml,
+    costObjectTitle,
+    costObjectRegex,
+    costObjectErrorMessage,
     /* others */
     shootCustomFields,
   }

@@ -16,6 +16,7 @@ import { cleanup } from '@/composables/helper'
 
 import { useProjectShootCustomFields } from './useProjectShootCustomFields'
 import { useProjectMetadata } from './useProjectMetadata'
+import { useProjectCostObject } from './useProjectCostObject'
 
 import {
   cloneDeep,
@@ -83,6 +84,9 @@ export function createProjectContextComposable () {
     generateKeyFromName,
   } = useProjectShootCustomFields(manifest)
 
+  /* costObject */
+  const { costObject } = useProjectCostObject(manifest, { projectMetadataComposable })
+
   return {
     /* manifest */
     projectManifest: normalizedManifest,
@@ -105,6 +109,8 @@ export function createProjectContextComposable () {
     getShootCustomFieldsPatchDocument,
     getCustomFieldByKey,
     generateKeyFromName,
+    /* costObject */
+    costObject,
   }
 }
 
