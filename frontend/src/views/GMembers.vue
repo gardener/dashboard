@@ -317,6 +317,7 @@ import GActionButton from '@/components/GActionButton.vue'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
 
 import { useApi } from '@/composables/useApi'
+import { useProvideProjectItem } from '@/composables/useProjectItem'
 
 import {
   displayName,
@@ -325,7 +326,6 @@ import {
   parseServiceAccountUsername,
   isForeignServiceAccount,
   isServiceAccountUsername,
-  getProjectDetails,
   sortedRoleDisplayNames,
   mapTableHeader,
 } from '@/utils'
@@ -397,15 +397,12 @@ const {
   serviceAccountSortBy,
 } = storeToRefs(localStorageStore)
 
+const {
+  projectName,
+  projectOwner: owner,
+} = useProvideProjectItem(project)
+
 const confirmDialog = ref(null)
-
-const projectDetails = computed(() => {
-  return getProjectDetails(project.value)
-})
-
-const owner = computed(() => {
-  return projectDetails.value.owner
-})
 
 const itemsPerPageOptions = markRaw([
   { value: 5, title: '5' },
@@ -651,15 +648,14 @@ async function onRemoveUser ({ username }) {
 }
 
 function confirmRemoveUser (name) {
-  const { projectName } = projectDetails.value
   let message
   if (isCurrentUser(name)) {
     message = renderComponent(GRemoveProjectMember, {
-      projectName,
+      projectName: projectName.value,
     })
   } else {
     message = renderComponent(GRemoveProjectMember, {
-      projectName,
+      projectName: projectName.value,
       memberName: displayName(name),
     })
   }
@@ -690,10 +686,9 @@ async function onResetServiceAccount ({ username }) {
 }
 
 function confirmRemoveForeignServiceAccount (serviceAccountName) {
-  const { projectName } = projectDetails.value
   const { namespace, name } = parseServiceAccountUsername(serviceAccountName)
   const message = renderComponent(GRemoveProjectMember, {
-    projectName,
+    projectName: projectName.value,
     memberName: name,
     namespace,
   })

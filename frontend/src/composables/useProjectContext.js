@@ -20,7 +20,9 @@ import { useProjectCostObject } from './useProjectCostObject'
 
 import {
   cloneDeep,
+  get,
   isEqual,
+  set,
 } from '@/lodash'
 
 export function createProjectContextComposable () {
@@ -53,7 +55,7 @@ export function createProjectContextComposable () {
     manifest.value = cloneDeep(initialManifest.value)
   }
 
-  function createProjectManifest (options) {
+  function createProjectManifest () {
     manifest.value = {}
     initialManifest.value = cloneDeep(normalizedManifest.value)
   }
@@ -63,13 +65,33 @@ export function createProjectContextComposable () {
   })
 
   /* metadata */
+  const projectMetadataComposable = useProjectMetadata(manifest)
   const {
     projectName,
     isNewProject,
     getProjectAnnotation,
     setProjectAnnotation,
     unsetProjectAnnotation,
-  } = useProjectMetadata(manifest)
+  } = projectMetadataComposable
+
+  /* spec */
+  const description = computed({
+    get () {
+      return get(manifest.value, 'spec.description')
+    },
+    set (value) {
+      set(manifest.value, 'spec.description', value || undefined)
+    },
+  })
+
+  const purpose = computed({
+    get () {
+      return get(manifest.value, 'spec.purpose')
+    },
+    set (value) {
+      set(manifest.value, 'spec.purpose', value || undefined)
+    },
+  })
 
   /* projectShootCustomFields */
   const {
@@ -99,6 +121,9 @@ export function createProjectContextComposable () {
     getProjectAnnotation,
     setProjectAnnotation,
     unsetProjectAnnotation,
+    /* spec */
+    description,
+    purpose,
     /* projectShootCustomFields */
     shootCustomFields,
     rawShootCustomFields,

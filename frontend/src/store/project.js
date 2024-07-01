@@ -41,13 +41,13 @@ export const useProjectStore = defineStore('project', () => {
   const namespace = toRef(authzStore, 'namespace')
 
   const namespaces = computed(() => {
-    return map(list.value, 'metadata.namespace')
+    return map(list.value, 'spec.namespace')
   })
 
   const projectNameMap = computed(() => {
     const projectNames = {}
     if (Array.isArray(list.value)) {
-      for (const { metadata: { namespace, name } } of list.value) {
+      for (const { metadata: { name }, spec: { namespace } } of list.value) {
         projectNames[namespace] = name
       }
     }
@@ -78,7 +78,7 @@ export const useProjectStore = defineStore('project', () => {
   })
 
   const project = computed(() => {
-    return find(list.value, ['metadata.namespace', namespace.value])
+    return find(list.value, ['spec.namespace', namespace.value])
   })
 
   const projectName = computed(() => {
@@ -114,52 +114,37 @@ export const useProjectStore = defineStore('project', () => {
     list.value = response.data
   }
 
-  async function createProject (obj) {
-    const { metadata, data } = obj
-    const response = await api.createProject({
-      data: {
-        metadata,
-        data,
-      },
-    })
+  async function createProject (project) {
+    const response = await api.createProject({ data: project })
     appStore.setSuccess('Project created')
     updateList(response.data)
 
     return response.data
   }
 
-  async function patchProject (obj) {
-    const { metadata, data } = obj
+  async function patchProject (project) {
     const response = await api.patchProject({
-      namespace: metadata.namespace ?? namespace.value,
-      data: {
-        metadata,
-        data,
-      },
+      name: get(project, 'metadata.name', projectName.value),
+      data: project,
     })
     updateList(response.data)
   }
 
-  async function updateProject (obj) {
-    const { metadata, data } = obj
-    const response = await updateProject({
-      namespace: metadata.namespace ?? namespace.value,
-      data: {
-        metadata,
-        data,
-      },
+  async function updateProject (project) {
+    const response = await api.updateProject({
+      name: get(project, 'metadata.name', projectName.value),
+      data: project,
     })
     appStore.setSuccess('Project updated')
     updateList(response.data)
   }
 
-  async function deleteProject (obj) {
-    const { metadata } = obj
+  async function deleteProject (project) {
     await api.deleteProject({
-      namespace: metadata.namespace ?? namespace.value,
+      name: get(project, 'metadata.name', projectName.value),
     })
     appStore.setSuccess('Project deleted')
-    // do not remove project from store as it will stay in termininating phase for a while
+    // do not remove project from store as it will stay in terminating phase for a while
   }
 
   async function $reset () {

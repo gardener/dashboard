@@ -540,10 +540,8 @@ import {
 import { errorDetailsFromError } from '@/utils/error'
 
 import {
-  get,
   set,
   includes,
-  isEmpty,
 } from '@/lodash'
 
 const logger = useLogger()
@@ -639,8 +637,13 @@ watch(
   { immediate: true },
 )
 
-function updateOwner (value) {
-  return updateProperty('owner', value)
+function updateOwner (name) {
+  const owner = {
+    apiGroup: 'rbac.authorization.k8s.io',
+    kind: 'User',
+    name,
+  }
+  return updateProperty('owner', owner)
 }
 
 function updateDescription (value) {
@@ -669,17 +672,18 @@ function updateCostObject (value) {
 }
 
 async function updateProperty (key, value, options = {}) {
-  const { metadata: { name, namespace } } = projectStore.project
+  const { metadata: { name }, spec: { namespace } } = projectStore.project
   try {
     const mergePatchDocument = {
-      metadata: { name, namespace },
+      metadata: { name },
+      spec: { namespace },
     }
     switch (key) {
       case 'costObject':
         set(mergePatchDocument, ['metadata', 'annotations', 'billing.gardener.cloud/costObject'], value)
         break
       default:
-        set(mergePatchDocument, ['data', key], value)
+        set(mergePatchDocument, ['spec', key], value)
         break
     }
     await projectStore.patchProject(mergePatchDocument)
@@ -698,7 +702,7 @@ async function showDialog () {
       await projectStore.deleteProject(projectStore.project)
       if (projectStore.projectList.length > 0) {
         const p1 = projectStore.projectList[0]
-        router.push({ name: 'ShootList', params: { namespace: p1.metadata.namespace } })
+        router.push({ name: 'ShootList', params: { namespace: p1.spec.namespace } })
       } else {
         router.push({ name: 'Home', params: {} })
       }

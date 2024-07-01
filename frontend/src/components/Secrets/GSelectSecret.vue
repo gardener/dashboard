@@ -63,23 +63,20 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import {
-  mapState,
-  mapActions,
-} from 'pinia'
 import { toRef } from 'vue'
+import { mapActions } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
-import { useAuthzStore } from '@/store/authz'
-import { useConfigStore } from '@/store/config'
 import { useSecretStore } from '@/store/secret'
 import { useProjectStore } from '@/store/project'
 
 import GSecretDialogWrapper from '@/components/Secrets/GSecretDialogWrapper'
 
 import { useProjectCostObject } from '@/composables/useProjectCostObject'
+import { useProjectMetadata } from '@/composables/useProjectMetadata'
+
 import {
   withParams,
   withMessage,
@@ -135,11 +132,16 @@ export default {
       costObjectErrorMessage,
     } = useProjectCostObject(projectItem)
 
+    const {
+      projectName,
+    } = useProjectMetadata(projectItem)
+
     const v$ = useVuelidate({
       $registerAs: props.registerVuelidateAs,
     })
 
     return {
+      projectName,
       costObjectSettingEnabled,
       costObjectTitle,
       costObjectErrorMessage,
@@ -179,12 +181,6 @@ export default {
     }
   },
   computed: {
-    ...mapState(useAuthzStore, [
-      'namespace',
-    ]),
-    projectName () {
-      return this.projectNameByNamespace(this.namespace)
-    },
     internalValue: {
       get () {
         return this.modelValue
@@ -233,9 +229,6 @@ export default {
   methods: {
     ...mapActions(useCloudProfileStore, [
       'cloudProfileByName',
-    ]),
-    ...mapActions(useProjectStore, [
-      'projectNameByNamespace',
     ]),
     ...mapActions(useSecretStore, [
       'infrastructureSecretsByCloudProfileName',

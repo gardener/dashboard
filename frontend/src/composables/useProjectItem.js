@@ -11,13 +11,13 @@ import {
   provide,
 } from 'vue'
 
-import { useProjectMetadata } from './useProjectMetadata'
-import { useProjectShootCustomFields } from './useProjectShootCustomFields'
+import { useProjectMetadata } from '@/composables/useProjectMetadata'
+import { useProjectShootCustomFields } from '@/composables/useProjectShootCustomFields'
 import { useProjectCostObject } from '@/composables/useProjectCostObject'
 
 import { get } from '@/lodash'
 
-export function createProjectItemComposable (projectItem, options = {}) {
+export function createProjectItemComposable (projectItem) {
   if (!isRef(projectItem)) {
     throw new TypeError('First argument `projectItem` must be a ref object')
   }
@@ -54,27 +54,26 @@ export function createProjectItemComposable (projectItem, options = {}) {
     costObjectRegex,
     costObjectErrorMessage,
   } = useProjectCostObject(projectItem)
+
+  /* spec */
+  const projectNamespace = useProjectNamespace(projectItem)
   const projectCreatedBy = computed(() => {
-    return get(projectItem.value, 'data.createdBy', '')
+    return get(projectItem.value, 'spec.createdBy.name', '')
   })
   const projectOwner = computed(() => {
-    return get(projectItem.value, 'data.owner', '')
+    return get(projectItem.value, 'spec.owner.name', '')
   })
   const projectDescription = computed(() => {
-    return get(projectItem.value, 'data.description', '')
+    return get(projectItem.value, 'spec.description', '')
   })
   const projectPurpose = computed(() => {
-    return get(projectItem.value, 'data.purpose', '')
+    return get(projectItem.value, 'spec.purpose', '')
   })
-  const projectStaleSinceTimestamp = computed(() => {
-    return get(projectItem.value, 'data.staleSinceTimestamp')
-  })
-  const projectStaleAutoDeleteTimestamp = computed(() => {
-    return get(projectItem.value, 'data.staleAutoDeleteTimestamp')
-  })
-  const projectPhase = computed(() => {
-    return get(projectItem.value, 'data.phase')
-  })
+
+  /* status */
+  const projectStaleSinceTimestamp = useProjectStaleSinceTimestamp(projectItem)
+  const projectStaleAutoDeleteTimestamp = useProjectStaleAutoDeleteTimestamp(projectItem)
+  const projectPhase = useProjectPhase(projectItem)
 
   return {
     projectItem,
@@ -94,12 +93,14 @@ export function createProjectItemComposable (projectItem, options = {}) {
     setProjectLabel,
     unsetProjectLabel,
     projectCreatedAt,
-    /* data */
+    /* spec */
+    projectNamespace,
     projectCreatedBy,
     isNewProject,
     projectOwner,
     projectDescription,
     projectPurpose,
+    /* status */
     projectStaleSinceTimestamp,
     projectStaleAutoDeleteTimestamp,
     projectPhase,
@@ -119,8 +120,34 @@ export function useProjectItem () {
   return inject('project-item', null)
 }
 
-export function useProvideProjectItem (projectItem, options) {
-  const composable = createProjectItemComposable(projectItem, options)
+export function useProvideProjectItem (projectItem) {
+  const composable = createProjectItemComposable(projectItem)
   provide('project-item', composable)
   return composable
+}
+
+/* spec */
+export function useProjectNamespace (projectItem) {
+  return computed(() => {
+    return get(projectItem.value, 'spec.namespace', '')
+  })
+}
+
+/* status */
+export function useProjectStaleSinceTimestamp (projectItem) {
+  return computed(() => {
+    return get(projectItem.value, 'status.staleSinceTimestamp')
+  })
+}
+
+export function useProjectStaleAutoDeleteTimestamp (projectItem) {
+  return computed(() => {
+    return get(projectItem.value, 'status.staleAutoDeleteTimestamp')
+  })
+}
+
+export function useProjectPhase (projectItem) {
+  return computed(() => {
+    return get(projectItem.value, 'status.phase', '')
+  })
 }

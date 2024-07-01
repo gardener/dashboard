@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-tooltip
-    v-if="projectDetails.phase !== 'Ready'"
+    v-if="projectPhase !== 'Ready'"
     location="top"
   >
     <template #activator="{ props: activatorProps }">
@@ -25,14 +25,14 @@ SPDX-License-Identifier: Apache-2.0
         size="x-small"
         class="px-1"
       >
-        {{ projectDetails.phase }}
+        {{ projectPhase }}
       </v-chip>
     </div>
     <div class="text-caption">
-      <span v-if="projectDetails.phase === 'Terminating'">
+      <span v-if="projectPhase === 'Terminating'">
         Gardener is currently cleaning up BackupEntries related to this project. The project will be removed when all cleanup activity has been finished.
       </span>
-      <span v-else-if="projectDetails.phase === 'Pending'">
+      <span v-else-if="projectPhase === 'Pending'">
         The project is currently being created and may not yet be ready to be used.
       </span>
       <span v-else>
@@ -43,9 +43,12 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import {
+  computed,
+  toRef,
+} from 'vue'
 
-import { getProjectDetails } from '@/utils'
+import { useProjectPhase } from '@/composables/useProjectItem'
 
 const props = defineProps({
   project: {
@@ -58,18 +61,18 @@ const props = defineProps({
   },
 })
 
-const projectDetails = computed(() => {
-  return getProjectDetails(props.project)
-})
+const projectItem = toRef(props, 'project')
+
+const projectPhase = useProjectPhase(projectItem)
 
 const color = computed(() => {
-  return ['Terminating', 'Pending'].includes(projectDetails.value.phase)
+  return ['Terminating', 'Pending'].includes(projectPhase.value)
     ? 'primary'
     : 'warning'
 })
 
 const icon = computed(() => {
-  switch (projectDetails.value.phase) {
+  switch (projectPhase.value) {
     case 'Terminating':
       return 'mdi-delete-sweep'
     case 'Pending':

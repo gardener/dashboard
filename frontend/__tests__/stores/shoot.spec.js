@@ -175,10 +175,11 @@ describe('stores', () => {
       }
       projectStore.list = [{
         metadata: {
-          namespace: 'foo',
           annotations,
         },
-        data,
+        spec: {
+          namespace: 'foo',
+        },
       }]
     }
 
