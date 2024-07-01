@@ -564,7 +564,10 @@ const errorMessage = ref(undefined)
 const detailedErrorMessage = ref(undefined)
 const refGDialog = ref(null)
 
-const projectItem = toRef(projectStore, 'project')
+const {
+  project,
+  projectsNotMarkedForDeletion,
+} = storeToRefs(projectStore)
 const {
   projectName,
   shootCustomFields,
@@ -581,7 +584,7 @@ const {
   costObjectDescriptionHtml,
   costObjectRegex,
   costObjectErrorMessage,
-} = useProvideProjectItem(projectItem)
+} = useProvideProjectItem(project)
 
 const {
   namespace,
@@ -700,8 +703,8 @@ async function showDialog () {
   if (confirmed) {
     try {
       await projectStore.deleteProject(projectStore.project)
-      if (projectStore.projectList.length > 0) {
-        const p1 = projectStore.projectList[0]
+      if (projectsNotMarkedForDeletion.value.length > 0) {
+        const p1 = projectsNotMarkedForDeletion.value[0]
         router.push({ name: 'ShootList', params: { namespace: p1.spec.namespace } })
       } else {
         router.push({ name: 'Home', params: {} })

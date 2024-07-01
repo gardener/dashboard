@@ -20,6 +20,7 @@ import { useAuthzStore } from './authz'
 import { useAppStore } from './app'
 
 import {
+  filter,
   find,
   findIndex,
   map,
@@ -75,6 +76,10 @@ export const useProjectStore = defineStore('project', () => {
 
   const projectList = computed(() => {
     return list.value ?? []
+  })
+
+  const projectsNotMarkedForDeletion = computed(() => {
+    return filter(projectList.value, project => !get(project, 'metadata.deletionTimestamp'))
   })
 
   const project = computed(() => {
@@ -140,9 +145,10 @@ export const useProjectStore = defineStore('project', () => {
   }
 
   async function deleteProject (project) {
-    await api.deleteProject({
+    const response = await api.deleteProject({
       name: get(project, 'metadata.name', projectName.value),
     })
+    updateList(response.data)
     appStore.setSuccess('Project deleted')
     // do not remove project from store as it will stay in terminating phase for a while
   }
@@ -160,6 +166,7 @@ export const useProjectStore = defineStore('project', () => {
     defaultNamespace,
     projectName,
     projectList,
+    projectsNotMarkedForDeletion,
     project,
     projectNames,
     isCurrentNamespace,

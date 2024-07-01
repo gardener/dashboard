@@ -375,7 +375,7 @@ const serviceAccountPage = ref(1)
 
 const {
   project,
-  projectList,
+  projectsNotMarkedForDeletion,
 } = storeToRefs(projectStore)
 const {
   namespace,
@@ -638,8 +638,8 @@ async function onRemoveUser ({ username }) {
   }
   await memberStore.deleteMember(username)
   if (isCurrentUser(username) && !isAdmin.value) {
-    if (projectList.value.length > 0) {
-      const p1 = projectList.value[0]
+    if (projectsNotMarkedForDeletion.value.length > 0) {
+      const p1 = projectsNotMarkedForDeletion.value[0]
       await router.push({ name: 'ShootList', params: { namespace: p1.metadata.namespace } })
     } else {
       await router.push({ name: 'Home', params: {} })
