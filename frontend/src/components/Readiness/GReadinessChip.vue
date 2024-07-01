@@ -126,7 +126,7 @@ export default {
       'isAdmin',
     ]),
     popoverKey () {
-      return `g-status-tag[${this.condition.type}]:${this.shootMetadata.uid}`
+      return `g-readiness-chip[${this.condition.type}]:${this.shootMetadata.uid}`
     },
     internalValue: {
       get () {

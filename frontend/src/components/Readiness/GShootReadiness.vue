@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div class="d-flex flex-nowrap justify-start">
-    <g-status-tag
+    <g-readiness-chip
       v-for="condition in conditions"
       :key="condition.type"
       :condition="condition"
@@ -46,7 +46,6 @@ import {
 import { useConfigStore } from '@/store/config'
 import { useShootStore } from '@/store/shoot'
 
-import GStatusTag from '@/components/GStatusTag.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
 
 import { useShootItem } from '@/composables/useShootItem'
@@ -55,6 +54,8 @@ import {
   objectsFromErrorCodes,
   errorCodesFromArray,
 } from '@/utils/errorCodes'
+
+import GReadinessChip from './GReadinessChip.vue'
 
 import {
   sortBy,
