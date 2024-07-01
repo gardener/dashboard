@@ -23,6 +23,7 @@ SPDX-License-Identifier: Apache-2.0
   >
     <template #default="popperProps">
       <slot
+        v-if="!activatorElement"
         name="activator"
         v-bind="makeActivatorProps(popperProps)"
       />
@@ -71,9 +72,9 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { options } from 'floating-vue'
+import { unref } from 'vue'
 
 import PopperWrapper from './PopperWrapper.vue'
-
 const Dropdown = {
   ...PopperWrapper,
   name: 'VDropdown',
@@ -145,6 +146,10 @@ export default {
       type: [Object, Array, String],
       default: null,
     },
+    activator: {
+      type: [String, Element, Object],
+      default: null,
+    },
   },
   emits: [
     'update:modelValue',
@@ -152,6 +157,7 @@ export default {
   data () {
     return {
       lazyValue: this.modelValue,
+      activatorElement: null,
     }
   },
   computed: {
@@ -185,6 +191,17 @@ export default {
         this.lazyValue = value
       }
     },
+    activator: {
+      handler (newVal) {
+        this.updateActivatorElement(newVal)
+      },
+      immediate: true,
+    },
+  },
+  beforeUnmount () {
+    if (this.activatorElement) {
+      this.activatorElement.removeEventListener('click', this.toggleDropdown)
+    }
   },
   methods: {
     makeActivatorProps ({ shown, show, hide }) {
@@ -201,6 +218,25 @@ export default {
         hide,
         props,
       }
+    },
+    updateActivatorElement (activator) {
+      if (!activator) {
+        return
+      }
+      if (typeof activator === 'string') {
+        this.activatorElement = document.querySelector(activator)
+      } else if (typeof activator === 'object' && activator.nodeType === Node.ELEMENT_NODE) {
+        this.activatorElement = activator
+      } else if (typeof activator === 'object') {
+        this.activatorElement = unref(activator)?.$el
+      }
+
+      if (this.activatorElement) {
+        this.activatorElement.addEventListener('click', this.toggleDropdown)
+      }
+    },
+    toggleDropdown () {
+      this.shown = !this.shown
     },
   },
 }
