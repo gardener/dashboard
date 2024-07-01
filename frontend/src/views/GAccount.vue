@@ -220,7 +220,7 @@ SPDX-License-Identifier: Apache-2.0
                                 color="primary"
                                 variant="underlined"
                                 label="Skip Open Browser"
-                                hint="If true, it does not open the browser on authentication"
+                                hint="If selected, it will not open the browser for authentication."
                                 persistent-hint
                               />
                             </v-col>
