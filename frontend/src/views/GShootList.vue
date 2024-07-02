@@ -231,12 +231,15 @@ import {
   ref,
   provide,
   toRef,
+  watch,
+  onMounted,
 } from 'vue'
 import {
   mapState,
   mapWritableState,
   mapActions,
 } from 'pinia'
+import { useRoute } from 'vue-router'
 
 import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
@@ -302,6 +305,7 @@ export default {
   },
   setup () {
     const projectStore = useProjectStore()
+    const route = useRoute()
 
     const activePopoverKey = ref('')
     provide('activePopoverKey', activePopoverKey)
@@ -311,15 +315,39 @@ export default {
       shootCustomFields,
     } = useProjectShootCustomFields(projectItem)
 
+    const shootSearch = ref('')
+    const debouncedShootSearch = ref('')
+
+    watch(shootSearch, newSearchQuery => {
+      const url = new URL(window.location.href)
+      if (newSearchQuery) {
+        url.searchParams.set('search', newSearchQuery)
+      } else {
+        url.searchParams.delete('search')
+      }
+      // directly manipulate the history state to avoid triggering Vue Router's navigation guard or hooks
+      window.history.replaceState(null, '', url.toString())
+    })
+
+    function setSearchFromUrl () {
+      const searchQuery = route.query.search || ''
+      shootSearch.value = searchQuery
+      debouncedShootSearch.value = searchQuery
+    }
+
+    onMounted(() => {
+      setSearchFromUrl()
+    })
+
     return {
       activePopoverKey,
       shootCustomFields,
+      shootSearch,
+      debouncedShootSearch,
     }
   },
   data () {
     return {
-      shootSearch: '',
-      debouncedShootSearch: '',
       dialog: null,
       page: 1,
       selectedColumns: undefined,
