@@ -45,6 +45,7 @@ import {
 
 import { useConfigStore } from '@/store/config'
 import { useShootStore } from '@/store/shoot'
+import { useAuthnStore } from '@/store/authn'
 
 import GExternalLink from '@/components/GExternalLink.vue'
 
@@ -85,10 +86,10 @@ const {
 
 const configStore = useConfigStore()
 const shootStore = useShootStore()
+const authnStore = useAuthnStore()
 
 const conditions = computed(() => {
   const conditions = shootReadiness.value
-    .filter(condition => !!condition.lastTransitionTime)
     .map(condition => {
       const conditionDefaults = configStore.conditionForType(condition.type)
       return {
@@ -97,6 +98,7 @@ const conditions = computed(() => {
         sortOrder: padStart(conditionDefaults.sortOrder, 8, '0'),
       }
     })
+    .filter(condition => !!condition.lastTransitionTime && (!condition.showAdminOnly || authnStore.isAdmin))
   return sortBy(conditions, 'sortOrder')
 })
 
