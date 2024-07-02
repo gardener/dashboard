@@ -6,6 +6,7 @@
 
 'use strict'
 
+const _ = require('lodash')
 const { promisify } = require('util')
 const createServer = require('socket.io')
 const cookieParser = require('cookie-parser')
@@ -164,7 +165,9 @@ function synchronizeShoots (socket, uids = []) {
     }
     // only send all shoot details for single shoot subscriptions
     if (!qualifiedNames.includes(qualifiedName)) {
-      trimObjectMetadata(object)
+      const clonedObject = _.cloneDeep(object)
+      trimObjectMetadata(clonedObject)
+      return clonedObject
     }
     return object
   })
