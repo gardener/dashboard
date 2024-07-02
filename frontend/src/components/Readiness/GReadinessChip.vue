@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <g-popover
-    v-model="internalValue"
+    v-model="internalPopoverValue"
     :placement="popperPlacement"
     :disabled="!condition.message"
     :toolbar-title="popperTitle"
@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
           :activator="$refs.tagChipRef"
           location="top"
           max-width="400px"
-          :disabled="internalValue"
+          :disabled="internalPopoverValue"
         >
           <div class="font-weight-bold">
             {{ chipTooltip.title }}
@@ -63,7 +63,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-chip>
     </template>
     <g-shoot-message-details
-      :status-title="chipStatus"
+      :status-title="statusTitle"
       :last-message="nonErrorMessage"
       :error-descriptions="errorDescriptions"
       :last-transition-time="condition.lastTransitionTime"
@@ -74,24 +74,20 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import {
-  inject,
-  computed,
-} from 'vue'
+import { computed } from 'vue'
 
 import { useAuthnStore } from '@/store/authn'
 
 import GShootMessageDetails from '@/components/GShootMessageDetails.vue'
+
+import { useShootReadiness } from '@/composables/useShootReadiness'
 
 import {
   isUserError,
   objectsFromErrorCodes,
 } from '@/utils/errorCodes'
 
-import {
-  isEmpty,
-  filter,
-} from '@/lodash'
+import { filter } from '@/lodash'
 
 const props = defineProps({
   condition: {
@@ -113,49 +109,26 @@ const props = defineProps({
   },
 })
 
-const activePopoverKey = inject('activePopoverKey')
+const {
+  isError,
+  isUnknown,
+  isProgressing,
+  errorDescriptions,
+  statusTitle,
+  color,
+  nonErrorMessage,
+  internalPopoverValue,
+  popperTitle,
+} = useShootReadiness(props.condition, props.staleShoot, props.shootMetadata)
 
 const authnStore = useAuthnStore()
 const isAdmin = computed(() => authnStore.isAdmin)
 
-const popoverKey = computed(() => {
-  return `g-readiness-chip[${props.condition.type}]:${props.shootMetadata.uid}`
-})
-
-const internalValue = computed({
-  get () {
-    return activePopoverKey.value === popoverKey.value
-  },
-  set (value) {
-    activePopoverKey.value = value ? popoverKey.value : ''
-  },
-})
-
-const popperTitle = computed(() => {
-  if (props.staleShoot) {
-    return 'Last Status'
-  }
-  return props.condition.name
-})
-
 const chipText = computed(() => props.condition.shortName || '')
-
-const chipStatus = computed(() => {
-  if (isError.value) {
-    return 'Error'
-  }
-  if (isUnknown.value) {
-    return 'Unknown'
-  }
-  if (isProgressing.value) {
-    return 'Progressing'
-  }
-  return 'Healthy'
-})
 
 const chipTooltip = computed(() => ({
   title: props.condition.name,
-  status: chipStatus.value,
+  status: statusTitle.value,
   description: props.condition.description,
   userErrorCodeObjects: filter(objectsFromErrorCodes(props.condition.codes), { userError: true }),
 }))
@@ -174,53 +147,6 @@ const chipIcon = computed(() => {
     return 'mdi-progress-alert'
   }
   return ''
-})
-
-const isError = computed(() => {
-  if (props.condition.status === 'False' || !isEmpty(props.condition.codes)) {
-    return true
-  }
-  return false
-})
-
-const isUnknown = computed(() => {
-  return props.condition.status === 'Unknown'
-})
-
-const isProgressing = computed(() => {
-  return props.condition.status === 'Progressing'
-})
-
-const errorDescriptions = computed(() => {
-  if (isError.value) {
-    return [
-      {
-        description: props.condition.message,
-        errorCodeObjects: objectsFromErrorCodes(props.condition.codes),
-      },
-    ]
-  }
-  return undefined
-})
-
-const nonErrorMessage = computed(() => {
-  if (!isError.value) {
-    return props.condition.message
-  }
-  return undefined
-})
-
-const color = computed(() => {
-  if (isUnknown.value || props.staleShoot) {
-    return 'unknown'
-  }
-  if (isError.value) {
-    return 'error'
-  }
-  if (isProgressing.value && isAdmin.value) {
-    return 'info'
-  }
-  return 'primary'
 })
 
 const textColor = computed(() => {

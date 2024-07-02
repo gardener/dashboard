@@ -5,7 +5,28 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div class="d-flex flex-nowrap justify-start">
+  <div
+    v-if="bar"
+    class="health-bar-container"
+  >
+    <div class="x-axis" />
+    <div class="health-bar">
+      <g-readiness-bar
+        v-for="condition in conditions"
+        :key="condition.type"
+        :condition="condition"
+        :popper-placement="popperPlacement"
+        :secret-binding-name="shootSecretBindingName"
+        :shoot-metadata="shootMetadata"
+        :stale-shoot="isStaleShoot"
+        :style="healthSegmentStyles"
+      />
+    </div>
+  </div>
+  <div
+    v-else
+    class="d-flex flex-nowrap justify-start"
+  >
     <g-readiness-chip
       v-for="condition in conditions"
       :key="condition.type"
@@ -56,6 +77,7 @@ import {
   errorCodesFromArray,
 } from '@/utils/errorCodes'
 
+import GReadinessBar from './GReadinessBar.vue'
 import GReadinessChip from './GReadinessChip.vue'
 
 import {
@@ -68,6 +90,10 @@ const props = defineProps({
     type: String,
   },
   showStatusText: {
+    type: Boolean,
+    default: false,
+  },
+  bar: {
     type: Boolean,
     default: false,
   },
@@ -110,4 +136,31 @@ const errorCodeObjects = computed(() => {
 const isStaleShoot = computed(() => {
   return !shootStore.isShootActive(shootUid.value)
 })
+
+const healthSegmentStyles = computed(() => ({
+  width: `${100 / conditions.value.length}%`,
+}))
 </script>
+
+<style scoped>
+.health-bar-container {
+  position: relative;
+  height: 40px;
+  width: 80px;
+  background-color: rgba(var(--v-border-color), .05);
+}
+.health-bar {
+  display: flex;
+}
+
+.x-axis {
+  position: absolute;
+  bottom: 19px;
+  height: 2px;
+  left: 1px;
+  right: 1px;
+  background-color: rgba(var(--v-border-color), .5);
+  z-index: 0;
+}
+
+</style>
