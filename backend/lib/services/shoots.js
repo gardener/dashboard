@@ -224,18 +224,6 @@ exports.replaceControlPlaneHighAvailability = async function ({ user, namespace,
   return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
 }
 
-exports.replaceDns = async function ({ user, namespace, name, body }) {
-  const client = user.client
-  const dns = body
-  const payload = {
-    spec: {
-      dns
-    }
-  }
-
-  return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
-}
-
 exports.patchProvider = async function ({ user, namespace, name, body }) {
   const client = user.client
   const payload = {

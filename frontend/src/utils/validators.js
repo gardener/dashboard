@@ -8,7 +8,7 @@ import { helpers } from '@vuelidate/validators'
 
 import { includes } from '@/lodash'
 
-const { withParams, regex, req, withMessage } = helpers
+const { withParams, regex, withMessage } = helpers
 
 const base64Pattern = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/
 const alphaNumUnderscorePattern = /^\w+$/
@@ -71,14 +71,6 @@ const includesIfAvailable = (key, reference) => withMessage(`Value of property '
     },
   ))
 
-const nilUnless = key => withMessage(`Must not be provided if '${key}' is not set`,
-  withParams(
-    { type: 'nilUnless', key },
-    function nilUnless (value) {
-      return !this[key] ? !req(value) : true
-    },
-  ))
-
 const withFieldName = (fieldName, validators) => {
   for (const [key, validator] of Object.entries(validators)) {
     if (typeof fieldName === 'function') {
@@ -119,5 +111,4 @@ export {
   includesIfAvailable,
   numberOrPercentage,
   isTimezone,
-  nilUnless,
 }

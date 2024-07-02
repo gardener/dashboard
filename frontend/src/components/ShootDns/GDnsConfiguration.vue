@@ -48,8 +48,9 @@ export default {
     } = useShootItem()
 
     const {
-      dns,
+      shootManifest,
       setShootManifest,
+      forceMigrateSyncDNSProvidersToFalse,
     } = useShootContext()
 
     const componentKey = ref(uuidv4())
@@ -59,9 +60,10 @@ export default {
       shootItem,
       shootNamespace,
       shootName,
-      dns,
+      shootManifest,
       setShootManifest,
       componentKey,
+      forceMigrateSyncDNSProvidersToFalse,
     }
   },
   methods: {
@@ -74,10 +76,21 @@ export default {
     },
     async updateConfiguration () {
       try {
+        // Remove migration logic when all dns configurations have been migrated by Gardener
+        this.forceMigrateSyncDNSProvidersToFalse()
+
+        const { dns, extensions, resources } = this.shootManifest.spec
+
         await this.api.updateShootDns({
           namespace: this.shootNamespace,
           name: this.shootName,
-          data: this.dns,
+          data: {
+            spec: {
+              dns,
+              extensions,
+              resources,
+            },
+          },
         })
       } catch (err) {
         const errorMessage = 'Could not update DNS Configuration'

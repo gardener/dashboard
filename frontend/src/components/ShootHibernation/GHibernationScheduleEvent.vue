@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
           return-object
           :error-messages="getErrorMessages(v$.selectedDays)"
           chips
-          label="Weekdays on which this rule shall be active"
+          label="Days of the week on which this rule shall be active"
           multiple
           closable-chips
           variant="underlined"
