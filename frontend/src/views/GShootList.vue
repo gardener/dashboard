@@ -154,7 +154,8 @@ SPDX-License-Identifier: Apache-2.0
           />
         </template>
       </g-toolbar>
-      <v-data-table
+      <component
+        :is="tableComponent"
         v-model:page="page"
         v-model:sort-by="sortByInternal"
         v-model:items-per-page="shootItemsPerPage"
@@ -162,10 +163,11 @@ SPDX-License-Identifier: Apache-2.0
         :items="sortedAndFilteredItems"
         hover
         :loading="loading || !connected"
-        :items-per-page-options="itemsPerPageOptions"
         :custom-key-sort="customKeySort"
         must-sort
         class="g-table"
+        :height="isVirtualScrollEnabled ? 'calc(100vh - 240px)' : undefined"
+        item-height="50px"
       >
         <template #progress>
           <g-shoot-list-progress />
@@ -188,11 +190,10 @@ SPDX-License-Identifier: Apache-2.0
             v-model:page="page"
             v-model:items-per-page="shootItemsPerPage"
             :items-length="sortedAndFilteredItems.length"
-            :items-per-page-options="itemsPerPageOptions"
             :page-count="pageCount"
           />
         </template>
-      </v-data-table>
+      </component>
       <v-dialog
         v-if="!isShootItemEmpty"
         v-model="clusterAccessDialog"
@@ -237,6 +238,10 @@ import {
   mapWritableState,
   mapActions,
 } from 'pinia'
+import {
+  VDataTableVirtual,
+  VDataTable,
+} from 'vuetify/components'
 
 import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
@@ -282,6 +287,8 @@ export default {
     GCertifiedKubernetes,
     GTableColumnSelection,
     GDataTableFooter,
+    VDataTableVirtual,
+    VDataTable,
   },
   inject: ['logger'],
   beforeRouteEnter (to, from, next) {
@@ -323,11 +330,6 @@ export default {
       dialog: null,
       page: 1,
       selectedColumns: undefined,
-      itemsPerPageOptions: [
-        { value: 5, title: '5' },
-        { value: 10, title: '10' },
-        { value: 20, title: '20' },
-      ],
     }
   },
   computed: {
@@ -753,6 +755,14 @@ export default {
     },
     issueSinceColumnVisible () {
       return this.operatorFeatures || (!this.projectScope && this.isAdmin)
+    },
+    isVirtualScrollEnabled () {
+      return this.shootItemsPerPage === -1
+    },
+    tableComponent () {
+      return this.isVirtualScrollEnabled
+        ? 'VDataTableVirtual'
+        : 'VDataTable'
     },
   },
   watch: {
