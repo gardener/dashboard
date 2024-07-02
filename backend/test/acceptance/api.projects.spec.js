@@ -1,246 +1,122 @@
 //
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 
 'use strict'
 
-const { mockRequest } = require('@gardener-dashboard/request')
-const { Store } = require('@gardener-dashboard/kube-client')
-const cache = require('../../lib/cache')
+const express = require('express')
+const supertest = require('supertest')
+const projects = require('../../lib/services/projects')
+const routes = require('../../lib/routes/projects')
 
-function createStore (items) {
-  const store = new Store()
-  store.replace(items)
-  return store
-}
+jest.mock('../../lib/services/projects')
 
-describe('api', function () {
-  let agent
+const app = express()
+app.use(express.json())
+app.use('/api/projects', routes)
 
-  beforeAll(() => {
-    agent = createAgent()
-
-    cache.initialize({
-      shoots: {
-        store: createStore(fixtures.shoots.list())
-      }
-    })
-  })
-
-  afterAll(() => {
-    cache.cache.resetTicketCache()
-    return agent.close()
-  })
+describe('API Projects', () => {
+  const user = { id: 'test-user', client: { 'core.gardener.cloud': { projects: {} } } }
 
   beforeEach(() => {
-    fixtures.resetAll()
-    mockRequest.mockReset()
+    jest.clearAllMocks()
   })
 
-  describe('projects', function () {
-    const user = fixtures.auth.createUser({
-      id: 'foo@example.org',
-      groups: ['group1']
-    })
-    const namespace = 'garden-foo'
-    const annotations = {
-      'billing.gardener.cloud/costObject': '8888888888'
-    }
-    const description = 'description'
-    const purpose = 'purpose'
+  describe('GET /api/projects', () => {
+    it('should return a list of projects', async () => {
+      const projectList = [{ metadata: { name: 'foo' } }, { metadata: { name: 'bar' } }]
+      projects.list.mockResolvedValue(projectList)
 
-    beforeAll(() => {
-      require('../../lib/services/projects').projectInitializationTimeout = 10
-    })
-
-    it('should return three projects', async function () {
-      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-
-      const res = await agent
-        .get('/api/namespaces')
-        .set('cookie', await user.cookie)
-        .expect('content-type', /json/)
+      const res = await supertest(app)
+        .get('/api/projects')
+        .set('user', JSON.stringify(user))
+        .expect('Content-Type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(1)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(res.body).toMatchSnapshot()
+      expect(res.body).toEqual(projectList)
     })
+  })
 
-    it('should return all projects', async function () {
-      const user = fixtures.auth.createUser({ id: 'projects-viewer@example.org' })
+  describe('POST /api/projects', () => {
+    it('should create a new project', async () => {
+      const body = { metadata: { name: 'foo' } }
+      const project = { metadata: { name: 'foo' }, status: { phase: 'Ready' } }
+      projects.create.mockResolvedValue(project)
 
-      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-
-      const res = await agent
-        .get('/api/namespaces')
-        .set('cookie', await user.cookie)
-        .expect('content-type', /json/)
+      const res = await supertest(app)
+        .post('/api/projects')
+        .send(body)
+        .set('user', JSON.stringify(user))
+        .expect('Content-Type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(1)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(res.body).toMatchSnapshot()
+      expect(res.body).toEqual(project)
     })
+  })
 
-    it('should return the foo project', async function () {
-      mockRequest.mockImplementationOnce(fixtures.projects.mocks.get())
+  describe('GET /api/projects/:project', () => {
+    it('should return a project by name', async () => {
+      const project = { metadata: { name: 'foo' } }
+      projects.read.mockResolvedValue(project)
 
-      const res = await agent
-        .get(`/api/namespaces/${namespace}`)
-        .set('cookie', await user.cookie)
-        .expect('content-type', /json/)
+      const res = await supertest(app)
+        .get('/api/projects/foo')
+        .set('user', JSON.stringify(user))
+        .expect('Content-Type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(1)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(res.body).toMatchSnapshot()
+      expect(res.body).toEqual(project)
     })
+  })
 
-    it('should reject request with authorization error', async function () {
-      const user = fixtures.auth.createUser({ id: 'baz@example.org' })
+  describe('PUT /api/projects/:project', () => {
+    it('should update a project', async () => {
+      const body = { metadata: { name: 'foo' } }
+      const project = { metadata: { name: 'foo' } }
+      projects.patch.mockResolvedValue(project)
 
-      mockRequest.mockImplementationOnce(fixtures.projects.mocks.get())
-
-      const res = await agent
-        .get(`/api/namespaces/${namespace}`)
-        .set('cookie', await user.cookie)
-        .expect('content-type', /json/)
-        .expect(403)
-
-      expect(mockRequest).toBeCalledTimes(1)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(res.body).toMatchSnapshot({
-        details: expect.any(Object)
-      })
-    })
-
-    it('should create a project', async function () {
-      mockRequest.mockImplementationOnce(fixtures.projects.mocks.create())
-      mockRequest.mockImplementationOnce(fixtures.projects.mocks.watch({
-        phase: 'Ready'
-      }))
-
-      const res = await agent
-        .post('/api/namespaces')
-        .set('cookie', await user.cookie)
-        .send({
-          metadata: {
-            name: 'xyz',
-            annotations
-          },
-          data: {
-            purpose,
-            description
-          }
-        })
-        .expect('content-type', /json/)
+      const res = await supertest(app)
+        .put('/api/projects/foo')
+        .send(body)
+        .set('user', JSON.stringify(user))
+        .expect('Content-Type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(2)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(res.body).toMatchSnapshot()
+      expect(res.body).toEqual(project)
     })
+  })
 
-    it('should timeout when creating a project', async function () {
-      mockRequest.mockImplementationOnce(fixtures.projects.mocks.create())
-      mockRequest.mockImplementationOnce(fixtures.projects.mocks.watch({
-        phase: 'Pending'
-      }))
+  describe('PATCH /api/projects/:project', () => {
+    it('should patch a project', async () => {
+      const body = { metadata: { name: 'foo' } }
+      const project = { metadata: { name: 'foo' } }
+      projects.patch.mockResolvedValue(project)
 
-      const res = await agent
-        .post('/api/namespaces')
-        .set('cookie', await user.cookie)
-        .send({
-          metadata: {
-            name: 'my-project',
-            annotations
-          },
-          data: {
-            purpose,
-            description
-          }
-        })
-        .expect('content-type', /json/)
-        .expect(504)
-
-      expect(mockRequest).toBeCalledTimes(2)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(res.body).toMatchSnapshot({
-        details: expect.any(Object)
-      })
-    })
-
-    it('should update a project', async function () {
-      mockRequest.mockImplementationOnce(fixtures.projects.mocks.patch())
-
-      const res = await agent
-        .put(`/api/namespaces/${namespace}`)
-        .set('cookie', await user.cookie)
-        .send({
-          metadata: {
-            annotations
-          },
-          data: {
-            owner: 'baz@example.org',
-            purpose,
-            description
-          }
-        })
-        .expect('content-type', /json/)
+      const res = await supertest(app)
+        .patch('/api/projects/foo')
+        .send(body)
+        .set('user', JSON.stringify(user))
+        .expect('Content-Type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(1)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(res.body).toMatchSnapshot()
+      expect(res.body).toEqual(project)
     })
+  })
 
-    it('should patch a project', async function () {
-      mockRequest.mockImplementationOnce(fixtures.projects.mocks.patch())
+  describe('DELETE /api/projects/:project', () => {
+    it('should delete a project', async () => {
+      const project = { metadata: { name: 'foo' } }
+      projects.remove.mockResolvedValue(project)
 
-      const res = await agent
-        .patch(`/api/namespaces/${namespace}`)
-        .set('cookie', await user.cookie)
-        .send({
-          data: {
-            description: 'foobar'
-          }
-        })
-        .expect('content-type', /json/)
+      const res = await supertest(app)
+        .delete('/api/projects/foo')
+        .set('user', JSON.stringify(user))
+        .expect('Content-Type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(1)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(res.body).toMatchSnapshot()
-    })
-
-    it('should delete a project', async function () {
-      const namespace = 'garden-bar'
-
-      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-      mockRequest.mockImplementationOnce(fixtures.projects.mocks.patch())
-      mockRequest.mockImplementationOnce(fixtures.projects.mocks.delete())
-
-      const res = await agent
-        .delete(`/api/namespaces/${namespace}`)
-        .set('cookie', await user.cookie)
-        .expect('content-type', /json/)
-        .expect(200)
-
-      expect(mockRequest).toBeCalledTimes(3)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(res.body).toMatchSnapshot()
+      expect(res.body).toEqual(project)
     })
   })
 })

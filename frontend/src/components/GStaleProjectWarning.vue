@@ -6,22 +6,21 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-tooltip
-    v-if="projectDetails.staleSinceTimestamp"
+    v-if="staleSinceTimestamp"
     location="top"
   >
     <template #activator="{ props: activatorProps }">
       <v-icon
         v-bind="activatorProps"
         :size="size"
-        :color="color"
         :icon="icon"
         class="ml-1"
       />
     </template>
-    <span v-if="projectDetails.staleAutoDeleteTimestamp">
+    <span v-if="staleAutoDeleteTimestamp">
       This is a <span class="font-weight-bold">stale</span> project. Gardener will auto delete this project
       <g-time-string
-        :date-time="projectDetails.staleAutoDeleteTimestamp"
+        :date-time="staleAutoDeleteTimestamp"
         mode="future"
         no-tooltip
         content-class="font-weight-bold"
@@ -30,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
     <span v-else>
       This project is considered <span class="font-weight-bold">stale</span> since
       <g-time-string
-        :date-time="projectDetails.staleSinceTimestamp"
+        :date-time="staleSinceTimestamp"
         without-prefix-or-suffix
         no-tooltip
         content-class="font-weight-bold"
@@ -47,7 +46,10 @@ import {
 
 import GTimeString from '@/components/GTimeString.vue'
 
-import { getProjectDetails } from '@/utils'
+import {
+  useProjectStaleAutoDeleteTimestamp,
+  useProjectStaleSinceTimestamp,
+} from '@/composables/useProjectItem'
 
 const props = defineProps({
   project: {
@@ -58,20 +60,16 @@ const props = defineProps({
     type: String,
     default: 'default',
   },
-  color: {
-    type: String,
-    default: 'primary',
-  },
 })
 
-const { size, color } = toRef(props, 'color')
+const size = toRef(props, 'size')
+const projectItem = toRef(props, 'project')
 
-const projectDetails = computed(() => {
-  return getProjectDetails(props.project)
-})
+const staleAutoDeleteTimestamp = useProjectStaleAutoDeleteTimestamp(projectItem)
+const staleSinceTimestamp = useProjectStaleSinceTimestamp(projectItem)
 
 const icon = computed(() => {
-  return projectDetails.value.staleAutoDeleteTimestamp
+  return staleAutoDeleteTimestamp.value
     ? 'mdi-delete-clock'
     : 'mdi-clock-alert-outline'
 })

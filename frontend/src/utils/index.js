@@ -299,37 +299,6 @@ export function getIssueSince (shootStatus) {
   return head(issueTimestamps.sort())
 }
 
-// TODO drop this function and useProjectItem composable instead
-export function getProjectDetails (project = {}) {
-  const projectData = project.data || {}
-  const projectMetadata = project.metadata || {}
-  const projectName = projectMetadata.name || ''
-  const owner = projectData.owner || ''
-  const costObject = get(project, ['metadata', 'annotations', 'billing.gardener.cloud/costObject'], '')
-  const creationTimestamp = projectMetadata.creationTimestamp
-  const createdAt = getDateFormatted(creationTimestamp)
-  const description = projectData.description || ''
-  const createdBy = projectData.createdBy || ''
-  const purpose = projectData.purpose || ''
-  const staleSinceTimestamp = projectData.staleSinceTimestamp
-  const staleAutoDeleteTimestamp = projectData.staleAutoDeleteTimestamp
-  const phase = projectData.phase
-
-  return {
-    projectName,
-    owner,
-    costObject,
-    createdAt,
-    creationTimestamp,
-    createdBy,
-    description,
-    purpose,
-    staleSinceTimestamp,
-    staleAutoDeleteTimestamp,
-    phase,
-  }
-}
-
 export function isShootStatusHibernated (status) {
   return get(status, 'hibernated', false)
 }
@@ -712,7 +681,6 @@ export default {
   isOwnSecret,
   getCreatedBy,
   getIssueSince,
-  getProjectDetails,
   isShootStatusHibernated,
   isReconciliationDeactivated,
   isTruthyValue,

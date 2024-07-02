@@ -277,9 +277,11 @@ import {
 const allProjectsItem = {
   metadata: {
     name: 'All Projects',
+  },
+  spec: {
     namespace: '_all',
   },
-  data: {
+  status: {
     phase: 'Ready',
   },
 }
@@ -310,13 +312,13 @@ const canCreateProject = toRef(authzStore, 'canCreateProject')
 
 const selectedProject = computed({
   get () {
-    if (namespace.value === allProjectsItem.metadata.namespace) {
+    if (namespace.value === allProjectsItem.spec.namespace) {
       return allProjectsItem
     }
-    return find(projectList.value, ['metadata.namespace', namespace.value])
+    return find(projectList.value, ['spec.namespace', namespace.value])
   },
-  set ({ metadata = {} } = {}) {
-    router.push(getProjectMenuTargetRoute(metadata.namespace))
+  set ({ spec = {} } = {}) {
+    router.push(getProjectMenuTargetRoute(spec.namespace))
   },
 })
 
@@ -325,7 +327,7 @@ const hasNoProjects = computed(() => {
 })
 
 const routes = computed(() => {
-  const hasProjectScope = get(selectedProject.value, 'metadata.namespace') !== allProjectsItem.metadata.namespace
+  const hasProjectScope = get(selectedProject.value, 'spec.namespace') !== allProjectsItem.spec.namespace
   return getRoutes(router, hasProjectScope)
 })
 
@@ -345,7 +347,8 @@ const sortedAndFilteredProjectList = computed(() => {
     }
     const filter = toLower(projectFilter.value)
     const name = toLower(item.metadata.name)
-    const owner = toLower(replace(item.data.owner, /@.*$/, ''))
+    let owner = get(item, 'spec.owner.name')
+    owner = toLower(replace(owner, /@.*$/, ''))
     return includes(name, filter) || includes(owner, filter)
   }
   const filteredList = filter([
@@ -357,7 +360,7 @@ const sortedAndFilteredProjectList = computed(() => {
     return toLower(item.metadata.name) === toLower(projectFilter.value) ? 0 : 1
   }
   const allProjectsMatch = item => {
-    return item?.metadata.namespace === allProjectsItem.metadata.namespace ? 0 : 1
+    return item?.spec.namespace === allProjectsItem.spec.namespace ? 0 : 1
   }
   const sortedList = sortBy(filteredList, [allProjectsMatch, exactMatch, 'metadata.name'])
   return sortedList
@@ -381,7 +384,7 @@ const projectNameThatMatchesFilter = computed(() => {
 })
 
 function getProjectOwner (project) {
-  return emailToDisplayName(get(project, 'data.owner'))
+  return emailToDisplayName(get(project, 'spec.owner.name'))
 }
 
 function namespacedRoute (route) {

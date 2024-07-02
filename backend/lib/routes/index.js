@@ -17,7 +17,8 @@ module.exports = {
   '/cloudprofiles': require('./cloudprofiles'),
   '/seeds': require('./seeds'),
   '/gardenerextensions': require('./gardenerExtensions'),
-  '/namespaces': require('./namespaces'),
+  '/projects': require('./projects'),
+  '/namespaces': require('./namespaces'), // TODO delete this legacy route
   '/namespaces/:namespace/shoots': require('./shoots'),
   '/namespaces/:namespace/tickets': require('./tickets'),
   '/namespaces/:namespace/cloudprovidersecrets': require('./cloudProviderSecrets'),

@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
         <template #description>
           <div class="wrap-text d-flex">
             <span class="mr-2">
-              Request a kubeconfig valid for
+              Request a kubeconfig for this Shoot cluster valid for
             </span>
             <g-popover
               v-model="popover"

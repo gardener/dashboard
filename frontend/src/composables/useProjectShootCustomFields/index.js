@@ -26,6 +26,7 @@ export function useProjectShootCustomFields (projectItem, options = {}) {
   } = options
 
   const {
+    projectName,
     getProjectAnnotation,
     setProjectAnnotation,
     unsetProjectAnnotation,
@@ -138,11 +139,9 @@ export function useProjectShootCustomFields (projectItem, options = {}) {
   }
 
   function getShootCustomFieldsPatchDocument () {
-    const { namespace, name } = projectItem.value.metadata
     return {
       metadata: {
-        namespace,
-        name,
+        name: projectName.value,
         annotations: {
           'dashboard.gardener.cloud/shootCustomFields': getProjectAnnotation('dashboard.gardener.cloud/shootCustomFields', null),
         },
