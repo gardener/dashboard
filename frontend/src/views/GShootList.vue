@@ -306,7 +306,6 @@ export default {
     this.resetState(this.expandedWorkerGroups, { default: false })
     this.resetState(this.expandedAccessRestrictions, { default: false })
     this.resetState(this.expandedTicketLabels, { default: false })
-    this.resetState(this.expandedConditions, { default: false })
 
     next()
   },
@@ -323,12 +322,10 @@ export default {
     const expandedWorkerGroups = reactive({ default: false })
     const expandedAccessRestrictions = reactive({ default: false })
     const expandedTicketLabels = reactive({ default: false })
-    const expandedConditions = reactive({ default: false })
     provide('activePopoverKey', activePopoverKey)
     provide('expandedWorkerGroups', expandedWorkerGroups)
     provide('expandedAccessRestrictions', expandedAccessRestrictions)
     provide('expandedTicketLabels', expandedTicketLabels)
-    provide('expandedConditions', expandedConditions)
 
     const projectItem = toRef(projectStore, 'project')
     const {
@@ -340,7 +337,6 @@ export default {
       expandedWorkerGroups,
       expandedAccessRestrictions,
       expandedTicketLabels,
-      expandedConditions,
       shootCustomFields,
     }
   },
