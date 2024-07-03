@@ -167,6 +167,11 @@ SPDX-License-Identifier: Apache-2.0
         must-sort
         class="g-table"
       >
+        <template #headers="headers">
+          <g-data-table-header
+            v-bind="{...headers, sortBy }"
+          />
+        </template>
         <template #progress>
           <g-shoot-list-progress />
         </template>
@@ -254,6 +259,7 @@ import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
 import GIconBase from '@/components/icons/GIconBase.vue'
 import GCertifiedKubernetes from '@/components/icons/GCertifiedKubernetes.vue'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
+import GDataTableHeader from '@/components/GDataTableHeader.vue'
 import GShootAccessCard from '@/components/ShootDetails/GShootAccessCard.vue'
 
 import { useProjectShootCustomFields } from '@/composables/useProjectShootCustomFields'
@@ -283,6 +289,7 @@ export default {
     GCertifiedKubernetes,
     GTableColumnSelection,
     GDataTableFooter,
+    GDataTableHeader,
   },
   inject: ['logger'],
   beforeRouteEnter (to, from, next) {
@@ -497,6 +504,7 @@ export default {
           align: 'start',
           defaultSelected: false,
           hidden: false,
+          expandedItems: this.expandedWorkerGroups,
         },
         {
           title: 'CREATED BY',
@@ -572,6 +580,7 @@ export default {
           align: 'start',
           defaultSelected: false,
           hidden: !this.accessRestrictionConfig || !this.isAdmin,
+          expandedItems: this.expandedAccessRestrictions,
         },
         {
           title: 'TICKET',
@@ -588,6 +597,7 @@ export default {
           align: 'start',
           defaultSelected: true,
           hidden: !this.gitHubRepoUrl || !this.isAdmin,
+          expandedItems: this.expandedTicketLabels,
         },
         {
           title: 'ACTIONS',
