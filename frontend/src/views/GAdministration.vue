@@ -564,6 +564,9 @@ export default {
     }
   },
   computed: {
+    ...mapState(useAppStore, [
+      'accountId',
+    ]),
     ...mapState(useConfigStore, [
       'sla',
       'costObjectSettings',
@@ -748,9 +751,13 @@ export default {
         const mergePatchDocument = {
           metadata: { name, namespace },
         }
+        if (this.accountId && !get(this.project, 'metadata.annotations["openmfp.org/account-id"]')) {
+          set(mergePatchDocument, 'metadata.labels["openmfp.org/managed-by"]', 'true')
+          set(mergePatchDocument, 'metadata.annotations["openmfp.org/account-id"]', this.accountId)
+        }
         switch (key) {
           case 'costObject':
-            set(mergePatchDocument, ['metadata', 'annotations', 'billing.gardener.cloud/costObject'], value)
+            set(mergePatchDocument, 'metadata.annotations["billing.gardener.cloud/costObject"]', value)
             break
           default:
             set(mergePatchDocument, ['data', key], value)

@@ -129,6 +129,7 @@ import {
 } from '@vuelidate/validators'
 import { useRouter } from 'vue-router'
 
+import { useAppStore } from '@/store/app'
 import { useConfigStore } from '@/store/config'
 import { useProjectStore } from '@/store/project'
 
@@ -174,6 +175,7 @@ const emit = defineEmits([
 ])
 
 const logger = useLogger()
+const appStore = useAppStore()
 const configStore = useConfigStore()
 const projectStore = useProjectStore()
 const router = useRouter()
@@ -286,6 +288,10 @@ function save () {
   const metadata = { name }
   if (costObjectSettingEnabled.value) {
     set(metadata, ['annotations', 'billing.gardener.cloud/costObject'], costObject.value)
+  }
+  if (appStore.accountId) {
+    set(metadata, 'label["openmfp.org/managed-by"]', 'true')
+    set(metadata, 'annotations["openmfp.org/account-id"]', appStore.accountId)
   }
 
   const data = {

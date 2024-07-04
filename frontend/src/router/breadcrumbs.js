@@ -33,6 +33,14 @@ export function accountBreadcrumbs () {
   ]
 }
 
+export function projectsBreadcrumbs () {
+  return [
+    {
+      title: 'Projects',
+    },
+  ]
+}
+
 export function settingsBreadcrumbs () {
   return [
     {

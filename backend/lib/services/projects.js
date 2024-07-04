@@ -22,9 +22,10 @@ const openfga = require('../openfga')
 
 const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
 
-function fromResource ({ metadata, spec = {}, status = {} }) {
+function fromResource (resource) {
+  const { metadata, spec = {}, status = {} } = resource
   const role = 'project'
-  const { name, resourceVersion, creationTimestamp, annotations } = metadata
+  const { name, resourceVersion, creationTimestamp, labels, annotations } = metadata
   const { namespace, createdBy, owner, description, purpose } = spec
   const { staleSinceTimestamp, staleAutoDeleteTimestamp, phase } = status
 
@@ -35,6 +36,7 @@ function fromResource ({ metadata, spec = {}, status = {} }) {
       resourceVersion,
       role,
       creationTimestamp,
+      labels,
       annotations
     },
     data: {
@@ -49,12 +51,13 @@ function fromResource ({ metadata, spec = {}, status = {} }) {
   }
 }
 
-function toResource ({ metadata, data = {} }) {
+function toResource (project) {
+  const { metadata, data = {} } = project
   const { apiVersion, kind } = Resources.Project
-  const { name, namespace, resourceVersion, annotations } = metadata
+  const { name, namespace, resourceVersion, labels, annotations } = metadata
   const { createdBy, owner, description = null, purpose = null } = data
 
-  return {
+  const resource = {
     apiVersion,
     kind,
     metadata: {
@@ -70,13 +73,37 @@ function toResource ({ metadata, data = {} }) {
       purpose
     }
   }
+
+  if (!_.isEmpty(labels)) {
+    _.set(resource, 'metadata.labels', labels)
+  }
+
+  if (!_.isEmpty(annotations)) {
+    _.set(resource, 'metadata.annotations', annotations)
+  }
+
+  return resource
 }
 
-function toResourceMergePatchDocument ({ metadata: { annotations } = {}, data = {} }) {
+function toResourceMergePatchDocument (body) {
+  const { metadata = { }, data = {} } = body
   const document = {}
-  if (!_.isEmpty(annotations)) {
-    document.metadata = { annotations }
+
+  const labels = metadata.labels
+  if (!_.isEmpty(labels)) {
+    _.set(document, 'metadata.labels', labels)
   }
+
+  const annotations = {}
+  for (const [key, value] of Object.entries(metadata.annotations ?? {})) {
+    if (!key.startsWith('computed.gardener.cloud')) {
+      annotations[key] = value
+    }
+  }
+  if (!_.isEmpty(annotations)) {
+    _.set(document, 'metadata.annotations', annotations)
+  }
+
   if (!_.isEmpty(data)) {
     document.spec = {}
     for (let [key, value] of Object.entries(data)) {
@@ -135,6 +162,7 @@ exports.list = async function ({ user, canListProjects }) {
   return _
     .chain(cache.getProjects())
     .filter(projectFilter(user, canListProjects, projectAllowList))
+    .forEach(project => setComputedProjectAnnotations(project))
     .map(fromResource)
     .value()
 }
@@ -142,8 +170,10 @@ exports.list = async function ({ user, canListProjects }) {
 exports.create = async function ({ user, body }) {
   const client = user.client
 
+  const accountId = _.get(body, 'metadata.annotations["openmfp.org/account-id"]')
   const name = _.get(body, 'metadata.name')
-  _.set(body, 'metadata.namespace', `garden-${name}`)
+  const namespace = `garden-${name}`
+  _.set(body, 'metadata.namespace', namespace)
   _.set(body, 'data.createdBy', user.id)
   let project = await client['core.gardener.cloud'].projects.create(toResource(body))
 
@@ -159,6 +189,13 @@ exports.create = async function ({ user, body }) {
   // must be the dashboardClient because rbac rolebinding does not exist yet
   const asyncIterable = await dashboardClient['core.gardener.cloud'].projects.watch(name)
   project = await asyncIterable.until(isProjectReady, { timeout })
+  if (openfga.client && accountId) {
+    try {
+      await openfga.writeProject(namespace, accountId)
+    } catch (err) {
+      logger.error('Failed to write openfga account releation:', err)
+    }
+  }
 
   return fromResource(project)
 }
@@ -169,6 +206,7 @@ exports.read = async function ({ user, name: namespace }) {
   const client = user.client
   const name = getProjectName(namespace)
   const project = await client['core.gardener.cloud'].projects.get(name)
+  setComputedProjectAnnotations(project)
   return fromResource(project)
 }
 
@@ -177,7 +215,16 @@ exports.patch = async function ({ user, name: namespace, body: { metadata, data 
   const name = getProjectName(namespace)
   const body = toResourceMergePatchDocument({ metadata, data })
   const project = await client['core.gardener.cloud'].projects.mergePatch(name, body)
+  setComputedProjectAnnotations(project)
   return fromResource(project)
+}
+
+function setComputedProjectAnnotations (project) {
+  if (process.env.NODE_ENV === 'test') {
+    return
+  }
+  const shoots = cache.getShoots(project.spec.namespace) ?? []
+  _.set(project, 'metadata.annotations["computed.gardener.cloud/number-of-shoots"]', shoots.length)
 }
 
 exports.remove = async function ({ user, name: namespace }) {

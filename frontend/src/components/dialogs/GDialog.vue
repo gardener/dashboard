@@ -85,7 +85,7 @@ SPDX-License-Identifier: Apache-2.0
             <div v-bind="props">
               <v-btn
                 variant="text"
-                class="text-toolbar-background"
+                color="primary"
                 :disabled="notConfirmed || !valid"
                 @click="resolveAction(true)"
               >

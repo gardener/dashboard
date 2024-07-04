@@ -11,6 +11,8 @@ import {
 import {
   ref,
   watch,
+  toRef,
+  computed,
 } from 'vue'
 import LuigiClient from '@luigi-project/client'
 
@@ -35,9 +37,9 @@ export const useAppStore = defineStore('app', () => {
   const routerError = ref(null)
   const luigiContext = ref(null)
 
-  const isInIframe = () => window.self !== window.top
+  const isInIframe = computed(() => window.self !== window.top)
 
-  if (isInIframe()) {
+  if (isInIframe.value) {
     logger.debug('Registering listener for Luigi context initialization and context updates')
     LuigiClient.addInitListener(context => setLuigiContext(context))
     LuigiClient.addContextUpdateListener(context => setLuigiContext(context))
@@ -47,8 +49,10 @@ export const useAppStore = defineStore('app', () => {
     luigiContext.value = value
   }
 
+  const accountId = computed(() => luigiContext.value?.accountId)
+
   function getLuigiContext () {
-    if (!isInIframe()) {
+    if (!isInIframe.value) {
       return Promise.resolve(null)
     }
     if (luigiContext.value !== null) {
@@ -71,6 +75,19 @@ export const useAppStore = defineStore('app', () => {
         immediate: true,
       })
     })
+  }
+
+  function setRoute (route) {
+    if (isInIframe.value) {
+      const pathname = toRef(route, 'path')
+      watch(pathname, value => {
+        if (value) {
+          LuigiClient.linkManager().fromVirtualTreeRoot().withoutSync().navigate(value)
+        }
+      }, {
+        immediate: true,
+      })
+    }
   }
 
   function updateSplitpaneResize () {
@@ -124,7 +141,10 @@ export const useAppStore = defineStore('app', () => {
     focusedElementId,
     splitpaneResize,
     fromRoute,
+    isInIframe,
+    setRoute,
     routerError,
+    accountId,
     luigiContext,
     getLuigiContext,
     updateSplitpaneResize,
