@@ -213,12 +213,12 @@ describe('stores', () => {
       authzStore.setNamespace('foo')
       projectStore = useProjectStore()
       setProjectData({
-        shootCustomFields: {
-          Foo: {
+        shootCustomFields: [
+          {
             name: 'Column uid',
             path: 'metadata.uid',
           },
-        },
+        ],
       })
       socketStore = useSocketStore()
       mockEmitSubscribe = vi.spyOn(socketStore, 'emitSubscribe').mockImplementation(noop)
@@ -297,7 +297,7 @@ describe('stores', () => {
 
       it('should sort shoots by custom column', () => {
         const sortBy = [{
-          key: 'Z_Foo',
+          key: 'Z_columnUid',
           order: 'asc',
         }]
         const sortedShoots = shootStore.sortItems(items, sortBy)
