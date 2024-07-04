@@ -38,7 +38,7 @@ SPDX-License-Identifier: Apache-2.0
             {{ isSortedAscending(column) ? 'descending' : 'ascending' }}
           </v-tooltip>
           <v-tooltip
-            v-if="!!column.expandedItems"
+            v-if="!!expandedItems[column.key]"
           >
             <template #activator="{ props: tooltipProps }">
               <v-btn
@@ -66,6 +66,8 @@ SPDX-License-Identifier: Apache-2.0
 import {
   toRefs,
   unref,
+  inject,
+  computed,
 } from 'vue'
 
 import { head } from '@/lodash'
@@ -95,16 +97,24 @@ const props = defineProps({
 
 const { columns, isSorted, getSortIcon, toggleSort, sortBy } = toRefs(props)
 
+const expandedItems = computed(() => {
+  return columns.value.reduce((acc, { key, expandedItemsInjectionKey }) => {
+    const expandedItems = inject(expandedItemsInjectionKey, undefined)
+    acc[key] = expandedItems
+    return acc
+  }, {})
+})
+
 const allExpanded = column => {
-  return column.expandedItems.default === true
+  return expandedItems.value[column.key].default === true
 }
 
 const toggleExpanded = column => {
-  const newValue = !column.expandedItems.default
-  for (const key in column.expandedItems) {
-    delete column.expandedItems[key]
+  const newValue = !expandedItems.value[column.key].default
+  for (const key in expandedItems.value[column.key]) {
+    delete expandedItems.value[column.key][key]
   }
-  column.expandedItems.default = newValue
+  expandedItems.value[column.key].default = newValue
 }
 
 const isSortedAscending = column => {

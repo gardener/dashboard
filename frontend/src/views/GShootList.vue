@@ -500,7 +500,7 @@ export default {
           align: 'start',
           defaultSelected: false,
           hidden: false,
-          expandedItems: this.expandedWorkerGroups,
+          expandedItemsInjectionKey: 'expandedWorkerGroups',
         },
         {
           title: 'CREATED BY',
@@ -576,7 +576,7 @@ export default {
           align: 'start',
           defaultSelected: false,
           hidden: !this.accessRestrictionConfig || !this.isAdmin,
-          expandedItems: this.expandedAccessRestrictions,
+          expandedItemsInjectionKey: 'expandedAccessRestrictions',
         },
         {
           title: 'TICKET',
@@ -593,7 +593,7 @@ export default {
           align: 'start',
           defaultSelected: true,
           hidden: !this.gitHubRepoUrl || !this.isAdmin,
-          expandedItems: this.expandedTicketLabels,
+          expandedItemsInjectionKey: 'expandedTicketLabels',
         },
         {
           title: 'ACTIONS',

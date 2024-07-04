@@ -108,7 +108,7 @@ const props = defineProps({
 
 const { items, itemName, itemPlural, noWrap } = toRefs(props)
 const internalExpanded = ref(false)
-const expandedItems = props.injectKey ? inject(props.injectKey, undefined) : undefined
+const expandedItems = inject(props.injectKey, undefined)
 
 const itemCount = computed(() => {
   return props.items.length
