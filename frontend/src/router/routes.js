@@ -16,6 +16,7 @@ import GDefault from '@/layouts/GDefault.vue'
 /* Views */
 import GError from '@/views/GError.vue'
 import GNotFound from '@/views/GNotFound.vue'
+import GProjectList from '@/views/GProjectList.vue'
 import GProjectPlaceholder from '@/views/GProjectPlaceholder.vue'
 import GNewShootPlaceholder from '@/views/GNewShootPlaceholder.vue'
 import GNewShootEditor from '@/views/GNewShootEditor.vue'
@@ -28,6 +29,7 @@ import GSettings from '@/views/GSettings.vue'
 import {
   homeBreadcrumbs,
   newProjectBreadcrumbs,
+  projectsBreadcrumbs,
   accountBreadcrumbs,
   settingsBreadcrumbs,
   shootListBreadcrumbs,
@@ -254,7 +256,13 @@ export function createRoutes () {
     return {
       path,
       name: 'ProjectList',
-      beforeEnter: redirectToShootList,
+      component: GProjectList,
+      alias: 'projects',
+      meta: {
+        namespaced: false,
+        projectScope: false,
+        breadcrumbs: projectsBreadcrumbs,
+      },
     }
   }
 

@@ -11,6 +11,7 @@ SPDX-License-Identifier: Apache-2.0
   >
     <div class="heading">
       <v-icon
+        v-if="!isInIframe"
         class="heading-icon"
         icon="mdi-hexagon-multiple"
       />
@@ -258,7 +259,10 @@ SPDX-License-Identifier: Apache-2.0
 import {
   computed,
   ref,
+  toRef,
 } from 'vue'
+
+import { useAppStore } from '@/store/app'
 
 import { parseShootSearch } from '@/store/shoot/helper'
 import { buildSearchTerms } from '@/store/shoot/search'
@@ -271,6 +275,9 @@ import { useShootListFilters } from '@/composables/useShootListFilters'
 
 import isEqual from 'lodash/isEqual'
 import sortBy from 'lodash/sortBy'
+
+const appStore = useAppStore()
+const isInIframe = toRef(appStore, 'isInIframe')
 
 const props = defineProps({
   modelValue: {

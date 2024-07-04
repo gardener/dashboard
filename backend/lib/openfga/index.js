@@ -27,12 +27,49 @@ const fgaClient = fgaApiUrl && fgaStoreId && fgaApiToken
   })
   : null
 
+function writeProject (namespace, accountId) {
+  return fgaClient.request('write', {
+    method: 'POST',
+    json: {
+      writes: {
+        tuple_keys: [
+          {
+            object: `gardener_project:${namespace}`,
+            relation: 'parent',
+            user: `account:${accountId}`,
+          },
+        ],
+      },
+    },
+  })
+}
+
+function deleteProject (namespace, accountId) {
+  return fgaClient.request('write', {
+    method: 'POST',
+    json: {
+      deletes: {
+        tuple_keys: [
+          {
+            object: `gardener_project:${namespace}`,
+            relation: 'parent',
+            user: `account:${accountId}`,
+          },
+        ],
+      },
+    },
+  })
+}
+
 async function listProjects (username, relation = 'viewer') {
   const type = 'gardener_project'
-  const user = `user:${username}`
   const { objects = [] } = await fgaClient.request('list-objects', {
     method: 'POST',
-    json: { user, relation, type },
+    json: {
+      user: `user:${username}`,
+      relation,
+      type,
+    },
   })
   logger.debug('Openfga response objects: %s', objects)
   const projects = []
@@ -53,4 +90,6 @@ async function listProjects (username, relation = 'viewer') {
 export default {
   client: fgaClient,
   listProjects,
+  writeProject,
+  deleteProject,
 }

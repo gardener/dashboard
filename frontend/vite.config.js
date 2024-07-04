@@ -202,7 +202,7 @@ export default defineConfig(({ command, mode }) => {
       exclude: ['vuetify'],
     }
     config.server = {
-      port: 8443,
+      port: 9443,
       strictPort: true,
       https,
       proxy: {

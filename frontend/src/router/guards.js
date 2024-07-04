@@ -175,7 +175,7 @@ export function createGlobalResolveGuards () {
         switch (to.name) {
           case 'Home':
           case 'ProjectList': {
-            // no action required for redirect routes
+            await projectStore.fetchProjects()
             break
           }
           case 'Credentials':

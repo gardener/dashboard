@@ -27,6 +27,7 @@ import { useConfigStore } from '@/store/config'
 import { useLoginStore } from '@/store/login'
 import { useLocalStorageStore } from '@/store/localStorage'
 import { useProjectStore } from '@/store/project'
+import { useAppStore } from '@/store/app'
 
 import { useCustomColors } from '@/composables/useCustomColors'
 
@@ -38,7 +39,10 @@ const localStorageStore = useLocalStorageStore()
 const configStore = useConfigStore()
 const loginStore = useLoginStore()
 const projectStore = useProjectStore()
+const appStore = useAppStore()
 const logger = inject('logger')
+
+appStore.setRoute(route)
 
 async function setCustomColors () {
   try {

@@ -672,6 +672,10 @@ async function updateProperty (path, value, options = {}) {
       metadata: { name },
       spec: { namespace },
     }
+    if (appStore.accountId && !projectStore.project.metadata.annotations?.['openmfp.org/account-id']) {
+      set(mergePatchDocument, ['metadata', 'labels', 'openmfp.org/managed-by'], 'true')
+      set(mergePatchDocument, ['metadata', 'annotations', 'openmfp.org/account-id'], appStore.accountId)
+    }
     set(mergePatchDocument, path, value)
     await projectStore.patchProject(mergePatchDocument)
   } catch (err) {

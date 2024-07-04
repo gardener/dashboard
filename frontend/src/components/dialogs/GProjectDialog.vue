@@ -119,6 +119,7 @@ import {
 } from '@vuelidate/validators'
 import { useRouter } from 'vue-router'
 
+import { useAppStore } from '@/store/app'
 import { useProjectStore } from '@/store/project'
 
 import GMessage from '@/components/GMessage.vue'
@@ -145,6 +146,7 @@ import {
   isConflict,
   isGatewayTimeout,
 } from '@/utils/error'
+import set from 'lodash/set'
 
 const props = defineProps({
   modelValue: {
@@ -158,6 +160,7 @@ const emit = defineEmits([
 ])
 
 const logger = useLogger()
+const appStore = useAppStore()
 const projectStore = useProjectStore()
 const router = useRouter()
 const {
@@ -228,6 +231,10 @@ async function submit () {
 
   try {
     loading.value = true
+    if (appStore.accountId) {
+      set(projectManifest.value, ['metadata', 'labels', 'openmfp.org/managed-by'], 'true')
+      set(projectManifest.value, ['metadata', 'annotations', 'openmfp.org/account-id'], appStore.accountId)
+    }
     const project = await projectStore.createProject(projectManifest.value)
     loading.value = false
     hide()
