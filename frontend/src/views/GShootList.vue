@@ -168,9 +168,7 @@ SPDX-License-Identifier: Apache-2.0
         class="g-table"
       >
         <template #headers="headers">
-          <g-data-table-header
-            v-bind="{...headers, sortBy }"
-          />
+          <g-data-table-header v-bind="headers" />
         </template>
         <template #progress>
           <g-shoot-list-progress />
