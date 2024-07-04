@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -30,15 +30,15 @@ SPDX-License-Identifier: Apache-2.0
   </v-tooltip>
 </template>
 
-<script>
+<script setup>
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
 
-export default {
-  components: {
-    GTextRouterLink,
-  },
-  mixins: [shootItem],
-}
+const {
+  shootSeedName,
+  canLinkToSeed,
+  isShootLastOperationTypeControlPlaneMigrating,
+  shootLastOperationTypeControlPlaneMigrationMessage,
+} = useShootItem()
 </script>

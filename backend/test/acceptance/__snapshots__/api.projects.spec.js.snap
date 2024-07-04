@@ -1,27 +1,27 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`api projects should create a project 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/core.gardener.cloud/v1beta1/projects",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImdyb3VwcyI6WyJncm91cDEiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.iLqu05bZNRweB_7pr3cM6ZGO5gl2wYNf4d-hCazuo7o",
     },
-    Object {
+    {
       "apiVersion": "core.gardener.cloud/v1beta1",
       "kind": "Project",
-      "metadata": Object {
-        "annotations": Object {
+      "metadata": {
+        "annotations": {
           "billing.gardener.cloud/costObject": "8888888888",
         },
         "name": "xyz",
         "resourceVersion": undefined,
       },
-      "spec": Object {
-        "createdBy": Object {
+      "spec": {
+        "createdBy": {
           "apiGroup": "rbac.authorization.k8s.io",
           "kind": "User",
           "name": "foo@example.org",
@@ -33,8 +33,8 @@ Array [
       },
     },
   ],
-  Array [
-    Object {
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "get",
       ":path": "/apis/core.gardener.cloud/v1beta1/projects?watch=true&fieldSelector=metadata.name%3Dxyz",
@@ -46,16 +46,16 @@ Array [
 `;
 
 exports[`api projects should create a project 2`] = `
-Object {
-  "data": Object {
+{
+  "data": {
     "createdBy": "foo@example.org",
     "description": "description",
     "owner": "foo@example.org",
     "phase": "Ready",
     "purpose": "purpose",
   },
-  "metadata": Object {
-    "annotations": Object {
+  "metadata": {
+    "annotations": {
       "billing.gardener.cloud/costObject": "8888888888",
     },
     "name": "xyz",
@@ -67,21 +67,21 @@ Object {
 `;
 
 exports[`api projects should delete a project 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImdyb3VwcyI6WyJncm91cDEiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.iLqu05bZNRweB_7pr3cM6ZGO5gl2wYNf4d-hCazuo7o",
     },
-    Object {
+    {
       "apiVersion": "authorization.k8s.io/v1",
       "kind": "SelfSubjectAccessReview",
-      "spec": Object {
+      "spec": {
         "nonResourceAttributes": undefined,
-        "resourceAttributes": Object {
+        "resourceAttributes": {
           "group": "core.gardener.cloud",
           "namespace": "garden-bar",
           "resource": "shoots",
@@ -90,8 +90,8 @@ Array [
       },
     },
   ],
-  Array [
-    Object {
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "patch",
       ":path": "/apis/core.gardener.cloud/v1beta1/projects/bar",
@@ -99,16 +99,16 @@ Array [
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImdyb3VwcyI6WyJncm91cDEiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.iLqu05bZNRweB_7pr3cM6ZGO5gl2wYNf4d-hCazuo7o",
       "content-type": "application/merge-patch+json",
     },
-    Object {
-      "metadata": Object {
-        "annotations": Object {
+    {
+      "metadata": {
+        "annotations": {
           "confirmation.gardener.cloud/deletion": "true",
         },
       },
     },
   ],
-  Array [
-    Object {
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "delete",
       ":path": "/apis/core.gardener.cloud/v1beta1/projects/bar",
@@ -120,16 +120,16 @@ Array [
 `;
 
 exports[`api projects should delete a project 2`] = `
-Object {
-  "data": Object {
+{
+  "data": {
     "createdBy": "foo@example.org",
     "description": "bar-description",
     "owner": "bar@example.org",
     "phase": "Ready",
     "purpose": "bar-purpose",
   },
-  "metadata": Object {
-    "annotations": Object {
+  "metadata": {
+    "annotations": {
       "confirmation.gardener.cloud/deletion": "true",
     },
     "name": "bar",
@@ -141,9 +141,9 @@ Object {
 `;
 
 exports[`api projects should patch a project 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "patch",
       ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
@@ -151,8 +151,8 @@ Array [
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImdyb3VwcyI6WyJncm91cDEiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.iLqu05bZNRweB_7pr3cM6ZGO5gl2wYNf4d-hCazuo7o",
       "content-type": "application/merge-patch+json",
     },
-    Object {
-      "spec": Object {
+    {
+      "spec": {
         "description": "foobar",
       },
     },
@@ -161,16 +161,16 @@ Array [
 `;
 
 exports[`api projects should patch a project 2`] = `
-Object {
-  "data": Object {
+{
+  "data": {
     "createdBy": "foo@example.org",
     "description": "foobar",
     "owner": "bar@example.org",
     "phase": "Ready",
     "purpose": "foo-purpose",
   },
-  "metadata": Object {
-    "annotations": Object {
+  "metadata": {
+    "annotations": {
       "billing.gardener.cloud/costObject": "9999999999",
     },
     "name": "foo",
@@ -182,9 +182,9 @@ Object {
 `;
 
 exports[`api projects should reject request with authorization error 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "get",
       ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
@@ -196,7 +196,7 @@ Array [
 `;
 
 exports[`api projects should reject request with authorization error 2`] = `
-Object {
+{
   "code": 403,
   "details": Any<Object>,
   "message": "Forbidden",
@@ -206,21 +206,21 @@ Object {
 `;
 
 exports[`api projects should return all projects 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InByb2plY3RzLXZpZXdlckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.mdL_IwTCaUnb2Yzua4Z54bS85BXKeAU3O1ioUfs7MeI",
     },
-    Object {
+    {
       "apiVersion": "authorization.k8s.io/v1",
       "kind": "SelfSubjectAccessReview",
-      "spec": Object {
+      "spec": {
         "nonResourceAttributes": undefined,
-        "resourceAttributes": Object {
+        "resourceAttributes": {
           "group": "core.gardener.cloud",
           "resource": "projects",
           "verb": "list",
@@ -232,30 +232,30 @@ Array [
 `;
 
 exports[`api projects should return all projects 2`] = `
-Array [
-  Object {
-    "data": Object {
+[
+  {
+    "data": {
       "createdBy": "admin@example.org",
       "owner": "admin@example.org",
       "phase": "Ready",
     },
-    "metadata": Object {
+    "metadata": {
       "name": "garden",
       "namespace": "garden",
       "resourceVersion": "42",
       "role": "project",
     },
   },
-  Object {
-    "data": Object {
+  {
+    "data": {
       "createdBy": "foo@example.org",
       "description": "foo-description",
       "owner": "bar@example.org",
       "phase": "Ready",
       "purpose": "foo-purpose",
     },
-    "metadata": Object {
-      "annotations": Object {
+    "metadata": {
+      "annotations": {
         "billing.gardener.cloud/costObject": "9999999999",
       },
       "name": "foo",
@@ -264,72 +264,72 @@ Array [
       "role": "project",
     },
   },
-  Object {
-    "data": Object {
+  {
+    "data": {
       "createdBy": "foo@example.org",
       "description": "bar-description",
       "owner": "bar@example.org",
       "phase": "Ready",
       "purpose": "bar-purpose",
     },
-    "metadata": Object {
+    "metadata": {
       "name": "bar",
       "namespace": "garden-bar",
       "resourceVersion": "42",
       "role": "project",
     },
   },
-  Object {
-    "data": Object {
+  {
+    "data": {
       "createdBy": "new@example.org",
       "owner": "new@example.org",
       "phase": "Ready",
     },
-    "metadata": Object {
+    "metadata": {
       "name": "GroupMember1",
       "namespace": "garden-GroupMember1",
       "resourceVersion": "42",
       "role": "project",
     },
   },
-  Object {
-    "data": Object {
+  {
+    "data": {
       "createdBy": "new@example.org",
       "owner": "new@example.org",
       "phase": "Ready",
     },
-    "metadata": Object {
+    "metadata": {
       "name": "GroupMember2",
       "namespace": "garden-GroupMember2",
       "resourceVersion": "42",
       "role": "project",
     },
   },
-  Object {
-    "data": Object {
+  {
+    "data": {
       "createdBy": "admin@example.org",
       "description": "secret-description",
       "owner": "admin@example.org",
       "phase": "Ready",
       "purpose": "secret-purpose",
     },
-    "metadata": Object {
+    "metadata": {
       "name": "secret",
       "namespace": "garden-secret",
       "resourceVersion": "42",
       "role": "project",
     },
   },
-  Object {
-    "data": Object {
+  {
+    "data": {
       "createdBy": "admin@example.org",
       "description": "trial-description",
       "owner": "admin@example.org",
       "phase": "Failed",
       "purpose": "trial-purpose",
     },
-    "metadata": Object {
-      "annotations": Object {
+    "metadata": {
+      "annotations": {
         "billing.gardener.cloud/costObject": "1234567890",
       },
       "name": "trial",
@@ -342,9 +342,9 @@ Array [
 `;
 
 exports[`api projects should return the foo project 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "get",
       ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
@@ -356,16 +356,16 @@ Array [
 `;
 
 exports[`api projects should return the foo project 2`] = `
-Object {
-  "data": Object {
+{
+  "data": {
     "createdBy": "foo@example.org",
     "description": "foo-description",
     "owner": "bar@example.org",
     "phase": "Ready",
     "purpose": "foo-purpose",
   },
-  "metadata": Object {
-    "annotations": Object {
+  "metadata": {
+    "annotations": {
       "billing.gardener.cloud/costObject": "9999999999",
     },
     "name": "foo",
@@ -377,21 +377,21 @@ Object {
 `;
 
 exports[`api projects should return three projects 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImdyb3VwcyI6WyJncm91cDEiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.iLqu05bZNRweB_7pr3cM6ZGO5gl2wYNf4d-hCazuo7o",
     },
-    Object {
+    {
       "apiVersion": "authorization.k8s.io/v1",
       "kind": "SelfSubjectAccessReview",
-      "spec": Object {
+      "spec": {
         "nonResourceAttributes": undefined,
-        "resourceAttributes": Object {
+        "resourceAttributes": {
           "group": "core.gardener.cloud",
           "resource": "projects",
           "verb": "list",
@@ -403,17 +403,17 @@ Array [
 `;
 
 exports[`api projects should return three projects 2`] = `
-Array [
-  Object {
-    "data": Object {
+[
+  {
+    "data": {
       "createdBy": "foo@example.org",
       "description": "foo-description",
       "owner": "bar@example.org",
       "phase": "Ready",
       "purpose": "foo-purpose",
     },
-    "metadata": Object {
-      "annotations": Object {
+    "metadata": {
+      "annotations": {
         "billing.gardener.cloud/costObject": "9999999999",
       },
       "name": "foo",
@@ -422,28 +422,28 @@ Array [
       "role": "project",
     },
   },
-  Object {
-    "data": Object {
+  {
+    "data": {
       "createdBy": "foo@example.org",
       "description": "bar-description",
       "owner": "bar@example.org",
       "phase": "Ready",
       "purpose": "bar-purpose",
     },
-    "metadata": Object {
+    "metadata": {
       "name": "bar",
       "namespace": "garden-bar",
       "resourceVersion": "42",
       "role": "project",
     },
   },
-  Object {
-    "data": Object {
+  {
+    "data": {
       "createdBy": "new@example.org",
       "owner": "new@example.org",
       "phase": "Ready",
     },
-    "metadata": Object {
+    "metadata": {
       "name": "GroupMember1",
       "namespace": "garden-GroupMember1",
       "resourceVersion": "42",
@@ -454,27 +454,27 @@ Array [
 `;
 
 exports[`api projects should timeout when creating a project 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "post",
       ":path": "/apis/core.gardener.cloud/v1beta1/projects",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImdyb3VwcyI6WyJncm91cDEiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.iLqu05bZNRweB_7pr3cM6ZGO5gl2wYNf4d-hCazuo7o",
     },
-    Object {
+    {
       "apiVersion": "core.gardener.cloud/v1beta1",
       "kind": "Project",
-      "metadata": Object {
-        "annotations": Object {
+      "metadata": {
+        "annotations": {
           "billing.gardener.cloud/costObject": "8888888888",
         },
         "name": "my-project",
         "resourceVersion": undefined,
       },
-      "spec": Object {
-        "createdBy": Object {
+      "spec": {
+        "createdBy": {
           "apiGroup": "rbac.authorization.k8s.io",
           "kind": "User",
           "name": "foo@example.org",
@@ -486,8 +486,8 @@ Array [
       },
     },
   ],
-  Array [
-    Object {
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "get",
       ":path": "/apis/core.gardener.cloud/v1beta1/projects?watch=true&fieldSelector=metadata.name%3Dmy-project",
@@ -499,19 +499,19 @@ Array [
 `;
 
 exports[`api projects should timeout when creating a project 2`] = `
-Object {
+{
   "code": 504,
   "details": Any<Object>,
-  "message": "The condition for \\"projects\\" was not met within 10 ms",
+  "message": "The condition for "projects" was not met within 10 ms",
   "reason": "Gateway Timeout",
   "status": "Failure",
 }
 `;
 
 exports[`api projects should update a project 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       ":authority": "kubernetes:6443",
       ":method": "patch",
       ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
@@ -519,15 +519,15 @@ Array [
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImdyb3VwcyI6WyJncm91cDEiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.iLqu05bZNRweB_7pr3cM6ZGO5gl2wYNf4d-hCazuo7o",
       "content-type": "application/merge-patch+json",
     },
-    Object {
-      "metadata": Object {
-        "annotations": Object {
+    {
+      "metadata": {
+        "annotations": {
           "billing.gardener.cloud/costObject": "8888888888",
         },
       },
-      "spec": Object {
+      "spec": {
         "description": "description",
-        "owner": Object {
+        "owner": {
           "apiGroup": "rbac.authorization.k8s.io",
           "kind": "User",
           "name": "baz@example.org",
@@ -540,16 +540,16 @@ Array [
 `;
 
 exports[`api projects should update a project 2`] = `
-Object {
-  "data": Object {
+{
+  "data": {
     "createdBy": "foo@example.org",
     "description": "description",
     "owner": "baz@example.org",
     "phase": "Ready",
     "purpose": "purpose",
   },
-  "metadata": Object {
-    "annotations": Object {
+  "metadata": {
+    "annotations": {
       "billing.gardener.cloud/costObject": "8888888888",
     },
     "name": "foo",

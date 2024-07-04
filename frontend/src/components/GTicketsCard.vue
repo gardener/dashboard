@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
         :key="ticket.metadata.issueNumber"
         :ticket="ticket"
       />
-      <div class="d-flex align-center justify-center mt-4">
+      <div class="d-flex align-center justify-center">
         <v-btn
           variant="tonal"
           color="primary"
@@ -59,7 +59,8 @@ import { useTicketStore } from '@/store/ticket'
 
 import GTicket from '@/components/ShootTickets/GTicket'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
+
 import moment from '@/utils/moment'
 
 import {
@@ -73,8 +74,32 @@ export default {
   components: {
     GTicket,
   },
-  mixins: [shootItem],
   inject: ['sanitizeUrl'],
+  setup () {
+    const {
+      shootItem,
+      shootNamespace,
+      shootName,
+      shootProjectName,
+      shootCreatedAt,
+      shootCloudProviderKind,
+      shootRegion,
+      shootSeedName,
+      shootAccessRestrictions,
+    } = useShootItem()
+
+    return {
+      shootItem,
+      shootNamespace,
+      shootName,
+      shootProjectName,
+      shootCreatedAt,
+      shootCloudProviderKind,
+      shootRegion,
+      shootSeedName,
+      shootAccessRestrictions,
+    }
+  },
   computed: {
     ...mapState(useConfigStore, {
       ticketConfig: 'ticket',
@@ -118,7 +143,7 @@ export default {
         projectName: this.shootProjectName,
         utcDateTimeNow: moment().utc().format(),
         seedName: this.shootSeedName,
-        accessRestrictions: this.shootSelectedAccessRestrictions,
+        accessRestrictions: this.shootAccessRestrictions,
       }
 
       const baseUrl = new URL(this.gitHubRepoUrl)

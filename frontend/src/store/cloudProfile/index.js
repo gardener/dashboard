@@ -38,8 +38,6 @@ import {
   findVendorHint,
   decorateClassificationObject,
   firstItemMatchingVersionClassification,
-  mapAccessRestrictionForInput,
-  mapAccessRestrictionForDisplay,
 } from './helper'
 
 import {
@@ -48,17 +46,16 @@ import {
   uniq,
   map,
   get,
+  set,
   some,
   intersection,
   find,
   difference,
   toPairs,
-  fromPairs,
   includes,
   isEmpty,
   flatMap,
   template,
-  compact,
   head,
   cloneDeep,
   sample,
@@ -83,9 +80,64 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return list.value
   })
 
+  function flattenMachineImages (machineImages) {
+    return flatMap(machineImages, machineImage => {
+      const { name, updateStrategy = 'major' } = machineImage
+
+      const versions = []
+      for (const versionObj of machineImage.versions) {
+        if (semver.valid(versionObj.version)) {
+          versions.push(versionObj)
+          continue
+        }
+
+        const normalizedVersion = normalizeVersion(versionObj.version)
+        if (normalizedVersion) {
+          versionObj.version = normalizedVersion
+          versions.push(versionObj)
+          continue
+        }
+
+        logger.warn(`Skipped machine image ${name} as version ${versionObj.version} is not a valid semver version and cannot be normalized`)
+      }
+      versions.sort((a, b) => {
+        return semver.rcompare(a.version, b.version)
+      })
+
+      const vendorName = vendorNameFromImageName(name)
+      const vendorHint = findVendorHint(configStore.vendorHints, vendorName)
+
+      return map(versions, ({ version, expirationDate, cri, classification, architectures }) => {
+        if (isEmpty(architectures)) {
+          architectures = ['amd64'] // default if not maintained
+        }
+        return decorateClassificationObject({
+          key: name + '/' + version,
+          name,
+          version,
+          updateStrategy,
+          cri,
+          classification,
+          expirationDate,
+          vendorName,
+          icon: vendorName,
+          vendorHint,
+          architectures,
+        })
+      })
+    })
+  }
+
   async function fetchCloudProfiles () {
     const response = await api.getCloudProfiles()
-    list.value = response.data
+    setCloudProfiles(response.data)
+  }
+
+  function setCloudProfiles (cloudProfiles) {
+    for (const cloudProfile of cloudProfiles) {
+      set(cloudProfile, 'data.machineImages', flattenMachineImages(get(cloudProfile, 'data.machineImages')))
+    }
+    list.value = cloudProfiles
   }
 
   function isValidRegion (cloudProfile) {
@@ -102,12 +154,26 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     }
   }
 
+  const knownInfrastructureKindList = ref([
+    'aws',
+    'azure',
+    'gcp',
+    'openstack',
+    'alicloud',
+    'metal',
+    'vsphere',
+    'hcloud',
+    'onmetal',
+    'ironcore',
+    'local',
+  ])
+
   const infrastructureKindList = computed(() => {
     return uniq(map(list.value, 'metadata.cloudProviderKind'))
   })
 
   const sortedInfrastructureKindList = computed(() => {
-    return intersection(['aws', 'azure', 'gcp', 'openstack', 'alicloud', 'metal', 'vsphere', 'hcloud', 'onmetal', 'ironcore', 'local'], infrastructureKindList.value)
+    return intersection(knownInfrastructureKindList.value, infrastructureKindList.value)
   })
 
   function cloudProfilesByCloudProviderKind (cloudProviderKind) {
@@ -168,7 +234,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return '0Gi'
   }
 
-  function getDefaultNodesCIDR ({ cloudProfileName }) {
+  function getDefaultNodesCIDR (cloudProfileName) {
     const cloudProfile = cloudProfileByName(cloudProfileName)
     return get(cloudProfile, 'data.providerConfig.defaultNodesCIDR', configStore.defaultNodesCIDR)
   }
@@ -294,7 +360,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return filter(items, machineAndVolumeTypePredicate(unavailableItemsInAllZones))
   }
 
-  function machineTypesByCloudProfileName ({ cloudProfileName }) {
+  function machineTypesByCloudProfileName (cloudProfileName) {
     return machineTypesOrVolumeTypesByCloudProfileNameAndRegion({ type: 'machineTypes', cloudProfileName })
   }
 
@@ -387,115 +453,47 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return machineTypesOrVolumeTypesByCloudProfileNameAndRegion({ type: 'volumeTypes', cloudProfileName, region })
   }
 
-  function volumeTypesByCloudProfileName ({ cloudProfileName }) {
-    return volumeTypesByCloudProfileNameAndRegion({ cloudProfileName })
+  function volumeTypesByCloudProfileName (cloudProfileName) {
+    return volumeTypesByCloudProfileNameAndRegion({ cloudProfileName, region: undefined })
   }
 
   function machineImagesByCloudProfileName (cloudProfileName) {
     const cloudProfile = cloudProfileByName(cloudProfileName)
-    const machineImages = get(cloudProfile, 'data.machineImages')
-    const mapMachineImages = machineImage => {
-      const { name, updateStrategy = 'major' } = machineImage
-
-      const versions = []
-      for (const versionObj of machineImage.versions) {
-        if (semver.valid(versionObj.version)) {
-          versions.push(versionObj)
-          continue
-        }
-
-        const normalizedVersion = normalizeVersion(versionObj.version)
-        if (normalizedVersion) {
-          versionObj.version = normalizedVersion
-          versions.push(versionObj)
-          continue
-        }
-
-        logger.error(`Skipped machine image ${name} as version ${versionObj.version} is not a valid semver version and cannot be normalized`)
-      }
-      versions.sort((a, b) => {
-        return semver.rcompare(a.version, b.version)
-      })
-
-      const vendorName = vendorNameFromImageName(name)
-      const vendorHint = findVendorHint(configStore.vendorHints, vendorName)
-
-      return map(versions, ({ version, expirationDate, cri, classification, architectures }) => {
-        if (isEmpty(architectures)) {
-          architectures = ['amd64'] // default if not maintained
-        }
-        return decorateClassificationObject({
-          key: name + '/' + version,
-          name,
-          version,
-          updateStrategy,
-          cri,
-          classification,
-          expirationDate,
-          vendorName,
-          icon: vendorName,
-          vendorHint,
-          architectures,
-        })
-      })
-    }
-
-    return flatMap(machineImages, mapMachineImages)
+    return get(cloudProfile, 'data.machineImages')
   }
 
-  function accessRestrictionNoItemsTextForCloudProfileNameAndRegion ({ cloudProfileName: cloudProfile, region }) {
-    const noItemsText = get(configStore, 'accessRestriction.noItemsText', 'No access restriction options available for region ${region}') // eslint-disable-line no-template-curly-in-string
+  function accessRestrictionNoItemsTextForCloudProfileNameAndRegion ({ cloudProfileName, region }) {
+    const defaultNoItemsText = 'No access restriction options available for region ${region}' // eslint-disable-line no-template-curly-in-string
+    const noItemsText = get(configStore, 'accessRestriction.noItemsText', defaultNoItemsText)
 
-    const compiled = template(noItemsText)
-    return compiled({
+    return template(noItemsText)({
       region,
-      cloudProfile,
+      cloudProfile: cloudProfileName,
     })
   }
 
   function accessRestrictionDefinitionsByCloudProfileNameAndRegion ({ cloudProfileName, region }) {
-    if (!cloudProfileName) {
-      return undefined
-    }
-    if (!region) {
-      return undefined
+    if (!cloudProfileName || !region) {
+      return []
     }
 
     const labels = labelsByCloudProfileNameAndRegion({ cloudProfileName, region })
     if (isEmpty(labels)) {
-      return undefined
+      return []
     }
 
     const items = get(configStore, 'accessRestriction.items')
     return filter(items, ({ key }) => {
-      if (!key) {
-        return false
-      }
-      return labels[key] === 'true'
+      return key && labels[key] === 'true'
     })
-  }
-
-  function accessRestrictionsForShootByCloudProfileNameAndRegion ({ shootResource, cloudProfileName, region }) {
-    const definitions = accessRestrictionDefinitionsByCloudProfileNameAndRegion({ cloudProfileName, region })
-
-    let accessRestrictionsMap = map(definitions, definition => mapAccessRestrictionForInput(definition, shootResource))
-    accessRestrictionsMap = compact(accessRestrictionsMap)
-    return fromPairs(accessRestrictionsMap)
-  }
-
-  function selectedAccessRestrictionsForShootByCloudProfileNameAndRegion ({ shootResource, cloudProfileName, region }) {
-    const definitions = accessRestrictionDefinitionsByCloudProfileNameAndRegion({ cloudProfileName, region })
-    const accessRestrictions = accessRestrictionsForShootByCloudProfileNameAndRegion({ shootResource, cloudProfileName, region })
-
-    return compact(map(definitions, definition => mapAccessRestrictionForDisplay({ definition, accessRestriction: accessRestrictions[definition.key] })))
   }
 
   function labelsByCloudProfileNameAndRegion ({ cloudProfileName, region }) {
     const cloudProfile = cloudProfileByName(cloudProfileName)
-    if (cloudProfile) {
-      return get(find(cloudProfile.data.regions, { name: region }), 'labels')
+    if (!cloudProfile) {
+      return {}
     }
-    return {}
+    return get(find(cloudProfile.data.regions, ['name', region]), 'labels')
   }
 
   function defaultMachineImageForCloudProfileNameAndMachineType (cloudProfileName, machineType) {
@@ -509,7 +507,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     const allVersions = get(cloudProfile, 'data.kubernetes.versions', [])
     const validVersions = filter(allVersions, ({ expirationDate, version }) => {
       if (!semver.valid(version)) {
-        logger.error(`Skipped Kubernetes version ${version} as it is not a valid semver version`)
+        logger.info(`Skipped Kubernetes version ${version} as it is not a valid semver version`)
         return false
       }
       return true
@@ -648,7 +646,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
       },
       zones,
       cri: {
-        name: defaultCriNameByKubernetesVersion(map(machineImage.cri, 'name'), kubernetesVersion),
+        name: defaultCriNameByKubernetesVersion(map(machineImage?.cri, 'name'), kubernetesVersion),
       },
       isNew: true,
     }
@@ -665,8 +663,10 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     list,
     isInitial,
     cloudProfileList,
+    setCloudProfiles,
     fetchCloudProfiles,
     cloudProfilesByCloudProviderKind,
+    knownInfrastructureKindList,
     sortedInfrastructureKindList,
     cloudProfileByName,
     regionsWithSeedByCloudProfileName,
@@ -690,8 +690,8 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     volumeTypesByCloudProfileName,
     defaultMachineImageForCloudProfileNameAndMachineType,
     minimumVolumeSizeByMachineTypeAndVolumeType,
-    selectedAccessRestrictionsForShootByCloudProfileNameAndRegion,
     labelsByCloudProfileNameAndRegion,
+    accessRestrictionDefinitionsByCloudProfileNameAndRegion,
     accessRestrictionNoItemsTextForCloudProfileNameAndRegion,
     kubernetesVersions,
     sortedKubernetesVersions,
@@ -700,8 +700,6 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     kubernetesVersionUpdatePathAvailable,
     kubernetesVersionExpirationForShoot,
     seedsByCloudProfileName,
-    accessRestrictionDefinitionsByCloudProfileNameAndRegion,
-    accessRestrictionsForShootByCloudProfileNameAndRegion,
     loadBalancerClassesByCloudProfileName,
     generateWorker,
     machineImagesByCloudProfileName,

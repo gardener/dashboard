@@ -38,7 +38,6 @@ SPDX-License-Identifier: Apache-2.0
     >
       <v-card-text class="pa-0">
         <g-terminal-shortcuts
-          :shoot-item="shootItem"
           :popper-boundaries-selector="popperBoundariesSelector"
           @add-terminal-shortcut="onAddTerminalShortcut"
         />
@@ -56,8 +55,13 @@ SPDX-License-Identifier: Apache-2.0
   />
 </template>
 
-<script>
-import { mapState } from 'pinia'
+<script setup>
+import {
+  ref,
+  computed,
+  toRefs,
+  inject,
+} from 'vue'
 
 import { useAuthnStore } from '@/store/authn'
 
@@ -70,7 +74,8 @@ import GTerminalShortcutIcon from '@/components/icons/GTerminalShortcutIcon.vue'
 import GUnverifiedTerminalShortcutsDialog from '@/components/dialogs/GUnverifiedTerminalShortcutsDialog.vue'
 import GWebterminalServiceAccountDialog from '@/components/dialogs/GWebterminalServiceAccountDialog.vue'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
+
 import { TargetEnum } from '@/utils'
 
 import {
@@ -79,66 +84,61 @@ import {
   includes,
 } from '@/lodash'
 
-export default {
-  components: {
-    GListItem,
-    GListItemContent,
-    GActionButton,
-    GTerminalShortcuts,
-    GIconBase,
-    GTerminalShortcutIcon,
-    GUnverifiedTerminalShortcutsDialog,
-    GWebterminalServiceAccountDialog,
+const api = inject('api')
+
+const webterminalServiceAccountDialog = ref(null)
+const unverifiedTerminalShortcutsDialog = ref(null)
+
+const props = defineProps({
+  popperBoundariesSelector: {
+    type: String,
   },
-  mixins: [shootItem],
-  inject: ['api'],
-  props: {
-    popperBoundariesSelector: {
-      type: String,
-    },
-  },
-  emits: ['addTerminalShortcut'],
-  data () {
-    return {
-      expansionPanel: false,
+})
+const {
+  popperBoundariesSelector,
+} = toRefs(props)
+
+const emit = defineEmits(['addTerminalShortcut'])
+const authnStore = useAuthnStore()
+
+const {
+  shootNamespace,
+} = useShootItem()
+
+const expansionPanel = ref(false)
+
+const expansionPanelIcon = computed(() => {
+  return expansionPanel.value ? 'mdi-chevron-up' : 'mdi-chevron-down'
+})
+
+const expansionPanelTooltip = computed(() => {
+  return expansionPanel.value ? 'Hide terminal shortcuts' : 'Show terminal shortcuts'
+})
+
+async function onAddTerminalShortcut (shortcut) {
+  if (shortcut.unverified) {
+    const confirmation = await unverifiedTerminalShortcutsDialog.value.promptForConfirmation()
+    if (!confirmation) {
+      return
     }
-  },
-  computed: {
-    ...mapState(useAuthnStore, [
-      'isAdmin',
-    ]),
-    expansionPanelIcon () {
-      return this.expansionPanel ? 'mdi-chevron-up' : 'mdi-chevron-down'
-    },
-    expansionPanelTooltip () {
-      return this.expansionPanel ? 'Hide terminal shortcuts' : 'Show terminal shortcuts'
-    },
-  },
-  methods: {
-    async onAddTerminalShortcut (shortcut) {
-      if (shortcut.unverified) {
-        const confirmation = await this.$refs.unverified.promptForConfirmation()
-        if (!confirmation) {
-          return
-        }
-      }
+  }
 
-      const isGardenTarget = get(shortcut, 'target') === TargetEnum.GARDEN
-      if (!this.isAdmin && isGardenTarget) {
-        const { data: projectMembers } = await this.api.getMembers({ namespace: this.shootNamespace })
-        const serviceAccountName = `system:serviceaccount:${this.shootNamespace}:dashboard-webterminal`
-        const member = find(projectMembers, ['username', serviceAccountName])
-        const roles = get(member, 'roles')
-        if (!includes(roles, 'admin')) {
-          const confirmation = await this.$refs.serviceAccount.promptForConfirmation(member)
-          if (!confirmation) {
-            return
-          }
-        }
+  const isGardenTarget = get(shortcut, 'target') === TargetEnum.GARDEN
+  if (!authnStore.isAdmin && isGardenTarget) {
+    const { data: projectMembers } = await api.getMembers({
+      namespace: shootNamespace.value,
+    })
+    const serviceAccountName = `system:serviceaccount:${shootNamespace.value}:dashboard-webterminal`
+    const member = find(projectMembers, ['username', serviceAccountName])
+    const roles = get(member, 'roles')
+    if (!includes(roles, 'admin')) {
+      const confirmation = await webterminalServiceAccountDialog.value.promptForConfirmation(member)
+      if (!confirmation) {
+        return
       }
+    }
+  }
 
-      this.$emit('addTerminalShortcut', shortcut)
-    },
-  },
+  emit('addTerminalShortcut', shortcut)
 }
 </script>

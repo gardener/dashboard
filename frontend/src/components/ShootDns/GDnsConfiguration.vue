@@ -7,10 +7,10 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-action-button-dialog
     ref="actionDialog"
-    :shoot-item="shootItem"
     caption="Configure DNS"
     width="900"
     confirm-required
+    @before-dialog-opened="setShootManifest(shootItem)"
     @dialog-opened="onConfigurationDialogOpened"
   >
     <template #content>
@@ -22,16 +22,16 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapActions } from 'pinia'
+import { ref } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
-
-import { useShootStagingStore } from '@/store/shootStaging'
 
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GManageShootDns from '@/components/ShootDns/GManageDns'
 
+import { useShootContext } from '@/composables/useShootContext'
+import { useShootItem } from '@/composables/useShootItem'
+
 import { errorDetailsFromError } from '@/utils/error'
-import { shootItem } from '@/mixins/shootItem'
 import { v4 as uuidv4 } from '@/utils/uuid'
 
 export default {
@@ -39,25 +39,34 @@ export default {
     GActionButtonDialog,
     GManageShootDns,
   },
-  mixins: [shootItem],
   inject: ['api', 'logger'],
   setup () {
+    const {
+      shootItem,
+      shootNamespace,
+      shootName,
+    } = useShootItem()
+
+    const {
+      dns,
+      setShootManifest,
+    } = useShootContext()
+
+    const componentKey = ref(uuidv4())
+
     return {
       v$: useVuelidate(),
-    }
-  },
-  data () {
-    return {
-      componentKey: uuidv4(),
+      shootItem,
+      shootNamespace,
+      shootName,
+      dns,
+      setShootManifest,
+      componentKey,
     }
   },
   methods: {
-    ...mapActions(useShootStagingStore, [
-      'getDnsConfiguration',
-      'setClusterConfiguration',
-    ]),
     async onConfigurationDialogOpened () {
-      this.reset()
+      this.componentKey = uuidv4() // force re-render
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
         this.updateConfiguration()
@@ -65,10 +74,11 @@ export default {
     },
     async updateConfiguration () {
       try {
-        const namespace = this.shootNamespace
-        const name = this.shootName
-        const data = this.getDnsConfiguration()
-        await this.api.updateShootDns({ namespace, name, data })
+        await this.api.updateShootDns({
+          namespace: this.shootNamespace,
+          name: this.shootName,
+          data: this.dns,
+        })
       } catch (err) {
         const errorMessage = 'Could not update DNS Configuration'
         const errorDetails = errorDetailsFromError(err)
@@ -76,10 +86,6 @@ export default {
         this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
         this.logger.error(errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
-    },
-    reset () {
-      this.setClusterConfiguration(this.shootItem)
-      this.componentKey = uuidv4() // force re-render
     },
   },
 }

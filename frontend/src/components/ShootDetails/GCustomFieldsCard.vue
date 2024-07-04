@@ -6,40 +6,48 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-card
-    v-if="customFields && customFields.length"
+    v-if="customFieldValues && customFieldValues.length"
     class="mb-4"
   >
     <g-toolbar title="Custom Fields" />
     <g-list>
       <template
-        v-for="(customField, index) in customFields"
-        :key="customField.key"
+        v-for="(field, index) in customFieldValues"
+        :key="field.key"
       >
         <v-divider
           v-if="index !== 0"
-          :key="`${customField.key}-divider`"
+          :key="`${field.key}-divider`"
           inset
         />
         <g-list-item>
           <template #prepend>
             <v-icon
-              v-if="customField.icon"
+              v-if="field.icon"
               color="primary"
             >
-              {{ customField.icon }}
+              {{ field.icon }}
             </v-icon>
           </template>
-          <g-list-item-content :label="customField.name">
+          <g-list-item-content :label="field.name">
             <v-tooltip
-              v-if="customField.tooltip"
+              v-if="field.tooltip"
               location="top"
             >
               <template #activator="{ props }">
-                <span v-bind="props">{{ customField.value }}</span>
+                <span
+                  v-bind="props"
+                  :class="{'text-disabled' : !field.value}"
+                >{{ field.displayValue }}</span>
               </template>
-              {{ customField.tooltip }}
+              {{ field.tooltip }}
             </v-tooltip>
-            <span v-else>{{ customField.value }}</span>
+            <span
+              v-else-if="field.displayValue"
+              :class="{'text-disabled' : !field.value}"
+            >
+              {{ field.displayValue }}
+            </span>
           </g-list-item-content>
         </g-list-item>
       </template>
@@ -47,13 +55,46 @@ SPDX-License-Identifier: Apache-2.0
   </v-card>
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
 
-export default {
-  props: {
-    customFields: {
-      type: Array,
-    },
-  },
-}
+import { useShootItem } from '@/composables/useShootItem'
+import { useProjectShootCustomFields } from '@/composables/useProjectShootCustomFields'
+import { useProjectItem } from '@/composables/useProjectItem'
+import { formatValue } from '@/composables/useProjectShootCustomFields/helper'
+
+import {
+  filter,
+  get,
+  map,
+} from '@/lodash'
+
+const { projectItem } = useProjectItem()
+
+const {
+  shootCustomFields,
+} = useProjectShootCustomFields(projectItem)
+
+const {
+  shootItem,
+} = useShootItem()
+
+const customFieldValues = computed(() => {
+  const customFields = filter(shootCustomFields.value, ['showDetails', true])
+  return map(customFields, ({ name, path, icon, tooltip, defaultValue }) => {
+    const value = get(shootItem.value, path)
+    const displayValue = formatValue(value, ', ') || defaultValue || 'Not defined'
+
+    return {
+      name,
+      path,
+      icon,
+      tooltip,
+      defaultValue,
+      value,
+      displayValue,
+    }
+  })
+})
+
 </script>

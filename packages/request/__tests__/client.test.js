@@ -25,8 +25,6 @@ const {
   HTTP2_HEADER_STATUS
 } = http2.constants
 
-jest.useFakeTimers('legacy')
-
 describe('Client', () => {
   const url = new URL('https://127.0.0.1:31415/test')
   const xRequestId = '4711'
@@ -36,6 +34,14 @@ describe('Client', () => {
   let agent
   let client
   let stream
+
+  beforeAll(() => {
+    jest.useFakeTimers({ legacyFakeTimers: true })
+  })
+
+  afterAll(() => {
+    jest.useRealTimers()
+  })
 
   beforeEach(() => {
     const mockBody = jest.fn().mockReturnValue({

@@ -7,6 +7,8 @@
 import {
   ref,
   computed,
+  inject,
+  provide,
 } from 'vue'
 import {
   useRouter,
@@ -15,16 +17,17 @@ import {
 
 import { useAppStore } from '@/store/app'
 import { useAuthzStore } from '@/store/authz'
+import { useShootStore } from '@/store/shoot'
 import { useLocalStorageStore } from '@/store/localStorage'
 
-import { TargetEnum } from '@/utils'
+import { useApi } from '@/composables/useApi'
+
+import utils, { TargetEnum } from '@/utils'
 
 import {
   GSymbolTree,
   Leaf,
 } from '@/lib/g-symbol-tree'
-
-import { useApi } from './useApi'
 
 import {
   every,
@@ -32,18 +35,20 @@ import {
   pick,
   filter,
   includes,
+  isEmpty,
   map,
   merge,
   cloneDeep,
   difference,
 } from '@/lodash'
 
-export const useTerminalSplitpanes = () => {
+export function createTerminalSplitpanesComposable () {
   const api = useApi()
   const router = useRouter()
   const route = useRoute()
   const authzStore = useAuthzStore()
   const appStore = useAppStore()
+  const shootStore = useShootStore()
   const localStorageStore = useLocalStorageStore()
 
   let symbolTree = new GSymbolTree()
@@ -57,6 +62,26 @@ export const useTerminalSplitpanes = () => {
 
   const terminalCoordinates = computed(() => {
     return pick(route.params, ['name', 'namespace', 'target'])
+  })
+
+  const shootItem = computed(() => {
+    return shootStore.shootByNamespaceAndName(terminalCoordinates.value)
+  })
+
+  const shootNamespace = computed(() => {
+    return get(terminalCoordinates.value, 'namespace')
+  })
+
+  const shootName = computed(() => {
+    return get(terminalCoordinates.value, 'name')
+  })
+
+  const hasShootWorkerGroups = computed(() => {
+    return !isEmpty(get(shootItem.value, 'spec.provider.workers', []))
+  })
+
+  const isShootStatusHibernated = computed(() => {
+    return utils.isShootStatusHibernated(get(shootItem.value, 'status'))
   })
 
   const slotItemUUIds = computed(() => {
@@ -217,9 +242,14 @@ export const useTerminalSplitpanes = () => {
   }
 
   return {
+    terminalCoordinates,
+    shootItem,
+    shootNamespace,
+    shootName,
+    hasShootWorkerGroups,
+    isShootStatusHibernated,
     splitpaneTree,
     newTerminalPrompt,
-    terminalCoordinates,
     defaultTarget,
     add,
     setSelections,
@@ -231,4 +261,14 @@ export const useTerminalSplitpanes = () => {
     leavePage,
     isTreeEmpty,
   }
+}
+
+export function useTerminalSplitpanes () {
+  return inject('terminal-splitpanes', null)
+}
+
+export function useProvideTerminalSplitpanes () {
+  const terminalSplitpanesComposable = createTerminalSplitpanesComposable()
+  provide('terminal-splitpanes', terminalSplitpanesComposable)
+  return terminalSplitpanesComposable
 }

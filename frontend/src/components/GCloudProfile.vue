@@ -8,16 +8,15 @@ SPDX-License-Identifier: Apache-2.0
   <div>
     <template v-if="createMode">
       <v-select
+        v-model="v$.internalValue.$model"
         :items="cloudProfiles"
-        :model-value="modelValue"
         item-value="metadata.name"
         item-title="metadata.displayName"
         label="Cloud Profile"
-        :error-messages="getErrorMessages(v$.modelValue)"
+        :error-messages="getErrorMessages(v$.internalValue)"
         color="primary"
         variant="underlined"
-        @update:model-value="onInput"
-        @blur="v$.modelValue.$touch()"
+        @blur="v$.internalValue.$touch()"
       />
     </template>
     <template v-else>
@@ -61,16 +60,22 @@ export default {
   },
   validations () {
     return {
-      modelValue: withFieldName('Cloud Profile', {
+      internalValue: withFieldName('Cloud Profile', {
         required,
       }),
     }
   },
-  methods: {
-    onInput (modelValue) {
-      this.v$.modelValue.$touch()
-      this.$emit('update:modelValue', modelValue)
+  computed: {
+    internalValue: {
+      get () {
+        return this.modelValue
+      },
+      set (value) {
+        this.$emit('update:modelValue', value)
+      },
     },
+  },
+  methods: {
     getErrorMessages,
   },
 }

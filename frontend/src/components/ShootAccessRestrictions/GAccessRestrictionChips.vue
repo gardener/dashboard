@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div
-    v-for="{ key, title, description, options: optionsList } in props.selectedAccessRestrictions"
+    v-for="{ key, title, description, options: optionsList } in props.accessRestrictions"
     :key="key"
     class="d-flex"
   >
@@ -39,8 +39,8 @@ SPDX-License-Identifier: Apache-2.0
       {{ options.title }}
       <v-tooltip
         activator="parent"
-        :disabled="!options.description"
         location="top"
+        :disabled="!options.description"
         max-width="600px"
       >
         <!-- eslint-disable-next-line vue/no-v-html -->
@@ -54,7 +54,7 @@ SPDX-License-Identifier: Apache-2.0
 import { transformHtml } from '@/utils'
 
 const props = defineProps({
-  selectedAccessRestrictions: {
+  accessRestrictions: {
     type: Array,
   },
 })

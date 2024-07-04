@@ -2,9 +2,8 @@
 SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
- -->
+-->
 
-<!-- eslint-disable vuetify/no-deprecated-components -->
 <template>
   <v-container fluid>
     <v-row no-gutters>
@@ -203,55 +202,55 @@ SPDX-License-Identifier: Apache-2.0
                     <!-- eslint-enable vue/no-v-html -->
                   </g-list-item>
                 </template>
-                <template v-if="shootCustomFieldList">
-                  <v-divider inset />
-                  <g-list-item>
-                    <template #prepend>
-                      <v-icon :color="color">
-                        mdi-playlist-star
-                      </v-icon>
-                    </template>
-                    <div class="text-body-2 text-medium-emphasis">
-                      Custom Fields for Shoots
-                    </div>
-                    <div class="text-body-1 d-flex flex-wrap align-center pt-1">
-                      <g-shoot-custom-field
-                        v-for="{
-                          key,
-                          name,
-                          path,
-                          icon,
-                          tooltip,
-                          defaultValue,
-                          showColumn,
-                          weight,
-                          columnSelectedByDefault,
-                          showDetails,
-                          searchable,
-                          sortable
-                        } in shootCustomFieldList"
-                        :key="key"
-                        class="mr-2 mb-2"
-                        :color="color"
-                        :name="name"
-                        :path="path"
-                        :icon="icon"
-                        :tooltip="tooltip"
-                        :default-value="defaultValue"
-                        :show-column="showColumn"
-                        :weight="weight"
-                        :column-selected-by-default="columnSelectedByDefault"
-                        :show-details="showDetails"
-                        :searchable="searchable"
-                        :sortable="sortable"
-                      />
-                      <span
-                        v-if="!shootCustomFieldList || !shootCustomFieldList.length"
-                        class="font-weight-light text-disabled"
-                      >Not defined</span>
-                    </div>
-                  </g-list-item>
-                </template>
+                <v-divider inset />
+                <g-list-item>
+                  <template #prepend>
+                    <v-icon :color="color">
+                      mdi-playlist-star
+                    </v-icon>
+                  </template>
+                  <div class="text-body-2 text-medium-emphasis">
+                    Custom Fields for Shoots
+                  </div>
+                  <div class="text-body-1 d-flex flex-wrap align-center pt-1">
+                    <g-shoot-custom-field
+                      v-for="{
+                        name,
+                        path,
+                        icon,
+                        tooltip,
+                        defaultValue,
+                        showColumn,
+                        weight,
+                        columnSelectedByDefault,
+                        showDetails,
+                        searchable,
+                        sortable
+                      } in shootCustomFields"
+                      :key="name"
+                      class="mr-2 mb-2"
+                      :color="color"
+                      :name="name"
+                      :path="path"
+                      :icon="icon"
+                      :tooltip="tooltip"
+                      :default-value="defaultValue"
+                      :show-column="showColumn"
+                      :weight="weight"
+                      :column-selected-by-default="columnSelectedByDefault"
+                      :show-details="showDetails"
+                      :searchable="searchable"
+                      :sortable="sortable"
+                    />
+                    <span
+                      v-if="!shootCustomFields?.length"
+                      class="font-weight-light text-disabled"
+                    >Not defined</span>
+                  </div>
+                  <template #append>
+                    <g-shoot-custom-fields-configuration />
+                  </template>
+                </g-list-item>
               </g-list>
             </v-card>
           </v-col>
@@ -469,7 +468,7 @@ SPDX-License-Identifier: Apache-2.0
     </v-row>
 
     <g-dialog
-      ref="gDialog"
+      ref="refGDialog"
       v-model:error-message="errorMessage"
       v-model:detailed-error-message="detailedErrorMessage"
       width="600"
@@ -488,24 +487,31 @@ SPDX-License-Identifier: Apache-2.0
   </v-container>
 </template>
 
-<script>
+<script setup>
 import {
-  mapState,
-  mapActions,
-} from 'pinia'
+  ref,
+  computed,
+  watch,
+  toRef,
+} from 'vue'
+import { storeToRefs } from 'pinia'
+import {
+  useRoute,
+  useRouter,
+} from 'vue-router'
 import {
   required,
   helpers,
 } from '@vuelidate/validators'
 
 import { useAppStore } from '@/store/app'
-import { useAuthzStore } from '@/store/authz'
 import { useConfigStore } from '@/store/config'
 import { useQuotaStore } from '@/store/quota'
-import { useKubeconfigStore } from '@/store/kubeconfig'
 import { useProjectStore } from '@/store/project'
 import { useShootStore } from '@/store/shoot'
 import { useMemberStore } from '@/store/member'
+import { useAuthzStore } from '@/store/authz'
+import { useKubeconfigStore } from '@/store/kubeconfig'
 
 import GList from '@/components/GList.vue'
 import GListItem from '@/components/GListItem.vue'
@@ -517,15 +523,18 @@ import GAccountAvatar from '@/components/GAccountAvatar.vue'
 import GDialog from '@/components/dialogs/GDialog.vue'
 import GTimeString from '@/components/GTimeString.vue'
 import GShootCustomField from '@/components/GShootCustomField.vue'
+import GShootCustomFieldsConfiguration from '@/components/GShootCustomFieldsConfiguration.vue'
 import GResourceQuotaHelp from '@/components/GResourceQuotaHelp.vue'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
+
+import { useProvideProjectItem } from '@/composables/useProjectItem'
+import { useProvideProjectContext } from '@/composables/useProjectContext'
+import { useLogger } from '@/composables/useLogger'
 
 import { withMessage } from '@/utils/validators'
 import {
   transformHtml,
-  getProjectDetails,
   isServiceAccountUsername,
-  gravatarUrlGeneric,
   getDateFormatted,
 } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
@@ -537,272 +546,184 @@ import {
   isEmpty,
 } from '@/lodash'
 
-export default {
-  components: {
-    GList,
-    GListItem,
-    GToolbar,
-    GCopyBtn,
-    GEditableAccount,
-    GEditableText,
-    GAccountAvatar,
-    GDialog,
-    GTimeString,
-    GShootCustomField,
-    GResourceQuotaHelp,
-    GTextRouterLink,
-  },
-  inject: ['logger'],
-  data () {
-    return {
-      color: 'primary',
-      edit: false,
-      editOwner: false,
-      ownerMessages: [],
-      errorMessage: undefined,
-      detailedErrorMessage: undefined,
+const logger = useLogger()
+const appStore = useAppStore()
+const configStore = useConfigStore()
+const quotaStore = useQuotaStore()
+const projectStore = useProjectStore()
+const shootStore = useShootStore()
+const memberStore = useMemberStore()
+const authzStore = useAuthzStore()
+const kubeconfigStore = useKubeconfigStore()
+
+const route = useRoute()
+const router = useRouter()
+
+useProvideProjectContext()
+
+const color = ref('primary')
+const errorMessage = ref(undefined)
+const detailedErrorMessage = ref(undefined)
+const refGDialog = ref(null)
+
+const projectItem = toRef(projectStore, 'project')
+const {
+  projectName,
+  shootCustomFields,
+  projectOwner: owner,
+  projectCostObject: costObject,
+  projectCreationTimestamp: creationTimestamp,
+  projectCreatedBy: createdBy,
+  projectDescription: description,
+  projectPurpose: purpose,
+  projectStaleSinceTimestamp: staleSinceTimestamp,
+  projectStaleAutoDeleteTimestamp: staleAutoDeleteTimestamp,
+} = useProvideProjectItem(projectItem)
+
+const {
+  namespace,
+  canPatchProject,
+  canManageMembers,
+  canDeleteProject,
+} = storeToRefs(authzStore)
+const isKubeconfigEnabled = toRef(kubeconfigStore, 'isKubeconfigEnabled')
+const projectQuotaStatus = toRef(quotaStore, 'projectQuotaStatus')
+
+const userList = computed(() => {
+  const members = new Set()
+  for (const { username } of memberStore.memberList) {
+    if (!isServiceAccountUsername(username)) {
+      members.add(username)
+    }
+  }
+  if (owner.value) {
+    members.add(owner.value)
+  }
+  return Array.from(members)
+})
+const costObjectSettingEnabled = computed(() => !isEmpty(configStore.costObjectSettings))
+const costObjectDescriptionHtml = computed(() => transformHtml(get(configStore.costObjectSettings, 'description')))
+const costObjectRules = computed(() => {
+  const pattern = get(configStore.costObjectSettings, 'regex', '[^]*')
+
+  return {
+    projectCostObject: withMessage(
+      () => get(configStore.costObjectSettings, 'errorMessage', ''),
+      helpers.regex(new RegExp(pattern)),
+    ),
+  }
+})
+const ownerRules = computed(() => {
+  const userListIncludesValidator = helpers.withParams(
+    { type: 'userListIncludes' },
+    value => includes(userList.value, value),
+  )
+  return {
+    required: withMessage('Owner is required', required),
+    userListIncludes: withMessage('Owner must be a project member', userListIncludesValidator),
+  }
+})
+
+const staleAutoDeleteDate = computed(() => getDateFormatted(staleAutoDeleteTimestamp.value))
+const isDeleteButtonDisabled = computed(() => shootStore.shootList.length > 0)
+const slaDescriptionHtml = computed(() => transformHtml(configStore.sla.description))
+const slaTitle = computed(() => configStore.sla.title)
+
+watch(
+  () => route.params,
+  async () => {
+    try {
+      await quotaStore.fetchQuotas(namespace.value)
+    } catch (err) {
+      appStore.setError(`Failed to fetch project quota: ${err.message}`)
     }
   },
-  computed: {
-    ...mapState(useConfigStore, [
-      'sla',
-      'costObjectSettings',
-    ]),
-    ...mapState(useAuthzStore, [
-      'namespace',
-      'canPatchProject',
-      'canManageMembers',
-      'canDeleteProject',
-    ]),
-    ...mapState(useKubeconfigStore, [
-      'isKubeconfigEnabled',
-    ]),
-    ...mapState(useProjectStore, [
-      'projectList',
-      'project',
-      'shootCustomFieldList',
-    ]),
-    ...mapState(useMemberStore, [
-      'memberList',
-    ]),
-    ...mapState(useShootStore, [
-      'shootList',
-    ]),
-    ...mapState(useQuotaStore, [
-      'projectQuotaStatus',
-    ]),
-    projectDetails () {
-      return getProjectDetails(this.project)
-    },
-    userList () {
-      const members = new Set()
-      for (const { username } of this.memberList) {
-        if (!isServiceAccountUsername(username)) {
-          members.add(username)
-        }
-      }
-      if (this.owner) {
-        members.add(this.owner)
-      }
-      return Array.from(members)
-    },
-    costObjectSettingEnabled () {
-      return !isEmpty(this.costObjectSettings)
-    },
-    costObjectTitle () {
-      return get(this.costObjectSettings, 'title')
-    },
-    costObjectDescriptionHtml () {
-      const description = get(this.costObjectSettings, 'description')
-      return transformHtml(description)
-    },
-    costObjectRules () {
-      return {
-        costObject: this.getCostObjectValidator(),
-      }
-    },
-    projectName () {
-      return this.projectDetails.projectName
-    },
-    owner () {
-      return this.projectDetails.owner
-    },
-    ownerRules () {
-      const userListIncludesValidator = helpers.withParams(
-        { type: 'userListIncludes' },
-        value => {
-          return includes(this.userList, value)
-        },
-      )
-      return {
-        required: withMessage('Owner is required', required),
-        userListIncludes: withMessage('Owner must be a project member', userListIncludesValidator),
-      }
-    },
-    ownerAvatarUrl () {
-      return gravatarUrlGeneric(this.owner, 48)
-    },
-    costObject () {
-      return this.projectDetails.costObject
-    },
-    createdAt () {
-      return this.projectDetails.createdAt
-    },
-    creationTimestamp () {
-      return this.projectDetails.creationTimestamp
-    },
-    createdBy () {
-      return this.projectDetails.createdBy
-    },
-    description () {
-      return this.projectDetails.description
-    },
-    purpose () {
-      return this.projectDetails.purpose
-    },
-    staleSinceTimestamp () {
-      return this.projectDetails.staleSinceTimestamp
-    },
-    staleAutoDeleteTimestamp () {
-      return this.projectDetails.staleAutoDeleteTimestamp
-    },
-    staleAutoDeleteDate () {
-      return getDateFormatted(this.staleAutoDeleteTimestamp)
-    },
-    isDeleteButtonDisabled () {
-      return this.shootList.length > 0
-    },
-    slaDescriptionHtml () {
-      return transformHtml(this.sla.description)
-    },
-    slaTitle () {
-      return this.sla.title
-    },
-  },
-  created () {
-    // see https://router.vuejs.org/guide/advanced/data-fetching.html#fetching-after-navigation
-    this.$watch(
-      () => this.$route.params,
-      async () => {
-        try {
-          await this.fetchQuotas(this.project.metadata.namespace)
-        } catch (err) {
-          this.setError(`Failed to fetch project quota: ${err.message}`)
-        }
-      },
-      { immediate: true },
-    )
-  },
-  methods: {
-    ...mapActions(useAppStore, [
-      'setError',
-    ]),
-    ...mapActions(useProjectStore, [
-      'patchProject',
-      'deleteProject',
-    ]),
-    ...mapActions(useQuotaStore, [
-      'fetchQuotas',
-    ]),
-    getCostObjectValidator () {
-      const pattern = get(this.costObjectSettings, 'regex', '[^]*')
-      return withMessage(
-        () => get(this.costObjectSettings, 'errorMessage'),
-        helpers.regex(new RegExp(pattern)),
-      )
-    },
-    onEditOwner () {
-      this.editOwner = !this.editOwner
-      if (this.editOwner) {
-        this.$nextTick(() => this.$refs.owner.activateMenu())
-      }
-    },
-    updateOwner (value) {
-      return this.updateProperty('owner', value)
-    },
-    updateDescription (value) {
-      if (!value) {
-        value = null
-      }
-      return this.updateProperty('description', value)
-    },
-    updatePurpose (value) {
-      if (!value) {
-        value = null
-      }
-      return this.updateProperty('purpose', value)
-    },
-    updateCostObject (value) {
-      if (this.costObjectSettingEnabled) {
-        if (!value) {
-          value = null
-        }
-        return this.updateProperty('costObject', value, {
-          error: 'Failed to update billing information of project',
-        })
-      }
-    },
-    async updateProperty (key, value, options = {}) {
-      const { metadata: { name, namespace } } = this.project
-      try {
-        const mergePatchDocument = {
-          metadata: { name, namespace },
-        }
-        switch (key) {
-          case 'costObject':
-            set(mergePatchDocument, ['metadata', 'annotations', 'billing.gardener.cloud/costObject'], value)
-            break
-          default:
-            set(mergePatchDocument, ['data', key], value)
-            break
-        }
-        // eslint-disable-next-line no-unused-vars
-        const body = await this.patchProject(mergePatchDocument)
-      } catch (err) {
-        const { error = `Failed to update project ${key}` } = options
-        throw Object.assign(new Error(error), errorDetailsFromError(err))
-      }
-    },
-    async showDialog () {
-      this.$refs.gDialog.showDialog()
+  { immediate: true },
+)
 
-      const confirmed = await this.$refs.gDialog.confirmWithDialog()
-      if (confirmed) {
-        try {
-          await this.deleteProject(this.project)
-          if (this.projectList.length > 0) {
-            const p1 = this.projectList[0]
-            this.$router.push({ name: 'ShootList', params: { namespace: p1.metadata.namespace } })
-          } else {
-            this.$router.push({ name: 'Home', params: { } })
-          }
-        } catch (err) {
-          const errorDetails = errorDetailsFromError(err)
-          this.errorMessage = 'Failed to delete project'
-          this.detailedErrorMessage = errorDetails.detailedMessage
-          this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-          this.showDialog()
-        }
+function updateOwner (value) {
+  return updateProperty('owner', value)
+}
+
+function updateDescription (value) {
+  if (!value) {
+    value = null
+  }
+  return updateProperty('description', value)
+}
+
+function updatePurpose (value) {
+  if (!value) {
+    value = null
+  }
+  return updateProperty('purpose', value)
+}
+
+function updateCostObject (value) {
+  if (costObjectSettingEnabled.value) {
+    if (!value) {
+      value = null
+    }
+    return updateProperty('costObject', value, {
+      error: 'Failed to update billing information of project',
+    })
+  }
+}
+
+async function updateProperty (key, value, options = {}) {
+  const { metadata: { name, namespace } } = projectStore.project
+  try {
+    const mergePatchDocument = {
+      metadata: { name, namespace },
+    }
+    switch (key) {
+      case 'costObject':
+        set(mergePatchDocument, ['metadata', 'annotations', 'billing.gardener.cloud/costObject'], value)
+        break
+      default:
+        set(mergePatchDocument, ['data', key], value)
+        break
+    }
+    await projectStore.patchProject(mergePatchDocument)
+  } catch (err) {
+    const { error = `Failed to update project ${key}` } = options
+    throw Object.assign(new Error(error), errorDetailsFromError(err))
+  }
+}
+
+async function showDialog () {
+  refGDialog.value.showDialog()
+
+  const confirmed = await refGDialog.value.confirmWithDialog()
+  if (confirmed) {
+    try {
+      await projectStore.deleteProject(projectStore.project)
+      if (projectStore.projectList.length > 0) {
+        const p1 = projectStore.projectList[0]
+        router.push({ name: 'ShootList', params: { namespace: p1.metadata.namespace } })
+      } else {
+        router.push({ name: 'Home', params: {} })
       }
-    },
-    reset () {
-      this.errorMessage = undefined
-      this.detailedMessage = undefined
-      this.edit = false
-    },
-  },
+    } catch (err) {
+      const errorDetails = errorDetailsFromError(err)
+      errorMessage.value = 'Failed to delete project'
+      detailedErrorMessage.value = errorDetails.detailedMessage
+      logger.error(errorMessage.value, errorDetails.errorCode, errorDetails.detailedMessage, err)
+      showDialog()
+    }
+  }
 }
 </script>
 
 <style lang="scss" scoped>
-  .markdown {
-    :deep(> p) {
-      margin: 0px;
-    }
+.markdown {
+  :deep(> p) {
+    margin: 0px;
   }
-  .wrap-text {
-    line-height: inherit;
-    overflow: auto !important;
-    white-space: normal !important;
-  }
+}
+.wrap-text {
+  line-height: inherit;
+  overflow: auto !important;
+  white-space: normal !important;
+}
 </style>

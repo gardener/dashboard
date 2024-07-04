@@ -90,13 +90,13 @@ import { trim } from '@/lodash'
 
 export default {
   props: {
+    modelValue: {
+      type: String,
+    },
     wildcardSelectItems: {
       type: Array,
     },
     wildcardSelectLabel: {
-      type: String,
-    },
-    modelValue: {
       type: String,
     },
   },

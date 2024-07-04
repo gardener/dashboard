@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <div>
     <v-select
       ref="secret"
-      v-model="secret"
+      v-model="v$.internalValue.$model"
       color="primary"
       item-color="primary"
       label="Secret"
@@ -17,12 +17,11 @@ SPDX-License-Identifier: Apache-2.0
       item-value="metadata.name"
       item-title="metadata.name"
       return-object
-      :error-messages="getErrorMessages(v$.secret)"
+      :error-messages="getErrorMessages(v$.internalValue)"
       persistent-hint
       :hint="secretHint"
       variant="underlined"
-      @update:model-value="v$.secret.$touch()"
-      @blur="v$.secret.$touch()"
+      @blur="v$.internalValue.$touch()"
     >
       <template #item="{ item, props }">
         <v-list-item
@@ -80,7 +79,7 @@ import { useProjectStore } from '@/store/project'
 import GSecretDialogWrapper from '@/components/Secrets/GSecretDialogWrapper'
 
 import {
-  requiresCostObjectIfEnabled,
+  withParams,
   withMessage,
   withFieldName,
 } from '@/utils/validators'
@@ -118,13 +117,18 @@ export default {
     dnsProviderKind: {
       type: String,
     },
+    registerVuelidateAs: {
+      type: String,
+    },
   },
   emits: [
     'update:modelValue',
   ],
-  setup () {
+  setup (props) {
     return {
-      v$: useVuelidate(),
+      v$: useVuelidate({
+        $registerAs: props.registerVuelidateAs,
+      }),
     }
   },
   data () {
@@ -134,32 +138,47 @@ export default {
     }
   },
   validations () {
-    const requiresCostObjectIfEnabledMessage = () => {
-      const projectName = get(this.secret, 'metadata.projectName')
-      const isSecretInProject = this.projectName === projectName
-      return isSecretInProject
-        ? `${this.costObjectTitle} is required. Go to the ADMINISTRATION page to edit the project and set the ${this.costObjectTitle}.`
-        : `${this.costObjectTitle} is required and has to be set on the Project ${toUpper(this.projectName)}`
+    const projectName = this.projectName
+    const costObjectTitle = this.costObjectTitle
+
+    const messageFn = ({ $model }) => {
+      return projectName === get($model, 'metadata.projectName')
+        ? `${costObjectTitle} is required. Go to the ADMINISTRATION page to edit the project and set the ${costObjectTitle}.`
+        : `${costObjectTitle} is required and has to be set on the Project ${toUpper(projectName)}`
     }
+
+    const requiresCostObjectIfEnabled = (enabled = false) => withParams(
+      { type: 'requiresCostObjectIfEnabled', enabled },
+      function requiresCostObjectIfEnabled (value) {
+        return enabled
+          ? get(value, 'metadata.hasCostObject', false)
+          : true
+      },
+    )
+
     return {
-      secret: withFieldName('Secret', {
+      internalValue: withFieldName('Secret', {
         required,
-        requiresCostObjectIfEnabled: withMessage(requiresCostObjectIfEnabledMessage(), requiresCostObjectIfEnabled),
+        requiresCostObjectIfEnabled: withMessage(messageFn, requiresCostObjectIfEnabled(this.costObjectSettingEnabled)),
       }),
     }
   },
   computed: {
-    ...mapState(useConfigStore, ['costObjectSettings']),
-    ...mapState(useAuthzStore, ['namespace']),
+    ...mapState(useConfigStore, [
+      'costObjectSettings',
+    ]),
+    ...mapState(useAuthzStore, [
+      'namespace',
+    ]),
     projectName () {
       return this.projectNameByNamespace(this.namespace)
     },
-    secret: {
+    internalValue: {
       get () {
         return this.modelValue
       },
-      set (modelValue) {
-        this.$emit('update:modelValue', modelValue)
+      set (value) {
+        this.$emit('update:modelValue', value)
       },
     },
     secretList () {
@@ -199,16 +218,11 @@ export default {
       return get(this.costObjectSettings, 'title')
     },
     selfTerminationDays () {
-      return selfTerminationDaysForSecret(this.secret)
-    },
-  },
-  watch: {
-    modelValue () {
-      this.v$.secret.$touch() // secret may not be valid (e.g. missing cost object). We want to show the error immediatley
+      return selfTerminationDaysForSecret(this.internalValue)
     },
   },
   mounted () {
-    this.v$.secret.$touch()
+    this.v$.internalValue.$touch()
   },
   methods: {
     ...mapActions(useCloudProfileStore, [
@@ -229,9 +243,9 @@ export default {
     },
     onSecretDialogClosed () {
       this.visibleSecretDialog = undefined
-      const newSecret = head(differenceWith(this.secretList, this.secretItemsBeforeAdd, isEqual))
-      if (newSecret) {
-        this.secret = newSecret
+      const value = head(differenceWith(this.secretList, this.secretItemsBeforeAdd, isEqual))
+      if (value) {
+        this.internalValue = value
       }
     },
     getErrorMessages,

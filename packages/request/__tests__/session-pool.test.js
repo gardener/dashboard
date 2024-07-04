@@ -14,8 +14,6 @@ const SessionId = require('../lib/SessionId')
 const SessionPool = require('../lib/SessionPool')
 const { StreamError } = require('../lib/errors')
 
-jest.useFakeTimers('legacy')
-
 const { getOwnSymbolProperty } = fixtures.helper
 const {
   NGHTTP2_CANCEL,
@@ -89,6 +87,14 @@ describe('SessionPool', () => {
   let mockHttp2Connect
   let requestHeaders
   let responseHeaders
+
+  beforeAll(() => {
+    jest.useFakeTimers({ legacyFakeTimers: true })
+  })
+
+  afterAll(() => {
+    jest.useRealTimers()
+  })
 
   beforeEach(() => {
     requestHeaders = {}

@@ -44,16 +44,12 @@ SPDX-License-Identifier: Apache-2.0
         </v-tabs>
         <v-window
           v-model="loginType"
-          :style="{
-            height: `${windowHeight}px`,
-          }"
+          :style="windowItemStyle"
         >
           <v-window-item
             value="oidc"
             class="pa-3"
-            style="{
-              height: `${windowHeight}px`,
-            }"
+            style="windowItemStyle"
           >
             <!-- eslint-disable vue/no-v-html -->
             <div
@@ -65,9 +61,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-window-item
             value="token"
             class="pa-3"
-            style="{
-              height: `${windowHeight}px`,
-            }"
+            style="windowItemStyle"
           >
             <!-- eslint-disable vue/no-v-html -->
             <div
@@ -180,16 +174,25 @@ export default {
     next(vm => {
       if (err) {
         if (err.message !== 'NoAutoLogin') {
-          vm.setError(err)
+          vm.error = err
         }
         vm.$router.replace('/login')
       }
     })
   },
+  beforeRouteUpdate (to, from, next) {
+    if (this.error) {
+      const err = this.error
+      this.error = null
+      this.setError(err)
+    }
+    next()
+  },
   data () {
     return {
       showToken: false,
       token: '',
+      error: null,
     }
   },
   computed: {
@@ -230,6 +233,11 @@ export default {
     },
     windowItemHeight () {
       return this.windowHeight - 24
+    },
+    windowItemStyle () {
+      return {
+        height: `${this.windowHeight}px`,
+      }
     },
     appHeight () {
       return this.totalTeaserHeight + 2 * this.footerHeight
