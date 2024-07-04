@@ -1,1 +1,0 @@
-europe-docker.pkg.dev/gardener-project/snapshots/gardener/dashboard:1.76.0-dev-d752df12003dc165dcb2d75ca98b7ad3333674e7
