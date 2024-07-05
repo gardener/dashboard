@@ -7,10 +7,6 @@
 import { Base64 } from 'js-base64'
 import semver from 'semver'
 import {
-  computed,
-  isRef,
-  isProxy,
-  toRef,
   unref,
   nextTick,
 } from 'vue'
@@ -303,6 +299,7 @@ export function getIssueSince (shootStatus) {
   return head(issueTimestamps.sort())
 }
 
+// TODO drop this function and useProjectItem composable instead
 export function getProjectDetails (project = {}) {
   const projectData = project.data || {}
   const projectMetadata = project.metadata || {}
@@ -689,18 +686,6 @@ export function normalizeVersion (version) {
   }
 }
 
-export function toProperties (state) {
-  if (isRef(state)) {
-    return args => Array.isArray(args)
-      ? computed(() => get(state.value, ...args))
-      : computed(() => get(state.value, args))
-  }
-  if (isProxy(state)) {
-    return (path, key) => toRef(state, key)
-  }
-  throw new TypeError('Argument `state` must be a proxy or ref object')
-}
-
 export default {
   emailToDisplayName,
   handleTextFieldDrop,
@@ -761,5 +746,4 @@ export default {
   omitKeysWithSuffix,
   parseNumberWithMagnitudeSuffix,
   normalizeVersion,
-  toProperties,
 }

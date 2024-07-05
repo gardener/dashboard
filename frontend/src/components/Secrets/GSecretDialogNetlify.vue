@@ -10,7 +10,6 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :secret-validations="v$"
     :secret="secret"
-    vendor="netlify-dns"
     create-title="Add new Netlify Secret"
     replace-title="Replace Netlify Secret"
   >
@@ -43,7 +42,8 @@ SPDX-License-Identifier: Apache-2.0
           <pre>$ echo -n '1234567890123456789' | base64</pre>
         </p>
         <p>
-          For details see <g-external-link url="https://docs.netlify.com/cli/get-started/#obtain-a-token-in-the-netlify-ui" />
+          For details see
+          <g-external-link url="https://docs.netlify.com/cli/get-started/#obtain-a-token-in-the-netlify-ui" />
         </p>
       </div>
     </template>
@@ -116,19 +116,7 @@ export default {
       return !this.secret
     },
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-      }
-    },
-  },
   methods: {
-    reset () {
-      this.v$.$reset()
-
-      this.apiToken = ''
-    },
     getErrorMessages,
   },
 }

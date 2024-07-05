@@ -21,7 +21,7 @@ import {
   isSessionExpiredError,
 } from '@/utils/errors'
 
-export const COOKIE_HEADER_PAYLOAD = 'gHdrPyl'
+export const COOKIE_HEADER_PAYLOAD = '__Host-gHdrPyl'
 const CLOCK_TOLERANCE = 15
 
 function now () {

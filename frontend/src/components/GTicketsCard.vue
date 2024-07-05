@@ -85,7 +85,7 @@ export default {
       shootCloudProviderKind,
       shootRegion,
       shootSeedName,
-      shootSelectedAccessRestrictions,
+      shootAccessRestrictions,
     } = useShootItem()
 
     return {
@@ -97,7 +97,7 @@ export default {
       shootCloudProviderKind,
       shootRegion,
       shootSeedName,
-      shootSelectedAccessRestrictions,
+      shootAccessRestrictions,
     }
   },
   computed: {
@@ -143,7 +143,7 @@ export default {
         projectName: this.shootProjectName,
         utcDateTimeNow: moment().utc().format(),
         seedName: this.shootSeedName,
-        accessRestrictions: this.shootSelectedAccessRestrictions,
+        accessRestrictions: this.shootAccessRestrictions,
       }
 
       const baseUrl = new URL(this.gitHubRepoUrl)

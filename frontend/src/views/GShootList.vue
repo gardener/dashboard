@@ -230,7 +230,7 @@ SPDX-License-Identifier: Apache-2.0
 import {
   ref,
   provide,
-  defineAsyncComponent,
+  toRef,
 } from 'vue'
 import {
   mapState,
@@ -253,6 +253,10 @@ import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
 import GIconBase from '@/components/icons/GIconBase.vue'
 import GCertifiedKubernetes from '@/components/icons/GCertifiedKubernetes.vue'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
+import GShootAccessCard from '@/components/ShootDetails/GShootAccessCard.vue'
+
+import { useProjectShootCustomFields } from '@/composables/useProjectShootCustomFields'
+import { isCustomField } from '@/composables/useProjectShootCustomFields/helper'
 
 import { mapTableHeader } from '@/utils'
 
@@ -265,7 +269,6 @@ import {
   map,
   some,
   sortBy,
-  startsWith,
   upperCase,
 } from '@/lodash'
 
@@ -274,7 +277,7 @@ export default {
     GToolbar,
     GShootListRow,
     GShootListProgress,
-    GShootAccessCard: defineAsyncComponent(() => import('@/components/ShootDetails/GShootAccessCard.vue')),
+    GShootAccessCard,
     GIconBase,
     GCertifiedKubernetes,
     GTableColumnSelection,
@@ -298,10 +301,19 @@ export default {
     next()
   },
   setup () {
+    const projectStore = useProjectStore()
+
     const activePopoverKey = ref('')
     provide('activePopoverKey', activePopoverKey)
+
+    const projectItem = toRef(projectStore, 'project')
+    const {
+      shootCustomFields,
+    } = useProjectShootCustomFields(projectItem)
+
     return {
       activePopoverKey,
+      shootCustomFields,
     }
   },
   data () {
@@ -335,8 +347,6 @@ export default {
     }),
     ...mapState(useProjectStore, [
       'projectName',
-      'shootCustomFieldList',
-      'shootCustomFields',
     ]),
     ...mapState(useSocketStore, [
       'connected',
@@ -576,7 +586,7 @@ export default {
     },
     customHeaders () {
       const isSortable = value => value && !this.focusModeInternal
-      const customHeaders = filter(this.shootCustomFieldList, ['showColumn', true])
+      const customHeaders = filter(this.shootCustomFields, ['showColumn', true])
 
       return map(customHeaders, ({
         align = 'left',
@@ -747,7 +757,7 @@ export default {
   },
   watch: {
     sortBy (sortBy) {
-      if (some(sortBy, value => startsWith(value.key, 'Z_'))) {
+      if (some(sortBy, value => isCustomField(value.key))) {
         this.shootCustomSortBy = sortBy
       } else {
         this.shootCustomSortBy = null // clear project specific options

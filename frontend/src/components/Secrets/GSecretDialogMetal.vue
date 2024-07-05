@@ -10,7 +10,6 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :secret-validations="v$"
     :secret="secret"
-    vendor="metal"
     create-title="Add new Metal Secret"
     replace-title="Replace Metal Secret"
   >
@@ -62,10 +61,7 @@ import {
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 
-import {
-  getErrorMessages,
-  setDelayedInputFocus,
-} from '@/utils'
+import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
 
 export default {
@@ -129,24 +125,7 @@ export default {
       return !this.secret
     },
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-      }
-    },
-  },
   methods: {
-    reset () {
-      this.v$.$reset()
-
-      this.apiHmac = ''
-      this.apiUrl = ''
-
-      if (!this.isCreateMode) {
-        setDelayedInputFocus(this, 'apiUrl')
-      }
-    },
     getErrorMessages,
   },
 }

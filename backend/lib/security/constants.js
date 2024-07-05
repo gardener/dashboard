@@ -6,10 +6,13 @@
 
 'use strict'
 
+const HOST_PREFIX = '__Host-'
+
 module.exports = {
-  COOKIE_HEADER_PAYLOAD: 'gHdrPyl',
-  COOKIE_SIGNATURE: 'gSgn',
-  COOKIE_TOKEN: 'gTkn',
-  COOKIE_CODE_VERIFIER: 'gCdVrfr',
-  GARDENER_AUDIENCE: 'gardener'
+  GARDENER_AUDIENCE: 'gardener',
+  COOKIE_HEADER_PAYLOAD: HOST_PREFIX + 'gHdrPyl',
+  COOKIE_SIGNATURE: HOST_PREFIX + 'gSgn',
+  COOKIE_TOKEN: HOST_PREFIX + 'gTkn',
+  COOKIE_CODE_VERIFIER: HOST_PREFIX + 'gCdVrfr',
+  COOKIE_STATE: HOST_PREFIX + 'gStt'
 }

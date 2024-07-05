@@ -59,7 +59,7 @@ const shootCompletions = {
   },
 }
 
-describe('composable', () => {
+describe('composables', () => {
   describe('useShootEditor', () => {
     describe('EditorCompletions', () => {
       let editor

@@ -1,0 +1,62 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`useProjectShootCustomFields > should add a custom field 1`] = `
+[
+  {
+    "columnSelectedByDefault": true,
+    "name": "Field1",
+    "path": "path1",
+    "searchable": true,
+    "showColumn": true,
+    "showDetails": true,
+    "sortable": true,
+    "weight": 0,
+  },
+]
+`;
+
+exports[`useProjectShootCustomFields > should ensure the key is not part of the rendered JSON.stringify annotation when adding a new entry 1`] = `"[{"name":"Field1","path":"path1"}]"`;
+
+exports[`useProjectShootCustomFields > should initialize shootCustomFields correctly with legacy data 1`] = `
+[
+  {
+    "columnSelectedByDefault": true,
+    "defaultValue": "unknown",
+    "icon": "mdi-heart-pulse",
+    "name": "Shoot Status",
+    "path": "metadata.labels["shoot.gardener.cloud/status"]",
+    "searchable": true,
+    "showColumn": true,
+    "showDetails": true,
+    "sortable": true,
+    "tooltip": "Indicates the health status of the cluster",
+    "weight": 950,
+  },
+  {
+    "columnSelectedByDefault": true,
+    "icon": "mdi-table-network",
+    "name": "Networking Type",
+    "path": "spec.networking.type",
+    "searchable": true,
+    "showColumn": false,
+    "showDetails": true,
+    "sortable": true,
+    "weight": 0,
+  },
+]
+`;
+
+exports[`useProjectShootCustomFields > should skip custom fields with invalid values 1`] = `
+[
+  {
+    "columnSelectedByDefault": true,
+    "name": "Valid Field",
+    "path": "path1",
+    "searchable": true,
+    "showColumn": true,
+    "showDetails": true,
+    "sortable": true,
+    "weight": 0,
+  },
+]
+`;

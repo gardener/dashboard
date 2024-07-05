@@ -208,6 +208,21 @@ export default {
               value: 'hidden',
             },
           ]
+        case 'ddns':
+          return [
+            {
+              label: 'Server',
+              value: secretData.Server,
+            },
+            {
+              label: 'TSIG Key Name',
+              value: secretData.TSIGKeyName,
+            },
+            {
+              label: 'Zone',
+              value: secretData.Zone,
+            },
+          ]
         default:
           return [
             {
