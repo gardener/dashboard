@@ -232,14 +232,13 @@ import {
   provide,
   toRef,
   watch,
-  onMounted,
 } from 'vue'
 import {
   mapState,
   mapWritableState,
   mapActions,
 } from 'pinia'
-import { useRoute } from 'vue-router'
+import { useUrlSearchParams } from '@vueuse/core'
 
 import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
@@ -305,7 +304,6 @@ export default {
   },
   setup () {
     const projectStore = useProjectStore()
-    const route = useRoute()
 
     const activePopoverKey = ref('')
     provide('activePopoverKey', activePopoverKey)
@@ -315,28 +313,18 @@ export default {
       shootCustomFields,
     } = useProjectShootCustomFields(projectItem)
 
-    const shootSearch = ref('')
-    const debouncedShootSearch = ref('')
+    const params = useUrlSearchParams('hash-params')
+    const shootSearch = ref(params.q)
+    const debouncedShootSearch = ref(shootSearch.value)
 
-    watch(shootSearch, newSearchQuery => {
-      const url = new URL(window.location.href)
-      if (newSearchQuery) {
-        url.searchParams.set('search', newSearchQuery)
-      } else {
-        url.searchParams.delete('search')
+    watch(params, value => {
+      if (value.q !== shootSearch.value) {
+        debouncedShootSearch.value = shootSearch.value = value.q
       }
-      // directly manipulate the history state to avoid triggering Vue Router's navigation guard or hooks
-      window.history.replaceState(null, '', url.toString())
     })
 
-    function setSearchFromUrl () {
-      const searchQuery = route.query.search || ''
-      shootSearch.value = searchQuery
-      debouncedShootSearch.value = searchQuery
-    }
-
-    onMounted(() => {
-      setSearchFromUrl()
+    watch(shootSearch, value => {
+      params.q = value
     })
 
     return {
