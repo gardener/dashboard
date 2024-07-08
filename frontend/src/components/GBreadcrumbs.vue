@@ -25,8 +25,12 @@ SPDX-License-Identifier: Apache-2.0
       </v-breadcrumbs>
 
       <template #append>
-        <v-tooltip
+        <v-menu
           location="bottom"
+          open-on-click
+          close-on-content-click
+          :offset="[8, 4]"
+          transition="slide-y-transition"
         >
           <template #activator="{ props }">
             <v-btn
@@ -34,12 +38,42 @@ SPDX-License-Identifier: Apache-2.0
               size="small"
               flat
               icon="mdi-dots-vertical"
-              :to="{ name: 'Settings' }"
               class="mr-1"
             />
           </template>
-          Settings
-        </v-tooltip>
+
+          <v-list
+            density="compact"
+            color="primary"
+          >
+            <v-list-item
+              :to="{ name: 'Account' }"
+              exact
+              title="Profile"
+            >
+              <template #prepend>
+                <v-icon
+                  size="small"
+                  density="compact"
+                  icon="mdi-account-outline"
+                />
+              </template>
+            </v-list-item>
+            <v-list-item
+              :to="{ name: 'Settings' }"
+              exact
+              title="Settings"
+            >
+              <template #prepend>
+                <v-icon
+                  size="small"
+                  density="compact"
+                  icon="mdi-cog-outline"
+                />
+              </template>
+            </v-list-item>
+          </v-list>
+        </v-menu>
       </template>
       <template #extension>
         <v-divider />

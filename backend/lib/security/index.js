@@ -18,6 +18,7 @@ const logger = require('../logger')
 const {
   sessionSecrets,
   cookieSameSitePolicy = 'Lax',
+  partitioned = cookieSameSitePolicy === 'None',
   oidc = {}
 } = require('../config')
 
@@ -168,7 +169,8 @@ async function authorizationUrl (req, res) {
     secure: true,
     httpOnly: true,
     maxAge: 180_000, // cookie will be removed after 3 minutes
-    sameSite: cookieSameSitePolicy
+    sameSite: cookieSameSitePolicy,
+    partitioned
   })
   const client = await exports.getIssuerClient()
   if (!includes(redirectUris, backendRedirectUri)) {
@@ -186,7 +188,8 @@ async function authorizationUrl (req, res) {
       secure: true,
       httpOnly: true,
       maxAge: 180_000, // cookie will be removed after 5 minutes
-      sameSite: cookieSameSitePolicy
+      sameSite: cookieSameSitePolicy,
+      partitioned
     })
     switch (codeChallengeMethod) {
       case 'S256':
@@ -259,13 +262,15 @@ async function setCookies (res, tokenSet) {
   res.cookie(COOKIE_HEADER_PAYLOAD, join([header, payload], '.'), {
     secure: true,
     expires: undefined,
-    sameSite: cookieSameSitePolicy
+    sameSite: cookieSameSitePolicy,
+    partitioned
   })
   res.cookie(COOKIE_SIGNATURE, signature, {
     secure: true,
     httpOnly: true,
     expires: undefined,
-    sameSite: cookieSameSitePolicy
+    sameSite: cookieSameSitePolicy,
+    partitioned
   })
   const values = [tokenSet.id_token]
   if (tokenSet.refresh_token) {
@@ -276,7 +281,8 @@ async function setCookies (res, tokenSet) {
     secure: true,
     httpOnly: true,
     expires: undefined,
-    sameSite: cookieSameSitePolicy
+    sameSite: cookieSameSitePolicy,
+    partitioned
   })
   return accessToken
 }
