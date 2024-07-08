@@ -122,10 +122,10 @@ export function useShootSpec (shootItem, options = {}) {
   })
 
   const shootDnsPrimaryProvider = computed(() => {
-    return find(shootSpec.value.dns?.providers, { primary: true })
+    return find(shootSpec.value.dns?.providers, 'primary')
   })
 
-  const shootExtensionDnsProviders = computed(() => {
+  const shootDnsServiceExtensionProviders = computed(() => {
     const extensionDns = find(shootSpec.value.extensions, ['type', 'shoot-dns-service'])
     return get(extensionDns, 'providerConfig.providers')
   })
@@ -180,7 +180,7 @@ export function useShootSpec (shootItem, options = {}) {
     shootDomain,
     isCustomShootDomain,
     shootDnsPrimaryProvider,
-    shootExtensionDnsProviders,
+    shootDnsServiceExtensionProviders,
     shootHibernationSchedules,
     shootMaintenance,
     shootControlPlaneHighAvailabilityFailureTolerance,

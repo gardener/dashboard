@@ -84,8 +84,7 @@ SPDX-License-Identifier: Apache-2.0
           max-width="50%"
         >
           <div>
-            The cluster domain is used for the API server of this cluster.
-            To expose workload services with your cluster domain, add a DNS provider for the <code>shoot-dns-service</code> extension.
+            To manage DNS entries for your cluster domain, add a DNS provider for the <code>shoot-dns-service</code> extension.<br>
             Click the <span class="font-weight-bold">Apply</span> button below to configure a provider for the <code>shoot-dns-service</code> extension using your cluster domain as the included domain.
           </div>
           <v-btn
@@ -104,7 +103,7 @@ SPDX-License-Identifier: Apache-2.0
         DNS Providers for the shoot-dns-service Extension
       </div>
       <div class="text-caption">
-        Configure DNS providers for the shoot-dns-service-extension to expose cluster workloads using domains managed by the configured providers
+        Configure DNS providers for the shoot-dns-service extension to automatically manage and synchronize DNS entries for cluster resources like services and ingresses
       </div>
       <div class="alternate-row-background">
         <v-expand-transition group>
@@ -155,6 +154,7 @@ import {
   mapState,
   mapActions,
 } from 'pinia'
+import { ref } from 'vue'
 
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useSecretStore } from '@/store/secret'
@@ -188,7 +188,6 @@ export default {
       dnsPrimaryProviderType,
       dnsPrimaryProviderSecretName,
       isNewCluster,
-      dnsProvidersWithPrimarySupport,
       dnsServiceExtensionProviders,
       hasDnsServiceExtensionProviderForCustomDomain,
       addDnsServiceExtensionProvider,
@@ -197,19 +196,21 @@ export default {
       deleteDnsServiceExtensionProvider,
     } = useShootContext()
 
+    const customDomain = ref(!!dnsDomain.value && !!dnsPrimaryProviderType.value)
+
     return {
       v$: useVuelidate(),
       dnsDomain,
       dnsPrimaryProviderType,
       dnsPrimaryProviderSecretName,
       isNewCluster,
-      dnsProvidersWithPrimarySupport,
       dnsServiceExtensionProviders,
       hasDnsServiceExtensionProviderForCustomDomain,
       addDnsServiceExtensionProvider,
       addDnsServiceExtensionProviderForCustomDomain,
       resetDnsPrimaryProvider,
       deleteDnsServiceExtensionProvider,
+      customDomain,
     }
   },
   validations () {
@@ -223,11 +224,6 @@ export default {
       dnsDomain: withFieldName('Custom Cluster Domain', {
         required: withMessage('If cluster domain is enabled, you need to define a cluster domain', requiredIf(this.customDomainEnabled)),
       }),
-    }
-  },
-  data () {
-    return {
-      customDomain: false,
     }
   },
   computed: {
@@ -254,8 +250,7 @@ export default {
     },
     customDomainEnabled: {
       get () {
-        return this.customDomain ||
-          (!!this.dnsDomain && !!this.dnsPrimaryProviderType)
+        return this.customDomain
       },
       set (value) {
         this.customDomain = value
@@ -303,11 +298,6 @@ export default {
         this.v$.dnsDomain.$reset()
       }
     },
-  },
-  mounted () {
-    if (this.customDomainEnabled) {
-      this.customDomain = true
-    }
   },
   methods: {
     ...mapActions(useSecretStore, [

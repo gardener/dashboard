@@ -37,7 +37,7 @@ describe('composables', () => {
       shootDns = reactive(composable)
     })
 
-    it('should add extension dns providers', async () => {
+    it('should add extension dns providers', () => {
       shootDns.addDnsServiceExtensionProvider()
       shootDns.dnsDomain = 'example.org'
 
@@ -46,7 +46,7 @@ describe('composables', () => {
       expect(manifest.spec).toMatchSnapshot()
     })
 
-    it('should delete extension dns providers', async () => {
+    it('should delete extension dns providers', () => {
       shootDns.addDnsServiceExtensionProvider()
       shootDns.addDnsServiceExtensionProvider()
 
@@ -61,7 +61,7 @@ describe('composables', () => {
       expect(manifest.spec).toMatchSnapshot('last provider deleted')
     })
 
-    it('should add primary dns provider', async () => {
+    it('should add primary dns provider', () => {
       shootDns.dnsDomain = 'example.org'
       shootDns.dnsPrimaryProviderType = 'foo'
       shootDns.dnsPrimaryProviderSecretName = 'bar'
@@ -69,7 +69,7 @@ describe('composables', () => {
       expect(manifest.spec).toMatchSnapshot()
     })
 
-    it('should add extension custom domain dns provider', async () => {
+    it('should add extension custom domain dns provider', () => {
       shootDns.dnsDomain = 'example.org'
       shootDns.dnsPrimaryProviderType = 'foo'
       shootDns.dnsPrimaryProviderSecretName = 'bar'

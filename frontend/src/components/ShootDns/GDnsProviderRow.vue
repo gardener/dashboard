@@ -9,14 +9,12 @@ SPDX-License-Identifier: Apache-2.0
     <div class="d-flex flex-wrap">
       <div class="regular-input">
         <v-select
-          v-model="dnsProviderType"
+          v-model="v$.dnsProviderType.$model"
           color="primary"
           :items="dnsProviderTypes"
           :error-messages="getErrorMessages(v$.dnsProviderType)"
           label="Dns Provider Type"
           variant="underlined"
-          @change="v$.dnsProviderType.$touch()"
-          @blur="v$.dnsProviderType.$touch()"
         >
           <template #item="{ props }">
             <v-list-item v-bind="props">
@@ -38,11 +36,11 @@ SPDX-License-Identifier: Apache-2.0
       </div>
       <div class="regular-input">
         <g-select-secret
-          v-if="extensionDnsProviderSecret || !dnsProvider.secretName"
-          v-model="extensionDnsProviderSecret"
+          v-if="dnsServiceExtensionProviderSecret || !dnsProvider.secretName"
+          v-model="dnsServiceExtensionProviderSecret"
           :dns-provider-kind="dnsProviderType"
-          :filter-secret-names="filterSecretNames"
-          register-vuelidate-as="extensionDnsProviderSecret"
+          :allowed-secret-names="allowedSecretNames"
+          register-vuelidate-as="dnsServiceExtensionProviderSecret"
         />
         <v-text-field
           v-else
@@ -179,10 +177,10 @@ export default {
         this.dnsProvider.type = value
         const dnsSecrets = this.dnsSecretsByProviderKind(value)
         const defaultDnsSecret = head(dnsSecrets)
-        this.extensionDnsProviderSecret = defaultDnsSecret
+        this.dnsServiceExtensionProviderSecret = defaultDnsSecret
       },
     },
-    extensionDnsProviderSecret: {
+    dnsServiceExtensionProviderSecret: {
       get () {
         const resourceName = this.dnsProvider.secretName
         const secretName = this.getResourceRefName(resourceName)
@@ -235,10 +233,10 @@ export default {
         set(this.dnsProvider, 'zones.include', value)
       },
     },
-    filterSecretNames () {
+    allowedSecretNames () {
       return this.dnsServiceExtensionProviders.map(provider => {
         const secretName = this.getResourceRefName(provider.secretName) // provider.secretName is the resource name
-        if (secretName !== this.extensionDnsProviderSecret?.metadata.name) {
+        if (secretName !== this.dnsServiceExtensionProviderSecret?.metadata.name) {
           return secretName
         }
         return undefined

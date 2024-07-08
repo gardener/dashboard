@@ -171,11 +171,11 @@ SPDX-License-Identifier: Apache-2.0
         <template #prepend />
         <g-list-item-content label="DNS Providers">
           <div
-            v-if="shootExtensionDnsProviders && shootExtensionDnsProviders.length"
+            v-if="shootDnsServiceExtensionProviders && shootDnsServiceExtensionProviders.length"
             class="d-flex"
           >
             <g-dns-provider
-              v-for="({ secretName, type, domains, zones }) in shootExtensionDnsProviders"
+              v-for="({ secretName, type, domains, zones }) in shootDnsServiceExtensionProviders"
               :key="secretName"
               class="mr-2"
               :secret-name="secretNameFromShootResources(secretName)"
@@ -313,7 +313,7 @@ export default {
       nodesCidr,
       podsCidr,
       shootTechnicalId,
-      shootExtensionDnsProviders,
+      shootDnsServiceExtensionProviders,
       shootDnsPrimaryProvider,
       shootResources,
     } = useShootItem()
@@ -336,7 +336,7 @@ export default {
       nodesCidr,
       podsCidr,
       shootTechnicalId,
-      shootExtensionDnsProviders,
+      shootDnsServiceExtensionProviders,
       shootDnsPrimaryProvider,
       shootResources,
     }

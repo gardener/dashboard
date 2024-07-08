@@ -264,7 +264,7 @@ export const useShootDns = (manifest, options) => {
     }
   }
 
-  function forceMigrateSyncDNSProvidersToFalse () {
+  function forceMigrateSyncDnsProvidersToFalse () {
     if (get(dnsServiceExtension.value, 'providerConfig.syncProvidersFromShootSpecDNS') === true) {
       // Migrate from old DNS configuration to new DNS configuration
       set(dnsServiceExtension.value, 'providerConfig.syncProvidersFromShootSpecDNS', false)
@@ -278,7 +278,7 @@ export const useShootDns = (manifest, options) => {
     dnsPrimaryProviderType,
     dnsPrimaryProviderSecretName,
     resetDnsPrimaryProvider,
-    forceMigrateSyncDNSProvidersToFalse,
+    forceMigrateSyncDnsProvidersToFalse,
     dnsServiceExtensionProviders,
     addDnsServiceExtensionProvider,
     deleteDnsServiceExtensionProvider,

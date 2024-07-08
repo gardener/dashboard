@@ -120,7 +120,7 @@ export default {
     registerVuelidateAs: {
       type: String,
     },
-    filterSecretNames: {
+    allowedSecretNames: {
       type: Array,
       default: () => [],
     },
@@ -198,7 +198,7 @@ export default {
         secrets = this.dnsSecretsByProviderKind(this.dnsProviderKind)
       }
       return secrets
-        ?.filter(secret => !this.filterSecretNames.includes(secret.metadata.name))
+        ?.filter(secret => !this.allowedSecretNames.includes(secret.metadata.name))
     },
     infrastructureKind () {
       if (this.dnsProviderKind) {
