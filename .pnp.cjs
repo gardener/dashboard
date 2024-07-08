@@ -1510,7 +1510,7 @@ const RAW_RUNTIME_STATE =
           ["helmet", "npm:7.1.0"],\
           ["http-errors", "npm:2.0.0"],\
           ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:29.7.0"],\
-          ["jose", "npm:5.6.2"],\
+          ["jose", "npm:5.6.3"],\
           ["js-yaml", "npm:4.1.0"],\
           ["jsonwebtoken", "npm:9.0.2"],\
           ["lodash", "npm:4.17.21"],\
@@ -8878,17 +8878,17 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["jose", [\
-      ["npm:4.15.7", {\
-        "packageLocation": "./.yarn/cache/jose-npm-4.15.7-9e745060dd-ba45390927.zip/node_modules/jose/",\
+      ["npm:4.15.9", {\
+        "packageLocation": "./.yarn/cache/jose-npm-4.15.9-a725b711d7-4ed4ddf4a0.zip/node_modules/jose/",\
         "packageDependencies": [\
-          ["jose", "npm:4.15.7"]\
+          ["jose", "npm:4.15.9"]\
         ],\
         "linkType": "HARD"\
       }],\
-      ["npm:5.6.2", {\
-        "packageLocation": "./.yarn/cache/jose-npm-5.6.2-6dd6e106fc-86df192545.zip/node_modules/jose/",\
+      ["npm:5.6.3", {\
+        "packageLocation": "./.yarn/cache/jose-npm-5.6.3-5f0ff4eb49-c33d8d37b8.zip/node_modules/jose/",\
         "packageDependencies": [\
-          ["jose", "npm:5.6.2"]\
+          ["jose", "npm:5.6.3"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -10147,7 +10147,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/openid-client-npm-5.6.5-5d3d2c2d1d-4308dcd37a.zip/node_modules/openid-client/",\
         "packageDependencies": [\
           ["openid-client", "npm:5.6.5"],\
-          ["jose", "npm:4.15.7"],\
+          ["jose", "npm:4.15.9"],\
           ["lru-cache", "npm:6.0.0"],\
           ["object-hash", "npm:2.2.0"],\
           ["oidc-token-hash", "npm:5.0.3"]\
