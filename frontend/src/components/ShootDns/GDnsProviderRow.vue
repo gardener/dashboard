@@ -234,12 +234,10 @@ export default {
       },
     },
     allowedSecretNames () {
-      return this.dnsServiceExtensionProviders.map(provider => {
-        const secretName = this.getResourceRefName(provider.secretName) // provider.secretName is the resource name
-        if (secretName !== this.dnsServiceExtensionProviderSecret?.metadata.name) {
-          return secretName
-        }
-        return undefined
+      const dnsProviderSecretName = get(this.dnsServiceExtensionProviderSecret, 'metadata.name')
+      const secretNames = this.dnsServiceExtensionProviders.map(({ secretName }) => this.getResourceRefName(secretName))
+      return secretNames.filter(secretName => {
+        return dnsProviderSecretName !== secretName
       })
     },
   },
