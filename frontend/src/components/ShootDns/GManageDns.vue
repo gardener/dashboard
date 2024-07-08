@@ -9,25 +9,25 @@ SPDX-License-Identifier: Apache-2.0
     <v-row>
       <v-checkbox
         v-model="customDomainEnabled"
-        label="Custom Domain"
+        label="Configure Cluster Domain"
         color="primary"
         :disabled="!isNewCluster"
         density="compact"
         persistent-hint
         :hint="domainCheckboxHint"
+        max-width="50%"
         class="mb-3 mx-3"
-        hide-details="auto"
       />
     </v-row>
     <template v-if="customDomainEnabled">
-      <v-row class="my-0">
+      <v-row>
         <v-col cols="6">
           <v-text-field
             ref="dnsDomainRef"
             v-model="dnsDomain"
             :error-messages="getErrorMessages(v$.dnsDomain)"
             color="primary"
-            label="Custom Domain"
+            label="Cluster Domain"
             :disabled="!isNewCluster || !customDomainEnabled"
             persistent-hint
             :hint="domainHint"
@@ -81,10 +81,12 @@ SPDX-License-Identifier: Apache-2.0
           variant="tonal"
           type="info"
           color="primary"
+          max-width="50%"
         >
           <div>
-            To expose workload services with your custom domain, add a DNS provider for the <code>shoot-dns-service</code> extension.
-            Click the <span class="font-weight-bold">Apply</span> button below to configure a provider for the <code>shoot-dns-service</code> extension using your custom domain as the included domain.
+            The cluster domain is used for the API server of this cluster.
+            To expose workload services with your cluster domain, add a DNS provider for the <code>shoot-dns-service</code> extension.
+            Click the <span class="font-weight-bold">Apply</span> button below to configure a provider for the <code>shoot-dns-service</code> extension using your cluster domain as the included domain.
           </div>
           <v-btn
             class="mt-3"
@@ -98,9 +100,11 @@ SPDX-License-Identifier: Apache-2.0
       </v-col>
     </v-row>
     <template v-if="hasDnsServiceExtension">
-      <v-divider class="my-3" />
-      <div class="wrap-text text-subtitle-2">
-        DNS Providers for the <code>shoot-dns-service</code> Extension
+      <div class="text-subtitle-1 my-3">
+        DNS Providers for the shoot-dns-service Extension
+      </div>
+      <div class="text-caption">
+        Configure DNS providers for the shoot-dns-service-extension to expose cluster workloads using domains managed by the configured providers
       </div>
       <div class="alternate-row-background">
         <v-expand-transition group>
@@ -211,13 +215,13 @@ export default {
   validations () {
     return {
       dnsPrimaryProviderType: withFieldName('Primary DNS Provider Type', {
-        required: withMessage('Provider type is required if a custom domain is defined', requiredIf(this.isNewCluster && !!this.dnsDomain)),
+        required: withMessage('Provider type is required if a cluster domain is defined', requiredIf(this.isNewCluster && !!this.dnsDomain)),
       }),
       primaryDnsProviderSecret: withFieldName('Primary DNS Provider Secret', {
-        required: withMessage('Provider secret is required if a custom domain is defined', requiredIf(this.isNewCluster && !!this.dnsDomain)),
+        required: withMessage('Provider secret is required if a cluster domain is defined', requiredIf(this.isNewCluster && !!this.dnsDomain)),
       }),
       dnsDomain: withFieldName('Custom Cluster Domain', {
-        required: withMessage('If custom domain is enabled, you need to define a cluster domain', requiredIf(this.customDomainEnabled)),
+        required: withMessage('If cluster domain is enabled, you need to define a cluster domain', requiredIf(this.customDomainEnabled)),
       }),
     }
   },
@@ -235,13 +239,13 @@ export default {
       if (!this.isNewCluster) {
         return 'Domain cannot be changed after cluster creation'
       }
-      return `Define custom domain of the cluster (API server will be reachable under api.${this.dnsDomain ? this.dnsDomain : '<custom-domain>'})`
+      return `Configure domain of the cluster (API server will be reachable under api.${this.dnsDomain ? this.dnsDomain : '<custom-domain>'})`
     },
     domainCheckboxHint () {
       if (!this.isNewCluster) {
-        return 'Custom domain cannot be changed after cluster creation'
+        return 'Cluster domain cannot be changed after cluster creation'
       }
-      return 'Configure custom domain using the primary DNS provider. This domain will be used for the API server of this cluster'
+      return 'Configure cluster domain using the primary DNS provider. This domain will be used for the API server of this cluster. If you do not configure a cluster domain, Gardener will automatically assign a generated domain to your cluster.'
     },
     typeHint () {
       return this.isNewCluster
