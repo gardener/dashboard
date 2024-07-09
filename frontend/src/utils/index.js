@@ -107,7 +107,7 @@ export function setDelayedInputFocus (...args) {
 
 export function setInputFocus (vm, fieldName, options) {
   if (typeof fieldName === 'string') {
-    vm = vm.$refs[fieldName]
+    vm = get(vm.$refs, fieldName)
   } else {
     vm = unref(vm)
     options = fieldName

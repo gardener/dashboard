@@ -267,14 +267,15 @@ export default {
   },
   watch: {
     loginType: {
-      async handler (value) {
+      handler (value) {
         if (value === 'token') {
           setDelayedInputFocus(this, 'tokenField')
         }
         if (value === 'oidc') {
-          setTimeout(() => {
-            this.$refs.loginButton.$el.focus()
-          }, 0)
+          setDelayedInputFocus(this, 'loginButton.$el', {
+            delay: 0,
+            noSelect: true,
+          })
         }
       },
       immediate: true,
