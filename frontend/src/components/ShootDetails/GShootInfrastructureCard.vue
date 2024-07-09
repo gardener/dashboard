@@ -154,29 +154,35 @@ SPDX-License-Identifier: Apache-2.0
               {{ customDomainChipText }}
             </v-chip>
           </template>
-          {{ shootDomain }}
+          <div class="d-flex">
+            {{ shootDomain }}
+            <g-dns-provider
+              v-if="shootDnsPrimaryProvider"
+              class="ml-2"
+              primary
+              :secret-name="shootDnsPrimaryProvider.secretName"
+              :shoot-namespace="shootNamespace"
+              :type="shootDnsPrimaryProvider.type"
+            />
+          </div>
         </g-list-item-content>
       </g-list-item>
-      <g-list-item>
+      <g-list-item v-if="hasDnsServiceExtension || isCustomShootDomain">
         <template #prepend />
-        <g-list-item-content
-          label="DNS Providers"
-        >
+        <g-list-item-content label="DNS Providers">
           <div
-            v-if="shootDnsProviders && shootDnsProviders.length"
-            class="d-flex justify-start"
+            v-if="shootDnsServiceExtensionProviders && shootDnsServiceExtensionProviders.length"
+            class="d-flex"
           >
             <g-dns-provider
-              v-for="({ primary, secretName, type, domains, zones }) in shootDnsProviders"
+              v-for="({ secretName, type, domains, zones }) in shootDnsServiceExtensionProviders"
               :key="secretName"
               class="mr-2"
-              :primary="primary"
-              :secret-name="secretName"
+              :secret-name="secretNameFromShootResources(secretName)"
               :shoot-namespace="shootNamespace"
               :type="type"
               :domains="domains"
               :zones="zones"
-              :secret="getCloudProviderSecretByName({ name: secretName, namespace: shootNamespace })"
             />
           </div>
           <span v-else>No DNS provider configured</span>
@@ -248,6 +254,7 @@ import {
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useSecretStore } from '@/store/secret'
 import { useAuthzStore } from '@/store/authz'
+import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 
 import GCopyBtn from '@/components/GCopyBtn'
 import GShootSeedName from '@/components/GShootSeedName'
@@ -299,7 +306,6 @@ export default {
       shootDomain,
       isCustomShootDomain,
       shootSecretBindingName,
-      shootDnsProviders,
       hasShootWorkerGroups,
       shootControlPlaneHighAvailabilityFailureTolerance,
       shootCloudProviderKind,
@@ -307,6 +313,9 @@ export default {
       nodesCidr,
       podsCidr,
       shootTechnicalId,
+      shootDnsServiceExtensionProviders,
+      shootDnsPrimaryProvider,
+      shootResources,
     } = useShootItem()
 
     return {
@@ -320,7 +329,6 @@ export default {
       shootDomain,
       isCustomShootDomain,
       shootSecretBindingName,
-      shootDnsProviders,
       hasShootWorkerGroups,
       shootControlPlaneHighAvailabilityFailureTolerance,
       shootCloudProviderKind,
@@ -328,9 +336,15 @@ export default {
       nodesCidr,
       podsCidr,
       shootTechnicalId,
+      shootDnsServiceExtensionProviders,
+      shootDnsPrimaryProvider,
+      shootResources,
     }
   },
   computed: {
+    ...mapState(useGardenerExtensionStore, [
+      'hasDnsServiceExtension',
+    ]),
     ...mapState(useAuthzStore, [
       'canPatchShootsBinding',
     ]),
@@ -400,9 +414,10 @@ export default {
       'cloudProfileByName',
       'floatingPoolsByCloudProfileNameAndRegionAndDomain',
     ]),
-    ...mapActions(useSecretStore, [
-      'getCloudProviderSecretByName',
-    ]),
+    secretNameFromShootResources (resourceName) {
+      const secretResource = find(this.shootResources, ['name', resourceName])
+      return get(secretResource, 'resourceRef.name')
+    },
   },
 }
 </script>

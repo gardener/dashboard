@@ -15,7 +15,6 @@ import {
   flatMap,
   cloneDeep,
   find,
-  some,
   compact,
 } from '@/lodash'
 
@@ -119,11 +118,16 @@ export function useShootSpec (shootItem, options = {}) {
   })
 
   const isCustomShootDomain = computed(() => {
-    return some(shootDnsProviders.value, 'primary')
+    return !!shootDnsPrimaryProvider.value
   })
 
-  const shootDnsProviders = computed(() => {
-    return get(shootSpec.value, 'dns.providers')
+  const shootDnsPrimaryProvider = computed(() => {
+    return find(shootSpec.value.dns?.providers, 'primary')
+  })
+
+  const shootDnsServiceExtensionProviders = computed(() => {
+    const extensionDns = find(shootSpec.value.extensions, ['type', 'shoot-dns-service'])
+    return get(extensionDns, 'providerConfig.providers')
   })
 
   const shootHibernationSchedules = computed(() => {
@@ -144,6 +148,10 @@ export function useShootSpec (shootItem, options = {}) {
 
   const isSeedUnreachable = computed(() => {
     return seedStore.isSeedUnreachableByName(shootSeedName.value)
+  })
+
+  const shootResources = computed(() => {
+    return get(shootSpec.value, 'resources')
   })
 
   return {
@@ -171,11 +179,13 @@ export function useShootSpec (shootItem, options = {}) {
     servicesCidr,
     shootDomain,
     isCustomShootDomain,
-    shootDnsProviders,
+    shootDnsPrimaryProvider,
+    shootDnsServiceExtensionProviders,
     shootHibernationSchedules,
     shootMaintenance,
     shootControlPlaneHighAvailabilityFailureTolerance,
     shootSeedName,
     isSeedUnreachable,
+    shootResources,
   }
 }

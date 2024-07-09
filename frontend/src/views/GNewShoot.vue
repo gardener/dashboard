@@ -42,7 +42,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-card class="mt-4">
         <g-toolbar title="DNS Configuration" />
         <v-card-text class="py-1">
-          <g-manage-shoot-dns />
+          <g-manage-dns />
         </v-card-text>
       </v-card>
       <v-card
@@ -147,7 +147,7 @@ import GNewShootSelectInfrastructure from '@/components/NewShoot/GNewShootSelect
 import GMaintenanceComponents from '@/components/ShootMaintenance/GMaintenanceComponents'
 import GMaintenanceTime from '@/components/ShootMaintenance/GMaintenanceTime'
 import GManageShootAddons from '@/components/ShootAddons/GManageAddons'
-import GManageShootDns from '@/components/ShootDns/GManageDns'
+import GManageDns from '@/components/ShootDns/GManageDns'
 import GManageControlPlaneHighAvailability from '@/components/ControlPlaneHighAvailability/GManageControlPlaneHighAvailability'
 import GToolbar from '@/components/GToolbar.vue'
 
@@ -163,7 +163,7 @@ export default {
     GAccessRestrictions,
     GNewShootDetails,
     GManageShootAddons,
-    GManageShootDns,
+    GManageDns,
     GMaintenanceComponents,
     GMaintenanceTime,
     GManageHibernationSchedule: defineAsyncComponent(() => import('@/components/ShootHibernation/GManageHibernationSchedule')),

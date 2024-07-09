@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
   >
     <template #content>
       <v-card-text>
-        <g-manage-shoot-dns :key="componentKey" />
+        <g-manage-dns :key="componentKey" />
       </v-card-text>
     </template>
   </g-action-button-dialog>
@@ -26,7 +26,7 @@ import { ref } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
-import GManageShootDns from '@/components/ShootDns/GManageDns'
+import GManageDns from '@/components/ShootDns/GManageDns'
 
 import { useShootContext } from '@/composables/useShootContext'
 import { useShootItem } from '@/composables/useShootItem'
@@ -37,7 +37,7 @@ import { v4 as uuidv4 } from '@/utils/uuid'
 export default {
   components: {
     GActionButtonDialog,
-    GManageShootDns,
+    GManageDns,
   },
   inject: ['api', 'logger'],
   setup () {
@@ -48,8 +48,9 @@ export default {
     } = useShootItem()
 
     const {
-      dns,
+      shootManifest,
       setShootManifest,
+      forceMigrateSyncDnsProvidersToFalse,
     } = useShootContext()
 
     const componentKey = ref(uuidv4())
@@ -59,9 +60,10 @@ export default {
       shootItem,
       shootNamespace,
       shootName,
-      dns,
+      shootManifest,
       setShootManifest,
       componentKey,
+      forceMigrateSyncDnsProvidersToFalse,
     }
   },
   methods: {
@@ -74,10 +76,21 @@ export default {
     },
     async updateConfiguration () {
       try {
+        // Remove migration logic when all dns configurations have been migrated by Gardener
+        this.forceMigrateSyncDnsProvidersToFalse()
+
+        const { dns, extensions, resources } = this.shootManifest.spec
+
         await this.api.updateShootDns({
           namespace: this.shootNamespace,
           name: this.shootName,
-          data: this.dns,
+          data: {
+            spec: {
+              dns,
+              extensions,
+              resources,
+            },
+          },
         })
       } catch (err) {
         const errorMessage = 'Could not update DNS Configuration'

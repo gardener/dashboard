@@ -1,18 +1,5 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`composables > useShootContext > should add dns providers 1`] = `
-{
-  "domain": "example.org",
-  "providers": [
-    {
-      "primary": true,
-      "secretName": "aws-route53-secret",
-      "type": "aws-route53",
-    },
-  ],
-}
-`;
-
 exports[`composables > useShootContext > should add workers and update zones network config 1`] = `
 [
   {
