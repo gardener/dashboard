@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     v-if="items.length || !hideEmpty"
     class="d-flex align-center collapsable-items-wrapper"
   >
-    <template v-if="collapse && !expanded">
+    <template v-if="!expanded">
       <slot
         name="collapsed"
         :item-count="itemCount"
@@ -47,7 +47,7 @@ SPDX-License-Identifier: Apache-2.0
             :item="item"
           />
           <g-collapsable-items-button
-            v-if="collapse && i === items.length - 1"
+            v-if="i === items.length - 1"
             class="collapsable-items-button"
             :expanded="expanded"
             @click="toggleExpanded"
@@ -77,10 +77,6 @@ const props = defineProps({
   uid: {
     type: String,
     required: false,
-  },
-  collapse: {
-    type: Boolean,
-    default: false,
   },
   // key for provided state
   // If state not provided internal state is used

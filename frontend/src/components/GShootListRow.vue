@@ -66,7 +66,35 @@ SPDX-License-Identifier: Apache-2.0
         </g-auto-hide>
       </template>
       <template v-if="cell.header.key === 'workers'">
-        <g-worker-groups collapse />
+        <g-collapsable-items
+          :items="shootWorkerGroups"
+          :uid="shootMetadata.uid"
+          inject-key="expandedWorkerGroups"
+        >
+          <template #collapsed="{ itemCount }">
+            <v-chip
+              size="small"
+              variant="tonal"
+            >
+              {{ itemCount }}
+              {{ itemCount !== 1 ? 'Groups' : 'Group' }}
+              <v-tooltip
+                location="top"
+                activator="parent"
+                text="Worker Groups"
+              />
+            </v-chip>
+          </template>
+          <template #noItems>
+            <g-workerless-chip />
+          </template>
+          <template #item="{ item }">
+            <g-worker-group
+              :worker-group="item"
+              class="ma-1"
+            />
+          </template>
+        </g-collapsable-items>
       </template>
       <template v-if="cell.header.key === 'createdBy'">
         <g-account-avatar :account-name="shootCreatedBy" />
@@ -115,10 +143,23 @@ SPDX-License-Identifier: Apache-2.0
         />
       </template>
       <template v-if="cell.header.key === 'accessRestrictions'">
-        <g-access-restriction-chips
-          :access-restrictions="shootAccessRestrictions"
-          collapse
-        />
+        <g-collapsable-items
+          :items="shootAccessRestrictions"
+          :uid="shootUid"
+          inject-key="expandedAccessRestrictions"
+          hide-empty
+          item-name="Restriction"
+        >
+          <template #item="{ item }">
+            <g-access-restriction-chip
+              :id="item.id"
+              :key="item.key"
+              :title="item.title"
+              :description="item.description"
+              :options="item.options"
+            />
+          </template>
+        </g-collapsable-items>
       </template>
       <template v-if="cell.header.key === 'ticket'">
         <g-external-link
@@ -142,7 +183,6 @@ SPDX-License-Identifier: Apache-2.0
           inject-key="expandedTicketLabels"
           item-name="Ticket"
           hide-empty
-          collapse
         >
           <template #item="{ item }">
             <g-ticket-label
@@ -222,7 +262,7 @@ import { useProjectStore } from '@/store/project'
 import { useSeedStore } from '@/store/seed'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 
-import GAccessRestrictionChips from '@/components/ShootAccessRestrictions/GAccessRestrictionChips.vue'
+import GAccessRestrictionChip from '@/components/ShootAccessRestrictions/GAccessRestrictionChip.vue'
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
 import GActionButton from '@/components/GActionButton.vue'
 import GCopyBtn from '@/components/GCopyBtn.vue'
@@ -239,7 +279,8 @@ import GShootListRowActions from '@/components/GShootListRowActions.vue'
 import GAutoHide from '@/components/GAutoHide.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
 import GControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityTag.vue'
-import GWorkerGroups from '@/components/ShootWorkers/GWorkerGroups'
+import GWorkerGroup from '@/components/ShootWorkers/GWorkerGroup'
+import GWorkerlessChip from '@/components/ShootWorkers/GWorkerlessChip.vue'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 import GCollapsableItems from '@/components/GCollapsableItems'
 
@@ -302,6 +343,8 @@ const {
   shootTechnicalId,
   shootSeedName,
   shootAccessRestrictions,
+  shootWorkerGroups,
+  shootUid,
 } = useProvideShootItem(shootItem, {
   cloudProfileStore,
   projectStore,

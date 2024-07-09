@@ -370,6 +370,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { ref } from 'vue'
 import { mapActions } from 'pinia'
 import yaml from 'js-yaml'
 
@@ -377,6 +378,8 @@ import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import GCodeBlock from '@/components/GCodeBlock'
 import GVendorIcon from '@/components/GVendorIcon'
+
+import { useShootItem } from '@/composables/useShootItem'
 
 import {
   find,
@@ -393,25 +396,24 @@ export default {
     'activePopoverKey',
   ],
   props: {
-    modelValue: {
-      type: [String, Number],
-    },
     workerGroup: {
       type: Object,
     },
-    cloudProfileName: {
-      type: String,
-    },
-    shootMetadata: {
-      type: Object,
-      default () {
-        return { uid: '' }
-      },
-    },
   },
-  emits: [
-    'update:modelValue',
-  ],
+  setup () {
+    const {
+      shootMetadata,
+      cloudProfileName,
+    } = useShootItem()
+
+    const tab = ref('overview')
+
+    return {
+      tab,
+      shootMetadata,
+      cloudProfileName,
+    }
+  },
   data () {
     return {
       workerGroupYaml: undefined,
@@ -473,14 +475,6 @@ export default {
     },
     machineCri () {
       return this.workerGroup.cri ?? {}
-    },
-    tab: {
-      get () {
-        return this.modelValue
-      },
-      set (modelValue) {
-        this.$emit('update:modelValue', modelValue)
-      },
     },
     classificationColor () {
       if (this.machineImage.isDeprecated) {
