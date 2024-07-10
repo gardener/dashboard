@@ -45,6 +45,21 @@ export const useShootDns = (manifest, options) => {
     deleteExtension,
   } = useShootExtensions(manifest)
 
+  const setDnsServiceExtension = providers => {
+    const providerConfig = {
+      apiVersion: 'service.dns.extensions.gardener.cloud/v1alpha1',
+      kind: 'DNSConfig',
+      syncProvidersFromShootSpecDNS: false,
+    }
+    if (providers) {
+      providerConfig.providers = providers
+    }
+    setExtension({
+      type: 'shoot-dns-service',
+      providerConfig,
+    })
+  }
+
   const dnsServiceExtension = computed(() => {
     return find(extensions.value, ['type', 'shoot-dns-service'])
   })
@@ -177,15 +192,7 @@ export const useShootDns = (manifest, options) => {
       secretName: resourceName, // resourceName is the secret name
     }
     if (isEmpty(dnsServiceExtensionProviders.value)) {
-      setExtension({
-        type: 'shoot-dns-service',
-        providerConfig: {
-          apiVersion: 'service.dns.extensions.gardener.cloud/v1alpha1',
-          kind: 'DNSConfig',
-          syncProvidersFromShootSpecDNS: false,
-          providers: [provider],
-        },
-      })
+      setDnsServiceExtension([provider])
     } else {
       dnsServiceExtensionProviders.value.push(provider)
     }
@@ -222,6 +229,9 @@ export const useShootDns = (manifest, options) => {
       // Migrate from old DNS configuration to new DNS configuration
       set(dnsServiceExtension.value, 'providerConfig.syncProvidersFromShootSpecDNS', false)
       dnsProviders.value = filter(dnsProviders.value, ['primary', true])
+    } else if (!dnsServiceExtension.value) {
+      // set default empty dns service extension where sync is set to off
+      setDnsServiceExtension()
     }
   }
 
