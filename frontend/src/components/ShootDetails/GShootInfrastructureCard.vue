@@ -178,7 +178,7 @@ SPDX-License-Identifier: Apache-2.0
               v-for="({ secretName, type, domains, zones }) in shootDnsServiceExtensionProviders"
               :key="secretName"
               class="mr-2"
-              :secret-name="secretNameFromShootResources(secretName)"
+              :secret-name="getResourceRefName(secretName)"
               :shoot-namespace="shootNamespace"
               :type="type"
               :domains="domains"
@@ -267,6 +267,7 @@ import GControlPlaneHighAvailabilityConfiguration from '@/components/ControlPlan
 import GControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityTag'
 import GSecretDetailsItemContent from '@/components/Secrets/GSecretDetailsItemContent'
 
+import { useShootResources } from '@/composables/useShootResources'
 import { useShootItem } from '@/composables/useShootItem'
 
 import {
@@ -315,8 +316,9 @@ export default {
       shootTechnicalId,
       shootDnsServiceExtensionProviders,
       shootDnsPrimaryProvider,
-      shootResources,
     } = useShootItem()
+
+    const { getResourceRefName } = useShootResources(shootItem)
 
     return {
       shootItem,
@@ -338,7 +340,7 @@ export default {
       shootTechnicalId,
       shootDnsServiceExtensionProviders,
       shootDnsPrimaryProvider,
-      shootResources,
+      getResourceRefName,
     }
   },
   computed: {
@@ -414,10 +416,6 @@ export default {
       'cloudProfileByName',
       'floatingPoolsByCloudProfileNameAndRegionAndDomain',
     ]),
-    secretNameFromShootResources (resourceName) {
-      const secretResource = find(this.shootResources, ['name', resourceName])
-      return get(secretResource, 'resourceRef.name')
-    },
   },
 }
 </script>

@@ -9,6 +9,9 @@ import { computed } from 'vue'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useSecretStore } from '@/store/secret'
 
+import { useShootResources } from '@/composables/useShootResources'
+import { useShootExtensions } from '@/composables/useShootExtensions'
+
 import {
   get,
   set,
@@ -28,69 +31,19 @@ export const useShootDns = (manifest, options) => {
   } = options
 
   /* resources */
-  const resources = computed({
-    get () {
-      return get(manifest.value, 'spec.resources')
-    },
-    set (value) {
-      set(manifest.value, 'spec.resources', value)
-    },
-  })
-
-  function setResource ({ name, resourceRef }) {
-    if (!name) {
-      return
-    }
-    if (isEmpty(resources.value)) {
-      resources.value = [{ name, resourceRef }]
-    } else {
-      const resource = find(resources.value, ['name', name])
-      if (resource) {
-        resource.resourceRef = resourceRef
-      } else {
-        resources.value.push({ name, resourceRef })
-      }
-    }
-  }
-
-  function deleteResource (resourceName) {
-    resources.value = filter(resources.value, resource => resource.name !== resourceName)
-  }
-
-  function getResourceRefName (resourceName) {
-    const secretResource = find(resources.value, ['name', resourceName])
-    return get(secretResource, 'resourceRef.name')
-  }
+  const {
+    resources,
+    deleteResource,
+    setResource,
+    getResourceRefName,
+  } = useShootResources(manifest)
 
   /* extensions */
-  const extensions = computed({
-    get () {
-      return get(manifest.value, 'spec.extensions')
-    },
-    set (value) {
-      set(manifest.value, 'spec.extensions', value)
-    },
-  })
-
-  function setExtension ({ type, providerConfig }) {
-    if (!type) {
-      return
-    }
-    if (isEmpty(extensions.value)) {
-      extensions.value = [{ type, providerConfig }]
-    } else {
-      const extension = find(extensions.value, ['type', type])
-      if (extension) {
-        extension.providerConfig = providerConfig
-      } else {
-        extensions.value.push({ type, providerConfig })
-      }
-    }
-  }
-
-  function deleteExtension (extensionType) {
-    extensions.value = filter(extensions.value, extension => extension.type !== extensionType)
-  }
+  const {
+    extensions,
+    setExtension,
+    deleteExtension,
+  } = useShootExtensions(manifest)
 
   const dnsServiceExtension = computed(() => {
     return find(extensions.value, ['type', 'shoot-dns-service'])
