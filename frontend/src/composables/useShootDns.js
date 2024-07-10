@@ -9,8 +9,8 @@ import { computed } from 'vue'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useSecretStore } from '@/store/secret'
 
-import { useShootResources } from './useShootResources'
-import { useShootExtensions } from './useShootExtensions'
+import { useShootResources } from '@/composables/useShootResources'
+import { useShootExtensions } from '@/composables/useShootExtensions'
 
 import {
   get,
