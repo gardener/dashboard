@@ -69,10 +69,7 @@ SPDX-License-Identifier: Apache-2.0
               v-html="tokenLoginText"
             />
             <!-- eslint-enable vue/no-v-html -->
-            <v-form
-              autocomplete="off"
-              class="d-flex justify-center mt-3"
-            >
+            <div class="d-flex justify-center mt-3">
               <v-text-field
                 ref="tokenField"
                 v-model="token"
@@ -90,8 +87,9 @@ SPDX-License-Identifier: Apache-2.0
                   maxWidth: `${teaserWidth - 96}px`,
                 }"
                 @click:append-inner="showToken = !showToken"
+                @keydown.enter="handleLogin"
               />
-            </v-form>
+            </div>
           </v-window-item>
         </v-window>
         <div
@@ -101,7 +99,8 @@ SPDX-License-Identifier: Apache-2.0
           }"
         >
           <v-btn
-            variant="elevated"
+            ref="loginButton"
+            variant="tonal"
             color="primary"
             @click="handleLogin"
           >
@@ -267,10 +266,19 @@ export default {
     },
   },
   watch: {
-    loginType (value) {
-      if (value === 'token') {
-        setDelayedInputFocus(this, 'tokenField')
-      }
+    loginType: {
+      handler (value) {
+        if (value === 'token') {
+          setDelayedInputFocus(this, 'tokenField')
+        }
+        if (value === 'oidc') {
+          setDelayedInputFocus(this, 'loginButton.$el', {
+            delay: 0,
+            noSelect: true,
+          })
+        }
+      },
+      immediate: true,
     },
   },
   methods: {
@@ -341,4 +349,5 @@ export default {
   .v-application {
     background: linear-gradient(to bottom, $bg-top 0%, $bg-top 50%, $bg-bottom 50%, $bg-bottom 100%) !important;
   }
+
 </style>
