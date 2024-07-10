@@ -208,7 +208,7 @@ export default {
               value: 'hidden',
             },
           ]
-        case 'ddns':
+        case 'rfc2136':
           return [
             {
               label: 'Server',

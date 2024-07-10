@@ -91,8 +91,8 @@ const iconSrc = computed(() => {
       return new URL('/src/assets/infoblox-dns.svg', import.meta.url)
     case 'netlify-dns':
       return new URL('/src/assets/netlify-dns.svg', import.meta.url)
-    case 'ddns':
-      return new URL('/src/assets/ddns.svg', import.meta.url)
+    case 'rfc2136':
+      return new URL('/src/assets/rfc2136.svg', import.meta.url)
 
     // os
     case 'coreos':

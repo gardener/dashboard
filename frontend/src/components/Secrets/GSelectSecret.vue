@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
       v-model="v$.internalValue.$model"
       color="primary"
       item-color="primary"
-      label="Secret"
+      :label="label"
       :disabled="disabled"
       :items="secretList"
       item-value="metadata.name"
@@ -120,6 +120,14 @@ export default {
     registerVuelidateAs: {
       type: String,
     },
+    allowedSecretNames: {
+      type: Array,
+      default: () => [],
+    },
+    label: {
+      type: String,
+      default: 'Secret',
+    },
   },
   emits: [
     'update:modelValue',
@@ -182,13 +190,15 @@ export default {
       },
     },
     secretList () {
+      let secrets
       if (this.cloudProfileName) {
-        return this.infrastructureSecretsByCloudProfileName(this.cloudProfileName)
+        secrets = this.infrastructureSecretsByCloudProfileName(this.cloudProfileName)
       }
       if (this.dnsProviderKind) {
-        return this.dnsSecretsByProviderKind(this.dnsProviderKind)
+        secrets = this.dnsSecretsByProviderKind(this.dnsProviderKind)
       }
-      return []
+      return secrets
+        ?.filter(secret => !this.allowedSecretNames.includes(secret.metadata.name))
     },
     infrastructureKind () {
       if (this.dnsProviderKind) {
