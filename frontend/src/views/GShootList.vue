@@ -86,7 +86,7 @@ SPDX-License-Identifier: Apache-2.0
                 density="compact"
                 class="g-table-search-field mr-3"
                 @update:model-value="onUpdateShootSearch"
-                @keyup.esc="resetShootSearch"
+                @keyup.esc="setShootSearch(null)"
               />
             </template>
             Search terms are <span class="font-weight-bold">ANDed</span>.<br>
@@ -231,12 +231,14 @@ import {
   ref,
   provide,
   toRef,
+  watch,
 } from 'vue'
 import {
   mapState,
   mapWritableState,
   mapActions,
 } from 'pinia'
+import { useUrlSearchParams } from '@vueuse/core'
 
 import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
@@ -290,13 +292,15 @@ export default {
     })
   },
   beforeRouteUpdate (to, from, next) {
-    this.resetShootSearch()
+    if (to.path !== from.path) {
+      this.setShootSearch(null)
+    }
     this.updateTableSettings()
     this.focusModeInternal = false
     next()
   },
   beforeRouteLeave (to, from, next) {
-    this.resetShootSearch()
+    this.setShootSearch(null)
     this.focusModeInternal = false
     next()
   },
@@ -311,15 +315,49 @@ export default {
       shootCustomFields,
     } = useProjectShootCustomFields(projectItem)
 
+    const params = useUrlSearchParams('hash-params')
+    const shootSearch = ref(params.q)
+    const debouncedShootSearch = ref(shootSearch.value)
+
+    function setShootSearch (value) {
+      debouncedShootSearch.value = shootSearch.value = value
+    }
+
+    const setDebouncedShootSearch = debounce(() => {
+      debouncedShootSearch.value = shootSearch.value
+    }, 300)
+
+    watch(() => params.q, value => {
+      if (shootSearch.value !== value) {
+        setShootSearch(value)
+      }
+    })
+
+    watch(debouncedShootSearch, value => {
+      if (!value) {
+        params.q = null
+      } else if (params.q !== value) {
+        params.q = value
+      }
+    })
+
+    function onUpdateShootSearch (value) {
+      shootSearch.value = value
+
+      setDebouncedShootSearch()
+    }
+
     return {
       activePopoverKey,
       shootCustomFields,
+      shootSearch,
+      debouncedShootSearch,
+      setShootSearch,
+      onUpdateShootSearch,
     }
   },
   data () {
     return {
-      shootSearch: '',
-      debouncedShootSearch: '',
       dialog: null,
       page: 1,
       selectedColumns: undefined,
@@ -775,10 +813,6 @@ export default {
       'setFocusMode',
       'setSortBy',
     ]),
-    resetShootSearch () {
-      this.shootSearch = null
-      this.debouncedShootSearch = null
-    },
     async showDialog (args) {
       switch (args.action) {
         case 'access':
@@ -841,14 +875,6 @@ export default {
       const filters = this.shootListFilters
       return get(filters, key, false)
     },
-    onUpdateShootSearch (value) {
-      this.shootSearch = value
-
-      this.setDebouncedShootSearch()
-    },
-    setDebouncedShootSearch: debounce(function () {
-      this.debouncedShootSearch = this.shootSearch
-    }, 500),
   },
 }
 </script>
