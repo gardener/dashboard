@@ -152,7 +152,7 @@ SPDX-License-Identifier: Apache-2.0
         >
           <template #item="{ item }">
             <g-access-restriction-chip
-              :id="item.id"
+              :id="item.key"
               :key="item.key"
               :title="item.title"
               :description="item.description"
