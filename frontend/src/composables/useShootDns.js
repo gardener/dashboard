@@ -45,18 +45,15 @@ export const useShootDns = (manifest, options) => {
     deleteExtension,
   } = useShootExtensions(manifest)
 
-  const setDnsServiceExtension = providers => {
-    const providerConfig = {
-      apiVersion: 'service.dns.extensions.gardener.cloud/v1alpha1',
-      kind: 'DNSConfig',
-      syncProvidersFromShootSpecDNS: false,
-    }
-    if (providers) {
-      providerConfig.providers = providers
-    }
+  function setDnsServiceExtension ({ providers } = {}) {
     setExtension({
       type: 'shoot-dns-service',
-      providerConfig,
+      providerConfig: {
+        apiVersion: 'service.dns.extensions.gardener.cloud/v1alpha1',
+        kind: 'DNSConfig',
+        syncProvidersFromShootSpecDNS: false,
+        providers,
+      },
     })
   }
 
@@ -192,7 +189,7 @@ export const useShootDns = (manifest, options) => {
       secretName: resourceName, // resourceName is the secret name
     }
     if (isEmpty(dnsServiceExtensionProviders.value)) {
-      setDnsServiceExtension([provider])
+      setDnsServiceExtension({ providers: [provider] })
     } else {
       dnsServiceExtensionProviders.value.push(provider)
     }
