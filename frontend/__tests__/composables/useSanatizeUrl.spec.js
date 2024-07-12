@@ -37,6 +37,12 @@ describe('composables', () => {
       expect(sanitizeUrl('mailto:test@example.com?subject=hello+world')).toBe('mailto:test@example.com?subject=hello+world')
     })
 
+    it('does not alter http(s) URLs with encoded search params', () => {
+      const url = new URL('https://example.com/path/to/something')
+      url.searchParams.set('markdown', '# h1\n## h2\n### h3')
+      expect(sanitizeUrl(url.href)).toBe(url.href)
+    })
+
     it('adds trailing slash to origin urls', () => {
       expect(sanitizeUrl('https://example.org')).toBe('https://example.org/')
     })
