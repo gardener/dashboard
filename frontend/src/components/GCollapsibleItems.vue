@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div
     v-if="items.length || !hideEmpty"
-    class="d-flex align-center collapsable-items-wrapper"
+    class="d-flex align-center collapsible-items-wrapper"
   >
     <template v-if="!expanded">
       <slot
@@ -17,8 +17,8 @@ SPDX-License-Identifier: Apache-2.0
         {{ itemCount }}
         {{ itemCount === 1 ? itemName : (itemPlural ? itemPlural : `${itemName}s`) }}
       </slot>
-      <g-collapsable-items-button
-        class="collapsable-items-button"
+      <g-collapsible-items-button
+        class="collapsible-items-button"
         :expanded="expanded"
         @click="toggleExpanded"
       />
@@ -26,8 +26,8 @@ SPDX-License-Identifier: Apache-2.0
     <template v-else>
       <template v-if="!items.length">
         <slot name="noItems" />
-        <g-collapsable-items-button
-          class="collapsable-items-button"
+        <g-collapsible-items-button
+          class="collapsible-items-button"
           :expanded="expanded"
           @click="toggleExpanded"
         />
@@ -46,9 +46,9 @@ SPDX-License-Identifier: Apache-2.0
             name="item"
             :item="item"
           />
-          <g-collapsable-items-button
+          <g-collapsible-items-button
             v-if="i === items.length - 1"
-            class="collapsable-items-button"
+            class="collapsible-items-button"
             :expanded="expanded"
             @click="toggleExpanded"
           />
@@ -67,7 +67,7 @@ import {
   inject,
 } from 'vue'
 
-import GCollapsableItemsButton from './GCollapsableItemsButton.vue'
+import GCollapsibleItemsButton from './GCollapsibleItemsButton.vue'
 
 const props = defineProps({
   items: {
@@ -144,14 +144,14 @@ const toggleExpanded = e => {
 </script>
 
 <style lang="scss" scoped>
-  .collapsable-items-wrapper {
-    .collapsable-items-button {
+  .collapsible-items-wrapper {
+    .collapsible-items-button {
       visibility: hidden;
     }
   }
 
-  .collapsable-items-wrapper:hover{
-    .collapsable-items-button {
+  .collapsible-items-wrapper:hover{
+    .collapsible-items-button {
       visibility: visible;
     }
   }

@@ -16,11 +16,14 @@ SPDX-License-Identifier: Apache-2.0
           :class="[column.align ? `justify-${column.align}` : '', 'hover-button-container']"
         >
           <span
+            v-if="column.sortable"
             class="cursor-pointer"
             @click="() => toggleSort(column)"
           >{{ column.title }}</span>
+          <span v-else>{{ column.title }}</span>
           <v-tooltip
             v-if="column.sortable"
+            open-delay="300"
           >
             <template #activator="{ props: tooltipProps }">
               <v-btn
@@ -39,6 +42,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-tooltip>
           <v-tooltip
             v-if="!!expandedItems[column.key]"
+            open-delay="300"
           >
             <template #activator="{ props: tooltipProps }">
               <v-btn
@@ -98,10 +102,10 @@ const props = defineProps({
 const { columns, isSorted, getSortIcon, toggleSort, sortBy } = toRefs(props)
 
 const expandedItems = computed(() => {
-  return columns.value.reduce((acc, { key, expandedItemsInjectionKey }) => {
+  return columns.value.reduce((accumulator, { key, expandedItemsInjectionKey }) => {
     const expandedItems = inject(expandedItemsInjectionKey, undefined)
-    acc[key] = expandedItems
-    return acc
+    accumulator[key] = expandedItems
+    return accumulator
   }, {})
 })
 

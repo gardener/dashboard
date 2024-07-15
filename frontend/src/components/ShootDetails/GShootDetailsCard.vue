@@ -87,7 +87,7 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           <div
             v-if="hasShootWorkerGroups"
-            class="d-flex align-center"
+            class="d-flex align-center flex-wrap"
           >
             <g-worker-group
               v-for="workerGroup in shootWorkerGroups"

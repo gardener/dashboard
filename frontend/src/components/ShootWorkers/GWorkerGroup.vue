@@ -403,7 +403,7 @@ export default {
   setup () {
     const {
       shootMetadata,
-      cloudProfileName,
+      shootCloudProfileName,
     } = useShootItem()
 
     const tab = ref('overview')
@@ -411,7 +411,7 @@ export default {
     return {
       tab,
       shootMetadata,
-      cloudProfileName,
+      shootCloudProfileName,
     }
   },
   data () {
@@ -432,12 +432,12 @@ export default {
       },
     },
     machineType () {
-      const machineTypes = this.machineTypesByCloudProfileName(this.cloudProfileName)
+      const machineTypes = this.machineTypesByCloudProfileName(this.shootCloudProfileName)
       const type = get(this.workerGroup, 'machine.type')
       return find(machineTypes, ['name', type])
     },
     volumeType () {
-      const volumeTypes = this.volumeTypesByCloudProfileName(this.cloudProfileName)
+      const volumeTypes = this.volumeTypesByCloudProfileName(this.shootCloudProfileName)
       const type = get(this.workerGroup, 'volume.type')
       return find(volumeTypes, ['name', type])
     },
@@ -469,7 +469,7 @@ export default {
       return {}
     },
     machineImage () {
-      const machineImages = this.machineImagesByCloudProfileName(this.cloudProfileName)
+      const machineImages = this.machineImagesByCloudProfileName(this.shootCloudProfileName)
       const { name, version } = get(this.workerGroup, 'machine.image', {})
       return find(machineImages, { name, version }) ?? {}
     },

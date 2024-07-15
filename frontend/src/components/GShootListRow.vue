@@ -66,7 +66,7 @@ SPDX-License-Identifier: Apache-2.0
         </g-auto-hide>
       </template>
       <template v-if="cell.header.key === 'workers'">
-        <g-collapsable-items
+        <g-collapsible-items
           :items="shootWorkerGroups"
           :uid="shootMetadata.uid"
           inject-key="expandedWorkerGroups"
@@ -75,6 +75,7 @@ SPDX-License-Identifier: Apache-2.0
             <v-chip
               size="small"
               variant="tonal"
+              :color="hasShootWorkerGroupWarning ? 'warning' : 'primary'"
             >
               {{ itemCount }}
               {{ itemCount !== 1 ? 'Groups' : 'Group' }}
@@ -85,7 +86,7 @@ SPDX-License-Identifier: Apache-2.0
               />
             </v-chip>
           </template>
-          <template #noItems>
+          <template #no-items>
             <g-workerless-chip />
           </template>
           <template #item="{ item }">
@@ -94,7 +95,7 @@ SPDX-License-Identifier: Apache-2.0
               class="ma-1"
             />
           </template>
-        </g-collapsable-items>
+        </g-collapsible-items>
       </template>
       <template v-if="cell.header.key === 'createdBy'">
         <g-account-avatar :account-name="shootCreatedBy" />
@@ -143,7 +144,7 @@ SPDX-License-Identifier: Apache-2.0
         />
       </template>
       <template v-if="cell.header.key === 'accessRestrictions'">
-        <g-collapsable-items
+        <g-collapsible-items
           :items="shootAccessRestrictions"
           :uid="shootUid"
           inject-key="expandedAccessRestrictions"
@@ -159,7 +160,7 @@ SPDX-License-Identifier: Apache-2.0
               :options="item.options"
             />
           </template>
-        </g-collapsable-items>
+        </g-collapsible-items>
       </template>
       <template v-if="cell.header.key === 'ticket'">
         <g-external-link
@@ -176,12 +177,12 @@ SPDX-License-Identifier: Apache-2.0
         <template v-if="shootLastUpdatedTicketTimestamp && !shootTicketLabels.length">
           None
         </template>
-        <g-collapsable-items
+        <g-collapsible-items
           v-else
           :items="shootTicketLabels"
           :uid="shootMetadata.uid"
           inject-key="expandedTicketLabels"
-          item-name="Ticket"
+          item-name="Ticket Label"
           hide-empty
         >
           <template #item="{ item }">
@@ -189,7 +190,7 @@ SPDX-License-Identifier: Apache-2.0
               :label="item"
             />
           </template>
-        </g-collapsable-items>
+        </g-collapsible-items>
       </template>
       <template v-if="cell.header.customField">
         <v-tooltip
@@ -282,7 +283,7 @@ import GControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvail
 import GWorkerGroup from '@/components/ShootWorkers/GWorkerGroup'
 import GWorkerlessChip from '@/components/ShootWorkers/GWorkerlessChip.vue'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
-import GCollapsableItems from '@/components/GCollapsableItems'
+import GCollapsibleItems from '@/components/GCollapsibleItems'
 
 import { useProvideShootItem } from '@/composables/useShootItem'
 import { useProvideShootHelper } from '@/composables/useShootHelper'
@@ -294,6 +295,8 @@ import {
   includes,
   get,
   map,
+  some,
+  find,
 } from '@/lodash'
 
 const props = defineProps({
@@ -345,6 +348,7 @@ const {
   shootAccessRestrictions,
   shootWorkerGroups,
   shootUid,
+  shootCloudProfileName,
 } = useProvideShootItem(shootItem, {
   cloudProfileStore,
   projectStore,
@@ -450,6 +454,15 @@ function showDialog (action) {
     shootItem: shootItem.value,
   })
 }
+
+const hasShootWorkerGroupWarning = computed(() => {
+  const machineImages = cloudProfileStore.machineImagesByCloudProfileName(shootCloudProfileName.value)
+  return some(shootWorkerGroups.value, workerGroup => {
+    const { name, version } = get(workerGroup, 'machine.image', {})
+    const machineImage = find(machineImages, { name, version })
+    return machineImage?.isDeprecated
+  })
+})
 
 </script>
 
