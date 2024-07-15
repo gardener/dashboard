@@ -8452,9 +8452,9 @@ __metadata:
   linkType: hard
 
 "path-to-regexp@npm:^7.0.0":
-  version: 7.0.0
-  resolution: "path-to-regexp@npm:7.0.0"
-  checksum: 10c0/f37607cf5de1365586dbefb1ae0d239e9dcdd817556e1e3de7e251e5a60c6a507996266da6516c07e51f9f87eece1dc17e570030f4b5d5e6af9c3b41de54945f
+  version: 7.1.0
+  resolution: "path-to-regexp@npm:7.1.0"
+  checksum: 10c0/8a5e6a496e980c7e8769bfa57fa9e2b6c79a9410e59739095f0bc9ea847b5d719ba629d4840dc1428791082d73e7d4a08bc1223a365eae26653f8f0eb0e0f7cb
   languageName: node
   linkType: hard
 
