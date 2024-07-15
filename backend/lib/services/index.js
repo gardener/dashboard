@@ -7,7 +7,6 @@
 module.exports = {
   cloudprofiles: require('./cloudprofiles'),
   seeds: require('./seeds'),
-  namespaces: require('./namespaces'),
   projects: require('./projects'),
   shoots: require('./shoots'),
   cloudProviderSecrets: require('./cloudProviderSecrets'),

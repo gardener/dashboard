@@ -639,8 +639,9 @@ async function onRemoveUser ({ username }) {
   await memberStore.deleteMember(username)
   if (isCurrentUser(username) && !isAdmin.value) {
     if (projectsNotMarkedForDeletion.value.length > 0) {
-      const p1 = projectsNotMarkedForDeletion.value[0]
-      await router.push({ name: 'ShootList', params: { namespace: p1.metadata.namespace } })
+      const project = projectsNotMarkedForDeletion.value[0]
+      const namespace = project.spec.namespace
+      await router.push({ name: 'ShootList', params: { namespace } })
     } else {
       await router.push({ name: 'Home', params: {} })
     }
