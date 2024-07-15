@@ -13,20 +13,16 @@ SPDX-License-Identifier: Apache-2.0
       <v-chip
         v-bind="props"
         size="small"
+        density="comfortable"
         color="primary"
         variant="tonal"
         class="cursor-pointer my-0 ml-0"
       >
         <g-vendor-icon
           :icon="type"
-          :size="20"
+          :size="14"
         />
         <span class="px-1">{{ secretName }}</span>
-        <v-icon
-          v-if="primary"
-          icon="mdi-star"
-          size="small"
-        />
       </v-chip>
     </template>
     <v-list min-width="300">
@@ -62,6 +58,10 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { mapActions } from 'pinia'
+
+import { useSecretStore } from '@/store/secret'
+
 import GVendorIcon from '@/components/GVendorIcon'
 import GSecretDetailsItemContent from '@/components/Secrets/GSecretDetailsItemContent.vue'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
@@ -102,10 +102,6 @@ export default {
       type: Object,
       required: false,
     },
-    secret: {
-      type: Object,
-      required: false,
-    },
   },
   data () {
     return {
@@ -134,22 +130,16 @@ export default {
         title: 'Primary DNS Provider',
         value: this.primary ? 'true' : 'false',
       })
-      if (get(this.domains, 'exclude.length')) {
-        descriptions.push({
-          title: 'Exclude Domains',
-          value: join(this.domains.exclude, ', '),
-        })
-      }
       if (get(this.domains, 'include.length')) {
         descriptions.push({
           title: 'Include Domains',
           value: join(this.domains.include, ', '),
         })
       }
-      if (get(this.zones, 'exclude.length')) {
+      if (get(this.domains, 'exclude.length')) {
         descriptions.push({
-          title: 'Exclude Zones',
-          value: join(this.zones.exclude, ', '),
+          title: 'Exclude Domains',
+          value: join(this.domains.exclude, ', '),
         })
       }
       if (get(this.zones, 'include.length')) {
@@ -158,8 +148,22 @@ export default {
           value: join(this.zones.include, ', '),
         })
       }
+      if (get(this.zones, 'exclude.length')) {
+        descriptions.push({
+          title: 'Exclude Zones',
+          value: join(this.zones.exclude, ', '),
+        })
+      }
       return descriptions
     },
+    secret () {
+      return this.getCloudProviderSecretByName({ name: this.secretName, namespace: this.shootNamespace })
+    },
+  },
+  methods: {
+    ...mapActions(useSecretStore, [
+      'getCloudProviderSecretByName',
+    ]),
   },
 }
 </script>

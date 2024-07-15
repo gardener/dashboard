@@ -3,6 +3,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
+
 import { reactive } from 'vue'
 import {
   setActivePinia,
@@ -117,15 +118,6 @@ describe('composables', () => {
       const shootManifest = shootContextStore.shootManifest
       expect(shootManifest.spec.provider.workers).toMatchSnapshot()
       expect(shootManifest.spec.provider.infrastructureConfig.networks.zones).toMatchSnapshot()
-    })
-
-    it('should add dns providers', async () => {
-      shootContextStore.createShootManifest()
-      shootContextStore.addDnsProvider()
-      shootContextStore.dnsDomain = 'example.org'
-      expect(shootContextStore.dnsProviderIds).toHaveLength(1)
-      const shootManifest = shootContextStore.shootManifest
-      expect(shootManifest.spec.dns).toMatchSnapshot()
     })
   })
 })

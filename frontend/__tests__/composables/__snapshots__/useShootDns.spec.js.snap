@@ -1,0 +1,160 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`composables > useShootDns > should add extension custom domain dns provider 1`] = `
+{
+  "dns": {
+    "domain": "example.org",
+    "providers": [
+      {
+        "primary": true,
+        "secretName": "bar",
+        "type": "foo",
+      },
+    ],
+  },
+  "extensions": [
+    {
+      "providerConfig": {
+        "apiVersion": "service.dns.extensions.gardener.cloud/v1alpha1",
+        "kind": "DNSConfig",
+        "providers": [
+          {
+            "domains": {
+              "include": [
+                "example.org",
+              ],
+            },
+            "secretName": "shoot-dns-service-bar",
+            "type": "foo",
+          },
+        ],
+        "syncProvidersFromShootSpecDNS": false,
+      },
+      "type": "shoot-dns-service",
+    },
+  ],
+  "resources": [
+    {
+      "name": "shoot-dns-service-bar",
+      "resourceRef": {
+        "apiVersion": "v1",
+        "kind": "Secret",
+        "name": "bar",
+      },
+    },
+  ],
+}
+`;
+
+exports[`composables > useShootDns > should add extension dns providers 1`] = `
+{
+  "dns": {
+    "domain": "example.org",
+  },
+  "extensions": [
+    {
+      "providerConfig": {
+        "apiVersion": "service.dns.extensions.gardener.cloud/v1alpha1",
+        "kind": "DNSConfig",
+        "providers": [
+          {
+            "secretName": "shoot-dns-service-aws-route53-secret",
+            "type": "aws-route53",
+          },
+        ],
+        "syncProvidersFromShootSpecDNS": false,
+      },
+      "type": "shoot-dns-service",
+    },
+  ],
+  "resources": [
+    {
+      "name": "shoot-dns-service-aws-route53-secret",
+      "resourceRef": {
+        "apiVersion": "v1",
+        "kind": "Secret",
+        "name": "aws-route53-secret",
+      },
+    },
+  ],
+}
+`;
+
+exports[`composables > useShootDns > should add primary dns provider 1`] = `
+{
+  "dns": {
+    "domain": "example.org",
+    "providers": [
+      {
+        "primary": true,
+        "secretName": "bar",
+        "type": "foo",
+      },
+    ],
+  },
+}
+`;
+
+exports[`composables > useShootDns > should delete extension dns providers > last provider deleted 1`] = `
+{
+  "extensions": [],
+  "resources": [],
+}
+`;
+
+exports[`composables > useShootDns > should delete extension dns providers > one provider deleted 1`] = `
+{
+  "extensions": [
+    {
+      "providerConfig": {
+        "apiVersion": "service.dns.extensions.gardener.cloud/v1alpha1",
+        "kind": "DNSConfig",
+        "providers": [
+          {
+            "secretName": undefined,
+            "type": "aws-route53",
+          },
+        ],
+        "syncProvidersFromShootSpecDNS": false,
+      },
+      "type": "shoot-dns-service",
+    },
+  ],
+  "resources": [],
+}
+`;
+
+exports[`composables > useShootDns > should delete extension dns providers > two providers added 1`] = `
+{
+  "extensions": [
+    {
+      "providerConfig": {
+        "apiVersion": "service.dns.extensions.gardener.cloud/v1alpha1",
+        "kind": "DNSConfig",
+        "providers": [
+          {
+            "secretName": "shoot-dns-service-aws-route53-secret",
+            "type": "aws-route53",
+          },
+          {
+            "secretName": undefined,
+            "type": "aws-route53",
+          },
+        ],
+        "syncProvidersFromShootSpecDNS": false,
+      },
+      "type": "shoot-dns-service",
+    },
+  ],
+  "resources": [
+    {
+      "name": "shoot-dns-service-aws-route53-secret",
+      "resourceRef": {
+        "apiVersion": "v1",
+        "kind": "Secret",
+        "name": "aws-route53-secret",
+      },
+    },
+  ],
+}
+`;

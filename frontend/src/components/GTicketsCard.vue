@@ -68,6 +68,7 @@ import {
   map,
   template,
   uniq,
+  cloneDeep,
 } from '@/lodash'
 
 export default {
@@ -110,9 +111,6 @@ export default {
         name: this.shootName,
       })
     },
-    newIssue () {
-      return get(this.ticketConfig, 'newIssue', {})
-    },
     gitHubRepoUrl () {
       return get(this.ticketConfig, 'gitHubRepoUrl')
     },
@@ -127,7 +125,7 @@ export default {
       return imageNames.join(', ')
     },
     ticketLink () {
-      const newIssue = this.newIssue
+      const newIssue = cloneDeep(get(this.ticketConfig, 'newIssue', {}))
       if (!newIssue.title) {
         newIssue.title = `[${this.shootProjectName}/${this.shootName}]`
       }

@@ -43,6 +43,8 @@ import {
 import { v4 as uuidv4 } from '@/utils/uuid'
 import utils from '@/utils'
 
+import { useShootDns } from './useShootDns'
+
 import {
   get,
   set,
@@ -111,7 +113,6 @@ export function createShootContextComposable (options = {}) {
 
   const normalizedManifest = computed(() => {
     const object = cloneDeep(manifest.value)
-    set(object, 'spec.dns', dns.value)
     set(object, 'spec.hibernation.schedules', hibernationSchedules.value)
     if (!workerless.value) {
       set(object, 'spec.provider.infrastructureConfig.networks.zones', providerInfrastructureConfigNetworksZones.value)
@@ -123,7 +124,6 @@ export function createShootContextComposable (options = {}) {
   function setShootManifest (value) {
     initialManifest.value = value
     manifest.value = cloneDeep(initialManifest.value)
-    dns.value = get(manifest.value, 'spec.dns', {})
     hibernationSchedules.value = get(manifest.value, 'spec.hibernation.schedules', [])
     if (shootCreationTimestamp.value) {
       providerState.workerless = isEmpty(providerWorkers.value)
@@ -137,7 +137,6 @@ export function createShootContextComposable (options = {}) {
         namespace: get(options, 'namespace', authzStore.namespace),
       },
     }
-    dns.value = {}
     hibernationSchedules.value = []
     workerless.value = get(options, 'workerless', false)
     const defaultProviderType = head(cloudProfileStore.sortedInfrastructureKindList)
@@ -839,220 +838,26 @@ export function createShootContextComposable (options = {}) {
   })
 
   /* dns */
-  const dnsState = reactive({
-    domain: undefined,
-    providers: {},
-    providerIds: [],
-    primaryProviderId: undefined,
+  const {
+    dnsDomain,
+    dnsPrimaryProviderType,
+    dnsPrimaryProviderSecretName,
+    dnsServiceExtensionProviders,
+    hasDnsServiceExtensionProviderForCustomDomain,
+    addDnsServiceExtensionProviderForCustomDomain,
+    addDnsServiceExtensionProvider,
+    deleteDnsServiceExtensionProvider,
+    getDnsServiceExtensionResourceName,
+    resetDnsPrimaryProvider,
+    forceMigrateSyncDnsProvidersToFalse,
+    addExtensionDnsProviderResourceRef,
+    setResource,
+    deleteResource,
+    getResourceRefName,
+  } = useShootDns(manifest, {
+    gardenerExtensionStore,
+    secretStore,
   })
-
-  const dns = computed({
-    get () {
-      const providers = map(dnsProviderIds.value, id => {
-        const {
-          type,
-          secretName,
-          excludeDomains,
-          includeDomains,
-          excludeZones,
-          includeZones,
-        } = dnsProviders.value[id]
-        const primary = dnsPrimaryProviderId.value === id
-        const provider = {
-          type,
-          secretName,
-          primary,
-        }
-        if (!isEmpty(excludeDomains)) {
-          set(provider, 'domains.exclude', [...excludeDomains])
-        }
-        if (!isEmpty(includeDomains)) {
-          set(provider, 'domains.include', [...includeDomains])
-        }
-        if (!isEmpty(excludeZones)) {
-          set(provider, 'zones.exclude', [...excludeZones])
-        }
-        if (!isEmpty(includeZones)) {
-          set(provider, 'zones.include', [...includeZones])
-        }
-        return provider
-      })
-      const domain = dnsDomain.value
-      const dns = { providers }
-      if (domain) {
-        dns.domain = domain
-      }
-      return dns
-    },
-    set ({ domain, providers }) {
-      const dnsProviderList = map(providers, provider => {
-        const id = uuidv4()
-        const {
-          type,
-          secretName,
-          primary = false,
-          domains: {
-            exclude: excludeDomains = [],
-            include: includeDomains = [],
-          } = {},
-          zones: {
-            exclude: excludeZones = [],
-            include: includeZones = [],
-          } = {},
-        } = provider
-        if (primary) {
-          dnsPrimaryProviderId.value = id
-        }
-        let readonly = false
-        if (!isNewCluster.value) {
-          const secret = findDnsProviderSecret(type, secretName)
-          // If no secret binding was found for a given secretName and the cluster is not new,
-          // then we assume that the secret exists and was created by hand.
-          // The DNS provider should not be changed in this case.
-          if (!secret) {
-            readonly = true
-          }
-        }
-        return {
-          id,
-          type,
-          secretName,
-          excludeDomains: [...excludeDomains],
-          includeDomains: [...includeDomains],
-          excludeZones: [...excludeZones],
-          includeZones: [...includeZones],
-          readonly,
-        }
-      })
-      dnsDomain.value = domain
-      dnsProviders.value = keyBy(dnsProviderList, 'id')
-      dnsProviderIds.value = map(dnsProviderList, 'id')
-      if (!domain && isEmpty(providers)) {
-        unset(manifest.value, 'spec.dns')
-      } else {
-        set(manifest.value, 'spec.dns', { domain, providers })
-      }
-    },
-  })
-
-  const dnsDomain = computed({
-    get () {
-      return dnsState.domain
-    },
-    set (value) {
-      dnsState.domain = value
-      resetDnsPrimaryProviderId()
-    },
-  })
-
-  const dnsProviders = computed({
-    get () {
-      return dnsState.providers
-    },
-    set (value) {
-      dnsState.providers = value
-    },
-  })
-
-  const dnsProviderIds = computed({
-    get () {
-      return dnsState.providerIds
-    },
-    set (value) {
-      dnsState.providerIds = value
-    },
-  })
-
-  const dnsPrimaryProviderId = computed({
-    get () {
-      return dnsState.primaryProviderId
-    },
-    set (value) {
-      dnsState.primaryProviderId = value
-    },
-  })
-
-  function resetDnsPrimaryProviderId () {
-    if (!dnsDomain.value) {
-      dnsPrimaryProviderId.value = null
-    } else if (!dnsPrimaryProviderId.value) {
-      const defaultDnsPrimaryProvider = head(dnsProvidersWithPrimarySupport.value)
-      const id = get(defaultDnsPrimaryProvider, 'id')
-      if (id) {
-        dnsPrimaryProviderId.value = id
-      }
-    }
-  }
-
-  const dnsPrimaryProvider = computed({
-    get () {
-      return dnsProviders.value[dnsPrimaryProviderId.value]
-    },
-    set (value) {
-      dnsPrimaryProviderId.value = get(value, 'id')
-    },
-  })
-
-  const dnsProvidersWithPrimarySupport = computed(() => {
-    const hasPrimarySupport = type => includes(gardenerExtensionStore.dnsProviderTypesWithPrimarySupport, type)
-    return filter(dnsProviders.value, ({ type, secretName }) => hasPrimarySupport(type) && !!secretName)
-  })
-
-  function createDnsProvider () {
-    const type = head(gardenerExtensionStore.dnsProviderTypes)
-    const secrets = secretStore.dnsSecretsByProviderKind(type)
-    const secret = head(secrets)
-    const secretName = get(secret, 'metadata.name')
-    const id = uuidv4()
-    const object = {
-      type,
-      secretName,
-      excludeDomains: [],
-      includeDomains: [],
-      excludeZones: [],
-      includeZones: [],
-      readonly: false,
-    }
-    Object.defineProperty(object, 'id', { value: id })
-    return object
-  }
-
-  function addDnsProvider () {
-    const object = createDnsProvider()
-    const id = get(object, 'id')
-    dnsProviderIds.value.push(id)
-    dnsProviders.value[id] = object
-    resetDnsPrimaryProviderId()
-  }
-
-  function patchDnsProvider (object) {
-    const id = get(object, 'id')
-    const index = dnsProviderIds.value.indexOf(id)
-    if (index !== -1 && has(dnsProviders.value, id)) {
-      for (const [key, value] of Object.entries(object)) {
-        dnsProviders.value[id][key] = value
-      }
-    }
-  }
-
-  function deleteDnsProvider (id) {
-    const index = dnsProviderIds.value.indexOf(id)
-    if (index !== -1) {
-      dnsProviderIds.value.splice(index, 1)
-    }
-    delete dnsProviders.value[id]
-    if (isEmpty(dnsProviderIds.value)) {
-      dnsDomain.value = null
-      dnsPrimaryProviderId.value = null
-    } else if (dnsPrimaryProviderId.value === id) {
-      dnsPrimaryProviderId.value = null
-    }
-  }
-
-  function findDnsProviderSecret (type, secretName) {
-    const secrets = secretStore.dnsSecretsByProviderKind(type)
-    return find(secrets, ['metadata.secretRef.name', secretName])
-  }
 
   /* accessRestrictions */
   const {
@@ -1190,15 +995,21 @@ export function createShootContextComposable (options = {}) {
     controlPlaneHighAvailabilityFailureToleranceType,
     controlPlaneHighAvailabilityFailureToleranceTypeChangeAllowed,
     /* dns */
-    dns,
     dnsDomain,
-    dnsProviders,
-    dnsProviderIds,
-    dnsPrimaryProvider,
-    dnsProvidersWithPrimarySupport,
-    addDnsProvider,
-    patchDnsProvider,
-    deleteDnsProvider,
+    dnsPrimaryProviderType,
+    dnsPrimaryProviderSecretName,
+    dnsServiceExtensionProviders,
+    hasDnsServiceExtensionProviderForCustomDomain,
+    addDnsServiceExtensionProviderForCustomDomain,
+    addDnsServiceExtensionProvider,
+    deleteDnsServiceExtensionProvider,
+    getDnsServiceExtensionResourceName,
+    resetDnsPrimaryProvider,
+    forceMigrateSyncDnsProvidersToFalse,
+    addExtensionDnsProviderResourceRef,
+    setResource,
+    deleteResource,
+    getResourceRefName,
     /* accessRestrictions */
     getAccessRestrictionValue,
     setAccessRestrictionValue,
