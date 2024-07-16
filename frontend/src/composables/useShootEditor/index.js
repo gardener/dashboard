@@ -23,6 +23,7 @@ import { useLocalStorageStore } from '@/store/localStorage'
 
 import { useApi } from '@/composables/useApi'
 import { useLogger } from '@/composables/useLogger'
+import { useEditorLineHighlighter } from '@/composables/useEditorLineHighlighter'
 
 import {
   createEditor,
@@ -43,6 +44,7 @@ export function useShootEditor (initialValue, options = {}) {
     authzStore = useAuthzStore(),
     projectStore = useProjectStore(),
     localStorageStore = useLocalStorageStore(),
+    disableLineHighlighting = false,
   } = options
 
   const cm = shallowRef(null)
@@ -64,6 +66,8 @@ export function useShootEditor (initialValue, options = {}) {
     type: undefined,
     description: undefined,
   })
+
+  let editorLineHighlighter = null
 
   const schemaDefinition = computedAsync(() => {
     return api.getShootSchemaDefinition()
@@ -155,7 +159,7 @@ export function useShootEditor (initialValue, options = {}) {
         scrollbarStyle: 'native',
         lineNumbers: true,
         lineWrapping: true,
-        viewportMargin: Infinity, // make sure the whole shoot resource is laoded so that the browser's text search works on it
+        viewportMargin: Infinity, // make sure the whole shoot resource is loaded so that the browser's text search works on it
         readOnly: isReadOnly.value,
         extraKeys: getExtraKeys(),
         hintOptions: {
@@ -169,7 +173,17 @@ export function useShootEditor (initialValue, options = {}) {
         touched.value = true
         clean.value = instance.doc.isClean(generation.value)
         historySize.value = instance.doc.historySize()
+
+        if (editorLineHighlighter) {
+          editorLineHighlighter.clearHighlightedLines()
+        }
       })
+
+      if (!disableLineHighlighting) {
+        editorLineHighlighter = useEditorLineHighlighter(instance)
+        editorLineHighlighter.attachGutterClickListener()
+      }
+
       let cmTooltipFnTimerID
       const CodeMirror = instance.constructor
       CodeMirror.on(element, 'mouseover', e => {
@@ -190,19 +204,35 @@ export function useShootEditor (initialValue, options = {}) {
       })
       resetEditor()
       refreshEditor()
+
+      if (editorLineHighlighter) {
+        const { selectionBoundary, highlightBoundary } = editorLineHighlighter
+        const { startLine } = selectionBoundary?.value || {}
+        if (startLine !== null) {
+          instance.scrollIntoView({ line: startLine, ch: 0 })
+          instance.setCursor({ line: startLine, ch: 0 })
+          if (!disableLineHighlighting) {
+            highlightBoundary(selectionBoundary.value)
+          }
+        }
+      }
     } catch (err) {
       logger.error('Failed to create codemirror instance: %s', err.message)
     }
   }
 
   function destroyEditor () {
+    if (editorLineHighlighter) {
+      editorLineHighlighter.detachAllListeners()
+      editorLineHighlighter = null
+    }
     if (cm.value) {
       const element = cm.value.doc.cm.getWrapperElement()
       if (element && element.remove) {
         element.remove()
       }
+      cm.value = null
     }
-    cm.value = null
   }
 
   function getDocumentValue () {
@@ -242,6 +272,7 @@ export function useShootEditor (initialValue, options = {}) {
 
   function resetEditor () {
     setEditorValue(shootItem.value)
+    highlightBoundary()
   }
 
   function refreshEditor () {
@@ -295,6 +326,13 @@ export function useShootEditor (initialValue, options = {}) {
     }
   }
 
+  function highlightBoundary () {
+    if (editorLineHighlighter) {
+      const { selectionBoundary, highlightBoundary } = editorLineHighlighter
+      highlightBoundary(selectionBoundary.value)
+    }
+  }
+
   watchEffect(() => {
     if (cm.value && schemaDefinition.value) {
       const shootProperties = get(schemaDefinition.value, 'properties', {})
@@ -321,6 +359,7 @@ export function useShootEditor (initialValue, options = {}) {
   watch(shootItem, (newValue, oldValue) => {
     if (!touched.value) {
       setEditorValue(newValue)
+      highlightBoundary()
       return
     }
     for (const path of ['spec', 'metadata.annotations', 'metadata.labels']) {
