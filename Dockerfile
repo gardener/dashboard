@@ -56,7 +56,7 @@ RUN yarn workspace @gardener-dashboard/monitor run test --coverage
 ############# node-scratch #############
 FROM scratch as node-scratch
 
-ENV NODE_ENV "production"
+ENV NODE_ENV="production"
 
 COPY --from=builder /volume /
 
