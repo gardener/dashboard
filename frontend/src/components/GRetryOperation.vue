@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
     <template #activator="{ props }">
       <v-btn
         v-bind="props"
-        density="comfortable"
+        density="compact"
         variant="text"
         icon="mdi-reload"
         color="primary"
