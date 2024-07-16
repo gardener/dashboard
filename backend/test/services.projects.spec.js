@@ -6,7 +6,7 @@
 
 'use strict'
 
-const { PreconditionFailed } = require('http-errors')
+const { PreconditionFailed, InternalServerError } = require('http-errors')
 const projects = require('../lib/services/projects')
 const shoots = require('../lib/services/shoots')
 const authorization = require('../lib/services/authorization')
@@ -208,6 +208,72 @@ describe('services/projects', () => {
 
       await expect(projects.create({ user, body })).rejects.toThrow('Timeout')
     })
+
+    it('should throw an InternalServerError if project is deleted', async () => {
+      const body = { metadata: { name: 'foo' } }
+      const user = createUser('creator@bar.com')
+      user.client['core.gardener.cloud'].projects.create.mockResolvedValue({
+        ...body,
+        status: { phase: 'Pending' }
+      })
+      dashboardClient['core.gardener.cloud'].projects.watch.mockResolvedValue({
+        until: jest.fn((isProjectReady) => {
+          return new Promise((resolve, reject) => {
+            setTimeout(() => {
+              try {
+                isProjectReady({ type: 'DELETE', object: { metadata: { name: 'foo' } } })
+              } catch (error) {
+                reject(error)
+              }
+            }, 10) // Simulate delay before project is deleted
+          })
+        })
+      })
+
+      await expect(projects.create({ user, body })).rejects.toThrow(InternalServerError)
+    })
+
+    it('should return ok: true when project status is Ready', async () => {
+      const body = { metadata: { name: 'foo' } }
+      const user = createUser('creator@bar.com')
+      user.client['core.gardener.cloud'].projects.create.mockResolvedValue({
+        ...body,
+        status: { phase: 'Pending' }
+      })
+      dashboardClient['core.gardener.cloud'].projects.watch.mockResolvedValue({
+        until: jest.fn((isProjectReady) => {
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              resolve(isProjectReady({ type: 'MODIFIED', object: { ...body, status: { phase: 'Ready' } } }))
+            }, 10) // Simulate delay before project becomes ready
+          })
+        })
+      })
+
+      const result = await projects.create({ user, body })
+      expect(result).toMatchObject({ ok: true })
+    })
+
+    it('should return ok: false when project status is not Ready', async () => {
+      const body = { metadata: { name: 'foo' } }
+      const user = createUser('creator@bar.com')
+      user.client['core.gardener.cloud'].projects.create.mockResolvedValue({
+        ...body,
+        status: { phase: 'Pending' }
+      })
+      dashboardClient['core.gardener.cloud'].projects.watch.mockResolvedValue({
+        until: jest.fn((isProjectReady) => {
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              resolve(isProjectReady({ type: 'MODIFIED', object: { ...body, status: { phase: 'Pending' } } }))
+            }, 10) // Simulate delay before project remains pending
+          })
+        })
+      })
+
+      const result = await projects.create({ user, body })
+      expect(result).toMatchObject({ ok: false })
+    })
   })
 
   describe('#read', () => {
@@ -249,6 +315,38 @@ describe('services/projects', () => {
       shoots.list.mockResolvedValue({ items: [{}] })
 
       await expect(projects.remove({ user, name: 'foo' })).rejects.toThrow(PreconditionFailed)
+    })
+
+    it('should revert the annotation if deletion fails', async () => {
+      const user = createUser('remover@bar.com')
+      const projectName = 'foo'
+      const error = new Error('Deletion failed')
+
+      shoots.list.mockResolvedValue({ items: [] })
+
+      user.client['core.gardener.cloud'].projects.mergePatch.mockResolvedValue({})
+
+      user.client['core.gardener.cloud'].projects.delete.mockRejectedValue(error)
+
+      await expect(projects.remove({ user, name: projectName })).rejects.toThrow('Deletion failed')
+
+      expect(user.client['core.gardener.cloud'].projects.mergePatch).toHaveBeenCalledTimes(2)
+
+      expect(user.client['core.gardener.cloud'].projects.mergePatch).toHaveBeenCalledWith(projectName, {
+        metadata: {
+          annotations: {
+            'confirmation.gardener.cloud/deletion': 'true'
+          }
+        }
+      })
+
+      expect(user.client['core.gardener.cloud'].projects.mergePatch).toHaveBeenCalledWith(projectName, {
+        metadata: {
+          annotations: {
+            'confirmation.gardener.cloud/deletion': null
+          }
+        }
+      })
     })
   })
 })
