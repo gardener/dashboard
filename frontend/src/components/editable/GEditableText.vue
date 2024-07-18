@@ -114,7 +114,7 @@ export default {
   props: {
     modelValue: {
       type: String,
-      required: true,
+      default: '',
     },
     save: {
       type: Function,

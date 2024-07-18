@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -12,7 +12,7 @@ const { metricsRoute } = require('../middleware')
 
 const router = module.exports = express.Router()
 
-const metricsMiddleware = metricsRoute('namespaces')
+const metricsMiddleware = metricsRoute('project')
 
 router.route('/')
   .all(metricsMiddleware)
@@ -34,12 +34,12 @@ router.route('/')
     }
   })
 
-router.route('/:namespace')
+router.route('/:project')
   .all(metricsMiddleware)
   .get(async (req, res, next) => {
     try {
       const user = req.user
-      const name = req.params.namespace
+      const name = req.params.project
       res.send(await projects.read({ user, name }))
     } catch (err) {
       next(err)
@@ -48,7 +48,7 @@ router.route('/:namespace')
   .put(async (req, res, next) => {
     try {
       const user = req.user
-      const name = req.params.namespace
+      const name = req.params.project
       const body = req.body
       res.send(await projects.patch({ user, name, body }))
     } catch (err) {
@@ -58,7 +58,7 @@ router.route('/:namespace')
   .patch(async (req, res, next) => {
     try {
       const user = req.user
-      const name = req.params.namespace
+      const name = req.params.project
       const body = req.body
       res.send(await projects.patch({ user, name, body }))
     } catch (err) {
@@ -68,7 +68,7 @@ router.route('/:namespace')
   .delete(async (req, res, next) => {
     try {
       const user = req.user
-      const name = req.params.namespace
+      const name = req.params.project
       res.send(await projects.remove({ user, name }))
     } catch (err) {
       next(err)

@@ -7,7 +7,7 @@
 'use strict'
 
 const { AssertionError } = require('assert').strict
-const { merge } = require('lodash')
+const { merge, cloneDeep } = require('lodash')
 const {
   encodeBase64,
   decodeBase64,
@@ -18,6 +18,7 @@ const {
   filterBySelectors,
   constants,
   trimObjectMetadata,
+  trimProject,
   parseRooms
 } = require('../lib/utils')
 
@@ -86,6 +87,42 @@ describe('utils', function () {
         }
       })
       expect(trimObjectMetadata({ metadata: extendedMetadata })).toEqual({ metadata })
+    })
+
+    it('should trim project metadata and remove spec.members', () => {
+      const name = 'test'
+      const managedFields = 'managedFields'
+      const lastAppliedConfiguration = 'last-applied-configuration'
+      const metadata = {
+        name,
+        annotations: {
+          foo: 'bar'
+        }
+      }
+      const spec = {
+        members: ['member1', 'member2']
+      }
+      const project = { metadata, spec }
+
+      // Test case where metadata does not have managedFields or last-applied-configuration
+      expect(trimProject(cloneDeep(project))).toEqual({
+        metadata,
+        spec: {}
+      })
+
+      // Test case where metadata has managedFields and last-applied-configuration
+      const extendedMetadata = merge(cloneDeep(metadata), {
+        managedFields,
+        annotations: {
+          'kubectl.kubernetes.io/last-applied-configuration': lastAppliedConfiguration
+        }
+      })
+      const extendedProject = { metadata: extendedMetadata, spec }
+
+      expect(trimProject(cloneDeep(extendedProject))).toEqual({
+        metadata,
+        spec: {}
+      })
     })
 
     it('should parse labelSelectors', () => {
