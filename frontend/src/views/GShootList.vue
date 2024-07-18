@@ -86,7 +86,7 @@ SPDX-License-Identifier: Apache-2.0
                 density="compact"
                 class="g-table-search-field mr-3"
                 @update:model-value="onUpdateShootSearch"
-                @keyup.esc="resetShootSearch"
+                @keyup.esc="setShootSearch(null)"
               />
             </template>
             Search terms are <span class="font-weight-bold">ANDed</span>.<br>
@@ -231,7 +231,8 @@ SPDX-License-Identifier: Apache-2.0
 import {
   ref,
   provide,
-  defineAsyncComponent,
+  toRef,
+  watch,
 } from 'vue'
 import {
   mapState,
@@ -242,6 +243,7 @@ import {
   VDataTableVirtual,
   VDataTable,
 } from 'vuetify/components'
+import { useUrlSearchParams } from '@vueuse/core'
 
 import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
@@ -258,6 +260,10 @@ import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
 import GIconBase from '@/components/icons/GIconBase.vue'
 import GCertifiedKubernetes from '@/components/icons/GCertifiedKubernetes.vue'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
+import GShootAccessCard from '@/components/ShootDetails/GShootAccessCard.vue'
+
+import { useProjectShootCustomFields } from '@/composables/useProjectShootCustomFields'
+import { isCustomField } from '@/composables/useProjectShootCustomFields/helper'
 
 import { mapTableHeader } from '@/utils'
 
@@ -270,7 +276,6 @@ import {
   map,
   some,
   sortBy,
-  startsWith,
   upperCase,
 } from '@/lodash'
 
@@ -279,7 +284,7 @@ export default {
     GToolbar,
     GShootListRow,
     GShootListProgress,
-    GShootAccessCard: defineAsyncComponent(() => import('@/components/ShootDetails/GShootAccessCard.vue')),
+    GShootAccessCard,
     GIconBase,
     GCertifiedKubernetes,
     GTableColumnSelection,
@@ -294,27 +299,72 @@ export default {
     })
   },
   beforeRouteUpdate (to, from, next) {
-    this.resetShootSearch()
+    if (to.path !== from.path) {
+      this.setShootSearch(null)
+    }
     this.updateTableSettings()
     this.focusModeInternal = false
     next()
   },
   beforeRouteLeave (to, from, next) {
-    this.resetShootSearch()
+    this.setShootSearch(null)
     this.focusModeInternal = false
     next()
   },
   setup () {
+    const projectStore = useProjectStore()
+
     const activePopoverKey = ref('')
     provide('activePopoverKey', activePopoverKey)
+
+    const projectItem = toRef(projectStore, 'project')
+    const {
+      shootCustomFields,
+    } = useProjectShootCustomFields(projectItem)
+
+    const params = useUrlSearchParams('hash-params')
+    const shootSearch = ref(params.q)
+    const debouncedShootSearch = ref(shootSearch.value)
+
+    function setShootSearch (value) {
+      debouncedShootSearch.value = shootSearch.value = value
+    }
+
+    const setDebouncedShootSearch = debounce(() => {
+      debouncedShootSearch.value = shootSearch.value
+    }, 300)
+
+    watch(() => params.q, value => {
+      if (shootSearch.value !== value) {
+        setShootSearch(value)
+      }
+    })
+
+    watch(debouncedShootSearch, value => {
+      if (!value) {
+        params.q = null
+      } else if (params.q !== value) {
+        params.q = value
+      }
+    })
+
+    function onUpdateShootSearch (value) {
+      shootSearch.value = value
+
+      setDebouncedShootSearch()
+    }
+
     return {
       activePopoverKey,
+      shootCustomFields,
+      shootSearch,
+      debouncedShootSearch,
+      setShootSearch,
+      onUpdateShootSearch,
     }
   },
   data () {
     return {
-      shootSearch: '',
-      debouncedShootSearch: '',
       dialog: null,
       page: 1,
       selectedColumns: undefined,
@@ -337,8 +387,6 @@ export default {
     }),
     ...mapState(useProjectStore, [
       'projectName',
-      'shootCustomFieldList',
-      'shootCustomFields',
     ]),
     ...mapState(useSocketStore, [
       'connected',
@@ -578,7 +626,7 @@ export default {
     },
     customHeaders () {
       const isSortable = value => value && !this.focusModeInternal
-      const customHeaders = filter(this.shootCustomFieldList, ['showColumn', true])
+      const customHeaders = filter(this.shootCustomFields, ['showColumn', true])
 
       return map(customHeaders, ({
         align = 'left',
@@ -757,7 +805,7 @@ export default {
   },
   watch: {
     sortBy (sortBy) {
-      if (some(sortBy, value => startsWith(value.key, 'Z_'))) {
+      if (some(sortBy, value => isCustomField(value.key))) {
         this.shootCustomSortBy = sortBy
       } else {
         this.shootCustomSortBy = null // clear project specific options
@@ -775,10 +823,6 @@ export default {
       'setFocusMode',
       'setSortBy',
     ]),
-    resetShootSearch () {
-      this.shootSearch = null
-      this.debouncedShootSearch = null
-    },
     async showDialog (args) {
       switch (args.action) {
         case 'access':
@@ -841,14 +885,6 @@ export default {
       const filters = this.shootListFilters
       return get(filters, key, false)
     },
-    onUpdateShootSearch (value) {
-      this.shootSearch = value
-
-      this.setDebouncedShootSearch()
-    },
-    setDebouncedShootSearch: debounce(function () {
-      this.debouncedShootSearch = this.shootSearch
-    }, 500),
   },
 }
 </script>

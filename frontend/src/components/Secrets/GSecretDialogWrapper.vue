@@ -24,6 +24,7 @@ import VsphereDialog from '@/components/Secrets/GSecretDialogVSphere'
 import CloudflareDialog from '@/components/Secrets/GSecretDialogCloudflare'
 import InfobloxDialog from '@/components/Secrets/GSecretDialogInfoblox'
 import NetlifyDialog from '@/components/Secrets/GSecretDialogNetlify'
+import DDnsDialog from '@/components/Secrets/GSecretDialogDDns'
 import DeleteDialog from '@/components/Secrets/GSecretDialogDelete'
 import HcloudDialog from '@/components/Secrets/GSecretDialogHCloud'
 import GenericDialog from '@/components/Secrets/GSecretDialogGeneric'
@@ -45,6 +46,7 @@ const components = {
   CloudflareDialog,
   InfobloxDialog,
   NetlifyDialog,
+  DDnsDialog,
   HcloudDialog,
   GenericDialog,
   DeleteDialog,
@@ -75,6 +77,8 @@ export default {
       switch (this.visibleDialog) {
         case 'google-clouddns':
           return 'GcpDialog'
+        case 'rfc2136':
+          return 'DDnsDialog'
         default: {
           const name = upperFirst(head(split(this.visibleDialog, '-')))
           const componentName = `${name}Dialog`

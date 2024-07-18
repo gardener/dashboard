@@ -17,6 +17,7 @@ import GDefault from '@/layouts/GDefault.vue'
 import GError from '@/views/GError.vue'
 import GNotFound from '@/views/GNotFound.vue'
 import GProjectPlaceholder from '@/views/GProjectPlaceholder.vue'
+import GNewShootPlaceholder from '@/views/GNewShootPlaceholder.vue'
 import GNewShootEditor from '@/views/GNewShootEditor.vue'
 import GShootItemPlaceholder from '@/views/GShootItemPlaceholder.vue'
 import GShootItemEditor from '@/views/GShootItemEditor.vue'
@@ -101,8 +102,7 @@ export function createRoutes () {
       children: [
         { path: '', redirect: 'shoots' },
         shootListRoute('shoots'),
-        newShootRoute('shoots/+'),
-        newShootEditorRoute('shoots/+/yaml'),
+        newShootHierarchy('shoots/+'),
         shootItemHierarchy('shoots/:name'),
         secretListRoute('secrets'),
         secretItemRoute('secrets/:name'),
@@ -110,6 +110,25 @@ export function createRoutes () {
         administrationRoute('administration'),
         { path: 'term', redirect: 'term/garden' },
         gardenTerminalRoute('term/garden'),
+        {
+          path: ':pathMatch(.*)*',
+          component: GNotFound,
+          meta: {
+            breadcrumbs: notFoundBreadcrumbs,
+          },
+        },
+      ],
+    }
+  }
+
+  /* New Shoot Hierachy "/namespace/:namespace/shoots/+" */
+  function newShootHierarchy (path) {
+    return {
+      path,
+      component: GNewShootPlaceholder,
+      children: [
+        newShootRoute(''),
+        newShootEditorRoute('yaml'),
         {
           path: ':pathMatch(.*)*',
           component: GNotFound,

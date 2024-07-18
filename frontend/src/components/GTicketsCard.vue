@@ -68,6 +68,7 @@ import {
   map,
   template,
   uniq,
+  cloneDeep,
 } from '@/lodash'
 
 export default {
@@ -85,7 +86,7 @@ export default {
       shootCloudProviderKind,
       shootRegion,
       shootSeedName,
-      shootSelectedAccessRestrictions,
+      shootAccessRestrictions,
     } = useShootItem()
 
     return {
@@ -97,7 +98,7 @@ export default {
       shootCloudProviderKind,
       shootRegion,
       shootSeedName,
-      shootSelectedAccessRestrictions,
+      shootAccessRestrictions,
     }
   },
   computed: {
@@ -109,9 +110,6 @@ export default {
         projectName: this.shootProjectName,
         name: this.shootName,
       })
-    },
-    newIssue () {
-      return get(this.ticketConfig, 'newIssue', {})
     },
     gitHubRepoUrl () {
       return get(this.ticketConfig, 'gitHubRepoUrl')
@@ -127,7 +125,7 @@ export default {
       return imageNames.join(', ')
     },
     ticketLink () {
-      const newIssue = this.newIssue
+      const newIssue = cloneDeep(get(this.ticketConfig, 'newIssue', {}))
       if (!newIssue.title) {
         newIssue.title = `[${this.shootProjectName}/${this.shootName}]`
       }
@@ -143,7 +141,7 @@ export default {
         projectName: this.shootProjectName,
         utcDateTimeNow: moment().utc().format(),
         seedName: this.shootSeedName,
-        accessRestrictions: this.shootSelectedAccessRestrictions,
+        accessRestrictions: this.shootAccessRestrictions,
       }
 
       const baseUrl = new URL(this.gitHubRepoUrl)

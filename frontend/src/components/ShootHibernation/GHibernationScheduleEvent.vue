@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
           return-object
           :error-messages="getErrorMessages(v$.selectedDays)"
           chips
-          label="Weekdays on which this rule shall be active"
+          label="Days of the week on which this rule shall be active"
           multiple
           closable-chips
           variant="underlined"
@@ -74,16 +74,15 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapActions } from 'pinia'
 import {
   required,
   requiredIf,
 } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
-import { useShootContextStore } from '@/store/shootContext'
-
 import GTimeTextField from '@/components/GTimeTextField.vue'
+
+import { useShootContext } from '@/composables/useShootContext'
 
 import {
   withMessage,
@@ -119,8 +118,15 @@ export default {
     },
   },
   setup () {
+    const {
+      getHibernationScheduleEvent,
+      removeHibernationScheduleEvent,
+    } = useShootContext()
+
     return {
       v$: useVuelidate(),
+      getHibernationScheduleEvent,
+      removeHibernationScheduleEvent,
     }
   },
   validations () {
@@ -246,10 +252,6 @@ export default {
     },
   },
   methods: {
-    ...mapActions(useShootContextStore, [
-      'getHibernationScheduleEvent',
-      'removeHibernationScheduleEvent',
-    ]),
     touchIfNothingFocused () {
       if (!get(this, '$refs.selectedDays.isFocused') &&
           !get(this, '$refs.wakeUpTime.isFocused') &&

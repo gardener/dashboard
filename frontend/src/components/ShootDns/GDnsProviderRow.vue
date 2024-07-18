@@ -5,114 +5,95 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div>
-    <!-- do not wrap v-row with tooltip component as this breaks expand (appear) animation -->
-    <v-tooltip
-      location="top"
-      :disabled="!dnsProvider.readonly"
-      open-delay="0"
-      :activator="$refs.dnsRow"
-    >
-      <span class="font-weight-bold">You cannot edit this DNS Provider</span><br>
-      SecretBinding for secret {{ dnsProvider.secretName }} not found in poject namespace
-    </v-tooltip>
-    <div
-      ref="dnsRow"
-      class="d-flex flex-nowrap align-center"
-    >
-      <div class="d-flex flex-wrap">
-        <div class="regular-input">
-          <v-select
-            v-model="dnsProviderType"
-            :disabled="dnsProvider.readonly || primaryReadonly"
-            color="primary"
-            :items="dnsProviderTypes"
-            :error-messages="getErrorMessages(v$.dnsProviderType)"
-            label="Dns Provider Type"
-            :hint="typeHint"
-            persistent-hint
-            variant="underlined"
-            @change="v$.dnsProviderType.$touch()"
-            @blur="v$.dnsProviderType.$touch()"
-          >
-            <template #item="{ props }">
-              <v-list-item v-bind="props">
-                <template #prepend>
-                  <g-vendor-icon :icon="props.value" />
-                </template>
-              </v-list-item>
-            </template>
-            <template #selection="{ item }">
-              <div class="d-flex">
-                <g-vendor-icon
-                  :icon="item.value"
-                  class="mr-2"
-                />
-                {{ item.title }}
-              </div>
-            </template>
-          </v-select>
-        </div>
-        <div class="regular-input">
-          <g-select-secret
-            v-model="dnsProviderSecret"
-            :disabled="dnsProvider.readonly"
-            :dns-provider-kind="dnsProviderType"
-            register-vuelidate-as="dnsProviderSecret"
-          />
-        </div>
-        <div class="regular-input">
-          <v-combobox
-            v-model="dnsProvider.excludeDomains"
-            :disabled="dnsProvider.readonly"
-            label="Exclude Domains"
-            multiple
-            closable-chips
-            variant="underlined"
-          />
-        </div>
-        <div class="regular-input">
-          <v-combobox
-            v-model="dnsProvider.includeDomains"
-            :disabled="dnsProvider.readonly"
-            label="Include Domains"
-            multiple
-            closable-chips
-            variant="underlined"
-          />
-        </div>
-        <div class="regular-input">
-          <v-combobox
-            v-model="dnsProvider.excludeZones"
-            :disabled="dnsProvider.readonly"
-            label="Exclude Zones"
-            multiple
-            closable-chips
-            variant="underlined"
-          />
-        </div>
-        <div class="regular-input">
-          <v-combobox
-            v-model="dnsProvider.includeZones"
-            :disabled="dnsProvider.readonly"
-            label="Include Zones"
-            multiple
-            closable-chips
-            variant="underlined"
-          />
-        </div>
+  <div class="d-flex flex-nowrap align-center">
+    <div class="d-flex flex-wrap">
+      <div class="regular-input">
+        <v-select
+          v-model="v$.dnsProviderType.$model"
+          color="primary"
+          :items="dnsProviderTypes"
+          :error-messages="getErrorMessages(v$.dnsProviderType)"
+          label="Dns Provider Type"
+          variant="underlined"
+        >
+          <template #item="{ props }">
+            <v-list-item v-bind="props">
+              <template #prepend>
+                <g-vendor-icon :icon="props.value" />
+              </template>
+            </v-list-item>
+          </template>
+          <template #selection="{ item }">
+            <div class="d-flex">
+              <g-vendor-icon
+                :icon="item.value"
+                class="mr-2"
+              />
+              {{ item.title }}
+            </div>
+          </template>
+        </v-select>
       </div>
-
-      <div class="ml-4 mr-2">
-        <v-btn
-          :disabled="dnsProvider.readonly || primaryReadonly"
-          size="x-small"
-          variant="tonal"
-          icon="mdi-close"
-          color="grey"
-          @click="deleteDnsProvider(dnsProviderId)"
+      <div class="regular-input">
+        <g-select-secret
+          v-if="dnsServiceExtensionProviderSecret || !dnsProvider.secretName"
+          v-model="dnsServiceExtensionProviderSecret"
+          :dns-provider-kind="dnsProviderType"
+          :allowed-secret-names="allowedSecretNames"
+          register-vuelidate-as="dnsServiceExtensionProviderSecret"
+        />
+        <v-text-field
+          v-else
+          :value="dnsProvider.secretName"
+          disabled
+          variant="underlined"
+          persistent-hint
+          hint="Secret Binding for secret not found in project namespace. Use YAML view to edit secret"
         />
       </div>
+      <div class="large-input">
+        <v-combobox
+          v-model="includeDomains"
+          label="Include Domains"
+          multiple
+          chips
+          closable-chips
+          variant="underlined"
+        />
+      </div>
+      <div class="large-input">
+        <v-combobox
+          v-model="excludeDomains"
+          label="Exclude Domains"
+          multiple
+          chips
+          closable-chips
+          variant="underlined"
+        />
+      </div>
+      <div class="large-input">
+        <v-combobox
+          v-model="includeZones"
+          label="Include Zones"
+          multiple
+          chips
+          closable-chips
+          variant="underlined"
+        />
+      </div>
+      <div class="large-input">
+        <v-combobox
+          v-model="excludeZones"
+          label="Exclude Zones"
+          multiple
+          chips
+          closable-chips
+          variant="underlined"
+        />
+      </div>
+    </div>
+    <div class="ml-4 mr-2">
+      <slot name="action" />
     </div>
   </div>
 </template>
@@ -126,11 +107,12 @@ import { required } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
 import { useSecretStore } from '@/store/secret'
-import { useShootContextStore } from '@/store/shootContext'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 
 import GSelectSecret from '@/components/Secrets/GSelectSecret'
 import GVendorIcon from '@/components/GVendorIcon'
+
+import { useShootContext } from '@/composables/useShootContext'
 
 import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
@@ -139,6 +121,7 @@ import {
   get,
   head,
   find,
+  set,
 } from '@/lodash'
 
 export default {
@@ -147,14 +130,29 @@ export default {
     GVendorIcon,
   },
   props: {
-    dnsProviderId: {
-      type: String,
+    dnsProvider: {
+      type: Object,
       required: true,
     },
   },
   setup () {
+    const {
+      isNewCluster,
+      dnsServiceExtensionProviders,
+      getDnsServiceExtensionResourceName,
+      setResource,
+      deleteResource,
+      getResourceRefName,
+    } = useShootContext()
+
     return {
       v$: useVuelidate(),
+      isNewCluster,
+      dnsServiceExtensionProviders,
+      getDnsServiceExtensionResourceName,
+      setResource,
+      deleteResource,
+      getResourceRefName,
     }
   },
   validations () {
@@ -164,72 +162,89 @@ export default {
       }),
     }
   },
-  data () {
-    return {
-      secretValid: true,
-    }
-  },
   computed: {
-    ...mapState(useShootContextStore, [
-      'dnsProviders',
-      'dnsPrimaryProviderId',
-      'isNewCluster',
-    ]),
     ...mapState(useGardenerExtensionStore, [
       'dnsProviderTypes',
     ]),
-    dnsProvider () {
-      return this.dnsProviders[this.dnsProviderId]
-    },
-    primary () {
-      return this.dnsPrimaryProviderId === this.dnsProviderId
-    },
     dnsSecrets () {
       return this.dnsSecretsByProviderKind(this.dnsProviderType)
     },
-    typeHint () {
-      return this.primary && !this.isNewCluster
-        ? 'Primary Provider type cannot be changed after cluster creation'
-        : ''
-    },
-    primaryReadonly () {
-      return !this.isNewCluster && this.primary
-    },
     dnsProviderType: {
       get () {
-        return this.dnsProvider.type
+        return this.dnsProvider?.type
       },
       set (value) {
         this.dnsProvider.type = value
         const dnsSecrets = this.dnsSecretsByProviderKind(value)
         const defaultDnsSecret = head(dnsSecrets)
-        this.dnsProvider.secretName = get(defaultDnsSecret, 'metadata.secretRef.name', null)
+        this.dnsServiceExtensionProviderSecret = defaultDnsSecret
       },
     },
-    dnsProviderSecret: {
+    dnsServiceExtensionProviderSecret: {
       get () {
-        return find(this.dnsSecrets, ['metadata.secretRef.name', this.dnsProvider.secretName])
+        const resourceName = this.dnsProvider.secretName
+        const secretName = this.getResourceRefName(resourceName)
+        return find(this.dnsSecrets, ['metadata.secretRef.name', secretName])
       },
       set (value) {
-        this.dnsProvider.secretName = get(value, 'metadata.secretRef.name', null)
+        this.deleteResource(this.dnsProvider.secretName)
+        const secretName = get(value, 'metadata.secretRef.name')
+        const resourceName = this.getDnsServiceExtensionResourceName(secretName)
+        this.dnsProvider.secretName = resourceName
+        this.setResource({
+          name: resourceName,
+          resourceRef: {
+            apiVersion: 'v1',
+            kind: 'Secret',
+            name: secretName,
+          },
+        })
       },
     },
-  },
-  watch: {
-    'v$.$invalid' (value) {
-      const oldValue = !this.dnsProvider?.valid
-      if (oldValue !== value && !this.dnsProvider.readonly) {
-        this.dnsProvider.valid = !value
-      }
+    excludeDomains: {
+      get () {
+        return get(this.dnsProvider, 'domains.exclude')
+      },
+      set (value) {
+        set(this.dnsProvider, 'domains.exclude', value)
+      },
+    },
+    includeDomains: {
+      get () {
+        return get(this.dnsProvider, 'domains.include')
+      },
+      set (value) {
+        set(this.dnsProvider, 'domains.include', value)
+      },
+    },
+    excludeZones: {
+      get () {
+        return get(this.dnsProvider, 'zones.exclude')
+      },
+      set (value) {
+        set(this.dnsProvider, 'zones.exclude', value)
+      },
+    },
+    includeZones: {
+      get () {
+        return get(this.dnsProvider, 'zones.include')
+      },
+      set (value) {
+        set(this.dnsProvider, 'zones.include', value)
+      },
+    },
+    allowedSecretNames () {
+      const dnsProviderSecretName = get(this.dnsServiceExtensionProviderSecret, 'metadata.name')
+      const secretNames = this.dnsServiceExtensionProviders.map(({ secretName }) => this.getResourceRefName(secretName))
+      return secretNames.filter(secretName => {
+        return dnsProviderSecretName !== secretName
+      })
     },
   },
   mounted () {
     this.v$.$touch()
   },
   methods: {
-    ...mapActions(useShootContextStore, [
-      'deleteDnsProvider',
-    ]),
     ...mapActions(useSecretStore, [
       'dnsSecretsByProviderKind',
     ]),

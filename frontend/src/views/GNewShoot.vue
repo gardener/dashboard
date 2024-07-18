@@ -42,7 +42,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-card class="mt-4">
         <g-toolbar title="DNS Configuration" />
         <v-card-text class="py-1">
-          <g-manage-shoot-dns />
+          <g-manage-dns />
         </v-card-text>
       </v-card>
       <v-card
@@ -132,13 +132,11 @@ import { useVuelidate } from '@vuelidate/core'
 import {
   mapActions,
   mapState,
-  mapWritableState,
 } from 'pinia'
 
 import { useAppStore } from '@/store/app'
 import { useConfigStore } from '@/store/config'
 import { useCloudProfileStore } from '@/store/cloudProfile'
-import { useShootContextStore } from '@/store/shootContext'
 
 import GAccessRestrictions from '@/components/ShootAccessRestrictions/GAccessRestrictions'
 import GConfirmDialog from '@/components/dialogs/GConfirmDialog'
@@ -149,9 +147,11 @@ import GNewShootSelectInfrastructure from '@/components/NewShoot/GNewShootSelect
 import GMaintenanceComponents from '@/components/ShootMaintenance/GMaintenanceComponents'
 import GMaintenanceTime from '@/components/ShootMaintenance/GMaintenanceTime'
 import GManageShootAddons from '@/components/ShootAddons/GManageAddons'
-import GManageShootDns from '@/components/ShootDns/GManageDns'
+import GManageDns from '@/components/ShootDns/GManageDns'
 import GManageControlPlaneHighAvailability from '@/components/ControlPlaneHighAvailability/GManageControlPlaneHighAvailability'
 import GToolbar from '@/components/GToolbar.vue'
+
+import { useShootContext } from '@/composables/useShootContext'
 
 import { errorDetailsFromError } from '@/utils/error'
 import { messageFromErrors } from '@/utils/validators'
@@ -163,7 +163,7 @@ export default {
     GAccessRestrictions,
     GNewShootDetails,
     GManageShootAddons,
-    GManageShootDns,
+    GManageDns,
     GMaintenanceComponents,
     GMaintenanceTime,
     GManageHibernationSchedule: defineAsyncComponent(() => import('@/components/ShootHibernation/GManageHibernationSchedule')),
@@ -193,8 +193,25 @@ export default {
     return next()
   },
   setup () {
+    const {
+      shootNamespace,
+      shootName,
+      shootManifest,
+      isShootDirty,
+      workerless,
+      maintenanceAutoUpdateKubernetesVersion,
+      maintenanceAutoUpdateMachineImageVersion,
+    } = useShootContext()
+
     return {
       v$: useVuelidate(),
+      shootNamespace,
+      shootName,
+      shootManifest,
+      isShootDirty,
+      workerless,
+      maintenanceAutoUpdateKubernetesVersion,
+      maintenanceAutoUpdateMachineImageVersion,
     }
   },
   data () {
@@ -207,17 +224,6 @@ export default {
   computed: {
     ...mapState(useConfigStore, [
       'accessRestriction',
-    ]),
-    ...mapWritableState(useShootContextStore, [
-      'maintenanceAutoUpdateKubernetesVersion',
-      'maintenanceAutoUpdateMachineImageVersion',
-    ]),
-    ...mapState(useShootContextStore, [
-      'shootNamespace',
-      'shootName',
-      'shootManifest',
-      'isShootDirty',
-      'workerless',
     ]),
     ...mapState(useCloudProfileStore, [
       'sortedInfrastructureKindList',

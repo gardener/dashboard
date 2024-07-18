@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div v-if="showCredentials || showNotAvailablePlaceholder">
+  <div v-if="showCredentials">
     <template v-if="showCredentials">
       <g-list-item v-if="username">
         <template #prepend>
@@ -50,7 +50,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
       </g-list-item>
     </template>
-    <g-list-item v-else-if="showNotAvailablePlaceholder">
+    <g-list-item v-else>
       <template #prepend>
         <v-icon
           color="primary"
@@ -109,10 +109,6 @@ export default {
     },
     password: {
       type: String,
-    },
-    showNotAvailablePlaceholder: {
-      type: Boolean,
-      default: true,
     },
   },
   data () {

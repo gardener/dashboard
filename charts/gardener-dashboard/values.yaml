@@ -233,6 +233,10 @@ global:
       features:
         terminalEnabled: false
         projectTerminalShortcutsEnabled: false
+        # The oidcObservabilityUrlsEnabled feature flag controls whether OIDC observability URLs are displayed in the dashboard.
+        # This requires the gardener/oidc-apps-controller extension to be deployed and assumes the hostPrefix (https://github.com/gardener/oidc-apps-controller/blob/653add2e304c382c1b8ba4e4b775477e288826a3/example/config.yaml#L64) is empty.
+        # When enabled, it shows the OIDC URLs; when disabled, it displays the current observability URLs for basic auth login along with the credentials.
+        oidcObservabilityUrlsEnabled: false
 
       shootAdminKubeconfig:
         enabled: false

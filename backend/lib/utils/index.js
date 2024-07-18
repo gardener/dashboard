@@ -107,6 +107,12 @@ function trimObjectMetadata (object) {
   return object
 }
 
+function trimProject (project) {
+  project = trimObjectMetadata(project)
+  _.set(project, 'spec.members', undefined)
+  return project
+}
+
 function parseSelectors (selectors) {
   const items = []
   for (const selector of selectors) {
@@ -181,7 +187,7 @@ function shootHasIssue (shoot) {
 }
 
 function getSeedIngressDomain (seed) {
-  return _.get(seed, 'spec.dns.ingressDomain') || _.get(seed, 'spec.ingress.domain')
+  return _.get(seed, 'spec.ingress.domain')
 }
 
 function isSeedUnreachable (seed) {
@@ -198,6 +204,7 @@ module.exports = {
   projectFilter,
   parseRooms,
   trimObjectMetadata,
+  trimProject,
   parseSelectors,
   filterBySelectors,
   getConfigValue,

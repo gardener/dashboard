@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
       v-model="v$.internalValue.$model"
       color="primary"
       item-color="primary"
-      label="Secret"
+      :label="label"
       :disabled="disabled"
       :items="secretList"
       item-value="metadata.name"
@@ -63,23 +63,22 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import {
-  mapState,
-  mapActions,
-} from 'pinia'
+import { toRef } from 'vue'
+import { mapActions } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
-import { useAuthzStore } from '@/store/authz'
-import { useConfigStore } from '@/store/config'
 import { useSecretStore } from '@/store/secret'
 import { useProjectStore } from '@/store/project'
 
 import GSecretDialogWrapper from '@/components/Secrets/GSecretDialogWrapper'
 
+import { useProjectCostObject } from '@/composables/useProjectCostObject'
+import { useProjectMetadata } from '@/composables/useProjectMetadata'
+
 import {
-  requiresCostObjectIfEnabled,
+  withParams,
   withMessage,
   withFieldName,
 } from '@/utils/validators'
@@ -93,7 +92,6 @@ import {
   cloneDeep,
   differenceWith,
   isEqual,
-  isEmpty,
   head,
   get,
   toUpper,
@@ -120,15 +118,42 @@ export default {
     registerVuelidateAs: {
       type: String,
     },
+    allowedSecretNames: {
+      type: Array,
+      default: () => [],
+    },
+    label: {
+      type: String,
+      default: 'Secret',
+    },
   },
   emits: [
     'update:modelValue',
   ],
   setup (props) {
+    const projectStore = useProjectStore()
+
+    const projectItem = toRef(projectStore, 'project')
+    const {
+      costObjectSettingEnabled,
+      costObjectTitle,
+      costObjectErrorMessage,
+    } = useProjectCostObject(projectItem)
+
+    const {
+      projectName,
+    } = useProjectMetadata(projectItem)
+
+    const v$ = useVuelidate({
+      $registerAs: props.registerVuelidateAs,
+    })
+
     return {
-      v$: useVuelidate({
-        $registerAs: props.registerVuelidateAs,
-      }),
+      projectName,
+      costObjectSettingEnabled,
+      costObjectTitle,
+      costObjectErrorMessage,
+      v$,
     }
   },
   data () {
@@ -138,30 +163,32 @@ export default {
     }
   },
   validations () {
-    const requiresCostObjectIfEnabledMessage = () => {
-      const projectName = get(this.internalValue, 'metadata.projectName')
-      const isSecretInProject = this.projectName === projectName
-      return isSecretInProject
-        ? `${this.costObjectTitle} is required. Go to the ADMINISTRATION page to edit the project and set the ${this.costObjectTitle}.`
-        : `${this.costObjectTitle} is required and has to be set on the Project ${toUpper(this.projectName)}`
+    const projectName = this.projectName
+    const costObjectTitle = this.costObjectTitle
+
+    const messageFn = ({ $model }) => {
+      return projectName === get($model, 'metadata.projectName')
+        ? `${costObjectTitle} is required. Go to the ADMINISTRATION page to edit the project and set the ${costObjectTitle}.`
+        : `${costObjectTitle} is required and has to be set on the Project ${toUpper(projectName)}`
     }
+
+    const requiresCostObjectIfEnabled = (enabled = false) => withParams(
+      { type: 'requiresCostObjectIfEnabled', enabled },
+      function requiresCostObjectIfEnabled (value) {
+        return enabled
+          ? get(value, 'metadata.hasCostObject', false)
+          : true
+      },
+    )
+
     return {
       internalValue: withFieldName('Secret', {
         required,
-        requiresCostObjectIfEnabled: withMessage(requiresCostObjectIfEnabledMessage(), requiresCostObjectIfEnabled),
+        requiresCostObjectIfEnabled: withMessage(messageFn, requiresCostObjectIfEnabled(this.costObjectSettingEnabled)),
       }),
     }
   },
   computed: {
-    ...mapState(useConfigStore, [
-      'costObjectSettings',
-    ]),
-    ...mapState(useAuthzStore, [
-      'namespace',
-    ]),
-    projectName () {
-      return this.projectNameByNamespace(this.namespace)
-    },
     internalValue: {
       get () {
         return this.modelValue
@@ -171,13 +198,15 @@ export default {
       },
     },
     secretList () {
+      let secrets
       if (this.cloudProfileName) {
-        return this.infrastructureSecretsByCloudProfileName(this.cloudProfileName)
+        secrets = this.infrastructureSecretsByCloudProfileName(this.cloudProfileName)
       }
       if (this.dnsProviderKind) {
-        return this.dnsSecretsByProviderKind(this.dnsProviderKind)
+        secrets = this.dnsSecretsByProviderKind(this.dnsProviderKind)
       }
-      return []
+      return secrets
+        ?.filter(secret => !this.allowedSecretNames.includes(secret.metadata.name))
     },
     infrastructureKind () {
       if (this.dnsProviderKind) {
@@ -200,12 +229,6 @@ export default {
       }
       return undefined
     },
-    costObjectSettingEnabled () { // required internally for requiresCostObjectIfEnabled
-      return !isEmpty(this.costObjectSettings)
-    },
-    costObjectTitle () {
-      return get(this.costObjectSettings, 'title')
-    },
     selfTerminationDays () {
       return selfTerminationDaysForSecret(this.internalValue)
     },
@@ -216,9 +239,6 @@ export default {
   methods: {
     ...mapActions(useCloudProfileStore, [
       'cloudProfileByName',
-    ]),
-    ...mapActions(useProjectStore, [
-      'projectNameByNamespace',
     ]),
     ...mapActions(useSecretStore, [
       'infrastructureSecretsByCloudProfileName',

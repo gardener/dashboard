@@ -10,7 +10,6 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :secret-validations="v$"
     :secret="secret"
-    vendor="hcloud"
     create-title="Add new Hetzner Cloud Secret"
     replace-title="Replace Hetzner Cloud Secret"
   >
@@ -56,10 +55,7 @@ import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink.vue'
 
 import { withFieldName } from '@/utils/validators'
-import {
-  getErrorMessages,
-  setDelayedInputFocus,
-} from '@/utils'
+import { getErrorMessages } from '@/utils'
 
 export default {
   components: {
@@ -117,26 +113,7 @@ export default {
       return !this.secret
     },
   },
-  watch: {
-    value: function (value) {
-      if (value) {
-        this.reset()
-      }
-    },
-  },
   methods: {
-    reset () {
-      this.v$.$reset()
-
-      this.hcloudToken = ''
-
-      if (!this.isCreateMode) {
-        if (this.secret.data) {
-          this.hcloudToken = this.secret.data.hcloudToken
-        }
-        setDelayedInputFocus(this, 'hcloudToken')
-      }
-    },
     getErrorMessages,
   },
 }

@@ -7,10 +7,6 @@
 import { Base64 } from 'js-base64'
 import semver from 'semver'
 import {
-  computed,
-  isRef,
-  isProxy,
-  toRef,
   unref,
   nextTick,
 } from 'vue'
@@ -111,7 +107,7 @@ export function setDelayedInputFocus (...args) {
 
 export function setInputFocus (vm, fieldName, options) {
   if (typeof fieldName === 'string') {
-    vm = vm.$refs[fieldName]
+    vm = get(vm.$refs, fieldName)
   } else {
     vm = unref(vm)
     options = fieldName
@@ -301,36 +297,6 @@ export function getIssueSince (shootStatus) {
     issueTimestamps.push(lastError.lastUpdateTime)
   })
   return head(issueTimestamps.sort())
-}
-
-export function getProjectDetails (project = {}) {
-  const projectData = project.data || {}
-  const projectMetadata = project.metadata || {}
-  const projectName = projectMetadata.name || ''
-  const owner = projectData.owner || ''
-  const costObject = get(project, ['metadata', 'annotations', 'billing.gardener.cloud/costObject'], '')
-  const creationTimestamp = projectMetadata.creationTimestamp
-  const createdAt = getDateFormatted(creationTimestamp)
-  const description = projectData.description || ''
-  const createdBy = projectData.createdBy || ''
-  const purpose = projectData.purpose || ''
-  const staleSinceTimestamp = projectData.staleSinceTimestamp
-  const staleAutoDeleteTimestamp = projectData.staleAutoDeleteTimestamp
-  const phase = projectData.phase
-
-  return {
-    projectName,
-    owner,
-    costObject,
-    createdAt,
-    creationTimestamp,
-    createdBy,
-    description,
-    purpose,
-    staleSinceTimestamp,
-    staleAutoDeleteTimestamp,
-    phase,
-  }
 }
 
 export function isShootStatusHibernated (status) {
@@ -689,18 +655,6 @@ export function normalizeVersion (version) {
   }
 }
 
-export function toProperties (state) {
-  if (isRef(state)) {
-    return args => Array.isArray(args)
-      ? computed(() => get(state.value, ...args))
-      : computed(() => get(state.value, args))
-  }
-  if (isProxy(state)) {
-    return (path, key) => toRef(state, key)
-  }
-  throw new TypeError('Argument `state` must be a proxy or ref object')
-}
-
 export default {
   emailToDisplayName,
   handleTextFieldDrop,
@@ -727,7 +681,6 @@ export default {
   isOwnSecret,
   getCreatedBy,
   getIssueSince,
-  getProjectDetails,
   isShootStatusHibernated,
   isReconciliationDeactivated,
   isTruthyValue,
@@ -761,5 +714,4 @@ export default {
   omitKeysWithSuffix,
   parseNumberWithMagnitudeSuffix,
   normalizeVersion,
-  toProperties,
 }

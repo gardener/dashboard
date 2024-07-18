@@ -1,0 +1,727 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`composables > useShootContext > should add workers and update zones network config 1`] = `
+[
+  {
+    "cri": {
+      "name": "containerd",
+    },
+    "machine": {
+      "architecture": "amd64",
+      "image": {
+        "name": "gardenlinux",
+        "version": "1312.3.0",
+      },
+      "type": "m4.large",
+    },
+    "maxSurge": 1,
+    "maximum": 2,
+    "minimum": 1,
+    "name": "worker-a",
+    "volume": {
+      "size": "50Gi",
+      "type": "gp3",
+    },
+    "zones": [
+      "eu-central-1b",
+      "eu-central-1c",
+    ],
+  },
+  {
+    "cri": {
+      "name": "containerd",
+    },
+    "machine": {
+      "architecture": "amd64",
+      "image": {
+        "name": "gardenlinux",
+        "version": "1312.3.0",
+      },
+      "type": "m4.large",
+    },
+    "maxSurge": 1,
+    "maximum": 2,
+    "minimum": 1,
+    "name": "worker-b",
+    "volume": {
+      "size": "50Gi",
+      "type": "gp3",
+    },
+    "zones": [
+      "eu-central-1a",
+      "eu-central-1b",
+    ],
+  },
+]
+`;
+
+exports[`composables > useShootContext > should add workers and update zones network config 2`] = `
+[
+  {
+    "internal": "10.180.48.0/20",
+    "name": "eu-central-1b",
+    "public": "10.180.32.0/20",
+    "workers": "10.180.0.0/19",
+  },
+  {
+    "internal": "10.180.112.0/20",
+    "name": "eu-central-1c",
+    "public": "10.180.96.0/20",
+    "workers": "10.180.64.0/19",
+  },
+  {
+    "internal": "10.180.176.0/20",
+    "name": "eu-central-1a",
+    "public": "10.180.160.0/20",
+    "workers": "10.180.128.0/19",
+  },
+]
+`;
+
+exports[`composables > useShootContext > should change the infrastructure kind 1`] = `
+{
+  "apiVersion": "core.gardener.cloud/v1beta1",
+  "kind": "Shoot",
+  "metadata": {
+    "name": "m6kgstc1b0",
+    "namespace": "garden-test",
+  },
+  "spec": {
+    "addons": {
+      "kubernetesDashboard": {
+        "enabled": false,
+      },
+      "nginxIngress": {
+        "enabled": false,
+      },
+    },
+    "cloudProfileName": "gcp",
+    "hibernation": {
+      "schedules": [
+        {
+          "location": "Europe/Berlin",
+          "start": "00 17 * * 1,2,3,4,5",
+        },
+      ],
+    },
+    "kubernetes": {
+      "enableStaticTokenKubeconfig": false,
+      "version": "1.28.6",
+    },
+    "maintenance": {
+      "autoUpdate": {
+        "kubernetesVersion": true,
+        "machineImageVersion": true,
+      },
+      "timeWindow": {
+        "begin": "220000+0100",
+        "end": "230000+0100",
+      },
+    },
+    "networking": {
+      "nodes": "10.180.0.0/16",
+      "type": "calico",
+    },
+    "provider": {
+      "controlPlaneConfig": {
+        "apiVersion": "gcp.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "ControlPlaneConfig",
+        "zone": "europe-west1-b",
+      },
+      "infrastructureConfig": {
+        "apiVersion": "gcp.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "InfrastructureConfig",
+        "networks": {
+          "workers": "10.180.0.0/16",
+        },
+      },
+      "type": "gcp",
+      "workers": [
+        {
+          "cri": {
+            "name": "containerd",
+          },
+          "machine": {
+            "architecture": "amd64",
+            "image": {
+              "name": "gardenlinux",
+              "version": "1312.3.0",
+            },
+            "type": "n1-standard-2",
+          },
+          "maxSurge": 1,
+          "maximum": 2,
+          "minimum": 1,
+          "name": "worker-m6kgs",
+          "volume": {
+            "size": "50Gi",
+            "type": "pd-balanced",
+          },
+          "zones": [
+            "europe-west1-b",
+          ],
+        },
+      ],
+    },
+    "purpose": "evaluation",
+    "region": "europe-west1",
+    "secretBindingName": "gcp-secret",
+  },
+}
+`;
+
+exports[`composables > useShootContext > should create a default "alicloud" shoot manifest 1`] = `
+{
+  "apiVersion": "core.gardener.cloud/v1beta1",
+  "kind": "Shoot",
+  "metadata": {
+    "name": "m6kgstc1b0",
+    "namespace": "garden-test",
+  },
+  "spec": {
+    "addons": {
+      "kubernetesDashboard": {
+        "enabled": false,
+      },
+      "nginxIngress": {
+        "enabled": false,
+      },
+    },
+    "cloudProfileName": "alicloud",
+    "hibernation": {
+      "schedules": [
+        {
+          "location": "Europe/Berlin",
+          "start": "00 17 * * 1,2,3,4,5",
+        },
+      ],
+    },
+    "kubernetes": {
+      "enableStaticTokenKubeconfig": false,
+      "version": "1.28.6",
+    },
+    "maintenance": {
+      "autoUpdate": {
+        "kubernetesVersion": true,
+        "machineImageVersion": true,
+      },
+      "timeWindow": {
+        "begin": "220000+0100",
+        "end": "230000+0100",
+      },
+    },
+    "networking": {
+      "nodes": "10.180.0.0/16",
+      "type": "calico",
+    },
+    "provider": {
+      "controlPlaneConfig": {
+        "apiVersion": "alicloud.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "ControlPlaneConfig",
+      },
+      "infrastructureConfig": {
+        "apiVersion": "alicloud.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "InfrastructureConfig",
+        "networks": {
+          "vpc": {
+            "cidr": "10.180.0.0/16",
+          },
+          "zones": [
+            {
+              "name": "eu-central-1a",
+              "workers": "10.180.0.0/18",
+            },
+          ],
+        },
+      },
+      "type": "alicloud",
+      "workers": [
+        {
+          "cri": {
+            "name": "containerd",
+          },
+          "machine": {
+            "architecture": "amd64",
+            "image": {
+              "name": "gardenlinux",
+              "version": "1312.3.0",
+            },
+            "type": "ecs.c1.small",
+          },
+          "maxSurge": 1,
+          "maximum": 2,
+          "minimum": 1,
+          "name": "worker-m6kgs",
+          "volume": {
+            "size": "50Gi",
+            "type": "cloud",
+          },
+          "zones": [
+            "eu-central-1a",
+          ],
+        },
+      ],
+    },
+    "purpose": "evaluation",
+    "region": "eu-central-1",
+    "secretBindingName": "alicloud-secret",
+  },
+}
+`;
+
+exports[`composables > useShootContext > should create a default "aws" shoot manifest 1`] = `
+{
+  "apiVersion": "core.gardener.cloud/v1beta1",
+  "kind": "Shoot",
+  "metadata": {
+    "name": "m6kgstc1b0",
+    "namespace": "garden-test",
+  },
+  "spec": {
+    "addons": {
+      "kubernetesDashboard": {
+        "enabled": false,
+      },
+      "nginxIngress": {
+        "enabled": false,
+      },
+    },
+    "cloudProfileName": "aws",
+    "hibernation": {
+      "schedules": [
+        {
+          "location": "Europe/Berlin",
+          "start": "00 17 * * 1,2,3,4,5",
+        },
+      ],
+    },
+    "kubernetes": {
+      "enableStaticTokenKubeconfig": false,
+      "version": "1.28.6",
+    },
+    "maintenance": {
+      "autoUpdate": {
+        "kubernetesVersion": true,
+        "machineImageVersion": true,
+      },
+      "timeWindow": {
+        "begin": "220000+0100",
+        "end": "230000+0100",
+      },
+    },
+    "networking": {
+      "nodes": "10.180.0.0/16",
+      "type": "calico",
+    },
+    "provider": {
+      "controlPlaneConfig": {
+        "apiVersion": "aws.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "ControlPlaneConfig",
+      },
+      "infrastructureConfig": {
+        "apiVersion": "aws.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "InfrastructureConfig",
+        "networks": {
+          "vpc": {
+            "cidr": "10.180.0.0/16",
+          },
+          "zones": [
+            {
+              "internal": "10.180.48.0/20",
+              "name": "eu-central-1a",
+              "public": "10.180.32.0/20",
+              "workers": "10.180.0.0/19",
+            },
+          ],
+        },
+      },
+      "type": "aws",
+      "workers": [
+        {
+          "cri": {
+            "name": "containerd",
+          },
+          "machine": {
+            "architecture": "amd64",
+            "image": {
+              "name": "gardenlinux",
+              "version": "1312.3.0",
+            },
+            "type": "m4.large",
+          },
+          "maxSurge": 1,
+          "maximum": 2,
+          "minimum": 1,
+          "name": "worker-m6kgs",
+          "volume": {
+            "size": "50Gi",
+            "type": "gp3",
+          },
+          "zones": [
+            "eu-central-1a",
+          ],
+        },
+      ],
+    },
+    "purpose": "evaluation",
+    "region": "eu-central-1",
+    "secretBindingName": "aws-secret",
+  },
+}
+`;
+
+exports[`composables > useShootContext > should create a default "azure" shoot manifest 1`] = `
+{
+  "apiVersion": "core.gardener.cloud/v1beta1",
+  "kind": "Shoot",
+  "metadata": {
+    "name": "m6kgstc1b0",
+    "namespace": "garden-test",
+  },
+  "spec": {
+    "addons": {
+      "kubernetesDashboard": {
+        "enabled": false,
+      },
+      "nginxIngress": {
+        "enabled": false,
+      },
+    },
+    "cloudProfileName": "az",
+    "hibernation": {
+      "schedules": [
+        {
+          "location": "Europe/Berlin",
+          "start": "00 17 * * 1,2,3,4,5",
+        },
+      ],
+    },
+    "kubernetes": {
+      "enableStaticTokenKubeconfig": false,
+      "version": "1.28.6",
+    },
+    "maintenance": {
+      "autoUpdate": {
+        "kubernetesVersion": true,
+        "machineImageVersion": true,
+      },
+      "timeWindow": {
+        "begin": "220000+0100",
+        "end": "230000+0100",
+      },
+    },
+    "networking": {
+      "nodes": "10.180.0.0/16",
+      "type": "calico",
+    },
+    "provider": {
+      "controlPlaneConfig": {
+        "apiVersion": "azure.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "ControlPlaneConfig",
+      },
+      "infrastructureConfig": {
+        "apiVersion": "azure.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "InfrastructureConfig",
+        "networks": {
+          "vnet": {
+            "cidr": "10.180.0.0/16",
+          },
+          "workers": "10.180.0.0/16",
+        },
+        "zoned": true,
+      },
+      "type": "azure",
+      "workers": [
+        {
+          "cri": {
+            "name": "containerd",
+          },
+          "machine": {
+            "architecture": "amd64",
+            "image": {
+              "name": "gardenlinux",
+              "version": "1312.3.0",
+            },
+            "type": "Standard_A4_v2",
+          },
+          "maxSurge": 1,
+          "maximum": 2,
+          "minimum": 1,
+          "name": "worker-m6kgs",
+          "volume": {
+            "size": "50Gi",
+            "type": "StandardSSD_LRS",
+          },
+          "zones": [
+            "1",
+          ],
+        },
+      ],
+    },
+    "purpose": "evaluation",
+    "region": "westeurope",
+    "secretBindingName": "az-secret",
+  },
+}
+`;
+
+exports[`composables > useShootContext > should create a default "gcp" shoot manifest 1`] = `
+{
+  "apiVersion": "core.gardener.cloud/v1beta1",
+  "kind": "Shoot",
+  "metadata": {
+    "name": "m6kgstc1b0",
+    "namespace": "garden-test",
+  },
+  "spec": {
+    "addons": {
+      "kubernetesDashboard": {
+        "enabled": false,
+      },
+      "nginxIngress": {
+        "enabled": false,
+      },
+    },
+    "cloudProfileName": "gcp",
+    "hibernation": {
+      "schedules": [
+        {
+          "location": "Europe/Berlin",
+          "start": "00 17 * * 1,2,3,4,5",
+        },
+      ],
+    },
+    "kubernetes": {
+      "enableStaticTokenKubeconfig": false,
+      "version": "1.28.6",
+    },
+    "maintenance": {
+      "autoUpdate": {
+        "kubernetesVersion": true,
+        "machineImageVersion": true,
+      },
+      "timeWindow": {
+        "begin": "220000+0100",
+        "end": "230000+0100",
+      },
+    },
+    "networking": {
+      "nodes": "10.180.0.0/16",
+      "type": "calico",
+    },
+    "provider": {
+      "controlPlaneConfig": {
+        "apiVersion": "gcp.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "ControlPlaneConfig",
+        "zone": "europe-west1-b",
+      },
+      "infrastructureConfig": {
+        "apiVersion": "gcp.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "InfrastructureConfig",
+        "networks": {
+          "workers": "10.180.0.0/16",
+        },
+      },
+      "type": "gcp",
+      "workers": [
+        {
+          "cri": {
+            "name": "containerd",
+          },
+          "machine": {
+            "architecture": "amd64",
+            "image": {
+              "name": "gardenlinux",
+              "version": "1312.3.0",
+            },
+            "type": "n1-standard-2",
+          },
+          "maxSurge": 1,
+          "maximum": 2,
+          "minimum": 1,
+          "name": "worker-m6kgs",
+          "volume": {
+            "size": "50Gi",
+            "type": "pd-balanced",
+          },
+          "zones": [
+            "europe-west1-b",
+          ],
+        },
+      ],
+    },
+    "purpose": "evaluation",
+    "region": "europe-west1",
+    "secretBindingName": "gcp-secret",
+  },
+}
+`;
+
+exports[`composables > useShootContext > should create a default "ironcore" shoot manifest 1`] = `
+{
+  "apiVersion": "core.gardener.cloud/v1beta1",
+  "kind": "Shoot",
+  "metadata": {
+    "name": "m6kgstc1b0",
+    "namespace": "garden-test",
+  },
+  "spec": {
+    "addons": {
+      "kubernetesDashboard": {
+        "enabled": false,
+      },
+      "nginxIngress": {
+        "enabled": false,
+      },
+    },
+    "cloudProfileName": "ironcore",
+    "hibernation": {
+      "schedules": [
+        {
+          "location": "Europe/Berlin",
+          "start": "00 17 * * 1,2,3,4,5",
+        },
+      ],
+    },
+    "kubernetes": {
+      "enableStaticTokenKubeconfig": false,
+      "version": "1.28.4",
+    },
+    "maintenance": {
+      "autoUpdate": {
+        "kubernetesVersion": true,
+        "machineImageVersion": true,
+      },
+      "timeWindow": {
+        "begin": "220000+0100",
+        "end": "230000+0100",
+      },
+    },
+    "networking": {
+      "nodes": "10.180.0.0/16",
+      "type": "calico",
+    },
+    "provider": {
+      "type": "ironcore",
+      "workers": [
+        {
+          "cri": {
+            "name": "containerd",
+          },
+          "machine": {
+            "architecture": "amd64",
+            "image": {
+              "name": "gardenlinux",
+              "version": "1312.2.0",
+            },
+            "type": "x3-xlarge",
+          },
+          "maxSurge": 1,
+          "maximum": 2,
+          "minimum": 1,
+          "name": "worker-m6kgs",
+          "volume": {
+            "size": "50Gi",
+            "type": "general-purpose",
+          },
+          "zones": [
+            "fra3",
+          ],
+        },
+      ],
+    },
+    "purpose": "evaluation",
+    "region": "de-fra",
+    "secretBindingName": "ironcore-secret",
+  },
+}
+`;
+
+exports[`composables > useShootContext > should create a default "openstack" shoot manifest 1`] = `
+{
+  "apiVersion": "core.gardener.cloud/v1beta1",
+  "kind": "Shoot",
+  "metadata": {
+    "name": "m6kgstc1b0",
+    "namespace": "garden-test",
+  },
+  "spec": {
+    "addons": {
+      "kubernetesDashboard": {
+        "enabled": false,
+      },
+      "nginxIngress": {
+        "enabled": false,
+      },
+    },
+    "cloudProfileName": "openstack-1",
+    "hibernation": {
+      "schedules": [
+        {
+          "location": "Europe/Berlin",
+          "start": "00 17 * * 1,2,3,4,5",
+        },
+      ],
+    },
+    "kubernetes": {
+      "enableStaticTokenKubeconfig": false,
+      "version": "1.28.6",
+    },
+    "maintenance": {
+      "autoUpdate": {
+        "kubernetesVersion": true,
+        "machineImageVersion": true,
+      },
+      "timeWindow": {
+        "begin": "220000+0100",
+        "end": "230000+0100",
+      },
+    },
+    "networking": {
+      "nodes": "10.180.0.0/16",
+      "type": "calico",
+    },
+    "provider": {
+      "controlPlaneConfig": {
+        "apiVersion": "openstack.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "ControlPlaneConfig",
+        "loadBalancerProvider": "f5",
+      },
+      "infrastructureConfig": {
+        "apiVersion": "openstack.provider.extensions.gardener.cloud/v1alpha1",
+        "floatingPoolName": "FloatingIP*",
+        "kind": "InfrastructureConfig",
+        "networks": {
+          "workers": "10.180.0.0/16",
+        },
+      },
+      "type": "openstack",
+      "workers": [
+        {
+          "cri": {
+            "name": "containerd",
+          },
+          "machine": {
+            "architecture": "amd64",
+            "image": {
+              "name": "gardenlinux",
+              "version": "1312.3.0",
+            },
+            "type": "g_c2_m16",
+          },
+          "maxSurge": 1,
+          "maximum": 2,
+          "minimum": 1,
+          "name": "worker-m6kgs",
+          "zones": [
+            "eu-de-1a",
+          ],
+        },
+      ],
+    },
+    "purpose": "evaluation",
+    "region": "eu-de-1",
+    "secretBindingName": "openstack-1-secret",
+  },
+}
+`;

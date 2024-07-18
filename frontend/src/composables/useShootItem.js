@@ -98,12 +98,15 @@ export function createShootItemComposable (shootItem, options = {}) {
     servicesCidr,
     shootDomain,
     isCustomShootDomain,
+    shootDnsPrimaryProvider,
+    shootDnsServiceExtensionProviders,
     shootDnsProviders,
     shootHibernationSchedules,
     shootMaintenance,
     shootControlPlaneHighAvailabilityFailureTolerance,
     shootSeedName,
     isSeedUnreachable,
+    shootResources,
   } = useShootSpec(shootItem, {
     cloudProfileStore,
     seedStore,
@@ -138,7 +141,6 @@ export function createShootItemComposable (shootItem, options = {}) {
 
   const {
     shootInfo,
-    seedShootIngressDomain,
     canLinkToSeed,
   } = useShootInfo(shootItem)
 
@@ -215,12 +217,15 @@ export function createShootItemComposable (shootItem, options = {}) {
     servicesCidr,
     shootDomain,
     isCustomShootDomain,
+    shootDnsPrimaryProvider,
+    shootDnsServiceExtensionProviders,
     shootDnsProviders,
     shootHibernationSchedules,
     shootMaintenance,
     shootControlPlaneHighAvailabilityFailureTolerance,
     shootSeedName,
     isSeedUnreachable,
+    shootResources,
     /* status */
     shootStatus,
     isShootStatusHibernated,
@@ -248,11 +253,9 @@ export function createShootItemComposable (shootItem, options = {}) {
     caCertificateValiditiesAcceptableMessage,
     /* info */
     shootInfo,
-    seedShootIngressDomain,
     canLinkToSeed,
     /* others */
-    accessRestrictionList,
-    shootSelectedAccessRestrictions: accessRestrictionList, // TODO deprecated
+    shootAccessRestrictions: accessRestrictionList,
     isShootStatusHibernationProgressing,
     canForceDeleteShoot,
   }

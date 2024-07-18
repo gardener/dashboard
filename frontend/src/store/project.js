@@ -14,28 +14,21 @@ import {
   toRef,
 } from 'vue'
 
-import { useLogger } from '@/composables/useLogger'
 import { useApi } from '@/composables/useApi'
 
 import { useAuthzStore } from './authz'
 import { useAppStore } from './app'
 
 import {
+  filter,
   find,
   findIndex,
   map,
   get,
-  pickBy,
-  some,
-  isEmpty,
-  isObject,
-  mapKeys,
-  mapValues,
   replace,
 } from '@/lodash'
 
 export const useProjectStore = defineStore('project', () => {
-  const logger = useLogger()
   const api = useApi()
   const appStore = useAppStore()
   const authzStore = useAuthzStore()
@@ -49,13 +42,13 @@ export const useProjectStore = defineStore('project', () => {
   const namespace = toRef(authzStore, 'namespace')
 
   const namespaces = computed(() => {
-    return map(list.value, 'metadata.namespace')
+    return map(list.value, 'spec.namespace')
   })
 
   const projectNameMap = computed(() => {
     const projectNames = {}
     if (Array.isArray(list.value)) {
-      for (const { metadata: { namespace, name } } of list.value) {
+      for (const { metadata: { name }, spec: { namespace } } of list.value) {
         projectNames[namespace] = name
       }
     }
@@ -85,8 +78,12 @@ export const useProjectStore = defineStore('project', () => {
     return list.value ?? []
   })
 
+  const projectsNotMarkedForDeletion = computed(() => {
+    return filter(projectList.value, project => !get(project, 'metadata.deletionTimestamp'))
+  })
+
   const project = computed(() => {
-    return find(list.value, ['metadata.namespace', namespace.value])
+    return find(list.value, ['spec.namespace', namespace.value])
   })
 
   const projectName = computed(() => {
@@ -95,55 +92,6 @@ export const useProjectStore = defineStore('project', () => {
 
   const projectNames = computed(() => {
     return map(list.value, 'metadata.name')
-  })
-
-  const shootCustomFieldList = computed(() => {
-    return map(shootCustomFields.value, (customFields, key) => {
-      return {
-        ...customFields,
-        key,
-      }
-    })
-  })
-
-  const shootCustomFields = computed(() => {
-    let shootCustomFields = get(project.value, 'metadata.annotations["dashboard.gardener.cloud/shootCustomFields"]')
-    if (!shootCustomFields) {
-      return
-    }
-
-    try {
-      shootCustomFields = JSON.parse(shootCustomFields)
-    } catch (error) {
-      logger.error('could not parse custom fields', error.message)
-      return
-    }
-
-    shootCustomFields = pickBy(shootCustomFields, customField => {
-      if (isEmpty(customField)) {
-        return false // omit null values
-      }
-      if (some(customField, isObject)) {
-        return false // omit custom fields with object values
-      }
-      return customField.name && customField.path
-    })
-
-    const defaultProperties = {
-      showColumn: true,
-      columnSelectedByDefault: true,
-      showDetails: true,
-      sortable: true,
-      searchable: true,
-    }
-    shootCustomFields = mapKeys(shootCustomFields, (customField, key) => `Z_${key}`)
-    shootCustomFields = mapValues(shootCustomFields, customField => {
-      return {
-        ...defaultProperties,
-        ...customField,
-      }
-    })
-    return shootCustomFields
   })
 
   function updateList (obj) {
@@ -171,52 +119,38 @@ export const useProjectStore = defineStore('project', () => {
     list.value = response.data
   }
 
-  async function createProject (obj) {
-    const { metadata, data } = obj
-    const response = await api.createProject({
-      data: {
-        metadata,
-        data,
-      },
-    })
+  async function createProject (project) {
+    const response = await api.createProject({ data: project })
     appStore.setSuccess('Project created')
     updateList(response.data)
 
     return response.data
   }
 
-  async function patchProject (obj) {
-    const { metadata, data } = obj
+  async function patchProject (project) {
     const response = await api.patchProject({
-      namespace: metadata.namespace ?? namespace.value,
-      data: {
-        metadata,
-        data,
-      },
+      name: get(project, 'metadata.name', projectName.value),
+      data: project,
     })
     updateList(response.data)
   }
 
-  async function updateProject (obj) {
-    const { metadata, data } = obj
-    const response = await updateProject({
-      namespace: metadata.namespace ?? namespace.value,
-      data: {
-        metadata,
-        data,
-      },
+  async function updateProject (project) {
+    const response = await api.updateProject({
+      name: get(project, 'metadata.name', projectName.value),
+      data: project,
     })
     appStore.setSuccess('Project updated')
     updateList(response.data)
   }
 
-  async function deleteProject (obj) {
-    const { metadata } = obj
-    await api.deleteProject({
-      namespace: metadata.namespace ?? namespace.value,
+  async function deleteProject (project) {
+    const response = await api.deleteProject({
+      name: get(project, 'metadata.name', projectName.value),
     })
+    updateList(response.data)
     appStore.setSuccess('Project deleted')
-    // do not remove project from store as it will stay in termininating phase for a while
+    // do not remove project from store as it will stay in terminating phase for a while
   }
 
   async function $reset () {
@@ -232,10 +166,9 @@ export const useProjectStore = defineStore('project', () => {
     defaultNamespace,
     projectName,
     projectList,
+    projectsNotMarkedForDeletion,
     project,
     projectNames,
-    shootCustomFields,
-    shootCustomFieldList,
     isCurrentNamespace,
     fetchProjects,
     createProject,

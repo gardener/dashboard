@@ -13,17 +13,12 @@ export function useShootInfo (shootItem) {
     return get(shootItem.value, 'info', {})
   })
 
-  const seedShootIngressDomain = computed(() => {
-    return shootInfo.value.seedShootIngressDomain || ''
-  })
-
   const canLinkToSeed = computed(() => {
     return get(shootInfo.value, 'canLinkToSeed', false)
   })
 
   return {
     shootInfo,
-    seedShootIngressDomain,
     canLinkToSeed,
   }
 }

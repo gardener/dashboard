@@ -68,6 +68,17 @@ router
       next(err)
     }
   })
+  .patch(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      const name = req.params.name
+      const body = req.body
+      res.send(await shoots.patch({ user, namespace, name, body }))
+    } catch (err) {
+      next(err)
+    }
+  })
   .delete(async (req, res, next) => {
     try {
       const user = req.user
@@ -172,20 +183,6 @@ router.route('/:name/spec/controlPlane/highAvailability')
       const name = req.params.name
       const body = req.body
       res.send(await shoots.replaceControlPlaneHighAvailability({ user, namespace, name, body }))
-    } catch (err) {
-      next(err)
-    }
-  })
-
-router.route('/:name/spec/dns')
-  .all(metricsMiddleware)
-  .put(async (req, res, next) => {
-    try {
-      const user = req.user
-      const namespace = req.params.namespace
-      const name = req.params.name
-      const body = req.body
-      res.send(await shoots.replaceDns({ user, namespace, name, body }))
     } catch (err) {
       next(err)
     }

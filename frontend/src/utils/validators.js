@@ -6,12 +6,9 @@
 
 import { helpers } from '@vuelidate/validators'
 
-import {
-  includes,
-  get,
-} from '@/lodash'
+import { includes } from '@/lodash'
 
-const { withParams, regex, req, withMessage } = helpers
+const { withParams, regex, withMessage } = helpers
 
 const base64Pattern = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/
 const alphaNumUnderscorePattern = /^\w+$/
@@ -51,23 +48,6 @@ const unique = key => withMessage(`Value of property '${key}' must be unique`, w
   },
 ))
 
-const uniqueWorkerName = withMessage('Worker name must be unique', withParams(
-  { type: 'uniqueWorkerName' },
-  function unique (value) {
-    return this.workers.filter(item => item.name === value).length === 1
-  },
-))
-
-const requiresCostObjectIfEnabled = withMessage('Cost Object is required', withParams(
-  { type: 'requiresCostObjectIfEnabled' },
-  function requiresCostObjectIfEnabled (infrastructureSecret) {
-    if (!this.costObjectSettingEnabled) {
-      return true
-    }
-    return get(infrastructureSecret, 'metadata.hasCostObject', false)
-  },
-))
-
 const serviceAccountKey = withMessage('Not a valid Service Account Key',
   withParams(
     { type: 'serviceAccountKey' },
@@ -88,14 +68,6 @@ const includesIfAvailable = (key, reference) => withMessage(`Value of property '
     function includesIfAvailable (selectedKeys) {
       const availableKeys = this[reference]
       return includes(availableKeys, key) ? includes(selectedKeys, key) : true
-    },
-  ))
-
-const nilUnless = key => withMessage(`Must not be provided if '${key}' is not set`,
-  withParams(
-    { type: 'nilUnless', key },
-    function nilUnless (value) {
-      return !this[key] ? !req(value) : true
     },
   ))
 
@@ -137,9 +109,6 @@ export {
   noStartEndHyphen,
   serviceAccountKey,
   includesIfAvailable,
-  uniqueWorkerName,
   numberOrPercentage,
-  requiresCostObjectIfEnabled,
   isTimezone,
-  nilUnless,
 }

@@ -43,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
           :machine-images="machineImages"
           :worker="worker"
           :machine-type="selectedMachineType"
-          :update-o-s-maintenance="updateOSMaintenance"
+          :auto-update="maintenanceAutoUpdateMachineImageVersion"
           :field-name="`${workerGroupName} Machine Image`"
         />
       </div>
@@ -149,10 +149,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import {
-  mapState,
-  mapActions,
-} from 'pinia'
+import { mapActions } from 'pinia'
 import {
   required,
   maxLength,
@@ -162,7 +159,6 @@ import {
 import { useVuelidate } from '@vuelidate/core'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
-import { useShootContextStore } from '@/store/shootContext'
 
 import GVolumeSizeInput from '@/components/ShootWorkers/GVolumeSizeInput'
 import GMachineType from '@/components/ShootWorkers/GMachineType'
@@ -170,13 +166,15 @@ import GVolumeType from '@/components/ShootWorkers/GVolumeType'
 import GMachineImage from '@/components/ShootWorkers/GMachineImage'
 import GContainerRuntime from '@/components/ShootWorkers/GContainerRuntime'
 
+import { useShootContext } from '@/composables/useShootContext'
+
 import {
   withFieldName,
-  uniqueWorkerName,
   lowerCaseAlphaNumHyphen,
   noStartEndHyphen,
   numberOrPercentage,
   withMessage,
+  withParams,
 } from '@/utils/validators'
 import {
   getErrorMessages,
@@ -214,8 +212,37 @@ export default {
     },
   },
   setup () {
+    const {
+      isNewCluster,
+      cloudProfileName,
+      kubernetesVersion,
+      region,
+      allZones,
+      availableZones,
+      initialZones,
+      maxAdditionalZones,
+      isZonedCluster,
+      maintenanceAutoUpdateMachineImageVersion,
+      machineArchitectures,
+      volumeTypes,
+      providerWorkers,
+    } = useShootContext()
+
     return {
       v$: useVuelidate(),
+      isNewCluster,
+      cloudProfileName,
+      kubernetesVersion,
+      region,
+      allZones,
+      availableZones,
+      initialZones,
+      maxAdditionalZones,
+      isZonedCluster,
+      maintenanceAutoUpdateMachineImageVersion,
+      machineArchitectures,
+      volumeTypes,
+      providerWorkers,
     }
   },
   data () {
@@ -226,6 +253,13 @@ export default {
   },
   validations () {
     const rules = { worker: {} }
+
+    const uniqueWorkerName = withMessage('Worker name must be unique', withParams(
+      { type: 'uniqueWorkerName' },
+      function unique (value) {
+        return this.providerWorkers.filter(item => item.name === value).length === 1
+      },
+    ))
 
     const nameRules = {
       required,
@@ -282,21 +316,6 @@ export default {
     return rules
   },
   computed: {
-    ...mapState(useShootContextStore, [
-      'isNewCluster',
-      'cloudProfileName',
-      'kubernetesVersion',
-      'region',
-      'allZones',
-      'availableZones',
-      'initialZones',
-      'maxAdditionalZones',
-      'isZonedCluster',
-      'updateOSMaintenance',
-      'machineArchitectures',
-      'volumeTypes',
-      'workers',
-    ]),
     immutableZones () {
       return this.isNewCluster || this.worker.isNew
         ? []
