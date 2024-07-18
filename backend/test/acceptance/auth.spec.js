@@ -90,6 +90,10 @@ class Client {
     return url.toString()
   }
 
+  callbackParams (req) {
+    return pick(req.query, ['code', 'state', 'iss'])
+  }
+
   async callback (redirectUri, { code }, { response_type: responseType }) {
     assert.strictEqual(code, OTAC)
     assert.strictEqual(responseType, 'code')
@@ -217,7 +221,7 @@ describe('auth', function () {
     ])
     expect(mockRequest.mock.calls[1]).toMatchSnapshot()
 
-    expect(getIssuerClientStub).toBeCalledTimes(1)
+    expect(getIssuerClientStub).toBeCalledTimes(2)
     expect(res.headers).toHaveProperty('location', '/')
   })
 
@@ -235,7 +239,7 @@ describe('auth', function () {
       .redirects(0)
       .expect(302)
 
-    expect(getIssuerClientStub).toBeCalledTimes(1)
+    expect(getIssuerClientStub).toBeCalledTimes(2)
     expect(res.headers).toHaveProperty('location', `/login#error=${encodeURIComponent(message)}`)
   })
 

@@ -20,7 +20,6 @@ import { useLogger } from '@/composables/useLogger'
 import { createError } from '@/utils/errors'
 
 import { useAuthnStore } from '../authn'
-import { useProjectStore } from '../project'
 import { useShootStore } from '../shoot'
 import { useTicketStore } from '../ticket'
 
@@ -32,7 +31,6 @@ export const useSocketStore = defineStore('socket', () => {
   const logger = useLogger()
 
   const authnStore = useAuthnStore()
-  const projectStore = useProjectStore()
   const shootStore = useShootStore()
   const ticketStore = useTicketStore()
 
@@ -56,7 +54,6 @@ export const useSocketStore = defineStore('socket', () => {
   const socket = createSocket(state, {
     logger,
     authnStore,
-    projectStore,
     shootStore,
     ticketStore,
   })

@@ -18,8 +18,6 @@ const logger = require('../logger')
 const { sessionSecrets, oidc = {} } = require('../config')
 
 const {
-  encodeState,
-  decodeState,
   sign,
   verify,
   decode,
@@ -292,7 +290,9 @@ async function authorizationCallback (req, res) {
     redirectOrigin,
     state
   } = stateObject
-  const parameters = pick(req.query, ['code', 'state'])
+
+  const client = await exports.getIssuerClient()
+  const parameters = client.callbackParams(req)
   const backendRedirectUri = getBackendRedirectUri(redirectOrigin)
   const checks = {
     response_type: 'code',
@@ -497,8 +497,6 @@ exports = module.exports = {
   COOKIE_HEADER_PAYLOAD,
   COOKIE_SIGNATURE,
   COOKIE_TOKEN,
-  encodeState,
-  decodeState,
   sign,
   decode,
   verify,
