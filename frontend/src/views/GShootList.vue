@@ -167,9 +167,6 @@ SPDX-License-Identifier: Apache-2.0
         must-sort
         class="g-table"
       >
-        <template #headers="headers">
-          <g-data-table-header v-bind="headers" />
-        </template>
         <template #progress>
           <g-shoot-list-progress />
         </template>
@@ -257,7 +254,6 @@ import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
 import GIconBase from '@/components/icons/GIconBase.vue'
 import GCertifiedKubernetes from '@/components/icons/GCertifiedKubernetes.vue'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
-import GDataTableHeader from '@/components/GDataTableHeader.vue'
 import GShootAccessCard from '@/components/ShootDetails/GShootAccessCard.vue'
 
 import { useProjectShootCustomFields } from '@/composables/useProjectShootCustomFields'
@@ -287,7 +283,6 @@ export default {
     GCertifiedKubernetes,
     GTableColumnSelection,
     GDataTableFooter,
-    GDataTableHeader,
   },
   inject: ['logger'],
   beforeRouteEnter (to, from, next) {
@@ -303,7 +298,6 @@ export default {
     // Reset expanded state in case project changes
     this.resetState(this.expandedWorkerGroups, { default: false })
     this.resetState(this.expandedAccessRestrictions, { default: false })
-    this.resetState(this.expandedTicketLabels, { default: false })
 
     next()
   },
@@ -319,11 +313,9 @@ export default {
     const activePopoverKey = ref('')
     const expandedWorkerGroups = reactive({ default: false })
     const expandedAccessRestrictions = reactive({ default: false })
-    const expandedTicketLabels = reactive({ default: false })
     provide('activePopoverKey', activePopoverKey)
     provide('expandedWorkerGroups', expandedWorkerGroups)
     provide('expandedAccessRestrictions', expandedAccessRestrictions)
-    provide('expandedTicketLabels', expandedTicketLabels)
 
     const projectItem = toRef(projectStore, 'project')
     const {
@@ -334,7 +326,6 @@ export default {
       activePopoverKey,
       expandedWorkerGroups,
       expandedAccessRestrictions,
-      expandedTicketLabels,
       shootCustomFields,
     }
   },
@@ -495,10 +486,9 @@ export default {
           title: 'WORKERS',
           key: 'workers',
           sortable: isSortable(true),
-          align: 'start',
+          align: 'center',
           defaultSelected: false,
           hidden: false,
-          expandedItemsInjectionKey: 'expandedWorkerGroups',
         },
         {
           title: 'CREATED BY',
@@ -574,7 +564,6 @@ export default {
           align: 'start',
           defaultSelected: false,
           hidden: !this.accessRestrictionConfig || !this.isAdmin,
-          expandedItemsInjectionKey: 'expandedAccessRestrictions',
         },
         {
           title: 'TICKET',
@@ -591,7 +580,6 @@ export default {
           align: 'start',
           defaultSelected: true,
           hidden: !this.gitHubRepoUrl || !this.isAdmin,
-          expandedItemsInjectionKey: 'expandedTicketLabels',
         },
         {
           title: 'ACTIONS',

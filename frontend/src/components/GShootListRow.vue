@@ -66,36 +66,21 @@ SPDX-License-Identifier: Apache-2.0
         </g-auto-hide>
       </template>
       <template v-if="cell.header.key === 'workers'">
-        <g-collapsible-items
-          :items="shootWorkerGroups"
-          :uid="shootMetadata.uid"
-          inject-key="expandedWorkerGroups"
-        >
-          <template #collapsed="{ itemCount }">
-            <v-chip
-              size="small"
-              variant="tonal"
-              :color="hasShootWorkerGroupWarning ? 'warning' : 'primary'"
-            >
-              {{ itemCount }}
-              {{ itemCount !== 1 ? 'Groups' : 'Group' }}
-              <v-tooltip
-                location="top"
-                activator="parent"
-                text="Worker Groups"
+        <div class="d-flex justify-center">
+          <g-collapsible-items
+            :items="shootWorkerGroups"
+            :uid="shootUid"
+            :chip-color="hasShootWorkerGroupWarning ? 'warning' : 'primary'"
+            inject-key="expandedWorkerGroups"
+          >
+            <template #item="{ item }">
+              <g-worker-group
+                :worker-group="item"
+                class="ma-1"
               />
-            </v-chip>
-          </template>
-          <template #no-items>
-            <g-workerless-chip />
-          </template>
-          <template #item="{ item }">
-            <g-worker-group
-              :worker-group="item"
-              class="ma-1"
-            />
-          </template>
-        </g-collapsible-items>
+            </template>
+          </g-collapsible-items>
+        </div>
       </template>
       <template v-if="cell.header.key === 'createdBy'">
         <g-account-avatar :account-name="shootCreatedBy" />
@@ -148,8 +133,6 @@ SPDX-License-Identifier: Apache-2.0
           :items="shootAccessRestrictions"
           :uid="shootUid"
           inject-key="expandedAccessRestrictions"
-          hide-empty
-          item-name="Restriction"
         >
           <template #item="{ item }">
             <g-access-restriction-chip
@@ -177,20 +160,16 @@ SPDX-License-Identifier: Apache-2.0
         <template v-if="shootLastUpdatedTicketTimestamp && !shootTicketLabels.length">
           None
         </template>
-        <g-collapsible-items
+        <v-chip-group
           v-else
-          :items="shootTicketLabels"
-          :uid="shootMetadata.uid"
-          inject-key="expandedTicketLabels"
-          item-name="Ticket Label"
-          hide-empty
+          style="max-width: 300px"
         >
-          <template #item="{ item }">
-            <g-ticket-label
-              :label="item"
-            />
-          </template>
-        </g-collapsible-items>
+          <g-ticket-label
+            v-for="label in shootTicketLabels"
+            :key="label.name"
+            :label="label"
+          />
+        </v-chip-group>
       </template>
       <template v-if="cell.header.customField">
         <v-tooltip
@@ -281,7 +260,6 @@ import GAutoHide from '@/components/GAutoHide.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
 import GControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityTag.vue'
 import GWorkerGroup from '@/components/ShootWorkers/GWorkerGroup'
-import GWorkerlessChip from '@/components/ShootWorkers/GWorkerlessChip.vue'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 import GCollapsibleItems from '@/components/GCollapsibleItems'
 

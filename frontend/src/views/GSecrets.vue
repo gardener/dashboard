@@ -107,9 +107,6 @@ SPDX-License-Identifier: Apache-2.0
         density="compact"
         class="g-table"
       >
-        <template #headers="headers">
-          <g-data-table-header v-bind="headers" />
-        </template>
         <template #item="{ item }">
           <g-secret-row-infra
             :key="`${item.cloudProfileName}/${item.name}`"
@@ -278,7 +275,6 @@ import GSecretRowDns from '@/components/Secrets/GSecretRowDns.vue'
 import GVendorIcon from '@/components/GVendorIcon'
 import GToolbar from '@/components/GToolbar'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
-import GDataTableHeader from '@/components/GDataTableHeader.vue'
 
 import {
   isOwnSecret,
@@ -307,7 +303,6 @@ export default {
     GVendorIcon,
     GToolbar,
     GDataTableFooter,
-    GDataTableHeader,
   },
   inject: ['mergeProps'],
   data () {

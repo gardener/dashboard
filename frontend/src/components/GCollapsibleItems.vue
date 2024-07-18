@@ -6,55 +6,55 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div
-    v-if="items.length || !hideEmpty"
-    class="d-flex align-center collapsible-items-wrapper"
+    v-if="items.length"
+    class="d-flex"
+    :class="!expanded ? 'collapsible-items-wrapper' : ''"
   >
-    <template v-if="!expanded">
-      <slot
-        name="collapsed"
-        :item-count="itemCount"
-      >
-        {{ itemCount }}
-        {{ itemCount === 1 ? itemName : (itemPlural ? itemPlural : `${itemName}s`) }}
-      </slot>
+    <div
+      class="d-flex align-center"
+    >
+      <template v-if="!expanded">
+        <v-chip
+          variant="outlined"
+          size="small"
+          :color="chipColor"
+          label
+          @click="toggleExpanded"
+        >
+          {{ itemCount }}
+          <v-tooltip
+            top
+            activator="parent"
+          >
+            Expand items
+          </v-tooltip>
+        </v-chip>
+      </template>
+      <template v-else>
+        <div
+          class="d-flex flex-wrap"
+        >
+          <div
+            v-for="(item, i) in items"
+            :key="i"
+            class="d-flex align-center"
+          >
+            <slot
+              name="item"
+              :item="item"
+              :on-click="toggleExpanded"
+            />
+          </div>
+        </div>
+      </template>
+    </div>
+    <div>
       <g-collapsible-items-button
         class="collapsible-items-button"
         :expanded="expanded"
         @click="toggleExpanded"
       />
-    </template>
-    <template v-else>
-      <template v-if="!items.length">
-        <slot name="noItems" />
-        <g-collapsible-items-button
-          class="collapsible-items-button"
-          :expanded="expanded"
-          @click="toggleExpanded"
-        />
-      </template>
-      <div
-        v-else
-        class="d-flex"
-        :class="noWrap ? 'flex-nowrap' : 'flex-wrap'"
-      >
-        <div
-          v-for="(item, i) in items"
-          :key="i"
-          class="d-flex align-center"
-        >
-          <slot
-            name="item"
-            :item="item"
-          />
-          <g-collapsible-items-button
-            v-if="i === items.length - 1"
-            class="collapsible-items-button"
-            :expanded="expanded"
-            @click="toggleExpanded"
-          />
-        </div>
-      </div>
-    </template>
+    </div>
   </div>
 </template>
 
@@ -62,7 +62,6 @@ SPDX-License-Identifier: Apache-2.0
 
 import {
   toRefs,
-  ref,
   computed,
   inject,
 } from 'vue'
@@ -78,32 +77,17 @@ const props = defineProps({
     type: String,
     required: false,
   },
-  // key for provided state
-  // If state not provided internal state is used
   injectKey: {
     type: String,
     required: false,
   },
-  hideEmpty: {
-    type: Boolean,
-    default: false,
-  },
-  itemName: {
+  chipColor: {
     type: String,
-    default: 'Item',
-  },
-  itemPlural: {
-    type: String,
-    required: false,
-  },
-  noWrap: {
-    type: Boolean,
-    default: false,
+    default: 'primary',
   },
 })
 
-const { items, itemName, itemPlural, noWrap } = toRefs(props)
-const internalExpanded = ref(false)
+const { items } = toRefs(props)
 const expandedItems = inject(props.injectKey, undefined)
 
 const itemCount = computed(() => {
@@ -112,17 +96,10 @@ const itemCount = computed(() => {
 
 const expanded = computed({
   get () {
-    if (expandedItems) {
-      return expandedItems[props.uid] ?? expandedItems.default
-    }
-    return internalExpanded.value
+    return expandedItems[props.uid] ?? expandedItems.default
   },
   set (value) {
-    if (expandedItems) {
-      expandedItems[props.uid] = value
-    } else {
-      internalExpanded.value = value
-    }
+    expandedItems[props.uid] = value
   },
 })
 

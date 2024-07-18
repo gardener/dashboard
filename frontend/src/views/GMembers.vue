@@ -100,9 +100,6 @@ SPDX-License-Identifier: Apache-2.0
         density="compact"
         class="g-table"
       >
-        <template #headers="headers">
-          <g-data-table-header v-bind="headers" />
-        </template>
         <template #item="{ item }">
           <g-user-row
             :key="item.username"
@@ -321,7 +318,6 @@ import GCodeBlock from '@/components/GCodeBlock.vue'
 import GToolbar from '@/components/GToolbar.vue'
 import GActionButton from '@/components/GActionButton.vue'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
-import GDataTableHeader from '@/components/GDataTableHeader.vue'
 
 import { useApi } from '@/composables/useApi'
 

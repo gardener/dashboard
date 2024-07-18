@@ -9,7 +9,6 @@ SPDX-License-Identifier: Apache-2.0
     <v-btn
       :icon="icon"
       size="small"
-      density="compact"
       variant="flat"
     />
     <v-tooltip
