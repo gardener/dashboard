@@ -97,7 +97,7 @@
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-vuetify": "^2.0.3",
     "vitest": "^1.4.0",
-    "vitest-fetch-mock": "^0.2.2"
+    "vitest-fetch-mock": "^0.3.0"
   },
   "packageManager": "yarn@4.3.1",
   "engines": {
