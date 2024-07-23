@@ -9,7 +9,7 @@
 const express = require('express')
 const { shoots } = require('../services')
 const { metricsRoute } = require('../middleware')
-const { trimObjectMetadata, useWatchCacheForListShoots } = require('../utils')
+const { trimObjectMetadata } = require('../utils')
 
 const router = module.exports = express.Router({
   mergeParams: true
@@ -24,8 +24,7 @@ router.route('/')
       const user = req.user
       const namespace = req.params.namespace
       const labelSelector = req.query.labelSelector
-      const useCache = useWatchCacheForListShoots(req.query.useCache)
-      const shootList = await shoots.list({ user, namespace, labelSelector, useCache })
+      const shootList = await shoots.list({ user, namespace, labelSelector })
       for (const object of shootList.items) {
         trimObjectMetadata(object)
       }
@@ -65,6 +64,17 @@ router
       const name = req.params.name
       const body = req.body
       res.send(await shoots.replace({ user, namespace, name, body }))
+    } catch (err) {
+      next(err)
+    }
+  })
+  .patch(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      const name = req.params.name
+      const body = req.body
+      res.send(await shoots.patch({ user, namespace, name, body }))
     } catch (err) {
       next(err)
     }
@@ -173,20 +183,6 @@ router.route('/:name/spec/controlPlane/highAvailability')
       const name = req.params.name
       const body = req.body
       res.send(await shoots.replaceControlPlaneHighAvailability({ user, namespace, name, body }))
-    } catch (err) {
-      next(err)
-    }
-  })
-
-router.route('/:name/spec/dns')
-  .all(metricsMiddleware)
-  .put(async (req, res, next) => {
-    try {
-      const user = req.user
-      const namespace = req.params.namespace
-      const name = req.params.name
-      const body = req.body
-      res.send(await shoots.replaceDns({ user, namespace, name, body }))
     } catch (err) {
       next(err)
     }

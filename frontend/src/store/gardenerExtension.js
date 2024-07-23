@@ -43,24 +43,30 @@ export const useGardenerExtensionStore = defineStore('gardenerExtension', () => 
     list.value = response.data
   }
 
+  const hasDnsServiceExtension = computed(() => {
+    return some(list.value, ['name', 'extension-shoot-dns-service'])
+  })
+
   const sortedDnsProviderList = computed(() => {
-    const supportedProviderTypes = ['aws-route53', 'azure-dns', 'azure-private-dns', 'google-clouddns', 'openstack-designate', 'alicloud-dns', 'infoblox-dns', 'netlify-dns']
+    const supportedProviderTypes = ['aws-route53', 'azure-dns', 'azure-private-dns', 'google-clouddns', 'openstack-designate', 'alicloud-dns', 'infoblox-dns', 'netlify-dns', 'rfc2136']
     const resources = flatMap(list.value, 'resources')
     const dnsProvidersFromDnsRecords = filter(resources, ['kind', 'DNSRecord'])
 
-    const dnsProviderList = map(supportedProviderTypes, type => {
+    return map(supportedProviderTypes, type => {
+      const dnsProvider = find(dnsProvidersFromDnsRecords, ['type', type])
       return {
         type,
-        primary: get(find(dnsProvidersFromDnsRecords, { type }), 'primary', false),
+        primary: get(dnsProvider, 'primary', false),
       }
     })
+  })
 
-    const dnsServiceExtensionDeployed = some(list.value, ['name', 'extension-shoot-dns-service'])
-    if (dnsServiceExtensionDeployed) {
-      return dnsProviderList
-    }
-    // return only primary DNS Providers backed by DNSRecord
-    return filter(dnsProviderList, 'primary')
+  const dnsProviderTypes = computed(() => {
+    return map(sortedDnsProviderList.value, 'type')
+  })
+
+  const dnsProviderTypesWithPrimarySupport = computed(() => {
+    return map(filter(sortedDnsProviderList.value, 'primary'), 'type')
   })
 
   const networkingTypes = computed(() => {
@@ -78,7 +84,9 @@ export const useGardenerExtensionStore = defineStore('gardenerExtension', () => 
     isInitial,
     gardenerExtensionList,
     fetchGardenerExtensions,
-    sortedDnsProviderList,
+    dnsProviderTypes,
+    dnsProviderTypesWithPrimarySupport,
+    hasDnsServiceExtension,
     networkingTypes,
     networkingTypeList,
   }

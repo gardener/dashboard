@@ -58,7 +58,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import { getErrorMessages } from '@/utils'
-import { getWorkerProviderConfig } from '@/utils/createShoot'
+import { getWorkerProviderConfig } from '@/utils/shoot'
 import { withFieldName } from '@/utils/validators'
 
 import {

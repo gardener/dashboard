@@ -23,10 +23,9 @@ SPDX-License-Identifier: Apache-2.0
 <script setup>
 import {
   ref,
-  computed,
   onMounted,
   provide,
-  watch,
+  watchEffect,
 } from 'vue'
 import { useLayout } from 'vuetify'
 import { storeToRefs } from 'pinia'
@@ -35,12 +34,13 @@ import { useConfigStore } from '@/store/config'
 
 import GAlertBanner from '@/components/GAlertBanner.vue'
 
-import { useLogger } from '@/composables/useLogger'
-
-const layout = useLayout()
-const logger = useLogger()
+const { mainRect } = useLayout()
 const configStore = useConfigStore()
-const { alertBannerMessage, alertBannerType, alertBannerIdentifier } = storeToRefs(configStore)
+const {
+  alertBannerMessage,
+  alertBannerType,
+  alertBannerIdentifier,
+} = storeToRefs(configStore)
 
 // refs
 const mainRef = ref(null)
@@ -52,42 +52,31 @@ function setElementOverflowY (element, value) {
   }
 }
 
-const mainContainer = computed(() => {
-  return mainRef.value?.$el.querySelector(':scope > div[class$=\'wrap\']')
-})
-
 function setScrollTop (top = 0) {
-  mainRef.value.$el.scrollTop = top
-}
-
-function setWrapElementHeight (value) {
-  const wrapElement = wrapRef.value
-  if (wrapElement) {
-    wrapElement.style.height = `calc(100vh - ${value}px)`
+  const mainElement = mainRef.value?.$el
+  if (mainElement) {
+    mainElement.scrollTop = top
   }
 }
 
 onMounted(() => {
-  try {
-    const mainElement = mainRef.value.$el
-    setElementOverflowY(mainElement, 'hidden')
-    // Find the first direct child div element of mainElement with a class attribute ending in "wrap"
-    const element = mainElement.querySelector(':scope > div[class$=\'wrap\']')
-    setElementOverflowY(element, 'auto')
-  } catch (err) {
-    logger.error(err.message)
-  }
+  setElementOverflowY(mainRef.value?.$el, 'hidden')
+  setElementOverflowY(wrapRef.value, 'auto')
 })
 
-watch(layout.mainRect, () => {
-  setWrapElementHeight(layout.mainRect.value.top)
+watchEffect(() => {
+  const toolbarHeight = mainRect.value?.top
+  const wrapElement = wrapRef.value
+  if (wrapElement && Number.isInteger(toolbarHeight)) {
+    wrapElement.style.height = `calc(100vh - ${toolbarHeight}px)`
+  }
 })
 
 defineExpose({
   setScrollTop,
 })
 
-provide('mainContainer', mainContainer)
+provide('mainContainer', wrapRef)
 </script>
 
 <style lang="scss">

@@ -10,20 +10,28 @@ SPDX-License-Identifier: Apache-2.0
     :toolbar-title="workerGroup.name"
     placement="bottom"
   >
-    <template #activator="{ props }">
-      <v-chip
-        v-bind="props"
-        size="small"
-        class="cursor-pointer my-0 ml-0"
-        variant="tonal"
-        color="primary"
+    <template #activator="{ props: popoverProps }">
+      <v-tooltip
+        location="top"
+        :disabled="!machineImage.isDeprecated"
+        text="Machine image version is deprecated"
       >
-        <g-vendor-icon
-          :icon="machineImageIcon"
-          :size="20"
-        />
-        <span class="px-1">{{ workerGroup.name }}</span>
-      </v-chip>
+        <template #activator="{ props: tooltipProps }">
+          <v-chip
+            v-bind="mergeProps(popoverProps, tooltipProps)"
+            size="small"
+            class="cursor-pointer ma-1"
+            variant="tonal"
+            :color="chipColor"
+          >
+            <g-vendor-icon
+              :icon="machineImage.icon"
+              :size="20"
+            />
+            <span class="px-1">{{ workerGroup.name }}</span>
+          </v-chip>
+        </template>
+      </v-tooltip>
     </template>
     <v-tabs
       v-model="tab"
@@ -215,18 +223,40 @@ SPDX-License-Identifier: Apache-2.0
                           mdi-alert
                         </v-icon>Image not found in cloud profile
                       </v-col>
-                      <v-col
-                        v-else-if="machineImage.expirationDate"
-                        cols="12"
-                      >
-                        <v-icon
-                          size="small"
-                          class="mr-1"
-                          color="warning"
+                      <template v-else>
+                        <v-col
+                          cols="12"
                         >
-                          mdi-alert
-                        </v-icon>Image expires on {{ machineImage.expirationDateString }}
-                      </v-col>
+                          <legend class="text-caption text-medium-emphasis">
+                            Classification
+                          </legend>
+                          <v-icon
+                            size="x-small"
+                            :color="classificationColor"
+                            :icon="classificationIcon"
+                          />
+                          {{ machineImage.classification }}
+                        </v-col>
+                        <v-col
+                          v-if="machineImage.expirationDate"
+                          cols="12"
+                        >
+                          <v-icon
+                            v-if="machineImage.isExpirationWarning"
+                            size="x-small"
+                            class="mr-1"
+                            color="warning"
+                          >
+                            mdi-alert
+                          </v-icon>
+                          Image expires
+                          <g-time-string
+                            :date-time="machineImage.expirationDate"
+                            mode="future"
+                            date-tooltip
+                          />
+                        </v-col>
+                      </template>
                     </v-row>
                   </v-card-text>
                 </v-card>
@@ -344,6 +374,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapActions } from 'pinia'
+import yaml from 'js-yaml'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
@@ -361,7 +392,7 @@ export default {
     GCodeBlock,
   },
   inject: [
-    'yaml',
+    'mergeProps',
     'activePopoverKey',
   ],
   props: {
@@ -402,12 +433,12 @@ export default {
       },
     },
     machineType () {
-      const machineTypes = this.machineTypesByCloudProfileName({ cloudProfileName: this.cloudProfileName })
+      const machineTypes = this.machineTypesByCloudProfileName(this.cloudProfileName)
       const type = get(this.workerGroup, 'machine.type')
       return find(machineTypes, ['name', type])
     },
     volumeType () {
-      const volumeTypes = this.volumeTypesByCloudProfileName({ cloudProfileName: this.cloudProfileName })
+      const volumeTypes = this.volumeTypesByCloudProfileName(this.cloudProfileName)
       const type = get(this.workerGroup, 'volume.type')
       return find(volumeTypes, ['name', type])
     },
@@ -441,13 +472,10 @@ export default {
     machineImage () {
       const machineImages = this.machineImagesByCloudProfileName(this.cloudProfileName)
       const { name, version } = get(this.workerGroup, 'machine.image', {})
-      return find(machineImages, { name, version })
+      return find(machineImages, { name, version }) ?? {}
     },
     machineCri () {
       return this.workerGroup.cri ?? {}
-    },
-    machineImageIcon () {
-      return get(this.machineImage, 'icon')
     },
     tab: {
       get () {
@@ -456,6 +484,24 @@ export default {
       set (modelValue) {
         this.$emit('update:modelValue', modelValue)
       },
+    },
+    chipColor () {
+      return this.machineImage.isDeprecated ? 'warning' : 'primary'
+    },
+    classificationColor () {
+      if (this.machineImage.isDeprecated) {
+        return 'warning'
+      }
+      if (this.machineImage.isPreview) {
+        return 'info'
+      }
+      return 'primary'
+    },
+    classificationIcon () {
+      if (this.machineImage.isDeprecated || this.machineImage.isPreview) {
+        return 'mdi-alert-circle-outline'
+      }
+      return 'mdi-information-outline'
     },
   },
   created () {
@@ -467,8 +513,8 @@ export default {
       'volumeTypesByCloudProfileName',
       'machineImagesByCloudProfileName',
     ]),
-    async updateWorkerGroupYaml (value) {
-      this.workerGroupYaml = await this.yaml.dump(value)
+    updateWorkerGroupYaml (value) {
+      this.workerGroupYaml = yaml.dump(value)
     },
   },
 }

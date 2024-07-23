@@ -42,7 +42,6 @@ const defaults = {
       oidc: {
         issuerUrl: 'https://identity.garden.example.org',
         clientId: 'dashboard',
-        clientSecret: 'dashboardSecret',
         ca: getCertificate('...')
       },
       frontendConfig: {

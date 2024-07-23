@@ -1,126 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`gardener-dashboard deployment github app authentication should render GITHUB environment variables 1`] = `
-Array [
-  Object {
-    "name": "SESSION_SECRET",
-    "valueFrom": Object {
-      "secretKeyRef": Object {
-        "key": "keyValue",
-        "name": "gardener-dashboard-sessionsecret",
-      },
-    },
-  },
-  Object {
-    "name": "OIDC_CLIENT_ID",
-    "valueFrom": Object {
-      "secretKeyRef": Object {
-        "key": "client_id",
-        "name": "gardener-dashboard-oidc",
-      },
-    },
-  },
-  Object {
-    "name": "OIDC_CLIENT_SECRET",
-    "valueFrom": Object {
-      "secretKeyRef": Object {
-        "key": "client_secret",
-        "name": "gardener-dashboard-oidc",
-      },
-    },
-  },
-  Object {
-    "name": "GITHUB_AUTHENTICATION_APP_ID",
-    "valueFrom": Object {
-      "secretKeyRef": Object {
-        "key": "authentication.appId",
-        "name": "gardener-dashboard-github",
-      },
-    },
-  },
-  Object {
-    "name": "GITHUB_AUTHENTICATION_CLIENT_ID",
-    "valueFrom": Object {
-      "secretKeyRef": Object {
-        "key": "authentication.clientId",
-        "name": "gardener-dashboard-github",
-      },
-    },
-  },
-  Object {
-    "name": "GITHUB_AUTHENTICATION_CLIENT_SECRET",
-    "valueFrom": Object {
-      "secretKeyRef": Object {
-        "key": "authentication.clientSecret",
-        "name": "gardener-dashboard-github",
-      },
-    },
-  },
-  Object {
-    "name": "GITHUB_AUTHENTICATION_INSTALLATION_ID",
-    "valueFrom": Object {
-      "secretKeyRef": Object {
-        "key": "authentication.installationId",
-        "name": "gardener-dashboard-github",
-      },
-    },
-  },
-  Object {
-    "name": "GITHUB_AUTHENTICATION_PRIVATE_KEY",
-    "valueFrom": Object {
-      "secretKeyRef": Object {
-        "key": "authentication.privateKey",
-        "name": "gardener-dashboard-github",
-      },
-    },
-  },
-  Object {
-    "name": "GITHUB_WEBHOOK_SECRET",
-    "valueFrom": Object {
-      "secretKeyRef": Object {
-        "key": "webhookSecret",
-        "name": "gardener-dashboard-github",
-      },
-    },
-  },
-  Object {
-    "name": "GARDENER_CONFIG",
-    "value": "/etc/gardener-dashboard/config.yaml",
-  },
-  Object {
-    "name": "METRICS_PORT",
-    "value": "9050",
-  },
-  Object {
-    "name": "POD_NAME",
-    "valueFrom": Object {
-      "fieldRef": Object {
-        "fieldPath": "metadata.name",
-      },
-    },
-  },
-  Object {
-    "name": "POD_NAMESPACE",
-    "valueFrom": Object {
-      "fieldRef": Object {
-        "fieldPath": "metadata.namespace",
-      },
-    },
-  },
-]
-`;
-
 exports[`gardener-dashboard deployment kubeconfig should render the template 1`] = `
-Object {
+{
   "name": "gardener-dashboard-secret-kubeconfig",
-  "secret": Object {
+  "secret": {
     "secretName": "gardener-dashboard-kubeconfig",
   },
 }
 `;
 
 exports[`gardener-dashboard deployment kubeconfig should render the template 2`] = `
-Object {
+{
   "mountPath": "/etc/gardener-dashboard/secrets/kubeconfig",
   "name": "gardener-dashboard-secret-kubeconfig",
   "readOnly": true,
@@ -128,19 +18,19 @@ Object {
 `;
 
 exports[`gardener-dashboard deployment kubeconfig should render the template 3`] = `
-Object {
+{
   "name": "KUBECONFIG",
   "value": "/etc/gardener-dashboard/secrets/kubeconfig/kubeconfig",
 }
 `;
 
 exports[`gardener-dashboard deployment should not project service account token if disabled 1`] = `
-Array [
-  Object {
-    "configMap": Object {
+[
+  {
+    "configMap": {
       "defaultMode": 420,
-      "items": Array [
-        Object {
+      "items": [
+        {
           "key": "config.yaml",
           "path": "config.yaml",
         },
@@ -149,11 +39,11 @@ Array [
     },
     "name": "gardener-dashboard-config",
   },
-  Object {
-    "configMap": Object {
+  {
+    "configMap": {
       "defaultMode": 444,
-      "items": Array [
-        Object {
+      "items": [
+        {
           "key": "login-config.json",
           "path": "login-config.json",
         },
@@ -162,29 +52,109 @@ Array [
     },
     "name": "gardener-dashboard-login-config",
   },
+  {
+    "name": "gardener-dashboard-sessionsecret",
+    "secret": {
+      "secretName": "gardener-dashboard-sessionsecret",
+    },
+  },
+  {
+    "name": "gardener-dashboard-oidc",
+    "secret": {
+      "secretName": "gardener-dashboard-oidc",
+    },
+  },
 ]
 `;
 
 exports[`gardener-dashboard deployment should not project service account token if disabled 2`] = `
-Array [
-  Object {
+[
+  {
     "mountPath": "/etc/gardener-dashboard",
     "name": "gardener-dashboard-config",
   },
-  Object {
+  {
     "mountPath": "/app/public/login-config.json",
     "name": "gardener-dashboard-login-config",
     "subPath": "login-config.json",
+  },
+  {
+    "mountPath": "/etc/gardener-dashboard/secrets/session",
+    "name": "gardener-dashboard-sessionsecret",
+    "readOnly": true,
+  },
+  {
+    "mountPath": "/etc/gardener-dashboard/secrets/oidc",
+    "name": "gardener-dashboard-oidc",
+    "readOnly": true,
+  },
+]
+`;
+
+exports[`gardener-dashboard deployment should render the template w/ \`client_secret\` 1`] = `
+[
+  {
+    "name": "GARDENER_CONFIG",
+    "value": "/etc/gardener-dashboard/config.yaml",
+  },
+  {
+    "name": "METRICS_PORT",
+    "value": "9050",
+  },
+  {
+    "name": "POD_NAME",
+    "valueFrom": {
+      "fieldRef": {
+        "fieldPath": "metadata.name",
+      },
+    },
+  },
+  {
+    "name": "POD_NAMESPACE",
+    "valueFrom": {
+      "fieldRef": {
+        "fieldPath": "metadata.namespace",
+      },
+    },
+  },
+]
+`;
+
+exports[`gardener-dashboard deployment should render the template w/o \`client_secret\` 1`] = `
+[
+  {
+    "name": "GARDENER_CONFIG",
+    "value": "/etc/gardener-dashboard/config.yaml",
+  },
+  {
+    "name": "METRICS_PORT",
+    "value": "9050",
+  },
+  {
+    "name": "POD_NAME",
+    "valueFrom": {
+      "fieldRef": {
+        "fieldPath": "metadata.name",
+      },
+    },
+  },
+  {
+    "name": "POD_NAMESPACE",
+    "valueFrom": {
+      "fieldRef": {
+        "fieldPath": "metadata.namespace",
+      },
+    },
   },
 ]
 `;
 
 exports[`gardener-dashboard deployment should render the template with default values 1`] = `
-Object {
+{
   "apiVersion": "apps/v1",
   "kind": "Deployment",
-  "metadata": Object {
-    "labels": Object {
+  "metadata": {
+    "labels": {
       "app.kubernetes.io/component": "dashboard",
       "app.kubernetes.io/instance": "gardener-dashboard",
       "app.kubernetes.io/managed-by": "Helm",
@@ -195,22 +165,22 @@ Object {
     "name": "gardener-dashboard",
     "namespace": "garden",
   },
-  "spec": Object {
+  "spec": {
     "replicas": 1,
-    "selector": Object {
-      "matchLabels": Object {
+    "selector": {
+      "matchLabels": {
         "app.kubernetes.io/component": "dashboard",
         "app.kubernetes.io/name": "gardener-dashboard",
       },
     },
-    "template": Object {
-      "metadata": Object {
-        "annotations": Object {
+    "template": {
+      "metadata": {
+        "annotations": {
           "checksum/configmap-gardener-dashboard-config": StringMatching /\\[0-9a-f\\]\\{64\\}/,
           "checksum/secret-gardener-dashboard-oidc": StringMatching /\\[0-9a-f\\]\\{64\\}/,
           "checksum/secret-gardener-dashboard-sessionSecret": StringMatching /\\[0-9a-f\\]\\{64\\}/,
         },
-        "labels": Object {
+        "labels": {
           "app.kubernetes.io/component": "dashboard",
           "app.kubernetes.io/instance": "gardener-dashboard",
           "app.kubernetes.io/managed-by": "Helm",
@@ -221,61 +191,34 @@ Object {
           "networking.resources.gardener.cloud/to-virtual-garden-kube-apiserver-tcp-443": "allowed",
         },
       },
-      "spec": Object {
-        "containers": Array [
-          Object {
-            "args": Array [
+      "spec": {
+        "containers": [
+          {
+            "args": [
               "--max-old-space-size=920",
               "server.js",
             ],
-            "env": Array [
-              Object {
-                "name": "SESSION_SECRET",
-                "valueFrom": Object {
-                  "secretKeyRef": Object {
-                    "key": "keyValue",
-                    "name": "gardener-dashboard-sessionsecret",
-                  },
-                },
-              },
-              Object {
-                "name": "OIDC_CLIENT_ID",
-                "valueFrom": Object {
-                  "secretKeyRef": Object {
-                    "key": "client_id",
-                    "name": "gardener-dashboard-oidc",
-                  },
-                },
-              },
-              Object {
-                "name": "OIDC_CLIENT_SECRET",
-                "valueFrom": Object {
-                  "secretKeyRef": Object {
-                    "key": "client_secret",
-                    "name": "gardener-dashboard-oidc",
-                  },
-                },
-              },
-              Object {
+            "env": [
+              {
                 "name": "GARDENER_CONFIG",
                 "value": "/etc/gardener-dashboard/config.yaml",
               },
-              Object {
+              {
                 "name": "METRICS_PORT",
                 "value": "9050",
               },
-              Object {
+              {
                 "name": "POD_NAME",
-                "valueFrom": Object {
-                  "fieldRef": Object {
+                "valueFrom": {
+                  "fieldRef": {
                     "fieldPath": "metadata.name",
                   },
                 },
               },
-              Object {
+              {
                 "name": "POD_NAMESPACE",
-                "valueFrom": Object {
-                  "fieldRef": Object {
+                "valueFrom": {
+                  "fieldRef": {
                     "fieldPath": "metadata.namespace",
                   },
                 },
@@ -283,32 +226,32 @@ Object {
             ],
             "image": "europe-docker.pkg.dev/gardener-project/releases/gardener/dashboard:1.26.0-dev-4d529c1",
             "imagePullPolicy": "IfNotPresent",
-            "livenessProbe": Object {
+            "livenessProbe": {
               "failureThreshold": 6,
               "initialDelaySeconds": 15,
               "periodSeconds": 20,
               "successThreshold": 1,
-              "tcpSocket": Object {
+              "tcpSocket": {
                 "port": "http",
               },
               "timeoutSeconds": 5,
             },
             "name": "gardener-dashboard",
-            "ports": Array [
-              Object {
+            "ports": [
+              {
                 "containerPort": 8080,
                 "name": "http",
                 "protocol": "TCP",
               },
-              Object {
+              {
                 "containerPort": 9050,
                 "name": "metrics",
                 "protocol": "TCP",
               },
             ],
-            "readinessProbe": Object {
+            "readinessProbe": {
               "failureThreshold": 6,
-              "httpGet": Object {
+              "httpGet": {
                 "path": "/healthz",
                 "port": "http",
               },
@@ -317,25 +260,35 @@ Object {
               "successThreshold": 1,
               "timeoutSeconds": 5,
             },
-            "resources": Object {
-              "requests": Object {
+            "resources": {
+              "requests": {
                 "cpu": "100m",
                 "memory": "350Mi",
               },
             },
-            "volumeMounts": Array [
-              Object {
+            "volumeMounts": [
+              {
                 "mountPath": "/etc/gardener-dashboard",
                 "name": "gardener-dashboard-config",
               },
-              Object {
+              {
                 "mountPath": "/app/public/login-config.json",
                 "name": "gardener-dashboard-login-config",
                 "subPath": "login-config.json",
               },
-              Object {
+              {
+                "mountPath": "/etc/gardener-dashboard/secrets/session",
+                "name": "gardener-dashboard-sessionsecret",
+                "readOnly": true,
+              },
+              {
                 "mountPath": "/var/run/secrets/projected/serviceaccount",
                 "name": "service-account-token",
+                "readOnly": true,
+              },
+              {
+                "mountPath": "/etc/gardener-dashboard/secrets/oidc",
+                "name": "gardener-dashboard-oidc",
                 "readOnly": true,
               },
             ],
@@ -343,12 +296,12 @@ Object {
         ],
         "restartPolicy": "Always",
         "serviceAccountName": "gardener-dashboard",
-        "volumes": Array [
-          Object {
-            "configMap": Object {
+        "volumes": [
+          {
+            "configMap": {
               "defaultMode": 420,
-              "items": Array [
-                Object {
+              "items": [
+                {
                   "key": "config.yaml",
                   "path": "config.yaml",
                 },
@@ -357,11 +310,11 @@ Object {
             },
             "name": "gardener-dashboard-config",
           },
-          Object {
-            "configMap": Object {
+          {
+            "configMap": {
               "defaultMode": 444,
-              "items": Array [
-                Object {
+              "items": [
+                {
                   "key": "login-config.json",
                   "path": "login-config.json",
                 },
@@ -370,12 +323,24 @@ Object {
             },
             "name": "gardener-dashboard-login-config",
           },
-          Object {
+          {
+            "name": "gardener-dashboard-sessionsecret",
+            "secret": {
+              "secretName": "gardener-dashboard-sessionsecret",
+            },
+          },
+          {
+            "name": "gardener-dashboard-oidc",
+            "secret": {
+              "secretName": "gardener-dashboard-oidc",
+            },
+          },
+          {
             "name": "service-account-token",
-            "projected": Object {
-              "sources": Array [
-                Object {
-                  "serviceAccountToken": Object {
+            "projected": {
+              "sources": [
+                {
+                  "serviceAccountToken": {
                     "expirationSeconds": 43200,
                     "path": "token",
                   },
@@ -391,7 +356,7 @@ Object {
 `;
 
 exports[`gardener-dashboard deployment should render the template with node options 1`] = `
-Array [
+[
   "--max-old-space-size=460",
   "--expose-gc",
   "--trace-gc",
@@ -400,87 +365,30 @@ Array [
 ]
 `;
 
-exports[`gardener-dashboard deployment when github is configured token authentication should render GITHUB environment variable 1`] = `
-Array [
-  Object {
-    "name": "SESSION_SECRET",
-    "valueFrom": Object {
-      "secretKeyRef": Object {
-        "key": "keyValue",
-        "name": "gardener-dashboard-sessionsecret",
-      },
-    },
+exports[`gardener-dashboard deployment when github is configured should render github secret volume and volumeMount 1`] = `
+{
+  "name": "gardener-dashboard-github",
+  "secret": {
+    "secretName": "gardener-dashboard-github",
   },
-  Object {
-    "name": "OIDC_CLIENT_ID",
-    "valueFrom": Object {
-      "secretKeyRef": Object {
-        "key": "client_id",
-        "name": "gardener-dashboard-oidc",
-      },
-    },
-  },
-  Object {
-    "name": "OIDC_CLIENT_SECRET",
-    "valueFrom": Object {
-      "secretKeyRef": Object {
-        "key": "client_secret",
-        "name": "gardener-dashboard-oidc",
-      },
-    },
-  },
-  Object {
-    "name": "GITHUB_AUTHENTICATION_TOKEN",
-    "valueFrom": Object {
-      "secretKeyRef": Object {
-        "key": "authentication.token",
-        "name": "gardener-dashboard-github",
-      },
-    },
-  },
-  Object {
-    "name": "GITHUB_WEBHOOK_SECRET",
-    "valueFrom": Object {
-      "secretKeyRef": Object {
-        "key": "webhookSecret",
-        "name": "gardener-dashboard-github",
-      },
-    },
-  },
-  Object {
-    "name": "GARDENER_CONFIG",
-    "value": "/etc/gardener-dashboard/config.yaml",
-  },
-  Object {
-    "name": "METRICS_PORT",
-    "value": "9050",
-  },
-  Object {
-    "name": "POD_NAME",
-    "valueFrom": Object {
-      "fieldRef": Object {
-        "fieldPath": "metadata.name",
-      },
-    },
-  },
-  Object {
-    "name": "POD_NAMESPACE",
-    "valueFrom": Object {
-      "fieldRef": Object {
-        "fieldPath": "metadata.namespace",
-      },
-    },
-  },
-]
+}
+`;
+
+exports[`gardener-dashboard deployment when github is configured should render github secret volume and volumeMount 2`] = `
+{
+  "mountPath": "/etc/gardener-dashboard/secrets/github",
+  "name": "gardener-dashboard-github",
+  "readOnly": true,
+}
 `;
 
 exports[`gardener-dashboard deployment when virtual garden is enabled should render the template 1`] = `
-Object {
+{
   "name": "service-account-token",
-  "projected": Object {
-    "sources": Array [
-      Object {
-        "serviceAccountToken": Object {
+  "projected": {
+    "sources": [
+      {
+        "serviceAccountToken": {
           "audience": "https://identity.garden.example.org",
           "expirationSeconds": 3600,
           "path": "token",
@@ -492,7 +400,7 @@ Object {
 `;
 
 exports[`gardener-dashboard deployment when virtual garden is enabled should render the template 2`] = `
-Object {
+{
   "mountPath": "/var/run/secrets/projected/serviceaccount",
   "name": "service-account-token",
   "readOnly": true,
@@ -500,14 +408,14 @@ Object {
 `;
 
 exports[`gardener-dashboard deployment when virtual garden is enabled should use the volume mount based kubeconfig 1`] = `
-Object {
+{
   "name": "kubeconfig",
-  "projected": Object {
-    "sources": Array [
-      Object {
-        "secret": Object {
-          "items": Array [
-            Object {
+  "projected": {
+    "sources": [
+      {
+        "secret": {
+          "items": [
+            {
               "key": "kubeconfig",
               "path": "kubeconfig",
             },
@@ -516,10 +424,10 @@ Object {
           "optional": false,
         },
       },
-      Object {
-        "secret": Object {
-          "items": Array [
-            Object {
+      {
+        "secret": {
+          "items": [
+            {
               "key": "token",
               "path": "token",
             },
@@ -534,7 +442,7 @@ Object {
 `;
 
 exports[`gardener-dashboard deployment when virtual garden is enabled should use the volume mount based kubeconfig 2`] = `
-Object {
+{
   "mountPath": "/var/run/secrets/gardener.cloud",
   "name": "kubeconfig",
   "readOnly": true,
@@ -542,7 +450,7 @@ Object {
 `;
 
 exports[`gardener-dashboard deployment when virtual garden is enabled should use the volume mount based kubeconfig 3`] = `
-Object {
+{
   "name": "KUBECONFIG",
   "value": "/var/run/secrets/gardener.cloud/kubeconfig",
 }

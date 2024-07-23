@@ -10,7 +10,6 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :secret-validations="v$"
     :secret="secret"
-    vendor="hcloud"
   >
     <template #secret-slot>
       <div>
@@ -54,10 +53,7 @@ import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink.vue'
 
 import { withFieldName } from '@/utils/validators'
-import {
-  getErrorMessages,
-  setDelayedInputFocus,
-} from '@/utils'
+import { getErrorMessages } from '@/utils'
 
 export default {
   components: {
@@ -111,11 +107,6 @@ export default {
     isCreateMode () {
       return !this.secret
     },
-  },
-  mounted () {
-    if (!this.isCreateMode) {
-      setDelayedInputFocus(this, 'hcloudToken')
-    }
   },
   methods: {
     getErrorMessages,

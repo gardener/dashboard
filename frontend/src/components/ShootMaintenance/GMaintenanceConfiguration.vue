@@ -7,21 +7,18 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-action-button-dialog
     ref="actionDialog"
-    :shoot-item="shootItem"
     width="900"
     caption="Configure Maintenance"
+    @before-dialog-opened="setShootManifest(shootItem)"
     @dialog-opened="onConfigurationDialogOpened"
   >
     <template #content>
       <v-card-text>
-        <g-maintenance-time
-          ref="maintenanceTime"
-          :time-window-begin="data.timeWindowBegin"
-          :time-window-end="data.timeWindowEnd"
-        />
+        <g-maintenance-time />
         <g-maintenance-components
-          ref="maintenanceComponents"
-          :hide-os-updates="!hasShootWorkerGroups"
+          v-model:auto-update-kubernetes-version="maintenanceAutoUpdateKubernetesVersion"
+          v-model:auto-update-machine-image-version="maintenanceAutoUpdateMachineImageVersion"
+          :workerless="!hasShootWorkerGroups"
         />
         <v-alert
           type="warning"
@@ -46,13 +43,10 @@ import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GMaintenanceComponents from '@/components/ShootMaintenance/GMaintenanceComponents'
 import GMaintenanceTime from '@/components/ShootMaintenance/GMaintenanceTime'
 
-import { errorDetailsFromError } from '@/utils/error'
-import { shootItem } from '@/mixins/shootItem'
+import { useShootContext } from '@/composables/useShootContext'
+import { useShootItem } from '@/composables/useShootItem'
 
-import {
-  get,
-  assign,
-} from '@/lodash'
+import { errorDetailsFromError } from '@/utils/error'
 
 export default {
   components: {
@@ -60,26 +54,42 @@ export default {
     GMaintenanceComponents,
     GMaintenanceTime,
   },
-  mixins: [shootItem],
   inject: ['api', 'logger'],
   setup () {
+    const {
+      shootItem,
+      shootNamespace,
+      shootName,
+      hasShootWorkerGroups,
+      maintenancePreconditionSatisfiedMessage,
+      isMaintenancePreconditionSatisfied,
+    } = useShootItem()
+
+    const {
+      maintenanceTimeWindowBegin,
+      maintenanceTimeWindowEnd,
+      maintenanceAutoUpdateKubernetesVersion,
+      maintenanceAutoUpdateMachineImageVersion,
+      setShootManifest,
+    } = useShootContext()
+
     return {
       v$: useVuelidate(),
-    }
-  },
-  data () {
-    return {
-      data: {
-        timeWindowBegin: undefined,
-        timeWindowEnd: undefined,
-        updateKubernetesVersion: false,
-        updateOSVersion: false,
-      },
+      shootItem,
+      shootNamespace,
+      shootName,
+      hasShootWorkerGroups,
+      maintenancePreconditionSatisfiedMessage,
+      isMaintenancePreconditionSatisfied,
+      maintenanceTimeWindowBegin,
+      maintenanceTimeWindowEnd,
+      maintenanceAutoUpdateKubernetesVersion,
+      maintenanceAutoUpdateMachineImageVersion,
+      setShootManifest,
     }
   },
   methods: {
     async onConfigurationDialogOpened () {
-      this.reset()
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
         this.updateConfiguration()
@@ -87,18 +97,19 @@ export default {
     },
     async updateConfiguration () {
       try {
-        const { begin, end } = this.$refs.maintenanceTime.getMaintenanceWindow()
-        const { k8sUpdates, osUpdates } = this.$refs.maintenanceComponents.getComponentUpdates()
-        assign(this.data, {
-          timeWindowBegin: begin,
-          timeWindowEnd: end,
-          updateKubernetesVersion: k8sUpdates,
-          updateOSVersion: osUpdates,
-        })
-        if (!this.hasShootWorkerGroups) {
-          delete this.data.updateOSVersion
+        const data = {
+          timeWindowBegin: this.maintenanceTimeWindowBegin,
+          timeWindowEnd: this.maintenanceTimeWindowEnd,
+          updateKubernetesVersion: this.maintenanceAutoUpdateKubernetesVersion,
         }
-        await this.api.updateShootMaintenance({ namespace: this.shootNamespace, name: this.shootName, data: this.data })
+        if (this.hasShootWorkerGroups) {
+          data.updateOSVersion = this.maintenanceAutoUpdateMachineImageVersion
+        }
+        await this.api.updateShootMaintenance({
+          namespace: this.shootNamespace,
+          name: this.shootName,
+          data,
+        })
       } catch (err) {
         const errorMessage = 'Could not save maintenance configuration'
         const errorDetails = errorDetailsFromError(err)
@@ -106,23 +117,6 @@ export default {
         this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
         this.logger.error(errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
-    },
-    reset () {
-      this.data.timeWindowBegin = get(this.shootItem, 'spec.maintenance.timeWindow.begin')
-      this.data.timeWindowEnd = get(this.shootItem, 'spec.maintenance.timeWindow.end')
-      this.data.updateKubernetesVersion = get(this.shootItem, 'spec.maintenance.autoUpdate.kubernetesVersion', false)
-      this.data.updateOSVersion = get(this.shootItem, 'spec.maintenance.autoUpdate.machineImageVersion', false)
-
-      this.$nextTick(() => {
-        // trigger reset in next tick to ensure that property data has been propagated
-        // reset function requires time-window-begin property to be set
-        this.$refs.maintenanceTime.reset()
-      })
-
-      this.$refs.maintenanceComponents.setComponentUpdates({
-        k8sUpdates: this.data.updateKubernetesVersion,
-        osUpdates: this.data.updateOSVersion,
-      })
     },
   },
 }

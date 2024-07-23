@@ -10,7 +10,6 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :secret-validations="v$"
     :secret="secret"
-    vendor="netlify-dns"
   >
     <template #secret-slot>
       <div>
@@ -41,7 +40,8 @@ SPDX-License-Identifier: Apache-2.0
           <pre>$ echo -n '1234567890123456789' | base64</pre>
         </p>
         <p>
-          For details see <g-external-link url="https://docs.netlify.com/cli/get-started/#obtain-a-token-in-the-netlify-ui" />
+          For details see
+          <g-external-link url="https://docs.netlify.com/cli/get-started/#obtain-a-token-in-the-netlify-ui" />
         </p>
       </div>
     </template>
@@ -55,10 +55,7 @@ import { required } from '@vuelidate/validators'
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
 
-import {
-  getErrorMessages,
-  setDelayedInputFocus,
-} from '@/utils'
+import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
 
 export default {
@@ -116,11 +113,6 @@ export default {
     isCreateMode () {
       return !this.secret
     },
-  },
-  mounted () {
-    if (!this.isCreateMode) {
-      setDelayedInputFocus(this, 'apiToken')
-    }
   },
   methods: {
     getErrorMessages,

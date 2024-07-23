@@ -11,6 +11,8 @@ SPDX-License-Identifier: Apache-2.0
     :secret-validations="v$"
     :secret="secret"
     :vendor="vendor"
+    :create-title="`Add new ${vendor} Secret`"
+    :replace-title="`Replace ${vendor} Secret`"
   >
     <template #secret-slot>
       <template v-if="customCloudProviderFields">
@@ -41,7 +43,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-
 import { mapState } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 

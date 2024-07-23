@@ -6,7 +6,7 @@
 
 'use strict'
 
-const { isPlainObject } = require('lodash')
+const { isPlainObject, map } = require('lodash')
 const { promisify } = require('util')
 const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
@@ -34,25 +34,16 @@ function decodeSecret (input) {
   return Buffer.from(input)
 }
 
-function encodeState (data = {}) {
-  return base64url.encode(JSON.stringify(data))
-}
-
-function decodeState (state) {
-  try {
-    return JSON.parse(base64url.decode(state))
-  } catch (err) {
-    return {}
+module.exports = sessionSecrets => {
+  if (!sessionSecrets?.length) {
+    throw new Error('No session secrets provided')
   }
-}
-
-module.exports = sessionSecret => {
-  const symetricKey = importSymmetricKey(sessionSecret)
+  const [sessionSecret] = sessionSecrets
+  const symmetricKeys = map(sessionSecrets, importSymmetricKey)
+  const [symetricKey] = symmetricKeys
   const encoder = new TextEncoder()
   const decoder = new TextDecoder()
   return {
-    encodeState,
-    decodeState,
     sign (payload, secretOrPrivateKey, { ...options } = {}) {
       if (isPlainObject(secretOrPrivateKey)) {
         options = secretOrPrivateKey
@@ -69,8 +60,16 @@ module.exports = sessionSecret => {
       }
       return jwtSign(payload, secretOrPrivateKey, options)
     },
-    verify (token, options) {
-      return jwtVerify(token, sessionSecret, options)
+    async verify (token, options) {
+      let firstError
+      for (const sessionSecret of sessionSecrets) {
+        try {
+          return await jwtVerify(token, sessionSecret, options)
+        } catch (err) {
+          firstError ??= err
+        }
+      }
+      throw firstError
     },
     decode (token) {
       return jwt.decode(token) || {}
@@ -89,8 +88,16 @@ module.exports = sessionSecret => {
       const options = {
         keyManagementAlgorithms: ['PBES2-HS256+A128KW']
       }
-      const { plaintext } = await jose.compactDecrypt(data, symetricKey, options)
-      return decoder.decode(plaintext)
+      let firstError
+      for (const symetricKey of symmetricKeys) {
+        try {
+          const { plaintext } = await jose.compactDecrypt(data, symetricKey, options)
+          return decoder.decode(plaintext)
+        } catch (err) {
+          firstError ??= err
+        }
+      }
+      throw firstError
     }
   }
 }

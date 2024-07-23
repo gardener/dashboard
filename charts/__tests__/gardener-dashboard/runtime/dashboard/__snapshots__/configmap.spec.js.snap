@@ -1,40 +1,40 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`gardener-dashboard configmap access restrictions should render the template w/ \`item.options\` 1`] = `
-Object {
-  "frontend": Object {
-    "accessRestriction": Object {
-      "items": Array [
-        Object {
-          "display": Object {
+{
+  "frontend": {
+    "accessRestriction": {
+      "items": [
+        {
+          "display": {
             "description": "display Foo description",
             "title": "display Foo",
             "visibleIf": true,
           },
-          "input": Object {
+          "input": {
             "description": "input Foo description",
             "inverted": true,
             "title": "input Foo",
           },
           "key": "foo",
-          "options": Array [
-            Object {
-              "display": Object {
+          "options": [
+            {
+              "display": {
                 "description": "display Foo  Option 1 description",
                 "title": "display Foo Option 1",
                 "visibleIf": false,
               },
-              "input": Object {
+              "input": {
                 "description": "input Foo  Option 1 description",
                 "title": "input Foo Option 1",
               },
               "key": "foo-option-1",
             },
-            Object {
-              "display": Object {
+            {
+              "display": {
                 "visibleIf": true,
               },
-              "input": Object {
+              "input": {
                 "description": "input Foo  Option 2 description",
                 "inverted": true,
                 "title": "input Foo Option 2",
@@ -50,15 +50,15 @@ Object {
 `;
 
 exports[`gardener-dashboard configmap access restrictions should render the template w/o \`item.options\` 1`] = `
-Object {
-  "frontend": Object {
-    "accessRestriction": Object {
-      "items": Array [
-        Object {
-          "display": Object {
+{
+  "frontend": {
+    "accessRestriction": {
+      "items": [
+        {
+          "display": {
             "visibleIf": true,
           },
-          "input": Object {
+          "input": {
             "title": "Foo",
           },
           "key": "foo",
@@ -71,9 +71,9 @@ Object {
 `;
 
 exports[`gardener-dashboard configmap alert should render the template w/ \`alert.identifier\` 1`] = `
-Object {
-  "frontend": Object {
-    "alert": Object {
+{
+  "frontend": {
+    "alert": {
       "identifier": "bar",
       "message": "foo",
       "type": "warning",
@@ -83,9 +83,9 @@ Object {
 `;
 
 exports[`gardener-dashboard configmap alert should render the template w/o \`alert.identifier\` 1`] = `
-Object {
-  "frontend": Object {
-    "alert": Object {
+{
+  "frontend": {
+    "alert": {
       "message": "foo",
       "type": "warning",
     },
@@ -94,15 +94,15 @@ Object {
 `;
 
 exports[`gardener-dashboard configmap branding should render the template 1`] = `
-Object {
-  "frontend": Object {
-    "branding": Object {
-      "loginHints": Array [
-        Object {
+{
+  "frontend": {
+    "branding": {
+      "loginHints": [
+        {
           "href": "https://gardener.cloud",
           "title": "Support",
         },
-        Object {
+        {
           "href": "https://gardener.cloud/docs",
           "title": "Documentation",
         },
@@ -126,9 +126,9 @@ Object {
 `;
 
 exports[`gardener-dashboard configmap contentSecurityPolicy should render the template with connectSrc containing additional host sources 1`] = `
-Object {
-  "contentSecurityPolicy": Object {
-    "connectSrc": Array [
+{
+  "contentSecurityPolicy": {
+    "connectSrc": [
       "'self'",
       "wss://*.seed.example.com",
       "https://*.seed.example.com",
@@ -138,9 +138,9 @@ Object {
 `;
 
 exports[`gardener-dashboard configmap contentSecurityPolicy should render the template with default connectSrc 1`] = `
-Object {
-  "contentSecurityPolicy": Object {
-    "connectSrc": Array [
+{
+  "contentSecurityPolicy": {
+    "connectSrc": [
       "'self'",
     ],
   },
@@ -148,9 +148,9 @@ Object {
 `;
 
 exports[`gardener-dashboard configmap controlPlaneHighAvailabilityHelp should render the template with controlPlaneHighAvailabilityHelp markdown 1`] = `
-Object {
-  "frontend": Object {
-    "controlPlaneHighAvailabilityHelp": Object {
+{
+  "frontend": {
+    "controlPlaneHighAvailabilityHelp": {
       "text": "[foo](https://bar.baz)",
     },
   },
@@ -212,9 +212,9 @@ foo",
 `;
 
 exports[`gardener-dashboard configmap experimental should render the template with experimental features 1`] = `
-Object {
-  "frontend": Object {
-    "experimental": Object {
+{
+  "frontend": {
+    "experimental": {
       "throttleDelayPerCluster": 42,
     },
   },
@@ -222,9 +222,9 @@ Object {
 `;
 
 exports[`gardener-dashboard configmap grantTypes should render the template 1`] = `
-Object {
-  "frontend": Object {
-    "grantTypes": Array [
+{
+  "frontend": {
+    "grantTypes": [
       "a",
       "b",
       "c",
@@ -234,10 +234,10 @@ Object {
 `;
 
 exports[`gardener-dashboard configmap knownConditions should render the template with knownConditions markdown 1`] = `
-Object {
-  "frontend": Object {
-    "knownConditions": Object {
-      "ExampleConditionReady": Object {
+{
+  "frontend": {
+    "knownConditions": {
+      "ExampleConditionReady": {
         "description": "Example Description",
         "name": "Example",
         "shortName": "E",
@@ -250,18 +250,18 @@ Object {
 `;
 
 exports[`gardener-dashboard configmap kubeconfig download should render the template w/ \`public.client_secret\` 1`] = `
-Object {
+{
   "apiServerCaData": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCllYQnBVMlZ5ZG1WeVEyRT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==",
-  "oidc": Object {
+  "oidc": {
     "ca": "-----BEGIN CERTIFICATE-----
 Li4u
 -----END CERTIFICATE-----",
     "issuer": "https://identity.garden.example.org",
-    "public": Object {
+    "public": {
       "clientId": "kube-kubectl",
       "clientSecret": "kube-kubectl-secret",
     },
-    "redirect_uris": Array [
+    "redirect_uris": [
       "https://dashboard.garden.example.org/auth/callback",
       "https://dashboard.ingress.garden.example.org/auth/callback",
     ],
@@ -272,18 +272,18 @@ Li4u
 `;
 
 exports[`gardener-dashboard configmap kubeconfig download should render the template w/o \`public.client_secret\` 1`] = `
-Object {
+{
   "apiServerCaData": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCllYQnBVMlZ5ZG1WeVEyRT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==",
-  "oidc": Object {
+  "oidc": {
     "ca": "-----BEGIN CERTIFICATE-----
 Li4u
 -----END CERTIFICATE-----",
     "issuer": "https://identity.garden.example.org",
-    "public": Object {
+    "public": {
       "clientId": "kube-kubectl",
       "usePKCE": true,
     },
-    "redirect_uris": Array [
+    "redirect_uris": [
       "https://dashboard.garden.example.org/auth/callback",
       "https://dashboard.ingress.garden.example.org/auth/callback",
     ],
@@ -294,19 +294,19 @@ Li4u
 `;
 
 exports[`gardener-dashboard configmap kubeconfig download should render the template with PKCE flow for the public client 1`] = `
-Object {
+{
   "apiServerCaData": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCllYQnBVMlZ5ZG1WeVEyRT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==",
-  "oidc": Object {
+  "oidc": {
     "ca": "-----BEGIN CERTIFICATE-----
 Li4u
 -----END CERTIFICATE-----",
     "issuer": "https://identity.garden.example.org",
-    "public": Object {
+    "public": {
       "clientId": "kube-kubectl",
       "clientSecret": "kube-kubectl-secret",
       "usePKCE": true,
     },
-    "redirect_uris": Array [
+    "redirect_uris": [
       "https://dashboard.garden.example.org/auth/callback",
       "https://dashboard.ingress.garden.example.org/auth/callback",
     ],
@@ -317,14 +317,14 @@ Li4u
 `;
 
 exports[`gardener-dashboard configmap login-config.json should render login-config with branding and themes 1`] = `
-Object {
-  "branding": Object {
-    "loginHints": Array [
-      Object {
+{
+  "branding": {
+    "loginHints": [
+      {
         "href": "https://gardener.cloud",
         "title": "Support",
       },
-      Object {
+      {
         "href": "https://gardener.cloud/docs",
         "title": "Documentation",
       },
@@ -333,16 +333,16 @@ Object {
     "productSlogan": "Slogan",
   },
   "landingPageUrl": "https://gardener.cloud/",
-  "loginTypes": Array [
+  "loginTypes": [
     "oidc",
     "token",
   ],
-  "themes": Object {
-    "dark": Object {
+  "themes": {
+    "dark": {
       "main-navigation-title": "grey.darken3",
       "primary": "#ff0000",
     },
-    "light": Object {
+    "light": {
       "main-navigation-title": "grey.darken3",
       "primary": "#ff0000",
     },
@@ -351,13 +351,13 @@ Object {
 `;
 
 exports[`gardener-dashboard configmap oidc should render the template with PKCE flow for the internal client 1`] = `
-Object {
-  "oidc": Object {
+{
+  "oidc": {
     "ca": "-----BEGIN CERTIFICATE-----
 Li4u
 -----END CERTIFICATE-----",
     "issuer": "https://identity.garden.example.org",
-    "redirect_uris": Array [
+    "redirect_uris": [
       "https://dashboard.garden.example.org/auth/callback",
       "https://dashboard.ingress.garden.example.org/auth/callback",
     ],
@@ -369,13 +369,13 @@ Li4u
 `;
 
 exports[`gardener-dashboard configmap oidc should render the template with default scope 1`] = `
-Object {
-  "oidc": Object {
+{
+  "oidc": {
     "ca": "-----BEGIN CERTIFICATE-----
 Li4u
 -----END CERTIFICATE-----",
     "issuer": "https://identity.garden.example.org",
-    "redirect_uris": Array [
+    "redirect_uris": [
       "https://dashboard.garden.example.org/auth/callback",
       "https://dashboard.ingress.garden.example.org/auth/callback",
     ],
@@ -386,13 +386,13 @@ Li4u
 `;
 
 exports[`gardener-dashboard configmap oidc should render the template with scope containing offline_access 1`] = `
-Object {
-  "oidc": Object {
+{
+  "oidc": {
     "ca": "-----BEGIN CERTIFICATE-----
 Li4u
 -----END CERTIFICATE-----",
     "issuer": "https://identity.garden.example.org",
-    "redirect_uris": Array [
+    "redirect_uris": [
       "https://dashboard.garden.example.org/auth/callback",
       "https://dashboard.ingress.garden.example.org/auth/callback",
     ],
@@ -404,9 +404,9 @@ Li4u
 `;
 
 exports[`gardener-dashboard configmap resourceQuotaHelp should render the template with resourceQuotaHelp markdown 1`] = `
-Object {
-  "frontend": Object {
-    "resourceQuotaHelp": Object {
+{
+  "frontend": {
+    "resourceQuotaHelp": {
       "text": "[foo](https://bar.baz)",
     },
   },
@@ -414,9 +414,9 @@ Object {
 `;
 
 exports[`gardener-dashboard configmap shootAdminKubeconfig should render the template 1`] = `
-Object {
-  "frontend": Object {
-    "shootAdminKubeconfig": Object {
+{
+  "frontend": {
+    "shootAdminKubeconfig": {
       "enabled": true,
       "maxExpirationSeconds": 86400,
     },
@@ -425,11 +425,11 @@ Object {
 `;
 
 exports[`gardener-dashboard configmap should render the template w/ defaults values 1`] = `
-Object {
+{
   "apiVersion": "v1",
   "kind": "ConfigMap",
-  "metadata": Object {
-    "labels": Object {
+  "metadata": {
+    "labels": {
       "app.kubernetes.io/component": "dashboard",
       "app.kubernetes.io/instance": "gardener-dashboard",
       "app.kubernetes.io/managed-by": "Helm",
@@ -443,9 +443,9 @@ Object {
 `;
 
 exports[`gardener-dashboard configmap should render the template w/ defaults values 2`] = `
-Object {
+{
   "landingPageUrl": "https://gardener.cloud/",
-  "loginTypes": Array [
+  "loginTypes": [
     "oidc",
     "token",
   ],
@@ -453,56 +453,56 @@ Object {
 `;
 
 exports[`gardener-dashboard configmap should render the template w/ defaults values 3`] = `
-Object {
+{
   "apiServerUrl": "https://api.garden.example.org",
-  "contentSecurityPolicy": Object {
-    "connectSrc": Array [
+  "contentSecurityPolicy": {
+    "connectSrc": [
       "'self'",
     ],
   },
-  "experimentalUseWatchCacheForListShoots": "never",
-  "frontend": Object {
-    "defaultHibernationSchedule": Object {
-      "development": Array [
-        Object {
+  "frontend": {
+    "defaultHibernationSchedule": {
+      "development": [
+        {
           "end": "00 08 * * 1,2,3,4,5",
           "start": "00 17 * * 1,2,3,4,5",
         },
       ],
-      "evaluation": Array [
-        Object {
+      "evaluation": [
+        {
           "start": "00 17 * * 1,2,3,4,5",
         },
       ],
       "production": null,
     },
     "defaultNodesCIDR": "10.250.0.0/16",
-    "experimental": Object {
+    "experimental": {
       "throttleDelayPerCluster": 10,
     },
-    "externalTools": Array [
-      Object {
+    "externalTools": [
+      {
         "icon": "apps",
         "title": "Applications and Services Hub",
         "url": "https://apps.garden.example.org/foo/bar{?namespace,name}",
       },
     ],
-    "features": Object {
+    "features": {
+      "oidcObservabilityUrlsEnabled": false,
       "projectTerminalShortcutsEnabled": false,
       "terminalEnabled": false,
     },
-    "helpMenuItems": Array [
-      Object {
+    "helpMenuItems": [
+      {
         "icon": "description",
         "title": "Getting Started",
         "url": "https://gardener.cloud/about/",
       },
-      Object {
+      {
         "icon": "mdi-slack",
         "title": "slack",
         "url": "https://kubernetes.slack.com/messages/gardener",
       },
-      Object {
+      {
         "icon": "mdi-bug",
         "title": "Issues",
         "url": "https://github.com/gardener/dashboard/issues/",
@@ -510,7 +510,7 @@ Object {
     ],
     "seedCandidateDeterminationStrategy": "SameRegion",
     "serviceAccountDefaultTokenExpiration": 7776000,
-    "shootAdminKubeconfig": Object {
+    "shootAdminKubeconfig": {
       "enabled": false,
       "maxExpirationSeconds": 86400,
     },
@@ -518,12 +518,12 @@ Object {
   "logFormat": "text",
   "logLevel": "debug",
   "maxRequestBodySize": "100kb",
-  "oidc": Object {
+  "oidc": {
     "ca": "-----BEGIN CERTIFICATE-----
 Li4u
 -----END CERTIFICATE-----",
     "issuer": "https://identity.garden.example.org",
-    "redirect_uris": Array [
+    "redirect_uris": [
       "https://dashboard.garden.example.org/auth/callback",
       "https://dashboard.ingress.garden.example.org/auth/callback",
     ],
@@ -531,22 +531,22 @@ Li4u
     "scope": "openid email profile groups audience:server:client_id:dashboard audience:server:client_id:kube-kubectl",
   },
   "port": 8080,
-  "readinessProbe": Object {
+  "readinessProbe": {
     "periodSeconds": 10,
   },
-  "terminal": Object {
-    "container": Object {
+  "terminal": {
+    "container": {
       "image": "ops-toolbelt:0.11.0-mod1",
     },
-    "garden": Object {
-      "operatorCredentials": Object {
-        "serviceAccountRef": Object {
+    "garden": {
+      "operatorCredentials": {
+        "serviceAccountRef": {
           "name": "dashboard-terminal-admin",
           "namespace": "garden",
         },
       },
     },
-    "gardenTerminalHost": Object {
+    "gardenTerminalHost": {
       "seedRef": "soil-gcp",
     },
   },
@@ -554,9 +554,9 @@ Li4u
 `;
 
 exports[`gardener-dashboard configmap sla should render the template with sla description markdown hyperlink 1`] = `
-Object {
-  "frontend": Object {
-    "sla": Object {
+{
+  "frontend": {
+    "sla": {
       "description": "[foo](https://bar.baz)",
       "title": "SLA title",
     },
@@ -565,13 +565,13 @@ Object {
 `;
 
 exports[`gardener-dashboard configmap terminal config garden cluster custom rolebBindings should default apiGroup 1`] = `
-Object {
-  "terminal": Object {
-    "garden": Object {
-      "roleBindings": Array [
-        Object {
+{
+  "terminal": {
+    "garden": {
+      "roleBindings": [
+        {
           "bindingKind": "ClusterRoleBinding",
-          "roleRef": Object {
+          "roleRef": {
             "apiGroup": "rbac.authorization.k8s.io",
             "kind": "ClusterRole",
             "name": "test-role",
@@ -584,13 +584,13 @@ Object {
 `;
 
 exports[`gardener-dashboard configmap terminal config garden cluster custom rolebBindings should render the template 1`] = `
-Object {
-  "terminal": Object {
-    "garden": Object {
-      "roleBindings": Array [
-        Object {
+{
+  "terminal": {
+    "garden": {
+      "roleBindings": [
+        {
           "bindingKind": "ClusterRoleBinding",
-          "roleRef": Object {
+          "roleRef": {
             "apiGroup": "rbac.authorization.k8s.foo",
             "kind": "ClusterRole",
             "name": "test-role",
@@ -603,20 +603,20 @@ Object {
 `;
 
 exports[`gardener-dashboard configmap terminal config should render the template 1`] = `
-Object {
-  "terminal": Object {
-    "container": Object {
+{
+  "terminal": {
+    "container": {
       "image": "chart-test:0.1.0",
     },
-    "garden": Object {
-      "operatorCredentials": Object {
-        "serviceAccountRef": Object {
+    "garden": {
+      "operatorCredentials": {
+        "serviceAccountRef": {
           "name": "robot",
           "namespace": "garden",
         },
       },
     },
-    "gardenTerminalHost": Object {
+    "gardenTerminalHost": {
       "seedRef": "my-seed",
     },
     "serviceAccountTokenExpiration": 42,
@@ -625,18 +625,18 @@ Object {
 `;
 
 exports[`gardener-dashboard configmap terminal shortcuts should render the template 1`] = `
-Object {
-  "frontend": Object {
-    "terminal": Object {
-      "shortcuts": Array [
-        Object {
-          "container": Object {
-            "args": Array [
+{
+  "frontend": {
+    "terminal": {
+      "shortcuts": [
+        {
+          "container": {
+            "args": [
               "a",
               "b",
               "c",
             ],
-            "command": Array [
+            "command": [
               "command",
             ],
             "image": "repo:tag",
@@ -652,14 +652,14 @@ Object {
 `;
 
 exports[`gardener-dashboard configmap themes should render the template 1`] = `
-Object {
-  "frontend": Object {
-    "themes": Object {
-      "dark": Object {
+{
+  "frontend": {
+    "themes": {
+      "dark": {
         "main-navigation-title": "grey.darken3",
         "primary": "#ff0000",
       },
-      "light": Object {
+      "light": {
         "main-navigation-title": "grey.darken3",
         "primary": "#ff0000",
       },
@@ -669,10 +669,10 @@ Object {
 `;
 
 exports[`gardener-dashboard configmap themes should render the template with light theme values only 1`] = `
-Object {
-  "frontend": Object {
-    "themes": Object {
-      "light": Object {
+{
+  "frontend": {
+    "themes": {
+      "light": {
         "main-navigation-title": "grey.darken3",
         "primary": "#ff0000",
       },
@@ -682,22 +682,24 @@ Object {
 `;
 
 exports[`gardener-dashboard configmap tickets github app authentication should render the template 1`] = `
-Object {
-  "frontend": Object {
-    "ticket": Object {
+{
+  "frontend": {
+    "ticket": {
       "avatarSource": "gravatar",
       "gitHubRepoUrl": "https://github.com/gardener/tickets",
-      "hideClustersWithLabels": Array [
+      "hideClustersWithLabels": [
         "ignore1",
         "ignore2",
       ],
-      "issueDescriptionTemplate": "issue description",
-      "newTicketLabels": Array [
-        "default-label",
-      ],
+      "newIssue": {
+        "body": "issue description",
+        "labels": [
+          "default-label",
+        ],
+      },
     },
   },
-  "gitHub": Object {
+  "gitHub": {
     "apiUrl": "https://github.com/api/v3/",
     "org": "gardener",
     "pollIntervalSeconds": 60,
@@ -709,7 +711,7 @@ Object {
 `;
 
 exports[`gardener-dashboard configmap tickets github app authentication should render the template 2`] = `
-Object {
+{
   "authentication.appId": "1",
   "authentication.clientId": "clientId",
   "authentication.clientSecret": "clientSecret",
@@ -720,22 +722,24 @@ Object {
 `;
 
 exports[`gardener-dashboard configmap tickets token authentication should render the template 1`] = `
-Object {
-  "frontend": Object {
-    "ticket": Object {
+{
+  "frontend": {
+    "ticket": {
       "avatarSource": "gravatar",
       "gitHubRepoUrl": "https://github.com/gardener/tickets",
-      "hideClustersWithLabels": Array [
+      "hideClustersWithLabels": [
         "ignore1",
         "ignore2",
       ],
-      "issueDescriptionTemplate": "issue description",
-      "newTicketLabels": Array [
-        "default-label",
-      ],
+      "newIssue": {
+        "body": "issue description",
+        "labels": [
+          "default-label",
+        ],
+      },
     },
   },
-  "gitHub": Object {
+  "gitHub": {
     "apiUrl": "https://github.com/api/v3/",
     "org": "gardener",
     "pollIntervalSeconds": 60,
@@ -747,18 +751,18 @@ Object {
 `;
 
 exports[`gardener-dashboard configmap tickets token authentication should render the template 2`] = `
-Object {
+{
   "authentication.token": "token",
   "webhookSecret": "webhookSecret",
 }
 `;
 
 exports[`gardener-dashboard configmap token request should render the template 1`] = `
-Object {
-  "frontend": Object {
+{
+  "frontend": {
     "serviceAccountDefaultTokenExpiration": 42,
   },
-  "tokenRequestAudiences": Array [
+  "tokenRequestAudiences": [
     "foo",
     "bar",
   ],
@@ -766,9 +770,9 @@ Object {
 `;
 
 exports[`gardener-dashboard configmap unreachable seeds should render the template 1`] = `
-Object {
-  "unreachableSeeds": Object {
-    "matchLabels": Object {
+{
+  "unreachableSeeds": {
+    "matchLabels": {
       "seed": "unreachable",
     },
   },
@@ -776,19 +780,19 @@ Object {
 `;
 
 exports[`gardener-dashboard configmap vendorHints should render the template 1`] = `
-Object {
-  "frontend": Object {
-    "vendorHints": Array [
-      Object {
-        "matchNames": Array [
+{
+  "frontend": {
+    "vendorHints": [
+      {
+        "matchNames": [
           "foo",
           "bar",
         ],
         "message": "[foo](https://bar.baz)",
         "severity": "warning",
       },
-      Object {
-        "matchNames": Array [
+      {
+        "matchNames": [
           "fooz",
         ],
         "message": "other message",

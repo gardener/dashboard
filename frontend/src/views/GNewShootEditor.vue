@@ -1,154 +1,145 @@
 <!--
-SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
   <div class="fill-height">
-    <g-shoot-editor
-      ref="shootEditorRef"
-      v-model:error-message="errorMessage"
-      v-model:detailed-error-message="detailedErrorMessage"
-      alert-banner-identifier="newShootEditorWarning"
-      :shoot-item="newShootResource"
-    >
+    <g-shoot-editor :identifier="injectionKey">
       <template #modificationWarning>
         By modifying the resource directly you may create an invalid cluster resource.
         If the resource is invalid, you may lose data when switching back to the overview page.
+      </template>
+      <template #errorMessage>
+        <g-message
+          v-model:message="errorMessage"
+          v-model:detailed-message="detailedErrorMessage"
+          color="error"
+          class="ma-0"
+          tile
+        />
       </template>
       <template #toolbarItemsRight>
         <v-btn
           variant="text"
           color="primary"
-          @click.stop="createClicked()"
-        >
-          Create
-        </v-btn>
+          text="Create"
+          @click.stop="save"
+        />
       </template>
     </g-shoot-editor>
     <g-confirm-dialog ref="confirmDialog" />
   </div>
 </template>
 
-<script>
-import { defineAsyncComponent } from 'vue'
+<script setup>
 import {
-  mapState,
-  mapActions,
-} from 'pinia'
+  ref,
+  inject,
+  provide,
+} from 'vue'
+import {
+  useRouter,
+  onBeforeRouteLeave,
+} from 'vue-router'
 
-import { useShootStore } from '@/store/shoot'
-import { useAuthzStore } from '@/store/authz'
 import { useAppStore } from '@/store/app'
 
+import GShootEditor from '@/components/GShootEditor'
 import GConfirmDialog from '@/components/dialogs/GConfirmDialog'
+import GMessage from '@/components/GMessage'
 
-import { useAsyncRef } from '@/composables/useAsyncRef'
+import { useShootContext } from '@/composables/useShootContext'
+import { useShootEditor } from '@/composables/useShootEditor'
 
 import { errorDetailsFromError } from '@/utils/error'
 
-import { isEqual } from '@/lodash'
+import { get } from '@/lodash'
 
-export default {
-  components: {
-    GShootEditor: defineAsyncComponent(() => import('@/components/GShootEditor')),
-    GConfirmDialog,
-  },
-  inject: ['yaml', 'logger'],
-  async beforeRouteLeave (to, from, next) {
-    if (to.name === 'NewShoot') {
-      try {
-        const shootResource = await this.getShootResource()
-        this.setNewShootResource(shootResource)
-        return next()
-      } catch (err) {
-        this.errorMessage = err.message
-        return next(false)
-      }
-    }
-    if (this.isShootCreated) {
-      return next()
-    }
-    let isDirty = true
-    try {
-      isDirty = await this.isShootContentDirty()
-    } catch (err) {
-      this.errorMessage = err.message
-    }
-    if (isDirty) {
-      if (!await this.confirmEditorNavigation()) {
-        this.shootEditor.dispatch('focus')
-        return next(false)
-      }
-    }
-    return next()
-  },
-  setup () {
-    return {
-      ...useAsyncRef('shootEditor'),
-    }
-  },
-  data () {
-    return {
-      errorMessage: undefined,
-      detailedErrorMessage: undefined,
-      isShootCreated: false,
-    }
-  },
-  computed: {
-    ...mapState(useAuthzStore, [
-      'namespace',
-    ]),
-    ...mapState(useShootStore, [
-      'newShootResource',
-      'initialNewShootResource',
-    ]),
-  },
-  methods: {
-    ...mapActions(useShootStore, [
-      'setNewShootResource',
-      'createShoot',
-    ]),
-    ...mapActions(useAppStore, ['alert']),
-    confirmEditorNavigation () {
-      return this.$refs.confirmDialog.waitForConfirmation({
-        confirmButtonText: 'Leave',
-        captionText: 'Leave Create Cluster Page?',
-        messageHtml: 'Your cluster has not been created.<br/>Do you want to cancel cluster creation and discard your changes?',
-      })
-    },
-    async getShootResource () {
-      const content = await this.shootEditor.dispatch('getContent')
-      return this.yaml.load(content)
-    },
-    async createClicked () {
-      try {
-        const shootResource = await this.getShootResource()
-        await this.createShoot(shootResource)
-        this.isShootCreated = true
-        this.$router.push({
-          name: 'ShootItem',
-          params: {
-            namespace: this.namespace,
-            name: shootResource.metadata.name,
-          },
-        })
-      } catch (err) {
-        this.errorMessage = 'Failed to create cluster.'
-        if (err.response) {
-          const errorDetails = errorDetailsFromError(err)
-          this.detailedErrorMessage = errorDetails.detailedMessage
-        } else {
-          this.detailedErrorMessage = err.message
-        }
-        this.logger.error(this.errorMessage, this.detailedErrorMessage, err)
-      }
-    },
-    async isShootContentDirty () {
-      const shootResource = await this.getShootResource()
-      return !isEqual(this.initialNewShootResource, shootResource)
-    },
-  },
+const injectionKey = 'new-shoot-editor'
+const confirmDialog = ref(null)
+const errorMessage = ref()
+const detailedErrorMessage = ref()
+const isShootCreated = ref(false)
+
+const api = inject('api')
+const logger = inject('logger')
+
+const router = useRouter()
+
+const appStore = useAppStore()
+
+const {
+  shootNamespace,
+  isShootDirty,
+  shootManifest,
+  setShootManifest,
+} = useShootContext()
+
+const useProvide = (key, value) => {
+  provide(key, value)
+  return value
 }
+const {
+  getEditorValue,
+  focusEditor,
+} = useProvide(injectionKey, useShootEditor(shootManifest))
+
+function confirmEditorNavigation () {
+  return confirmDialog.value?.waitForConfirmation({
+    confirmButtonText: 'Leave',
+    captionText: 'Leave Create Cluster Page?',
+    messageHtml: 'Your cluster has not been created.<br/>Do you want to cancel cluster creation and discard your changes?',
+  })
+}
+
+async function save () {
+  try {
+    const data = getEditorValue()
+    const namespace = shootNamespace.value
+    const name = get(data, 'metadata.name')
+    await api.createShoot({ namespace, data })
+    appStore.setSuccess('Cluster created')
+    isShootCreated.value = true
+    router.push({
+      name: 'ShootItem',
+      params: {
+        namespace,
+        name,
+      },
+    })
+  } catch (err) {
+    errorMessage.value = 'Failed to create cluster.'
+    if (err.response) {
+      const errorDetails = errorDetailsFromError(err)
+      detailedErrorMessage.value = errorDetails.detailedMessage
+    } else {
+      detailedErrorMessage.value = err.message
+    }
+    logger.error(errorMessage.value, detailedErrorMessage.value, err)
+  }
+}
+
+onBeforeRouteLeave(async (to, from, next) => {
+  if (to.name === 'NewShoot') {
+    try {
+      setShootManifest(getEditorValue())
+      return next()
+    } catch (err) {
+      errorMessage.value = err.message
+      return next(false)
+    }
+  }
+  if (isShootCreated.value) {
+    return next()
+  }
+  if (isShootDirty.value) {
+    if (!await confirmEditorNavigation()) {
+      focusEditor()
+      return next(false)
+    }
+  }
+  return next()
+})
 </script>

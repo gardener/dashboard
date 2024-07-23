@@ -16,9 +16,9 @@ const {
   COOKIE_SIGNATURE
 } = require('../lib/security/constants')
 const jose = require('../lib/security/jose')
-const { sessionSecret } = require('./config').default
+const { sessionSecrets } = require('./config').default
 
-const { sign, encrypt, decode } = jose(sessionSecret)
+const { sign, encrypt, decode } = jose(sessionSecrets)
 
 const iat = 1577836800
 const expiresIn = '50y'
@@ -126,10 +126,11 @@ const mocks = {
       const { id } = auth.getTokenPayload(headers)
       const { resourceAttributes, nonResourceAttributes } = json.spec
       if (resourceAttributes) {
-        const { resource } = resourceAttributes
+        const { resource, namespace } = resourceAttributes
         switch (resource) {
           case 'secrets':
-            allowed = id === 'admin@example.org'
+            allowed = id === 'admin@example.org' ||
+              (id === 'foo@example.org' && namespace === 'garden-foo')
             break
           case 'projects':
             allowed = id === 'projects-viewer@example.org'

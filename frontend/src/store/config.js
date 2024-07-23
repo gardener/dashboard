@@ -92,6 +92,18 @@ const wellKnownConditions = {
     description: 'Indicates the system components health',
     sortOrder: '10',
   },
+  CRDsWithProblematicConversionWebhooks: {
+    name: 'CRDs with Problematic Conversion Webhooks',
+    shortName: 'CRD',
+    description: 'Indicates that there is at least one CustomResourceDefinition in the cluster which has multiple stored versions and a conversion webhook configured. This could break the reconciliation flow of a Shoot cluster in some cases.',
+    sortOrder: '11',
+  },
+  CACertificateValiditiesAcceptable: {
+    name: 'CA Certificate Validities',
+    shortName: 'CA',
+    description: 'Indicates that there is at least one CA certificate which expires in less than 1 year. A credentials rotation operation should be considered.',
+    sortOrder: '12',
+  },
 }
 
 export function getCondition (type) {
@@ -258,6 +270,14 @@ export const useConfigStore = defineStore('config', () => {
     return features.value?.projectTerminalShortcutsEnabled === true
   })
 
+  const isShootForceDeletionEnabled = computed(() => {
+    return features.value?.shootForceDeletionEnabled === true
+  })
+
+  const isOidcObservabilityUrlsEnabled = computed(() => {
+    return features.value?.oidcObservabilityUrlsEnabled === true
+  })
+
   const throttleDelayPerCluster = computed(() => {
     return experimental.value?.throttleDelayPerCluster ?? 10
   })
@@ -303,18 +323,6 @@ export const useConfigStore = defineStore('config', () => {
     }
   })
 
-  const customCloudProviders = computed(() => {
-    return state.value?.customCloudProviders
-  })
-
-  const vendors = computed(() => {
-    return state.value?.vendors
-  })
-
-  const cloudProviderList = computed(() => {
-    return state.value?.cloudProviderList
-  })
-
   const appVersion = computed(() => {
     return state.value?.appVersion ?? import.meta.env.VITE_APP_VERSION
   })
@@ -329,10 +337,14 @@ export const useConfigStore = defineStore('config', () => {
 
   async function fetchConfig () {
     const response = await api.getConfiguration()
-    state.value = {
+    setConfiguration({
       themes: {},
       ...response.data,
-    }
+    })
+  }
+
+  function setConfiguration (value) {
+    state.value = value
   }
 
   async function $reset () {
@@ -364,6 +376,18 @@ export const useConfigStore = defineStore('config', () => {
   function conditionForType (type) {
     return allKnownConditions.value[type] ?? getCondition(type)
   }
+
+  const customCloudProviders = computed(() => {
+    return state.value?.customCloudProviders
+  })
+
+  const vendors = computed(() => {
+    return state.value?.vendors
+  })
+
+  const cloudProviderList = computed(() => {
+    return state.value?.cloudProviderList
+  })
 
   function vendorDisplayName (kind) {
     const knownVendors = {
@@ -453,6 +477,8 @@ export const useConfigStore = defineStore('config', () => {
     serviceAccountDefaultTokenExpiration,
     isTerminalEnabled,
     isProjectTerminalShortcutsEnabled,
+    isShootForceDeletionEnabled,
+    isOidcObservabilityUrlsEnabled,
     throttleDelayPerCluster,
     alertBannerMessage,
     alertBannerType,
@@ -461,11 +487,12 @@ export const useConfigStore = defineStore('config', () => {
     purposeRequiresHibernationSchedule,
     isShootHasNoHibernationScheduleWarning,
     fetchConfig,
+    setConfiguration,
     conditionForType,
-    customCloudProviders,
     vendors,
     vendorDisplayName,
     cloudProviderList,
+    customCloudProviders,
     $reset,
   }
 })

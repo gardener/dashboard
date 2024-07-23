@@ -29,6 +29,13 @@ module.exports = {
     '/tmp/',
   ],
   rules: {
+    'no-restricted-globals': [
+      'error',
+      'find',
+      'event',
+      'location',
+      'history',
+    ],
     'comma-dangle': ['error', 'always-multiline'],
     'no-console': 'error',
     quotes: ['error', 'single'],

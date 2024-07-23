@@ -6,6 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <splitpanes
+    v-if="splitpaneTree.items?.length"
     :horizontal="splitpaneTree.horizontal"
     @resize="resize"
     @resized="resize"

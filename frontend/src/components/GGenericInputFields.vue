@@ -61,6 +61,7 @@ import {
 } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 import { mapActions } from 'pinia'
+import yaml from 'js-yaml'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
@@ -85,7 +86,6 @@ export default {
   components: {
     VCol,
   },
-  inject: ['yaml'],
   props: {
     fields: {
       type: Array,
@@ -194,32 +194,34 @@ export default {
       },
     },
     modelValue: {
-      async handler (value) {
+      handler (value) {
         if (isEmpty(this.fieldData)) {
           // set initial data
-          const fieldData = fromPairs(await Promise.all(map(this.fields, async ({ key, type }) => {
+          const fieldData = fromPairs(map(this.fields, ({ key, type }) => {
             if (type === 'yaml') {
-              return [key, await this.yaml.dump(value[key])]
+              return [key, yaml.dump(value[key])]
             }
             if (type === 'json') {
               return [key, JSON.stringify(value[key])]
             }
+
             return [key, value[key]]
-          })))
+          }))
           this.fieldData = fieldData
         }
       },
+      immediate: true,
     },
   },
   methods: {
     ...mapActions(useCloudProfileStore, [
       'cloudProfileByName',
     ]),
-    async onInputTextarea (key, type) {
+    onInputTextarea (key, type) {
       set(this.parsedInput, key, {})
       try {
         if (type === 'yaml') {
-          this.parsedInput[key] = await this.yaml.load(this.fieldData[key])
+          this.parsedInput[key] = yaml.load(this.fieldData[key])
         } else if (type === 'json') {
           this.parsedInput[key] = JSON.parse(this.fieldData[key])
         }

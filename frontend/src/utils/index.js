@@ -4,12 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { Buffer } from 'buffer'
-
+import { Base64 } from 'js-base64'
 import semver from 'semver'
 import {
-  nextTick,
   unref,
+  nextTick,
 } from 'vue'
 
 import { useLogger } from '@/composables/useLogger'
@@ -107,7 +106,7 @@ export function setDelayedInputFocus (...args) {
 
 export function setInputFocus (vm, fieldName, options) {
   if (typeof fieldName === 'string') {
-    vm = vm.$refs[fieldName]
+    vm = get(vm.$refs, fieldName)
   } else {
     vm = unref(vm)
     options = fieldName
@@ -299,36 +298,6 @@ export function getIssueSince (shootStatus) {
   return head(issueTimestamps.sort())
 }
 
-export function getProjectDetails (project = {}) {
-  const projectData = project.data || {}
-  const projectMetadata = project.metadata || {}
-  const projectName = projectMetadata.name || ''
-  const owner = projectData.owner || ''
-  const costObject = get(project, ['metadata', 'annotations', 'billing.gardener.cloud/costObject'], '')
-  const creationTimestamp = projectMetadata.creationTimestamp
-  const createdAt = getDateFormatted(creationTimestamp)
-  const description = projectData.description || ''
-  const createdBy = projectData.createdBy || ''
-  const purpose = projectData.purpose || ''
-  const staleSinceTimestamp = projectData.staleSinceTimestamp
-  const staleAutoDeleteTimestamp = projectData.staleAutoDeleteTimestamp
-  const phase = projectData.phase
-
-  return {
-    projectName,
-    owner,
-    costObject,
-    createdAt,
-    creationTimestamp,
-    createdBy,
-    description,
-    purpose,
-    staleSinceTimestamp,
-    staleAutoDeleteTimestamp,
-    phase,
-  }
-}
-
 export function isShootStatusHibernated (status) {
   return get(status, 'hibernated', false)
 }
@@ -385,7 +354,7 @@ export function parseServiceAccountUsername (username) {
 }
 
 export function encodeBase64 (input) {
-  return Buffer.from(input, 'utf8').toString('base64')
+  return Base64.encode(input)
 }
 
 export function encodeBase64Url (input) {
@@ -421,7 +390,9 @@ export function selfTerminationDaysForSecret (secret) {
 }
 
 export function purposesForSecret (secret) {
-  return selfTerminationDaysForSecret(secret) ? ['evaluation'] : ['evaluation', 'development', 'testing', 'production']
+  return selfTerminationDaysForSecret(secret)
+    ? ['evaluation']
+    : ['evaluation', 'development', 'testing', 'production']
 }
 
 export const shootAddonList = [
@@ -526,25 +497,6 @@ export function defaultCriNameByKubernetesVersion (criNames, kubernetesVersion) 
     ? criName
     : head(criNames)
 }
-export function isZonedCluster ({ cloudProviderKind, shootSpec, isNewCluster, customCloudProviders }) {
-  const customCloudProviderZone = get(customCloudProviders, [cloudProviderKind, 'zoned'])
-  if (customCloudProviderZone !== undefined) {
-    return customCloudProviderZone
-  }
-  switch (cloudProviderKind) {
-    case 'azure':
-      if (isNewCluster) {
-        return true // new clusters are always created as zoned clusters by the dashboard
-      }
-      return get(shootSpec, 'provider.infrastructureConfig.zoned', false)
-    case 'metal':
-      return false // metal clusters do not support zones for worker groups
-    case 'local':
-      return false // local development provider does not support zones
-    default:
-      return true
-  }
-}
 
 export const MEMBER_ROLE_DESCRIPTORS = [
   {
@@ -608,12 +560,28 @@ export function targetText (target) {
   }
 }
 
-export function selectedImageIsNotLatest (machineImage, machineImages) {
-  const { version: testImageVersion, vendorName: testVendor } = machineImage
+const allowedSemverDiffs = {
+  patch: ['patch'],
+  minor: ['patch', 'minor'],
+  major: ['patch', 'minor', 'major'],
+}
 
+export function machineImageHasUpdate (machineImage, machineImages) {
+  let { updateStrategy } = machineImage
+  if (!allowedSemverDiffs[updateStrategy]) {
+    updateStrategy = 'major'
+  }
   return some(machineImages, ({ version, vendorName, isSupported }) => {
-    return testVendor === vendorName && semver.gt(version, testImageVersion) && isSupported
+    return isSupported &&
+      machineImage.vendorName === vendorName &&
+      semver.gt(version, machineImage.version) &&
+      allowedSemverDiffs[updateStrategy].includes(semver.diff(version, machineImage.version))
   })
+}
+
+export function machineVendorHasSupportedVersion (machineImage, machineImages) {
+  const { vendorName, isSupported } = machineImage
+  return some(machineImages, { vendorName, isSupported })
 }
 
 export const UNKNOWN_EXPIRED_TIMESTAMP = '1970-01-01T00:00:00Z'
@@ -669,4 +637,64 @@ export function normalizeVersion (version) {
   if (match) {
     return [major, minor, patch].map(Number).join('.') + suffix
   }
+}
+
+export default {
+  emailToDisplayName,
+  handleTextFieldDrop,
+  getErrorMessages,
+  setDelayedInputFocus,
+  setInputFocus,
+  fullDisplayName,
+  displayName,
+  parseSize,
+  isEmail,
+  gravatarUrlGeneric,
+  gravatarUrlMp,
+  gravatarUrlRetro,
+  gravatarUrlIdenticon,
+  gravatarUrlRobohash,
+  gravatarUrl,
+  routes,
+  namespacedRoute,
+  routeName,
+  getDateFormatted,
+  getTimestampFormatted,
+  getTimeStringFrom,
+  getTimeStringTo,
+  isOwnSecret,
+  getCreatedBy,
+  getIssueSince,
+  isShootStatusHibernated,
+  isReconciliationDeactivated,
+  isTruthyValue,
+  isStatusProgressing,
+  isSelfTerminationWarning,
+  isValidTerminationDate,
+  isTypeDelete,
+  isServiceAccountUsername,
+  isForeignServiceAccount,
+  parseServiceAccountUsername,
+  encodeBase64,
+  encodeBase64Url,
+  shortRandomString,
+  selfTerminationDaysForSecret,
+  purposesForSecret,
+  shootAddonList,
+  htmlToDocumentFragment,
+  documentFragmentToHtml,
+  transformHtml,
+  randomMaintenanceBegin,
+  maintenanceWindowWithBeginAndTimezone,
+  getDurationInMinutes,
+  defaultCriNameByKubernetesVersion,
+  includesNameOrAll,
+  canI,
+  targetText,
+  sortedRoleDisplayNames,
+  mapTableHeader,
+  isHtmlColorCode,
+  omitKeysWithSuffix,
+  parseNumberWithMagnitudeSuffix,
+  normalizeVersion,
 }

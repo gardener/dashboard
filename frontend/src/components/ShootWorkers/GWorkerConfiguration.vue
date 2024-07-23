@@ -8,13 +8,13 @@ SPDX-License-Identifier: Apache-2.0
   <g-action-button-dialog
     :key="componentKey"
     ref="actionDialog"
-    :shoot-item="shootItem"
     width="1250"
     confirm-required
     caption="Configure Workers"
     disable-confirm-input-focus
     max-height="80vh"
     :disabled="!hasShootWorkerGroups"
+    @before-dialog-opened="setShootManifest(shootItem)"
     @dialog-opened="onConfigurationDialogOpened"
   >
     <template #header>
@@ -44,20 +44,15 @@ SPDX-License-Identifier: Apache-2.0
           class="ma-3"
         >
           <g-manage-workers
-            ref="manageWorkersRef"
             :disable-worker-animation="disableWorkerAnimation"
-            @additional-zones-network-configuration="setNetworkConfiguration"
           />
         </v-window-item>
         <v-window-item value="yaml">
           <div :style="{ 'min-height': `${overviewTabHeight}px` }">
             <g-shoot-editor
-              ref="workerEditorRef"
-              :shoot-item="editorData"
-              :completion-paths="['spec.properties.provider.properties.workers', 'spec.properties.provider.properties.infrastructureConfig']"
+              :identifier="injectionKey"
               hide-toolbar
               animate-on-appear
-              alert-banner-identifier="workerEditorWarning"
             >
               <template #modificationWarning>
                 Directly modifying this resource can result in irreversible configurations that may severely compromise your cluster's stability and functionality.
@@ -71,18 +66,18 @@ SPDX-License-Identifier: Apache-2.0
     <template #footer>
       <v-expand-transition>
         <v-alert
-          v-if="networkConfiguration.length"
+          v-if="newZonesYaml"
+          v-model="newZonesAlert"
           type="warning"
           variant="tonal"
           tile
           prominent
           closable
-          @update:model-value="setNetworkConfiguration(undefined)"
         >
           <span>Adding addtional zones will extend the zone network configuration by adding new networks to your cluster:</span>
           <g-code-block
             lang="yaml"
-            :content="networkConfigurationYaml"
+            :content="newZonesYaml"
             :show-copy-button="false"
           />
           <div class="font-weight-bold">
@@ -92,7 +87,7 @@ SPDX-License-Identifier: Apache-2.0
             You can verify and modify the network configuration on the <a
               href="#"
               class="text-anchor"
-              @click="tab='yaml'"
+              @click="tab = 'yaml'"
             >yaml</a> tab.
           </div>
         </v-alert>
@@ -109,109 +104,207 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineAsyncComponent } from 'vue'
+import {
+  ref,
+  computed,
+  provide,
+  watch,
+} from 'vue'
 import { useVuelidate } from '@vuelidate/core'
-import { mapState } from 'pinia'
-
-import { useConfigStore } from '@/store/config'
+import yaml from 'js-yaml'
 
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GCodeBlock from '@/components/GCodeBlock'
+import GManageWorkers from '@/components/ShootWorkers/GManageWorkers'
+import GShootEditor from '@/components/GShootEditor'
 
-import { useAsyncRef } from '@/composables/useAsyncRef'
+import { useShootContext } from '@/composables/useShootContext'
+import { useShootItem } from '@/composables/useShootItem'
+import { useShootEditor } from '@/composables/useShootEditor'
 
-import shootItem from '@/mixins/shootItem'
 import { errorDetailsFromError } from '@/utils/error'
-import { isZonedCluster } from '@/utils'
 import { v4 as uuidv4 } from '@/utils/uuid'
 
 import {
   get,
-  cloneDeep,
+  set,
+  filter,
+  includes,
+  isEmpty,
+  pick,
+  isEqual,
 } from '@/lodash'
 
 export default {
-
   components: {
     GActionButtonDialog,
-    GManageWorkers: defineAsyncComponent(() => import('@/components/ShootWorkers/GManageWorkers')),
-    GShootEditor: defineAsyncComponent(() => import('@/components/GShootEditor')),
+    GManageWorkers,
+    GShootEditor,
     GCodeBlock,
   },
-  mixins: [
-    shootItem,
-  ],
-  inject: ['api', 'logger', 'yaml'],
+  inject: ['api', 'logger'],
   setup () {
-    return {
-      ...useAsyncRef('manageWorkers'),
-      ...useAsyncRef('workerEditor'),
-      v$: useVuelidate(),
+    const {
+      shootItem,
+      shootNamespace,
+      shootName,
+      hasShootWorkerGroups,
+    } = useShootItem()
+
+    const {
+      providerWorkers,
+      providerInfrastructureConfigNetworksZones,
+      initialZones,
+      usedZones,
+      setShootManifest,
+    } = useShootContext()
+
+    const injectionKey = 'shoot-worker-editor'
+    const lazyTab = ref('overview')
+    const open = ref(false)
+    const overviewTabHeight = ref(0)
+    const componentKey = ref(uuidv4())
+    const disableWorkerAnimation = ref(false)
+    const newZonesAlert = ref(true)
+
+    const newZones = computed(() => {
+      return filter(providerInfrastructureConfigNetworksZones.value, ({ name }) => {
+        return !includes(initialZones.value, name)
+      })
+    })
+
+    const newZonesYaml = computed(() => {
+      return isEmpty(newZones.value)
+        ? undefined
+        : yaml.dump(newZones.value)
+    })
+
+    const editorData = computed({
+      get () {
+        if (!open.value) {
+          return pick(shootItem.value, [
+            'spec.provider.workers',
+            'spec.provider.infrastructureConfig.networks.zones',
+          ])
+        }
+        const data = {}
+        set(data, 'spec.provider.workers', providerWorkers.value)
+        const zones = providerInfrastructureConfigNetworksZones.value
+        if (zones) {
+          set(data, 'spec.provider.infrastructureConfig.networks.zones', zones)
+        }
+        return data
+      },
+      set (value) {
+        providerWorkers.value = get(value, 'spec.provider.workers', [])
+        const zones = get(value, 'spec.provider.infrastructureConfig.networks.zones')
+        if (!isEqual(zones, providerInfrastructureConfigNetworksZones.value)) {
+          providerInfrastructureConfigNetworksZones.value = get(value, 'spec.provider.infrastructureConfig.networks.zones')
+        }
+      },
+    })
+
+    const useProvide = (key, value) => {
+      provide(key, value)
+      return value
     }
-  },
-  data () {
+    const {
+      touched,
+      getEditorValue,
+      reloadEditor,
+      refreshEditor,
+      clearDocumentHistory,
+    } = useProvide(injectionKey, useShootEditor(editorData, {
+      completionPaths: [
+        'spec.properties.provider.properties.workers',
+        'spec.properties.provider.properties.infrastructureConfig',
+      ],
+    }))
+
+    watch(usedZones, value => {
+      providerInfrastructureConfigNetworksZones.value = filter(providerInfrastructureConfigNetworksZones.value, zone => includes(value, zone.name))
+    })
+
     return {
-      workers: undefined,
-      networkConfiguration: [],
-      networkConfigurationYaml: undefined,
-      tabValue: 'overview',
-      editorData: {},
-      overviewTabHeight: 0,
-      componentKey: uuidv4(),
-      disableWorkerAnimation: false,
+      v$: useVuelidate(),
+      shootItem,
+      shootNamespace,
+      shootName,
+      hasShootWorkerGroups,
+      providerWorkers,
+      providerInfrastructureConfigNetworksZones,
+      setShootManifest,
+      injectionKey,
+      open,
+      lazyTab,
+      overviewTabHeight,
+      componentKey,
+      disableWorkerAnimation,
+      newZonesAlert,
+      newZonesYaml,
+      editorData,
+      touched,
+      getEditorValue,
+      reloadEditor,
+      refreshEditor,
+      clearDocumentHistory,
     }
   },
   computed: {
-    ...mapState(useConfigStore, [
-      'customCloudProviders',
-    ]),
     tab: {
       get () {
-        return this.tabValue
+        return this.lazyTab
       },
       set (value) {
-        this.tabValue = value
-        if (value === 'overview') {
-          this.setOverviewData()
-          setTimeout(() => {
-            // enable worker group animations after tab navigation animation completed
-            this.disableWorkerAnimation = false
-          }, 1500)
-        }
-        if (value === 'yaml') {
-          // set current height as min-height for yaml tab to avoid
-          // dialog downsize as editor not yet rendered
-          this.overviewTabHeight = this.$refs.overviewTab.$el.getBoundingClientRect().height
-          this.setEditorData()
-          this.disableWorkerAnimation = true
+        this.lazyTab = value
+        switch (value) {
+          case 'overview': {
+            this.touched = false
+            this.editorData = this.getEditorValue()
+            setTimeout(() => {
+              // enable worker group animations after tab navigation animation completed
+              this.disableWorkerAnimation = false
+            }, 1500)
+            break
+          }
+          case 'yaml': {
+            // set current height as min-height for yaml tab to avoid
+            // dialog downsize as editor not yet rendered
+            this.overviewTabHeight = this.$refs.overviewTab.$el.getBoundingClientRect().height
+            this.$nextTick(() => this.refreshEditor())
+            this.disableWorkerAnimation = true
+            break
+          }
         }
       },
     },
   },
   methods: {
     async onConfigurationDialogOpened () {
-      await this.reset()
+      this.open = true
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
-        if (await this.updateConfiguration()) {
-          this.tabValue = 'overview'
-          this.componentKey = uuidv4() // force re-render
-        }
+        await this.updateConfiguration()
       } else {
-        this.tabValue = 'overview'
+        this.open = false
+        this.lazyTab = 'overview'
         this.componentKey = uuidv4() // force re-render
       }
     },
     async updateConfiguration () {
       try {
-        let data
-        if (this.tab === 'overview') {
-          data = await this.getWorkerComponentData()
-        } else if (this.tab === 'yaml') {
-          data = await this.getWorkerEditorData()
+        if (this.lazyTab === 'yaml') {
+          this.touched = false
+          this.editorData = this.getEditorValue()
         }
-        await this.api.patchShootProvider({ namespace: this.shootNamespace, name: this.shootName, data })
-        return true
+        await this.api.patchShootProvider({
+          namespace: this.shootNamespace,
+          name: this.shootName,
+          data: get(this.editorData, 'spec.provider'),
+        })
+        this.open = false
+        this.lazyTab = 'overview'
+        this.componentKey = uuidv4() // force re-render
       } catch (err) {
         const errorMessage = 'Could not save worker configuration'
         let detailedErrorMessage
@@ -223,75 +316,6 @@ export default {
         }
         this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
         this.logger.error(errorMessage, detailedErrorMessage, err)
-        return false
-      }
-    },
-    async reset () {
-      const workers = cloneDeep(this.shootWorkerGroups)
-      const zonesNetworkConfiguration = get(this.shootItem, 'spec.provider.infrastructureConfig.networks.zones')
-      const cloudProfileName = this.shootCloudProfileName
-      const region = this.shootRegion
-      const zonedCluster = isZonedCluster({
-        cloudProviderKind: this.shootCloudProviderKind,
-        shootSpec: this.shootSpec,
-        customCloudProviders: this.customCloudProviders,
-      })
-      const existingWorkerCIDR = get(this.shootItem, 'spec.networking.nodes')
-      const updateOSMaintenance = get(this.shootItem, 'spec.maintenance.autoUpdate.machineImageVersion', true)
-
-      await this.manageWorkers.dispatch('setWorkersData', { workers, cloudProfileName, region, updateOSMaintenance, zonesNetworkConfiguration, zonedCluster, existingWorkerCIDR, kubernetesVersion: this.shootK8sVersion })
-    },
-    async setNetworkConfiguration (value) {
-      if (value) {
-        this.networkConfiguration = value
-        this.networkConfigurationYaml = await this.yaml.dump(value)
-      } else {
-        this.networkConfiguration = []
-        this.networkConfigurationYaml = undefined
-      }
-    },
-    async getWorkerComponentData () {
-      const vm = await this.manageWorkers.vm()
-      const workers = vm.getWorkers()
-      const zonesNetworkConfiguration = vm.currentZonesNetworkConfiguration
-      const data = { workers }
-      if (zonesNetworkConfiguration) {
-        data.infrastructureConfig = {
-          networks: {
-            zones: zonesNetworkConfiguration,
-          },
-        }
-      }
-      return data
-    },
-    async getWorkerEditorData () {
-      const yaml = await this.workerEditor.dispatch('getContent')
-      const content = await this.yaml.load(yaml)
-      return get(content, 'spec.provider')
-    },
-    async setEditorData () {
-      const editorData = await this.getWorkerComponentData()
-      if (editorData) {
-        this.editorData = {
-          spec: {
-            provider: {
-              ...editorData,
-            },
-          },
-        }
-        this.workerEditor.dispatch('reload')
-      }
-    },
-    async setOverviewData () {
-      try {
-        const editorData = await this.getWorkerEditorData()
-        const workers = get(editorData, 'workers')
-        const zonesNetworkConfiguration = get(editorData, 'infrastructureConfig.networks.zones', [])
-        await this.manageWorkers.dispatch('updateWorkersData', { workers, zonesNetworkConfiguration })
-      } catch (err) {
-        const errorMessage = 'Could not update workers with changed yaml'
-        const detailedErrorMessage = err.message
-        this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
       }
     },
   },

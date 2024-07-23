@@ -10,7 +10,22 @@ const { Resources } = require('@gardener-dashboard/kube-client')
 const createError = require('http-errors')
 const { format: fmt } = require('util')
 const { decodeBase64, encodeBase64 } = require('../utils')
-const cleartextPropertyKeys = ['accessKeyID', 'subscriptionID', 'project', 'domainName', 'tenantName', 'authUrl', 'vsphereUsername', 'nsxtUsername', 'username', 'metalAPIURL', 'AWS_REGION']
+const cleartextPropertyKeys = [
+  'accessKeyID',
+  'subscriptionID',
+  'project',
+  'domainName',
+  'tenantName',
+  'authUrl',
+  'vsphereUsername',
+  'nsxtUsername',
+  'username',
+  'metalAPIURL',
+  'AWS_REGION',
+  'Server',
+  'TSIGKeyName',
+  'Zone'
+]
 const normalizedCleartextPropertyKeys = cleartextPropertyKeys.map(key => key.toLowerCase())
 const cloudprofiles = require('./cloudprofiles')
 const shoots = require('./shoots')
@@ -147,7 +162,7 @@ async function getCloudProviderSecrets ({ secretBindings, cloudProfileList, secr
         throw new Error(fmt('Secretbinding has no label that the dashboard recognizes. Skipping secretbinding with name %s', name))
       }
 
-      const secret = _.find(secretList, ['metadata.name', secretName]) // pragma: whitelist secret
+      const secret = _.find(secretList, ['metadata.name', secretName])
       if (isOwnSecret(secretBinding) && !secret) {
         throw new Error(fmt('Secret missing for secretbinding in own namespace. Skipping secretbinding with name %s', secretName))
       }

@@ -17,7 +17,6 @@ SPDX-License-Identifier: Apache-2.0
           create-mode
           :cloud-profiles="cloudProfiles"
           color="primary"
-          @update:model-value="onUpdateCloudProfileName"
         />
       </v-col>
       <v-col
@@ -25,14 +24,13 @@ SPDX-License-Identifier: Apache-2.0
         cols="3"
       >
         <g-select-secret
-          v-model="secret"
+          v-model="infrastructureSecret"
           :cloud-profile-name="cloudProfileName"
-          @update:model-value="onUpdateSecret"
         />
       </v-col>
       <v-col cols="3">
         <v-select
-          v-model="region"
+          v-model="v$.region.$model"
           color="primary"
           item-color="primary"
           label="Region"
@@ -41,7 +39,6 @@ SPDX-License-Identifier: Apache-2.0
           persistent-hint
           :error-messages="getErrorMessages(v$.region)"
           variant="underlined"
-          @update:model-value="onInputRegion"
           @blur="v$.region.$touch()"
         >
           <template #item="{ item, props }">
@@ -61,7 +58,7 @@ SPDX-License-Identifier: Apache-2.0
         cols="3"
       >
         <v-select
-          v-model="networkingType"
+          v-model="v$.networkingType.$model"
           color="primary"
           item-color="primary"
           label="Networking Type"
@@ -69,11 +66,10 @@ SPDX-License-Identifier: Apache-2.0
           persistent-hint
           :error-messages="getErrorMessages(v$.networkingType)"
           variant="underlined"
-          @update:model-value="v$.networkingType.$touch()"
           @blur="v$.networkingType.$touch()"
         />
       </v-col>
-      <template v-if="infrastructureKind === 'openstack'">
+      <template v-if="providerType === 'openstack'">
         <v-col cols="3">
           <g-wildcard-select
             v-model="floatingPoolName"
@@ -83,7 +79,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-col>
         <v-col cols="3">
           <v-select
-            v-model="loadBalancerProviderName"
+            v-model="v$.loadBalancerProviderName.$model"
             color="primary"
             item-color="primary"
             label="Load Balancer Provider"
@@ -91,15 +87,14 @@ SPDX-License-Identifier: Apache-2.0
             :error-messages="getErrorMessages(v$.loadBalancerProviderName)"
             persistent-hint
             variant="underlined"
-            @update:model-value="onInputLoadBalancerProviderName"
             @blur="v$.loadBalancerProviderName.$touch()"
           />
         </v-col>
       </template>
-      <template v-else-if="infrastructureKind === 'metal'">
+      <template v-else-if="providerType === 'metal'">
         <v-col cols="3">
           <v-text-field
-            v-model="projectID"
+            v-model="v$.projectID.$model"
             color="primary"
             item-color="primary"
             label="Project ID"
@@ -107,13 +102,12 @@ SPDX-License-Identifier: Apache-2.0
             hint="Clusters with same Project ID share IP ranges to allow load balancing accross multiple partitions"
             persistent-hint
             variant="underlined"
-            @update:model-value="onInputProjectID"
             @blur="v$.projectID.$touch()"
           />
         </v-col>
         <v-col cols="3">
           <v-select
-            v-model="partitionID"
+            v-model="v$.partitionID.$model"
             color="primary"
             item-color="primary"
             label="Partition ID"
@@ -122,39 +116,36 @@ SPDX-License-Identifier: Apache-2.0
             hint="Partion ID equals zone on other infrastructures"
             persistent-hint
             variant="underlined"
-            @update:model-value="onInputPartitionID"
             @blur="v$.partitionID.$touch()"
           />
         </v-col>
         <v-col cols="3">
           <v-select
-            v-model="firewallImage"
+            v-model="v$.firewallImage.$model"
             color="primary"
             item-color="primary"
             label="Firewall Image"
             :items="firewallImages"
             :error-messages="getErrorMessages(v$.firewallImage)"
             variant="underlined"
-            @update:model-value="onInputFirewallImage"
             @blur="v$.firewallImage.$touch()"
           />
         </v-col>
         <v-col cols="3">
           <v-select
-            v-model="firewallSize"
+            v-model="v$.firewallSize.$model"
             color="primary"
             item-color="primary"
             label="Firewall Size"
             :items="firewallSizes"
             :error-messages="getErrorMessages(v$.firewallSize)"
             variant="underlined"
-            @update:model-value="onInputFirewallSize"
             @blur="v$.firewallImage.$touch()"
           />
         </v-col>
         <v-col cols="3">
           <v-select
-            v-model="firewallNetworks"
+            v-model="v$.firewallNetworks.$model"
             color="primary"
             item-color="primary"
             label="Firewall Networks"
@@ -164,15 +155,14 @@ SPDX-License-Identifier: Apache-2.0
             closable-chips
             multiple
             variant="underlined"
-            @update:model-value="onInputFirewallNetworks"
             @blur="v$.firewallNetworks.$touch()"
           />
         </v-col>
       </template>
-      <template v-else-if="infrastructureKind === 'vsphere'">
+      <template v-else-if="providerType === 'vsphere'">
         <v-col cols="3">
           <v-select
-            v-model="loadBalancerClassNames"
+            v-model="v$.loadBalancerClassNames.$model"
             color="primary"
             label="Load Balancer Classes"
             :items="allLoadBalancerClasses"
@@ -181,7 +171,6 @@ SPDX-License-Identifier: Apache-2.0
             chips
             multiple
             variant="underlined"
-            @update:model-value="onInputLoadBalancerClassNames"
             @blur="v$.loadBalancerClassNames.$touch()"
           />
         </v-col>
@@ -199,26 +188,21 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { mapState } from 'pinia'
 import {
   required,
   requiredIf,
 } from '@vuelidate/validators'
-import {
-  mapState,
-  mapActions,
-} from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 
-import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useConfigStore } from '@/store/config'
-import { useGardenerExtensionStore } from '@/store/gardenerExtension'
-import { useSecretStore } from '@/store/secret'
-import { useShootStagingStore } from '@/store/shootStaging'
 
 import GCloudProfile from '@/components/GCloudProfile'
 import GWildcardSelect from '@/components/GWildcardSelect'
 import GSelectSecret from '@/components/Secrets/GSelectSecret'
 import GGenericInputFields from '@/components/GGenericInputFields'
+
+import { useShootContext } from '@/composables/useShootContext'
 
 import { getErrorMessages } from '@/utils'
 import {
@@ -228,16 +212,12 @@ import {
 } from '@/utils/validators'
 
 import {
-  sortBy,
-  head,
-  get,
   map,
   isEmpty,
   includes,
   forEach,
-  intersection,
   find,
-  set,
+  get,
 } from '@/lodash'
 
 export default {
@@ -247,41 +227,73 @@ export default {
     GSelectSecret,
     GGenericInputFields,
   },
-  props: {
-    userInterActionBus: {
-      type: Object,
-      required: true,
-    },
-  },
   setup () {
+    const {
+      providerType,
+      cloudProfileName,
+      infrastructureSecret,
+      region,
+      networkingType,
+      providerControlPlaneConfigLoadBalancerProviderName,
+      providerControlPlaneConfigLoadBalancerClassNames,
+      providerInfrastructureConfigFloatingPoolName,
+      providerInfrastructureConfigPartitionID,
+      providerInfrastructureConfigProjectID,
+      providerInfrastructureConfigFirewallImage,
+      providerInfrastructureConfigFirewallSize,
+      providerInfrastructureConfigFirewallNetworks,
+      cloudProfiles,
+      infrastructureSecrets,
+      regionsWithSeed,
+      regionsWithoutSeed,
+      showAllRegions,
+      networkingTypes,
+      allLoadBalancerProviderNames,
+      allLoadBalancerClassNames,
+      partitionIDs,
+      firewallImages,
+      firewallSizes,
+      allFirewallNetworks,
+      allFloatingPoolNames,
+      workerless,
+      customCloudProviderData,
+    } = useShootContext()
+
     return {
       v$: useVuelidate(),
-    }
-  },
-  data () {
-    return {
-      infrastructureKind: undefined,
-      cloudProfileName: undefined,
-      secret: undefined,
-      region: undefined,
-      networkingType: undefined,
-      floatingPoolName: undefined,
-      // default validation status of subcomponents is true, as they are not shown in all cases
-      fpname: undefined,
-      loadBalancerProviderName: undefined,
-      loadBalancerClassNames: [],
-      partitionID: undefined,
-      firewallImage: undefined,
-      firewallSize: undefined,
-      firewallNetworks: undefined,
-      projectID: undefined,
-      defaultNodesCIDR: undefined,
-      customCloudProviderData: {},
+      providerType,
+      cloudProfileName,
+      infrastructureSecret,
+      region,
+      networkingType,
+      loadBalancerProviderName: providerControlPlaneConfigLoadBalancerProviderName,
+      loadBalancerClassNames: providerControlPlaneConfigLoadBalancerClassNames,
+      floatingPoolName: providerInfrastructureConfigFloatingPoolName,
+      partitionID: providerInfrastructureConfigPartitionID,
+      projectID: providerInfrastructureConfigProjectID,
+      firewallImage: providerInfrastructureConfigFirewallImage,
+      firewallSize: providerInfrastructureConfigFirewallSize,
+      firewallNetworks: providerInfrastructureConfigFirewallNetworks,
+      cloudProfiles,
+      infrastructureSecrets,
+      regionsWithSeed,
+      regionsWithoutSeed,
+      showAllRegions,
+      networkingTypes,
+      allLoadBalancerProviderNames,
+      allLoadBalancerClassNames,
+      partitionIDs,
+      firewallImages,
+      firewallSizes,
+      allFirewallNetworks,
+      allFloatingPoolNames,
+      workerless,
+      customCloudProviderData,
     }
   },
   validations () {
     const requiresInfrastructure = infrastructureKind => {
-      return requiredIf(() => this.infrastructureKind === infrastructureKind)
+      return requiredIf(() => this.providerType === infrastructureKind)
     }
     return {
       region: withFieldName('Region', {
@@ -316,26 +328,8 @@ export default {
   },
   computed: {
     ...mapState(useConfigStore, [
-      'seedCandidateDeterminationStrategy',
       'customCloudProviders',
     ]),
-    ...mapState(useGardenerExtensionStore, ['networkingTypes']),
-    ...mapState(useShootStagingStore, ['workerless']),
-    cloudProfiles () {
-      return sortBy(this.cloudProfilesByCloudProviderKind(this.infrastructureKind), [item => item.metadata.name])
-    },
-    infrastructureSecretsByProfileName () {
-      return this.infrastructureSecretsByCloudProfileName(this.cloudProfileName)
-    },
-    regionsWithSeed () {
-      return this.regionsWithSeedByCloudProfileName(this.cloudProfileName)
-    },
-    regionsWithoutSeed () {
-      return this.regionsWithoutSeedByCloudProfileName(this.cloudProfileName)
-    },
-    showAllRegions () {
-      return this.seedCandidateDeterminationStrategy !== 'SameRegion'
-    },
     regionItems () {
       const regionItems = []
       if (!isEmpty(this.regionsWithSeed)) {
@@ -358,29 +352,8 @@ export default {
       }
       return 'API servers in another region than your workers (expect a somewhat higher latency; picked by Gardener based on internal considerations such as geographic proximity)'
     },
-    allLoadBalancerProviderNames () {
-      return this.loadBalancerProviderNamesByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
-    },
-    allLoadBalancerClassNames () {
-      return this.loadBalancerClassNamesByCloudProfileName(this.cloudProfileName)
-    },
-    partitionIDs () {
-      return this.partitionIDsByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
-    },
-    firewallImages () {
-      return this.firewallImagesByCloudProfileName(this.cloudProfileName)
-    },
-    firewallSizes () {
-      const cloudProfileName = this.cloudProfileName
-      const region = this.region
-      const firewallSizes = this.firewallSizesByCloudProfileNameAndRegion({ cloudProfileName, region })
-      return map(firewallSizes, 'name')
-    },
-    allFirewallNetworks () {
-      return this.firewallNetworksByCloudProfileNameAndPartitionId({ cloudProfileName: this.cloudProfileName, partitionID: this.partitionID })
-    },
     allLoadBalancerClasses () {
-      const loadBalancerClasses = map(this.loadBalancerClassesByCloudProfileName(this.cloudProfileName), ({ name, ipPoolName }) => {
+      return map(this.allLoadBalancerClassNames, name => {
         return {
           title: name,
           value: name,
@@ -389,16 +362,9 @@ export default {
           },
         }
       })
-      return loadBalancerClasses
-    },
-    allFloatingPoolNames () {
-      const cloudProfileName = this.cloudProfileName
-      const region = this.region
-      const secretDomain = get(this.secret, 'data.domainName')
-      return this.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({ cloudProfileName, region, secretDomain })
     },
     customCloudProvider () {
-      return get(this.customCloudProviders, this.infrastructureKind)
+      return get(this.customCloudProviders, this.providerType)
     },
     customCloudProviderFields () {
       return this.customCloudProvider?.shoot?.createFields
@@ -407,182 +373,11 @@ export default {
       const selectedCloudProfile = find(this.cloudProfiles, { metadata: { name: this.cloudProfileName } })
       return selectedCloudProfile?.data.seedNames?.length
     },
-    customCloudProviderShootData () {
-      const shootData = {}
-      forEach(this.customCloudProviderFields, ({ key, path }) => {
-        set(shootData, `${path}.${key}`, this.customCloudProviderData[key])
-      })
-      return shootData
-    },
-  },
-  watch: {
-    workerless (value) {
-      if (!value && !this.secret && !this.networkingType) {
-        // If worker required values missing (navigated to overview tab from yaml), reset to defaults
-        this.setDefaultsDependingOnCloudProfile()
-        this.networkingType = head(this.networkingTypes)
-      }
-    },
   },
   mounted () {
-    this.userInterActionBus.on('updateInfrastructure', infrastructureKind => {
-      this.infrastructureKind = infrastructureKind
-      this.setDefaultCloudProfile()
-    })
+    this.v$.projectID.$touch() // project id is a required field (for metal). We want to show the error immediatley
   },
   methods: {
-    ...mapActions(useCloudProfileStore, [
-      'cloudProfilesByCloudProviderKind',
-      'regionsWithSeedByCloudProfileName',
-      'regionsWithoutSeedByCloudProfileName',
-      'loadBalancerProviderNamesByCloudProfileNameAndRegion',
-      'loadBalancerClassesByCloudProfileName',
-      'loadBalancerClassNamesByCloudProfileName',
-      'floatingPoolNamesByCloudProfileNameAndRegionAndDomain',
-      'partitionIDsByCloudProfileNameAndRegion',
-      'firewallImagesByCloudProfileName',
-      'firewallNetworksByCloudProfileNameAndPartitionId',
-      'firewallSizesByCloudProfileNameAndRegion',
-      'getDefaultNodesCIDR',
-    ]),
-    ...mapActions(useSecretStore, [
-      'infrastructureSecretsByCloudProfileName',
-    ]),
-    ...mapActions(useShootStagingStore, [
-      'setCloudProfileName',
-    ]),
-    setDefaultsDependingOnCloudProfile () {
-      this.onUpdateSecret(head(this.infrastructureSecretsByProfileName))
-      this.region = head(this.regionsWithSeed)
-      if (!this.region && this.showAllRegions) {
-        this.region = head(this.regionsWithoutSeed)
-      }
-      this.onInputRegion()
-      this.loadBalancerProviderName = head(this.allLoadBalancerProviderNames)
-      this.onInputLoadBalancerProviderName()
-      this.floatingPoolName = head(this.allFloatingPoolNames)
-      if (!isEmpty(this.allLoadBalancerClassNames)) {
-        this.loadBalancerClassNames = [
-          includes(this.allLoadBalancerClassNames, 'default')
-            ? 'default'
-            : head(this.allLoadBalancerClassNames),
-        ]
-      } else {
-        this.loadBalancerClassNames = []
-      }
-      this.onInputLoadBalancerClassNames()
-      this.firewallImage = head(this.firewallImages)
-      this.onInputFirewallImage()
-      this.projectID = undefined
-
-      const cloudProfileName = this.cloudProfileName
-      this.defaultNodesCIDR = this.getDefaultNodesCIDR({ cloudProfileName })
-    },
-    setDefaultCloudProfile () {
-      this.cloudProfileName = get(head(this.cloudProfiles), 'metadata.name')
-      this.onUpdateCloudProfileName()
-    },
-    onUpdateSecret (secret) {
-      this.secret = secret
-      this.userInterActionBus.emit('updateSecret', this.secret)
-    },
-    onInputRegion () {
-      this.partitionID = head(this.partitionIDs)
-      this.onInputPartitionID()
-      this.floatingPoolName = head(this.allFloatingPoolNames)
-      this.loadBalancerProviderName = head(this.allLoadBalancerProviderNames)
-      this.onInputLoadBalancerProviderName()
-      this.v$.region.$touch()
-      this.userInterActionBus.emit('updateRegion', this.region)
-    },
-    onInputLoadBalancerProviderName () {
-      this.v$.loadBalancerProviderName.$touch()
-    },
-    onInputLoadBalancerClassNames () {
-      // sort loadBalancerClassNames in the same order as they are listed in the cloudProfile
-      this.loadBalancerClassNames = intersection(this.allLoadBalancerClassNames, this.loadBalancerClassNames)
-      this.v$.loadBalancerClassNames.$touch()
-    },
-    onInputPartitionID () {
-      this.v$.partitionID.$touch()
-      this.firewallSize = head(this.firewallSizes)
-      const firewallNetwork = find(this.allFirewallNetworks, { key: 'internet' })
-      if (firewallNetwork) {
-        this.firewallNetworks = [firewallNetwork.value]
-      } else {
-        this.firewallNetworks = undefined
-      }
-    },
-    onInputProjectID () {
-      this.v$.projectID.$touch()
-    },
-    onInputFirewallImage () {
-      this.v$.firewallImage.$touch()
-    },
-    onInputFirewallSize () {
-      this.v$.firewallSize.$touch()
-    },
-    onInputFirewallNetworks () {
-      this.v$.firewallNetworks.$touch()
-    },
-    onUpdateCloudProfileName () {
-      this.setCloudProfileName(this.cloudProfileName)
-      this.userInterActionBus.emit('updateCloudProfileName', this.cloudProfileName)
-      this.setDefaultsDependingOnCloudProfile()
-    },
-    getInfrastructureData () {
-      return {
-        infrastructureKind: this.infrastructureKind,
-        cloudProfileName: this.cloudProfileName,
-        secret: this.secret,
-        region: this.region,
-        networkingType: this.networkingType,
-        floatingPoolName: this.floatingPoolName,
-        loadBalancerProviderName: this.loadBalancerProviderName,
-        loadBalancerClasses: map(this.loadBalancerClassNames, name => ({ name })),
-        partitionID: this.partitionID,
-        projectID: this.projectID,
-        firewallImage: this.firewallImage,
-        firewallSize: this.firewallSize,
-        firewallNetworks: this.firewallNetworks,
-        defaultNodesCIDR: this.defaultNodesCIDR,
-        customCloudProviderData: this.customCloudProviderShootData,
-      }
-    },
-    setInfrastructureData ({
-      infrastructureKind,
-      cloudProfileName,
-      secret,
-      region,
-      networkingType,
-      floatingPoolName,
-      loadBalancerProviderName,
-      loadBalancerClasses,
-      partitionID,
-      projectID,
-      firewallImage,
-      firewallSize,
-      firewallNetworks,
-      customCloudProviderData,
-    }) {
-      this.infrastructureKind = infrastructureKind
-      this.cloudProfileName = cloudProfileName
-      this.secret = secret
-      this.region = region
-      this.networkingType = networkingType
-      this.floatingPoolName = floatingPoolName
-      this.loadBalancerProviderName = loadBalancerProviderName
-      this.loadBalancerClassNames = map(loadBalancerClasses, 'name')
-      this.partitionID = partitionID
-      this.projectID = projectID
-      this.firewallImage = firewallImage
-      this.firewallSize = firewallSize
-      this.firewallNetworks = firewallNetworks
-      this.defaultNodesCIDR = this.getDefaultNodesCIDR({ cloudProfileName })
-      this.customCloudProviderData = customCloudProviderData
-
-      this.v$.projectID.$touch() // project id is a required field (for metal). We want to show the error immediatley
-    },
     getErrorMessages,
   },
 }

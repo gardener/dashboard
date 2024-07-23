@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
         <template #description>
           <div class="wrap-text d-flex">
             <span class="mr-2">
-              Request a kubeconfig valid for
+              Request a kubeconfig for this Shoot cluster valid for
             </span>
             <g-popover
               v-model="popover"
@@ -96,9 +96,9 @@ import GCodeBlock from '@/components/GCodeBlock.vue'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 
 import { useShootAdminKubeconfig } from '@/composables/useShootAdminKubeconfig'
+import { useShootItem } from '@/composables/useShootItem'
 
 import { errorDetailsFromError } from '@/utils/error'
-import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
@@ -109,11 +109,24 @@ export default {
     GCodeBlock,
     GTextRouterLink,
   },
-  mixins: [shootItem],
   inject: ['api', 'logger'],
   setup () {
-    const { expiration, isEnabled, humanizeExpiration } = useShootAdminKubeconfig()
+    const {
+      shootNamespace,
+      shootName,
+      shootProjectName,
+    } = useShootItem()
+
+    const {
+      expiration,
+      isEnabled,
+      humanizeExpiration,
+    } = useShootAdminKubeconfig()
+
     return {
+      shootNamespace,
+      shootName,
+      shootProjectName,
       expiration,
       isEnabled,
       humanizeExpiration,

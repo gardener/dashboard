@@ -23,13 +23,11 @@ const {
   decodeBase64,
   encodeBase64,
   getSeedNameFromShoot,
-  getSeedIngressDomain,
   projectFilter
 } = utils
 const { getSeed } = cache
 
-exports.list = async function ({ user, namespace, labelSelector, useCache = false }) {
-  const client = user.client
+exports.list = async function ({ user, namespace, labelSelector }) {
   const query = {}
   if (labelSelector) {
     query.labelSelector = labelSelector
@@ -37,14 +35,11 @@ exports.list = async function ({ user, namespace, labelSelector, useCache = fals
   if (namespace === '_all') {
     if (await authorization.canListShoots(user)) {
       // user is permitted to list shoots in all namespaces
-      if (useCache) {
-        return {
-          apiVersion: 'v1',
-          kind: 'List',
-          items: cache.getShoots(namespace, query)
-        }
+      return {
+        apiVersion: 'v1',
+        kind: 'List',
+        items: cache.getShoots(namespace, query)
       }
-      return client['core.gardener.cloud'].shoots.listAllNamespaces(query)
     } else {
       // user is permitted to list shoots only in namespaces associated with their projects
       const namespaces = _
@@ -52,38 +47,25 @@ exports.list = async function ({ user, namespace, labelSelector, useCache = fals
         .filter(projectFilter(user, false))
         .map('spec.namespace')
         .value()
-      if (useCache) {
-        const statuses = await Promise.allSettled(namespaces.map(namespace => authorization.canListShoots(user, namespace)))
-        return {
-          apiVersion: 'v1',
-          kind: 'List',
-          items: namespaces
-            .filter((_, i) => statuses[i].status === 'fulfilled' && statuses[i].value)
-            .flatMap(namespace => cache.getShoots(namespace, query))
-        }
-      }
-      const statuses = await Promise.allSettled(namespaces.map(namespace => client['core.gardener.cloud'].shoots.list(namespace, query)))
+      const statuses = await Promise.allSettled(namespaces.map(namespace => authorization.canListShoots(user, namespace)))
       return {
         apiVersion: 'v1',
         kind: 'List',
-        items: statuses
-          .filter(({ status }) => status === 'fulfilled')
-          .flatMap(({ value }) => value.items)
+        items: namespaces
+          .filter((_, i) => statuses[i].status === 'fulfilled' && statuses[i].value)
+          .flatMap(namespace => cache.getShoots(namespace, query))
       }
     }
   }
-  if (useCache) {
-    const isAllowed = await authorization.canListShoots(user, namespace)
-    if (!isAllowed) {
-      throw createError(403, `No authorization to list shoots in namespace ${namespace}`)
-    }
-    return {
-      apiVersion: 'v1',
-      kind: 'List',
-      items: cache.getShoots(namespace, query)
-    }
+  const isAllowed = await authorization.canListShoots(user, namespace)
+  if (!isAllowed) {
+    throw createError(403, `No authorization to list shoots in namespace ${namespace}`)
   }
-  return client['core.gardener.cloud'].shoots.list(namespace, query)
+  return {
+    apiVersion: 'v1',
+    kind: 'List',
+    items: cache.getShoots(namespace, query)
+  }
 }
 
 exports.create = async function ({ user, namespace, body }) {
@@ -242,18 +224,6 @@ exports.replaceControlPlaneHighAvailability = async function ({ user, namespace,
   return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
 }
 
-exports.replaceDns = async function ({ user, namespace, name, body }) {
-  const client = user.client
-  const dns = body
-  const payload = {
-    spec: {
-      dns
-    }
-  }
-
-  return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
-}
-
 exports.patchProvider = async function ({ user, namespace, name, body }) {
   const client = user.client
   const payload = {
@@ -351,13 +321,6 @@ exports.info = async function ({ user, namespace, name }) {
 
   if (shoot.spec.seedName) {
     const seed = getSeed(getSeedNameFromShoot(shoot))
-    const prefix = _.replace(shoot.status.technicalID, /^shoot-{1,2}/, '')
-    if (prefix) {
-      const ingressDomain = getSeedIngressDomain(seed)
-      if (ingressDomain) {
-        data.seedShootIngressDomain = `${prefix}.${ingressDomain}`
-      }
-    }
     if (seed && namespace !== 'garden') {
       try {
         data.canLinkToSeed = !!(await client['core.gardener.cloud'].shoots.get('garden', seed.metadata.name))
@@ -389,14 +352,10 @@ exports.info = async function ({ user, namespace, name }) {
   }
   data.dashboardUrlPath = getDashboardUrlPath(shoot.spec.kubernetes.version)
 
-  /*
-    We explicitly use the (privileged) dashboardClient here for fetching the monitoring credentials instead of using the user's token
-    as we agreed that also project viewers should be able to see the monitoring credentials.
-    Usually project viewers do not have the permission to read the <shootName>.monitoring credential.
-    Our assumption: if the user can read the shoot resource, the user can be considered as project viewer.
-    This is only a temporary workaround until a Plutono SSO solution is implemented https://github.com/gardener/monitoring/issues/11.
-  */
-  await assignMonitoringSecret(dashboardClient, data, namespace, name)
+  const oidcObservabilityUrlsEnabled = _.get(config, 'frontend.features.oidcObservabilityUrlsEnabled', false)
+  if (!oidcObservabilityUrlsEnabled && await authorization.canGetSecret(user, namespace, `${name}.monitoring`)) {
+    await assignMonitoringSecret(client, data, namespace, name)
+  }
 
   return data
 }

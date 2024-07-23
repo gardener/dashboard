@@ -1,11 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`gardener-dashboard role should render the template with default values 1`] = `
-Object {
+{
   "apiVersion": "rbac.authorization.k8s.io/v1",
   "kind": "Role",
-  "metadata": Object {
-    "labels": Object {
+  "metadata": {
+    "labels": {
       "app.kubernetes.io/component": "dashboard",
       "app.kubernetes.io/instance": "gardener-dashboard",
       "app.kubernetes.io/managed-by": "Helm",
@@ -15,18 +15,19 @@ Object {
     "name": "gardener.cloud:system:dashboard-github-webhook",
     "namespace": "garden",
   },
-  "rules": Array [
-    Object {
-      "apiGroups": Array [
+  "rules": [
+    {
+      "apiGroups": [
         "coordination.k8s.io",
       ],
-      "resourceNames": Array [
+      "resourceNames": [
         "gardener-dashboard-github-webhook",
       ],
-      "resources": Array [
+      "resources": [
         "leases",
       ],
-      "verbs": Array [
+      "verbs": [
+        "create",
         "get",
         "patch",
         "watch",

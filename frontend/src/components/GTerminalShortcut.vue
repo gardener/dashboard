@@ -83,11 +83,13 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapState } from 'pinia'
+import yaml from 'js-yaml'
 
 import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
+
 import {
   TargetEnum,
   targetText,
@@ -106,8 +108,7 @@ export default {
     GActionButton,
     GCodeBlock,
   },
-  mixins: [shootItem],
-  inject: ['yaml', 'logger'],
+  inject: ['logger'],
   props: {
     shortcut: {
       type: Object,
@@ -128,6 +129,17 @@ export default {
   emits: [
     'addTerminalShortcut',
   ],
+  setup () {
+    const {
+      shootItem,
+      isShootStatusHibernated,
+    } = useShootItem()
+
+    return {
+      shootItem,
+      isShootStatusHibernated,
+    }
+  },
   data () {
     return {
       expansionPanel: false,
@@ -177,7 +189,7 @@ export default {
     },
   },
   watch: {
-    async shortcut (value) {
+    shortcut (value) {
       this.updateShortcutYaml(this.shortcut)
     },
   },
@@ -191,9 +203,9 @@ export default {
     shortcutTargetDescription (shortcut) {
       return targetText(shortcut.target)
     },
-    async updateShortcutYaml (value) {
+    updateShortcutYaml (value) {
       try {
-        this.shortcutYaml = await this.yaml.dump(value)
+        this.shortcutYaml = yaml.dump(value)
       } catch (err) {
         this.logger.error(err)
       }

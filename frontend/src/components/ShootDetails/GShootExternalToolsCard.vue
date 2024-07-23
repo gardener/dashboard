@@ -38,39 +38,37 @@ SPDX-License-Identifier: Apache-2.0
   </v-card>
 </template>
 
-<script>
+<script setup>
+import {
+  computed,
+  inject,
+} from 'vue'
 import { parseTemplate } from 'url-template'
-import { mapState } from 'pinia'
 
 import { useConfigStore } from '@/store/config'
 
 import GExternalLink from '@/components/GExternalLink'
 
-import { shootItem } from '@/mixins/shootItem'
+import { useShootItem } from '@/composables/useShootItem'
 
-import { get } from '@/lodash'
+const logger = inject('logger')
 
-export default {
-  components: {
-    GExternalLink,
-  },
-  mixins: [shootItem],
-  inject: ['logger'],
-  computed: {
-    ...mapState(useConfigStore, ['externalTools']),
-    items () {
-      return get(this, 'externalTools', [])
-    },
-  },
-  methods: {
-    expandUrl (url) {
-      try {
-        return parseTemplate(url).expand(this.shootMetadata)
-      } catch (err) {
-        this.logger.error(`Failed to parse URL template "${url}"`)
-        return url
-      }
-    },
-  },
+const configStore = useConfigStore()
+
+const {
+  shootMetadata,
+} = useShootItem()
+
+const items = computed(() => {
+  return configStore.externalTools ?? []
+})
+
+function expandUrl (url) {
+  try {
+    return parseTemplate(url).expand(shootMetadata.value)
+  } catch (err) {
+    logger.error(`Failed to parse URL template "${url}"`)
+    return url
+  }
 }
 </script>

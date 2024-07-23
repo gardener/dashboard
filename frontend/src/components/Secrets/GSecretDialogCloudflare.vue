@@ -10,7 +10,6 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :secret-validations="v$"
     :secret="secret"
-    vendor="cloudflare-dns"
   >
     <template #secret-slot>
       <div>
@@ -33,7 +32,8 @@ SPDX-License-Identifier: Apache-2.0
     <template #help-slot>
       <div>
         <p>
-          To use this provider you need to generate an API token from the Cloudflare dashboard. A detailed documentation to generate an API token is available at <g-external-link url="https://support.cloudflare.com/hc/en-us/articles/200167836-Managing-API-Tokens-and-Keys" />.
+          To use this provider you need to generate an API token from the Cloudflare dashboard. A detailed documentation to generate an API token is available at
+          <g-external-link url="https://support.cloudflare.com/hc/en-us/articles/200167836-Managing-API-Tokens-and-Keys" />.
         </p>
         <p class="font-weight-bold">
           Note: You need to generate an API token and not an API key.
@@ -65,10 +65,7 @@ import { required } from '@vuelidate/validators'
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
 
-import {
-  getErrorMessages,
-  setDelayedInputFocus,
-} from '@/utils'
+import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
 
 export default {
@@ -123,11 +120,6 @@ export default {
     isCreateMode () {
       return !this.secret
     },
-  },
-  mounted () {
-    if (!this.isCreateMode) {
-      setDelayedInputFocus(this, 'apiToken')
-    }
   },
   methods: {
     getErrorMessages,

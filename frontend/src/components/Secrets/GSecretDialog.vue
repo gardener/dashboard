@@ -71,10 +71,12 @@ SPDX-License-Identifier: Apache-2.0
           <v-slide-x-reverse-transition>
             <div
               v-if="helpVisible"
-              class="pa-3 ml-3 help"
-              :style="helpStyle"
+              class="ml-6 help-container"
+              :style="helpContainerStyles"
             >
-              <slot name="help-slot" />
+              <div class="help-content">
+                <slot name="help-slot" />
+              </div>
             </div>
           </v-slide-x-reverse-transition>
         </div>
@@ -158,7 +160,6 @@ import {
 import {
   cloneDeep,
   get,
-  map,
   head,
   sortBy,
   filter,
@@ -237,11 +238,8 @@ export default {
       'dnsSecretList',
     ]),
     ...mapState(useCloudProfileStore, ['sortedInfrastructureKindList']),
-    ...mapState(useGardenerExtensionStore, ['sortedDnsProviderList']),
+    ...mapState(useGardenerExtensionStore, ['dnsProviderTypes']),
     ...mapState(useShootStore, ['shootList']),
-    dnsProviderTypes () {
-      return map(this.sortedDnsProviderList, 'type')
-    },
     cloudProfileName: {
       get () {
         return this.selectedCloudProfile
@@ -286,7 +284,7 @@ export default {
       const name = get(this.secret, 'metadata.name')
       return filter(this.shootList, ['spec.secretBindingName', name])
     },
-    helpStyle () {
+    helpContainerStyles () {
       const detailsRef = this.$refs.secretDetails
       let detailsHeight = 0
       if (detailsRef) {
@@ -294,6 +292,7 @@ export default {
       }
       return {
         maxHeight: `${detailsHeight}px`,
+        maxWidth: '50%',
       }
     },
     isInfrastructureSecret () {
@@ -407,9 +406,27 @@ export default {
 
 <style lang="scss" scoped>
 
-  .help {
-    max-width: 80%;
-    overflow-y: auto;
-  }
+.help-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.help-content {
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 15px;
+  box-sizing: content-box;
+}
+
+.help-container::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 50px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(var(--v-theme-surface)));
+  pointer-events: none;
+}
 
 </style>

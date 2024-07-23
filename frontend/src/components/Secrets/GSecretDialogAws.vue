@@ -110,10 +110,7 @@ import {
   alphaNumUnderscore,
   base64,
 } from '@/utils/validators'
-import {
-  getErrorMessages,
-  setDelayedInputFocus,
-} from '@/utils'
+import { getErrorMessages } from '@/utils'
 
 export default {
   components: {
@@ -264,11 +261,6 @@ export default {
     isCreateMode () {
       return !this.secret
     },
-  },
-  mounted () {
-    if (!this.isCreateMode) {
-      setDelayedInputFocus(this, 'accessKeyId')
-    }
   },
   methods: {
     getErrorMessages,

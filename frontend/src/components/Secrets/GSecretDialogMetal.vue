@@ -10,7 +10,6 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :secret-validations="v$"
     :secret="secret"
-    vendor="metal"
   >
     <template #secret-slot>
       <div>
@@ -60,10 +59,7 @@ import {
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 
-import {
-  getErrorMessages,
-  setDelayedInputFocus,
-} from '@/utils'
+import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
 
 export default {
@@ -123,11 +119,6 @@ export default {
     isCreateMode () {
       return !this.secret
     },
-  },
-  mounted () {
-    if (!this.isCreateMode) {
-      setDelayedInputFocus(this, 'apiUrl')
-    }
   },
   methods: {
     getErrorMessages,

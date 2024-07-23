@@ -194,9 +194,9 @@ SPDX-License-Identifier: Apache-2.0
                           <v-row>
                             <v-col cols="12">
                               <v-select
-                                v-model="projectName"
+                                v-model="internalProjectName"
                                 color="primary"
-                                :items="projectNames"
+                                :items="sortedProjectNamesWithEmpty"
                                 variant="underlined"
                                 label="Project"
                                 hint="The namespace of the selected project will be the default namespace in the kubeconfig"
@@ -220,7 +220,7 @@ SPDX-License-Identifier: Apache-2.0
                                 color="primary"
                                 variant="underlined"
                                 label="Skip Open Browser"
-                                hint="If true, it does not open the browser on authentication"
+                                hint="If selected, it will not open the browser for authentication."
                                 persistent-hint
                               />
                             </v-col>
@@ -247,8 +247,16 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import {
+  ref,
+  toRef,
+} from 'vue'
 import download from 'downloadjs'
-import { mapState } from 'pinia'
+import {
+  mapState,
+  storeToRefs,
+} from 'pinia'
+import yaml from 'js-yaml'
 
 import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
@@ -261,12 +269,10 @@ import GCodeBlock from '@/components/GCodeBlock.vue'
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
 import GTimeString from '@/components/GTimeString.vue'
 
-import {
-  map,
-  find,
-  get,
-  head,
-} from '@/lodash'
+import { useProjectMetadata } from '@/composables/useProjectMetadata'
+import { useProjectNamespace } from '@/composables/useProjectItem'
+
+import { head } from '@/lodash'
 
 export default {
   components: {
@@ -275,31 +281,48 @@ export default {
     GAccountAvatar,
     GTimeString,
   },
-  inject: ['api', 'logger', 'yaml'],
+  inject: ['api', 'logger'],
+  setup () {
+    const projectStore = useProjectStore()
+    const configStore = useConfigStore()
+
+    const {
+      project,
+      projectNames,
+    } = storeToRefs(projectStore)
+
+    const projectNamespace = useProjectNamespace(project)
+    const {
+      projectName,
+    } = useProjectMetadata(project)
+
+    const grantTypes = toRef(configStore, 'grantTypes')
+    const grantType = ref(head(grantTypes.value))
+
+    return {
+      projectName,
+      projectNames,
+      projectNamespace,
+      grantTypes,
+      grantType,
+    }
+  },
   data () {
     return {
+      internalProjectName: this.projectName,
       kubeconfigExpansionPanel: false,
       kubeconfigTab: 'configure',
-      projectName: undefined,
       skipOpenBrowser: false,
       showToken: false,
       showMessage: false,
-      kubeconfigYaml: '',
-      grantType: undefined,
     }
   },
   computed: {
-    ...mapState(useConfigStore, [
-      'grantTypes',
-    ]),
     ...mapState(useAuthnStore, [
       'user',
       'username',
       'fullDisplayName',
       'isAdmin',
-    ]),
-    ...mapState(useProjectStore, [
-      'projectList',
     ]),
     ...mapState(useAuthzStore, [
       'namespace',
@@ -327,21 +350,21 @@ export default {
     expiresAt () {
       return this.user.exp * 1000
     },
-    projectNames () {
-      const names = map(this.projectList, 'metadata.name').sort()
+    sortedProjectNamesWithEmpty () {
+      const names = this.projectNames.toSorted()
       names.unshift('')
       return names
     },
     kubeconfigFilename () {
-      if (this.projectName) {
-        return `kubeconfig-garden-${this.projectName}.yaml`
+      if (this.internalProjectName) {
+        return `kubeconfig-garden-${this.internalProjectName}.yaml`
       }
       return 'kubeconfig-garden.yaml'
     },
     kubeconfig () {
-      const project = find(this.projectList, ['metadata.name', this.projectName])
-      const name = 'garden-' + get(project, 'metadata.name', 'none')
-      const namespace = get(project, 'metadata.namespace')
+      const projectName = this.internalProjectName || 'none'
+      const name = 'garden-' + projectName
+      const namespace = this.projectNamespace
       const {
         server,
         certificateAuthorityData,
@@ -415,32 +438,20 @@ export default {
         preferences: {},
       }
     },
-  },
-  watch: {
-    kubeconfig (value) {
-      this.updateKubeconfigYaml(value)
+    kubeconfigYaml () {
+      return yaml.dump(this.kubeconfig)
     },
   },
-  created () {
-    this.grantType = head(this.grantTypes)
-  },
-  async mounted () {
-    try {
-      const project = find(this.projectList, ['metadata.namespace', this.namespace])
-      this.projectName = get(project, 'metadata.name', '')
-      this.updateKubeconfigYaml(this.kubeconfig)
-    } catch (err) {
-      this.logger.error(err.message)
-    }
+  watch: {
+    projectName (value) {
+      this.internalProjectName = value
+    },
   },
   methods: {
     async onDownload () {
       const kubeconfig = this.kubeconfigYaml
       const filename = this.kubeconfigFilename
       download(kubeconfig, filename, 'text/yaml')
-    },
-    async updateKubeconfigYaml (value) {
-      this.kubeconfigYaml = await this.yaml.dump(value)
     },
     expansionPanelIcon (value) {
       return value ? 'mdi-chevron-up' : 'mdi-chevron-down'

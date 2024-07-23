@@ -80,9 +80,11 @@ SPDX-License-Identifier: Apache-2.0
           You need to provide an access key (access key ID and secret access key) for Alibaba Cloud to allow the dns-controller-manager to authenticate to Alibaba Cloud DNS.
         </p>
         <p>
-          For details see <g-external-link url="https://github.com/aliyun/alibaba-cloud-sdk-go/blob/master/docs/2-Client-EN.md#accesskey-client">
+          For details see
+          <g-external-link url="https://github.com/aliyun/alibaba-cloud-sdk-go/blob/master/docs/2-Client-EN.md#accesskey-client">
             AccessKey Client
-          </g-external-link>. Currently the regionId is fixed to cn-shanghai.
+          </g-external-link>.
+          Currently the regionId is fixed to cn-shanghai.
         </p>
       </div>
     </template>
@@ -101,10 +103,7 @@ import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GCodeBlock from '@/components/GCodeBlock'
 import GExternalLink from '@/components/GExternalLink'
 
-import {
-  getErrorMessages,
-  setDelayedInputFocus,
-} from '@/utils'
+import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
 
 export default {
@@ -205,11 +204,6 @@ export default {
     isCreateMode () {
       return !this.secret
     },
-  },
-  mounted () {
-    if (!this.isCreateMode) {
-      setDelayedInputFocus(this, 'accessKeyId')
-    }
   },
   methods: {
     getErrorMessages,

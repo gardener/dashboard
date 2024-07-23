@@ -321,7 +321,7 @@ export default {
   },
   computed: {
     ...mapState(useCloudProfileStore, ['sortedInfrastructureKindList']),
-    ...mapState(useGardenerExtensionStore, ['sortedDnsProviderList']),
+    ...mapState(useGardenerExtensionStore, ['dnsProviderTypes']),
     ...mapState(useSecretStore, [
       'infrastructureSecretList',
       'dnsSecretList',
@@ -409,9 +409,6 @@ export default {
         isSupportedCloudProvider: includes(this.sortedInfrastructureKindList, secret.metadata.cloudProviderKind),
         secret,
       }))
-    },
-    dnsProviderTypes () {
-      return map(this.sortedDnsProviderList, 'type')
     },
     dnsSecretTableHeaders () {
       const headers = [

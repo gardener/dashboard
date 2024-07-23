@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
           counter="15"
           label="Group Name"
           variant="underlined"
-          @input="onInputName"
+          @input="v$.worker.name.$touch()"
           @blur="v$.worker.name.$touch()"
         />
       </div>
@@ -43,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
           :machine-images="machineImages"
           :worker="worker"
           :machine-type="selectedMachineType"
-          :update-o-s-maintenance="updateOSMaintenance"
+          :auto-update="maintenanceAutoUpdateMachineImageVersion"
           :field-name="`${workerGroupName} Machine Image`"
         />
       </div>
@@ -71,7 +71,7 @@ SPDX-License-Identifier: Apache-2.0
           v-model="volumeSize"
           v-model:has-custom-storage-size="hasCustomStorageSize"
           :min="minimumVolumeSize"
-          :default-storage-size="selectedMachineType.storage?.size"
+          :default-storage-size="defaultStorageSize"
           :has-volume-types="volumeInCloudProfile"
           color="primary"
           :error-messages="getErrorMessages(v$.volumeSize)"
@@ -89,7 +89,7 @@ SPDX-License-Identifier: Apache-2.0
           type="number"
           label="Autoscaler Min."
           variant="underlined"
-          @input="onInputMinimum"
+          @input="v$.worker.minimum.$touch()"
           @blur="v$.worker.minimum.$touch()"
         />
       </div>
@@ -102,7 +102,7 @@ SPDX-License-Identifier: Apache-2.0
           label="Autoscaler Max."
           variant="underlined"
           :error-messages="getErrorMessages(v$.worker.maximum)"
-          @input="onInputMaximum"
+          @input="v$.worker.maximum.$touch()"
           @blur="v$.worker.maximum.$touch()"
         />
       </div>
@@ -114,13 +114,13 @@ SPDX-License-Identifier: Apache-2.0
           :error-messages="getErrorMessages(v$.worker.maxSurge)"
           label="Max. Surge"
           variant="underlined"
-          @input="onInputMaxSurge"
+          @input="v$.worker.maxSurge.$touch()"
           @blur="v$.worker.maxSurge.$touch()"
         />
       </div>
 
       <div
-        v-if="zonedCluster"
+        v-if="isZonedCluster"
         class="regular-input"
       >
         <v-select
@@ -166,13 +166,15 @@ import GVolumeType from '@/components/ShootWorkers/GVolumeType'
 import GMachineImage from '@/components/ShootWorkers/GMachineImage'
 import GContainerRuntime from '@/components/ShootWorkers/GContainerRuntime'
 
+import { useShootContext } from '@/composables/useShootContext'
+
 import {
   withFieldName,
-  uniqueWorkerName,
   lowerCaseAlphaNumHyphen,
   noStartEndHyphen,
   numberOrPercentage,
   withMessage,
+  withParams,
 } from '@/utils/validators'
 import {
   getErrorMessages,
@@ -208,59 +210,56 @@ export default {
       type: Object,
       required: true,
     },
-    workers: {
-      type: Array,
-      required: true,
-    },
-    cloudProfileName: {
-      type: String,
-    },
-    region: {
-      type: String,
-    },
-    allZones: {
-      type: Array,
-    },
-    availableZones: {
-      type: Array,
-    },
-    zonedCluster: {
-      type: Boolean,
-    },
-    updateOSMaintenance: {
-      type: Boolean,
-    },
-    isNew: {
-      type: Boolean,
-    },
-    maxAdditionalZones: {
-      type: Number,
-    },
-    initialZones: {
-      type: Array,
-    },
-    kubernetesVersion: {
-      type: String,
-    },
   },
-  emits: [
-    'removedZones',
-    'updateMaxSurge',
-  ],
   setup () {
+    const {
+      isNewCluster,
+      cloudProfileName,
+      kubernetesVersion,
+      region,
+      allZones,
+      availableZones,
+      initialZones,
+      maxAdditionalZones,
+      isZonedCluster,
+      maintenanceAutoUpdateMachineImageVersion,
+      machineArchitectures,
+      volumeTypes,
+      providerWorkers,
+    } = useShootContext()
+
     return {
       v$: useVuelidate(),
+      isNewCluster,
+      cloudProfileName,
+      kubernetesVersion,
+      region,
+      allZones,
+      availableZones,
+      initialZones,
+      maxAdditionalZones,
+      isZonedCluster,
+      maintenanceAutoUpdateMachineImageVersion,
+      machineArchitectures,
+      volumeTypes,
+      providerWorkers,
     }
   },
   data () {
     return {
-      immutableZones: undefined,
       volumeSize: undefined,
       hasCustomStorageSize: false,
     }
   },
   validations () {
     const rules = { worker: {} }
+
+    const uniqueWorkerName = withMessage('Worker name must be unique', withParams(
+      { type: 'uniqueWorkerName' },
+      function unique (value) {
+        return this.providerWorkers.filter(item => item.name === value).length === 1
+      },
+    ))
 
     const nameRules = {
       required,
@@ -294,7 +293,7 @@ export default {
     })
 
     rules.selectedZones = withFieldName(() => `${this.workerGroupName} Zones`, {
-      required: requiredIf(() => this.zonedCluster),
+      required: requiredIf(() => this.isZonedCluster),
     })
 
     const volumeSizeRules = {
@@ -317,23 +316,16 @@ export default {
     return rules
   },
   computed: {
+    immutableZones () {
+      return this.isNewCluster || this.worker.isNew
+        ? []
+        : this.initialZones
+    },
     machineTypes () {
       return this.machineTypesByCloudProfileNameAndRegionAndArchitecture({
         cloudProfileName: this.cloudProfileName,
         region: this.region,
-        architecture: this.worker.machine.architecture,
-      })
-    },
-    machineArchitectures () {
-      return this.machineArchitecturesByCloudProfileNameAndRegion({
-        cloudProfileName: this.cloudProfileName,
-        region: this.region,
-      })
-    },
-    volumeTypes () {
-      return this.volumeTypesByCloudProfileNameAndRegion({
-        cloudProfileName: this.cloudProfileName,
-        region: this.region,
+        architecture: this.machineArchitecture,
       })
     },
     volumeInCloudProfile () {
@@ -347,11 +339,13 @@ export default {
     },
     machineImages () {
       const machineImages = this.machineImagesByCloudProfileName(this.cloudProfileName)
-      const architecture = this.worker.machine.architecture
-      return filter(machineImages, ({ isExpired, architectures }) => !isExpired && includes(architectures, architecture))
+      return filter(machineImages, ({ isExpired, architectures }) => !isExpired && includes(architectures, this.machineArchitecture))
     },
     minimumVolumeSize () {
-      const minimumVolumeSize = parseSize(this.minimumVolumeSizeByMachineTypeAndVolumeType({ machineType: this.selectedMachineType, volumeType: this.selectedVolumeType }))
+      const minimumVolumeSize = parseSize(this.minimumVolumeSizeByMachineTypeAndVolumeType({
+        machineType: this.selectedMachineType,
+        volumeType: this.selectedVolumeType,
+      }))
       const defaultSize = parseSize(get(this.selectedMachineType, 'storage.size'))
       if (defaultSize > 0 && defaultSize < minimumVolumeSize) {
         return defaultSize
@@ -360,10 +354,10 @@ export default {
       return minimumVolumeSize
     },
     innerMin: {
-      get: function () {
+      get () {
         return Math.max(0, this.worker.minimum)
       },
-      set: function (value) {
+      set (value) {
         this.worker.minimum = Math.max(0, parseInt(value))
         if (this.innerMax < this.worker.minimum) {
           this.worker.maximum = this.worker.minimum
@@ -407,12 +401,7 @@ export default {
         })
       },
       set (zoneValues) {
-        const zones = map(zoneValues, last)
-        const removedZones = difference(this.worker.zones, zones)
-        this.worker.zones = zones
-        if (removedZones.length) {
-          this.$emit('removedZones', removedZones)
-        }
+        this.worker.zones = map(zoneValues, last)
       },
     },
     unselectedZones () {
@@ -473,36 +462,31 @@ export default {
         this.onInputVolumeSize()
       },
     },
-
     workerGroupName () {
       return this.worker.name ? `[Worker Group ${this.worker.name}]` : '[Worker Group]'
     },
     hasVolumeSize () {
       return this.volumeInCloudProfile || this.hasCustomStorageSize
     },
+    defaultStorageSize () {
+      return get(this.selectedMachineType, 'storage.size')
+    },
   },
   mounted () {
     const volumeSize = get(this.worker, 'volume.size')
     if (volumeSize) {
       this.volumeSize = volumeSize
-      if (!this.volumeInCloudProfile) {
-        this.hasCustomStorageSize = true
-      }
+      this.hasCustomStorageSize = !this.volumeInCloudProfile
     }
     this.onInputVolumeSize()
-    this.immutableZones = this.isNew ? [] : this.initialZones
   },
   methods: {
     ...mapActions(useCloudProfileStore, [
       'machineTypesByCloudProfileNameAndRegionAndArchitecture',
-      'machineArchitecturesByCloudProfileNameAndRegion',
-      'volumeTypesByCloudProfileNameAndRegion',
       'machineImagesByCloudProfileName',
       'minimumVolumeSizeByMachineTypeAndVolumeType',
+      'defaultMachineImageForCloudProfileNameAndMachineType',
     ]),
-    onInputName () {
-      this.v$.worker.name.$touch()
-    },
     onInputVolumeSize () {
       if (this.hasVolumeSize) {
         set(this.worker, 'volume.size', this.volumeSize)
@@ -512,24 +496,15 @@ export default {
       }
       this.v$.volumeSize.$touch()
     },
-    onInputMinimum () {
-      this.v$.worker.minimum.$touch()
-    },
-    onInputMaximum () {
-      this.v$.worker.maximum.$touch()
-    },
-    onInputMaxSurge () {
-      this.v$.worker.maxSurge.$touch()
-      this.$emit('updateMaxSurge', { maxSurge: this.worker.maxSurge, id: this.worker.id })
-    },
     onInputZones () {
       this.v$.selectedZones.$touch()
       this.v$.worker.maximum.$touch()
     },
     resetWorkerMachine () {
-      this.worker.machine.type = get(head(this.machineTypes), 'name')
-      const machineImage = head(this.machineImages)
-      this.worker.machine.image = pick(machineImage, ['name', 'version'])
+      const defaultMachineType = head(this.machineTypes)
+      this.worker.machine.type = get(defaultMachineType, 'name')
+      const defaultMachineImage = this.defaultMachineImageForCloudProfileNameAndMachineType(this.cloudProfileName, defaultMachineType)
+      this.worker.machine.image = pick(defaultMachineImage, ['name', 'version'])
     },
     getErrorMessages,
   },

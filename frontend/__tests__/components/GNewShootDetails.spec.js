@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import EventEmitter from 'events'
-
 import { mount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
 
@@ -15,7 +13,15 @@ import { useProjectStore } from '@/store/project'
 
 import GNewShootDetails from '@/components/NewShoot/GNewShootDetails.vue'
 
-const { createPlugins } = global.fixtures.helper
+import { createShootContextComposable } from '@/composables/useShootContext'
+
+import {
+  components as componentsPlugin,
+  utils as utilsPlugin,
+  notify as notifyPlugin,
+} from '@/plugins'
+
+const { createVuetifyPlugin } = global.fixtures.helper
 
 describe('components', () => {
   describe('g-new-shoot-details', () => {
@@ -25,9 +31,15 @@ describe('components', () => {
       return mount(GNewShootDetails, {
         global: {
           plugins: [
-            ...createPlugins(),
+            createVuetifyPlugin(),
+            componentsPlugin,
+            utilsPlugin,
+            notifyPlugin,
             pinia,
           ],
+          provide: {
+            'shoot-context': createShootContextComposable(),
+          },
         },
         props,
       })
@@ -59,8 +71,7 @@ describe('components', () => {
     })
 
     it('maximum shoot name length should depend on project name', () => {
-      const userInterActionBus = new EventEmitter()
-      const wrapper = mountNewShootDetails({ userInterActionBus })
+      const wrapper = mountNewShootDetails({ })
       expect(wrapper.find('.v-row:nth-of-type(4) label').text()).toBe('title')
       expect(wrapper.vm.maxShootNameLength).toBe(18)
     })

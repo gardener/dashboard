@@ -117,6 +117,12 @@ export function replaceShoot ({ namespace, name, data }) {
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}`, data)
 }
 
+export function patchShoot ({ namespace, name, data }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
+  return patchResource(`/api/namespaces/${namespace}/shoots/${name}`, data)
+}
+
 export function addShootAnnotation ({ namespace, name, data }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
@@ -180,7 +186,10 @@ export function updateShootControlPlaneHighAvailability ({ namespace, name, data
 export function updateShootDns ({ namespace, name, data }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
-  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/dns`, data)
+  const { dns, extensions, resources } = data.spec
+  return patchResource(`/api/namespaces/${namespace}/shoots/${name}`, {
+    spec: { dns, extensions, resources },
+  })
 }
 
 export async function getShootSchemaDefinition () {
@@ -221,26 +230,26 @@ export function getSeeds () {
 /* Projects */
 
 export function getProjects () {
-  return getResource('/api/namespaces')
+  return getResource('/api/projects')
 }
 
 export function createProject ({ data }) {
-  return createResource('/api/namespaces', data)
+  return createResource('/api/projects', data)
 }
 
-export function patchProject ({ namespace, data }) {
-  namespace = encodeURIComponent(namespace)
-  return patchResource(`/api/namespaces/${namespace}`, data)
+export function patchProject ({ name, data }) {
+  name = encodeURIComponent(name)
+  return patchResource(`/api/projects/${name}`, data)
 }
 
-export function updateProject ({ namespace, data }) {
-  namespace = encodeURIComponent(namespace)
-  return updateResource(`/api/namespaces/${namespace}`, data)
+export function updateProject ({ name, data }) {
+  name = encodeURIComponent(name)
+  return updateResource(`/api/projects/${name}`, data)
 }
 
-export function deleteProject ({ namespace }) {
-  namespace = encodeURIComponent(namespace)
-  return deleteResource(`/api/namespaces/${namespace}`)
+export function deleteProject ({ name }) {
+  name = encodeURIComponent(name)
+  return deleteResource(`/api/projects/${name}`)
 }
 
 /* Members */
@@ -400,6 +409,7 @@ export default {
   createShoot,
   deleteShoot,
   replaceShoot,
+  patchShoot,
   addShootAnnotation,
   getShootInfo,
   updateShootVersion,

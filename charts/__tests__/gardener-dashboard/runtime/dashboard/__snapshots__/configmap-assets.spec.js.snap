@@ -1,15 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`gardener-dashboard configmap-assets should render the template 1`] = `
-Object {
+{
   "apiVersion": "v1",
-  "binaryData": Object {
+  "binaryData": {
     "bar.png": "Zm9vCg==
 ",
   },
   "kind": "ConfigMap",
-  "metadata": Object {
-    "labels": Object {
+  "metadata": {
+    "labels": {
       "app.kubernetes.io/component": "dashboard",
       "app.kubernetes.io/instance": "gardener-dashboard",
       "app.kubernetes.io/managed-by": "Helm",
