@@ -2,7 +2,6 @@
 
 This section demonstrates how to use the standard Kubernetes tool for cluster operation `kubectl` for common cluster operations with emphasis on Gardener resources. For more information on `kubectl`, see [kubectl](https://kubernetes.io/docs/reference/kubectl/overview/) on _kubernetes.io_.
 
-
 - [Project Operations](#project-operations)
   - [Prerequisites](#prerequisites)
   - [Using `kubeconfig` for remote project operations](#using-kubeconfig-for-remote-project-operations)
@@ -14,9 +13,8 @@ This section demonstrates how to use the standard Kubernetes tool for cluster op
     - [List project clusters](#list-project-clusters)
     - [Create a new cluster](#create-a-new-cluster)
     - [Delete cluster](#delete-cluster)
-    - [Get `kubeconfig` for a cluster](#get-kubeconfig-for-a-cluster)
+    - [Get `kubeconfig` for a Shoot Cluster](#get-kubeconfig-for-a-shoot-cluster)
   - [Related Links](#related-links)
-
 
 ## Prerequisites
 
@@ -24,7 +22,6 @@ This section demonstrates how to use the standard Kubernetes tool for cluster op
 - You’ve created a cluster and its status is operational.
 
 It's recommended that you get acquainted with the resources in the [Gardener API](https://github.com/gardener/gardener/tree/master/docs/api-reference).
-
 
 ## Using `kubeconfig` for remote project operations
 
@@ -60,13 +57,13 @@ You can now execute `kubectl` commands on the garden cluster using the identity 
 
 1. Using a `kubeconfig` for project operations, you can  list the Gardner API resources using the following command:
 
-    ```
+    ```bash
     kubectl api-resources | grep garden
     ```
 
     The response looks like this:
 
-    ```
+    ```bash
     backupbuckets                     bbc             core.gardener.cloud            false        BackupBucket
     backupentries                     bec             core.gardener.cloud            true         BackupEntry
     cloudprofiles                     cprofile,cpfl   core.gardener.cloud            false        CloudProfile
@@ -86,13 +83,13 @@ You can now execute `kubectl` commands on the garden cluster using the identity 
 
 2. Enter the following command to view the Gardener API versions:
 
-    ```
+    ```bash
     kubectl api-versions | grep garden
     ```
 
     The response looks like this:
 
-    ```
+    ```bash
     core.gardener.cloud/v1alpha1
     core.gardener.cloud/v1beta1
     dashboard.gardener.cloud/v1alpha1
@@ -103,13 +100,13 @@ You can now execute `kubectl` commands on the garden cluster using the identity 
 
 1. The operations on project resources are limited by the role of the identity that tries to perform them. To get an overview over your permissions, use the following command:
 
-    ```
+    ```bash
     kubectl auth can-i --list | grep garden
     ```
 
     The response looks like this:
 
-    ```
+    ```bash
     plants.core.gardener.cloud                      []                       []                 [create delete deletecollection get list patch update watch]
     quotas.core.gardener.cloud                      []                       []                 [create delete deletecollection get list patch update watch]
     secretbindings.core.gardener.cloud              []                       []                 [create delete deletecollection get list patch update watch]
@@ -123,13 +120,13 @@ You can now execute `kubectl` commands on the garden cluster using the identity 
 
 2. Try to execute an operation that you aren’t allowed, for example:
 
-    ```
+    ```bash
     kubectl get projects
     ```
 
     You receive an error message like this:
 
-    ```
+    ```bash
     Error from server (Forbidden): projects.core.gardener.cloud is forbidden: User "system:serviceaccount:garden-flowering:robot" cannot list resource "projects" in API group "core.gardener.cloud" at the cluster scope
     ```
 
@@ -137,13 +134,13 @@ You can now execute `kubectl` commands on the garden cluster using the identity 
 
 1. You can get the details for a project, where you (or the service account) is a member.
 
-    ```
+    ```bash
     kubectl get project flowering
     ```
 
     The response looks like this:
 
-    ```
+    ```bash
     NAME        NAMESPACE          STATUS   OWNER                    CREATOR                         AGE
     flowering   garden-flowering   Ready    [PROJECT-ADMIN]@domain   [PROJECT-ADMIN]@domain system   45m
     ```
@@ -152,13 +149,13 @@ You can now execute `kubectl` commands on the garden cluster using the identity 
 
 2. To query the names of the members of a project, use the following command:
 
-    ```
+    ```bash
     kubectl get project docu -o jsonpath='{.spec.members[*].name }'
     ```
 
     The response looks like this:
 
-    ```
+    ```bash
     [PROJECT-ADMIN]@domain system:serviceaccount:garden-flowering:robot
     ```
 
@@ -171,23 +168,25 @@ The Gardener domain object for a managed cluster is called [Shoot](https://githu
 ### List project clusters
 
 To query the clusters in a project:
-```
+
+```bash
 kubectl get shoots
 ```
 
 The output looks like this:
 
-```
+```bash
 NAME       CLOUDPROFILE   VERSION   SEED      DOMAIN                                 HIBERNATION   OPERATION   PROGRESS   APISERVER   CONTROL   NODES   SYSTEM   AGE
 geranium   aws            1.18.3    aws-eu1   geranium.flowering.shoot.<truncated>   Awake         Succeeded   100        True        True      True    True     74m
 ```
+
 ### Create a new cluster
 
 To create a new cluster using the command line, you need a YAML definition of the `Shoot` resource.
 
 1. To get started, copy the following YAML definition to a new file, for example, `daffodil.yaml` (or copy file [shoot.yaml](shoot.yaml) to `daffodil.yaml`) and adapt it to your needs.
 
-    ```
+    ```yaml
     apiVersion: core.gardener.cloud/v1beta1
     kind: Shoot
     metadata:
@@ -261,18 +260,19 @@ To create a new cluster using the command line, you need a YAML definition of th
 
 1. Create a cluster using this manifest (with flag `--wait=false` the command returns immediately, otherwise it doesn't return until the process is finished):
 
-    ```
+    ```bash
     kubectl apply -f daffodil.yaml --wait=false
     ```
 
     The response looks like this:
-    ```
+
+    ```bash
     shoot.core.gardener.cloud/daffodil created
     ```
 
 1. It takes 5–10 minutes until the cluster is created. To watch the progress, get all shoots and use the `-w` flag.
 
-    ```
+    ```bash
     kubectl get shoots -w
     ```
 
@@ -284,7 +284,7 @@ To delete a shoot cluster, you must first annotate the shoot resource to confirm
 
 1. Add the annotation to your manifest (`daffodil.yaml` in the previous example):
 
-    ```
+    ```yaml
     apiVersion: core.gardener.cloud/v1beta1
       kind: Shoot
       metadata:
@@ -299,34 +299,33 @@ To delete a shoot cluster, you must first annotate the shoot resource to confirm
 
 1. Apply your changes of `daffodil.yaml`.
 
-    ```
+    ```bash
     kubectl apply -f daffodil.yaml
     ```
 
     The response looks like this:
 
-    ```
+    ```bash
     shoot.core.gardener.cloud/daffodil configured
     ```
 
 1. Trigger the deletion.
 
-    ```
+    ```bash
     kubectl delete shoot daffodil --wait=false
     ```
 
     The response looks like this:
 
-    ```
+    ```bash
     shoot.core.gardener.cloud "daffodil" deleted
     ```
 
 1. It takes 5–10 minutes to delete the cluster. To watch the progress, get all shoots and use the `-w` flag.
 
-    ```
+    ```bash
     kubectl get shoots -w
     ```
-
 
 ### Get `kubeconfig` for a Shoot Cluster
 
@@ -342,15 +341,20 @@ To get the `kubeconfig` for a shoot cluster in Gardener from the command line, u
    - Both tools can share the same configuration. To set up the tools, refer to the documentation [here](https://github.com/gardener/dashboard/blob/master/docs/usage/connect-kubectl.md#setup-gardenlogin).
    - To get the `kubeconfig`, use either the `target` or `kubeconfig` command:
      - **Target Command**: This command targets the specified Shoot cluster and automatically downloads the `kubeconfig`.
+
        ```bash
        gardenctl target --garden landscape-dev --project my-project --shoot my-shoot
        ```
+
        To set the `KUBECONFIG` environment variable to point to the downloaded `kubeconfig` file, use the following command (for bash):
+
        ```bash
        eval $(gardenctl kubectl-env bash)
        ```
+
        Detailed instructions can be found [here](https://github.com/gardener/gardenctl-v2/?tab=readme-ov-file#configure-kubeconfig-for-shoot-clusters).
      - **Kubeconfig Command**: This command directly downloads the `kubeconfig` for the specified Shoot cluster and outputs it in raw format.
+
        ```bash
        gardenctl kubeconfig --garden landscape-dev --project my-project --shoot my-shoot --raw
        ```
@@ -358,5 +362,4 @@ To get the `kubeconfig` for a shoot cluster in Gardener from the command line, u
 ## Related Links
 
 - [Automating Project Resource Management](./automated-resource-management.md)
-
-- [Authenticating with an Identity Provider](https://github.com/gardener/documentation/blob/master/website/documentation/guides/administer-shoots/oidc-login/_index.md).
+- [Authenticating with an Identity Provider](https://github.com/gardener/documentation/blob/master/website/documentation/guides/administer-shoots/oidc-login.md).
