@@ -1070,7 +1070,7 @@ __metadata:
     vite-plugin-compression: "npm:^0.5.1"
     vite-plugin-vuetify: "npm:^2.0.3"
     vitest: "npm:^1.4.0"
-    vitest-fetch-mock: "npm:^0.2.2"
+    vitest-fetch-mock: "npm:^0.3.0"
     vue: "npm:^3.4.21"
     vue-router: "npm:^4.3.0"
     vuetify: "npm:^3.5.10"
@@ -3909,12 +3909,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cross-fetch@npm:^3.0.6":
-  version: 3.1.8
-  resolution: "cross-fetch@npm:3.1.8"
+"cross-fetch@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "cross-fetch@npm:4.0.0"
   dependencies:
     node-fetch: "npm:^2.6.12"
-  checksum: 10c0/4c5e022ffe6abdf380faa6e2373c0c4ed7ef75e105c95c972b6f627c3f083170b6886f19fb488a7fa93971f4f69dcc890f122b0d97f0bf5f41ca1d9a8f58c8af
+  checksum: 10c0/386727dc4c6b044746086aced959ff21101abb85c43df5e1d151547ccb6f338f86dec3f28b9dbddfa8ff5b9ec8662ed2263ad4607a93b2dc354fb7fe3bbb898a
   languageName: node
   linkType: hard
 
@@ -10318,14 +10318,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vitest-fetch-mock@npm:^0.2.2":
-  version: 0.2.2
-  resolution: "vitest-fetch-mock@npm:0.2.2"
+"vitest-fetch-mock@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "vitest-fetch-mock@npm:0.3.0"
   dependencies:
-    cross-fetch: "npm:^3.0.6"
+    cross-fetch: "npm:^4.0.0"
   peerDependencies:
-    vitest: ">=0.16.0"
-  checksum: 10c0/5c011274089301e2c21e794e79de6af2ad2884c1bf5784f79f11a06f93b8dc0284f007645ab145708bab86c810356eaafaf9de31fe9746f9084dcf28c20f85e9
+    vitest: ">=2.0.0"
+  checksum: 10c0/794a3ba957d419ff862139872c9ef55f0add1937003157ce734f11f294c5733bee1874c57fd00b7d49b8a1ef68ea4abe7e2d22573be3dd72bd90829046729aef
   languageName: node
   linkType: hard
 
