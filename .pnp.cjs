@@ -1635,7 +1635,7 @@ const RAW_RUNTIME_STATE =
           ["statuses", "npm:2.0.1"],\
           ["symbol-tree", "npm:3.2.4"],\
           ["toidentifier", "npm:1.0.1"],\
-          ["universal-cookie", "npm:7.1.4"],\
+          ["universal-cookie", "npm:7.2.0"],\
           ["unplugin-fonts", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:1.1.1"],\
           ["url-template", "npm:3.1.1"],\
           ["uuid", "npm:10.0.0"],\
@@ -3738,7 +3738,7 @@ const RAW_RUNTIME_STATE =
           ["nprogress", null],\
           ["qrcode", null],\
           ["sortablejs", null],\
-          ["universal-cookie", "npm:7.1.4"],\
+          ["universal-cookie", "npm:7.2.0"],\
           ["vue", "virtual:ec350e632119c2fa6aa4185d5fb2e6904d7c1f9cefb2603c234bc720b5a0490a22229e2320a7b46e1376c2f73972079ba6fa907f4b7e80df555b8cfccd6e5aa2#npm:3.4.33"],\
           ["vue-demi", "virtual:b101ea8b93cdd1956cca7ac8374a1bab48c2fe8a98cfb205f2ba7f54d13800b113247c34d413f0c7c0758f7f9f22eebe4471cf52b8f45cdd6b41c5b0b9d1e339#npm:0.14.8"]\
         ],\
@@ -12219,10 +12219,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["universal-cookie", [\
-      ["npm:7.1.4", {\
-        "packageLocation": "./.yarn/cache/universal-cookie-npm-7.1.4-03692ae496-076b8dfe13.zip/node_modules/universal-cookie/",\
+      ["npm:7.2.0", {\
+        "packageLocation": "./.yarn/cache/universal-cookie-npm-7.2.0-eb2c0ed6f9-70dec5aaae.zip/node_modules/universal-cookie/",\
         "packageDependencies": [\
-          ["universal-cookie", "npm:7.1.4"],\
+          ["universal-cookie", "npm:7.2.0"],\
           ["@types/cookie", "npm:0.6.0"],\
           ["cookie", "npm:0.6.0"]\
         ],\
