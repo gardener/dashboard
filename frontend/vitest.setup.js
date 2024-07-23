@@ -42,7 +42,7 @@ vi.mock('@/utils', async importOriginal => {
   }
 })
 
-globalDocument.createRange = vi.fn().mockImplementation(() => {
+globalDocument.createRange = vi.fn(() => {
   const range = new Range()
   range.getBoundingClientRect = vi.fn()
   range.getClientRects = () => {
@@ -55,7 +55,7 @@ globalDocument.createRange = vi.fn().mockImplementation(() => {
   return range
 })
 
-globalWindow.matchMedia = vi.fn().mockImplementation(query => {
+globalWindow.matchMedia = vi.fn(query => {
   return {
     matches: false,
     media: query,
