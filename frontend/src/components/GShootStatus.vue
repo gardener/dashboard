@@ -274,6 +274,9 @@ export default {
         return 'mdi-plus'
       }
       if (this.isError) {
+        if (this.showProgress) {
+          return 'mdi-exclamation'
+        }
         return 'mdi-alert-outline'
       }
       return undefined
