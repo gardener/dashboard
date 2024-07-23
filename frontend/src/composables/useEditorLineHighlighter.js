@@ -25,7 +25,7 @@ export function useEditorLineHighlighter (cm) {
     },
     set (values = []) {
       const [startLine, endLine = startLine] = values
-      if (!values.every(Number.isInteger)) {
+      if (!values.length || !values.every(Number.isInteger)) {
         params.line = null
       } else if (startLine === endLine) {
         params.line = `${startLine + 1}`
