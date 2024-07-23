@@ -173,15 +173,10 @@ export function useShootEditor (initialValue, options = {}) {
         touched.value = true
         clean.value = instance.doc.isClean(generation.value)
         historySize.value = instance.doc.historySize()
-
-        if (editorLineHighlighter) {
-          editorLineHighlighter.clearHighlightedLines()
-        }
       })
 
       if (!disableLineHighlighting) {
         editorLineHighlighter = useEditorLineHighlighter(instance)
-        editorLineHighlighter.attachGutterClickListener()
       }
 
       let cmTooltipFnTimerID
@@ -204,18 +199,6 @@ export function useShootEditor (initialValue, options = {}) {
       })
       resetEditor()
       refreshEditor()
-
-      if (editorLineHighlighter) {
-        const { selectionBoundary, highlightBoundary } = editorLineHighlighter
-        const { startLine } = selectionBoundary?.value || {}
-        if (startLine !== null) {
-          instance.scrollIntoView({ line: startLine, ch: 0 })
-          instance.setCursor({ line: startLine, ch: 0 })
-          if (!disableLineHighlighting) {
-            highlightBoundary(selectionBoundary.value)
-          }
-        }
-      }
     } catch (err) {
       logger.error('Failed to create codemirror instance: %s', err.message)
     }
@@ -223,7 +206,7 @@ export function useShootEditor (initialValue, options = {}) {
 
   function destroyEditor () {
     if (editorLineHighlighter) {
-      editorLineHighlighter.detachAllListeners()
+      editorLineHighlighter.destroy()
       editorLineHighlighter = null
     }
     if (cm.value) {
@@ -272,7 +255,6 @@ export function useShootEditor (initialValue, options = {}) {
 
   function resetEditor () {
     setEditorValue(shootItem.value)
-    highlightBoundary()
   }
 
   function refreshEditor () {
@@ -326,13 +308,6 @@ export function useShootEditor (initialValue, options = {}) {
     }
   }
 
-  function highlightBoundary () {
-    if (editorLineHighlighter) {
-      const { selectionBoundary, highlightBoundary } = editorLineHighlighter
-      highlightBoundary(selectionBoundary.value)
-    }
-  }
-
   watchEffect(() => {
     if (cm.value && schemaDefinition.value) {
       const shootProperties = get(schemaDefinition.value, 'properties', {})
@@ -359,7 +334,6 @@ export function useShootEditor (initialValue, options = {}) {
   watch(shootItem, (newValue, oldValue) => {
     if (!touched.value) {
       setEditorValue(newValue)
-      highlightBoundary()
       return
     }
     for (const path of ['spec', 'metadata.annotations', 'metadata.labels']) {

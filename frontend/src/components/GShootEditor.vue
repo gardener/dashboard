@@ -308,52 +308,6 @@ onBeforeUnmount(() => {
 <style lang="scss">
   @import 'vuetify/settings';
 
-  .v-theme--light .g-highlighted-top {
-    background-color: #fff3cd;
-    border-top: 1px solid #fde7a4;
-    border-left: 1px solid #fde7a4;
-    border-right: 1px solid #fde7a4;
-    box-sizing: border-box;
-  }
-
-  .v-theme--light .g-highlighted-middle {
-    background-color: #fff3cd;
-    border-left: 1px solid #fde7a4;
-    border-right: 1px solid #fde7a4;
-    box-sizing: border-box;
-  }
-
-  .v-theme--light .g-highlighted-bottom {
-    background-color: #fff3cd;
-    border-bottom: 1px solid #fde7a4;
-    border-left: 1px solid #fde7a4;
-    border-right: 1px solid #fde7a4;
-    box-sizing: border-box;
-  }
-
-  .v-theme--dark .g-highlighted-top {
-    background-color: #2e2e2e;
-    border-top: 1px solid #444444;
-    border-left: 1px solid #444444;
-    border-right: 1px solid #444444;
-    box-sizing: border-box;
-  }
-
-  .v-theme--dark .g-highlighted-middle {
-    background-color: #2e2e2e;
-    border-left: 1px solid #444444;
-    border-right: 1px solid #444444;
-    box-sizing: border-box;
-  }
-
-  .v-theme--dark .g-highlighted-bottom {
-    background-color: #2e2e2e;
-    border-bottom: 1px solid #444444;
-    border-left: 1px solid #444444;
-    border-right: 1px solid #444444;
-    box-sizing: border-box;
-  }
-
   .CodeMirror-hint {
 
     .ghint-type  {
