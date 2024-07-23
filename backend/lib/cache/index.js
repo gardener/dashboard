@@ -88,6 +88,13 @@ module.exports = {
     }
     return _.filter(cache.getSeeds(), predicate)
   },
+  getProject (name) {
+    const project = cache.get('projects').find(['metadata.name', name])
+    if (!project) {
+      throw new NotFound(`Project with name '${name}' not found`)
+    }
+    return project
+  },
   getProjects () {
     return cache.getProjects()
   },

@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0
       />
       Note that the
       <span class="font-family-monospace">kubeconfig</span>
-      refers to the path of the garden cluster
+      refers to the path of the Garden cluster
       <span class="font-family-monospace">kubeconfig</span>
       which you can download from the
       <g-text-router-link

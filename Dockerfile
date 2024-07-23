@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 ############# builder #############
-FROM node:20-alpine3.20 as builder
+FROM node:20-alpine3.20 AS builder
 
 WORKDIR /volume
 
@@ -54,9 +54,9 @@ RUN yarn workspace @gardener-dashboard/kube-client run test --coverage
 RUN yarn workspace @gardener-dashboard/monitor run test --coverage
 
 ############# node-scratch #############
-FROM scratch as node-scratch
+FROM scratch AS node-scratch
 
-ENV NODE_ENV "production"
+ENV NODE_ENV="production"
 
 COPY --from=builder /volume /
 
@@ -69,7 +69,7 @@ VOLUME ["/home/node"]
 ENTRYPOINT [ "tini", "--", "node"]
 
 ############# dashboard-builder #############
-FROM builder as dashboard-builder
+FROM builder AS dashboard-builder
 
 # run lint
 RUN yarn workspace @gardener-dashboard/backend run lint
@@ -93,7 +93,7 @@ RUN yarn workspace @gardener-dashboard/backend prod-install --pack /app/dist \
     && chown -R 1000:1000  /app/dist
 
 ############# dashboard #############
-FROM node-scratch as dashboard
+FROM node-scratch AS dashboard
 
 COPY --from=dashboard-builder /app/dist .
 

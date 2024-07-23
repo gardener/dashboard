@@ -63,20 +63,19 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import {
-  mapState,
-  mapActions,
-} from 'pinia'
+import { toRef } from 'vue'
+import { mapActions } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
-import { useAuthzStore } from '@/store/authz'
-import { useConfigStore } from '@/store/config'
 import { useSecretStore } from '@/store/secret'
 import { useProjectStore } from '@/store/project'
 
 import GSecretDialogWrapper from '@/components/Secrets/GSecretDialogWrapper'
+
+import { useProjectCostObject } from '@/composables/useProjectCostObject'
+import { useProjectMetadata } from '@/composables/useProjectMetadata'
 
 import {
   withParams,
@@ -93,7 +92,6 @@ import {
   cloneDeep,
   differenceWith,
   isEqual,
-  isEmpty,
   head,
   get,
   toUpper,
@@ -133,10 +131,29 @@ export default {
     'update:modelValue',
   ],
   setup (props) {
+    const projectStore = useProjectStore()
+
+    const projectItem = toRef(projectStore, 'project')
+    const {
+      costObjectSettingEnabled,
+      costObjectTitle,
+      costObjectErrorMessage,
+    } = useProjectCostObject(projectItem)
+
+    const {
+      projectName,
+    } = useProjectMetadata(projectItem)
+
+    const v$ = useVuelidate({
+      $registerAs: props.registerVuelidateAs,
+    })
+
     return {
-      v$: useVuelidate({
-        $registerAs: props.registerVuelidateAs,
-      }),
+      projectName,
+      costObjectSettingEnabled,
+      costObjectTitle,
+      costObjectErrorMessage,
+      v$,
     }
   },
   data () {
@@ -172,15 +189,6 @@ export default {
     }
   },
   computed: {
-    ...mapState(useConfigStore, [
-      'costObjectSettings',
-    ]),
-    ...mapState(useAuthzStore, [
-      'namespace',
-    ]),
-    projectName () {
-      return this.projectNameByNamespace(this.namespace)
-    },
     internalValue: {
       get () {
         return this.modelValue
@@ -221,12 +229,6 @@ export default {
       }
       return undefined
     },
-    costObjectSettingEnabled () { // required internally for requiresCostObjectIfEnabled
-      return !isEmpty(this.costObjectSettings)
-    },
-    costObjectTitle () {
-      return get(this.costObjectSettings, 'title')
-    },
     selfTerminationDays () {
       return selfTerminationDaysForSecret(this.internalValue)
     },
@@ -237,9 +239,6 @@ export default {
   methods: {
     ...mapActions(useCloudProfileStore, [
       'cloudProfileByName',
-    ]),
-    ...mapActions(useProjectStore, [
-      'projectNameByNamespace',
     ]),
     ...mapActions(useSecretStore, [
       'infrastructureSecretsByCloudProfileName',
