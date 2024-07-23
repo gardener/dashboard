@@ -1609,7 +1609,7 @@ const RAW_RUNTIME_STATE =
           ["vite-plugin-compression", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.5.1"],\
           ["vite-plugin-vuetify", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.0.3"],\
           ["vitest", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:1.6.0"],\
-          ["vitest-fetch-mock", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.2.2"],\
+          ["vitest-fetch-mock", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.3.0"],\
           ["vue", "virtual:ec350e632119c2fa6aa4185d5fb2e6904d7c1f9cefb2603c234bc720b5a0490a22229e2320a7b46e1376c2f73972079ba6fa907f4b7e80df555b8cfccd6e5aa2#npm:3.4.33"],\
           ["vue-router", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:4.4.0"],\
           ["vuetify", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.6.13"]\
@@ -5160,10 +5160,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["cross-fetch", [\
-      ["npm:3.1.8", {\
-        "packageLocation": "./.yarn/cache/cross-fetch-npm-3.1.8-71c3c05709-4c5e022ffe.zip/node_modules/cross-fetch/",\
+      ["npm:4.0.0", {\
+        "packageLocation": "./.yarn/cache/cross-fetch-npm-4.0.0-9c67668db4-386727dc4c.zip/node_modules/cross-fetch/",\
         "packageDependencies": [\
-          ["cross-fetch", "npm:3.1.8"],\
+          ["cross-fetch", "npm:4.0.0"],\
           ["node-fetch", "virtual:b01bc14c3fb20a565009002ee2e0790039582d5ead51843fa878af651c6a4713382219abd2c6b1a0bc65ff66858b5db4627e960be7fcc9aa9469883e27f8fb1c#npm:2.7.0"]\
         ],\
         "linkType": "HARD"\
@@ -12608,19 +12608,19 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["vitest-fetch-mock", [\
-      ["npm:0.2.2", {\
-        "packageLocation": "./.yarn/cache/vitest-fetch-mock-npm-0.2.2-ba54c13e51-5c01127408.zip/node_modules/vitest-fetch-mock/",\
+      ["npm:0.3.0", {\
+        "packageLocation": "./.yarn/cache/vitest-fetch-mock-npm-0.3.0-b8e8ed5324-794a3ba957.zip/node_modules/vitest-fetch-mock/",\
         "packageDependencies": [\
-          ["vitest-fetch-mock", "npm:0.2.2"]\
+          ["vitest-fetch-mock", "npm:0.3.0"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.2.2", {\
-        "packageLocation": "./.yarn/__virtual__/vitest-fetch-mock-virtual-67ae3d2ddc/0/cache/vitest-fetch-mock-npm-0.2.2-ba54c13e51-5c01127408.zip/node_modules/vitest-fetch-mock/",\
+      ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.3.0", {\
+        "packageLocation": "./.yarn/__virtual__/vitest-fetch-mock-virtual-1fe7d38c11/0/cache/vitest-fetch-mock-npm-0.3.0-b8e8ed5324-794a3ba957.zip/node_modules/vitest-fetch-mock/",\
         "packageDependencies": [\
-          ["vitest-fetch-mock", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.2.2"],\
+          ["vitest-fetch-mock", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.3.0"],\
           ["@types/vitest", null],\
-          ["cross-fetch", "npm:3.1.8"],\
+          ["cross-fetch", "npm:4.0.0"],\
           ["vitest", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:1.6.0"]\
         ],\
         "packagePeers": [\
