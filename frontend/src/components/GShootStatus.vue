@@ -22,14 +22,14 @@ SPDX-License-Identifier: Apache-2.0
               <v-btn
                 v-if="isUserError"
                 v-bind="mergeProps(activatorProps, tooltipProps)"
-                density="compact"
+                density="comfortable"
                 variant="text"
                 icon="mdi-account-alert"
                 color="error"
               />
               <v-btn
                 v-bind="mergeProps(activatorProps, tooltipProps)"
-                density="compact"
+                density="comfortable"
                 variant="text"
                 :icon="true"
               >
