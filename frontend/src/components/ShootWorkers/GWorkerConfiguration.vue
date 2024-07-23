@@ -219,6 +219,7 @@ export default {
         'spec.properties.provider.properties.workers',
         'spec.properties.provider.properties.infrastructureConfig',
       ],
+      disableLineHighlighting: true,
     }))
 
     watch(usedZones, value => {
