@@ -8,6 +8,7 @@ import {
   shallowRef,
   computed,
   reactive,
+  effectScope,
 } from 'vue'
 import {
   setActivePinia,
@@ -30,6 +31,7 @@ import {
 
 describe('composables', () => {
   describe('useProvideShootItem', () => {
+    let scope
     let shootItem
     let shootStore
     let authzStore
@@ -53,6 +55,7 @@ describe('composables', () => {
     }
 
     beforeEach(() => {
+      setActivePinia(createPinia())
       shootItem = shallowRef({
         metadata: {
           namespace: 'garden-test',
@@ -60,13 +63,17 @@ describe('composables', () => {
           uid: '1d8a140f-3e0d-4d80-a044-a2e8473c0e2d',
         },
       })
-      setActivePinia(createPinia())
-      authzStore = useAuthzStore()
-      authzStore.setNamespace(shootItem.value.metadata.namespace)
-      shootStore = useShootStore()
-      projectStore = useProjectStore()
-      cloudProfileStore = useCloudProfileStore()
-      seedStore = useSeedStore()
+
+      scope = effectScope()
+      scope.run(() => {
+        authzStore = useAuthzStore()
+        authzStore.setNamespace(shootItem.value.metadata.namespace)
+        shootStore = useShootStore()
+        projectStore = useProjectStore()
+        cloudProfileStore = useCloudProfileStore()
+        seedStore = useSeedStore()
+      })
+
       reactiveShootItem = reactive({
         isStaleShoot: computed(() => !shootStore.isShootActive(shootItem.value?.metadata.uid)),
         ...createShootItemComposable(shootItem, {
@@ -76,6 +83,8 @@ describe('composables', () => {
         }),
       })
     })
+
+    afterEach(() => scope.stop())
 
     it('should compute isShootMarkedForDeletion correctly', () => {
       setShootItem('metadata.annotations["confirmation.gardener.cloud/deletion"]', 'True')

@@ -5,7 +5,6 @@
 //
 
 import { useEventListener } from '@vueuse/core'
-import { useCookies } from '@vueuse/integrations/useCookies'
 import { jwtDecode } from 'jwt-decode'
 
 import { useLogger } from '@/composables/useLogger'
@@ -57,9 +56,8 @@ function isExpired (user) {
   return typeof t === 'number' && t < CLOCK_TOLERANCE
 }
 
-export function useUserManager (options) {
+export function useUserManager (cookies, options) {
   const {
-    cookies = useCookies([COOKIE_HEADER_PAYLOAD]),
     logger = useLogger(),
   } = options ?? {}
 

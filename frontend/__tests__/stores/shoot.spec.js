@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import { effectScope } from 'vue'
 import {
   setActivePinia,
   createPinia,
@@ -51,6 +52,7 @@ describe('stores', () => {
     let mockEmitUnsubscribe
     let mockSynchronize
     /* eslint-enable no-unused-vars */
+    let scope
     let authnStore
     let authzStore
     let projectStore
@@ -184,6 +186,8 @@ describe('stores', () => {
     }
 
     beforeEach(() => {
+      setActivePinia(createPinia())
+
       mockGetShoots = vi.spyOn(api, 'getShoots').mockResolvedValue({
         data: {
           items: cloneDeep(shootList),
@@ -204,24 +208,29 @@ describe('stores', () => {
         },
       })
       mockGetShootInfo = vi.spyOn(api, 'getShootInfo').mockRejectedValue(notFound)
-      setActivePinia(createPinia())
-      authnStore = useAuthnStore()
-      authnStore.user = {
-        isAdmin: false,
-        email: 'john.doe@example.org',
-      }
-      authzStore = useAuthzStore()
-      authzStore.setNamespace('foo')
-      projectStore = useProjectStore()
-      setProjectData({
-        shootCustomFields: [
-          {
-            name: 'Column uid',
-            path: 'metadata.uid',
-          },
-        ],
+
+      scope = effectScope()
+      scope.run(() => {
+        authnStore = useAuthnStore()
+        authnStore.user = {
+          isAdmin: false,
+          email: 'john.doe@example.org',
+        }
+        authzStore = useAuthzStore()
+        authzStore.setNamespace('foo')
+        projectStore = useProjectStore()
+        setProjectData({
+          shootCustomFields: [
+            {
+              name: 'Column uid',
+              path: 'metadata.uid',
+            },
+          ],
+        })
+        socketStore = useSocketStore()
+        shootStore = useShootStore()
       })
-      socketStore = useSocketStore()
+
       mockEmitSubscribe = vi.spyOn(socketStore, 'emitSubscribe').mockImplementation(noop)
       mockEmitUnsubscribe = vi.spyOn(socketStore, 'emitUnsubscribe').mockImplementation(noop)
       const getShoots = uids => map(uids, uid => {
@@ -234,9 +243,10 @@ describe('stores', () => {
         }
       })
       mockSynchronize = vi.spyOn(socketStore, 'synchronize').mockImplementation(uids => Promise.resolve(getShoots(uids)))
-      shootStore = useShootStore()
       shootStore.initializeShootListFilters()
     })
+
+    afterEach(() => scope.stop())
 
     describe('#sortItems', () => {
       let items
