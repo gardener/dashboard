@@ -4,10 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import {
-  shallowRef,
-  effectScope,
-} from 'vue'
+import { shallowRef } from 'vue'
 import { mount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
 
@@ -25,7 +22,6 @@ describe('components', () => {
     const lastTransitionTime = 'last-transition-time'
 
     let pinia
-    let scope
 
     function mountStatusTags (conditionTypes) {
       const shootItem = shallowRef({
@@ -56,33 +52,28 @@ describe('components', () => {
 
     beforeEach(() => {
       pinia = createTestingPinia({ stubActions: false })
-      scope = effectScope()
-      scope.run(() => {
-        const authnStore = useAuthnStore(pinia) // eslint-disable-line no-unused-vars
-        const configStore = useConfigStore(pinia)
-        configStore.knownConditions = {
-          ControlPlaneHealthy: {
-            name: 'Control Plane Overwritten',
-            shortName: 'CPO',
-            description: 'Overwritten Description',
-            sortOrder: '11',
-          },
-          ConditionFromConfigAvailability: {
-            name: 'Config Condition',
-            shortName: 'CC',
-            description: 'Config Condition Description',
-          },
-          ImportantCondition: {
-            name: 'Important Condition',
-            shortName: 'IC',
-            description: 'Important Config Condition Description',
-            sortOrder: '0',
-          },
-        }
-      })
+      const authnStore = useAuthnStore(pinia) // eslint-disable-line no-unused-vars
+      const configStore = useConfigStore(pinia)
+      configStore.knownConditions = {
+        ControlPlaneHealthy: {
+          name: 'Control Plane Overwritten',
+          shortName: 'CPO',
+          description: 'Overwritten Description',
+          sortOrder: '11',
+        },
+        ConditionFromConfigAvailability: {
+          name: 'Config Condition',
+          shortName: 'CC',
+          description: 'Config Condition Description',
+        },
+        ImportantCondition: {
+          name: 'Important Condition',
+          shortName: 'IC',
+          description: 'Important Config Condition Description',
+          sortOrder: '0',
+        },
+      }
     })
-
-    afterEach(() => scope.stop())
 
     it('should generate condition object for simple condition type', () => {
       const type = 'SampleConditionAvailability'

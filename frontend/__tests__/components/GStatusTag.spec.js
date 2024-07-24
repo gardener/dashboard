@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { effectScope } from 'vue'
 import { mount } from '@vue/test-utils'
 import { createPinia } from 'pinia'
 
@@ -20,7 +19,6 @@ describe('components', () => {
 
     let pinia
     let authnStore
-    let scope
 
     function mountStatusTag (condition) {
       return mount(GStatusTag, {
@@ -38,17 +36,12 @@ describe('components', () => {
 
     beforeEach(() => {
       pinia = createPinia()
-      scope = effectScope()
-      scope.run(() => {
-        authnStore = useAuthnStore(pinia)
-        authnStore.user = {
-          email: 'test@example.org',
-          isAdmin: false,
-        }
-      })
+      authnStore = useAuthnStore(pinia)
+      authnStore.user = {
+        email: 'test@example.org',
+        isAdmin: false,
+      }
     })
-
-    afterEach(() => scope.stop())
 
     it('should render healthy condition object', () => {
       const wrapper = mountStatusTag({
