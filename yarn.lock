@@ -958,7 +958,7 @@ __metadata:
     eslint-plugin-import: "npm:^2.29.1"
     eslint-plugin-jest: "npm:^26.9.0"
     eslint-plugin-n: "npm:^15.7.0"
-    eslint-plugin-promise: "npm:^6.1.1"
+    eslint-plugin-promise: "npm:^7.0.0"
     express: "npm:^4.18.3"
     express-static-gzip: "npm:^2.1.7"
     fast-json-patch: "npm:^3.1.1"
@@ -1000,7 +1000,7 @@ __metadata:
     eslint-plugin-import: "npm:^2.29.1"
     eslint-plugin-jest: "npm:^26.9.0"
     eslint-plugin-n: "npm:^15.7.0"
-    eslint-plugin-promise: "npm:^6.1.1"
+    eslint-plugin-promise: "npm:^7.0.0"
     jest: "npm:^29.7.0"
     js-yaml: "npm:^4.1.0"
     lodash: "npm:^4.17.21"
@@ -1037,7 +1037,7 @@ __metadata:
     eslint-plugin-import: "npm:^2.29.1"
     eslint-plugin-import-newlines: "npm:^1.4.0"
     eslint-plugin-n: "npm:^15.7.0"
-    eslint-plugin-promise: "npm:^6.1.1"
+    eslint-plugin-promise: "npm:^7.0.0"
     eslint-plugin-vitest: "npm:^0.4.0"
     eslint-plugin-vue: "npm:^9.23.0"
     eventemitter3: "npm:^5.0.1"
@@ -1091,7 +1091,7 @@ __metadata:
     eslint-plugin-import: "npm:^2.29.1"
     eslint-plugin-jest: "npm:^26.9.0"
     eslint-plugin-n: "npm:^15.7.0"
-    eslint-plugin-promise: "npm:^6.1.1"
+    eslint-plugin-promise: "npm:^7.0.0"
     express: "npm:^4.18.3"
     http-errors: "npm:^2.0.0"
     jest: "npm:^29.7.0"
@@ -1114,7 +1114,7 @@ __metadata:
     eslint-plugin-import: "npm:^2.29.1"
     eslint-plugin-jest: "npm:^26.9.0"
     eslint-plugin-n: "npm:^15.7.0"
-    eslint-plugin-promise: "npm:^6.1.1"
+    eslint-plugin-promise: "npm:^7.0.0"
     gtoken: "npm:^7.1.0"
     jest: "npm:^29.7.0"
     js-yaml: "npm:^4.1.0"
@@ -1132,7 +1132,7 @@ __metadata:
     eslint-plugin-import: "npm:^2.29.1"
     eslint-plugin-jest: "npm:^26.9.0"
     eslint-plugin-n: "npm:^15.7.0"
-    eslint-plugin-promise: "npm:^6.1.1"
+    eslint-plugin-promise: "npm:^7.0.0"
     jest: "npm:^29.7.0"
     jest-date-mock: "npm:^1.0.8"
   languageName: unknown
@@ -1148,7 +1148,7 @@ __metadata:
     eslint-plugin-import: "npm:^2.29.1"
     eslint-plugin-jest: "npm:^26.9.0"
     eslint-plugin-n: "npm:^15.7.0"
-    eslint-plugin-promise: "npm:^6.1.1"
+    eslint-plugin-promise: "npm:^7.0.0"
     express: "npm:^4.18.3"
     http-errors: "npm:^2.0.0"
     jest: "npm:^29.7.0"
@@ -1170,7 +1170,7 @@ __metadata:
     eslint-plugin-import: "npm:^2.29.1"
     eslint-plugin-jest: "npm:^26.9.0"
     eslint-plugin-n: "npm:^15.7.0"
-    eslint-plugin-promise: "npm:^6.1.1"
+    eslint-plugin-promise: "npm:^7.0.0"
     http-errors: "npm:^2.0.0"
     jest: "npm:^29.7.0"
     lodash: "npm:^4.17.21"
@@ -1187,7 +1187,7 @@ __metadata:
     eslint-plugin-import: "npm:^2.29.1"
     eslint-plugin-jest: "npm:^26.9.0"
     eslint-plugin-n: "npm:^15.7.0"
-    eslint-plugin-promise: "npm:^6.1.1"
+    eslint-plugin-promise: "npm:^7.0.0"
   languageName: unknown
   linkType: soft
 
@@ -4869,12 +4869,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-promise@npm:^6.1.1":
-  version: 6.6.0
-  resolution: "eslint-plugin-promise@npm:6.6.0"
+"eslint-plugin-promise@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "eslint-plugin-promise@npm:7.0.0"
   peerDependencies:
     eslint: ^7.0.0 || ^8.0.0 || ^9.0.0
-  checksum: 10c0/93a667dbc9ff15c4d586b0d40a31c7828314cbbb31b2b9a75802aa4ef536e9457bb3e1a89b384b07aa336dd61b315ae8b0aadc0870210378023dd018819b59b3
+  checksum: 10c0/9a9b5e057ed2d109aabe0d38f98142df0b02f555a2660fbacc58a7ea473f170dcd02ab2f88e514b7a4cbae314945343fbb26cdc04cd36d4f082bfcd6d5a2c650
   languageName: node
   linkType: hard
 
