@@ -64,6 +64,11 @@ globalWindow.matchMedia = vi.fn(query => {
   }
 })
 
+globalWindow.cookieStore = {
+  addEventListener: vi.fn(),
+  removeEventListener: vi.fn(),
+}
+
 vi.stubGlobal('console', {
   log (...args) {
     globalConsole.log(...args)
