@@ -81,3 +81,4 @@ const ResizeObserverMock = vi.fn(() => ({
 vi.stubGlobal('ResizeObserver', ResizeObserverMock)
 vi.stubGlobal('requestAnimationFrame', window.requestAnimationFrame)
 vi.stubGlobal('fixtures', fixtures)
+vi.stubGlobal('document', globalDocument)
