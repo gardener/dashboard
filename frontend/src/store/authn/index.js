@@ -12,6 +12,7 @@ import {
   ref,
   computed,
 } from 'vue'
+import { useCookies } from '@vueuse/integrations/useCookies'
 
 import { useLogger } from '@/composables/useLogger'
 import { useInterceptors } from '@/composables/useApi'
@@ -23,10 +24,14 @@ import {
 } from '@/utils'
 import { createAbortError } from '@/utils/errors'
 
-import { useUserManager } from './helper'
+import {
+  useUserManager,
+  COOKIE_HEADER_PAYLOAD,
+} from './helper'
 
 export const useAuthnStore = defineStore('authn', () => {
   const logger = useLogger()
+  const cookies = useCookies([COOKIE_HEADER_PAYLOAD])
   const {
     decodeCookie,
     isExpired,
@@ -34,7 +39,7 @@ export const useAuthnStore = defineStore('authn', () => {
     signout,
     signinWithOidc,
     ensureValidToken,
-  } = useUserManager({
+  } = useUserManager(cookies, {
     logger,
   })
 
