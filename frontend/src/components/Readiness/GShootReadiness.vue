@@ -5,8 +5,29 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div class="d-flex flex-nowrap justify-start">
-    <g-status-tag
+  <div
+    v-if="bar"
+    class="health-bar-container"
+  >
+    <div class="x-axis" />
+    <div class="health-bar">
+      <g-readiness-bar
+        v-for="condition in conditions"
+        :key="condition.type"
+        :condition="condition"
+        :popper-placement="popperPlacement"
+        :secret-binding-name="shootSecretBindingName"
+        :shoot-metadata="shootMetadata"
+        :stale-shoot="isStaleShoot"
+        :style="healthSegmentStyles"
+      />
+    </div>
+  </div>
+  <div
+    v-else
+    class="d-flex flex-nowrap justify-start"
+  >
+    <g-readiness-chip
       v-for="condition in conditions"
       :key="condition.type"
       :condition="condition"
@@ -45,8 +66,8 @@ import {
 
 import { useConfigStore } from '@/store/config'
 import { useShootStore } from '@/store/shoot'
+import { useAuthnStore } from '@/store/authn'
 
-import GStatusTag from '@/components/GStatusTag.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
 
 import { useShootItem } from '@/composables/useShootItem'
@@ -55,6 +76,9 @@ import {
   objectsFromErrorCodes,
   errorCodesFromArray,
 } from '@/utils/errorCodes'
+
+import GReadinessBar from './GReadinessBar.vue'
+import GReadinessChip from './GReadinessChip.vue'
 
 import {
   sortBy,
@@ -66,6 +90,10 @@ const props = defineProps({
     type: String,
   },
   showStatusText: {
+    type: Boolean,
+    default: false,
+  },
+  bar: {
     type: Boolean,
     default: false,
   },
@@ -84,10 +112,10 @@ const {
 
 const configStore = useConfigStore()
 const shootStore = useShootStore()
+const authnStore = useAuthnStore()
 
 const conditions = computed(() => {
   const conditions = shootReadiness.value
-    .filter(condition => !!condition.lastTransitionTime)
     .map(condition => {
       const conditionDefaults = configStore.conditionForType(condition.type)
       return {
@@ -96,6 +124,7 @@ const conditions = computed(() => {
         sortOrder: padStart(conditionDefaults.sortOrder, 8, '0'),
       }
     })
+    .filter(condition => !!condition.lastTransitionTime && (!condition.showAdminOnly || authnStore.isAdmin))
   return sortBy(conditions, 'sortOrder')
 })
 
@@ -107,4 +136,31 @@ const errorCodeObjects = computed(() => {
 const isStaleShoot = computed(() => {
   return !shootStore.isShootActive(shootUid.value)
 })
+
+const healthSegmentStyles = computed(() => ({
+  width: `${100 / conditions.value.length}%`,
+}))
 </script>
+
+<style scoped>
+.health-bar-container {
+  position: relative;
+  height: 40px;
+  width: 80px;
+  background-color: rgba(var(--v-border-color), .05);
+}
+.health-bar {
+  display: flex;
+}
+
+.x-axis {
+  position: absolute;
+  bottom: 19px;
+  height: 2px;
+  left: 1px;
+  right: 1px;
+  background-color: rgba(var(--v-border-color), .5);
+  z-index: 0;
+}
+
+</style>

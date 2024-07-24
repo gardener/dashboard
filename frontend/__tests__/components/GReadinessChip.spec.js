@@ -7,14 +7,14 @@
 import { mount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
 
-import GStatusTag from '@/components/GStatusTag.vue'
+import GReadinessChip from '@/components/Readiness/GReadinessChip.vue'
 
 const { createVuetifyPlugin } = global.fixtures.helper
 
 describe('components', () => {
-  describe('g-status-tag', () => {
+  describe('g-readiness-chip', () => {
     function mountStatusTag (condition, isAdmin = false) {
-      return mount(GStatusTag, {
+      return mount(GReadinessChip, {
         global: {
           plugins: [
             createVuetifyPlugin(),
@@ -44,12 +44,11 @@ describe('components', () => {
       }, true)
       const vm = wrapper.vm
       expect(vm.chipText).toBe('foo')
-      expect(vm.chipStatus).toBe('Healthy')
+      expect(vm.statusTitle).toBe('Healthy')
       expect(vm.chipTooltip.title).toBe('foo-bar')
       expect(vm.chipIcon).toBe('')
       expect(vm.isError || vm.isUnknown || vm.isProgressing).toBe(false)
       expect(vm.color).toBe('primary')
-      expect(vm.visible).toBe(true)
     })
 
     it('should render condition with user error', () => {
@@ -63,15 +62,13 @@ describe('components', () => {
       })
       const vm = wrapper.vm
       expect(vm.chipText).toBe('foo')
-      expect(vm.chipStatus).toBe('Error')
+      expect(vm.statusTitle).toBe('Error')
       expect(vm.isError).toBe(true)
-      expect(vm.isUserError).toBe(true)
       expect(vm.chipIcon).toBe('mdi-account-alert-outline')
       expect(vm.color).toBe('error')
-      expect(vm.visible).toBe(true)
     })
 
-    it('should render accoring to admin status', () => {
+    it('should render according to admin status', () => {
       const condition = {
         shortName: 'foo',
         name: 'foo-bar',
@@ -80,18 +77,16 @@ describe('components', () => {
       }
       let wrapper = mountStatusTag(condition)
       const vm = wrapper.vm
-      expect(vm.visible).toBe(false)
       expect(vm.isProgressing).toBe(true)
       expect(vm.color).toBe('primary')
-      expect(vm.chipStatus).toBe('Progressing')
+      expect(vm.statusTitle).toBe('Progressing')
       expect(vm.chipIcon).toBe('')
 
       wrapper = mountStatusTag(condition, true)
       const vmAdmin = wrapper.vm
-      expect(vmAdmin.visible).toBe(true)
       expect(vmAdmin.isProgressing).toBe(true)
       expect(vmAdmin.color).toBe('info')
-      expect(vmAdmin.chipStatus).toBe('Progressing')
+      expect(vmAdmin.statusTitle).toBe('Progressing')
       expect(vmAdmin.chipIcon).toBe('mdi-progress-alert')
     })
   })

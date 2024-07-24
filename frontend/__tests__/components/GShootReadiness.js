@@ -10,14 +10,14 @@ import { createTestingPinia } from '@pinia/testing'
 
 import { useConfigStore } from '@/store/config'
 
-import GStatusTags from '@/components/GStatusTags'
+import GShootReadiness from '@/components/Readiness/GShootReadiness'
 
 import { createShootItemComposable } from '@/composables/useShootItem'
 
 const { createVuetifyPlugin } = global.fixtures.helper
 
 describe('components', () => {
-  describe('g-status-tags', () => {
+  describe('g-shoot-readiness', () => {
     let pinia
 
     function mountStatusTags (conditionTypes) {
@@ -31,7 +31,7 @@ describe('components', () => {
           }),
         },
       })
-      return mount(GStatusTags, {
+      return mount(GShootReadiness, {
         global: {
           plugins: [
             createVuetifyPlugin(),
