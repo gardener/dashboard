@@ -600,7 +600,7 @@ export function createShootContextComposable (options = {}) {
 
   const isZonedCluster = computed(() => {
     const customCloudProviders = configStore.customCloudProviders
-    const customCloudProviderZone = get(customCloudProviders.value, [providerType.value, 'zoned'])
+    const customCloudProviderZone = get(customCloudProviders?.value, [providerType.value, 'zoned'])
     if (customCloudProviderZone !== undefined) {
       return customCloudProviderZone
     }
@@ -1021,7 +1021,6 @@ export function createShootContextComposable (options = {}) {
     unusedZones,
     availableZones,
     isZonedCluster,
-
     /* hibernation */
     maintenanceTimeWindowBegin,
     maintenanceTimeWindowEnd,
