@@ -529,21 +529,6 @@ export function defaultCriNameByKubernetesVersion (criNames, kubernetesVersion) 
     ? criName
     : head(criNames)
 }
-export function isZonedCluster ({ cloudProviderKind, shootSpec, isNewCluster }) {
-  switch (cloudProviderKind) {
-    case 'azure':
-      if (isNewCluster) {
-        return true // new clusters are always created as zoned clusters by the dashboard
-      }
-      return get(shootSpec, 'provider.infrastructureConfig.zoned', false)
-    case 'metal':
-      return false // metal clusters do not support zones for worker groups
-    case 'local':
-      return false // local development provider does not support zones
-    default:
-      return true
-  }
-}
 
 export const MEMBER_ROLE_DESCRIPTORS = [
   {
@@ -736,7 +721,6 @@ export default {
   maintenanceWindowWithBeginAndTimezone,
   getDurationInMinutes,
   defaultCriNameByKubernetesVersion,
-  isZonedCluster,
   includesNameOrAll,
   canI,
   targetText,

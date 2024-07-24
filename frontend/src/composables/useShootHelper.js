@@ -30,7 +30,6 @@ import {
 } from '@/lodash'
 
 const shootPropertyMappings = Object.freeze({
-  creationTimestamp: 'metadata.creationTimestamp',
   cloudProfileName: 'spec.cloudProfileName',
   seedName: 'spec.seedName',
   region: 'spec.region',
@@ -49,7 +48,6 @@ export function createShootHelperComposable (shootItem, options = {}) {
   } = options
 
   const {
-    creationTimestamp,
     cloudProfileName,
     seedName,
     region,
@@ -75,13 +73,6 @@ export function createShootHelperComposable (shootItem, options = {}) {
 
   const cloudProfile = computed(() => {
     return cloudProfileStore.cloudProfileByName(cloudProfileName.value)
-  })
-
-  const isZonedCluster = computed(() => {
-    return utils.isZonedCluster({
-      cloudProviderKind: providerType.value,
-      isNewCluster: !creationTimestamp.value,
-    })
   })
 
   const seed = computed(() => {
@@ -223,7 +214,6 @@ export function createShootHelperComposable (shootItem, options = {}) {
     cloudProfiles,
     defaultCloudProfileName,
     cloudProfile,
-    isZonedCluster,
     seed,
     seedIngressDomain,
     seeds,
