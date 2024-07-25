@@ -86,6 +86,7 @@ spec:
         configMap:
           name: dashboard-vendor-assets
           defaultMode: 0444
+      {{- end }}
       {{- if .Values.global.dashboard.oidc }}
       - name: gardener-dashboard-oidc
         secret:

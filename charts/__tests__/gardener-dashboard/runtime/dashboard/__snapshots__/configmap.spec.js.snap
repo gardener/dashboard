@@ -115,9 +115,9 @@ exports[`gardener-dashboard configmap branding should render the template 1`] = 
 `;
 
 exports[`gardener-dashboard configmap cloudProviderList should render the template with cloudProviderList 1`] = `
-Object {
-  "frontend": Object {
-    "cloudProviderList": Array [
+{
+  "frontend": {
+    "cloudProviderList": [
       "foo",
       "bar",
     ],
@@ -158,19 +158,19 @@ exports[`gardener-dashboard configmap controlPlaneHighAvailabilityHelp should re
 `;
 
 exports[`gardener-dashboard configmap customCloudProviders should render the template with customCloudProviders 1`] = `
-Object {
-  "frontend": Object {
-    "customCloudProviders": Object {
-      "fooProvider": Object {
-        "secret": Object {
-          "fields": Array [
-            Object {
+{
+  "frontend": {
+    "customCloudProviders": {
+      "fooProvider": {
+        "secret": {
+          "fields": [
+            {
               "hint": "Enter a valid namespace",
               "key": "namespace",
               "label": "Namespace",
               "type": "text",
-              "validators": Object {
-                "required": Object {
+              "validators": {
+                "required": {
                   "type": "required",
                 },
               },
@@ -179,27 +179,27 @@ Object {
           "help": "#Custom Cloud Provider
 foo",
         },
-        "shoot": Object {
-          "createFields": Array [
-            Object {
+        "shoot": {
+          "createFields": [
+            {
               "hint": "Select foo value",
               "key": "selectFoo",
               "label": "Select Foo",
               "path": "spec.provider",
               "type": "select",
-              "validators": Object {
-                "required": Object {
+              "validators": {
+                "required": {
                   "type": "required",
                 },
               },
-              "values": Object {
+              "values": {
                 "cloudprofilePath": "data.foo",
                 "key": "name",
               },
             },
           ],
-          "specTemplate": Object {
-            "provider": Object {
+          "specTemplate": {
+            "provider": {
               "type": "custom",
             },
           },
@@ -803,10 +803,10 @@ exports[`gardener-dashboard configmap vendorHints should render the template 1`]
 `;
 
 exports[`gardener-dashboard configmap vendors should render the template with vendors 1`] = `
-Object {
-  "frontend": Object {
-    "vendors": Object {
-      "foo": Object {
+{
+  "frontend": {
+    "vendors": {
+      "foo": {
         "icon": "foo_icon.svg",
       },
     },
