@@ -8,18 +8,21 @@ SPDX-License-Identifier: Apache-2.0
   <v-card class="mb-4">
     <g-toolbar>
       <div class="d-flex">
-        <div class="ticket-title d-flex align-center">
+        <div
+          class="ticket-title d-flex align-center"
+        >
           Ticket {{ ticketTitle }}
         </div>
-        <v-chip-group
+        <div
           v-if="labels.length"
+          class="d-flex flex-wrap"
         >
           <g-ticket-label
             v-for="label in labels"
             :key="label.id"
             :label="label"
           />
-        </v-chip-group>
+        </div>
       </div>
     </g-toolbar>
     <v-container>

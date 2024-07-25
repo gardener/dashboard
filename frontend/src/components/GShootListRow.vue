@@ -160,8 +160,9 @@ SPDX-License-Identifier: Apache-2.0
         <template v-if="shootLastUpdatedTicketTimestamp && !shootTicketLabels.length">
           None
         </template>
-        <v-chip-group
+        <div
           v-else
+          class="d-flex flex-wrap"
           style="max-width: 300px"
         >
           <g-ticket-label
@@ -169,7 +170,7 @@ SPDX-License-Identifier: Apache-2.0
             :key="label.name"
             :label="label"
           />
-        </v-chip-group>
+        </div>
       </template>
       <template v-if="cell.header.customField">
         <v-tooltip

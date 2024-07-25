@@ -8,27 +8,30 @@ SPDX-License-Identifier: Apache-2.0
   <div
     v-if="items.length"
     class="d-flex"
-    :class="!expanded ? 'collapsible-items-wrapper' : ''"
   >
     <div
       class="d-flex align-center"
     >
       <template v-if="!expanded">
-        <v-chip
-          variant="outlined"
-          size="small"
-          :color="chipColor"
-          label
-          @click="toggleExpanded"
-        >
-          {{ itemCount }}
-          <v-tooltip
-            top
-            activator="parent"
+        <v-hover v-slot="{ props: hoverProps, isHovering }">
+          <v-chip
+            v-bind="hoverProps"
+            :variant="isHovering ? 'flat' : 'outlined'"
+            size="small"
+            :color="chipColor"
+            label
+            class="pointer"
+            @click="expanded = true"
           >
-            Expand items
-          </v-tooltip>
-        </v-chip>
+            {{ itemCount }}
+            <v-tooltip
+              location="top"
+              activator="parent"
+            >
+              Expand items
+            </v-tooltip>
+          </v-chip>
+        </v-hover>
       </template>
       <template v-else>
         <div
@@ -42,17 +45,18 @@ SPDX-License-Identifier: Apache-2.0
             <slot
               name="item"
               :item="item"
-              :on-click="toggleExpanded"
             />
           </div>
         </div>
       </template>
     </div>
     <div>
-      <g-collapsible-items-button
-        class="collapsible-items-button"
-        :expanded="expanded"
-        @click="toggleExpanded"
+      <v-btn
+        v-if="expanded"
+        icon="mdi-close"
+        variant="plain"
+        size="small"
+        @click="expanded = false"
       />
     </div>
   </div>
@@ -65,8 +69,6 @@ import {
   computed,
   inject,
 } from 'vue'
-
-import GCollapsibleItemsButton from './GCollapsibleItemsButton.vue'
 
 const props = defineProps({
   items: {
@@ -103,33 +105,4 @@ const expanded = computed({
   },
 })
 
-const toggleExpanded = e => {
-  const newValue = !expanded.value
-
-  if (e.shiftKey) {
-    if (expandedItems) {
-      for (const key in expandedItems) {
-        delete expandedItems[key]
-      }
-      expandedItems.default = newValue
-    }
-  } else {
-    expanded.value = newValue
-  }
-}
-
 </script>
-
-<style lang="scss" scoped>
-  .collapsible-items-wrapper {
-    .collapsible-items-button {
-      visibility: hidden;
-    }
-  }
-
-  .collapsible-items-wrapper:hover{
-    .collapsible-items-button {
-      visibility: visible;
-    }
-  }
-</style>
