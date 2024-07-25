@@ -72,7 +72,6 @@ const appStore = useAppStore()
 
 const {
   shootNamespace,
-  shootName,
   isShootDirty,
   shootManifest,
   setShootManifest,
@@ -98,15 +97,16 @@ function confirmEditorNavigation () {
 async function save () {
   try {
     const data = getEditorValue()
-    const namespace = get(shootManifest, 'metadata.namespace', shootNamespace.value)
+    const namespace = shootNamespace.value
+    const name = get(data, 'metadata.name')
     await api.createShoot({ namespace, data })
     appStore.setSuccess('Cluster created')
     isShootCreated.value = true
     router.push({
       name: 'ShootItem',
       params: {
-        namespace: shootNamespace.value,
-        name: shootName.value,
+        namespace,
+        name,
       },
     })
   } catch (err) {

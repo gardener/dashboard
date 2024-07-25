@@ -175,14 +175,17 @@ describe('stores', () => {
       }
       projectStore.list = [{
         metadata: {
-          namespace: 'foo',
           annotations,
         },
-        data,
+        spec: {
+          namespace: 'foo',
+        },
       }]
     }
 
     beforeEach(() => {
+      setActivePinia(createPinia())
+
       mockGetShoots = vi.spyOn(api, 'getShoots').mockResolvedValue({
         data: {
           items: cloneDeep(shootList),
@@ -203,7 +206,7 @@ describe('stores', () => {
         },
       })
       mockGetShootInfo = vi.spyOn(api, 'getShootInfo').mockRejectedValue(notFound)
-      setActivePinia(createPinia())
+
       authnStore = useAuthnStore()
       authnStore.user = {
         isAdmin: false,
@@ -221,6 +224,8 @@ describe('stores', () => {
         ],
       })
       socketStore = useSocketStore()
+      shootStore = useShootStore()
+
       mockEmitSubscribe = vi.spyOn(socketStore, 'emitSubscribe').mockImplementation(noop)
       mockEmitUnsubscribe = vi.spyOn(socketStore, 'emitUnsubscribe').mockImplementation(noop)
       const getShoots = uids => map(uids, uid => {
@@ -233,7 +238,6 @@ describe('stores', () => {
         }
       })
       mockSynchronize = vi.spyOn(socketStore, 'synchronize').mockImplementation(uids => Promise.resolve(getShoots(uids)))
-      shootStore = useShootStore()
       shootStore.initializeShootListFilters()
     })
 

@@ -1,6 +1,6 @@
 {
   "name": "@gardener-dashboard/backend",
-  "version": "1.72.0",
+  "version": "1.76.0",
   "description": "Gardener Dashboard Server",
   "license": "Apache-2.0",
   "author": "Koser, Holger <holger.koser@sap.com>",
@@ -82,7 +82,7 @@
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-jest": "^26.9.0",
     "eslint-plugin-n": "^15.7.0",
-    "eslint-plugin-promise": "^6.1.1",
+    "eslint-plugin-promise": "^6.4.0",
     "fast-json-patch": "^3.1.1",
     "jest": "^29.7.0",
     "p-event": "^4.2.0",
@@ -146,8 +146,8 @@
       "global": {
         "branches": 68,
         "functions": 94,
-        "lines": 90,
-        "statements": 90
+        "lines": 89,
+        "statements": 89
       }
     },
     "setupFilesAfterEnv": [
@@ -156,6 +156,6 @@
   },
   "packageManager": "yarn@4.3.1",
   "engines": {
-    "node": "^20.5.0"
+    "node": "^20.9.0"
   }
 }

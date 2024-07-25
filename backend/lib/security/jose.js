@@ -34,18 +34,6 @@ function decodeSecret (input) {
   return Buffer.from(input)
 }
 
-function encodeState (data = {}) {
-  return base64url.encode(JSON.stringify(data))
-}
-
-function decodeState (state) {
-  try {
-    return JSON.parse(base64url.decode(state))
-  } catch (err) {
-    return {}
-  }
-}
-
 module.exports = sessionSecrets => {
   if (!sessionSecrets?.length) {
     throw new Error('No session secrets provided')
@@ -56,8 +44,6 @@ module.exports = sessionSecrets => {
   const encoder = new TextEncoder()
   const decoder = new TextDecoder()
   return {
-    encodeState,
-    decodeState,
     sign (payload, secretOrPrivateKey, { ...options } = {}) {
       if (isPlainObject(secretOrPrivateKey)) {
         options = secretOrPrivateKey

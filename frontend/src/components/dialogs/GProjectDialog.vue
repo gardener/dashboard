@@ -126,6 +126,7 @@ import { useVuelidate } from '@vuelidate/core'
 import {
   maxLength,
   required,
+  helpers,
 } from '@vuelidate/validators'
 import { useRouter } from 'vue-router'
 
@@ -137,6 +138,8 @@ import GMessage from '@/components/GMessage.vue'
 import GToolbar from '@/components/GToolbar.vue'
 
 import { useLogger } from '@/composables/useLogger'
+import { useProvideProjectContext } from '@/composables/useProjectContext'
+import { useProjectCostObject } from '@/composables/useProjectCostObject'
 
 import {
   messageFromErrors,
@@ -149,19 +152,12 @@ import {
   getErrorMessages,
   setInputFocus,
   setDelayedInputFocus,
-  transformHtml,
 } from '@/utils'
 import {
   errorDetailsFromError,
   isConflict,
   isGatewayTimeout,
 } from '@/utils/error'
-
-import {
-  get,
-  set,
-  isEmpty,
-} from '@/lodash'
 
 const props = defineProps({
   modelValue: {
@@ -179,8 +175,18 @@ const appStore = useAppStore()
 const configStore = useConfigStore()
 const projectStore = useProjectStore()
 const router = useRouter()
+const {
+  createProjectManifest,
+  projectManifest,
+  projectName,
+  description,
+  purpose,
+  costObject,
+} = useProvideProjectContext({
+  appStore,
+  configStore,
+})
 
-const costObjectSettings = toRef(configStore, 'costObjectSettings')
 const projectNames = toRef(projectStore, 'projectNames')
 
 const visible = computed({
@@ -192,24 +198,19 @@ const visible = computed({
   },
 })
 
-const projectName = ref('')
-const description = ref('')
-const purpose = ref('')
-const costObject = ref('')
 const errorMessage = ref('')
 const detailedErrorMessage = ref('')
 const loading = ref(false)
 
 const refProjectName = ref(null)
 
-const costObjectSettingEnabled = computed(() => !isEmpty(costObjectSettings.value))
-const costObjectTitle = computed(() => get(costObjectSettings.value, 'title'))
-const costObjectDescriptionHtml = computed(() => {
-  const description = get(costObjectSettings.value, 'description')
-  return transformHtml(description)
-})
-const costObjectRegex = computed(() => get(costObjectSettings.value, 'regex'))
-const costObjectErrorMessage = computed(() => get(costObjectSettings.value, 'errorMessage', ''))
+const {
+  costObjectSettingEnabled,
+  costObjectTitle,
+  costObjectDescriptionHtml,
+  costObjectRegex,
+  costObjectErrorMessage,
+} = useProjectCostObject()
 
 const isUniqueProjectName = withMessage(
   'A project with this name already exists',
@@ -218,7 +219,7 @@ const isUniqueProjectName = withMessage(
 
 const isValidCostObject = withMessage(
   costObjectErrorMessage.value,
-  value => !costObjectRegex.value ? true : RegExp(costObjectRegex.value).test(value ?? ''),
+  helpers.regex(new RegExp(costObjectRegex.value)),
 )
 
 const rules = {
@@ -258,13 +259,13 @@ async function submit () {
 
   try {
     loading.value = true
-    const project = await save()
+    const project = await projectStore.createProject(projectManifest.value)
     loading.value = false
     hide()
     router.push({
       name: 'Secrets',
       params: {
-        namespace: project.metadata.namespace,
+        namespace: project.spec.namespace,
       },
     })
   } catch (err) {
@@ -283,34 +284,12 @@ async function submit () {
   }
 }
 
-function save () {
-  const name = projectName.value
-  const metadata = { name }
-  if (costObjectSettingEnabled.value) {
-    set(metadata, ['annotations', 'billing.gardener.cloud/costObject'], costObject.value)
-  }
-  if (appStore.accountId) {
-    set(metadata, 'label["openmfp.org/managed-by"]', 'true')
-    set(metadata, 'annotations["openmfp.org/account-id"]', appStore.accountId)
-  }
-
-  const data = {
-    description: description.value,
-    purpose: purpose.value,
-  }
-
-  return projectStore.createProject({ metadata, data })
-}
-
 function reset () {
   v$.value.$reset()
   errorMessage.value = undefined
   detailedErrorMessage.value = undefined
 
-  projectName.value = ''
-  description.value = undefined
-  purpose.value = undefined
-  costObject.value = undefined
+  createProjectManifest()
 
   setDelayedInputFocus(refProjectName)
 }

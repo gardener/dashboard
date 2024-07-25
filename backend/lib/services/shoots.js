@@ -43,7 +43,7 @@ exports.list = async function ({ user, namespace, labelSelector }) {
     } else {
       // user is permitted to list shoots only in namespaces associated with their projects
       const projects = await projectsService.list({ user, canListProjects: false })
-      const namespaces = _.map(projects, 'metadata.namespace')
+      const namespaces = _.map(projects, 'spec.namespace')
       const statuses = await Promise.allSettled(namespaces.map(namespace => authorization.canListShoots(user, namespace)))
       return {
         apiVersion: 'v1',

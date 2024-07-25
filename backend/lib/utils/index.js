@@ -110,6 +110,12 @@ function trimObjectMetadata (object) {
   return object
 }
 
+function trimProject (project) {
+  project = trimObjectMetadata(project)
+  _.set(project, 'spec.members', undefined)
+  return project
+}
+
 function parseSelectors (selectors) {
   const items = []
   for (const selector of selectors) {
@@ -201,6 +207,7 @@ module.exports = {
   projectFilter,
   parseRooms,
   trimObjectMetadata,
+  trimProject,
   parseSelectors,
   filterBySelectors,
   getConfigValue,

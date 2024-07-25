@@ -76,10 +76,11 @@ export default {
     },
     async updateConfiguration () {
       try {
-        // Remove migration logic when all dns configurations have been migrated by Gardener
+        // Remove migration logic when all dns configurations have been migrated
+        // and migraton logic has been removed from the extension
         this.forceMigrateSyncDnsProvidersToFalse()
 
-        const { dns, extensions, resources } = this.shootManifest.spec
+        const { dns, extensions = null, resources = null } = this.shootManifest.spec
 
         await this.api.updateShootDns({
           namespace: this.shootNamespace,

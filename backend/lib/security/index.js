@@ -22,8 +22,6 @@ const {
 } = require('../config')
 
 const {
-  encodeState,
-  decodeState,
   sign,
   verify,
   decode,
@@ -506,8 +504,6 @@ exports = module.exports = {
   COOKIE_HEADER_PAYLOAD,
   COOKIE_SIGNATURE,
   COOKIE_TOKEN,
-  encodeState,
-  decodeState,
   sign,
   decode,
   verify,

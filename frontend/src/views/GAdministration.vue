@@ -319,7 +319,7 @@ SPDX-License-Identifier: Apache-2.0
                     />
                   </template>
                   <div class="text-body-2 text-medium-emphasis">
-                    Cost Object
+                    {{ costObjectTitle }}
                   </div>
                   <div class="text-body-1 wrap-text">
                     <g-editable-text
@@ -543,7 +543,6 @@ import {
   get,
   set,
   includes,
-  isEmpty,
 } from '@/lodash'
 
 const logger = useLogger()
@@ -566,19 +565,27 @@ const errorMessage = ref(undefined)
 const detailedErrorMessage = ref(undefined)
 const refGDialog = ref(null)
 
-const projectItem = toRef(projectStore, 'project')
+const {
+  project,
+  projectsNotMarkedForDeletion,
+} = storeToRefs(projectStore)
 const {
   projectName,
   shootCustomFields,
   projectOwner: owner,
-  projectCostObject: costObject,
   projectCreationTimestamp: creationTimestamp,
   projectCreatedBy: createdBy,
   projectDescription: description,
   projectPurpose: purpose,
   projectStaleSinceTimestamp: staleSinceTimestamp,
   projectStaleAutoDeleteTimestamp: staleAutoDeleteTimestamp,
-} = useProvideProjectItem(projectItem)
+  costObject,
+  costObjectSettingEnabled,
+  costObjectTitle,
+  costObjectDescriptionHtml,
+  costObjectRegex,
+  costObjectErrorMessage,
+} = useProvideProjectItem(project)
 
 const {
   namespace,
@@ -601,18 +608,11 @@ const userList = computed(() => {
   }
   return Array.from(members)
 })
-const costObjectSettingEnabled = computed(() => !isEmpty(configStore.costObjectSettings))
-const costObjectDescriptionHtml = computed(() => transformHtml(get(configStore.costObjectSettings, 'description')))
-const costObjectRules = computed(() => {
-  const pattern = get(configStore.costObjectSettings, 'regex', '[^]*')
-
-  return {
-    projectCostObject: withMessage(
-      () => get(configStore.costObjectSettings, 'errorMessage', ''),
-      helpers.regex(new RegExp(pattern)),
-    ),
-  }
-})
+const isValidCostObject = withMessage(
+  costObjectErrorMessage.value,
+  helpers.regex(new RegExp(costObjectRegex.value)),
+)
+const costObjectRules = computed(() => ({ costObject: isValidCostObject }))
 const ownerRules = computed(() => {
   const userListIncludesValidator = helpers.withParams(
     { type: 'userListIncludes' },
@@ -641,8 +641,13 @@ watch(
   { immediate: true },
 )
 
-function updateOwner (value) {
-  return updateProperty('owner', value)
+function updateOwner (name) {
+  const owner = {
+    apiGroup: 'rbac.authorization.k8s.io',
+    kind: 'User',
+    name,
+  }
+  return updateProperty('owner', owner)
 }
 
 function updateDescription (value) {
@@ -671,10 +676,11 @@ function updateCostObject (value) {
 }
 
 async function updateProperty (key, value, options = {}) {
-  const { metadata: { name, namespace } } = projectStore.project
+  const { metadata: { name }, spec: { namespace } } = projectStore.project
   try {
     const mergePatchDocument = {
-      metadata: { name, namespace },
+      metadata: { name },
+      spec: { namespace },
     }
     if (appStore.accountId && !get(projectStore.project, 'metadata.annotations["openmfp.org/account-id"]')) {
       set(mergePatchDocument, 'metadata.labels["openmfp.org/managed-by"]', 'true')
@@ -685,7 +691,7 @@ async function updateProperty (key, value, options = {}) {
         set(mergePatchDocument, ['metadata', 'annotations', 'billing.gardener.cloud/costObject'], value)
         break
       default:
-        set(mergePatchDocument, ['data', key], value)
+        set(mergePatchDocument, ['spec', key], value)
         break
     }
     await projectStore.patchProject(mergePatchDocument)
@@ -702,9 +708,9 @@ async function showDialog () {
   if (confirmed) {
     try {
       await projectStore.deleteProject(projectStore.project)
-      if (projectStore.projectList.length > 0) {
-        const p1 = projectStore.projectList[0]
-        router.push({ name: 'ShootList', params: { namespace: p1.metadata.namespace } })
+      if (projectsNotMarkedForDeletion.value.length > 0) {
+        const p1 = projectsNotMarkedForDeletion.value[0]
+        router.push({ name: 'ShootList', params: { namespace: p1.spec.namespace } })
       } else {
         router.push({ name: 'Home', params: {} })
       }

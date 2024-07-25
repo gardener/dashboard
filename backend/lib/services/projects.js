@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -7,144 +7,26 @@
 'use strict'
 
 const _ = require('lodash')
-const {
-  dashboardClient,
-  Resources
-} = require('@gardener-dashboard/kube-client')
+const { dashboardClient } = require('@gardener-dashboard/kube-client')
 
 const { PreconditionFailed, InternalServerError } = require('http-errors')
 const shoots = require('./shoots')
 const authorization = require('./authorization')
-const { projectFilter } = require('../utils')
+const { projectFilter, trimProject } = require('../utils')
 const cache = require('../cache')
 const logger = require('../logger')
 const openfga = require('../openfga')
 
 const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
 
-function fromResource (resource) {
-  const { metadata, spec = {}, status = {} } = resource
-  const role = 'project'
-  const { name, resourceVersion, creationTimestamp, labels, annotations } = metadata
-  const { namespace, createdBy, owner, description, purpose } = spec
-  const { staleSinceTimestamp, staleAutoDeleteTimestamp, phase } = status
+async function validateDeletePreconditions ({ user, name }) {
+  const project = cache.getProject(name)
+  const namespace = _.get(project, 'spec.namespace')
 
-  return {
-    metadata: {
-      name,
-      namespace,
-      resourceVersion,
-      role,
-      creationTimestamp,
-      labels,
-      annotations
-    },
-    data: {
-      createdBy: fromSubject(createdBy),
-      owner: fromSubject(owner),
-      description,
-      purpose,
-      staleSinceTimestamp,
-      staleAutoDeleteTimestamp,
-      phase
-    }
-  }
-}
-
-function toResource (project) {
-  const { metadata, data = {} } = project
-  const { apiVersion, kind } = Resources.Project
-  const { name, namespace, resourceVersion, labels, annotations } = metadata
-  const { createdBy, owner, description = null, purpose = null } = data
-
-  const resource = {
-    apiVersion,
-    kind,
-    metadata: {
-      name,
-      resourceVersion,
-      annotations
-    },
-    spec: {
-      namespace,
-      createdBy: toSubject(createdBy),
-      owner: toSubject(owner),
-      description,
-      purpose
-    }
-  }
-
-  if (!_.isEmpty(labels)) {
-    _.set(resource, 'metadata.labels', labels)
-  }
-
-  if (!_.isEmpty(annotations)) {
-    _.set(resource, 'metadata.annotations', annotations)
-  }
-
-  return resource
-}
-
-function toResourceMergePatchDocument (body) {
-  const { metadata = { }, data = {} } = body
-  const document = {}
-
-  const labels = metadata.labels
-  if (!_.isEmpty(labels)) {
-    _.set(document, 'metadata.labels', labels)
-  }
-
-  const annotations = {}
-  for (const [key, value] of Object.entries(metadata.annotations ?? {})) {
-    if (!key.startsWith('computed.gardener.cloud')) {
-      annotations[key] = value
-    }
-  }
-  if (!_.isEmpty(annotations)) {
-    _.set(document, 'metadata.annotations', annotations)
-  }
-
-  if (!_.isEmpty(data)) {
-    document.spec = {}
-    for (let [key, value] of Object.entries(data)) {
-      if (value) {
-        switch (key) {
-          case 'owner':
-            value = toSubject(value)
-            break
-        }
-        document.spec[key] = value
-      } else if (value === null) {
-        document.spec[key] = null
-      }
-    }
-  }
-  return document
-}
-
-function fromSubject ({ name } = {}) {
-  return name
-}
-
-function toSubject (username) {
-  if (username) {
-    return {
-      apiGroup: 'rbac.authorization.k8s.io',
-      kind: 'User',
-      name: username
-    }
-  }
-}
-
-async function validateDeletePreconditions ({ user, namespace }) {
   const shootList = await shoots.list({ user, namespace })
   if (!_.isEmpty(shootList.items)) {
     throw new PreconditionFailed('Only empty projects can be deleted')
   }
-}
-
-function getProjectName (namespace) {
-  return cache.findProjectByNamespace(namespace).metadata.name
 }
 
 exports.list = async function ({ user, canListProjects }) {
@@ -163,7 +45,8 @@ exports.list = async function ({ user, canListProjects }) {
     .chain(cache.getProjects())
     .filter(projectFilter(user, canListProjects, projectAllowList))
     .forEach(project => setComputedProjectAnnotations(project))
-    .map(fromResource)
+    .map(_.cloneDeep)
+    .map(trimProject)
     .value()
 }
 
@@ -172,10 +55,8 @@ exports.create = async function ({ user, body }) {
 
   const accountId = _.get(body, 'metadata.annotations["openmfp.org/account-id"]')
   const name = _.get(body, 'metadata.name')
-  const namespace = `garden-${name}`
-  _.set(body, 'metadata.namespace', namespace)
-  _.set(body, 'data.createdBy', user.id)
-  let project = await client['core.gardener.cloud'].projects.create(toResource(body))
+  _.set(body, 'spec.namespace', `garden-${name}`)
+  let project = await client['core.gardener.cloud'].projects.create(body)
 
   const isProjectReady = ({ type, object: project }) => {
     if (type === 'DELETE') {
@@ -197,26 +78,23 @@ exports.create = async function ({ user, body }) {
     }
   }
 
-  return fromResource(project)
+  return project
 }
 // needs to be exported for testing
 exports.projectInitializationTimeout = PROJECT_INITIALIZATION_TIMEOUT
 
-exports.read = async function ({ user, name: namespace }) {
+exports.read = async function ({ user, name }) {
   const client = user.client
-  const name = getProjectName(namespace)
   const project = await client['core.gardener.cloud'].projects.get(name)
   setComputedProjectAnnotations(project)
-  return fromResource(project)
+  return project
 }
 
-exports.patch = async function ({ user, name: namespace, body: { metadata, data } }) {
+exports.patch = async function ({ user, name, body }) {
   const client = user.client
-  const name = getProjectName(namespace)
-  const body = toResourceMergePatchDocument({ metadata, data })
   const project = await client['core.gardener.cloud'].projects.mergePatch(name, body)
   setComputedProjectAnnotations(project)
-  return fromResource(project)
+  return project
 }
 
 function setComputedProjectAnnotations (project) {
@@ -227,12 +105,11 @@ function setComputedProjectAnnotations (project) {
   _.set(project, 'metadata.annotations["computed.gardener.cloud/number-of-shoots"]', shoots.length)
 }
 
-exports.remove = async function ({ user, name: namespace }) {
-  await validateDeletePreconditions({ user, namespace })
+exports.remove = async function ({ user, name }) {
+  await validateDeletePreconditions({ user, name })
 
   const client = user.client
 
-  const name = getProjectName(namespace)
   const body = {
     metadata: {
       annotations: {
@@ -240,7 +117,20 @@ exports.remove = async function ({ user, name: namespace }) {
       }
     }
   }
-  const project = await client['core.gardener.cloud'].projects.mergePatch(name, body)
-  await client['core.gardener.cloud'].projects.delete(name)
-  return fromResource(project)
+  await client['core.gardener.cloud'].projects.mergePatch(name, body)
+  try {
+    const project = await client['core.gardener.cloud'].projects.delete(name)
+    return project
+  } catch (error) {
+    // Revert the annotation if deletion fails
+    const revertBody = {
+      metadata: {
+        annotations: {
+          'confirmation.gardener.cloud/deletion': null
+        }
+      }
+    }
+    await client['core.gardener.cloud'].projects.mergePatch(name, revertBody)
+    throw error // Re-throw the error after reverting the annotation
+  }
 }

@@ -12,17 +12,28 @@ import {
   provide,
 } from 'vue'
 
+import { useAppStore } from '@/store/app'
+import { useConfigStore } from '@/store/config'
+
 import { cleanup } from '@/composables/helper'
 
 import { useProjectShootCustomFields } from './useProjectShootCustomFields'
 import { useProjectMetadata } from './useProjectMetadata'
+import { useProjectCostObject } from './useProjectCostObject'
 
 import {
   cloneDeep,
+  get,
   isEqual,
+  set,
 } from '@/lodash'
 
-export function createProjectContextComposable () {
+export function createProjectContextComposable (options = {}) {
+  const {
+    appStore = useAppStore(),
+    configStore = useConfigStore(),
+  } = options
+
   function normalizeManifest (value) {
     const object = Object.assign({
       apiVersion: 'core.gardener.cloud/v1beta1',
@@ -52,8 +63,12 @@ export function createProjectContextComposable () {
     manifest.value = cloneDeep(initialManifest.value)
   }
 
-  function createProjectManifest (options) {
+  function createProjectManifest () {
     manifest.value = {}
+    if (appStore.accountId) {
+      set(manifest.value, 'metadata.label["openmfp.org/managed-by"]', 'true')
+      set(manifest.value, 'metadata.annotations["openmfp.org/account-id"]', appStore.accountId)
+    }
     initialManifest.value = cloneDeep(normalizedManifest.value)
   }
 
@@ -62,13 +77,33 @@ export function createProjectContextComposable () {
   })
 
   /* metadata */
+  const projectMetadataComposable = useProjectMetadata(manifest)
   const {
     projectName,
     isNewProject,
     getProjectAnnotation,
     setProjectAnnotation,
     unsetProjectAnnotation,
-  } = useProjectMetadata(manifest)
+  } = projectMetadataComposable
+
+  /* spec */
+  const description = computed({
+    get () {
+      return get(manifest.value, 'spec.description')
+    },
+    set (value) {
+      set(manifest.value, 'spec.description', value || undefined)
+    },
+  })
+
+  const purpose = computed({
+    get () {
+      return get(manifest.value, 'spec.purpose')
+    },
+    set (value) {
+      set(manifest.value, 'spec.purpose', value || undefined)
+    },
+  })
 
   /* projectShootCustomFields */
   const {
@@ -83,6 +118,14 @@ export function createProjectContextComposable () {
     generateKeyFromName,
   } = useProjectShootCustomFields(manifest)
 
+  /* costObject */
+  const {
+    costObject,
+  } = useProjectCostObject(manifest, {
+    configStore,
+    projectMetadataComposable,
+  })
+
   return {
     /* manifest */
     projectManifest: normalizedManifest,
@@ -95,6 +138,9 @@ export function createProjectContextComposable () {
     getProjectAnnotation,
     setProjectAnnotation,
     unsetProjectAnnotation,
+    /* spec */
+    description,
+    purpose,
     /* projectShootCustomFields */
     shootCustomFields,
     rawShootCustomFields,
@@ -105,6 +151,8 @@ export function createProjectContextComposable () {
     getShootCustomFieldsPatchDocument,
     getCustomFieldByKey,
     generateKeyFromName,
+    /* costObject */
+    costObject,
   }
 }
 
