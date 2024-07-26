@@ -80,7 +80,7 @@ SPDX-License-Identifier: Apache-2.0
           >
             <td>
               <g-text-router-link
-                :to="{ name: 'Administration', params: { namespace: item.metadata.namespace } }"
+                :to="{ name: 'Administration', params: { namespace: item.spec.namespace } }"
                 :text="item.metadata.name"
               />
             </td>
@@ -90,13 +90,13 @@ SPDX-License-Identifier: Apache-2.0
                 color="primary"
                 variant="outlined"
                 label
-                :to="{ name: 'ShootList', params: { namespace: item.metadata.namespace } }"
+                :to="{ name: 'ShootList', params: { namespace: item.spec.namespace } }"
               >
                 {{ getNumberOfShoots(item) }}
               </v-chip>
             </td>
             <td>
-              <g-account-avatar :account-name="item.data.createdBy" />
+              <g-account-avatar :account-name="item.spec.createdBy.name" />
             </td>
             <td>
               <g-time-string
@@ -105,16 +105,16 @@ SPDX-License-Identifier: Apache-2.0
               />
             </td>
             <td>
-              {{ item.data.description ?? '-' }}
+              {{ item.spec.description ?? '-' }}
             </td>
             <td>
-              {{ item.data.purpose ?? '-' }}
+              {{ item.spec.purpose ?? '-' }}
             </td>
             <td>
               <v-chip
                 color="primary"
               >
-                {{ item.data.phase ?? '-' }}
+                {{ item.status.phase ?? '-' }}
               </v-chip>
             </td>
           </tr>
