@@ -55,7 +55,8 @@ exports.create = async function ({ user, body }) {
 
   const accountId = _.get(body, 'metadata.annotations["openmfp.org/account-id"]')
   const name = _.get(body, 'metadata.name')
-  _.set(body, 'spec.namespace', `garden-${name}`)
+  const namespace = `garden-${name}`
+  _.set(body, 'spec.namespace', namespace)
   let project = await client['core.gardener.cloud'].projects.create(body)
 
   const isProjectReady = ({ type, object: project }) => {
