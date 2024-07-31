@@ -182,7 +182,7 @@ export default defineConfig(({ command, mode }) => {
     }
 
     config.server = {
-      port: 9443,
+      port: 8443,
       strictPort: true,
       https,
       proxy: {
