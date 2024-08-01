@@ -2,7 +2,7 @@
 
 exports[`gardener-dashboard vpa should render the template with default values 1`] = `
 {
-  "apiVersion": "autoscaling.k8s.io/v1beta2",
+  "apiVersion": "autoscaling.k8s.io/v1",
   "kind": "VerticalPodAutoscaler",
   "metadata": {
     "labels": {
@@ -50,7 +50,7 @@ exports[`gardener-dashboard vpa should render the template with default values 1
 
 exports[`gardener-dashboard vpa should render the template with overwritten values 1`] = `
 {
-  "apiVersion": "autoscaling.k8s.io/v1beta2",
+  "apiVersion": "autoscaling.k8s.io/v1",
   "kind": "VerticalPodAutoscaler",
   "metadata": {
     "labels": {
