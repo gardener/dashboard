@@ -154,21 +154,10 @@ const canCreateProject = toRef(authzStore, 'canCreateProject')
 const projectDialog = ref(false)
 
 const projectList = computed(() => {
+  const belongsToAccount = project => appStore.accountId === get(project, 'metadata.annotations["openmfp.org/account-id"]')
   return !appStore.accountId
     ? projectStore.projectList
-    : filter(projectStore.projectList, project => {
-      let accountId
-      const accountIds = []
-      accountId = get(project, 'metadata.annotations["openmfp.org/account-id"]')
-      if (accountId) {
-        accountIds.push(accountId)
-      }
-      accountId = get(project, 'metadata.annotations["openmfp.org/accountId"]')
-      if (accountId) {
-        accountIds.push(accountId)
-      }
-      return accountIds.includes(appStore.accountId)
-    })
+    : filter(projectStore.projectList, belongsToAccount)
 })
 
 function getNumberOfShoots (project) {
