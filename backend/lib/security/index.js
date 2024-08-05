@@ -15,7 +15,11 @@ const pTimeout = require('p-timeout')
 const { authentication, authorization } = require('../services')
 const createError = require('http-errors')
 const logger = require('../logger')
-const { sessionSecrets, oidc = {} } = require('../config')
+const {
+  sessionSecrets,
+  cookieSameSitePolicy = 'Lax',
+  oidc = {}
+} = require('../config')
 
 const {
   sign,
@@ -43,6 +47,14 @@ const {
   COOKIE_STATE,
   GARDENER_AUDIENCE
 } = require('./constants')
+
+const cookieAtributes = {
+  secure: true,
+  sameSite: cookieSameSitePolicy
+}
+if (cookieSameSitePolicy === 'None') {
+  cookieAtributes.partitioned = true
+}
 
 const {
   issuer,
@@ -159,10 +171,9 @@ async function authorizationUrl (req, res) {
     redirectOrigin,
     state
   }, {
-    secure: true,
+    ...cookieAtributes,
     httpOnly: true,
-    maxAge: 180_000, // cookie will be removed after 3 minutes
-    sameSite: 'Lax'
+    maxAge: 180_000 // cookie will be removed after 3 minutes
   })
   const client = await exports.getIssuerClient()
   if (!includes(redirectUris, backendRedirectUri)) {
@@ -177,10 +188,9 @@ async function authorizationUrl (req, res) {
     const codeChallengeMethod = getCodeChallengeMethod(client)
     const codeVerifier = generators.codeVerifier()
     res.cookie(COOKIE_CODE_VERIFIER, codeVerifier, {
-      secure: true,
+      ...cookieAtributes,
       httpOnly: true,
-      maxAge: 180_000, // cookie will be removed after 3 minutes
-      sameSite: 'Lax'
+      maxAge: 180_000 // cookie will be removed after 3 minutes
     })
     switch (codeChallengeMethod) {
       case 'S256':
@@ -251,15 +261,13 @@ async function setCookies (res, tokenSet) {
   const accessToken = tokenSet.access_token
   const [header, payload, signature] = split(accessToken, '.')
   res.cookie(COOKIE_HEADER_PAYLOAD, join([header, payload], '.'), {
-    secure: true,
-    expires: undefined,
-    sameSite: 'Lax'
+    ...cookieAtributes,
+    expires: undefined
   })
   res.cookie(COOKIE_SIGNATURE, signature, {
-    secure: true,
+    ...cookieAtributes,
     httpOnly: true,
-    expires: undefined,
-    sameSite: 'Lax'
+    expires: undefined
   })
   const values = [tokenSet.id_token]
   if (tokenSet.refresh_token) {
@@ -267,10 +275,9 @@ async function setCookies (res, tokenSet) {
   }
   const encryptedValues = await encrypt(values.join(','))
   res.cookie(COOKIE_TOKEN, encryptedValues, {
-    secure: true,
+    ...cookieAtributes,
     httpOnly: true,
-    expires: undefined,
-    sameSite: 'Lax'
+    expires: undefined
   })
   return accessToken
 }

@@ -540,6 +540,7 @@ import {
 import { errorDetailsFromError } from '@/utils/error'
 
 import {
+  get,
   set,
   includes,
 } from '@/lodash'
@@ -680,6 +681,10 @@ async function updateProperty (key, value, options = {}) {
     const mergePatchDocument = {
       metadata: { name },
       spec: { namespace },
+    }
+    if (appStore.accountId && !get(projectStore.project, 'metadata.annotations["openmfp.org/account-id"]')) {
+      set(mergePatchDocument, 'metadata.labels["openmfp.org/managed-by"]', 'true')
+      set(mergePatchDocument, 'metadata.annotations["openmfp.org/account-id"]', appStore.accountId)
     }
     switch (key) {
       case 'costObject':

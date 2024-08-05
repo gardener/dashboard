@@ -130,6 +130,8 @@ import {
 } from '@vuelidate/validators'
 import { useRouter } from 'vue-router'
 
+import { useAppStore } from '@/store/app'
+import { useConfigStore } from '@/store/config'
 import { useProjectStore } from '@/store/project'
 
 import GMessage from '@/components/GMessage.vue'
@@ -169,6 +171,8 @@ const emit = defineEmits([
 ])
 
 const logger = useLogger()
+const appStore = useAppStore()
+const configStore = useConfigStore()
 const projectStore = useProjectStore()
 const router = useRouter()
 const {
@@ -178,7 +182,10 @@ const {
   description,
   purpose,
   costObject,
-} = useProvideProjectContext()
+} = useProvideProjectContext({
+  appStore,
+  configStore,
+})
 
 const projectNames = toRef(projectStore, 'projectNames')
 
