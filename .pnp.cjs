@@ -1289,7 +1289,7 @@ const RAW_RUNTIME_STATE =
           ["path-to-regexp", "npm:7.1.0"],\
           ["sanitize-html", "npm:2.13.0"],\
           ["semver", "npm:7.6.3"],\
-          ["set-cookie-parser", "npm:2.6.0"],\
+          ["set-cookie-parser", "npm:2.7.0"],\
           ["showdown", "npm:2.1.0"],\
           ["socket.io", "npm:4.7.5"],\
           ["socket.io-client", "npm:4.7.5"],\
@@ -10474,10 +10474,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["set-cookie-parser", [\
-      ["npm:2.6.0", {\
-        "packageLocation": "./.yarn/cache/set-cookie-parser-npm-2.6.0-a7dd154236-739da029f0.zip/node_modules/set-cookie-parser/",\
+      ["npm:2.7.0", {\
+        "packageLocation": "./.yarn/cache/set-cookie-parser-npm-2.7.0-f8857d236c-5ccb2d0389.zip/node_modules/set-cookie-parser/",\
         "packageDependencies": [\
-          ["set-cookie-parser", "npm:2.6.0"]\
+          ["set-cookie-parser", "npm:2.7.0"]\
         ],\
         "linkType": "HARD"\
       }]\
