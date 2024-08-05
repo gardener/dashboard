@@ -1227,10 +1227,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@fontsource/roboto", [\
-      ["npm:5.0.13", {\
-        "packageLocation": "./.yarn/cache/@fontsource-roboto-npm-5.0.13-36a85c0158-7128bf10a8.zip/node_modules/@fontsource/roboto/",\
+      ["npm:5.0.14", {\
+        "packageLocation": "./.yarn/cache/@fontsource-roboto-npm-5.0.14-41d98b7dc3-9a15fdeb53.zip/node_modules/@fontsource/roboto/",\
         "packageDependencies": [\
-          ["@fontsource/roboto", "npm:5.0.13"]\
+          ["@fontsource/roboto", "npm:5.0.14"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -1323,7 +1323,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./frontend/",\
         "packageDependencies": [\
           ["@gardener-dashboard/frontend", "workspace:frontend"],\
-          ["@fontsource/roboto", "npm:5.0.13"],\
+          ["@fontsource/roboto", "npm:5.0.14"],\
           ["@kyvg/vue3-notification", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.2.1"],\
           ["@mdi/font", "npm:7.4.47"],\
           ["@pinia/testing", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.1.4"],\
