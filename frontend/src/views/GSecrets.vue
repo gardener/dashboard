@@ -222,6 +222,9 @@ SPDX-License-Identifier: Apache-2.0
         density="compact"
         class="g-table"
       >
+        <template #headers="headers">
+          <g-data-table-header v-bind="headers" />
+        </template>
         <template #item="{ item }">
           <g-secret-row-dns
             :key="`${item.cloudProfileName}/${item.name}`"
@@ -561,6 +564,7 @@ export default {
       this.dnsSecretSortBy = [{ key: 'name', order: 'asc' }]
     },
     onDialogClosed () {
+      // This forces re-rendering of secret dialogs when re-opened so we don't need to reset them manually
       this.visibleSecretDialog = undefined
     },
     sortItems (items, sortByArr, secondSortCriteria) {

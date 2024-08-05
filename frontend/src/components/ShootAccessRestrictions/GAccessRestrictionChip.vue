@@ -5,11 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div
-    v-for="{ key, title, description, options: optionsList } in props.accessRestrictions"
-    :key="key"
-    class="d-flex"
-  >
+  <div class="d-flex">
     <v-chip
       size="small"
       variant="tonal"
@@ -24,27 +20,27 @@ SPDX-License-Identifier: Apache-2.0
         max-width="600px"
       >
         <!-- eslint-disable-next-line vue/no-v-html -->
-        <div v-html="transformHtml(description) " />
+        <div v-html="transformHtml(description)" />
       </v-tooltip>
     </v-chip>
 
     <v-chip
-      v-for="options in optionsList "
-      :key="`${key}_${options.key}`"
+      v-for="option in options"
+      :key="`${id}_${option.key}`"
       size="small"
       variant="tonal"
       color="primary"
       class="mr-2"
     >
-      {{ options.title }}
+      {{ option.title }}
       <v-tooltip
         activator="parent"
         location="top"
-        :disabled="!options.description"
+        :disabled="!option.description"
         max-width="600px"
       >
         <!-- eslint-disable-next-line vue/no-v-html -->
-        <div v-html="transformHtml(options.description) " />
+        <div v-html="transformHtml(option.description)" />
       </v-tooltip>
     </v-chip>
   </div>
@@ -53,9 +49,22 @@ SPDX-License-Identifier: Apache-2.0
 <script setup>
 import { transformHtml } from '@/utils'
 
-const props = defineProps({
-  accessRestrictions: {
+defineProps({
+  id: {
+    type: String,
+    required: true,
+  },
+  title: {
+    type: String,
+    required: true,
+  },
+  description: {
+    type: String,
+    required: false,
+  },
+  options: {
     type: Array,
+    required: true,
   },
 })
 </script>

@@ -319,7 +319,7 @@ export default {
     },
     color () {
       if (this.isAborted || this.isStaleShoot) {
-        return 'grey'
+        return 'unknown'
       } else if (this.isError) {
         return 'error'
       } else {
