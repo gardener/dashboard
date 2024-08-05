@@ -225,7 +225,7 @@ export default {
     },
     color () {
       if (this.isUnknown || this.staleShoot) {
-        return 'grey'
+        return 'unknown'
       }
       if (this.isError) {
         return 'error'
