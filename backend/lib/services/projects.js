@@ -40,7 +40,7 @@ exports.create = async function ({ user, body }) {
   const client = user.client
 
   const name = _.get(body, 'metadata.name')
-  _.set(body, 'metadata.namespace', `garden-${name}`)
+  _.set(body, 'spec.namespace', `garden-${name}`)
   let project = await client['core.gardener.cloud'].projects.create(body)
 
   const isProjectReady = ({ type, object: project }) => {
