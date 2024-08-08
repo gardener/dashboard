@@ -55,10 +55,10 @@ function errorToLocals (err, req) {
     ? { name, stack }
     : { name }
   let code = 500
-  let reason = STATUS_CODES[code]
+  let reason = STATUS_CODES[500]
   if (isHttpError(err)) {
     code = err.statusCode
-    reason = STATUS_CODES[code]
+    reason = STATUS_CODES[code] // eslint-disable-line security/detect-object-injection
   }
   if (code < 100 || code >= 600) {
     code = 500

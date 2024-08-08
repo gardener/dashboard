@@ -47,12 +47,24 @@ exports.list = async function ({ user, namespace, labelSelector }) {
         .filter(projectFilter(user, false))
         .map('spec.namespace')
         .value()
-      const statuses = await Promise.allSettled(namespaces.map(namespace => authorization.canListShoots(user, namespace)))
+
+      const results = await Promise.allSettled(namespaces.map(async namespace => {
+        const allowed = await authorization.canListShoots(user, namespace)
+        return [namespace, allowed]
+      }))
+
+      const allowedNamespaceMap = _
+        .chain(results)
+        .filter(['status', 'fulfilled'])
+        .map('value')
+        .thru(value => new Map(value))
+        .value()
+
       return {
         apiVersion: 'v1',
         kind: 'List',
         items: namespaces
-          .filter((_, i) => statuses[i].status === 'fulfilled' && statuses[i].value)
+          .filter(namespace => allowedNamespaceMap.get(namespace))
           .flatMap(namespace => cache.getShoots(namespace, query))
       }
     }
@@ -340,7 +352,7 @@ exports.info = async function ({ user, namespace, name }) {
         if (key === 'kubeconfig') {
           try {
             const kubeconfigObject = cleanKubeconfig(value)
-            data[key] = kubeconfigObject.toYAML()
+            data.kubeconfig = kubeconfigObject.toYAML()
           } catch (err) {
             logger.error('failed to clean kubeconfig', err)
           }

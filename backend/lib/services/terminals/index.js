@@ -102,7 +102,7 @@ function findImageDescription (containerImage, containerImageDescriptions) {
     .find(({ image }) => {
       if (_.startsWith(image, '/') && _.endsWith(image, '/')) {
         image = image.substring(1, image.length - 1)
-        return new RegExp(image).test(containerImage)
+        return new RegExp(image).test(containerImage) // eslint-disable-line security/detect-non-literal-regexp
       }
       return image === containerImage
     })

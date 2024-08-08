@@ -1267,6 +1267,7 @@ const RAW_RUNTIME_STATE =
           ["eslint-plugin-jest", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:26.9.0"],\
           ["eslint-plugin-n", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:15.7.0"],\
           ["eslint-plugin-promise", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:6.6.0"],\
+          ["eslint-plugin-security", "npm:3.0.1"],\
           ["express", "npm:4.19.2"],\
           ["express-static-gzip", "npm:2.1.7"],\
           ["fast-json-patch", "npm:3.1.1"],\
@@ -5969,6 +5970,16 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["eslint-plugin-security", [\
+      ["npm:3.0.1", {\
+        "packageLocation": "./.yarn/cache/eslint-plugin-security-npm-3.0.1-c5165134bf-6b85feabe3.zip/node_modules/eslint-plugin-security/",\
+        "packageDependencies": [\
+          ["eslint-plugin-security", "npm:3.0.1"],\
+          ["safe-regex", "npm:2.1.1"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["eslint-plugin-vitest", [\
       ["npm:0.4.1", {\
         "packageLocation": "./.yarn/cache/eslint-plugin-vitest-npm-0.4.1-77fbd88a02-d06a7efec2.zip/node_modules/eslint-plugin-vitest/",\
@@ -10089,6 +10100,15 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["regexp-tree", [\
+      ["npm:0.1.27", {\
+        "packageLocation": "./.yarn/cache/regexp-tree-npm-0.1.27-e0324e6a9c-f636f44b4a.zip/node_modules/regexp-tree/",\
+        "packageDependencies": [\
+          ["regexp-tree", "npm:0.1.27"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["regexp.prototype.flags", [\
       ["npm:1.5.2", {\
         "packageLocation": "./.yarn/cache/regexp.prototype.flags-npm-1.5.2-a44e05d7d9-0f3fc4f580.zip/node_modules/regexp.prototype.flags/",\
@@ -10351,6 +10371,16 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/safe-buffer-npm-5.2.1-3481c8aa9b-6501914237.zip/node_modules/safe-buffer/",\
         "packageDependencies": [\
           ["safe-buffer", "npm:5.2.1"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["safe-regex", [\
+      ["npm:2.1.1", {\
+        "packageLocation": "./.yarn/cache/safe-regex-npm-2.1.1-4438cded67-53eb5d3ecf.zip/node_modules/safe-regex/",\
+        "packageDependencies": [\
+          ["safe-regex", "npm:2.1.1"],\
+          ["regexp-tree", "npm:0.1.27"]\
         ],\
         "linkType": "HARD"\
       }]\
