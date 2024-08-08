@@ -131,30 +131,23 @@ function parseConfigValue (value, type) {
   }
 }
 
-function getValueFromFile (filePath, type) {
-  try {
-    const value = fs.readFileSync(filePath, 'utf8')
-    return parseConfigValue(value, type)
-  } catch (error) {
-    return undefined
-  }
-}
-
-function getValueFromEnvironmentOrFile (env, environmentVariableName, filePath, type) {
-  const value = parseConfigValue(env[environmentVariableName], type)
-  if (value !== undefined) {
-    return value
-  }
-
-  if (filePath) {
-    return getValueFromFile(filePath, type)
-  }
-}
-
 module.exports = {
   assignConfigFromEnvironmentAndFileSystem (config, env) {
-    for (const { environmentVariableName, configPath, filePath, type = 'String' } of configMappings) {
-      const value = getValueFromEnvironmentOrFile(env, environmentVariableName, filePath, type)
+    for (const configMapping of configMappings) {
+      const {
+        environmentVariableName,
+        configPath,
+        filePath,
+        type = 'String'
+      } = configMapping
+      // environmentVariableName and filePath are not user input
+      let rawValue = env[environmentVariableName] // eslint-disable-line security/detect-object-injection
+      if (!rawValue && filePath) {
+        try {
+          rawValue = fs.readFileSync(filePath, 'utf8') // eslint-disable-line security/detect-non-literal-fs-filename
+        } catch (err) { /* ignore error */ }
+      }
+      const value = parseConfigValue(rawValue, type)
 
       if (value !== undefined) {
         _.set(config, configPath, value)
@@ -224,6 +217,8 @@ module.exports = {
     return config
   },
   readConfig (path) {
-    return yaml.load(fs.readFileSync(path, 'utf8'))
+    // path is not user input
+    const data = fs.readFileSync(path, 'utf8') // eslint-disable-line security/detect-non-literal-fs-filename
+    return yaml.load(data)
   }
 }
