@@ -41,8 +41,9 @@ router.route('/')
 function sanitizeFrontendConfig (frontendConfig) {
   const converter = markdown.createConverter()
   const convertAndSanitize = (obj, key) => {
-    if (obj[key]) {
-      obj[key] = converter.makeSanitizedHtml(obj[key])
+    const value = _.get(obj, key)
+    if (value) {
+      _.set(obj, key, converter.makeSanitizedHtml(value))
     }
   }
 

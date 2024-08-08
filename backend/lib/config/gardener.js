@@ -140,7 +140,6 @@ module.exports = {
         filePath,
         type = 'String'
       } = configMapping
-      // environmentVariableName and filePath are not user input
       let rawValue = env[environmentVariableName] // eslint-disable-line security/detect-object-injection
       if (!rawValue && filePath) {
         try {
@@ -217,7 +216,6 @@ module.exports = {
     return config
   },
   readConfig (path) {
-    // path is not user input
     const data = fs.readFileSync(path, 'utf8') // eslint-disable-line security/detect-non-literal-fs-filename
     return yaml.load(data)
   }
