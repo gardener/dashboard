@@ -4,14 +4,14 @@
 Gardener landscape administrators should have the possibility to change icons and names of vendors (cloud providers, image vendors, etc.). This enables the administrator to adjust vendors and apply company or context-specific values. An example of use could be a locally hosted OpenStack infrastructure that should appear as `MyCustomCloud` with a custom icon in the Dashboard, so that the user immediately identifies it as `MyCustomCloud` as they might not be familiar with the term `OpenStack`.
 
 ## Vendor Configuration
-It is possible to change the name and icon of built-in vendors in the Gardener Dashboard (e.g., AWS, Ubuntu, etc.) when using the [helm chart](https://github.com/gardener/dashboard/blob/master/charts/gardener-dashboard) in the `frontend.vendors` map. You can add a key for each vendor that you want to customize. The following configuration properties are supported:
+It is possible to change the name and icon of built-in vendors in the Gardener Dashboard (e.g., AWS, Ubuntu, etc.) when using the [helm chart](https://github.com/gardener/dashboard/blob/master/charts/gardener-dashboard) in the `frontend.vendors` map. You can add a key for each vendor that you want to customize. The key equals the vendor type. The following configuration properties are supported:
 
 | name | description |
 | ---- | ----------- |
-| `name` | Name of the vendor |
+| `name` | Display name of the vendor |
 | `icon` | Asset name as defined in the vendor asset map. You can also use the [data:](https://developer.mozilla.org/en-US/docs/web/http/basics_of_http/data_urls) scheme for development. For production, it is recommended to provide static assets |
 
-Besides overwriting built-in vendors, you can also add additional vendors that the Dashboard does not already support. For example, additional machine image vendors or a cloud provider that you have defined via [cloud provider configuration](#configure-available-cloud-providers).
+Besides overwriting built-in vendors, you can also add additional vendors that the Dashboard does not (yet) have built-in support for. For example, additional machine image vendors or a cloud provider that you have defined via [cloud provider configuration](#configure-available-cloud-providers).
 
 ## Configure Available Cloud Providers
 The Gardener Dashboard has a list of built-in cloud providers:
@@ -24,7 +24,8 @@ You can overwrite the list by providing the `frontend.cloudProviderList` array u
 This way, you can change the order or hide cloud providers from the Gardener Dashboard by omitting them from the list. You can also add additional (custom) cloud providers. You can overwrite the appearance of the custom cloud providers via [vendor configuration](#vendor-configuration). For information on how to configure a custom cloud provider, see [custom cloud providers](#custom-cloud-providers).
 
 ## Custom Cloud Providers
-You can add custom cloud providers and define the secret dialog input fields as well as add a default shoot spec where you can provide values that are required for the shoot resource. You can also define input fields that are added to the `Infrastructure Details` section of the create cluster page. These fields can be used if a user needs to provide infrastructure-specific data for a shoot cluster. All values for the custom cloud provider can be configured using the helm chart in the `frontend.customCloudProviders` map. You can add a key for each vendor that you want to customize. The following configuration properties are supported:
+Custom Cloud Providers are provider types already suppored by Gardener (Gardener Provider Extension exists) but that are not (yet) built into the Dashboard.
+You can add custom cloud providers and define the secret dialog input fields as well as add a default shoot spec where you can provide values that are required for the shoot resource. You can also define input fields that are added to the `Infrastructure Details` section of the create cluster page. These fields can be used if a user needs to provide infrastructure-specific data for a shoot cluster. All values for the custom cloud provider can be configured using the helm chart in the `frontend.customCloudProviders` map. You can add a key for each vendor that you want to customize. The key equals the custom cloud provider type. The following configuration properties are supported:
 
 | name | description |
 | ---- | ----------- |
@@ -40,8 +41,8 @@ You can add custom cloud providers and define the secret dialog input fields as 
 It is possible to define input fields with data validation for the `Infrastructure Details` section on the create cluster page as well as for the infrastructure secret dialog. The array can contain field definitions with the following properties:
 | name | description |
 | ---- | ----------- |
-| `key` | Unique key for the input field. Used as the secret data key. |
-| `path` | Destination path in shoot spec for create fields. |
+| `key` | Unique key for the input field. Used as the secret data key if defined as part of infrastructure secret dialog. |
+| `path` | Destination path in shoot spec for create fields. Only required for `Infrastructure Details` section. |
 | `hint` | Input field hint. |
 | `label` | Input field label. |
 | `type` | Input field type. Supported values are detailed below. |
@@ -63,13 +64,14 @@ Supported input field types include:
 For the `select` and `select-multiple` input field, the list of values can be:
 
 - `Array`: A simple list of values.
-- `Object`: Use `{ cloudprofilePath, key }` - Source path in cloud profile. If an object, use `key` to map values.
+- `Object`: Use `{ cloudprofilePath, key }` - Source path in the cloud profile. If an object, use `key` to map values.
 
 
 ### Validators
 | type | properties | description |
 | ---- | ---------- | ----------- |
-| `required` | `not`: Optional array of field keys. Makes field required if one of the referenced input fields is empty. If `not` is not provided, the field is always required | Required input field. Use `not` references to create *either or* scenarios, e.g., `username / password` *or* `token` is required |
+| `required` | `none` | Required input field |
+| `requiredIf` | `not`: Optional array of field keys. Makes field required if one of the referenced input fields is empty. | Depends on other input field if required or not. Use `not` references to create *either or* scenarios, e.g., `username / password` *or* `token` is required |
 | `regex` | `value`: JavaScript regex pattern | Input field must match the provided pattern. You can define arbitrary validations, e.g., length or specific syntax |
 | `isValidObject` | `none` | Input value must be a valid object. Can be used for `json` and `yaml` field types to ensure valid data |
 
@@ -227,6 +229,6 @@ global:
 ```
 
 ## Vendor assets
-In the above example, the vendor icon is referenced as static asset. Static vendor assets can be provided in the [assets](https://github.com/gardener/dashboard/tree/master/frontend/public/static/vendor-assets) folder when using the [helm chart](https://github.com/gardener/dashboard/blob/master/charts/gardener-dashboard) in the `frontendConfig.vendorAssets` map.
+In the above example, the vendor icon is referenced as static asset. Static vendor assets can be provided in the `static/vendor-assets` folder using in the `frontendConfig.vendorAssets` map.
 
-The files have to be encoded as base64 for the chart. For more information, see [Logos and Icons](customization.md#logos-and-icons) section of customization documentation.
+The files have to be encoded as base64 for the chart. For more information on how to provide assets using the chart, see [Logos and Icons](customization.md#logos-and-icons) section of customization documentation.
