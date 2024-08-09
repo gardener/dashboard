@@ -10,12 +10,11 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :secret-validations="v$"
     :secret="secret"
-    create-title="Add new Cloudflare Secret"
-    replace-title="Replace Cloudflare Secret"
   >
     <template #secret-slot>
       <div>
         <v-text-field
+          ref="apiToken"
           v-model="apiToken"
           color="primary"
           label="Cloudflare API Token"
@@ -112,9 +111,6 @@ export default {
       set (modelValue) {
         this.$emit('update:modelValue', modelValue)
       },
-    },
-    valid () {
-      return !this.v$.$invalid
     },
     secretData () {
       return {
