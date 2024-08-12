@@ -35,7 +35,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { parseSize } from '@/utils'
+import { convertToGi } from '@/utils'
 
 export default {
   props: {
@@ -75,7 +75,7 @@ export default {
     innerValue: {
       get () {
         if (this.modelValue) {
-          return parseSize(this.modelValue)
+          return convertToGi(this.modelValue)
         }
         return undefined
       },

@@ -43,11 +43,21 @@ import {
 } from '@/lodash'
 
 const serviceAccountRegex = /^system:serviceaccount:([^:]+):([^:]+)$/
-const sizeRegex = /^(\d+)Gi$/
 const emailRegex = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
 const colorCodeRegex = /^#([a-f0-9]{6}|[a-f0-9]{3})$/i
 const magnitudeNumberSuffixRegex = /^(\d+(?:\.\d*)?)([kmbt]?)$/i
 const versionRegex = /^(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:\.\d+)*([-+].+)?$/
+const sizeRegex = /^(\d+)([GMKTi]{1,2})$/
+const sizeConversionFactors = {
+  Gi: 1,
+  G: 1 / 1.073741824, // 1 Gi = 1.073741824 G
+  Mi: 1 / 1024, // 1 Gi = 1024 Mi
+  M: 1 / (1024 * 1.073741824), // 1 Gi = 1073.741824 M
+  Ki: 1 / (1024 * 1024), // 1 Gi = 1024^2 Ki
+  K: 1 / (1024 * 1024 * 1.073741824), // 1 Gi = 1073741.824 K
+  Ti: 1024, // 1 Ti = 1024 Gi
+  T: 1024 / 1.073741824, // 1 Ti = 1073.741824 Gi
+}
 
 const logger = useLogger()
 
@@ -155,16 +165,19 @@ export function displayName (username) {
   return username
 }
 
-export function parseSize (value) {
+export function convertToGi (value) {
   if (!value) {
     return 0
   }
   const result = sizeRegex.exec(value)
   if (result) {
-    const [, sizeValue] = result
-    return parseInt(sizeValue, 10)
+    const [, sizeValue, unit] = result
+    const conversionFactor = sizeConversionFactors[unit]
+    if (conversionFactor !== undefined) {
+      return parseInt(sizeValue, 10) * conversionFactor
+    }
   }
-  logger.error(`Could not parse size ${value} as it does not match regex ^(\\d+)Gi$`)
+  logger.error(`Could not parse size ${value} as it does not match expected formats`)
   return 0
 }
 
@@ -648,7 +661,7 @@ export default {
   setInputFocus,
   fullDisplayName,
   displayName,
-  parseSize,
+  convertToGi,
   isEmail,
   gravatarUrlGeneric,
   gravatarUrlMp,

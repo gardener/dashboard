@@ -19,7 +19,7 @@ import { useApi } from '@/composables/useApi'
 
 import {
   shortRandomString,
-  parseSize,
+  convertToGi,
   defaultCriNameByKubernetesVersion,
   isValidTerminationDate,
   machineImageHasUpdate,
@@ -632,7 +632,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     const machineImage = defaultMachineImageForCloudProfileNameAndMachineType(cloudProfileName, machineType)
     const minVolumeSize = minimumVolumeSizeByMachineTypeAndVolumeType({ machineType, volumeType })
 
-    const defaultVolumeSize = parseSize(minVolumeSize) <= parseSize('50Gi') ? '50Gi' : minVolumeSize
+    const defaultVolumeSize = convertToGi(minVolumeSize) <= convertToGi('50Gi') ? '50Gi' : minVolumeSize
     const worker = {
       id,
       name,
