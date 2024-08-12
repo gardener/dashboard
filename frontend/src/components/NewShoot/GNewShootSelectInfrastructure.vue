@@ -30,5 +30,4 @@ const { providerType } = useShootContext()
 function setProviderType (value) {
   providerType.value = value
 }
-
 </script>

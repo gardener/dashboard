@@ -58,10 +58,7 @@ SPDX-License-Identifier: Apache-2.0
                 :cloud-profiles="cloudProfiles"
               />
             </div>
-
-            <div ref="bla">
-              <slot name="secret-slot" />
-            </div>
+            <slot name="secret-slot" />
             <g-message
               v-model:message="errorMessage"
               v-model:detailed-message="detailedErrorMessage"

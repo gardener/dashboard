@@ -14,7 +14,6 @@ SPDX-License-Identifier: Apache-2.0
     <template #secret-slot>
       <div>
         <v-text-field
-          ref="apiToken"
           v-model="apiToken"
           color="primary"
           label="Cloudflare API Token"
