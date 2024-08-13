@@ -43,7 +43,18 @@ function isAbortError (err = {}) {
   return err.code === 'ABORT_ERR'
 }
 
-function createHttpError ({ statusCode = 500, statusMessage = http.STATUS_CODES[statusCode], response, headers, body }) {
+function getDefaultStatusMessage (statusCode) {
+  return http.STATUS_CODES[statusCode] // eslint-disable-line security/detect-object-injection
+}
+
+function createHttpError (options) {
+  const {
+    statusCode = 500,
+    statusMessage = getDefaultStatusMessage(statusCode),
+    response,
+    headers,
+    body
+  } = options
   const properties = { statusMessage }
   if (headers) {
     properties.headers = { ...headers }

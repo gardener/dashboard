@@ -5,12 +5,12 @@
 //
 
 import { helpers } from '@vuelidate/validators'
+import { Base64 } from 'js-base64'
 
 import { includes } from '@/lodash'
 
 const { withParams, regex, withMessage } = helpers
 
-const base64Pattern = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/
 const alphaNumUnderscorePattern = /^\w+$/
 const alphaNumUnderscoreHyphenPattern = /^[a-zA-Z0-9-_]+$/
 const lowerCaseAlphaNumHyphenPattern = /^[-a-z0-9]*$/
@@ -19,7 +19,9 @@ const startEndHyphenPattern = /^-.*.|.*-$/
 const numberOrPercentagePattern = /^[\d]+[%]?$/
 export const timezonePattern = /^([+-])(\d{2}):(\d{2})$/
 
-const base64 = withMessage('Must be a valid base64 string', regex(base64Pattern))
+const base64 = withMessage('Must be a valid base64 string', value => {
+  return Base64.isValid(value)
+})
 const alphaNumUnderscore = withMessage('Must contain only alphanumeric characters and underscore', regex(alphaNumUnderscorePattern))
 const lowerCaseAlphaNumHyphen = withMessage('Must contain only lowercase alphanumeric characters or hyphen', regex(lowerCaseAlphaNumHyphenPattern))
 const noConsecutiveHyphen = withMessage('Must not contain consecutive hyphens', value => {

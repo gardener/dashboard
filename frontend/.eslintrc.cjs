@@ -17,6 +17,7 @@ module.exports = {
   extends: [
     'eslint:recommended',
     'standard',
+    'plugin:security/recommended-legacy',
     'plugin:vue/vue3-recommended',
     'plugin:vitest/recommended',
   ],
@@ -100,5 +101,21 @@ module.exports = {
     'vue/no-mutating-props': ['error', { shallowOnly: true }],
     'vue/require-default-prop': 'off',
     'vue/order-in-components': 'error',
+    'security/detect-object-injection': 'off',
   },
+  overrides: [
+    {
+      files: [
+        '**/__fixtures__/**',
+        '**/__mocks__/**',
+        '**/__tests__/**',
+        'vite.config.js',
+      ],
+      rules: {
+        'security/detect-object-injection': 'off',
+        'security/detect-non-literal-fs-filename': 'off',
+        'security/detect-unsafe-regex': 'off',
+      },
+    },
+  ],
 }

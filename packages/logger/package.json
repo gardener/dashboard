@@ -53,23 +53,7 @@
     "globals": {},
     "rules": {
       "no-console": "error"
-    },
-    "overrides": [
-      {
-        "files": [
-          "**/__fixtures__/**",
-          "**/__mocks__/**",
-          "**/__tests__/**",
-          "**/test/**",
-          "jest.setup.js"
-        ],
-        "rules": {
-          "security/detect-object-injection": "off",
-          "security/detect-possible-timing-attacks": "off",
-          "security/detect-unsafe-regex": "off"
-        }
-      }
-    ]
+    }
   },
   "jest": {
     "restoreMocks": true,

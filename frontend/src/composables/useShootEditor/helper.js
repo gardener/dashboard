@@ -97,7 +97,7 @@ export class EditorCompletions {
     const cur = cm.getCursor()
 
     const { lineString, lineTokens } = this._getTokenLine(cm, cur)
-    const [, indent, firstArrayItem] = lineString.match(/^(\s*)(-\s)?(.*?)?$/) || []
+    const [, indent, firstArrayItem] = lineString.match(/^(\s*)(-\s)?(.*)$/) || []
     let extraIntent = ''
     if (firstArrayItem) {
       extraIntent = `${repeat(' ', this.arrayBulletIndent)}`
@@ -214,7 +214,7 @@ export class EditorCompletions {
     let token
     const { lineTokens, lineString } = this._getTokenLine(cm, cur)
     forEach(lineTokens, lineToken => {
-      const result = lineToken.string.match(/^(\s*)-\s(.*)?$/)
+      const result = lineToken.string.match(/^(\s*)-\s(.*)$/)
       if (result) {
         const indent = result[1]
         token = lineToken

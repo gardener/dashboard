@@ -44,10 +44,7 @@ import {
 
 const serviceAccountRegex = /^system:serviceaccount:([^:]+):([^:]+)$/
 const sizeRegex = /^(\d+)Gi$/
-const emailRegex = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
 const colorCodeRegex = /^#([a-f0-9]{6}|[a-f0-9]{3})$/i
-const magnitudeNumberSuffixRegex = /^(\d+(?:\.\d*)?)([kmbt]?)$/i
-const versionRegex = /^(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:\.\d+)*([-+].+)?$/
 
 const logger = useLogger()
 
@@ -169,7 +166,36 @@ export function parseSize (value) {
 }
 
 export function isEmail (value) {
-  return emailRegex.test(value)
+  if (typeof value !== 'string' || value.length > 320) {
+    return false
+  }
+
+  const parts = value.split('@')
+  if (parts.length !== 2) {
+    return false
+  }
+
+  const [local, domain] = parts
+  if (!/^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]{1,64}$/.test(local)) {
+    return false
+  }
+
+  const domainParts = domain.split('.')
+  if (domainParts.length < 2) {
+    return false
+  }
+  const lastIndex = domainParts.length - 1
+  const isValidPart = (part, index) => {
+    const minLength = index < lastIndex ? 1 : 2
+    return part.length < minLength || part.length > 63
+      ? false
+      : /^[a-zA-Z0-9-]*$/.test(part)
+  }
+  if (!domainParts.every(isValidPart)) {
+    return false
+  }
+
+  return true
 }
 
 export function gravatarUrlGeneric (username, size = 128) {
@@ -622,22 +648,38 @@ export function omitKeysWithSuffix (obj, suffix) {
 }
 
 export function parseNumberWithMagnitudeSuffix (abbreviatedNumber) {
-  const [, number, suffix] = magnitudeNumberSuffixRegex.exec(abbreviatedNumber) ?? []
-  if (!number) {
+  let number = abbreviatedNumber
+  let suffix = ''
+  if (/[kmbt]$/i.test(abbreviatedNumber)) {
+    suffix = abbreviatedNumber.slice(-1)
+    number = abbreviatedNumber.slice(0, -1)
+  }
+  number = Number(number)
+  if (isNaN(number)) {
     logger.error(`Failed to parse ${abbreviatedNumber} because it doesn't follow the required format: a number optionally with a decimal, followed by an optional magnitude suffix ('k', 'm', 'b', 't').`)
     return null
   }
 
   const suffixFactors = { k: 1e3, m: 1e6, b: 1e9, t: 1e12 }
   const factor = suffixFactors[suffix?.toLowerCase()] ?? 1
-  return Number(number) * factor
+  return number * factor
 }
 
 export function normalizeVersion (version) {
-  const [match, major, minor = '0', patch = '0', suffix = ''] = versionRegex.exec(version) ?? []
-  if (match) {
-    return [major, minor, patch].map(Number).join('.') + suffix
+  let suffix = ''
+
+  const index = version.search(/[+-]/)
+  if (index !== -1) {
+    suffix = version.substring(index)
+    version = version.substring(0, index)
   }
+
+  const parts = version.split('.')
+  if (!parts.every(part => /^\d+$/.test(part))) {
+    return
+  }
+  const [major, minor = '0', patch = '0'] = parts
+  return [major, minor, patch].map(Number).join('.') + suffix
 }
 
 export default {

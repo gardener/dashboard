@@ -7,37 +7,42 @@
 'use strict'
 
 const crypto = require('crypto')
+const { get, set } = require('lodash')
 
 const kOptions = Symbol('options')
 
 class SessionId extends URL {
   constructor (authority, options = {}) {
     super(createPath(options), authority)
-    this[kOptions] = options
+    this[kOptions] = options // eslint-disable-line security/detect-object-injection
   }
 
   getOptions () {
-    return this[kOptions]
+    return this[kOptions] // eslint-disable-line security/detect-object-injection
   }
 }
 
 function normalizeObject (object) {
   const normalizedObject = {}
   for (const key of Object.keys(object).sort()) {
-    const value = object[key]
+    const value = get(object, key)
+    let normalizedValue
     switch (typeof value) {
       case 'string':
       case 'number':
       case 'boolean':
-        normalizedObject[key] = value
+        normalizedValue = value
         break
       case 'object':
         if (value) {
-          normalizedObject[key] = normalizeObject(value)
+          normalizedValue = normalizeObject(value)
         }
         break
       case 'undefined':
         break
+    }
+    if (typeof normalizedValue !== 'undefined') {
+      set(normalizedObject, key, normalizedValue)
     }
   }
   return normalizedObject

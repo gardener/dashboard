@@ -4,12 +4,53 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-const timeWithOffsetRegex = /^(?:(\d{2}):?(\d{2}):?(\d{2})?)?(?:([+-])(\d{2}):?(\d{2}))?$/
+function splitIntoPairs (str) {
+  if (str.length % 2 !== 0) {
+    return null
+  }
+
+  const parts = []
+  for (let i = 0; i < str.length; i += 2) {
+    parts.push(str.slice(i, i + 2))
+  }
+
+  if (!parts.every(part => /^\d{2}$/.test(part))) {
+    return null
+  }
+
+  return parts
+}
 
 class TimeWithOffset {
-  constructor (timeString) {
-    const [ok, hours = '00', minutes = '00', , offsetSign = '+', offsetHours = '00', offsetMinutes = '00'] = timeWithOffsetRegex.exec(timeString) || []
-    this.valid = !!ok
+  constructor (value) {
+    let time = value
+    let offsetSign = '+'
+    let offset = '00:00'
+
+    const index = value.search(/[+-]/)
+    if (index !== -1) {
+      time = value.substring(0, index)
+      offsetSign = value[index]
+      offset = value.substring(index + 1)
+    }
+
+    const timeParts = splitIntoPairs(time.replaceAll(':', ''))
+    const [
+      hours = '00',
+      minutes = '00',
+    ] = Array.isArray(timeParts)
+      ? timeParts
+      : []
+
+    const offsetParts = splitIntoPairs(offset.replaceAll(':', ''))
+    const [
+      offsetHours = '00',
+      offsetMinutes = '00',
+    ] = Array.isArray(offsetParts)
+      ? offsetParts
+      : []
+
+    this.valid = !!(timeParts && offsetParts)
     Object.assign(this, {
       hours,
       minutes,
