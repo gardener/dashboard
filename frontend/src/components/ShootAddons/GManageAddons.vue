@@ -33,6 +33,14 @@ SPDX-License-Identifier: Apache-2.0
             {{ description }}
           </div>
         </div>
+        <v-tooltip
+          :disabled="!getDisabled(name)"
+          location="top"
+          activator="parent"
+        >
+          <span v-if="getDisabledForbidden(name)">Add-on cannot be disabled</span>
+          <span v-if="getDisabledPurpose()">Add-ons are only avaialble if cluster has purpose <code>evaluation</code></span>
+        </v-tooltip>
       </div>
     </v-row>
   </div>
@@ -53,11 +61,20 @@ const {
   workerless,
   getAddonEnabled,
   setAddonEnabled,
+  purpose,
 } = useShootContext()
 
-function getDisabled (name) {
+function getDisabledForbidden (name) {
   const { forbidDisable = false } = addonDefinitions.value[name]
   return !props.createMode && forbidDisable && getAddonEnabled(name)
+}
+
+function getDisabledPurpose () {
+  return purpose.value !== 'evaluation'
+}
+
+function getDisabled (name) {
+  return getDisabledForbidden(name) || getDisabledPurpose()
 }
 
 function getTextClass (name) {
