@@ -63,6 +63,17 @@ SPDX-License-Identifier: Apache-2.0
           @blur="v$.subscriptionId.$touch()"
         />
       </div>
+      <div v-if="isDNSSecret">
+        <v-select
+          v-model="azureCloud"
+          hint="AzurePublic is default. Choose AzureChina or AzureGovernment if you are using a different Azure cloud"
+          color="primary"
+          item-color="primary"
+          label="Azure Cloud"
+          :items="['AzurePublic', 'AzureChina', 'AzureGovernment']"
+          variant="underlined"
+        />
+      </div>
     </template>
     <template #help-slot>
       <div v-if="vendor==='azure'">
@@ -85,7 +96,7 @@ SPDX-License-Identifier: Apache-2.0
           </g-external-link> on how to manage your credentials and subscriptions.
         </p>
       </div>
-      <div v-if="vendor==='azure-dns' || vendor==='azure-private-dns'">
+      <div v-if="isDNSSecret">
         <p>
           Follow the steps as described in the Azure documentation to
           <g-external-link url="https://docs.microsoft.com/en-us/azure/dns/dns-sdk#create-a-service-principal-account">
@@ -140,6 +151,7 @@ export default {
       tenantId: undefined,
       subscriptionId: undefined,
       hideSecret: true,
+      azureCloud: 'AzurePublic',
     }
   },
   validations () {
@@ -176,6 +188,10 @@ export default {
         clientSecret: this.clientSecret,
         subscriptionID: this.subscriptionId,
         tenantID: this.tenantId,
+        ...(this.isDNSSecret
+          ? { AZURE_CLOUD: this.azureCloud }
+          : {}
+        ),
       }
     },
     isCreateMode () {
@@ -192,6 +208,9 @@ export default {
         return 'Azure Private DNS'
       }
       return undefined
+    },
+    isDNSSecret () {
+      return this.vendor === 'azure-dns' || this.vendor === 'azure-private-dns'
     },
   },
   methods: {
