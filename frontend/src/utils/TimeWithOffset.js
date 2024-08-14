@@ -30,7 +30,7 @@ class TimeWithOffset {
     const index = value.search(/[+-]/)
     if (index !== -1) {
       time = value.substring(0, index)
-      offsetSign = value[index]
+      offsetSign = value[index] // eslint-disable-line security/detect-object-injection
       offset = value.substring(index + 1)
     }
 

@@ -7,7 +7,11 @@
 import { helpers } from '@vuelidate/validators'
 import { Base64 } from 'js-base64'
 
-import { includes } from '@/lodash'
+import {
+  get,
+  set,
+  includes,
+} from '@/lodash'
 
 const { withParams, regex, withMessage } = helpers
 
@@ -68,7 +72,7 @@ const includesIfAvailable = (key, reference) => withMessage(`Value of property '
   withParams(
     { type: 'includesIfAvailable', key },
     function includesIfAvailable (selectedKeys) {
-      const availableKeys = this[reference]
+      const availableKeys = get(this, [reference])
       return includes(availableKeys, key) ? includes(selectedKeys, key) : true
     },
   ))
@@ -78,7 +82,7 @@ const withFieldName = (fieldName, validators) => {
     if (typeof fieldName === 'function') {
       fieldName = fieldName.call(this)
     }
-    validators[key] = withParams({ fieldName }, validator)
+    set(validators, [key], withParams({ fieldName }, validator))
   }
   return validators
 }

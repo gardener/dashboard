@@ -24,7 +24,7 @@ export function normalizeObject (obj) {
     obj = Object.fromEntries(obj)
   }
   return Object.keys(obj).sort().reduce((accumulator, key) => {
-    accumulator[key] = normalizeValue(obj[key])
+    accumulator[key] = normalizeValue(obj[key]) // eslint-disable-line security/detect-object-injection
     return accumulator
   }, {})
 }

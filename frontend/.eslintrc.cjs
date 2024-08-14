@@ -101,7 +101,6 @@ module.exports = {
     'vue/no-mutating-props': ['error', { shallowOnly: true }],
     'vue/require-default-prop': 'off',
     'vue/order-in-components': 'error',
-    'security/detect-object-injection': 'off',
   },
   overrides: [
     {

@@ -20,6 +20,7 @@ import {
   upperFirst,
   flatMap,
   get,
+  unset,
   forIn,
   isEqual,
   first,
@@ -143,7 +144,7 @@ export class EditorCompletions {
       }
       if (Array.isArray(type)) {
         return type
-          .map((type, i) => formatTypeText(type, format[i]))
+          .map((type, i) => formatTypeText(type, format[i])) // eslint-disable-line security/detect-object-injection
           .join(' | ')
       }
       return formatTypeText(type, format)
@@ -380,7 +381,7 @@ export class EditorCompletions {
           this.logger.warn('Unsupported schema array length, %s has length %i at %s', propertyName, propertyValue.length, parentPropertyName)
         }
 
-        delete properties[propertyName]
+        unset(properties, [propertyName])
       } else if (typeof propertyValue === 'object') {
         this._resolveSchemaArrays(propertyValue, propertyName)
       }

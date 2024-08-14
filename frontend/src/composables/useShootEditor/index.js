@@ -32,6 +32,7 @@ import {
 
 import {
   get,
+  set,
   omit,
   isEqual,
 } from '@/lodash'
@@ -97,7 +98,8 @@ export function useShootEditor (initialValue, options = {}) {
     }
     const extraKeys = {}
     for (const [key, value] of Object.entries(originalExtraKeys)) {
-      extraKeys[localStorageStore.editorShortcuts[key] ?? key] = value
+      const keyCode = get(localStorageStore.editorShortcuts, [key], key)
+      set(extraKeys, [keyCode], value)
     }
     return extraKeys
   }

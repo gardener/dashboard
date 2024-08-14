@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from './uuid'
 import moment from './moment'
 
 import {
+  get,
   isEmpty,
   replace,
   split,
@@ -20,7 +21,7 @@ import {
   toUpper,
 } from '@/lodash'
 
-function parseCronExpression (value) {
+export function parseCronExpression (value) {
   const [minute, hour, dayOfMonth, month, dayOfWeek] = toUpper(value).split(/\s/)
   if (
     !/^\d{1,2}$/.test(minute) ||
@@ -44,7 +45,7 @@ function parseCronExpression (value) {
     7: 0,
     '*': '1,2,3,4,5,6,0',
   }
-  let weekdays = replace(dayOfWeek, /[7*]|MON|TUE|WED|THU|FRI|SAT|SUN/g, weekday => intVals[weekday])
+  let weekdays = replace(dayOfWeek, /([7*]|MON|TUE|WED|THU|FRI|SAT|SUN)/g, weekday => get(intVals, [weekday]))
 
   // convert to array
   weekdays = split(weekdays, ',')

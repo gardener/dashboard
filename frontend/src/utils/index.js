@@ -24,6 +24,7 @@ import {
   capitalize,
   replace,
   get,
+  set,
   head,
   map,
   toLower,
@@ -595,14 +596,14 @@ const allowedSemverDiffs = {
 
 export function machineImageHasUpdate (machineImage, machineImages) {
   let { updateStrategy } = machineImage
-  if (!allowedSemverDiffs[updateStrategy]) {
+  if (!Object.keys(allowedSemverDiffs).includes(updateStrategy)) {
     updateStrategy = 'major'
   }
   return some(machineImages, ({ version, vendorName, isSupported }) => {
     return isSupported &&
       machineImage.vendorName === vendorName &&
       semver.gt(version, machineImage.version) &&
-      allowedSemverDiffs[updateStrategy].includes(semver.diff(version, machineImage.version))
+      get(allowedSemverDiffs, [updateStrategy], []).includes(semver.diff(version, machineImage.version))
   })
 }
 
@@ -620,8 +621,12 @@ export function sortedRoleDisplayNames (roleNames) {
 
 export function mapTableHeader (headers, valueKey) {
   const obj = {}
-  for (const { key, [valueKey]: value } of headers) {
-    obj[key] = value
+  for (const header of headers) {
+    const {
+      key,
+      [valueKey]: value,
+    } = header
+    set(obj, [key], value)
   }
   return obj
 }

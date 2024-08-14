@@ -668,7 +668,7 @@ export function createShootContextComposable (options = {}) {
     const defaultAddons = {}
     if (!providerState.workerless) {
       for (const { name, enabled } of visibleAddonDefinitionList.value) {
-        defaultAddons[name] = { enabled }
+        set(defaultAddons, [name], { enabled })
       }
     }
     addons.value = defaultAddons
