@@ -81,13 +81,21 @@ function getType (value) {
   return 'secondary'
 }
 
+function getDuration (value, type) {
+  if (value.duration) {
+    return value.duration
+  }
+  return type === 'success'
+    ? 3000
+    : props.duration
+}
+
 // watches
 watch(alert, value => {
   if (value) {
     const type = getType(value)
-    const duration = type === 'success'
-      ? 3000
-      : props.duration
+    const duration = getDuration(value, type)
+
     const options = {
       group: props.group,
       type,

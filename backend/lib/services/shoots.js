@@ -77,7 +77,7 @@ exports.create = async function ({ user, namespace, body }) {
   }
 
   body = _.merge({}, body, { metadata: { namespace, annotations } })
-  return client['core.gardener.cloud'].shoots.create(namespace, body)
+  return client['core.gardener.cloud'].shoots.create(namespace, body, undefined, true)
 }
 
 async function read ({ user, namespace, name }) {
@@ -106,7 +106,7 @@ exports.replace = async function ({ user, namespace, name, body }) {
   // compose new body
   body = { kind, apiVersion, metadata, spec, status }
   // replace
-  return client['core.gardener.cloud'].shoots.update(namespace, name, body)
+  return client['core.gardener.cloud'].shoots.update(namespace, name, body, undefined, true)
 }
 
 exports.replaceVersion = async function ({ user, namespace, name, body }) {

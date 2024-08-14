@@ -34,7 +34,7 @@ export const useAppStore = defineStore('app', () => {
     alert.value = value
   }
 
-  function setAlertWithType (type, value) {
+  function setAlertWithType (type, value, persistent = false) {
     const alert = {
       type,
     }
@@ -51,7 +51,14 @@ export const useAppStore = defineStore('app', () => {
     } else {
       alert.message = ''
     }
+    if (persistent) {
+      alert.duration = -1
+    }
     setAlert(alert)
+  }
+
+  function setPersistentError (value) {
+    setAlertWithType('error', value, true)
   }
 
   function setError (value) {
@@ -60,6 +67,10 @@ export const useAppStore = defineStore('app', () => {
 
   function setSuccess (value) {
     setAlertWithType('success', value)
+  }
+
+  function setPersistentWarning (value) {
+    setAlertWithType('warning', value, true)
   }
 
   function setRouterError (value) {
@@ -81,6 +92,8 @@ export const useAppStore = defineStore('app', () => {
     updateSplitpaneResize,
     setAlert,
     setError,
+    setPersistentError,
+    setPersistentWarning,
     setSuccess,
     setRouterError,
   }

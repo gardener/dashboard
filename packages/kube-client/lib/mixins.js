@@ -195,17 +195,17 @@ NamespaceScoped.Observable = superclass => class extends superclass {
 }
 
 ClusterScoped.Creatable = superclass => class extends superclass {
-  create (body, options) {
+  create (body, options, returnResponse) {
     assertBodyObject(body)
     assertOptions(options)
     const url = clusterScopedUrl(this.constructor.names)
     const searchParams = new URLSearchParams(options)
-    return this[http.request](url, { method: 'post', searchParams, json: body })
+    return this[http.request](url, { method: 'post', searchParams, json: body, returnResponse })
   }
 }
 
 NamespaceScoped.Creatable = superclass => class extends superclass {
-  create (namespace, body, options) {
+  create (namespace, body, options, returnResponse) {
     let name
     if (Array.isArray(namespace)) {
       name = namespace[1]
@@ -218,18 +218,18 @@ NamespaceScoped.Creatable = superclass => class extends superclass {
     assertOptions(options)
     const url = namespaceScopedUrl(this.constructor.names, namespace, name)
     const searchParams = new URLSearchParams(options)
-    return this[http.request](url, { method: 'post', searchParams, json: body })
+    return this[http.request](url, { method: 'post', searchParams, json: body, returnResponse })
   }
 }
 
 ClusterScoped.Writable = superclass => class extends ClusterScoped.Creatable(superclass) {
-  update (name, body, options) {
+  update (name, body, options, returnResponse) {
     assertName(name)
     assertBodyObject(body)
     assertOptions(options)
     const url = clusterScopedUrl(this.constructor.names, name)
     const searchParams = new URLSearchParams(options)
-    return this[http.request](url, { method: 'put', searchParams, json: body })
+    return this[http.request](url, { method: 'put', searchParams, json: body, returnResponse })
   }
 
   mergePatch (name, body, options) {
@@ -276,14 +276,15 @@ ClusterScoped.Writable = superclass => class extends ClusterScoped.Creatable(sup
 }
 
 NamespaceScoped.Writable = superclass => class extends NamespaceScoped.Creatable(superclass) {
-  update (namespace, name, body, options) {
+  update (namespace, name, body, options, returnResponse) {
     assertNamespace(namespace)
     assertName(name)
     assertBodyObject(body)
     assertOptions(options)
     const url = namespaceScopedUrl(this.constructor.names, namespace, name)
     const searchParams = new URLSearchParams(options)
-    return this[http.request](url, { method: 'put', searchParams, json: body })
+
+    return this[http.request](url, { method: 'put', searchParams, json: body, returnResponse })
   }
 
   mergePatch (namespace, name, body, options) {

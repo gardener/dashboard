@@ -161,7 +161,7 @@ export default {
   },
   methods: {
     ...mapActions(useAppStore, [
-      'setError',
+      'setPersistentError',
     ]),
     async createAdminKubeconfig () {
       try {
@@ -181,7 +181,7 @@ export default {
         const errorDetails = errorDetailsFromError(err)
         this.logger.error(errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
 
-        this.setError(err)
+        this.setPersistentError(err)
 
         return false
       }

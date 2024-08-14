@@ -72,7 +72,7 @@ export const useMemberStore = defineStore('member', () => {
       appStore.setSuccess('Service Account has been reset')
       list.value = response.data
     } catch (err) {
-      appStore.setError({
+      appStore.setPersistentError({
         message: `Failed to reset Service Account: ${err.message}`,
       })
     }

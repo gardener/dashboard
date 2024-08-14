@@ -44,6 +44,8 @@ import {
 } from 'vue'
 import { onBeforeRouteLeave } from 'vue-router'
 
+import { useAppStore } from '@/store/app'
+
 import GShootEditor from '@/components/GShootEditor'
 import GConfirmDialog from '@/components/dialogs/GConfirmDialog'
 import GMessage from '@/components/GMessage'
@@ -60,6 +62,7 @@ import {
 
 const api = inject('api')
 const logger = inject('logger')
+const appStore = useAppStore()
 
 const injectionKey = 'shoot-editor'
 const confirmDialog = ref(null)
@@ -107,11 +110,17 @@ async function save () {
     }
 
     const shootResource = getEditorValue()
-    await api.replaceShoot({
+    const { data: res } = await api.replaceShoot({
       namespace: shootNamespace.value,
       name: shootName.value,
       data: pick(shootResource, ['spec', 'metadata.labels', 'metadata.annotations']),
     })
+    if (res.headers.warning) {
+      appStore.setPersistentWarning({
+        message: res.headers.warning,
+      })
+    }
+
     clearDocumentHistory()
   } catch (err) {
     errorMessage.value = 'Failed to save changes.'

@@ -289,7 +289,7 @@ class Client {
     return response
   }
 
-  async request (path, { headers = {}, body, json, ...options } = {}) {
+  async request (path, { headers = {}, body, json, returnResponse = false, ...options } = {}) {
     headers = this.constructor.normalizeHeaders(headers)
     if (json) {
       body = JSON.stringify(json)
@@ -320,6 +320,11 @@ class Client {
         body
       })
     }
+
+    if (returnResponse) {
+      return response
+    }
+
     return body
   }
 
