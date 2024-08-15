@@ -179,7 +179,7 @@ function filterBySelectors (selectors) {
   return item => {
     const labels = item.metadata.labels ?? {}
     for (const { op, key, value } of selectors) {
-      const labelValue = _.get(labels, key, '')
+      const labelValue = _.get(labels, [key], '')
       switch (op) {
         case NOT_EXISTS: {
           if (key in labels) {

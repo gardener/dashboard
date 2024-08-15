@@ -40,33 +40,33 @@ router.route('/')
 
       const { method, params: body } = req.body
 
-      let func
+      let terminalOperation
       switch (method) {
         case 'create':
-          func = terminals.create
+          terminalOperation = terminals.create
           break
         case 'fetch':
-          func = terminals.fetch
+          terminalOperation = terminals.fetch
           break
         case 'list':
-          func = terminals.list
+          terminalOperation = terminals.list
           break
         case 'config':
-          func = terminals.config
+          terminalOperation = terminals.config
           break
         case 'remove':
-          func = terminals.remove
+          terminalOperation = terminals.remove
           break
         case 'heartbeat':
-          func = terminals.heartbeat
+          terminalOperation = terminals.heartbeat
           break
         case 'listProjectTerminalShortcuts':
-          func = terminals.listProjectTerminalShortcuts
+          terminalOperation = terminals.listProjectTerminalShortcuts
           break
         default:
           throw new UnprocessableEntity(`${method} not allowed for terminals`)
       }
-      res.send(await func({ user, body }))
+      res.send(await terminalOperation.call(terminals, { user, body }))
     } catch (err) {
       next(err)
     }

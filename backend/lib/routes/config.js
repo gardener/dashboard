@@ -41,9 +41,9 @@ router.route('/')
 function sanitizeFrontendConfig (frontendConfig) {
   const converter = markdown.createConverter()
   const convertAndSanitize = (obj, key) => {
-    const value = _.get(obj, key)
+    const value = obj[key] // eslint-disable-line security/detect-object-injection
     if (value) {
-      _.set(obj, key, converter.makeSanitizedHtml(value))
+      obj[key] = converter.makeSanitizedHtml(value) // eslint-disable-line security/detect-object-injection
     }
   }
 
