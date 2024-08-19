@@ -2463,14 +2463,14 @@ __metadata:
   linkType: hard
 
 "@vueuse/router@npm:^11.0.0-0":
-  version: 11.0.0-beta.2
-  resolution: "@vueuse/router@npm:11.0.0-beta.2"
+  version: 11.0.0
+  resolution: "@vueuse/router@npm:11.0.0"
   dependencies:
-    "@vueuse/shared": "npm:11.0.0-beta.2"
-    vue-demi: "npm:>=0.14.8"
+    "@vueuse/shared": "npm:11.0.0"
+    vue-demi: "npm:>=0.14.10"
   peerDependencies:
     vue-router: ">=4.0.0-rc.1"
-  checksum: 10c0/ca4e01de2a61a332d568b115f677059a398c70327a91d2943bcf54e6b053d0924930d58cc9638fff3dd8bfb629bf43fad12ac1a7019ec4c343566bb62c46a5f9
+  checksum: 10c0/0925a42b3f57c8c41352d18cf1227198592acae0353c60029518c29a77f6f89ceeca85e447897dd19322c58520f5ee417017de7e1eb86b0bc453005b71f3e6e7
   languageName: node
   linkType: hard
 
@@ -2480,15 +2480,6 @@ __metadata:
   dependencies:
     vue-demi: "npm:>=0.14.10"
   checksum: 10c0/a13af53c17bd98c2700e3849e7f9c2aad0ff3639e30416a427cdc34e1d21d0d59bb1e486f08b90060b73ab555d24139b563f6c15fa7a272df159e98b561b5b6c
-  languageName: node
-  linkType: hard
-
-"@vueuse/shared@npm:11.0.0-beta.2":
-  version: 11.0.0-beta.2
-  resolution: "@vueuse/shared@npm:11.0.0-beta.2"
-  dependencies:
-    vue-demi: "npm:>=0.14.8"
-  checksum: 10c0/b01eda12a508bbbdf02517be1439ffd3cc005199f9790bdf71cb731e0c15e13fb5fc8614385fcf9cef6390637b8f938aca01368fa9bcd5184832da62114e147b
   languageName: node
   linkType: hard
 
@@ -9602,22 +9593,6 @@ __metadata:
     vue-demi-fix: bin/vue-demi-fix.js
     vue-demi-switch: bin/vue-demi-switch.js
   checksum: 10c0/a9ed8712fa36d01bc13c39757f95f30cebf42d557b99e94bff86d8660c81f2911b41220f7affc023d1ffcc19e13999e4a83019991e264787cca2c616e83aea48
-  languageName: node
-  linkType: hard
-
-"vue-demi@npm:>=0.14.8":
-  version: 0.14.8
-  resolution: "vue-demi@npm:0.14.8"
-  peerDependencies:
-    "@vue/composition-api": ^1.0.0-rc.1
-    vue: ^3.0.0-0 || ^2.6.0
-  peerDependenciesMeta:
-    "@vue/composition-api":
-      optional: true
-  bin:
-    vue-demi-fix: bin/vue-demi-fix.js
-    vue-demi-switch: bin/vue-demi-switch.js
-  checksum: 10c0/71eac43330f36861f541b4bce9232c2668b8e921d1592b20d42b06f2e2ee023c680e9266276921f5c903a6fb4d15880e89c1f7cbbb241eefa5c4954437d17c77
   languageName: node
   linkType: hard
 
