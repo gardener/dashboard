@@ -2394,19 +2394,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vueuse/core@npm:11.0.0-beta.2":
-  version: 11.0.0-beta.2
-  resolution: "@vueuse/core@npm:11.0.0-beta.2"
-  dependencies:
-    "@types/web-bluetooth": "npm:^0.0.20"
-    "@vueuse/metadata": "npm:11.0.0-beta.2"
-    "@vueuse/shared": "npm:11.0.0-beta.2"
-    vue-demi: "npm:>=0.14.8"
-  checksum: 10c0/75c61a660aec1211910fa56f74e2461ba512a40af8c2d8b5f2569704dae18f5bd268a042aa45fee551bb55fbe2e15eb90c70d250551f8b9c5ae767262fa53f39
-  languageName: node
-  linkType: hard
-
-"@vueuse/core@npm:^11.0.0-0":
+"@vueuse/core@npm:11.0.0, @vueuse/core@npm:^11.0.0-0":
   version: 11.0.0
   resolution: "@vueuse/core@npm:11.0.0"
   dependencies:
@@ -2419,12 +2407,12 @@ __metadata:
   linkType: hard
 
 "@vueuse/integrations@npm:^11.0.0-0":
-  version: 11.0.0-beta.2
-  resolution: "@vueuse/integrations@npm:11.0.0-beta.2"
+  version: 11.0.0
+  resolution: "@vueuse/integrations@npm:11.0.0"
   dependencies:
-    "@vueuse/core": "npm:11.0.0-beta.2"
-    "@vueuse/shared": "npm:11.0.0-beta.2"
-    vue-demi: "npm:>=0.14.8"
+    "@vueuse/core": "npm:11.0.0"
+    "@vueuse/shared": "npm:11.0.0"
+    vue-demi: "npm:>=0.14.10"
   peerDependencies:
     async-validator: ^4
     axios: ^1
@@ -2463,7 +2451,7 @@ __metadata:
       optional: true
     universal-cookie:
       optional: true
-  checksum: 10c0/71eb94fafc62e99f2293bb264dd1f9a67af8cc0c7534efa75242769fbd3d0c4421937be4cbacd2df24f7d5e569e1a0bfdc8f115508e4a6aa57cab006bedf479f
+  checksum: 10c0/ef2478716bc08760c04a5e0cde349d27949620ce54da9e053ecae3d1e13ee982b8b715dee414bc55c4b53c772555be0b9567c63a3812c40102e16e237f9300d1
   languageName: node
   linkType: hard
 
@@ -2471,13 +2459,6 @@ __metadata:
   version: 11.0.0
   resolution: "@vueuse/metadata@npm:11.0.0"
   checksum: 10c0/e729d729e1bbf2366e8571299aa3780585c5d7bd02bbdf55a245f282893b847743fab4d121cddfb62ee1df1a5220fb41266c6ce26d0fa9db741be51b5bfe0543
-  languageName: node
-  linkType: hard
-
-"@vueuse/metadata@npm:11.0.0-beta.2":
-  version: 11.0.0-beta.2
-  resolution: "@vueuse/metadata@npm:11.0.0-beta.2"
-  checksum: 10c0/3739559245c2e2993572ddddbdc121a82e9c8f1f152463b1d24bbbe7cdcdb761277682fc6f3b58016e3d9250648341442bf8938e6da0efac5028aee5a307e4e3
   languageName: node
   linkType: hard
 
