@@ -9473,8 +9473,8 @@ __metadata:
   linkType: hard
 
 "vite-plugin-vuetify@npm:^2.0.3":
-  version: 2.0.3
-  resolution: "vite-plugin-vuetify@npm:2.0.3"
+  version: 2.0.4
+  resolution: "vite-plugin-vuetify@npm:2.0.4"
   dependencies:
     "@vuetify/loader-shared": "npm:^2.0.3"
     debug: "npm:^4.3.3"
@@ -9483,7 +9483,7 @@ __metadata:
     vite: ">=5"
     vue: ^3.0.0
     vuetify: ^3.0.0
-  checksum: 10c0/5af9d45e92f88526afddd2fc3dd629ef005dc1d816522e109bd91f2fcb652b5e0fc9a31979b6f4110bdd20c570ba5178ba6146d28515edb49221e19011e583f6
+  checksum: 10c0/23c03bfcb9997e4aeeef7a5ed64f9849189bf1a5599ab228cd9c49c87ef7867f0abc51f3c5a93cf261288b10d3947d529c5399e1d4f720879d8ed18e6f1419d4
   languageName: node
   linkType: hard
 
