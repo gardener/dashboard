@@ -2482,14 +2482,14 @@ __metadata:
   linkType: hard
 
 "@vueuse/router@npm:^11.0.0-0":
-  version: 11.0.0
-  resolution: "@vueuse/router@npm:11.0.0"
+  version: 11.0.1
+  resolution: "@vueuse/router@npm:11.0.1"
   dependencies:
-    "@vueuse/shared": "npm:11.0.0"
+    "@vueuse/shared": "npm:11.0.1"
     vue-demi: "npm:>=0.14.10"
   peerDependencies:
     vue-router: ">=4.0.0-rc.1"
-  checksum: 10c0/0925a42b3f57c8c41352d18cf1227198592acae0353c60029518c29a77f6f89ceeca85e447897dd19322c58520f5ee417017de7e1eb86b0bc453005b71f3e6e7
+  checksum: 10c0/a7437acd318006e577d29fcf24980ac500f4bb9dade6c3ae0d7e50c65261bd124e81a50cee37e909466c728d7660ea6c32dbde1b254c60d96138f11041182442
   languageName: node
   linkType: hard
 
