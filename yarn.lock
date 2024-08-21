@@ -2394,19 +2394,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vueuse/core@npm:11.0.0":
-  version: 11.0.0
-  resolution: "@vueuse/core@npm:11.0.0"
-  dependencies:
-    "@types/web-bluetooth": "npm:^0.0.20"
-    "@vueuse/metadata": "npm:11.0.0"
-    "@vueuse/shared": "npm:11.0.0"
-    vue-demi: "npm:>=0.14.10"
-  checksum: 10c0/82154d0217b9f025a12f88fc04b70094027fac2dfcf032600e4c62aa36e97dde7f8867c9388714883ee41c479e3034cbb1dd5e32fdd5d40233124b35b2de090a
-  languageName: node
-  linkType: hard
-
-"@vueuse/core@npm:^11.0.0-0":
+"@vueuse/core@npm:11.0.1, @vueuse/core@npm:^11.0.0-0":
   version: 11.0.1
   resolution: "@vueuse/core@npm:11.0.1"
   dependencies:
@@ -2419,11 +2407,11 @@ __metadata:
   linkType: hard
 
 "@vueuse/integrations@npm:^11.0.0-0":
-  version: 11.0.0
-  resolution: "@vueuse/integrations@npm:11.0.0"
+  version: 11.0.1
+  resolution: "@vueuse/integrations@npm:11.0.1"
   dependencies:
-    "@vueuse/core": "npm:11.0.0"
-    "@vueuse/shared": "npm:11.0.0"
+    "@vueuse/core": "npm:11.0.1"
+    "@vueuse/shared": "npm:11.0.1"
     vue-demi: "npm:>=0.14.10"
   peerDependencies:
     async-validator: ^4
@@ -2463,14 +2451,7 @@ __metadata:
       optional: true
     universal-cookie:
       optional: true
-  checksum: 10c0/ef2478716bc08760c04a5e0cde349d27949620ce54da9e053ecae3d1e13ee982b8b715dee414bc55c4b53c772555be0b9567c63a3812c40102e16e237f9300d1
-  languageName: node
-  linkType: hard
-
-"@vueuse/metadata@npm:11.0.0":
-  version: 11.0.0
-  resolution: "@vueuse/metadata@npm:11.0.0"
-  checksum: 10c0/e729d729e1bbf2366e8571299aa3780585c5d7bd02bbdf55a245f282893b847743fab4d121cddfb62ee1df1a5220fb41266c6ce26d0fa9db741be51b5bfe0543
+  checksum: 10c0/301b00148f14284ecf66832cf2a23d064660bfcc8b3f49b1ab1820b51cde3b87e1d7c8a291d7339c68ec9f95a8144a3666553b0b140f46cdab29a423fbe38033
   languageName: node
   linkType: hard
 
@@ -2490,15 +2471,6 @@ __metadata:
   peerDependencies:
     vue-router: ">=4.0.0-rc.1"
   checksum: 10c0/a7437acd318006e577d29fcf24980ac500f4bb9dade6c3ae0d7e50c65261bd124e81a50cee37e909466c728d7660ea6c32dbde1b254c60d96138f11041182442
-  languageName: node
-  linkType: hard
-
-"@vueuse/shared@npm:11.0.0":
-  version: 11.0.0
-  resolution: "@vueuse/shared@npm:11.0.0"
-  dependencies:
-    vue-demi: "npm:>=0.14.10"
-  checksum: 10c0/a13af53c17bd98c2700e3849e7f9c2aad0ff3639e30416a427cdc34e1d21d0d59bb1e486f08b90060b73ab555d24139b563f6c15fa7a272df159e98b561b5b6c
   languageName: node
   linkType: hard
 
