@@ -23,6 +23,7 @@ import {
   useDocumentVisibility,
   useTitle,
 } from '@vueuse/core'
+import { useRouteQuery } from '@vueuse/router'
 import { useRoute } from 'vue-router'
 
 import { useConfigStore } from '@/store/config'
@@ -57,6 +58,8 @@ async function setCustomColors () {
 setCustomColors()
 
 const colorScheme = toRef(localStorageStore, 'colorScheme')
+const sapTheme = useRouteQuery('sap-theme')
+
 const { system } = useColorMode({
   storageRef: colorScheme,
   onChanged (value) {
@@ -78,6 +81,14 @@ onKeyStroke('Escape', e => {
 watch(visibility, (current, previous) => {
   if (current === 'visible' && previous === 'hidden') {
     shootStore.invokeSubscriptionEventHandler()
+  }
+})
+
+watch(sapTheme, value => {
+  if (value && typeof value === 'string') {
+    theme.global.name.value = colorScheme.value = value.endsWith('dark')
+      ? 'dark'
+      : 'light'
   }
 })
 
