@@ -1342,7 +1342,7 @@ const RAW_RUNTIME_STATE =
           ["@xterm/xterm", "npm:5.5.0"],\
           ["ansi-html", "npm:0.0.9"],\
           ["codemirror", "npm:5.65.17"],\
-          ["dayjs", "npm:1.11.12"],\
+          ["dayjs", "npm:1.11.13"],\
           ["downloadjs", "npm:1.4.7"],\
           ["eslint", "npm:8.57.0"],\
           ["eslint-config-standard", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:17.1.0"],\
@@ -4943,10 +4943,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["dayjs", [\
-      ["npm:1.11.12", {\
-        "packageLocation": "./.yarn/cache/dayjs-npm-1.11.12-ce23245b6e-9673d37f3f.zip/node_modules/dayjs/",\
+      ["npm:1.11.13", {\
+        "packageLocation": "./.yarn/cache/dayjs-npm-1.11.13-d478bb9479-a3caf6ac83.zip/node_modules/dayjs/",\
         "packageDependencies": [\
-          ["dayjs", "npm:1.11.12"]\
+          ["dayjs", "npm:1.11.13"]\
         ],\
         "linkType": "HARD"\
       }]\
