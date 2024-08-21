@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-card class="mt-4">
           <g-toolbar title="Global" />
           <g-list>
-            <g-list-item>
+            <g-list-item v-if="!sapTheme">
               <template #prepend>
                 <v-icon color="primary">
                   mdi-theme-light-dark
@@ -440,6 +440,7 @@ import {
   useRoute,
   useRouter,
 } from 'vue-router'
+import { useRouteQuery } from '@vueuse/router'
 
 import { useAuthzStore } from '@/store/authz'
 import { useConfigStore } from '@/store/config'
@@ -452,6 +453,7 @@ import {
 } from '@/composables/useShootListFilters'
 
 const localStorageStore = useLocalStorageStore()
+const sapTheme = useRouteQuery('sap-theme')
 const allProjectsDialog = ref(false)
 const showIgnoredTicketLabels = ref(false)
 const defaultClusterViewSettingsItem = ref()
