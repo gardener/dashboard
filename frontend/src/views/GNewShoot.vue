@@ -192,6 +192,13 @@ export default {
 
     return next()
   },
+  async beforeRouteUpdate (to, from, next) {
+    if (!this.isShootCreated && this.isShootDirty && !await this.confirmNavigation()) {
+      return next(false)
+    }
+
+    return next()
+  },
   setup () {
     const {
       shootNamespace,

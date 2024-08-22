@@ -12,6 +12,7 @@ import {
 } from 'vue-router'
 
 import { useAppStore } from '@/store/app'
+import { useAuthzStore } from '@/store/authz'
 
 import { useLogger } from '@/composables/useLogger'
 
@@ -26,6 +27,7 @@ const zeroPoint = { left: 0, top: 0 }
 export function createRouter () {
   const logger = useLogger()
   const appStore = useAppStore()
+  const authzStore = useAuthzStore()
 
   const router = createVueRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -52,6 +54,10 @@ export function createRouter () {
       } else {
         logger.info('Navigation failure: %s', failure)
       }
+
+      // Reset namespace if navigation failed
+      const namespace = from.params.namespace ?? from.query.namespace
+      authzStore.fetchRules(namespace)
     }
   })
 
