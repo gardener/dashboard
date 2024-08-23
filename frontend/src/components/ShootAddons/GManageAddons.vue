@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0
           activator="parent"
         >
           <span v-if="getDisabledForbidden(name)">Add-on cannot be disabled</span>
-          <span v-if="getDisabledPurpose()">Add-ons are only avaialble if cluster has purpose <code>evaluation</code></span>
+          <span v-if="getDisabledPurpose()">Add-ons are only available if cluster has purpose <code>evaluation</code></span>
         </v-tooltip>
       </div>
     </v-row>
