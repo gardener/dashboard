@@ -2394,19 +2394,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vueuse/core@npm:11.0.1":
-  version: 11.0.1
-  resolution: "@vueuse/core@npm:11.0.1"
-  dependencies:
-    "@types/web-bluetooth": "npm:^0.0.20"
-    "@vueuse/metadata": "npm:11.0.1"
-    "@vueuse/shared": "npm:11.0.1"
-    vue-demi: "npm:>=0.14.10"
-  checksum: 10c0/8bfc02a240a9b11fe63253f54d4d78869280fdf1d2d6562aa56d4b39c7faf374eebc2b766232f1cfac085c0a5d0b2367bfd085ccebfb804a88c622c709368421
-  languageName: node
-  linkType: hard
-
-"@vueuse/core@npm:^11.0.0-0":
+"@vueuse/core@npm:11.0.3, @vueuse/core@npm:^11.0.0-0":
   version: 11.0.3
   resolution: "@vueuse/core@npm:11.0.3"
   dependencies:
@@ -2419,11 +2407,11 @@ __metadata:
   linkType: hard
 
 "@vueuse/integrations@npm:^11.0.0-0":
-  version: 11.0.1
-  resolution: "@vueuse/integrations@npm:11.0.1"
+  version: 11.0.3
+  resolution: "@vueuse/integrations@npm:11.0.3"
   dependencies:
-    "@vueuse/core": "npm:11.0.1"
-    "@vueuse/shared": "npm:11.0.1"
+    "@vueuse/core": "npm:11.0.3"
+    "@vueuse/shared": "npm:11.0.3"
     vue-demi: "npm:>=0.14.10"
   peerDependencies:
     async-validator: ^4
@@ -2463,14 +2451,7 @@ __metadata:
       optional: true
     universal-cookie:
       optional: true
-  checksum: 10c0/301b00148f14284ecf66832cf2a23d064660bfcc8b3f49b1ab1820b51cde3b87e1d7c8a291d7339c68ec9f95a8144a3666553b0b140f46cdab29a423fbe38033
-  languageName: node
-  linkType: hard
-
-"@vueuse/metadata@npm:11.0.1":
-  version: 11.0.1
-  resolution: "@vueuse/metadata@npm:11.0.1"
-  checksum: 10c0/85ca84dc8d7687925e49161dac14edefb7361816aec48525d0d31e5ec9c9fce74a3e50e383ec39f3d093eb508aa6e2d7bfcd03c71c3cef3d8e30e696292258e3
+  checksum: 10c0/1b0602dc7cb37d3630ea92ee1db612b689e441604a5a2e53d270d6ad5b810f59771f4caad59c75a4b38b5054ddff455a54e5bd5c8c3d784b2f86df2487f51c2e
   languageName: node
   linkType: hard
 
