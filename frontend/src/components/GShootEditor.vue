@@ -221,6 +221,7 @@ const containerStyles = computed(() => {
   return {
     flex: '1 1 auto',
     minHeight: `${lineHeight.value * 3}px`,
+    overflow: 'scroll',
   }
 })
 
@@ -371,4 +372,10 @@ onBeforeUnmount(() => {
     transition: max-height 1.5s;
     max-height: 100vh;
   }
+
+  .cm-gutterElement {
+    user-select: none;
+    cursor: pointer;
+  }
+
 </style>

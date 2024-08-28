@@ -4,6 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import { EditorView } from '@codemirror/view'
+
 import { useLogger } from '@/composables/useLogger'
 
 import {
@@ -26,8 +28,7 @@ import {
 } from '@/lodash'
 
 export async function createEditor (...args) {
-  const { default: CodeMirror } = await import('./codemirror')
-  return CodeMirror(...args)
+  return new EditorView(...args)
 }
 
 export class EditorCompletions {

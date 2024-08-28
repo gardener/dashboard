@@ -16,14 +16,45 @@ import {
 import { computedAsync } from '@vueuse/core'
 import { useTheme } from 'vuetify'
 import yaml from 'js-yaml'
+import {
+  EditorView,
+  keymap,
+  highlightActiveLine,
+  lineNumbers,
+} from '@codemirror/view'
+import {
+  EditorState,
+  Compartment,
+} from '@codemirror/state'
+import { yaml as cmYaml } from '@codemirror/lang-yaml'
+import {
+  indentUnit,
+  syntaxHighlighting,
+  defaultHighlightStyle,
+} from '@codemirror/language'
+import {
+  defaultKeymap,
+  indentWithTab,
+  history,
+  historyKeymap,
+  undo,
+  redo,
+  historyField,
+} from '@codemirror/commands'
+import { autocompletion } from '@codemirror/autocomplete'
+import { searchKeymap } from '@codemirror/search'
+import {
+  oneDark,
+  oneDarkHighlightStyle,
+} from '@codemirror/theme-one-dark'
 
-import { useAuthzStore } from '@/store/authz'
-import { useProjectStore } from '@/store/project'
 import { useLocalStorageStore } from '@/store/localStorage'
+import { useProjectStore } from '@/store/project'
+import { useAuthzStore } from '@/store/authz'
 
-import { useApi } from '@/composables/useApi'
-import { useLogger } from '@/composables/useLogger'
 import { useEditorLineHighlighter } from '@/composables/useEditorLineHighlighter'
+import { useLogger } from '@/composables/useLogger'
+import { useApi } from '@/composables/useApi'
 
 import {
   createEditor,
@@ -47,10 +78,9 @@ export function useShootEditor (initialValue, options = {}) {
     disableLineHighlighting = false,
   } = options
 
-  const cm = shallowRef(null)
+  const cmView = shallowRef(null)
   const completions = shallowRef(null)
   const conflictPath = ref(null)
-  const generation = ref(0)
   const touched = ref(false)
   const clean = ref(true)
   const showManagedFields = ref(false)
@@ -68,36 +98,32 @@ export function useShootEditor (initialValue, options = {}) {
   })
 
   let editorLineHighlighter = null
+  let initialDocumentValue = null
 
   const schemaDefinition = computedAsync(() => {
     return api.getShootSchemaDefinition()
   }, null)
 
-  const defaultExtraKeys = {
-    Tab: instance => {
-      if (instance.somethingSelected()) {
-        instance.indentSelection('add')
-      } else {
-        instance.execCommand('insertSoftTab')
-      }
+  const defaultExtraKeys = [
+    {
+      // key: 'Enter',
+      // run: view => {
+      //   // completions.value?.editorEnter(view) TODO
+      //   return true
+      // },
     },
-    'Shift-Tab': instance => {
-      instance.indentSelection('subtract')
-    },
-    Enter: instance => {
-      completions.value?.editorEnter(instance)
-    },
-    'Ctrl-Space': 'autocomplete',
-  }
+    // 'Ctrl-Space': 'autocomplete', TODO
+  ]
 
   function getExtraKeys () {
-    const originalExtraKeys = {
+    const extraKeys = [
       ...defaultExtraKeys,
-      ...options.extraKeys,
-    }
-    const extraKeys = {}
-    for (const [key, value] of Object.entries(originalExtraKeys)) {
-      extraKeys[localStorageStore.editorShortcuts[key] ?? key] = value
+      ...(options.extraKeys ?? []),
+    ]
+    for (const extraKey of extraKeys) {
+      if (localStorageStore.editorShortcuts[extraKey.key]) {
+        extraKey.key = localStorageStore.editorShortcuts[extraKey.key]
+      }
     }
     return extraKeys
   }
@@ -106,8 +132,8 @@ export function useShootEditor (initialValue, options = {}) {
     return isShootActionsDisabled.value || !authzStore.canPatchShoots
   })
 
-  const cmTheme = computed(() => {
-    return theme.global.current.value?.dark ? 'seti' : 'default'
+  const isDarkMode = computed(() => {
+    return !!theme.global.current.value?.dark
   })
 
   const shootItem = computed(() => {
@@ -147,58 +173,76 @@ export function useShootEditor (initialValue, options = {}) {
     return get(shootItem.value, 'spec.purpose') === 'infrastructure'
   })
 
+  let cmTooltipFnTimerID
+  const themeCompartment = new Compartment()
+  const readonlyCompartment = new Compartment()
+  const historyCompartment = new Compartment()
+
   async function loadEditor (element) {
     try {
-      const instance = cm.value = await createEditor(element, {
-        mode: 'text/yaml',
-        autofocus: true,
-        indentUnit: 2,
-        tabSize: 2,
-        indentWithTabs: false,
-        smartIndent: true,
-        scrollbarStyle: 'native',
-        lineNumbers: true,
-        lineWrapping: true,
-        viewportMargin: Infinity, // make sure the whole shoot resource is loaded so that the browser's text search works on it
-        readOnly: isReadOnly.value,
-        extraKeys: getExtraKeys(),
-        hintOptions: {
-          completeSingle: false,
-          hint: instance => completions.value?.yamlHint(instance),
-        },
-        theme: cmTheme.value,
+      const state = EditorState.create({
+        extensions: [
+          cmYaml(),
+          highlightActiveLine(),
+          EditorView.lineWrapping, // Enable line wrapping
+          EditorView.updateListener.of(update => {
+            if (update.docChanged) {
+              touched.value = true
+              clean.value = getDocumentValue() === initialDocumentValue
+              const historyState = cmView.value.state.field(historyField)
+              const undo = historyState.done.length
+              const redo = historyState.undone.length
+              historySize.value = { undo, redo }
+            }
+          }),
+          EditorView.domEventHandlers({
+            mouseover: (e, view) => {
+              clearTimeout(cmTooltipFnTimerID)
+              helpTooltip.visible = false
+              cmTooltipFnTimerID = setTimeout(() => {
+                // TODO
+                // const tooltip = completions.value?.editorTooltip(e, instance)
+                // if (!tooltip) {
+                //   return
+                // }
+                // helpTooltip.visible = true
+                // helpTooltip.posX = e.clientX
+                // helpTooltip.posY = e.clientY
+                // helpTooltip.property = tooltip.property
+                // helpTooltip.type = tooltip.type
+                // helpTooltip.description = tooltip.description
+              }, 200)
+            },
+          }),
+          keymap.of(getExtraKeys()),
+          keymap.of([
+            ...defaultKeymap,
+            ...historyKeymap,
+            ...searchKeymap,
+            indentWithTab,
+          ]),
+          indentUnit.of('  '),
+          autocompletion({
+            override: [
+              context => {
+                // TODO
+                // Provide custom completions here
+              },
+            ],
+          }),
+          EditorView.theme({}),
+          historyCompartment.of(history()),
+          readonlyCompartment.of(EditorView.editable.of(!isReadOnly.value)),
+          themeCompartment.of([isDarkMode.value ? oneDark : [], syntaxHighlighting(isDarkMode.value ? oneDarkHighlightStyle : defaultHighlightStyle)]),
+          lineNumbers(),
+        ],
       })
-      instance.setSize('100%', '100%')
-      instance.on('change', instance => {
-        touched.value = true
-        clean.value = instance.doc.isClean(generation.value)
-        historySize.value = instance.doc.historySize()
-      })
+      cmView.value = await createEditor({ parent: element, state })
+      resetEditor()
 
       if (!disableLineHighlighting) {
-        editorLineHighlighter = useEditorLineHighlighter(instance)
+        editorLineHighlighter = useEditorLineHighlighter(cmView.value)
       }
-
-      let cmTooltipFnTimerID
-      const CodeMirror = instance.constructor
-      CodeMirror.on(element, 'mouseover', e => {
-        clearTimeout(cmTooltipFnTimerID)
-        helpTooltip.visible = false
-        cmTooltipFnTimerID = setTimeout(() => {
-          const tooltip = completions.value?.editorTooltip(e, instance)
-          if (!tooltip) {
-            return
-          }
-          helpTooltip.visible = true
-          helpTooltip.posX = e.clientX
-          helpTooltip.posY = e.clientY
-          helpTooltip.property = tooltip.property
-          helpTooltip.type = tooltip.type
-          helpTooltip.description = tooltip.description
-        }, 200)
-      })
-      resetEditor()
-      refreshEditor()
     } catch (err) {
       logger.error('Failed to create codemirror instance: %s', err.message)
     }
@@ -209,33 +253,40 @@ export function useShootEditor (initialValue, options = {}) {
       editorLineHighlighter.destroy()
       editorLineHighlighter = null
     }
-    if (cm.value) {
-      const element = cm.value.doc.cm.getWrapperElement()
+    if (cmView.value) {
+      cmView.value.destroy()
+      const element = cmView.value.dom
       if (element && element.remove) {
         element.remove()
       }
-      cm.value = null
+      cmView.value = null
     }
   }
 
   function getDocumentValue () {
-    if (cm.value) {
-      return cm.value.doc.getValue()
+    if (cmView.value) {
+      return cmView.value.state.doc.toString()
     }
     return ''
   }
 
   function setDocumentValue (value) {
-    if (cm.value) {
-      const cursor = cm.value.doc.getCursor()
-      const { left, top } = cm.value.getScrollInfo() || {}
-      cm.value.doc.setValue(value)
-      cm.value.focus()
-      if (cursor) {
-        cm.value.doc.setCursor(cursor)
-      }
-      cm.value.scrollTo(left, top)
+    if (cmView.value) {
+      const state = cmView.value.state
+      const selection = state.selection
+      const scrollPos = cmView.value.scrollDOM.scrollTop
+
+      const transaction = state.update({
+        changes: { from: 0, to: state.doc.length, insert: value },
+        selection,
+      })
+
+      cmView.value.dispatch(transaction)
+      cmView.value.scrollDOM.scrollTop = scrollPos
+      cmView.value.focus()
+
       clearDocumentHistory()
+      initialDocumentValue = value
     }
   }
 
@@ -257,33 +308,24 @@ export function useShootEditor (initialValue, options = {}) {
     setEditorValue(shootItem.value)
   }
 
-  function refreshEditor () {
-    if (cm.value) {
-      cm.value.refresh()
-    }
-  }
-
   function reloadEditor () {
     resetEditor()
-    refreshEditor()
   }
 
   function focusEditor () {
-    if (cm.value) {
-      cm.value.focus()
-    }
-  }
-
-  function getEditorScrollInfo () {
-    if (cm.value) {
-      return cm.value.getScrollInfo()
+    if (cmView.value) {
+      cmView.value.focus()
     }
   }
 
   function clearDocumentHistory () {
-    if (cm.value) {
-      cm.value.doc.clearHistory()
-      generation.value = cm.value.doc.changeGeneration()
+    if (cmView.value) {
+      cmView.value.dispatch({
+        effects: historyCompartment.reconfigure([]),
+      })
+      cmView.value.dispatch({
+        effects: historyCompartment.reconfigure(history()),
+      })
       clean.value = true
       touched.value = false
       conflictPath.value = null
@@ -295,40 +337,38 @@ export function useShootEditor (initialValue, options = {}) {
   }
 
   function execUndo () {
-    if (cm.value) {
-      cm.value.execCommand('undo')
-      cm.value.focus()
+    if (cmView.value) {
+      undo(cmView.value)
     }
   }
 
   function execRedo () {
-    if (cm.value) {
-      cm.value.execCommand('redo')
-      cm.value.focus()
+    if (cmView.value) {
+      redo(cmView.value)
     }
   }
 
   watchEffect(() => {
-    if (cm.value && schemaDefinition.value) {
+    if (cmView.value && schemaDefinition.value) {
       const shootProperties = get(schemaDefinition.value, 'properties', {})
       completions.value = new EditorCompletions(shootProperties, {
-        cm: cm.value,
+        cm: cmView.value,
         completionPaths: get(options, 'completionPaths', []),
         logger,
       })
     }
   })
 
-  watch(isReadOnly, value => {
-    if (cm.value) {
-      cm.value.setOption('readOnly', value)
-    }
+  watch(isReadOnly, isReadOnly => {
+    cmView.value.dispatch({
+      effects: readonlyCompartment.reconfigure(EditorView.editable.of(isReadOnly)),
+    })
   })
 
-  watch(cmTheme, value => {
-    if (cm.value) {
-      cm.value.setOption('theme', value)
-    }
+  watch(isDarkMode, isDarkMode => {
+    cmView.value.dispatch({
+      effects: themeCompartment.reconfigure([isDarkMode ? oneDark : [], syntaxHighlighting(isDarkMode ? oneDarkHighlightStyle : defaultHighlightStyle)]),
+    })
   })
 
   watch(shootItem, (newValue, oldValue) => {
@@ -359,11 +399,9 @@ export function useShootEditor (initialValue, options = {}) {
     setDocumentValue,
     getEditorValue,
     setEditorValue,
-    refreshEditor,
     resetEditor,
     reloadEditor,
     focusEditor,
-    getEditorScrollInfo,
     clearDocumentHistory,
     execUndo,
     execRedo,
