@@ -21,6 +21,8 @@ import {
 } from '@codemirror/state'
 
 export function useEditorLineHighlighter (cmView) {
+  cmView.dom.classList.add('g-editor-line-highlighter')
+
   const highlightableLineNumbers = lineNumbers({
     domEventHandlers: {
       mousedown (cmView, line, event) {
@@ -91,6 +93,9 @@ export function useEditorLineHighlighter (cmView) {
       return Decoration.none
     },
     update (highlights, tr) {
+      // need to re-add when editor updates
+      cmView.dom.classList.add('g-editor-line-highlighter')
+
       for (const effect of tr.effects) {
         if (effect.is(setHighlightEffect)) {
           return effect.value

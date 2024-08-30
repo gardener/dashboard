@@ -106,13 +106,12 @@ export function useShootEditor (initialValue, options = {}) {
 
   const defaultExtraKeys = [
     {
-      // key: 'Enter',
-      // run: view => {
-      //   // completions.value?.editorEnter(view) TODO
-      //   return true
-      // },
+      key: 'Enter',
+      run: view => {
+        completions.value?.editorEnter(view)
+        return true
+      },
     },
-    // 'Ctrl-Space': 'autocomplete', TODO
   ]
 
   function getExtraKeys () {
@@ -200,17 +199,17 @@ export function useShootEditor (initialValue, options = {}) {
               clearTimeout(cmTooltipFnTimerID)
               helpTooltip.visible = false
               cmTooltipFnTimerID = setTimeout(() => {
-                // TODO
-                // const tooltip = completions.value?.editorTooltip(e, instance)
-                // if (!tooltip) {
-                //   return
-                // }
-                // helpTooltip.visible = true
-                // helpTooltip.posX = e.clientX
-                // helpTooltip.posY = e.clientY
-                // helpTooltip.property = tooltip.property
-                // helpTooltip.type = tooltip.type
-                // helpTooltip.description = tooltip.description
+                const tooltip = completions.value?.editorTooltip(e, view)
+                if (!tooltip) {
+                  return
+                }
+
+                helpTooltip.visible = true
+                helpTooltip.posX = e.clientX
+                helpTooltip.posY = e.clientY
+                helpTooltip.property = tooltip.property
+                helpTooltip.type = tooltip.detail
+                helpTooltip.description = tooltip.info
               }, 200)
             },
           }),
@@ -225,8 +224,7 @@ export function useShootEditor (initialValue, options = {}) {
           autocompletion({
             override: [
               context => {
-                // TODO
-                // Provide custom completions here
+                return completions.value?.yamlHint(context)
               },
             ],
           }),
@@ -352,7 +350,7 @@ export function useShootEditor (initialValue, options = {}) {
     if (cmView.value && schemaDefinition.value) {
       const shootProperties = get(schemaDefinition.value, 'properties', {})
       completions.value = new EditorCompletions(shootProperties, {
-        cm: cmView.value,
+        cmView: cmView.value,
         completionPaths: get(options, 'completionPaths', []),
         logger,
       })

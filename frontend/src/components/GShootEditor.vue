@@ -24,7 +24,6 @@ SPDX-License-Identifier: Apache-2.0
     <div
       ref="container"
       :style="containerStyles"
-      :class="containerClass"
     />
     <div
       v-if="!!$slots.errorMessage"
@@ -162,7 +161,6 @@ import {
   inject,
   onBeforeUnmount,
   onMounted,
-  nextTick,
 } from 'vue'
 import download from 'downloadjs'
 
@@ -180,13 +178,9 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  animateOnAppear: {
-    type: Boolean,
-  },
 })
 
 const container = ref(null)
-const containerClass = ref('')
 const snackbar = ref(false)
 const snackbarTimeout = ref(3000)
 const snackbarColor = ref()
@@ -264,21 +258,7 @@ function onCopyFailed () {
   snackbar.value = true
 }
 
-function animateExpansion () {
-  containerClass.value = 'collapsed'
-  nextTick(() => {
-    // wait for ui to render collapsed class before setting animation class
-    containerClass.value = 'animate'
-    setTimeout(() => {
-      containerClass.value = ''
-    }, 1500) // remove after animation ends (1.5 sec)
-  })
-}
-
 onMounted(() => {
-  if (props.animateOnAppear) {
-    animateExpansion()
-  }
   loadEditor(container.value)
 })
 
@@ -287,95 +267,20 @@ onBeforeUnmount(() => {
 })
 </script>
 
-<style lang="scss" scoped>
-  .no-margin {
-    margin: 0 !important;
-  }
-  .position-relative {
-    position: relative !important;
-  }
-  :deep(.cm-tab) {
-     background: url('../assets/tab.png');
-     background-position: right;
-     background-repeat: no-repeat;
-  }
-  .font-style-italic {
-    font-style: italic;
-  }
-  .font-wrap {
-    white-space: pre-wrap;
-  }
-</style>
 <style lang="scss">
-  @import 'vuetify/settings';
-
-  .CodeMirror-hint {
-
-    .ghint-type  {
-      color: #000;
-
-      .property {
-        font-weight: bold;
-        font-size: 14px;
-      }
-      .type {
-        font-style: italic;
-        padding-left: 10px;
-        font-size: 13px;
-      }
+  /* Styling the dropdown background and border */
+  .cm-tooltip-autocomplete {
+    li[aria-selected] {
+      background-color: rgb(var(--v-theme-toolbar-background)) !important;
+      color: rgb(var(--v-theme-toolbar-title)) !important;
     }
   }
 
-  .CodeMirror-hint .ghint-desc  {
-    white-space: pre-wrap;
-    max-width: 800px;
-    padding: 10px;
-
-    .description {
-      font-family: Roboto, sans-serif;
-      font-size: 13px;
-      color: map-get($grey, 'darken-3');
+  .g-editor-line-highlighter {
+    .cm-gutterElement {
+      user-select: none;
+      cursor: pointer;
     }
-  }
-
-  .CodeMirror-hint-active {
-    background-color: map-get($grey, 'lighten-4') !important;
-  }
-
-  .CodeMirror-hints.seti {
-    background-color: #000;
-  }
-
-  .seti {
-    .CodeMirror-hint {
-      .ghint-type  {
-        color: #fff;
-      }
-    }
-
-    .CodeMirror-hint .ghint-desc  {
-      .description {
-        color: map-get($grey, 'lighten-3');
-      }
-    }
-
-    .CodeMirror-hint-active {
-      background-color: map-get($grey, 'darken-4') !important;
-    }
-  }
-
-  .collapsed .CodeMirror-lines {
-    max-height: 0px;
-  }
-
-  .animate .CodeMirror-lines {
-    transition: max-height 1.5s;
-    max-height: 100vh;
-  }
-
-  .cm-gutterElement {
-    user-select: none;
-    cursor: pointer;
   }
 
 </style>

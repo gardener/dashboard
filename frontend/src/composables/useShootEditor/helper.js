@@ -5,6 +5,7 @@
 //
 
 import { EditorView } from '@codemirror/view'
+import { indentUnit } from '@codemirror/language'
 
 import { useLogger } from '@/composables/useLogger'
 
@@ -34,7 +35,7 @@ export async function createEditor (...args) {
 export class EditorCompletions {
   constructor (shootProperties, options = {}) {
     const {
-      cm,
+      cmView,
       supportedPaths = [],
       logger = useLogger(),
     } = options
@@ -43,32 +44,36 @@ export class EditorCompletions {
     this.shootCompletions = shootProperties
 
     this.logger = logger
-    this.indentUnit = get(cm, 'options.indentUnit', 2)
+    this.indentUnit = cmView.state.facet(indentUnit).length
     this.arrayBulletIndent = 2 // -[space]
     this.supportedPaths = supportedPaths
-    this.createPos = get(cm, 'constructor.Pos')
   }
 
   // Callback function for CodeMirror autocomplete plugin
-  yamlHint (cm) {
-    const cur = cm.getCursor()
-    const token = this._getYamlToken(cm, cur)
-    const list = this._getYamlCompletions(token, cur, cm)
+  yamlHint (context) {
+    const cmView = context.view
+    const word = context.matchBefore(/\w*/)
+
+    const cur = this._getCursor(cmView)
+    const token = this._getYamlToken(cmView, cur)
+
+    const list = this._getYamlCompletions(token, cur, cmView)
 
     return {
-      list,
-      from: this.createPos(cur.line, token.start),
-      to: this.createPos(cur.line, token.end),
+      options: list,
+      from: word.from,
+      to: word.to,
+      filter: false,
     }
   }
 
   // Callback function for CodeMirror tooltip
-  editorTooltip (e, cm) {
-    const pos = cm.coordsChar({
-      left: e.clientX,
-      top: e.clientY,
-    })
-    const lineTokens = cm.getLineTokens(pos.line)
+  editorTooltip (e, cmView) {
+    const pos = cmView.posAtCoords({ x: e.clientX, y: e.clientY })
+    const line = cmView.state.doc.lineAt(pos).number
+    const lineChar = pos - cmView.state.doc.line(line).from
+
+    const lineTokens = this._getLineTokens(cmView, line)
     const lineString = join(map(lineTokens, 'string'), '')
     const result = lineString.match(/^(\s*)([^\s]+?):.*$/)
 
@@ -83,9 +88,9 @@ export class EditorCompletions {
         end,
         string,
       }
-      if (token.start <= pos.ch && pos.ch <= token.end) {
+      if (token.start <= lineChar && lineChar <= token.end) {
         // Ensure that mouse pointer is on propety and not somewhere else on this line
-        const completions = this._getYamlCompletions(token, pos, cm, true)
+        const completions = this._getYamlCompletions(token, { ch: lineChar, line }, cmView, true)
         if (completions.length === 1) {
           return first(completions)
         }
@@ -94,10 +99,10 @@ export class EditorCompletions {
   }
 
   // callback function for cm editor enter function
-  editorEnter (cm) {
-    const cur = cm.getCursor()
+  editorEnter (cmView) {
+    const cur = this._getCursor(cmView)
 
-    const { lineString, lineTokens } = this._getTokenLine(cm, cur)
+    const { lineString, lineTokens } = this._getTokenLine(cmView, cur)
     const [, indent, firstArrayItem] = lineString.match(/^(\s*)(-\s)?(.*?)?$/) || []
     let extraIntent = ''
     if (firstArrayItem) {
@@ -105,12 +110,12 @@ export class EditorCompletions {
     } else if (this._isTokenLineStartingObject(lineTokens)) {
       extraIntent = `${repeat(' ', this.indentUnit)}`
     }
-    cm.replaceSelection(`\n${indent}${extraIntent}`)
+    this._replaceSelection(cmView, `\n${indent}${extraIntent}`)
   }
 
   // Get completions for token, exact match is used for tooltip function
-  _getYamlCompletions (token, cur, cm, exactMatch = false) {
-    const completionPath = this._getTokenCompletionPath(token, cur, cm)
+  _getYamlCompletions (token, cur, cmView, exactMatch = false) {
+    const completionPath = this._getTokenCompletionPath(token, cur, cmView)
     if (this.supportedPaths?.length) {
       const currentPath = completionPath.join('.')
       if (!this.supportedPaths.some(path => currentPath.startsWith(path))) {
@@ -156,64 +161,38 @@ export class EditorCompletions {
         text = '- ' + text
       }
       const string = propertyName.toLowerCase()
-      const type = generateTypeText(completion.type, completion.format)
+      const typeText = generateTypeText(completion.type, completion.format)
 
       completionArray.push({
-        text,
-        string,
+        label: string,
+        displayLabel: text,
+        detail: typeText,
+        type: 'keyword', // TODO check weather we want to show diffrent icons
+        info: completion.description,
+        apply: text,
         property: propertyName,
-        type,
-        description: completion.description,
-        render (el, self, data) {
-          const document = el.ownerDocument
-          const { property, type, description } = data
-
-          const propertyElement = document.createElement('span')
-          propertyElement.className = 'property'
-          propertyElement.textContent = property
-
-          const typeElement = document.createElement('span')
-          typeElement.className = 'type'
-          typeElement.textContent = type
-
-          const propertyWrapper = document.createElement('div')
-          propertyWrapper.className = 'ghint-type'
-          propertyWrapper.appendChild(propertyElement)
-          propertyWrapper.appendChild(typeElement)
-
-          const descriptionElement = document.createElement('span')
-          descriptionElement.className = 'description'
-          descriptionElement.textContent = description
-
-          const descriptionWrapper = document.createElement('div')
-          descriptionWrapper.className = 'ghint-desc'
-          descriptionWrapper.appendChild(descriptionElement)
-
-          el.appendChild(propertyWrapper)
-          el.appendChild(descriptionWrapper)
-        },
       })
     })
     if (trim(token.string).length > 0) {
       completionArray = filter(completionArray, completion => {
         if (exactMatch) {
-          return isEqual(completion.string, token.string)
+          return isEqual(completion.label, token.string)
         }
-        if (includes(words(token.string), completion.string)) {
+        if (includes(words(token.string), completion.label)) {
           // filter completion if already in this line - avoid duplicate completions
           return false
         }
         // filter completions that to not match text already in line
-        return includes(completion.string, token.string)
+        return includes(completion.label, token.string)
       })
     }
     return completionArray
   }
 
   // get token at cursor position in editor with yaml content
-  _getYamlToken (cm, cur) {
+  _getYamlToken (cmView, cur) {
     let token
-    const { lineTokens, lineString } = this._getTokenLine(cm, cur)
+    const { lineTokens, lineString } = this._getTokenLine(cmView, cur)
     forEach(lineTokens, lineToken => {
       const result = lineToken.string.match(/^(\s*)-\s(.*)?$/)
       if (result) {
@@ -236,21 +215,23 @@ export class EditorCompletions {
       token = this._returnObjectTokenFromTokenLine(lineTokens)
     }
     if (!token) {
-      token = cm.getTokenAt(cur, true)
-      token.string = this._getTokenStringFromLine(lineString, cur.ch)
-      token.start = token.end - token.string.length
+      const string = this._getTokenStringFromLine(lineString, cur.ch)
+      token = {
+        string,
+        start: cur.ch,
+        end: string.length,
+      }
     }
     return token
   }
 
   // returns path to completions in shootCompletions object
-  _getTokenCompletionPath (token, cur, cm) {
+  _getTokenCompletionPath (token, cur, cmView) {
     let currentToken = token
     let line = cur.line
     const tokenContext = []
-
-    while (line >= 0 && !this._isTopLevelProperty(currentToken)) {
-      currentToken = this._getYamlToken(cm, this.createPos(line, 0))
+    while (line >= 1 && !this._isTopLevelProperty(currentToken)) {
+      currentToken = this._getYamlToken(cmView, { line, ch: 0 })
       if (this._isCurrentTokenParentOfToken(currentToken, token) &&
         this._isCurrentTokenIndentSmallerThanContextRoot(currentToken, tokenContext)) {
         if (currentToken.type === 'property') {
@@ -340,8 +321,8 @@ export class EditorCompletions {
     return token
   }
 
-  _getTokenLine (cm, cur) {
-    const lineTokens = cm.getLineTokens(cur.line)
+  _getTokenLine (cmView, cur) {
+    const lineTokens = this._getLineTokens(cmView, cur.line)
     const lineString = join(map(lineTokens, 'string'), '')
 
     return { lineTokens, lineString }
@@ -386,5 +367,49 @@ export class EditorCompletions {
         this._resolveSchemaArrays(propertyValue, propertyName)
       }
     }
+  }
+
+  _getCursor (cmView) {
+    const selection = cmView.state.selection.main
+    const line = cmView.state.doc.lineAt(selection.head).number
+    const ch = selection.head - cmView.state.doc.line(line).from
+    return { line, ch }
+  }
+
+  _getLineTokens (cmView, lineNumber) {
+    const line = cmView.state.doc.line(lineNumber)
+    const lineText = line.text
+    const tokens = []
+
+    let currentPos = 0
+    let match
+
+    // Regular expression to match words, delimiters, and spaces
+    const regex = /(\s*[^\s\w]*\w+|\s*[^\s\w]+|\s+)/g
+
+    while ((match = regex.exec(lineText)) !== null) {
+      const string = match[0]
+      const start = currentPos
+      const end = start + string.length
+
+      tokens.push({
+        string,
+        start,
+        end,
+      })
+
+      currentPos = end
+    }
+
+    return tokens
+  }
+
+  _replaceSelection (cmView, replacementText) {
+    const selection = cmView.state.selection.main
+    const newCursorPosition = selection.from + replacementText.length
+    cmView.dispatch({
+      changes: { from: selection.from, to: selection.to, insert: replacementText },
+      selection: { anchor: newCursorPosition },
+    })
   }
 }
