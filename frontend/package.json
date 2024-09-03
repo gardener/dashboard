@@ -99,7 +99,7 @@
     "vitest": "^2.0.0",
     "vitest-fetch-mock": "^0.3.0"
   },
-  "packageManager": "yarn@4.3.1",
+  "packageManager": "yarn@4.4.1",
   "engines": {
     "node": "^20.9.0"
   }
