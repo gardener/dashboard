@@ -726,7 +726,7 @@ __metadata:
     eslint-plugin-import: "npm:^2.29.1"
     eslint-plugin-jest: "npm:^26.9.0"
     eslint-plugin-n: "npm:^15.7.0"
-    eslint-plugin-promise: "npm:^6.4.0"
+    eslint-plugin-promise: "npm:^7.0.0"
     express: "npm:^4.18.3"
     express-static-gzip: "npm:^2.1.7"
     fast-json-patch: "npm:^3.1.1"
@@ -746,7 +746,7 @@ __metadata:
     p-limit: "npm:3.1.0"
     p-retry: "npm:4.6.2"
     p-timeout: "npm:^4.1.0"
-    path-to-regexp: "npm:^7.0.0"
+    path-to-regexp: "npm:^8.0.0"
     sanitize-html: "npm:^2.12.1"
     semver: "npm:^7.6.0"
     set-cookie-parser: "npm:^2.6.0"
@@ -768,7 +768,7 @@ __metadata:
     eslint-plugin-import: "npm:^2.29.1"
     eslint-plugin-jest: "npm:^26.9.0"
     eslint-plugin-n: "npm:^15.7.0"
-    eslint-plugin-promise: "npm:^6.4.0"
+    eslint-plugin-promise: "npm:^7.0.0"
     jest: "npm:^29.7.0"
     js-yaml: "npm:^4.1.0"
     lodash: "npm:^4.17.21"
@@ -805,7 +805,7 @@ __metadata:
     eslint-plugin-import: "npm:^2.29.1"
     eslint-plugin-import-newlines: "npm:^1.4.0"
     eslint-plugin-n: "npm:^15.7.0"
-    eslint-plugin-promise: "npm:^6.4.0"
+    eslint-plugin-promise: "npm:^7.0.0"
     eslint-plugin-vitest: "npm:^0.4.0"
     eslint-plugin-vue: "npm:^9.23.0"
     eventemitter3: "npm:^5.0.1"
@@ -815,7 +815,7 @@ __metadata:
     js-base64: "npm:^3.7.6"
     js-cookie: "npm:^3.0.5"
     js-yaml: "npm:^4.1.0"
-    jsdom: "npm:^24.0.0"
+    jsdom: "npm:^25.0.0"
     jwt-decode: "npm:^4.0.0"
     lodash: "npm:^4.17.21"
     md5: "npm:^2.3.0"
@@ -859,7 +859,7 @@ __metadata:
     eslint-plugin-import: "npm:^2.29.1"
     eslint-plugin-jest: "npm:^26.9.0"
     eslint-plugin-n: "npm:^15.7.0"
-    eslint-plugin-promise: "npm:^6.4.0"
+    eslint-plugin-promise: "npm:^7.0.0"
     express: "npm:^4.18.3"
     http-errors: "npm:^2.0.0"
     jest: "npm:^29.7.0"
@@ -882,7 +882,7 @@ __metadata:
     eslint-plugin-import: "npm:^2.29.1"
     eslint-plugin-jest: "npm:^26.9.0"
     eslint-plugin-n: "npm:^15.7.0"
-    eslint-plugin-promise: "npm:^6.4.0"
+    eslint-plugin-promise: "npm:^7.0.0"
     gtoken: "npm:^7.1.0"
     jest: "npm:^29.7.0"
     js-yaml: "npm:^4.1.0"
@@ -900,7 +900,7 @@ __metadata:
     eslint-plugin-import: "npm:^2.29.1"
     eslint-plugin-jest: "npm:^26.9.0"
     eslint-plugin-n: "npm:^15.7.0"
-    eslint-plugin-promise: "npm:^6.4.0"
+    eslint-plugin-promise: "npm:^7.0.0"
     jest: "npm:^29.7.0"
     jest-date-mock: "npm:^1.0.8"
   languageName: unknown
@@ -916,7 +916,7 @@ __metadata:
     eslint-plugin-import: "npm:^2.29.1"
     eslint-plugin-jest: "npm:^26.9.0"
     eslint-plugin-n: "npm:^15.7.0"
-    eslint-plugin-promise: "npm:^6.4.0"
+    eslint-plugin-promise: "npm:^7.0.0"
     express: "npm:^4.18.3"
     http-errors: "npm:^2.0.0"
     jest: "npm:^29.7.0"
@@ -938,7 +938,7 @@ __metadata:
     eslint-plugin-import: "npm:^2.29.1"
     eslint-plugin-jest: "npm:^26.9.0"
     eslint-plugin-n: "npm:^15.7.0"
-    eslint-plugin-promise: "npm:^6.4.0"
+    eslint-plugin-promise: "npm:^7.0.0"
     http-errors: "npm:^2.0.0"
     jest: "npm:^29.7.0"
     lodash: "npm:^4.17.21"
@@ -955,7 +955,7 @@ __metadata:
     eslint-plugin-import: "npm:^2.29.1"
     eslint-plugin-jest: "npm:^26.9.0"
     eslint-plugin-n: "npm:^15.7.0"
-    eslint-plugin-promise: "npm:^6.4.0"
+    eslint-plugin-promise: "npm:^7.0.0"
   languageName: unknown
   linkType: soft
 
@@ -4409,12 +4409,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-promise@npm:^6.4.0":
-  version: 6.6.0
-  resolution: "eslint-plugin-promise@npm:6.6.0"
+"eslint-plugin-promise@npm:^7.0.0":
+  version: 7.1.0
+  resolution: "eslint-plugin-promise@npm:7.1.0"
   peerDependencies:
     eslint: ^7.0.0 || ^8.0.0 || ^9.0.0
-  checksum: 10c0/93a667dbc9ff15c4d586b0d40a31c7828314cbbb31b2b9a75802aa4ef536e9457bb3e1a89b384b07aa336dd61b315ae8b0aadc0870210378023dd018819b59b3
+  checksum: 10c0/bbc3406139715dfa5f48d04f6d5b5e82f68929d954b0fa3821eb8cd6dc381b210512cedd2d874e5de5381005d316566f4ae046a4750ce3f5f5cbf28a14cc0ab2
   languageName: node
   linkType: hard
 
@@ -6559,9 +6559,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jsdom@npm:^24.0.0":
-  version: 24.1.1
-  resolution: "jsdom@npm:24.1.1"
+"jsdom@npm:^25.0.0":
+  version: 25.0.0
+  resolution: "jsdom@npm:25.0.0"
   dependencies:
     cssstyle: "npm:^4.0.1"
     data-urls: "npm:^5.0.0"
@@ -6589,7 +6589,7 @@ __metadata:
   peerDependenciesMeta:
     canvas:
       optional: true
-  checksum: 10c0/02d6bfe32f09f26329c0e53ad9f9883a3c671fc1f75725167d2089ca412f5b7ca85ff8aa62327d1cc6fc70ffbb3b18dfc7642c4b2096c2c8b19aaf9a48473eb3
+  checksum: 10c0/1552bcfb816b2c69ae159ba0cd79e8964030c106cc0cb2deb20a64c1ca54e1ea41352b9802d89b7cf823e43e6d74ed7289abff4aacc95b1b2bc936570aab3594
   languageName: node
   linkType: hard
 
@@ -7790,10 +7790,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"path-to-regexp@npm:^7.0.0":
-  version: 7.1.0
-  resolution: "path-to-regexp@npm:7.1.0"
-  checksum: 10c0/8a5e6a496e980c7e8769bfa57fa9e2b6c79a9410e59739095f0bc9ea847b5d719ba629d4840dc1428791082d73e7d4a08bc1223a365eae26653f8f0eb0e0f7cb
+"path-to-regexp@npm:^8.0.0":
+  version: 8.0.0
+  resolution: "path-to-regexp@npm:8.0.0"
+  checksum: 10c0/21a24e929b975a9c70507d6554b4c5cb9171fd06a7040d178f20bee5ab15d7624bf1803a6ee6776703e9ecdb6a354f1cf5f7636d5bb9e779f73d34ce8c53eccb
   languageName: node
   linkType: hard
 
