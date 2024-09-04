@@ -1266,7 +1266,7 @@ const RAW_RUNTIME_STATE =
           ["@gardener-dashboard/request", "workspace:packages/request"],\
           ["@gardener-dashboard/test-utils", "workspace:packages/test-utils"],\
           ["@godaddy/terminus", "npm:4.12.1"],\
-          ["@octokit/auth-app", "npm:6.1.1"],\
+          ["@octokit/auth-app", "npm:6.1.2"],\
           ["@octokit/core", "npm:5.2.0"],\
           ["@octokit/plugin-paginate-graphql", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:4.0.1"],\
           ["@octokit/plugin-paginate-rest", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:9.2.1"],\
@@ -2020,10 +2020,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@octokit/auth-app", [\
-      ["npm:6.1.1", {\
-        "packageLocation": "./.yarn/cache/@octokit-auth-app-npm-6.1.1-8881bbe471-633fa49ef1.zip/node_modules/@octokit/auth-app/",\
+      ["npm:6.1.2", {\
+        "packageLocation": "./.yarn/cache/@octokit-auth-app-npm-6.1.2-cc3282ef63-e3f9125571.zip/node_modules/@octokit/auth-app/",\
         "packageDependencies": [\
-          ["@octokit/auth-app", "npm:6.1.1"],\
+          ["@octokit/auth-app", "npm:6.1.2"],\
           ["@octokit/auth-oauth-app", "npm:7.1.0"],\
           ["@octokit/auth-oauth-user", "npm:4.1.0"],\
           ["@octokit/request", "npm:8.3.1"],\
