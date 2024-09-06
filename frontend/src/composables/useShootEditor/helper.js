@@ -57,7 +57,13 @@ export class EditorCompletions {
     const cur = this._getCursor(cmView)
     const token = this._getYamlToken(cmView, cur)
 
-    const list = this._getYamlCompletions(token, cur, cmView)
+    const lineString = cmView.state.doc.line(cur.line).text
+
+    const lineContainsKeyValuePair = /\w:\s/.test(lineString)
+    let list = []
+    if (!lineContainsKeyValuePair) {
+      list = this._getYamlCompletions(token, cur, cmView)
+    }
 
     return {
       options: list,
@@ -73,13 +79,11 @@ export class EditorCompletions {
     const line = cmView.state.doc.lineAt(pos).number
     const lineChar = pos - cmView.state.doc.line(line).from
 
-    const lineTokens = this._getLineTokens(cmView, line)
-    const lineString = join(map(lineTokens, 'string'), '')
-    const result = lineString.match(/^(\s*)([^\s]+?):.*$/)
+    const lineString = cmView.state.doc.line(line).text
+    const result = lineString.match(/^(\s*-?\s*)([^\s]+?):.*$/)
 
     if (result) {
-      const indent = result[1]
-      const tokenString = result[2]
+      const [, indent, tokenString] = result
       const start = indent.length
       const end = start + tokenString.length
       const string = tokenString.toLowerCase()
@@ -102,12 +106,13 @@ export class EditorCompletions {
   editorEnter (cmView) {
     const cur = this._getCursor(cmView)
 
-    const { lineString, lineTokens } = this._getTokenLine(cmView, cur)
+    const lineString = cmView.state.doc.line(cur.line).text
     const [, indent, firstArrayItem] = lineString.match(/^(\s*)(-\s)?(.*?)?$/) || []
+
     let extraIntent = ''
     if (firstArrayItem) {
       extraIntent = `${repeat(' ', this.arrayBulletIndent)}`
-    } else if (this._isTokenLineStartingObject(lineTokens)) {
+    } else if (this._isLineStartingObject(lineString)) {
       extraIntent = `${repeat(' ', this.indentUnit)}`
     }
     this._replaceSelection(cmView, `\n${indent}${extraIntent}`)
@@ -156,9 +161,9 @@ export class EditorCompletions {
     }
 
     forIn(completions, (completion, propertyName) => {
-      let text = generateCompletionText(propertyName, completion.type, token.type)
+      const text = generateCompletionText(propertyName, completion.type, token.type)
       if (token.type === 'firstArrayItem') {
-        text = '- ' + text
+        // text = '- ' + text // TODO: Selection ccurently does not replace the bullet
       }
       const string = propertyName.toLowerCase()
       const typeText = generateTypeText(completion.type, completion.format)
@@ -173,55 +178,56 @@ export class EditorCompletions {
         property: propertyName,
       })
     })
+
     if (trim(token.string).length > 0) {
       completionArray = filter(completionArray, completion => {
-        if (exactMatch) {
-          return isEqual(completion.label, token.string)
+        let tokenString = token.string
+        if (token.type === 'firstArrayItem') {
+          tokenString = tokenString.replace(/.*\s-\s/, '')
         }
-        if (includes(words(token.string), completion.label)) {
-          // filter completion if already in this line - avoid duplicate completions
-          return false
+        if (exactMatch) {
+          return isEqual(completion.label, tokenString)
         }
         // filter completions that to not match text already in line
-        return includes(completion.label, token.string)
+        return includes(completion.label, tokenString)
       })
     }
+
     return completionArray
   }
 
   // get token at cursor position in editor with yaml content
   _getYamlToken (cmView, cur) {
     let token
-    const { lineTokens, lineString } = this._getTokenLine(cmView, cur)
-    forEach(lineTokens, lineToken => {
-      const result = lineToken.string.match(/^(\s*)-\s(.*)?$/)
-      if (result) {
-        const indent = result[1]
-        token = lineToken
-        token.type = 'firstArrayItem'
-        token.string = this._getTokenStringFromLine(lineString, cur.ch)
-        token.indent = token.start = indent.length
-        token.end = token.start + token.string.length + this.arrayBulletIndent
-        token.propertyName = trim(token.string)
+    const lineString = cmView.state.doc.line(cur.line).text
 
-        const objectToken = this._returnObjectTokenFromTokenLine(lineTokens)
-        if (objectToken) {
-          // firstArrayItem line can also start new object
-          token.propertyName = objectToken.propertyName
-        }
+    const result = lineString.match(/^(\s*)-\s(.*)?$/)
+    if (result) {
+      const indent = result[1]
+      token = { string: lineString }
+      token.type = 'firstArrayItem'
+      token.indent = token.start = indent.length
+      token.end = token.start + token.string.length + this.arrayBulletIndent
+      token.propertyName = trim(token.string)
+
+      const objectToken = this._returnObjectTokenFromLine(lineString)
+      if (objectToken) {
+        // firstArrayItem line can also start new object
+        token.propertyName = objectToken.propertyName
       }
-    })
+    }
     if (!token) {
-      token = this._returnObjectTokenFromTokenLine(lineTokens)
+      token = this._returnObjectTokenFromLine(lineString)
     }
     if (!token) {
       const string = this._getTokenStringFromLine(lineString, cur.ch)
       token = {
         string,
-        start: cur.ch,
-        end: string.length,
+        start: cur.ch - string.length,
+        end: cur.ch,
       }
     }
+
     return token
   }
 
@@ -297,35 +303,22 @@ export class EditorCompletions {
     return trim(last(words(lineString.substring(0, cursorChar).toLowerCase())))
   }
 
-  _isTokenLineStartingObject (lineTokens) {
-    const lineEndToken = last(lineTokens)
-    if (!lineEndToken) {
-      return false
-    }
-    return lineEndToken.string === ':'
+  _isLineStartingObject (lineString) {
+    return lineString.endsWith(':')
   }
 
-  _returnObjectTokenFromTokenLine (lineTokens) {
-    if (lineTokens.length < 2) {
-      return
-    }
-    if (!this._isTokenLineStartingObject(lineTokens)) {
+  _returnObjectTokenFromLine (lineString) {
+    if (!this._isLineStartingObject(lineString)) {
       return
     }
 
-    const token = lineTokens[lineTokens.length - 2]
-    const [, indent, propertyName] = token.string.match(/^(\s*)(.+?)$/)
+    const [, indent, propertyName] = lineString.match(/^(\s*)(.+?):$/)
+    const token = { string: lineString }
     token.indent = token.start = indent.length
     token.propertyName = propertyName
     token.type = 'property'
+
     return token
-  }
-
-  _getTokenLine (cmView, cur) {
-    const lineTokens = this._getLineTokens(cmView, cur.line)
-    const lineString = join(map(lineTokens, 'string'), '')
-
-    return { lineTokens, lineString }
   }
 
   _resolveSchemaArrays (properties, parentPropertyName = '') {
@@ -374,34 +367,6 @@ export class EditorCompletions {
     const line = cmView.state.doc.lineAt(selection.head).number
     const ch = selection.head - cmView.state.doc.line(line).from
     return { line, ch }
-  }
-
-  _getLineTokens (cmView, lineNumber) {
-    const line = cmView.state.doc.line(lineNumber)
-    const lineText = line.text
-    const tokens = []
-
-    let currentPos = 0
-    let match
-
-    // Regular expression to match words, delimiters, and spaces
-    const regex = /(\s*[^\s\w]*\w+|\s*[^\s\w]+|\s+)/g
-
-    while ((match = regex.exec(lineText)) !== null) {
-      const string = match[0]
-      const start = currentPos
-      const end = start + string.length
-
-      tokens.push({
-        string,
-        start,
-        end,
-      })
-
-      currentPos = end
-    }
-
-    return tokens
   }
 
   _replaceSelection (cmView, replacementText) {
