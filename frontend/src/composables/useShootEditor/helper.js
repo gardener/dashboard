@@ -10,9 +10,6 @@ import { indentUnit } from '@codemirror/language'
 import { useLogger } from '@/composables/useLogger'
 
 import {
-  forEach,
-  join,
-  map,
   trim,
   nth,
   filter,
@@ -312,7 +309,7 @@ export class EditorCompletions {
       return
     }
 
-    const [, indent, propertyName] = lineString.match(/^(\s*)(.+?):$/)
+    const [, indent, propertyName] = lineString.match(/^(\s*)(?:-\s)?(.+?):$/)
     const token = { string: lineString }
     token.indent = token.start = indent.length
     token.propertyName = propertyName

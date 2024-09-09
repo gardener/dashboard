@@ -74,7 +74,7 @@ describe('composables', () => {
       let shootEditorCompletions
       let createMockCompletionContext
 
-      beforeAll(() => {
+      beforeEach(() => {
         const element = document.createElement('div')
         const state = EditorState.create({
           extensions: [
@@ -264,8 +264,8 @@ describe('composables', () => {
         describe('#editorTooltip', () => {
           it('should return a simple tooltip', () => {
             setEditorContentAndCursor('spec:', 1, 0)
-            editorView.coordsChar = () => {
-              return { line: 0, ch: 1 }
+            editorView.posAtCoords = () => {
+              return 1 // { line: 1, ch: 1 }
             }
             const tooltip = shootEditorCompletions.editorTooltip({}, editorView)
             expect(tooltip.detail).toBe('Object')
@@ -273,27 +273,27 @@ describe('composables', () => {
 
           it('should return tooltips for nested properties', () => {
             setEditorContentAndCursor('spec:\n  metadata:\n    managedFields:\n', 1, 0)
-            editorView.coordsChar = () => {
-              return { line: 1, ch: 1 }
+            editorView.posAtCoords = () => {
+              return 6 // { line: 1, ch: 1 }
             }
             let tooltip = shootEditorCompletions.editorTooltip({}, editorView)
             expect(tooltip).toBeUndefined()
 
-            editorView.coordsChar = () => {
-              return { line: 1, ch: 3 }
+            editorView.posAtCoords = () => {
+              return 8 // { line: 1, ch: 3 }
             }
             tooltip = shootEditorCompletions.editorTooltip({}, editorView)
             expect(tooltip.detail).toBe('Object')
 
-            editorView.coordsChar = () => {
-              return { line: 2, ch: 5 }
+            editorView.posAtCoords = () => {
+              return 23 // { line: 2, ch: 5 }
             }
             tooltip = shootEditorCompletions.editorTooltip({}, editorView)
             expect(tooltip.detail).toBe('Array')
             expect(tooltip.info).toBe('Demo Array')
 
-            editorView.coordsChar = () => {
-              return { line: 2, ch: 18 }
+            editorView.posAtCoords = () => {
+              return 36 // { line: 2, ch: 18 }
             }
             tooltip = shootEditorCompletions.editorTooltip({}, editorView)
             expect(tooltip).toBeUndefined()
@@ -302,9 +302,9 @@ describe('composables', () => {
 
         describe('#editorEnter', () => {
           let spy
-          beforeEach(() => {
-            spy = vi.spyOn(editorView, 'replaceSelection')
-          })
+          const setupSpy = () => {
+            spy = vi.spyOn(editorView, 'dispatch')
+          }
 
           afterEach(() => {
             spy.mockReset()
@@ -312,36 +312,56 @@ describe('composables', () => {
 
           it('should return a simple line break', () => {
             setEditorContentAndCursor('', 1, 0)
+            setupSpy()
             shootEditorCompletions.editorEnter(editorView)
             expect(spy).toHaveBeenCalledTimes(1)
-            expect(spy).toHaveBeenCalledWith('\n')
+            expect(spy).toHaveBeenCalledWith({
+              changes: { from: 0, to: 0, insert: '\n' },
+              selection: { anchor: 1 },
+            })
 
-            spy.mockReset()
             setEditorContentAndCursor('test', 1, 0)
+            spy.mockReset()
             shootEditorCompletions.editorEnter(editorView)
             expect(spy).toHaveBeenCalledTimes(1)
-            expect(spy).toHaveBeenCalledWith('\n')
+            expect(spy).toHaveBeenCalledWith({
+              changes: { from: 0, to: 0, insert: '\n' },
+              selection: { anchor: 1 },
+            })
           })
 
           it('should preserve indent after a regular line', () => {
             setEditorContentAndCursor('spec:\n  foo:bar', 2, 9)
+            setupSpy()
             shootEditorCompletions.editorEnter(editorView)
             expect(spy).toHaveBeenCalledTimes(1)
-            expect(spy).toHaveBeenCalledWith('\n  ')
+            expect(spy).toHaveBeenCalledWith({
+              changes: { from: 15, to: 15, insert: '\n  ' },
+              selection: { anchor: 18 },
+            })
           })
 
           it('should increase indent after an object or array', () => {
             setEditorContentAndCursor('spec:\n  foo:', 2, 6)
+            setupSpy()
             shootEditorCompletions.editorEnter(editorView)
+            const indent = editorView.state.facet(indentUnit).length
             expect(spy).toHaveBeenCalledTimes(1)
-            expect(spy).toHaveBeenCalledWith(`\n  ${repeat(' ', editorView.options.indentUnit)}`)
+            expect(spy).toHaveBeenCalledWith({
+              changes: { from: 12, to: 12, insert: `\n  ${repeat(' ', indent)}` },
+              selection: { anchor: 18 },
+            })
           })
 
           it('should increase indent after first item of an array', () => {
             setEditorContentAndCursor('spec:\n  foo:\n    - foo:bar', 3, 13)
+            setupSpy()
             shootEditorCompletions.editorEnter(editorView)
             expect(spy).toHaveBeenCalledTimes(1)
-            expect(spy).toHaveBeenCalledWith('\n      ')
+            expect(spy).toHaveBeenCalledWith({
+              changes: { from: 26, to: 26, insert: '\n      ' },
+              selection: { anchor: 33 },
+            })
           })
         })
       })
@@ -418,13 +438,13 @@ describe('composables', () => {
         })
         describe('#resolveShemaArrays', () => {
           it('should recursively remove allOf, anyOf and oneOf array level', () => {
-            const shootEditorCompletions = new EditorCompletions(shootCompletions)
-            const shootEditorCompletionsV3 = new EditorCompletions(shootCompletionsV3)
+            const shootEditorCompletions = new EditorCompletions(shootCompletions, { cmView: editorView })
+            const shootEditorCompletionsV3 = new EditorCompletions(shootCompletionsV3, { cmView: editorView })
             expect(shootEditorCompletionsV3.shootCompletions).toEqual(shootEditorCompletions.shootCompletions)
           })
 
           it('should handle multiple type options using oneOf discriminators', () => {
-          // add multi-type value to openapi v3 spec (not supported by v2)
+            // add multi-type value to openapi v3 spec (not supported by v2)
             shootCompletionsV3.spec.allOf[0].properties.foo = {
               oneOf: [
                 {
@@ -438,15 +458,15 @@ describe('composables', () => {
             }
 
             const shootEditorCompletionsV3 = new EditorCompletions(shootCompletionsV3, {
-              cm: editor,
+              cmView: editorView,
             })
-            setEditorContentAndCursor('spec:\n   ', 1, 3)
+            setEditorContentAndCursor('spec:\n   ', 2, 3)
             const completions = shootEditorCompletionsV3.yamlHint(createMockCompletionContext(editorView)).options
             expect(completions).toHaveLength(4)
 
-            const { text, type } = completions[3]
-            expect(text).toBe('foo: ')
-            expect(type).toBe('Number (int32) | String')
+            const { apply, detail } = completions[3]
+            expect(apply).toBe('foo: ')
+            expect(detail).toBe('Number (int32) | String')
           })
         })
       })
