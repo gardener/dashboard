@@ -96,7 +96,7 @@ SPDX-License-Identifier: Apache-2.0
               </v-chip>
             </td>
             <td>
-              <g-account-avatar :account-name="item.spec.createdBy.name" />
+              <g-account-avatar :account-name="item.spec.owner.name" />
             </td>
             <td>
               <g-time-string
