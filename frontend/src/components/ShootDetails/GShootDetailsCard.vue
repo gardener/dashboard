@@ -188,7 +188,7 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           <g-list-item-content>
             <template #label>
-              Add-ons <span class="text-caption">(not actively monitored and provided on a best-effort basis only)</span>
+              Add-ons <span class="text-caption">(not actively monitored and available for clusters with purpose evaluation only)</span>
             </template>
             <div
               v-if="shootAddonNames.length"
