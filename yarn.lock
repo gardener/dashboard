@@ -2330,6 +2330,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@vue/devtools-api@npm:^6.6.4":
+  version: 6.6.4
+  resolution: "@vue/devtools-api@npm:6.6.4"
+  checksum: 10c0/0a993ae23618166e1bee5a7c14cebd8312752b93c143cbdd48fb2d0f7ade070d0e6baf757cd920d4681fef8f9acf29515162160f38cc7410f9a684d2df21b6de
+  languageName: node
+  linkType: hard
+
 "@vue/reactivity@npm:3.5.4":
   version: 3.5.4
   resolution: "@vue/reactivity@npm:3.5.4"
@@ -9770,13 +9777,13 @@ __metadata:
   linkType: hard
 
 "vue-router@npm:^4.3.0":
-  version: 4.4.3
-  resolution: "vue-router@npm:4.4.3"
+  version: 4.4.4
+  resolution: "vue-router@npm:4.4.4"
   dependencies:
-    "@vue/devtools-api": "npm:^6.6.3"
+    "@vue/devtools-api": "npm:^6.6.4"
   peerDependencies:
     vue: ^3.2.0
-  checksum: 10c0/dc13c30367653fb441f3f6378dc64645250e55a4089c8f547ffe0e1227122fbd02da53b14ecff9711b02e44070a5495c9e97b69954386ea55fb9644dd8dbb1d3
+  checksum: 10c0/aceb25a66602b0771b86caacf62aa9a21dfec678865aac30c0c2f73622b3049c97909b2609467f0053f6dc4230332eeff05c9823d18d3ffdd5915c7c4ca83e98
   languageName: node
   linkType: hard
 
