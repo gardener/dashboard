@@ -1299,7 +1299,7 @@ const RAW_RUNTIME_STATE =
           ["morgan", "npm:1.10.0"],\
           ["object-hash", "npm:3.0.0"],\
           ["openapi-types", "npm:12.1.3"],\
-          ["openid-client", "npm:5.6.5"],\
+          ["openid-client", "npm:5.7.0"],\
           ["p-event", "npm:4.2.0"],\
           ["p-limit", "npm:3.1.0"],\
           ["p-retry", "npm:4.6.2"],\
@@ -9601,10 +9601,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["openid-client", [\
-      ["npm:5.6.5", {\
-        "packageLocation": "./.yarn/cache/openid-client-npm-5.6.5-5d3d2c2d1d-4308dcd37a.zip/node_modules/openid-client/",\
+      ["npm:5.7.0", {\
+        "packageLocation": "./.yarn/cache/openid-client-npm-5.7.0-8a8fbe009d-02e42c6641.zip/node_modules/openid-client/",\
         "packageDependencies": [\
-          ["openid-client", "npm:5.6.5"],\
+          ["openid-client", "npm:5.7.0"],\
           ["jose", "npm:4.15.9"],\
           ["lru-cache", "npm:6.0.0"],\
           ["object-hash", "npm:2.2.0"],\
