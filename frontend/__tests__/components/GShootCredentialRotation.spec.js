@@ -73,6 +73,11 @@ describe('components', () => {
             workers: [
               {},
             ],
+            workerSettings: {
+              sshAccess: {
+                enabled: true,
+              },
+            },
           },
         },
         status: {
@@ -127,6 +132,26 @@ describe('components', () => {
     })
 
     describe('Credential tiles', () => {
+      it('should not include SSH key rotation when SSH access is disabled', () => {
+        shootItem.spec.provider.workerSettings.sshAccess.enabled = false
+        const wrapper = mountShootCredentialRotationCard(shootItem)
+        const credentialWrappers = wrapper.findAllComponents(GCredentialTile)
+
+        // Ensure SSH key tile is not present
+        const sshKeyWrapper = credentialWrappers.find(wrapper => wrapper.vm.type === 'sshKeypair')
+        expect(sshKeyWrapper).toBe(undefined)
+      })
+
+      it('should include SSH key rotation when SSH access is enabled', () => {
+        shootItem.spec.provider.workerSettings.sshAccess.enabled = true
+        const wrapper = mountShootCredentialRotationCard(shootItem)
+        const credentialWrappers = wrapper.findAllComponents(GCredentialTile)
+
+        // Ensure SSH key tile is present
+        const sshKeyWrapper = credentialWrappers.find(wrapper => wrapper.vm.type === 'sshKeypair')
+        expect(sshKeyWrapper).toBeDefined()
+      })
+
       it('should compute phases', () => {
         const wrapper = mountShootCredentialRotationCard(shootItem)
         const [
