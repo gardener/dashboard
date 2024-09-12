@@ -23,6 +23,12 @@ SPDX-License-Identifier: Apache-2.0
           :items="seedNames"
           persistent-hint
         />
+        <div
+          v-if="providerMismatch"
+          class="my-2"
+        >
+          Note: Ensure network connectivity for etcd backups and Shoot control plane. Without it, migration may stall.
+        </div>
       </v-card-text>
     </template>
   </g-action-button-dialog>
@@ -63,8 +69,19 @@ export default {
     const seedStore = useSeedStore()
 
     const seedNames = computed(() => {
-      const seeds = filter(seedStore.seedList, ['data.type', shootCloudProviderKind.value])
-      return map(seeds, 'metadata.name')
+      return map(seedStore.seedList, 'metadata.name')
+    })
+
+    const providerMismatch = computed(() => {
+      const selectedSeed = seedStore.seedList.find(seed => seed.metadata.name === seedName.value)
+      const sourceSeed = seedStore.seedList.find(seed => seed.metadata.name === shootSeedName.value)
+      if (!selectedSeed || !sourceSeed) {
+        return false
+      }
+      const selectedProvider = selectedSeed.data.type
+      const sourceProvider = sourceSeed.data.type
+      const shootProvider = shootCloudProviderKind.value
+      return selectedProvider !== sourceProvider || selectedProvider !== shootProvider
     })
 
     const seedName = ref(shootSeedName.value)
@@ -75,6 +92,7 @@ export default {
       shootSeedName,
       seedName,
       seedNames,
+      providerMismatch,
     }
   },
   methods: {
