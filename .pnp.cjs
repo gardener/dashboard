@@ -1286,7 +1286,7 @@ const RAW_RUNTIME_STATE =
           ["eslint-plugin-n", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:15.7.0"],\
           ["eslint-plugin-promise", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:6.6.0"],\
           ["express", "npm:4.19.2"],\
-          ["express-static-gzip", "npm:2.1.7"],\
+          ["express-static-gzip", "npm:2.1.8"],\
           ["fast-json-patch", "npm:3.1.1"],\
           ["fnv-plus", "npm:1.3.1"],\
           ["helmet", "npm:7.1.0"],\
@@ -5450,6 +5450,13 @@ const RAW_RUNTIME_STATE =
           ["encodeurl", "npm:1.0.2"]\
         ],\
         "linkType": "HARD"\
+      }],\
+      ["npm:2.0.0", {\
+        "packageLocation": "./.yarn/cache/encodeurl-npm-2.0.0-3660bcc92a-5d317306ac.zip/node_modules/encodeurl/",\
+        "packageDependencies": [\
+          ["encodeurl", "npm:2.0.0"]\
+        ],\
+        "linkType": "HARD"\
       }]\
     ]],\
     ["encoding", [\
@@ -6420,11 +6427,11 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["express-static-gzip", [\
-      ["npm:2.1.7", {\
-        "packageLocation": "./.yarn/cache/express-static-gzip-npm-2.1.7-b88261b8b1-a12174d627.zip/node_modules/express-static-gzip/",\
+      ["npm:2.1.8", {\
+        "packageLocation": "./.yarn/cache/express-static-gzip-npm-2.1.8-92faa4bc3d-55efccf89b.zip/node_modules/express-static-gzip/",\
         "packageDependencies": [\
-          ["express-static-gzip", "npm:2.1.7"],\
-          ["serve-static", "npm:1.15.0"]\
+          ["express-static-gzip", "npm:2.1.8"],\
+          ["serve-static", "npm:1.16.2"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -10566,6 +10573,26 @@ const RAW_RUNTIME_STATE =
           ["statuses", "npm:2.0.1"]\
         ],\
         "linkType": "HARD"\
+      }],\
+      ["npm:0.19.0", {\
+        "packageLocation": "./.yarn/cache/send-npm-0.19.0-4297594770-ea3f8a67a8.zip/node_modules/send/",\
+        "packageDependencies": [\
+          ["send", "npm:0.19.0"],\
+          ["debug", "virtual:44738662cf800ff2863ba9baeabb817b24a959a14f86e20a31680e5dc79a4a738f7ceb7dca32753d579fae475aa061dffad8228a3391f3a9546b122f077e29a5#npm:2.6.9"],\
+          ["depd", "npm:2.0.0"],\
+          ["destroy", "npm:1.2.0"],\
+          ["encodeurl", "npm:1.0.2"],\
+          ["escape-html", "npm:1.0.3"],\
+          ["etag", "npm:1.8.1"],\
+          ["fresh", "npm:0.5.2"],\
+          ["http-errors", "npm:2.0.0"],\
+          ["mime", "npm:1.6.0"],\
+          ["ms", "npm:2.1.3"],\
+          ["on-finished", "npm:2.4.1"],\
+          ["range-parser", "npm:1.2.1"],\
+          ["statuses", "npm:2.0.1"]\
+        ],\
+        "linkType": "HARD"\
       }]\
     ]],\
     ["serve-static", [\
@@ -10577,6 +10604,17 @@ const RAW_RUNTIME_STATE =
           ["escape-html", "npm:1.0.3"],\
           ["parseurl", "npm:1.3.3"],\
           ["send", "npm:0.18.0"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:1.16.2", {\
+        "packageLocation": "./.yarn/cache/serve-static-npm-1.16.2-5d8e560aec-528fff6f5e.zip/node_modules/serve-static/",\
+        "packageDependencies": [\
+          ["serve-static", "npm:1.16.2"],\
+          ["encodeurl", "npm:2.0.0"],\
+          ["escape-html", "npm:1.0.3"],\
+          ["parseurl", "npm:1.3.3"],\
+          ["send", "npm:0.19.0"]\
         ],\
         "linkType": "HARD"\
       }]\
