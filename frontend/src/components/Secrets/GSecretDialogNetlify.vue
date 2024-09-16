@@ -38,9 +38,7 @@ SPDX-License-Identifier: Apache-2.0
         <p>
           Then base64 encode the token. For eg. if the generated token in 1234567890123456, use
         </p>
-        <p>
-          <pre>$ echo -n '1234567890123456789' | base64</pre>
-        </p>
+        <pre>$ echo -n '1234567890123456789' | base64</pre>
         <p>
           For details see
           <g-external-link url="https://docs.netlify.com/cli/get-started/#obtain-a-token-in-the-netlify-ui" />
