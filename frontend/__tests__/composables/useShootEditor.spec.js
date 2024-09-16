@@ -9,6 +9,7 @@ import { CompletionContext } from '@codemirror/autocomplete'
 import {
   EditorState,
   EditorSelection,
+  StateEffect,
 } from '@codemirror/state'
 
 import { EditorCompletions } from '@/composables/useShootEditor/helper'
@@ -315,19 +316,21 @@ describe('composables', () => {
             setupSpy()
             shootEditorCompletions.editorEnter(editorView)
             expect(spy).toHaveBeenCalledTimes(1)
-            expect(spy).toHaveBeenCalledWith({
+            expect(spy).toHaveBeenCalledWith(expect.objectContaining({
               changes: { from: 0, to: 0, insert: '\n' },
               selection: { anchor: 1 },
-            })
+              effects: expect.any(StateEffect),
+            }))
 
             setEditorContentAndCursor('test', 1, 0)
             spy.mockReset()
             shootEditorCompletions.editorEnter(editorView)
             expect(spy).toHaveBeenCalledTimes(1)
-            expect(spy).toHaveBeenCalledWith({
+            expect(spy).toHaveBeenCalledWith(expect.objectContaining({
               changes: { from: 0, to: 0, insert: '\n' },
               selection: { anchor: 1 },
-            })
+              effects: expect.any(StateEffect),
+            }))
           })
 
           it('should preserve indent after a regular line', () => {
@@ -335,10 +338,11 @@ describe('composables', () => {
             setupSpy()
             shootEditorCompletions.editorEnter(editorView)
             expect(spy).toHaveBeenCalledTimes(1)
-            expect(spy).toHaveBeenCalledWith({
+            expect(spy).toHaveBeenCalledWith(expect.objectContaining({
               changes: { from: 15, to: 15, insert: '\n  ' },
               selection: { anchor: 18 },
-            })
+              effects: expect.any(StateEffect),
+            }))
           })
 
           it('should increase indent after an object or array', () => {
@@ -347,10 +351,11 @@ describe('composables', () => {
             shootEditorCompletions.editorEnter(editorView)
             const indent = editorView.state.facet(indentUnit).length
             expect(spy).toHaveBeenCalledTimes(1)
-            expect(spy).toHaveBeenCalledWith({
+            expect(spy).toHaveBeenCalledWith(expect.objectContaining({
               changes: { from: 12, to: 12, insert: `\n  ${repeat(' ', indent)}` },
               selection: { anchor: 18 },
-            })
+              effects: expect.any(StateEffect),
+            }))
           })
 
           it('should increase indent after first item of an array', () => {
@@ -358,10 +363,11 @@ describe('composables', () => {
             setupSpy()
             shootEditorCompletions.editorEnter(editorView)
             expect(spy).toHaveBeenCalledTimes(1)
-            expect(spy).toHaveBeenCalledWith({
+            expect(spy).toHaveBeenCalledWith(expect.objectContaining({
               changes: { from: 26, to: 26, insert: '\n      ' },
               selection: { anchor: 33 },
-            })
+              effects: expect.any(StateEffect),
+            }))
           })
         })
       })
