@@ -1304,7 +1304,7 @@ const RAW_RUNTIME_STATE =
           ["p-limit", "npm:3.1.0"],\
           ["p-retry", "npm:4.6.2"],\
           ["p-timeout", "npm:4.1.0"],\
-          ["path-to-regexp", "npm:8.0.0"],\
+          ["path-to-regexp", "npm:8.1.0"],\
           ["sanitize-html", "npm:2.13.0"],\
           ["semver", "npm:7.6.3"],\
           ["set-cookie-parser", "npm:2.7.0"],\
@@ -9866,10 +9866,10 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "HARD"\
       }],\
-      ["npm:8.0.0", {\
-        "packageLocation": "./.yarn/cache/path-to-regexp-npm-8.0.0-02cc6e0268-21a24e929b.zip/node_modules/path-to-regexp/",\
+      ["npm:8.1.0", {\
+        "packageLocation": "./.yarn/cache/path-to-regexp-npm-8.1.0-a82a7a7724-1c46be3806.zip/node_modules/path-to-regexp/",\
         "packageDependencies": [\
-          ["path-to-regexp", "npm:8.0.0"]\
+          ["path-to-regexp", "npm:8.1.0"]\
         ],\
         "linkType": "HARD"\
       }]\
