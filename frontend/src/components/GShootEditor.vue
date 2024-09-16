@@ -291,4 +291,8 @@ onBeforeUnmount(() => {
     }
   }
 
+  .cm-editor {
+    height: 100%;
+  }
+
 </style>

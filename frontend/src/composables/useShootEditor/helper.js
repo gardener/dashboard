@@ -372,6 +372,7 @@ export class EditorCompletions {
     cmView.dispatch({
       changes: { from: selection.from, to: selection.to, insert: replacementText },
       selection: { anchor: newCursorPosition },
+      effects: EditorView.scrollIntoView(newCursorPosition),
     })
   }
 }

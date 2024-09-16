@@ -48,12 +48,12 @@ export function useEditorLineHighlighter (cmView) {
       return valuesFromParams()
     },
     set (values = []) {
-      const valuesOld = valuesFromParams()
+      const valuesCurrent = valuesFromParams()
 
       let [startLine, endLine = startLine] = values
-      const [startLineOld, endLineOld] = valuesOld
+      const [startLineCurrent, endLineCurrent] = valuesCurrent
 
-      if (endLine === startLine && startLine === startLineOld && !endLineOld) {
+      if (endLine === startLine && startLine === startLineCurrent && !endLineCurrent) {
         startLine = null
       }
 
