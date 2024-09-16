@@ -53,6 +53,7 @@ import { useProjectStore } from '@/store/project'
 import { useAuthzStore } from '@/store/authz'
 
 import { useEditorLineHighlighter } from '@/composables/useEditorLineHighlighter'
+import { useEditorWhitespace } from '@/composables/useEditorWhitespace'
 import { useLogger } from '@/composables/useLogger'
 import { useApi } from '@/composables/useApi'
 
@@ -78,12 +79,15 @@ export function useShootEditor (initialValue, options = {}) {
     disableLineHighlighting = false,
   } = options
 
+  const { showAllWhitespace } = useEditorWhitespace()
+
   const cmView = shallowRef(null)
   const completions = shallowRef(null)
   const conflictPath = ref(null)
   const touched = ref(false)
   const clean = ref(true)
   const showManagedFields = ref(false)
+  const renderWhitespaces = ref(true)
   const historySize = shallowRef({
     undo: 0,
     redo: 0,
@@ -176,6 +180,7 @@ export function useShootEditor (initialValue, options = {}) {
   const themeCompartment = new Compartment()
   const readonlyCompartment = new Compartment()
   const historyCompartment = new Compartment()
+  const whitespacesCompartment = new Compartment()
 
   async function loadEditor (element) {
     try {
@@ -233,6 +238,7 @@ export function useShootEditor (initialValue, options = {}) {
           readonlyCompartment.of(EditorView.editable.of(!isReadOnly.value)),
           themeCompartment.of([isDarkMode.value ? oneDark : [], syntaxHighlighting(isDarkMode.value ? oneDarkHighlightStyle : defaultHighlightStyle)]),
           lineNumbers(),
+          whitespacesCompartment.of(showAllWhitespace),
         ],
       })
       cmView.value = await createEditor({ parent: element, state })
@@ -384,11 +390,18 @@ export function useShootEditor (initialValue, options = {}) {
     }
   })
 
+  watch(renderWhitespaces, renderWhitespaces => {
+    cmView.value.dispatch({
+      effects: whitespacesCompartment.reconfigure(renderWhitespaces ? showAllWhitespace : []),
+    })
+  })
+
   return {
     conflictPath,
     touched,
     clean,
     showManagedFields,
+    renderWhitespaces,
     historySize,
     helpTooltip,
     loadEditor,

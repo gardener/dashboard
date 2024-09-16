@@ -125,6 +125,20 @@ SPDX-License-Identifier: Apache-2.0
             <span>{{ showManagedFields ? 'Hide' : 'Show' }} managed fields</span>
           </v-tooltip>
         </div>
+        <div class="px-2">
+          <v-tooltip location="top">
+            <template #activator="slotProps">
+              <div v-bind="slotProps.props">
+                <g-action-button
+                  size="x-small"
+                  :icon="renderWhitespaces ? 'mdi-grid' : 'mdi-grid-off'"
+                  @click="renderWhitespaces = !renderWhitespaces"
+                />
+              </div>
+            </template>
+            <span>{{ renderWhitespaces ? 'Hide' : 'Render' }} whitespaces</span>
+          </v-tooltip>
+        </div>
         <v-divider vertical />
       </div>
       <div class="d-flex fill-height align-center justify-end">
@@ -192,6 +206,7 @@ const {
   clean,
   touched,
   showManagedFields,
+  renderWhitespaces,
   historySize,
   helpTooltip,
   loadEditor,
@@ -273,13 +288,6 @@ onBeforeUnmount(() => {
     li[aria-selected] {
       background-color: rgb(var(--v-theme-toolbar-background)) !important;
       color: rgb(var(--v-theme-toolbar-title)) !important;
-    }
-  }
-
-  .g-editor-line-highlighter {
-    .cm-gutterElement {
-      user-select: none;
-      cursor: pointer;
     }
   }
 
