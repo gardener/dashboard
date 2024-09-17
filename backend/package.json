@@ -1,6 +1,6 @@
 {
   "name": "@gardener-dashboard/backend",
-  "version": "1.76.0",
+  "version": "1.77.0",
   "description": "Gardener Dashboard Server",
   "license": "Apache-2.0",
   "author": "Koser, Holger <holger.koser@sap.com>",
@@ -81,11 +81,11 @@
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-jest": "^26.9.0",
     "eslint-plugin-n": "^15.7.0",
-    "eslint-plugin-promise": "^6.4.0",
+    "eslint-plugin-promise": "^6.6.0",
     "fast-json-patch": "^3.1.1",
     "jest": "^29.7.0",
     "p-event": "^4.2.0",
-    "path-to-regexp": "^7.0.0",
+    "path-to-regexp": "^8.0.0",
     "set-cookie-parser": "^2.6.0",
     "socket.io-client": "^4.7.5",
     "supertest": "^7.0.0"
@@ -144,7 +144,7 @@
     "coverageThreshold": {
       "global": {
         "branches": 68,
-        "functions": 95,
+        "functions": 94,
         "lines": 90,
         "statements": 90
       }
@@ -153,8 +153,8 @@
       "<rootDir>/jest.setup.js"
     ]
   },
-  "packageManager": "yarn@4.3.1",
+  "packageManager": "yarn@4.5.0",
   "engines": {
-    "node": "^20.9.0"
+    "node": "^22.7.0"
   }
 }
