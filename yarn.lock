@@ -2527,14 +2527,14 @@ __metadata:
   linkType: hard
 
 "@vueuse/router@npm:^11.0.0-0":
-  version: 11.0.3
-  resolution: "@vueuse/router@npm:11.0.3"
+  version: 11.1.0
+  resolution: "@vueuse/router@npm:11.1.0"
   dependencies:
-    "@vueuse/shared": "npm:11.0.3"
+    "@vueuse/shared": "npm:11.1.0"
     vue-demi: "npm:>=0.14.10"
   peerDependencies:
     vue-router: ">=4.0.0-rc.1"
-  checksum: 10c0/ceca5e74c4be18fe062a811f4ea16b190633bb97a6179cddd2b8dca844357bbba7cf3f261b4e5a266737fec7c6c972c2da8f45297077f68f8f3052502ac44fcb
+  checksum: 10c0/47c99e71c5948c578cfd132d6c656e43f00aedcb3e4b8fd1b73a60555a8f666ee62644558516ef93a276a665e08057f1f8f0f0eba40a15066e813a4f169177e5
   languageName: node
   linkType: hard
 
@@ -2544,6 +2544,15 @@ __metadata:
   dependencies:
     vue-demi: "npm:>=0.14.10"
   checksum: 10c0/3d42bf185dcfd17aa20f2381271057cf55484c983795ed211c69586526b7b80ec5641a476b0ed8645dc19991203396b5a7c6219e93f9a79fab8f2ab47f680448
+  languageName: node
+  linkType: hard
+
+"@vueuse/shared@npm:11.1.0":
+  version: 11.1.0
+  resolution: "@vueuse/shared@npm:11.1.0"
+  dependencies:
+    vue-demi: "npm:>=0.14.10"
+  checksum: 10c0/ed9a4625537825fe783c66823592560696604f5301e8dcef12dda3a816b85334e7c70ccbaaf1c0c62ea2b8efcce58893b780210162374d2e9bc1e4c5889e066b
   languageName: node
   linkType: hard
 
