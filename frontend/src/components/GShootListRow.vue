@@ -162,8 +162,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
         <div
           v-else
-          class="d-flex flex-wrap"
-          style="max-width: 300px"
+          class="d-flex flex-wrap ticket-labels"
         >
           <g-ticket-label
             v-for="label in shootTicketLabels"
@@ -446,8 +445,10 @@ const hasShootWorkerGroupWarning = computed(() => {
 </script>
 
 <style lang="scss" scoped>
-  .labels {
-    line-height: 10px;
+  .ticket-labels {
+    overflow-y: scroll;
+    max-height: 30px;
+    max-width: 300px;
   }
 
   .position-relative {

@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
         </div>
         <div
           v-if="labels.length"
-          class="d-flex flex-wrap"
+          class="d-flex flex-wrap ml-2 ticket-labels"
         >
           <g-ticket-label
             v-for="label in labels"
@@ -133,7 +133,8 @@ export default {
     line-height: 20px;
   }
   .ticket-labels {
-    line-height: 10px;
+    overflow-y: scroll;
+    max-height: 30px;
   }
 
   .link-icon {
