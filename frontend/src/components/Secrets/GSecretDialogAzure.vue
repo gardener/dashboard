@@ -66,7 +66,6 @@ SPDX-License-Identifier: Apache-2.0
       <div v-if="isDNSSecret">
         <v-select
           v-model="azureCloud"
-          hint="AzurePublic is default. Choose AzureChina or AzureGovernment if you are using a different Azure cloud"
           color="primary"
           item-color="primary"
           label="Azure Cloud"
@@ -188,10 +187,7 @@ export default {
         clientSecret: this.clientSecret,
         subscriptionID: this.subscriptionId,
         tenantID: this.tenantId,
-        ...(this.isDNSSecret
-          ? { AZURE_CLOUD: this.azureCloud }
-          : {}
-        ),
+        AZURE_CLOUD: this.isDNSSecret ? this.azureCloud : undefined,
       }
     },
     isCreateMode () {
