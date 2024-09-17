@@ -4,6 +4,8 @@ exports[`services/projects #create should create a project and return it when re
 {
   "metadata": {
     "name": "foo",
+  },
+  "spec": {
     "namespace": "garden-foo",
   },
   "status": {

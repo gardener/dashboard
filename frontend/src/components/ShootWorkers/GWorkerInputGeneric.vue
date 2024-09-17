@@ -195,6 +195,7 @@ import {
   set,
   head,
   pick,
+  every,
 } from '@/lodash'
 
 export default {
@@ -422,8 +423,14 @@ export default {
       return sortBy(concat(this.selectedZones, this.unselectedZones), 'text')
     },
     zoneHint () {
+      const allAvailable = every(this.allZones, zone =>
+        includes(this.availableZones, zone),
+      )
+      if (allAvailable) {
+        return ''
+      }
       if (this.maxAdditionalZones >= this.availableZones.length) {
-        return undefined
+        return ''
       }
       if (this.maxAdditionalZones === 0) {
         return 'Your network configuration does not allow to add more zones that are not already used by this cluster'
