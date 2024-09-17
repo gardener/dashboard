@@ -222,9 +222,6 @@ SPDX-License-Identifier: Apache-2.0
         density="compact"
         class="g-table"
       >
-        <template #headers="headers">
-          <g-data-table-header v-bind="headers" />
-        </template>
         <template #item="{ item }">
           <g-secret-row-dns
             :key="`${item.cloudProfileName}/${item.name}`"

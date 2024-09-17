@@ -197,9 +197,6 @@ SPDX-License-Identifier: Apache-2.0
         :custom-key-sort="disableCustomKeySort(visibleServiceAccountTableHeaders)"
         class="g-table"
       >
-        <template #headers="headers">
-          <g-data-table-header v-bind="headers" />
-        </template>
         <template #item="{ item }">
           <g-service-account-row
             :key="`${item.namespace}_${item.username}`"

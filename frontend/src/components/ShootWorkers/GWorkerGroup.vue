@@ -27,6 +27,7 @@ SPDX-License-Identifier: Apache-2.0
           location="top"
           :disabled="!machineImage.isDeprecated"
           text="Machine image version is deprecated"
+          activator="parent"
         />
       </v-chip>
     </template>
@@ -380,6 +381,8 @@ import GCodeBlock from '@/components/GCodeBlock'
 import GVendorIcon from '@/components/GVendorIcon'
 
 import { useShootItem } from '@/composables/useShootItem'
+
+import { parseTimeString } from '@/utils/hibernationSchedule'
 
 import {
   find,
