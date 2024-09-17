@@ -48,10 +48,7 @@ import { useShootItem } from '@/composables/useShootItem'
 
 import { errorDetailsFromError } from '@/utils/error'
 
-import {
-  map,
-  filter,
-} from '@/lodash'
+import { map } from '@/lodash'
 
 export default {
   components: {
