@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-autocomplete
     ref="autocomplete"
-    v-model:modelValue="internalValue"
+    v-model:model-value="internalValue"
     v-messages-color="{ color: 'warning' }"
     auto-select-first
     color="primary"

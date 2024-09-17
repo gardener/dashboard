@@ -3540,13 +3540,6 @@ const RAW_RUNTIME_STATE =
           ["@vueuse/metadata", "npm:11.1.0"]\
         ],\
         "linkType": "HARD"\
-      }],\
-      ["npm:11.1.0", {\
-        "packageLocation": "./.yarn/cache/@vueuse-metadata-npm-11.1.0-955d686c6a-5063d8b81c.zip/node_modules/@vueuse/metadata/",\
-        "packageDependencies": [\
-          ["@vueuse/metadata", "npm:11.1.0"]\
-        ],\
-        "linkType": "HARD"\
       }]\
     ]],\
     ["@vueuse/router", [\
