@@ -8,6 +8,7 @@
 
 const http = require('http')
 const createError = require('http-errors')
+const { get } = require('lodash')
 
 class TimeoutError extends Error {
   constructor (message) {
@@ -44,7 +45,7 @@ function isAbortError (err = {}) {
 }
 
 function getDefaultStatusMessage (statusCode) {
-  return http.STATUS_CODES[statusCode] // eslint-disable-line security/detect-object-injection
+  return get(http.STATUS_CODES, [statusCode])
 }
 
 function createHttpError (options) {

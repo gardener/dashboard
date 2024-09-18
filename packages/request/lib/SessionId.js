@@ -25,7 +25,7 @@ class SessionId extends URL {
 function normalizeObject (object) {
   const normalizedObject = {}
   for (const key of Object.keys(object).sort()) {
-    const value = get(object, key)
+    const value = get(object, [key])
     let normalizedValue
     switch (typeof value) {
       case 'string':
@@ -42,7 +42,7 @@ function normalizeObject (object) {
         break
     }
     if (typeof normalizedValue !== 'undefined') {
-      set(normalizedObject, key, normalizedValue)
+      set(normalizedObject, [key], normalizedValue)
     }
   }
   return normalizedObject
