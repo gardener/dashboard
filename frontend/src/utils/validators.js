@@ -17,6 +17,7 @@ const lowerCaseAlphaNumHyphenPattern = /^[-a-z0-9]*$/
 const consecutiveHyphenPattern = /.?-{2,}.?/
 const startEndHyphenPattern = /^-.*.|.*-$/
 const numberOrPercentagePattern = /^[\d]+[%]?$/
+const guidPattern = /^[0-9A-Fa-f]{8}-([0-9A-Fa-f]{4}-){3}[0-9A-Fa-f]{12}$/
 export const timezonePattern = /^([+-])(\d{2}):(\d{2})$/
 
 const base64 = withMessage('Must be a valid base64 string', regex(base64Pattern))
@@ -31,6 +32,7 @@ const noStartEndHyphen = withMessage('Must not start or end with a hyphen', valu
 const numberOrPercentage = withMessage('Must be a number or percentage', value => {
   return numberOrPercentagePattern.test(value)
 })
+const guid = withMessage('Must be a valid GUID', regex(guidPattern))
 
 const isTimezone = withMessage('TimeZone must have format [+|-]HH:mm', value => {
   return timezonePattern.test(value)
@@ -111,4 +113,5 @@ export {
   includesIfAvailable,
   numberOrPercentage,
   isTimezone,
+  guid,
 }

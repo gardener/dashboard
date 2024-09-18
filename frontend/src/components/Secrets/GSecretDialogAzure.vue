@@ -115,7 +115,10 @@ import { required } from '@vuelidate/validators'
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
 
-import { withFieldName } from '@/utils/validators'
+import {
+  withFieldName,
+  guid,
+} from '@/utils/validators'
 import { getErrorMessages } from '@/utils'
 
 export default {
@@ -157,15 +160,18 @@ export default {
     return {
       clientId: withFieldName('Client ID', {
         required,
+        guid,
       }),
       clientSecret: withFieldName('Client Secret', {
         required,
       }),
       tenantId: withFieldName('Tenant ID', {
         required,
+        guid,
       }),
       subscriptionId: withFieldName('Subscription ID', {
         required,
+        guid,
       }),
     }
   },
