@@ -135,8 +135,7 @@ export default {
 
     const projectItem = toRef(projectStore, 'project')
     const {
-      costObjectSettingEnabled,
-      costObjectTitle,
+      costObjectsSettingEnabled,
       costObjectErrorMessage,
     } = useProjectCostObject(projectItem)
 
@@ -150,8 +149,7 @@ export default {
 
     return {
       projectName,
-      costObjectSettingEnabled,
-      costObjectTitle,
+      costObjectsSettingEnabled,
       costObjectErrorMessage,
       v$,
     }
@@ -164,12 +162,11 @@ export default {
   },
   validations () {
     const projectName = this.projectName
-    const costObjectTitle = this.costObjectTitle
 
     const messageFn = ({ $model }) => {
       return projectName === get($model, 'metadata.projectName')
-        ? `${costObjectTitle} is required. Go to the ADMINISTRATION page to edit the project and set the ${costObjectTitle}.`
-        : `${costObjectTitle} is required and has to be set on the Project ${toUpper(projectName)}`
+        ? 'A Cost Object is required. Go to the ADMINISTRATION page to edit the project and set the Cost Object.'
+        : `A Cost Object is required and has to be set on the Project ${toUpper(projectName)}`
     }
 
     const requiresCostObjectIfEnabled = (enabled = false) => withParams(
@@ -184,7 +181,7 @@ export default {
     return {
       internalValue: withFieldName('Secret', {
         required,
-        requiresCostObjectIfEnabled: withMessage(messageFn, requiresCostObjectIfEnabled(this.costObjectSettingEnabled)),
+        requiresCostObjectIfEnabled: withMessage(messageFn, requiresCostObjectIfEnabled(this.costObjectsSettingEnabled)),
       }),
     }
   },

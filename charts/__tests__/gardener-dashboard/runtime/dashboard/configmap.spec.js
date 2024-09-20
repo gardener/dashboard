@@ -163,6 +163,34 @@ describe('gardener-dashboard', function () {
       })
     })
 
+    describe('costObjects', function () {
+      it('should render the template with costObjects configuration', async function () {
+        const values = {
+          global: {
+            dashboard: {
+              frontendConfig: {
+                costObjects: [
+                  {
+                    type: 'CO',
+                    title: 'Cost Object',
+                    description: 'Example Description',
+                    regex: '^example.*$',
+                    errorMessage: 'Invalid cost object'
+                  }
+                ]
+              }
+            }
+          }
+        }
+
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [configMap] = documents
+        const config = yaml.load(configMap.data['config.yaml'])
+        expect(pick(config, ['frontend.costObjects'])).toMatchSnapshot()
+      })
+    })
+
     describe('oidc', () => {
       let values
 
