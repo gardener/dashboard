@@ -1359,7 +1359,7 @@ const RAW_RUNTIME_STATE =
           ["@xterm/addon-web-links", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.11.0"],\
           ["@xterm/xterm", "npm:5.5.0"],\
           ["ansi-html", "npm:0.0.9"],\
-          ["codemirror", "npm:5.65.17"],\
+          ["codemirror", "npm:5.65.18"],\
           ["dayjs", "npm:1.11.13"],\
           ["downloadjs", "npm:1.4.7"],\
           ["eslint", "npm:8.57.0"],\
@@ -4621,10 +4621,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["codemirror", [\
-      ["npm:5.65.17", {\
-        "packageLocation": "./.yarn/cache/codemirror-npm-5.65.17-ce71cad637-c2fa8eda0f.zip/node_modules/codemirror/",\
+      ["npm:5.65.18", {\
+        "packageLocation": "./.yarn/cache/codemirror-npm-5.65.18-debbbac10b-806e00c708.zip/node_modules/codemirror/",\
         "packageDependencies": [\
-          ["codemirror", "npm:5.65.17"]\
+          ["codemirror", "npm:5.65.18"]\
         ],\
         "linkType": "HARD"\
       }]\
