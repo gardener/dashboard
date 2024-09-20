@@ -462,8 +462,9 @@ export class Spinner {
     this._hideCursor()
     this.#intervalId = setInterval(() => {
       i = ++i % frames.length
+      const frame = frames[i] // eslint-disable-line security/detect-object-injection
       this._eraseLine()
-      this.#term.write(frames[i] + ' ' + this.#text)
+      this.#term.write(frame + ' ' + this.#text)
     }, 125)
   }
 

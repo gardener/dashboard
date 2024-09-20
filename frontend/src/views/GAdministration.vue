@@ -609,7 +609,7 @@ const userList = computed(() => {
 })
 const isValidCostObject = withMessage(
   costObjectErrorMessage.value,
-  helpers.regex(new RegExp(costObjectRegex.value)),
+  helpers.regex(costObjectRegex.value),
 )
 const costObjectRules = computed(() => ({ costObject: isValidCostObject }))
 const ownerRules = computed(() => {

@@ -50,11 +50,12 @@ class LifecycleHooks {
     this.io = io(server, cache)
     // register watches
     for (const [key, watch] of Object.entries(watches)) {
-      if (informers[key]) {
+      const informer = informers[key] // eslint-disable-line security/detect-object-injection
+      if (informer) {
         if (key === 'leases') {
-          watch(this.io, informers[key], { signal: this.ac.signal })
+          watch(this.io, informer, { signal: this.ac.signal })
         } else {
-          watch(this.io, informers[key])
+          watch(this.io, informer)
         }
       }
     }
