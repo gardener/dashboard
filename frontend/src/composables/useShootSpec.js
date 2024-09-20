@@ -89,6 +89,10 @@ export function useShootSpec (shootItem, options = {}) {
     return !!shootWorkerGroups.value.length
   })
 
+  const sshAccessEnabled = computed(() => {
+    return get(shootSpec.value, 'provider.workerSettings.sshAccess.enabled', false)
+  })
+
   const shootAddons = computed(() => {
     return cloneDeep(get(shootSpec.value, 'addons', {}))
   })
@@ -171,6 +175,7 @@ export function useShootSpec (shootItem, options = {}) {
     shootCloudProviderKind,
     shootWorkerGroups,
     hasShootWorkerGroups,
+    sshAccessEnabled,
     shootAddons,
     shootRegion,
     shootZones,

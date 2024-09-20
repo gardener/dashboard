@@ -417,24 +417,18 @@ export function selfTerminationDaysForSecret (secret) {
   return terminationDays
 }
 
-export function purposesForSecret (secret) {
-  return selfTerminationDaysForSecret(secret)
-    ? ['evaluation']
-    : ['evaluation', 'development', 'testing', 'production']
-}
-
 export const shootAddonList = [
   {
     name: 'kubernetesDashboard',
     title: 'Dashboard',
-    description: 'General-purpose web UI for Kubernetes clusters. Several high-profile attacks have shown weaknesses, so installation is not recommend, especially not for production clusters.',
+    description: 'The general-purpose web UI for Kubernetes clusters has exhibited vulnerabilities in several high-profile attacks, making its installation not recommended.',
     visible: true,
     enabled: false,
   },
   {
     name: 'nginxIngress',
     title: 'Nginx Ingress',
-    description: 'Default ingress-controller with static configuration and conservatively sized (cannot be changed). Therefore, it is not recommended for production clusters. We recommend alternatively to install an ingress-controller of your liking, which you can freely configure, program, and scale to your production needs.',
+    description: 'The default ingress controller has a static configuration and a conservative size, which cannot be changed. For production clusters, we recommend installing an alternative ingress controller of your choice, which you can freely configure, program, and scale according to your production needs.',
     visible: true,
     enabled: false,
   },
@@ -727,7 +721,6 @@ export default {
   encodeBase64Url,
   shortRandomString,
   selfTerminationDaysForSecret,
-  purposesForSecret,
   shootAddonList,
   htmlToDocumentFragment,
   documentFragmentToHtml,

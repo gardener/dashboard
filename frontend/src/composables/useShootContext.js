@@ -108,6 +108,10 @@ export function createShootContextComposable (options = {}) {
     return uniq(flatMap(workers, 'zones'))
   })
 
+  const initialProviderInfrastructureConfigNetworksZones = computed(() => {
+    return get(initialManifest.value, 'spec.provider.infrastructureConfig.networks.zones')
+  })
+
   /* manifest */
   const manifest = ref({})
 
@@ -982,6 +986,7 @@ export function createShootContextComposable (options = {}) {
     providerInfrastructureConfigFirewallSize,
     providerInfrastructureConfigFloatingPoolName,
     providerInfrastructureConfigNetworksZones,
+    initialProviderInfrastructureConfigNetworksZones,
     providerInfrastructureConfigPartitionID,
     providerInfrastructureConfigProjectID,
     /* provider - workers */
