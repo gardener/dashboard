@@ -1445,7 +1445,7 @@ const RAW_RUNTIME_STATE =
           ["@gardener-dashboard/kube-config", "workspace:packages/kube-config"],\
           ["@gardener-dashboard/logger", "workspace:packages/logger"],\
           ["@gardener-dashboard/test-utils", "workspace:packages/test-utils"],\
-          ["chokidar", "npm:4.0.0"],\
+          ["chokidar", "npm:4.0.1"],\
           ["eslint", "npm:8.57.0"],\
           ["eslint-config-standard", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:17.1.0"],\
           ["eslint-plugin-import", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:2.30.0"],\
@@ -4561,10 +4561,10 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "HARD"\
       }],\
-      ["npm:4.0.0", {\
-        "packageLocation": "./.yarn/cache/chokidar-npm-4.0.0-39d260a09b-42d03c53b0.zip/node_modules/chokidar/",\
+      ["npm:4.0.1", {\
+        "packageLocation": "./.yarn/cache/chokidar-npm-4.0.1-989df9ae3c-4bb7a3adc3.zip/node_modules/chokidar/",\
         "packageDependencies": [\
-          ["chokidar", "npm:4.0.0"],\
+          ["chokidar", "npm:4.0.1"],\
           ["readdirp", "npm:4.0.1"]\
         ],\
         "linkType": "HARD"\
