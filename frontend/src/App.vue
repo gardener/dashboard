@@ -33,6 +33,8 @@ import { useProjectStore } from '@/store/project'
 
 import { useCustomColors } from '@/composables/useCustomColors'
 
+import { get } from '@/lodash'
+
 const theme = useTheme()
 const route = useRoute()
 const localStorageStore = useLocalStorageStore()
@@ -62,7 +64,9 @@ const { system } = useColorMode({
   },
 })
 
-provide('getColorCode', value => theme.current.value?.colors[value])
+provide('getColorCode', value => {
+  return get(theme.current.value, ['colors', value])
+})
 
 const bus = useEventBus('esc-pressed')
 

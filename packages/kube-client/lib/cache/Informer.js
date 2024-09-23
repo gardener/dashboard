@@ -10,17 +10,16 @@ const EventEmitter = require('events')
 const Reflector = require('./Reflector')
 const Store = require('./Store')
 
-const kReflector = Symbol('reflector')
-const kAbortController = Symbol('abortController')
-const kStore = Symbol('store')
-
 class Informer extends EventEmitter {
+  #reflector
+  #abortController = new AbortController()
+  #store
+
   constructor (listWatcher, { keyPath } = {}) {
     super()
-    this[kAbortController] = new AbortController()
-    const store = this[kStore] = new Store({ keyPath })
+    const store = this.#store = new Store({ keyPath })
     const emitter = this
-    this[kReflector] = Reflector.create(listWatcher, {
+    this.#reflector = Reflector.create(listWatcher, {
       replace (items, resourceVersion) {
         const events = new Map()
         for (const key of store.listKeys()) {
@@ -65,34 +64,55 @@ class Informer extends EventEmitter {
   }
 
   get names () {
-    return this[kReflector].names
+    return this.#reflector.names
   }
 
   get store () {
-    return this[kStore]
+    return this.#store
   }
 
   get hasSynced () {
-    return this[kStore].hasSynced
+    return this.#store.hasSynced
   }
 
   get lastSyncResourceVersion () {
-    return this[kReflector].lastSyncResourceVersion
+    return this.#reflector.lastSyncResourceVersion
   }
 
   abort () {
-    this[kAbortController].abort()
+    this.#abortController.abort()
   }
 
   run (signal) {
     if (signal instanceof AbortSignal) {
       signal.addEventListener('abort', () => this.abort(), { once: true })
     }
-    this[kReflector].run(this[kAbortController].signal)
+    this.#reflector.run(this.#abortController.signal)
   }
 
   static create (...args) {
     return new this(...args)
+  }
+
+  static createTestingInformer (...args) {
+    const informer = new this(...args)
+    return Object.defineProperties(informer, {
+      reflector: {
+        get () {
+          return informer.#reflector
+        }
+      },
+      store: {
+        get () {
+          return informer.#store
+        }
+      },
+      abortController: {
+        get () {
+          return informer.#abortController
+        }
+      }
+    })
   }
 }
 

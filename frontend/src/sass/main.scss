@@ -104,6 +104,28 @@
   }
 }
 
+.v-theme-- {
+  &light, &dark {
+    .g-highlighted {
+      $background-color: if(&light, #fff3cd, #2e2e2e);
+      $border-color: if(&light, #fde7a4, #444444);
+
+      background-color: $background-color;
+      border-left: 1px solid $border-color;
+      border-right: 1px solid $border-color;
+      box-sizing: border-box;
+
+      &.g-highlighted--top {
+        border-top: 1px solid $border-color;
+      }
+
+      &.g-highlighted--bottom {
+        border-bottom: 1px solid $border-color;
+      }
+    }
+  }
+}
+
 .inherit-color {
   color: inherit !important;
 }

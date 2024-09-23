@@ -19,6 +19,18 @@ function enforceConsistentDependencies ({ Yarn }) {
   }
 }
 
+function enforceConsistentVueUseVersions({ Yarn }) {
+  const vueUsePackages = Yarn.dependencies().filter(dep => dep.ident.startsWith('@vueuse/'));
+
+  if (vueUsePackages.length > 0) {
+    const firstVersion = vueUsePackages[0].range
+
+    for (const dependency of vueUsePackages) {
+      dependency.update(firstVersion)
+    }
+  }
+}
+
 function enforceWorkspaceDependencies({ Yarn }) {
   for (const dependency of Yarn.dependencies()) {
     if (!Yarn.workspace({ ident: dependency.ident })) {
@@ -40,11 +52,12 @@ function enforceFieldsOnAllWorkspaces({ Yarn }, fields) {
 module.exports = {
   async constraints (ctx) {
     enforceConsistentDependencies(ctx)
+    enforceConsistentVueUseVersions(ctx)
     enforceWorkspaceDependencies(ctx)
     enforceFieldsOnAllWorkspaces(ctx, {
       license: 'Apache-2.0',
-      'engines.node': '^20.5.0',
-      'packageManager': 'yarn@4.0.2',
+      'engines.node': '^22.7.0',
+      'packageManager': 'yarn@4.4.1',
       'repository.type': 'git',
       'repository.url': 'git+https://github.com/gardener/dashboard.git',
       'repository.directory': workspace => workspace.cwd,

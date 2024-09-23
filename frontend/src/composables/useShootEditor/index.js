@@ -23,6 +23,7 @@ import { useLocalStorageStore } from '@/store/localStorage'
 
 import { useApi } from '@/composables/useApi'
 import { useLogger } from '@/composables/useLogger'
+import { useEditorLineHighlighter } from '@/composables/useEditorLineHighlighter'
 
 import {
   createEditor,
@@ -31,6 +32,7 @@ import {
 
 import {
   get,
+  set,
   omit,
   isEqual,
 } from '@/lodash'
@@ -43,6 +45,7 @@ export function useShootEditor (initialValue, options = {}) {
     authzStore = useAuthzStore(),
     projectStore = useProjectStore(),
     localStorageStore = useLocalStorageStore(),
+    disableLineHighlighting = false,
   } = options
 
   const cm = shallowRef(null)
@@ -64,6 +67,8 @@ export function useShootEditor (initialValue, options = {}) {
     type: undefined,
     description: undefined,
   })
+
+  let editorLineHighlighter = null
 
   const schemaDefinition = computedAsync(() => {
     return api.getShootSchemaDefinition()
@@ -93,7 +98,8 @@ export function useShootEditor (initialValue, options = {}) {
     }
     const extraKeys = {}
     for (const [key, value] of Object.entries(originalExtraKeys)) {
-      extraKeys[localStorageStore.editorShortcuts[key] ?? key] = value
+      const keyCode = get(localStorageStore.editorShortcuts, [key], key)
+      set(extraKeys, [keyCode], value)
     }
     return extraKeys
   }
@@ -155,7 +161,7 @@ export function useShootEditor (initialValue, options = {}) {
         scrollbarStyle: 'native',
         lineNumbers: true,
         lineWrapping: true,
-        viewportMargin: Infinity, // make sure the whole shoot resource is laoded so that the browser's text search works on it
+        viewportMargin: Infinity, // make sure the whole shoot resource is loaded so that the browser's text search works on it
         readOnly: isReadOnly.value,
         extraKeys: getExtraKeys(),
         hintOptions: {
@@ -170,6 +176,11 @@ export function useShootEditor (initialValue, options = {}) {
         clean.value = instance.doc.isClean(generation.value)
         historySize.value = instance.doc.historySize()
       })
+
+      if (!disableLineHighlighting) {
+        editorLineHighlighter = useEditorLineHighlighter(instance)
+      }
+
       let cmTooltipFnTimerID
       const CodeMirror = instance.constructor
       CodeMirror.on(element, 'mouseover', e => {
@@ -196,13 +207,17 @@ export function useShootEditor (initialValue, options = {}) {
   }
 
   function destroyEditor () {
+    if (editorLineHighlighter) {
+      editorLineHighlighter.destroy()
+      editorLineHighlighter = null
+    }
     if (cm.value) {
       const element = cm.value.doc.cm.getWrapperElement()
       if (element && element.remove) {
         element.remove()
       }
+      cm.value = null
     }
-    cm.value = null
   }
 
   function getDocumentValue () {

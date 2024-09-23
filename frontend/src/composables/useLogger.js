@@ -31,7 +31,7 @@ function print (key, ...args) {
   } else {
     args.unshift(prefix)
   }
-  const fn = console[key] // eslint-disable-line no-console
+  const fn = console[key] // eslint-disable-line security/detect-object-injection, no-console
   if (typeof fn === 'function') {
     fn(...args)
   }

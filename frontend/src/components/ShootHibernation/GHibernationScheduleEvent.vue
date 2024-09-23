@@ -215,9 +215,12 @@ export default {
       },
       set (value) {
         const time = parseTimeString(value)
-        if (time) {
-          set(this.scheduleEvent, 'end.minute', time.minute)
-          set(this.scheduleEvent, 'end.hour', time.hour)
+        set(this.scheduleEvent, 'end.minute', time?.minute)
+        set(this.scheduleEvent, 'end.hour', time?.hour)
+
+        if (!get(this.scheduleEvent, 'end.weekdays')) {
+          const weekdays = get(this.scheduleEvent, 'start.weekdays')
+          set(this.scheduleEvent, 'end.weekdays', weekdays)
         }
       },
     },
@@ -227,9 +230,12 @@ export default {
       },
       set (value) {
         const time = parseTimeString(value)
-        if (time) {
-          set(this.scheduleEvent, 'start.minute', time.minute)
-          set(this.scheduleEvent, 'start.hour', time.hour)
+        set(this.scheduleEvent, 'start.minute', time?.minute)
+        set(this.scheduleEvent, 'start.hour', time?.hour)
+
+        if (!get(this.scheduleEvent, 'start.weekdays')) {
+          const weekdays = get(this.scheduleEvent, 'end.weekdays')
+          set(this.scheduleEvent, 'start.weekdays', weekdays)
         }
       },
     },

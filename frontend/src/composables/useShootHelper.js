@@ -30,13 +30,13 @@ import {
 } from '@/lodash'
 
 const shootPropertyMappings = Object.freeze({
-  creationTimestamp: 'metadata.creationTimestamp',
   cloudProfileName: 'spec.cloudProfileName',
   seedName: 'spec.seedName',
   region: 'spec.region',
   secretBindingName: 'spec.secretBindingName',
   kubernetesVersion: 'spec.kubernetes.version',
   providerType: 'spec.provider.type',
+  addons: 'spec.addons',
 })
 
 export function createShootHelperComposable (shootItem, options = {}) {
@@ -49,13 +49,13 @@ export function createShootHelperComposable (shootItem, options = {}) {
   } = options
 
   const {
-    creationTimestamp,
     cloudProfileName,
     seedName,
     region,
     secretBindingName,
     kubernetesVersion,
     providerType,
+    addons,
   } = mapValues(shootPropertyMappings, path => {
     return computed(() => get(shootItem.value, path))
   })
@@ -75,13 +75,6 @@ export function createShootHelperComposable (shootItem, options = {}) {
 
   const cloudProfile = computed(() => {
     return cloudProfileStore.cloudProfileByName(cloudProfileName.value)
-  })
-
-  const isZonedCluster = computed(() => {
-    return utils.isZonedCluster({
-      cloudProviderKind: providerType.value,
-      isNewCluster: !creationTimestamp.value,
-    })
   })
 
   const seed = computed(() => {
@@ -135,7 +128,12 @@ export function createShootHelperComposable (shootItem, options = {}) {
   })
 
   const allPurposes = computed(() => {
-    return utils.purposesForSecret(infrastructureSecret.value)
+    if (some(addons.value, 'enabled')) {
+      return ['evaluation']
+    }
+    return utils.selfTerminationDaysForSecret(infrastructureSecret.value)
+      ? ['evaluation']
+      : ['evaluation', 'development', 'testing', 'production']
   })
 
   const allLoadBalancerProviderNames = computed(() => {
@@ -223,7 +221,6 @@ export function createShootHelperComposable (shootItem, options = {}) {
     cloudProfiles,
     defaultCloudProfileName,
     cloudProfile,
-    isZonedCluster,
     seed,
     seedIngressDomain,
     seeds,

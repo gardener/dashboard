@@ -108,6 +108,10 @@ export function createShootContextComposable (options = {}) {
     return uniq(flatMap(workers, 'zones'))
   })
 
+  const initialProviderInfrastructureConfigNetworksZones = computed(() => {
+    return get(initialManifest.value, 'spec.provider.infrastructureConfig.networks.zones')
+  })
+
   /* manifest */
   const manifest = ref({})
 
@@ -591,6 +595,22 @@ export function createShootContextComposable (options = {}) {
     return difference(allZones.value, usedZones.value)
   })
 
+  const isZonedCluster = computed(() => {
+    switch (providerType.value) {
+      case 'azure':
+        if (isNewCluster.value) {
+          return true // new clusters are always created as zoned clusters by the dashboard
+        }
+        return get(manifest.value, 'spec.provider.infrastructureConfig.zoned', false)
+      case 'metal':
+        return false // metal clusters do not support zones for worker groups
+      case 'local':
+        return false // local development provider does not support zones
+      default:
+        return true
+    }
+  })
+
   const availableZones = computed(() => {
     if (!isZonedCluster.value) {
       return []
@@ -652,7 +672,7 @@ export function createShootContextComposable (options = {}) {
     const defaultAddons = {}
     if (!providerState.workerless) {
       for (const { name, enabled } of visibleAddonDefinitionList.value) {
-        defaultAddons[name] = { enabled }
+        set(defaultAddons, [name], { enabled })
       }
     }
     addons.value = defaultAddons
@@ -874,7 +894,6 @@ export function createShootContextComposable (options = {}) {
     cloudProfiles,
     defaultCloudProfileName,
     cloudProfile,
-    isZonedCluster,
     seed,
     seeds,
     isFailureToleranceTypeZoneSupported,
@@ -967,6 +986,7 @@ export function createShootContextComposable (options = {}) {
     providerInfrastructureConfigFirewallSize,
     providerInfrastructureConfigFloatingPoolName,
     providerInfrastructureConfigNetworksZones,
+    initialProviderInfrastructureConfigNetworksZones,
     providerInfrastructureConfigPartitionID,
     providerInfrastructureConfigProjectID,
     /* provider - workers */
@@ -977,6 +997,7 @@ export function createShootContextComposable (options = {}) {
     usedZones,
     unusedZones,
     availableZones,
+    isZonedCluster,
     /* hibernation */
     maintenanceTimeWindowBegin,
     maintenanceTimeWindowEnd,
@@ -1028,7 +1049,6 @@ export function createShootContextComposable (options = {}) {
     /* helper */
     cloudProfiles,
     cloudProfile,
-    isZonedCluster,
     seed,
     seeds,
     isFailureToleranceTypeZoneSupported,

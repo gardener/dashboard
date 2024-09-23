@@ -125,7 +125,7 @@ const components = {
 }
 
 function resolveComponent (name) {
-  return components[name]
+  return components[name] // eslint-disable-line security/detect-object-injection
 }
 
 const {
