@@ -103,7 +103,7 @@ describe('kube-config', () => {
         KUBECONFIG: '/path/to/kube/config:/path/to/another/kube/config'
       })
       expect(fs.readFileSync).toHaveBeenCalledTimes(1)
-      expect(fs.readFileSync.mock.calls[0]).toEqual(['/path/to/kube/config'])
+      expect(fs.readFileSync.mock.calls[0]).toEqual(['/path/to/kube/config', 'utf8'])
       expect(config).toEqual({
         url: server.origin,
         ca,

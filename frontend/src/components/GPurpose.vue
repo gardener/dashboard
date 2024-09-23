@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-select
     v-model="v$.internalValue.$model"
-    hint="Indicate the importance of the cluster"
+    hint="Indicate the importance of the cluster. Available purposes may be limited by the selected secret. If any add-on is enabled, only purpose evaluation can be selected."
     color="primary"
     item-color="primary"
     label="Purpose"

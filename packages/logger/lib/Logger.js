@@ -40,7 +40,7 @@ class Logger {
 
   setLogLevel (value) {
     if (Reflect.has(LEVELS, value)) {
-      this.logLevel = LEVELS[value]
+      this.logLevel = LEVELS[value] // eslint-disable-line security/detect-object-injection
     }
   }
 

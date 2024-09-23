@@ -22,7 +22,11 @@ import {
   aggregateResourceQuotaStatus,
 } from './helper'
 
-import { map } from '@/lodash'
+import {
+  get,
+  set,
+  map,
+} from '@/lodash'
 
 export const useQuotaStore = defineStore('quota', () => {
   const api = useApi()
@@ -32,7 +36,7 @@ export const useQuotaStore = defineStore('quota', () => {
 
   const projectQuotaStatus = computed(() => {
     const namespace = authzStore.namespace
-    const quota = quotas.value[namespace]
+    const quota = get(quotas.value, [namespace])
     return quota
       ? getProjectQuotaStatus(quota)
       : []
@@ -40,7 +44,7 @@ export const useQuotaStore = defineStore('quota', () => {
 
   async function fetchQuotas (namespace = authzStore.namespace) {
     const response = await api.getResourceQuotas({ namespace })
-    quotas.value[namespace] = aggregateResourceQuotaStatus(map(response.data, 'status'))
+    set(quotas.value, [namespace], aggregateResourceQuotaStatus(map(response.data, 'status')))
   }
 
   return {

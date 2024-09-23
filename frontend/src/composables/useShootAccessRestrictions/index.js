@@ -73,10 +73,10 @@ export const useShootAccessRestrictions = (shootItem, options = {}) => {
     const accessRestrictionDefinitions = {}
     for (const definition of accessRestrictionDefinitionList.value) {
       const { key, options } = definition
-      accessRestrictionDefinitions[key] = {
+      set(accessRestrictionDefinitions, [key], {
         ...definition,
         options: keyBy(options, 'key'),
-      }
+      })
     }
     return accessRestrictionDefinitions
   })
@@ -95,7 +95,7 @@ export const useShootAccessRestrictions = (shootItem, options = {}) => {
   })
 
   function getAccessRestrictionValue (key) {
-    const { input } = accessRestrictionDefinitions.value[key]
+    const { input } = get(accessRestrictionDefinitions.value, [key])
     const inverted = !!input?.inverted
     const defaultValue = inverted
     const value = getSeedSelectorMatchLabel(key, defaultValue) === 'true'
@@ -103,7 +103,7 @@ export const useShootAccessRestrictions = (shootItem, options = {}) => {
   }
 
   function setAccessRestrictionValue (key, value) {
-    const { input, options } = accessRestrictionDefinitions.value[key]
+    const { input, options } = get(accessRestrictionDefinitions.value, [key])
     const enabled = NAND(value, !!input?.inverted)
     if (enabled) {
       setSeedSelectorMatchLabel(key, 'true')
@@ -120,7 +120,7 @@ export const useShootAccessRestrictions = (shootItem, options = {}) => {
   }
 
   function getAccessRestrictionOptionValue (key) {
-    const { accessRestrictionKey } = accessRestrictionOptionDefinitions.value[key]
+    const { accessRestrictionKey } = get(accessRestrictionOptionDefinitions.value, [key])
     const { input } = get(accessRestrictionDefinitions.value, [accessRestrictionKey, 'options', key])
     const inverted = !!input?.inverted
     const defaultValue = inverted
@@ -129,7 +129,7 @@ export const useShootAccessRestrictions = (shootItem, options = {}) => {
   }
 
   function setAccessRestrictionOptionValue (key, value) {
-    const { accessRestrictionKey } = accessRestrictionOptionDefinitions.value[key]
+    const { accessRestrictionKey } = get(accessRestrictionOptionDefinitions.value, [key])
     const { input } = get(accessRestrictionDefinitions.value, [accessRestrictionKey, 'options', key])
     const inverted = !!input?.inverted
     setShootAnnotation(key, `${NAND(value, inverted)}`)

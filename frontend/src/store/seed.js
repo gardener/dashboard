@@ -48,7 +48,7 @@ export const useSeedStore = defineStore('seed', () => {
     const seedsByName = keyBy(list.value, 'metadata.name')
     const names = get(cloudProfile, 'data.seedNames', [])
     for (const name of names) {
-      const seed = seedsByName[name]
+      const seed = get(seedsByName, [name])
       if (seed) {
         seeds.push(seed)
       }

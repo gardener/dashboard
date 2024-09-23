@@ -20,6 +20,7 @@ import {
   upperFirst,
   flatMap,
   get,
+  unset,
   forIn,
   isEqual,
   first,
@@ -97,7 +98,7 @@ export class EditorCompletions {
     const cur = cm.getCursor()
 
     const { lineString, lineTokens } = this._getTokenLine(cm, cur)
-    const [, indent, firstArrayItem] = lineString.match(/^(\s*)(-\s)?(.*?)?$/) || []
+    const [, indent, firstArrayItem] = lineString.match(/^(\s*)(-\s)?(.*)$/) || []
     let extraIntent = ''
     if (firstArrayItem) {
       extraIntent = `${repeat(' ', this.arrayBulletIndent)}`
@@ -143,7 +144,7 @@ export class EditorCompletions {
       }
       if (Array.isArray(type)) {
         return type
-          .map((type, i) => formatTypeText(type, format[i]))
+          .map((type, i) => formatTypeText(type, format[i])) // eslint-disable-line security/detect-object-injection
           .join(' | ')
       }
       return formatTypeText(type, format)
@@ -214,7 +215,7 @@ export class EditorCompletions {
     let token
     const { lineTokens, lineString } = this._getTokenLine(cm, cur)
     forEach(lineTokens, lineToken => {
-      const result = lineToken.string.match(/^(\s*)-\s(.*)?$/)
+      const result = lineToken.string.match(/^(\s*)-\s(.*)$/)
       if (result) {
         const indent = result[1]
         token = lineToken
@@ -380,7 +381,7 @@ export class EditorCompletions {
           this.logger.warn('Unsupported schema array length, %s has length %i at %s', propertyName, propertyValue.length, parentPropertyName)
         }
 
-        delete properties[propertyName]
+        unset(properties, [propertyName])
       } else if (typeof propertyValue === 'object') {
         this._resolveSchemaArrays(propertyValue, propertyName)
       }

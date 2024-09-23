@@ -98,7 +98,7 @@ function getUser ({ headers, key, cert }) {
 
 function beforeRequest (options) {
   const { url, method, headers, body } = options
-  options[xRequestStart] = Date.now()
+  options[xRequestStart] = Date.now() // eslint-disable-line security/detect-object-injection
   if (!('x-request-id' in headers)) {
     headers['x-request-id'] = xRequestId.next()
   }

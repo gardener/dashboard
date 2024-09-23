@@ -207,7 +207,7 @@ export const useShootDns = (manifest, options) => {
   }
 
   function deleteDnsServiceExtensionProvider (index) {
-    const provider = dnsServiceExtensionProviders.value[index]
+    const provider = get(dnsServiceExtensionProviders.value, [index])
     if (!provider) {
       return
     }
