@@ -25,6 +25,7 @@ import {
   findIndex,
   map,
   get,
+  set,
   replace,
 } from '@/lodash'
 
@@ -48,8 +49,9 @@ export const useProjectStore = defineStore('project', () => {
   const projectNameMap = computed(() => {
     const projectNames = {}
     if (Array.isArray(list.value)) {
-      for (const { metadata: { name }, spec: { namespace } } of list.value) {
-        projectNames[namespace] = name
+      for (const project of list.value) {
+        const { metadata: { name }, spec: { namespace } } = project
+        set(projectNames, [namespace], name)
       }
     }
     return projectNames
@@ -97,7 +99,8 @@ export const useProjectStore = defineStore('project', () => {
   function updateList (obj) {
     const index = findIndex(list.value, ['metadata.name', obj.metadata.name])
     if (index !== -1) {
-      list.value.splice(index, 1, Object.assign(list.value[index], obj))
+      const item = list.value[index] // eslint-disable-line security/detect-object-injection
+      list.value.splice(index, 1, Object.assign(item, obj))
     } else {
       list.value.push(obj)
     }
@@ -111,7 +114,7 @@ export const useProjectStore = defineStore('project', () => {
     const namespace = typeof metadata === 'string'
       ? metadata
       : metadata?.namespace
-    return projectNameMap.value[namespace] ?? replace(namespace, /^garden-/, '')
+    return get(projectNameMap.value, [namespace], replace(namespace, /^garden-/, ''))
   }
 
   async function fetchProjects () {

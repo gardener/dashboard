@@ -108,7 +108,7 @@ const wellKnownConditions = {
 
 export function getCondition (type) {
   if (type in wellKnownConditions) {
-    return wellKnownConditions[type]
+    return get(wellKnownConditions, [type])
   }
 
   let name = ''
@@ -356,7 +356,7 @@ export const useConfigStore = defineStore('config', () => {
       if (!purpose) {
         return true
       }
-      return !!defaultHibernationSchedule.value[purpose]
+      return !!get(defaultHibernationSchedule.value, [purpose], false)
     }
     return false
   }
@@ -374,7 +374,7 @@ export const useConfigStore = defineStore('config', () => {
   }
 
   function conditionForType (type) {
-    return allKnownConditions.value[type] ?? getCondition(type)
+    return get(allKnownConditions.value, [type], getCondition(type))
   }
 
   const customCloudProviders = computed(() => {

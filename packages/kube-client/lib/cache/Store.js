@@ -8,56 +8,56 @@
 
 const { get, matches, matchesProperty, property, isPlainObject } = require('lodash')
 
-const kMap = Symbol('map')
-const kKeyPath = Symbol('keyPath')
-const kKeyFunc = Symbol('keyFunc')
-const kHasSynced = Symbol('hasSynced')
-const kResolve = Symbol('resolve')
-
 class Store {
-  constructor ({ keyPath = 'metadata.uid' } = {}) {
-    this[kMap] = new Map()
-    this[kKeyPath] = keyPath
-    this[kHasSynced] = false
+  #map = new Map()
+  #keyPath = 'metadata.uid'
+  #hasSynced = false
+  #resolve = undefined
+
+  constructor (options) {
+    this.#map = new Map()
+    if (options?.keyPath) {
+      this.#keyPath = options.keyPath
+    }
     const untilHasSynced = new Promise(resolve => {
-      this[kResolve] = () => {
-        this[kHasSynced] = true
+      this.#resolve = () => {
+        this.#hasSynced = true
         resolve()
       }
     })
     Reflect.defineProperty(this, 'untilHasSynced', { value: untilHasSynced })
   }
 
-  [kKeyFunc] (object) {
-    return get(object, this[kKeyPath])
+  #keyFunc (object) {
+    return get(object, this.#keyPath)
   }
 
   get hasSynced () {
-    return this[kHasSynced]
+    return this.#hasSynced
   }
 
   listKeys () {
-    return Array.from(this[kMap].keys())
+    return Array.from(this.#map.keys())
   }
 
   list () {
-    return Array.from(this[kMap].values())
+    return Array.from(this.#map.values())
   }
 
   clear () {
-    this[kMap].clear()
+    this.#map.clear()
   }
 
   getKey (object) {
-    return this[kKeyFunc](object)
+    return this.#keyFunc(object)
   }
 
   getByKey (key) {
-    return this[kMap].get(key)
+    return this.#map.get(key)
   }
 
   get (object) {
-    const key = this[kKeyFunc](object)
+    const key = this.#keyFunc(object)
     return this.getByKey(key)
   }
 
@@ -71,7 +71,7 @@ class Store {
     } else if (typeof predicate !== 'function') {
       throw new TypeError('Invalid predicate argument')
     }
-    for (const object of this[kMap].values()) {
+    for (const object of this.#map.values()) {
       if (predicate(object)) {
         return object
       }
@@ -79,17 +79,17 @@ class Store {
   }
 
   hasByKey (key) {
-    return this[kMap].has(key)
+    return this.#map.has(key)
   }
 
   has (object) {
-    const key = this[kKeyFunc](object)
+    const key = this.#keyFunc(object)
     return this.hasByKey(key)
   }
 
   set (object) {
-    const key = this[kKeyFunc](object)
-    this[kMap].set(key, object)
+    const key = this.#keyFunc(object)
+    this.#map.set(key, object)
   }
 
   add (object) {
@@ -101,23 +101,23 @@ class Store {
   }
 
   deleteByKey (key) {
-    this[kMap].delete(key)
+    this.#map.delete(key)
   }
 
   delete (object) {
-    const key = this[kKeyFunc](object)
-    this[kMap].delete(key)
+    const key = this.#keyFunc(object)
+    this.#map.delete(key)
   }
 
   replace (items) {
     this.clear()
     for (const object of items) {
-      const key = this[kKeyFunc](object)
-      this[kMap].set(key, object)
+      const key = this.#keyFunc(object)
+      this.#map.set(key, object)
     }
-    if (this[kResolve]) {
-      this[kResolve]()
-      this[kResolve] = undefined
+    if (this.#resolve) {
+      this.#resolve()
+      this.#resolve = undefined
     }
   }
 }

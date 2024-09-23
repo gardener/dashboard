@@ -108,7 +108,6 @@ import {
   ref,
   computed,
   provide,
-  watch,
 } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import yaml from 'js-yaml'
@@ -133,6 +132,7 @@ import {
   isEmpty,
   pick,
   isEqual,
+  map,
 } from '@/lodash'
 
 export default {
@@ -154,8 +154,7 @@ export default {
     const {
       providerWorkers,
       providerInfrastructureConfigNetworksZones,
-      initialZones,
-      usedZones,
+      initialProviderInfrastructureConfigNetworksZones,
       setShootManifest,
     } = useShootContext()
 
@@ -167,16 +166,17 @@ export default {
     const disableWorkerAnimation = ref(false)
     const newZonesAlert = ref(true)
 
-    const newZones = computed(() => {
+    const newZoneNetworks = computed(() => {
+      const initialNetworkNames = map(initialProviderInfrastructureConfigNetworksZones.value, 'name')
       return filter(providerInfrastructureConfigNetworksZones.value, ({ name }) => {
-        return !includes(initialZones.value, name)
+        return !includes(initialNetworkNames, name)
       })
     })
 
     const newZonesYaml = computed(() => {
-      return isEmpty(newZones.value)
+      return isEmpty(newZoneNetworks.value)
         ? undefined
-        : yaml.dump(newZones.value)
+        : yaml.dump(newZoneNetworks.value)
     })
 
     const editorData = computed({
@@ -221,10 +221,6 @@ export default {
       ],
       disableLineHighlighting: true,
     }))
-
-    watch(usedZones, value => {
-      providerInfrastructureConfigNetworksZones.value = filter(providerInfrastructureConfigNetworksZones.value, zone => includes(value, zone.name))
-    })
 
     return {
       v$: useVuelidate(),

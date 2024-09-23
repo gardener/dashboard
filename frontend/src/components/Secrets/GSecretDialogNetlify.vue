@@ -31,16 +31,14 @@ SPDX-License-Identifier: Apache-2.0
     <template #help-slot>
       <div>
         <p>
-          You need to provide an access token for Netlify to allow the dns-controller-manager to authenticate to Netlify DNS API.
+          You need to provide an access token for Netlify to allow the dns-controller-manager to authenticate with the Netlify DNS API.
         </p>
         <p>
-          Then base64 encode the token. For eg. if the generated token in 1234567890123456, use
+          Then, base64 encode the token. For example, if the generated token in 1234567890123456, use
         </p>
+        <pre>$ echo -n '1234567890123456789' | base64</pre>
         <p>
-          <pre>$ echo -n '1234567890123456789' | base64</pre>
-        </p>
-        <p>
-          For details see
+          For details, see
           <g-external-link url="https://docs.netlify.com/cli/get-started/#obtain-a-token-in-the-netlify-ui" />
         </p>
       </div>

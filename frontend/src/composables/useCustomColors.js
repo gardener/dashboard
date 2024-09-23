@@ -14,12 +14,15 @@ import { toValue } from '@vueuse/core'
 
 import { isHtmlColorCode } from '@/utils'
 
-import { get } from '@/lodash'
+import {
+  get,
+  set,
+} from '@/lodash'
 
 function patchThemes (themes, customThemes) {
   for (const colorMode of ['light', 'dark']) {
-    const themeColors = themes[colorMode]?.colors ?? {}
-    const customThemeColors = customThemes[colorMode] ?? {}
+    const themeColors = get(themes, [colorMode, 'colors'], {})
+    const customThemeColors = get(customThemes, [colorMode], {})
     patchThemeColors(themeColors, customThemeColors)
   }
 }
@@ -36,9 +39,9 @@ function setThemeColor (themeColors, key, value) {
   }
   const colorCode = get(vuetifyColors, value)
   if (colorCode) {
-    themeColors[key] = colorCode
+    set(themeColors, [key], colorCode)
   } else if (isHtmlColorCode(value)) {
-    themeColors[key] = value
+    set(themeColors, [key], value)
   }
 }
 

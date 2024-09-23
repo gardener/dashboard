@@ -118,7 +118,7 @@ export const useSecretStore = defineStore('secret', () => {
     const index = findIndex(list.value, eqlNameAndNamespace(obj.metadata))
     if (index !== -1) {
       list.value.splice(index, 1, {
-        ...list.value[index],
+        ...list.value[index], // eslint-disable-line security/detect-object-injection
         ...obj,
       })
     } else {

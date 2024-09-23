@@ -115,6 +115,10 @@ export function createShootContextComposable (options = {}) {
     return get(customCloudProviders, [providerType.value, 'shoot', 'createFields'], [])
   })
 
+  const initialProviderInfrastructureConfigNetworksZones = computed(() => {
+    return get(initialManifest.value, 'spec.provider.infrastructureConfig.networks.zones')
+  })
+
   /* manifest */
   const manifest = ref({})
 
@@ -680,7 +684,7 @@ export function createShootContextComposable (options = {}) {
     const defaultAddons = {}
     if (!providerState.workerless) {
       for (const { name, enabled } of visibleAddonDefinitionList.value) {
-        defaultAddons[name] = { enabled }
+        set(defaultAddons, [name], { enabled })
       }
     }
     addons.value = defaultAddons
@@ -1010,6 +1014,7 @@ export function createShootContextComposable (options = {}) {
     providerInfrastructureConfigFirewallSize,
     providerInfrastructureConfigFloatingPoolName,
     providerInfrastructureConfigNetworksZones,
+    initialProviderInfrastructureConfigNetworksZones,
     providerInfrastructureConfigPartitionID,
     providerInfrastructureConfigProjectID,
     /* provider - workers */

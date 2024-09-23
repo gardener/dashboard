@@ -5,6 +5,7 @@
 //
 
 import {
+  parseCronExpression,
   scheduleEventsFromCrontabBlock,
   crontabBlocksFromScheduleEvents,
 } from '@/utils/hibernationSchedule'
@@ -14,6 +15,28 @@ const currentLocation = moment.tz.guess()
 
 describe('utils', () => {
   describe('hibernationSchedule', () => {
+    describe('#parseCronExpression', () => {
+      it('should parse a crontab expressions', () => {
+        expect(parseCronExpression('0 8 * * 1')).toEqual({
+          hour: '8',
+          minute: '0',
+          weekdays: '1',
+        })
+        expect(parseCronExpression('00 12 * * 1,2,3,4,5').weekdays).toBe('1,2,3,4,5')
+        expect(parseCronExpression('00 12 * * MON,TUE,WED,THU,FRI').weekdays).toBe('1,2,3,4,5')
+        expect(parseCronExpression('00 12 * * 1-5').weekdays).toBe('1,2,3,4,5')
+        expect(parseCronExpression('00 12 * * 7').weekdays).toBe('0')
+        expect(parseCronExpression('00 12 * * *').weekdays).toBe('1,2,3,4,5,6,0')
+        expect(parseCronExpression('00 12 * * SAT,SUN').weekdays).toBe('6,0')
+      })
+
+      it('should fail to parse a crontab expressions', () => {
+        expect(parseCronExpression('00 12 * * FR')).toBeUndefined()
+        expect(parseCronExpression('00 12 * * 8')).toBeUndefined()
+        expect(parseCronExpression('00 12 0 * 1')).toBeUndefined()
+        expect(parseCronExpression('00 12 * 0 1')).toBeUndefined()
+      })
+    })
     describe('#scheduleEventsFromCrontabBlock', () => {
       it('should parse a simple crontab block', () => {
         const crontabBlock = {
