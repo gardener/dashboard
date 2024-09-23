@@ -136,31 +136,31 @@ export default {
         forEach(validators, (validator, validatorName) => {
           switch (validator.type) {
             case 'required':
-              compiledValidators[validatorName] = required
+              set(compiledValidators, [validatorName], required)
               break
             case 'requiredIf':
-              compiledValidators[validatorName] = requiredIf(() => !every(map(validator.not, fieldKey => this.fieldData[fieldKey])))
+              set(compiledValidators, [validatorName], requiredIf(() => !every(map(validator.not, fieldKey => get(this.fieldData, [fieldKey])))))
               break
             case 'isValidObject':
-              compiledValidators[validatorName] = () => isEmpty(this.fieldData[key]) || Object.keys(this.parsedInput[key]).length > 0
+              set(compiledValidators, [validatorName], () => isEmpty(get(this.fieldData, [key])) || Object.keys(get(this.parsedInput, [key])).length > 0)
               break
             case 'regex':
-              compiledValidators[validatorName] = value => !value || new RegExp(validator.value).test(value)
+              set(compiledValidators, [validatorName], value => !value || new RegExp(validator.value).test(value)) // eslint-disable-line security/detect-non-literal-regexp
           }
           if (validator.message) {
-            compiledValidators[validatorName] = withMessage(validator.message, compiledValidators[validatorName])
+            set(compiledValidators, [validatorName], withMessage(validator.message, get(compiledValidators, [validatorName])))
           }
         })
-        allValidators.fieldData[key] = withFieldName(label, compiledValidators)
+        set(allValidators.fieldData, [key], withFieldName(label, compiledValidators))
       })
       return allValidators
     },
     parsedFieldData () {
       return fromPairs(map(this.fields, ({ key, type }) => {
         if (type === 'json' || type === 'yaml') {
-          return [key, this.parsedInput[key]]
+          return [key, get(this.parsedInput, [key])]
         }
-        return [key, this.fieldData[key]]
+        return [key, get(this.fieldData, [key])]
       }))
     },
     parsedFields () {
@@ -199,13 +199,13 @@ export default {
           // set initial data
           const fieldData = fromPairs(map(this.fields, ({ key, type }) => {
             if (type === 'yaml') {
-              return [key, yaml.dump(value[key])]
+              return [key, yaml.dump(get(value, [key]))]
             }
             if (type === 'json') {
-              return [key, JSON.stringify(value[key])]
+              return [key, JSON.stringify(get(value, [key]))]
             }
 
-            return [key, value[key]]
+            return [key, get(value, [key])]
           }))
           this.fieldData = fieldData
         }
@@ -221,21 +221,21 @@ export default {
       set(this.parsedInput, key, {})
       try {
         if (type === 'yaml') {
-          this.parsedInput[key] = yaml.load(this.fieldData[key])
+          set(this.parsedInput, [key], yaml.load(get(this.fieldData, [key])))
         } else if (type === 'json') {
-          this.parsedInput[key] = JSON.parse(this.fieldData[key])
+          set(this.parsedInput, [key], JSON.parse(get(this.fieldData, [key])))
         }
       } catch (err) {
         /* ignore errors */
       } finally {
-        if (!isObject(this.parsedInput[key])) {
-          this.parsedInput[key] = {}
+        if (!isObject(get(this.parsedInput, [key]))) {
+          set(this.parsedInput, [key], {})
         }
       }
-      this.v$.fieldData[key].$touch()
+      get(this.v$.fieldData, [key]).$touch()
     },
     toggleShowInputData (key) {
-      set(this.showInputData, key, !this.showInputData[key])
+      set(this.showInputData, key, !get(this.showInputData, [key]))
     },
     getErrorMessages,
   },

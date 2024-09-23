@@ -880,7 +880,7 @@ export function createShootContextComposable (options = {}) {
     },
     set (value) {
       forEach(customCloudProviderFields.value, ({ key, path }) => {
-        set(manifest.value, `${path}.${key}`, value[key])
+        set(manifest.value, [`${path}.${key}`], get(value, [key]))
       })
     },
   })
