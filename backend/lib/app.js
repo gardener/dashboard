@@ -23,6 +23,12 @@ const { healthCheck } = require('./healthz')
 const { port, metricsPort } = config
 const periodSeconds = config.readinessProbe?.periodSeconds || 10
 
+// protect against Prototype Pollution vulnerabilities
+for (const ctor of [Object, Function, Array, String, Number, Boolean]) {
+  Object.freeze(ctor)
+  Object.freeze(ctor.prototype)
+}
+
 // resolve pathnames
 const PUBLIC_DIRNAME = resolve(join(__dirname, '..', 'public'))
 const INDEX_FILENAME = join(PUBLIC_DIRNAME, 'index.html')

@@ -55,10 +55,10 @@ function errorToLocals (err, req) {
     ? { name, stack }
     : { name }
   let code = 500
-  let reason = STATUS_CODES[code]
+  let reason = _.get(STATUS_CODES, [code])
   if (isHttpError(err)) {
     code = err.statusCode
-    reason = STATUS_CODES[code]
+    reason = _.get(STATUS_CODES, [code])
   }
   if (code < 100 || code >= 600) {
     code = 500

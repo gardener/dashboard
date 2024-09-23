@@ -16,6 +16,7 @@ import {
   getTimeStringFrom,
   parseNumberWithMagnitudeSuffix,
   normalizeVersion,
+  isEmail,
 } from '@/utils'
 
 import {
@@ -468,6 +469,29 @@ describe('utils', () => {
 
     test('returns null for invalid suffix', () => {
       expect(parseNumberWithMagnitudeSuffix('1x')).toBeNull()
+    })
+  })
+
+  describe('isEmail', () => {
+    it('should return true for valid emails', () => {
+      expect(isEmail('a@b.de')).toBe(true)
+      expect(isEmail('a@b.a.r.com')).toBe(true)
+      expect(isEmail('abcdefghijklmnopqrstuvwxyz0123456789.!#$%&’*+/=?^_`{|}~-@bar.com')).toBe(true)
+    })
+
+    it('should return false for valid emails', () => {
+      expect(isEmail(undefined)).toBe(false)
+      expect(isEmail('')).toBe(false)
+      expect(isEmail('a'.repeat(321))).toBe(false)
+      expect(isEmail('bar.com')).toBe(false)
+      expect(isEmail('a@b@bar.com')).toBe(false)
+      expect(isEmail('a@b@bar.com')).toBe(false)
+      expect(isEmail('@bar.com')).toBe(false)
+      expect(isEmail('a@bar')).toBe(false)
+      expect(isEmail('<a>@bar.com')).toBe(false)
+      expect(isEmail('a@bar.c')).toBe(false)
+      expect(isEmail('a@bar..com')).toBe(false)
+      expect(isEmail('abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789@bar.com')).toBe(false)
     })
   })
 

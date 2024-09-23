@@ -50,30 +50,43 @@ class SubjectList {
       const id = item.id
       if (_.startsWith(id, `system:serviceaccount:${namespace}:`)) {
         const extensions = {}
-        if (serviceAccountItems[id]) {
-          _.assign(extensions, serviceAccountItems[id].extensions)
-          delete serviceAccountItems[id]
+        const serviceAccountItem = serviceAccountItemMap.get(id)
+        if (serviceAccountItem) {
+          Object.assign(extensions, serviceAccountItem.extensions)
+          serviceAccountItemMap.delete(id)
         } else {
-          _.set(extensions, 'orphaned', true)
+          extensions.orphaned = true
         }
         item.extend(extensions)
       }
     }
 
-    const serviceAccountItems = _
+    const toMap = obj => new Map(Object.entries(obj))
+
+    const serviceAccountItemMap = _
       .chain(serviceAccounts)
       .map(createServiceAccountItem)
       .keyBy('id')
+      .thru(toMap)
       .value()
 
-    this.subjectListItems = _
+    const subjectListItemMap = _
       .chain(subjects)
       .map(createItem)
       .groupBy('id')
       .mapValues(createGroup)
       .forEach(extendItem)
-      .assign(serviceAccountItems)
+      .thru(toMap)
       .value()
+
+    this.subjectListItemMap = new Map([
+      ...subjectListItemMap,
+      ...serviceAccountItemMap
+    ])
+  }
+
+  get subjectListItems () {
+    return Object.fromEntries(this.subjectListItemMap)
   }
 
   get subjects () {
@@ -96,19 +109,19 @@ class SubjectList {
   }
 
   get (id) {
-    return this.subjectListItems[id]
+    return this.subjectListItemMap.get(id)
   }
 
   set (id, item) {
-    this.subjectListItems[id] = item
+    this.subjectListItemMap.set(id, item)
   }
 
   delete (id) {
-    delete this.subjectListItems[id]
+    this.subjectListItemMap.delete(id)
   }
 
   has (id) {
-    return !!this.subjectListItems[id]
+    return this.subjectListItemMap.has(id)
   }
 }
 

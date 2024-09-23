@@ -27,7 +27,7 @@ SPDX-License-Identifier: Apache-2.0
         dense
       />
       <g-credential-tile
-        v-if="hasShootWorkerGroups"
+        v-if="hasShootWorkerGroups && sshAccessEnabled"
         type="sshKeypair"
         dense
       />
@@ -52,5 +52,6 @@ const {
   shootEnableStaticTokenKubeconfig,
   isTestingCluster,
   hasShootWorkerGroups,
+  sshAccessEnabled,
 } = useShootItem()
 </script>
