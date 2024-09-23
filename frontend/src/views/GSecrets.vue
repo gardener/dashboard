@@ -581,7 +581,7 @@ export default {
         case 'infrastructure':
           return `${item.infrastructureName} ${item.cloudProfileName}`
         default:
-          return item[column]
+          return get(item, [column])
       }
     },
     disableCustomKeySort (tableHeaders) {

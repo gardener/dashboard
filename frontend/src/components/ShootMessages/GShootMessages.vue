@@ -94,6 +94,10 @@ const components = {
   'g-force-delete-message': GForceDeleteMessage,
 }
 
+function resolveComponent (name) {
+  return components[name] // eslint-disable-line security/detect-object-injection
+}
+
 const props = defineProps({
   small: {
     type: Boolean,
@@ -476,10 +480,6 @@ function colorForSeverity (severity) {
     default:
       return 'primary'
   }
-}
-
-function resolveComponent (name) {
-  return components[name]
 }
 </script>
 
