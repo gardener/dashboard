@@ -7,6 +7,8 @@
 import { parseNumberWithMagnitudeSuffix } from '@/utils'
 
 import {
+  get,
+  set,
   map,
   replace,
   upperFirst,
@@ -22,7 +24,7 @@ export function getProjectQuotaStatus (quota) {
 
   const { hard, used } = quota
   const quotaStatus = map(hard, (limitValue, key) => {
-    const usedValue = used[key] || 0
+    const usedValue = get(used, [key], 0)
     const percentage = Math.floor((usedValue / limitValue) * 100)
     const resourceName = replace(key, 'count/', '')
     const caption = upperFirst(head(split(resourceName, '.')))
@@ -54,12 +56,12 @@ export function aggregateResourceQuotaStatus (quotas) {
 
   for (const quota of quotas) {
     for (const [key, value] of Object.entries(quota.hard)) {
-      const currentValue = hard[key] ?? Number.MAX_SAFE_INTEGER
-      hard[key] = Math.min(parseNumberWithMagnitudeSuffix(value), currentValue).toString()
+      const currentValue = get(hard, [key], Number.MAX_SAFE_INTEGER)
+      set(hard, [key], Math.min(parseNumberWithMagnitudeSuffix(value), currentValue).toString())
     }
     for (const [key, value] of Object.entries(quota.used)) {
-      const currentValue = used[key] ?? Number.MIN_SAFE_INTEGER
-      used[key] = Math.max(parseNumberWithMagnitudeSuffix(value), currentValue).toString()
+      const currentValue = get(used, [key], Number.MIN_SAFE_INTEGER)
+      set(used, [key], Math.max(parseNumberWithMagnitudeSuffix(value), currentValue).toString())
     }
   }
 

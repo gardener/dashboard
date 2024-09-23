@@ -16,7 +16,7 @@ const resourceGroups = _
   .value()
 
 function loadGroup ({ name }) {
-  const resources = require(`./${name}`)
+  const resources = require(`./${name}`) // eslint-disable-line security/detect-non-literal-require
   return _.mapKeys(resources, 'names.plural')
 }
 

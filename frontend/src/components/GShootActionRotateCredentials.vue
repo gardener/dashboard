@@ -111,6 +111,7 @@ export default {
       shootEnableStaticTokenKubeconfig,
       isShootStatusHibernated,
       hasShootWorkerGroups,
+      sshAccessEnabled,
     } = useShootItem()
 
     const {
@@ -396,7 +397,7 @@ export default {
             : [],
           ...allComponentTexts['rotate-ca-start'].actions,
           ...allComponentTexts['rotate-observability-credentials'].actions,
-          ...hasShootWorkerGroups.value
+          ...hasShootWorkerGroups.value && sshAccessEnabled.value
             ? allComponentTexts['rotate-ssh-keypair'].actions
             : [],
           ...allComponentTexts['rotate-etcd-encryption-key-start'].actions,

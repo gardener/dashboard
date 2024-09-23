@@ -10,6 +10,11 @@ const _ = require('lodash')
 
 const Member = require('./Member')
 
+const allowedExtensionProperties = Object.freeze([
+  ...Member.allowedExtensionProperties,
+  'secrets'
+])
+
 class SubjectListItem {
   constructor (index = SubjectListItem.NOT_IN_LIST) {
     this.index = index
@@ -32,7 +37,7 @@ class SubjectListItem {
 
   extend (obj) {
     const before = _.cloneDeep(this.extensions)
-    const after = _.assign(this.extensions, obj)
+    const after = _.assign(this.extensions, _.pick(obj, allowedExtensionProperties))
     return !_.isEqual(before, after)
   }
 

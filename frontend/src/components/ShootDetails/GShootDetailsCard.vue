@@ -188,7 +188,7 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           <g-list-item-content>
             <template #label>
-              Add-ons <span class="text-caption">(not actively monitored and provided on a best-effort basis only)</span>
+              Add-ons <span class="text-caption">(not actively monitored and available for clusters with purpose evaluation only)</span>
             </template>
             <div
               v-if="shootAddonNames.length"
@@ -245,6 +245,7 @@ import utils, {
 } from '@/utils'
 
 import {
+  get,
   filter,
   map,
 } from '@/lodash'
@@ -284,14 +285,12 @@ const isValidTerminationDate = computed(() => {
   return utils.isValidTerminationDate(shootExpirationTimestamp.value)
 })
 
-const addon = computed(() => {
-  return name => {
-    return shootAddons.value[name] || {}
-  }
-})
+function getAddon (name) {
+  return get(shootAddons.value, [name], {})
+}
 
 const shootAddonNames = computed(() => {
-  return map(filter(shootAddonList, item => addon.value(item.name).enabled), 'title')
+  return map(filter(shootAddonList, item => getAddon(item.name).enabled), 'title')
 })
 
 const slaDescriptionHtml = computed(() => {

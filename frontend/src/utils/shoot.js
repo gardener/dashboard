@@ -224,7 +224,8 @@ export function getDefaultNetworkConfigurationForAllZones (numberOfZones, infras
     case 'aws': {
       const zoneNetworksAws = splitCIDR(workerCIDR, numberOfZones)
       return map(range(numberOfZones), index => {
-        const bigNetWorks = splitCIDR(zoneNetworksAws[index], 2)
+        const zoneNetwork = zoneNetworksAws[index] // eslint-disable-line security/detect-object-injection
+        const bigNetWorks = splitCIDR(zoneNetwork, 2)
         const workerNetwork = bigNetWorks[0]
         const smallNetworks = splitCIDR(bigNetWorks[1], 2)
         const publicNetwork = smallNetworks[0]
@@ -239,8 +240,9 @@ export function getDefaultNetworkConfigurationForAllZones (numberOfZones, infras
     case 'alicloud': {
       const zoneNetworksAli = splitCIDR(workerCIDR, numberOfZones)
       return map(range(numberOfZones), index => {
+        const zoneNetwork = zoneNetworksAli[index] // eslint-disable-line security/detect-object-injection
         return {
-          workers: zoneNetworksAli[index],
+          workers: zoneNetwork,
         }
       })
     }
@@ -253,9 +255,10 @@ export function getDefaultZonesNetworkConfiguration (zones, infrastructureKind, 
     return undefined
   }
   return map(zones, (zone, index) => {
+    const zoneConfiguration = zoneConfigurations[index] // eslint-disable-line security/detect-object-injection
     return {
       name: zone,
-      ...zoneConfigurations[index],
+      ...zoneConfiguration,
     }
   })
 }
