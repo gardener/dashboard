@@ -188,10 +188,12 @@ export default {
   },
   methods: {
     fillOnPosition (position) {
-      return this.mouseDown ? this.rect[position] : undefined
+      const { [position]: value } = this.rect
+      return this.mouseDown ? value : undefined
     },
     strokeRectOnPosition (position) {
-      return this.mouseDown ? this.strokeRect[position] : undefined
+      const { [position]: value } = this.strokeRect
+      return this.mouseDown ? value : undefined
     },
     dragOver ({ detail: { mouseOverId: position } }) {
       this.showIt = true
@@ -199,13 +201,9 @@ export default {
         return
       }
       this.mouseDown = true
-      const newRect = {}
-      newRect[position] = '#d71e00'
-      this.rect = newRect
+      this.rect = { [position]: '#d71e00' }
 
-      const newStrokeRect = {}
-      newStrokeRect[position] = '#fff'
-      this.strokeRect = newStrokeRect
+      this.strokeRect = { [position]: '#fff' }
       this.currentPosition = position
     },
     dragLeaveZone () {

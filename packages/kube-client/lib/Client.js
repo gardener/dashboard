@@ -17,11 +17,11 @@ const nonResourceEndpoints = require('./nonResourceEndpoints')
 
 const { fromKubeconfig, parseKubeconfig } = require('@gardener-dashboard/kube-config')
 
-const kClientConfig = Symbol('kClientConfig')
-
 class Client {
+  #clientConfig
+
   constructor (clientConfig, options) {
-    this[kClientConfig] = clientConfig
+    this.#clientConfig = clientConfig
     // add hooks for logging
     options = debug.attach(options)
     // assign grouped resources (e.g. core.)
@@ -31,9 +31,9 @@ class Client {
   }
 
   get cluster () {
-    const server = this[kClientConfig].url
-    const certificateAuthority = this[kClientConfig].ca
-    const insecureSkipTlsVerify = !this[kClientConfig].rejectUnauthorized
+    const server = this.#clientConfig.url
+    const certificateAuthority = this.#clientConfig.ca
+    const insecureSkipTlsVerify = !this.#clientConfig.rejectUnauthorized
     return {
       server: new URL(server),
       certificateAuthority,

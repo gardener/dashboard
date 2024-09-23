@@ -29,10 +29,13 @@ function readKubeconfig (filename) {
     filename = filename.shift()
   }
   const dirname = path.dirname(filename)
-  const kubeconfig = yaml.load(fs.readFileSync(filename))
+  const kubeconfig = yaml.load(
+    fs.readFileSync(filename, 'utf8') // eslint-disable-line security/detect-non-literal-fs-filename
+  )
   const resolvePath = (object, key) => {
-    if (object[key]) {
-      object[key] = path.resolve(dirname, object[key])
+    const value = object[key] // eslint-disable-line security/detect-object-injection
+    if (value) {
+      object[key] = path.resolve(dirname, value) // eslint-disable-line security/detect-object-injection
     }
   }
   for (const { cluster } of kubeconfig.clusters) {

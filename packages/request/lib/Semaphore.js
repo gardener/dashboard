@@ -6,23 +6,28 @@
 
 'use strict'
 
-const kMaxConcurrency = Symbol('maxConcurrency')
 const kReleased = Symbol('released')
 
+function setReleased (obj, value) {
+  obj[kReleased] = value // eslint-disable-line security/detect-object-injection
+}
+
 class Semaphore {
+  #maxConcurrency = 0
+
   constructor (maxConcurrency = 100) {
-    this[kMaxConcurrency] = maxConcurrency
+    this.#maxConcurrency = maxConcurrency
     this.concurrency = 0
     this.queue = []
   }
 
   set maxConcurrency (value) {
-    this[kMaxConcurrency] = value
+    this.#maxConcurrency = value
     this.dispatch()
   }
 
   get maxConcurrency () {
-    return this[kMaxConcurrency]
+    return this.#maxConcurrency
   }
 
   get value () {
@@ -31,7 +36,7 @@ class Semaphore {
 
   acquire () {
     const ticket = new Promise(resolve => {
-      resolve[kReleased] = false
+      setReleased(resolve, false)
       this.queue.push(resolve)
     })
     this.dispatch()
@@ -43,8 +48,9 @@ class Semaphore {
       const resolve = this.queue.shift()
       this.concurrency++
       const releaser = () => {
-        if (!resolve[kReleased]) {
-          resolve[kReleased] = true
+        const { [kReleased]: released } = resolve
+        if (!released) {
+          setReleased(resolve, true)
           this.concurrency--
           this.dispatch()
         }

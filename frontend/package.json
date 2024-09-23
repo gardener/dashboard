@@ -87,6 +87,7 @@
     "eslint-plugin-import-newlines": "^1.4.0",
     "eslint-plugin-n": "^15.7.0",
     "eslint-plugin-promise": "^6.6.0",
+    "eslint-plugin-security": "^3.0.1",
     "eslint-plugin-vitest": "^0.4.0",
     "eslint-plugin-vue": "^9.23.0",
     "jsdom": "^25.0.0",

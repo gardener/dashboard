@@ -212,7 +212,7 @@ const isUniqueProjectName = withMessage(
 
 const isValidCostObject = withMessage(
   costObjectErrorMessage.value,
-  helpers.regex(new RegExp(costObjectRegex.value)),
+  helpers.regex(costObjectRegex.value),
 )
 
 const rules = {
