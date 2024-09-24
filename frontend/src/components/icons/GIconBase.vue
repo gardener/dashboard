@@ -26,6 +26,8 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { isHtmlColorCode } from '@/utils'
 
+import { get } from '@/lodash'
+
 export default {
   props: {
     iconName: {
@@ -55,7 +57,8 @@ export default {
       if (isHtmlColorCode(iconColor)) {
         return iconColor
       }
-      return this.$vuetify.theme.current.colors[iconColor]
+      const currentTheme = this.$vuetify.theme.current
+      return get(currentTheme, ['colors', iconColor])
     },
   },
 }

@@ -491,7 +491,7 @@ function highlightProjectWithKeys (keyDirection) {
     currentHighlightedIndex++
   }
 
-  const newHighlightedProject = sortedAndFilteredProjectList.value[currentHighlightedIndex]
+  const newHighlightedProject = sortedAndFilteredProjectList.value[currentHighlightedIndex] // eslint-disable-line security/detect-object-injection
   highlightedProjectName.value = newHighlightedProject.metadata.name
 
   if (currentHighlightedIndex >= numberOfVisibleProjects.value - 1) {

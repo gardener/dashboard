@@ -19,6 +19,7 @@ import {
   assign,
   findIndex,
   get,
+  set,
   head,
   matches,
   matchesProperty,
@@ -58,15 +59,15 @@ const deleteComment = (issueComments, deletedItem) => {
   // eslint-disable-next-line
   const index = findIndex(commentForIssue(state, issueNumber), matchesProperty('metadata.id', deletedItem.metadata.id))
   if (index !== -1) {
-    issueComments.value[issueNumber].splice(index, 1)
+    get(issueComments.value, [issueNumber]).splice(index, 1)
   }
 }
 
 const commentForIssue = (issueComments, issueNumber) => {
-  if (!issueComments.value[issueNumber]) {
-    issueComments.value[issueNumber] = []
+  if (!get(issueComments.value, [issueNumber])) {
+    set(issueComments.value, [issueNumber], [])
   }
-  return issueComments.value[issueNumber]
+  return get(issueComments.value, [issueNumber])
 }
 
 const putComment = (issueComments, newItem) => {
@@ -79,7 +80,7 @@ const putComment = (issueComments, newItem) => {
 const putToList = (list, newItem, updatedAtKeyPath, matcher, descending = true) => {
   const index = findIndex(list, matcher)
   if (index !== -1) {
-    const item = list[index]
+    const item = list[index] // eslint-disable-line security/detect-object-injection
     if (get(item, updatedAtKeyPath) <= get(newItem, updatedAtKeyPath)) {
       list.splice(index, 1, assign({}, item, newItem))
     }
@@ -112,11 +113,11 @@ export const useTicketStore = defineStore('ticket', () => {
 
   function issues ({ name, projectName }) {
     const key = issueKey(projectName, name)
-    return issuesMap.value[key] ?? []
+    return get(issuesMap.value, [key], [])
   }
 
   function comments ({ issueNumber }) {
-    return issueComments.value[issueNumber]
+    return get(issueComments.value, [issueNumber])
   }
 
   function latestUpdated ({ name, projectName }) {
@@ -125,7 +126,7 @@ export const useTicketStore = defineStore('ticket', () => {
 
   function labels ({ name, projectName }) {
     const key = issueKey(projectName, name)
-    return labelsMap.value[key] ?? []
+    return get(labelsMap.value, [key], [])
   }
 
   function receiveIssues (issues) {

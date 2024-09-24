@@ -20,6 +20,7 @@ import {
   upperFirst,
   flatMap,
   get,
+  unset,
   forIn,
   isEqual,
   first,
@@ -104,7 +105,7 @@ export class EditorCompletions {
     const cur = this._getCursor(cmView)
 
     const lineString = cmView.state.doc.line(cur.line).text
-    const [, indent, firstArrayItem] = lineString.match(/^(\s*)(-\s)?(.*?)?$/) || []
+    const [, indent, firstArrayItem] = lineString.match(/^(\s*)(-\s)?(.*)$/) || []
 
     let extraIntent = ''
     if (firstArrayItem) {
@@ -151,7 +152,7 @@ export class EditorCompletions {
       }
       if (Array.isArray(type)) {
         return type
-          .map((type, i) => formatTypeText(type, format[i]))
+          .map((type, i) => formatTypeText(type, format[i])) // eslint-disable-line security/detect-object-injection
           .join(' | ')
       }
       return formatTypeText(type, format)
@@ -198,7 +199,7 @@ export class EditorCompletions {
     let token
     const lineString = cmView.state.doc.line(cur.line).text
 
-    const result = lineString.match(/^(\s*)-\s(.*)?$/)
+    const result = lineString.match(/^(\s*)-\s(.*)$/)
     if (result) {
       const indent = result[1]
       token = { string: lineString }
@@ -352,7 +353,7 @@ export class EditorCompletions {
           this.logger.warn('Unsupported schema array length, %s has length %i at %s', propertyName, propertyValue.length, parentPropertyName)
         }
 
-        delete properties[propertyName]
+        unset(properties, [propertyName])
       } else if (typeof propertyValue === 'object') {
         this._resolveSchemaArrays(propertyValue, propertyName)
       }

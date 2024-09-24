@@ -280,9 +280,9 @@ async function authorizationCallback (req, res) {
     secure: true,
     path: '/'
   }
-  const stateObject = {}
+  let stateObject = {}
   if (COOKIE_STATE in req.cookies) {
-    Object.assign(stateObject, req.cookies[COOKIE_STATE])
+    stateObject = req.cookies[COOKIE_STATE] // eslint-disable-line security/detect-object-injection -- COOKIE_STATE is a constant
     res.clearCookie(COOKIE_STATE, options)
   }
   const {
@@ -299,7 +299,7 @@ async function authorizationCallback (req, res) {
     state
   }
   if (COOKIE_CODE_VERIFIER in req.cookies) {
-    checks.code_verifier = req.cookies[COOKIE_CODE_VERIFIER]
+    checks.code_verifier = req.cookies[COOKIE_CODE_VERIFIER] // eslint-disable-line security/detect-object-injection -- COOKIE_CODE_VERIFIER is a constant
     res.clearCookie(COOKIE_CODE_VERIFIER, options)
   }
   const tokenSet = await authorizationCodeExchange(backendRedirectUri, parameters, checks)
@@ -316,8 +316,9 @@ function isXmlHttpRequest ({ headers = {} }) {
 }
 
 function getAccessToken (cookies) {
-  const [header, payload] = split(cookies[COOKIE_HEADER_PAYLOAD], '.')
-  const signature = cookies[COOKIE_SIGNATURE]
+  const headerAndPayload = cookies[COOKIE_HEADER_PAYLOAD] // eslint-disable-line security/detect-object-injection -- COOKIE_HEADER_PAYLOAD is a constant
+  const [header, payload] = split(headerAndPayload, '.')
+  const signature = cookies[COOKIE_SIGNATURE] // eslint-disable-line security/detect-object-injection -- COOKIE_SIGNATURE is a constant
   if (header && payload && signature) {
     return join([header, payload, signature], '.')
   }
@@ -360,7 +361,7 @@ function csrfProtection (req) {
 
 async function getTokenSet (cookies) {
   const accessToken = getAccessToken(cookies)
-  const encryptedValues = cookies[COOKIE_TOKEN]
+  const encryptedValues = cookies[COOKIE_TOKEN] // eslint-disable-line security/detect-object-injection -- COOKIE_TOKEN is a constant
   if (!encryptedValues) {
     throw createError(401, 'No bearer token found in request', { code: 'ERR_JWE_NOT_FOUND' })
   }
