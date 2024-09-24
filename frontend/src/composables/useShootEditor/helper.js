@@ -160,9 +160,6 @@ export class EditorCompletions {
 
     forIn(completions, (completion, propertyName) => {
       const text = generateCompletionText(propertyName, completion.type, token.type)
-      if (token.type === 'firstArrayItem') {
-        // text = '- ' + text // TODO: Selection ccurently does not replace the bullet
-      }
       const string = propertyName.toLowerCase()
       const typeText = generateTypeText(completion.type, completion.format)
 

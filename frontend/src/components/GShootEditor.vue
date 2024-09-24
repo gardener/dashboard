@@ -295,4 +295,8 @@ onBeforeUnmount(() => {
     height: 100%;
   }
 
+  .cm-scroller {
+    outline: none;
+  }
+
 </style>

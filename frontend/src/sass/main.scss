@@ -138,15 +138,31 @@
 
   @mixin g-highlighted($background-color, $border-color) {
     .g-highlighted {
+      position: relative;
       background-color: $background-color;
-      border-left: 1px solid $border-color;
+      /* Left border */
+      box-shadow: inset 1px 0 0 0 $border-color;
 
-      &.g-highlighted--top {
-        border-top: 1px solid $border-color;
+      /* Top border */
+      &.g-highlighted--top::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px; /* Adjust border thickness as needed */
+        background-color: $border-color;
       }
 
-      &.g-highlighted--bottom {
-        border-bottom: 1px solid $border-color;
+      /* Bottom border */
+      &.g-highlighted--bottom::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 1px; /* Adjust border thickness as needed */
+        background-color: $border-color;
       }
     }
   }

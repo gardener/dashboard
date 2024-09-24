@@ -39,7 +39,8 @@ import {
   historyKeymap,
   undo,
   redo,
-  historyField,
+  undoDepth,
+  redoDepth,
 } from '@codemirror/commands'
 import { autocompletion } from '@codemirror/autocomplete'
 import { searchKeymap } from '@codemirror/search'
@@ -124,8 +125,8 @@ export function useShootEditor (initialValue, options = {}) {
       ...(options.extraKeys ?? []),
     ]
     for (const extraKey of extraKeys) {
-      if (localStorageStore.editorShortcuts[extraKey.key]) {
-        extraKey.key = localStorageStore.editorShortcuts[extraKey.key]
+      if (get(localStorageStore.editorShortcuts, [extraKey.key])) {
+        extraKey.key = get(localStorageStore.editorShortcuts, [extraKey.key])
       }
     }
     return extraKeys
@@ -193,9 +194,8 @@ export function useShootEditor (initialValue, options = {}) {
             if (update.docChanged) {
               touched.value = true
               clean.value = getDocumentValue() === initialDocumentValue
-              const historyState = cmView.value.state.field(historyField)
-              const undo = historyState.done.length
-              const redo = historyState.undone.length
+              const undo = undoDepth(cmView.value.state)
+              const redo = redoDepth(cmView.value.state)
               historySize.value = { undo, redo }
             }
           }),
@@ -371,7 +371,10 @@ export function useShootEditor (initialValue, options = {}) {
 
   watch(isDarkMode, isDarkMode => {
     cmView.value.dispatch({
-      effects: themeCompartment.reconfigure([isDarkMode ? oneDark : [], syntaxHighlighting(isDarkMode ? oneDarkHighlightStyle : defaultHighlightStyle)]),
+      effects: themeCompartment.reconfigure([
+        isDarkMode ? oneDark : [],
+        syntaxHighlighting(isDarkMode ? oneDarkHighlightStyle : defaultHighlightStyle),
+      ]),
     })
   })
 
