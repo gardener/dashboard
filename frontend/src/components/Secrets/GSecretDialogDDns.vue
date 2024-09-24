@@ -182,7 +182,10 @@ export default {
       zone: withFieldName('Zone', {
         required,
         format: withMessage('Must be fully qualified', value => {
-          return /^[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.$/.test(value)
+          if (typeof value !== 'string' || value.length > 255) {
+            return false
+          }
+          return /^[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\.$/.test(value) // eslint-disable-line security/detect-unsafe-regex
         }),
       }),
     }

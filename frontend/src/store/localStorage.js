@@ -78,6 +78,7 @@ const useLazyLocalStorage = () => {
 
   const createGetter = (name, initialValue = null) => {
     return () => {
+      /* eslint-disable security/detect-object-injection */
       const currentKey = refs[name]?.[kLocalStorageKey]
       const key = keys[name]
       if (currentKey !== key) {
@@ -85,6 +86,7 @@ const useLazyLocalStorage = () => {
         refs[name] = createLocalStorageRef(key, initialValue)
       }
       return refs[name]
+      /* eslint-enable security/detect-object-injection */
     }
   }
 

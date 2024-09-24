@@ -5,6 +5,7 @@
 //
 
 import {
+  set,
   isEmpty,
   isNil,
   isObject,
@@ -16,7 +17,7 @@ export function cleanup (obj) {
     for (const [key, value] of Object.entries(obj)) {
       const cleanValue = cleanupValue(value)
       if (cleanValue !== null) {
-        cleanObj[key] = cleanValue
+        set(cleanObj, [key], cleanValue)
       }
     }
     return cleanObj
