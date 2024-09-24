@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <v-container class="px-0 mx-0">
     <v-row>
       <v-col
-        v-if="cloudProfiles.length > 1"
+        v-if="cloudProfiles.length > 1 || !cloudProfileHasSeedNames"
         cols="3"
       >
         <g-cloud-profile
@@ -175,20 +175,32 @@ SPDX-License-Identifier: Apache-2.0
           />
         </v-col>
       </template>
+      <g-generic-input-fields
+        v-model="customCloudProviderData"
+        :fields="customCloudProviderFields"
+        wrapper="VCol"
+        :wrapper-props="{ cols: '3' }"
+        :input-props="{ variant: 'underlined' }"
+        :cloud-profile-name="cloudProfileName"
+      />
     </v-row>
   </v-container>
 </template>
 
 <script>
+import { mapState } from 'pinia'
 import {
   required,
   requiredIf,
 } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
+import { useConfigStore } from '@/store/config'
+
 import GCloudProfile from '@/components/GCloudProfile'
 import GWildcardSelect from '@/components/GWildcardSelect'
 import GSelectSecret from '@/components/Secrets/GSelectSecret'
+import GGenericInputFields from '@/components/GGenericInputFields'
 
 import { useShootContext } from '@/composables/useShootContext'
 
@@ -204,6 +216,8 @@ import {
   isEmpty,
   includes,
   forEach,
+  find,
+  get,
 } from '@/lodash'
 
 export default {
@@ -211,6 +225,7 @@ export default {
     GCloudProfile,
     GWildcardSelect,
     GSelectSecret,
+    GGenericInputFields,
   },
   setup () {
     const {
@@ -241,6 +256,7 @@ export default {
       allFirewallNetworks,
       allFloatingPoolNames,
       workerless,
+      customCloudProviderData,
     } = useShootContext()
 
     return {
@@ -272,6 +288,7 @@ export default {
       allFirewallNetworks,
       allFloatingPoolNames,
       workerless,
+      customCloudProviderData,
     }
   },
   validations () {
@@ -310,6 +327,9 @@ export default {
     }
   },
   computed: {
+    ...mapState(useConfigStore, [
+      'customCloudProviders',
+    ]),
     regionItems () {
       const regionItems = []
       if (!isEmpty(this.regionsWithSeed)) {
@@ -342,6 +362,16 @@ export default {
           },
         }
       })
+    },
+    customCloudProvider () {
+      return get(this.customCloudProviders, this.providerType)
+    },
+    customCloudProviderFields () {
+      return this.customCloudProvider?.shoot?.createFields
+    },
+    cloudProfileHasSeedNames () {
+      const selectedCloudProfile = find(this.cloudProfiles, { metadata: { name: this.cloudProfileName } })
+      return selectedCloudProfile?.data.seedNames?.length
     },
   },
   mounted () {

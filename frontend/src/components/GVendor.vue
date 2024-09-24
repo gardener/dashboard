@@ -37,7 +37,7 @@ SPDX-License-Identifier: Apache-2.0
               :icon="cloudProviderKind"
               class="mr-2"
             />
-            {{ cloudProviderKind }}
+            {{ vendorName }}
           </v-list-item-title>
         </v-list-item>
         <v-list-item v-if="cloudProfileName">
@@ -58,6 +58,10 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { mapActions } from 'pinia'
+
+import { useConfigStore } from '@/store/config'
+
 import GVendorIcon from '@/components/GVendorIcon'
 
 import { join } from '@/lodash'
@@ -102,7 +106,7 @@ export default {
     description () {
       const description = []
       if (this.extended && this.cloudProviderKind) {
-        description.push(this.cloudProviderKind)
+        description.push(this.vendorName)
       }
       if (this.cloudProfileName) {
         description.push(this.cloudProfileName)
@@ -132,6 +136,12 @@ export default {
       }
       return join(titles, ' / ')
     },
+    vendorName () {
+      return this.vendorDisplayName(this.cloudProviderKind)
+    },
+  },
+  methods: {
+    ...mapActions(useConfigStore, ['vendorDisplayName']),
   },
 }
 </script>
