@@ -155,13 +155,17 @@ export default {
   },
   methods: {
     visibilityIcon (index) {
-      return this.expansionPanel[index] ? 'mdi-eye-off' : 'mdi-eye'
+      return this.expansionPanel[index] // eslint-disable-line security/detect-object-injection
+        ? 'mdi-eye-off'
+        : 'mdi-eye'
     },
     visibilityTitle (index) {
-      return this.expansionPanel[index] ? 'Hide Command' : 'Show Command'
+      return this.expansionPanel[index] // eslint-disable-line security/detect-object-injection
+        ? 'Hide Command'
+        : 'Show Command'
     },
     toggle (index) {
-      this.expansionPanel[index] = !this.expansionPanel[index]
+      this.expansionPanel[index] = !this.expansionPanel[index] // eslint-disable-line security/detect-object-injection
     },
   },
 }

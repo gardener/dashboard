@@ -65,7 +65,7 @@ const {
 } = useShootContext()
 
 function getDisabledForbidden (name) {
-  const { forbidDisable = false } = addonDefinitions.value[name]
+  const { forbidDisable = false } = addonDefinitions.value[name] // eslint-disable-line security/detect-object-injection
   return !props.createMode && forbidDisable && getAddonEnabled(name)
 }
 

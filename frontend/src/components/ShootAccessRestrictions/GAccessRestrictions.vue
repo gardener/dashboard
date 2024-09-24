@@ -97,7 +97,7 @@ const {
 
 function getDisabled (key) {
   const value = getAccessRestrictionValue(key)
-  const { input } = accessRestrictionDefinitions.value[key]
+  const { input } = accessRestrictionDefinitions.value[key] // eslint-disable-line security/detect-object-injection
   const inverted = !!input?.inverted
   return !NAND(value, inverted)
 }

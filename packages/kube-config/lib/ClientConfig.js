@@ -25,7 +25,7 @@ function getCluster ({ currentCluster }, files) {
       cluster.certificateAuthority = base64Decode(caData)
     } else if (caFile) {
       files.set(caFile, 'certificateAuthority')
-      cluster.certificateAuthority = fs.readFileSync(caFile, 'utf8')
+      cluster.certificateAuthority = fs.readFileSync(caFile, 'utf8') // eslint-disable-line security/detect-non-literal-fs-filename
     }
     if (typeof insecureSkipTlsVerify === 'boolean') {
       cluster.insecureSkipTlsVerify = insecureSkipTlsVerify
@@ -55,14 +55,14 @@ function getUser ({ currentUser }, files) {
       user.clientKey = base64Decode(keyData)
     } else if (certFile && keyFile) {
       files.set(certFile, 'clientCert')
-      user.clientCert = fs.readFileSync(certFile, 'utf8')
+      user.clientCert = fs.readFileSync(certFile, 'utf8') // eslint-disable-line security/detect-non-literal-fs-filename
       files.set(keyFile, 'clientKey')
-      user.clientKey = fs.readFileSync(keyFile, 'utf8')
+      user.clientKey = fs.readFileSync(keyFile, 'utf8') // eslint-disable-line security/detect-non-literal-fs-filename
     } else if (token) {
       user.token = token
     } else if (tokenFile) {
       files.set(tokenFile, 'token')
-      user.token = fs.readFileSync(tokenFile, 'utf8')
+      user.token = fs.readFileSync(tokenFile, 'utf8') // eslint-disable-line security/detect-non-literal-fs-filename
     } else if (username && password) {
       user.username = username
       user.password = password
@@ -168,10 +168,19 @@ class ClientConfig {
       const watcher = new Watcher(Array.from(files.keys()), options)
       watcher.run((path, value) => {
         const key = files.get(path)
-        if (['certificateAuthority'].includes(key)) {
-          cluster[key] = value
-        } else if (['clientKey', 'clientCert', 'token'].includes(key)) {
-          user[key] = value
+        switch (key) {
+          case 'certificateAuthority':
+            cluster.certificateAuthority = value
+            break
+          case 'clientKey':
+            user.clientKey = value
+            break
+          case 'clientCert':
+            user.clientCert = value
+            break
+          case 'token':
+            user.token = value
+            break
         }
         watcher.emit(`update:${key}`)
       })

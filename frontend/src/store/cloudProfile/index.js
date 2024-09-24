@@ -339,7 +339,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     if (!cloudProfile) {
       return []
     }
-    const items = cloudProfile.data[type]
+    const items = get(cloudProfile.data, [type])
     if (!region) {
       return items
     }
@@ -484,7 +484,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
 
     const items = get(configStore, 'accessRestriction.items')
     return filter(items, ({ key }) => {
-      return key && labels[key] === 'true'
+      return key && get(labels, [key]) === 'true'
     })
   }
 
@@ -541,10 +541,12 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     const newerVersionsForShoot = filter(validVersions, ({ version }) => semver.gt(version, shootVersion))
     for (const version of newerVersionsForShoot) {
       const diff = semver.diff(version.version, shootVersion)
+      /* eslint-disable security/detect-object-injection */
       if (!newerVersions[diff]) {
         newerVersions[diff] = []
       }
       newerVersions[diff].push(version)
+      /* eslint-enable security/detect-object-injection */
     }
     newerVersions = newerVersionsForShoot.length ? newerVersions : null
     availableKubernetesUpdatesCache.set(key, newerVersions)

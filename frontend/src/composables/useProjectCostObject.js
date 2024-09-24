@@ -51,7 +51,10 @@ export const useProjectCostObject = (projectItem, options = {}) => {
 
   const costObjectTitle = computed(() => get(costObjectSettings.value, 'title'))
 
-  const costObjectRegex = computed(() => get(costObjectSettings.value, 'regex', '[^]*'))
+  const costObjectRegex = computed(() => {
+    const pattern = get(costObjectSettings.value, 'regex', '[^]*')
+    return new RegExp(pattern) // eslint-disable-line security/detect-non-literal-regexp
+  })
 
   const costObjectErrorMessage = computed(() => get(costObjectSettings.value, 'errorMessage', ''))
 

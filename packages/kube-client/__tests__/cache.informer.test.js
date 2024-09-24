@@ -7,7 +7,6 @@
 'use strict'
 
 const { Informer, ListWatcher, Store, Reflector } = require('../lib/cache')
-const { getOwnSymbolProperty } = fixtures.helper
 const { Foo } = fixtures.resources
 
 describe('kube-client', () => {
@@ -34,12 +33,12 @@ describe('kube-client', () => {
         listFunc = jest.fn()
         watchFunc = jest.fn()
         listWatcher = new ListWatcher(listFunc, watchFunc, Foo)
-        informer = Informer.create(listWatcher, { keyPath: 'uid' })
+        informer = Informer.createTestingInformer(listWatcher, { keyPath: 'uid' })
         informer.emit = jest.fn()
-        internalAbortController = getOwnSymbolProperty(informer, 'abortController')
+        internalAbortController = informer.abortController
         internalAbortController.abort = jest.fn()
-        store = getOwnSymbolProperty(informer, 'store')
-        reflector = getOwnSymbolProperty(informer, 'reflector')
+        store = informer.store
+        reflector = informer.reflector
         reflector.run = jest.fn()
       })
 

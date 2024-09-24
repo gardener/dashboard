@@ -9,6 +9,8 @@
 import statuses from 'statuses'
 import toIdentifier from 'toidentifier'
 
+import { get } from '@/lodash'
+
 function hasStatusCode (err, statusCode) {
   return err.statusCode === statusCode || err.response?.status === statusCode
 }
@@ -30,7 +32,7 @@ export function createError (name, message, properties) {
   if (typeof name === 'number') {
     const statusCode = name
     err.statusCode = statusCode
-    name = toIdentifier(statuses.message[statusCode] ?? 'http')
+    name = toIdentifier(get(statuses, [message, statusCode], 'http'))
   }
   name = toIdentifier(name)
   if (!name.endsWith('Error')) {

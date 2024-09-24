@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from './uuid'
 import moment from './moment'
 
 import {
+  get,
   isEmpty,
   replace,
   split,
@@ -20,14 +21,17 @@ import {
   toUpper,
 } from '@/lodash'
 
-const scheduleCrontabRegex = /^(\d{1,2})\s(\d{1,2})\s\*\s\*\s((?:[0-7,*-]*|MON|TUE|WED|THU|FRI|SAT|SUN)+)$/
-
-function parseCronExpression (value) {
-  const matches = scheduleCrontabRegex.exec(toUpper(value))
-  if (!matches) {
+export function parseCronExpression (value) {
+  const [minute, hour, dayOfMonth, month, dayOfWeek] = toUpper(value).split(/\s/)
+  if (
+    !/^\d{1,2}$/.test(minute) ||
+    !/^\d{1,2}$/.test(hour) ||
+    dayOfMonth !== '*' ||
+    month !== '*' ||
+    !/^[A-Z0-7*,-]+$/.test(dayOfWeek)
+  ) {
     return
   }
-  let [, minute, hour, weekdays] = matches
 
   // replace weekday shortnames, * and 7 with default integer values
   const intVals = {
@@ -41,10 +45,13 @@ function parseCronExpression (value) {
     7: 0,
     '*': '1,2,3,4,5,6,0',
   }
-  weekdays = replace(weekdays, /[7*]|MON|TUE|WED|THU|FRI|SAT|SUN/g, weekday => intVals[weekday])
+  let weekdays = replace(dayOfWeek, /([7*]|MON|TUE|WED|THU|FRI|SAT|SUN)/g, weekday => get(intVals, [weekday]))
 
   // convert to array
   weekdays = split(weekdays, ',')
+  if (!weekdays.every(day => /^([0-6]|[0-6]-[0-6])$/.test(day))) {
+    return
+  }
 
   // resolve intervals
   weekdays = flatMap(weekdays, weekdayOrInterval => {
