@@ -5,24 +5,17 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-action-button
+  <g-generic-action-button-dialog
     icon="mdi-help-circle-outline"
     color="toolbar-title"
     class="mr-4"
-    @click="showDialog"
+    caption="Credential Rotation Help"
+    can-perform-action
+    cancel-button-text=""
+    confirm-button-text="Close"
   >
     <template #tooltip>
       <span>Help</span>
-    </template>
-  </g-action-button>
-  <g-dialog
-    ref="gDialog"
-    confirm-button-text="Ok"
-    cancel-button-text=""
-    width="600"
-  >
-    <template #caption>
-      Credential Rotation Help
     </template>
     <template #content>
       <v-card-text>
@@ -33,22 +26,11 @@ SPDX-License-Identifier: Apache-2.0
         explains how the varieties of credentials can be rotated so that the cluster can be considered secure.
       </v-card-text>
     </template>
-  </g-dialog>
+  </g-generic-action-button-dialog>
 </template>
 
-<script>
-import GDialog from '@/components/dialogs/GDialog.vue'
-import GActionButton from '@/components/GActionButton.vue'
+<script setup>
 
-export default {
-  components: {
-    GDialog,
-    GActionButton,
-  },
-  methods: {
-    showDialog () {
-      this.$refs.gDialog.showDialog()
-    },
-  },
-}
+import GGenericActionButtonDialog from '@/components/dialogs/GGenericActionButtonDialog.vue'
+
 </script>
