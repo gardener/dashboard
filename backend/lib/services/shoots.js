@@ -23,7 +23,7 @@ const {
   decodeBase64,
   encodeBase64,
   getSeedNameFromShoot,
-  projectFilter
+  projectFilter,
 } = utils
 const { getSeed } = cache
 
@@ -38,7 +38,7 @@ exports.list = async function ({ user, namespace, labelSelector }) {
       return {
         apiVersion: 'v1',
         kind: 'List',
-        items: cache.getShoots(namespace, query)
+        items: cache.getShoots(namespace, query),
       }
     } else {
       // user is permitted to list shoots only in namespaces associated with their projects
@@ -65,7 +65,7 @@ exports.list = async function ({ user, namespace, labelSelector }) {
         kind: 'List',
         items: namespaces
           .filter(namespace => allowedNamespaceMap.get(namespace))
-          .flatMap(namespace => cache.getShoots(namespace, query))
+          .flatMap(namespace => cache.getShoots(namespace, query)),
       }
     }
   }
@@ -76,7 +76,7 @@ exports.list = async function ({ user, namespace, labelSelector }) {
   return {
     apiVersion: 'v1',
     kind: 'List',
-    items: cache.getShoots(namespace, query)
+    items: cache.getShoots(namespace, query),
   }
 }
 
@@ -85,7 +85,7 @@ exports.create = async function ({ user, namespace, body }) {
   const username = user.id
 
   const annotations = {
-    'gardener.cloud/created-by': username
+    'gardener.cloud/created-by': username,
   }
 
   body = _.merge({}, body, { metadata: { namespace, annotations } })
@@ -111,7 +111,7 @@ exports.replace = async function ({ user, namespace, name, body }) {
   const { metadata, kind, apiVersion, status } = await client['core.gardener.cloud'].shoots.get(namespace, name)
   const {
     metadata: { labels, annotations },
-    spec
+    spec,
   } = body
   // assign new labels and annotations to metadata
   Object.assign(metadata, { labels, annotations })
@@ -127,7 +127,7 @@ exports.replaceVersion = async function ({ user, namespace, name, body }) {
   const patchOperations = [{
     op: 'replace',
     path: '/spec/kubernetes/version',
-    value: version
+    value: version,
   }]
   return client['core.gardener.cloud'].shoots.jsonPatch(namespace, name, patchOperations)
 }
@@ -138,7 +138,7 @@ exports.replaceEnableStaticTokenKubeconfig = async function ({ user, namespace, 
   const patchOperations = [{
     op: 'replace',
     path: '/spec/kubernetes/enableStaticTokenKubeconfig',
-    value: enableStaticTokenKubeconfig
+    value: enableStaticTokenKubeconfig,
   }]
   return client['core.gardener.cloud'].shoots.jsonPatch(namespace, name, patchOperations)
 }
@@ -149,9 +149,9 @@ exports.replaceHibernationEnabled = async function ({ user, namespace, name, bod
   const payload = {
     spec: {
       hibernation: {
-        enabled
-      }
-    }
+        enabled,
+      },
+    },
   }
   return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
 }
@@ -162,9 +162,9 @@ exports.replaceHibernationSchedules = async function ({ user, namespace, name, b
   const payload = {
     spec: {
       hibernation: {
-        schedules
-      }
-    }
+        schedules,
+      },
+    },
   }
   return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
 }
@@ -174,8 +174,8 @@ exports.replacePurpose = async function ({ user, namespace, name, body }) {
   const purpose = body.purpose
   const payload = {
     spec: {
-      purpose
-    }
+      purpose,
+    },
   }
   return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
 }
@@ -186,7 +186,7 @@ exports.replaceSeedName = async function ({ user, namespace, name, body }) {
   const patchOperations = [{
     op: 'replace',
     path: '/spec/seedName',
-    value: seedName
+    value: seedName,
   }]
   return client['core.gardener.cloud'].shoots.jsonPatch(namespace, [name, 'binding'], patchOperations)
 }
@@ -198,15 +198,15 @@ exports.createAdminKubeconfig = async function ({ user, namespace, name, body })
     kind,
     apiVersion,
     spec: {
-      expirationSeconds: body.expirationSeconds
-    }
+      expirationSeconds: body.expirationSeconds,
+    },
   }
 
   const { status } = await client['core.gardener.cloud'].shoots.createAdminKubeconfigRequest(namespace, name, payload)
   const kubeconfig = utils.decodeBase64(status.kubeconfig)
 
   return {
-    kubeconfig
+    kubeconfig,
   }
 }
 
@@ -215,8 +215,8 @@ exports.replaceAddons = async function ({ user, namespace, name, body }) {
   const addons = body
   const payload = {
     spec: {
-      addons
-    }
+      addons,
+    },
   }
 
   return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
@@ -228,9 +228,9 @@ exports.replaceControlPlaneHighAvailability = async function ({ user, namespace,
   const payload = {
     spec: {
       controlPlane: {
-        highAvailability
-      }
-    }
+        highAvailability,
+      },
+    },
   }
 
   return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
@@ -240,8 +240,8 @@ exports.patchProvider = async function ({ user, namespace, name, body }) {
   const client = user.client
   const payload = {
     spec: {
-      provider: body
-    }
+      provider: body,
+    },
   }
   return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
 }
@@ -254,14 +254,14 @@ exports.replaceMaintenance = async function ({ user, namespace, name, body }) {
       maintenance: {
         timeWindow: {
           begin: timeWindowBegin,
-          end: timeWindowEnd
+          end: timeWindowEnd,
         },
         autoUpdate: {
           kubernetesVersion: updateKubernetesVersion,
-          machineImageVersion: updateOSVersion
-        }
-      }
-    }
+          machineImageVersion: updateOSVersion,
+        },
+      },
+    },
   }
   return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
 }
@@ -270,8 +270,8 @@ const patchAnnotations = async function ({ user, namespace, name, annotations })
   const client = user.client
   const body = {
     metadata: {
-      annotations
-    }
+      annotations,
+    },
   }
   return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, body)
 }
@@ -280,7 +280,7 @@ exports.patchAnnotations = patchAnnotations
 exports.remove = async function ({ user, namespace, name }) {
   const client = user.client
   const annotations = {
-    'confirmation.gardener.cloud/deletion': 'true'
+    'confirmation.gardener.cloud/deletion': 'true',
   }
   await patchAnnotations({ user, namespace, name, annotations })
 
@@ -303,18 +303,18 @@ exports.info = async function ({ user, namespace, name }) {
 
   const [
     { value: shoot, reason: shootError },
-    { value: secret }
+    { value: secret },
   ] = await Promise.allSettled([
     read({
       user,
       namespace,
-      name
+      name,
     }),
     client.getSecret({
       namespace,
       name: `${name}.kubeconfig`,
-      throwNotFound: false
-    })
+      throwNotFound: false,
+    }),
   ])
 
   if (shootError) {
@@ -322,7 +322,7 @@ exports.info = async function ({ user, namespace, name }) {
   }
 
   const data = {
-    canLinkToSeed: false
+    canLinkToSeed: false,
   }
 
   try {
@@ -345,7 +345,7 @@ exports.info = async function ({ user, namespace, name }) {
   if (secret) {
     _
       .chain(secret)
-      .get('data')
+      .get(['data'])
       .pick('kubeconfig', 'token')
       .forEach((value, key) => {
         value = decodeBase64(value)
@@ -364,7 +364,7 @@ exports.info = async function ({ user, namespace, name }) {
   }
   data.dashboardUrlPath = getDashboardUrlPath(shoot.spec.kubernetes.version)
 
-  const oidcObservabilityUrlsEnabled = _.get(config, 'frontend.features.oidcObservabilityUrlsEnabled', false)
+  const oidcObservabilityUrlsEnabled = _.get(config, ['frontend', 'features', 'oidcObservabilityUrlsEnabled'], false)
   if (!oidcObservabilityUrlsEnabled && await authorization.canGetSecret(user, namespace, `${name}.monitoring`)) {
     await assignMonitoringSecret(client, data, namespace, name)
   }
@@ -373,7 +373,7 @@ exports.info = async function ({ user, namespace, name }) {
 }
 
 async function getGardenClusterIdentity () {
-  const configClusterIdentity = _.get(config, 'clusterIdentity')
+  const configClusterIdentity = _.get(config, ['clusterIdentity'])
 
   if (configClusterIdentity) {
     return configClusterIdentity
@@ -410,18 +410,18 @@ async function getKubeconfigGardenlogin (client, shoot) {
 
   const [
     caData,
-    gardenClusterIdentity
+    gardenClusterIdentity,
   ] = await Promise.all([
     getClusterCaData(client, { namespace, name }),
-    getGardenClusterIdentity()
+    getGardenClusterIdentity(),
   ])
 
   const extensions = [{
     name: 'client.authentication.k8s.io/exec',
     extension: {
       shootRef: { namespace, name },
-      gardenClusterIdentity
-    }
+      gardenClusterIdentity,
+    },
   }]
   const userName = `${namespace}--${name}`
 
@@ -453,14 +453,14 @@ Note that the kubeconfig refers to the path of the garden cluster kubeconfig whi
           apiVersion: 'client.authentication.k8s.io/v1beta1',
           command: 'kubectl-gardenlogin',
           args: [
-            'get-client-certificate'
+            'get-client-certificate',
           ],
           provideClusterInfo: true,
           interactiveMode: 'IfAvailable',
-          installHint
-        }
-      }
-    }]
+          installHint,
+        },
+      },
+    }],
   }
 
   for (const [i, address] of shoot.status.advertisedAddresses.entries()) {
@@ -479,8 +479,8 @@ Note that the kubeconfig refers to the path of the garden cluster kubeconfig whi
       cluster: {
         server: address.url,
         'certificate-authority-data': caData,
-        extensions
-      }
+        extensions,
+      },
     })
 
     cfg.contexts.push({
@@ -488,8 +488,8 @@ Note that the kubeconfig refers to the path of the garden cluster kubeconfig whi
       context: {
         cluster: name,
         user: userName,
-        namespace: 'default'
-      }
+        namespace: 'default',
+      },
     })
   }
 
@@ -514,7 +514,7 @@ async function assignMonitoringSecret (client, data, namespace, shootName) {
   if (secret) {
     _
       .chain(secret)
-      .get('data')
+      .get(['data'])
       .pick('username', 'password')
       .forEach((value, key) => {
         if (key === 'password') {

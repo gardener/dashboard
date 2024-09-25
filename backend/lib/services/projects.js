@@ -18,7 +18,7 @@ const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
 
 async function validateDeletePreconditions ({ user, name }) {
   const project = cache.getProject(name)
-  const namespace = _.get(project, 'spec.namespace')
+  const namespace = _.get(project, ['spec', 'namespace'])
 
   const shootList = await shoots.list({ user, namespace })
   if (!_.isEmpty(shootList.items)) {
@@ -39,8 +39,8 @@ exports.list = async function ({ user }) {
 exports.create = async function ({ user, body }) {
   const client = user.client
 
-  const name = _.get(body, 'metadata.name')
-  _.set(body, 'spec.namespace', `garden-${name}`)
+  const name = _.get(body, ['metadata', 'name'])
+  _.set(body, ['spec', 'namespace'], `garden-${name}`)
   let project = await client['core.gardener.cloud'].projects.create(body)
 
   const isProjectReady = ({ type, object: project }) => {
@@ -48,7 +48,7 @@ exports.create = async function ({ user, body }) {
       throw new InternalServerError('Project resource has been deleted')
     }
     return {
-      ok: _.get(project, 'status.phase') === 'Ready'
+      ok: _.get(project, ['status', 'phase']) === 'Ready',
     }
   }
   const timeout = exports.projectInitializationTimeout
@@ -81,9 +81,9 @@ exports.remove = async function ({ user, name }) {
   const body = {
     metadata: {
       annotations: {
-        'confirmation.gardener.cloud/deletion': 'true'
-      }
-    }
+        'confirmation.gardener.cloud/deletion': 'true',
+      },
+    },
   }
   await client['core.gardener.cloud'].projects.mergePatch(name, body)
   try {
@@ -94,9 +94,9 @@ exports.remove = async function ({ user, name }) {
     const revertBody = {
       metadata: {
         annotations: {
-          'confirmation.gardener.cloud/deletion': null
-        }
-      }
+          'confirmation.gardener.cloud/deletion': null,
+        },
+      },
     }
     await client['core.gardener.cloud'].projects.mergePatch(name, revertBody)
     throw error // Re-throw the error after reverting the annotation

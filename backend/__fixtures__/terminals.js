@@ -18,19 +18,19 @@ const terminalList = [
   getTerminal({
     target: 'garden',
     namespace: 'garden-foo',
-    identifier: '1'
+    identifier: '1',
   }),
   getTerminal({
     target: 'cp',
     namespace: 'garden-foo',
-    identifier: '2'
+    identifier: '2',
   }),
   getTerminal({
     target: 'shoot',
     namespace: 'garden-foo',
     identifier: '3',
-    preferredHost: 'shoot'
-  })
+    preferredHost: 'shoot',
+  }),
 ]
 
 function getTerminal (options = {}) {
@@ -40,7 +40,7 @@ function getTerminal (options = {}) {
     identifier,
     createdBy = 'admin@example.org',
     preferredHost = 'seed',
-    image = 'fooImage:0.1.2'
+    image = 'fooImage:0.1.2',
   } = options
   const generateName = `term-${target}-`
   const name = generateName + padStart(identifier, 5, '0')
@@ -52,13 +52,13 @@ function getTerminal (options = {}) {
       annotations: {
         'gardener.cloud/created-by': createdBy,
         'dashboard.gardener.cloud/identifier': identifier,
-        'dashboard.gardener.cloud/preferredHost': preferredHost
+        'dashboard.gardener.cloud/preferredHost': preferredHost,
       },
       labels: {
         'dashboard.gardener.cloud/created-by-hash': hash(createdBy),
-        'dashboard.gardener.cloud/identifier-hash': hash(identifier)
+        'dashboard.gardener.cloud/identifier-hash': hash(identifier),
       },
-      uid: identifier
+      uid: identifier,
     },
     spec: {
       host: {
@@ -67,21 +67,21 @@ function getTerminal (options = {}) {
         credentials: {
           secretRef: {
             namespace: 'garden',
-            name: 'host.kubeconfig'
-          }
+            name: 'host.kubeconfig',
+          },
         },
         pod: {
           container: {
-            image
-          }
-        }
+            image,
+          },
+        },
       },
-      target: {}
+      target: {},
     },
     status: {
       attachServiceAccountName: 'term-attach-' + identifier,
-      podName: 'term-' + identifier
-    }
+      podName: 'term-' + identifier,
+    },
   }
 }
 
@@ -102,7 +102,7 @@ const terminals = {
       items = filter(items, ['metadata.labels', labelSelector])
     }
     return items
-  }
+  },
 }
 
 const matchOptions = { decode: decodeURIComponent }
@@ -132,17 +132,17 @@ const mocks = {
       }
       const { params: { namespace } = {} } = matchResult
       const item = cloneDeep(json)
-      const identifier = get(item, 'metadata.annotations["dashboard.gardener.cloud/identifier"]', '21')
-      const generateName = get(item, 'metadata.generateName')
+      const identifier = get(item, ['metadata', 'annotations', 'dashboard.gardener.cloud/identifier'], '21')
+      const generateName = get(item, ['metadata', 'generateName'])
       if (generateName) {
-        set(item, 'metadata.name', generateName + padStart(identifier, 5, '0'))
+        set(item, ['metadata', 'name'], generateName + padStart(identifier, 5, '0'))
       }
-      const temporaryNamespace = get(item, 'spec.host.temporaryNamespace')
+      const temporaryNamespace = get(item, ['spec', 'host', 'temporaryNamespace'])
       if (temporaryNamespace) {
-        set(item, 'spec.host.namespace', 'term-host-' + identifier)
+        set(item, ['spec', 'host', 'namespace'], 'term-host-' + identifier)
       }
-      set(item, 'metadata.namespace', namespace)
-      set(item, 'metadata.resourceVersion', resourceVersion)
+      set(item, ['metadata', 'namespace'], namespace)
+      set(item, ['metadata', 'resourceVersion'], resourceVersion)
       return Promise.resolve(item)
     }
   },
@@ -161,7 +161,7 @@ const mocks = {
         for (const item of items) {
           const event = {
             type: 'ADDED',
-            object: cloneDeep(item)
+            object: cloneDeep(item),
           }
           stream.write(event)
         }
@@ -194,9 +194,9 @@ const mocks = {
       }
       const { params: { namespace, name } = {} } = matchResult
       const item = terminals.get(namespace, name)
-      const resourceVersion = get(item, 'metadata.resourceVersion', '42')
+      const resourceVersion = get(item, ['metadata', 'resourceVersion'], '42')
       merge(item, json)
-      set(item, 'metadata.resourceVersion', (+resourceVersion + 1).toString())
+      set(item, ['metadata', 'resourceVersion'], (+resourceVersion + 1).toString())
       return Promise.resolve(item)
     }
   },
@@ -210,10 +210,10 @@ const mocks = {
       const item = terminals.get(namespace, name)
       return Promise.resolve(item)
     }
-  }
+  },
 }
 
 module.exports = {
   ...terminals,
-  mocks
+  mocks,
 }

@@ -19,7 +19,7 @@ const {
   constants,
   trimObjectMetadata,
   trimProject,
-  parseRooms
+  parseRooms,
 } = require('../lib/utils')
 
 describe('utils', function () {
@@ -37,7 +37,7 @@ describe('utils', function () {
     })
 
     it('should return some config values with defaults', function () {
-      expect(() => getConfigValue('test')).toThrowError(AssertionError)
+      expect(() => getConfigValue('test')).toThrow(AssertionError)
       expect(getConfigValue('logLevel')).toBe('info')
     })
 
@@ -45,9 +45,9 @@ describe('utils', function () {
       const shoot = {
         metadata: {
           labels: {
-            'shoot.gardener.cloud/status': undefined
-          }
-        }
+            'shoot.gardener.cloud/status': undefined,
+          },
+        },
       }
       expect(shootHasIssue(shoot)).toBe(false)
       shoot.metadata.labels['shoot.gardener.cloud/status'] = 'healthy'
@@ -57,14 +57,14 @@ describe('utils', function () {
     })
 
     it('should return the seed name for a shoot resource', function () {
-      expect(() => getSeedNameFromShoot({})).toThrowError(AssertionError)
+      expect(() => getSeedNameFromShoot({})).toThrow(AssertionError)
       const shoot = {
         spec: {
-          seedName: 'foo'
+          seedName: 'foo',
         },
         status: {
-          seed: 'bar'
-        }
+          seed: 'bar',
+        },
       }
       expect(getSeedNameFromShoot(shoot)).toBe('foo')
     })
@@ -76,15 +76,15 @@ describe('utils', function () {
       const metadata = {
         name,
         annotations: {
-          foo: 'bar'
-        }
+          foo: 'bar',
+        },
       }
       expect(trimObjectMetadata({ metadata })).toEqual({ metadata })
       const extendedMetadata = merge(metadata, {
         managedFields,
         annotations: {
-          'kubectl.kubernetes.io/last-applied-configuration': lastAppliedConfiguration
-        }
+          'kubectl.kubernetes.io/last-applied-configuration': lastAppliedConfiguration,
+        },
       })
       expect(trimObjectMetadata({ metadata: extendedMetadata })).toEqual({ metadata })
     })
@@ -96,69 +96,69 @@ describe('utils', function () {
       const metadata = {
         name,
         annotations: {
-          foo: 'bar'
-        }
+          foo: 'bar',
+        },
       }
       const spec = {
-        members: ['member1', 'member2']
+        members: ['member1', 'member2'],
       }
       const project = { metadata, spec }
 
       // Test case where metadata does not have managedFields or last-applied-configuration
       expect(trimProject(cloneDeep(project))).toEqual({
         metadata,
-        spec: {}
+        spec: {},
       })
 
       // Test case where metadata has managedFields and last-applied-configuration
       const extendedMetadata = merge(cloneDeep(metadata), {
         managedFields,
         annotations: {
-          'kubectl.kubernetes.io/last-applied-configuration': lastAppliedConfiguration
-        }
+          'kubectl.kubernetes.io/last-applied-configuration': lastAppliedConfiguration,
+        },
       })
       const extendedProject = { metadata: extendedMetadata, spec }
 
       expect(trimProject(cloneDeep(extendedProject))).toEqual({
         metadata,
-        spec: {}
+        spec: {},
       })
     })
 
     it('should parse labelSelectors', () => {
       expect(parseSelectors([
-        'shoot.gardener.cloud/status!=healthy'
+        'shoot.gardener.cloud/status!=healthy',
       ])).toEqual([{
         key: 'shoot.gardener.cloud/status',
         op: constants.NOT_EQUAL,
-        value: 'healthy'
+        value: 'healthy',
       }])
       expect(parseSelectors([
         'foo=1',
         'bar==2',
-        'qux!=3'
+        'qux!=3',
       ])).toEqual([{
         key: 'foo',
         op: constants.EQUAL,
-        value: '1'
+        value: '1',
       }, {
         key: 'bar',
         op: constants.EQUAL,
-        value: '2'
+        value: '2',
       }, {
         key: 'qux',
         op: constants.NOT_EQUAL,
-        value: '3'
+        value: '3',
       }])
       expect(parseSelectors([
         'foo',
-        '!baz'
+        '!baz',
       ])).toEqual([{
         key: 'foo',
-        op: constants.EXISTS
+        op: constants.EXISTS,
       }, {
         key: 'baz',
-        op: constants.NOT_EXISTS
+        op: constants.NOT_EXISTS,
       }])
     })
 
@@ -166,69 +166,69 @@ describe('utils', function () {
       const labels = {
         foo: '1',
         bar: '2',
-        qux: '3'
+        qux: '3',
       }
       const item = {
         metadata: {
-          labels
-        }
+          labels,
+        },
       }
       expect(filterBySelectors([{
         key: 'foo',
-        op: constants.EXISTS
+        op: constants.EXISTS,
       }])(item)).toBe(true)
       expect(filterBySelectors([{
         key: 'baz',
-        op: constants.EXISTS
+        op: constants.EXISTS,
       }])(item)).toBe(false)
       expect(filterBySelectors([{
         key: 'baz',
-        op: constants.NOT_EXISTS
+        op: constants.NOT_EXISTS,
       }])(item)).toBe(true)
       expect(filterBySelectors([{
         key: 'foo',
-        op: constants.NOT_EXISTS
+        op: constants.NOT_EXISTS,
       }])(item)).toBe(false)
       expect(filterBySelectors([{
         key: 'foo',
         op: constants.EQUAL,
-        value: '1'
+        value: '1',
       }])(item)).toBe(true)
       expect(filterBySelectors([{
         key: 'bar',
         op: constants.EQUAL,
-        value: '1'
+        value: '1',
       }])(item)).toBe(false)
       expect(filterBySelectors([{
         key: 'qux',
         op: constants.NOT_EQUAL,
-        value: '2'
+        value: '2',
       }])(item)).toBe(true)
       expect(filterBySelectors([{
         key: 'qux',
         op: constants.NOT_EQUAL,
-        value: '3'
+        value: '3',
       }])(item)).toBe(false)
     })
 
     it('should parse rooms for all kind of shoot subscriptions', () => {
       expect(parseRooms(['seeds:admin'])).toEqual([
-        false, [], []
+        false, [], [],
       ])
       expect(parseRooms(['shoots:admin'])).toEqual([
-        true, [], []
+        true, [], [],
       ])
       expect(parseRooms(['shoots:unhealthy:admin'])).toEqual([
-        true, [], []
+        true, [], [],
       ])
       expect(parseRooms(['shoots;garden-foo'])).toEqual([
-        false, ['garden-foo'], []
+        false, ['garden-foo'], [],
       ])
       expect(parseRooms(['shoots:unhealthy;garden-foo'])).toEqual([
-        false, ['garden-foo'], []
+        false, ['garden-foo'], [],
       ])
       expect(parseRooms(['shoots;garden-foo/bar'])).toEqual([
-        false, [], ['garden-foo/bar']
+        false, [], ['garden-foo/bar'],
       ])
     })
   })

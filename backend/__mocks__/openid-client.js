@@ -24,7 +24,7 @@ Issuer.discover = jest.fn(issuer => {
     request_uri_parameter_supported: true,
     require_request_uri_registration: false,
     response_modes_supported: ['query', 'fragment'],
-    token_endpoint_auth_methods_supported: ['client_secret_basic']
+    token_endpoint_auth_methods_supported: ['client_secret_basic'],
   }))
 })
 

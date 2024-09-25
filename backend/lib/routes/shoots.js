@@ -12,7 +12,7 @@ const { metricsRoute } = require('../middleware')
 const { trimObjectMetadata } = require('../utils')
 
 const router = module.exports = express.Router({
-  mergeParams: true
+  mergeParams: true,
 })
 
 const metricsMiddleware = metricsRoute('shoots')

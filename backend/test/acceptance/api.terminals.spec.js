@@ -14,7 +14,7 @@ function getTerminalName (target, identifier) {
   return [
     'term',
     target,
-    padStart(identifier, 5, '0')
+    padStart(identifier, 5, '0'),
   ].join('-')
 }
 
@@ -48,7 +48,7 @@ describe('api', function () {
         mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
         mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get({
           valid: true,
-          invalid: true
+          invalid: true,
         }))
 
         const res = await agent
@@ -58,14 +58,14 @@ describe('api', function () {
             method: 'listProjectTerminalShortcuts',
             params: {
               coordinate: {
-                namespace
-              }
-            }
+                namespace,
+              },
+            },
           })
           .expect('content-type', /json/)
           .expect(200)
 
-        expect(mockRequest).toBeCalledTimes(2)
+        expect(mockRequest).toHaveBeenCalledTimes(2)
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(res.body).toMatchSnapshot()
@@ -75,7 +75,7 @@ describe('api', function () {
         mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
         mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get({
           valid: false,
-          invalid: true
+          invalid: true,
         }))
 
         const res = await agent
@@ -85,14 +85,14 @@ describe('api', function () {
             method: 'listProjectTerminalShortcuts',
             params: {
               coordinate: {
-                namespace
-              }
-            }
+                namespace,
+              },
+            },
           })
           .expect('content-type', /json/)
           .expect(200)
 
-        expect(mockRequest).toBeCalledTimes(2)
+        expect(mockRequest).toHaveBeenCalledTimes(2)
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(res.body).toMatchSnapshot()
@@ -102,7 +102,7 @@ describe('api', function () {
         mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
         mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get({
           valid: false,
-          invalid: false
+          invalid: false,
         }))
 
         const res = await agent
@@ -112,14 +112,14 @@ describe('api', function () {
             method: 'listProjectTerminalShortcuts',
             params: {
               coordinate: {
-                namespace
-              }
-            }
+                namespace,
+              },
+            },
           })
           .expect('content-type', /json/)
           .expect(200)
 
-        expect(mockRequest).toBeCalledTimes(2)
+        expect(mockRequest).toHaveBeenCalledTimes(2)
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(res.body).toMatchSnapshot()
@@ -151,17 +151,17 @@ describe('api', function () {
               identifier,
               coordinate: {
                 namespace,
-                target
-              }
-            }
+                target,
+              },
+            },
           })
           .expect('content-type', /json/)
           .expect(200)
 
-        expect(makeSanitizedHtmlStub).toBeCalledTimes(1)
+        expect(makeSanitizedHtmlStub).toHaveBeenCalledTimes(1)
         expect(makeSanitizedHtmlStub.mock.calls).toEqual([['Dummy Image Description']])
 
-        expect(mockRequest).toBeCalledTimes(6)
+        expect(mockRequest).toHaveBeenCalledTimes(6)
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(res.body).toMatchSnapshot()
@@ -191,17 +191,17 @@ describe('api', function () {
                 coordinate: {
                   namespace,
                   name: shootName,
-                  target
-                }
-              }
+                  target,
+                },
+              },
             })
             .expect('content-type', /json/)
             .expect(200)
 
-          expect(makeSanitizedHtmlStub).toBeCalledTimes(1)
+          expect(makeSanitizedHtmlStub).toHaveBeenCalledTimes(1)
           expect(makeSanitizedHtmlStub.mock.calls).toEqual([['Dummy Image Description']])
 
-          expect(mockRequest).toBeCalledTimes(7)
+          expect(mockRequest).toHaveBeenCalledTimes(7)
           expect(mockRequest.mock.calls).toMatchSnapshot()
 
           expect(res.body).toMatchSnapshot()
@@ -225,17 +225,17 @@ describe('api', function () {
               identifier,
               coordinate: {
                 namespace,
-                target
-              }
-            }
+                target,
+              },
+            },
           })
           .expect('content-type', /json/)
           .expect(200)
 
-        expect(makeSanitizedHtmlStub).toBeCalledTimes(1)
+        expect(makeSanitizedHtmlStub).toHaveBeenCalledTimes(1)
         expect(makeSanitizedHtmlStub.mock.calls).toEqual([['Foo Image Description']])
 
-        expect(mockRequest).toBeCalledTimes(6)
+        expect(mockRequest).toHaveBeenCalledTimes(6)
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(res.body).toMatchSnapshot()
@@ -254,13 +254,13 @@ describe('api', function () {
             method: 'fetch',
             params: {
               name,
-              namespace
-            }
+              namespace,
+            },
           })
           .expect('content-type', /json/)
           .expect(200)
 
-        expect(mockRequest).toBeCalledTimes(4)
+        expect(mockRequest).toHaveBeenCalledTimes(4)
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(res.body).toMatchSnapshot()
@@ -277,14 +277,14 @@ describe('api', function () {
             params: {
               coordinate: {
                 namespace,
-                target
-              }
-            }
+                target,
+              },
+            },
           })
           .expect('content-type', /json/)
           .expect(200)
 
-        expect(mockRequest).toBeCalledTimes(1)
+        expect(mockRequest).toHaveBeenCalledTimes(1)
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(res.body).toMatchSnapshot()
@@ -302,13 +302,13 @@ describe('api', function () {
             method: 'heartbeat',
             params: {
               name,
-              namespace
-            }
+              namespace,
+            },
           })
           .expect('content-type', /json/)
           .expect(200)
 
-        expect(mockRequest).toBeCalledTimes(3)
+        expect(mockRequest).toHaveBeenCalledTimes(3)
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(res.body).toMatchSnapshot()
@@ -326,13 +326,13 @@ describe('api', function () {
             method: 'remove',
             params: {
               name,
-              namespace
-            }
+              namespace,
+            },
           })
           .expect('content-type', /json/)
           .expect(200)
 
-        expect(mockRequest).toBeCalledTimes(3)
+        expect(mockRequest).toHaveBeenCalledTimes(3)
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(res.body).toMatchSnapshot()
@@ -366,17 +366,17 @@ describe('api', function () {
               coordinate: {
                 name: shootName,
                 namespace,
-                target
-              }
-            }
+                target,
+              },
+            },
           })
           .expect('content-type', /json/)
           .expect(200)
 
-        expect(makeSanitizedHtmlStub).toBeCalledTimes(1)
+        expect(makeSanitizedHtmlStub).toHaveBeenCalledTimes(1)
         expect(makeSanitizedHtmlStub.mock.calls).toEqual([['Dummy Image Description']])
 
-        expect(mockRequest).toBeCalledTimes(8)
+        expect(mockRequest).toHaveBeenCalledTimes(8)
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(res.body).toMatchSnapshot()
@@ -394,14 +394,14 @@ describe('api', function () {
               coordinate: {
                 name: shootName,
                 namespace,
-                target
-              }
-            }
+                target,
+              },
+            },
           })
           .expect('content-type', /json/)
           .expect(200)
 
-        expect(mockRequest).toBeCalledTimes(1)
+        expect(mockRequest).toHaveBeenCalledTimes(1)
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(res.body).toMatchSnapshot()
@@ -421,13 +421,13 @@ describe('api', function () {
             method: 'heartbeat',
             params: {
               name,
-              namespace
-            }
+              namespace,
+            },
           })
           .expect('content-type', /json/)
           .expect(200)
 
-        expect(mockRequest).toBeCalledTimes(3)
+        expect(mockRequest).toHaveBeenCalledTimes(3)
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(res.body).toMatchSnapshot()
@@ -458,18 +458,18 @@ describe('api', function () {
               coordinate: {
                 name: shootName,
                 namespace,
-                target
+                target,
               },
-              preferredHost: 'shoot'
-            }
+              preferredHost: 'shoot',
+            },
           })
           .expect('content-type', /json/)
           .expect(200)
 
-        expect(makeSanitizedHtmlStub).toBeCalledTimes(1)
+        expect(makeSanitizedHtmlStub).toHaveBeenCalledTimes(1)
         expect(makeSanitizedHtmlStub.mock.calls).toEqual([['Dummy Image Description']])
 
-        expect(mockRequest).toBeCalledTimes(5)
+        expect(mockRequest).toHaveBeenCalledTimes(5)
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(res.body).toMatchSnapshot()
@@ -492,17 +492,17 @@ describe('api', function () {
               coordinate: {
                 name: shootName,
                 namespace,
-                target
-              }
-            }
+                target,
+              },
+            },
           })
           .expect('content-type', /json/)
           .expect(200)
 
-        expect(makeSanitizedHtmlStub).toBeCalledTimes(1)
+        expect(makeSanitizedHtmlStub).toHaveBeenCalledTimes(1)
         expect(makeSanitizedHtmlStub.mock.calls).toEqual([['Foo Image Description']])
 
-        expect(mockRequest).toBeCalledTimes(5)
+        expect(mockRequest).toHaveBeenCalledTimes(5)
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(res.body).toMatchSnapshot()
@@ -522,14 +522,14 @@ describe('api', function () {
               coordinate: {
                 name: shootName,
                 namespace,
-                target
-              }
-            }
+                target,
+              },
+            },
           })
           .expect('content-type', /json/)
           .expect(200)
 
-        expect(mockRequest).toBeCalledTimes(3)
+        expect(mockRequest).toHaveBeenCalledTimes(3)
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(res.body).toMatchSnapshot()
@@ -548,14 +548,14 @@ describe('api', function () {
             method: 'list',
             params: {
               coordinate: {
-                namespace
-              }
-            }
+                namespace,
+              },
+            },
           })
           .expect('content-type', /json/)
           .expect(200)
 
-        expect(mockRequest).toBeCalledTimes(2)
+        expect(mockRequest).toHaveBeenCalledTimes(2)
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(res.body).toMatchSnapshot()

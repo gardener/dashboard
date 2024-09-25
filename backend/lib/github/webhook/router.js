@@ -20,7 +20,7 @@ const router = express.Router()
 const middlewares = [
   requestLogger,
   monitorResponseTimes(),
-  bodyParser.json({ verify })
+  bodyParser.json({ verify }),
 ]
 
 router.route('/')

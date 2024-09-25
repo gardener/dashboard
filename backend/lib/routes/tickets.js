@@ -13,7 +13,7 @@ const tickets = require('../services/tickets')
 const { metricsRoute } = require('../middleware')
 
 const router = module.exports = express.Router({
-  mergeParams: true
+  mergeParams: true,
 })
 
 const ticketCache = cache.getTicketCache()

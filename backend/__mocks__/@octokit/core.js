@@ -37,18 +37,18 @@ const mockOctokitPaginateGraphQL = jest.fn().mockImplementation(async (_query, {
       body: comment.body,
       author: {
         login: comment.user.login,
-        avatarUrl: comment.user.avatar_url
-      }
+        avatarUrl: comment.user.avatar_url,
+      },
     }
   })
   return {
     repository: {
       issue: {
         comments: {
-          nodes
-        }
-      }
-    }
+          nodes,
+        },
+      },
+    },
   }
 })
 
@@ -98,7 +98,7 @@ const Octokit = jest.fn().mockImplementation(options => {
   octokit.issues = {
     get: jest.fn().mockRejectedValue(serviceUnavailable),
     update: jest.fn().mockRejectedValue(serviceUnavailable),
-    createComment: jest.fn().mockRejectedValue(serviceUnavailable)
+    createComment: jest.fn().mockRejectedValue(serviceUnavailable),
   }
   return octokit
 })
@@ -109,5 +109,5 @@ module.exports = {
   mockListIssues,
   mockListComments,
   mockOctokitPaginateREST,
-  mockOctokitPaginateGraphQL
+  mockOctokitPaginateGraphQL,
 }

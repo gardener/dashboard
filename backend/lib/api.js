@@ -23,13 +23,13 @@ const router = express.Router()
 
 router.use(compression({
   threshold: 8192,
-  level: zlib.constants.Z_DEFAULT_COMPRESSION
+  level: zlib.constants.Z_DEFAULT_COMPRESSION,
 }))
 router.use(requestLogger)
 router.use(monitorResponseTimes())
 router.use(cookieParser())
 router.use(bodyParser.json({
-  limit: config.maxRequestBodySize
+  limit: config.maxRequestBodySize,
 }))
 router.use(authenticate({ createClient }))
 for (const [key, value] of Object.entries(routes)) {
@@ -41,5 +41,5 @@ router.use(sendError)
 // exports
 module.exports = {
   router,
-  hooks
+  hooks,
 }

@@ -26,11 +26,11 @@ describe('api', function () {
       fixtures.github.createIssue(1, 'foo'),
       fixtures.github.createIssue(2, 'bar', { comments: 1 }),
       fixtures.github.createIssue(3, 'foobar'),
-      fixtures.github.createIssue(4, 'foo', { comments: 1, state: 'closed' })
+      fixtures.github.createIssue(4, 'foo', { comments: 1, state: 'closed' }),
     ])
     mockListComments.mockReturnValue([
       fixtures.github.createComment(1, 2),
-      fixtures.github.createComment(2, 4)
+      fixtures.github.createComment(2, 4),
     ])
     await tickets.loadOpenIssues()
   })
@@ -41,7 +41,7 @@ describe('api', function () {
 
   describe('tickets', function () {
     const user = fixtures.auth.createUser({
-      id: 'foo@example.org'
+      id: 'foo@example.org',
     })
 
     it('should fetch open issues for all namespaces', async () => {
@@ -53,9 +53,9 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).not.toBeCalled()
-      expect(mockListIssues).toBeCalledTimes(1)
-      expect(mockListComments).not.toBeCalled()
+      expect(mockRequest).not.toHaveBeenCalled()
+      expect(mockListIssues).toHaveBeenCalledTimes(1)
+      expect(mockListComments).not.toHaveBeenCalled()
 
       expect(res.body).toMatchSnapshot()
     })
@@ -69,9 +69,9 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).not.toBeCalled()
-      expect(mockListIssues).toBeCalledTimes(1)
-      expect(mockListComments).not.toBeCalled()
+      expect(mockRequest).not.toHaveBeenCalled()
+      expect(mockListIssues).toHaveBeenCalledTimes(1)
+      expect(mockListComments).not.toHaveBeenCalled()
 
       expect(res.body).toMatchSnapshot()
     })
@@ -86,9 +86,9 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).not.toBeCalled()
-      expect(mockListIssues).toBeCalledTimes(1)
-      expect(mockListComments).toBeCalledTimes(1)
+      expect(mockRequest).not.toHaveBeenCalled()
+      expect(mockListIssues).toHaveBeenCalledTimes(1)
+      expect(mockListComments).toHaveBeenCalledTimes(1)
 
       expect(res.body).toMatchSnapshot()
     })

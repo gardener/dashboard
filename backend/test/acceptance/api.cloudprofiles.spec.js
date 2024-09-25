@@ -34,7 +34,7 @@ describe('api', function () {
         .set('cookie', await user.cookie)
         .expect('content-type', /json/)
 
-      expect(mockRequest).toBeCalledTimes(1)
+      expect(mockRequest).toHaveBeenCalledTimes(1)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()

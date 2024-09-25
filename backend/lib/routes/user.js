@@ -14,7 +14,7 @@ const { authorization } = require('../services')
 const { metricsRoute } = require('../middleware')
 
 const router = module.exports = express.Router({
-  mergeParams: true
+  mergeParams: true,
 })
 
 const metricsMiddleware = metricsRoute('user')
@@ -41,7 +41,7 @@ router.route('/token')
   .get(async (req, res, next) => {
     const token = getToken(req.user)
     res.send({
-      token
+      token,
     })
   })
 
@@ -52,15 +52,15 @@ router.route('/kubeconfig')
       apiServerUrl: server,
       apiServerCaData: certificateAuthorityData,
       apiServerSkipTlsVerify: insecureSkipTlsVerify,
-      oidc = {}
+      oidc = {},
     } = config
     const {
       issuer: issuerUrl,
       public: {
         clientId = oidc.client_id,
         clientSecret,
-        usePKCE
-      } = {}
+        usePKCE,
+      } = {},
     } = oidc
     const body = {
       server,
@@ -68,8 +68,8 @@ router.route('/kubeconfig')
       insecureSkipTlsVerify,
       oidc: {
         issuerUrl,
-        clientId
-      }
+        clientId,
+      },
     }
     if (clientSecret) {
       body.oidc.clientSecret = clientSecret

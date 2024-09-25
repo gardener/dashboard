@@ -32,7 +32,7 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).not.toBeCalled()
+      expect(mockRequest).not.toHaveBeenCalled()
 
       expect(res.body).toMatchSnapshot()
     })
@@ -44,12 +44,12 @@ describe('api', function () {
         .post('/api/user/subjectrules')
         .set('cookie', await user.cookie)
         .send({
-          namespace: 'garden-foo'
+          namespace: 'garden-foo',
         })
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(1)
+      expect(mockRequest).toHaveBeenCalledTimes(1)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
@@ -62,7 +62,7 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).not.toBeCalled()
+      expect(mockRequest).not.toHaveBeenCalled()
 
       expect(res.body).toMatchSnapshot()
     })

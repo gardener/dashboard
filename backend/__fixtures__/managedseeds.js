@@ -18,14 +18,14 @@ const managedSeedList = [
     project: 'garden',
     createdBy: 'admin@example.org',
     secretBindingName: 'soil-infra1',
-    seed: 'soil-infra1'
-  })
+    seed: 'soil-infra1',
+  }),
 ]
 
 function getManagedSeed ({
   name,
   uid,
-  shootName
+  shootName,
 }) {
   const namespace = 'garden'
   uid = uid || `${namespace}--${name}`
@@ -35,14 +35,14 @@ function getManagedSeed ({
     metadata: {
       uid,
       name,
-      namespace
+      namespace,
     },
     spec: {
       shoot: {
-        name: shootName
-      }
+        name: shootName,
+      },
     },
-    status: {}
+    status: {},
   }
 }
 
@@ -59,7 +59,7 @@ const managedSeeds = {
     return namespace
       ? filter(items, ['metadata.namespace', namespace])
       : items
-  }
+  },
 }
 
 const matchOptions = { decode: decodeURIComponent }
@@ -79,10 +79,10 @@ const mocks = {
       }
       return Promise.resolve(item)
     }
-  }
+  },
 }
 
 module.exports = {
   ...managedSeeds,
-  mocks
+  mocks,
 }

@@ -10,5 +10,5 @@ const kubeClient = jest.requireActual('@gardener-dashboard/kube-client')
 
 module.exports = {
   ...kubeClient,
-  createDashboardClient: jest.fn().mockImplementation(kubeClient.createDashboardClient)
+  createDashboardClient: jest.fn().mockImplementation(kubeClient.createDashboardClient),
 }
