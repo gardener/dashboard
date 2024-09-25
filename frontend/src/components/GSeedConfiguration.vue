@@ -48,7 +48,10 @@ import { useShootItem } from '@/composables/useShootItem'
 
 import { errorDetailsFromError } from '@/utils/error'
 
-import { map } from '@/lodash'
+import {
+  find,
+  map,
+} from '@/lodash'
 
 export default {
   components: {
@@ -70,8 +73,8 @@ export default {
     })
 
     const providerMismatch = computed(() => {
-      const selectedSeed = seedStore.seedList.find(seed => seed.metadata.name === seedName.value)
-      const sourceSeed = seedStore.seedList.find(seed => seed.metadata.name === shootSeedName.value)
+      const selectedSeed = find(seedStore.seedList, ['metadata.name', seedName.value])
+      const sourceSeed = find(seedStore.seedList, ['metadata.name', shootSeedName.value])
       if (!selectedSeed || !sourceSeed) {
         return false
       }
