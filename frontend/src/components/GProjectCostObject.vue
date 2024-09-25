@@ -9,6 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-col cols="6">
       <v-select
         v-model="v$.costObjectType.$model"
+        variant="underlined"
         :items="costObjectTypes"
         label="Cost Object Type"
         required
@@ -101,6 +102,3 @@ const rules = {
 const v$ = useVuelidate(rules, { costObject, costObjectType })
 
 </script>
-
-<style lang="scss" scoped>
-</style>
