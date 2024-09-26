@@ -261,12 +261,15 @@ data:
         identifier: {{ .Values.global.dashboard.frontendConfig.alert.identifier }}
         {{- end }}
       {{- end }}
-      {{- if .Values.global.dashboard.frontendConfig.costObject }}
-      costObject:
-        title: {{ .Values.global.dashboard.frontendConfig.costObject.title }}
-        description: {{ .Values.global.dashboard.frontendConfig.costObject.description }}
-        regex: {{ .Values.global.dashboard.frontendConfig.costObject.regex }}
-        errorMessage: {{ .Values.global.dashboard.frontendConfig.costObject.errorMessage }}
+      {{- if .Values.global.dashboard.frontendConfig.costObjects }}
+      costObjects:
+      {{- range .Values.global.dashboard.frontendConfig.costObjects }}
+      - type: {{ required ".Values.global.dashboard.frontendConfig.costObjects.type is required" (quote .type) }}
+        title: {{ required ".Values.global.dashboard.frontendConfig.costObjects.title is required" (quote .title) }}
+        description: {{ quote .description }}
+        regex: {{ quote .regex }}
+        errorMessage: {{ quote .errorMessage }}
+      {{- end }}
       {{- end }}
       {{- if .Values.global.dashboard.frontendConfig.sla }}
       sla:

@@ -107,7 +107,11 @@ export function createProjectContextComposable () {
   } = useProjectShootCustomFields(manifest)
 
   /* costObject */
-  const { costObject } = useProjectCostObject(manifest, { projectMetadataComposable })
+  const {
+    costObject,
+    costObjectType,
+    getCostObjectPatchDocument,
+  } = useProjectCostObject(manifest, { projectMetadataComposable })
 
   return {
     /* manifest */
@@ -136,6 +140,8 @@ export function createProjectContextComposable () {
     generateKeyFromName,
     /* costObject */
     costObject,
+    costObjectType,
+    getCostObjectPatchDocument,
   }
 }
 
