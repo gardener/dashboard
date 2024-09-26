@@ -273,8 +273,9 @@ global:
       #       - wide
       #   heartbeatIntervalSeconds: 60
 
-      # # costObject is used for billing purposes and is assigned to the gardener project
-      # costObject:
+      # # costObjects are used for billing purposes and the cost object and type is assigned to the gardener project
+      # costObjects:
+      # - type: CO
       #   title: Cost Object
       #   description: Costs for the control planes of the clusters in this project will be charged to this cost object.
       #   regex: ^([0-9]{10})$
