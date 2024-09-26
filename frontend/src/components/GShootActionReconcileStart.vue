@@ -12,6 +12,7 @@ SPDX-License-Identifier: Apache-2.0
     :text="buttonText"
     confirm-button-text="Trigger now"
     icon="mdi-refresh"
+    ignore-deletion-status
     :loading="isReconcileToBeScheduled"
     :disabled="isShootReconciliationDeactivated"
     @dialog-opened="onConfigurationDialogOpened"

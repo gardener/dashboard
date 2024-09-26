@@ -146,6 +146,22 @@ exports[`gardener-dashboard configmap controlPlaneHighAvailabilityHelp should re
 }
 `;
 
+exports[`gardener-dashboard configmap costObjects should render the template with costObjects configuration 1`] = `
+{
+  "frontend": {
+    "costObjects": [
+      {
+        "description": "Example Description",
+        "errorMessage": "Invalid cost object",
+        "regex": "^example.*$",
+        "title": "Cost Object",
+        "type": "CO",
+      },
+    ],
+  },
+}
+`;
+
 exports[`gardener-dashboard configmap experimental should render the template with experimental features 1`] = `
 {
   "frontend": {

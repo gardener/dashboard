@@ -48,7 +48,8 @@ export function createProjectItemComposable (projectItem) {
   /* costObject */
   const {
     costObject,
-    costObjectSettingEnabled,
+    costObjectType,
+    costObjectsSettingEnabled,
     costObjectDescriptionHtml,
     costObjectTitle,
     costObjectRegex,
@@ -106,7 +107,8 @@ export function createProjectItemComposable (projectItem) {
     projectPhase,
     /* costObject */
     costObject,
-    costObjectSettingEnabled,
+    costObjectType,
+    costObjectsSettingEnabled,
     costObjectDescriptionHtml,
     costObjectTitle,
     costObjectRegex,
