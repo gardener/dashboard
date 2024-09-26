@@ -19,11 +19,11 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <template #content>
       <v-card-text>
-        There are a lot of different credentials for Shoots to make sure that the various components can communicate with each other and to make sure it is usable and operable.<br>
+        There are many different credentials for Shoots to ensure that various components can communicate with each other and to make sure they are usable and operable.<br>
         <g-external-link url="https://github.com/gardener/gardener/blob/master/docs/usage/shoot_credentials_rotation.md">
           This page
         </g-external-link>
-        explains how the varieties of credentials can be rotated so that the cluster can be considered secure.
+        explains how these credentials can be rotated to ensure the cluster's security.
       </v-card-text>
     </template>
   </g-generic-action-button-dialog>
