@@ -63,17 +63,19 @@ ClusterScoped.Readable = superclass => class extends superclass {
     assertName(name)
     assertSearchParams(searchParams)
     assertOptions(options)
+    const method = 'get'
     const url = clusterScopedUrl(this.constructor.names, name)
-    searchParams = normalizeSearchParams(searchParams, options)
-    return this[http.request](url, { method: 'get', searchParams })
+    searchParams = normalizeSearchParams(method, searchParams, options)
+    return this[http.request](url, { method, searchParams })
   }
 
   list ({ searchParams, signal, ...options } = {}) {
     assertSearchParams(searchParams)
     assertOptions(options)
+    const method = 'get'
     const url = clusterScopedUrl(this.constructor.names)
-    searchParams = normalizeSearchParams(searchParams, options)
-    return this[http.request](url, { method: 'get', searchParams })
+    searchParams = normalizeSearchParams(method, searchParams, options)
+    return this[http.request](url, { method, searchParams })
   }
 }
 
@@ -83,26 +85,29 @@ NamespaceScoped.Readable = superclass => class extends superclass {
     assertName(name)
     assertSearchParams(searchParams)
     assertOptions(options)
+    const method = 'get'
     const url = namespaceScopedUrl(this.constructor.names, namespace, name)
-    searchParams = normalizeSearchParams(searchParams, options)
-    return this[http.request](url, { method: 'get', searchParams })
+    searchParams = normalizeSearchParams(method, searchParams, options)
+    return this[http.request](url, { method, searchParams })
   }
 
   list (namespace, { searchParams, signal, ...options } = {}) {
     assertNamespace(namespace)
     assertSearchParams(searchParams)
     assertOptions(options)
+    const method = 'get'
     const url = namespaceScopedUrl(this.constructor.names, namespace)
-    searchParams = normalizeSearchParams(searchParams, options)
-    return this[http.request](url, { method: 'get', searchParams })
+    searchParams = normalizeSearchParams(method, searchParams, options)
+    return this[http.request](url, { method, searchParams })
   }
 
   listAllNamespaces ({ searchParams, signal, ...options } = {}) {
     assertSearchParams(searchParams)
     assertOptions(options)
+    const method = 'get'
     const url = namespaceScopedUrl(this.constructor.names)
-    searchParams = normalizeSearchParams(searchParams, options)
-    return this[http.request](url, { method: 'get', searchParams })
+    searchParams = normalizeSearchParams(method, searchParams, options)
+    return this[http.request](url, { method, searchParams })
   }
 }
 
@@ -112,21 +117,23 @@ ClusterScoped.Observable = superclass => class extends superclass {
     assertSearchParams(searchParams)
     assertSignal(signal)
     assertOptions(options)
+    const method = 'get'
     const url = clusterScopedUrl(this.constructor.names)
-    searchParams = normalizeSearchParams(searchParams, options)
+    searchParams = normalizeSearchParams(method, searchParams, options)
     searchParams.set('watch', true)
     addFieldSelector(searchParams, 'metadata.name', name)
-    return this[http.stream](url, { method: 'get', searchParams, signal })
+    return this[http.stream](url, { method, searchParams, signal })
   }
 
   watchList ({ searchParams, signal, ...options } = {}) {
     assertSearchParams(searchParams)
     assertSignal(signal)
     assertOptions(options)
+    const method = 'get'
     const url = clusterScopedUrl(this.constructor.names)
-    searchParams = normalizeSearchParams(searchParams, options)
+    searchParams = normalizeSearchParams(method, searchParams, options)
     searchParams.set('watch', true)
-    return this[http.stream](url, { method: 'get', searchParams, signal })
+    return this[http.stream](url, { method, searchParams, signal })
   }
 
   informer (options) {
@@ -146,11 +153,12 @@ NamespaceScoped.Observable = superclass => class extends superclass {
     assertSearchParams(searchParams)
     assertSignal(signal)
     assertOptions(options)
+    const method = 'get'
     const url = namespaceScopedUrl(this.constructor.names, namespace)
-    searchParams = normalizeSearchParams(searchParams, options)
+    searchParams = normalizeSearchParams(method, searchParams, options)
     searchParams.set('watch', true)
     addFieldSelector(searchParams, 'metadata.name', name)
-    return this[http.stream](url, { method: 'get', searchParams, signal })
+    return this[http.stream](url, { method, searchParams, signal })
   }
 
   watchList (namespace, { searchParams, signal, ...options } = {}) {
@@ -158,20 +166,22 @@ NamespaceScoped.Observable = superclass => class extends superclass {
     assertSearchParams(searchParams)
     assertSignal(signal)
     assertOptions(options)
+    const method = 'get'
     const url = namespaceScopedUrl(this.constructor.names, namespace)
-    searchParams = normalizeSearchParams(searchParams, options)
+    searchParams = normalizeSearchParams(method, searchParams, options)
     searchParams.set('watch', true)
-    return this[http.stream](url, { method: 'get', searchParams, signal })
+    return this[http.stream](url, { method, searchParams, signal })
   }
 
   watchListAllNamespaces ({ searchParams, signal, ...options } = {}) {
     assertSearchParams(searchParams)
     assertSignal(signal)
     assertOptions(options)
+    const method = 'get'
     const url = namespaceScopedUrl(this.constructor.names)
-    searchParams = normalizeSearchParams(searchParams, options)
+    searchParams = normalizeSearchParams(method, searchParams, options)
     searchParams.set('watch', true)
-    return this[http.stream](url, { method: 'get', searchParams, signal })
+    return this[http.stream](url, { method, searchParams, signal })
   }
 
   informer (namespace, options) {
@@ -195,17 +205,20 @@ NamespaceScoped.Observable = superclass => class extends superclass {
 }
 
 ClusterScoped.Creatable = superclass => class extends superclass {
-  create (body, options, returnResponse) {
+  create (body, { searchParams, signal, onWarning, ...options } = {}) {
     assertBodyObject(body)
+    assertSearchParams(searchParams)
+    assertSignal(signal)
     assertOptions(options)
+    const method = 'post'
     const url = clusterScopedUrl(this.constructor.names)
-    const searchParams = new URLSearchParams(options)
-    return this[http.request](url, { method: 'post', searchParams, json: body, returnResponse })
+    searchParams = normalizeSearchParams(method, searchParams, options)
+    return this[http.request](url, { method, searchParams, json: body, signal, onWarning })
   }
 }
 
 NamespaceScoped.Creatable = superclass => class extends superclass {
-  create (namespace, body, options, returnResponse) {
+  create (namespace, body, { searchParams, signal, onWarning, ...options } = {}) {
     let name
     if (Array.isArray(namespace)) {
       name = namespace[1]
@@ -215,123 +228,161 @@ NamespaceScoped.Creatable = superclass => class extends superclass {
     }
     assertNamespace(namespace)
     assertBodyObject(body)
+    assertSearchParams(searchParams)
+    assertSignal(signal)
     assertOptions(options)
+    const method = 'post'
     const url = namespaceScopedUrl(this.constructor.names, namespace, name)
-    const searchParams = new URLSearchParams(options)
-    return this[http.request](url, { method: 'post', searchParams, json: body, returnResponse })
+    searchParams = normalizeSearchParams(method, searchParams, options)
+    return this[http.request](url, { method, searchParams, json: body, signal, onWarning })
   }
 }
 
 ClusterScoped.Writable = superclass => class extends ClusterScoped.Creatable(superclass) {
-  update (name, body, options, returnResponse) {
+  update (name, body, { searchParams, signal, onWarning, ...options } = {}) {
     assertName(name)
     assertBodyObject(body)
+    assertSearchParams(searchParams)
+    assertSignal(signal)
     assertOptions(options)
+    const method = 'put'
     const url = clusterScopedUrl(this.constructor.names, name)
-    const searchParams = new URLSearchParams(options)
-    return this[http.request](url, { method: 'put', searchParams, json: body, returnResponse })
+    searchParams = normalizeSearchParams(method, searchParams, options)
+    return this[http.request](url, { method, searchParams, json: body, signal, onWarning })
   }
 
-  mergePatch (name, body, options) {
+  mergePatch (name, body, { searchParams, signal, onWarning, ...options } = {}) {
     assertName(name)
     assertBodyObject(body)
+    assertSearchParams(searchParams)
+    assertSignal(signal)
     assertOptions(options)
+    const method = 'patch'
     const url = clusterScopedUrl(this.constructor.names, name)
-    const searchParams = new URLSearchParams(options)
-    return this[http.request](url, setPatchType({ method: 'patch', searchParams, json: body }, PatchType.MERGE))
+    searchParams = normalizeSearchParams(method, searchParams, options)
+    return this[http.request](url, setPatchType({ method, searchParams, json: body, signal, onWarning }, PatchType.MERGE))
   }
 
-  jsonPatch (name, body, options) {
+  jsonPatch (name, body, { searchParams, signal, onWarning, ...options } = {}) {
     assertName(name)
     assertBodyArray(body)
+    assertSearchParams(searchParams)
+    assertSignal(signal)
     assertOptions(options)
+    const method = 'patch'
     const url = clusterScopedUrl(this.constructor.names, name)
-    const searchParams = new URLSearchParams(options)
-    return this[http.request](url, setPatchType({ method: 'patch', searchParams, json: body }, PatchType.JSON))
+    searchParams = normalizeSearchParams(method, searchParams, options)
+    return this[http.request](url, setPatchType({ method, searchParams, json: body, signal, onWarning }, PatchType.JSON))
   }
 
-  strategicMergePatch (name, body, options) {
+  strategicMergePatch (name, body, { searchParams, signal, onWarning, ...options } = {}) {
     assertName(name)
     assertBodyObject(body)
+    assertSearchParams(searchParams)
+    assertSignal(signal)
     assertOptions(options)
+    const method = 'patch'
     const url = clusterScopedUrl(this.constructor.names, name)
-    const searchParams = new URLSearchParams(options)
-    return this[http.request](url, setPatchType({ method: 'patch', searchParams, json: body }, PatchType.STRATEGIC_MERGE))
+    searchParams = normalizeSearchParams(method, searchParams, options)
+    return this[http.request](url, setPatchType({ method, searchParams, json: body, signal, onWarning }, PatchType.STRATEGIC_MERGE))
   }
 
-  delete (name, options) {
+  delete (name, { searchParams, signal, ...options } = {}) {
     assertName(name)
+    assertSearchParams(searchParams)
+    assertSignal(signal)
     assertOptions(options)
+    const method = 'delete'
     const url = clusterScopedUrl(this.constructor.names, name)
-    const searchParams = new URLSearchParams(options)
-    return this[http.request](url, { method: 'delete', searchParams })
+    searchParams = normalizeSearchParams(method, searchParams, options)
+    return this[http.request](url, { method, searchParams, signal })
   }
 
-  deleteCollection (options) {
+  deleteCollection ({ searchParams, signal, ...options } = {}) {
+    assertSearchParams(searchParams)
+    assertSignal(signal)
     assertOptions(options)
+    const method = 'delete'
     const url = clusterScopedUrl(this.constructor.names)
-    const searchParams = new URLSearchParams(options)
-    return this[http.request](url, { method: 'delete', searchParams })
+    searchParams = normalizeSearchParams(method, searchParams, options)
+    return this[http.request](url, { method, searchParams, signal })
   }
 }
 
 NamespaceScoped.Writable = superclass => class extends NamespaceScoped.Creatable(superclass) {
-  update (namespace, name, body, options, returnResponse) {
+  update (namespace, name, body, { searchParams, signal, onWarning, ...options } = {}) {
     assertNamespace(namespace)
     assertName(name)
     assertBodyObject(body)
+    assertSearchParams(searchParams)
+    assertSignal(signal)
     assertOptions(options)
+    const method = 'put'
     const url = namespaceScopedUrl(this.constructor.names, namespace, name)
-    const searchParams = new URLSearchParams(options)
-
-    return this[http.request](url, { method: 'put', searchParams, json: body, returnResponse })
+    searchParams = normalizeSearchParams(method, searchParams, options)
+    return this[http.request](url, { method: 'put', searchParams, json: body, signal, onWarning })
   }
 
-  mergePatch (namespace, name, body, options) {
+  mergePatch (namespace, name, body, { searchParams, signal, onWarning, ...options } = {}) {
     assertName(name)
     assertNamespace(namespace)
     assertBodyObject(body)
+    assertSearchParams(searchParams)
+    assertSignal(signal)
     assertOptions(options)
+    const method = 'patch'
     const url = namespaceScopedUrl(this.constructor.names, namespace, name)
-    const searchParams = new URLSearchParams(options)
-    return this[http.request](url, setPatchType({ method: 'patch', searchParams, json: body }, PatchType.MERGE))
+    searchParams = normalizeSearchParams(method, searchParams, options)
+    return this[http.request](url, setPatchType({ method, searchParams, json: body, signal, onWarning }, PatchType.MERGE))
   }
 
-  jsonPatch (namespace, name, body, options) {
+  jsonPatch (namespace, name, body, { searchParams, signal, onWarning, ...options } = {}) {
     assertNamespace(namespace)
     assertName(name)
     assertBodyArray(body)
+    assertSearchParams(searchParams)
+    assertSignal(signal)
     assertOptions(options)
+    const method = 'patch'
     const url = namespaceScopedUrl(this.constructor.names, namespace, name)
-    const searchParams = new URLSearchParams(options)
-    return this[http.request](url, setPatchType({ method: 'patch', searchParams, json: body }, PatchType.JSON))
+    searchParams = normalizeSearchParams(method, searchParams, options)
+    return this[http.request](url, setPatchType({ method, searchParams, json: body, signal, onWarning }, PatchType.JSON))
   }
 
-  strategicMergePatch (namespace, name, body, options) {
+  strategicMergePatch (namespace, name, body, { searchParams, signal, onWarning, ...options } = {}) {
     assertNamespace(namespace)
     assertName(name)
     assertBodyObject(body)
+    assertSearchParams(searchParams)
+    assertSignal(signal)
     assertOptions(options)
+    const method = 'patch'
     const url = namespaceScopedUrl(this.constructor.names, namespace, name)
-    const searchParams = new URLSearchParams(options)
-    return this[http.request](url, setPatchType({ method: 'patch', searchParams, json: body }, PatchType.STRATEGIC_MERGE))
+    searchParams = normalizeSearchParams(method, searchParams, options)
+    return this[http.request](url, setPatchType({ method, searchParams, json: body, signal, onWarning }, PatchType.STRATEGIC_MERGE))
   }
 
-  delete (namespace, name, options) {
+  delete (namespace, name, { searchParams, signal, ...options } = {}) {
     assertNamespace(namespace)
     assertName(name)
+    assertSearchParams(searchParams)
+    assertSignal(signal)
     assertOptions(options)
+    const method = 'delete'
     const url = namespaceScopedUrl(this.constructor.names, namespace, name)
-    const searchParams = new URLSearchParams(options)
-    return this[http.request](url, { method: 'delete', searchParams })
+    searchParams = normalizeSearchParams(method, searchParams, options)
+    return this[http.request](url, { method, searchParams, signal })
   }
 
-  deleteCollection (namespace, options) {
+  deleteCollection (namespace, { searchParams, signal, ...options } = {}) {
     assertNamespace(namespace)
+    assertSearchParams(searchParams)
+    assertSignal(signal)
     assertOptions(options)
+    const method = 'delete'
     const url = namespaceScopedUrl(this.constructor.names, namespace)
-    const searchParams = new URLSearchParams(options)
-    return this[http.request](url, { method: 'delete', searchParams })
+    searchParams = normalizeSearchParams(method, searchParams, options)
+    return this[http.request](url, { method, searchParams, signal })
   }
 }
 
@@ -433,8 +484,56 @@ function addFieldSelector (searchParams, key, value, operator = '=') {
   searchParams.set('fieldSelector', fieldSelector)
 }
 
-function normalizeSearchParams (searchParams, options) {
-  return searchParams || new URLSearchParams(options)
+const allowedSearchParamsMap = new Map(Object.entries({
+  get: [
+    'watch',
+    'limit',
+    'continue',
+    'fieldSelector',
+    'labelSelector',
+    'resourceVersion',
+    'timeoutSeconds',
+    'includeUninitialized',
+    'allowWatchBookmarks',
+    'pretty'
+  ],
+  post: [
+    'pretty',
+    'dryRun'
+  ],
+  put: [
+    'fieldManager',
+    'pretty',
+    'dryRun'
+  ],
+  patch: [
+    'fieldManager',
+    'pretty',
+    'dryRun'
+  ],
+  delete: [
+    'gracePeriodSeconds',
+    'orphanDependents',
+    'propagationPolicy',
+    'pretty',
+    'dryRun'
+  ]
+}))
+
+function normalizeSearchParams (method, searchParams, options) {
+  const normalizedSearchParams = new URLSearchParams()
+  const allowedSearchParams = allowedSearchParamsMap.get(method)
+  try {
+    searchParams ??= Object.entries(options)
+    for (const [key, value] of searchParams) {
+      if (allowedSearchParams.includes(key)) {
+        normalizedSearchParams.set(key, value)
+      }
+    }
+  } catch (err) {
+    return null
+  }
+  return normalizedSearchParams
 }
 
 module.exports = {

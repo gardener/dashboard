@@ -110,15 +110,13 @@ async function save () {
     }
 
     const shootResource = getEditorValue()
-    const { data: res } = await api.replaceShoot({
+    const { headers } = await api.replaceShoot({
       namespace: shootNamespace.value,
       name: shootName.value,
       data: pick(shootResource, ['spec', 'metadata.labels', 'metadata.annotations']),
     })
-    if (res.headers.warning) {
-      appStore.setPersistentWarning({
-        message: res.headers.warning,
-      })
+    if (headers.warning) {
+      appStore.setPersistentWarning({ message: headers.warning })
     }
 
     clearDocumentHistory()

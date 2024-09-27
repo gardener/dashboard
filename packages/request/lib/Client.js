@@ -302,7 +302,7 @@ class Client {
     return response
   }
 
-  async request (path, { headers = {}, body, json, returnResponse = false, ...options } = {}) {
+  async request (path, { headers = {}, body, json, onWarning, ...options } = {}) {
     headers = this.constructor.normalizeHeaders(headers)
     if (json) {
       body = JSON.stringify(json)
@@ -326,16 +326,16 @@ class Client {
     }
     this.executeHooks('afterResponse', responseOptions)
 
+    if (typeof onWarning === 'function' && response.headers.warning) {
+      onWarning.call(response, response.headers.warning)
+    }
+
     if (statusCode >= 400) {
       throw createHttpError({
         statusCode,
         headers,
         body
       })
-    }
-
-    if (returnResponse) {
-      return response
     }
 
     return body

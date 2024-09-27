@@ -80,7 +80,7 @@ exports.list = async function ({ user, namespace, labelSelector }) {
   }
 }
 
-exports.create = async function ({ user, namespace, body }) {
+exports.create = async function ({ user, namespace, body, ...options }) {
   const client = user.client
   const username = user.id
 
@@ -89,7 +89,7 @@ exports.create = async function ({ user, namespace, body }) {
   }
 
   body = _.merge({}, body, { metadata: { namespace, annotations } })
-  return client['core.gardener.cloud'].shoots.create(namespace, body, undefined, true)
+  return client['core.gardener.cloud'].shoots.create(namespace, body, options)
 }
 
 async function read ({ user, namespace, name }) {
@@ -105,7 +105,7 @@ async function patch ({ user, namespace, name, body }) {
 }
 exports.patch = patch
 
-exports.replace = async function ({ user, namespace, name, body }) {
+exports.replace = async function ({ user, namespace, name, body, ...options }) {
   const client = user.client
 
   const { metadata, kind, apiVersion, status } = await client['core.gardener.cloud'].shoots.get(namespace, name)
@@ -118,7 +118,7 @@ exports.replace = async function ({ user, namespace, name, body }) {
   // compose new body
   body = { kind, apiVersion, metadata, spec, status }
   // replace
-  return client['core.gardener.cloud'].shoots.update(namespace, name, body, undefined, true)
+  return client['core.gardener.cloud'].shoots.update(namespace, name, body, options)
 }
 
 exports.replaceVersion = async function ({ user, namespace, name, body }) {

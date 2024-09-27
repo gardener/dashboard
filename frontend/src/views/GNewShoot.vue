@@ -244,14 +244,12 @@ export default {
       }
 
       try {
-        const { data: res } = await this.api.createShoot({
+        const { headers } = await this.api.createShoot({
           namespace: this.shootNamespace,
           data: this.shootManifest,
         })
-        if (res.headers.warning) {
-          this.setPersistentWarning({
-            message: res.headers.warning,
-          })
+        if (headers.warning) {
+          this.setPersistentWarning({ message: headers.warning })
         } else {
           this.setSuccess('Cluster created')
         }
