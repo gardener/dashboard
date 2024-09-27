@@ -17,6 +17,8 @@ import {
   parseNumberWithMagnitudeSuffix,
   normalizeVersion,
   isEmail,
+  convertToGi,
+  convertToGibibyte,
 } from '@/utils'
 
 import {
@@ -522,6 +524,40 @@ describe('utils', () => {
     it('should not allow pre or suffix other than allowed ones', () => {
       expect(normalizeVersion('x23.1')).toBeUndefined()
       expect(normalizeVersion('23.2x')).toBeUndefined()
+    })
+  })
+
+  describe('convertToGi', () => {
+    const precision = 9
+    it('should convert binary units to Gibibyte', () => {
+      expect(convertToGi('1Ki')).toBe(Math.pow(1024, -2))
+      expect(convertToGi('1Mi')).toBe(Math.pow(1024, -1))
+      expect(convertToGi('1Gi')).toBe(Math.pow(1024, 0))
+      expect(convertToGi('1Ti')).toBe(Math.pow(1024, 1))
+      expect(convertToGi('1Pi')).toBe(Math.pow(1024, 2))
+    })
+
+    it('should convert decimal units to Gibibyte', () => {
+      expect(convertToGi('1')).toBeCloseTo(Math.pow(1000, 3) * Math.pow(1024, -6), precision)
+      expect(convertToGi('1K')).toBeCloseTo(Math.pow(1000, 3) * Math.pow(1024, -5), precision)
+      expect(convertToGi('1M')).toBeCloseTo(Math.pow(1000, 3) * Math.pow(1024, -4), precision)
+      expect(convertToGi('1G')).toBeCloseTo(Math.pow(1000, 3) * Math.pow(1024, -3), precision)
+      expect(convertToGi('1T')).toBeCloseTo(Math.pow(1000, 3) * Math.pow(1024, -2), precision)
+      expect(convertToGi('1P')).toBeCloseTo(Math.pow(1000, 3) * Math.pow(1024, -1), precision)
+    })
+
+    it('should convert floats to Gibibyte', () => {
+      expect(convertToGi('1.23Gi')).toBe(1.23)
+      expect(convertToGi('4.56Ti')).toBe(4.56 * Math.pow(1024, 1))
+      expect(convertToGi('7.89G')).toBeCloseTo(7.89 * Math.pow(1000, 3) * Math.pow(1024, -3), precision)
+    })
+
+    it('should fail to convert to Gibibyte', () => {
+      expect(() => convertToGibibyte('1.2.3')).toThrow(TypeError)
+      expect(() => convertToGibibyte('1Xi')).toThrow(TypeError)
+      expect(() => convertToGibibyte('1E3')).toThrow(TypeError)
+      expect(() => convertToGibibyte('1,23')).toThrow(TypeError)
+      expect(() => convertToGibibyte('Gi')).toThrow(TypeError)
     })
   })
 })
