@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     disable-confirm-input-focus
     :can-perform-action="canPatchProject"
     :disabled="!canPatchProject"
-    :is-toolbar-close-button-visible="true"
+    is-toolbar-close-button-visible
     cancel-button-text=""
     confirm-button-text="Close"
     width="90vw"
