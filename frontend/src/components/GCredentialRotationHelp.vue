@@ -9,8 +9,8 @@ SPDX-License-Identifier: Apache-2.0
     icon="mdi-help-circle-outline"
     color="toolbar-title"
     class="mr-4"
-    caption="Quota Help"
-    :can-perform-action="!!resourceQuotaHelpText"
+    caption="Credential Rotation Help"
+    can-perform-action
     cancel-button-text=""
     confirm-button-text="Close"
   >
@@ -19,32 +19,18 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <template #content>
       <v-card-text>
-        <!-- eslint-disable vue/no-v-html -->
-        <div
-          class="wrap-text"
-          v-html="resourceQuotaHelpHtml"
-        />
-        <!-- eslint-enable vue/no-v-html -->
+        There are many different credentials for Shoots to ensure that various components can communicate with each other and to make sure they are usable and operable.<br>
+        <g-external-link url="https://github.com/gardener/gardener/blob/master/docs/usage/shoot_credentials_rotation.md">
+          This page
+        </g-external-link>
+        explains how these credentials can be rotated to ensure the cluster's security.
       </v-card-text>
     </template>
   </g-generic-action-button-dialog>
 </template>
 
 <script setup>
-import { storeToRefs } from 'pinia'
-import { computed } from 'vue'
-
-import { useConfigStore } from '@/store/config'
 
 import GGenericActionButtonDialog from '@/components/dialogs/GGenericActionButtonDialog.vue'
-
-import { transformHtml } from '@/utils'
-
-const configStore = useConfigStore()
-const { resourceQuotaHelpText } = storeToRefs(configStore)
-
-const resourceQuotaHelpHtml = computed(() => {
-  return transformHtml(resourceQuotaHelpText.value, true)
-})
 
 </script>
