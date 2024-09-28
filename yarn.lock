@@ -754,7 +754,7 @@ __metadata:
     express-static-gzip: "npm:^2.1.7"
     fast-json-patch: "npm:^3.1.1"
     fnv-plus: "npm:^1.3.1"
-    helmet: "npm:^7.1.0"
+    helmet: "npm:^8.0.0"
     http-errors: "npm:^2.0.0"
     jest: "npm:^29.7.0"
     jose: "npm:^5.2.3"
@@ -5497,10 +5497,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"helmet@npm:^7.1.0":
-  version: 7.1.0
-  resolution: "helmet@npm:7.1.0"
-  checksum: 10c0/8c3370d07487be11ac918577c68952e05d779a1a2c037023c1ba763034c381a025899bc52f8acfab5209304a1dc618a3764dbfd26386a0d1173befe4fb932e84
+"helmet@npm:^8.0.0":
+  version: 8.0.0
+  resolution: "helmet@npm:8.0.0"
+  checksum: 10c0/c3d273df206cbb4e5e830ea68afdbd3d0f8e055b2707f67f651ebb4b679c7fd4d6ac77ce6188a2cee32e853d4e24aa00548f787989bbe6e5f98ebfb703855d09
   languageName: node
   linkType: hard
 
