@@ -79,14 +79,14 @@ SPDX-License-Identifier: Apache-2.0
       </p>
       <g-code-block
         v-if="vendor==='aws'"
-        height="100%"
+        max-height="100%"
         lang="json"
         :content="JSON.stringify(templateAws, undefined, 2)"
       />
       <div v-if="vendor==='aws-route53'">
         <p>In this example, the placeholder for the hosted zone is Z2XXXXXXXXXXXX</p>
         <g-code-block
-          height="100%"
+          max-height="100%"
           lang="json"
           :content="JSON.stringify(templateAwsRoute53, undefined, 2)"
         />

@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
   >
     <div
       class="code-block-wrapper"
-      :style="{ 'max-height': height, 'min-width': width }"
+      :style="{ 'max-height': maxHeight, 'min-width': minWidth }"
     >
       <pre><code
           ref="block"
@@ -62,11 +62,11 @@ export default {
   },
   props: {
     lang: String,
-    height: {
+    maxHeight: {
       type: [Number, String],
       default: '450px',
     },
-    width: {
+    minWidth: {
       type: [Number, String],
       default: '100%',
     },

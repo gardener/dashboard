@@ -362,7 +362,7 @@ SPDX-License-Identifier: Apache-2.0
           <g-code-block
             lang="yaml"
             :content="workerGroupYaml"
-            height="100%"
+            max-height="100%"
           />
         </v-window-item>
       </v-window>
