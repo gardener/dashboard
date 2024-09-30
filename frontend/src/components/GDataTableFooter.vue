@@ -17,6 +17,7 @@ SPDX-License-Identifier: Apache-2.0
         flat
         single-line
         hide-details
+        width="105px"
         @update:model-value="value => setItemsPerPage(Number(value))"
       />
     </div>
