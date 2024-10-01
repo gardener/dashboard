@@ -1385,7 +1385,7 @@ const RAW_RUNTIME_STATE =
           ["md5", "npm:2.3.0"],\
           ["mitt", "npm:3.0.1"],\
           ["netmask", "npm:2.0.2"],\
-          ["pinia", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.2.3"],\
+          ["pinia", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.2.4"],\
           ["rollup-plugin-visualizer", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.12.0"],\
           ["sass", "npm:1.74.1"],\
           ["semver", "npm:7.6.3"],\
@@ -2340,7 +2340,7 @@ const RAW_RUNTIME_STATE =
           ["@pinia/testing", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.1.5"],\
           ["@types/pinia", null],\
           ["@types/vue", null],\
-          ["pinia", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.2.3"],\
+          ["pinia", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.2.4"],\
           ["vue", "virtual:ec350e632119c2fa6aa4185d5fb2e6904d7c1f9cefb2603c234bc720b5a0490a22229e2320a7b46e1376c2f73972079ba6fa907f4b7e80df555b8cfccd6e5aa2#npm:3.5.10"],\
           ["vue-demi", "virtual:546cb600df5a08c35583463fec41169f6f23f9ae84cb210e36fc6e37844c80a4f8bb92fe07987b8bc75e2b575703d7a52811a6d5c177077b4aed053d240bbe3c#npm:0.14.10"]\
         ],\
@@ -9933,17 +9933,17 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["pinia", [\
-      ["npm:2.2.3", {\
-        "packageLocation": "./.yarn/cache/pinia-npm-2.2.3-d23297e93e-ffa4af7f58.zip/node_modules/pinia/",\
+      ["npm:2.2.4", {\
+        "packageLocation": "./.yarn/cache/pinia-npm-2.2.4-4d30e963f7-d4eea590e1.zip/node_modules/pinia/",\
         "packageDependencies": [\
-          ["pinia", "npm:2.2.3"]\
+          ["pinia", "npm:2.2.4"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.2.3", {\
-        "packageLocation": "./.yarn/__virtual__/pinia-virtual-e9a879546e/0/cache/pinia-npm-2.2.3-d23297e93e-ffa4af7f58.zip/node_modules/pinia/",\
+      ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.2.4", {\
+        "packageLocation": "./.yarn/__virtual__/pinia-virtual-b3aa681ab8/0/cache/pinia-npm-2.2.4-4d30e963f7-d4eea590e1.zip/node_modules/pinia/",\
         "packageDependencies": [\
-          ["pinia", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.2.3"],\
+          ["pinia", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.2.4"],\
           ["@types/typescript", null],\
           ["@types/vue", null],\
           ["@types/vue__composition-api", null],\
