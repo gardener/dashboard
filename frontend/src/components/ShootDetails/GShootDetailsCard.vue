@@ -85,9 +85,18 @@ SPDX-License-Identifier: Apache-2.0
               />
             </div>
           </template>
-          <g-worker-groups
-            class="flex-wrap"
-          />
+          <div
+            v-if="hasShootWorkerGroups"
+            class="d-flex align-center flex-wrap"
+          >
+            <g-worker-group
+              v-for="workerGroup in shootWorkerGroups"
+              :key="workerGroup.name"
+              :worker-group="workerGroup"
+              class="ma-1"
+            />
+          </div>
+          <g-workerless-chip v-else />
         </g-list-item-content>
         <template
           #append
@@ -167,7 +176,14 @@ SPDX-License-Identifier: Apache-2.0
               v-if="shootAccessRestrictions.length"
               class="d-flex flex-wrap align-center"
             >
-              <g-access-restriction-chips :access-restrictions="shootAccessRestrictions" />
+              <g-access-restriction-chip
+                v-for="item in shootAccessRestrictions"
+                :id="item.key"
+                :key="item.key"
+                :title="item.title"
+                :description="item.description"
+                :options="item.options"
+              />
             </div>
             <span v-else>
               No access restrictions configured
@@ -223,10 +239,11 @@ import { storeToRefs } from 'pinia'
 import { useConfigStore } from '@/store/config'
 import { useAuthzStore } from '@/store/authz'
 
-import GAccessRestrictionChips from '@/components/ShootAccessRestrictions/GAccessRestrictionChips'
+import GAccessRestrictionChip from '@/components/ShootAccessRestrictions/GAccessRestrictionChip'
 import GAccountAvatar from '@/components/GAccountAvatar'
 import GTimeString from '@/components/GTimeString'
-import GWorkerGroups from '@/components/ShootWorkers/GWorkerGroups'
+import GWorkerGroup from '@/components/ShootWorkers/GWorkerGroup'
+import GWorkerlessChip from '@/components/ShootWorkers/GWorkerlessChip.vue'
 import GWorkerConfiguration from '@/components/ShootWorkers/GWorkerConfiguration'
 import GAccessRestrictionsConfiguration from '@/components/ShootAccessRestrictions/GAccessRestrictionsConfiguration'
 import GPurposeConfiguration from '@/components/GPurposeConfiguration'
@@ -259,6 +276,7 @@ const {
   isShootMarkedForDeletion,
   shootAddons,
   hasShootWorkerGroups,
+  shootWorkerGroups,
   shootAccessRestrictions,
 } = useShootItem()
 
