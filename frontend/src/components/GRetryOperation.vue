@@ -72,7 +72,10 @@ async function onRetryOperation () {
       },
     })
   } catch (err) {
-    appStore.setPersistentError(err)
+    appStore.setError({
+      message: err,
+      duration: -1,
+    })
     logger.error('failed to retry operation', err)
   } finally {
     retryingOperation.value = false

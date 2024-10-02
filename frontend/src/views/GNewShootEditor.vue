@@ -99,12 +99,8 @@ async function save () {
     const data = getEditorValue()
     const namespace = shootNamespace.value
     const name = get(data, 'metadata.name')
-    const { headers } = await api.createShoot({ namespace, data })
-    if (headers.warning) {
-      appStore.setPersistentWarning({ message: headers.warning })
-    } else {
-      appStore.setSuccess('Cluster created')
-    }
+    await api.createShoot({ namespace, data })
+    appStore.setSuccess('Cluster created')
     isShootCreated.value = true
     router.push({
       name: 'ShootItem',

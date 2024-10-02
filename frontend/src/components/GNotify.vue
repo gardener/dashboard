@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
         :title="item.title"
         :text="item.text"
         closable
-        class="mt-2"
+        class="mt-2 overflow-wrap"
         @click:close="close"
       />
     </template>
@@ -36,10 +36,6 @@ import {
 } from 'vue'
 
 import { useAppStore } from '@/store/app'
-
-const store = useAppStore()
-const notify = inject('notify')
-const alert = toRef(store, 'alert')
 
 // props
 const props = defineProps({
@@ -71,6 +67,10 @@ const props = defineProps({
 
 const { group, width, position } = toRefs(props)
 
+const store = useAppStore()
+const notify = inject('notify')
+const alert = toRef(store, props.group === 'headerWarning' ? 'headerWarningAlert' : 'defaultAlert')
+
 function getType (value) {
   if (value.type === 'warn') {
     return 'warning'
@@ -90,6 +90,12 @@ function getDuration (value, type) {
     : props.duration
 }
 
+function getGroup (value) {
+  return value.group
+    ? value.group
+    : props.group
+}
+
 // watches
 watch(alert, value => {
   if (value) {
@@ -97,12 +103,13 @@ watch(alert, value => {
     const duration = getDuration(value, type)
 
     const options = {
-      group: props.group,
+      group: getGroup(value),
       type,
       title: value.title,
       text: value.message,
       duration,
     }
+
     alert.value = null
     nextTick(() => notify(options))
   }
@@ -110,3 +117,11 @@ watch(alert, value => {
   immediate: true,
 })
 </script>
+
+<style lang="scss" scoped>
+
+.overflow-wrap {
+  overflow-wrap: break-word;
+}
+
+</style>

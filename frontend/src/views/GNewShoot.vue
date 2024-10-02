@@ -232,7 +232,6 @@ export default {
   methods: {
     ...mapActions(useAppStore, [
       'setSuccess',
-      'setPersistentWarning',
     ]),
     async createClicked () {
       if (this.v$.$invalid) {
@@ -244,15 +243,11 @@ export default {
       }
 
       try {
-        const { headers } = await this.api.createShoot({
+        await this.api.createShoot({
           namespace: this.shootNamespace,
           data: this.shootManifest,
         })
-        if (headers.warning) {
-          this.setPersistentWarning({ message: headers.warning })
-        } else {
-          this.setSuccess('Cluster created')
-        }
+        this.setSuccess('Cluster created')
         this.isShootCreated = true
         this.$router.push({
           name: 'ShootItem',

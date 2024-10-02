@@ -62,7 +62,6 @@ import {
 
 const api = inject('api')
 const logger = inject('logger')
-const appStore = useAppStore()
 
 const injectionKey = 'shoot-editor'
 const confirmDialog = ref(null)
@@ -110,14 +109,11 @@ async function save () {
     }
 
     const shootResource = getEditorValue()
-    const { headers } = await api.replaceShoot({
+    await api.replaceShoot({
       namespace: shootNamespace.value,
       name: shootName.value,
       data: pick(shootResource, ['spec', 'metadata.labels', 'metadata.annotations']),
     })
-    if (headers.warning) {
-      appStore.setPersistentWarning({ message: headers.warning })
-    }
 
     clearDocumentHistory()
   } catch (err) {
