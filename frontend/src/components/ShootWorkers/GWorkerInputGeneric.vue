@@ -347,7 +347,10 @@ export default {
         machineType: this.selectedMachineType,
         volumeType: this.selectedVolumeType,
       }))
-      const defaultSize = convertToGi(get(this.selectedMachineType, 'storage.size'))
+      let defaultSize = get(this.selectedMachineType, ['storage.size'])
+      if (defaultSize) {
+        defaultSize = convertToGi(defaultSize)
+      }
       if (defaultSize > 0 && defaultSize < minimumVolumeSize) {
         return defaultSize
       }
