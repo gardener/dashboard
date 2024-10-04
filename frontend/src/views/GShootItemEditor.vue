@@ -44,8 +44,6 @@ import {
 } from 'vue'
 import { onBeforeRouteLeave } from 'vue-router'
 
-import { useAppStore } from '@/store/app'
-
 import GShootEditor from '@/components/GShootEditor'
 import GConfirmDialog from '@/components/dialogs/GConfirmDialog'
 import GMessage from '@/components/GMessage'
