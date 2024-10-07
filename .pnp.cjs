@@ -1497,7 +1497,7 @@ const RAW_RUNTIME_STATE =
           ["http-errors", "npm:2.0.0"],\
           ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:29.7.0"],\
           ["prom-client", "npm:15.1.3"],\
-          ["response-time", "npm:2.3.2"],\
+          ["response-time", "npm:2.3.3"],\
           ["supertest", "npm:7.0.0"]\
         ],\
         "linkType": "SOFT"\
@@ -5211,13 +5211,6 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["depd", [\
-      ["npm:1.1.2", {\
-        "packageLocation": "./.yarn/cache/depd-npm-1.1.2-b0c8414da7-acb24aaf93.zip/node_modules/depd/",\
-        "packageDependencies": [\
-          ["depd", "npm:1.1.2"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["npm:2.0.0", {\
         "packageLocation": "./.yarn/cache/depd-npm-2.0.0-b6c51a4b43-58bd06ec20.zip/node_modules/depd/",\
         "packageDependencies": [\
@@ -10338,11 +10331,11 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["response-time", [\
-      ["npm:2.3.2", {\
-        "packageLocation": "./.yarn/cache/response-time-npm-2.3.2-e5c67ab5c5-9213579b14.zip/node_modules/response-time/",\
+      ["npm:2.3.3", {\
+        "packageLocation": "./.yarn/cache/response-time-npm-2.3.3-a2ac0648ba-5e04c6a803.zip/node_modules/response-time/",\
         "packageDependencies": [\
-          ["response-time", "npm:2.3.2"],\
-          ["depd", "npm:1.1.2"],\
+          ["response-time", "npm:2.3.3"],\
+          ["depd", "npm:2.0.0"],\
           ["on-headers", "npm:1.0.2"]\
         ],\
         "linkType": "HARD"\
