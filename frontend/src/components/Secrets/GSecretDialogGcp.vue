@@ -91,7 +91,8 @@ import GExternalLink from '@/components/GExternalLink'
 
 import {
   withFieldName,
-  serviceAccountKey,
+  withMessage,
+  withParams,
 } from '@/utils/validators'
 import {
   handleTextFieldDrop,
@@ -131,11 +132,43 @@ export default {
     }
   },
   validations () {
+    const projectIDTestPattern = /^[a-z][a-z0-9-]{4,28}[a-z0-9]+$/
+
     return {
-      serviceAccountKey: withFieldName('Service Account Key', {
-        required,
-        serviceAccountKey,
-      }),
+      serviceAccountKey: withFieldName('Service Account Key',
+        {
+          required,
+          validJson: withMessage('Not a valid JSON', value => {
+            try {
+              JSON.parse(value)
+              return true
+            } catch (err) {
+              return false
+            }
+          }),
+          projectID: withMessage('Must contain a valid `project_id`', value => {
+            try {
+              const key = JSON.parse(value)
+              if (key.project_id && projectIDTestPattern.test(key.project_id)) {
+                return true
+              }
+            } catch (err) {
+              return false
+            }
+          }),
+          type: withMessage('Credential `type` must be "service_account"', value => {
+            try {
+              const key = JSON.parse(value)
+              if (key.type && key.type === 'service_account') {
+                return true
+              }
+            } catch (err) {
+              return false
+            }
+          }),
+
+        },
+      ),
     }
   },
   computed: {
