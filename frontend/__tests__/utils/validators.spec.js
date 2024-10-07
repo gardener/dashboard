@@ -4,10 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import {
-  unique,
-  serviceAccountKey,
-} from '@/utils/validators'
+import { unique } from '@/utils/validators'
 
 describe('utils', () => {
   describe('validators', () => {
