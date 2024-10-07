@@ -92,7 +92,6 @@ import GExternalLink from '@/components/GExternalLink'
 import {
   withFieldName,
   withMessage,
-  withParams,
 } from '@/utils/validators'
 import {
   handleTextFieldDrop,

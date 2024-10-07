@@ -178,7 +178,7 @@ import {
 } from '@/utils/validators'
 import {
   getErrorMessages,
-  parseSize,
+  convertToGi,
 } from '@/utils'
 
 import {
@@ -298,14 +298,14 @@ export default {
     })
 
     const volumeSizeRules = {
-      minVolumeSize: withMessage(`Minimum size is ${this.minimumVolumeSize}`, value => {
+      minVolumeSize: withMessage(() => `Minimum size is ${this.minimumVolumeSize}`, value => {
         if (!this.hasVolumeSize) {
           return true
         }
         if (!value) {
           return false
         }
-        return this.minimumVolumeSize <= parseSize(value)
+        return this.minimumVolumeSize <= convertToGi(value)
       }),
     }
     rules.volumeSize = withFieldName(() => `${this.workerGroupName} Volume Size`, volumeSizeRules)
@@ -343,11 +343,14 @@ export default {
       return filter(machineImages, ({ isExpired, architectures }) => !isExpired && includes(architectures, this.machineArchitecture))
     },
     minimumVolumeSize () {
-      const minimumVolumeSize = parseSize(this.minimumVolumeSizeByMachineTypeAndVolumeType({
+      const minimumVolumeSize = convertToGi(this.minimumVolumeSizeByMachineTypeAndVolumeType({
         machineType: this.selectedMachineType,
         volumeType: this.selectedVolumeType,
       }))
-      const defaultSize = parseSize(get(this.selectedMachineType, 'storage.size'))
+      let defaultSize = get(this.selectedMachineType, ['storage.size'])
+      if (defaultSize) {
+        defaultSize = convertToGi(defaultSize)
+      }
       if (defaultSize > 0 && defaultSize < minimumVolumeSize) {
         return defaultSize
       }
