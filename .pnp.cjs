@@ -1276,7 +1276,7 @@ const RAW_RUNTIME_STATE =
           ["base64url", "npm:3.0.1"],\
           ["body-parser", "npm:1.20.3"],\
           ["compression", "npm:1.7.4"],\
-          ["cookie-parser", "npm:1.4.6"],\
+          ["cookie-parser", "npm:1.4.7"],\
           ["cross-env", "npm:7.0.3"],\
           ["dockerfile-ast", "npm:0.6.1"],\
           ["eslint", "npm:8.57.0"],\
@@ -4807,13 +4807,6 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["cookie", [\
-      ["npm:0.4.1", {\
-        "packageLocation": "./.yarn/cache/cookie-npm-0.4.1-cc5e2ebb42-4d7bc798df.zip/node_modules/cookie/",\
-        "packageDependencies": [\
-          ["cookie", "npm:0.4.1"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["npm:0.4.2", {\
         "packageLocation": "./.yarn/cache/cookie-npm-0.4.2-7761894d5f-beab41fbd7.zip/node_modules/cookie/",\
         "packageDependencies": [\
@@ -4827,14 +4820,21 @@ const RAW_RUNTIME_STATE =
           ["cookie", "npm:0.6.0"]\
         ],\
         "linkType": "HARD"\
+      }],\
+      ["npm:0.7.2", {\
+        "packageLocation": "./.yarn/cache/cookie-npm-0.7.2-6ea9ee4231-9596e8ccdb.zip/node_modules/cookie/",\
+        "packageDependencies": [\
+          ["cookie", "npm:0.7.2"]\
+        ],\
+        "linkType": "HARD"\
       }]\
     ]],\
     ["cookie-parser", [\
-      ["npm:1.4.6", {\
-        "packageLocation": "./.yarn/cache/cookie-parser-npm-1.4.6-a68f84d02a-9c2ade5459.zip/node_modules/cookie-parser/",\
+      ["npm:1.4.7", {\
+        "packageLocation": "./.yarn/cache/cookie-parser-npm-1.4.7-970a70a2fd-46bef553de.zip/node_modules/cookie-parser/",\
         "packageDependencies": [\
-          ["cookie-parser", "npm:1.4.6"],\
-          ["cookie", "npm:0.4.1"],\
+          ["cookie-parser", "npm:1.4.7"],\
+          ["cookie", "npm:0.7.2"],\
           ["cookie-signature", "npm:1.0.6"]\
         ],\
         "linkType": "HARD"\
