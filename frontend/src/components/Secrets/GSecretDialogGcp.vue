@@ -148,9 +148,7 @@ export default {
           projectID: withMessage('Must contain a valid `project_id`', value => {
             try {
               const key = JSON.parse(value)
-              if (key.project_id && projectIDTestPattern.test(key.project_id)) {
-                return true
-              }
+              return key.project_id && projectIDTestPattern.test(key.project_id)
             } catch (err) {
               return false
             }
@@ -158,9 +156,7 @@ export default {
           type: withMessage('Credential `type` must be "service_account"', value => {
             try {
               const key = JSON.parse(value)
-              if (key.type && key.type === 'service_account') {
-                return true
-              }
+              return key.type && key.type === 'service_account'
             } catch (err) {
               return false
             }
