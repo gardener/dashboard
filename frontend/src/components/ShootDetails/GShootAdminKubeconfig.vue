@@ -182,7 +182,7 @@ export default {
         this.logger.error(errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
 
         this.setError({
-          message: err,
+          text: err,
           duration: -1,
         })
 

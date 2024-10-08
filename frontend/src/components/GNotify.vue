@@ -5,19 +5,18 @@ SPDX-License-Identifier: Apache-2.0
 -->
 <template>
   <notifications
-    :group="group"
-    :width="width"
-    :position="position"
-    :duration="props.duration"
+    position="bottom right"
     class="ma-2"
+    width="360px"
   >
     <template #body="{ item, close }">
       <v-alert
-        :density="props.density"
-        :variant="props.variant"
+        compact
+        flat
         :color="item.type"
         :title="item.title"
         :text="item.text"
+        :width="item.width"
         closable
         class="mt-2 overflow-wrap"
         @click:close="close"
@@ -25,98 +24,6 @@ SPDX-License-Identifier: Apache-2.0
     </template>
   </notifications>
 </template>
-
-<script setup>
-import {
-  inject,
-  watch,
-  toRef,
-  toRefs,
-  nextTick,
-} from 'vue'
-
-import { useAppStore } from '@/store/app'
-
-// props
-const props = defineProps({
-  group: {
-    type: String,
-    default: 'default',
-  },
-  width: {
-    type: String,
-    default: '360px',
-  },
-  position: {
-    type: String,
-    default: 'bottom right',
-  },
-  duration: {
-    type: Number,
-    default: 5000,
-  },
-  density: {
-    type: String,
-    default: 'compact',
-  },
-  variant: {
-    type: String,
-    default: 'flat',
-  },
-})
-
-const { group, width, position } = toRefs(props)
-
-const store = useAppStore()
-const notify = inject('notify')
-const alert = toRef(store, props.group === 'headerWarning' ? 'headerWarningAlert' : 'defaultAlert')
-
-function getType (value) {
-  if (value.type === 'warn') {
-    return 'warning'
-  }
-  if (['success', 'info', 'warning', 'error'].includes(value.type)) {
-    return value.type
-  }
-  return 'secondary'
-}
-
-function getDuration (value, type) {
-  if (value.duration) {
-    return value.duration
-  }
-  return type === 'success'
-    ? 3000
-    : props.duration
-}
-
-function getGroup (value) {
-  return value.group
-    ? value.group
-    : props.group
-}
-
-// watches
-watch(alert, value => {
-  if (value) {
-    const type = getType(value)
-    const duration = getDuration(value, type)
-
-    const options = {
-      group: getGroup(value),
-      type,
-      title: value.title,
-      text: value.message,
-      duration,
-    }
-
-    alert.value = null
-    nextTick(() => notify(options))
-  }
-}, {
-  immediate: true,
-})
-</script>
 
 <style lang="scss" scoped>
 

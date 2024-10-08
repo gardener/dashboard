@@ -73,7 +73,7 @@ export const useMemberStore = defineStore('member', () => {
       list.value = response.data
     } catch (err) {
       appStore.setError({
-        message: `Failed to reset Service Account: ${err.message}`,
+        text: `Failed to reset Service Account: ${err.message}`,
         duration: -1,
       })
     }

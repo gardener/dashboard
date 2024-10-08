@@ -21,12 +21,6 @@ SPDX-License-Identifier: Apache-2.0
       <g-main-toolbar />
       <g-main-content ref="mainContent" />
       <g-notify />
-      <g-notify
-        group="headerWarning"
-        :duration="-1"
-        width="500px"
-        position="top right"
-      />
     </template>
   </v-app>
 </template>
