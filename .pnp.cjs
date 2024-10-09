@@ -1394,7 +1394,7 @@ const RAW_RUNTIME_STATE =
           ["statuses", "npm:2.0.1"],\
           ["symbol-tree", "npm:3.2.4"],\
           ["toidentifier", "npm:1.0.1"],\
-          ["universal-cookie", "npm:7.2.0"],\
+          ["universal-cookie", "npm:7.2.1"],\
           ["unplugin-fonts", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:1.1.1"],\
           ["url-template", "npm:3.1.1"],\
           ["uuid", "npm:10.0.0"],\
@@ -3505,7 +3505,7 @@ const RAW_RUNTIME_STATE =
           ["nprogress", null],\
           ["qrcode", null],\
           ["sortablejs", null],\
-          ["universal-cookie", "npm:7.2.0"],\
+          ["universal-cookie", "npm:7.2.1"],\
           ["vue", "virtual:ec350e632119c2fa6aa4185d5fb2e6904d7c1f9cefb2603c234bc720b5a0490a22229e2320a7b46e1376c2f73972079ba6fa907f4b7e80df555b8cfccd6e5aa2#npm:3.5.11"],\
           ["vue-demi", "virtual:546cb600df5a08c35583463fec41169f6f23f9ae84cb210e36fc6e37844c80a4f8bb92fe07987b8bc75e2b575703d7a52811a6d5c177077b4aed053d240bbe3c#npm:0.14.10"]\
         ],\
@@ -4811,13 +4811,6 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/cookie-npm-0.4.2-7761894d5f-beab41fbd7.zip/node_modules/cookie/",\
         "packageDependencies": [\
           ["cookie", "npm:0.4.2"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
-      ["npm:0.6.0", {\
-        "packageLocation": "./.yarn/cache/cookie-npm-0.6.0-362d6a2e45-f2318b31af.zip/node_modules/cookie/",\
-        "packageDependencies": [\
-          ["cookie", "npm:0.6.0"]\
         ],\
         "linkType": "HARD"\
       }],\
@@ -11565,12 +11558,12 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["universal-cookie", [\
-      ["npm:7.2.0", {\
-        "packageLocation": "./.yarn/cache/universal-cookie-npm-7.2.0-eb2c0ed6f9-70dec5aaae.zip/node_modules/universal-cookie/",\
+      ["npm:7.2.1", {\
+        "packageLocation": "./.yarn/cache/universal-cookie-npm-7.2.1-4ef570d641-e1cc4c7adb.zip/node_modules/universal-cookie/",\
         "packageDependencies": [\
-          ["universal-cookie", "npm:7.2.0"],\
+          ["universal-cookie", "npm:7.2.1"],\
           ["@types/cookie", "npm:0.6.0"],\
-          ["cookie", "npm:0.6.0"]\
+          ["cookie", "npm:0.7.2"]\
         ],\
         "linkType": "HARD"\
       }]\
