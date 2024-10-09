@@ -228,7 +228,7 @@ export function getRawVal (context, item, column) {
     case 'controlPlaneHighAvailability':
       return get(spec, 'controlPlane.highAvailability.failureTolerance.type')
     case 'issueSince':
-      return getIssueSince(item.status) || 0
+      return getIssueSince(item.status)
     case 'technicalId':
       return item.status?.technicalID
     case 'workers':
