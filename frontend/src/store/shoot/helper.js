@@ -329,10 +329,10 @@ export function getSortVal (state, context, item, sortBy) {
       })
     }
     default:
-      if (typeof value === 'number') {
-        return value
+      if (isNaN(value)) {
+        return toLower(value)
       }
-      return toLower(value)
+      return value
   }
 }
 
