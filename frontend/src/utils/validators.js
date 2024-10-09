@@ -16,7 +16,6 @@ import {
 const { withParams, regex, withMessage } = helpers
 
 const alphaNumUnderscorePattern = /^\w+$/
-const alphaNumUnderscoreHyphenPattern = /^[a-zA-Z0-9-_]+$/
 const lowerCaseAlphaNumHyphenPattern = /^[-a-z0-9]*$/
 const consecutiveHyphenPattern = /.?-{2,}.?/
 const startEndHyphenPattern = /^-.*.|.*-$/
@@ -55,20 +54,6 @@ const unique = key => withMessage(`Value of property '${key}' must be unique`, w
     return !includes(keys, value)
   },
 ))
-
-const serviceAccountKey = withMessage('Not a valid Service Account Key',
-  withParams(
-    { type: 'serviceAccountKey' },
-    function serviceAccountKey (value) {
-      try {
-        const key = JSON.parse(value)
-        if (key.project_id && alphaNumUnderscoreHyphenPattern.test(key.project_id)) {
-          return true
-        }
-      } catch (err) { /* ignore error */ }
-      return false
-    },
-  ))
 
 const includesIfAvailable = (key, reference) => withMessage(`Value of property '${key}' must be selected`,
   withParams(
@@ -115,7 +100,6 @@ export {
   lowerCaseAlphaNumHyphen,
   noConsecutiveHyphen,
   noStartEndHyphen,
-  serviceAccountKey,
   includesIfAvailable,
   numberOrPercentage,
   isTimezone,
