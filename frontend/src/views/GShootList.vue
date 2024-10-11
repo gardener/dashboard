@@ -154,19 +154,18 @@ SPDX-License-Identifier: Apache-2.0
           />
         </template>
       </g-toolbar>
-      <component
-        :is="tableComponent"
-        v-model:page="page"
+      <v-data-table-virtual
+        ref="shootTable"
         v-model:sort-by="sortByInternal"
-        v-model:items-per-page="shootItemsPerPage"
         :headers="visibleHeaders"
         :items="sortedAndFilteredItems"
-        hover
         :loading="loading || !connected"
         :custom-key-sort="customKeySort"
+        hover
         must-sort
+        fixed-header
         class="g-table"
-        :height="isVirtualScrollEnabled ? 'calc(100vh - 240px)' : undefined"
+        height="calc(100vh - 240px)"
         item-height="50px"
       >
         <template #progress>
@@ -185,15 +184,12 @@ SPDX-License-Identifier: Apache-2.0
             @show-dialog="showDialog"
           />
         </template>
-        <template #bottom="{ pageCount }">
+        <template #bottom>
           <g-data-table-footer
-            v-model:page="page"
-            v-model:items-per-page="shootItemsPerPage"
             :items-length="sortedAndFilteredItems.length"
-            :page-count="pageCount"
           />
         </template>
-      </component>
+      </v-data-table-virtual>
       <v-dialog
         v-if="!isShootItemEmpty"
         v-model="clusterAccessDialog"
@@ -240,10 +236,6 @@ import {
   mapWritableState,
   mapActions,
 } from 'pinia'
-import {
-  VDataTableVirtual,
-  VDataTable,
-} from 'vuetify/components'
 import { useUrlSearchParams } from '@vueuse/core'
 
 import { useAuthnStore } from '@/store/authn'
@@ -290,8 +282,6 @@ export default {
     GCertifiedKubernetes,
     GTableColumnSelection,
     GDataTableFooter,
-    VDataTableVirtual,
-    VDataTable,
   },
   inject: ['logger'],
   beforeRouteEnter (to, from, next) {
@@ -361,7 +351,6 @@ export default {
 
     function onUpdateShootSearch (value) {
       shootSearch.value = value
-
       setDebouncedShootSearch()
     }
 
@@ -379,7 +368,6 @@ export default {
   data () {
     return {
       dialog: null,
-      page: 1,
       selectedColumns: undefined,
     }
   },
@@ -416,7 +404,6 @@ export default {
     ]),
     ...mapWritableState(useLocalStorageStore, [
       'shootSelectedColumns',
-      'shootItemsPerPage',
       'shootSortBy',
       'shootCustomSelectedColumns',
       'shootCustomSortBy',
@@ -425,9 +412,6 @@ export default {
     ]),
     defaultSortBy () {
       return [{ key: 'name', order: 'asc' }]
-    },
-    defaultItemsPerPage () {
-      return 10
     },
     clusterAccessDialog: {
       get () {
@@ -807,14 +791,6 @@ export default {
     issueSinceColumnVisible () {
       return this.operatorFeatures || (!this.projectScope && this.isAdmin)
     },
-    isVirtualScrollEnabled () {
-      return this.shootItemsPerPage === -1
-    },
-    tableComponent () {
-      return this.isVirtualScrollEnabled
-        ? 'VDataTableVirtual'
-        : 'VDataTable'
-    },
   },
   watch: {
     sortBy (sortBy) {
@@ -824,6 +800,10 @@ export default {
         this.shootCustomSortBy = null // clear project specific options
         this.shootSortBy = sortBy
       }
+    },
+    debouncedShootSearch () {
+      // Workaround for https://github.com/vuetifyjs/vuetify/issues/20566
+      this.scrollToTop()
     },
   },
   methods: {
@@ -867,7 +847,6 @@ export default {
         ...this.defaultCustomSelectedColumns,
       }
       this.saveSelectedColumns()
-      this.shootItemsPerPage = this.defaultItemsPerPage
       this.sortByInternal = this.defaultSortBy
     },
     updateTableSettings () {
@@ -903,6 +882,17 @@ export default {
         delete reactiveObject[key]
       }
       Object.assign(reactiveObject, defaultState)
+    },
+    scrollToTop () {
+      const tableRef = this.$refs.shootTable
+
+      if (tableRef) {
+        const scrollableElement = tableRef.$el.querySelector('.v-table__wrapper')
+
+        if (scrollableElement) {
+          scrollableElement.scrollTop = 0
+        }
+      }
     },
   },
 }

@@ -7,21 +7,21 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-divider />
   <div class="v-data-table-footer">
-    <div class="v-data-table-footer__items-per-page">
-      <span>Rows per page:</span>
-      <v-select
-        :items="itemsPerPageOptions"
-        :model-value="itemsPerPage"
-        density="compact"
-        variant="solo"
-        flat
-        single-line
-        hide-details
-        width="105px"
-        @update:model-value="value => setItemsPerPage(Number(value))"
-      />
-    </div>
     <template v-if="pageCount">
+      <div class="v-data-table-footer__items-per-page">
+        <span>Rows per page:</span>
+        <v-select
+          :items="itemsPerPageOptions"
+          :model-value="itemsPerPage"
+          density="compact"
+          variant="solo"
+          flat
+          single-line
+          hide-details
+          width="105px"
+          @update:model-value="value => setItemsPerPage(Number(value))"
+        />
+      </div>
       <div class="v-data-table-footer__info">
         {{ !itemsLength ? 0 : startIndex + 1 }}-{{ stopIndex }} of {{ itemsLength }}
       </div>
@@ -78,7 +78,7 @@ const props = defineProps({
   },
   itemsPerPage: {
     type: Number,
-    required: true,
+    required: false,
   },
   itemsPerPageOptions: {
     type: Array,
@@ -92,7 +92,7 @@ const props = defineProps({
   },
   page: {
     type: Number,
-    required: true,
+    required: false,
   },
   pageCount: {
     type: Number,

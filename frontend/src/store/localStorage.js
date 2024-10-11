@@ -217,11 +217,6 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     writeDefaults: false,
   })
 
-  const shootItemsPerPage = useLocalStorage('projects/shoot-list/itemsPerPage', 10, {
-    serializer: StorageSerializers.integer,
-    writeDefaults: false,
-  })
-
   const shootSortBy = useLocalStorage('projects/shoot-list/sortBy', [], {
     serializer: StorageSerializers.json,
     writeDefaults: false,
@@ -287,7 +282,6 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     dnsSecretItemsPerPage,
     dnsSecretSortBy,
     shootSelectedColumns,
-    shootItemsPerPage,
     shootSortBy,
     allProjectsShootFilter,
     shootListFetchFromCache,
