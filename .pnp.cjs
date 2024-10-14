@@ -1343,7 +1343,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@gardener-dashboard/frontend", "workspace:frontend"],\
           ["@fontsource/roboto", "npm:5.1.0"],\
-          ["@kyvg/vue3-notification", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.3.0"],\
+          ["@kyvg/vue3-notification", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.4.0"],\
           ["@mdi/font", "npm:7.4.47"],\
           ["@pinia/testing", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.1.6"],\
           ["@vitejs/plugin-basic-ssl", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:1.1.0"],\
@@ -1955,17 +1955,17 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@kyvg/vue3-notification", [\
-      ["npm:3.3.0", {\
-        "packageLocation": "./.yarn/cache/@kyvg-vue3-notification-npm-3.3.0-88b8a8acd6-c87f8bc979.zip/node_modules/@kyvg/vue3-notification/",\
+      ["npm:3.4.0", {\
+        "packageLocation": "./.yarn/cache/@kyvg-vue3-notification-npm-3.4.0-28d3e78df0-644c85f99d.zip/node_modules/@kyvg/vue3-notification/",\
         "packageDependencies": [\
-          ["@kyvg/vue3-notification", "npm:3.3.0"]\
+          ["@kyvg/vue3-notification", "npm:3.4.0"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.3.0", {\
-        "packageLocation": "./.yarn/__virtual__/@kyvg-vue3-notification-virtual-6f51b4bb62/0/cache/@kyvg-vue3-notification-npm-3.3.0-88b8a8acd6-c87f8bc979.zip/node_modules/@kyvg/vue3-notification/",\
+      ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.4.0", {\
+        "packageLocation": "./.yarn/__virtual__/@kyvg-vue3-notification-virtual-2ff3cd8408/0/cache/@kyvg-vue3-notification-npm-3.4.0-28d3e78df0-644c85f99d.zip/node_modules/@kyvg/vue3-notification/",\
         "packageDependencies": [\
-          ["@kyvg/vue3-notification", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.3.0"],\
+          ["@kyvg/vue3-notification", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.4.0"],\
           ["@types/vue", null],\
           ["vue", "virtual:ec350e632119c2fa6aa4185d5fb2e6904d7c1f9cefb2603c234bc720b5a0490a22229e2320a7b46e1376c2f73972079ba6fa907f4b7e80df555b8cfccd6e5aa2#npm:3.5.12"]\
         ],\
