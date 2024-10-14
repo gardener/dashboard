@@ -160,6 +160,13 @@ export default defineConfig(({ command, mode }) => {
         '.vue',
       ],
     },
+    css: {
+      preprocessorOptions: {
+        sass: {
+          api: 'modern-compiler',
+        },
+      }
+    }
   }
 
   if (command === 'serve') {
