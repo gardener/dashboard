@@ -165,6 +165,9 @@ export default defineConfig(({ command, mode }) => {
         sass: {
           api: 'modern-compiler',
         },
+        scss: {
+          api: 'modern-compiler',
+        },
       },
     },
   }
