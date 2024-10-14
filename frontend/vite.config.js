@@ -165,8 +165,8 @@ export default defineConfig(({ command, mode }) => {
         sass: {
           api: 'modern-compiler',
         },
-      }
-    }
+      },
+    },
   }
 
   if (command === 'serve') {
