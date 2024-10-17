@@ -70,7 +70,7 @@ export default {
   methods: {
     getSecretDetailsInfra (secret) {
       const secretData = secret.data || {}
-      switch (secret.metadata.cloudProviderKind) {
+      switch (secret.metadata.provider.type) {
         case 'openstack':
           return [
             {
@@ -146,7 +146,7 @@ export default {
     },
     getSecretDetailsDns (secret) {
       const secretData = secret.data || {}
-      switch (secret.metadata.dnsProviderName) {
+      switch (secret.metadata.provider.type) {
         case 'openstack-designate':
           return [
             {
