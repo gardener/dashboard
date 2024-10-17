@@ -75,6 +75,7 @@ const {
   shootNamespace,
   shootManifest,
   setShootManifest,
+  isShootDirty,
 } = useShootContext()
 
 const useProvide = (key, value) => {
@@ -135,7 +136,7 @@ onBeforeRouteLeave(async (to, from, next) => {
   if (isShootCreated.value) {
     return next()
   }
-  if (!clean.value) {
+  if (!clean.value || isShootDirty.value) {
     if (!await confirmEditorNavigation()) {
       focusEditor()
       return next(false)
@@ -144,7 +145,7 @@ onBeforeRouteLeave(async (to, from, next) => {
   return next()
 })
 onBeforeRouteUpdate(async (to, from, next) => {
-  if (!clean.value) {
+  if (!clean.value || isShootDirty.value) {
     if (!await confirmEditorNavigation()) {
       focusEditor()
       return next(false)
