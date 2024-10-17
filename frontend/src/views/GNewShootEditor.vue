@@ -42,6 +42,7 @@ import {
 import {
   useRouter,
   onBeforeRouteLeave,
+  onBeforeRouteUpdate,
 } from 'vue-router'
 
 import { useAppStore } from '@/store/app'
@@ -134,7 +135,7 @@ onBeforeRouteLeave(async (to, from, next) => {
   if (isShootCreated.value) {
     return next()
   }
-  if (isShootDirty.value) {
+  if (!isShootDirty.value) {
     if (!await confirmEditorNavigation()) {
       focusEditor()
       return next(false)

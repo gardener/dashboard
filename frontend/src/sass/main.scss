@@ -92,40 +92,6 @@
   border-radius: 8px;
 }
 
-.v-theme--light {
-  .alternate-row-background > div:nth-of-type(even) {
-    background-color: rgba(0, 0, 0, .02);
-  }
-}
-
-.v-theme--dark {
-  .alternate-row-background > div:nth-of-type(even) {
-    background-color: rgba(0, 0, 0, .2);
-  }
-}
-
-.v-theme-- {
-  &light, &dark {
-    .g-highlighted {
-      $background-color: if(&light, #fff3cd, #2e2e2e);
-      $border-color: if(&light, #fde7a4, #444444);
-
-      background-color: $background-color;
-      border-left: 1px solid $border-color;
-      border-right: 1px solid $border-color;
-      box-sizing: border-box;
-
-      &.g-highlighted--top {
-        border-top: 1px solid $border-color;
-      }
-
-      &.g-highlighted--bottom {
-        border-bottom: 1px solid $border-color;
-      }
-    }
-  }
-}
-
 .inherit-color {
   color: inherit !important;
 }
@@ -153,4 +119,80 @@
   min-width: 180px;
   flex: 1 1 auto;
   padding: 12px;
+}
+
+.g-cm-line-highlighter {
+  .cm-gutterElement {
+    user-select: none;
+    cursor: pointer;
+  }
+}
+
+/* Theme dependant classes */
+@mixin alternate-row-background($background-color) {
+  .alternate-row-background>div:nth-of-type(even) {
+    background-color: $background-color;
+  }
+}
+@mixin g-highlighted($background-color, $border-color) {
+  .g-highlighted {
+    position: relative;
+    background-color: $background-color;
+    /* Left border */
+    box-shadow: inset 1px 0 0 0 $border-color;
+    /* Top border */
+    &.g-highlighted--top::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      /* Adjust border thickness as needed */
+      background-color: $border-color;
+    }
+    /* Bottom border */
+    &.g-highlighted--bottom::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      /* Adjust border thickness as needed */
+      background-color: $border-color;
+    }
+  }
+}
+@mixin g-cm-highlighted-whitespace($whitespace-color) {
+  $whitespace-color-encoded: #{'%23' + str-slice(inspect($whitespace-color), 2)};
+  .g-cm-highlightedSpace {
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="6" height="6"><circle cx="3" cy="3" r="1" fill="#{$whitespace-color-encoded}" /></svg>');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+  }
+  .g-cm-highlightedTab {
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 3 L10 3" stroke="#{$whitespace-color-encoded}" stroke-width="1" /></svg>');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+  }
+  .g-cm-newline-marker {
+    color: $whitespace-color;
+  }
+}
+
+.v-theme-- {
+  &light {
+    @include alternate-row-background(rgba(0, 0, 0, .04));
+    @include g-highlighted(#fff3cd, #fde7a4);
+    @include g-cm-highlighted-whitespace(#f0f0f0);
+  }
+
+  &dark {
+    @include alternate-row-background(rgba(0, 0, 0, .4));
+    @include g-highlighted(#2e2e2e, #444444);
+    @include g-cm-highlighted-whitespace(#404040);
+  }
 }
