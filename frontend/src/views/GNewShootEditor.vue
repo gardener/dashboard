@@ -73,6 +73,7 @@ const appStore = useAppStore()
 
 const {
   shootNamespace,
+  isShootDirty,
   shootManifest,
   setShootManifest,
 } = useShootContext()
@@ -84,7 +85,6 @@ const useProvide = (key, value) => {
 const {
   getEditorValue,
   focusEditor,
-  clean,
 } = useProvide(injectionKey, useShootEditor(shootManifest))
 
 function confirmEditorNavigation () {
@@ -135,16 +135,7 @@ onBeforeRouteLeave(async (to, from, next) => {
   if (isShootCreated.value) {
     return next()
   }
-  if (!clean.value) {
-    if (!await confirmEditorNavigation()) {
-      focusEditor()
-      return next(false)
-    }
-  }
-  return next()
-})
-onBeforeRouteUpdate(async (to, from, next) => {
-  if (!clean.value) {
+  if (!isShootDirty.value) {
     if (!await confirmEditorNavigation()) {
       focusEditor()
       return next(false)

@@ -14,12 +14,13 @@ import {
 export function useEditorWhitespace () {
   const matchDecorator = new MatchDecorator({
     regexp: /[ \t]/g,
-    decoration: match => {
+    decoration (match) {
       if (match[0] === '\t') {
         return Decoration.mark({
           attributes: { class: 'g-cm-highlightedTab' },
         })
-      } else if (match[0] === ' ') {
+      }
+      if (match[0] === ' ') {
         return Decoration.mark({
           attributes: { class: 'g-cm-highlightedSpace' },
         })

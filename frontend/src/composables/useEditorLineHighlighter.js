@@ -103,7 +103,9 @@ export function useEditorLineHighlighter (cmView) {
       }
       return highlights
     },
-    provide: f => EditorView.decorations.from(f),
+    provide (f) {
+      return EditorView.decorations.from(f)
+    },
   })
 
   function highlightSelection () {
