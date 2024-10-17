@@ -40,12 +40,15 @@ export default {
     maxExpirationSeconds: 86400,
   },
   seedCandidateDeterminationStrategy: 'MinimalDistance',
-  costObject: {
-    title: 'Cost Center',
-    description: 'Costs for the control planes of the clusters in this project will be charged to this cost center.',
-    regex: '^([0-9]{9,10})?$',
-    errorMessage: 'Must be a valid cost center',
-  },
+  costObjects: [
+    {
+      type: 'CO',
+      title: 'Cost Center',
+      description: 'Costs for the control planes of the clusters in this project will be charged to this cost center.',
+      regex: '^([0-9]{9,10})?$',
+      errorMessage: 'Must be a valid cost center',
+    },
+  ],
   sla: {
     title: 'Terms and Conditions',
     description: '<p><a href="https://gardener.cloud/terms-and-conditions" target="_blank">Terms and Conditions</a></p>',

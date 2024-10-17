@@ -302,10 +302,6 @@ export function getSubjectRules (options) {
   })
 }
 
-export function getToken () {
-  return getResource('/api/user/token')
-}
-
 export function getKubeconfigData () {
   return getResource('/api/user/kubeconfig')
 }
@@ -439,7 +435,6 @@ export default {
   resetServiceAccount,
   createTokenReview,
   getSubjectRules,
-  getToken,
   getKubeconfigData,
   getInfo,
   createTerminal,

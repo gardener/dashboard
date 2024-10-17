@@ -55,12 +55,6 @@ exports[`api user should return selfsubjectrules for the user 2`] = `
 }
 `;
 
-exports[`api user should return the bearer token of the user 1`] = `
-{
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
-}
-`;
-
 exports[`api user should return the kubeconfig data the user 1`] = `
 {
   "certificateAuthorityData": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCkxpNHUKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==",

@@ -16,11 +16,11 @@ import {
 const { withParams, regex, withMessage } = helpers
 
 const alphaNumUnderscorePattern = /^\w+$/
-const alphaNumUnderscoreHyphenPattern = /^[a-zA-Z0-9-_]+$/
 const lowerCaseAlphaNumHyphenPattern = /^[-a-z0-9]*$/
 const consecutiveHyphenPattern = /.?-{2,}.?/
 const startEndHyphenPattern = /^-.*.|.*-$/
 const numberOrPercentagePattern = /^[\d]+[%]?$/
+const guidPattern = /^[0-9A-Fa-f]{8}-([0-9A-Fa-f]{4}-){3}[0-9A-Fa-f]{12}$/
 export const timezonePattern = /^([+-])(\d{2}):(\d{2})$/
 
 const base64 = withMessage('Must be a valid base64 string', value => {
@@ -37,6 +37,7 @@ const noStartEndHyphen = withMessage('Must not start or end with a hyphen', valu
 const numberOrPercentage = withMessage('Must be a number or percentage', value => {
   return numberOrPercentagePattern.test(value)
 })
+const guid = withMessage('Must be a valid GUID', regex(guidPattern))
 
 const isTimezone = withMessage('TimeZone must have format [+|-]HH:mm', value => {
   return timezonePattern.test(value)
@@ -53,20 +54,6 @@ const unique = key => withMessage(`Value of property '${key}' must be unique`, w
     return !includes(keys, value)
   },
 ))
-
-const serviceAccountKey = withMessage('Not a valid Service Account Key',
-  withParams(
-    { type: 'serviceAccountKey' },
-    function serviceAccountKey (value) {
-      try {
-        const key = JSON.parse(value)
-        if (key.project_id && alphaNumUnderscoreHyphenPattern.test(key.project_id)) {
-          return true
-        }
-      } catch (err) { /* ignore error */ }
-      return false
-    },
-  ))
 
 const includesIfAvailable = (key, reference) => withMessage(`Value of property '${key}' must be selected`,
   withParams(
@@ -113,8 +100,8 @@ export {
   lowerCaseAlphaNumHyphen,
   noConsecutiveHyphen,
   noStartEndHyphen,
-  serviceAccountKey,
   includesIfAvailable,
   numberOrPercentage,
   isTimezone,
+  guid,
 }

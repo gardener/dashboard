@@ -31,31 +31,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-col>
         </v-row>
 
-        <v-row v-if="costObjectSettingEnabled">
-          <v-col cols="12">
-            <v-text-field
-              v-model="v$.costObject.$model"
-              variant="underlined"
-              color="primary"
-              :label="costObjectTitle"
-              :error-messages="getErrorMessages(v$.costObject)"
-            />
-            <v-alert
-              v-if="!!costObjectDescriptionHtml"
-              density="compact"
-              type="info"
-              variant="tonal"
-              color="primary"
-            >
-              <!-- eslint-disable vue/no-v-html -->
-              <div
-                class="alert-banner-message"
-                v-html="costObjectDescriptionHtml"
-              />
-              <!-- eslint-enable vue/no-v-html -->
-            </v-alert>
-          </v-col>
-        </v-row>
+        <g-project-cost-object />
 
         <v-row>
           <v-col cols="12">
@@ -126,7 +102,6 @@ import { useVuelidate } from '@vuelidate/core'
 import {
   maxLength,
   required,
-  helpers,
 } from '@vuelidate/validators'
 import { useRouter } from 'vue-router'
 
@@ -134,10 +109,10 @@ import { useProjectStore } from '@/store/project'
 
 import GMessage from '@/components/GMessage.vue'
 import GToolbar from '@/components/GToolbar.vue'
+import GProjectCostObject from '@/components/GProjectCostObject.vue'
 
 import { useLogger } from '@/composables/useLogger'
 import { useProvideProjectContext } from '@/composables/useProjectContext'
-import { useProjectCostObject } from '@/composables/useProjectCostObject'
 
 import {
   messageFromErrors,
@@ -177,7 +152,6 @@ const {
   projectName,
   description,
   purpose,
-  costObject,
 } = useProvideProjectContext()
 
 const projectNames = toRef(projectStore, 'projectNames')
@@ -197,28 +171,12 @@ const loading = ref(false)
 
 const refProjectName = ref(null)
 
-const {
-  costObjectSettingEnabled,
-  costObjectTitle,
-  costObjectDescriptionHtml,
-  costObjectRegex,
-  costObjectErrorMessage,
-} = useProjectCostObject()
-
 const isUniqueProjectName = withMessage(
   'A project with this name already exists',
   value => !value ? true : !projectNames.value.includes(value),
 )
 
-const isValidCostObject = withMessage(
-  costObjectErrorMessage.value,
-  helpers.regex(costObjectRegex.value),
-)
-
 const rules = {
-  costObject: {
-    isValidCostObject,
-  },
   projectName: {
     required,
     maxLength: maxLength(10),
@@ -229,7 +187,7 @@ const rules = {
   },
 }
 
-const v$ = useVuelidate(rules, { projectName, costObject })
+const v$ = useVuelidate(rules, { projectName })
 
 watch(visible, value => {
   if (value) {
