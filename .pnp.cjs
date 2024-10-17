@@ -1300,7 +1300,7 @@ const RAW_RUNTIME_STATE =
           ["morgan", "npm:1.10.0"],\
           ["object-hash", "npm:3.0.0"],\
           ["openapi-types", "npm:12.1.3"],\
-          ["openid-client", "npm:5.7.0"],\
+          ["openid-client", "npm:6.0.0"],\
           ["p-event", "npm:4.2.0"],\
           ["p-limit", "npm:3.1.0"],\
           ["p-retry", "npm:4.6.2"],\
@@ -8592,13 +8592,6 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["jose", [\
-      ["npm:4.15.9", {\
-        "packageLocation": "./.yarn/cache/jose-npm-4.15.9-a725b711d7-4ed4ddf4a0.zip/node_modules/jose/",\
-        "packageDependencies": [\
-          ["jose", "npm:4.15.9"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["npm:5.9.4", {\
         "packageLocation": "./.yarn/cache/jose-npm-5.9.4-eb1e38a597-d24d929db0.zip/node_modules/jose/",\
         "packageDependencies": [\
@@ -9030,14 +9023,6 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["lru-cache", "npm:5.1.1"],\
           ["yallist", "npm:3.1.1"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
-      ["npm:6.0.0", {\
-        "packageLocation": "./.yarn/cache/lru-cache-npm-6.0.0-b4c8668fe1-cb53e58278.zip/node_modules/lru-cache/",\
-        "packageDependencies": [\
-          ["lru-cache", "npm:6.0.0"],\
-          ["yallist", "npm:4.0.0"]\
         ],\
         "linkType": "HARD"\
       }],\
@@ -9607,6 +9592,15 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["oauth4webapi", [\
+      ["npm:3.1.1", {\
+        "packageLocation": "./.yarn/cache/oauth4webapi-npm-3.1.1-868f03b064-a674de4a05.zip/node_modules/oauth4webapi/",\
+        "packageDependencies": [\
+          ["oauth4webapi", "npm:3.1.1"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["object-assign", [\
       ["npm:4.1.1", {\
         "packageLocation": "./.yarn/cache/object-assign-npm-4.1.1-1004ad6dec-1f4df99451.zip/node_modules/object-assign/",\
@@ -9617,13 +9611,6 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["object-hash", [\
-      ["npm:2.2.0", {\
-        "packageLocation": "./.yarn/cache/object-hash-npm-2.2.0-d97a921cc1-1527de8439.zip/node_modules/object-hash/",\
-        "packageDependencies": [\
-          ["object-hash", "npm:2.2.0"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["npm:3.0.0", {\
         "packageLocation": "./.yarn/cache/object-hash-npm-3.0.0-d941e0cabe-a068445371.zip/node_modules/object-hash/",\
         "packageDependencies": [\
@@ -9700,15 +9687,6 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
-    ["oidc-token-hash", [\
-      ["npm:5.0.3", {\
-        "packageLocation": "./.yarn/cache/oidc-token-hash-npm-5.0.3-7619b94ea8-d0dc055140.zip/node_modules/oidc-token-hash/",\
-        "packageDependencies": [\
-          ["oidc-token-hash", "npm:5.0.3"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
     ["on-finished", [\
       ["npm:2.3.0", {\
         "packageLocation": "./.yarn/cache/on-finished-npm-2.3.0-4ce92f72c6-c904f9e518.zip/node_modules/on-finished/",\
@@ -9778,14 +9756,12 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["openid-client", [\
-      ["npm:5.7.0", {\
-        "packageLocation": "./.yarn/cache/openid-client-npm-5.7.0-8a8fbe009d-02e42c6641.zip/node_modules/openid-client/",\
+      ["npm:6.0.0", {\
+        "packageLocation": "./.yarn/cache/openid-client-npm-6.0.0-cd57367d48-cb4b38b70f.zip/node_modules/openid-client/",\
         "packageDependencies": [\
-          ["openid-client", "npm:5.7.0"],\
-          ["jose", "npm:4.15.9"],\
-          ["lru-cache", "npm:6.0.0"],\
-          ["object-hash", "npm:2.2.0"],\
-          ["oidc-token-hash", "npm:5.0.3"]\
+          ["openid-client", "npm:6.0.0"],\
+          ["jose", "npm:5.9.4"],\
+          ["oauth4webapi", "npm:3.1.1"]\
         ],\
         "linkType": "HARD"\
       }]\
