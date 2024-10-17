@@ -15,6 +15,8 @@ import { parseWarningHeader } from '@/utils/headerWarnings'
 import { errorDetailsFromError } from '@/utils/error'
 import moment from '@/utils/moment'
 
+import { assign } from '@/lodash'
+
 export const useAppStore = defineStore('app', () => {
   const ready = ref(false)
   const sidebar = ref(true)
@@ -39,7 +41,7 @@ export const useAppStore = defineStore('app', () => {
       alert.text = value
     } else if (value && typeof value === 'object') {
       const { response, text = '', ...props } = value
-      Object.assign(alert, props)
+      assign(alert, props)
       alert.text = response
         ? errorDetailsFromError(value).detailedMessage
         : text
