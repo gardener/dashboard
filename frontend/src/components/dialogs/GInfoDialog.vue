@@ -143,9 +143,7 @@ export default {
           this.dashboardVersion = `${version}`
         }
       } catch (err) {
-        this.setError({
-          message: `Failed to fetch version information. ${err.message}`,
-        })
+        this.setError(`Failed to fetch version information. ${err.message}`)
       }
     },
     onDialogClosed () {

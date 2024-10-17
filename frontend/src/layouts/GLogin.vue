@@ -317,7 +317,7 @@ export default {
       } catch (err) {
         this.setError({
           title: `${this.getLoginTypeTitle('oidc')} Login Error`,
-          message: err.message,
+          text: err.message,
         })
       }
     },
@@ -334,7 +334,7 @@ export default {
       } catch (err) {
         this.setError({
           title: `${this.getLoginTypeTitle('token')} Login Error`,
-          message: err.message,
+          text: err.message,
         })
       }
     },

@@ -5,100 +5,30 @@ SPDX-License-Identifier: Apache-2.0
 -->
 <template>
   <notifications
-    :group="group"
-    :width="width"
-    :position="position"
-    :duration="props.duration"
+    position="bottom right"
     class="ma-2"
+    width="360px"
   >
     <template #body="{ item, close }">
       <v-alert
-        :density="props.density"
-        :variant="props.variant"
+        compact
+        flat
         :color="item.type"
         :title="item.title"
         :text="item.text"
+        :width="item.width"
         closable
-        class="mt-2"
+        class="mt-2 overflow-wrap"
         @click:close="close"
       />
     </template>
   </notifications>
 </template>
 
-<script setup>
-import {
-  inject,
-  watch,
-  toRef,
-  toRefs,
-  nextTick,
-} from 'vue'
+<style lang="scss" scoped>
 
-import { useAppStore } from '@/store/app'
-
-const store = useAppStore()
-const notify = inject('notify')
-const alert = toRef(store, 'alert')
-
-// props
-const props = defineProps({
-  group: {
-    type: String,
-    default: 'default',
-  },
-  width: {
-    type: String,
-    default: '360px',
-  },
-  position: {
-    type: String,
-    default: 'bottom right',
-  },
-  duration: {
-    type: Number,
-    default: 5000,
-  },
-  density: {
-    type: String,
-    default: 'compact',
-  },
-  variant: {
-    type: String,
-    default: 'flat',
-  },
-})
-
-const { group, width, position } = toRefs(props)
-
-function getType (value) {
-  if (value.type === 'warn') {
-    return 'warning'
-  }
-  if (['success', 'info', 'warning', 'error'].includes(value.type)) {
-    return value.type
-  }
-  return 'secondary'
+.overflow-wrap {
+  overflow-wrap: break-word;
 }
 
-// watches
-watch(alert, value => {
-  if (value) {
-    const type = getType(value)
-    const duration = type === 'success'
-      ? 3000
-      : props.duration
-    const options = {
-      group: props.group,
-      type,
-      title: value.title,
-      text: value.message,
-      duration,
-    }
-    alert.value = null
-    nextTick(() => notify(options))
-  }
-}, {
-  immediate: true,
-})
-</script>
+</style>

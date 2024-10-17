@@ -181,7 +181,10 @@ export default {
         const errorDetails = errorDetailsFromError(err)
         this.logger.error(errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
 
-        this.setError(err)
+        this.setError({
+          text: err,
+          duration: -1,
+        })
 
         return false
       }
