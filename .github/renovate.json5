@@ -50,6 +50,7 @@
         "eslint-plugin-vue",
         "eslint-plugin-jest",
         "eslint-plugin-n",
+        "eslint-plugin-promise", // latest version not yet supported by eslint-config-standard
         "jest",
         "p-event",
         "p-limit",
