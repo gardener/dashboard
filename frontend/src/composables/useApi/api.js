@@ -4,10 +4,18 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import { useAppStore } from '@/store/app'
+
 import fetch from './fetch'
 
-function request (method, url, data) {
-  return fetch(url, { method, body: data })
+async function request (method, url, data) {
+  const response = await fetch(url, { method, body: data })
+  const { headers } = response
+  if (headers.warning) {
+    const appStore = useAppStore()
+    appStore.setHeaderWarning(headers.warning)
+  }
+  return response
 }
 
 function getResource (url) {

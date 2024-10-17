@@ -112,6 +112,7 @@ async function save () {
       name: shootName.value,
       data: pick(shootResource, ['spec', 'metadata.labels', 'metadata.annotations']),
     })
+
     clearDocumentHistory()
   } catch (err) {
     errorMessage.value = 'Failed to save changes.'
