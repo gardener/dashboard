@@ -229,6 +229,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import {
   ref,
+  reactive,
   provide,
   toRef,
   watch,
@@ -297,18 +298,28 @@ export default {
     }
     this.updateTableSettings()
     this.focusModeInternal = false
+
+    // Reset expanded state in case project changes
+    this.resetState(this.expandedWorkerGroups, { default: false })
+    this.resetState(this.expandedAccessRestrictions, { default: false })
+
     next()
   },
   beforeRouteLeave (to, from, next) {
     this.setShootSearch(null)
     this.focusModeInternal = false
+
     next()
   },
   setup () {
     const projectStore = useProjectStore()
 
     const activePopoverKey = ref('')
+    const expandedWorkerGroups = reactive({ default: false })
+    const expandedAccessRestrictions = reactive({ default: false })
     provide('activePopoverKey', activePopoverKey)
+    provide('expandedWorkerGroups', expandedWorkerGroups)
+    provide('expandedAccessRestrictions', expandedAccessRestrictions)
 
     const projectItem = toRef(projectStore, 'project')
     const {
@@ -349,6 +360,8 @@ export default {
 
     return {
       activePopoverKey,
+      expandedWorkerGroups,
+      expandedAccessRestrictions,
       shootCustomFields,
       shootSearch,
       debouncedShootSearch,
@@ -511,7 +524,7 @@ export default {
           title: 'WORKERS',
           key: 'workers',
           sortable: isSortable(true),
-          align: 'start',
+          align: 'center',
           defaultSelected: false,
           hidden: false,
         },
@@ -874,6 +887,12 @@ export default {
     isFilterActive (key) {
       const filters = this.shootListFilters
       return get(filters, key, false)
+    },
+    resetState (reactiveObject, defaultState) {
+      for (const key in reactiveObject) {
+        delete reactiveObject[key]
+      }
+      Object.assign(reactiveObject, defaultState)
     },
   },
 }

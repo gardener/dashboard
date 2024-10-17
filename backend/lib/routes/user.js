@@ -18,11 +18,6 @@ const router = module.exports = express.Router({
 })
 
 const metricsMiddleware = metricsRoute('user')
-
-function getToken ({ auth = {} } = {}) {
-  return auth.bearer
-}
-
 router.route('/subjectrules')
   .all(metricsMiddleware)
   .post(async (req, res, next) => {
@@ -34,15 +29,6 @@ router.route('/subjectrules')
     } catch (err) {
       next(err)
     }
-  })
-
-router.route('/token')
-  .all(metricsMiddleware)
-  .get(async (req, res, next) => {
-    const token = getToken(req.user)
-    res.send({
-      token
-    })
   })
 
 router.route('/kubeconfig')
