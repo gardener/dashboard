@@ -12,13 +12,13 @@ import {
 } from 'vue-router'
 
 import { useAppStore } from '@/store/app'
-import { useAuthzStore } from '@/store/authz'
 
 import { useLogger } from '@/composables/useLogger'
 
 import { createRoutes } from './routes'
 import {
   createGlobalBeforeGuards,
+  createGlobalResolveGuards,
   createGlobalAfterHooks,
 } from './guards'
 
@@ -27,7 +27,6 @@ const zeroPoint = { left: 0, top: 0 }
 export function createRouter () {
   const logger = useLogger()
   const appStore = useAppStore()
-  const authzStore = useAuthzStore()
 
   const router = createVueRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -54,10 +53,6 @@ export function createRouter () {
       } else {
         logger.info('Navigation failure: %s', failure)
       }
-
-      // Reset namespace if navigation failed
-      const namespace = from.params.namespace ?? from.query.namespace
-      authzStore.fetchRules(namespace)
     }
   })
 
@@ -66,6 +61,13 @@ export function createRouter () {
 
 export function registerGlobalBeforeGuards (router) {
   const guards = createGlobalBeforeGuards()
+  for (const guard of guards) {
+    router.beforeEach(guard)
+  }
+}
+
+export function registerGlobalResolveGuards (router) {
+  const guards = createGlobalResolveGuards()
   for (const guard of guards) {
     router.beforeEach(guard)
   }
