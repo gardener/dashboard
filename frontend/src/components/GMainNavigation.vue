@@ -440,6 +440,9 @@ function getProjectMenuTargetRoute (namespace) {
     if (has(route, 'params.name')) {
       return true
     }
+    if (get(route, 'name') === 'NewShoot' || get(route, 'name') === 'NewShootEditor') {
+      return true
+    }
     if (get(route, 'name') === 'GardenTerminal') {
       return true
     }

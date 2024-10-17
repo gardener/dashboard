@@ -18,6 +18,7 @@ import { useLogger } from '@/composables/useLogger'
 import { createRoutes } from './routes'
 import {
   createGlobalBeforeGuards,
+  createGlobalResolveGuards,
   createGlobalAfterHooks,
 } from './guards'
 
@@ -60,6 +61,13 @@ export function createRouter () {
 
 export function registerGlobalBeforeGuards (router) {
   const guards = createGlobalBeforeGuards()
+  for (const guard of guards) {
+    router.beforeEach(guard)
+  }
+}
+
+export function registerGlobalResolveGuards (router) {
+  const guards = createGlobalResolveGuards()
   for (const guard of guards) {
     router.beforeEach(guard)
   }
