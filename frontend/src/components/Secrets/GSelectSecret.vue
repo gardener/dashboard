@@ -109,10 +109,10 @@ export default {
       type: Boolean,
       default: false,
     },
-    cloudProfileName: {
+    dnsProviderKind: {
       type: String,
     },
-    dnsProviderKind: {
+    infrastructureKind: {
       type: String,
     },
     registerVuelidateAs: {
@@ -194,31 +194,19 @@ export default {
         this.$emit('update:modelValue', value)
       },
     },
+    cloudProviderKind () {
+      return this.infrastructureKind || this.dnsProviderKind
+    },
     secretList () {
       let secrets
-      if (this.cloudProfileName) {
-        secrets = this.infrastructureSecretsByCloudProfileName(this.cloudProfileName)
+      if (this.infrastructureKind) {
+        secrets = this.infrastructureSecretsByCloudProviderKind(this.infrastructureKind)
       }
       if (this.dnsProviderKind) {
         secrets = this.dnsSecretsByProviderKind(this.dnsProviderKind)
       }
       return secrets
         ?.filter(secret => !this.allowedSecretNames.includes(secret.metadata.name))
-    },
-    infrastructureKind () {
-      if (this.dnsProviderKind) {
-        return this.dnsProviderKind
-      }
-
-      if (!this.cloudProfileName) {
-        return undefined
-      }
-
-      const cloudProfile = this.cloudProfileByName(this.cloudProfileName)
-      if (!cloudProfile) {
-        return undefined
-      }
-      return cloudProfile.metadata.cloudProviderKind
     },
     secretHint () {
       if (this.selfTerminationDays) {
@@ -238,13 +226,13 @@ export default {
       'cloudProfileByName',
     ]),
     ...mapActions(useSecretStore, [
-      'infrastructureSecretsByCloudProfileName',
+      'infrastructureSecretsByCloudProviderKind',
       'dnsSecretsByProviderKind',
     ]),
     get,
     isOwnSecret,
     openSecretDialog () {
-      this.visibleSecretDialog = this.infrastructureKind
+      this.visibleSecretDialog = this.cloudProviderKind
       this.secretItemsBeforeAdd = cloneDeep(this.secretList)
     },
     onSecretDialogClosed () {

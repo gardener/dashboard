@@ -282,7 +282,6 @@ import {
   get,
   filter,
   head,
-  includes,
   isEmpty,
   map,
   mapKeys,
@@ -407,11 +406,10 @@ export default {
         isOwnSecret: isOwnSecret(secret),
         secretNamespace: secret.metadata.secretRef.namespace,
         secretName: secret.metadata.secretRef.name,
-        infrastructureName: secret.metadata.cloudProviderKind,
+        cloudProviderKind: secret.metadata.provider.type,
         cloudProfileName: secret.metadata.cloudProfileName,
         relatedShootCount: this.relatedShootCountInfra(secret),
         relatedShootCountLabel: this.relatedShootCountLabel(this.relatedShootCountInfra(secret)),
-        isSupportedCloudProvider: includes(this.sortedInfrastructureKindList, secret.metadata.cloudProviderKind),
         secret,
       }))
     },
@@ -478,10 +476,9 @@ export default {
         isOwnSecret: isOwnSecret(secret),
         secretNamespace: secret.metadata.secretRef.namespace,
         secretName: secret.metadata.secretRef.name,
-        dnsProvider: secret.metadata.dnsProviderName,
+        cloudProviderKind: secret.metadata.provider.type,
         relatedShootCount: this.relatedShootCountDns(secret),
         relatedShootCountLabel: this.relatedShootCountLabel(this.relatedShootCountDns(secret)),
-        isSupportedCloudProvider: includes(this.dnsProviderTypes, secret.metadata.dnsProviderName),
         secret,
       }))
     },
@@ -509,7 +506,7 @@ export default {
       this.visibleSecretDialog = infrastructureKind
     },
     onUpdateSecret (secret) {
-      const kind = secret.metadata.cloudProviderKind || secret.metadata.dnsProviderName
+      const kind = secret.metadata.provider.type
       this.selectedSecret = secret
       this.visibleSecretDialog = kind
     },
@@ -525,8 +522,10 @@ export default {
     relatedShootCountDns (secret) {
       const shootsByDnsSecret = filter(this.shootList, shoot => {
         return some(shoot.spec.dns?.providers, {
-          type: secret.metadata.dnsProviderName,
           secretName: secret.metadata.name,
+        }) ||
+        some(shoot.spec.resources, ({ resourceRef }) => {
+          return resourceRef?.kind === 'Secret' && resourceRef?.name === secret.metadata.name
         })
       })
       return shootsByDnsSecret.length

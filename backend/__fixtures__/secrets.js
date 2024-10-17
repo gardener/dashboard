@@ -36,15 +36,6 @@ function getSecret ({ namespace, name, labels, creationTimestamp, data = {} }) {
   return { metadata, data }
 }
 
-function getCloudProviderSecret ({ cloudProfileName, ...options }) {
-  return getSecret({
-    labels: {
-      'cloudprofile.garden.sapcloud.io/name': cloudProfileName
-    },
-    ...options
-  })
-}
-
 function getKubeconfig ({ server, name = 'default' }) {
   const cluster = {
     'certificate-authority-data': certificateAuthorityData,
@@ -68,28 +59,25 @@ function getKubeconfig ({ server, name = 'default' }) {
 }
 
 const cloudProviderSecretList = [
-  getCloudProviderSecret({
+  getSecret({
     namespace: 'garden-foo',
     name: 'secret1',
-    cloudProfileName: 'infra1-profileName',
     data: {
       key: 'fooKey',
       secret: 'fooSecret'
     }
   }),
-  getCloudProviderSecret({
+  getSecret({
     namespace: 'garden-foo',
     name: 'secret2',
-    cloudProfileName: 'infra3-profileName',
     data: {
       key: 'fooKey',
       secret: 'fooSecret'
     }
   }),
-  getCloudProviderSecret({
+  getSecret({
     namespace: 'garden-trial',
     name: 'trial-secret',
-    cloudProfileName: 'infra1-profileName',
     data: {
       key: 'trialKey',
       secret: 'trialSecret'

@@ -4,12 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-function createCloudProviderSecret (cloudProviderKind, options = {}) {
+function createCloudProviderSecret (type, options = {}) {
   const {
     projectName = 'test',
-    cloudProfileName = cloudProviderKind,
   } = options
-  const name = `${cloudProfileName}-secret`
+  const name = `${type}-secret`
   const namespace = `garden-${projectName}`
 
   return {
@@ -20,18 +19,19 @@ function createCloudProviderSecret (cloudProviderKind, options = {}) {
         name,
         namespace,
       },
-      cloudProviderKind,
-      cloudProfileName,
+      provider: {
+        type,
+      },
       projectName,
     },
   }
 }
 
-function createDnsProviderSecret (dnsProviderName, options = {}) {
+function createDnsProviderSecret (type, options = {}) {
   const {
     projectName = 'test',
   } = options
-  const name = `${dnsProviderName}-secret`
+  const name = `${type}-secret`
   const namespace = `garden-${projectName}`
 
   return {
@@ -42,20 +42,21 @@ function createDnsProviderSecret (dnsProviderName, options = {}) {
         name,
         namespace,
       },
-      dnsProviderName,
+      provider: {
+        type,
+      },
       projectName,
     },
   }
 }
 
 export default [
-  createCloudProviderSecret('alicloud', { cloudProfileName: 'alicloud' }),
-  createCloudProviderSecret('aws', { cloudProfileName: 'aws' }),
-  createCloudProviderSecret('azure', { cloudProfileName: 'az' }),
-  createCloudProviderSecret('openstack', { cloudProfileName: 'openstack-1' }),
-  createCloudProviderSecret('openstack', { cloudProfileName: 'openstack-2' }),
-  createCloudProviderSecret('gcp', { cloudProfileName: 'gcp' }),
-  createCloudProviderSecret('ironcore', { cloudProfileName: 'ironcore' }),
+  createCloudProviderSecret('alicloud'),
+  createCloudProviderSecret('aws'),
+  createCloudProviderSecret('azure'),
+  createCloudProviderSecret('openstack'),
+  createCloudProviderSecret('gcp'),
+  createCloudProviderSecret('ironcore'),
   createDnsProviderSecret('aws-route53'),
   createDnsProviderSecret('azure-dns'),
 ]

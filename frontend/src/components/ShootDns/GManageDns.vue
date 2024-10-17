@@ -68,7 +68,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-col cols="3">
           <g-select-secret
             v-model="primaryDnsProviderSecret"
-            :dns-provider-kind="dnsPrimaryProviderType"
+            :cloud-provider-kind="dnsPrimaryProviderType"
             register-vuelidate-as="dnsProviderSecret"
             label="Primary DNS Provider Secret"
           />

@@ -27,24 +27,17 @@ const cleartextPropertyKeys = [
   'Zone'
 ]
 const normalizedCleartextPropertyKeys = cleartextPropertyKeys.map(key => key.toLowerCase())
-const cloudprofiles = require('./cloudprofiles')
 const shoots = require('./shoots')
 const { getQuotas, findProjectByNamespace } = require('../cache')
 
-function fromResource ({ secretBinding, cloudProviderKind, secret, quotas = [], projectName, hasCostObject }) {
-  const labels = _.get(secretBinding, 'metadata.labels', {})
-  const cloudProfileName = labels['cloudprofile.garden.sapcloud.io/name']
-  const dnsProviderName = labels['gardener.cloud/dnsProviderName']
-
-  const { metadata: { namespace, name }, secretRef } = secretBinding
+function fromResource ({ secretBinding, secret, quotas = [], projectName, hasCostObject }) {
+  const { metadata: { namespace, name }, secretRef, provider } = secretBinding
   const cloudProviderSecret = {
     metadata: {
       namespace,
       name,
       secretRef,
-      cloudProviderKind,
-      cloudProfileName,
-      dnsProviderName,
+      provider,
       projectName,
       hasCostObject
     },
@@ -102,27 +95,14 @@ function toSecretBindingResource ({ metadata }) {
   const resource = Resources.SecretBinding
   const apiVersion = resource.apiVersion
   const kind = resource.kind
-  const { name, secretRef, cloudProfileName, cloudProviderKind, dnsProviderName } = metadata
-  const providerType = cloudProviderKind || dnsProviderName
-  const labels = {}
-  if (cloudProfileName) {
-    labels['cloudprofile.garden.sapcloud.io/name'] = cloudProfileName
-  }
-  if (dnsProviderName) {
-    labels['gardener.cloud/dnsProviderName'] = dnsProviderName
-  }
+  const { name, secretRef, provider } = metadata
 
   metadata = _
     .chain(metadata)
     .pick(['namespace'])
-    .assign({ name, labels })
+    .assign({ name })
     .value()
-  const secretBinding = { apiVersion, kind, metadata, secretRef }
-  if (providerType) {
-    secretBinding.provider = {
-      type: providerType
-    }
-  }
+  const secretBinding = { apiVersion, kind, metadata, secretRef, provider }
 
   return secretBinding
 }
@@ -141,26 +121,13 @@ function resolveQuotas (secretBinding) {
   }
 }
 
-async function getCloudProviderSecrets ({ secretBindings, cloudProfileList, secretList, namespace }) {
+async function getCloudProviderSecrets ({ secretBindings, secretList, namespace }) {
   const infrastructureSecrets = []
   for (const secretBinding of secretBindings) {
     try {
-      const metadata = secretBinding.metadata || {}
-      const labels = metadata.labels || {}
-      const cloudProfileName = labels['cloudprofile.garden.sapcloud.io/name']
-      const dnsProviderName = labels['gardener.cloud/dnsProviderName']
-      const name = metadata.name
       const secretName = _.get(secretBinding, 'secretRef.name')
       const secretNamespace = _.get(secretBinding, 'secretRef.namespace', namespace)
-      const cloudProfile = _.find(cloudProfileList, ['metadata.name', cloudProfileName])
-      const cloudProviderKind = _.get(cloudProfile, 'metadata.cloudProviderKind')
       const projectInfo = getProjectNameAndHasCostObject(secretNamespace)
-      if (cloudProfileName && !cloudProviderKind) {
-        throw new Error(fmt('Could not determine cloud provider kind for cloud profile name %s. Skipping secretbinding with name %s', cloudProfileName, name))
-      }
-      if (!cloudProfileName && !dnsProviderName) {
-        throw new Error(fmt('Secretbinding has no label that the dashboard recognizes. Skipping secretbinding with name %s', name))
-      }
 
       const secret = _.find(secretList, ['metadata.name', secretName])
       if (isOwnSecret(secretBinding) && !secret) {
@@ -168,7 +135,6 @@ async function getCloudProviderSecrets ({ secretBindings, cloudProfileList, secr
       }
       const infrastructureSecret = fromResource({
         secretBinding,
-        cloudProviderKind,
         secret,
         quotas: resolveQuotas(secretBinding),
         ...projectInfo
@@ -179,11 +145,6 @@ async function getCloudProviderSecrets ({ secretBindings, cloudProfileList, secr
     }
   }
   return infrastructureSecrets
-}
-
-async function getCloudProviderKind (user, name) {
-  const cloudProfile = await cloudprofiles.read({ user, name })
-  return _.get(cloudProfile, 'metadata.cloudProviderKind')
 }
 
 /*
@@ -205,18 +166,15 @@ exports.list = async function ({ user, namespace }) {
 
   try {
     const [
-      cloudProfileList,
       { items: secretList },
       { items: secretBindings }
     ] = await Promise.all([
-      cloudprofiles.list({ user }),
       client.core.secrets.list(namespace, { labelSelector: 'reference.gardener.cloud/secretbinding=true' }),
       client['core.gardener.cloud'].secretbindings.list(namespace)
     ])
 
     return getCloudProviderSecrets({
       secretBindings,
-      cloudProfileList,
       secretList,
       namespace
     })
@@ -244,17 +202,11 @@ exports.create = async function ({ user, namespace, body }) {
     throw err
   }
 
-  const cloudProfileName = _.get(secretBinding, 'metadata.labels["cloudprofile.garden.sapcloud.io/name"]')
-  let cloudProviderKind
-  if (cloudProfileName) {
-    cloudProviderKind = await getCloudProviderKind(user, cloudProfileName)
-  }
   const projectInfo = getProjectNameAndHasCostObject(namespace)
 
   return fromResource({
     secretBinding,
     secret,
-    cloudProviderKind,
     quotas: resolveQuotas(secretBinding),
     ...projectInfo
   })
@@ -289,17 +241,11 @@ exports.patch = async function ({ user, namespace, name, body }) {
   const secretRef = secretBinding.secretRef
   const secret = client.core.secrets.jsonPatch(secretRef.namespace, secretRef.name, patchOperations)
 
-  const cloudProfileName = _.get(secretBinding, 'metadata.labels["cloudprofile.garden.sapcloud.io/name"]')
-  let cloudProviderKind
-  if (cloudProfileName) {
-    cloudProviderKind = await getCloudProviderKind(user, cloudProfileName)
-  }
   const projectInfo = getProjectNameAndHasCostObject(secretRef.namespace)
 
   return fromResource({
     secretBinding,
     secret,
-    cloudProviderKind,
     quotas: resolveQuotas(secretBinding),
     ...projectInfo
   })

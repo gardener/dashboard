@@ -40,19 +40,13 @@ describe('api', function () {
     const namespace = 'garden-foo'
     const infraName = 'foo-infra3'
     const dnsName = 'foo-dns1'
-    const infraSecretBinding = fixtures.secretbindings.get(namespace, infraName)
-    const dnsSecretBinding = fixtures.secretbindings.get(namespace, dnsName)
     // project
     const project = fixtures.projects.getByNamespace(namespace)
     // user
     const id = project.spec.owner.name
     const user = fixtures.auth.createUser({ id })
-    // cloudProfile
-    const cloudProfileName = infraSecretBinding.metadata.labels['cloudprofile.garden.sapcloud.io/name']
-    const dnsProviderName = dnsSecretBinding.metadata.labels['gardener.cloud/dnsProviderName']
 
     it('should return three cloudProvider secrets', async function () {
-      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.list())
       mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.list())
 
@@ -62,7 +56,7 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(3)
+      expect(mockRequest).toBeCalledTimes(2)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
@@ -71,7 +65,6 @@ describe('api', function () {
     it('should return no cloudProvider secrets', async function () {
       const namespace = 'garden-baz'
 
-      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.list())
       mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.list())
 
@@ -81,7 +74,7 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(3)
+      expect(mockRequest).toBeCalledTimes(2)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
@@ -90,7 +83,9 @@ describe('api', function () {
     it('should create a cloudProvider infrastructure secret', async function () {
       const metadata = {
         name: 'new-infra1',
-        cloudProfileName,
+        provider: {
+          type: infraName
+        },
         cloudProviderKind: 'infra1'
       }
       const data = {
@@ -100,7 +95,6 @@ describe('api', function () {
 
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.create())
       mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.create())
-      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
 
       const res = await agent
         .post(`/api/namespaces/${namespace}/cloudprovidersecrets`)
@@ -109,7 +103,7 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(3)
+      expect(mockRequest).toBeCalledTimes(2)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
@@ -118,7 +112,9 @@ describe('api', function () {
     it('should create a cloudProvider dns secret', async function () {
       const metadata = {
         name: 'new-dns1',
-        dnsProviderName
+        provider: {
+          type: dnsName
+        }
       }
       const data = {
         key: 'myKey',
@@ -149,7 +145,6 @@ describe('api', function () {
 
       mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.patch())
-      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
 
       const res = await agent
         .put(`/api/namespaces/${namespace}/cloudprovidersecrets/${infraName}`)
@@ -158,7 +153,7 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(3)
+      expect(mockRequest).toBeCalledTimes(2)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
