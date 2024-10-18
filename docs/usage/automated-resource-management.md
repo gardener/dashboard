@@ -54,4 +54,4 @@ Choose *Delete Service Account* to delete it.
 
 ## Related Links
 
-- [Service Account Manager](https://github.com/gardener/gardener/blob/master/docs/usage/service-account-manager.md)
+- [Service Account Manager](https://github.com/gardener/gardener/blob/master/docs/usage/project/service-account-manager.md)
