@@ -42,7 +42,6 @@ import {
 import {
   useRouter,
   onBeforeRouteLeave,
-  onBeforeRouteUpdate,
 } from 'vue-router'
 
 import { useAppStore } from '@/store/app'

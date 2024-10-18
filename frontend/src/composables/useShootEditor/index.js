@@ -6,6 +6,7 @@
 
 import {
   ref,
+  toRef,
   shallowRef,
   computed,
   reactive,
@@ -88,7 +89,7 @@ export function useShootEditor (initialValue, options = {}) {
   const touched = ref(false)
   const clean = ref(true)
   const showManagedFields = ref(false)
-  const renderWhitespaces = ref(true)
+  const renderWhitespaces = toRef(localStorageStore, 'renderEditorWhitespaes')
   const historySize = shallowRef({
     undo: 0,
     redo: 0,
@@ -353,13 +354,25 @@ export function useShootEditor (initialValue, options = {}) {
   }
 
   watchEffect(() => {
-    if (cmView.value && schemaDefinition.value) {
-      const shootProperties = get(schemaDefinition.value, 'properties', {})
-      completions.value = new EditorCompletions(shootProperties, {
-        cmView: cmView.value,
-        completionPaths: get(options, 'completionPaths', []),
-        logger,
-      })
+    if (cmView.value) {
+      if (schemaDefinition.value) {
+        const shootProperties = get(schemaDefinition.value, 'properties', {})
+        completions.value = new EditorCompletions(shootProperties, {
+          cmView: cmView.value,
+          completionPaths: get(options, 'completionPaths', []),
+          logger,
+        })
+      }
+
+      if (renderWhitespaces.value) {
+        cmView.value.dispatch({
+          effects: whitespacesCompartment.reconfigure(showAllWhitespace),
+        })
+      } else {
+        cmView.value.dispatch({
+          effects: whitespacesCompartment.reconfigure([]),
+        })
+      }
     }
   })
 
@@ -391,12 +404,6 @@ export function useShootEditor (initialValue, options = {}) {
         break
       }
     }
-  })
-
-  watch(renderWhitespaces, renderWhitespaces => {
-    cmView.value.dispatch({
-      effects: whitespacesCompartment.reconfigure(renderWhitespaces ? showAllWhitespace : []),
-    })
   })
 
   return {
