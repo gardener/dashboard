@@ -40,10 +40,6 @@ SPDX-License-Identifier: Apache-2.0
             {{ cloudProviderKind }}
           </v-list-item-title>
         </v-list-item>
-        <v-list-item v-if="cloudProfileName">
-          <v-list-item-subtitle>Cloud Profile</v-list-item-subtitle>
-          <v-list-item-title>{{ cloudProfileName }}</v-list-item-title>
-        </v-list-item>
         <v-list-item v-if="region">
           <v-list-item-subtitle>Region</v-list-item-subtitle>
           <v-list-item-title>{{ region }}</v-list-item-title>
@@ -74,9 +70,6 @@ export default {
     cloudProviderKind: {
       type: String,
     },
-    cloudProfileName: {
-      type: String,
-    },
     region: {
       type: String,
     },
@@ -104,9 +97,6 @@ export default {
       if (this.extended && this.cloudProviderKind) {
         description.push(this.cloudProviderKind)
       }
-      if (this.cloudProfileName) {
-        description.push(this.cloudProfileName)
-      }
       if (this.region) {
         description.push(this.region)
       }
@@ -120,9 +110,6 @@ export default {
       const titles = []
       if (this.extended && this.cloudProviderKind) {
         titles.push('Provider')
-      }
-      if (this.cloudProfileName) {
-        titles.push('Profile')
       }
       if (this.region) {
         titles.push('Region')

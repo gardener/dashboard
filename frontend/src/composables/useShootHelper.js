@@ -116,7 +116,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
   })
 
   const infrastructureSecrets = computed(() => {
-    return secretStore.infrastructureSecretsByCloudProfileName(cloudProfileName.value)
+    return secretStore.infrastructureSecretsByCloudProviderKind(cloudProfile.value?.metadata.cloudProviderKind)
   })
 
   const sortedKubernetesVersions = computed(() => {

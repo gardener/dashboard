@@ -17,7 +17,7 @@ const secretBindingList = [
   getSecretBinding({
     namespace: 'garden-foo',
     name: 'foo-infra1',
-    cloudProfileName: 'infra1-profileName',
+    type: 'infra1',
     secretRef: {
       namespace: 'garden-foo',
       name: 'secret1'
@@ -27,7 +27,7 @@ const secretBindingList = [
   getSecretBinding({
     namespace: 'garden-foo',
     name: 'foo-infra3',
-    cloudProfileName: 'infra3-profileName',
+    type: 'infra3',
     secretRef: {
       namespace: 'garden-foo',
       name: 'secret2'
@@ -37,7 +37,7 @@ const secretBindingList = [
   getSecretBinding({
     namespace: 'garden-foo',
     name: 'trial-infra1',
-    cloudProfileName: 'infra1-profileName',
+    type: 'infra1',
     secretRef: {
       namespace: 'garden-trial',
       name: 'trial-secret'
@@ -47,7 +47,7 @@ const secretBindingList = [
   getSecretBinding({
     namespace: 'garden-foo',
     name: 'foo-dns1',
-    dnsProviderName: 'foo-dns',
+    type: 'foo-dns',
     secretRef: {
       namespace: 'garden-foo',
       name: 'secret3'
@@ -56,20 +56,15 @@ const secretBindingList = [
   })
 ]
 
-function getSecretBinding ({ namespace, name, cloudProfileName, dnsProviderName, secretRef = {}, quotas = [] }) {
-  const labels = {}
-  if (cloudProfileName) {
-    labels['cloudprofile.garden.sapcloud.io/name'] = cloudProfileName
-  }
-  if (dnsProviderName) {
-    labels['gardener.cloud/dnsProviderName'] = dnsProviderName
-  }
+function getSecretBinding ({ namespace, name, type, secretRef = {}, quotas = [] }) {
   return {
     kind: 'SecretBinding',
     metadata: {
       name,
-      namespace,
-      labels
+      namespace
+    },
+    provider: {
+      type
     },
     secretRef,
     quotas
