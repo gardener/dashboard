@@ -134,7 +134,7 @@ onBeforeRouteLeave(async (to, from, next) => {
   if (isShootCreated.value) {
     return next()
   }
-  if (isShootDirty.value) {
+  if (!isShootDirty.value) {
     if (!await confirmEditorNavigation()) {
       focusEditor()
       return next(false)

@@ -135,6 +135,11 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     writeDefaults: false,
   })
 
+  const renderEditorWhitespaes = useLocalStorage('global/editor/render-whitespaces', false, {
+    serializer: StorageSerializers.flag,
+    writeDefaults: false,
+  })
+
   const shootAdminKubeconfigExpiration = useLocalStorage('global/shoot-admin-kubeconfig-expiration', 0, {
     serializer: StorageSerializers.integer,
     writeDefaults: false,
@@ -273,6 +278,7 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     logLevel,
     hiddenMessages,
     editorShortcuts,
+    renderEditorWhitespaes,
     shootAdminKubeconfigExpiration,
     userSelectedColumns,
     userItemsPerPage,
