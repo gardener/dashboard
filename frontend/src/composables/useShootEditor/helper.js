@@ -4,12 +4,12 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import { EditorView } from '@codemirror/view'
+import { indentUnit } from '@codemirror/language'
+
 import { useLogger } from '@/composables/useLogger'
 
 import {
-  forEach,
-  join,
-  map,
   trim,
   nth,
   filter,
@@ -27,54 +27,61 @@ import {
 } from '@/lodash'
 
 export async function createEditor (...args) {
-  const { default: CodeMirror } = await import('./codemirror')
-  return CodeMirror(...args)
+  return new EditorView(...args)
 }
 
 export class EditorCompletions {
   constructor (shootProperties, options = {}) {
     const {
-      cm,
+      cmView,
       supportedPaths = [],
       logger = useLogger(),
     } = options
 
-    this._resolveSchemaArrays(shootProperties)
+    this.#resolveSchemaArrays(shootProperties)
     this.shootCompletions = shootProperties
 
     this.logger = logger
-    this.indentUnit = get(cm, 'options.indentUnit', 2)
+    this.indentUnit = cmView.state.facet(indentUnit).length
     this.arrayBulletIndent = 2 // -[space]
     this.supportedPaths = supportedPaths
-    this.createPos = get(cm, 'constructor.Pos')
   }
 
   // Callback function for CodeMirror autocomplete plugin
-  yamlHint (cm) {
-    const cur = cm.getCursor()
-    const token = this._getYamlToken(cm, cur)
-    const list = this._getYamlCompletions(token, cur, cm)
+  yamlHint (context) {
+    const cmView = context.view
+    const word = context.matchBefore(/\w*/)
+
+    const cursor = this.#getCursor(cmView)
+    const token = this.#getYamlToken(cmView, cursor)
+
+    const lineString = cmView.state.doc.line(cursor.line).text
+
+    const lineContainsKeyValuePair = /\w:\s/.test(lineString)
+    let list = []
+    if (!lineContainsKeyValuePair) {
+      list = this.#getYamlCompletions(token, cursor, cmView)
+    }
 
     return {
-      list,
-      from: this.createPos(cur.line, token.start),
-      to: this.createPos(cur.line, token.end),
+      options: list,
+      from: word.from,
+      to: word.to,
+      filter: false,
     }
   }
 
   // Callback function for CodeMirror tooltip
-  editorTooltip (e, cm) {
-    const pos = cm.coordsChar({
-      left: e.clientX,
-      top: e.clientY,
-    })
-    const lineTokens = cm.getLineTokens(pos.line)
-    const lineString = join(map(lineTokens, 'string'), '')
-    const result = lineString.match(/^(\s*)([^\s]+?):.*$/)
+  editorTooltip (e, cmView) {
+    const pos = cmView.posAtCoords({ x: e.clientX, y: e.clientY })
+    const line = cmView.state.doc.lineAt(pos).number
+    const lineChar = pos - cmView.state.doc.line(line).from
+
+    const lineString = cmView.state.doc.line(line).text
+    const result = lineString.match(/^(\s*-?\s*)([^\s]+?):.*$/)
 
     if (result) {
-      const indent = result[1]
-      const tokenString = result[2]
+      const [, indent, tokenString] = result
       const start = indent.length
       const end = start + tokenString.length
       const string = tokenString.toLowerCase()
@@ -83,9 +90,10 @@ export class EditorCompletions {
         end,
         string,
       }
-      if (token.start <= pos.ch && pos.ch <= token.end) {
-        // Ensure that mouse pointer is on propety and not somewhere else on this line
-        const completions = this._getYamlCompletions(token, pos, cm, true)
+      if (token.start <= lineChar && lineChar <= token.end) {
+        // Ensure that mouse pointer is on property and not somewhere else on this line
+        const cursor = { ch: lineChar, line }
+        const completions = this.#getYamlCompletions(token, cursor, cmView, true)
         if (completions.length === 1) {
           return first(completions)
         }
@@ -94,26 +102,27 @@ export class EditorCompletions {
   }
 
   // callback function for cm editor enter function
-  editorEnter (cm) {
-    const cur = cm.getCursor()
+  editorEnter (cmView) {
+    const cursor = this.#getCursor(cmView)
 
-    const { lineString, lineTokens } = this._getTokenLine(cm, cur)
+    const lineString = cmView.state.doc.line(cursor.line).text
     const [, indent, firstArrayItem] = lineString.match(/^(\s*)(-\s)?(.*)$/) || []
+
     let extraIntent = ''
     if (firstArrayItem) {
       extraIntent = `${repeat(' ', this.arrayBulletIndent)}`
-    } else if (this._isTokenLineStartingObject(lineTokens)) {
+    } else if (this.#isLineStartingObject(lineString)) {
       extraIntent = `${repeat(' ', this.indentUnit)}`
     }
-    cm.replaceSelection(`\n${indent}${extraIntent}`)
+    this.#replaceSelection(cmView, `\n${indent}${extraIntent}`)
   }
 
   // Get completions for token, exact match is used for tooltip function
-  _getYamlCompletions (token, cur, cm, exactMatch = false) {
-    const completionPath = this._getTokenCompletionPath(token, cur, cm)
+  #getYamlCompletions (token, cursor, cmView, exactMatch = false) {
+    const completionPath = this.#getTokenCompletionPath(token, cursor, cmView)
     if (this.supportedPaths?.length) {
-      const currentPath = completionPath.join('.')
-      if (!this.supportedPaths.some(path => currentPath.startsWith(path))) {
+      const cursorrentPath = completionPath.join('.')
+      if (!this.supportedPaths.some(path => cursorrentPath.startsWith(path))) {
         return []
       }
     }
@@ -151,108 +160,82 @@ export class EditorCompletions {
     }
 
     forIn(completions, (completion, propertyName) => {
-      let text = generateCompletionText(propertyName, completion.type, token.type)
-      if (token.type === 'firstArrayItem') {
-        text = '- ' + text
-      }
+      const text = generateCompletionText(propertyName, completion.type, token.type)
       const string = propertyName.toLowerCase()
-      const type = generateTypeText(completion.type, completion.format)
+      const typeText = generateTypeText(completion.type, completion.format)
 
       completionArray.push({
-        text,
-        string,
+        label: string,
+        displayLabel: text,
+        detail: typeText,
+        type: 'keyword',
+        info: completion.description,
+        apply: text,
         property: propertyName,
-        type,
-        description: completion.description,
-        render (el, self, data) {
-          const document = el.ownerDocument
-          const { property, type, description } = data
-
-          const propertyElement = document.createElement('span')
-          propertyElement.className = 'property'
-          propertyElement.textContent = property
-
-          const typeElement = document.createElement('span')
-          typeElement.className = 'type'
-          typeElement.textContent = type
-
-          const propertyWrapper = document.createElement('div')
-          propertyWrapper.className = 'ghint-type'
-          propertyWrapper.appendChild(propertyElement)
-          propertyWrapper.appendChild(typeElement)
-
-          const descriptionElement = document.createElement('span')
-          descriptionElement.className = 'description'
-          descriptionElement.textContent = description
-
-          const descriptionWrapper = document.createElement('div')
-          descriptionWrapper.className = 'ghint-desc'
-          descriptionWrapper.appendChild(descriptionElement)
-
-          el.appendChild(propertyWrapper)
-          el.appendChild(descriptionWrapper)
-        },
       })
     })
+
     if (trim(token.string).length > 0) {
       completionArray = filter(completionArray, completion => {
-        if (exactMatch) {
-          return isEqual(completion.string, token.string)
+        let tokenString = token.string
+        if (token.type === 'firstArrayItem') {
+          tokenString = tokenString.replace(/.*\s-\s/, '')
         }
-        if (includes(words(token.string), completion.string)) {
-          // filter completion if already in this line - avoid duplicate completions
-          return false
+        if (exactMatch) {
+          return isEqual(completion.label, tokenString)
         }
         // filter completions that to not match text already in line
-        return includes(completion.string, token.string)
+        return includes(completion.label, tokenString)
       })
     }
+
     return completionArray
   }
 
-  // get token at cursor position in editor with yaml content
-  _getYamlToken (cm, cur) {
+  // get token at cursorsor position in editor with yaml content
+  #getYamlToken (cmView, cursor) {
     let token
-    const { lineTokens, lineString } = this._getTokenLine(cm, cur)
-    forEach(lineTokens, lineToken => {
-      const result = lineToken.string.match(/^(\s*)-\s(.*)$/)
-      if (result) {
-        const indent = result[1]
-        token = lineToken
-        token.type = 'firstArrayItem'
-        token.string = this._getTokenStringFromLine(lineString, cur.ch)
-        token.indent = token.start = indent.length
-        token.end = token.start + token.string.length + this.arrayBulletIndent
-        token.propertyName = trim(token.string)
+    const lineString = cmView.state.doc.line(cursor.line).text
 
-        const objectToken = this._returnObjectTokenFromTokenLine(lineTokens)
-        if (objectToken) {
-          // firstArrayItem line can also start new object
-          token.propertyName = objectToken.propertyName
-        }
+    const result = lineString.match(/^(\s*)-\s(.*)$/)
+    if (result) {
+      const indent = result[1]
+      token = { string: lineString }
+      token.type = 'firstArrayItem'
+      token.indent = token.start = indent.length
+      token.end = token.start + token.string.length + this.arrayBulletIndent
+      token.propertyName = trim(token.string)
+
+      const objectToken = this.#returnObjectTokenFromLine(lineString)
+      if (objectToken) {
+        // firstArrayItem line can also start new object
+        token.propertyName = objectToken.propertyName
       }
-    })
-    if (!token) {
-      token = this._returnObjectTokenFromTokenLine(lineTokens)
     }
     if (!token) {
-      token = cm.getTokenAt(cur, true)
-      token.string = this._getTokenStringFromLine(lineString, cur.ch)
-      token.start = token.end - token.string.length
+      token = this.#returnObjectTokenFromLine(lineString)
     }
+    if (!token) {
+      const string = this.#getTokenStringFromLine(lineString, cursor.ch)
+      token = {
+        string,
+        start: cursor.ch - string.length,
+        end: cursor.ch,
+      }
+    }
+
     return token
   }
 
   // returns path to completions in shootCompletions object
-  _getTokenCompletionPath (token, cur, cm) {
+  #getTokenCompletionPath (token, cursor, cmView) {
     let currentToken = token
-    let line = cur.line
+    let line = cursor.line
     const tokenContext = []
-
-    while (line >= 0 && !this._isTopLevelProperty(currentToken)) {
-      currentToken = this._getYamlToken(cm, this.createPos(line, 0))
-      if (this._isCurrentTokenParentOfToken(currentToken, token) &&
-        this._isCurrentTokenIndentSmallerThanContextRoot(currentToken, tokenContext)) {
+    while (line >= 1 && !this.#isTopLevelProperty(currentToken)) {
+      currentToken = this.#getYamlToken(cmView, { line, ch: 0 })
+      if (this.#isCurrentTokenParentOfToken(currentToken, token) &&
+        this.#isCurrentTokenIndentSmallerThanContextRoot(currentToken, tokenContext)) {
         if (currentToken.type === 'property') {
           tokenContext.unshift(currentToken)
         } else if (currentToken.type === 'firstArrayItem') {
@@ -296,81 +279,72 @@ export class EditorCompletions {
   }
 
   // Utils
-  _isTopLevelProperty (token) {
+  #isTopLevelProperty (token) {
     return token.type === 'property' && token.indent === 0
   }
 
-  _isCurrentTokenParentOfToken (currentToken, token) {
+  #isCurrentTokenParentOfToken (currentToken, token) {
     return currentToken.indent < token.start
   }
 
-  _isContextInitial (context) {
+  #isContextInitial (context) {
     return context.length === 0
   }
 
-  _isCurrentTokenIndentSmallerThanContextRoot (currentToken, context) {
-    return this._isContextInitial(context) || first(context).indent > currentToken.indent
+  #isCurrentTokenIndentSmallerThanContextRoot (currentToken, context) {
+    return this.#isContextInitial(context) || first(context).indent > currentToken.indent
   }
 
-  _getTokenStringFromLine (lineString, cursorChar) {
-    return trim(last(words(lineString.substring(0, cursorChar).toLowerCase())))
+  #getTokenStringFromLine (lineString, cursorsorChar) {
+    return trim(last(words(lineString.substring(0, cursorsorChar).toLowerCase())))
   }
 
-  _isTokenLineStartingObject (lineTokens) {
-    const lineEndToken = last(lineTokens)
-    if (!lineEndToken) {
-      return false
-    }
-    return lineEndToken.string === ':'
+  #isLineStartingObject (lineString) {
+    return lineString.endsWith(':')
   }
 
-  _returnObjectTokenFromTokenLine (lineTokens) {
-    if (lineTokens.length < 2) {
-      return
-    }
-    if (!this._isTokenLineStartingObject(lineTokens)) {
+  #returnObjectTokenFromLine (lineString) {
+    if (!this.#isLineStartingObject(lineString)) {
       return
     }
 
-    const token = lineTokens[lineTokens.length - 2]
-    const [, indent, propertyName] = token.string.match(/^(\s*)(.+?)$/)
+    const [, indent, propertyName] = lineString.match(/^(\s*)(?:-\s)?(.+?):$/)
+    const token = { string: lineString }
     token.indent = token.start = indent.length
     token.propertyName = propertyName
     token.type = 'property'
+
     return token
   }
 
-  _getTokenLine (cm, cur) {
-    const lineTokens = cm.getLineTokens(cur.line)
-    const lineString = join(map(lineTokens, 'string'), '')
+  #resolveSchemaArrays (properties, parentPropertyName = '') {
+    const hasValidKeys = value => {
+      const validKeyCombinations = [
+        ['type'],
+        ['type', 'format'],
+      ]
 
-    return { lineTokens, lineString }
-  }
-
-  _resolveSchemaArrays (properties, parentPropertyName = '') {
-    const hasOnlyTypeOrTypeAndFormatProperties = value => {
-      if (value.every(item => {
-        return (Object.keys(item).length === 1 && item.type) ||
-        (Object.keys(item).length === 2 && item.type && item.format)
-      })) {
-        return true
-      }
-      return false
+      return value.every(item => {
+        const keys = Object.keys(item)
+        return validKeyCombinations.some(combination =>
+          combination.length === keys.length && combination.every(key => keys.includes(key)),
+        )
+      })
     }
     let foundDiscriminators = false
     for (const [propertyName, propertyValue] of Object.entries(properties)) {
       if (['allOf', 'anyOf', 'oneOf'].includes(propertyName) && !properties.type) {
         if (foundDiscriminators) {
-          // We currently do not support merging when schema has multiple discriminators on same level
+          // We cursorrently do not support merging when schema has multiple discriminators on same level
           this.logger.warn('Found multiple discriminators in schema at %s', parentPropertyName)
         }
         foundDiscriminators = true
 
         if (propertyValue.length === 1) {
-          this._resolveSchemaArrays(propertyValue[0], parentPropertyName)
+          this.#resolveSchemaArrays(propertyValue[0], parentPropertyName)
           Object.assign(properties, propertyValue[0])
         } else if (propertyValue.length > 1 && propertyName === 'oneOf') {
-          if (hasOnlyTypeOrTypeAndFormatProperties(propertyValue)) {
+          if (hasValidKeys(propertyValue)) {
             // In case of oneOf, we support multiple entries if they are only used to define different types
             properties.type = propertyValue.map(obj => obj.type)
             properties.format = propertyValue.map(obj => obj.format)
@@ -383,8 +357,25 @@ export class EditorCompletions {
 
         unset(properties, [propertyName])
       } else if (typeof propertyValue === 'object') {
-        this._resolveSchemaArrays(propertyValue, propertyName)
+        this.#resolveSchemaArrays(propertyValue, propertyName)
       }
     }
+  }
+
+  #getCursor (cmView) {
+    const selection = cmView.state.selection.main
+    const line = cmView.state.doc.lineAt(selection.head).number
+    const ch = selection.head - cmView.state.doc.line(line).from
+    return { line, ch }
+  }
+
+  #replaceSelection (cmView, replacementText) {
+    const selection = cmView.state.selection.main
+    const newCursorPosition = selection.from + replacementText.length
+    cmView.dispatch({
+      changes: { from: selection.from, to: selection.to, insert: replacementText },
+      selection: { anchor: newCursorPosition },
+      effects: EditorView.scrollIntoView(newCursorPosition),
+    })
   }
 }

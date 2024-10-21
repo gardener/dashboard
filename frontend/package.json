@@ -33,8 +33,17 @@
     "test": "run vitest run"
   },
   "dependencies": {
+    "@codemirror/autocomplete": "^6.18.0",
+    "@codemirror/commands": "^6.6.0",
+    "@codemirror/lang-yaml": "^6.1.1",
+    "@codemirror/language": "^6.10.2",
+    "@codemirror/search": "^6.5.6",
+    "@codemirror/state": "^6.4.1",
+    "@codemirror/theme-one-dark": "^6.1.2",
+    "@codemirror/view": "^6.33.0",
     "@fontsource/roboto": "^5.0.12",
     "@kyvg/vue3-notification": "^3.2.1",
+    "@lezer/common": "^1.2.1",
     "@mdi/font": "7.4.47",
     "@vuelidate/core": "^2.0.3",
     "@vuelidate/validators": "^2.0.4",
@@ -45,7 +54,6 @@
     "@xterm/addon-web-links": "^0.11.0",
     "@xterm/xterm": "^5.5.0",
     "ansi-html": "^0.0.9",
-    "codemirror": "^5.65.16",
     "dayjs": "^1.11.10",
     "downloadjs": "^1.4.7",
     "eventemitter3": "^5.0.1",
@@ -92,7 +100,7 @@
     "eslint-plugin-vue": "^9.23.0",
     "jsdom": "^25.0.0",
     "rollup-plugin-visualizer": "^5.12.0",
-    "sass": "~1.74.1",
+    "sass": "~1.79.0",
     "unplugin-fonts": "^1.1.1",
     "vite": "^5.1.6",
     "vite-plugin-compression": "^0.5.1",
@@ -100,7 +108,7 @@
     "vitest": "^2.0.0",
     "vitest-fetch-mock": "^0.3.0"
   },
-  "packageManager": "yarn@4.5.0",
+  "packageManager": "yarn@4.5.1",
   "engines": {
     "node": "^22.7.0"
   }
