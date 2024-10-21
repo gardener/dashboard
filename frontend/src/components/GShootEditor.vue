@@ -139,7 +139,7 @@ SPDX-License-Identifier: Apache-2.0
                   <!-- eslint-disable vue/no-v-html -->
                   <span
                     style="width: 18px; height: 18px"
-                    v-html="renderWhitespaces ? whitespaceEye : whitespaceEyeOff"
+                    v-html="renderWhitespaces ? whitespaceEyeOff : whitespaceEye"
                   />
                   <!-- eslint-enable vue/no-v-html -->
                 </v-btn>
