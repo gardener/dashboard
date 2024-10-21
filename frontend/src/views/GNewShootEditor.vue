@@ -144,6 +144,7 @@ onBeforeRouteLeave(async (to, from, next) => {
   }
   return next()
 })
+
 onBeforeRouteUpdate(async (to, from, next) => {
   if (!clean.value || isShootDirty.value) {
     if (!await confirmEditorNavigation()) {
