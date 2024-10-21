@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
     <td v-if="selectedHeaders.infrastructure">
       <g-vendor
         extended
-        :cloud-provider-kind="item.cloudProviderKind"
+        :provider-type="item.providerType"
       />
     </td>
     <td v-if="selectedHeaders.details">

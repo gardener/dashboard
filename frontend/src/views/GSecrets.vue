@@ -52,7 +52,7 @@ SPDX-License-Identifier: Apache-2.0
                 Create Infrastructure Secret
               </v-list-subheader>
               <v-list-item
-                v-for="infrastructure in sortedInfrastructureKindList"
+                v-for="infrastructure in sortedInfrastructureTypesList"
                 :key="infrastructure"
                 @click="openSecretAddDialog(infrastructure)"
               >
@@ -76,7 +76,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
       </g-toolbar>
 
-      <v-card-text v-if="!sortedInfrastructureKindList.length">
+      <v-card-text v-if="!sortedInfrastructureTypesList.length">
         <v-alert
           class="ma-3"
           type="warning"
@@ -282,7 +282,6 @@ import {
   get,
   filter,
   head,
-  isEmpty,
   map,
   mapKeys,
   mapValues,
@@ -319,7 +318,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(useCloudProfileStore, ['sortedInfrastructureKindList']),
+    ...mapState(useCloudProfileStore, ['sortedInfrastructureTypesList']),
     ...mapState(useGardenerExtensionStore, ['dnsProviderTypes']),
     ...mapState(useSecretStore, [
       'infrastructureSecretList',
@@ -338,11 +337,6 @@ export default {
       'dnsSecretItemsPerPage',
       'dnsSecretSortBy',
     ]),
-    hasCloudProfileForCloudProviderKind () {
-      return kind => {
-        return !isEmpty(this.cloudProfilesByCloudProviderKind(kind))
-      }
-    },
     infraSecretTableHeaders () {
       const headers = [
         {
@@ -406,7 +400,7 @@ export default {
         isOwnSecret: isOwnSecret(secret),
         secretNamespace: secret.metadata.secretRef.namespace,
         secretName: secret.metadata.secretRef.name,
-        cloudProviderKind: secret.metadata.provider.type,
+        providerType: secret.metadata.provider.type,
         cloudProfileName: secret.metadata.cloudProfileName,
         relatedShootCount: this.relatedShootCountInfra(secret),
         relatedShootCountLabel: this.relatedShootCountLabel(this.relatedShootCountInfra(secret)),
@@ -476,7 +470,7 @@ export default {
         isOwnSecret: isOwnSecret(secret),
         secretNamespace: secret.metadata.secretRef.namespace,
         secretName: secret.metadata.secretRef.name,
-        cloudProviderKind: secret.metadata.provider.type,
+        providerType: secret.metadata.provider.type,
         relatedShootCount: this.relatedShootCountDns(secret),
         relatedShootCountLabel: this.relatedShootCountLabel(this.relatedShootCountDns(secret)),
         secret,
@@ -499,11 +493,10 @@ export default {
     this.onUpdateSecret(secret)
   },
   methods: {
-    ...mapActions(useCloudProfileStore, ['cloudProfilesByCloudProviderKind']),
     ...mapActions(useSecretStore, ['getCloudProviderSecretByName']),
-    openSecretAddDialog (infrastructureKind) {
+    openSecretAddDialog (providerType) {
       this.selectedSecret = undefined
-      this.visibleSecretDialog = infrastructureKind
+      this.visibleSecretDialog = providerType
     },
     onUpdateSecret (secret) {
       const kind = secret.metadata.provider.type

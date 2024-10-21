@@ -86,7 +86,7 @@ describe('api', function () {
         provider: {
           type: infraName
         },
-        cloudProviderKind: 'infra1'
+        providerType: 'infra1'
       }
       const data = {
         key: 'myKey',

@@ -142,9 +142,9 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
 
   function isValidRegion (cloudProfile) {
     const cloudProfileName = cloudProfile.metadata.name
-    const cloudProviderKind = cloudProfile.metadata.cloudProviderKind
+    const providerType = cloudProfile.metadata.providerType
     return region => {
-      if (cloudProviderKind === 'azure') {
+      if (providerType === 'azure') {
         // Azure regions may not be zoned, need to filter these out for the dashboard
         return !!zonesByCloudProfileNameAndRegion({ cloudProfileName, region }).length
       }
@@ -154,7 +154,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     }
   }
 
-  const knownInfrastructureKindList = ref([
+  const knownInfrastructureTypesList = ref([
     'aws',
     'azure',
     'gcp',
@@ -168,16 +168,16 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     'local',
   ])
 
-  const infrastructureKindList = computed(() => {
-    return uniq(map(list.value, 'metadata.cloudProviderKind'))
+  const infrastructureTypesList = computed(() => {
+    return uniq(map(list.value, 'metadata.providerType'))
   })
 
-  const sortedInfrastructureKindList = computed(() => {
-    return intersection(knownInfrastructureKindList.value, infrastructureKindList.value)
+  const sortedInfrastructureTypesList = computed(() => {
+    return intersection(knownInfrastructureTypesList.value, infrastructureTypesList.value)
   })
 
-  function cloudProfilesByCloudProviderKind (cloudProviderKind) {
-    const predicate = item => item.metadata.cloudProviderKind === cloudProviderKind
+  function cloudProfilesByProviderType (providerType) {
+    const predicate = item => item.metadata.providerType === providerType
     const filteredCloudProfiles = filter(list.value, predicate)
     return sortBy(filteredCloudProfiles, 'metadata.name')
   }
@@ -285,7 +285,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
   function partitionIDsByCloudProfileNameAndRegion ({ cloudProfileName, region }) {
     // Partion IDs equal zones for metal infrastructure
     const cloudProfile = cloudProfileByName(cloudProfileName)
-    if (get(cloudProfile, 'metadata.cloudProviderKind') !== 'metal') {
+    if (get(cloudProfile, 'metadata.providerType') !== 'metal') {
       return
     }
     const partitionIDs = zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
@@ -294,7 +294,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
 
   function firewallSizesByCloudProfileNameAndRegion ({ cloudProfileName, region, architecture }) {
     const cloudProfile = cloudProfileByName(cloudProfileName)
-    if (get(cloudProfile, 'metadata.cloudProviderKind') !== 'metal') {
+    if (get(cloudProfile, 'metadata.providerType') !== 'metal') {
       return
     }
     // Firewall Sizes equals to list of machine types for this cloud provider
@@ -667,9 +667,9 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     cloudProfileList,
     setCloudProfiles,
     fetchCloudProfiles,
-    cloudProfilesByCloudProviderKind,
-    knownInfrastructureKindList,
-    sortedInfrastructureKindList,
+    cloudProfilesByProviderType,
+    knownInfrastructureTypesList,
+    sortedInfrastructureTypesList,
     cloudProfileByName,
     regionsWithSeedByCloudProfileName,
     regionsWithoutSeedByCloudProfileName,

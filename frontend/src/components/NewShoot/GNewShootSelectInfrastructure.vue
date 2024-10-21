@@ -7,10 +7,10 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-row class="my-0">
     <g-new-shoot-infrastructure-card
-      v-for="value in cloudProfileStore.sortedInfrastructureKindList"
+      v-for="value in cloudProfileStore.sortedInfrastructureTypesList"
       :key="value"
       :model-value="value === providerType"
-      :infrastructure-kind="value"
+      :infrastructure-type="value"
       @update:model-value="setProviderType(value)"
     />
   </v-row>

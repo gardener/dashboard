@@ -137,7 +137,7 @@ export default {
     },
     isAWS () {
       const cloudProfile = this.cloudProfileByName(this.cloudProfileName)
-      return get(cloudProfile, 'metadata.cloudProviderKind') === 'aws'
+      return get(cloudProfile, 'metadata.providerType') === 'aws'
     },
   },
   mounted () {

@@ -167,7 +167,7 @@ export const useShootDns = (manifest, options) => {
   }
 
   function getDefaultSecretName (type) {
-    const secrets = secretStore.dnsSecretsByProviderKind(type)
+    const secrets = secretStore.dnsSecretsByProviderType(type)
     // find unused secret
     const usedResourceNames = map(resources.value, 'name')
     const secret = find(secrets, secret => {

@@ -13,11 +13,11 @@ const _ = require('lodash')
 const { getCloudProfiles, getVisibleAndNotProtectedSeeds } = require('../cache')
 
 function fromResource ({ cloudProfile: { metadata, spec }, seedNames }) {
-  const cloudProviderKind = spec.type
+  const providerType = spec.type
   const name = _.get(metadata, 'name')
   const displayName = _.get(metadata, ['annotations', 'garden.sapcloud.io/displayName'], name)
   const resourceVersion = _.get(metadata, 'resourceVersion')
-  metadata = { name, cloudProviderKind, displayName, resourceVersion }
+  metadata = { name, providerType, displayName, resourceVersion }
   const data = { seedNames, ...spec }
   return { metadata, data }
 }

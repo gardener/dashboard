@@ -94,7 +94,7 @@ export const useSecretStore = defineStore('secret', () => {
 
   const infrastructureSecretList = computed(() => {
     return filter(list.value, secret => {
-      return cloudProfileStore.sortedInfrastructureKindList.includes(secret.metadata.provider?.type)
+      return cloudProfileStore.sortedInfrastructureTypesList.includes(secret.metadata.provider?.type)
     })
   })
 
@@ -108,11 +108,11 @@ export const useSecretStore = defineStore('secret', () => {
     return find(list.value, eqlNameAndNamespace({ name, namespace }))
   }
 
-  function infrastructureSecretsByCloudProviderKind (cloudProviderKind) {
-    return filter(list.value, ['metadata.provider.type', cloudProviderKind])
+  function infrastructureSecretsByProviderType (providerType) {
+    return filter(list.value, ['metadata.provider.type', providerType])
   }
 
-  function dnsSecretsByProviderKind (dnsProviderName) {
+  function dnsSecretsByProviderType (dnsProviderName) {
     return filter(list.value, secret => {
       return secret.metadata.provider.type === dnsProviderName && isOwnSecret(secret) // secret binding not supported
     })
@@ -147,9 +147,9 @@ export const useSecretStore = defineStore('secret', () => {
     deleteSecret,
     infrastructureSecretList,
     dnsSecretList,
-    dnsSecretsByProviderKind,
+    dnsSecretsByProviderType,
     getCloudProviderSecretByName,
-    infrastructureSecretsByCloudProviderKind,
+    infrastructureSecretsByProviderType,
     $reset,
   }
 })

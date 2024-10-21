@@ -68,7 +68,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-col cols="3">
           <g-select-secret
             v-model="primaryDnsProviderSecret"
-            :cloud-provider-kind="dnsPrimaryProviderType"
+            :provider-type="dnsPrimaryProviderType"
             register-vuelidate-as="dnsProviderSecret"
             label="Primary DNS Provider Secret"
           />
@@ -265,7 +265,7 @@ export default {
     },
     primaryDnsProviderSecret: {
       get () {
-        const dnsSecrets = this.dnsSecretsByProviderKind(this.dnsPrimaryProviderType)
+        const dnsSecrets = this.dnsSecretsByProviderType(this.dnsPrimaryProviderType)
         return find(dnsSecrets, ['metadata.secretRef.name', this.dnsPrimaryProviderSecretName])
       },
       set (value) {
@@ -293,7 +293,7 @@ export default {
       if (value) {
         const type = head(this.dnsProviderTypesWithPrimarySupport)
         this.dnsPrimaryProviderType = type
-        const dnsSecrets = this.dnsSecretsByProviderKind(type)
+        const dnsSecrets = this.dnsSecretsByProviderType(type)
         this.primaryDnsProviderSecret = head(dnsSecrets)
         this.v$.dnsDomain.$reset()
       }
@@ -301,7 +301,7 @@ export default {
   },
   methods: {
     ...mapActions(useSecretStore, [
-      'dnsSecretsByProviderKind',
+      'dnsSecretsByProviderType',
     ]),
     getErrorMessages,
   },

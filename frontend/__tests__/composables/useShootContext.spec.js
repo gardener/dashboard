@@ -61,9 +61,9 @@ describe('composables', () => {
     shootContextStore = reactive(composable)
   })
 
-  function createShootManifest (infrastructureKind) {
+  function createShootManifest (providerType) {
     shootContextStore.createShootManifest({
-      providerType: infrastructureKind,
+      providerType,
       workerless: false,
     })
     return shootContextStore.shootManifest
