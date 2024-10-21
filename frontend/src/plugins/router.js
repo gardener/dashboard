@@ -7,6 +7,7 @@
 import {
   createRouter,
   registerGlobalBeforeGuards,
+  registerGlobalResolveGuards,
   registerGlobalAfterHooks,
 } from '@/router'
 
@@ -19,6 +20,7 @@ export default {
     // must be done after the router plugin has been installed
     // because some stores use the router or route
     registerGlobalBeforeGuards(router)
+    registerGlobalResolveGuards(router)
     registerGlobalAfterHooks(router)
   },
 }
