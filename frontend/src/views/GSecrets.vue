@@ -517,8 +517,11 @@ export default {
         return some(shoot.spec.dns?.providers, {
           secretName: secret.metadata.name,
         }) ||
-        some(shoot.spec.resources, ({ resourceRef }) => {
-          return resourceRef?.kind === 'Secret' && resourceRef?.name === secret.metadata.name
+        some(shoot.spec.resources, {
+          resourceRef: {
+            kind: 'Secret',
+            name: secret.metadata.name,
+          },
         })
       })
       return shootsByDnsSecret.length
