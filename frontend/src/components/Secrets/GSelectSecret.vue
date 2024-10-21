@@ -109,10 +109,7 @@ export default {
       type: Boolean,
       default: false,
     },
-    cloudProfileName: {
-      type: String,
-    },
-    dnsProviderKind: {
+    providerType: {
       type: String,
     },
     registerVuelidateAs: {
@@ -195,30 +192,9 @@ export default {
       },
     },
     secretList () {
-      let secrets
-      if (this.cloudProfileName) {
-        secrets = this.infrastructureSecretsByCloudProfileName(this.cloudProfileName)
-      }
-      if (this.dnsProviderKind) {
-        secrets = this.dnsSecretsByProviderKind(this.dnsProviderKind)
-      }
+      const secrets = this.secretsByProviderType(this.providerType)
       return secrets
         ?.filter(secret => !this.allowedSecretNames.includes(secret.metadata.name))
-    },
-    infrastructureKind () {
-      if (this.dnsProviderKind) {
-        return this.dnsProviderKind
-      }
-
-      if (!this.cloudProfileName) {
-        return undefined
-      }
-
-      const cloudProfile = this.cloudProfileByName(this.cloudProfileName)
-      if (!cloudProfile) {
-        return undefined
-      }
-      return cloudProfile.metadata.cloudProviderKind
     },
     secretHint () {
       if (this.selfTerminationDays) {
@@ -238,13 +214,12 @@ export default {
       'cloudProfileByName',
     ]),
     ...mapActions(useSecretStore, [
-      'infrastructureSecretsByCloudProfileName',
-      'dnsSecretsByProviderKind',
+      'secretsByProviderType',
     ]),
     get,
     isOwnSecret,
     openSecretDialog () {
-      this.visibleSecretDialog = this.infrastructureKind
+      this.visibleSecretDialog = this.providerType
       this.secretItemsBeforeAdd = cloneDeep(this.secretList)
     },
     onSecretDialogClosed () {

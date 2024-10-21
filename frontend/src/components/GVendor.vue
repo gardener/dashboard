@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
         v-bind="props"
       >
         <g-vendor-icon
-          :icon="cloudProviderKind"
+          :icon="providerType"
         />
         <span
           v-if="description"
@@ -34,15 +34,11 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item-subtitle>Provider</v-list-item-subtitle>
           <v-list-item-title class="d-flex">
             <g-vendor-icon
-              :icon="cloudProviderKind"
+              :icon="providerType"
               class="mr-2"
             />
-            {{ cloudProviderKind }}
+            {{ providerType }}
           </v-list-item-title>
-        </v-list-item>
-        <v-list-item v-if="cloudProfileName">
-          <v-list-item-subtitle>Cloud Profile</v-list-item-subtitle>
-          <v-list-item-title>{{ cloudProfileName }}</v-list-item-title>
         </v-list-item>
         <v-list-item v-if="region">
           <v-list-item-subtitle>Region</v-list-item-subtitle>
@@ -71,10 +67,7 @@ export default {
       type: Array,
       default: () => [],
     },
-    cloudProviderKind: {
-      type: String,
-    },
-    cloudProfileName: {
+    providerType: {
       type: String,
     },
     region: {
@@ -101,11 +94,8 @@ export default {
     },
     description () {
       const description = []
-      if (this.extended && this.cloudProviderKind) {
-        description.push(this.cloudProviderKind)
-      }
-      if (this.cloudProfileName) {
-        description.push(this.cloudProfileName)
+      if (this.extended && this.providerType) {
+        description.push(this.providerType)
       }
       if (this.region) {
         description.push(this.region)
@@ -118,11 +108,8 @@ export default {
     },
     titleText () {
       const titles = []
-      if (this.extended && this.cloudProviderKind) {
+      if (this.extended && this.providerType) {
         titles.push('Provider')
-      }
-      if (this.cloudProfileName) {
-        titles.push('Profile')
       }
       if (this.region) {
         titles.push('Region')

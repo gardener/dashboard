@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
     <td v-if="selectedHeaders.dnsProvider">
       <g-vendor
         extended
-        :cloud-provider-kind="item.dnsProvider"
+        :provider-type="item.providerType"
       />
     </td>
     <td v-if="selectedHeaders.details">
@@ -58,19 +58,18 @@ SPDX-License-Identifier: Apache-2.0
         <g-action-button
           v-if="canPatchSecrets"
           icon="mdi-pencil"
-          :disabled="!item.isOwnSecret || !item.isSupportedCloudProvider"
+          :disabled="!item.isOwnSecret"
           @click="onUpdate"
         >
           <template #tooltip>
             <span v-if="!item.isOwnSecret">You can only edit secrets that are owned by you</span>
-            <span v-else-if="!item.isSupportedCloudProvider">This DNS Provider is currently not supported by the dashboard</span>
             <span v-else>Edit Secret</span>
           </template>
         </g-action-button>
         <g-action-button
           v-if="canDeleteSecrets"
           icon="mdi-delete"
-          :disabled="!item.isOwnSecret || !item.isSupportedCloudProvider"
+          :disabled="item.relatedShootCount > 0 || !item.isOwnSecret"
           @click="onDelete"
         >
           <template #tooltip>

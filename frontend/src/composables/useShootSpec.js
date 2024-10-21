@@ -77,7 +77,7 @@ export function useShootSpec (shootItem, options = {}) {
     return shootSpec.value.cloudProfileName
   })
 
-  const shootCloudProviderKind = computed(() => {
+  const shootProviderType = computed(() => {
     return get(shootSpec.value, 'provider.type')
   })
 
@@ -172,7 +172,7 @@ export function useShootSpec (shootItem, options = {}) {
     shootSupportedUpgradeAvailable,
     shootEnableStaticTokenKubeconfig,
     shootCloudProfileName,
-    shootCloudProviderKind,
+    shootProviderType,
     shootWorkerGroups,
     hasShootWorkerGroups,
     sshAccessEnabled,

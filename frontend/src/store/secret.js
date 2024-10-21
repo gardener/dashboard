@@ -19,6 +19,8 @@ import { isOwnSecret } from '@/utils'
 
 import { useAuthzStore } from './authz'
 import { useAppStore } from './app'
+import { useGardenerExtensionStore } from './gardenerExtension'
+import { useCloudProfileStore } from './cloudProfile'
 
 import {
   findIndex,
@@ -35,6 +37,8 @@ export const useSecretStore = defineStore('secret', () => {
   const api = useApi()
   const appStore = useAppStore()
   const authzStore = useAuthzStore()
+  const gardenerExtensionStore = useGardenerExtensionStore()
+  const cloudProfileStore = useCloudProfileStore()
 
   const list = ref(null)
 
@@ -90,13 +94,13 @@ export const useSecretStore = defineStore('secret', () => {
 
   const infrastructureSecretList = computed(() => {
     return filter(list.value, secret => {
-      return !!secret.metadata.cloudProviderKind
+      return cloudProfileStore.sortedProviderTypesList.includes(secret.metadata.provider?.type)
     })
   })
 
   const dnsSecretList = computed(() => {
     return filter(list.value, secret => {
-      return !!secret.metadata.dnsProviderName && isOwnSecret(secret) // secret binding not supported
+      return gardenerExtensionStore.dnsProviderTypes.includes(secret.metadata.provider?.type) && isOwnSecret(secret) // secret binding not supported
     })
   })
 
@@ -104,13 +108,11 @@ export const useSecretStore = defineStore('secret', () => {
     return find(list.value, eqlNameAndNamespace({ name, namespace }))
   }
 
-  function infrastructureSecretsByCloudProfileName (cloudProfileName) {
-    return filter(list.value, ['metadata.cloudProfileName', cloudProfileName])
-  }
-
-  function dnsSecretsByProviderKind (dnsProviderName) {
+  function secretsByProviderType (providerType) {
+    const isDnsSecret = gardenerExtensionStore.dnsProviderTypes.includes(providerType)
     return filter(list.value, secret => {
-      return secret.metadata.dnsProviderName === dnsProviderName && isOwnSecret(secret) // secret binding not supported
+      return secret.metadata.provider?.type === providerType &&
+        (!isDnsSecret || isOwnSecret(secret)) // secret binding not supported for dns secrets
     })
   }
 
@@ -143,9 +145,8 @@ export const useSecretStore = defineStore('secret', () => {
     deleteSecret,
     infrastructureSecretList,
     dnsSecretList,
-    dnsSecretsByProviderKind,
+    secretsByProviderType,
     getCloudProviderSecretByName,
-    infrastructureSecretsByCloudProfileName,
     $reset,
   }
 })

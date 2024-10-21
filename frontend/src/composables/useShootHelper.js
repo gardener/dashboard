@@ -65,7 +65,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
   })
 
   const cloudProfiles = computed(() => {
-    return cloudProfileStore.cloudProfilesByCloudProviderKind(providerType.value)
+    return cloudProfileStore.cloudProfilesByProviderType(providerType.value)
   })
 
   const defaultCloudProfileName = computed(() => {
@@ -116,7 +116,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
   })
 
   const infrastructureSecrets = computed(() => {
-    return secretStore.infrastructureSecretsByCloudProfileName(cloudProfileName.value)
+    return secretStore.secretsByProviderType(cloudProfile.value?.metadata.providerType)
   })
 
   const sortedKubernetesVersions = computed(() => {
