@@ -17,7 +17,7 @@ const secretBindingList = [
   getSecretBinding({
     namespace: 'garden-foo',
     name: 'foo-infra1',
-    type: 'infra1',
+    providerType: 'infra1',
     secretRef: {
       namespace: 'garden-foo',
       name: 'secret1'
@@ -27,7 +27,7 @@ const secretBindingList = [
   getSecretBinding({
     namespace: 'garden-foo',
     name: 'foo-infra3',
-    type: 'infra3',
+    providerType: 'infra3',
     secretRef: {
       namespace: 'garden-foo',
       name: 'secret2'
@@ -37,7 +37,7 @@ const secretBindingList = [
   getSecretBinding({
     namespace: 'garden-foo',
     name: 'trial-infra1',
-    type: 'infra1',
+    providerType: 'infra1',
     secretRef: {
       namespace: 'garden-trial',
       name: 'trial-secret'
@@ -47,7 +47,7 @@ const secretBindingList = [
   getSecretBinding({
     namespace: 'garden-foo',
     name: 'foo-dns1',
-    type: 'foo-dns',
+    providerType: 'foo-dns',
     secretRef: {
       namespace: 'garden-foo',
       name: 'secret3'
@@ -56,7 +56,7 @@ const secretBindingList = [
   })
 ]
 
-function getSecretBinding ({ namespace, name, type, secretRef = {}, quotas = [] }) {
+function getSecretBinding ({ namespace, name, providerType, secretRef = {}, quotas = [] }) {
   return {
     kind: 'SecretBinding',
     metadata: {
@@ -64,7 +64,7 @@ function getSecretBinding ({ namespace, name, type, secretRef = {}, quotas = [] 
       namespace
     },
     provider: {
-      type
+      providerType
     },
     secretRef,
     quotas
