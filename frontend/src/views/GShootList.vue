@@ -154,18 +154,19 @@ SPDX-License-Identifier: Apache-2.0
           />
         </template>
       </g-toolbar>
-      <v-data-table
-        v-model:page="page"
+      <v-data-table-virtual
+        ref="shootTable"
         v-model:sort-by="sortByInternal"
-        v-model:items-per-page="shootItemsPerPage"
         :headers="visibleHeaders"
         :items="sortedAndFilteredItems"
-        hover
         :loading="loading || !connected"
-        :items-per-page-options="itemsPerPageOptions"
         :custom-key-sort="customKeySort"
+        hover
         must-sort
+        fixed-header
         class="g-table"
+        height="calc(100vh - 240px)"
+        item-height="50px"
       >
         <template #progress>
           <g-shoot-list-progress />
@@ -183,16 +184,12 @@ SPDX-License-Identifier: Apache-2.0
             @show-dialog="showDialog"
           />
         </template>
-        <template #bottom="{ pageCount }">
+        <template #bottom>
           <g-data-table-footer
-            v-model:page="page"
-            v-model:items-per-page="shootItemsPerPage"
             :items-length="sortedAndFilteredItems.length"
-            :items-per-page-options="itemsPerPageOptions"
-            :page-count="pageCount"
           />
         </template>
-      </v-data-table>
+      </v-data-table-virtual>
       <v-dialog
         v-if="!isShootItemEmpty"
         v-model="clusterAccessDialog"
@@ -354,7 +351,6 @@ export default {
 
     function onUpdateShootSearch (value) {
       shootSearch.value = value
-
       setDebouncedShootSearch()
     }
 
@@ -372,13 +368,7 @@ export default {
   data () {
     return {
       dialog: null,
-      page: 1,
       selectedColumns: undefined,
-      itemsPerPageOptions: [
-        { value: 5, title: '5' },
-        { value: 10, title: '10' },
-        { value: 20, title: '20' },
-      ],
     }
   },
   computed: {
@@ -414,7 +404,6 @@ export default {
     ]),
     ...mapWritableState(useLocalStorageStore, [
       'shootSelectedColumns',
-      'shootItemsPerPage',
       'shootSortBy',
       'shootCustomSelectedColumns',
       'shootCustomSortBy',
@@ -423,9 +412,6 @@ export default {
     ]),
     defaultSortBy () {
       return [{ key: 'name', order: 'asc' }]
-    },
-    defaultItemsPerPage () {
-      return 10
     },
     clusterAccessDialog: {
       get () {
@@ -815,6 +801,10 @@ export default {
         this.shootSortBy = sortBy
       }
     },
+    debouncedShootSearch () {
+      // Workaround for https://github.com/vuetifyjs/vuetify/issues/20566
+      this.scrollToTop()
+    },
   },
   methods: {
     ...mapActions(useShootStore, [
@@ -857,7 +847,6 @@ export default {
         ...this.defaultCustomSelectedColumns,
       }
       this.saveSelectedColumns()
-      this.shootItemsPerPage = this.defaultItemsPerPage
       this.sortByInternal = this.defaultSortBy
     },
     updateTableSettings () {
@@ -893,6 +882,17 @@ export default {
         delete reactiveObject[key]
       }
       Object.assign(reactiveObject, defaultState)
+    },
+    scrollToTop () {
+      const tableRef = this.$refs.shootTable
+
+      if (tableRef) {
+        const scrollableElement = tableRef.$el.querySelector('.v-table__wrapper')
+
+        if (scrollableElement) {
+          scrollableElement.scrollTop = 0
+        }
+      }
     },
   },
 }
