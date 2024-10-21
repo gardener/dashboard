@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
       >
         <g-select-secret
           v-model="infrastructureSecret"
-          :infrastructure-type="providerType"
+          :provider-type="providerType"
         />
       </v-col>
       <v-col cols="3">

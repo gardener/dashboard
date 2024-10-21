@@ -270,7 +270,7 @@ export default {
       }
     },
     isInfrastructureSecret () {
-      return includes(this.sortedInfrastructureTypesList, this.vendor)
+      return includes(this.sortedProviderTypesList, this.vendor)
     },
     isDnsProviderSecret () {
       return includes(this.dnsProviderTypes, this.vendor)

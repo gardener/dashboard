@@ -154,7 +154,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     }
   }
 
-  const knownInfrastructureTypesList = ref([
+  const knownProviderTypesList = ref([
     'aws',
     'azure',
     'gcp',
@@ -168,12 +168,12 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     'local',
   ])
 
-  const infrastructureTypesList = computed(() => {
+  const providerTypesList = computed(() => {
     return uniq(map(list.value, 'metadata.providerType'))
   })
 
-  const sortedInfrastructureTypesList = computed(() => {
-    return intersection(knownInfrastructureTypesList.value, infrastructureTypesList.value)
+  const sortedProviderTypesList = computed(() => {
+    return intersection(knownProviderTypesList.value, providerTypesList.value)
   })
 
   function cloudProfilesByProviderType (providerType) {
@@ -668,8 +668,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     setCloudProfiles,
     fetchCloudProfiles,
     cloudProfilesByProviderType,
-    knownInfrastructureTypesList,
-    sortedInfrastructureTypesList,
+    sortedProviderTypesList,
     cloudProfileByName,
     regionsWithSeedByCloudProfileName,
     regionsWithoutSeedByCloudProfileName,

@@ -38,7 +38,7 @@ SPDX-License-Identifier: Apache-2.0
         <g-select-secret
           v-if="dnsServiceExtensionProviderSecret || !dnsProvider.secretName"
           v-model="dnsServiceExtensionProviderSecret"
-          :dns-provider-type="dnsProviderType"
+          :provider-type="dnsProviderType"
           :allowed-secret-names="allowedSecretNames"
           register-vuelidate-as="dnsServiceExtensionProviderSecret"
         />
@@ -167,7 +167,7 @@ export default {
       'dnsProviderTypes',
     ]),
     dnsSecrets () {
-      return this.dnsSecretsByProviderType(this.dnsProviderType)
+      return this.secretsByProviderType(this.dnsProviderType)
     },
     dnsProviderType: {
       get () {
@@ -175,7 +175,7 @@ export default {
       },
       set (value) {
         this.dnsProvider.type = value
-        const dnsSecrets = this.dnsSecretsByProviderType(value)
+        const dnsSecrets = this.secretsByProviderType(value)
         const defaultDnsSecret = head(dnsSecrets)
         this.dnsServiceExtensionProviderSecret = defaultDnsSecret
       },
@@ -246,7 +246,7 @@ export default {
   },
   methods: {
     ...mapActions(useSecretStore, [
-      'dnsSecretsByProviderType',
+      'secretsByProviderType',
     ]),
     getErrorMessages,
   },

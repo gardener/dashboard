@@ -265,7 +265,7 @@ export default {
     },
     primaryDnsProviderSecret: {
       get () {
-        const dnsSecrets = this.dnsSecretsByProviderType(this.dnsPrimaryProviderType)
+        const dnsSecrets = this.secretsByProviderType(this.dnsPrimaryProviderType)
         return find(dnsSecrets, ['metadata.secretRef.name', this.dnsPrimaryProviderSecretName])
       },
       set (value) {
@@ -293,7 +293,7 @@ export default {
       if (value) {
         const type = head(this.dnsProviderTypesWithPrimarySupport)
         this.dnsPrimaryProviderType = type
-        const dnsSecrets = this.dnsSecretsByProviderType(type)
+        const dnsSecrets = this.secretsByProviderType(type)
         this.primaryDnsProviderSecret = head(dnsSecrets)
         this.v$.dnsDomain.$reset()
       }
@@ -301,7 +301,7 @@ export default {
   },
   methods: {
     ...mapActions(useSecretStore, [
-      'dnsSecretsByProviderType',
+      'secretsByProviderType',
     ]),
     getErrorMessages,
   },

@@ -109,10 +109,7 @@ export default {
       type: Boolean,
       default: false,
     },
-    dnsProviderType: {
-      type: String,
-    },
-    infrastructureType: {
+    providerType: {
       type: String,
     },
     registerVuelidateAs: {
@@ -194,17 +191,8 @@ export default {
         this.$emit('update:modelValue', value)
       },
     },
-    providerType () {
-      return this.infrastructureType || this.dnsProviderType
-    },
     secretList () {
-      let secrets
-      if (this.infrastructureType) {
-        secrets = this.infrastructureSecretsByProviderType(this.infrastructureType)
-      }
-      if (this.dnsProviderType) {
-        secrets = this.dnsSecretsByProviderType(this.dnsProviderType)
-      }
+      const secrets = this.secretsByProviderType(this.providerType)
       return secrets
         ?.filter(secret => !this.allowedSecretNames.includes(secret.metadata.name))
     },
@@ -226,8 +214,7 @@ export default {
       'cloudProfileByName',
     ]),
     ...mapActions(useSecretStore, [
-      'infrastructureSecretsByProviderType',
-      'dnsSecretsByProviderType',
+      'secretsByProviderType',
     ]),
     get,
     isOwnSecret,

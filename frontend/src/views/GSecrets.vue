@@ -52,7 +52,7 @@ SPDX-License-Identifier: Apache-2.0
                 Create Infrastructure Secret
               </v-list-subheader>
               <v-list-item
-                v-for="infrastructure in sortedInfrastructureTypesList"
+                v-for="infrastructure in sortedProviderTypesList"
                 :key="infrastructure"
                 @click="openSecretAddDialog(infrastructure)"
               >
@@ -76,7 +76,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
       </g-toolbar>
 
-      <v-card-text v-if="!sortedInfrastructureTypesList.length">
+      <v-card-text v-if="!sortedProviderTypesList.length">
         <v-alert
           class="ma-3"
           type="warning"
@@ -318,7 +318,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(useCloudProfileStore, ['sortedInfrastructureTypesList']),
+    ...mapState(useCloudProfileStore, ['sortedProviderTypesList']),
     ...mapState(useGardenerExtensionStore, ['dnsProviderTypes']),
     ...mapState(useSecretStore, [
       'infrastructureSecretList',

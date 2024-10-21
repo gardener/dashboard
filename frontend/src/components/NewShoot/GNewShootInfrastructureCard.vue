@@ -18,13 +18,13 @@ SPDX-License-Identifier: Apache-2.0
     >
       <div class="d-flex flex-column justify-center align-center">
         <g-vendor-icon
-          :icon="infrastructureType"
+          :icon="providerType"
           :size="60"
           no-background
           :style="getVendorIconStyles(isHovering)"
         />
         <div class="mt-2 text-subtitle-1">
-          {{ infrastructureType }}
+          {{ providerType }}
         </div>
       </div>
     </v-card>
@@ -44,7 +44,7 @@ export default {
       type: Boolean,
       required: true,
     },
-    infrastructureType: {
+    providerType: {
       type: String,
       required: true,
     },
