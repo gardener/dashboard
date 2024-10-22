@@ -180,7 +180,7 @@ SPDX-License-Identifier: Apache-2.0
           <g-shoot-list-row
             :model-value="item"
             :visible-headers="visibleHeaders"
-            @show-dialog="showDialog"
+            @trigger-action="triggerAction"
           />
         </template>
         <template #bottom="{ pageCount }">
@@ -223,6 +223,11 @@ SPDX-License-Identifier: Apache-2.0
         </v-card>
       </v-dialog>
     </v-card>
+    <g-shoot-list-row-actions
+      v-model="showRowActions"
+      :activator="rowActionsActivator"
+      :selected-shoot="shootItem"
+    />
   </v-container>
 </template>
 
@@ -257,6 +262,7 @@ import GIconBase from '@/components/icons/GIconBase.vue'
 import GCertifiedKubernetes from '@/components/icons/GCertifiedKubernetes.vue'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
 import GShootAccessCard from '@/components/ShootDetails/GShootAccessCard.vue'
+import GShootListRowActions from '@/components/GShootListRowActions.vue'
 
 import { useProjectShootCustomFields } from '@/composables/useProjectShootCustomFields'
 import { isCustomField } from '@/composables/useProjectShootCustomFields/helper'
@@ -285,6 +291,7 @@ export default {
     GCertifiedKubernetes,
     GTableColumnSelection,
     GDataTableFooter,
+    GShootListRowActions,
   },
   inject: ['logger'],
   beforeRouteEnter (to, from, next) {
@@ -379,6 +386,8 @@ export default {
         { value: 10, title: '10' },
         { value: 20, title: '20' },
       ],
+      showRowActions: false,
+      rowActionsActivator: undefined,
     }
   },
   computed: {
@@ -826,15 +835,20 @@ export default {
       'setFocusMode',
       'setSortBy',
     ]),
-    async showDialog (args) {
+    async triggerAction (args) {
       switch (args.action) {
         case 'access':
           try {
-            await this.setSelection(args.shootItem.metadata)
+            await this.setSelection(args.item.metadata)
             this.dialog = args.action
           } catch (err) {
-            this.logger('Failed to select shoot: %s', err.message)
+            this.logger.error('Failed to select shoot: %s', err.message)
           }
+          break
+        case 'menu':
+          await this.setSelection(args.item.metadata)
+          this.rowActionsActivator = args.target
+          this.showRowActions = true
       }
     },
     hideDialog () {

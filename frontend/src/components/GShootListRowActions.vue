@@ -6,21 +6,15 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-menu
-    v-model="menu"
+    v-model="visible"
     location="left"
     :close-on-content-click="false"
     eager
+    :activator="activator"
   >
-    <template #activator="{ props }">
-      <g-action-button
-        v-bind="props"
-        icon="mdi-dots-vertical"
-        tooltip="Cluster Actions"
-      />
-    </template>
     <v-list
       dense
-      @click.capture="menu = false"
+      @click.capture="visible = false"
     >
       <v-list-item>
         <g-shoot-action-change-hibernation
@@ -64,9 +58,12 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import {
+  toRefs,
+  ref,
+  computed,
+} from 'vue'
 
-import GActionButton from '@/components/GActionButton.vue'
 import GShootActionChangeHibernation from '@/components/ShootHibernation/GShootActionChangeHibernation.vue'
 import GShootActionMaintenanceStart from '@/components/ShootMaintenance/GShootActionMaintenanceStart.vue'
 import GShootActionReconcileStart from '@/components/GShootActionReconcileStart.vue'
@@ -75,13 +72,39 @@ import GShootActionDeleteCluster from '@/components/GShootActionDeleteCluster.vu
 import GShootActionForceDelete from '@/components/GShootActionForceDelete.vue'
 import GShootVersionConfiguration from '@/components/ShootVersion/GShootVersionConfiguration.vue'
 
-import { useShootItem } from '@/composables/useShootItem'
+import { useProvideShootItem } from '@/composables/useShootItem'
+
+const props = defineProps({
+  modelValue: {
+    type: Boolean,
+    required: true,
+  },
+  selectedShoot: {
+    type: Object,
+  },
+  activator: {
+    type: Element,
+  },
+})
+
+const { modelValue, selectedShoot, activator } = toRefs(props)
+
+const emit = defineEmits([
+  'update:modelValue',
+])
+
+const visible = computed({
+  get () {
+    return modelValue.value
+  },
+  set (value) {
+    emit('update:modelValue', value)
+  },
+})
 
 const {
   canForceDeleteShoot,
-} = useShootItem()
-
-const menu = ref(false)
+} = useProvideShootItem(selectedShoot)
 
 const rotationType = ref('ALL_CREDENTIALS')
 </script>

@@ -202,10 +202,13 @@ SPDX-License-Identifier: Apache-2.0
             icon="mdi-key"
             :disabled="isClusterAccessDialogDisabled"
             :tooltip="showClusterAccessActionTitle"
-            @click="showDialog('access')"
+            @click="triggerAction('access')"
           />
-          <g-shoot-list-row-actions
+          <g-action-button
             v-if="canPatchShoots"
+            icon="mdi-dots-vertical"
+            tooltip="Cluster Actions"
+            @click="triggerAction('menu', $event)"
           />
         </v-row>
       </template>
@@ -255,7 +258,6 @@ import GShootVersionChip from '@/components/ShootVersion/GShootVersionChip.vue'
 import GTicketLabel from '@/components/ShootTickets/GTicketLabel.vue'
 import GShootSeedName from '@/components/GShootSeedName.vue'
 import GShootMessages from '@/components/ShootMessages/GShootMessages.vue'
-import GShootListRowActions from '@/components/GShootListRowActions.vue'
 import GAutoHide from '@/components/GAutoHide.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
 import GControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityTag.vue'
@@ -290,7 +292,7 @@ const props = defineProps({
 const shootItem = toRef(props, 'modelValue')
 
 const emit = defineEmits([
-  'showDialog',
+  'triggerAction',
 ])
 
 const shootStore = useShootStore()
@@ -426,10 +428,11 @@ const cells = computed(() => {
   })
 })
 
-function showDialog (action) {
-  emit('showDialog', {
+function triggerAction (action, e) {
+  emit('triggerAction', {
     action,
-    shootItem: shootItem.value,
+    item: shootItem.value,
+    target: e.target,
   })
 }
 
