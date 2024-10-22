@@ -10,9 +10,9 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :secret-validations="v$"
     :secret="secret"
-    :vendor="vendor"
-    :create-title="`Add new ${vendor} Secret`"
-    :replace-title="`Replace ${vendor} Secret`"
+    :provider-type="providerType"
+    :create-title="`Add new ${providerType} Secret`"
+    :replace-title="`Replace ${providerType} Secret`"
   >
     <template #secret-slot>
       <div>
@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
           This is a generic secret dialog.
         </p>
         <p>
-          Please enter data required for {{ vendor }}.
+          Please enter data required for {{ providerType }}.
         </p>
       </div>
     </template>
@@ -71,7 +71,7 @@ export default {
     secret: {
       type: Object,
     },
-    vendor: {
+    providerType: {
       type: String,
     },
   },

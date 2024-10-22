@@ -40,6 +40,10 @@ SPDX-License-Identifier: Apache-2.0
             {{ providerType }}
           </v-list-item-title>
         </v-list-item>
+        <v-list-item v-if="shootCloudProfileName">
+          <v-list-item-subtitle>Cloud Profile</v-list-item-subtitle>
+          <v-list-item-title>{{ shootCloudProfileName }}</v-list-item-title>
+        </v-list-item>
         <v-list-item v-if="region">
           <v-list-item-subtitle>Region</v-list-item-subtitle>
           <v-list-item-title>{{ region }}</v-list-item-title>
@@ -55,6 +59,8 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import GVendorIcon from '@/components/GVendorIcon'
+
+import { useShootItem } from '@/composables/useShootItem'
 
 import { join } from '@/lodash'
 
@@ -81,6 +87,14 @@ export default {
       type: Boolean,
       default: false,
     },
+  },
+  setup () {
+    const {
+      shootCloudProfileName,
+    } = useShootItem() ?? {}
+    return {
+      shootCloudProfileName,
+    }
   },
   computed: {
     zoneText () {

@@ -111,8 +111,11 @@ export const useSecretStore = defineStore('secret', () => {
   function secretsByProviderType (providerType) {
     const isDnsSecret = gardenerExtensionStore.dnsProviderTypes.includes(providerType)
     return filter(list.value, secret => {
-      return secret.metadata.provider?.type === providerType &&
-        (!isDnsSecret || isOwnSecret(secret)) // secret binding not supported for dns secrets
+      if (isDnsSecret && !isOwnSecret(secret)) {
+        // secret binding not supported for dns secrets, shared secret not supported
+        return false
+      }
+      return secret.metadata.provider?.type === providerType
     })
   }
 

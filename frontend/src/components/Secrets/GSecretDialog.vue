@@ -170,7 +170,7 @@ export default {
       type: Object,
       required: true,
     },
-    vendor: {
+    providerType: {
       type: String,
       required: true,
     },
@@ -270,10 +270,10 @@ export default {
       }
     },
     isInfrastructureSecret () {
-      return includes(this.sortedProviderTypesList, this.vendor)
+      return includes(this.sortedProviderTypesList, this.providerType)
     },
     isDnsProviderSecret () {
-      return includes(this.dnsProviderTypes, this.vendor)
+      return includes(this.dnsProviderTypes, this.providerType)
     },
   },
   mounted () {
@@ -327,7 +327,7 @@ export default {
             namespace: this.namespace,
           },
           provider: {
-            type: this.vendor,
+            type: this.providerType,
           },
         }
         return this.createSecret({ metadata, data: this.data })
@@ -341,7 +341,7 @@ export default {
       this.v$.$reset()
 
       if (this.isCreateMode) {
-        this.name = `my-${this.vendor}-secret`
+        this.name = `my-${this.providerType}-secret`
         setDelayedInputFocus(this, 'name')
       } else {
         this.name = get(this.secret, 'metadata.name')
