@@ -114,17 +114,6 @@ exports[`gardener-dashboard configmap branding should render the template 1`] = 
 }
 `;
 
-exports[`gardener-dashboard configmap cloudProviderList should render the template with cloudProviderList 1`] = `
-{
-  "frontend": {
-    "cloudProviderList": [
-      "foo",
-      "bar",
-    ],
-  },
-}
-`;
-
 exports[`gardener-dashboard configmap contentSecurityPolicy should render the template with connectSrc containing additional host sources 1`] = `
 {
   "contentSecurityPolicy": {
@@ -157,56 +146,18 @@ exports[`gardener-dashboard configmap controlPlaneHighAvailabilityHelp should re
 }
 `;
 
-exports[`gardener-dashboard configmap customCloudProviders should render the template with customCloudProviders 1`] = `
+exports[`gardener-dashboard configmap costObjects should render the template with costObjects configuration 1`] = `
 {
   "frontend": {
-    "customCloudProviders": {
-      "fooProvider": {
-        "secret": {
-          "fields": [
-            {
-              "hint": "Enter a valid namespace",
-              "key": "namespace",
-              "label": "Namespace",
-              "type": "text",
-              "validators": {
-                "required": {
-                  "type": "required",
-                },
-              },
-            },
-          ],
-          "help": "#Custom Cloud Provider
-foo",
-        },
-        "shoot": {
-          "createFields": [
-            {
-              "hint": "Select foo value",
-              "key": "selectFoo",
-              "label": "Select Foo",
-              "path": "spec.provider",
-              "type": "select",
-              "validators": {
-                "required": {
-                  "type": "required",
-                },
-              },
-              "values": {
-                "cloudprofilePath": "data.foo",
-                "key": "name",
-              },
-            },
-          ],
-          "specTemplate": {
-            "provider": {
-              "type": "custom",
-            },
-          },
-        },
-        "zoned": false,
+    "costObjects": [
+      {
+        "description": "Example Description",
+        "errorMessage": "Invalid cost object",
+        "regex": "^example.*$",
+        "title": "Cost Object",
+        "type": "CO",
       },
-    },
+    ],
   },
 }
 `;
@@ -798,18 +749,6 @@ exports[`gardener-dashboard configmap vendorHints should render the template 1`]
         "message": "other message",
       },
     ],
-  },
-}
-`;
-
-exports[`gardener-dashboard configmap vendors should render the template with vendors 1`] = `
-{
-  "frontend": {
-    "vendors": {
-      "foo": {
-        "icon": "foo_icon.svg",
-      },
-    },
   },
 }
 `;

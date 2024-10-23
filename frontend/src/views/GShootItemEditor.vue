@@ -83,10 +83,12 @@ const {
   focusEditor,
   clearDocumentHistory,
 } = useProvide(injectionKey, useShootEditor(shootItem, {
-  extraKeys: {
-    'Ctrl-S': save,
-    'Cmd-S': save,
-  },
+  extraKeys: [
+    { key: 'Ctrl-s',
+      run: save },
+    { key: 'Cmd-s',
+      run: save },
+  ],
 }))
 
 const hasConflict = computed(() => {
@@ -112,6 +114,7 @@ async function save () {
       name: shootName.value,
       data: pick(shootResource, ['spec', 'metadata.labels', 'metadata.annotations']),
     })
+
     clearDocumentHistory()
   } catch (err) {
     errorMessage.value = 'Failed to save changes.'

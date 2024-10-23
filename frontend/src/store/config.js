@@ -19,6 +19,7 @@ import { useApi } from '@/composables/useApi'
 import { hash } from '@/utils/crypto'
 
 import {
+  map,
   get,
   isEmpty,
   camelCase,
@@ -304,23 +305,27 @@ export const useConfigStore = defineStore('config', () => {
     return `cfg.${identifier}`
   })
 
-  const costObjectSettings = computed(() => {
-    const costObject = state.value?.costObject
-    if (!costObject) {
+  const costObjectsSettings = computed(() => {
+    const costObjects = state.value?.costObjects
+    if (!costObjects) {
       return undefined
     }
 
-    const title = costObject.title || ''
-    const description = costObject.description || ''
-    const regex = costObject.regex
-    const errorMessage = costObject.errorMessage
+    return map(costObjects, costObject => {
+      const type = costObject.type || ''
+      const title = costObject.title || ''
+      const description = costObject.description || ''
+      const regex = costObject.regex
+      const errorMessage = costObject.errorMessage
 
-    return {
-      regex,
-      title,
-      description,
-      errorMessage,
-    }
+      return {
+        type,
+        regex,
+        title,
+        description,
+        errorMessage,
+      }
+    })
   })
 
   const appVersion = computed(() => {
@@ -483,7 +488,7 @@ export const useConfigStore = defineStore('config', () => {
     alertBannerMessage,
     alertBannerType,
     alertBannerIdentifier,
-    costObjectSettings,
+    costObjectsSettings,
     purposeRequiresHibernationSchedule,
     isShootHasNoHibernationScheduleWarning,
     fetchConfig,

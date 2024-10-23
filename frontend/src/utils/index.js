@@ -44,7 +44,6 @@ import {
 } from '@/lodash'
 
 const serviceAccountRegex = /^system:serviceaccount:([^:]+):([^:]+)$/
-const sizeRegex = /^(\d+)Gi$/
 const colorCodeRegex = /^#([a-f0-9]{6}|[a-f0-9]{3})$/i
 
 const logger = useLogger()
@@ -152,17 +151,71 @@ export function displayName (username) {
   return username
 }
 
-export function parseSize (value) {
+export function convertToGibibyte (value) {
   if (!value) {
+    throw new TypeError('Value is empty')
+  }
+  if (typeof value === 'number') {
+    value = value.toString()
+  }
+
+  value = value.trim().toLowerCase()
+  let size = ''
+  let unit = ''
+  let isFloat = false
+
+  for (let i = 0; i < value.length; i++) {
+    const c = value[i] // eslint-disable-line security/detect-object-injection -- loop variable is controlled
+    if (c >= '0' && c <= '9') {
+      size += c
+    } else if (c === '.' && !isFloat) {
+      isFloat = true
+      size += c
+    } else {
+      unit = value.slice(i)
+      break
+    }
+  }
+
+  if (size === '') {
+    throw new TypeError('Invalid value')
+  }
+
+  const num = parseFloat(size)
+
+  if (unit === '') {
+    return num * 1e9 / Math.pow(2, 6 * 10)
+  }
+
+  const multipliers = {
+    k: 1e9 * Math.pow(1024, -5),
+    m: 1e9 * Math.pow(1024, -4),
+    g: 1e9 * Math.pow(1024, -3),
+    t: 1e9 * Math.pow(1024, -2),
+    p: 1e9 * Math.pow(1024, -1),
+    e: 1e9 * Math.pow(1024, 0),
+    ki: Math.pow(1024, -2),
+    mi: Math.pow(1024, -1),
+    gi: Math.pow(1024, 0),
+    ti: Math.pow(1024, 1),
+    pi: Math.pow(1024, 2),
+    ei: Math.pow(1024, 3),
+  }
+
+  if (!(unit in multipliers)) {
+    throw new TypeError('Invalid value')
+  }
+
+  return num * multipliers[unit] // eslint-disable-line security/detect-object-injection -- value of unit is validated
+}
+
+export function convertToGi (value) {
+  try {
+    return convertToGibibyte(value)
+  } catch (err) {
+    logger.error('Failed to convert value %s to GiB: %s', value, err.message)
     return 0
   }
-  const result = sizeRegex.exec(value)
-  if (result) {
-    const [, sizeValue] = result
-    return parseInt(sizeValue, 10)
-  }
-  logger.error(`Could not parse size ${value} as it does not match regex ^(\\d+)Gi$`)
-  return 0
 }
 
 export function isEmail (value) {
@@ -688,7 +741,7 @@ export default {
   setInputFocus,
   fullDisplayName,
   displayName,
-  parseSize,
+  convertToGi,
   isEmail,
   gravatarUrlGeneric,
   gravatarUrlMp,

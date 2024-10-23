@@ -50,7 +50,7 @@ function sanitizeFrontendConfig (frontendConfig) {
   const sanitizedFrontendConfig = _.cloneDeep(frontendConfig)
   const {
     alert = {},
-    costObject = {},
+    costObjects = [],
     sla = {},
     addonDefinition = {},
     accessRestriction: {
@@ -63,7 +63,9 @@ function sanitizeFrontendConfig (frontendConfig) {
   } = sanitizedFrontendConfig
 
   convertAndSanitize(alert, 'message')
-  convertAndSanitize(costObject, 'description')
+  for (const costObject of costObjects) {
+    convertAndSanitize(costObject, 'description')
+  }
   convertAndSanitize(sla, 'description')
   convertAndSanitize(addonDefinition, 'description')
   convertAndSanitize(resourceQuotaHelp, 'text')

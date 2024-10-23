@@ -70,7 +70,7 @@ SPDX-License-Identifier: Apache-2.0
           user: AliyunECSFullAccess, AliyunSLBFullAccess, AliyunVPCFullAccess, AliyunEIPFullAccess, AliyunNATGatewayFullAccess.
         </p>
         <g-code-block
-          height="100%"
+          max-height="100%"
           lang="json"
           :content="JSON.stringify(template, undefined, 2)"
         />

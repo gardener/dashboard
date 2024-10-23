@@ -10,28 +10,26 @@ SPDX-License-Identifier: Apache-2.0
     :toolbar-title="workerGroup.name"
     placement="bottom"
   >
-    <template #activator="{ props: popoverProps }">
-      <v-tooltip
-        location="top"
-        :disabled="!machineImage.isDeprecated"
-        text="Machine image version is deprecated"
+    <template #activator="{ props }">
+      <v-chip
+        v-bind="props"
+        size="small"
+        class="cursor-pointer"
+        variant="tonal"
+        :color="chipColor"
       >
-        <template #activator="{ props: tooltipProps }">
-          <v-chip
-            v-bind="mergeProps(popoverProps, tooltipProps)"
-            size="small"
-            class="cursor-pointer ma-1"
-            variant="tonal"
-            :color="chipColor"
-          >
-            <g-vendor-icon
-              :icon="machineImage.icon"
-              :size="20"
-            />
-            <span class="px-1">{{ workerGroup.name }}</span>
-          </v-chip>
-        </template>
-      </v-tooltip>
+        <g-vendor-icon
+          :icon="machineImage.icon"
+          :size="20"
+        />
+        <span class="pl-1">{{ workerGroup.name }}</span>
+        <v-tooltip
+          location="top"
+          :disabled="!machineImage.isDeprecated"
+          text="Machine image version is deprecated"
+          activator="parent"
+        />
+      </v-chip>
     </template>
     <v-tabs
       v-model="tab"
@@ -54,10 +52,10 @@ SPDX-License-Identifier: Apache-2.0
     <v-card-text>
       <v-window
         v-model="tab"
-        min-width="600"
+        class="group-window"
       >
         <v-window-item value="overview">
-          <v-container class="pa-2">
+          <v-container class="pa-0">
             <v-row dense>
               <v-col cols="6">
                 <v-card
@@ -106,7 +104,7 @@ SPDX-License-Identifier: Apache-2.0
                           size="small"
                           label
                           variant="tonal"
-                          class="px-1 mr-1"
+                          class="ma-1"
                         >
                           {{ zone }}
                         </v-chip>
@@ -364,7 +362,7 @@ SPDX-License-Identifier: Apache-2.0
           <g-code-block
             lang="yaml"
             :content="workerGroupYaml"
-            style="min-width: 480px"
+            max-height="100%"
           />
         </v-window-item>
       </v-window>
@@ -373,13 +371,16 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { ref } from 'vue'
 import { mapActions } from 'pinia'
 import yaml from 'js-yaml'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
-import GVendorIcon from '@/components/GVendorIcon'
 import GCodeBlock from '@/components/GCodeBlock'
+import GVendorIcon from '@/components/GVendorIcon'
+
+import { useShootItem } from '@/composables/useShootItem'
 
 import {
   find,
@@ -388,33 +389,32 @@ import {
 
 export default {
   components: {
-    GVendorIcon,
     GCodeBlock,
+    GVendorIcon,
   },
   inject: [
     'mergeProps',
     'activePopoverKey',
   ],
   props: {
-    modelValue: {
-      type: [String, Number],
-    },
     workerGroup: {
       type: Object,
     },
-    cloudProfileName: {
-      type: String,
-    },
-    shootMetadata: {
-      type: Object,
-      default () {
-        return { uid: '' }
-      },
-    },
   },
-  emits: [
-    'update:modelValue',
-  ],
+  setup () {
+    const {
+      shootMetadata,
+      shootCloudProfileName,
+    } = useShootItem()
+
+    const tab = ref('overview')
+
+    return {
+      tab,
+      shootMetadata,
+      shootCloudProfileName,
+    }
+  },
   data () {
     return {
       workerGroupYaml: undefined,
@@ -433,12 +433,12 @@ export default {
       },
     },
     machineType () {
-      const machineTypes = this.machineTypesByCloudProfileName(this.cloudProfileName)
+      const machineTypes = this.machineTypesByCloudProfileName(this.shootCloudProfileName)
       const type = get(this.workerGroup, 'machine.type')
       return find(machineTypes, ['name', type])
     },
     volumeType () {
-      const volumeTypes = this.volumeTypesByCloudProfileName(this.cloudProfileName)
+      const volumeTypes = this.volumeTypesByCloudProfileName(this.shootCloudProfileName)
       const type = get(this.workerGroup, 'volume.type')
       return find(volumeTypes, ['name', type])
     },
@@ -470,23 +470,12 @@ export default {
       return {}
     },
     machineImage () {
-      const machineImages = this.machineImagesByCloudProfileName(this.cloudProfileName)
+      const machineImages = this.machineImagesByCloudProfileName(this.shootCloudProfileName)
       const { name, version } = get(this.workerGroup, 'machine.image', {})
       return find(machineImages, { name, version }) ?? {}
     },
     machineCri () {
       return this.workerGroup.cri ?? {}
-    },
-    tab: {
-      get () {
-        return this.modelValue
-      },
-      set (modelValue) {
-        this.$emit('update:modelValue', modelValue)
-      },
-    },
-    chipColor () {
-      return this.machineImage.isDeprecated ? 'warning' : 'primary'
     },
     classificationColor () {
       if (this.machineImage.isDeprecated) {
@@ -502,6 +491,9 @@ export default {
         return 'mdi-alert-circle-outline'
       }
       return 'mdi-information-outline'
+    },
+    chipColor () {
+      return this.machineImage.isDeprecated ? 'warning' : 'primary'
     },
   },
   created () {
@@ -523,5 +515,9 @@ export default {
 <style>
   .border {
     border-color: rgba(var(--v-border-color), var(--v-border-opacity)) !important;
+  }
+
+  .group-window {
+    width: 450px;
   }
 </style>

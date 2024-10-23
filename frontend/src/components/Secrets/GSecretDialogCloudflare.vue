@@ -46,9 +46,7 @@ SPDX-License-Identifier: Apache-2.0
         <p>
           Generate the token and keep this key safe as it won't be shown again.
         </p>
-        <p>
-          <pre>$ echo -n '1234567890123456789' | base64</pre>
-        </p>
+        <pre>$ echo -n '1234567890123456789' | base64</pre>
         <p>
           to get the base64 encoded token. In this eg. this would be MTIzNDU2Nzg5MDEyMzQ1Njc4OQ==.
         </p>
