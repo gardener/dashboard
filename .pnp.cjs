@@ -1433,8 +1433,8 @@ const RAW_RUNTIME_STATE =
           ["semver", "npm:7.6.3"],\
           ["set-cookie-parser", "npm:2.7.0"],\
           ["showdown", "npm:2.1.0"],\
-          ["socket.io", "npm:4.8.0"],\
-          ["socket.io-client", "npm:4.8.0"],\
+          ["socket.io", "npm:4.8.1"],\
+          ["socket.io-client", "npm:4.8.1"],\
           ["supertest", "npm:7.0.0"],\
           ["uuid", "npm:10.0.0"]\
         ],\
@@ -1520,7 +1520,7 @@ const RAW_RUNTIME_STATE =
           ["rollup-plugin-visualizer", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.12.0"],\
           ["sass", "npm:1.79.5"],\
           ["semver", "npm:7.6.3"],\
-          ["socket.io-client", "npm:4.8.0"],\
+          ["socket.io-client", "npm:4.8.1"],\
           ["splitpanes", "npm:3.1.5"],\
           ["statuses", "npm:2.0.1"],\
           ["symbol-tree", "npm:3.2.4"],\
@@ -11087,10 +11087,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["socket.io", [\
-      ["npm:4.8.0", {\
-        "packageLocation": "./.yarn/cache/socket.io-npm-4.8.0-1e93513319-eab8a0da61.zip/node_modules/socket.io/",\
+      ["npm:4.8.1", {\
+        "packageLocation": "./.yarn/cache/socket.io-npm-4.8.1-26090d3c01-acf931a2bb.zip/node_modules/socket.io/",\
         "packageDependencies": [\
-          ["socket.io", "npm:4.8.0"],\
+          ["socket.io", "npm:4.8.1"],\
           ["accepts", "npm:1.3.8"],\
           ["base64id", "npm:2.0.0"],\
           ["cors", "npm:2.8.5"],\
@@ -11113,10 +11113,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["socket.io-client", [\
-      ["npm:4.8.0", {\
-        "packageLocation": "./.yarn/cache/socket.io-client-npm-4.8.0-2867c0e0ec-41f142a79f.zip/node_modules/socket.io-client/",\
+      ["npm:4.8.1", {\
+        "packageLocation": "./.yarn/cache/socket.io-client-npm-4.8.1-eb1c9f0ea4-544c49cc8c.zip/node_modules/socket.io-client/",\
         "packageDependencies": [\
-          ["socket.io-client", "npm:4.8.0"],\
+          ["socket.io-client", "npm:4.8.1"],\
           ["@socket.io/component-emitter", "npm:3.1.0"],\
           ["debug", "virtual:1ff4b5f90832ba0a9c93ba1223af226e44ba70c1126a3740d93562b97bc36544e896a5e95908196f7458713e6a6089a34bfc67362fc6df7fa093bd06c878be47#npm:4.3.5"],\
           ["engine.io-client", "npm:6.6.1"],\
