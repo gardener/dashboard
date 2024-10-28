@@ -1449,11 +1449,11 @@ __metadata:
   linkType: hard
 
 "@kyvg/vue3-notification@npm:^3.2.1":
-  version: 3.4.0
-  resolution: "@kyvg/vue3-notification@npm:3.4.0"
+  version: 3.4.1
+  resolution: "@kyvg/vue3-notification@npm:3.4.1"
   peerDependencies:
     vue: ^3.0.0
-  checksum: 10c0/644c85f99ded7799e369f02281d932d94e94d80fcb0d4b13d255b85c3ff1f3b249108c1af94659ec34fabdc1933bfe311ce8e92aebef469c12362191d81efb2e
+  checksum: 10c0/831d79e5ef0cd64ef6530d692d315e9a5e5773e9fbccd914ef176800aedc74aedaa3dc8195e2030028c39640465443f204bdac52ec9f29299bd09cd8ef0e53e1
   languageName: node
   linkType: hard
 
