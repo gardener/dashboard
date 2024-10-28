@@ -1436,7 +1436,7 @@ const RAW_RUNTIME_STATE =
           ["socket.io", "npm:4.8.1"],\
           ["socket.io-client", "npm:4.8.1"],\
           ["supertest", "npm:7.0.0"],\
-          ["uuid", "npm:10.0.0"]\
+          ["uuid", "npm:11.0.2"]\
         ],\
         "linkType": "SOFT"\
       }]\
@@ -1528,7 +1528,7 @@ const RAW_RUNTIME_STATE =
           ["universal-cookie", "npm:7.2.1"],\
           ["unplugin-fonts", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:1.1.1"],\
           ["url-template", "npm:3.1.1"],\
-          ["uuid", "npm:10.0.0"],\
+          ["uuid", "npm:11.0.2"],\
           ["vite", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.4.9"],\
           ["vite-plugin-compression", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.5.1"],\
           ["vite-plugin-vuetify", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.0.4"],\
@@ -1564,7 +1564,7 @@ const RAW_RUNTIME_STATE =
           ["jsonwebtoken", "npm:9.0.2"],\
           ["lodash", "npm:4.17.21"],\
           ["mixwith", "npm:0.1.1"],\
-          ["uuid", "npm:10.0.0"]\
+          ["uuid", "npm:11.0.2"]\
         ],\
         "linkType": "SOFT"\
       }]\
@@ -12059,10 +12059,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["uuid", [\
-      ["npm:10.0.0", {\
-        "packageLocation": "./.yarn/cache/uuid-npm-10.0.0-4872b46ff8-eab18c27fe.zip/node_modules/uuid/",\
+      ["npm:11.0.2", {\
+        "packageLocation": "./.yarn/cache/uuid-npm-11.0.2-13e156cc62-bd0670a0d6.zip/node_modules/uuid/",\
         "packageDependencies": [\
-          ["uuid", "npm:10.0.0"]\
+          ["uuid", "npm:11.0.2"]\
         ],\
         "linkType": "HARD"\
       }]\
