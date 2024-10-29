@@ -9698,12 +9698,12 @@ __metadata:
   linkType: hard
 
 "universal-cookie@npm:^7.1.0":
-  version: 7.2.1
-  resolution: "universal-cookie@npm:7.2.1"
+  version: 7.2.2
+  resolution: "universal-cookie@npm:7.2.2"
   dependencies:
     "@types/cookie": "npm:^0.6.0"
     cookie: "npm:^0.7.2"
-  checksum: 10c0/e1cc4c7adbdc41c16d0beb37028a68575ce426504e7c66297e8b9d14f69abadd94a4c557adf355b622010f60a7e4c5b018d1e50527c42e9d34870313c89885ac
+  checksum: 10c0/214c5cf72b12b6d98a72e11a10adb3f1d06dbeadbd9a2d46ded8c288d86387e9ff25499f85d2f85728809484d678c02028ac674cb8747257b38d2c17fb93e896
   languageName: node
   linkType: hard
 
