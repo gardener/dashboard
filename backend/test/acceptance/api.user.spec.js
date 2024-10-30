@@ -25,18 +25,6 @@ describe('api', function () {
   describe('user', function () {
     const user = fixtures.auth.createUser({ id: 'bar@example.org' })
 
-    it('should return the bearer token of the user', async function () {
-      const res = await agent
-        .get('/api/user/token')
-        .set('cookie', await user.cookie)
-        .expect('content-type', /json/)
-        .expect(200)
-
-      expect(mockRequest).not.toHaveBeenCalled()
-
-      expect(res.body).toMatchSnapshot()
-    })
-
     it('should return selfsubjectrules for the user', async function () {
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectRules())
 

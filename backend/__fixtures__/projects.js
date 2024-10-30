@@ -45,6 +45,7 @@ function getProject ({ name, namespace, uid, resourceVersion = '42', createdBy, 
   }
   if (costObject) {
     set(metadata, ['annotations', 'billing.gardener.cloud/costObject'], costObject)
+    set(metadata, ['annotations', 'billing.gardener.cloud/costObjectType'], 'CO')
   }
   return {
     metadata,

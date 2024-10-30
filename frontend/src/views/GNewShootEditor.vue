@@ -42,6 +42,7 @@ import {
 import {
   useRouter,
   onBeforeRouteLeave,
+  onBeforeRouteUpdate,
 } from 'vue-router'
 
 import { useAppStore } from '@/store/app'
@@ -72,9 +73,9 @@ const appStore = useAppStore()
 
 const {
   shootNamespace,
-  isShootDirty,
   shootManifest,
   setShootManifest,
+  isShootDirty,
 } = useShootContext()
 
 const useProvide = (key, value) => {
@@ -84,6 +85,7 @@ const useProvide = (key, value) => {
 const {
   getEditorValue,
   focusEditor,
+  clean,
 } = useProvide(injectionKey, useShootEditor(shootManifest))
 
 function confirmEditorNavigation () {
@@ -134,7 +136,17 @@ onBeforeRouteLeave(async (to, from, next) => {
   if (isShootCreated.value) {
     return next()
   }
-  if (isShootDirty.value) {
+  if (!clean.value || isShootDirty.value) {
+    if (!await confirmEditorNavigation()) {
+      focusEditor()
+      return next(false)
+    }
+  }
+  return next()
+})
+
+onBeforeRouteUpdate(async (to, from, next) => {
+  if (!clean.value || isShootDirty.value) {
     if (!await confirmEditorNavigation()) {
       focusEditor()
       return next(false)
