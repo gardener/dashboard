@@ -950,17 +950,17 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@codemirror/autocomplete", [\
-      ["npm:6.18.1", {\
-        "packageLocation": "./.yarn/cache/@codemirror-autocomplete-npm-6.18.1-cf0e6451dd-30bf98685f.zip/node_modules/@codemirror/autocomplete/",\
+      ["npm:6.18.2", {\
+        "packageLocation": "./.yarn/cache/@codemirror-autocomplete-npm-6.18.2-8904a48d02-6506dc92fe.zip/node_modules/@codemirror/autocomplete/",\
         "packageDependencies": [\
-          ["@codemirror/autocomplete", "npm:6.18.1"]\
+          ["@codemirror/autocomplete", "npm:6.18.2"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:394dfa168191eeecf96909f25681b55b33ead8fc50fd0a11ab993dc4dac05b4b1625a43d289b67f5ea6f52728a72fd8b13e50efd2deb55615cce83baa304218a#npm:6.18.1", {\
-        "packageLocation": "./.yarn/__virtual__/@codemirror-autocomplete-virtual-3513d37599/0/cache/@codemirror-autocomplete-npm-6.18.1-cf0e6451dd-30bf98685f.zip/node_modules/@codemirror/autocomplete/",\
+      ["virtual:394dfa168191eeecf96909f25681b55b33ead8fc50fd0a11ab993dc4dac05b4b1625a43d289b67f5ea6f52728a72fd8b13e50efd2deb55615cce83baa304218a#npm:6.18.2", {\
+        "packageLocation": "./.yarn/__virtual__/@codemirror-autocomplete-virtual-3bfc55fae3/0/cache/@codemirror-autocomplete-npm-6.18.2-8904a48d02-6506dc92fe.zip/node_modules/@codemirror/autocomplete/",\
         "packageDependencies": [\
-          ["@codemirror/autocomplete", "virtual:394dfa168191eeecf96909f25681b55b33ead8fc50fd0a11ab993dc4dac05b4b1625a43d289b67f5ea6f52728a72fd8b13e50efd2deb55615cce83baa304218a#npm:6.18.1"],\
+          ["@codemirror/autocomplete", "virtual:394dfa168191eeecf96909f25681b55b33ead8fc50fd0a11ab993dc4dac05b4b1625a43d289b67f5ea6f52728a72fd8b13e50efd2deb55615cce83baa304218a#npm:6.18.2"],\
           ["@codemirror/language", "npm:6.10.3"],\
           ["@codemirror/state", "npm:6.4.1"],\
           ["@codemirror/view", "npm:6.34.1"],\
@@ -1000,7 +1000,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/@codemirror-lang-yaml-npm-6.1.1-394dfa1681-a6952affce.zip/node_modules/@codemirror/lang-yaml/",\
         "packageDependencies": [\
           ["@codemirror/lang-yaml", "npm:6.1.1"],\
-          ["@codemirror/autocomplete", "virtual:394dfa168191eeecf96909f25681b55b33ead8fc50fd0a11ab993dc4dac05b4b1625a43d289b67f5ea6f52728a72fd8b13e50efd2deb55615cce83baa304218a#npm:6.18.1"],\
+          ["@codemirror/autocomplete", "virtual:394dfa168191eeecf96909f25681b55b33ead8fc50fd0a11ab993dc4dac05b4b1625a43d289b67f5ea6f52728a72fd8b13e50efd2deb55615cce83baa304218a#npm:6.18.2"],\
           ["@codemirror/language", "npm:6.10.3"],\
           ["@codemirror/state", "npm:6.4.1"],\
           ["@lezer/common", "npm:1.2.3"],\
@@ -1465,7 +1465,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./frontend/",\
         "packageDependencies": [\
           ["@gardener-dashboard/frontend", "workspace:frontend"],\
-          ["@codemirror/autocomplete", "virtual:394dfa168191eeecf96909f25681b55b33ead8fc50fd0a11ab993dc4dac05b4b1625a43d289b67f5ea6f52728a72fd8b13e50efd2deb55615cce83baa304218a#npm:6.18.1"],\
+          ["@codemirror/autocomplete", "virtual:394dfa168191eeecf96909f25681b55b33ead8fc50fd0a11ab993dc4dac05b4b1625a43d289b67f5ea6f52728a72fd8b13e50efd2deb55615cce83baa304218a#npm:6.18.2"],\
           ["@codemirror/commands", "npm:6.7.1"],\
           ["@codemirror/lang-yaml", "npm:6.1.1"],\
           ["@codemirror/language", "npm:6.10.3"],\
