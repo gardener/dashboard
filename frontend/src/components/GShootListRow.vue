@@ -202,13 +202,13 @@ SPDX-License-Identifier: Apache-2.0
             icon="mdi-key"
             :disabled="isClusterAccessDialogDisabled"
             :tooltip="showClusterAccessActionTitle"
-            @click="setShootActionEvent('access', shootItem)"
+            @click="setShootAction('access', shootItem)"
           />
           <g-action-button
             v-if="canPatchShoots"
             icon="mdi-dots-vertical"
             tooltip="Cluster Actions"
-            @click="setShootActionEvent('menu', shootItem, $event.target)"
+            @click="setShootAction('menu', shootItem, $event.target)"
           />
         </v-row>
       </template>
@@ -292,7 +292,7 @@ const props = defineProps({
 })
 const shootItem = toRef(props, 'modelValue')
 
-const { setShootActionEvent } = useShootAction()
+const { setShootAction } = useShootAction()
 
 const shootStore = useShootStore()
 const ticketStore = useTicketStore()

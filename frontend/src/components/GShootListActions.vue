@@ -87,6 +87,8 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
+import { watch } from 'vue'
+
 import GShootAccessCard from '@/components/ShootDetails/GShootAccessCard.vue'
 import GShootActionChangeHibernation from '@/components/ShootHibernation/GShootActionChangeHibernation.vue'
 import GShootActionMaintenanceStart from '@/components/ShootMaintenance/GShootActionMaintenanceStart.vue'
@@ -103,6 +105,7 @@ const {
   shootActionItem,
   shootActionTarget,
   createShootActionFlag,
+  unsetShootAction,
 } = useShootAction()
 
 const {
@@ -113,4 +116,10 @@ const {
 
 const accessDialog = createShootActionFlag('access')
 const actionMenu = createShootActionFlag('menu')
+
+watch(accessDialog, value => {
+  if (!value) {
+    unsetShootAction()
+  }
+})
 </script>

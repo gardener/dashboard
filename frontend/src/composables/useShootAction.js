@@ -29,11 +29,15 @@ export function createShootActionEventComposable (options = {}) {
   const shootActionItem = toRef(shootStore, 'selectedShoot')
   const shootActionTarget = computed(() => state.target)
 
-  function setShootActionEvent (name, shootItem, target = null) {
+  function setShootAction (name, shootItem, target = null) {
     const metadata = get(shootItem, ['metadata'], null)
     shootStore.setSelection(metadata)
     state.name = name
     state.target = target
+  }
+
+  function unsetShootAction () {
+    setShootAction('', null, null)
   }
 
   function createShootActionFlag (name) {
@@ -43,7 +47,7 @@ export function createShootActionEventComposable (options = {}) {
       },
       set (value) {
         if (!value) {
-          setShootActionEvent('', null, null)
+          state.name = ''
         }
       },
     })
@@ -52,7 +56,8 @@ export function createShootActionEventComposable (options = {}) {
   return {
     shootActionItem,
     shootActionTarget,
-    setShootActionEvent,
+    setShootAction,
+    unsetShootAction,
     createShootActionFlag,
   }
 }
