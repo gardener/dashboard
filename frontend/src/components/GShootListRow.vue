@@ -202,13 +202,13 @@ SPDX-License-Identifier: Apache-2.0
             icon="mdi-key"
             :disabled="isClusterAccessDialogDisabled"
             :tooltip="showClusterAccessActionTitle"
-            @click="onAccessDialog"
+            @click="setShootActionEvent('access', shootItem)"
           />
           <g-action-button
             v-if="canPatchShoots"
             icon="mdi-dots-vertical"
             tooltip="Cluster Actions"
-            @click="onActionMenu"
+            @click="setShootActionEvent('menu', shootItem, $event.target)"
           />
         </v-row>
       </template>
@@ -265,7 +265,7 @@ import GWorkerGroup from '@/components/ShootWorkers/GWorkerGroup'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 import GCollapsibleItems from '@/components/GCollapsibleItems'
 
-import { useShootActionEvent } from '@/composables/useShootActionEvent'
+import { useShootAction } from '@/composables/useShootAction'
 import { useProvideShootItem } from '@/composables/useShootItem'
 import { useProvideShootHelper } from '@/composables/useShootHelper'
 import { formatValue } from '@/composables/useProjectShootCustomFields/helper'
@@ -292,7 +292,7 @@ const props = defineProps({
 })
 const shootItem = toRef(props, 'modelValue')
 
-const { setShootActionEvent } = useShootActionEvent()
+const { setShootActionEvent } = useShootAction()
 
 const shootStore = useShootStore()
 const ticketStore = useTicketStore()
@@ -436,15 +436,6 @@ const hasShootWorkerGroupWarning = computed(() => {
   })
 })
 
-function onAccessDialog (event) {
-  shootStore.setSelection(shootMetadata.value)
-  setShootActionEvent('access', event.target)
-}
-
-function onActionMenu (event) {
-  shootStore.setSelection(shootMetadata.value)
-  setShootActionEvent('menu', event.target)
-}
 </script>
 
 <style lang="scss" scoped>

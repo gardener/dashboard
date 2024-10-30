@@ -231,7 +231,7 @@ import GShootListActions from '@/components/GShootListActions.vue'
 
 import { useProjectShootCustomFields } from '@/composables/useProjectShootCustomFields'
 import { isCustomField } from '@/composables/useProjectShootCustomFields/helper'
-import { useProvideShootActionEvent } from '@/composables/useShootActionEvent'
+import { useProvideShootAction } from '@/composables/useShootAction'
 
 import { mapTableHeader } from '@/utils'
 
@@ -286,8 +286,9 @@ export default {
   },
   setup () {
     const projectStore = useProjectStore()
+    const shootStore = useShootStore()
 
-    useProvideShootActionEvent()
+    useProvideShootAction({ shootStore })
 
     const activePopoverKey = ref('')
     const expandedWorkerGroups = reactive({ default: false })

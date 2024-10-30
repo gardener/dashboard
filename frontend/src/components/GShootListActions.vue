@@ -6,7 +6,7 @@
 
 <template>
   <v-dialog
-    v-if="!isShootItemEmpty"
+    v-if="!!shootUid"
     v-model="accessDialog"
     persistent
     max-width="850"
@@ -15,7 +15,7 @@
       <g-toolbar>
         Cluster Access
         <code class="text-toolbar-title">
-          {{ currentName }}
+          {{ shootName }}
         </code>
         <template #append>
           <v-btn
@@ -29,7 +29,7 @@
       </g-toolbar>
       <g-shoot-access-card
         ref="clusterAccess"
-        :selected-shoot="shootItem"
+        :selected-shoot="shootActionItem"
         :hide-terminal-shortcuts="true"
       />
     </v-card>
@@ -39,7 +39,7 @@
     location="left"
     :close-on-content-click="false"
     eager
-    :target="actionMenu ? shootActionEventTarget : undefined"
+    :target="shootActionTarget"
   >
     <v-list
       dense
@@ -87,13 +87,6 @@
 </template>
 
 <script setup>
-import {
-  computed,
-  toRef,
-} from 'vue'
-
-import { useShootStore } from '@/store/shoot'
-
 import GShootAccessCard from '@/components/ShootDetails/GShootAccessCard.vue'
 import GShootActionChangeHibernation from '@/components/ShootHibernation/GShootActionChangeHibernation.vue'
 import GShootActionMaintenanceStart from '@/components/ShootMaintenance/GShootActionMaintenanceStart.vue'
@@ -104,51 +97,20 @@ import GShootActionForceDelete from '@/components/GShootActionForceDelete.vue'
 import GShootVersionConfiguration from '@/components/ShootVersion/GShootVersionConfiguration.vue'
 
 import { useProvideShootItem } from '@/composables/useShootItem'
-import { useShootActionEvent } from '@/composables/useShootActionEvent'
-
-import { get } from '@/lodash'
-
-const shootStore = useShootStore()
-
-const shootItem = toRef(shootStore, 'selectedShoot')
+import { useShootAction } from '@/composables/useShootAction'
 
 const {
+  shootActionItem,
+  shootActionTarget,
+  createShootActionFlag,
+} = useShootAction()
+
+const {
+  shootName,
+  shootUid,
   canForceDeleteShoot,
-} = useProvideShootItem(shootItem)
+} = useProvideShootItem(shootActionItem)
 
-const {
-  shootActionEventName,
-  shootActionEventTarget,
-  clearShootActionEvent,
-} = useShootActionEvent()
-
-const accessDialog = computed({
-  get () {
-    return shootActionEventName.value === 'access'
-  },
-  set (value) {
-    if (!value) {
-      clearShootActionEvent()
-    }
-  },
-})
-
-const actionMenu = computed({
-  get () {
-    return shootActionEventName.value === 'menu'
-  },
-  set (value) {
-    if (!value) {
-      clearShootActionEvent()
-    }
-  },
-})
-
-const isShootItemEmpty = computed(() => {
-  return !get(shootItem.value, ['metadata', 'uid'])
-})
-
-const currentName = computed(() => {
-  return get(shootItem.value, ['metadata', 'name'])
-})
+const accessDialog = createShootActionFlag('access')
+const actionMenu = createShootActionFlag('menu')
 </script>
