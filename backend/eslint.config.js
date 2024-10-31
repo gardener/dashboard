@@ -5,44 +5,35 @@
 //
 
 const neostandard = require('neostandard')
-const jest = require('eslint-plugin-jest')
-const security = require('eslint-plugin-security')
-const lodash = require('eslint-plugin-lodash')
-
-const jestConfig = jest.configs['flat/recommended']
-const securityConfig = security.configs.recommended
-const lodashConfig = {
-  plugins: {
-    lodash,
-  },
-  rules: {
-    'lodash/path-style': ['error', 'array'],
-  },
-}
+const pluginJest = require('eslint-plugin-jest')
+const pluginSecurity = require('eslint-plugin-security')
+const pluginLodash = require('eslint-plugin-lodash')
+const pluginImport = require('eslint-plugin-import')
 
 module.exports = [
   ...neostandard({
     ignores: neostandard.resolveIgnoresFromGitignore(),
-    globals: {
-      ...jestConfig.languageOptions.globals,
-      createAgent: true,
-      fixtures: true,
-    },
   }),
-  lodashConfig,
-  securityConfig,
-  {
-    files: [
-      '**/__tests__/**',
-      '**/test/**/*.spec.js',
-    ],
-    ...jestConfig,
-  },
   {
     rules: {
       '@stylistic/comma-dangle': ['error', 'always-multiline'],
       'no-console': 'error',
       'no-debugger': 'error',
+    },
+  },
+  pluginSecurity.configs.recommended,
+  {
+    plugins: {
+      import: pluginImport,
+    },
+    rules: pluginImport.flatConfigs.recommended.rules,
+  },
+  {
+    plugins: {
+      lodash: pluginLodash,
+    },
+    rules: {
+      'lodash/path-style': ['error', 'array'],
     },
   },
   {
@@ -53,6 +44,16 @@ module.exports = [
       '**/test/**',
       '**/jest.setup.js',
     ],
+    plugins: {
+      jest: pluginJest,
+    },
+    languageOptions: {
+      globals: {
+        ...pluginJest.environments.globals.globals,
+        createAgent: true,
+        fixtures: true,
+      },
+    },
     rules: {
       'security/detect-object-injection': 'off',
       'security/detect-possible-timing-attacks': 'off',

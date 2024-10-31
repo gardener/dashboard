@@ -27,7 +27,7 @@
   ],
   "scripts": {
     "serve": "cross-env NODE_ENV=development node server.js",
-    "lint": "eslint server.js .",
+    "lint": "eslint server.js . --max-warnings=0",
     "test": "cross-env NODE_ENV=test jest",
     "test-coverage": "yarn test --coverage"
   },
@@ -77,6 +77,7 @@
     "cross-env": "^7.0.3",
     "dockerfile-ast": "^0.6.1",
     "eslint": "^9.11.0",
+    "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jest": "^28.8.3",
     "eslint-plugin-lodash": "^8.0.0",
     "eslint-plugin-security": "^3.0.1",
