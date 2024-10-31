@@ -11,30 +11,30 @@ const { getCertificate } = require('./helper')
 const defaults = {
   global: {
     virtualGarden: {
-      enabled: false
+      enabled: false,
     },
     dashboard: {
       image: {
-        tag: '1.26.0-dev-4d529c1'
+        tag: '1.26.0-dev-4d529c1',
       },
       apiServerUrl: 'https://api.garden.example.org',
       serviceAccountName: 'gardener-dashboard',
       serviceAccountTokenVolumeProjection: {
         enabled: true,
-        expirationSeconds: 43200
+        expirationSeconds: 43200,
       },
       ingress: {
         annotations: {
           'nginx.ingress.kubernetes.io/ssl-redirect': 'true',
-          'nginx.ingress.kubernetes.io/use-port-in-redirects': 'true'
+          'nginx.ingress.kubernetes.io/use-port-in-redirects': 'true',
         },
         hosts: [
           'dashboard.garden.example.org',
-          'dashboard.ingress.garden.example.org'
+          'dashboard.ingress.garden.example.org',
         ],
         tls: {
-          secretName: 'default-gardener-dashboard-tls'
-        }
+          secretName: 'default-gardener-dashboard-tls',
+        },
       },
 
       sessionSecret: 'sessionSecret',
@@ -42,7 +42,7 @@ const defaults = {
       oidc: {
         issuerUrl: 'https://identity.garden.example.org',
         clientId: 'dashboard',
-        ca: getCertificate('...')
+        ca: getCertificate('...'),
       },
       frontendConfig: {
         landingPageUrl: 'https://gardener.cloud/',
@@ -50,45 +50,45 @@ const defaults = {
           {
             title: 'Getting Started',
             icon: 'description',
-            url: 'https://gardener.cloud/about/'
+            url: 'https://gardener.cloud/about/',
           },
           {
             title: 'slack',
             icon: 'mdi-slack',
-            url: 'https://kubernetes.slack.com/messages/gardener'
+            url: 'https://kubernetes.slack.com/messages/gardener',
           },
           {
             title: 'Issues',
             icon: 'mdi-bug',
-            url: 'https://github.com/gardener/dashboard/issues/'
-          }
+            url: 'https://github.com/gardener/dashboard/issues/',
+          },
         ],
         externalTools: [
           {
             title: 'Applications and Services Hub',
             icon: 'apps',
-            url: 'https://apps.garden.example.org/foo/bar{?namespace,name}'
-          }
-        ]
-      }
+            url: 'https://apps.garden.example.org/foo/bar{?namespace,name}',
+          },
+        ],
+      },
     },
     terminal: {
       container: {
-        image: 'ops-toolbelt:0.11.0-mod1'
+        image: 'ops-toolbelt:0.11.0-mod1',
       },
       gardenTerminalHost: {
-        seedRef: 'soil-gcp'
+        seedRef: 'soil-gcp',
       },
       garden: {
         operatorCredentials: {
           serviceAccountRef: {
             name: 'dashboard-terminal-admin',
-            namespace: 'garden'
-          }
-        }
-      }
-    }
-  }
+            namespace: 'garden',
+          },
+        },
+      },
+    },
+  },
 }
 
 module.exports = defaults

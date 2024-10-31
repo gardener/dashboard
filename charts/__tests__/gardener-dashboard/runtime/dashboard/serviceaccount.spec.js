@@ -16,7 +16,7 @@ describe('gardener-dashboard', function () {
 
     beforeEach(() => {
       templates = [
-        'serviceaccount'
+        'serviceaccount',
       ]
     })
 
@@ -33,14 +33,14 @@ describe('gardener-dashboard', function () {
         const values = {
           global: {
             virtualGarden: {
-              enabled: true
+              enabled: true,
             },
             dashboard: {
               serviceAccountTokenVolumeProjection: {
-                enabled: true
-              }
-            }
-          }
+                enabled: true,
+              },
+            },
+          },
         }
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
@@ -52,14 +52,14 @@ describe('gardener-dashboard', function () {
         const values = {
           global: {
             virtualGarden: {
-              enabled: true
+              enabled: true,
             },
             dashboard: {
               serviceAccountTokenVolumeProjection: {
-                enabled: false
-              }
-            }
-          }
+                enabled: false,
+              },
+            },
+          },
         }
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)

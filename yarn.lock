@@ -941,15 +941,15 @@ __metadata:
   resolution: "@gardener-dashboard/charts@workspace:charts"
   dependencies:
     "@gardener-dashboard/test-utils": "workspace:^"
-    eslint: "npm:^8.57.0"
-    eslint-config-standard: "npm:^17.1.0"
-    eslint-plugin-import: "npm:^2.29.1"
-    eslint-plugin-jest: "npm:^26.9.0"
-    eslint-plugin-n: "npm:^15.7.0"
-    eslint-plugin-promise: "npm:^6.6.0"
+    eslint: "npm:^9.11.0"
+    eslint-plugin-import: "npm:^2.31.0"
+    eslint-plugin-jest: "npm:^28.8.3"
+    eslint-plugin-lodash: "npm:^8.0.0"
+    eslint-plugin-security: "npm:^3.0.1"
     jest: "npm:^29.7.0"
     js-yaml: "npm:^4.1.0"
     lodash: "npm:^4.17.21"
+    neostandard: "npm:^0.11.5"
   languageName: unknown
   linkType: soft
 

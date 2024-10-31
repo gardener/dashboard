@@ -17,7 +17,7 @@ describe('gardener-dashboard', function () {
 
     beforeEach(() => {
       templates = [
-        'configmap-assets'
+        'configmap-assets',
       ]
     })
 
@@ -27,11 +27,11 @@ describe('gardener-dashboard', function () {
           dashboard: {
             frontendConfig: {
               assets: {
-                'bar.png': encodeBase64('foo\n')
-              }
-            }
-          }
-        }
+                'bar.png': encodeBase64('foo\n'),
+              },
+            },
+          },
+        },
       }
       const documents = await renderTemplates(templates, values)
       expect(documents).toHaveLength(1)
