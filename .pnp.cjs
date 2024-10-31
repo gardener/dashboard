@@ -1398,7 +1398,7 @@ const RAW_RUNTIME_STATE =
           ["abort-controller", "npm:3.0.0"],\
           ["base64url", "npm:3.0.1"],\
           ["body-parser", "npm:1.20.3"],\
-          ["compression", "npm:1.7.4"],\
+          ["compression", "npm:1.7.5"],\
           ["cookie-parser", "npm:1.4.7"],\
           ["cross-env", "npm:7.0.3"],\
           ["dockerfile-ast", "npm:0.6.1"],\
@@ -4722,13 +4722,6 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["bytes", [\
-      ["npm:3.0.0", {\
-        "packageLocation": "./.yarn/cache/bytes-npm-3.0.0-19be09472d-91d42c3860.zip/node_modules/bytes/",\
-        "packageDependencies": [\
-          ["bytes", "npm:3.0.0"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["npm:3.1.2", {\
         "packageLocation": "./.yarn/cache/bytes-npm-3.1.2-28b8643004-76d1c43cbd.zip/node_modules/bytes/",\
         "packageDependencies": [\
@@ -5066,16 +5059,16 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["compression", [\
-      ["npm:1.7.4", {\
-        "packageLocation": "./.yarn/cache/compression-npm-1.7.4-e0cd6afa69-138db83620.zip/node_modules/compression/",\
+      ["npm:1.7.5", {\
+        "packageLocation": "./.yarn/cache/compression-npm-1.7.5-346039c027-35c9d2d57c.zip/node_modules/compression/",\
         "packageDependencies": [\
-          ["compression", "npm:1.7.4"],\
-          ["accepts", "npm:1.3.8"],\
-          ["bytes", "npm:3.0.0"],\
+          ["compression", "npm:1.7.5"],\
+          ["bytes", "npm:3.1.2"],\
           ["compressible", "npm:2.0.18"],\
           ["debug", "virtual:c7b184cd14c02e3ce555ab1875e60cf5033c617e17d82c4c02ea822101d3c817f48bf25a766b4d4335742dc5c9c14c2e88a57ed955a56c4ad0613899f82f5618#npm:2.6.9"],\
+          ["negotiator", "npm:0.6.4"],\
           ["on-headers", "npm:1.0.2"],\
-          ["safe-buffer", "npm:5.1.2"],\
+          ["safe-buffer", "npm:5.2.1"],\
           ["vary", "npm:1.1.2"]\
         ],\
         "linkType": "HARD"\
@@ -9626,6 +9619,13 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/negotiator-npm-0.6.3-9d50e36171-3ec9fd413e.zip/node_modules/negotiator/",\
         "packageDependencies": [\
           ["negotiator", "npm:0.6.3"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:0.6.4", {\
+        "packageLocation": "./.yarn/cache/negotiator-npm-0.6.4-4a96086720-3e677139c7.zip/node_modules/negotiator/",\
+        "packageDependencies": [\
+          ["negotiator", "npm:0.6.4"]\
         ],\
         "linkType": "HARD"\
       }]\
