@@ -289,16 +289,14 @@ global:
       # accessRestriction:
       #   noItemsText: No access restriction options available for region ${region} and cloud profile ${cloudProfile}
       #   items:
-      #   - key: seed.gardener.cloud/eu-access
+      #   - key: eu-access
       #     display:
-      #       visibleIf: true
       #       # title: foo # optional title, if not defined key will be used
       #       # description: bar # optional description displayed in a tooltip
       #     input:
       #       title: EU Access
       #       description: |
       #         This service is offered to you with our regular SLAs and 24x7 support for the control plane of the cluster. 24x7 support for cluster add-ons and nodes is only available if you meet the following conditions:
-      #       # inverted: false
       #     options:
       #     - key: support.gardener.cloud/eu-access-for-cluster-addons
       #       display:

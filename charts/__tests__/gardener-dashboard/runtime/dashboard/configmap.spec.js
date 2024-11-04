@@ -250,7 +250,7 @@ describe('gardener-dashboard', function () {
                     {
                       key: 'foo',
                       display: {
-                        visibleIf: true,
+                        title: 'Foo Only',
                       },
                       input: {
                         title: 'Foo',
@@ -279,14 +279,12 @@ describe('gardener-dashboard', function () {
                     {
                       key: 'foo',
                       display: {
-                        visibleIf: true,
                         title: 'display Foo',
                         description: 'display Foo description',
                       },
                       input: {
                         title: 'input Foo',
                         description: 'input Foo description',
-                        inverted: true,
                       },
                       options: [
                         {
@@ -304,9 +302,6 @@ describe('gardener-dashboard', function () {
                         },
                         {
                           key: 'foo-option-2',
-                          display: {
-                            visibleIf: true,
-                          },
                           input: {
                             title: 'input Foo Option 2',
                             description: 'input Foo  Option 2 description',
