@@ -38,6 +38,7 @@ const importConfig = {
     import: pluginImport,
   },
   rules: {
+    ...pluginImport.flatConfigs.recommended.rules,
     'import/order': ['error', {
       groups: [
         'builtin',
