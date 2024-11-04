@@ -51,7 +51,7 @@ describe('monitors', () => {
 
       const connectHandler = serverStub.on.mock.calls[0][1]
       const res = {
-        once: jest.fn()
+        once: jest.fn(),
       }
 
       connectHandler(undefined, res)
@@ -90,7 +90,7 @@ describe('monitors', () => {
       expect(metrics.responseTime.observe).toHaveBeenCalledWith({
         ...additionalLabels,
         method,
-        status_code: statusCode
+        status_code: statusCode,
       }, requestDuration / 1000)
     })
 
@@ -109,7 +109,7 @@ describe('monitors', () => {
       expect(metrics.responseTime.observe).toBeCalledTimes(1)
       expect(metrics.responseTime.observe).toHaveBeenCalledWith({
         method,
-        status_code: statusCode
+        status_code: statusCode,
       }, requestDuration / 1000)
     })
 
@@ -130,7 +130,7 @@ describe('monitors', () => {
       expect(metrics.responseTime.observe).toHaveBeenCalledWith({
         method,
         route: metricsRoute,
-        status_code: statusCode
+        status_code: statusCode,
       }, requestDuration / 1000)
     })
   })

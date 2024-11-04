@@ -13,7 +13,7 @@ const {
   ParseError,
   isAbortError,
   createHttpError,
-  isHttpError
+  isHttpError,
 } = require('../lib/errors')
 
 describe('errors', () => {
@@ -73,7 +73,7 @@ describe('errors', () => {
       expect(error).toMatchObject({
         statusCode: 404,
         statusMessage: 'Not Found',
-        message: 'Response code 404 (Not Found)'
+        message: 'Response code 404 (Not Found)',
       })
     })
   })

@@ -5,7 +5,7 @@
 //
 
 const neostandard = require('neostandard')
-const pluginJest = require('eslint-plugin-jest')
+const pluginSecurity = require('eslint-plugin-security')
 const pluginLodash = require('eslint-plugin-lodash')
 const pluginImport = require('eslint-plugin-import')
 
@@ -18,6 +18,7 @@ module.exports = [
       'no-debugger': 'error',
     },
   },
+  pluginSecurity.configs.recommended,
   {
     plugins: {
       import: pluginImport,
@@ -30,24 +31,6 @@ module.exports = [
     },
     rules: {
       'lodash/path-style': ['error', 'array'],
-    },
-  },
-  {
-    files: [
-      '**/__fixtures__/**',
-      '**/__mocks__/**',
-      '**/__tests__/**',
-      '**/jest.setup.js',
-    ],
-    plugins: {
-      jest: pluginJest,
-    },
-    languageOptions: {
-      globals: {
-        ...pluginJest.environments.globals.globals,
-        createAgent: true,
-        fixtures: true,
-      },
     },
   },
 ]

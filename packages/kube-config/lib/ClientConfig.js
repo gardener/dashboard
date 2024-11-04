@@ -18,7 +18,7 @@ function getCluster ({ currentCluster }, files) {
       server,
       'certificate-authority-data': caData,
       'certificate-authority': caFile,
-      'insecure-skip-tls-verify': insecureSkipTlsVerify
+      'insecure-skip-tls-verify': insecureSkipTlsVerify,
     } = currentCluster
     cluster.server = server
     if (caData) {
@@ -48,7 +48,7 @@ function getUser ({ currentUser }, files) {
       tokenFile,
       username,
       password,
-      'auth-provider': authProvider
+      'auth-provider': authProvider,
     } = currentUser
     if (certData && keyData) {
       user.clientCert = base64Decode(certData)
@@ -69,13 +69,13 @@ function getUser ({ currentUser }, files) {
     } else if (authProvider) {
       const {
         name,
-        config: authProviderConfig = {}
+        config: authProviderConfig = {},
       } = authProvider
       switch (name) {
         case 'gcp': {
           const {
             'access-token': accessToken,
-            expiry = '1970-01-01T00:00:00.000Z'
+            expiry = '1970-01-01T00:00:00.000Z',
           } = authProviderConfig
           if (new Date() < new Date(expiry)) {
             user.token = accessToken
@@ -95,20 +95,20 @@ function createAuth (user) {
       enumerable: true,
       get () {
         return user.token
-      }
+      },
     },
     user: {
       enumerable: true,
       get () {
         return user.username
-      }
+      },
     },
     pass: {
       enumerable: true,
       get () {
         return user.password
-      }
-    }
+      },
+    },
   })
 
   return Object.freeze(auth)
@@ -129,31 +129,31 @@ class ClientConfig {
         enumerable: true,
         get () {
           return cluster.server
-        }
+        },
       },
       ca: {
         enumerable: true,
         get () {
           return cluster.certificateAuthority
-        }
+        },
       },
       rejectUnauthorized: {
         enumerable: true,
         get () {
           return !cluster.insecureSkipTlsVerify
-        }
+        },
       },
       key: {
         enumerable: true,
         get () {
           return user.clientKey
-        }
+        },
       },
       cert: {
         enumerable: true,
         get () {
           return user.clientCert
-        }
+        },
       },
       auth: {
         enumerable: true,
@@ -161,8 +161,8 @@ class ClientConfig {
           if (user.token || (user.username && user.password)) {
             return auth
           }
-        }
-      }
+        },
+      },
     }
     if (reactive && files.size) {
       const watcher = new Watcher(Array.from(files.keys()), options)
@@ -197,28 +197,28 @@ class ClientConfig {
       properties = {
         auth: {
           enumerable: true,
-          value: Object.freeze(Object.assign({}, auth))
+          value: Object.freeze(Object.assign({}, auth)),
         },
         key: {
-          value: undefined
+          value: undefined,
         },
         cert: {
-          value: undefined
-        }
+          value: undefined,
+        },
       }
     } else if (key && cert) {
       properties = {
         auth: {
-          value: undefined
+          value: undefined,
         },
         key: {
           enumerable: true,
-          value: key
+          value: key,
         },
         cert: {
           enumerable: true,
-          value: cert
-        }
+          value: cert,
+        },
       }
     }
     return Object.assign(Object.create(this, properties), options)

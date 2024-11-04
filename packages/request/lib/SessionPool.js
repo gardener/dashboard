@@ -16,7 +16,7 @@ const { TimeoutError, StreamError, isAbortError } = require('./errors')
 const {
   NGHTTP2_CANCEL,
   NGHTTP2_INTERNAL_ERROR,
-  NGHTTP2_CONNECT_ERROR
+  NGHTTP2_CONNECT_ERROR,
 } = http2.constants
 
 const kSemaphore = Symbol('semaphore')
@@ -232,7 +232,7 @@ class SessionPool {
     Object.assign(options, {
       maxSessionMemory: 20,
       servername: !net.isIP(hostname) ? hostname : '',
-      session: this.tlsSession
+      session: this.tlsSession,
     })
     const session = http2.connect(origin, options)
     const timer = new Timer()

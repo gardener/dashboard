@@ -13,7 +13,7 @@ class BackoffManager {
       max = 30 * 1000,
       resetDuration = 120 * 1000,
       factor = 2,
-      jitter = 1
+      jitter = 1,
     } = options
     this.min = min
     this.max = max

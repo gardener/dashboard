@@ -6,6 +6,7 @@
 
 const neostandard = require('neostandard')
 const pluginJest = require('eslint-plugin-jest')
+const pluginSecurity = require('eslint-plugin-security')
 const pluginLodash = require('eslint-plugin-lodash')
 const pluginImport = require('eslint-plugin-import')
 
@@ -18,6 +19,7 @@ module.exports = [
       'no-debugger': 'error',
     },
   },
+  pluginSecurity.configs.recommended,
   {
     plugins: {
       import: pluginImport,
@@ -45,9 +47,13 @@ module.exports = [
     languageOptions: {
       globals: {
         ...pluginJest.environments.globals.globals,
-        createAgent: true,
         fixtures: true,
       },
+    },
+    rules: {
+      'security/detect-object-injection': 'off',
+      'security/detect-possible-timing-attacks': 'off',
+      'security/detect-unsafe-regex': 'off',
     },
   },
 ]

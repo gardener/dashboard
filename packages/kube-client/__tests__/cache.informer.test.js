@@ -65,7 +65,7 @@ describe('kube-client', () => {
         expect(informer.emit.mock.calls).toEqual([
           ['add', a],
           ['add', b],
-          ['add', c]
+          ['add', c],
         ])
         informer.emit.mockClear()
 
@@ -73,7 +73,7 @@ describe('kube-client', () => {
         expect(store.list()).toEqual([a, b])
         expect(informer.emit).toBeCalledTimes(1)
         expect(informer.emit.mock.calls).toEqual([
-          ['delete', c]
+          ['delete', c],
         ])
         informer.emit.mockClear()
 
@@ -81,7 +81,7 @@ describe('kube-client', () => {
         expect(store.list()).toEqual([x, b])
         expect(informer.emit).toBeCalledTimes(1)
         expect(informer.emit.mock.calls).toEqual([
-          ['update', x, a]
+          ['update', x, a],
         ])
         informer.emit.mockClear()
 
@@ -89,7 +89,7 @@ describe('kube-client', () => {
         expect(store.list()).toEqual([x, y])
         expect(informer.emit).toBeCalledTimes(1)
         expect(informer.emit.mock.calls).toEqual([
-          ['update', y, b]
+          ['update', y, b],
         ])
         informer.emit.mockClear()
 
@@ -97,7 +97,7 @@ describe('kube-client', () => {
         expect(store.list()).toEqual([x, y, z])
         expect(informer.emit).toBeCalledTimes(1)
         expect(informer.emit.mock.calls).toEqual([
-          ['add', z]
+          ['add', z],
         ])
         informer.emit.mockClear()
 
@@ -107,7 +107,7 @@ describe('kube-client', () => {
         expect(informer.emit.mock.calls).toEqual([
           ['update', a, x],
           ['update', b, y],
-          ['delete', z]
+          ['delete', z],
         ])
         informer.emit.mockClear()
       })

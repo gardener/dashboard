@@ -20,8 +20,8 @@ describe('kube-client', () => {
       it('should set the MERGE patch type', async () => {
         expect(setPatchType(options, PatchType.MERGE)).toEqual({
           headers: {
-            'content-type': 'application/merge-patch+json'
-          }
+            'content-type': 'application/merge-patch+json',
+          },
         })
       })
 

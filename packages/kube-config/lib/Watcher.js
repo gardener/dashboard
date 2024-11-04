@@ -21,7 +21,7 @@ class Watcher extends Readable {
   constructor (paths, { readyTimeout = 15000, readFile = fsPromises.readFile, ...options } = {}) {
     super({
       ...options,
-      objectMode: true
+      objectMode: true,
     })
     logger.debug('[kube-config] creating watcher for', paths)
     this.#paths = paths
@@ -33,7 +33,7 @@ class Watcher extends Readable {
       awaitWriteFinish: true,
       ignoreInitial: true,
       followSymlinks: true,
-      disableGlobbing: true
+      disableGlobbing: true,
     })
   }
 

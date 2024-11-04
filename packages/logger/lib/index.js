@@ -10,5 +10,5 @@ const Logger = require('./Logger')
 
 module.exports = {
   Logger,
-  globalLogger: new Logger()
+  globalLogger: new Logger(),
 }

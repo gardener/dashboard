@@ -13,9 +13,9 @@ function initializeList ({ metadata: { resourceVersion, selfLink } }) {
     metadata: {
       resourceVersion,
       selfLink,
-      paginated: false
+      paginated: false,
     },
-    items: []
+    items: [],
   }
 }
 

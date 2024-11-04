@@ -34,7 +34,7 @@ class ParseError extends Error {
     Object.assign(this, {
       name: this.constructor.name,
       code: 'ERR_BODY_PARSE_FAILURE',
-      ...properties
+      ...properties,
     })
     Error.captureStackTrace(this, this.constructor)
   }
@@ -54,7 +54,7 @@ function createHttpError (options) {
     statusMessage = getDefaultStatusMessage(statusCode),
     response,
     headers,
-    body
+    body,
   } = options
   const properties = { statusMessage }
   if (headers) {
@@ -91,5 +91,5 @@ module.exports = {
   ParseError,
   createHttpError,
   isHttpError,
-  isAbortError
+  isAbortError,
 }

@@ -11,9 +11,7 @@ const pluginLodash = require('eslint-plugin-lodash')
 const pluginImport = require('eslint-plugin-import')
 
 module.exports = [
-  ...neostandard({
-    ignores: neostandard.resolveIgnoresFromGitignore(),
-  }),
+  ...neostandard({}),
   {
     rules: {
       '@stylistic/comma-dangle': ['error', 'always-multiline'],

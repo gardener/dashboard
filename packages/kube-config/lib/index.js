@@ -14,7 +14,7 @@ const Config = require('./Config')
 const ClientConfig = require('./ClientConfig')
 const {
   KUBERNETES_SERVICEACCOUNT_TOKEN_FILE,
-  KUBERNETES_SERVICEACCOUNT_CA_FILE
+  KUBERNETES_SERVICEACCOUNT_CA_FILE,
 } = require('./constants')
 
 function readKubeconfig (filename) {
@@ -30,7 +30,7 @@ function readKubeconfig (filename) {
   }
   const dirname = path.dirname(filename)
   const kubeconfig = yaml.load(
-    fs.readFileSync(filename, 'utf8') // eslint-disable-line security/detect-non-literal-fs-filename
+    fs.readFileSync(filename, 'utf8'), // eslint-disable-line security/detect-non-literal-fs-filename
   )
   const resolvePath = (object, key) => {
     const value = object[key] // eslint-disable-line security/detect-object-injection
@@ -51,7 +51,7 @@ function readKubeconfig (filename) {
 
 function inClusterConfig ({
   KUBERNETES_SERVICE_HOST: host,
-  KUBERNETES_SERVICE_PORT: port
+  KUBERNETES_SERVICE_PORT: port,
 }) {
   if (!host || !port) {
     throw new TypeError('Failed to load in-cluster configuration, kubernetes service endpoint not defined')
@@ -59,9 +59,9 @@ function inClusterConfig ({
 
   return Config.build({
     server: `https://${host}:${port}`,
-    'certificate-authority': KUBERNETES_SERVICEACCOUNT_CA_FILE
+    'certificate-authority': KUBERNETES_SERVICEACCOUNT_CA_FILE,
   }, {
-    tokenFile: KUBERNETES_SERVICEACCOUNT_TOKEN_FILE
+    tokenFile: KUBERNETES_SERVICEACCOUNT_TOKEN_FILE,
   })
 }
 
@@ -70,7 +70,7 @@ exports = module.exports = {
   ClientConfig,
   constants: {
     KUBERNETES_SERVICEACCOUNT_CA_FILE,
-    KUBERNETES_SERVICEACCOUNT_TOKEN_FILE
+    KUBERNETES_SERVICEACCOUNT_TOKEN_FILE,
   },
   parseKubeconfig (input) {
     return Config.parse(input)
@@ -85,7 +85,7 @@ exports = module.exports = {
     return Config.build(
       { server, 'certificate-authority-data': caData },
       { token },
-      { userName, contextName, clusterName, namespace }
+      { userName, contextName, clusterName, namespace },
     ).toYAML()
   },
   load (env, options) {
@@ -115,5 +115,5 @@ exports = module.exports = {
       }
       throw err
     }
-  }
+  },
 }

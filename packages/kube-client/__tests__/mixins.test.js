@@ -19,10 +19,10 @@ const { HTTP2_HEADER_CONTENT_TYPE } = http2.constants
 describe('kube-client', () => {
   describe('mixins', () => {
     const testOptions = {
-      foo: 'bar'
+      foo: 'bar',
     }
     const dryRunOptions = {
-      dryRun: true
+      dryRun: true,
     }
     const testInformer = {}
     Informer.create = jest.fn(() => testInformer)
@@ -46,7 +46,7 @@ describe('kube-client', () => {
 
       static get names () {
         return {
-          plural: 'dummies'
+          plural: 'dummies',
         }
       }
     }
