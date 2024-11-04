@@ -16,6 +16,7 @@
 
 # include workspace packages/logger
 !packages/logger/package.json
+!packages/logger/eslint.config.js
 !packages/logger/jest.setup.js
 !packages/logger/lib
 !packages/logger/__tests__
@@ -24,6 +25,7 @@
 
 # include workspace packages/request
 !packages/request/package.json
+!packages/request/eslint.config.js
 !packages/request/jest.setup.js
 !packages/request/lib
 !packages/request/__tests__
@@ -32,6 +34,7 @@
 
 # include workspace packages/kube-config
 !packages/kube-config/package.json
+!packages/kube-config/eslint.config.js
 !packages/kube-config/jest.setup.js
 !packages/kube-config/lib
 !packages/kube-config/__tests__
@@ -40,6 +43,7 @@
 
 # include workspace packages/kube-client
 !packages/kube-client/package.json
+!packages/kube-client/eslint.config.js
 !packages/kube-client/jest.setup.js
 !packages/kube-client/lib
 !packages/kube-client/__tests__
@@ -48,6 +52,7 @@
 
 # include workspace packages/monitor
 !packages/monitor/package.json
+!packages/monitor/eslint.config.js
 !packages/monitor/jest.setup.js
 !packages/monitor/lib
 !packages/monitor/__tests__
@@ -56,6 +61,7 @@
 
 # include workspace backend
 !backend/package.json
+!backend/eslint.config.js
 !backend/jest.setup.js
 !backend/server.js
 !backend/lib
@@ -67,8 +73,8 @@
 # include workspace frontend
 !frontend/.browserslistrc
 !frontend/.env*
-!frontend/.eslintrc.cjs
 !frontend/.gitignore
+!frontend/eslint.config.cjs
 !frontend/jsconfig.json
 !frontend/package.json
 !frontend/vite.config.js
@@ -82,6 +88,7 @@
 
 # include workspace charts
 !charts/package.json
+!charts/eslint.config.js
 !charts/jest.setup.js
 !charts/_versions.tpl
 !charts/gardener-dashboard
@@ -92,6 +99,7 @@
 
 # include workspace packages/test-utils
 !packages/test-utils/package.json
+!packages/test-utils/eslint.config.js
 !packages/test-utils/lib
 
 # include metadata files
