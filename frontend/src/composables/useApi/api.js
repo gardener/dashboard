@@ -6,7 +6,7 @@
 
 import { useAppStore } from '@/store/app'
 
-import fetch from './fetch'
+import { fetchWrapper as fetch } from './fetch'
 
 async function request (method, url, data) {
   const response = await fetch(url, { method, body: data })

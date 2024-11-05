@@ -12,7 +12,7 @@ import {
   ref,
   computed,
 } from 'vue'
-import { useCookies } from '@vueuse/integrations/useCookies'
+import { useCookies } from '@vueuse/integrations/useCookies' // eslint-disable-line import/no-unresolved
 
 import { useLogger } from '@/composables/useLogger'
 import { useInterceptors } from '@/composables/useApi'

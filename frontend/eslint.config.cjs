@@ -24,9 +24,12 @@ const lodashConfig = {
 }
 
 const importConfig = {
+  ignores: [
+    'vite.config.js',
+  ],
   settings: {
     'import/resolver': {
-      'eslint-import-resolver-custom-alias': {
+      'custom-alias': {
         alias: {
           '@': './src',
         },
@@ -132,6 +135,7 @@ module.exports = [
     ignores: [
       'dist/**',
       'build/**',
+      'vite.config.js.timestamp-*',
     ],
   },
   ...neostandard({

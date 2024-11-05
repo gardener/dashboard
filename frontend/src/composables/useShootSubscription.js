@@ -6,7 +6,7 @@
 
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
-import colors from 'vuetify/lib/util/colors'
+import colors from 'vuetify/lib/util/colors' // eslint-disable-line import/no-unresolved
 
 import { useShootStore } from '@/store/shoot'
 import { useSocketStore } from '@/store/socket'

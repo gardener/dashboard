@@ -191,8 +191,8 @@ import GCopyBtn from '@/components/GCopyBtn'
 import GActionButton from '@/components/GActionButton'
 import GAlertBanner from '@/components/GAlertBanner'
 
-import whitespaceEye from '@/assets/whitespace-eye.svg?raw'
-import whitespaceEyeOff from '@/assets/whitespace-eye-off.svg?raw'
+import whitespaceEye from '@/assets/whitespace-eye.svg?raw' // eslint-disable-line import/no-unresolved
+import whitespaceEyeOff from '@/assets/whitespace-eye-off.svg?raw' // eslint-disable-line import/no-unresolved
 
 import { camelCase } from '@/lodash'
 

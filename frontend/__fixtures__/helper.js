@@ -5,10 +5,10 @@
 //
 
 import { createVuetify } from 'vuetify'
-import * as components from 'vuetify/components'
-import * as directives from 'vuetify/directives'
+import * as components from 'vuetify/components' // eslint-disable-line import/no-unresolved
+import * as directives from 'vuetify/directives' // eslint-disable-line import/no-unresolved
 
-import 'vuetify/styles'
+import 'vuetify/styles' // eslint-disable-line import/no-unresolved
 
 export function createVuetifyPlugin () {
   return createVuetify({
