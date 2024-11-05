@@ -386,18 +386,8 @@ async function getGardenClusterIdentity () {
 exports.getGardenClusterIdentity = getGardenClusterIdentity
 
 async function getClusterCaData (client, { namespace, name }) {
-  try {
-    const configmap = await client.core.configmaps.get(namespace, `${name}.ca-cluster`)
-    return encodeBase64(configmap.data?.['ca.crt'])
-  } catch (err) {
-    // TODO(petersutter): Remove this fallback of reading the `<shoot-name>.ca-cluster` Secret when Gardener no longer reconciles it, presumably with Gardener v1.97.
-    if (isHttpError(err, 404)) {
-      const caCluster = await client.core.secrets.get(namespace, `${name}.ca-cluster`)
-      return caCluster.data?.['ca.crt']
-    } else {
-      throw err
-    }
-  }
+  const configmap = await client.core.configmaps.get(namespace, `${name}.ca-cluster`)
+  return encodeBase64(configmap.data?.['ca.crt'])
 }
 exports.getClusterCaData = getClusterCaData
 
