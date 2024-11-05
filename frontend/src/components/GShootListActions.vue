@@ -23,7 +23,7 @@ SPDX-License-Identifier: Apache-2.0
             density="comfortable"
             icon="mdi-close"
             color="toolbar-title"
-            @click.stop="accessDialog = false"
+            @click="accessDialog = false"
           />
         </template>
       </g-toolbar>
