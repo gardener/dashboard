@@ -38,7 +38,6 @@ vi.mock('@/utils', async importOriginal => {
   }
   return {
     ...utils,
-    default: utils,
   }
 })
 

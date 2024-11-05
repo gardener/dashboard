@@ -6,10 +6,10 @@
 
 import { useAppStore } from '@/store/app'
 
-import { fetchWrapper as fetch } from './fetch'
+import { fetchWrapper } from './fetch'
 
 async function request (method, url, data) {
-  const response = await fetch(url, { method, body: data })
+  const response = await fetchWrapper(url, { method, body: data })
   const { headers } = response
   if (headers.warning) {
     const appStore = useAppStore()

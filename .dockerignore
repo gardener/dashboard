@@ -75,6 +75,7 @@
 !frontend/.env*
 !frontend/.gitignore
 !frontend/eslint.config.cjs
+!frontend/eslint-import-resolver-local.cjs
 !frontend/jsconfig.json
 !frontend/package.json
 !frontend/vite.config.js
