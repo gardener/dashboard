@@ -4,6 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+const path = require('path')
+
 const neostandard = require('neostandard')
 const pluginVue = require('eslint-plugin-vue')
 const pluginSecurity = require('eslint-plugin-security')
@@ -29,11 +31,23 @@ const importConfig = {
   ],
   settings: {
     'import/resolver': {
-      'custom-alias': {
-        alias: {
-          '@': './src',
-        },
+      alias: {
+        map: [
+          ['@', './src'],
+        ],
         extensions: ['.js', '.vue'],
+      },
+      [path.resolve('./eslint-import-resolver-local.cjs')]: {
+        map: [
+          ['unfonts.css', true],
+          ['@vueuse/integrations/useCookies', null],
+          ['vuetify/components', null],
+          ['vuetify/directives', null],
+          ['vuetify/styles', null],
+          ['vuetify/lib/util/colors', null],
+          ['@/assets/whitespace-eye.svg?raw', null],
+          ['@/assets/whitespace-eye-off.svg?raw', null],
+        ],
       },
     },
   },

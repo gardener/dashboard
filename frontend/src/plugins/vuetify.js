@@ -8,12 +8,12 @@
 import '@/sass/materialdesignicons.scss'
 
 // Styles
-import 'unfonts.css' // eslint-disable-line import/no-unresolved
-import 'vuetify/styles' // eslint-disable-line import/no-unresolved
+import 'unfonts.css'
+import 'vuetify/styles'
 
 // Composables
 import { createVuetify } from 'vuetify'
-import colors from 'vuetify/lib/util/colors' // eslint-disable-line import/no-unresolved
+import colors from 'vuetify/lib/util/colors'
 
 const gardenerGreen = '#0b8062'
 
