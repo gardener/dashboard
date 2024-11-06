@@ -15,7 +15,6 @@ module.exports = [
     rules: {
       '@stylistic/comma-dangle': ['error', 'always-multiline'],
       'no-console': 'error',
-      'no-debugger': 'error',
     },
   },
   {
