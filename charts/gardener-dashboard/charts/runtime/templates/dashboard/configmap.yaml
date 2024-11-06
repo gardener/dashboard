@@ -284,26 +284,27 @@ data:
         items:
         {{- range .Values.global.dashboard.frontendConfig.accessRestriction.items }}
         - key: {{ .key }}
+          {{- if .display }}
           display:
-            visibleIf: {{ .display.visibleIf }}{{- if .display.title }}
+            {{- if .display.title }}
             title: {{ .display.title }}{{- end }}{{- if .display.description }}
             description: {{ .display.description }}{{- end }}
+          {{- end }}
           input:
             title: {{ quote .input.title }}
             {{- if .input.description }}
             description: {{ quote .input.description }}
             {{- end }}
-            {{- if .input.inverted }}
-            inverted: {{ .input.inverted }}
-            {{- end }}
           {{- if .options }}
           options:
           {{- range .options }}
           - key: {{ .key }}
+            {{- if .display }}
             display:
               visibleIf: {{ .display.visibleIf }}{{- if .display.title }}
               title: {{ .display.title }}{{- end }}{{- if .display.description }}
               description: {{ .display.description }}{{- end }}
+            {{- end }}
             input:
               title: {{ quote .input.title }}
               {{- if .input.description }}

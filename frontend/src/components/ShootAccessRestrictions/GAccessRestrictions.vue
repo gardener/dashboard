@@ -43,11 +43,11 @@ SPDX-License-Identifier: Apache-2.0
       >
         <div class="action-select">
           <v-checkbox
-            :model-value="getAccessRestrictionOptionValue(optionKey) "
+            :model-value="getAccessRestrictionOptionValue(key, optionKey) "
             :disabled="getDisabled(key)"
             color="primary"
             density="compact"
-            @update:model-value="value => setAccessRestrictionOptionValue(optionKey, value)"
+            @update:model-value="value => setAccessRestrictionOptionValue(key, optionKey, value)"
           />
         </div>
         <div
@@ -80,7 +80,6 @@ SPDX-License-Identifier: Apache-2.0
 
 <script setup>
 import { useShootContext } from '@/composables/useShootContext'
-import { NAND } from '@/composables/useShootAccessRestrictions/helper'
 
 import { transformHtml } from '@/utils'
 
@@ -96,10 +95,7 @@ const {
 } = useShootContext()
 
 function getDisabled (key) {
-  const value = getAccessRestrictionValue(key)
-  const { input } = accessRestrictionDefinitions.value[key] // eslint-disable-line security/detect-object-injection
-  const inverted = !!input?.inverted
-  return !NAND(value, inverted)
+  return !getAccessRestrictionValue(key)
 }
 
 function getTextClass (key) {

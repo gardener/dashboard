@@ -464,7 +464,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
 
   function accessRestrictionNoItemsTextForCloudProfileNameAndRegion ({ cloudProfileName, region }) {
     const defaultNoItemsText = 'No access restriction options available for region ${region}' // eslint-disable-line no-template-curly-in-string
-    const noItemsText = get(configStore, 'accessRestriction.noItemsText', defaultNoItemsText)
+    const noItemsText = get(configStore, ['accessRestriction', 'noItemsText'], defaultNoItemsText)
 
     return template(noItemsText)({
       region,
@@ -477,23 +477,29 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
       return []
     }
 
-    const labels = labelsByCloudProfileNameAndRegion({ cloudProfileName, region })
-    if (isEmpty(labels)) {
+    const allowedAccessRestrictions = accessRestrictionsByCloudProfileNameAndRegion({ cloudProfileName, region })
+    if (isEmpty(allowedAccessRestrictions)) {
       return []
     }
 
-    const items = get(configStore, 'accessRestriction.items')
+    const allowedAccessRestrictionNames = allowedAccessRestrictions.map(ar => ar.name)
+
+    const items = get(configStore, ['accessRestriction', 'items'])
     return filter(items, ({ key }) => {
-      return key && get(labels, [key]) === 'true'
+      return key && allowedAccessRestrictionNames.includes(key)
     })
   }
 
-  function labelsByCloudProfileNameAndRegion ({ cloudProfileName, region }) {
+  function accessRestrictionsByCloudProfileNameAndRegion ({ cloudProfileName, region }) {
     const cloudProfile = cloudProfileByName(cloudProfileName)
     if (!cloudProfile) {
-      return {}
+      return []
     }
-    return get(find(cloudProfile.data.regions, ['name', region]), 'labels')
+    const regionData = find(cloudProfile.data.regions, [['name'], region])
+    if (!regionData) {
+      return []
+    }
+    return get(regionData, ['accessRestrictions'], [])
   }
 
   function defaultMachineImageForCloudProfileNameAndMachineType (cloudProfileName, machineType) {
@@ -692,7 +698,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     volumeTypesByCloudProfileName,
     defaultMachineImageForCloudProfileNameAndMachineType,
     minimumVolumeSizeByMachineTypeAndVolumeType,
-    labelsByCloudProfileNameAndRegion,
+    accessRestrictionsByCloudProfileNameAndRegion,
     accessRestrictionDefinitionsByCloudProfileNameAndRegion,
     accessRestrictionNoItemsTextForCloudProfileNameAndRegion,
     kubernetesVersions,
