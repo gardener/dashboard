@@ -202,10 +202,13 @@ SPDX-License-Identifier: Apache-2.0
             icon="mdi-key"
             :disabled="isClusterAccessDialogDisabled"
             :tooltip="showClusterAccessActionTitle"
-            @click="showDialog('access')"
+            @click="setShootAction('access', shootItem)"
           />
-          <g-shoot-list-row-actions
+          <g-action-button
             v-if="canPatchShoots"
+            icon="mdi-dots-vertical"
+            tooltip="Cluster Actions"
+            @click="setShootAction('menu', shootItem, $event.target)"
           />
         </v-row>
       </template>
@@ -255,7 +258,6 @@ import GShootVersionChip from '@/components/ShootVersion/GShootVersionChip.vue'
 import GTicketLabel from '@/components/ShootTickets/GTicketLabel.vue'
 import GShootSeedName from '@/components/GShootSeedName.vue'
 import GShootMessages from '@/components/ShootMessages/GShootMessages.vue'
-import GShootListRowActions from '@/components/GShootListRowActions.vue'
 import GAutoHide from '@/components/GAutoHide.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
 import GControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityTag.vue'
@@ -263,6 +265,7 @@ import GWorkerGroup from '@/components/ShootWorkers/GWorkerGroup'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 import GCollapsibleItems from '@/components/GCollapsibleItems'
 
+import { useShootAction } from '@/composables/useShootAction'
 import { useProvideShootItem } from '@/composables/useShootItem'
 import { useProvideShootHelper } from '@/composables/useShootHelper'
 import { formatValue } from '@/composables/useProjectShootCustomFields/helper'
@@ -289,9 +292,7 @@ const props = defineProps({
 })
 const shootItem = toRef(props, 'modelValue')
 
-const emit = defineEmits([
-  'showDialog',
-])
+const { setShootAction } = useShootAction()
 
 const shootStore = useShootStore()
 const ticketStore = useTicketStore()
@@ -425,13 +426,6 @@ const cells = computed(() => {
     }
   })
 })
-
-function showDialog (action) {
-  emit('showDialog', {
-    action,
-    shootItem: shootItem.value,
-  })
-}
 
 const hasShootWorkerGroupWarning = computed(() => {
   const machineImages = cloudProfileStore.machineImagesByCloudProfileName(shootCloudProfileName.value)

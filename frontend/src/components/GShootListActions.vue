@@ -5,22 +5,45 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
+  <v-dialog
+    v-if="!!shootUid"
+    v-model="accessDialog"
+    persistent
+    max-width="850"
+  >
+    <v-card>
+      <g-toolbar>
+        Cluster Access
+        <code class="text-toolbar-title">
+          {{ shootName }}
+        </code>
+        <template #append>
+          <v-btn
+            variant="text"
+            density="comfortable"
+            icon="mdi-close"
+            color="toolbar-title"
+            @click="accessDialog = false"
+          />
+        </template>
+      </g-toolbar>
+      <g-shoot-access-card
+        ref="clusterAccess"
+        :selected-shoot="shootActionItem"
+        :hide-terminal-shortcuts="true"
+      />
+    </v-card>
+  </v-dialog>
   <v-menu
-    v-model="menu"
+    v-model="actionMenu"
     location="left"
     :close-on-content-click="false"
     eager
+    :target="shootActionTarget"
   >
-    <template #activator="{ props }">
-      <g-action-button
-        v-bind="props"
-        icon="mdi-dots-vertical"
-        tooltip="Cluster Actions"
-      />
-    </template>
     <v-list
       dense
-      @click.capture="menu = false"
+      @click.capture="actionMenu = false"
     >
       <v-list-item>
         <g-shoot-action-change-hibernation
@@ -39,7 +62,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-list-item>
       <v-list-item>
         <g-shoot-action-rotate-credentials
-          :type="rotationType"
+          type="ALL_CREDENTIALS"
           text
         />
       </v-list-item>
@@ -64,9 +87,9 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { watch } from 'vue'
 
-import GActionButton from '@/components/GActionButton.vue'
+import GShootAccessCard from '@/components/ShootDetails/GShootAccessCard.vue'
 import GShootActionChangeHibernation from '@/components/ShootHibernation/GShootActionChangeHibernation.vue'
 import GShootActionMaintenanceStart from '@/components/ShootMaintenance/GShootActionMaintenanceStart.vue'
 import GShootActionReconcileStart from '@/components/GShootActionReconcileStart.vue'
@@ -75,13 +98,28 @@ import GShootActionDeleteCluster from '@/components/GShootActionDeleteCluster.vu
 import GShootActionForceDelete from '@/components/GShootActionForceDelete.vue'
 import GShootVersionConfiguration from '@/components/ShootVersion/GShootVersionConfiguration.vue'
 
-import { useShootItem } from '@/composables/useShootItem'
+import { useProvideShootItem } from '@/composables/useShootItem'
+import { useShootAction } from '@/composables/useShootAction'
 
 const {
+  shootActionItem,
+  shootActionTarget,
+  createShootActionFlag,
+  unsetShootAction,
+} = useShootAction()
+
+const {
+  shootName,
+  shootUid,
   canForceDeleteShoot,
-} = useShootItem()
+} = useProvideShootItem(shootActionItem)
 
-const menu = ref(false)
+const accessDialog = createShootActionFlag('access')
+const actionMenu = createShootActionFlag('menu')
 
-const rotationType = ref('ALL_CREDENTIALS')
+watch(accessDialog, value => {
+  if (!value) {
+    unsetShootAction()
+  }
+})
 </script>
