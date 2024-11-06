@@ -5,16 +5,45 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
+  <v-dialog
+    v-if="!!shootUid"
+    v-model="accessDialog"
+    persistent
+    max-width="850"
+  >
+    <v-card>
+      <g-toolbar>
+        Cluster Access
+        <code class="text-toolbar-title">
+          {{ shootName }}
+        </code>
+        <template #append>
+          <v-btn
+            variant="text"
+            density="comfortable"
+            icon="mdi-close"
+            color="toolbar-title"
+            @click="accessDialog = false"
+          />
+        </template>
+      </g-toolbar>
+      <g-shoot-access-card
+        ref="clusterAccess"
+        :selected-shoot="shootActionItem"
+        :hide-terminal-shortcuts="true"
+      />
+    </v-card>
+  </v-dialog>
   <v-menu
-    v-model="visible"
+    v-model="actionMenu"
     location="left"
     :close-on-content-click="false"
     eager
-    :activator="activator"
+    :target="shootActionTarget"
   >
     <v-list
       dense
-      @click.capture="visible = false"
+      @click.capture="actionMenu = false"
     >
       <v-list-item>
         <g-shoot-action-change-hibernation
@@ -33,7 +62,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-list-item>
       <v-list-item>
         <g-shoot-action-rotate-credentials
-          :type="rotationType"
+          type="ALL_CREDENTIALS"
           text
         />
       </v-list-item>
@@ -58,12 +87,9 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import {
-  toRefs,
-  ref,
-  computed,
-} from 'vue'
+import { watch } from 'vue'
 
+import GShootAccessCard from '@/components/ShootDetails/GShootAccessCard.vue'
 import GShootActionChangeHibernation from '@/components/ShootHibernation/GShootActionChangeHibernation.vue'
 import GShootActionMaintenanceStart from '@/components/ShootMaintenance/GShootActionMaintenanceStart.vue'
 import GShootActionReconcileStart from '@/components/GShootActionReconcileStart.vue'
@@ -73,38 +99,27 @@ import GShootActionForceDelete from '@/components/GShootActionForceDelete.vue'
 import GShootVersionConfiguration from '@/components/ShootVersion/GShootVersionConfiguration.vue'
 
 import { useProvideShootItem } from '@/composables/useShootItem'
-
-const props = defineProps({
-  modelValue: {
-    type: Boolean,
-    required: true,
-  },
-  selectedShoot: {
-    type: Object,
-  },
-  activator: {
-    type: Element,
-  },
-})
-
-const { modelValue, selectedShoot, activator } = toRefs(props)
-
-const emit = defineEmits([
-  'update:modelValue',
-])
-
-const visible = computed({
-  get () {
-    return modelValue.value
-  },
-  set (value) {
-    emit('update:modelValue', value)
-  },
-})
+import { useShootAction } from '@/composables/useShootAction'
 
 const {
-  canForceDeleteShoot,
-} = useProvideShootItem(selectedShoot)
+  shootActionItem,
+  shootActionTarget,
+  createShootActionFlag,
+  unsetShootAction,
+} = useShootAction()
 
-const rotationType = ref('ALL_CREDENTIALS')
+const {
+  shootName,
+  shootUid,
+  canForceDeleteShoot,
+} = useProvideShootItem(shootActionItem)
+
+const accessDialog = createShootActionFlag('access')
+const actionMenu = createShootActionFlag('menu')
+
+watch(accessDialog, value => {
+  if (!value) {
+    unsetShootAction()
+  }
+})
 </script>

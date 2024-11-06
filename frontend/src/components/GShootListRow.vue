@@ -202,13 +202,13 @@ SPDX-License-Identifier: Apache-2.0
             icon="mdi-key"
             :disabled="isClusterAccessDialogDisabled"
             :tooltip="showClusterAccessActionTitle"
-            @click="triggerAction('access')"
+            @click="setShootAction('access', shootItem)"
           />
           <g-action-button
             v-if="canPatchShoots"
             icon="mdi-dots-vertical"
             tooltip="Cluster Actions"
-            @click="triggerAction('menu', $event)"
+            @click="setShootAction('menu', shootItem, $event.target)"
           />
         </v-row>
       </template>
@@ -265,6 +265,7 @@ import GWorkerGroup from '@/components/ShootWorkers/GWorkerGroup'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 import GCollapsibleItems from '@/components/GCollapsibleItems'
 
+import { useShootAction } from '@/composables/useShootAction'
 import { useProvideShootItem } from '@/composables/useShootItem'
 import { useProvideShootHelper } from '@/composables/useShootHelper'
 import { formatValue } from '@/composables/useProjectShootCustomFields/helper'
@@ -291,9 +292,7 @@ const props = defineProps({
 })
 const shootItem = toRef(props, 'modelValue')
 
-const emit = defineEmits([
-  'triggerAction',
-])
+const { setShootAction } = useShootAction()
 
 const shootStore = useShootStore()
 const ticketStore = useTicketStore()
@@ -427,14 +426,6 @@ const cells = computed(() => {
     }
   })
 })
-
-function triggerAction (action, e) {
-  emit('triggerAction', {
-    action,
-    item: shootItem.value,
-    target: e.target,
-  })
-}
 
 const hasShootWorkerGroupWarning = computed(() => {
   const machineImages = cloudProfileStore.machineImagesByCloudProfileName(shootCloudProfileName.value)
