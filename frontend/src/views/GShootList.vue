@@ -355,8 +355,6 @@ export default {
         { value: 10, title: '10' },
         { value: 20, title: '20' },
       ],
-      showRowActions: false,
-      rowActionsActivator: undefined,
     }
   },
   computed: {
