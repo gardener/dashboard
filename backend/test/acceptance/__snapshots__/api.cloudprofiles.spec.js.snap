@@ -43,7 +43,7 @@ exports[`api cloudprofiles should return all cloudprofiles 2`] = `
       "seedNames": [
         "infra1-seed",
         "infra1-seed2",
-        "infra4-seed-without-secretRef",
+        "infra4-seed-managed",
       ],
       "seedSelector": {},
       "type": "infra1",
@@ -155,7 +155,7 @@ exports[`api cloudprofiles should return all cloudprofiles 2`] = `
         "infra1-seed",
         "infra1-seed2",
         "infra3-seed",
-        "infra4-seed-without-secretRef",
+        "infra4-seed-managed",
         "infra3-seed-with-selector",
         "infra3-seed-without-selector",
       ],

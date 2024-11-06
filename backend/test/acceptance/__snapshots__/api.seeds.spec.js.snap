@@ -89,7 +89,7 @@ exports[`api seeds should return all seeds 2`] = `
       "visible": true,
     },
     "metadata": {
-      "name": "infra4-seed-without-secretRef",
+      "name": "infra4-seed-managed",
       "unreachable": false,
     },
   },

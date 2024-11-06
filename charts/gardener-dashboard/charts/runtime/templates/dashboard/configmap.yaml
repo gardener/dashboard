@@ -135,15 +135,6 @@ data:
       serviceAccountTokenExpiration: {{ .Values.global.terminal.serviceAccountTokenExpiration }}
       {{- end }}
       gardenTerminalHost:
-        {{- if .Values.global.terminal.gardenTerminalHost.secretRef }}
-        apiServerIngressHost: {{ .Values.global.terminal.gardenTerminalHost.apiServerIngressHost }}
-        secretRef:
-          namespace: {{ .Values.global.terminal.gardenTerminalHost.secretRef.namespace }}
-          {{- with .Values.global.terminal.gardenTerminalHost.secretRef.labelSelector }}
-          labelSelector:
-{{ toYaml . | trim | nindent 12 }}
-          {{- end }}
-        {{- end }}
         {{- if .Values.global.terminal.gardenTerminalHost.seedRef }}
         seedRef: {{ .Values.global.terminal.gardenTerminalHost.seedRef }}
         {{- end }}

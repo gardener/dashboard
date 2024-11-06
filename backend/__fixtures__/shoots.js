@@ -42,7 +42,7 @@ const shootList = [
     createdBy: 'foo@example.org',
     purpose: 'fooPurpose',
     secretBindingName: 'barSecretName',
-    seed: 'infra4-seed-without-secretRef',
+    seed: 'infra1-seed',
     advertisedAddresses: null,
   }),
   getShoot({
