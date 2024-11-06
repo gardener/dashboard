@@ -13,5 +13,5 @@ module.exports = {
   helper: require('./helper'),
   helm: require('./helm'),
   'gardener-dashboard': require('./gardener-dashboard'),
-  identity: require('./identity')
+  identity: require('./identity'),
 }

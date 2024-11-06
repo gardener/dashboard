@@ -15,8 +15,8 @@ class SubjectList {
     const {
       spec: {
         namespace,
-        members: subjects
-      }
+        members: subjects,
+      },
     } = project
     const createServiceAccountItem = ({ metadata, secrets }) => {
       const { namespace, name, annotations = {}, creationTimestamp, deletionTimestamp } = metadata
@@ -26,14 +26,14 @@ class SubjectList {
       const item = SubjectListItem.create({
         kind: 'ServiceAccount',
         namespace,
-        name
+        name,
       })
       item.extend({
         createdBy,
         description,
         creationTimestamp,
         deletionTimestamp,
-        secrets
+        secrets,
       })
       return item
     }
@@ -81,7 +81,7 @@ class SubjectList {
 
     this.subjectListItemMap = new Map([
       ...subjectListItemMap,
-      ...serviceAccountItemMap
+      ...serviceAccountItemMap,
     ])
   }
 

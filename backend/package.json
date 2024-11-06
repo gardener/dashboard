@@ -27,7 +27,7 @@
   ],
   "scripts": {
     "serve": "cross-env NODE_ENV=development node server.js",
-    "lint": "eslint --ext .js server.js .",
+    "lint": "eslint server.js . --max-warnings=0",
     "test": "cross-env NODE_ENV=test jest",
     "test-coverage": "yarn test --coverage"
   },
@@ -76,71 +76,19 @@
     "abort-controller": "^3.0.0",
     "cross-env": "^7.0.3",
     "dockerfile-ast": "^0.6.1",
-    "eslint": "^8.57.0",
-    "eslint-config-standard": "^17.1.0",
-    "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-jest": "^26.9.0",
-    "eslint-plugin-n": "^15.7.0",
-    "eslint-plugin-promise": "^6.6.0",
+    "eslint": "^9.11.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jest": "^28.8.3",
+    "eslint-plugin-lodash": "^8.0.0",
     "eslint-plugin-security": "^3.0.1",
     "fast-json-patch": "^3.1.1",
     "jest": "^29.7.0",
+    "neostandard": "^0.11.7",
     "p-event": "^4.2.0",
     "path-to-regexp": "^8.0.0",
     "set-cookie-parser": "^2.6.0",
     "socket.io-client": "^4.7.5",
     "supertest": "^7.0.0"
-  },
-  "eslintConfig": {
-    "env": {
-      "commonjs": true,
-      "jest/globals": true
-    },
-    "plugins": [
-      "jest"
-    ],
-    "extends": [
-      "standard",
-      "plugin:security/recommended-legacy",
-      "plugin:jest/recommended"
-    ],
-    "globals": {
-      "createAgent": true,
-      "fixtures": true
-    },
-    "rules": {
-      "no-console": "error",
-      "no-debugger": "error"
-    },
-    "ignorePatterns": [
-      "public",
-      "my*.js"
-    ],
-    "overrides": [
-      {
-        "files": [
-          "**/__fixtures__/**",
-          "**/__mocks__/**",
-          "**/__tests__/**",
-          "**/test/**",
-          "jest.setup.js"
-        ],
-        "rules": {
-          "security/detect-object-injection": "off",
-          "security/detect-possible-timing-attacks": "off",
-          "security/detect-unsafe-regex": "off"
-        }
-      },
-      {
-        "files": [
-          "**/__tests__/**",
-          "**/test/**/*.spec.js"
-        ],
-        "env": {
-          "jest": true
-        }
-      }
-    ]
   },
   "jest": {
     "restoreMocks": true,

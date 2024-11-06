@@ -18,7 +18,7 @@ module.exports = (io, informer, options) => {
     const rooms = [
       'shoots:admin',
       `shoots;${namespace}`,
-      `shoots;${namespace}/${name}`
+      `shoots;${namespace}/${name}`,
     ]
     nsp.to(rooms).emit('shoots', { type, uid })
   }
@@ -42,7 +42,7 @@ module.exports = (io, informer, options) => {
     }
     const rooms = [
       'shoots:unhealthy:admin',
-      `shoots:unhealthy;${namespace}`
+      `shoots:unhealthy;${namespace}`,
     ]
     nsp.to(rooms).emit('shoots', { type, uid })
   }

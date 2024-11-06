@@ -12,22 +12,22 @@ const { http } = require('../symbols')
 const endpoints = exports.endpoints = {
   api: {
     Ctor: require('./API'),
-    responseType: 'json'
+    responseType: 'json',
   },
   healthz: {
-    Ctor: require('./Healthz')
+    Ctor: require('./Healthz'),
   },
   openapi: {
     Ctor: require('./OpenAPI'),
-    responseType: 'json'
-  }
+    responseType: 'json',
+  },
 }
 
 function load (clientConfig, options) {
   const createInstance = ({ Ctor, ...rest }) => new Ctor(clientConfig.extend({
     ...options,
     ...rest,
-    relativeUrl: Ctor[http.relativeUrl]
+    relativeUrl: Ctor[http.relativeUrl],
   }))
   return _.mapValues(endpoints, createInstance)
 }

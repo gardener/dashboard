@@ -37,7 +37,7 @@ class Foo extends mix(MockGroup).with(NamespaceScoped, Readable, Observable, Wri
     return {
       plural: 'foos',
       singular: 'foo',
-      kind: 'Foo'
+      kind: 'Foo',
     }
   }
 }
@@ -47,12 +47,12 @@ class Bar extends mix(MockGroup).with(ClusterScoped, Readable, Observable, Writa
     return {
       plural: 'bars',
       singular: 'bar',
-      kind: 'Bar'
+      kind: 'Bar',
     }
   }
 }
 
 module.exports = {
   Foo,
-  Bar
+  Bar,
 }

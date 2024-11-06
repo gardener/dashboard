@@ -21,14 +21,14 @@ const serviceAccountList = [
   getServiceAccount({ namespace: 'garden-bar', name: 'robot', createdBy: 'bar@example.org' }),
   getServiceAccount({ namespace: 'term-host-1', name: 'term-attach-1' }),
   getServiceAccount({ namespace: 'term-host-2', name: 'term-attach-2' }),
-  getServiceAccount({ namespace: 'term-host-3', name: 'term-attach-3' })
+  getServiceAccount({ namespace: 'term-host-3', name: 'term-attach-3' }),
 ]
 
 function getServiceAccount ({
   namespace,
   name,
   createdBy = 'admin@example.org',
-  creationTimestamp = '2020-01-01T00:00:00Z'
+  creationTimestamp = '2020-01-01T00:00:00Z',
 }) {
   return {
     metadata: {
@@ -36,9 +36,9 @@ function getServiceAccount ({
       namespace,
       creationTimestamp,
       annotations: {
-        'gardener.cloud/created-by': createdBy
-      }
-    }
+        'gardener.cloud/created-by': createdBy,
+      },
+    },
   }
 }
 
@@ -55,7 +55,7 @@ const serviceaccounts = {
     return namespace
       ? filter(items, ['metadata.namespace', namespace])
       : items
-  }
+  },
 }
 
 const matchOptions = { decode: decodeURIComponent }
@@ -84,11 +84,11 @@ const mocks = {
       const { params: { namespace } = {} } = matchResult
       const payload = getTokenPayload(headers)
       const item = cloneDeep(json)
-      set(item, 'metadata.namespace', namespace)
-      set(item, 'metadata.resourceVersion', resourceVersion)
-      set(item, 'metadata.uid', uid)
-      set(item, 'metadata.creationTimestamp', creationTimestamp)
-      set(item, 'metadata.annotations["gardener.cloud/created-by"]', payload.id)
+      set(item, ['metadata', 'namespace'], namespace)
+      set(item, ['metadata', 'resourceVersion'], resourceVersion)
+      set(item, ['metadata', 'uid'], uid)
+      set(item, ['metadata', 'creationTimestamp'], creationTimestamp)
+      set(item, ['metadata', 'annotations', 'gardener.cloud/created-by'], payload.id)
       return Promise.resolve(item)
     }
   },
@@ -99,7 +99,7 @@ const mocks = {
         return Promise.reject(createError(503))
       }
       const item = cloneDeep(json)
-      set(item, 'status.token', token)
+      set(item, ['status', 'token'], token)
       return Promise.resolve(item)
     }
   },
@@ -118,7 +118,7 @@ const mocks = {
         for (const item of items) {
           const event = {
             type: 'ADDED',
-            object: cloneDeep(item)
+            object: cloneDeep(item),
           }
           stream.write(event)
         }
@@ -151,9 +151,9 @@ const mocks = {
       }
       const { params: { namespace, name } = {} } = matchResult
       const item = serviceaccounts.get(namespace, name)
-      const resourceVersion = get(item, 'metadata.resourceVersion', '42')
+      const resourceVersion = get(item, ['metadata', 'resourceVersion'], '42')
       merge(item, json)
-      set(item, 'metadata.resourceVersion', (+resourceVersion + 1).toString())
+      set(item, ['metadata', 'resourceVersion'], (+resourceVersion + 1).toString())
       return Promise.resolve(item)
     }
   },
@@ -167,10 +167,10 @@ const mocks = {
       const item = serviceaccounts.get(namespace, name)
       return Promise.resolve(item)
     }
-  }
+  },
 }
 
 module.exports = {
   ...serviceaccounts,
-  mocks
+  mocks,
 }

@@ -11,11 +11,11 @@ const request = jest.requireActual('@gardener-dashboard/request')
 
 const mockClient = {
   request: jest.fn(() => Promise.resolve()),
-  stream: jest.fn(() => Promise.resolve(new PassThrough({ objectMode: true })))
+  stream: jest.fn(() => Promise.resolve(new PassThrough({ objectMode: true }))),
 }
 
 module.exports = {
   ...request,
   extend: jest.fn(() => mockClient),
-  mockClient
+  mockClient,
 }

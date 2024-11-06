@@ -267,6 +267,7 @@ import {
   debounce,
   filter,
   get,
+  unset,
   isEmpty,
   join,
   map,
@@ -886,11 +887,11 @@ export default {
     },
     isFilterActive (key) {
       const filters = this.shootListFilters
-      return get(filters, key, false)
+      return get(filters, [key], false)
     },
     resetState (reactiveObject, defaultState) {
       for (const key in reactiveObject) {
-        delete reactiveObject[key]
+        unset(reactiveObject, [key])
       }
       Object.assign(reactiveObject, defaultState)
     },

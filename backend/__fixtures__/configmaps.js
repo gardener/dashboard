@@ -14,7 +14,7 @@ const { createUrl } = require('./helper')
 function getConfigMap ({ namespace, name, labels, creationTimestamp, data = {} }) {
   const metadata = {
     namespace,
-    name
+    name,
   }
   if (!isEmpty(labels)) {
     metadata.labels = labels
@@ -32,13 +32,13 @@ function getClusterIdentitConfigMap ({ identity = 'landscape-test' } = {}) {
     namespace: 'kube-system',
     name: 'cluster-identity',
     data: {
-      'cluster-identity': identity
-    }
+      'cluster-identity': identity,
+    },
   })
 }
 
 const configMapsList = [
-  getClusterIdentitConfigMap()
+  getClusterIdentitConfigMap(),
 ]
 
 const configMaps = {
@@ -60,13 +60,13 @@ const configMaps = {
       name,
       namespace,
       labels: {
-        'gardener.cloud/role': 'ca-cluster'
+        'gardener.cloud/role': 'ca-cluster',
       },
       data: {
-        'ca.crt': 'ca.crt'
-      }
+        'ca.crt': 'ca.crt',
+      },
     })
-  }
+  },
 }
 
 const matchOptions = { decode: decodeURIComponent }
@@ -116,10 +116,10 @@ const mocks = {
 
       return Promise.reject(createError(404))
     }
-  }
+  },
 }
 
 module.exports = {
   ...configMaps,
-  mocks
+  mocks,
 }

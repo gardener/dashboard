@@ -11,6 +11,6 @@ module.exports = {
     relativeUrl: Symbol('http.relativeUrl'),
     client: Symbol('http.client'),
     agent: Symbol('http.agent'),
-    request: Symbol('http.request')
-  }
+    request: Symbol('http.request'),
+  },
 }

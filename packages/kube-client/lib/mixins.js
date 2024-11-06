@@ -495,29 +495,29 @@ const allowedSearchParamsMap = new Map(Object.entries({
     'timeoutSeconds',
     'includeUninitialized',
     'allowWatchBookmarks',
-    'pretty'
+    'pretty',
   ],
   post: [
     'pretty',
-    'dryRun'
+    'dryRun',
   ],
   put: [
     'fieldManager',
     'pretty',
-    'dryRun'
+    'dryRun',
   ],
   patch: [
     'fieldManager',
     'pretty',
-    'dryRun'
+    'dryRun',
   ],
   delete: [
     'gracePeriodSeconds',
     'orphanDependents',
     'propagationPolicy',
     'pretty',
-    'dryRun'
-  ]
+    'dryRun',
+  ],
 }))
 
 function normalizeSearchParams (method, searchParams, options) {
@@ -547,5 +547,5 @@ module.exports = {
   Readable,
   Observable,
   Creatable,
-  Writable
+  Writable,
 }

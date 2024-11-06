@@ -16,7 +16,7 @@ describe('gardener-dashboard', function () {
 
     beforeEach(() => {
       templates = [
-        'service'
+        'service',
       ]
     })
 
@@ -32,9 +32,9 @@ describe('gardener-dashboard', function () {
       const values = {
         global: {
           dashboard: {
-            sessionAffinity: 'None'
-          }
-        }
+            sessionAffinity: 'None',
+          },
+        },
       }
       const documents = await renderTemplates(templates, values)
       expect(documents).toHaveLength(1)

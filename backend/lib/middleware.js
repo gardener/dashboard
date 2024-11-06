@@ -83,7 +83,7 @@ function renderError (err, req, res, next) {
 
   res.format({
     json: () => res.status(locals.code).send(locals),
-    default: () => res.status(locals.code).send(ErrorTemplate(locals))
+    default: () => res.status(locals.code).send(ErrorTemplate(locals)),
   })
 }
 
@@ -129,5 +129,5 @@ module.exports = {
   sendError,
   renderError,
   metricsRoute,
-  ErrorTemplate
+  ErrorTemplate,
 }

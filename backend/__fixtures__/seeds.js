@@ -16,7 +16,7 @@ function getSeed ({
   seedProtected = false,
   seedVisible = true,
   labels = {},
-  withSecretRef = true
+  withSecretRef = true,
 }) {
   uid = uid || `seed--${name}`
   const seed = {
@@ -24,33 +24,33 @@ function getSeed ({
     metadata: {
       name,
       uid,
-      labels
+      labels,
     },
     spec: {
       provider: {
         type: kind,
-        region
+        region,
       },
       ingress: {
-        domain: `ingress.${region}.${kind}.example.org`
+        domain: `ingress.${region}.${kind}.example.org`,
       },
       taints: [],
       settings: {
         scheduling: {
-          visible: seedVisible
-        }
-      }
-    }
+          visible: seedVisible,
+        },
+      },
+    },
   }
   if (seedProtected) {
     seed.spec.taints.push({
-      key: 'seed.gardener.cloud/protected'
+      key: 'seed.gardener.cloud/protected',
     })
   }
   if (withSecretRef) {
     seed.spec.secretRef = {
       name: `seedsecret-${name}`,
-      namespace: 'garden'
+      namespace: 'garden',
     }
   }
 
@@ -66,7 +66,7 @@ const seedList = [
   getSeed({ name: 'infra3-seed-with-selector', region: 'foo-europe', kind: 'infra3', seedProtected: false, seedVisible: true, labels: { foo: 'bar', fooz: 'baz' } }),
   getSeed({ name: 'infra3-seed-without-selector', region: 'foo-europe', kind: 'infra3', seedProtected: false, seedVisible: true }),
   getSeed({ name: 'infra3-seed-protected', region: 'foo-europe', kind: 'infra3', seedProtected: true }),
-  getSeed({ name: 'infra3-seed-invisible', region: 'foo-europe', kind: 'infra3', seedProtected: false, seedVisible: false })
+  getSeed({ name: 'infra3-seed-invisible', region: 'foo-europe', kind: 'infra3', seedProtected: false, seedVisible: false }),
 ]
 
 const seeds = {
@@ -78,7 +78,7 @@ const seeds = {
   },
   list () {
     return cloneDeep(seedList)
-  }
+  },
 }
 
 module.exports = seeds

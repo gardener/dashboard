@@ -29,7 +29,7 @@ describe('api', function () {
     const aud = ['gardener']
     const service = {
       name: 'gardener-apiserver',
-      namespace: 'gardener'
+      namespace: 'gardener',
     }
     const caBundle = fixtures.helper.toBase64('ca')
 
@@ -40,10 +40,10 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(403)
 
-      expect(mockRequest).not.toBeCalled()
+      expect(mockRequest).not.toHaveBeenCalled()
 
       expect(res.body).toMatchSnapshot({
-        details: expect.any(Object)
+        details: expect.any(Object),
       })
     })
 
@@ -53,10 +53,10 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(401)
 
-      expect(mockRequest).not.toBeCalled()
+      expect(mockRequest).not.toHaveBeenCalled()
 
       expect(res.body).toMatchSnapshot({
-        details: expect.any(Object)
+        details: expect.any(Object),
       })
     })
 
@@ -69,10 +69,10 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(401)
 
-      expect(mockRequest).not.toBeCalled()
+      expect(mockRequest).not.toHaveBeenCalled()
 
       expect(res.body).toMatchSnapshot({
-        details: expect.any(Object)
+        details: expect.any(Object),
       })
     })
 
@@ -85,10 +85,10 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(401)
 
-      expect(mockRequest).not.toBeCalled()
+      expect(mockRequest).not.toHaveBeenCalled()
 
       expect(res.body).toMatchSnapshot({
-        details: expect.any(Object)
+        details: expect.any(Object),
       })
     })
 
@@ -105,11 +105,11 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(2)
+      expect(mockRequest).toHaveBeenCalledTimes(2)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot({
-        version: expect.any(String)
+        version: expect.any(String),
       })
     })
 
@@ -125,11 +125,11 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(2)
+      expect(mockRequest).toHaveBeenCalledTimes(2)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot({
-        version: expect.any(String)
+        version: expect.any(String),
       })
     })
   })

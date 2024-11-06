@@ -14,7 +14,7 @@ const LEVELS = {
   debug: 2,
   info: 3,
   warn: 4,
-  error: 5
+  error: 5,
 }
 
 class Stream {

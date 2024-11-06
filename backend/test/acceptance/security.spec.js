@@ -17,7 +17,7 @@ describe('security', function () {
     expect(client[custom.http_options]()).toMatchObject({
       followRedirect: false,
       rejectUnauthorized,
-      ca
+      ca,
     })
     expect(client[custom.clock_tolerance]).toBe(42)
   })

@@ -16,11 +16,11 @@ class Ingress extends mix(Networking).with(NamespaceScoped, Readable, Observable
     return {
       plural: 'ingresses',
       singular: 'ingress',
-      kind: 'Ingress'
+      kind: 'Ingress',
     }
   }
 }
 
 module.exports = {
-  Ingress
+  Ingress,
 }

@@ -31,7 +31,7 @@ const env = require('./env')
 const user = {
   create (...args) {
     return auth.createUser(...args)
-  }
+  },
 }
 
 function resetAll () {
@@ -62,6 +62,6 @@ const fixtures = {
   github,
   helper,
   env,
-  resetAll
+  resetAll,
 }
 module.exports = fixtures

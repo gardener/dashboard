@@ -25,7 +25,7 @@ const rooms = new Map()
 function getRoom (name) {
   if (!rooms.has(name)) {
     rooms.set(name, {
-      emit: jest.fn()
+      emit: jest.fn(),
     })
   }
   return rooms.get(name)
@@ -40,16 +40,16 @@ const nsp = {
           for (const room of this.rooms) {
             room.emit(...args)
           }
-        }
+        },
       }
     }
     return getRoom(name)
   }),
-  emit: jest.fn()
+  emit: jest.fn(),
 }
 
 const io = {
-  of: jest.fn().mockReturnValue(nsp)
+  of: jest.fn().mockReturnValue(nsp),
 }
 
 describe('watches', function () {
@@ -68,13 +68,13 @@ describe('watches', function () {
     const foobarUnhealthy = _
       .chain(foobar)
       .cloneDeep()
-      .set('metadata.labels["shoot.gardener.cloud/status"]', 'unhealthy')
+      .set(['metadata', 'labels', 'shoot.gardener.cloud/status'], 'unhealthy')
       .value()
 
     const foobazUnhealthy = _
       .chain(foobaz)
       .cloneDeep()
-      .set('metadata.labels["shoot.gardener.cloud/status"]', 'unhealthy')
+      .set(['metadata', 'labels', 'shoot.gardener.cloud/status'], 'unhealthy')
       .value()
 
     let shootsWithIssues
@@ -86,35 +86,35 @@ describe('watches', function () {
     it('should watch shoots without issues', async function () {
       watches.shoots(io, informer)
 
-      expect(io.of).toBeCalledTimes(1)
+      expect(io.of).toHaveBeenCalledTimes(1)
       expect(io.of.mock.calls).toEqual([['/']])
 
       informer.emit('add', foobar)
       informer.emit('update', foobar)
       informer.emit('delete', foobar)
 
-      expect(logger.error).not.toBeCalled()
+      expect(logger.error).not.toHaveBeenCalled()
 
       const keys = ['shoots:admin', 'shoots;foo', 'shoots;foo/bar']
-      expect(nsp.to).toBeCalledTimes(3)
+      expect(nsp.to).toHaveBeenCalledTimes(3)
       expect(nsp.to.mock.calls).toEqual([[keys], [keys], [keys]])
       expect(Array.from(rooms.keys())).toEqual(keys)
       for (const key of keys) {
         const room = rooms.get(key)
-        expect(room.emit).toBeCalledTimes(3)
+        expect(room.emit).toHaveBeenCalledTimes(3)
         expect(room.emit.mock.calls).toEqual([
           [
             'shoots',
-            { type: 'ADDED', uid: foobar.metadata.uid }
+            { type: 'ADDED', uid: foobar.metadata.uid },
           ],
           [
             'shoots',
-            { type: 'MODIFIED', uid: foobar.metadata.uid }
+            { type: 'MODIFIED', uid: foobar.metadata.uid },
           ],
           [
             'shoots',
-            { type: 'DELETED', uid: foobar.metadata.uid }
-          ]
+            { type: 'DELETED', uid: foobar.metadata.uid },
+          ],
         ])
       }
     })
@@ -135,30 +135,30 @@ describe('watches', function () {
       expect(shootsWithIssues).toHaveProperty('size', 0)
 
       const fooRoom = rooms.get('shoots;foo')
-      expect(fooRoom.emit).toBeCalledTimes(5)
+      expect(fooRoom.emit).toHaveBeenCalledTimes(5)
       const fooIssuesRoom = rooms.get('shoots:unhealthy;foo')
-      expect(fooIssuesRoom.emit).toBeCalledTimes(5)
+      expect(fooIssuesRoom.emit).toHaveBeenCalledTimes(5)
       expect(fooIssuesRoom.emit.mock.calls).toEqual([
         [
           'shoots',
-          { type: 'ADDED', uid: foobarUnhealthy.metadata.uid }
+          { type: 'ADDED', uid: foobarUnhealthy.metadata.uid },
         ],
         [
           'shoots',
-          { type: 'DELETED', uid: foobar.metadata.uid }
+          { type: 'DELETED', uid: foobar.metadata.uid },
         ],
         [
           'shoots',
-          { type: 'ADDED', uid: foobazUnhealthy.metadata.uid }
+          { type: 'ADDED', uid: foobazUnhealthy.metadata.uid },
         ],
         [
           'shoots',
-          { type: 'MODIFIED', uid: foobazUnhealthy.metadata.uid }
+          { type: 'MODIFIED', uid: foobazUnhealthy.metadata.uid },
         ],
         [
           'shoots',
-          { type: 'DELETED', uid: foobazUnhealthy.metadata.uid }
-        ]
+          { type: 'DELETED', uid: foobazUnhealthy.metadata.uid },
+        ],
       ])
     })
   })
@@ -166,7 +166,7 @@ describe('watches', function () {
   describe('leases', function () {
     const metadata = {
       projectName: 'foo',
-      name: 'bar'
+      name: 'bar',
     }
     const issueEvent = { object: { metadata } }
     const commentEvent = { object: { metadata } }
@@ -181,12 +181,12 @@ describe('watches', function () {
             handler(commentEvent)
             break
         }
-      }
+      },
     }
 
     const gitHubConfig = {
       pollIntervalSeconds: 10,
-      syncThrottleSeconds: 2
+      syncThrottleSeconds: 2,
     }
 
     let gitHubStub
@@ -212,8 +212,8 @@ describe('watches', function () {
 
       await watches.leases(io, informer, { signal: abortController.signal })
 
-      expect(logger.warn).toBeCalledTimes(1)
-      expect(ticketCache.on).toBeCalledTimes(0)
+      expect(logger.warn).toHaveBeenCalledTimes(1)
+      expect(ticketCache.on).toHaveBeenCalledTimes(0)
     })
 
     it('should add event listeners and create SyncManager', async function () {
@@ -222,24 +222,24 @@ describe('watches', function () {
 
       watches.leases(io, informer, { signal })
 
-      expect(io.of).toBeCalledTimes(1)
-      expect(io.of).toBeCalledWith('/')
+      expect(io.of).toHaveBeenCalledTimes(1)
+      expect(io.of).toHaveBeenCalledWith('/')
 
-      expect(ticketCache.on).toBeCalledTimes(2)
-      expect(ticketCache.on).toBeCalledWith('issue', expect.any(Function))
-      expect(ticketCache.on).toBeCalledWith('comment', expect.any(Function))
+      expect(ticketCache.on).toHaveBeenCalledTimes(2)
+      expect(ticketCache.on).toHaveBeenCalledWith('issue', expect.any(Function))
+      expect(ticketCache.on).toHaveBeenCalledWith('comment', expect.any(Function))
 
-      expect(SyncManager).toBeCalledTimes(1)
-      expect(SyncManager).toBeCalledWith(expect.any(Function), {
+      expect(SyncManager).toHaveBeenCalledTimes(1)
+      expect(SyncManager).toHaveBeenCalledWith(expect.any(Function), {
         interval: gitHubConfig.pollIntervalSeconds * 1000,
         throttle: gitHubConfig.syncThrottleSeconds * 1000,
-        signal
+        signal,
       })
       const syncManagerInstance = SyncManager.mock.instances[0]
-      expect(syncManagerInstance.sync).toBeCalledTimes(1)
+      expect(syncManagerInstance.sync).toHaveBeenCalledTimes(1)
 
-      expect(informer.on).toBeCalledTimes(1)
-      expect(informer.on).toBeCalledWith('update', expect.any(Function))
+      expect(informer.on).toHaveBeenCalledTimes(1)
+      expect(informer.on).toHaveBeenCalledWith('update', expect.any(Function))
     })
 
     it('should create SyncManager with defaults', async () => {
@@ -247,14 +247,14 @@ describe('watches', function () {
 
       watches.leases(io, informer, { signal })
 
-      expect(SyncManager).toBeCalledTimes(1)
+      expect(SyncManager).toHaveBeenCalledTimes(1)
       expect(SyncManager.mock.calls[0]).toEqual([
         expect.any(Function),
         {
           interval: 0,
           throttle: 0,
-          signal
-        }
+          signal,
+        },
       ])
     })
 
@@ -265,10 +265,10 @@ describe('watches', function () {
       gitHubStub.mockReturnValue({})
       watches.leases(io, informer, { signal })
 
-      expect(SyncManager).toBeCalledTimes(1)
+      expect(SyncManager).toHaveBeenCalledTimes(1)
       const [funcWithDefaultConcurrency] = SyncManager.mock.calls[0]
       await funcWithDefaultConcurrency()
-      expect(pLimit).toBeCalledWith(10)
+      expect(pLimit).toHaveBeenCalledWith(10)
     })
 
     it('should call loadOpenIssuesAndComments with configured concurrency parameter', async () => {
@@ -278,23 +278,23 @@ describe('watches', function () {
       gitHubStub.mockReturnValue({ syncConcurrency: 42 })
       watches.leases(io, informer, { signal })
 
-      expect(SyncManager).toBeCalledTimes(1)
+      expect(SyncManager).toHaveBeenCalledTimes(1)
       const [funcWithConfiguredConcurrency] = SyncManager.mock.calls[0]
       await funcWithConfiguredConcurrency()
-      expect(pLimit).toBeCalledWith(42)
+      expect(pLimit).toHaveBeenCalledWith(42)
     })
 
     it('should emit ticket cache events to socket io', async () => {
       watches.leases(io, informer, { signal })
 
-      expect(nsp.emit).toBeCalledTimes(1)
-      expect(nsp.emit).toBeCalledWith('issues', issueEvent)
+      expect(nsp.emit).toHaveBeenCalledTimes(1)
+      expect(nsp.emit).toHaveBeenCalledWith('issues', issueEvent)
 
       const room = `shoots;${cache.getProjectNamespace(issueEvent.object.metadata.projectName)}/${issueEvent.object.metadata.name}`
       const mockRoom = rooms.get(room)
-      expect(nsp.to).toBeCalledWith([room])
-      expect(mockRoom.emit).toBeCalledTimes(1)
-      expect(mockRoom.emit).toBeCalledWith('comments', issueEvent)
+      expect(nsp.to).toHaveBeenCalledWith([room])
+      expect(mockRoom.emit).toHaveBeenCalledTimes(1)
+      expect(mockRoom.emit).toHaveBeenCalledWith('comments', issueEvent)
     })
 
     it('should listen to informer update events', async function () {
@@ -302,13 +302,13 @@ describe('watches', function () {
 
       watches.leases(io, informer, { signal })
 
-      expect(informer.on).toBeCalledTimes(1)
-      expect(informer.on).toBeCalledWith('update', expect.any(Function))
+      expect(informer.on).toHaveBeenCalledTimes(1)
+      expect(informer.on).toHaveBeenCalledWith('update', expect.any(Function))
 
       informer.emit('update', {})
 
       const syncManagerInstance = SyncManager.mock.instances[0]
-      expect(syncManagerInstance.sync).toBeCalledTimes(2)
+      expect(syncManagerInstance.sync).toHaveBeenCalledTimes(2)
     })
 
     it('should should load issues and comments of all issues', async function () {
@@ -327,10 +327,10 @@ describe('watches', function () {
 
       await loadOpenIssuesAndComments(10)
 
-      expect(tickets.loadOpenIssues).toBeCalledTimes(1)
-      expect(tickets.loadIssueComments).toBeCalledTimes(t.length)
+      expect(tickets.loadOpenIssues).toHaveBeenCalledTimes(1)
+      expect(tickets.loadIssueComments).toHaveBeenCalledTimes(t.length)
       for (const number of issueNumbers) {
-        expect(tickets.loadIssueComments).toBeCalledWith({ number })
+        expect(tickets.loadIssueComments).toHaveBeenCalledWith({ number })
       }
     })
   })

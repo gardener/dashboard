@@ -31,8 +31,8 @@ describe('openapi', function () {
 
     const shootDefinitions = {
       'com.github.gardener.gardener.pkg.apis.core.v1beta1.Shoot': {
-        type: 'object'
-      }
+        type: 'object',
+      },
     }
 
     mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
@@ -41,10 +41,10 @@ describe('openapi', function () {
         schemas: {
           ...shootDefinitions,
           foo: {
-            type: 'object'
-          }
-        }
-      }
+            type: 'object',
+          },
+        },
+      },
     })
     const dereferenceStub = jest.spyOn(SwaggerParser, 'dereference').mockImplementation(obj => obj)
 
@@ -54,13 +54,13 @@ describe('openapi', function () {
       .expect('content-type', /json/)
       .expect(200)
 
-    expect(mockRequest).toBeCalledTimes(2)
+    expect(mockRequest).toHaveBeenCalledTimes(2)
     expect(mockRequest.mock.calls[0]).toEqual([
       {
         ...pick(fixtures.kube, [':scheme', ':authority']),
         authorization: `Bearer ${await user.bearer}`,
         ':method': 'post',
-        ':path': '/apis/authorization.k8s.io/v1/selfsubjectaccessreviews'
+        ':path': '/apis/authorization.k8s.io/v1/selfsubjectaccessreviews',
       },
       {
         apiVersion: 'authorization.k8s.io/v1',
@@ -68,18 +68,18 @@ describe('openapi', function () {
         spec: expect.objectContaining({
           nonResourceAttributes: {
             verb: 'get',
-            path: '/openapi/v3'
-          }
-        })
-      }
+            path: '/openapi/v3',
+          },
+        }),
+      },
     ])
     expect(mockRequest.mock.calls[1]).toEqual([{
       ...pick(fixtures.kube, [':scheme', ':authority', 'authorization']),
       ':method': 'get',
-      ':path': '/openapi/v3/apis/core.gardener.cloud/v1beta1'
+      ':path': '/openapi/v3/apis/core.gardener.cloud/v1beta1',
     }])
 
-    expect(dereferenceStub).toBeCalledTimes(1)
+    expect(dereferenceStub).toHaveBeenCalledTimes(1)
     expect(res.body).toEqual(shootDefinitions)
   })
 })

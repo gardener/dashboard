@@ -31,27 +31,27 @@ describe('client-config', () => {
 
   beforeEach(() => {
     cluster = {
-      server: 'https://kubernetes:6443'
+      server: 'https://kubernetes:6443',
     }
     user = {}
     context = {
       cluster: 'garden',
-      user: 'robot'
+      user: 'robot',
     }
     kubeconfig = {
       clusters: [{
         name: 'garden',
-        cluster
+        cluster,
       }],
       users: [{
         name: 'robot',
-        user
+        user,
       }],
       contexts: [{
         name: 'default',
-        context
+        context,
       }],
-      'current-context': 'default'
+      'current-context': 'default',
     }
     clientConfig = undefined
   })
@@ -85,7 +85,7 @@ describe('client-config', () => {
     afterAll(() => {
       if (tmpDir) {
         fs.rmSync(tmpDir, {
-          recursive: true
+          recursive: true,
         })
       }
     })
@@ -135,7 +135,7 @@ describe('client-config', () => {
       beforeEach(() => {
         Object.assign(user, {
           'client-key': keyFile,
-          'client-certificate': certFile
+          'client-certificate': certFile,
         })
         return initClientConfig(ac.signal)
       })
@@ -146,7 +146,7 @@ describe('client-config', () => {
         expect(clientConfig.cert).toBe('cert')
         await Promise.all([
           updateValue(keyFile, 'foo'),
-          updateValue(certFile, 'bar')
+          updateValue(certFile, 'bar'),
         ])
         expect(clientConfig.key).toBe('foo')
         expect(clientConfig.cert).toBe('bar')
@@ -171,9 +171,9 @@ describe('client-config', () => {
       expect(clientConfig.auth.bearer).toBe('token')
       const extendedClientConfig = clientConfig.extend({
         auth: {
-          bearer: 'foo'
+          bearer: 'foo',
         },
-        responseType: 'json'
+        responseType: 'json',
       })
       expect(extendedClientConfig.url).toBe('https://kubernetes:6443')
       expect(extendedClientConfig.auth.bearer).toBe('foo')
@@ -191,7 +191,7 @@ describe('client-config', () => {
       const extendedClientConfig = clientConfig.extend({
         key: 'foo',
         cert: 'bar',
-        responseType: 'json'
+        responseType: 'json',
       })
       expect(extendedClientConfig.url).toBe('https://kubernetes:6443')
       expect(extendedClientConfig.auth).toBeUndefined()

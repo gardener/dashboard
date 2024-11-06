@@ -21,8 +21,8 @@ function createIssue ({ number, name = 'foo', projectName = 'test', updatedAt })
       number,
       updated_at: updatedAt,
       name,
-      projectName
-    }
+      projectName,
+    },
   }
 }
 
@@ -32,8 +32,8 @@ function createComment ({ number, id, updatedAt }) {
     metadata: {
       number,
       id,
-      updated_at: updatedAt
-    }
+      updated_at: updatedAt,
+    },
   }
 }
 
@@ -81,14 +81,14 @@ describe('cache', function () {
     describe('#getIssues', function () {
       it('should return all issues', function () {
         expect(cache.getIssues()).toEqual(allIssues)
-        expect(emitSpy).not.toBeCalled()
+        expect(emitSpy).not.toHaveBeenCalled()
       })
     })
 
     describe('#getIssue', function () {
       it('should return the first issue', function () {
         expect(cache.getIssue(1)).toBe(firstIssue)
-        expect(emitSpy).not.toBeCalled()
+        expect(emitSpy).not.toHaveBeenCalled()
       })
     })
 
@@ -97,14 +97,14 @@ describe('cache', function () {
         const issue = _
           .chain(firstIssue)
           .cloneDeep()
-          .set('metadata.updated_at', timestamp(+60))
+          .set(['metadata', 'updated_at'], timestamp(+60))
           .value()
         cache.addOrUpdateIssue({ issue })
         expect(emitSpy).toHaveBeenCalledTimes(1)
         expect(emitSpy.mock.calls[0]).toEqual(['issue', {
           kind: 'issue',
           type: 'MODIFIED',
-          object: issue
+          object: issue,
         }])
       })
 
@@ -112,10 +112,10 @@ describe('cache', function () {
         const issue = _
           .chain(firstIssue)
           .cloneDeep()
-          .set('metadata.updated_at', timestamp(-60))
+          .set(['metadata', 'updated_at'], timestamp(-60))
           .value()
         cache.addOrUpdateIssue({ issue })
-        expect(emitSpy).not.toBeCalled()
+        expect(emitSpy).not.toHaveBeenCalled()
       })
     })
 
@@ -126,12 +126,12 @@ describe('cache', function () {
         expect(emitSpy.mock.calls[0]).toEqual(['issue', {
           kind: 'issue',
           type: 'DELETED',
-          object: firstIssue
+          object: firstIssue,
         }])
         expect(emitSpy.mock.calls[1]).toEqual(['comment', {
           kind: 'comment',
           type: 'DELETED',
-          object: firstComment
+          object: firstComment,
         }])
       })
     })
@@ -141,7 +141,7 @@ describe('cache', function () {
         const comment = _
           .chain(firstComment)
           .cloneDeep()
-          .set('metadata.updated_at', timestamp(+60))
+          .set(['metadata', 'updated_at'], timestamp(+60))
           .value()
         const issueNumber = comment.metadata.number
         cache.addOrUpdateComment({ issueNumber, comment })
@@ -149,7 +149,7 @@ describe('cache', function () {
         expect(emitSpy.mock.calls[0]).toEqual(['comment', {
           kind: 'comment',
           type: 'MODIFIED',
-          object: comment
+          object: comment,
         }])
       })
 
@@ -157,11 +157,11 @@ describe('cache', function () {
         const comment = _
           .chain(firstComment)
           .cloneDeep()
-          .set('metadata.updated_at', timestamp(-60))
+          .set(['metadata', 'updated_at'], timestamp(-60))
           .value()
         const issueNumber = comment.metadata.number
         cache.addOrUpdateComment({ issueNumber, comment })
-        expect(emitSpy).not.toBeCalled()
+        expect(emitSpy).not.toHaveBeenCalled()
       })
     })
 
@@ -172,7 +172,7 @@ describe('cache', function () {
         expect(emitSpy.mock.calls[0]).toEqual(['comment', {
           kind: 'comment',
           type: 'DELETED',
-          object: firstComment
+          object: firstComment,
         }])
       })
     })
@@ -181,7 +181,7 @@ describe('cache', function () {
       it('should return the issueNumbers for name "foo" and project "test"', function () {
         const numbers = cache.getIssueNumbersForNameAndProjectName({ projectName: 'test', name: 'foo' })
         expect(numbers).toEqual([1, 2])
-        expect(emitSpy).not.toBeCalled()
+        expect(emitSpy).not.toHaveBeenCalled()
       })
     })
 
@@ -190,7 +190,7 @@ describe('cache', function () {
         const comments = cache.getCommentsForIssue({ issueNumber: 1 })
         expect(comments).toHaveLength(1)
         expect(comments[0]).toEqual(firstComment)
-        expect(emitSpy).not.toBeCalled()
+        expect(emitSpy).not.toHaveBeenCalled()
       })
     })
   })

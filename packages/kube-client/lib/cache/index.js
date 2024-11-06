@@ -19,5 +19,5 @@ module.exports = {
   ListPager,
   Reflector,
   Store,
-  ListWatcher
+  ListWatcher,
 }

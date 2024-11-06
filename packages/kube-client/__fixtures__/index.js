@@ -13,5 +13,5 @@ const resources = require('./resources')
 module.exports = {
   matchers,
   helper,
-  resources
+  resources,
 }

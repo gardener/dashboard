@@ -27,96 +27,96 @@ If both environmentVariableName and filePath are missing/empty, the config path 
 const configMappings = [
   {
     environmentVariableName: 'VUE_APP_VERSION',
-    configPath: 'frontend.appVersion'
+    configPath: 'frontend.appVersion',
   },
   {
     environmentVariableName: 'SESSION_SECRET',
     filePath: '/etc/gardener-dashboard/secrets/session/sessionSecret',
-    configPath: 'sessionSecret'
+    configPath: 'sessionSecret',
   },
   {
     environmentVariableName: 'SESSION_SECRET_PREVIOUS',
     filePath: '/etc/gardener-dashboard/secrets/session/sessionSecretPrevious',
-    configPath: 'sessionSecretPrevious'
+    configPath: 'sessionSecretPrevious',
   },
   {
     environmentVariableName: 'API_SERVER_URL',
-    configPath: 'apiServerUrl'
+    configPath: 'apiServerUrl',
   },
   {
     environmentVariableName: 'OIDC_ISSUER',
-    configPath: 'oidc.issuer'
+    configPath: 'oidc.issuer',
   },
   {
     environmentVariableName: 'OIDC_CA',
-    configPath: 'oidc.ca'
+    configPath: 'oidc.ca',
   },
   {
     environmentVariableName: 'OIDC_CLIENT_ID',
     filePath: '/etc/gardener-dashboard/secrets/oidc/client_id',
-    configPath: 'oidc.client_id'
+    configPath: 'oidc.client_id',
   },
   {
     environmentVariableName: 'OIDC_CLIENT_SECRET',
     filePath: '/etc/gardener-dashboard/secrets/oidc/client_secret',
-    configPath: 'oidc.client_secret'
+    configPath: 'oidc.client_secret',
   },
   {
     environmentVariableName: 'GITHUB_AUTHENTICATION_APP_ID',
     filePath: '/etc/gardener-dashboard/secrets/github/authentication.appId',
     configPath: 'gitHub.authentication.appId',
-    type: 'Integer'
+    type: 'Integer',
   },
   {
     environmentVariableName: 'GITHUB_AUTHENTICATION_CLIENT_ID',
     filePath: '/etc/gardener-dashboard/secrets/github/authentication.clientId',
-    configPath: 'gitHub.authentication.clientId'
+    configPath: 'gitHub.authentication.clientId',
   },
   {
     environmentVariableName: 'GITHUB_AUTHENTICATION_CLIENT_SECRET',
     filePath: '/etc/gardener-dashboard/secrets/github/authentication.clientSecret',
-    configPath: 'gitHub.authentication.clientSecret'
+    configPath: 'gitHub.authentication.clientSecret',
   },
   {
     environmentVariableName: 'GITHUB_AUTHENTICATION_INSTALLATION_ID',
     filePath: '/etc/gardener-dashboard/secrets/github/authentication.installationId',
     configPath: 'gitHub.authentication.installationId',
-    type: 'Integer'
+    type: 'Integer',
   },
   {
     environmentVariableName: 'GITHUB_AUTHENTICATION_PRIVATE_KEY',
     filePath: '/etc/gardener-dashboard/secrets/github/authentication.privateKey',
-    configPath: 'gitHub.authentication.privateKey'
+    configPath: 'gitHub.authentication.privateKey',
   },
   {
     environmentVariableName: 'GITHUB_AUTHENTICATION_TOKEN',
     filePath: '/etc/gardener-dashboard/secrets/github/authentication.token',
-    configPath: 'gitHub.authentication.token'
+    configPath: 'gitHub.authentication.token',
   },
   {
     environmentVariableName: 'GITHUB_WEBHOOK_SECRET',
     filePath: '/etc/gardener-dashboard/secrets/github/webhookSecret',
-    configPath: 'gitHub.webhookSecret'
+    configPath: 'gitHub.webhookSecret',
   },
   {
     environmentVariableName: 'LOG_LEVEL',
-    configPath: 'logLevel'
+    configPath: 'logLevel',
   },
   {
     environmentVariableName: 'LOG_HTTP_REQUEST_BODY',
     configPath: 'logHttpRequestBody',
-    type: 'Boolean'
+    type: 'Boolean',
   },
   {
     environmentVariableName: 'PORT',
     configPath: 'port',
-    type: 'Integer'
+    type: 'Integer',
   },
   {
     environmentVariableName: 'METRICS_PORT',
     configPath: 'metricsPort',
-    type: 'Integer'
-  }
+    type: 'Integer',
+  },
 ]
 
 function parseConfigValue (value, type) {
@@ -138,7 +138,7 @@ module.exports = {
         environmentVariableName,
         configPath,
         filePath,
-        type = 'String'
+        type = 'String',
       } = configMapping
       let rawValue = env[environmentVariableName] // eslint-disable-line security/detect-object-injection
       if (!rawValue && filePath) {
@@ -159,7 +159,7 @@ module.exports = {
       isProd,
       logLevel: isProd ? 'warn' : 'debug',
       port: 3030,
-      metricsPort: 9050
+      metricsPort: 9050,
     }
   },
   getFilename ({ argv, env } = process) {
@@ -181,20 +181,20 @@ module.exports = {
     this.assignConfigFromEnvironmentAndFileSystem(config, env)
     const requiredConfigurationProperties = [
       'sessionSecret',
-      'apiServerUrl'
+      'apiServerUrl',
     ]
 
     // When OIDC is configured, some more configuration is required
     if (config.oidc) {
-      const redirectUri = _.get(config, 'oidc.redirect_uri')
-      const redirectUris = _.get(config, 'oidc.redirect_uris')
+      const redirectUri = _.get(config, ['oidc', 'redirect_uri'])
+      const redirectUris = _.get(config, ['oidc', 'redirect_uris'])
       if (redirectUri && _.isEmpty(redirectUris)) {
-        _.set(config, 'oidc.redirect_uris', [redirectUri])
+        _.set(config, ['oidc', 'redirect_uris'], [redirectUri])
       }
       requiredConfigurationProperties.push(
         'oidc.issuer',
         'oidc.client_id',
-        'oidc.redirect_uris'
+        'oidc.redirect_uris',
       )
     }
 
@@ -206,11 +206,11 @@ module.exports = {
     if (config.sessionSecretPrevious) {
       sessionSecrets.push(config.sessionSecretPrevious)
     }
-    _.set(config, 'sessionSecrets', sessionSecrets)
-    _.set(config, 'frontend.apiServerUrl', config.apiServerUrl)
-    _.set(config, 'frontend.clusterIdentity', config.clusterIdentity)
-    if (!config.gitHub && _.has(config, 'frontend.ticket')) {
-      _.unset(config, 'frontend.ticket')
+    _.set(config, ['sessionSecrets'], sessionSecrets)
+    _.set(config, ['frontend', 'apiServerUrl'], config.apiServerUrl)
+    _.set(config, ['frontend', 'clusterIdentity'], config.clusterIdentity)
+    if (!config.gitHub && _.has(config, ['frontend', 'ticket'])) {
+      _.unset(config, ['frontend', 'ticket'])
     }
 
     return config
@@ -218,5 +218,5 @@ module.exports = {
   readConfig (path) {
     const data = fs.readFileSync(path, 'utf8') // eslint-disable-line security/detect-non-literal-fs-filename
     return yaml.load(data)
-  }
+  },
 }

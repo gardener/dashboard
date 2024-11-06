@@ -126,11 +126,11 @@ describe('security', function () {
         authorization_endpoint: issuerUrl + '/oauth2/authorize',
         token_endpoint: issuerUrl + '/oauth2/token',
         jwks_uri: issuerUrl + '/oauth2/jwks',
-        code_challenge_methods_supported: ['S256', 'plain']
+        code_challenge_methods_supported: ['S256', 'plain'],
       })
       client = new issuer.Client({
         client_id: config.oidc.client_id,
-        client_secret: config.oidc.client_secret
+        client_secret: config.oidc.client_secret,
       })
       mockGetIssuerClient = jest.spyOn(security, 'getIssuerClient').mockResolvedValue(client)
       mockRefresh = jest.spyOn(client, 'refresh').mockImplementation(async () => {
@@ -139,7 +139,7 @@ describe('security', function () {
         return {
           id_token: idToken,
           expires_at: iat + expiresIn,
-          refresh_token: 'new-refresh-token'
+          refresh_token: 'new-refresh-token',
         }
       })
       mockState = jest.spyOn(openidClient.generators, 'state').mockReturnValue('state')
@@ -157,34 +157,34 @@ describe('security', function () {
       const scope = 'oidc email groups profile offline_access'
       mockSecurity({ oidc: { scope, usePKCE: true } })
       const query = {
-        redirectUrl: redirectUrl.toString()
+        redirectUrl: redirectUrl.toString(),
       }
       const req = { query }
       const res = {
-        cookie: jest.fn()
+        cookie: jest.fn(),
       }
       const authorizationUrl = await security.authorizationUrl(req, res)
       const url = new URL(authorizationUrl)
-      expect(mockGetIssuerClient).toBeCalledTimes(1)
-      expect(mockState).toBeCalledTimes(1)
-      expect(mockCodeVerifier).toBeCalledTimes(1)
-      expect(mockCodeChallenge).toBeCalledTimes(1)
+      expect(mockGetIssuerClient).toHaveBeenCalledTimes(1)
+      expect(mockState).toHaveBeenCalledTimes(1)
+      expect(mockCodeVerifier).toHaveBeenCalledTimes(1)
+      expect(mockCodeChallenge).toHaveBeenCalledTimes(1)
       expect(mockCodeChallenge.mock.calls[0]).toEqual(['code-verifier'])
-      expect(res.cookie).toBeCalledTimes(2)
+      expect(res.cookie).toHaveBeenCalledTimes(2)
       expect(res.cookie.mock.calls).toEqual([
         [
           '__Host-gStt',
           {
             redirectOrigin: redirectUrl.origin,
             redirectPath: redirectUrl.pathname,
-            state: 'state'
+            state: 'state',
           },
           {
             httpOnly: true,
             maxAge: 180000,
             sameSite: 'Lax',
-            secure: true
-          }
+            secure: true,
+          },
         ],
         [
           '__Host-gCdVrfr',
@@ -193,9 +193,9 @@ describe('security', function () {
             httpOnly: true,
             maxAge: 180000,
             sameSite: 'Lax',
-            secure: true
-          }
-        ]
+            secure: true,
+          },
+        ],
       ])
       expect(url.origin).toBe(config.oidc.issuer)
       const params = Object.fromEntries(url.searchParams)
@@ -206,7 +206,7 @@ describe('security', function () {
         redirect_uri: redirectUrl.origin + '/auth/callback',
         state: 'state',
         code_challenge: 'code-challenge',
-        code_challenge_method: 'S256'
+        code_challenge_method: 'S256',
       }))
     })
 
@@ -215,21 +215,21 @@ describe('security', function () {
       const {
         COOKIE_HEADER_PAYLOAD,
         COOKIE_SIGNATURE,
-        COOKIE_TOKEN
+        COOKIE_TOKEN,
       } = security
       const sub = 'john.doe@example.org'
       const iat = now()
       const idTokenPayload = {
         iat,
         sub,
-        exp: iat - 60
+        exp: iat - 60,
       }
       const accessTokenPayload = {
         iat,
         id: sub,
         exp: iat + 24 * expiresIn,
         refresh_at: idTokenPayload.exp,
-        aud: ['gardener']
+        aud: ['gardener'],
       }
       const idToken = await jose.sign(idTokenPayload)
       const accessToken = await jose.sign(accessTokenPayload)
@@ -238,37 +238,37 @@ describe('security', function () {
       const encryptedValues = await jose.encrypt([idToken, refreshToken].join(','))
       const req = {
         headers: {
-          'x-requested-with': 'XMLHttpRequest'
+          'x-requested-with': 'XMLHttpRequest',
         },
         cookies: {
           [COOKIE_HEADER_PAYLOAD]: [header, payload].join('.'),
           [COOKIE_SIGNATURE]: signature,
-          [COOKIE_TOKEN]: encryptedValues
-        }
+          [COOKIE_TOKEN]: encryptedValues,
+        },
       }
       const res = {
         cookie: jest.fn(),
-        clearCookie: jest.fn()
+        clearCookie: jest.fn(),
       }
       const user = await security.refreshToken(req, res)
 
-      expect(mockGetIssuerClient).toBeCalledTimes(1)
-      expect(mockRefresh).toBeCalledTimes(1)
+      expect(mockGetIssuerClient).toHaveBeenCalledTimes(1)
+      expect(mockRefresh).toHaveBeenCalledTimes(1)
       expect(mockRefresh.mock.calls[0]).toEqual([refreshToken])
       expect(mockRefresh.mock.results[0].value).toBeInstanceOf(Promise)
       const tokenSet = await mockRefresh.mock.results[0].value
       expect(tokenSet).toEqual(expect.objectContaining({
         id_token: expect.stringMatching(/^[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$/),
         expires_at: expect.any(Number),
-        refresh_token: 'new-refresh-token'
+        refresh_token: 'new-refresh-token',
       }))
-      expect(mockIsAuthenticated).toBeCalledTimes(1)
+      expect(mockIsAuthenticated).toHaveBeenCalledTimes(1)
       expect(mockIsAuthenticated.mock.calls[0]).toEqual([{
-        token: tokenSet.id_token
+        token: tokenSet.id_token,
       }])
-      expect(mockIsAdmin).toBeCalledTimes(1)
+      expect(mockIsAdmin).toHaveBeenCalledTimes(1)
       expect(mockIsAdmin.mock.calls[0]).toEqual([{
-        auth: { bearer: tokenSet.id_token }
+        auth: { bearer: tokenSet.id_token },
       }])
       expect(user).toEqual({
         iat: expect.toBeWithinRange(iat, iat + 5),
@@ -279,27 +279,27 @@ describe('security', function () {
         exp: accessTokenPayload.exp,
         refresh_at: security.decode(tokenSet.id_token).exp,
         rti: expect.stringMatching(/^[a-z0-9]{7}$/),
-        isAdmin: false
+        isAdmin: false,
       })
 
-      expect(res.clearCookie).not.toBeCalled()
-      expect(res.cookie).toBeCalledTimes(3)
+      expect(res.clearCookie).not.toHaveBeenCalled()
+      expect(res.cookie).toHaveBeenCalledTimes(3)
       expect(res.cookie.mock.calls).toEqual([
         [
           COOKIE_HEADER_PAYLOAD,
           expect.stringMatching(/^[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$/),
-          { secure: true, expires: undefined, sameSite: 'Lax' }
+          { secure: true, expires: undefined, sameSite: 'Lax' },
         ],
         [
           COOKIE_SIGNATURE,
           expect.stringMatching(/^[a-zA-Z0-9_-]{43}$/),
-          { secure: true, httpOnly: true, expires: undefined, sameSite: 'Lax' }
+          { secure: true, httpOnly: true, expires: undefined, sameSite: 'Lax' },
         ],
         [
           COOKIE_TOKEN,
           expect.stringMatching(/^[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$/),
-          { secure: true, httpOnly: true, expires: undefined, sameSite: 'Lax' }
-        ]
+          { secure: true, httpOnly: true, expires: undefined, sameSite: 'Lax' },
+        ],
       ])
     })
   })

@@ -44,7 +44,7 @@ describe('kube-client', () => {
         expect(listWatcher.list({ b: 2 })).toBe(body)
         expect(listFunc).toBeCalledTimes(1)
         expect(listFunc.mock.calls[0]).toEqual([{
-          searchParams: new URLSearchParams({ a: 1, b: 2 })
+          searchParams: new URLSearchParams({ a: 1, b: 2 }),
         }])
       })
 
@@ -55,7 +55,7 @@ describe('kube-client', () => {
         expect(watchFunc).toBeCalledTimes(1)
         expect(watchFunc.mock.calls[0]).toEqual([{
           signal,
-          searchParams: new URLSearchParams({ a: 1, b: 2 })
+          searchParams: new URLSearchParams({ a: 1, b: 2 }),
         }])
       })
     })

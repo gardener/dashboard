@@ -16,7 +16,7 @@ import {
   isStatusProgressing,
   isReconciliationDeactivated,
   getCreatedBy,
-  isShootStatusHibernated,
+  isStatusHibernated,
   getIssueSince,
 } from '@/utils'
 import {
@@ -295,7 +295,7 @@ export function getSortVal (state, context, item, sortBy) {
       }
       return inProgress
         ? '6' + padStart(operation.progress, 2, '0')
-        : isShootStatusHibernated(status)
+        : isStatusHibernated(status)
           ? 500
           : 700
     }

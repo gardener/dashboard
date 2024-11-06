@@ -22,7 +22,7 @@ describe('kube-client', () => {
       return {
         apiVersion: 'v1',
         kind: 'Dummy',
-        metadata: { ...metadata }
+        metadata: { ...metadata },
       }
     }
 
@@ -46,9 +46,9 @@ describe('kube-client', () => {
       list () {
         return {
           metadata: {
-            resourceVersion: '1'
+            resourceVersion: '1',
           },
-          items: []
+          items: [],
         }
       }
     }
@@ -59,7 +59,7 @@ describe('kube-client', () => {
         this.version = 'v1'
         this.names = {
           kind: 'Dummy',
-          plural: 'dummies'
+          plural: 'dummies',
         }
         this.stream = undefined
         this.expiredErrorForToken = undefined
@@ -74,7 +74,7 @@ describe('kube-client', () => {
         await nextTick()
         const metadata = {
           resourceVersion: '2',
-          selfLink: 'link'
+          selfLink: 'link',
         }
         if (!continueToken) {
           if (limit !== 1) {
@@ -86,13 +86,13 @@ describe('kube-client', () => {
           throw new ApiErrors.StatusError({
             code: 410,
             reason: 'Expired',
-            message: 'Resource is expired'
+            message: 'Resource is expired',
           })
         }
         if (continueToken === 'b') {
           return {
             metadata: {},
-            items: [b]
+            items: [b],
           }
         }
         throw new Error('Unexpected continue token')
@@ -177,7 +177,7 @@ describe('kube-client', () => {
         expect(metadata).toEqual({
           resourceVersion: '2',
           selfLink: 'link',
-          paginated: true
+          paginated: true,
         })
         expect(items).toEqual([a, b])
       })
@@ -191,7 +191,7 @@ describe('kube-client', () => {
         const { metadata, items } = await listPager.list(options)
         expect(metadata).toEqual({
           resourceVersion: '2',
-          selfLink: 'link'
+          selfLink: 'link',
         })
         expect(items).toEqual([a, b])
       })
@@ -207,7 +207,6 @@ describe('kube-client', () => {
         try {
           await listPager.list(options)
         } catch (err) {
-          // eslint-disable-next-line jest/no-conditional-expect
           expect(ApiErrors.isExpiredError(err)).toBe(true)
         }
         listPager.fullListIfExpired = true
@@ -215,7 +214,7 @@ describe('kube-client', () => {
         expect(metadata).toEqual({
           resourceVersion: '2',
           selfLink: 'link',
-          paginated: true
+          paginated: true,
         })
         expect(items).toEqual([a, b])
       })
@@ -289,7 +288,6 @@ describe('kube-client', () => {
           try {
             await reflector.watchHandler(stream, 1000)
           } catch (err) {
-            // eslint-disable-next-line jest/no-conditional-expect
             expect(ApiErrors.isExpiredError(err)).toBe(true)
           }
           expect(reflector.lastSyncResourceVersion).toBe('9')
@@ -330,7 +328,7 @@ describe('kube-client', () => {
           expect(createPagerStub).toHaveBeenCalledTimes(1)
           expect(listStub).toHaveBeenCalledTimes(1)
           expect(listStub.mock.calls).toEqual([
-            [{ resourceVersion: '0' }]
+            [{ resourceVersion: '0' }],
           ])
         })
 
@@ -342,7 +340,7 @@ describe('kube-client', () => {
           expect(listStub).toHaveBeenCalledTimes(2)
           expect(listStub.mock.calls).toEqual([
             [{ resourceVersion: '0' }],
-            [{ resourceVersion: '' }]
+            [{ resourceVersion: '' }],
           ])
         })
 
@@ -350,9 +348,9 @@ describe('kube-client', () => {
           listStub.mockResolvedValueOnce({
             metadata: {
               resourceVersion: '2',
-              paginated: true
+              paginated: true,
             },
-            items: [a, b]
+            items: [a, b],
           })
           watchStub.mockRejectedValueOnce(connectionRefusedError)
           watchStub.mockImplementationOnce(() => {
@@ -369,13 +367,13 @@ describe('kube-client', () => {
             [{
               allowWatchBookmarks: true,
               timeoutSeconds: expect.toBeWithinRange(30, 60),
-              resourceVersion: '2'
+              resourceVersion: '2',
             }],
             [{
               allowWatchBookmarks: true,
               timeoutSeconds: expect.toBeWithinRange(30, 60),
-              resourceVersion: '2'
-            }]
+              resourceVersion: '2',
+            }],
           ])
           expect(store.listKeys()).toEqual(['a', 'b'])
         })
@@ -384,9 +382,9 @@ describe('kube-client', () => {
           listStub.mockResolvedValueOnce({
             metadata: {
               resourceVersion: '2',
-              paginated: true
+              paginated: true,
             },
-            items: [a, b]
+            items: [a, b],
           })
           watchStub.mockImplementationOnce(() => {
             const stream = new TestStream()
@@ -407,9 +405,9 @@ describe('kube-client', () => {
           listStub.mockResolvedValueOnce({
             metadata: {
               resourceVersion: '2',
-              paginated: true
+              paginated: true,
             },
-            items: [a, b]
+            items: [a, b],
           })
           watchStub.mockImplementationOnce(() => {
             const stream = new TestStream()

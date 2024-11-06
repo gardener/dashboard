@@ -11,5 +11,5 @@ const matchers = require('./matchers')
 
 module.exports = {
   helper,
-  matchers
+  matchers,
 }
