@@ -495,7 +495,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     if (!cloudProfile) {
       return []
     }
-    const regionData = find(cloudProfile.data.regions, ['name', region])
+    const regionData = find(cloudProfile.data.regions, [['name'], region])
     if (!regionData) {
       return []
     }
