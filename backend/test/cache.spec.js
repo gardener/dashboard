@@ -21,10 +21,10 @@ describe('cache', function () {
     const a = { store: { id: 1 } }
     const b = { store: { id: 2 } }
     cache.initialize({ a, b })
-    expect(stub).toBeCalledTimes(2)
+    expect(stub).toHaveBeenCalledTimes(2)
     expect(stub.mock.calls).toEqual([
       ['a', { id: 1 }],
-      ['b', { id: 2 }]
+      ['b', { id: 2 }],
     ])
   })
 
@@ -32,34 +32,34 @@ describe('cache', function () {
     const list = []
     const stub = jest.spyOn(internalCache, 'getCloudProfiles').mockReturnValue(list)
     expect(cache.getCloudProfiles()).toBe(list)
-    expect(stub).toBeCalledTimes(1)
+    expect(stub).toHaveBeenCalledTimes(1)
   })
 
   it('should dispatch "getQuotas" to internal cache', function () {
     const list = []
     const stub = jest.spyOn(internalCache, 'getQuotas').mockReturnValue(list)
     expect(cache.getQuotas()).toBe(list)
-    expect(stub).toBeCalledTimes(1)
+    expect(stub).toHaveBeenCalledTimes(1)
   })
 
   it('should dispatch "getSeeds" to internal cache', function () {
     const list = []
     const stub = jest.spyOn(internalCache, 'getSeeds').mockReturnValue(list)
     expect(cache.getSeeds()).toBe(list)
-    expect(stub).toBeCalledTimes(1)
+    expect(stub).toHaveBeenCalledTimes(1)
   })
 
   it('should dispatch "getProjects" to internal cache', function () {
     const list = []
     const stub = jest.spyOn(internalCache, 'getProjects').mockReturnValue(list)
     expect(cache.getProjects()).toBe(list)
-    expect(stub).toBeCalledTimes(1)
+    expect(stub).toHaveBeenCalledTimes(1)
   })
 
   it('should dispatch "getShoots" to internal cache', function () {
     const list = [
       { metadata: { uid: 1, namespace: 'foo' } },
-      { metadata: { uid: 2, namespace: 'bar' } }
+      { metadata: { uid: 2, namespace: 'bar' } },
     ]
     const store = new Store()
     store.replace(list)
@@ -89,14 +89,14 @@ describe('cache', function () {
     const list = []
     const stub = jest.spyOn(internalCache, 'getControllerRegistrations').mockReturnValue(list)
     expect(cache.getControllerRegistrations()).toBe(list)
-    expect(stub).toBeCalledTimes(1)
+    expect(stub).toHaveBeenCalledTimes(1)
   })
 
   it('should dispatch "getResourceQuotas" to internal cache', function () {
     const list = []
     const stub = jest.spyOn(internalCache, 'getResourceQuotas').mockReturnValue(list)
     expect(cache.getResourceQuotas()).toBe(list)
-    expect(stub).toBeCalledTimes(1)
+    expect(stub).toHaveBeenCalledTimes(1)
   })
 
   describe('Cache', function () {

@@ -6,7 +6,10 @@
 
 import { computed } from 'vue'
 
-import utils from '@/utils'
+import {
+  isStatusHibernated,
+  isTypeDelete,
+} from '@/utils'
 
 import {
   get,
@@ -20,11 +23,11 @@ export const useShootStatus = shootItem => {
   })
 
   const isShootStatusHibernated = computed(() => {
-    return utils.isShootStatusHibernated(shootStatus.value)
+    return isStatusHibernated(shootStatus.value)
   })
 
   const isShootLastOperationTypeDelete = computed(() => {
-    return utils.isTypeDelete(shootLastOperation.value)
+    return isTypeDelete(shootLastOperation.value)
   })
 
   const isShootLastOperationTypeControlPlaneMigrating = computed(() => {

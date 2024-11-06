@@ -20,9 +20,9 @@ const secretBindingList = [
     cloudProfileName: 'infra1-profileName',
     secretRef: {
       namespace: 'garden-foo',
-      name: 'secret1'
+      name: 'secret1',
     },
-    quotas
+    quotas,
   }),
   getSecretBinding({
     namespace: 'garden-foo',
@@ -30,9 +30,9 @@ const secretBindingList = [
     cloudProfileName: 'infra3-profileName',
     secretRef: {
       namespace: 'garden-foo',
-      name: 'secret2'
+      name: 'secret2',
     },
-    quotas
+    quotas,
   }),
   getSecretBinding({
     namespace: 'garden-foo',
@@ -40,9 +40,9 @@ const secretBindingList = [
     cloudProfileName: 'infra1-profileName',
     secretRef: {
       namespace: 'garden-trial',
-      name: 'trial-secret'
+      name: 'trial-secret',
     },
-    quotas
+    quotas,
   }),
   getSecretBinding({
     namespace: 'garden-foo',
@@ -50,10 +50,10 @@ const secretBindingList = [
     dnsProviderName: 'foo-dns',
     secretRef: {
       namespace: 'garden-foo',
-      name: 'secret3'
+      name: 'secret3',
     },
-    quotas
-  })
+    quotas,
+  }),
 ]
 
 function getSecretBinding ({ namespace, name, cloudProfileName, dnsProviderName, secretRef = {}, quotas = [] }) {
@@ -69,10 +69,10 @@ function getSecretBinding ({ namespace, name, cloudProfileName, dnsProviderName,
     metadata: {
       name,
       namespace,
-      labels
+      labels,
     },
     secretRef,
-    quotas
+    quotas,
   }
 }
 
@@ -89,7 +89,7 @@ const secretBindings = {
     return namespace
       ? filter(items, ['metadata.namespace', namespace])
       : items
-  }
+  },
 }
 
 const matchOptions = { decode: decodeURIComponent }
@@ -116,8 +116,8 @@ const mocks = {
       }
       const { params: { namespace } = {} } = matchResult
       const item = cloneDeep(json)
-      set(item, 'metadata.namespace', namespace)
-      set(item, 'metadata. resourceVersion', resourceVersion)
+      set(item, ['metadata', 'namespace'], namespace)
+      set(item, ['metadata', ' resourceVersion'], resourceVersion)
       return Promise.resolve(item)
     }
   },
@@ -142,10 +142,10 @@ const mocks = {
       const item = secretBindings.get(namespace, name)
       return Promise.resolve(item)
     }
-  }
+  },
 }
 
 module.exports = {
   ...secretBindings,
-  mocks
+  mocks,
 }

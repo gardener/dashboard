@@ -62,5 +62,5 @@ module.exports = {
   hash,
   randomNumber,
   encodeBase64,
-  decodeBase64
+  decodeBase64,
 }

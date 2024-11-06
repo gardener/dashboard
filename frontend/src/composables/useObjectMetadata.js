@@ -6,7 +6,10 @@
 
 import { computed } from 'vue'
 
-import utils from '@/utils'
+import {
+  getCreatedBy,
+  getTimestampFormatted,
+} from '@/utils'
 
 import {
   get,
@@ -95,11 +98,11 @@ export const useObjectMetadata = object => {
   })
 
   const createdBy = computed(() => {
-    return utils.getCreatedBy(metadata.value)
+    return getCreatedBy(metadata.value)
   })
 
   const createdAt = computed(() => {
-    return utils.getTimestampFormatted(creationTimestamp.value)
+    return getTimestampFormatted(creationTimestamp.value)
   })
 
   const isNew = computed(() => {

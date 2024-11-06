@@ -24,7 +24,7 @@ function load (clientConfig, options) {
   const createInstance = Ctor => new Ctor(clientConfig.extend({
     ...options,
     responseType: 'json',
-    relativeUrl: Ctor[http.relativeUrl]
+    relativeUrl: Ctor[http.relativeUrl],
   }))
   const createInstances = resourceGroup => _.mapValues(resourceGroup, createInstance)
   return _.mapValues(resourceGroups, createInstances)
@@ -35,7 +35,7 @@ function getResourceMetadata (Resource) {
   return {
     name: plural,
     kind,
-    apiVersion: group === '' ? version : `${group}/${version}`
+    apiVersion: group === '' ? version : `${group}/${version}`,
   }
 }
 
@@ -52,14 +52,14 @@ exports.Resources = _.reduce(resourceGroups, getResourceGroupMetadata, {
   TokenRequest: {
     name: 'token',
     kind: 'TokenRequest',
-    apiVersion: 'authentication.k8s.io/v1'
+    apiVersion: 'authentication.k8s.io/v1',
   },
   AdminKubeconfigRequest: {
     name: 'adminkubeconfig',
     kind: 'AdminKubeconfigRequest',
     apiVersion: 'authentication.gardener.cloud/v1alpha1',
-    subresource: true
-  }
+    subresource: true,
+  },
 })
 
 exports.assign = (object, ...args) => {

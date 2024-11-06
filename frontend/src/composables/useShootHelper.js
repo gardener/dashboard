@@ -16,7 +16,7 @@ import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useSecretStore } from '@/store/secret'
 import { useSeedStore } from '@/store/seed'
 
-import utils from '@/utils'
+import { selfTerminationDaysForSecret } from '@/utils'
 
 import { useShootAccessRestrictions } from './useShootAccessRestrictions'
 
@@ -131,7 +131,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     if (some(addons.value, 'enabled')) {
       return ['evaluation']
     }
-    return utils.selfTerminationDaysForSecret(infrastructureSecret.value)
+    return selfTerminationDaysForSecret(infrastructureSecret.value)
       ? ['evaluation']
       : ['evaluation', 'development', 'testing', 'production']
   })

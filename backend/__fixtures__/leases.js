@@ -23,12 +23,12 @@ const getLease = (renewTime = null) => {
   return {
     metadata: {
       namespace: POD_NAMESPACE,
-      name: 'gardener-dashboard-github-webhook'
+      name: 'gardener-dashboard-github-webhook',
     },
     spec: {
       holderIdentity: POD_NAME,
-      renewTime
-    }
+      renewTime,
+    },
   }
 }
 
@@ -41,7 +41,7 @@ const leases = {
   },
   get (namespace, name) {
     return find(leases.list(), { metadata: { namespace, name } })
-  }
+  },
 }
 
 const matchOptions = { decode: decodeURIComponent }
@@ -87,10 +87,10 @@ const mocks = {
       const item = leases.get(name)
       return Promise.resolve(item)
     }
-  }
+  },
 }
 
 module.exports = {
   ...leases,
-  mocks
+  mocks,
 }

@@ -18,7 +18,7 @@ const {
   HTTP2_HEADER_AUTHORITY,
   HTTP2_HEADER_PATH,
   HTTP2_HEADER_METHOD,
-  HTTP2_HEADER_AUTHORIZATION
+  HTTP2_HEADER_AUTHORIZATION,
 } = http2.constants
 
 class MockClient {
@@ -51,7 +51,7 @@ class MockClient {
       [HTTP2_HEADER_METHOD]: method,
       [HTTP2_HEADER_SCHEME]: protocol.replace(/:$/, ''),
       [HTTP2_HEADER_AUTHORITY]: host,
-      [HTTP2_HEADER_PATH]: pathname
+      [HTTP2_HEADER_PATH]: pathname,
     }
     headers[HTTP2_HEADER_PATH] = join(headers[HTTP2_HEADER_PATH], path)
     if (searchParams) {
@@ -74,5 +74,5 @@ class MockClient {
 module.exports = {
   ...request,
   extend: jest.fn(options => new MockClient(options)),
-  mockRequest
+  mockRequest,
 }

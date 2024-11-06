@@ -8,7 +8,10 @@ import { computed } from 'vue'
 
 import { useProjectStore } from '@/store/project'
 
-import utils from '@/utils'
+import {
+  isTruthyValue,
+  isReconciliationDeactivated,
+} from '@/utils'
 
 import { useObjectMetadata } from './useObjectMetadata'
 
@@ -47,7 +50,7 @@ export const useShootMetadata = (shootItem, options = {}) => {
   })
 
   const shootConfirmationDeletion = computed(() => {
-    return utils.isTruthyValue(getShootAnnotation('confirmation.gardener.cloud/deletion'))
+    return isTruthyValue(getShootAnnotation('confirmation.gardener.cloud/deletion'))
   })
 
   const isShootMarkedForDeletion = computed(() => {
@@ -55,7 +58,7 @@ export const useShootMetadata = (shootItem, options = {}) => {
   })
 
   const shootConfirmationForceDeletion = computed(() => {
-    return utils.isTruthyValue(getShootAnnotation('confirmation.gardener.cloud/force-deletion'))
+    return isTruthyValue(getShootAnnotation('confirmation.gardener.cloud/force-deletion'))
   })
 
   const isShootMarkedForForceDeletion = computed(() => {
@@ -63,7 +66,7 @@ export const useShootMetadata = (shootItem, options = {}) => {
   })
 
   const isShootReconciliationDeactivated = computed(() => {
-    return utils.isReconciliationDeactivated(shootMetadata.value)
+    return isReconciliationDeactivated(shootMetadata.value)
   })
 
   const shootGardenerOperation = computed(() => {

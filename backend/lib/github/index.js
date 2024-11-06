@@ -11,13 +11,13 @@ const config = require('../config')
 
 const {
   org: owner,
-  repository: repo
+  repository: repo,
 } = config.gitHub || {}
 
 function searchIssues ({ state, title } = {}) {
   const q = [
     `repo:${owner}/${repo}`,
-    'is:issue'
+    'is:issue',
   ]
   if (state) {
     q.push(`state:${state}`)
@@ -26,7 +26,7 @@ function searchIssues ({ state, title } = {}) {
     q.push(`${title} in:title`)
   }
   const options = octokit.search.issuesAndPullRequests.endpoint.merge({
-    q: q.join(' ')
+    q: q.join(' '),
   })
   return octokit.paginate(options)
 }
@@ -35,7 +35,7 @@ function getIssue ({ number }) {
   return octokit.issues.get({
     owner,
     repo,
-    issue_number: number
+    issue_number: number,
   })
 }
 
@@ -44,7 +44,7 @@ function closeIssue ({ number }) {
     owner,
     repo,
     issue_number: number,
-    state: 'closed'
+    state: 'closed',
   })
 }
 
@@ -91,12 +91,12 @@ async function getComments ({ number }) {
         html_url: node.url,
         user: {
           login: author.login ?? 'ghost',
-          avatar_url: author.avatarUrl
+          avatar_url: author.avatarUrl,
         },
         created_at: node.createdAt,
         updated_at: node.updatedAt,
         author_association: node.authorAssociation,
-        body: node.body
+        body: node.body,
       }
     })
 }
@@ -106,7 +106,7 @@ function createComment ({ number }, body) {
     owner,
     repo,
     issue_number: number,
-    body
+    body,
   })
 }
 
@@ -116,5 +116,5 @@ module.exports = {
   closeIssue,
   getIssue,
   getComments,
-  createComment
+  createComment,
 }

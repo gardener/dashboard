@@ -44,7 +44,7 @@ describe('hooks', () => {
         ['core.gardener.cloud', 'quotas'],
         ['core.gardener.cloud', 'shoots'],
         ['core', 'resourcequotas'],
-        ['coordination.k8s.io', 'leases']
+        ['coordination.k8s.io', 'leases'],
       ]
 
       for (const [apiGroup, name] of resources) {
@@ -52,9 +52,9 @@ describe('hooks', () => {
 
         const informer = {
           names: {
-            plural: name
+            plural: name,
           },
-          mockFn: jest.fn(() => informer)
+          mockFn: jest.fn(() => informer),
         }
 
         observable.informerAllNamespaces = informer.mockFn
@@ -64,7 +64,7 @@ describe('hooks', () => {
       for (const [, name] of resources) {
         const { mockFn, names } = informers[name]
         expect(names.plural).toBe(name)
-        expect(mockFn).toBeCalledTimes(1)
+        expect(mockFn).toHaveBeenCalledTimes(1)
       }
     })
 
@@ -72,15 +72,15 @@ describe('hooks', () => {
       // initial state
       expect(hooks.io).toBeUndefined()
       await hooks.cleanup()
-      expect(hooks.ac.abort).toBeCalledTimes(1)
+      expect(hooks.ac.abort).toHaveBeenCalledTimes(1)
       hooks.ac.abort.mockClear()
       // listening state
       hooks.io = {
-        close: jest.fn(callback => setImmediate(callback))
+        close: jest.fn(callback => setImmediate(callback)),
       }
       await hooks.cleanup()
-      expect(hooks.ac.abort).toBeCalledTimes(1)
-      expect(hooks.io.close).toBeCalledTimes(1)
+      expect(hooks.ac.abort).toHaveBeenCalledTimes(1)
+      expect(hooks.io.close).toHaveBeenCalledTimes(1)
       expect(hooks.io.close.mock.calls[0]).toEqual([expect.any(Function)])
     })
 
@@ -96,15 +96,15 @@ describe('hooks', () => {
           leases: {
             run: jest.fn(),
             store: {
-              untilHasSynced: Promise.resolve('leases')
-            }
+              untilHasSynced: Promise.resolve('leases'),
+            },
           },
           shoots: {
             run: jest.fn(),
             store: {
-              untilHasSynced: Promise.resolve('shoots')
-            }
-          }
+              untilHasSynced: Promise.resolve('shoots'),
+            },
+          },
         }
         hooks.constructor.createInformers = mockCreateInformers = jest.fn(() => informers)
         cache.initialize = jest.fn()
@@ -115,25 +115,25 @@ describe('hooks', () => {
       it('should create and run informers, create io instance and initialize cache and watches', async function () {
         await expect(hooks.beforeListen(server)).resolves.toEqual(['leases', 'shoots'])
 
-        expect(mockCreateInformers).toBeCalledTimes(1)
+        expect(mockCreateInformers).toHaveBeenCalledTimes(1)
         expect(mockCreateInformers.mock.calls[0]).toHaveLength(1)
         expect(mockCreateInformers.mock.calls[0][0]).toBe(hooks.client)
 
         for (const informer of Object.values(informers)) {
-          expect(informer.run).toBeCalledTimes(1)
+          expect(informer.run).toHaveBeenCalledTimes(1)
           expect(informer.run.mock.calls[0]).toHaveLength(1)
           expect(informer.run.mock.calls[0][0]).toBe(hooks.ac.signal)
         }
 
-        expect(cache.initialize).toBeCalledTimes(1)
+        expect(cache.initialize).toHaveBeenCalledTimes(1)
         expect(cache.initialize.mock.calls[0]).toHaveLength(1)
         expect(cache.initialize.mock.calls[0][0]).toBe(informers)
 
-        expect(io).toBeCalledTimes(1)
+        expect(io).toHaveBeenCalledTimes(1)
         expect(io.mock.calls[0]).toEqual([server, cache])
 
         for (const [key, watch] of Object.entries(watches)) {
-          expect(watch).toBeCalledTimes(1)
+          expect(watch).toHaveBeenCalledTimes(1)
           expect(watch.mock.calls[0]).toHaveLength(key === 'leases' ? 3 : 2)
           expect(watch.mock.calls[0][0]).toBe(ioInstance)
           expect(watch.mock.calls[0][1]).toBe(informers[key])

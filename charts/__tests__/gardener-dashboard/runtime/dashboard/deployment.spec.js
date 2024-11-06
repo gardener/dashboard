@@ -16,7 +16,7 @@ describe('gardener-dashboard', function () {
 
     beforeEach(() => {
       templates = [
-        'deployment'
+        'deployment',
       ]
     })
 
@@ -32,11 +32,11 @@ describe('gardener-dashboard', function () {
               annotations: {
                 'checksum/configmap-gardener-dashboard-config': expect.stringMatching(/[0-9a-f]{64}/),
                 'checksum/secret-gardener-dashboard-oidc': expect.stringMatching(/[0-9a-f]{64}/),
-                'checksum/secret-gardener-dashboard-sessionSecret': expect.stringMatching(/[0-9a-f]{64}/)
-              }
-            }
-          }
-        }
+                'checksum/secret-gardener-dashboard-sessionSecret': expect.stringMatching(/[0-9a-f]{64}/),
+              },
+            },
+          },
+        },
       })
     })
 
@@ -45,10 +45,10 @@ describe('gardener-dashboard', function () {
         global: {
           dashboard: {
             oidc: {
-              clientSecret: 'client-secret'
-            }
-          }
-        }
+              clientSecret: 'client-secret',
+            },
+          },
+        },
       }
       const documents = await renderTemplates(templates, values)
       expect(documents).toHaveLength(1)
@@ -73,9 +73,9 @@ describe('gardener-dashboard', function () {
       const values = {
         global: {
           dashboard: {
-            image: { tag }
-          }
-        }
+            image: { tag },
+          },
+        },
       }
       const documents = await renderTemplates(templates, values)
       expect(documents).toHaveLength(1)
@@ -85,7 +85,7 @@ describe('gardener-dashboard', function () {
       const [container] = containers
       expect(container).toEqual(expect.objectContaining({
         image: 'europe-docker.pkg.dev/gardener-project/releases/gardener/dashboard@' + tag,
-        imagePullPolicy: 'IfNotPresent'
+        imagePullPolicy: 'IfNotPresent',
       }))
     })
 
@@ -93,9 +93,9 @@ describe('gardener-dashboard', function () {
       const values = {
         global: {
           dashboard: {
-            nodeOptions: ['--max-old-space-size=460', '--expose-gc', '--trace-gc', '--gc-interval=100']
-          }
-        }
+            nodeOptions: ['--max-old-space-size=460', '--expose-gc', '--trace-gc', '--gc-interval=100'],
+          },
+        },
       }
       const documents = await renderTemplates(templates, values)
       expect(documents).toHaveLength(1)
@@ -110,9 +110,9 @@ describe('gardener-dashboard', function () {
       const values = {
         global: {
           dashboard: {
-            nodeOptions: []
-          }
-        }
+            nodeOptions: [],
+          },
+        },
       }
       const documents = await renderTemplates(templates, values)
       expect(documents).toHaveLength(1)
@@ -127,9 +127,9 @@ describe('gardener-dashboard', function () {
       const values = {
         global: {
           dashboard: {
-            replicaCount: 3
-          }
-        }
+            replicaCount: 3,
+          },
+        },
       }
       const documents = await renderTemplates(templates, values)
       expect(documents).toHaveLength(1)
@@ -142,10 +142,10 @@ describe('gardener-dashboard', function () {
         global: {
           dashboard: {
             deploymentLabels: {
-              a: 'b'
-            }
-          }
-        }
+              a: 'b',
+            },
+          },
+        },
       }
       const documents = await renderTemplates(templates, values)
       expect(documents).toHaveLength(1)
@@ -159,17 +159,17 @@ describe('gardener-dashboard', function () {
           dashboard: {
             frontendConfig: {
               assets: {
-                foo: 'bar'
-              }
-            }
-          }
-        }
+                foo: 'bar',
+              },
+            },
+          },
+        },
       }
       const documents = await renderTemplates(templates, values)
       expect(documents).toHaveLength(1)
       const [deployment] = documents
       expect(deployment.spec.template.metadata.annotations).toEqual(expect.objectContaining({
-        'checksum/configmap-gardener-dashboard-assets': expect.stringMatching(/[0-9a-f]{64}/)
+        'checksum/configmap-gardener-dashboard-assets': expect.stringMatching(/[0-9a-f]{64}/),
       }))
     })
 
@@ -178,10 +178,10 @@ describe('gardener-dashboard', function () {
         global: {
           dashboard: {
             deploymentAnnotations: {
-              a: 'b'
-            }
-          }
-        }
+              a: 'b',
+            },
+          },
+        },
       }
       const documents = await renderTemplates(templates, values)
       expect(documents).toHaveLength(1)
@@ -194,9 +194,9 @@ describe('gardener-dashboard', function () {
         const values = {
           global: {
             dashboard: {
-              kubeconfig: 'apiVersion: v1'
-            }
-          }
+              kubeconfig: 'apiVersion: v1',
+            },
+          },
         }
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
@@ -223,10 +223,10 @@ describe('gardener-dashboard', function () {
         global: {
           dashboard: {
             serviceAccountTokenVolumeProjection: {
-              enabled: false
-            }
-          }
-        }
+              enabled: false,
+            },
+          },
+        },
       }
       const documents = await renderTemplates(templates, values)
       expect(documents).toHaveLength(1)
@@ -246,16 +246,16 @@ describe('gardener-dashboard', function () {
         const values = {
           global: {
             virtualGarden: {
-              enabled: true
+              enabled: true,
             },
             dashboard: {
               serviceAccountTokenVolumeProjection: {
                 enabled: true,
                 expirationSeconds: 3600,
-                audience: 'https://identity.garden.example.org'
-              }
-            }
-          }
+                audience: 'https://identity.garden.example.org',
+              },
+            },
+          },
         }
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
@@ -277,14 +277,14 @@ describe('gardener-dashboard', function () {
         const values = {
           global: {
             virtualGarden: {
-              enabled: true
+              enabled: true,
             },
             dashboard: {
               serviceAccountTokenVolumeProjection: {
-                enabled: false
-              }
-            }
-          }
+                enabled: false,
+              },
+            },
+          },
         }
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
@@ -296,16 +296,16 @@ describe('gardener-dashboard', function () {
         const values = {
           global: {
             virtualGarden: {
-              enabled: true
+              enabled: true,
             },
             dashboard: {
               projectedKubeconfig: {
                 baseMountPath: '/var/run/secrets/gardener.cloud',
                 genericKubeconfigSecretName: 'generic-token-kubeconfig',
-                tokenSecretName: 'access-dashboard'
-              }
-            }
-          }
+                tokenSecretName: 'access-dashboard',
+              },
+            },
+          },
         }
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
@@ -333,11 +333,11 @@ describe('gardener-dashboard', function () {
             dashboard: {
               gitHub: {
                 authentication: {
-                  token: 'foo'
-                }
-              }
-            }
-          }
+                  token: 'foo',
+                },
+              },
+            },
+          },
         }
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)

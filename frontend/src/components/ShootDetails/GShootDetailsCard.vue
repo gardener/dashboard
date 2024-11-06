@@ -255,7 +255,8 @@ import GCopyBtn from '@/components/GCopyBtn'
 
 import { useShootItem } from '@/composables/useShootItem'
 
-import utils, {
+import {
+  isValidTerminationDate,
   getTimeStringTo,
   shootAddonList,
   transformHtml,
@@ -292,15 +293,15 @@ const {
 } = storeToRefs(authzStore)
 
 const selfTerminationMessage = computed(() => {
-  if (isValidTerminationDate.value) {
+  if (validTerminationDate.value) {
     return `This cluster will self terminate ${getTimeStringTo(new Date(), new Date(shootExpirationTimestamp.value))}`
   } else {
     return 'This cluster is about to self terminate'
   }
 })
 
-const isValidTerminationDate = computed(() => {
-  return utils.isValidTerminationDate(shootExpirationTimestamp.value)
+const validTerminationDate = computed(() => {
+  return isValidTerminationDate(shootExpirationTimestamp.value)
 })
 
 function getAddon (name) {

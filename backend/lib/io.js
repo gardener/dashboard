@@ -32,7 +32,7 @@ function authenticateFn (options) {
   const noop = () => {}
   const res = {
     clearCookie: noop,
-    cookie: noop
+    cookie: noop,
   }
 
   return async req => {
@@ -132,7 +132,7 @@ function synchronizeShoots (socket, uids = []) {
   const [
     isAdmin,
     namespaces,
-    qualifiedNames
+    qualifiedNames,
   ] = parseRooms(rooms)
 
   const uidNotFound = uid => {
@@ -145,9 +145,9 @@ function synchronizeShoots (socket, uids = []) {
       details: {
         uid,
         group: 'core.gardener.cloud',
-        kind: 'shoots'
+        kind: 'shoots',
       },
-      code: 404
+      code: 404,
     }
   }
   return uids.map(uid => {
@@ -199,7 +199,7 @@ function setDisconnectTimeout (socket, delay) {
 function init (httpServer, cache) {
   const io = createServer(httpServer, {
     path: '/api/events',
-    serveClient: false
+    serveClient: false,
   })
 
   // middleware
@@ -218,8 +218,8 @@ function init (httpServer, cache) {
             code: 'ERR_JWT_TOKEN_REFRESH_REQUIRED',
             data: {
               rti: user.rti,
-              exp: user.refresh_at
-            }
+              exp: user.refresh_at,
+            },
           })
         }
       }

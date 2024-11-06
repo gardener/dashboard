@@ -135,5 +135,3 @@ export function createError (status, message, properties = {}) {
   }
   return err
 }
-
-export default fetchWrapper

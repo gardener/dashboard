@@ -14,7 +14,7 @@ const {
   authorizationCallback,
   refreshToken,
   authorizeToken,
-  clearCookies
+  clearCookies,
 } = require('./security')
 const { requestLogger } = require('./middleware')
 
@@ -46,7 +46,7 @@ router.route('/logout')
       clearCookies(res)
       const {
         error = {},
-        redirectPath
+        redirectPath,
       } = req.query
       const hash = error.message
         ? `#error=${encodeURIComponent(error.message)}`

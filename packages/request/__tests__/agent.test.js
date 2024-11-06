@@ -22,7 +22,7 @@ describe('Agent', () => {
   describe('#constructor', () => {
     it('should create an agent instance with defaults', () => {
       const options = {
-        foo: 'bar'
+        foo: 'bar',
       }
       const agent = new Agent(options)
       expect(agent.defaults.options).toEqual({
@@ -30,7 +30,7 @@ describe('Agent', () => {
         keepAliveTimeout: 60000,
         connectTimeout: 15000,
         pingInterval: 0,
-        ...options
+        ...options,
       })
       expect(agent.sessionPools.size).toBe(0)
     })
@@ -42,7 +42,7 @@ describe('Agent', () => {
         keepAliveTimeout: 60000,
         connectTimeout: 15000,
         pingInterval: 30000,
-        foo: 'bar'
+        foo: 'bar',
       }
       const agent = new Agent(options)
       expect(agent.defaults.options).toEqual(options)
@@ -55,7 +55,7 @@ describe('Agent', () => {
       const agent = new Agent()
       const pools = [
         ['https://foo.org'],
-        ['https://bar.org']
+        ['https://bar.org'],
       ]
         .map((...args) => agent.createSessionId(...args))
         .map(sid => agent.getSessionPool(sid))
@@ -72,7 +72,7 @@ describe('Agent', () => {
       const host = 'foo.org'
       const agent = new Agent()
       const headers = {
-        [HTTP2_HEADER_HOST]: host
+        [HTTP2_HEADER_HOST]: host,
       }
       await agent.request(headers, { id: 'id' })
       expect(SessionPool).toBeCalledTimes(1)
@@ -81,13 +81,13 @@ describe('Agent', () => {
           protocol: 'https:',
           host,
           pathname: '/id',
-          hash: expect.stringMatching(/^#[a-f0-9]{7}$/)
-        })
+          hash: expect.stringMatching(/^#[a-f0-9]{7}$/),
+        }),
       ])
       const pool = SessionPool.mock.instances[0]
       expect(pool.request).toBeCalledTimes(1)
       expect(pool.request.mock.calls[0]).toEqual([
-        headers, {}
+        headers, {},
       ])
     })
   })

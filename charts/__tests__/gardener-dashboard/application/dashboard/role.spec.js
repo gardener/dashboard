@@ -16,7 +16,7 @@ describe('gardener-dashboard', function () {
 
     beforeEach(() => {
       templates = [
-        'role'
+        'role',
       ]
     })
 

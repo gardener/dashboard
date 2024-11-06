@@ -16,7 +16,7 @@ class Project extends mix(GardenerCore).with(ClusterScoped, Readable, Observable
     return {
       plural: 'projects',
       singular: 'project',
-      kind: 'Project'
+      kind: 'Project',
     }
   }
 }
@@ -26,7 +26,7 @@ class CloudProfile extends mix(GardenerCore).with(ClusterScoped, Readable, Obser
     return {
       plural: 'cloudprofiles',
       singular: 'cloudprofile',
-      kind: 'CloudProfile'
+      kind: 'CloudProfile',
     }
   }
 }
@@ -36,7 +36,7 @@ class Seed extends mix(GardenerCore).with(ClusterScoped, Readable, Observable) {
     return {
       plural: 'seeds',
       singular: 'seed',
-      kind: 'Seed'
+      kind: 'Seed',
     }
   }
 }
@@ -46,7 +46,7 @@ class Quota extends mix(GardenerCore).with(NamespaceScoped, Readable, Observable
     return {
       plural: 'quotas',
       singular: 'quota',
-      kind: 'Quota'
+      kind: 'Quota',
     }
   }
 }
@@ -56,7 +56,7 @@ class SecretBinding extends mix(GardenerCore).with(NamespaceScoped, Readable, Ob
     return {
       plural: 'secretbindings',
       singular: 'secretbinding',
-      kind: 'SecretBinding'
+      kind: 'SecretBinding',
     }
   }
 }
@@ -70,7 +70,7 @@ class Shoot extends mix(GardenerCore).with(NamespaceScoped, Readable, Observable
     return {
       plural: 'shoots',
       singular: 'shoot',
-      kind: 'Shoot'
+      kind: 'Shoot',
     }
   }
 }
@@ -80,7 +80,7 @@ class ControllerRegistration extends mix(GardenerCore).with(ClusterScoped, Reada
     return {
       plural: 'controllerregistrations',
       singular: 'controllerregistration',
-      kind: 'ControllerRegistration'
+      kind: 'ControllerRegistration',
     }
   }
 }
@@ -92,5 +92,5 @@ module.exports = {
   SecretBinding,
   Seed,
   Shoot,
-  ControllerRegistration
+  ControllerRegistration,
 }

@@ -16,7 +16,7 @@ const { onceEvent } = fixtures.helper
 describe('watcher', () => {
   const paths = [
     '/path/to/ca.crt',
-    '/path/to/token'
+    '/path/to/token',
   ]
   let mockWatch
   let emitter
@@ -32,8 +32,8 @@ describe('watcher', () => {
         awaitWriteFinish: true,
         ignoreInitial: true,
         followSymlinks: true,
-        disableGlobbing: true
-      }
+        disableGlobbing: true,
+      },
     ])
     setImmediate(() => emitter.emit('ready'))
     await onceEvent(watcher, 'ready')
@@ -65,7 +65,7 @@ describe('watcher', () => {
   it('should run a watcher and log errors', async () => {
     const watcher = await createWatcher({
       signal: ac.signal,
-      readFile: path => Promise.resolve(basename(path))
+      readFile: path => Promise.resolve(basename(path)),
     })
     const mockHandler = jest.fn((key, value) => {
       if (value === 'ca.crt') {
@@ -81,12 +81,12 @@ describe('watcher', () => {
     expect(mockHandler).toBeCalledTimes(2)
     expect(mockHandler.mock.calls).toEqual([
       ['/path/to/token', 'token'],
-      ['/path/to/ca.crt', 'ca.crt']
+      ['/path/to/ca.crt', 'ca.crt'],
     ])
     expect(logger.error).toBeCalledTimes(2)
     expect(logger.error.mock.calls).toEqual([
       ['[kube-config] watch files error: %s', 'foo'],
-      ['[kube-config] watch files error: %s', 'bar']
+      ['[kube-config] watch files error: %s', 'bar'],
     ])
   })
 
@@ -94,7 +94,7 @@ describe('watcher', () => {
     const milliseconds = 1
     const watcher = new Watcher(paths, {
       signal: ac.signal,
-      readyTimeout: milliseconds
+      readyTimeout: milliseconds,
     })
     const err = await onceEvent(watcher, 'error')
     expect(err).toBeInstanceOf(Error)
@@ -117,7 +117,7 @@ describe('watcher', () => {
       signal: ac.signal,
       readFile: path => path === '/path/to/token'
         ? Promise.resolve(basename(path))
-        : Promise.reject(readFileError)
+        : Promise.reject(readFileError),
     })
     const mockHandler = jest.fn(() => watcher.destroy())
     watcher.run(mockHandler)
@@ -127,11 +127,11 @@ describe('watcher', () => {
     await onceEvent(watcher, 'close')
     expect(mockHandler).toBeCalledTimes(1)
     expect(mockHandler.mock.calls).toEqual([
-      ['/path/to/token', 'token']
+      ['/path/to/token', 'token'],
     ])
     expect(logger.error).toBeCalledTimes(1)
     expect(logger.error.mock.calls).toEqual([
-      ['[kube-config] read file error %s: %s', 'EREADFILE', 'read file error']
+      ['[kube-config] read file error %s: %s', 'EREADFILE', 'read file error'],
     ])
   })
 })

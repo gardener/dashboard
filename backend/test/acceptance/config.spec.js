@@ -34,7 +34,7 @@ describe('config', function () {
       .expect('content-type', /json/)
       .expect(200)
 
-    expect(mockRequest).toBeCalledTimes(1)
+    expect(mockRequest).toHaveBeenCalledTimes(1)
     expect(mockRequest.mock.calls).toMatchSnapshot()
 
     expect(res.body).toMatchSnapshot()

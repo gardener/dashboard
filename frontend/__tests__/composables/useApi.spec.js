@@ -5,7 +5,8 @@
 //
 
 import { useApi } from '@/composables/useApi'
-import fetchWrapper, {
+import {
+  fetchWrapper,
   registry,
   isUnauthorizedError,
 } from '@/composables/useApi/fetch'

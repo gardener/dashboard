@@ -16,11 +16,11 @@ function fromLabel (item) {
   return _.pick(item, [
     'id',
     'name',
-    'color'
+    'color',
   ])
 }
 
-const apiUrl = _.get(config, 'gitHub.apiUrl')
+const apiUrl = _.get(config, ['gitHub', 'apiUrl'])
 const options = {}
 
 if (apiUrl) {
@@ -42,11 +42,11 @@ function fromIssue (issue) {
         'created_at',
         'updated_at',
         'number',
-        'state'
+        'state',
       ])
       .assign({
         projectName,
-        name
+        name,
       })
       .value(),
     data: _
@@ -55,14 +55,14 @@ function fromIssue (issue) {
         'user.login',
         'user.avatar_url',
         'html_url',
-        'comments'
+        'comments',
       ])
       .assign({
         body: converter.makeSanitizedHtml(issue.body),
         labels,
-        ticketTitle
+        ticketTitle,
       })
-      .value()
+      .value(),
   }
 }
 exports.fromIssue = fromIssue
@@ -73,12 +73,12 @@ function fromComment (number, name, projectName, item) {
     .pick([
       'id',
       'created_at',
-      'updated_at'
+      'updated_at',
     ])
     .assign({
       number,
       name,
-      projectName
+      projectName,
     })
     .value()
   const data = _
@@ -86,16 +86,16 @@ function fromComment (number, name, projectName, item) {
     .pick([
       'user.login',
       'user.avatar_url',
-      'html_url'
+      'html_url',
     ])
     .assign({
-      body: converter.makeSanitizedHtml(item.body)
+      body: converter.makeSanitizedHtml(item.body),
     })
     .value()
   return {
     kind: 'comment',
     metadata,
-    data
+    data,
   }
 }
 exports.fromComment = fromComment

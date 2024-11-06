@@ -12,7 +12,7 @@ function getCertificate (payload = '...') {
   return [
     '-----BEGIN CERTIFICATE-----',
     helper.encodeBase64(payload),
-    '-----END CERTIFICATE-----'
+    '-----END CERTIFICATE-----',
   ].join('\n')
 }
 
@@ -20,12 +20,12 @@ function getPrivateKey (payload = '...') {
   return [
     '-----BEGIN RSA PRIVATE KEY-----',
     helper.encodeBase64(payload),
-    '-----END RSA PRIVATE KEY-----'
+    '-----END RSA PRIVATE KEY-----',
   ].join('\n')
 }
 
 module.exports = {
   ...helper,
   getCertificate,
-  getPrivateKey
+  getPrivateKey,
 }

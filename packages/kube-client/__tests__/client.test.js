@@ -52,8 +52,8 @@ describe('kube-client', () => {
       const testKubeconfig = fixtures.helper.createTestKubeconfig({ token: bearer }, { server })
       getSecretStub.mockReturnValue({
         data: {
-          kubeconfig: Buffer.from(testKubeconfig.toYAML()).toString('base64')
-        }
+          kubeconfig: Buffer.from(testKubeconfig.toYAML()).toString('base64'),
+        },
       })
       const kubeconfig = await testClient.getKubeconfig({ namespace, name })
       expect(getSecretStub).toHaveBeenCalledWith(namespace, name)
@@ -64,8 +64,8 @@ describe('kube-client', () => {
       const testKubeconfig = fixtures.helper.createTestKubeconfig({ token: bearer }, { server })
       getSecretStub.mockReturnValue({
         data: {
-          kubeconfig: Buffer.from(testKubeconfig.toYAML()).toString('base64')
-        }
+          kubeconfig: Buffer.from(testKubeconfig.toYAML()).toString('base64'),
+        },
       })
       const client = await testClient.createKubeconfigClient({ namespace, name })
       expect(getSecretStub).toHaveBeenCalledWith(namespace, name)
@@ -75,19 +75,19 @@ describe('kube-client', () => {
     it('should get shoot adminkubeconfig', async () => {
       const user = {
         'client-certificate-data': certificateAuthorityData,
-        'client-key-data': clientCertificateData
+        'client-key-data': clientCertificateData,
       }
       const testKubeconfig = fixtures.helper.createTestKubeconfig(user, { server })
       createShootAdminKubeconfigStub.mockReturnValue({
         status: {
-          kubeconfig: Buffer.from(testKubeconfig.toYAML()).toString('base64')
-        }
+          kubeconfig: Buffer.from(testKubeconfig.toYAML()).toString('base64'),
+        },
       })
       const kubeconfig = await testClient.createShootAdminKubeconfig({ namespace, name })
       expect(createShootAdminKubeconfigStub).toHaveBeenCalledWith(namespace, name, {
         apiVersion: 'authentication.gardener.cloud/v1alpha1',
         kind: 'AdminKubeconfigRequest',
-        spec: { expirationSeconds: 600 }
+        spec: { expirationSeconds: 600 },
       })
       expect(kubeconfig.currentUser['client-certificate-data']).toBe(certificateAuthorityData)
       expect(kubeconfig.currentUser['client-key-data']).toBe(clientCertificateData)
@@ -96,7 +96,7 @@ describe('kube-client', () => {
 
     it('should not find a "kubeconfig" in the secret', async () => {
       getSecretStub.mockReturnValue({
-        data: {}
+        data: {},
       })
       await expect(testClient.getKubeconfig({ namespace, name })).rejects.toThrow(NotFound)
     })
@@ -105,8 +105,8 @@ describe('kube-client', () => {
       const testKubeconfig = fixtures.helper.createTestKubeconfig({ 'auth-provider': { name: 'gcp' } })
       getSecretStub.mockReturnValue({
         data: {
-          kubeconfig: Buffer.from(testKubeconfig.toYAML()).toString('base64')
-        }
+          kubeconfig: Buffer.from(testKubeconfig.toYAML()).toString('base64'),
+        },
       })
       await expect(testClient.getKubeconfig({ namespace, name })).rejects.toThrow(NotFound)
     })

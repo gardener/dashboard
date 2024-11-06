@@ -11,7 +11,7 @@ const { helm, helper } = fixtures
 const {
   getPrivateKey,
   getCertificate,
-  decodeBase64
+  decodeBase64,
 } = helper
 
 const renderTemplates = helm.renderDashboardRuntimeTemplates
@@ -22,7 +22,7 @@ describe('gardener-dashboard', function () {
 
     beforeEach(() => {
       templates = [
-        'secret-github'
+        'secret-github',
       ]
     })
 
@@ -33,12 +33,12 @@ describe('gardener-dashboard', function () {
             dashboard: {
               gitHub: {
                 authentication: {
-                  token: 'token'
+                  token: 'token',
                 },
-                webhookSecret: 'webhook-secret'
-              }
-            }
-          }
+                webhookSecret: 'webhook-secret',
+              },
+            },
+          },
         }
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
@@ -58,12 +58,12 @@ describe('gardener-dashboard', function () {
                   clientId: 'clientId',
                   clientSecret: 'clientSecret',
                   installationId: 123,
-                  privateKey: 'privateKey'
+                  privateKey: 'privateKey',
                 },
-                webhookSecret: 'webhook-secret'
-              }
-            }
-          }
+                webhookSecret: 'webhook-secret',
+              },
+            },
+          },
         }
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
@@ -79,7 +79,7 @@ describe('gardener-dashboard', function () {
 
     beforeEach(() => {
       templates = [
-        'secret-kubeconfig'
+        'secret-kubeconfig',
       ]
     })
 
@@ -87,9 +87,9 @@ describe('gardener-dashboard', function () {
       const values = {
         global: {
           dashboard: {
-            kubeconfig: 'apiVersion: v1'
-          }
-        }
+            kubeconfig: 'apiVersion: v1',
+          },
+        },
       }
       const documents = await renderTemplates(templates, values)
       expect(documents).toHaveLength(1)
@@ -111,7 +111,7 @@ describe('gardener-dashboard', function () {
 
     beforeEach(() => {
       templates = [
-        'secret-oidc'
+        'secret-oidc',
       ]
     })
 
@@ -128,10 +128,10 @@ describe('gardener-dashboard', function () {
         global: {
           dashboard: {
             oidc: {
-              clientSecret: 'dashboardSecret'
-            }
-          }
-        }
+              clientSecret: 'dashboardSecret',
+            },
+          },
+        },
       }
       const documents = await renderTemplates(templates, values)
       expect(documents).toHaveLength(1)
@@ -145,7 +145,7 @@ describe('gardener-dashboard', function () {
 
     beforeEach(() => {
       templates = [
-        'secret-sessionSecret'
+        'secret-sessionSecret',
       ]
     })
 
@@ -161,9 +161,9 @@ describe('gardener-dashboard', function () {
       const values = {
         global: {
           dashboard: {
-            sessionSecretPrevious: 'previous'
-          }
-        }
+            sessionSecretPrevious: 'previous',
+          },
+        },
       }
       const documents = await renderTemplates(templates, values)
       expect(documents).toHaveLength(1)
@@ -179,7 +179,7 @@ describe('gardener-dashboard', function () {
 
     beforeEach(() => {
       templates = [
-        'secret-tls'
+        'secret-tls',
       ]
     })
 
@@ -191,11 +191,11 @@ describe('gardener-dashboard', function () {
               tls: {
                 secretName: 'other-gardener-dashboard-tls',
                 key: tlsKey,
-                crt: tlsCrt
-              }
-            }
-          }
-        }
+                crt: tlsCrt,
+              },
+            },
+          },
+        },
       }
       const documents = await renderTemplates(templates, values)
       expect(documents).toHaveLength(1)

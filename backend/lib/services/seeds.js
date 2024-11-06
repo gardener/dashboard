@@ -15,22 +15,22 @@ const { isSeedUnreachable } = require('../utils')
 function fromResource (seed) {
   const unreachable = isSeedUnreachable(seed)
   const metadata = {
-    name: _.get(seed, 'metadata.name'),
-    unreachable
+    name: _.get(seed, ['metadata', 'name']),
+    unreachable,
   }
 
-  const taints = _.get(seed, 'spec.taints')
+  const taints = _.get(seed, ['spec', 'taints'])
   const unprotected = !_.find(taints, ['key', 'seed.gardener.cloud/protected'])
-  const visible = _.get(seed, 'spec.settings.scheduling.visible')
-  const provider = _.get(seed, 'spec.provider')
-  const volume = _.get(seed, 'spec.volume')
-  const ingressDomain = _.get(seed, 'spec.ingress.domain')
+  const visible = _.get(seed, ['spec', 'settings', 'scheduling', 'visible'])
+  const provider = _.get(seed, ['spec', 'provider'])
+  const volume = _.get(seed, ['spec', 'volume'])
+  const ingressDomain = _.get(seed, ['spec', 'ingress', 'domain'])
   const data = {
     volume,
     ...provider,
     visible,
     unprotected,
-    ingressDomain
+    ingressDomain,
   }
 
   return { metadata, data }

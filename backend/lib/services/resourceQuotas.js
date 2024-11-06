@@ -16,7 +16,7 @@ function fromResource (resourceQuotas) {
     return {
       metadata: {},
       spec: {},
-      status
+      status,
     }
   })
 }
