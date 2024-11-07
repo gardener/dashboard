@@ -105,7 +105,6 @@ exports[`composables > useShootContext > should change the infrastructure kind 1
       ],
     },
     "kubernetes": {
-      "enableStaticTokenKubeconfig": false,
       "version": "1.28.6",
     },
     "maintenance": {
@@ -197,7 +196,6 @@ exports[`composables > useShootContext > should create a default "alicloud" shoo
       ],
     },
     "kubernetes": {
-      "enableStaticTokenKubeconfig": false,
       "version": "1.28.6",
     },
     "maintenance": {
@@ -296,7 +294,6 @@ exports[`composables > useShootContext > should create a default "aws" shoot man
       ],
     },
     "kubernetes": {
-      "enableStaticTokenKubeconfig": false,
       "version": "1.28.6",
     },
     "maintenance": {
@@ -397,7 +394,6 @@ exports[`composables > useShootContext > should create a default "azure" shoot m
       ],
     },
     "kubernetes": {
-      "enableStaticTokenKubeconfig": false,
       "version": "1.28.6",
     },
     "maintenance": {
@@ -492,7 +488,6 @@ exports[`composables > useShootContext > should create a default "gcp" shoot man
       ],
     },
     "kubernetes": {
-      "enableStaticTokenKubeconfig": false,
       "version": "1.28.6",
     },
     "maintenance": {
@@ -584,7 +579,6 @@ exports[`composables > useShootContext > should create a default "ironcore" shoo
       ],
     },
     "kubernetes": {
-      "enableStaticTokenKubeconfig": false,
       "version": "1.28.4",
     },
     "maintenance": {
@@ -664,7 +658,6 @@ exports[`composables > useShootContext > should create a default "openstack" sho
       ],
     },
     "kubernetes": {
-      "enableStaticTokenKubeconfig": false,
       "version": "1.28.6",
     },
     "maintenance": {
