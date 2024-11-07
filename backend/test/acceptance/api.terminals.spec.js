@@ -139,7 +139,7 @@ describe('api', function () {
         mockRequest.mockImplementationOnce(fixtures.terminals.mocks.list())
         mockRequest.mockImplementationOnce(fixtures.managedseeds.mocks.get())
         mockRequest.mockImplementationOnce(fixtures.managedseeds.mocks.get())
-        mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
+        mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
         mockRequest.mockImplementationOnce(fixtures.terminals.mocks.create())
 
         const res = await agent
@@ -213,7 +213,7 @@ describe('api', function () {
         mockRequest.mockImplementationOnce(fixtures.terminals.mocks.list())
         mockRequest.mockImplementationOnce(fixtures.managedseeds.mocks.get())
         mockRequest.mockImplementationOnce(fixtures.managedseeds.mocks.get())
-        mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
+        mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
         mockRequest.mockImplementationOnce(fixtures.terminals.mocks.patch())
 
         const res = await agent
@@ -244,7 +244,7 @@ describe('api', function () {
       it('should fetch a terminal resource', async function () {
         mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
         mockRequest.mockImplementationOnce(fixtures.terminals.mocks.watch())
-        mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
+        mockRequest.mockImplementationOnce(fixtures.shoots.mocks.createAdminKubeconfigRequest())
         mockRequest.mockImplementationOnce(fixtures.serviceaccounts.mocks.createTokenRequest())
 
         const res = await agent

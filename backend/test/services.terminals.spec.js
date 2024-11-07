@@ -37,7 +37,7 @@ describe('services', function () {
   /* eslint no-unused-expressions: 0 */
   describe('terminals', function () {
     const seedName = 'infra1-seed'
-    const seedWithoutSecretRefName = 'infra4-seed-without-secretRef'
+    const managedSeedName = 'infra4-seed-managed'
     const soilName = 'soil-infra1'
     const kind = 'infra1'
     const region = 'foo-east'
@@ -74,7 +74,7 @@ describe('services', function () {
         if (namespace === 'garden' && name === soilName) {
           return
         }
-        if (namespace === 'garden' && _.includes([seedName, seedWithoutSecretRefName], name)) {
+        if (namespace === 'garden' && _.includes([seedName, managedSeedName], name)) {
           return {
             kind: 'Shoot',
             metadata: { namespace, name },
@@ -103,9 +103,6 @@ describe('services', function () {
     function createTerminalConfig (terminal = {}) {
       return _.merge({
         containerImage: 'image:1.2.3',
-        gardenTerminalHost: {
-          apiServerIngressHost: 'gardenTerminalApiServerIngressHost',
-        },
         garden: {
           operatorCredentials: {
             serviceAccountRef: {
@@ -185,39 +182,14 @@ describe('services', function () {
       })
 
       describe('#getGardenTerminalHostClusterCredentials', function () {
-        it('should return the secret reference by secretRef', async function () {
-          const gardenTerminalHost = {
-            secretRef: {
-              namespace: 'secretNamespace',
-            },
-          }
-          terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost }))
-          const listSecretsSpy = jest.spyOn(client.core.secrets, 'list')
-          const { secretRef } = await getGardenTerminalHostClusterCredentials(client)
-          expect(listSecretsSpy).toHaveBeenCalledTimes(1)
-          expect(listSecretsSpy.mock.calls[0]).toEqual([
-            gardenTerminalHost.secretRef.namespace,
-            {
-              labelSelector: 'runtime=gardenTerminalHost',
-            },
-          ])
-          expect(secretRef).toEqual({
-            namespace: gardenTerminalHost.secretRef.namespace,
-            name: firstSecretName,
-          })
-        })
-
         describe('get credentials by seedRef', function () {
           it('should return the secret reference for non-managed Seeds', async function () {
             const gardenTerminalHost = {
               seedRef: soilName,
             }
             terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost }))
-            const { secretRef } = await getGardenTerminalHostClusterCredentials(client)
-            expect(secretRef).toEqual({
-              namespace: 'garden',
-              name: `seedsecret-${gardenTerminalHost.seedRef}`,
-            })
+
+            await expect(getGardenTerminalHostClusterCredentials(client)).rejects.toThrow('Seed soil-infra1 is not a managed seed')
           })
 
           it('should return the shoot reference for managed Seeds', async function () {
@@ -233,7 +205,7 @@ describe('services', function () {
           })
         })
 
-        it('should return the secret reference by shootRef', async function () {
+        it('should return the shoot reference', async function () {
           const gardenTerminalHost = {
             shootRef: {
               namespace: 'shootNamespace',
@@ -241,10 +213,10 @@ describe('services', function () {
             },
           }
           terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost }))
-          const { secretRef } = await getGardenTerminalHostClusterCredentials(client)
-          expect(secretRef).toEqual({
+          const { shootRef } = await getGardenTerminalHostClusterCredentials(client)
+          expect(shootRef).toEqual({
             namespace: gardenTerminalHost.shootRef.namespace,
-            name: `${gardenTerminalHost.shootRef.name}.kubeconfig`,
+            name: gardenTerminalHost.shootRef.name,
           })
         })
 
@@ -386,18 +358,6 @@ describe('services', function () {
 
     describe('utils', function () {
       describe('#getGardenHostClusterKubeApiServer', function () {
-        it('should return the kubeApiServer by secretRef', async function () {
-          const gardenTerminalHost = {
-            apiServerIngressHost: 'apiServerIngressHost',
-            secretRef: {
-              namespace: 'secretNamespace',
-            },
-          }
-          terminalStub.mockReturnValue(createTerminalConfig({ gardenTerminalHost }))
-          const kubeApiServer = await getGardenHostClusterKubeApiServer(client)
-          expect(kubeApiServer).toBe(gardenTerminalHost.apiServerIngressHost)
-        })
-
         it('should return the secret reference by shooted seedRef', async function () {
           const gardenTerminalHost = {
             seedRef: seedName,

@@ -11,7 +11,6 @@ const { cloneDeep, merge, find, filter, has, get, set, mapValues, split, startsW
 const createError = require('http-errors')
 const pathToRegexp = require('path-to-regexp')
 const { toBase64, createUrl } = require('./helper')
-const seeds = require('./seeds')
 
 const certificateAuthorityData = toBase64('certificate-authority-data')
 const clientCertificateData = toBase64('client-certificate-data')
@@ -161,21 +160,6 @@ const secrets = {
       },
     })
   },
-  getSeedSecret (namespace, name) {
-    const seedName = name.substring(11)
-    const seed = seeds.get(seedName)
-    const { type, region } = seed.spec.provider
-    return getSecret({
-      name,
-      namespace,
-      data: {
-        kubeconfig: getKubeconfig({
-          server: `https://api.${region}.${type}.seed.cluster`,
-          name: `shoot--garden--${seedName}`,
-        }),
-      },
-    })
-  },
   getMonitoringSecret (namespace, name, creationTimestamp) {
     return getSecret({
       name,
@@ -243,10 +227,6 @@ const mocks = {
       const { params: { namespace, name } = {} } = matchResult
       const [hostname] = split(headers[':authority'], ':')
       if (hostname === 'kubernetes') {
-        if (namespace === 'garden' && startsWith(name, 'seedsecret-')) {
-          const item = secrets.getSeedSecret(namespace, name)
-          return Promise.resolve(item)
-        }
         if (endsWith(name, '.kubeconfig')) {
           const item = secrets.getShootSecret(namespace, name)
           return Promise.resolve(item)

@@ -45,7 +45,7 @@ According to the privileges of the user (operator / enduser) and the selected ta
 The frontend makes another POST request to the dashboard backend to fetch the terminal session. The Backend waits until the `terminal` resource is in a "ready" state (timeout 10s) before sending a response to the frontend. More to that later.
 
 ### 4. Terminal Resource
-The `terminal` resource, among other things, holds the information of the desired host and target cluster. The credentials to these clusters are declared as references (secretRef / serviceAccountRef). The `terminal` resource itself doesn’t contain sensitive information.
+The `terminal` resource, among other things, holds the information of the desired host and target cluster. The credentials to these clusters are declared as references (`shootRef`, `serviceAccountRef`). The `terminal` resource itself doesn’t contain sensitive information.
 
 ### 5. Admission
 A validating webhook is in place to ensure that the user, that created the `terminal` resource, has the **permission to read the referenced credentials**. There is also a mutating webhook in place. Both admission configurations have **`failurePolicy: Fail`**.

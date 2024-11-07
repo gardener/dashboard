@@ -65,7 +65,7 @@ const defaultConfig = {
       },
     ],
     gardenTerminalHost: {
-      seedRef: 'infra1-seed2',
+      seedRef: 'infra1-seed',
     },
     garden: {
       operatorCredentials: {

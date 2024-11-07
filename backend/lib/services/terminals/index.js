@@ -11,7 +11,6 @@ const hash = require('object-hash')
 const yaml = require('js-yaml')
 const config = require('../../config')
 const { getClusterCaData } = require('../shoots')
-const { cleanKubeconfig } = require('@gardener-dashboard/kube-config')
 const { Resources } = require('@gardener-dashboard/kube-client')
 
 const { Forbidden, UnprocessableEntity, InternalServerError } = require('http-errors')
@@ -290,28 +289,13 @@ async function getTargetCluster ({ user, namespace, name, target, preferredHost,
       const seedName = getSeedNameFromShoot(shootResource)
       const managedSeed = await client.getManagedSeed({ namespace: 'garden', name: seedName, throwNotFound: false })
 
-      let credentials
-      let caData
-      if (managedSeed) {
-        const shootRef = getShootRef(managedSeed)
-        credentials = { shootRef }
-
-        caData = await getClusterCaData(client, { namespace: shootRef.namespace, name: shootRef.name })
-      } else {
-        const seed = getSeed(seedName)
-        const secretRef = seed.spec?.secretRef
-        credentials = { secretRef }
-
-        const {
-          namespace: secretRefNamespace,
-          name: secretRefName,
-        } = secretRef || {}
-
-        const seedKubeconfigSecret = await client.core.secrets.get(secretRefNamespace, secretRefName)
-        const rawConfig = decodeBase64(seedKubeconfigSecret.data.kubeconfig)
-        const kubeconfigObject = cleanKubeconfig(rawConfig)
-        caData = kubeconfigObject.currentCluster['certificate-authority-data']
+      if (!managedSeed) {
+        throw new Error('terminal cannot be hosted on non-managed seed')
       }
+      const shootRef = getShootRef(managedSeed)
+      const credentials = { shootRef }
+
+      const caData = await getClusterCaData(client, { namespace: shootRef.namespace, name: shootRef.name })
 
       const seedShootNamespace = getSeedShootNamespace(shootResource)
 
@@ -371,14 +355,11 @@ async function getSeedHostCluster (client, { namespace, name, target, body, shoo
 
   const seed = getSeed(seedName)
 
-  let credentials
-  if (managedSeed) {
-    const shootRef = getShootRef(managedSeed)
-    credentials = { shootRef }
-  } else {
-    const secretRef = seed.spec?.secretRef
-    credentials = { secretRef }
+  if (!managedSeed) {
+    throw new Error('terminal cannot be hosted on non-managed seed')
   }
+  const shootRef = getShootRef(managedSeed)
+  const credentials = { shootRef }
 
   hostCluster.namespace = seedShootNamespace
   hostCluster.credentials = credentials
@@ -593,15 +574,6 @@ async function getOrCreateTerminalSession ({ user, namespace, name, target, body
     throw new Error('Hosting cluster or target cluster is hibernated')
   }
 
-  const secretRef = hostCluster.credentials.secretRef
-  if (secretRef) {
-    try {
-      await client.getKubeconfig(secretRef)
-    } catch (err) {
-      throw new Error('Host kubeconfig does not exist (yet)')
-    }
-  }
-
   if (!terminal) {
     logger.debug(`No terminal found for user ${username}. Creating new..`)
     const { identifier } = body
@@ -676,21 +648,11 @@ async function ensureServiceAccountCleanup (client, { terminal, namespace, name 
   await client.core.serviceaccounts.mergePatch(namespace, name, payload)
 }
 
-async function createHostClient (client, { shootRef, secretRef }) {
-  if (shootRef) {
-    return client.createShootAdminKubeconfigClient(shootRef)
+async function createHostClient (client, { shootRef }) {
+  if (!shootRef) {
+    throw new Error('shootRef is required')
   }
-
-  try {
-    return await client.createKubeconfigClient(secretRef)
-  } catch (err) {
-    if (isHttpError(err, 404)) {
-      throw new Error('Host kubeconfig does not exist (yet)')
-    }
-    const { namespace, name } = secretRef
-    logger.error(`Failed to create client from kubeconfig secret ${namespace}/${name}`, err)
-    throw err
-  }
+  return client.createShootAdminKubeconfigClient(shootRef)
 }
 
 async function fetchTerminalSession ({ user, body: { name, namespace } }) {

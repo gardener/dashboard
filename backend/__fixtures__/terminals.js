@@ -65,9 +65,9 @@ function getTerminal (options = {}) {
         temporaryNamespace: true,
         namespace: 'term-host-' + identifier,
         credentials: {
-          secretRef: {
+          shootRef: {
             namespace: 'garden',
-            name: 'host.kubeconfig',
+            name: 'host',
           },
         },
         pod: {

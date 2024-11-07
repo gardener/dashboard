@@ -16,7 +16,6 @@ function getSeed ({
   seedProtected = false,
   seedVisible = true,
   labels = {},
-  withSecretRef = true,
 }) {
   uid = uid || `seed--${name}`
   const seed = {
@@ -47,12 +46,6 @@ function getSeed ({
       key: 'seed.gardener.cloud/protected',
     })
   }
-  if (withSecretRef) {
-    seed.spec.secretRef = {
-      name: `seedsecret-${name}`,
-      namespace: 'garden',
-    }
-  }
 
   return seed
 }
@@ -62,7 +55,7 @@ const seedList = [
   getSeed({ name: 'infra1-seed', region: 'foo-east', kind: 'infra1' }),
   getSeed({ name: 'infra1-seed2', region: 'foo-west', kind: 'infra1' }),
   getSeed({ name: 'infra3-seed', region: 'foo-europe', kind: 'infra3', labels: { 'test-unreachable': 'true', biz: 'baz' } }),
-  getSeed({ name: 'infra4-seed-without-secretRef', region: 'foo-south', kind: 'infra1', withSecretRef: false }),
+  getSeed({ name: 'infra4-seed-managed', region: 'foo-south', kind: 'infra1' }),
   getSeed({ name: 'infra3-seed-with-selector', region: 'foo-europe', kind: 'infra3', seedProtected: false, seedVisible: true, labels: { foo: 'bar', fooz: 'baz' } }),
   getSeed({ name: 'infra3-seed-without-selector', region: 'foo-europe', kind: 'infra3', seedProtected: false, seedVisible: true }),
   getSeed({ name: 'infra3-seed-protected', region: 'foo-europe', kind: 'infra3', seedProtected: true }),
