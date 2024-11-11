@@ -1,6 +1,6 @@
 {
   "name": "@gardener-dashboard/backend",
-  "version": "1.77.0",
+  "version": "1.78.0",
   "description": "Gardener Dashboard Server",
   "license": "Apache-2.0",
   "author": "Koser, Holger <holger.koser@sap.com>",
@@ -69,7 +69,7 @@
     "semver": "^7.6.0",
     "showdown": "^2.1.0",
     "socket.io": "^4.7.5",
-    "uuid": "^10.0.0"
+    "uuid": "^11.0.0"
   },
   "devDependencies": {
     "@gardener-dashboard/test-utils": "workspace:^",
