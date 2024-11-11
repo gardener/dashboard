@@ -35,7 +35,7 @@ async function writeNumbers (stream, max = 10) {
 describe('kube-client', () => {
   describe('HttpClient', () => {
     const options = {
-      url: 'https://127.0.0.1:31415/test'
+      url: 'https://127.0.0.1:31415/test',
     }
     const url = 'url'
     const method = 'GET'
@@ -75,7 +75,7 @@ describe('kube-client', () => {
       expect(typeof response.until).toBe('function')
       const value = await response.until(event => ({
         ok: event.object > 3,
-        object: event.object
+        object: event.object,
       }))
       expect(value).toBe(4)
     })
@@ -90,7 +90,7 @@ describe('kube-client', () => {
       expect(typeof response.until).toBe('function')
       await expect(response.until(
         event => ({
-          ok: event.object > 9
+          ok: event.object > 9,
         }), { timeout: 10 })).rejects.toThrow(GatewayTimeout)
       expect(destroySpy).toBeCalled()
       expect(destroySpy.mock.calls[0]).toHaveLength(1)

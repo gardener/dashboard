@@ -81,7 +81,7 @@ function createUrl (headers) {
   const {
     ':path': path,
     ':scheme': scheme = 'https',
-    ':authority': authority = 'localhost'
+    ':authority': authority = 'localhost',
   } = headers
   return new URL(path, scheme + '://' + authority)
 }
@@ -131,17 +131,17 @@ function createTestKubeconfig (user = { token: 'token' }, cluster = { server: 's
       name: 'default',
       context: {
         user: 'user',
-        cluster: 'cluster'
-      }
+        cluster: 'cluster',
+      },
     }],
     users: [{
       name: 'user',
-      user
+      user,
     }],
     clusters: [{
       name: 'cluster',
-      cluster
-    }]
+      cluster,
+    }],
   }))
 }
 
@@ -162,5 +162,5 @@ module.exports = {
   toHex,
   formatTime,
   nextTick,
-  delay
+  delay,
 }

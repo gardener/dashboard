@@ -9,7 +9,7 @@
 const {
   helm,
   helper,
-  'gardener-dashboard': defaults
+  'gardener-dashboard': defaults,
 } = fixtures
 const { getPrivateKey, getCertificate } = helper
 
@@ -25,7 +25,7 @@ describe('gardener-dashboard', function () {
     beforeEach(() => {
       templates = [
         'ingress',
-        'secret-tls'
+        'secret-tls',
       ]
     })
 
@@ -37,11 +37,11 @@ describe('gardener-dashboard', function () {
               tls: {
                 secretName: tlsSecretName,
                 key: getPrivateKey('tls.key'),
-                crt: getCertificate('tls.crt')
-              }
-            }
-          }
-        }
+                crt: getCertificate('tls.crt'),
+              },
+            },
+          },
+        },
       }
       const documents = await renderTemplates(templates, values)
       expect(documents).toHaveLength(2)
@@ -56,11 +56,11 @@ describe('gardener-dashboard', function () {
           dashboard: {
             ingress: {
               tls: {
-                secretName: tlsSecretName
-              }
-            }
-          }
-        }
+                secretName: tlsSecretName,
+              },
+            },
+          },
+        },
       }
       const documents = await renderTemplates(templates, values)
       expect(documents).toHaveLength(2)
@@ -70,7 +70,7 @@ describe('gardener-dashboard', function () {
       expect(ingress.spec.tls).toHaveLength(1)
       expect(ingress.spec.tls[0]).toEqual({
         secretName: tlsSecretName,
-        hosts: defaults.global.dashboard.ingress.hosts
+        hosts: defaults.global.dashboard.ingress.hosts,
       })
 
       expect(tlsSecret).toBe(null)
@@ -81,10 +81,10 @@ describe('gardener-dashboard', function () {
         global: {
           dashboard: {
             ingress: {
-              tls: null
-            }
-          }
-        }
+              tls: null,
+            },
+          },
+        },
       }
       const documents = await renderTemplates(templates, values)
       expect(documents).toHaveLength(2)
@@ -104,10 +104,10 @@ describe('gardener-dashboard', function () {
         global: {
           dashboard: {
             ingress: {
-              ingressClassName
-            }
-          }
-        }
+              ingressClassName,
+            },
+          },
+        },
       }
       const documents = await renderTemplates(templates, values)
       expect(documents).toHaveLength(1)

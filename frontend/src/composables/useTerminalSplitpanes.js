@@ -22,7 +22,10 @@ import { useLocalStorageStore } from '@/store/localStorage'
 
 import { useApi } from '@/composables/useApi'
 
-import utils, { TargetEnum } from '@/utils'
+import {
+  isStatusHibernated,
+  TargetEnum,
+} from '@/utils'
 
 import {
   GSymbolTree,
@@ -81,7 +84,7 @@ export function createTerminalSplitpanesComposable () {
   })
 
   const isShootStatusHibernated = computed(() => {
-    return utils.isShootStatusHibernated(get(shootItem.value, 'status'))
+    return isStatusHibernated(get(shootItem.value, 'status'))
   })
 
   const slotItemUUIds = computed(() => {

@@ -78,7 +78,7 @@ module.exports = sessionSecrets => {
       const encodedText = encoder.encode(text)
       const protectedHeader = {
         enc: 'A128CBC-HS256',
-        alg: 'PBES2-HS256+A128KW'
+        alg: 'PBES2-HS256+A128KW',
       }
       return new jose.CompactEncrypt(encodedText)
         .setProtectedHeader(protectedHeader)
@@ -86,7 +86,7 @@ module.exports = sessionSecrets => {
     },
     async decrypt (data) {
       const options = {
-        keyManagementAlgorithms: ['PBES2-HS256+A128KW']
+        keyManagementAlgorithms: ['PBES2-HS256+A128KW'],
       }
       let firstError
       for (const symetricKey of symmetricKeys) {
@@ -98,6 +98,6 @@ module.exports = sessionSecrets => {
         }
       }
       throw firstError
-    }
+    },
   }
 }

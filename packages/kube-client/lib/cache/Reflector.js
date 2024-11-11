@@ -17,7 +17,7 @@ const {
   isConnectionRefused,
   isTooLargeResourceVersionError,
   isAbortError,
-  StatusError
+  StatusError,
 } = require('../ApiErrors')
 
 function delay (milliseconds) {
@@ -124,7 +124,7 @@ class Reflector {
   async listAndWatch () {
     const pager = ListPager.create(this.listWatcher)
     const options = {
-      resourceVersion: this.relistResourceVersion
+      resourceVersion: this.relistResourceVersion,
     }
 
     if (this.paginatedResult) {
@@ -163,7 +163,7 @@ class Reflector {
         try {
           logger.debug('Falling back to full list %s', this.expectedTypeName)
           list = await pager.list({
-            resourceVersion: this.relistResourceVersion
+            resourceVersion: this.relistResourceVersion,
           })
         } catch (err) {
           logger.error('Failed to call full list %s: %s', this.expectedTypeName, err.message)
@@ -176,7 +176,7 @@ class Reflector {
 
     const {
       resourceVersion,
-      paginated: paginatedResult
+      paginated: paginatedResult,
     } = list.metadata
 
     const lines = Array.isArray(list.items) ? list.items.length : 0
@@ -206,7 +206,7 @@ class Reflector {
       const options = {
         allowWatchBookmarks: true,
         timeoutSeconds,
-        resourceVersion: this.lastSyncResourceVersion
+        resourceVersion: this.lastSyncResourceVersion,
       }
       let response
       try {

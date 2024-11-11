@@ -20,10 +20,10 @@ jest.mock('@gardener-dashboard/kube-client', () => ({
   dashboardClient: {
     'core.gardener.cloud': {
       projects: {
-        watch: jest.fn()
-      }
-    }
-  }
+        watch: jest.fn(),
+      },
+    },
+  },
 }))
 
 const createUser = (username) => {
@@ -35,10 +35,10 @@ const createUser = (username) => {
           create: jest.fn(),
           get: jest.fn(),
           mergePatch: jest.fn(),
-          delete: jest.fn()
-        }
-      }
-    }
+          delete: jest.fn(),
+        },
+      },
+    },
   }
 }
 
@@ -49,73 +49,73 @@ describe('services/projects', () => {
     projectList = [
       {
         metadata: {
-          name: 'foo'
+          name: 'foo',
         },
         spec: {
           members: [
             {
               kind: 'User',
-              name: 'foo@bar.com'
+              name: 'foo@bar.com',
             },
             {
               kind: 'User',
-              name: 'system:serviceaccount:garden-foo:robot-user'
+              name: 'system:serviceaccount:garden-foo:robot-user',
             },
             {
               kind: 'ServiceAccount',
               name: 'robot-sa',
-              namespace: 'garden-foo'
-            }
-          ]
+              namespace: 'garden-foo',
+            },
+          ],
         },
         status: {
-          phase: 'Ready'
-        }
+          phase: 'Ready',
+        },
       },
       {
         metadata: {
-          name: 'bar'
+          name: 'bar',
         },
         spec: {
           members: [
             {
               kind: 'User',
-              name: 'bar@bar.com'
-            }
-          ]
+              name: 'bar@bar.com',
+            },
+          ],
         },
         status: {
-          phase: 'Ready'
-        }
+          phase: 'Ready',
+        },
       },
       {
         metadata: {
-          name: 'pending'
+          name: 'pending',
         },
         spec: {
           members: [
             {
               apiGroup: 'rbac.authorization.k8s.io',
               kind: 'User',
-              name: 'bar@bar.com'
-            }
-          ]
-        }
+              name: 'bar@bar.com',
+            },
+          ],
+        },
       },
       {
         metadata: {
-          name: 'terminating'
+          name: 'terminating',
         },
         status: {
-          phase: 'Terminating'
-        }
-      }
+          phase: 'Terminating',
+        },
+      },
     ]
     jest.clearAllMocks()
     cache.getProjects = jest.fn().mockImplementation(() => projectList)
     cache.getProject = jest.fn(name => projectList.find(project => project.metadata.name === name))
     dashboardClient['core.gardener.cloud'].projects.watch.mockResolvedValue({
-      until: jest.fn().mockResolvedValue(projectList[0])
+      until: jest.fn().mockResolvedValue(projectList[0]),
     })
   })
 
@@ -129,7 +129,7 @@ describe('services/projects', () => {
       expect(result).toEqual(expect.arrayContaining([
         expect.objectContaining({ metadata: { name: 'foo' } }),
         expect.objectContaining({ metadata: { name: 'bar' } }),
-        expect.objectContaining({ metadata: { name: 'terminating' } })
+        expect.objectContaining({ metadata: { name: 'terminating' } }),
       ]))
     })
 
@@ -174,7 +174,7 @@ describe('services/projects', () => {
       // Mock the project creation to return a pending project
       user.client['core.gardener.cloud'].projects.create.mockResolvedValue({
         ...body,
-        status: { phase: 'Pending' }
+        status: { phase: 'Pending' },
       })
 
       // Mock the watch functionality to eventually return a ready project
@@ -184,11 +184,11 @@ describe('services/projects', () => {
             setTimeout(() => {
               resolve({
                 ...body,
-                status: { phase: 'Ready' }
+                status: { phase: 'Ready' },
               })
             }, 10) // Simulate delay for the project to become ready
           })
-        })
+        }),
       })
 
       const result = await projects.create({ user, body })
@@ -200,10 +200,10 @@ describe('services/projects', () => {
       const user = createUser('creator@bar.com')
       user.client['core.gardener.cloud'].projects.create.mockResolvedValue({
         ...body,
-        status: { phase: 'Pending' }
+        status: { phase: 'Pending' },
       })
       dashboardClient['core.gardener.cloud'].projects.watch.mockResolvedValue({
-        until: jest.fn().mockRejectedValue(new Error('Timeout'))
+        until: jest.fn().mockRejectedValue(new Error('Timeout')),
       })
 
       await expect(projects.create({ user, body })).rejects.toThrow('Timeout')
@@ -214,7 +214,7 @@ describe('services/projects', () => {
       const user = createUser('creator@bar.com')
       user.client['core.gardener.cloud'].projects.create.mockResolvedValue({
         ...body,
-        status: { phase: 'Pending' }
+        status: { phase: 'Pending' },
       })
       dashboardClient['core.gardener.cloud'].projects.watch.mockResolvedValue({
         until: jest.fn((isProjectReady) => {
@@ -227,7 +227,7 @@ describe('services/projects', () => {
               }
             }, 10) // Simulate delay before project is deleted
           })
-        })
+        }),
       })
 
       await expect(projects.create({ user, body })).rejects.toThrow(InternalServerError)
@@ -238,7 +238,7 @@ describe('services/projects', () => {
       const user = createUser('creator@bar.com')
       user.client['core.gardener.cloud'].projects.create.mockResolvedValue({
         ...body,
-        status: { phase: 'Pending' }
+        status: { phase: 'Pending' },
       })
       dashboardClient['core.gardener.cloud'].projects.watch.mockResolvedValue({
         until: jest.fn((isProjectReady) => {
@@ -247,7 +247,7 @@ describe('services/projects', () => {
               resolve(isProjectReady({ type: 'MODIFIED', object: { ...body, status: { phase: 'Ready' } } }))
             }, 10) // Simulate delay before project becomes ready
           })
-        })
+        }),
       })
 
       const result = await projects.create({ user, body })
@@ -259,7 +259,7 @@ describe('services/projects', () => {
       const user = createUser('creator@bar.com')
       user.client['core.gardener.cloud'].projects.create.mockResolvedValue({
         ...body,
-        status: { phase: 'Pending' }
+        status: { phase: 'Pending' },
       })
       dashboardClient['core.gardener.cloud'].projects.watch.mockResolvedValue({
         until: jest.fn((isProjectReady) => {
@@ -268,7 +268,7 @@ describe('services/projects', () => {
               resolve(isProjectReady({ type: 'MODIFIED', object: { ...body, status: { phase: 'Pending' } } }))
             }, 10) // Simulate delay before project remains pending
           })
-        })
+        }),
       })
 
       const result = await projects.create({ user, body })
@@ -335,17 +335,17 @@ describe('services/projects', () => {
       expect(user.client['core.gardener.cloud'].projects.mergePatch).toHaveBeenCalledWith(projectName, {
         metadata: {
           annotations: {
-            'confirmation.gardener.cloud/deletion': 'true'
-          }
-        }
+            'confirmation.gardener.cloud/deletion': 'true',
+          },
+        },
       })
 
       expect(user.client['core.gardener.cloud'].projects.mergePatch).toHaveBeenCalledWith(projectName, {
         metadata: {
           annotations: {
-            'confirmation.gardener.cloud/deletion': null
-          }
-        }
+            'confirmation.gardener.cloud/deletion': null,
+          },
+        },
       })
     })
   })

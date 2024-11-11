@@ -81,9 +81,9 @@ module.exports = {
   },
   getVisibleAndNotProtectedSeeds () {
     const predicate = item => {
-      const taints = _.get(item, 'spec.taints')
+      const taints = _.get(item, ['spec', 'taints'])
       const unprotected = !_.find(taints, ['key', 'seed.gardener.cloud/protected'])
-      const visible = _.get(item, 'spec.settings.scheduling.visible')
+      const visible = _.get(item, ['spec', 'settings', 'scheduling', 'visible'])
       return unprotected && visible
     }
     return _.filter(cache.getSeeds(), predicate)
@@ -102,7 +102,7 @@ module.exports = {
     return _
       .chain(cache.getProjects())
       .find(['metadata.name', name])
-      .get('spec.namespace')
+      .get(['spec', 'namespace'])
       .value()
   },
   getShoots (namespace, query = {}) {
@@ -140,5 +140,5 @@ module.exports = {
   },
   getTicketCache () {
     return cache.getTicketCache()
-  }
+  },
 }

@@ -16,5 +16,5 @@ module.exports = {
   tickets: require('./tickets'),
   terminals: require('./terminals'),
   controllerregistrations: require('./controllerregistrations'),
-  resourceQuotas: require('./resourceQuotas')
+  resourceQuotas: require('./resourceQuotas'),
 }

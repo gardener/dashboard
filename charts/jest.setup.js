@@ -19,7 +19,7 @@ afterAll(function () {
   const dirname = process.env.HELM_VALUES_DIRNAME
   fs.rmSync(dirname, {
     maxRetries: 100,
-    recursive: true
+    recursive: true,
   })
 })
 

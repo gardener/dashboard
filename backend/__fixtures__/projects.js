@@ -19,7 +19,7 @@ function createUser (member) {
   const user = {
     apiGroup: 'rbac.authorization.k8s.io',
     kind: 'User',
-    name
+    name,
   }
   return user
 }
@@ -38,14 +38,14 @@ function getProject ({ name, namespace, uid, resourceVersion = '42', createdBy, 
   createdBy = createUser(createdBy)
   const metadata = {
     name,
-    resourceVersion
+    resourceVersion,
   }
   if (uid) {
     metadata.uid = uid
   }
   if (costObject) {
-    set(metadata, 'annotations["billing.gardener.cloud/costObject"]', costObject)
-    set(metadata, 'annotations["billing.gardener.cloud/costObjectType"]', 'CO')
+    set(metadata, ['annotations', 'billing.gardener.cloud/costObject'], costObject)
+    set(metadata, ['annotations', 'billing.gardener.cloud/costObjectType'], 'CO')
   }
   return {
     metadata,
@@ -55,11 +55,11 @@ function getProject ({ name, namespace, uid, resourceVersion = '42', createdBy, 
       owner,
       members,
       purpose,
-      description
+      description,
     },
     status: {
-      phase
-    }
+      phase,
+    },
   }
 }
 
@@ -69,7 +69,7 @@ const projectList = [
     name: 'garden',
     namespace: 'garden',
     createdBy: 'admin@example.org',
-    owner: 'admin@example.org'
+    owner: 'admin@example.org',
   }),
   getProject({
     uid: 1,
@@ -81,30 +81,30 @@ const projectList = [
         apiGroup: 'rbac.authorization.k8s.io',
         kind: 'User',
         name: 'foo@example.org',
-        roles: ['admin']
+        roles: ['admin'],
       },
       {
         apiGroup: 'rbac.authorization.k8s.io',
         kind: 'User',
         name: 'bar@example.org',
-        roles: ['admin', 'owner']
+        roles: ['admin', 'owner'],
       },
       {
         apiGroup: 'rbac.authorization.k8s.io',
         kind: 'User',
         name: 'system:serviceaccount:garden-foo:robot',
-        roles: ['viewer']
+        roles: ['viewer'],
       },
       {
         apiGroup: 'rbac.authorization.k8s.io',
         kind: 'User',
         name: 'system:serviceaccount:garden-baz:robot',
-        roles: ['viewer', 'admin']
-      }
+        roles: ['viewer', 'admin'],
+      },
     ],
     description: 'foo-description',
     purpose: 'foo-purpose',
-    costObject: '9999999999'
+    costObject: '9999999999',
   }),
   getProject({
     uid: 2,
@@ -116,17 +116,17 @@ const projectList = [
         apiGroup: 'rbac.authorization.k8s.io',
         kind: 'User',
         name: 'foo@example.org',
-        roles: ['admin', 'owner']
+        roles: ['admin', 'owner'],
       },
       {
         apiGroup: 'rbac.authorization.k8s.io',
         kind: 'User',
         name: 'system:serviceaccount:garden-foo:robot',
-        roles: ['viewer', 'admin']
-      }
+        roles: ['viewer', 'admin'],
+      },
     ],
     description: 'bar-description',
-    purpose: 'bar-purpose'
+    purpose: 'bar-purpose',
   }),
   getProject({
     uid: 3,
@@ -138,9 +138,9 @@ const projectList = [
         apiGroup: 'rbac.authorization.k8s.io',
         kind: 'Group',
         name: 'group1',
-        roles: ['admin', 'owner']
-      }
-    ]
+        roles: ['admin', 'owner'],
+      },
+    ],
   }),
   getProject({
     uid: 4,
@@ -152,9 +152,9 @@ const projectList = [
         apiGroup: 'rbac.authorization.k8s.io',
         kind: 'Group',
         name: 'group2',
-        roles: ['admin', 'owner']
-      }
-    ]
+        roles: ['admin', 'owner'],
+      },
+    ],
   }),
   getProject({
     uid: 5,
@@ -162,7 +162,7 @@ const projectList = [
     createdBy: 'admin@example.org',
     description: 'pending-description',
     purpose: 'pending-purpose',
-    phase: 'Pending'
+    phase: 'Pending',
   }),
   getProject({
     uid: 6,
@@ -174,11 +174,11 @@ const projectList = [
         kind: 'ServiceAccount',
         namespace: 'garden-bar',
         name: 'robot',
-        roles: ['viewer']
-      }
+        roles: ['viewer'],
+      },
     ],
     description: 'secret-description',
-    purpose: 'secret-purpose'
+    purpose: 'secret-purpose',
   }),
   getProject({
     uid: 7,
@@ -187,8 +187,8 @@ const projectList = [
     description: 'trial-description',
     purpose: 'trial-purpose',
     costObject: '1234567890',
-    phase: 'Failed'
-  })
+    phase: 'Failed',
+  }),
 ]
 
 const projects = {
@@ -210,9 +210,9 @@ const projects = {
         item = projects.get(item)
       }
     }
-    const members = get(item, 'spec.members', [])
+    const members = get(item, ['spec', 'members'], [])
     const userList = [
-      'admin@example.org'
+      'admin@example.org',
     ]
     const groupList = []
     for (const { kind, namespace, name } of members) {
@@ -235,7 +235,7 @@ const projects = {
   },
   reset () {
     this.items = [...projectList]
-  }
+  },
 }
 
 const matchOptions = { decode: decodeURIComponent }
@@ -263,17 +263,17 @@ const mocks = {
       const item = cloneDeep(json)
       const name = json.metadata.name
       const user = createUser(payload.id)
-      set(item, 'metadata.resourceVersion', resourceVersion)
-      set(item, 'metadata.uid', uid)
-      set(item, 'spec.namespace', `garden-${name}`)
-      set(item, 'spec.createdBy', user)
-      set(item, 'spec.owner', user)
-      set(item, 'spec.members', [{
+      set(item, ['metadata', 'resourceVersion'], resourceVersion)
+      set(item, ['metadata', 'uid'], uid)
+      set(item, ['spec', 'namespace'], `garden-${name}`)
+      set(item, ['spec', 'createdBy'], user)
+      set(item, ['spec', 'owner'], user)
+      set(item, ['spec', 'members'], [{
         ...user,
         role: 'owner',
-        roles: ['admin', 'uam']
+        roles: ['admin', 'uam'],
       }])
-      set(item, 'status.phase', 'Initial')
+      set(item, ['status', 'phase'], 'Initial')
       projects.items.push(item)
       return Promise.resolve(item)
     }
@@ -296,9 +296,9 @@ const mocks = {
         const initialItems = filter(items, ['status.phase', 'Initial'])
         for (const oldItem of initialItems) {
           const item = cloneDeep(oldItem)
-          const resourceVersion = get(item, 'metadata.resourceVersion', '42')
-          set(item, 'status.phase', phase)
-          set(item, 'metadata.resourceVersion', (+resourceVersion + 1).toString())
+          const resourceVersion = get(item, ['metadata', 'resourceVersion'], '42')
+          set(item, ['status', 'phase'], phase)
+          set(item, ['metadata', 'resourceVersion'], (+resourceVersion + 1).toString())
           stream.write({ type: 'MODIFIED', object: item })
         }
         if (end === true) {
@@ -331,9 +331,9 @@ const mocks = {
       }
       const { params: { name } = {} } = matchResult
       const item = projects.get(name)
-      const resourceVersion = get(item, 'metadata.resourceVersion', '42')
+      const resourceVersion = get(item, ['metadata', 'resourceVersion'], '42')
       merge(item, json)
-      set(item, 'metadata.resourceVersion', (+resourceVersion + 1).toString())
+      set(item, ['metadata', 'resourceVersion'], (+resourceVersion + 1).toString())
       return Promise.resolve(item)
     }
   },
@@ -347,10 +347,10 @@ const mocks = {
       const item = projects.get(name)
       return Promise.resolve(item)
     }
-  }
+  },
 }
 
 module.exports = {
   ...projects,
-  mocks
+  mocks,
 }

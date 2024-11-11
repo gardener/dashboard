@@ -16,7 +16,7 @@ function monitorResponseTimes (additionalLabels = {}) {
     const labels = {
       method,
       status_code: statusCode,
-      ...additionalLabels
+      ...additionalLabels,
     }
     if (metricsRoute) {
       labels.route = metricsRoute
@@ -50,5 +50,5 @@ function monitorHttpServer (server) {
 module.exports = {
   monitorResponseTimes,
   monitorSocketIO,
-  monitorHttpServer
+  monitorHttpServer,
 }

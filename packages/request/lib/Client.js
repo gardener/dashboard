@@ -29,7 +29,7 @@ const {
   HTTP2_HEADER_CONTENT_LENGTH,
   HTTP2_METHOD_GET,
   HTTP2_HEADER_ACCEPT_ENCODING,
-  HTTP2_HEADER_CONTENT_ENCODING
+  HTTP2_HEADER_CONTENT_ENCODING,
 } = http2.constants
 
 function getHeader (headers, key) {
@@ -108,11 +108,11 @@ class Client {
       'maxHeaderListPairs',
       'maxReservedRemoteStreams',
       'peerMaxConcurrentStreams',
-      'settings'
+      'settings',
     ]
     return {
       servername,
-      ...pick(this.#options, keys)
+      ...pick(this.#options, keys),
     }
   }
 
@@ -156,10 +156,10 @@ class Client {
         [HTTP2_HEADER_AUTHORITY]: url.host,
         [HTTP2_HEADER_METHOD]: method.toUpperCase(),
         [HTTP2_HEADER_PATH]: url.pathname + url.search,
-        [HTTP2_HEADER_ACCEPT_ENCODING]: 'gzip, deflate, br'
+        [HTTP2_HEADER_ACCEPT_ENCODING]: 'gzip, deflate, br',
       },
       normalizeHeaders(this.#defaultHeaders),
-      normalizeHeaders(headers)
+      normalizeHeaders(headers),
     )
   }
 
@@ -167,7 +167,7 @@ class Client {
     headers = this.getRequestHeaders(path, {
       method,
       searchParams,
-      headers
+      headers,
     })
 
     // beforeRequest hooks
@@ -176,14 +176,14 @@ class Client {
       method: getHeader(headers, HTTP2_HEADER_METHOD),
       headers,
       body,
-      ...options
+      ...options,
     }
     this.executeHooks('beforeRequest', requestOptions)
 
     const stream = await this.#agent.request(headers, {
       ...this.#defaultOptions,
       ...options,
-      signal
+      signal,
     })
     if (body) {
       stream.write(body)
@@ -238,7 +238,7 @@ class Client {
                   if (this.ok) {
                     throw new ParseError(err.message, {
                       headers,
-                      rawBody: text
+                      rawBody: text,
                     })
                   }
                   // return the raw body text if the response status is not ok (keep the original http error in this case)
@@ -247,7 +247,7 @@ class Client {
               default:
                 return Buffer.from(text, 'utf8')
             }
-          }
+          },
         ]
         if (decompressor) {
           streams.splice(1, 0, decompressor)
@@ -285,7 +285,7 @@ class Client {
         if (data && data.length) {
           yield transform(data)
         }
-      }
+      },
     }
   }
 
@@ -296,7 +296,7 @@ class Client {
       throw createHttpError({
         statusCode,
         headers: response.headers,
-        body: await response.body()
+        body: await response.body(),
       })
     }
     return response
@@ -322,7 +322,7 @@ class Client {
       statusCode,
       statusMessage: http.STATUS_CODES[statusCode], // eslint-disable-line security/detect-object-injection
       body,
-      request: response.request
+      request: response.request,
     }
     this.executeHooks('afterResponse', responseOptions)
 
@@ -334,7 +334,7 @@ class Client {
       throw createHttpError({
         statusCode,
         headers,
-        body
+        body,
       })
     }
 

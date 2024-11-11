@@ -15,7 +15,7 @@ const {
   isResourceExpired,
   isGone,
   isTooLargeResourceVersionError,
-  isGatewayTimeout
+  isGatewayTimeout,
 } = require('../lib/ApiErrors')
 
 describe('kube-client', () => {
@@ -59,8 +59,8 @@ describe('kube-client', () => {
       expect(isExpiredError(error)).toBe(true)
       error = createHttpError({
         body: {
-          reason
-        }
+          reason,
+        },
       })
       expect(isResourceExpired(error)).toBe(true)
       expect(isExpiredError(error)).toBe(true)
@@ -78,16 +78,16 @@ describe('kube-client', () => {
       let error = createHttpError({
         statusCode: code,
         body: {
-          reason
-        }
+          reason,
+        },
       })
       expect(isGatewayTimeout(error)).toBe(true)
       expect(isTooLargeResourceVersionError(error)).toBe(true)
       error = createHttpError({
         body: {
           code,
-          reason
-        }
+          reason,
+        },
       })
       expect(isGatewayTimeout(error)).toBe(true)
       expect(isTooLargeResourceVersionError(error)).toBe(true)
@@ -96,18 +96,18 @@ describe('kube-client', () => {
           code,
           reason: 'Gateway Timeout',
           details: {
-            causes: [{ message: 'Too large resource version' }]
-          }
-        }
+            causes: [{ message: 'Too large resource version' }],
+          },
+        },
       })
       expect(isGatewayTimeout(error)).toBe(false)
       expect(isTooLargeResourceVersionError(error)).toBe(true)
       error = createHttpError({
         body: {
           details: {
-            causes: [{ reason: 'ResourceVersionTooLarge' }]
-          }
-        }
+            causes: [{ reason: 'ResourceVersionTooLarge' }],
+          },
+        },
       })
       expect(isGatewayTimeout(error)).toBe(false)
       expect(isTooLargeResourceVersionError(error)).toBe(true)

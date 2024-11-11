@@ -25,7 +25,7 @@ describe('api', () => {
       const metricsText = [
         '# HELP some_example_metric_foo bar.',
         '# TYPE some_example_metric_foo bar',
-        'some_example_metric_foo 0.42'
+        'some_example_metric_foo 0.42',
       ].join('\n')
       promClient.register.metrics.mockResolvedValue(metricsText)
       const res = await agent
@@ -43,7 +43,7 @@ describe('api', () => {
 
       expect(res.body).toEqual({
         message: 'No matching route: GET /unknown',
-        status: 404
+        status: 404,
       })
     })
 
@@ -54,7 +54,7 @@ describe('api', () => {
 
       expect(res.body).toEqual({
         message: 'No matching route: DELETE /metrics',
-        status: 404
+        status: 404,
       })
     })
 
@@ -67,7 +67,7 @@ describe('api', () => {
 
       expect(res.body).toEqual({
         status: 500,
-        message: error.message
+        message: error.message,
       })
       expect(logger.error).toBeCalledTimes(1)
     })

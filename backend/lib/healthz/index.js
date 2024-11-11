@@ -25,5 +25,5 @@ async function healthCheck (transitive = false) {
 }
 
 module.exports = {
-  healthCheck
+  healthCheck,
 }

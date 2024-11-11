@@ -11,7 +11,7 @@ const { cloudProviderSecrets } = require('../services')
 const { metricsRoute } = require('../middleware')
 
 const router = module.exports = express.Router({
-  mergeParams: true
+  mergeParams: true,
 })
 
 const metricsMiddleware = metricsRoute('cloudprovidersecrets')

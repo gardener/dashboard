@@ -59,7 +59,6 @@ export default {
       {
         key: 'seed.gardener.cloud/eu-access',
         display: {
-          visibleIf: true,
           title: 'Limited Access',
           description: 'Clusters will not be migrated ...',
         },

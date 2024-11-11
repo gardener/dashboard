@@ -16,7 +16,7 @@ describe('gardener-dashboard', function () {
 
     beforeEach(() => {
       templates = [
-        'rolebinding'
+        'rolebinding',
       ]
     })
 
@@ -34,12 +34,12 @@ describe('gardener-dashboard', function () {
           global: {
             virtualGarden: {
               enabled: true,
-              userName: 'runtime-cluster:system:serviceaccount:garden:gardener-dashboard'
+              userName: 'runtime-cluster:system:serviceaccount:garden:gardener-dashboard',
             },
             dashboard: {
-              serviceAccountName: 'gardener-dashboard'
-            }
-          }
+              serviceAccountName: 'gardener-dashboard',
+            },
+          },
         }
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)

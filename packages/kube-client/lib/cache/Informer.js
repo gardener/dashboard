@@ -59,7 +59,7 @@ class Informer extends EventEmitter {
       delete (object) {
         store.delete(object)
         emitter.emit('delete', object)
-      }
+      },
     })
   }
 
@@ -100,18 +100,18 @@ class Informer extends EventEmitter {
       reflector: {
         get () {
           return informer.#reflector
-        }
+        },
       },
       store: {
         get () {
           return informer.#store
-        }
+        },
       },
       abortController: {
         get () {
           return informer.#abortController
-        }
-      }
+        },
+      },
     })
   }
 }

@@ -19,13 +19,13 @@ async function hasAuthorization (user, { resourceAttributes, nonResourceAttribut
     apiVersion,
     spec: {
       resourceAttributes,
-      nonResourceAttributes
-    }
+      nonResourceAttributes,
+    },
   }
   const {
     status: {
-      allowed = false
-    } = {}
+      allowed = false,
+    } = {},
   } = await client['authorization.k8s.io'].selfsubjectaccessreviews.create(body)
   return allowed
 }
@@ -36,8 +36,8 @@ exports.isAdmin = function (user) {
     resourceAttributes: {
       verb: 'get',
       group: '',
-      resource: 'secrets'
-    }
+      resource: 'secrets',
+    },
   })
 }
 
@@ -46,8 +46,8 @@ exports.canListProjects = function (user) {
     resourceAttributes: {
       verb: 'list',
       group: 'core.gardener.cloud',
-      resource: 'projects'
-    }
+      resource: 'projects',
+    },
   })
 }
 
@@ -55,8 +55,8 @@ exports.canGetOpenAPI = function (user) {
   return hasAuthorization(user, {
     nonResourceAttributes: {
       verb: 'get',
-      path: '/openapi/v3'
-    }
+      path: '/openapi/v3',
+    },
   })
 }
 
@@ -66,8 +66,8 @@ exports.canListShoots = function (user, namespace) {
       verb: 'list',
       group: 'core.gardener.cloud',
       resource: 'shoots',
-      namespace
-    }
+      namespace,
+    },
   })
 }
 
@@ -78,8 +78,8 @@ exports.canGetShoot = function (user, namespace, name) {
       group: 'core.gardener.cloud',
       resource: 'shoots',
       namespace,
-      name
-    }
+      name,
+    },
   })
 }
 
@@ -88,8 +88,8 @@ exports.canListSeeds = function (user) {
     resourceAttributes: {
       verb: 'list',
       group: 'core.gardener.cloud',
-      resource: 'seeds'
-    }
+      resource: 'seeds',
+    },
   })
 }
 
@@ -98,8 +98,8 @@ exports.canListCloudProfiles = function (user) {
     resourceAttributes: {
       verb: 'list',
       group: 'core.gardener.cloud',
-      resource: 'cloudprofiles'
-    }
+      resource: 'cloudprofiles',
+    },
   })
 }
 
@@ -109,8 +109,8 @@ exports.canGetCloudProfiles = function (user, name) {
       verb: 'get',
       group: 'core.gardener.cloud',
       resource: 'cloudprofiles',
-      name
-    }
+      name,
+    },
   })
 }
 
@@ -120,8 +120,8 @@ exports.canListResourceQuotas = function (user, namespace) {
       verb: 'list',
       group: '',
       resource: 'resourcequotas',
-      namespace
-    }
+      namespace,
+    },
   })
 }
 
@@ -130,8 +130,8 @@ exports.canListControllerRegistrations = function (user) {
     resourceAttributes: {
       verb: 'list',
       group: 'core.gardener.cloud',
-      resource: 'controllerregistrations'
-    }
+      resource: 'controllerregistrations',
+    },
   })
 }
 
@@ -142,8 +142,8 @@ exports.canGetSecret = function (user, namespace, name) {
       group: '',
       resource: 'secrets',
       namespace,
-      name
-    }
+      name,
+    },
   })
 }
 
@@ -160,16 +160,16 @@ exports.selfSubjectRulesReview = async function (user, namespace) {
     kind,
     apiVersion,
     spec: {
-      namespace
-    }
+      namespace,
+    },
   }
   const {
     status: {
       resourceRules,
       nonResourceRules,
       incomplete,
-      evaluationError
-    } = {}
+      evaluationError,
+    } = {},
   } = await client['authorization.k8s.io'].selfsubjectrulesreviews.create(body)
   return { resourceRules, nonResourceRules, incomplete, evaluationError }
 }

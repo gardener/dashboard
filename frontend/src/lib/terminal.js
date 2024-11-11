@@ -8,7 +8,7 @@ import { useLogger } from '@/composables/useLogger'
 import { useApi } from '@/composables/useApi'
 
 import { encodeBase64Url } from '@/utils'
-import pTimeout from '@/utils/p-timeout'
+import { pTimeout } from '@/utils/p-timeout'
 
 import {
   K8sAttachAddon,

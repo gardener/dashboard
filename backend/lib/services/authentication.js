@@ -11,7 +11,7 @@ const { Unauthorized } = require('http-errors')
 const logger = require('../logger')
 const {
   dashboardClient,
-  Resources
+  Resources,
 } = require('@gardener-dashboard/kube-client')
 
 exports.isAuthenticated = async function ({ token } = {}) {
@@ -20,19 +20,19 @@ exports.isAuthenticated = async function ({ token } = {}) {
     kind,
     apiVersion,
     metadata: {
-      name: `token-${Date.now()}`
+      name: `token-${Date.now()}`,
     },
     spec: {
-      token
-    }
+      token,
+    },
   }
   try {
     const {
       status: {
         user = {},
         authenticated = false,
-        error = 'User not authenticated'
-      } = {}
+        error = 'User not authenticated',
+      } = {},
     } = await dashboardClient['authentication.k8s.io'].tokenreviews.create(body)
     assert.strictEqual(authenticated, true, error)
     assert.ok(user.username, 'User authenticated but username is empty')

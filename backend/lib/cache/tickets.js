@@ -146,7 +146,7 @@ function init () {
     addOrUpdateIssue,
     addOrUpdateComment,
     removeIssue,
-    removeComment
+    removeComment,
   }
 }
 

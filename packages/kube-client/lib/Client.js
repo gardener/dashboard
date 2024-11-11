@@ -37,19 +37,19 @@ class Client {
     return {
       server: new URL(server),
       certificateAuthority,
-      insecureSkipTlsVerify
+      insecureSkipTlsVerify,
     }
   }
 
   async getKubeconfig ({ name, namespace }) {
     const secret = await this.getSecret({ name, namespace })
-    const kubeconfigBase64 = _.get(secret, 'data.kubeconfig')
+    const kubeconfigBase64 = _.get(secret, ['data', 'kubeconfig'])
     if (!kubeconfigBase64) {
       throw NotFound('No "kubeconfig" found in secret')
     }
     const kubeconfig = parseKubeconfig(decodeBase64(kubeconfigBase64))
-    const authProviderName = _.get(kubeconfig, 'currentUser.auth-provider.name')
-    const serviceaccountJsonBase64 = _.get(secret, 'data["serviceaccount.json"]')
+    const authProviderName = _.get(kubeconfig, ['currentUser', 'auth-provider', 'name'])
+    const serviceaccountJsonBase64 = _.get(secret, ['data', 'serviceaccount.json'])
     if (authProviderName === 'gcp' && !serviceaccountJsonBase64) {
       throw NotFound('No "serviceaccount.json" found in secret for gcp authentication provider')
     }
@@ -70,12 +70,12 @@ class Client {
       kind,
       apiVersion,
       spec: {
-        expirationSeconds: 600 // 10 minutes (lowest possible value https://github.com/gardener/gardener/blob/master/pkg/apis/authentication/validation/validation.go#L34)
-      }
+        expirationSeconds: 600, // 10 minutes (lowest possible value https://github.com/gardener/gardener/blob/master/pkg/apis/authentication/validation/validation.go#L34)
+      },
     }
 
     const adminKubeconfigRequest = await this['core.gardener.cloud'].shoots.createAdminKubeconfigRequest(namespace, name, body)
-    const kubeconfigBase64 = _.get(adminKubeconfigRequest, 'status.kubeconfig')
+    const kubeconfigBase64 = _.get(adminKubeconfigRequest, ['status', 'kubeconfig'])
     return parseKubeconfig(decodeBase64(kubeconfigBase64))
   }
 

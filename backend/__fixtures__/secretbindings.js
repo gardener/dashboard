@@ -17,57 +17,62 @@ const secretBindingList = [
   getSecretBinding({
     namespace: 'garden-foo',
     name: 'foo-infra1',
-    providerType: 'infra1',
+    cloudProfileName: 'infra1-profileName',
     secretRef: {
       namespace: 'garden-foo',
-      name: 'secret1'
+      name: 'secret1',
     },
-    quotas
+    quotas,
   }),
   getSecretBinding({
     namespace: 'garden-foo',
     name: 'foo-infra3',
-    providerType: 'infra3',
+    cloudProfileName: 'infra3-profileName',
     secretRef: {
       namespace: 'garden-foo',
-      name: 'secret2'
+      name: 'secret2',
     },
-    quotas
+    quotas,
   }),
   getSecretBinding({
     namespace: 'garden-foo',
     name: 'trial-infra1',
-    providerType: 'infra1',
+    cloudProfileName: 'infra1-profileName',
     secretRef: {
       namespace: 'garden-trial',
-      name: 'trial-secret'
+      name: 'trial-secret',
     },
-    quotas
+    quotas,
   }),
   getSecretBinding({
     namespace: 'garden-foo',
     name: 'foo-dns1',
-    providerType: 'foo-dns',
+    dnsProviderName: 'foo-dns',
     secretRef: {
       namespace: 'garden-foo',
-      name: 'secret3'
+      name: 'secret3',
     },
-    quotas
-  })
+    quotas,
+  }),
 ]
 
-function getSecretBinding ({ namespace, name, providerType, secretRef = {}, quotas = [] }) {
+function getSecretBinding ({ namespace, name, cloudProfileName, dnsProviderName, secretRef = {}, quotas = [] }) {
+  const labels = {}
+  if (cloudProfileName) {
+    labels['cloudprofile.garden.sapcloud.io/name'] = cloudProfileName
+  }
+  if (dnsProviderName) {
+    labels['gardener.cloud/dnsProviderName'] = dnsProviderName
+  }
   return {
     kind: 'SecretBinding',
     metadata: {
       name,
-      namespace
-    },
-    provider: {
-      providerType
+      namespace,
+      labels,
     },
     secretRef,
-    quotas
+    quotas,
   }
 }
 
@@ -84,7 +89,7 @@ const secretBindings = {
     return namespace
       ? filter(items, ['metadata.namespace', namespace])
       : items
-  }
+  },
 }
 
 const matchOptions = { decode: decodeURIComponent }
@@ -111,8 +116,8 @@ const mocks = {
       }
       const { params: { namespace } = {} } = matchResult
       const item = cloneDeep(json)
-      set(item, 'metadata.namespace', namespace)
-      set(item, 'metadata. resourceVersion', resourceVersion)
+      set(item, ['metadata', 'namespace'], namespace)
+      set(item, ['metadata', ' resourceVersion'], resourceVersion)
       return Promise.resolve(item)
     }
   },
@@ -137,10 +142,10 @@ const mocks = {
       const item = secretBindings.get(namespace, name)
       return Promise.resolve(item)
     }
-  }
+  },
 }
 
 module.exports = {
   ...secretBindings,
-  mocks
+  mocks,
 }

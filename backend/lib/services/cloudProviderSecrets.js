@@ -24,7 +24,7 @@ const cleartextPropertyKeys = [
   'AWS_REGION',
   'Server',
   'TSIGKeyName',
-  'Zone'
+  'Zone',
 ]
 const normalizedCleartextPropertyKeys = cleartextPropertyKeys.map(key => key.toLowerCase())
 const shoots = require('./shoots')
@@ -39,9 +39,9 @@ function fromResource ({ secretBinding, secret, quotas = [], projectName, hasCos
       secretRef,
       provider,
       projectName,
-      hasCostObject
+      hasCostObject,
     },
-    quotas
+    quotas,
   }
 
   if (secret) {
@@ -58,7 +58,7 @@ function fromResource ({ secretBinding, secret, quotas = [], projectName, hasCos
     }
     cloudProviderSecret.data = _.mapValues(secret.data, iteratee)
 
-    const secretAccountKey = _.get(secret.data, 'serviceaccount.json')
+    const secretAccountKey = _.get(secret.data, ['serviceaccount', 'json'])
     if (secretAccountKey) {
       cloudProviderSecret.data.project = projectId(secretAccountKey)
     }
@@ -70,7 +70,7 @@ function fromResource ({ secretBinding, secret, quotas = [], projectName, hasCos
 function projectId (serviceAccountKey) {
   try {
     const key = JSON.parse(decodeBase64(serviceAccountKey))
-    const projectId = _.get(key, 'project_id', '')
+    const projectId = _.get(key, ['project_id'], '')
     return projectId
   } catch (err) {
     return ''
@@ -125,8 +125,8 @@ async function getCloudProviderSecrets ({ secretBindings, secretList, namespace 
   const infrastructureSecrets = []
   for (const secretBinding of secretBindings) {
     try {
-      const secretName = _.get(secretBinding, 'secretRef.name')
-      const secretNamespace = _.get(secretBinding, 'secretRef.namespace', namespace)
+      const secretName = _.get(secretBinding, ['secretRef', 'name'])
+      const secretNamespace = _.get(secretBinding, ['secretRef', 'namespace'], namespace)
       const projectInfo = getProjectNameAndHasCostObject(secretNamespace)
 
       const secret = _.find(secretList, ['metadata.name', secretName])
@@ -137,7 +137,7 @@ async function getCloudProviderSecrets ({ secretBindings, secretList, namespace 
         secretBinding,
         secret,
         quotas: resolveQuotas(secretBinding),
-        ...projectInfo
+        ...projectInfo,
       })
       infrastructureSecrets.push(infrastructureSecret)
     } catch (err) {
@@ -155,8 +155,8 @@ async function getCloudProviderSecrets ({ secretBindings, secretList, namespace 
 */
 function getProjectNameAndHasCostObject (namespace) {
   const project = findProjectByNamespace(namespace)
-  const projectName = _.get(project, 'metadata.name')
-  const costObject = _.get(project, 'metadata.annotations["billing.gardener.cloud/costObject"]')
+  const projectName = _.get(project, ['metadata', 'name'])
+  const costObject = _.get(project, ['metadata', 'annotations', 'billing.gardener.cloud/costObject'])
   const hasCostObject = !_.isEmpty(costObject)
   return { projectName, hasCostObject }
 }
@@ -167,16 +167,16 @@ exports.list = async function ({ user, namespace }) {
   try {
     const [
       { items: secretList },
-      { items: secretBindings }
+      { items: secretBindings },
     ] = await Promise.all([
       client.core.secrets.list(namespace, { labelSelector: 'reference.gardener.cloud/secretbinding=true' }),
-      client['core.gardener.cloud'].secretbindings.list(namespace)
+      client['core.gardener.cloud'].secretbindings.list(namespace),
     ])
 
     return getCloudProviderSecrets({
       secretBindings,
       secretList,
-      namespace
+      namespace,
     })
   } catch (err) {
     logger.error(err)
@@ -208,7 +208,7 @@ exports.create = async function ({ user, namespace, body }) {
     secretBinding,
     secret,
     quotas: resolveQuotas(secretBinding),
-    ...projectInfo
+    ...projectInfo,
   })
 }
 
@@ -235,7 +235,7 @@ exports.patch = async function ({ user, namespace, name, body }) {
   const patchOperations = [{
     op: 'replace',
     path: '/data',
-    value: data
+    value: data,
   }]
 
   const secretRef = secretBinding.secretRef
@@ -247,7 +247,7 @@ exports.patch = async function ({ user, namespace, name, body }) {
     secretBinding,
     secret,
     quotas: resolveQuotas(secretBinding),
-    ...projectInfo
+    ...projectInfo,
   })
 }
 
@@ -269,13 +269,13 @@ exports.remove = async function ({ user, namespace, name }) {
   const secretRef = secretBinding.secretRef
   await Promise.all([
     await client['core.gardener.cloud'].secretbindings.delete(namespace, name),
-    await client.core.secrets.delete(secretRef.namespace, secretRef.name)
+    await client.core.secrets.delete(secretRef.namespace, secretRef.name),
   ])
   return {
     metadata: {
       name,
       namespace,
-      secretRef
-    }
+      secretRef,
+    },
   }
 }

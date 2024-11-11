@@ -16,21 +16,21 @@ function createTestKubeconfig (user = { token: 'token' }, cluster = { server: 's
       name: 'default',
       context: {
         user: 'user',
-        cluster: 'cluster'
-      }
+        cluster: 'cluster',
+      },
     }],
     users: [{
       name: 'user',
-      user
+      user,
     }],
     clusters: [{
       name: 'cluster',
-      cluster
-    }]
+      cluster,
+    }],
   })
 }
 
 module.exports = {
   ...helper,
-  createTestKubeconfig
+  createTestKubeconfig,
 }

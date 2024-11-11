@@ -12,7 +12,7 @@ function getResourceQuotas ({ uid, name, namespace, hard, used }) {
   const metadata = {
     name,
     namespace,
-    uid
+    uid,
   }
   const spec = {}
   if (hard) {
@@ -36,21 +36,21 @@ const resourceQuotasList = [
     namespace: 'garden-foo',
     hard: {
       'count/configmaps': '22',
-      'count/secrets': '70'
+      'count/secrets': '70',
     },
     used: {
       'count/configmaps': '5',
-      'count/secrets': '12'
-    }
-  })
+      'count/secrets': '12',
+    },
+  }),
 ]
 
 const resourceQuotas = {
   list () {
     return cloneDeep(resourceQuotasList)
-  }
+  },
 }
 
 module.exports = {
-  ...resourceQuotas
+  ...resourceQuotas,
 }

@@ -10,5 +10,5 @@ const { matchers, helper } = require('@gardener-dashboard/test-utils')
 
 module.exports = {
   helper,
-  matchers
+  matchers,
 }

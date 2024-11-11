@@ -16,7 +16,7 @@ class Endpoints extends mix(Core).with(NamespaceScoped, Readable, Writable) {
     return {
       plural: 'endpoints',
       singular: '',
-      kind: 'Endpoints'
+      kind: 'Endpoints',
     }
   }
 }
@@ -26,7 +26,7 @@ class Namespace extends mix(Core).with(ClusterScoped, Readable, Observable) {
     return {
       plural: 'namespaces',
       singular: 'namespace',
-      kind: 'Namespace'
+      kind: 'Namespace',
     }
   }
 }
@@ -36,7 +36,7 @@ class Node extends mix(Core).with(ClusterScoped, Readable, Observable) {
     return {
       plural: 'nodes',
       singular: 'node',
-      kind: 'Node'
+      kind: 'Node',
     }
   }
 }
@@ -46,7 +46,7 @@ class Pod extends mix(Core).with(NamespaceScoped, Readable, Observable, Writable
     return {
       plural: 'pods',
       singular: 'pod',
-      kind: 'Pod'
+      kind: 'Pod',
     }
   }
 }
@@ -56,7 +56,7 @@ class ConfigMap extends mix(Core).with(NamespaceScoped, Readable) {
     return {
       plural: 'configmaps',
       singular: 'configmap',
-      kind: 'ConfigMap'
+      kind: 'ConfigMap',
     }
   }
 }
@@ -66,7 +66,7 @@ class Secret extends mix(Core).with(NamespaceScoped, Readable, Observable, Writa
     return {
       plural: 'secrets',
       singular: 'secret',
-      kind: 'Secret'
+      kind: 'Secret',
     }
   }
 }
@@ -76,7 +76,7 @@ class Service extends mix(Core).with(NamespaceScoped, Readable, Observable, Writ
     return {
       plural: 'services',
       singular: 'service',
-      kind: 'Service'
+      kind: 'Service',
     }
   }
 }
@@ -90,7 +90,7 @@ class ServiceAccount extends mix(Core).with(NamespaceScoped, Readable, Observabl
     return {
       plural: 'serviceaccounts',
       singular: 'serviceaccount',
-      kind: 'ServiceAccount'
+      kind: 'ServiceAccount',
     }
   }
 }
@@ -100,7 +100,7 @@ class ResourceQuota extends mix(Core).with(NamespaceScoped, Readable, Observable
     return {
       plural: 'resourcequotas',
       singular: 'resourcequota',
-      kind: 'ResourceQuota'
+      kind: 'ResourceQuota',
     }
   }
 }
@@ -114,5 +114,5 @@ module.exports = {
   Secret,
   Service,
   ServiceAccount,
-  ResourceQuota
+  ResourceQuota,
 }

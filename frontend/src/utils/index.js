@@ -379,7 +379,7 @@ export function getIssueSince (shootStatus) {
   return head(issueTimestamps.sort())
 }
 
-export function isShootStatusHibernated (status) {
+export function isStatusHibernated (status) {
   return get(status, 'hibernated', false)
 }
 
@@ -732,63 +732,4 @@ export function normalizeVersion (version) {
   }
   const [major, minor = '0', patch = '0'] = parts
   return [major, minor, patch].map(Number).join('.') + suffix
-}
-
-export default {
-  emailToDisplayName,
-  handleTextFieldDrop,
-  getErrorMessages,
-  setDelayedInputFocus,
-  setInputFocus,
-  fullDisplayName,
-  displayName,
-  convertToGi,
-  isEmail,
-  gravatarUrlGeneric,
-  gravatarUrlMp,
-  gravatarUrlRetro,
-  gravatarUrlIdenticon,
-  gravatarUrlRobohash,
-  gravatarUrl,
-  routes,
-  namespacedRoute,
-  routeName,
-  getDateFormatted,
-  getTimestampFormatted,
-  getTimeStringFrom,
-  getTimeStringTo,
-  isOwnSecret,
-  getCreatedBy,
-  getIssueSince,
-  isShootStatusHibernated,
-  isReconciliationDeactivated,
-  isTruthyValue,
-  isStatusProgressing,
-  isSelfTerminationWarning,
-  isValidTerminationDate,
-  isTypeDelete,
-  isServiceAccountUsername,
-  isForeignServiceAccount,
-  parseServiceAccountUsername,
-  encodeBase64,
-  encodeBase64Url,
-  shortRandomString,
-  selfTerminationDaysForSecret,
-  shootAddonList,
-  htmlToDocumentFragment,
-  documentFragmentToHtml,
-  transformHtml,
-  randomMaintenanceBegin,
-  maintenanceWindowWithBeginAndTimezone,
-  getDurationInMinutes,
-  defaultCriNameByKubernetesVersion,
-  includesNameOrAll,
-  canI,
-  targetText,
-  sortedRoleDisplayNames,
-  mapTableHeader,
-  isHtmlColorCode,
-  omitKeysWithSuffix,
-  parseNumberWithMagnitudeSuffix,
-  normalizeVersion,
 }

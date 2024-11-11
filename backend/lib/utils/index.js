@@ -33,7 +33,7 @@ function projectFilter (user, canListProjects = false) {
   const isMemberOf = project => {
     return _
       .chain(project)
-      .get('spec.members')
+      .get(['spec', 'members'])
       .find(({ kind, namespace, name }) => {
         switch (kind) {
           case 'Group':
@@ -58,7 +58,7 @@ function projectFilter (user, canListProjects = false) {
   }
 
   const isPending = project => {
-    return _.get(project, 'status.phase', 'Pending') === 'Pending'
+    return _.get(project, ['status', 'phase'], 'Pending') === 'Pending'
   }
 
   return project => {
@@ -95,7 +95,7 @@ function parseRooms (rooms) {
   return [
     isAdmin,
     namespaces,
-    qualifiedNames
+    qualifiedNames,
   ]
 }
 
@@ -109,7 +109,7 @@ function trimObjectMetadata (object) {
 
 function trimProject (project) {
   project = trimObjectMetadata(project)
-  _.set(project, 'spec.members', undefined)
+  _.set(project, ['spec', 'members'], undefined)
   return project
 }
 
@@ -230,11 +230,11 @@ function shootHasIssue (shoot) {
 }
 
 function getSeedIngressDomain (seed) {
-  return _.get(seed, 'spec.ingress.domain')
+  return _.get(seed, ['spec', 'ingress', 'domain'])
 }
 
 function isSeedUnreachable (seed) {
-  const matchLabels = _.get(config, 'unreachableSeeds.matchLabels')
+  const matchLabels = _.get(config, ['unreachableSeeds', 'matchLabels'])
   if (!matchLabels) {
     return false
   }
@@ -259,6 +259,6 @@ module.exports = {
     EXISTS,
     NOT_EXISTS,
     EQUAL,
-    NOT_EQUAL
-  })
+    NOT_EQUAL,
+  }),
 }
