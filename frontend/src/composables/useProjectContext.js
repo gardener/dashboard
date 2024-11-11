@@ -18,12 +18,10 @@ import { useProjectShootCustomFields } from './useProjectShootCustomFields'
 import { useProjectMetadata } from './useProjectMetadata'
 import { useProjectCostObject } from './useProjectCostObject'
 
-import {
-  cloneDeep,
-  get,
-  isEqual,
-  set,
-} from '@/lodash'
+import cloneDeep from 'lodash/cloneDeep'
+import get from 'lodash/get'
+import isEqual from 'lodash/isEqual'
+import set from 'lodash/set'
 
 export function createProjectContextComposable () {
   function normalizeManifest (value) {
@@ -77,19 +75,19 @@ export function createProjectContextComposable () {
   /* spec */
   const description = computed({
     get () {
-      return get(manifest.value, 'spec.description')
+      return get(manifest.value, ['spec', 'description'])
     },
     set (value) {
-      set(manifest.value, 'spec.description', value || undefined)
+      set(manifest.value, ['spec', 'description'], value || undefined)
     },
   })
 
   const purpose = computed({
     get () {
-      return get(manifest.value, 'spec.purpose')
+      return get(manifest.value, ['spec', 'purpose'])
     },
     set (value) {
-      set(manifest.value, 'spec.purpose', value || undefined)
+      set(manifest.value, ['spec', 'purpose'], value || undefined)
     },
   })
 

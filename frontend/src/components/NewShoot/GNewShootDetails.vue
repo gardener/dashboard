@@ -118,11 +118,9 @@ import {
   setDelayedInputFocus,
 } from '@/utils'
 
-import {
-  find,
-  join,
-  filter,
-} from '@/lodash'
+import filter from 'lodash/filter'
+import join from 'lodash/join'
+import find from 'lodash/find'
 
 export default {
   components: {

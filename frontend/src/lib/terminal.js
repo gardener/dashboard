@@ -1,9 +1,3 @@
-//
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
-//
-// SPDX-License-Identifier: Apache-2.0
-//
-
 import { useLogger } from '@/composables/useLogger'
 import { useApi } from '@/composables/useApi'
 
@@ -15,17 +9,15 @@ import {
   WsReadyStateEnum,
 } from './xterm-addon-k8s-attach'
 
-import {
-  assign,
-  find,
-  get,
-  head,
-  merge,
-  intersection,
-  keys,
-  includes,
-  pick,
-} from '@/lodash'
+import assign from 'lodash/assign'
+import find from 'lodash/find'
+import get from 'lodash/get'
+import head from 'lodash/head'
+import merge from 'lodash/merge'
+import intersection from 'lodash/intersection'
+import keys from 'lodash/keys'
+import includes from 'lodash/includes'
+import pick from 'lodash/pick'
 
 const api = useApi()
 const logger = useLogger()
@@ -81,7 +73,7 @@ export class TerminalSession {
   }
 
   async createTerminal () {
-    let container = get(this.vm.data, 'container')
+    let container = get(this.vm.data, ['container'])
     container = pick(container, [
       'image',
       'command',
@@ -90,7 +82,7 @@ export class TerminalSession {
       'privileged',
     ])
 
-    let selectedConfigContainer = get(this.vm.selectedConfig, 'container')
+    let selectedConfigContainer = get(this.vm.selectedConfig, ['container'])
     selectedConfigContainer = pick(selectedConfigContainer, [
       'image',
       'privileged',
@@ -235,20 +227,20 @@ export class TerminalSession {
   async waitUntilPodIsRunning (timeoutSeconds) {
     const containerName = this.hostCluster.pod.container
     const onPodStateChange = ({ type, object: pod }) => {
-      const containers = get(pod, 'spec.containers')
+      const containers = get(pod, ['spec', 'containers'])
       const terminalContainer = find(containers, ['name', containerName])
-      this.container.image = get(terminalContainer, 'image')
-      this.container.privileged = get(terminalContainer, 'securityContext.privileged', false)
-      this.hostPID = get(pod, 'spec.hostPID', false)
-      this.hostNetwork = get(pod, 'spec.hostNetwork', false)
-      this.node = get(pod, 'spec.nodeName')
+      this.container.image = get(terminalContainer, ['image'])
+      this.container.privileged = get(terminalContainer, ['securityContext', 'privileged'], false)
+      this.hostPID = get(pod, ['spec', 'hostPID'], false)
+      this.hostNetwork = get(pod, ['spec', 'hostNetwork'], false)
+      this.node = get(pod, ['spec', 'nodeName'])
 
-      const phase = get(pod, 'status.phase')
+      const phase = get(pod, ['status', 'phase'])
       if (includes(['Failed', 'Succeeded'], phase) || type === 'DELETED') {
         return
       }
 
-      const containerStatuses = get(pod, 'status.containerStatuses')
+      const containerStatuses = get(pod, ['status', 'containerStatuses'])
       const terminalContainerStatus = find(containerStatuses, ['name', containerName])
       this.detailedConnectionStateText = getDetailedConnectionStateText(terminalContainerStatus)
       this.vm.spinner.text = `Connecting to Pod. Current phase is "${phase}".`
@@ -380,7 +372,7 @@ async function waitForPodRunning (hostCluster, containerName, onPodEvent, timeou
         }
       }
 
-      const phase = get(pod, 'status.phase')
+      const phase = get(pod, ['status', 'phase'])
       if (includes(['Failed', 'Succeeded'], phase)) {
         rejectOnce(new Error(`Pod is in phase ${phase}`))
         return
@@ -389,9 +381,9 @@ async function waitForPodRunning (hostCluster, containerName, onPodEvent, timeou
         return
       }
 
-      const containerStatuses = get(pod, 'status.containerStatuses')
+      const containerStatuses = get(pod, ['status', 'containerStatuses'])
       const terminalContainerStatus = find(containerStatuses, ['name', containerName])
-      const isContainerReady = get(terminalContainerStatus, 'ready', false)
+      const isContainerReady = get(terminalContainerStatus, ['ready'], false)
 
       if (phase === 'Running' && isContainerReady) {
         resolveOnce()
@@ -409,7 +401,7 @@ async function waitForPodRunning (hostCluster, containerName, onPodEvent, timeou
 }
 
 function getDetailedConnectionStateText (terminalContainerStatus) {
-  const state = get(terminalContainerStatus, 'state')
+  const state = get(terminalContainerStatus, ['state'])
   const stateKeys = intersection(['waiting', 'running', 'terminated'], keys(state))
   const stateType = head(stateKeys)
 

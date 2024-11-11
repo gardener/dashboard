@@ -1,21 +1,13 @@
-//
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
-//
-// SPDX-License-Identifier: Apache-2.0
-//
-
 import { parseNumberWithMagnitudeSuffix } from '@/utils'
 
-import {
-  get,
-  set,
-  map,
-  replace,
-  upperFirst,
-  sortBy,
-  head,
-  split,
-} from '@/lodash'
+import get from 'lodash/get'
+import set from 'lodash/set'
+import map from 'lodash/map'
+import replace from 'lodash/replace'
+import upperFirst from 'lodash/upperFirst'
+import sortBy from 'lodash/sortBy'
+import head from 'lodash/head'
+import split from 'lodash/split'
 
 export function getProjectQuotaStatus (quota) {
   if (!quota) {

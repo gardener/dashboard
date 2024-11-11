@@ -1,25 +1,15 @@
-//
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
-//
-// SPDX-License-Identifier: Apache-2.0
-//
-
-// Local
-
 import { v4 as uuidv4 } from './uuid'
 import moment from './moment'
 
-import {
-  get,
-  isEmpty,
-  replace,
-  split,
-  join,
-  flatMap,
-  uniq,
-  range,
-  toUpper,
-} from '@/lodash'
+import get from 'lodash/get'
+import isEmpty from 'lodash/isEmpty'
+import replace from 'lodash/replace'
+import split from 'lodash/split'
+import join from 'lodash/join'
+import flatMap from 'lodash/flatMap'
+import uniq from 'lodash/uniq'
+import range from 'lodash/range'
+import toUpper from 'lodash/toUpper'
 
 export function parseCronExpression (value) {
   const [minute, hour, dayOfMonth, month, dayOfWeek] = toUpper(value).split(/\s/)

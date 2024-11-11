@@ -63,13 +63,11 @@ import { useShootItem } from '@/composables/useShootItem'
 
 import moment from '@/utils/moment'
 
-import {
-  get,
-  map,
-  template,
-  uniq,
-  cloneDeep,
-} from '@/lodash'
+import get from 'lodash/get'
+import map from 'lodash/map'
+import template from 'lodash/template'
+import uniq from 'lodash/uniq'
+import cloneDeep from 'lodash/cloneDeep'
 
 export default {
   components: {
@@ -112,20 +110,20 @@ export default {
       })
     },
     gitHubRepoUrl () {
-      return get(this.ticketConfig, 'gitHubRepoUrl')
+      return get(this.ticketConfig, ['gitHubRepoUrl'])
     },
     shootUrl () {
       const url = new URL(`/namespace/${this.shootNamespace}/shoots/${this.shootName}`, window.location)
       return url.toString()
     },
     shootMachineImageNames () {
-      const workers = get(this.shootItem, 'spec.provider.workers')
-      let imageNames = map(workers, worker => get(worker, 'machine.image.name'))
+      const workers = get(this.shootItem, ['spec', 'provider', 'workers'])
+      let imageNames = map(workers, worker => get(worker, ['machine', 'image', 'name']))
       imageNames = uniq(imageNames)
       return imageNames.join(', ')
     },
     ticketLink () {
-      const newIssue = cloneDeep(get(this.ticketConfig, 'newIssue', {}))
+      const newIssue = cloneDeep(get(this.ticketConfig, ['newIssue'], {}))
       if (!newIssue.title) {
         newIssue.title = `[${this.shootProjectName}/${this.shootName}]`
       }

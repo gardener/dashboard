@@ -11,27 +11,25 @@ import {
   getTimestampFormatted,
 } from '@/utils'
 
-import {
-  get,
-  set,
-  unset,
-} from '@/lodash'
+import get from 'lodash/get'
+import set from 'lodash/set'
+import unset from 'lodash/unset'
 
 export const useAnnotations = object => {
   const annotations = computed(() => {
-    return get(object.value, 'metadata.annotations', {})
+    return get(object.value, ['metadata', 'annotations'], {})
   })
 
   function getAnnotation (key, defaultValue) {
-    return get(object.value, `metadata.annotations['${key}']`, defaultValue)
+    return get(object.value, ['metadata', 'annotations', key], defaultValue)
   }
 
   function setAnnotation (key, value) {
-    set(object.value, `metadata.annotations['${key}']`, value)
+    set(object.value, ['metadata', 'annotations', key], value)
   }
 
   function unsetAnnotation (key) {
-    unset(object.value, `metadata.annotations['${key}']`)
+    unset(object.value, ['metadata', 'annotations', key])
   }
 
   return {
@@ -44,19 +42,19 @@ export const useAnnotations = object => {
 
 export const useLabels = object => {
   const labels = computed(() => {
-    return get(object.value, 'metadata.labels', {})
+    return get(object.value, ['metadata', 'labels'], {})
   })
 
   function getLabel (key, defaultValue) {
-    return get(object.value, `metadata.labels['${key}']`, defaultValue)
+    return get(object.value, ['metadata', 'labels', key], defaultValue)
   }
 
   function setLabel (key, value) {
-    set(object.value, `metadata.labels['${key}']`, value)
+    set(object.value, ['metadata', 'labels', key], value)
   }
 
   function unsetLabel (key) {
-    unset(object.value, `metadata.labels['${key}']`)
+    unset(object.value, ['metadata', 'labels', key])
   }
 
   return {
@@ -70,31 +68,31 @@ export const useLabels = object => {
 export const useObjectMetadata = object => {
   const name = computed({
     get () {
-      return get(object.value, 'metadata.name')
+      return get(object.value, ['metadata', 'name'])
     },
     set (value) {
-      set(object.value, 'metadata.name', value)
+      set(object.value, ['metadata', 'name'], value)
     },
   })
 
   const namespace = computed(() => {
-    return get(object.value, 'metadata.namespace')
+    return get(object.value, ['metadata', 'namespace'])
   })
 
   const creationTimestamp = computed(() => {
-    return get(object.value, 'metadata.creationTimestamp')
+    return get(object.value, ['metadata', 'creationTimestamp'])
   })
 
   const deletionTimestamp = computed(() => {
-    return get(object.value, 'metadata.deletionTimestamp')
+    return get(object.value, ['metadata', 'deletionTimestamp'])
   })
 
   const generation = computed(() => {
-    return get(object.value, 'metadata.generation')
+    return get(object.value, ['metadata', 'generation'])
   })
 
   const uid = computed(() => {
-    return get(object.value, 'metadata.uid')
+    return get(object.value, ['metadata', 'uid'])
   })
 
   const createdBy = computed(() => {
@@ -110,7 +108,7 @@ export const useObjectMetadata = object => {
   })
 
   const metadata = computed(() => {
-    return get(object.value, 'metadata', {})
+    return get(object.value, ['metadata'], {})
   })
 
   return {

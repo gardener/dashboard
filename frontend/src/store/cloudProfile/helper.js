@@ -1,19 +1,11 @@
-//
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
-//
-// SPDX-License-Identifier: Apache-2.0
-//
-
 import { getDateFormatted } from '@/utils'
 
-import {
-  get,
-  find,
-  isEqual,
-  includes,
-  lowerCase,
-  head,
-} from '@/lodash'
+import get from 'lodash/get'
+import find from 'lodash/find'
+import isEqual from 'lodash/isEqual'
+import includes from 'lodash/includes'
+import lowerCase from 'lodash/lowerCase'
+import head from 'lodash/head'
 
 export function matchesPropertyOrEmpty (path, srcValue) {
   return object => {

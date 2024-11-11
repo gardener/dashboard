@@ -12,7 +12,7 @@ import { shallowRef } from 'vue'
 
 import { useShootAccessRestrictions } from '@/composables/useShootAccessRestrictions'
 
-import { find } from '@/lodash'
+import find from 'lodash/find'
 
 describe('composables', () => {
   describe('useShootAccessRestrictions', () => {

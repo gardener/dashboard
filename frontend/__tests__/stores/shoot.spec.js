@@ -18,11 +18,9 @@ import { parseSearch } from '@/store/shoot/helper'
 
 import { useApi } from '@/composables/useApi'
 
-import {
-  cloneDeep,
-  map,
-  find,
-} from '@/lodash'
+import cloneDeep from 'lodash/cloneDeep'
+import map from 'lodash/map'
+import find from 'lodash/find'
 
 const globalSetImmediate = global.setImmediate
 

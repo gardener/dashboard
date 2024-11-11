@@ -194,7 +194,7 @@ import GAlertBanner from '@/components/GAlertBanner'
 import whitespaceEye from '@/assets/whitespace-eye.svg?raw'
 import whitespaceEyeOff from '@/assets/whitespace-eye-off.svg?raw'
 
-import { camelCase } from '@/lodash'
+import camelCase from 'lodash/camelCase'
 
 const props = defineProps({
   identifier: {

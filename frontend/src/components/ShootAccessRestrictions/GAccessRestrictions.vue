@@ -79,11 +79,12 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
+
 import { useShootContext } from '@/composables/useShootContext'
 
 import { transformHtml } from '@/utils'
 
-import { isEmpty } from '@/lodash'
+import isEmpty from 'lodash/isEmpty'
 
 const {
   accessRestrictionDefinitions,

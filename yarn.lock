@@ -4648,18 +4648,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-import-resolver-custom-alias@npm:*":
-  version: 1.3.2
-  resolution: "eslint-import-resolver-custom-alias@npm:1.3.2"
-  dependencies:
-    glob-parent: "npm:^6.0.2"
-    resolve: "npm:^1.22.2"
-  peerDependencies:
-    eslint-plugin-import: ">=2.2.0"
-  checksum: 10c0/4ef8278ec3b07de5c64c82e6066b314495eabddde84efb9d1b7f1403ca1179dea5599cc180112602c3d9eb5eea3b590a3ee0445b64e0b8534f1c5761a8a17f89
-  languageName: node
-  linkType: hard
-
 "eslint-import-resolver-node@npm:^0.3.9":
   version: 0.3.9
   resolution: "eslint-import-resolver-node@npm:0.3.9"
@@ -8618,7 +8606,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"resolve@npm:^1.20.0, resolve@npm:^1.22.2, resolve@npm:^1.22.4":
+"resolve@npm:^1.20.0, resolve@npm:^1.22.4":
   version: 1.22.8
   resolution: "resolve@npm:1.22.8"
   dependencies:
@@ -8644,7 +8632,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"resolve@patch:resolve@npm%3A^1.20.0#optional!builtin<compat/resolve>, resolve@patch:resolve@npm%3A^1.22.2#optional!builtin<compat/resolve>, resolve@patch:resolve@npm%3A^1.22.4#optional!builtin<compat/resolve>":
+"resolve@patch:resolve@npm%3A^1.20.0#optional!builtin<compat/resolve>, resolve@patch:resolve@npm%3A^1.22.4#optional!builtin<compat/resolve>":
   version: 1.22.8
   resolution: "resolve@patch:resolve@npm%3A1.22.8#optional!builtin<compat/resolve>::version=1.22.8&hash=c3c19d"
   dependencies:

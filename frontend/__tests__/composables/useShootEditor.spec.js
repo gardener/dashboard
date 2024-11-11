@@ -14,7 +14,7 @@ import {
 
 import { EditorCompletions } from '@/composables/useShootEditor/helper'
 
-import { repeat } from '@/lodash'
+import repeat from 'lodash/repeat'
 
 const shootCompletions = {
   spec: {

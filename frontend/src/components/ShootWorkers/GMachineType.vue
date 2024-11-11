@@ -44,7 +44,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
 
-import { find } from '@/lodash'
+import find from 'lodash/find'
 
 export default {
   props: {

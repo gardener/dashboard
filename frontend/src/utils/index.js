@@ -20,28 +20,26 @@ import {
 } from './crypto'
 import TimeWithOffset from './TimeWithOffset'
 
-import {
-  capitalize,
-  replace,
-  get,
-  set,
-  head,
-  map,
-  toLower,
-  filter,
-  words,
-  find,
-  some,
-  sortBy,
-  isEmpty,
-  includes,
-  split,
-  join,
-  sample,
-  compact,
-  forEach,
-  omit,
-} from '@/lodash'
+import capitalize from 'lodash/capitalize'
+import replace from 'lodash/replace'
+import get from 'lodash/get'
+import set from 'lodash/set'
+import head from 'lodash/head'
+import map from 'lodash/map'
+import toLower from 'lodash/toLower'
+import filter from 'lodash/filter'
+import words from 'lodash/words'
+import find from 'lodash/find'
+import some from 'lodash/some'
+import sortBy from 'lodash/sortBy'
+import isEmpty from 'lodash/isEmpty'
+import includes from 'lodash/includes'
+import split from 'lodash/split'
+import join from 'lodash/join'
+import sample from 'lodash/sample'
+import compact from 'lodash/compact'
+import forEach from 'lodash/forEach'
+import omit from 'lodash/omit'
 
 const serviceAccountRegex = /^system:serviceaccount:([^:]+):([^:]+)$/
 const colorCodeRegex = /^#([a-f0-9]{6}|[a-f0-9]{3})$/i
@@ -355,7 +353,7 @@ export function getTimeStringTo (time, toTime, withoutPrefix = false) {
 }
 
 export function isOwnSecret (infrastructureSecret) {
-  return get(infrastructureSecret, 'metadata.secretRef.namespace') === get(infrastructureSecret, 'metadata.namespace')
+  return get(infrastructureSecret, ['metadata', 'secretRef', 'namespace']) === get(infrastructureSecret, ['metadata', 'namespace'])
 }
 
 export function getCreatedBy (metadata) {
@@ -364,23 +362,23 @@ export function getCreatedBy (metadata) {
 
 export function getIssueSince (shootStatus) {
   const issueTimestamps = []
-  const lastOperation = get(shootStatus, 'lastOperation', {})
+  const lastOperation = get(shootStatus, ['lastOperation'], {})
   if (lastOperation.state === 'False') {
     issueTimestamps.push(lastOperation.lastUpdateTime)
   }
-  forEach([...get(shootStatus, 'conditions', []), ...get(shootStatus, 'constraints', [])], readiness => {
+  forEach([...get(shootStatus, ['conditions'], []), ...get(shootStatus, ['constraints'], [])], readiness => {
     if (readiness.status !== 'True') {
       issueTimestamps.push(readiness.lastTransitionTime)
     }
   })
-  forEach(get(shootStatus, 'lastErrors'), lastError => {
+  forEach(get(shootStatus, ['lastErrors']), lastError => {
     issueTimestamps.push(lastError.lastUpdateTime)
   })
   return head(issueTimestamps.sort())
 }
 
 export function isStatusHibernated (status) {
-  return get(status, 'hibernated', false)
+  return get(status, ['hibernated'], false)
 }
 
 export function isReconciliationDeactivated (metadata) {
@@ -409,7 +407,7 @@ export function isValidTerminationDate (expirationTimestamp) {
 }
 
 export function isTypeDelete (lastOperation) {
-  return get(lastOperation, 'type') === 'Delete'
+  return get(lastOperation, ['type']) === 'Delete'
 }
 
 export function isServiceAccountUsername (username) {
@@ -458,10 +456,10 @@ export function shortRandomString (length) {
 
 export function selfTerminationDaysForSecret (secret) {
   const clusterLifetimeDays = function (quotas, scope) {
-    return get(find(quotas, scope), 'spec.clusterLifetimeDays')
+    return get(find(quotas, scope), ['spec', 'clusterLifetimeDays'])
   }
 
-  const quotas = get(secret, 'quotas')
+  const quotas = get(secret, ['quotas'])
   let terminationDays = clusterLifetimeDays(quotas, { spec: { scope: { apiVersion: 'core.gardener.cloud/v1beta1', kind: 'Project' } } })
   if (!terminationDays) {
     terminationDays = clusterLifetimeDays(quotas, { spec: { scope: { apiVersion: 'v1', kind: 'Secret' } } })

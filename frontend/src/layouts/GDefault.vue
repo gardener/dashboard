@@ -45,7 +45,7 @@ import GNotify from '@/components/GNotify.vue'
 
 import { useLogger } from '@/composables/useLogger'
 
-import { get } from '@/lodash'
+import get from 'lodash/get'
 
 const logger = useLogger()
 const appStore = useAppStore()
@@ -62,17 +62,17 @@ const hasRouterError = computed(() => {
 
 const routerErrorCode = computed(() => {
   const err = appStore.routerError
-  return get(err, 'response.data.code', get(err, 'status', 500))
+  return get(err, ['response', 'data', 'code'], get(err, ['status'], 500))
 })
 
 const routerErrorText = computed(() => {
   const err = appStore.routerError
-  return get(err, 'response.data.reason', get(err, 'reason', 'Unexpected error :('))
+  return get(err, ['response', 'data', 'reason'], get(err, ['reason'], 'Unexpected error :('))
 })
 
 const routerErrorMessage = computed(() => {
   const err = appStore.routerError
-  return get(err, 'response.data.message', get(err, 'message'))
+  return get(err, ['response', 'data', 'message'], get(err, ['message']))
 })
 
 const buttonText = computed(() => {

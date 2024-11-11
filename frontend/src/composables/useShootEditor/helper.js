@@ -9,22 +9,20 @@ import { indentUnit } from '@codemirror/language'
 
 import { useLogger } from '@/composables/useLogger'
 
-import {
-  trim,
-  nth,
-  filter,
-  includes,
-  last,
-  words,
-  repeat,
-  upperFirst,
-  flatMap,
-  get,
-  unset,
-  forIn,
-  isEqual,
-  first,
-} from '@/lodash'
+import trim from 'lodash/trim'
+import nth from 'lodash/nth'
+import filter from 'lodash/filter'
+import includes from 'lodash/includes'
+import last from 'lodash/last'
+import words from 'lodash/words'
+import repeat from 'lodash/repeat'
+import upperFirst from 'lodash/upperFirst'
+import flatMap from 'lodash/flatMap'
+import get from 'lodash/get'
+import unset from 'lodash/unset'
+import forIn from 'lodash/forIn'
+import isEqual from 'lodash/isEqual'
+import first from 'lodash/first'
 
 export async function createEditor (...args) {
   return new EditorView(...args)

@@ -19,15 +19,13 @@ import { useApi } from '@/composables/useApi'
 import { useAuthzStore } from './authz'
 import { useAppStore } from './app'
 
-import {
-  filter,
-  find,
-  findIndex,
-  map,
-  get,
-  set,
-  replace,
-} from '@/lodash'
+import filter from 'lodash/filter'
+import find from 'lodash/find'
+import findIndex from 'lodash/findIndex'
+import map from 'lodash/map'
+import get from 'lodash/get'
+import set from 'lodash/set'
+import replace from 'lodash/replace'
 
 export const useProjectStore = defineStore('project', () => {
   const api = useApi()
@@ -81,7 +79,7 @@ export const useProjectStore = defineStore('project', () => {
   })
 
   const projectsNotMarkedForDeletion = computed(() => {
-    return filter(projectList.value, project => !get(project, 'metadata.deletionTimestamp'))
+    return filter(projectList.value, project => !get(project, ['metadata', 'deletionTimestamp']))
   })
 
   const project = computed(() => {
@@ -89,7 +87,7 @@ export const useProjectStore = defineStore('project', () => {
   })
 
   const projectName = computed(() => {
-    return get(project.value, 'metadata.name')
+    return get(project.value, ['metadata', 'name'])
   })
 
   const projectNames = computed(() => {
@@ -132,7 +130,7 @@ export const useProjectStore = defineStore('project', () => {
 
   async function patchProject (project) {
     const response = await api.patchProject({
-      name: get(project, 'metadata.name', projectName.value),
+      name: get(project, ['metadata', 'name'], projectName.value),
       data: project,
     })
     updateList(response.data)
@@ -140,7 +138,7 @@ export const useProjectStore = defineStore('project', () => {
 
   async function updateProject (project) {
     const response = await api.updateProject({
-      name: get(project, 'metadata.name', projectName.value),
+      name: get(project, ['metadata', 'name'], projectName.value),
       data: project,
     })
     appStore.setSuccess('Project updated')
@@ -149,7 +147,7 @@ export const useProjectStore = defineStore('project', () => {
 
   async function deleteProject (project) {
     const response = await api.deleteProject({
-      name: get(project, 'metadata.name', projectName.value),
+      name: get(project, ['metadata', 'name'], projectName.value),
     })
     updateList(response.data)
     appStore.setSuccess('Project deleted')

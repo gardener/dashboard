@@ -46,19 +46,17 @@ import {
   shootHasIssue,
 } from './helper'
 
-import {
-  get,
-  set,
-  unset,
-  map,
-  pick,
-  difference,
-  find,
-  includes,
-  throttle,
-  isEmpty,
-  isEqual,
-} from '@/lodash'
+import isEqual from 'lodash/isEqual'
+import isEmpty from 'lodash/isEmpty'
+import throttle from 'lodash/throttle'
+import includes from 'lodash/includes'
+import find from 'lodash/find'
+import difference from 'lodash/difference'
+import pick from 'lodash/pick'
+import map from 'lodash/map'
+import unset from 'lodash/unset'
+import set from 'lodash/set'
+import get from 'lodash/get'
 
 const useShootStore = defineStore('shoot', () => {
   const api = useApi()
@@ -170,7 +168,7 @@ const useShootStore = defineStore('shoot', () => {
   })
 
   const onlyShootsWithIssues = computed(() => {
-    return get(state.shootListFilters, 'onlyShootsWithIssues', true)
+    return get(state.shootListFilters, ['onlyShootsWithIssues'], true)
   })
 
   const loading = computed(() => {
@@ -239,10 +237,10 @@ const useShootStore = defineStore('shoot', () => {
   function setSubscriptionError (state, err) {
     if (err) {
       const name = err.name
-      const statusCode = get(err, 'response.status', 500)
-      const message = get(err, 'response.data.message', err.message)
-      const reason = get(err, 'response.data.reason', 'InternalError')
-      const code = get(err, 'response.data.code', 500)
+      const statusCode = get(err, ['response', 'status'], 500)
+      const message = get(err, ['response', 'data', 'message'], err.message)
+      const reason = get(err, ['response', 'data', 'reason'], 'InternalError')
+      const code = get(err, ['response', 'data', 'code'], 500)
       state.subscriptionError = {
         name,
         statusCode,
@@ -403,7 +401,7 @@ const useShootStore = defineStore('shoot', () => {
           setSubscriptionState(state, constants.LOADED)
           throttleDelay = getThrottleDelay(options, 1)
         } else {
-          const message = get(err, 'response.data.message', err.message)
+          const message = get(err, ['response', 'data', 'message'], err.message)
           logger.error('Failed to fetch shoots or tickets: %s', message)
           setSubscriptionError(state, err)
         }

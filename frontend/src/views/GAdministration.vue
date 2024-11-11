@@ -523,10 +523,8 @@ import {
 } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
 
-import {
-  set,
-  includes,
-} from '@/lodash'
+import includes from 'lodash/includes'
+import set from 'lodash/set'
 
 const logger = useLogger()
 const appStore = useAppStore()

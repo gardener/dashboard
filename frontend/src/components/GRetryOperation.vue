@@ -34,7 +34,7 @@ import { useAppStore } from '@/store/app'
 
 import { useShootItem } from '@/composables/useShootItem'
 
-import { get } from '@/lodash'
+import get from 'lodash/get'
 
 const api = inject('api')
 const logger = inject('logger')
@@ -55,7 +55,7 @@ const retryingOperation = ref(false)
 const canRetry = computed(() => {
   const reconcileScheduled = shootGeneration.value !== shootObservedGeneration.value && !!shootObservedGeneration.value
 
-  return get(shootLastOperation.value, 'state') === 'Failed' &&
+  return get(shootLastOperation.value, ['state']) === 'Failed' &&
     !isShootReconciliationDeactivated.value &&
     !retryingOperation.value &&
     !reconcileScheduled

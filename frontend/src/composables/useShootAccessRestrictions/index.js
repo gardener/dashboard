@@ -10,13 +10,11 @@ import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import { NAND } from './helper'
 
-import {
-  get,
-  set,
-  unset,
-  keyBy,
-  mapValues,
-} from '@/lodash'
+import get from 'lodash/get'
+import set from 'lodash/set'
+import unset from 'lodash/unset'
+import keyBy from 'lodash/keyBy'
+import mapValues from 'lodash/mapValues'
 
 const shootPropertyMappings = Object.freeze({
   cloudProfileName: 'spec.cloudProfileName',

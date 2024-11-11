@@ -58,7 +58,7 @@ import GToolbar from '@/components/GToolbar.vue'
 
 import { errorDetailsFromError } from '@/utils/error'
 
-import { get } from '@/lodash'
+import get from 'lodash/get'
 
 export default {
   components: {
@@ -95,7 +95,7 @@ export default {
       },
     },
     name () {
-      return get(this.secret, 'metadata.name', '')
+      return get(this.secret, ['metadata', 'name'], '')
     },
   },
   watch: {
@@ -111,7 +111,7 @@ export default {
       this.visible = false
     },
     async onDeleteSecret () {
-      const name = get(this.secret, 'metadata.name')
+      const name = get(this.secret, ['metadata', 'name'])
       try {
         await this.deleteSecret(name)
         this.hide()

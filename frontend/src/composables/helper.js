@@ -1,15 +1,7 @@
-//
-// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Gardener contributors
-//
-// SPDX-License-Identifier: Apache-2.0
-//
-
-import {
-  set,
-  isEmpty,
-  isNil,
-  isObject,
-} from '@/lodash'
+import set from 'lodash/set'
+import isEmpty from 'lodash/isEmpty'
+import isNil from 'lodash/isNil'
+import isObject from 'lodash/isObject'
 
 export function cleanup (obj) {
   const cleanupObject = obj => {
