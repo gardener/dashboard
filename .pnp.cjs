@@ -1461,7 +1461,7 @@ const RAW_RUNTIME_STATE =
           ["socket.io", "npm:4.8.1"],\
           ["socket.io-client", "npm:4.8.1"],\
           ["supertest", "npm:7.0.0"],\
-          ["uuid", "npm:11.0.2"]\
+          ["uuid", "npm:11.0.3"]\
         ],\
         "linkType": "SOFT"\
       }]\
@@ -1554,7 +1554,7 @@ const RAW_RUNTIME_STATE =
           ["universal-cookie", "npm:7.2.2"],\
           ["unplugin-fonts", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:1.1.1"],\
           ["url-template", "npm:3.1.1"],\
-          ["uuid", "npm:11.0.2"],\
+          ["uuid", "npm:11.0.3"],\
           ["vite", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.4.10"],\
           ["vite-plugin-compression", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.5.1"],\
           ["vite-plugin-vuetify", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.0.4"],\
@@ -1589,7 +1589,7 @@ const RAW_RUNTIME_STATE =
           ["lodash", "npm:4.17.21"],\
           ["mixwith", "npm:0.1.1"],\
           ["neostandard", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:0.11.7"],\
-          ["uuid", "npm:11.0.2"]\
+          ["uuid", "npm:11.0.3"]\
         ],\
         "linkType": "SOFT"\
       }]\
@@ -12299,10 +12299,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["uuid", [\
-      ["npm:11.0.2", {\
-        "packageLocation": "./.yarn/cache/uuid-npm-11.0.2-13e156cc62-bd0670a0d6.zip/node_modules/uuid/",\
+      ["npm:11.0.3", {\
+        "packageLocation": "./.yarn/cache/uuid-npm-11.0.3-abcb5b16c0-cee762fc76.zip/node_modules/uuid/",\
         "packageDependencies": [\
-          ["uuid", "npm:11.0.2"]\
+          ["uuid", "npm:11.0.3"]\
         ],\
         "linkType": "HARD"\
       }]\
