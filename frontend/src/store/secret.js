@@ -108,17 +108,6 @@ export const useSecretStore = defineStore('secret', () => {
     return find(list.value, eqlNameAndNamespace({ name, namespace }))
   }
 
-  function secretsByProviderType (providerType) {
-    const isDnsSecret = gardenerExtensionStore.dnsProviderTypes.includes(providerType)
-    return filter(list.value, secret => {
-      if (isDnsSecret && !isOwnSecret(secret)) {
-        // secret binding not supported for dns secrets, shared secret not supported
-        return false
-      }
-      return secret.metadata.provider?.type === providerType
-    })
-  }
-
   function replace (obj) {
     const index = findIndex(list.value, eqlNameAndNamespace(obj.metadata))
     if (index !== -1) {
@@ -148,7 +137,6 @@ export const useSecretStore = defineStore('secret', () => {
     deleteSecret,
     infrastructureSecretList,
     dnsSecretList,
-    secretsByProviderType,
     getCloudProviderSecretByName,
     $reset,
   }

@@ -4,13 +4,17 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { computed } from 'vue'
+import {
+  computed,
+  toRef,
+} from 'vue'
 
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useSecretStore } from '@/store/secret'
 
 import { useShootResources } from '@/composables/useShootResources'
 import { useShootExtensions } from '@/composables/useShootExtensions'
+import { useSecretList } from '@/composables/useSecretList'
 
 import {
   get,
@@ -167,10 +171,10 @@ export const useShootDns = (manifest, options) => {
   }
 
   function getDefaultSecretName (type) {
-    const secrets = secretStore.secretsByProviderType(type)
+    const secrets = useSecretList(toRef(type), { secretStore, gardenerExtensionStore })
     // find unused secret
     const usedResourceNames = map(resources.value, 'name')
-    const secret = find(secrets, secret => {
+    const secret = find(secrets.value, secret => {
       const resourceName = getDnsServiceExtensionResourceName(secret.metadata.name)
       return !includes(usedResourceNames, resourceName)
     })
