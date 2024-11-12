@@ -1,3 +1,9 @@
+//
+// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Gardener contributors
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+
 import get from 'lodash/get'
 import pick from 'lodash/pick'
 
