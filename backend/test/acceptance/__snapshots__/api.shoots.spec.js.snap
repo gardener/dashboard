@@ -1244,7 +1244,7 @@ exports[`api shoots should return all shoots for a non-admin user 2`] = `
         "purpose": "fooPurpose",
         "region": "foo-west",
         "secretBindingName": "barSecretName",
-        "seedName": "infra4-seed-without-secretRef",
+        "seedName": "infra1-seed",
       },
       "status": {
         "technicalID": "shoot--foo--dummyShoot",
@@ -1388,7 +1388,7 @@ exports[`api shoots should return all shoots for an admin user 2`] = `
         "purpose": "fooPurpose",
         "region": "foo-west",
         "secretBindingName": "barSecretName",
-        "seedName": "infra4-seed-without-secretRef",
+        "seedName": "infra1-seed",
       },
       "status": {
         "technicalID": "shoot--foo--dummyShoot",
@@ -1494,7 +1494,7 @@ exports[`api shoots should return all unhealthy shoots 2`] = `
         "purpose": "fooPurpose",
         "region": "foo-west",
         "secretBindingName": "barSecretName",
-        "seedName": "infra4-seed-without-secretRef",
+        "seedName": "infra1-seed",
       },
       "status": {
         "technicalID": "shoot--foo--dummyShoot",
@@ -1611,7 +1611,7 @@ exports[`api shoots should return shoot info without gardenlogin kubeconfig 1`] 
     {
       ":authority": "kubernetes:6443",
       ":method": "get",
-      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden/shoots/infra4-seed-without-secretRef",
+      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden/shoots/infra1-seed",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
@@ -1947,7 +1947,7 @@ exports[`api shoots should return shoots for a single namespace 2`] = `
         "purpose": "fooPurpose",
         "region": "foo-west",
         "secretBindingName": "barSecretName",
-        "seedName": "infra4-seed-without-secretRef",
+        "seedName": "infra1-seed",
       },
       "status": {
         "technicalID": "shoot--foo--dummyShoot",

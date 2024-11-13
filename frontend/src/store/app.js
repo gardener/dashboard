@@ -15,7 +15,7 @@ import { parseWarningHeader } from '@/utils/headerWarnings'
 import { errorDetailsFromError } from '@/utils/error'
 import moment from '@/utils/moment'
 
-import { assign } from '@/lodash'
+import assign from 'lodash/assign'
 
 export const useAppStore = defineStore('app', () => {
   const ready = ref(false)

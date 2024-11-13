@@ -60,11 +60,9 @@ import {
 } from '@/utils'
 import { withFieldName } from '@/utils/validators'
 
-import {
-  pick,
-  find,
-  join,
-} from '@/lodash'
+import join from 'lodash/join'
+import find from 'lodash/find'
+import pick from 'lodash/pick'
 
 export default {
   components: {

@@ -114,8 +114,8 @@ import {
 } from 'vue'
 
 import GIconBase from '@/components/icons/GIconBase.vue'
-import GConnected from '@/components/icons/GConnected.vue' // eslint-disable-line no-unused-vars
-import GDisconnected from '@/components/icons/GDisconnected.vue' // eslint-disable-line no-unused-vars
+import GConnected from '@/components/icons/GConnected.vue'
+import GDisconnected from '@/components/icons/GDisconnected.vue'
 
 import { useShootSubscription } from '@/composables/useShootSubscription'
 

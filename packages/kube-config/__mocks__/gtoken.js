@@ -10,7 +10,7 @@ const _ = require('lodash')
 
 const mockGetToken = jest.fn().mockResolvedValue({
   access_token: 'valid-access-token',
-  token_type: 'Bearer'
+  token_type: 'Bearer',
 })
 
 module.exports = {
@@ -24,15 +24,15 @@ module.exports = {
       expiresAt: undefined,
       rawToken: undefined,
       get accessToken () {
-        return _.get(this.rawToken, 'access_token')
+        return _.get(this.rawToken, ['access_token'])
       },
       async getToken () {
         const iat = Math.floor(new Date().getTime() / 1000)
         this.rawToken = await mockGetToken()
-        const expiresIn = _.get(this.rawToken, 'expires_in', 3600)
+        const expiresIn = _.get(this.rawToken, ['expires_in'], 3600)
         this.expiresAt = (iat + expiresIn) * 1000
         return this.rawToken
-      }
+      },
     }
-  })
+  }),
 }

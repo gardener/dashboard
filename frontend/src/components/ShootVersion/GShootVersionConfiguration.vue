@@ -69,7 +69,7 @@ import { useShootItem } from '@/composables/useShootItem'
 
 import { errorDetailsFromError } from '@/utils/error'
 
-import { get } from '@/lodash'
+import get from 'lodash/get'
 
 export default {
   components: {
@@ -117,10 +117,10 @@ export default {
       return 'Update Cluster'
     },
     selectedVersion () {
-      return get(this.selectedItem, 'version')
+      return get(this.selectedItem, ['version'])
     },
     selectedVersionType () {
-      return get(this.selectedItem, 'updateType')
+      return get(this.selectedItem, ['updateType'])
     },
     confirmRequired () {
       return this.selectedVersionType !== 'patch'

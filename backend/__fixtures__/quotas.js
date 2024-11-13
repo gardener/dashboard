@@ -13,33 +13,33 @@ function getQuota ({
   namespace = 'garden-trial',
   scope = {
     apiVersion: 'v1',
-    kind: 'Secret'
+    kind: 'Secret',
   },
   clusterLifetimeDays = 14,
   cpu = '200',
-  uid
+  uid,
 }) {
   uid = uid || `${namespace}--${name}`
   return {
     metadata: {
       name,
       namespace,
-      uid
+      uid,
     },
     spec: {
       scope,
       clusterLifetimeDays,
       metrics: {
-        cpu
-      }
-    }
+        cpu,
+      },
+    },
   }
 }
 
 const quotaList = [
   getQuota({ uid: 1, name: 'trial-secret-quota', namespace: 'garden-trial' }),
   getQuota({ uid: 2, name: 'foo-quota1', namespace: 'garden-foo' }),
-  getQuota({ uid: 3, name: 'foo-quota2', namespace: 'garden-foo' })
+  getQuota({ uid: 3, name: 'foo-quota2', namespace: 'garden-foo' }),
 ]
 
 const quotas = {
@@ -55,9 +55,9 @@ const quotas = {
     return namespace
       ? filter(items, ['metadata.namespace', namespace])
       : items
-  }
+  },
 }
 
 module.exports = {
-  ...quotas
+  ...quotas,
 }

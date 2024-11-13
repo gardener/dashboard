@@ -23,7 +23,7 @@ const shootList = [
     project: 'foo',
     createdBy: 'foo@example.org',
     purpose: 'fooPurpose',
-    secretBindingName: 'foo-infra1'
+    secretBindingName: 'foo-infra1',
   }),
   getShoot({
     uid: 2,
@@ -32,7 +32,7 @@ const shootList = [
     project: 'foo',
     createdBy: 'bar@example.org',
     purpose: 'barPurpose',
-    secretBindingName: 'foo-infra1'
+    secretBindingName: 'foo-infra1',
   }),
   getShoot({
     uid: 3,
@@ -42,8 +42,8 @@ const shootList = [
     createdBy: 'foo@example.org',
     purpose: 'fooPurpose',
     secretBindingName: 'barSecretName',
-    seed: 'infra4-seed-without-secretRef',
-    advertisedAddresses: null
+    seed: 'infra1-seed',
+    advertisedAddresses: null,
   }),
   getShoot({
     uid: 4,
@@ -52,8 +52,8 @@ const shootList = [
     project: 'garden',
     createdBy: 'admin@example.org',
     secretBindingName: 'soil-infra1',
-    seed: 'soil-infra1'
-  })
+    seed: 'soil-infra1',
+  }),
 ]
 
 function getShoot ({
@@ -70,7 +70,7 @@ function getShoot ({
   seed = 'infra1-seed',
   hibernation = { enabled: false },
   kubernetesVersion = '1.16.0',
-  advertisedAddresses
+  advertisedAddresses,
 }) {
   uid = uid || `${namespace}--${name}`
   const shoot = {
@@ -78,7 +78,7 @@ function getShoot ({
       uid,
       name,
       namespace,
-      annotations: {}
+      annotations: {},
     },
     spec: {
       secretBindingName,
@@ -86,15 +86,15 @@ function getShoot ({
       region,
       hibernation,
       provider: {
-        type: kind
+        type: kind,
       },
       seedName: seed,
       kubernetes: {
-        version: kubernetesVersion
+        version: kubernetesVersion,
       },
-      purpose
+      purpose,
     },
-    status: {}
+    status: {},
   }
   if (createdBy) {
     shoot.metadata.annotations['gardener.cloud/created-by'] = createdBy
@@ -105,7 +105,7 @@ function getShoot ({
   if (advertisedAddresses !== null) {
     shoot.status.advertisedAddresses = advertisedAddresses ?? [{
       name: 'external',
-      url: `https://api.${name}.${project}.shoot.test`
+      url: `https://api.${name}.${project}.shoot.test`,
     }]
   }
   return shoot
@@ -127,7 +127,7 @@ const shoots = {
     return namespace
       ? filter(items, ['metadata.namespace', namespace])
       : items
-  }
+  },
 }
 
 const matchOptions = { decode: decodeURIComponent }
@@ -170,19 +170,19 @@ const mocks = {
       }
       const item = cloneDeep(json)
       const name = item.metadata.name
-      set(item, 'metadata.namespace', namespace)
-      set(item, 'metadata.resourceVersion', resourceVersion)
-      set(item, 'metadata.uid', uid)
-      set(item, 'metadata.annotations["gardener.cloud/created-by"]', payload.id)
-      set(item, 'status.technicalID', `shoot--${project.metadata.name}--${name}`)
+      set(item, ['metadata', 'namespace'], namespace)
+      set(item, ['metadata', 'resourceVersion'], resourceVersion)
+      set(item, ['metadata', 'uid'], uid)
+      set(item, ['metadata', 'annotations', 'gardener.cloud/created-by'], payload.id)
+      set(item, ['status', 'technicalID'], `shoot--${project.metadata.name}--${name}`)
       return Promise.resolve(item)
     }
   },
   createAdminKubeconfigRequest ({
     user = {
       'client-certificate-data': toBase64('certificate-authority-data'),
-      'client-key-data': toBase64('client-key-data')
-    }, cluster = { server: 'https://shootApiServerHostname:6443' }
+      'client-key-data': toBase64('client-key-data'),
+    }, cluster = { server: 'https://shootApiServerHostname:6443' },
   } = {}) {
     return (headers, json) => {
       const matchResult = matchAdminKubeconfig(headers[':path'])
@@ -191,12 +191,12 @@ const mocks = {
       }
       const { params: { namespace, name } = {} } = matchResult
       const item = cloneDeep(json)
-      const expirationSeconds = get(item, 'spec.expirationSeconds', 600)
-      set(item, 'metadata.namespace', namespace)
-      set(item, 'metadata.name', name)
-      set(item, 'status.kubeconfig', createTestKubeconfig(user, cluster))
-      set(item, 'status.expirationTimestamp', formatTime(
-        new Date().setSeconds(new Date().getSeconds() + expirationSeconds))
+      const expirationSeconds = get(item, ['spec', 'expirationSeconds'], 600)
+      set(item, ['metadata', 'namespace'], namespace)
+      set(item, ['metadata', 'name'], name)
+      set(item, ['status', 'kubeconfig'], createTestKubeconfig(user, cluster))
+      set(item, ['status', 'expirationTimestamp'], formatTime(
+        new Date().setSeconds(new Date().getSeconds() + expirationSeconds)),
       )
       return Promise.resolve(item)
     }
@@ -231,7 +231,7 @@ const mocks = {
       if (!item) {
         return Promise.reject(createError(404))
       }
-      const resourceVersion = get(item, 'metadata.resourceVersion', '42')
+      const resourceVersion = get(item, ['metadata', 'resourceVersion'], '42')
       switch (headers['content-type']) {
         case 'application/json-patch+json':
           item = applyPatch(item, json).newDocument
@@ -240,7 +240,7 @@ const mocks = {
           merge(item, json)
           break
       }
-      set(item, 'metadata.resourceVersion', (+resourceVersion + 1).toString())
+      set(item, ['metadata', 'resourceVersion'], (+resourceVersion + 1).toString())
       return Promise.resolve(item)
     }
   },
@@ -255,9 +255,9 @@ const mocks = {
       if (!item) {
         return Promise.reject(createError(404))
       }
-      const resourceVersion = get(item, 'metadata.resourceVersion', '42')
+      const resourceVersion = get(item, ['metadata', 'resourceVersion'], '42')
       item = cloneDeep(json)
-      set(item, 'metadata.resourceVersion', (+resourceVersion + 1).toString())
+      set(item, ['metadata', 'resourceVersion'], (+resourceVersion + 1).toString())
       return Promise.resolve(item)
     }
   },
@@ -269,7 +269,7 @@ const mocks = {
       }
       const { params: { namespace, name } = {} } = matchResult
       const item = shoots.get(namespace, name)
-      set(item, 'metadata.annotations["confirmation.gardener.cloud/deletion"]', 'true')
+      set(item, ['metadata', 'annotations', 'confirmation.gardener.cloud/deletion'], 'true')
       return Promise.resolve(item)
     }
   },
@@ -289,10 +289,10 @@ const mocks = {
 
       return Promise.resolve(item)
     }
-  }
+  },
 }
 
 module.exports = {
   ...shoots,
-  mocks
+  mocks,
 }

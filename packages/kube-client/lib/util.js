@@ -11,13 +11,13 @@ const path = require('path')
 const _ = require('lodash')
 
 const {
-  HTTP2_HEADER_CONTENT_TYPE
+  HTTP2_HEADER_CONTENT_TYPE,
 } = http2.constants
 
 const PatchType = {
   MERGE: 'merge',
   STRATEGIC_MERGE: 'strategic-merge',
-  JSON: 'json'
+  JSON: 'json',
 }
 
 function decodeBase64 (value) {
@@ -78,5 +78,5 @@ exports = module.exports = {
   setPatchType,
   namespaceScopedUrl,
   clusterScopedUrl,
-  validateLabelValue
+  validateLabelValue,
 }

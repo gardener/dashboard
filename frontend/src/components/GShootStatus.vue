@@ -153,10 +153,8 @@ import {
 import GShootMessageDetails from './GShootMessageDetails.vue'
 import GRetryOperation from './GRetryOperation.vue'
 
-import {
-  join,
-  map,
-} from '@/lodash'
+import map from 'lodash/map'
+import join from 'lodash/join'
 
 export default {
   components: {

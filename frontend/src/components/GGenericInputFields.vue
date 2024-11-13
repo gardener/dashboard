@@ -71,16 +71,14 @@ import {
 } from '@/utils/validators'
 import { getErrorMessages } from '@/utils'
 
-import {
-  isObject,
-  forEach,
-  every,
-  map,
-  isEmpty,
-  fromPairs,
-  set,
-  get,
-} from '@/lodash'
+import isObject from 'lodash/isObject'
+import forEach from 'lodash/forEach'
+import every from 'lodash/every'
+import map from 'lodash/map'
+import isEmpty from 'lodash/isEmpty'
+import fromPairs from 'lodash/fromPairs'
+import set from 'lodash/set'
+import get from 'lodash/get'
 
 export default {
   components: {

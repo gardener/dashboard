@@ -16,5 +16,5 @@ module.exports = {
   server,
   ':scheme': scheme,
   ':authority': authority,
-  authorization
+  authorization,
 }

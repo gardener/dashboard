@@ -18,7 +18,7 @@ describe('identity', function () {
 
     beforeEach(() => {
       templates = [
-        'configmap'
+        'configmap',
       ]
     })
 

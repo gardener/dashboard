@@ -17,8 +17,8 @@ const {
     org,
     repository,
     authentication,
-    webhookSecret
-  }
+    webhookSecret,
+  },
 } = require('./config').default
 
 const server = new URL(apiUrl)
@@ -38,7 +38,7 @@ function getIssue ({
   comments = 0,
   state = 'open',
   created_at,
-  updated_at
+  updated_at,
 }) {
   const issueId = 327883526 + number
   title = `[${projectName ?? namespace}/${name}] ${title}`
@@ -59,13 +59,13 @@ function getIssue ({
     user: {
       id: 21031061,
       avatar_url: 'https://avatars1.githubusercontent.com/u/21031061?v=4',
-      login: 'johndoe'
+      login: 'johndoe',
     },
     labels: [{
       id: 949737505,
       name: 'bug',
-      color: 'd73a4a'
-    }]
+      color: 'd73a4a',
+    }],
   }
 }
 
@@ -74,7 +74,7 @@ function getComment ({
   number,
   body,
   created_at,
-  updated_at
+  updated_at,
 }) {
   body = body || `This is comment ${id} for issue #${number}`
   const time = (1530563012 + number * 60) * 1000
@@ -90,8 +90,8 @@ function getComment ({
     user: {
       id: 21031061,
       avatar_url: 'https://avatars1.githubusercontent.com/u/21031061?v=4',
-      login: 'johndoe'
-    }
+      login: 'johndoe',
+    },
   }
 }
 
@@ -99,12 +99,12 @@ const issueList = [
   getIssue({ number: 1 }),
   getIssue({ number: 2, body: 'The second bug', comments: 1 }),
   getIssue({ number: 3, namespace: 'garden-foobar' }),
-  getIssue({ number: 4, state: 'closed', comments: 1 })
+  getIssue({ number: 4, state: 'closed', comments: 1 }),
 ]
 
 const commentList = [
   getComment({ id: 1, number: 4 }),
-  getComment({ id: 2, number: 2 })
+  getComment({ id: 2, number: 2 }),
 ]
 
 const issues = {
@@ -113,7 +113,7 @@ const issues = {
   },
   list () {
     return cloneDeep(issueList)
-  }
+  },
 }
 
 const comments = {
@@ -122,7 +122,7 @@ const comments = {
   },
   list () {
     return cloneDeep(commentList)
-  }
+  },
 }
 
 function createHubSignature (body, secret = null) {
@@ -145,5 +145,5 @@ module.exports = {
   createComment (id, number) {
     return getComment({ id, number })
   },
-  createHubSignature
+  createHubSignature,
 }

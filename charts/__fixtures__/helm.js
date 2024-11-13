@@ -42,7 +42,7 @@ function renderTemplatesFn (...paths) {
       path.join(...tplPaths, `${template}.yaml`),
       '.',
       '-f',
-      filename
+      filename,
     ]
     return new Promise((resolve, reject) => {
       const { KUBECONFIG, ...env } = process.env
@@ -99,5 +99,5 @@ module.exports = {
   renderTemplatesFn,
   renderDashboardRuntimeTemplates,
   renderDashboardApplicationTemplates,
-  renderIdentityTemplates
+  renderIdentityTemplates,
 }

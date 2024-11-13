@@ -21,8 +21,8 @@ async function updateLease () {
   const body = {
     spec: {
       holderIdentity: process.env.POD_NAME || 'gardener-dashboard',
-      renewTime: currentMicroDateStr()
-    }
+      renewTime: currentMicroDateStr(),
+    },
   }
   try {
     await dashboardClient['coordination.k8s.io'].leases.mergePatch(namespace, name, body)
@@ -31,7 +31,7 @@ async function updateLease () {
       // Lease not found, create it
       try {
         body.metadata = {
-          name
+          name,
         }
         await dashboardClient['coordination.k8s.io'].leases.create(namespace, body)
       } catch (createErr) {

@@ -11,7 +11,6 @@ const { cloneDeep, merge, find, filter, has, get, set, mapValues, split, startsW
 const createError = require('http-errors')
 const pathToRegexp = require('path-to-regexp')
 const { toBase64, createUrl } = require('./helper')
-const seeds = require('./seeds')
 
 const certificateAuthorityData = toBase64('certificate-authority-data')
 const clientCertificateData = toBase64('client-certificate-data')
@@ -20,7 +19,7 @@ const clientKeyData = toBase64('client-key-data')
 function getSecret ({ namespace, name, labels, creationTimestamp, data = {} }) {
   const metadata = {
     namespace,
-    name
+    name,
   }
   if (!isEmpty(labels)) {
     metadata.labels = labels
@@ -39,31 +38,31 @@ function getSecret ({ namespace, name, labels, creationTimestamp, data = {} }) {
 function getCloudProviderSecret ({ cloudProfileName, ...options }) {
   return getSecret({
     labels: {
-      'cloudprofile.garden.sapcloud.io/name': cloudProfileName
+      'cloudprofile.garden.sapcloud.io/name': cloudProfileName,
     },
-    ...options
+    ...options,
   })
 }
 
 function getKubeconfig ({ server, name = 'default' }) {
   const cluster = {
     'certificate-authority-data': certificateAuthorityData,
-    server
+    server,
   }
   const user = {
     'client-certificate-data': clientCertificateData,
-    'client-key-data': clientKeyData
+    'client-key-data': clientKeyData,
   }
   const context = {
     cluster: name,
-    user: name
+    user: name,
   }
   return yaml.dump({
     kind: 'Config',
     clusters: [{ cluster, name }],
     contexts: [{ context, name }],
     users: [{ user, name }],
-    'current-context': name
+    'current-context': name,
   })
 }
 
@@ -74,8 +73,8 @@ const cloudProviderSecretList = [
     cloudProfileName: 'infra1-profileName',
     data: {
       key: 'fooKey',
-      secret: 'fooSecret'
-    }
+      secret: 'fooSecret',
+    },
   }),
   getCloudProviderSecret({
     namespace: 'garden-foo',
@@ -83,8 +82,8 @@ const cloudProviderSecretList = [
     cloudProfileName: 'infra3-profileName',
     data: {
       key: 'fooKey',
-      secret: 'fooSecret'
-    }
+      secret: 'fooSecret',
+    },
   }),
   getCloudProviderSecret({
     namespace: 'garden-trial',
@@ -92,9 +91,9 @@ const cloudProviderSecretList = [
     cloudProfileName: 'infra1-profileName',
     data: {
       key: 'trialKey',
-      secret: 'trialSecret'
-    }
-  })
+      secret: 'trialSecret',
+    },
+  }),
 ]
 
 const secrets = {
@@ -115,7 +114,7 @@ const secrets = {
     const {
       valid = false,
       invalid = false,
-      target = 'cp'
+      target = 'cp',
     } = options
     const shortcuts = []
     if (valid) {
@@ -126,13 +125,13 @@ const secrets = {
         container: {
           image: 'image:latest',
           command: ['cmd'],
-          args: ['a', 'b']
-        }
+          args: ['a', 'b'],
+        },
       })
     }
     if (invalid) {
       shortcuts.push({
-        invalidShortcut: 'foo'
+        invalidShortcut: 'foo',
       })
     }
     if (shortcuts.length) {
@@ -140,8 +139,8 @@ const secrets = {
         name: 'terminal.shortcuts',
         namespace,
         data: {
-          shortcuts: yaml.dump(shortcuts)
-        }
+          shortcuts: yaml.dump(shortcuts),
+        },
       })
     }
   },
@@ -154,26 +153,11 @@ const secrets = {
       data: {
         kubeconfig: getKubeconfig({
           server: `https://api.${shootName}.${projectName}.shoot.cluster`,
-          name: `shoot--${projectName}--${shootName}`
+          name: `shoot--${projectName}--${shootName}`,
         }),
         username: `user-${projectName}-${shootName}`,
-        password: `pass-${projectName}-${shootName}`
-      }
-    })
-  },
-  getSeedSecret (namespace, name) {
-    const seedName = name.substring(11)
-    const seed = seeds.get(seedName)
-    const { type, region } = seed.spec.provider
-    return getSecret({
-      name,
-      namespace,
-      data: {
-        kubeconfig: getKubeconfig({
-          server: `https://api.${region}.${type}.seed.cluster`,
-          name: `shoot--garden--${seedName}`
-        })
-      }
+        password: `pass-${projectName}-${shootName}`,
+      },
     })
   },
   getMonitoringSecret (namespace, name, creationTimestamp) {
@@ -183,8 +167,8 @@ const secrets = {
       creationTimestamp,
       data: {
         username: `user-${namespace}-${name}`,
-        password: `pass-${namespace}-${name}`
-      }
+        password: `pass-${namespace}-${name}`,
+      },
     })
   },
   getServiceAccountSecret (namespace, name) {
@@ -193,10 +177,10 @@ const secrets = {
       namespace,
       data: {
         namespace,
-        token: name
-      }
+        token: name,
+      },
     })
-  }
+  },
 }
 
 const matchOptions = { decode: decodeURIComponent }
@@ -229,8 +213,8 @@ const mocks = {
       }
       const { params: { namespace } = {} } = matchResult
       const item = cloneDeep(json)
-      set(item, 'metadata.namespace', namespace)
-      set(item, 'metadata.resourceVersion', resourceVersion)
+      set(item, ['metadata', 'namespace'], namespace)
+      set(item, ['metadata', 'resourceVersion'], resourceVersion)
       return Promise.resolve(item)
     }
   },
@@ -243,10 +227,6 @@ const mocks = {
       const { params: { namespace, name } = {} } = matchResult
       const [hostname] = split(headers[':authority'], ':')
       if (hostname === 'kubernetes') {
-        if (namespace === 'garden' && startsWith(name, 'seedsecret-')) {
-          const item = secrets.getSeedSecret(namespace, name)
-          return Promise.resolve(item)
-        }
         if (endsWith(name, '.kubeconfig')) {
           const item = secrets.getShootSecret(namespace, name)
           return Promise.resolve(item)
@@ -286,13 +266,13 @@ const mocks = {
         return Promise.reject(createError(503))
       }
       const { params: { namespace, name } = {} } = matchResult
-      if (has(json, 'metadata.resourceVersion')) {
+      if (has(json, ['metadata', 'resourceVersion'])) {
         return Promise.reject(createError(409))
       }
       const item = secrets.get(namespace, name)
-      const resourceVersion = get(item, 'metadata.resourceVersion', '42')
+      const resourceVersion = get(item, ['metadata', 'resourceVersion'], '42')
       merge(item, json)
-      set(item, 'metadata.resourceVersion', (+resourceVersion + 1).toString())
+      set(item, ['metadata', 'resourceVersion'], (+resourceVersion + 1).toString())
       return Promise.resolve(item)
     }
   },
@@ -306,10 +286,10 @@ const mocks = {
       const item = secrets.get(namespace, name)
       return Promise.resolve(item)
     }
-  }
+  },
 }
 
 module.exports = {
   ...secrets,
-  mocks
+  mocks,
 }

@@ -179,7 +179,7 @@ import { useShootItem } from '@/composables/useShootItem'
 import TimeWithOffset from '@/utils/TimeWithOffset'
 import moment from '@/utils/moment'
 
-import { get } from '@/lodash'
+import get from 'lodash/get'
 
 const authzStore = useAuthzStore()
 const {
@@ -225,7 +225,7 @@ const hibernationDescription = computed(() => {
 })
 
 const maintenanceTooltipBegin = computed(() => {
-  const maintenanceStart = get(shootMaintenance.value, 'timeWindow.begin')
+  const maintenanceStart = get(shootMaintenance.value, ['timeWindow', 'begin'])
   const maintenanceStartTime = new TimeWithOffset(maintenanceStart)
   if (!maintenanceStartTime.isValid()) {
     return
@@ -235,7 +235,7 @@ const maintenanceTooltipBegin = computed(() => {
 })
 
 const maintenanceTooltipEnd = computed(() => {
-  const maintenanceStart = get(shootMaintenance.value, 'timeWindow.end')
+  const maintenanceStart = get(shootMaintenance.value, ['timeWindow', 'end'])
   const maintenanceStartTime = new TimeWithOffset(maintenanceStart)
   if (!maintenanceStartTime.isValid()) {
     return
@@ -245,7 +245,7 @@ const maintenanceTooltipEnd = computed(() => {
 })
 
 const nextMaintenanceBeginTimestamp = computed(() => {
-  const maintenanceStart = get(shootMaintenance.value, 'timeWindow.begin')
+  const maintenanceStart = get(shootMaintenance.value, ['timeWindow', 'begin'])
   const maintenanceStartTime = new TimeWithOffset(maintenanceStart)
   if (!maintenanceStartTime.isValid()) {
     return
@@ -255,7 +255,7 @@ const nextMaintenanceBeginTimestamp = computed(() => {
 })
 
 const nextMaintenanceEndTimestamp = computed(() => {
-  const maintenanceEnd = get(shootMaintenance.value, 'timeWindow.end')
+  const maintenanceEnd = get(shootMaintenance.value, ['timeWindow', 'end'])
   const maintenanceEndTime = new TimeWithOffset(maintenanceEnd)
   if (!maintenanceEndTime.isValid()) {
     return

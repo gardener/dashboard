@@ -154,14 +154,12 @@ import {
   setInputFocus,
 } from '@/utils'
 
-import {
-  cloneDeep,
-  get,
-  head,
-  sortBy,
-  filter,
-  includes,
-} from '@/lodash'
+import includes from 'lodash/includes'
+import filter from 'lodash/filter'
+import sortBy from 'lodash/sortBy'
+import head from 'lodash/head'
+import get from 'lodash/get'
+import cloneDeep from 'lodash/cloneDeep'
 
 export default {
   components: {
@@ -278,7 +276,7 @@ export default {
       return this.shootsByInfrastructureSecret.length
     },
     shootsByInfrastructureSecret () {
-      const name = get(this.secret, 'metadata.name')
+      const name = get(this.secret, ['metadata', 'name'])
       return filter(this.shootList, ['spec.secretBindingName', name])
     },
     helpContainerStyles () {
@@ -316,15 +314,15 @@ export default {
       this.name = `my-${this.vendor}-secret`
 
       if (this.cloudProfiles.length === 1) {
-        this.cloudProfileName = get(head(this.cloudProfiles), 'metadata.name')
+        this.cloudProfileName = get(head(this.cloudProfiles), ['metadata', 'name'])
       } else {
         this.cloudProfileName = undefined
       }
 
       setDelayedInputFocus(this, 'name')
     } else {
-      this.name = get(this.secret, 'metadata.name')
-      this.cloudProfileName = get(this.secret, 'metadata.cloudProfileName')
+      this.name = get(this.secret, ['metadata', 'name'])
+      this.cloudProfileName = get(this.secret, ['metadata', 'cloudProfileName'])
     }
   },
   methods: {

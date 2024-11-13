@@ -20,19 +20,19 @@ function createConverter (options) {
     emoji: true,
     simplifiedAutoLink: true,
     simpleLineBreaks: true,
-    ...options
+    ...options,
   })
 
   return {
     makeSanitizedHtml (text, options) {
       return sanitizeHtml(converter.makeHtml(text), {
         allowedTags: [...sanitizeHtml.defaults.allowedTags, 'img', 'details', 'summary'],
-        ...options
+        ...options,
       })
-    }
+    },
   }
 }
 
 module.exports = {
-  createConverter
+  createConverter,
 }

@@ -62,7 +62,7 @@ async function synchronize (socket, ...args) {
     statusCode = 500,
     name = 'InternalError',
     message = 'Failed to synchronize shoots',
-    items = []
+    items = [],
   } = await socket.timeout(1000).emitWithAck('synchronize', ...args)
   if (statusCode === 200) {
     return items
@@ -85,11 +85,11 @@ describe('api', function () {
     cache.cache.resetTicketCache()
     cache.initialize({
       projects: {
-        store: createStore(fixtures.projects.list())
+        store: createStore(fixtures.projects.list()),
       },
       shoots: {
-        store: createStore(fixtures.shoots.list())
-      }
+        store: createStore(fixtures.shoots.list()),
+      },
     })
     agent = createAgent('io', cache)
     nsp = agent.io.sockets
@@ -104,11 +104,11 @@ describe('api', function () {
       fixtures.github.createIssue(1, 'foo'),
       fixtures.github.createIssue(2, 'bar', { comments: 1 }),
       fixtures.github.createIssue(3, 'foobar'),
-      fixtures.github.createIssue(4, 'foo', { comments: 1, state: 'closed' })
+      fixtures.github.createIssue(4, 'foo', { comments: 1, state: 'closed' }),
     ])
     mockListComments.mockReturnValue([
       fixtures.github.createComment(1, 2),
-      fixtures.github.createComment(2, 4)
+      fixtures.github.createComment(2, 4),
     ])
     await tickets.loadOpenIssues()
   })
@@ -121,13 +121,13 @@ describe('api', function () {
   describe('events', function () {
     describe('when user is "foo"', () => {
       const user = fixtures.auth.createUser({
-        id: 'foo@example.org'
+        id: 'foo@example.org',
       })
       let args
 
       beforeEach(async () => {
         socket = await agent.connect({
-          cookie: await user.cookie
+          cookie: await user.cookie,
         })
       })
 
@@ -136,19 +136,19 @@ describe('api', function () {
 
         await subscribe(socket, 'shoots', { namespace: 'garden-foo', name: 'fooShoot' })
 
-        expect(mockRequest).toBeCalledTimes(1)
+        expect(mockRequest).toHaveBeenCalledTimes(1)
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
           socket.id,
-          'shoots;garden-foo/fooShoot'
+          'shoots;garden-foo/fooShoot',
         ]))
 
         args = [
           socket,
           nsp.to('shoots;garden-foo/fooShoot'),
           'shoots',
-          { namespace: 'garden-foo', name: 'fooShoot' }
+          { namespace: 'garden-foo', name: 'fooShoot' },
         ]
         await expect(publishEvent(...args)).resolves.toEqual(args[3])
 
@@ -156,7 +156,7 @@ describe('api', function () {
           socket,
           nsp.to('shoots;garden-foo/barShoot'),
           'shoots',
-          { namespace: 'garden-foo', name: 'barShoot' }
+          { namespace: 'garden-foo', name: 'barShoot' },
         ]
         await expect(publishEvent(...args)).resolves.toBeUndefined()
       })
@@ -166,17 +166,17 @@ describe('api', function () {
 
         await subscribe(socket, 'shoots', { namespace: 'garden-foo' })
 
-        expect(mockRequest).toBeCalledTimes(1)
+        expect(mockRequest).toHaveBeenCalledTimes(1)
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
           socket.id,
-          'shoots;garden-foo'
+          'shoots;garden-foo',
         ]))
 
         await unsubscribe(socket, 'shoots')
         expect(getRooms(socket, nsp)).toEqual(new Set([
-          socket.id
+          socket.id,
         ]))
       })
 
@@ -187,13 +187,13 @@ describe('api', function () {
 
         await subscribe(socket, 'shoots', { namespace: '_all' })
 
-        expect(mockRequest).toBeCalledTimes(3)
+        expect(mockRequest).toHaveBeenCalledTimes(3)
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
           socket.id,
           'shoots;garden-foo',
-          'shoots;garden-bar'
+          'shoots;garden-bar',
         ]))
       })
 
@@ -204,13 +204,13 @@ describe('api', function () {
 
         await subscribe(socket, 'shoots', { namespace: '_all', labelSelector: 'shoot.gardener.cloud/status!=healthy' })
 
-        expect(mockRequest).toBeCalledTimes(3)
+        expect(mockRequest).toHaveBeenCalledTimes(3)
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
           socket.id,
           'shoots:unhealthy;garden-foo',
-          'shoots:unhealthy;garden-bar'
+          'shoots:unhealthy;garden-bar',
         ]))
       })
 
@@ -220,7 +220,7 @@ describe('api', function () {
         await expect(subscribe(socket, 'shoots', { namespace: 'garden-baz' })).rejects.toEqual(expect.objectContaining({
           name: 'ForbiddenError',
           statusCode: 403,
-          message: 'Insufficient authorization for shoot subscription'
+          message: 'Insufficient authorization for shoot subscription',
         }))
       })
 
@@ -232,7 +232,7 @@ describe('api', function () {
         await expect(subscribe(socket, 'shoots', { namespace: '_all' })).rejects.toEqual(expect.objectContaining({
           name: 'ForbiddenError',
           statusCode: 403,
-          message: 'Insufficient authorization for shoot subscription'
+          message: 'Insufficient authorization for shoot subscription',
         }))
       })
 
@@ -240,7 +240,7 @@ describe('api', function () {
         await expect(subscribe(socket, 'baz')).rejects.toEqual(expect.objectContaining({
           name: 'TypeError',
           statusCode: 500,
-          message: 'Invalid subscription type - baz'
+          message: 'Invalid subscription type - baz',
         }))
       })
 
@@ -248,19 +248,19 @@ describe('api', function () {
         await expect(unsubscribe(socket, 'baz')).rejects.toEqual(expect.objectContaining({
           name: 'TypeError',
           statusCode: 500,
-          message: 'Invalid subscription type - baz'
+          message: 'Invalid subscription type - baz',
         }))
       })
     })
 
     describe('when user is "admin"', () => {
       const user = fixtures.auth.createUser({
-        id: 'admin@example.org'
+        id: 'admin@example.org',
       })
 
       beforeEach(async () => {
         socket = await agent.connect({
-          cookie: await user.cookie
+          cookie: await user.cookie,
         })
       })
 
@@ -269,12 +269,12 @@ describe('api', function () {
 
         await subscribe(socket, 'shoots', { namespace: 'garden-foo', name: 'fooShoot' })
 
-        expect(mockRequest).toBeCalledTimes(1)
+        expect(mockRequest).toHaveBeenCalledTimes(1)
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
           socket.id,
-          'shoots;garden-foo/fooShoot'
+          'shoots;garden-foo/fooShoot',
         ]))
 
         const items = await synchronize(socket, 'shoots', [1, 2])
@@ -286,12 +286,12 @@ describe('api', function () {
 
         await subscribe(socket, 'shoots', { namespace: 'garden-foo' })
 
-        expect(mockRequest).toBeCalledTimes(1)
+        expect(mockRequest).toHaveBeenCalledTimes(1)
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
           socket.id,
-          'shoots;garden-foo'
+          'shoots;garden-foo',
         ]))
 
         const items = await synchronize(socket, 'shoots', [1, 4])
@@ -303,12 +303,12 @@ describe('api', function () {
 
         await subscribe(socket, 'shoots', { namespace: '_all' })
 
-        expect(mockRequest).toBeCalledTimes(1)
+        expect(mockRequest).toHaveBeenCalledTimes(1)
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
           socket.id,
-          'shoots:admin'
+          'shoots:admin',
         ]))
 
         const items = await synchronize(socket, 'shoots', [1, 4])
@@ -320,12 +320,12 @@ describe('api', function () {
 
         await subscribe(socket, 'shoots', { namespace: '_all', labelSelector: 'shoot.gardener.cloud/status!=healthy' })
 
-        expect(mockRequest).toBeCalledTimes(1)
+        expect(mockRequest).toHaveBeenCalledTimes(1)
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
           socket.id,
-          'shoots:unhealthy:admin'
+          'shoots:unhealthy:admin',
         ]))
       })
 
@@ -350,7 +350,7 @@ describe('api', function () {
       const exp = timestamp - 30
       const user = fixtures.auth.createUser({
         id: 'baz@example.org',
-        exp
+        exp,
       })
       const cookie = await user.cookie
       await expect(agent.connect({ cookie })).rejects.toEqual(expect.objectContaining({
@@ -358,8 +358,8 @@ describe('api', function () {
         message: 'jwt expired',
         data: {
           statusCode: 401,
-          code: 'ERR_JWT_TOKEN_EXPIRED'
-        }
+          code: 'ERR_JWT_TOKEN_EXPIRED',
+        },
       }))
     })
 
@@ -369,7 +369,7 @@ describe('api', function () {
       const user = fixtures.auth.createUser({
         id: 'baz@example.org',
         rti,
-        refresh_at: refreshAt
+        refresh_at: refreshAt,
       })
       const cookie = await user.cookie
       await expect(agent.connect({ cookie })).rejects.toEqual(expect.objectContaining({
@@ -379,8 +379,8 @@ describe('api', function () {
           statusCode: 401,
           code: 'ERR_JWT_TOKEN_REFRESH_REQUIRED',
           rti,
-          exp: refreshAt
-        }
+          exp: refreshAt,
+        },
       }))
     })
   })
@@ -402,20 +402,20 @@ describe('api', function () {
       const options = {
         id: 'baz@example.org',
         rti: 'abcdefg',
-        refresh_at: Math.ceil(Date.now() / 1000) + 4
+        refresh_at: Math.ceil(Date.now() / 1000) + 4,
       }
       const user = fixtures.auth.createUser(options)
       socket = await agent.connect({
-        cookie: await user.cookie
+        cookie: await user.cookie,
       })
-      expect(mockSetDisconnectTimeout).toBeCalledTimes(1)
+      expect(mockSetDisconnectTimeout).toHaveBeenCalledTimes(1)
       expect(mockSetDisconnectTimeout.mock.calls[0]).toEqual([
         expect.objectContaining({
           data: {
-            user: expect.objectContaining(options)
-          }
+            user: expect.objectContaining(options),
+          },
         }),
-        expect.toBeWithinRange(0, 5000)
+        expect.toBeWithinRange(0, 5000),
       ])
       await expect(pEvent(socket, 'disconnect')).resolves.toEqual('io server disconnect')
     })

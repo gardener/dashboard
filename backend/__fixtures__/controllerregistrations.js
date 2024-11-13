@@ -11,7 +11,7 @@ const { cloneDeep, find } = require('lodash')
 function getControllerRegistration ({ uid, name, version, resources }) {
   const metadata = {
     name,
-    uid
+    uid,
   }
   const spec = {}
   if (resources) {
@@ -30,28 +30,28 @@ const controllerRegistrationList = [
     version: 'v1.0.0',
     resources: [{
       kind: 'OperatingSystemConfig',
-      type: 'gardenlinux'
-    }]
+      type: 'gardenlinux',
+    }],
   }),
   getControllerRegistration({
     uid: 2,
     name: 'Network Registration',
     resources: [{
       kind: 'Network',
-      type: 'gardium'
-    }]
+      type: 'gardium',
+    }],
   }),
   getControllerRegistration({
     uid: 3,
     name: 'Network Registration 2',
     resources: [{
       kind: 'Network',
-      type: 'foobium'
+      type: 'foobium',
     },
     {
       kind: 'Foo',
-      type: 'bar'
-    }]
+      type: 'bar',
+    }],
   }),
   getControllerRegistration({
     uid: 4,
@@ -59,17 +59,17 @@ const controllerRegistrationList = [
     resources: [{
       kind: 'DNSRecord',
       type: 'gardenland',
-      primary: true
-    }]
+      primary: true,
+    }],
   }),
   getControllerRegistration({
     uid: 5,
     name: 'extension-shoot-dns-service',
     resources: [{
       kind: 'Foo',
-      type: 'bar'
-    }]
-  })
+      type: 'bar',
+    }],
+  }),
 ]
 
 const controllerregistrations = {
@@ -82,9 +82,9 @@ const controllerregistrations = {
   },
   list () {
     return cloneDeep(controllerRegistrationList)
-  }
+  },
 }
 
 module.exports = {
-  ...controllerregistrations
+  ...controllerregistrations,
 }

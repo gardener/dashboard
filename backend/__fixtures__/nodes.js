@@ -12,7 +12,7 @@ const pathToRegexp = require('path-to-regexp')
 
 const nodeList = [
   getNode({ name: 'node-1', hostname: 'host-1' }),
-  getNode({ name: 'node-2', hostname: 'host-2', ready: false })
+  getNode({ name: 'node-2', hostname: 'host-2', ready: false }),
 ]
 
 function getNode (options = {}) {
@@ -20,20 +20,20 @@ function getNode (options = {}) {
     name,
     creationTimestamp = '2020-01-01T00:00:00Z',
     hostname,
-    ready = true
+    ready = true,
   } = options
   const metadata = {
     name,
-    creationTimestamp
+    creationTimestamp,
   }
   if (hostname) {
-    set(metadata, 'labels["kubernetes.io/hostname"]', hostname)
+    set(metadata, ['labels', 'kubernetes.io/hostname'], hostname)
   }
   const status = {
     conditions: [{
       type: 'Ready',
-      status: ready ? 'True' : 'False'
-    }]
+      status: ready ? 'True' : 'False',
+    }],
   }
   return { metadata, status }
 }
@@ -48,7 +48,7 @@ const nodes = {
   },
   list () {
     return cloneDeep(nodeList)
-  }
+  },
 }
 
 const matchOptions = { decode: decodeURIComponent }
@@ -64,10 +64,10 @@ const mocks = {
       const items = nodes.list()
       return Promise.resolve({ items })
     }
-  }
+  },
 }
 
 module.exports = {
   ...nodes,
-  mocks
+  mocks,
 }

@@ -37,10 +37,8 @@ import { storeToRefs } from 'pinia'
 
 import { useConfigStore } from '@/store/config'
 
-import {
-  startsWith,
-  get,
-} from '@/lodash'
+import startsWith from 'lodash/startsWith'
+import get from 'lodash/get'
 
 const props = defineProps({
   icon: {

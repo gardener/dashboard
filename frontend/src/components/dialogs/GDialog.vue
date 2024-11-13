@@ -120,11 +120,9 @@ import { useScrollBar } from '@/composables/useScrollBar'
 import { setDelayedInputFocus } from '@/utils'
 import { messageFromErrors } from '@/utils/validators'
 
-import {
-  isFunction,
-  noop,
-  trim,
-} from '@/lodash'
+import trim from 'lodash/trim'
+import noop from 'lodash/noop'
+import isFunction from 'lodash/isFunction'
 
 const zeroWidthSpace = '\u200B'
 

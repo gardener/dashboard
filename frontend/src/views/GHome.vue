@@ -42,7 +42,7 @@ import { useProjectStore } from '@/store/project'
 
 import GProjectDialog from '@/components/dialogs/GProjectDialog.vue'
 
-import { isEmpty } from '@/lodash'
+import isEmpty from 'lodash/isEmpty'
 
 export default {
   components: {

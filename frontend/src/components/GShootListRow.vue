@@ -202,10 +202,13 @@ SPDX-License-Identifier: Apache-2.0
             icon="mdi-key"
             :disabled="isClusterAccessDialogDisabled"
             :tooltip="showClusterAccessActionTitle"
-            @click="showDialog('access')"
+            @click="setShootAction('access', shootItem)"
           />
-          <g-shoot-list-row-actions
+          <g-action-button
             v-if="canPatchShoots"
+            icon="mdi-dots-vertical"
+            tooltip="Cluster Actions"
+            @click="setShootAction('menu', shootItem, $event.target)"
           />
         </v-row>
       </template>
@@ -255,7 +258,6 @@ import GShootVersionChip from '@/components/ShootVersion/GShootVersionChip.vue'
 import GTicketLabel from '@/components/ShootTickets/GTicketLabel.vue'
 import GShootSeedName from '@/components/GShootSeedName.vue'
 import GShootMessages from '@/components/ShootMessages/GShootMessages.vue'
-import GShootListRowActions from '@/components/GShootListRowActions.vue'
 import GAutoHide from '@/components/GAutoHide.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
 import GControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityTag.vue'
@@ -263,19 +265,18 @@ import GWorkerGroup from '@/components/ShootWorkers/GWorkerGroup'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 import GCollapsibleItems from '@/components/GCollapsibleItems'
 
+import { useShootAction } from '@/composables/useShootAction'
 import { useProvideShootItem } from '@/composables/useShootItem'
 import { useProvideShootHelper } from '@/composables/useShootHelper'
 import { formatValue } from '@/composables/useProjectShootCustomFields/helper'
 
 import { getIssueSince } from '@/utils'
 
-import {
-  includes,
-  get,
-  map,
-  some,
-  find,
-} from '@/lodash'
+import find from 'lodash/find'
+import some from 'lodash/some'
+import map from 'lodash/map'
+import get from 'lodash/get'
+import includes from 'lodash/includes'
 
 const props = defineProps({
   modelValue: {
@@ -289,9 +290,7 @@ const props = defineProps({
 })
 const shootItem = toRef(props, 'modelValue')
 
-const emit = defineEmits([
-  'showDialog',
-])
+const { setShootAction } = useShootAction()
 
 const shootStore = useShootStore()
 const ticketStore = useTicketStore()
@@ -387,11 +386,11 @@ const shootLastUpdatedTicket = computed(() => {
 })
 
 const shootLastUpdatedTicketUrl = computed(() => {
-  return get(shootLastUpdatedTicket.value, 'data.html_url')
+  return get(shootLastUpdatedTicket.value, ['data', 'html_url'])
 })
 
 const shootLastUpdatedTicketTimestamp = computed(() => {
-  return get(shootLastUpdatedTicket.value, 'metadata.updated_at')
+  return get(shootLastUpdatedTicket.value, ['metadata', 'updated_at'])
 })
 
 const shootTicketLabels = computed(() => {
@@ -426,17 +425,10 @@ const cells = computed(() => {
   })
 })
 
-function showDialog (action) {
-  emit('showDialog', {
-    action,
-    shootItem: shootItem.value,
-  })
-}
-
 const hasShootWorkerGroupWarning = computed(() => {
   const machineImages = cloudProfileStore.machineImagesByCloudProfileName(shootCloudProfileName.value)
   return some(shootWorkerGroups.value, workerGroup => {
-    const { name, version } = get(workerGroup, 'machine.image', {})
+    const { name, version } = get(workerGroup, ['machine', 'image'], {})
     const machineImage = find(machineImages, { name, version })
     return machineImage?.isDeprecated
   })

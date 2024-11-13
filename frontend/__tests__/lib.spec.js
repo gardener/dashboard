@@ -11,7 +11,7 @@ import {
   PositionEnum,
 } from '@/lib/g-symbol-tree'
 
-import { cloneDeep } from '@/lodash'
+import cloneDeep from 'lodash/cloneDeep'
 
 describe('lib', () => {
   describe('g-symbol-tree', () => {

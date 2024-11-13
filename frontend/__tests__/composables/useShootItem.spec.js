@@ -22,11 +22,9 @@ import { useSeedStore } from '@/store/seed'
 
 import { createShootItemComposable } from '@/composables/useShootItem'
 
-import {
-  set,
-  cloneDeep,
-  unset,
-} from '@/lodash'
+import set from 'lodash/set'
+import cloneDeep from 'lodash/cloneDeep'
+import unset from 'lodash/unset'
 
 describe('composables', () => {
   describe('useProvideShootItem', () => {

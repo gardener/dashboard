@@ -151,10 +151,8 @@ import GShootKubeconfig from './GShootKubeconfig.vue'
 import GShootAdminKubeconfig from './GShootAdminKubeconfig.vue'
 import GTerminalShortcutsTile from './GTerminalShortcutsTile.vue'
 
-import {
-  get,
-  isEmpty,
-} from '@/lodash'
+import isEmpty from 'lodash/isEmpty'
+import get from 'lodash/get'
 
 const props = defineProps({
   selectedShoot: {
@@ -217,7 +215,7 @@ const dashboardUrl = computed(() => {
 })
 
 const hasDashboardEnabled = computed(() => {
-  return get(shootItem.value, 'spec.addons.kubernetesDashboard.enabled', false) === true
+  return get(shootItem.value, ['spec', 'addons', 'kubernetesDashboard', 'enabled'], false) === true
 })
 
 const kubeconfigGardenlogin = computed(() => {

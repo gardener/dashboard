@@ -15,11 +15,9 @@ import {
 
 import { useApi } from '@/composables/useApi'
 
-import {
-  find,
-  get,
-  keyBy,
-} from '@/lodash'
+import find from 'lodash/find'
+import get from 'lodash/get'
+import keyBy from 'lodash/keyBy'
 
 export const useSeedStore = defineStore('seed', () => {
   const api = useApi()
@@ -46,7 +44,7 @@ export const useSeedStore = defineStore('seed', () => {
   function seedsForCloudProfile (cloudProfile) {
     const seeds = []
     const seedsByName = keyBy(list.value, 'metadata.name')
-    const names = get(cloudProfile, 'data.seedNames', [])
+    const names = get(cloudProfile, ['data', 'seedNames'], [])
     for (const name of names) {
       const seed = get(seedsByName, [name])
       if (seed) {
@@ -58,7 +56,7 @@ export const useSeedStore = defineStore('seed', () => {
 
   function isSeedUnreachableByName (name) {
     const seed = seedByName(name)
-    return get(seed, 'metadata.unreachable')
+    return get(seed, ['metadata', 'unreachable'])
   }
 
   return {

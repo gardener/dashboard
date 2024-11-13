@@ -15,15 +15,13 @@ import {
 
 import { useApi } from '@/composables/useApi'
 
-import {
-  map,
-  flatMap,
-  filter,
-  get,
-  some,
-  find,
-  sortBy,
-} from '@/lodash'
+import map from 'lodash/map'
+import flatMap from 'lodash/flatMap'
+import filter from 'lodash/filter'
+import get from 'lodash/get'
+import some from 'lodash/some'
+import find from 'lodash/find'
+import sortBy from 'lodash/sortBy'
 
 export const useGardenerExtensionStore = defineStore('gardenerExtension', () => {
   const api = useApi()
@@ -56,7 +54,7 @@ export const useGardenerExtensionStore = defineStore('gardenerExtension', () => 
       const dnsProvider = find(dnsProvidersFromDnsRecords, ['type', type])
       return {
         type,
-        primary: get(dnsProvider, 'primary', false),
+        primary: get(dnsProvider, ['primary'], false),
       }
     })
   })

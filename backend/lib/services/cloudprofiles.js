@@ -13,9 +13,9 @@ const { getCloudProfiles, getVisibleAndNotProtectedSeeds } = require('../cache')
 
 function fromResource ({ cloudProfile: { metadata, spec }, seedNames }) {
   const cloudProviderKind = spec.type
-  const name = _.get(metadata, 'name')
+  const name = _.get(metadata, ['name'])
   const displayName = _.get(metadata, ['annotations', 'garden.sapcloud.io/displayName'], name)
-  const resourceVersion = _.get(metadata, 'resourceVersion')
+  const resourceVersion = _.get(metadata, ['resourceVersion'])
   metadata = { name, cloudProviderKind, displayName, resourceVersion }
   const data = { seedNames, ...spec }
   return { metadata, data }
@@ -28,14 +28,14 @@ function emptyToUndefined (value) {
 function assignSeedsToCloudProfileIteratee (seeds) {
   return cloudProfileResource => {
     function filterProviderType (seed) {
-      const seedProviderType = _.get(seed, 'spec.provider.type')
+      const seedProviderType = _.get(seed, ['spec', 'provider', 'type'])
       return providerTypes.some(providerType => [seedProviderType, '*'].includes(providerType))
     }
     const providerType = cloudProfileResource.spec.type
-    const matchLabels = _.get(cloudProfileResource, 'spec.seedSelector.matchLabels')
-    const providerTypes = _.get(cloudProfileResource, 'spec.seedSelector.providerTypes', [providerType])
+    const matchLabels = _.get(cloudProfileResource, ['spec', 'seedSelector', 'matchLabels'])
+    const providerTypes = _.get(cloudProfileResource, ['spec', 'seedSelector', 'providerTypes'], [providerType])
     const matchLabelsFilter = {
-      metadata: {}
+      metadata: {},
     }
     if (matchLabels) {
       matchLabelsFilter.metadata.labels = matchLabels
@@ -51,7 +51,7 @@ function assignSeedsToCloudProfileIteratee (seeds) {
 
     return fromResource({
       cloudProfile: cloudProfileResource,
-      seedNames: seedNamesForCloudProfile
+      seedNames: seedNamesForCloudProfile,
     })
   }
 }

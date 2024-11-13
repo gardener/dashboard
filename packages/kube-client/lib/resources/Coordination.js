@@ -16,11 +16,11 @@ class Lease extends mix(Coordination).with(NamespaceScoped, Readable, Observable
     return {
       plural: 'leases',
       singular: 'lease',
-      kind: 'Lease'
+      kind: 'Lease',
     }
   }
 }
 
 module.exports = {
-  Lease
+  Lease,
 }

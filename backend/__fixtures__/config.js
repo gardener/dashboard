@@ -11,7 +11,7 @@ const { toHex, toBase64, gardenerConfigPath } = require('./helper')
 const ca = [
   '-----BEGIN CERTIFICATE-----',
   toBase64('...'),
-  '-----END CERTIFICATE-----'
+  '-----END CERTIFICATE-----',
 ].join('\n')
 
 const defaultConfigPath = gardenerConfigPath()
@@ -30,8 +30,8 @@ const defaultConfig = {
     repository: 'ticket-dev',
     webhookSecret: toHex('webhook-secret'),
     authentication: {
-      token: toHex('token')
-    }
+      token: toHex('token'),
+    },
   },
   sessionSecret,
   sessionSecrets: [sessionSecret],
@@ -41,69 +41,69 @@ const defaultConfig = {
     ca,
     client_id: 'dashboard',
     redirect_uris: [
-      'https://localhost:8443/auth/callback'
+      'https://localhost:8443/auth/callback',
     ],
     scope: 'openid email profile groups audience:server:client_id:dashboard audience:server:client_id:kube-kubectl',
     clockTolerance: 42,
     public: {
       clientId: 'kube-kubectl',
-      clientSecret: toHex('kube-kubectl-secret')
-    }
+      clientSecret: toHex('kube-kubectl-secret'),
+    },
   },
   terminal: {
     container: {
-      image: 'dummyImage:1.0.0'
+      image: 'dummyImage:1.0.0',
     },
     containerImageDescriptions: [
       {
         image: '/dummyImage:.*/',
-        description: 'Dummy Image Description'
+        description: 'Dummy Image Description',
       },
       {
         image: 'fooImage:0.1.2',
-        description: 'Foo Image Description'
-      }
+        description: 'Foo Image Description',
+      },
     ],
     gardenTerminalHost: {
-      seedRef: 'infra1-seed2'
+      seedRef: 'infra1-seed',
     },
     garden: {
       operatorCredentials: {
         serviceAccountRef: {
           name: 'dashboard-terminal-admin',
-          namespace: 'garden'
-        }
-      }
-    }
+          namespace: 'garden',
+        },
+      },
+    },
   },
   unreachableSeeds: {
     matchLabels: {
-      'test-unreachable': 'true'
-    }
+      'test-unreachable': 'true',
+    },
   },
   frontend: {
     features: {
-      terminalEnabled: true
+      terminalEnabled: true,
     },
     helpMenuItems: [
       {
         title: 'Getting Started',
         icon: 'description',
-        url: 'https://gardener.cloud/about/'
+        url: 'https://gardener.cloud/about/',
       },
       {
         title: 'Feedback',
         icon: 'mdi-slack',
-        url: 'https://kubernetes.slack.com/messages/gardener/'
+        url: 'https://kubernetes.slack.com/messages/gardener/',
       },
       {
         title: 'Issues',
         icon: 'mdi-bug',
-        url: 'https://github.com/gardener/dashboard/issues/'
-      }
+        url: 'https://github.com/gardener/dashboard/issues/',
+      },
     ],
-    serviceAccountDefaultTokenExpiration: 42
-  }
+    serviceAccountDefaultTokenExpiration: 42,
+  },
 }
 
 const configMap = new Map()
@@ -111,22 +111,22 @@ const configMap = new Map()
 configMap.set(defaultConfigPath, defaultConfig)
 
 configMap.set('/etc/gardener/1/config.yaml', {
-  port: 1234
+  port: 1234,
 })
 
 configMap.set('/etc/gardener/2/config.yaml', {
   port: 1234,
-  logLevel: 'info'
+  logLevel: 'info',
 })
 
 configMap.set('/etc/gardener/3/config.yaml', {
-  sessionSecret: undefined
+  sessionSecret: undefined,
 })
 
 configMap.set('/etc/gardener/4/config.yaml', {
   oidc: {
-    ...defaultConfig.oidc
-  }
+    ...defaultConfig.oidc,
+  },
 })
 
 module.exports = {
@@ -136,5 +136,5 @@ module.exports = {
   },
   list () {
     return Array.from(configMap.entries())
-  }
+  },
 }

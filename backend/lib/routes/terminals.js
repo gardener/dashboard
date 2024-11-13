@@ -12,7 +12,7 @@ const { UnprocessableEntity } = require('http-errors')
 const { metricsRoute } = require('../middleware')
 
 const router = module.exports = express.Router({
-  mergeParams: true
+  mergeParams: true,
 })
 
 const metricsMiddleware = metricsRoute('terminals')

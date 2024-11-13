@@ -24,7 +24,7 @@ function createHttpAgent () {
     const signal = 'SIGTERM'
     const healthChecks = {
       '/healthz': () => healthCheck(false),
-      '/healthz-transitive': () => healthCheck(true)
+      '/healthz-transitive': () => healthCheck(true),
     }
     process.removeAllListeners(signal)
     server = createTerminus(server, { signal, healthChecks })
@@ -34,7 +34,7 @@ function createHttpAgent () {
     server,
     close () {
       server.close()
-    }
+    },
   }
 
   for (const method of ['get', 'put', 'patch', 'delete', 'post']) {
@@ -74,17 +74,17 @@ function createSocketAgent (cache) {
         reconnectionDelay: 0,
         forceNew: true,
         autoConnect: false,
-        transports: ['websocket']
+        transports: ['websocket'],
       })
       socket.connect()
       if (connected) {
         await pEvent(socket, 'connect', {
           timeout: 1000,
-          rejectionEvents: ['error', 'connect_error']
+          rejectionEvents: ['error', 'connect_error'],
         })
       }
       return socket
-    }
+    },
   }
 
   return agent
@@ -108,7 +108,7 @@ jest.mock('./lib/config/gardener', () => {
   }
   return {
     ...originalGardener,
-    readConfig: jest.fn(path => mockFiles.get(path))
+    readConfig: jest.fn(path => mockFiles.get(path)),
   }
 })
 
@@ -124,7 +124,7 @@ jest.mock('./lib/cache', () => {
     'quotas',
     'projects',
     'controllerregistrations',
-    'resourcequotas'
+    'resourcequotas',
   ]
   for (const key of keys) {
     cache.set(key, {
@@ -134,7 +134,7 @@ jest.mock('./lib/cache', () => {
       },
       find (predicate) {
         return find(this.list(), predicate)
-      }
+      },
     })
   }
   cache.ticketCache = createTicketCache()

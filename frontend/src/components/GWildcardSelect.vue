@@ -86,7 +86,7 @@ import {
   bestMatchForString,
 } from '@/utils/wildcard'
 
-import { trim } from '@/lodash'
+import trim from 'lodash/trim'
 
 export default {
   props: {

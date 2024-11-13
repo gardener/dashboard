@@ -43,11 +43,11 @@ function getAuthOptions (auth) {
     clientId,
     clientSecret,
     installationId,
-    privateKey
+    privateKey,
   } = auth || {}
   if (token) {
     return {
-      auth: token
+      auth: token,
     }
   }
   if (appId && clientId && clientSecret && installationId && privateKey) {
@@ -58,8 +58,8 @@ function getAuthOptions (auth) {
         clientId,
         clientSecret,
         installationId,
-        privateKey
-      }
+        privateKey,
+      },
     }
   }
 }
@@ -70,14 +70,14 @@ function init (options) {
       apiUrl: baseUrl = 'https://api.github.com',
       ca,
       timeout = 30000,
-      authentication
-    } = {}
+      authentication,
+    } = {},
   } = config
   let agent = false
   if (ca) {
     agent = new Agent({
       ca,
-      keepAlive: true
+      keepAlive: true,
     })
   }
   const authOptions = getAuthOptions(authentication)
@@ -88,8 +88,8 @@ function init (options) {
     log: OctokitLog,
     request: {
       agent,
-      timeout
-    }
+      timeout,
+    },
   }, options)
 
   return new Octokit(options)

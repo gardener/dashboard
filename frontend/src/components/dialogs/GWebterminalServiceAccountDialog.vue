@@ -68,7 +68,7 @@ import {
 } from '@/utils/error'
 import { sortedRoleDisplayNames } from '@/utils'
 
-import { get } from '@/lodash'
+import get from 'lodash/get'
 
 export default {
   components: {
@@ -109,7 +109,7 @@ export default {
       return sortedRoleDisplayNames(this.desiredRoles)
     },
     desiredRoles () {
-      const roles = [...get(this.member, 'roles', [])]
+      const roles = [...get(this.member, ['roles'], [])]
       roles.push('admin')
       roles.push('serviceaccountmanager')
       return roles

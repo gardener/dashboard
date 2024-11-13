@@ -76,7 +76,7 @@ import GTicketLabel from '@/components/ShootTickets/GTicketLabel.vue'
 import GTicketComment from '@/components/ShootTickets/GTicketComment.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
 
-import { get } from '@/lodash'
+import get from 'lodash/get'
 
 export default {
   components: {
@@ -97,24 +97,24 @@ export default {
       ticketConfig: 'ticket',
     }),
     ticketTitle () {
-      const title = get(this.ticket, 'data.ticketTitle')
+      const title = get(this.ticket, ['data', 'ticketTitle'])
       return title ? ` - ${title}` : ''
     },
     login () {
-      return get(this.ticket, 'data.user.login')
+      return get(this.ticket, ['data', 'user', 'login'])
     },
     ticketHtmlUrl () {
-      return get(this.ticket, 'data.html_url')
+      return get(this.ticket, ['data', 'html_url'])
     },
     labels () {
-      return get(this.ticket, 'data.labels', [])
+      return get(this.ticket, ['data', 'labels'], [])
     },
     commentsForTicket () {
-      const issueNumber = get(this.ticket, 'metadata.number')
+      const issueNumber = get(this.ticket, ['metadata', 'number'])
       return this.ticketCommentsByIssueNumber({ issueNumber })
     },
     gitHubRepoUrl () {
-      return get(this.ticketConfig, 'gitHubRepoUrl')
+      return get(this.ticketConfig, ['gitHubRepoUrl'])
     },
     addCommentLink () {
       return `${this.ticketHtmlUrl}#new_comment_field`

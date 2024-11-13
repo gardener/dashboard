@@ -53,7 +53,7 @@ import GGenericInputFields from '@/components/GGenericInputFields'
 
 import { transformHtml } from '@/utils'
 
-import { get } from '@/lodash'
+import get from 'lodash/get'
 
 export default {
   components: {

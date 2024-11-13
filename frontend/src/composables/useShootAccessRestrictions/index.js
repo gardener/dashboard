@@ -8,17 +8,13 @@ import { computed } from 'vue'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
-import { useAnnotations } from '../useObjectMetadata'
-
 import { NAND } from './helper'
 
-import {
-  get,
-  set,
-  unset,
-  keyBy,
-  mapValues,
-} from '@/lodash'
+import get from 'lodash/get'
+import set from 'lodash/set'
+import unset from 'lodash/unset'
+import keyBy from 'lodash/keyBy'
+import mapValues from 'lodash/mapValues'
 
 const shootPropertyMappings = Object.freeze({
   cloudProfileName: 'spec.cloudProfileName',
@@ -31,29 +27,11 @@ export const useShootAccessRestrictions = (shootItem, options = {}) => {
   } = options
 
   const {
-    getAnnotation: getShootAnnotation,
-    setAnnotation: setShootAnnotation,
-    unsetAnnotation: unsetShootAnnotation,
-  } = useAnnotations(shootItem)
-
-  const {
     cloudProfileName,
     region,
   } = mapValues(shootPropertyMappings, path => {
     return computed(() => get(shootItem.value, path))
   })
-
-  function getSeedSelectorMatchLabel (key, defaultValue) {
-    return get(shootItem.value, `spec.seedSelector.matchLabels["${key}"]`, `${defaultValue}`)
-  }
-
-  function setSeedSelectorMatchLabel (key, value) {
-    set(shootItem.value, `spec.seedSelector.matchLabels["${key}"]`, `${value}`)
-  }
-
-  function unsetSeedSelectorMatchLabel (key) {
-    unset(shootItem.value, `spec.seedSelector.matchLabels["${key}"]`)
-  }
 
   const accessRestrictionDefinitionList = computed(() => {
     return cloudProfileStore.accessRestrictionDefinitionsByCloudProfileNameAndRegion({
@@ -94,58 +72,80 @@ export const useShootAccessRestrictions = (shootItem, options = {}) => {
     return accessRestrictionOptionDefinitions
   })
 
+  function getAccessRestrictions () {
+    return get(shootItem.value, ['spec', 'accessRestrictions'], [])
+  }
+
+  function setAccessRestrictions (accessRestrictions) {
+    if (accessRestrictions.length > 0) {
+      set(shootItem.value, ['spec', 'accessRestrictions'], accessRestrictions)
+    } else {
+      unset(shootItem.value, ['spec', 'accessRestrictions'])
+    }
+  }
+
+  function getAccessRestrictionItem (key) {
+    return getAccessRestrictions().find(ar => ar.name === key)
+  }
+
   function getAccessRestrictionValue (key) {
-    const { input } = get(accessRestrictionDefinitions.value, [key])
-    const inverted = !!input?.inverted
-    const defaultValue = inverted
-    const value = getSeedSelectorMatchLabel(key, defaultValue) === 'true'
-    return NAND(value, inverted)
+    const accessRestrictionItem = getAccessRestrictionItem(key)
+    return !!accessRestrictionItem
   }
 
   function setAccessRestrictionValue (key, value) {
-    const { input, options } = get(accessRestrictionDefinitions.value, [key])
-    const enabled = NAND(value, !!input?.inverted)
-    if (enabled) {
-      setSeedSelectorMatchLabel(key, 'true')
+    const accessRestrictions = getAccessRestrictions()
+    const index = accessRestrictions.findIndex(ar => ar.name === key)
+    if (value) {
+      if (index === -1) {
+        accessRestrictions.push({ name: key })
+      }
     } else {
-      unsetSeedSelectorMatchLabel(key)
-    }
-    for (const key of Object.keys(options)) {
-      if (enabled) {
-        setAccessRestrictionOptionValue(key, false)
-      } else {
-        unsetShootAnnotation(key)
+      if (index !== -1) {
+        accessRestrictions.splice(index, 1)
       }
     }
+    setAccessRestrictions(accessRestrictions)
   }
 
-  function getAccessRestrictionOptionValue (key) {
-    const { accessRestrictionKey } = get(accessRestrictionOptionDefinitions.value, [key])
-    const { input } = get(accessRestrictionDefinitions.value, [accessRestrictionKey, 'options', key])
+  function getAccessRestrictionOptionValue (accessRestrictionKey, optionKey) {
+    const { input } = get(accessRestrictionDefinitions.value, [accessRestrictionKey, 'options', optionKey])
     const inverted = !!input?.inverted
     const defaultValue = inverted
-    const value = getShootAnnotation(key, `${defaultValue}`) === 'true'
+
+    const accessRestrictionItem = getAccessRestrictionItem(accessRestrictionKey)
+    if (!accessRestrictionItem || !accessRestrictionItem.options) {
+      return NAND(defaultValue, inverted)
+    }
+    const value = get(accessRestrictionItem.options, [optionKey], `${defaultValue}`) === 'true'
     return NAND(value, inverted)
   }
 
-  function setAccessRestrictionOptionValue (key, value) {
-    const { accessRestrictionKey } = get(accessRestrictionOptionDefinitions.value, [key])
-    const { input } = get(accessRestrictionDefinitions.value, [accessRestrictionKey, 'options', key])
+  function setAccessRestrictionOptionValue (accessRestrictionKey, optionKey, value) {
+    const { input } = get(accessRestrictionDefinitions.value, [accessRestrictionKey, 'options', optionKey])
     const inverted = !!input?.inverted
-    setShootAnnotation(key, `${NAND(value, inverted)}`)
+    const optionValue = NAND(value, inverted) ? 'true' : 'false'
+
+    const accessRestrictions = getAccessRestrictions()
+    let accessRestrictionItem = accessRestrictions.find(ar => ar.name === accessRestrictionKey)
+    if (!accessRestrictionItem) {
+      accessRestrictionItem = { name: accessRestrictionKey, options: {} }
+      accessRestrictions.push(accessRestrictionItem)
+    }
+    if (!accessRestrictionItem.options) {
+      accessRestrictionItem.options = {}
+    }
+    set(accessRestrictionItem.options, [optionKey], optionValue)
+    setAccessRestrictions(accessRestrictions)
   }
 
   function getAccessRestrictionPatchData () {
-    const data = {}
-    for (const definition of accessRestrictionDefinitionList.value) {
-      const path = `spec.seedSelector.matchLabels["${definition.key}"]`
-      set(data, path, get(shootItem.value, path, null))
-      for (const optionDefinition of definition.options) {
-        const path = `metadata.annotations["${optionDefinition.key}"]`
-        set(data, path, get(shootItem.value, path, null))
-      }
+    const accessRestrictions = get(shootItem.value, ['spec', 'accessRestrictions'], [])
+    return {
+      spec: {
+        accessRestrictions,
+      },
     }
-    return data
   }
 
   const accessRestrictionList = computed(() => {
@@ -154,7 +154,6 @@ export const useShootAccessRestrictions = (shootItem, options = {}) => {
       const {
         key,
         display: {
-          visibleIf = false,
           title = key,
           description,
         },
@@ -162,30 +161,30 @@ export const useShootAccessRestrictions = (shootItem, options = {}) => {
       } = definition
 
       const value = getAccessRestrictionValue(key)
-      if (visibleIf !== value) {
-        continue // skip
+      if (!value) {
+        continue // Skip if access restriction is not enabled
       }
 
       const accessRestrictionOptionList = []
-      for (const optionDefinition of optionDefinitions) {
+      for (const optionDefinition of Object.values(optionDefinitions)) {
         const {
-          key,
+          key: optionKey,
           display: {
-            visibleIf = false,
-            title = key,
-            description,
+            visibleIf = true,
+            title: optionTitle = optionKey,
+            description: optionDescription,
           },
         } = optionDefinition
 
-        const value = getAccessRestrictionOptionValue(key)
-        if (value !== visibleIf) {
-          continue // skip
+        const optionValue = getAccessRestrictionOptionValue(key, optionKey)
+        if (optionValue !== visibleIf) {
+          continue // Skip
         }
 
         accessRestrictionOptionList.push({
-          key,
-          title,
-          description,
+          key: optionKey,
+          title: optionTitle,
+          description: optionDescription,
         })
       }
 
@@ -209,9 +208,6 @@ export const useShootAccessRestrictions = (shootItem, options = {}) => {
     setAccessRestrictionValue,
     getAccessRestrictionOptionValue,
     setAccessRestrictionOptionValue,
-    getSeedSelectorMatchLabel,
-    setSeedSelectorMatchLabel,
-    unsetSeedSelectorMatchLabel,
     accessRestrictionList,
     getAccessRestrictionPatchData,
   }

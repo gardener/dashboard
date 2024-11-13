@@ -171,10 +171,8 @@ import {
 } from '@/utils/validators'
 import { getErrorMessages } from '@/utils'
 
-import {
-  find,
-  head,
-} from '@/lodash'
+import head from 'lodash/head'
+import find from 'lodash/find'
 
 export default {
   components: {

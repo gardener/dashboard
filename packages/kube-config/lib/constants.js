@@ -8,7 +8,7 @@
 
 const constants = {
   KUBERNETES_SERVICEACCOUNT_TOKEN_FILE: '/var/run/secrets/kubernetes.io/serviceaccount/token',
-  KUBERNETES_SERVICEACCOUNT_CA_FILE: '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
+  KUBERNETES_SERVICEACCOUNT_CA_FILE: '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt',
 }
 
 Object.assign(exports, constants)

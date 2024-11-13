@@ -64,7 +64,7 @@ import { useConfigStore } from '@/store/config'
 
 import GVendorIcon from '@/components/GVendorIcon'
 
-import { join } from '@/lodash'
+import join from 'lodash/join'
 
 export default {
   components: {

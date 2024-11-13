@@ -54,12 +54,12 @@ function sanitizeFrontendConfig (frontendConfig) {
     sla = {},
     addonDefinition = {},
     accessRestriction: {
-      items = []
+      items = [],
     } = {},
     vendorHints = [],
     resourceQuotaHelp = '',
     controlPlaneHighAvailabilityHelp = '',
-    customCloudProviders = {}
+    customCloudProviders = {},
   } = sanitizedFrontendConfig
 
   convertAndSanitize(alert, 'message')
@@ -75,14 +75,14 @@ function sanitizeFrontendConfig (frontendConfig) {
     const {
       display = {},
       input = {},
-      options = []
+      options = [],
     } = item
     convertAndSanitize(display, 'description')
     convertAndSanitize(input, 'description')
     for (const option of options) {
       const {
         display = {},
-        input = {}
+        input = {},
       } = option
       convertAndSanitize(display, 'description')
       convertAndSanitize(input, 'description')

@@ -49,7 +49,7 @@ import { useShootItem } from '@/composables/useShootItem'
 
 import { errorDetailsFromError } from '@/utils/error'
 
-import { get } from '@/lodash'
+import get from 'lodash/get'
 
 export default {
   components: {
@@ -98,7 +98,7 @@ export default {
     })
 
     const lastOperationFailed = computed(() => {
-      return get(shootLastOperation.value, 'state') === 'Failed'
+      return get(shootLastOperation.value, ['state']) === 'Failed'
     })
 
     const appStore = useAppStore()

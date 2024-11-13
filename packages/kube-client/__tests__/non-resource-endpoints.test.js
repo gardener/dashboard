@@ -28,14 +28,13 @@ describe('kube-client', () => {
     const clientConfig = {
       extend (options) {
         return Object.assign(Object.create(this), options)
-      }
+      },
     }
     const options = { url }
     let extendStub
     let endpoints
 
     beforeEach(() => {
-      // eslint-disable-next-line no-unused-vars
       extendStub = jest
         .spyOn(request, 'extend')
         .mockImplementation(options => {
@@ -51,18 +50,18 @@ describe('kube-client', () => {
       expect(endpoints.api[http.client].options).toEqual({
         url,
         relativeUrl,
-        responseType: 'json'
+        responseType: 'json',
       })
       expect(endpoints.healthz).toBeInstanceOf(HttpClient)
       expect(endpoints.healthz[http.client].options).toEqual({
         url,
-        relativeUrl
+        relativeUrl,
       })
       expect(endpoints.openapi).toBeInstanceOf(HttpClient)
       expect(endpoints.openapi[http.client].options).toEqual({
         url,
         relativeUrl,
-        responseType: 'json'
+        responseType: 'json',
       })
     })
 

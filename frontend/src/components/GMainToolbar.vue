@@ -332,7 +332,7 @@ import { useNamespace } from '@/composables/useNamespace'
 
 import GShootSubscriptionStatus from './GShootSubscriptionStatus.vue'
 
-import { get } from '@/lodash'
+import get from 'lodash/get'
 
 const route = useRoute()
 
@@ -345,7 +345,7 @@ const namespace = useNamespace(route)
 
 const help = ref(false)
 const menu = ref(false)
-const tabKey = ref(get(route, 'meta.tabKey'))
+const tabKey = ref(get(route, ['meta', 'tabKey']))
 const infoDialog = ref(false)
 const sidebar = toRef(appStore, 'sidebar')
 const helpMenuItems = toRef(configStore, 'helpMenuItems')
@@ -365,7 +365,7 @@ const tabs = computed(() => {
 
 const routeMetaTabKey = computed({
   get () {
-    return get(route, 'meta.tabKey', tabKey.value)
+    return get(route, ['meta', 'tabKey'], tabKey.value)
   },
   set (value) {
     tabKey.value = value

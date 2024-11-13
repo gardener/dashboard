@@ -27,7 +27,7 @@ function toResource ({
   annotations = {},
   labels = {},
   ownerReferences,
-  data
+  data,
 }) {
   const apiVersion = resource.apiVersion
   const kind = resource.kind
@@ -37,7 +37,7 @@ function toResource ({
   const metadata = {
     labels,
     annotations,
-    ownerReferences
+    ownerReferences,
   }
   if (name) {
     metadata.name = name
@@ -52,7 +52,7 @@ function toResource ({
   const resourceBody = {
     apiVersion,
     kind,
-    metadata
+    metadata,
   }
   _.assign(resourceBody, data)
 
@@ -61,24 +61,24 @@ function toResource ({
 
 function fromNodeResource ({ metadata, status = {} }) {
   const { name, creationTimestamp, labels } = metadata
-  const version = _.get(status, 'nodeInfo.kubeletVersion')
-  const conditions = _.get(status, 'conditions')
+  const version = _.get(status, ['nodeInfo', 'kubeletVersion'])
+  const conditions = _.get(status, ['conditions'])
   const readyCondition = _.find(conditions, condition => condition.type === 'Ready')
-  const readyStatus = _.get(readyCondition, 'status', 'UNKNOWN')
+  const readyStatus = _.get(readyCondition, ['status'], 'UNKNOWN')
   return {
     metadata: {
       name,
-      creationTimestamp
+      creationTimestamp,
     },
     data: {
       kubernetesHostname: labels['kubernetes.io/hostname'],
       version,
-      readyStatus
-    }
+      readyStatus,
+    },
   }
 }
 
 module.exports = {
   toTerminalResource,
-  fromNodeResource
+  fromNodeResource,
 }

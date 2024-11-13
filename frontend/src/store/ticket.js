@@ -15,20 +15,18 @@ import {
 
 import { useLogger } from '@/composables/useLogger'
 
-import {
-  assign,
-  findIndex,
-  get,
-  set,
-  head,
-  matches,
-  matchesProperty,
-  groupBy,
-  orderBy,
-  uniqBy,
-  flatMap,
-  mapValues,
-} from '@/lodash'
+import assign from 'lodash/assign'
+import findIndex from 'lodash/findIndex'
+import get from 'lodash/get'
+import set from 'lodash/set'
+import head from 'lodash/head'
+import matches from 'lodash/matches'
+import matchesProperty from 'lodash/matchesProperty'
+import groupBy from 'lodash/groupBy'
+import orderBy from 'lodash/orderBy'
+import uniqBy from 'lodash/uniqBy'
+import flatMap from 'lodash/flatMap'
+import mapValues from 'lodash/mapValues'
 
 const eqIssue = issue => {
   return matches({ metadata: { number: issue.metadata.number } })
@@ -54,7 +52,7 @@ const putItem = (issueList, newItem) => {
 }
 
 const deleteComment = (issueComments, deletedItem) => {
-  const issueNumber = get(deletedItem, 'metadata.number')
+  const issueNumber = get(deletedItem, ['metadata', 'number'])
 
   // eslint-disable-next-line
   const index = findIndex(commentForIssue(state, issueNumber), matchesProperty('metadata.id', deletedItem.metadata.id))
@@ -71,9 +69,9 @@ const commentForIssue = (issueComments, issueNumber) => {
 }
 
 const putComment = (issueComments, newItem) => {
-  const issueNumber = get(newItem, 'metadata.number')
+  const issueNumber = get(newItem, ['metadata', 'number'])
   const commentsList = commentForIssue(issueComments, issueNumber)
-  const matcher = matchesProperty('metadata.id', newItem.metadata.id)
+  const matcher = matchesProperty(['metadata', 'id'], newItem.metadata.id)
   putToList(commentsList, newItem, 'metadata.updated_at', matcher)
 }
 

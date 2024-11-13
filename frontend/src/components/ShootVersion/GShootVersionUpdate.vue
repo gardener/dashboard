@@ -70,15 +70,13 @@ import { useShootItem } from '@/composables/useShootItem'
 import { withFieldName } from '@/utils/validators'
 import { getErrorMessages } from '@/utils'
 
-import {
-  map,
-  flatMap,
-  upperFirst,
-  head,
-  get,
-  join,
-  filter,
-} from '@/lodash'
+import map from 'lodash/map'
+import flatMap from 'lodash/flatMap'
+import upperFirst from 'lodash/upperFirst'
+import head from 'lodash/head'
+import get from 'lodash/get'
+import join from 'lodash/join'
+import filter from 'lodash/filter'
 
 export default {
   props: {
@@ -205,7 +203,7 @@ export default {
       return filter(this.items, item => item.notNextMinor && item.isSupported).length > 0
     },
     selectedVersionIsPatch () {
-      return get(this.selectedItem, 'updateType') === 'patch'
+      return get(this.selectedItem, ['updateType']) === 'patch'
     },
     label () {
       if (this.selectedVersionIsPatch) {

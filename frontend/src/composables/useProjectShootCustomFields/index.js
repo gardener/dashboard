@@ -9,16 +9,14 @@ import { computed } from 'vue'
 import { useLogger } from '@/composables/useLogger'
 import { useProjectMetadata } from '@/composables/useProjectMetadata'
 
-import {
-  cloneDeep,
-  filter,
-  isEmpty,
-  isObject,
-  map,
-  some,
-  camelCase,
-  find,
-} from '@/lodash'
+import cloneDeep from 'lodash/cloneDeep'
+import filter from 'lodash/filter'
+import isEmpty from 'lodash/isEmpty'
+import isObject from 'lodash/isObject'
+import map from 'lodash/map'
+import some from 'lodash/some'
+import camelCase from 'lodash/camelCase'
+import find from 'lodash/find'
 
 export function useProjectShootCustomFields (projectItem, options = {}) {
   const {

@@ -16,11 +16,11 @@ class Terminal extends mix(GardenerDashboard).with(NamespaceScoped, Readable, Ob
     return {
       plural: 'terminals',
       singular: 'terminal',
-      kind: 'Terminal'
+      kind: 'Terminal',
     }
   }
 }
 
 module.exports = {
-  Terminal
+  Terminal,
 }

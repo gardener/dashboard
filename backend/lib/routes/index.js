@@ -22,9 +22,9 @@ module.exports = {
   '/namespaces/:namespace/tickets': require('./tickets'),
   '/namespaces/:namespace/cloudprovidersecrets': require('./cloudProviderSecrets'),
   '/namespaces/:namespace/members': require('./members'),
-  '/namespaces/:namespace/resourcequotas': require('./resourceQuotas')
+  '/namespaces/:namespace/resourcequotas': require('./resourceQuotas'),
 }
 
-if (_.get(config, 'frontend.features.terminalEnabled', false)) {
+if (_.get(config, ['frontend', 'features', 'terminalEnabled'], false)) {
   module.exports['/terminals'] = require('./terminals')
 }

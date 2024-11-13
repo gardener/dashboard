@@ -81,7 +81,7 @@ import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 
 import GDialog from './GDialog.vue'
 
-import { sortBy } from '@/lodash'
+import sortBy from 'lodash/sortBy'
 
 export default {
   components: {

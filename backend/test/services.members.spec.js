@@ -22,14 +22,14 @@ describe('services', function () {
         name: 'foo@bar.com',
         role: 'admin',
         roles: [
-          'owner'
-        ]
+          'owner',
+        ],
       },
       {
         apiGroup: 'rbac.authorization.k8s.io',
         kind: 'User',
         name: 'mutiple@bar.com',
-        role: 'admin'
+        role: 'admin',
       },
       {
         kind: 'ServiceAccount',
@@ -38,8 +38,8 @@ describe('services', function () {
         role: 'admin',
         roles: [
           'myrole',
-          'viewer'
-        ]
+          'viewer',
+        ],
       },
       {
         apiGroup: 'rbac.authorization.k8s.io',
@@ -47,20 +47,20 @@ describe('services', function () {
         name: 'mutiple@bar.com',
         role: 'admin',
         roles: [
-          'viewer'
-        ]
+          'viewer',
+        ],
       },
       {
         apiGroup: 'rbac.authorization.k8s.io',
         kind: 'User',
         name: 'system:serviceaccount:garden-foo:robot-user',
-        role: 'admin'
+        role: 'admin',
       },
       {
         apiGroup: 'rbac.authorization.k8s.io',
         kind: 'User',
         name: 'system:serviceaccount:garden-foo:robot-multiple',
-        role: 'otherrole'
+        role: 'otherrole',
       },
       {
         kind: 'ServiceAccount',
@@ -68,8 +68,8 @@ describe('services', function () {
         namespace: 'garden-foo',
         role: 'admin',
         roles: [
-          'myrole'
-        ]
+          'myrole',
+        ],
       },
       {
         kind: 'ServiceAccount',
@@ -77,14 +77,14 @@ describe('services', function () {
         namespace: 'garden-foo',
         role: 'myrole',
         roles: [
-          'viewer'
-        ]
+          'viewer',
+        ],
       },
       {
         kind: 'ServiceAccount',
         name: 'robot-orphaned',
         namespace: 'garden-foo',
-        role: 'myrole'
+        role: 'myrole',
       },
       {
         kind: 'ServiceAccount',
@@ -92,21 +92,21 @@ describe('services', function () {
         namespace: 'garden-foreign',
         role: 'myrole',
         roles: [
-          'viewer'
-        ]
+          'viewer',
+        ],
       },
       {
         apiGroup: 'rbac.authorization.k8s.io',
         kind: 'User',
         name: 'system:serviceaccount:garden-foreign:robot-foreign-namespace',
-        role: 'admin'
+        role: 'admin',
       },
       {
         apiGroup: 'rbac.authorization.k8s.io',
         kind: 'User',
         name: 'system:serviceaccount:garden-other-foreign:robot-other-foreign-namespace',
-        role: 'otherrole'
-      }
+        role: 'otherrole',
+      },
     ]
 
     const serviceAccounts = [
@@ -117,9 +117,9 @@ describe('services', function () {
           creationTimestamp: 'bar-time',
           annotations: {
             'dashboard.gardener.cloud/created-by': 'k8s',
-            'dashboard.gardener.cloud/description': 'description'
-          }
-        }
+            'dashboard.gardener.cloud/description': 'description',
+          },
+        },
       },
       {
         metadata: {
@@ -127,64 +127,64 @@ describe('services', function () {
           namespace: 'garden-foo',
           annotations: {
             'dashboard.gardener.cloud/created-by': 'foo',
-            'dashboard.gardener.cloud/description': 'description'
+            'dashboard.gardener.cloud/description': 'description',
           },
-          creationTimestamp: 'bar-time'
-        }
+          creationTimestamp: 'bar-time',
+        },
       },
       {
         metadata: {
           name: 'robot-user',
           namespace: 'garden-foo',
           annotations: {
-            'dashboard.gardener.cloud/created-by': 'foo'
+            'dashboard.gardener.cloud/created-by': 'foo',
           },
-          creationTimestamp: 'bar-time'
-        }
+          creationTimestamp: 'bar-time',
+        },
       },
       {
         metadata: {
           name: 'robot-multiple',
           namespace: 'garden-foo',
           annotations: {
-            'dashboard.gardener.cloud/created-by': 'foo'
+            'dashboard.gardener.cloud/created-by': 'foo',
           },
-          creationTimestamp: 'bar-time'
-        }
+          creationTimestamp: 'bar-time',
+        },
       },
       {
         metadata: {
           name: 'robot-nomember',
           namespace: 'garden-foo',
           annotations: {
-            'dashboard.gardener.cloud/created-by': 'foo'
+            'dashboard.gardener.cloud/created-by': 'foo',
           },
-          creationTimestamp: 'bar-time'
-        }
+          creationTimestamp: 'bar-time',
+        },
       },
       {
         metadata: {
           name: 'robot-deleted',
           namespace: 'garden-foo',
           creationTimestamp: 'bar-time',
-          deletionTimestamp: 'baz-time'
-        }
-      }
+          deletionTimestamp: 'baz-time',
+        },
+      },
     ]
 
     const project = {
       spec: {
         members: memberSubjects,
-        namespace: 'garden-foo'
+        namespace: 'garden-foo',
       },
       metadata: {
-        name: 'foo'
-      }
+        name: 'foo',
+      },
     }
 
     const client = {
       'core.gardener.cloud': {},
-      core: {}
+      core: {},
     }
 
     const findObjectFn = (objects) => {
@@ -199,22 +199,22 @@ describe('services', function () {
 
     beforeEach(function () {
       client['core.gardener.cloud'].projects = {
-        mergePatch: jest.fn().mockResolvedValue()
+        mergePatch: jest.fn().mockResolvedValue(),
       }
       client.core.serviceaccounts = {
         create: jest.fn().mockImplementation((namespace, body) => {
           if (body.metadata.name === 'default') {
             throw createError(409)
           }
-          return Promise.resolve(_.set(body, 'metadata.creationTimestamp', 'now'))
+          return Promise.resolve(_.set(body, ['metadata', 'creationTimestamp'], 'now'))
         }),
         createTokenRequest: jest.fn().mockImplementation((namespace, name, body) => {
-          return Promise.resolve(_.set(body, 'status.token', 'secret'))
+          return Promise.resolve(_.set(body, ['status', 'token'], 'secret'))
         }),
         delete: jest.fn().mockImplementation(findObjectFn(serviceAccounts)),
         mergePatch: jest.fn().mockImplementation((namespace, name, body) => {
-          return Promise.resolve(_.set(body, 'metadata.creationTimestamp', 'bar-time'))
-        })
+          return Promise.resolve(_.set(body, ['metadata', 'creationTimestamp'], 'bar-time'))
+        }),
       }
     })
 
@@ -254,36 +254,36 @@ describe('services', function () {
           expect(frontendMemberList).toHaveLength(11)
           expect(frontendMemberList).toContainEqual({
             username: 'mutiple@bar.com',
-            roles: ['admin', 'viewer']
+            roles: ['admin', 'viewer'],
           })
           expect(frontendMemberList).toContainEqual({
             username: 'system:serviceaccount:garden-foo:robot-multiple',
             roles: ['otherrole', 'admin', 'myrole', 'viewer'],
             createdBy: 'foo',
             creationTimestamp: 'bar-time',
-            description: undefined
+            description: undefined,
           })
           expect(frontendMemberList).toContainEqual({
             username: 'system:serviceaccount:garden-foreign:robot-foreign-namespace',
-            roles: ['myrole', 'viewer', 'admin']
+            roles: ['myrole', 'viewer', 'admin'],
           })
           expect(frontendMemberList).toContainEqual({
             username: 'system:serviceaccount:garden-foo:robot-nomember',
             roles: [],
             createdBy: 'foo',
             creationTimestamp: 'bar-time',
-            description: undefined
+            description: undefined,
           })
           expect(frontendMemberList).toContainEqual({
             username: 'system:serviceaccount:garden-foo:robot-orphaned',
             roles: ['myrole'],
-            orphaned: true
+            orphaned: true,
           })
           expect(frontendMemberList).toContainEqual({
             username: 'system:serviceaccount:garden-foo:robot-deleted',
             roles: [],
             creationTimestamp: 'bar-time',
-            deletionTimestamp: 'baz-time'
+            deletionTimestamp: 'baz-time',
           })
         })
 
@@ -295,7 +295,7 @@ describe('services', function () {
             roles: ['admin', 'myrole', 'viewer'],
             createdBy: 'foo',
             creationTimestamp: 'bar-time',
-            description: 'description'
+            description: 'description',
           })
         })
       })
@@ -438,7 +438,7 @@ describe('services', function () {
           const id = 'system:serviceaccount:garden-foo:robot-sa'
           const item = memberManager.subjectList.get(id)
           await memberManager.deleteServiceAccount(item)
-          expect(client.core.serviceaccounts.delete).toBeCalledTimes(1)
+          expect(client.core.serviceaccounts.delete).toHaveBeenCalledTimes(1)
           expect(client.core.serviceaccounts.delete.mock.calls[0]).toEqual(['garden-foo', 'robot-sa'])
           expect(memberManager.subjectList.has(id)).toBe(false)
         })
@@ -447,7 +447,7 @@ describe('services', function () {
           const id = 'system:serviceaccount:garden-foreign:robot-foreign-namespace'
           const item = memberManager.subjectList.get(id)
           await memberManager.deleteServiceAccount(item)
-          expect(client.core.serviceaccounts.delete).not.toBeCalled()
+          expect(client.core.serviceaccounts.delete).not.toHaveBeenCalled()
           expect(memberManager.subjectList.has(id)).toBe(true)
         })
 
@@ -455,7 +455,7 @@ describe('services', function () {
           const id = 'system:serviceaccount:garden-foo:robot-orphaned'
           const item = memberManager.subjectList.get(id)
           await memberManager.deleteServiceAccount(item)
-          expect(client.core.serviceaccounts.delete).toBeCalledTimes(1)
+          expect(client.core.serviceaccounts.delete).toHaveBeenCalledTimes(1)
           expect(client.core.serviceaccounts.delete.mock.calls[0]).toEqual(['garden-foo', 'robot-orphaned'])
           expect(memberManager.subjectList.has(id)).toBe(false)
         })
@@ -474,20 +474,20 @@ describe('services', function () {
         it('should delete and create a serviceaccount', async function () {
           const id = 'system:serviceaccount:garden-foo:robot-sa'
           await memberManager.resetServiceAccount(id)
-          expect(client.core.serviceaccounts.delete).toBeCalledTimes(1)
+          expect(client.core.serviceaccounts.delete).toHaveBeenCalledTimes(1)
           expect(client.core.serviceaccounts.delete.mock.calls[0]).toEqual(['garden-foo', 'robot-sa'])
           const body = {
             metadata: {
               annotations: {
                 'dashboard.gardener.cloud/created-by': 'foo',
-                'dashboard.gardener.cloud/description': 'description'
+                'dashboard.gardener.cloud/description': 'description',
               },
               creationTimestamp: 'now',
               name: 'robot-sa',
-              namespace: 'garden-foo'
-            }
+              namespace: 'garden-foo',
+            },
           }
-          expect(client.core.serviceaccounts.create).toBeCalledTimes(1)
+          expect(client.core.serviceaccounts.create).toHaveBeenCalledTimes(1)
           expect(client.core.serviceaccounts.create.mock.calls[0]).toEqual(['garden-foo', body])
         })
 
@@ -504,37 +504,37 @@ describe('services', function () {
         it('should skip service accounts that are no members', async function () {
           const id = 'system:serviceaccount:garden-foo:no-member'
           await memberManager.resetServiceAccount(id)
-          expect(client.core.serviceaccounts.delete).toBeCalledTimes(0)
-          expect(client.core.serviceaccounts.create).toBeCalledTimes(0)
+          expect(client.core.serviceaccounts.delete).toHaveBeenCalledTimes(0)
+          expect(client.core.serviceaccounts.create).toHaveBeenCalledTimes(0)
         })
 
         it('should patch the default service account', async function () {
           const id = 'system:serviceaccount:garden-foo:default'
           await memberManager.resetServiceAccount(id)
-          expect(client.core.serviceaccounts.delete).toBeCalledTimes(1)
+          expect(client.core.serviceaccounts.delete).toHaveBeenCalledTimes(1)
           expect(client.core.serviceaccounts.delete.mock.calls[0]).toEqual(['garden-foo', 'default'])
           const body = {
             metadata: {
               annotations: {
                 'dashboard.gardener.cloud/created-by': 'k8s',
-                'dashboard.gardener.cloud/description': 'description'
+                'dashboard.gardener.cloud/description': 'description',
               },
               name: 'default',
-              namespace: 'garden-foo'
-            }
+              namespace: 'garden-foo',
+            },
           }
-          expect(client.core.serviceaccounts.create).toBeCalledTimes(1)
+          expect(client.core.serviceaccounts.create).toHaveBeenCalledTimes(1)
           expect(client.core.serviceaccounts.create.mock.calls[0]).toEqual(['garden-foo', body])
           const patch = {
             metadata: {
               annotations: {
                 'dashboard.gardener.cloud/created-by': 'k8s',
-                'dashboard.gardener.cloud/description': 'description'
+                'dashboard.gardener.cloud/description': 'description',
               },
-              creationTimestamp: 'bar-time'
-            }
+              creationTimestamp: 'bar-time',
+            },
           }
-          expect(client.core.serviceaccounts.mergePatch).toBeCalledTimes(1)
+          expect(client.core.serviceaccounts.mergePatch).toHaveBeenCalledTimes(1)
           expect(client.core.serviceaccounts.mergePatch.mock.calls[0]).toEqual(['garden-foo', 'default', patch])
         })
       })
@@ -549,13 +549,13 @@ describe('services', function () {
             kind: 'TokenRequest',
             spec: {
               audiences: ['aud1', 'aud2'],
-              expirationSeconds: 42
+              expirationSeconds: 42,
             },
             status: {
-              token: 'secret'
-            }
+              token: 'secret',
+            },
           }
-          expect(client.core.serviceaccounts.createTokenRequest).toBeCalledTimes(1)
+          expect(client.core.serviceaccounts.createTokenRequest).toHaveBeenCalledTimes(1)
           expect(client.core.serviceaccounts.createTokenRequest.mock.calls[0]).toEqual(['garden-foo', 'robot-user', body])
           expect(kubeConfig.users[0].user.token).toContain('secret')
         })
