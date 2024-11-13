@@ -5078,11 +5078,12 @@ __metadata:
   linkType: hard
 
 "express-static-gzip@npm:^2.1.7":
-  version: 2.1.8
-  resolution: "express-static-gzip@npm:2.1.8"
+  version: 2.2.0
+  resolution: "express-static-gzip@npm:2.2.0"
   dependencies:
+    parseurl: "npm:^1.3.3"
     serve-static: "npm:^1.16.2"
-  checksum: 10c0/55efccf89b821e883a69c086f8770ce23d5a73a1957fa0d807d54bcc2ac938b94fad4fd7bf651ae52c910633e91c92cd7423a1f55b72df3ef0563c52851aadb1
+  checksum: 10c0/41a06af32112db903b465bb5b9caf0b6a142b054c47657dfdeee08e0c20652fe2e025ca962f31b122178b7698de9e0e4469554e24615adbf8f0cc871f8108c8d
   languageName: node
   linkType: hard
 
@@ -8180,7 +8181,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"parseurl@npm:~1.3.3":
+"parseurl@npm:^1.3.3, parseurl@npm:~1.3.3":
   version: 1.3.3
   resolution: "parseurl@npm:1.3.3"
   checksum: 10c0/90dd4760d6f6174adb9f20cf0965ae12e23879b5f5464f38e92fce8073354341e4b3b76fa3d878351efe7d01e617121955284cfd002ab087fba1a0726ec0b4f5
