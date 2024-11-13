@@ -250,7 +250,7 @@ import GTimeString from '@/components/GTimeString.vue'
 import { useProjectMetadata } from '@/composables/useProjectMetadata'
 import { useProjectNamespace } from '@/composables/useProjectItem'
 
-import { head } from '@/lodash'
+import head from 'lodash/head'
 
 export default {
   components: {

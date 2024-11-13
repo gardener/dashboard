@@ -6,19 +6,17 @@
 
 import { Netmask } from 'netmask'
 
-import {
-  map,
-  flatMap,
-  uniq,
-  difference,
-  some,
-  sample,
-  includes,
-  filter,
-  range,
-  isEmpty,
-  compact,
-} from '@/lodash'
+import map from 'lodash/map'
+import flatMap from 'lodash/flatMap'
+import uniq from 'lodash/uniq'
+import difference from 'lodash/difference'
+import some from 'lodash/some'
+import sample from 'lodash/sample'
+import includes from 'lodash/includes'
+import filter from 'lodash/filter'
+import range from 'lodash/range'
+import isEmpty from 'lodash/isEmpty'
+import compact from 'lodash/compact'
 
 export function getSpecTemplate (infrastructureKind, defaultWorkerCIDR) {
   const spec = {

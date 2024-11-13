@@ -392,12 +392,10 @@ import {
   Spinner,
 } from '@/lib/terminal'
 
-import {
-  get,
-  assign,
-  find,
-  head,
-} from '@/lodash'
+import head from 'lodash/head'
+import find from 'lodash/find'
+import assign from 'lodash/assign'
+import get from 'lodash/get'
 
 export default {
   components: {
@@ -491,13 +489,13 @@ export default {
     },
     defaultNode () {
       const defaultNode = find(this.config.nodes, ['data.kubernetesHostname', this.terminalSession.node])
-      return get(defaultNode, 'data.kubernetesHostname') || get(head(this.config.nodes), 'data.kubernetesHostname')
+      return get(defaultNode, ['data', 'kubernetesHostname']) || get(head(this.config.nodes), ['data', 'kubernetesHostname'])
     },
     defaultPrivilegedMode () {
       return this.privilegedMode || false
     },
     privilegedMode () {
-      return get(this.terminalSession, 'container.privileged') || this.terminalSession.hostPID || this.terminalSession.hostNetwork
+      return get(this.terminalSession, ['container', 'privileged']) || this.terminalSession.hostPID || this.terminalSession.hostNetwork
     },
     connectionStateText () {
       switch (this.terminalSession.connectionState) {
@@ -515,17 +513,17 @@ export default {
       }
     },
     heartbeatIntervalSeconds () {
-      return get(this.terminal, 'heartbeatIntervalSeconds', 60)
+      return get(this.terminal, ['heartbeatIntervalSeconds'], 60)
     },
     privilegedModeText () {
       return this.privilegedMode ? 'Privileged' : 'Unprivileged'
     },
     imageShortText () {
-      const image = get(this.terminalSession, 'container.image', '')
+      const image = get(this.terminalSession, ['container', 'image'], '')
       return image.substring(image.lastIndexOf('/') + 1)
     },
     imageHelpHtml () {
-      return transformHtml(get(this.terminalSession, 'imageHelpText', ''))
+      return transformHtml(get(this.terminalSession, ['imageHelpText'], ''))
     },
     name () {
       // name is undefined in case of garden terminal
@@ -608,7 +606,7 @@ export default {
 
         assign(this.config, config)
       } catch (err) {
-        this.showErrorSnackbarBottom(get(err, 'response.data.message', err.message))
+        this.showErrorSnackbarBottom(get(err, ['response', 'data', 'message'], err.message))
       } finally {
         this.loading[refName] = false // eslint-disable-line security/detect-object-injection
       }
@@ -682,7 +680,7 @@ export default {
       try {
         await terminalSession.open()
       } catch (err) {
-        const message = get(err, 'response.data.message', err.message)
+        const message = get(err, ['response', 'data', 'message'], err.message)
         this.showErrorSnackbarBottom(message)
         terminalSession.setDisconnectedState()
       }

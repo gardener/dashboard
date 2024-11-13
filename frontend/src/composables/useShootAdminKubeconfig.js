@@ -9,10 +9,8 @@ import { computed } from 'vue'
 import { useLocalStorageStore } from '@/store/localStorage'
 import { useConfigStore } from '@/store/config'
 
-import {
-  last,
-  head,
-} from '@/lodash'
+import last from 'lodash/last'
+import head from 'lodash/head'
 
 const defaultExpirations = [600, 1800, 3600, 10800, 21600, 43200, 86400, 259200, 604800]
 const defaultMaxExpiration = 2592000

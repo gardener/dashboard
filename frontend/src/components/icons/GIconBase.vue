@@ -26,7 +26,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { isHtmlColorCode } from '@/utils'
 
-import { get } from '@/lodash'
+import get from 'lodash/get'
 
 export default {
   props: {

@@ -14,7 +14,7 @@ import { useConfigStore } from '@/store/config'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { firstItemMatchingVersionClassification } from '@/store/cloudProfile/helper'
 
-import { find } from '@/lodash'
+import find from 'lodash/find'
 
 describe('stores', () => {
   describe('cloudProfile', () => {

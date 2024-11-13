@@ -45,7 +45,7 @@ import { useProvideProjectItem } from '@/composables/useProjectItem'
 import { useProvideShootItem } from '@/composables/useShootItem'
 import { useProvideShootHelper } from '@/composables/useShootHelper'
 
-import { isEqual } from '@/lodash'
+import isEqual from 'lodash/isEqual'
 
 function isLoadRequired (route, to) {
   return route.name !== to.name || !isEqual(route.params, to.params)

@@ -95,15 +95,13 @@ import GTerminalShortcut from './GTerminalShortcut.vue'
 import GIconBase from './icons/GIconBase.vue'
 import GTerminalShortcutIcon from './icons/GTerminalShortcutIcon.vue'
 
-import {
-  filter,
-  get,
-  every,
-} from '@/lodash'
+import every from 'lodash/every'
+import get from 'lodash/get'
+import filter from 'lodash/filter'
 
 function shootSelectorFilter (shortcuts, shootItem) {
   return filter(shortcuts, shortcut => {
-    const matchLabels = get(shortcut, 'shootSelector.matchLabels')
+    const matchLabels = get(shortcut, ['shootSelector', 'matchLabels'])
     if (!matchLabels) {
       return true
     }

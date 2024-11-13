@@ -6,7 +6,7 @@
 
 'use strict'
 
-import { get } from '@/lodash'
+import get from 'lodash/get'
 
 export function isConflict (error) {
   return hasStatusCode(409, error)
@@ -21,12 +21,12 @@ export function isGatewayTimeout (error) {
 }
 
 function hasStatusCode (statusCode, err) {
-  return get(err, 'response.status') === statusCode
+  return get(err, ['response', 'status']) === statusCode
 }
 
 export function errorDetailsFromError (err) {
-  const errorCode = get(err, 'response.data.code', get(err, 'response.status'))
-  const detailedMessage = get(err, 'response.data.message', 'Request failed with code: ' + errorCode)
+  const errorCode = get(err, ['response', 'data', 'code'], get(err, ['response', 'status']))
+  const detailedMessage = get(err, ['response', 'data', 'message'], 'Request failed with code: ' + errorCode)
 
   return { errorCode, detailedMessage }
 }

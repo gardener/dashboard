@@ -14,7 +14,7 @@ import {
 
 import { useShootStore } from '@/store/shoot'
 
-import { get } from '@/lodash'
+import get from 'lodash/get'
 
 export function createShootActionEventComposable (options = {}) {
   const {

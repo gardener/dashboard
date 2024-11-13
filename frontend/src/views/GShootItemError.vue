@@ -21,7 +21,7 @@ import { useProjectStore } from '@/store/project'
 
 import GError from '@/components/GError.vue'
 
-import { get } from '@/lodash'
+import get from 'lodash/get'
 
 export default {
   components: {
@@ -50,7 +50,7 @@ export default {
       'defaultNamespace',
     ]),
     fallbackRoute () {
-      const namespace = get(this.$route, 'params.namespace', this.defaultNamespace)
+      const namespace = get(this.$route, ['params', 'namespace'], this.defaultNamespace)
       if (namespace) {
         return {
           name: 'ShootList',

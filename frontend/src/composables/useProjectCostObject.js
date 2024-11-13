@@ -15,12 +15,10 @@ import { transformHtml } from '@/utils'
 
 import { useProjectMetadata } from './useProjectMetadata'
 
-import {
-  find,
-  get,
-  isEmpty,
-  map,
-} from '@/lodash'
+import find from 'lodash/find'
+import get from 'lodash/get'
+import isEmpty from 'lodash/isEmpty'
+import map from 'lodash/map'
 
 export const useProjectCostObject = (projectItem, options = {}) => {
   const {
@@ -70,20 +68,20 @@ export const useProjectCostObject = (projectItem, options = {}) => {
   })
 
   const costObjectDescriptionHtml = computed(() => {
-    const description = get(costObjectSettings.value, 'description')
+    const description = get(costObjectSettings.value, ['description'])
     return transformHtml(description)
   })
 
-  const costObjectSettingsType = computed(() => get(costObjectSettings.value, 'type'))
+  const costObjectSettingsType = computed(() => get(costObjectSettings.value, ['type']))
 
-  const costObjectTitle = computed(() => get(costObjectSettings.value, 'title'))
+  const costObjectTitle = computed(() => get(costObjectSettings.value, ['title']))
 
   const costObjectRegex = computed(() => {
-    const pattern = get(costObjectSettings.value, 'regex', '[^]*')
+    const pattern = get(costObjectSettings.value, ['regex'], '[^]*')
     return new RegExp(pattern) // eslint-disable-line security/detect-non-literal-regexp
   })
 
-  const costObjectErrorMessage = computed(() => get(costObjectSettings.value, 'errorMessage', 'Invalid cost object'))
+  const costObjectErrorMessage = computed(() => get(costObjectSettings.value, ['errorMessage'], 'Invalid cost object'))
 
   function getCostObjectPatchDocument () {
     return {

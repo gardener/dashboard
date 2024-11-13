@@ -123,10 +123,11 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+
 import GAnsiText from '@/components/GAnsiText.vue'
 import GShootSecretName from '@/components/GShootSecretName.vue'
 
-import { isEmpty } from '@/lodash'
+import isEmpty from 'lodash/isEmpty'
 
 export default {
   components: {

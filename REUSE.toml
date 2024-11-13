@@ -1,0 +1,47 @@
+version = 1
+SPDX-PackageName = "Gardener dashboard"
+SPDX-PackageSupplier = "The Gardener project <gardener@googlegroups.com>"
+SPDX-PackageDownloadLocation = "https://github.com/gardener/dashboard"
+
+[[annotations]]
+path = [
+  "**/.gitignore",
+  "**/.helmignore",
+  "**/.browserslistrc",
+  "**/.editorconfig",
+  "**/.env",
+  "**.ico",
+  "**.json",
+  "**.png",
+  "**.sketch",
+  "**.svg",
+  "**.gif",
+  "**.tpl",
+  "**.snap",
+  ".github/**",
+  ".yarn/**",
+  "charts/**/Chart.yaml",
+  "charts/**/values.yaml",
+  "charts/**/templates/**.yaml",
+  "charts/**/templates/**/**.yaml",
+  "frontend/index.html",
+  "CODEOWNERS",
+  "VERSION",
+  ".editorconfig",
+  ".gitignore",
+  ".dockerignore",
+  ".yarnrc.yml",
+  ".pnp.cjs",
+  ".pnp.loader.mjs",
+  "yarn.lock",
+  "REUSE.toml",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2017-2024 SAP SE or an SAP affiliate company and Gardener contributors"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = ["**.md", "docs/usage/shoot.yaml"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2017-2024 SAP SE or an SAP affiliate company and Gardener contributors"
+SPDX-License-Identifier = "CC-BY-4.0"
