@@ -1,64 +1,77 @@
 {
-  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
   extends: [
-    "config:recommended",
-    ":semanticCommitsDisabled",
-    "regexManagers:githubActionsVersions",
-    "group:monorepos"
+    'config:recommended',
+    ':semanticCommitsDisabled',
+    'customManagers:githubActionsVersions',
+    'group:monorepos',
   ],
   labels: [
-    "kind/enhancement",
-    "renovate"
+    'kind/enhancement',
+    'renovate',
   ],
   ignorePaths: [
-    "**/node_modules/**",
-    "**/.yarn/**"
+    '**/node_modules/**',
+    '**/.yarn/**',
   ],
   customManagers: [
     {
-      // Generic detection for pod-like image specifications.
-      customType: "regex",
-      fileMatch: ["^\.ci\/pipeline_definitions$"],
-      matchStrings: ["image: ['\"]?(?<depName>.*?):(?<currentValue>.*?)['\"]?\\s"],
-      datasourceTemplate: "docker"
-    }
+      customType: 'regex',
+      fileMatch: [
+        '^.ci/pipeline_definitions$',
+      ],
+      matchStrings: [
+        'image: [\'"]?(?<depName>.*?):(?<currentValue>.*?)[\'"]?\\s',
+      ],
+      datasourceTemplate: 'docker',
+    },
   ],
   packageRules: [
     {
-      matchDepTypes: ["devDependencies"],
-      groupName: "Monthly Dev Dependencies",
-      schedule: ["on the first day of the month"]
-    },
-    {
-      matchUpdateTypes: ["patch"],
-      automerge: true
-    },
-    {
-      // Ignore major updates for these dependencies until we support ES modules
-      matchDatasources: ["npm"],
-      matchPackageNames: [
-        "@octokit/auth-app",
-        "@octokit/core",
-        "@octokit/plugin-paginate-graphql",
-        "@octokit/plugin-paginate-rest",
-        "@octokit/plugin-request-log",
-        "@octokit/plugin-rest-endpoint-methods",
-        "chalk",
-        "codemirror",
-        "jest",
-        "openid-client",
-        "p-event",
-        "p-limit",
-        "p-retry",
-        "p-timeout"
+      matchDepTypes: [
+        'devDependencies',
       ],
-      matchUpdateTypes: ["major"],
-      enabled: false
+      groupName: 'Monthly Dev Dependencies',
+      schedule: [
+        'on the first day of the month',
+      ],
     },
     {
-      // Group github-actions in one PR.
-      groupName: "github-actions",
-      matchManagers: ["github-actions"]
-    }
-  ]
+      matchUpdateTypes: [
+        'patch',
+      ],
+      automerge: true,
+    },
+    {
+      matchDatasources: [
+        'npm',
+      ],
+      matchPackageNames: [
+        '@octokit/auth-app',
+        '@octokit/core',
+        '@octokit/plugin-paginate-graphql',
+        '@octokit/plugin-paginate-rest',
+        '@octokit/plugin-request-log',
+        '@octokit/plugin-rest-endpoint-methods',
+        'chalk',
+        'codemirror',
+        'jest',
+        'openid-client',
+        'p-event',
+        'p-limit',
+        'p-retry',
+        'p-timeout',
+      ],
+      matchUpdateTypes: [
+        'major',
+      ],
+      enabled: false,
+    },
+    {
+      groupName: 'github-actions',
+      matchManagers: [
+        'github-actions',
+      ],
+    },
+  ],
 }
