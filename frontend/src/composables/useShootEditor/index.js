@@ -180,7 +180,7 @@ export function useShootEditor (initialValue, options = {}) {
 
   let cmTooltipFnTimerID
   const themeCompartment = new Compartment()
-  const readonlyCompartment = new Compartment()
+  const readOnlyCompartment = new Compartment()
   const historyCompartment = new Compartment()
   const whitespacesCompartment = new Compartment()
 
@@ -236,7 +236,7 @@ export function useShootEditor (initialValue, options = {}) {
           }),
           EditorView.theme({}),
           historyCompartment.of(history()),
-          readonlyCompartment.of(EditorView.editable.of(!isReadOnly.value)),
+          readOnlyCompartment.of(EditorState.readOnly.of(isReadOnly.value)),
           themeCompartment.of([isDarkMode.value ? oneDark : [], syntaxHighlighting(isDarkMode.value ? oneDarkHighlightStyle : defaultHighlightStyle)]),
           lineNumbers(),
           whitespacesCompartment.of(showAllWhitespace),
@@ -378,7 +378,7 @@ export function useShootEditor (initialValue, options = {}) {
 
   watch(isReadOnly, isReadOnly => {
     cmView.value.dispatch({
-      effects: readonlyCompartment.reconfigure(EditorView.editable.of(isReadOnly)),
+      effects: readOnlyCompartment.reconfigure(EditorState.readOnly.of(isReadOnly)),
     })
   })
 
