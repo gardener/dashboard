@@ -50,11 +50,12 @@ class LifecycleHooks {
     this.io = io(server, cache)
     // register watches
     for (const [key, watch] of Object.entries(watches)) {
-      if (informers[key]) {
+      const informer = informers[key] // eslint-disable-line security/detect-object-injection
+      if (informer) {
         if (key === 'leases') {
-          watch(this.io, informers[key], { signal: this.ac.signal })
+          watch(this.io, informer, { signal: this.ac.signal })
         } else {
-          watch(this.io, informers[key])
+          watch(this.io, informer)
         }
       }
     }
@@ -75,7 +76,7 @@ class LifecycleHooks {
       seeds: client['core.gardener.cloud'].seeds.informer(),
       shoots: client['core.gardener.cloud'].shoots.informerAllNamespaces(),
       // core
-      resourcequotas: client.core.resourcequotas.informerAllNamespaces()
+      resourcequotas: client.core.resourcequotas.informerAllNamespaces(),
     }
 
     if (config.gitHub?.webhookSecret) {
@@ -92,7 +93,7 @@ module.exports = () => {
   const client = createDashboardClient({
     id: 'watch',
     pingInterval: 30000,
-    maxOutstandingPings: 2
+    maxOutstandingPings: 2,
   })
   return new LifecycleHooks(client)
 }

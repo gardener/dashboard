@@ -11,7 +11,7 @@ const { omit, pick, mapValues } = require('lodash')
 const { helm, helper } = fixtures
 const {
   getCertificate,
-  decodeBase64
+  decodeBase64,
 } = helper
 
 const renderTemplates = helm.renderDashboardRuntimeTemplates
@@ -24,28 +24,28 @@ describe('gardener-dashboard', function () {
     const themes = {
       light: {
         primary: '#ff0000',
-        'main-navigation-title': 'grey.darken3'
+        'main-navigation-title': 'grey.darken3',
       },
       dark: {
         primary: '#ff0000',
-        'main-navigation-title': 'grey.darken3'
-      }
+        'main-navigation-title': 'grey.darken3',
+      },
     }
     const branding = {
       productName: 'SuperCoolProduct',
       productSlogan: 'Slogan',
       loginHints: [{
         title: 'Support',
-        href: 'https://gardener.cloud'
+        href: 'https://gardener.cloud',
       }, {
         title: 'Documentation',
-        href: 'https://gardener.cloud/docs'
-      }]
+        href: 'https://gardener.cloud/docs',
+      }],
     }
 
     beforeEach(() => {
       templates = [
-        'configmap'
+        'configmap',
       ]
     })
 
@@ -68,10 +68,10 @@ describe('gardener-dashboard', function () {
             dashboard: {
               frontendConfig: {
                 themes,
-                branding
-              }
-            }
-          }
+                branding,
+              },
+            },
+          },
         }
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
@@ -100,17 +100,17 @@ describe('gardener-dashboard', function () {
               apiServerCa: getCertificate('apiServerCa'),
               oidc: {
                 public: {
-                  clientId: 'kube-kubectl'
-                }
-              }
-            }
-          }
+                  clientId: 'kube-kubectl',
+                },
+              },
+            },
+          },
         }
       })
 
       it('should render the template w/ `public.client_secret`', async function () {
         Object.assign(values.global.dashboard.oidc.public, {
-          clientSecret: 'kube-kubectl-secret'
+          clientSecret: 'kube-kubectl-secret',
         })
         expect.assertions(2)
         await assertTemplate()
@@ -124,7 +124,7 @@ describe('gardener-dashboard', function () {
       it('should render the template with PKCE flow for the public client', async function () {
         Object.assign(values.global.dashboard.oidc.public, {
           clientSecret: 'kube-kubectl-secret',
-          usePKCE: true
+          usePKCE: true,
         })
         expect.assertions(2)
         await assertTemplate()
@@ -145,7 +145,7 @@ describe('gardener-dashboard', function () {
       beforeEach(() => {
         values = {
           global: {
-          }
+          },
         }
       })
 
@@ -156,10 +156,38 @@ describe('gardener-dashboard', function () {
 
       it('should render the template with connectSrc containing additional host sources', async function () {
         values.global.terminal = {
-          allowedHostSourceList: ['*.seed.example.com']
+          allowedHostSourceList: ['*.seed.example.com'],
         }
         expect.assertions(2)
         await assertTemplate()
+      })
+    })
+
+    describe('costObjects', function () {
+      it('should render the template with costObjects configuration', async function () {
+        const values = {
+          global: {
+            dashboard: {
+              frontendConfig: {
+                costObjects: [
+                  {
+                    type: 'CO',
+                    title: 'Cost Object',
+                    description: 'Example Description',
+                    regex: '^example.*$',
+                    errorMessage: 'Invalid cost object',
+                  },
+                ],
+              },
+            },
+          },
+        }
+
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [configMap] = documents
+        const config = yaml.load(configMap.data['config.yaml'])
+        expect(pick(config, ['frontend.costObjects'])).toMatchSnapshot()
       })
     })
 
@@ -178,9 +206,9 @@ describe('gardener-dashboard', function () {
         values = {
           global: {
             dashboard: {
-              oidc: {}
-            }
-          }
+              oidc: {},
+            },
+          },
         }
       })
 
@@ -192,7 +220,7 @@ describe('gardener-dashboard', function () {
       it('should render the template with scope containing offline_access', async function () {
         Object.assign(values.global.dashboard.oidc, {
           scope: 'openid email groups offline_access',
-          sessionLifetime: 30 * 24 * 60 * 60
+          sessionLifetime: 30 * 24 * 60 * 60,
         })
         expect.assertions(2)
         await assertTemplate()
@@ -200,7 +228,7 @@ describe('gardener-dashboard', function () {
 
       it('should render the template with PKCE flow for the internal client', async function () {
         Object.assign(values.global.dashboard.oidc, {
-          usePKCE: true
+          usePKCE: true,
         })
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
@@ -222,17 +250,17 @@ describe('gardener-dashboard', function () {
                     {
                       key: 'foo',
                       display: {
-                        visibleIf: true
+                        title: 'Foo Only',
                       },
                       input: {
-                        title: 'Foo'
-                      }
-                    }
-                  ]
-                }
-              }
-            }
-          }
+                        title: 'Foo',
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
         }
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
@@ -251,14 +279,12 @@ describe('gardener-dashboard', function () {
                     {
                       key: 'foo',
                       display: {
-                        visibleIf: true,
                         title: 'display Foo',
-                        description: 'display Foo description'
+                        description: 'display Foo description',
                       },
                       input: {
                         title: 'input Foo',
                         description: 'input Foo description',
-                        inverted: true
                       },
                       options: [
                         {
@@ -266,32 +292,29 @@ describe('gardener-dashboard', function () {
                           display: {
                             visibleIf: false,
                             title: 'display Foo Option 1',
-                            description: 'display Foo  Option 1 description'
+                            description: 'display Foo  Option 1 description',
                           },
                           input: {
                             title: 'input Foo Option 1',
                             description: 'input Foo  Option 1 description',
-                            inverted: false
-                          }
+                            inverted: false,
+                          },
                         },
                         {
                           key: 'foo-option-2',
-                          display: {
-                            visibleIf: true
-                          },
                           input: {
                             title: 'input Foo Option 2',
                             description: 'input Foo  Option 2 description',
-                            inverted: true
-                          }
-                        }
-                      ]
-                    }
-                  ]
-                }
-              }
-            }
-          }
+                            inverted: true,
+                          },
+                        },
+                      ],
+                    },
+                  ],
+                },
+              },
+            },
+          },
         }
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
@@ -307,11 +330,11 @@ describe('gardener-dashboard', function () {
           global: {
             dashboard: {
               frontendConfig: {
-                serviceAccountDefaultTokenExpiration: 42
+                serviceAccountDefaultTokenExpiration: 42,
               },
-              tokenRequestAudiences: ['foo', 'bar']
-            }
-          }
+              tokenRequestAudiences: ['foo', 'bar'],
+            },
+          },
         }
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
@@ -336,9 +359,9 @@ describe('gardener-dashboard', function () {
                   hideClustersWithLabels: ['ignore1', 'ignore2'],
                   newIssue: {
                     labels: ['default-label'],
-                    body: 'issue description'
-                  }
-                }
+                    body: 'issue description',
+                  },
+                },
               },
               gitHub: {
                 apiUrl: 'https://github.com/api/v3/',
@@ -347,17 +370,17 @@ describe('gardener-dashboard', function () {
                 webhookSecret: 'webhookSecret',
                 pollIntervalSeconds: 60,
                 syncThrottleSeconds: 10,
-                syncConcurrency: 5
-              }
-            }
-          }
+                syncConcurrency: 5,
+              },
+            },
+          },
         }
       })
 
       describe('token authentication', function () {
         beforeEach(() => {
           values.global.dashboard.gitHub.authentication = {
-            token: 'token'
+            token: 'token',
           }
         })
 
@@ -381,7 +404,7 @@ describe('gardener-dashboard', function () {
             clientId: 'clientId',
             clientSecret: 'clientSecret',
             installationId: 123,
-            privateKey: 'privateKey'
+            privateKey: 'privateKey',
           }
         })
 
@@ -405,10 +428,10 @@ describe('gardener-dashboard', function () {
           global: {
             unreachableSeeds: {
               matchLabels: {
-                seed: 'unreachable'
-              }
-            }
-          }
+                seed: 'unreachable',
+              },
+            },
+          },
         }
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
@@ -426,11 +449,11 @@ describe('gardener-dashboard', function () {
               frontendConfig: {
                 alert: {
                   message: 'foo',
-                  type: 'warning'
-                }
-              }
-            }
-          }
+                  type: 'warning',
+                },
+              },
+            },
+          },
         }
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
@@ -447,11 +470,11 @@ describe('gardener-dashboard', function () {
                 alert: {
                   message: 'foo',
                   type: 'warning',
-                  identifier: 'bar'
-                }
-              }
-            }
-          }
+                  identifier: 'bar',
+                },
+              },
+            },
+          },
         }
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
@@ -476,21 +499,21 @@ describe('gardener-dashboard', function () {
                       target: 'foo-target',
                       container: {
                         command: [
-                          'command'
+                          'command',
                         ],
                         image: 'repo:tag',
                         args: [
                           'a',
                           'b',
-                          'c'
-                        ]
-                      }
-                    }
-                  ]
-                }
-              }
-            }
-          }
+                          'c',
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
         }
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
@@ -506,22 +529,22 @@ describe('gardener-dashboard', function () {
           global: {
             terminal: {
               container: {
-                image: 'chart-test:0.1.0'
+                image: 'chart-test:0.1.0',
               },
               garden: {
                 operatorCredentials: {
                   serviceAccountRef: {
                     name: 'robot',
-                    namespace: 'garden'
-                  }
-                }
+                    namespace: 'garden',
+                  },
+                },
               },
               gardenTerminalHost: {
-                seedRef: 'my-seed'
+                seedRef: 'my-seed',
               },
-              serviceAccountTokenExpiration: 42
-            }
-          }
+              serviceAccountTokenExpiration: 42,
+            },
+          },
         }
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
@@ -541,14 +564,14 @@ describe('gardener-dashboard', function () {
                       roleRef: {
                         apiGroup: 'rbac.authorization.k8s.foo',
                         kind: 'ClusterRole',
-                        name: 'test-role'
+                        name: 'test-role',
                       },
-                      bindingKind: 'ClusterRoleBinding'
-                    }
-                  ]
-                }
-              }
-            }
+                      bindingKind: 'ClusterRoleBinding',
+                    },
+                  ],
+                },
+              },
+            },
           }
           const documents = await renderTemplates(templates, values)
           expect(documents).toHaveLength(1)
@@ -566,14 +589,14 @@ describe('gardener-dashboard', function () {
                     {
                       roleRef: {
                         kind: 'ClusterRole',
-                        name: 'test-role'
+                        name: 'test-role',
                       },
-                      bindingKind: 'ClusterRoleBinding'
-                    }
-                  ]
-                }
-              }
-            }
+                      bindingKind: 'ClusterRoleBinding',
+                    },
+                  ],
+                },
+              },
+            },
           }
           const documents = await renderTemplates(templates, values)
           expect(documents).toHaveLength(1)
@@ -590,10 +613,10 @@ describe('gardener-dashboard', function () {
           global: {
             dashboard: {
               frontendConfig: {
-                branding
-              }
-            }
-          }
+                branding,
+              },
+            },
+          },
         }
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
@@ -609,10 +632,10 @@ describe('gardener-dashboard', function () {
           global: {
             dashboard: {
               frontendConfig: {
-                themes
-              }
-            }
-          }
+                themes,
+              },
+            },
+          },
         }
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
@@ -626,10 +649,10 @@ describe('gardener-dashboard', function () {
           global: {
             dashboard: {
               frontendConfig: {
-                themes: pick(themes, ['light'])
-              }
-            }
-          }
+                themes: pick(themes, ['light']),
+              },
+            },
+          },
         }
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
@@ -647,11 +670,11 @@ describe('gardener-dashboard', function () {
               frontendConfig: {
                 sla: {
                   title: 'SLA title',
-                  description: '[foo](https://bar.baz)'
-                }
-              }
-            }
-          }
+                  description: '[foo](https://bar.baz)',
+                },
+              },
+            },
+          },
         }
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
@@ -671,21 +694,21 @@ describe('gardener-dashboard', function () {
                   {
                     matchNames: [
                       'foo',
-                      'bar'
+                      'bar',
                     ],
                     message: '[foo](https://bar.baz)',
-                    severity: 'warning'
+                    severity: 'warning',
                   },
                   {
                     matchNames: [
-                      'fooz'
+                      'fooz',
                     ],
-                    message: 'other message'
-                  }
-                ]
-              }
-            }
-          }
+                    message: 'other message',
+                  },
+                ],
+              },
+            },
+          },
         }
 
         const documents = await renderTemplates(templates, values)
@@ -702,9 +725,9 @@ describe('gardener-dashboard', function () {
         const values = {
           global: {
             dashboard: {
-              clusterIdentity
-            }
-          }
+              clusterIdentity,
+            },
+          },
         }
 
         const documents = await renderTemplates(templates, values)
@@ -721,9 +744,9 @@ describe('gardener-dashboard', function () {
         const values = {
           global: {
             dashboard: {
-              maxRequestBodySize: limit
-            }
-          }
+              maxRequestBodySize: limit,
+            },
+          },
         }
 
         const documents = await renderTemplates(templates, values)
@@ -740,10 +763,10 @@ describe('gardener-dashboard', function () {
           global: {
             dashboard: {
               frontendConfig: {
-                grantTypes: ['a', 'b', 'c']
-              }
-            }
-          }
+                grantTypes: ['a', 'b', 'c'],
+              },
+            },
+          },
         }
 
         const documents = await renderTemplates(templates, values)
@@ -761,11 +784,11 @@ describe('gardener-dashboard', function () {
             dashboard: {
               frontendConfig: {
                 resourceQuotaHelp: {
-                  text: '[foo](https://bar.baz)'
-                }
-              }
-            }
-          }
+                  text: '[foo](https://bar.baz)',
+                },
+              },
+            },
+          },
         }
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
@@ -782,11 +805,11 @@ describe('gardener-dashboard', function () {
             dashboard: {
               frontendConfig: {
                 controlPlaneHighAvailabilityHelp: {
-                  text: '[foo](https://bar.baz)'
-                }
-              }
-            }
-          }
+                  text: '[foo](https://bar.baz)',
+                },
+              },
+            },
+          },
         }
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
@@ -808,12 +831,12 @@ describe('gardener-dashboard', function () {
                     shortName: 'E',
                     description: 'Example Description',
                     showAdmin: false,
-                    sortOrder: '99'
-                  }
-                }
-              }
-            }
-          }
+                    sortOrder: '99',
+                  },
+                },
+              },
+            },
+          },
         }
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
@@ -832,11 +855,11 @@ describe('gardener-dashboard', function () {
               frontendConfig: {
                 shootAdminKubeconfig: {
                   enabled: true,
-                  maxExpirationSeconds
-                }
-              }
-            }
-          }
+                  maxExpirationSeconds,
+                },
+              },
+            },
+          },
         }
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
@@ -853,11 +876,11 @@ describe('gardener-dashboard', function () {
             dashboard: {
               frontendConfig: {
                 experimental: {
-                  throttleDelayPerCluster: 42
-                }
-              }
-            }
-          }
+                  throttleDelayPerCluster: 42,
+                },
+              },
+            },
+          },
         }
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)

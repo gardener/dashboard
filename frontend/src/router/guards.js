@@ -26,17 +26,12 @@ export function createGlobalBeforeGuards () {
   const api = useApi()
   const appStore = useAppStore()
   const authnStore = useAuthnStore()
-  const authzStore = useAuthzStore()
   const configStore = useConfigStore()
   const projectStore = useProjectStore()
   const cloudProfileStore = useCloudProfileStore()
   const seedStore = useSeedStore()
   const gardenerExtensionStore = useGardenerExtensionStore()
   const kubeconfigStore = useKubeconfigStore()
-  const memberStore = useMemberStore()
-  const secretStore = useSecretStore()
-  const shootStore = useShootStore()
-  const terminalStore = useTerminalStore()
 
   function ensureUserAuthenticatedForNonPublicRoutes () {
     return async to => {
@@ -87,16 +82,13 @@ export function createGlobalBeforeGuards () {
     }
   }
 
-  function ensureDataLoaded () {
-    return async (to, from, next) => {
-      const { meta = {} } = to
-      if (meta.public) {
-        shootStore.unsubscribeShoots()
-        return next()
+  function ensureCommonDataLoaded () {
+    return async to => {
+      if (to.meta?.public) {
+        return
       }
 
       try {
-        const namespace = to.params.namespace ?? to.query.namespace
         await Promise.all([
           ensureConfigLoaded(configStore),
           ensureProjectsLoaded(projectStore),
@@ -104,8 +96,43 @@ export function createGlobalBeforeGuards () {
           ensureSeedsLoaded(seedStore),
           ensureGardenerExtensionsLoaded(gardenerExtensionStore),
           ensureKubeconfigLoaded(kubeconfigStore),
-          refreshRules(authzStore, namespace),
         ])
+      } catch (err) {
+        appStore.setRouterError(err)
+      }
+    }
+  }
+
+  return [
+    (to, from) => {
+      appStore.loading = true
+    },
+    ensureUserAuthenticatedForNonPublicRoutes(),
+    ensureCommonDataLoaded(),
+  ]
+}
+
+export function createGlobalResolveGuards () {
+  const logger = useLogger()
+  const appStore = useAppStore()
+  const authnStore = useAuthnStore()
+  const authzStore = useAuthzStore()
+  const projectStore = useProjectStore()
+  const memberStore = useMemberStore()
+  const secretStore = useSecretStore()
+  const shootStore = useShootStore()
+  const terminalStore = useTerminalStore()
+
+  function ensureDataLoaded () {
+    return async to => {
+      if (to.meta?.public) {
+        shootStore.unsubscribeShoots()
+        return
+      }
+
+      try {
+        const namespace = to.params.namespace ?? to.query.namespace
+        await refreshRules(authzStore, namespace)
 
         if (namespace && namespace !== '_all' && !projectStore.namespaces.includes(namespace)) {
           authzStore.$reset()
@@ -166,17 +193,11 @@ export function createGlobalBeforeGuards () {
         }
       } catch (err) {
         appStore.setRouterError(err)
-      } finally {
-        next()
       }
     }
   }
 
   return [
-    (to, from) => {
-      appStore.loading = true
-    },
-    ensureUserAuthenticatedForNonPublicRoutes(),
     ensureDataLoaded(),
   ]
 }

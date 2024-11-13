@@ -41,9 +41,9 @@ async function getSchemaDefinitions (user) {
 
     const selectedSchemaDefinitions = _
       .chain(dereferencedOpenApi)
-      .get('components.schemas')
+      .get(['components', 'schemas'])
       .pick([
-        'com.github.gardener.gardener.pkg.apis.core.v1beta1.Shoot'
+        'com.github.gardener.gardener.pkg.apis.core.v1beta1.Shoot',
       ])
       .value()
     _.assign(schemaDefinitions, selectedSchemaDefinitions)

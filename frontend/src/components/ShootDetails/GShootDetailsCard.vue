@@ -85,9 +85,18 @@ SPDX-License-Identifier: Apache-2.0
               />
             </div>
           </template>
-          <g-worker-groups
-            class="flex-wrap"
-          />
+          <div
+            v-if="hasShootWorkerGroups"
+            class="d-flex align-center flex-wrap"
+          >
+            <g-worker-group
+              v-for="workerGroup in shootWorkerGroups"
+              :key="workerGroup.name"
+              :worker-group="workerGroup"
+              class="ma-1"
+            />
+          </div>
+          <g-workerless-chip v-else />
         </g-list-item-content>
         <template
           #append
@@ -167,7 +176,14 @@ SPDX-License-Identifier: Apache-2.0
               v-if="shootAccessRestrictions.length"
               class="d-flex flex-wrap align-center"
             >
-              <g-access-restriction-chips :access-restrictions="shootAccessRestrictions" />
+              <g-access-restriction-chip
+                v-for="item in shootAccessRestrictions"
+                :id="item.key"
+                :key="item.key"
+                :title="item.title"
+                :description="item.description"
+                :options="item.options"
+              />
             </div>
             <span v-else>
               No access restrictions configured
@@ -188,7 +204,7 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           <g-list-item-content>
             <template #label>
-              Add-ons <span class="text-caption">(not actively monitored and provided on a best-effort basis only)</span>
+              Add-ons <span class="text-caption">(not actively monitored and available for clusters with purpose evaluation only)</span>
             </template>
             <div
               v-if="shootAddonNames.length"
@@ -223,10 +239,11 @@ import { storeToRefs } from 'pinia'
 import { useConfigStore } from '@/store/config'
 import { useAuthzStore } from '@/store/authz'
 
-import GAccessRestrictionChips from '@/components/ShootAccessRestrictions/GAccessRestrictionChips'
+import GAccessRestrictionChip from '@/components/ShootAccessRestrictions/GAccessRestrictionChip'
 import GAccountAvatar from '@/components/GAccountAvatar'
 import GTimeString from '@/components/GTimeString'
-import GWorkerGroups from '@/components/ShootWorkers/GWorkerGroups'
+import GWorkerGroup from '@/components/ShootWorkers/GWorkerGroup'
+import GWorkerlessChip from '@/components/ShootWorkers/GWorkerlessChip.vue'
 import GWorkerConfiguration from '@/components/ShootWorkers/GWorkerConfiguration'
 import GAccessRestrictionsConfiguration from '@/components/ShootAccessRestrictions/GAccessRestrictionsConfiguration'
 import GPurposeConfiguration from '@/components/GPurposeConfiguration'
@@ -238,13 +255,15 @@ import GCopyBtn from '@/components/GCopyBtn'
 
 import { useShootItem } from '@/composables/useShootItem'
 
-import utils, {
+import {
+  isValidTerminationDate,
   getTimeStringTo,
   shootAddonList,
   transformHtml,
 } from '@/utils'
 
 import {
+  get,
   filter,
   map,
 } from '@/lodash'
@@ -258,6 +277,7 @@ const {
   isShootMarkedForDeletion,
   shootAddons,
   hasShootWorkerGroups,
+  shootWorkerGroups,
   shootAccessRestrictions,
 } = useShootItem()
 
@@ -273,25 +293,23 @@ const {
 } = storeToRefs(authzStore)
 
 const selfTerminationMessage = computed(() => {
-  if (isValidTerminationDate.value) {
+  if (validTerminationDate.value) {
     return `This cluster will self terminate ${getTimeStringTo(new Date(), new Date(shootExpirationTimestamp.value))}`
   } else {
     return 'This cluster is about to self terminate'
   }
 })
 
-const isValidTerminationDate = computed(() => {
-  return utils.isValidTerminationDate(shootExpirationTimestamp.value)
+const validTerminationDate = computed(() => {
+  return isValidTerminationDate(shootExpirationTimestamp.value)
 })
 
-const addon = computed(() => {
-  return name => {
-    return shootAddons.value[name] || {}
-  }
-})
+function getAddon (name) {
+  return get(shootAddons.value, [name], {})
+}
 
 const shootAddonNames = computed(() => {
-  return map(filter(shootAddonList, item => addon.value(item.name).enabled), 'title')
+  return map(filter(shootAddonList, item => getAddon(item.name).enabled), 'title')
 })
 
 const slaDescriptionHtml = computed(() => {

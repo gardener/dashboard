@@ -9,11 +9,9 @@ exports[`gardener-dashboard configmap access restrictions should render the temp
           "display": {
             "description": "display Foo description",
             "title": "display Foo",
-            "visibleIf": true,
           },
           "input": {
             "description": "input Foo description",
-            "inverted": true,
             "title": "input Foo",
           },
           "key": "foo",
@@ -31,9 +29,6 @@ exports[`gardener-dashboard configmap access restrictions should render the temp
               "key": "foo-option-1",
             },
             {
-              "display": {
-                "visibleIf": true,
-              },
               "input": {
                 "description": "input Foo  Option 2 description",
                 "inverted": true,
@@ -56,7 +51,7 @@ exports[`gardener-dashboard configmap access restrictions should render the temp
       "items": [
         {
           "display": {
-            "visibleIf": true,
+            "title": "Foo Only",
           },
           "input": {
             "title": "Foo",
@@ -142,6 +137,22 @@ exports[`gardener-dashboard configmap controlPlaneHighAvailabilityHelp should re
     "controlPlaneHighAvailabilityHelp": {
       "text": "[foo](https://bar.baz)",
     },
+  },
+}
+`;
+
+exports[`gardener-dashboard configmap costObjects should render the template with costObjects configuration 1`] = `
+{
+  "frontend": {
+    "costObjects": [
+      {
+        "description": "Example Description",
+        "errorMessage": "Invalid cost object",
+        "regex": "^example.*$",
+        "title": "Cost Object",
+        "type": "CO",
+      },
+    ],
   },
 }
 `;

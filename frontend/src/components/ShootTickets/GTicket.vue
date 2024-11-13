@@ -7,13 +7,15 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-card class="mb-4">
     <g-toolbar>
-      <div class="ticket-title">
-        Ticket {{ ticketTitle }}
-      </div>
-      <template #append>
+      <div class="d-flex">
+        <div
+          class="ticket-title d-flex align-center"
+        >
+          Ticket {{ ticketTitle }}
+        </div>
         <div
           v-if="labels.length"
-          class="ticket-labels ml-2 mr-4"
+          class="d-flex flex-wrap ml-2 ticket-labels"
         >
           <g-ticket-label
             v-for="label in labels"
@@ -21,7 +23,7 @@ SPDX-License-Identifier: Apache-2.0
             :label="label"
           />
         </div>
-      </template>
+      </div>
     </g-toolbar>
     <v-container>
       <span class="font-weight-bold">{{ login }}</span> created this
@@ -127,16 +129,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .ticket-toolbar {
-    white-space: pre-wrap;
-    padding-top: 10px;
-    padding-bottom: 10px;
-  }
   .ticket-title {
     line-height: 20px;
   }
   .ticket-labels {
-    line-height: 10px;
+    overflow-y: scroll;
+    max-height: 30px;
   }
 
   .link-icon {

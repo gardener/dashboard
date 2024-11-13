@@ -13,7 +13,7 @@ const cache = require('../cache')
 const {
   fgaApiUrl,
   fgaStoreId,
-  fgaApiToken
+  fgaApiToken,
 } = config
 
 const fgaClient = fgaApiUrl && fgaStoreId && fgaApiToken
@@ -21,8 +21,8 @@ const fgaClient = fgaApiUrl && fgaStoreId && fgaApiToken
     url: `${fgaApiUrl}/stores/${fgaStoreId}`,
     responseType: 'json',
     auth: {
-      bearer: fgaApiToken
-    }
+      bearer: fgaApiToken,
+    },
   })
   : null
 
@@ -35,11 +35,11 @@ function writeProject (namespace, accountId) {
           {
             object: `gardener_project:${namespace}`,
             relation: 'parent',
-            user: `account:${accountId}`
-          }
-        ]
-      }
-    }
+            user: `account:${accountId}`,
+          },
+        ],
+      },
+    },
   })
 }
 
@@ -52,11 +52,11 @@ function deleteProject (namespace, accountId) {
           {
             object: `gardener_project:${namespace}`,
             relation: 'parent',
-            user: `account:${accountId}`
-          }
-        ]
-      }
-    }
+            user: `account:${accountId}`,
+          },
+        ],
+      },
+    },
   })
 }
 
@@ -67,8 +67,8 @@ async function listProjects (username, relation = 'viewer') {
     json: {
       user: `user:${username}`,
       relation,
-      type
-    }
+      type,
+    },
   })
   logger.debug('Openfga response objects: %s', objects)
   const projects = []
@@ -90,5 +90,5 @@ module.exports = {
   client: fgaClient,
   listProjects,
   writeProject,
-  deleteProject
+  deleteProject,
 }

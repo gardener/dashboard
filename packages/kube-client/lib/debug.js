@@ -21,7 +21,7 @@ const xRequestId = {
       this.id = 1
     }
     return this.id
-  }
+  },
 }
 
 function decodeBase64 (value) {
@@ -30,8 +30,8 @@ function decodeBase64 (value) {
 
 function afterResponse (response) {
   const { headers, httpVersion, statusCode, statusMessage, body, request } = response
-  const requestOptions = get(request, 'options', {})
-  const id = get(requestOptions, 'headers["x-request-id"]')
+  const requestOptions = get(request, ['options'], {})
+  const id = get(requestOptions, ['headers', 'x-request-id'])
   const { url, method, [xRequestStart]: start } = requestOptions
   const duration = start ? Date.now() - start : undefined
   logger.response({
@@ -43,7 +43,7 @@ function afterResponse (response) {
     httpVersion,
     headers: clone(headers),
     duration,
-    body
+    body,
   })
   return response
 }
@@ -51,7 +51,7 @@ function afterResponse (response) {
 function getUser ({ headers, key, cert }) {
   const user = {
     id: undefined,
-    type: undefined
+    type: undefined,
   }
 
   const [schema, value] = split(headers.authorization, ' ') || []
@@ -98,7 +98,7 @@ function getUser ({ headers, key, cert }) {
 
 function beforeRequest (options) {
   const { url, method, headers, body } = options
-  options[xRequestStart] = Date.now()
+  options[xRequestStart] = Date.now() // eslint-disable-line security/detect-object-injection
   if (!('x-request-id' in headers)) {
     headers['x-request-id'] = xRequestId.next()
   }
@@ -107,7 +107,7 @@ function beforeRequest (options) {
     method,
     user: getUser(options),
     headers: clone(headers),
-    body
+    body,
   })
 }
 
@@ -133,5 +133,5 @@ function attach (options = {}) {
 module.exports = {
   attach,
   beforeRequest,
-  afterResponse
+  afterResponse,
 }

@@ -16,7 +16,7 @@ import {
   isStatusProgressing,
   isReconciliationDeactivated,
   getCreatedBy,
-  isShootStatusHibernated,
+  isStatusHibernated,
   getIssueSince,
 } from '@/utils'
 import {
@@ -74,7 +74,7 @@ export function parseSearch (text) {
     }
     let exact = false
     const end = value.length - 1
-    if (value[0] === '"' && value[end] === '"') {
+    if (value[0] === '"' && value[end] === '"') { // eslint-disable-line security/detect-object-injection
       exact = true
       value = value.substring(1, end).replace(/""/g, '"')
     }
@@ -228,7 +228,7 @@ export function getRawVal (context, item, column) {
     case 'controlPlaneHighAvailability':
       return get(spec, 'controlPlane.highAvailability.failureTolerance.type')
     case 'issueSince':
-      return getIssueSince(item.status) || 0
+      return getIssueSince(item.status)
     case 'technicalId':
       return item.status?.technicalID
     case 'workers':
@@ -242,7 +242,7 @@ export function getRawVal (context, item, column) {
         const value = get(item, path)
         return formatValue(value, ' ')
       }
-      return metadata[column]
+      return get(metadata, [column])
     }
   }
 }
@@ -265,7 +265,7 @@ export function getSortVal (state, context, item, sortBy) {
   const status = item.status
   switch (sortBy) {
     case 'purpose':
-      return purposeValue[value] ?? 4
+      return get(purposeValue, [value], 4)
     case 'k8sVersion':
       return (value || '0.0.0').split('.').map(i => padStart(i, 4, '0')).join('.')
     case 'lastOperation': {
@@ -295,7 +295,7 @@ export function getSortVal (state, context, item, sortBy) {
       }
       return inProgress
         ? '6' + padStart(operation.progress, 2, '0')
-        : isShootStatusHibernated(status)
+        : isStatusHibernated(status)
           ? 500
           : 700
     }
@@ -329,6 +329,9 @@ export function getSortVal (state, context, item, sortBy) {
       })
     }
     default:
+      if (typeof value === 'number') {
+        return value
+      }
       return toLower(value)
   }
 }

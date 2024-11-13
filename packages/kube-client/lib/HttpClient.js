@@ -54,7 +54,7 @@ class HttpClient {
           const {
             ok,
             reason,
-            object = event.object
+            object = event.object,
           } = condition(event)
           if (ok) {
             return object

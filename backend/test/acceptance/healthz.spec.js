@@ -32,11 +32,11 @@ describe('healthz', function () {
       .expect('content-type', /json/)
       .expect(200)
 
-    expect(mockRequest).toBeCalledTimes(1)
+    expect(mockRequest).toHaveBeenCalledTimes(1)
     expect(mockRequest.mock.calls[0]).toEqual([{
       ...pick(fixtures.kube, [':scheme', ':authority', 'authorization']),
       ':method': 'get',
-      ':path': '/healthz'
+      ':path': '/healthz',
     }])
 
     expect(res.body).toEqual({ status: 'ok' })

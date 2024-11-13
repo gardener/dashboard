@@ -8,7 +8,14 @@
 
 const { pick } = require('lodash')
 
-const PROPERTY_NAMES = ['createdBy', 'creationTimestamp', 'deletionTimestamp', 'description', 'kubeconfig', 'orphaned']
+const PROPERTY_NAMES = Object.freeze([
+  'createdBy',
+  'creationTimestamp',
+  'deletionTimestamp',
+  'description',
+  'kubeconfig',
+  'orphaned',
+])
 
 class Member {
   constructor (username, { roles, extensions } = {}) {
@@ -23,14 +30,18 @@ class Member {
       return {
         kind: 'ServiceAccount',
         namespace,
-        name
+        name,
       }
     }
     return {
       kind: 'User',
       apiGroup: 'rbac.authorization.k8s.io',
-      name: username
+      name: username,
     }
+  }
+
+  static get allowedExtensionProperties () {
+    return PROPERTY_NAMES
   }
 }
 

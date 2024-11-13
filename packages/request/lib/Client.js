@@ -29,8 +29,16 @@ const {
   HTTP2_HEADER_CONTENT_LENGTH,
   HTTP2_METHOD_GET,
   HTTP2_HEADER_ACCEPT_ENCODING,
-  HTTP2_HEADER_CONTENT_ENCODING
+  HTTP2_HEADER_CONTENT_ENCODING,
 } = http2.constants
+
+function getHeader (headers, key) {
+  return headers[key] // eslint-disable-line security/detect-object-injection
+}
+
+function setHeader (headers, key, value) {
+  headers[key] = value // eslint-disable-line security/detect-object-injection
+}
 
 const EOL = '\n'
 
@@ -73,10 +81,10 @@ class Client {
     const headers = { ...this.#options.headers }
     const { bearer, user, pass } = this.#options.auth || {}
     if (bearer) {
-      headers[HTTP2_HEADER_AUTHORIZATION] = `Bearer ${bearer}`
+      setHeader(headers, HTTP2_HEADER_AUTHORIZATION, `Bearer ${bearer}`)
     } else if (user && pass) {
       const credentials = Buffer.from(user + ':' + pass, 'utf8').toString('base64')
-      headers[HTTP2_HEADER_AUTHORIZATION] = `Basic ${credentials}`
+      setHeader(headers, HTTP2_HEADER_AUTHORIZATION, `Basic ${credentials}`)
     }
     return headers
   }
@@ -100,19 +108,24 @@ class Client {
       'maxHeaderListPairs',
       'maxReservedRemoteStreams',
       'peerMaxConcurrentStreams',
-      'settings'
+      'settings',
     ]
     return {
       servername,
-      ...pick(this.#options, keys)
+      ...pick(this.#options, keys),
     }
   }
 
+  get #hooksMap () {
+    const hooks = this.#options.hooks ?? {}
+    return new Map(Object.entries(hooks))
+  }
+
   executeHooks (name, ...args) {
-    const hooks = this.#options.hooks || {}
     try {
-      if (Array.isArray(hooks[name])) {
-        for (const hook of hooks[name]) {
+      const hooks = this.#hooksMap.get(name)
+      if (Array.isArray(hooks)) {
+        for (const hook of hooks) {
           hook(...args)
         }
       }
@@ -143,10 +156,10 @@ class Client {
         [HTTP2_HEADER_AUTHORITY]: url.host,
         [HTTP2_HEADER_METHOD]: method.toUpperCase(),
         [HTTP2_HEADER_PATH]: url.pathname + url.search,
-        [HTTP2_HEADER_ACCEPT_ENCODING]: 'gzip, deflate, br'
+        [HTTP2_HEADER_ACCEPT_ENCODING]: 'gzip, deflate, br',
       },
       normalizeHeaders(this.#defaultHeaders),
-      normalizeHeaders(headers)
+      normalizeHeaders(headers),
     )
   }
 
@@ -154,23 +167,23 @@ class Client {
     headers = this.getRequestHeaders(path, {
       method,
       searchParams,
-      headers
+      headers,
     })
 
     // beforeRequest hooks
     const requestOptions = {
-      url: new URL(headers[HTTP2_HEADER_PATH], this.baseUrl.origin),
-      method: headers[HTTP2_HEADER_METHOD],
+      url: new URL(getHeader(headers, HTTP2_HEADER_PATH), this.baseUrl.origin),
+      method: getHeader(headers, HTTP2_HEADER_METHOD),
       headers,
       body,
-      ...options
+      ...options,
     }
     this.executeHooks('beforeRequest', requestOptions)
 
     const stream = await this.#agent.request(headers, {
       ...this.#defaultOptions,
       ...options,
-      signal
+      signal,
     })
     if (body) {
       stream.write(body)
@@ -180,13 +193,13 @@ class Client {
     const { createDecompressor, concat, transformFactory } = this.constructor
 
     headers = await stream.getHeaders()
-    const decompressor = createDecompressor(headers[HTTP2_HEADER_CONTENT_ENCODING])
+    const decompressor = createDecompressor(getHeader(headers, HTTP2_HEADER_CONTENT_ENCODING))
 
     return {
       request: { options: requestOptions },
       headers,
       get statusCode () {
-        return this.headers[HTTP2_HEADER_STATUS]
+        return getHeader(this.headers, HTTP2_HEADER_STATUS)
       },
       get ok () {
         return this.statusCode >= 200 && this.statusCode < 300
@@ -195,10 +208,10 @@ class Client {
         return this.statusCode >= 300 && this.statusCode < 400
       },
       get contentType () {
-        return this.headers[HTTP2_HEADER_CONTENT_TYPE]
+        return getHeader(this.headers, HTTP2_HEADER_CONTENT_TYPE)
       },
       get contentLength () {
-        return this.headers[HTTP2_HEADER_CONTENT_LENGTH]
+        return getHeader(this.headers, HTTP2_HEADER_CONTENT_LENGTH)
       },
       get type () {
         if (['json', 'text'].includes(responseType)) {
@@ -225,7 +238,7 @@ class Client {
                   if (this.ok) {
                     throw new ParseError(err.message, {
                       headers,
-                      rawBody: text
+                      rawBody: text,
                     })
                   }
                   // return the raw body text if the response status is not ok (keep the original http error in this case)
@@ -234,7 +247,7 @@ class Client {
               default:
                 return Buffer.from(text, 'utf8')
             }
-          }
+          },
         ]
         if (decompressor) {
           streams.splice(1, 0, decompressor)
@@ -272,7 +285,7 @@ class Client {
         if (data && data.length) {
           yield transform(data)
         }
-      }
+      },
     }
   }
 
@@ -283,18 +296,18 @@ class Client {
       throw createHttpError({
         statusCode,
         headers: response.headers,
-        body: await response.body()
+        body: await response.body(),
       })
     }
     return response
   }
 
-  async request (path, { headers = {}, body, json, ...options } = {}) {
+  async request (path, { headers = {}, body, json, onWarning, ...options } = {}) {
     headers = this.constructor.normalizeHeaders(headers)
     if (json) {
       body = JSON.stringify(json)
-      if (!headers[HTTP2_HEADER_CONTENT_TYPE]) {
-        headers[HTTP2_HEADER_CONTENT_TYPE] = 'application/json'
+      if (!getHeader(headers, HTTP2_HEADER_CONTENT_TYPE)) {
+        setHeader(headers, HTTP2_HEADER_CONTENT_TYPE, 'application/json')
       }
     }
     const response = await this.fetch(path, { headers, body, ...options })
@@ -307,19 +320,24 @@ class Client {
       headers,
       httpVersion: '2',
       statusCode,
-      statusMessage: http.STATUS_CODES[statusCode],
+      statusMessage: http.STATUS_CODES[statusCode], // eslint-disable-line security/detect-object-injection
       body,
-      request: response.request
+      request: response.request,
     }
     this.executeHooks('afterResponse', responseOptions)
+
+    if (typeof onWarning === 'function' && response.headers.warning) {
+      onWarning.call(response, response.headers.warning)
+    }
 
     if (statusCode >= 400) {
       throw createHttpError({
         statusCode,
         headers,
-        body
+        body,
       })
     }
+
     return body
   }
 

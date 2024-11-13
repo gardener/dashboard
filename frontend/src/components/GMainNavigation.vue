@@ -440,6 +440,9 @@ function getProjectMenuTargetRoute (namespace) {
     if (has(route, 'params.name')) {
       return true
     }
+    if (get(route, 'name') === 'NewShoot' || get(route, 'name') === 'NewShootEditor') {
+      return true
+    }
     if (get(route, 'name') === 'GardenTerminal') {
       return true
     }
@@ -491,7 +494,7 @@ function highlightProjectWithKeys (keyDirection) {
     currentHighlightedIndex++
   }
 
-  const newHighlightedProject = sortedAndFilteredProjectList.value[currentHighlightedIndex]
+  const newHighlightedProject = sortedAndFilteredProjectList.value[currentHighlightedIndex] // eslint-disable-line security/detect-object-injection
   highlightedProjectName.value = newHighlightedProject.metadata.name
 
   if (currentHighlightedIndex >= numberOfVisibleProjects.value - 1) {

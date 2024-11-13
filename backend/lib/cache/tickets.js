@@ -9,8 +9,8 @@ const _ = require('lodash')
 const logger = require('../logger')
 
 function init () {
-  const issues = {}
-  const commentsForIssues = {} // we could also think of getting rid of the comments cache
+  const issues = new Map()
+  const commentsForIssues = new Map() // we could also think of getting rid of the comments cache
   const emitter = new EventEmitter()
 
   function on (eventName, listener) {
@@ -38,15 +38,16 @@ function init () {
   }
 
   function getIssues () {
-    return _.values(issues)
+    return Array.from(issues.values())
   }
 
   function getCommentsForIssue ({ issueNumber }) {
-    return _.values(getCommentsForIssueCache({ issueNumber }))
+    const comments = getCommentsForIssueCache({ issueNumber })
+    return Array.from(comments.values())
   }
 
   function getIssue (number) {
-    return issues[number]
+    return issues.get(number)
   }
 
   function getIssueNumbers () {
@@ -62,23 +63,25 @@ function init () {
   }
 
   function getCommentsForIssueCache ({ issueNumber }) {
-    if (!commentsForIssues[issueNumber]) {
-      commentsForIssues[issueNumber] = {}
+    if (!commentsForIssues.has(issueNumber)) {
+      commentsForIssues.set(issueNumber, new Map())
     }
-    return commentsForIssues[issueNumber]
+    return commentsForIssues.get(issueNumber)
   }
 
   function addOrUpdateIssues ({ issues }) {
-    _.forEach(issues, issue => addOrUpdateIssue({ issue }))
+    for (const issue of issues) {
+      addOrUpdateIssue({ issue })
+    }
   }
 
   function addOrUpdateIssue ({ issue }) {
-    updateIfNewer('issue', issues, issue, 'number')
+    updateIfNewer('issue', issues, issue)
   }
 
   function addOrUpdateComment ({ issueNumber, comment }) {
     const comments = getCommentsForIssueCache({ issueNumber })
-    updateIfNewer('comment', comments, comment, 'id')
+    updateIfNewer('comment', comments, comment)
   }
 
   function removeIssue ({ issue }) {
@@ -87,29 +90,33 @@ function init () {
 
     const comments = getCommentsForIssueCache({ issueNumber })
 
-    _.unset(issues, issueNumber)
-    _.unset(commentsForIssues, issueNumber)
+    issues.delete(issueNumber)
+    commentsForIssues.delete(issueNumber)
 
     emitIssueDeleted(issue)
-    _.forEach(comments, emitCommmentDeleted)
+    for (const comment of comments.values()) {
+      emitCommmentDeleted(comment)
+    }
   }
 
   function removeComment ({ issueNumber, comment }) {
     const identifier = comment.metadata.id
     logger.trace('removing comment', identifier, 'of issue', issueNumber)
     const commentsForIssuesCache = getCommentsForIssueCache({ issueNumber })
-    _.unset(commentsForIssuesCache, identifier)
+    commentsForIssuesCache.delete(identifier)
     emitCommmentDeleted(comment)
   }
 
-  function updateIfNewer (kind, cachedList, item, itemIdentifier) {
-    const identifier = item.metadata[itemIdentifier]
-    const cachedItem = cachedList[identifier]
+  function updateIfNewer (kind, cachedMap, item) {
+    const identifier = kind === 'issue'
+      ? item.metadata.number
+      : item.metadata.id
+    const cachedItem = cachedMap.get(identifier)
     if (cachedItem) {
       if (isCachedItemOlder(cachedItem, item)) {
         if (!_.isEqual(cachedItem, item)) {
           logger.trace('updating', kind, identifier)
-          cachedList[identifier] = item
+          cachedMap.set(identifier, item)
           emitModified(kind, item)
         }
       } else {
@@ -117,7 +124,7 @@ function init () {
       }
     } else {
       logger.trace('adding new', kind, identifier)
-      cachedList[identifier] = item
+      cachedMap.set(identifier, item)
       emitAdded(kind, item)
     }
     return item
@@ -139,7 +146,7 @@ function init () {
     addOrUpdateIssue,
     addOrUpdateComment,
     removeIssue,
-    removeComment
+    removeComment,
   }
 }
 

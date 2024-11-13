@@ -16,11 +16,11 @@ class SeedManagement extends mix(GardenerSeedManagement).with(NamespaceScoped, R
     return {
       plural: 'managedseeds',
       singular: 'managedseed',
-      kind: 'ManagedSeed'
+      kind: 'ManagedSeed',
     }
   }
 }
 
 module.exports = {
-  SeedManagement
+  SeedManagement,
 }

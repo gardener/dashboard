@@ -36,7 +36,7 @@ function projectFilter (user, canListProjects = false, projectAllowList = []) {
     }
     return _
       .chain(project)
-      .get('spec.members')
+      .get(['spec', 'members'])
       .find(({ kind, namespace, name }) => {
         switch (kind) {
           case 'Group':
@@ -61,7 +61,7 @@ function projectFilter (user, canListProjects = false, projectAllowList = []) {
   }
 
   const isPending = project => {
-    return _.get(project, 'status.phase', 'Pending') === 'Pending'
+    return _.get(project, ['status', 'phase'], 'Pending') === 'Pending'
   }
 
   return project => {
@@ -98,7 +98,7 @@ function parseRooms (rooms) {
   return [
     isAdmin,
     namespaces,
-    qualifiedNames
+    qualifiedNames,
   ]
 }
 
@@ -112,24 +112,67 @@ function trimObjectMetadata (object) {
 
 function trimProject (project) {
   project = trimObjectMetadata(project)
-  _.set(project, 'spec.members', undefined)
+  _.set(project, ['spec', 'members'], undefined)
   return project
+}
+
+function parseSelector (selector = '') {
+  let notOperator
+  let key
+  let operator
+  let value = ''
+
+  if (selector.startsWith('!')) {
+    notOperator = '!'
+    selector = selector.slice(1)
+  }
+
+  const index = selector.search(/[=!]/)
+  if (index !== -1) {
+    key = selector.slice(0, index)
+    const remainingPart = selector.slice(index)
+    if (remainingPart.startsWith('==')) {
+      operator = '=='
+      value = remainingPart.slice(2)
+    } else if (remainingPart.startsWith('=')) {
+      operator = '='
+      value = remainingPart.slice(1)
+    } else if (remainingPart.startsWith('!=')) {
+      operator = '!='
+      value = remainingPart.slice(2)
+    } else {
+      operator = ''
+      value = remainingPart
+    }
+  } else {
+    key = selector
+  }
+
+  const isValidPart = part => /^[a-zA-Z0-9._/-]*$/.test(part)
+
+  if (!isValidPart(key) || !isValidPart(value)) {
+    return
+  }
+
+  if (notOperator) {
+    if (!operator) {
+      return { op: NOT_EXISTS, key }
+    }
+  } else if (!operator) {
+    return { op: EXISTS, key }
+  } else if (operator === '!=') {
+    return { op: NOT_EQUAL, key, value }
+  } else if (operator === '=' || operator === '==') {
+    return { op: EQUAL, key, value }
+  }
 }
 
 function parseSelectors (selectors) {
   const items = []
   for (const selector of selectors) {
-    const [, notOperator, key, operator, value = ''] = /^(!)?([a-zA-Z0-9._/-]+)(=|==|!=)?([a-zA-Z0-9._-]+)?$/.exec(selector) ?? []
-    if (notOperator) {
-      if (!operator) {
-        items.push({ op: NOT_EXISTS, key })
-      }
-    } else if (!operator) {
-      items.push({ op: EXISTS, key })
-    } else if (operator === '!=') {
-      items.push({ op: NOT_EQUAL, key, value })
-    } else if (operator === '=' || operator === '==') {
-      items.push({ op: EQUAL, key, value })
+    const item = parseSelector(selector)
+    if (item) {
+      items.push(item)
     }
   }
   return items
@@ -139,7 +182,7 @@ function filterBySelectors (selectors) {
   return item => {
     const labels = item.metadata.labels ?? {}
     for (const { op, key, value } of selectors) {
-      const labelValue = labels[key] ?? ''
+      const labelValue = _.get(labels, [key], '')
       switch (op) {
         case NOT_EXISTS: {
           if (key in labels) {
@@ -190,11 +233,11 @@ function shootHasIssue (shoot) {
 }
 
 function getSeedIngressDomain (seed) {
-  return _.get(seed, 'spec.ingress.domain')
+  return _.get(seed, ['spec', 'ingress', 'domain'])
 }
 
 function isSeedUnreachable (seed) {
-  const matchLabels = _.get(config, 'unreachableSeeds.matchLabels')
+  const matchLabels = _.get(config, ['unreachableSeeds', 'matchLabels'])
   if (!matchLabels) {
     return false
   }
@@ -219,6 +262,6 @@ module.exports = {
     EXISTS,
     NOT_EXISTS,
     EQUAL,
-    NOT_EQUAL
-  })
+    NOT_EQUAL,
+  }),
 }

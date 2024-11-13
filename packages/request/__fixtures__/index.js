@@ -20,7 +20,7 @@ function sha1Hash (data, length = 7) {
 module.exports = {
   helper: {
     sha1Hash,
-    ...helper
+    ...helper,
   },
-  matchers
+  matchers,
 }

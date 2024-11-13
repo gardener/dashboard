@@ -13,7 +13,7 @@ const CONNECTION_ERROR_CODES = [
   'ECONNREFUSED',
   'ETIMEDOUT',
   'ENETUNREACH',
-  'ERR_HTTP2_PING_CANCEL'
+  'ERR_HTTP2_PING_CANCEL',
 ]
 
 class StatusError extends Error {
@@ -108,5 +108,5 @@ module.exports = {
   isGatewayTimeout,
   hasStatusCauseResourceVersionTooLarge,
   isConnectionRefused,
-  isAbortError
+  isAbortError,
 }

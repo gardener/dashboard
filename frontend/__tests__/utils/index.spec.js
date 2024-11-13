@@ -16,6 +16,9 @@ import {
   getTimeStringFrom,
   parseNumberWithMagnitudeSuffix,
   normalizeVersion,
+  isEmail,
+  convertToGi,
+  convertToGibibyte,
 } from '@/utils'
 
 import {
@@ -471,6 +474,29 @@ describe('utils', () => {
     })
   })
 
+  describe('isEmail', () => {
+    it('should return true for valid emails', () => {
+      expect(isEmail('a@b.de')).toBe(true)
+      expect(isEmail('a@b.a.r.com')).toBe(true)
+      expect(isEmail('abcdefghijklmnopqrstuvwxyz0123456789.!#$%&’*+/=?^_`{|}~-@bar.com')).toBe(true)
+    })
+
+    it('should return false for valid emails', () => {
+      expect(isEmail(undefined)).toBe(false)
+      expect(isEmail('')).toBe(false)
+      expect(isEmail('a'.repeat(321))).toBe(false)
+      expect(isEmail('bar.com')).toBe(false)
+      expect(isEmail('a@b@bar.com')).toBe(false)
+      expect(isEmail('a@b@bar.com')).toBe(false)
+      expect(isEmail('@bar.com')).toBe(false)
+      expect(isEmail('a@bar')).toBe(false)
+      expect(isEmail('<a>@bar.com')).toBe(false)
+      expect(isEmail('a@bar.c')).toBe(false)
+      expect(isEmail('a@bar..com')).toBe(false)
+      expect(isEmail('abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789@bar.com')).toBe(false)
+    })
+  })
+
   describe('normalizeVersion', () => {
     it('should fill missing segments', () => {
       expect(normalizeVersion('1.12')).toBe('1.12.0')
@@ -498,6 +524,40 @@ describe('utils', () => {
     it('should not allow pre or suffix other than allowed ones', () => {
       expect(normalizeVersion('x23.1')).toBeUndefined()
       expect(normalizeVersion('23.2x')).toBeUndefined()
+    })
+  })
+
+  describe('convertToGi', () => {
+    const precision = 9
+    it('should convert binary units to Gibibyte', () => {
+      expect(convertToGi('1Ki')).toBe(Math.pow(1024, -2))
+      expect(convertToGi('1Mi')).toBe(Math.pow(1024, -1))
+      expect(convertToGi('1Gi')).toBe(Math.pow(1024, 0))
+      expect(convertToGi('1Ti')).toBe(Math.pow(1024, 1))
+      expect(convertToGi('1Pi')).toBe(Math.pow(1024, 2))
+    })
+
+    it('should convert decimal units to Gibibyte', () => {
+      expect(convertToGi('1')).toBeCloseTo(Math.pow(1000, 3) * Math.pow(1024, -6), precision)
+      expect(convertToGi('1K')).toBeCloseTo(Math.pow(1000, 3) * Math.pow(1024, -5), precision)
+      expect(convertToGi('1M')).toBeCloseTo(Math.pow(1000, 3) * Math.pow(1024, -4), precision)
+      expect(convertToGi('1G')).toBeCloseTo(Math.pow(1000, 3) * Math.pow(1024, -3), precision)
+      expect(convertToGi('1T')).toBeCloseTo(Math.pow(1000, 3) * Math.pow(1024, -2), precision)
+      expect(convertToGi('1P')).toBeCloseTo(Math.pow(1000, 3) * Math.pow(1024, -1), precision)
+    })
+
+    it('should convert floats to Gibibyte', () => {
+      expect(convertToGi('1.23Gi')).toBe(1.23)
+      expect(convertToGi('4.56Ti')).toBe(4.56 * Math.pow(1024, 1))
+      expect(convertToGi('7.89G')).toBeCloseTo(7.89 * Math.pow(1000, 3) * Math.pow(1024, -3), precision)
+    })
+
+    it('should fail to convert to Gibibyte', () => {
+      expect(() => convertToGibibyte('1.2.3')).toThrow(TypeError)
+      expect(() => convertToGibibyte('1Xi')).toThrow(TypeError)
+      expect(() => convertToGibibyte('1E3')).toThrow(TypeError)
+      expect(() => convertToGibibyte('1,23')).toThrow(TypeError)
+      expect(() => convertToGibibyte('Gi')).toThrow(TypeError)
     })
   })
 })

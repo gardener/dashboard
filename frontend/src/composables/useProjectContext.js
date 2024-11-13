@@ -120,7 +120,10 @@ export function createProjectContextComposable (options = {}) {
 
   /* costObject */
   const {
+
     costObject,
+    costObjectType,
+    getCostObjectPatchDocument,
   } = useProjectCostObject(manifest, {
     configStore,
     projectMetadataComposable,
@@ -153,6 +156,8 @@ export function createProjectContextComposable (options = {}) {
     generateKeyFromName,
     /* costObject */
     costObject,
+    costObjectType,
+    getCostObjectPatchDocument,
   }
 }
 

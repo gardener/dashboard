@@ -8,31 +8,24 @@
 
 const http2 = require('http2')
 const path = require('path')
+const _ = require('lodash')
 
 const {
-  HTTP2_HEADER_CONTENT_TYPE
+  HTTP2_HEADER_CONTENT_TYPE,
 } = http2.constants
 
 const PatchType = {
   MERGE: 'merge',
   STRATEGIC_MERGE: 'strategic-merge',
-  JSON: 'json'
+  JSON: 'json',
 }
 
 function decodeBase64 (value) {
   return Buffer.from(value, 'base64').toString('utf8')
 }
 
-function setHeader (options, key, value) {
-  if (!options.headers) {
-    options.headers = {}
-  }
-  options.headers[key] = value
-  return options
-}
-
 function setContentType (options, value) {
-  return setHeader(options, HTTP2_HEADER_CONTENT_TYPE, value)
+  return _.set(options, ['headers', HTTP2_HEADER_CONTENT_TYPE], value)
 }
 
 function setPatchType (options, type = PatchType.MERGE) {
@@ -80,11 +73,10 @@ function validateLabelValue (name) {
 
 exports = module.exports = {
   decodeBase64,
-  setHeader,
   setContentType,
   PatchType,
   setPatchType,
   namespaceScopedUrl,
   clusterScopedUrl,
-  validateLabelValue
+  validateLabelValue,
 }

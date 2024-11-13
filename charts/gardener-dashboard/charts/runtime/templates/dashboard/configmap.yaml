@@ -135,15 +135,6 @@ data:
       serviceAccountTokenExpiration: {{ .Values.global.terminal.serviceAccountTokenExpiration }}
       {{- end }}
       gardenTerminalHost:
-        {{- if .Values.global.terminal.gardenTerminalHost.secretRef }}
-        apiServerIngressHost: {{ .Values.global.terminal.gardenTerminalHost.apiServerIngressHost }}
-        secretRef:
-          namespace: {{ .Values.global.terminal.gardenTerminalHost.secretRef.namespace }}
-          {{- with .Values.global.terminal.gardenTerminalHost.secretRef.labelSelector }}
-          labelSelector:
-{{ toYaml . | trim | nindent 12 }}
-          {{- end }}
-        {{- end }}
         {{- if .Values.global.terminal.gardenTerminalHost.seedRef }}
         seedRef: {{ .Values.global.terminal.gardenTerminalHost.seedRef }}
         {{- end }}
@@ -261,12 +252,15 @@ data:
         identifier: {{ .Values.global.dashboard.frontendConfig.alert.identifier }}
         {{- end }}
       {{- end }}
-      {{- if .Values.global.dashboard.frontendConfig.costObject }}
-      costObject:
-        title: {{ .Values.global.dashboard.frontendConfig.costObject.title }}
-        description: {{ .Values.global.dashboard.frontendConfig.costObject.description }}
-        regex: {{ .Values.global.dashboard.frontendConfig.costObject.regex }}
-        errorMessage: {{ .Values.global.dashboard.frontendConfig.costObject.errorMessage }}
+      {{- if .Values.global.dashboard.frontendConfig.costObjects }}
+      costObjects:
+      {{- range .Values.global.dashboard.frontendConfig.costObjects }}
+      - type: {{ required ".Values.global.dashboard.frontendConfig.costObjects.type is required" (quote .type) }}
+        title: {{ required ".Values.global.dashboard.frontendConfig.costObjects.title is required" (quote .title) }}
+        description: {{ quote .description }}
+        regex: {{ quote .regex }}
+        errorMessage: {{ quote .errorMessage }}
+      {{- end }}
       {{- end }}
       {{- if .Values.global.dashboard.frontendConfig.sla }}
       sla:
@@ -281,26 +275,27 @@ data:
         items:
         {{- range .Values.global.dashboard.frontendConfig.accessRestriction.items }}
         - key: {{ .key }}
+          {{- if .display }}
           display:
-            visibleIf: {{ .display.visibleIf }}{{- if .display.title }}
+            {{- if .display.title }}
             title: {{ .display.title }}{{- end }}{{- if .display.description }}
             description: {{ .display.description }}{{- end }}
+          {{- end }}
           input:
             title: {{ quote .input.title }}
             {{- if .input.description }}
             description: {{ quote .input.description }}
             {{- end }}
-            {{- if .input.inverted }}
-            inverted: {{ .input.inverted }}
-            {{- end }}
           {{- if .options }}
           options:
           {{- range .options }}
           - key: {{ .key }}
+            {{- if .display }}
             display:
               visibleIf: {{ .display.visibleIf }}{{- if .display.title }}
               title: {{ .display.title }}{{- end }}{{- if .display.description }}
               description: {{ .display.description }}{{- end }}
+            {{- end }}
             input:
               title: {{ quote .input.title }}
               {{- if .input.description }}

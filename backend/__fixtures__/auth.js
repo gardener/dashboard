@@ -13,7 +13,7 @@ const pathToRegexp = require('path-to-regexp')
 const {
   COOKIE_HEADER_PAYLOAD,
   COOKIE_TOKEN,
-  COOKIE_SIGNATURE
+  COOKIE_SIGNATURE,
 } = require('../lib/security/constants')
 const jose = require('../lib/security/jose')
 const { sessionSecrets } = require('./config').default
@@ -31,7 +31,7 @@ async function getCookieValue (token) {
   const cookies = {
     [COOKIE_HEADER_PAYLOAD]: join([header, payload], '.'),
     [COOKIE_SIGNATURE]: signature,
-    [COOKIE_TOKEN]: encrypted
+    [COOKIE_TOKEN]: encrypted,
   }
   return reduce(cookies, (accumulator, value, key) => {
     if (accumulator) {
@@ -65,13 +65,13 @@ const auth = {
       },
       get bearer () {
         return bearer
-      }
+      },
     }
   },
   getTokenPayload ({ authorization } = {}) {
     const [, token] = /^Bearer (.*)$/.exec(authorization)
     return decode(token)
-  }
+  },
 }
 
 const mocks = {
@@ -91,19 +91,19 @@ const mocks = {
           verbs: ['get'],
           apiGroups: ['core.gardener.cloud'],
           resources: ['projects'],
-          resourceName: ['foo']
+          resourceName: ['foo'],
         })
         resourceRules.push({
           verbs: ['create'],
           apiGroups: ['core.gardener.cloud'],
-          resources: ['projects']
+          resources: ['projects'],
         })
       } else {
         resourceRules.push({
           verbs: ['get'],
           apiGroups: ['core.gardener.cloud'],
           resources: ['projects'],
-          resourceName: ['foo']
+          resourceName: ['foo'],
         })
       }
       return {
@@ -111,8 +111,8 @@ const mocks = {
         status: {
           resourceRules,
           nonResourceRules,
-          incomplete
-        }
+          incomplete,
+        },
       }
     }
   },
@@ -143,8 +143,8 @@ const mocks = {
       return Promise.resolve({
         ...json,
         status: {
-          allowed
-        }
+          allowed,
+        },
       })
     }
   },
@@ -163,14 +163,14 @@ const mocks = {
       return Promise.resolve({
         status: {
           user,
-          authenticated
-        }
+          authenticated,
+        },
       })
     }
-  }
+  },
 }
 
 module.exports = {
   ...auth,
-  mocks
+  mocks,
 }

@@ -178,7 +178,7 @@ import {
 } from '@/utils/validators'
 import {
   getErrorMessages,
-  parseSize,
+  convertToGi,
 } from '@/utils'
 
 import {
@@ -195,6 +195,7 @@ import {
   set,
   head,
   pick,
+  every,
 } from '@/lodash'
 
 export default {
@@ -297,14 +298,14 @@ export default {
     })
 
     const volumeSizeRules = {
-      minVolumeSize: withMessage(`Minimum size is ${this.minimumVolumeSize}`, value => {
+      minVolumeSize: withMessage(() => `Minimum size is ${this.minimumVolumeSize}`, value => {
         if (!this.hasVolumeSize) {
           return true
         }
         if (!value) {
           return false
         }
-        return this.minimumVolumeSize <= parseSize(value)
+        return this.minimumVolumeSize <= convertToGi(value)
       }),
     }
     rules.volumeSize = withFieldName(() => `${this.workerGroupName} Volume Size`, volumeSizeRules)
@@ -342,11 +343,14 @@ export default {
       return filter(machineImages, ({ isExpired, architectures }) => !isExpired && includes(architectures, this.machineArchitecture))
     },
     minimumVolumeSize () {
-      const minimumVolumeSize = parseSize(this.minimumVolumeSizeByMachineTypeAndVolumeType({
+      const minimumVolumeSize = convertToGi(this.minimumVolumeSizeByMachineTypeAndVolumeType({
         machineType: this.selectedMachineType,
         volumeType: this.selectedVolumeType,
       }))
-      const defaultSize = parseSize(get(this.selectedMachineType, 'storage.size'))
+      let defaultSize = get(this.selectedMachineType, ['storage.size'])
+      if (defaultSize) {
+        defaultSize = convertToGi(defaultSize)
+      }
       if (defaultSize > 0 && defaultSize < minimumVolumeSize) {
         return defaultSize
       }
@@ -422,8 +426,14 @@ export default {
       return sortBy(concat(this.selectedZones, this.unselectedZones), 'text')
     },
     zoneHint () {
+      const allAvailable = every(this.allZones, zone =>
+        includes(this.availableZones, zone),
+      )
+      if (allAvailable) {
+        return ''
+      }
       if (this.maxAdditionalZones >= this.availableZones.length) {
-        return undefined
+        return ''
       }
       if (this.maxAdditionalZones === 0) {
         return 'Your network configuration does not allow to add more zones that are not already used by this cluster'

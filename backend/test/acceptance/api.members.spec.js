@@ -37,7 +37,7 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(2)
+      expect(mockRequest).toHaveBeenCalledTimes(2)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
@@ -52,10 +52,10 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(404)
 
-      expect(mockRequest).not.toBeCalled()
+      expect(mockRequest).not.toHaveBeenCalled()
 
       expect(res.body).toMatchSnapshot({
-        details: expect.any(Object)
+        details: expect.any(Object),
       })
     })
 
@@ -72,7 +72,7 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(3)
+      expect(mockRequest).toHaveBeenCalledTimes(3)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
@@ -90,11 +90,11 @@ describe('api', function () {
         .post(`/api/namespaces/${namespace}/members/${name}`)
         .set('cookie', await user.cookie)
         .send({
-          method: 'resetServiceAccount'
+          method: 'resetServiceAccount',
         })
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(4)
+      expect(mockRequest).toHaveBeenCalledTimes(4)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
@@ -110,12 +110,12 @@ describe('api', function () {
         .set('cookie', await user.cookie)
         .send({
           name: 'baz@example.org',
-          roles: ['admin', 'owner']
+          roles: ['admin', 'owner'],
         })
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(3)
+      expect(mockRequest).toHaveBeenCalledTimes(3)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
@@ -130,16 +130,16 @@ describe('api', function () {
         .set('cookie', await user.cookie)
         .send({
           name: 'foo@example.org',
-          roles: ['admin']
+          roles: ['admin'],
         })
         .expect('content-type', /json/)
         .expect(409)
 
-      expect(mockRequest).toBeCalledTimes(2)
+      expect(mockRequest).toHaveBeenCalledTimes(2)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot({
-        details: expect.any(Object)
+        details: expect.any(Object),
       })
     })
 
@@ -154,12 +154,12 @@ describe('api', function () {
         .put(`/api/namespaces/${namespace}/members/${name}`)
         .set('cookie', await user.cookie)
         .send({
-          roles: ['newRole']
+          roles: ['newRole'],
         })
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(3)
+      expect(mockRequest).toHaveBeenCalledTimes(3)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
@@ -178,7 +178,7 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(3)
+      expect(mockRequest).toHaveBeenCalledTimes(3)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
@@ -196,7 +196,7 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(2)
+      expect(mockRequest).toHaveBeenCalledTimes(2)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
@@ -212,12 +212,12 @@ describe('api', function () {
         .set('cookie', await user.cookie)
         .send({
           name: `system:serviceaccount:${namespace}:foo`,
-          roles: []
+          roles: [],
         })
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(3)
+      expect(mockRequest).toHaveBeenCalledTimes(3)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
@@ -237,7 +237,7 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(4)
+      expect(mockRequest).toHaveBeenCalledTimes(4)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
@@ -255,12 +255,12 @@ describe('api', function () {
         .send({
           name: `system:serviceaccount:${namespace}:foo`,
           roles: ['myrole'],
-          description: 'description'
+          description: 'description',
         })
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(4)
+      expect(mockRequest).toHaveBeenCalledTimes(4)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
@@ -275,16 +275,16 @@ describe('api', function () {
         .set('cookie', await user.cookie)
         .send({
           name: `system:serviceaccount:${namespace}:robot`,
-          roles: ['myrole']
+          roles: ['myrole'],
         })
         .expect('content-type', /json/)
         .expect(409)
 
-      expect(mockRequest).toBeCalledTimes(2)
+      expect(mockRequest).toHaveBeenCalledTimes(2)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot({
-        details: expect.any(Object)
+        details: expect.any(Object),
       })
     })
 
@@ -301,12 +301,12 @@ describe('api', function () {
         .set('cookie', await user.cookie)
         .send({
           roles: ['myrole'],
-          description: 'newDescription'
+          description: 'newDescription',
         })
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(4)
+      expect(mockRequest).toHaveBeenCalledTimes(4)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
@@ -323,12 +323,12 @@ describe('api', function () {
         .put(`/api/namespaces/${namespace}/members/${name}`)
         .set('cookie', await user.cookie)
         .send({
-          roles: ['myrole']
+          roles: ['myrole'],
         })
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(3)
+      expect(mockRequest).toHaveBeenCalledTimes(3)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
@@ -345,12 +345,12 @@ describe('api', function () {
         .put(`/api/namespaces/${namespace}/members/${name}`)
         .set('cookie', await user.cookie)
         .send({
-          roles: []
+          roles: [],
         })
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(3)
+      expect(mockRequest).toHaveBeenCalledTimes(3)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
@@ -366,12 +366,12 @@ describe('api', function () {
         .set('cookie', await user.cookie)
         .send({
           name: 'system:serviceaccount:othernamespace:fsa',
-          roles: ['myrole']
+          roles: ['myrole'],
         })
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(3)
+      expect(mockRequest).toHaveBeenCalledTimes(3)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
@@ -386,12 +386,12 @@ describe('api', function () {
         .set('cookie', await user.cookie)
         .send({
           name: 'system:serviceaccount:othernamespace:fsa-noroles',
-          roles: []
+          roles: [],
         })
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(2)
+      expect(mockRequest).toHaveBeenCalledTimes(2)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
@@ -410,7 +410,7 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(3)
+      expect(mockRequest).toHaveBeenCalledTimes(3)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()

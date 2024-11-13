@@ -70,10 +70,10 @@ SPDX-License-Identifier: Apache-2.0
         class="mt-4"
       >
         <g-toolbar
-          title="Add-Ons (not actively monitored and provided on a best-effort basis only)"
+          title="Add-Ons (not actively monitored and available for clusters with purpose evaluation only)"
         />
         <v-card-text>
-          <g-manage-shoot-addons create-mode />
+          <g-manage-addons create-mode />
         </v-card-text>
       </v-card>
       <v-card class="mt-4">
@@ -146,7 +146,7 @@ import GNewShootInfrastructureDetails from '@/components/NewShoot/GNewShootInfra
 import GNewShootSelectInfrastructure from '@/components/NewShoot/GNewShootSelectInfrastructure'
 import GMaintenanceComponents from '@/components/ShootMaintenance/GMaintenanceComponents'
 import GMaintenanceTime from '@/components/ShootMaintenance/GMaintenanceTime'
-import GManageShootAddons from '@/components/ShootAddons/GManageAddons'
+import GManageAddons from '@/components/ShootAddons/GManageAddons'
 import GManageDns from '@/components/ShootDns/GManageDns'
 import GManageControlPlaneHighAvailability from '@/components/ControlPlaneHighAvailability/GManageControlPlaneHighAvailability'
 import GToolbar from '@/components/GToolbar.vue'
@@ -162,7 +162,7 @@ export default {
     GNewShootInfrastructureDetails,
     GAccessRestrictions,
     GNewShootDetails,
-    GManageShootAddons,
+    GManageAddons,
     GManageDns,
     GMaintenanceComponents,
     GMaintenanceTime,
@@ -186,6 +186,13 @@ export default {
       return next()
     }
 
+    if (!this.isShootCreated && this.isShootDirty && !await this.confirmNavigation()) {
+      return next(false)
+    }
+
+    return next()
+  },
+  async beforeRouteUpdate (to, from, next) {
     if (!this.isShootCreated && this.isShootDirty && !await this.confirmNavigation()) {
       return next(false)
     }

@@ -18,14 +18,14 @@ function getCluster ({ currentCluster }, files) {
       server,
       'certificate-authority-data': caData,
       'certificate-authority': caFile,
-      'insecure-skip-tls-verify': insecureSkipTlsVerify
+      'insecure-skip-tls-verify': insecureSkipTlsVerify,
     } = currentCluster
     cluster.server = server
     if (caData) {
       cluster.certificateAuthority = base64Decode(caData)
     } else if (caFile) {
       files.set(caFile, 'certificateAuthority')
-      cluster.certificateAuthority = fs.readFileSync(caFile, 'utf8')
+      cluster.certificateAuthority = fs.readFileSync(caFile, 'utf8') // eslint-disable-line security/detect-non-literal-fs-filename
     }
     if (typeof insecureSkipTlsVerify === 'boolean') {
       cluster.insecureSkipTlsVerify = insecureSkipTlsVerify
@@ -48,34 +48,34 @@ function getUser ({ currentUser }, files) {
       tokenFile,
       username,
       password,
-      'auth-provider': authProvider
+      'auth-provider': authProvider,
     } = currentUser
     if (certData && keyData) {
       user.clientCert = base64Decode(certData)
       user.clientKey = base64Decode(keyData)
     } else if (certFile && keyFile) {
       files.set(certFile, 'clientCert')
-      user.clientCert = fs.readFileSync(certFile, 'utf8')
+      user.clientCert = fs.readFileSync(certFile, 'utf8') // eslint-disable-line security/detect-non-literal-fs-filename
       files.set(keyFile, 'clientKey')
-      user.clientKey = fs.readFileSync(keyFile, 'utf8')
+      user.clientKey = fs.readFileSync(keyFile, 'utf8') // eslint-disable-line security/detect-non-literal-fs-filename
     } else if (token) {
       user.token = token
     } else if (tokenFile) {
       files.set(tokenFile, 'token')
-      user.token = fs.readFileSync(tokenFile, 'utf8')
+      user.token = fs.readFileSync(tokenFile, 'utf8') // eslint-disable-line security/detect-non-literal-fs-filename
     } else if (username && password) {
       user.username = username
       user.password = password
     } else if (authProvider) {
       const {
         name,
-        config: authProviderConfig = {}
+        config: authProviderConfig = {},
       } = authProvider
       switch (name) {
         case 'gcp': {
           const {
             'access-token': accessToken,
-            expiry = '1970-01-01T00:00:00.000Z'
+            expiry = '1970-01-01T00:00:00.000Z',
           } = authProviderConfig
           if (new Date() < new Date(expiry)) {
             user.token = accessToken
@@ -95,20 +95,20 @@ function createAuth (user) {
       enumerable: true,
       get () {
         return user.token
-      }
+      },
     },
     user: {
       enumerable: true,
       get () {
         return user.username
-      }
+      },
     },
     pass: {
       enumerable: true,
       get () {
         return user.password
-      }
-    }
+      },
+    },
   })
 
   return Object.freeze(auth)
@@ -129,31 +129,31 @@ class ClientConfig {
         enumerable: true,
         get () {
           return cluster.server
-        }
+        },
       },
       ca: {
         enumerable: true,
         get () {
           return cluster.certificateAuthority
-        }
+        },
       },
       rejectUnauthorized: {
         enumerable: true,
         get () {
           return !cluster.insecureSkipTlsVerify
-        }
+        },
       },
       key: {
         enumerable: true,
         get () {
           return user.clientKey
-        }
+        },
       },
       cert: {
         enumerable: true,
         get () {
           return user.clientCert
-        }
+        },
       },
       auth: {
         enumerable: true,
@@ -161,17 +161,26 @@ class ClientConfig {
           if (user.token || (user.username && user.password)) {
             return auth
           }
-        }
-      }
+        },
+      },
     }
     if (reactive && files.size) {
       const watcher = new Watcher(Array.from(files.keys()), options)
       watcher.run((path, value) => {
         const key = files.get(path)
-        if (['certificateAuthority'].includes(key)) {
-          cluster[key] = value
-        } else if (['clientKey', 'clientCert', 'token'].includes(key)) {
-          user[key] = value
+        switch (key) {
+          case 'certificateAuthority':
+            cluster.certificateAuthority = value
+            break
+          case 'clientKey':
+            user.clientKey = value
+            break
+          case 'clientCert':
+            user.clientCert = value
+            break
+          case 'token':
+            user.token = value
+            break
         }
         watcher.emit(`update:${key}`)
       })
@@ -188,28 +197,28 @@ class ClientConfig {
       properties = {
         auth: {
           enumerable: true,
-          value: Object.freeze(Object.assign({}, auth))
+          value: Object.freeze(Object.assign({}, auth)),
         },
         key: {
-          value: undefined
+          value: undefined,
         },
         cert: {
-          value: undefined
-        }
+          value: undefined,
+        },
       }
     } else if (key && cert) {
       properties = {
         auth: {
-          value: undefined
+          value: undefined,
         },
         key: {
           enumerable: true,
-          value: key
+          value: key,
         },
         cert: {
           enumerable: true,
-          value: cert
-        }
+          value: cert,
+        },
       }
     }
     return Object.assign(Object.create(this, properties), options)

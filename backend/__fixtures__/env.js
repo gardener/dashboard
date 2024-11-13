@@ -6,5 +6,5 @@
 
 module.exports = {
   POD_NAME: 'pod-name',
-  POD_NAMESPACE: 'pod-namespace'
+  POD_NAMESPACE: 'pod-namespace',
 }

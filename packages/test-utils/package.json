@@ -19,30 +19,18 @@
     "lib"
   ],
   "scripts": {
-    "lint": "eslint --ext .js ."
+    "lint": "eslint . --max-warnings=0"
   },
   "devDependencies": {
-    "eslint": "^8.57.0",
-    "eslint-config-standard": "^17.1.0",
-    "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-jest": "^26.9.0",
-    "eslint-plugin-n": "^15.7.0",
-    "eslint-plugin-promise": "^6.4.0"
+    "eslint": "^9.11.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jest": "^28.8.3",
+    "eslint-plugin-lodash": "^8.0.0",
+    "eslint-plugin-security": "^3.0.1",
+    "neostandard": "^0.11.7"
   },
-  "eslintConfig": {
-    "env": {
-      "commonjs": true
-    },
-    "extends": [
-      "standard"
-    ],
-    "globals": {},
-    "rules": {
-      "no-console": "error"
-    }
-  },
-  "packageManager": "yarn@4.3.1",
+  "packageManager": "yarn@4.5.1",
   "engines": {
-    "node": "^20.9.0"
+    "node": "^22.7.0"
   }
 }

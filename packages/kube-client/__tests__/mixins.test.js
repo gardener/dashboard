@@ -19,7 +19,10 @@ const { HTTP2_HEADER_CONTENT_TYPE } = http2.constants
 describe('kube-client', () => {
   describe('mixins', () => {
     const testOptions = {
-      foo: 'bar'
+      foo: 'bar',
+    }
+    const dryRunOptions = {
+      dryRun: true,
     }
     const testInformer = {}
     Informer.create = jest.fn(() => testInformer)
@@ -43,7 +46,7 @@ describe('kube-client', () => {
 
       static get names () {
         return {
-          plural: 'dummies'
+          plural: 'dummies',
         }
       }
     }
@@ -151,31 +154,31 @@ describe('kube-client', () => {
           const testObject = new TestObject()
           const patchMethod = camelCase(patchType) + 'Patch'
           const patchContentType = 'application/' + patchType + '-patch+json'
-          const [url, { method, searchParams, headers, json }] = testObject[patchMethod]('name', testBody, testOptions)
+          const [url, { method, searchParams, headers, json }] = testObject[patchMethod]('name', testBody, dryRunOptions)
           expect(url).toBe('dummies/name')
           expect(method).toBe('patch')
           expect(headers[HTTP2_HEADER_CONTENT_TYPE]).toBe(patchContentType)
-          expect(searchParams.toString()).toBe('foo=bar')
+          expect(searchParams.toString()).toBe('dryRun=true')
           expect(json).toBe(testBody)
         }
 
         it('should create a resource', () => {
           const testObject = new TestObject()
           const testBody = { bar: 'foo' }
-          const [url, { method, searchParams, json }] = testObject.create(testBody, testOptions)
+          const [url, { method, searchParams, json }] = testObject.create(testBody, dryRunOptions)
           expect(url).toBe('dummies')
           expect(method).toBe('post')
-          expect(searchParams.toString()).toBe('foo=bar')
+          expect(searchParams.toString()).toBe('dryRun=true')
           expect(json).toBe(testBody)
         })
 
         it('should update a resource', () => {
           const testObject = new TestObject()
           const testBody = { bar: 'foo' }
-          const [url, { method, searchParams, json }] = testObject.update('name', testBody, testOptions)
+          const [url, { method, searchParams, json }] = testObject.update('name', testBody, dryRunOptions)
           expect(url).toBe('dummies/name')
           expect(method).toBe('put')
-          expect(searchParams.toString()).toBe('foo=bar')
+          expect(searchParams.toString()).toBe('dryRun=true')
           expect(json).toBe(testBody)
         })
 
@@ -196,18 +199,18 @@ describe('kube-client', () => {
 
         it('should delete a resource', () => {
           const testObject = new TestObject()
-          const [url, { method, searchParams }] = testObject.delete('name', testOptions)
+          const [url, { method, searchParams }] = testObject.delete('name', dryRunOptions)
           expect(url).toBe('dummies/name')
           expect(method).toBe('delete')
-          expect(searchParams.toString()).toBe('foo=bar')
+          expect(searchParams.toString()).toBe('dryRun=true')
         })
 
         it('should delete multiple resources', () => {
           const testObject = new TestObject()
-          const [url, { method, searchParams }] = testObject.deleteCollection(testOptions)
+          const [url, { method, searchParams }] = testObject.deleteCollection(dryRunOptions)
           expect(url).toBe('dummies')
           expect(method).toBe('delete')
-          expect(searchParams.toString()).toBe('foo=bar')
+          expect(searchParams.toString()).toBe('dryRun=true')
         })
       })
     })
@@ -325,31 +328,31 @@ describe('kube-client', () => {
           const testObject = new TestObject()
           const patchMethod = camelCase(patchType) + 'Patch'
           const patchContentType = 'application/' + patchType + '-patch+json'
-          const [url, { method, searchParams, headers, json }] = testObject[patchMethod]('namespace', 'name', testBody, testOptions)
+          const [url, { method, searchParams, headers, json }] = testObject[patchMethod]('namespace', 'name', testBody, dryRunOptions)
           expect(url).toBe('namespaces/namespace/dummies/name')
           expect(method).toBe('patch')
           expect(headers[HTTP2_HEADER_CONTENT_TYPE]).toBe(patchContentType)
-          expect(searchParams.toString()).toBe('foo=bar')
+          expect(searchParams.toString()).toBe('dryRun=true')
           expect(json).toBe(testBody)
         }
 
         it('should create a resource', () => {
           const testObject = new TestObject()
           const testBody = { bar: 'foo' }
-          const [url, { method, searchParams, json }] = testObject.create('namespace', testBody, testOptions)
+          const [url, { method, searchParams, json }] = testObject.create('namespace', testBody, dryRunOptions)
           expect(url).toBe('namespaces/namespace/dummies')
           expect(method).toBe('post')
-          expect(searchParams.toString()).toBe('foo=bar')
+          expect(searchParams.toString()).toBe('dryRun=true')
           expect(json).toBe(testBody)
         })
 
         it('should update a resource', () => {
           const testObject = new TestObject()
           const testBody = { bar: 'foo' }
-          const [url, { method, searchParams, json }] = testObject.update('namespace', 'name', testBody, testOptions)
+          const [url, { method, searchParams, json }] = testObject.update('namespace', 'name', testBody, dryRunOptions)
           expect(url).toBe('namespaces/namespace/dummies/name')
           expect(method).toBe('put')
-          expect(searchParams.toString()).toBe('foo=bar')
+          expect(searchParams.toString()).toBe('dryRun=true')
           expect(json).toBe(testBody)
         })
 
@@ -370,18 +373,18 @@ describe('kube-client', () => {
 
         it('should delete a resource', () => {
           const testObject = new TestObject()
-          const [url, { method, searchParams }] = testObject.delete('namespace', 'name', testOptions)
+          const [url, { method, searchParams }] = testObject.delete('namespace', 'name', dryRunOptions)
           expect(url).toBe('namespaces/namespace/dummies/name')
           expect(method).toBe('delete')
-          expect(searchParams.toString()).toBe('foo=bar')
+          expect(searchParams.toString()).toBe('dryRun=true')
         })
 
         it('should delete multiple resources', () => {
           const testObject = new TestObject()
-          const [url, { method, searchParams }] = testObject.deleteCollection('namespace', testOptions)
+          const [url, { method, searchParams }] = testObject.deleteCollection('namespace', dryRunOptions)
           expect(url).toBe('namespaces/namespace/dummies')
           expect(method).toBe('delete')
-          expect(searchParams.toString()).toBe('foo=bar')
+          expect(searchParams.toString()).toBe('dryRun=true')
         })
       })
     })

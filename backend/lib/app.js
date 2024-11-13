@@ -23,9 +23,15 @@ const { healthCheck } = require('./healthz')
 const {
   port,
   metricsPort,
-  cspFrameAncestors = []
+  cspFrameAncestors = [],
 } = config
 const periodSeconds = config.readinessProbe?.periodSeconds || 10
+
+// protect against Prototype Pollution vulnerabilities
+for (const ctor of [Object, Function, Array, String, Number, Boolean]) {
+  Object.freeze(ctor)
+  Object.freeze(ctor.prototype)
+}
 
 // resolve pathnames
 const PUBLIC_DIRNAME = resolve(join(__dirname, '..', 'public'))
@@ -33,9 +39,9 @@ const INDEX_FILENAME = join(PUBLIC_DIRNAME, 'index.html')
 const STATIC_PATHS = ['/assets', '/static', '/js', '/css', '/fonts', '/img']
 
 // csp sources
-const connectSrc = _.get(config, 'contentSecurityPolicy.connectSrc', ['\'self\''])
+const connectSrc = _.get(config, ['contentSecurityPolicy', 'connectSrc'], ['\'self\''])
 const imgSrc = ['\'self\'', 'data:', 'https://www.gravatar.com']
-const gitHubRepoUrl = _.get(config, 'frontend.ticket.gitHubRepoUrl')
+const gitHubRepoUrl = _.get(config, ['frontend', 'ticket', 'gitHubRepoUrl'])
 if (gitHubRepoUrl) {
   const url = new URL(gitHubRepoUrl)
   const gitHubHostname = url.hostname
@@ -77,11 +83,11 @@ app.use(helmet.contentSecurityPolicy({
     fontSrc: ['\'self\'', 'data:'],
     imgSrc,
     scriptSrc: ['\'self\'', '\'unsafe-eval\''],
-    frameAncestors: ['\'self\'', ...cspFrameAncestors]
-  }
+    frameAncestors: ['\'self\'', ...cspFrameAncestors],
+  },
 }))
 app.use(helmet.referrerPolicy({
-  policy: 'same-origin'
+  policy: 'same-origin',
 }))
 
 app.use(expressStaticGzip(PUBLIC_DIRNAME, {
@@ -89,8 +95,8 @@ app.use(expressStaticGzip(PUBLIC_DIRNAME, {
   orderPreference: ['br'],
   serveStatic: {
     immutable: true,
-    maxAge: '1 Week'
-  }
+    maxAge: '1 Week',
+  },
 }))
 app.use(STATIC_PATHS, notFound)
 app.use(historyFallback(INDEX_FILENAME))

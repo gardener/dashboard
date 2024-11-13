@@ -10,8 +10,8 @@ const defaults = {
   dashboardOrigins: [
     'https://dashboard.garden.example.org',
     'https://dashboard.ingress.garden.example.org',
-    'http://localhost:8080'
-  ]
+    'http://localhost:8080',
+  ],
 }
 
 module.exports = defaults

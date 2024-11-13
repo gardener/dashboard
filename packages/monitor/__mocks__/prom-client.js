@@ -17,8 +17,8 @@ module.exports = {
     contentType: register.contentType, // property not enumerable
     registerMetric: jest.fn(),
     metrics: jest.fn(),
-    clear: jest.fn()
+    clear: jest.fn(),
   },
   collectDefaultMetrics: jest.fn(),
-  linearBuckets: jest.fn()
+  linearBuckets: jest.fn(),
 }

@@ -8,12 +8,11 @@
 
 const express = require('express')
 const { terminals, authorization } = require('../services')
-const _ = require('lodash')
 const { UnprocessableEntity } = require('http-errors')
 const { metricsRoute } = require('../middleware')
 
 const router = module.exports = express.Router({
-  mergeParams: true
+  mergeParams: true,
 })
 
 const metricsMiddleware = metricsRoute('terminals')
@@ -41,10 +40,33 @@ router.route('/')
 
       const { method, params: body } = req.body
 
-      if (!_.includes(['create', 'fetch', 'list', 'config', 'remove', 'heartbeat', 'listProjectTerminalShortcuts'], method)) {
-        throw new UnprocessableEntity(`${method} not allowed for terminals`)
+      let terminalOperation
+      switch (method) {
+        case 'create':
+          terminalOperation = terminals.create
+          break
+        case 'fetch':
+          terminalOperation = terminals.fetch
+          break
+        case 'list':
+          terminalOperation = terminals.list
+          break
+        case 'config':
+          terminalOperation = terminals.config
+          break
+        case 'remove':
+          terminalOperation = terminals.remove
+          break
+        case 'heartbeat':
+          terminalOperation = terminals.heartbeat
+          break
+        case 'listProjectTerminalShortcuts':
+          terminalOperation = terminals.listProjectTerminalShortcuts
+          break
+        default:
+          throw new UnprocessableEntity(`${method} not allowed for terminals`)
       }
-      res.send(await terminals[method]({ user, body }))
+      res.send(await terminalOperation.call(terminals, { user, body }))
     } catch (err) {
       next(err)
     }

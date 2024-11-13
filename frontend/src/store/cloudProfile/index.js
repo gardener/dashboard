@@ -19,7 +19,7 @@ import { useApi } from '@/composables/useApi'
 
 import {
   shortRandomString,
-  parseSize,
+  convertToGi,
   defaultCriNameByKubernetesVersion,
   isValidTerminationDate,
   machineImageHasUpdate,
@@ -339,7 +339,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     if (!cloudProfile) {
       return []
     }
-    const items = cloudProfile.data[type]
+    const items = get(cloudProfile.data, [type])
     if (!region) {
       return items
     }
@@ -464,7 +464,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
 
   function accessRestrictionNoItemsTextForCloudProfileNameAndRegion ({ cloudProfileName, region }) {
     const defaultNoItemsText = 'No access restriction options available for region ${region}' // eslint-disable-line no-template-curly-in-string
-    const noItemsText = get(configStore, 'accessRestriction.noItemsText', defaultNoItemsText)
+    const noItemsText = get(configStore, ['accessRestriction', 'noItemsText'], defaultNoItemsText)
 
     return template(noItemsText)({
       region,
@@ -477,23 +477,29 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
       return []
     }
 
-    const labels = labelsByCloudProfileNameAndRegion({ cloudProfileName, region })
-    if (isEmpty(labels)) {
+    const allowedAccessRestrictions = accessRestrictionsByCloudProfileNameAndRegion({ cloudProfileName, region })
+    if (isEmpty(allowedAccessRestrictions)) {
       return []
     }
 
-    const items = get(configStore, 'accessRestriction.items')
+    const allowedAccessRestrictionNames = allowedAccessRestrictions.map(ar => ar.name)
+
+    const items = get(configStore, ['accessRestriction', 'items'])
     return filter(items, ({ key }) => {
-      return key && labels[key] === 'true'
+      return key && allowedAccessRestrictionNames.includes(key)
     })
   }
 
-  function labelsByCloudProfileNameAndRegion ({ cloudProfileName, region }) {
+  function accessRestrictionsByCloudProfileNameAndRegion ({ cloudProfileName, region }) {
     const cloudProfile = cloudProfileByName(cloudProfileName)
     if (!cloudProfile) {
-      return {}
+      return []
     }
-    return get(find(cloudProfile.data.regions, ['name', region]), 'labels')
+    const regionData = find(cloudProfile.data.regions, [['name'], region])
+    if (!regionData) {
+      return []
+    }
+    return get(regionData, ['accessRestrictions'], [])
   }
 
   function defaultMachineImageForCloudProfileNameAndMachineType (cloudProfileName, machineType) {
@@ -541,10 +547,12 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     const newerVersionsForShoot = filter(validVersions, ({ version }) => semver.gt(version, shootVersion))
     for (const version of newerVersionsForShoot) {
       const diff = semver.diff(version.version, shootVersion)
+      /* eslint-disable security/detect-object-injection */
       if (!newerVersions[diff]) {
         newerVersions[diff] = []
       }
       newerVersions[diff].push(version)
+      /* eslint-enable security/detect-object-injection */
     }
     newerVersions = newerVersionsForShoot.length ? newerVersions : null
     availableKubernetesUpdatesCache.set(key, newerVersions)
@@ -632,7 +640,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     const machineImage = defaultMachineImageForCloudProfileNameAndMachineType(cloudProfileName, machineType)
     const minVolumeSize = minimumVolumeSizeByMachineTypeAndVolumeType({ machineType, volumeType })
 
-    const defaultVolumeSize = parseSize(minVolumeSize) <= parseSize('50Gi') ? '50Gi' : minVolumeSize
+    const defaultVolumeSize = convertToGi(minVolumeSize) <= convertToGi('50Gi') ? '50Gi' : minVolumeSize
     const worker = {
       id,
       name,
@@ -690,7 +698,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     volumeTypesByCloudProfileName,
     defaultMachineImageForCloudProfileNameAndMachineType,
     minimumVolumeSizeByMachineTypeAndVolumeType,
-    labelsByCloudProfileNameAndRegion,
+    accessRestrictionsByCloudProfileNameAndRegion,
     accessRestrictionDefinitionsByCloudProfileNameAndRegion,
     accessRestrictionNoItemsTextForCloudProfileNameAndRegion,
     kubernetesVersions,

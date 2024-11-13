@@ -15,11 +15,15 @@ import {
   computed,
 } from 'vue'
 import LuigiClient from '@luigi-project/client'
+import { useNotification } from '@kyvg/vue3-notification'
 
 import { useLogger } from '@/composables/useLogger'
 
-import moment from '@/utils/moment'
+import { parseWarningHeader } from '@/utils/headerWarnings'
 import { errorDetailsFromError } from '@/utils/error'
+import moment from '@/utils/moment'
+
+import { assign } from '@/lodash'
 
 export const useAppStore = defineStore('app', () => {
   const logger = useLogger()
@@ -28,7 +32,6 @@ export const useAppStore = defineStore('app', () => {
   const sidebar = ref(true)
   const redirectPath = ref(null)
   const loading = ref(false)
-  const alert = ref(null)
   const location = ref(moment.tz.guess())
   const timezone = ref(moment().format('Z'))
   const focusedElementId = ref(null)
@@ -36,6 +39,8 @@ export const useAppStore = defineStore('app', () => {
   const fromRoute = ref(null)
   const routerError = ref(null)
   const luigiContext = ref(null)
+
+  const { notify } = useNotification()
 
   const isInIframe = computed(() => window.self !== window.top)
 
@@ -94,32 +99,36 @@ export const useAppStore = defineStore('app', () => {
     splitpaneResize.value = Date.now()
   }
 
-  function setAlert (value) {
-    alert.value = value
-  }
-
   function setAlertWithType (type, value) {
-    const alert = {
-      type,
-    }
+    const alert = { type, duration: 5000 }
+
     if (typeof value === 'string') {
-      alert.message = value
-    } else if (value) {
-      const { message = '', title } = value
-      alert.message = value.response
+      alert.text = value
+    } else if (value && typeof value === 'object') {
+      const { response, text = '', ...props } = value
+      assign(alert, props)
+      alert.text = response
         ? errorDetailsFromError(value).detailedMessage
-        : message
-      if (title) {
-        alert.title = title
-      }
-    } else {
-      alert.message = ''
+        : text
     }
-    setAlert(alert)
+
+    notify(alert)
   }
 
   function setError (value) {
     setAlertWithType('error', value)
+  }
+
+  function setHeaderWarning (headerWarning) {
+    const parsedWarnings = parseWarningHeader(headerWarning)
+    parsedWarnings.forEach(warning => {
+      const { text, code } = warning
+      setAlertWithType('warning', {
+        title: code === '299' ? 'Kubernetes Warning' : undefined,
+        text,
+        duration: -1,
+      })
+    })
   }
 
   function setSuccess (value) {
@@ -135,7 +144,6 @@ export const useAppStore = defineStore('app', () => {
     sidebar,
     redirectPath,
     loading,
-    alert,
     location,
     timezone,
     focusedElementId,
@@ -148,8 +156,8 @@ export const useAppStore = defineStore('app', () => {
     luigiContext,
     getLuigiContext,
     updateSplitpaneResize,
-    setAlert,
     setError,
+    setHeaderWarning,
     setSuccess,
     setRouterError,
   }

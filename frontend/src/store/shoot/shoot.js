@@ -48,6 +48,8 @@ import {
 
 import {
   get,
+  set,
+  unset,
   map,
   pick,
   difference,
@@ -116,7 +118,7 @@ const useShootStore = defineStore('shoot', () => {
   })
 
   const activeShoots = computed(() => {
-    return activeUids.value.map(uid => state.shoots[uid])
+    return activeUids.value.map(uid => get(state.shoots, [uid]))
   })
 
   const activeUids = computed(() => {
@@ -149,8 +151,8 @@ const useShootStore = defineStore('shoot', () => {
       ? state.froozenUids
       : activeUids.value
     const getShoot = state.focusMode
-      ? uid => state.shoots[uid] ?? state.staleShoots[uid]
-      : uid => state.shoots[uid]
+      ? uid => get(state.shoots, [uid]) ?? get(state.staleShoots, [uid])
+      : uid => get(state.shoots, [uid])
     const items = []
     for (const uid of uids) {
       const object = getShoot(uid)
@@ -444,7 +446,7 @@ const useShootStore = defineStore('shoot', () => {
 
   function assignShootInfo (object) {
     const uid = object?.metadata.uid
-    const info = state.shootInfos[uid]
+    const info = get(state.shootInfos, [uid])
     return {
       ...object,
       info,
@@ -458,7 +460,7 @@ const useShootStore = defineStore('shoot', () => {
     } else {
       const uid = metadata.uid
       state.selectedUid = uid
-      const shootInfo = state.shootInfos[uid]
+      const shootInfo = get(state.shootInfos, [uid])
       if (!shootInfo) {
         shootStore.fetchInfo(metadata)
       }
@@ -479,7 +481,8 @@ const useShootStore = defineStore('shoot', () => {
 
   function toogleShootListFilter (key) {
     if (state.shootListFilters) {
-      state.shootListFilters[key] = !state.shootListFilters[key]
+      const value = get(state.shootListFilters, [key])
+      set(state.shootListFilters, [key], !value)
     }
   }
 
@@ -499,7 +502,7 @@ const useShootStore = defineStore('shoot', () => {
     const shootStore = this
     let uids = []
     if (value) {
-      const activeShoots = map(activeUids.value, uid => state.shoots[uid])
+      const activeShoots = map(activeUids.value, uid => get(state.shoots, [uid]))
       const sortedShoots = sortItems(activeShoots, state.sortBy)
       uids = map(sortedShoots, 'metadata.uid')
     }
@@ -535,7 +538,7 @@ const useShootStore = defineStore('shoot', () => {
     for (const item of items) {
       if (notOnlyShootsWithIssues || shootHasIssue(item)) {
         const uid = item.metadata.uid
-        shoots[uid] = markRaw(item)
+        set(shoots, [uid], markRaw(item))
       }
     }
 
@@ -545,11 +548,12 @@ const useShootStore = defineStore('shoot', () => {
         const newUids = Object.keys(shoots)
         for (const uid of difference(oldUids, newUids)) {
           if (includes(state.froozenUids, uid)) {
-            state.staleShoots[uid] = state.shoots[uid]
+            const value = get(state.shoots, [uid])
+            set(state.staleShoots, [uid], value)
           }
         }
         for (const uid of difference(newUids, oldUids)) {
-          delete state.staleShoots[uid]
+          unset(state.staleShoots, [uid])
         }
       }
       state.shoots = shoots
@@ -629,9 +633,10 @@ const useShootStore = defineStore('shoot', () => {
       shootStore.$patch(({ state }) => {
         for (const uid of deletedUids) {
           if (state.focusMode) {
-            state.staleShoots[uid] = state.shoots[uid]
+            const value = get(state.shoots, [uid])
+            set(state.staleShoots, [uid], value)
           }
-          delete state.shoots[uid]
+          unset(state.shoots, [uid])
         }
         for (const item of items) {
           if (item.kind === 'Status') {
@@ -639,15 +644,15 @@ const useShootStore = defineStore('shoot', () => {
             if (item.code === 404) {
               const uid = item.details?.uid
               if (uid) {
-                delete state.shoots[uid]
+                unset(state.shoots, [uid])
               }
             }
           } else if (notOnlyShootsWithIssues || shootHasIssue(item)) {
             const uid = item.metadata.uid
             if (state.focusMode) {
-              delete state.staleShoots[uid]
+              unset(state.staleShoots, [uid])
             }
-            state.shoots[uid] = markRaw(item)
+            set(state.shoots, [uid], markRaw(item))
           }
         }
       })

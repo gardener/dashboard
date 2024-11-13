@@ -4,10 +4,18 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import fetch from './fetch'
+import { useAppStore } from '@/store/app'
 
-function request (method, url, data) {
-  return fetch(url, { method, body: data })
+import { fetchWrapper } from './fetch'
+
+async function request (method, url, data) {
+  const response = await fetchWrapper(url, { method, body: data })
+  const { headers } = response
+  if (headers.warning) {
+    const appStore = useAppStore()
+    appStore.setHeaderWarning(headers.warning)
+  }
+  return response
 }
 
 function getResource (url) {
@@ -302,10 +310,6 @@ export function getSubjectRules (options) {
   })
 }
 
-export function getToken () {
-  return getResource('/api/user/token')
-}
-
 export function getKubeconfigData () {
   return getResource('/api/user/kubeconfig')
 }
@@ -439,7 +443,6 @@ export default {
   resetServiceAccount,
   createTokenReview,
   getSubjectRules,
-  getToken,
   getKubeconfigData,
   getInfo,
   createTerminal,

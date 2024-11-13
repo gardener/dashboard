@@ -72,5 +72,5 @@ module.exports = {
   Networking,
   GardenerCore,
   GardenerSeedManagement,
-  GardenerDashboard
+  GardenerDashboard,
 }

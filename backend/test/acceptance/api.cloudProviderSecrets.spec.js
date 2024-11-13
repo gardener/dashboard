@@ -22,8 +22,8 @@ describe('api', function () {
 
     cache.initialize({
       shoots: {
-        store: createStore(fixtures.shoots.list())
-      }
+        store: createStore(fixtures.shoots.list()),
+      },
     })
   })
 
@@ -62,7 +62,7 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(3)
+      expect(mockRequest).toHaveBeenCalledTimes(3)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
@@ -81,7 +81,7 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(3)
+      expect(mockRequest).toHaveBeenCalledTimes(3)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
@@ -91,11 +91,11 @@ describe('api', function () {
       const metadata = {
         name: 'new-infra1',
         cloudProfileName,
-        cloudProviderKind: 'infra1'
+        cloudProviderKind: 'infra1',
       }
       const data = {
         key: 'myKey',
-        secret: 'mySecret'
+        secret: 'mySecret',
       }
 
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.create())
@@ -109,7 +109,7 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(3)
+      expect(mockRequest).toHaveBeenCalledTimes(3)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
@@ -118,11 +118,11 @@ describe('api', function () {
     it('should create a cloudProvider dns secret', async function () {
       const metadata = {
         name: 'new-dns1',
-        dnsProviderName
+        dnsProviderName,
       }
       const data = {
         key: 'myKey',
-        secret: 'mySecret'
+        secret: 'mySecret',
       }
 
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.create())
@@ -135,7 +135,7 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(2)
+      expect(mockRequest).toHaveBeenCalledTimes(2)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
@@ -144,7 +144,7 @@ describe('api', function () {
     it('should patch an own cloudProvider secret', async function () {
       const data = {
         key: 'myKey',
-        secret: 'mySecret'
+        secret: 'mySecret',
       }
 
       mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.get())
@@ -158,7 +158,7 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(3)
+      expect(mockRequest).toHaveBeenCalledTimes(3)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
@@ -176,11 +176,11 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(422)
 
-      expect(mockRequest).toBeCalledTimes(1)
+      expect(mockRequest).toHaveBeenCalledTimes(1)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot({
-        details: expect.any(Object)
+        details: expect.any(Object),
       })
     })
 
@@ -196,7 +196,7 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toBeCalledTimes(4)
+      expect(mockRequest).toHaveBeenCalledTimes(4)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
@@ -213,11 +213,11 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(422)
 
-      expect(mockRequest).toBeCalledTimes(1)
+      expect(mockRequest).toHaveBeenCalledTimes(1)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot({
-        details: expect.any(Object)
+        details: expect.any(Object),
       })
     })
 
@@ -233,11 +233,11 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(422)
 
-      expect(mockRequest).toBeCalledTimes(2)
+      expect(mockRequest).toHaveBeenCalledTimes(2)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot({
-        details: expect.any(Object)
+        details: expect.any(Object),
       })
     })
   })

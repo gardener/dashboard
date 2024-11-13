@@ -305,7 +305,7 @@ SPDX-License-Identifier: Apache-2.0
             </v-card>
           </v-col>
           <v-col
-            v-if="costObjectSettingEnabled"
+            v-if="costObjectsSettingEnabled"
             class="pa-3"
           >
             <v-card>
@@ -319,38 +319,21 @@ SPDX-License-Identifier: Apache-2.0
                     />
                   </template>
                   <div class="text-body-2 text-medium-emphasis">
-                    {{ costObjectTitle }}
+                    {{ costObjectTitle || "Cost Object" }}
                   </div>
-                  <div class="text-body-1 wrap-text">
-                    <g-editable-text
-                      :read-only="!canPatchProject"
-                      color="action-button"
-                      :model-value="costObject"
-                      :rules="costObjectRules"
-                      :save="updateCostObject"
-                    >
-                      <template
-                        v-if="costObjectDescriptionHtml"
-                        #info
-                      >
-                        <v-alert
-                          icon="mdi-information-outline"
-                          density="compact"
-                          variant="tonal"
-                          rounded="0"
-                          :color="color"
-                          class="mb-0"
-                        >
-                          <!-- eslint-disable vue/no-v-html -->
-                          <div
-                            class="alertBannerMessage"
-                            v-html="costObjectDescriptionHtml"
-                          />
-                          <!-- eslint-enable vue/no-v-html -->
-                        </v-alert>
-                      </template>
-                    </g-editable-text>
+                  <div
+                    v-if="costObject"
+                    class="text-body-1 wrap-text"
+                  >
+                    {{ costObject }}
                   </div>
+                  <span
+                    v-else
+                    class="font-weight-light text-disabled"
+                  >Not defined</span>
+                  <template #append>
+                    <g-project-cost-object-configuration />
+                  </template>
                 </g-list-item>
               </g-list>
             </v-card>
@@ -523,6 +506,7 @@ import GAccountAvatar from '@/components/GAccountAvatar.vue'
 import GDialog from '@/components/dialogs/GDialog.vue'
 import GTimeString from '@/components/GTimeString.vue'
 import GShootCustomField from '@/components/GShootCustomField.vue'
+import GProjectCostObjectConfiguration from '@/components/GProjectCostObjectConfiguration.vue'
 import GShootCustomFieldsConfiguration from '@/components/GShootCustomFieldsConfiguration.vue'
 import GResourceQuotaHelp from '@/components/GResourceQuotaHelp.vue'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
@@ -580,11 +564,8 @@ const {
   projectStaleSinceTimestamp: staleSinceTimestamp,
   projectStaleAutoDeleteTimestamp: staleAutoDeleteTimestamp,
   costObject,
-  costObjectSettingEnabled,
+  costObjectsSettingEnabled,
   costObjectTitle,
-  costObjectDescriptionHtml,
-  costObjectRegex,
-  costObjectErrorMessage,
 } = useProvideProjectItem(project)
 
 const {
@@ -608,11 +589,7 @@ const userList = computed(() => {
   }
   return Array.from(members)
 })
-const isValidCostObject = withMessage(
-  costObjectErrorMessage.value,
-  helpers.regex(new RegExp(costObjectRegex.value)),
-)
-const costObjectRules = computed(() => ({ costObject: isValidCostObject }))
+
 const ownerRules = computed(() => {
   const userListIncludesValidator = helpers.withParams(
     { type: 'userListIncludes' },
@@ -664,17 +641,6 @@ function updatePurpose (value) {
   return updateProperty('purpose', value)
 }
 
-function updateCostObject (value) {
-  if (costObjectSettingEnabled.value) {
-    if (!value) {
-      value = null
-    }
-    return updateProperty('costObject', value, {
-      error: 'Failed to update billing information of project',
-    })
-  }
-}
-
 async function updateProperty (key, value, options = {}) {
   const { metadata: { name }, spec: { namespace } } = projectStore.project
   try {
@@ -682,18 +648,11 @@ async function updateProperty (key, value, options = {}) {
       metadata: { name },
       spec: { namespace },
     }
-    if (appStore.accountId && !get(projectStore.project, 'metadata.annotations["openmfp.org/account-id"]')) {
-      set(mergePatchDocument, 'metadata.labels["openmfp.org/managed-by"]', 'true')
-      set(mergePatchDocument, 'metadata.annotations["openmfp.org/account-id"]', appStore.accountId)
+    if (appStore.accountId && !get(projectStore.project, ['metadata', 'annotations', 'openmfp.org/account-id'])) {
+      set(mergePatchDocument, ['metadata', 'labels', 'openmfp.org/managed-by'], 'true')
+      set(mergePatchDocument, ['metadata', 'annotations', 'openmfp.org/account-id'], appStore.accountId)
     }
-    switch (key) {
-      case 'costObject':
-        set(mergePatchDocument, ['metadata', 'annotations', 'billing.gardener.cloud/costObject'], value)
-        break
-      default:
-        set(mergePatchDocument, ['spec', key], value)
-        break
-    }
+    set(mergePatchDocument, ['spec', key], value)
     await projectStore.patchProject(mergePatchDocument)
   } catch (err) {
     const { error = `Failed to update project ${key}` } = options

@@ -561,6 +561,7 @@ export default {
       this.dnsSecretSortBy = [{ key: 'name', order: 'asc' }]
     },
     onDialogClosed () {
+      // This forces re-rendering of secret dialogs when re-opened so we don't need to reset them manually
       this.visibleSecretDialog = undefined
     },
     sortItems (items, sortByArr, secondSortCriteria) {
@@ -580,7 +581,7 @@ export default {
         case 'infrastructure':
           return `${item.infrastructureName} ${item.cloudProfileName}`
         default:
-          return item[column]
+          return get(item, [column])
       }
     },
     disableCustomKeySort (tableHeaders) {

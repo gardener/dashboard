@@ -66,7 +66,21 @@ SPDX-License-Identifier: Apache-2.0
         </g-auto-hide>
       </template>
       <template v-if="cell.header.key === 'workers'">
-        <g-worker-groups />
+        <div class="d-flex justify-center">
+          <g-collapsible-items
+            :items="shootWorkerGroups"
+            :uid="shootUid"
+            :chip-color="hasShootWorkerGroupWarning ? 'warning' : 'primary'"
+            inject-key="expandedWorkerGroups"
+          >
+            <template #item="{ item }">
+              <g-worker-group
+                :worker-group="item"
+                class="ma-1"
+              />
+            </template>
+          </g-collapsible-items>
+        </div>
       </template>
       <template v-if="cell.header.key === 'createdBy'">
         <g-account-avatar :account-name="shootCreatedBy" />
@@ -115,7 +129,21 @@ SPDX-License-Identifier: Apache-2.0
         />
       </template>
       <template v-if="cell.header.key === 'accessRestrictions'">
-        <g-access-restriction-chips :access-restrictions="shootAccessRestrictions" />
+        <g-collapsible-items
+          :items="shootAccessRestrictions"
+          :uid="shootUid"
+          inject-key="expandedAccessRestrictions"
+        >
+          <template #item="{ item }">
+            <g-access-restriction-chip
+              :id="item.key"
+              :key="item.key"
+              :title="item.title"
+              :description="item.description"
+              :options="item.options"
+            />
+          </template>
+        </g-collapsible-items>
       </template>
       <template v-if="cell.header.key === 'ticket'">
         <g-external-link
@@ -134,11 +162,11 @@ SPDX-License-Identifier: Apache-2.0
         </template>
         <div
           v-else
-          class="labels"
+          class="d-flex flex-wrap ticket-labels"
         >
           <g-ticket-label
             v-for="label in shootTicketLabels"
-            :key="label.id"
+            :key="label.name"
             :label="label"
           />
         </div>
@@ -174,10 +202,13 @@ SPDX-License-Identifier: Apache-2.0
             icon="mdi-key"
             :disabled="isClusterAccessDialogDisabled"
             :tooltip="showClusterAccessActionTitle"
-            @click="showDialog('access')"
+            @click="setShootAction('access', shootItem)"
           />
-          <g-shoot-list-row-actions
+          <g-action-button
             v-if="canPatchShoots"
+            icon="mdi-dots-vertical"
+            tooltip="Cluster Actions"
+            @click="setShootAction('menu', shootItem, $event.target)"
           />
         </v-row>
       </template>
@@ -214,7 +245,7 @@ import { useProjectStore } from '@/store/project'
 import { useSeedStore } from '@/store/seed'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 
-import GAccessRestrictionChips from '@/components/ShootAccessRestrictions/GAccessRestrictionChips.vue'
+import GAccessRestrictionChip from '@/components/ShootAccessRestrictions/GAccessRestrictionChip.vue'
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
 import GActionButton from '@/components/GActionButton.vue'
 import GCopyBtn from '@/components/GCopyBtn.vue'
@@ -227,13 +258,14 @@ import GShootVersionChip from '@/components/ShootVersion/GShootVersionChip.vue'
 import GTicketLabel from '@/components/ShootTickets/GTicketLabel.vue'
 import GShootSeedName from '@/components/GShootSeedName.vue'
 import GShootMessages from '@/components/ShootMessages/GShootMessages.vue'
-import GShootListRowActions from '@/components/GShootListRowActions.vue'
 import GAutoHide from '@/components/GAutoHide.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
 import GControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityTag.vue'
-import GWorkerGroups from '@/components/ShootWorkers/GWorkerGroups'
+import GWorkerGroup from '@/components/ShootWorkers/GWorkerGroup'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
+import GCollapsibleItems from '@/components/GCollapsibleItems'
 
+import { useShootAction } from '@/composables/useShootAction'
 import { useProvideShootItem } from '@/composables/useShootItem'
 import { useProvideShootHelper } from '@/composables/useShootHelper'
 import { formatValue } from '@/composables/useProjectShootCustomFields/helper'
@@ -244,6 +276,8 @@ import {
   includes,
   get,
   map,
+  some,
+  find,
 } from '@/lodash'
 
 const props = defineProps({
@@ -258,9 +292,7 @@ const props = defineProps({
 })
 const shootItem = toRef(props, 'modelValue')
 
-const emit = defineEmits([
-  'showDialog',
-])
+const { setShootAction } = useShootAction()
 
 const shootStore = useShootStore()
 const ticketStore = useTicketStore()
@@ -293,6 +325,9 @@ const {
   shootTechnicalId,
   shootSeedName,
   shootAccessRestrictions,
+  shootWorkerGroups,
+  shootUid,
+  shootCloudProfileName,
 } = useProvideShootItem(shootItem, {
   cloudProfileStore,
   projectStore,
@@ -392,18 +427,22 @@ const cells = computed(() => {
   })
 })
 
-function showDialog (action) {
-  emit('showDialog', {
-    action,
-    shootItem: shootItem.value,
+const hasShootWorkerGroupWarning = computed(() => {
+  const machineImages = cloudProfileStore.machineImagesByCloudProfileName(shootCloudProfileName.value)
+  return some(shootWorkerGroups.value, workerGroup => {
+    const { name, version } = get(workerGroup, 'machine.image', {})
+    const machineImage = find(machineImages, { name, version })
+    return machineImage?.isDeprecated
   })
-}
+})
 
 </script>
 
 <style lang="scss" scoped>
-  .labels {
-    line-height: 10px;
+  .ticket-labels {
+    overflow-y: scroll;
+    max-height: 30px;
+    max-width: 300px;
   }
 
   .position-relative {

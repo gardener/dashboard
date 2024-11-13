@@ -16,7 +16,7 @@ import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useSecretStore } from '@/store/secret'
 import { useSeedStore } from '@/store/seed'
 
-import utils from '@/utils'
+import { selfTerminationDaysForSecret } from '@/utils'
 
 import { useShootAccessRestrictions } from './useShootAccessRestrictions'
 
@@ -36,6 +36,7 @@ const shootPropertyMappings = Object.freeze({
   secretBindingName: 'spec.secretBindingName',
   kubernetesVersion: 'spec.kubernetes.version',
   providerType: 'spec.provider.type',
+  addons: 'spec.addons',
 })
 
 export function createShootHelperComposable (shootItem, options = {}) {
@@ -54,6 +55,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     secretBindingName,
     kubernetesVersion,
     providerType,
+    addons,
   } = mapValues(shootPropertyMappings, path => {
     return computed(() => get(shootItem.value, path))
   })
@@ -126,7 +128,12 @@ export function createShootHelperComposable (shootItem, options = {}) {
   })
 
   const allPurposes = computed(() => {
-    return utils.purposesForSecret(infrastructureSecret.value)
+    if (some(addons.value, 'enabled')) {
+      return ['evaluation']
+    }
+    return selfTerminationDaysForSecret(infrastructureSecret.value)
+      ? ['evaluation']
+      : ['evaluation', 'development', 'testing', 'production']
   })
 
   const allLoadBalancerProviderNames = computed(() => {

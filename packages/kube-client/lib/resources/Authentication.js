@@ -16,11 +16,11 @@ class TokenReview extends mix(Authentication).with(ClusterScoped, Creatable) {
     return {
       plural: 'tokenreviews',
       singular: 'tokenreview',
-      kind: 'TokenReview'
+      kind: 'TokenReview',
     }
   }
 }
 
 module.exports = {
-  TokenReview
+  TokenReview,
 }

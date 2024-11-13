@@ -19,6 +19,7 @@ import { useApi } from '@/composables/useApi'
 import { hash } from '@/utils/crypto'
 
 import {
+  map,
   get,
   isEmpty,
   camelCase,
@@ -108,7 +109,7 @@ const wellKnownConditions = {
 
 export function getCondition (type) {
   if (type in wellKnownConditions) {
-    return wellKnownConditions[type]
+    return get(wellKnownConditions, [type])
   }
 
   let name = ''
@@ -304,23 +305,27 @@ export const useConfigStore = defineStore('config', () => {
     return `cfg.${identifier}`
   })
 
-  const costObjectSettings = computed(() => {
-    const costObject = state.value?.costObject
-    if (!costObject) {
+  const costObjectsSettings = computed(() => {
+    const costObjects = state.value?.costObjects
+    if (!costObjects) {
       return undefined
     }
 
-    const title = costObject.title || ''
-    const description = costObject.description || ''
-    const regex = costObject.regex
-    const errorMessage = costObject.errorMessage
+    return map(costObjects, costObject => {
+      const type = costObject.type || ''
+      const title = costObject.title || ''
+      const description = costObject.description || ''
+      const regex = costObject.regex
+      const errorMessage = costObject.errorMessage
 
-    return {
-      regex,
-      title,
-      description,
-      errorMessage,
-    }
+      return {
+        type,
+        regex,
+        title,
+        description,
+        errorMessage,
+      }
+    })
   })
 
   const appVersion = computed(() => {
@@ -356,7 +361,7 @@ export const useConfigStore = defineStore('config', () => {
       if (!purpose) {
         return true
       }
-      return !!defaultHibernationSchedule.value[purpose]
+      return !!get(defaultHibernationSchedule.value, [purpose], false)
     }
     return false
   }
@@ -374,7 +379,7 @@ export const useConfigStore = defineStore('config', () => {
   }
 
   function conditionForType (type) {
-    return allKnownConditions.value[type] ?? getCondition(type)
+    return get(allKnownConditions.value, [type], getCondition(type))
   }
 
   return {
@@ -414,7 +419,7 @@ export const useConfigStore = defineStore('config', () => {
     alertBannerMessage,
     alertBannerType,
     alertBannerIdentifier,
-    costObjectSettings,
+    costObjectsSettings,
     purposeRequiresHibernationSchedule,
     isShootHasNoHibernationScheduleWarning,
     fetchConfig,

@@ -87,10 +87,10 @@ function fulfilledFn (request) {
     if (!contentType) {
       promise = Promise.resolve(response)
     } else {
-      const method = contentType.startsWith('application/json')
-        ? 'json'
-        : 'text'
-      promise = response[method]().then(data => {
+      promise = contentType.startsWith('application/json')
+        ? response.json()
+        : response.text()
+      promise = promise.then(data => {
         Object.defineProperty(response, 'data', {
           value: data,
         })
@@ -135,5 +135,3 @@ export function createError (status, message, properties = {}) {
   }
   return err
 }
-
-export default fetchWrapper

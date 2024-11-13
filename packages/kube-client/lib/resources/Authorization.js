@@ -16,7 +16,7 @@ class SelfSubjectAccessReview extends mix(Authorization).with(ClusterScoped, Cre
     return {
       plural: 'selfsubjectaccessreviews',
       singular: 'selfsubjectaccessreview',
-      kind: 'SelfSubjectAccessReview'
+      kind: 'SelfSubjectAccessReview',
     }
   }
 }
@@ -26,7 +26,7 @@ class SelfSubjectRulesReview extends mix(Authorization).with(ClusterScoped, Crea
     return {
       plural: 'selfsubjectrulesreviews',
       singular: 'selfsubjectrulesreview',
-      kind: 'SelfSubjectRulesReview'
+      kind: 'SelfSubjectRulesReview',
     }
   }
 }
@@ -36,7 +36,7 @@ class SubjectAccessReview extends mix(Authorization).with(ClusterScoped, Creatab
     return {
       plural: 'subjectaccessreviews',
       singular: 'subjectaccessreview',
-      kind: 'SubjectAccessReview'
+      kind: 'SubjectAccessReview',
     }
   }
 }
@@ -44,5 +44,5 @@ class SubjectAccessReview extends mix(Authorization).with(ClusterScoped, Creatab
 module.exports = {
   SelfSubjectAccessReview,
   SelfSubjectRulesReview,
-  SubjectAccessReview
+  SubjectAccessReview,
 }

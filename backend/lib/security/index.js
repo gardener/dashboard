@@ -18,7 +18,7 @@ const logger = require('../logger')
 const {
   sessionSecrets,
   cookieSameSitePolicy = 'Lax',
-  oidc = {}
+  oidc = {},
 } = require('../config')
 
 const {
@@ -26,7 +26,7 @@ const {
   verify,
   decode,
   encrypt,
-  decrypt
+  decrypt,
 } = require('./jose')(sessionSecrets)
 
 const now = () => Math.floor(Date.now() / 1000)
@@ -45,12 +45,12 @@ const {
   COOKIE_SIGNATURE,
   COOKIE_CODE_VERIFIER,
   COOKIE_STATE,
-  GARDENER_AUDIENCE
+  GARDENER_AUDIENCE,
 } = require('./constants')
 
 const cookieAtributes = {
   secure: true,
-  sameSite: cookieSameSitePolicy
+  sameSite: cookieSameSitePolicy,
 }
 if (cookieSameSitePolicy === 'None') {
   cookieAtributes.partitioned = true
@@ -66,12 +66,12 @@ const {
   sessionLifetime = 86400,
   rejectUnauthorized = true,
   ca,
-  clockTolerance = 15
+  clockTolerance = 15,
 } = oidc
 const responseTypes = ['code']
 const httpOptions = {
   followRedirect: false,
-  rejectUnauthorized
+  rejectUnauthorized,
 }
 if (ca) {
   httpOptions.ca = ca
@@ -107,7 +107,7 @@ function discoverClient (url) {
     const options = {
       client_id: clientId,
       redirect_uris: redirectUris,
-      response_types: responseTypes
+      response_types: responseTypes,
     }
     if (clientSecret) {
       options.client_secret = clientSecret
@@ -122,7 +122,7 @@ function discoverClient (url) {
     forever: true,
     minTimeout: 1000,
     maxTimeout: 60 * 1000,
-    randomize: true
+    randomize: true,
   })
 }
 
@@ -169,11 +169,11 @@ async function authorizationUrl (req, res) {
   res.cookie(COOKIE_STATE, {
     redirectPath,
     redirectOrigin,
-    state
+    state,
   }, {
     ...cookieAtributes,
     httpOnly: true,
-    maxAge: 180_000 // cookie will be removed after 3 minutes
+    maxAge: 180_000, // cookie will be removed after 3 minutes
   })
   const client = await exports.getIssuerClient()
   if (!includes(redirectUris, backendRedirectUri)) {
@@ -182,7 +182,7 @@ async function authorizationUrl (req, res) {
   const params = {
     redirect_uri: backendRedirectUri,
     state,
-    scope
+    scope,
   }
   if (usePKCE) {
     const codeChallengeMethod = getCodeChallengeMethod(client)
@@ -190,7 +190,7 @@ async function authorizationUrl (req, res) {
     res.cookie(COOKIE_CODE_VERIFIER, codeVerifier, {
       ...cookieAtributes,
       httpOnly: true,
-      maxAge: 180_000 // cookie will be removed after 3 minutes
+      maxAge: 180_000, // cookie will be removed after 3 minutes
     })
     switch (codeChallengeMethod) {
       case 'S256':
@@ -207,7 +207,7 @@ async function authorizationUrl (req, res) {
 
 async function authorizeToken (req, res) {
   const idToken = chain(req.body)
-    .get('token')
+    .get(['token'])
     .trim()
     .value()
   const payload = {}
@@ -221,7 +221,7 @@ async function createAccessToken (payload, idToken) {
   const user = { auth: { bearer: idToken } }
   const results = await Promise.allSettled([
     authentication.isAuthenticated({ token: idToken }),
-    authorization.isAdmin(user)
+    authorization.isAdmin(user),
   ])
   // throw an error if any promise has been rejected
   for (const { status, reason: err } of results) {
@@ -231,13 +231,13 @@ async function createAccessToken (payload, idToken) {
   }
   const [
     { value: { username, groups } },
-    { value: isAdmin }
+    { value: isAdmin },
   ] = results
   Object.assign(payload, {
     id: username,
     groups,
     aud: [GARDENER_AUDIENCE],
-    isAdmin
+    isAdmin,
   })
   const idTokenPayload = decode(idToken)
   if (idTokenPayload) {
@@ -262,12 +262,12 @@ async function setCookies (res, tokenSet) {
   const [header, payload, signature] = split(accessToken, '.')
   res.cookie(COOKIE_HEADER_PAYLOAD, join([header, payload], '.'), {
     ...cookieAtributes,
-    expires: undefined
+    expires: undefined,
   })
   res.cookie(COOKIE_SIGNATURE, signature, {
     ...cookieAtributes,
     httpOnly: true,
-    expires: undefined
+    expires: undefined,
   })
   const values = [tokenSet.id_token]
   if (tokenSet.refresh_token) {
@@ -277,7 +277,7 @@ async function setCookies (res, tokenSet) {
   res.cookie(COOKIE_TOKEN, encryptedValues, {
     ...cookieAtributes,
     httpOnly: true,
-    expires: undefined
+    expires: undefined,
   })
   return accessToken
 }
@@ -285,17 +285,17 @@ async function setCookies (res, tokenSet) {
 async function authorizationCallback (req, res) {
   const options = {
     secure: true,
-    path: '/'
+    path: '/',
   }
-  const stateObject = {}
+  let stateObject = {}
   if (COOKIE_STATE in req.cookies) {
-    Object.assign(stateObject, req.cookies[COOKIE_STATE])
+    stateObject = req.cookies[COOKIE_STATE] // eslint-disable-line security/detect-object-injection -- COOKIE_STATE is a constant
     res.clearCookie(COOKIE_STATE, options)
   }
   const {
     redirectPath,
     redirectOrigin,
-    state
+    state,
   } = stateObject
 
   const client = await exports.getIssuerClient()
@@ -303,10 +303,10 @@ async function authorizationCallback (req, res) {
   const backendRedirectUri = getBackendRedirectUri(redirectOrigin)
   const checks = {
     response_type: 'code',
-    state
+    state,
   }
   if (COOKIE_CODE_VERIFIER in req.cookies) {
-    checks.code_verifier = req.cookies[COOKIE_CODE_VERIFIER]
+    checks.code_verifier = req.cookies[COOKIE_CODE_VERIFIER] // eslint-disable-line security/detect-object-injection -- COOKIE_CODE_VERIFIER is a constant
     res.clearCookie(COOKIE_CODE_VERIFIER, options)
   }
   const tokenSet = await authorizationCodeExchange(backendRedirectUri, parameters, checks)
@@ -323,8 +323,9 @@ function isXmlHttpRequest ({ headers = {} }) {
 }
 
 function getAccessToken (cookies) {
-  const [header, payload] = split(cookies[COOKIE_HEADER_PAYLOAD], '.')
-  const signature = cookies[COOKIE_SIGNATURE]
+  const headerAndPayload = cookies[COOKIE_HEADER_PAYLOAD] // eslint-disable-line security/detect-object-injection -- COOKIE_HEADER_PAYLOAD is a constant
+  const [header, payload] = split(headerAndPayload, '.')
+  const signature = cookies[COOKIE_SIGNATURE] // eslint-disable-line security/detect-object-injection -- COOKIE_SIGNATURE is a constant
   if (header && payload && signature) {
     return join([header, payload, signature], '.')
   }
@@ -367,7 +368,7 @@ function csrfProtection (req) {
 
 async function getTokenSet (cookies) {
   const accessToken = getAccessToken(cookies)
-  const encryptedValues = cookies[COOKIE_TOKEN]
+  const encryptedValues = cookies[COOKIE_TOKEN] // eslint-disable-line security/detect-object-injection -- COOKIE_TOKEN is a constant
   if (!encryptedValues) {
     throw createError(401, 'No bearer token found in request', { code: 'ERR_JWE_NOT_FOUND' })
   }
@@ -377,7 +378,7 @@ async function getTokenSet (cookies) {
   } catch (err) {
     const {
       message,
-      code = 'ERR_JWE_DECRYPTION_FAILED'
+      code = 'ERR_JWE_DECRYPTION_FAILED',
     } = err
     throw createError(401, message, { code })
   }
@@ -388,7 +389,7 @@ async function getTokenSet (cookies) {
   const tokenSet = new TokenSet({
     id_token: idToken,
     refresh_token: refreshToken,
-    access_token: accessToken
+    access_token: accessToken,
   })
   return tokenSet
 }
@@ -470,14 +471,14 @@ function authenticate (options = {}) {
       const tokenSet = await getTokenSet(req.cookies)
       const user = await verifyAccessToken(tokenSet.access_token)
       const auth = Object.freeze({
-        bearer: tokenSet.id_token
+        bearer: tokenSet.id_token,
       })
       Object.defineProperty(user, 'auth', {
         value: auth,
-        enumerable: true
+        enumerable: true,
       })
       Object.defineProperty(user, 'client', {
-        value: options.createClient({ auth })
+        value: options.createClient({ auth }),
       })
       req.user = user
       next()
@@ -491,7 +492,7 @@ function authenticate (options = {}) {
 function clearCookies (res) {
   const options = {
     secure: true,
-    path: '/'
+    path: '/',
   }
   res.clearCookie(COOKIE_HEADER_PAYLOAD, options)
   res.clearCookie(COOKIE_SIGNATURE, options)
@@ -515,5 +516,5 @@ exports = module.exports = {
   authorizationCallback,
   refreshToken,
   authorizeToken,
-  authenticate
+  authenticate,
 }

@@ -18,11 +18,11 @@ The project resource operations that are performed manually in the dashboard or 
 
 1. Select your project and choose *MEMBERS* from the menu on the left.
 
-2. Locate the section *Service Accounts* and choose *+*.
+1. Locate the section *Service Accounts* and choose *+*.
 
    ![Add service account](../images/01-add-service-account.png)
 
-3. Enter the service account details.
+1. Enter the service account details.
 
    ![Enter service account details](../images/02-enter-service-account-details.png)
 
@@ -34,9 +34,9 @@ The project resource operations that are performed manually in the dashboard or 
 | *Admin* | Allows to manage resources inside the project (e.g. secrets, shoots, configmaps and similar) and to manage permissions for service accounts. Note that the *Admin* role has read-only access to service accounts. |
 | *Viewer* | Provides read access to project details and shoots. Has access to shoots but is not able to create new ones. Cannot read cloud provider secrets. |
 | *UAM* | Allows to add/modify/remove human users, service accounts or groups to/from the project member list. In case an external UAM system is connected via a service account, only this account should get the *UAM* role. |
-| *[Service Account Manager](https://github.com/gardener/gardener/blob/master/docs/usage/service-account-manager.md)* | Allows to manage service accounts inside the project namespace and request tokens for them. The permissions of the created service accounts are instead managed by the *Admin* role. For security reasons this role should not be assigned to service accounts. In particular it should be ensured that the service account is not able to refresh service account tokens forever. |
+| *[Service Account Manager](https://github.com/gardener/gardener/blob/master/docs/usage/project/service-account-manager.md)* | Allows to manage service accounts inside the project namespace and request tokens for them. The permissions of the created service accounts are instead managed by the *Admin* role. For security reasons this role should not be assigned to service accounts. In particular it should be ensured that the service account is not able to refresh service account tokens forever. |
 
-4. Choose *CREATE*.
+1. Choose *CREATE*.
 
 ## Use the Service Account
 
@@ -54,4 +54,4 @@ Choose *Delete Service Account* to delete it.
 
 ## Related Links
 
-- [Service Account Manager](https://github.com/gardener/gardener/blob/master/docs/usage/service-account-manager.md)
+- [Service Account Manager](https://github.com/gardener/gardener/blob/master/docs/usage/project/service-account-manager.md)

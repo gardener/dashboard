@@ -18,5 +18,5 @@ module.exports = {
   globalAgent,
   extend,
   Client,
-  ...errors
+  ...errors,
 }

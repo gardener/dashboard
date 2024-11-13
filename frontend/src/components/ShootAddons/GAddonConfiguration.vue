@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
   >
     <template #content>
       <v-card-text>
-        <g-manage-shoot-addons />
+        <g-manage-addons />
       </v-card-text>
     </template>
   </g-action-button-dialog>
@@ -23,7 +23,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
-import GManageShootAddons from '@/components/ShootAddons/GManageAddons'
+import GManageAddons from '@/components/ShootAddons/GManageAddons'
 
 import { useShootContext } from '@/composables/useShootContext'
 import { useShootItem } from '@/composables/useShootItem'
@@ -33,7 +33,7 @@ import { errorDetailsFromError } from '@/utils/error'
 export default {
   components: {
     GActionButtonDialog,
-    GManageShootAddons,
+    GManageAddons,
   },
   inject: ['api', 'logger'],
   setup () {

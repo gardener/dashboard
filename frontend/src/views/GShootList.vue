@@ -186,7 +186,6 @@ SPDX-License-Identifier: Apache-2.0
           <g-shoot-list-row
             :model-value="item"
             :visible-headers="visibleHeaders"
-            @show-dialog="showDialog"
           />
         </template>
         <template #bottom="{ pageCount }">
@@ -199,42 +198,15 @@ SPDX-License-Identifier: Apache-2.0
           />
         </template>
       </v-data-table>
-      <v-dialog
-        v-if="!isShootItemEmpty"
-        v-model="clusterAccessDialog"
-        persistent
-        max-width="850"
-      >
-        <v-card>
-          <g-toolbar>
-            Cluster Access
-            <code class="text-toolbar-title">
-              {{ currentName }}
-            </code>
-            <template #append>
-              <v-btn
-                variant="text"
-                density="comfortable"
-                icon="mdi-close"
-                color="toolbar-title"
-                @click.stop="hideDialog"
-              />
-            </template>
-          </g-toolbar>
-          <g-shoot-access-card
-            ref="clusterAccess"
-            :selected-shoot="shootItem"
-            :hide-terminal-shortcuts="true"
-          />
-        </v-card>
-      </v-dialog>
     </v-card>
+    <g-shoot-list-actions />
   </v-container>
 </template>
 
 <script>
 import {
   ref,
+  reactive,
   toRef,
   provide,
   watch,
@@ -262,10 +234,11 @@ import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
 import GIconBase from '@/components/icons/GIconBase.vue'
 import GCertifiedKubernetes from '@/components/icons/GCertifiedKubernetes.vue'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
-import GShootAccessCard from '@/components/ShootDetails/GShootAccessCard.vue'
+import GShootListActions from '@/components/GShootListActions.vue'
 
 import { useProjectShootCustomFields } from '@/composables/useProjectShootCustomFields'
 import { isCustomField } from '@/composables/useProjectShootCustomFields/helper'
+import { useProvideShootAction } from '@/composables/useShootAction'
 
 import { mapTableHeader } from '@/utils'
 
@@ -273,6 +246,7 @@ import {
   debounce,
   filter,
   get,
+  unset,
   isEmpty,
   join,
   map,
@@ -286,11 +260,11 @@ export default {
     GToolbar,
     GShootListRow,
     GShootListProgress,
-    GShootAccessCard,
     GIconBase,
     GCertifiedKubernetes,
     GTableColumnSelection,
     GDataTableFooter,
+    GShootListActions,
   },
   inject: ['logger'],
   beforeRouteEnter (to, from, next) {
@@ -304,20 +278,33 @@ export default {
     }
     this.updateTableSettings()
     this.focusModeInternal = false
+
+    // Reset expanded state in case project changes
+    this.resetState(this.expandedWorkerGroups, { default: false })
+    this.resetState(this.expandedAccessRestrictions, { default: false })
+
     next()
   },
   beforeRouteLeave (to, from, next) {
     this.setShootSearch(null)
     this.focusModeInternal = false
+
     next()
   },
   setup () {
     const projectStore = useProjectStore()
+    const shootStore = useShootStore()
+
+    useProvideShootAction({ shootStore })
 
     const activePopoverKey = ref('')
+    const expandedWorkerGroups = reactive({ default: false })
+    const expandedAccessRestrictions = reactive({ default: false })
     const appStore = useAppStore()
     const isInIframe = toRef(appStore, 'isInIframe')
     provide('activePopoverKey', activePopoverKey)
+    provide('expandedWorkerGroups', expandedWorkerGroups)
+    provide('expandedAccessRestrictions', expandedAccessRestrictions)
 
     const projectItem = toRef(projectStore, 'project')
     const {
@@ -359,6 +346,8 @@ export default {
     return {
       isInIframe,
       activePopoverKey,
+      expandedWorkerGroups,
+      expandedAccessRestrictions,
       shootCustomFields,
       shootSearch,
       debouncedShootSearch,
@@ -423,16 +412,6 @@ export default {
     },
     defaultItemsPerPage () {
       return 10
-    },
-    clusterAccessDialog: {
-      get () {
-        return this.dialog === 'access'
-      },
-      set (value) {
-        if (!value) {
-          this.hideDialog()
-        }
-      },
     },
     focusModeInternal: {
       get () {
@@ -521,7 +500,7 @@ export default {
           title: 'WORKERS',
           key: 'workers',
           sortable: isSortable(true),
-          align: 'start',
+          align: 'center',
           defaultSelected: false,
           hidden: false,
         },
@@ -815,7 +794,6 @@ export default {
   },
   methods: {
     ...mapActions(useShootStore, [
-      'setSelection',
       'toogleShootListFilter',
       'subscribeShoots',
       'sortItems',
@@ -823,21 +801,6 @@ export default {
       'setFocusMode',
       'setSortBy',
     ]),
-    async showDialog (args) {
-      switch (args.action) {
-        case 'access':
-          try {
-            await this.setSelection(args.shootItem.metadata)
-            this.dialog = args.action
-          } catch (err) {
-            this.logger('Failed to select shoot: %s', err.message)
-          }
-      }
-    },
-    hideDialog () {
-      this.dialog = null
-      this.setSelection(null)
-    },
     setSelectedHeader (header) {
       this.selectedColumns[header.key] = !header.selected
       this.saveSelectedColumns()
@@ -883,7 +846,13 @@ export default {
     },
     isFilterActive (key) {
       const filters = this.shootListFilters
-      return get(filters, key, false)
+      return get(filters, [key], false)
+    },
+    resetState (reactiveObject, defaultState) {
+      for (const key in reactiveObject) {
+        unset(reactiveObject, [key])
+      }
+      Object.assign(reactiveObject, defaultState)
     },
   },
 }

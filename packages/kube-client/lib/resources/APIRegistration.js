@@ -16,11 +16,11 @@ class APIService extends mix(APIRegistration).with(ClusterScoped, Readable) {
     return {
       plural: 'apiservices',
       singular: 'apiservice',
-      kind: 'APIService'
+      kind: 'APIService',
     }
   }
 }
 
 module.exports = {
-  APIService
+  APIService,
 }

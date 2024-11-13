@@ -31,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0
                 v-bind="mergeProps(activatorProps, tooltipProps)"
                 density="comfortable"
                 variant="text"
-                :icon="true"
+                icon
               >
                 <v-progress-circular
                   v-if="showProgress"
@@ -41,7 +41,7 @@ SPDX-License-Identifier: Apache-2.0
                   :color="color"
                 >
                   <v-icon
-                    v-if="!!statusIcon"
+                    v-if="hasStatusIcon"
                     size="small"
                     :color="color"
                     :icon="statusIcon"
@@ -55,7 +55,7 @@ SPDX-License-Identifier: Apache-2.0
                 </v-progress-circular>
                 <template v-else>
                   <v-icon
-                    v-if="!!statusIcon"
+                    v-if="hasStatusIcon"
                     size="small"
                     :color="color"
                     :icon="statusIcon"
@@ -236,6 +236,9 @@ export default {
     isPending () {
       return this.operationState === 'Pending'
     },
+    isSucceeded () {
+      return this.operationState === 'Succeeded'
+    },
     isTypeCreate () {
       return this.operationType === 'Create'
     },
@@ -270,7 +273,7 @@ export default {
       if (this.isShootMarkedForDeletion) {
         return 'mdi-delete-clock'
       }
-      if (this.isTypeCreate) {
+      if (this.isTypeCreate && !this.isSucceeded) {
         return 'mdi-plus'
       }
       if (this.isError) {
@@ -280,6 +283,9 @@ export default {
         return 'mdi-alert-outline'
       }
       return undefined
+    },
+    hasStatusIcon () {
+      return !!this.statusIcon
     },
     statusTitle () {
       const statusTitle = []
@@ -319,7 +325,7 @@ export default {
     },
     color () {
       if (this.isAborted || this.isStaleShoot) {
-        return 'grey'
+        return 'unknown'
       } else if (this.isError) {
         return 'error'
       } else {

@@ -41,7 +41,12 @@ import {
   getZonesNetworkConfiguration,
 } from '@/utils/shoot'
 import { v4 as uuidv4 } from '@/utils/uuid'
-import utils from '@/utils'
+import {
+  shortRandomString,
+  shootAddonList,
+  randomMaintenanceBegin,
+  maintenanceWindowWithBeginAndTimezone,
+} from '@/utils'
 
 import { useShootDns } from './useShootDns'
 
@@ -108,6 +113,10 @@ export function createShootContextComposable (options = {}) {
     return uniq(flatMap(workers, 'zones'))
   })
 
+  const initialProviderInfrastructureConfigNetworksZones = computed(() => {
+    return get(initialManifest.value, 'spec.provider.infrastructureConfig.networks.zones')
+  })
+
   /* manifest */
   const manifest = ref({})
 
@@ -133,7 +142,7 @@ export function createShootContextComposable (options = {}) {
   function createShootManifest (options) {
     manifest.value = {
       metadata: {
-        name: get(options, 'names', utils.shortRandomString(10)),
+        name: get(options, 'names', shortRandomString(10)),
         namespace: get(options, 'namespace', authzStore.namespace),
       },
     }
@@ -668,18 +677,18 @@ export function createShootContextComposable (options = {}) {
     const defaultAddons = {}
     if (!providerState.workerless) {
       for (const { name, enabled } of visibleAddonDefinitionList.value) {
-        defaultAddons[name] = { enabled }
+        set(defaultAddons, [name], { enabled })
       }
     }
     addons.value = defaultAddons
   }
 
   const visibleAddonDefinitionList = computed(() => {
-    return filter(utils.shootAddonList, 'visible')
+    return filter(shootAddonList, 'visible')
   })
 
   const addonDefinitionList = computed(() => {
-    return filter(utils.shootAddonList, ({ name, visible }) => visible || has(addons.value, name))
+    return filter(shootAddonList, ({ name, visible }) => visible || has(addons.value, name))
   })
 
   const addonDefinitions = computed(() => {
@@ -714,8 +723,8 @@ export function createShootContextComposable (options = {}) {
   })
 
   function resetMaintenanceTimeWindow () {
-    const maintenanceBegin = utils.randomMaintenanceBegin()
-    const timeWindow = utils.maintenanceWindowWithBeginAndTimezone(maintenanceBegin, appStore.timezone)
+    const maintenanceBegin = randomMaintenanceBegin()
+    const timeWindow = maintenanceWindowWithBeginAndTimezone(maintenanceBegin, appStore.timezone)
     maintenanceTimeWindowBegin.value = timeWindow.begin
     maintenanceTimeWindowEnd.value = timeWindow.end
   }
@@ -982,6 +991,7 @@ export function createShootContextComposable (options = {}) {
     providerInfrastructureConfigFirewallSize,
     providerInfrastructureConfigFloatingPoolName,
     providerInfrastructureConfigNetworksZones,
+    initialProviderInfrastructureConfigNetworksZones,
     providerInfrastructureConfigPartitionID,
     providerInfrastructureConfigProjectID,
     /* provider - workers */

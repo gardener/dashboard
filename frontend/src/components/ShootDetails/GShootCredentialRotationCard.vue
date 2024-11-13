@@ -6,7 +6,11 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-card class="mb-4">
-    <g-toolbar title="Credential Rotation" />
+    <g-toolbar title="Credential Rotation">
+      <template #append>
+        <g-credential-rotation-help />
+      </template>
+    </g-toolbar>
     <g-list>
       <g-credential-tile
         type="ALL_CREDENTIALS"
@@ -27,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0
         dense
       />
       <g-credential-tile
-        v-if="hasShootWorkerGroups"
+        v-if="hasShootWorkerGroups && sshAccessEnabled"
         type="sshKeypair"
         dense
       />
@@ -45,6 +49,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script setup>
 import GCredentialTile from '@/components/GCredentialTile'
+import GCredentialRotationHelp from '@/components/GCredentialRotationHelp'
 
 import { useShootItem } from '@/composables/useShootItem'
 
@@ -52,5 +57,6 @@ const {
   shootEnableStaticTokenKubeconfig,
   isTestingCluster,
   hasShootWorkerGroups,
+  sshAccessEnabled,
 } = useShootItem()
 </script>

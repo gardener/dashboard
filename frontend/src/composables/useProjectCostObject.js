@@ -16,8 +16,10 @@ import { transformHtml } from '@/utils'
 import { useProjectMetadata } from './useProjectMetadata'
 
 import {
+  find,
   get,
   isEmpty,
+  map,
 } from '@/lodash'
 
 export const useProjectCostObject = (projectItem, options = {}) => {
@@ -27,8 +29,10 @@ export const useProjectCostObject = (projectItem, options = {}) => {
   } = options
 
   const {
+    projectName,
     getProjectAnnotation,
     setProjectAnnotation,
+    unsetProjectAnnotation,
   } = projectMetadataComposable
 
   const costObject = computed({
@@ -36,31 +40,73 @@ export const useProjectCostObject = (projectItem, options = {}) => {
       return getProjectAnnotation('billing.gardener.cloud/costObject')
     },
     set (value) {
-      setProjectAnnotation('billing.gardener.cloud/costObject', value)
+      if (value) {
+        setProjectAnnotation('billing.gardener.cloud/costObject', value)
+      } else {
+        unsetProjectAnnotation('billing.gardener.cloud/costObject')
+      }
     },
   })
 
-  const costObjectSettings = toRef(configStore, 'costObjectSettings')
+  const costObjectType = computed({
+    get () {
+      return getProjectAnnotation('billing.gardener.cloud/costObjectType')
+    },
+    set (value) {
+      setProjectAnnotation('billing.gardener.cloud/costObjectType', value)
+    },
+  })
 
-  const costObjectSettingEnabled = computed(() => !isEmpty(costObjectSettings.value))
+  const costObjectsSettings = toRef(configStore, 'costObjectsSettings')
+
+  const costObjectsSettingEnabled = computed(() => !isEmpty(costObjectsSettings.value))
+
+  const costObjectTypes = computed(() => {
+    return map(costObjectsSettings.value, ({ type, title }) => ({ value: type, title }))
+  })
+
+  const costObjectSettings = computed(() => {
+    return find(costObjectsSettings.value, ['type', costObjectType.value])
+  })
 
   const costObjectDescriptionHtml = computed(() => {
     const description = get(costObjectSettings.value, 'description')
     return transformHtml(description)
   })
 
+  const costObjectSettingsType = computed(() => get(costObjectSettings.value, 'type'))
+
   const costObjectTitle = computed(() => get(costObjectSettings.value, 'title'))
 
-  const costObjectRegex = computed(() => get(costObjectSettings.value, 'regex', '[^]*'))
+  const costObjectRegex = computed(() => {
+    const pattern = get(costObjectSettings.value, 'regex', '[^]*')
+    return new RegExp(pattern) // eslint-disable-line security/detect-non-literal-regexp
+  })
 
-  const costObjectErrorMessage = computed(() => get(costObjectSettings.value, 'errorMessage', ''))
+  const costObjectErrorMessage = computed(() => get(costObjectSettings.value, 'errorMessage', 'Invalid cost object'))
+
+  function getCostObjectPatchDocument () {
+    return {
+      metadata: {
+        name: projectName.value,
+        annotations: {
+          'billing.gardener.cloud/costObject': getProjectAnnotation('billing.gardener.cloud/costObject', null),
+          'billing.gardener.cloud/costObjectType': getProjectAnnotation('billing.gardener.cloud/costObjectType', null),
+        },
+      },
+    }
+  }
 
   return {
     costObject,
-    costObjectSettingEnabled,
+    costObjectsSettingEnabled,
+    costObjectTypes,
+    costObjectType,
     costObjectDescriptionHtml,
+    costObjectSettingsType,
     costObjectTitle,
     costObjectRegex,
     costObjectErrorMessage,
+    getCostObjectPatchDocument,
   }
 }

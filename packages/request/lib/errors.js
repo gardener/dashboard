@@ -8,6 +8,7 @@
 
 const http = require('http')
 const createError = require('http-errors')
+const { get } = require('lodash')
 
 class TimeoutError extends Error {
   constructor (message) {
@@ -33,7 +34,7 @@ class ParseError extends Error {
     Object.assign(this, {
       name: this.constructor.name,
       code: 'ERR_BODY_PARSE_FAILURE',
-      ...properties
+      ...properties,
     })
     Error.captureStackTrace(this, this.constructor)
   }
@@ -43,7 +44,18 @@ function isAbortError (err = {}) {
   return err.code === 'ABORT_ERR'
 }
 
-function createHttpError ({ statusCode = 500, statusMessage = http.STATUS_CODES[statusCode], response, headers, body }) {
+function getDefaultStatusMessage (statusCode) {
+  return get(http.STATUS_CODES, [statusCode])
+}
+
+function createHttpError (options) {
+  const {
+    statusCode = 500,
+    statusMessage = getDefaultStatusMessage(statusCode),
+    response,
+    headers,
+    body,
+  } = options
   const properties = { statusMessage }
   if (headers) {
     properties.headers = { ...headers }
@@ -79,5 +91,5 @@ module.exports = {
   ParseError,
   createHttpError,
   isHttpError,
-  isAbortError
+  isAbortError,
 }

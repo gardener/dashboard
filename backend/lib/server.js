@@ -33,7 +33,7 @@ function createServer (app, metricsApp) {
   // create terminus
   const healthChecks = {
     '/healthz': () => healthCheckFunc(false),
-    '/healthz-transitive': () => healthCheckFunc(true)
+    '/healthz-transitive': () => healthCheckFunc(true),
   }
 
   terminus.createTerminus(server, {
@@ -57,7 +57,7 @@ function createServer (app, metricsApp) {
     },
     logger (...args) {
       logger.error(...args)
-    }
+    },
   })
 
   return {
@@ -76,7 +76,7 @@ function createServer (app, metricsApp) {
       }
       await new Promise(resolve => server.listen(port, resolve))
       logger.info('Server listening on port %d', port)
-    }
+    },
   }
 }
 

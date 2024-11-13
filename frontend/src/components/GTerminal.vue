@@ -601,7 +601,7 @@ export default {
       this.$emit('terminated')
     },
     async configure (refName) {
-      this.loading[refName] = true
+      this.loading[refName] = true // eslint-disable-line security/detect-object-injection
       const { namespace, name, target } = this.data
       try {
         const { data: config } = await this.api.terminalConfig({ name, namespace, target })
@@ -610,7 +610,7 @@ export default {
       } catch (err) {
         this.showErrorSnackbarBottom(get(err, 'response.data.message', err.message))
       } finally {
-        this.loading[refName] = false
+        this.loading[refName] = false // eslint-disable-line security/detect-object-injection
       }
 
       const initialState = {

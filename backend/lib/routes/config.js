@@ -41,27 +41,30 @@ router.route('/')
 function sanitizeFrontendConfig (frontendConfig) {
   const converter = markdown.createConverter()
   const convertAndSanitize = (obj, key) => {
-    if (obj[key]) {
-      obj[key] = converter.makeSanitizedHtml(obj[key])
+    const value = obj[key] // eslint-disable-line security/detect-object-injection -- key is a local fixed string
+    if (value) {
+      obj[key] = converter.makeSanitizedHtml(value) // eslint-disable-line security/detect-object-injection -- key is a local fixed string
     }
   }
 
   const sanitizedFrontendConfig = _.cloneDeep(frontendConfig)
   const {
     alert = {},
-    costObject = {},
+    costObjects = [],
     sla = {},
     addonDefinition = {},
     accessRestriction: {
-      items = []
+      items = [],
     } = {},
     vendorHints = [],
     resourceQuotaHelp = '',
-    controlPlaneHighAvailabilityHelp = ''
+    controlPlaneHighAvailabilityHelp = '',
   } = sanitizedFrontendConfig
 
   convertAndSanitize(alert, 'message')
-  convertAndSanitize(costObject, 'description')
+  for (const costObject of costObjects) {
+    convertAndSanitize(costObject, 'description')
+  }
   convertAndSanitize(sla, 'description')
   convertAndSanitize(addonDefinition, 'description')
   convertAndSanitize(resourceQuotaHelp, 'text')
@@ -71,14 +74,14 @@ function sanitizeFrontendConfig (frontendConfig) {
     const {
       display = {},
       input = {},
-      options = []
+      options = [],
     } = item
     convertAndSanitize(display, 'description')
     convertAndSanitize(input, 'description')
     for (const option of options) {
       const {
         display = {},
-        input = {}
+        input = {},
       } = option
       convertAndSanitize(display, 'description')
       convertAndSanitize(input, 'description')
