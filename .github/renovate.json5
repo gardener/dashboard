@@ -45,12 +45,6 @@
         "@octokit/plugin-rest-endpoint-methods",
         "chalk",
         "codemirror",
-        "eslint",
-        "eslint-plugin-vitest",
-        "eslint-plugin-vue",
-        "eslint-plugin-jest",
-        "eslint-plugin-n",
-        "eslint-plugin-promise", // latest version not yet supported by eslint-config-standard
         "jest",
         "openid-client",
         "p-event",
@@ -59,15 +53,6 @@
         "p-timeout"
       ],
       matchUpdateTypes: ["major"],
-      enabled: false
-    },
-    {
-      // Ignore minor updates for these dependencies until we support flat config: https://github.com/veritem/eslint-plugin-vitest/releases/tag/v0.5.0
-      matchDatasources: ["npm"],
-      matchPackageNames: [
-        "eslint-plugin-vitest"
-      ],
-      matchUpdateTypes: ["minor"],
       enabled: false
     },
     {
