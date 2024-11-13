@@ -7,11 +7,9 @@
 import { helpers } from '@vuelidate/validators'
 import { Base64 } from 'js-base64'
 
-import {
-  get,
-  set,
-  includes,
-} from '@/lodash'
+import get from 'lodash/get'
+import set from 'lodash/set'
+import includes from 'lodash/includes'
 
 const { withParams, regex, withMessage } = helpers
 

@@ -79,10 +79,8 @@ import {
 
 import 'floating-vue/dist/style.css'
 
-import {
-  omit,
-  pick,
-} from '@/lodash'
+import omit from 'lodash/omit'
+import pick from 'lodash/pick'
 
 const referenceProps = ['class']
 

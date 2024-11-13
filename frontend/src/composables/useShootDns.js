@@ -16,17 +16,15 @@ import { useShootResources } from '@/composables/useShootResources'
 import { useShootExtensions } from '@/composables/useShootExtensions'
 import { useSecretList } from '@/composables/useSecretList'
 
-import {
-  get,
-  set,
-  unset,
-  find,
-  map,
-  head,
-  includes,
-  filter,
-  isEmpty,
-} from '@/lodash'
+import get from 'lodash/get'
+import set from 'lodash/set'
+import unset from 'lodash/unset'
+import find from 'lodash/find'
+import map from 'lodash/map'
+import head from 'lodash/head'
+import includes from 'lodash/includes'
+import filter from 'lodash/filter'
+import isEmpty from 'lodash/isEmpty'
 
 export const useShootDns = (manifest, options) => {
   const {
@@ -67,32 +65,32 @@ export const useShootDns = (manifest, options) => {
 
   const dnsServiceExtensionProviders = computed({
     get () {
-      return get(dnsServiceExtension.value, 'providerConfig.providers', [])
+      return get(dnsServiceExtension.value, ['providerConfig', 'providers'], [])
     },
     set (value) {
-      set(dnsServiceExtension.value, 'providerConfig.providers', value)
+      set(dnsServiceExtension.value, ['providerConfig', 'providers'], value)
     },
   })
 
   /* dns */
   const dnsDomain = computed({
     get () {
-      return get(manifest.value, 'spec.dns.domain')
+      return get(manifest.value, ['spec', 'dns', 'domain'])
     },
     set (value) {
-      set(manifest.value, 'spec.dns.domain', value)
+      set(manifest.value, ['spec', 'dns', 'domain'], value)
     },
   })
 
   const dnsProviders = computed({
     get () {
-      return get(manifest.value, 'spec.dns.providers')
+      return get(manifest.value, ['spec', 'dns', 'providers'])
     },
     set (value) {
       if (value) {
-        set(manifest.value, 'spec.dns.providers', value)
+        set(manifest.value, ['spec', 'dns', 'providers'], value)
       } else {
-        unset(manifest.value, 'spec.dns.providers')
+        unset(manifest.value, ['spec', 'dns', 'providers'])
       }
     },
   })
@@ -164,7 +162,7 @@ export const useShootDns = (manifest, options) => {
     }
     const customDomainProvider = primaryDnsServiceExtensionProvider.value ?? addDnsServiceExtensionProvider(dnsPrimaryProvider.value)
     if (isEmpty(customDomainProvider.domains?.include)) {
-      set(customDomainProvider, 'domains.include', [dnsDomain.value])
+      set(customDomainProvider, ['domains', 'include'], [dnsDomain.value])
     } else {
       customDomainProvider.domains.include.push(dnsDomain.value)
     }
@@ -178,7 +176,7 @@ export const useShootDns = (manifest, options) => {
       const resourceName = getDnsServiceExtensionResourceName(secret.metadata.name)
       return !includes(usedResourceNames, resourceName)
     })
-    return get(secret, 'metadata.secretRef.name')
+    return get(secret, ['metadata', 'secretRef', 'name'])
   }
 
   function addDnsServiceExtensionProvider (options = {}) {
@@ -226,9 +224,9 @@ export const useShootDns = (manifest, options) => {
   }
 
   function forceMigrateSyncDnsProvidersToFalse () {
-    if (get(dnsServiceExtension.value, 'providerConfig.syncProvidersFromShootSpecDNS') === true) {
+    if (get(dnsServiceExtension.value, ['providerConfig', 'syncProvidersFromShootSpecDNS']) === true) {
       // Migrate from old DNS configuration to new DNS configuration
-      set(dnsServiceExtension.value, 'providerConfig.syncProvidersFromShootSpecDNS', false)
+      set(dnsServiceExtension.value, ['providerConfig', 'syncProvidersFromShootSpecDNS'], false)
       dnsProviders.value = filter(dnsProviders.value, ['primary', true])
     } else if (!dnsServiceExtension.value) {
       // set default empty dns service extension where sync is set to off

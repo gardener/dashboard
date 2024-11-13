@@ -90,7 +90,7 @@ import GHibernationScheduleEvent from '@/components/ShootHibernation/GHibernatio
 
 import { useShootContext } from '@/composables/useShootContext'
 
-import { isEmpty } from '@/lodash'
+import isEmpty from 'lodash/isEmpty'
 
 export default {
   components: {

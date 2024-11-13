@@ -64,11 +64,9 @@ import {
   EditorCompletions,
 } from './helper'
 
-import {
-  get,
-  omit,
-  isEqual,
-} from '@/lodash'
+import isEqual from 'lodash/isEqual'
+import omit from 'lodash/omit'
+import get from 'lodash/get'
 
 export function useShootEditor (initialValue, options = {}) {
   const {
@@ -165,17 +163,17 @@ export function useShootEditor (initialValue, options = {}) {
   })
 
   const filename = computed(() => {
-    const namespace = get(shootItem.value, 'metadata.namespace')
+    const namespace = get(shootItem.value, ['metadata', 'namespace'])
     if (!namespace) {
-      return get(options, 'filename', 'unknown.yaml')
+      return get(options, ['filename'], 'unknown.yaml')
     }
-    const name = get(shootItem.value, 'metadata.name', 'unnamed')
+    const name = get(shootItem.value, ['metadata', 'name'], 'unnamed')
     const projectName = projectStore.projectNameByNamespace(namespace)
     return `shoot--${projectName}--${name}.yaml`
   })
 
   const isShootActionsDisabled = computed(() => {
-    return get(shootItem.value, 'spec.purpose') === 'infrastructure'
+    return get(shootItem.value, ['spec', 'purpose']) === 'infrastructure'
   })
 
   let cmTooltipFnTimerID
@@ -356,10 +354,10 @@ export function useShootEditor (initialValue, options = {}) {
   watchEffect(() => {
     if (cmView.value) {
       if (schemaDefinition.value) {
-        const shootProperties = get(schemaDefinition.value, 'properties', {})
+        const shootProperties = get(schemaDefinition.value, ['properties'], {})
         completions.value = new EditorCompletions(shootProperties, {
           cmView: cmView.value,
-          completionPaths: get(options, 'completionPaths', []),
+          completionPaths: get(options, ['completionPaths'], []),
           logger,
         })
       }

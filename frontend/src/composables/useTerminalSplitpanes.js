@@ -32,18 +32,16 @@ import {
   Leaf,
 } from '@/lib/g-symbol-tree'
 
-import {
-  every,
-  get,
-  pick,
-  filter,
-  includes,
-  isEmpty,
-  map,
-  merge,
-  cloneDeep,
-  difference,
-} from '@/lodash'
+import every from 'lodash/every'
+import get from 'lodash/get'
+import pick from 'lodash/pick'
+import filter from 'lodash/filter'
+import includes from 'lodash/includes'
+import isEmpty from 'lodash/isEmpty'
+import map from 'lodash/map'
+import merge from 'lodash/merge'
+import cloneDeep from 'lodash/cloneDeep'
+import difference from 'lodash/difference'
 
 export function createTerminalSplitpanesComposable () {
   const api = useApi()
@@ -72,19 +70,19 @@ export function createTerminalSplitpanesComposable () {
   })
 
   const shootNamespace = computed(() => {
-    return get(terminalCoordinates.value, 'namespace')
+    return get(terminalCoordinates.value, ['namespace'])
   })
 
   const shootName = computed(() => {
-    return get(terminalCoordinates.value, 'name')
+    return get(terminalCoordinates.value, ['name'])
   })
 
   const hasShootWorkerGroups = computed(() => {
-    return !isEmpty(get(shootItem.value, 'spec.provider.workers', []))
+    return !isEmpty(get(shootItem.value, ['spec', 'provider', 'workers'], []))
   })
 
   const isShootStatusHibernated = computed(() => {
-    return isStatusHibernated(get(shootItem.value, 'status'))
+    return isStatusHibernated(get(shootItem.value, ['status']))
   })
 
   const slotItemUUIds = computed(() => {
@@ -196,7 +194,7 @@ export function createTerminalSplitpanesComposable () {
     }
     if (!targetId) {
       const lastChild = symbolTree.lastChild(symbolTree.root, true)
-      targetId = get(lastChild, 'uuid')
+      targetId = get(lastChild, ['uuid'])
     }
     return targetId
   }

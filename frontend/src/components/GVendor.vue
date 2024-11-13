@@ -62,7 +62,7 @@ import GVendorIcon from '@/components/GVendorIcon'
 
 import { useShootItem } from '@/composables/useShootItem'
 
-import { join } from '@/lodash'
+import join from 'lodash/join'
 
 export default {
   components: {

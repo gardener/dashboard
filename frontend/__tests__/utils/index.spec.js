@@ -21,10 +21,8 @@ import {
   convertToGibibyte,
 } from '@/utils'
 
-import {
-  pick,
-  find,
-} from '@/lodash'
+import pick from 'lodash/pick'
+import find from 'lodash/find'
 
 describe('utils', () => {
   describe('authorization', () => {

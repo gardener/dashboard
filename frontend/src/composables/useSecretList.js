@@ -11,7 +11,7 @@ import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 
 import { isOwnSecret } from '@/utils'
 
-import { filter } from '@/lodash'
+import filter from 'lodash/filter'
 
 export const useSecretList = (providerType, options = {}) => {
   const {

@@ -53,10 +53,8 @@ import { useShootEditor } from '@/composables/useShootEditor'
 
 import { errorDetailsFromError } from '@/utils/error'
 
-import {
-  isEmpty,
-  pick,
-} from '@/lodash'
+import pick from 'lodash/pick'
+import isEmpty from 'lodash/isEmpty'
 
 const api = inject('api')
 const logger = inject('logger')

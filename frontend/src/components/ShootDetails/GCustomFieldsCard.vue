@@ -63,11 +63,9 @@ import { useProjectShootCustomFields } from '@/composables/useProjectShootCustom
 import { useProjectItem } from '@/composables/useProjectItem'
 import { formatValue } from '@/composables/useProjectShootCustomFields/helper'
 
-import {
-  filter,
-  get,
-  map,
-} from '@/lodash'
+import map from 'lodash/map'
+import get from 'lodash/get'
+import filter from 'lodash/filter'
 
 const { projectItem } = useProjectItem()
 

@@ -95,17 +95,15 @@ import {
 } from '@/utils/hibernationSchedule'
 import moment from '@/utils/moment'
 
-import {
-  join,
-  split,
-  compact,
-  get,
-  set,
-  map,
-  filter,
-  isEmpty,
-  includes,
-} from '@/lodash'
+import join from 'lodash/join'
+import split from 'lodash/split'
+import compact from 'lodash/compact'
+import get from 'lodash/get'
+import set from 'lodash/set'
+import map from 'lodash/map'
+import filter from 'lodash/filter'
+import isEmpty from 'lodash/isEmpty'
+import includes from 'lodash/includes'
 
 export default {
   components: {
@@ -203,46 +201,46 @@ export default {
     },
     selectedLocation: {
       get () {
-        return get(this.scheduleEvent, 'location')
+        return get(this.scheduleEvent, ['location'])
       },
       set (value) {
-        set(this.scheduleEvent, 'location', value)
+        set(this.scheduleEvent, ['location'], value)
       },
     },
     wakeUpTime: {
       get () {
-        return formatTimeString(get(this.scheduleEvent, 'end'))
+        return formatTimeString(get(this.scheduleEvent, ['end']))
       },
       set (value) {
         const time = parseTimeString(value)
-        set(this.scheduleEvent, 'end.minute', time?.minute)
-        set(this.scheduleEvent, 'end.hour', time?.hour)
+        set(this.scheduleEvent, ['end', 'minute'], time?.minute)
+        set(this.scheduleEvent, ['end', 'hour'], time?.hour)
 
-        if (!get(this.scheduleEvent, 'end.weekdays')) {
-          const weekdays = get(this.scheduleEvent, 'start.weekdays')
-          set(this.scheduleEvent, 'end.weekdays', weekdays)
+        if (!get(this.scheduleEvent, ['end', 'weekdays'])) {
+          const weekdays = get(this.scheduleEvent, ['start', 'weekdays'])
+          set(this.scheduleEvent, ['end', 'weekdays'], weekdays)
         }
       },
     },
     hibernateTime: {
       get () {
-        return formatTimeString(get(this.scheduleEvent, 'start'))
+        return formatTimeString(get(this.scheduleEvent, ['start']))
       },
       set (value) {
         const time = parseTimeString(value)
-        set(this.scheduleEvent, 'start.minute', time?.minute)
-        set(this.scheduleEvent, 'start.hour', time?.hour)
+        set(this.scheduleEvent, ['start', 'minute'], time?.minute)
+        set(this.scheduleEvent, ['start', 'hour'], time?.hour)
 
-        if (!get(this.scheduleEvent, 'start.weekdays')) {
-          const weekdays = get(this.scheduleEvent, 'end.weekdays')
-          set(this.scheduleEvent, 'start.weekdays', weekdays)
+        if (!get(this.scheduleEvent, ['start', 'weekdays'])) {
+          const weekdays = get(this.scheduleEvent, ['end', 'weekdays'])
+          set(this.scheduleEvent, ['start', 'weekdays'], weekdays)
         }
       },
     },
     selectedDays: {
       get () {
-        const startDays = get(this.scheduleEvent, 'start.weekdays')
-        const endDays = get(this.scheduleEvent, 'end.weekdays')
+        const startDays = get(this.scheduleEvent, ['start', 'weekdays'])
+        const endDays = get(this.scheduleEvent, ['end', 'weekdays'])
         const days = compact(split(startDays ?? endDays, ','))
         if (isEmpty(days)) {
           return null
@@ -252,16 +250,16 @@ export default {
       },
       set (value) {
         const weekdays = join(map(value, 'value'), ',')
-        set(this.scheduleEvent, 'start.weekdays', weekdays)
-        set(this.scheduleEvent, 'end.weekdays', weekdays)
+        set(this.scheduleEvent, ['start', 'weekdays'], weekdays)
+        set(this.scheduleEvent, ['end', 'weekdays'], weekdays)
       },
     },
   },
   methods: {
     touchIfNothingFocused () {
-      if (!get(this, '$refs.selectedDays.isFocused') &&
-          !get(this, '$refs.wakeUpTime.isFocused') &&
-          !get(this, '$refs.hibernateTime.isFocused')) {
+      if (!get(this, ['$refs', 'selectedDays', 'isFocused']) &&
+          !get(this, ['$refs', 'wakeUpTime', 'isFocused']) &&
+          !get(this, ['$refs', 'hibernateTime', 'isFocused'])) {
         this.v$.selectedDays.$touch()
         this.v$.wakeUpTime.$touch()
         this.v$.hibernateTime.$touch()

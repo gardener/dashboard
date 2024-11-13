@@ -181,22 +181,20 @@ import {
   convertToGi,
 } from '@/utils'
 
-import {
-  isEmpty,
-  filter,
-  map,
-  includes,
-  sortBy,
-  find,
-  concat,
-  last,
-  difference,
-  get,
-  set,
-  head,
-  pick,
-  every,
-} from '@/lodash'
+import isEmpty from 'lodash/isEmpty'
+import filter from 'lodash/filter'
+import map from 'lodash/map'
+import includes from 'lodash/includes'
+import sortBy from 'lodash/sortBy'
+import find from 'lodash/find'
+import concat from 'lodash/concat'
+import last from 'lodash/last'
+import difference from 'lodash/difference'
+import get from 'lodash/get'
+import set from 'lodash/set'
+import head from 'lodash/head'
+import pick from 'lodash/pick'
+import every from 'lodash/every'
 
 export default {
   components: {
@@ -279,11 +277,11 @@ export default {
       minValue: minValue(0),
       systemComponents: withMessage('Value must be greater or equal to the number of zones configured for this pool',
         value => {
-          const hasSystemComponents = get(this.worker, 'systemComponents.allow', true)
+          const hasSystemComponents = get(this.worker, ['systemComponents', 'allow'], true)
           if (!hasSystemComponents) {
             return true
           }
-          const zones = get(this.worker, 'zones.length', 0)
+          const zones = get(this.worker, ['zones', 'length'], 0)
           return value >= zones
         }),
     }
@@ -450,7 +448,7 @@ export default {
       return find(this.machineImages, this.worker.machine.image)
     },
     machineImageCri () {
-      return get(this.selectedMachineImage, 'cri')
+      return get(this.selectedMachineImage, ['cri'])
     },
     machineArchitecture: {
       get () {
@@ -479,11 +477,11 @@ export default {
       return this.volumeInCloudProfile || this.hasCustomStorageSize
     },
     defaultStorageSize () {
-      return get(this.selectedMachineType, 'storage.size')
+      return get(this.selectedMachineType, ['storage', 'size'])
     },
   },
   mounted () {
-    const volumeSize = get(this.worker, 'volume.size')
+    const volumeSize = get(this.worker, ['volume', 'size'])
     if (volumeSize) {
       this.volumeSize = volumeSize
       this.hasCustomStorageSize = !this.volumeInCloudProfile
@@ -499,7 +497,7 @@ export default {
     ]),
     onInputVolumeSize () {
       if (this.hasVolumeSize) {
-        set(this.worker, 'volume.size', this.volumeSize)
+        set(this.worker, ['volume', 'size'], this.volumeSize)
       } else {
         // default size, must not write to shoot spec
         delete this.worker.volume
@@ -512,7 +510,7 @@ export default {
     },
     resetWorkerMachine () {
       const defaultMachineType = head(this.machineTypes)
-      this.worker.machine.type = get(defaultMachineType, 'name')
+      this.worker.machine.type = get(defaultMachineType, ['name'])
       const defaultMachineImage = this.defaultMachineImageForCloudProfileNameAndMachineType(this.cloudProfileName, defaultMachineType)
       this.worker.machine.image = pick(defaultMachineImage, ['name', 'version'])
     },

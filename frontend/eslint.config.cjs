@@ -18,10 +18,17 @@ const securityConfig = pluginSecurity.configs.recommended
 
 const lodashConfig = {
   plugins: {
-    lodash: pluginLodash,
+    lodash: {
+      meta: {
+        name: 'eslint-plugin-lodash',
+        version: '11.0.0',
+      },
+      rules: pluginLodash.rules,
+    },
   },
   rules: {
     'lodash/path-style': ['error', 'array'],
+    'lodash/import-scope': ['error', 'method'],
   },
 }
 
@@ -92,7 +99,7 @@ const importConfig = {
           position: 'before',
         },
         {
-          pattern: '@/lodash',
+          pattern: 'lodash/**',
           group: 'index',
           position: 'after',
         },
@@ -106,6 +113,7 @@ const importConfig = {
           group: 'internal',
         },
       ],
+      pathGroupsExcludedImportTypes: ['builtin'],
       'newlines-between': 'always',
     }],
   },

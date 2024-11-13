@@ -19,7 +19,8 @@ import { useAuthzStore } from '@/store/authz'
 
 import { createShootContextComposable } from '@/composables/useShootContext'
 
-import { cloneDeep } from '@/lodash'
+import cloneDeep from 'lodash/cloneDeep'
+
 describe('composables', () => {
   let shootContextStore
 

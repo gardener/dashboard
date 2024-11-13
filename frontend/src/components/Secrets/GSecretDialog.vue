@@ -142,12 +142,10 @@ import {
   setInputFocus,
 } from '@/utils'
 
-import {
-  cloneDeep,
-  get,
-  filter,
-  includes,
-} from '@/lodash'
+import includes from 'lodash/includes'
+import filter from 'lodash/filter'
+import get from 'lodash/get'
+import cloneDeep from 'lodash/cloneDeep'
 
 export default {
   components: {
@@ -255,7 +253,7 @@ export default {
       return this.shootsByInfrastructureSecret.length
     },
     shootsByInfrastructureSecret () {
-      const name = get(this.secret, 'metadata.name')
+      const name = get(this.secret, ['metadata', 'name'])
       return filter(this.shootList, ['spec.secretBindingName', name])
     },
     helpContainerStyles () {
@@ -344,7 +342,7 @@ export default {
         this.name = `my-${this.providerType}-secret`
         setDelayedInputFocus(this, 'name')
       } else {
-        this.name = get(this.secret, 'metadata.name')
+        this.name = get(this.secret, ['metadata', 'name'])
       }
 
       this.errorMessage = undefined

@@ -22,12 +22,10 @@ import { useAppStore } from './app'
 import { useGardenerExtensionStore } from './gardenerExtension'
 import { useCloudProfileStore } from './cloudProfile'
 
-import {
-  findIndex,
-  find,
-  filter,
-  matches,
-} from '@/lodash'
+import findIndex from 'lodash/findIndex'
+import find from 'lodash/find'
+import filter from 'lodash/filter'
+import matches from 'lodash/matches'
 
 function eqlNameAndNamespace ({ namespace, name }) {
   return matches({ metadata: { namespace, name } })

@@ -6,21 +6,19 @@
 
 import { computed } from 'vue'
 
-import {
-  get,
-  set,
-  find,
-  filter,
-  isEmpty,
-} from '@/lodash'
+import get from 'lodash/get'
+import set from 'lodash/set'
+import find from 'lodash/find'
+import filter from 'lodash/filter'
+import isEmpty from 'lodash/isEmpty'
 
 export const useShootResources = manifest => {
   const resources = computed({
     get () {
-      return get(manifest.value, 'spec.resources')
+      return get(manifest.value, ['spec', 'resources'])
     },
     set (value) {
-      set(manifest.value, 'spec.resources', value)
+      set(manifest.value, ['spec', 'resources'], value)
     },
   })
 
@@ -46,7 +44,7 @@ export const useShootResources = manifest => {
 
   function getResourceRefName (resourceName) {
     const secretResource = find(resources.value, ['name', resourceName])
-    return get(secretResource, 'resourceRef.name')
+    return get(secretResource, ['resourceRef', 'name'])
   }
 
   return {

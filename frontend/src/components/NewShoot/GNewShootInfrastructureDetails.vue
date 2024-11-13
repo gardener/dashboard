@@ -199,12 +199,10 @@ import {
   withFieldName,
 } from '@/utils/validators'
 
-import {
-  map,
-  isEmpty,
-  includes,
-  forEach,
-} from '@/lodash'
+import forEach from 'lodash/forEach'
+import includes from 'lodash/includes'
+import isEmpty from 'lodash/isEmpty'
+import map from 'lodash/map'
 
 export default {
   components: {

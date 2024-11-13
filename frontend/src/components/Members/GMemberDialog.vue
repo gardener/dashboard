@@ -166,16 +166,14 @@ import {
   MEMBER_ROLE_DESCRIPTORS,
 } from '@/utils'
 
-import {
-  toLower,
-  filter,
-  map,
-  includes,
-  forEach,
-  find,
-  negate,
-  get,
-} from '@/lodash'
+import toLower from 'lodash/toLower'
+import filter from 'lodash/filter'
+import map from 'lodash/map'
+import includes from 'lodash/includes'
+import forEach from 'lodash/forEach'
+import find from 'lodash/find'
+import negate from 'lodash/negate'
+import get from 'lodash/get'
 
 const defaultUsername = ''
 const defaultServiceName = 'robot'
@@ -342,7 +340,7 @@ export default {
       return filter(this.memberUsernames, isServiceAccountUsername)
     },
     serviceAccountNames () {
-      return map(this.serviceAccountUsernames, username => get(parseServiceAccountUsername(username), 'name'))
+      return map(this.serviceAccountUsernames, username => get(parseServiceAccountUsername(username), ['name']))
     },
     projectUsernames () {
       return filter(this.memberUsernames, negate(isServiceAccountUsername))
@@ -458,7 +456,7 @@ export default {
         if (this.name) {
           this.internalName = this.name
           if (!this.isForeignServiceAccount) {
-            this.internalName = get(parseServiceAccountUsername(this.name), 'name')
+            this.internalName = get(parseServiceAccountUsername(this.name), ['name'])
           }
         } else {
           this.internalName = this.defaultServiceName()

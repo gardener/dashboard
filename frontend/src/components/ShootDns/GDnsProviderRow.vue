@@ -116,12 +116,10 @@ import { useSecretList } from '@/composables/useSecretList'
 import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
 
-import {
-  get,
-  head,
-  find,
-  set,
-} from '@/lodash'
+import set from 'lodash/set'
+import find from 'lodash/find'
+import head from 'lodash/head'
+import get from 'lodash/get'
 
 export default {
   components: {
@@ -191,7 +189,7 @@ export default {
       },
       set (value) {
         this.deleteResource(this.dnsProvider.secretName)
-        const secretName = get(value, 'metadata.secretRef.name')
+        const secretName = get(value, ['metadata', 'secretRef', 'name'])
         const resourceName = this.getDnsServiceExtensionResourceName(secretName)
         this.dnsProvider.secretName = resourceName
         this.setResource({
@@ -206,38 +204,38 @@ export default {
     },
     excludeDomains: {
       get () {
-        return get(this.dnsProvider, 'domains.exclude')
+        return get(this.dnsProvider, ['domains', 'exclude'])
       },
       set (value) {
-        set(this.dnsProvider, 'domains.exclude', value)
+        set(this.dnsProvider, ['domains', 'exclude'], value)
       },
     },
     includeDomains: {
       get () {
-        return get(this.dnsProvider, 'domains.include')
+        return get(this.dnsProvider, ['domains', 'include'])
       },
       set (value) {
-        set(this.dnsProvider, 'domains.include', value)
+        set(this.dnsProvider, ['domains', 'include'], value)
       },
     },
     excludeZones: {
       get () {
-        return get(this.dnsProvider, 'zones.exclude')
+        return get(this.dnsProvider, ['zones', 'exclude'])
       },
       set (value) {
-        set(this.dnsProvider, 'zones.exclude', value)
+        set(this.dnsProvider, ['zones', 'exclude'], value)
       },
     },
     includeZones: {
       get () {
-        return get(this.dnsProvider, 'zones.include')
+        return get(this.dnsProvider, ['zones', 'include'])
       },
       set (value) {
-        set(this.dnsProvider, 'zones.include', value)
+        set(this.dnsProvider, ['zones', 'include'], value)
       },
     },
     allowedSecretNames () {
-      const dnsProviderSecretName = get(this.dnsServiceExtensionProviderSecret, 'metadata.name')
+      const dnsProviderSecretName = get(this.dnsServiceExtensionProviderSecret, ['metadata', 'name'])
       const secretNames = this.dnsServiceExtensionProviders.map(({ secretName }) => this.getResourceRefName(secretName))
       return secretNames.filter(secretName => {
         return dnsProviderSecretName !== secretName

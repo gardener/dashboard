@@ -56,7 +56,7 @@ import { useShootEditor } from '@/composables/useShootEditor'
 
 import { errorDetailsFromError } from '@/utils/error'
 
-import { get } from '@/lodash'
+import get from 'lodash/get'
 
 const injectionKey = 'new-shoot-editor'
 const confirmDialog = ref(null)
@@ -100,7 +100,7 @@ async function save () {
   try {
     const data = getEditorValue()
     const namespace = shootNamespace.value
-    const name = get(data, 'metadata.name')
+    const name = get(data, ['metadata', 'name'])
     await api.createShoot({ namespace, data })
     appStore.setSuccess('Cluster created')
     isShootCreated.value = true

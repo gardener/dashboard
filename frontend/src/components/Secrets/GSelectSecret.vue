@@ -90,14 +90,12 @@ import {
   selfTerminationDaysForSecret,
 } from '@/utils'
 
-import {
-  cloneDeep,
-  differenceWith,
-  isEqual,
-  head,
-  get,
-  toUpper,
-} from '@/lodash'
+import toUpper from 'lodash/toUpper'
+import get from 'lodash/get'
+import head from 'lodash/head'
+import isEqual from 'lodash/isEqual'
+import differenceWith from 'lodash/differenceWith'
+import cloneDeep from 'lodash/cloneDeep'
 
 export default {
   components: {
@@ -167,7 +165,7 @@ export default {
     const projectName = this.projectName
 
     const messageFn = ({ $model }) => {
-      return projectName === get($model, 'metadata.projectName')
+      return projectName === get($model, ['metadata', 'projectName'])
         ? 'A Cost Object is required. Go to the ADMINISTRATION page to edit the project and set the Cost Object.'
         : `A Cost Object is required and has to be set on the Project ${toUpper(projectName)}`
     }
@@ -176,7 +174,7 @@ export default {
       { type: 'requiresCostObjectIfEnabled', enabled },
       function requiresCostObjectIfEnabled (value) {
         return enabled
-          ? get(value, 'metadata.hasCostObject', false)
+          ? get(value, ['metadata', 'hasCostObject'], false)
           : true
       },
     )

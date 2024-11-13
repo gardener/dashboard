@@ -258,21 +258,19 @@ import {
   routeName as getRouteName,
 } from '@/utils'
 
-import {
-  find,
-  findIndex,
-  filter,
-  sortBy,
-  toLower,
-  includes,
-  replace,
-  get,
-  has,
-  head,
-  slice,
-  last,
-  isEmpty,
-} from '@/lodash'
+import find from 'lodash/find'
+import findIndex from 'lodash/findIndex'
+import filter from 'lodash/filter'
+import sortBy from 'lodash/sortBy'
+import toLower from 'lodash/toLower'
+import includes from 'lodash/includes'
+import replace from 'lodash/replace'
+import get from 'lodash/get'
+import has from 'lodash/has'
+import head from 'lodash/head'
+import slice from 'lodash/slice'
+import last from 'lodash/last'
+import isEmpty from 'lodash/isEmpty'
 
 const allProjectsItem = {
   metadata: {
@@ -327,7 +325,7 @@ const hasNoProjects = computed(() => {
 })
 
 const routes = computed(() => {
-  const hasProjectScope = get(selectedProject.value, 'spec.namespace') !== allProjectsItem.spec.namespace
+  const hasProjectScope = get(selectedProject.value, ['spec', 'namespace']) !== allProjectsItem.spec.namespace
   return getRoutes(router, hasProjectScope)
 })
 
@@ -347,7 +345,7 @@ const sortedAndFilteredProjectList = computed(() => {
     }
     const filter = toLower(projectFilter.value)
     const name = toLower(item.metadata.name)
-    let owner = get(item, 'spec.owner.name')
+    let owner = get(item, ['spec', 'owner', 'name'])
     owner = toLower(replace(owner, /@.*$/, ''))
     return includes(name, filter) || includes(owner, filter)
   }
@@ -374,7 +372,7 @@ const visibleProjectList = computed(() => {
 
 const projectNameThatMatchesFilter = computed(() => {
   const project = head(sortedAndFilteredProjectList.value)
-  const projectName = get(project, 'metadata.name')
+  const projectName = get(project, ['metadata', 'name'])
 
   const singleMatch = sortedAndFilteredProjectList.value?.length === 1
 
@@ -384,7 +382,7 @@ const projectNameThatMatchesFilter = computed(() => {
 })
 
 function getProjectOwner (project) {
-  return emailToDisplayName(get(project, 'spec.owner.name'))
+  return emailToDisplayName(get(project, ['spec', 'owner', 'name']))
 }
 
 function namespacedRoute (route) {
@@ -434,16 +432,16 @@ function openProjectDialog () {
 
 function getProjectMenuTargetRoute (namespace) {
   const fallbackToShootList = route => {
-    if (namespace === '_all' && get(route, 'meta.projectScope') !== false) {
+    if (namespace === '_all' && get(route, ['meta', 'projectScope']) !== false) {
       return true
     }
-    if (has(route, 'params.name')) {
+    if (has(route, ['params', 'name'])) {
       return true
     }
-    if (get(route, 'name') === 'NewShoot' || get(route, 'name') === 'NewShootEditor') {
+    if (get(route, ['name']) === 'NewShoot' || get(route, ['name']) === 'NewShootEditor') {
       return true
     }
-    if (get(route, 'name') === 'GardenTerminal') {
+    if (get(route, ['name']) === 'GardenTerminal') {
       return true
     }
     return false
@@ -457,7 +455,7 @@ function getProjectMenuTargetRoute (namespace) {
     }
   }
   const name = getRouteName(currentRoute)
-  const key = get(currentRoute, 'meta.namespaced') === false
+  const key = get(currentRoute, ['meta', 'namespaced']) === false
     ? 'query'
     : 'params'
   return {
