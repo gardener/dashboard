@@ -27,8 +27,8 @@ const lodashConfig = {
     },
   },
   rules: {
-    'lodash/path-style': [2, 'array'],
-    'lodash/import-scope': [2, 'method'],
+    'lodash/path-style': ['error', 'array'],
+    'lodash/import-scope': ['error', 'method'],
   },
 }
 
