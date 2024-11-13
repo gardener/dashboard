@@ -15,7 +15,7 @@ import { useProjectMetadata } from '@/composables/useProjectMetadata'
 import { useProjectShootCustomFields } from '@/composables/useProjectShootCustomFields'
 import { useProjectCostObject } from '@/composables/useProjectCostObject'
 
-import { get } from '@/lodash'
+import get from 'lodash/get'
 
 export function createProjectItemComposable (projectItem) {
   if (!isRef(projectItem)) {
@@ -59,16 +59,16 @@ export function createProjectItemComposable (projectItem) {
   /* spec */
   const projectNamespace = useProjectNamespace(projectItem)
   const projectCreatedBy = computed(() => {
-    return get(projectItem.value, 'spec.createdBy.name', '')
+    return get(projectItem.value, ['spec', 'createdBy', 'name'], '')
   })
   const projectOwner = computed(() => {
-    return get(projectItem.value, 'spec.owner.name', '')
+    return get(projectItem.value, ['spec', 'owner', 'name'], '')
   })
   const projectDescription = computed(() => {
-    return get(projectItem.value, 'spec.description', '')
+    return get(projectItem.value, ['spec', 'description'], '')
   })
   const projectPurpose = computed(() => {
-    return get(projectItem.value, 'spec.purpose', '')
+    return get(projectItem.value, ['spec', 'purpose'], '')
   })
 
   /* status */
@@ -131,25 +131,25 @@ export function useProvideProjectItem (projectItem) {
 /* spec */
 export function useProjectNamespace (projectItem) {
   return computed(() => {
-    return get(projectItem.value, 'spec.namespace', '')
+    return get(projectItem.value, ['spec', 'namespace'], '')
   })
 }
 
 /* status */
 export function useProjectStaleSinceTimestamp (projectItem) {
   return computed(() => {
-    return get(projectItem.value, 'status.staleSinceTimestamp')
+    return get(projectItem.value, ['status', 'staleSinceTimestamp'])
   })
 }
 
 export function useProjectStaleAutoDeleteTimestamp (projectItem) {
   return computed(() => {
-    return get(projectItem.value, 'status.staleAutoDeleteTimestamp')
+    return get(projectItem.value, ['status', 'staleAutoDeleteTimestamp'])
   })
 }
 
 export function useProjectPhase (projectItem) {
   return computed(() => {
-    return get(projectItem.value, 'status.phase', '')
+    return get(projectItem.value, ['status', 'phase'], '')
   })
 }

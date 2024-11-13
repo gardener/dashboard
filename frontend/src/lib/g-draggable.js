@@ -1,14 +1,12 @@
 //
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import {
-  get,
-  set,
-  forEach,
-} from '@/lodash'
+import get from 'lodash/get'
+import set from 'lodash/set'
+import forEach from 'lodash/forEach'
 
 export const ATTRIBUTE_DRAG_AND_DROP_ID = 'data-g-id'
 
@@ -70,7 +68,7 @@ function mousedown (event, el, binding) {
   dragState.sourceDragAndDropId = el.getAttribute(ATTRIBUTE_DRAG_AND_DROP_ID)
   dragState.appendClone = true
 
-  set(binding, 'value.dragging', true)
+  set(binding, ['value', 'dragging'], true)
 
   dragState.source.dispatchEvent(new CustomEvent(DragAndDropEventsEnum.DRAG_START))
   addEventListeners(binding)
@@ -84,7 +82,7 @@ function mouseup (event, binding) {
     return
   }
 
-  set(binding, 'value.dragging', false)
+  set(binding, ['value', 'dragging'], false)
 
   dispose()
 
@@ -284,7 +282,7 @@ export const gDraggable = {
     gDraggable.updated(el, binding, vnode)
   },
   updated (el, binding) {
-    const handler = get(binding, 'value.handle.$el') || get(binding, 'value.handle') || el
+    const handler = get(binding, ['value', 'handle', '$el']) || get(binding, ['value', 'handle']) || el
     if (!handler.getAttribute('draggable')) {
       el.removeEventListener('mousedown', el._listener)
       const eventListener = event => mousedown(event, el, binding)

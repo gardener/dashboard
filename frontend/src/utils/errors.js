@@ -9,7 +9,7 @@
 import statuses from 'statuses'
 import toIdentifier from 'toidentifier'
 
-import { get } from '@/lodash'
+import get from 'lodash/get'
 
 function hasStatusCode (err, statusCode) {
   return err.statusCode === statusCode || err.response?.status === statusCode

@@ -59,7 +59,7 @@ import GShootAccessCard from '@/components/ShootDetails/GShootAccessCard'
 
 import { useProvideShootContext } from '@/composables/useShootContext'
 
-import { get } from '@/lodash'
+import get from 'lodash/get'
 
 const route = useRoute()
 
@@ -76,7 +76,7 @@ function onAddTerminalShortcut (shortcut) {
 }
 
 onMounted(() => {
-  if (get(route, 'name') === 'ShootItemHibernationSettings') {
+  if (get(route, ['name']) === 'ShootItemHibernationSettings') {
     shootLifecycleCard.value?.showHibernationConfigurationDialog()
   }
 })

@@ -128,7 +128,7 @@ import GShootMessages from '@/components/ShootMessages/GShootMessages'
 import { useShootItem } from '@/composables/useShootItem'
 import { useShootStatusCredentialRotation } from '@/composables/useShootStatusCredentialRotation'
 
-import { get } from '@/lodash'
+import get from 'lodash/get'
 
 export default {
   components: {
@@ -167,7 +167,7 @@ export default {
       return this.phaseType === 'Preparing' || this.phaseType === 'Completing' || this.phaseType === 'Rotating'
     },
     phaseCaption () {
-      return get(this.phase, 'caption', this.phaseType)
+      return get(this.phase, ['caption'], this.phaseType)
     },
     phaseColor () {
       switch (this.phaseType) {

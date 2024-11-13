@@ -63,7 +63,7 @@ import { useConfigStore } from '@/store/config'
 
 import { omitKeysWithSuffix } from '@/utils'
 
-import { template } from '@/lodash'
+import template from 'lodash/template'
 
 export default {
   computed: {

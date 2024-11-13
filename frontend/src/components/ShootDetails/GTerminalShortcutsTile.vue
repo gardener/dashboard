@@ -78,11 +78,9 @@ import { useShootItem } from '@/composables/useShootItem'
 
 import { TargetEnum } from '@/utils'
 
-import {
-  get,
-  find,
-  includes,
-} from '@/lodash'
+import includes from 'lodash/includes'
+import find from 'lodash/find'
+import get from 'lodash/get'
 
 const api = inject('api')
 
@@ -123,14 +121,14 @@ async function onAddTerminalShortcut (shortcut) {
     }
   }
 
-  const isGardenTarget = get(shortcut, 'target') === TargetEnum.GARDEN
+  const isGardenTarget = get(shortcut, ['target']) === TargetEnum.GARDEN
   if (!authnStore.isAdmin && isGardenTarget) {
     const { data: projectMembers } = await api.getMembers({
       namespace: shootNamespace.value,
     })
     const serviceAccountName = `system:serviceaccount:${shootNamespace.value}:dashboard-webterminal`
     const member = find(projectMembers, ['username', serviceAccountName])
-    const roles = get(member, 'roles')
+    const roles = get(member, ['roles'])
     if (!includes(roles, 'admin')) {
       const confirmation = await webterminalServiceAccountDialog.value.promptForConfirmation(member)
       if (!confirmation) {

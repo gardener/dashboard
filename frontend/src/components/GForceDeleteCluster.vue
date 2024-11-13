@@ -91,7 +91,7 @@ import {
   errorCodesFromArray,
 } from '@/utils/errorCodes'
 
-import { filter } from '@/lodash'
+import filter from 'lodash/filter'
 
 export default {
   components: {

@@ -262,11 +262,9 @@ import {
   transformHtml,
 } from '@/utils'
 
-import {
-  get,
-  filter,
-  map,
-} from '@/lodash'
+import map from 'lodash/map'
+import filter from 'lodash/filter'
+import get from 'lodash/get'
 
 const {
   shootMetadata,

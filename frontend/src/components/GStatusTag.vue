@@ -87,11 +87,9 @@ import {
   objectsFromErrorCodes,
 } from '@/utils/errorCodes'
 
-import {
-  get,
-  isEmpty,
-  filter,
-} from '@/lodash'
+import get from 'lodash/get'
+import isEmpty from 'lodash/isEmpty'
+import filter from 'lodash/filter'
 
 export default {
   components: {
@@ -243,7 +241,7 @@ export default {
     },
     visible () {
       if (!this.isAdmin) {
-        return !get(this.condition, 'showAdminOnly', false)
+        return !get(this.condition, ['showAdminOnly'], false)
       }
       return true
     },

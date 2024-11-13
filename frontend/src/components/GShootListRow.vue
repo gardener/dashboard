@@ -272,13 +272,11 @@ import { formatValue } from '@/composables/useProjectShootCustomFields/helper'
 
 import { getIssueSince } from '@/utils'
 
-import {
-  includes,
-  get,
-  map,
-  some,
-  find,
-} from '@/lodash'
+import find from 'lodash/find'
+import some from 'lodash/some'
+import map from 'lodash/map'
+import get from 'lodash/get'
+import includes from 'lodash/includes'
 
 const props = defineProps({
   modelValue: {
@@ -388,11 +386,11 @@ const shootLastUpdatedTicket = computed(() => {
 })
 
 const shootLastUpdatedTicketUrl = computed(() => {
-  return get(shootLastUpdatedTicket.value, 'data.html_url')
+  return get(shootLastUpdatedTicket.value, ['data', 'html_url'])
 })
 
 const shootLastUpdatedTicketTimestamp = computed(() => {
-  return get(shootLastUpdatedTicket.value, 'metadata.updated_at')
+  return get(shootLastUpdatedTicket.value, ['metadata', 'updated_at'])
 })
 
 const shootTicketLabels = computed(() => {
@@ -430,7 +428,7 @@ const cells = computed(() => {
 const hasShootWorkerGroupWarning = computed(() => {
   const machineImages = cloudProfileStore.machineImagesByCloudProfileName(shootCloudProfileName.value)
   return some(shootWorkerGroups.value, workerGroup => {
-    const { name, version } = get(workerGroup, 'machine.image', {})
+    const { name, version } = get(workerGroup, ['machine', 'image'], {})
     const machineImage = find(machineImages, { name, version })
     return machineImage?.isDeprecated
   })

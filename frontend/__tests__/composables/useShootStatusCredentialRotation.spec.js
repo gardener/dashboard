@@ -13,11 +13,9 @@ import {
   useShootStatusCredentialRotation,
 } from '@/composables/useShootStatusCredentialRotation'
 
-import {
-  set,
-  unset,
-  find,
-} from '@/lodash'
+import set from 'lodash/set'
+import unset from 'lodash/unset'
+import find from 'lodash/find'
 
 describe('composables', () => {
   describe('useShootStatusCredentialRotation', () => {
@@ -58,8 +56,8 @@ describe('composables', () => {
       })
 
       it('should return completed phase', () => {
-        set(shootItem.value, 'status.credentials.rotation.certificateAuthorities.phase', 'Completed')
-        set(shootItem.value, 'status.credentials.rotation.etcdEncryptionKey.phase', 'Completed')
+        set(shootItem.value, ['status', 'credentials', 'rotation', 'certificateAuthorities', 'phase'], 'Completed')
+        set(shootItem.value, ['status', 'credentials', 'rotation', 'etcdEncryptionKey', 'phase'], 'Completed')
         expect(reactiveShootItem.shootCredentialsRotationAggregatedPhase).toEqual({
           type: 'Completed',
           caption: 'Completed',
@@ -67,8 +65,8 @@ describe('composables', () => {
       })
 
       it('should return prepared phase', () => {
-        set(shootItem.value, 'status.credentials.rotation.etcdEncryptionKey.phase', 'Prepared')
-        set(shootItem.value, 'status.credentials.rotation.serviceAccountKey.phase', 'Prepared')
+        set(shootItem.value, ['status', 'credentials', 'rotation', 'etcdEncryptionKey', 'phase'], 'Prepared')
+        set(shootItem.value, ['status', 'credentials', 'rotation', 'serviceAccountKey', 'phase'], 'Prepared')
         expect(reactiveShootItem.shootCredentialsRotationAggregatedPhase).toEqual({
           type: 'Prepared',
           caption: 'Prepared',
@@ -77,7 +75,7 @@ describe('composables', () => {
 
       it('should return incomplete prepared phase', () => {
       // treat unrotated credentials as unprepared
-        unset(shootItem.value, 'status.credentials.rotation.etcdEncryptionKey')
+        unset(shootItem.value, ['status', 'credentials', 'rotation', 'etcdEncryptionKey'])
 
         expect(reactiveShootItem.shootCredentialsRotationAggregatedPhase).toEqual({
           type: 'Prepared',

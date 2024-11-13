@@ -278,18 +278,16 @@ import {
   mapTableHeader,
 } from '@/utils'
 
-import {
-  get,
-  filter,
-  head,
-  includes,
-  isEmpty,
-  map,
-  mapKeys,
-  mapValues,
-  orderBy,
-  some,
-} from '@/lodash'
+import some from 'lodash/some'
+import orderBy from 'lodash/orderBy'
+import mapValues from 'lodash/mapValues'
+import mapKeys from 'lodash/mapKeys'
+import map from 'lodash/map'
+import isEmpty from 'lodash/isEmpty'
+import includes from 'lodash/includes'
+import head from 'lodash/head'
+import filter from 'lodash/filter'
+import get from 'lodash/get'
 
 export default {
   components: {
@@ -492,7 +490,7 @@ export default {
     },
   },
   mounted () {
-    if (!get(this.$route.params, 'name')) {
+    if (!get(this.$route.params, ['name'])) {
       return
     }
     const secret = this.getCloudProviderSecretByName(this.$route.params)
@@ -577,7 +575,7 @@ export default {
     getRawVal (item, column) {
       switch (column) {
         case 'secret':
-          return `${get(item, 'secret.metadata.project')} ${get(item, 'secret.metadata.name')}`
+          return `${get(item, ['secret', 'metadata', 'project'])} ${get(item, ['secret', 'metadata', 'name'])}`
         case 'infrastructure':
           return `${item.infrastructureName} ${item.cloudProfileName}`
         default:

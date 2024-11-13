@@ -43,15 +43,13 @@ import { useVuelidate } from '@vuelidate/core'
 import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
 
-import {
-  find,
-  map,
-  get,
-  set,
-  unset,
-  includes,
-  isEmpty,
-} from '@/lodash'
+import find from 'lodash/find'
+import map from 'lodash/map'
+import get from 'lodash/get'
+import set from 'lodash/set'
+import unset from 'lodash/unset'
+import includes from 'lodash/includes'
+import isEmpty from 'lodash/isEmpty'
 
 export default {
   props: {
@@ -107,15 +105,15 @@ export default {
     },
     criContainerRuntimeTypes () {
       const containerRuntime = find(this.machineImageCri, ['name', this.criName])
-      const ociRuntimes = get(containerRuntime, 'containerRuntimes', [])
+      const ociRuntimes = get(containerRuntime, ['containerRuntimes'], [])
       return map(ociRuntimes, 'type')
     },
     criName: {
       get () {
-        return get(this.worker, 'cri.name')
+        return get(this.worker, ['cri', 'name'])
       },
       set (value) {
-        set(this.worker, 'cri', {
+        set(this.worker, ['cri'], {
           ...this.worker.cri,
           name: value,
         })
@@ -123,7 +121,7 @@ export default {
     },
     selectedCriContainerRuntimeTypes: {
       get () {
-        const criContainerRuntimes = get(this.worker, 'cri.containerRuntimes')
+        const criContainerRuntimes = get(this.worker, ['cri', 'containerRuntimes'])
         return criContainerRuntimes
           ? map(criContainerRuntimes, 'type')
           : undefined
@@ -131,9 +129,9 @@ export default {
       set (value) {
         if (!isEmpty(value)) {
           const criContainerRuntimes = map(value, type => ({ type }))
-          set(this.worker, 'cri.containerRuntimes', criContainerRuntimes)
+          set(this.worker, ['cri', 'containerRuntimes'], criContainerRuntimes)
         } else {
-          unset(this.worker, 'cri.containerRuntimes')
+          unset(this.worker, ['cri', 'containerRuntimes'])
         }
       },
     },

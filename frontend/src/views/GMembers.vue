@@ -330,19 +330,17 @@ import {
   mapTableHeader,
 } from '@/utils'
 
-import {
-  filter,
-  forEach,
-  get,
-  head,
-  includes,
-  join,
-  map,
-  mapKeys,
-  mapValues,
-  orderBy,
-  toLower,
-} from '@/lodash'
+import toLower from 'lodash/toLower'
+import orderBy from 'lodash/orderBy'
+import mapValues from 'lodash/mapValues'
+import mapKeys from 'lodash/mapKeys'
+import map from 'lodash/map'
+import join from 'lodash/join'
+import includes from 'lodash/includes'
+import head from 'lodash/head'
+import get from 'lodash/get'
+import forEach from 'lodash/forEach'
+import filter from 'lodash/filter'
 
 const renderComponent = inject('renderComponent')
 
@@ -496,7 +494,7 @@ const serviceAccountList = computed(() => {
 })
 
 const currentServiceAccountDisplayName = computed(() => {
-  return get(parseServiceAccountUsername(currentServiceAccountName.value), 'name')
+  return get(parseServiceAccountUsername(currentServiceAccountName.value), ['name'])
 })
 
 const serviceAccountTableHeaders = computed(() => {

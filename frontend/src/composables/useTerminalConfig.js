@@ -14,11 +14,9 @@ import {
 
 import { useAuthnStore } from '@/store/authn'
 
-import {
-  get,
-  head,
-  some,
-} from '@/lodash'
+import get from 'lodash/get'
+import head from 'lodash/head'
+import some from 'lodash/some'
 
 export function createTerminalConfigComposable () {
   const authnStore = useAuthnStore()
@@ -41,7 +39,7 @@ export function createTerminalConfigComposable () {
     state.node = defaultNode
     if (!defaultNode) {
       state.node = authnStore.isAdmin
-        ? get(head(nodes), 'data.kubernetesHostname')
+        ? get(head(nodes), ['data', 'kubernetesHostname'])
         : autoSelectNodeItem.data.kubernetesHostname
     }
 
