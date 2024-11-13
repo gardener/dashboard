@@ -395,17 +395,20 @@ export default {
       return this.sortItems(this.infrastructureSecretItems, this.infraSecretSortBy, secondSortCriteria)
     },
     infrastructureSecretItems () {
-      return map(this.infrastructureSecretList, secret => ({
-        name: secret.metadata.name,
-        isOwnSecret: isOwnSecret(secret),
-        secretNamespace: secret.metadata.secretRef.namespace,
-        secretName: secret.metadata.secretRef.name,
-        providerType: secret.metadata.provider.type,
-        cloudProfileName: secret.metadata.cloudProfileName,
-        relatedShootCount: this.relatedShootCountInfra(secret),
-        relatedShootCountLabel: this.relatedShootCountLabel(this.relatedShootCountInfra(secret)),
-        secret,
-      }))
+      return map(this.infrastructureSecretList, secret => {
+        const relatedShootCount = this.relatedShootCountInfra(secret)
+        return {
+          name: secret.metadata.name,
+          isOwnSecret: isOwnSecret(secret),
+          secretNamespace: secret.metadata.secretRef.namespace,
+          secretName: secret.metadata.secretRef.name,
+          providerType: secret.metadata.provider.type,
+          cloudProfileName: secret.metadata.cloudProfileName,
+          relatedShootCount,
+          relatedShootCountLabel: this.relatedShootCountLabel(relatedShootCount),
+          secret,
+        }
+      })
     },
     dnsSecretTableHeaders () {
       const headers = [
@@ -465,16 +468,19 @@ export default {
       return this.sortItems(this.dnsSecretItems, this.dnsSecretSortBy, secondSortCriteria)
     },
     dnsSecretItems () {
-      return map(this.dnsSecretList, secret => ({
-        name: secret.metadata.name,
-        isOwnSecret: isOwnSecret(secret),
-        secretNamespace: secret.metadata.secretRef.namespace,
-        secretName: secret.metadata.secretRef.name,
-        providerType: secret.metadata.provider.type,
-        relatedShootCount: this.relatedShootCountDns(secret),
-        relatedShootCountLabel: this.relatedShootCountLabel(this.relatedShootCountDns(secret)),
-        secret,
-      }))
+      return map(this.dnsSecretList, secret => {
+        const relatedShootCount = this.relatedShootCountDns(secret)
+        return {
+          name: secret.metadata.name,
+          isOwnSecret: isOwnSecret(secret),
+          secretNamespace: secret.metadata.secretRef.namespace,
+          secretName: secret.metadata.secretRef.name,
+          providerType: secret.metadata.provider.type,
+          relatedShootCount,
+          relatedShootCountLabel: this.relatedShootCountLabel(relatedShootCount),
+          secret,
+        }
+      })
     },
   },
   watch: {
