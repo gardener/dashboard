@@ -135,9 +135,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  @import '@/sass/settings';
+  @use '@/sass/settings' as gSettings;
+  @use 'sass:map';
 
-  $grey-lighten-4: map-get($grey, 'lighten-4');
+  $grey-lighten-4: map.get(gSettings.$grey, 'lighten-4');
 
   .code-block {
     overflow: hidden;
@@ -161,7 +162,7 @@ export default {
       position: absolute;
       top: 20px;
       right: 30px;
-      transition: $swift-ease-out;
+      transition: gSettings.$swift-ease-out;
       color: rgba(#000, .26);
       font-family: Roboto, sans-serif;
       font-size: 11px;
@@ -203,14 +204,16 @@ export default {
     padding: 16px;
     overflow: auto;
   }
+
   .copy-button {
     position: absolute;
     top: 12px;
     right: 12px;
     z-index: 2;
     opacity: 0;
-    transition: $swift-ease-out;
+    transition: gSettings.$swift-ease-out;
   }
+
   .copied {
     padding: 8px 16px;
     position: absolute;
@@ -219,29 +222,32 @@ export default {
     background-color: rgba(#000, .87);
     border-radius: 2px;
     transform: translate3d(0, -48px, 0);
-    transition: $swift-ease-in-out;
+    transition: gSettings.$swift-ease-in-out;
     color: #fff;
-    font-family: $font-roboto;
+    font-family: gSettings.$font-roboto;
     font-size: 14px;
     line-height: 1em;
-    &.active {
-      transition: $swift-ease-out;
-      transform: translate3d(0, 0, 0);
-    }
-  }
 
-  .v-theme--light .code-block {
-    background-color: rgba(0, 0, 0, .02);
-  }
+   &.active {
+     transition : gSettings.$swift-ease-out;
+     transform : translate3d(0,0,0);
+   }
+ }
 
-  .v-theme--dark .code-block {
-    background-color: rgba(0, 0, 0, .2);
+ .v-theme--light .code-block {
+   background-color : rgba(0,0,0,.02);
+ }
 
-    &:after {
-      color: rgba(#fff, .26) !important;
-    }
-    code.hljs {
-      color: $grey-lighten-4 !important;
-    }
-  }
+ .v-theme--dark .code-block {
+   background-color : rgba(0,0,0,.2);
+
+   &:after {
+     color : rgba(#fff,.26) !important;
+   }
+
+   code.hljs {
+     color : $grey-lighten-4 !important;
+   }
+ }
+
 </style>
