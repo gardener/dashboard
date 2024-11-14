@@ -1580,7 +1580,7 @@ const RAW_RUNTIME_STATE =
           ["netmask", "npm:2.0.2"],\
           ["pinia", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.2.6"],\
           ["rollup-plugin-visualizer", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.12.0"],\
-          ["sass", "npm:1.80.7"],\
+          ["sass", "npm:1.79.6"],\
           ["semver", "npm:7.6.3"],\
           ["socket.io-client", "npm:4.8.1"],\
           ["splitpanes", "npm:3.1.5"],\
@@ -7833,10 +7833,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["immutable", [\
-      ["npm:5.0.2", {\
-        "packageLocation": "./.yarn/cache/immutable-npm-5.0.2-d7d3c3ff6b-0d97ad9538.zip/node_modules/immutable/",\
+      ["npm:4.3.7", {\
+        "packageLocation": "./.yarn/cache/immutable-npm-4.3.7-a76ac3621b-9b09919708.zip/node_modules/immutable/",\
         "packageDependencies": [\
-          ["immutable", "npm:5.0.2"]\
+          ["immutable", "npm:4.3.7"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -11144,13 +11144,13 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["sass", [\
-      ["npm:1.80.7", {\
-        "packageLocation": "./.yarn/cache/sass-npm-1.80.7-f3e7fc66fb-e0e0df8dc9.zip/node_modules/sass/",\
+      ["npm:1.79.6", {\
+        "packageLocation": "./.yarn/cache/sass-npm-1.79.6-6b9222dfb9-d029c4ecc4.zip/node_modules/sass/",\
         "packageDependencies": [\
-          ["sass", "npm:1.80.7"],\
+          ["sass", "npm:1.79.6"],\
           ["@parcel/watcher", "npm:2.4.1"],\
           ["chokidar", "npm:4.0.1"],\
-          ["immutable", "npm:5.0.2"],\
+          ["immutable", "npm:4.3.7"],\
           ["source-map-js", "npm:1.2.1"]\
         ],\
         "linkType": "HARD"\
@@ -12433,7 +12433,7 @@ const RAW_RUNTIME_STATE =
           ["lightningcss", null],\
           ["postcss", "npm:8.4.47"],\
           ["rollup", "npm:4.22.4"],\
-          ["sass", "npm:1.80.7"],\
+          ["sass", "npm:1.79.6"],\
           ["sass-embedded", null],\
           ["stylus", null],\
           ["sugarss", null],\
