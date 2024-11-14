@@ -105,7 +105,7 @@ export default {
     },
     alertmanagerUrl () {
       if (this.isOidcObservabilityUrlsEnabled) {
-        return this.getOidcDeploymentUrl('alertmanager')
+        return this.getOidcStatefulsetUrl('alertmanager')
       }
 
       return `https://au-${this.prefix}.${this.seedIngressDomain}`
