@@ -1596,7 +1596,7 @@ const RAW_RUNTIME_STATE =
           ["vite-plugin-compression", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.5.1"],\
           ["vite-plugin-vuetify", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.0.4"],\
           ["vitest", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.1.5"],\
-          ["vitest-fetch-mock", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.4.2"],\
+          ["vitest-fetch-mock", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.3.0"],\
           ["vue", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.5.12"],\
           ["vue-router", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:4.4.5"],\
           ["vuetify", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.7.4"]\
@@ -5348,6 +5348,16 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["cross-env", "npm:7.0.3"],\
           ["cross-spawn", "npm:7.0.3"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["cross-fetch", [\
+      ["npm:4.0.0", {\
+        "packageLocation": "./.yarn/cache/cross-fetch-npm-4.0.0-9c67668db4-386727dc4c.zip/node_modules/cross-fetch/",\
+        "packageDependencies": [\
+          ["cross-fetch", "npm:4.0.0"],\
+          ["node-fetch", "virtual:b01bc14c3fb20a565009002ee2e0790039582d5ead51843fa878af651c6a4713382219abd2c6b1a0bc65ff66858b5db4627e960be7fcc9aa9469883e27f8fb1c#npm:2.7.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -12635,18 +12645,19 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["vitest-fetch-mock", [\
-      ["npm:0.4.2", {\
-        "packageLocation": "./.yarn/cache/vitest-fetch-mock-npm-0.4.2-144cc23387-d583056cf4.zip/node_modules/vitest-fetch-mock/",\
+      ["npm:0.3.0", {\
+        "packageLocation": "./.yarn/cache/vitest-fetch-mock-npm-0.3.0-b8e8ed5324-794a3ba957.zip/node_modules/vitest-fetch-mock/",\
         "packageDependencies": [\
-          ["vitest-fetch-mock", "npm:0.4.2"]\
+          ["vitest-fetch-mock", "npm:0.3.0"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.4.2", {\
-        "packageLocation": "./.yarn/__virtual__/vitest-fetch-mock-virtual-a09a0c15c3/0/cache/vitest-fetch-mock-npm-0.4.2-144cc23387-d583056cf4.zip/node_modules/vitest-fetch-mock/",\
+      ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.3.0", {\
+        "packageLocation": "./.yarn/__virtual__/vitest-fetch-mock-virtual-1fe7d38c11/0/cache/vitest-fetch-mock-npm-0.3.0-b8e8ed5324-794a3ba957.zip/node_modules/vitest-fetch-mock/",\
         "packageDependencies": [\
-          ["vitest-fetch-mock", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.4.2"],\
+          ["vitest-fetch-mock", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.3.0"],\
           ["@types/vitest", null],\
+          ["cross-fetch", "npm:4.0.0"],\
           ["vitest", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.1.5"]\
         ],\
         "packagePeers": [\
