@@ -63,7 +63,7 @@ SPDX-License-Identifier: Apache-2.0
                   />
                 </template>
                 <v-list-item-title>
-                  {{ infrastructure }}
+                  {{ vendorDisplayName(infrastructure) }}
                 </v-list-item-title>
               </v-list-item>
             </v-list>
@@ -187,7 +187,7 @@ SPDX-License-Identifier: Apache-2.0
                   />
                 </template>
                 <v-list-item-title>
-                  {{ dnsProvider }}
+                  {{ vendorDisplayName(dnsProvider) }}
                 </v-list-item-title>
               </v-list-item>
             </v-list>
@@ -264,6 +264,7 @@ import { useSecretStore } from '@/store/secret'
 import { useAuthzStore } from '@/store/authz'
 import { useShootStore } from '@/store/shoot'
 import { useLocalStorageStore } from '@/store/localStorage'
+import { useConfigStore } from '@/store/config'
 
 import GSecretDialogWrapper from '@/components/Secrets/GSecretDialogWrapper'
 import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
@@ -283,7 +284,6 @@ import orderBy from 'lodash/orderBy'
 import mapValues from 'lodash/mapValues'
 import mapKeys from 'lodash/mapKeys'
 import map from 'lodash/map'
-import isEmpty from 'lodash/isEmpty'
 import includes from 'lodash/includes'
 import head from 'lodash/head'
 import filter from 'lodash/filter'
@@ -337,11 +337,6 @@ export default {
       'dnsSecretItemsPerPage',
       'dnsSecretSortBy',
     ]),
-    hasCloudProfileForCloudProviderKind () {
-      return kind => {
-        return !isEmpty(this.cloudProfilesByCloudProviderKind(kind))
-      }
-    },
     infraSecretTableHeaders () {
       const headers = [
         {
@@ -500,8 +495,8 @@ export default {
     this.onUpdateSecret(secret)
   },
   methods: {
-    ...mapActions(useCloudProfileStore, ['cloudProfilesByCloudProviderKind']),
     ...mapActions(useSecretStore, ['getCloudProviderSecretByName']),
+    ...mapActions(useConfigStore, ['vendorDisplayName']),
     openSecretAddDialog (infrastructureKind) {
       this.selectedSecret = undefined
       this.visibleSecretDialog = infrastructureKind

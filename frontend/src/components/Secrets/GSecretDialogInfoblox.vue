@@ -10,8 +10,6 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :secret-validations="v$"
     :secret="secret"
-    create-title="Add new Infoblox Secret"
-    replace-title="Replace Infoblox Secret"
   >
     <template #secret-slot>
       <div>
@@ -106,9 +104,6 @@ export default {
       set (modelValue) {
         this.$emit('update:modelValue', modelValue)
       },
-    },
-    valid () {
-      return !this.v$.$invalid
     },
     secretData () {
       return {

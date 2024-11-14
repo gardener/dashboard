@@ -11,8 +11,6 @@ SPDX-License-Identifier: Apache-2.0
     :secret-validations="v$"
     :secret="secret"
     :vendor="vendor"
-    :create-title="`Add new ${name} Secret`"
-    :replace-title="`Replace ${name} Secret`"
   >
     <template #secret-slot>
       <div>
@@ -196,18 +194,6 @@ export default {
       set (modelValue) {
         this.$emit('update:modelValue', modelValue)
       },
-    },
-    valid () {
-      return !this.v$.$invalid
-    },
-    name () {
-      if (this.vendor === 'alicloud') {
-        return 'Alibaba Cloud'
-      }
-      if (this.vendor === 'alicloud-dns') {
-        return 'Alicloud DNS'
-      }
-      return undefined
     },
     secretData () {
       return {

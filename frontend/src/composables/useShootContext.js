@@ -67,6 +67,8 @@ import map from 'lodash/map'
 import has from 'lodash/has'
 import set from 'lodash/set'
 import get from 'lodash/get'
+import forEach from 'lodash/forEach'
+import fromPairs from 'lodash/fromPairs'
 
 export function createShootContextComposable (options = {}) {
   const {
@@ -109,6 +111,11 @@ export function createShootContextComposable (options = {}) {
   const initialZones = computed(() => {
     const workers = get(initialManifest.value, ['spec', 'provider', 'workers'])
     return uniq(flatMap(workers, 'zones'))
+  })
+
+  const customCloudProviderFields = computed(() => {
+    const customCloudProviders = configStore.customCloudProviders
+    return get(customCloudProviders, [providerType.value, 'shoot', 'createFields'], [])
   })
 
   const initialProviderInfrastructureConfigNetworksZones = computed(() => {
@@ -599,6 +606,11 @@ export function createShootContextComposable (options = {}) {
   })
 
   const isZonedCluster = computed(() => {
+    const customCloudProviders = configStore.customCloudProviders
+    const customCloudProviderZone = get(customCloudProviders?.value, [providerType.value, 'zoned'])
+    if (customCloudProviderZone !== undefined) {
+      return customCloudProviderZone
+    }
     switch (providerType.value) {
       case 'azure':
         if (isNewCluster.value) {
@@ -860,6 +872,22 @@ export function createShootContextComposable (options = {}) {
     },
   })
 
+  /* customCloudProvider */
+  // const customCloudProviderData = reactive({})
+
+  const customCloudProviderData = computed({
+    get () {
+      return fromPairs(map(customCloudProviderFields.value, ({ key, path }) =>
+        [key, get(manifest.value, [`${path}.${key}`])],
+      ))
+    },
+    set (value) {
+      forEach(customCloudProviderFields.value, ({ key, path }) => {
+        set(manifest.value, [`${path}.${key}`], get(value, [key]))
+      })
+    },
+  })
+
   /* dns */
   const {
     dnsDomain,
@@ -1018,6 +1046,8 @@ export function createShootContextComposable (options = {}) {
     controlPlaneHighAvailability,
     controlPlaneHighAvailabilityFailureToleranceType,
     controlPlaneHighAvailabilityFailureToleranceTypeChangeAllowed,
+    /* customCloudProvider */
+    customCloudProviderData,
     /* dns */
     dnsDomain,
     dnsPrimaryProviderType,

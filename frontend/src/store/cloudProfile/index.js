@@ -34,7 +34,7 @@ import { useSeedStore } from '../seed'
 
 import {
   matchesPropertyOrEmpty,
-  vendorNameFromImageName,
+  vendorNameFromMachineImageName,
   findVendorHint,
   decorateClassificationObject,
   firstItemMatchingVersionClassification,
@@ -102,7 +102,8 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
         return semver.rcompare(a.version, b.version)
       })
 
-      const vendorName = vendorNameFromImageName(name)
+      const vendorName = vendorNameFromMachineImageName(machineImage.name)
+      const displayName = get(configStore, ['vendors', vendorName, 'name'], vendorName)
       const vendorHint = findVendorHint(configStore.vendorHints, vendorName)
 
       return map(versions, ({ version, expirationDate, cri, classification, architectures }) => {
@@ -112,6 +113,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
         return decorateClassificationObject({
           key: name + '/' + version,
           name,
+          displayName,
           version,
           updateStrategy,
           cri,
@@ -171,7 +173,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
   })
 
   const sortedInfrastructureKindList = computed(() => {
-    return intersection(knownInfrastructureKindList.value, infrastructureKindList.value)
+    return intersection(configStore.cloudProviderList ?? knownInfrastructureKindList.value, infrastructureKindList.value)
   })
 
   function cloudProfilesByCloudProviderKind (cloudProviderKind) {

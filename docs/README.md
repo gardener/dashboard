@@ -18,6 +18,7 @@
 
 * [Configure Access Restrictions](operations/access-restrictions.md)
 * [Theming and Branding](operations/customization.md)
+* [Configure Vendors and Custom Cloud Providers](operations/vendors-custom-cps.md)
 * [Webterminals](operations/webterminals.md)
 
 ## Development

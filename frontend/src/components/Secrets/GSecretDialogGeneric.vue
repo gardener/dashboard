@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-secret-dialog
     v-model="visible"
-    :data="secretData"
+    :data="customCloudProviderData"
     :secret-validations="v$"
     :secret="secret"
     :vendor="vendor"
@@ -15,23 +15,24 @@ SPDX-License-Identifier: Apache-2.0
     :replace-title="`Replace ${vendor} Secret`"
   >
     <template #secret-slot>
-      <div>
-        <v-textarea
-          ref="data"
-          v-model="data"
-          color="primary"
-          variant="filled"
-          label="Secret Data"
-          :error-messages="getErrorMessages(v$.data)"
-          @update:model-value="onInputSecretData"
-          @blur="v$.data.$touch()"
+      <template v-if="customCloudProviderFields">
+        <g-generic-input-fields
+          v-model="customCloudProviderData"
+          :fields="customCloudProviderFields"
+          :input-props="{ variant: 'underlined' }"
         />
-      </div>
+      </template>
     </template>
     <template #help-slot>
-      <div class="help-content">
+      <!-- eslint-disable vue/no-v-html -->
+      <div
+        v-if="helpHtml"
+        class="markdown"
+        v-html="helpHtml"
+      />
+      <div v-else>
         <p>
-          This is a generic secret dialog.
+          This is a generic provider service account dialog.
         </p>
         <p>
           Please enter data required for {{ vendor }}.
@@ -42,26 +43,22 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { mapState } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
-import { required } from '@vuelidate/validators'
-import yaml from 'js-yaml'
+
+import { useConfigStore } from '@/store/config'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
+import GGenericInputFields from '@/components/GGenericInputFields'
 
-import {
-  withFieldName,
-  withMessage,
-} from '@/utils/validators'
-import {
-  getErrorMessages,
-  setDelayedInputFocus,
-} from '@/utils'
+import { transformHtml } from '@/utils'
 
-import isObject from 'lodash/isObject'
+import get from 'lodash/get'
 
 export default {
   components: {
     GSecretDialog,
+    GGenericInputFields,
   },
   props: {
     modelValue: {
@@ -85,19 +82,13 @@ export default {
   },
   data () {
     return {
-      data: undefined,
-      secretData: {},
-    }
-  },
-  validations () {
-    return {
-      data: withFieldName('Secret Data', {
-        required,
-        isYAML: withMessage('You need to enter secret data as YAML key - value pairs', () => Object.keys(this.secretData).length > 0),
-      }),
+      customCloudProviderData: {},
     }
   },
   computed: {
+    ...mapState(useConfigStore, [
+      'customCloudProviders',
+    ]),
     visible: {
       get () {
         return this.modelValue
@@ -106,64 +97,48 @@ export default {
         this.$emit('update:modelValue', modelValue)
       },
     },
-    valid () {
-      return !this.v$.$invalid
+    customCloudProvider () {
+      return get(this.customCloudProviders, this.vendor)
+    },
+    customCloudProviderFields () {
+      const configuredFields = this.customCloudProvider?.secret?.fields
+      if (configuredFields) {
+        return configuredFields
+      }
+      return [
+        {
+          key: 'secret',
+          label: 'Secret Data',
+          hint: 'Provide secret data as YAML key-value pairs',
+          type: 'yaml',
+          validators: {
+            required: {
+              type: 'required',
+            },
+            isYAML: {
+              type: 'isValidObject',
+              message: 'You need to enter secret data as YAML key-value pairs',
+            },
+          },
+        },
+      ]
+    },
+    helpHtml () {
+      return transformHtml(this.customCloudProvider?.secret?.help)
     },
     isCreateMode () {
       return !this.secret
     },
-  },
-  methods: {
-    onInputSecretData () {
-      this.secretData = {}
-
-      try {
-        this.secretData = yaml.load(this.data)
-      } catch (err) {
-        /* ignore errors */
-      } finally {
-        if (!isObject(this.secretData)) {
-          this.secretData = {}
-        }
-      }
-
-      this.v$.data.$touch()
-    },
-    reset () {
-      this.v$.$reset()
-
-      this.data = ''
-      this.secretData = {}
-
-      if (!this.isCreateMode) {
-        setDelayedInputFocus(this, 'data')
-      }
-    },
-    getErrorMessages,
   },
 }
 </script>
 
 <style lang="scss" scoped>
 
-  :deep(.v-input__control textarea) {
-    font-family: monospace;
-    font-size: 14px;
+.markdown {
+  :deep(p) {
+    margin: 0px;
   }
-
-  .help-content {
-    ul {
-      margin-top: 20px;
-      margin-bottom: 20px;
-      list-style-type: none;
-      border-left: 4px solid #318334 !important;
-      margin-left: 20px;
-      padding-left: 24px;
-      li {
-        font-weight: 300;
-        font-size: 16px;
-      }
-    }
-  }
+}
 
 </style>

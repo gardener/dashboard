@@ -11,8 +11,6 @@ SPDX-License-Identifier: Apache-2.0
     :secret-validations="v$"
     :secret="secret"
     :vendor="vendor"
-    :create-title="`Add new ${name} Secret`"
-    :replace-title="`Replace ${name} Secret`"
   >
     <template #secret-slot>
       <div>
@@ -184,9 +182,6 @@ export default {
         this.$emit('update:modelValue', modelValue)
       },
     },
-    valid () {
-      return !this.v$.$invalid
-    },
     secretData () {
       return {
         clientID: this.clientId,
@@ -198,18 +193,6 @@ export default {
     },
     isCreateMode () {
       return !this.secret
-    },
-    name () {
-      if (this.vendor === 'azure') {
-        return 'Azure'
-      }
-      if (this.vendor === 'azure-dns') {
-        return 'Azure DNS'
-      }
-      if (this.vendor === 'azure-private-dns') {
-        return 'Azure Private DNS'
-      }
-      return undefined
     },
     isDNSSecret () {
       return this.vendor === 'azure-dns' || this.vendor === 'azure-private-dns'

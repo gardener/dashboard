@@ -11,8 +11,6 @@ SPDX-License-Identifier: Apache-2.0
     :secret-validations="v$"
     :secret="secret"
     :vendor="vendor"
-    :create-title="`Add new ${name} Secret`"
-    :replace-title="`Replace ${name} Secret`"
   >
     <template #secret-slot>
       <div>
@@ -253,9 +251,6 @@ export default {
         this.$emit('update:modelValue', modelValue)
       },
     },
-    valid () {
-      return !this.v$.$invalid
-    },
     secretData () {
       return {
         accessKeyID: this.accessKeyId,
@@ -265,15 +260,6 @@ export default {
     },
     isCreateMode () {
       return !this.secret
-    },
-    name () {
-      if (this.vendor === 'aws') {
-        return 'AWS'
-      }
-      if (this.vendor === 'aws-route53') {
-        return 'Amazon Route 53'
-      }
-      return undefined
     },
   },
   methods: {

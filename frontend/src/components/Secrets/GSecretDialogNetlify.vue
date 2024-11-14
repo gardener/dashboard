@@ -10,8 +10,6 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :secret-validations="v$"
     :secret="secret"
-    create-title="Add new Netlify Secret"
-    replace-title="Replace Netlify Secret"
   >
     <template #secret-slot>
       <div>
