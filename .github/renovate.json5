@@ -61,6 +61,8 @@
         'p-limit',
         'p-retry',
         'p-timeout',
+        'dockerfile-ast',
+        'sass',
       ],
       matchUpdateTypes: [
         'major',
