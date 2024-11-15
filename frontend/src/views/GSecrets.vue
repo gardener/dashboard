@@ -109,7 +109,7 @@ SPDX-License-Identifier: Apache-2.0
       >
         <template #item="{ item }">
           <g-secret-row-infra
-            :key="`${item.cloudProfileName}/${item.name}`"
+            :key="`${item.secretName}/${item.secretNamespace}`"
             :item="item"
             :headers="infraSecretTableHeaders"
             @delete="onRemoveSecret"
@@ -224,7 +224,7 @@ SPDX-License-Identifier: Apache-2.0
       >
         <template #item="{ item }">
           <g-secret-row-dns
-            :key="`${item.cloudProfileName}/${item.name}`"
+            :key="`${item.secretName}/${item.secretNamespace}`"
             :item="item"
             :headers="dnsSecretTableHeaders"
             @delete="onRemoveSecret"
@@ -401,7 +401,6 @@ export default {
           secretNamespace: secret.metadata.secretRef.namespace,
           secretName: secret.metadata.secretRef.name,
           providerType: secret.metadata.provider.type,
-          cloudProfileName: secret.metadata.cloudProfileName,
           relatedShootCount,
           relatedShootCountLabel: this.relatedShootCountLabel(relatedShootCount),
           secret,
@@ -576,9 +575,9 @@ export default {
     getRawVal (item, column) {
       switch (column) {
         case 'secret':
-          return `${get(item, ['secret', 'metadata', 'project'])} ${get(item, ['secret', 'metadata', 'name'])}`
+          return `${get(item, ['secret', 'metadata', 'namespace'])} ${get(item, ['secret', 'metadata', 'name'])}`
         case 'infrastructure':
-          return `${item.infrastructureName} ${item.cloudProfileName}`
+          return item.infrastructureName
         default:
           return get(item, [column])
       }
