@@ -92,7 +92,7 @@ export const useSecretStore = defineStore('secret', () => {
 
   const infrastructureSecretList = computed(() => {
     return filter(list.value, secret => {
-      return cloudProfileStore.sortedProviderTypesList.includes(secret.metadata.provider?.type)
+      return cloudProfileStore.sortedProviderTypeList.includes(secret.metadata.provider?.type)
     })
   })
 

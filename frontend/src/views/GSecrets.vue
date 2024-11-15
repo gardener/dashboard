@@ -52,7 +52,7 @@ SPDX-License-Identifier: Apache-2.0
                 Create Infrastructure Secret
               </v-list-subheader>
               <v-list-item
-                v-for="infrastructure in sortedProviderTypesList"
+                v-for="infrastructure in sortedProviderTypeList"
                 :key="infrastructure"
                 @click="openSecretAddDialog(infrastructure)"
               >
@@ -76,7 +76,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
       </g-toolbar>
 
-      <v-card-text v-if="!sortedProviderTypesList.length">
+      <v-card-text v-if="!sortedProviderTypeList.length">
         <v-alert
           class="ma-3"
           type="warning"
@@ -109,7 +109,7 @@ SPDX-License-Identifier: Apache-2.0
       >
         <template #item="{ item }">
           <g-secret-row-infra
-            :key="`${item.secretName}/${item.secretNamespace}`"
+            :key="`${item.secretNamespace}/${item.secretName}`"
             :item="item"
             :headers="infraSecretTableHeaders"
             @delete="onRemoveSecret"
@@ -224,7 +224,7 @@ SPDX-License-Identifier: Apache-2.0
       >
         <template #item="{ item }">
           <g-secret-row-dns
-            :key="`${item.secretName}/${item.secretNamespace}`"
+            :key="`${item.secretNamespace}/${item.secretName}`"
             :item="item"
             :headers="dnsSecretTableHeaders"
             @delete="onRemoveSecret"
@@ -316,7 +316,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(useCloudProfileStore, ['sortedProviderTypesList']),
+    ...mapState(useCloudProfileStore, ['sortedProviderTypeList']),
     ...mapState(useGardenerExtensionStore, ['dnsProviderTypes']),
     ...mapState(useSecretStore, [
       'infrastructureSecretList',
@@ -502,9 +502,9 @@ export default {
       this.visibleSecretDialog = providerType
     },
     onUpdateSecret (secret) {
-      const kind = secret.metadata.provider.type
+      const providerType = secret.metadata.provider.type
       this.selectedSecret = secret
-      this.visibleSecretDialog = kind
+      this.visibleSecretDialog = providerType
     },
     onRemoveSecret (secret) {
       this.selectedSecret = secret
@@ -516,18 +516,20 @@ export default {
       return shootsByInfrastructureSecret.length
     },
     relatedShootCountDns (secret) {
-      const shootsByDnsSecret = filter(this.shootList, shoot => {
-        return some(shoot.spec.dns?.providers, {
-          secretName: secret.metadata.name,
-        }) ||
-        some(shoot.spec.resources, {
-          resourceRef: {
-            kind: 'Secret',
-            name: secret.metadata.name,
-          },
-        })
-      })
-      return shootsByDnsSecret.length
+      const secretName = secret.metadata.name
+
+      const someDnsProviderHasSecretRef = providers => some(providers, ['secretName', secretName])
+      const someResourceHasSecretRef = resources => some(resources, { resourceRef: { kind: 'Secret', name: secretName } })
+
+      let count = 0
+      for (const shoot of this.shootList) {
+        const dnsProviders = shoot.spec.dns?.providers
+        const resources = shoot.spec.resources
+        if (someDnsProviderHasSecretRef(dnsProviders) || someResourceHasSecretRef(resources)) {
+          count++
+        }
+      }
+      return count
     },
     relatedShootCountLabel (count) {
       if (count === 0) {

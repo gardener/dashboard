@@ -268,7 +268,7 @@ export default {
       }
     },
     isInfrastructureSecret () {
-      return includes(this.sortedProviderTypesList, this.providerType)
+      return includes(this.sortedProviderTypeList, this.providerType)
     },
     isDnsProviderSecret () {
       return includes(this.dnsProviderTypes, this.providerType)

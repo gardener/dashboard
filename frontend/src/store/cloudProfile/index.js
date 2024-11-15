@@ -170,7 +170,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return uniq(map(list.value, 'metadata.providerType'))
   })
 
-  const sortedProviderTypesList = computed(() => {
+  const sortedProviderTypeList = computed(() => {
     return intersection(knownProviderTypesList.value, providerTypesList.value)
   })
 
@@ -672,7 +672,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     setCloudProfiles,
     fetchCloudProfiles,
     cloudProfilesByProviderType,
-    sortedProviderTypesList,
+    sortedProviderTypeList,
     cloudProfileByName,
     regionsWithSeedByCloudProfileName,
     regionsWithoutSeedByCloudProfileName,
