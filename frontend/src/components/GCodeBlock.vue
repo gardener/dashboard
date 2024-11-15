@@ -135,9 +135,21 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  @import '@/sass/settings';
+  @use 'vuetify/settings' as vuetify;
+  @use 'sass:map';
 
-  $grey-lighten-4: map-get($grey, 'lighten-4');
+  /** Transitions - Based on Angular Material **/
+  $swift-ease-out-duration: .4s !default;
+  $swift-ease-out-timing-function: cubic-bezier(.25, .8, .25, 1) !default;
+  $swift-ease-out: all $swift-ease-out-duration $swift-ease-out-timing-function !default;
+
+  $swift-ease-in-duration: .3s !default;
+  $swift-ease-in-timing-function: cubic-bezier(.55, 0, .55, .2) !default;
+  $swift-ease-in: all $swift-ease-in-duration $swift-ease-in-timing-function !default;
+
+  $swift-ease-in-out-duration: .5s !default;
+  $swift-ease-in-out-timing-function: cubic-bezier(.35, 0, .25, 1) !default;
+  $swift-ease-in-out: all $swift-ease-in-out-duration $swift-ease-in-out-timing-function !default;
 
   .code-block {
     overflow: hidden;
@@ -203,6 +215,7 @@ export default {
     padding: 16px;
     overflow: auto;
   }
+
   .copy-button {
     position: absolute;
     top: 12px;
@@ -211,6 +224,7 @@ export default {
     opacity: 0;
     transition: $swift-ease-out;
   }
+
   .copied {
     padding: 8px 16px;
     position: absolute;
@@ -221,27 +235,30 @@ export default {
     transform: translate3d(0, -48px, 0);
     transition: $swift-ease-in-out;
     color: #fff;
-    font-family: $font-roboto;
+    font-family: Roboto, sans-serif;
     font-size: 14px;
     line-height: 1em;
-    &.active {
-      transition: $swift-ease-out;
-      transform: translate3d(0, 0, 0);
-    }
-  }
 
-  .v-theme--light .code-block {
-    background-color: rgba(0, 0, 0, .02);
-  }
+   &.active {
+     transition : $swift-ease-out;
+     transform : translate3d(0,0,0);
+   }
+ }
 
-  .v-theme--dark .code-block {
-    background-color: rgba(0, 0, 0, .2);
+ .v-theme--light .code-block {
+   background-color : rgba(0,0,0,.02);
+ }
 
-    &:after {
-      color: rgba(#fff, .26) !important;
-    }
-    code.hljs {
-      color: $grey-lighten-4 !important;
-    }
-  }
+ .v-theme--dark .code-block {
+   background-color : rgba(0,0,0,.2);
+
+   &:after {
+     color : rgba(#fff,.26) !important;
+   }
+
+   code.hljs {
+     color : map.get(vuetify.$grey, 'lighten-4') !important;
+   }
+ }
+
 </style>
