@@ -230,35 +230,47 @@ export default {
     position: absolute;
     top: 14px;
     left: 14px;
-    background-color: rgba(#000, .87);
     border-radius: 2px;
     transform: translate3d(0, -48px, 0);
     transition: $swift-ease-in-out;
-    color: #fff;
     font-family: Roboto, sans-serif;
     font-size: 14px;
     line-height: 1em;
 
-   &.active {
-     transition : $swift-ease-out;
-     transform : translate3d(0,0,0);
-   }
- }
+    &.active {
+      transition: $swift-ease-out;
+      transform: translate3d(0, 0, 0);
+    }
+  }
 
- .v-theme--light .code-block {
-   background-color : rgba(0,0,0,.02);
- }
+  .v-theme--light {
+    .code-block {
+      background-color: rgba(0, 0, 0, .02);
+    }
 
- .v-theme--dark .code-block {
-   background-color : rgba(0,0,0,.2);
+    .copied {
+      background-color: rgba(0, 0, 0, .87);
+      color: #fff;
+    }
+  }
 
-   &:after {
-     color : rgba(#fff,.26) !important;
-   }
+  .v-theme--dark {
+    .code-block {
+      background-color: rgba(0, 0, 0, .2);
 
-   code.hljs {
-     color : map.get(vuetify.$grey, 'lighten-4') !important;
-   }
- }
+      &:after {
+        color: rgba(#fff, .26) !important;
+      }
 
+      code.hljs {
+        color: map.get(vuetify.$grey, 'lighten-4') !important;
+      }
+    }
+
+    .copied {
+      background-color: rgba(255, 255, 255, .87);
+      color: #000;
+    }
+  }
 </style>
+
