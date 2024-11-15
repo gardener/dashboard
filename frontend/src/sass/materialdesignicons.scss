@@ -13,7 +13,7 @@
 
 @font-face {
   font-family: '#{$mdi-font-name}';
-  src: url('@mdi/font/fonts/#{$mdi-filename}-webfont.woff2') format('woff2'), url('@mdi/font/fonts/#{$mdi-filename}-webfont.woff') format('woff');
+  src: url('@mdi/font/fonts/#{$mdi-filename}-webfont.woff2') format('woff2');
   font-weight: normal;
   font-style: normal;
 }
