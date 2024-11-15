@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :secret-validations="v$"
     :secret="secret"
-    :vendor="vendor"
+    :provider-type="providerType"
     :create-title="`Add new ${name} Secret`"
     :replace-title="`Replace ${name} Secret`"
   >
@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <template #help-slot>
       <div
-        v-if="vendor==='gcp'"
+        v-if="providerType==='gcp'"
         class="help-content"
       >
         <p>
@@ -64,7 +64,7 @@ SPDX-License-Identifier: Apache-2.0
           to service accounts.
         </p>
       </div>
-      <div v-if="vendor==='google-clouddns'">
+      <div v-if="providerType==='google-clouddns'">
         <p>
           You need to provide a service account and a key (serviceaccount.json) to allow the dns-controller-manager to authenticate and execute calls to Cloud DNS.
         </p>
@@ -112,7 +112,7 @@ export default {
     secret: {
       type: Object,
     },
-    vendor: {
+    providerType: {
       type: String,
     },
   },
@@ -187,10 +187,10 @@ export default {
       return !this.secret
     },
     name () {
-      if (this.vendor === 'gcp') {
+      if (this.providerType === 'gcp') {
         return 'Google'
       }
-      if (this.vendor === 'google-clouddns') {
+      if (this.providerType === 'google-clouddns') {
         return 'Google Cloud DNS'
       }
       return undefined

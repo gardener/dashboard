@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :secret-validations="v$"
     :secret="secret"
-    :vendor="vendor"
+    :provider-type="providerType"
     :create-title="`Add new ${name} Secret`"
     :replace-title="`Replace ${name} Secret`"
   >
@@ -75,7 +75,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </template>
     <template #help-slot>
-      <div v-if="vendor==='azure'">
+      <div v-if="providerType==='azure'">
         <p>
           Before you can provision and access a Kubernetes cluster on Azure, you need to add account/subscription credentials.
           The Gardener needs the credentials of a service principal assigned to an account/subscription to provision
@@ -134,7 +134,7 @@ export default {
     secret: {
       type: Object,
     },
-    vendor: {
+    providerType: {
       type: String,
     },
   },
@@ -200,19 +200,19 @@ export default {
       return !this.secret
     },
     name () {
-      if (this.vendor === 'azure') {
+      if (this.providerType === 'azure') {
         return 'Azure'
       }
-      if (this.vendor === 'azure-dns') {
+      if (this.providerType === 'azure-dns') {
         return 'Azure DNS'
       }
-      if (this.vendor === 'azure-private-dns') {
+      if (this.providerType === 'azure-private-dns') {
         return 'Azure Private DNS'
       }
       return undefined
     },
     isDNSSecret () {
-      return this.vendor === 'azure-dns' || this.vendor === 'azure-private-dns'
+      return this.providerType === 'azure-dns' || this.providerType === 'azure-private-dns'
     },
   },
   methods: {

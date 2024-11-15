@@ -61,7 +61,7 @@ export default {
       shootNamespace,
       shootName,
       shootSeedName,
-      shootCloudProviderKind,
+      shootProviderType,
     } = useShootItem()
 
     const seedStore = useSeedStore()
@@ -78,7 +78,7 @@ export default {
       }
       const selectedProvider = selectedSeed.data.type
       const sourceProvider = sourceSeed.data.type
-      const shootProvider = shootCloudProviderKind.value
+      const shootProvider = shootProviderType.value
       return selectedProvider !== sourceProvider || selectedProvider !== shootProvider
     })
 

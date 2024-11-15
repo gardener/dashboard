@@ -16,6 +16,8 @@ import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useSecretStore } from '@/store/secret'
 import { useSeedStore } from '@/store/seed'
 
+import { useSecretList } from '@/composables/useSecretList'
+
 import { selfTerminationDaysForSecret } from '@/utils'
 
 import { useShootAccessRestrictions } from './useShootAccessRestrictions'
@@ -63,7 +65,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
   })
 
   const cloudProfiles = computed(() => {
-    return cloudProfileStore.cloudProfilesByCloudProviderKind(providerType.value)
+    return cloudProfileStore.cloudProfilesByProviderType(providerType.value)
   })
 
   const defaultCloudProfileName = computed(() => {
@@ -113,9 +115,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     return cloudProfileStore.getDefaultNodesCIDR(cloudProfileName.value)
   })
 
-  const infrastructureSecrets = computed(() => {
-    return secretStore.infrastructureSecretsByCloudProfileName(cloudProfileName.value)
-  })
+  const infrastructureSecrets = useSecretList(providerType, { secretStore, gardenerExtensionStore })
 
   const sortedKubernetesVersions = computed(() => {
     return cloudProfileStore.sortedKubernetesVersions(cloudProfileName.value)

@@ -146,7 +146,7 @@ export function createShootContextComposable (options = {}) {
     }
     hibernationSchedules.value = []
     workerless.value = get(options, ['workerless'], false)
-    const defaultProviderType = head(cloudProfileStore.sortedInfrastructureKindList)
+    const defaultProviderType = head(cloudProfileStore.sortedProviderTypeList)
     providerType.value = get(options, ['providerType'], defaultProviderType)
     resetMaintenanceAutoUpdate()
     resetMaintenanceTimeWindow()
