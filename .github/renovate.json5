@@ -54,18 +54,28 @@
         '@octokit/plugin-request-log',
         '@octokit/plugin-rest-endpoint-methods',
         'chalk',
-        'codemirror',
         'jest',
         'openid-client',
         'p-event',
         'p-limit',
         'p-retry',
         'p-timeout',
-        'dockerfile-ast',
+      ],
+      matchUpdateTypes: [
+        'major',
+      ],
+      enabled: false,
+    },
+    {
+      matchDatasources: [
+        'npm',
+      ],
+      matchPackageNames: [
         'sass',
       ],
       matchUpdateTypes: [
         'major',
+        'minor',
       ],
       enabled: false,
     },
