@@ -35,7 +35,7 @@ import { useAppStore } from '@/store/app'
 
 import { useCustomColors } from '@/composables/useCustomColors'
 
-import { get } from '@/lodash'
+import get from 'lodash/get'
 
 const theme = useTheme()
 const route = useRoute()

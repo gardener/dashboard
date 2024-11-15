@@ -6,15 +6,13 @@
 
 import { computed } from 'vue'
 
-import {
-  get,
-  filter,
-  find,
-  flatMap,
-  mapValues,
-  head,
-  compact,
-} from '@/lodash'
+import get from 'lodash/get'
+import filter from 'lodash/filter'
+import find from 'lodash/find'
+import flatMap from 'lodash/flatMap'
+import mapValues from 'lodash/mapValues'
+import head from 'lodash/head'
+import compact from 'lodash/compact'
 
 export const rotationTypes = Object.freeze([
   {

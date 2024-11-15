@@ -80,11 +80,9 @@ import { useShootStatusCredentialRotation } from '@/composables/useShootStatusCr
 
 import { errorDetailsFromError } from '@/utils/error'
 
-import {
-  get,
-  includes,
-  compact,
-} from '@/lodash'
+import compact from 'lodash/compact'
+import includes from 'lodash/includes'
+import get from 'lodash/get'
 
 export default {
   components: {
@@ -125,11 +123,11 @@ export default {
     const authnStore = useAuthnStore()
 
     const startOperation = computed(() => {
-      return get(rotationType.value, 'startOperation')
+      return get(rotationType.value, ['startOperation'])
     })
 
     const completionOperation = computed(() => {
-      return get(rotationType.value, 'completionOperation')
+      return get(rotationType.value, ['completionOperation'])
     })
 
     const operation = computed(() => {

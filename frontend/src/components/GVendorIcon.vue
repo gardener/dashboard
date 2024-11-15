@@ -33,7 +33,7 @@ import {
   toRef,
 } from 'vue'
 
-import { startsWith } from '@/lodash'
+import startsWith from 'lodash/startsWith'
 
 const props = defineProps({
   icon: {

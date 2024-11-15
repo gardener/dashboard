@@ -37,7 +37,7 @@ import { useLoginStore } from '@/store/login'
 
 import { omitKeysWithSuffix } from '@/utils'
 
-import { template } from '@/lodash'
+import template from 'lodash/template'
 
 export default {
   props: {

@@ -124,16 +124,14 @@ import { useShootEditor } from '@/composables/useShootEditor'
 import { errorDetailsFromError } from '@/utils/error'
 import { v4 as uuidv4 } from '@/utils/uuid'
 
-import {
-  get,
-  set,
-  filter,
-  includes,
-  isEmpty,
-  pick,
-  isEqual,
-  map,
-} from '@/lodash'
+import map from 'lodash/map'
+import isEqual from 'lodash/isEqual'
+import pick from 'lodash/pick'
+import isEmpty from 'lodash/isEmpty'
+import includes from 'lodash/includes'
+import filter from 'lodash/filter'
+import set from 'lodash/set'
+import get from 'lodash/get'
 
 export default {
   components: {
@@ -188,18 +186,18 @@ export default {
           ])
         }
         const data = {}
-        set(data, 'spec.provider.workers', providerWorkers.value)
+        set(data, ['spec', 'provider', 'workers'], providerWorkers.value)
         const zones = providerInfrastructureConfigNetworksZones.value
         if (zones) {
-          set(data, 'spec.provider.infrastructureConfig.networks.zones', zones)
+          set(data, ['spec', 'provider', 'infrastructureConfig', 'networks', 'zones'], zones)
         }
         return data
       },
       set (value) {
-        providerWorkers.value = get(value, 'spec.provider.workers', [])
-        const zones = get(value, 'spec.provider.infrastructureConfig.networks.zones')
+        providerWorkers.value = get(value, ['spec', 'provider', 'workers'], [])
+        const zones = get(value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'zones'])
         if (!isEqual(zones, providerInfrastructureConfigNetworksZones.value)) {
-          providerInfrastructureConfigNetworksZones.value = get(value, 'spec.provider.infrastructureConfig.networks.zones')
+          providerInfrastructureConfigNetworksZones.value = get(value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'zones'])
         }
       },
     })
@@ -297,7 +295,7 @@ export default {
         await this.api.patchShootProvider({
           namespace: this.shootNamespace,
           name: this.shootName,
-          data: get(this.editorData, 'spec.provider'),
+          data: get(this.editorData, ['spec', 'provider']),
         })
         this.open = false
         this.lazyTab = 'overview'

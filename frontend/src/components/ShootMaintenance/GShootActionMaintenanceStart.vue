@@ -49,7 +49,7 @@ import { useShootItem } from '@/composables/useShootItem'
 
 import { errorDetailsFromError } from '@/utils/error'
 
-import { get } from '@/lodash'
+import get from 'lodash/get'
 
 export default {
   components: {
@@ -76,11 +76,11 @@ export default {
     } = useShootItem()
 
     const autoUpdateKubernetesVersion = computed(() => {
-      return get(shootMaintenance.value, 'autoUpdate.kubernetesVersion', false)
+      return get(shootMaintenance.value, ['autoUpdate', 'kubernetesVersion'], false)
     })
 
     const autoUpdateMachineImageVersion = computed(() => {
-      return get(shootMaintenance.value, 'autoUpdate.machineImageVersion', false)
+      return get(shootMaintenance.value, ['autoUpdate', 'machineImageVersion'], false)
     })
 
     const isMaintenanceToBeScheduled = computed(() => {

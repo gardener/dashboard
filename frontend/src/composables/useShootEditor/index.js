@@ -64,11 +64,9 @@ import {
   EditorCompletions,
 } from './helper'
 
-import {
-  get,
-  omit,
-  isEqual,
-} from '@/lodash'
+import isEqual from 'lodash/isEqual'
+import omit from 'lodash/omit'
+import get from 'lodash/get'
 
 export function useShootEditor (initialValue, options = {}) {
   const {
@@ -165,22 +163,22 @@ export function useShootEditor (initialValue, options = {}) {
   })
 
   const filename = computed(() => {
-    const namespace = get(shootItem.value, 'metadata.namespace')
+    const namespace = get(shootItem.value, ['metadata', 'namespace'])
     if (!namespace) {
-      return get(options, 'filename', 'unknown.yaml')
+      return get(options, ['filename'], 'unknown.yaml')
     }
-    const name = get(shootItem.value, 'metadata.name', 'unnamed')
+    const name = get(shootItem.value, ['metadata', 'name'], 'unnamed')
     const projectName = projectStore.projectNameByNamespace(namespace)
     return `shoot--${projectName}--${name}.yaml`
   })
 
   const isShootActionsDisabled = computed(() => {
-    return get(shootItem.value, 'spec.purpose') === 'infrastructure'
+    return get(shootItem.value, ['spec', 'purpose']) === 'infrastructure'
   })
 
   let cmTooltipFnTimerID
   const themeCompartment = new Compartment()
-  const readonlyCompartment = new Compartment()
+  const readOnlyCompartment = new Compartment()
   const historyCompartment = new Compartment()
   const whitespacesCompartment = new Compartment()
 
@@ -236,7 +234,7 @@ export function useShootEditor (initialValue, options = {}) {
           }),
           EditorView.theme({}),
           historyCompartment.of(history()),
-          readonlyCompartment.of(EditorView.editable.of(!isReadOnly.value)),
+          readOnlyCompartment.of(EditorState.readOnly.of(isReadOnly.value)),
           themeCompartment.of([isDarkMode.value ? oneDark : [], syntaxHighlighting(isDarkMode.value ? oneDarkHighlightStyle : defaultHighlightStyle)]),
           lineNumbers(),
           whitespacesCompartment.of(showAllWhitespace),
@@ -356,10 +354,10 @@ export function useShootEditor (initialValue, options = {}) {
   watchEffect(() => {
     if (cmView.value) {
       if (schemaDefinition.value) {
-        const shootProperties = get(schemaDefinition.value, 'properties', {})
+        const shootProperties = get(schemaDefinition.value, ['properties'], {})
         completions.value = new EditorCompletions(shootProperties, {
           cmView: cmView.value,
-          completionPaths: get(options, 'completionPaths', []),
+          completionPaths: get(options, ['completionPaths'], []),
           logger,
         })
       }
@@ -378,7 +376,7 @@ export function useShootEditor (initialValue, options = {}) {
 
   watch(isReadOnly, isReadOnly => {
     cmView.value.dispatch({
-      effects: readonlyCompartment.reconfigure(EditorView.editable.of(isReadOnly)),
+      effects: readOnlyCompartment.reconfigure(EditorState.readOnly.of(isReadOnly)),
     })
   })
 

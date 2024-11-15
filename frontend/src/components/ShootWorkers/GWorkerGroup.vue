@@ -382,10 +382,8 @@ import GVendorIcon from '@/components/GVendorIcon'
 
 import { useShootItem } from '@/composables/useShootItem'
 
-import {
-  find,
-  get,
-} from '@/lodash'
+import get from 'lodash/get'
+import find from 'lodash/find'
 
 export default {
   components: {
@@ -434,17 +432,17 @@ export default {
     },
     machineType () {
       const machineTypes = this.machineTypesByCloudProfileName(this.shootCloudProfileName)
-      const type = get(this.workerGroup, 'machine.type')
+      const type = get(this.workerGroup, ['machine', 'type'])
       return find(machineTypes, ['name', type])
     },
     volumeType () {
       const volumeTypes = this.volumeTypesByCloudProfileName(this.shootCloudProfileName)
-      const type = get(this.workerGroup, 'volume.type')
+      const type = get(this.workerGroup, ['volume', 'type'])
       return find(volumeTypes, ['name', type])
     },
     volumeCardData () {
-      const storage = get(this.machineType, 'storage', {})
-      const volume = get(this.workerGroup, 'volume', {})
+      const storage = get(this.machineType, ['storage'], {})
+      const volume = get(this.workerGroup, ['volume'], {})
 
       // all infrastructures support volume sizes, but for some they are optional
       // if no size is defined on the worker itself, check if machine storage defines a default size
@@ -471,7 +469,7 @@ export default {
     },
     machineImage () {
       const machineImages = this.machineImagesByCloudProfileName(this.shootCloudProfileName)
-      const { name, version } = get(this.workerGroup, 'machine.image', {})
+      const { name, version } = get(this.workerGroup, ['machine', 'image'], {})
       return find(machineImages, { name, version }) ?? {}
     },
     machineCri () {

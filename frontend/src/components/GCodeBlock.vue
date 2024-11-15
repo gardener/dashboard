@@ -42,11 +42,9 @@ import yaml from 'highlight.js/lib/languages/yaml'
 
 import GCopyBtn from '@/components/GCopyBtn.vue'
 
-import {
-  trim,
-  split,
-  replace,
-} from '@/lodash'
+import trim from 'lodash/trim'
+import split from 'lodash/split'
+import replace from 'lodash/replace'
 
 import 'highlight.js/styles/docco.css'
 

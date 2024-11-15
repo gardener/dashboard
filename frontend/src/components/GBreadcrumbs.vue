@@ -88,7 +88,7 @@ import { useRoute } from 'vue-router'
 
 import { useProjectStore } from '@/store/project'
 
-import { kebabCase } from '@/lodash'
+import kebabCase from 'lodash/kebabCase'
 
 const projectStore = useProjectStore()
 const route = useRoute()

@@ -21,12 +21,10 @@ import { useProjectShootCustomFields } from './useProjectShootCustomFields'
 import { useProjectMetadata } from './useProjectMetadata'
 import { useProjectCostObject } from './useProjectCostObject'
 
-import {
-  cloneDeep,
-  get,
-  isEqual,
-  set,
-} from '@/lodash'
+import cloneDeep from 'lodash/cloneDeep'
+import get from 'lodash/get'
+import isEqual from 'lodash/isEqual'
+import set from 'lodash/set'
 
 export function createProjectContextComposable (options = {}) {
   const {
@@ -66,8 +64,8 @@ export function createProjectContextComposable (options = {}) {
   function createProjectManifest () {
     manifest.value = {}
     if (appStore.accountId) {
-      set(manifest.value, 'metadata.label["openmfp.org/managed-by"]', 'true')
-      set(manifest.value, 'metadata.annotations["openmfp.org/account-id"]', appStore.accountId)
+      set(manifest.value, ['metadata', 'label', 'openmfp.org/managed-by'], 'true')
+      set(manifest.value, ['metadata', 'annotations', 'openmfp.org/account-id'], appStore.accountId)
     }
     initialManifest.value = cloneDeep(normalizedManifest.value)
   }
@@ -89,19 +87,19 @@ export function createProjectContextComposable (options = {}) {
   /* spec */
   const description = computed({
     get () {
-      return get(manifest.value, 'spec.description')
+      return get(manifest.value, ['spec', 'description'])
     },
     set (value) {
-      set(manifest.value, 'spec.description', value || undefined)
+      set(manifest.value, ['spec', 'description'], value || undefined)
     },
   })
 
   const purpose = computed({
     get () {
-      return get(manifest.value, 'spec.purpose')
+      return get(manifest.value, ['spec', 'purpose'])
     },
     set (value) {
-      set(manifest.value, 'spec.purpose', value || undefined)
+      set(manifest.value, ['spec', 'purpose'], value || undefined)
     },
   })
 

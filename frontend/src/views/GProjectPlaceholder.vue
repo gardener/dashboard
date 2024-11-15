@@ -18,7 +18,7 @@ import { useProjectStore } from '@/store/project'
 
 import GProjectError from '@/views/GProjectError.vue'
 
-import { isEqual } from '@/lodash'
+import isEqual from 'lodash/isEqual'
 
 function isLoadRequired (route, to) {
   return route.name !== to.name || !isEqual(route.params, to.params)

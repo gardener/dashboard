@@ -76,13 +76,11 @@ import GConstraintMessage from './GConstraintMessage.vue'
 import GMaintenanceStatusMessage from './GMaintenanceStatusMessage.vue'
 import GForceDeleteMessage from './GForceDeleteMessage.vue'
 
-import {
-  get,
-  map,
-  includes,
-  isEmpty,
-  orderBy,
-} from '@/lodash'
+import orderBy from 'lodash/orderBy'
+import isEmpty from 'lodash/isEmpty'
+import includes from 'lodash/includes'
+import map from 'lodash/map'
+import get from 'lodash/get'
 
 const components = {
   'g-k8s-expiration-message': GK8sExpirationMessage,
@@ -194,7 +192,7 @@ const k8sMessage = computed(() => {
   if (!filterMatches('k8s')) {
     return []
   }
-  const k8sAutoPatch = get(shootItem.value, 'spec.maintenance.autoUpdate.kubernetesVersion', false)
+  const k8sAutoPatch = get(shootItem.value, ['spec', 'maintenance', 'autoUpdate', 'kubernetesVersion'], false)
   const k8sExpiration = cloudProfileStore.kubernetesVersionExpirationForShoot(shootK8sVersion.value, shootCloudProfileName.value, k8sAutoPatch)
   if (!k8sExpiration) {
     return []
@@ -225,7 +223,7 @@ const machineImageMessages = computed(() => {
   if (!filterMatches('machine-image')) {
     return []
   }
-  const imageAutoPatch = get(shootItem.value, 'spec.maintenance.autoUpdate.machineImageVersion', false)
+  const imageAutoPatch = get(shootItem.value, ['spec', 'maintenance', 'autoUpdate', 'machineImageVersion'], false)
   const expiredWorkerGroups = cloudProfileStore.expiringWorkerGroupsForShoot(shootWorkerGroups.value, shootCloudProfileName.value, imageAutoPatch)
   return map(expiredWorkerGroups, workerGroup => {
     const {

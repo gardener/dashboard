@@ -40,6 +40,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+
 import { useConfigStore } from '@/store/config'
 
 import GUsernamePassword from '@/components/GUsernamePasswordListTile'
@@ -51,10 +52,8 @@ import { useShootStatus } from '@/composables/useShootStatus'
 
 import { isTruthyValue } from '@/utils'
 
-import {
-  get,
-  replace,
-} from '@/lodash'
+import replace from 'lodash/replace'
+import get from 'lodash/get'
 
 export default {
   components: {
@@ -106,24 +105,24 @@ export default {
     },
     alertmanagerUrl () {
       if (this.isOidcObservabilityUrlsEnabled) {
-        return this.getOidcDeploymentUrl('alertmanager')
+        return this.getOidcStatefulsetUrl('alertmanager')
       }
 
       return `https://au-${this.prefix}.${this.seedIngressDomain}`
     },
     username () {
-      return get(this.shootInfo, 'monitoringUsername', '')
+      return get(this.shootInfo, ['monitoringUsername'], '')
     },
     password () {
-      return get(this.shootInfo, 'monitoringPassword', '')
+      return get(this.shootInfo, ['monitoringPassword'], '')
     },
     hasAlertmanager () {
-      const ignoreAlerts = get(this.shootItem, 'metadata.annotations["shoot.gardener.cloud/ignore-alerts"]', 'false')
+      const ignoreAlerts = get(this.shootItem, ['metadata', 'annotations', 'shoot.gardener.cloud/ignore-alerts'], 'false')
       if (isTruthyValue(ignoreAlerts)) {
         return false
       }
 
-      const emailReceivers = get(this.shootItem, 'spec.monitoring.alerting.emailReceivers', [])
+      const emailReceivers = get(this.shootItem, ['spec', 'monitoring', 'alerting', 'emailReceivers'], [])
       return emailReceivers.length > 0
     },
     prefix () {

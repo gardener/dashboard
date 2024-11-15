@@ -140,10 +140,8 @@ import GProjectDialog from '@/components/dialogs/GProjectDialog.vue'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
 
-import {
-  filter,
-  get,
-} from '@/lodash'
+import get from 'lodash/get'
+import filter from 'lodash/filter'
 
 const projectStore = useProjectStore()
 const authzStore = useAuthzStore()
@@ -154,13 +152,13 @@ const canCreateProject = toRef(authzStore, 'canCreateProject')
 const projectDialog = ref(false)
 
 const projectList = computed(() => {
-  const belongsToAccount = project => appStore.accountId === get(project, 'metadata.annotations["openmfp.org/account-id"]')
+  const belongsToAccount = project => appStore.accountId === get(project, ['metadata', 'annotations', 'openmfp.org/account-id'])
   return !appStore.accountId
     ? projectStore.projectList
     : filter(projectStore.projectList, belongsToAccount)
 })
 
 function getNumberOfShoots (project) {
-  return get(project, 'metadata.annotations["computed.gardener.cloud/number-of-shoots"]', 0)
+  return get(project, ['metadata', 'annotations', 'computed.gardener.cloud/number-of-shoots'], 0)
 }
 </script>

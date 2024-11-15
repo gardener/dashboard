@@ -6,21 +6,19 @@
 
 import { computed } from 'vue'
 
-import {
-  get,
-  set,
-  find,
-  filter,
-  isEmpty,
-} from '@/lodash'
+import get from 'lodash/get'
+import set from 'lodash/set'
+import find from 'lodash/find'
+import filter from 'lodash/filter'
+import isEmpty from 'lodash/isEmpty'
 
 export const useShootExtensions = manifest => {
   const extensions = computed({
     get () {
-      return get(manifest.value, 'spec.extensions')
+      return get(manifest.value, ['spec', 'extensions'])
     },
     set (value) {
-      set(manifest.value, 'spec.extensions', value)
+      set(manifest.value, ['spec', 'extensions'], value)
     },
   })
 

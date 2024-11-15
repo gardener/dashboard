@@ -9,14 +9,12 @@ import { computed } from 'vue'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useSeedStore } from '@/store/seed'
 
-import {
-  get,
-  uniq,
-  flatMap,
-  cloneDeep,
-  find,
-  compact,
-} from '@/lodash'
+import get from 'lodash/get'
+import uniq from 'lodash/uniq'
+import flatMap from 'lodash/flatMap'
+import cloneDeep from 'lodash/cloneDeep'
+import find from 'lodash/find'
+import compact from 'lodash/compact'
 
 export function useShootSpec (shootItem, options = {}) {
   const {
@@ -25,11 +23,11 @@ export function useShootSpec (shootItem, options = {}) {
   } = options
 
   const shootSpec = computed(() => {
-    return get(shootItem.value, 'spec', {})
+    return get(shootItem.value, ['spec'], {})
   })
 
   const shootPurpose = computed(() => {
-    return get(shootSpec.value, 'purpose')
+    return get(shootSpec.value, ['purpose'])
   })
 
   const isTestingCluster = computed(() => {
@@ -41,7 +39,7 @@ export function useShootSpec (shootItem, options = {}) {
   })
 
   const isShootSettingHibernated = computed(() => {
-    return get(shootSpec.value, 'hibernation.enabled', false)
+    return get(shootSpec.value, ['hibernation', 'enabled'], false)
   })
 
   const shootSecretBindingName = computed(() => {
@@ -49,7 +47,7 @@ export function useShootSpec (shootItem, options = {}) {
   })
 
   const shootK8sVersion = computed(() => {
-    return get(shootSpec.value, 'kubernetes.version')
+    return get(shootSpec.value, ['kubernetes', 'version'])
   })
 
   const shootAvailableK8sUpdates = computed(() => {
@@ -70,7 +68,7 @@ export function useShootSpec (shootItem, options = {}) {
   })
 
   const shootEnableStaticTokenKubeconfig = computed(() => {
-    return get(shootSpec.value, 'kubernetes.enableStaticTokenKubeconfig', true)
+    return get(shootSpec.value, ['kubernetes', 'enableStaticTokenKubeconfig'], true)
   })
 
   const shootCloudProfileName = computed(() => {
@@ -78,11 +76,11 @@ export function useShootSpec (shootItem, options = {}) {
   })
 
   const shootCloudProviderKind = computed(() => {
-    return get(shootSpec.value, 'provider.type')
+    return get(shootSpec.value, ['provider', 'type'])
   })
 
   const shootWorkerGroups = computed(() => {
-    return get(shootSpec.value, 'provider.workers', [])
+    return get(shootSpec.value, ['provider', 'workers'], [])
   })
 
   const hasShootWorkerGroups = computed(() => {
@@ -90,11 +88,11 @@ export function useShootSpec (shootItem, options = {}) {
   })
 
   const sshAccessEnabled = computed(() => {
-    return get(shootSpec.value, 'provider.workerSettings.sshAccess.enabled', false)
+    return get(shootSpec.value, ['provider', 'workerSettings', 'sshAccess', 'enabled'], false)
   })
 
   const shootAddons = computed(() => {
-    return cloneDeep(get(shootSpec.value, 'addons', {}))
+    return cloneDeep(get(shootSpec.value, ['addons'], {}))
   })
 
   const shootRegion = computed(() => {
@@ -102,23 +100,23 @@ export function useShootSpec (shootItem, options = {}) {
   })
 
   const shootZones = computed(() => {
-    return compact(uniq(flatMap(get(shootSpec.value, 'provider.workers'), 'zones')))
+    return compact(uniq(flatMap(get(shootSpec.value, ['provider', 'workers']), 'zones')))
   })
 
   const podsCidr = computed(() => {
-    return get(shootSpec.value, 'networking.pods')
+    return get(shootSpec.value, ['networking', 'pods'])
   })
 
   const nodesCidr = computed(() => {
-    return get(shootSpec.value, 'networking.nodes')
+    return get(shootSpec.value, ['networking', 'nodes'])
   })
 
   const servicesCidr = computed(() => {
-    return get(shootSpec.value, 'networking.services')
+    return get(shootSpec.value, ['networking', 'services'])
   })
 
   const shootDomain = computed(() => {
-    return get(shootSpec.value, 'dns.domain')
+    return get(shootSpec.value, ['dns', 'domain'])
   })
 
   const isCustomShootDomain = computed(() => {
@@ -131,23 +129,23 @@ export function useShootSpec (shootItem, options = {}) {
 
   const shootDnsServiceExtensionProviders = computed(() => {
     const extensionDns = find(shootSpec.value.extensions, ['type', 'shoot-dns-service'])
-    return get(extensionDns, 'providerConfig.providers')
+    return get(extensionDns, ['providerConfig', 'providers'])
   })
 
   const shootHibernationSchedules = computed(() => {
-    return get(shootSpec.value, 'hibernation.schedules', [])
+    return get(shootSpec.value, ['hibernation', 'schedules'], [])
   })
 
   const shootMaintenance = computed(() => {
-    return get(shootSpec.value, 'maintenance', {})
+    return get(shootSpec.value, ['maintenance'], {})
   })
 
   const shootControlPlaneHighAvailabilityFailureTolerance = computed(() => {
-    return get(shootSpec.value, 'controlPlane.highAvailability.failureTolerance.type')
+    return get(shootSpec.value, ['controlPlane', 'highAvailability', 'failureTolerance', 'type'])
   })
 
   const shootSeedName = computed(() => {
-    return get(shootSpec.value, 'seedName')
+    return get(shootSpec.value, ['seedName'])
   })
 
   const isSeedUnreachable = computed(() => {
@@ -155,7 +153,7 @@ export function useShootSpec (shootItem, options = {}) {
   })
 
   const shootResources = computed(() => {
-    return get(shootSpec.value, 'resources')
+    return get(shootSpec.value, ['resources'])
   })
 
   return {

@@ -242,18 +242,16 @@ import { useProvideShootAction } from '@/composables/useShootAction'
 
 import { mapTableHeader } from '@/utils'
 
-import {
-  debounce,
-  filter,
-  get,
-  unset,
-  isEmpty,
-  join,
-  map,
-  some,
-  sortBy,
-  upperCase,
-} from '@/lodash'
+import upperCase from 'lodash/upperCase'
+import sortBy from 'lodash/sortBy'
+import some from 'lodash/some'
+import map from 'lodash/map'
+import join from 'lodash/join'
+import isEmpty from 'lodash/isEmpty'
+import unset from 'lodash/unset'
+import get from 'lodash/get'
+import filter from 'lodash/filter'
+import debounce from 'lodash/debounce'
 
 export default {
   components: {
@@ -430,7 +428,7 @@ export default {
       },
     },
     currentName () {
-      return get(this.selectedShoot, 'metadata.name')
+      return get(this.selectedShoot, ['metadata', 'name'])
     },
     shootItem () {
       // property `shoot-item` of the mixin is required
@@ -764,10 +762,10 @@ export default {
       return join(subtitle, ', ')
     },
     gitHubRepoUrl () {
-      return get(this.ticketConfig, 'gitHubRepoUrl')
+      return get(this.ticketConfig, ['gitHubRepoUrl'])
     },
     hideClustersWithLabels () {
-      return get(this.ticketConfig, 'hideClustersWithLabels', [])
+      return get(this.ticketConfig, ['hideClustersWithLabels'], [])
     },
     filteredItems () {
       const query = this.debouncedShootSearch

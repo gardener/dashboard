@@ -6,15 +6,15 @@
 
 import { computed } from 'vue'
 
-import { get } from '@/lodash'
+import get from 'lodash/get'
 
 export function useShootInfo (shootItem) {
   const shootInfo = computed(() => {
-    return get(shootItem.value, 'info', {})
+    return get(shootItem.value, ['info'], {})
   })
 
   const canLinkToSeed = computed(() => {
-    return get(shootInfo.value, 'canLinkToSeed', false)
+    return get(shootInfo.value, ['canLinkToSeed'], false)
   })
 
   return {

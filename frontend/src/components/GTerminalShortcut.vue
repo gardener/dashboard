@@ -98,10 +98,8 @@ import {
 import GCodeBlock from './GCodeBlock.vue'
 import GActionButton from './GActionButton.vue'
 
-import {
-  get,
-  join,
-} from '@/lodash'
+import join from 'lodash/join'
+import get from 'lodash/get'
 
 export default {
   components: {
@@ -157,14 +155,14 @@ export default {
       'hasShootTerminalAccess',
     ]),
     image () {
-      return get(this.shortcut, 'container.image', 'default')
+      return get(this.shortcut, ['container', 'image'], 'default')
     },
     command () {
-      const command = get(this.shortcut, 'container.command')
+      const command = get(this.shortcut, ['container', 'command'])
       return join(command, ' ')
     },
     args () {
-      const args = get(this.shortcut, 'container.args')
+      const args = get(this.shortcut, ['container', 'args'])
       return join(args, ' ')
     },
     disabled () {

@@ -76,7 +76,7 @@
     "@gardener-dashboard/test-utils": "workspace:^",
     "abort-controller": "^3.0.0",
     "cross-env": "^7.0.3",
-    "dockerfile-ast": "^0.6.1",
+    "dockerfile-ast": "^0.7.0",
     "eslint": "^9.11.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jest": "^28.8.3",

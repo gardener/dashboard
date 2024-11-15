@@ -22,11 +22,9 @@ import {
   aggregateResourceQuotaStatus,
 } from './helper'
 
-import {
-  get,
-  set,
-  map,
-} from '@/lodash'
+import get from 'lodash/get'
+import set from 'lodash/set'
+import map from 'lodash/map'
 
 export const useQuotaStore = defineStore('quota', () => {
   const api = useApi()

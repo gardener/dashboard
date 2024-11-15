@@ -20,12 +20,10 @@ import { isOwnSecret } from '@/utils'
 import { useAuthzStore } from './authz'
 import { useAppStore } from './app'
 
-import {
-  findIndex,
-  find,
-  filter,
-  matches,
-} from '@/lodash'
+import findIndex from 'lodash/findIndex'
+import find from 'lodash/find'
+import filter from 'lodash/filter'
+import matches from 'lodash/matches'
 
 function eqlNameAndNamespace ({ namespace, name }) {
   return matches({ metadata: { namespace, name } })

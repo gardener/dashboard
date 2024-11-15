@@ -16,15 +16,15 @@ const globalWindow = global.window
 const fetchMock = createFetchMock(vi)
 fetchMock.enableMocks()
 
-vi.mock('@/lodash', async importOriginal => {
-  const originalLodash = await importOriginal()
-  const lodash = {
-    ...originalLodash,
-    sample: originalLodash.head,
-  }
+vi.mock('lodash/sample', () => {
+  const sample = vi.fn(collection => {
+    if (!Array.isArray(collection)) {
+      collection = Object.values(collection)
+    }
+    return collection[0]
+  })
   return {
-    ...lodash,
-    default: lodash,
+    default: sample,
   }
 })
 

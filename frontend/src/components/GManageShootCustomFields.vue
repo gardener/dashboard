@@ -420,7 +420,7 @@ import {
 } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
 
-import { cloneDeep } from '@/lodash'
+import cloneDeep from 'lodash/cloneDeep'
 
 const headers = ref([
   { title: 'Name', key: 'name' },

@@ -34,7 +34,7 @@ import { useShootHelper } from '@/composables/useShootHelper'
 
 import { errorDetailsFromError } from '@/utils/error'
 
-import { isEmpty } from '@/lodash'
+import isEmpty from 'lodash/isEmpty'
 
 export default {
   components: {

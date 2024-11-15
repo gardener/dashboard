@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import contrast from 'get-contrast'
 
-import { get } from '@/lodash'
+import get from 'lodash/get'
 
 export default {
   props: {
@@ -30,7 +30,7 @@ export default {
   computed: {
     labelStyle () {
       return label => {
-        const bgColor = `#${get(label, 'color')}`
+        const bgColor = `#${get(label, ['color'])}`
         const textColor = contrast.isAccessible(bgColor, '#fff') ? '#fff' : '#000'
         return `background-color: ${bgColor}; color: ${textColor};`
       }

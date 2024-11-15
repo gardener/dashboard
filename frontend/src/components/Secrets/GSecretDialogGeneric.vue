@@ -57,7 +57,7 @@ import {
   setDelayedInputFocus,
 } from '@/utils'
 
-import { isObject } from '@/lodash'
+import isObject from 'lodash/isObject'
 
 export default {
   components: {
