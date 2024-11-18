@@ -44,7 +44,7 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <template v-if="cell.header.key === 'infrastructure'">
         <g-vendor
-          :cloud-provider-kind="shootCloudProviderKind"
+          :provider-type="shootProviderType"
           :region="shootRegion"
           :zones="shootZones"
         />
@@ -315,7 +315,7 @@ const {
   shootCreationTimestamp,
   shootProjectName,
   shootPurpose,
-  shootCloudProviderKind,
+  shootProviderType,
   shootRegion,
   shootZones,
   shootInfo,

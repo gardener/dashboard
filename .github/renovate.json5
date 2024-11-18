@@ -54,7 +54,6 @@
         '@octokit/plugin-request-log',
         '@octokit/plugin-rest-endpoint-methods',
         'chalk',
-        'codemirror',
         'jest',
         'openid-client',
         'p-event',
@@ -64,6 +63,19 @@
       ],
       matchUpdateTypes: [
         'major',
+      ],
+      enabled: false,
+    },
+    {
+      matchDatasources: [
+        'npm',
+      ],
+      matchPackageNames: [
+        'sass',
+      ],
+      matchUpdateTypes: [
+        'major',
+        'minor',
       ],
       enabled: false,
     },

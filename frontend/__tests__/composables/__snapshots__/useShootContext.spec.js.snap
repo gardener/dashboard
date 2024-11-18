@@ -460,7 +460,7 @@ exports[`composables > useShootContext > should create a default "azure" shoot m
     },
     "purpose": "evaluation",
     "region": "westeurope",
-    "secretBindingName": "az-secret",
+    "secretBindingName": "azure-secret",
   },
 }
 `;
@@ -721,7 +721,7 @@ exports[`composables > useShootContext > should create a default "openstack" sho
     },
     "purpose": "evaluation",
     "region": "eu-de-1",
-    "secretBindingName": "openstack-1-secret",
+    "secretBindingName": "openstack-secret",
   },
 }
 `;

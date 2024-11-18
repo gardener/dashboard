@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     :is="componentName"
     v-if="visibleDialog"
     v-model="visibleDialogState"
-    v-bind="{ secret: selectedSecret, vendor: visibleDialog }"
+    v-bind="{ secret: selectedSecret, providerType: visibleDialog }"
   />
 </template>
 

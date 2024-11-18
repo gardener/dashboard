@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :secret-validations="v$"
     :secret="secret"
-    :vendor="vendor"
+    :provider-type="providerType"
     :create-title="`Add new ${name} Secret`"
     :replace-title="`Replace ${name} Secret`"
   >
@@ -47,7 +47,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </template>
     <template #help-slot>
-      <div v-if="vendor==='alicloud'">
+      <div v-if="providerType==='alicloud'">
         <p>
           Before you can provision and access a Kubernetes cluster on Alibaba Cloud, you need to add account credentials. To manage
           credentials for Alibaba Cloud Resource Access Management (RAM), use the
@@ -77,7 +77,7 @@ SPDX-License-Identifier: Apache-2.0
           :content="JSON.stringify(template, undefined, 2)"
         />
       </div>
-      <div v-if="vendor==='alicloud-dns'">
+      <div v-if="providerType==='alicloud-dns'">
         <p>
           You need to provide an access key (access key ID and secret access key) for Alibaba Cloud to allow the dns-controller-manager to authenticate to Alibaba Cloud DNS.
         </p>
@@ -122,7 +122,7 @@ export default {
     secret: {
       type: Object,
     },
-    vendor: {
+    providerType: {
       type: String,
     },
   },
@@ -201,10 +201,10 @@ export default {
       return !this.v$.$invalid
     },
     name () {
-      if (this.vendor === 'alicloud') {
+      if (this.providerType === 'alicloud') {
         return 'Alibaba Cloud'
       }
-      if (this.vendor === 'alicloud-dns') {
+      if (this.providerType === 'alicloud-dns') {
         return 'Alicloud DNS'
       }
       return undefined
