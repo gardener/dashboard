@@ -51,7 +51,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapActions } from 'pinia'
 
-import { useSecretStore } from '@/store/secret'
+import { useCredentialStore } from '@/store/credential'
 
 import GMessage from '@/components/GMessage'
 import GToolbar from '@/components/GToolbar.vue'
@@ -71,7 +71,7 @@ export default {
       type: Boolean,
       required: true,
     },
-    secret: {
+    secretBinding: {
       type: Object,
       required: true,
     },
@@ -95,7 +95,7 @@ export default {
       },
     },
     name () {
-      return get(this.secret, ['metadata', 'name'], '')
+      return get(this.secretBinding, ['metadata', 'name'], '')
     },
   },
   watch: {
@@ -106,14 +106,14 @@ export default {
     },
   },
   methods: {
-    ...mapActions(useSecretStore, ['deleteSecret']),
+    ...mapActions(useCredentialStore, ['deleteCredential']),
     hide () {
       this.visible = false
     },
     async onDeleteSecret () {
-      const name = get(this.secret, ['metadata', 'name'])
+      const name = get(this.secretBinding, ['metadata', 'name'])
       try {
-        await this.deleteSecret(name)
+        await this.deleteCredential(name)
         this.hide()
       } catch (err) {
         const errorDetails = errorDetailsFromError(err)

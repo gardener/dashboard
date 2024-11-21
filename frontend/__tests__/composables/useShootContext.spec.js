@@ -13,7 +13,7 @@ import {
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useConfigStore } from '@/store/config'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
-import { useSecretStore } from '@/store/secret'
+import { useCredentialStore } from '@/store/credential'
 import { useAppStore } from '@/store/app'
 import { useAuthzStore } from '@/store/authz'
 
@@ -44,7 +44,7 @@ describe('composables', () => {
     authzStore.setNamespace('garden-test')
     const configStore = useConfigStore()
     configStore.setConfiguration(global.fixtures.config)
-    const secretStore = useSecretStore()
+    const secretStore = useCredentialStore()
     secretStore.list = global.fixtures.secrets
     const cloudProfileStore = useCloudProfileStore()
     cloudProfileStore.setCloudProfiles(cloneDeep(global.fixtures.cloudprofiles))

@@ -13,7 +13,7 @@ import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useKubeconfigStore } from '@/store/kubeconfig'
 import { useMemberStore } from '@/store/member'
-import { useSecretStore } from '@/store/secret'
+import { useCredentialStore } from '@/store/credential'
 import { useSeedStore } from '@/store/seed'
 import { useShootStore } from '@/store/shoot'
 import { useTerminalStore } from '@/store/terminal'
@@ -100,7 +100,7 @@ export function createGlobalResolveGuards () {
   const authzStore = useAuthzStore()
   const projectStore = useProjectStore()
   const memberStore = useMemberStore()
-  const secretStore = useSecretStore()
+  const secretStore = useCredentialStore()
   const shootStore = useShootStore()
   const terminalStore = useTerminalStore()
 
@@ -134,14 +134,14 @@ export function createGlobalResolveGuards () {
           case 'Secrets':
           case 'Secret': {
             shootStore.subscribeShoots()
-            await secretStore.fetchSecrets()
+            await secretStore.fetchCredentials()
             break
           }
           case 'NewShoot':
           case 'NewShootEditor': {
             shootStore.subscribeShoots()
             if (authzStore.canGetSecrets) {
-              await secretStore.fetchSecrets()
+              await secretStore.fetchCredentials()
             }
             break
           }

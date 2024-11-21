@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     v-model="visible"
     :data="secretData"
     :secret-validations="v$"
-    :secret="secret"
+    :secret-binding="secretBinding"
     create-title="Add new Metal Secret"
     replace-title="Replace Metal Secret"
   >
@@ -73,7 +73,7 @@ export default {
       type: Boolean,
       required: true,
     },
-    secret: {
+    secretBinding: {
       type: Object,
     },
   },

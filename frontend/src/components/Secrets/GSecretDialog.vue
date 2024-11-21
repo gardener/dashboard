@@ -117,8 +117,7 @@ import {
   maxLength,
 } from '@vuelidate/validators'
 
-import { useSecretStore } from '@/store/secret'
-import { useAuthzStore } from '@/store/authz'
+import { useSecretStore } from '@/store/credential'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useShootStore } from '@/store/shoot'
 
@@ -145,7 +144,7 @@ import {
 import includes from 'lodash/includes'
 import filter from 'lodash/filter'
 import get from 'lodash/get'
-import cloneDeep from 'lodash/cloneDeep'
+import assign from 'lodash/assign'
 
 export default {
   components: {
@@ -180,7 +179,7 @@ export default {
       type: String,
       required: true,
     },
-    secret: {
+    secretBinding: {
       type: Object,
     },
   },
@@ -219,10 +218,9 @@ export default {
     return rules
   },
   computed: {
-    ...mapState(useAuthzStore, ['namespace']),
     ...mapState(useSecretStore, [
-      'infrastructureSecretList',
-      'dnsSecretList',
+      'infrastructureSecretBindingsList',
+      'dnsSecretBindingsList',
     ]),
     ...mapState(useGardenerExtensionStore, ['dnsProviderTypes']),
     ...mapState(useShootStore, ['shootList']),
@@ -235,13 +233,13 @@ export default {
       },
     },
     infrastructureSecretNames () {
-      return this.infrastructureSecretList.map(item => item.metadata.name)
+      return this.infrastructureSecretBindingsList.map(item => item.metadata.name)
     },
     dnsSecretNames () {
-      return this.dnsSecretList.map(item => item.metadata.name)
+      return this.dnsSecretBindingsList.map(item => item.metadata.name)
     },
     isCreateMode () {
-      return !this.secret
+      return !this.secretBinding
     },
     submitButtonText () {
       return this.isCreateMode ? 'Add Secret' : 'Replace Secret'
@@ -253,7 +251,7 @@ export default {
       return this.shootsByInfrastructureSecret.length
     },
     shootsByInfrastructureSecret () {
-      const name = get(this.secret, ['metadata', 'name'])
+      const name = get(this.secretBinding, ['metadata', 'name'])
       return filter(this.shootList, ['spec.secretBindingName', name])
     },
     helpContainerStyles () {
@@ -279,8 +277,8 @@ export default {
   },
   methods: {
     ...mapActions(useSecretStore, [
-      'createSecret',
-      'updateSecret',
+      'createCredential',
+      'updateCredential',
     ]),
     hide () {
       this.visible = false
@@ -316,23 +314,14 @@ export default {
       }
     },
     save () {
+      const credential = {
+        poviderType: this.providerType,
+        secretData: this.data,
+      }
       if (this.isCreateMode) {
-        const metadata = {
-          name: this.name,
-          namespace: this.namespace,
-          secretRef: {
-            name: this.name,
-            namespace: this.namespace,
-          },
-          provider: {
-            type: this.providerType,
-          },
-        }
-        return this.createSecret({ metadata, data: this.data })
+        return this.createCredential({ name: this.name, credential })
       } else {
-        const metadata = cloneDeep(this.secret.metadata)
-
-        return this.updateSecret({ metadata, data: this.data })
+        return this.updateCredential({ name: this.name, credential })
       }
     },
     reset () {
@@ -342,7 +331,7 @@ export default {
         this.name = `my-${this.providerType}-secret`
         setDelayedInputFocus(this, 'name')
       } else {
-        this.name = get(this.secret, ['metadata', 'name'])
+        this.name = get(this.secretBinding, ['metadata', 'name'])
       }
 
       this.errorMessage = undefined

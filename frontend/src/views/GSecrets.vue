@@ -245,7 +245,7 @@ SPDX-License-Identifier: Apache-2.0
 
     <g-secret-dialog-wrapper
       :visible-dialog="visibleSecretDialog"
-      :selected-secret="selectedSecret"
+      :selected-secret-binding="selectedSecretBinding"
       @dialog-closed="onDialogClosed"
     />
   </v-container>
@@ -260,7 +260,7 @@ import {
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
-import { useSecretStore } from '@/store/secret'
+import { useCredentialStore } from '@/store/credential'
 import { useAuthzStore } from '@/store/authz'
 import { useShootStore } from '@/store/shoot'
 import { useLocalStorageStore } from '@/store/localStorage'
@@ -300,7 +300,7 @@ export default {
   inject: ['mergeProps'],
   data () {
     return {
-      selectedSecret: {},
+      selectedSecretBinding: {},
       infraSecretPage: 1,
       dnsSecretPage: 1,
       infraSecretFilter: '',
@@ -318,9 +318,9 @@ export default {
   computed: {
     ...mapState(useCloudProfileStore, ['sortedProviderTypeList']),
     ...mapState(useGardenerExtensionStore, ['dnsProviderTypes']),
-    ...mapState(useSecretStore, [
-      'infrastructureSecretList',
-      'dnsSecretList',
+    ...mapState(useCredentialStore, [
+      'infrastructureSecretBindingsList',
+      'dnsSecretBindingsList',
     ]),
     ...mapState(useAuthzStore, [
       'namespace',
@@ -393,17 +393,17 @@ export default {
       return this.sortItems(this.infrastructureSecretItems, this.infraSecretSortBy, secondSortCriteria)
     },
     infrastructureSecretItems () {
-      return map(this.infrastructureSecretList, secret => {
-        const relatedShootCount = this.relatedShootCountInfra(secret)
+      return map(this.infrastructureSecretBindingsList, secretBinding => {
+        const relatedShootCount = this.relatedShootCountInfra(secretBinding)
         return {
-          name: secret.metadata.name,
-          isOwnSecret: isOwnSecret(secret),
-          secretNamespace: secret.metadata.secretRef.namespace,
-          secretName: secret.metadata.secretRef.name,
-          providerType: secret.metadata.provider.type,
+          name: secretBinding.metadata.name,
+          isOwnSecret: isOwnSecret(secretBinding),
+          secretNamespace: secretBinding.secretRef.namespace,
+          secretName: secretBinding.secretRef.name,
+          providerType: secretBinding.provider.type,
           relatedShootCount,
           relatedShootCountLabel: this.relatedShootCountLabel(relatedShootCount),
-          secret,
+          secretBinding,
         }
       })
     },
@@ -465,17 +465,17 @@ export default {
       return this.sortItems(this.dnsSecretItems, this.dnsSecretSortBy, secondSortCriteria)
     },
     dnsSecretItems () {
-      return map(this.dnsSecretList, secret => {
-        const relatedShootCount = this.relatedShootCountDns(secret)
+      return map(this.dnsSecretBindingsList, secretBinding => {
+        const relatedShootCount = this.relatedShootCountDns(secretBinding)
         return {
-          name: secret.metadata.name,
-          isOwnSecret: isOwnSecret(secret),
-          secretNamespace: secret.metadata.secretRef.namespace,
-          secretName: secret.metadata.secretRef.name,
-          providerType: secret.metadata.provider.type,
+          name: secretBinding.metadata.name,
+          isOwnSecret: isOwnSecret(secretBinding),
+          secretNamespace: secretBinding.secretRef.namespace,
+          secretName: secretBinding.secretRef.name,
+          providerType: secretBinding.provider.type,
           relatedShootCount,
           relatedShootCountLabel: this.relatedShootCountLabel(relatedShootCount),
-          secret,
+          secretBinding,
         }
       })
     },
@@ -489,25 +489,27 @@ export default {
     if (!get(this.$route.params, ['name'])) {
       return
     }
-    const secret = this.getCloudProviderSecretByName(this.$route.params)
-    if (!secret || !isOwnSecret(secret)) {
+    const secretBinding = this.getSecretBindingByName(this.$route.params)
+    if (!secretBinding || !isOwnSecret(secretBinding)) {
       return
     }
-    this.onUpdateSecret(secret)
+    this.onUpdateSecret(secretBinding)
   },
   methods: {
-    ...mapActions(useSecretStore, ['getCloudProviderSecretByName']),
+    ...mapActions(useCredentialStore, [
+      'getSecretBindingByName',
+    ]),
     openSecretAddDialog (providerType) {
-      this.selectedSecret = undefined
+      this.selectedSecretBinding = undefined
       this.visibleSecretDialog = providerType
     },
-    onUpdateSecret (secret) {
-      const providerType = secret.metadata.provider.type
-      this.selectedSecret = secret
+    onUpdateSecret (secretBinding) {
+      const providerType = secretBinding.provider.type
+      this.selectedSecretBinding = secretBinding
       this.visibleSecretDialog = providerType
     },
-    onRemoveSecret (secret) {
-      this.selectedSecret = secret
+    onRemoveSecret (secretBinding) {
+      this.selectedSecretBinding = secretBinding
       this.visibleSecretDialog = 'delete'
     },
     relatedShootCountInfra (secret) {

@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     v-model="visible"
     :data="secretData"
     :secret-validations="v$"
-    :secret="secret"
+    :secret-binding="secretBinding"
     :provider-type="providerType"
     :create-title="`Add new ${providerType} Secret`"
     :replace-title="`Replace ${providerType} Secret`"
@@ -68,7 +68,7 @@ export default {
       type: Boolean,
       required: true,
     },
-    secret: {
+    secretBinding: {
       type: Object,
     },
     providerType: {

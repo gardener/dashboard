@@ -39,7 +39,8 @@ SPDX-License-Identifier: Apache-2.0
       <g-secret-details-item-content
         dns
         class="py-1"
-        :secret="item.secret"
+        :secret="item.secretBinding.secretrResource"
+        :provider-type="item.providerType"
       />
     </td>
     <td v-if="selectedHeaders.relatedShootCount">
@@ -122,10 +123,10 @@ export default {
   },
   methods: {
     onUpdate () {
-      this.$emit('update', this.item.secret)
+      this.$emit('update', this.item.secretBinding)
     },
     onDelete () {
-      this.$emit('delete', this.item.secret)
+      this.$emit('delete', this.item.secretBinding)
     },
   },
 }

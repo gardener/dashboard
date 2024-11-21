@@ -13,10 +13,10 @@ import {
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useConfigStore } from '@/store/config'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
-import { useSecretStore } from '@/store/secret'
+import { useCredentialStore } from '@/store/credential'
 import { useSeedStore } from '@/store/seed'
 
-import { useSecretList } from '@/composables/useSecretList'
+import { useSecretBindingList } from '@/composables/useSecretBindingList'
 
 import { selfTerminationDaysForSecret } from '@/utils'
 
@@ -44,7 +44,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     cloudProfileStore = useCloudProfileStore(),
     configStore = useConfigStore(),
     gardenerExtensionStore = useGardenerExtensionStore(),
-    secretStore = useSecretStore(),
+    secretStore = useCredentialStore(),
     seedStore = useSeedStore(),
   } = options
 
@@ -61,7 +61,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
   })
 
   const infrastructureSecret = computed(() => {
-    return find(infrastructureSecrets.value, ['metadata.name', secretBindingName.value])
+    return find(infrastructureSecretBindings.value, ['metadata.name', secretBindingName.value])
   })
 
   const cloudProfiles = computed(() => {
@@ -115,7 +115,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     return cloudProfileStore.getDefaultNodesCIDR(cloudProfileName.value)
   })
 
-  const infrastructureSecrets = useSecretList(providerType, { secretStore, gardenerExtensionStore })
+  const infrastructureSecretBindings = useSecretBindingList(providerType, { secretStore, gardenerExtensionStore })
 
   const sortedKubernetesVersions = computed(() => {
     return cloudProfileStore.sortedKubernetesVersions(cloudProfileName.value)
@@ -225,7 +225,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     isFailureToleranceTypeZoneSupported,
     allZones,
     defaultNodesCIDR,
-    infrastructureSecrets,
+    infrastructureSecretBindings,
     infrastructureSecret,
     sortedKubernetesVersions,
     kubernetesVersionIsNotLatestPatch,

@@ -34,6 +34,8 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import get from 'lodash/get'
+
 export default {
 
   props: {
@@ -47,6 +49,9 @@ export default {
     },
     secret: {
       type: Object,
+    },
+    providerType: {
+      type: String,
     },
     detailsTitle: {
       type: Boolean,
@@ -68,9 +73,17 @@ export default {
     },
   },
   methods: {
+    getGCPProjectId (secret) {
+      try {
+        const serviceAccount = get(secret.data, ['serviceaccount.json'])
+        return get(JSON.parse(atob(serviceAccount)), ['project_id'])
+      } catch (err) {
+        return undefined
+      }
+    },
     getSecretDetailsInfra (secret) {
       const secretData = secret.data || {}
-      switch (secret.metadata.provider.type) {
+      switch (this.providerType) {
         case 'openstack':
           return [
             {
@@ -111,7 +124,7 @@ export default {
           return [
             {
               label: 'Project',
-              value: secretData.project,
+              value: this.getGCPProjectId(secret),
             },
           ]
         case 'alicloud':
@@ -146,7 +159,7 @@ export default {
     },
     getSecretDetailsDns (secret) {
       const secretData = secret.data || {}
-      switch (secret.metadata.provider.type) {
+      switch (this.providerType) {
         case 'openstack-designate':
           return [
             {

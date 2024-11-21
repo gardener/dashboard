@@ -154,14 +154,14 @@ import { mapState } from 'pinia'
 import { ref } from 'vue'
 
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
-import { useSecretStore } from '@/store/secret'
+import { useCredentialStore } from '@/store/credential'
 
 import GSelectSecret from '@/components/Secrets/GSelectSecret'
 import GDnsProviderRow from '@/components/ShootDns/GDnsProviderRow'
 import GVendorIcon from '@/components/GVendorIcon'
 
 import { useShootContext } from '@/composables/useShootContext'
-import { useSecretList } from '@/composables/useSecretList'
+import { useSecretBindingList } from '@/composables/useSecretBindingList'
 
 import {
   withFieldName,
@@ -192,11 +192,11 @@ export default {
       deleteDnsServiceExtensionProvider,
     } = useShootContext()
 
-    const secretStore = useSecretStore()
+    const secretStore = useCredentialStore()
     const gardenerExtensionStore = useGardenerExtensionStore()
 
     const customDomain = ref(!!dnsDomain.value && !!dnsPrimaryProviderType.value)
-    const dnsPrimaryProviderSecrets = useSecretList(dnsPrimaryProviderType, { secretStore, gardenerExtensionStore })
+    const dnsPrimaryProviderSecretBindings = useSecretBindingList(dnsPrimaryProviderType, { secretStore, gardenerExtensionStore })
 
     return {
       v$: useVuelidate(),
@@ -211,7 +211,7 @@ export default {
       resetDnsPrimaryProvider,
       deleteDnsServiceExtensionProvider,
       customDomain,
-      dnsPrimaryProviderSecrets,
+      dnsPrimaryProviderSecretBindings,
     }
   },
   validations () {
@@ -266,10 +266,10 @@ export default {
     },
     primaryDnsProviderSecret: {
       get () {
-        return find(this.dnsPrimaryProviderSecrets, ['metadata.secretRef.name', this.dnsPrimaryProviderSecretName])
+        return find(this.dnsPrimaryProviderSecretBindings, ['secretRef.name', this.dnsPrimaryProviderSecretName])
       },
       set (value) {
-        this.dnsPrimaryProviderSecretName = value?.metadata.secretRef.name
+        this.dnsPrimaryProviderSecretName = value?.secretRef.name
       },
     },
     domainRecommendationVisible () {
@@ -293,7 +293,7 @@ export default {
       if (value) {
         const type = head(this.dnsProviderTypesWithPrimarySupport)
         this.dnsPrimaryProviderType = type
-        this.primaryDnsProviderSecret = head(this.dnsPrimaryProviderSecrets)
+        this.primaryDnsProviderSecret = head(this.dnsPrimaryProviderSecretBindings)
         this.v$.dnsDomain.$reset()
       }
     },

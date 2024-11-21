@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-tooltip
-    :disabled="!secret"
+    :disabled="!secretBinding"
     location="top"
   >
     <template #activator="{ props }">
@@ -25,7 +25,8 @@ SPDX-License-Identifier: Apache-2.0
       <g-secret-details-item-content
         class="ma-1"
         infra
-        :secret="secret"
+        :secret="secretBinding.secretResource"
+        :provider-type="secretBinding.type"
       />
     </v-card>
   </v-tooltip>
@@ -38,7 +39,7 @@ import {
 } from 'pinia'
 
 import { useAuthzStore } from '@/store/authz'
-import { useSecretStore } from '@/store/secret'
+import { useCredentialStore } from '@/store/credential'
 
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 import GSecretDetailsItemContent from '@/components/Secrets/GSecretDetailsItemContent'
@@ -63,12 +64,12 @@ export default {
     canLinkToSecret () {
       return this.canGetSecrets && this.secretBindingName && this.namespace
     },
-    secret () {
-      return this.getCloudProviderSecretByName({ namespace: this.namespace, name: this.secretBindingName })
+    secretBinding () {
+      return this.getSecretBindingByName({ namespace: this.namespace, name: this.secretBindingName })
     },
   },
   methods: {
-    ...mapActions(useSecretStore, ['getCloudProviderSecretByName']),
+    ...mapActions(useCredentialStore, ['getSecretBindingByName']),
   },
 }
 </script>

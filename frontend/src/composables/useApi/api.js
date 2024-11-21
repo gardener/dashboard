@@ -48,28 +48,47 @@ export function getConfiguration () {
   return getResource('/api/config')
 }
 
-/* CloudProviders Secrets */
-
-export function getCloudProviderSecrets ({ namespace }) {
-  namespace = encodeURIComponent(namespace)
-  return getResource(`/api/namespaces/${namespace}/cloudprovidersecrets`)
+/* Credentials */
+function invokeCloudProviderCredentialMethod (method, body) {
+  return callResourceMethod('/api/namespaces/cloudprovidercredentials', {
+    method,
+    params: body,
+  })
 }
 
-export function updateCloudProviderSecret ({ namespace, name, data }) {
+export function getCloudProviderCredentials ({ namespace, body = {} }) {
   namespace = encodeURIComponent(namespace)
-  name = encodeURIComponent(name)
-  return updateResource(`/api/namespaces/${namespace}/cloudprovidersecrets/${name}`, data)
+  body.coordinate = {
+    namespace,
+  }
+  return invokeCloudProviderCredentialMethod('list', body)
 }
 
-export function createCloudProviderSecret ({ namespace, data }) {
+export function createCloudProviderCredential ({ namespace, name, body = {} }) {
   namespace = encodeURIComponent(namespace)
-  return createResource(`/api/namespaces/${namespace}/cloudprovidersecrets`, data)
+  body.coordinate = {
+    namespace,
+    name,
+  }
+  return invokeCloudProviderCredentialMethod('create', body)
 }
 
-export function deleteCloudProviderSecret ({ namespace, name }) {
+export function updateCloudProviderCredential ({ namespace, name, body = {} }) {
   namespace = encodeURIComponent(namespace)
-  name = encodeURIComponent(name)
-  return deleteResource(`/api/namespaces/${namespace}/cloudprovidersecrets/${name}`)
+  body.coordinate = {
+    namespace,
+    name,
+  }
+  return invokeCloudProviderCredentialMethod('patch', body)
+}
+
+export function deleteCloudProviderCredential ({ namespace, name, body = {} }) {
+  namespace = encodeURIComponent(namespace)
+  body.coordinate = {
+    namespace,
+    name,
+  }
+  return invokeCloudProviderCredentialMethod('remove', body)
 }
 
 /* Tickets */
@@ -402,10 +421,10 @@ export function getResourceQuotas ({ namespace }) {
 
 export default {
   getConfiguration,
-  getCloudProviderSecrets,
-  updateCloudProviderSecret,
-  createCloudProviderSecret,
-  deleteCloudProviderSecret,
+  getCloudProviderCredentials,
+  createCloudProviderCredential,
+  updateCloudProviderCredential,
+  deleteCloudProviderCredential,
   getIssues,
   getIssuesAndComments,
   getShoots,
