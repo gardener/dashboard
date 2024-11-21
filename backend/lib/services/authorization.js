@@ -125,17 +125,6 @@ exports.canListResourceQuotas = function (user, namespace) {
   })
 }
 
-exports.canListQuotas = function (user, namespace) {
-  return hasAuthorization(user, {
-    resourceAttributes: {
-      verb: 'list',
-      group: '',
-      resource: 'quotas',
-      namespace,
-    },
-  })
-}
-
 exports.canListControllerRegistrations = function (user) {
   return hasAuthorization(user, {
     resourceAttributes: {
