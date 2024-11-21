@@ -12,7 +12,6 @@ import {
   reactive,
   unref,
   watch,
-  watchEffect,
 } from 'vue'
 import { computedAsync } from '@vueuse/core'
 import { useTheme } from 'vuetify'
@@ -55,12 +54,11 @@ import { useProjectStore } from '@/store/project'
 import { useAuthzStore } from '@/store/authz'
 
 import { useEditorLineHighlighter } from '@/composables/useEditorLineHighlighter'
-import { useEditorWhitespace } from '@/composables/useEditorWhitespace'
 import { useLogger } from '@/composables/useLogger'
 import { useApi } from '@/composables/useApi'
 
 import {
-  createEditor,
+  createWhitespaceViewPlugin,
   EditorCompletions,
 } from './helper'
 
@@ -79,7 +77,7 @@ export function useShootEditor (initialValue, options = {}) {
     disableLineHighlighting = false,
   } = options
 
-  const { showAllWhitespace } = useEditorWhitespace()
+  const whitespaceViewPlugin = createWhitespaceViewPlugin()
 
   const cmView = shallowRef(null)
   const completions = shallowRef(null)
@@ -104,9 +102,7 @@ export function useShootEditor (initialValue, options = {}) {
   let editorLineHighlighter = null
   let initialDocumentValue = null
 
-  const schemaDefinition = computedAsync(() => {
-    return api.getShootSchemaDefinition()
-  }, null)
+  const schemaDefinition = computedAsync(api.getShootSchemaDefinition, null)
 
   const defaultExtraKeys = [
     {
@@ -182,7 +178,7 @@ export function useShootEditor (initialValue, options = {}) {
   const historyCompartment = new Compartment()
   const whitespacesCompartment = new Compartment()
 
-  async function loadEditor (element) {
+  function loadEditor (element) {
     try {
       const state = EditorState.create({
         extensions: [
@@ -237,10 +233,10 @@ export function useShootEditor (initialValue, options = {}) {
           readOnlyCompartment.of(EditorState.readOnly.of(isReadOnly.value)),
           themeCompartment.of([isDarkMode.value ? oneDark : [], syntaxHighlighting(isDarkMode.value ? oneDarkHighlightStyle : defaultHighlightStyle)]),
           lineNumbers(),
-          whitespacesCompartment.of(showAllWhitespace),
+          whitespacesCompartment.of(whitespaceViewPlugin),
         ],
       })
-      cmView.value = await createEditor({ parent: element, state })
+      cmView.value = new EditorView({ parent: element, state })
       resetEditor()
 
       if (!disableLineHighlighting) {
@@ -256,41 +252,47 @@ export function useShootEditor (initialValue, options = {}) {
       editorLineHighlighter.destroy()
       editorLineHighlighter = null
     }
-    if (cmView.value) {
-      cmView.value.destroy()
-      const element = cmView.value.dom
-      if (element && element.remove) {
-        element.remove()
-      }
-      cmView.value = null
+
+    if (!cmView.value) {
+      return
     }
+
+    cmView.value.destroy()
+    const element = cmView.value.dom
+    if (element && element.remove) {
+      element.remove()
+    }
+    cmView.value = null
   }
 
   function getDocumentValue () {
-    if (cmView.value) {
-      return cmView.value.state.doc.toString()
+    if (!cmView.value) {
+      return ''
     }
-    return ''
+
+    return cmView.value.state.doc.toString()
   }
 
   function setDocumentValue (value) {
-    if (cmView.value) {
-      const state = cmView.value.state
-      const selection = state.selection
-      const scrollPos = cmView.value.scrollDOM.scrollTop
-
-      const transaction = state.update({
-        changes: { from: 0, to: state.doc.length, insert: value },
-        selection,
-      })
-
-      cmView.value.dispatch(transaction)
-      cmView.value.scrollDOM.scrollTop = scrollPos
-      cmView.value.focus()
-
-      clearDocumentHistory()
-      initialDocumentValue = value
+    if (!cmView.value) {
+      return
     }
+
+    const state = cmView.value.state
+    const selection = state.selection
+    const scrollPos = cmView.value.scrollDOM.scrollTop
+
+    const transaction = state.update({
+      changes: { from: 0, to: state.doc.length, insert: value },
+      selection,
+    })
+
+    cmView.value.dispatch(transaction)
+    cmView.value.scrollDOM.scrollTop = scrollPos
+    cmView.value.focus()
+
+    clearDocumentHistory()
+    initialDocumentValue = value
   }
 
   function getEditorValue () {
@@ -316,76 +318,102 @@ export function useShootEditor (initialValue, options = {}) {
   }
 
   function focusEditor () {
-    if (cmView.value) {
-      cmView.value.focus()
+    if (!cmView.value) {
+      return
     }
+
+    cmView.value.focus()
   }
 
   function clearDocumentHistory () {
-    if (cmView.value) {
-      cmView.value.dispatch({
-        effects: historyCompartment.reconfigure([]),
-      })
-      cmView.value.dispatch({
-        effects: historyCompartment.reconfigure(history()),
-      })
-      clean.value = true
-      touched.value = false
-      conflictPath.value = null
-      historySize.value = {
-        undo: 0,
-        redo: 0,
-      }
+    if (!cmView.value) {
+      return
+    }
+
+    cmView.value.dispatch({
+      effects: historyCompartment.reconfigure([]),
+    })
+    cmView.value.dispatch({
+      effects: historyCompartment.reconfigure(history()),
+    })
+    clean.value = true
+    touched.value = false
+    conflictPath.value = null
+    historySize.value = {
+      undo: 0,
+      redo: 0,
     }
   }
 
   function execUndo () {
-    if (cmView.value) {
-      undo(cmView.value)
+    if (!cmView.value) {
+      return
     }
+
+    undo(cmView.value)
   }
 
   function execRedo () {
-    if (cmView.value) {
-      redo(cmView.value)
+    if (!cmView.value) {
+      return
     }
+
+    redo(cmView.value)
   }
 
-  watchEffect(() => {
-    if (cmView.value) {
-      if (schemaDefinition.value) {
-        const shootProperties = get(schemaDefinition.value, ['properties'], {})
-        completions.value = new EditorCompletions(shootProperties, {
-          cmView: cmView.value,
-          completionPaths: get(options, ['completionPaths'], []),
-          logger,
-        })
-      }
+  watch(schemaDefinition, value => {
+    if (!cmView.value) {
+      return
+    }
 
-      if (renderWhitespaces.value) {
-        cmView.value.dispatch({
-          effects: whitespacesCompartment.reconfigure(showAllWhitespace),
-        })
-      } else {
-        cmView.value.dispatch({
-          effects: whitespacesCompartment.reconfigure([]),
-        })
-      }
+    if (value) {
+      const shootProperties = get(value, ['properties'], {})
+      const completionPaths = get(options, ['completionPaths'], [])
+      completions.value = new EditorCompletions(shootProperties, {
+        indentUnit: cmView.value.state.facet(indentUnit).length,
+        completionPaths,
+        logger,
+      })
     }
   })
 
-  watch(isReadOnly, isReadOnly => {
+  watch(renderWhitespaces, value => {
+    if (!cmView.value) {
+      return
+    }
+
+    const content = value
+      ? whitespaceViewPlugin
+      : []
     cmView.value.dispatch({
-      effects: readOnlyCompartment.reconfigure(EditorState.readOnly.of(isReadOnly)),
+      effects: whitespacesCompartment.reconfigure(content),
     })
   })
 
-  watch(isDarkMode, isDarkMode => {
+  watch(isReadOnly, isReadOnly => {
+    if (!cmView.value) {
+      return
+    }
+
+    const content = EditorState.readOnly.of(isReadOnly)
     cmView.value.dispatch({
-      effects: themeCompartment.reconfigure([
-        isDarkMode ? oneDark : [],
-        syntaxHighlighting(isDarkMode ? oneDarkHighlightStyle : defaultHighlightStyle),
-      ]),
+      effects: readOnlyCompartment.reconfigure(content),
+    })
+  })
+
+  watch(isDarkMode, value => {
+    if (!cmView.value) {
+      return
+    }
+
+    const content = []
+    if (value) {
+      content.push(oneDark, syntaxHighlighting(oneDarkHighlightStyle))
+    } else {
+      content.push(syntaxHighlighting(defaultHighlightStyle))
+    }
+    cmView.value.dispatch({
+      effects: themeCompartment.reconfigure(content),
     })
   })
 
@@ -394,7 +422,12 @@ export function useShootEditor (initialValue, options = {}) {
       setEditorValue(newValue)
       return
     }
-    for (const path of ['spec', 'metadata.annotations', 'metadata.labels']) {
+    const paths = [
+      ['spec'],
+      ['metadata', 'annotations'],
+      ['metadata', 'labels'],
+    ]
+    for (const path of paths) {
       const newProp = get(newValue, path)
       const oldProp = get(oldValue, path)
       if (!isEqual(newProp, oldProp)) {

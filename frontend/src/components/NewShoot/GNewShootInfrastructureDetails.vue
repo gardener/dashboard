@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
       >
         <g-select-secret
           v-model="infrastructureSecret"
-          :cloud-profile-name="cloudProfileName"
+          :provider-type="providerType"
         />
       </v-col>
       <v-col cols="3">
@@ -273,8 +273,8 @@ export default {
     }
   },
   validations () {
-    const requiresInfrastructure = infrastructureKind => {
-      return requiredIf(() => this.providerType === infrastructureKind)
+    const requiresInfrastructure = providerType => {
+      return requiredIf(() => this.providerType === providerType)
     }
     return {
       region: withFieldName('Region', {

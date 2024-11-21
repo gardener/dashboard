@@ -7,7 +7,7 @@
 'use strict'
 
 const { isHttpError } = require('@gardener-dashboard/request')
-const { cleanKubeconfig, Config } = require('@gardener-dashboard/kube-config')
+const { Config } = require('@gardener-dashboard/kube-config')
 const { dashboardClient } = require('@gardener-dashboard/kube-client')
 const resources = require('@gardener-dashboard/kube-client/lib/resources')
 const createError = require('http-errors')
@@ -125,17 +125,6 @@ exports.replaceVersion = async function ({ user, namespace, name, body }) {
     op: 'replace',
     path: '/spec/kubernetes/version',
     value: version,
-  }]
-  return client['core.gardener.cloud'].shoots.jsonPatch(namespace, name, patchOperations)
-}
-
-exports.replaceEnableStaticTokenKubeconfig = async function ({ user, namespace, name, body }) {
-  const client = user.client
-  const enableStaticTokenKubeconfig = body.enableStaticTokenKubeconfig === true
-  const patchOperations = [{
-    op: 'replace',
-    path: '/spec/kubernetes/enableStaticTokenKubeconfig',
-    value: enableStaticTokenKubeconfig,
   }]
   return client['core.gardener.cloud'].shoots.jsonPatch(namespace, name, patchOperations)
 }
@@ -298,25 +287,7 @@ exports.getDashboardUrlPath = getDashboardUrlPath
 exports.info = async function ({ user, namespace, name }) {
   const client = user.client
 
-  const [
-    { value: shoot, reason: shootError },
-    { value: secret },
-  ] = await Promise.allSettled([
-    read({
-      user,
-      namespace,
-      name,
-    }),
-    client.getSecret({
-      namespace,
-      name: `${name}.kubeconfig`,
-      throwNotFound: false,
-    }),
-  ])
-
-  if (shootError) {
-    throw shootError
-  }
+  const shoot = await read({ user, namespace, name })
 
   const data = {
     canLinkToSeed: false,
@@ -339,26 +310,6 @@ exports.info = async function ({ user, namespace, name }) {
     }
   }
 
-  if (secret) {
-    _
-      .chain(secret)
-      .get(['data'])
-      .pick('kubeconfig', 'token')
-      .forEach((value, key) => {
-        value = decodeBase64(value)
-        if (key === 'kubeconfig') {
-          try {
-            const kubeconfigObject = cleanKubeconfig(value)
-            data.kubeconfig = kubeconfigObject.toYAML()
-          } catch (err) {
-            logger.error('failed to clean kubeconfig', err)
-          }
-        } else {
-          data[`cluster_${key}`] = value
-        }
-      })
-      .commit()
-  }
   data.dashboardUrlPath = getDashboardUrlPath(shoot.spec.kubernetes.version)
 
   const oidcObservabilityUrlsEnabled = _.get(config, ['frontend', 'features', 'oidcObservabilityUrlsEnabled'], false)

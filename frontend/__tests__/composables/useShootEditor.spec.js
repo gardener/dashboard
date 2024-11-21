@@ -77,10 +77,11 @@ describe('composables', () => {
 
       beforeEach(() => {
         const element = document.createElement('div')
+        const indentValue = '   ' // 3 spaces
         const state = EditorState.create({
           extensions: [
             cmYaml(),
-            indentUnit.of('   '), // 3 spaces
+            indentUnit.of(indentValue),
           ],
         })
         editorView = new EditorView({ parent: element, state })
@@ -103,7 +104,7 @@ describe('composables', () => {
         }
 
         shootEditorCompletions = new EditorCompletions(shootCompletions, {
-          cmView: editorView,
+          indentUnit: indentValue.length,
         })
 
         createMockCompletionContext = (view, pos = null) => {

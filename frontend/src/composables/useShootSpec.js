@@ -67,15 +67,11 @@ export function useShootSpec (shootItem, options = {}) {
     return find(kubernetesVersionObjects, ['version', shootK8sVersion.value]) ?? {}
   })
 
-  const shootEnableStaticTokenKubeconfig = computed(() => {
-    return get(shootSpec.value, ['kubernetes', 'enableStaticTokenKubeconfig'], true)
-  })
-
   const shootCloudProfileName = computed(() => {
     return shootSpec.value.cloudProfileName
   })
 
-  const shootCloudProviderKind = computed(() => {
+  const shootProviderType = computed(() => {
     return get(shootSpec.value, ['provider', 'type'])
   })
 
@@ -168,9 +164,8 @@ export function useShootSpec (shootItem, options = {}) {
     shootKubernetesVersionObject,
     shootSupportedPatchAvailable,
     shootSupportedUpgradeAvailable,
-    shootEnableStaticTokenKubeconfig,
     shootCloudProfileName,
-    shootCloudProviderKind,
+    shootProviderType,
     shootWorkerGroups,
     hasShootWorkerGroups,
     sshAccessEnabled,

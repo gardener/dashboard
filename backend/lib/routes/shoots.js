@@ -92,20 +92,6 @@ router
     }
   })
 
-router.route('/:name/spec/kubernetes/enableStaticTokenKubeconfig')
-  .all(metricsMiddleware)
-  .put(async (req, res, next) => {
-    try {
-      const user = req.user
-      const namespace = req.params.namespace
-      const name = req.params.name
-      const body = req.body
-      res.send(await shoots.replaceEnableStaticTokenKubeconfig({ user, namespace, name, body }))
-    } catch (err) {
-      next(err)
-    }
-  })
-
 router.route('/:name/spec/kubernetes/version')
   .all(metricsMiddleware)
   .put(async (req, res, next) => {

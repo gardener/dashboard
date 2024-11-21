@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :secret-validations="v$"
     :secret="secret"
-    :vendor="vendor"
+    :provider-type="providerType"
     :create-title="`Add new ${name} Secret`"
     :replace-title="`Replace ${name} Secret`"
   >
@@ -45,7 +45,7 @@ SPDX-License-Identifier: Apache-2.0
           @blur="v$.secretAccessKey.$touch()"
         />
       </div>
-      <div v-if="vendor === 'aws-route53'">
+      <div v-if="providerType === 'aws-route53'">
         <v-text-field
           v-model="awsRegion"
           color="primary"
@@ -56,10 +56,10 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </template>
     <template #help-slot>
-      <p v-if="vendor==='aws'">
+      <p v-if="providerType==='aws'">
         Before you can provision and access a Kubernetes cluster, you need to add account credentials. Gardener needs the credentials to provision and operate the AWS infrastructure for your Kubernetes cluster.
       </p>
-      <p v-if="vendor==='aws-route53'">
+      <p v-if="providerType==='aws-route53'">
         Before you can use an external DNS provider, you need to add account credentials.
         The user needs permissions on the hosted zone to list and change DNS records.
       </p>
@@ -78,12 +78,12 @@ SPDX-License-Identifier: Apache-2.0
         </g-external-link>).
       </p>
       <g-code-block
-        v-if="vendor==='aws'"
+        v-if="providerType==='aws'"
         max-height="100%"
         lang="json"
         :content="JSON.stringify(templateAws, undefined, 2)"
       />
-      <div v-if="vendor==='aws-route53'">
+      <div v-if="providerType==='aws-route53'">
         <p>In this example, the placeholder for the hosted zone is Z2XXXXXXXXXXXX</p>
         <g-code-block
           max-height="100%"
@@ -128,7 +128,7 @@ export default {
     secret: {
       type: Object,
     },
-    vendor: {
+    providerType: {
       type: String,
     },
   },
@@ -267,10 +267,10 @@ export default {
       return !this.secret
     },
     name () {
-      if (this.vendor === 'aws') {
+      if (this.providerType === 'aws') {
         return 'AWS'
       }
-      if (this.vendor === 'aws-route53') {
+      if (this.providerType === 'aws-route53') {
         return 'Amazon Route 53'
       }
       return undefined

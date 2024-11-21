@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
             <g-vendor
               title
               extended
-              :cloud-provider-kind="shootCloudProviderKind"
+              :provider-type="shootProviderType"
               :region="shootRegion"
               :zones="shootZones"
             />
@@ -27,7 +27,7 @@ SPDX-License-Identifier: Apache-2.0
           <div class="pt-1 d-flex flex-shrink-1">
             <g-vendor
               extended
-              :cloud-provider-kind="shootCloudProviderKind"
+              :provider-type="shootProviderType"
               :region="shootRegion"
               :zones="shootZones"
             />
@@ -307,7 +307,7 @@ export default {
       shootSecretBindingName,
       hasShootWorkerGroups,
       shootControlPlaneHighAvailabilityFailureTolerance,
-      shootCloudProviderKind,
+      shootProviderType,
       servicesCidr,
       nodesCidr,
       podsCidr,
@@ -331,7 +331,7 @@ export default {
       shootSecretBindingName,
       hasShootWorkerGroups,
       shootControlPlaneHighAvailabilityFailureTolerance,
-      shootCloudProviderKind,
+      shootProviderType,
       servicesCidr,
       nodesCidr,
       podsCidr,

@@ -146,7 +146,7 @@ export function createShootContextComposable (options = {}) {
     }
     hibernationSchedules.value = []
     workerless.value = get(options, ['workerless'], false)
-    const defaultProviderType = head(cloudProfileStore.sortedInfrastructureKindList)
+    const defaultProviderType = head(cloudProfileStore.sortedProviderTypeList)
     providerType.value = get(options, ['providerType'], defaultProviderType)
     resetMaintenanceAutoUpdate()
     resetMaintenanceTimeWindow()
@@ -192,19 +192,6 @@ export function createShootContextComposable (options = {}) {
       const defaultKubernetesVersionDescriptor = cloudProfileStore.defaultKubernetesVersionForCloudProfileName(cloudProfileName.value)
       kubernetesVersion.value = get(defaultKubernetesVersionDescriptor, ['version'])
     }
-  }
-
-  const kubernetesEnableStaticTokenKubeconfig = computed({
-    get () {
-      return !!get(manifest.value, ['spec', 'kubernetes', 'enableStaticTokenKubeconfig'])
-    },
-    set (value) {
-      set(manifest.value, ['spec', 'kubernetes', 'enableStaticTokenKubeconfig'], !!value)
-    },
-  })
-
-  function resetKubernetesEnableStaticTokenKubeconfig () {
-    kubernetesEnableStaticTokenKubeconfig.value = false
   }
 
   /* cloudProfileName */
@@ -346,7 +333,6 @@ export function createShootContextComposable (options = {}) {
     set(manifest.value, ['spec', 'provider', 'controlPlaneConfig'], provider.controlPlaneConfig)
     set(manifest.value, ['spec', 'networking'], networking)
     set(manifest.value, ['spec', 'kubernetes'], kubernetes)
-    resetKubernetesEnableStaticTokenKubeconfig()
   }
 
   const providerControlPlaneConfigZone = computed({
@@ -972,7 +958,6 @@ export function createShootContextComposable (options = {}) {
     infrastructureSecret,
     /* kubernetes */
     kubernetesVersion,
-    kubernetesEnableStaticTokenKubeconfig,
     /* networking */
     networkingType,
     networkingNodes,
