@@ -550,13 +550,13 @@ __metadata:
   linkType: hard
 
 "@codemirror/view@npm:^6.0.0, @codemirror/view@npm:^6.17.0, @codemirror/view@npm:^6.23.0, @codemirror/view@npm:^6.27.0, @codemirror/view@npm:^6.33.0":
-  version: 6.34.3
-  resolution: "@codemirror/view@npm:6.34.3"
+  version: 6.35.0
+  resolution: "@codemirror/view@npm:6.35.0"
   dependencies:
     "@codemirror/state": "npm:^6.4.0"
     style-mod: "npm:^4.1.0"
     w3c-keyname: "npm:^2.2.4"
-  checksum: 10c0/3958c313517c6fd7d2d70668fb35772299aee4985a55cc3e760155cdd66558d7a630b54d330a2af845af79fd704dfd9e363ca5c0770db486665c1865729475bd
+  checksum: 10c0/39b85e3ac266cb30a28c98a9ecf1cde34cdd160c243fe54a673b744990d72bb7758c1f557b7df25153c84e03ed9e989d7392a00e776533a731cb79fb0dca894e
   languageName: node
   linkType: hard
 
