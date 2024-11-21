@@ -17,11 +17,6 @@ SPDX-License-Identifier: Apache-2.0
       />
       <v-divider inset />
       <g-credential-tile
-        v-if="shootEnableStaticTokenKubeconfig"
-        type="kubeconfig"
-        dense
-      />
-      <g-credential-tile
         type="certificateAuthorities"
         dense
       />
@@ -54,7 +49,6 @@ import GCredentialRotationHelp from '@/components/GCredentialRotationHelp'
 import { useShootItem } from '@/composables/useShootItem'
 
 const {
-  shootEnableStaticTokenKubeconfig,
   isTestingCluster,
   hasShootWorkerGroups,
   sshAccessEnabled,
