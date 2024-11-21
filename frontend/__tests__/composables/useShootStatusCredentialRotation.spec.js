@@ -25,11 +25,6 @@ describe('composables', () => {
     describe('#shootStatusCredentialsRotationAggregatedPhase', () => {
       beforeEach(() => {
         shootItem.value = {
-          spec: {
-            kubernetes: {
-              enableStaticTokenKubeconfig: true,
-            },
-          },
           status: {
             credentials: {
               rotation: {

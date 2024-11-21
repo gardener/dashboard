@@ -168,12 +168,6 @@ export function updateShootVersion ({ namespace, name, data }) {
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/kubernetes/version`, data)
 }
 
-export function updateShootEnableStaticTokenKubeconfig ({ namespace, name, data }) {
-  namespace = encodeURIComponent(namespace)
-  name = encodeURIComponent(name)
-  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/kubernetes/enableStaticTokenKubeconfig`, data)
-}
-
 export function updateShootMaintenance ({ namespace, name, data }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
@@ -436,7 +430,6 @@ export default {
   addShootAnnotation,
   getShootInfo,
   updateShootVersion,
-  updateShootEnableStaticTokenKubeconfig,
   updateShootMaintenance,
   updateShootHibernationSchedules,
   updateShootHibernation,

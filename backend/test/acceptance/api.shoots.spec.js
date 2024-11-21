@@ -206,7 +206,6 @@ describe('api', function () {
 
     it('should return shoot info', async function () {
       mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
-      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.configmaps.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.configmaps.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
@@ -219,18 +218,14 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toHaveBeenCalledTimes(7)
+      expect(mockRequest).toHaveBeenCalledTimes(6)
       expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(kubeconfig.cleanKubeconfig).toHaveBeenCalledTimes(1)
 
       expect(logger.info).toHaveBeenCalledTimes(0)
 
       expect(res.body).toMatchSnapshot({
-        kubeconfig: expect.any(String),
         kubeconfigGardenlogin: expect.any(String),
       }, 'body')
-      expect(yaml.load(res.body.kubeconfig)).toMatchSnapshot('body.kubeconfig')
       expect(yaml.load(res.body.kubeconfigGardenlogin)).toMatchSnapshot('body.kubeconfigGardenlogin')
     })
 
@@ -238,7 +233,6 @@ describe('api', function () {
       const name = 'dummyShoot' // has no advertised addresses
 
       mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
-      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.shoots.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.get())
@@ -249,18 +243,13 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toHaveBeenCalledTimes(5)
+      expect(mockRequest).toHaveBeenCalledTimes(4)
       expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(kubeconfig.cleanKubeconfig).toHaveBeenCalledTimes(1)
 
       expect(logger.info).toHaveBeenCalledTimes(1)
       expect(logger.info).toHaveBeenLastCalledWith('failed to get gardenlogin kubeconfig', 'Shoot has no advertised addresses')
 
-      expect(res.body).toMatchSnapshot({
-        kubeconfig: expect.any(String),
-      }, 'body')
-      expect(yaml.load(res.body.kubeconfig)).toMatchSnapshot('body.kubeconfig')
+      expect(res.body).toMatchSnapshot('body')
     })
 
     it('should replace shoot', async function () {
@@ -297,24 +286,6 @@ describe('api', function () {
         .set('cookie', await user.cookie)
         .send({
           version: '1.17.1',
-        })
-        .expect('content-type', /json/)
-        .expect(200)
-
-      expect(mockRequest).toHaveBeenCalledTimes(1)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(res.body).toMatchSnapshot()
-    })
-
-    it('should replace shoot kubernetes enableStaticTokenKubeconfig', async function () {
-      mockRequest.mockImplementationOnce(fixtures.shoots.mocks.patch())
-
-      const res = await agent
-        .put(`/api/namespaces/${namespace}/shoots/${name}/spec/kubernetes/enableStaticTokenKubeconfig`)
-        .set('cookie', await user.cookie)
-        .send({
-          enableStaticTokenKubeconfig: true,
         })
         .expect('content-type', /json/)
         .expect(200)
