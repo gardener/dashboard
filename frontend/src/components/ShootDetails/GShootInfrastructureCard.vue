@@ -42,11 +42,11 @@ SPDX-License-Identifier: Apache-2.0
           />
         </g-list-item-content>
       </g-list-item>
-      <g-list-item v-if="secretBinding">
+      <g-list-item v-if="secretBinding?.secretResource">
         <g-secret-details-item-content
           infra
           :secret="secretBinding.secretResource"
-          :provider-type="secretBinding.providerType"
+          :provider-type="secretBinding.provider.type"
           details-title
         />
       </g-list-item>

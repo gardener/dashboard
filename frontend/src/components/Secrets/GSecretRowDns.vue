@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <tr>
+  <tr :class="{ 'highlighted': item.highlighted }">
     <td v-if="selectedHeaders.name">
       <div class="d-flex">
         {{ item.name }}
@@ -131,3 +131,11 @@ export default {
   },
 }
 </script>
+
+<style lang="scss" scoped>
+  $highlighted-color: rgb(var(--v-theme-accent));
+
+  .highlighted {
+    background-color: $highlighted-color;
+  }
+</style>

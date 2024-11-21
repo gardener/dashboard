@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-tooltip
-    :disabled="!secretBinding"
+    :disabled="!secretBinding?.secretResource"
     location="top"
   >
     <template #activator="{ props }">
@@ -26,7 +26,7 @@ SPDX-License-Identifier: Apache-2.0
         class="ma-1"
         infra
         :secret="secretBinding.secretResource"
-        :provider-type="secretBinding.type"
+        :provider-type="secretBinding.provider.type"
       />
     </v-card>
   </v-tooltip>

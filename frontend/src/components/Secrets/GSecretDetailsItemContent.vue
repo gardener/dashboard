@@ -83,166 +83,174 @@ export default {
     },
     getSecretDetailsInfra (secret) {
       const secretData = secret.data || {}
-      switch (this.providerType) {
-        case 'openstack':
-          return [
-            {
-              label: 'Domain Name',
-              value: secretData.domainName,
-            },
-            {
-              label: 'Tenant Name',
-              value: secretData.tenantName,
-            },
-          ]
-        case 'vsphere':
-          return [
-            {
-              label: 'vSphere Username',
-              value: secretData.vsphereUsername,
-            },
-            {
-              label: 'NSX-T Username',
-              value: secretData.nsxtUsername,
-            },
-          ]
-        case 'aws':
-          return [
-            {
-              label: 'Access Key ID',
-              value: secretData.accessKeyID,
-            },
-          ]
-        case 'azure':
-          return [
-            {
-              label: 'Subscription ID',
-              value: secretData.subscriptionID,
-            },
-          ]
-        case 'gcp':
-          return [
-            {
-              label: 'Project',
-              value: this.getGCPProjectId(secret),
-            },
-          ]
-        case 'alicloud':
-          return [
-            {
-              label: 'Access Key ID',
-              value: secretData.accessKeyID,
-            },
-          ]
-        case 'metal':
-          return [
-            {
-              label: 'API URL',
-              value: secretData.metalAPIURL,
-            },
-          ]
-        case 'hcloud':
-          return [
-            {
-              label: 'Hetzner Cloud Token',
-              value: secretData.hcloudToken,
-            },
-          ]
-        default:
-          return [
-            {
-              label: 'Secret Data',
-              value: JSON.stringify(secretData),
-            },
-          ]
+      try {
+        switch (this.providerType) {
+          case 'openstack':
+            return [
+              {
+                label: 'Domain Name',
+                value: atob(secretData.domainName),
+              },
+              {
+                label: 'Tenant Name',
+                value: atob(secretData.tenantName),
+              },
+            ]
+          case 'vsphere':
+            return [
+              {
+                label: 'vSphere Username',
+                value: atob(secretData.vsphereUsername),
+              },
+              {
+                label: 'NSX-T Username',
+                value: atob(secretData.nsxtUsername),
+              },
+            ]
+          case 'aws':
+            return [
+              {
+                label: 'Access Key ID',
+                value: atob(secretData.accessKeyID),
+              },
+            ]
+          case 'azure':
+            return [
+              {
+                label: 'Subscription ID',
+                value: atob(secretData.subscriptionID),
+              },
+            ]
+          case 'gcp':
+            return [
+              {
+                label: 'Project',
+                value: atob(this.getGCPProjectId)(secret),
+              },
+            ]
+          case 'alicloud':
+            return [
+              {
+                label: 'Access Key ID',
+                value: atob(secretData.accessKeyID),
+              },
+            ]
+          case 'metal':
+            return [
+              {
+                label: 'API URL',
+                value: atob(secretData.metalAPIURL),
+              },
+            ]
+          case 'hcloud':
+            return [
+              {
+                label: 'Hetzner Cloud Token',
+                value: atob(secretData.hcloudToken),
+              },
+            ]
+          default:
+            return [
+              {
+                label: 'Secret Data',
+                value: JSON.stringify(secretData),
+              },
+            ]
+        }
+      } catch (err) {
+        return undefined
       }
     },
     getSecretDetailsDns (secret) {
       const secretData = secret.data || {}
-      switch (this.providerType) {
-        case 'openstack-designate':
-          return [
-            {
-              label: 'Domain Name',
-              value: secretData.domainName,
-            },
-            {
-              label: 'Tenant Name',
-              value: secretData.tenantName,
-            },
-          ]
-        case 'aws-route53':
-          return [
-            {
-              label: 'Access Key ID',
-              value: secretData.accessKeyID,
-            },
-          ]
-        case 'azure-dns':
-        case 'azure-private-dns':
-          return [
-            {
-              label: 'Subscription ID',
-              value: secretData.subscriptionID,
-            },
-          ]
-        case 'google-clouddns':
-          return [
-            {
-              label: 'Project',
-              value: secretData.project,
-            },
-          ]
-        case 'alicloud-dns':
-          return [
-            {
-              label: 'Access Key ID',
-              value: secretData.accessKeyID,
-            },
-          ]
-        case 'infoblox-dns':
-          return [
-            {
-              label: 'Infoblox Username',
-              value: secretData.USERNAME,
-            },
-          ]
-        case 'cloudflare-dns':
-          return [
-            {
-              label: 'API Key',
-              value: 'hidden',
-            },
-          ]
-        case 'netlify-dns':
-          return [
-            {
-              label: 'API Key',
-              value: 'hidden',
-            },
-          ]
-        case 'rfc2136':
-          return [
-            {
-              label: 'Server',
-              value: secretData.Server,
-            },
-            {
-              label: 'TSIG Key Name',
-              value: secretData.TSIGKeyName,
-            },
-            {
-              label: 'Zone',
-              value: secretData.Zone,
-            },
-          ]
-        default:
-          return [
-            {
-              label: 'Secret Data',
-              value: JSON.stringify(secretData),
-            },
-          ]
+      try {
+        switch (this.providerType) {
+          case 'openstack-designate':
+            return [
+              {
+                label: 'Domain Name',
+                value: atob(secretData.domainName),
+              },
+              {
+                label: 'Tenant Name',
+                value: atob(secretData.tenantName),
+              },
+            ]
+          case 'aws-route53':
+            return [
+              {
+                label: 'Access Key ID',
+                value: atob(secretData.accessKeyID),
+              },
+            ]
+          case 'azure-dns':
+          case 'azure-private-dns':
+            return [
+              {
+                label: 'Subscription ID',
+                value: atob(secretData.subscriptionID),
+              },
+            ]
+          case 'google-clouddns':
+            return [
+              {
+                label: 'Project',
+                value: atob(secretData.project),
+              },
+            ]
+          case 'alicloud-dns':
+            return [
+              {
+                label: 'Access Key ID',
+                value: atob(secretData.accessKeyID),
+              },
+            ]
+          case 'infoblox-dns':
+            return [
+              {
+                label: 'Infoblox Username',
+                value: atob(secretData.USERNAME),
+              },
+            ]
+          case 'cloudflare-dns':
+            return [
+              {
+                label: 'API Key',
+                value: 'hidden',
+              },
+            ]
+          case 'netlify-dns':
+            return [
+              {
+                label: 'API Key',
+                value: 'hidden',
+              },
+            ]
+          case 'rfc2136':
+            return [
+              {
+                label: 'Server',
+                value: atob(secretData.Server),
+              },
+              {
+                label: 'TSIG Key Name',
+                value: atob(secretData.TSIGKeyName),
+              },
+              {
+                label: 'Zone',
+                value: atob(secretData.Zone),
+              },
+            ]
+          default:
+            return [
+              {
+                label: 'Secret Data',
+                value: JSON.stringify(secretData),
+              },
+            ]
+        }
+      } catch (err) {
+        return undefined
       }
     },
   },

@@ -313,6 +313,7 @@ export default {
         { value: 10, title: '10' },
         { value: 20, title: '20' },
       ],
+      highlightedItem: undefined,
     }
   },
   computed: {
@@ -404,6 +405,7 @@ export default {
           relatedShootCount,
           relatedShootCountLabel: this.relatedShootCountLabel(relatedShootCount),
           secretBinding,
+          highlighted: this.highlightedItem === secretBinding.metadata.name,
         }
       })
     },
@@ -476,6 +478,7 @@ export default {
           relatedShootCount,
           relatedShootCountLabel: this.relatedShootCountLabel(relatedShootCount),
           secretBinding,
+          highlighted: this.highlightedItem === secretBinding.metadata.name,
         }
       })
     },
@@ -486,14 +489,7 @@ export default {
     },
   },
   mounted () {
-    if (!get(this.$route.params, ['name'])) {
-      return
-    }
-    const secretBinding = this.getSecretBindingByName(this.$route.params)
-    if (!secretBinding || !isOwnSecret(secretBinding)) {
-      return
-    }
-    this.onUpdateSecret(secretBinding)
+    this.highlightedItem = get(this.$route.params, ['name'])
   },
   methods: {
     ...mapActions(useCredentialStore, [
