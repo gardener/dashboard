@@ -194,19 +194,6 @@ export function createShootContextComposable (options = {}) {
     }
   }
 
-  const kubernetesEnableStaticTokenKubeconfig = computed({
-    get () {
-      return !!get(manifest.value, ['spec', 'kubernetes', 'enableStaticTokenKubeconfig'])
-    },
-    set (value) {
-      set(manifest.value, ['spec', 'kubernetes', 'enableStaticTokenKubeconfig'], !!value)
-    },
-  })
-
-  function resetKubernetesEnableStaticTokenKubeconfig () {
-    kubernetesEnableStaticTokenKubeconfig.value = false
-  }
-
   /* cloudProfileName */
   const cloudProfileName = computed({
     get () {
@@ -346,7 +333,6 @@ export function createShootContextComposable (options = {}) {
     set(manifest.value, ['spec', 'provider', 'controlPlaneConfig'], provider.controlPlaneConfig)
     set(manifest.value, ['spec', 'networking'], networking)
     set(manifest.value, ['spec', 'kubernetes'], kubernetes)
-    resetKubernetesEnableStaticTokenKubeconfig()
   }
 
   const providerControlPlaneConfigZone = computed({
@@ -972,7 +958,6 @@ export function createShootContextComposable (options = {}) {
     infrastructureSecret,
     /* kubernetes */
     kubernetesVersion,
-    kubernetesEnableStaticTokenKubeconfig,
     /* networking */
     networkingType,
     networkingNodes,

@@ -402,7 +402,8 @@ function helpTarget (item) {
 </script>
 
 <style lang="scss" scoped>
-  @import 'vuetify/settings';
+  @use 'vuetify/settings' as vuetify;
+  @use 'sass:map';
 
   .link-icon {
     font-size: 100%;
@@ -420,7 +421,7 @@ function helpTarget (item) {
 
   .v-theme--light {
     &.v-app-bar {
-      background-color: map-get($grey, 'lighten-4');
+      background-color: map.get(vuetify.$grey, 'lighten-4');
     }
     .tabs-bar-background {
       background-color: white !important;

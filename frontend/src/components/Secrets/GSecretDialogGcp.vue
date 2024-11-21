@@ -44,13 +44,14 @@ SPDX-License-Identifier: Apache-2.0
 
         <p>
           Ensure that the service account has at least the roles below.
-          <ul>
-            <li>Service Account Admin</li>
-            <li>Service Account Token Creator</li>
-            <li>Service Account User</li>
-            <li>Compute Admin</li>
-          </ul>
         </p>
+
+        <ul>
+          <li>Service Account Admin</li>
+          <li>Service Account Token Creator</li>
+          <li>Service Account User</li>
+          <li>Compute Admin</li>
+        </ul>
 
         <p>
           The Service Account has to be enabled for the Google Identity and Access Management API.
