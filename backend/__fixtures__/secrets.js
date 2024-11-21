@@ -12,10 +12,6 @@ const createError = require('http-errors')
 const pathToRegexp = require('path-to-regexp')
 const { toBase64, createUrl } = require('./helper')
 
-const certificateAuthorityData = toBase64('certificate-authority-data')
-const clientCertificateData = toBase64('client-certificate-data')
-const clientKeyData = toBase64('client-key-data')
-
 function getSecret ({ namespace, name, labels, creationTimestamp, data = {} }) {
   const metadata = {
     namespace,
@@ -41,28 +37,6 @@ function getCloudProviderSecret ({ cloudProfileName, ...options }) {
       'cloudprofile.garden.sapcloud.io/name': cloudProfileName,
     },
     ...options,
-  })
-}
-
-function getKubeconfig ({ server, name = 'default' }) {
-  const cluster = {
-    'certificate-authority-data': certificateAuthorityData,
-    server,
-  }
-  const user = {
-    'client-certificate-data': clientCertificateData,
-    'client-key-data': clientKeyData,
-  }
-  const context = {
-    cluster: name,
-    user: name,
-  }
-  return yaml.dump({
-    kind: 'Config',
-    clusters: [{ cluster, name }],
-    contexts: [{ context, name }],
-    users: [{ user, name }],
-    'current-context': name,
   })
 }
 
@@ -144,22 +118,6 @@ const secrets = {
       })
     }
   },
-  getShootSecret (namespace, name) {
-    const shootName = name.substring(0, name.length - 11)
-    const projectName = namespace.replace(/^garden-/, '')
-    return getSecret({
-      name,
-      namespace,
-      data: {
-        kubeconfig: getKubeconfig({
-          server: `https://api.${shootName}.${projectName}.shoot.cluster`,
-          name: `shoot--${projectName}--${shootName}`,
-        }),
-        username: `user-${projectName}-${shootName}`,
-        password: `pass-${projectName}-${shootName}`,
-      },
-    })
-  },
   getMonitoringSecret (namespace, name, creationTimestamp) {
     return getSecret({
       name,
@@ -227,10 +185,6 @@ const mocks = {
       const { params: { namespace, name } = {} } = matchResult
       const [hostname] = split(headers[':authority'], ':')
       if (hostname === 'kubernetes') {
-        if (endsWith(name, '.kubeconfig')) {
-          const item = secrets.getShootSecret(namespace, name)
-          return Promise.resolve(item)
-        }
         if (/-token-[a-f0-9]{5}$/.test(name)) {
           const item = secrets.getServiceAccountSecret(namespace, name)
           return Promise.resolve(item)

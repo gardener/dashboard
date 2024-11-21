@@ -106,7 +106,6 @@ export default {
       shootNamespace,
       shootAnnotations,
       shootGardenerOperation,
-      shootEnableStaticTokenKubeconfig,
       isShootStatusHibernated,
       hasShootWorkerGroups,
       sshAccessEnabled,
@@ -272,18 +271,6 @@ export default {
 
     const componentTexts = computed(() => {
       const allComponentTexts = {
-        'rotate-kubeconfig-credentials': {
-          caption: showLoadingIndicator.value
-            ? 'Rotating kubeconfig credentials'
-            : 'Start Kubeconfig Rotation',
-          errorMessage: 'Could not start the rotation of kubeconfig credentials',
-          successMessage: `Rotation of kubeconfig credentials started for ${shootName.value}`,
-          heading: 'Do you want to start the rotation of kubeconfig credentials?',
-          actions: [
-            'The current kubeconfig credentials will be revoked',
-            'New kubeconfig credentials will be generated',
-          ],
-        },
         'rotate-ca-start': {
           caption: showLoadingIndicator.value
             ? 'Preparing certificate authorities rotation'
@@ -390,9 +377,6 @@ export default {
         successMessage: `Preparing credential rotation for ${shootName.value}`,
         heading: 'Do you want to prepare the rotation of all credentials?',
         actions: [
-          ...shootEnableStaticTokenKubeconfig.value
-            ? allComponentTexts['rotate-kubeconfig-credentials'].actions
-            : [],
           ...allComponentTexts['rotate-ca-start'].actions,
           ...allComponentTexts['rotate-observability-credentials'].actions,
           ...hasShootWorkerGroups.value && sshAccessEnabled.value
