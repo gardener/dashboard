@@ -117,7 +117,7 @@ import {
   maxLength,
 } from '@vuelidate/validators'
 
-import { useSecretStore } from '@/store/credential'
+import { useCredentialStore } from '@/store/credential'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useShootStore } from '@/store/shoot'
 
@@ -218,7 +218,7 @@ export default {
     return rules
   },
   computed: {
-    ...mapState(useSecretStore, [
+    ...mapState(useCredentialStore, [
       'infrastructureSecretBindingsList',
       'dnsSecretBindingsList',
     ]),
@@ -276,7 +276,7 @@ export default {
     this.reset()
   },
   methods: {
-    ...mapActions(useSecretStore, [
+    ...mapActions(useCredentialStore, [
       'createCredential',
       'updateCredential',
     ]),

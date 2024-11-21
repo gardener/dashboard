@@ -39,21 +39,21 @@ export const useCredentialStore = defineStore('credential', () => {
   const gardenerExtensionStore = useGardenerExtensionStore()
   const cloudProfileStore = useCloudProfileStore()
 
-  const credentialResources = ref(null)
+  const credentialResourcesList = ref(null)
 
   const isInitial = computed(() => {
-    return credentialResources.value === null
+    return credentialResourcesList.value === null
   })
 
   function $reset () {
-    credentialResources.value = null
+    credentialResourcesList.value = null
   }
 
   async function fetchCredentials () {
     const namespace = authzStore.namespace
     try {
       const { data: resources } = await api.getCloudProviderCredentials({ namespace })
-      credentialResources.value = resources
+      credentialResourcesList.value = resources
     } catch (err) {
       $reset()
       throw err
@@ -61,7 +61,7 @@ export const useCredentialStore = defineStore('credential', () => {
   }
 
   const secretBindingList = computed(() => {
-    return map(credentialResources.value, ({ secretBinding, secret, quotas }) => {
+    return map(credentialResourcesList.value, ({ secretBinding, secret, quotas }) => {
       Object.defineProperty(secretBinding, 'secretResource', {
         value: secret,
         writable: false,
@@ -79,7 +79,7 @@ export const useCredentialStore = defineStore('credential', () => {
   })
 
   const secretList = computed(() => {
-    return map(credentialResources.value, 'secret')
+    return map(credentialResourcesList.value, 'secret')
   })
 
   async function createCredential ({ name, credential }) {
@@ -141,19 +141,19 @@ export const useCredentialStore = defineStore('credential', () => {
     const { secretBinding } = credentialResources
     const index = findIndex(secretBindingList.value, eqlNameAndNamespace(secretBinding.metadata))
     if (index !== -1) {
-      credentialResources.value.splice(index, 1, {
-        ...credentialResources.value[index], // eslint-disable-line security/detect-object-injection
+      credentialResourcesList.value.splice(index, 1, {
+        ...credentialResourcesList.value[index], // eslint-disable-line security/detect-object-injection
         ...credentialResources,
       })
     } else {
-      credentialResources.value.push(credentialResources)
+      credentialResourcesList.value.push(credentialResources)
     }
   }
 
   function remove ({ namespace, name }) {
     const index = findIndex(secretBindingList.value, eqlNameAndNamespace({ namespace, name }))
     if (index !== -1) {
-      credentialResources.value.splice(index, 1)
+      credentialResourcesList.value.splice(index, 1)
     }
   }
 
