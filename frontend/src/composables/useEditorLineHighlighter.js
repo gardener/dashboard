@@ -20,17 +20,7 @@ import {
   StateField,
 } from '@codemirror/state'
 
-export function useEditorLineHighlighter (cmView) {
-  cmView.dom.classList.add('g-cm-line-highlighter')
-
-  const highlightableLineNumbers = lineNumbers({
-    domEventHandlers: {
-      mousedown (cmView, line, event) {
-        onGutterClick(cmView, line, event)
-      },
-    },
-  })
-
+function useSelection () {
   const params = useUrlSearchParams('hash-params')
 
   const valuesFromParams = () => {
@@ -43,7 +33,7 @@ export function useEditorLineHighlighter (cmView) {
       : []
   }
 
-  const selection = computed({
+  return computed({
     get () {
       return valuesFromParams()
     },
@@ -68,27 +58,24 @@ export function useEditorLineHighlighter (cmView) {
       }
     },
   })
+}
 
-  const startLine = computed(() => selection.value[0])
+export function useEditorLineHighlighter (cmView) {
+  cmView.dom.classList.add('g-cm-line-highlighter')
 
-  if (startLine.value) {
-    const pos = cmView.state.doc.line(startLine.value).from
+  const selection = useSelection()
+  const [startLine] = selection.value
 
+  if (startLine) {
+    const pos = cmView.state.doc.line(startLine).from
     cmView.dispatch({
       selection: EditorSelection.cursor(pos),
       effects: EditorView.scrollIntoView(pos, { y: 'center' }),
     })
   }
 
-  function onGutterClick (cmView, line, event) {
-    const lineNumber = cmView.state.doc.lineAt(line.from).number
-    selection.value = startLine.value && startLine.value !== lineNumber && event.shiftKey
-      ? [startLine.value, lineNumber]
-      : [lineNumber]
-  }
-
-  const setHighlightEffect = StateEffect.define()
-  const highlightField = StateField.define({
+  const stateEffectType = StateEffect.define()
+  const stateField = StateField.define({
     create () {
       return Decoration.none
     },
@@ -97,7 +84,7 @@ export function useEditorLineHighlighter (cmView) {
       cmView.dom.classList.add('g-cm-line-highlighter')
 
       for (const effect of tr.effects) {
-        if (effect.is(setHighlightEffect)) {
+        if (effect.is(stateEffectType)) {
           return effect.value
         }
       }
@@ -108,57 +95,51 @@ export function useEditorLineHighlighter (cmView) {
     },
   })
 
-  function highlightSelection () {
-    const { state } = cmView
-
-    const lineCount = state.doc.lines
-
-    const [startLine, endLine = startLine] = selection.value.map(value =>
-      Math.max(1, Math.min(value, lineCount)),
-    )
-
-    const decorations = []
-    for (let line = startLine; line <= endLine; line++) {
-      const lineRange = state.doc.line(line)
-
-      decorations.push(
-        Decoration.line({ class: 'g-highlighted' }).range(lineRange.from),
-      )
-
-      if (line === startLine) {
-        decorations.push(
-          Decoration.line({ class: 'g-highlighted--top' }).range(lineRange.from),
-        )
-      }
-
-      if (line === endLine) {
-        decorations.push(
-          Decoration.line({ class: 'g-highlighted--bottom' }).range(lineRange.from),
-        )
-      }
-    }
-
-    const decorationSet = Decoration.set(decorations)
-    cmView.dispatch({
-      effects: setHighlightEffect.of(decorationSet),
-    })
-  }
+  const lineNumberGutterExtension = lineNumbers({
+    domEventHandlers: {
+      mousedown (cmView, line, event) {
+        const lineNumber = cmView.state.doc.lineAt(line.from).number
+        const [startLine] = selection.value
+        selection.value = startLine && startLine !== lineNumber && event.shiftKey
+          ? [startLine, lineNumber]
+          : [lineNumber]
+      },
+    },
+  })
 
   // Apply the StateField to the editor's state
   cmView.dispatch({
     effects: [
-      StateEffect.appendConfig.of(highlightField),
-      StateEffect.appendConfig.of(highlightableLineNumbers),
+      StateEffect.appendConfig.of(stateField),
+      StateEffect.appendConfig.of(lineNumberGutterExtension),
     ],
   })
 
-  const unwatch = watch(selection, highlightSelection, {
+  const destroy = watch(selection, value => {
+    const lineCount = cmView.state.doc.lines
+    const [
+      startLine,
+      endLine = startLine,
+    ] = value.map(value => {
+      value = Math.min(value, lineCount)
+      value = Math.max(1, value)
+      return cmView.state.doc.line(value).from
+    })
+
+    const decorations = []
+    if (startLine && endLine) {
+      decorations.push(Decoration.line({ class: 'g-highlighted--top' }).range(startLine))
+      for (let line = startLine; line <= endLine; line++) {
+        decorations.push(Decoration.line({ class: 'g-highlighted' }).range(line))
+      }
+      decorations.push(Decoration.line({ class: 'g-highlighted--bottom' }).range(endLine))
+    }
+    cmView.dispatch({
+      effects: stateEffectType.of(Decoration.set(decorations)),
+    })
+  }, {
     immediate: true,
   })
-
-  function destroy () {
-    unwatch()
-  }
 
   return { destroy }
 }
