@@ -117,13 +117,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  @import 'vuetify/settings';
+  @use 'vuetify/settings' as vuetify;
+  @use 'sass:map';
 
-  $gh-code-background-color-light: map-get($grey, 'lighten-3');
-  $gh-code-background-color-dark: map-get($grey, 'darken-3');
+  $gh-code-background-color-light: map.get(vuetify.$grey, 'lighten-3');
+  $gh-code-background-color-dark: map.get(vuetify.$grey, 'darken-3');
 
-  $gh-code-color-light: map-get($grey, 'darken-4');
-  $gh-code-color-dark: map-get($grey, 'lighten-4');
+  $gh-code-color-light: map.get(vuetify.$grey, 'darken-4');
+  $gh-code-color-dark: map.get(vuetify.$grey, 'lighten-4');
 
   .comment {
     padding: 0;
