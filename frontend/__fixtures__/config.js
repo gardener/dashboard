@@ -57,7 +57,7 @@ export default {
     noItemsText: 'Limited Access services for certain cloud providers and regions',
     items: [
       {
-        key: 'seed.gardener.cloud/eu-access',
+        key: 'eu-access-only',
         display: {
           title: 'Limited Access',
           description: 'Clusters will not be migrated ...',
