@@ -5,6 +5,8 @@
  */
 
 @forward 'vuetify/lib/styles/main.sass';
+@use 'sass:meta';
+@use 'sass:string';
 
 /** Gardener Styles */
 [data-v-app] {
@@ -165,7 +167,7 @@
   }
 }
 @mixin g-cm-highlighted-whitespace($whitespace-color) {
-  $whitespace-color-encoded: #{'%23' + str-slice(inspect($whitespace-color), 2)};
+  $whitespace-color-encoded: #{'%23' + string.slice(meta.inspect($whitespace-color), 2)};
   .g-cm-highlightedSpace {
     background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="6" height="6"><circle cx="3" cy="3" r="1" fill="#{$whitespace-color-encoded}" /></svg>');
     background-repeat: no-repeat;

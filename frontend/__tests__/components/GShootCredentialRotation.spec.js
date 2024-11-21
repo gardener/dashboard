@@ -66,9 +66,6 @@ describe('components', () => {
       activePopoverKey = ref('')
       shootItem = reactive({
         spec: {
-          kubernetes: {
-            enableStaticTokenKubeconfig: true,
-          },
           provider: {
             workers: [
               {},
@@ -117,11 +114,10 @@ describe('components', () => {
       it('should have all credential tiles', () => {
         const wrapper = mountShootCredentialRotationCard(shootItem)
         const credentialWrappers = wrapper.findAllComponents(GCredentialTile)
-        expect(credentialWrappers.length).toBe(7)
+        expect(credentialWrappers.length).toBe(6)
       })
 
       it('should hide not available tiles', () => {
-        shootItem.spec.kubernetes.enableStaticTokenKubeconfig = false
         shootItem.spec.purpose = 'testing'
         delete shootItem.spec.provider.workers
 
@@ -156,7 +152,6 @@ describe('components', () => {
         const wrapper = mountShootCredentialRotationCard(shootItem)
         const [
           allWrapper,
-          ,
           certificateAuthoritiesWrapper,
           ,
           ,
@@ -182,7 +177,6 @@ describe('components', () => {
         const wrapper = mountShootCredentialRotationCard(shootItem)
         const [
           allWrapper,
-          ,
           certificateAuthoritiesWrapper,
         ] = wrapper.findAllComponents(GCredentialTile)
 
@@ -192,9 +186,6 @@ describe('components', () => {
         // no lastInitiationTime for overall tile
         expect(allWrapper.vm.lastInitiationTime).toBeUndefined()
 
-        // no lastCompletionTime if enableStaticTokenKubeconfig is true and kubeconfig value is not set
-        expect(allWrapper.vm.lastCompletionTime).toBeUndefined()
-        shootItem.spec.kubernetes.enableStaticTokenKubeconfig = false
         expect(allWrapper.vm.lastCompletionTime).toBe('2022-06-27T08:25:58Z')
 
         // no lastCompletionTime if lastCompletionTime is not set for all items
@@ -227,7 +218,6 @@ describe('components', () => {
         const wrapper = mountShootCredentialRotationCard(shootItem)
         const [
           ,
-          ,
           certificateAuthoritiesWrapper,
           observabilityRotationWrapper,
           sshKeyWrapper,
@@ -249,7 +239,6 @@ describe('components', () => {
 
         const wrapper = mountShootCredentialRotationCard(shootItem)
         const [
-          ,
           ,
           ,
           observabilityRotationWrapper,
@@ -275,7 +264,6 @@ describe('components', () => {
         const wrapper = mountShootCredentialRotationCard(shootItem)
         const [
           allTileWrapper,
-          ,
           certificateAuthoritiesTileWrapper,
           observabilityTileWrapper,
           ,

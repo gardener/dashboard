@@ -262,7 +262,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  @import 'vuetify/settings';
+  @use 'vuetify/settings' as vuetify;
+  @use 'sass:map';
 
   .g-field {
     :deep(.v-input__details .v-messages) {
@@ -279,7 +280,7 @@ export default {
     }
   }
 
-  $green-base: map-get($green, 'base');
+  $green-base: map.get(vuetify.$green, 'base');
 
   .content {
     animation-duration: 900ms;

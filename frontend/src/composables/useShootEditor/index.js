@@ -256,41 +256,47 @@ export function useShootEditor (initialValue, options = {}) {
       editorLineHighlighter.destroy()
       editorLineHighlighter = null
     }
-    if (cmView.value) {
-      cmView.value.destroy()
-      const element = cmView.value.dom
-      if (element && element.remove) {
-        element.remove()
-      }
-      cmView.value = null
+
+    if (!cmView.value) {
+      return
     }
+
+    cmView.value.destroy()
+    const element = cmView.value.dom
+    if (element && element.remove) {
+      element.remove()
+    }
+    cmView.value = null
   }
 
   function getDocumentValue () {
-    if (cmView.value) {
-      return cmView.value.state.doc.toString()
+    if (!cmView.value) {
+      return ''
     }
-    return ''
+
+    return cmView.value.state.doc.toString()
   }
 
   function setDocumentValue (value) {
-    if (cmView.value) {
-      const state = cmView.value.state
-      const selection = state.selection
-      const scrollPos = cmView.value.scrollDOM.scrollTop
-
-      const transaction = state.update({
-        changes: { from: 0, to: state.doc.length, insert: value },
-        selection,
-      })
-
-      cmView.value.dispatch(transaction)
-      cmView.value.scrollDOM.scrollTop = scrollPos
-      cmView.value.focus()
-
-      clearDocumentHistory()
-      initialDocumentValue = value
+    if (!cmView.value) {
+      return
     }
+
+    const state = cmView.value.state
+    const selection = state.selection
+    const scrollPos = cmView.value.scrollDOM.scrollTop
+
+    const transaction = state.update({
+      changes: { from: 0, to: state.doc.length, insert: value },
+      selection,
+    })
+
+    cmView.value.dispatch(transaction)
+    cmView.value.scrollDOM.scrollTop = scrollPos
+    cmView.value.focus()
+
+    clearDocumentHistory()
+    initialDocumentValue = value
   }
 
   function getEditorValue () {
@@ -316,71 +322,89 @@ export function useShootEditor (initialValue, options = {}) {
   }
 
   function focusEditor () {
-    if (cmView.value) {
-      cmView.value.focus()
+    if (!cmView.value) {
+      return
     }
+
+    cmView.value.focus()
   }
 
   function clearDocumentHistory () {
-    if (cmView.value) {
-      cmView.value.dispatch({
-        effects: historyCompartment.reconfigure([]),
-      })
-      cmView.value.dispatch({
-        effects: historyCompartment.reconfigure(history()),
-      })
-      clean.value = true
-      touched.value = false
-      conflictPath.value = null
-      historySize.value = {
-        undo: 0,
-        redo: 0,
-      }
+    if (!cmView.value) {
+      return
+    }
+
+    cmView.value.dispatch({
+      effects: historyCompartment.reconfigure([]),
+    })
+    cmView.value.dispatch({
+      effects: historyCompartment.reconfigure(history()),
+    })
+    clean.value = true
+    touched.value = false
+    conflictPath.value = null
+    historySize.value = {
+      undo: 0,
+      redo: 0,
     }
   }
 
   function execUndo () {
-    if (cmView.value) {
-      undo(cmView.value)
+    if (!cmView.value) {
+      return
     }
+
+    undo(cmView.value)
   }
 
   function execRedo () {
-    if (cmView.value) {
-      redo(cmView.value)
+    if (!cmView.value) {
+      return
     }
+
+    redo(cmView.value)
   }
 
   watchEffect(() => {
-    if (cmView.value) {
-      if (schemaDefinition.value) {
-        const shootProperties = get(schemaDefinition.value, ['properties'], {})
-        completions.value = new EditorCompletions(shootProperties, {
-          cmView: cmView.value,
-          completionPaths: get(options, ['completionPaths'], []),
-          logger,
-        })
-      }
+    if (!cmView.value) {
+      return
+    }
 
-      if (renderWhitespaces.value) {
-        cmView.value.dispatch({
-          effects: whitespacesCompartment.reconfigure(showAllWhitespace),
-        })
-      } else {
-        cmView.value.dispatch({
-          effects: whitespacesCompartment.reconfigure([]),
-        })
-      }
+    if (schemaDefinition.value) {
+      const shootProperties = get(schemaDefinition.value, ['properties'], {})
+      completions.value = new EditorCompletions(shootProperties, {
+        cmView: cmView.value,
+        completionPaths: get(options, ['completionPaths'], []),
+        logger,
+      })
+    }
+
+    if (renderWhitespaces.value) {
+      cmView.value.dispatch({
+        effects: whitespacesCompartment.reconfigure(showAllWhitespace),
+      })
+    } else {
+      cmView.value.dispatch({
+        effects: whitespacesCompartment.reconfigure([]),
+      })
     }
   })
 
   watch(isReadOnly, isReadOnly => {
+    if (!cmView.value) {
+      return
+    }
+
     cmView.value.dispatch({
       effects: readOnlyCompartment.reconfigure(EditorState.readOnly.of(isReadOnly)),
     })
   })
 
   watch(isDarkMode, isDarkMode => {
+    if (!cmView.value) {
+      return
+    }
+
     cmView.value.dispatch({
       effects: themeCompartment.reconfigure([
         isDarkMode ? oneDark : [],
