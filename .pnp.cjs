@@ -1008,10 +1008,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@codemirror/search", [\
-      ["npm:6.5.7", {\
-        "packageLocation": "./.yarn/cache/@codemirror-search-npm-6.5.7-95853e26b8-056a623a23.zip/node_modules/@codemirror/search/",\
+      ["npm:6.5.8", {\
+        "packageLocation": "./.yarn/cache/@codemirror-search-npm-6.5.8-9785bd8f0e-67a36fb078.zip/node_modules/@codemirror/search/",\
         "packageDependencies": [\
-          ["@codemirror/search", "npm:6.5.7"],\
+          ["@codemirror/search", "npm:6.5.8"],\
           ["@codemirror/state", "npm:6.4.1"],\
           ["@codemirror/view", "npm:6.35.0"],\
           ["crelt", "npm:1.0.6"]\
@@ -1530,7 +1530,7 @@ const RAW_RUNTIME_STATE =
           ["@codemirror/commands", "npm:6.7.1"],\
           ["@codemirror/lang-yaml", "npm:6.1.1"],\
           ["@codemirror/language", "npm:6.10.3"],\
-          ["@codemirror/search", "npm:6.5.7"],\
+          ["@codemirror/search", "npm:6.5.8"],\
           ["@codemirror/state", "npm:6.4.1"],\
           ["@codemirror/theme-one-dark", "npm:6.1.2"],\
           ["@codemirror/view", "npm:6.35.0"],\
