@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-secret-dialog
     v-model="visible"
-    :data="secretData"
     :secret-validations="v$"
     :secret-binding="secretBinding"
     create-title="Add new DDNS (RFC2136) Secret"
@@ -97,9 +96,12 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
+import { ref } from 'vue'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
+
+import { useProvideSecretDialogData } from '@/composables/useSecretDialogData'
 
 import { getErrorMessages } from '@/utils'
 import {
@@ -125,17 +127,40 @@ export default {
     'update:modelValue',
   ],
   setup () {
+    const server = ref(undefined)
+    const tsigKeyName = ref(undefined)
+    const tsigSecret = ref(undefined)
+    const zone = ref(undefined)
+    const tsigSecretAlgorithm = ref('hmac-sha256')
+
+    useProvideSecretDialogData({
+      data: {
+        server,
+        tsigKeyName,
+        tsigSecret,
+        zone,
+        tsigSecretAlgorithm,
+      },
+      keyMapping: {
+        server: 'Server',
+        tsigKeyName: 'TSIGKeyName',
+        tsigSecret: 'TSIGSecret',
+        zone: 'Zone',
+        tsigSecretAlgorithm: 'TSIGSecretAlgorithm',
+      },
+    })
+
     return {
+      server,
+      tsigKeyName,
+      tsigSecret,
+      zone,
+      tsigSecretAlgorithm,
       v$: useVuelidate(),
     }
   },
   data () {
     return {
-      server: undefined,
-      tsigKeyName: undefined,
-      tsigSecret: undefined,
-      zone: undefined,
-      tsigSecretAlgorithm: 'hmac-sha256',
       tsigSecretHidden: true,
       secretAlgorithmItems: [
         {
@@ -201,18 +226,6 @@ export default {
     },
     valid () {
       return !this.v$.$invalid
-    },
-    secretData () {
-      const data = {
-        Server: this.server,
-        TSIGKeyName: this.tsigKeyName,
-        TSIGSecret: this.tsigSecret,
-        Zone: this.zone,
-      }
-      if (this.tsigSecretAlgorithm !== 'hmac-sha256') {
-        data.TSIGSecretAlgorithm = this.tsigSecretAlgorithm
-      }
-      return data
     },
     isCreateMode () {
       return !this.secret

@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-secret-dialog
     v-model="visible"
-    :data="secretData"
     :secret-validations="v$"
     :secret-binding="secretBinding"
     :provider-type="providerType"
@@ -17,7 +16,6 @@ SPDX-License-Identifier: Apache-2.0
     <template #secret-slot>
       <div>
         <v-textarea
-          ref="data"
           v-model="data"
           color="primary"
           variant="filled"
@@ -45,8 +43,11 @@ SPDX-License-Identifier: Apache-2.0
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import yaml from 'js-yaml'
+import { ref } from 'vue'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
+
+import { useProvideSecretDialogData } from '@/composables/useSecretDialogData'
 
 import {
   withFieldName,
@@ -79,14 +80,20 @@ export default {
     'update:modelValue',
   ],
   setup () {
+    const secretData = ref(undefined)
+
+    useProvideSecretDialogData({
+      data: secretData,
+    })
+
     return {
+      secretData,
       v$: useVuelidate(),
     }
   },
   data () {
     return {
       data: undefined,
-      secretData: {},
     }
   },
   validations () {

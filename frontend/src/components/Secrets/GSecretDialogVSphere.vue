@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-secret-dialog
     v-model="visible"
-    :data="secretData"
     :secret-validations="v$"
     :secret-binding="secretBinding"
     create-title="Add new VMware vSphere Secret"
@@ -16,7 +15,6 @@ SPDX-License-Identifier: Apache-2.0
     <template #secret-slot>
       <div>
         <v-text-field
-          ref="vsphereUsername"
           v-model="vsphereUsername"
           color="primary"
           label="vSphere Username"
@@ -94,9 +92,12 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
+import { ref } from 'vue'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink.vue'
+
+import { useProvideSecretDialogData } from '@/composables/useSecretDialogData'
 
 import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
@@ -119,17 +120,31 @@ export default {
     'update:modelValue',
   ],
   setup () {
+    const vsphereUsername = ref(undefined)
+    const vspherePassword = ref(undefined)
+    const nsxtUsername = ref(undefined)
+    const nsxtPassword = ref(undefined)
+
+    useProvideSecretDialogData({
+      data: {
+        vsphereUsername,
+        vspherePassword,
+        nsxtUsername,
+        nsxtPassword,
+      },
+    })
+
     return {
+      vsphereUsername,
+      vspherePassword,
+      nsxtUsername,
+      nsxtPassword,
       v$: useVuelidate(),
     }
   },
   data () {
     return {
-      vsphereUsername: undefined,
-      vspherePassword: undefined,
       hideVspherePassword: true,
-      nsxtUsername: undefined,
-      nsxtPassword: undefined,
       hideNsxtPassword: true,
     }
   },
@@ -160,14 +175,6 @@ export default {
     },
     valid () {
       return !this.v$.$invalid
-    },
-    secretData () {
-      return {
-        vsphereUsername: this.vsphereUsername,
-        vspherePassword: this.vspherePassword,
-        nsxtUsername: this.nsxtUsername,
-        nsxtPassword: this.nsxtPassword,
-      }
     },
     isCreateMode () {
       return !this.secret

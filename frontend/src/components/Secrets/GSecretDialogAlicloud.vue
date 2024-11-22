@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-secret-dialog
     v-model="visible"
-    :data="secretData"
     :secret-validations="v$"
     :secret-binding="secretBinding"
     :provider-type="providerType"
@@ -17,7 +16,6 @@ SPDX-License-Identifier: Apache-2.0
     <template #secret-slot>
       <div>
         <v-text-field
-          ref="accessKeyId"
           v-model="accessKeyId"
           color="primary"
           label="Access Key Id"
@@ -100,10 +98,13 @@ import {
   minLength,
   maxLength,
 } from '@vuelidate/validators'
+import { ref } from 'vue'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GCodeBlock from '@/components/GCodeBlock'
 import GExternalLink from '@/components/GExternalLink'
+
+import { useProvideSecretDialogData } from '@/composables/useSecretDialogData'
 
 import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
@@ -130,14 +131,27 @@ export default {
     'update:modelValue',
   ],
   setup () {
+    const accessKeyId = ref(undefined)
+    const accessKeySecret = ref(undefined)
+
+    useProvideSecretDialogData({
+      data: {
+        accessKeyId,
+        accessKeySecret,
+      },
+      keyMapping: {
+        accessKeyId: 'accessKeyID',
+      },
+    })
+
     return {
+      accessKeyId,
+      accessKeySecret,
       v$: useVuelidate(),
     }
   },
   data () {
     return {
-      accessKeyId: undefined,
-      accessKeySecret: undefined,
       hideSecret: true,
       template: {
         Statement: [
@@ -208,12 +222,6 @@ export default {
         return 'Alicloud DNS'
       }
       return undefined
-    },
-    secretData () {
-      return {
-        accessKeyID: this.accessKeyId,
-        accessKeySecret: this.accessKeySecret,
-      }
     },
     isCreateMode () {
       return !this.secret

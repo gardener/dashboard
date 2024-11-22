@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-secret-dialog
     v-model="visible"
-    :data="secretData"
     :secret-validations="v$"
     :secret-binding="secretBinding"
     :provider-type="providerType"
@@ -17,7 +16,6 @@ SPDX-License-Identifier: Apache-2.0
     <template #secret-slot>
       <div>
         <v-text-field
-          ref="clientId"
           v-model="clientId"
           color="primary"
           label="Client Id"
@@ -111,9 +109,15 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
+import {
+  ref,
+  computed,
+} from 'vue'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
+
+import { useProvideSecretDialogData } from '@/composables/useSecretDialogData'
 
 import {
   withFieldName,
@@ -141,19 +145,46 @@ export default {
   emits: [
     'update:modelValue',
   ],
-  setup () {
+  setup (props) {
+    const isDNSSecret = computed(() => {
+      return props.providerType === 'azure-dns' || props.providerType === 'azure-private-dns'
+    })
+
+    const clientId = ref(undefined)
+    const clientSecret = ref(undefined)
+    const tenantId = ref(undefined)
+    const subscriptionId = ref(undefined)
+    const azureCloud = ref(isDNSSecret.value ? 'AzurePublic' : undefined)
+
+    useProvideSecretDialogData({
+      data: {
+        clientId,
+        clientSecret,
+        tenantId,
+        subscriptionId,
+        azureCloud,
+      },
+      keyMapping: {
+        clientId: 'clientID',
+        subscriptionId: 'subscriptionID',
+        tenantId: 'tenantID',
+        azureCloud: 'AZURE_CLOUD',
+      },
+    })
+
     return {
+      clientId,
+      clientSecret,
+      tenantId,
+      subscriptionId,
+      azureCloud,
+      isDNSSecret,
       v$: useVuelidate(),
     }
   },
   data () {
     return {
-      clientId: undefined,
-      clientSecret: undefined,
-      tenantId: undefined,
-      subscriptionId: undefined,
       hideSecret: true,
-      azureCloud: 'AzurePublic',
     }
   },
   validations () {
@@ -187,15 +218,6 @@ export default {
     valid () {
       return !this.v$.$invalid
     },
-    secretData () {
-      return {
-        clientID: this.clientId,
-        clientSecret: this.clientSecret,
-        subscriptionID: this.subscriptionId,
-        tenantID: this.tenantId,
-        AZURE_CLOUD: this.isDNSSecret ? this.azureCloud : undefined,
-      }
-    },
     isCreateMode () {
       return !this.secret
     },
@@ -210,9 +232,6 @@ export default {
         return 'Azure Private DNS'
       }
       return undefined
-    },
-    isDNSSecret () {
-      return this.providerType === 'azure-dns' || this.providerType === 'azure-private-dns'
     },
   },
   methods: {

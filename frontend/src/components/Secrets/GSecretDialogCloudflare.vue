@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-secret-dialog
     v-model="visible"
-    :data="secretData"
     :secret-validations="v$"
     :secret-binding="secretBinding"
     create-title="Add new Cloudflare Secret"
@@ -60,9 +59,12 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
+import { ref } from 'vue'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
+
+import { useProvideSecretDialogData } from '@/composables/useSecretDialogData'
 
 import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
@@ -85,13 +87,21 @@ export default {
     'update:modelValue',
   ],
   setup () {
+    const apiToken = ref(undefined)
+
+    useProvideSecretDialogData({
+      data: {
+        apiToken,
+      },
+    })
+
     return {
+      apiToken,
       v$: useVuelidate(),
     }
   },
   data () {
     return {
-      apiToken: undefined,
       hideApiToken: true,
     }
   },
@@ -113,11 +123,6 @@ export default {
     },
     valid () {
       return !this.v$.$invalid
-    },
-    secretData () {
-      return {
-        apiToken: this.apiToken,
-      }
     },
     isCreateMode () {
       return !this.secret

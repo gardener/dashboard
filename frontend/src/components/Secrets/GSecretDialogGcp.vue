@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-secret-dialog
     v-model="visible"
-    :data="secretData"
     :secret-validations="v$"
     :secret-binding="secretBinding"
     :provider-type="providerType"
@@ -17,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
     <template #secret-slot>
       <div>
         <v-textarea
-          ref="serviceAccountKey"
+          ref="serviceAccountKeyRef"
           v-model="serviceAccountKey"
           color="primary"
           variant="filled"
@@ -86,9 +85,12 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
+import { ref } from 'vue'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
+
+import { useProvideSecretDialogData } from '@/composables/useSecretDialogData'
 
 import {
   withFieldName,
@@ -121,13 +123,24 @@ export default {
     'update:modelValue',
   ],
   setup () {
+    const serviceAccountKey = ref(undefined)
+
+    useProvideSecretDialogData({
+      data: {
+        serviceAccountKey,
+      },
+      keyMapping: {
+        serviceAccountKey: 'serviceaccount.json',
+      },
+    })
+
     return {
+      serviceAccountKey,
       v$: useVuelidate(),
     }
   },
   data () {
     return {
-      serviceAccountKey: undefined,
       dropHandlerInitialized: false,
     }
   },
@@ -179,11 +192,6 @@ export default {
     valid () {
       return !this.v$.$invalid
     },
-    secretData () {
-      return {
-        'serviceaccount.json': this.serviceAccountKey,
-      }
-    },
     isCreateMode () {
       return !this.secret
     },
@@ -231,7 +239,7 @@ export default {
       const onDrop = value => {
         this.serviceAccountKey = value
       }
-      handleTextFieldDrop(this.$refs.serviceAccountKey, /json/, onDrop)
+      handleTextFieldDrop(this.$refs.serviceAccountKeyRef, /json/, onDrop)
     },
     getErrorMessages,
   },

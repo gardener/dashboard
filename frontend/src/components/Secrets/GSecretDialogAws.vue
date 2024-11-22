@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-secret-dialog
     v-model="visible"
-    :data="secretData"
     :secret-validations="v$"
     :secret-binding="secretBinding"
     :provider-type="providerType"
@@ -17,7 +16,6 @@ SPDX-License-Identifier: Apache-2.0
     <template #secret-slot>
       <div>
         <v-text-field
-          ref="accessKeyId"
           v-model="accessKeyId"
           color="primary"
           label="Access Key Id"
@@ -102,10 +100,13 @@ import {
   minLength,
   maxLength,
 } from '@vuelidate/validators'
+import { ref } from 'vue'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GCodeBlock from '@/components/GCodeBlock'
 import GExternalLink from '@/components/GExternalLink'
+
+import { useProvideSecretDialogData } from '@/composables/useSecretDialogData'
 
 import {
   withFieldName,
@@ -136,15 +137,31 @@ export default {
     'update:modelValue',
   ],
   setup () {
+    const accessKeyId = ref(undefined)
+    const secretAccessKey = ref(undefined)
+    const awsRegion = ref(undefined)
+
+    useProvideSecretDialogData({
+      data: {
+        accessKeyId,
+        secretAccessKey,
+        awsRegion,
+      },
+      keyMapping: {
+        accessKeyId: 'accessKeyID',
+        awsRegion: 'AWS_REGION',
+      },
+    })
+
     return {
+      accessKeyId,
+      secretAccessKey,
+      awsRegion,
       v$: useVuelidate(),
     }
   },
   data () {
     return {
-      accessKeyId: undefined,
-      secretAccessKey: undefined,
-      awsRegion: undefined,
       hideSecret: true,
       templateAws: {
         Version: '2012-10-17',
@@ -255,13 +272,6 @@ export default {
     },
     valid () {
       return !this.v$.$invalid
-    },
-    secretData () {
-      return {
-        accessKeyID: this.accessKeyId,
-        secretAccessKey: this.secretAccessKey,
-        AWS_REGION: this.awsRegion,
-      }
     },
     isCreateMode () {
       return !this.secret

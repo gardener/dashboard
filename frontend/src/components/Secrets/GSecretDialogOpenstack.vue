@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-secret-dialog
     v-model="visible"
-    :data="secretData"
     :secret-validations="v$"
     :secret-binding="secretBinding"
     :provider-type="providerType"
@@ -28,7 +27,6 @@ SPDX-License-Identifier: Apache-2.0
       </div>
       <div>
         <v-text-field
-          ref="domainName"
           v-model="domainName"
           color="primary"
           label="Domain Name"
@@ -171,11 +169,14 @@ import {
   required,
   requiredIf,
 } from '@vuelidate/validators'
+import { ref } from 'vue'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
+
+import { useProvideSecretDialogData } from '@/composables/useSecretDialogData'
 
 import {
   withMessage,
@@ -207,21 +208,46 @@ export default {
     'update:modelValue',
   ],
   setup () {
+    const domainName = ref(undefined)
+    const tenantName = ref(undefined)
+    const applicationCredentialID = ref(undefined)
+    const applicationCredentialName = ref(undefined)
+    const applicationCredentialSecret = ref(undefined)
+    const username = ref(undefined)
+    const password = ref(undefined)
+    const authURL = ref(undefined)
+
+    useProvideSecretDialogData({
+      data: {
+        domainName,
+        tenantName,
+        applicationCredentialID,
+        applicationCredentialName,
+        applicationCredentialSecret,
+        username,
+        password,
+        authURL,
+      },
+      keyMapping: {
+        authURL: 'OS_AUTH_URL',
+      },
+    })
+
     return {
+      domainName,
+      tenantName,
+      applicationCredentialID,
+      applicationCredentialName,
+      applicationCredentialSecret,
+      username,
+      password,
+      authURL,
       v$: useVuelidate(),
     }
   },
   data () {
     return {
-      domainName: undefined,
-      tenantName: undefined,
-      username: undefined,
-      password: undefined,
       hideSecret: true,
-      authURL: undefined,
-      applicationCredentialID: undefined,
-      applicationCredentialName: undefined,
-      applicationCredentialSecret: undefined,
       hideApplicationCredentialSecret: true,
       authenticationMethod: 'USER',
     }
@@ -293,22 +319,6 @@ export default {
     },
     valid () {
       return !this.v$.$invalid
-    },
-    secretData () {
-      const data = {
-        domainName: this.domainName,
-        tenantName: this.tenantName,
-        applicationCredentialID: this.applicationCredentialID,
-        applicationCredentialName: this.applicationCredentialName,
-        applicationCredentialSecret: this.applicationCredentialSecret,
-        username: this.username,
-        password: this.password,
-      }
-      if (this.authURL) {
-        data.OS_AUTH_URL = this.authURL
-      }
-
-      return data
     },
     isCreateMode () {
       return !this.secret

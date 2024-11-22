@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-secret-dialog
     v-model="visible"
-    :data="secretData"
     :secret-validations="v$"
     :secret-binding="secretBinding"
     create-title="Add new Metal Secret"
@@ -16,7 +15,6 @@ SPDX-License-Identifier: Apache-2.0
     <template #secret-slot>
       <div>
         <v-text-field
-          ref="apiUrl"
           v-model="apiUrl"
           color="primary"
           label="API URL"
@@ -58,8 +56,11 @@ import {
   required,
   url,
 } from '@vuelidate/validators'
+import { ref } from 'vue'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
+
+import { useProvideSecretDialogData } from '@/composables/useSecretDialogData'
 
 import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
@@ -81,14 +82,28 @@ export default {
     'update:modelValue',
   ],
   setup () {
+    const apiHmac = ref(undefined)
+    const apiUrl = ref(undefined)
+
+    useProvideSecretDialogData({
+      data: {
+        apiHmac,
+        apiUrl,
+      },
+      keyMapping: {
+        apiHmac: 'metalAPIHMac',
+        apiUrl: 'metalAPIURL',
+      },
+    })
+
     return {
+      apiHmac,
+      apiUrl,
       v$: useVuelidate(),
     }
   },
   data () {
     return {
-      apiHmac: undefined,
-      apiUrl: undefined,
       hideSecret: true,
     }
   },
@@ -114,12 +129,6 @@ export default {
     },
     valid () {
       return !this.v$.$invalid
-    },
-    secretData () {
-      return {
-        metalAPIHMac: this.apiHmac,
-        metalAPIURL: this.apiUrl,
-      }
     },
     isCreateMode () {
       return !this.secret
