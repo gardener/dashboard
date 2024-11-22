@@ -1485,7 +1485,7 @@ const RAW_RUNTIME_STATE =
           ["neostandard", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:0.11.8"],\
           ["object-hash", "npm:3.0.0"],\
           ["openapi-types", "npm:12.1.3"],\
-          ["openid-client", "npm:5.7.0"],\
+          ["openid-client", "npm:5.7.1"],\
           ["p-event", "npm:4.2.0"],\
           ["p-limit", "npm:3.1.0"],\
           ["p-retry", "npm:4.6.2"],\
@@ -10301,10 +10301,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["openid-client", [\
-      ["npm:5.7.0", {\
-        "packageLocation": "./.yarn/cache/openid-client-npm-5.7.0-8a8fbe009d-02e42c6641.zip/node_modules/openid-client/",\
+      ["npm:5.7.1", {\
+        "packageLocation": "./.yarn/cache/openid-client-npm-5.7.1-e8b59fb0f1-6aae649758.zip/node_modules/openid-client/",\
         "packageDependencies": [\
-          ["openid-client", "npm:5.7.0"],\
+          ["openid-client", "npm:5.7.1"],\
           ["jose", "npm:4.15.9"],\
           ["lru-cache", "npm:6.0.0"],\
           ["object-hash", "npm:2.2.0"],\
