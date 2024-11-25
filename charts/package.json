@@ -41,7 +41,7 @@
       "<rootDir>/jest.setup.js"
     ]
   },
-  "packageManager": "yarn@4.5.1",
+  "packageManager": "yarn@4.5.3",
   "engines": {
     "node": "^22.7.0"
   }
