@@ -12,7 +12,6 @@ import {
   reactive,
   unref,
   watch,
-  watchEffect,
 } from 'vue'
 import { computedAsync } from '@vueuse/core'
 import { useTheme } from 'vuetify'
@@ -55,12 +54,11 @@ import { useProjectStore } from '@/store/project'
 import { useAuthzStore } from '@/store/authz'
 
 import { useEditorLineHighlighter } from '@/composables/useEditorLineHighlighter'
-import { useEditorWhitespace } from '@/composables/useEditorWhitespace'
 import { useLogger } from '@/composables/useLogger'
 import { useApi } from '@/composables/useApi'
 
 import {
-  createEditor,
+  createWhitespaceViewPlugin,
   EditorCompletions,
 } from './helper'
 
@@ -79,7 +77,7 @@ export function useShootEditor (initialValue, options = {}) {
     disableLineHighlighting = false,
   } = options
 
-  const { showAllWhitespace } = useEditorWhitespace()
+  const whitespaceViewPlugin = createWhitespaceViewPlugin()
 
   const cmView = shallowRef(null)
   const completions = shallowRef(null)
@@ -104,9 +102,7 @@ export function useShootEditor (initialValue, options = {}) {
   let editorLineHighlighter = null
   let initialDocumentValue = null
 
-  const schemaDefinition = computedAsync(() => {
-    return api.getShootSchemaDefinition()
-  }, null)
+  const schemaDefinition = computedAsync(api.getShootSchemaDefinition, null)
 
   const defaultExtraKeys = [
     {
@@ -182,7 +178,7 @@ export function useShootEditor (initialValue, options = {}) {
   const historyCompartment = new Compartment()
   const whitespacesCompartment = new Compartment()
 
-  async function loadEditor (element) {
+  function loadEditor (element) {
     try {
       const state = EditorState.create({
         extensions: [
@@ -237,10 +233,10 @@ export function useShootEditor (initialValue, options = {}) {
           readOnlyCompartment.of(EditorState.readOnly.of(isReadOnly.value)),
           themeCompartment.of([isDarkMode.value ? oneDark : [], syntaxHighlighting(isDarkMode.value ? oneDarkHighlightStyle : defaultHighlightStyle)]),
           lineNumbers(),
-          whitespacesCompartment.of(showAllWhitespace),
+          whitespacesCompartment.of(whitespaceViewPlugin),
         ],
       })
-      cmView.value = await createEditor({ parent: element, state })
+      cmView.value = new EditorView({ parent: element, state })
       resetEditor()
 
       if (!disableLineHighlighting) {
@@ -365,29 +361,33 @@ export function useShootEditor (initialValue, options = {}) {
     redo(cmView.value)
   }
 
-  watchEffect(() => {
+  watch(schemaDefinition, value => {
     if (!cmView.value) {
       return
     }
 
-    if (schemaDefinition.value) {
-      const shootProperties = get(schemaDefinition.value, ['properties'], {})
+    if (value) {
+      const shootProperties = get(value, ['properties'], {})
+      const completionPaths = get(options, ['completionPaths'], [])
       completions.value = new EditorCompletions(shootProperties, {
-        cmView: cmView.value,
-        completionPaths: get(options, ['completionPaths'], []),
+        indentUnit: cmView.value.state.facet(indentUnit).length,
+        completionPaths,
         logger,
       })
     }
+  })
 
-    if (renderWhitespaces.value) {
-      cmView.value.dispatch({
-        effects: whitespacesCompartment.reconfigure(showAllWhitespace),
-      })
-    } else {
-      cmView.value.dispatch({
-        effects: whitespacesCompartment.reconfigure([]),
-      })
+  watch(renderWhitespaces, value => {
+    if (!cmView.value) {
+      return
     }
+
+    const content = value
+      ? whitespaceViewPlugin
+      : []
+    cmView.value.dispatch({
+      effects: whitespacesCompartment.reconfigure(content),
+    })
   })
 
   watch(isReadOnly, isReadOnly => {
@@ -395,21 +395,25 @@ export function useShootEditor (initialValue, options = {}) {
       return
     }
 
+    const content = EditorState.readOnly.of(isReadOnly)
     cmView.value.dispatch({
-      effects: readOnlyCompartment.reconfigure(EditorState.readOnly.of(isReadOnly)),
+      effects: readOnlyCompartment.reconfigure(content),
     })
   })
 
-  watch(isDarkMode, isDarkMode => {
+  watch(isDarkMode, value => {
     if (!cmView.value) {
       return
     }
 
+    const content = []
+    if (value) {
+      content.push(oneDark, syntaxHighlighting(oneDarkHighlightStyle))
+    } else {
+      content.push(syntaxHighlighting(defaultHighlightStyle))
+    }
     cmView.value.dispatch({
-      effects: themeCompartment.reconfigure([
-        isDarkMode ? oneDark : [],
-        syntaxHighlighting(isDarkMode ? oneDarkHighlightStyle : defaultHighlightStyle),
-      ]),
+      effects: themeCompartment.reconfigure(content),
     })
   })
 
@@ -418,7 +422,12 @@ export function useShootEditor (initialValue, options = {}) {
       setEditorValue(newValue)
       return
     }
-    for (const path of ['spec', 'metadata.annotations', 'metadata.labels']) {
+    const paths = [
+      ['spec'],
+      ['metadata', 'annotations'],
+      ['metadata', 'labels'],
+    ]
+    for (const path of paths) {
       const newProp = get(newValue, path)
       const oldProp = get(oldValue, path)
       if (!isEqual(newProp, oldProp)) {
