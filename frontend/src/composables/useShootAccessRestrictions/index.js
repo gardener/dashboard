@@ -4,13 +4,17 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { computed } from 'vue'
+import {
+  computed,
+  ref,
+} from 'vue'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import { NAND } from './helper'
 
 import get from 'lodash/get'
+import isEmpty from 'lodash/isEmpty'
 import set from 'lodash/set'
 import unset from 'lodash/unset'
 import keyBy from 'lodash/keyBy'
@@ -32,6 +36,8 @@ export const useShootAccessRestrictions = (shootItem, options = {}) => {
   } = mapValues(shootPropertyMappings, path => {
     return computed(() => get(shootItem.value, path))
   })
+
+  const unsetLegacyAccessRestriction = ref(false)
 
   const accessRestrictionDefinitionList = computed(() => {
     return cloudProfileStore.accessRestrictionDefinitionsByCloudProfileNameAndRegion({
@@ -100,9 +106,20 @@ export const useShootAccessRestrictions = (shootItem, options = {}) => {
       if (index === -1) {
         accessRestrictions.push({ name: key })
       }
+
+      // TODO(petersutter): remove this block after gardener has dropped the access restriction sync logic for spec.seedSelector.matchLabels
+      if (key === 'eu-access-only') {
+        unsetLegacyAccessRestriction.value = false
+      }
     } else {
       if (index !== -1) {
         accessRestrictions.splice(index, 1)
+      }
+
+      // TODO(petersutter): remove this block after gardener has dropped the access restriction sync logic for spec.seedSelector.matchLabels
+      if (key === 'eu-access-only') {
+        // Due to the migration/sync logic in g/g, to deactivate the `eu-access-only` access restriction, both `spec.AccessRestriction[@name="eu-access-only"]` and `spec.seedSelector.matchLabels["seed.gardener.cloud/eu-access"]` must be removed at the same time.
+        unsetLegacyAccessRestriction.value = true
       }
     }
     setAccessRestrictions(accessRestrictions)
@@ -141,11 +158,35 @@ export const useShootAccessRestrictions = (shootItem, options = {}) => {
 
   function getAccessRestrictionPatchData () {
     const accessRestrictions = get(shootItem.value, ['spec', 'accessRestrictions'], [])
-    return {
+    const data = {
       spec: {
         accessRestrictions,
       },
     }
+
+    // TODO(petersutter): remove this block after gardener has dropped the access restriction sync logic for spec.seedSelector.matchLabels
+    if (unsetLegacyAccessRestriction.value) {
+      let seedSelector = get(shootItem.value, ['spec', 'seedSelector'])
+
+      unset(seedSelector, ['matchLabels', 'seed.gardener.cloud/eu-access'])
+
+      if (isEmpty(get(seedSelector, ['matchLabels']))) {
+        unset(seedSelector, ['matchLabels'])
+      }
+
+      if (isEmpty(seedSelector)) {
+        seedSelector = null
+      }
+
+      data.spec.seedSelector = seedSelector
+      data.metadata = {
+        annotations: {
+          'support.gardener.cloud/eu-access-for-cluster-addons': null,
+          'support.gardener.cloud/eu-access-for-cluster-nodes': null,
+        },
+      }
+    }
+    return data
   }
 
   const accessRestrictionList = computed(() => {

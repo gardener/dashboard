@@ -399,9 +399,9 @@ export default [
               ],
             },
           ],
-          labels: {
-            'seed.gardener.cloud/eu-access': 'true',
-          },
+          accessRestrictions: [{
+            name: 'eu-access-only',
+          }],
         },
         {
           name: 'eu-west-1',
@@ -424,9 +424,9 @@ export default [
               ],
             },
           ],
-          labels: {
-            'seed.gardener.cloud/eu-access': 'true',
-          },
+          accessRestrictions: [{
+            name: 'eu-access-only',
+          }],
         },
         {
           name: 'us-east-1',
@@ -535,9 +535,9 @@ export default [
               ],
             },
           ],
-          labels: {
-            'seed.gardener.cloud/eu-access': 'true',
-          },
+          accessRestrictions: [{
+            name: 'eu-access-only',
+          }],
         },
         {
           name: 'eastus',
@@ -713,9 +713,9 @@ export default [
               ],
             },
           ],
-          labels: {
-            'seed.gardener.cloud/eu-access': 'true',
-          },
+          accessRestrictions: [{
+            name: 'eu-access-only',
+          }],
         },
         {
           name: 'na-us-1',
@@ -895,9 +895,9 @@ export default [
               ],
             },
           ],
-          labels: {
-            'seed.gardener.cloud/eu-access': 'true',
-          },
+          accessRestrictions: [{
+            name: 'eu-access-only',
+          }],
         },
         {
           name: 'na-us-2',
