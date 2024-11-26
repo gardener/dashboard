@@ -210,7 +210,6 @@ export default {
       touched,
       getEditorValue,
       reloadEditor,
-      refreshEditor,
       clearDocumentHistory,
     } = useProvide(injectionKey, useShootEditor(editorData, {
       completionPaths: [
@@ -241,7 +240,6 @@ export default {
       touched,
       getEditorValue,
       reloadEditor,
-      refreshEditor,
       clearDocumentHistory,
     }
   },
@@ -266,7 +264,6 @@ export default {
             // set current height as min-height for yaml tab to avoid
             // dialog downsize as editor not yet rendered
             this.overviewTabHeight = this.$refs.overviewTab.$el.getBoundingClientRect().height
-            this.$nextTick(() => this.refreshEditor())
             this.disableWorkerAnimation = true
             break
           }

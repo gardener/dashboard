@@ -4,8 +4,12 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { EditorView } from '@codemirror/view'
-import { indentUnit } from '@codemirror/language'
+import {
+  EditorView,
+  MatchDecorator,
+  Decoration,
+  ViewPlugin,
+} from '@codemirror/view'
 
 import { useLogger } from '@/composables/useLogger'
 
@@ -24,14 +28,46 @@ import forIn from 'lodash/forIn'
 import isEqual from 'lodash/isEqual'
 import first from 'lodash/first'
 
-export async function createEditor (...args) {
-  return new EditorView(...args)
+export function createWhitespaceViewPlugin () {
+  const matchDecorator = new MatchDecorator({
+    regexp: /[ \t]/g,
+    decoration (match) {
+      let name
+      if (match[0] === '\t') {
+        name = 'Tab'
+      } else if (match[0] === ' ') {
+        name = 'Space'
+      }
+      if (name) {
+        return Decoration.mark({
+          attributes: { class: `g-cm-highlighted${name}` },
+        })
+      }
+    },
+  })
+
+  const create = view => {
+    return {
+      decorations: matchDecorator.createDeco(view),
+      update (update) {
+        this.decorations = matchDecorator.updateDeco(update, this.decorations)
+      },
+    }
+  }
+
+  const spec = {
+    decorations (view) {
+      return view.decorations
+    },
+  }
+
+  return ViewPlugin.define(create, spec)
 }
 
 export class EditorCompletions {
   constructor (shootProperties, options = {}) {
     const {
-      cmView,
+      indentUnit = 2,
       supportedPaths = [],
       logger = useLogger(),
     } = options
@@ -40,7 +76,7 @@ export class EditorCompletions {
     this.shootCompletions = shootProperties
 
     this.logger = logger
-    this.indentUnit = cmView.state.facet(indentUnit).length
+    this.indentUnit = indentUnit
     this.arrayBulletIndent = 2 // -[space]
     this.supportedPaths = supportedPaths
   }
