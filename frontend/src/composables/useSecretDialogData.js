@@ -11,6 +11,8 @@ import {
   provide,
 } from 'vue'
 
+import { decodeBase64 } from '@/utils'
+
 import get from 'lodash/get'
 import set from 'lodash/set'
 import mapKeys from 'lodash/mapKeys'
@@ -33,7 +35,7 @@ export function createSecretDialogDataComposable (options) {
       }
 
       try {
-        set(state, key, atob(encodedValue))
+        set(state, key, decodeBase64(encodedValue))
       } catch (error) {
         set(state, key, undefined)
       }

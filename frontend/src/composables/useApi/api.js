@@ -49,46 +49,38 @@ export function getConfiguration () {
 }
 
 /* Credentials */
-function invokeCloudProviderCredentialMethod (method, body) {
+function invokeCloudProviderCredentialMethod (method, params) {
   return callResourceMethod('/api/namespaces/cloudprovidercredentials', {
     method,
-    params: body,
+    params,
   })
 }
 
-export function getCloudProviderCredentials ({ namespace, body = {} }) {
+export function getCloudProviderCredentials ({ namespace, params = {} }) {
   namespace = encodeURIComponent(namespace)
-  body.coordinate = {
-    namespace,
-  }
-  return invokeCloudProviderCredentialMethod('list', body)
+  params.secretBindingNamespace = namespace
+  return invokeCloudProviderCredentialMethod('list', params)
 }
 
-export function createCloudProviderCredential ({ namespace, name, body = {} }) {
+export function createCloudProviderCredential ({ namespace, name, params = {} }) {
   namespace = encodeURIComponent(namespace)
-  body.coordinate = {
-    namespace,
-    name,
-  }
-  return invokeCloudProviderCredentialMethod('create', body)
+  params.secretBindingNamespace = namespace
+  params.secretBindingName = name
+  return invokeCloudProviderCredentialMethod('create', params)
 }
 
-export function updateCloudProviderCredential ({ namespace, name, body = {} }) {
+export function updateCloudProviderCredential ({ namespace, name, params = {} }) {
   namespace = encodeURIComponent(namespace)
-  body.coordinate = {
-    namespace,
-    name,
-  }
-  return invokeCloudProviderCredentialMethod('patch', body)
+  params.secretBindingNamespace = namespace
+  params.secretBindingName = name
+  return invokeCloudProviderCredentialMethod('patch', params)
 }
 
-export function deleteCloudProviderCredential ({ namespace, name, body = {} }) {
+export function deleteCloudProviderCredential ({ namespace, name, params = {} }) {
   namespace = encodeURIComponent(namespace)
-  body.coordinate = {
-    namespace,
-    name,
-  }
-  return invokeCloudProviderCredentialMethod('remove', body)
+  params.secretBindingNamespace = namespace
+  params.secretBindingName = name
+  return invokeCloudProviderCredentialMethod('remove', params)
 }
 
 /* Tickets */

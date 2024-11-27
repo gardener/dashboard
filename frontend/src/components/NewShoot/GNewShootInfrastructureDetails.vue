@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0
         cols="3"
       >
         <g-select-secret
-          v-model="infrastructureSecret"
+          v-model="infrastructureSecretBinding"
           :provider-type="providerType"
         />
       </v-col>
@@ -214,7 +214,7 @@ export default {
     const {
       providerType,
       cloudProfileName,
-      infrastructureSecret,
+      infrastructureSecretBinding,
       region,
       networkingType,
       providerControlPlaneConfigLoadBalancerProviderName,
@@ -245,7 +245,7 @@ export default {
       v$: useVuelidate(),
       providerType,
       cloudProfileName,
-      infrastructureSecret,
+      infrastructureSecretBinding,
       region,
       networkingType,
       loadBalancerProviderName: providerControlPlaneConfigLoadBalancerProviderName,

@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0
       <g-secret-details-item-content
         infra
         class="py-1"
-        :secret="item.secretBinding.secretResource"
+        :secret="item.secretBinding.secret"
         :provider-type="item.providerType"
       />
     </td>

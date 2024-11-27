@@ -39,21 +39,21 @@ export const useCredentialStore = defineStore('credential', () => {
   const gardenerExtensionStore = useGardenerExtensionStore()
   const cloudProfileStore = useCloudProfileStore()
 
-  const credentialResourcesList = ref(null)
+  const cloudProviderCredentials = ref(null)
 
   const isInitial = computed(() => {
-    return credentialResourcesList.value === null
+    return cloudProviderCredentials.value === null
   })
 
   function $reset () {
-    credentialResourcesList.value = null
+    cloudProviderCredentials.value = null
   }
 
   async function fetchCredentials () {
     const namespace = authzStore.namespace
     try {
       const { data: resources } = await api.getCloudProviderCredentials({ namespace })
-      credentialResourcesList.value = resources
+      cloudProviderCredentials.value = resources
     } catch (err) {
       $reset()
       throw err
@@ -61,49 +61,43 @@ export const useCredentialStore = defineStore('credential', () => {
   }
 
   const secretBindingList = computed(() => {
-    return map(credentialResourcesList.value, ({ secretBinding, secret, quotas }) => {
-      Object.defineProperty(secretBinding, 'secretResource', {
+    return map(cloudProviderCredentials.value, ({ secretBinding, secret, quotas }) => {
+      Object.defineProperty(secretBinding, 'secret', {
         value: secret,
-        writable: false,
-        configurable: false,
-        enumerable: false,
       })
-      Object.defineProperty(secretBinding, 'quotaResources', {
+      Object.defineProperty(secretBinding, 'quotaItems', {
         value: quotas,
-        writable: false,
-        configurable: false,
-        enumerable: false,
       })
       return secretBinding
     })
   })
 
   const secretList = computed(() => {
-    return map(credentialResourcesList.value, 'secret')
+    return map(cloudProviderCredentials.value, 'secret')
   })
 
-  async function createCredential ({ name, credential }) {
+  async function createCredential ({ name, ...params }) {
     const namespace = authzStore.namespace
 
     try {
-      const { data: credentialResources } = await api.createCloudProviderCredential({ name, namespace, body: { credential } })
+      const { data: credentials } = await api.createCloudProviderCredential({ name, namespace, params })
 
       appStore.setSuccess('Cloud Provider credential created')
-      updateCredentialResourcesList(credentialResources)
+      updatecloudProviderCredentials(credentials)
     } catch (err) {
       $reset()
       throw err
     }
   }
 
-  async function updateCredential ({ name, credential }) {
+  async function updateCredential ({ name, ...params }) {
     const namespace = authzStore.namespace
 
     try {
-      const { data: credentialResources } = await api.updateCloudProviderCredential({ name, namespace, body: { credential } })
+      const { data: credentials } = await api.updateCloudProviderCredential({ name, namespace, params })
 
       appStore.setSuccess('Cloud Provider credential updated')
-      updateCredentialResourcesList(credentialResources)
+      updatecloudProviderCredentials(credentials)
     } catch (err) {
       $reset()
       throw err
@@ -137,23 +131,23 @@ export const useCredentialStore = defineStore('credential', () => {
     return find(secretBindingList.value, eqlNameAndNamespace({ namespace, name }))
   }
 
-  function updateCredentialResourcesList (credentialResources) {
-    const { secretBinding } = credentialResources
+  function updatecloudProviderCredentials (credentials) {
+    const { secretBinding } = credentials
     const index = findIndex(secretBindingList.value, eqlNameAndNamespace(secretBinding.metadata))
     if (index !== -1) {
-      credentialResourcesList.value.splice(index, 1, {
-        ...credentialResourcesList.value[index], // eslint-disable-line security/detect-object-injection
-        ...credentialResources,
+      cloudProviderCredentials.value.splice(index, 1, {
+        ...cloudProviderCredentials.value[index], // eslint-disable-line security/detect-object-injection
+        ...credentials,
       })
     } else {
-      credentialResourcesList.value.push(credentialResources)
+      cloudProviderCredentials.value.push(credentials)
     }
   }
 
   function remove ({ namespace, name }) {
     const index = findIndex(secretBindingList.value, eqlNameAndNamespace({ namespace, name }))
     if (index !== -1) {
-      credentialResourcesList.value.splice(index, 1)
+      cloudProviderCredentials.value.splice(index, 1)
     }
   }
 

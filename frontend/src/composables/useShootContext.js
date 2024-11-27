@@ -226,7 +226,7 @@ export function createShootContextComposable (options = {}) {
     },
   })
 
-  const infrastructureSecret = computed({
+  const infrastructureSecretBinding = computed({
     get () {
       return find(infrastructureSecretBindings.value, ['metadata.name', secretBindingName.value])
     },
@@ -236,7 +236,7 @@ export function createShootContextComposable (options = {}) {
   })
 
   function resetSecretBindingName () {
-    infrastructureSecret.value = head(infrastructureSecretBindings.value)
+    infrastructureSecretBinding.value = head(infrastructureSecretBindings.value)
   }
 
   /* networking */
@@ -955,7 +955,7 @@ export function createShootContextComposable (options = {}) {
     seedName,
     /* secretBindingName */
     secretBindingName,
-    infrastructureSecret,
+    infrastructureSecretBinding,
     /* kubernetes */
     kubernetesVersion,
     /* networking */

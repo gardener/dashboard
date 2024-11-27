@@ -60,7 +60,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     return computed(() => get(shootItem.value, path))
   })
 
-  const infrastructureSecret = computed(() => {
+  const infrastructureSecretBinding = computed(() => {
     return find(infrastructureSecretBindings.value, ['metadata.name', secretBindingName.value])
   })
 
@@ -129,7 +129,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     if (some(addons.value, 'enabled')) {
       return ['evaluation']
     }
-    return selfTerminationDaysForSecret(infrastructureSecret.value)
+    return selfTerminationDaysForSecret(infrastructureSecretBinding.value)
       ? ['evaluation']
       : ['evaluation', 'development', 'testing', 'production']
   })
@@ -168,7 +168,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     return cloudProfileStore.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({
       cloudProfileName: cloudProfileName.value,
       region: region.value,
-      secretDomain: get(infrastructureSecret.value, ['data', 'domainName']),
+      secretDomain: get(infrastructureSecretBinding.value, ['data', 'domainName']),
     })
   })
 
@@ -226,7 +226,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     allZones,
     defaultNodesCIDR,
     infrastructureSecretBindings,
-    infrastructureSecret,
+    infrastructureSecretBinding,
     sortedKubernetesVersions,
     kubernetesVersionIsNotLatestPatch,
     allPurposes,

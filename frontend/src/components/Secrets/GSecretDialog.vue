@@ -315,14 +315,12 @@ export default {
       }
     },
     save () {
-      const credential = {
-        poviderType: this.providerType,
-        secretData: this.secretData,
-      }
+      const poviderType = this.providerType
+      const secretData = this.secretData
       if (this.isCreateMode) {
-        return this.createCredential({ name: this.name, credential })
+        return this.createCredential({ name: this.name, poviderType, secretData })
       } else {
-        return this.updateCredential({ name: this.name, credential })
+        return this.updateCredential({ name: this.name, poviderType, secretData })
       }
     },
     reset () {
@@ -333,7 +331,7 @@ export default {
         setDelayedInputFocus(this, 'name')
       } else {
         this.name = get(this.secretBinding, ['metadata', 'name'])
-        this.updateWithSecret(this.secretBinding.secretResource)
+        this.updateWithSecret(this.secretBinding.secret)
       }
 
       this.errorMessage = undefined

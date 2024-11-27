@@ -11,20 +11,21 @@ const { encodeBase64 } = require('../utils')
 const createError = require('http-errors')
 const logger = require('../logger')
 
-exports.list = async function ({ user, body }) {
+exports.list = async function ({ user, params }) {
   const client = user.client
-  const { coordinate: { namespace } } = body
+  const { secretBindingNamespace } = params
 
   const [
     { items: secretBindings },
     { items: referencedSecrets },
   ] = await Promise.all([
-    client['core.gardener.cloud'].secretbindings.list(namespace),
-    client.core.secrets.list(namespace, { labelSelector: 'reference.gardener.cloud/secretbinding=true' }),
+    client['core.gardener.cloud'].secretbindings.list(secretBindingNamespace),
+    client.core.secrets.list(secretBindingNamespace, { labelSelector: 'reference.gardener.cloud/secretbinding=true' }),
   ])
 
+  const secretMap = new Map(referencedSecrets.map(secret => [secret.metadata.name, secret]))
   const credentialsList = secretBindings.map(secretBinding => {
-    const secret = referencedSecrets.find(secret => secret.metadata.name === secretBinding.secretRef.name)
+    const secret = secretMap.get(secretBinding.secretRef.name)
 
     return {
       secretBinding,
@@ -36,21 +37,28 @@ exports.list = async function ({ user, body }) {
   return credentialsList
 }
 
-exports.create = async function ({ user, body }) {
+exports.create = async function ({ user, params }) {
   const client = user.client
-  const { coordinate: { namespace, name }, credential: { poviderType, secretData } } = body
+  const {
+    secretBindingNamespace,
+    secretBindingName,
+    secretBindingNamespace: secretNamespace,
+    secretBindingName: secretName,
+    poviderType,
+    secretData,
+  } = params
 
-  const secretResource = toSecretResource({ namespace, name, data: secretData })
-  const secret = await client.core.secrets.create(namespace, secretResource)
+  const secretResource = toSecretResource({ namespace: secretNamespace, name: secretName, data: secretData })
+  const secret = await client.core.secrets.create(secretNamespace, secretResource)
 
   let secretBinding
   try {
     const secretRef = { namespace: secret.metadata.namespace, name: secret.metadata.name }
-    const secretBindingResource = toSecretBindingResource({ namespace, name, poviderType, secretRef })
-    secretBinding = await client['core.gardener.cloud'].secretbindings.create(namespace, secretBindingResource)
+    const secretBindingResource = toSecretBindingResource({ namespace: secretBindingNamespace, name: secretBindingName, poviderType, secretRef })
+    secretBinding = await client['core.gardener.cloud'].secretbindings.create(secretBindingNamespace, secretBindingResource)
   } catch (err) {
-    logger.error('failed to create SecretBinding, cleaning up secret %s/%s', namespace, secret.metadata.name)
-    await client.core.secrets.delete(namespace, secret.metadata.name)
+    logger.error('failed to create SecretBinding, cleaning up secret %s/%s', secret.metadata.namespace, secret.metadata.name)
+    await client.core.secrets.delete(secretNamespace, secret.metadata.name)
 
     throw err
   }
@@ -62,11 +70,14 @@ exports.create = async function ({ user, body }) {
   }
 }
 
-exports.patch = async function ({ user, body }) {
+exports.patch = async function ({ user, params }) {
   const client = user.client
-  const { coordinate: { namespace, name }, credential: { secretData } } = body
-
-  const secretBinding = await client['core.gardener.cloud'].secretbindings.get(namespace, name)
+  const {
+    secretBindingNamespace,
+    secretBindingName,
+    secretData,
+  } = params
+  const secretBinding = await client['core.gardener.cloud'].secretbindings.get(secretBindingNamespace, secretBindingName)
 
   let data
   try {
@@ -82,7 +93,7 @@ exports.patch = async function ({ user, body }) {
   }]
 
   const secretRef = secretBinding.secretRef
-  const secret = client.core.secrets.jsonPatch(secretRef.namespace, secretRef.name, patchOperations)
+  const secret = await client.core.secrets.jsonPatch(secretRef.namespace, secretRef.name, patchOperations)
 
   return {
     secretBinding,
@@ -91,15 +102,15 @@ exports.patch = async function ({ user, body }) {
   }
 }
 
-exports.remove = async function ({ user, body }) {
+exports.remove = async function ({ user, params }) {
   const client = user.client
-  const { coordinate: { namespace, name } } = body
+  const { secretBindingNamespace, secretBindingName } = params
 
-  const secretBinding = await client['core.gardener.cloud'].secretbindings.get(namespace, name)
+  const secretBinding = await client['core.gardener.cloud'].secretbindings.get(secretBindingNamespace, secretBindingName)
 
   const secretRef = secretBinding.secretRef
   await Promise.all([
-    await client['core.gardener.cloud'].secretbindings.delete(namespace, name),
+    await client['core.gardener.cloud'].secretbindings.delete(secretBindingNamespace, secretBindingName),
     await client.core.secrets.delete(secretRef.namespace, secretRef.name),
   ])
 }

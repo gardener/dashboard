@@ -34,6 +34,8 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { decodeBase64 } from '@/utils'
+
 import get from 'lodash/get'
 
 export default {
@@ -76,7 +78,7 @@ export default {
     getGCPProjectId (secret) {
       try {
         const serviceAccount = get(secret.data, ['serviceaccount.json'])
-        return get(JSON.parse(atob(serviceAccount)), ['project_id'])
+        return get(JSON.parse(decodeBase64(serviceAccount)), ['project_id'])
       } catch (err) {
         return undefined
       }
@@ -89,64 +91,64 @@ export default {
             return [
               {
                 label: 'Domain Name',
-                value: atob(secretData.domainName),
+                value: decodeBase64(secretData.domainName),
               },
               {
                 label: 'Tenant Name',
-                value: atob(secretData.tenantName),
+                value: decodeBase64(secretData.tenantName),
               },
             ]
           case 'vsphere':
             return [
               {
                 label: 'vSphere Username',
-                value: atob(secretData.vsphereUsername),
+                value: decodeBase64(secretData.vsphereUsername),
               },
               {
                 label: 'NSX-T Username',
-                value: atob(secretData.nsxtUsername),
+                value: decodeBase64(secretData.nsxtUsername),
               },
             ]
           case 'aws':
             return [
               {
                 label: 'Access Key ID',
-                value: atob(secretData.accessKeyID),
+                value: decodeBase64(secretData.accessKeyID),
               },
             ]
           case 'azure':
             return [
               {
                 label: 'Subscription ID',
-                value: atob(secretData.subscriptionID),
+                value: decodeBase64(secretData.subscriptionID),
               },
             ]
           case 'gcp':
             return [
               {
                 label: 'Project',
-                value: atob(this.getGCPProjectId)(secret),
+                value: decodeBase64(this.getGCPProjectId)(secret),
               },
             ]
           case 'alicloud':
             return [
               {
                 label: 'Access Key ID',
-                value: atob(secretData.accessKeyID),
+                value: decodeBase64(secretData.accessKeyID),
               },
             ]
           case 'metal':
             return [
               {
                 label: 'API URL',
-                value: atob(secretData.metalAPIURL),
+                value: decodeBase64(secretData.metalAPIURL),
               },
             ]
           case 'hcloud':
             return [
               {
                 label: 'Hetzner Cloud Token',
-                value: atob(secretData.hcloudToken),
+                value: decodeBase64(secretData.hcloudToken),
               },
             ]
           default:
@@ -169,18 +171,18 @@ export default {
             return [
               {
                 label: 'Domain Name',
-                value: atob(secretData.domainName),
+                value: decodeBase64(secretData.domainName),
               },
               {
                 label: 'Tenant Name',
-                value: atob(secretData.tenantName),
+                value: decodeBase64(secretData.tenantName),
               },
             ]
           case 'aws-route53':
             return [
               {
                 label: 'Access Key ID',
-                value: atob(secretData.accessKeyID),
+                value: decodeBase64(secretData.accessKeyID),
               },
             ]
           case 'azure-dns':
@@ -188,28 +190,28 @@ export default {
             return [
               {
                 label: 'Subscription ID',
-                value: atob(secretData.subscriptionID),
+                value: decodeBase64(secretData.subscriptionID),
               },
             ]
           case 'google-clouddns':
             return [
               {
                 label: 'Project',
-                value: atob(secretData.project),
+                value: decodeBase64(secretData.project),
               },
             ]
           case 'alicloud-dns':
             return [
               {
                 label: 'Access Key ID',
-                value: atob(secretData.accessKeyID),
+                value: decodeBase64(secretData.accessKeyID),
               },
             ]
           case 'infoblox-dns':
             return [
               {
                 label: 'Infoblox Username',
-                value: atob(secretData.USERNAME),
+                value: decodeBase64(secretData.USERNAME),
               },
             ]
           case 'cloudflare-dns':
@@ -230,15 +232,15 @@ export default {
             return [
               {
                 label: 'Server',
-                value: atob(secretData.Server),
+                value: decodeBase64(secretData.Server),
               },
               {
                 label: 'TSIG Key Name',
-                value: atob(secretData.TSIGKeyName),
+                value: decodeBase64(secretData.TSIGKeyName),
               },
               {
                 label: 'Zone',
-                value: atob(secretData.Zone),
+                value: decodeBase64(secretData.Zone),
               },
             ]
           default:

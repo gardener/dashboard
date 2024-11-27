@@ -22,7 +22,7 @@ router.route('/')
   .post(async (req, res, next) => {
     try {
       const user = req.user
-      const { method, params: body } = req.body
+      const { method, params } = req.body
 
       let credentialOperation
       switch (method) {
@@ -41,7 +41,7 @@ router.route('/')
         default:
           throw new UnprocessableEntity(`${method} not allowed for cloud provider credentials`)
       }
-      res.send(await credentialOperation.call(cloudProviderCredentials, { user, body }))
+      res.send(await credentialOperation.call(cloudProviderCredentials, { user, params }))
     } catch (err) {
       next(err)
     }

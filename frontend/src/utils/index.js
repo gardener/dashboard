@@ -444,6 +444,10 @@ export function encodeBase64Url (input) {
   return output
 }
 
+export function decodeBase64 (input) {
+  return Base64.decode(input)
+}
+
 export function shortRandomString (length) {
   const start = 'abcdefghijklmnopqrstuvwxyz'
   const possible = start + '0123456789'
@@ -454,15 +458,15 @@ export function shortRandomString (length) {
   return text
 }
 
-export function selfTerminationDaysForSecret (secret) {
-  const clusterLifetimeDays = function (quotaResources, scope) {
-    return get(find(quotaResources, scope), ['spec', 'clusterLifetimeDays'])
+export function selfTerminationDaysForSecret (secretBinding) {
+  const clusterLifetimeDays = function (quotas, scope) {
+    return get(find(quotas, scope), ['spec', 'clusterLifetimeDays'])
   }
 
-  const quotaResources = get(secret, ['quotaResources'])
-  let terminationDays = clusterLifetimeDays(quotaResources, { spec: { scope: { apiVersion: 'core.gardener.cloud/v1beta1', kind: 'Project' } } })
+  const quotas = get(secretBinding, ['quotaItems'])
+  let terminationDays = clusterLifetimeDays(quotas, { spec: { scope: { apiVersion: 'core.gardener.cloud/v1beta1', kind: 'Project' } } })
   if (!terminationDays) {
-    terminationDays = clusterLifetimeDays(quotaResources, { spec: { scope: { apiVersion: 'v1', kind: 'Secret' } } })
+    terminationDays = clusterLifetimeDays(quotas, { spec: { scope: { apiVersion: 'v1', kind: 'Secret' } } })
   }
 
   return terminationDays
