@@ -52,8 +52,8 @@ export const useCredentialStore = defineStore('credential', () => {
   async function fetchCredentials () {
     const namespace = authzStore.namespace
     try {
-      const { data: resources } = await api.getCloudProviderCredentials({ namespace })
-      cloudProviderCredentials.value = resources
+      const { data: credentials } = await api.getCloudProviderCredentials({ namespace })
+      cloudProviderCredentials.value = credentials
     } catch (err) {
       $reset()
       throw err
@@ -152,6 +152,7 @@ export const useCredentialStore = defineStore('credential', () => {
   }
 
   return {
+    cloudProviderCredentials,
     secretBindingList,
     isInitial,
     fetchCredentials,

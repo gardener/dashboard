@@ -173,7 +173,7 @@ export const useShootDns = (manifest, options) => {
     // find unused secret
     const usedResourceNames = map(resources.value, 'name')
     const secretBinding = find(secretBindings.value, secretBinding => {
-      const resourceName = getDnsServiceExtensionResourceName(secretBinding.metadata.name)
+      const resourceName = getDnsServiceExtensionResourceName(secretBinding.secretRef.name)
       return !includes(usedResourceNames, resourceName)
     })
     return get(secretBinding, ['secretRef', 'name'])
