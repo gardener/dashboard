@@ -20,7 +20,7 @@ module.exports = {
   '/projects': require('./projects'),
   '/namespaces/:namespace/shoots': require('./shoots'),
   '/namespaces/:namespace/tickets': require('./tickets'),
-  '/namespaces/cloudprovidercredentials': require('./cloudProviderCredentials'),
+  '/cloudprovidercredentials': require('./cloudProviderCredentials'),
   '/namespaces/:namespace/members': require('./members'),
   '/namespaces/:namespace/resourcequotas': require('./resourceQuotas'),
 }

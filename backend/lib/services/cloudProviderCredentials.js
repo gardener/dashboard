@@ -77,7 +77,14 @@ exports.patch = async function ({ user, params }) {
     secretBindingName,
     secretData,
   } = params
+
   const secretBinding = await client['core.gardener.cloud'].secretbindings.get(secretBindingNamespace, secretBindingName)
+  if (!secretBinding) {
+    throw createError(404)
+  }
+  if (secretBinding.metadata.namespace !== secretBinding.secretRef.namespace) {
+    throw createError(422, 'Patch allowed only for secrets in own namespace')
+  }
 
   let data
   try {
@@ -107,6 +114,12 @@ exports.remove = async function ({ user, params }) {
   const { secretBindingNamespace, secretBindingName } = params
 
   const secretBinding = await client['core.gardener.cloud'].secretbindings.get(secretBindingNamespace, secretBindingName)
+  if (!secretBinding) {
+    throw createError(404)
+  }
+  if (secretBinding.metadata.namespace !== secretBinding.secretRef.namespace) {
+    throw createError(422, 'Remove allowed only for secrets in own namespace')
+  }
 
   const secretRef = secretBinding.secretRef
   await Promise.all([

@@ -50,7 +50,7 @@ export function getConfiguration () {
 
 /* Credentials */
 function invokeCloudProviderCredentialMethod (method, params) {
-  return callResourceMethod('/api/namespaces/cloudprovidercredentials', {
+  return callResourceMethod('/api/cloudprovidercredentials', {
     method,
     params,
   })
