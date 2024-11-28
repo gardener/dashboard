@@ -26,7 +26,6 @@
   "dependencies": {
     "@gardener-dashboard/logger": "workspace:^",
     "@gardener-dashboard/test-utils": "workspace:^",
-    "chokidar": "^4.0.0",
     "gtoken": "^7.1.0",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21"
@@ -83,7 +82,7 @@
     "testEnvironment": "node",
     "coverageThreshold": {
       "global": {
-        "branches": 98,
+        "branches": 100,
         "functions": 100,
         "lines": 100,
         "statements": 100

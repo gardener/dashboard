@@ -10,8 +10,6 @@ const fs = require('fs')
 const path = require('path')
 const os = require('os')
 const yaml = require('js-yaml')
-const EventEmitter = require('events')
-const chokidar = require('chokidar')
 const { mockGetToken } = require('gtoken')
 const { cloneDeep } = require('lodash')
 const Config = require('../lib/Config')
@@ -33,17 +31,10 @@ describe('kube-config', () => {
   const accessToken = 'access-token'
 
   beforeEach(() => {
-    jest.spyOn(chokidar, 'watch').mockImplementationOnce(() => {
-      const emitter = new EventEmitter()
-      emitter.close = jest.fn().mockImplementation(() => Promise.resolve())
-      process.nextTick(() => emitter.emit('ready'))
-      return emitter
-    })
     jest.spyOn(fs, 'readFileSync')
   })
 
   afterEach(() => {
-    chokidar.watch.mockRestore()
     fs.readFileSync.mockRestore()
   })
 
