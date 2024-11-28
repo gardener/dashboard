@@ -116,7 +116,8 @@ export function useCodemirror (element, options) {
     logger = useLogger(),
     doc = '',
     onDocChanged = noop,
-    onTooltip = noop,
+    showTooltip = noop,
+    hideTooltip = noop,
     extraKeys = [],
     completionPaths = [],
     readOnly = false,
@@ -171,8 +172,7 @@ export function useCodemirror (element, options) {
             if (!tooltip) {
               return
             }
-            onTooltip({
-              visible: true,
+            showTooltip({
               posX: e.clientX,
               posY: e.clientY,
               property: tooltip.property,
@@ -183,9 +183,7 @@ export function useCodemirror (element, options) {
         },
         mouseout () {
           clearTimeout(mouseoverTimeoutId)
-          onTooltip({
-            visible: false,
-          })
+          hideTooltip()
         },
       }),
       keymap.of([

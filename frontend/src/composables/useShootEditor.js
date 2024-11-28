@@ -126,11 +126,12 @@ export function useShootEditor (initialValue, options = {}) {
             redo: redoDepth,
           }
         },
-        onTooltip ({ visible, ...rest }) {
-          helpTooltip.visible = visible
-          if (visible) {
-            Object.assign(helpTooltip, rest)
-          }
+        showTooltip (props) {
+          Object.assign(helpTooltip, props)
+          helpTooltip.visible = true
+        },
+        hideTooltip () {
+          helpTooltip.visible = false
         },
         extraKeys: getExtraKeys(),
         readOnly: isReadOnly.value,
