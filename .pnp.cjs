@@ -43,6 +43,10 @@ const RAW_RUNTIME_STATE =
       "reference": "workspace:packages/monitor"\
     },\
     {\
+      "name": "@gardener-dashboard/polling-watcher",\
+      "reference": "workspace:packages/polling-watcher"\
+    },\
+    {\
       "name": "@gardener-dashboard/request",\
       "reference": "workspace:packages/request"\
     },\
@@ -61,6 +65,7 @@ const RAW_RUNTIME_STATE =
     ["@gardener-dashboard/kube-config", ["workspace:packages/kube-config"]],\
     ["@gardener-dashboard/logger", ["workspace:packages/logger"]],\
     ["@gardener-dashboard/monitor", ["workspace:packages/monitor"]],\
+    ["@gardener-dashboard/polling-watcher", ["workspace:packages/polling-watcher"]],\
     ["@gardener-dashboard/request", ["workspace:packages/request"]],\
     ["@gardener-dashboard/test-utils", ["workspace:packages/test-utils"]],\
     ["gardener-dashboard", ["workspace:."]]\
@@ -1608,7 +1613,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./packages/kube-config/",\
         "packageDependencies": [\
           ["@gardener-dashboard/kube-config", "workspace:packages/kube-config"],\
-          ["@gardener-dashboard/logger", "workspace:packages/logger"],\
+          ["@gardener-dashboard/polling-watcher", "workspace:packages/polling-watcher"],\
           ["@gardener-dashboard/test-utils", "workspace:packages/test-utils"],\
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.14.0"],\
           ["eslint-plugin-import", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:2.31.0"],\
@@ -1660,6 +1665,24 @@ const RAW_RUNTIME_STATE =
           ["prom-client", "npm:15.1.3"],\
           ["response-time", "npm:2.3.3"],\
           ["supertest", "npm:7.0.0"]\
+        ],\
+        "linkType": "SOFT"\
+      }]\
+    ]],\
+    ["@gardener-dashboard/polling-watcher", [\
+      ["workspace:packages/polling-watcher", {\
+        "packageLocation": "./packages/polling-watcher/",\
+        "packageDependencies": [\
+          ["@gardener-dashboard/polling-watcher", "workspace:packages/polling-watcher"],\
+          ["@gardener-dashboard/logger", "workspace:packages/logger"],\
+          ["@gardener-dashboard/test-utils", "workspace:packages/test-utils"],\
+          ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.14.0"],\
+          ["eslint-plugin-import", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:2.31.0"],\
+          ["eslint-plugin-jest", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:28.9.0"],\
+          ["eslint-plugin-lodash", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:8.0.0"],\
+          ["eslint-plugin-security", "npm:3.0.1"],\
+          ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:29.7.0"],\
+          ["neostandard", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:0.11.8"]\
         ],\
         "linkType": "SOFT"\
       }]\

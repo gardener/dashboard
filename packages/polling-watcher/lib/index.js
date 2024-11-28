@@ -20,11 +20,6 @@ class PollingWatcher extends EventEmitter {
     super()
     this.#paths = paths
     this.#interval = options?.interval ?? 300_000
-    process.nextTick(() => {
-      this.#state = 'ready'
-      logger.debug('[kube-config] watcher ready')
-      this.emit('ready')
-    })
     const signal = options?.signal
     if (signal instanceof AbortSignal) {
       if (!signal.aborted) {
@@ -33,6 +28,21 @@ class PollingWatcher extends EventEmitter {
         this.#state = 'aborted'
       }
     }
+    process.nextTick(() => {
+      if (this.#state === 'initial') {
+        this.#state = 'ready'
+        logger.debug('[polling-watcher] watcher is ready')
+        this.emit('ready')
+      }
+    })
+  }
+
+  get interval () {
+    return this.#interval
+  }
+
+  get state () {
+    return this.#state
   }
 
   run (fn) {
@@ -41,10 +51,10 @@ class PollingWatcher extends EventEmitter {
         try {
           // eslint-disable-next-line security/detect-non-literal-fs-filename -- path is not user input
           const value = await fs.readFile(path, 'utf8')
-          logger.info('[kube-config] updated content of file `%s`', path)
+          logger.info('[polling-watcher] updated content of file `%s`', path)
           fn(path, value)
         } catch (err) {
-          logger.error('[kube-config] failed to stat file `%s`: %s', path, err.message)
+          logger.error('[polling-watcher] failed to stat file `%s`: %s', path, err.message)
         }
       }
       this.#state = 'running'
@@ -59,7 +69,14 @@ class PollingWatcher extends EventEmitter {
   abort () {
     this.#state = 'aborted'
     clearInterval(this.#intervalId)
+    logger.error('[polling-watcher] watcher has been aborted')
   }
 }
 
-module.exports = PollingWatcher
+function createPollingWatcher (...args) {
+  return new PollingWatcher(...args)
+}
+
+createPollingWatcher.PollingWatcher = PollingWatcher
+
+module.exports = createPollingWatcher

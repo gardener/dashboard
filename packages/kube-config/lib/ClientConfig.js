@@ -8,7 +8,7 @@
 
 const assert = require('assert').strict
 const fs = require('fs')
-const Watcher = require('./PollingWatcher')
+const createPollingWatcher = require('@gardener-dashboard/polling-watcher')
 
 function getCluster ({ currentCluster }, files) {
   const cluster = {}
@@ -169,7 +169,7 @@ class ClientConfig {
       },
     }
     if (reactive && files.size) {
-      const watcher = new Watcher(Array.from(files.keys()), options)
+      const watcher = createPollingWatcher(Array.from(files.keys()), options)
       watcher.run((path, value) => {
         const key = files.get(path)
         switch (key) {
