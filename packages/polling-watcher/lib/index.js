@@ -6,15 +6,21 @@
 
 'use strict'
 
+const crypto = require('crypto')
 const fs = require('fs/promises')
 const EventEmitter = require('events')
 const { globalLogger: logger } = require('@gardener-dashboard/logger')
+
+function sha256 (data) {
+  return crypto.createHash('sha256').update(data).digest('hex')
+}
 
 class PollingWatcher extends EventEmitter {
   #paths
   #interval
   #intervalId
   #state = 'initial'
+  #hashes
 
   constructor (paths, options) {
     super()
@@ -28,13 +34,25 @@ class PollingWatcher extends EventEmitter {
         this.#state = 'aborted'
       }
     }
-    process.nextTick(() => {
-      if (this.#state === 'initial') {
-        this.#state = 'ready'
-        logger.debug('[polling-watcher] watcher is ready')
-        this.emit('ready')
+    const init = async () => {
+      try {
+        // eslint-disable-next-line security/detect-non-literal-fs-filename -- path is not user input
+        const createHashEntry = async path => [path, sha256(await fs.readFile(path))]
+        const hashEntries = await Promise.all(paths.map(createHashEntry))
+        this.#hashes = new Map(hashEntries)
+        if (this.#state === 'initial') {
+          this.#state = 'ready'
+          logger.info('[polling-watcher] watcher is ready')
+          this.emit('ready')
+        }
+      } catch (err) {
+        clearInterval(this.#intervalId)
+        this.#state = 'error'
+        logger.error('[polling-watcher] failed to initialize file hashes: %s', err.message)
+        this.emit('error', err)
       }
-    })
+    }
+    init()
   }
 
   get interval () {
@@ -50,11 +68,16 @@ class PollingWatcher extends EventEmitter {
       const tryReadFile = async path => {
         try {
           // eslint-disable-next-line security/detect-non-literal-fs-filename -- path is not user input
-          const value = await fs.readFile(path, 'utf8')
-          logger.info('[polling-watcher] updated content of file `%s`', path)
-          fn(path, value)
+          const data = await fs.readFile(path)
+          const newHash = sha256(data)
+          const oldHash = this.#hashes.get(path)
+          if (newHash !== oldHash) {
+            logger.info('[polling-watcher] updated content of file `%s`', path)
+            this.#hashes.set(path, newHash)
+            fn(path, data.toString('utf8'))
+          }
         } catch (err) {
-          logger.error('[polling-watcher] failed to stat file `%s`: %s', path, err.message)
+          logger.error('[polling-watcher] failed to read file `%s`: %s', path, err.message)
         }
       }
       this.#state = 'running'
@@ -69,7 +92,7 @@ class PollingWatcher extends EventEmitter {
   abort () {
     this.#state = 'aborted'
     clearInterval(this.#intervalId)
-    logger.error('[polling-watcher] watcher has been aborted')
+    logger.info('[polling-watcher] watcher has been aborted')
   }
 }
 

@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -22,6 +22,7 @@ describe('polling-watcher', () => {
   describe('#run', () => {
     const filename = '/path/to/file'
     const content = 'content'
+    const newContent = 'new content'
     const interval = 10
     let ac
     let fn
@@ -33,9 +34,34 @@ describe('polling-watcher', () => {
       })
     }
 
-    const advanceTimersByOneInterval = i => {
-      return jest.advanceTimersByTimeAsync(i + 1)
-    }
+    const isReady = watcher => new Promise((resolve, reject) => {
+      switch (watcher.state) {
+        case 'ready': {
+          resolve()
+          break
+        }
+        case 'initial': {
+          const onReady = () => {
+            clearTimeout(timeoutId)
+            resolve()
+          }
+          const onError = err => {
+            clearTimeout(timeoutId)
+            reject(err)
+          }
+          const timeoutId = setTimeout(() => {
+            reject(new Error('timed out'))
+          }, 100)
+          watcher.once('ready', onReady)
+          watcher.once('error', onError)
+          break
+        }
+        default: {
+          reject(new Error('invalid state'))
+          break
+        }
+      }
+    })
 
     beforeEach(() => {
       ac = new AbortController()
@@ -50,77 +76,93 @@ describe('polling-watcher', () => {
       ac.abort()
     })
 
-
     it('should create and run a watcher with default interval', async () => {
       const watcher = createPollingWatcher([filename], {
         signal: ac.signal,
       })
-      jest.runAllTicks()
+      await isReady(watcher)
       expect(watcher.state).toBe('ready')
       watcher.run(fn)
       expect(fn).toHaveBeenCalledTimes(0)
-      await advanceTimersByOneInterval(watcher.interval)
+      await jest.advanceTimersByTimeAsync(watcher.interval + 1)
+      expect(fn).toHaveBeenCalledTimes(0)
+      fs.readFile.mockResolvedValueOnce(newContent)
+      await jest.advanceTimersByTimeAsync(watcher.interval + 1)
       expect(fn).toHaveBeenCalledTimes(1)
     })
 
     it('should read the file content and call the callback function', async () => {
       const watcher = createWatcher()
-      jest.runAllTicks()
+      await isReady(watcher)
       expect(watcher.state).toBe('ready')
       watcher.run(fn)
       expect(fn).toHaveBeenCalledTimes(0)
-      await advanceTimersByOneInterval(watcher.interval)
+      fs.readFile.mockResolvedValueOnce(newContent)
+      await jest.advanceTimersByTimeAsync(watcher.interval + 1)
       expect(fn).toHaveBeenCalledTimes(1)
-      expect(fn.mock.calls[0]).toEqual([filename, content])
-      expect(logger.info).toHaveBeenCalledTimes(1)
-      expect(logger.info.mock.calls[0]).toEqual(['[polling-watcher] updated content of file `%s`', filename])
+      expect(fn.mock.calls[0]).toEqual([filename, newContent])
+      expect(logger.info).toHaveBeenCalledTimes(2)
+      expect(logger.info.mock.calls).toEqual([
+        ['[polling-watcher] watcher is ready'],
+        ['[polling-watcher] updated content of file `%s`', filename],
+      ])
     })
 
     it('should fail to read file content and not call the callback function', async () => {
       const error = new Error('no such file')
-      fs.readFile.mockRejectedValueOnce(error)
       const watcher = createWatcher()
       watcher.run(fn)
       expect(fn).toHaveBeenCalledTimes(0)
-      await advanceTimersByOneInterval(watcher.interval)
+      fs.readFile.mockRejectedValueOnce(error)
+      await jest.advanceTimersByTimeAsync(watcher.interval + 1)
       expect(fn).toHaveBeenCalledTimes(0)
       expect(logger.error).toHaveBeenCalledTimes(1)
-      expect(logger.error.mock.calls[0]).toEqual(['[polling-watcher] failed to stat file `%s`: %s', filename, error.message])
+      expect(logger.error.mock.calls[0]).toEqual(['[polling-watcher] failed to read file `%s`: %s', filename, error.message])
     })
 
-    it('should do nothing if abortet before run', async () => {
+    it('should do nothing if aborted before run', async () => {
       const watcher = createWatcher()
       expect(watcher.state).toBe('initial')
-      jest.runAllTicks()
+      await isReady(watcher)
       expect(watcher.state).toBe('ready')
       ac.abort()
       expect(watcher.state).toBe('aborted')
       watcher.run(fn)
-      await advanceTimersByOneInterval(watcher.interval)
+      await jest.advanceTimersByTimeAsync(watcher.interval + 1)
       expect(fn).toHaveBeenCalledTimes(0)
     })
 
-    it('should do nothing if already abortet', async () => {
+    it('should do nothing if already aborted', async () => {
       ac.abort()
       const watcher = createWatcher()
       expect(watcher.state).toBe('aborted')
       watcher.run(fn)
-      await advanceTimersByOneInterval(watcher.interval)
+      await jest.advanceTimersByTimeAsync(watcher.interval + 1)
       expect(fn).toHaveBeenCalledTimes(0)
       expect(watcher.state).toBe('aborted')
     })
 
     it('should run a watcher without abort signal', async () => {
       const watcher = createWatcher(null)
-      jest.runAllTicks()
+      await isReady(watcher)
       expect(watcher.state).toBe('ready')
       ac.abort()
       expect(watcher.state).toBe('ready')
       watcher.run(fn)
-      await advanceTimersByOneInterval(watcher.interval)
+      fs.readFile.mockResolvedValueOnce(newContent)
+      await jest.advanceTimersByTimeAsync(watcher.interval + 1)
       expect(fn).toHaveBeenCalledTimes(1)
       watcher.abort()
       expect(watcher.state).toBe('aborted')
+    })
+
+    it('should fail to initialize the watcher', async () => {
+      const error = new Error('no such file')
+      fs.readFile.mockRejectedValueOnce(error)
+      const watcher = createWatcher()
+      await expect(isReady(watcher)).rejects.toThrow(error.message)
+      expect(logger.error).toHaveBeenCalledTimes(1)
+      expect(logger.error.mock.calls[0]).toEqual(['[polling-watcher] failed to initialize file hashes: %s', error.message])
     })
   })
 })
