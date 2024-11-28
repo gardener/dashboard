@@ -8328,8 +8328,8 @@ __metadata:
   linkType: hard
 
 "pinia@npm:^2.1.7":
-  version: 2.2.7
-  resolution: "pinia@npm:2.2.7"
+  version: 2.2.8
+  resolution: "pinia@npm:2.2.8"
   dependencies:
     "@vue/devtools-api": "npm:^6.6.3"
     vue-demi: "npm:^0.14.10"
@@ -8342,7 +8342,7 @@ __metadata:
       optional: true
     typescript:
       optional: true
-  checksum: 10c0/06946e95084f67290d34edc8b5c84a892f8b221063a1321189b70e670fca707950e3aceb5bb21e3af841531b15d65915115cce0c4a7836803ad96c0a9f858bde
+  checksum: 10c0/afcaba130850d939659d72d855f449d5d153a623d81139cf4667526253e6dcc426219cafd898b544cd538ffe63d3f750ac023a643056ec20e8c19cb909678f32
   languageName: node
   linkType: hard
 
