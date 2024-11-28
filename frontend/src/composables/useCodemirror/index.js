@@ -133,7 +133,7 @@ export function useCodemirror (element, options) {
     const shootProperties = get(schemaDefinition.value, ['properties'], {})
     return new EditorCompletions(shootProperties, {
       indentUnit: view.state.facet(indentUnit).length,
-      completionPaths,
+      supportedPaths: completionPaths,
       logger,
     })
   })
