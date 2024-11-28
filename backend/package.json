@@ -28,6 +28,7 @@
   "scripts": {
     "serve": "cross-env NODE_ENV=development node server.js",
     "lint": "eslint server.js . --max-warnings=0",
+    "lint-sarif": "eslint server.js . --max-warnings=0 --format=@microsoft/eslint-formatter-sarif",
     "test": "cross-env NODE_ENV=test jest",
     "test-coverage": "yarn test --coverage"
   },
@@ -73,6 +74,7 @@
   },
   "devDependencies": {
     "@gardener-dashboard/test-utils": "workspace:^",
+    "@microsoft/eslint-formatter-sarif": "^3.1.0",
     "abort-controller": "^3.0.0",
     "cross-env": "^7.0.3",
     "dockerfile-ast": "^0.7.0",

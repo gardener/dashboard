@@ -20,6 +20,7 @@
   ],
   "scripts": {
     "lint": "eslint . --max-warnings=0",
+    "lint-sarif": "eslint . --max-warnings=0 --format=@microsoft/eslint-formatter-sarif",
     "test": "jest",
     "test-coverage": "yarn test --coverage"
   },
@@ -31,6 +32,7 @@
     "lodash": "^4.17.21"
   },
   "devDependencies": {
+    "@microsoft/eslint-formatter-sarif": "^3.1.0",
     "eslint": "^9.11.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jest": "^28.8.3",
