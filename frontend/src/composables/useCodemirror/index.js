@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 import { computed } from 'vue'
-import { computedAsync } from '@vueuse/core'
 import {
   EditorView,
   keymap,
@@ -40,6 +39,7 @@ import { yaml } from '@codemirror/lang-yaml'
 
 import { useLogger } from '@/composables/useLogger'
 import { useApi } from '@/composables/useApi'
+import { useShootSchemaDefinition } from '@/composables/useShootSchemaDefinition'
 
 import {
   createWhitespaceViewPlugin,
@@ -48,6 +48,7 @@ import {
 } from './helper'
 
 import get from 'lodash/get'
+import noop from 'lodash/noop'
 
 function dispatchEffects (view, effects) {
   view.dispatch({ effects })
@@ -113,17 +114,17 @@ export function useCodemirror (element, options) {
   const {
     api = useApi(),
     logger = useLogger(),
-    onDocumentChanged,
-    onTooltip,
-    extraKeys,
-    completionPaths = [],
     doc = '',
+    onDocChanged = noop,
+    onTooltip = noop,
+    extraKeys = [],
+    completionPaths = [],
     readOnly = false,
     darkMode = false,
     disableLineHighlighting = false,
   } = options
 
-  const schemaDefinition = computedAsync(api.getShootSchemaDefinition, null)
+  const schemaDefinition = useShootSchemaDefinition({ api })
   const completions = computed(() => {
     if (!schemaDefinition.value) {
       return null
@@ -144,7 +145,7 @@ export function useCodemirror (element, options) {
     },
   }
 
-  let initialDocValue = ''
+  let initialDocValue = doc
   let mouseoverTimeoutId
 
   const state = EditorState.create({
@@ -156,7 +157,7 @@ export function useCodemirror (element, options) {
       EditorView.updateListener.of(e => {
         if (e.docChanged) {
           const docValue = e.state.doc.toString()
-          onDocumentChanged({
+          onDocChanged({
             modified: docValue !== initialDocValue,
             undoDepth: undoDepth(e.state),
             redoDepth: redoDepth(e.state),
@@ -182,7 +183,9 @@ export function useCodemirror (element, options) {
         },
         mouseout () {
           clearTimeout(mouseoverTimeoutId)
-          onTooltip({ visible: false })
+          onTooltip({
+            visible: false,
+          })
         },
       }),
       keymap.of([

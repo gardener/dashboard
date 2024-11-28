@@ -115,9 +115,12 @@ export function useShootEditor (initialValue, options = {}) {
       const { useCodemirror } = await import('./useCodemirror')
       cm = useCodemirror(element, {
         ...options,
-        onDocumentChanged ({ modified, undoDepth, redoDepth }) {
-          touched.value = true
-          clean.value = modified
+        doc: yaml.dump(shootItem.value),
+        onDocChanged ({ modified, undoDepth, redoDepth }) {
+          if (!touched.value && modified) {
+            touched.value = true
+          }
+          clean.value = !modified
           historySize.value = {
             undo: undoDepth,
             redo: redoDepth,
@@ -129,14 +132,12 @@ export function useShootEditor (initialValue, options = {}) {
             Object.assign(helpTooltip, rest)
           }
         },
-        doc: yaml.dump(shootItem.value),
         extraKeys: getExtraKeys(),
         readOnly: isReadOnly.value,
         darkMode: isDarkMode.value,
       })
     } catch (err) {
       logger.error('Failed to create codemirror instance: %s', err.message)
-      logger.error(err.stack)
     }
   }
 
@@ -177,6 +178,14 @@ export function useShootEditor (initialValue, options = {}) {
     cm?.setDocValue(value)
   }
 
+  function execUndo () {
+    cm?.undo()
+  }
+
+  function execRedo () {
+    cm?.redo()
+  }
+
   function clearDocumentHistory () {
     cm?.clearDocHistory()
     clean.value = true
@@ -186,14 +195,6 @@ export function useShootEditor (initialValue, options = {}) {
       undo: 0,
       redo: 0,
     }
-  }
-
-  function execUndo () {
-    cm?.undo()
-  }
-
-  function execRedo () {
-    cm?.redo()
   }
 
   watch(renderWhitespaces, value => {
