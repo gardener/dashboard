@@ -8,7 +8,8 @@
 
 const fs = require('fs/promises')
 const { globalLogger: logger } = require('@gardener-dashboard/logger')
-const createPollingWatcher = require('../lib')
+const createWatch = require('../lib')
+const { sign } = require('crypto')
 
 describe('polling-watcher', () => {
   beforeAll(() => {
@@ -19,150 +20,114 @@ describe('polling-watcher', () => {
     jest.useRealTimers()
   })
 
-  describe('#run', () => {
+  describe('watch', () => {
+    const noSuchFile = new Error('no such file')
     const filename = '/path/to/file'
-    const content = 'content'
-    const newContent = 'new content'
-    const interval = 10
-    let ac
+    const oldContent = 'old'
+    const newContent = 'new'
     let fn
+    let stop
 
-    const createWatcher = (signal = ac.signal) => {
-      return createPollingWatcher([filename], {
-        interval,
-        signal,
-      })
+    async function startWatch (options) {
+      const watch = await createWatch([filename], options)
+      if (typeof watch === 'function') {
+        stop = watch(fn)
+      }
     }
 
-    const isReady = watcher => new Promise((resolve, reject) => {
-      switch (watcher.state) {
-        case 'ready': {
-          resolve()
-          break
-        }
-        case 'initial': {
-          const onReady = () => {
-            clearTimeout(timeoutId)
-            resolve()
-          }
-          const onError = err => {
-            clearTimeout(timeoutId)
-            reject(err)
-          }
-          const timeoutId = setTimeout(() => {
-            reject(new Error('timed out'))
-          }, 100)
-          watcher.once('ready', onReady)
-          watcher.once('error', onError)
-          break
-        }
-        default: {
-          reject(new Error('invalid state'))
-          break
-        }
-      }
-    })
-
     beforeEach(() => {
-      ac = new AbortController()
       fn = jest.fn()
-      jest.spyOn(fs, 'readFile').mockResolvedValue(content)
+      stop = undefined
+      jest.spyOn(fs, 'readFile').mockResolvedValue(oldContent)
+      logger.debug.mockClear()
       logger.info.mockClear()
       logger.error.mockClear()
     })
 
     afterEach(() => {
       fs.readFile.mockRestore()
-      ac.abort()
+      if (typeof stop === 'function') {
+        stop()
+      }
     })
 
-    it('should create and run a watcher with default interval', async () => {
-      const watcher = createPollingWatcher([filename], {
-        signal: ac.signal,
-      })
-      await isReady(watcher)
-      expect(watcher.state).toBe('ready')
-      watcher.run(fn)
+    it('should create a file watch with default options', async () => {
+      await startWatch()
       expect(fn).toHaveBeenCalledTimes(0)
-      await jest.advanceTimersByTimeAsync(watcher.interval + 1)
+      await jest.advanceTimersToNextTimerAsync(1)
       expect(fn).toHaveBeenCalledTimes(0)
       fs.readFile.mockResolvedValueOnce(newContent)
-      await jest.advanceTimersByTimeAsync(watcher.interval + 1)
-      expect(fn).toHaveBeenCalledTimes(1)
-    })
-
-    it('should read the file content and call the callback function', async () => {
-      const watcher = createWatcher()
-      await isReady(watcher)
-      expect(watcher.state).toBe('ready')
-      watcher.run(fn)
-      expect(fn).toHaveBeenCalledTimes(0)
-      fs.readFile.mockResolvedValueOnce(newContent)
-      await jest.advanceTimersByTimeAsync(watcher.interval + 1)
+      await jest.advanceTimersToNextTimerAsync(1)
       expect(fn).toHaveBeenCalledTimes(1)
       expect(fn.mock.calls[0]).toEqual([filename, newContent])
-      expect(logger.info).toHaveBeenCalledTimes(2)
+      stop()
+      expect(logger.debug).toHaveBeenCalledTimes(1)
+      expect(logger.debug.mock.calls).toEqual([
+        ['[polling-watcher] watch started with interval %dms', 300_000],
+      ])
+      expect(logger.info).toHaveBeenCalledTimes(3)
       expect(logger.info.mock.calls).toEqual([
-        ['[polling-watcher] watcher is ready'],
-        ['[polling-watcher] updated content of file `%s`', filename],
+        ['[polling-watcher] watch created for %d files', 1],
+        ['[polling-watcher] detected file change `%s`', filename],
+        ['[polling-watcher] watch aborted'],
+      ])
+      expect(logger.error).toHaveBeenCalledTimes(0)
+    })
+
+    it('should create a file watch with custom options', async () => {
+      const ac = new AbortController()
+      await startWatch({
+        interval: 10,
+        signal: ac.signal,
+      })
+      expect(fn).toHaveBeenCalledTimes(0)
+      fs.readFile.mockResolvedValueOnce(newContent)
+      await jest.advanceTimersToNextTimerAsync(1)
+      expect(fn).toHaveBeenCalledTimes(1)
+      expect(fn.mock.calls[0]).toEqual([filename, newContent])
+      ac.abort()
+      expect(logger.debug).toHaveBeenCalledTimes(1)
+      expect(logger.debug.mock.calls).toEqual([
+        ['[polling-watcher] watch started with interval %dms', 10],
+      ])
+      expect(logger.info).toHaveBeenCalledTimes(3)
+      expect(logger.info.mock.calls).toEqual([
+        ['[polling-watcher] watch created for %d files', 1],
+        ['[polling-watcher] detected file change `%s`', filename],
+        ['[polling-watcher] watch aborted'],
+      ])
+      expect(logger.error).toHaveBeenCalledTimes(0)
+    })
+
+    it('should fail to read file', async () => {
+      await startWatch()
+      expect(fn).toHaveBeenCalledTimes(0)
+      fs.readFile.mockRejectedValueOnce(noSuchFile)
+      await jest.advanceTimersToNextTimerAsync(1)
+      expect(fn).toHaveBeenCalledTimes(0)
+      expect(logger.error).toHaveBeenCalledTimes(1)
+      expect(logger.error.mock.calls).toEqual([
+        ['[polling-watcher] failed to read file `%s`: %s', filename, noSuchFile.message],
       ])
     })
 
-    it('should fail to read file content and not call the callback function', async () => {
-      const error = new Error('no such file')
-      const watcher = createWatcher()
-      watcher.run(fn)
-      expect(fn).toHaveBeenCalledTimes(0)
-      fs.readFile.mockRejectedValueOnce(error)
-      await jest.advanceTimersByTimeAsync(watcher.interval + 1)
-      expect(fn).toHaveBeenCalledTimes(0)
-      expect(logger.error).toHaveBeenCalledTimes(1)
-      expect(logger.error.mock.calls[0]).toEqual(['[polling-watcher] failed to read file `%s`: %s', filename, error.message])
-    })
-
-    it('should do nothing if aborted before run', async () => {
-      const watcher = createWatcher()
-      expect(watcher.state).toBe('initial')
-      await isReady(watcher)
-      expect(watcher.state).toBe('ready')
-      ac.abort()
-      expect(watcher.state).toBe('aborted')
-      watcher.run(fn)
-      await jest.advanceTimersByTimeAsync(watcher.interval + 1)
-      expect(fn).toHaveBeenCalledTimes(0)
-    })
-
-    it('should do nothing if already aborted', async () => {
-      ac.abort()
-      const watcher = createWatcher()
-      expect(watcher.state).toBe('aborted')
-      watcher.run(fn)
-      await jest.advanceTimersByTimeAsync(watcher.interval + 1)
-      expect(fn).toHaveBeenCalledTimes(0)
-      expect(watcher.state).toBe('aborted')
-    })
-
-    it('should run a watcher without abort signal', async () => {
-      const watcher = createWatcher(null)
-      await isReady(watcher)
-      expect(watcher.state).toBe('ready')
-      ac.abort()
-      expect(watcher.state).toBe('ready')
-      watcher.run(fn)
-      fs.readFile.mockResolvedValueOnce(newContent)
-      await jest.advanceTimersByTimeAsync(watcher.interval + 1)
-      expect(fn).toHaveBeenCalledTimes(1)
-      watcher.abort()
-      expect(watcher.state).toBe('aborted')
-    })
-
     it('should fail to initialize the watcher', async () => {
-      const error = new Error('no such file')
-      fs.readFile.mockRejectedValueOnce(error)
-      const watcher = createWatcher()
-      await expect(isReady(watcher)).rejects.toThrow(error.message)
-      expect(logger.error).toHaveBeenCalledTimes(1)
-      expect(logger.error.mock.calls[0]).toEqual(['[polling-watcher] failed to initialize file hashes: %s', error.message])
+      fs.readFile.mockRejectedValueOnce(noSuchFile)
+      await expect(startWatch()).rejects.toThrow(noSuchFile.message)
+      expect(stop).toBeUndefined()
+      expect(logger.error).toHaveBeenCalledTimes(0)
+    })
+
+    it('should immediately stop if signal is already aborted', async () => {
+      const ac = new AbortController()
+      ac.abort()
+      await startWatch({
+        interval: 10,
+        signal: ac.signal,
+      })
+      fs.readFile.mockResolvedValueOnce(newContent)
+      await jest.advanceTimersToNextTimerAsync(1)
+      expect(fn).toHaveBeenCalledTimes(0)
     })
   })
 })
