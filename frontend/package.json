@@ -27,7 +27,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --max-warnings=0",
-    "lint-sarif": "eslint . --max-warnings=0 --format=@microsoft/eslint-formatter-sarif",
+    "lint-sarif": "yarn lint --format=@microsoft/eslint-formatter-sarif",
     "test": "vitest run"
   },
   "dependencies": {

@@ -28,7 +28,7 @@
   "scripts": {
     "serve": "cross-env NODE_ENV=development node server.js",
     "lint": "eslint server.js . --max-warnings=0",
-    "lint-sarif": "eslint server.js . --max-warnings=0 --format=@microsoft/eslint-formatter-sarif",
+    "lint-sarif": "yarn lint --format=@microsoft/eslint-formatter-sarif",
     "test": "cross-env NODE_ENV=test jest",
     "test-coverage": "yarn test --coverage"
   },
