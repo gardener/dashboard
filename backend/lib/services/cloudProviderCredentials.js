@@ -17,24 +17,28 @@ exports.list = async function ({ user, params }) {
 
   const [
     { items: secretBindings },
-    { items: referencedSecrets },
+    { items: secrets },
   ] = await Promise.all([
     client['core.gardener.cloud'].secretbindings.list(secretBindingNamespace),
     client.core.secrets.list(secretBindingNamespace, { labelSelector: 'reference.gardener.cloud/secretbinding=true' }),
   ])
 
-  const secretMap = new Map(referencedSecrets.map(secret => [secret.metadata.name, secret]))
-  const credentialsList = secretBindings.map(secretBinding => {
-    const secret = secretMap.get(secretBinding.secretRef.name)
-
-    return {
-      secretBinding,
-      secret,
-      quotas: resolveQuotas(secretBinding),
-    }
+  const quotas = _.flatMap(secretBindings, secretBinding => {
+    const bindingQuotas = resolveQuotas(secretBinding)
+    const clusterLifetimeQuotas = _.filter(bindingQuotas, 'spec.clusterLifetimeDays')
+    return _.flatMap(clusterLifetimeQuotas, ({ metadata, spec }) => {
+      return {
+        metadata: _.pick(metadata, ['name', 'namespace', 'uid']),
+        spec: _.pick(spec, ['clusterLifetimeDays', 'scope']),
+      }
+    })
   })
 
-  return credentialsList
+  return {
+    secretBindings,
+    secrets,
+    quotas,
+  }
 }
 
 exports.create = async function ({ user, params }) {

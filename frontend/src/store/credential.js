@@ -26,10 +26,13 @@ import findIndex from 'lodash/findIndex'
 import find from 'lodash/find'
 import filter from 'lodash/filter'
 import matches from 'lodash/matches'
-import map from 'lodash/map'
 
 function eqlNameAndNamespace ({ namespace, name }) {
   return matches({ metadata: { namespace, name } })
+}
+
+function namespaceNameKey ({ namespace, name }) {
+  return `${namespace}/${name}`
 }
 
 export const useCredentialStore = defineStore('credential', () => {
@@ -61,19 +64,37 @@ export const useCredentialStore = defineStore('credential', () => {
   }
 
   const secretBindingList = computed(() => {
-    return map(cloudProviderCredentials.value, ({ secretBinding, secret, quotas }) => {
+    const secretMap = new Map(cloudProviderCredentials.value?.secrets?.map(secret => [namespaceNameKey(secret.metadata), secret]))
+    const quotaMap = new Map(cloudProviderCredentials.value?.quotas?.map(quota => [namespaceNameKey(quota.metadata), quota]))
+
+    return cloudProviderCredentials.value?.secretBindings?.map(secretBinding => {
+      const secret = secretMap.get(namespaceNameKey(secretBinding.secretRef))
       Object.defineProperty(secretBinding, 'secret', {
-        value: secret,
+        get () {
+          return secret
+        },
+        configurable: true,
+        enumerable: false,
       })
+
+      const quotaItems = (secretBinding.quotas || [])
+        .map(quota => quotaMap.get(namespaceNameKey(quota)))
+        .filter(item => item !== undefined)
+
       Object.defineProperty(secretBinding, 'quotaItems', {
-        value: quotas,
+        get () {
+          return quotaItems
+        },
+        configurable: true,
+        enumerable: false,
       })
+
       return secretBinding
     })
   })
 
   const secretList = computed(() => {
-    return map(cloudProviderCredentials.value, 'secret')
+    return cloudProviderCredentials.value.secrets
   })
 
   async function createCredential ({ name, ...params }) {

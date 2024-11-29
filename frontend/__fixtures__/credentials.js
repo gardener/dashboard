@@ -34,7 +34,7 @@ function createProviderCredentials (type, options = {}) {
   }
 }
 
-export default [
+const credentials = [
   createProviderCredentials('alicloud'),
   createProviderCredentials('aws'),
   createProviderCredentials('azure'),
@@ -44,3 +44,11 @@ export default [
   createProviderCredentials('aws-route53'),
   createProviderCredentials('azure-dns'),
 ]
+
+const secretBindings = credentials.map(item => item.secretBinding)
+const secrets = credentials.map(item => item.secret)
+
+export default {
+  secretBindings,
+  secrets,
+}
