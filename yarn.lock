@@ -506,8 +506,8 @@ __metadata:
   linkType: hard
 
 "@codemirror/language@npm:^6.0.0, @codemirror/language@npm:^6.10.2":
-  version: 6.10.5
-  resolution: "@codemirror/language@npm:6.10.5"
+  version: 6.10.6
+  resolution: "@codemirror/language@npm:6.10.6"
   dependencies:
     "@codemirror/state": "npm:^6.0.0"
     "@codemirror/view": "npm:^6.23.0"
@@ -515,7 +515,7 @@ __metadata:
     "@lezer/highlight": "npm:^1.0.0"
     "@lezer/lr": "npm:^1.0.0"
     style-mod: "npm:^4.0.0"
-  checksum: 10c0/9e32d8ab95348a74e35cf7b5453f67a8b22ddb20a9c8a8c015070aac3d595879c4e3ff39fc571d3070858567b987e014c32d8703690b4f5f3e04e705cbac9fcf
+  checksum: 10c0/8d6812165970303696d7b8e20236278ff2df0407c76e784a4d5be42b2219a5ca868d15ccbe59f43445dc62968e4ab784ed9e738db02e3a7b1be11a8eba59756d
   languageName: node
   linkType: hard
 
@@ -8488,8 +8488,8 @@ __metadata:
   linkType: hard
 
 "pinia@npm:^2.1.7":
-  version: 2.2.7
-  resolution: "pinia@npm:2.2.7"
+  version: 2.2.8
+  resolution: "pinia@npm:2.2.8"
   dependencies:
     "@vue/devtools-api": "npm:^6.6.3"
     vue-demi: "npm:^0.14.10"
@@ -8502,7 +8502,7 @@ __metadata:
       optional: true
     typescript:
       optional: true
-  checksum: 10c0/06946e95084f67290d34edc8b5c84a892f8b221063a1321189b70e670fca707950e3aceb5bb21e3af841531b15d65915115cce0c4a7836803ad96c0a9f858bde
+  checksum: 10c0/afcaba130850d939659d72d855f449d5d153a623d81139cf4667526253e6dcc426219cafd898b544cd538ffe63d3f750ac023a643056ec20e8c19cb909678f32
   languageName: node
   linkType: hard
 
