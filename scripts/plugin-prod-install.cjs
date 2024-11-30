@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -19,32 +19,14 @@ const factory = originalRequire => {
       : originalRequire(id)
   }
 
-  const core = originalRequire('@yarnpkg/core')
-  const originalGet = core.Configuration.prototype.get
-  core.Configuration.prototype.get = function get (key) {
-    return key === 'lockfileFilename'
-      ? 'yarn.lock'
-      : originalGet.call(this, key)
-  }
+  const core = require('@yarnpkg/core')
   const MultiResolver = core.Configuration.prototype.makeResolver.call({ plugins: new Map() }).constructor
-  const LockfileResolver = core.LockfileResolver
-
-  const fslib = originalRequire('@yarnpkg/fslib')
-  const { npath, ppath } = fslib
-
-  fslib.toFilename = function toFilename(filename) {
-    if (npath.parse(filename).dir !== '' || ppath.parse(filename).dir !== '')
-      throw new Error(`Invalid filename: "${filename}"`);
-    return filename;
-  }
 
   const __yarnUtils = (require, exports) => {
     exports.dependenciesUtils = require('./dependenciesUtils')
   }
 
-  registry.set('@yarnpkg/core/lib/MultiResolver', { MultiResolver })
-  registry.set('@yarnpkg/core/lib/LockfileResolver', { LockfileResolver })
-  registry.set('@yarnpkg/fslib', fslib)
+  registry.set('../MultiResolver', { MultiResolver })
   registry.set('./dependenciesUtils', createModule(__dependenciesUtils))
   registry.set('@larry1123/yarn-utils', createModule(__yarnUtils))
   registry.set('../util', createModule(__util))
@@ -65,13 +47,6 @@ const factory = originalRequire => {
  * This function `__ProductionInstallCommand` is based on a file from the `plugin-prod-install` yarn plugin
  * originally developed by Larry1123. The original file can be found at:
  * https://gitlab.com/Larry1123/yarn-contrib/-/blob/master/packages/plugin-production-install/lib/commands/productionInstall.js.
- * This version has been adapted and modified to ensure compatibility with yarn 4. The original plugin
- * appears to be unmaintained and incompatible with this version of yarn. Modifications include:
- * 1. Use method `getPackageExtensions` instead of directly accessing the property `configuration.packageExtensions`
- *   (see https://github.com/yarnpkg/berry/commit/207413b4ea5c9684ebc8dad77bf0cae4b0ec727a).
- *
- * These changes are detailed in the commit:
- * https://github.com/gardener/dashboard/commit/e6e1cbd963a969579294ad2e584ed5056266331a.
  */
 const __ProductionInstallCommand = (require, exports) => {
   /*
@@ -93,18 +68,17 @@ const __ProductionInstallCommand = (require, exports) => {
   exports.ProdInstall = void 0;
   // imports
   const core_1 = require("@yarnpkg/core");
-  const MultiResolver_1 = require("@yarnpkg/core/lib/MultiResolver");
-  const LockfileResolver_1 = require("@yarnpkg/core/lib/LockfileResolver");
+  const MultiResolver_1 = require("../MultiResolver");
   const cli_1 = require("@yarnpkg/cli");
   const fslib_1 = require("@yarnpkg/fslib");
   const plugin_patch_1 = require("@yarnpkg/plugin-patch");
   const plugin_pack_1 = require("@yarnpkg/plugin-pack");
+  const plugin_pnp_1 = require("@yarnpkg/plugin-pnp");
   const clipanion_1 = require("clipanion");
   const yarn_utils_1 = require("@larry1123/yarn-utils");
   const util_1 = require("../util");
   const ProductionInstallFetcher_1 = require("../ProductionInstallFetcher");
   const ProductionInstallResolver_1 = require("../ProductionInstallResolver");
-  const ManifestFile = (0, fslib_1.toFilename)('package.json');
   class ProdInstall extends clipanion_1.Command {
     constructor() {
       super(...arguments);
@@ -114,6 +88,7 @@ const __ProductionInstallCommand = (require, exports) => {
       this.pack = clipanion_1.Option.Boolean('--pack', false);
       this.silent = clipanion_1.Option.Boolean('--silent', false, { hidden: true });
       this.production = clipanion_1.Option.Boolean(`--production`, true, { description: 'Use --no-production to not strip devDependencies' });
+      this.injectCjsPnp = clipanion_1.Option.String(`--injectCjsPnp`, '', { description: 'Expermental!: Use --injectCjsPnp to inject a require to the .pnp.cjs file, this requires pack to be enabled' });
     }
     async execute() {
       const configuration = await core_1.Configuration.find(this.context.cwd, this.context.plugins);
@@ -137,9 +112,9 @@ const __ProductionInstallCommand = (require, exports) => {
       }, async (report) => {
         await report.startTimerPromise('Setting up production directory', async () => {
           await fslib_1.xfs.mkdirpPromise(outDirectoryPath);
-          await (0, util_1.copyFile)(rootDirectoryPath, outDirectoryPath, configuration.get(`lockfileFilename`));
+          await (0, util_1.copyFile)(rootDirectoryPath, outDirectoryPath, fslib_1.Filename.lockfile);
           await (0, util_1.copyFile)(rootDirectoryPath, outDirectoryPath, configuration.get(`rcFilename`));
-          await (0, util_1.copyFile)(workspace.cwd, outDirectoryPath, ManifestFile);
+          await (0, util_1.copyFile)(workspace.cwd, outDirectoryPath, fslib_1.Filename.manifest);
           const yarnExcludes = [];
           const checkConfigurationToExclude = (config) => {
             try {
@@ -166,23 +141,15 @@ const __ProductionInstallCommand = (require, exports) => {
         await report.startTimerPromise('Installing production version', async () => {
           const outConfiguration = await core_1.Configuration.find(outDirectoryPath, this.context.plugins);
           if (this.stripTypes) {
-            const packageExtensions = await outConfiguration.getPackageExtensions()
-            for (const [ident, extensionsByIdent,] of packageExtensions.entries()) {
-              const identExt = [];
-              for (const [range, extensionsByRange] of extensionsByIdent) {
-                identExt.push([
-                  range,
-                  extensionsByRange.filter((extension) => {
-                    var _a;
-                    // TODO solve without ts-ignore
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                    // @ts-ignore
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                    return ((_a = extension === null || extension === void 0 ? void 0 : extension.descriptor) === null || _a === void 0 ? void 0 : _a.scope) !== 'types';
-                  }),
-                ]);
+            const packageExtensions = await outConfiguration.getPackageExtensions();
+            for (const extensionsByIdent of packageExtensions.values()) {
+              for (const [, extensionsByRange] of extensionsByIdent) {
+                for (const extension of extensionsByRange) {
+                  if (extension.type === core_1.PackageExtensionType.Dependency && extension.descriptor.scope === 'types') {
+                    extension.status = core_1.PackageExtensionStatus.Inactive;
+                  }
+                }
               }
-              packageExtensions.set(ident, identExt);
             }
           }
           const { project: outProject, workspace: outWorkspace, } = await core_1.Project.find(outConfiguration, outDirectoryPath);
@@ -192,14 +159,18 @@ const __ProductionInstallCommand = (require, exports) => {
           if (this.production) {
             outWorkspace.manifest.devDependencies.clear();
           }
+          // carry root package resolutions into out project
+          for (const [original, resolution] of project.resolutionAliases) {
+            outProject.resolutionAliases.set(original, resolution);
+          }
           const outCache = await core_1.Cache.find(outConfiguration, {
             immutable: false,
             check: false,
           });
-          const multiFetcher = configuration.makeFetcher();
+          const multiFetcher = outConfiguration.makeFetcher();
           const realResolver = configuration.makeResolver();
           const multiResolver = new MultiResolver_1.MultiResolver([
-            new LockfileResolver_1.LockfileResolver(realResolver),
+            new core_1.LockfileResolver(realResolver),
             realResolver,
           ]);
           const resolver = new ProductionInstallResolver_1.ProductionInstallResolver({
@@ -230,6 +201,8 @@ const __ProductionInstallCommand = (require, exports) => {
             immutable: false,
             fetcher,
             resolver,
+            checkResolutions: false,
+            persistProject: false,
           });
           await report.startTimerPromise('Cleaning up unused dependencies', async () => {
             const toRemove = [];
@@ -250,7 +223,7 @@ const __ProductionInstallCommand = (require, exports) => {
               for (const file of files) {
                 report.reportInfo(null, file);
                 report.reportJson({ location: file });
-                if (file.endsWith(ManifestFile)) {
+                if (file.endsWith(fslib_1.Filename.manifest)) {
                   const manifest = await plugin_pack_1.packUtils.genPackageManifest(workspace);
                   await fslib_1.xfs.writeJsonPromise(fslib_1.ppath.resolve(outDirectoryPath, file), manifest);
                 }
@@ -260,6 +233,22 @@ const __ProductionInstallCommand = (require, exports) => {
               }
             });
           });
+          if (this.injectCjsPnp) {
+            // Expermental
+            await report.startTimerPromise('Injecting .pnp.cjs call into file ', async () => {
+              const fileToInjectPath = fslib_1.npath.isAbsolute(this.injectCjsPnp)
+                ? fslib_1.npath.toPortablePath(this.injectCjsPnp)
+                : fslib_1.ppath.join(outDirectoryPath, fslib_1.npath.toPortablePath(this.injectCjsPnp));
+              await fslib_1.xfs.statPromise(fileToInjectPath);
+              const fileToInject = await fslib_1.xfs.readFilePromise(fileToInjectPath, 'utf8');
+              const outConfiguration = await core_1.Configuration.find(outDirectoryPath, this.context.plugins);
+              const { project: outProject, } = await core_1.Project.find(outConfiguration, outDirectoryPath);
+              const { cjs: cjsPnpFile, } = (0, plugin_pnp_1.getPnpPath)(outProject);
+              const relativeCjsPnpFilePath = fslib_1.ppath.relative(fslib_1.ppath.dirname(fileToInjectPath), cjsPnpFile);
+              const injectedFile = `require('${relativeCjsPnpFilePath}').setup()\n${fileToInject}`;
+              await fslib_1.xfs.writeFilePromise(fileToInjectPath, injectedFile);
+            });
+          }
         }
       });
       return report.exitCode();
@@ -314,14 +303,6 @@ const __ProductionInstallCommand = (require, exports) => {
  * This function `__ProductionInstallFetcher` is based on a file from the `plugin-prod-install` yarn plugin
  * originally developed by Larry1123. The original file can be found at:
  * https://gitlab.com/Larry1123/yarn-contrib/-/blob/master/packages/plugin-production-install/lib/ProductionInstallFetcher.js.
- * This version has been adapted and modified to ensure compatibility with yarn 4. The original plugin
- * appears to be unmaintained and incompatible with this version of yarn. Modifications include:
- * 1. In the case of workspace packages fetched from the cache, a checksum is generated. It is
- *   essential for the `ProductionInstallFetcher` not to return this checksum, as doing so leads
- *   to the packages not being located in the filesystem subsequently.
- *
- * These changes are detailed in the commit:
- * https://github.com/gardener/dashboard/commit/194b6567282bd4b0bbfc9b5e955dbd228f317244.
  */
 const __ProductionInstallFetcher = (require, exports) => {
   /*
@@ -345,6 +326,7 @@ const __ProductionInstallFetcher = (require, exports) => {
   const core_1 = require("@yarnpkg/core");
   const fslib_1 = require("@yarnpkg/fslib");
   const plugin_pack_1 = require("@yarnpkg/plugin-pack");
+  const libzip_1 = require("@yarnpkg/libzip");
   class ProductionInstallFetcher {
     constructor({ fetcher, project, cache, }) {
       this.fetcher = fetcher;
@@ -352,7 +334,10 @@ const __ProductionInstallFetcher = (require, exports) => {
       this.cache = cache;
     }
     supports(locator, opts) {
-      return this.fetcher.supports(locator, opts);
+      return this.fetcher.supports(locator, {
+        project: opts.project,
+        fetcher: this,
+      });
     }
     getLocalPath(locator, opts) {
       if (locator.reference.startsWith(core_1.WorkspaceResolver.protocol) &&
@@ -360,7 +345,14 @@ const __ProductionInstallFetcher = (require, exports) => {
         return null;
       }
       else {
-        return this.fetcher.getLocalPath(locator, opts);
+        return this.fetcher.getLocalPath(locator, {
+          project: opts.project,
+          fetcher: this,
+          cache: opts.cache,
+          cacheOptions: opts.cacheOptions,
+          checksums: opts.checksums,
+          report: opts.report,
+        });
       }
     }
     async fetch(locator, opts) {
@@ -368,18 +360,26 @@ const __ProductionInstallFetcher = (require, exports) => {
       if (locator.reference.startsWith(core_1.WorkspaceResolver.protocol) &&
         locator.reference !== `${core_1.WorkspaceResolver.protocol}.`) {
         const cache = await this.makeTemporaryCache(opts.cache);
-        const [packageFs, releaseFs, checksum] = await cache.fetchPackageFromCache(locator, expectedChecksum, {
+        const [packageFs, releaseFs] = await cache.fetchPackageFromCache(locator, expectedChecksum, {
           onHit: () => opts.report.reportCacheHit(locator),
           onMiss: () => opts.report.reportCacheMiss(locator, `${core_1.structUtils.prettyLocator(opts.project.configuration, locator)} can't be found in the cache and will be packed from disk.`),
-          loader: async () => this.packWorkspace(locator, opts),
-          skipIntegrityCheck: opts.skipIntegrityCheck,
+          loader: async () => this.packWorkspace(locator, {
+            project: opts.project,
+            fetcher: this,
+            cache: opts.cache,
+            cacheOptions: opts.cacheOptions,
+            checksums: opts.checksums,
+            report: opts.report,
+          }),
         });
         cache.markedFiles.forEach((cachePath) => opts.cache.markedFiles.add(cachePath));
         return {
           packageFs,
           releaseFs,
           prefixPath: core_1.structUtils.getIdentVendorPath(locator),
-          checksum: expectedChecksum,
+          // TODO this seems wrong
+          //  it should be the real checksum of the file but for some reason the file is being saved with the cacheKey instead
+          checksum: cache.cacheKey,
         };
       }
       const cachePath = this.cache.getLocatorPath(locator, expectedChecksum);
@@ -397,15 +397,47 @@ const __ProductionInstallFetcher = (require, exports) => {
             }
           }
         }
+        const checksum = await core_1.hashUtils.checksumFile(outCachePath);
+        let zipFs;
+        const lazyFs = new fslib_1.LazyFS(() => core_1.miscUtils.prettifySyncErrors(() => {
+          return zipFs = new libzip_1.ZipFS(outCachePath, {
+            baseFs: fslib_1.xfs,
+            readOnly: true,
+          });
+        }, message => {
+          return `Failed to open the cache entry for ${core_1.structUtils.prettyLocator(opts.project.configuration, locator)}: ${message}`;
+        }), fslib_1.ppath);
+        // We use an AliasFS to speed up getRealPath calls (e.g. VirtualFetcher.ensureVirtualLink)
+        // (there's no need to create the lazy baseFs instance to gather the already-known cachePath)
+        const aliasFs = new fslib_1.AliasFS(outCachePath, {
+          baseFs: lazyFs,
+          pathUtils: fslib_1.ppath,
+        });
+        const releaseFs = () => {
+          zipFs === null || zipFs === void 0 ? void 0 : zipFs.discardAndClose();
+        };
+        return {
+          packageFs: aliasFs,
+          releaseFs,
+          prefixPath: core_1.structUtils.getIdentVendorPath(locator),
+          checksum,
+        };
       }
-      return this.fetcher.fetch(locator, opts);
+      return this.fetcher.fetch(locator, {
+        project: opts.project,
+        fetcher: this,
+        cache: opts.cache,
+        cacheOptions: opts.cacheOptions,
+        checksums: opts.checksums,
+        report: opts.report,
+      });
     }
     async packWorkspace(locator, { report, }) {
       const { configuration, } = this.project;
       const workspace = this.project.getWorkspaceByLocator(locator);
       return fslib_1.xfs.mktempPromise(async (logDir) => {
         const workspacePretty = core_1.structUtils.slugifyLocator(locator);
-        const logFile = fslib_1.ppath.join(logDir, (0, fslib_1.toFilename)(`${workspacePretty}-pack.log`));
+        const logFile = fslib_1.ppath.join(logDir, `${workspacePretty}-pack.log`);
         const header = `# This file contains the result of Yarn calling packing "${workspacePretty}" ("${workspace.cwd}")\n`;
         const { stdout, stderr, } = configuration.getSubprocessStreams(logFile, {
           report,
@@ -430,9 +462,12 @@ const __ProductionInstallFetcher = (require, exports) => {
             const pack = await plugin_pack_1.packUtils.genPackStream(workspace, files);
             buffer = await core_1.miscUtils.bufferStream(pack);
           });
-          return await core_1.tgzUtils.convertToZip(buffer, {
-            stripComponents: 1,
-            prefixPath: core_1.structUtils.getIdentVendorPath(locator),
+          return await core_1.miscUtils.releaseAfterUseAsync(async () => {
+            return await core_1.tgzUtils.convertToZip(buffer, {
+              configuration,
+              stripComponents: 1,
+              prefixPath: core_1.structUtils.getIdentVendorPath(locator),
+            });
           });
         }
         catch (error) {
@@ -452,7 +487,7 @@ const __ProductionInstallFetcher = (require, exports) => {
     async makeTemporaryCache(cache) {
       const { configuration: { startingCwd, plugins, }, check, immutable, cwd, } = cache;
       const configuration = core_1.Configuration.create(startingCwd, plugins);
-      configuration.useWithSource(startingCwd, { enableMirror: false }, startingCwd, { overwrite: true });
+      configuration.useWithSource('<plugin>', { enableMirror: false }, startingCwd, { overwrite: true });
       return new core_1.Cache(cwd, {
         configuration,
         check,
@@ -467,12 +502,6 @@ const __ProductionInstallFetcher = (require, exports) => {
  * This function `__ProductionInstallResolver` is based on a file from the `plugin-prod-install` yarn plugin
  * originally developed by Larry1123. The original file can be found at:
  * https://gitlab.com/Larry1123/yarn-contrib/-/blob/master/packages/plugin-production-install/lib/ProductionInstallResolver.js.
- * This version has been adapted and modified to ensure compatibility with yarn 4. The original plugin
- * appears to be unmaintained and incompatible with this version of yarn. Modifications include:
- * 1. Normalize dependency map of resolved workspace packages.
- *
- * These changes are detailed in the commit:
- * https://github.com/gardener/dashboard/commit/e6e1cbd963a969579294ad2e584ed5056266331a.
  */
 const __ProductionInstallResolver = (require, exports) => {
   /*
@@ -501,36 +530,64 @@ const __ProductionInstallResolver = (require, exports) => {
       this.stripTypes = stripTypes;
     }
     supportsDescriptor(descriptor, opts) {
-      return this.resolver.supportsDescriptor(descriptor, opts);
+      descriptor = opts.project.configuration.normalizeDependency(descriptor);
+      return this.resolver.supportsDescriptor(descriptor, {
+        project: opts.project,
+        resolver: this,
+      });
     }
     supportsLocator(locator, opts) {
-      return this.resolver.supportsLocator(locator, opts);
+      locator = opts.project.configuration.normalizeLocator(locator);
+      return this.resolver.supportsLocator(locator, {
+        project: opts.project,
+        resolver: this,
+      });
     }
     shouldPersistResolution(locator, opts) {
+      locator = opts.project.configuration.normalizeLocator(locator);
       if (locator.reference.startsWith(core_1.WorkspaceResolver.protocol)) {
         return false;
       }
       else {
-        return this.resolver.shouldPersistResolution(locator, opts);
+        return this.resolver.shouldPersistResolution(locator, {
+          project: opts.project,
+          resolver: this,
+        });
       }
     }
     bindDescriptor(descriptor, fromLocator, opts) {
-      return this.resolver.bindDescriptor(descriptor, fromLocator, opts);
+      descriptor = opts.project.configuration.normalizeDependency(descriptor);
+      fromLocator = opts.project.configuration.normalizeLocator(fromLocator);
+      return this.resolver.bindDescriptor(descriptor, fromLocator, {
+        project: opts.project,
+        resolver: this,
+      });
     }
     getResolutionDependencies(descriptor, opts) {
-      return this.resolver.getResolutionDependencies(descriptor, opts);
+      descriptor = opts.project.configuration.normalizeDependency(descriptor);
+      return this.resolver.getResolutionDependencies(descriptor, {
+        project: opts.project,
+        resolver: this,
+      });
     }
     async getCandidates(descriptor, dependencies, opts) {
+      descriptor = opts.project.configuration.normalizeDependency(descriptor);
       if (descriptor.range.startsWith(core_1.WorkspaceResolver.protocol) &&
         descriptor.range !== `${core_1.WorkspaceResolver.protocol}.`) {
         const workplace = this.project.getWorkspaceByDescriptor(descriptor);
         return [workplace.anchoredLocator];
       }
       else {
-        return this.resolver.getCandidates(descriptor, dependencies, opts);
+        return this.resolver.getCandidates(descriptor, dependencies, {
+          project: opts.project,
+          resolver: this,
+          fetchOptions: opts.fetchOptions,
+          report: opts.report,
+        });
       }
     }
     async resolve(locator, opts) {
+      locator = opts.project.configuration.normalizeLocator(locator);
       const resolve = async () => {
         if (locator.reference.startsWith(core_1.WorkspaceResolver.protocol) &&
           locator.reference !== `${core_1.WorkspaceResolver.protocol}.`) {
@@ -539,15 +596,20 @@ const __ProductionInstallResolver = (require, exports) => {
             ...locator,
             version: workspace.manifest.version || `0.0.0`,
             languageName: `unknown`,
-            linkType: core_1.LinkType.SOFT,
-            dependencies: this.project.configuration.normalizeDependencyMap(new Map([...workspace.manifest.dependencies])),
+            linkType: core_1.LinkType.HARD,
+            dependencies: new Map([...workspace.manifest.dependencies]),
             peerDependencies: new Map([...workspace.manifest.peerDependencies]),
             dependenciesMeta: workspace.manifest.dependenciesMeta,
             peerDependenciesMeta: workspace.manifest.peerDependenciesMeta,
             bin: workspace.manifest.bin,
           };
         }
-        return this.resolver.resolve(locator, opts);
+        return this.resolver.resolve(locator, {
+          project: opts.project,
+          resolver: this,
+          fetchOptions: opts.fetchOptions,
+          report: opts.report,
+        });
       };
       const resolvedPackage = await resolve();
       const dependencies = new Map();
@@ -562,14 +624,17 @@ const __ProductionInstallResolver = (require, exports) => {
         dependencies,
       };
     }
-    async getSatisfying(
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      _descriptor,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      _references,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      _opts) {
-      return null;
+    async getSatisfying(descriptor, dependencies, locators, opts) {
+      descriptor = opts.project.configuration.normalizeDependency(descriptor);
+      locators = locators.map(locator => opts.project.configuration.normalizeLocator(locator));
+      const packageExtensions = await opts.project.configuration.getPackageExtensions();
+      Object.keys(dependencies).forEach(key => dependencies[key] = opts.project.configuration.normalizePackage(dependencies[key], { packageExtensions }));
+      return this.resolver.getSatisfying(descriptor, dependencies, locators, {
+        project: opts.project,
+        resolver: this,
+        fetchOptions: opts.fetchOptions,
+        report: opts.report,
+      });
     }
   }
   exports.ProductionInstallResolver = ProductionInstallResolver;
@@ -580,9 +645,6 @@ const __ProductionInstallResolver = (require, exports) => {
  * yarn plugin developed by Larry1123. This code remains unmodified from the original implementation.
  * The original file can be found at:
  * https://gitlab.com/Larry1123/yarn-contrib/-/blob/master/packages/plugin-production-install/lib/util.js.
- *
- * Note: This wrapper is created to integrate with yarn 4, as the original plugin is
- * not maintained and is incompatible with this version of yarn.
  */
 const __util = (require, exports) => {
   /*
@@ -609,11 +671,11 @@ const __util = (require, exports) => {
     return fslib_1.xfs.copyFilePromise(fslib_1.ppath.resolve(src, file), fslib_1.ppath.resolve(dist, file));
   }
   exports.copyFile = copyFile;
-  async function copyFolder(src, dist, folder, exclude = []) {
-    return copyFolderRecursivePromise(fslib_1.ppath.resolve(src, folder), fslib_1.ppath.resolve(dist, folder), exclude);
+  async function copyFolder(src, dist, folder, exclude = [], linkInsteadOfCopy = false) {
+    return copyFolderRecursivePromise(fslib_1.ppath.resolve(src, folder), fslib_1.ppath.resolve(dist, folder), exclude, linkInsteadOfCopy);
   }
   exports.copyFolder = copyFolder;
-  async function copyFolderRecursivePromise(source, target, exclude = []) {
+  async function copyFolderRecursivePromise(source, target, exclude = [], linkInsteadOfCopy = false) {
     if ((await fslib_1.xfs.lstatPromise(source)).isDirectory()) {
       if (!(await fslib_1.xfs.existsPromise(target))) {
         await fslib_1.xfs.mkdirpPromise(target);
@@ -631,10 +693,15 @@ const __util = (require, exports) => {
         };
         if (!isExcluded()) {
           if ((await fslib_1.xfs.lstatPromise(curSource)).isDirectory()) {
-            await copyFolderRecursivePromise(curSource, curTarget, exclude);
+            await copyFolderRecursivePromise(curSource, curTarget, exclude, linkInsteadOfCopy);
           }
           else {
-            await fslib_1.xfs.copyFilePromise(curSource, curTarget);
+            if (linkInsteadOfCopy) {
+              await fslib_1.xfs.linkPromise(curSource, curTarget);
+            }
+            else {
+              await fslib_1.xfs.copyFilePromise(curSource, curTarget);
+            }
           }
         }
       }
@@ -651,9 +718,6 @@ const __util = (require, exports) => {
  * yarn plugin developed by Larry1123. This code remains unmodified from the original implementation.
  * The original file can be found at:
  * https://gitlab.com/Larry1123/yarn-contrib/-/blob/master/packages/yarn-utils/lib/dependenciesUtils.js.
- *
- * Note: This wrapper is created to integrate with yarn 4, as the original plugin is
- * not maintained and is incompatible with this version of yarn.
  */
 const __dependenciesUtils = (require, exports) => {
   /*
