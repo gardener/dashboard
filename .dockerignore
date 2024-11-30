@@ -1,7 +1,7 @@
 # Ignore everything
 **
 
-# include Yarn 2 configuration, cache, releases and plugins
+# include Yarn 4 configuration, cache, releases and plugins
 !.yarn/cache
 !.yarn/releases
 !.yarn/plugins
@@ -9,6 +9,7 @@
 !.yarnrc.yml
 !.pnp.cjs
 !.pnp.loader.mjs
+!yarn.config.cjs
 
 # include root workspace
 !package.json
