@@ -5,7 +5,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-const os = require('os')
 const fs = require('fs')
 const path = require('path')
 const crypto = require('crypto')
@@ -142,7 +141,7 @@ async function main () {
   const modulesIndex = lines.findIndex(line => /^module\.exports/.test(line))
   lines.splice(modulesIndex, 0, await createModulesCodes())
   fs.writeFileSync(filename, lines.join('\n'), 'utf8')
-  console.log(`Wrote ${filename}`)
+  console.log('Updated %s', filename)
 }
 
 main()
