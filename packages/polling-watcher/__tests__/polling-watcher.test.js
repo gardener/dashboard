@@ -9,7 +9,6 @@
 const fs = require('fs/promises')
 const { globalLogger: logger } = require('@gardener-dashboard/logger')
 const createWatch = require('../lib')
-const { sign } = require('crypto')
 
 describe('polling-watcher', () => {
   beforeAll(() => {

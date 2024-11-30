@@ -32,6 +32,15 @@
 !packages/request/__fixtures__
 !packages/request/__mocks__
 
+# include workspace packages/polling-watcher
+!packages/polling-watcher/package.json
+!packages/polling-watcher/eslint.config.js
+!packages/polling-watcher/jest.setup.js
+!packages/polling-watcher/lib
+!packages/polling-watcher/__tests__
+!packages/polling-watcher/__fixtures__
+!packages/polling-watcher/__mocks__
+
 # include workspace packages/kube-config
 !packages/kube-config/package.json
 !packages/kube-config/eslint.config.js

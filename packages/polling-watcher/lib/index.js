@@ -37,6 +37,7 @@ function removeAbortListener (signal, abort) {
   }
 }
 
+// Note: The parameter 'paths' must not be user input to prevent security vulnerabilities
 module.exports = async function createWatch (paths, options = {}) {
   const {
     interval = 300_000,
