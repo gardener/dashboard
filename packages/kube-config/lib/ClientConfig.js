@@ -169,32 +169,32 @@ class ClientConfig {
         },
       },
     }
-    const watcher = new EventEmitter()
-    const startWatch = async () => {
-      const watch = await createWatch(Array.from(files.keys()), options)
-      watcher.emit('ready')
-      watch((path, value) => {
-        const key = files.get(path)
-        switch (key) {
-          case 'certificateAuthority':
-            cluster.certificateAuthority = value
-            break
-          case 'clientKey':
-            user.clientKey = value
-            break
-          case 'clientCert':
-            user.clientCert = value
-            break
-          case 'token':
-            user.token = value
-            break
-        }
-        watcher.emit(`update:${key}`)
-      })
-    }
     if (reactive && files.size) {
-      properties.watcher = { value: watcher }
+      const watcher = new EventEmitter()
+      const startWatch = async () => {
+        const watch = await createWatch(Array.from(files.keys()), options)
+        watcher.emit('ready')
+        watch((path, value) => {
+          const key = files.get(path)
+          switch (key) {
+            case 'certificateAuthority':
+              cluster.certificateAuthority = value
+              break
+            case 'clientKey':
+              user.clientKey = value
+              break
+            case 'clientCert':
+              user.clientCert = value
+              break
+            case 'token':
+              user.token = value
+              break
+          }
+          watcher.emit(`update:${key}`)
+        })
+      }
       startWatch()
+      properties.watcher = { value: watcher }
     }
     Object.defineProperties(this, properties)
     Object.freeze(this)
