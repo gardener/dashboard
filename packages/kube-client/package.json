@@ -20,6 +20,7 @@
   ],
   "scripts": {
     "lint": "eslint . --max-warnings=0",
+    "lint-sarif": "yarn lint --format=@microsoft/eslint-formatter-sarif",
     "test": "jest",
     "test-coverage": "yarn test --coverage"
   },
@@ -35,6 +36,7 @@
   },
   "devDependencies": {
     "@gardener-dashboard/test-utils": "workspace:^",
+    "@microsoft/eslint-formatter-sarif": "^3.1.0",
     "abort-controller": "^3.0.0",
     "eslint": "^9.11.0",
     "eslint-plugin-import": "^2.31.0",
