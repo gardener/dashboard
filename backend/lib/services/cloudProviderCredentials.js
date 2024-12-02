@@ -23,16 +23,21 @@ exports.list = async function ({ user, params }) {
     client.core.secrets.list(secretBindingNamespace, { labelSelector: 'reference.gardener.cloud/secretbinding=true' }),
   ])
 
-  const quotas = _.flatMap(secretBindings, secretBinding => {
-    const bindingQuotas = resolveQuotas(secretBinding)
-    const clusterLifetimeQuotas = _.filter(bindingQuotas, 'spec.clusterLifetimeDays')
-    return _.flatMap(clusterLifetimeQuotas, ({ metadata, spec }) => {
-      return {
-        metadata: _.pick(metadata, ['name', 'namespace', 'uid']),
-        spec: _.pick(spec, ['clusterLifetimeDays', 'scope']),
-      }
-    })
-  })
+  const pickQuotaProperties = _.partialRight(_.pick, [
+    'apiVersion',
+    'kind',
+    'metadata.name',
+    'metadata.namespace',
+    'spec.scope',
+    'spec.clusterLifetimeDays',
+  ])
+
+  const quotas = _
+    .chain(secretBindings)
+    .flatMap(resolveQuotas)
+    .filter('spec.clusterLifetimeDays')
+    .map(pickQuotaProperties)
+    .value()
 
   return {
     secretBindings,
