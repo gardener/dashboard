@@ -52,13 +52,20 @@ describe('polling-watcher', () => {
 
     it('should create a file watch with default options', async () => {
       await startWatch()
+      // Verify no changes are detected initially.
       expect(fn).toHaveBeenCalledTimes(0)
+
+      // Simulate the passage of time without file changes.
       await jest.advanceTimersToNextTimerAsync(1)
       expect(fn).toHaveBeenCalledTimes(0)
+
+      // Mock a file content change and verify that the callback is triggered.
       fs.readFile.mockResolvedValueOnce(newContent)
       await jest.advanceTimersToNextTimerAsync(1)
       expect(fn).toHaveBeenCalledTimes(1)
       expect(fn.mock.calls[0]).toEqual([filename, newContent])
+
+      // Stop the watcher and verify log messages.
       stop()
       expect(logger.debug).toHaveBeenCalledTimes(1)
       expect(logger.debug.mock.calls).toEqual([
@@ -79,11 +86,16 @@ describe('polling-watcher', () => {
         interval: 10,
         signal: ac.signal,
       })
+      // Verify no changes are detected initially.
       expect(fn).toHaveBeenCalledTimes(0)
+
+      // Mock a file content change and verify that the callback is triggered.
       fs.readFile.mockResolvedValueOnce(newContent)
       await jest.advanceTimersToNextTimerAsync(1)
       expect(fn).toHaveBeenCalledTimes(1)
       expect(fn.mock.calls[0]).toEqual([filename, newContent])
+
+      // Abort the watcher and verify log messages.
       ac.abort()
       expect(logger.debug).toHaveBeenCalledTimes(1)
       expect(logger.debug.mock.calls).toEqual([
@@ -99,10 +111,13 @@ describe('polling-watcher', () => {
     })
 
     it('should fail to read file', async () => {
+      // Simulate a file read failure during polling.
       await startWatch()
       expect(fn).toHaveBeenCalledTimes(0)
       fs.readFile.mockRejectedValueOnce(noSuchFile)
       await jest.advanceTimersToNextTimerAsync(1)
+
+      // Verify that the callback is not called and an error is logged.
       expect(fn).toHaveBeenCalledTimes(0)
       expect(logger.error).toHaveBeenCalledTimes(1)
       expect(logger.error.mock.calls).toEqual([
@@ -111,19 +126,25 @@ describe('polling-watcher', () => {
     })
 
     it('should fail to initialize the watcher', async () => {
+      // Test watcher initialization failure due to file read error.
       fs.readFile.mockRejectedValueOnce(noSuchFile)
       await expect(startWatch()).rejects.toThrow(noSuchFile.message)
+
+      // Verify that the watcher is not started and no error is logged.
       expect(stop).toBeUndefined()
       expect(logger.error).toHaveBeenCalledTimes(0)
     })
 
     it('should immediately stop if signal is already aborted', async () => {
+      // Ensure the watcher does not start if the abort signal is already triggered.
       const ac = new AbortController()
       ac.abort()
       await startWatch({
         interval: 10,
         signal: ac.signal,
       })
+
+      // Simulate the passage of time and verify no file changes are detected.
       fs.readFile.mockResolvedValueOnce(newContent)
       await jest.advanceTimersToNextTimerAsync(1)
       expect(fn).toHaveBeenCalledTimes(0)
