@@ -12,7 +12,7 @@ import {
   StateEffect,
 } from '@codemirror/state'
 
-import { EditorCompletions } from '@/composables/useShootEditor/helper'
+import { EditorCompletions } from '@/composables/useCodemirror/helper'
 
 import repeat from 'lodash/repeat'
 
@@ -67,7 +67,7 @@ const shootCompletions = {
 }
 
 describe('composables', () => {
-  describe('useShootEditor', () => {
+  describe('useCodemirror', () => {
     describe('EditorCompletions', () => {
       let editorView
       let setEditorContentAndCursor
