@@ -5,14 +5,26 @@
 //
 
 import {
+  computed,
+  watch,
+} from 'vue'
+import { useUrlSearchParams } from '@vueuse/core'
+import {
   EditorView,
   MatchDecorator,
   Decoration,
   ViewPlugin,
+  lineNumbers,
 } from '@codemirror/view'
+import {
+  StateEffect,
+  EditorSelection,
+  StateField,
+} from '@codemirror/state'
 
 import { useLogger } from '@/composables/useLogger'
 
+import get from 'lodash/get'
 import trim from 'lodash/trim'
 import nth from 'lodash/nth'
 import filter from 'lodash/filter'
@@ -22,7 +34,6 @@ import words from 'lodash/words'
 import repeat from 'lodash/repeat'
 import upperFirst from 'lodash/upperFirst'
 import flatMap from 'lodash/flatMap'
-import get from 'lodash/get'
 import unset from 'lodash/unset'
 import forIn from 'lodash/forIn'
 import isEqual from 'lodash/isEqual'
@@ -62,6 +73,130 @@ export function createWhitespaceViewPlugin () {
   }
 
   return ViewPlugin.define(create, spec)
+}
+
+export function useSelection () {
+  const params = useUrlSearchParams('hash-params')
+
+  const valuesFromParams = () => {
+    const line = params.line ?? ''
+    const values = line.split('-')
+      .map(value => parseInt(value, 10))
+      .sort((a, b) => a - b)
+    return values.every(Number.isInteger)
+      ? values
+      : []
+  }
+
+  return computed({
+    get () {
+      return valuesFromParams()
+    },
+    set (values = []) {
+      const valuesCurrent = valuesFromParams()
+
+      let [startLine, endLine = startLine] = values
+      const [startLineCurrent, endLineCurrent] = valuesCurrent
+
+      if (endLine === startLine && startLine === startLineCurrent && !endLineCurrent) {
+        startLine = null
+      }
+
+      if (!startLine || !values.every(Number.isInteger)) {
+        params.line = null
+      } else if (startLine === endLine) {
+        params.line = `${startLine}`
+      } else if (startLine > endLine) {
+        params.line = `${endLine}-${startLine}`
+      } else {
+        params.line = `${startLine}-${endLine}`
+      }
+    },
+  })
+}
+
+export function useLineHighlighter (view) {
+  view.dom.classList.add('g-cm-line-highlighter')
+
+  const selection = useSelection()
+  const [startLine] = selection.value
+
+  if (startLine) {
+    const pos = view.state.doc.line(startLine).from
+    view.dispatch({
+      selection: EditorSelection.cursor(pos),
+      effects: EditorView.scrollIntoView(pos, { y: 'center' }),
+    })
+  }
+
+  const stateEffectType = StateEffect.define()
+  const stateField = StateField.define({
+    create () {
+      return Decoration.none
+    },
+    update (highlights, tr) {
+      // need to re-add when editor updates
+      view.dom.classList.add('g-cm-line-highlighter')
+
+      for (const effect of tr.effects) {
+        if (effect.is(stateEffectType)) {
+          return effect.value
+        }
+      }
+      return highlights
+    },
+    provide (f) {
+      return EditorView.decorations.from(f)
+    },
+  })
+
+  const lineNumberGutterExtension = lineNumbers({
+    domEventHandlers: {
+      mousedown (view, line, event) {
+        const lineNumber = view.state.doc.lineAt(line.from).number
+        const [startLine] = selection.value
+        selection.value = startLine && startLine !== lineNumber && event.shiftKey
+          ? [startLine, lineNumber]
+          : [lineNumber]
+      },
+    },
+  })
+
+  // Apply the StateField to the editor's state
+  view.dispatch({
+    effects: [
+      StateEffect.appendConfig.of(stateField),
+      StateEffect.appendConfig.of(lineNumberGutterExtension),
+    ],
+  })
+
+  const destroy = watch(selection, value => {
+    const lineCount = view.state.doc.lines
+    const [
+      startLine,
+      endLine = startLine,
+    ] = value.map(value => {
+      value = Math.min(value, lineCount)
+      value = Math.max(1, value)
+      return view.state.doc.line(value).from
+    })
+
+    const decorations = []
+    if (startLine && endLine) {
+      decorations.push(Decoration.line({ class: 'g-highlighted--top' }).range(startLine))
+      for (let line = startLine; line <= endLine; line++) {
+        decorations.push(Decoration.line({ class: 'g-highlighted' }).range(line))
+      }
+      decorations.push(Decoration.line({ class: 'g-highlighted--bottom' }).range(endLine))
+    }
+    view.dispatch({
+      effects: stateEffectType.of(Decoration.set(decorations)),
+    })
+  }, {
+    immediate: true,
+  })
+
+  return { destroy }
 }
 
 export class EditorCompletions {
