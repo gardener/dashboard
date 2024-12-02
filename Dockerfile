@@ -40,11 +40,11 @@ RUN yarn install --immutable --immutable-cache
 RUN yarn constraints
 
 # run lint
-RUN yarn workspace @gardener-dashboard/logger run lint
-RUN yarn workspace @gardener-dashboard/request run lint
-RUN yarn workspace @gardener-dashboard/kube-config run lint
-RUN yarn workspace @gardener-dashboard/kube-client run lint
-RUN yarn workspace @gardener-dashboard/monitor run lint
+RUN yarn workspace @gardener-dashboard/logger run lint-sarif
+RUN yarn workspace @gardener-dashboard/request run lint-sarif
+RUN yarn workspace @gardener-dashboard/kube-config run lint-sarif
+RUN yarn workspace @gardener-dashboard/kube-client run lint-sarif
+RUN yarn workspace @gardener-dashboard/monitor run lint-sarif
 
 # run test --coverage
 RUN yarn workspace @gardener-dashboard/logger run test --coverage
@@ -72,8 +72,8 @@ ENTRYPOINT [ "tini", "--", "node"]
 FROM builder AS dashboard-builder
 
 # run lint
-RUN yarn workspace @gardener-dashboard/backend run lint
-RUN yarn workspace @gardener-dashboard/frontend run lint
+RUN yarn workspace @gardener-dashboard/backend run lint-sarif
+RUN yarn workspace @gardener-dashboard/frontend run lint-sarif
 
 # run test --coverage
 RUN yarn workspace @gardener-dashboard/backend run test --coverage

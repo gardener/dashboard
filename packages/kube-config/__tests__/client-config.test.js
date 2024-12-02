@@ -23,7 +23,7 @@ describe('client-config', () => {
   const initClientConfig = signal => {
     const config = new Config(kubeconfig)
     const reactive = !!signal
-    clientConfig = new ClientConfig(config, { reactive, signal })
+    clientConfig = new ClientConfig(config, { reactive, interval: 500, signal })
     return reactive
       ? onceEvent(clientConfig.watcher, 'ready')
       : Promise.resolve()
