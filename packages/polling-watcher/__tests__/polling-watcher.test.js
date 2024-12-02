@@ -150,44 +150,10 @@ describe('polling-watcher', () => {
       expect(fn).toHaveBeenCalledTimes(0)
     })
 
-    it('should start the watcher multiple times with the same stop function', async () => {
+    it('should throw an error if the watch function is called twice', async () => {
       const watch = await createWatch([filename])
-      const fn1 = jest.fn()
-      const fn2 = jest.fn()
-
-      // Verify no changes are detected initially.
-      expect(fn1).toHaveBeenCalledTimes(0)
-      expect(fn2).toHaveBeenCalledTimes(0)
-
-      // Start two watchers for the same file and verify that they share the same stop function.
-      const stop1 = watch(fn1)
-      const stop2 = watch(fn2)
-      expect(stop1).toBe(stop2)
-
-      // Mock a file content change and verify that only the first callback is triggered.
-      fs.readFile.mockResolvedValueOnce(newContent)
-      await jest.advanceTimersToNextTimerAsync(1)
-      expect(fn1).toHaveBeenCalledTimes(1)
-      expect(fn1.mock.calls[0]).toEqual([filename, newContent])
-      expect(fn2).toHaveBeenCalledTimes(0)
-
-      // Stop the watcher and verify log messages.
-      stop1()
-      stop2()
-      expect(logger.debug).toHaveBeenCalledTimes(1)
-      expect(logger.debug.mock.calls).toEqual([
-        ['[polling-watcher] watch started with interval %dms', 300_000],
-      ])
-      expect(logger.info).toHaveBeenCalledTimes(3)
-      expect(logger.info.mock.calls).toEqual([
-        ['[polling-watcher] watch created for %d files', 1],
-        ['[polling-watcher] detected file change `%s`', filename],
-        ['[polling-watcher] watch aborted'],
-      ])
-      expect(logger.error).toHaveBeenCalledTimes(1)
-      expect(logger.error.mock.calls).toEqual([
-        ['[polling-watcher] watch is already running'],
-      ])
+      stop = watch(fn)
+      expect(() => watch(fn)).toThrow('Watcher already started')
     })
   })
 })

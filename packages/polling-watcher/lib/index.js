@@ -77,17 +77,17 @@ module.exports = async function createWatch (paths, options = {}) {
       }
     }
 
-    if (!intervalId) {
-      intervalId = setInterval(() => {
-        for (const path of paths) {
-          tryReadFile(path)
-        }
-      }, interval)
-      addAbortListener(signal, abort)
-      logger.debug('[polling-watcher] watch started with interval %dms', interval)
-    } else {
-      logger.error('[polling-watcher] watch is already running')
+    if (intervalId) {
+      throw new Error('Watcher already started')
     }
+
+    intervalId = setInterval(() => {
+      for (const path of paths) {
+        tryReadFile(path)
+      }
+    }, interval)
+    addAbortListener(signal, abort)
+    logger.debug('[polling-watcher] watch started with interval %dms', interval)
 
     return abort
   }
