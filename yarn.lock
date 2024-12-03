@@ -6019,6 +6019,8 @@ __metadata:
       built: false
     fsevents:
       built: false
+  bin:
+    update-prod-install: ./scripts/update-prod-install.cjs
   languageName: unknown
   linkType: soft
 
