@@ -8,7 +8,8 @@
 
 const assert = require('assert').strict
 const fs = require('fs')
-const Watcher = require('./Watcher')
+const createWatch = require('@gardener-dashboard/polling-watcher')
+const { EventEmitter } = require('stream')
 
 function getCluster ({ currentCluster }, files) {
   const cluster = {}
@@ -25,7 +26,8 @@ function getCluster ({ currentCluster }, files) {
       cluster.certificateAuthority = base64Decode(caData)
     } else if (caFile) {
       files.set(caFile, 'certificateAuthority')
-      cluster.certificateAuthority = fs.readFileSync(caFile, 'utf8') // eslint-disable-line security/detect-non-literal-fs-filename
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- caFile is not user input
+      cluster.certificateAuthority = fs.readFileSync(caFile, 'utf8')
     }
     if (typeof insecureSkipTlsVerify === 'boolean') {
       cluster.insecureSkipTlsVerify = insecureSkipTlsVerify
@@ -55,14 +57,17 @@ function getUser ({ currentUser }, files) {
       user.clientKey = base64Decode(keyData)
     } else if (certFile && keyFile) {
       files.set(certFile, 'clientCert')
-      user.clientCert = fs.readFileSync(certFile, 'utf8') // eslint-disable-line security/detect-non-literal-fs-filename
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- certFile is not user input
+      user.clientCert = fs.readFileSync(certFile, 'utf8')
       files.set(keyFile, 'clientKey')
-      user.clientKey = fs.readFileSync(keyFile, 'utf8') // eslint-disable-line security/detect-non-literal-fs-filename
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- keyFile is not user input
+      user.clientKey = fs.readFileSync(keyFile, 'utf8')
     } else if (token) {
       user.token = token
     } else if (tokenFile) {
       files.set(tokenFile, 'token')
-      user.token = fs.readFileSync(tokenFile, 'utf8') // eslint-disable-line security/detect-non-literal-fs-filename
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- tokenFile is not user input
+      user.token = fs.readFileSync(tokenFile, 'utf8')
     } else if (username && password) {
       user.username = username
       user.password = password
@@ -165,25 +170,30 @@ class ClientConfig {
       },
     }
     if (reactive && files.size) {
-      const watcher = new Watcher(Array.from(files.keys()), options)
-      watcher.run((path, value) => {
-        const key = files.get(path)
-        switch (key) {
-          case 'certificateAuthority':
-            cluster.certificateAuthority = value
-            break
-          case 'clientKey':
-            user.clientKey = value
-            break
-          case 'clientCert':
-            user.clientCert = value
-            break
-          case 'token':
-            user.token = value
-            break
-        }
-        watcher.emit(`update:${key}`)
-      })
+      const watcher = new EventEmitter()
+      const startWatch = async () => {
+        const watch = await createWatch(Array.from(files.keys()), options)
+        watcher.emit('ready')
+        watch((path, value) => {
+          const key = files.get(path)
+          switch (key) {
+            case 'certificateAuthority':
+              cluster.certificateAuthority = value
+              break
+            case 'clientKey':
+              user.clientKey = value
+              break
+            case 'clientCert':
+              user.clientCert = value
+              break
+            case 'token':
+              user.token = value
+              break
+          }
+          watcher.emit(`update:${key}`)
+        })
+      }
+      startWatch()
       properties.watcher = { value: watcher }
     }
     Object.defineProperties(this, properties)

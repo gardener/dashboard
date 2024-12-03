@@ -7,15 +7,22 @@
 'use strict'
 
 const fs = require('fs')
+const fsp = require('fs/promises')
 const path = require('path')
 const os = require('os')
 const yaml = require('js-yaml')
-const EventEmitter = require('events')
-const chokidar = require('chokidar')
 const { mockGetToken } = require('gtoken')
 const { cloneDeep } = require('lodash')
 const Config = require('../lib/Config')
-const { load, dumpKubeconfig, fromKubeconfig, getInCluster, cleanKubeconfig, parseKubeconfig, constants } = require('../lib')
+const {
+  load,
+  dumpKubeconfig,
+  fromKubeconfig,
+  getInCluster,
+  cleanKubeconfig,
+  parseKubeconfig,
+  constants,
+} = require('../lib')
 
 describe('kube-config', () => {
   const server = new URL('https://kubernetes:6443')
@@ -32,19 +39,30 @@ describe('kube-config', () => {
   const currentContext = 'default'
   const accessToken = 'access-token'
 
-  beforeEach(() => {
-    jest.spyOn(chokidar, 'watch').mockImplementationOnce(() => {
-      const emitter = new EventEmitter()
-      emitter.close = jest.fn().mockImplementation(() => Promise.resolve())
-      process.nextTick(() => emitter.emit('ready'))
-      return emitter
+  function mockFs (files) {
+    fs.readFileSync.mockImplementation((...args) => {
+      const [path] = args
+      if (files.has(path)) {
+        return files.get(path)
+      }
+      throw new Error(`ENOENT: no such file or directory, open '${path}'`)
     })
+    fsp.readFile.mockImplementation((...args) => {
+      const [path] = args
+      if (files.has(path)) {
+        return Promise.resolve(files.get(path))
+      }
+      return Promise.reject(new Error(`ENOENT: no such file or directory, open '${path}'`))
+    })
+  }
+
+  beforeEach(() => {
     jest.spyOn(fs, 'readFileSync')
+    jest.spyOn(fsp, 'readFile')
   })
 
   afterEach(() => {
-    chokidar.watch.mockRestore()
-    fs.readFileSync.mockRestore()
+    jest.restoreAllMocks()
   })
 
   describe('#load', () => {
@@ -62,7 +80,6 @@ describe('kube-config', () => {
 
     beforeEach(() => {
       ac = new AbortController()
-      fs.readFileSync.mockClear()
     })
 
     afterEach(() => {
@@ -70,9 +87,10 @@ describe('kube-config', () => {
     })
 
     it('should return the in cluster config', async () => {
-      fs.readFileSync
-        .mockReturnValueOnce(token)
-        .mockReturnValueOnce(ca)
+      mockFs(new Map([
+        [constants.KUBERNETES_SERVICEACCOUNT_TOKEN_FILE, token],
+        [constants.KUBERNETES_SERVICEACCOUNT_CA_FILE, ca],
+      ]))
       const config = await loadConfig({
         KUBERNETES_SERVICE_HOST: server.hostname,
         KUBERNETES_SERVICE_PORT: server.port,
@@ -98,7 +116,10 @@ describe('kube-config', () => {
         server: server.origin,
         caData,
       })
-      fs.readFileSync.mockReturnValue(kubeconfig)
+      mockFs(new Map([
+        ['/path/to/kube/config', kubeconfig],
+        ['/path/to/another/kube/config', null],
+      ]))
       const config = await loadConfig({
         KUBECONFIG: '/path/to/kube/config:/path/to/another/kube/config',
       })
@@ -141,18 +162,12 @@ describe('kube-config', () => {
           },
         }],
       })
-      fs.readFileSync.mockImplementation(path => {
-        switch (path) {
-          case defaultKubeconfigPath:
-            return kubeconfig
-          case '/path/to/ca.crt':
-            return ca
-          case '/path/to/client.crt':
-            return clientCertificate
-          case '/path/to/client.key':
-            return clientKey
-        }
-      })
+      mockFs(new Map([
+        [defaultKubeconfigPath, kubeconfig],
+        ['/path/to/ca.crt', ca],
+        ['/path/to/client.crt', clientCertificate],
+        ['/path/to/client.key', clientKey],
+      ]))
       const config = await loadConfig({
         NODE_ENV: 'development',
       })
