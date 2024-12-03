@@ -30,9 +30,8 @@
   ],
   "search.exclude": {
     "**/.pnp.*": true,
-    "**/.yarn/build-state.yml": true,
+    "**/.yarn/*.*": true,
     "**/.yarn/cache/**": true,
-    "**/.yarn/install-state.gz": true,
     "**/.yarn/releases/**": true,
     "**/.yarn/sdks/**": true,
     "**/.yarn/unplugged/**": true,
