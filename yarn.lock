@@ -1212,7 +1212,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@gardener-dashboard/kube-config@workspace:packages/kube-config"
   dependencies:
-    "@gardener-dashboard/logger": "workspace:^"
+    "@gardener-dashboard/polling-watcher": "workspace:^"
     "@gardener-dashboard/test-utils": "workspace:^"
     "@microsoft/eslint-formatter-sarif": "npm:^3.1.0"
     eslint: "npm:^9.11.0"
@@ -1263,6 +1263,22 @@ __metadata:
     prom-client: "npm:^15.1.0"
     response-time: "npm:^2.3.2"
     supertest: "npm:^7.0.0"
+  languageName: unknown
+  linkType: soft
+
+"@gardener-dashboard/polling-watcher@workspace:^, @gardener-dashboard/polling-watcher@workspace:packages/polling-watcher":
+  version: 0.0.0-use.local
+  resolution: "@gardener-dashboard/polling-watcher@workspace:packages/polling-watcher"
+  dependencies:
+    "@gardener-dashboard/logger": "workspace:^"
+    "@gardener-dashboard/test-utils": "workspace:^"
+    eslint: "npm:^9.11.0"
+    eslint-plugin-import: "npm:^2.31.0"
+    eslint-plugin-jest: "npm:^28.8.3"
+    eslint-plugin-lodash: "npm:^8.0.0"
+    eslint-plugin-security: "npm:^3.0.1"
+    jest: "npm:^29.7.0"
+    neostandard: "npm:^0.11.7"
   languageName: unknown
   linkType: soft
 

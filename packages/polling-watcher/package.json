@@ -1,12 +1,12 @@
 {
-  "name": "@gardener-dashboard/kube-client",
+  "name": "@gardener-dashboard/polling-watcher",
   "version": "1.0.0",
-  "description": "Kubernetes Client",
+  "description": "Polling Watcher",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gardener/dashboard.git",
-    "directory": "packages/kube-client"
+    "directory": "packages/polling-watcher"
   },
   "bugs": {
     "url": "https://github.com/gardener/dashboard/issues"
@@ -20,30 +20,19 @@
   ],
   "scripts": {
     "lint": "eslint . --max-warnings=0",
-    "lint-sarif": "yarn lint --format=@microsoft/eslint-formatter-sarif",
     "test": "jest",
     "test-coverage": "yarn test --coverage"
   },
   "dependencies": {
-    "@gardener-dashboard/kube-config": "workspace:^",
     "@gardener-dashboard/logger": "workspace:^",
-    "@gardener-dashboard/request": "workspace:^",
-    "http-errors": "^2.0.0",
-    "jsonwebtoken": "^9.0.2",
-    "lodash": "^4.17.21",
-    "mixwith": "^0.1.1",
-    "uuid": "^11.0.0"
+    "@gardener-dashboard/test-utils": "workspace:^"
   },
   "devDependencies": {
-    "@gardener-dashboard/test-utils": "workspace:^",
-    "@microsoft/eslint-formatter-sarif": "^3.1.0",
-    "abort-controller": "^3.0.0",
     "eslint": "^9.11.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jest": "^28.8.3",
     "eslint-plugin-lodash": "^8.0.0",
     "eslint-plugin-security": "^3.0.1",
-    "express": "^4.18.3",
     "jest": "^29.7.0",
     "neostandard": "^0.11.7"
   },
@@ -55,16 +44,12 @@
       "lib/**/*.js"
     ],
     "testEnvironment": "node",
-    "transformIgnorePatterns": [
-      "/node_modules/",
-      "\\.pnp\\.[^\\/]+$"
-    ],
     "coverageThreshold": {
       "global": {
-        "branches": 73,
-        "functions": 97,
-        "lines": 94,
-        "statements": 94
+        "branches": 100,
+        "functions": 100,
+        "lines": 100,
+        "statements": 100
       }
     },
     "setupFilesAfterEnv": [

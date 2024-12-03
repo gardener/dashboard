@@ -8,7 +8,8 @@
 
 const assert = require('assert').strict
 const fs = require('fs')
-const Watcher = require('./PollingWatcher')
+const createWatch = require('@gardener-dashboard/polling-watcher')
+const { EventEmitter } = require('stream')
 
 function getCluster ({ currentCluster }, files) {
   const cluster = {}
@@ -169,25 +170,30 @@ class ClientConfig {
       },
     }
     if (reactive && files.size) {
-      const watcher = new Watcher(Array.from(files.keys()), options)
-      watcher.run((path, value) => {
-        const key = files.get(path)
-        switch (key) {
-          case 'certificateAuthority':
-            cluster.certificateAuthority = value
-            break
-          case 'clientKey':
-            user.clientKey = value
-            break
-          case 'clientCert':
-            user.clientCert = value
-            break
-          case 'token':
-            user.token = value
-            break
-        }
-        watcher.emit(`update:${key}`)
-      })
+      const watcher = new EventEmitter()
+      const startWatch = async () => {
+        const watch = await createWatch(Array.from(files.keys()), options)
+        watcher.emit('ready')
+        watch((path, value) => {
+          const key = files.get(path)
+          switch (key) {
+            case 'certificateAuthority':
+              cluster.certificateAuthority = value
+              break
+            case 'clientKey':
+              user.clientKey = value
+              break
+            case 'clientCert':
+              user.clientCert = value
+              break
+            case 'token':
+              user.token = value
+              break
+          }
+          watcher.emit(`update:${key}`)
+        })
+      }
+      startWatch()
       properties.watcher = { value: watcher }
     }
     Object.defineProperties(this, properties)

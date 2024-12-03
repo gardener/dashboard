@@ -1,7 +1,7 @@
 # Ignore everything
 **
 
-# include Yarn 2 configuration, cache, releases and plugins
+# include Yarn 4 configuration, cache, releases and plugins
 !.yarn/cache
 !.yarn/releases
 !.yarn/plugins
@@ -9,6 +9,7 @@
 !.yarnrc.yml
 !.pnp.cjs
 !.pnp.loader.mjs
+!yarn.config.cjs
 
 # include root workspace
 !package.json
@@ -31,6 +32,15 @@
 !packages/request/__tests__
 !packages/request/__fixtures__
 !packages/request/__mocks__
+
+# include workspace packages/polling-watcher
+!packages/polling-watcher/package.json
+!packages/polling-watcher/eslint.config.js
+!packages/polling-watcher/jest.setup.js
+!packages/polling-watcher/lib
+!packages/polling-watcher/__tests__
+!packages/polling-watcher/__fixtures__
+!packages/polling-watcher/__mocks__
 
 # include workspace packages/kube-config
 !packages/kube-config/package.json
