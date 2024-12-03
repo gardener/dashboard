@@ -69,7 +69,7 @@ export default {
     const authzStore = useAuthzStore()
     const configStore = useConfigStore()
     const shootStore = useShootStore()
-    const secretStore = useCredentialStore()
+    const credentialStore = useCredentialStore()
     const terminalStore = useTerminalStore()
     const cloudProfileStore = useCloudProfileStore()
     const projectStore = useProjectStore()
@@ -130,7 +130,7 @@ export default {
           shootStore.subscribe(routeParams),
         ]
         if (['ShootItem', 'ShootItemHibernationSettings'].includes(routeName) && authzStore.canGetSecrets) {
-          promises.push(secretStore.fetchCredentials()) // Required for purpose configuration
+          promises.push(credentialStore.fetchCredentials()) // Required for purpose configuration
         }
         if (['ShootItem', 'ShootItemHibernationSettings', 'ShootItemTerminal'].includes(routeName) && authzStore.canUseProjectTerminalShortcuts) {
           promises.push(terminalStore.ensureProjectTerminalShortcutsLoaded())
@@ -225,7 +225,7 @@ export default {
       cloudProfileStore,
       configStore,
       gardenerExtensionStore,
-      secretStore,
+      credentialStore,
       seedStore,
     })
 

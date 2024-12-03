@@ -44,8 +44,8 @@ describe('composables', () => {
     authzStore.setNamespace('garden-test')
     const configStore = useConfigStore()
     configStore.setConfiguration(global.fixtures.config)
-    const secretStore = useCredentialStore()
-    secretStore.cloudProviderCredentials = global.fixtures.credentials
+    const credentialStore = useCredentialStore()
+    credentialStore.cloudProviderCredentials = global.fixtures.credentials
     const cloudProfileStore = useCloudProfileStore()
     cloudProfileStore.setCloudProfiles(cloneDeep(global.fixtures.cloudprofiles))
     const gardenerExtensionStore = useGardenerExtensionStore()
@@ -57,7 +57,7 @@ describe('composables', () => {
       cloudProfileStore,
       configStore,
       gardenerExtensionStore,
-      secretStore,
+      credentialStore,
     })
     shootContextStore = reactive(composable)
   })

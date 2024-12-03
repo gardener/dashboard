@@ -296,7 +296,7 @@ const shootStore = useShootStore()
 const ticketStore = useTicketStore()
 const authzStore = useAuthzStore()
 const configStore = useConfigStore()
-const secretStore = useCredentialStore()
+const credentialStore = useCredentialStore()
 const cloudProfileStore = useCloudProfileStore()
 const projectStore = useProjectStore()
 const seedStore = useSeedStore()
@@ -336,7 +336,7 @@ useProvideShootHelper(shootItem, {
   cloudProfileStore,
   configStore,
   gardenerExtensionStore,
-  secretStore,
+  credentialStore,
   seedStore,
 })
 

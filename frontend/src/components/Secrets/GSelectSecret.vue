@@ -133,7 +133,7 @@ export default {
       costObjectErrorMessage,
       costObject,
     } = useProjectCostObject(projectItem)
-    const secretStore = useCredentialStore()
+    const credentialStore = useCredentialStore()
     const gardenerExtensionStore = useGardenerExtensionStore()
 
     const v$ = useVuelidate({
@@ -141,7 +141,7 @@ export default {
     })
 
     const providerType = toRef(props, 'providerType')
-    const secretBindingList = useSecretBindingList(providerType, { secretStore, gardenerExtensionStore })
+    const secretBindingList = useSecretBindingList(providerType, { credentialStore, gardenerExtensionStore })
 
     return {
       costObjectsSettingEnabled,

@@ -69,7 +69,7 @@ const useShootStore = defineStore('shoot', () => {
   const projectStore = useProjectStore()
   const cloudProfileStore = useCloudProfileStore()
   const configStore = useConfigStore()
-  const secretStore = useCredentialStore()
+  const credentialStore = useCredentialStore()
   const gardenerExtensionStore = useGardenerExtensionStore()
   const ticketStore = useTicketStore()
   const socketStore = useSocketStore()
@@ -87,7 +87,7 @@ const useShootStore = defineStore('shoot', () => {
     projectStore,
     cloudProfileStore,
     configStore,
-    secretStore,
+    credentialStore,
     gardenerExtensionStore,
     ticketStore,
     socketStore,

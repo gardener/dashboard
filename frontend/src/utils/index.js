@@ -463,7 +463,7 @@ export function selfTerminationDaysForSecret (secretBinding) {
     return get(find(quotas, scope), ['spec', 'clusterLifetimeDays'])
   }
 
-  const quotas = get(secretBinding, ['quotaItems'])
+  const quotas = get(secretBinding, ['_quotas'])
   let terminationDays = clusterLifetimeDays(quotas, { spec: { scope: { apiVersion: 'core.gardener.cloud/v1beta1', kind: 'Project' } } })
   if (!terminationDays) {
     terminationDays = clusterLifetimeDays(quotas, { spec: { scope: { apiVersion: 'v1', kind: 'Secret' } } })

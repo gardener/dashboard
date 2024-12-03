@@ -29,7 +29,7 @@ import isEmpty from 'lodash/isEmpty'
 export const useShootDns = (manifest, options) => {
   const {
     gardenerExtensionStore = useGardenerExtensionStore(),
-    secretStore = useCredentialStore(),
+    credentialStore = useCredentialStore(),
   } = options
 
   /* resources */
@@ -169,7 +169,7 @@ export const useShootDns = (manifest, options) => {
   }
 
   function getDefaultSecretName (type) {
-    const secretBindings = useSecretBindingList(toRef(type), { secretStore, gardenerExtensionStore })
+    const secretBindings = useSecretBindingList(toRef(type), { credentialStore, gardenerExtensionStore })
     // find unused secret
     const usedResourceNames = map(resources.value, 'name')
     const secretBinding = find(secretBindings.value, secretBinding => {

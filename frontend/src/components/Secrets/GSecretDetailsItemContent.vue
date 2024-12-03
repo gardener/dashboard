@@ -75,16 +75,12 @@ export default {
     },
   },
   methods: {
-    getGCPProjectId (secret) {
-      try {
-        const serviceAccount = get(secret.data, ['serviceaccount.json'])
-        return get(JSON.parse(decodeBase64(serviceAccount)), ['project_id'])
-      } catch (err) {
-        return undefined
-      }
-    },
     getSecretDetailsInfra (secret) {
       const secretData = secret.data || {}
+      const getGCPProjectId = () => {
+        const serviceAccount = get(secretData, ['serviceaccount.json'])
+        return get(JSON.parse(decodeBase64(serviceAccount)), ['project_id'])
+      }
       try {
         switch (this.providerType) {
           case 'openstack':
@@ -127,7 +123,7 @@ export default {
             return [
               {
                 label: 'Project',
-                value: decodeBase64(this.getGCPProjectId)(secret),
+                value: getGCPProjectId(),
               },
             ]
           case 'alicloud':

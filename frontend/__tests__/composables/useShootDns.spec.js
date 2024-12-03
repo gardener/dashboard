@@ -25,14 +25,14 @@ describe('composables', () => {
     beforeEach(() => {
       setActivePinia(createPinia())
       manifest.spec = {}
-      const secretStore = useCredentialStore()
-      secretStore.cloudProviderCredentials = global.fixtures.credentials
+      const credentialStore = useCredentialStore()
+      credentialStore.cloudProviderCredentials = global.fixtures.credentials
       const gardenerExtensionStore = useGardenerExtensionStore()
       gardenerExtensionStore.list = global.fixtures.gardenerExtensions
 
       const composable = useShootDns(toRef(manifest), {
         gardenerExtensionStore,
-        secretStore,
+        credentialStore,
       })
       shootDns = reactive(composable)
     })

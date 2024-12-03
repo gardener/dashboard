@@ -44,7 +44,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     cloudProfileStore = useCloudProfileStore(),
     configStore = useConfigStore(),
     gardenerExtensionStore = useGardenerExtensionStore(),
-    secretStore = useCredentialStore(),
+    credentialStore = useCredentialStore(),
     seedStore = useSeedStore(),
   } = options
 
@@ -115,7 +115,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     return cloudProfileStore.getDefaultNodesCIDR(cloudProfileName.value)
   })
 
-  const infrastructureSecretBindings = useSecretBindingList(providerType, { secretStore, gardenerExtensionStore })
+  const infrastructureSecretBindings = useSecretBindingList(providerType, { credentialStore, gardenerExtensionStore })
 
   const sortedKubernetesVersions = computed(() => {
     return cloudProfileStore.sortedKubernetesVersions(cloudProfileName.value)

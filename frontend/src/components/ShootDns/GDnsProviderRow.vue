@@ -142,11 +142,11 @@ export default {
       getResourceRefName,
     } = useShootContext()
 
-    const secretStore = useCredentialStore()
+    const credentialStore = useCredentialStore()
     const gardenerExtensionStore = useGardenerExtensionStore()
 
     const dnsProviderType = toRef(props.dnsProvider, 'type')
-    const dnsSecretBindings = useSecretBindingList(dnsProviderType, { secretStore, gardenerExtensionStore })
+    const dnsSecretBindings = useSecretBindingList(dnsProviderType, { credentialStore, gardenerExtensionStore })
 
     return {
       v$: useVuelidate(),

@@ -192,11 +192,11 @@ export default {
       deleteDnsServiceExtensionProvider,
     } = useShootContext()
 
-    const secretStore = useCredentialStore()
+    const credentialStore = useCredentialStore()
     const gardenerExtensionStore = useGardenerExtensionStore()
 
     const customDomain = ref(!!dnsDomain.value && !!dnsPrimaryProviderType.value)
-    const dnsPrimaryProviderSecretBindings = useSecretBindingList(dnsPrimaryProviderType, { secretStore, gardenerExtensionStore })
+    const dnsPrimaryProviderSecretBindings = useSecretBindingList(dnsPrimaryProviderType, { credentialStore, gardenerExtensionStore })
 
     return {
       v$: useVuelidate(),

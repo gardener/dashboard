@@ -77,7 +77,7 @@ export function createShootContextComposable (options = {}) {
     configStore = useConfigStore(),
     gardenerExtensionStore = useGardenerExtensionStore(),
     projectStore = useProjectStore(),
-    secretStore = useCredentialStore(),
+    credentialStore = useCredentialStore(),
     seedStore = useSeedStore(),
   } = options
 
@@ -865,7 +865,7 @@ export function createShootContextComposable (options = {}) {
     getResourceRefName,
   } = useShootDns(manifest, {
     gardenerExtensionStore,
-    secretStore,
+    credentialStore,
   })
 
   /* accessRestrictions */
@@ -912,7 +912,7 @@ export function createShootContextComposable (options = {}) {
     cloudProfileStore,
     configStore,
     gardenerExtensionStore,
-    secretStore,
+    credentialStore,
     seedStore,
   })
 

@@ -100,7 +100,7 @@ export function createGlobalResolveGuards () {
   const authzStore = useAuthzStore()
   const projectStore = useProjectStore()
   const memberStore = useMemberStore()
-  const secretStore = useCredentialStore()
+  const credentialStore = useCredentialStore()
   const shootStore = useShootStore()
   const terminalStore = useTerminalStore()
 
@@ -134,14 +134,14 @@ export function createGlobalResolveGuards () {
           case 'Secrets':
           case 'Secret': {
             shootStore.subscribeShoots()
-            await secretStore.fetchCredentials()
+            await credentialStore.fetchCredentials()
             break
           }
           case 'NewShoot':
           case 'NewShootEditor': {
             shootStore.subscribeShoots()
             if (authzStore.canGetSecrets) {
-              await secretStore.fetchCredentials()
+              await credentialStore.fetchCredentials()
             }
             break
           }

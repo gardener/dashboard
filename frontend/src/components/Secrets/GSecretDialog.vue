@@ -331,7 +331,7 @@ export default {
         setDelayedInputFocus(this, 'name')
       } else {
         this.name = get(this.secretBinding, ['metadata', 'name'])
-        this.updateWithSecret(this.secretBinding.secret)
+        this.updateWithSecret(this.secretBinding._secret)
       }
 
       this.errorMessage = undefined

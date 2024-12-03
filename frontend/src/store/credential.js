@@ -64,27 +64,28 @@ export const useCredentialStore = defineStore('credential', () => {
   }
 
   const secretBindingList = computed(() => {
-    const secretMap = new Map(cloudProviderCredentials.value?.secrets?.map(secret => [namespaceNameKey(secret.metadata), secret]))
-    const quotaMap = new Map(cloudProviderCredentials.value?.quotas?.map(quota => [namespaceNameKey(quota.metadata), quota]))
+    const {
+      quotas = [],
+      secrets = [],
+      secretBindings = [],
+    } = cloudProviderCredentials.value ?? {}
+    const secretMap = new Map(secrets.map(secret => [namespaceNameKey(secret.metadata), secret]))
+    const quotaMap = new Map(quotas.map(quota => [namespaceNameKey(quota.metadata), quota]))
 
-    return cloudProviderCredentials.value?.secretBindings?.map(secretBinding => {
+    return secretBindings.map(secretBinding => {
       const secret = secretMap.get(namespaceNameKey(secretBinding.secretRef))
-      Object.defineProperty(secretBinding, 'secret', {
-        get () {
-          return secret
-        },
+      Object.defineProperty(secretBinding, '_secret', {
+        value: secret,
         configurable: true,
         enumerable: false,
       })
 
       const quotaItems = (secretBinding.quotas || [])
         .map(quota => quotaMap.get(namespaceNameKey(quota)))
-        .filter(item => item !== undefined)
+        .filter(Boolean)
 
-      Object.defineProperty(secretBinding, 'quotaItems', {
-        get () {
-          return quotaItems
-        },
+      Object.defineProperty(secretBinding, '_quota', {
+        value: quotaItems,
         configurable: true,
         enumerable: false,
       })
@@ -104,7 +105,7 @@ export const useCredentialStore = defineStore('credential', () => {
       const { data: credentials } = await api.createCloudProviderCredential({ name, namespace, params })
 
       appStore.setSuccess('Cloud Provider credential created')
-      updatecloudProviderCredentials(credentials)
+      updateCloudProviderCredential(credentials)
     } catch (err) {
       $reset()
       throw err
@@ -118,7 +119,7 @@ export const useCredentialStore = defineStore('credential', () => {
       const { data: credentials } = await api.updateCloudProviderCredential({ name, namespace, params })
 
       appStore.setSuccess('Cloud Provider credential updated')
-      updatecloudProviderCredentials(credentials)
+      updateCloudProviderCredential(credentials)
     } catch (err) {
       $reset()
       throw err
@@ -152,14 +153,11 @@ export const useCredentialStore = defineStore('credential', () => {
     return find(secretBindingList.value, eqlNameAndNamespace({ namespace, name }))
   }
 
-  function updatecloudProviderCredentials (credentials) {
+  function updateCloudProviderCredential (credentials) {
     const { secretBinding } = credentials
     const index = findIndex(secretBindingList.value, eqlNameAndNamespace(secretBinding.metadata))
     if (index !== -1) {
-      cloudProviderCredentials.value.splice(index, 1, {
-        ...cloudProviderCredentials.value[index], // eslint-disable-line security/detect-object-injection
-        ...credentials,
-      })
+      cloudProviderCredentials.value[index] = credentials // eslint-disable-line security/detect-object-injection
     } else {
       cloudProviderCredentials.value.push(credentials)
     }

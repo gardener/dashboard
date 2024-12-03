@@ -15,13 +15,13 @@ import filter from 'lodash/filter'
 
 export const useSecretBindingList = (providerType, options = {}) => {
   const {
-    secretStore = useCredentialStore(),
+    credentialStore = useCredentialStore(),
     gardenerExtensionStore = useGardenerExtensionStore(),
   } = options
 
   return computed(() => {
     const isDnsSecret = gardenerExtensionStore.dnsProviderTypes.includes(providerType.value)
-    return filter(secretStore.secretBindingList, secretBinding => {
+    return filter(credentialStore.secretBindingList, secretBinding => {
       if (secretBinding.provider?.type !== providerType.value) {
         return false
       }
