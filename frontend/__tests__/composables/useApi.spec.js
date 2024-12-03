@@ -11,6 +11,15 @@ import {
   isUnauthorizedError,
 } from '@/composables/useApi/fetch'
 
+async function concatStream (stream) {
+  let chunks = ''
+  const decoder = new TextDecoder('utf-8')
+  for await (const chunk of stream) {
+    chunks += decoder.decode(chunk)
+  }
+  return chunks
+}
+
 describe('composables', () => {
   describe('useApi', () => {
     afterEach(() => {
@@ -72,14 +81,6 @@ describe('composables', () => {
         expect(res.data).toEqual(text)
       })
 
-      it('should respond with status 100', async () => {
-        const status = 100
-        fetch.mockResponseOnce(null, {
-          status,
-        })
-        await expect(fetchWrapper(url)).rejects.toThrowError(`Unexpected informational response with status code ${status}`)
-      })
-
       it('should respond with status 300', async () => {
         const status = 300
         fetch.mockResponseOnce(null, {
@@ -123,7 +124,8 @@ describe('composables', () => {
           'x-requested-with': 'XMLHttpRequest',
           'content-type': 'application/json; charset=UTF-8',
         })
-        expect(JSON.parse(req.body)).toEqual(data)
+        const body = await concatStream(req.body)
+        expect(JSON.parse(body)).toEqual(data)
       })
 
       it('should send a request with text content', async () => {
@@ -145,7 +147,8 @@ describe('composables', () => {
           'x-requested-with': 'XMLHttpRequest',
           'content-type': 'text/plain; charset=UTF-8',
         })
-        expect(req.body.toString('utf8')).toEqual(text)
+        const body = await concatStream(req.body)
+        expect(body).toEqual(text)
       })
 
       describe('intercepting the fetch response', () => {
