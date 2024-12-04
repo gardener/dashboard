@@ -8843,21 +8843,18 @@ __metadata:
   linkType: hard
 
 "pinia@npm:^2.1.7":
-  version: 2.2.8
-  resolution: "pinia@npm:2.2.8"
+  version: 2.3.0
+  resolution: "pinia@npm:2.3.0"
   dependencies:
     "@vue/devtools-api": "npm:^6.6.3"
     vue-demi: "npm:^0.14.10"
   peerDependencies:
-    "@vue/composition-api": ^1.4.0
     typescript: ">=4.4.4"
-    vue: ^2.6.14 || ^3.5.11
+    vue: ^2.7.0 || ^3.5.11
   peerDependenciesMeta:
-    "@vue/composition-api":
-      optional: true
     typescript:
       optional: true
-  checksum: 10c0/afcaba130850d939659d72d855f449d5d153a623d81139cf4667526253e6dcc426219cafd898b544cd538ffe63d3f750ac023a643056ec20e8c19cb909678f32
+  checksum: 10c0/08bba6fd45f4e45e1e7160c70005f074722a6eccb3da113bb038bf219ff4447b745fed23ec42efd001322599433bb741986b5f17628c079508136ee2b7923062
   languageName: node
   linkType: hard
 
