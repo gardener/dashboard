@@ -7,13 +7,9 @@
 'use strict'
 
 const createServer = require('socket.io')
-const createError = require('http-errors')
-const kubernetesClient = require('@gardener-dashboard/kube-client')
 const logger = require('../logger')
 const helper = require('./helper')
 const dispatcher = require('./dispatcher')
-
-const { isHttpError } = createError
 
 function init (httpServer, cache) {
   const io = createServer(httpServer, {
@@ -22,43 +18,15 @@ function init (httpServer, cache) {
   })
 
   // middleware
-  const authenticate = helper.authenticateFn(kubernetesClient)
-  io.use(async (socket, next) => {
-    logger.debug('Socket %s authenticating', socket.id)
-    try {
-      const user = socket.data.user = await authenticate(socket.request)
-      logger.debug('Socket %s authenticated (user %s)', socket.id, user.id)
-      if (user.rti) {
-        const delay = helper.expiresIn(socket)
-        if (delay > 0) {
-          helper.setDisconnectTimeout(socket, delay)
-        } else {
-          throw createError(401, 'Token refresh required', {
-            code: 'ERR_JWT_TOKEN_REFRESH_REQUIRED',
-            data: {
-              rti: user.rti,
-              exp: user.refresh_at,
-            },
-          })
-        }
-      }
-      next()
-    } catch (err) {
-      logger.error('Socket %s authentication failed: %s', socket.id, err)
-      if (isHttpError(err)) {
-        // additional details (see https://socket.io/docs/v4/server-api/#namespaceusefn)
-        const { statusCode, code, data } = err
-        err.data = { statusCode, code, ...data }
-      }
-      next(err)
-    }
-  })
+  io.use(helper.authenticationMiddleware())
 
   // handle connections (see https://socket.io/docs/v4/server-application-structure)
   io.on('connection', socket => {
     const socketId = socket.id
     const timeoutId = socket.data.timeoutId
     delete socket.data.timeoutId
+
+    helper.joinPrivateRoom(socket)
 
     // handle 'subscribe' events
     socket.on('subscribe', async (key, ...args) => {

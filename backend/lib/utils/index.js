@@ -29,34 +29,34 @@ function encodeBase64 (value) {
   return Buffer.from(value, 'utf8').toString('base64')
 }
 
-function projectFilter (user, canListProjects = false) {
-  const isMemberOf = project => {
-    return _
-      .chain(project)
-      .get(['spec', 'members'])
-      .find(({ kind, namespace, name }) => {
-        switch (kind) {
-          case 'Group':
-            if (_.includes(user.groups, name)) {
-              return true
-            }
-            break
-          case 'User':
-            if (user.id === name) {
-              return true
-            }
-            break
-          case 'ServiceAccount':
-            if (user.id === `system:serviceaccount:${namespace}:${name}`) {
-              return true
-            }
-            break
-        }
-        return false
-      })
-      .value()
-  }
+function isMemberOf (project, user) {
+  return _
+    .chain(project)
+    .get(['spec', 'members'])
+    .find(({ kind, namespace, name }) => {
+      switch (kind) {
+        case 'Group':
+          if (_.includes(user.groups, name)) {
+            return true
+          }
+          break
+        case 'User':
+          if (user.id === name) {
+            return true
+          }
+          break
+        case 'ServiceAccount':
+          if (user.id === `system:serviceaccount:${namespace}:${name}`) {
+            return true
+          }
+          break
+      }
+      return false
+    })
+    .value()
+}
 
+function projectFilter (user, canListProjects = false) {
   const isPending = project => {
     return _.get(project, ['status', 'phase'], 'Pending') === 'Pending'
   }
@@ -65,7 +65,7 @@ function projectFilter (user, canListProjects = false) {
     if (isPending(project)) {
       return false
     }
-    return canListProjects || isMemberOf(project)
+    return canListProjects || isMemberOf(project, user)
   }
 }
 
@@ -244,6 +244,7 @@ function isSeedUnreachable (seed) {
 module.exports = {
   decodeBase64,
   encodeBase64,
+  isMemberOf,
   projectFilter,
   parseRooms,
   trimObjectMetadata,
