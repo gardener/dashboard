@@ -1642,7 +1642,7 @@ const RAW_RUNTIME_STATE =
           ["eslint-plugin-jest", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:28.9.0"],\
           ["eslint-plugin-lodash", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:8.0.0"],\
           ["eslint-plugin-security", "npm:3.0.1"],\
-          ["express", "npm:4.21.1"],\
+          ["express", "npm:4.21.2"],\
           ["express-static-gzip", "npm:2.2.0"],\
           ["fast-json-patch", "npm:3.1.1"],\
           ["fnv-plus", "npm:1.3.1"],\
@@ -1793,7 +1793,7 @@ const RAW_RUNTIME_STATE =
           ["eslint-plugin-jest", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:28.9.0"],\
           ["eslint-plugin-lodash", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:8.0.0"],\
           ["eslint-plugin-security", "npm:3.0.1"],\
-          ["express", "npm:4.21.1"],\
+          ["express", "npm:4.21.2"],\
           ["http-errors", "npm:2.0.0"],\
           ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:29.7.0"],\
           ["jsonwebtoken", "npm:9.0.2"],\
@@ -1858,7 +1858,7 @@ const RAW_RUNTIME_STATE =
           ["eslint-plugin-jest", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:28.9.0"],\
           ["eslint-plugin-lodash", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:8.0.0"],\
           ["eslint-plugin-security", "npm:3.0.1"],\
-          ["express", "npm:4.21.1"],\
+          ["express", "npm:4.21.2"],\
           ["http-errors", "npm:2.0.0"],\
           ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:29.7.0"],\
           ["neostandard", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:0.11.9"],\
@@ -7350,10 +7350,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["express", [\
-      ["npm:4.21.1", {\
-        "packageLocation": "./.yarn/cache/express-npm-4.21.1-f1cd48000b-0c287867e5.zip/node_modules/express/",\
+      ["npm:4.21.2", {\
+        "packageLocation": "./.yarn/cache/express-npm-4.21.2-9b3bd32250-38168fd0a3.zip/node_modules/express/",\
         "packageDependencies": [\
-          ["express", "npm:4.21.1"],\
+          ["express", "npm:4.21.2"],\
           ["accepts", "npm:1.3.8"],\
           ["array-flatten", "npm:1.1.1"],\
           ["body-parser", "npm:1.20.3"],\
@@ -7373,7 +7373,7 @@ const RAW_RUNTIME_STATE =
           ["methods", "npm:1.1.2"],\
           ["on-finished", "npm:2.4.1"],\
           ["parseurl", "npm:1.3.3"],\
-          ["path-to-regexp", "npm:0.1.10"],\
+          ["path-to-regexp", "npm:0.1.12"],\
           ["proxy-addr", "npm:2.0.7"],\
           ["qs", "npm:6.13.0"],\
           ["range-parser", "npm:1.2.1"],\
@@ -10945,10 +10945,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["path-to-regexp", [\
-      ["npm:0.1.10", {\
-        "packageLocation": "./.yarn/cache/path-to-regexp-npm-0.1.10-63516149e0-34196775b9.zip/node_modules/path-to-regexp/",\
+      ["npm:0.1.12", {\
+        "packageLocation": "./.yarn/cache/path-to-regexp-npm-0.1.12-a9bf1de212-1c6ff10ca1.zip/node_modules/path-to-regexp/",\
         "packageDependencies": [\
-          ["path-to-regexp", "npm:0.1.10"]\
+          ["path-to-regexp", "npm:0.1.12"]\
         ],\
         "linkType": "HARD"\
       }],\
