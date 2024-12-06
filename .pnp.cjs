@@ -950,7 +950,7 @@ const RAW_RUNTIME_STATE =
           ["@codemirror/autocomplete", "virtual:394dfa168191eeecf96909f25681b55b33ead8fc50fd0a11ab993dc4dac05b4b1625a43d289b67f5ea6f52728a72fd8b13e50efd2deb55615cce83baa304218a#npm:6.18.3"],\
           ["@codemirror/language", "npm:6.10.6"],\
           ["@codemirror/state", "npm:6.4.1"],\
-          ["@codemirror/view", "npm:6.35.0"],\
+          ["@codemirror/view", "npm:6.35.1"],\
           ["@lezer/common", "npm:1.2.3"],\
           ["@types/codemirror__language", null],\
           ["@types/codemirror__state", null],\
@@ -976,7 +976,7 @@ const RAW_RUNTIME_STATE =
           ["@codemirror/commands", "npm:6.7.1"],\
           ["@codemirror/language", "npm:6.10.6"],\
           ["@codemirror/state", "npm:6.4.1"],\
-          ["@codemirror/view", "npm:6.35.0"],\
+          ["@codemirror/view", "npm:6.35.1"],\
           ["@lezer/common", "npm:1.2.3"]\
         ],\
         "linkType": "HARD"\
@@ -1004,7 +1004,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@codemirror/language", "npm:6.10.6"],\
           ["@codemirror/state", "npm:6.4.1"],\
-          ["@codemirror/view", "npm:6.35.0"],\
+          ["@codemirror/view", "npm:6.35.1"],\
           ["@lezer/common", "npm:1.2.3"],\
           ["@lezer/highlight", "npm:1.2.1"],\
           ["@lezer/lr", "npm:1.4.2"],\
@@ -1019,7 +1019,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@codemirror/search", "npm:6.5.8"],\
           ["@codemirror/state", "npm:6.4.1"],\
-          ["@codemirror/view", "npm:6.35.0"],\
+          ["@codemirror/view", "npm:6.35.1"],\
           ["crelt", "npm:1.0.6"]\
         ],\
         "linkType": "HARD"\
@@ -1041,17 +1041,17 @@ const RAW_RUNTIME_STATE =
           ["@codemirror/theme-one-dark", "npm:6.1.2"],\
           ["@codemirror/language", "npm:6.10.6"],\
           ["@codemirror/state", "npm:6.4.1"],\
-          ["@codemirror/view", "npm:6.35.0"],\
+          ["@codemirror/view", "npm:6.35.1"],\
           ["@lezer/highlight", "npm:1.2.1"]\
         ],\
         "linkType": "HARD"\
       }]\
     ]],\
     ["@codemirror/view", [\
-      ["npm:6.35.0", {\
-        "packageLocation": "./.yarn/cache/@codemirror-view-npm-6.35.0-c5498a49bd-39b85e3ac2.zip/node_modules/@codemirror/view/",\
+      ["npm:6.35.1", {\
+        "packageLocation": "./.yarn/cache/@codemirror-view-npm-6.35.1-5caf66c0e8-0c412c39c8.zip/node_modules/@codemirror/view/",\
         "packageDependencies": [\
-          ["@codemirror/view", "npm:6.35.0"],\
+          ["@codemirror/view", "npm:6.35.1"],\
           ["@codemirror/state", "npm:6.4.1"],\
           ["style-mod", "npm:4.1.2"],\
           ["w3c-keyname", "npm:2.2.8"]\
@@ -1705,7 +1705,7 @@ const RAW_RUNTIME_STATE =
           ["@codemirror/search", "npm:6.5.8"],\
           ["@codemirror/state", "npm:6.4.1"],\
           ["@codemirror/theme-one-dark", "npm:6.1.2"],\
-          ["@codemirror/view", "npm:6.35.0"],\
+          ["@codemirror/view", "npm:6.35.1"],\
           ["@fontsource/roboto", "npm:5.1.0"],\
           ["@kyvg/vue3-notification", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.4.1"],\
           ["@lezer/common", "npm:1.2.3"],\
