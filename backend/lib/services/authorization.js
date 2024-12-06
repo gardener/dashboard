@@ -41,6 +41,17 @@ exports.isAdmin = function (user) {
   })
 }
 
+exports.canListSecrets = function (user, namespace) {
+  return hasAuthorization(user, {
+    resourceAttributes: {
+      verb: 'list',
+      group: '',
+      resource: 'secrets',
+      namespace,
+    },
+  })
+}
+
 exports.canListProjects = function (user) {
   return hasAuthorization(user, {
     resourceAttributes: {

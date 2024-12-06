@@ -5,6 +5,7 @@
 //
 
 const shoots = require('./shoots')
+const projects = require('./projects')
 
 async function subscribe (socket, key, options = {}) {
   switch (key) {
@@ -29,13 +30,22 @@ function synchronize (socket, key, ...args) {
   switch (key) {
     case 'shoots': {
       const [uids] = args
-      if (!Array.isArray(uids)) {
-        throw new TypeError('Invalid parameters for synchronize shoots')
-      }
+      assertArray(uids)
       return shoots.synchronize(socket, uids)
+    }
+    case 'projects': {
+      const [uids] = args
+      assertArray(uids)
+      return projects.synchronize(socket, uids)
     }
     default:
       throw new TypeError(`Invalid synchronization type - ${key}`)
+  }
+}
+
+function assertArray (value) {
+  if (!Array.isArray(value)) {
+    throw new TypeError('Invalid parameters for synchronize shoots')
   }
 }
 

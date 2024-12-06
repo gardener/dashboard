@@ -9,8 +9,12 @@ const { promisify } = require('util')
 const createError = require('http-errors')
 const cookieParser = require('cookie-parser')
 const kubernetesClient = require('@gardener-dashboard/kube-client')
+const { cloneDeep } = require('lodash')
+const cache = require('../cache')
 const logger = require('../logger')
+const authorization = require('../services/authorization')
 const { authenticate } = require('../security')
+const { trimObjectMetadata } = require('../utils')
 
 const { isHttpError } = createError
 
@@ -20,9 +24,33 @@ function expiresIn (socket) {
   return Math.max(0, refreshAt * 1000 - Date.now())
 }
 
+async function userProfiles (req, res, next) {
+  try {
+    const [
+      canListProjects,
+      canGetSecrets,
+    ] = await Promise.all([
+      authorization.canListProjects(req.user),
+      authorization.canListSecrets(req.user),
+    ])
+    const profiles = Object.freeze({
+      canListProjects,
+      canGetSecrets,
+    })
+    Object.defineProperty(req.user, 'profiles', {
+      value: profiles,
+      enumerable: true,
+    })
+    next()
+  } catch (err) {
+    next(err)
+  }
+}
+
 function authenticateFn (options) {
   const cookieParserAsync = promisify(cookieParser())
   const authenticateAsync = promisify(authenticate(options))
+  const userProfilesAsync = promisify(userProfiles)
   const noop = () => { }
   const res = {
     clearCookie: noop,
@@ -32,7 +60,7 @@ function authenticateFn (options) {
   return async req => {
     await cookieParserAsync(req, res)
     await authenticateAsync(req, res)
-    logger.info('User: %s', req.user)
+    await userProfilesAsync(req, res)
     return req.user
   }
 }
@@ -98,10 +126,66 @@ function joinPrivateRoom (socket) {
   return socket.join(sha256(user.id))
 }
 
+function uidNotFoundFactory (group, kind) {
+  return uid => ({
+    kind: 'Status',
+    apiVersion: 'v1',
+    status: 'Failure',
+    message: `${kind} with uid ${uid} does not exist`,
+    reason: 'NotFound',
+    details: {
+      uid,
+      group,
+      kind,
+    },
+    code: 404,
+  })
+}
+
+const constants = Object.freeze({
+  OBJECT_FORBIDDEN: 0,
+  OBJECT_DEFAULT: 1,
+  OBJECT_UNMODIFIED: 2,
+})
+
+function synchronizeFactory (kind, options = {}) {
+  const {
+    group = 'core.gardener.cloud',
+    predicate = () => constants.OBJECT_DEFAULT,
+  } = options
+  const uidNotFound = uidNotFoundFactory(group, kind)
+
+  return (socket, uids = []) => {
+    return uids.map(uid => {
+      const object = cache.getByUid(kind, uid)
+      if (!object) {
+        // the project has been removed from the cache
+        return uidNotFound(uid)
+      }
+      switch (predicate(socket, object)) {
+        case constants.OBJECT_DEFAULT: {
+          const clonedObject = cloneDeep(object)
+          trimObjectMetadata(clonedObject)
+          return clonedObject
+        }
+        case constants.OBJECT_UNMODIFIED: {
+          return object
+        }
+        default: {
+          // the user has no authorization to access the object
+          return uidNotFound(uid)
+        }
+      }
+    })
+  }
+}
+
 const helper = module.exports = {
+  constants,
   authenticationMiddleware,
   getUserFromSocket,
   setDisconnectTimeout,
   sha256,
   joinPrivateRoom,
+  synchronizeFactory,
 }

@@ -6,15 +6,17 @@
 
 'use strict'
 
+const { get } = require('lodash')
+
 const ioHelper = require('../io/helper')
 const { isMemberOf } = require('../utils')
 
 module.exports = (io, informer, options) => {
   const nsp = io.of('/')
 
-  const handleEvent = async (newObject, oldObject) => {
-    const { uid } = newObject.metadata
-
+  const handleEvent = async (type, newObject, oldObject) => {
+    const path = ['metadata', 'uid']
+    const uid = get(newObject, path, get(oldObject, path))
     const sockets = await io.fetchSockets()
     const users = new Map()
     for (const socket of sockets) {
@@ -24,26 +26,31 @@ module.exports = (io, informer, options) => {
       }
     }
     for (const user of users.values()) {
-      const isMember = isMemberOf(newObject, user)
-      const hasBeenMember = oldObject
-        ? isMemberOf(oldObject, user)
-        : false
-      let type
-      if (hasBeenMember && isMember) {
-        type = 'MODIFIED'
-      } else if (!hasBeenMember && isMember) {
-        type = 'ADDED'
-      } else if (hasBeenMember && !isMember) {
-        type = 'DELETED'
+      const event = { uid }
+      const canListProjects = get(user, ['profiles', 'canListProjects'], false)
+      if (canListProjects) {
+        event.type = type
+      } else {
+        const isMember = isMemberOf(newObject, user)
+        const hasBeenMember = oldObject
+          ? isMemberOf(oldObject, user)
+          : false
+        if (hasBeenMember && isMember) {
+          event.type = 'MODIFIED'
+        } else if (!hasBeenMember && isMember) {
+          event.type = 'ADDED'
+        } else if (hasBeenMember && !isMember) {
+          event.type = 'DELETED'
+        }
       }
-      if (type) {
+      if (event.type) {
         const room = ioHelper.sha256(user.id)
-        nsp.to(room).emit('projects', { type, uid })
+        nsp.to(room).emit('projects', event)
       }
     }
   }
 
-  informer.on('add', (...args) => handleEvent(...args))
-  informer.on('update', (...args) => handleEvent(...args))
-  informer.on('delete', (...args) => handleEvent(null, ...args))
+  informer.on('add', object => handleEvent('ADDED', object))
+  informer.on('update', (object, oldObject) => handleEvent('MODIFIED', object, oldObject))
+  informer.on('delete', object => handleEvent('DELETED', object))
 }
