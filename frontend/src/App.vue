@@ -31,9 +31,10 @@ import { useLoginStore } from '@/store/login'
 import { useLocalStorageStore } from '@/store/localStorage'
 import { useShootStore } from '@/store/shoot'
 import { useProjectStore } from '@/store/project'
-import { useAppStore } from '@/store/app'
 
 import { useCustomColors } from '@/composables/useCustomColors'
+
+import { useLuigiContext } from './composables/useLuigiContext'
 
 import get from 'lodash/get'
 
@@ -45,10 +46,10 @@ const configStore = useConfigStore()
 const loginStore = useLoginStore()
 const shootStore = useShootStore()
 const projectStore = useProjectStore()
-const appStore = useAppStore()
 const logger = inject('logger')
+const luigiContext = useLuigiContext()
 
-appStore.setRoute(route)
+luigiContext.setRoute(route)
 
 async function setCustomColors () {
   try {

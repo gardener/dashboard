@@ -132,7 +132,6 @@ import {
   toRef,
 } from 'vue'
 
-import { useAppStore } from '@/store/app'
 import { useAuthzStore } from '@/store/authz'
 import { useProjectStore } from '@/store/project'
 
@@ -140,20 +139,22 @@ import GProjectDialog from '@/components/dialogs/GProjectDialog.vue'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
 
+import { useLuigiContext } from '@/composables/useLuigiContext'
+
 import get from 'lodash/get'
 import filter from 'lodash/filter'
 
 const projectStore = useProjectStore()
 const authzStore = useAuthzStore()
-const appStore = useAppStore()
+const luigiContext = useLuigiContext
 
 const canCreateProject = toRef(authzStore, 'canCreateProject')
 
 const projectDialog = ref(false)
 
 const projectList = computed(() => {
-  const belongsToAccount = project => appStore.accountId === get(project, ['metadata', 'annotations', 'openmfp.org/account-id'])
-  return !appStore.accountId
+  const belongsToAccount = project => luigiContext.accountId === get(project, ['metadata', 'annotations', 'openmfp.org/account-id'])
+  return !luigiContext.accountId
     ? projectStore.projectList
     : filter(projectStore.projectList, belongsToAccount)
 })
