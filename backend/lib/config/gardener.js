@@ -117,10 +117,43 @@ const configMappings = [
     configPath: 'metricsPort',
     type: 'Integer',
   },
+  {
+    environmentVariableName: 'COOKIE_SAME_SITE_POLICY',
+    configPath: 'cookieSameSitePolicy',
+  },
+  {
+    environmentVariableName: 'CSP_FRAME_ANCESTORS',
+    configPath: 'cspFrameAncestors',
+    type: 'Object',
+  },
+  {
+    environmentVariableName: 'FGA_API_URL',
+    filePath: '/etc/gardener-dashboard/secrets/fga/apiUrl',
+    configPath: 'fgaApiUrl',
+  },
+  {
+    environmentVariableName: 'FGA_STORE_ID',
+    filePath: '/etc/gardener-dashboard/secrets/fga/storeId',
+    configPath: 'fgaStoreId',
+  },
+  {
+    environmentVariableName: 'FGA_AUTHORIZATION_MODEL_ID',
+    filePath: '/etc/gardener-dashboard/secrets/fga/authorizationModelId',
+    configPath: 'fgaAuthorizationModelId',
+  },
+  {
+    environmentVariableName: 'FGA_API_TOKEN',
+    filePath: '/etc/gardener-dashboard/secrets/fga/apiToken',
+    configPath: 'fgaApiToken',
+  },
 ]
 
 function parseConfigValue (value, type) {
   switch (type) {
+    case 'Object':
+      return value
+        ? JSON.parse(value)
+        : undefined
     case 'Integer':
       value = parseInt(value, 10)
       return Number.isInteger(value) ? value : undefined

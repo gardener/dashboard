@@ -17,8 +17,11 @@ SPDX-License-Identifier: Apache-2.0
     </v-main>
     <template v-else>
       <g-loading />
-      <g-main-navigation />
-      <g-main-toolbar />
+      <template v-if="!isInIframe">
+        <g-main-navigation />
+        <g-main-toolbar />
+      </template>
+      <g-breadcrumbs v-else />
       <g-main-content ref="mainContent" />
       <g-notify />
     </template>
@@ -29,6 +32,7 @@ SPDX-License-Identifier: Apache-2.0
 import {
   ref,
   computed,
+  toRef,
   onMounted,
 } from 'vue'
 import { onBeforeRouteUpdate } from 'vue-router'
@@ -42,6 +46,7 @@ import GMainNavigation from '@/components/GMainNavigation.vue'
 import GMainToolbar from '@/components/GMainToolbar.vue'
 import GMainContent from '@/components/GMainContent.vue'
 import GNotify from '@/components/GNotify.vue'
+import GBreadcrumbs from '@/components/GBreadcrumbs.vue'
 
 import { useLogger } from '@/composables/useLogger'
 
@@ -52,6 +57,7 @@ const appStore = useAppStore()
 const authnStore = useAuthnStore()
 
 // refs
+const isInIframe = toRef(appStore, 'isInIframe')
 const app = ref(null)
 const mainContent = ref(null)
 

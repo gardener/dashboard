@@ -523,8 +523,9 @@ import {
 } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
 
-import includes from 'lodash/includes'
+import get from 'lodash/get'
 import set from 'lodash/set'
+import includes from 'lodash/includes'
 
 const logger = useLogger()
 const appStore = useAppStore()
@@ -644,6 +645,10 @@ async function updateProperty (key, value, options = {}) {
     const mergePatchDocument = {
       metadata: { name },
       spec: { namespace },
+    }
+    if (appStore.accountId && !get(projectStore.project, ['metadata', 'annotations', 'openmfp.org/account-id'])) {
+      set(mergePatchDocument, ['metadata', 'labels', 'openmfp.org/managed-by'], 'true')
+      set(mergePatchDocument, ['metadata', 'annotations', 'openmfp.org/account-id'], appStore.accountId)
     }
     set(mergePatchDocument, ['spec', key], value)
     await projectStore.patchProject(mergePatchDocument)
