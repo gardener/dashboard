@@ -13,7 +13,7 @@ const pEvent = require('p-event')
 const createError = require('http-errors')
 const tickets = require('../../lib/services/tickets')
 const cache = require('../../lib/cache')
-const io = require('../../lib/io')
+const ioHelper = require('../../lib/io/helper')
 const fixtures = require('../../__fixtures__')
 
 function publishEvent (socket, room, eventName, metadata) {
@@ -386,11 +386,11 @@ describe('api', function () {
   })
 
   describe('when the token will expire soon', () => {
-    const setDisconnectTimeout = io.setDisconnectTimeout
+    const setDisconnectTimeout = ioHelper.setDisconnectTimeout
     let mockSetDisconnectTimeout
 
     beforeEach(() => {
-      mockSetDisconnectTimeout = jest.spyOn(io, 'setDisconnectTimeout')
+      mockSetDisconnectTimeout = jest.spyOn(ioHelper, 'setDisconnectTimeout')
         .mockImplementation(socket => setDisconnectTimeout(socket, 500))
     })
 

@@ -626,7 +626,7 @@ const useShootStore = defineStore('shoot', () => {
       }
     }
     try {
-      const items = await socketStore.synchronize(uids)
+      const items = await socketStore.synchronize('shoots', uids)
       const notOnlyShootsWithIssues = !onlyAllShootsWithIssues(state, context)
       shootStore.$patch(({ state }) => {
         for (const uid of deletedUids) {

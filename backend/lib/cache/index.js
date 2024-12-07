@@ -95,6 +95,9 @@ module.exports = {
     }
     return project
   },
+  getProjectByUid (uid) {
+    return cache.get('projects').find(['metadata.uid', uid])
+  },
   getProjects () {
     return cache.getProjects()
   },
@@ -140,5 +143,15 @@ module.exports = {
   },
   getTicketCache () {
     return cache.getTicketCache()
+  },
+  getByUid (kind, uid) {
+    switch (kind) {
+      case 'Project':
+        return this.getProjectByUid(uid)
+      case 'Shoot':
+        return this.getShootByUid(uid)
+      default:
+        throw new TypeError(`Kind '${kind}' not supported`)
+    }
   },
 }
