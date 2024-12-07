@@ -34,6 +34,10 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { decodeBase64 } from '@/utils'
+
+import get from 'lodash/get'
+
 export default {
 
   props: {
@@ -47,6 +51,9 @@ export default {
     },
     secret: {
       type: Object,
+    },
+    providerType: {
+      type: String,
     },
     detailsTitle: {
       type: Boolean,
@@ -70,166 +77,178 @@ export default {
   methods: {
     getSecretDetailsInfra (secret) {
       const secretData = secret.data || {}
-      switch (secret.metadata.provider.type) {
-        case 'openstack':
-          return [
-            {
-              label: 'Domain Name',
-              value: secretData.domainName,
-            },
-            {
-              label: 'Tenant Name',
-              value: secretData.tenantName,
-            },
-          ]
-        case 'vsphere':
-          return [
-            {
-              label: 'vSphere Username',
-              value: secretData.vsphereUsername,
-            },
-            {
-              label: 'NSX-T Username',
-              value: secretData.nsxtUsername,
-            },
-          ]
-        case 'aws':
-          return [
-            {
-              label: 'Access Key ID',
-              value: secretData.accessKeyID,
-            },
-          ]
-        case 'azure':
-          return [
-            {
-              label: 'Subscription ID',
-              value: secretData.subscriptionID,
-            },
-          ]
-        case 'gcp':
-          return [
-            {
-              label: 'Project',
-              value: secretData.project,
-            },
-          ]
-        case 'alicloud':
-          return [
-            {
-              label: 'Access Key ID',
-              value: secretData.accessKeyID,
-            },
-          ]
-        case 'metal':
-          return [
-            {
-              label: 'API URL',
-              value: secretData.metalAPIURL,
-            },
-          ]
-        case 'hcloud':
-          return [
-            {
-              label: 'Hetzner Cloud Token',
-              value: secretData.hcloudToken,
-            },
-          ]
-        default:
-          return [
-            {
-              label: 'Secret Data',
-              value: JSON.stringify(secretData),
-            },
-          ]
+      const getGCPProjectId = () => {
+        const serviceAccount = get(secretData, ['serviceaccount.json'])
+        return get(JSON.parse(decodeBase64(serviceAccount)), ['project_id'])
+      }
+      try {
+        switch (this.providerType) {
+          case 'openstack':
+            return [
+              {
+                label: 'Domain Name',
+                value: decodeBase64(secretData.domainName),
+              },
+              {
+                label: 'Tenant Name',
+                value: decodeBase64(secretData.tenantName),
+              },
+            ]
+          case 'vsphere':
+            return [
+              {
+                label: 'vSphere Username',
+                value: decodeBase64(secretData.vsphereUsername),
+              },
+              {
+                label: 'NSX-T Username',
+                value: decodeBase64(secretData.nsxtUsername),
+              },
+            ]
+          case 'aws':
+            return [
+              {
+                label: 'Access Key ID',
+                value: decodeBase64(secretData.accessKeyID),
+              },
+            ]
+          case 'azure':
+            return [
+              {
+                label: 'Subscription ID',
+                value: decodeBase64(secretData.subscriptionID),
+              },
+            ]
+          case 'gcp':
+            return [
+              {
+                label: 'Project',
+                value: getGCPProjectId(),
+              },
+            ]
+          case 'alicloud':
+            return [
+              {
+                label: 'Access Key ID',
+                value: decodeBase64(secretData.accessKeyID),
+              },
+            ]
+          case 'metal':
+            return [
+              {
+                label: 'API URL',
+                value: decodeBase64(secretData.metalAPIURL),
+              },
+            ]
+          case 'hcloud':
+            return [
+              {
+                label: 'Hetzner Cloud Token',
+                value: decodeBase64(secretData.hcloudToken),
+              },
+            ]
+          default:
+            return [
+              {
+                label: 'Secret Data',
+                value: JSON.stringify(secretData),
+              },
+            ]
+        }
+      } catch (err) {
+        return undefined
       }
     },
     getSecretDetailsDns (secret) {
       const secretData = secret.data || {}
-      switch (secret.metadata.provider.type) {
-        case 'openstack-designate':
-          return [
-            {
-              label: 'Domain Name',
-              value: secretData.domainName,
-            },
-            {
-              label: 'Tenant Name',
-              value: secretData.tenantName,
-            },
-          ]
-        case 'aws-route53':
-          return [
-            {
-              label: 'Access Key ID',
-              value: secretData.accessKeyID,
-            },
-          ]
-        case 'azure-dns':
-        case 'azure-private-dns':
-          return [
-            {
-              label: 'Subscription ID',
-              value: secretData.subscriptionID,
-            },
-          ]
-        case 'google-clouddns':
-          return [
-            {
-              label: 'Project',
-              value: secretData.project,
-            },
-          ]
-        case 'alicloud-dns':
-          return [
-            {
-              label: 'Access Key ID',
-              value: secretData.accessKeyID,
-            },
-          ]
-        case 'infoblox-dns':
-          return [
-            {
-              label: 'Infoblox Username',
-              value: secretData.USERNAME,
-            },
-          ]
-        case 'cloudflare-dns':
-          return [
-            {
-              label: 'API Key',
-              value: 'hidden',
-            },
-          ]
-        case 'netlify-dns':
-          return [
-            {
-              label: 'API Key',
-              value: 'hidden',
-            },
-          ]
-        case 'rfc2136':
-          return [
-            {
-              label: 'Server',
-              value: secretData.Server,
-            },
-            {
-              label: 'TSIG Key Name',
-              value: secretData.TSIGKeyName,
-            },
-            {
-              label: 'Zone',
-              value: secretData.Zone,
-            },
-          ]
-        default:
-          return [
-            {
-              label: 'Secret Data',
-              value: JSON.stringify(secretData),
-            },
-          ]
+      try {
+        switch (this.providerType) {
+          case 'openstack-designate':
+            return [
+              {
+                label: 'Domain Name',
+                value: decodeBase64(secretData.domainName),
+              },
+              {
+                label: 'Tenant Name',
+                value: decodeBase64(secretData.tenantName),
+              },
+            ]
+          case 'aws-route53':
+            return [
+              {
+                label: 'Access Key ID',
+                value: decodeBase64(secretData.accessKeyID),
+              },
+            ]
+          case 'azure-dns':
+          case 'azure-private-dns':
+            return [
+              {
+                label: 'Subscription ID',
+                value: decodeBase64(secretData.subscriptionID),
+              },
+            ]
+          case 'google-clouddns':
+            return [
+              {
+                label: 'Project',
+                value: decodeBase64(secretData.project),
+              },
+            ]
+          case 'alicloud-dns':
+            return [
+              {
+                label: 'Access Key ID',
+                value: decodeBase64(secretData.accessKeyID),
+              },
+            ]
+          case 'infoblox-dns':
+            return [
+              {
+                label: 'Infoblox Username',
+                value: decodeBase64(secretData.USERNAME),
+              },
+            ]
+          case 'cloudflare-dns':
+            return [
+              {
+                label: 'API Key',
+                value: 'hidden',
+              },
+            ]
+          case 'netlify-dns':
+            return [
+              {
+                label: 'API Key',
+                value: 'hidden',
+              },
+            ]
+          case 'rfc2136':
+            return [
+              {
+                label: 'Server',
+                value: decodeBase64(secretData.Server),
+              },
+              {
+                label: 'TSIG Key Name',
+                value: decodeBase64(secretData.TSIGKeyName),
+              },
+              {
+                label: 'Zone',
+                value: decodeBase64(secretData.Zone),
+              },
+            ]
+          default:
+            return [
+              {
+                label: 'Secret Data',
+                value: JSON.stringify(secretData),
+              },
+            ]
+        }
+      } catch (err) {
+        return undefined
       }
     },
   },

@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <tr>
+  <tr :class="{ 'highlighted': item.highlighted }">
     <td v-if="selectedHeaders.name">
       <div class="d-flex">
         {{ item.name }}
@@ -39,7 +39,8 @@ SPDX-License-Identifier: Apache-2.0
       <g-secret-details-item-content
         infra
         class="py-1"
-        :secret="item.secret"
+        :secret="item.secretBinding._secret"
+        :provider-type="item.providerType"
       />
     </td>
     <td v-if="selectedHeaders.relatedShootCount">
@@ -119,11 +120,19 @@ export default {
   },
   methods: {
     onUpdate () {
-      this.$emit('update', this.item.secret)
+      this.$emit('update', this.item.secretBinding)
     },
     onDelete () {
-      this.$emit('delete', this.item.secret)
+      this.$emit('delete', this.item.secretBinding)
     },
   },
 }
 </script>
+
+<style lang="scss" scoped>
+  $highlighted-color: rgb(var(--v-theme-accent));
+
+  .highlighted {
+    background-color: $highlighted-color;
+  }
+</style>
