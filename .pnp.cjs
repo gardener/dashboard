@@ -949,7 +949,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@codemirror/autocomplete", "virtual:394dfa168191eeecf96909f25681b55b33ead8fc50fd0a11ab993dc4dac05b4b1625a43d289b67f5ea6f52728a72fd8b13e50efd2deb55615cce83baa304218a#npm:6.18.3"],\
           ["@codemirror/language", "npm:6.10.6"],\
-          ["@codemirror/state", "npm:6.4.1"],\
+          ["@codemirror/state", "npm:6.5.0"],\
           ["@codemirror/view", "npm:6.35.2"],\
           ["@lezer/common", "npm:1.2.3"],\
           ["@types/codemirror__language", null],\
@@ -975,7 +975,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@codemirror/commands", "npm:6.7.1"],\
           ["@codemirror/language", "npm:6.10.6"],\
-          ["@codemirror/state", "npm:6.4.1"],\
+          ["@codemirror/state", "npm:6.5.0"],\
           ["@codemirror/view", "npm:6.35.2"],\
           ["@lezer/common", "npm:1.2.3"]\
         ],\
@@ -989,7 +989,7 @@ const RAW_RUNTIME_STATE =
           ["@codemirror/lang-yaml", "npm:6.1.1"],\
           ["@codemirror/autocomplete", "virtual:394dfa168191eeecf96909f25681b55b33ead8fc50fd0a11ab993dc4dac05b4b1625a43d289b67f5ea6f52728a72fd8b13e50efd2deb55615cce83baa304218a#npm:6.18.3"],\
           ["@codemirror/language", "npm:6.10.6"],\
-          ["@codemirror/state", "npm:6.4.1"],\
+          ["@codemirror/state", "npm:6.5.0"],\
           ["@lezer/common", "npm:1.2.3"],\
           ["@lezer/highlight", "npm:1.2.1"],\
           ["@lezer/lr", "npm:1.4.2"],\
@@ -1003,7 +1003,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/@codemirror-language-npm-6.10.6-46cac28271-8d68121659.zip/node_modules/@codemirror/language/",\
         "packageDependencies": [\
           ["@codemirror/language", "npm:6.10.6"],\
-          ["@codemirror/state", "npm:6.4.1"],\
+          ["@codemirror/state", "npm:6.5.0"],\
           ["@codemirror/view", "npm:6.35.2"],\
           ["@lezer/common", "npm:1.2.3"],\
           ["@lezer/highlight", "npm:1.2.1"],\
@@ -1018,7 +1018,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/@codemirror-search-npm-6.5.8-9785bd8f0e-67a36fb078.zip/node_modules/@codemirror/search/",\
         "packageDependencies": [\
           ["@codemirror/search", "npm:6.5.8"],\
-          ["@codemirror/state", "npm:6.4.1"],\
+          ["@codemirror/state", "npm:6.5.0"],\
           ["@codemirror/view", "npm:6.35.2"],\
           ["crelt", "npm:1.0.6"]\
         ],\
@@ -1026,10 +1026,11 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@codemirror/state", [\
-      ["npm:6.4.1", {\
-        "packageLocation": "./.yarn/cache/@codemirror-state-npm-6.4.1-3f770fdaf1-cdab74d0ca.zip/node_modules/@codemirror/state/",\
+      ["npm:6.5.0", {\
+        "packageLocation": "./.yarn/cache/@codemirror-state-npm-6.5.0-cc8408a413-740425d605.zip/node_modules/@codemirror/state/",\
         "packageDependencies": [\
-          ["@codemirror/state", "npm:6.4.1"]\
+          ["@codemirror/state", "npm:6.5.0"],\
+          ["@marijn/find-cluster-break", "npm:1.0.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -1040,7 +1041,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@codemirror/theme-one-dark", "npm:6.1.2"],\
           ["@codemirror/language", "npm:6.10.6"],\
-          ["@codemirror/state", "npm:6.4.1"],\
+          ["@codemirror/state", "npm:6.5.0"],\
           ["@codemirror/view", "npm:6.35.2"],\
           ["@lezer/highlight", "npm:1.2.1"]\
         ],\
@@ -1052,7 +1053,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/@codemirror-view-npm-6.35.2-59c9fc0a9d-2f129a65ce.zip/node_modules/@codemirror/view/",\
         "packageDependencies": [\
           ["@codemirror/view", "npm:6.35.2"],\
-          ["@codemirror/state", "npm:6.4.1"],\
+          ["@codemirror/state", "npm:6.5.0"],\
           ["style-mod", "npm:4.1.2"],\
           ["w3c-keyname", "npm:2.2.8"]\
         ],\
@@ -1703,7 +1704,7 @@ const RAW_RUNTIME_STATE =
           ["@codemirror/lang-yaml", "npm:6.1.1"],\
           ["@codemirror/language", "npm:6.10.6"],\
           ["@codemirror/search", "npm:6.5.8"],\
-          ["@codemirror/state", "npm:6.4.1"],\
+          ["@codemirror/state", "npm:6.5.0"],\
           ["@codemirror/theme-one-dark", "npm:6.1.2"],\
           ["@codemirror/view", "npm:6.35.2"],\
           ["@fontsource/roboto", "npm:5.1.0"],\
@@ -2435,6 +2436,15 @@ const RAW_RUNTIME_STATE =
           ["@lezer/common", "npm:1.2.3"],\
           ["@lezer/highlight", "npm:1.2.1"],\
           ["@lezer/lr", "npm:1.4.2"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["@marijn/find-cluster-break", [\
+      ["npm:1.0.0", {\
+        "packageLocation": "./.yarn/cache/@marijn-find-cluster-break-npm-1.0.0-f3aab0e89c-396ba386b0.zip/node_modules/@marijn/find-cluster-break/",\
+        "packageDependencies": [\
+          ["@marijn/find-cluster-break", "npm:1.0.0"]\
         ],\
         "linkType": "HARD"\
       }]\
