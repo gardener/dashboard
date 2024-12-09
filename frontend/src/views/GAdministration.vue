@@ -511,7 +511,7 @@ import GShootCustomFieldsConfiguration from '@/components/GShootCustomFieldsConf
 import GResourceQuotaHelp from '@/components/GResourceQuotaHelp.vue'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 
-import { useLuigiContext } from '@/composables/useLuigiContext'
+import { useOpenMFP } from '@/composables/useOpenMFP'
 import { useProvideProjectItem } from '@/composables/useProjectItem'
 import { useProvideProjectContext } from '@/composables/useProjectContext'
 import { useLogger } from '@/composables/useLogger'
@@ -529,7 +529,7 @@ import set from 'lodash/set'
 import includes from 'lodash/includes'
 
 const logger = useLogger()
-const luigiContext = useLuigiContext()
+const openMFP = useOpenMFP()
 const appStore = useAppStore()
 const configStore = useConfigStore()
 const quotaStore = useQuotaStore()
@@ -543,7 +543,7 @@ const route = useRoute()
 const router = useRouter()
 
 useProvideProjectContext({
-  luigiContext,
+  openMFP,
   configStore,
 })
 
@@ -651,9 +651,9 @@ async function updateProperty (key, value, options = {}) {
       metadata: { name },
       spec: { namespace },
     }
-    if (luigiContext.accountId && !get(projectStore.project, ['metadata', 'annotations', 'openmfp.org/account-id'])) {
+    if (openMFP.accountId && !get(projectStore.project, ['metadata', 'annotations', 'openmfp.org/account-id'])) {
       set(mergePatchDocument, ['metadata', 'labels', 'openmfp.org/managed-by'], 'true')
-      set(mergePatchDocument, ['metadata', 'annotations', 'openmfp.org/account-id'], luigiContext.accountId)
+      set(mergePatchDocument, ['metadata', 'annotations', 'openmfp.org/account-id'], openMFP.accountId)
     }
     set(mergePatchDocument, ['spec', key], value)
     await projectStore.patchProject(mergePatchDocument)

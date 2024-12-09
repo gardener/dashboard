@@ -16,7 +16,7 @@ import LuigiClient from '@luigi-project/client'
 import { useLogger } from '@/composables/useLogger'
 import { useIsInIframe } from '@/composables/useIsInIframe'
 
-export const useLuigiContext = createGlobalState(() => {
+export const useOpenMFP = createGlobalState(() => {
   const logger = useLogger()
   const isInIframe = useIsInIframe()
 

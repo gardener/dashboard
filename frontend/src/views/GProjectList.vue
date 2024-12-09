@@ -139,22 +139,22 @@ import GProjectDialog from '@/components/dialogs/GProjectDialog.vue'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
 
-import { useLuigiContext } from '@/composables/useLuigiContext'
+import { useOpenMFP } from '@/composables/useOpenMFP'
 
 import get from 'lodash/get'
 import filter from 'lodash/filter'
 
 const projectStore = useProjectStore()
 const authzStore = useAuthzStore()
-const luigiContext = useLuigiContext
+const openMFP = useOpenMFP()
 
 const canCreateProject = toRef(authzStore, 'canCreateProject')
 
 const projectDialog = ref(false)
 
 const projectList = computed(() => {
-  const belongsToAccount = project => luigiContext.accountId === get(project, ['metadata', 'annotations', 'openmfp.org/account-id'])
-  return !luigiContext.accountId
+  const belongsToAccount = project => openMFP.accountId === get(project, ['metadata', 'annotations', 'openmfp.org/account-id'])
+  return !openMFP.accountId
     ? projectStore.projectList
     : filter(projectStore.projectList, belongsToAccount)
 })

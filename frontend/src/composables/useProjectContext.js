@@ -15,7 +15,7 @@ import {
 import { useConfigStore } from '@/store/config'
 
 import { cleanup } from '@/composables/helper'
-import { useLuigiContext } from '@/composables/useLuigiContext'
+import { useOpenMFP } from '@/composables/useOpenMFP'
 import { useProjectShootCustomFields } from '@/composables/useProjectShootCustomFields'
 import { useProjectMetadata } from '@/composables/useProjectMetadata'
 import { useProjectCostObject } from '@/composables/useProjectCostObject'
@@ -27,7 +27,7 @@ import set from 'lodash/set'
 
 export function createProjectContextComposable (options = {}) {
   const {
-    luigiContext = useLuigiContext(),
+    openMFP = useOpenMFP(),
     configStore = useConfigStore(),
   } = options
 
@@ -62,9 +62,9 @@ export function createProjectContextComposable (options = {}) {
 
   function createProjectManifest () {
     manifest.value = {}
-    if (luigiContext.accountId) {
+    if (openMFP.accountId) {
       set(manifest.value, ['metadata', 'label', 'openmfp.org/managed-by'], 'true')
-      set(manifest.value, ['metadata', 'annotations', 'openmfp.org/account-id'], luigiContext.accountId)
+      set(manifest.value, ['metadata', 'annotations', 'openmfp.org/account-id'], openMFP.accountId)
     }
     initialManifest.value = cloneDeep(normalizedManifest.value)
   }

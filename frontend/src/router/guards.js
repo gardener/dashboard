@@ -18,14 +18,14 @@ import { useSeedStore } from '@/store/seed'
 import { useShootStore } from '@/store/shoot'
 import { useTerminalStore } from '@/store/terminal'
 
-import { useLuigiContext } from '@/composables/useLuigiContext'
+import { useOpenMFP } from '@/composables/useOpenMFP'
 import { useLogger } from '@/composables/useLogger'
 import { useApi } from '@/composables/useApi'
 
 export function createGlobalBeforeGuards () {
   const logger = useLogger()
   const api = useApi()
-  const luigiContext = useLuigiContext()
+  const openMFP = useOpenMFP()
   const appStore = useAppStore()
   const authnStore = useAuthnStore()
   const configStore = useConfigStore()
@@ -52,7 +52,7 @@ export function createGlobalBeforeGuards () {
         return true
       }
 
-      const context = await luigiContext.getLuigiContext()
+      const context = await openMFP.getLuigiContext()
       if (context) {
         logger.debug('Luigi context:', context)
         const token = context.token

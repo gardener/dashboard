@@ -34,7 +34,7 @@ import { useProjectStore } from '@/store/project'
 
 import { useCustomColors } from '@/composables/useCustomColors'
 
-import { useLuigiContext } from './composables/useLuigiContext'
+import { useOpenMFP } from './composables/useOpenMFP'
 
 import get from 'lodash/get'
 
@@ -47,9 +47,9 @@ const loginStore = useLoginStore()
 const shootStore = useShootStore()
 const projectStore = useProjectStore()
 const logger = inject('logger')
-const luigiContext = useLuigiContext()
+const openMFP = useOpenMFP()
 
-luigiContext.setRoute(route)
+openMFP.setRoute(route)
 
 async function setCustomColors () {
   try {
