@@ -25,7 +25,6 @@ import { useApi } from '@/composables/useApi'
 export function createGlobalBeforeGuards () {
   const logger = useLogger()
   const api = useApi()
-  const openMFP = useOpenMFP()
   const appStore = useAppStore()
   const authnStore = useAuthnStore()
   const configStore = useConfigStore()
@@ -52,6 +51,7 @@ export function createGlobalBeforeGuards () {
         return true
       }
 
+      const openMFP = useOpenMFP()
       const context = await openMFP.getLuigiContext()
       if (context) {
         logger.debug('Luigi context:', context)

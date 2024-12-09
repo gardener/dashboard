@@ -4,21 +4,28 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import { useRoute } from 'vue-router'
+import {
+  until,
+  createGlobalState,
+} from '@vueuse/core'
+import LuigiClient from '@luigi-project/client'
 import {
   computed,
   ref,
   toRef,
   watch,
 } from 'vue'
-import { createGlobalState } from '@vueuse/core'
-import LuigiClient from '@luigi-project/client'
 
 import { useLogger } from '@/composables/useLogger'
 import { useIsInIframe } from '@/composables/useIsInIframe'
 
-export const useOpenMFP = createGlobalState(() => {
-  const logger = useLogger()
-  const isInIframe = useIsInIframe()
+export const useOpenMFP = createGlobalState((options = {}) => {
+  const {
+    logger = useLogger(),
+    isInIframe = useIsInIframe(),
+    route = useRoute(),
+  } = options
 
   const luigiContext = ref(null)
 
@@ -26,6 +33,14 @@ export const useOpenMFP = createGlobalState(() => {
     logger.debug('Registering listener for Luigi context initialization and context updates')
     LuigiClient.addInitListener(context => setLuigiContext(context))
     LuigiClient.addContextUpdateListener(context => setLuigiContext(context))
+    const pathname = toRef(route, 'path')
+    watch(pathname, value => {
+      if (value) {
+        LuigiClient.linkManager().fromVirtualTreeRoot().withoutSync().navigate(value)
+      }
+    }, {
+      immediate: true,
+    })
   }
 
   function setLuigiContext (value) {
@@ -34,49 +49,29 @@ export const useOpenMFP = createGlobalState(() => {
 
   const accountId = computed(() => luigiContext.value?.accountId)
 
-  function getLuigiContext () {
+  async function getLuigiContext () {
     if (!isInIframe.value) {
-      return Promise.resolve(null)
+      return null
     }
     if (luigiContext.value !== null) {
-      return Promise.resolve(luigiContext.value)
+      return luigiContext.value
     }
-    return new Promise(resolve => {
-      const timeout = 3000
-      const timeoutId = setTimeout(() => {
-        unwatch()
-        logger.error('The initialization of the Luigi Client has timed out after %d milliseconds', timeout)
-        resolve(null)
-      }, timeout)
-      const unwatch = watch(luigiContext, context => {
-        if (context !== null) {
-          clearTimeout(timeoutId)
-          unwatch()
-          resolve(context)
-        }
-      }, {
-        immediate: true,
+    const timeout = 3000
+    try {
+      await until(luigiContext).toBeTruthy({
+        timeout: 1000,
+        throwOnTimeout: true,
       })
-    })
-  }
-
-  function setRoute (route) {
-    if (isInIframe.value) {
-      const pathname = toRef(route, 'path')
-      watch(pathname, value => {
-        if (value) {
-          LuigiClient.linkManager().fromVirtualTreeRoot().withoutSync().navigate(value)
-        }
-      }, {
-        immediate: true,
-      })
+      return luigiContext.value
+    } catch (err) {
+      logger.error('The initialization of the Luigi Client has timed out after %d milliseconds', timeout)
+      return null
     }
   }
 
   return {
     accountId,
     luigiContext,
-    setRoute,
     getLuigiContext,
   }
 })

@@ -34,8 +34,6 @@ import { useProjectStore } from '@/store/project'
 
 import { useCustomColors } from '@/composables/useCustomColors'
 
-import { useOpenMFP } from './composables/useOpenMFP'
-
 import get from 'lodash/get'
 
 const theme = useTheme()
@@ -47,9 +45,6 @@ const loginStore = useLoginStore()
 const shootStore = useShootStore()
 const projectStore = useProjectStore()
 const logger = inject('logger')
-const openMFP = useOpenMFP()
-
-openMFP.setRoute(route)
 
 async function setCustomColors () {
   try {
