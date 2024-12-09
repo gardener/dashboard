@@ -48,28 +48,39 @@ export function getConfiguration () {
   return getResource('/api/config')
 }
 
-/* CloudProviders Secrets */
-
-export function getCloudProviderSecrets ({ namespace }) {
-  namespace = encodeURIComponent(namespace)
-  return getResource(`/api/namespaces/${namespace}/cloudprovidersecrets`)
+/* Credentials */
+function invokeCloudProviderCredentialMethod (method, params) {
+  return callResourceMethod('/api/cloudprovidercredentials', {
+    method,
+    params,
+  })
 }
 
-export function updateCloudProviderSecret ({ namespace, name, data }) {
+export function getCloudProviderCredentials ({ namespace, params = {} }) {
   namespace = encodeURIComponent(namespace)
-  name = encodeURIComponent(name)
-  return updateResource(`/api/namespaces/${namespace}/cloudprovidersecrets/${name}`, data)
+  params.secretBindingNamespace = namespace
+  return invokeCloudProviderCredentialMethod('list', params)
 }
 
-export function createCloudProviderSecret ({ namespace, data }) {
+export function createCloudProviderCredential ({ namespace, name, params = {} }) {
   namespace = encodeURIComponent(namespace)
-  return createResource(`/api/namespaces/${namespace}/cloudprovidersecrets`, data)
+  params.secretBindingNamespace = namespace
+  params.secretBindingName = name
+  return invokeCloudProviderCredentialMethod('create', params)
 }
 
-export function deleteCloudProviderSecret ({ namespace, name }) {
+export function updateCloudProviderCredential ({ namespace, name, params = {} }) {
   namespace = encodeURIComponent(namespace)
-  name = encodeURIComponent(name)
-  return deleteResource(`/api/namespaces/${namespace}/cloudprovidersecrets/${name}`)
+  params.secretBindingNamespace = namespace
+  params.secretBindingName = name
+  return invokeCloudProviderCredentialMethod('patch', params)
+}
+
+export function deleteCloudProviderCredential ({ namespace, name, params = {} }) {
+  namespace = encodeURIComponent(namespace)
+  params.secretBindingNamespace = namespace
+  params.secretBindingName = name
+  return invokeCloudProviderCredentialMethod('remove', params)
 }
 
 /* Tickets */
@@ -396,10 +407,10 @@ export function getResourceQuotas ({ namespace }) {
 
 export default {
   getConfiguration,
-  getCloudProviderSecrets,
-  updateCloudProviderSecret,
-  createCloudProviderSecret,
-  deleteCloudProviderSecret,
+  getCloudProviderCredentials,
+  createCloudProviderCredential,
+  updateCloudProviderCredential,
+  deleteCloudProviderCredential,
   getIssues,
   getIssuesAndComments,
   getShoots,
