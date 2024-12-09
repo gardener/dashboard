@@ -14,6 +14,9 @@ const shoots = require('./shoots')
 const authorization = require('./authorization')
 const { projectFilter, trimProject } = require('../utils')
 const cache = require('../cache')
+const logger = require('../logger')
+const openfga = require('../openfga')
+
 const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
 
 async function validateDeletePreconditions ({ user, name }) {
@@ -26,11 +29,22 @@ async function validateDeletePreconditions ({ user, name }) {
   }
 }
 
-exports.list = async function ({ user }) {
-  const canListProjects = await authorization.canListProjects(user)
+exports.list = async function ({ user, canListProjects }) {
+  if (typeof canListProjects !== 'boolean') {
+    canListProjects = await authorization.canListProjects(user)
+  }
+  let projectAllowList = []
+  if (openfga.client) {
+    try {
+      projectAllowList = await openfga.listProjects(user.id)
+    } catch (err) {
+      logger.error('openfga query failed: %s', err)
+    }
+  }
   return _
     .chain(cache.getProjects())
-    .filter(projectFilter(user, canListProjects))
+    .filter(projectFilter(user, canListProjects, projectAllowList))
+    .forEach(project => setComputedProjectAnnotations(project))
     .map(_.cloneDeep)
     .map(trimProject)
     .value()
@@ -39,8 +53,10 @@ exports.list = async function ({ user }) {
 exports.create = async function ({ user, body }) {
   const client = user.client
 
+  const accountId = _.get(body, ['metadata', 'annotations', 'openmfp.org/account-id'])
   const name = _.get(body, ['metadata', 'name'])
-  _.set(body, ['spec', 'namespace'], `garden-${name}`)
+  const namespace = `garden-${name}`
+  _.set(body, ['spec', 'namespace'], namespace)
   let project = await client['core.gardener.cloud'].projects.create(body)
 
   const isProjectReady = ({ type, object: project }) => {
@@ -55,6 +71,13 @@ exports.create = async function ({ user, body }) {
   // must be the dashboardClient because rbac rolebinding does not exist yet
   const asyncIterable = await dashboardClient['core.gardener.cloud'].projects.watch(name)
   project = await asyncIterable.until(isProjectReady, { timeout })
+  if (openfga.client && accountId) {
+    try {
+      await openfga.writeProject(namespace, accountId)
+    } catch (err) {
+      logger.error('Failed to write openfga account releation:', err)
+    }
+  }
 
   return project
 }
@@ -64,13 +87,23 @@ exports.projectInitializationTimeout = PROJECT_INITIALIZATION_TIMEOUT
 exports.read = async function ({ user, name }) {
   const client = user.client
   const project = await client['core.gardener.cloud'].projects.get(name)
+  setComputedProjectAnnotations(project)
   return project
 }
 
 exports.patch = async function ({ user, name, body }) {
   const client = user.client
   const project = await client['core.gardener.cloud'].projects.mergePatch(name, body)
+  setComputedProjectAnnotations(project)
   return project
+}
+
+function setComputedProjectAnnotations (project) {
+  if (process.env.NODE_ENV === 'test') {
+    return
+  }
+  const shoots = cache.getShoots(project.spec.namespace) ?? []
+  _.set(project, ['metadata', 'annotations', 'computed.gardener.cloud/number-of-shoots'], shoots.length)
 }
 
 exports.remove = async function ({ user, name }) {

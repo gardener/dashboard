@@ -8,9 +8,12 @@ SPDX-License-Identifier: Apache-2.0
   <v-container fluid>
     <v-card class="ma-3">
       <g-toolbar
-        :height="72"
+        :height="isInIframe ? 48 : 72"
       >
-        <template #prepend>
+        <template
+          v-if="!isInIframe"
+          #prepend
+        >
           <g-icon-base
             width="44"
             height="60"
@@ -21,10 +24,13 @@ SPDX-License-Identifier: Apache-2.0
             <g-certified-kubernetes />
           </g-icon-base>
         </template>
-        <div class="text-h5">
-          Kubernetes Clusters
+        <div :class="!isInIframe ? 'text-h5' : 'text-body-1'">
+          Clusters
         </div>
-        <div class="text-caption">
+        <div
+          v-if=" !isInIframe"
+          class="text-caption"
+        >
           {{ headlineSubtitle }}
         </div>
         <template #append>
@@ -201,8 +207,8 @@ SPDX-License-Identifier: Apache-2.0
 import {
   ref,
   reactive,
-  provide,
   toRef,
+  provide,
   watch,
 } from 'vue'
 import {
@@ -212,6 +218,7 @@ import {
 } from 'pinia'
 import { useUrlSearchParams } from '@vueuse/core'
 
+import { useAppStore } from '@/store/app'
 import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
 import { useShootStore } from '@/store/shoot'
@@ -291,6 +298,8 @@ export default {
     const activePopoverKey = ref('')
     const expandedWorkerGroups = reactive({ default: false })
     const expandedAccessRestrictions = reactive({ default: false })
+    const appStore = useAppStore()
+    const isInIframe = toRef(appStore, 'isInIframe')
     provide('activePopoverKey', activePopoverKey)
     provide('expandedWorkerGroups', expandedWorkerGroups)
     provide('expandedAccessRestrictions', expandedAccessRestrictions)
@@ -333,6 +342,7 @@ export default {
     }
 
     return {
+      isInIframe,
       activePopoverKey,
       expandedWorkerGroups,
       expandedAccessRestrictions,

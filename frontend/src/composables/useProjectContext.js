@@ -12,6 +12,9 @@ import {
   provide,
 } from 'vue'
 
+import { useAppStore } from '@/store/app'
+import { useConfigStore } from '@/store/config'
+
 import { cleanup } from '@/composables/helper'
 
 import { useProjectShootCustomFields } from './useProjectShootCustomFields'
@@ -23,7 +26,12 @@ import get from 'lodash/get'
 import isEqual from 'lodash/isEqual'
 import set from 'lodash/set'
 
-export function createProjectContextComposable () {
+export function createProjectContextComposable (options = {}) {
+  const {
+    appStore = useAppStore(),
+    configStore = useConfigStore(),
+  } = options
+
   function normalizeManifest (value) {
     const object = Object.assign({
       apiVersion: 'core.gardener.cloud/v1beta1',
@@ -55,6 +63,10 @@ export function createProjectContextComposable () {
 
   function createProjectManifest () {
     manifest.value = {}
+    if (appStore.accountId) {
+      set(manifest.value, ['metadata', 'label', 'openmfp.org/managed-by'], 'true')
+      set(manifest.value, ['metadata', 'annotations', 'openmfp.org/account-id'], appStore.accountId)
+    }
     initialManifest.value = cloneDeep(normalizedManifest.value)
   }
 
@@ -106,10 +118,14 @@ export function createProjectContextComposable () {
 
   /* costObject */
   const {
+
     costObject,
     costObjectType,
     getCostObjectPatchDocument,
-  } = useProjectCostObject(manifest, { projectMetadataComposable })
+  } = useProjectCostObject(manifest, {
+    configStore,
+    projectMetadataComposable,
+  })
 
   return {
     /* manifest */

@@ -23,6 +23,7 @@ import {
   useDocumentVisibility,
   useTitle,
 } from '@vueuse/core'
+import { useRouteQuery } from '@vueuse/router'
 import { useRoute } from 'vue-router'
 
 import { useConfigStore } from '@/store/config'
@@ -30,6 +31,7 @@ import { useLoginStore } from '@/store/login'
 import { useLocalStorageStore } from '@/store/localStorage'
 import { useShootStore } from '@/store/shoot'
 import { useProjectStore } from '@/store/project'
+import { useAppStore } from '@/store/app'
 
 import { useCustomColors } from '@/composables/useCustomColors'
 
@@ -43,7 +45,10 @@ const configStore = useConfigStore()
 const loginStore = useLoginStore()
 const shootStore = useShootStore()
 const projectStore = useProjectStore()
+const appStore = useAppStore()
 const logger = inject('logger')
+
+appStore.setRoute(route)
 
 async function setCustomColors () {
   try {
@@ -55,6 +60,8 @@ async function setCustomColors () {
 setCustomColors()
 
 const colorScheme = toRef(localStorageStore, 'colorScheme')
+const sapTheme = useRouteQuery('sap-theme')
+
 const { system } = useColorMode({
   storageRef: colorScheme,
   onChanged (value) {
@@ -78,6 +85,14 @@ onKeyStroke('Escape', e => {
 watch(visibility, (current, previous) => {
   if (current === 'visible' && previous === 'hidden') {
     shootStore.invokeSubscriptionEventHandler()
+  }
+})
+
+watch(sapTheme, value => {
+  if (value && typeof value === 'string') {
+    theme.global.name.value = colorScheme.value = value.endsWith('dark')
+      ? 'dark'
+      : 'light'
   }
 })
 

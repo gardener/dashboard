@@ -19,9 +19,11 @@ import { useShootStore } from '@/store/shoot'
 import { useTerminalStore } from '@/store/terminal'
 
 import { useLogger } from '@/composables/useLogger'
+import { useApi } from '@/composables/useApi'
 
 export function createGlobalBeforeGuards () {
   const logger = useLogger()
+  const api = useApi()
   const appStore = useAppStore()
   const authnStore = useAuthnStore()
   const configStore = useConfigStore()
@@ -32,7 +34,7 @@ export function createGlobalBeforeGuards () {
   const kubeconfigStore = useKubeconfigStore()
 
   function ensureUserAuthenticatedForNonPublicRoutes () {
-    return to => {
+    return async to => {
       const {
         meta = {},
         fullPath: redirectPath,
@@ -46,6 +48,23 @@ export function createGlobalBeforeGuards () {
 
       if (!authnStore.isExpired()) {
         return true
+      }
+
+      const context = await appStore.getLuigiContext()
+      if (context) {
+        logger.debug('Luigi context:', context)
+        const token = context.token
+        if (token) {
+          try {
+            await api.createTokenReview({ token })
+            authnStore.$reset()
+            if (!authnStore.isExpired()) {
+              return true
+            }
+          } catch (err) {
+            logger.error('Luigi token review error: %s', err.message)
+          }
+        }
       }
 
       const message = !authnStore.user
@@ -128,7 +147,7 @@ export function createGlobalResolveGuards () {
         switch (to.name) {
           case 'Home':
           case 'ProjectList': {
-            // no action required for redirect routes
+            await projectStore.fetchProjects()
             break
           }
           case 'Secrets':
