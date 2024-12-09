@@ -32,7 +32,6 @@ SPDX-License-Identifier: Apache-2.0
 import {
   ref,
   computed,
-  toRef,
   onMounted,
 } from 'vue'
 import { onBeforeRouteUpdate } from 'vue-router'
@@ -49,15 +48,16 @@ import GNotify from '@/components/GNotify.vue'
 import GBreadcrumbs from '@/components/GBreadcrumbs.vue'
 
 import { useLogger } from '@/composables/useLogger'
+import { useIsInIframe } from '@/composables/useIsInIframe'
 
 import get from 'lodash/get'
 
 const logger = useLogger()
+const isInIframe = useIsInIframe()
 const appStore = useAppStore()
 const authnStore = useAuthnStore()
 
 // refs
-const isInIframe = toRef(appStore, 'isInIframe')
 const app = ref(null)
 const mainContent = ref(null)
 
