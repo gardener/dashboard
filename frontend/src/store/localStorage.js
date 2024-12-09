@@ -49,11 +49,11 @@ function createLocalStorageRef (key, initialValue) {
 }
 
 const useLazyLocalStorage = () => {
-  const route = useRoute()
   const projectStore = useProjectStore()
 
   const keys = {
     get terminalSplitpaneTree () {
+      const route = useRoute()
       const routeName = getRouteName(route)
       const { name, namespace } = route.params
       const keys = [routeName, namespace]
