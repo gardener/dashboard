@@ -6,7 +6,6 @@
 
 'use strict'
 
-const _ = require('lodash')
 const createError = require('http-errors')
 const cache = require('../cache')
 const logger = require('../logger')
@@ -80,7 +79,7 @@ function unsubscribe (socket) {
 }
 
 const synchronize = synchronizeFactory('Shoot', {
-  predicate (socket, object) {
+  accessResolver (socket, object) {
     const rooms = Array.from(socket.rooms).filter(room => room !== socket.id)
     const [
       isAdmin,
@@ -91,11 +90,11 @@ const synchronize = synchronizeFactory('Shoot', {
     const { namespace, name } = object.metadata
     const qualifiedName = [namespace, name].join('/')
     if (qualifiedNames.includes(qualifiedName)) {
-      return constants.OBJECT_UNMODIFIED
+      return constants.OBJECT_ORIGINAL
     } else if (isAdmin || namespaces.includes(namespace)) {
-      return constants.OBJECT_DEFAULT
+      return constants.OBJECT_SIMPLE
     }
-    return constants.OBJECT_FORBIDDEN
+    return constants.OBJECT_NONE
   },
 })
 

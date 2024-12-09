@@ -9,7 +9,7 @@
 const express = require('express')
 const { shoots } = require('../services')
 const { metricsRoute } = require('../middleware')
-const { trimObjectMetadata } = require('../utils')
+const { simplifyObjectMetadata } = require('../utils')
 
 const router = module.exports = express.Router({
   mergeParams: true,
@@ -26,7 +26,7 @@ router.route('/')
       const labelSelector = req.query.labelSelector
       const shootList = await shoots.list({ user, namespace, labelSelector })
       for (const object of shootList.items) {
-        trimObjectMetadata(object)
+        simplifyObjectMetadata(object)
       }
       res.send(shootList)
     } catch (err) {

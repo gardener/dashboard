@@ -99,7 +99,7 @@ function parseRooms (rooms) {
   ]
 }
 
-function trimObjectMetadata (object) {
+function simplifyObjectMetadata (object) {
   object.metadata.managedFields = undefined
   if (object.metadata.annotations) {
     object.metadata.annotations['kubectl.kubernetes.io/last-applied-configuration'] = undefined
@@ -107,8 +107,8 @@ function trimObjectMetadata (object) {
   return object
 }
 
-function trimProject (project) {
-  project = trimObjectMetadata(project)
+function simplifyProject (project) {
+  project = simplifyObjectMetadata(project)
   _.set(project, ['spec', 'members'], undefined)
   return project
 }
@@ -247,8 +247,8 @@ module.exports = {
   isMemberOf,
   projectFilter,
   parseRooms,
-  trimObjectMetadata,
-  trimProject,
+  simplifyObjectMetadata,
+  simplifyProject,
   parseSelectors,
   filterBySelectors,
   getConfigValue,

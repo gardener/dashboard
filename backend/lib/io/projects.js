@@ -7,7 +7,10 @@
 'use strict'
 
 const { get } = require('lodash')
-const { isMemberOf } = require('../utils')
+const {
+  isMemberOf,
+  simplifyProject,
+} = require('../utils')
 const {
   constants,
   getUserFromSocket,
@@ -17,11 +20,12 @@ const {
 module.exports = {
   synchronize: synchronizeFactory('Project', {
     group: 'core.gardener.cloud',
-    predicate (socket, object) {
+    accessResolver (socket, object) {
       const user = getUserFromSocket(socket)
       return get(user, ['profiles', 'canListProjects'], false) || isMemberOf(object, user)
-        ? constants.OBJECT_DEFAULT
-        : constants.OBJECT_FORBIDDEN
+        ? constants.OBJECT_SIMPLE
+        : constants.OBJECT_NONE
     },
+    simplifyObject: simplifyProject,
   }),
 }

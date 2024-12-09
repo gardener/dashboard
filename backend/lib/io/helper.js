@@ -14,7 +14,7 @@ const cache = require('../cache')
 const logger = require('../logger')
 const authorization = require('../services/authorization')
 const { authenticate } = require('../security')
-const { trimObjectMetadata } = require('../utils')
+const { simplifyObjectMetadata } = require('../utils')
 
 const { isHttpError } = createError
 
@@ -143,15 +143,16 @@ function uidNotFoundFactory (group, kind) {
 }
 
 const constants = Object.freeze({
-  OBJECT_FORBIDDEN: 0,
-  OBJECT_DEFAULT: 1,
-  OBJECT_UNMODIFIED: 2,
+  OBJECT_NONE: 0,
+  OBJECT_SIMPLE: 1,
+  OBJECT_ORIGINAL: 2,
 })
 
 function synchronizeFactory (kind, options = {}) {
   const {
     group = 'core.gardener.cloud',
-    predicate = () => constants.OBJECT_DEFAULT,
+    accessResolver = () => constants.OBJECT_SIMPLE,
+    simplifyObject = simplifyObjectMetadata,
   } = options
   const uidNotFound = uidNotFoundFactory(group, kind)
 
@@ -162,13 +163,13 @@ function synchronizeFactory (kind, options = {}) {
         // the project has been removed from the cache
         return uidNotFound(uid)
       }
-      switch (predicate(socket, object)) {
-        case constants.OBJECT_DEFAULT: {
+      switch (accessResolver(socket, object)) {
+        case constants.OBJECT_SIMPLE: {
           const clonedObject = cloneDeep(object)
-          trimObjectMetadata(clonedObject)
+          simplifyObject(clonedObject)
           return clonedObject
         }
-        case constants.OBJECT_UNMODIFIED: {
+        case constants.OBJECT_ORIGINAL: {
           return object
         }
         default: {
