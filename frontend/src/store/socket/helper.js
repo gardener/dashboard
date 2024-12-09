@@ -17,6 +17,7 @@ export function createSocket (state, context) {
     authnStore,
     shootStore,
     ticketStore,
+    projectStore,
   } = context
 
   const socket = io({
@@ -208,6 +209,10 @@ export function createSocket (state, context) {
 
   socket.on('comments', event => {
     ticketStore.handleCommentsEvent(event)
+  })
+
+  socket.on('projects', event => {
+    projectStore.handleEvent(event)
   })
 
   return socket

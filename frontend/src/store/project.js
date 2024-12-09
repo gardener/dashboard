@@ -15,9 +15,13 @@ import {
 } from 'vue'
 
 import { useApi } from '@/composables/useApi'
+import { useLogger } from '@/composables/useLogger'
+
+import { isTooManyRequestsError } from '@/utils/errors'
 
 import { useAuthzStore } from './authz'
 import { useAppStore } from './app'
+import { useSocketStore } from './socket'
 
 import filter from 'lodash/filter'
 import find from 'lodash/find'
@@ -26,13 +30,18 @@ import map from 'lodash/map'
 import get from 'lodash/get'
 import set from 'lodash/set'
 import replace from 'lodash/replace'
+import throttle from 'lodash/throttle'
 
 export const useProjectStore = defineStore('project', () => {
   const api = useApi()
+  const logger = useLogger()
   const appStore = useAppStore()
   const authzStore = useAuthzStore()
+  const socketStore = useSocketStore()
 
   const list = ref(null)
+
+  const events = new Map()
 
   const isInitial = computed(() => {
     return list.value === null
@@ -154,6 +163,82 @@ export const useProjectStore = defineStore('project', () => {
     // do not remove project from store as it will stay in terminating phase for a while
   }
 
+  async function handleEvents (projectStore) {
+    const eventValues = Array.from(events.values())
+    events.clear()
+    const uids = []
+    const deletedUids = []
+    for (const { type, uid } of eventValues) {
+      if (type === 'DELETED') {
+        deletedUids.push(uid)
+      } else {
+        uids.push(uid)
+      }
+    }
+    try {
+      const items = await socketStore.synchronize('projects', uids)
+      projectStore.$patch(state => {
+        const deleteItem = uid => {
+          const index = findIndex(state.list, ['metadata.uid', uid])
+          if (index !== -1) {
+            state.list.splice(index, 1)
+          }
+        }
+        const setItem = (uid, item) => {
+          const index = findIndex(state.list, ['metadata.uid', uid])
+          if (index !== -1) {
+            state.list.splice(index, 1, item)
+          } else {
+            state.list.push(item)
+          }
+        }
+        for (const uid of deletedUids) {
+          deleteItem(uid)
+        }
+        for (const item of items) {
+          if (item.kind === 'Status') {
+            logger.info('Failed to synchronize a single project: %s', item.message)
+            if (item.code === 404) {
+              const uid = item.details?.uid
+              if (uid) {
+                deleteItem(uid)
+              }
+            }
+          } else {
+            const uid = item.metadata.uid
+            setItem(uid, item)
+          }
+        }
+      })
+    } catch (err) {
+      if (isTooManyRequestsError(err)) {
+        logger.info('Skipped synchronization of modified projects: %s', err.message)
+      } else {
+        logger.error('Failed to synchronize modified projects: %s', err.message)
+      }
+      // Synchronization failed. Rollback project events
+      for (const event of events) {
+        const { uid } = event
+        if (!events.has(uid)) {
+          events.set(uid, event)
+        }
+      }
+    }
+  }
+
+  const throttledHandleEvents = throttle(handleEvents, 500)
+
+  function handleEvent (event) {
+    const projectStore = this
+    const { type, uid } = event
+    if (!['ADDED', 'MODIFIED', 'DELETED'].includes(type)) {
+      logger.error('undhandled event type', type)
+      return
+    }
+    events.set(uid, event)
+    throttledHandleEvents(projectStore)
+  }
+
   async function $reset () {
     list.value = null
   }
@@ -177,6 +262,7 @@ export const useProjectStore = defineStore('project', () => {
     updateProject,
     deleteProject,
     projectNameByNamespace,
+    handleEvent,
     $reset,
   }
 })

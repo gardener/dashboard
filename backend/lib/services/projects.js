@@ -12,7 +12,7 @@ const { dashboardClient } = require('@gardener-dashboard/kube-client')
 const { PreconditionFailed, InternalServerError } = require('http-errors')
 const shoots = require('./shoots')
 const authorization = require('./authorization')
-const { projectFilter, trimProject } = require('../utils')
+const { projectFilter, simplifyProject } = require('../utils')
 const cache = require('../cache')
 const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
 
@@ -32,7 +32,7 @@ exports.list = async function ({ user }) {
     .chain(cache.getProjects())
     .filter(projectFilter(user, canListProjects))
     .map(_.cloneDeep)
-    .map(trimProject)
+    .map(simplifyProject)
     .value()
 }
 
