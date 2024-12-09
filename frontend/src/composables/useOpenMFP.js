@@ -59,7 +59,7 @@ export const useOpenMFP = createGlobalState((options = {}) => {
     const timeout = 3000
     try {
       await until(luigiContext).toBeTruthy({
-        timeout: 1000,
+        timeout,
         throwOnTimeout: true,
       })
       return luigiContext.value
