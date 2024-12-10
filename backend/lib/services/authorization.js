@@ -190,7 +190,7 @@ exports.selfSubjectRulesReview = async function (user, namespace, accountId) {
   const resourceRules = [...k8sResourceRules, ...fgaResourceRules]
   const nonResourceRules = [...k8sNonResourceRules, ...fgaNonResourceRules]
   const incomplete = k8sIncomplete || fgaIncomplete
-  const evaluationError = [k8sEvaluationError, fgaEvaluationError].filter(Boolean).join(' | ') || null
+  const evaluationError = [k8sEvaluationError, fgaEvaluationError].filter(Boolean).join(' | ') || undefined
 
   return { resourceRules, nonResourceRules, incomplete, evaluationError }
 }
