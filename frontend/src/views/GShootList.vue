@@ -218,7 +218,6 @@ import {
 } from 'pinia'
 import { useUrlSearchParams } from '@vueuse/core'
 
-import { useAppStore } from '@/store/app'
 import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
 import { useShootStore } from '@/store/shoot'
@@ -236,6 +235,7 @@ import GCertifiedKubernetes from '@/components/icons/GCertifiedKubernetes.vue'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
 import GShootListActions from '@/components/GShootListActions.vue'
 
+import { useIsInIframe } from '@/composables/useIsInIframe'
 import { useProjectShootCustomFields } from '@/composables/useProjectShootCustomFields'
 import { isCustomField } from '@/composables/useProjectShootCustomFields/helper'
 import { useProvideShootAction } from '@/composables/useShootAction'
@@ -292,14 +292,13 @@ export default {
   setup () {
     const projectStore = useProjectStore()
     const shootStore = useShootStore()
+    const isInIframe = useIsInIframe()
 
     useProvideShootAction({ shootStore })
 
     const activePopoverKey = ref('')
     const expandedWorkerGroups = reactive({ default: false })
     const expandedAccessRestrictions = reactive({ default: false })
-    const appStore = useAppStore()
-    const isInIframe = toRef(appStore, 'isInIframe')
     provide('activePopoverKey', activePopoverKey)
     provide('expandedWorkerGroups', expandedWorkerGroups)
     provide('expandedAccessRestrictions', expandedAccessRestrictions)
