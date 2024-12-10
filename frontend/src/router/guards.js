@@ -20,6 +20,7 @@ import { useManagedSeedShootStore } from '@/store/managedSeedShoot'
 import { useShootStore } from '@/store/shoot'
 import { useTerminalStore } from '@/store/terminal'
 
+import { useOpenMFP } from '@/composables/useOpenMFP'
 import { useLogger } from '@/composables/useLogger'
 import { useShootListFilters } from '@/composables/useShootListFilters'
 import { useApi } from '@/composables/useApi'
@@ -61,7 +62,8 @@ export function createGlobalBeforeGuards () {
         return true
       }
 
-      const context = await appStore.getLuigiContext()
+      const openMFP = useOpenMFP()
+      const context = await openMFP.getLuigiContext()
       if (context) {
         logger.debug('Luigi context:', context)
         const token = context.token
