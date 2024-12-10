@@ -7,16 +7,14 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-secret-dialog
     v-model="visible"
-    :data="secretData"
     :secret-validations="v$"
-    :secret="secret"
+    :secret-binding="secretBinding"
     create-title="Add new Infoblox Secret"
     replace-title="Replace Infoblox Secret"
   >
     <template #secret-slot>
       <div>
         <v-text-field
-          ref="infobloxUsername"
           v-model="infobloxUsername"
           color="primary"
           label="Infoblox Username"
@@ -54,8 +52,11 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
+import { toRefs } from 'vue'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
+
+import { useProvideSecretData } from '@/composables/useSecretData'
 
 import { withFieldName } from '@/utils/validators'
 import { getErrorMessages } from '@/utils'
@@ -69,7 +70,7 @@ export default {
       type: Boolean,
       required: true,
     },
-    secret: {
+    secretBinding: {
       type: Object,
     },
   },
@@ -77,14 +78,26 @@ export default {
     'update:modelValue',
   ],
   setup () {
+    const { state } = useProvideSecretData(
+      [
+        'infobloxUsername',
+        'infobloxPassword',
+      ],
+      {
+        keyMapping: {
+          infobloxUsername: 'USERNAME',
+          infobloxPassword: 'PASSWORD',
+        },
+      },
+    )
+
     return {
+      ...toRefs(state),
       v$: useVuelidate(),
     }
   },
   data () {
     return {
-      infobloxUsername: undefined,
-      infobloxPassword: undefined,
       hideInfobloxPassword: true,
     }
   },
@@ -109,12 +122,6 @@ export default {
     },
     valid () {
       return !this.v$.$invalid
-    },
-    secretData () {
-      return {
-        USERNAME: this.infobloxUsername,
-        PASSWORD: this.infobloxPassword,
-      }
     },
     isCreateMode () {
       return !this.secret

@@ -7,16 +7,14 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-secret-dialog
     v-model="visible"
-    :data="secretData"
     :secret-validations="v$"
-    :secret="secret"
+    :secret-binding="secretBinding"
     create-title="Add new Metal Secret"
     replace-title="Replace Metal Secret"
   >
     <template #secret-slot>
       <div>
         <v-text-field
-          ref="apiUrl"
           v-model="apiUrl"
           color="primary"
           label="API URL"
@@ -58,8 +56,11 @@ import {
   required,
   url,
 } from '@vuelidate/validators'
+import { toRefs } from 'vue'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
+
+import { useProvideSecretData } from '@/composables/useSecretData'
 
 import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
@@ -73,7 +74,7 @@ export default {
       type: Boolean,
       required: true,
     },
-    secret: {
+    secretBinding: {
       type: Object,
     },
   },
@@ -81,14 +82,26 @@ export default {
     'update:modelValue',
   ],
   setup () {
+    const { state } = useProvideSecretData(
+      [
+        'apiHmac',
+        'apiUrl',
+      ],
+      {
+        keyMapping: {
+          apiHmac: 'metalAPIHMac',
+          apiUrl: 'metalAPIURL',
+        },
+      },
+    )
+
     return {
+      ...toRefs(state),
       v$: useVuelidate(),
     }
   },
   data () {
     return {
-      apiHmac: undefined,
-      apiUrl: undefined,
       hideSecret: true,
     }
   },
@@ -114,12 +127,6 @@ export default {
     },
     valid () {
       return !this.v$.$invalid
-    },
-    secretData () {
-      return {
-        metalAPIHMac: this.apiHmac,
-        metalAPIURL: this.apiUrl,
-      }
     },
     isCreateMode () {
       return !this.secret

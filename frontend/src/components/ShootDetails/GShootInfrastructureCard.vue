@@ -42,10 +42,11 @@ SPDX-License-Identifier: Apache-2.0
           />
         </g-list-item-content>
       </g-list-item>
-      <g-list-item v-if="secret">
+      <g-list-item v-if="secretBinding?._secret">
         <g-secret-details-item-content
           infra
-          :secret="secret"
+          :secret="secretBinding._secret"
+          :provider-type="secretBinding.provider.type"
           details-title
         />
       </g-list-item>
@@ -252,7 +253,7 @@ import {
 } from 'pinia'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
-import { useSecretStore } from '@/store/secret'
+import { useCredentialStore } from '@/store/credential'
 import { useAuthzStore } from '@/store/authz'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 
@@ -348,8 +349,8 @@ export default {
     ...mapState(useAuthzStore, [
       'canPatchShootsBinding',
     ]),
-    ...mapState(useSecretStore, [
-      'infrastructureSecretList',
+    ...mapState(useCredentialStore, [
+      'infrastructureSecretBindingsList',
     ]),
     showSeedInfo () {
       return !!this.shootSeedName
@@ -405,8 +406,8 @@ export default {
       }
       return 'generated'
     },
-    secret () {
-      return find(this.infrastructureSecretList, ['metadata.name', this.shootSecretBindingName])
+    secretBinding () {
+      return find(this.infrastructureSecretBindingsList, ['metadata.name', this.shootSecretBindingName])
     },
   },
   methods: {

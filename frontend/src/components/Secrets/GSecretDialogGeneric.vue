@@ -7,9 +7,8 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-secret-dialog
     v-model="visible"
-    :data="secretData"
     :secret-validations="v$"
-    :secret="secret"
+    :secret-binding="secretBinding"
     :provider-type="providerType"
     :create-title="`Add new ${providerType} Secret`"
     :replace-title="`Replace ${providerType} Secret`"
@@ -17,7 +16,6 @@ SPDX-License-Identifier: Apache-2.0
     <template #secret-slot>
       <div>
         <v-textarea
-          ref="data"
           v-model="data"
           color="primary"
           variant="filled"
@@ -45,8 +43,11 @@ SPDX-License-Identifier: Apache-2.0
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import yaml from 'js-yaml'
+import { toRefs } from 'vue'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
+
+import { useProvideSecretData } from '@/composables/useSecretData'
 
 import {
   withFieldName,
@@ -68,7 +69,7 @@ export default {
       type: Boolean,
       required: true,
     },
-    secret: {
+    secretBinding: {
       type: Object,
     },
     providerType: {
@@ -79,14 +80,20 @@ export default {
     'update:modelValue',
   ],
   setup () {
+    const { state } = useProvideSecretData(
+      [
+        'secretData',
+      ],
+    )
+
     return {
+      ...toRefs(state),
       v$: useVuelidate(),
     }
   },
   data () {
     return {
       data: undefined,
-      secretData: {},
     }
   },
   validations () {

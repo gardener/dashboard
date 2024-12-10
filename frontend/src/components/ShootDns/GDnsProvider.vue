@@ -43,13 +43,12 @@ SPDX-License-Identifier: Apache-2.0
           {{ value }}
         </v-list-item-title>
       </v-list-item>
-      <v-list-item
-        v-if="secret"
-      >
+      <v-list-item v-if="secret">
         <g-secret-details-item-content
           class="pb-2"
           dns
           :secret="secret"
+          :provider-type="type"
           details-title
         />
       </v-list-item>
@@ -60,7 +59,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapActions } from 'pinia'
 
-import { useSecretStore } from '@/store/secret'
+import { useCredentialStore } from '@/store/credential'
 
 import GVendorIcon from '@/components/GVendorIcon'
 import GSecretDetailsItemContent from '@/components/Secrets/GSecretDetailsItemContent.vue'
@@ -107,6 +106,9 @@ export default {
     }
   },
   computed: {
+    secret () {
+      return this.getSecret({ namespace: this.shootNamespace, name: this.secretName })
+    },
     dnsProviderDescriptions () {
       const descriptions = []
       descriptions.push({
@@ -154,13 +156,10 @@ export default {
       }
       return descriptions
     },
-    secret () {
-      return this.getCloudProviderSecretByName({ name: this.secretName, namespace: this.shootNamespace })
-    },
   },
   methods: {
-    ...mapActions(useSecretStore, [
-      'getCloudProviderSecretByName',
+    ...mapActions(useCredentialStore, [
+      'getSecret',
     ]),
   },
 }
