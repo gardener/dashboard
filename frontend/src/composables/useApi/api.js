@@ -297,10 +297,14 @@ export function createTokenReview (data) {
   return createResource('/auth', data)
 }
 
-export function getSubjectRules (options) {
-  const namespace = options?.namespace ?? 'default'
+export function getSubjectRules (options = {}) {
+  const {
+    namespace = 'default',
+    accountId,
+  } = options
   return callResourceMethod('/api/user/subjectrules', {
     namespace,
+    accountId,
   })
 }
 

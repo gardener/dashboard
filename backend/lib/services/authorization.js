@@ -7,6 +7,9 @@
 'use strict'
 
 const { Resources, createClient } = require('@gardener-dashboard/kube-client')
+const openfga = require('../openfga')
+const cache = require('../cache')
+const logger = require('../logger')
 
 async function hasAuthorization (user, { resourceAttributes, nonResourceAttributes }) {
   if (!user) {
@@ -150,7 +153,7 @@ exports.canGetSecret = function (user, namespace, name) {
 /*
 SelfSubjectRulesReview should only be used to hide/show actions or views on the UI and not for authorization checks.
 */
-exports.selfSubjectRulesReview = async function (user, namespace) {
+exports.selfSubjectRulesReview = async function (user, namespace, accountId) {
   if (!user) {
     return false
   }
@@ -163,13 +166,50 @@ exports.selfSubjectRulesReview = async function (user, namespace) {
       namespace,
     },
   }
-  const {
-    status: {
-      resourceRules,
-      nonResourceRules,
-      incomplete,
-      evaluationError,
+
+  const [
+    {
+      status: {
+        resourceRules: k8sResourceRules = [],
+        nonResourceRules: k8sNonResourceRules = [],
+        incomplete: k8sIncomplete = false,
+        evaluationError: k8sEvaluationError = null,
+      } = {},
+    },
+    {
+      resourceRules: fgaResourceRules = [],
+      nonResourceRules: fgaNonResourceRules = [],
+      incomplete: fgaIncomplete = false,
+      evaluationError: fgaEvaluationError = null,
     } = {},
-  } = await client['authorization.k8s.io'].selfsubjectrulesreviews.create(body)
+  ] = await Promise.all([
+    client['authorization.k8s.io'].selfsubjectrulesreviews.create(body),
+    fgaSelfSubjectRulesReview(user, namespace, accountId),
+  ])
+
+  const resourceRules = [...k8sResourceRules, ...fgaResourceRules]
+  const nonResourceRules = [...k8sNonResourceRules, ...fgaNonResourceRules]
+  const incomplete = k8sIncomplete || fgaIncomplete
+  const evaluationError = [k8sEvaluationError, fgaEvaluationError].filter(Boolean).join(' | ') || null
+
   return { resourceRules, nonResourceRules, incomplete, evaluationError }
+}
+
+async function fgaSelfSubjectRulesReview (user, namespace, accountId) {
+  if (!openfga.client || !accountId) {
+    return
+  }
+  const username = user.id
+  try {
+    const resourceRules = await openfga.getDerivedResourceRules(username, namespace, accountId)
+    return {
+      resourceRules,
+    }
+  } catch (error) {
+    logger.debug('Error while fetching FGA derived resource rules: %s', error.message)
+    return {
+      incomplete: true,
+      evaluationError: error.message,
+    }
+  }
 }
