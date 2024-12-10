@@ -65,11 +65,11 @@ export default {
       return this.canGetSecrets && this.secretBindingName && this.namespace
     },
     secretBinding () {
-      return this.getSecretBindingByName({ namespace: this.namespace, name: this.secretBindingName })
+      return this.getSecretBinding({ namespace: this.namespace, name: this.secretBindingName })
     },
   },
   methods: {
-    ...mapActions(useCredentialStore, ['getSecretBindingByName']),
+    ...mapActions(useCredentialStore, ['getSecretBinding']),
   },
 }
 </script>

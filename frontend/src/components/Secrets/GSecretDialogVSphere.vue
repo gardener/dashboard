@@ -92,12 +92,12 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-import { ref } from 'vue'
+import { toRefs } from 'vue'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink.vue'
 
-import { useProvideSecretDialogData } from '@/composables/useSecretDialogData'
+import { useProvideSecretData } from '@/composables/useSecretData'
 
 import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
@@ -120,25 +120,17 @@ export default {
     'update:modelValue',
   ],
   setup () {
-    const vsphereUsername = ref(undefined)
-    const vspherePassword = ref(undefined)
-    const nsxtUsername = ref(undefined)
-    const nsxtPassword = ref(undefined)
-
-    useProvideSecretDialogData({
-      data: {
-        vsphereUsername,
-        vspherePassword,
-        nsxtUsername,
-        nsxtPassword,
-      },
-    })
+    const { state } = useProvideSecretData(
+      [
+        'vsphereUsername',
+        'vspherePassword',
+        'nsxtUsername',
+        'nsxtPassword',
+      ],
+    )
 
     return {
-      vsphereUsername,
-      vspherePassword,
-      nsxtUsername,
-      nsxtPassword,
+      ...toRefs(state),
       v$: useVuelidate(),
     }
   },

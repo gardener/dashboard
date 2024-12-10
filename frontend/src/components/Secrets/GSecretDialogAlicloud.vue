@@ -98,13 +98,13 @@ import {
   minLength,
   maxLength,
 } from '@vuelidate/validators'
-import { ref } from 'vue'
+import { toRefs } from 'vue'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GCodeBlock from '@/components/GCodeBlock'
 import GExternalLink from '@/components/GExternalLink'
 
-import { useProvideSecretDialogData } from '@/composables/useSecretDialogData'
+import { useProvideSecretData } from '@/composables/useSecretData'
 
 import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
@@ -131,22 +131,20 @@ export default {
     'update:modelValue',
   ],
   setup () {
-    const accessKeyId = ref(undefined)
-    const accessKeySecret = ref(undefined)
-
-    useProvideSecretDialogData({
-      data: {
-        accessKeyId,
-        accessKeySecret,
+    const { state } = useProvideSecretData(
+      [
+        'accessKeyId',
+        'accessKeySecret',
+      ],
+      {
+        keyMapping: {
+          accessKeyId: 'accessKeyID',
+        },
       },
-      keyMapping: {
-        accessKeyId: 'accessKeyID',
-      },
-    })
+    )
 
     return {
-      accessKeyId,
-      accessKeySecret,
+      ...toRefs(state),
       v$: useVuelidate(),
     }
   },

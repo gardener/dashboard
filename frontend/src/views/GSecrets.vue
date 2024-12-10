@@ -493,7 +493,7 @@ export default {
   },
   methods: {
     ...mapActions(useCredentialStore, [
-      'getSecretBindingByName',
+      'getSecretBinding',
     ]),
     openSecretAddDialog (providerType) {
       this.selectedSecretBinding = undefined

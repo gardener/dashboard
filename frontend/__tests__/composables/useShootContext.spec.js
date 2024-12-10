@@ -45,7 +45,7 @@ describe('composables', () => {
     const configStore = useConfigStore()
     configStore.setConfiguration(global.fixtures.config)
     const credentialStore = useCredentialStore()
-    credentialStore.cloudProviderCredentials = global.fixtures.credentials
+    credentialStore.setCredentials(global.fixtures.credentials)
     const cloudProfileStore = useCloudProfileStore()
     cloudProfileStore.setCloudProfiles(cloneDeep(global.fixtures.cloudprofiles))
     const gardenerExtensionStore = useGardenerExtensionStore()

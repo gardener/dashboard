@@ -110,14 +110,14 @@ SPDX-License-Identifier: Apache-2.0
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import {
-  ref,
+  toRefs,
   computed,
 } from 'vue'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
 
-import { useProvideSecretDialogData } from '@/composables/useSecretDialogData'
+import { useProvideSecretData } from '@/composables/useSecretData'
 
 import {
   withFieldName,
@@ -150,34 +150,26 @@ export default {
       return props.providerType === 'azure-dns' || props.providerType === 'azure-private-dns'
     })
 
-    const clientId = ref(undefined)
-    const clientSecret = ref(undefined)
-    const tenantId = ref(undefined)
-    const subscriptionId = ref(undefined)
-    const azureCloud = ref(isDNSSecret.value ? 'AzurePublic' : undefined)
-
-    useProvideSecretDialogData({
-      data: {
-        clientId,
-        clientSecret,
-        tenantId,
-        subscriptionId,
-        azureCloud,
+    const { state } = useProvideSecretData(
+      [
+        'clientId',
+        'clientSecret',
+        'tenantId',
+        'subscriptionId',
+        'azureCloud',
+      ],
+      {
+        keyMapping: {
+          clientId: 'clientID',
+          subscriptionId: 'subscriptionID',
+          tenantId: 'tenantID',
+          azureCloud: 'AZURE_CLOUD',
+        },
       },
-      keyMapping: {
-        clientId: 'clientID',
-        subscriptionId: 'subscriptionID',
-        tenantId: 'tenantID',
-        azureCloud: 'AZURE_CLOUD',
-      },
-    })
+    )
 
     return {
-      clientId,
-      clientSecret,
-      tenantId,
-      subscriptionId,
-      azureCloud,
+      ...toRefs(state),
       isDNSSecret,
       v$: useVuelidate(),
     }

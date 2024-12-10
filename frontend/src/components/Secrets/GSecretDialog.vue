@@ -124,7 +124,7 @@ import { useShootStore } from '@/store/shoot'
 import GToolbar from '@/components/GToolbar.vue'
 import GMessage from '@/components/GMessage'
 
-import { useSecretDialogData } from '@/composables/useSecretDialogData'
+import { useSecretData } from '@/composables/useSecretData'
 
 import {
   messageFromErrors,
@@ -185,11 +185,11 @@ export default {
     'cloud-profile-name',
   ],
   setup () {
-    const { secretData, updateWithSecret } = useSecretDialogData()
+    const { secretStringData, setSecretData } = useSecretData()
 
     return {
-      secretData,
-      updateWithSecret,
+      secretStringData,
+      setSecretData,
       v$: useVuelidate(),
     }
   },
@@ -316,11 +316,11 @@ export default {
     },
     save () {
       const poviderType = this.providerType
-      const secretData = this.secretData
+      const secretStringData = this.secretStringData
       if (this.isCreateMode) {
-        return this.createCredential({ name: this.name, poviderType, secretData })
+        return this.createCredential({ name: this.name, poviderType, secretStringData })
       } else {
-        return this.updateCredential({ name: this.name, poviderType, secretData })
+        return this.updateCredential({ name: this.name, secretStringData })
       }
     },
     reset () {
@@ -331,7 +331,7 @@ export default {
         setDelayedInputFocus(this, 'name')
       } else {
         this.name = get(this.secretBinding, ['metadata', 'name'])
-        this.updateWithSecret(this.secretBinding._secret)
+        this.setSecretData(this.secretBinding._secret.data)
       }
 
       this.errorMessage = undefined

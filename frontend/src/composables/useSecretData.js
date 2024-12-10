@@ -17,19 +17,21 @@ import get from 'lodash/get'
 import set from 'lodash/set'
 import mapKeys from 'lodash/mapKeys'
 
-export function createSecretDialogDataComposable (options) {
-  const { data, keyMapping } = options
-  const state = reactive(data)
+export function createSecretDataComposable (keys, { keyMapping = [] } = {}) {
+  const state = reactive({})
+  keys.forEach(key => {
+    set(state, [key])
+  })
 
-  const secretData = computed(() => {
+  const secretStringData = computed(() => {
     return mapKeys(state, (value, key) => get(keyMapping, [key], key))
   })
 
-  function updateWithSecret (secret) {
+  function setSecretData (data) {
     for (const key of Object.keys(state)) {
       const secretKey = get(keyMapping, [key], key)
 
-      const encodedValue = get(secret, ['data', secretKey])
+      const encodedValue = get(data, [secretKey])
       if (!encodedValue) {
         continue
       }
@@ -43,17 +45,18 @@ export function createSecretDialogDataComposable (options) {
   }
 
   return {
-    secretData,
-    updateWithSecret,
+    state,
+    secretStringData,
+    setSecretData,
   }
 }
 
-export function useSecretDialogData () {
-  return inject('secret-dialog-data', null)
+export function useSecretData () {
+  return inject('secret-data', null)
 }
 
-export function useProvideSecretDialogData (options) {
-  const composable = createSecretDialogDataComposable(options)
-  provide('secret-dialog-data', composable)
+export function useProvideSecretData (keys, options) {
+  const composable = createSecretDataComposable(keys, options)
+  provide('secret-data', composable)
   return composable
 }

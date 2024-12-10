@@ -26,7 +26,7 @@ describe('composables', () => {
       setActivePinia(createPinia())
       manifest.spec = {}
       const credentialStore = useCredentialStore()
-      credentialStore.cloudProviderCredentials = global.fixtures.credentials
+      credentialStore.setCredentials(global.fixtures.credentials)
       const gardenerExtensionStore = useGardenerExtensionStore()
       gardenerExtensionStore.list = global.fixtures.gardenerExtensions
 

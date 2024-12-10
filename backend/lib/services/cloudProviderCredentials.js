@@ -28,6 +28,7 @@ exports.list = async function ({ user, params }) {
     'kind',
     'metadata.name',
     'metadata.namespace',
+    'metadata.uid',
     'spec.scope',
     'spec.clusterLifetimeDays',
   ])
@@ -35,6 +36,7 @@ exports.list = async function ({ user, params }) {
   const quotas = _
     .chain(secretBindings)
     .flatMap(resolveQuotas)
+    .uniqBy('metadata.uid')
     .filter('spec.clusterLifetimeDays')
     .map(pickQuotaProperties)
     .value()
@@ -54,10 +56,10 @@ exports.create = async function ({ user, params }) {
     secretBindingNamespace: secretNamespace,
     secretBindingName: secretName,
     poviderType,
-    secretData,
+    secretStringData,
   } = params
 
-  const secretResource = toSecretResource({ namespace: secretNamespace, name: secretName, data: secretData })
+  const secretResource = toSecretResource({ namespace: secretNamespace, name: secretName, stringData: secretStringData })
   const secret = await client.core.secrets.create(secretNamespace, secretResource)
 
   let secretBinding
@@ -84,7 +86,7 @@ exports.patch = async function ({ user, params }) {
   const {
     secretBindingNamespace,
     secretBindingName,
-    secretData,
+    secretStringData,
   } = params
 
   const secretBinding = await client['core.gardener.cloud'].secretbindings.get(secretBindingNamespace, secretBindingName)
@@ -95,17 +97,10 @@ exports.patch = async function ({ user, params }) {
     throw createError(422, 'Patch allowed only for secrets in own namespace')
   }
 
-  let data
-  try {
-    data = _.mapValues(secretData, encodeBase64)
-  } catch (err) {
-    throw createError(422, 'Failed to encode "base64" secret data')
-  }
-
   const patchOperations = [{
     op: 'replace',
-    path: '/data',
-    value: data,
+    path: '/stringData',
+    value: secretStringData,
   }]
 
   const secretRef = secretBinding.secretRef
@@ -151,7 +146,7 @@ function resolveQuotas (secretBinding) {
   }
 }
 
-function toSecretResource ({ namespace, name, data }) {
+function toSecretResource ({ namespace, name, stringData }) {
   const resource = Resources.Secret
   const apiVersion = resource.apiVersion
   const kind = resource.kind
@@ -160,12 +155,8 @@ function toSecretResource ({ namespace, name, data }) {
     namespace,
     name,
   }
-  try {
-    data = _.mapValues(data, encodeBase64)
-  } catch (err) {
-    throw createError(422, 'Failed to encode "base64" secret data')
-  }
-  return { apiVersion, kind, metadata, type, data }
+
+  return { apiVersion, kind, metadata, type, stringData }
 }
 
 function toSecretBindingResource ({ namespace, name, poviderType, secretRef }) {

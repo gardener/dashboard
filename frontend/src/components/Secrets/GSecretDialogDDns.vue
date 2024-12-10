@@ -96,12 +96,12 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-import { ref } from 'vue'
+import { toRefs } from 'vue'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
 
-import { useProvideSecretDialogData } from '@/composables/useSecretDialogData'
+import { useProvideSecretData } from '@/composables/useSecretData'
 
 import { getErrorMessages } from '@/utils'
 import {
@@ -127,28 +127,27 @@ export default {
     'update:modelValue',
   ],
   setup () {
-    const server = ref(undefined)
-    const tsigKeyName = ref(undefined)
-    const tsigSecret = ref(undefined)
-    const zone = ref(undefined)
-    const tsigSecretAlgorithm = ref('hmac-sha256')
+    const { state } = useProvideSecretData(
+      [
+        'server',
+        'tsigKeyName',
+        'tsigSecret',
+        'zone',
+        'tsigSecretAlgorithm',
+      ],
+      {
+        keyMapping: {
+          server: 'Server',
+          tsigKeyName: 'TSIGKeyName',
+          tsigSecret: 'TSIGSecret',
+          zone: 'Zone',
+          tsigSecretAlgorithm: 'TSIGSecretAlgorithm',
+        },
+      },
+    )
 
-    useProvideSecretDialogData({
-      data: {
-        server,
-        tsigKeyName,
-        tsigSecret,
-        zone,
-        tsigSecretAlgorithm,
-      },
-      keyMapping: {
-        server: 'Server',
-        tsigKeyName: 'TSIGKeyName',
-        tsigSecret: 'TSIGSecret',
-        zone: 'Zone',
-        tsigSecretAlgorithm: 'TSIGSecretAlgorithm',
-      },
-    })
+    const { server, tsigKeyName, tsigSecret, zone, tsigSecretAlgorithm } = toRefs(state)
+    tsigSecretAlgorithm.value = 'hmac-sha256'
 
     return {
       server,

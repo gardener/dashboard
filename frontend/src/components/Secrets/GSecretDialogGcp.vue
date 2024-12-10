@@ -85,12 +85,12 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-import { ref } from 'vue'
+import { toRefs } from 'vue'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
 
-import { useProvideSecretDialogData } from '@/composables/useSecretDialogData'
+import { useProvideSecretData } from '@/composables/useSecretData'
 
 import {
   withFieldName,
@@ -123,19 +123,19 @@ export default {
     'update:modelValue',
   ],
   setup () {
-    const serviceAccountKey = ref(undefined)
-
-    useProvideSecretDialogData({
-      data: {
-        serviceAccountKey,
+    const { state } = useProvideSecretData(
+      [
+        'serviceAccountKey',
+      ],
+      {
+        keyMapping: {
+          serviceAccountKey: 'serviceaccount.json',
+        },
       },
-      keyMapping: {
-        serviceAccountKey: 'serviceaccount.json',
-      },
-    })
+    )
 
     return {
-      serviceAccountKey,
+      ...toRefs(state),
       v$: useVuelidate(),
     }
   },

@@ -48,12 +48,12 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-import { ref } from 'vue'
+import { toRefs } from 'vue'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink.vue'
 
-import { useProvideSecretDialogData } from '@/composables/useSecretDialogData'
+import { useProvideSecretData } from '@/composables/useSecretData'
 
 import { withFieldName } from '@/utils/validators'
 import { getErrorMessages } from '@/utils'
@@ -76,16 +76,14 @@ export default {
     'update:modelValue',
   ],
   setup () {
-    const hcloudToken = ref(undefined)
-
-    useProvideSecretDialogData({
-      data: {
-        hcloudToken,
-      },
-    })
+    const { state } = useProvideSecretData(
+      [
+        'hcloudToken',
+      ],
+    )
 
     return {
-      hcloudToken,
+      ...toRefs(state),
       v$: useVuelidate(),
     }
   },

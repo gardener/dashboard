@@ -107,7 +107,7 @@ export default {
   },
   computed: {
     secret () {
-      return this.getSecretByName({ namespace: this.shootNamespace, name: this.secretName })
+      return this.getSecret({ namespace: this.shootNamespace, name: this.secretName })
     },
     dnsProviderDescriptions () {
       const descriptions = []
@@ -159,7 +159,7 @@ export default {
   },
   methods: {
     ...mapActions(useCredentialStore, [
-      'getSecretByName',
+      'getSecret',
     ]),
   },
 }
