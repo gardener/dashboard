@@ -8,7 +8,6 @@
 
 const { Resources, createClient } = require('@gardener-dashboard/kube-client')
 const openfga = require('../openfga')
-const cache = require('../cache')
 const logger = require('../logger')
 
 async function hasAuthorization (user, { resourceAttributes, nonResourceAttributes }) {
