@@ -133,8 +133,11 @@ export function createGlobalResolveGuards () {
       }
 
       try {
+        const openMFP = useOpenMFP()
+        const accountId = openMFP.accountId.value ?? to.query.accountId
+
         const namespace = to.params.namespace ?? to.query.namespace
-        await refreshRules(authzStore, namespace)
+        await refreshRules(authzStore, namespace, accountId)
 
         if (namespace && namespace !== '_all' && !projectStore.namespaces.includes(namespace)) {
           authzStore.$reset()

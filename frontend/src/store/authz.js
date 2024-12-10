@@ -143,13 +143,16 @@ export const useAuthzStore = defineStore('authz', () => {
   })
 
   // reuse function not exported
-  async function getRules (namespace) {
-    const body = { namespace }
+  async function getRules (namespace, accountId) {
+    const body = {
+      namespace,
+      accountId,
+    }
     const response = await api.getSubjectRules(body)
     status.value = response.data
   }
 
-  async function fetchRules (namespace) {
+  async function fetchRules (namespace, accountId) {
     /**
      * The value of `spec.value?.namespace` is:
      * - undefined if no rules have been fetched yet
@@ -159,18 +162,22 @@ export const useAuthzStore = defineStore('authz', () => {
     if (!namespace) {
       namespace = null
     }
-    if (spec.value?.namespace !== namespace) {
-      await getRules(namespace)
-      this.setNamespace(namespace)
+    if (
+      spec.value?.namespace !== namespace ||
+      spec.value?.accountId !== accountId
+    ) {
+      await getRules(namespace, accountId)
+      spec.value = { namespace, accountId }
     }
   }
 
   function refreshRules () {
-    return getRules(spec.value?.namespace)
+    return getRules(spec.value?.namespace, spec.value?.accountId)
   }
 
   function setNamespace (namespace) {
-    spec.value = { namespace }
+    spec.value = spec.value || {}
+    spec.value.namespace = namespace
   }
 
   function $reset () {

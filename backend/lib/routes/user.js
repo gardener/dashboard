@@ -23,8 +23,11 @@ router.route('/subjectrules')
   .post(async (req, res, next) => {
     try {
       const user = req.user || {}
-      const { namespace } = req.body
-      const result = await authorization.selfSubjectRulesReview(user, namespace)
+      const {
+        namespace,
+        accountId,
+      } = req.body
+      const result = await authorization.selfSubjectRulesReview(user, namespace, accountId)
       res.send(result)
     } catch (err) {
       next(err)
