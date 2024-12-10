@@ -12,18 +12,25 @@ import {
   provide,
 } from 'vue'
 
-import { cleanup } from '@/composables/helper'
+import { useConfigStore } from '@/store/config'
 
-import { useProjectShootCustomFields } from './useProjectShootCustomFields'
-import { useProjectMetadata } from './useProjectMetadata'
-import { useProjectCostObject } from './useProjectCostObject'
+import { cleanup } from '@/composables/helper'
+import { useOpenMFP } from '@/composables/useOpenMFP'
+import { useProjectShootCustomFields } from '@/composables/useProjectShootCustomFields'
+import { useProjectMetadata } from '@/composables/useProjectMetadata'
+import { useProjectCostObject } from '@/composables/useProjectCostObject'
 
 import cloneDeep from 'lodash/cloneDeep'
 import get from 'lodash/get'
 import isEqual from 'lodash/isEqual'
 import set from 'lodash/set'
 
-export function createProjectContextComposable () {
+export function createProjectContextComposable (options = {}) {
+  const {
+    openMFP = useOpenMFP(),
+    configStore = useConfigStore(),
+  } = options
+
   function normalizeManifest (value) {
     const object = Object.assign({
       apiVersion: 'core.gardener.cloud/v1beta1',
@@ -55,6 +62,10 @@ export function createProjectContextComposable () {
 
   function createProjectManifest () {
     manifest.value = {}
+    if (openMFP.accountId) {
+      set(manifest.value, ['metadata', 'label', 'openmfp.org/managed-by'], 'true')
+      set(manifest.value, ['metadata', 'annotations', 'openmfp.org/account-id'], openMFP.accountId)
+    }
     initialManifest.value = cloneDeep(normalizedManifest.value)
   }
 
@@ -106,10 +117,14 @@ export function createProjectContextComposable () {
 
   /* costObject */
   const {
+
     costObject,
     costObjectType,
     getCostObjectPatchDocument,
-  } = useProjectCostObject(manifest, { projectMetadataComposable })
+  } = useProjectCostObject(manifest, {
+    configStore,
+    projectMetadataComposable,
+  })
 
   return {
     /* manifest */

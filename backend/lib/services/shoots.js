@@ -18,12 +18,12 @@ const logger = require('../logger')
 const _ = require('lodash')
 const semver = require('semver')
 const config = require('../config')
+const projectsService = require('./projects')
 
 const {
   decodeBase64,
   encodeBase64,
   getSeedNameFromShoot,
-  projectFilter,
 } = utils
 const { getSeed } = cache
 
@@ -42,11 +42,8 @@ exports.list = async function ({ user, namespace, labelSelector }) {
       }
     } else {
       // user is permitted to list shoots only in namespaces associated with their projects
-      const namespaces = _
-        .chain(cache.getProjects())
-        .filter(projectFilter(user, false))
-        .map('spec.namespace')
-        .value()
+      const projects = await projectsService.list({ user, canListProjects: false })
+      const namespaces = _.map(projects, 'spec.namespace')
 
       const results = await Promise.allSettled(namespaces.map(async namespace => {
         const allowed = await authorization.canListShoots(user, namespace)

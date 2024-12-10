@@ -28,6 +28,7 @@ export const useAppStore = defineStore('app', () => {
   const splitpaneResize = ref(0)
   const fromRoute = ref(null)
   const routerError = ref(null)
+
   const { notify } = useNotification()
 
   function updateSplitpaneResize () {

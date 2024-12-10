@@ -24,7 +24,10 @@ SPDX-License-Identifier: Apache-2.0
           </v-toolbar>
           <v-card-text>
             <v-row>
-              <v-col cols="12">
+              <v-col
+                v-if="!sapTheme"
+                cols="12"
+              >
                 <legend class="text-medium-emphasis">
                   Color Scheme
                 </legend>
@@ -181,12 +184,14 @@ SPDX-License-Identifier: Apache-2.0
 <script setup>
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
+import { useRouteQuery } from '@vueuse/router'
 
 import { useLocalStorageStore } from '@/store/localStorage'
 
 import { useShootAdminKubeconfig } from '@/composables/useShootAdminKubeconfig'
 
 const localStorageStore = useLocalStorageStore()
+const sapTheme = useRouteQuery('sap-theme')
 const shootAdminKubeconfig = useShootAdminKubeconfig()
 const {
   expirations: shootAdminKubeconfigExpirations,

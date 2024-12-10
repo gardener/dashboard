@@ -105,6 +105,7 @@ import {
 } from '@vuelidate/validators'
 import { useRouter } from 'vue-router'
 
+import { useConfigStore } from '@/store/config'
 import { useProjectStore } from '@/store/project'
 
 import GMessage from '@/components/GMessage.vue'
@@ -113,6 +114,7 @@ import GProjectCostObject from '@/components/GProjectCostObject.vue'
 
 import { useLogger } from '@/composables/useLogger'
 import { useProvideProjectContext } from '@/composables/useProjectContext'
+import { useOpenMFP } from '@/composables/useOpenMFP'
 
 import {
   messageFromErrors,
@@ -144,6 +146,8 @@ const emit = defineEmits([
 ])
 
 const logger = useLogger()
+const openMFP = useOpenMFP()
+const configStore = useConfigStore()
 const projectStore = useProjectStore()
 const router = useRouter()
 const {
@@ -152,7 +156,10 @@ const {
   projectName,
   description,
   purpose,
-} = useProvideProjectContext()
+} = useProvideProjectContext({
+  openMFP,
+  configStore,
+})
 
 const projectNames = toRef(projectStore, 'projectNames')
 

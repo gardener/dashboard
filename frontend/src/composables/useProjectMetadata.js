@@ -6,7 +6,7 @@
 
 import { useObjectMetadata } from './useObjectMetadata'
 
-export const useProjectMetadata = (projectItem, options = {}) => {
+export const useProjectMetadata = projectItem => {
   const {
     name: projectName,
     creationTimestamp: projectCreationTimestamp,

@@ -8,9 +8,12 @@ SPDX-License-Identifier: Apache-2.0
   <v-container fluid>
     <v-card class="ma-3">
       <g-toolbar
-        :height="72"
+        :height="isInIframe ? 48 : 72"
       >
-        <template #prepend>
+        <template
+          v-if="!isInIframe"
+          #prepend
+        >
           <g-icon-base
             width="44"
             height="60"
@@ -21,10 +24,13 @@ SPDX-License-Identifier: Apache-2.0
             <g-certified-kubernetes />
           </g-icon-base>
         </template>
-        <div class="text-h5">
-          Kubernetes Clusters
+        <div :class="!isInIframe ? 'text-h5' : 'text-body-1'">
+          Clusters
         </div>
-        <div class="text-caption">
+        <div
+          v-if=" !isInIframe"
+          class="text-caption"
+        >
           {{ headlineSubtitle }}
         </div>
         <template #append>
@@ -201,8 +207,8 @@ SPDX-License-Identifier: Apache-2.0
 import {
   ref,
   reactive,
-  provide,
   toRef,
+  provide,
   watch,
 } from 'vue'
 import {
@@ -229,6 +235,7 @@ import GCertifiedKubernetes from '@/components/icons/GCertifiedKubernetes.vue'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
 import GShootListActions from '@/components/GShootListActions.vue'
 
+import { useIsInIframe } from '@/composables/useIsInIframe'
 import { useProjectShootCustomFields } from '@/composables/useProjectShootCustomFields'
 import { isCustomField } from '@/composables/useProjectShootCustomFields/helper'
 import { useProvideShootAction } from '@/composables/useShootAction'
@@ -285,6 +292,7 @@ export default {
   setup () {
     const projectStore = useProjectStore()
     const shootStore = useShootStore()
+    const isInIframe = useIsInIframe()
 
     useProvideShootAction({ shootStore })
 
@@ -333,6 +341,7 @@ export default {
     }
 
     return {
+      isInIframe,
       activePopoverKey,
       expandedWorkerGroups,
       expandedAccessRestrictions,
