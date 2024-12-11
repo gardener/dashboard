@@ -16,7 +16,7 @@ import {
 
 import { useApi } from '@/composables/useApi'
 import { useLogger } from '@/composables/useLogger'
-import { useEventHandler } from '@/composables/useEventHandler'
+import { useSocketEventHandler } from '@/composables/useSocketEventHandler'
 
 import { useAuthzStore } from './authz'
 import { useAppStore } from './app'
@@ -38,8 +38,6 @@ export const useProjectStore = defineStore('project', () => {
   const socketStore = useSocketStore()
 
   const list = ref(null)
-
-  const onEvent = useEventHandler({ logger })
 
   const isInitial = computed(() => {
     return list.value === null
@@ -161,11 +159,18 @@ export const useProjectStore = defineStore('project', () => {
     // do not remove project from store as it will stay in terminating phase for a while
   }
 
+  const {
+    startSocketEventHandler,
+    onSocketEvent,
+  } = useSocketEventHandler({ logger })
+
+  startSocketEventHandler(500)
+
   function handleEvent (event) {
-    onEvent.call(this, event)
+    onSocketEvent.call(this, event)
   }
 
-  function synchronize (uids) {
+  function fetchObjects (uids) {
     return socketStore.synchronize('projects', uids)
   }
 
@@ -193,7 +198,7 @@ export const useProjectStore = defineStore('project', () => {
     deleteProject,
     projectNameByNamespace,
     handleEvent,
-    synchronize,
+    fetchObjects,
     $reset,
   }
 })

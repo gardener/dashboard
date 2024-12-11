@@ -4,12 +4,20 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import { useDocumentVisibility } from '@vueuse/core'
+
 import { useLogger } from '@/composables/useLogger'
 
 import { isTooManyRequestsError } from '@/utils/errors'
 
 import throttle from 'lodash/throttle'
 import findIndex from 'lodash/findIndex'
+
+export function createDefaultOperator (state) {
+  if (Array.isArray(state.list)) {
+    return createListOperator(state.list)
+  }
+}
 
 export function createListOperator (list) {
   return {
@@ -30,10 +38,11 @@ export function createListOperator (list) {
   }
 }
 
-export function useEventHandler (options = {}) {
+export function useSocketEventHandler (options = {}) {
   const {
     logger = useLogger(),
-    wait = 500,
+    visibility = useDocumentVisibility(),
+    createOperator = createDefaultOperator,
   } = options
 
   const eventMap = new Map([])
@@ -52,7 +61,7 @@ export function useEventHandler (options = {}) {
           uids.push(uid)
         }
       }
-      const items = await store.synchronize(uids)
+      const items = await store.fetchObjects(uids)
       for (const item of items) {
         if (item.kind === 'Status') {
           logger.info('Failed to synchronize a single project: %s', item.message)
@@ -68,15 +77,17 @@ export function useEventHandler (options = {}) {
         }
       }
       store.$patch(state => {
-        const listOperator = createListOperator(state.list)
+        const operator = createOperator(state)
+        // Delete items first
         for (const [uid, item] of uidMap) {
           if (typeof item === 'boolean' && !item) {
-            listOperator.delete(uid)
+            operator.delete(uid)
           }
         }
+        // Update items
         for (const [uid, item] of uidMap) {
           if (typeof item === 'object' && item) {
-            listOperator.set(uid, item)
+            operator.set(uid, item)
           }
         }
       })
@@ -86,7 +97,7 @@ export function useEventHandler (options = {}) {
       } else {
         logger.error('Failed to synchronize modified projects: %s', err.message)
       }
-      // Synchronization failed. Rollback events
+      // Synchronization failed -> Rollback events
       for (const event of events) {
         const { uid } = event
         if (!eventMap.has(uid)) {
@@ -96,17 +107,47 @@ export function useEventHandler (options = {}) {
     }
   }
 
-  const throttledHandleEvents = throttle(handleEvents, wait)
+  let throttledHandleEvents
 
-  function handleEvent (event) {
+  function cancelTrailingInvocation () {
+    if (typeof throttledHandleEvents?.cancel === 'function') {
+      throttledHandleEvents.cancel()
+    }
+  }
+
+  function startSocketEventHandler (wait = 500) {
+    cancelTrailingInvocation()
+    eventMap.clear()
+    throttledHandleEvents = wait > 0
+      ? throttle(handleEvents, wait)
+      : store => handleEvents(store)
+  }
+
+  function stopSocketEventHandler () {
+    cancelTrailingInvocation()
+    eventMap.clear()
+    throttledHandleEvents = undefined
+  }
+
+  function onSocketEvent (event) {
+    if (typeof throttledHandleEvents !== 'function') {
+      return
+    }
     const { type, uid } = event
     if (!['ADDED', 'MODIFIED', 'DELETED'].includes(type)) {
-      logger.error('undhandled event type', type)
+      logger.error('Invalid event type', type)
       return
     }
     eventMap.set(uid, event)
+    if (visibility.value !== 'visible') {
+      return
+    }
     throttledHandleEvents(this)
   }
 
-  return handleEvent
+  return {
+    startSocketEventHandler,
+    stopSocketEventHandler,
+    onSocketEvent,
+  }
 }
