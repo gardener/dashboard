@@ -651,9 +651,9 @@ async function updateProperty (key, value, options = {}) {
       metadata: { name },
       spec: { namespace },
     }
-    if (openMFP.accountId && !get(projectStore.project, ['metadata', 'annotations', 'openmfp.org/account-id'])) {
+    if (openMFP.accountId.value && !get(projectStore.project, ['metadata', 'annotations', 'openmfp.org/account-id'])) {
       set(mergePatchDocument, ['metadata', 'labels', 'openmfp.org/managed-by'], 'true')
-      set(mergePatchDocument, ['metadata', 'annotations', 'openmfp.org/account-id'], openMFP.accountId)
+      set(mergePatchDocument, ['metadata', 'annotations', 'openmfp.org/account-id'], openMFP.accountId.value)
     }
     set(mergePatchDocument, ['spec', key], value)
     await projectStore.patchProject(mergePatchDocument)

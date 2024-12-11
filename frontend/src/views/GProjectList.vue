@@ -153,8 +153,8 @@ const canCreateProject = toRef(authzStore, 'canCreateProject')
 const projectDialog = ref(false)
 
 const projectList = computed(() => {
-  const belongsToAccount = project => openMFP.accountId === get(project, ['metadata', 'annotations', 'openmfp.org/account-id'])
-  return !openMFP.accountId
+  const belongsToAccount = project => openMFP.accountId.value === get(project, ['metadata', 'annotations', 'openmfp.org/account-id'])
+  return !openMFP.accountId.value
     ? projectStore.projectList
     : filter(projectStore.projectList, belongsToAccount)
 })
