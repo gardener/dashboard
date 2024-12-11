@@ -77,7 +77,7 @@ SPDX-License-Identifier: Apache-2.0
     />
     <g-external-link
       v-else
-      url="https://github.com/gardener/gardener/blob/master/docs/usage/shoot_high_availability.md"
+      url="https://github.com/gardener/gardener/blob/master/docs/usage/high-availability/shoot_high_availability.md"
     >
       More information
     </g-external-link>
