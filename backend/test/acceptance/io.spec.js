@@ -120,15 +120,25 @@ describe('api', function () {
 
   describe('events', function () {
     describe('when user is "foo"', () => {
+      const username = 'foo@example.org'
       const user = fixtures.auth.createUser({
-        id: 'foo@example.org',
+        id: username,
       })
+      let defaultRooms
       let args
 
       beforeEach(async () => {
+        // authorization check for `canListProjects`
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
         socket = await agent.connect({
           cookie: await user.cookie,
         })
+        defaultRooms = [
+          socket.id,
+          ioHelper.sha256(username),
+        ]
+        expect(mockRequest).toHaveBeenCalledTimes(1)
+        mockRequest.mockClear()
       })
 
       it('should subscribe shoots for a single cluster', async function () {
@@ -140,7 +150,7 @@ describe('api', function () {
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
-          socket.id,
+          ...defaultRooms,
           'shoots;garden-foo/fooShoot',
         ]))
 
@@ -170,13 +180,13 @@ describe('api', function () {
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
-          socket.id,
+          ...defaultRooms,
           'shoots;garden-foo',
         ]))
 
         await unsubscribe(socket, 'shoots')
         expect(getRooms(socket, nsp)).toEqual(new Set([
-          socket.id,
+          ...defaultRooms,
         ]))
       })
 
@@ -191,7 +201,7 @@ describe('api', function () {
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
-          socket.id,
+          ...defaultRooms,
           'shoots;garden-foo',
           'shoots;garden-bar',
         ]))
@@ -208,7 +218,7 @@ describe('api', function () {
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
-          socket.id,
+          ...defaultRooms,
           'shoots:unhealthy;garden-foo',
           'shoots:unhealthy;garden-bar',
         ]))
@@ -254,14 +264,23 @@ describe('api', function () {
     })
 
     describe('when user is "admin"', () => {
+      const username = 'admin@example.org'
       const user = fixtures.auth.createUser({
-        id: 'admin@example.org',
+        id: username,
       })
+      let defaultRooms
 
       beforeEach(async () => {
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
         socket = await agent.connect({
           cookie: await user.cookie,
         })
+        defaultRooms = [
+          socket.id,
+          ioHelper.sha256(username),
+        ]
+        expect(mockRequest).toHaveBeenCalledTimes(1)
+        mockRequest.mockClear()
       })
 
       it('should subscribe shoots for a single cluster', async function () {
@@ -273,7 +292,7 @@ describe('api', function () {
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
-          socket.id,
+          ...defaultRooms,
           'shoots;garden-foo/fooShoot',
         ]))
 
@@ -290,7 +309,7 @@ describe('api', function () {
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
-          socket.id,
+          ...defaultRooms,
           'shoots;garden-foo',
         ]))
 
@@ -307,7 +326,7 @@ describe('api', function () {
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
-          socket.id,
+          ...defaultRooms,
           'shoots:admin',
         ]))
 
@@ -324,7 +343,7 @@ describe('api', function () {
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
-          socket.id,
+          ...defaultRooms,
           'shoots:unhealthy:admin',
         ]))
       })
@@ -399,15 +418,18 @@ describe('api', function () {
     })
 
     it('should close the underlying connection', async function () {
+      const username = 'baz@example.org'
       const options = {
-        id: 'baz@example.org',
+        id: username,
         rti: 'abcdefg',
         refresh_at: Math.ceil(Date.now() / 1000) + 4,
       }
       const user = fixtures.auth.createUser(options)
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       socket = await agent.connect({
         cookie: await user.cookie,
       })
+      expect(mockRequest).toHaveBeenCalledTimes(1)
       expect(mockSetDisconnectTimeout).toHaveBeenCalledTimes(1)
       expect(mockSetDisconnectTimeout.mock.calls[0]).toEqual([
         expect.objectContaining({

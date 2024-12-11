@@ -28,14 +28,11 @@ async function userProfiles (req, res, next) {
   try {
     const [
       canListProjects,
-      canGetSecrets,
     ] = await Promise.all([
       authorization.canListProjects(req.user),
-      authorization.canListSecrets(req.user),
     ])
     const profiles = Object.freeze({
       canListProjects,
-      canGetSecrets,
     })
     Object.defineProperty(req.user, 'profiles', {
       value: profiles,

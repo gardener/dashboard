@@ -88,24 +88,21 @@ describe('hooks', () => {
       const server = {}
       const ticketCache = {}
       const ioInstance = {}
+      const keys = ['leases', 'shoots', 'projects']
       let informers
       let mockCreateInformers
 
       beforeEach(() => {
-        informers = {
-          leases: {
-            run: jest.fn(),
-            store: {
-              untilHasSynced: Promise.resolve('leases'),
+        informers = keys.reduce((acc, key) => {
+          return Object.assign(acc, {
+            [key]: {
+              run: jest.fn(),
+              store: {
+                untilHasSynced: Promise.resolve(key),
+              },
             },
-          },
-          shoots: {
-            run: jest.fn(),
-            store: {
-              untilHasSynced: Promise.resolve('shoots'),
-            },
-          },
-        }
+          })
+        }, {})
         hooks.constructor.createInformers = mockCreateInformers = jest.fn(() => informers)
         cache.initialize = jest.fn()
         cache.getTicketCache = jest.fn(() => ticketCache)
@@ -113,7 +110,7 @@ describe('hooks', () => {
       })
 
       it('should create and run informers, create io instance and initialize cache and watches', async function () {
-        await expect(hooks.beforeListen(server)).resolves.toEqual(['leases', 'shoots'])
+        await expect(hooks.beforeListen(server)).resolves.toEqual(keys)
 
         expect(mockCreateInformers).toHaveBeenCalledTimes(1)
         expect(mockCreateInformers.mock.calls[0]).toHaveLength(1)

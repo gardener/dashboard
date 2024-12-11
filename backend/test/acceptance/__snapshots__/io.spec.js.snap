@@ -70,7 +70,7 @@ exports[`api events when user is "admin" should subscribe shoots for a single cl
     "code": 404,
     "details": {
       "group": "core.gardener.cloud",
-      "kind": "shoots",
+      "kind": "Shoot",
       "uid": 2,
     },
     "kind": "Status",
@@ -150,7 +150,7 @@ exports[`api events when user is "admin" should subscribe shoots for a single na
     "code": 404,
     "details": {
       "group": "core.gardener.cloud",
-      "kind": "shoots",
+      "kind": "Shoot",
       "uid": 4,
     },
     "kind": "Status",

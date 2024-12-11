@@ -30,6 +30,7 @@ function init (httpServer, cache) {
 
     // handle 'subscribe' events
     socket.on('subscribe', async (key, ...args) => {
+      logger.debug('Socket %s subscribed to %s', socket.id, key)
       const done = args.pop()
       try {
         await dispatcher.subscribe(socket, key, ...args)
