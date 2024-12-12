@@ -537,6 +537,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@codemirror/state@npm:^6.5.0":
+  version: 6.5.0
+  resolution: "@codemirror/state@npm:6.5.0"
+  dependencies:
+    "@marijn/find-cluster-break": "npm:^1.0.0"
+  checksum: 10c0/740425d605d7b12524e3abef242a8ca0ea1a17bab97f7583221f89c56b8f2eb236f8a227885e2bb472662b328d2a32b972fbf8543096224711679dfc3a28b492
+  languageName: node
+  linkType: hard
+
 "@codemirror/theme-one-dark@npm:^6.1.2":
   version: 6.1.2
   resolution: "@codemirror/theme-one-dark@npm:6.1.2"
@@ -549,7 +558,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@codemirror/view@npm:^6.0.0, @codemirror/view@npm:^6.17.0, @codemirror/view@npm:^6.23.0, @codemirror/view@npm:^6.27.0, @codemirror/view@npm:^6.33.0":
+"@codemirror/view@npm:^6.0.0, @codemirror/view@npm:^6.17.0, @codemirror/view@npm:^6.23.0, @codemirror/view@npm:^6.27.0":
   version: 6.35.2
   resolution: "@codemirror/view@npm:6.35.2"
   dependencies:
@@ -557,6 +566,17 @@ __metadata:
     style-mod: "npm:^4.1.0"
     w3c-keyname: "npm:^2.2.4"
   checksum: 10c0/2f129a65ceb946d77981eaa230e859aa3f989b6d51c2a491f88953e32a91c59a2d5d2676f1944c9f50241eb3bbd301f786d047571834900c676edc981263fdf5
+  languageName: node
+  linkType: hard
+
+"@codemirror/view@npm:^6.35.3":
+  version: 6.35.3
+  resolution: "@codemirror/view@npm:6.35.3"
+  dependencies:
+    "@codemirror/state": "npm:^6.5.0"
+    style-mod: "npm:^4.1.0"
+    w3c-keyname: "npm:^2.2.4"
+  checksum: 10c0/aa12c86756360f0ab2cf4b09fca16e5bfb3d32cc99a94a18a12aec84dd3a20f15277fb36d42fc78f803caaa7b93f3fa7382ba47e1d3495fad7166317c60090d8
   languageName: node
   linkType: hard
 
@@ -1111,7 +1131,7 @@ __metadata:
     "@codemirror/search": "npm:^6.5.6"
     "@codemirror/state": "npm:^6.4.1"
     "@codemirror/theme-one-dark": "npm:^6.1.2"
-    "@codemirror/view": "npm:^6.33.0"
+    "@codemirror/view": "npm:^6.35.3"
     "@fontsource/roboto": "npm:^5.0.12"
     "@kyvg/vue3-notification": "npm:^3.2.1"
     "@lezer/common": "npm:^1.2.1"
@@ -1743,6 +1763,13 @@ __metadata:
     "@lezer/highlight": "npm:^1.0.0"
     "@lezer/lr": "npm:^1.4.0"
   checksum: 10c0/cef3d0c0a2c48a7e0f36ccc0af948da9394d17b164dcbaf0187d9b472fd4f628b3107d7a4041045181488f1966a94ae65640c932fc8d3bf8c3597813cfb86ae0
+  languageName: node
+  linkType: hard
+
+"@marijn/find-cluster-break@npm:^1.0.0":
+  version: 1.0.2
+  resolution: "@marijn/find-cluster-break@npm:1.0.2"
+  checksum: 10c0/1a17a60b16083cc5f7ce89d7b7d8aa87ce4099723e3e9e34e229ef2cd8a980e69d481ca8ee90ffedfec5119af1aed581642fb60ed0365e7e90634c81ea6b630f
   languageName: node
   linkType: hard
 

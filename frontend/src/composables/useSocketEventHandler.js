@@ -43,10 +43,7 @@ export function createListOperator (list) {
 }
 
 export function useSocketEventHandler (useStore, options = {}) {
-  const kind = useStore.name.replace(/^use([a-zA-Z]+)Store$/, '$1')
   const {
-    singularName = kind.toLowerCase(),
-    pluralName = singularName + 's',
     logger = useLogger(),
     socketStore = useSocketStore(),
     visibility = useDocumentVisibility(),
@@ -56,6 +53,7 @@ export function useSocketEventHandler (useStore, options = {}) {
   const eventMap = new Map([])
 
   async function handleEvents (store) {
+    const pluralName = store.$id + 's'
     const events = Array.from(eventMap.values())
     eventMap.clear()
     try {
@@ -72,7 +70,7 @@ export function useSocketEventHandler (useStore, options = {}) {
       const items = await socketStore.synchronize(pluralName, uids)
       for (const item of items) {
         if (item.kind === 'Status') {
-          logger.info('Failed to synchronize a single %s: %s', singularName, item.message)
+          logger.info('Failed to synchronize a single %s: %s', store.$id, item.message)
           if (item.code === 404) {
             const uid = item.details?.uid
             if (uid) {
@@ -127,10 +125,10 @@ export function useSocketEventHandler (useStore, options = {}) {
     cancelTrailingInvocation()
     eventMap.clear()
     const store = useStore()
-    const boundHandleEvents = partial(handleEvents, store)
+    const handleEventsWithParams = partial(handleEvents, store)
     throttledHandleEvents = wait > 0
-      ? throttle(boundHandleEvents, wait)
-      : boundHandleEvents
+      ? throttle(handleEventsWithParams, wait)
+      : handleEventsWithParams
     return throttledHandleEvents
   }
 

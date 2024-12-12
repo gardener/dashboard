@@ -967,6 +967,31 @@ const RAW_RUNTIME_STATE =
           "@types/lezer__common"\
         ],\
         "linkType": "HARD"\
+      }],\
+      ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:6.18.3", {\
+        "packageLocation": "./.yarn/__virtual__/@codemirror-autocomplete-virtual-d5889fb313/0/cache/@codemirror-autocomplete-npm-6.18.3-d04fd15061-6d953d50ca.zip/node_modules/@codemirror/autocomplete/",\
+        "packageDependencies": [\
+          ["@codemirror/autocomplete", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:6.18.3"],\
+          ["@codemirror/language", "npm:6.10.6"],\
+          ["@codemirror/state", "npm:6.4.1"],\
+          ["@codemirror/view", "npm:6.35.3"],\
+          ["@lezer/common", "npm:1.2.3"],\
+          ["@types/codemirror__language", null],\
+          ["@types/codemirror__state", null],\
+          ["@types/codemirror__view", null],\
+          ["@types/lezer__common", null]\
+        ],\
+        "packagePeers": [\
+          "@codemirror/language",\
+          "@codemirror/state",\
+          "@codemirror/view",\
+          "@lezer/common",\
+          "@types/codemirror__language",\
+          "@types/codemirror__state",\
+          "@types/codemirror__view",\
+          "@types/lezer__common"\
+        ],\
+        "linkType": "HARD"\
       }]\
     ]],\
     ["@codemirror/commands", [\
@@ -1032,6 +1057,14 @@ const RAW_RUNTIME_STATE =
           ["@codemirror/state", "npm:6.4.1"]\
         ],\
         "linkType": "HARD"\
+      }],\
+      ["npm:6.5.0", {\
+        "packageLocation": "./.yarn/cache/@codemirror-state-npm-6.5.0-cc8408a413-740425d605.zip/node_modules/@codemirror/state/",\
+        "packageDependencies": [\
+          ["@codemirror/state", "npm:6.5.0"],\
+          ["@marijn/find-cluster-break", "npm:1.0.2"]\
+        ],\
+        "linkType": "HARD"\
       }]\
     ]],\
     ["@codemirror/theme-one-dark", [\
@@ -1053,6 +1086,16 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@codemirror/view", "npm:6.35.2"],\
           ["@codemirror/state", "npm:6.4.1"],\
+          ["style-mod", "npm:4.1.2"],\
+          ["w3c-keyname", "npm:2.2.8"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:6.35.3", {\
+        "packageLocation": "./.yarn/cache/@codemirror-view-npm-6.35.3-06fc228026-aa12c86756.zip/node_modules/@codemirror/view/",\
+        "packageDependencies": [\
+          ["@codemirror/view", "npm:6.35.3"],\
+          ["@codemirror/state", "npm:6.5.0"],\
           ["style-mod", "npm:4.1.2"],\
           ["w3c-keyname", "npm:2.2.8"]\
         ],\
@@ -1698,14 +1741,14 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./frontend/",\
         "packageDependencies": [\
           ["@gardener-dashboard/frontend", "workspace:frontend"],\
-          ["@codemirror/autocomplete", "virtual:394dfa168191eeecf96909f25681b55b33ead8fc50fd0a11ab993dc4dac05b4b1625a43d289b67f5ea6f52728a72fd8b13e50efd2deb55615cce83baa304218a#npm:6.18.3"],\
+          ["@codemirror/autocomplete", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:6.18.3"],\
           ["@codemirror/commands", "npm:6.7.1"],\
           ["@codemirror/lang-yaml", "npm:6.1.1"],\
           ["@codemirror/language", "npm:6.10.6"],\
           ["@codemirror/search", "npm:6.5.8"],\
           ["@codemirror/state", "npm:6.4.1"],\
           ["@codemirror/theme-one-dark", "npm:6.1.2"],\
-          ["@codemirror/view", "npm:6.35.2"],\
+          ["@codemirror/view", "npm:6.35.3"],\
           ["@fontsource/roboto", "npm:5.1.0"],\
           ["@kyvg/vue3-notification", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.4.1"],\
           ["@lezer/common", "npm:1.2.3"],\
@@ -2435,6 +2478,15 @@ const RAW_RUNTIME_STATE =
           ["@lezer/common", "npm:1.2.3"],\
           ["@lezer/highlight", "npm:1.2.1"],\
           ["@lezer/lr", "npm:1.4.2"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["@marijn/find-cluster-break", [\
+      ["npm:1.0.2", {\
+        "packageLocation": "./.yarn/cache/@marijn-find-cluster-break-npm-1.0.2-1b67577854-1a17a60b16.zip/node_modules/@marijn/find-cluster-break/",\
+        "packageDependencies": [\
+          ["@marijn/find-cluster-break", "npm:1.0.2"]\
         ],\
         "linkType": "HARD"\
       }]\
