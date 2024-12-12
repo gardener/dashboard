@@ -4,12 +4,16 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import { watch } from 'vue'
 import { useDocumentVisibility } from '@vueuse/core'
+
+import { useSocketStore } from '@/store/socket'
 
 import { useLogger } from '@/composables/useLogger'
 
 import { isTooManyRequestsError } from '@/utils/errors'
 
+import partial from 'lodash/partial'
 import throttle from 'lodash/throttle'
 import findIndex from 'lodash/findIndex'
 
@@ -38,9 +42,13 @@ export function createListOperator (list) {
   }
 }
 
-export function useSocketEventHandler (options = {}) {
+export function useSocketEventHandler (useStore, options = {}) {
+  const kind = useStore.name.replace(/^use([a-zA-Z]+)Store$/, '$1')
   const {
+    singularName = kind.toLowerCase(),
+    pluralName = singularName + 's',
     logger = useLogger(),
+    socketStore = useSocketStore(),
     visibility = useDocumentVisibility(),
     createOperator = createDefaultOperator,
   } = options
@@ -61,10 +69,10 @@ export function useSocketEventHandler (options = {}) {
           uids.push(uid)
         }
       }
-      const items = await store.fetchObjects(uids)
+      const items = await socketStore.synchronize(pluralName, uids)
       for (const item of items) {
         if (item.kind === 'Status') {
-          logger.info('Failed to synchronize a single project: %s', item.message)
+          logger.info('Failed to synchronize a single %s: %s', singularName, item.message)
           if (item.code === 404) {
             const uid = item.details?.uid
             if (uid) {
@@ -93,9 +101,9 @@ export function useSocketEventHandler (options = {}) {
       })
     } catch (err) {
       if (isTooManyRequestsError(err)) {
-        logger.info('Skipped synchronization of modified projects: %s', err.message)
+        logger.info('Skipped synchronization of modified %s: %s', pluralName, err.message)
       } else {
-        logger.error('Failed to synchronize modified projects: %s', err.message)
+        logger.error('Failed to synchronize modified %s: %s', pluralName, err.message)
       }
       // Synchronization failed -> Rollback events
       for (const event of events) {
@@ -115,21 +123,25 @@ export function useSocketEventHandler (options = {}) {
     }
   }
 
-  function startSocketEventHandler (wait = 500) {
+  function start (wait = 500) {
     cancelTrailingInvocation()
     eventMap.clear()
+    const store = useStore()
+    const boundHandleEvents = partial(handleEvents, store)
     throttledHandleEvents = wait > 0
-      ? throttle(handleEvents, wait)
-      : store => handleEvents(store)
+      ? throttle(boundHandleEvents, wait)
+      : boundHandleEvents
+    return this
   }
 
-  function stopSocketEventHandler () {
+  function stop () {
     cancelTrailingInvocation()
     eventMap.clear()
     throttledHandleEvents = undefined
+    return this
   }
 
-  function onSocketEvent (event) {
+  function listener (event) {
     if (typeof throttledHandleEvents !== 'function') {
       return
     }
@@ -142,12 +154,18 @@ export function useSocketEventHandler (options = {}) {
     if (visibility.value !== 'visible') {
       return
     }
-    throttledHandleEvents(this)
+    throttledHandleEvents()
   }
 
+  watch(visibility, (current, previous) => {
+    if (current === 'visible' && previous === 'hidden') {
+      throttledHandleEvents()
+    }
+  })
+
   return {
-    startSocketEventHandler,
-    stopSocketEventHandler,
-    onSocketEvent,
+    start,
+    stop,
+    listener,
   }
 }

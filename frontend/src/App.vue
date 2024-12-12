@@ -75,12 +75,6 @@ onKeyStroke('Escape', e => {
   e.preventDefault()
 })
 
-watch(visibility, (current, previous) => {
-  if (current === 'visible' && previous === 'hidden') {
-    shootStore.invokeSubscriptionEventHandler()
-  }
-})
-
 const documentTitle = computed(() => {
   let appTitle = process.env.VITE_APP_TITLE
   const branding = configStore.branding ?? loginStore.branding

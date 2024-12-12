@@ -20,7 +20,6 @@ import { useSocketEventHandler } from '@/composables/useSocketEventHandler'
 
 import { useAuthzStore } from './authz'
 import { useAppStore } from './app'
-import { useSocketStore } from './socket'
 
 import filter from 'lodash/filter'
 import find from 'lodash/find'
@@ -35,7 +34,6 @@ export const useProjectStore = defineStore('project', () => {
   const logger = useLogger()
   const appStore = useAppStore()
   const authzStore = useAuthzStore()
-  const socketStore = useSocketStore()
 
   const list = ref(null)
 
@@ -159,20 +157,9 @@ export const useProjectStore = defineStore('project', () => {
     // do not remove project from store as it will stay in terminating phase for a while
   }
 
-  const {
-    startSocketEventHandler,
-    onSocketEvent,
-  } = useSocketEventHandler({ logger })
-
-  startSocketEventHandler(500)
-
-  function handleEvent (event) {
-    onSocketEvent.call(this, event)
-  }
-
-  function fetchObjects (uids) {
-    return socketStore.synchronize('projects', uids)
-  }
+  const socketEventHandler = useSocketEventHandler(useProjectStore, {
+    logger,
+  }).start(500)
 
   async function $reset () {
     list.value = null
@@ -197,8 +184,7 @@ export const useProjectStore = defineStore('project', () => {
     updateProject,
     deleteProject,
     projectNameByNamespace,
-    handleEvent,
-    fetchObjects,
+    handleEvent: socketEventHandler.listener,
     $reset,
   }
 })
