@@ -131,14 +131,13 @@ export function useSocketEventHandler (useStore, options = {}) {
     throttledHandleEvents = wait > 0
       ? throttle(boundHandleEvents, wait)
       : boundHandleEvents
-    return this
+    return throttledHandleEvents
   }
 
   function stop () {
     cancelTrailingInvocation()
     eventMap.clear()
     throttledHandleEvents = undefined
-    return this
   }
 
   function listener (event) {

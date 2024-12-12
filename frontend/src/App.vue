@@ -12,7 +12,6 @@ import {
   provide,
   inject,
   toRef,
-  watch,
   computed,
 } from 'vue'
 import { useTheme } from 'vuetify'
@@ -20,7 +19,6 @@ import {
   onKeyStroke,
   useEventBus,
   useColorMode,
-  useDocumentVisibility,
   useTitle,
 } from '@vueuse/core'
 import { useRoute } from 'vue-router'
@@ -28,7 +26,6 @@ import { useRoute } from 'vue-router'
 import { useConfigStore } from '@/store/config'
 import { useLoginStore } from '@/store/login'
 import { useLocalStorageStore } from '@/store/localStorage'
-import { useShootStore } from '@/store/shoot'
 import { useProjectStore } from '@/store/project'
 
 import { useCustomColors } from '@/composables/useCustomColors'
@@ -38,10 +35,8 @@ import get from 'lodash/get'
 const theme = useTheme()
 const route = useRoute()
 const localStorageStore = useLocalStorageStore()
-const visibility = useDocumentVisibility()
 const configStore = useConfigStore()
 const loginStore = useLoginStore()
-const shootStore = useShootStore()
 const projectStore = useProjectStore()
 const logger = inject('logger')
 

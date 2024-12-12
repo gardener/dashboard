@@ -559,7 +559,7 @@ const useShootStore = defineStore('shoot', () => {
     const shootStore = this
     shootStore.$patch(({ state }) => {
       setSubscriptionState(state, constants.OPENING)
-      socketEventHandler.start(throttleDelay)
+      state.subscriptionEventHandler = socketEventHandler.start(throttleDelay)
     })
     try {
       await socketStore.emitSubscribe(value)
@@ -579,6 +579,7 @@ const useShootStore = defineStore('shoot', () => {
       state.subscription = null
       setSubscriptionState(state, constants.CLOSING)
       socketEventHandler.stop()
+      state.subscriptionEventHandler = undefined
     })
     try {
       await socketStore.emitUnsubscribe()
@@ -593,7 +594,7 @@ const useShootStore = defineStore('shoot', () => {
     return includes(activeUids.value, uid)
   }
 
-  const socketEventHandler = useSocketEventHandler('shoots', {
+  const socketEventHandler = useSocketEventHandler(useShootStore, {
     logger,
     createOperator ({ state }) {
       const notOnlyShootsWithIssues = !onlyAllShootsWithIssues(state, context)

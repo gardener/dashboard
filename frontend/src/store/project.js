@@ -159,7 +159,8 @@ export const useProjectStore = defineStore('project', () => {
 
   const socketEventHandler = useSocketEventHandler(useProjectStore, {
     logger,
-  }).start(500)
+  })
+  socketEventHandler.start(500)
 
   async function $reset () {
     list.value = null
