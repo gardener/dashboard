@@ -19,6 +19,11 @@ const watches = require('../lib/watches')
 const cache = require('../lib/cache')
 const tickets = require('../lib/services/tickets')
 const SyncManager = require('../lib/github/SyncManager')
+const { sha256 } = require('../lib/io/helper')
+
+const { cloneDeep } = require('lodash')
+
+const flushPromises = () => new Promise(setImmediate)
 
 const rooms = new Map()
 
@@ -48,8 +53,45 @@ const nsp = {
   emit: jest.fn(),
 }
 
+const sockets = [
+  {
+    id: 1,
+    data: {
+      user: {
+        id: 'admin@example.org',
+        profiles: {
+          canListProjects: true,
+        },
+      },
+    },
+  },
+  {
+    id: 2,
+    data: {
+      user: {
+        id: 'foo@example.org',
+        profiles: {
+          canListProjects: false,
+        },
+      },
+    },
+  },
+  {
+    id: 3,
+    data: {
+      user: {
+        id: 'bar@example.org',
+        profiles: {
+          canListProjects: false,
+        },
+      },
+    },
+  },
+]
+
 const io = {
   of: jest.fn().mockReturnValue(nsp),
+  fetchSockets: jest.fn().mockResolvedValue(sockets),
 }
 
 describe('watches', function () {
@@ -159,6 +201,61 @@ describe('watches', function () {
           'shoots',
           { type: 'DELETED', uid: foobazUnhealthy.metadata.uid },
         ],
+      ])
+    })
+  })
+
+  describe('projects', function () {
+    it('should watch projects', async function () {
+      watches.projects(io, informer)
+
+      expect(io.of).toHaveBeenCalledTimes(1)
+      expect(io.of.mock.calls).toEqual([['/']])
+
+      const uid = 4
+      const bar = {
+        metadata: {
+          name: 'bar',
+          uid,
+        },
+        spec: {
+          members: [{
+            kind: 'User',
+            name: 'foo@example.org',
+          }],
+        },
+      }
+
+      informer.emit('add', bar)
+      const modifiedBar = cloneDeep(bar)
+      modifiedBar.spec.members = []
+      informer.emit('update', modifiedBar, bar)
+      informer.emit('delete', modifiedBar)
+
+      await flushPromises()
+
+      expect(logger.error).not.toHaveBeenCalled()
+
+      const ids = [
+        'admin@example.org',
+        'foo@example.org',
+      ].map(sha256)
+      expect(Array.from(rooms.keys())).toEqual(ids)
+      expect(nsp.to).toHaveBeenCalledTimes(5)
+
+      const adminRoom = rooms.get(ids[0])
+      expect(adminRoom.emit).toHaveBeenCalledTimes(3)
+      expect(adminRoom.emit.mock.calls).toEqual([
+        ['projects', { type: 'ADDED', uid }],
+        ['projects', { type: 'MODIFIED', uid }],
+        ['projects', { type: 'DELETED', uid }],
+      ])
+
+      const fooRoom = rooms.get(ids[1])
+      expect(fooRoom.emit).toHaveBeenCalledTimes(2)
+      expect(fooRoom.emit.mock.calls).toEqual([
+        ['projects', { type: 'ADDED', uid }],
+        ['projects', { type: 'DELETED', uid }],
       ])
     })
   })

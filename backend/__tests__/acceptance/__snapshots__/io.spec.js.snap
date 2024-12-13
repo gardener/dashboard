@@ -288,6 +288,36 @@ exports[`api events when user is "admin" should subscribe unhealthy shoots for a
 ]
 `;
 
+exports[`api events when user is "admin" should synchronize a project 1`] = `
+[
+  {
+    "metadata": {
+      "name": "bar",
+      "resourceVersion": "42",
+      "uid": 2,
+    },
+    "spec": {
+      "createdBy": {
+        "apiGroup": "rbac.authorization.k8s.io",
+        "kind": "User",
+        "name": "foo@example.org",
+      },
+      "description": "bar-description",
+      "namespace": "garden-bar",
+      "owner": {
+        "apiGroup": "rbac.authorization.k8s.io",
+        "kind": "User",
+        "name": "bar@example.org",
+      },
+      "purpose": "bar-purpose",
+    },
+    "status": {
+      "phase": "Ready",
+    },
+  },
+]
+`;
+
 exports[`api events when user is "foo" should subscribe shoots for a single cluster 1`] = `
 [
   [
@@ -317,6 +347,33 @@ exports[`api events when user is "foo" should subscribe shoots for a single clus
 `;
 
 exports[`api events when user is "foo" should subscribe shoots for a single namespace 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
+    },
+    {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": {
+          "group": "core.gardener.cloud",
+          "namespace": "garden-foo",
+          "resource": "shoots",
+          "verb": "list",
+        },
+      },
+    },
+  ],
+]
+`;
+
+exports[`api events when user is "foo" should subscribe shoots for a single namespace 2`] = `
 [
   [
     {

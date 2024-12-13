@@ -261,6 +261,42 @@ describe('api', function () {
           message: 'Invalid subscription type - baz',
         }))
       })
+
+      it('should subscribe shoots for a single namespace', async function () {
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+
+        await subscribe(socket, 'shoots', { namespace: 'garden-foo' })
+
+        expect(mockRequest).toHaveBeenCalledTimes(1)
+        expect(mockRequest.mock.calls).toMatchSnapshot()
+
+        expect(getRooms(socket, nsp)).toEqual(new Set([
+          ...defaultRooms,
+          'shoots;garden-foo',
+        ]))
+
+        await unsubscribe(socket, 'shoots')
+        expect(getRooms(socket, nsp)).toEqual(new Set([
+          ...defaultRooms,
+        ]))
+      })
+
+      it('should fail to synchronize a secret project', async function () {
+        const items = await synchronize(socket, 'projects', [6])
+        expect(items).toEqual([{
+          apiVersion: 'v1',
+          code: 404,
+          details: {
+            group: 'core.gardener.cloud',
+            kind: 'Project',
+            uid: 6,
+          },
+          kind: 'Status',
+          message: 'Project with uid 6 does not exist',
+          reason: 'NotFound',
+          status: 'Failure',
+        }])
+      })
     })
 
     describe('when user is "admin"', () => {
@@ -348,12 +384,17 @@ describe('api', function () {
         ]))
       })
 
-      it('should fail to syncronize cats', async function () {
+      it('should fail to synchronize cats', async function () {
         mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
 
         await expect(synchronize(socket, 'cats', [42]))
           .rejects
           .toThrow('Invalid synchronization type - cats')
+      })
+
+      it('should synchronize a project', async function () {
+        const items = await synchronize(socket, 'projects', [2])
+        expect(items).toMatchSnapshot()
       })
     })
   })
