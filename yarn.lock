@@ -462,7 +462,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@codemirror/autocomplete@npm:^6.0.0, @codemirror/autocomplete@npm:^6.18.0":
+"@codemirror/autocomplete@npm:^6.0.0, @codemirror/autocomplete@npm:^6.18.3":
   version: 6.18.3
   resolution: "@codemirror/autocomplete@npm:6.18.3"
   dependencies:
@@ -479,7 +479,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@codemirror/commands@npm:^6.6.0":
+"@codemirror/commands@npm:^6.7.1":
   version: 6.7.1
   resolution: "@codemirror/commands@npm:6.7.1"
   dependencies:
@@ -491,21 +491,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@codemirror/lang-yaml@npm:^6.1.1":
-  version: 6.1.1
-  resolution: "@codemirror/lang-yaml@npm:6.1.1"
+"@codemirror/lang-yaml@npm:^6.1.2":
+  version: 6.1.2
+  resolution: "@codemirror/lang-yaml@npm:6.1.2"
   dependencies:
     "@codemirror/autocomplete": "npm:^6.0.0"
     "@codemirror/language": "npm:^6.0.0"
     "@codemirror/state": "npm:^6.0.0"
     "@lezer/common": "npm:^1.2.0"
     "@lezer/highlight": "npm:^1.2.0"
+    "@lezer/lr": "npm:^1.0.0"
     "@lezer/yaml": "npm:^1.0.0"
-  checksum: 10c0/a6952affceacaa0e9ce699683f167eb356df487fa2254889d0067a30a7effe2d358607182da11bd7bc8d885e42fdd0235100a408f57be5a396b2e08179025246
+  checksum: 10c0/fc993c5e24baee0212d587c652ee7633792533c1b1e5b708d5e4f6c29e6164a3563958fd6a3bb402a64f565f7bab7edbda6c8b8cd8bfecfd0b7294f0dcf998a8
   languageName: node
   linkType: hard
 
-"@codemirror/language@npm:^6.0.0, @codemirror/language@npm:^6.10.2":
+"@codemirror/language@npm:^6.0.0, @codemirror/language@npm:^6.10.6":
   version: 6.10.6
   resolution: "@codemirror/language@npm:6.10.6"
   dependencies:
@@ -519,7 +520,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@codemirror/search@npm:^6.5.6":
+"@codemirror/search@npm:^6.5.8":
   version: 6.5.8
   resolution: "@codemirror/search@npm:6.5.8"
   dependencies:
@@ -530,14 +531,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@codemirror/state@npm:^6.0.0, @codemirror/state@npm:^6.4.0, @codemirror/state@npm:^6.4.1":
-  version: 6.4.1
-  resolution: "@codemirror/state@npm:6.4.1"
-  checksum: 10c0/cdab74d0ca4e262531a257ac419c9c44124f3ace8b0ca1262598a9218fbb6fd8f0afeb4b5ed2f64552a9573a0fc5d55481d4b9b05e9505ef729f9bd0f9469423
-  languageName: node
-  linkType: hard
-
-"@codemirror/state@npm:^6.5.0":
+"@codemirror/state@npm:^6.0.0, @codemirror/state@npm:^6.4.0, @codemirror/state@npm:^6.5.0":
   version: 6.5.0
   resolution: "@codemirror/state@npm:6.5.0"
   dependencies:
@@ -558,18 +552,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@codemirror/view@npm:^6.0.0, @codemirror/view@npm:^6.17.0, @codemirror/view@npm:^6.23.0, @codemirror/view@npm:^6.27.0":
-  version: 6.35.2
-  resolution: "@codemirror/view@npm:6.35.2"
-  dependencies:
-    "@codemirror/state": "npm:^6.4.0"
-    style-mod: "npm:^4.1.0"
-    w3c-keyname: "npm:^2.2.4"
-  checksum: 10c0/2f129a65ceb946d77981eaa230e859aa3f989b6d51c2a491f88953e32a91c59a2d5d2676f1944c9f50241eb3bbd301f786d047571834900c676edc981263fdf5
-  languageName: node
-  linkType: hard
-
-"@codemirror/view@npm:^6.35.3":
+"@codemirror/view@npm:^6.0.0, @codemirror/view@npm:^6.17.0, @codemirror/view@npm:^6.23.0, @codemirror/view@npm:^6.27.0, @codemirror/view@npm:^6.35.3":
   version: 6.35.3
   resolution: "@codemirror/view@npm:6.35.3"
   dependencies:
@@ -1124,12 +1107,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@gardener-dashboard/frontend@workspace:frontend"
   dependencies:
-    "@codemirror/autocomplete": "npm:^6.18.0"
-    "@codemirror/commands": "npm:^6.6.0"
-    "@codemirror/lang-yaml": "npm:^6.1.1"
-    "@codemirror/language": "npm:^6.10.2"
-    "@codemirror/search": "npm:^6.5.6"
-    "@codemirror/state": "npm:^6.4.1"
+    "@codemirror/autocomplete": "npm:^6.18.3"
+    "@codemirror/commands": "npm:^6.7.1"
+    "@codemirror/lang-yaml": "npm:^6.1.2"
+    "@codemirror/language": "npm:^6.10.6"
+    "@codemirror/search": "npm:^6.5.8"
+    "@codemirror/state": "npm:^6.5.0"
     "@codemirror/theme-one-dark": "npm:^6.1.2"
     "@codemirror/view": "npm:^6.35.3"
     "@fontsource/roboto": "npm:^5.0.12"
@@ -1746,7 +1729,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lezer/lr@npm:*, @lezer/lr@npm:^1.0.0, @lezer/lr@npm:^1.4.0":
+"@lezer/lr@npm:^1.0.0, @lezer/lr@npm:^1.4.0":
   version: 1.4.2
   resolution: "@lezer/lr@npm:1.4.2"
   dependencies:
