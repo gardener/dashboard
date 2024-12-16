@@ -1741,7 +1741,7 @@ const RAW_RUNTIME_STATE =
           ["eventemitter3", "npm:5.0.1"],\
           ["floating-vue", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.2.2"],\
           ["get-contrast", "npm:3.0.0"],\
-          ["highlight.js", "npm:11.10.0"],\
+          ["highlight.js", "npm:11.11.0"],\
           ["js-base64", "npm:3.7.7"],\
           ["js-cookie", "npm:3.0.5"],\
           ["js-yaml", "npm:4.1.0"],\
@@ -8038,10 +8038,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["highlight.js", [\
-      ["npm:11.10.0", {\
-        "packageLocation": "./.yarn/cache/highlight.js-npm-11.10.0-2560016492-cd8bf7ef06.zip/node_modules/highlight.js/",\
+      ["npm:11.11.0", {\
+        "packageLocation": "./.yarn/cache/highlight.js-npm-11.11.0-3c9c4e55b7-32288dd342.zip/node_modules/highlight.js/",\
         "packageDependencies": [\
-          ["highlight.js", "npm:11.10.0"]\
+          ["highlight.js", "npm:11.11.0"]\
         ],\
         "linkType": "HARD"\
       }]\
