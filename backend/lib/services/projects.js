@@ -53,11 +53,10 @@ exports.list = async function ({ user, canListProjects }) {
 exports.create = async function ({ user, body }) {
   const client = user.client
 
-  const accountId = _.get(body, ['metadata', 'annotations', 'openmfp.org/account-id'])
   const name = _.get(body, ['metadata', 'name'])
   const namespace = `garden-${name}`
   _.set(body, ['spec', 'namespace'], namespace)
-  let project = await client['core.gardener.cloud'].projects.create(body)
+  await client['core.gardener.cloud'].projects.create(body)
 
   const isProjectReady = ({ type, object: project }) => {
     if (type === 'DELETE') {
@@ -70,15 +69,7 @@ exports.create = async function ({ user, body }) {
   const timeout = exports.projectInitializationTimeout
   // must be the dashboardClient because rbac rolebinding does not exist yet
   const asyncIterable = await dashboardClient['core.gardener.cloud'].projects.watch(name)
-  project = await asyncIterable.until(isProjectReady, { timeout })
-  if (openfga.client && accountId) {
-    try {
-      await openfga.writeProject(namespace, accountId)
-    } catch (err) {
-      logger.error('Failed to write openfga account releation:', err)
-    }
-  }
-
+  const project = await asyncIterable.until(isProjectReady, { timeout })
   return project
 }
 // needs to be exported for testing
