@@ -31,6 +31,8 @@ export function createProjectContextComposable (options = {}) {
     configStore = useConfigStore(),
   } = options
 
+  const { accountId } = openMFP
+
   function normalizeManifest (value) {
     const object = Object.assign({
       apiVersion: 'core.gardener.cloud/v1beta1',
@@ -62,9 +64,9 @@ export function createProjectContextComposable (options = {}) {
 
   function createProjectManifest () {
     manifest.value = {}
-    if (openMFP.accountId.value) {
+    if (accountId.value) {
       set(manifest.value, ['metadata', 'label', 'openmfp.org/managed-by'], 'true')
-      set(manifest.value, ['metadata', 'annotations', 'openmfp.org/account-id'], openMFP.accountId.value)
+      set(manifest.value, ['metadata', 'annotations', 'openmfp.org/account-id'], accountId.value)
     }
     initialManifest.value = cloneDeep(normalizedManifest.value)
   }

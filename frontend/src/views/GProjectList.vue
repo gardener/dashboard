@@ -146,15 +146,15 @@ import filter from 'lodash/filter'
 
 const projectStore = useProjectStore()
 const authzStore = useAuthzStore()
-const openMFP = useOpenMFP()
+const { accountId } = useOpenMFP()
 
 const canCreateProject = toRef(authzStore, 'canCreateProject')
 
 const projectDialog = ref(false)
 
 const projectList = computed(() => {
-  const belongsToAccount = project => openMFP.accountId.value === get(project, ['metadata', 'annotations', 'openmfp.org/account-id'])
-  return !openMFP.accountId.value
+  const belongsToAccount = project => accountId.value === get(project, ['metadata', 'annotations', 'openmfp.org/account-id'])
+  return !accountId.value
     ? projectStore.projectList
     : filter(projectStore.projectList, belongsToAccount)
 })
