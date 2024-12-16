@@ -1030,7 +1030,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/@codemirror-state-npm-6.5.0-cc8408a413-740425d605.zip/node_modules/@codemirror/state/",\
         "packageDependencies": [\
           ["@codemirror/state", "npm:6.5.0"],\
-          ["@marijn/find-cluster-break", "npm:1.0.0"]\
+          ["@marijn/find-cluster-break", "npm:1.0.2"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -2441,10 +2441,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@marijn/find-cluster-break", [\
-      ["npm:1.0.0", {\
-        "packageLocation": "./.yarn/cache/@marijn-find-cluster-break-npm-1.0.0-f3aab0e89c-396ba386b0.zip/node_modules/@marijn/find-cluster-break/",\
+      ["npm:1.0.2", {\
+        "packageLocation": "./.yarn/cache/@marijn-find-cluster-break-npm-1.0.2-1b67577854-1a17a60b16.zip/node_modules/@marijn/find-cluster-break/",\
         "packageDependencies": [\
-          ["@marijn/find-cluster-break", "npm:1.0.0"]\
+          ["@marijn/find-cluster-break", "npm:1.0.2"]\
         ],\
         "linkType": "HARD"\
       }]\

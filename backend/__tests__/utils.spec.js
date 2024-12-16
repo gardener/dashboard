@@ -17,8 +17,8 @@ const {
   parseSelectors,
   filterBySelectors,
   constants,
-  trimObjectMetadata,
-  trimProject,
+  simplifyObjectMetadata,
+  simplifyProject,
   parseRooms,
 } = require('../lib/utils')
 
@@ -79,14 +79,14 @@ describe('utils', function () {
           foo: 'bar',
         },
       }
-      expect(trimObjectMetadata({ metadata })).toEqual({ metadata })
+      expect(simplifyObjectMetadata({ metadata })).toEqual({ metadata })
       const extendedMetadata = merge(metadata, {
         managedFields,
         annotations: {
           'kubectl.kubernetes.io/last-applied-configuration': lastAppliedConfiguration,
         },
       })
-      expect(trimObjectMetadata({ metadata: extendedMetadata })).toEqual({ metadata })
+      expect(simplifyObjectMetadata({ metadata: extendedMetadata })).toEqual({ metadata })
     })
 
     it('should trim project metadata and remove spec.members', () => {
@@ -105,7 +105,7 @@ describe('utils', function () {
       const project = { metadata, spec }
 
       // Test case where metadata does not have managedFields or last-applied-configuration
-      expect(trimProject(cloneDeep(project))).toEqual({
+      expect(simplifyProject(cloneDeep(project))).toEqual({
         metadata,
         spec: {},
       })
@@ -119,7 +119,7 @@ describe('utils', function () {
       })
       const extendedProject = { metadata: extendedMetadata, spec }
 
-      expect(trimProject(cloneDeep(extendedProject))).toEqual({
+      expect(simplifyProject(cloneDeep(extendedProject))).toEqual({
         metadata,
         spec: {},
       })

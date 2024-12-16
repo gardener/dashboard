@@ -133,7 +133,7 @@ const mocks = {
               (id === 'foo@example.org' && namespace === 'garden-foo')
             break
           case 'projects':
-            allowed = id === 'projects-viewer@example.org'
+            allowed = id === 'admin@example.org' || id === 'projects-viewer@example.org'
             break
         }
       }

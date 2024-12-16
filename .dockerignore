@@ -75,7 +75,6 @@
 !backend/jest.setup.js
 !backend/server.js
 !backend/lib
-!backend/test
 !backend/__tests__
 !backend/__fixtures__
 !backend/__mocks__

@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -15,6 +15,8 @@ import {
 } from 'vue'
 
 import { useApi } from '@/composables/useApi'
+import { useLogger } from '@/composables/useLogger'
+import { useSocketEventHandler } from '@/composables/useSocketEventHandler'
 
 import { useAuthzStore } from './authz'
 import { useAppStore } from './app'
@@ -29,6 +31,7 @@ import replace from 'lodash/replace'
 
 export const useProjectStore = defineStore('project', () => {
   const api = useApi()
+  const logger = useLogger()
   const appStore = useAppStore()
   const authzStore = useAuthzStore()
 
@@ -154,6 +157,11 @@ export const useProjectStore = defineStore('project', () => {
     // do not remove project from store as it will stay in terminating phase for a while
   }
 
+  const socketEventHandler = useSocketEventHandler(useProjectStore, {
+    logger,
+  })
+  socketEventHandler.start(500)
+
   async function $reset () {
     list.value = null
   }
@@ -177,6 +185,7 @@ export const useProjectStore = defineStore('project', () => {
     updateProject,
     deleteProject,
     projectNameByNamespace,
+    handleEvent: socketEventHandler.listener,
     $reset,
   }
 })

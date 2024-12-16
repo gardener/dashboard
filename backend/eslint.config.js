@@ -38,7 +38,6 @@ module.exports = [
       '**/__fixtures__/**',
       '**/__mocks__/**',
       '**/__tests__/**',
-      '**/test/**',
       '**/jest.setup.js',
     ],
     plugins: {
