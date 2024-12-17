@@ -36,6 +36,7 @@ export const useOpenMFP = createGlobalState((options = {}) => {
     const pathname = toRef(route, 'path')
     watch(pathname, value => {
       if (value) {
+        logger.debug('Navigating Luigi Client to path:', value)
         LuigiClient.linkManager().fromVirtualTreeRoot().withoutSync().navigate(value)
       }
     }, {
