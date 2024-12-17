@@ -948,7 +948,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/__virtual__/@codemirror-autocomplete-virtual-bd9ac66305/0/cache/@codemirror-autocomplete-npm-6.18.3-d04fd15061-6d953d50ca.zip/node_modules/@codemirror/autocomplete/",\
         "packageDependencies": [\
           ["@codemirror/autocomplete", "virtual:9fd6e82b088f3505e08f2713a7bee99c56b4dd07f47743914a8c87e8a4b9036cd408cd5b0c972951fedeff8b258fdb28ea813f74478c59810eca4e760e820c42#npm:6.18.3"],\
-          ["@codemirror/language", "npm:6.10.6"],\
+          ["@codemirror/language", "npm:6.10.7"],\
           ["@codemirror/state", "npm:6.5.0"],\
           ["@codemirror/view", "npm:6.35.3"],\
           ["@lezer/common", "npm:1.2.3"],\
@@ -974,7 +974,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/@codemirror-commands-npm-6.7.1-d192cff451-287a50eebc.zip/node_modules/@codemirror/commands/",\
         "packageDependencies": [\
           ["@codemirror/commands", "npm:6.7.1"],\
-          ["@codemirror/language", "npm:6.10.6"],\
+          ["@codemirror/language", "npm:6.10.7"],\
           ["@codemirror/state", "npm:6.5.0"],\
           ["@codemirror/view", "npm:6.35.3"],\
           ["@lezer/common", "npm:1.2.3"]\
@@ -988,7 +988,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@codemirror/lang-yaml", "npm:6.1.2"],\
           ["@codemirror/autocomplete", "virtual:9fd6e82b088f3505e08f2713a7bee99c56b4dd07f47743914a8c87e8a4b9036cd408cd5b0c972951fedeff8b258fdb28ea813f74478c59810eca4e760e820c42#npm:6.18.3"],\
-          ["@codemirror/language", "npm:6.10.6"],\
+          ["@codemirror/language", "npm:6.10.7"],\
           ["@codemirror/state", "npm:6.5.0"],\
           ["@lezer/common", "npm:1.2.3"],\
           ["@lezer/highlight", "npm:1.2.1"],\
@@ -999,10 +999,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@codemirror/language", [\
-      ["npm:6.10.6", {\
-        "packageLocation": "./.yarn/cache/@codemirror-language-npm-6.10.6-46cac28271-8d68121659.zip/node_modules/@codemirror/language/",\
+      ["npm:6.10.7", {\
+        "packageLocation": "./.yarn/cache/@codemirror-language-npm-6.10.7-8177678ba7-4896ea5839.zip/node_modules/@codemirror/language/",\
         "packageDependencies": [\
-          ["@codemirror/language", "npm:6.10.6"],\
+          ["@codemirror/language", "npm:6.10.7"],\
           ["@codemirror/state", "npm:6.5.0"],\
           ["@codemirror/view", "npm:6.35.3"],\
           ["@lezer/common", "npm:1.2.3"],\
@@ -1040,7 +1040,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/@codemirror-theme-one-dark-npm-6.1.2-4b82de8377-d0d70ce1e0.zip/node_modules/@codemirror/theme-one-dark/",\
         "packageDependencies": [\
           ["@codemirror/theme-one-dark", "npm:6.1.2"],\
-          ["@codemirror/language", "npm:6.10.6"],\
+          ["@codemirror/language", "npm:6.10.7"],\
           ["@codemirror/state", "npm:6.5.0"],\
           ["@codemirror/view", "npm:6.35.3"],\
           ["@lezer/highlight", "npm:1.2.1"]\
@@ -1702,7 +1702,7 @@ const RAW_RUNTIME_STATE =
           ["@codemirror/autocomplete", "virtual:9fd6e82b088f3505e08f2713a7bee99c56b4dd07f47743914a8c87e8a4b9036cd408cd5b0c972951fedeff8b258fdb28ea813f74478c59810eca4e760e820c42#npm:6.18.3"],\
           ["@codemirror/commands", "npm:6.7.1"],\
           ["@codemirror/lang-yaml", "npm:6.1.2"],\
-          ["@codemirror/language", "npm:6.10.6"],\
+          ["@codemirror/language", "npm:6.10.7"],\
           ["@codemirror/search", "npm:6.5.8"],\
           ["@codemirror/state", "npm:6.5.0"],\
           ["@codemirror/theme-one-dark", "npm:6.1.2"],\
