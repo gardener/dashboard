@@ -30,6 +30,7 @@ export const useAuthzStore = defineStore('authz', () => {
   const projectStore = useProjectStore()
 
   const rulesMap = ref(new Map())
+  const rulesAccountIds = new Map()
   const currentNamespace = ref(undefined)
   const rulesRequestIds = new Map()
   let rulesRequestId = 0
@@ -219,13 +220,16 @@ export const useAuthzStore = defineStore('authz', () => {
       canCreateTerminals.value
   })
 
-  async function getRules (namespace) {
-    const body = { namespace }
+  async function getRules (namespace, accountId) {
+    const body = {
+      namespace,
+      accountId,
+    }
     const response = await api.getSubjectRules(body)
     return response.data
   }
 
-  async function prepareRules (namespace) {
+  async function prepareRules (namespace, accountId) {
     /**
      * The value of `currentNamespace` is:
      * - undefined if no rules have been fetched yet
@@ -233,12 +237,13 @@ export const useAuthzStore = defineStore('authz', () => {
      * - a non-empty string if both cluster-scoped rules and the rules for the namespace have been fetched
      */
     namespace = normalizeNamespace(namespace)
-    if (currentNamespace.value !== namespace) {
+    if (currentNamespace.value !== namespace || rulesAccountIds.get(namespace) !== accountId) {
       const requestId = ++rulesRequestId
       rulesRequestIds.set(namespace, requestId)
-      const data = await getRules(namespace)
+      const data = await getRules(namespace, accountId)
       if (rulesRequestIds.get(namespace) === requestId) {
         rulesMap.value.set(namespace, data)
+        rulesAccountIds.set(namespace, accountId)
       }
     }
   }
@@ -251,14 +256,15 @@ export const useAuthzStore = defineStore('authz', () => {
     for (const key of rulesMap.value.keys()) {
       if (key !== GARDEN_NAMESPACE && key !== namespace) {
         rulesMap.value.delete(key)
+        rulesAccountIds.delete(key)
       }
     }
     currentNamespace.value = namespace
     return true
   }
 
-  async function fetchRules (namespace) {
-    await prepareRules(namespace)
+  async function fetchRules (namespace, accountId) {
+    await prepareRules(namespace, accountId)
     activateRules(namespace)
   }
 
@@ -272,13 +278,15 @@ export const useAuthzStore = defineStore('authz', () => {
   // hasn't changed but the permissions have.
   async function refreshRules () {
     const namespace = currentNamespace.value
-    const data = await getRules(namespace)
-    setRules(namespace, data)
+    const accountId = rulesAccountIds.get(namespace)
+    const data = await getRules(namespace, accountId)
+    setRules(namespace, data, accountId)
   }
 
-  function setRules (namespace, data) {
+  function setRules (namespace, data, accountId) {
     namespace = normalizeNamespace(namespace)
     rulesMap.value.set(namespace, data)
+    rulesAccountIds.set(namespace, accountId)
     activateRules(namespace)
   }
 
@@ -289,6 +297,7 @@ export const useAuthzStore = defineStore('authz', () => {
 
   function $reset () {
     rulesMap.value = new Map()
+    rulesAccountIds.clear()
     currentNamespace.value = undefined
     rulesRequestIds.clear()
   }

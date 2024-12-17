@@ -26,6 +26,8 @@ import GShootItemEditor from '@/views/GShootItemEditor.vue'
 import GAccount from '@/views/GAccount.vue'
 import GSettings from '@/views/GSettings.vue'
 
+import { useIsInIframe } from '@/composables/useIsInIframe'
+
 import {
   homeBreadcrumbs,
   newProjectBreadcrumbs,
@@ -234,7 +236,14 @@ export function createRoutes () {
         projectScope: false,
         breadcrumbs: homeBreadcrumbs,
       },
-      beforeEnter: redirectToShootList,
+      beforeEnter () {
+        const isInIframe = useIsInIframe()
+
+        return isInIframe.value
+          ? { name: 'ProjectList' }
+          : redirectToShootList()
+      },
+
     }
   }
 
