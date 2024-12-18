@@ -30,12 +30,16 @@
   ],
   "search.exclude": {
     "**/.pnp.*": true,
-    "**/.yarn": true,
+    "**/.yarn/*.*": true,
+    "**/.yarn/cache/**": true,
+    "**/.yarn/releases/**": true,
+    "**/.yarn/sdks/**": true,
+    "**/.yarn/unplugged/**": true,
+    "**/.yarn/versions/**": true,
     "**/dist": true
   },
   "eslint.nodePath": ".yarn/sdks",
   "files.exclude": {
-    ".yarn": true,
     "logo": true,
     "LICENSES": true,
     "**/node_modules": true,

@@ -36,6 +36,9 @@ COPY . .
 RUN yarn config set enableNetwork false
 RUN yarn install --immutable --immutable-cache
 
+# check and report found duplicate dependencies
+RUN yarn dedupe --check
+
 # check that the constraints are met
 RUN yarn constraints
 

@@ -42,40 +42,6 @@
     "neostandard": "^0.11.7",
     "supertest": "^7.0.0"
   },
-  "eslintConfig": {
-    "env": {
-      "commonjs": true,
-      "jest/globals": true
-    },
-    "plugins": [
-      "jest"
-    ],
-    "extends": [
-      "standard",
-      "plugin:security/recommended-legacy",
-      "plugin:jest/recommended"
-    ],
-    "globals": {
-      "createAgent": true,
-      "fixtures": true
-    },
-    "rules": {
-      "no-console": "error"
-    },
-    "overrides": [
-      {
-        "files": [
-          "**/__fixtures__/**",
-          "**/__mocks__/**",
-          "**/__tests__/**",
-          "jest.setup.js"
-        ],
-        "rules": {
-          "security/detect-object-injection": "off"
-        }
-      }
-    ]
-  },
   "jest": {
     "restoreMocks": true,
     "clearMocks": true,
