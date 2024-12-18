@@ -12,12 +12,12 @@ function createProviderCredentials (type, options = {}) {
     quotas = [],
   } = options
   const secretBindingName = `${name}-secretbinding`
-  const secretBindingNamespace = `garden-${projectName}`
+  const bindingNamespace = `garden-${projectName}`
   const secretName = `${name}-secret`
   const quotaName = `${name}-quota`
   const secretBinding = {
     metadata: {
-      namespace: secretBindingNamespace,
+      namespace: bindingNamespace,
       name: secretBindingName,
     },
     provider: {
@@ -30,7 +30,7 @@ function createProviderCredentials (type, options = {}) {
   }
 
   let secret
-  if (secretNamepace === secretBindingNamespace) {
+  if (secretNamepace === bindingNamespace) {
     // no secret if referenced in other namespace
     secret = {
       metadata: {
@@ -43,7 +43,7 @@ function createProviderCredentials (type, options = {}) {
     }
   }
 
-  if (secretNamepace !== secretBindingNamespace) {
+  if (secretNamepace !== bindingNamespace) {
     // always add default quota if secret is in different namespace (trial quota)
     quotas.push({
       metadata: {

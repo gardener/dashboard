@@ -92,7 +92,7 @@ export function createCredentialContextComposable (options = {}) {
   const secretBindingMetadataComposable = useObjectMetadata(secretBindingManifest)
   const {
     name: secretBindingName,
-    namespace: secretBindingNamespace,
+    namespace: bindingNamespace,
   } = secretBindingMetadataComposable
 
   /* SecretBinding provider */
@@ -226,7 +226,7 @@ export function createCredentialContextComposable (options = {}) {
     createSecretBindingManifest,
     isSecretBindingDirty,
     secretBindingName,
-    secretBindingNamespace,
+    bindingNamespace,
     secretBindingProviderType,
     secretBindingSecretRef,
 

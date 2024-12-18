@@ -51,7 +51,7 @@ describe('api', function () {
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.list())
 
       const params = {
-        secretBindingNamespace: namespace,
+        bindingNamespace: namespace,
       }
 
       const res = await agent
@@ -73,7 +73,7 @@ describe('api', function () {
 
       const namespace = 'garden-baz'
       const params = {
-        secretBindingNamespace: namespace,
+        bindingNamespace: namespace,
       }
 
       const res = await agent
@@ -190,7 +190,7 @@ describe('api', function () {
 
     it('should delete an own cloudProvider credential', async function () {
       const params = {
-        secretBindingNamespace: namespace,
+        bindingNamespace: namespace,
         secretBindingName: 'foo-infra1',
       }
       mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.get())
@@ -211,7 +211,7 @@ describe('api', function () {
 
     it('should not delete a shared cloudProvider credential', async function () {
       const params = {
-        secretBindingNamespace: namespace,
+        bindingNamespace: namespace,
         secretBindingName: 'trial-infra1',
       }
       mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.get())

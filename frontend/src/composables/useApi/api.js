@@ -49,7 +49,7 @@ export function getConfiguration () {
 }
 
 /* Credentials */
-function invokeCloudProviderCredentialMethod (method, params) {
+export function invokeCloudProviderCredentialMethod (method, params) {
   return callResourceMethod('/api/cloudprovidercredentials', {
     method,
     params,
@@ -57,7 +57,7 @@ function invokeCloudProviderCredentialMethod (method, params) {
 }
 
 export function getCloudProviderCredentials (namespace) {
-  return invokeCloudProviderCredentialMethod('list', { secretBindingNamespace: namespace })
+  return invokeCloudProviderCredentialMethod('list', { bindingNamespace: namespace })
 }
 
 export function createCloudProviderCredential ({ secretBinding, secret }) {
@@ -69,7 +69,7 @@ export function updateCloudProviderCredential ({ secretBinding, secret }) {
 }
 
 export function deleteCloudProviderCredential ({ namespace, name }) {
-  return invokeCloudProviderCredentialMethod('remove', { secretBindingNamespace: namespace, secretBindingName: name })
+  return invokeCloudProviderCredentialMethod('remove', { bindingNamespace: namespace, secretBindingName: name })
 }
 
 /* Tickets */

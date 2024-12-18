@@ -36,7 +36,7 @@ describe('composables', () => {
       credentialContext.setSecretBindingManifest(manifest)
 
       expect(credentialContext.secretBindingName).toBe('foo')
-      expect(credentialContext.secretBindingNamespace).toBe(testNamespace)
+      expect(credentialContext.bindingNamespace).toBe(testNamespace)
       expect(credentialContext.secretBindingProviderType).toBe('aws')
       expect(credentialContext.secretBindingManifest).toMatchSnapshot()
     })
@@ -44,7 +44,7 @@ describe('composables', () => {
     it('should create a new SecretBinding manifest with defaults', () => {
       credentialContext.createSecretBindingManifest()
       expect(credentialContext.secretBindingName).toBe('')
-      expect(credentialContext.secretBindingNamespace).toBe(testNamespace)
+      expect(credentialContext.bindingNamespace).toBe(testNamespace)
       expect(credentialContext.secretBindingProviderType).toBe('')
       expect(credentialContext.secretBindingManifest).toMatchSnapshot()
     })

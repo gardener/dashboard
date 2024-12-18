@@ -11,14 +11,14 @@ const logger = require('../logger')
 
 exports.list = async function ({ user, params }) {
   const client = user.client
-  const { secretBindingNamespace } = params
+  const { bindingNamespace } = params
 
   const [
     { items: secretBindings },
     { items: secrets },
   ] = await Promise.all([
-    client['core.gardener.cloud'].secretbindings.list(secretBindingNamespace),
-    client.core.secrets.list(secretBindingNamespace, { labelSelector: 'reference.gardener.cloud/secretbinding=true' }),
+    client['core.gardener.cloud'].secretbindings.list(bindingNamespace),
+    client.core.secrets.list(bindingNamespace, { labelSelector: 'reference.gardener.cloud/secretbinding=true' }),
   ])
 
   const pickQuotaProperties = _.partialRight(_.pick, [
@@ -51,10 +51,10 @@ exports.create = async function ({ user, params }) {
 
   let { secret, secretBinding } = params
   const secretNamespace = secret.metadata.namespace
-  const secretBindingNamespace = secretBinding.metadata.namespace
+  const bindingNamespace = secretBinding.metadata.namespace
   const secretRefNamespace = secretBinding.secretRef.namespace
 
-  if (secretBindingNamespace !== secretRefNamespace ||
+  if (bindingNamespace !== secretRefNamespace ||
     secretRefNamespace !== secretNamespace) {
     throw createError(422, 'Create allowed only for secrets in own namespace')
   }
@@ -62,7 +62,7 @@ exports.create = async function ({ user, params }) {
   secret = await client.core.secrets.create(secretNamespace, secret)
 
   try {
-    secretBinding = await client['core.gardener.cloud'].secretbindings.create(secretBindingNamespace, secretBinding)
+    secretBinding = await client['core.gardener.cloud'].secretbindings.create(bindingNamespace, secretBinding)
   } catch (err) {
     logger.error('failed to create SecretBinding, cleaning up secret %s/%s', secret.metadata.namespace, secret.metadata.name)
     await client.core.secrets.delete(secret.metadata.namespace, secret.metadata.name)
@@ -83,19 +83,19 @@ exports.patch = async function ({ user, params }) {
   let { secret, secretBinding } = params
   const secretNamespace = secret.metadata.namespace
   const secretName = secret.metadata.name
-  const secretBindingNamespace = secretBinding.metadata.namespace
+  const bindingNamespace = secretBinding.metadata.namespace
   const secretBindingName = secretBinding.metadata.name
   const secretRefNamespace = secretBinding.secretRef.namespace
 
-  secretBinding = await client['core.gardener.cloud'].secretbindings.get(secretBindingNamespace, secretBindingName)
+  secretBinding = await client['core.gardener.cloud'].secretbindings.get(bindingNamespace, secretBindingName)
   if (!secretBinding) {
     throw createError(404)
   }
-  if (secretBindingNamespace !== secretRefNamespace ||
+  if (bindingNamespace !== secretRefNamespace ||
     secretRefNamespace !== secretNamespace) {
     throw createError(422, 'Patch allowed only for secrets in own namespace')
   }
-  secret = await client.core.secrets.update(secretBindingNamespace, secretName, secret)
+  secret = await client.core.secrets.update(bindingNamespace, secretName, secret)
 
   return {
     secretBinding,
@@ -106,9 +106,9 @@ exports.patch = async function ({ user, params }) {
 
 exports.remove = async function ({ user, params }) {
   const client = user.client
-  const { secretBindingNamespace, secretBindingName } = params
+  const { bindingNamespace, secretBindingName } = params
 
-  const secretBinding = await client['core.gardener.cloud'].secretbindings.get(secretBindingNamespace, secretBindingName)
+  const secretBinding = await client['core.gardener.cloud'].secretbindings.get(bindingNamespace, secretBindingName)
   if (!secretBinding) {
     throw createError(404)
   }
@@ -118,7 +118,7 @@ exports.remove = async function ({ user, params }) {
 
   const secretRef = secretBinding.secretRef
   await Promise.all([
-    await client['core.gardener.cloud'].secretbindings.delete(secretBindingNamespace, secretBindingName),
+    await client['core.gardener.cloud'].secretbindings.delete(bindingNamespace, secretBindingName),
     await client.core.secrets.delete(secretRef.namespace, secretRef.name),
   ])
 }

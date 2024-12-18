@@ -47,10 +47,6 @@ describe('stores', () => {
         }
       })
       vi.spyOn(api, 'updateCloudProviderCredential').mockImplementation(({ secretBinding, secret }) => {
-        if (secretBinding.metadata.namespace !== testNamespace) {
-          throw new Error('Unauthorized')
-        }
-
         return {
           data: {
             secretBinding,
@@ -59,10 +55,6 @@ describe('stores', () => {
         }
       })
       vi.spyOn(api, 'createCloudProviderCredential').mockImplementation(({ secretBinding, secret }) => {
-        if (secretBinding.metadata.namespace !== testNamespace) {
-          throw new Error('Unauthorized')
-        }
-
         return {
           data: {
             secretBinding,
@@ -309,31 +301,12 @@ describe('stores', () => {
       await expect(credentialStore.fetchCredentials()).rejects.toThrow(Error)
       expect(credentialStore.secretBindingList.length).toBe(0)
     })
-
-    it('store should be resetted in case of a create error', async () => {
+    it('store should be resetted before setting new data', async () => {
       const namespace = 'invalid'
       authzStore.setNamespace(namespace)
 
       expect(credentialStore.secretBindingList.length).toBeGreaterThan(0)
-      await expect(credentialStore.createCredential({ name: 'foo' })).rejects.toThrow(Error)
-      expect(credentialStore.secretBindingList.length).toBe(0)
-    })
-
-    it('store should be resetted in case of an update error', async () => {
-      const namespace = 'invalid'
-      authzStore.setNamespace(namespace)
-
-      expect(credentialStore.secretBindingList.length).toBeGreaterThan(0)
-      await expect(credentialStore.updateCredential({ name: 'foo' })).rejects.toThrow(Error)
-      expect(credentialStore.secretBindingList.length).toBe(0)
-    })
-
-    it('store should be resetted in case of a delete error', async () => {
-      const namespace = 'invalid'
-      authzStore.setNamespace(namespace)
-
-      expect(credentialStore.secretBindingList.length).toBeGreaterThan(0)
-      await expect(credentialStore.deleteCredential(awsTrialSecretBindingName)).rejects.toThrow(Error)
+      credentialStore.setCredentials({})
       expect(credentialStore.secretBindingList.length).toBe(0)
     })
   })
