@@ -109,15 +109,12 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-import {
-  toRefs,
-  computed,
-} from 'vue'
+import { computed } from 'vue'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
 
-import { useProvideSecretData } from '@/composables/useSecretData'
+import { useProvideCredentialContext } from '@/composables/useCredentialContext'
 
 import {
   withFieldName,
@@ -150,26 +147,28 @@ export default {
       return props.providerType === 'azure-dns' || props.providerType === 'azure-private-dns'
     })
 
-    const { state } = useProvideSecretData(
-      [
-        'clientId',
-        'clientSecret',
-        'tenantId',
-        'subscriptionId',
-        'azureCloud',
-      ],
-      {
-        keyMapping: {
-          clientId: 'clientID',
-          subscriptionId: 'subscriptionID',
-          tenantId: 'tenantID',
-          azureCloud: 'AZURE_CLOUD',
-        },
-      },
-    )
+    const { secretStringDataRefs } = useProvideCredentialContext()
+
+    const {
+      clientId,
+      clientSecret,
+      tenantId,
+      subscriptionId,
+      azureCloud,
+    } = secretStringDataRefs({
+      clientID: 'clientId',
+      clientSecret: 'clientSecret',
+      tenantID: 'tenantId',
+      subscriptionID: 'subscriptionId',
+      AZURE_CLOUD: 'azureCloud',
+    })
 
     return {
-      ...toRefs(state),
+      clientId,
+      clientSecret,
+      tenantId,
+      subscriptionId,
+      azureCloud,
       isDNSSecret,
       v$: useVuelidate(),
     }

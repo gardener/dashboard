@@ -58,7 +58,7 @@ export const useCredentialStore = defineStore('credential', () => {
   async function fetchCredentials () {
     const namespace = authzStore.namespace
     try {
-      const { data: { secretBindings, secrets, quotas } } = await api.getCloudProviderCredentials({ namespace })
+      const { data: { secretBindings, secrets, quotas } } = await api.getCloudProviderCredentials(namespace)
       setCredentials({ secretBindings, secrets, quotas })
     } catch (err) {
       $reset()
@@ -115,12 +115,9 @@ export const useCredentialStore = defineStore('credential', () => {
     return Object.values(state.quotas)
   })
 
-  async function createCredential ({ name, ...params }) {
-    const namespace = authzStore.namespace
-
+  async function createCredential (params) {
     try {
-      const { data: { secretBinding, secret } } = await api.createCloudProviderCredential({ name, namespace, params })
-
+      const { data: { secretBinding, secret } } = await api.createCloudProviderCredential({ secretBinding: params.secretBinding, secret: params.secret })
       updateCloudProviderCredential({ secretBinding, secret })
       appStore.setSuccess('Cloud Provider credential created')
     } catch (err) {
@@ -129,12 +126,9 @@ export const useCredentialStore = defineStore('credential', () => {
     }
   }
 
-  async function updateCredential ({ name, ...params }) {
-    const namespace = authzStore.namespace
-
+  async function updateCredential (params) {
     try {
-      const { data: { secretBinding, secret } } = await api.updateCloudProviderCredential({ name, namespace, params })
-
+      const { data: { secretBinding, secret } } = await api.updateCloudProviderCredential({ secretBinding: params.secretBinding, secret: params.secret })
       updateCloudProviderCredential({ secretBinding, secret })
       appStore.setSuccess('Cloud Provider credential updated')
     } catch (err) {
@@ -147,7 +141,7 @@ export const useCredentialStore = defineStore('credential', () => {
     const namespace = authzStore.namespace
 
     try {
-      await api.deleteCloudProviderCredential({ name, namespace })
+      await api.deleteCloudProviderCredential({ namespace, name })
       remove({ namespace, name })
       appStore.setSuccess('Cloud Provider credential deleted')
     } catch (err) {

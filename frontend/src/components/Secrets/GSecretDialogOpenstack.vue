@@ -169,14 +169,13 @@ import {
   required,
   requiredIf,
 } from '@vuelidate/validators'
-import { toRefs } from 'vue'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
 
-import { useProvideSecretData } from '@/composables/useSecretData'
+import { useProvideCredentialContext } from '@/composables/useCredentialContext'
 
 import {
   withMessage,
@@ -208,26 +207,37 @@ export default {
     'update:modelValue',
   ],
   setup () {
-    const { state } = useProvideSecretData(
-      [
-        'domainName',
-        'tenantName',
-        'applicationCredentialID',
-        'applicationCredentialName',
-        'applicationCredentialSecret',
-        'username',
-        'password',
-        'authURL',
-      ],
-      {
-        keyMapping: {
-          authURL: 'OS_AUTH_URL',
-        },
-      },
-    )
+    const { secretStringDataRefs } = useProvideCredentialContext()
+
+    const {
+      domainName,
+      tenantName,
+      applicationCredentialID,
+      applicationCredentialName,
+      applicationCredentialSecret,
+      username,
+      password,
+      authURL,
+    } = secretStringDataRefs({
+      domainName: 'domainName',
+      tenantName: 'tenantName',
+      applicationCredentialID: 'applicationCredentialID',
+      applicationCredentialName: 'applicationCredentialName',
+      applicationCredentialSecret: 'applicationCredentialSecret',
+      username: 'username',
+      password: 'password',
+      authURL: 'authURL',
+    })
 
     return {
-      ...toRefs(state),
+      domainName,
+      tenantName,
+      applicationCredentialID,
+      applicationCredentialName,
+      applicationCredentialSecret,
+      username,
+      password,
+      authURL,
       v$: useVuelidate(),
     }
   },

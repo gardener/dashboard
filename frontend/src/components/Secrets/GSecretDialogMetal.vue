@@ -56,11 +56,10 @@ import {
   required,
   url,
 } from '@vuelidate/validators'
-import { toRefs } from 'vue'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 
-import { useProvideSecretData } from '@/composables/useSecretData'
+import { useProvideCredentialContext } from '@/composables/useCredentialContext'
 
 import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
@@ -82,21 +81,16 @@ export default {
     'update:modelValue',
   ],
   setup () {
-    const { state } = useProvideSecretData(
-      [
-        'apiHmac',
-        'apiUrl',
-      ],
-      {
-        keyMapping: {
-          apiHmac: 'metalAPIHMac',
-          apiUrl: 'metalAPIURL',
-        },
-      },
-    )
+    const { secretStringDataRefs } = useProvideCredentialContext()
+
+    const { apiHmac, apiUrl } = secretStringDataRefs({
+      metalAPIHMac: 'apiHmac',
+      metalAPIURL: 'apiUrl',
+    })
 
     return {
-      ...toRefs(state),
+      apiHmac,
+      apiUrl,
       v$: useVuelidate(),
     }
   },

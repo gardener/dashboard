@@ -100,13 +100,12 @@ import {
   minLength,
   maxLength,
 } from '@vuelidate/validators'
-import { toRefs } from 'vue'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GCodeBlock from '@/components/GCodeBlock'
 import GExternalLink from '@/components/GExternalLink'
 
-import { useProvideSecretData } from '@/composables/useSecretData'
+import { useProvideCredentialContext } from '@/composables/useCredentialContext'
 
 import {
   withFieldName,
@@ -137,22 +136,22 @@ export default {
     'update:modelValue',
   ],
   setup () {
-    const { state } = useProvideSecretData(
-      [
-        'accessKeyId',
-        'secretAccessKey',
-        'awsRegion',
-      ],
-      {
-        keyMapping: {
-          accessKeyId: 'accessKeyID',
-          awsRegion: 'AWS_REGION',
-        },
-      },
-    )
+    const { secretStringDataRefs } = useProvideCredentialContext()
+
+    const {
+      accessKeyId,
+      secretAccessKey,
+      awsRegion,
+    } = secretStringDataRefs({
+      accessKeyID: 'accessKeyId',
+      secretAccessKey: 'secretAccessKey',
+      AWS_REGION: 'awsRegion',
+    })
 
     return {
-      ...toRefs(state),
+      accessKeyId,
+      secretAccessKey,
+      awsRegion,
       v$: useVuelidate(),
     }
   },

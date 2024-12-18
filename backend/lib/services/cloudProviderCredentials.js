@@ -6,8 +6,6 @@
 
 const _ = require('lodash')
 const { getQuotas } = require('../cache')
-const { Resources } = require('@gardener-dashboard/kube-client')
-const { encodeBase64 } = require('../utils')
 const createError = require('http-errors')
 const logger = require('../logger')
 
@@ -50,26 +48,24 @@ exports.list = async function ({ user, params }) {
 
 exports.create = async function ({ user, params }) {
   const client = user.client
-  const {
-    secretBindingNamespace,
-    secretBindingName,
-    secretBindingNamespace: secretNamespace,
-    secretBindingName: secretName,
-    poviderType,
-    secretStringData,
-  } = params
 
-  const secretResource = toSecretResource({ namespace: secretNamespace, name: secretName, stringData: secretStringData })
-  const secret = await client.core.secrets.create(secretNamespace, secretResource)
+  let { secret, secretBinding } = params
+  const secretNamespace = secret.metadata.namespace
+  const secretBindingNamespace = secretBinding.metadata.namespace
+  const secretRefNamespace = secretBinding.secretRef.namespace
 
-  let secretBinding
+  if (secretBindingNamespace !== secretRefNamespace ||
+    secretRefNamespace !== secretNamespace) {
+    throw createError(422, 'Create allowed only for secrets in own namespace')
+  }
+
+  secret = await client.core.secrets.create(secretNamespace, secret)
+
   try {
-    const secretRef = { namespace: secret.metadata.namespace, name: secret.metadata.name }
-    const secretBindingResource = toSecretBindingResource({ namespace: secretBindingNamespace, name: secretBindingName, poviderType, secretRef })
-    secretBinding = await client['core.gardener.cloud'].secretbindings.create(secretBindingNamespace, secretBindingResource)
+    secretBinding = await client['core.gardener.cloud'].secretbindings.create(secretBindingNamespace, secretBinding)
   } catch (err) {
     logger.error('failed to create SecretBinding, cleaning up secret %s/%s', secret.metadata.namespace, secret.metadata.name)
-    await client.core.secrets.delete(secretNamespace, secret.metadata.name)
+    await client.core.secrets.delete(secret.metadata.namespace, secret.metadata.name)
 
     throw err
   }
@@ -83,28 +79,23 @@ exports.create = async function ({ user, params }) {
 
 exports.patch = async function ({ user, params }) {
   const client = user.client
-  const {
-    secretBindingNamespace,
-    secretBindingName,
-    secretStringData,
-  } = params
 
-  const secretBinding = await client['core.gardener.cloud'].secretbindings.get(secretBindingNamespace, secretBindingName)
+  let { secret, secretBinding } = params
+  const secretNamespace = secret.metadata.namespace
+  const secretName = secret.metadata.name
+  const secretBindingNamespace = secretBinding.metadata.namespace
+  const secretBindingName = secretBinding.metadata.name
+  const secretRefNamespace = secretBinding.secretRef.namespace
+
+  secretBinding = await client['core.gardener.cloud'].secretbindings.get(secretBindingNamespace, secretBindingName)
   if (!secretBinding) {
     throw createError(404)
   }
-  if (secretBinding.metadata.namespace !== secretBinding.secretRef.namespace) {
+  if (secretBindingNamespace !== secretRefNamespace ||
+    secretRefNamespace !== secretNamespace) {
     throw createError(422, 'Patch allowed only for secrets in own namespace')
   }
-
-  const patchOperations = [{
-    op: 'replace',
-    path: '/stringData',
-    value: secretStringData,
-  }]
-
-  const secretRef = secretBinding.secretRef
-  const secret = await client.core.secrets.jsonPatch(secretRef.namespace, secretRef.name, patchOperations)
+  secret = await client.core.secrets.update(secretBindingNamespace, secretName, secret)
 
   return {
     secretBinding,
@@ -144,34 +135,4 @@ function resolveQuotas (secretBinding) {
   } catch (err) {
     return []
   }
-}
-
-function toSecretResource ({ namespace, name, stringData }) {
-  const resource = Resources.Secret
-  const apiVersion = resource.apiVersion
-  const kind = resource.kind
-  const type = 'Opaque'
-  const metadata = {
-    namespace,
-    name,
-  }
-
-  return { apiVersion, kind, metadata, type, stringData }
-}
-
-function toSecretBindingResource ({ namespace, name, poviderType, secretRef }) {
-  const resource = Resources.SecretBinding
-  const apiVersion = resource.apiVersion
-  const kind = resource.kind
-
-  const metadata = {
-    namespace,
-    name,
-  }
-
-  const provider = {
-    type: poviderType,
-  }
-
-  return { apiVersion, kind, metadata, secretRef, provider }
 }

@@ -52,11 +52,10 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-import { toRefs } from 'vue'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 
-import { useProvideSecretData } from '@/composables/useSecretData'
+import { useProvideCredentialContext } from '@/composables/useCredentialContext'
 
 import { withFieldName } from '@/utils/validators'
 import { getErrorMessages } from '@/utils'
@@ -78,21 +77,19 @@ export default {
     'update:modelValue',
   ],
   setup () {
-    const { state } = useProvideSecretData(
-      [
-        'infobloxUsername',
-        'infobloxPassword',
-      ],
-      {
-        keyMapping: {
-          infobloxUsername: 'USERNAME',
-          infobloxPassword: 'PASSWORD',
-        },
-      },
-    )
+    const { secretStringDataRefs } = useProvideCredentialContext()
+
+    const {
+      infobloxUsername,
+      infobloxPassword,
+    } = secretStringDataRefs({
+      USERNAME: 'infobloxUsername',
+      PASSWORD: 'infobloxPassword',
+    })
 
     return {
-      ...toRefs(state),
+      infobloxUsername,
+      infobloxPassword,
       v$: useVuelidate(),
     }
   },

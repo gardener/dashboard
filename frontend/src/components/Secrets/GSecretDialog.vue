@@ -124,7 +124,7 @@ import { useShootStore } from '@/store/shoot'
 import GToolbar from '@/components/GToolbar.vue'
 import GMessage from '@/components/GMessage'
 
-import { useSecretData } from '@/composables/useSecretData'
+import { useCredentialContext } from '@/composables/useCredentialContext'
 
 import {
   messageFromErrors,
@@ -185,17 +185,33 @@ export default {
     'cloud-profile-name',
   ],
   setup () {
-    const { secretStringData, setSecretData } = useSecretData()
+    const { createSecretBindingManifest,
+      setSecretBindingManifest,
+      secretBindingManifest,
+      secretBindingName,
+      secretBindingProviderType,
+      secretBindingSecretRef,
+      createSecretManifest,
+      setSecretManifest,
+      secretManifest,
+      secretName } = useCredentialContext()
 
     return {
-      secretStringData,
-      setSecretData,
+      createSecretBindingManifest,
+      setSecretBindingManifest,
+      secretBindingManifest,
+      secretBindingName,
+      secretBindingProviderType,
+      secretBindingSecretRef,
+      createSecretManifest,
+      setSecretManifest,
+      secretManifest,
+      secretName,
       v$: useVuelidate(),
     }
   },
   data () {
     return {
-      name: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined,
       helpVisible: false,
@@ -272,6 +288,16 @@ export default {
     isDnsProviderSecret () {
       return includes(this.dnsProviderTypes, this.providerType)
     },
+    name: {
+      get () {
+        return this.secretBindingName
+      },
+      set (value) {
+        this.secretBindingName = value
+        this.secretName = value
+        this.secretBindingSecretRef.name = value
+      },
+    },
   },
   mounted () {
     this.reset()
@@ -315,23 +341,25 @@ export default {
       }
     },
     save () {
-      const poviderType = this.providerType
-      const secretStringData = this.secretStringData
       if (this.isCreateMode) {
-        return this.createCredential({ name: this.name, poviderType, secretStringData })
+        return this.createCredential({ secret: this.secretManifest, secretBinding: this.secretBindingManifest })
       } else {
-        return this.updateCredential({ name: this.name, secretStringData })
+        return this.updateCredential({ secret: this.secretManifest, secretBinding: this.secretBindingManifest })
       }
     },
     reset () {
       this.v$.$reset()
 
       if (this.isCreateMode) {
+        this.createSecretBindingManifest()
+        this.createSecretManifest()
         this.name = `my-${this.providerType}-secret`
+        this.secretBindingProviderType = this.providerType
+
         setDelayedInputFocus(this, 'name')
       } else {
-        this.name = get(this.secretBinding, ['metadata', 'name'])
-        this.setSecretData(this.secretBinding._secret.data)
+        this.setSecretBindingManifest(this.secretBinding)
+        this.setSecretManifest(this.secretBinding._secret)
       }
 
       this.errorMessage = undefined

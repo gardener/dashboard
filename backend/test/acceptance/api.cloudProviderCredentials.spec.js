@@ -7,6 +7,7 @@
 const { mockRequest } = require('@gardener-dashboard/request')
 const { Store } = require('@gardener-dashboard/kube-client')
 const cache = require('../../lib/cache')
+const _ = require('lodash')
 
 function createStore (items) {
   const store = new Store()
@@ -39,7 +40,6 @@ describe('api', function () {
   describe('cloudproviderCredentials', function () {
     const namespace = 'garden-foo'
     const infraName = 'foo-infra3'
-    const dnsName = 'foo-dns1'
     // project
     const project = fixtures.projects.getByNamespace(namespace)
     // user
@@ -90,45 +90,42 @@ describe('api', function () {
     })
 
     it('should create a cloudProvider infrastructure secret', async function () {
-      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.create())
-      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.create())
-
-      const params = {
-        secretBindingNamespace: namespace,
-        secretBindingName: 'new-infra1',
-        poviderType: infraName,
-        secretData: {
-          key: 'myKey',
-          secret: 'mySecret',
+      const newSecretBinding = {
+        apiVersion: 'core.gardener.cloud/v1alpha1',
+        kind: 'SecretBinding',
+        metadata: {
+          name: `new-${infraName}-secretbinding`,
+          namespace,
+        },
+        provider: {
+          type: infraName,
+        },
+        secretRef: {
+          namespace,
+          name: `new-${infraName}-secret`,
         },
       }
 
-      const res = await agent
-        .post('/api/cloudprovidercredentials')
-        .set('cookie', await user.cookie)
-        .send({ method: 'create', params })
-        .expect('content-type', /json/)
-        .expect(200)
-
-      expect(mockRequest).toHaveBeenCalledTimes(2)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(res.body).toMatchSnapshot()
-    })
-
-    it('should create a cloudProvider dns secret', async function () {
-      const params = {
-        secretBindingNamespace: namespace,
-        secretBindingName: 'new-dns1',
-        poviderType: dnsName,
-        secretData: {
-          key: 'myKey',
-          secret: 'mySecret',
+      const newSecret = {
+        apiVersion: 'v1',
+        kind: 'Secret',
+        type: 'Opaque',
+        metadata: {
+          name: `new-${infraName}-secret`,
+          namespace,
+        },
+        data: {
+          key: 'bmV3LWRhdGE=',
         },
       }
 
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.create())
       mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.create())
+
+      const params = {
+        secretBinding: newSecretBinding,
+        secret: newSecret,
+      }
 
       const res = await agent
         .post('/api/cloudprovidercredentials')
@@ -144,13 +141,11 @@ describe('api', function () {
     })
 
     it('should patch an own cloudProvider credential', async function () {
+      const secretBinding = _.find(fixtures.secretbindings.list(namespace), { metadata: { name: 'foo-infra1', namespace } })
+      const secret = _.find(fixtures.secrets.list(namespace), { metadata: secretBinding.secretRef })
       const params = {
-        secretBindingNamespace: namespace,
-        secretBindingName: 'foo-infra1',
-        secretData: {
-          key: 'myNewKey',
-          secret: 'myNewSecret',
-        },
+        secretBinding,
+        secret,
       }
 
       mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.get())
@@ -170,13 +165,12 @@ describe('api', function () {
     })
 
     it('should not patch a shared cloudProvider credential', async function () {
+      const secretBinding = _.find(fixtures.secretbindings.list(namespace), { metadata: { name: 'trial-infra1' } })
+      const secret = _.find(fixtures.secrets.list('garden-trial'), { metadata: { name: 'trial-secret' } })
+
       const params = {
-        secretBindingNamespace: namespace,
-        secretBindingName: 'trial-infra1',
-        secretData: {
-          key: 'myNewKey',
-          secret: 'myNewSecret',
-        },
+        secretBinding,
+        secret,
       }
 
       mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.get())

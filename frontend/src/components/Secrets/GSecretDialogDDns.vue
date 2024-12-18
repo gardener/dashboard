@@ -96,12 +96,11 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-import { toRefs } from 'vue'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
 
-import { useProvideSecretData } from '@/composables/useSecretData'
+import { useProvideCredentialContext } from '@/composables/useCredentialContext'
 
 import { getErrorMessages } from '@/utils'
 import {
@@ -127,26 +126,22 @@ export default {
     'update:modelValue',
   ],
   setup () {
-    const { state } = useProvideSecretData(
-      [
-        'server',
-        'tsigKeyName',
-        'tsigSecret',
-        'zone',
-        'tsigSecretAlgorithm',
-      ],
-      {
-        keyMapping: {
-          server: 'Server',
-          tsigKeyName: 'TSIGKeyName',
-          tsigSecret: 'TSIGSecret',
-          zone: 'Zone',
-          tsigSecretAlgorithm: 'TSIGSecretAlgorithm',
-        },
-      },
-    )
+    const { secretStringDataRefs } = useProvideCredentialContext()
 
-    const { server, tsigKeyName, tsigSecret, zone, tsigSecretAlgorithm } = toRefs(state)
+    const {
+      server,
+      tsigKeyName,
+      tsigSecret,
+      zone,
+      tsigSecretAlgorithm,
+    } = secretStringDataRefs({
+      Server: 'server',
+      TSIGKeyName: 'tsigKeyName',
+      TSIGSecret: 'tsigSecret',
+      Zone: 'zone',
+      TSIGSecretAlgorithm: 'tsigSecretAlgorithm',
+    })
+
     tsigSecretAlgorithm.value = 'hmac-sha256'
 
     return {
