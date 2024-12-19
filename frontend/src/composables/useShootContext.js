@@ -20,7 +20,7 @@ import { useConfigStore } from '@/store/config'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useProjectStore } from '@/store/project'
-import { useSecretStore } from '@/store/secret'
+import { useCredentialStore } from '@/store/credential'
 import { useAppStore } from '@/store/app'
 import { useSeedStore } from '@/store/seed'
 
@@ -77,7 +77,7 @@ export function createShootContextComposable (options = {}) {
     configStore = useConfigStore(),
     gardenerExtensionStore = useGardenerExtensionStore(),
     projectStore = useProjectStore(),
-    secretStore = useSecretStore(),
+    credentialStore = useCredentialStore(),
     seedStore = useSeedStore(),
   } = options
 
@@ -226,9 +226,9 @@ export function createShootContextComposable (options = {}) {
     },
   })
 
-  const infrastructureSecret = computed({
+  const infrastructureSecretBinding = computed({
     get () {
-      return find(infrastructureSecrets.value, ['metadata.name', secretBindingName.value])
+      return find(infrastructureSecretBindings.value, ['metadata.name', secretBindingName.value])
     },
     set (value) {
       secretBindingName.value = get(value, ['metadata', 'name'])
@@ -236,7 +236,7 @@ export function createShootContextComposable (options = {}) {
   })
 
   function resetSecretBindingName () {
-    infrastructureSecret.value = head(infrastructureSecrets.value)
+    infrastructureSecretBinding.value = head(infrastructureSecretBindings.value)
   }
 
   /* networking */
@@ -865,7 +865,7 @@ export function createShootContextComposable (options = {}) {
     getResourceRefName,
   } = useShootDns(manifest, {
     gardenerExtensionStore,
-    secretStore,
+    credentialStore,
   })
 
   /* accessRestrictions */
@@ -888,7 +888,7 @@ export function createShootContextComposable (options = {}) {
     isFailureToleranceTypeZoneSupported,
     allZones,
     defaultNodesCIDR,
-    infrastructureSecrets,
+    infrastructureSecretBindings,
     sortedKubernetesVersions,
     kubernetesVersionIsNotLatestPatch,
     allPurposes,
@@ -912,7 +912,7 @@ export function createShootContextComposable (options = {}) {
     cloudProfileStore,
     configStore,
     gardenerExtensionStore,
-    secretStore,
+    credentialStore,
     seedStore,
   })
 
@@ -955,7 +955,7 @@ export function createShootContextComposable (options = {}) {
     seedName,
     /* secretBindingName */
     secretBindingName,
-    infrastructureSecret,
+    infrastructureSecretBinding,
     /* kubernetes */
     kubernetesVersion,
     /* networking */
@@ -1044,7 +1044,7 @@ export function createShootContextComposable (options = {}) {
     initialZones,
     maxAdditionalZones,
     defaultNodesCIDR,
-    infrastructureSecrets,
+    infrastructureSecretBindings,
     sortedKubernetesVersions,
     kubernetesVersionIsNotLatestPatch,
     allPurposes,

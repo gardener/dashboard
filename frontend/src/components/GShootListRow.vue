@@ -239,7 +239,7 @@ import { useAuthzStore } from '@/store/authz'
 import { useTicketStore } from '@/store/ticket'
 import { useShootStore } from '@/store/shoot'
 import { useConfigStore } from '@/store/config'
-import { useSecretStore } from '@/store/secret'
+import { useCredentialStore } from '@/store/credential'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useProjectStore } from '@/store/project'
 import { useSeedStore } from '@/store/seed'
@@ -296,7 +296,7 @@ const shootStore = useShootStore()
 const ticketStore = useTicketStore()
 const authzStore = useAuthzStore()
 const configStore = useConfigStore()
-const secretStore = useSecretStore()
+const credentialStore = useCredentialStore()
 const cloudProfileStore = useCloudProfileStore()
 const projectStore = useProjectStore()
 const seedStore = useSeedStore()
@@ -336,7 +336,7 @@ useProvideShootHelper(shootItem, {
   cloudProfileStore,
   configStore,
   gardenerExtensionStore,
-  secretStore,
+  credentialStore,
   seedStore,
 })
 

@@ -7,9 +7,8 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-secret-dialog
     v-model="visible"
-    :data="secretData"
     :secret-validations="v$"
-    :secret="secret"
+    :secret-binding="secretBinding"
     :provider-type="providerType"
     :create-title="`Add new ${name} Secret`"
     :replace-title="`Replace ${name} Secret`"
@@ -17,7 +16,6 @@ SPDX-License-Identifier: Apache-2.0
     <template #secret-slot>
       <div>
         <v-text-field
-          ref="accessKeyId"
           v-model="accessKeyId"
           color="primary"
           label="Access Key Id"
@@ -107,6 +105,8 @@ import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GCodeBlock from '@/components/GCodeBlock'
 import GExternalLink from '@/components/GExternalLink'
 
+import { useProvideCredentialContext } from '@/composables/useCredentialContext'
+
 import {
   withFieldName,
   alphaNumUnderscore,
@@ -125,7 +125,7 @@ export default {
       type: Boolean,
       required: true,
     },
-    secret: {
+    secretBinding: {
       type: Object,
     },
     providerType: {
@@ -136,15 +136,27 @@ export default {
     'update:modelValue',
   ],
   setup () {
+    const { secretStringDataRefs } = useProvideCredentialContext()
+
+    const {
+      accessKeyId,
+      secretAccessKey,
+      awsRegion,
+    } = secretStringDataRefs({
+      accessKeyID: 'accessKeyId',
+      secretAccessKey: 'secretAccessKey',
+      AWS_REGION: 'awsRegion',
+    })
+
     return {
+      accessKeyId,
+      secretAccessKey,
+      awsRegion,
       v$: useVuelidate(),
     }
   },
   data () {
     return {
-      accessKeyId: undefined,
-      secretAccessKey: undefined,
-      awsRegion: undefined,
       hideSecret: true,
       templateAws: {
         Version: '2012-10-17',
@@ -255,13 +267,6 @@ export default {
     },
     valid () {
       return !this.v$.$invalid
-    },
-    secretData () {
-      return {
-        accessKeyID: this.accessKeyId,
-        secretAccessKey: this.secretAccessKey,
-        AWS_REGION: this.awsRegion,
-      }
     },
     isCreateMode () {
       return !this.secret

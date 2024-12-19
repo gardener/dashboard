@@ -7,16 +7,14 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-secret-dialog
     v-model="visible"
-    :data="secretData"
     :secret-validations="v$"
-    :secret="secret"
+    :secret-binding="secretBinding"
     create-title="Add new VMware vSphere Secret"
     replace-title="Replace VMware vSphere Secret"
   >
     <template #secret-slot>
       <div>
         <v-text-field
-          ref="vsphereUsername"
           v-model="vsphereUsername"
           color="primary"
           label="vSphere Username"
@@ -98,6 +96,8 @@ import { required } from '@vuelidate/validators'
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink.vue'
 
+import { useProvideCredentialContext } from '@/composables/useCredentialContext'
+
 import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
 
@@ -111,7 +111,7 @@ export default {
       type: Boolean,
       required: true,
     },
-    secret: {
+    secretBinding: {
       type: Object,
     },
   },
@@ -119,17 +119,31 @@ export default {
     'update:modelValue',
   ],
   setup () {
+    const { secretStringDataRefs } = useProvideCredentialContext()
+
+    const {
+      vsphereUsername,
+      vspherePassword,
+      nsxtUsername,
+      nsxtPassword,
+    } = secretStringDataRefs({
+      vSphereUsername: 'vsphereUsername',
+      vSpherePassword: 'vspherePassword',
+      NSXTUsername: 'nsxtUsername',
+      NSXTPassword: 'nsxtPassword',
+    })
+
     return {
+      vsphereUsername,
+      vspherePassword,
+      nsxtUsername,
+      nsxtPassword,
       v$: useVuelidate(),
     }
   },
   data () {
     return {
-      vsphereUsername: undefined,
-      vspherePassword: undefined,
       hideVspherePassword: true,
-      nsxtUsername: undefined,
-      nsxtPassword: undefined,
       hideNsxtPassword: true,
     }
   },
@@ -160,14 +174,6 @@ export default {
     },
     valid () {
       return !this.v$.$invalid
-    },
-    secretData () {
-      return {
-        vsphereUsername: this.vsphereUsername,
-        vspherePassword: this.vspherePassword,
-        nsxtUsername: this.nsxtUsername,
-        nsxtPassword: this.nsxtPassword,
-      }
     },
     isCreateMode () {
       return !this.secret

@@ -10,11 +10,11 @@ import {
 } from 'vue'
 
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
-import { useSecretStore } from '@/store/secret'
+import { useCredentialStore } from '@/store/credential'
 
 import { useShootResources } from '@/composables/useShootResources'
 import { useShootExtensions } from '@/composables/useShootExtensions'
-import { useSecretList } from '@/composables/useSecretList'
+import { useSecretBindingList } from '@/composables/useSecretBindingList'
 
 import get from 'lodash/get'
 import set from 'lodash/set'
@@ -29,7 +29,7 @@ import isEmpty from 'lodash/isEmpty'
 export const useShootDns = (manifest, options) => {
   const {
     gardenerExtensionStore = useGardenerExtensionStore(),
-    secretStore = useSecretStore(),
+    credentialStore = useCredentialStore(),
   } = options
 
   /* resources */
@@ -169,14 +169,14 @@ export const useShootDns = (manifest, options) => {
   }
 
   function getDefaultSecretName (type) {
-    const secrets = useSecretList(toRef(type), { secretStore, gardenerExtensionStore })
+    const secretBindings = useSecretBindingList(toRef(type), { credentialStore, gardenerExtensionStore })
     // find unused secret
     const usedResourceNames = map(resources.value, 'name')
-    const secret = find(secrets.value, secret => {
-      const resourceName = getDnsServiceExtensionResourceName(secret.metadata.name)
+    const secretBinding = find(secretBindings.value, secretBinding => {
+      const resourceName = getDnsServiceExtensionResourceName(secretBinding.secretRef.name)
       return !includes(usedResourceNames, resourceName)
     })
-    return get(secret, ['metadata', 'secretRef', 'name'])
+    return get(secretBinding, ['secretRef', 'name'])
   }
 
   function addDnsServiceExtensionProvider (options = {}) {

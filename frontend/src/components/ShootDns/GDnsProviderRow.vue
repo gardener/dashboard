@@ -105,13 +105,13 @@ import { required } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
-import { useSecretStore } from '@/store/secret'
+import { useCredentialStore } from '@/store/credential'
 
 import GSelectSecret from '@/components/Secrets/GSelectSecret'
 import GVendorIcon from '@/components/GVendorIcon'
 
 import { useShootContext } from '@/composables/useShootContext'
-import { useSecretList } from '@/composables/useSecretList'
+import { useSecretBindingList } from '@/composables/useSecretBindingList'
 
 import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
@@ -142,11 +142,11 @@ export default {
       getResourceRefName,
     } = useShootContext()
 
-    const secretStore = useSecretStore()
+    const credentialStore = useCredentialStore()
     const gardenerExtensionStore = useGardenerExtensionStore()
 
     const dnsProviderType = toRef(props.dnsProvider, 'type')
-    const dnsSecrets = useSecretList(dnsProviderType, { secretStore, gardenerExtensionStore })
+    const dnsSecretBindings = useSecretBindingList(dnsProviderType, { credentialStore, gardenerExtensionStore })
 
     return {
       v$: useVuelidate(),
@@ -156,7 +156,7 @@ export default {
       setResource,
       deleteResource,
       getResourceRefName,
-      dnsSecrets,
+      dnsSecretBindings,
     }
   },
   validations () {
@@ -176,7 +176,7 @@ export default {
       },
       set (value) {
         this.dnsProvider.type = value
-        const defaultDnsSecret = head(this.dnsSecrets)
+        const defaultDnsSecret = head(this.dnsSecretBindings)
         this.dnsServiceExtensionProviderSecret = defaultDnsSecret
       },
     },
@@ -185,11 +185,11 @@ export default {
         const resourceName = this.dnsProvider.secretName
         const secretName = this.getResourceRefName(resourceName)
 
-        return find(this.dnsSecrets, ['metadata.secretRef.name', secretName])
+        return find(this.dnsSecretBindings, ['secretRef.name', secretName])
       },
       set (value) {
         this.deleteResource(this.dnsProvider.secretName)
-        const secretName = get(value, ['metadata', 'secretRef', 'name'])
+        const secretName = get(value, ['secretRef', 'name'])
         const resourceName = this.getDnsServiceExtensionResourceName(secretName)
         this.dnsProvider.secretName = resourceName
         this.setResource({
