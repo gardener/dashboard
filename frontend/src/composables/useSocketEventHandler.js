@@ -155,6 +155,9 @@ export function useSocketEventHandler (useStore, options = {}) {
   }
 
   watch(visibility, (current, previous) => {
+    if (typeof throttledHandleEvents !== 'function') {
+      return
+    }
     if (current === 'visible' && previous === 'hidden') {
       throttledHandleEvents()
     }
