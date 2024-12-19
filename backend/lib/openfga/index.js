@@ -105,18 +105,8 @@ function batchCheck (checks) {
   })
 }
 
-function getProjectName (namespace) {
-  try {
-    return cache.findProjectByNamespace(namespace).metadata.name
-  } catch (err) {
-    // ignore error when project is not found
-    return null
-  }
-}
-
 async function getDerivedResourceRules (username, namespace, accountId) {
-  const projectName = getProjectName(namespace)
-  const permissionMappings = getPermissionMappings(accountId, projectName)
+  const permissionMappings = getPermissionMappings(accountId, namespace)
   const checks = permissionMappings.map(({ relation, object }) => ({
     tuple_key: {
       user: `user:${username}`,
