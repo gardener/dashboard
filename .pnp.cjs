@@ -937,34 +937,14 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@codemirror/autocomplete", [\
-      ["npm:6.18.3", {\
-        "packageLocation": "./.yarn/cache/@codemirror-autocomplete-npm-6.18.3-d04fd15061-6d953d50ca.zip/node_modules/@codemirror/autocomplete/",\
+      ["npm:6.18.4", {\
+        "packageLocation": "./.yarn/cache/@codemirror-autocomplete-npm-6.18.4-dfb09aec9c-602ea9395b.zip/node_modules/@codemirror/autocomplete/",\
         "packageDependencies": [\
-          ["@codemirror/autocomplete", "npm:6.18.3"]\
-        ],\
-        "linkType": "SOFT"\
-      }],\
-      ["virtual:9fd6e82b088f3505e08f2713a7bee99c56b4dd07f47743914a8c87e8a4b9036cd408cd5b0c972951fedeff8b258fdb28ea813f74478c59810eca4e760e820c42#npm:6.18.3", {\
-        "packageLocation": "./.yarn/__virtual__/@codemirror-autocomplete-virtual-bd9ac66305/0/cache/@codemirror-autocomplete-npm-6.18.3-d04fd15061-6d953d50ca.zip/node_modules/@codemirror/autocomplete/",\
-        "packageDependencies": [\
-          ["@codemirror/autocomplete", "virtual:9fd6e82b088f3505e08f2713a7bee99c56b4dd07f47743914a8c87e8a4b9036cd408cd5b0c972951fedeff8b258fdb28ea813f74478c59810eca4e760e820c42#npm:6.18.3"],\
-          ["@codemirror/language", "npm:6.10.7"],\
+          ["@codemirror/autocomplete", "npm:6.18.4"],\
+          ["@codemirror/language", "npm:6.10.8"],\
           ["@codemirror/state", "npm:6.5.0"],\
-          ["@codemirror/view", "npm:6.35.3"],\
-          ["@lezer/common", "npm:1.2.3"],\
-          ["@types/codemirror__language", null],\
-          ["@types/codemirror__state", null],\
-          ["@types/codemirror__view", null],\
-          ["@types/lezer__common", null]\
-        ],\
-        "packagePeers": [\
-          "@codemirror/language",\
-          "@codemirror/state",\
-          "@lezer/common",\
-          "@types/codemirror__language",\
-          "@types/codemirror__state",\
-          "@types/codemirror__view",\
-          "@types/lezer__common"\
+          ["@codemirror/view", "npm:6.36.1"],\
+          ["@lezer/common", "npm:1.2.3"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -974,9 +954,9 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/@codemirror-commands-npm-6.7.1-d192cff451-287a50eebc.zip/node_modules/@codemirror/commands/",\
         "packageDependencies": [\
           ["@codemirror/commands", "npm:6.7.1"],\
-          ["@codemirror/language", "npm:6.10.7"],\
+          ["@codemirror/language", "npm:6.10.8"],\
           ["@codemirror/state", "npm:6.5.0"],\
-          ["@codemirror/view", "npm:6.35.3"],\
+          ["@codemirror/view", "npm:6.36.1"],\
           ["@lezer/common", "npm:1.2.3"]\
         ],\
         "linkType": "HARD"\
@@ -987,8 +967,8 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/@codemirror-lang-yaml-npm-6.1.2-9fd6e82b08-fc993c5e24.zip/node_modules/@codemirror/lang-yaml/",\
         "packageDependencies": [\
           ["@codemirror/lang-yaml", "npm:6.1.2"],\
-          ["@codemirror/autocomplete", "virtual:9fd6e82b088f3505e08f2713a7bee99c56b4dd07f47743914a8c87e8a4b9036cd408cd5b0c972951fedeff8b258fdb28ea813f74478c59810eca4e760e820c42#npm:6.18.3"],\
-          ["@codemirror/language", "npm:6.10.7"],\
+          ["@codemirror/autocomplete", "npm:6.18.4"],\
+          ["@codemirror/language", "npm:6.10.8"],\
           ["@codemirror/state", "npm:6.5.0"],\
           ["@lezer/common", "npm:1.2.3"],\
           ["@lezer/highlight", "npm:1.2.1"],\
@@ -999,12 +979,12 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@codemirror/language", [\
-      ["npm:6.10.7", {\
-        "packageLocation": "./.yarn/cache/@codemirror-language-npm-6.10.7-8177678ba7-4896ea5839.zip/node_modules/@codemirror/language/",\
+      ["npm:6.10.8", {\
+        "packageLocation": "./.yarn/cache/@codemirror-language-npm-6.10.8-8a9095f9cd-b7d07bc472.zip/node_modules/@codemirror/language/",\
         "packageDependencies": [\
-          ["@codemirror/language", "npm:6.10.7"],\
+          ["@codemirror/language", "npm:6.10.8"],\
           ["@codemirror/state", "npm:6.5.0"],\
-          ["@codemirror/view", "npm:6.35.3"],\
+          ["@codemirror/view", "npm:6.36.1"],\
           ["@lezer/common", "npm:1.2.3"],\
           ["@lezer/highlight", "npm:1.2.1"],\
           ["@lezer/lr", "npm:1.4.2"],\
@@ -1019,7 +999,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@codemirror/search", "npm:6.5.8"],\
           ["@codemirror/state", "npm:6.5.0"],\
-          ["@codemirror/view", "npm:6.35.3"],\
+          ["@codemirror/view", "npm:6.36.1"],\
           ["crelt", "npm:1.0.6"]\
         ],\
         "linkType": "HARD"\
@@ -1040,19 +1020,19 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/@codemirror-theme-one-dark-npm-6.1.2-4b82de8377-d0d70ce1e0.zip/node_modules/@codemirror/theme-one-dark/",\
         "packageDependencies": [\
           ["@codemirror/theme-one-dark", "npm:6.1.2"],\
-          ["@codemirror/language", "npm:6.10.7"],\
+          ["@codemirror/language", "npm:6.10.8"],\
           ["@codemirror/state", "npm:6.5.0"],\
-          ["@codemirror/view", "npm:6.35.3"],\
+          ["@codemirror/view", "npm:6.36.1"],\
           ["@lezer/highlight", "npm:1.2.1"]\
         ],\
         "linkType": "HARD"\
       }]\
     ]],\
     ["@codemirror/view", [\
-      ["npm:6.35.3", {\
-        "packageLocation": "./.yarn/cache/@codemirror-view-npm-6.35.3-06fc228026-aa12c86756.zip/node_modules/@codemirror/view/",\
+      ["npm:6.36.1", {\
+        "packageLocation": "./.yarn/cache/@codemirror-view-npm-6.36.1-5782c7f91c-7a580ec072.zip/node_modules/@codemirror/view/",\
         "packageDependencies": [\
-          ["@codemirror/view", "npm:6.35.3"],\
+          ["@codemirror/view", "npm:6.36.1"],\
           ["@codemirror/state", "npm:6.5.0"],\
           ["style-mod", "npm:4.1.2"],\
           ["w3c-keyname", "npm:2.2.8"]\
@@ -1699,14 +1679,14 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./frontend/",\
         "packageDependencies": [\
           ["@gardener-dashboard/frontend", "workspace:frontend"],\
-          ["@codemirror/autocomplete", "virtual:9fd6e82b088f3505e08f2713a7bee99c56b4dd07f47743914a8c87e8a4b9036cd408cd5b0c972951fedeff8b258fdb28ea813f74478c59810eca4e760e820c42#npm:6.18.3"],\
+          ["@codemirror/autocomplete", "npm:6.18.4"],\
           ["@codemirror/commands", "npm:6.7.1"],\
           ["@codemirror/lang-yaml", "npm:6.1.2"],\
-          ["@codemirror/language", "npm:6.10.7"],\
+          ["@codemirror/language", "npm:6.10.8"],\
           ["@codemirror/search", "npm:6.5.8"],\
           ["@codemirror/state", "npm:6.5.0"],\
           ["@codemirror/theme-one-dark", "npm:6.1.2"],\
-          ["@codemirror/view", "npm:6.35.3"],\
+          ["@codemirror/view", "npm:6.36.1"],\
           ["@fontsource/roboto", "npm:5.1.1"],\
           ["@kyvg/vue3-notification", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.4.1"],\
           ["@lezer/common", "npm:1.2.3"],\

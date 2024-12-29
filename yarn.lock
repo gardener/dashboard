@@ -463,19 +463,14 @@ __metadata:
   linkType: hard
 
 "@codemirror/autocomplete@npm:^6.0.0, @codemirror/autocomplete@npm:^6.18.0":
-  version: 6.18.3
-  resolution: "@codemirror/autocomplete@npm:6.18.3"
+  version: 6.18.4
+  resolution: "@codemirror/autocomplete@npm:6.18.4"
   dependencies:
     "@codemirror/language": "npm:^6.0.0"
     "@codemirror/state": "npm:^6.0.0"
     "@codemirror/view": "npm:^6.17.0"
     "@lezer/common": "npm:^1.0.0"
-  peerDependencies:
-    "@codemirror/language": ^6.0.0
-    "@codemirror/state": ^6.0.0
-    "@codemirror/view": ^6.0.0
-    "@lezer/common": ^1.0.0
-  checksum: 10c0/6d953d50ca264d2892f3d341efe2fa6a5220e9ef66d725fa315aa194813df5a0a133dc75f1eb5115c741aa22d5ba399dcc90356bb26ccfcad5b368d7e330eed8
+  checksum: 10c0/602ea9395b3ebbb258669d7a946f650cc734742d1f67fd277c804ae152411f198546a1dc0c64ff2fda12a46eb83d766540ab609d1e3afa817bfe8131d10dfbdb
   languageName: node
   linkType: hard
 
@@ -507,8 +502,8 @@ __metadata:
   linkType: hard
 
 "@codemirror/language@npm:^6.0.0, @codemirror/language@npm:^6.10.2":
-  version: 6.10.7
-  resolution: "@codemirror/language@npm:6.10.7"
+  version: 6.10.8
+  resolution: "@codemirror/language@npm:6.10.8"
   dependencies:
     "@codemirror/state": "npm:^6.0.0"
     "@codemirror/view": "npm:^6.23.0"
@@ -516,7 +511,7 @@ __metadata:
     "@lezer/highlight": "npm:^1.0.0"
     "@lezer/lr": "npm:^1.0.0"
     style-mod: "npm:^4.0.0"
-  checksum: 10c0/4896ea5839999479ada3dd54d09e1f6994ddc54fae0f6dfab9e5e611b7e266a15add170734183e48b4104cb6762ae3499da62dc81c04a145e40c9b75dc0b22f7
+  checksum: 10c0/b7d07bc4726046563d4cfcd5d26ae64300fbfa58d81c034674d25e346ace0b5b2a53446d0b246ff09f6b0111a7ff35d827f2d5cc4ef95de9dfd43e4d068fe3a7
   languageName: node
   linkType: hard
 
@@ -553,13 +548,13 @@ __metadata:
   linkType: hard
 
 "@codemirror/view@npm:^6.0.0, @codemirror/view@npm:^6.17.0, @codemirror/view@npm:^6.23.0, @codemirror/view@npm:^6.27.0, @codemirror/view@npm:^6.33.0":
-  version: 6.35.3
-  resolution: "@codemirror/view@npm:6.35.3"
+  version: 6.36.1
+  resolution: "@codemirror/view@npm:6.36.1"
   dependencies:
     "@codemirror/state": "npm:^6.5.0"
     style-mod: "npm:^4.1.0"
     w3c-keyname: "npm:^2.2.4"
-  checksum: 10c0/aa12c86756360f0ab2cf4b09fca16e5bfb3d32cc99a94a18a12aec84dd3a20f15277fb36d42fc78f803caaa7b93f3fa7382ba47e1d3495fad7166317c60090d8
+  checksum: 10c0/7a580ec072801c05df2cc9f1f0e3bf5fda228e533e2537fd02f92632a4b57fc8ad63bbd53d991a8b86acd50019a9e167e2f0193b8979c7f9f234045535a6443e
   languageName: node
   linkType: hard
 
