@@ -7,9 +7,8 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-secret-dialog
     v-model="visible"
-    :data="secretData"
     :secret-validations="v$"
-    :secret="secret"
+    :secret-binding="secretBinding"
     :provider-type="providerType"
     :create-title="`Add new ${name} Secret`"
     :replace-title="`Replace ${name} Secret`"
@@ -17,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
     <template #secret-slot>
       <div>
         <v-textarea
-          ref="serviceAccountKey"
+          ref="serviceAccountKeyRef"
           v-model="serviceAccountKey"
           color="primary"
           variant="filled"
@@ -90,6 +89,8 @@ import { required } from '@vuelidate/validators'
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
 
+import { useProvideCredentialContext } from '@/composables/useCredentialContext'
+
 import {
   withFieldName,
   withMessage,
@@ -110,7 +111,7 @@ export default {
       type: Boolean,
       required: true,
     },
-    secret: {
+    secretBinding: {
       type: Object,
     },
     providerType: {
@@ -121,13 +122,19 @@ export default {
     'update:modelValue',
   ],
   setup () {
+    const { secretStringDataRefs } = useProvideCredentialContext()
+
+    const { serviceAccountKey } = secretStringDataRefs({
+      'serviceaccount.json': 'serviceAccountKey',
+    })
+
     return {
+      serviceAccountKey,
       v$: useVuelidate(),
     }
   },
   data () {
     return {
-      serviceAccountKey: undefined,
       dropHandlerInitialized: false,
     }
   },
@@ -179,11 +186,6 @@ export default {
     valid () {
       return !this.v$.$invalid
     },
-    secretData () {
-      return {
-        'serviceaccount.json': this.serviceAccountKey,
-      }
-    },
     isCreateMode () {
       return !this.secret
     },
@@ -231,7 +233,7 @@ export default {
       const onDrop = value => {
         this.serviceAccountKey = value
       }
-      handleTextFieldDrop(this.$refs.serviceAccountKey, /json/, onDrop)
+      handleTextFieldDrop(this.$refs.serviceAccountKeyRef, /json/, onDrop)
     },
     getErrorMessages,
   },

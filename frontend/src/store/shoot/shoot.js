@@ -32,7 +32,7 @@ import { useProjectStore } from '../project'
 import { useCloudProfileStore } from '../cloudProfile'
 import { useConfigStore } from '../config'
 import { useGardenerExtensionStore } from '../gardenerExtension'
-import { useSecretStore } from '../secret'
+import { useCredentialStore } from '../credential'
 import { useSocketStore } from '../socket'
 import { useTicketStore } from '../ticket'
 import { useLocalStorageStore } from '../localStorage'
@@ -69,7 +69,7 @@ const useShootStore = defineStore('shoot', () => {
   const projectStore = useProjectStore()
   const cloudProfileStore = useCloudProfileStore()
   const configStore = useConfigStore()
-  const secretStore = useSecretStore()
+  const credentialStore = useCredentialStore()
   const gardenerExtensionStore = useGardenerExtensionStore()
   const ticketStore = useTicketStore()
   const socketStore = useSocketStore()
@@ -87,7 +87,7 @@ const useShootStore = defineStore('shoot', () => {
     projectStore,
     cloudProfileStore,
     configStore,
-    secretStore,
+    credentialStore,
     gardenerExtensionStore,
     ticketStore,
     socketStore,

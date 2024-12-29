@@ -7,9 +7,8 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-secret-dialog
     v-model="visible"
-    :data="secretData"
     :secret-validations="v$"
-    :secret="secret"
+    :secret-binding="secretBinding"
     create-title="Add new Cloudflare Secret"
     replace-title="Replace Cloudflare Secret"
   >
@@ -64,6 +63,8 @@ import { required } from '@vuelidate/validators'
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
 
+import { useProvideCredentialContext } from '@/composables/useCredentialContext'
+
 import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
 
@@ -77,7 +78,7 @@ export default {
       type: Boolean,
       required: true,
     },
-    secret: {
+    secretBinding: {
       type: Object,
     },
   },
@@ -85,13 +86,19 @@ export default {
     'update:modelValue',
   ],
   setup () {
+    const { secretStringDataRefs } = useProvideCredentialContext()
+
+    const { apiToken } = secretStringDataRefs({
+      apiToken: 'apiToken',
+    })
+
     return {
+      apiToken,
       v$: useVuelidate(),
     }
   },
   data () {
     return {
-      apiToken: undefined,
       hideApiToken: true,
     }
   },
@@ -113,11 +120,6 @@ export default {
     },
     valid () {
       return !this.v$.$invalid
-    },
-    secretData () {
-      return {
-        apiToken: this.apiToken,
-      }
     },
     isCreateMode () {
       return !this.secret
