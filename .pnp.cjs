@@ -106,13 +106,13 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@apidevtools/json-schema-ref-parser", [\
-      ["npm:9.0.6", {\
-        "packageLocation": "./.yarn/cache/@apidevtools-json-schema-ref-parser-npm-9.0.6-231bc15a89-fc2cde5d8f.zip/node_modules/@apidevtools/json-schema-ref-parser/",\
+      ["npm:11.7.2", {\
+        "packageLocation": "./.yarn/cache/@apidevtools-json-schema-ref-parser-npm-11.7.2-06ef388533-90dd8e60e2.zip/node_modules/@apidevtools/json-schema-ref-parser/",\
         "packageDependencies": [\
-          ["@apidevtools/json-schema-ref-parser", "npm:9.0.6"],\
+          ["@apidevtools/json-schema-ref-parser", "npm:11.7.2"],\
           ["@jsdevtools/ono", "npm:7.1.3"],\
-          ["call-me-maybe", "npm:1.0.2"],\
-          ["js-yaml", "npm:3.14.1"]\
+          ["@types/json-schema", "npm:7.0.15"],\
+          ["js-yaml", "npm:4.1.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -136,24 +136,24 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@apidevtools/swagger-parser", [\
-      ["npm:10.1.0", {\
-        "packageLocation": "./.yarn/cache/@apidevtools-swagger-parser-npm-10.1.0-97318b3580-9a81529af6.zip/node_modules/@apidevtools/swagger-parser/",\
+      ["npm:10.1.1", {\
+        "packageLocation": "./.yarn/cache/@apidevtools-swagger-parser-npm-10.1.1-527689a109-21be668c64.zip/node_modules/@apidevtools/swagger-parser/",\
         "packageDependencies": [\
-          ["@apidevtools/swagger-parser", "npm:10.1.0"]\
+          ["@apidevtools/swagger-parser", "npm:10.1.1"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:10.1.0", {\
-        "packageLocation": "./.yarn/__virtual__/@apidevtools-swagger-parser-virtual-bcdf10ff09/0/cache/@apidevtools-swagger-parser-npm-10.1.0-97318b3580-9a81529af6.zip/node_modules/@apidevtools/swagger-parser/",\
+      ["virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:10.1.1", {\
+        "packageLocation": "./.yarn/__virtual__/@apidevtools-swagger-parser-virtual-8e10cb8f07/0/cache/@apidevtools-swagger-parser-npm-10.1.1-527689a109-21be668c64.zip/node_modules/@apidevtools/swagger-parser/",\
         "packageDependencies": [\
-          ["@apidevtools/swagger-parser", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:10.1.0"],\
-          ["@apidevtools/json-schema-ref-parser", "npm:9.0.6"],\
+          ["@apidevtools/swagger-parser", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:10.1.1"],\
+          ["@apidevtools/json-schema-ref-parser", "npm:11.7.2"],\
           ["@apidevtools/openapi-schemas", "npm:2.1.0"],\
           ["@apidevtools/swagger-methods", "npm:3.0.2"],\
           ["@jsdevtools/ono", "npm:7.1.3"],\
           ["@types/openapi-types", null],\
-          ["ajv", "npm:8.12.0"],\
-          ["ajv-draft-04", "virtual:bcdf10ff0997a48f2a3e329f1212cdf6a00c240853cf1ff2df379aba1710f80d9ef47544f92088eaf9c7704733943208f321267eb47e2cc2d09acd866d76c919#npm:1.0.0"],\
+          ["ajv", "npm:8.17.1"],\
+          ["ajv-draft-04", "virtual:8e10cb8f07e1fe4a2521962e5934906d18b47e757c540eb2531098ed953fa2761a838fa7d519ed25368afdc7729d481a085cdd2d14d300a8dd7b6527735bcddc#npm:1.0.0"],\
           ["call-me-maybe", "npm:1.0.2"],\
           ["openapi-types", "npm:12.1.3"]\
         ],\
@@ -1616,7 +1616,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./backend/",\
         "packageDependencies": [\
           ["@gardener-dashboard/backend", "workspace:backend"],\
-          ["@apidevtools/swagger-parser", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:10.1.0"],\
+          ["@apidevtools/swagger-parser", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:10.1.1"],\
           ["@gardener-dashboard/kube-client", "workspace:packages/kube-client"],\
           ["@gardener-dashboard/kube-config", "workspace:packages/kube-config"],\
           ["@gardener-dashboard/logger", "workspace:packages/logger"],\
@@ -4511,14 +4511,14 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "HARD"\
       }],\
-      ["npm:8.12.0", {\
-        "packageLocation": "./.yarn/cache/ajv-npm-8.12.0-3bf6e30741-ac4f72adf7.zip/node_modules/ajv/",\
+      ["npm:8.17.1", {\
+        "packageLocation": "./.yarn/cache/ajv-npm-8.17.1-12ade7edc6-ec3ba10a57.zip/node_modules/ajv/",\
         "packageDependencies": [\
-          ["ajv", "npm:8.12.0"],\
+          ["ajv", "npm:8.17.1"],\
           ["fast-deep-equal", "npm:3.1.3"],\
+          ["fast-uri", "npm:3.0.5"],\
           ["json-schema-traverse", "npm:1.0.0"],\
-          ["require-from-string", "npm:2.0.2"],\
-          ["uri-js", "npm:4.4.1"]\
+          ["require-from-string", "npm:2.0.2"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -4531,12 +4531,12 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:bcdf10ff0997a48f2a3e329f1212cdf6a00c240853cf1ff2df379aba1710f80d9ef47544f92088eaf9c7704733943208f321267eb47e2cc2d09acd866d76c919#npm:1.0.0", {\
-        "packageLocation": "./.yarn/__virtual__/ajv-draft-04-virtual-a7386d23ca/0/cache/ajv-draft-04-npm-1.0.0-6fc962dbab-6044310bd3.zip/node_modules/ajv-draft-04/",\
+      ["virtual:8e10cb8f07e1fe4a2521962e5934906d18b47e757c540eb2531098ed953fa2761a838fa7d519ed25368afdc7729d481a085cdd2d14d300a8dd7b6527735bcddc#npm:1.0.0", {\
+        "packageLocation": "./.yarn/__virtual__/ajv-draft-04-virtual-4d7e1d0572/0/cache/ajv-draft-04-npm-1.0.0-6fc962dbab-6044310bd3.zip/node_modules/ajv-draft-04/",\
         "packageDependencies": [\
-          ["ajv-draft-04", "virtual:bcdf10ff0997a48f2a3e329f1212cdf6a00c240853cf1ff2df379aba1710f80d9ef47544f92088eaf9c7704733943208f321267eb47e2cc2d09acd866d76c919#npm:1.0.0"],\
+          ["ajv-draft-04", "virtual:8e10cb8f07e1fe4a2521962e5934906d18b47e757c540eb2531098ed953fa2761a838fa7d519ed25368afdc7729d481a085cdd2d14d300a8dd7b6527735bcddc#npm:1.0.0"],\
           ["@types/ajv", null],\
-          ["ajv", "npm:8.12.0"]\
+          ["ajv", "npm:8.17.1"]\
         ],\
         "packagePeers": [\
           "@types/ajv",\
@@ -7352,6 +7352,15 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/fast-safe-stringify-npm-2.1.1-7ce89033ca-d90ec1c963.zip/node_modules/fast-safe-stringify/",\
         "packageDependencies": [\
           ["fast-safe-stringify", "npm:2.1.1"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["fast-uri", [\
+      ["npm:3.0.5", {\
+        "packageLocation": "./.yarn/cache/fast-uri-npm-3.0.5-88ac8c7ad4-f5501fd849.zip/node_modules/fast-uri/",\
+        "packageDependencies": [\
+          ["fast-uri", "npm:3.0.5"]\
         ],\
         "linkType": "HARD"\
       }]\
