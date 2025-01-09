@@ -112,13 +112,13 @@ async function getDerivedResourceRules (username, namespace, accountId) {
     return []
   }
 
-  const checks = permissionMappings.map(({ relation, object }) => ({
+  const checks = permissionMappings.map(({ correlationId, relation, object }) => ({
     tuple_key: {
       user: `user:${username}`,
       relation,
       object,
     },
-    correlation_id: relation,
+    correlation_id: correlationId,
   }))
 
   let fgaResult
@@ -131,7 +131,7 @@ async function getDerivedResourceRules (username, namespace, accountId) {
     throw new Error('Error performing batch permission checks')
   }
 
-  const isAllowed = ({ relation: correlationId }) => {
+  const isAllowed = ({ correlationId }) => {
     return _.get(fgaResult, [correlationId, 'allowed'], false)
   }
 
