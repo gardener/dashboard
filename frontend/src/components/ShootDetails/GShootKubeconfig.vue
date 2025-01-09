@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-list-item v-if="canGetSecrets">
+  <g-list-item>
     <template #prepend>
       <v-icon
         :icon="icon"
