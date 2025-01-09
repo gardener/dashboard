@@ -107,6 +107,11 @@ function batchCheck (checks) {
 
 async function getDerivedResourceRules (username, namespace, accountId) {
   const permissionMappings = getPermissionMappings(accountId, namespace)
+  if (_.isEmpty(permissionMappings)) {
+    logger.debug('No permission mappings for user "%s", account "%s", namespace "%s"', username, accountId, namespace)
+    return []
+  }
+
   const checks = permissionMappings.map(({ relation, object }) => ({
     tuple_key: {
       user: `user:${username}`,

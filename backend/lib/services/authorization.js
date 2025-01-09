@@ -195,7 +195,7 @@ exports.selfSubjectRulesReview = async function (user, namespace, accountId) {
 }
 
 async function fgaSelfSubjectRulesReview (user, namespace, accountId) {
-  if (!openfga.client || !accountId) {
+  if (!openfga.client) {
     return
   }
   const username = user.id
