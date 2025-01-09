@@ -950,10 +950,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@codemirror/commands", [\
-      ["npm:6.7.1", {\
-        "packageLocation": "./.yarn/cache/@codemirror-commands-npm-6.7.1-d192cff451-287a50eebc.zip/node_modules/@codemirror/commands/",\
+      ["npm:6.8.0", {\
+        "packageLocation": "./.yarn/cache/@codemirror-commands-npm-6.8.0-4aee24e541-689f85a305.zip/node_modules/@codemirror/commands/",\
         "packageDependencies": [\
-          ["@codemirror/commands", "npm:6.7.1"],\
+          ["@codemirror/commands", "npm:6.8.0"],\
           ["@codemirror/language", "npm:6.10.8"],\
           ["@codemirror/state", "npm:6.5.0"],\
           ["@codemirror/view", "npm:6.36.1"],\
@@ -1680,7 +1680,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@gardener-dashboard/frontend", "workspace:frontend"],\
           ["@codemirror/autocomplete", "npm:6.18.4"],\
-          ["@codemirror/commands", "npm:6.7.1"],\
+          ["@codemirror/commands", "npm:6.8.0"],\
           ["@codemirror/lang-yaml", "npm:6.1.2"],\
           ["@codemirror/language", "npm:6.10.8"],\
           ["@codemirror/search", "npm:6.5.8"],\
