@@ -942,7 +942,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@codemirror/autocomplete", "npm:6.18.4"],\
           ["@codemirror/language", "npm:6.10.8"],\
-          ["@codemirror/state", "npm:6.5.0"],\
+          ["@codemirror/state", "npm:6.5.1"],\
           ["@codemirror/view", "npm:6.36.2"],\
           ["@lezer/common", "npm:1.2.3"]\
         ],\
@@ -955,7 +955,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@codemirror/commands", "npm:6.8.0"],\
           ["@codemirror/language", "npm:6.10.8"],\
-          ["@codemirror/state", "npm:6.5.0"],\
+          ["@codemirror/state", "npm:6.5.1"],\
           ["@codemirror/view", "npm:6.36.2"],\
           ["@lezer/common", "npm:1.2.3"]\
         ],\
@@ -969,7 +969,7 @@ const RAW_RUNTIME_STATE =
           ["@codemirror/lang-yaml", "npm:6.1.2"],\
           ["@codemirror/autocomplete", "npm:6.18.4"],\
           ["@codemirror/language", "npm:6.10.8"],\
-          ["@codemirror/state", "npm:6.5.0"],\
+          ["@codemirror/state", "npm:6.5.1"],\
           ["@lezer/common", "npm:1.2.3"],\
           ["@lezer/highlight", "npm:1.2.1"],\
           ["@lezer/lr", "npm:1.4.2"],\
@@ -983,7 +983,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/@codemirror-language-npm-6.10.8-8a9095f9cd-b7d07bc472.zip/node_modules/@codemirror/language/",\
         "packageDependencies": [\
           ["@codemirror/language", "npm:6.10.8"],\
-          ["@codemirror/state", "npm:6.5.0"],\
+          ["@codemirror/state", "npm:6.5.1"],\
           ["@codemirror/view", "npm:6.36.2"],\
           ["@lezer/common", "npm:1.2.3"],\
           ["@lezer/highlight", "npm:1.2.1"],\
@@ -998,7 +998,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/@codemirror-search-npm-6.5.8-9785bd8f0e-67a36fb078.zip/node_modules/@codemirror/search/",\
         "packageDependencies": [\
           ["@codemirror/search", "npm:6.5.8"],\
-          ["@codemirror/state", "npm:6.5.0"],\
+          ["@codemirror/state", "npm:6.5.1"],\
           ["@codemirror/view", "npm:6.36.2"],\
           ["crelt", "npm:1.0.6"]\
         ],\
@@ -1006,10 +1006,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@codemirror/state", [\
-      ["npm:6.5.0", {\
-        "packageLocation": "./.yarn/cache/@codemirror-state-npm-6.5.0-cc8408a413-740425d605.zip/node_modules/@codemirror/state/",\
+      ["npm:6.5.1", {\
+        "packageLocation": "./.yarn/cache/@codemirror-state-npm-6.5.1-106ed551c4-94c4ab3a55.zip/node_modules/@codemirror/state/",\
         "packageDependencies": [\
-          ["@codemirror/state", "npm:6.5.0"],\
+          ["@codemirror/state", "npm:6.5.1"],\
           ["@marijn/find-cluster-break", "npm:1.0.0"]\
         ],\
         "linkType": "HARD"\
@@ -1021,7 +1021,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@codemirror/theme-one-dark", "npm:6.1.2"],\
           ["@codemirror/language", "npm:6.10.8"],\
-          ["@codemirror/state", "npm:6.5.0"],\
+          ["@codemirror/state", "npm:6.5.1"],\
           ["@codemirror/view", "npm:6.36.2"],\
           ["@lezer/highlight", "npm:1.2.1"]\
         ],\
@@ -1033,7 +1033,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/@codemirror-view-npm-6.36.2-8117a91cd8-321398fe16.zip/node_modules/@codemirror/view/",\
         "packageDependencies": [\
           ["@codemirror/view", "npm:6.36.2"],\
-          ["@codemirror/state", "npm:6.5.0"],\
+          ["@codemirror/state", "npm:6.5.1"],\
           ["style-mod", "npm:4.1.2"],\
           ["w3c-keyname", "npm:2.2.8"]\
         ],\
@@ -1684,7 +1684,7 @@ const RAW_RUNTIME_STATE =
           ["@codemirror/lang-yaml", "npm:6.1.2"],\
           ["@codemirror/language", "npm:6.10.8"],\
           ["@codemirror/search", "npm:6.5.8"],\
-          ["@codemirror/state", "npm:6.5.0"],\
+          ["@codemirror/state", "npm:6.5.1"],\
           ["@codemirror/theme-one-dark", "npm:6.1.2"],\
           ["@codemirror/view", "npm:6.36.2"],\
           ["@fontsource/roboto", "npm:5.1.1"],\
