@@ -16,7 +16,13 @@ else
   export MAIN_REPO_DIR="$(readlink -f ${MAIN_REPO_DIR})"
 fi
 
-make sast
-make test
+if [ "${SAST+no}" = yes ] ; then
+  # supposed to be run in release jobs
+  make sast
+else
+  make lint
+fi
+
+make coverage
 
 popd > /dev/null

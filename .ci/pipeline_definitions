@@ -36,9 +36,7 @@ dashboard:
                 confidentiality_requirement: 'high'
                 integrity_requirement: 'high'
                 availability_requirement: 'low'
-    steps:
-      verify:
-        image: 'node:22'
+    steps: ~
   jobs:
     head-update:
       traits:
@@ -49,6 +47,8 @@ dashboard:
       steps:
         check:
           image: 'node:22-alpine3.20'
+        verify:
+          image: 'node:22'
     release:
       traits:
         version:
@@ -71,3 +71,9 @@ dashboard:
               tag_as_latest: true
               extra_push_targets: # may be dropped after all users updated to new registry
                 - eu.gcr.io/gardener-project/gardener/dashboard
+      steps:
+        verify:
+          image: 'node:22'
+          vars:
+            SAST: '"yes"'
+
