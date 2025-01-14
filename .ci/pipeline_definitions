@@ -36,7 +36,9 @@ dashboard:
                 confidentiality_requirement: 'high'
                 integrity_requirement: 'high'
                 availability_requirement: 'low'
-    steps: ~
+    steps:
+      verify:
+        image: 'node:22'
   jobs:
     head-update:
       traits:
