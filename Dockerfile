@@ -42,20 +42,6 @@ RUN yarn dedupe --check
 # check that the constraints are met
 RUN yarn constraints
 
-# run lint
-RUN yarn workspace @gardener-dashboard/logger run lint-sarif
-RUN yarn workspace @gardener-dashboard/request run lint-sarif
-RUN yarn workspace @gardener-dashboard/kube-config run lint-sarif
-RUN yarn workspace @gardener-dashboard/kube-client run lint-sarif
-RUN yarn workspace @gardener-dashboard/monitor run lint-sarif
-
-# run test --coverage
-RUN yarn workspace @gardener-dashboard/logger run test --coverage
-RUN yarn workspace @gardener-dashboard/request run test --coverage
-RUN yarn workspace @gardener-dashboard/kube-config run test --coverage
-RUN yarn workspace @gardener-dashboard/kube-client run test --coverage
-RUN yarn workspace @gardener-dashboard/monitor run test --coverage
-
 ############# node-scratch #############
 FROM scratch AS node-scratch
 

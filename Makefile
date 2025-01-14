@@ -7,6 +7,22 @@ DASHBOARD_IMAGE_REPOSITORY    := $(REGISTRY)/dashboard
 TAG                           := $(shell cat ./VERSION)-$(shell ./scripts/git-version)
 PUSH_LATEST_TAG               := true
 
+.PHONY: lint
+lint: ## Run eslint against code.
+	@./hack/lint.sh
+
+.PHONY: sast
+sast: ## Run eslint and output in sarif format.
+	@./hack/lint.sh lint-sarif
+
+.PHONY: test
+test: ## Run tests.
+	@./hack/test.sh
+
+.PHONY: coverage
+coverage: ## Run tests with coverage.
+	@./hack/test.sh --coverage
+
 .PHONY: build
 build:
 	@echo "Building docker images with version and tag $(TAG)"
