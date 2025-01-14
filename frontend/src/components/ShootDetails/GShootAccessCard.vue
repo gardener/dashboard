@@ -118,6 +118,7 @@ import GListItem from '@/components/GListItem.vue'
 import GListItemContent from '@/components/GListItemContent.vue'
 import GTerminalListTile from '@/components/GTerminalListTile.vue'
 
+import { useShootAdminKubeconfig } from '@/composables/useShootAdminKubeconfig'
 import {
   useShootItem,
   useProvideShootItem,
@@ -160,13 +161,15 @@ const {
   canCreateShootsAdminkubeconfig,
   canCreateShootsViewerkubeconfig,
   hasControlPlaneTerminalAccess,
-  canPatchShoots,
 } = storeToRefs(authzStore)
 const terminalStore = useTerminalStore()
 const {
   isTerminalShortcutsFeatureEnabled,
 } = storeToRefs(terminalStore)
 
+const {
+  isEnabled: isShootAdminKubeconfigEnabled,
+} = useShootAdminKubeconfig()
 const {
   shootItem,
   isShootStatusHibernated,
@@ -221,7 +224,7 @@ const isDashboardTileVisible = computed(() => {
 })
 
 const isKubeconfigTileVisible = computed(() => {
-  return !!kubeconfigGardenlogin.value || canPatchShoots.value
+  return !!kubeconfigGardenlogin.value || (isShootAdminKubeconfigEnabled.value && canCreateShootsAdminkubeconfig.value)
 })
 
 const isGardenctlTileVisible = computed(() => {
