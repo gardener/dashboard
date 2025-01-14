@@ -105,25 +105,20 @@ function batchCheck (checks) {
   })
 }
 
-function getProjectName (namespace) {
-  try {
-    return cache.findProjectByNamespace(namespace).metadata.name
-  } catch (err) {
-    // ignore error when project is not found
-    return null
-  }
-}
-
 async function getDerivedResourceRules (username, namespace, accountId) {
-  const projectName = getProjectName(namespace)
-  const permissionMappings = getPermissionMappings(accountId, projectName)
-  const checks = permissionMappings.map(({ relation, object }) => ({
+  const permissionMappings = getPermissionMappings(accountId, namespace)
+  if (_.isEmpty(permissionMappings)) {
+    logger.debug('No permission mappings for user "%s", account "%s", namespace "%s"', username, accountId, namespace)
+    return []
+  }
+
+  const checks = permissionMappings.map(({ correlationId, relation, object }) => ({
     tuple_key: {
       user: `user:${username}`,
       relation,
       object,
     },
-    correlation_id: relation,
+    correlation_id: correlationId,
   }))
 
   let fgaResult
@@ -136,7 +131,7 @@ async function getDerivedResourceRules (username, namespace, accountId) {
     throw new Error('Error performing batch permission checks')
   }
 
-  const isAllowed = ({ relation: correlationId }) => {
+  const isAllowed = ({ correlationId }) => {
     return _.get(fgaResult, [correlationId, 'allowed'], false)
   }
 
