@@ -1,12 +1,12 @@
+#!/bin/sh
+
 # SPDX-FileCopyrightText: 2025 SAP SE or an SAP affiliate company and Gardener contributors
 #
 # SPDX-License-Identifier: Apache-2.0
 
-#!/bin/sh
-
 CMD="$1"
 if [[ -z "$CMD" ]]; then
-  echo "ERROR: No command provided. Please specify either 'lint' or 'test' (e.g., './workspace-run.sh lint')."
+  echo "ERROR: No command provided. Please specify either 'lint', 'lint-sarif' or 'test' (e.g., './workspace-run.sh lint')."
   exit 1
 fi
 
@@ -23,8 +23,8 @@ WORKSPACES="
 "
 case "$CMD" in
   lint|lint-sarif|test)
-    echo "Running \"${CMD}${@:+ }${@}\" in all relevant workspaces..."
     for ws in $WORKSPACES; do
+      echo "Executing: yarn workspace \"$ws\" run $CMD $@"
       yarn workspace "$ws" run "$CMD" "$@"
     done
     ;;
