@@ -36,7 +36,9 @@ dashboard:
                 confidentiality_requirement: 'high'
                 integrity_requirement: 'high'
                 availability_requirement: 'low'
-    steps: ~
+    steps:
+      verify:
+        image: 'node:22-alpine3.20'
   jobs:
     head-update:
       traits:
@@ -44,11 +46,6 @@ dashboard:
     pull-request:
       traits:
         pull-request: ~
-      steps:
-        check:
-          image: 'node:22-alpine3.20'
-        verify:
-          image: 'node:22'
     release:
       traits:
         version:
@@ -73,7 +70,6 @@ dashboard:
                 - eu.gcr.io/gardener-project/gardener/dashboard
       steps:
         verify:
-          image: 'node:22'
           vars:
-            SAST: '"yes"'
+            SARIF: '"yes"'
 
