@@ -54,14 +54,6 @@ ENTRYPOINT [ "tini", "--", "node"]
 ############# dashboard-builder #############
 FROM builder AS dashboard-builder
 
-# run lint
-RUN yarn workspace @gardener-dashboard/backend run lint-sarif
-RUN yarn workspace @gardener-dashboard/frontend run lint-sarif
-
-# run test --coverage
-RUN yarn workspace @gardener-dashboard/backend run test --coverage
-RUN yarn workspace @gardener-dashboard/frontend run test --coverage
-
 # bump version
 RUN yarn workspace @gardener-dashboard/backend version "$(cat VERSION)"
 RUN yarn workspace @gardener-dashboard/frontend version "$(cat VERSION)"
