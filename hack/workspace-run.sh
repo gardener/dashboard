@@ -20,6 +20,8 @@ WORKSPACES="
 @gardener-dashboard/kube-config
 @gardener-dashboard/kube-client
 @gardener-dashboard/monitor
+@gardener-dashboard/backend
+@gardener-dashboard/frontend
 "
 case "$CMD" in
   lint|lint-sarif|test)
