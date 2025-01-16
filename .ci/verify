@@ -55,7 +55,7 @@ install_if_missing make make
 # the lockfile was to be modified or
 # the cache folder was to be modified or
 # the checksums of the packages are not consistent
-yarn install --immutable --immutable-cache --check-cache
+yarn install --immutable --immutable-cache --check-cache --refresh-lockfile
 
 # check and report found duplicate dependencies
 yarn dedupe --check
