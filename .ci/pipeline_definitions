@@ -49,7 +49,7 @@ dashboard:
       steps:
         verify:
           vars:
-            SARIF: '"yes"'
+            SARIF: 'yes'
     release:
       traits:
         version:
