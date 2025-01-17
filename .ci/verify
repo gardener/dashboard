@@ -67,7 +67,7 @@ yarn constraints
 yarn workspace @gardener-dashboard/charts run test
 
 # Run linting
-if [ "$SARIF" = "yes" ] ; then
+if [ "${LINT_SARIF+yes}" = yes ] ; then
   # supposed to be run in release jobs
   make lint-sarif
 else
