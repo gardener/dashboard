@@ -39,8 +39,6 @@ dashboard:
     steps:
       verify:
         image: 'node:22-alpine3.20'
-        vars:
-          SARIF: 'no'
   jobs:
     head-update:
       traits:
@@ -73,5 +71,5 @@ dashboard:
       steps:
         verify:
           vars:
-            SARIF: 'yes'
+            LINT_SARIF: 'yes'
 
