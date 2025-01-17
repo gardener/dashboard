@@ -46,10 +46,6 @@ dashboard:
     pull-request:
       traits:
         pull-request: ~
-      steps:
-        verify:
-          vars:
-            SARIF: 'yes'
     release:
       traits:
         version:
@@ -75,5 +71,5 @@ dashboard:
       steps:
         verify:
           vars:
-            SARIF: '"yes"'
+            SARIF: 'yes'
 
