@@ -56,7 +56,7 @@ exports.create = async function ({ user, params }) {
 
   if (bindingNamespace !== secretRefNamespace ||
     secretRefNamespace !== secretNamespace) {
-    throw createError(422, 'Create allowed only for secrets in own namespace')
+    throw createError(422, 'Create allowed if secret and secretBinding are in the same namespace')
   }
 
   secret = await client.core.secrets.create(secretNamespace, secret)
@@ -93,7 +93,7 @@ exports.patch = async function ({ user, params }) {
   }
   if (bindingNamespace !== secretRefNamespace ||
     secretRefNamespace !== secretNamespace) {
-    throw createError(422, 'Patch allowed only for secrets in own namespace')
+    throw createError(422, 'Patch allowed only if secret and secretBinding are in the same namespace')
   }
   secret = await client.core.secrets.update(bindingNamespace, secretName, secret)
 
@@ -113,7 +113,7 @@ exports.remove = async function ({ user, params }) {
     throw createError(404)
   }
   if (secretBinding.metadata.namespace !== secretBinding.secretRef.namespace) {
-    throw createError(422, 'Remove allowed only for secrets in own namespace')
+    throw createError(422, 'Remove allowed only if secret and secretBinding are in the same namespace')
   }
 
   const secretRef = secretBinding.secretRef

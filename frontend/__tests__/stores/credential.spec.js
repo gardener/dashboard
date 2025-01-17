@@ -18,7 +18,6 @@ import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useApi } from '@/composables/useApi'
 
 import find from 'lodash/find'
-import map from 'lodash/map'
 
 const testNamespace = 'garden-test'
 const awsSecretBindingName = 'aws-secretbinding'
@@ -108,34 +107,31 @@ describe('stores', () => {
 
     it('should return secretBindingList with multiple quotas', () => {
       const azureSecretBinding = find(credentialStore.secretBindingList, { metadata: { name: azureSecretBindingName } })
-      expect(azureSecretBinding._secret).toBeDefined()
+      expect(azureSecretBinding._secret).toMatchSnapshot()
       expect(azureSecretBinding._quotas.length).toBe(2)
-      const azureQuota = find(credentialStore.quotaList, { metadata: azureSecretBinding.quotas[1] })
-      expect(azureQuota).toBeDefined()
+      const azureQuotaRef2 = azureSecretBinding.quotas[1]
+      const azureQuota = find(credentialStore.quotaList, { metadata: azureQuotaRef2 })
+      expect(azureQuota).toMatchSnapshot()
     })
 
     it('should return infrastructureSecretBindingsList', () => {
       expect(credentialStore.infrastructureSecretBindingsList.length).toBeGreaterThan(0)
       expect(credentialStore.secretBindingList.length).toBeGreaterThan(credentialStore.infrastructureSecretBindingsList.length)
-      expect(cloudProfileStore.sortedProviderTypeList).toEqual(
-        expect.arrayContaining(map(credentialStore.infrastructureSecretBindingsList, 'provider.type')),
-      )
+      expect(cloudProfileStore.sortedProviderTypeList).toMatchSnapshot()
     })
 
     it('should return dnsSecretBindingsList', () => {
       expect(credentialStore.dnsSecretBindingsList.length).toBeGreaterThan(0)
       expect(credentialStore.secretBindingList.length).toBeGreaterThan(credentialStore.dnsSecretBindingsList.length)
-      expect(gardenerExtensionStore.dnsProviderTypes).toEqual(
-        expect.arrayContaining(map(credentialStore.dnsSecretBindingsList, 'provider.type')),
-      )
+      expect(gardenerExtensionStore.dnsProviderTypes).toMatchSnapshot()
     })
 
-    it('should return getSecret', () => {
-      expect(credentialStore.getSecret({ namespace: testNamespace, name: awsSecretName })).toBeDefined()
+    it('should return secret', () => {
+      expect(credentialStore.getSecret({ namespace: testNamespace, name: awsSecretName })).toMatchSnapshot()
     })
 
-    it('should return getSecretBinding', () => {
-      expect(credentialStore.getSecretBinding({ namespace: testNamespace, name: awsSecretBindingName })).toBeDefined()
+    it('should return secretBinding', () => {
+      expect(credentialStore.getSecretBinding({ namespace: testNamespace, name: awsSecretBindingName })).toMatchSnapshot()
     })
 
     it('should fetchCredentials', async () => {
@@ -152,7 +148,7 @@ describe('stores', () => {
       const secret = {
         ...awsSecretBinding._secret,
         data: {
-          newSecret2: 'c3VwZXJzZWNyZXQy',
+          newSecret2: 'dummy-data',
         },
       }
       await credentialStore.updateCredential({ secretBinding: awsSecretBinding, secret })
@@ -160,7 +156,7 @@ describe('stores', () => {
       expect(api.updateCloudProviderCredential).toBeCalledTimes(1)
       expect(api.updateCloudProviderCredential).toBeCalledWith({ secretBinding: awsSecretBinding, secret })
       awsSecretBinding = find(credentialStore.secretBindingList, { metadata: { name: awsSecretBindingName } })
-      expect(awsSecretBinding._secret.data).toEqual({ newSecret2: 'c3VwZXJzZWNyZXQy' })
+      expect(awsSecretBinding._secret.data).toEqual({ newSecret2: 'dummy-data' })
     })
 
     it('should createCredential', async () => {
@@ -188,7 +184,7 @@ describe('stores', () => {
           namespace: testNamespace,
         },
         data: {
-          newSecret: 'c3VwZXJzZWNyZXQz',
+          newSecret: 'dummy-data',
         },
       }
 
@@ -199,7 +195,7 @@ describe('stores', () => {
       const newSecretBinding = find(credentialStore.secretBindingList, { metadata: secretBinding.metadata })
       expect(newSecretBinding.metadata.namespace).toEqual(testNamespace)
       expect(newSecretBinding.provider.type).toEqual('aws')
-      expect(newSecretBinding._secret.data).toEqual({ newSecret: 'c3VwZXJzZWNyZXQz' })
+      expect(newSecretBinding._secret.data).toEqual({ newSecret: 'dummy-data' })
     })
 
     it('should deleteCredential secretbinding and referenced secret / quota', async () => {
@@ -207,19 +203,19 @@ describe('stores', () => {
       const namespace = testNamespace
 
       let azureSecretBinding = find(credentialStore.secretBindingList, { metadata: { namespace, name } })
-      expect(azureSecretBinding).toBeDefined()
+      expect(azureSecretBinding).toMatchSnapshot()
 
       const azureSecretRef = azureSecretBinding.secretRef
       let azureSecret = find(credentialStore.secretList, { metadata: azureSecretRef })
-      expect(azureSecret).toBeDefined()
+      expect(azureSecret).toMatchSnapshot()
 
       const azureQuotaRef1 = azureSecretBinding.quotas[0]
       let azureQuota1 = find(credentialStore.quotaList, { metadata: azureQuotaRef1 })
-      expect(azureQuota1).toBeDefined()
+      expect(azureQuota1).toMatchSnapshot()
 
       const azureQuotaRef2 = azureSecretBinding.quotas[1]
       let azureQuota2 = find(credentialStore.quotaList, { metadata: azureQuotaRef2 })
-      expect(azureQuota2).toBeDefined()
+      expect(azureQuota2).toMatchSnapshot()
 
       await credentialStore.deleteCredential(name)
 
@@ -244,7 +240,7 @@ describe('stores', () => {
       const namespace = testNamespace
 
       let azureSecretBinding = find(credentialStore.secretBindingList, { metadata: { namespace, name } })
-      expect(azureSecretBinding).toBeDefined()
+      expect(azureSecretBinding).toMatchSnapshot()
 
       const azureSecretRef = azureSecretBinding.secretRef
       const azureQuotaRef1 = azureSecretBinding.quotas[0]
@@ -267,13 +263,13 @@ describe('stores', () => {
       credentialStore.setCredentials({ secretBindings, secrets, quotas })
 
       let azureSecret = find(credentialStore.secretList, { metadata: azureSecretRef })
-      expect(azureSecret).toBeDefined()
+      expect(azureSecret).toMatchSnapshot()
 
       let azureQuota1 = find(credentialStore.quotaList, { metadata: azureQuotaRef1 })
-      expect(azureQuota1).toBeDefined()
+      expect(azureQuota1).toMatchSnapshot()
 
       let azureQuota2 = find(credentialStore.quotaList, { metadata: azureQuotaRef2 })
-      expect(azureQuota2).toBeDefined()
+      expect(azureQuota2).toMatchSnapshot()
 
       await credentialStore.deleteCredential(name)
 
@@ -284,10 +280,10 @@ describe('stores', () => {
       expect(azureSecretBinding).toBeUndefined()
 
       azureSecret = find(credentialStore.secretList, { metadata: azureSecretRef })
-      expect(azureSecret).toBeDefined() // still referenced by otherSecretBinding
+      expect(azureSecret).toMatchSnapshot() // still referenced by otherSecretBinding
 
       azureQuota1 = find(credentialStore.quotaList, { metadata: azureQuotaRef1 })
-      expect(azureQuota1).toBeDefined() // still referenced by otherSecretBinding
+      expect(azureQuota1).toMatchSnapshot() // still referenced by otherSecretBinding
 
       azureQuota2 = find(credentialStore.quotaList, { metadata: azureQuotaRef2 })
       expect(azureQuota2).toBeUndefined() // not referenced anymore
@@ -301,7 +297,7 @@ describe('stores', () => {
       await expect(credentialStore.fetchCredentials()).rejects.toThrow(Error)
       expect(credentialStore.secretBindingList.length).toBe(0)
     })
-    it('store should be resetted before setting new data', async () => {
+    it('store should be resetted after setting new data', async () => {
       const namespace = 'invalid'
       authzStore.setNamespace(namespace)
 

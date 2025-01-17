@@ -101,7 +101,7 @@ export function createCredentialContextComposable (options = {}) {
       return get(secretBindingManifest.value, ['provider', 'type'])
     },
     set (value) {
-      set(secretBindingManifest.value, ['provider', 'type'], value || undefined)
+      set(secretBindingManifest.value, ['provider', 'type'], value)
     },
   })
 
@@ -111,7 +111,7 @@ export function createCredentialContextComposable (options = {}) {
       return get(secretBindingManifest.value, ['secretRef'])
     },
     set (value) {
-      set(secretBindingManifest.value, ['secretRef'], value || undefined)
+      set(secretBindingManifest.value, ['secretRef'], value)
     },
   })
 
@@ -175,16 +175,7 @@ export function createCredentialContextComposable (options = {}) {
       return get(secretManifest.value, ['data'])
     },
     set (value) {
-      set(secretManifest.value, ['data'], value || undefined)
-    },
-  })
-
-  const secretStringData = computed({
-    get () {
-      return mapValues(secretData.value, decodeBase64)
-    },
-    set (value) {
-      secretData.value = value ? mapValues(value, encodeBase64) : undefined
+      set(secretManifest.value, ['data'], value)
     },
   })
 
@@ -196,22 +187,21 @@ export function createCredentialContextComposable (options = {}) {
     }
 
     watch(
-      secretStringData,
-      newValue => {
-        if (newValue) {
-          for (const [dataKey, variableName] of Object.entries(keyMapping)) {
-            set(refs, [variableName, 'value'], get(newValue, [dataKey], ''))
-          }
+      secretData,
+      newValues => {
+        for (const [dataKey, variableName] of Object.entries(keyMapping)) {
+          const value = decodeBase64(get(newValues, [dataKey], ''))
+          set(refs, [variableName, 'value'], value)
         }
       },
       { immediate: true, deep: true },
     )
 
     watchEffect(() => {
-      secretStringData.value = Object.fromEntries(
+      secretData.value = Object.fromEntries(
         Object.entries(keyMapping).map(([dataKey, variableName]) => [
           dataKey,
-          get(refs, [variableName, 'value']),
+          encodeBase64(get(refs, [variableName, 'value'])),
         ]),
       )
     })
@@ -236,7 +226,6 @@ export function createCredentialContextComposable (options = {}) {
     createSecretManifest,
     isSecretDirty,
     secretName,
-    secretStringData,
     secretStringDataRefs,
     secretNamespace,
     secretData,

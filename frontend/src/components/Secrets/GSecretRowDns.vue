@@ -134,8 +134,10 @@ export default {
 
 <style lang="scss" scoped>
   $highlighted-color: rgb(var(--v-theme-accent));
+  $highlighted-border-color: rgb(var(--v-theme-accent-darken-2));
 
   .highlighted {
     background-color: $highlighted-color;
+    border-color: $highlighted-border-color;
   }
 </style>

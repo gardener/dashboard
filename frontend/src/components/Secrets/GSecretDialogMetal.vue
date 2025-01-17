@@ -83,7 +83,10 @@ export default {
   setup () {
     const { secretStringDataRefs } = useProvideCredentialContext()
 
-    const { apiHmac, apiUrl } = secretStringDataRefs({
+    const {
+      apiHmac,
+      apiUrl,
+    } = secretStringDataRefs({
       metalAPIHMac: 'apiHmac',
       metalAPIURL: 'apiUrl',
     })

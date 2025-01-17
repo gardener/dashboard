@@ -38,7 +38,7 @@ function createProviderCredentials (type, options = {}) {
         name: secretName,
       },
       data: {
-        secret: 'c3VwZXJzZWNyZXQ=',
+        secret: 'cw==',
       },
     }
   }

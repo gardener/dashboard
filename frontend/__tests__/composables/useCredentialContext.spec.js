@@ -17,6 +17,8 @@ import { useAuthzStore } from '@/store/authz'
 
 import { createCredentialContextComposable } from '@/composables/useCredentialContext'
 
+import { encodeBase64 } from '@/utils'
+
 describe('composables', () => {
   describe('useCredentialContext', () => {
     const testNamespace = 'garden-foo'
@@ -32,7 +34,15 @@ describe('composables', () => {
     })
 
     it('should set SecretBinding manifest', () => {
-      const manifest = { metadata: { name: 'foo', namespace: testNamespace }, provider: { type: 'aws' } }
+      const manifest = {
+        metadata: {
+          name: 'foo',
+          namespace: testNamespace,
+        },
+        provider: {
+          type: 'aws',
+        },
+      }
       credentialContext.setSecretBindingManifest(manifest)
 
       expect(credentialContext.secretBindingName).toBe('foo')
@@ -58,12 +68,17 @@ describe('composables', () => {
 
     it('should set and create Secret manifest', () => {
       const secretManifest = {
-        metadata: { name: 'my-secret', namespace: testNamespace },
-        data: { foo: 'YmFy' },
+        metadata: {
+          name: 'my-secret',
+          namespace: testNamespace,
+        },
+        data: {
+          foo: 'dummy-data',
+        },
       }
       credentialContext.setSecretManifest(secretManifest)
       expect(credentialContext.secretName).toBe('my-secret')
-      expect(credentialContext.secretData).toEqual({ foo: 'YmFy' })
+      expect(credentialContext.secretData).toEqual({ foo: 'dummy-data' })
 
       credentialContext.createSecretManifest()
       expect(credentialContext.secretName).toBe('')
@@ -77,15 +92,36 @@ describe('composables', () => {
       expect(credentialContext.isSecretDirty).toBe(true)
     })
 
-    it('should update and encode/decode secretStringData', () => {
+    it('should update secretStringDataRefs via secretData', async () => {
       credentialContext.createSecretManifest()
-      credentialContext.secretStringData = { password: 'secret' }
-      expect(credentialContext.secretData).toEqual({ password: 'c2VjcmV0' })
-      expect(credentialContext.secretStringData).toEqual({ password: 'secret' })
+
+      const keyMapping = { password: 'pwdVar', token: 'tokenVar' }
+      const refs = credentialContext.secretStringDataRefs(keyMapping)
+
+      await nextTick()
+      expect(refs.pwdVar.value).toBe('')
+      expect(refs.tokenVar.value).toBe('')
+
+      const password = encodeBase64('mypassword')
+      const token = encodeBase64('mytoken')
+
+      credentialContext.secretData = { password, token }
+
+      await nextTick()
+      expect(refs.pwdVar.value).toBe('mypassword')
+      expect(refs.tokenVar.value).toBe('mytoken')
     })
 
-    it('should update secret data via secretStringDataRefs', async () => {
-      credentialContext.setSecretManifest({ metadata: { name: 'my-secret', namespace: testNamespace }, data: { password: 'aW5pdGlhbA==' } })
+    it('should update secretData via secretStringDataRefs', async () => {
+      credentialContext.setSecretManifest({
+        metadata: {
+          name: 'my-secret',
+          namespace: testNamespace,
+        },
+        data: {
+          password: encodeBase64('initial'),
+        },
+      })
 
       const keyMapping = { password: 'pwdVar', token: 'tokenVar' }
       const refs = credentialContext.secretStringDataRefs(keyMapping)
@@ -97,13 +133,9 @@ describe('composables', () => {
       refs.tokenVar.value = 'mytoken'
 
       await nextTick()
-      expect(credentialContext.secretStringData).toEqual({
-        password: 'mypassword',
-        token: 'mytoken',
-      })
       expect(credentialContext.secretData).toEqual({
-        password: 'bXlwYXNzd29yZA==',
-        token: 'bXl0b2tlbg==',
+        password: encodeBase64('mypassword'),
+        token: encodeBase64('mytoken'),
       })
     })
 
