@@ -46,6 +46,10 @@ dashboard:
     pull-request:
       traits:
         pull-request: ~
+      steps:
+        verify:
+          vars:
+            LINT_SARIF: 'yes'
     release:
       traits:
         version:
