@@ -49,7 +49,7 @@ dashboard:
       steps:
         verify:
           vars:
-            LINT_SARIF: "'yes'"
+            LINT_SARIF: '"yes"'
     release:
       traits:
         version:
@@ -75,5 +75,5 @@ dashboard:
       steps:
         verify:
           vars:
-            LINT_SARIF: 'yes'
+            LINT_SARIF: '"yes"'
 
