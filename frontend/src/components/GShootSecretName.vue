@@ -23,6 +23,7 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <v-card>
       <g-secret-details-item-content
+        v-if="secretBinding"
         class="ma-1"
         infra
         :secret="secretBinding._secret"
