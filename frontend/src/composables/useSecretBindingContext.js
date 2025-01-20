@@ -53,17 +53,18 @@ export function useSecretBindingContext (options = {}) {
   }
 
   function createSecretBindingManifest () {
+    const namespace = get(options, ['namespace'], authzStore.namespace)
     secretBindingManifest.value = {
       metadata: {
         name: '',
-        namespace: get(options, ['namespace'], authzStore.namespace),
+        namespace,
       },
       provider: {
         type: '',
       },
       secretRef: {
         name: '',
-        namespace: get(options, ['namespace'], authzStore.namespace),
+        namespace,
       },
     }
     initialSecretBindingManifest.value = cloneDeep(secretBindingManifest.value)

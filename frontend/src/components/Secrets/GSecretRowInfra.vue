@@ -135,6 +135,15 @@ export default {
   $highlighted-color: rgb(var(--v-theme-accent));
 
   .highlighted {
-    background-color: $highlighted-color;
+    animation: highlightFade 5s forwards;
+  }
+
+  @keyframes highlightFade {
+    0%, 60% {
+      background-color: $highlighted-color;
+    }
+    100% {
+      background-color: transparent;
+    }
   }
 </style>

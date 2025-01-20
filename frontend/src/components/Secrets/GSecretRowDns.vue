@@ -136,10 +136,17 @@ export default {
 
 <style lang="scss" scoped>
   $highlighted-color: rgb(var(--v-theme-accent));
-  $highlighted-border-color: rgb(var(--v-theme-accent-darken-2));
 
   .highlighted {
-    background-color: $highlighted-color;
-    border-color: $highlighted-border-color;
+    animation: highlightFade 5s forwards;
+  }
+
+  @keyframes highlightFade {
+    0%, 60% {
+      background-color: $highlighted-color;
+    }
+    100% {
+      background-color: transparent;
+    }
   }
 </style>

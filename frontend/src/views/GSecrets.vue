@@ -469,7 +469,7 @@ export default {
     },
   },
   mounted () {
-    this.highlightedItem = get(this.$route.params, ['name'])
+    this.highlightedItem = get(this.$route.hash.match(/^#secret-binding-name:(.*)/), [1])
   },
   methods: {
     ...mapActions(useCredentialStore, [
