@@ -80,19 +80,6 @@ SPDX-License-Identifier: Apache-2.0
           </template>
         </g-list-item-content>
       </g-list-item>
-      <g-list-item v-if="token">
-        <g-list-item-content label="Token">
-          <pre class="scroll">{{ tokenText }}</pre>
-        </g-list-item-content>
-        <template #append>
-          <g-copy-btn :clipboard-text="token" />
-          <g-action-button
-            :icon="visibilityIcon"
-            :tooltip="tokenVisibilityTitle"
-            @click="showToken = !showToken"
-          />
-        </template>
-      </g-list-item>
     </template>
 
     <v-divider
@@ -100,14 +87,7 @@ SPDX-License-Identifier: Apache-2.0
       inset
     />
     <template v-if="isKubeconfigTileVisible">
-      <g-shoot-kubeconfig
-        :show-list-icon="true"
-        type="gardenlogin"
-      />
-      <g-shoot-kubeconfig
-        :show-list-icon="false"
-        type="token"
-      />
+      <g-shoot-kubeconfig show-list-icon />
       <g-shoot-admin-kubeconfig />
     </template>
 
@@ -124,7 +104,6 @@ SPDX-License-Identifier: Apache-2.0
 
 <script setup>
 import {
-  ref,
   computed,
   toRefs,
 } from 'vue'
@@ -137,10 +116,9 @@ import { useTerminalStore } from '@/store/terminal'
 import GList from '@/components/GList.vue'
 import GListItem from '@/components/GListItem.vue'
 import GListItemContent from '@/components/GListItemContent.vue'
-import GActionButton from '@/components/GActionButton.vue'
-import GCopyBtn from '@/components/GCopyBtn.vue'
 import GTerminalListTile from '@/components/GTerminalListTile.vue'
 
+import { useShootAdminKubeconfig } from '@/composables/useShootAdminKubeconfig'
 import {
   useShootItem,
   useProvideShootItem,
@@ -151,10 +129,8 @@ import GShootKubeconfig from './GShootKubeconfig.vue'
 import GShootAdminKubeconfig from './GShootAdminKubeconfig.vue'
 import GTerminalShortcutsTile from './GTerminalShortcutsTile.vue'
 
-import {
-  get,
-  isEmpty,
-} from '@/lodash'
+import isEmpty from 'lodash/isEmpty'
+import get from 'lodash/get'
 
 const props = defineProps({
   selectedShoot: {
@@ -185,13 +161,15 @@ const {
   canCreateShootsAdminkubeconfig,
   canCreateShootsViewerkubeconfig,
   hasControlPlaneTerminalAccess,
-  canPatchShoots,
 } = storeToRefs(authzStore)
 const terminalStore = useTerminalStore()
 const {
   isTerminalShortcutsFeatureEnabled,
 } = storeToRefs(terminalStore)
 
+const {
+  isEnabled: isShootAdminKubeconfigEnabled,
+} = useShootAdminKubeconfig()
 const {
   shootItem,
   isShootStatusHibernated,
@@ -201,8 +179,6 @@ const {
 } = selectedShoot.value
   ? useProvideShootItem(selectedShoot)
   : useShootItem()
-
-const showToken = ref(false)
 
 const dashboardUrl = computed(() => {
   if (!hasDashboardEnabled.value) {
@@ -217,7 +193,7 @@ const dashboardUrl = computed(() => {
 })
 
 const hasDashboardEnabled = computed(() => {
-  return get(shootItem.value, 'spec.addons.kubernetesDashboard.enabled', false) === true
+  return get(shootItem.value, ['spec', 'addons', 'kubernetesDashboard', 'enabled'], false) === true
 })
 
 const kubeconfigGardenlogin = computed(() => {
@@ -248,7 +224,7 @@ const isDashboardTileVisible = computed(() => {
 })
 
 const isKubeconfigTileVisible = computed(() => {
-  return !!kubeconfigGardenlogin.value || canPatchShoots.value
+  return !!kubeconfigGardenlogin.value || (isShootAdminKubeconfigEnabled.value && canCreateShootsAdminkubeconfig.value)
 })
 
 const isGardenctlTileVisible = computed(() => {
@@ -261,22 +237,6 @@ const isTerminalTileVisible = computed(() => {
 
 const isTerminalShortcutsTileVisible = computed(() => {
   return !isEmpty(shootItem.value) && isTerminalShortcutsFeatureEnabled.value && hasShootTerminalAccess.value && !hideTerminalShortcuts.value && !isSeedUnreachable.value && (hasShootWorkerGroups.value || isAdmin.value)
-})
-
-const token = computed(() => {
-  return shootInfo.value.cluster_token || ''
-})
-
-const tokenText = computed(() => {
-  return showToken.value ? token.value : '****************'
-})
-
-const tokenVisibilityTitle = computed(() => {
-  return showToken.value ? 'Hide token' : 'Show token'
-})
-
-const visibilityIcon = computed(() => {
-  return showToken.value ? 'mdi-eye-off' : 'mdi-eye'
 })
 
 function onAddTerminalShortcut (shortcut) {

@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
             <g-vendor
               title
               extended
-              :cloud-provider-kind="shootCloudProviderKind"
+              :provider-type="shootProviderType"
               :region="shootRegion"
               :zones="shootZones"
             />
@@ -27,7 +27,7 @@ SPDX-License-Identifier: Apache-2.0
           <div class="pt-1 d-flex flex-shrink-1">
             <g-vendor
               extended
-              :cloud-provider-kind="shootCloudProviderKind"
+              :provider-type="shootProviderType"
               :region="shootRegion"
               :zones="shootZones"
             />
@@ -275,12 +275,10 @@ import {
   bestMatchForString,
 } from '@/utils/wildcard'
 
-import {
-  get,
-  find,
-  map,
-  head,
-} from '@/lodash'
+import head from 'lodash/head'
+import map from 'lodash/map'
+import find from 'lodash/find'
+import get from 'lodash/get'
 
 export default {
   components: {
@@ -309,7 +307,7 @@ export default {
       shootSecretBindingName,
       hasShootWorkerGroups,
       shootControlPlaneHighAvailabilityFailureTolerance,
-      shootCloudProviderKind,
+      shootProviderType,
       servicesCidr,
       nodesCidr,
       podsCidr,
@@ -333,7 +331,7 @@ export default {
       shootSecretBindingName,
       hasShootWorkerGroups,
       shootControlPlaneHighAvailabilityFailureTolerance,
-      shootCloudProviderKind,
+      shootProviderType,
       servicesCidr,
       nodesCidr,
       podsCidr,
@@ -357,14 +355,14 @@ export default {
       return !!this.shootSeedName
     },
     shootIngressDomainText () {
-      const nginxIngressEnabled = get(this.shootItem, 'spec.addons.nginxIngress.enabled', false)
+      const nginxIngressEnabled = get(this.shootItem, ['spec', 'addons', 'nginxIngress', 'enabled'], false)
       if (!this.shootDomain || !nginxIngressEnabled) {
         return undefined
       }
       return `*.ingress.${this.shootDomain}`
     },
     shootLoadbalancerClasses () {
-      const shootLBClasses = get(this.shootItem, 'spec.provider.controlPlaneConfig.loadBalancerClasses')
+      const shootLBClasses = get(this.shootItem, ['spec', 'provider', 'controlPlaneConfig', 'loadBalancerClasses'])
       if (shootLBClasses) {
         // If the user defines the LB classes in the shoot mainfest, they completely replace the ones defined in the cloudprofile
         return shootLBClasses
@@ -376,7 +374,7 @@ export default {
       })
       const floatingPoolWildCardObjects = wildcardObjectsFromStrings(map(availableFloatingPools, 'name'))
 
-      const shootFloatingPoolName = get(this.shootItem, 'spec.provider.infrastructureConfig.floatingPoolName')
+      const shootFloatingPoolName = get(this.shootItem, ['spec', 'provider', 'infrastructureConfig', 'floatingPoolName'])
       const floatingPoolWildcardName = bestMatchForString(floatingPoolWildCardObjects, shootFloatingPoolName)
 
       if (!floatingPoolWildcardName) {
@@ -384,7 +382,7 @@ export default {
       }
 
       const shootFloatingPool = find(availableFloatingPools, ['name', floatingPoolWildcardName.originalValue])
-      return get(shootFloatingPool, 'loadBalancerClasses')
+      return get(shootFloatingPool, ['loadBalancerClasses'])
     },
     defaultLoadbalancerClass () {
       const shootLBClasses = this.shootLoadbalancerClasses
@@ -399,7 +397,7 @@ export default {
         return defaultLoadbalancerClass.name
       }
 
-      return get(head(shootLBClasses), 'name')
+      return get(head(shootLBClasses), ['name'])
     },
     customDomainChipText () {
       if (this.isCustomShootDomain) {

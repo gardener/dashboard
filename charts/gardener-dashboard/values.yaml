@@ -289,16 +289,14 @@ global:
       # accessRestriction:
       #   noItemsText: No access restriction options available for region ${region} and cloud profile ${cloudProfile}
       #   items:
-      #   - key: seed.gardener.cloud/eu-access
+      #   - key: eu-access
       #     display:
-      #       visibleIf: true
       #       # title: foo # optional title, if not defined key will be used
       #       # description: bar # optional description displayed in a tooltip
       #     input:
       #       title: EU Access
       #       description: |
       #         This service is offered to you with our regular SLAs and 24x7 support for the control plane of the cluster. 24x7 support for cluster add-ons and nodes is only available if you meet the following conditions:
-      #       # inverted: false
       #     options:
       #     - key: support.gardener.cloud/eu-access-for-cluster-addons
       #       display:
@@ -439,18 +437,13 @@ global:
   #   allowedHostSourceList:
   #   - "*.seed.example.com"
   #   gardenTerminalHost: # cluster that hosts the terminal pods for the (virtual) garden cluster
-  #     apiServerIngressHost: api.example.org # is host in browser-trusted certificate. Optional, but required if using secretRef
-  #     secretRef:
-  #       namespace: garden # namespace, in which the secret for the gardenTerminalHost resides on the (virtual) garden cluster
-  #       labelSelector:
-  #       - runtime=gardenTerminalHost
-  #       # seedRef: my-soil
-  #       # shootRef:
-  #       #   name: myshoot
-  #       #   namespace: garden
+  #     seedRef: seed1 # must be a managed seed
+  #     # shootRef:
+  #     #   name: shoot1
+  #     #   namespace: garden
   #   garden: # (virtual) garden
   #     operatorCredentials: # this is the credential used for operators for the (virtual) garden cluster, to create terminal session specific service accounts
-  #       serviceAccountRef: # serviceAccountRef or secretRef
+  #       serviceAccountRef:
   #         name: dashboard-terminal-admin
   #         namespace: garden
   #     # role bindings that the access service account within the terminal pod should receive

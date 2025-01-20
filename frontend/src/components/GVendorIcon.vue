@@ -33,7 +33,7 @@ import {
   toRef,
 } from 'vue'
 
-import { startsWith } from '@/lodash'
+import startsWith from 'lodash/startsWith'
 
 const props = defineProps({
   icon: {
@@ -133,11 +133,10 @@ const iconStyle = computed(() => {
 </script>
 
 <style lang="scss" scoped>
-  @import 'vuetify/settings';
-
-  $grey-darken-2: map-get($grey, 'darken-2');
+  @use 'vuetify/settings' as vuetify;
+  @use 'sass:map';
 
   .v-theme--dark .icon-background {
-    background-color: $grey-darken-2
+    background-color: map.get(vuetify.$grey, 'darken-2');
   }
 </style>

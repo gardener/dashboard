@@ -68,7 +68,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-col cols="3">
           <g-select-secret
             v-model="primaryDnsProviderSecret"
-            :dns-provider-kind="dnsPrimaryProviderType"
+            :provider-type="dnsPrimaryProviderType"
             register-vuelidate-as="dnsProviderSecret"
             label="Primary DNS Provider Secret"
           />
@@ -150,10 +150,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { requiredIf } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
-import {
-  mapState,
-  mapActions,
-} from 'pinia'
+import { mapState } from 'pinia'
 import { ref } from 'vue'
 
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
@@ -164,6 +161,7 @@ import GDnsProviderRow from '@/components/ShootDns/GDnsProviderRow'
 import GVendorIcon from '@/components/GVendorIcon'
 
 import { useShootContext } from '@/composables/useShootContext'
+import { useSecretList } from '@/composables/useSecretList'
 
 import {
   withFieldName,
@@ -171,10 +169,8 @@ import {
 } from '@/utils/validators'
 import { getErrorMessages } from '@/utils'
 
-import {
-  find,
-  head,
-} from '@/lodash'
+import head from 'lodash/head'
+import find from 'lodash/find'
 
 export default {
   components: {
@@ -196,7 +192,11 @@ export default {
       deleteDnsServiceExtensionProvider,
     } = useShootContext()
 
+    const secretStore = useSecretStore()
+    const gardenerExtensionStore = useGardenerExtensionStore()
+
     const customDomain = ref(!!dnsDomain.value && !!dnsPrimaryProviderType.value)
+    const dnsPrimaryProviderSecrets = useSecretList(dnsPrimaryProviderType, { secretStore, gardenerExtensionStore })
 
     return {
       v$: useVuelidate(),
@@ -211,6 +211,7 @@ export default {
       resetDnsPrimaryProvider,
       deleteDnsServiceExtensionProvider,
       customDomain,
+      dnsPrimaryProviderSecrets,
     }
   },
   validations () {
@@ -265,8 +266,7 @@ export default {
     },
     primaryDnsProviderSecret: {
       get () {
-        const dnsSecrets = this.dnsSecretsByProviderKind(this.dnsPrimaryProviderType)
-        return find(dnsSecrets, ['metadata.secretRef.name', this.dnsPrimaryProviderSecretName])
+        return find(this.dnsPrimaryProviderSecrets, ['metadata.secretRef.name', this.dnsPrimaryProviderSecretName])
       },
       set (value) {
         this.dnsPrimaryProviderSecretName = value?.metadata.secretRef.name
@@ -293,16 +293,12 @@ export default {
       if (value) {
         const type = head(this.dnsProviderTypesWithPrimarySupport)
         this.dnsPrimaryProviderType = type
-        const dnsSecrets = this.dnsSecretsByProviderKind(type)
-        this.primaryDnsProviderSecret = head(dnsSecrets)
+        this.primaryDnsProviderSecret = head(this.dnsPrimaryProviderSecrets)
         this.v$.dnsDomain.$reset()
       }
     },
   },
   methods: {
-    ...mapActions(useSecretStore, [
-      'dnsSecretsByProviderKind',
-    ]),
     getErrorMessages,
   },
 }

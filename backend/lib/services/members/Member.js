@@ -14,7 +14,7 @@ const PROPERTY_NAMES = Object.freeze([
   'deletionTimestamp',
   'description',
   'kubeconfig',
-  'orphaned'
+  'orphaned',
 ])
 
 class Member {
@@ -30,13 +30,13 @@ class Member {
       return {
         kind: 'ServiceAccount',
         namespace,
-        name
+        name,
       }
     }
     return {
       kind: 'User',
       apiGroup: 'rbac.authorization.k8s.io',
-      name: username
+      name: username,
     }
   }
 

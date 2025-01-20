@@ -18,12 +18,10 @@ import { useApi } from '@/composables/useApi'
 
 import { hash } from '@/utils/crypto'
 
-import {
-  map,
-  get,
-  isEmpty,
-  camelCase,
-} from '@/lodash'
+import map from 'lodash/map'
+import get from 'lodash/get'
+import isEmpty from 'lodash/isEmpty'
+import camelCase from 'lodash/camelCase'
 
 const wellKnownConditions = {
   APIServerAvailable: {
@@ -151,7 +149,26 @@ export const useConfigStore = defineStore('config', () => {
   })
 
   const accessRestriction = computed(() => {
-    return state.value?.accessRestriction
+    // TODO(petersutter): remove mapping from seed.gardener.cloud/eu-access to eu-access-only in dashboard version >=1.80.0. Add breaking change release note.
+    const accessRestriction = state.value?.accessRestriction
+    if (!accessRestriction) {
+      return
+    }
+
+    const items = map(accessRestriction.items, item => {
+      if (item.key === 'seed.gardener.cloud/eu-access') {
+        return {
+          ...item,
+          key: 'eu-access-only',
+        }
+      }
+      return item
+    })
+
+    return {
+      ...accessRestriction,
+      items,
+    }
   })
 
   const sla = computed(() => {
@@ -367,11 +384,11 @@ export const useConfigStore = defineStore('config', () => {
   }
 
   function isShootHasNoHibernationScheduleWarning (shoot) {
-    const purpose = get(shoot, 'spec.purpose')
-    const annotations = get(shoot, 'metadata.annotations', {})
+    const purpose = get(shoot, ['spec', 'purpose'])
+    const annotations = get(shoot, ['metadata', 'annotations'], {})
     if (purposeRequiresHibernationSchedule(purpose)) {
       const hasNoScheduleFlag = !!annotations['dashboard.garden.sapcloud.io/no-hibernation-schedule']
-      if (!hasNoScheduleFlag && isEmpty(get(shoot, 'spec.hibernation.schedules'))) {
+      if (!hasNoScheduleFlag && isEmpty(get(shoot, ['spec', 'hibernation', 'schedules']))) {
         return true
       }
     }

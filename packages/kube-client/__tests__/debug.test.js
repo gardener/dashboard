@@ -49,7 +49,7 @@ xrfonUDHQfXphOlk7VDCmkmXK0rEQUcA4wOgJgq84Tr9rHAcYGMvOZ/B6Gs+DmyI
           return 'Bearer <token>'
         }
         return 'Bearer ' + jwt.sign({ [key]: this[key] }, 'secret')
-      }
+      },
     }
 
     let isDisabledStub

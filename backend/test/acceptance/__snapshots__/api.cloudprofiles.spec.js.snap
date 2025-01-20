@@ -43,15 +43,15 @@ exports[`api cloudprofiles should return all cloudprofiles 2`] = `
       "seedNames": [
         "infra1-seed",
         "infra1-seed2",
-        "infra4-seed-without-secretRef",
+        "infra4-seed-managed",
       ],
       "seedSelector": {},
       "type": "infra1",
     },
     "metadata": {
-      "cloudProviderKind": "infra1",
       "displayName": "infra1-profileName",
       "name": "infra1-profileName",
+      "providerType": "infra1",
     },
   },
   {
@@ -80,9 +80,9 @@ exports[`api cloudprofiles should return all cloudprofiles 2`] = `
       "type": "infra1",
     },
     "metadata": {
-      "cloudProviderKind": "infra1",
       "displayName": "infra1-profileName2",
       "name": "infra1-profileName2",
+      "providerType": "infra1",
     },
   },
   {
@@ -108,9 +108,9 @@ exports[`api cloudprofiles should return all cloudprofiles 2`] = `
       "type": "infra3",
     },
     "metadata": {
-      "cloudProviderKind": "infra3",
       "displayName": "infra3-profileName",
       "name": "infra3-profileName",
+      "providerType": "infra3",
     },
   },
   {
@@ -134,9 +134,9 @@ exports[`api cloudprofiles should return all cloudprofiles 2`] = `
       "type": "infra3",
     },
     "metadata": {
-      "cloudProviderKind": "infra3",
       "displayName": "infra3-profileName2",
       "name": "infra3-profileName2",
+      "providerType": "infra3",
     },
   },
   {
@@ -155,7 +155,7 @@ exports[`api cloudprofiles should return all cloudprofiles 2`] = `
         "infra1-seed",
         "infra1-seed2",
         "infra3-seed",
-        "infra4-seed-without-secretRef",
+        "infra4-seed-managed",
         "infra3-seed-with-selector",
         "infra3-seed-without-selector",
       ],
@@ -167,9 +167,9 @@ exports[`api cloudprofiles should return all cloudprofiles 2`] = `
       "type": "infra4",
     },
     "metadata": {
-      "cloudProviderKind": "infra4",
       "displayName": "infra4-profileName",
       "name": "infra4-profileName",
+      "providerType": "infra4",
     },
   },
 ]

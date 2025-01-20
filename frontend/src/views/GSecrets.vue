@@ -52,7 +52,7 @@ SPDX-License-Identifier: Apache-2.0
                 Create Infrastructure Secret
               </v-list-subheader>
               <v-list-item
-                v-for="infrastructure in sortedInfrastructureKindList"
+                v-for="infrastructure in sortedProviderTypeList"
                 :key="infrastructure"
                 @click="openSecretAddDialog(infrastructure)"
               >
@@ -76,7 +76,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
       </g-toolbar>
 
-      <v-card-text v-if="!sortedInfrastructureKindList.length">
+      <v-card-text v-if="!sortedProviderTypeList.length">
         <v-alert
           class="ma-3"
           type="warning"
@@ -109,7 +109,7 @@ SPDX-License-Identifier: Apache-2.0
       >
         <template #item="{ item }">
           <g-secret-row-infra
-            :key="`${item.cloudProfileName}/${item.name}`"
+            :key="`${item.secretNamespace}/${item.secretName}`"
             :item="item"
             :headers="infraSecretTableHeaders"
             @delete="onRemoveSecret"
@@ -224,7 +224,7 @@ SPDX-License-Identifier: Apache-2.0
       >
         <template #item="{ item }">
           <g-secret-row-dns
-            :key="`${item.cloudProfileName}/${item.name}`"
+            :key="`${item.secretNamespace}/${item.secretName}`"
             :item="item"
             :headers="dnsSecretTableHeaders"
             @delete="onRemoveSecret"
@@ -278,18 +278,14 @@ import {
   mapTableHeader,
 } from '@/utils'
 
-import {
-  get,
-  filter,
-  head,
-  includes,
-  isEmpty,
-  map,
-  mapKeys,
-  mapValues,
-  orderBy,
-  some,
-} from '@/lodash'
+import some from 'lodash/some'
+import orderBy from 'lodash/orderBy'
+import mapValues from 'lodash/mapValues'
+import mapKeys from 'lodash/mapKeys'
+import map from 'lodash/map'
+import head from 'lodash/head'
+import filter from 'lodash/filter'
+import get from 'lodash/get'
 
 export default {
   components: {
@@ -320,7 +316,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(useCloudProfileStore, ['sortedInfrastructureKindList']),
+    ...mapState(useCloudProfileStore, ['sortedProviderTypeList']),
     ...mapState(useGardenerExtensionStore, ['dnsProviderTypes']),
     ...mapState(useSecretStore, [
       'infrastructureSecretList',
@@ -339,11 +335,6 @@ export default {
       'dnsSecretItemsPerPage',
       'dnsSecretSortBy',
     ]),
-    hasCloudProfileForCloudProviderKind () {
-      return kind => {
-        return !isEmpty(this.cloudProfilesByCloudProviderKind(kind))
-      }
-    },
     infraSecretTableHeaders () {
       const headers = [
         {
@@ -402,18 +393,19 @@ export default {
       return this.sortItems(this.infrastructureSecretItems, this.infraSecretSortBy, secondSortCriteria)
     },
     infrastructureSecretItems () {
-      return map(this.infrastructureSecretList, secret => ({
-        name: secret.metadata.name,
-        isOwnSecret: isOwnSecret(secret),
-        secretNamespace: secret.metadata.secretRef.namespace,
-        secretName: secret.metadata.secretRef.name,
-        infrastructureName: secret.metadata.cloudProviderKind,
-        cloudProfileName: secret.metadata.cloudProfileName,
-        relatedShootCount: this.relatedShootCountInfra(secret),
-        relatedShootCountLabel: this.relatedShootCountLabel(this.relatedShootCountInfra(secret)),
-        isSupportedCloudProvider: includes(this.sortedInfrastructureKindList, secret.metadata.cloudProviderKind),
-        secret,
-      }))
+      return map(this.infrastructureSecretList, secret => {
+        const relatedShootCount = this.relatedShootCountInfra(secret)
+        return {
+          name: secret.metadata.name,
+          isOwnSecret: isOwnSecret(secret),
+          secretNamespace: secret.metadata.secretRef.namespace,
+          secretName: secret.metadata.secretRef.name,
+          providerType: secret.metadata.provider.type,
+          relatedShootCount,
+          relatedShootCountLabel: this.relatedShootCountLabel(relatedShootCount),
+          secret,
+        }
+      })
     },
     dnsSecretTableHeaders () {
       const headers = [
@@ -473,17 +465,19 @@ export default {
       return this.sortItems(this.dnsSecretItems, this.dnsSecretSortBy, secondSortCriteria)
     },
     dnsSecretItems () {
-      return map(this.dnsSecretList, secret => ({
-        name: secret.metadata.name,
-        isOwnSecret: isOwnSecret(secret),
-        secretNamespace: secret.metadata.secretRef.namespace,
-        secretName: secret.metadata.secretRef.name,
-        dnsProvider: secret.metadata.dnsProviderName,
-        relatedShootCount: this.relatedShootCountDns(secret),
-        relatedShootCountLabel: this.relatedShootCountLabel(this.relatedShootCountDns(secret)),
-        isSupportedCloudProvider: includes(this.dnsProviderTypes, secret.metadata.dnsProviderName),
-        secret,
-      }))
+      return map(this.dnsSecretList, secret => {
+        const relatedShootCount = this.relatedShootCountDns(secret)
+        return {
+          name: secret.metadata.name,
+          isOwnSecret: isOwnSecret(secret),
+          secretNamespace: secret.metadata.secretRef.namespace,
+          secretName: secret.metadata.secretRef.name,
+          providerType: secret.metadata.provider.type,
+          relatedShootCount,
+          relatedShootCountLabel: this.relatedShootCountLabel(relatedShootCount),
+          secret,
+        }
+      })
     },
   },
   watch: {
@@ -492,7 +486,7 @@ export default {
     },
   },
   mounted () {
-    if (!get(this.$route.params, 'name')) {
+    if (!get(this.$route.params, ['name'])) {
       return
     }
     const secret = this.getCloudProviderSecretByName(this.$route.params)
@@ -502,16 +496,15 @@ export default {
     this.onUpdateSecret(secret)
   },
   methods: {
-    ...mapActions(useCloudProfileStore, ['cloudProfilesByCloudProviderKind']),
     ...mapActions(useSecretStore, ['getCloudProviderSecretByName']),
-    openSecretAddDialog (infrastructureKind) {
+    openSecretAddDialog (providerType) {
       this.selectedSecret = undefined
-      this.visibleSecretDialog = infrastructureKind
+      this.visibleSecretDialog = providerType
     },
     onUpdateSecret (secret) {
-      const kind = secret.metadata.cloudProviderKind || secret.metadata.dnsProviderName
+      const providerType = secret.metadata.provider.type
       this.selectedSecret = secret
-      this.visibleSecretDialog = kind
+      this.visibleSecretDialog = providerType
     },
     onRemoveSecret (secret) {
       this.selectedSecret = secret
@@ -523,13 +516,20 @@ export default {
       return shootsByInfrastructureSecret.length
     },
     relatedShootCountDns (secret) {
-      const shootsByDnsSecret = filter(this.shootList, shoot => {
-        return some(shoot.spec.dns?.providers, {
-          type: secret.metadata.dnsProviderName,
-          secretName: secret.metadata.name,
-        })
-      })
-      return shootsByDnsSecret.length
+      const secretName = secret.metadata.name
+
+      const someDnsProviderHasSecretRef = providers => some(providers, ['secretName', secretName])
+      const someResourceHasSecretRef = resources => some(resources, { resourceRef: { kind: 'Secret', name: secretName } })
+
+      let count = 0
+      for (const shoot of this.shootList) {
+        const dnsProviders = shoot.spec.dns?.providers
+        const resources = shoot.spec.resources
+        if (someDnsProviderHasSecretRef(dnsProviders) || someResourceHasSecretRef(resources)) {
+          count++
+        }
+      }
+      return count
     },
     relatedShootCountLabel (count) {
       if (count === 0) {
@@ -577,9 +577,9 @@ export default {
     getRawVal (item, column) {
       switch (column) {
         case 'secret':
-          return `${get(item, 'secret.metadata.project')} ${get(item, 'secret.metadata.name')}`
+          return `${get(item, ['secret', 'metadata', 'namespace'])} ${get(item, ['secret', 'metadata', 'name'])}`
         case 'infrastructure':
-          return `${item.infrastructureName} ${item.cloudProfileName}`
+          return item.infrastructureName
         default:
           return get(item, [column])
       }

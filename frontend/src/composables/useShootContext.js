@@ -41,29 +41,32 @@ import {
   getZonesNetworkConfiguration,
 } from '@/utils/shoot'
 import { v4 as uuidv4 } from '@/utils/uuid'
-import utils from '@/utils'
+import {
+  shortRandomString,
+  shootAddonList,
+  randomMaintenanceBegin,
+  maintenanceWindowWithBeginAndTimezone,
+} from '@/utils'
 
 import { useShootDns } from './useShootDns'
 
-import {
-  get,
-  set,
-  has,
-  map,
-  keyBy,
-  flatMap,
-  unset,
-  head,
-  find,
-  filter,
-  difference,
-  cloneDeep,
-  includes,
-  uniq,
-  isEqual,
-  isEmpty,
-  size,
-} from '@/lodash'
+import size from 'lodash/size'
+import isEmpty from 'lodash/isEmpty'
+import isEqual from 'lodash/isEqual'
+import uniq from 'lodash/uniq'
+import includes from 'lodash/includes'
+import cloneDeep from 'lodash/cloneDeep'
+import difference from 'lodash/difference'
+import filter from 'lodash/filter'
+import find from 'lodash/find'
+import head from 'lodash/head'
+import unset from 'lodash/unset'
+import flatMap from 'lodash/flatMap'
+import keyBy from 'lodash/keyBy'
+import map from 'lodash/map'
+import has from 'lodash/has'
+import set from 'lodash/set'
+import get from 'lodash/get'
 
 export function createShootContextComposable (options = {}) {
   const {
@@ -84,13 +87,13 @@ export function createShootContextComposable (options = {}) {
       kind: 'Shoot',
     }, value)
     if (workerless.value) {
-      unset(object, 'spec.provider.infrastructureConfig')
-      unset(object, 'spec.provider.controlPlaneConfig')
-      unset(object, 'spec.provider.workers')
-      unset(object, 'spec.addons')
-      unset(object, 'spec.networking')
-      unset(object, 'spec.secretBindingName')
-      unset(object, 'spec.maintenance.autoUpdate.machineImageVersion')
+      unset(object, ['spec', 'provider', 'infrastructureConfig'])
+      unset(object, ['spec', 'provider', 'controlPlaneConfig'])
+      unset(object, ['spec', 'provider', 'workers'])
+      unset(object, ['spec', 'addons'])
+      unset(object, ['spec', 'networking'])
+      unset(object, ['spec', 'secretBindingName'])
+      unset(object, ['spec', 'maintenance', 'autoUpdate', 'machineImageVersion'])
     }
     return cleanup(object)
   }
@@ -104,12 +107,12 @@ export function createShootContextComposable (options = {}) {
   })
 
   const initialZones = computed(() => {
-    const workers = get(initialManifest.value, 'spec.provider.workers')
+    const workers = get(initialManifest.value, ['spec', 'provider', 'workers'])
     return uniq(flatMap(workers, 'zones'))
   })
 
   const initialProviderInfrastructureConfigNetworksZones = computed(() => {
-    return get(initialManifest.value, 'spec.provider.infrastructureConfig.networks.zones')
+    return get(initialManifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'zones'])
   })
 
   /* manifest */
@@ -117,10 +120,10 @@ export function createShootContextComposable (options = {}) {
 
   const normalizedManifest = computed(() => {
     const object = cloneDeep(manifest.value)
-    set(object, 'spec.hibernation.schedules', hibernationSchedules.value)
+    set(object, ['spec', 'hibernation', 'schedules'], hibernationSchedules.value)
     if (!workerless.value) {
-      set(object, 'spec.provider.infrastructureConfig.networks.zones', providerInfrastructureConfigNetworksZones.value)
-      set(object, 'spec.provider.controlPlaneConfig.zone', providerControlPlaneConfigZone.value)
+      set(object, ['spec', 'provider', 'infrastructureConfig', 'networks', 'zones'], providerInfrastructureConfigNetworksZones.value)
+      set(object, ['spec', 'provider', 'controlPlaneConfig', 'zone'], providerControlPlaneConfigZone.value)
     }
     return normalizeManifest(object)
   })
@@ -128,7 +131,7 @@ export function createShootContextComposable (options = {}) {
   function setShootManifest (value) {
     initialManifest.value = value
     manifest.value = cloneDeep(initialManifest.value)
-    hibernationSchedules.value = get(manifest.value, 'spec.hibernation.schedules', [])
+    hibernationSchedules.value = get(manifest.value, ['spec', 'hibernation', 'schedules'], [])
     if (shootCreationTimestamp.value) {
       providerState.workerless = isEmpty(providerWorkers.value)
     }
@@ -137,14 +140,14 @@ export function createShootContextComposable (options = {}) {
   function createShootManifest (options) {
     manifest.value = {
       metadata: {
-        name: get(options, 'names', utils.shortRandomString(10)),
-        namespace: get(options, 'namespace', authzStore.namespace),
+        name: get(options, ['names'], shortRandomString(10)),
+        namespace: get(options, ['namespace'], authzStore.namespace),
       },
     }
     hibernationSchedules.value = []
-    workerless.value = get(options, 'workerless', false)
-    const defaultProviderType = head(cloudProfileStore.sortedInfrastructureKindList)
-    providerType.value = get(options, 'providerType', defaultProviderType)
+    workerless.value = get(options, ['workerless'], false)
+    const defaultProviderType = head(cloudProfileStore.sortedProviderTypeList)
+    providerType.value = get(options, ['providerType'], defaultProviderType)
     resetMaintenanceAutoUpdate()
     resetMaintenanceTimeWindow()
     initialManifest.value = cloneDeep(normalizedManifest.value)
@@ -170,16 +173,16 @@ export function createShootContextComposable (options = {}) {
 
   /* seedName */
   const seedName = computed(() => {
-    return get(manifest.value, 'spec.seedName')
+    return get(manifest.value, ['spec', 'seedName'])
   })
 
   /* kubernetes */
   const kubernetesVersion = computed({
     get () {
-      return get(manifest.value, 'spec.kubernetes.version')
+      return get(manifest.value, ['spec', 'kubernetes', 'version'])
     },
     set (value) {
-      set(manifest.value, 'spec.kubernetes.version', value)
+      set(manifest.value, ['spec', 'kubernetes', 'version'], value)
     },
   })
 
@@ -187,30 +190,17 @@ export function createShootContextComposable (options = {}) {
     const kubernetesVersions = map(cloudProfileStore.sortedKubernetesVersions(cloudProfileName.value), 'version')
     if (!kubernetesVersion.value || !includes(kubernetesVersions, kubernetesVersion.value)) {
       const defaultKubernetesVersionDescriptor = cloudProfileStore.defaultKubernetesVersionForCloudProfileName(cloudProfileName.value)
-      kubernetesVersion.value = get(defaultKubernetesVersionDescriptor, 'version')
+      kubernetesVersion.value = get(defaultKubernetesVersionDescriptor, ['version'])
     }
-  }
-
-  const kubernetesEnableStaticTokenKubeconfig = computed({
-    get () {
-      return !!get(manifest.value, 'spec.kubernetes.enableStaticTokenKubeconfig')
-    },
-    set (value) {
-      set(manifest.value, 'spec.kubernetes.enableStaticTokenKubeconfig', !!value)
-    },
-  })
-
-  function resetKubernetesEnableStaticTokenKubeconfig () {
-    kubernetesEnableStaticTokenKubeconfig.value = false
   }
 
   /* cloudProfileName */
   const cloudProfileName = computed({
     get () {
-      return get(manifest.value, 'spec.cloudProfileName')
+      return get(manifest.value, ['spec', 'cloudProfileName'])
     },
     set (value) {
-      set(manifest.value, 'spec.cloudProfileName', value)
+      set(manifest.value, ['spec', 'cloudProfileName'], value)
       resetCloudProfileDependendValues()
     },
   })
@@ -228,10 +218,10 @@ export function createShootContextComposable (options = {}) {
   /* secretBindingName */
   const secretBindingName = computed({
     get () {
-      return get(manifest.value, 'spec.secretBindingName')
+      return get(manifest.value, ['spec', 'secretBindingName'])
     },
     set (value) {
-      set(manifest.value, 'spec.secretBindingName', value)
+      set(manifest.value, ['spec', 'secretBindingName'], value)
       resetPurpose()
     },
   })
@@ -241,7 +231,7 @@ export function createShootContextComposable (options = {}) {
       return find(infrastructureSecrets.value, ['metadata.name', secretBindingName.value])
     },
     set (value) {
-      secretBindingName.value = get(value, 'metadata.name')
+      secretBindingName.value = get(value, ['metadata', 'name'])
     },
   })
 
@@ -251,15 +241,15 @@ export function createShootContextComposable (options = {}) {
 
   /* networking */
   const networkingNodes = computed(() => {
-    return get(manifest.value, 'spec.networking.nodes')
+    return get(manifest.value, ['spec', 'networking', 'nodes'])
   })
 
   const networkingType = computed({
     get () {
-      return get(manifest.value, 'spec.networking.type')
+      return get(manifest.value, ['spec', 'networking', 'type'])
     },
     set (value) {
-      set(manifest.value, 'spec.networking.type', value)
+      set(manifest.value, ['spec', 'networking', 'type'], value)
     },
   })
 
@@ -272,10 +262,10 @@ export function createShootContextComposable (options = {}) {
   /* region */
   const region = computed({
     get () {
-      return get(manifest.value, 'spec.region')
+      return get(manifest.value, ['spec', 'region'])
     },
     set (value) {
-      set(manifest.value, 'spec.region', value)
+      set(manifest.value, ['spec', 'region'], value)
       resetProviderWorkers()
       resetProviderControlPlaneConfigLoadBalancerProviderName()
       resetProviderInfrastructureConfigPartitionID()
@@ -297,10 +287,10 @@ export function createShootContextComposable (options = {}) {
   /* purpose */
   const purpose = computed({
     get () {
-      return get(manifest.value, 'spec.purpose')
+      return get(manifest.value, ['spec', 'purpose'])
     },
     set (value) {
-      set(manifest.value, 'spec.purpose', includes(allPurposes.value, value) ? value : '')
+      set(manifest.value, ['spec', 'purpose'], includes(allPurposes.value, value) ? value : '')
       resetHibernationShedules()
     },
   })
@@ -324,10 +314,10 @@ export function createShootContextComposable (options = {}) {
 
   const providerType = computed({
     get () {
-      return get(manifest.value, 'spec.provider.type')
+      return get(manifest.value, ['spec', 'provider', 'type'])
     },
     set (value) {
-      set(manifest.value, 'spec.provider.type', value)
+      set(manifest.value, ['spec', 'provider', 'type'], value)
       applySpecTemplate(defaultCloudProfileName.value)
       cloudProfileName.value = defaultCloudProfileName.value
     },
@@ -339,16 +329,15 @@ export function createShootContextComposable (options = {}) {
       networking,
       provider,
     } = getSpecTemplate(providerType.value, cloudProfileStore.getDefaultNodesCIDR(cloudProfileName))
-    set(manifest.value, 'spec.provider.infrastructureConfig', provider.infrastructureConfig)
-    set(manifest.value, 'spec.provider.controlPlaneConfig', provider.controlPlaneConfig)
-    set(manifest.value, 'spec.networking', networking)
-    set(manifest.value, 'spec.kubernetes', kubernetes)
-    resetKubernetesEnableStaticTokenKubeconfig()
+    set(manifest.value, ['spec', 'provider', 'infrastructureConfig'], provider.infrastructureConfig)
+    set(manifest.value, ['spec', 'provider', 'controlPlaneConfig'], provider.controlPlaneConfig)
+    set(manifest.value, ['spec', 'networking'], networking)
+    set(manifest.value, ['spec', 'kubernetes'], kubernetes)
   }
 
   const providerControlPlaneConfigZone = computed({
     get () {
-      const value = get(manifest.value, 'spec.provider.controlPlaneConfig.zone')
+      const value = get(manifest.value, ['spec', 'provider', 'controlPlaneConfig', 'zone'])
       return getControlPlaneZone(
         providerWorkers.value,
         providerType.value,
@@ -362,19 +351,19 @@ export function createShootContextComposable (options = {}) {
         value,
       )
       if (value) {
-        set(manifest.value, 'spec.provider.controlPlaneConfig.zone', value)
+        set(manifest.value, ['spec', 'provider', 'controlPlaneConfig', 'zone'], value)
       } else {
-        unset(manifest.value, 'spec.provider.controlPlaneConfig.zone')
+        unset(manifest.value, ['spec', 'provider', 'controlPlaneConfig', 'zone'])
       }
     },
   })
 
   const providerControlPlaneConfigLoadBalancerProviderName = computed({
     get () {
-      return get(manifest.value, 'spec.provider.controlPlaneConfig.loadBalancerProvider')
+      return get(manifest.value, ['spec', 'provider', 'controlPlaneConfig', 'loadBalancerProvider'])
     },
     set (value) {
-      set(manifest.value, 'spec.provider.controlPlaneConfig.loadBalancerProvider', value)
+      set(manifest.value, ['spec', 'provider', 'controlPlaneConfig', 'loadBalancerProvider'], value)
     },
   })
 
@@ -393,10 +382,10 @@ export function createShootContextComposable (options = {}) {
 
   const providerControlPlaneConfigLoadBalancerClasses = computed({
     get () {
-      return get(manifest.value, 'spec.provider.controlPlaneConfig.loadBalancerClasses')
+      return get(manifest.value, ['spec', 'provider', 'controlPlaneConfig', 'loadBalancerClasses'])
     },
     set (value) {
-      set(manifest.value, 'spec.provider.controlPlaneConfig.loadBalancerClasses', value)
+      set(manifest.value, ['spec', 'provider', 'controlPlaneConfig', 'loadBalancerClasses'], value)
     },
   })
 
@@ -411,10 +400,10 @@ export function createShootContextComposable (options = {}) {
 
   const providerInfrastructureConfigPartitionID = computed({
     get () {
-      return get(manifest.value, 'spec.provider.infrastructureConfig.partitionID')
+      return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'partitionID'])
     },
     set (value) {
-      set(manifest.value, 'spec.provider.infrastructureConfig.partitionID', value)
+      set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'partitionID'], value)
       resetProviderInfrastructureConfigFirewallSize()
       resetProviderInfrastructureConfigFirewallNetworks()
     },
@@ -433,10 +422,10 @@ export function createShootContextComposable (options = {}) {
 
   const providerInfrastructureConfigProjectID = computed({
     get () {
-      return get(manifest.value, 'spec.provider.infrastructureConfig.projectID')
+      return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'projectID'])
     },
     set (value) {
-      set(manifest.value, 'spec.provider.infrastructureConfig.projectID', value)
+      set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'projectID'], value)
     },
   })
 
@@ -446,10 +435,10 @@ export function createShootContextComposable (options = {}) {
 
   const providerInfrastructureConfigFloatingPoolName = computed({
     get () {
-      return get(manifest.value, 'spec.provider.infrastructureConfig.floatingPoolName')
+      return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'floatingPoolName'])
     },
     set (value) {
-      set(manifest.value, 'spec.provider.infrastructureConfig.floatingPoolName', value)
+      set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'floatingPoolName'], value)
     },
   })
 
@@ -459,10 +448,10 @@ export function createShootContextComposable (options = {}) {
 
   const providerInfrastructureConfigFirewallImage = computed({
     get () {
-      return get(manifest.value, 'spec.provider.infrastructureConfig.firewall.image')
+      return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'firewall', 'image'])
     },
     set (value) {
-      set(manifest.value, 'spec.provider.infrastructureConfig.firewall.image', value)
+      set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'firewall', 'image'], value)
     },
   })
 
@@ -472,10 +461,10 @@ export function createShootContextComposable (options = {}) {
 
   const providerInfrastructureConfigFirewallSize = computed({
     get () {
-      return get(manifest.value, 'spec.provider.infrastructureConfig.firewall.size')
+      return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'firewall', 'size'])
     },
     set (value) {
-      set(manifest.value, 'spec.provider.infrastructureConfig.firewall.size', value)
+      set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'firewall', 'size'], value)
     },
   })
 
@@ -485,10 +474,10 @@ export function createShootContextComposable (options = {}) {
 
   const providerInfrastructureConfigFirewallNetworks = computed({
     get () {
-      return get(manifest.value, 'spec.provider.infrastructureConfig.firewall.networks')
+      return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'firewall', 'networks'])
     },
     set (value) {
-      set(manifest.value, 'spec.provider.infrastructureConfig.firewall.networks', value)
+      set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'firewall', 'networks'], value)
     },
   })
 
@@ -525,10 +514,10 @@ export function createShootContextComposable (options = {}) {
 
   const providerWorkers = computed({
     get () {
-      return get(manifest.value, 'spec.provider.workers', [])
+      return get(manifest.value, ['spec', 'provider', 'workers'], [])
     },
     set (value = []) {
-      set(manifest.value, 'spec.provider.workers', value)
+      set(manifest.value, ['spec', 'provider', 'workers'], value)
       resetAddons()
     },
   })
@@ -566,7 +555,7 @@ export function createShootContextComposable (options = {}) {
   /* providerInfrastructureConfigNetworksZones */
   const providerInfrastructureConfigNetworksZones = computed({
     get () {
-      const value = get(manifest.value, 'spec.provider.infrastructureConfig.networks.zones')
+      const value = get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'zones'])
       const args = shootCreationTimestamp.value
         ? [networkingNodes.value, undefined]
         : [undefined, networkingNodes.value]
@@ -579,7 +568,7 @@ export function createShootContextComposable (options = {}) {
       )
     },
     set (value) {
-      set(manifest.value, 'spec.provider.infrastructureConfig.networks.zones', value)
+      set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'zones'], value)
     },
   })
 
@@ -601,7 +590,7 @@ export function createShootContextComposable (options = {}) {
         if (isNewCluster.value) {
           return true // new clusters are always created as zoned clusters by the dashboard
         }
-        return get(manifest.value, 'spec.provider.infrastructureConfig.zoned', false)
+        return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'zoned'], false)
       case 'metal':
         return false // metal clusters do not support zones for worker groups
       case 'local':
@@ -661,10 +650,10 @@ export function createShootContextComposable (options = {}) {
   /* addons */
   const addons = computed({
     get () {
-      return get(manifest.value, 'spec.addons', {})
+      return get(manifest.value, ['spec', 'addons'], {})
     },
     set (value) {
-      set(manifest.value, 'spec.addons', value)
+      set(manifest.value, ['spec', 'addons'], value)
     },
   })
 
@@ -679,11 +668,11 @@ export function createShootContextComposable (options = {}) {
   }
 
   const visibleAddonDefinitionList = computed(() => {
-    return filter(utils.shootAddonList, 'visible')
+    return filter(shootAddonList, 'visible')
   })
 
   const addonDefinitionList = computed(() => {
-    return filter(utils.shootAddonList, ({ name, visible }) => visible || has(addons.value, name))
+    return filter(shootAddonList, ({ name, visible }) => visible || has(addons.value, name))
   })
 
   const addonDefinitions = computed(() => {
@@ -701,25 +690,25 @@ export function createShootContextComposable (options = {}) {
   /* maintenance */
   const maintenanceTimeWindowBegin = computed({
     get () {
-      return get(manifest.value, 'spec.maintenance.timeWindow.begin')
+      return get(manifest.value, ['spec', 'maintenance', 'timeWindow', 'begin'])
     },
     set (value) {
-      set(manifest.value, 'spec.maintenance.timeWindow.begin', value)
+      set(manifest.value, ['spec', 'maintenance', 'timeWindow', 'begin'], value)
     },
   })
 
   const maintenanceTimeWindowEnd = computed({
     get () {
-      return get(manifest.value, 'spec.maintenance.timeWindow.end')
+      return get(manifest.value, ['spec', 'maintenance', 'timeWindow', 'end'])
     },
     set (value) {
-      set(manifest.value, 'spec.maintenance.timeWindow.end', value)
+      set(manifest.value, ['spec', 'maintenance', 'timeWindow', 'end'], value)
     },
   })
 
   function resetMaintenanceTimeWindow () {
-    const maintenanceBegin = utils.randomMaintenanceBegin()
-    const timeWindow = utils.maintenanceWindowWithBeginAndTimezone(maintenanceBegin, appStore.timezone)
+    const maintenanceBegin = randomMaintenanceBegin()
+    const timeWindow = maintenanceWindowWithBeginAndTimezone(maintenanceBegin, appStore.timezone)
     maintenanceTimeWindowBegin.value = timeWindow.begin
     maintenanceTimeWindowEnd.value = timeWindow.end
   }
@@ -727,19 +716,19 @@ export function createShootContextComposable (options = {}) {
   /* maintenanceAutoUpdateKubernetesVersion */
   const maintenanceAutoUpdateKubernetesVersion = computed({
     get () {
-      return get(manifest.value, 'spec.maintenance.autoUpdate.kubernetesVersion', true)
+      return get(manifest.value, ['spec', 'maintenance', 'autoUpdate', 'kubernetesVersion'], true)
     },
     set (value) {
-      set(manifest.value, 'spec.maintenance.autoUpdate.kubernetesVersion', value)
+      set(manifest.value, ['spec', 'maintenance', 'autoUpdate', 'kubernetesVersion'], value)
     },
   })
 
   const maintenanceAutoUpdateMachineImageVersion = computed({
     get () {
-      return get(manifest.value, 'spec.maintenance.autoUpdate.machineImageVersion', true)
+      return get(manifest.value, ['spec', 'maintenance', 'autoUpdate', 'machineImageVersion'], true)
     },
     set (value) {
-      set(manifest.value, 'spec.maintenance.autoUpdate.machineImageVersion', value)
+      set(manifest.value, ['spec', 'maintenance', 'autoUpdate', 'machineImageVersion'], value)
     },
   })
 
@@ -826,19 +815,19 @@ export function createShootContextComposable (options = {}) {
   /* controlPlane */
   const controlPlaneHighAvailabilityFailureToleranceType = computed({
     get () {
-      return get(manifest.value, 'spec.controlPlane.highAvailability.failureTolerance.type')
+      return get(manifest.value, ['spec', 'controlPlane', 'highAvailability', 'failureTolerance', 'type'])
     },
     set (value) {
       if (value) {
-        set(manifest.value, 'spec.controlPlane.highAvailability.failureTolerance.type', value)
+        set(manifest.value, ['spec', 'controlPlane', 'highAvailability', 'failureTolerance', 'type'], value)
       } else {
-        unset(manifest.value, 'spec.controlPlane.highAvailability')
+        unset(manifest.value, ['spec', 'controlPlane', 'highAvailability'])
       }
     },
   })
 
   const controlPlaneHighAvailabilityFailureToleranceTypeChangeAllowed = computed(() => {
-    const oldControlPlaneFailureToleranceType = get(normalizedInitialManifest.value, 'spec.controlPlane.highAvailability.failureTolerance.type')
+    const oldControlPlaneFailureToleranceType = get(normalizedInitialManifest.value, ['spec', 'controlPlane', 'highAvailability', 'failureTolerance', 'type'])
     return isNewCluster.value || !oldControlPlaneFailureToleranceType
   })
 
@@ -969,7 +958,6 @@ export function createShootContextComposable (options = {}) {
     infrastructureSecret,
     /* kubernetes */
     kubernetesVersion,
-    kubernetesEnableStaticTokenKubeconfig,
     /* networking */
     networkingType,
     networkingNodes,

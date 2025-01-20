@@ -76,7 +76,7 @@ class LifecycleHooks {
       seeds: client['core.gardener.cloud'].seeds.informer(),
       shoots: client['core.gardener.cloud'].shoots.informerAllNamespaces(),
       // core
-      resourcequotas: client.core.resourcequotas.informerAllNamespaces()
+      resourcequotas: client.core.resourcequotas.informerAllNamespaces(),
     }
 
     if (config.gitHub?.webhookSecret) {
@@ -93,7 +93,7 @@ module.exports = () => {
   const client = createDashboardClient({
     id: 'watch',
     pingInterval: 30000,
-    maxOutstandingPings: 2
+    maxOutstandingPings: 2,
   })
   return new LifecycleHooks(client)
 }

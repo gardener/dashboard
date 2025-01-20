@@ -12,7 +12,7 @@ import { shallowRef } from 'vue'
 
 import { useShootAccessRestrictions } from '@/composables/useShootAccessRestrictions'
 
-import { find } from '@/lodash'
+import find from 'lodash/find'
 
 describe('composables', () => {
   describe('useShootAccessRestrictions', () => {
@@ -31,7 +31,7 @@ describe('composables', () => {
       accessRestrictionDefinition = {
         key: 'foo',
         input: {
-          inverted: false,
+          title: 'Foo',
         },
         options: [
           {
@@ -62,20 +62,20 @@ describe('composables', () => {
       }
       shootResource = shallowRef({
         metadata: {
-          annotations: {
-            'foo-option-1': 'false',
-            'foo-option-2': 'false',
-            'foo-option-3': 'true',
-          },
         },
         spec: {
           cloudProfileName: 'cloud-profile-name',
           region: 'region',
-          seedSelector: {
-            matchLabels: {
-              foo: 'true',
+          accessRestrictions: [
+            {
+              name: 'foo',
+              options: {
+                'foo-option-1': 'false',
+                'foo-option-2': 'false',
+                'foo-option-3': 'true',
+              },
             },
-          },
+          ],
         },
       })
 
@@ -93,7 +93,7 @@ describe('composables', () => {
       })
       const { key, options } = accessRestrictionDefinition
       expect(getAccessRestrictionValue(key)).toBe(true)
-      expect(options.map(({ key }) => getAccessRestrictionOptionValue(key))).toEqual([
+      expect(options.map(({ key: optionKey }) => getAccessRestrictionOptionValue(key, optionKey))).toEqual([
         false,
         true,
         false,
@@ -101,15 +101,14 @@ describe('composables', () => {
       ])
     })
 
-    it('should invert access restriction', () => {
-      accessRestrictionDefinition.input.inverted = true
+    it('should get access restriction value', () => {
       const {
         getAccessRestrictionValue,
       } = useShootAccessRestrictions(shootResource, {
         cloudProfileStore,
       })
       const { key } = accessRestrictionDefinition
-      expect(getAccessRestrictionValue(key)).toBe(false)
+      expect(getAccessRestrictionValue(key)).toBe(true)
     })
 
     it('should not invert option', () => {
@@ -120,7 +119,7 @@ describe('composables', () => {
       } = useShootAccessRestrictions(shootResource, {
         cloudProfileStore,
       })
-      expect(getAccessRestrictionOptionValue(option.key)).toBe(false)
+      expect(getAccessRestrictionOptionValue(accessRestrictionDefinition.key, option.key)).toBe(false)
     })
 
     it('should invert option', () => {
@@ -131,7 +130,7 @@ describe('composables', () => {
       } = useShootAccessRestrictions(shootResource, {
         cloudProfileStore,
       })
-      expect(getAccessRestrictionOptionValue(option.key)).toBe(true)
+      expect(getAccessRestrictionOptionValue(accessRestrictionDefinition.key, option.key)).toBe(true)
     })
   })
 })

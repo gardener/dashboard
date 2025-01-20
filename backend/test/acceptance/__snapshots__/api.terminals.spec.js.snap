@@ -550,7 +550,7 @@ exports[`api terminals garden should create a terminal resource 1`] = `
     {
       ":authority": "kubernetes:6443",
       ":method": "get",
-      ":path": "/apis/seedmanagement.gardener.cloud/v1alpha1/namespaces/garden/managedseeds/infra1-seed2",
+      ":path": "/apis/seedmanagement.gardener.cloud/v1alpha1/namespaces/garden/managedseeds/infra1-seed",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
     },
@@ -559,7 +559,7 @@ exports[`api terminals garden should create a terminal resource 1`] = `
     {
       ":authority": "kubernetes:6443",
       ":method": "get",
-      ":path": "/apis/seedmanagement.gardener.cloud/v1alpha1/namespaces/garden/managedseeds/infra1-seed2",
+      ":path": "/apis/seedmanagement.gardener.cloud/v1alpha1/namespaces/garden/managedseeds/infra1-seed",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
     },
@@ -568,7 +568,7 @@ exports[`api terminals garden should create a terminal resource 1`] = `
     {
       ":authority": "kubernetes:6443",
       ":method": "get",
-      ":path": "/api/v1/namespaces/garden/secrets/seedsecret-infra1-seed2",
+      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden/shoots/infra1-seed",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
     },
@@ -601,8 +601,8 @@ exports[`api terminals garden should create a terminal resource 1`] = `
       "spec": {
         "host": {
           "credentials": {
-            "secretRef": {
-              "name": "seedsecret-infra1-seed2",
+            "shootRef": {
+              "name": "infra1-seed",
               "namespace": "garden",
             },
           },
@@ -658,7 +658,7 @@ exports[`api terminals garden should create a terminal resource 1`] = `
 exports[`api terminals garden should create a terminal resource 2`] = `
 {
   "hostCluster": {
-    "kubeApiServer": "api-seed.ingress.foo-west.infra1.example.org",
+    "kubeApiServer": "api-garden--infra1-seed.ingress.foo-east.infra1.example.org",
     "namespace": "term-host-21",
   },
   "imageHelpText": "Dummy Image Description",
@@ -756,15 +756,22 @@ exports[`api terminals garden should fetch a terminal resource 1`] = `
   [
     {
       ":authority": "kubernetes:6443",
-      ":method": "get",
-      ":path": "/api/v1/namespaces/garden/secrets/host.kubeconfig",
+      ":method": "post",
+      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden/shoots/host/adminkubeconfig",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+    {
+      "apiVersion": "authentication.gardener.cloud/v1alpha1",
+      "kind": "AdminKubeconfigRequest",
+      "spec": {
+        "expirationSeconds": 600,
+      },
     },
   ],
   [
     {
-      ":authority": "api.host.garden.shoot.cluster",
+      ":authority": "shootapiserverhostname:6443",
       ":method": "post",
       ":path": "/api/v1/namespaces/term-host-1/serviceaccounts/term-attach-1/token",
       ":scheme": "https",
@@ -925,7 +932,7 @@ exports[`api terminals garden should reuse a terminal session 1`] = `
     {
       ":authority": "kubernetes:6443",
       ":method": "get",
-      ":path": "/apis/seedmanagement.gardener.cloud/v1alpha1/namespaces/garden/managedseeds/infra1-seed2",
+      ":path": "/apis/seedmanagement.gardener.cloud/v1alpha1/namespaces/garden/managedseeds/infra1-seed",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
     },
@@ -934,7 +941,7 @@ exports[`api terminals garden should reuse a terminal session 1`] = `
     {
       ":authority": "kubernetes:6443",
       ":method": "get",
-      ":path": "/apis/seedmanagement.gardener.cloud/v1alpha1/namespaces/garden/managedseeds/infra1-seed2",
+      ":path": "/apis/seedmanagement.gardener.cloud/v1alpha1/namespaces/garden/managedseeds/infra1-seed",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
     },
@@ -943,7 +950,7 @@ exports[`api terminals garden should reuse a terminal session 1`] = `
     {
       ":authority": "kubernetes:6443",
       ":method": "get",
-      ":path": "/api/v1/namespaces/garden/secrets/seedsecret-infra1-seed2",
+      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden/shoots/infra1-seed",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
     },
@@ -971,7 +978,7 @@ exports[`api terminals garden should reuse a terminal session 1`] = `
 exports[`api terminals garden should reuse a terminal session 2`] = `
 {
   "hostCluster": {
-    "kubeApiServer": "api-seed.ingress.foo-west.infra1.example.org",
+    "kubeApiServer": "api-garden--infra1-seed.ingress.foo-east.infra1.example.org",
     "namespace": "term-host-1",
   },
   "imageHelpText": "Foo Image Description",

@@ -23,7 +23,7 @@ app.get('/metrics', async (req, res, next) => {
     res
       .set({
         'cache-control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-        'content-type': register.contentType
+        'content-type': register.contentType,
       })
       .send(metrics)
   } catch (err) {
@@ -38,7 +38,7 @@ app.use((err, req, res, next) => {
   logger.error('Error in monitoring server: %s', message)
   res.status(status).json({
     status,
-    message
+    message,
   })
 })
 

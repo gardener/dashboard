@@ -6,34 +6,32 @@
 
 import { Netmask } from 'netmask'
 
-import {
-  map,
-  flatMap,
-  uniq,
-  difference,
-  some,
-  sample,
-  includes,
-  filter,
-  range,
-  isEmpty,
-  compact,
-} from '@/lodash'
+import map from 'lodash/map'
+import flatMap from 'lodash/flatMap'
+import uniq from 'lodash/uniq'
+import difference from 'lodash/difference'
+import some from 'lodash/some'
+import sample from 'lodash/sample'
+import includes from 'lodash/includes'
+import filter from 'lodash/filter'
+import range from 'lodash/range'
+import isEmpty from 'lodash/isEmpty'
+import compact from 'lodash/compact'
 
-export function getSpecTemplate (infrastructureKind, defaultWorkerCIDR) {
+export function getSpecTemplate (providerType, defaultWorkerCIDR) {
   const spec = {
-    provider: getProviderTemplate(infrastructureKind, defaultWorkerCIDR),
-    networking: getNetworkingTemplate(infrastructureKind, defaultWorkerCIDR),
+    provider: getProviderTemplate(providerType, defaultWorkerCIDR),
+    networking: getNetworkingTemplate(providerType, defaultWorkerCIDR),
   }
-  const kubernetes = getKubernetesTemplate(infrastructureKind)
+  const kubernetes = getKubernetesTemplate(providerType)
   if (!isEmpty(kubernetes)) {
     spec.kubernetes = kubernetes
   }
   return spec
 }
 
-export function getProviderTemplate (infrastructureKind, defaultWorkerCIDR) {
-  switch (infrastructureKind) {
+export function getProviderTemplate (providerType, defaultWorkerCIDR) {
+  switch (providerType) {
     case 'aws':
       return {
         type: 'aws',
@@ -154,13 +152,13 @@ export function getProviderTemplate (infrastructureKind, defaultWorkerCIDR) {
       }
     default:
       return {
-        type: infrastructureKind,
+        type: providerType,
       }
   }
 }
 
-export function getNetworkingTemplate (infrastructureKind, defaultWorkerCIDR) {
-  switch (infrastructureKind) {
+export function getNetworkingTemplate (providerType, defaultWorkerCIDR) {
+  switch (providerType) {
     case 'metal':
       return {
         type: 'calico',
@@ -187,8 +185,8 @@ export function getNetworkingTemplate (infrastructureKind, defaultWorkerCIDR) {
   }
 }
 
-export function getKubernetesTemplate (infrastructureKind) {
-  switch (infrastructureKind) {
+export function getKubernetesTemplate (providerType) {
+  switch (providerType) {
     case 'metal':
       return {
         kubeControllerManager: {
@@ -219,8 +217,8 @@ export function splitCIDR (cidrToSplitStr, numberOfNetworks) {
   return cidrArray
 }
 
-export function getDefaultNetworkConfigurationForAllZones (numberOfZones, infrastructureKind, workerCIDR) {
-  switch (infrastructureKind) {
+export function getDefaultNetworkConfigurationForAllZones (numberOfZones, providerType, workerCIDR) {
+  switch (providerType) {
     case 'aws': {
       const zoneNetworksAws = splitCIDR(workerCIDR, numberOfZones)
       return map(range(numberOfZones), index => {
@@ -249,8 +247,8 @@ export function getDefaultNetworkConfigurationForAllZones (numberOfZones, infras
   }
 }
 
-export function getDefaultZonesNetworkConfiguration (zones, infrastructureKind, maxNumberOfZones, workerCIDR) {
-  const zoneConfigurations = getDefaultNetworkConfigurationForAllZones(maxNumberOfZones, infrastructureKind, workerCIDR)
+export function getDefaultZonesNetworkConfiguration (zones, providerType, maxNumberOfZones, workerCIDR) {
+  const zoneConfigurations = getDefaultNetworkConfigurationForAllZones(maxNumberOfZones, providerType, workerCIDR)
   if (!zoneConfigurations) {
     return undefined
   }
@@ -263,12 +261,12 @@ export function getDefaultZonesNetworkConfiguration (zones, infrastructureKind, 
   })
 }
 
-export function findFreeNetworks (existingZonesNetworkConfiguration, workerCIDR, infrastructureKind, maxNumberOfZones) {
+export function findFreeNetworks (existingZonesNetworkConfiguration, workerCIDR, providerType, maxNumberOfZones) {
   if (!existingZonesNetworkConfiguration) {
-    return getDefaultNetworkConfigurationForAllZones(maxNumberOfZones, infrastructureKind, workerCIDR)
+    return getDefaultNetworkConfigurationForAllZones(maxNumberOfZones, providerType, workerCIDR)
   }
   for (let numberOfZones = maxNumberOfZones; numberOfZones >= existingZonesNetworkConfiguration.length; numberOfZones--) {
-    const newZonesNetworkConfiguration = getDefaultNetworkConfigurationForAllZones(numberOfZones, infrastructureKind, workerCIDR)
+    const newZonesNetworkConfiguration = getDefaultNetworkConfigurationForAllZones(numberOfZones, providerType, workerCIDR)
     const freeZoneNetworks = filter(newZonesNetworkConfiguration, networkConfiguration => {
       return !some(existingZonesNetworkConfiguration, networkConfiguration)
     })
@@ -280,15 +278,15 @@ export function findFreeNetworks (existingZonesNetworkConfiguration, workerCIDR,
   return []
 }
 
-export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, workers, infrastructureKind, maxNumberOfZones, existingShootWorkerCIDR, newShootWorkerCIDR) {
-  if (isEmpty(workers) || !infrastructureKind || !maxNumberOfZones) {
+export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, workers, providerType, maxNumberOfZones, existingShootWorkerCIDR, newShootWorkerCIDR) {
+  if (isEmpty(workers) || !providerType || !maxNumberOfZones) {
     return
   }
 
   const usedZones = uniq(flatMap(workers, 'zones'))
 
   const workerCIDR = existingShootWorkerCIDR || newShootWorkerCIDR
-  const defaultZonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(usedZones, infrastructureKind, maxNumberOfZones, workerCIDR)
+  const defaultZonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(usedZones, providerType, maxNumberOfZones, workerCIDR)
   if (!defaultZonesNetworkConfiguration) {
     return
   }
@@ -296,7 +294,7 @@ export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, work
   const existingZonesNetworkConfiguration = filter(oldZonesNetworkConfiguration, ({ name }) => includes(usedZones, name))
 
   if (existingShootWorkerCIDR) {
-    const freeZoneNetworks = findFreeNetworks(existingZonesNetworkConfiguration, existingShootWorkerCIDR, infrastructureKind, maxNumberOfZones)
+    const freeZoneNetworks = findFreeNetworks(existingZonesNetworkConfiguration, existingShootWorkerCIDR, providerType, maxNumberOfZones)
     const availableNetworksLength = existingZonesNetworkConfiguration.length + freeZoneNetworks.length
     if (availableNetworksLength < usedZones.length) {
       return
@@ -328,9 +326,9 @@ export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, work
     : existingZonesNetworkConfiguration
 }
 
-export function getControlPlaneZone (workers, infrastructureKind, oldControlPlaneZone) {
+export function getControlPlaneZone (workers, providerType, oldControlPlaneZone) {
   const workerZones = uniq(flatMap(workers, 'zones'))
-  switch (infrastructureKind) {
+  switch (providerType) {
     case 'gcp':
     case 'hcloud':
       if (includes(workerZones, oldControlPlaneZone)) {
@@ -342,8 +340,8 @@ export function getControlPlaneZone (workers, infrastructureKind, oldControlPlan
   }
 }
 
-export function getWorkerProviderConfig (infrastructureKind) {
-  switch (infrastructureKind) {
+export function getWorkerProviderConfig (providerType) {
+  switch (providerType) {
     case 'aws': {
       return {
         apiVersion: 'aws.provider.extensions.gardener.cloud/v1alpha1',

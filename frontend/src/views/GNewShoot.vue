@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div
-    v-if="sortedInfrastructureKindList.length"
+    v-if="sortedProviderTypeList.length"
     class="d-flex flex-column justify-space-between fill-height"
   >
     <v-container
@@ -175,7 +175,7 @@ export default {
   },
   inject: ['api', 'logger'],
   async beforeRouteLeave (to, from, next) {
-    if (!this.sortedInfrastructureKindList.length) {
+    if (!this.sortedProviderTypeList.length) {
       return next()
     }
 
@@ -186,6 +186,13 @@ export default {
       return next()
     }
 
+    if (!this.isShootCreated && this.isShootDirty && !await this.confirmNavigation()) {
+      return next(false)
+    }
+
+    return next()
+  },
+  async beforeRouteUpdate (to, from, next) {
     if (!this.isShootCreated && this.isShootDirty && !await this.confirmNavigation()) {
       return next(false)
     }
@@ -226,7 +233,7 @@ export default {
       'accessRestriction',
     ]),
     ...mapState(useCloudProfileStore, [
-      'sortedInfrastructureKindList',
+      'sortedProviderTypeList',
     ]),
   },
   methods: {

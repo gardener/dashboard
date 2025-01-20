@@ -31,8 +31,8 @@ describe('kube-client', () => {
             `namespaces/${namespace}/shoots/${name}/adminkubeconfig`,
             {
               method: 'post',
-              json: data
-            }
+              json: data,
+            },
           ])
         })
       })

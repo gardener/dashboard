@@ -60,7 +60,7 @@ import { useProjectCostObject } from '@/composables/useProjectCostObject'
 import { withMessage } from '@/utils/validators'
 import { getErrorMessages } from '@/utils'
 
-import { head } from '@/lodash'
+import head from 'lodash/head'
 
 const {
   projectManifest,

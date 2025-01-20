@@ -141,7 +141,7 @@ import GNotify from '@/components/GNotify.vue'
 
 import { setDelayedInputFocus } from '@/utils'
 
-import { get } from '@/lodash'
+import get from 'lodash/get'
 
 export default {
   components: {
@@ -165,7 +165,7 @@ export default {
     const localStorageStore = useLocalStorageStore()
     await loginStore.fetchConfig()
     if (!err && loginStore.loginType === 'oidc' && localStorageStore.autoLogin) {
-      const redirectPath = get(to.query, 'redirectPath', '/')
+      const redirectPath = get(to.query, ['redirectPath'], '/')
       const authnStore = useAuthnStore()
       authnStore.signinWithOidc(redirectPath)
       return next(false)
@@ -254,7 +254,7 @@ export default {
       }
     },
     redirectPath () {
-      return get(this.$route.query, 'redirectPath', '/')
+      return get(this.$route.query, ['redirectPath'], '/')
     },
     oidcLoginText () {
       const value = this.branding.oidcLoginText ?? 'Press Login to be redirected to the configured\nOpenID Connect Provider.'
@@ -317,7 +317,7 @@ export default {
       } catch (err) {
         this.setError({
           title: `${this.getLoginTypeTitle('oidc')} Login Error`,
-          message: err.message,
+          text: err.message,
         })
       }
     },
@@ -334,7 +334,7 @@ export default {
       } catch (err) {
         this.setError({
           title: `${this.getLoginTypeTitle('token')} Login Error`,
-          message: err.message,
+          text: err.message,
         })
       }
     },

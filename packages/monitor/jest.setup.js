@@ -17,7 +17,7 @@ function createHttpAgent () {
     server,
     close () {
       server.close()
-    }
+    },
   }
 
   for (const method of ['get', 'put', 'patch', 'delete', 'post']) {

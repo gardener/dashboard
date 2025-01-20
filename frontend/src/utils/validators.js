@@ -7,11 +7,9 @@
 import { helpers } from '@vuelidate/validators'
 import { Base64 } from 'js-base64'
 
-import {
-  get,
-  set,
-  includes,
-} from '@/lodash'
+import get from 'lodash/get'
+import set from 'lodash/set'
+import includes from 'lodash/includes'
 
 const { withParams, regex, withMessage } = helpers
 
@@ -20,7 +18,7 @@ const lowerCaseAlphaNumHyphenPattern = /^[-a-z0-9]*$/
 const consecutiveHyphenPattern = /.?-{2,}.?/
 const startEndHyphenPattern = /^-.*.|.*-$/
 const numberOrPercentagePattern = /^[\d]+[%]?$/
-const guidPattern = /^[0-9A-Fa-f]{8}-([0-9A-Fa-f]{4}-){3}[0-9A-Fa-f]{12}$/
+const guidPattern = /^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$/
 export const timezonePattern = /^([+-])(\d{2}):(\d{2})$/
 
 const base64 = withMessage('Must be a valid base64 string', value => {

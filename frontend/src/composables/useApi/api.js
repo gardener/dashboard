@@ -4,10 +4,18 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import fetch from './fetch'
+import { useAppStore } from '@/store/app'
 
-function request (method, url, data) {
-  return fetch(url, { method, body: data })
+import { fetchWrapper } from './fetch'
+
+async function request (method, url, data) {
+  const response = await fetchWrapper(url, { method, body: data })
+  const { headers } = response
+  if (headers.warning) {
+    const appStore = useAppStore()
+    appStore.setHeaderWarning(headers.warning)
+  }
+  return response
 }
 
 function getResource (url) {
@@ -139,12 +147,6 @@ export function updateShootVersion ({ namespace, name, data }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/kubernetes/version`, data)
-}
-
-export function updateShootEnableStaticTokenKubeconfig ({ namespace, name, data }) {
-  namespace = encodeURIComponent(namespace)
-  name = encodeURIComponent(name)
-  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/kubernetes/enableStaticTokenKubeconfig`, data)
 }
 
 export function updateShootMaintenance ({ namespace, name, data }) {
@@ -302,10 +304,6 @@ export function getSubjectRules (options) {
   })
 }
 
-export function getToken () {
-  return getResource('/api/user/token')
-}
-
 export function getKubeconfigData () {
   return getResource('/api/user/kubeconfig')
 }
@@ -413,7 +411,6 @@ export default {
   addShootAnnotation,
   getShootInfo,
   updateShootVersion,
-  updateShootEnableStaticTokenKubeconfig,
   updateShootMaintenance,
   updateShootHibernationSchedules,
   updateShootHibernation,
@@ -439,7 +436,6 @@ export default {
   resetServiceAccount,
   createTokenReview,
   getSubjectRules,
-  getToken,
   getKubeconfigData,
   getInfo,
   createTerminal,

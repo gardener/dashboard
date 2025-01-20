@@ -40,27 +40,25 @@ import {
   firstItemMatchingVersionClassification,
 } from './helper'
 
-import {
-  filter,
-  sortBy,
-  uniq,
-  map,
-  get,
-  set,
-  some,
-  intersection,
-  find,
-  difference,
-  toPairs,
-  includes,
-  isEmpty,
-  flatMap,
-  template,
-  head,
-  cloneDeep,
-  sample,
-  pick,
-} from '@/lodash'
+import filter from 'lodash/filter'
+import sortBy from 'lodash/sortBy'
+import uniq from 'lodash/uniq'
+import map from 'lodash/map'
+import get from 'lodash/get'
+import set from 'lodash/set'
+import some from 'lodash/some'
+import intersection from 'lodash/intersection'
+import find from 'lodash/find'
+import difference from 'lodash/difference'
+import toPairs from 'lodash/toPairs'
+import includes from 'lodash/includes'
+import isEmpty from 'lodash/isEmpty'
+import flatMap from 'lodash/flatMap'
+import template from 'lodash/template'
+import head from 'lodash/head'
+import cloneDeep from 'lodash/cloneDeep'
+import sample from 'lodash/sample'
+import pick from 'lodash/pick'
 
 export const useCloudProfileStore = defineStore('cloudProfile', () => {
   const logger = useLogger()
@@ -135,16 +133,16 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
 
   function setCloudProfiles (cloudProfiles) {
     for (const cloudProfile of cloudProfiles) {
-      set(cloudProfile, 'data.machineImages', flattenMachineImages(get(cloudProfile, 'data.machineImages')))
+      set(cloudProfile, ['data', 'machineImages'], flattenMachineImages(get(cloudProfile, ['data', 'machineImages'])))
     }
     list.value = cloudProfiles
   }
 
   function isValidRegion (cloudProfile) {
     const cloudProfileName = cloudProfile.metadata.name
-    const cloudProviderKind = cloudProfile.metadata.cloudProviderKind
+    const providerType = cloudProfile.metadata.providerType
     return region => {
-      if (cloudProviderKind === 'azure') {
+      if (providerType === 'azure') {
         // Azure regions may not be zoned, need to filter these out for the dashboard
         return !!zonesByCloudProfileNameAndRegion({ cloudProfileName, region }).length
       }
@@ -154,7 +152,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     }
   }
 
-  const knownInfrastructureKindList = ref([
+  const knownProviderTypesList = ref([
     'aws',
     'azure',
     'gcp',
@@ -168,16 +166,16 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     'local',
   ])
 
-  const infrastructureKindList = computed(() => {
-    return uniq(map(list.value, 'metadata.cloudProviderKind'))
+  const providerTypesList = computed(() => {
+    return uniq(map(list.value, 'metadata.providerType'))
   })
 
-  const sortedInfrastructureKindList = computed(() => {
-    return intersection(knownInfrastructureKindList.value, infrastructureKindList.value)
+  const sortedProviderTypeList = computed(() => {
+    return intersection(knownProviderTypesList.value, providerTypesList.value)
   })
 
-  function cloudProfilesByCloudProviderKind (cloudProviderKind) {
-    const predicate = item => item.metadata.cloudProviderKind === cloudProviderKind
+  function cloudProfilesByProviderType (providerType) {
+    const predicate = item => item.metadata.providerType === providerType
     const filteredCloudProfiles = filter(list.value, predicate)
     return sortBy(filteredCloudProfiles, 'metadata.name')
   }
@@ -194,7 +192,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
   function zonesByCloudProfileNameAndRegion ({ cloudProfileName, region }) {
     const cloudProfile = cloudProfileByName(cloudProfileName)
     if (cloudProfile) {
-      return map(get(find(cloudProfile.data.regions, { name: region }), 'zones'), 'name')
+      return map(get(find(cloudProfile.data.regions, { name: region }), ['zones']), 'name')
     }
     return []
   }
@@ -236,12 +234,12 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
 
   function getDefaultNodesCIDR (cloudProfileName) {
     const cloudProfile = cloudProfileByName(cloudProfileName)
-    return get(cloudProfile, 'data.providerConfig.defaultNodesCIDR', configStore.defaultNodesCIDR)
+    return get(cloudProfile, ['data', 'providerConfig', 'defaultNodesCIDR'], configStore.defaultNodesCIDR)
   }
 
   function floatingPoolsByCloudProfileNameAndRegionAndDomain ({ cloudProfileName, region, secretDomain }) {
     const cloudProfile = cloudProfileByName(cloudProfileName)
-    const floatingPools = get(cloudProfile, 'data.providerConfig.constraints.floatingPools')
+    const floatingPools = get(cloudProfile, ['data', 'providerConfig', 'constraints', 'floatingPools'])
     let availableFloatingPools = filter(floatingPools, matchesPropertyOrEmpty('region', region))
     availableFloatingPools = filter(availableFloatingPools, matchesPropertyOrEmpty('domain', secretDomain))
 
@@ -263,7 +261,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
 
   function loadBalancerProviderNamesByCloudProfileNameAndRegion ({ cloudProfileName, region }) {
     const cloudProfile = cloudProfileByName(cloudProfileName)
-    const loadBalancerProviders = get(cloudProfile, 'data.providerConfig.constraints.loadBalancerProviders')
+    const loadBalancerProviders = get(cloudProfile, ['data', 'providerConfig', 'constraints', 'loadBalancerProviders'])
     let availableLoadBalancerProviders = filter(loadBalancerProviders, matchesPropertyOrEmpty('region', region))
     const hasRegionSpecificLoadBalancerProvider = find(availableLoadBalancerProviders, lb => !!lb.region)
     if (hasRegionSpecificLoadBalancerProvider) {
@@ -279,13 +277,13 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
 
   function loadBalancerClassesByCloudProfileName (cloudProfileName) {
     const cloudProfile = cloudProfileByName(cloudProfileName)
-    return get(cloudProfile, 'data.providerConfig.constraints.loadBalancerConfig.classes')
+    return get(cloudProfile, ['data', 'providerConfig', 'constraints', 'loadBalancerConfig', 'classes'])
   }
 
   function partitionIDsByCloudProfileNameAndRegion ({ cloudProfileName, region }) {
     // Partion IDs equal zones for metal infrastructure
     const cloudProfile = cloudProfileByName(cloudProfileName)
-    if (get(cloudProfile, 'metadata.cloudProviderKind') !== 'metal') {
+    if (get(cloudProfile, ['metadata', 'providerType']) !== 'metal') {
       return
     }
     const partitionIDs = zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
@@ -294,7 +292,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
 
   function firewallSizesByCloudProfileNameAndRegion ({ cloudProfileName, region, architecture }) {
     const cloudProfile = cloudProfileByName(cloudProfileName)
-    if (get(cloudProfile, 'metadata.cloudProviderKind') !== 'metal') {
+    if (get(cloudProfile, ['metadata', 'providerType']) !== 'metal') {
       return
     }
     // Firewall Sizes equals to list of machine types for this cloud provider
@@ -304,7 +302,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
 
   function firewallImagesByCloudProfileName (cloudProfileName) {
     const cloudProfile = cloudProfileByName(cloudProfileName)
-    return get(cloudProfile, 'data.providerConfig.firewallImages')
+    return get(cloudProfile, ['data', 'providerConfig', 'firewallImages'])
   }
 
   function firewallNetworksByCloudProfileNameAndPartitionId ({ cloudProfileName, partitionID }) {
@@ -346,7 +344,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     const zones = zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
 
     const regionObject = find(cloudProfile.data.regions, { name: region })
-    let regionZones = get(regionObject, 'zones', [])
+    let regionZones = get(regionObject, ['zones'], [])
     regionZones = filter(regionZones, regionZone => includes(zones, regionZone.name))
     const unavailableItems = map(regionZones, zone => {
       if (type === 'machineTypes') {
@@ -386,7 +384,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
   function expiringWorkerGroupsForShoot (shootWorkerGroups, shootCloudProfileName, imageAutoPatch) {
     const allMachineImages = machineImagesByCloudProfileName(shootCloudProfileName)
     const workerGroups = map(shootWorkerGroups, worker => {
-      const workerImage = get(worker, 'machine.image', {})
+      const workerImage = get(worker, ['machine', 'image'], {})
       const { name, version } = workerImage
       const workerImageDetails = find(allMachineImages, { name, version })
       if (!workerImageDetails) {
@@ -459,12 +457,12 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
 
   function machineImagesByCloudProfileName (cloudProfileName) {
     const cloudProfile = cloudProfileByName(cloudProfileName)
-    return get(cloudProfile, 'data.machineImages')
+    return get(cloudProfile, ['data', 'machineImages'])
   }
 
   function accessRestrictionNoItemsTextForCloudProfileNameAndRegion ({ cloudProfileName, region }) {
     const defaultNoItemsText = 'No access restriction options available for region ${region}' // eslint-disable-line no-template-curly-in-string
-    const noItemsText = get(configStore, 'accessRestriction.noItemsText', defaultNoItemsText)
+    const noItemsText = get(configStore, ['accessRestriction', 'noItemsText'], defaultNoItemsText)
 
     return template(noItemsText)({
       region,
@@ -477,23 +475,29 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
       return []
     }
 
-    const labels = labelsByCloudProfileNameAndRegion({ cloudProfileName, region })
-    if (isEmpty(labels)) {
+    const allowedAccessRestrictions = accessRestrictionsByCloudProfileNameAndRegion({ cloudProfileName, region })
+    if (isEmpty(allowedAccessRestrictions)) {
       return []
     }
 
-    const items = get(configStore, 'accessRestriction.items')
+    const allowedAccessRestrictionNames = allowedAccessRestrictions.map(ar => ar.name)
+
+    const items = get(configStore, ['accessRestriction', 'items'])
     return filter(items, ({ key }) => {
-      return key && get(labels, [key]) === 'true'
+      return key && allowedAccessRestrictionNames.includes(key)
     })
   }
 
-  function labelsByCloudProfileNameAndRegion ({ cloudProfileName, region }) {
+  function accessRestrictionsByCloudProfileNameAndRegion ({ cloudProfileName, region }) {
     const cloudProfile = cloudProfileByName(cloudProfileName)
     if (!cloudProfile) {
-      return {}
+      return []
     }
-    return get(find(cloudProfile.data.regions, ['name', region]), 'labels')
+    const regionData = find(cloudProfile.data.regions, [['name'], region])
+    if (!regionData) {
+      return []
+    }
+    return get(regionData, ['accessRestrictions'], [])
   }
 
   function defaultMachineImageForCloudProfileNameAndMachineType (cloudProfileName, machineType) {
@@ -504,7 +508,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
 
   function kubernetesVersions (cloudProfileName) {
     const cloudProfile = cloudProfileByName(cloudProfileName)
-    const allVersions = get(cloudProfile, 'data.kubernetes.versions', [])
+    const allVersions = get(cloudProfile, ['data', 'kubernetes', 'versions'], [])
     const validVersions = filter(allVersions, ({ expirationDate, version }) => {
       if (!semver.valid(version)) {
         logger.info(`Skipped Kubernetes version ${version} as it is not a valid semver version`)
@@ -667,9 +671,8 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     cloudProfileList,
     setCloudProfiles,
     fetchCloudProfiles,
-    cloudProfilesByCloudProviderKind,
-    knownInfrastructureKindList,
-    sortedInfrastructureKindList,
+    cloudProfilesByProviderType,
+    sortedProviderTypeList,
     cloudProfileByName,
     regionsWithSeedByCloudProfileName,
     regionsWithoutSeedByCloudProfileName,
@@ -692,7 +695,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     volumeTypesByCloudProfileName,
     defaultMachineImageForCloudProfileNameAndMachineType,
     minimumVolumeSizeByMachineTypeAndVolumeType,
-    labelsByCloudProfileNameAndRegion,
+    accessRestrictionsByCloudProfileNameAndRegion,
     accessRestrictionDefinitionsByCloudProfileNameAndRegion,
     accessRestrictionNoItemsTextForCloudProfileNameAndRegion,
     kubernetesVersions,

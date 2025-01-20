@@ -24,13 +24,11 @@ import {
 import { useConfigStore } from './config'
 import { useAuthzStore } from './authz'
 
-import {
-  map,
-  uniqBy,
-  filter,
-  includes,
-  isEmpty,
-} from '@/lodash'
+import map from 'lodash/map'
+import uniqBy from 'lodash/uniqBy'
+import filter from 'lodash/filter'
+import includes from 'lodash/includes'
+import isEmpty from 'lodash/isEmpty'
 
 export const useTerminalStore = defineStore('terminal', () => {
   const logger = useLogger()

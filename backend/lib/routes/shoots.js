@@ -12,7 +12,7 @@ const { metricsRoute } = require('../middleware')
 const { trimObjectMetadata } = require('../utils')
 
 const router = module.exports = express.Router({
-  mergeParams: true
+  mergeParams: true,
 })
 
 const metricsMiddleware = metricsRoute('shoots')
@@ -38,7 +38,8 @@ router.route('/')
       const user = req.user
       const namespace = req.params.namespace
       const body = req.body
-      res.send(await shoots.create({ user, namespace, body }))
+      const onWarning = value => res.set('Warning', value)
+      res.send(await shoots.create({ user, namespace, body, onWarning }))
     } catch (err) {
       next(err)
     }
@@ -63,7 +64,8 @@ router
       const namespace = req.params.namespace
       const name = req.params.name
       const body = req.body
-      res.send(await shoots.replace({ user, namespace, name, body }))
+      const onWarning = value => res.set('Warning', value)
+      res.send(await shoots.replace({ user, namespace, name, body, onWarning }))
     } catch (err) {
       next(err)
     }
@@ -85,20 +87,6 @@ router
       const namespace = req.params.namespace
       const name = req.params.name
       res.send(await shoots.remove({ user, namespace, name }))
-    } catch (err) {
-      next(err)
-    }
-  })
-
-router.route('/:name/spec/kubernetes/enableStaticTokenKubeconfig')
-  .all(metricsMiddleware)
-  .put(async (req, res, next) => {
-    try {
-      const user = req.user
-      const namespace = req.params.namespace
-      const name = req.params.name
-      const body = req.body
-      res.send(await shoots.replaceEnableStaticTokenKubeconfig({ user, namespace, name, body }))
     } catch (err) {
       next(err)
     }

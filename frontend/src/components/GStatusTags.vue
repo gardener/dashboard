@@ -56,10 +56,8 @@ import {
   errorCodesFromArray,
 } from '@/utils/errorCodes'
 
-import {
-  sortBy,
-  padStart,
-} from '@/lodash'
+import padStart from 'lodash/padStart'
+import sortBy from 'lodash/sortBy'
 
 const props = defineProps({
   popperPlacement: {

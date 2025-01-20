@@ -61,12 +61,10 @@ import { getErrorMessages } from '@/utils'
 import { getWorkerProviderConfig } from '@/utils/shoot'
 import { withFieldName } from '@/utils/validators'
 
-import {
-  find,
-  get,
-  set,
-  unset,
-} from '@/lodash'
+import find from 'lodash/find'
+import get from 'lodash/get'
+import set from 'lodash/set'
+import unset from 'lodash/unset'
 
 export default {
   props: {
@@ -137,11 +135,11 @@ export default {
     },
     isAWS () {
       const cloudProfile = this.cloudProfileByName(this.cloudProfileName)
-      return get(cloudProfile, 'metadata.cloudProviderKind') === 'aws'
+      return get(cloudProfile, ['metadata', 'providerType']) === 'aws'
     },
   },
   mounted () {
-    this.workerIops = get(this.worker, 'providerConfig.volume.iops')
+    this.workerIops = get(this.worker, ['providerConfig', 'volume', 'iops'])
     this.v$.$touch()
   },
   methods: {
@@ -158,9 +156,9 @@ export default {
         if (!this.worker.providerConfig) {
           this.worker.providerConfig = getWorkerProviderConfig('aws')
         }
-        set(this.worker.providerConfig, 'volume.iops', iopsValue)
+        set(this.worker.providerConfig, ['volume', 'iops'], iopsValue)
       } else {
-        unset(this.worker.providerConfig, 'volume.iops')
+        unset(this.worker.providerConfig, ['volume', 'iops'])
       }
       this.v$.workerIops.$touch()
       this.$emit('updateVolumeType')

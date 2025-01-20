@@ -16,18 +16,18 @@ import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useSecretStore } from '@/store/secret'
 import { useSeedStore } from '@/store/seed'
 
-import utils from '@/utils'
+import { useSecretList } from '@/composables/useSecretList'
+
+import { selfTerminationDaysForSecret } from '@/utils'
 
 import { useShootAccessRestrictions } from './useShootAccessRestrictions'
 
-import {
-  get,
-  map,
-  head,
-  mapValues,
-  find,
-  some,
-} from '@/lodash'
+import some from 'lodash/some'
+import find from 'lodash/find'
+import mapValues from 'lodash/mapValues'
+import head from 'lodash/head'
+import map from 'lodash/map'
+import get from 'lodash/get'
 
 const shootPropertyMappings = Object.freeze({
   cloudProfileName: 'spec.cloudProfileName',
@@ -65,12 +65,12 @@ export function createShootHelperComposable (shootItem, options = {}) {
   })
 
   const cloudProfiles = computed(() => {
-    return cloudProfileStore.cloudProfilesByCloudProviderKind(providerType.value)
+    return cloudProfileStore.cloudProfilesByProviderType(providerType.value)
   })
 
   const defaultCloudProfileName = computed(() => {
     const defaultCloudProfile = head(cloudProfiles.value)
-    return get(defaultCloudProfile, 'metadata.name')
+    return get(defaultCloudProfile, ['metadata', 'name'])
   })
 
   const cloudProfile = computed(() => {
@@ -82,7 +82,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
   })
 
   const seedIngressDomain = computed(() => {
-    return get(seed.value, 'data.ingressDomain')
+    return get(seed.value, ['data', 'ingressDomain'])
   })
 
   const seeds = computed(() => {
@@ -115,9 +115,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     return cloudProfileStore.getDefaultNodesCIDR(cloudProfileName.value)
   })
 
-  const infrastructureSecrets = computed(() => {
-    return secretStore.infrastructureSecretsByCloudProfileName(cloudProfileName.value)
-  })
+  const infrastructureSecrets = useSecretList(providerType, { secretStore, gardenerExtensionStore })
 
   const sortedKubernetesVersions = computed(() => {
     return cloudProfileStore.sortedKubernetesVersions(cloudProfileName.value)
@@ -131,7 +129,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     if (some(addons.value, 'enabled')) {
       return ['evaluation']
     }
-    return utils.selfTerminationDaysForSecret(infrastructureSecret.value)
+    return selfTerminationDaysForSecret(infrastructureSecret.value)
       ? ['evaluation']
       : ['evaluation', 'development', 'testing', 'production']
   })
@@ -170,7 +168,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     return cloudProfileStore.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({
       cloudProfileName: cloudProfileName.value,
       region: region.value,
-      secretDomain: get(infrastructureSecret.value, 'data.domainName'),
+      secretDomain: get(infrastructureSecret.value, ['data', 'domainName']),
     })
   })
 

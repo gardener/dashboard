@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
       item-color="primary"
       :label="label"
       :disabled="disabled"
-      :items="secretList"
+      :items="allowedSecrets"
       item-value="metadata.name"
       item-title="metadata.name"
       return-object
@@ -69,13 +69,15 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
-import { useSecretStore } from '@/store/secret'
 import { useProjectStore } from '@/store/project'
+import { useSecretStore } from '@/store/secret'
+import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 
 import GSecretDialogWrapper from '@/components/Secrets/GSecretDialogWrapper'
 
 import { useProjectCostObject } from '@/composables/useProjectCostObject'
 import { useProjectMetadata } from '@/composables/useProjectMetadata'
+import { useSecretList } from '@/composables/useSecretList'
 
 import {
   withParams,
@@ -88,14 +90,12 @@ import {
   selfTerminationDaysForSecret,
 } from '@/utils'
 
-import {
-  cloneDeep,
-  differenceWith,
-  isEqual,
-  head,
-  get,
-  toUpper,
-} from '@/lodash'
+import toUpper from 'lodash/toUpper'
+import get from 'lodash/get'
+import head from 'lodash/head'
+import isEqual from 'lodash/isEqual'
+import differenceWith from 'lodash/differenceWith'
+import cloneDeep from 'lodash/cloneDeep'
 
 export default {
   components: {
@@ -109,10 +109,7 @@ export default {
       type: Boolean,
       default: false,
     },
-    cloudProfileName: {
-      type: String,
-    },
-    dnsProviderKind: {
+    providerType: {
       type: String,
     },
     registerVuelidateAs: {
@@ -132,13 +129,13 @@ export default {
   ],
   setup (props) {
     const projectStore = useProjectStore()
-
     const projectItem = toRef(projectStore, 'project')
     const {
       costObjectsSettingEnabled,
       costObjectErrorMessage,
     } = useProjectCostObject(projectItem)
-
+    const secretStore = useSecretStore()
+    const gardenerExtensionStore = useGardenerExtensionStore()
     const {
       projectName,
     } = useProjectMetadata(projectItem)
@@ -147,10 +144,14 @@ export default {
       $registerAs: props.registerVuelidateAs,
     })
 
+    const providerType = toRef(props, 'providerType')
+    const secretList = useSecretList(providerType, { secretStore, gardenerExtensionStore })
+
     return {
       projectName,
       costObjectsSettingEnabled,
       costObjectErrorMessage,
+      secretList,
       v$,
     }
   },
@@ -164,7 +165,7 @@ export default {
     const projectName = this.projectName
 
     const messageFn = ({ $model }) => {
-      return projectName === get($model, 'metadata.projectName')
+      return projectName === get($model, ['metadata', 'projectName'])
         ? 'A Cost Object is required. Go to the ADMINISTRATION page to edit the project and set the Cost Object.'
         : `A Cost Object is required and has to be set on the Project ${toUpper(projectName)}`
     }
@@ -173,7 +174,7 @@ export default {
       { type: 'requiresCostObjectIfEnabled', enabled },
       function requiresCostObjectIfEnabled (value) {
         return enabled
-          ? get(value, 'metadata.hasCostObject', false)
+          ? get(value, ['metadata', 'hasCostObject'], false)
           : true
       },
     )
@@ -194,31 +195,9 @@ export default {
         this.$emit('update:modelValue', value)
       },
     },
-    secretList () {
-      let secrets
-      if (this.cloudProfileName) {
-        secrets = this.infrastructureSecretsByCloudProfileName(this.cloudProfileName)
-      }
-      if (this.dnsProviderKind) {
-        secrets = this.dnsSecretsByProviderKind(this.dnsProviderKind)
-      }
-      return secrets
+    allowedSecrets () {
+      return this.secretList
         ?.filter(secret => !this.allowedSecretNames.includes(secret.metadata.name))
-    },
-    infrastructureKind () {
-      if (this.dnsProviderKind) {
-        return this.dnsProviderKind
-      }
-
-      if (!this.cloudProfileName) {
-        return undefined
-      }
-
-      const cloudProfile = this.cloudProfileByName(this.cloudProfileName)
-      if (!cloudProfile) {
-        return undefined
-      }
-      return cloudProfile.metadata.cloudProviderKind
     },
     secretHint () {
       if (this.selfTerminationDays) {
@@ -237,19 +216,15 @@ export default {
     ...mapActions(useCloudProfileStore, [
       'cloudProfileByName',
     ]),
-    ...mapActions(useSecretStore, [
-      'infrastructureSecretsByCloudProfileName',
-      'dnsSecretsByProviderKind',
-    ]),
     get,
     isOwnSecret,
     openSecretDialog () {
-      this.visibleSecretDialog = this.infrastructureKind
-      this.secretItemsBeforeAdd = cloneDeep(this.secretList)
+      this.visibleSecretDialog = this.providerType
+      this.secretItemsBeforeAdd = cloneDeep(this.allowedSecrets)
     },
     onSecretDialogClosed () {
       this.visibleSecretDialog = undefined
-      const value = head(differenceWith(this.secretList, this.secretItemsBeforeAdd, isEqual))
+      const value = head(differenceWith(this.allowedSecrets, this.secretItemsBeforeAdd, isEqual))
       if (value) {
         this.internalValue = value
       }

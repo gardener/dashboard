@@ -61,7 +61,7 @@ import {
   transformHtml,
 } from '@/utils'
 
-import { get } from '@/lodash'
+import get from 'lodash/get'
 
 const AvatarEnum = {
   GITHUB: 'github', // default
@@ -85,21 +85,21 @@ export default {
       ticketConfig: 'ticket',
     }),
     commentHtml () {
-      return transformHtml(get(this.comment, 'data.body', ''))
+      return transformHtml(get(this.comment, ['data', 'body'], ''))
     },
     login () {
-      return get(this.comment, 'data.user.login')
+      return get(this.comment, ['data', 'user', 'login'])
     },
     createdAt () {
-      return get(this.comment, 'metadata.created_at')
+      return get(this.comment, ['metadata', 'created_at'])
     },
     avatarSource () {
-      return get(this.ticketConfig, 'avatarSource', AvatarEnum.GITHUB)
+      return get(this.ticketConfig, ['avatarSource'], AvatarEnum.GITHUB)
     },
     avatarUrl () {
       switch (this.avatarSource) {
         case AvatarEnum.GITHUB:
-          return get(this.comment, 'data.user.avatar_url')
+          return get(this.comment, ['data', 'user', 'avatar_url'])
         case AvatarEnum.GRAVATAR:
           return gravatarUrlIdenticon(this.login)
         default:
@@ -107,7 +107,7 @@ export default {
       }
     },
     htmlUrl () {
-      return get(this.comment, 'data.html_url')
+      return get(this.comment, ['data', 'html_url'])
     },
     gThemeClass () {
       return this.$vuetify.theme.current.dark ? 'g-theme-dark' : 'g-theme-light'
@@ -117,13 +117,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  @import 'vuetify/settings';
+  @use 'vuetify/settings' as vuetify;
+  @use 'sass:map';
 
-  $gh-code-background-color-light: map-get($grey, 'lighten-3');
-  $gh-code-background-color-dark: map-get($grey, 'darken-3');
+  $gh-code-background-color-light: map.get(vuetify.$grey, 'lighten-3');
+  $gh-code-background-color-dark: map.get(vuetify.$grey, 'darken-3');
 
-  $gh-code-color-light: map-get($grey, 'darken-4');
-  $gh-code-color-dark: map-get($grey, 'lighten-4');
+  $gh-code-color-light: map.get(vuetify.$grey, 'darken-4');
+  $gh-code-color-dark: map.get(vuetify.$grey, 'lighten-4');
 
   .comment {
     padding: 0;

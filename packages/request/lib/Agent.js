@@ -15,7 +15,7 @@ const SessionPool = require('./SessionPool')
 const {
   HTTP2_HEADER_AUTHORITY,
   HTTP2_HEADER_SCHEME,
-  HTTP2_HEADER_HOST
+  HTTP2_HEADER_HOST,
 } = http2.constants
 
 class Agent {
@@ -26,8 +26,8 @@ class Agent {
         keepAliveTimeout: 60000,
         connectTimeout: 15000,
         pingInterval: 0,
-        ...options
-      }
+        ...options,
+      },
     }
     this.sessionPools = new Map()
   }
@@ -43,7 +43,7 @@ class Agent {
     const {
       [HTTP2_HEADER_SCHEME]: scheme = 'https',
       [HTTP2_HEADER_AUTHORITY]: authority,
-      [HTTP2_HEADER_HOST]: host
+      [HTTP2_HEADER_HOST]: host,
     } = headers
 
     const url = new URL(`${scheme}://${authority || host}`)
@@ -56,10 +56,10 @@ class Agent {
     return new SessionId(authority, {
       settings: {
         enablePush: false,
-        ...settings
+        ...settings,
       },
       ...this.defaults.options,
-      ...options
+      ...options,
     })
   }
 

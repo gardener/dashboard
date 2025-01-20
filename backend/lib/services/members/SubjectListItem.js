@@ -12,7 +12,7 @@ const Member = require('./Member')
 
 const allowedExtensionProperties = Object.freeze([
   ...Member.allowedExtensionProperties,
-  'secrets'
+  'secrets',
 ])
 
 class SubjectListItem {
@@ -54,7 +54,7 @@ class SubjectListItem {
 
 Object.assign(SubjectListItem, {
   NOT_IN_LIST: -1,
-  END_OF_LIST: Number.MAX_SAFE_INTEGER
+  END_OF_LIST: Number.MAX_SAFE_INTEGER,
 })
 
 class SubjectListItemUniq extends SubjectListItem {
@@ -115,7 +115,7 @@ class SubjectListItemGroup extends SubjectListItem {
     return _
       .chain(this.items)
       .head()
-      .get('id')
+      .get(['id'])
       .value()
   }
 
@@ -130,7 +130,7 @@ class SubjectListItemGroup extends SubjectListItem {
   set roles (roles = []) {
     const diff = {
       del: _.difference(this.roles, roles),
-      add: _.difference(roles, this.roles)
+      add: _.difference(roles, this.roles),
     }
     const deleteRoles = item => {
       item.roles = _.difference(item.roles, diff.del)

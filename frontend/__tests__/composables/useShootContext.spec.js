@@ -19,7 +19,8 @@ import { useAuthzStore } from '@/store/authz'
 
 import { createShootContextComposable } from '@/composables/useShootContext'
 
-import { cloneDeep } from '@/lodash'
+import cloneDeep from 'lodash/cloneDeep'
+
 describe('composables', () => {
   let shootContextStore
 
@@ -61,9 +62,9 @@ describe('composables', () => {
     shootContextStore = reactive(composable)
   })
 
-  function createShootManifest (infrastructureKind) {
+  function createShootManifest (providerType) {
     shootContextStore.createShootManifest({
-      providerType: infrastructureKind,
+      providerType,
       workerless: false,
     })
     return shootContextStore.shootManifest

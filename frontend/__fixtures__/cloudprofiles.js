@@ -157,7 +157,7 @@ export default [
   {
     metadata: {
       name: 'alicloud',
-      cloudProviderKind: 'alicloud',
+      providerType: 'alicloud',
       displayName: 'Alibaba Cloud',
     },
     data: {
@@ -283,7 +283,7 @@ export default [
   {
     metadata: {
       name: 'aws',
-      cloudProviderKind: 'aws',
+      providerType: 'aws',
       displayName: 'aws',
     },
     data: {
@@ -399,9 +399,9 @@ export default [
               ],
             },
           ],
-          labels: {
-            'seed.gardener.cloud/eu-access': 'true',
-          },
+          accessRestrictions: [{
+            name: 'eu-access-only',
+          }],
         },
         {
           name: 'eu-west-1',
@@ -424,9 +424,9 @@ export default [
               ],
             },
           ],
-          labels: {
-            'seed.gardener.cloud/eu-access': 'true',
-          },
+          accessRestrictions: [{
+            name: 'eu-access-only',
+          }],
         },
         {
           name: 'us-east-1',
@@ -470,7 +470,7 @@ export default [
   {
     metadata: {
       name: 'az',
-      cloudProviderKind: 'azure',
+      providerType: 'azure',
       displayName: 'Azure',
     },
     data: {
@@ -535,9 +535,9 @@ export default [
               ],
             },
           ],
-          labels: {
-            'seed.gardener.cloud/eu-access': 'true',
-          },
+          accessRestrictions: [{
+            name: 'eu-access-only',
+          }],
         },
         {
           name: 'eastus',
@@ -580,7 +580,7 @@ export default [
   {
     metadata: {
       name: 'openstack-1',
-      cloudProviderKind: 'openstack',
+      providerType: 'openstack',
       displayName: 'Openstack 1',
     },
     data: {
@@ -713,9 +713,9 @@ export default [
               ],
             },
           ],
-          labels: {
-            'seed.gardener.cloud/eu-access': 'true',
-          },
+          accessRestrictions: [{
+            name: 'eu-access-only',
+          }],
         },
         {
           name: 'na-us-1',
@@ -738,7 +738,7 @@ export default [
   {
     metadata: {
       name: 'openstack-2',
-      cloudProviderKind: 'openstack',
+      providerType: 'openstack',
       displayName: 'Openstack 2',
     },
     data: {
@@ -895,9 +895,9 @@ export default [
               ],
             },
           ],
-          labels: {
-            'seed.gardener.cloud/eu-access': 'true',
-          },
+          accessRestrictions: [{
+            name: 'eu-access-only',
+          }],
         },
         {
           name: 'na-us-2',
@@ -920,7 +920,7 @@ export default [
   {
     metadata: {
       name: 'gcp',
-      cloudProviderKind: 'gcp',
+      providerType: 'gcp',
       displayName: 'Google Cloud',
     },
     data: {
@@ -1071,7 +1071,7 @@ export default [
   {
     metadata: {
       name: 'ironcore',
-      cloudProviderKind: 'ironcore',
+      providerType: 'ironcore',
       displayName: 'IronCore',
     },
     data: {

@@ -9,11 +9,12 @@ SPDX-License-Identifier: Apache-2.0
     :is="componentName"
     v-if="visibleDialog"
     v-model="visibleDialogState"
-    v-bind="{ secret: selectedSecret, vendor: visibleDialog }"
+    v-bind="{ secret: selectedSecret, providerType: visibleDialog }"
   />
 </template>
 
 <script>
+
 import GcpDialog from '@/components/Secrets/GSecretDialogGcp'
 import AwsDialog from '@/components/Secrets/GSecretDialogAws'
 import AzureDialog from '@/components/Secrets/GSecretDialogAzure'
@@ -29,11 +30,9 @@ import DeleteDialog from '@/components/Secrets/GSecretDialogDelete'
 import HcloudDialog from '@/components/Secrets/GSecretDialogHCloud'
 import GenericDialog from '@/components/Secrets/GSecretDialogGeneric'
 
-import {
-  upperFirst,
-  split,
-  head,
-} from '@/lodash'
+import head from 'lodash/head'
+import split from 'lodash/split'
+import upperFirst from 'lodash/upperFirst'
 
 const components = {
   GcpDialog,

@@ -32,14 +32,14 @@ class Config {
           name: 'gcp',
           config: {
             'access-token': undefined,
-            expiry: '1970-01-01T00:00:00.000Z'
-          }
+            expiry: '1970-01-01T00:00:00.000Z',
+          },
         }
       }
     }
     Object.assign(this, {
       apiVersion: 'v1',
-      kind: 'Config'
+      kind: 'Config',
     }, input)
   }
 
@@ -47,7 +47,7 @@ class Config {
     return _
       .chain(this.contexts)
       .find(['name', this['current-context']])
-      .get('context')
+      .get(['context'])
       .value()
   }
 
@@ -55,7 +55,7 @@ class Config {
     return _
       .chain(this.clusters)
       .find(['name', this.currentContext.cluster])
-      .get('cluster')
+      .get(['cluster'])
       .value()
   }
 
@@ -63,7 +63,7 @@ class Config {
     return _
       .chain(this.users)
       .find(['name', this.currentContext.user])
-      .get('user')
+      .get(['user'])
       .value()
   }
 
@@ -100,7 +100,7 @@ class Config {
       ...rest,
       contexts: _.map(contexts, cleanContext),
       clusters: _.map(clusters, cleanCluster),
-      users: _.map(users, cleanAuthInfo)
+      users: _.map(users, cleanAuthInfo),
     })
     return new Config(cleanConfig(this.toJSON()))
   }
@@ -112,24 +112,24 @@ class Config {
         case 'gcp': {
           const {
             private_key: key,
-            client_email: email
+            client_email: email,
           } = options
           const gToken = new GoogleToken({
             key,
             email,
             scope: ['https://www.googleapis.com/auth/cloud-platform'],
-            eagerRefreshThresholdMillis: 5 * 60 * 1000
+            eagerRefreshThresholdMillis: 5 * 60 * 1000,
           })
           authProvider.config = authProvider.config || {}
           const {
             'access-token': accessToken,
-            expiry = '1970-01-01T00:00:00.000Z'
+            expiry = '1970-01-01T00:00:00.000Z',
           } = authProvider.config
           if (accessToken) {
             gToken.expiresAt = new Date(expiry).getTime()
             gToken.rawToken = {
               access_token: accessToken,
-              token_type: 'Bearer'
+              token_type: 'Bearer',
             }
           }
           await gToken.getToken()
@@ -150,7 +150,7 @@ class Config {
   static build (cluster, user, { userName = 'robot', clusterName = 'garden', contextName = 'default', namespace } = {}) {
     const context = {
       cluster: clusterName,
-      user: userName
+      user: userName,
     }
     if (namespace) {
       context.namespace = namespace
@@ -159,17 +159,17 @@ class Config {
     return new Config({
       clusters: [{
         name: clusterName,
-        cluster
+        cluster,
       }],
       users: [{
         name: userName,
-        user
+        user,
       }],
       contexts: [{
         name: contextName,
-        context
+        context,
       }],
-      'current-context': contextName
+      'current-context': contextName,
     })
   }
 }

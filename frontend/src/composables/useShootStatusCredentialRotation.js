@@ -6,23 +6,14 @@
 
 import { computed } from 'vue'
 
-import {
-  get,
-  filter,
-  find,
-  flatMap,
-  mapValues,
-  head,
-  compact,
-} from '@/lodash'
+import get from 'lodash/get'
+import filter from 'lodash/filter'
+import find from 'lodash/find'
+import flatMap from 'lodash/flatMap'
+import head from 'lodash/head'
+import compact from 'lodash/compact'
 
 export const rotationTypes = Object.freeze([
-  {
-    type: 'kubeconfig',
-    hasRotationStatus: true,
-    startOperation: 'rotate-kubeconfig-credentials',
-    title: 'Kubeconfig',
-  },
   {
     type: 'certificateAuthorities',
     hasRotationStatus: true,
@@ -73,21 +64,10 @@ export const twoStepRotationTypes = Object.freeze(filter(rotationTypes, {
   twoStep: true,
 }))
 
-const shootPropertyMappings = Object.freeze({
-  shootEnableStaticTokenKubeconfig: 'spec.kubernetes.enableStaticTokenKubeconfig',
-  shootCredentialsRotation: ['status.credentials.rotation', {}],
-})
-
 export function useShootStatusCredentialRotation (state, options = {}) {
-  const {
-    shootEnableStaticTokenKubeconfig,
-    shootCredentialsRotation,
-  } = mapValues(shootPropertyMappings, args => {
-    const [path, defaultValue] = Array.isArray(args) ? args : [args]
-    return computed(() => get(state.value, path, defaultValue))
-  })
-
   options.type ??= 'ALL_CREDENTIALS'
+
+  const shootCredentialsRotation = computed(() => get(state.value, ['status', 'credentials', 'rotation'], {}))
 
   const shootCredentialsRotationAggregatedPhase = computed(() => {
     let preparedRotationsCount = 0
@@ -163,7 +143,7 @@ export function useShootStatusCredentialRotation (state, options = {}) {
          (!rotationStatus.value.lastCompletionTime ||
           rotationStatus.value.lastInitiationTime > rotationStatus.value.lastCompletionTime)
     ) {
-      // Show 'Rotating' phase for one step rotations
+      // Show 'Rotating' phase for one-step rotations
       return 'Rotating'
     }
     return undefined
@@ -186,10 +166,7 @@ export function useShootStatusCredentialRotation (state, options = {}) {
       return rotationStatus.value.lastCompletionTime
     }
     const allCompletionTimestamps = compact(flatMap(shootCredentialsRotation.value, 'lastCompletionTime')).sort()
-    let requiredNumberOfRotationTimestamps = filter(rotationTypes, 'hasRotationStatus').length
-    if (!shootEnableStaticTokenKubeconfig.value) {
-      requiredNumberOfRotationTimestamps = requiredNumberOfRotationTimestamps - 1
-    }
+    const requiredNumberOfRotationTimestamps = filter(rotationTypes, 'hasRotationStatus').length
 
     if (requiredNumberOfRotationTimestamps === allCompletionTimestamps.length) {
       return head(allCompletionTimestamps)

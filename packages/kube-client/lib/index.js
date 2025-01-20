@@ -39,5 +39,5 @@ Object.assign(exports, {
   abortWatcher,
   dashboardClient,
   Resources,
-  Store
+  Store,
 })

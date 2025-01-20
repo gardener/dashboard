@@ -7,15 +7,22 @@
 'use strict'
 
 const fs = require('fs')
+const fsp = require('fs/promises')
 const path = require('path')
 const os = require('os')
 const yaml = require('js-yaml')
-const EventEmitter = require('events')
-const chokidar = require('chokidar')
 const { mockGetToken } = require('gtoken')
 const { cloneDeep } = require('lodash')
 const Config = require('../lib/Config')
-const { load, dumpKubeconfig, fromKubeconfig, getInCluster, cleanKubeconfig, parseKubeconfig, constants } = require('../lib')
+const {
+  load,
+  dumpKubeconfig,
+  fromKubeconfig,
+  getInCluster,
+  cleanKubeconfig,
+  parseKubeconfig,
+  constants,
+} = require('../lib')
 
 describe('kube-config', () => {
   const server = new URL('https://kubernetes:6443')
@@ -32,19 +39,30 @@ describe('kube-config', () => {
   const currentContext = 'default'
   const accessToken = 'access-token'
 
-  beforeEach(() => {
-    jest.spyOn(chokidar, 'watch').mockImplementationOnce(() => {
-      const emitter = new EventEmitter()
-      emitter.close = jest.fn().mockImplementation(() => Promise.resolve())
-      process.nextTick(() => emitter.emit('ready'))
-      return emitter
+  function mockFs (files) {
+    fs.readFileSync.mockImplementation((...args) => {
+      const [path] = args
+      if (files.has(path)) {
+        return files.get(path)
+      }
+      throw new Error(`ENOENT: no such file or directory, open '${path}'`)
     })
+    fsp.readFile.mockImplementation((...args) => {
+      const [path] = args
+      if (files.has(path)) {
+        return Promise.resolve(files.get(path))
+      }
+      return Promise.reject(new Error(`ENOENT: no such file or directory, open '${path}'`))
+    })
+  }
+
+  beforeEach(() => {
     jest.spyOn(fs, 'readFileSync')
+    jest.spyOn(fsp, 'readFile')
   })
 
   afterEach(() => {
-    chokidar.watch.mockRestore()
-    fs.readFileSync.mockRestore()
+    jest.restoreAllMocks()
   })
 
   describe('#load', () => {
@@ -52,7 +70,7 @@ describe('kube-config', () => {
 
     function loadConfig (env) {
       const clientConfig = load(env, {
-        signal: ac.signal
+        signal: ac.signal,
       })
       if (!clientConfig.watcher) {
         return Promise.resolve(clientConfig)
@@ -62,7 +80,6 @@ describe('kube-config', () => {
 
     beforeEach(() => {
       ac = new AbortController()
-      fs.readFileSync.mockClear()
     })
 
     afterEach(() => {
@@ -70,23 +87,24 @@ describe('kube-config', () => {
     })
 
     it('should return the in cluster config', async () => {
-      fs.readFileSync
-        .mockReturnValueOnce(token)
-        .mockReturnValueOnce(ca)
+      mockFs(new Map([
+        [constants.KUBERNETES_SERVICEACCOUNT_TOKEN_FILE, token],
+        [constants.KUBERNETES_SERVICEACCOUNT_CA_FILE, ca],
+      ]))
       const config = await loadConfig({
         KUBERNETES_SERVICE_HOST: server.hostname,
-        KUBERNETES_SERVICE_PORT: server.port
+        KUBERNETES_SERVICE_PORT: server.port,
       })
       expect(fs.readFileSync).toHaveBeenCalledTimes(2)
       expect(fs.readFileSync.mock.calls).toEqual([
         ['/var/run/secrets/kubernetes.io/serviceaccount/token', 'utf8'],
-        ['/var/run/secrets/kubernetes.io/serviceaccount/ca.crt', 'utf8']
+        ['/var/run/secrets/kubernetes.io/serviceaccount/ca.crt', 'utf8'],
       ])
       expect(config).toEqual({
         url: server.origin,
         ca,
         rejectUnauthorized: true,
-        auth: { bearer: token }
+        auth: { bearer: token },
       })
     })
 
@@ -96,11 +114,14 @@ describe('kube-config', () => {
         namespace,
         token,
         server: server.origin,
-        caData
+        caData,
       })
-      fs.readFileSync.mockReturnValue(kubeconfig)
+      mockFs(new Map([
+        ['/path/to/kube/config', kubeconfig],
+        ['/path/to/another/kube/config', null],
+      ]))
       const config = await loadConfig({
-        KUBECONFIG: '/path/to/kube/config:/path/to/another/kube/config'
+        KUBECONFIG: '/path/to/kube/config:/path/to/another/kube/config',
       })
       expect(fs.readFileSync).toHaveBeenCalledTimes(1)
       expect(fs.readFileSync.mock.calls[0]).toEqual(['/path/to/kube/config', 'utf8'])
@@ -108,7 +129,7 @@ describe('kube-config', () => {
         url: server.origin,
         ca,
         rejectUnauthorized: true,
-        auth: { bearer: token }
+        auth: { bearer: token },
       })
     })
 
@@ -122,46 +143,40 @@ describe('kube-config', () => {
           cluster: {
             server: server.origin,
             'insecure-skip-tls-verify': false,
-            'certificate-authority': '/path/to/ca.crt'
-          }
+            'certificate-authority': '/path/to/ca.crt',
+          },
         }],
         contexts: [{
           name: currentContext,
           context: {
             cluster,
-            user
-          }
+            user,
+          },
         }],
         'current-context': currentContext,
         users: [{
           name: user,
           user: {
             'client-certificate': '/path/to/client.crt',
-            'client-key': '/path/to/client.key'
-          }
-        }]
+            'client-key': '/path/to/client.key',
+          },
+        }],
       })
-      fs.readFileSync.mockImplementation(path => {
-        switch (path) {
-          case defaultKubeconfigPath:
-            return kubeconfig
-          case '/path/to/ca.crt':
-            return ca
-          case '/path/to/client.crt':
-            return clientCertificate
-          case '/path/to/client.key':
-            return clientKey
-        }
-      })
+      mockFs(new Map([
+        [defaultKubeconfigPath, kubeconfig],
+        ['/path/to/ca.crt', ca],
+        ['/path/to/client.crt', clientCertificate],
+        ['/path/to/client.key', clientKey],
+      ]))
       const config = await loadConfig({
-        NODE_ENV: 'development'
+        NODE_ENV: 'development',
       })
       expect(config).toEqual({
         url: server.origin,
         ca,
         rejectUnauthorized: true,
         cert: clientCertificate,
-        key: clientKey
+        key: clientKey,
       })
     })
   })
@@ -175,16 +190,16 @@ describe('kube-config', () => {
         name: currentContext,
         context: {
           cluster,
-          user
-        }
+          user,
+        },
       }],
       'current-context': currentContext,
       users: [{
         name: user,
         user: {
-          token
-        }
-      }]
+          token,
+        },
+      }],
     }
     let kubeconfig
 
@@ -197,8 +212,8 @@ describe('kube-config', () => {
         name: cluster,
         cluster: {
           server: server.origin,
-          'certificate-authority': '/path/to/ca.crt'
-        }
+          'certificate-authority': '/path/to/ca.crt',
+        },
       })
       kubeconfig = yaml.dump(kubeconfig)
       fs.readFileSync.mockImplementation(path => {
@@ -211,7 +226,7 @@ describe('kube-config', () => {
       expect(config).toEqual({
         url: server.origin,
         rejectUnauthorized: true,
-        auth: { bearer: token }
+        auth: { bearer: token },
       })
     })
 
@@ -219,22 +234,22 @@ describe('kube-config', () => {
       const config = fromKubeconfig(kubeconfig)
       expect(config).toEqual({
         rejectUnauthorized: true,
-        auth: { bearer: token }
+        auth: { bearer: token },
       })
     })
 
     it('should return a config with username and password', () => {
       kubeconfig.users[0].user = {
         username,
-        password
+        password,
       }
       const config = fromKubeconfig(kubeconfig)
       expect(config).toEqual({
         rejectUnauthorized: true,
         auth: {
           user: username,
-          pass: password
-        }
+          pass: password,
+        },
       })
     })
 
@@ -242,13 +257,13 @@ describe('kube-config', () => {
       const base64Encode = data => Buffer.from(data, 'utf8').toString('base64')
       kubeconfig.users[0].user = {
         'client-key-data': base64Encode('key'),
-        'client-certificate-data': base64Encode('cert')
+        'client-certificate-data': base64Encode('cert'),
       }
       const config = fromKubeconfig(kubeconfig)
       expect(config).toEqual({
         rejectUnauthorized: true,
         key: 'key',
-        cert: 'cert'
+        cert: 'cert',
       })
     })
 
@@ -260,29 +275,29 @@ describe('kube-config', () => {
       const authProvider = {
         config: {
           'access-token': accessToken,
-          expiry: new Date(Date.now() + 86400000).toISOString()
+          expiry: new Date(Date.now() + 86400000).toISOString(),
         },
-        name: 'gcp'
+        name: 'gcp',
       }
       kubeconfig.users[0].user = {
-        'auth-provider': authProvider
+        'auth-provider': authProvider,
       }
       const config = fromKubeconfig(kubeconfig)
       expect(config).toEqual({
         rejectUnauthorized: true,
-        auth: { bearer: accessToken }
+        auth: { bearer: accessToken },
       })
     })
 
     it('should return a config with gcp auth-provider without auth-provider-config', () => {
       kubeconfig.users[0].user = {
         'auth-provider': {
-          name: 'gcp'
-        }
+          name: 'gcp',
+        },
       }
       const config = fromKubeconfig(kubeconfig)
       expect(config).toEqual({
-        rejectUnauthorized: true
+        rejectUnauthorized: true,
       })
     })
 
@@ -290,26 +305,26 @@ describe('kube-config', () => {
       kubeconfig.users[0].user = {
         'auth-provider': {
           config: {
-            'access-token': accessToken
+            'access-token': accessToken,
           },
-          name: 'gcp'
-        }
+          name: 'gcp',
+        },
       }
       const config = fromKubeconfig(kubeconfig)
       expect(config).toEqual({
-        rejectUnauthorized: true
+        rejectUnauthorized: true,
       })
     })
 
     it('should return a config for the gke-gcloud-auth-plugin', () => {
       kubeconfig.users[0].user = {
         exec: {
-          command: 'gke-gcloud-auth-plugin'
-        }
+          command: 'gke-gcloud-auth-plugin',
+        },
       }
       const config = fromKubeconfig(kubeconfig)
       expect(config).toEqual({
-        rejectUnauthorized: true
+        rejectUnauthorized: true,
       })
     })
 
@@ -317,7 +332,7 @@ describe('kube-config', () => {
       kubeconfig.users[0].user = {}
       const config = fromKubeconfig(kubeconfig)
       expect(config).toEqual({
-        rejectUnauthorized: true
+        rejectUnauthorized: true,
       })
     })
   })
@@ -326,7 +341,7 @@ describe('kube-config', () => {
     const noEntityError = path => {
       Object.assign(new Error(`ENOENT: no such file or directory, open '${path}'`), {
         code: 'ENOENT',
-        path
+        path,
       })
     }
     it('should fail with "kubernetes service endpoint not defined"', () => {
@@ -338,7 +353,7 @@ describe('kube-config', () => {
         .mockImplementationOnce(noEntityError(constants.KUBERNETES_SERVICEACCOUNT_TOKEN_FILE))
       expect(() => getInCluster({
         KUBERNETES_SERVICE_HOST: server.hostname,
-        KUBERNETES_SERVICE_PORT: server.port
+        KUBERNETES_SERVICE_PORT: server.port,
       })).toThrow(/serviceaccount token not found$/)
     })
 
@@ -348,7 +363,7 @@ describe('kube-config', () => {
         .mockImplementationOnce(noEntityError(constants.KUBERNETES_SERVICEACCOUNT_CA_FILE))
       expect(() => getInCluster({
         KUBERNETES_SERVICE_HOST: server.hostname,
-        KUBERNETES_SERVICE_PORT: server.port
+        KUBERNETES_SERVICE_PORT: server.port,
       })).toThrow(/serviceaccount certificate authority not found$/)
     })
   })
@@ -356,24 +371,24 @@ describe('kube-config', () => {
   describe('#cleanKubeconfig', () => {
     const authProvider = {
       config: {
-        'access-token': accessToken
+        'access-token': accessToken,
       },
-      name: 'gcp'
+      name: 'gcp',
     }
     const defaultInput = {
       contexts: [{
         name: currentContext,
         context: {
-          user
-        }
+          user,
+        },
       }],
       'current-context': currentContext,
       users: [{
         name: user,
         user: {
-          'auth-provider': authProvider
-        }
-      }]
+          'auth-provider': authProvider,
+        },
+      }],
     }
 
     let input
@@ -411,7 +426,7 @@ describe('kube-config', () => {
         userName: user,
         namespace,
         token,
-        server: server.origin
+        server: server.origin,
       }))
       expect(kubeconfig.clusters).toHaveLength(1)
       const cluster = kubeconfig.clusters[0]
@@ -424,8 +439,8 @@ describe('kube-config', () => {
       contexts: [{
         name: currentContext,
         context: {
-          user
-        }
+          user,
+        },
       }],
       'current-context': currentContext,
       users: [{
@@ -433,16 +448,16 @@ describe('kube-config', () => {
         user: {
           'auth-provider': {
             config: {
-              'access-token': accessToken
+              'access-token': accessToken,
             },
-            name: 'gcp'
-          }
-        }
-      }]
+            name: 'gcp',
+          },
+        },
+      }],
     }
     const credentials = {
       private_key: 'key',
-      client_email: 'iss'
+      client_email: 'iss',
     }
 
     let input
@@ -475,8 +490,8 @@ describe('kube-config', () => {
     it('should convert the exec command "gke-gcloud-auth-plugin" to a gcp auth-provider', async () => {
       input.users[0].user = {
         exec: {
-          command: 'gke-gcloud-auth-plugin'
-        }
+          command: 'gke-gcloud-auth-plugin',
+        },
       }
       const kubeconfig = parseKubeconfig(input)
       await kubeconfig.refreshAuthProviderConfig(credentials)

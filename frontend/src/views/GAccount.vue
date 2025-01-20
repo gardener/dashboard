@@ -84,6 +84,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-card>
       </v-col>
       <v-col
+        v-if="isKubeconfigEnabled"
         cols="12"
         md="6"
       >
@@ -94,151 +95,128 @@ SPDX-License-Identifier: Apache-2.0
               <template #prepend>
                 <v-icon
                   color="primary"
-                  icon="mdi-key"
+                  icon="mdi-file"
                 />
               </template>
               <div class="text-body-1">
-                Token
+                Kubeconfig
               </div>
-              <div class="text-body-2 text-medium-emphasis">
-                Personal bearer token for API authentication
+              <div class="text-body-2 text-medium-emphasis line-clamp-2">
+                Personalized command line interface access (requires <span class="font-family-monospace">kubelogin</span> kubectl plugin)
               </div>
               <template #append>
-                <g-copy-btn :clipboard-text="() => getToken()" />
+                <g-action-button
+                  icon="mdi-download"
+                  @click="onDownload"
+                >
+                  <template #tooltip>
+                    <span>Download kubeconfig</span>
+                  </template>
+                </g-action-button>
+                <g-copy-btn
+                  :clipboard-text="kubeconfigYaml"
+                  tooltip-text="Copy kubeconfig to clipboard"
+                />
+                <g-action-button
+                  :icon="kubeconfigExpansionPanelIcon"
+                  @click="kubeconfigExpansionPanel = !kubeconfigExpansionPanel"
+                >
+                  <template #tooltip>
+                    <span>{{ kubeconfigExpansionPanelTooltip }}</span>
+                  </template>
+                </g-action-button>
               </template>
             </g-list-item>
-            <template v-if="isKubeconfigEnabled">
-              <v-divider
-                inset
-                class="my-2"
-              />
-              <g-list-item>
-                <template #prepend>
-                  <v-icon
-                    color="primary"
-                    icon="mdi-file"
-                  />
-                </template>
-                <div class="text-body-1">
-                  Kubeconfig
-                </div>
-                <div class="text-body-2 text-medium-emphasis line-clamp-2">
-                  Personalized command line interface access (requires <span class="font-family-monospace">kubelogin</span> kubectl plugin)
-                </div>
-                <template #append>
-                  <g-action-button
-                    icon="mdi-download"
-                    @click="onDownload"
+            <v-expand-transition>
+              <v-card
+                v-if="kubeconfigExpansionPanel"
+                flat
+                class="mx-2 mt-2"
+              >
+                <v-card-text class="pt-0">
+                  <div>
+                    The downloaded <span class="font-family-monospace">kubeconfig</span> will initiate
+                    <g-external-link url="https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens">
+                      OIDC
+                    </g-external-link>
+                    authentication via <span class="font-family-monospace">kubelogin</span>.
+                    If not already done, please install <span class="font-family-monospace">kubelogin</span>
+                    according to the
+                    <g-external-link url="https://github.com/int128/kubelogin#setup">
+                      setup instructions
+                    </g-external-link>.
+                    For more information please refer to the <span class="font-family-monospace">kubelogin</span> documentation.
+                    <br>
+                    Below you can configure and preview the <span class="font-family-monospace">kubeconfig</span> file before download.
+                  </div>
+                  <v-sheet
+                    elevation="1"
+                    class="mt-3"
                   >
-                    <template #tooltip>
-                      <span>Download kubeconfig</span>
-                    </template>
-                  </g-action-button>
-                  <g-copy-btn
-                    :clipboard-text="kubeconfigYaml"
-                    tooltip-text="Copy kubeconfig to clipboard"
-                  />
-                  <g-action-button
-                    :icon="kubeconfigExpansionPanelIcon"
-                    @click="kubeconfigExpansionPanel = !kubeconfigExpansionPanel"
-                  >
-                    <template #tooltip>
-                      <span>{{ kubeconfigExpansionPanelTooltip }}</span>
-                    </template>
-                  </g-action-button>
-                </template>
-              </g-list-item>
-              <v-expand-transition>
-                <v-card
-                  v-if="kubeconfigExpansionPanel"
-                  flat
-                  class="mx-2 mt-2"
-                >
-                  <v-card-text class="pt-0">
-                    <div>
-                      The downloaded <span class="font-family-monospace">kubeconfig</span> will initiate
-                      <g-external-link url="https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens">
-                        OIDC
-                      </g-external-link>
-                      authentication via <span class="font-family-monospace">kubelogin</span>.
-                      If not already done, please install <span class="font-family-monospace">kubelogin</span>
-                      according to the
-                      <g-external-link url="https://github.com/int128/kubelogin#setup">
-                        setup instructions
-                      </g-external-link>.
-                      For more information please refer to the <span class="font-family-monospace">kubelogin</span> documentation.
-                      <br>
-                      Below you can configure and preview the <span class="font-family-monospace">kubeconfig</span> file before download.
-                    </div>
-                    <v-sheet
-                      elevation="1"
-                      class="mt-3"
+                    <v-tabs
+                      v-model="kubeconfigTab"
+                      color="primary"
+                      slider-color="primary"
                     >
-                      <v-tabs
-                        v-model="kubeconfigTab"
-                        color="primary"
-                        slider-color="primary"
+                      <v-tab :value="'configure'">
+                        Configure
+                      </v-tab>
+                      <v-tab :value="'preview'">
+                        Preview
+                      </v-tab>
+                    </v-tabs>
+                    <v-window v-model="kubeconfigTab">
+                      <v-window-item
+                        :value="'configure'"
+                        class="pa-4"
                       >
-                        <v-tab :value="'configure'">
-                          Configure
-                        </v-tab>
-                        <v-tab :value="'preview'">
-                          Preview
-                        </v-tab>
-                      </v-tabs>
-                      <v-window v-model="kubeconfigTab">
-                        <v-window-item
-                          :value="'configure'"
-                          class="pa-4"
-                        >
-                          <v-row>
-                            <v-col cols="12">
-                              <v-select
-                                v-model="internalProjectName"
-                                color="primary"
-                                :items="sortedProjectNamesWithEmpty"
-                                variant="underlined"
-                                label="Project"
-                                hint="The namespace of the selected project will be the default namespace in the kubeconfig"
-                                persistent-hint
-                              />
-                            </v-col>
-                            <v-col cols="12">
-                              <v-select
-                                v-model="grantType"
-                                color="primary"
-                                :items="grantTypes"
-                                variant="underlined"
-                                label="Grant Type"
-                                hint="The authorization grant type to use"
-                                persistent-hint
-                              />
-                            </v-col>
-                            <v-col cols="12">
-                              <v-switch
-                                v-model="skipOpenBrowser"
-                                color="primary"
-                                variant="underlined"
-                                label="Skip Open Browser"
-                                hint="If selected, it will not open the browser for authentication."
-                                persistent-hint
-                              />
-                            </v-col>
-                          </v-row>
-                        </v-window-item>
-                        <v-window-item :value="'preview'">
-                          <g-code-block
-                            lang="yaml"
-                            :content="kubeconfigYaml"
-                            :show-copy-button="false"
-                          />
-                        </v-window-item>
-                      </v-window>
-                    </v-sheet>
-                  </v-card-text>
-                </v-card>
-              </v-expand-transition>
-            </template>
+                        <v-row>
+                          <v-col cols="12">
+                            <v-select
+                              v-model="internalProjectName"
+                              color="primary"
+                              :items="sortedProjectNamesWithEmpty"
+                              variant="underlined"
+                              label="Project"
+                              hint="The namespace of the selected project will be the default namespace in the kubeconfig"
+                              persistent-hint
+                            />
+                          </v-col>
+                          <v-col cols="12">
+                            <v-select
+                              v-model="grantType"
+                              color="primary"
+                              :items="grantTypes"
+                              variant="underlined"
+                              label="Grant Type"
+                              hint="The authorization grant type to use"
+                              persistent-hint
+                            />
+                          </v-col>
+                          <v-col cols="12">
+                            <v-switch
+                              v-model="skipOpenBrowser"
+                              color="primary"
+                              variant="underlined"
+                              label="Skip Open Browser"
+                              hint="If selected, it will not open the browser for authentication."
+                              persistent-hint
+                            />
+                          </v-col>
+                        </v-row>
+                      </v-window-item>
+                      <v-window-item :value="'preview'">
+                        <g-code-block
+                          lang="yaml"
+                          :content="kubeconfigYaml"
+                          :show-copy-button="false"
+                        />
+                      </v-window-item>
+                    </v-window>
+                  </v-sheet>
+                </v-card-text>
+              </v-card>
+            </v-expand-transition>
           </g-list>
         </v-card>
       </v-col>
@@ -272,7 +250,7 @@ import GTimeString from '@/components/GTimeString.vue'
 import { useProjectMetadata } from '@/composables/useProjectMetadata'
 import { useProjectNamespace } from '@/composables/useProjectItem'
 
-import { head } from '@/lodash'
+import head from 'lodash/head'
 
 export default {
   components: {
@@ -281,7 +259,7 @@ export default {
     GAccountAvatar,
     GTimeString,
   },
-  inject: ['api', 'logger'],
+  inject: ['logger'],
   setup () {
     const projectStore = useProjectStore()
     const configStore = useConfigStore()
@@ -458,10 +436,6 @@ export default {
     },
     expansionPanelTooltip (value) {
       return value ? 'Hide advanced options' : 'Show advanced options'
-    },
-    async getToken () {
-      const response = await this.api.getToken()
-      return response.data.token ?? ''
     },
   },
 }

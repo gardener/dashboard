@@ -38,7 +38,7 @@ SPDX-License-Identifier: Apache-2.0
         <g-select-secret
           v-if="dnsServiceExtensionProviderSecret || !dnsProvider.secretName"
           v-model="dnsServiceExtensionProviderSecret"
-          :dns-provider-kind="dnsProviderType"
+          :provider-type="dnsProviderType"
           :allowed-secret-names="allowedSecretNames"
           register-vuelidate-as="dnsServiceExtensionProviderSecret"
         />
@@ -99,30 +99,27 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import {
-  mapState,
-  mapActions,
-} from 'pinia'
+import { toRef } from 'vue'
+import { mapState } from 'pinia'
 import { required } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
-import { useSecretStore } from '@/store/secret'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
+import { useSecretStore } from '@/store/secret'
 
 import GSelectSecret from '@/components/Secrets/GSelectSecret'
 import GVendorIcon from '@/components/GVendorIcon'
 
 import { useShootContext } from '@/composables/useShootContext'
+import { useSecretList } from '@/composables/useSecretList'
 
 import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
 
-import {
-  get,
-  head,
-  find,
-  set,
-} from '@/lodash'
+import set from 'lodash/set'
+import find from 'lodash/find'
+import head from 'lodash/head'
+import get from 'lodash/get'
 
 export default {
   components: {
@@ -135,7 +132,7 @@ export default {
       required: true,
     },
   },
-  setup () {
+  setup (props) {
     const {
       isNewCluster,
       dnsServiceExtensionProviders,
@@ -145,6 +142,12 @@ export default {
       getResourceRefName,
     } = useShootContext()
 
+    const secretStore = useSecretStore()
+    const gardenerExtensionStore = useGardenerExtensionStore()
+
+    const dnsProviderType = toRef(props.dnsProvider, 'type')
+    const dnsSecrets = useSecretList(dnsProviderType, { secretStore, gardenerExtensionStore })
+
     return {
       v$: useVuelidate(),
       isNewCluster,
@@ -153,6 +156,7 @@ export default {
       setResource,
       deleteResource,
       getResourceRefName,
+      dnsSecrets,
     }
   },
   validations () {
@@ -166,17 +170,13 @@ export default {
     ...mapState(useGardenerExtensionStore, [
       'dnsProviderTypes',
     ]),
-    dnsSecrets () {
-      return this.dnsSecretsByProviderKind(this.dnsProviderType)
-    },
     dnsProviderType: {
       get () {
         return this.dnsProvider?.type
       },
       set (value) {
         this.dnsProvider.type = value
-        const dnsSecrets = this.dnsSecretsByProviderKind(value)
-        const defaultDnsSecret = head(dnsSecrets)
+        const defaultDnsSecret = head(this.dnsSecrets)
         this.dnsServiceExtensionProviderSecret = defaultDnsSecret
       },
     },
@@ -184,11 +184,12 @@ export default {
       get () {
         const resourceName = this.dnsProvider.secretName
         const secretName = this.getResourceRefName(resourceName)
+
         return find(this.dnsSecrets, ['metadata.secretRef.name', secretName])
       },
       set (value) {
         this.deleteResource(this.dnsProvider.secretName)
-        const secretName = get(value, 'metadata.secretRef.name')
+        const secretName = get(value, ['metadata', 'secretRef', 'name'])
         const resourceName = this.getDnsServiceExtensionResourceName(secretName)
         this.dnsProvider.secretName = resourceName
         this.setResource({
@@ -203,38 +204,38 @@ export default {
     },
     excludeDomains: {
       get () {
-        return get(this.dnsProvider, 'domains.exclude')
+        return get(this.dnsProvider, ['domains', 'exclude'])
       },
       set (value) {
-        set(this.dnsProvider, 'domains.exclude', value)
+        set(this.dnsProvider, ['domains', 'exclude'], value)
       },
     },
     includeDomains: {
       get () {
-        return get(this.dnsProvider, 'domains.include')
+        return get(this.dnsProvider, ['domains', 'include'])
       },
       set (value) {
-        set(this.dnsProvider, 'domains.include', value)
+        set(this.dnsProvider, ['domains', 'include'], value)
       },
     },
     excludeZones: {
       get () {
-        return get(this.dnsProvider, 'zones.exclude')
+        return get(this.dnsProvider, ['zones', 'exclude'])
       },
       set (value) {
-        set(this.dnsProvider, 'zones.exclude', value)
+        set(this.dnsProvider, ['zones', 'exclude'], value)
       },
     },
     includeZones: {
       get () {
-        return get(this.dnsProvider, 'zones.include')
+        return get(this.dnsProvider, ['zones', 'include'])
       },
       set (value) {
-        set(this.dnsProvider, 'zones.include', value)
+        set(this.dnsProvider, ['zones', 'include'], value)
       },
     },
     allowedSecretNames () {
-      const dnsProviderSecretName = get(this.dnsServiceExtensionProviderSecret, 'metadata.name')
+      const dnsProviderSecretName = get(this.dnsServiceExtensionProviderSecret, ['metadata', 'name'])
       const secretNames = this.dnsServiceExtensionProviders.map(({ secretName }) => this.getResourceRefName(secretName))
       return secretNames.filter(secretName => {
         return dnsProviderSecretName !== secretName
@@ -245,9 +246,6 @@ export default {
     this.v$.$touch()
   },
   methods: {
-    ...mapActions(useSecretStore, [
-      'dnsSecretsByProviderKind',
-    ]),
     getErrorMessages,
   },
 }

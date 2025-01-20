@@ -14,7 +14,7 @@ module.exports = {
       message () {
         return `expected ${value} ${phrase} to be within range ${floor} - ${ceiling}`
       },
-      pass
+      pass,
     }
-  }
+  },
 }

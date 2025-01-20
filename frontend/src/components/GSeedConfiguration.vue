@@ -48,10 +48,8 @@ import { useShootItem } from '@/composables/useShootItem'
 
 import { errorDetailsFromError } from '@/utils/error'
 
-import {
-  find,
-  map,
-} from '@/lodash'
+import map from 'lodash/map'
+import find from 'lodash/find'
 
 export default {
   components: {
@@ -63,7 +61,7 @@ export default {
       shootNamespace,
       shootName,
       shootSeedName,
-      shootCloudProviderKind,
+      shootProviderType,
     } = useShootItem()
 
     const seedStore = useSeedStore()
@@ -80,7 +78,7 @@ export default {
       }
       const selectedProvider = selectedSeed.data.type
       const sourceProvider = sourceSeed.data.type
-      const shootProvider = shootCloudProviderKind.value
+      const shootProvider = shootProviderType.value
       return selectedProvider !== sourceProvider || selectedProvider !== shootProvider
     })
 

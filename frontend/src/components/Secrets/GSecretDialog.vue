@@ -49,16 +49,6 @@ SPDX-License-Identifier: Apache-2.0
                 </div>
               </template>
             </div>
-
-            <div v-if="cloudProfiles.length !== 1 && isInfrastructureSecret">
-              <g-cloud-profile
-                ref="cloudProfile"
-                v-model="cloudProfileName"
-                :create-mode="isCreateMode"
-                :cloud-profiles="cloudProfiles"
-              />
-            </div>
-
             <slot name="secret-slot" />
             <g-message
               v-model:message="errorMessage"
@@ -129,13 +119,11 @@ import {
 
 import { useSecretStore } from '@/store/secret'
 import { useAuthzStore } from '@/store/authz'
-import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useShootStore } from '@/store/shoot'
 
 import GToolbar from '@/components/GToolbar.vue'
 import GMessage from '@/components/GMessage'
-import GCloudProfile from '@/components/GCloudProfile'
 
 import {
   messageFromErrors,
@@ -154,18 +142,13 @@ import {
   setInputFocus,
 } from '@/utils'
 
-import {
-  cloneDeep,
-  get,
-  head,
-  sortBy,
-  filter,
-  includes,
-} from '@/lodash'
+import includes from 'lodash/includes'
+import filter from 'lodash/filter'
+import get from 'lodash/get'
+import cloneDeep from 'lodash/cloneDeep'
 
 export default {
   components: {
-    GCloudProfile,
     GMessage,
     GToolbar,
   },
@@ -185,7 +168,7 @@ export default {
       type: Object,
       required: true,
     },
-    vendor: {
+    providerType: {
       type: String,
       required: true,
     },
@@ -212,7 +195,6 @@ export default {
   },
   data () {
     return {
-      selectedCloudProfile: undefined,
       name: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined,
@@ -242,21 +224,8 @@ export default {
       'infrastructureSecretList',
       'dnsSecretList',
     ]),
-    ...mapState(useCloudProfileStore, ['sortedInfrastructureKindList']),
     ...mapState(useGardenerExtensionStore, ['dnsProviderTypes']),
     ...mapState(useShootStore, ['shootList']),
-    cloudProfileName: {
-      get () {
-        return this.selectedCloudProfile
-      },
-      set (cloudProfileName) {
-        this.selectedCloudProfile = cloudProfileName
-        this.$emit('cloud-profile-name', cloudProfileName)
-      },
-    },
-    cloudProfiles () {
-      return sortBy(this.cloudProfilesByCloudProviderKind(this.vendor), [item => item.metadata.name])
-    },
     visible: {
       get () {
         return this.modelValue
@@ -284,7 +253,7 @@ export default {
       return this.shootsByInfrastructureSecret.length
     },
     shootsByInfrastructureSecret () {
-      const name = get(this.secret, 'metadata.name')
+      const name = get(this.secret, ['metadata', 'name'])
       return filter(this.shootList, ['spec.secretBindingName', name])
     },
     helpContainerStyles () {
@@ -299,10 +268,10 @@ export default {
       }
     },
     isInfrastructureSecret () {
-      return includes(this.sortedInfrastructureKindList, this.vendor)
+      return includes(this.sortedProviderTypeList, this.providerType)
     },
     isDnsProviderSecret () {
-      return includes(this.dnsProviderTypes, this.vendor)
+      return includes(this.dnsProviderTypes, this.providerType)
     },
   },
   mounted () {
@@ -312,9 +281,6 @@ export default {
     ...mapActions(useSecretStore, [
       'createSecret',
       'updateSecret',
-    ]),
-    ...mapActions(useCloudProfileStore, [
-      'cloudProfilesByCloudProviderKind',
     ]),
     hide () {
       this.visible = false
@@ -358,17 +324,10 @@ export default {
             name: this.name,
             namespace: this.namespace,
           },
+          provider: {
+            type: this.providerType,
+          },
         }
-
-        if (this.isInfrastructureSecret) {
-          metadata.cloudProviderKind = this.vendor
-          metadata.cloudProfileName = this.cloudProfileName
-        }
-
-        if (this.isDnsProviderSecret) {
-          metadata.dnsProviderName = this.vendor
-        }
-
         return this.createSecret({ metadata, data: this.data })
       } else {
         const metadata = cloneDeep(this.secret.metadata)
@@ -378,24 +337,12 @@ export default {
     },
     reset () {
       this.v$.$reset()
-      const cloudProfileRef = this.$refs.cloudProfile
-      if (cloudProfileRef) {
-        cloudProfileRef.v$.$reset()
-      }
 
       if (this.isCreateMode) {
-        this.name = `my-${this.vendor}-secret`
-
-        if (this.cloudProfiles.length === 1) {
-          this.cloudProfileName = get(head(this.cloudProfiles), 'metadata.name')
-        } else {
-          this.cloudProfileName = undefined
-        }
-
+        this.name = `my-${this.providerType}-secret`
         setDelayedInputFocus(this, 'name')
       } else {
-        this.name = get(this.secret, 'metadata.name')
-        this.cloudProfileName = get(this.secret, 'metadata.cloudProfileName')
+        this.name = get(this.secret, ['metadata', 'name'])
       }
 
       this.errorMessage = undefined

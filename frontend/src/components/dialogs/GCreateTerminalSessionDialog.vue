@@ -112,15 +112,13 @@ import { useTerminalSplitpanes } from '@/composables/useTerminalSplitpanes'
 
 import { TargetEnum } from '@/utils'
 
-import {
-  filter,
-  get,
-  includes,
-  isEmpty,
-  pick,
-  find,
-  some,
-} from '@/lodash'
+import some from 'lodash/some'
+import find from 'lodash/find'
+import pick from 'lodash/pick'
+import isEmpty from 'lodash/isEmpty'
+import includes from 'lodash/includes'
+import get from 'lodash/get'
+import filter from 'lodash/filter'
 
 export default {
   components: {
@@ -263,7 +261,7 @@ export default {
           })
           const serviceAccountName = `system:serviceaccount:${this.shootNamespace}:dashboard-webterminal`
           const member = find(projectMembers, ['username', serviceAccountName])
-          const roles = get(member, 'roles')
+          const roles = get(member, ['roles'])
           if (includes(roles, 'admin') && includes(roles, 'serviceaccountmanager')) {
             return true
           }

@@ -64,7 +64,7 @@ import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import { useShootItem } from '@/composables/useShootItem'
 
-import { some } from '@/lodash'
+import some from 'lodash/some'
 
 export default {
   inject: [

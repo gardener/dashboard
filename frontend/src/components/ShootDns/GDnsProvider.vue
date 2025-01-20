@@ -66,10 +66,8 @@ import GVendorIcon from '@/components/GVendorIcon'
 import GSecretDetailsItemContent from '@/components/Secrets/GSecretDetailsItemContent.vue'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 
-import {
-  join,
-  get,
-} from '@/lodash'
+import get from 'lodash/get'
+import join from 'lodash/join'
 
 export default {
   components: {
@@ -130,25 +128,25 @@ export default {
         title: 'Primary DNS Provider',
         value: this.primary ? 'true' : 'false',
       })
-      if (get(this.domains, 'include.length')) {
+      if (get(this.domains, ['include', 'length'])) {
         descriptions.push({
           title: 'Include Domains',
           value: join(this.domains.include, ', '),
         })
       }
-      if (get(this.domains, 'exclude.length')) {
+      if (get(this.domains, ['exclude', 'length'])) {
         descriptions.push({
           title: 'Exclude Domains',
           value: join(this.domains.exclude, ', '),
         })
       }
-      if (get(this.zones, 'include.length')) {
+      if (get(this.zones, ['include', 'length'])) {
         descriptions.push({
           title: 'Include Zones',
           value: join(this.zones.include, ', '),
         })
       }
-      if (get(this.zones, 'exclude.length')) {
+      if (get(this.zones, ['exclude', 'length'])) {
         descriptions.push({
           title: 'Exclude Zones',
           value: join(this.zones.exclude, ', '),

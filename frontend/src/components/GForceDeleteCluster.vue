@@ -51,7 +51,7 @@ SPDX-License-Identifier: Apache-2.0
     <template #label>
       <span>
         I confirm that I read the message above and deleted all resources
-        in the underlying <code>{{ shootCloudProviderKind }}</code> account
+        in the underlying <code>{{ shootProviderType }}</code> account
         <code>
           <g-shoot-secret-name
             :namespace="shootNamespace"
@@ -91,7 +91,7 @@ import {
   errorCodesFromArray,
 } from '@/utils/errorCodes'
 
-import { filter } from '@/lodash'
+import filter from 'lodash/filter'
 
 export default {
   components: {
@@ -104,7 +104,7 @@ export default {
       shootName,
       shootCreatedBy,
       shootSecretBindingName,
-      shootCloudProviderKind,
+      shootProviderType,
       isShootReconciliationDeactivated,
       shootLastErrors,
     } = useShootItem()
@@ -130,7 +130,7 @@ export default {
       shootName,
       shootCreatedBy,
       shootSecretBindingName,
-      shootCloudProviderKind,
+      shootProviderType,
       isShootReconciliationDeactivated,
       shootLastErrors,
       confirmed,

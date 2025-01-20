@@ -80,11 +80,9 @@ import { useShootStatusCredentialRotation } from '@/composables/useShootStatusCr
 
 import { errorDetailsFromError } from '@/utils/error'
 
-import {
-  get,
-  includes,
-  compact,
-} from '@/lodash'
+import compact from 'lodash/compact'
+import includes from 'lodash/includes'
+import get from 'lodash/get'
 
 export default {
   components: {
@@ -108,7 +106,6 @@ export default {
       shootNamespace,
       shootAnnotations,
       shootGardenerOperation,
-      shootEnableStaticTokenKubeconfig,
       isShootStatusHibernated,
       hasShootWorkerGroups,
       sshAccessEnabled,
@@ -125,11 +122,11 @@ export default {
     const authnStore = useAuthnStore()
 
     const startOperation = computed(() => {
-      return get(rotationType.value, 'startOperation')
+      return get(rotationType.value, ['startOperation'])
     })
 
     const completionOperation = computed(() => {
-      return get(rotationType.value, 'completionOperation')
+      return get(rotationType.value, ['completionOperation'])
     })
 
     const operation = computed(() => {
@@ -274,18 +271,6 @@ export default {
 
     const componentTexts = computed(() => {
       const allComponentTexts = {
-        'rotate-kubeconfig-credentials': {
-          caption: showLoadingIndicator.value
-            ? 'Rotating kubeconfig credentials'
-            : 'Start Kubeconfig Rotation',
-          errorMessage: 'Could not start the rotation of kubeconfig credentials',
-          successMessage: `Rotation of kubeconfig credentials started for ${shootName.value}`,
-          heading: 'Do you want to start the rotation of kubeconfig credentials?',
-          actions: [
-            'The current kubeconfig credentials will be revoked',
-            'New kubeconfig credentials will be generated',
-          ],
-        },
         'rotate-ca-start': {
           caption: showLoadingIndicator.value
             ? 'Preparing certificate authorities rotation'
@@ -392,9 +377,6 @@ export default {
         successMessage: `Preparing credential rotation for ${shootName.value}`,
         heading: 'Do you want to prepare the rotation of all credentials?',
         actions: [
-          ...shootEnableStaticTokenKubeconfig.value
-            ? allComponentTexts['rotate-kubeconfig-credentials'].actions
-            : [],
           ...allComponentTexts['rotate-ca-start'].actions,
           ...allComponentTexts['rotate-observability-credentials'].actions,
           ...hasShootWorkerGroups.value && sshAccessEnabled.value

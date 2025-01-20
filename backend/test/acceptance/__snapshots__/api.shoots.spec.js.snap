@@ -612,68 +612,6 @@ exports[`api shoots should replace shoot 2`] = `
 }
 `;
 
-exports[`api shoots should replace shoot kubernetes enableStaticTokenKubeconfig 1`] = `
-[
-  [
-    {
-      ":authority": "kubernetes:6443",
-      ":method": "patch",
-      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot",
-      ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
-      "content-type": "application/json-patch+json",
-    },
-    [
-      {
-        "op": "replace",
-        "path": "/spec/kubernetes/enableStaticTokenKubeconfig",
-        "value": true,
-      },
-    ],
-  ],
-]
-`;
-
-exports[`api shoots should replace shoot kubernetes enableStaticTokenKubeconfig 2`] = `
-{
-  "metadata": {
-    "annotations": {
-      "gardener.cloud/created-by": "bar@example.org",
-    },
-    "name": "barShoot",
-    "namespace": "garden-foo",
-    "resourceVersion": "43",
-    "uid": 2,
-  },
-  "spec": {
-    "cloudProfileName": "infra1-profileName",
-    "hibernation": {
-      "enabled": false,
-    },
-    "kubernetes": {
-      "enableStaticTokenKubeconfig": true,
-      "version": "1.16.0",
-    },
-    "provider": {
-      "type": "fooInfra",
-    },
-    "purpose": "barPurpose",
-    "region": "foo-west",
-    "secretBindingName": "foo-infra1",
-    "seedName": "infra1-seed",
-  },
-  "status": {
-    "advertisedAddresses": [
-      {
-        "name": "external",
-        "url": "https://api.barShoot.foo.shoot.test",
-      },
-    ],
-    "technicalID": "shoot--foo--barShoot",
-  },
-}
-`;
-
 exports[`api shoots should replace shoot kubernetes version 1`] = `
 [
   [
@@ -1244,7 +1182,7 @@ exports[`api shoots should return all shoots for a non-admin user 2`] = `
         "purpose": "fooPurpose",
         "region": "foo-west",
         "secretBindingName": "barSecretName",
-        "seedName": "infra4-seed-without-secretRef",
+        "seedName": "infra1-seed",
       },
       "status": {
         "technicalID": "shoot--foo--dummyShoot",
@@ -1388,7 +1326,7 @@ exports[`api shoots should return all shoots for an admin user 2`] = `
         "purpose": "fooPurpose",
         "region": "foo-west",
         "secretBindingName": "barSecretName",
-        "seedName": "infra4-seed-without-secretRef",
+        "seedName": "infra1-seed",
       },
       "status": {
         "technicalID": "shoot--foo--dummyShoot",
@@ -1494,7 +1432,7 @@ exports[`api shoots should return all unhealthy shoots 2`] = `
         "purpose": "fooPurpose",
         "region": "foo-west",
         "secretBindingName": "barSecretName",
-        "seedName": "infra4-seed-without-secretRef",
+        "seedName": "infra1-seed",
       },
       "status": {
         "technicalID": "shoot--foo--dummyShoot",
@@ -1512,15 +1450,6 @@ exports[`api shoots should return shoot info 1`] = `
       ":authority": "kubernetes:6443",
       ":method": "get",
       ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot",
-      ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
-    },
-  ],
-  [
-    {
-      ":authority": "kubernetes:6443",
-      ":method": "get",
-      ":path": "/api/v1/namespaces/garden-foo/secrets/barShoot.kubeconfig",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
@@ -1602,16 +1531,7 @@ exports[`api shoots should return shoot info without gardenlogin kubeconfig 1`] 
     {
       ":authority": "kubernetes:6443",
       ":method": "get",
-      ":path": "/api/v1/namespaces/garden-foo/secrets/dummyShoot.kubeconfig",
-      ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
-    },
-  ],
-  [
-    {
-      ":authority": "kubernetes:6443",
-      ":method": "get",
-      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden/shoots/infra4-seed-without-secretRef",
+      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden/shoots/infra1-seed",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
@@ -1655,44 +1575,8 @@ exports[`api shoots should return shoot info without gardenlogin kubeconfig: bod
 {
   "canLinkToSeed": false,
   "dashboardUrlPath": "/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/",
-  "kubeconfig": Any<String>,
   "monitoringPassword": "pass-garden-foo-dummyShoot.monitoring",
   "monitoringUsername": "user-garden-foo-dummyShoot.monitoring",
-}
-`;
-
-exports[`api shoots should return shoot info without gardenlogin kubeconfig: body.kubeconfig 1`] = `
-{
-  "apiVersion": "v1",
-  "clusters": [
-    {
-      "cluster": {
-        "certificate-authority-data": "Y2VydGlmaWNhdGUtYXV0aG9yaXR5LWRhdGE=",
-        "server": "https://api.dummyShoot.foo.shoot.cluster",
-      },
-      "name": "shoot--foo--dummyShoot",
-    },
-  ],
-  "contexts": [
-    {
-      "context": {
-        "cluster": "shoot--foo--dummyShoot",
-        "user": "shoot--foo--dummyShoot",
-      },
-      "name": "shoot--foo--dummyShoot",
-    },
-  ],
-  "current-context": "shoot--foo--dummyShoot",
-  "kind": "Config",
-  "users": [
-    {
-      "name": "shoot--foo--dummyShoot",
-      "user": {
-        "client-certificate-data": "Y2xpZW50LWNlcnRpZmljYXRlLWRhdGE=",
-        "client-key-data": "Y2xpZW50LWtleS1kYXRh",
-      },
-    },
-  ],
 }
 `;
 
@@ -1700,45 +1584,9 @@ exports[`api shoots should return shoot info: body 1`] = `
 {
   "canLinkToSeed": false,
   "dashboardUrlPath": "/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/",
-  "kubeconfig": Any<String>,
   "kubeconfigGardenlogin": Any<String>,
   "monitoringPassword": "pass-garden-foo-barShoot.monitoring",
   "monitoringUsername": "user-garden-foo-barShoot.monitoring",
-}
-`;
-
-exports[`api shoots should return shoot info: body.kubeconfig 1`] = `
-{
-  "apiVersion": "v1",
-  "clusters": [
-    {
-      "cluster": {
-        "certificate-authority-data": "Y2VydGlmaWNhdGUtYXV0aG9yaXR5LWRhdGE=",
-        "server": "https://api.barShoot.foo.shoot.cluster",
-      },
-      "name": "shoot--foo--barShoot",
-    },
-  ],
-  "contexts": [
-    {
-      "context": {
-        "cluster": "shoot--foo--barShoot",
-        "user": "shoot--foo--barShoot",
-      },
-      "name": "shoot--foo--barShoot",
-    },
-  ],
-  "current-context": "shoot--foo--barShoot",
-  "kind": "Config",
-  "users": [
-    {
-      "name": "shoot--foo--barShoot",
-      "user": {
-        "client-certificate-data": "Y2xpZW50LWNlcnRpZmljYXRlLWRhdGE=",
-        "client-key-data": "Y2xpZW50LWtleS1kYXRh",
-      },
-    },
-  ],
 }
 `;
 
@@ -1947,7 +1795,7 @@ exports[`api shoots should return shoots for a single namespace 2`] = `
         "purpose": "fooPurpose",
         "region": "foo-west",
         "secretBindingName": "barSecretName",
-        "seedName": "infra4-seed-without-secretRef",
+        "seedName": "infra1-seed",
       },
       "status": {
         "technicalID": "shoot--foo--dummyShoot",

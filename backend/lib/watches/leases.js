@@ -39,7 +39,7 @@ module.exports = (io, informer, { signal }) => {
     const { projectName, name } = event.object.metadata
     const namespace = cache.getProjectNamespace(projectName)
     const rooms = [
-      `shoots;${namespace}/${name}`
+      `shoots;${namespace}/${name}`,
     ]
     nsp.to(rooms).emit('comments', event)
   })
@@ -50,7 +50,7 @@ module.exports = (io, informer, { signal }) => {
   }, {
     interval: pollIntervalSeconds * 1000 || 0,
     throttle: syncThrottleSeconds * 1000 || 0,
-    signal
+    signal,
   })
   syncManager.sync()
 

@@ -39,7 +39,7 @@ class MemberManager {
 
     if (item.kind === 'ServiceAccount') {
       item.extend({
-        kubeconfig: await this.getKubeconfig(item)
+        kubeconfig: await this.getKubeconfig(item),
       })
     }
     return item.member
@@ -57,7 +57,7 @@ class MemberManager {
     if (item.kind === 'ServiceAccount') {
       await this.createServiceAccount(item, {
         createdBy: this.userId,
-        description
+        description,
       })
     }
     if (roles.length) {
@@ -80,10 +80,10 @@ class MemberManager {
       if (item.extensions?.orphaned) {
         await this.createServiceAccount(item, {
           createdBy: this.userId,
-          description
+          description,
         })
         item.extend({
-          orphaned: false
+          orphaned: false,
         })
       } else {
         await this.updateServiceAccount(item, { description })
@@ -135,7 +135,7 @@ class MemberManager {
 
     const annotations = {
       'dashboard.gardener.cloud/created-by': createdBy,
-      'dashboard.gardener.cloud/description': description
+      'dashboard.gardener.cloud/description': description,
     }
 
     let serviceAccount
@@ -144,8 +144,8 @@ class MemberManager {
         metadata: {
           name,
           namespace,
-          annotations
-        }
+          annotations,
+        },
       })
     } catch (err) {
       if (!isHttpError(err) || err.statusCode !== 409) {
@@ -156,22 +156,22 @@ class MemberManager {
       // in this case we just want to restore the annotations
       serviceAccount = await this.client.core.serviceaccounts.mergePatch(namespace, name, {
         metadata: {
-          annotations
-        }
+          annotations,
+        },
       })
     }
 
     const {
       metadata: {
-        creationTimestamp
-      }
+        creationTimestamp,
+      },
     } = serviceAccount
 
     item.extend({
       createdBy,
       creationTimestamp,
       description,
-      orphaned: false
+      orphaned: false,
     })
     this.subjectList.set(item.id, item)
 
@@ -204,20 +204,20 @@ class MemberManager {
         namespace,
         annotations: {
           'dashboard.gardener.cloud/created-by': createdBy,
-          'dashboard.gardener.cloud/description': description
-        }
-      }
+          'dashboard.gardener.cloud/description': description,
+        },
+      },
     })
     const {
       metadata: {
-        creationTimestamp
-      }
+        creationTimestamp,
+      },
     } = serviceAccount
 
     item.extend({
       createdBy,
       creationTimestamp,
-      description
+      description,
     })
     this.subjectList.set(item.id, item)
   }
@@ -233,9 +233,9 @@ class MemberManager {
       await this.client.core.serviceaccounts.mergePatch(namespace, name, {
         metadata: {
           annotations: {
-            'dashboard.gardener.cloud/description': description
-          }
-        }
+            'dashboard.gardener.cloud/description': description,
+          },
+        },
       })
     }
   }
@@ -256,7 +256,7 @@ class MemberManager {
   }
 
   async getKubeconfig (item) {
-    const defaultTokenExpiration = _.get(config, 'frontend.serviceAccountDefaultTokenExpiration', 7776000) // default is 90 days
+    const defaultTokenExpiration = _.get(config, ['frontend', 'serviceAccountDefaultTokenExpiration'], 7776000) // default is 90 days
 
     const { namespace, name } = Member.parseUsername(item.id)
 
@@ -265,9 +265,9 @@ class MemberManager {
       kind,
       apiVersion,
       spec: {
-        audiences: _.get(config, 'tokenRequestAudiences'),
-        expirationSeconds: defaultTokenExpiration
-      }
+        audiences: _.get(config, ['tokenRequestAudiences']),
+        expirationSeconds: defaultTokenExpiration,
+      },
     }
 
     const tokenRequest = await this.client.core.serviceaccounts.createTokenRequest(namespace, name, body)
@@ -286,7 +286,7 @@ class MemberManager {
       namespace,
       token,
       server,
-      caData
+      caData,
     })
   }
 
@@ -316,10 +316,10 @@ class MemberManager {
     const name = findProjectByNamespace(namespace).metadata.name
     const [
       project,
-      { items: serviceAccounts }
+      { items: serviceAccounts },
     ] = await Promise.all([
       client['core.gardener.cloud'].projects.get(name),
-      client.core.serviceaccounts.list(namespace)
+      client.core.serviceaccounts.list(namespace),
     ])
     return new this(client, id, project, serviceAccounts)
   }

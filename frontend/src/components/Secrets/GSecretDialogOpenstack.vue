@@ -10,12 +10,12 @@ SPDX-License-Identifier: Apache-2.0
     :data="secretData"
     :secret-validations="v$"
     :secret="secret"
-    :vendor="vendor"
+    :provider-type="providerType"
     :create-title="`Add new ${name} Secret`"
     :replace-title="`Replace ${name} Secret`"
   >
     <template #secret-slot>
-      <div v-if="vendor==='openstack-designate'">
+      <div v-if="providerType==='openstack-designate'">
         <v-text-field
           v-model="authURL"
           color="primary"
@@ -141,7 +141,7 @@ SPDX-License-Identifier: Apache-2.0
     </template>
 
     <template #help-slot>
-      <div v-if="vendor==='openstack'">
+      <div v-if="providerType==='openstack'">
         <p>
           Before you can provision and access a Kubernetes cluster on OpenStack, you need to add account credentials.
           The Gardener needs the credentials to provision and operate the OpenStack infrastructure for your Kubernetes cluster.
@@ -150,7 +150,7 @@ SPDX-License-Identifier: Apache-2.0
           Ensure that the user has privileges to <strong>create, modify and delete VMs</strong>.
         </p>
       </div>
-      <div v-if="vendor==='openstack-designate'">
+      <div v-if="providerType==='openstack-designate'">
         <p>Make sure that you configure your account for DNS usage.</p>
         <p>Required Roles: dns_viewer, dns_webmaster</p>
       </div>
@@ -199,7 +199,7 @@ export default {
     secret: {
       type: Object,
     },
-    vendor: {
+    providerType: {
       type: String,
     },
   },
@@ -255,7 +255,7 @@ export default {
     rules.password = withFieldName('Password', passwordRules)
 
     const authURLRules = {
-      required: requiredIf(() => this.vendor === 'openstack-designate'),
+      required: requiredIf(() => this.providerType === 'openstack-designate'),
     }
     rules.authURL = withFieldName('Auth URL', authURLRules)
 
@@ -314,10 +314,10 @@ export default {
       return !this.secret
     },
     name () {
-      if (this.vendor === 'openstack') {
+      if (this.providerType === 'openstack') {
         return 'OpenStack'
       }
-      if (this.vendor === 'openstack-designate') {
+      if (this.providerType === 'openstack-designate') {
         return 'OpenStack Designate'
       }
       return undefined

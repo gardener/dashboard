@@ -46,6 +46,11 @@ export function fetchWrapper (url, { method = 'GET', cache = 'no-cache', headers
     }
   }
   promise = promise.then(args => {
+    try {
+      new URL(args[0]) // eslint-disable-line no-new
+    } catch (err) {
+      args[0] = new URL(args[0], window.location.origin)
+    }
     const request = new Request(...args)
     return fetch(request).then(fulfilledFn(request), rejectedFn(request))
   })
@@ -135,5 +140,3 @@ export function createError (status, message, properties = {}) {
   }
   return err
 }
-
-export default fetchWrapper

@@ -16,7 +16,7 @@ describe('gardener-dashboard', function () {
 
     beforeEach(() => {
       templates = [
-        'vpa'
+        'vpa',
       ]
     })
 
@@ -25,10 +25,10 @@ describe('gardener-dashboard', function () {
         global: {
           dashboard: {
             vpa: {
-              dummy: false
-            }
-          }
-        }
+              dummy: false,
+            },
+          },
+        },
       }
       const documents = await renderTemplates(templates, values)
       expect(documents).toHaveLength(1)
@@ -54,10 +54,10 @@ describe('gardener-dashboard', function () {
               minAllowedCpu: '30m',
               minAllowedMemory: '60Mi',
               maxAllowedCpu: '1000m',
-              maxAllowedMemory: '1200Mi'
-            }
-          }
-        }
+              maxAllowedMemory: '1200Mi',
+            },
+          },
+        },
       }
       const documents = await renderTemplates(templates, values)
       expect(documents).toHaveLength(1)

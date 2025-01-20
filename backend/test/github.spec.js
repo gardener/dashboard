@@ -71,36 +71,36 @@ describe('github', () => {
           const expectedBody = {
             spec: {
               holderIdentity,
-              renewTime: microDateStr
-            }
+              renewTime: microDateStr,
+            },
           }
-          expect(mergePatchStub).toBeCalledWith(namespace, leaseName, expectedBody)
+          expect(mergePatchStub).toHaveBeenCalledWith(namespace, leaseName, expectedBody)
         })
 
         it('should update the lease object for an issue_comment event', async () => {
           const expectedBody = {
             spec: {
               holderIdentity,
-              renewTime: microDateStr
-            }
+              renewTime: microDateStr,
+            },
           }
 
           await handleGithubEvent('issue_comment', { comment: { updated_at: dateStr } })
 
-          expect(mergePatchStub).toBeCalledWith(namespace, leaseName, expectedBody)
+          expect(mergePatchStub).toHaveBeenCalledWith(namespace, leaseName, expectedBody)
         })
 
         it('should rethrow errors from underlying kube client', async () => {
           const expectedBody = {
             spec: {
               holderIdentity,
-              renewTime: microDateStr
-            }
+              renewTime: microDateStr,
+            },
           }
           mergePatchStub.mockRejectedValueOnce(createError(403, 'Forbidden'))
 
           await expect(handleGithubEvent('issue_comment', { comment: { updated_at: dateStr } })).rejects.toThrow(InternalServerError)
-          expect(mergePatchStub).toBeCalledWith(namespace, leaseName, expectedBody)
+          expect(mergePatchStub).toHaveBeenCalledWith(namespace, leaseName, expectedBody)
         })
       })
 
@@ -115,14 +115,14 @@ describe('github', () => {
 
           const expectedBody = {
             metadata: {
-              name: leaseName
+              name: leaseName,
             },
             spec: {
               holderIdentity,
-              renewTime: microDateStr
-            }
+              renewTime: microDateStr,
+            },
           }
-          expect(createStub).toBeCalledWith(namespace, expectedBody)
+          expect(createStub).toHaveBeenCalledWith(namespace, expectedBody)
         })
       })
     })
@@ -167,7 +167,7 @@ describe('github', () => {
 
         it('should fail with an assertion error', () => {
           expect(() => verify(req, res, body)).toThrow(new AssertionError({
-            message: 'Property \'gitHub.webhookSecret\' not configured on dashboard backend'
+            message: 'Property \'gitHub.webhookSecret\' not configured on dashboard backend',
           }))
         })
       })
@@ -195,7 +195,7 @@ describe('github', () => {
       syncManagerOpts = {
         signal: abortController.signal,
         interval: 10_000,
-        throttle: 2_000
+        throttle: 2_000,
       }
     })
 
@@ -213,8 +213,8 @@ describe('github', () => {
 
       // eslint-disable-next-line no-unused-vars
       const syncManager = new SyncManager(loadTicketsStub, syncManagerOpts)
-      expect(signal.addEventListener).toBeCalledTimes(1)
-      expect(signal.addEventListener).toBeCalledWith('abort', expect.any(Function), { once: true })
+      expect(signal.addEventListener).toHaveBeenCalledTimes(1)
+      expect(signal.addEventListener).toHaveBeenCalledWith('abort', expect.any(Function), { once: true })
     })
 
     it('should be "ready" after first successful sync', async () => {
@@ -222,7 +222,7 @@ describe('github', () => {
       syncManager.sync()
 
       await advanceTimersAndFlushPromises(0)
-      expect(loadTicketsStub).toBeCalledTimes(1)
+      expect(loadTicketsStub).toHaveBeenCalledTimes(1)
       await advanceTimersAndFlushPromises(loadTicketsDuration)
       expect(syncManager.ready).toEqual(true)
     })
@@ -237,7 +237,7 @@ describe('github', () => {
       jest.advanceTimersByTime(loadTicketsDuration)
       await flushPromises()
       expect(syncManager.ready).toEqual(false)
-      expect(logger.error).toBeCalledTimes(1)
+      expect(logger.error).toHaveBeenCalledTimes(1)
     })
 
     describe('interval loading of tickets', () => {
@@ -250,13 +250,13 @@ describe('github', () => {
 
         syncManager.sync()
         await advanceTimersAndFlushPromises(loadTicketsDuration)
-        expect(loadTicketsStub).toBeCalledTimes(1)
+        expect(loadTicketsStub).toHaveBeenCalledTimes(1)
 
         await advanceTimersAndFlushPromises(syncManagerOpts.interval)
         // When the interval is over a new timeout - in this case - with delay of 0 ms is scheduled.
         // jest.advanceTimersByTime(0) does not trigger setTimeout(..., 0). So use 1(ms) here.
         await advanceTimersAndFlushPromises(1)
-        expect(loadTicketsStub).toBeCalledTimes(2)
+        expect(loadTicketsStub).toHaveBeenCalledTimes(2)
       })
 
       it('interval should be reset upon sync call', async () => {
@@ -265,21 +265,21 @@ describe('github', () => {
 
         syncManager.sync()
         await advanceTimersAndFlushPromises(loadTicketsDuration)
-        expect(loadTicketsStub).toBeCalledTimes(1)
+        expect(loadTicketsStub).toHaveBeenCalledTimes(1)
 
         // reset interval by calling sync manually
         await advanceTimersAndFlushPromises(incompleteInterval)
         syncManager.sync()
         await advanceTimersAndFlushPromises(loadTicketsDuration)
-        expect(loadTicketsStub).toBeCalledTimes(2)
+        expect(loadTicketsStub).toHaveBeenCalledTimes(2)
 
         await advanceTimersAndFlushPromises(incompleteInterval)
-        expect(loadTicketsStub).toBeCalledTimes(2)
+        expect(loadTicketsStub).toHaveBeenCalledTimes(2)
 
         // advance timers so that one full sync interval has passed since last sync()-call
         await advanceTimersAndFlushPromises(syncManagerOpts.interval - incompleteInterval)
         await advanceTimersAndFlushPromises(1)
-        expect(loadTicketsStub).toBeCalledTimes(3)
+        expect(loadTicketsStub).toHaveBeenCalledTimes(3)
       })
 
       it('should stop interval loading on abort', async () => {
@@ -287,12 +287,12 @@ describe('github', () => {
 
         syncManager.sync()
         await advanceTimersAndFlushPromises(loadTicketsDuration)
-        expect(loadTicketsStub).toBeCalledTimes(1)
+        expect(loadTicketsStub).toHaveBeenCalledTimes(1)
 
         abortController.abort()
 
         await advanceTimersAndFlushPromises(syncManagerOpts.interval * 2)
-        expect(loadTicketsStub).toBeCalledTimes(1)
+        expect(loadTicketsStub).toHaveBeenCalledTimes(1)
       })
     })
 
@@ -306,12 +306,12 @@ describe('github', () => {
 
         syncManager.sync()
         await advanceTimersAndFlushPromises(1)
-        expect(loadTicketsStub).toBeCalledTimes(1)
+        expect(loadTicketsStub).toHaveBeenCalledTimes(1)
 
         syncManager.sync() // still within the throttle period after which it should execute
 
         await advanceTimersAndFlushPromises(syncManagerOpts.throttle)
-        expect(loadTicketsStub).toBeCalledTimes(2)
+        expect(loadTicketsStub).toHaveBeenCalledTimes(2)
       })
 
       it('should run multiple loadTicket invocations in parallel', async () => {
@@ -323,7 +323,7 @@ describe('github', () => {
           await advanceTimersAndFlushPromises(1)
         }
 
-        expect(loadTicketsStub).toBeCalledTimes(3)
+        expect(loadTicketsStub).toHaveBeenCalledTimes(3)
       })
 
       it('should idle if no new or pending sync calls occure', async () => {
@@ -332,11 +332,11 @@ describe('github', () => {
         syncManager.sync()
 
         await advanceTimersAndFlushPromises(syncManagerOpts.throttle)
-        expect(loadTicketsStub).toBeCalledTimes(1)
+        expect(loadTicketsStub).toHaveBeenCalledTimes(1)
 
         jest.runAllTimers()
         await flushPromises()
-        expect(loadTicketsStub).toBeCalledTimes(1)
+        expect(loadTicketsStub).toHaveBeenCalledTimes(1)
       })
 
       it('should not execute pending throttled loads after abort', async () => {
@@ -345,12 +345,12 @@ describe('github', () => {
         syncManager.sync()
         syncManager.sync()
         await advanceTimersAndFlushPromises(loadTicketsDuration)
-        expect(loadTicketsStub).toBeCalledTimes(1)
+        expect(loadTicketsStub).toHaveBeenCalledTimes(1)
 
         abortController.abort()
 
         await advanceTimersAndFlushPromises(syncManagerOpts.throttle - loadTicketsDuration)
-        expect(loadTicketsStub).toBeCalledTimes(1)
+        expect(loadTicketsStub).toHaveBeenCalledTimes(1)
       })
     })
   })
@@ -364,7 +364,7 @@ describe('github', () => {
       expect(mockOctokitPaginateGraphQL).toHaveBeenCalledTimes(1)
       expect(mockOctokitPaginateGraphQL.mock.calls[0]).toEqual([
         expect.stringMatching(/^query paginate\(\$cursor: String, \$owner: String!, \$repo: String!, \$number: Int!\)/),
-        { owner, repo, number }
+        { owner, repo, number },
       ])
       expect(comments).toHaveLength(1)
       expect(comments[0].body).toBe('This is comment 2 for issue #2')

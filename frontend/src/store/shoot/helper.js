@@ -16,7 +16,7 @@ import {
   isStatusProgressing,
   isReconciliationDeactivated,
   getCreatedBy,
-  isShootStatusHibernated,
+  isStatusHibernated,
   getIssueSince,
 } from '@/utils'
 import {
@@ -25,19 +25,17 @@ import {
   errorCodesFromArray,
 } from '@/utils/errorCodes'
 
-import {
-  find,
-  includes,
-  head,
-  get,
-  map,
-  filter,
-  some,
-  toLower,
-  join,
-  padStart,
-  orderBy,
-} from '@/lodash'
+import find from 'lodash/find'
+import includes from 'lodash/includes'
+import head from 'lodash/head'
+import get from 'lodash/get'
+import map from 'lodash/map'
+import filter from 'lodash/filter'
+import some from 'lodash/some'
+import toLower from 'lodash/toLower'
+import join from 'lodash/join'
+import padStart from 'lodash/padStart'
+import orderBy from 'lodash/orderBy'
 
 const tokenizePattern = /(-?"([^"]|"")*"|\S+)/g
 
@@ -103,7 +101,7 @@ export function onlyAllShootsWithIssues (state, context) {
   const {
     authzStore,
   } = context
-  return authzStore.namespace === '_all' && get(state.shootListFilters, 'onlyShootsWithIssues', true)
+  return authzStore.namespace === '_all' && get(state.shootListFilters, ['onlyShootsWithIssues'], true)
 }
 
 export function getFilteredUids (state, context) {
@@ -115,7 +113,7 @@ export function getFilteredUids (state, context) {
 
   // filter function
   const notProgressing = item => {
-    return !isStatusProgressing(get(item, 'metadata', {}))
+    return !isStatusProgressing(get(item, ['metadata'], {}))
   }
 
   const noUserError = item => {
@@ -123,30 +121,30 @@ export function getFilteredUids (state, context) {
     if (ignoreIssues) {
       return false
     }
-    const lastErrors = get(item, 'status.lastErrors', [])
+    const lastErrors = get(item, ['status', 'lastErrors'], [])
     const allLastErrorCodes = errorCodesFromArray(lastErrors)
     if (isTemporaryError(allLastErrorCodes)) {
       return false
     }
-    const conditions = get(item, 'status.conditions', [])
+    const conditions = get(item, ['status', 'conditions'], [])
     const allConditionCodes = errorCodesFromArray(conditions)
 
-    const constraints = get(item, 'status.constraints', [])
+    const constraints = get(item, ['status', 'constraints'], [])
     const allConstraintCodes = errorCodesFromArray(constraints)
 
     return !(isUserError(allLastErrorCodes) || isUserError(allConditionCodes) || isUserError(allConstraintCodes))
   }
 
   const reconciliationNotDeactivated = item => {
-    return !isReconciliationDeactivated(get(item, 'metadata', {}))
+    return !isReconciliationDeactivated(get(item, ['metadata'], {}))
   }
 
   const hasTicketsWithoutHideLabel = item => {
-    const hideClustersWithLabels = get(configStore.ticket, 'hideClustersWithLabels')
+    const hideClustersWithLabels = get(configStore.ticket, ['hideClustersWithLabels'])
     if (!hideClustersWithLabels) {
       return true
     }
-    const metadata = get(item, 'metadata', {})
+    const metadata = get(item, ['metadata'], {})
     metadata.projectName = projectStore.projectNameByNamespace(metadata)
     const ticketsForCluster = ticketStore.issues(metadata)
     if (!ticketsForCluster.length) {
@@ -154,7 +152,7 @@ export function getFilteredUids (state, context) {
     }
 
     const ticketsWithoutHideLabel = filter(ticketsForCluster, ticket => {
-      const labelNames = map(get(ticket, 'data.labels'), 'name')
+      const labelNames = map(get(ticket, ['data', 'labels']), 'name')
       const ticketHasHideLabel = some(hideClustersWithLabels, hideClustersWithLabel => includes(labelNames, hideClustersWithLabel))
       return !ticketHasHideLabel
     })
@@ -164,16 +162,16 @@ export function getFilteredUids (state, context) {
   // list of active filter function
   const predicates = []
   if (onlyAllShootsWithIssues(state, context)) {
-    if (get(state, 'shootListFilters.progressing', false)) {
+    if (get(state, ['shootListFilters', 'progressing'], false)) {
       predicates.push(notProgressing)
     }
-    if (get(state, 'shootListFilters.noOperatorAction', false)) {
+    if (get(state, ['shootListFilters', 'noOperatorAction'], false)) {
       predicates.push(noUserError)
     }
-    if (get(state, 'shootListFilters.deactivatedReconciliation', false)) {
+    if (get(state, ['shootListFilters', 'deactivatedReconciliation'], false)) {
       predicates.push(reconciliationNotDeactivated)
     }
-    if (get(state, 'shootListFilters.hideTicketsWithLabel', false)) {
+    if (get(state, ['shootListFilters', 'hideTicketsWithLabel'], false)) {
       predicates.push(hasTicketsWithoutHideLabel)
     }
   }
@@ -201,9 +199,9 @@ export function getRawVal (context, item, column) {
   const spec = item.spec
   switch (column) {
     case 'purpose':
-      return get(spec, 'purpose')
+      return get(spec, ['purpose'])
     case 'lastOperation':
-      return get(item, 'status.lastOperation')
+      return get(item, ['status', 'lastOperation'])
     case 'createdAt':
       return metadata.creationTimestamp
     case 'createdBy':
@@ -211,11 +209,11 @@ export function getRawVal (context, item, column) {
     case 'project':
       return projectStore.projectNameByNamespace(metadata)
     case 'k8sVersion':
-      return get(spec, 'kubernetes.version')
+      return get(spec, ['kubernetes', 'version'])
     case 'infrastructure':
-      return `${get(spec, 'provider.type')} ${get(spec, 'region')}`
+      return `${get(spec, ['provider', 'type'])} ${get(spec, ['region'])}`
     case 'seed':
-      return get(item, 'spec.seedName')
+      return get(item, ['spec', 'seedName'])
     case 'ticketLabels': {
       const labels = ticketStore.labels({
         projectName: projectStore.projectNameByNamespace(metadata),
@@ -224,11 +222,11 @@ export function getRawVal (context, item, column) {
       return join(map(labels, 'name'), ' ')
     }
     case 'errorCodes':
-      return join(errorCodesFromArray(get(item, 'status.lastErrors', [])), ' ')
+      return join(errorCodesFromArray(get(item, ['status', 'lastErrors'], [])), ' ')
     case 'controlPlaneHighAvailability':
-      return get(spec, 'controlPlane.highAvailability.failureTolerance.type')
+      return get(spec, ['controlPlane', 'highAvailability', 'failureTolerance', 'type'])
     case 'issueSince':
-      return getIssueSince(item.status) || 0
+      return getIssueSince(item.status)
     case 'technicalId':
       return item.status?.technicalID
     case 'workers':
@@ -295,7 +293,7 @@ export function getSortVal (state, context, item, sortBy) {
       }
       return inProgress
         ? '6' + padStart(operation.progress, 2, '0')
-        : isShootStatusHibernated(status)
+        : isStatusHibernated(status)
           ? 500
           : 700
     }
@@ -309,7 +307,7 @@ export function getSortVal (state, context, item, sortBy) {
         const lastTransitionTime = item.status?.lastOperation.lastUpdateTime ?? item.metadata.creationTimestamp
         return `${priority}-${lastTransitionTime}`
       }
-      const hideProgressingClusters = get(state.shootListFilters, 'progressing', false)
+      const hideProgressingClusters = get(state.shootListFilters, ['progressing'], false)
       const iteratee = ({ type, status = 'True', lastTransitionTime = '1970-01-01T00:00:00Z' }) => {
         const isError = status !== 'True' && !(hideProgressingClusters && status === 'Progressing')
         // items without any error have lowest priority
@@ -329,10 +327,10 @@ export function getSortVal (state, context, item, sortBy) {
       })
     }
     default:
-      if (isNaN(value)) {
-        return toLower(value)
+      if (typeof value === 'number') {
+        return value
       }
-      return value
+      return toLower(value)
   }
 }
 

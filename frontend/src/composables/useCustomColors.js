@@ -14,10 +14,8 @@ import { toValue } from '@vueuse/core'
 
 import { isHtmlColorCode } from '@/utils'
 
-import {
-  get,
-  set,
-} from '@/lodash'
+import get from 'lodash/get'
+import set from 'lodash/set'
 
 function patchThemes (themes, customThemes) {
   for (const colorMode of ['light', 'dark']) {
