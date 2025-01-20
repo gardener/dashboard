@@ -775,10 +775,6 @@ export default {
         this.shootSortBy = sortBy
       }
     },
-    debouncedShootSearch () {
-      // Workaround for https://github.com/vuetifyjs/vuetify/issues/20566
-      this.scrollToTop()
-    },
   },
   methods: {
     ...mapActions(useShootStore, [
@@ -840,17 +836,6 @@ export default {
         unset(reactiveObject, [key])
       }
       Object.assign(reactiveObject, defaultState)
-    },
-    scrollToTop () {
-      const tableRef = this.$refs.shootTable
-
-      if (tableRef) {
-        const scrollableElement = tableRef.$el.querySelector('.v-table__wrapper')
-
-        if (scrollableElement) {
-          scrollableElement.scrollTop = 0
-        }
-      }
     },
   },
 }
