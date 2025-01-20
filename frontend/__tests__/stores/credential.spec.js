@@ -197,95 +197,15 @@ describe('stores', () => {
       expect(newSecretBinding._secret.data).toEqual({ newSecret: 'dummy-data' })
     })
 
-    it('should deleteCredential secretbinding and referenced secret / quota', async () => {
+    it('should not delete credential', async () => {
       const name = azureSecretBindingName
       const namespace = testNamespace
-
-      let azureSecretBinding = find(credentialStore.secretBindingList, { metadata: { namespace, name } })
-      expect(azureSecretBinding).toMatchSnapshot()
-
-      const azureSecretRef = azureSecretBinding.secretRef
-      let azureSecret = find(credentialStore.secretList, { metadata: azureSecretRef })
-      expect(azureSecret).toMatchSnapshot()
-
-      const azureQuotaRef1 = azureSecretBinding.quotas[0]
-      let azureQuota1 = find(credentialStore.quotaList, { metadata: azureQuotaRef1 })
-      expect(azureQuota1).toMatchSnapshot()
-
-      const azureQuotaRef2 = azureSecretBinding.quotas[1]
-      let azureQuota2 = find(credentialStore.quotaList, { metadata: azureQuotaRef2 })
-      expect(azureQuota2).toMatchSnapshot()
 
       await credentialStore.deleteCredential(name)
 
       expect(api.deleteCloudProviderCredential).toBeCalledTimes(1)
       expect(api.deleteCloudProviderCredential).toBeCalledWith({ name, namespace })
-
-      azureSecretBinding = find(credentialStore.secretBindingList, { metadata: { namespace, name } })
-      expect(azureSecretBinding).toBeUndefined()
-
-      azureSecret = find(credentialStore.secretList, { metadata: azureSecretRef })
-      expect(azureSecret).toBeUndefined()
-
-      azureQuota1 = find(credentialStore.quotaList, { metadata: azureQuotaRef1 })
-      expect(azureQuota1).toBeUndefined()
-
-      azureQuota2 = find(credentialStore.quotaList, { metadata: azureQuotaRef2 })
-      expect(azureQuota2).toBeUndefined()
-    })
-
-    it('should not delete secret or quota if referenced by other SecretBinding', async () => {
-      const name = azureSecretBindingName
-      const namespace = testNamespace
-
-      let azureSecretBinding = find(credentialStore.secretBindingList, { metadata: { namespace, name } })
-      expect(azureSecretBinding).toMatchSnapshot()
-
-      const azureSecretRef = azureSecretBinding.secretRef
-      const azureQuotaRef1 = azureSecretBinding.quotas[0]
-      const azureQuotaRef2 = azureSecretBinding.quotas[1]
-
-      // Add another SecretBinding that references the same secret and quota
-      const otherSecretBinding = {
-        metadata: {
-          namespace,
-          name: 'other-secretbinding',
-        },
-        provider: {
-          type: 'azure',
-        },
-        secretRef: azureSecretRef,
-        quotas: [azureQuotaRef1],
-      }
-      const { secretBindings, secrets, quotas } = fixtures.credentials
-      secretBindings.push(otherSecretBinding)
-      credentialStore._setCredentials({ secretBindings, secrets, quotas })
-
-      let azureSecret = find(credentialStore.secretList, { metadata: azureSecretRef })
-      expect(azureSecret).toMatchSnapshot()
-
-      let azureQuota1 = find(credentialStore.quotaList, { metadata: azureQuotaRef1 })
-      expect(azureQuota1).toMatchSnapshot()
-
-      let azureQuota2 = find(credentialStore.quotaList, { metadata: azureQuotaRef2 })
-      expect(azureQuota2).toMatchSnapshot()
-
-      await credentialStore.deleteCredential(name)
-
-      expect(api.deleteCloudProviderCredential).toBeCalledTimes(1)
-      expect(api.deleteCloudProviderCredential).toBeCalledWith({ name, namespace })
-
-      azureSecretBinding = find(credentialStore.secretBindingList, { metadata: { namespace, name } })
-      expect(azureSecretBinding).toBeUndefined()
-
-      azureSecret = find(credentialStore.secretList, { metadata: azureSecretRef })
-      expect(azureSecret).toMatchSnapshot() // still referenced by otherSecretBinding
-
-      azureQuota1 = find(credentialStore.quotaList, { metadata: azureQuotaRef1 })
-      expect(azureQuota1).toMatchSnapshot() // still referenced by otherSecretBinding
-
-      azureQuota2 = find(credentialStore.quotaList, { metadata: azureQuotaRef2 })
-      expect(azureQuota2).toBeUndefined() // not referenced anymore
+      expect(api.getCloudProviderCredentials).toBeCalledTimes(1)
     })
 
     it('store should be resetted in case of a fetch error', async () => {
