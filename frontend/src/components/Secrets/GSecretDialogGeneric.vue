@@ -21,6 +21,9 @@ SPDX-License-Identifier: Apache-2.0
           variant="filled"
           label="Secret Data"
           :error-messages="getErrorMessages(v$.data)"
+          :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
+          :class="{ 'hide-secret': hideSecret }"
+          @click:append="() => (hideSecret = !hideSecret)"
           @update:model-value="onInputSecretData"
           @blur="v$.data.$touch()"
         />
@@ -92,6 +95,7 @@ export default {
   },
   data () {
     return {
+      hideSecret: true,
       data: undefined,
     }
   },
@@ -169,6 +173,12 @@ export default {
         font-weight: 300;
         font-size: 16px;
       }
+    }
+  }
+
+  .hide-secret {
+    :deep(.v-input__control textarea) {
+      -webkit-text-security: disc;
     }
   }
 

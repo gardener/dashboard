@@ -89,11 +89,10 @@ export function createCredentialContextComposable (options = {}) {
   })
 
   /* SecretBinding metadata */
-  const secretBindingMetadataComposable = useObjectMetadata(secretBindingManifest)
   const {
     name: secretBindingName,
     namespace: bindingNamespace,
-  } = secretBindingMetadataComposable
+  } = useObjectMetadata(secretBindingManifest)
 
   /* SecretBinding provider */
   const secretBindingProviderType = computed({
@@ -163,11 +162,10 @@ export function createCredentialContextComposable (options = {}) {
   })
 
   /* Secret metadata */
-  const secretMetadataComposable = useObjectMetadata(secretManifest)
   const {
     name: secretName,
     namespace: secretNamespace,
-  } = secretMetadataComposable
+  } = useObjectMetadata(secretManifest)
 
   /* Secret data */
   const secretData = computed({

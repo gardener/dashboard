@@ -15,7 +15,7 @@ import {
 
 import { useApi } from '@/composables/useApi'
 
-import { isOwnSecret } from '@/utils'
+import { hasOwnSecret } from '@/utils'
 
 import { useAuthzStore } from './authz'
 import { useAppStore } from './app'
@@ -23,10 +23,8 @@ import { useGardenerExtensionStore } from './gardenerExtension'
 import { useCloudProfileStore } from './cloudProfile'
 
 import filter from 'lodash/filter'
-import isEmpty from 'lodash/isEmpty'
 import set from 'lodash/set'
 import get from 'lodash/get'
-import some from 'lodash/some'
 
 function namespaceNameKey ({ namespace, name }) {
   return `${namespace}/${name}`
@@ -45,10 +43,6 @@ export const useCredentialStore = defineStore('credential', () => {
     quotas: {},
   })
 
-  const isInitial = computed(() => {
-    return isEmpty(state.secretBindings)
-  })
-
   function $reset () {
     state.secretBindings = {}
     state.secrets = {}
@@ -59,14 +53,14 @@ export const useCredentialStore = defineStore('credential', () => {
     const namespace = authzStore.namespace
     try {
       const { data: { secretBindings, secrets, quotas } } = await api.getCloudProviderCredentials(namespace)
-      setCredentials({ secretBindings, secrets, quotas })
+      _setCredentials({ secretBindings, secrets, quotas })
     } catch (err) {
       $reset()
       throw err
     }
   }
 
-  function setCredentials ({ secretBindings, secrets, quotas }) {
+  function _setCredentials ({ secretBindings, secrets, quotas }) {
     $reset()
 
     secretBindings?.forEach(item => {
@@ -119,22 +113,22 @@ export const useCredentialStore = defineStore('credential', () => {
 
   async function createCredential (params) {
     const { data: { secretBinding, secret } } = await api.createCloudProviderCredential({ secretBinding: params.secretBinding, secret: params.secret })
-    updateCloudProviderCredential({ secretBinding, secret })
-    appStore.setSuccess('Cloud Provider credential created')
+    _updateCloudProviderCredential({ secretBinding, secret })
+    appStore.setSuccess(`Cloud Provider credential ${secretBinding.metadata.name} created`)
   }
 
   async function updateCredential (params) {
     const { data: { secretBinding, secret } } = await api.updateCloudProviderCredential({ secretBinding: params.secretBinding, secret: params.secret })
-    updateCloudProviderCredential({ secretBinding, secret })
-    appStore.setSuccess('Cloud Provider credential updated')
+    _updateCloudProviderCredential({ secretBinding, secret })
+    appStore.setSuccess(`Cloud Provider credential ${secretBinding.metadata.name} updated`)
   }
 
   async function deleteCredential (name) {
     const namespace = authzStore.namespace
 
     await api.deleteCloudProviderCredential({ namespace, name })
-    remove({ namespace, name })
-    appStore.setSuccess('Cloud Provider credential deleted')
+    await fetchCredentials()
+    appStore.setSuccess(`Cloud Provider credential ${name} deleted`)
   }
 
   const infrastructureSecretBindingsList = computed(() => {
@@ -145,23 +139,25 @@ export const useCredentialStore = defineStore('credential', () => {
 
   const dnsSecretBindingsList = computed(() => {
     return filter(secretBindingList.value, secretBinding => {
-      return gardenerExtensionStore.dnsProviderTypes.includes(secretBinding.provider?.type) && isOwnSecret(secretBinding) // setting secret binding not supported
+      return gardenerExtensionStore.dnsProviderTypes.includes(secretBinding.provider?.type) && hasOwnSecret(secretBinding) // setting secret binding not supported
     })
   })
 
   function getSecret ({ namespace, name }) {
-    return get(state.secrets, namespaceNameKey({ namespace, name }))
+    return get(state.secrets, [namespaceNameKey({ namespace, name })])
   }
 
   function getSecretBinding ({ namespace, name }) {
-    return get(state.secretBindings, namespaceNameKey({ namespace, name }))
+    return get(state.secretBindings, [namespaceNameKey({ namespace, name })])
   }
 
-  function updateCloudProviderCredential ({ secretBinding, secret }) {
+  function _updateCloudProviderCredential ({ secretBinding, secret }) {
     const key = namespaceNameKey(secretBinding.metadata)
     set(state.secretBindings, [key], secretBinding)
 
     if (secret) {
+      // technically speaking secret hould always be there as we currently only support to create secret and secret binding together
+      // however this might change in the future
       const key = namespaceNameKey(secret.metadata)
       set(state.secrets, [key], secret)
     }
@@ -169,39 +165,12 @@ export const useCredentialStore = defineStore('credential', () => {
     // no update logic for quotas as they currently cannot be updated using the dashboard
   }
 
-  function remove ({ namespace, name }) {
-    const secretBinding = getSecretBinding({ namespace, name })
-    const secretRef = secretBinding.secretRef
-    const secretBindingKey = namespaceNameKey(secretBinding.metadata)
-
-    delete state.secretBindings[secretBindingKey] // eslint-disable-line security/detect-object-injection
-
-    if (secretRef.namespace === namespace) {
-      const isSecretStillReferenced = some(secretBindingList.value, { secretRef })
-      if (!isSecretStillReferenced) {
-        const secretKey = namespaceNameKey(secretRef)
-        delete state.secrets[secretKey] // eslint-disable-line security/detect-object-injection
-      }
-    }
-
-    if (secretBinding.quotas) {
-      secretBinding.quotas.forEach(quotaRef => {
-        const isQuotaStillReferenced = some(secretBindingList.value, { quotas: [quotaRef] })
-        if (!isQuotaStillReferenced) {
-          const quotaKey = namespaceNameKey(quotaRef)
-          delete state.quotas[quotaKey] // eslint-disable-line security/detect-object-injection
-        }
-      })
-    }
-  }
-
   return {
     secretBindingList,
     secretList,
     quotaList,
-    isInitial,
     fetchCredentials,
-    setCredentials,
+    _setCredentials,
     updateCredential,
     createCredential,
     deleteCredential,

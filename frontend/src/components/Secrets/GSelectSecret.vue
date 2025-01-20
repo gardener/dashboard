@@ -30,14 +30,14 @@ SPDX-License-Identifier: Apache-2.0
           :subtitle="item.raw.description"
         >
           {{ get(item.raw, 'metadata.name') }}
-          <v-icon v-if="!isOwnSecret(item.raw)">
+          <v-icon v-if="!hasOwnSecret(item.raw)">
             mdi-share
           </v-icon>
         </v-list-item>
       </template>
       <template #selection="{ item }">
         {{ get(item.raw, 'metadata.name') }}
-        <v-icon v-if="!isOwnSecret(item.raw)">
+        <v-icon v-if="!hasOwnSecret(item.raw)">
           mdi-share
         </v-icon>
       </template>
@@ -85,7 +85,7 @@ import {
 } from '@/utils/validators'
 import {
   getErrorMessages,
-  isOwnSecret,
+  hasOwnSecret,
   selfTerminationDaysForSecret,
 } from '@/utils'
 
@@ -162,7 +162,7 @@ export default {
       { type: 'requiresCostObjectIfEnabled', enabled },
       function requiresCostObjectIfEnabled (value) {
         return enabled
-          ? !!this.costObject || !isOwnSecret(value)
+          ? !!this.costObject || !hasOwnSecret(value)
           : true
       },
     )
@@ -208,7 +208,7 @@ export default {
       'cloudProfileByName',
     ]),
     get,
-    isOwnSecret,
+    hasOwnSecret,
     openSecretDialog () {
       this.visibleSecretDialog = this.providerType
       this.secretItemsBeforeAdd = cloneDeep(this.allowedSecretBindings)

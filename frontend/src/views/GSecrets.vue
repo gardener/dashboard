@@ -274,7 +274,7 @@ import GToolbar from '@/components/GToolbar'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
 
 import {
-  isOwnSecret,
+  hasOwnSecret,
   mapTableHeader,
 } from '@/utils'
 
@@ -396,17 +396,7 @@ export default {
     infrastructureSecretItems () {
       return map(this.infrastructureSecretBindingsList, secretBinding => {
         const relatedShootCount = this.relatedShootCountInfra(secretBinding)
-        return {
-          name: secretBinding.metadata.name,
-          isOwnSecret: isOwnSecret(secretBinding),
-          secretNamespace: secretBinding.secretRef.namespace,
-          secretName: secretBinding.secretRef.name,
-          providerType: secretBinding.provider.type,
-          relatedShootCount,
-          relatedShootCountLabel: this.relatedShootCountLabel(relatedShootCount),
-          secretBinding,
-          highlighted: this.highlightedItem === secretBinding.metadata.name,
-        }
+        return this.computeItems(secretBinding, relatedShootCount)
       })
     },
     dnsSecretTableHeaders () {
@@ -469,17 +459,7 @@ export default {
     dnsSecretItems () {
       return map(this.dnsSecretBindingsList, secretBinding => {
         const relatedShootCount = this.relatedShootCountDns(secretBinding)
-        return {
-          name: secretBinding.metadata.name,
-          isOwnSecret: isOwnSecret(secretBinding),
-          secretNamespace: secretBinding.secretRef.namespace,
-          secretName: secretBinding.secretRef.name,
-          providerType: secretBinding.provider.type,
-          relatedShootCount,
-          relatedShootCountLabel: this.relatedShootCountLabel(relatedShootCount),
-          secretBinding,
-          highlighted: this.highlightedItem === secretBinding.metadata.name,
-        }
+        return this.computeItems(secretBinding, relatedShootCount)
       })
     },
   },
@@ -586,6 +566,20 @@ export default {
       const sortableTableHeaders = filter(tableHeaders, ['sortable', true])
       const tableKeys = mapKeys(sortableTableHeaders, ({ key }) => key)
       return mapValues(tableKeys, () => () => 0)
+    },
+    computeItems (secretBinding, relatedShootCount) {
+      return {
+        name: secretBinding.metadata.name,
+        hasOwnSecret: hasOwnSecret(secretBinding),
+        secretNamespace: secretBinding.secretRef.namespace,
+        secretName: secretBinding.secretRef.name,
+        providerType: secretBinding.provider.type,
+        relatedShootCount,
+        relatedShootCountLabel: this.relatedShootCountLabel(relatedShootCount),
+        secretBinding,
+        highlighted: this.highlightedItem === secretBinding.metadata.name,
+        isMarkedForDeletion: !!secretBinding.metadata.deletionTimestamp,
+      }
     },
   },
 }

@@ -9,7 +9,7 @@ import { computed } from 'vue'
 import { useCredentialStore } from '@/store/credential'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 
-import { isOwnSecret } from '@/utils'
+import { hasOwnSecret } from '@/utils'
 
 import filter from 'lodash/filter'
 
@@ -27,7 +27,7 @@ export const useSecretBindingList = (providerType, options = {}) => {
       }
 
       return isDnsSecret
-        ? isOwnSecret(secretBinding) // shared dns secret not supported by dns extension
+        ? hasOwnSecret(secretBinding) // shared dns secret not supported by dns extension
         : true
     })
   })

@@ -71,7 +71,7 @@ describe('stores', () => {
       gardenerExtensionStore = useGardenerExtensionStore()
       gardenerExtensionStore.list = fixtures.gardenerExtensions
       credentialStore = useCredentialStore()
-      credentialStore.setCredentials(fixtures.credentials)
+      credentialStore._setCredentials(fixtures.credentials)
     })
 
     afterEach(() => {
@@ -83,7 +83,6 @@ describe('stores', () => {
     })
 
     it('should create a new credential store', () => {
-      expect(credentialStore.isInitial).toBe(false)
       expect(cloudProfileStore.sortedProviderTypeList).toEqual(
         expect.arrayContaining(['aws', 'azure']),
       )
@@ -260,7 +259,7 @@ describe('stores', () => {
       }
       const { secretBindings, secrets, quotas } = fixtures.credentials
       secretBindings.push(otherSecretBinding)
-      credentialStore.setCredentials({ secretBindings, secrets, quotas })
+      credentialStore._setCredentials({ secretBindings, secrets, quotas })
 
       let azureSecret = find(credentialStore.secretList, { metadata: azureSecretRef })
       expect(azureSecret).toMatchSnapshot()
@@ -302,7 +301,7 @@ describe('stores', () => {
       authzStore.setNamespace(namespace)
 
       expect(credentialStore.secretBindingList.length).toBeGreaterThan(0)
-      credentialStore.setCredentials({})
+      credentialStore._setCredentials({})
       expect(credentialStore.secretBindingList.length).toBe(0)
     })
   })

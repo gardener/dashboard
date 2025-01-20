@@ -352,7 +352,7 @@ export function getTimeStringTo (time, toTime, withoutPrefix = false) {
   return moment(time).to(toTime, withoutPrefix)
 }
 
-export function isOwnSecret (secretBinding) {
+export function hasOwnSecret (secretBinding) {
   return get(secretBinding, ['secretRef', 'namespace']) === get(secretBinding, ['metadata', 'namespace'])
 }
 

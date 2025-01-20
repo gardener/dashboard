@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
       <div class="d-flex">
         {{ item.name }}
         <v-tooltip
-          v-if="!item.isOwnSecret"
+          v-if="!item.hasOwnSecret"
           location="top"
         >
           <template #activator="{ props }">
@@ -27,7 +27,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </td>
     <td v-if="selectedHeaders.secret">
-      <span v-if="!item.isOwnSecret">{{ item.secretNamespace }}: </span>{{ item.secretName }}
+      <span v-if="!item.hasOwnSecret">{{ item.secretNamespace }}: </span>{{ item.secretName }}
     </td>
     <td v-if="selectedHeaders.dnsProvider">
       <g-vendor
@@ -59,23 +59,25 @@ SPDX-License-Identifier: Apache-2.0
         <g-action-button
           v-if="canPatchSecrets"
           icon="mdi-pencil"
-          :disabled="!item.isOwnSecret"
+          :disabled="!item.hasOwnSecret || item.isMarkedForDeletion"
           @click="onUpdate"
         >
           <template #tooltip>
-            <span v-if="!item.isOwnSecret">You can only edit secrets that are owned by you</span>
+            <span v-if="!item.hasOwnSecret">You can only edit secrets that are owned by you</span>
+            <span v-else-if="item.isMarkedForDeletion">Secret is marked for deletion</span>
             <span v-else>Edit Secret</span>
           </template>
         </g-action-button>
         <g-action-button
           v-if="canDeleteSecrets"
           icon="mdi-delete"
-          :disabled="item.relatedShootCount > 0 || !item.isOwnSecret"
+          :disabled="item.relatedShootCount > 0 || !item.hasOwnSecret || item.isMarkedForDeletion"
           @click="onDelete"
         >
           <template #tooltip>
-            <span v-if="!item.isOwnSecret">You can only delete secrets that are owned by you</span>
+            <span v-if="!item.hasOwnSecret">You can only delete secrets that are owned by you</span>
             <span v-else-if="item.relatedShootCount > 0">You can only delete secrets that are currently unused</span>
+            <span v-else-if="item.isMarkedForDeletion">Secret is already marked for deletion</span>
             <span v-else>Delete Secret</span>
           </template>
         </g-action-button>

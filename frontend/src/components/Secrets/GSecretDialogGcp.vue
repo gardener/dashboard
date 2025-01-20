@@ -24,6 +24,9 @@ SPDX-License-Identifier: Apache-2.0
           :error-messages="getErrorMessages(v$.serviceAccountKey)"
           hint="Enter or drop a service account key in JSON format"
           persistent-hint
+          :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
+          :class="{ 'hide-secret': hideSecret }"
+          @click:append="() => (hideSecret = !hideSecret)"
           @update:model-value="v$.serviceAccountKey.$touch()"
           @blur="v$.serviceAccountKey.$touch()"
         />
@@ -135,6 +138,7 @@ export default {
   },
   data () {
     return {
+      hideSecret: true,
       dropHandlerInitialized: false,
     }
   },
@@ -247,7 +251,7 @@ export default {
     font-size: 14px;
   }
 
-    .help-content {
+  .help-content {
     ul {
       margin-top: 20px;
       margin-bottom: 20px;
@@ -259,6 +263,12 @@ export default {
         font-weight: 300;
         font-size: 16px;
       }
+    }
+  }
+
+  .hide-secret {
+    :deep(.v-input__control textarea) {
+      -webkit-text-security: disc;
     }
   }
 

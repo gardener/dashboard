@@ -104,4 +104,20 @@ describe('components', () => {
       expect(wrapper.find(selector).text()).toBe(hint)
     })
   })
+
+  describe('v-textarea', () => {
+    it('Ensure .v-input__control exists for v-textarea', () => {
+      const Component = {
+        template: '<v-textarea />',
+      }
+      const wrapper = mount(Component, {
+        global: {
+          plugins: [
+            createVuetifyPlugin(),
+          ],
+        },
+      })
+      expect(wrapper.find('.v-input__control').exists()).toBe(true)
+    })
+  })
 })
