@@ -32,7 +32,6 @@ import {
   shootListBreadcrumbs,
   shootItemBreadcrumbs,
   shootItemTerminalBreadcrumbs,
-  secretItemBreadcrumbs,
   secretsBreadcrumbs,
   newShootBreadcrumbs,
   newShootEditorBreadcrumbs,
@@ -105,7 +104,6 @@ export function createRoutes () {
         newShootHierarchy('shoots/+'),
         shootItemHierarchy('shoots/:name'),
         secretListRoute('secrets'),
-        secretItemRoute('secrets/:name'),
         membersRoute('members'),
         administrationRoute('administration'),
         { path: 'term', redirect: 'term/garden' },
@@ -379,17 +377,6 @@ export function createRoutes () {
           },
         },
         breadcrumbs: secretsBreadcrumbs,
-      },
-    }
-  }
-
-  function secretItemRoute (path) {
-    return {
-      path,
-      name: 'Secret',
-      component: GSecrets,
-      meta: {
-        breadcrumbs: secretItemBreadcrumbs,
       },
     }
   }

@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
       <g-text-router-link
         v-if="canLinkToSecret"
         v-bind="props"
-        :to="{ name: 'Secret', params: { namespace: namespace }, hash: `#secret-binding-name:${secretBindingName}` }"
+        :to="{ name: 'Secrets', params: { namespace }, hash: `#secret-binding-name:${secretBindingName}` }"
         :text="secretBindingName"
       />
       <span

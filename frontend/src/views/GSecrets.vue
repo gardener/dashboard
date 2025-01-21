@@ -286,6 +286,7 @@ import map from 'lodash/map'
 import head from 'lodash/head'
 import filter from 'lodash/filter'
 import get from 'lodash/get'
+import findIndex from 'lodash/findIndex'
 
 export default {
   components: {
@@ -396,7 +397,7 @@ export default {
     infrastructureSecretItems () {
       return map(this.infrastructureSecretBindingsList, secretBinding => {
         const relatedShootCount = this.relatedShootCountInfra(secretBinding)
-        return this.computeItems(secretBinding, relatedShootCount)
+        return this.computeItem(secretBinding, relatedShootCount)
       })
     },
     dnsSecretTableHeaders () {
@@ -459,7 +460,7 @@ export default {
     dnsSecretItems () {
       return map(this.dnsSecretBindingsList, secretBinding => {
         const relatedShootCount = this.relatedShootCountDns(secretBinding)
-        return this.computeItems(secretBinding, relatedShootCount)
+        return this.computeItem(secretBinding, relatedShootCount)
       })
     },
   },
@@ -470,6 +471,14 @@ export default {
   },
   mounted () {
     this.highlightedItem = get(this.$route.hash.match(/^#secret-binding-name:(.*)/), [1])
+    const infraIndex = findIndex(this.infrastructureSecretSortedItems, { name: this.highlightedItem })
+    if (infraIndex !== -1) {
+      this.infraSecretPage = Math.floor(infraIndex / this.infraSecretItemsPerPage) + 1
+    }
+    const dnsIndex = findIndex(this.dnsSecretSortedItems, { name: this.highlightedItem })
+    if (dnsIndex !== -1) {
+      this.dnsSecretPage = Math.floor(dnsIndex / this.dnsSecretItemsPerPage) + 1
+    }
   },
   methods: {
     ...mapActions(useCredentialStore, [
@@ -567,7 +576,7 @@ export default {
       const tableKeys = mapKeys(sortableTableHeaders, ({ key }) => key)
       return mapValues(tableKeys, () => () => 0)
     },
-    computeItems (secretBinding, relatedShootCount) {
+    computeItem (secretBinding, relatedShootCount) {
       return {
         name: secretBinding.metadata.name,
         hasOwnSecret: hasOwnSecret(secretBinding),
