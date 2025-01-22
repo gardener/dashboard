@@ -8,6 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <v-dialog
     v-model="visible"
     max-width="850"
+    scrollable
   >
     <v-card>
       <g-toolbar
@@ -25,7 +26,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
       </g-toolbar>
       <v-card-text>
-        <div class="d-flex flex-row pa-3">
+        <div class="d-flex flex-row pa-3 card-content">
           <div
             ref="secretDetails"
             class="d-flex flex-column flex-grow-1"
@@ -69,22 +70,24 @@ SPDX-License-Identifier: Apache-2.0
           </v-slide-x-reverse-transition>
         </div>
       </v-card-text>
-      <v-alert
-        :model-value="!isCreateMode && relatedShootCount > 0"
-        type="warning"
-        rounded="0"
-        class="mb-2"
-      >
-        This secret is used by {{ relatedShootCount }} clusters. The new secret should be part of the same account as the one that gets replaced.
-      </v-alert>
-      <v-alert
-        :model-value="!isCreateMode && relatedShootCount > 0"
-        type="warning"
-        rounded="0"
-        class="mb-2"
-      >
-        Clusters will only start using the new secret after they got reconciled. Therefore, wait until all clusters using the secret are reconciled before you disable the old secret in your infrastructure account. Otherwise the clusters will no longer function.
-      </v-alert>
+      <div>
+        <v-alert
+          :model-value="!isCreateMode && relatedShootCount > 0"
+          type="warning"
+          rounded="0"
+          class="mb-2"
+        >
+          This secret is used by {{ relatedShootCount }} clusters. The new secret should be part of the same account as the one that gets replaced.
+        </v-alert>
+        <v-alert
+          :model-value="!isCreateMode && relatedShootCount > 0"
+          type="warning"
+          rounded="0"
+          class="mb-2"
+        >
+          Clusters will only start using the new secret after they got reconciled. Therefore, wait until all clusters using the secret are reconciled before you disable the old secret in your infrastructure account. Otherwise the clusters will no longer function.
+        </v-alert>
+      </div>
       <v-divider />
       <v-card-actions>
         <v-spacer />
@@ -394,5 +397,10 @@ export default {
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(var(--v-theme-surface)));
   pointer-events: none;
 }
+
+.card-content {
+    overflow: scroll;
+    height: auto;
+  }
 
 </style>

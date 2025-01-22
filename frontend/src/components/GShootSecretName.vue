@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
       <g-text-router-link
         v-if="canLinkToSecret"
         v-bind="props"
-        :to="{ name: 'Secrets', params: { namespace }, hash: `#secret-binding-name:${secretBindingName}` }"
+        :to="{ name: 'Secrets', params: { namespace }, hash: credentialHash }"
         :text="secretBindingName"
       />
       <span
@@ -67,6 +67,13 @@ export default {
     },
     secretBinding () {
       return this.getSecretBinding({ namespace: this.namespace, name: this.secretBindingName })
+    },
+    credentialHash () {
+      const uid = this.secretBinding?.metadata.uid
+      if (!uid) {
+        return ''
+      }
+      return `#credential-uid=${encodeURIComponent(uid)}`
     },
   },
   methods: {

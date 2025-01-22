@@ -6,7 +6,10 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <v-container fluid>
+  <v-container
+    fluid
+    @click="highlightedUid = null"
+  >
     <v-card class="ma-3">
       <g-toolbar
         prepend-icon="mdi-key"
@@ -257,6 +260,7 @@ import {
   mapWritableState,
   mapActions,
 } from 'pinia'
+import { useUrlSearchParams } from '@vueuse/core'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
@@ -314,7 +318,7 @@ export default {
         { value: 10, title: '10' },
         { value: 20, title: '20' },
       ],
-      highlightedItem: undefined,
+      hashParams: useUrlSearchParams('hash-params'),
     }
   },
   computed: {
@@ -463,6 +467,14 @@ export default {
         return this.computeItem(secretBinding, relatedShootCount)
       })
     },
+    highlightedUid: {
+      get () {
+        return this.hashParams['credential-uid']
+      },
+      set (highlightedUid) {
+        this.hashParams['credential-uid'] = highlightedUid
+      },
+    },
   },
   watch: {
     namespace () {
@@ -470,12 +482,11 @@ export default {
     },
   },
   mounted () {
-    this.highlightedItem = get(this.$route.hash.match(/^#secret-binding-name:(.*)/), [1])
-    const infraIndex = findIndex(this.infrastructureSecretSortedItems, { name: this.highlightedItem })
+    const infraIndex = findIndex(this.infrastructureSecretSortedItems, { secretBinding: { metadata: { uid: this.highlightedUid } } })
     if (infraIndex !== -1) {
       this.infraSecretPage = Math.floor(infraIndex / this.infraSecretItemsPerPage) + 1
     }
-    const dnsIndex = findIndex(this.dnsSecretSortedItems, { name: this.highlightedItem })
+    const dnsIndex = findIndex(this.dnsSecretSortedItems, { secretBinding: { metadata: { uid: this.highlightedUid } } })
     if (dnsIndex !== -1) {
       this.dnsSecretPage = Math.floor(dnsIndex / this.dnsSecretItemsPerPage) + 1
     }
@@ -586,7 +597,7 @@ export default {
         relatedShootCount,
         relatedShootCountLabel: this.relatedShootCountLabel(relatedShootCount),
         secretBinding,
-        highlighted: this.highlightedItem === secretBinding.metadata.name,
+        highlighted: this.highlightedUid === secretBinding.metadata.uid,
         isMarkedForDeletion: !!secretBinding.metadata.deletionTimestamp,
       }
     },

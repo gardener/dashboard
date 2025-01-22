@@ -5,7 +5,10 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <tr :class="{ 'highlighted': item.highlighted }">
+  <tr
+    class="secret-row"
+    :class="{ 'highlighted': item.highlighted }"
+  >
     <td v-if="selectedHeaders.name">
       <div class="d-flex">
         {{ item.name }}
@@ -137,16 +140,12 @@ export default {
 <style lang="scss" scoped>
   $highlighted-color: rgb(var(--v-theme-accent));
 
-  .highlighted {
-    animation: highlightFade 5s forwards;
-  }
+  .secret-row {
+    background-color: inherit;
+    transition: background-color 0.5s ease;
 
-  @keyframes highlightFade {
-    0%, 60% {
+    &.highlighted {
       background-color: $highlighted-color;
-    }
-    100% {
-      background-color: transparent;
     }
   }
 </style>
