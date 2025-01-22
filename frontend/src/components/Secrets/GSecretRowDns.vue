@@ -141,7 +141,6 @@ export default {
   $highlighted-color: rgb(var(--v-theme-accent));
 
   .secret-row {
-    background-color: inherit;
     transition: background-color 0.5s ease;
 
     &.highlighted {

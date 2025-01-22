@@ -261,6 +261,7 @@ import {
   mapActions,
 } from 'pinia'
 import { useUrlSearchParams } from '@vueuse/core'
+import { toRef } from 'vue'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
@@ -303,6 +304,13 @@ export default {
     GDataTableFooter,
   },
   inject: ['mergeProps'],
+  setup () {
+    const hashParams = useUrlSearchParams('hash-params')
+    const highlightedUid = toRef(hashParams, 'credential-uid')
+    return {
+      highlightedUid,
+    }
+  },
   data () {
     return {
       selectedSecretBinding: {},
@@ -318,7 +326,6 @@ export default {
         { value: 10, title: '10' },
         { value: 20, title: '20' },
       ],
-      hashParams: useUrlSearchParams('hash-params'),
     }
   },
   computed: {
@@ -467,29 +474,25 @@ export default {
         return this.computeItem(secretBinding, relatedShootCount)
       })
     },
-    highlightedUid: {
-      get () {
-        return this.hashParams['credential-uid']
-      },
-      set (highlightedUid) {
-        this.hashParams['credential-uid'] = highlightedUid
-      },
-    },
   },
   watch: {
     namespace () {
       this.reset()
     },
-  },
-  mounted () {
-    const infraIndex = findIndex(this.infrastructureSecretSortedItems, { secretBinding: { metadata: { uid: this.highlightedUid } } })
-    if (infraIndex !== -1) {
-      this.infraSecretPage = Math.floor(infraIndex / this.infraSecretItemsPerPage) + 1
-    }
-    const dnsIndex = findIndex(this.dnsSecretSortedItems, { secretBinding: { metadata: { uid: this.highlightedUid } } })
-    if (dnsIndex !== -1) {
-      this.dnsSecretPage = Math.floor(dnsIndex / this.dnsSecretItemsPerPage) + 1
-    }
+    highlightedUid: {
+      immediate: true,
+      handler (value) {
+        const infraIndex = findIndex(this.infrastructureSecretSortedItems, ['secretBinding.metadata.uid', value])
+        if (infraIndex !== -1) {
+          this.infraSecretPage = Math.floor(infraIndex / this.infraSecretItemsPerPage) + 1
+        }
+
+        const dnsIndex = findIndex(this.dnsSecretSortedItems, ['secretBinding.metadata.uid', value])
+        if (dnsIndex !== -1) {
+          this.dnsSecretPage = Math.floor(dnsIndex / this.dnsSecretItemsPerPage) + 1
+        }
+      },
+    },
   },
   methods: {
     ...mapActions(useCredentialStore, [

@@ -26,7 +26,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
       </g-toolbar>
       <v-card-text>
-        <div class="d-flex flex-row pa-3 card-content">
+        <div class="d-flex flex-row pa-3">
           <div
             ref="secretDetails"
             class="d-flex flex-column flex-grow-1"
@@ -397,10 +397,5 @@ export default {
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(var(--v-theme-surface)));
   pointer-events: none;
 }
-
-.card-content {
-    overflow: scroll;
-    height: auto;
-  }
 
 </style>
