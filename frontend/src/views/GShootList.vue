@@ -166,7 +166,7 @@ SPDX-License-Identifier: Apache-2.0
         fixed-header
         class="g-table"
         height="calc(100vh - 240px)"
-        item-height="50px"
+        item-height="52px"
       >
         <template #progress>
           <g-shoot-list-progress />
@@ -386,16 +386,6 @@ export default {
     ]),
     defaultSortBy () {
       return [{ key: 'name', order: 'asc' }]
-    },
-    clusterAccessDialog: {
-      get () {
-        return this.dialog === 'access'
-      },
-      set (value) {
-        if (!value) {
-          this.hideDialog()
-        }
-      },
     },
     focusModeInternal: {
       get () {
