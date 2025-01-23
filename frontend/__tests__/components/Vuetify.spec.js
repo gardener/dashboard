@@ -46,6 +46,11 @@ describe('components', () => {
 
       expect(wrapper.find('.v-main > div[class$=\'wrap\']').text()).toBe(text)
     })
+
+    it('should apply theme classes to application', () => {
+      const wrapper = mountApplication()
+      expect(wrapper.classes()).toContain('v-theme--light')
+    })
   })
 
   describe('v-messages', () => {
@@ -102,6 +107,42 @@ describe('components', () => {
         hint,
       })
       expect(wrapper.find(selector).text()).toBe(hint)
+    })
+  })
+
+  describe('v-breadcrumbs', () => {
+    it('should be able to find v-breadcrumbs-item v-breadcrumbs-item--disabled class', () => {
+      const Component = {
+        template: '<v-breadcrumbs><v-breadcrumbs-item disabled>test</v-breadcrumbs-item></v-breadcrumbs>',
+      }
+      const wrapper = mount(Component, {
+        global: {
+          plugins: [
+            createVuetifyPlugin(),
+          ],
+        },
+      })
+      const breadcrumbsItem = wrapper.find('.v-breadcrumbs-item')
+      expect(breadcrumbsItem.exists()).toBe(true)
+      expect(breadcrumbsItem.classes()).toContain('v-breadcrumbs-item--disabled')
+    })
+  })
+
+  describe('v-btn', () => {
+    it('should be able to find v-btn icon class', () => {
+      const Component = {
+        template: '<v-btn icon="mdi-foo" />',
+      }
+      const wrapper = mount(Component, {
+        global: {
+          plugins: [
+            createVuetifyPlugin(),
+          ],
+        },
+      })
+      const iconItem = wrapper.find('.v-icon')
+      expect(iconItem.exists()).toBe(true)
+      expect(iconItem.classes()).toContain('v-icon')
     })
   })
 })
