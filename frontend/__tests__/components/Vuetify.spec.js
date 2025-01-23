@@ -110,6 +110,22 @@ describe('components', () => {
     })
   })
 
+  describe('v-textarea', () => {
+    it('Ensure .v-input__control exists for v-textarea', () => {
+      const Component = {
+        template: '<v-textarea />',
+      }
+      const wrapper = mount(Component, {
+        global: {
+          plugins: [
+            createVuetifyPlugin(),
+          ],
+        },
+      })
+      expect(wrapper.find('.v-input__control').exists()).toBe(true)
+    })
+  })
+
   describe('v-breadcrumbs', () => {
     it('should be able to find v-breadcrumbs-item v-breadcrumbs-item--disabled class', () => {
       const Component = {

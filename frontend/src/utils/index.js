@@ -352,8 +352,8 @@ export function getTimeStringTo (time, toTime, withoutPrefix = false) {
   return moment(time).to(toTime, withoutPrefix)
 }
 
-export function isOwnSecret (infrastructureSecret) {
-  return get(infrastructureSecret, ['metadata', 'secretRef', 'namespace']) === get(infrastructureSecret, ['metadata', 'namespace'])
+export function hasOwnSecret (secretBinding) {
+  return get(secretBinding, ['secretRef', 'namespace']) === get(secretBinding, ['metadata', 'namespace'])
 }
 
 export function getCreatedBy (metadata) {
@@ -444,6 +444,10 @@ export function encodeBase64Url (input) {
   return output
 }
 
+export function decodeBase64 (input) {
+  return Base64.decode(input)
+}
+
 export function shortRandomString (length) {
   const start = 'abcdefghijklmnopqrstuvwxyz'
   const possible = start + '0123456789'
@@ -454,12 +458,12 @@ export function shortRandomString (length) {
   return text
 }
 
-export function selfTerminationDaysForSecret (secret) {
+export function selfTerminationDaysForSecret (secretBinding) {
   const clusterLifetimeDays = function (quotas, scope) {
     return get(find(quotas, scope), ['spec', 'clusterLifetimeDays'])
   }
 
-  const quotas = get(secret, ['quotas'])
+  const quotas = get(secretBinding, ['_quotas'])
   let terminationDays = clusterLifetimeDays(quotas, { spec: { scope: { apiVersion: 'core.gardener.cloud/v1beta1', kind: 'Project' } } })
   if (!terminationDays) {
     terminationDays = clusterLifetimeDays(quotas, { spec: { scope: { apiVersion: 'v1', kind: 'Secret' } } })

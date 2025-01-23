@@ -164,7 +164,7 @@ exports[`composables > useShootContext > should change the infrastructure kind 1
     },
     "purpose": "evaluation",
     "region": "europe-west1",
-    "secretBindingName": "gcp-secret",
+    "secretBindingName": "gcp-secretbinding",
   },
 }
 `;
@@ -262,7 +262,7 @@ exports[`composables > useShootContext > should create a default "alicloud" shoo
     },
     "purpose": "evaluation",
     "region": "eu-central-1",
-    "secretBindingName": "alicloud-secret",
+    "secretBindingName": "alicloud-secretbinding",
   },
 }
 `;
@@ -362,7 +362,7 @@ exports[`composables > useShootContext > should create a default "aws" shoot man
     },
     "purpose": "evaluation",
     "region": "eu-central-1",
-    "secretBindingName": "aws-secret",
+    "secretBindingName": "aws-secretbinding",
   },
 }
 `;
@@ -456,7 +456,7 @@ exports[`composables > useShootContext > should create a default "azure" shoot m
     },
     "purpose": "evaluation",
     "region": "westeurope",
-    "secretBindingName": "azure-secret",
+    "secretBindingName": "azure-secretbinding",
   },
 }
 `;
@@ -547,7 +547,7 @@ exports[`composables > useShootContext > should create a default "gcp" shoot man
     },
     "purpose": "evaluation",
     "region": "europe-west1",
-    "secretBindingName": "gcp-secret",
+    "secretBindingName": "gcp-secretbinding",
   },
 }
 `;
@@ -626,7 +626,7 @@ exports[`composables > useShootContext > should create a default "ironcore" shoo
     },
     "purpose": "evaluation",
     "region": "de-fra",
-    "secretBindingName": "ironcore-secret",
+    "secretBindingName": "ironcore-secretbinding",
   },
 }
 `;
@@ -714,7 +714,7 @@ exports[`composables > useShootContext > should create a default "openstack" sho
     },
     "purpose": "evaluation",
     "region": "eu-de-1",
-    "secretBindingName": "openstack-secret",
+    "secretBindingName": "openstack-secretbinding",
   },
 }
 `;
