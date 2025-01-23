@@ -480,7 +480,6 @@ export default {
       this.reset()
     },
     highlightedUid: {
-      immediate: true,
       handler (value) {
         const infraIndex = findIndex(this.infrastructureSecretSortedItems, ['secretBinding.metadata.uid', value])
         if (infraIndex !== -1) {
@@ -492,6 +491,7 @@ export default {
           this.dnsSecretPage = Math.floor(dnsIndex / this.dnsSecretItemsPerPage) + 1
         }
       },
+      immediate: true,
     },
   },
   methods: {
