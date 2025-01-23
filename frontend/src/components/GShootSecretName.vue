@@ -6,14 +6,14 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-tooltip
-    :disabled="!secret"
+    :disabled="!secretBinding?._secret"
     location="top"
   >
     <template #activator="{ props }">
       <g-text-router-link
         v-if="canLinkToSecret"
         v-bind="props"
-        :to="{ name: 'Secret', params: { name: secretBindingName, namespace: namespace } }"
+        :to="{ name: 'Secrets', params: { namespace }, hash: credentialHash }"
         :text="secretBindingName"
       />
       <span
@@ -23,9 +23,11 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <v-card>
       <g-secret-details-item-content
+        v-if="secretBinding"
         class="ma-1"
         infra
-        :secret="secret"
+        :secret="secretBinding._secret"
+        :provider-type="secretBinding.provider.type"
       />
     </v-card>
   </v-tooltip>
@@ -38,7 +40,7 @@ import {
 } from 'pinia'
 
 import { useAuthzStore } from '@/store/authz'
-import { useSecretStore } from '@/store/secret'
+import { useCredentialStore } from '@/store/credential'
 
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 import GSecretDetailsItemContent from '@/components/Secrets/GSecretDetailsItemContent'
@@ -63,12 +65,19 @@ export default {
     canLinkToSecret () {
       return this.canGetSecrets && this.secretBindingName && this.namespace
     },
-    secret () {
-      return this.getCloudProviderSecretByName({ namespace: this.namespace, name: this.secretBindingName })
+    secretBinding () {
+      return this.getSecretBinding({ namespace: this.namespace, name: this.secretBindingName })
+    },
+    credentialHash () {
+      const uid = this.secretBinding?.metadata.uid
+      if (!uid) {
+        return ''
+      }
+      return `#credential-uid=${encodeURIComponent(uid)}`
     },
   },
   methods: {
-    ...mapActions(useSecretStore, ['getCloudProviderSecretByName']),
+    ...mapActions(useCredentialStore, ['getSecretBinding']),
   },
 }
 </script>

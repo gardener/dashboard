@@ -6,28 +6,28 @@
 
 import { computed } from 'vue'
 
-import { useSecretStore } from '@/store/secret'
+import { useCredentialStore } from '@/store/credential'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 
-import { isOwnSecret } from '@/utils'
+import { hasOwnSecret } from '@/utils'
 
 import filter from 'lodash/filter'
 
-export const useSecretList = (providerType, options = {}) => {
+export const useSecretBindingList = (providerType, options = {}) => {
   const {
-    secretStore = useSecretStore(),
+    credentialStore = useCredentialStore(),
     gardenerExtensionStore = useGardenerExtensionStore(),
   } = options
 
   return computed(() => {
     const isDnsSecret = gardenerExtensionStore.dnsProviderTypes.includes(providerType.value)
-    return filter(secretStore.list, secret => {
-      if (secret.metadata.provider?.type !== providerType.value) {
+    return filter(credentialStore.secretBindingList, secretBinding => {
+      if (secretBinding.provider?.type !== providerType.value) {
         return false
       }
 
       return isDnsSecret
-        ? isOwnSecret(secret) // shared dns secret not supported by dns extension
+        ? hasOwnSecret(secretBinding) // shared dns secret not supported by dns extension
         : true
     })
   })

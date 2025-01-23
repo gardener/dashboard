@@ -122,25 +122,6 @@ export function shootItemBreadcrumbs ({ params }) {
   ]
 }
 
-export function secretItemBreadcrumbs ({ params }) {
-  return [
-    {
-      title: 'Secrets',
-      get to () {
-        return {
-          name: 'Secrets',
-          params: pick(params, ['namespace']),
-        }
-      },
-    },
-    {
-      get title () {
-        return get(params, ['name'])
-      },
-    },
-  ]
-}
-
 export function shootItemTerminalBreadcrumbs ({ params }) {
   return [
     {

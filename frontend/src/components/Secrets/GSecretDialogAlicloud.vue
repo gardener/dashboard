@@ -7,9 +7,8 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-secret-dialog
     v-model="visible"
-    :data="secretData"
     :secret-validations="v$"
-    :secret="secret"
+    :secret-binding="secretBinding"
     :provider-type="providerType"
     :create-title="`Add new ${name} Secret`"
     :replace-title="`Replace ${name} Secret`"
@@ -17,12 +16,10 @@ SPDX-License-Identifier: Apache-2.0
     <template #secret-slot>
       <div>
         <v-text-field
-          ref="accessKeyId"
           v-model="accessKeyId"
           color="primary"
           label="Access Key Id"
           :error-messages="getErrorMessages(v$.accessKeyId)"
-          counter="128"
           hint="e.g. QNJebZ17v5Q7pYpP"
           variant="underlined"
           @update:model-value="v$.accessKeyId.$touch()"
@@ -37,7 +34,6 @@ SPDX-License-Identifier: Apache-2.0
           :error-messages="getErrorMessages(v$.accessKeySecret)"
           :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideSecret ? 'password' : 'text'"
-          counter="30"
           hint="e.g. WJalrXUtnFEMIK7MDENG/bPxRfiCYz"
           variant="underlined"
           @click:append="() => (hideSecret = !hideSecret)"
@@ -105,6 +101,8 @@ import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GCodeBlock from '@/components/GCodeBlock'
 import GExternalLink from '@/components/GExternalLink'
 
+import { useProvideCredentialContext } from '@/composables/useCredentialContext'
+
 import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
 
@@ -119,7 +117,7 @@ export default {
       type: Boolean,
       required: true,
     },
-    secret: {
+    secretBinding: {
       type: Object,
     },
     providerType: {
@@ -130,14 +128,24 @@ export default {
     'update:modelValue',
   ],
   setup () {
+    const { secretStringDataRefs } = useProvideCredentialContext()
+
+    const {
+      accessKeyId,
+      accessKeySecret,
+    } = secretStringDataRefs({
+      accessKeyID: 'accessKeyId',
+      accessKeySecret: 'accessKeySecret',
+    })
+
     return {
+      accessKeyId,
+      accessKeySecret,
       v$: useVuelidate(),
     }
   },
   data () {
     return {
-      accessKeyId: undefined,
-      accessKeySecret: undefined,
       hideSecret: true,
       template: {
         Statement: [
@@ -208,12 +216,6 @@ export default {
         return 'Alicloud DNS'
       }
       return undefined
-    },
-    secretData () {
-      return {
-        accessKeyID: this.accessKeyId,
-        accessKeySecret: this.accessKeySecret,
-      }
     },
     isCreateMode () {
       return !this.secret

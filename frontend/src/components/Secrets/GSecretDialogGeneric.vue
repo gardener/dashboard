@@ -7,9 +7,8 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-secret-dialog
     v-model="visible"
-    :data="secretData"
     :secret-validations="v$"
-    :secret="secret"
+    :secret-binding="secretBinding"
     :provider-type="providerType"
     :create-title="`Add new ${providerType} Secret`"
     :replace-title="`Replace ${providerType} Secret`"
@@ -17,12 +16,14 @@ SPDX-License-Identifier: Apache-2.0
     <template #secret-slot>
       <div>
         <v-textarea
-          ref="data"
           v-model="data"
           color="primary"
           variant="filled"
           label="Secret Data"
           :error-messages="getErrorMessages(v$.data)"
+          :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
+          :class="{ 'hide-secret': hideSecret }"
+          @click:append="() => (hideSecret = !hideSecret)"
           @update:model-value="onInputSecretData"
           @blur="v$.data.$touch()"
         />
@@ -48,6 +49,8 @@ import yaml from 'js-yaml'
 
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 
+import { useProvideCredentialContext } from '@/composables/useCredentialContext'
+
 import {
   withFieldName,
   withMessage,
@@ -68,7 +71,7 @@ export default {
       type: Boolean,
       required: true,
     },
-    secret: {
+    secretBinding: {
       type: Object,
     },
     providerType: {
@@ -79,14 +82,21 @@ export default {
     'update:modelValue',
   ],
   setup () {
+    const { secretStringDataRefs } = useProvideCredentialContext()
+
+    const { secretData } = secretStringDataRefs({
+      secretData: 'secretData',
+    })
+
     return {
+      secretData,
       v$: useVuelidate(),
     }
   },
   data () {
     return {
+      hideSecret: true,
       data: undefined,
-      secretData: {},
     }
   },
   validations () {
@@ -163,6 +173,12 @@ export default {
         font-weight: 300;
         font-size: 16px;
       }
+    }
+  }
+
+  .hide-secret {
+    :deep(.v-input__control textarea) {
+      -webkit-text-security: disc;
     }
   }
 
