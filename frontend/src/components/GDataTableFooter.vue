@@ -5,52 +5,62 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
+  <v-divider />
   <div class="v-data-table-footer">
-    <div class="v-data-table-footer__items-per-page">
-      <span>Rows per page:</span>
-      <v-select
-        :items="itemsPerPageOptions"
-        :model-value="itemsPerPage"
-        density="compact"
-        variant="solo"
-        flat
-        single-line
-        hide-details
-        @update:model-value="value => setItemsPerPage(Number(value))"
-      />
-    </div>
-    <div class="v-data-table-footer__info">
-      {{ !itemsLength ? 0 : startIndex + 1 }}-{{ stopIndex }} of {{ itemsLength }}
-    </div>
-    <div class="v-data-table-footer__pagination">
-      <v-btn
-        icon="mdi-page-first"
-        variant="plain"
-        :disabled="page === 1"
-        aria-label="First page"
-        @click="setPage(1)"
-      />
-      <v-btn
-        icon="mdi-chevron-left"
-        variant="plain"
-        :disabled="page === 1"
-        aria-label="Previous page"
-        @click="setPage(Math.max(1, page - 1))"
-      />
-      <v-btn
-        icon="mdi-chevron-right"
-        variant="plain"
-        :disabled="page === pageCount"
-        aria-label="Next page"
-        @click="setPage(Math.min(pageCount, page + 1))"
-      />
-      <v-btn
-        icon="mdi-page-last"
-        variant="plain"
-        :disabled="page === pageCount"
-        aria-label="Last page"
-        @click="setPage(pageCount)"
-      />
+    <template v-if="pageCount">
+      <div class="v-data-table-footer__items-per-page">
+        <span>Rows per page:</span>
+        <v-select
+          :items="itemsPerPageOptions"
+          :model-value="itemsPerPage"
+          density="compact"
+          variant="solo"
+          flat
+          single-line
+          hide-details
+          width="105px"
+          @update:model-value="value => setItemsPerPage(Number(value))"
+        />
+      </div>
+      <div class="v-data-table-footer__info">
+        {{ !itemsLength ? 0 : startIndex + 1 }}-{{ stopIndex }} of {{ itemsLength }}
+      </div>
+      <div class="v-data-table-footer__pagination">
+        <v-btn
+          icon="mdi-page-first"
+          variant="plain"
+          :disabled="page === 1"
+          aria-label="First page"
+          @click="setPage(1)"
+        />
+        <v-btn
+          icon="mdi-chevron-left"
+          variant="plain"
+          :disabled="page === 1"
+          aria-label="Previous page"
+          @click="setPage(Math.max(1, page - 1))"
+        />
+        <v-btn
+          icon="mdi-chevron-right"
+          variant="plain"
+          :disabled="page === pageCount"
+          aria-label="Next page"
+          @click="setPage(Math.min(pageCount, page + 1))"
+        />
+        <v-btn
+          icon="mdi-page-last"
+          variant="plain"
+          :disabled="page === pageCount"
+          aria-label="Last page"
+          @click="setPage(pageCount)"
+        />
+      </div>
+    </template>
+    <div
+      v-else
+      class="v-data-table-footer__info"
+    >
+      {{ itemsLength }} Rows
     </div>
   </div>
 </template>
@@ -68,7 +78,7 @@ const props = defineProps({
   },
   itemsPerPage: {
     type: Number,
-    required: true,
+    required: false,
   },
   itemsPerPageOptions: {
     type: Array,
@@ -77,16 +87,15 @@ const props = defineProps({
       { value: 25, title: '25' },
       { value: 50, title: '50' },
       { value: 100, title: '100' },
-      { value: -1, title: 'All' },
     ]),
   },
   page: {
     type: Number,
-    required: true,
+    required: false,
   },
   pageCount: {
     type: Number,
-    required: true,
+    required: false,
   },
 })
 
