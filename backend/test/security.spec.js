@@ -302,5 +302,35 @@ describe('security', function () {
         ],
       ])
     })
+
+    describe('authorizationCallback', () => {
+      it('should throw 400 error if redirectPath has a mismatched origin', async () => {
+        mockSecurity({})
+        const { COOKIE_STATE } = security
+
+        // Simulate a user state cookie that includes a redirectPath pointing to an unexpected domain
+        const req = {
+          cookies: {
+            [COOKIE_STATE]: {
+              redirectOrigin: 'https://localhost:8443',
+              redirectPath: 'https://127.0.0.1/account', // <-- Different origin
+              state: 'test-state',
+            },
+          },
+        }
+
+        const res = {
+          cookie: jest.fn(),
+          clearCookie: jest.fn(),
+        }
+
+        await expect(security.authorizationCallback(req, res))
+          .rejects
+          .toThrow('Invalid redirect path')
+
+        expect(res.clearCookie).toHaveBeenCalledWith(COOKIE_STATE, expect.any(Object))
+        expect(res.cookie).not.toHaveBeenCalled()
+      })
+    })
   })
 })
