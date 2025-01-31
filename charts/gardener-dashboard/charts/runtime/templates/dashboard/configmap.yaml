@@ -92,14 +92,6 @@ data:
       {{- else }}
       scope: "openid email profile groups audience:server:client_id:{{ .Values.global.dashboard.oidc.clientId }} audience:server:client_id:kube-kubectl"
       {{- end }}
-      {{- if hasKey .Values.global.dashboard.oidc "rejectUnauthorized" }}
-      rejectUnauthorized: {{ .Values.global.dashboard.oidc.rejectUnauthorized }}
-      {{- else }}
-      rejectUnauthorized: true
-      {{- end }}
-      {{- if .Values.global.dashboard.oidc.ca }}
-      ca: {{ quote .Values.global.dashboard.oidc.ca }}
-      {{- end }}
       {{- if .Values.global.dashboard.oidc.clockTolerance }}
       clockTolerance: {{ .Values.global.dashboard.oidc.clockTolerance }}
       {{- end }}
