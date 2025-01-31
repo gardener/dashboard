@@ -28,7 +28,7 @@ function expiresIn (socket) {
 
 function authenticateFn (options) {
   const cookieParserAsync = promisify(cookieParser())
-  const authenticateAsync = promisify(authenticate(options))
+  const authenticateAsync = authenticate(options)
   const noop = () => {}
   const res = {
     clearCookie: noop,
@@ -37,7 +37,11 @@ function authenticateFn (options) {
 
   return async req => {
     await cookieParserAsync(req, res)
-    await authenticateAsync(req, res)
+    await authenticateAsync(req, res, (err) => {
+      if (err) {
+        throw err
+      }
+    })
     return req.user
   }
 }
