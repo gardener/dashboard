@@ -58,7 +58,6 @@
         '@octokit/plugin-rest-endpoint-methods',
         'chalk',
         'jest',
-        'openid-client',
         'p-event',
         'p-limit',
         'p-retry',
