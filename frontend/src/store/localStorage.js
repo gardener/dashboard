@@ -150,11 +150,6 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     writeDefaults: false,
   })
 
-  const userItemsPerPage = useLocalStorage('members/useraccount-list/itemsPerPage', 10, {
-    serializer: StorageSerializers.integer,
-    writeDefaults: false,
-  })
-
   const userSortBy = useLocalStorage('members/useraccount-list/sortBy', [{
     key: 'username',
     order: 'asc',
@@ -165,11 +160,6 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
 
   const serviceAccountSelectedColumns = useLocalStorage('members/serviceaccount-list/selected-columns', {}, {
     serializer: StorageSerializers.json,
-    writeDefaults: false,
-  })
-
-  const serviceAccountItemsPerPage = useLocalStorage('members/serviceaccount-list/itemsPerPage', 10, {
-    serializer: StorageSerializers.integer,
     writeDefaults: false,
   })
 
@@ -186,11 +176,6 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     writeDefaults: false,
   })
 
-  const infraSecretItemsPerPage = useLocalStorage('secrets/infra-secret-list/itemsPerPage', 10, {
-    serializer: StorageSerializers.integer,
-    writeDefaults: false,
-  })
-
   const infraSecretSortBy = useLocalStorage('secrets/infra-secret-list/sortBy', [{
     key: 'name',
     order: 'asc',
@@ -201,11 +186,6 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
 
   const dnsSecretSelectedColumns = useLocalStorage('secrets/dns-secret-list/selected-columns', {}, {
     serializer: StorageSerializers.json,
-    writeDefaults: false,
-  })
-
-  const dnsSecretItemsPerPage = useLocalStorage('secrets/dns-secret-list/itemsPerPage', 10, {
-    serializer: StorageSerializers.integer,
     writeDefaults: false,
   })
 
@@ -276,16 +256,12 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     renderEditorWhitespaes,
     shootAdminKubeconfigExpiration,
     userSelectedColumns,
-    userItemsPerPage,
     userSortBy,
     serviceAccountSelectedColumns,
-    serviceAccountItemsPerPage,
     serviceAccountSortBy,
     infraSecretSelectedColumns,
-    infraSecretItemsPerPage,
     infraSecretSortBy,
     dnsSecretSelectedColumns,
-    dnsSecretItemsPerPage,
     dnsSecretSortBy,
     shootSelectedColumns,
     shootSortBy,

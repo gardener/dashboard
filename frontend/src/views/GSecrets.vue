@@ -7,15 +7,19 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-container
+    ref="container"
     fluid
+    class="container-size"
     @click="highlightedUid = null"
   >
     <v-card class="ma-3">
       <g-toolbar
         prepend-icon="mdi-key"
-        title="Infrastructure Secrets"
         :height="64"
       >
+        <div class="text-h6">
+          Infrastructure Secrets
+        </div>
         <template #append>
           <v-text-field
             v-if="infrastructureSecretItems.length > 3"
@@ -96,19 +100,22 @@ SPDX-License-Identifier: Apache-2.0
           Before you can provision and access a Kubernetes cluster, you need to add infrastructure account credentials. The Gardener needs the credentials to provision and operate the infrastructure for your Kubernetes cluster.
         </p>
       </v-card-text>
-      <v-data-table
+      <v-data-table-virtual
         v-else
+        id="infraSecretTable"
+        ref="infraSecretTableRef"
         v-model:sort-by="infraSecretSortBy"
-        v-model:page="infraSecretPage"
-        v-model:items-per-page="infraSecretItemsPerPage"
         :headers="visibleInfraSecretTableHeaders"
         :items="infrastructureSecretSortedItems"
-        :items-per-page-options="itemsPerPageOptions"
         :custom-key-sort="disableCustomKeySort(visibleInfraSecretTableHeaders)"
         must-sort
+        hover
         :search="infraSecretFilter"
         density="compact"
         class="g-table"
+        :item-height="itemHeight"
+        :style="infraSecretTableStyles"
+        fixed-header
       >
         <template #item="{ item }">
           <g-secret-row-infra
@@ -119,16 +126,13 @@ SPDX-License-Identifier: Apache-2.0
             @update="onUpdateSecret"
           />
         </template>
-        <template #bottom="{ pageCount }">
+        <template #bottom>
           <g-data-table-footer
-            v-model:page="infraSecretPage"
-            v-model:items-per-page="infraSecretItemsPerPage"
             :items-length="infrastructureSecretItems.length"
-            :items-per-page-options="itemsPerPageOptions"
-            :page-count="pageCount"
+            items-label="Infrastructure Secrets"
           />
         </template>
-      </v-data-table>
+      </v-data-table-virtual>
     </v-card>
 
     <v-card
@@ -137,9 +141,12 @@ SPDX-License-Identifier: Apache-2.0
     >
       <g-toolbar
         prepend-icon="mdi-key"
-        title="DNS Secrets"
         :height="64"
       >
+        <div class="text-h6">
+          DNS Secrets
+        </div>
+
         <template #append>
           <v-text-field
             v-if="dnsSecretItems.length > 3"
@@ -211,19 +218,20 @@ SPDX-License-Identifier: Apache-2.0
           Before you can use your DNS Provider account for your cluster, you need to configure the credentials here.
         </p>
       </v-card-text>
-      <v-data-table
+      <v-data-table-virtual
         v-else
-        v-model:page="dnsSecretPage"
         v-model:sort-by="dnsSecretSortBy"
-        v-model:items-per-page="dnsSecretItemsPerPage"
         :headers="visibleDnsSecretTableHeaders"
         :items="dnsSecretSortedItems"
-        :items-per-page-options="itemsPerPageOptions"
         :custom-key-sort="disableCustomKeySort(visibleDnsSecretTableHeaders)"
         must-sort
+        hover
         :search="dnsSecretFilter"
         density="compact"
         class="g-table"
+        :item-height="itemHeight"
+        :style="dnsSecretTableStyles"
+        fixed-header
       >
         <template #item="{ item }">
           <g-secret-row-dns
@@ -234,16 +242,13 @@ SPDX-License-Identifier: Apache-2.0
             @update="onUpdateSecret"
           />
         </template>
-        <template #bottom="{ pageCount }">
+        <template #bottom>
           <g-data-table-footer
-            v-model:page="dnsSecretPage"
-            v-model:items-per-page="dnsSecretItemsPerPage"
             :items-length="dnsSecretItems.length"
-            :items-per-page-options="itemsPerPageOptions"
-            :page-count="pageCount"
+            items-label="DNS Secrets"
           />
         </template>
-      </v-data-table>
+      </v-data-table-virtual>
     </v-card>
 
     <g-secret-dialog-wrapper
@@ -259,9 +264,13 @@ import {
   mapState,
   mapWritableState,
   mapActions,
+  storeToRefs,
 } from 'pinia'
 import { useUrlSearchParams } from '@vueuse/core'
-import { toRef } from 'vue'
+import {
+  toRef,
+  computed,
+} from 'vue'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
@@ -277,6 +286,8 @@ import GSecretRowDns from '@/components/Secrets/GSecretRowDns.vue'
 import GVendorIcon from '@/components/GVendorIcon'
 import GToolbar from '@/components/GToolbar'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
+
+import { useTwoTableLayout } from '@/composables/useTwoTableLayout'
 
 import {
   hasOwnSecret,
@@ -307,34 +318,45 @@ export default {
   setup () {
     const hashParams = useUrlSearchParams('hash-params')
     const highlightedUid = toRef(hashParams, 'credential-uid')
+
+    const credentialStore = useCredentialStore()
+    const {
+      infrastructureSecretBindingsList,
+      dnsSecretBindingsList,
+    } = storeToRefs(credentialStore)
+
+    const itemHeight = 56
+    const firstTableItemCount = computed(() => infrastructureSecretBindingsList.value.length)
+    const secondTableItemCount = computed(() => dnsSecretBindingsList.value.length)
+
+    const { firstTableStyles: infraSecretTableStyles, secondTableStyles: dnsSecretTableStyles } = useTwoTableLayout({
+      firstTableItemCount,
+      secondTableItemCount,
+      itemHeight,
+    })
+
     return {
       highlightedUid,
+      infrastructureSecretBindingsList,
+      dnsSecretBindingsList,
+      itemHeight,
+      infraSecretTableStyles,
+      dnsSecretTableStyles,
     }
   },
   data () {
     return {
       selectedSecretBinding: {},
-      infraSecretPage: 1,
-      dnsSecretPage: 1,
       infraSecretFilter: '',
       createInfraSecretMenu: false,
       dnsSecretFilter: '',
       createDnsSecretMenu: false,
       visibleSecretDialog: undefined,
-      itemsPerPageOptions: [
-        { value: 5, title: '5' },
-        { value: 10, title: '10' },
-        { value: 20, title: '20' },
-      ],
     }
   },
   computed: {
     ...mapState(useCloudProfileStore, ['sortedProviderTypeList']),
     ...mapState(useGardenerExtensionStore, ['dnsProviderTypes']),
-    ...mapState(useCredentialStore, [
-      'infrastructureSecretBindingsList',
-      'dnsSecretBindingsList',
-    ]),
     ...mapState(useAuthzStore, [
       'namespace',
       'canCreateSecrets',
@@ -342,10 +364,8 @@ export default {
     ...mapState(useShootStore, ['shootList']),
     ...mapWritableState(useLocalStorageStore, [
       'infraSecretSelectedColumns',
-      'infraSecretItemsPerPage',
       'infraSecretSortBy',
       'dnsSecretSelectedColumns',
-      'dnsSecretItemsPerPage',
       'dnsSecretSortBy',
     ]),
     infraSecretTableHeaders () {
@@ -481,14 +501,19 @@ export default {
     },
     highlightedUid: {
       handler (value) {
-        const infraIndex = findIndex(this.infrastructureSecretSortedItems, ['secretBinding.metadata.uid', value])
-        if (infraIndex !== -1) {
-          this.infraSecretPage = Math.floor(infraIndex / this.infraSecretItemsPerPage) + 1
+        let itemIndex = findIndex(this.infrastructureSecretSortedItems, ['secretBinding.metadata.uid', value])
+        if (itemIndex === -1) {
+          itemIndex = findIndex(this.dnsSecretSortedItems, ['secretBinding.metadata.uid', value])
         }
-
-        const dnsIndex = findIndex(this.dnsSecretSortedItems, ['secretBinding.metadata.uid', value])
-        if (dnsIndex !== -1) {
-          this.dnsSecretPage = Math.floor(dnsIndex / this.dnsSecretItemsPerPage) + 1
+        if (itemIndex !== -1) {
+          setTimeout(() => {
+            this.$refs.infraSecretTableRef.$el.querySelector('.v-table__wrapper').scrollTo(
+              {
+                top: itemIndex * this.itemHeight,
+                left: 0,
+                behavior: 'smooth',
+              })
+          }, 0)
         }
       },
       immediate: true,
@@ -545,12 +570,9 @@ export default {
     reset () {
       this.infraSecretFilter = ''
       this.dnsSecretFilter = ''
-      this.infraSecretPage = 1
-      this.dnsSecretPage = 1
     },
     resetInfraTableSettings () {
       this.infraSecretSelectedColumns = mapTableHeader(this.infraSecretTableHeaders, 'defaultSelected')
-      this.infraSecretItemsPerPage = 10
       this.infraSecretSortBy = [{ key: 'name', order: 'asc' }]
     },
     setSelectedDnsHeader (header) {
@@ -558,7 +580,6 @@ export default {
     },
     resetDnsTableSettings () {
       this.dnsSecretSelectedColumns = mapTableHeader(this.dnsSecretTableHeaders, 'defaultSelected')
-      this.dnsSecretItemsPerPage = 10
       this.dnsSecretSortBy = [{ key: 'name', order: 'asc' }]
     },
     onDialogClosed () {
@@ -607,3 +628,12 @@ export default {
   },
 }
 </script>
+
+<style lang="scss" scoped>
+
+.container-size {
+  height: 100%;
+  min-height: 800px; //ensure readability on small devices
+}
+
+</style>
