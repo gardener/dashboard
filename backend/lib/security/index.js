@@ -6,6 +6,7 @@
 
 'use strict'
 
+const { fetch, Agent } = require('undici')
 const assert = require('assert').strict
 const crypto = require('crypto')
 const { split, join, includes, head, chain, pick } = require('lodash')
@@ -51,8 +52,32 @@ const {
   client_secret: clientSecret,
   usePKCE = !clientSecret,
   sessionLifetime = 86400,
+  allowInsecure = false,
+  ca,
+  rejectUnauthorized = true,
   clockTolerance = 15,
 } = oidc
+const connectOptions = {
+  rejectUnauthorized,
+}
+if (ca) {
+  connectOptions.ca = ca
+}
+if (allowInsecure) {
+  logger.warn(
+    'WARNING: Insecure requests are allowed because "oidc.allowInsecure" is enabled. ' +
+    'This bypasses HTTPS-only restrictions and disables TLS certificate verification. ' +
+    'Use this setting only for local development or testing in non-secure environments.',
+  )
+}
+
+if (!rejectUnauthorized) {
+  logger.warn(
+    'WARNING: TLS certificate validation is disabled because "oidc.rejectUnauthorized" is set to false. ' +
+    'This bypasses certificate verification and compromises connection security. ' +
+    'Use this setting only for local development or testing in non-secure environments.',
+  )
+}
 
 function getOpenIdClientModule () {
   if (!exports.openidClientPromise) {
@@ -64,22 +89,38 @@ function getOpenIdClientModule () {
 async function getConfiguration () {
   if (!exports.discoveryPromise) {
     exports.discoveryPromise = pRetry(async () => {
-      const { discovery } = await getOpenIdClientModule()
+      const {
+        discovery,
+        customFetch,
+        allowInsecureRequests,
+      } = await getOpenIdClientModule()
 
       const issuerUrl = new URL(issuer)
-
       const clientMetadata = {
         clockTolerance,
       }
       if (clientSecret) {
         clientMetadata.client_secret = clientSecret
       }
-      const config = await discovery(
+      // ClientOptions: https://undici.nodejs.org/#/docs/api/Client?id=parameter-clientoptions
+      const clientOptions = { connect: connectOptions }
+      const dispatcher = new Agent(clientOptions)
+      const options = {
+        [customFetch]: (url, options) => {
+          return fetch(url, { ...options, dispatcher })
+        },
+      }
+      if (allowInsecure) {
+        options.execute = [allowInsecureRequests]
+      }
+      const clientAuthentication = undefined
+      return await discovery(
         issuerUrl,
         clientId,
         clientMetadata,
+        clientAuthentication,
+        options,
       )
-      return config
     }, {
       forever: true,
       minTimeout: 1000,
@@ -509,6 +550,7 @@ exports = module.exports = {
   decrypt,
   setCookies,
   clearCookies,
+  getConfiguration,
   authorizationUrl,
   authorizationCallback,
   refreshToken,

@@ -129,6 +129,11 @@ global:
     #   usePKCE: true
     #   # sessionLifetime is the maximum lifetime of a login session without reauthentication in seconds (defaults to 86400)
     #   sessionLifetime: 86400
+    #   # certificate authority of the OpenID provider
+    #   ca: |
+    #     -----BEGIN CERTIFICATE-----
+    #     Li4u
+    #     -----END CERTIFICATE-----
     #   # configuration for kubeconfig download required by kubelogin
     #   public:
     #     # clientId is the identifier of the public oidc client use by kubelogin

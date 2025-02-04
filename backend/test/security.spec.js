@@ -10,10 +10,10 @@ const _ = require('lodash')
 
 describe('security', function () {
   const createJose = require('../lib/security/jose')
+
   describe('jose', function () {
     const secret1 = Buffer.from('this-is-a-secret-only-used-for-tests').toString('base64')
     const secret2 = Buffer.from('another-secret-for-testing-purposes').toString('base64')
-
     const value = 'hello world'
 
     it('should throw an error when no session secrets are provided', function () {
@@ -86,6 +86,7 @@ describe('security', function () {
     const redirectUrl = new URL('/account', 'https://localhost:8443')
     const sub = 'john.doe@example.org'
 
+    let undici
     let config
     let authentication
     let authorization
@@ -99,6 +100,8 @@ describe('security', function () {
     let randomState
     let randomPKCECodeVerifier
     let calculatePKCECodeChallenge
+    let allowInsecureRequestsMock
+    let customFetch
 
     let mockOpenidClient
 
@@ -110,6 +113,8 @@ describe('security', function () {
       randomState = jest.fn()
       randomPKCECodeVerifier = jest.fn()
       calculatePKCECodeChallenge = jest.fn()
+      allowInsecureRequestsMock = jest.fn()
+      customFetch = Symbol('customFetch')
       mockOpenidClient = {
         discovery,
         buildAuthorizationUrl,
@@ -118,9 +123,16 @@ describe('security', function () {
         randomState,
         randomPKCECodeVerifier,
         calculatePKCECodeChallenge,
+        allowInsecureRequestsMock,
+        customFetch,
       }
+      mockOpenidClient.allowInsecureRequests = allowInsecureRequestsMock
+
       config = _.merge({}, fixtures.config.default, options)
       jest.isolateModules(() => {
+        jest.mock('undici', () => ({
+          Agent: jest.fn().mockImplementation((options) => ({ options })),
+        }))
         require('../lib/config/gardener').readConfig.mockReturnValue(config)
         jest.mock('../lib/services/authentication', () => ({
           isAuthenticated: jest.fn(),
@@ -128,6 +140,7 @@ describe('security', function () {
         jest.mock('../lib/services/authorization', () => ({
           isAdmin: jest.fn(),
         }))
+        undici = require('undici')
         authentication = require('../lib/services/authentication')
         authorization = require('../lib/services/authorization')
         security = require('../lib/security')
@@ -147,7 +160,9 @@ describe('security', function () {
         discovery.mockResolvedValue({
           code_challenge_methods_supported: ['S256', 'plain'],
         })
-        buildAuthorizationUrl.mockReturnValue('https://issuer.example.org/oauth2/authorize?client_id=my-client-id&...')
+        buildAuthorizationUrl.mockReturnValue(
+          'https://issuer.example.org/oauth2/authorize?client_id=my-client-id&...',
+        )
         randomState.mockReturnValue('state')
         randomPKCECodeVerifier.mockReturnValue('code-verifier')
         calculatePKCECodeChallenge.mockResolvedValue('code-challenge')
@@ -164,11 +179,17 @@ describe('security', function () {
         // Assert
         expect(discovery).toHaveBeenCalledTimes(1)
         expect(discovery).toHaveBeenCalledWith(
-          new URL('https://issuer.example.org/.well-known/openid-configuration'),
+          expect.objectContaining({
+            href: 'https://kubernetes:32001/',
+          }),
           'dashboard',
           {
             clockTolerance: 42,
             client_secret: 'client_secret',
+          },
+          undefined, // clientAuthentication
+          {
+            [customFetch]: expect.any(Function),
           },
         )
         expect(randomState).toHaveBeenCalledTimes(1)
@@ -215,7 +236,9 @@ describe('security', function () {
         discovery.mockResolvedValue({
           code_challenge_methods_supported: ['plain'],
         })
-        buildAuthorizationUrl.mockReturnValue('https://issuer.example.org/oauth2/authorize?client_id=my-client-id&...')
+        buildAuthorizationUrl.mockReturnValue(
+          'https://issuer.example.org/oauth2/authorize?client_id=my-client-id&...',
+        )
         randomState.mockReturnValue('state')
         randomPKCECodeVerifier.mockReturnValue('code-verifier')
 
@@ -276,7 +299,9 @@ describe('security', function () {
         // Act & Assert
         await expect(async () => {
           await security.authorizationUrl(req, res)
-        }).rejects.toThrow('neither code_challenge_method supported by the client is supported by the issuer')
+        }).rejects.toThrow(
+          'neither code_challenge_method supported by the client is supported by the issuer',
+        )
 
         expect(buildAuthorizationUrl).not.toHaveBeenCalled()
         expect(res.cookie).toHaveBeenCalledTimes(1)
@@ -404,7 +429,9 @@ describe('security', function () {
           ],
           [
             '__Host-gTkn',
-            expect.stringMatching(/^[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$/),
+            expect.stringMatching(
+              /^[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$/,
+            ),
             { secure: true, httpOnly: true, expires: undefined, sameSite: 'Lax' },
           ],
         ])
@@ -416,7 +443,6 @@ describe('security', function () {
             groups: [],
             aud: ['gardener'],
             isAdmin: false,
-          // also iat, jti, exp, refresh_at, etc.
           }),
         )
       })
@@ -564,6 +590,93 @@ describe('security', function () {
 
         expect(res.clearCookie).toHaveBeenCalledWith(COOKIE_STATE, expect.any(Object))
         expect(res.cookie).not.toHaveBeenCalled()
+      })
+    })
+
+    describe('getConfiguration', () => {
+      beforeEach(() => {
+        undici.Agent.mockClear()
+      })
+
+      it('should use default TLS settings', async () => {
+        mockSecurity({
+          oidc: {
+            issuer: 'https://issuer.example.org',
+            ca: null,
+          },
+        })
+        discovery.mockResolvedValue({ dummy: 'issuer-config' })
+
+        const configResult = await security.getConfiguration()
+
+        expect(discovery).toHaveBeenCalledTimes(1)
+        expect(discovery).toHaveBeenCalledWith(
+          expect.objectContaining({
+            href: 'https://issuer.example.org/',
+          }),
+          'dashboard',
+          {
+            clockTolerance: 42,
+          },
+          undefined, // clientAuthentication
+          {
+            [customFetch]: expect.any(Function),
+          },
+        )
+
+        // Verify that Agent was called with connect options including rejectUnauthorized: true.
+        expect(undici.Agent).toHaveBeenCalledTimes(1)
+        expect(undici.Agent).toHaveBeenCalledWith({
+          connect: {
+            rejectUnauthorized: true,
+          },
+        })
+
+        expect(configResult).toEqual({ dummy: 'issuer-config' })
+      })
+
+      it('should use custom TLS settings and set execute when allowInsecure is true', async () => {
+        const testCA = 'my-ca-cert'
+        mockSecurity({
+          oidc: {
+            rejectUnauthorized: false,
+            ca: testCA,
+            allowInsecure: true, // -> "execute" should be set
+          },
+        })
+        mockOpenidClient.allowInsecureRequests = allowInsecureRequestsMock
+
+        discovery.mockResolvedValue({ dummy: 'issuer-config-2' })
+
+        const configResult = await security.getConfiguration()
+
+        expect(discovery).toHaveBeenCalledTimes(1)
+        expect(discovery).toHaveBeenCalledWith(
+          expect.objectContaining({
+            href: 'https://kubernetes:32001/',
+          }),
+          'dashboard',
+          {
+            clockTolerance: 42,
+          },
+          undefined, // clientAuthentication
+          {
+            [customFetch]: expect.any(Function),
+            execute: [allowInsecureRequestsMock],
+          },
+        )
+
+        expect(undici.Agent).toHaveBeenCalledTimes(1)
+        expect(undici.Agent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            connect: {
+              rejectUnauthorized: false,
+              ca: testCA,
+            },
+          }),
+        )
+
+        expect(configResult).toEqual({ dummy: 'issuer-config-2' })
       })
     })
   })
