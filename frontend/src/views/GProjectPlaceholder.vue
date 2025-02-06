@@ -154,11 +154,15 @@ export default {
     watch(project, value => {
       if (readyState.value === 'loaded') {
         if (!value) {
+          fallbackRoute.value = {
+            name: 'Home',
+          }
           error.value = Object.assign(new Error('The project you are looking for is no longer available'), {
             code: 410,
             reason: 'Project is gone',
           })
         } else if ([404, 410].includes(error.value?.code)) {
+          fallbackRoute.value = null
           error.value = null
         }
       }
