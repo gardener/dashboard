@@ -102,7 +102,6 @@ SPDX-License-Identifier: Apache-2.0
       </v-card-text>
       <v-data-table-virtual
         v-else
-        id="infraSecretTable"
         ref="infraSecretTableRef"
         v-model:sort-by="infraSecretSortBy"
         :headers="visibleInfraSecretTableHeaders"
@@ -220,6 +219,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-card-text>
       <v-data-table-virtual
         v-else
+        ref="dnsSecretTableRef"
         v-model:sort-by="dnsSecretSortBy"
         :headers="visibleDnsSecretTableHeaders"
         :items="dnsSecretSortedItems"
@@ -325,7 +325,7 @@ export default {
       dnsSecretBindingsList,
     } = storeToRefs(credentialStore)
 
-    const itemHeight = 56
+    const itemHeight = 58
     const firstTableItemCount = computed(() => infrastructureSecretBindingsList.value.length)
     const secondTableItemCount = computed(() => dnsSecretBindingsList.value.length)
 
@@ -501,20 +501,27 @@ export default {
     },
     highlightedUid: {
       handler (value) {
-        let itemIndex = findIndex(this.infrastructureSecretSortedItems, ['secretBinding.metadata.uid', value])
-        if (itemIndex === -1) {
-          itemIndex = findIndex(this.dnsSecretSortedItems, ['secretBinding.metadata.uid', value])
-        }
-        if (itemIndex !== -1) {
-          setTimeout(() => {
+        setTimeout(() => {
+          // Cannot start scrolling before the table is rendered
+          let itemIndex = findIndex(this.infrastructureSecretSortedItems, ['secretBinding.metadata.uid', value])
+          if (itemIndex !== -1) {
             this.$refs.infraSecretTableRef.$el.querySelector('.v-table__wrapper').scrollTo(
               {
                 top: itemIndex * this.itemHeight,
                 left: 0,
                 behavior: 'smooth',
               })
-          }, 0)
-        }
+          }
+          itemIndex = findIndex(this.dnsSecretSortedItems, ['secretBinding.metadata.uid', value])
+          if (itemIndex !== -1) {
+            this.$refs.dnsSecretTableRef.$el.querySelector('.v-table__wrapper').scrollTo(
+              {
+                top: itemIndex * this.itemHeight,
+                left: 0,
+                behavior: 'smooth',
+              })
+          }
+        }, 100)
       },
       immediate: true,
     },
