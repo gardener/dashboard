@@ -26,11 +26,7 @@ function expiresIn (socket) {
 
 async function userProfiles (req, res, next) {
   try {
-    const [
-      canListProjects,
-    ] = await Promise.all([
-      authorization.canListProjects(req.user),
-    ])
+    const canListProjects = await authorization.canListProjects(req.user)
     const profiles = Object.freeze({
       canListProjects,
     })
@@ -47,21 +43,22 @@ async function userProfiles (req, res, next) {
 function authenticateFn (options) {
   const cookieParserAsync = promisify(cookieParser())
   const authenticateAsync = authenticate(options)
-  const userProfilesAsync = promisify(userProfiles)
+  const userProfilesAsync = userProfiles
   const noop = () => { }
   const res = {
     clearCookie: noop,
     cookie: noop,
   }
+  const next = err => {
+    if (err) {
+      throw err
+    }
+  }
 
   return async req => {
-    await cookieParserAsync(req, res)
-    await authenticateAsync(req, res, (err) => {
-      if (err) {
-        throw err
-      }
-    })
-    await userProfilesAsync(req, res)
+    await cookieParserAsync(req, res) // Note: We intentionally omit the 'next' callback here because promisify automatically appends an error-first callback (err, value) => { ... } to the function arguments.
+    await authenticateAsync(req, res, next)
+    await userProfilesAsync(req, res, next)
     return req.user
   }
 }
