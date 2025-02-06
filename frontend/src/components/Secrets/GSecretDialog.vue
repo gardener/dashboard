@@ -8,6 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <v-dialog
     v-model="visible"
     max-width="850"
+    scrollable
   >
     <v-card>
       <g-toolbar
@@ -69,22 +70,24 @@ SPDX-License-Identifier: Apache-2.0
           </v-slide-x-reverse-transition>
         </div>
       </v-card-text>
-      <v-alert
-        :model-value="!isCreateMode && relatedShootCount > 0"
-        type="warning"
-        rounded="0"
-        class="mb-2"
-      >
-        This secret is used by {{ relatedShootCount }} clusters. The new secret should be part of the same account as the one that gets replaced.
-      </v-alert>
-      <v-alert
-        :model-value="!isCreateMode && relatedShootCount > 0"
-        type="warning"
-        rounded="0"
-        class="mb-2"
-      >
-        Clusters will only start using the new secret after they got reconciled. Therefore, wait until all clusters using the secret are reconciled before you disable the old secret in your infrastructure account. Otherwise the clusters will no longer function.
-      </v-alert>
+      <div>
+        <v-alert
+          :model-value="!isCreateMode && relatedShootCount > 0"
+          type="warning"
+          rounded="0"
+          class="mb-2"
+        >
+          This secret is used by {{ relatedShootCount }} clusters. The new secret should be part of the same account as the one that gets replaced.
+        </v-alert>
+        <v-alert
+          :model-value="!isCreateMode && relatedShootCount > 0"
+          type="warning"
+          rounded="0"
+          class="mb-2"
+        >
+          Clusters will only start using the new secret after they got reconciled. Therefore, wait until all clusters using the secret are reconciled before you disable the old secret in your infrastructure account. Otherwise the clusters will no longer function.
+        </v-alert>
+      </div>
       <v-divider />
       <v-card-actions>
         <v-spacer />
@@ -117,13 +120,14 @@ import {
   maxLength,
 } from '@vuelidate/validators'
 
-import { useSecretStore } from '@/store/secret'
-import { useAuthzStore } from '@/store/authz'
+import { useCredentialStore } from '@/store/credential'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useShootStore } from '@/store/shoot'
 
 import GToolbar from '@/components/GToolbar.vue'
 import GMessage from '@/components/GMessage'
+
+import { useCredentialContext } from '@/composables/useCredentialContext'
 
 import {
   messageFromErrors,
@@ -145,7 +149,6 @@ import {
 import includes from 'lodash/includes'
 import filter from 'lodash/filter'
 import get from 'lodash/get'
-import cloneDeep from 'lodash/cloneDeep'
 
 export default {
   components: {
@@ -156,10 +159,6 @@ export default {
   props: {
     modelValue: {
       type: Boolean,
-      required: true,
-    },
-    data: {
-      type: Object,
       required: true,
     },
     secretValidations: {
@@ -180,7 +179,7 @@ export default {
       type: String,
       required: true,
     },
-    secret: {
+    secretBinding: {
       type: Object,
     },
   },
@@ -189,13 +188,33 @@ export default {
     'cloud-profile-name',
   ],
   setup () {
+    const { createSecretBindingManifest,
+      setSecretBindingManifest,
+      secretBindingManifest,
+      secretBindingName,
+      secretBindingProviderType,
+      secretBindingSecretRef,
+      createSecretManifest,
+      setSecretManifest,
+      secretManifest,
+      secretName } = useCredentialContext()
+
     return {
+      createSecretBindingManifest,
+      setSecretBindingManifest,
+      secretBindingManifest,
+      secretBindingName,
+      secretBindingProviderType,
+      secretBindingSecretRef,
+      createSecretManifest,
+      setSecretManifest,
+      secretManifest,
+      secretName,
       v$: useVuelidate(),
     }
   },
   data () {
     return {
-      name: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined,
       helpVisible: false,
@@ -219,10 +238,9 @@ export default {
     return rules
   },
   computed: {
-    ...mapState(useAuthzStore, ['namespace']),
-    ...mapState(useSecretStore, [
-      'infrastructureSecretList',
-      'dnsSecretList',
+    ...mapState(useCredentialStore, [
+      'infrastructureSecretBindingsList',
+      'dnsSecretBindingsList',
     ]),
     ...mapState(useGardenerExtensionStore, ['dnsProviderTypes']),
     ...mapState(useShootStore, ['shootList']),
@@ -235,13 +253,13 @@ export default {
       },
     },
     infrastructureSecretNames () {
-      return this.infrastructureSecretList.map(item => item.metadata.name)
+      return this.infrastructureSecretBindingsList.map(item => item.metadata.name)
     },
     dnsSecretNames () {
-      return this.dnsSecretList.map(item => item.metadata.name)
+      return this.dnsSecretBindingsList.map(item => item.metadata.name)
     },
     isCreateMode () {
-      return !this.secret
+      return !this.secretBinding
     },
     submitButtonText () {
       return this.isCreateMode ? 'Add Secret' : 'Replace Secret'
@@ -253,7 +271,7 @@ export default {
       return this.shootsByInfrastructureSecret.length
     },
     shootsByInfrastructureSecret () {
-      const name = get(this.secret, ['metadata', 'name'])
+      const name = get(this.secretBinding, ['metadata', 'name'])
       return filter(this.shootList, ['spec.secretBindingName', name])
     },
     helpContainerStyles () {
@@ -273,14 +291,24 @@ export default {
     isDnsProviderSecret () {
       return includes(this.dnsProviderTypes, this.providerType)
     },
+    name: {
+      get () {
+        return this.secretBindingName
+      },
+      set (value) {
+        this.secretBindingName = value
+        this.secretName = value
+        this.secretBindingSecretRef.name = value
+      },
+    },
   },
   mounted () {
     this.reset()
   },
   methods: {
-    ...mapActions(useSecretStore, [
-      'createSecret',
-      'updateSecret',
+    ...mapActions(useCredentialStore, [
+      'createCredential',
+      'updateCredential',
     ]),
     hide () {
       this.visible = false
@@ -317,32 +345,24 @@ export default {
     },
     save () {
       if (this.isCreateMode) {
-        const metadata = {
-          name: this.name,
-          namespace: this.namespace,
-          secretRef: {
-            name: this.name,
-            namespace: this.namespace,
-          },
-          provider: {
-            type: this.providerType,
-          },
-        }
-        return this.createSecret({ metadata, data: this.data })
+        return this.createCredential({ secret: this.secretManifest, secretBinding: this.secretBindingManifest })
       } else {
-        const metadata = cloneDeep(this.secret.metadata)
-
-        return this.updateSecret({ metadata, data: this.data })
+        return this.updateCredential({ secret: this.secretManifest, secretBinding: this.secretBindingManifest })
       }
     },
     reset () {
       this.v$.$reset()
 
       if (this.isCreateMode) {
+        this.createSecretBindingManifest()
+        this.createSecretManifest()
         this.name = `my-${this.providerType}-secret`
+        this.secretBindingProviderType = this.providerType
+
         setDelayedInputFocus(this, 'name')
       } else {
-        this.name = get(this.secret, ['metadata', 'name'])
+        this.setSecretBindingManifest(this.secretBinding)
+        this.setSecretManifest(this.secretBinding._secret)
       }
 
       this.errorMessage = undefined

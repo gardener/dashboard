@@ -9,7 +9,7 @@ module.exports = {
   seeds: require('./seeds'),
   projects: require('./projects'),
   shoots: require('./shoots'),
-  cloudProviderSecrets: require('./cloudProviderSecrets'),
+  cloudProviderCredentials: require('./cloudProviderCredentials'),
   members: require('./members'),
   authorization: require('./authorization'),
   authentication: require('./authentication'),

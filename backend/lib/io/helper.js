@@ -46,7 +46,7 @@ async function userProfiles (req, res, next) {
 
 function authenticateFn (options) {
   const cookieParserAsync = promisify(cookieParser())
-  const authenticateAsync = promisify(authenticate(options))
+  const authenticateAsync = authenticate(options)
   const userProfilesAsync = promisify(userProfiles)
   const noop = () => { }
   const res = {
@@ -56,7 +56,11 @@ function authenticateFn (options) {
 
   return async req => {
     await cookieParserAsync(req, res)
-    await authenticateAsync(req, res)
+    await authenticateAsync(req, res, (err) => {
+      if (err) {
+        throw err
+      }
+    })
     await userProfilesAsync(req, res)
     return req.user
   }

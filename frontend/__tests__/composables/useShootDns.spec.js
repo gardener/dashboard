@@ -13,7 +13,7 @@ import {
 } from 'pinia'
 
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
-import { useSecretStore } from '@/store/secret'
+import { useCredentialStore } from '@/store/credential'
 
 import { useShootDns } from '@/composables/useShootDns'
 
@@ -25,14 +25,14 @@ describe('composables', () => {
     beforeEach(() => {
       setActivePinia(createPinia())
       manifest.spec = {}
-      const secretStore = useSecretStore()
-      secretStore.list = global.fixtures.secrets
+      const credentialStore = useCredentialStore()
+      credentialStore._setCredentials(global.fixtures.credentials)
       const gardenerExtensionStore = useGardenerExtensionStore()
       gardenerExtensionStore.list = global.fixtures.gardenerExtensions
 
       const composable = useShootDns(toRef(manifest), {
         gardenerExtensionStore,
-        secretStore,
+        credentialStore,
       })
       shootDns = reactive(composable)
     })

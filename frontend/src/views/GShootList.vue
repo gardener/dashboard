@@ -154,18 +154,19 @@ SPDX-License-Identifier: Apache-2.0
           />
         </template>
       </g-toolbar>
-      <v-data-table
-        v-model:page="page"
+      <v-data-table-virtual
+        ref="shootTable"
         v-model:sort-by="sortByInternal"
-        v-model:items-per-page="shootItemsPerPage"
         :headers="visibleHeaders"
         :items="sortedAndFilteredItems"
-        hover
         :loading="loading || !connected"
-        :items-per-page-options="itemsPerPageOptions"
         :custom-key-sort="customKeySort"
+        hover
         must-sort
+        fixed-header
         class="g-table"
+        height="calc(100vh - 240px)"
+        item-height="52px"
       >
         <template #progress>
           <g-shoot-list-progress />
@@ -182,16 +183,12 @@ SPDX-License-Identifier: Apache-2.0
             :visible-headers="visibleHeaders"
           />
         </template>
-        <template #bottom="{ pageCount }">
+        <template #bottom>
           <g-data-table-footer
-            v-model:page="page"
-            v-model:items-per-page="shootItemsPerPage"
             :items-length="sortedAndFilteredItems.length"
-            :items-per-page-options="itemsPerPageOptions"
-            :page-count="pageCount"
           />
         </template>
-      </v-data-table>
+      </v-data-table-virtual>
     </v-card>
     <g-shoot-list-actions />
   </v-container>
@@ -328,7 +325,6 @@ export default {
 
     function onUpdateShootSearch (value) {
       shootSearch.value = value
-
       setDebouncedShootSearch()
     }
 
@@ -346,13 +342,7 @@ export default {
   data () {
     return {
       dialog: null,
-      page: 1,
       selectedColumns: undefined,
-      itemsPerPageOptions: [
-        { value: 5, title: '5' },
-        { value: 10, title: '10' },
-        { value: 20, title: '20' },
-      ],
     }
   },
   computed: {
@@ -388,7 +378,6 @@ export default {
     ]),
     ...mapWritableState(useLocalStorageStore, [
       'shootSelectedColumns',
-      'shootItemsPerPage',
       'shootSortBy',
       'shootCustomSelectedColumns',
       'shootCustomSortBy',
@@ -397,9 +386,6 @@ export default {
     ]),
     defaultSortBy () {
       return [{ key: 'name', order: 'asc' }]
-    },
-    defaultItemsPerPage () {
-      return 10
     },
     focusModeInternal: {
       get () {
@@ -805,7 +791,6 @@ export default {
         ...this.defaultCustomSelectedColumns,
       }
       this.saveSelectedColumns()
-      this.shootItemsPerPage = this.defaultItemsPerPage
       this.sortByInternal = this.defaultSortBy
     },
     updateTableSettings () {

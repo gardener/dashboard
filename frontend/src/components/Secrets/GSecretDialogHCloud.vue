@@ -7,16 +7,14 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-secret-dialog
     v-model="visible"
-    :data="secretData"
     :secret-validations="v$"
-    :secret="secret"
+    :secret-binding="secretBinding"
     create-title="Add new Hetzner Cloud Secret"
     replace-title="Replace Hetzner Cloud Secret"
   >
     <template #secret-slot>
       <div>
         <v-text-field
-          ref="hcloudToken"
           v-model="hcloudToken"
           color="primary"
           label="Hetzner Cloud Token"
@@ -54,6 +52,8 @@ import { required } from '@vuelidate/validators'
 import GSecretDialog from '@/components/Secrets/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink.vue'
 
+import { useProvideCredentialContext } from '@/composables/useCredentialContext'
+
 import { withFieldName } from '@/utils/validators'
 import { getErrorMessages } from '@/utils'
 
@@ -67,7 +67,7 @@ export default {
       type: Boolean,
       required: true,
     },
-    secret: {
+    secretBinding: {
       type: Object,
     },
   },
@@ -75,13 +75,19 @@ export default {
     'update:modelValue',
   ],
   setup () {
+    const { secretStringDataRefs } = useProvideCredentialContext()
+
+    const { hcloudToken } = secretStringDataRefs({
+      hcloudToken: 'hcloudToken',
+    })
+
     return {
+      hcloudToken,
       v$: useVuelidate(),
     }
   },
   data () {
     return {
-      hcloudToken: undefined,
       hideHcloudToken: true,
     }
   },
@@ -103,11 +109,6 @@ export default {
     },
     valid () {
       return !this.v$.$invalid
-    },
-    secretData () {
-      return {
-        hcloudToken: this.hcloudToken,
-      }
     },
     isCreateMode () {
       return !this.secret

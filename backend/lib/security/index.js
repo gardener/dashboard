@@ -286,10 +286,18 @@ async function authorizationCallback (req, res) {
     res.clearCookie(COOKIE_STATE, options)
   }
   const {
-    redirectPath,
+    redirectPath = '/',
     redirectOrigin,
     state,
   } = stateObject
+
+  const baseUri = head(redirectUris)
+  const resolvedOrigin = new URL(redirectPath, baseUri).origin
+  const trustedOrigin = new URL(baseUri).origin
+  if (resolvedOrigin !== trustedOrigin) {
+    logger.error(`Invalid redirect path: ${redirectPath}, origin: ${resolvedOrigin}, expected origin: ${trustedOrigin}`)
+    throw createError(400, 'Invalid redirect path')
+  }
 
   const client = await exports.getIssuerClient()
   const parameters = client.callbackParams(req)
@@ -498,6 +506,7 @@ exports = module.exports = {
   COOKIE_HEADER_PAYLOAD,
   COOKIE_SIGNATURE,
   COOKIE_TOKEN,
+  COOKIE_STATE,
   sign,
   decode,
   verify,

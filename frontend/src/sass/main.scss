@@ -188,13 +188,14 @@
 .v-theme-- {
   &light {
     @include alternate-row-background(rgba(0, 0, 0, .04));
-    @include g-highlighted(#fff3cd, #fde7a4);
+    @include g-highlighted(rgb(var(--v-theme-accent)), rgb(var(--v-theme-accent-darken-1)));
     @include g-cm-highlighted-whitespace(#f0f0f0);
   }
 
   &dark {
+    $highlighted-color: rgb(var(--v-theme-accent));
     @include alternate-row-background(rgba(0, 0, 0, .4));
-    @include g-highlighted(#2e2e2e, #444444);
+    @include g-highlighted(rgb(var(--v-theme-accent)), rgb(var(--v-theme-accent-darken-1)));
     @include g-cm-highlighted-whitespace(#404040);
   }
 }

@@ -332,7 +332,7 @@ To delete a shoot cluster, you must first annotate the shoot resource to confirm
 To get the `kubeconfig` for a shoot cluster in Gardener from the command line, use one of the following methods:
 
 1. **Using `shoots/admin/kubeconfig` Subresource**:
-   - You can obtain a temporary admin `kubeconfig` by using the `shoots/admin/kubeconfig` subresource. Detailed instructions can be found in the Gardener documentation [here](https://github.com/gardener/gardener/blob/master/docs/usage/shoot_access.md#shootsadminkubeconfig-subresource).
+   - You can obtain a temporary admin `kubeconfig` by using the `shoots/admin/kubeconfig` subresource. Detailed instructions can be found in the Gardener documentation [here](https://github.com/gardener/gardener/blob/master/docs/usage/shoot/shoot_access.md#shootsadminkubeconfig-subresource).
 
 2. **Using `gardenctl` and `gardenlogin`**:
    `gardenctl` simplifies targeting Shoot clusters. It automatically downloads a `kubeconfig` that uses the `gardenlogin` kubectl auth plugin. This plugin transparently manages `Shoot` cluster authentication and certificate renewal without embedding any credentials in the kubeconfig file.

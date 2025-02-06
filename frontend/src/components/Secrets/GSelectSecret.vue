@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
       item-color="primary"
       :label="label"
       :disabled="disabled"
-      :items="allowedSecrets"
+      :items="allowedSecretBindings"
       item-value="metadata.name"
       item-title="metadata.name"
       return-object
@@ -30,14 +30,14 @@ SPDX-License-Identifier: Apache-2.0
           :subtitle="item.raw.description"
         >
           {{ get(item.raw, 'metadata.name') }}
-          <v-icon v-if="!isOwnSecret(item.raw)">
+          <v-icon v-if="!hasOwnSecret(item.raw)">
             mdi-share
           </v-icon>
         </v-list-item>
       </template>
       <template #selection="{ item }">
         {{ get(item.raw, 'metadata.name') }}
-        <v-icon v-if="!isOwnSecret(item.raw)">
+        <v-icon v-if="!hasOwnSecret(item.raw)">
           mdi-share
         </v-icon>
       </template>
@@ -70,14 +70,13 @@ import { required } from '@vuelidate/validators'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useProjectStore } from '@/store/project'
-import { useSecretStore } from '@/store/secret'
+import { useCredentialStore } from '@/store/credential'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 
 import GSecretDialogWrapper from '@/components/Secrets/GSecretDialogWrapper'
 
 import { useProjectCostObject } from '@/composables/useProjectCostObject'
-import { useProjectMetadata } from '@/composables/useProjectMetadata'
-import { useSecretList } from '@/composables/useSecretList'
+import { useSecretBindingList } from '@/composables/useSecretBindingList'
 
 import {
   withParams,
@@ -86,11 +85,10 @@ import {
 } from '@/utils/validators'
 import {
   getErrorMessages,
-  isOwnSecret,
+  hasOwnSecret,
   selfTerminationDaysForSecret,
 } from '@/utils'
 
-import toUpper from 'lodash/toUpper'
 import get from 'lodash/get'
 import head from 'lodash/head'
 import isEqual from 'lodash/isEqual'
@@ -133,25 +131,23 @@ export default {
     const {
       costObjectsSettingEnabled,
       costObjectErrorMessage,
+      costObject,
     } = useProjectCostObject(projectItem)
-    const secretStore = useSecretStore()
+    const credentialStore = useCredentialStore()
     const gardenerExtensionStore = useGardenerExtensionStore()
-    const {
-      projectName,
-    } = useProjectMetadata(projectItem)
 
     const v$ = useVuelidate({
       $registerAs: props.registerVuelidateAs,
     })
 
     const providerType = toRef(props, 'providerType')
-    const secretList = useSecretList(providerType, { secretStore, gardenerExtensionStore })
+    const secretBindingList = useSecretBindingList(providerType, { credentialStore, gardenerExtensionStore })
 
     return {
-      projectName,
       costObjectsSettingEnabled,
       costObjectErrorMessage,
-      secretList,
+      costObject,
+      secretBindingList,
       v$,
     }
   },
@@ -162,19 +158,11 @@ export default {
     }
   },
   validations () {
-    const projectName = this.projectName
-
-    const messageFn = ({ $model }) => {
-      return projectName === get($model, ['metadata', 'projectName'])
-        ? 'A Cost Object is required. Go to the ADMINISTRATION page to edit the project and set the Cost Object.'
-        : `A Cost Object is required and has to be set on the Project ${toUpper(projectName)}`
-    }
-
     const requiresCostObjectIfEnabled = (enabled = false) => withParams(
       { type: 'requiresCostObjectIfEnabled', enabled },
       function requiresCostObjectIfEnabled (value) {
         return enabled
-          ? get(value, ['metadata', 'hasCostObject'], false)
+          ? !!this.costObject || !hasOwnSecret(value)
           : true
       },
     )
@@ -182,7 +170,10 @@ export default {
     return {
       internalValue: withFieldName('Secret', {
         required,
-        requiresCostObjectIfEnabled: withMessage(messageFn, requiresCostObjectIfEnabled(this.costObjectsSettingEnabled)),
+        requiresCostObjectIfEnabled: withMessage(
+          'A Cost Object is required. Go to the ADMINISTRATION page to edit the project and set the Cost Object.',
+          requiresCostObjectIfEnabled(this.costObjectsSettingEnabled),
+        ),
       }),
     }
   },
@@ -195,8 +186,8 @@ export default {
         this.$emit('update:modelValue', value)
       },
     },
-    allowedSecrets () {
-      return this.secretList
+    allowedSecretBindings () {
+      return this.secretBindingList
         ?.filter(secret => !this.allowedSecretNames.includes(secret.metadata.name))
     },
     secretHint () {
@@ -217,14 +208,14 @@ export default {
       'cloudProfileByName',
     ]),
     get,
-    isOwnSecret,
+    hasOwnSecret,
     openSecretDialog () {
       this.visibleSecretDialog = this.providerType
-      this.secretItemsBeforeAdd = cloneDeep(this.allowedSecrets)
+      this.secretItemsBeforeAdd = cloneDeep(this.allowedSecretBindings)
     },
     onSecretDialogClosed () {
       this.visibleSecretDialog = undefined
-      const value = head(differenceWith(this.allowedSecrets, this.secretItemsBeforeAdd, isEqual))
+      const value = head(differenceWith(this.allowedSecretBindings, this.secretItemsBeforeAdd, isEqual))
       if (value) {
         this.internalValue = value
       }

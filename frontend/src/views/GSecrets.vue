@@ -5,7 +5,10 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <v-container fluid>
+  <v-container
+    fluid
+    @click="highlightedUid = null"
+  >
     <v-card class="ma-3">
       <g-toolbar
         prepend-icon="mdi-key"
@@ -244,7 +247,7 @@ SPDX-License-Identifier: Apache-2.0
 
     <g-secret-dialog-wrapper
       :visible-dialog="visibleSecretDialog"
-      :selected-secret="selectedSecret"
+      :selected-secret-binding="selectedSecretBinding"
       @dialog-closed="onDialogClosed"
     />
   </v-container>
@@ -256,10 +259,12 @@ import {
   mapWritableState,
   mapActions,
 } from 'pinia'
+import { useUrlSearchParams } from '@vueuse/core'
+import { toRef } from 'vue'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
-import { useSecretStore } from '@/store/secret'
+import { useCredentialStore } from '@/store/credential'
 import { useAuthzStore } from '@/store/authz'
 import { useShootStore } from '@/store/shoot'
 import { useLocalStorageStore } from '@/store/localStorage'
@@ -273,7 +278,7 @@ import GToolbar from '@/components/GToolbar'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
 
 import {
-  isOwnSecret,
+  hasOwnSecret,
   mapTableHeader,
 } from '@/utils'
 
@@ -285,6 +290,7 @@ import map from 'lodash/map'
 import head from 'lodash/head'
 import filter from 'lodash/filter'
 import get from 'lodash/get'
+import findIndex from 'lodash/findIndex'
 
 export default {
   components: {
@@ -297,9 +303,16 @@ export default {
     GDataTableFooter,
   },
   inject: ['mergeProps'],
+  setup () {
+    const hashParams = useUrlSearchParams('hash-params')
+    const highlightedUid = toRef(hashParams, 'credential-uid')
+    return {
+      highlightedUid,
+    }
+  },
   data () {
     return {
-      selectedSecret: {},
+      selectedSecretBinding: {},
       infraSecretPage: 1,
       dnsSecretPage: 1,
       infraSecretFilter: '',
@@ -317,9 +330,9 @@ export default {
   computed: {
     ...mapState(useCloudProfileStore, ['sortedProviderTypeList']),
     ...mapState(useGardenerExtensionStore, ['dnsProviderTypes']),
-    ...mapState(useSecretStore, [
-      'infrastructureSecretList',
-      'dnsSecretList',
+    ...mapState(useCredentialStore, [
+      'infrastructureSecretBindingsList',
+      'dnsSecretBindingsList',
     ]),
     ...mapState(useAuthzStore, [
       'namespace',
@@ -392,18 +405,9 @@ export default {
       return this.sortItems(this.infrastructureSecretItems, this.infraSecretSortBy, secondSortCriteria)
     },
     infrastructureSecretItems () {
-      return map(this.infrastructureSecretList, secret => {
-        const relatedShootCount = this.relatedShootCountInfra(secret)
-        return {
-          name: secret.metadata.name,
-          isOwnSecret: isOwnSecret(secret),
-          secretNamespace: secret.metadata.secretRef.namespace,
-          secretName: secret.metadata.secretRef.name,
-          providerType: secret.metadata.provider.type,
-          relatedShootCount,
-          relatedShootCountLabel: this.relatedShootCountLabel(relatedShootCount),
-          secret,
-        }
+      return map(this.infrastructureSecretBindingsList, secretBinding => {
+        const relatedShootCount = this.relatedShootCountInfra(secretBinding)
+        return this.computeItem(secretBinding, relatedShootCount)
       })
     },
     dnsSecretTableHeaders () {
@@ -464,18 +468,9 @@ export default {
       return this.sortItems(this.dnsSecretItems, this.dnsSecretSortBy, secondSortCriteria)
     },
     dnsSecretItems () {
-      return map(this.dnsSecretList, secret => {
-        const relatedShootCount = this.relatedShootCountDns(secret)
-        return {
-          name: secret.metadata.name,
-          isOwnSecret: isOwnSecret(secret),
-          secretNamespace: secret.metadata.secretRef.namespace,
-          secretName: secret.metadata.secretRef.name,
-          providerType: secret.metadata.provider.type,
-          relatedShootCount,
-          relatedShootCountLabel: this.relatedShootCountLabel(relatedShootCount),
-          secret,
-        }
+      return map(this.dnsSecretBindingsList, secretBinding => {
+        const relatedShootCount = this.relatedShootCountDns(secretBinding)
+        return this.computeItem(secretBinding, relatedShootCount)
       })
     },
   },
@@ -483,30 +478,36 @@ export default {
     namespace () {
       this.reset()
     },
-  },
-  mounted () {
-    if (!get(this.$route.params, ['name'])) {
-      return
-    }
-    const secret = this.getCloudProviderSecretByName(this.$route.params)
-    if (!secret || !isOwnSecret(secret)) {
-      return
-    }
-    this.onUpdateSecret(secret)
+    highlightedUid: {
+      handler (value) {
+        const infraIndex = findIndex(this.infrastructureSecretSortedItems, ['secretBinding.metadata.uid', value])
+        if (infraIndex !== -1) {
+          this.infraSecretPage = Math.floor(infraIndex / this.infraSecretItemsPerPage) + 1
+        }
+
+        const dnsIndex = findIndex(this.dnsSecretSortedItems, ['secretBinding.metadata.uid', value])
+        if (dnsIndex !== -1) {
+          this.dnsSecretPage = Math.floor(dnsIndex / this.dnsSecretItemsPerPage) + 1
+        }
+      },
+      immediate: true,
+    },
   },
   methods: {
-    ...mapActions(useSecretStore, ['getCloudProviderSecretByName']),
+    ...mapActions(useCredentialStore, [
+      'getSecretBinding',
+    ]),
     openSecretAddDialog (providerType) {
-      this.selectedSecret = undefined
+      this.selectedSecretBinding = undefined
       this.visibleSecretDialog = providerType
     },
-    onUpdateSecret (secret) {
-      const providerType = secret.metadata.provider.type
-      this.selectedSecret = secret
+    onUpdateSecret (secretBinding) {
+      const providerType = secretBinding.provider.type
+      this.selectedSecretBinding = secretBinding
       this.visibleSecretDialog = providerType
     },
-    onRemoveSecret (secret) {
-      this.selectedSecret = secret
+    onRemoveSecret (secretBinding) {
+      this.selectedSecretBinding = secretBinding
       this.visibleSecretDialog = 'delete'
     },
     relatedShootCountInfra (secret) {
@@ -587,6 +588,20 @@ export default {
       const sortableTableHeaders = filter(tableHeaders, ['sortable', true])
       const tableKeys = mapKeys(sortableTableHeaders, ({ key }) => key)
       return mapValues(tableKeys, () => () => 0)
+    },
+    computeItem (secretBinding, relatedShootCount) {
+      return {
+        name: secretBinding.metadata.name,
+        hasOwnSecret: hasOwnSecret(secretBinding),
+        secretNamespace: secretBinding.secretRef.namespace,
+        secretName: secretBinding.secretRef.name,
+        providerType: secretBinding.provider.type,
+        relatedShootCount,
+        relatedShootCountLabel: this.relatedShootCountLabel(relatedShootCount),
+        secretBinding,
+        highlighted: this.highlightedUid === secretBinding.metadata.uid,
+        isMarkedForDeletion: !!secretBinding.metadata.deletionTimestamp,
+      }
     },
   },
 }
