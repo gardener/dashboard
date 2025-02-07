@@ -158,7 +158,7 @@ function synchronizeFactory (kind, options = {}) {
     return uids.map(uid => {
       const object = cache.getByUid(kind, uid)
       if (!object) {
-        // the project has been removed from the cache
+        // the object has been removed from the cache
         return uidNotFound(uid)
       }
       switch (accessResolver(socket, object)) {
