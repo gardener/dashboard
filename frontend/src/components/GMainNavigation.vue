@@ -200,8 +200,8 @@ SPDX-License-Identifier: Apache-2.0
       </v-list-item>
       <template v-if="namespace">
         <template
-          v-for="route in visibleRoutes "
-          :key="route.path"
+          v-for="route in visibleRoutes"
+          :key="`${namespace}-${route.path}`"
         >
           <v-list-item
             :to="namespacedRoute(route)"
