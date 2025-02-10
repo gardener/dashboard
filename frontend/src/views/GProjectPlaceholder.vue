@@ -62,10 +62,8 @@ export default {
     const component = computed(() => {
       if (error.value) {
         return 'g-project-error'
-      } else if (readyState.value === 'loaded') {
-        return 'router-view'
       }
-      return 'div'
+      return 'router-view'
     })
 
     const componentProperties = computed(() => {
