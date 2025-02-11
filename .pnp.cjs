@@ -1742,7 +1742,7 @@ const RAW_RUNTIME_STATE =
           ["abort-controller", "npm:3.0.0"],\
           ["base64url", "npm:3.0.1"],\
           ["body-parser", "npm:1.20.3"],\
-          ["compression", "npm:1.7.5"],\
+          ["compression", "npm:1.8.0"],\
           ["cookie-parser", "npm:1.4.7"],\
           ["cross-env", "npm:7.0.3"],\
           ["dockerfile-ast", "npm:0.7.0"],\
@@ -5639,10 +5639,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["compression", [\
-      ["npm:1.7.5", {\
-        "packageLocation": "./.yarn/cache/compression-npm-1.7.5-346039c027-35c9d2d57c.zip/node_modules/compression/",\
+      ["npm:1.8.0", {\
+        "packageLocation": "./.yarn/cache/compression-npm-1.8.0-5088616544-804d3c8430.zip/node_modules/compression/",\
         "packageDependencies": [\
-          ["compression", "npm:1.7.5"],\
+          ["compression", "npm:1.8.0"],\
           ["bytes", "npm:3.1.2"],\
           ["compressible", "npm:2.0.18"],\
           ["debug", "virtual:c7b184cd14c02e3ce555ab1875e60cf5033c617e17d82c4c02ea822101d3c817f48bf25a766b4d4335742dc5c9c14c2e88a57ed955a56c4ad0613899f82f5618#npm:2.6.9"],\
