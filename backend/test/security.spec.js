@@ -10,10 +10,10 @@ const _ = require('lodash')
 
 describe('security', function () {
   const createJose = require('../lib/security/jose')
+
   describe('jose', function () {
     const secret1 = Buffer.from('this-is-a-secret-only-used-for-tests').toString('base64')
     const secret2 = Buffer.from('another-secret-for-testing-purposes').toString('base64')
-
     const value = 'hello world'
 
     it('should throw an error when no session secrets are provided', function () {
@@ -85,222 +85,482 @@ describe('security', function () {
   describe('openid-client', () => {
     const redirectUrl = new URL('/account', 'https://localhost:8443')
     const sub = 'john.doe@example.org'
-    const expiresIn = 3600
 
+    let undici
     let config
     let authentication
     let authorization
     let security
     let jose
-    let issuer
-    let client
 
-    let mockGetIssuerClient
-    let mockState
-    let mockCodeVerifier
-    let mockCodeChallenge
-    let mockRefresh
-    let mockIsAuthenticated
-    let mockIsAdmin
+    let discovery
+    let buildAuthorizationUrl
+    let authorizationCodeGrant
+    let refreshTokenGrant
+    let randomState
+    let randomPKCECodeVerifier
+    let calculatePKCECodeChallenge
+    let allowInsecureRequestsMock
+    let customFetch
 
-    const now = () => Math.floor(Date.now() / 1000)
+    let mockOpenidClient
 
     const mockSecurity = options => {
-      config = _
-        .chain(fixtures.config.default)
-        .cloneDeep()
-        .merge(options)
-        .value()
-      let openidClient
+      discovery = jest.fn()
+      buildAuthorizationUrl = jest.fn()
+      authorizationCodeGrant = jest.fn()
+      refreshTokenGrant = jest.fn()
+      randomState = jest.fn()
+      randomPKCECodeVerifier = jest.fn()
+      calculatePKCECodeChallenge = jest.fn()
+      allowInsecureRequestsMock = jest.fn()
+      customFetch = Symbol('customFetch')
+      mockOpenidClient = {
+        discovery,
+        buildAuthorizationUrl,
+        authorizationCodeGrant,
+        refreshTokenGrant,
+        randomState,
+        randomPKCECodeVerifier,
+        calculatePKCECodeChallenge,
+        allowInsecureRequestsMock,
+        customFetch,
+      }
+      mockOpenidClient.allowInsecureRequests = allowInsecureRequestsMock
+
+      config = _.merge({}, fixtures.config.default, options)
       jest.isolateModules(() => {
+        jest.mock('undici', () => ({
+          Agent: jest.fn().mockImplementation((options) => ({ options })),
+        }))
         require('../lib/config/gardener').readConfig.mockReturnValue(config)
-        openidClient = require('openid-client')
+        jest.mock('../lib/services/authentication', () => ({
+          isAuthenticated: jest.fn(),
+        }))
+        jest.mock('../lib/services/authorization', () => ({
+          isAdmin: jest.fn(),
+        }))
+        undici = require('undici')
         authentication = require('../lib/services/authentication')
         authorization = require('../lib/services/authorization')
-        jose = createJose(config.sessionSecrets)
         security = require('../lib/security')
+        jose = createJose(config.sessionSecrets)
       })
-      const issuerUrl = config.oidc.issuer
-      issuer = new openidClient.Issuer({
-        issuer: issuerUrl,
-        authorization_endpoint: issuerUrl + '/oauth2/authorize',
-        token_endpoint: issuerUrl + '/oauth2/token',
-        jwks_uri: issuerUrl + '/oauth2/jwks',
-        code_challenge_methods_supported: ['S256', 'plain'],
-      })
-      client = new issuer.Client({
-        client_id: config.oidc.client_id,
-        client_secret: config.oidc.client_secret,
-      })
-      mockGetIssuerClient = jest.spyOn(security, 'getIssuerClient').mockResolvedValue(client)
-      mockRefresh = jest.spyOn(client, 'refresh').mockImplementation(async () => {
-        const iat = now()
-        const idToken = await jose.sign({ iat, sub }, { expiresIn })
-        return {
-          id_token: idToken,
-          expires_at: iat + expiresIn,
-          refresh_token: 'new-refresh-token',
-        }
-      })
-      mockState = jest.spyOn(openidClient.generators, 'state').mockReturnValue('state')
-      mockCodeVerifier = jest.spyOn(openidClient.generators, 'codeVerifier').mockReturnValue('code-verifier')
-      mockCodeChallenge = jest.spyOn(openidClient.generators, 'codeChallenge').mockReturnValue('code-challenge')
-      mockIsAuthenticated = jest.spyOn(authentication, 'isAuthenticated').mockResolvedValue({ username: sub, groups: [] })
-      mockIsAdmin = jest.spyOn(authorization, 'isAdmin').mockResolvedValue(false)
+      security.openidClientPromise = Promise.resolve(mockOpenidClient)
     }
 
-    afterEach(() => {
-      jest.restoreAllMocks()
+    beforeEach(() => {
+      jest.clearAllMocks()
     })
 
-    it('should return an authorization url with PKCE flow', async () => {
-      const scope = 'oidc email groups profile offline_access'
-      mockSecurity({ oidc: { scope, usePKCE: true } })
-      const query = {
-        redirectUrl: redirectUrl.toString(),
-      }
-      const req = { query }
-      const res = {
-        cookie: jest.fn(),
-      }
-      const authorizationUrl = await security.authorizationUrl(req, res)
-      const url = new URL(authorizationUrl)
-      expect(mockGetIssuerClient).toHaveBeenCalledTimes(1)
-      expect(mockState).toHaveBeenCalledTimes(1)
-      expect(mockCodeVerifier).toHaveBeenCalledTimes(1)
-      expect(mockCodeChallenge).toHaveBeenCalledTimes(1)
-      expect(mockCodeChallenge.mock.calls[0]).toEqual(['code-verifier'])
-      expect(res.cookie).toHaveBeenCalledTimes(2)
-      expect(res.cookie.mock.calls).toEqual([
-        [
-          '__Host-gStt',
-          {
-            redirectOrigin: redirectUrl.origin,
-            redirectPath: redirectUrl.pathname,
-            state: 'state',
-          },
-          {
-            httpOnly: true,
-            maxAge: 180000,
-            sameSite: 'Lax',
-            secure: true,
-          },
-        ],
-        [
-          '__Host-gCdVrfr',
-          'code-verifier',
-          {
-            httpOnly: true,
-            maxAge: 180000,
-            sameSite: 'Lax',
-            secure: true,
-          },
-        ],
-      ])
-      expect(url.origin).toBe(config.oidc.issuer)
-      const params = Object.fromEntries(url.searchParams)
-      expect(params).toEqual(expect.objectContaining({
-        client_id: config.oidc.client_id,
-        scope,
-        response_type: 'code',
-        redirect_uri: redirectUrl.origin + '/auth/callback',
-        state: 'state',
-        code_challenge: 'code-challenge',
-        code_challenge_method: 'S256',
-      }))
-    })
+    describe('authorizationUrl', () => {
+      it('should return an authorization url with PKCE flow (preferring S256)', async () => {
+        const scope = 'oidc email groups profile offline_access'
+        mockSecurity({ oidc: { scope, usePKCE: true, client_secret: 'client_secret' } })
+        discovery.mockResolvedValue({
+          code_challenge_methods_supported: ['S256', 'plain'],
+        })
+        buildAuthorizationUrl.mockReturnValue(
+          'https://issuer.example.org/oauth2/authorize?client_id=my-client-id&...',
+        )
+        randomState.mockReturnValue('state')
+        randomPKCECodeVerifier.mockReturnValue('code-verifier')
+        calculatePKCECodeChallenge.mockResolvedValue('code-challenge')
 
-    it('should refesh an expired token', async () => {
-      mockSecurity({ oidc: { scope: 'openid email' } })
-      const {
-        COOKIE_HEADER_PAYLOAD,
-        COOKIE_SIGNATURE,
-        COOKIE_TOKEN,
-      } = security
-      const sub = 'john.doe@example.org'
-      const iat = now()
-      const idTokenPayload = {
-        iat,
-        sub,
-        exp: iat - 60,
-      }
-      const accessTokenPayload = {
-        iat,
-        id: sub,
-        exp: iat + 24 * expiresIn,
-        refresh_at: idTokenPayload.exp,
-        aud: ['gardener'],
-      }
-      const idToken = await jose.sign(idTokenPayload)
-      const accessToken = await jose.sign(accessTokenPayload)
-      const refreshToken = 'refresh-token'
-      const [header, payload, signature] = accessToken.split('.')
-      const encryptedValues = await jose.encrypt([idToken, refreshToken].join(','))
-      const req = {
-        headers: {
-          'x-requested-with': 'XMLHttpRequest',
-        },
-        cookies: {
-          [COOKIE_HEADER_PAYLOAD]: [header, payload].join('.'),
-          [COOKIE_SIGNATURE]: signature,
-          [COOKIE_TOKEN]: encryptedValues,
-        },
-      }
-      const res = {
-        cookie: jest.fn(),
-        clearCookie: jest.fn(),
-      }
-      const user = await security.refreshToken(req, res)
+        const query = {
+          redirectUrl: redirectUrl.toString(),
+        }
+        const req = { query }
+        const res = { cookie: jest.fn() }
 
-      expect(mockGetIssuerClient).toHaveBeenCalledTimes(1)
-      expect(mockRefresh).toHaveBeenCalledTimes(1)
-      expect(mockRefresh.mock.calls[0]).toEqual([refreshToken])
-      expect(mockRefresh.mock.results[0].value).toBeInstanceOf(Promise)
-      const tokenSet = await mockRefresh.mock.results[0].value
-      expect(tokenSet).toEqual(expect.objectContaining({
-        id_token: expect.stringMatching(/^[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$/),
-        expires_at: expect.any(Number),
-        refresh_token: 'new-refresh-token',
-      }))
-      expect(mockIsAuthenticated).toHaveBeenCalledTimes(1)
-      expect(mockIsAuthenticated.mock.calls[0]).toEqual([{
-        token: tokenSet.id_token,
-      }])
-      expect(mockIsAdmin).toHaveBeenCalledTimes(1)
-      expect(mockIsAdmin.mock.calls[0]).toEqual([{
-        auth: { bearer: tokenSet.id_token },
-      }])
-      expect(user).toEqual({
-        iat: expect.toBeWithinRange(iat, iat + 5),
-        jti: expect.stringMatching(/^[a-z0-9-]+$/),
-        id: sub,
-        groups: [],
-        aud: ['gardener'],
-        exp: accessTokenPayload.exp,
-        refresh_at: security.decode(tokenSet.id_token).exp,
-        rti: expect.stringMatching(/^[a-z0-9]{7}$/),
-        isAdmin: false,
+        // Act
+        const authorizationUrl = await security.authorizationUrl(req, res)
+
+        // Assert
+        expect(discovery).toHaveBeenCalledTimes(1)
+        expect(discovery).toHaveBeenCalledWith(
+          expect.objectContaining({
+            href: 'https://kubernetes:32001/',
+          }),
+          'dashboard',
+          {
+            clockTolerance: 42,
+            client_secret: 'client_secret',
+          },
+          undefined, // clientAuthentication
+          {
+            [customFetch]: expect.any(Function),
+          },
+        )
+        expect(randomState).toHaveBeenCalledTimes(1)
+        expect(randomPKCECodeVerifier).toHaveBeenCalledTimes(1)
+        expect(calculatePKCECodeChallenge).toHaveBeenCalledWith('code-verifier')
+        expect(buildAuthorizationUrl).toHaveBeenCalledTimes(1)
+        const [openidConfig, params] = buildAuthorizationUrl.mock.calls[0]
+        expect(openidConfig).toMatchObject({
+          code_challenge_methods_supported: ['S256', 'plain'],
+        })
+        expect(params).toMatchObject({
+          redirect_uri: 'https://localhost:8443/auth/callback',
+          state: 'state',
+          scope: config.oidc.scope,
+          code_challenge: 'code-challenge',
+          code_challenge_method: 'S256',
+        })
+
+        expect(authorizationUrl).toBe(
+          'https://issuer.example.org/oauth2/authorize?client_id=my-client-id&...',
+        )
+        expect(res.cookie).toHaveBeenCalledTimes(2)
+        expect(res.cookie.mock.calls).toEqual([
+          [
+            '__Host-gStt',
+            {
+              redirectOrigin: 'https://localhost:8443',
+              redirectPath: '/account',
+              state: 'state',
+            },
+            { httpOnly: true, maxAge: 180000, sameSite: 'Lax', secure: true },
+          ],
+          [
+            '__Host-gCdVrfr',
+            'code-verifier',
+            { httpOnly: true, maxAge: 180000, sameSite: 'Lax', secure: true },
+          ],
+        ])
       })
 
-      expect(res.clearCookie).not.toHaveBeenCalled()
-      expect(res.cookie).toHaveBeenCalledTimes(3)
-      expect(res.cookie.mock.calls).toEqual([
-        [
-          COOKIE_HEADER_PAYLOAD,
-          expect.stringMatching(/^[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$/),
-          { secure: true, expires: undefined, sameSite: 'Lax' },
-        ],
-        [
-          COOKIE_SIGNATURE,
-          expect.stringMatching(/^[a-zA-Z0-9_-]{43}$/),
-          { secure: true, httpOnly: true, expires: undefined, sameSite: 'Lax' },
-        ],
-        [
-          COOKIE_TOKEN,
-          expect.stringMatching(/^[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$/),
-          { secure: true, httpOnly: true, expires: undefined, sameSite: 'Lax' },
-        ],
-      ])
+      it('should return an authorization url with PKCE flow (plain only)', async () => {
+        // Here we only provide 'plain' in code_challenge_methods_supported
+        mockSecurity({ oidc: { usePKCE: true } })
+        discovery.mockResolvedValue({
+          code_challenge_methods_supported: ['plain'],
+        })
+        buildAuthorizationUrl.mockReturnValue(
+          'https://issuer.example.org/oauth2/authorize?client_id=my-client-id&...',
+        )
+        randomState.mockReturnValue('state')
+        randomPKCECodeVerifier.mockReturnValue('code-verifier')
+
+        const query = {
+          redirectUrl: redirectUrl.toString(),
+        }
+        const req = { query }
+        const res = { cookie: jest.fn() }
+
+        // Act
+        const authorizationUrl = await security.authorizationUrl(req, res)
+
+        // Assert
+        expect(calculatePKCECodeChallenge).not.toHaveBeenCalled() // For "plain" method, no hashed code challenge is required
+        const [, params] = buildAuthorizationUrl.mock.calls[0]
+        expect(params).toMatchObject({
+          code_challenge: 'code-verifier',
+        })
+        expect(authorizationUrl).toBe(
+          'https://issuer.example.org/oauth2/authorize?client_id=my-client-id&...',
+        )
+        expect(res.cookie).toHaveBeenCalledTimes(2)
+        expect(res.cookie.mock.calls).toEqual([
+          [
+            '__Host-gStt',
+            {
+              redirectOrigin: 'https://localhost:8443',
+              redirectPath: '/account',
+              state: 'state',
+            },
+            { httpOnly: true, maxAge: 180000, sameSite: 'Lax', secure: true },
+          ],
+          [
+            '__Host-gCdVrfr',
+            'code-verifier',
+            { httpOnly: true, maxAge: 180000, sameSite: 'Lax', secure: true },
+          ],
+        ])
+      })
+
+      it('should throw a 500 error if neither S256 nor plain are supported', async () => {
+        mockSecurity({ oidc: { usePKCE: true } })
+        // Provide something that doesn't include S256 or plain
+        discovery.mockResolvedValue({
+          code_challenge_methods_supported: ['unsupported1', 'unsupported2'],
+        })
+        buildAuthorizationUrl.mockReturnValue('should not be called')
+        randomState.mockReturnValue('state')
+        randomPKCECodeVerifier.mockReturnValue('code-verifier')
+        calculatePKCECodeChallenge.mockResolvedValue('code-challenge')
+
+        const query = {
+          redirectUrl: redirectUrl.toString(),
+        }
+        const req = { query }
+        const res = { cookie: jest.fn() }
+
+        // Act & Assert
+        await expect(async () => {
+          await security.authorizationUrl(req, res)
+        }).rejects.toThrow(
+          'neither code_challenge_method supported by the client is supported by the issuer',
+        )
+
+        expect(buildAuthorizationUrl).not.toHaveBeenCalled()
+        expect(res.cookie).toHaveBeenCalledTimes(1)
+        expect(res.cookie.mock.calls[0]).toEqual([
+          '__Host-gStt',
+          {
+            redirectOrigin: 'https://localhost:8443',
+            redirectPath: '/account',
+            state: 'state',
+          },
+          { httpOnly: true, maxAge: 180000, sameSite: 'Lax', secure: true },
+        ])
+      })
+
+      it('throws a 400 error if the redirectUrl is not in the configured redirectUris', async () => {
+        mockSecurity()
+        const req = {
+          query: {
+            redirectUrl: 'https://disallowed.example.com/somepath',
+          },
+        }
+        const res = { cookie: jest.fn() }
+
+        // Act & Assert
+        await expect(async () => {
+          await security.authorizationUrl(req, res)
+        }).rejects.toThrow(
+          "The 'redirectUrl' parameter must match a redirect URI in the settings",
+        )
+        expect(res.cookie).not.toHaveBeenCalled()
+      })
+    })
+
+    describe('refreshToken', () => {
+      it('should refresh an expired token', async () => {
+        mockSecurity({ oidc: { scope: 'openid email' } })
+        discovery.mockResolvedValue({
+          code_challenge_methods_supported: 'does-not-matter',
+        })
+        const { refreshToken } = security
+
+        authentication.isAuthenticated.mockResolvedValue({ username: sub, groups: [] })
+        authorization.isAdmin.mockResolvedValue(false)
+
+        // Create an expired ID token and an access token
+        const iat = Math.floor(Date.now() / 1000) - 3600
+        const expiresIn = 3600
+        const oldIdTokenPayload = {
+          sub,
+          iat,
+          exp: iat - 60,
+        }
+        const oldIdToken = await jose.sign(oldIdTokenPayload)
+        const oldRefreshToken = 'refresh-token'
+
+        const oldAccessTokenPayload = {
+          iat,
+          id: sub,
+          exp: iat + 24 * expiresIn,
+          refresh_at: oldIdTokenPayload.exp,
+          aud: ['gardener'],
+        }
+        const oldAccessToken = await jose.sign(oldAccessTokenPayload)
+
+        // The cookies: we split the header/payload and signature
+        const [header, payload, signature] = oldAccessToken.split('.')
+        const encryptedValues = await jose.encrypt([oldIdToken, oldRefreshToken].join(','))
+
+        const req = {
+          method: 'POST',
+          headers: {
+            'x-requested-with': 'XMLHttpRequest', // for CSRF check
+          },
+          cookies: {
+            '__Host-gHdrPyl': `${header}.${payload}`,
+            '__Host-gSgn': signature,
+            '__Host-gTkn': encryptedValues,
+          },
+        }
+        const res = {
+          cookie: jest.fn(),
+          clearCookie: jest.fn(),
+        }
+
+        // Mock refreshTokenGrant so it returns a new token set
+        refreshTokenGrant.mockImplementation(async () => {
+          const iat = Math.floor(Date.now() / 1000)
+          return {
+            id_token: await jose.sign({ iat, sub }, { expiresIn }),
+            expires_at: iat + expiresIn,
+            refresh_token: 'new-refresh-token',
+          }
+        })
+
+        // Act
+        const user = await refreshToken(req, res)
+
+        // Assert
+        expect(discovery).toHaveBeenCalledTimes(1)
+        expect(refreshTokenGrant).toHaveBeenCalledTimes(1)
+        expect(refreshTokenGrant).toHaveBeenCalledWith(
+          {
+            code_challenge_methods_supported: 'does-not-matter',
+          },
+          oldRefreshToken,
+        )
+
+        // isAuthenticated/isAdmin should be invoked with new ID token
+        expect(authentication.isAuthenticated).toHaveBeenCalledTimes(1)
+        expect(authorization.isAdmin).toHaveBeenCalledTimes(1)
+
+        // Should set new cookies with new tokens
+        expect(res.clearCookie).not.toHaveBeenCalled()
+        expect(res.cookie).toHaveBeenCalledTimes(3)
+        expect(res.cookie.mock.calls).toEqual([
+          [
+            '__Host-gHdrPyl',
+            expect.stringMatching(/^[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$/),
+            { secure: true, expires: undefined, sameSite: 'Lax' },
+          ],
+          [
+            '__Host-gSgn',
+            expect.stringMatching(/^[a-zA-Z0-9_-]{43}$/),
+            { secure: true, httpOnly: true, expires: undefined, sameSite: 'Lax' },
+          ],
+          [
+            '__Host-gTkn',
+            expect.stringMatching(
+              /^[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$/,
+            ),
+            { secure: true, httpOnly: true, expires: undefined, sameSite: 'Lax' },
+          ],
+        ])
+
+        // User object returned by refreshToken
+        expect(user).toEqual(
+          expect.objectContaining({
+            id: sub,
+            groups: [],
+            aud: ['gardener'],
+            isAdmin: false,
+          }),
+        )
+      })
+    })
+
+    describe('authorizationCallback', () => {
+      it('should exchange the code and set cookies', async () => {
+        mockSecurity()
+        discovery.mockResolvedValue({ code_challenge_methods_supported: ['S256'] })
+        authorizationCodeGrant.mockResolvedValue({
+          id_token: 'new-id-token',
+          expires_at: Date.now() + 60,
+          refresh_token: 'new-refresh-token',
+        })
+        authentication.isAuthenticated.mockResolvedValue({ username: sub, groups: [] })
+        authorization.isAdmin.mockResolvedValue(false)
+
+        const req = {
+          originalUrl: '/auth/callback?code=some-code',
+          cookies: {
+            '__Host-gStt': {
+              redirectOrigin: 'https://localhost:8443',
+              redirectPath: '/account',
+              state: 'some-state',
+            },
+            '__Host-gCdVrfr': 'pkce-code-verifier',
+          },
+        }
+        const res = {
+          cookie: jest.fn(),
+          clearCookie: jest.fn(),
+        }
+
+        // Act
+        const { redirectPath } = await security.authorizationCallback(req, res)
+
+        // Assert
+        expect(redirectPath).toBe('/account')
+        expect(authorizationCodeGrant).toHaveBeenCalledTimes(1)
+        expect(authorizationCodeGrant).toHaveBeenCalledWith(
+          expect.any(Object),
+          new URL('/auth/callback?code=some-code', 'https://localhost:8443'),
+          {
+            idTokenExpected: true,
+            expectedState: 'some-state',
+            pkceCodeVerifier: 'pkce-code-verifier',
+          },
+        )
+        // __Host-gStt and __Host-gCdVrfr should be cleared
+        expect(res.clearCookie).toHaveBeenCalledWith('__Host-gStt', { secure: true, path: '/' })
+        expect(res.clearCookie).toHaveBeenCalledWith('__Host-gCdVrfr', { secure: true, path: '/' })
+        // New cookies should be set by setCookies
+        expect(res.cookie).toHaveBeenCalled()
+      })
+
+      it('should throw 401 and clear cookies if authorizationCodeGrant fails', async () => {
+        mockSecurity()
+        discovery.mockResolvedValue({ code_challenge_methods_supported: ['S256'] })
+        authorizationCodeGrant.mockRejectedValue(new Error('code exchange failed'))
+
+        const req = {
+          originalUrl: '/auth/callback?code=some-code',
+          cookies: {
+            '__Host-gStt': {
+              redirectOrigin: 'https://localhost:8443',
+              redirectPath: '/account',
+              state: 'another-state',
+            },
+            '__Host-gCdVrfr': 'pkce-code-verifier',
+          },
+        }
+        const res = {
+          cookie: jest.fn(),
+          clearCookie: jest.fn(),
+        }
+
+        await expect(async () => {
+          await security.authorizationCallback(req, res)
+        }).rejects.toThrow('code exchange failed')
+
+        expect(res.clearCookie).toHaveBeenCalledWith('__Host-gStt', { secure: true, path: '/' })
+        expect(res.clearCookie).toHaveBeenCalledWith('__Host-gCdVrfr', { secure: true, path: '/' })
+        // No cookies should be set if the exchange fails
+        expect(res.cookie).not.toHaveBeenCalled()
+      })
+
+      it('should throw 400 if the redirectPath is from a different (untrusted) origin', async () => {
+        mockSecurity()
+        discovery.mockResolvedValue({ code_challenge_methods_supported: ['S256'] })
+        authentication.isAuthenticated.mockResolvedValue({ username: sub, groups: [] })
+        authorization.isAdmin.mockResolvedValue(false)
+
+        const req = {
+          originalUrl: '/auth/callback?code=some-code',
+          cookies: {
+            '__Host-gStt': {
+              redirectOrigin: 'https://localhost:8443',
+              redirectPath: 'https://127.0.0.1/account', // <-- Different origin
+              state: 'some-state',
+            },
+            '__Host-gCdVrfr': 'pkce-code-verifier',
+          },
+        }
+        const res = {
+          cookie: jest.fn(),
+          clearCookie: jest.fn(),
+        }
+
+        await expect(async () => {
+          await security.authorizationCallback(req, res)
+        }).rejects.toThrow('Invalid redirect path')
+
+        // __Host-gStt and __Host-gCdVrfr should be cleared
+        expect(res.clearCookie).toHaveBeenCalledWith('__Host-gStt', { secure: true, path: '/' })
+        expect(res.clearCookie).toHaveBeenCalledWith('__Host-gCdVrfr', { secure: true, path: '/' })
+        // No new cookies should be set
+        expect(res.cookie).not.toHaveBeenCalled()
+      })
     })
 
     describe('authorizationCallback', () => {
@@ -330,6 +590,93 @@ describe('security', function () {
 
         expect(res.clearCookie).toHaveBeenCalledWith(COOKIE_STATE, expect.any(Object))
         expect(res.cookie).not.toHaveBeenCalled()
+      })
+    })
+
+    describe('getConfiguration', () => {
+      beforeEach(() => {
+        undici.Agent.mockClear()
+      })
+
+      it('should use default TLS settings', async () => {
+        mockSecurity({
+          oidc: {
+            issuer: 'https://issuer.example.org',
+            ca: null,
+          },
+        })
+        discovery.mockResolvedValue({ dummy: 'issuer-config' })
+
+        const configResult = await security.getConfiguration()
+
+        expect(discovery).toHaveBeenCalledTimes(1)
+        expect(discovery).toHaveBeenCalledWith(
+          expect.objectContaining({
+            href: 'https://issuer.example.org/',
+          }),
+          'dashboard',
+          {
+            clockTolerance: 42,
+          },
+          undefined, // clientAuthentication
+          {
+            [customFetch]: expect.any(Function),
+          },
+        )
+
+        // Verify that Agent was called with connect options including rejectUnauthorized: true.
+        expect(undici.Agent).toHaveBeenCalledTimes(1)
+        expect(undici.Agent).toHaveBeenCalledWith({
+          connect: {
+            rejectUnauthorized: true,
+          },
+        })
+
+        expect(configResult).toEqual({ dummy: 'issuer-config' })
+      })
+
+      it('should use custom TLS settings and set execute when allowInsecure is true', async () => {
+        const testCA = 'my-ca-cert'
+        mockSecurity({
+          oidc: {
+            rejectUnauthorized: false,
+            ca: testCA,
+            allowInsecure: true, // -> "execute" should be set
+          },
+        })
+        mockOpenidClient.allowInsecureRequests = allowInsecureRequestsMock
+
+        discovery.mockResolvedValue({ dummy: 'issuer-config-2' })
+
+        const configResult = await security.getConfiguration()
+
+        expect(discovery).toHaveBeenCalledTimes(1)
+        expect(discovery).toHaveBeenCalledWith(
+          expect.objectContaining({
+            href: 'https://kubernetes:32001/',
+          }),
+          'dashboard',
+          {
+            clockTolerance: 42,
+          },
+          undefined, // clientAuthentication
+          {
+            [customFetch]: expect.any(Function),
+            execute: [allowInsecureRequestsMock],
+          },
+        )
+
+        expect(undici.Agent).toHaveBeenCalledTimes(1)
+        expect(undici.Agent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            connect: {
+              rejectUnauthorized: false,
+              ca: testCA,
+            },
+          }),
+        )
+
+        expect(configResult).toEqual({ dummy: 'issuer-config-2' })
       })
     })
   })
