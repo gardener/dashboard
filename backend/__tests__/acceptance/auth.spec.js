@@ -8,7 +8,6 @@
 
 const { pick, head } = require('lodash')
 const assert = require('assert').strict
-const { TokenSet, generators } = require('openid-client')
 const setCookieParser = require('set-cookie-parser')
 const { mockRequest } = require('@gardener-dashboard/request')
 
@@ -57,71 +56,21 @@ async function parseCookies (res) {
 const ZERO_DATE = new Date(0)
 const OTAC = 'jd93ke'
 
-class Client {
-  constructor ({
-    user,
-    issuer,
-    client_id: clientId,
-    client_secret: clientSecret,
-    redirect_uris: redirectUris,
-    response_types: responseTypes,
-  }) {
-    this.user = user
-    this.issuer = issuer
-    this.clientId = clientId
-    this.clientSecret = clientSecret
-    this.redirectUris = redirectUris
-    this.responseTypes = responseTypes
-  }
-
-  authorizationUrl ({
-    redirect_uri: redirectUri,
-    state,
-    scope,
-  }) {
-    const url = new URL(this.issuer)
-    url.pathname = '/auth'
-    const params = url.searchParams
-    params.append('client_id', this.clientId)
-    params.append('redirect_uri', redirectUri)
-    params.append('state', state)
-    params.append('scope', scope)
-    params.append('response_type', head(this.responseTypes))
-    return url.toString()
-  }
-
-  callbackParams (req) {
-    return pick(req.query, ['code', 'state', 'iss'])
-  }
-
-  async callback (redirectUri, { code }, { response_type: responseType }) {
-    assert.strictEqual(code, OTAC)
-    assert.strictEqual(responseType, 'code')
-    const idToken = await this.user.bearer
-    const tokenSet = new TokenSet({ id_token: idToken })
-    tokenSet.expires_at = tokenSet.claims().exp
-    return tokenSet
-  }
-
-  refresh (token) {
-    const tokenSet = new TokenSet({
-      id_token: token,
-      refresh_token: 'refresh-token',
-    })
-    tokenSet.expires_at = tokenSet.claims().exp
-    return tokenSet
-  }
-}
-
 describe('auth', function () {
   const { oidc } = fixtures.config.get()
   const id = 'foo@example.org'
   const user = fixtures.user.create({ id })
 
+  let discovery
+  let buildAuthorizationUrl
+  let authorizationCodeGrant
+  let refreshTokenGrant
+  let randomState
+  let randomPKCECodeVerifier
+  let calculatePKCECodeChallenge
+  let mockOpenidClient
+
   let agent
-  let getIssuerClientStub
-  let mockRefresh
-  let mockState
 
   beforeAll(() => {
     agent = createAgent()
@@ -132,25 +81,76 @@ describe('auth', function () {
   })
 
   beforeEach(() => {
-    mockRequest.mockReset()
-    const client = Object.assign(new Client({ user, ...oidc }), {
-      CLOCK_TOLERANCE: oidc.clockTolerance || 30,
+    jest.clearAllMocks()
+
+    discovery = jest.fn()
+    buildAuthorizationUrl = jest.fn()
+    authorizationCodeGrant = jest.fn()
+    refreshTokenGrant = jest.fn()
+    randomState = jest.fn()
+    randomPKCECodeVerifier = jest.fn()
+    calculatePKCECodeChallenge = jest.fn()
+
+    mockOpenidClient = {
+      discovery,
+      buildAuthorizationUrl,
+      authorizationCodeGrant,
+      refreshTokenGrant,
+      randomState,
+      randomPKCECodeVerifier,
+      calculatePKCECodeChallenge,
+    }
+
+    security.openidClientPromise = Promise.resolve(mockOpenidClient)
+    security.discoveryPromise = undefined
+
+    randomPKCECodeVerifier.mockReturnValueOnce('code-verifier')
+    calculatePKCECodeChallenge.mockReturnValueOnce('code-challenge')
+    buildAuthorizationUrl.mockImplementationOnce((config, params) => {
+      const url = new URL(oidc.issuer)
+      url.pathname = '/auth'
+      const searchParams = url.searchParams
+      searchParams.append('client_id', oidc.client_id)
+      searchParams.append('redirect_uri', params.redirect_uri)
+      searchParams.append('state', params.state)
+      searchParams.append('scope', params.scope)
+      searchParams.append('response_type', head(oidc.response_types))
+      return url.toString()
     })
-    getIssuerClientStub = jest.spyOn(security, 'getIssuerClient').mockResolvedValue(client)
-    mockRefresh = jest.spyOn(client, 'refresh')
-    mockState = jest.spyOn(generators, 'state').mockReturnValue('state')
+
+    randomState.mockReturnValueOnce('state')
   })
 
   it('should redirect to authorization url without frontend redirectUrl', async function () {
     const redirectUri = head(oidc.redirect_uris)
+    discovery.mockResolvedValue({
+      code_challenge_methods_supported: ['S256'],
+      issuer: 'https://issuer.example.org',
+      authorization_endpoint: 'https://issuer.example.org/authorize',
+      token_endpoint: 'https://issuer.example.org/token',
+    })
 
     const res = await agent
       .get('/auth')
       .redirects(0)
       .expect(302)
 
-    expect(getIssuerClientStub).toHaveBeenCalledTimes(1)
-    expect(mockState).toHaveBeenCalledTimes(1)
+    expect(discovery).toHaveBeenCalledTimes(1)
+    expect(buildAuthorizationUrl).toHaveBeenCalledTimes(1)
+    expect(randomPKCECodeVerifier).toHaveBeenCalledTimes(1)
+    expect(calculatePKCECodeChallenge).toHaveBeenCalledTimes(1)
+    expect(buildAuthorizationUrl).toHaveBeenCalledWith(
+      {
+        code_challenge_methods_supported: ['S256'],
+        issuer: 'https://issuer.example.org',
+        authorization_endpoint: 'https://issuer.example.org/authorize',
+        token_endpoint: 'https://issuer.example.org/token',
+      },
+      expect.objectContaining({
+        code_challenge: 'code-challenge',
+        code_challenge_method: 'S256',
+      }),
+    )
     const url = new URL(res.headers.location)
     expect(url.searchParams.get('client_id')).toBe(oidc.client_id)
     expect(url.searchParams.get('redirect_uri')).toBe(redirectUri)
@@ -160,9 +160,17 @@ describe('auth', function () {
   })
 
   it('should redirect to authorization url with frontend redirectUrl', async function () {
+    // define a custom redirect path
     const redirectPath = '/namespace/garden-foo/administration'
     const redirectUri = head(oidc.redirect_uris)
     const redirectUrl = new URL(redirectPath, redirectUri).toString()
+
+    discovery.mockResolvedValue({
+      code_challenge_methods_supported: ['S256'],
+      issuer: 'https://issuer.example.org',
+      authorization_endpoint: 'https://issuer.example.org/authorize',
+      token_endpoint: 'https://issuer.example.org/token',
+    })
 
     const res = await agent
       .get('/auth')
@@ -170,23 +178,37 @@ describe('auth', function () {
       .redirects(0)
       .expect(302)
 
-    expect(getIssuerClientStub).toHaveBeenCalledTimes(1)
+    expect(discovery).toHaveBeenCalledTimes(1)
+    expect(buildAuthorizationUrl).toHaveBeenCalledTimes(1)
+    expect(randomPKCECodeVerifier).toHaveBeenCalledTimes(1)
+    expect(calculatePKCECodeChallenge).toHaveBeenCalledTimes(1)
+    expect(buildAuthorizationUrl).toHaveBeenCalledWith(
+      {
+        code_challenge_methods_supported: ['S256'],
+        issuer: 'https://issuer.example.org',
+        authorization_endpoint: 'https://issuer.example.org/authorize',
+        token_endpoint: 'https://issuer.example.org/token',
+      },
+      expect.objectContaining({
+        code_challenge: 'code-challenge',
+        code_challenge_method: 'S256',
+      }),
+    )
     const url = new URL(res.headers.location)
     expect(url.searchParams.get('redirect_uri')).toBe(redirectUri)
-    const state = url.searchParams.get('state')
-    expect(state).toEqual('state')
+    expect(url.searchParams.get('state')).toEqual('state')
   })
 
   it('should fail to redirect to authorization url', async function () {
     const message = 'Issuer not available'
-    getIssuerClientStub.mockRejectedValueOnce(new Error(message))
+    discovery.mockRejectedValueOnce(new Error(message))
 
     const res = await agent
       .get('/auth')
       .redirects(0)
       .expect(302)
 
-    expect(getIssuerClientStub).toHaveBeenCalledTimes(1)
+    expect(discovery).toHaveBeenCalledTimes(1)
     expect(res.headers).toHaveProperty('location', `/login#error=${encodeURIComponent(message)}`)
   })
 
@@ -195,6 +217,11 @@ describe('auth', function () {
 
     mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewToken())
     mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+
+    authorizationCodeGrant.mockImplementationOnce((config, currentUrl, checks) => {
+      assert.strictEqual(currentUrl.searchParams.get('code'), OTAC)
+      return { id_token: bearer }
+    })
 
     const res = await agent
       .get(`/auth/callback?code=${OTAC}`)
@@ -221,11 +248,19 @@ describe('auth', function () {
     ])
     expect(mockRequest.mock.calls[1]).toMatchSnapshot()
 
-    expect(getIssuerClientStub).toHaveBeenCalledTimes(2)
+    expect(discovery).toHaveBeenCalledTimes(1)
     expect(res.headers).toHaveProperty('location', '/')
+    expect(mockRequest).toHaveBeenCalledTimes(2)
+    expect(authorizationCodeGrant).toHaveBeenCalledTimes(1)
   })
 
   it('should redirect to login after failed authorization', async function () {
+    const bearer = await user.bearer
+    authorizationCodeGrant.mockImplementationOnce((config, currentUrl, checks) => {
+      assert.strictEqual(currentUrl.searchParams.get('code'), OTAC)
+      return { id_token: bearer }
+    })
+
     const invalidOtac = 'ic82jd'
     let message
     try {
@@ -239,14 +274,15 @@ describe('auth', function () {
       .redirects(0)
       .expect(302)
 
-    expect(getIssuerClientStub).toHaveBeenCalledTimes(2)
+    expect(discovery).toHaveBeenCalledTimes(1)
     expect(res.headers).toHaveProperty('location', `/login#error=${encodeURIComponent(message)}`)
+    expect(authorizationCodeGrant).toHaveBeenCalledTimes(1)
   })
 
   it('should successfully login with a given token', async function () {
     const bearer = await user.bearer
-    const now = Math.floor(Date.now() / 1000)
-    const expiresAt = now + 86400
+    const nowSec = Math.floor(Date.now() / 1000)
+    const expiresAt = nowSec + 86400
 
     mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewToken())
     mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
@@ -278,24 +314,27 @@ describe('auth', function () {
     expect(mockRequest.mock.calls[1]).toMatchSnapshot()
 
     const [accessToken, idToken, refreshToken] = await parseCookies(res)
+    expect(idToken).toEqual(bearer)
+    expect(refreshToken).toBeUndefined()
     const payload = await security.verify(accessToken)
     expect(payload).toEqual(expect.objectContaining({
       id,
-      iat: expect.toBeWithinRange(now, now + 3),
+      iat: expect.toBeWithinRange(nowSec, nowSec + 3),
       aud: ['gardener'],
       isAdmin: false,
       exp: expect.toBeWithinRange(expiresAt, expiresAt + 3),
       jti: expect.stringMatching(/[a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}/i),
     }))
-    expect(idToken).toEqual(bearer)
-    expect(refreshToken).toBeUndefined()
+
     expect(res.body.id).toBe(id)
   })
 
   it('should logout', async function () {
+    const userCookie = await user.cookie
+
     const res = await agent
       .get('/auth/logout')
-      .set('cookie', await user.cookie)
+      .set('cookie', userCookie)
       .redirects(0)
       .send()
       .expect(302)
@@ -319,7 +358,6 @@ describe('auth', function () {
 
   it('should successfully refresh a token', async function () {
     const iat = Math.floor(Date.now() / 1000)
-
     const idTokenPayload = {
       iat,
       sub: id,
@@ -332,20 +370,31 @@ describe('auth', function () {
       refresh_at: idTokenPayload.exp,
       aud: ['gardener'],
     }
-    // in this test the refreshToken is return as new idToken in the `client.refresh` mock implementation
+    // in this test the refreshToken is return as new idToken in the `refreshTokenGrant` mock implementation
     const refreshTokenPayload = {
       iat: iat + 60,
       sub: id,
       exp: iat + 61 * 60,
     }
-    const tokenSet = new TokenSet({
+    const tokenSet = {
       id_token: await sign(idTokenPayload),
       access_token: await sign(accessTokenPayload),
       refresh_token: await sign(refreshTokenPayload),
+    }
+
+    refreshTokenGrant.mockResolvedValueOnce({
+      id_token: tokenSet.refresh_token,
+      refresh_token: 'refresh-token',
     })
 
     mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewToken())
     mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+    discovery.mockResolvedValue({
+      code_challenge_methods_supported: ['S256'],
+      issuer: 'https://issuer.example.org',
+      authorization_endpoint: 'https://issuer.example.org/authorize',
+      token_endpoint: 'https://issuer.example.org/token',
+    })
 
     const res = await agent
       .post('/auth/token')
@@ -390,12 +439,20 @@ describe('auth', function () {
         },
       },
     ]])
-    expect(mockRefresh).toHaveBeenCalledTimes(1)
-    expect(mockRefresh.mock.calls[0]).toEqual([tokenSet.refresh_token])
+
+    expect(refreshTokenGrant).toHaveBeenCalledTimes(1)
+    expect(refreshTokenGrant).toHaveBeenCalledWith(
+      expect.objectContaining({
+        issuer: 'https://issuer.example.org',
+        authorization_endpoint: 'https://issuer.example.org/authorize',
+      }),
+      tokenSet.refresh_token,
+    )
 
     const [accessToken, idToken, refreshToken] = await parseCookies(res)
     expect(idToken).toEqual(tokenSet.refresh_token)
     expect(refreshToken).toBe('refresh-token')
+
     const payload = decode(accessToken)
     expect(payload).toEqual(res.body)
     expect(payload).toEqual({
