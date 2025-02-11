@@ -441,14 +441,14 @@ __metadata:
   linkType: hard
 
 "@codemirror/autocomplete@npm:^6.0.0, @codemirror/autocomplete@npm:^6.18.3":
-  version: 6.18.4
-  resolution: "@codemirror/autocomplete@npm:6.18.4"
+  version: 6.18.5
+  resolution: "@codemirror/autocomplete@npm:6.18.5"
   dependencies:
     "@codemirror/language": "npm:^6.0.0"
     "@codemirror/state": "npm:^6.0.0"
     "@codemirror/view": "npm:^6.17.0"
     "@lezer/common": "npm:^1.0.0"
-  checksum: 10c0/602ea9395b3ebbb258669d7a946f650cc734742d1f67fd277c804ae152411f198546a1dc0c64ff2fda12a46eb83d766540ab609d1e3afa817bfe8131d10dfbdb
+  checksum: 10c0/854f825e14dc8d71f6c067f433750f603fd0c1ddf26aa44e2ba0b2c0ae9b3c03d22faf20c10ac7a03e08038790ccfd2d1800ca2d9c6b602e29547df9fc905a8c
   languageName: node
   linkType: hard
 
