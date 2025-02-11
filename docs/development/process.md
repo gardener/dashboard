@@ -29,7 +29,7 @@ Before you initiate a cherry pick, make sure that the following prerequisites ar
 
 ### Initiate a Cherry Pick
 
-- Run the [cherry pick script][cherry-pick-script].
+- Run the [cherry-pick-script](../../hack/cherry-pick-pull.sh).
 
   This example applies a master branch PR #1824 to the remote branch
   `upstream/hotfix-1.74`:
@@ -48,5 +48,3 @@ Before you initiate a cherry pick, make sure that the following prerequisites ar
   - When asked for your GitHub password, provide the created GitHub token
     rather than your actual GitHub password.
     Refer [https://github.com/github/hub/issues/2655#issuecomment-735836048](https://github.com/github/hub/issues/2655#issuecomment-735836048)
-
-- [cherry-pick-script](../../hack/cherry-pick-pull.sh)
