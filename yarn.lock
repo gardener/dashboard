@@ -494,13 +494,13 @@ __metadata:
   linkType: hard
 
 "@codemirror/search@npm:^6.5.8":
-  version: 6.5.8
-  resolution: "@codemirror/search@npm:6.5.8"
+  version: 6.5.9
+  resolution: "@codemirror/search@npm:6.5.9"
   dependencies:
     "@codemirror/state": "npm:^6.0.0"
     "@codemirror/view": "npm:^6.0.0"
     crelt: "npm:^1.0.5"
-  checksum: 10c0/67a36fb0781427b23c39e223ecd9729b170a2e28874825b2d63b551761e620f2523707d7e593426b5cc4d5ea520ffb9026408de02a0aacfe55453e70e2d9b7a2
+  checksum: 10c0/291c219aab340a6844b9fca560f41d861ae76abb4704408d512b238f07f70df0341228fffaecfc96bd1d7de4d93f8245324030eea716d502a6c210aefe5f3cd2
   languageName: node
   linkType: hard
 
