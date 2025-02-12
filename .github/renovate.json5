@@ -57,7 +57,6 @@
         '@octokit/plugin-request-log',
         '@octokit/plugin-rest-endpoint-methods',
         'chalk',
-        'jest',
         'p-event',
         'p-limit',
         'p-retry',
