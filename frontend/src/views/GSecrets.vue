@@ -1,4 +1,3 @@
-<!-- eslint-disable vuetify/no-deprecated-components -->
 <!--
 SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
 

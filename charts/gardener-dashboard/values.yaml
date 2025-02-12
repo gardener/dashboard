@@ -134,10 +134,6 @@ global:
     #     -----BEGIN CERTIFICATE-----
     #     Li4u
     #     -----END CERTIFICATE-----
-    #   # secretKey reference to the certificate authority
-    #   caSecretKeyRef:
-    #     name: oidc-ca-secret-name
-    #     key: ca.crt
     #   # configuration for kubeconfig download required by kubelogin
     #   public:
     #     # clientId is the identifier of the public oidc client use by kubelogin
