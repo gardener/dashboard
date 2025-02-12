@@ -356,7 +356,9 @@ export function createRoutes () {
       },
       beforeEnter (to, from) {
         if (!authzStore.hasShootTerminalAccess) {
-          appStore.setError(new Error('Access to cluster terminal is not allowed'))
+          appStore.setError({
+            text: 'Access to cluster terminal is not allowed',
+          })
           return from
         }
       },
@@ -429,7 +431,9 @@ export function createRoutes () {
       },
       beforeEnter (to, from) {
         if (!authzStore.hasGardenTerminalAccess) {
-          appStore.setError(new Error('Access to garden terminal is not allowed'))
+          appStore.setError({
+            text: 'Access to garden terminal is not allowed.',
+          })
           return from
         }
         to.params.target = 'garden'

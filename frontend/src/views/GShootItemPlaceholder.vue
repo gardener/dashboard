@@ -182,6 +182,7 @@ export default {
     onBeforeRouteUpdate(async to => {
       if (isLoadRequired(route, to)) {
         await load(to)
+        readyState.value = 'loaded'
       }
     })
 
