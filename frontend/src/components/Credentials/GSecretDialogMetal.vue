@@ -9,36 +9,41 @@ SPDX-License-Identifier: Apache-2.0
     v-model="visible"
     :secret-validations="v$"
     :secret-binding="secretBinding"
-    create-title="Add new Hetzner Cloud Secret"
-    replace-title="Replace Hetzner Cloud Secret"
+    create-title="Add new Metal Secret"
+    replace-title="Replace Metal Secret"
   >
     <template #secret-slot>
       <div>
         <v-text-field
-          v-model="hcloudToken"
+          v-model="apiUrl"
           color="primary"
-          label="Hetzner Cloud Token"
-          :error-messages="getErrorMessages(v$.hcloudToken)"
+          label="API URL"
+          :error-messages="getErrorMessages(v$.apiUrl)"
           variant="underlined"
-          @update:model-value="v$.hcloudToken.$touch()"
-          @blur="v$.hcloudToken.$touch()"
+          @update:model-value="v$.apiUrl.$touch()"
+          @blur="v$.apiUrl.$touch()"
+        />
+      </div>
+      <div>
+        <v-text-field
+          v-model="apiHmac"
+          color="primary"
+          label="API HMAC"
+          :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
+          :type="hideSecret ? 'password' : 'text'"
+          :error-messages="getErrorMessages(v$.apiHmac)"
+          variant="underlined"
+          @click:append="() => (hideSecret = !hideSecret)"
+          @update:model-value="v$.apiHmac.$touch()"
+          @blur="v$.apiHmac.$touch()"
         />
       </div>
     </template>
-
     <template #help-slot>
       <div>
         <p>
-          Before you can provision and access a Kubernetes cluster on Hetzner Cloud, you need to add a Hetzner Cloud token.
-          The Gardener needs these credentials to provision and operate Hetzner Cloud infrastructure for your Kubernetes cluster.
-        </p>
-        <p>
-          Please read the
-          <g-external-link
-            url="https://www.hetzner.com/cloud"
-          >
-            Hetzner Cloud Documentation
-          </g-external-link>.
+          Before you can provision and access a Kubernetes cluster on Metal Stack, you need to provide HMAC credentials and the endpoint of your Metal API.
+          The Gardener needs the credentials to provision and operate the Metal Stack infrastructure for your Kubernetes cluster.
         </p>
       </div>
     </template>
@@ -47,20 +52,21 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { useVuelidate } from '@vuelidate/core'
-import { required } from '@vuelidate/validators'
+import {
+  required,
+  url,
+} from '@vuelidate/validators'
 
-import GSecretDialog from '@/components/Secrets/GSecretDialog'
-import GExternalLink from '@/components/GExternalLink.vue'
+import GSecretDialog from '@/components/Credentials/GSecretDialog'
 
 import { useProvideCredentialContext } from '@/composables/useCredentialContext'
 
-import { withFieldName } from '@/utils/validators'
 import { getErrorMessages } from '@/utils'
+import { withFieldName } from '@/utils/validators'
 
 export default {
   components: {
     GSecretDialog,
-    GExternalLink,
   },
   props: {
     modelValue: {
@@ -77,24 +83,33 @@ export default {
   setup () {
     const { secretStringDataRefs } = useProvideCredentialContext()
 
-    const { hcloudToken } = secretStringDataRefs({
-      hcloudToken: 'hcloudToken',
+    const {
+      apiHmac,
+      apiUrl,
+    } = secretStringDataRefs({
+      metalAPIHMac: 'apiHmac',
+      metalAPIURL: 'apiUrl',
     })
 
     return {
-      hcloudToken,
+      apiHmac,
+      apiUrl,
       v$: useVuelidate(),
     }
   },
   data () {
     return {
-      hideHcloudToken: true,
+      hideSecret: true,
     }
   },
   validations () {
     return {
-      hcloudToken: withFieldName('Cloud Token', {
+      apiHmac: withFieldName('API HMAC', {
         required,
+      }),
+      apiUrl: withFieldName('API URL', {
+        required,
+        url,
       }),
     }
   },

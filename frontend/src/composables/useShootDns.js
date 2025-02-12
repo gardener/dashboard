@@ -14,7 +14,7 @@ import { useCredentialStore } from '@/store/credential'
 
 import { useShootResources } from '@/composables/useShootResources'
 import { useShootExtensions } from '@/composables/useShootExtensions'
-import { useSecretBindingList } from '@/composables/useSecretBindingList'
+import { useCloudProviderBindingList } from '@/composables/useCloudProviderBindingList'
 
 import get from 'lodash/get'
 import set from 'lodash/set'
@@ -169,7 +169,7 @@ export const useShootDns = (manifest, options) => {
   }
 
   function getDefaultSecretName (type) {
-    const secretBindings = useSecretBindingList(toRef(type), { credentialStore, gardenerExtensionStore })
+    const secretBindings = useCloudProviderBindingList(toRef(type), { credentialStore, gardenerExtensionStore })
     // find unused secret
     const usedResourceNames = map(resources.value, 'name')
     const secretBinding = find(secretBindings.value, secretBinding => {

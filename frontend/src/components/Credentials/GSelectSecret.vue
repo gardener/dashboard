@@ -30,14 +30,14 @@ SPDX-License-Identifier: Apache-2.0
           :subtitle="item.raw.description"
         >
           {{ get(item.raw, 'metadata.name') }}
-          <v-icon v-if="!hasOwnSecret(item.raw)">
+          <v-icon v-if="!hasOwnCredential(item.raw)">
             mdi-share
           </v-icon>
         </v-list-item>
       </template>
       <template #selection="{ item }">
         {{ get(item.raw, 'metadata.name') }}
-        <v-icon v-if="!hasOwnSecret(item.raw)">
+        <v-icon v-if="!hasOwnCredential(item.raw)">
           mdi-share
         </v-icon>
       </template>
@@ -73,10 +73,10 @@ import { useProjectStore } from '@/store/project'
 import { useCredentialStore } from '@/store/credential'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 
-import GSecretDialogWrapper from '@/components/Secrets/GSecretDialogWrapper'
+import GSecretDialogWrapper from '@/components/Credentials/GSecretDialogWrapper'
 
 import { useProjectCostObject } from '@/composables/useProjectCostObject'
-import { useSecretBindingList } from '@/composables/useSecretBindingList'
+import { useCloudProviderBindingList } from '@/composables/useCloudProviderBindingList'
 
 import {
   withParams,
@@ -85,7 +85,7 @@ import {
 } from '@/utils/validators'
 import {
   getErrorMessages,
-  hasOwnSecret,
+  hasOwnCredential,
   selfTerminationDaysForSecret,
 } from '@/utils'
 
@@ -141,13 +141,13 @@ export default {
     })
 
     const providerType = toRef(props, 'providerType')
-    const secretBindingList = useSecretBindingList(providerType, { credentialStore, gardenerExtensionStore })
+    const cloudProviderBindingList = useCloudProviderBindingList(providerType, { credentialStore, gardenerExtensionStore })
 
     return {
       costObjectsSettingEnabled,
       costObjectErrorMessage,
       costObject,
-      secretBindingList,
+      cloudProviderBindingList,
       v$,
     }
   },
@@ -162,7 +162,7 @@ export default {
       { type: 'requiresCostObjectIfEnabled', enabled },
       function requiresCostObjectIfEnabled (value) {
         return enabled
-          ? !!this.costObject || !hasOwnSecret(value)
+          ? !!this.costObject || !hasOwnCredential(value)
           : true
       },
     )
@@ -187,7 +187,7 @@ export default {
       },
     },
     allowedSecretBindings () {
-      return this.secretBindingList
+      return this.cloudProviderBindingList
         ?.filter(secret => !this.allowedSecretNames.includes(secret.metadata.name))
     },
     secretHint () {
@@ -208,7 +208,7 @@ export default {
       'cloudProfileByName',
     ]),
     get,
-    hasOwnSecret,
+    hasOwnCredential,
     openSecretDialog () {
       this.visibleSecretDialog = this.providerType
       this.secretItemsBeforeAdd = cloneDeep(this.allowedSecretBindings)

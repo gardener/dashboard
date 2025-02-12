@@ -107,11 +107,11 @@ import { useVuelidate } from '@vuelidate/core'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useCredentialStore } from '@/store/credential'
 
-import GSelectSecret from '@/components/Secrets/GSelectSecret'
+import GSelectSecret from '@/components/Credentials/GSelectSecret'
 import GVendorIcon from '@/components/GVendorIcon'
 
 import { useShootContext } from '@/composables/useShootContext'
-import { useSecretBindingList } from '@/composables/useSecretBindingList'
+import { useCloudProviderBindingList } from '@/composables/useCloudProviderBindingList'
 
 import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
@@ -146,7 +146,7 @@ export default {
     const gardenerExtensionStore = useGardenerExtensionStore()
 
     const dnsProviderType = toRef(props.dnsProvider, 'type')
-    const dnsSecretBindings = useSecretBindingList(dnsProviderType, { credentialStore, gardenerExtensionStore })
+    const dnsSecretBindings = useCloudProviderBindingList(dnsProviderType, { credentialStore, gardenerExtensionStore })
 
     return {
       v$: useVuelidate(),

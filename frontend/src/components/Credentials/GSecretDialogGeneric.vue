@@ -47,7 +47,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import yaml from 'js-yaml'
 
-import GSecretDialog from '@/components/Secrets/GSecretDialog'
+import GSecretDialog from '@/components/Credentials/GSecretDialog'
 
 import { useProvideCredentialContext } from '@/composables/useCredentialContext'
 

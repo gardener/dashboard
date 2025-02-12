@@ -15,10 +15,16 @@ exports.list = async function ({ user, params }) {
 
   const [
     { items: secretBindings },
-    { items: secrets },
+    { items: credentialsBindings },
+    { items: secretBindingSecrets },
+    { items: credentialsBindingSecrets },
+    { items: workloadIdentities },
   ] = await Promise.all([
     client['core.gardener.cloud'].secretbindings.list(bindingNamespace),
+    client['security.gardener.cloud'].credentialsbindings.list(bindingNamespace),
     client.core.secrets.list(bindingNamespace, { labelSelector: 'reference.gardener.cloud/secretbinding=true' }),
+    client.core.secrets.list(bindingNamespace, { labelSelector: 'reference.gardener.cloud/credentialsbinding=true' }),
+    client['security.gardener.cloud'].workloadidentities.list(bindingNamespace),
   ])
 
   const pickQuotaProperties = _.partialRight(_.pick, [
@@ -32,7 +38,7 @@ exports.list = async function ({ user, params }) {
   ])
 
   const quotas = _
-    .chain(secretBindings)
+    .chain([...secretBindings, ...credentialsBindings])
     .flatMap(resolveQuotas)
     .uniqBy('metadata.uid')
     .filter('spec.clusterLifetimeDays')
@@ -41,7 +47,9 @@ exports.list = async function ({ user, params }) {
 
   return {
     secretBindings,
-    secrets,
+    credentialsBindings,
+    secrets: [...secretBindingSecrets, ...credentialsBindingSecrets],
+    workloadIdentities,
     quotas,
   }
 }
@@ -123,12 +131,12 @@ exports.remove = async function ({ user, params }) {
   ])
 }
 
-function resolveQuotas (secretBinding) {
+function resolveQuotas (binding) {
   const quotas = getQuotas()
   const findQuota = ({ namespace, name } = {}) => _.find(quotas, ({ metadata }) => metadata.namespace === namespace && metadata.name === name)
   try {
     return _
-      .chain(secretBinding.quotas)
+      .chain(binding.quotas)
       .map(findQuota)
       .compact()
       .value()

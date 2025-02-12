@@ -91,21 +91,21 @@ describe('stores', () => {
       )
     })
 
-    it('should return secretBindingList with resolved secret', () => {
-      expect(credentialStore.secretBindingList.length).toBeGreaterThan(0)
-      const awsSecretBinding = find(credentialStore.secretBindingList, { metadata: { name: awsSecretBindingName } })
+    it('should return cloudProviderBindingList with resolved secret', () => {
+      expect(credentialStore.cloudProviderBindingList.length).toBeGreaterThan(0)
+      const awsSecretBinding = find(credentialStore.cloudProviderBindingList, { metadata: { name: awsSecretBindingName } })
       expect(awsSecretBinding.secretRef.name).toBe(awsSecretBinding._secret.metadata.name)
       expect(awsSecretBinding.secretRef.namespace).toBe(awsSecretBinding._secret.metadata.namespace)
     })
 
-    it('should return secretBindingList with trial quota and secret from other namespace', () => {
-      const awsTrialSecretBinding = find(credentialStore.secretBindingList, { metadata: { name: awsTrialSecretBindingName } })
+    it('should return cloudProviderBindingList with trial quota and secret from other namespace', () => {
+      const awsTrialSecretBinding = find(credentialStore.cloudProviderBindingList, { metadata: { name: awsTrialSecretBindingName } })
       expect(awsTrialSecretBinding._secret).toBeUndefined()
       expect(awsTrialSecretBinding.secretRef.namespace).toBe(awsTrialSecretBinding._quotas[0].metadata.namespace)
     })
 
-    it('should return secretBindingList with multiple quotas', () => {
-      const azureSecretBinding = find(credentialStore.secretBindingList, { metadata: { name: azureSecretBindingName } })
+    it('should return cloudProviderBindingList with multiple quotas', () => {
+      const azureSecretBinding = find(credentialStore.cloudProviderBindingList, { metadata: { name: azureSecretBindingName } })
       expect(azureSecretBinding._secret).toMatchSnapshot()
       expect(azureSecretBinding._quotas.length).toBe(2)
       const azureQuotaRef2 = azureSecretBinding.quotas[1]
@@ -113,15 +113,15 @@ describe('stores', () => {
       expect(azureQuota).toMatchSnapshot()
     })
 
-    it('should return infrastructureSecretBindingsList', () => {
-      expect(credentialStore.infrastructureSecretBindingsList.length).toBeGreaterThan(0)
-      expect(credentialStore.secretBindingList.length).toBeGreaterThan(credentialStore.infrastructureSecretBindingsList.length)
+    it('should return infrastructureBindingList', () => {
+      expect(credentialStore.infrastructureBindingList.length).toBeGreaterThan(0)
+      expect(credentialStore.cloudProviderBindingList.length).toBeGreaterThan(credentialStore.infrastructureBindingList.length)
       expect(cloudProfileStore.sortedProviderTypeList).toMatchSnapshot()
     })
 
-    it('should return dnsSecretBindingsList', () => {
-      expect(credentialStore.dnsSecretBindingsList.length).toBeGreaterThan(0)
-      expect(credentialStore.secretBindingList.length).toBeGreaterThan(credentialStore.dnsSecretBindingsList.length)
+    it('should return dnsBindingList', () => {
+      expect(credentialStore.dnsBindingList.length).toBeGreaterThan(0)
+      expect(credentialStore.cloudProviderBindingList.length).toBeGreaterThan(credentialStore.dnsBindingList.length)
       expect(gardenerExtensionStore.dnsProviderTypes).toMatchSnapshot()
     })
 
@@ -135,15 +135,15 @@ describe('stores', () => {
 
     it('should fetchCredentials', async () => {
       credentialStore.$reset()
-      expect(credentialStore.secretBindingList.length).toBe(0)
+      expect(credentialStore.cloudProviderBindingList.length).toBe(0)
       await credentialStore.fetchCredentials()
       expect(api.getCloudProviderCredentials).toBeCalledTimes(1)
       expect(api.getCloudProviderCredentials).toBeCalledWith(testNamespace)
-      expect(credentialStore.secretBindingList.length).toBeGreaterThan(0)
+      expect(credentialStore.cloudProviderBindingList.length).toBeGreaterThan(0)
     })
 
     it('should updateCredential', async () => {
-      let awsSecretBinding = find(credentialStore.secretBindingList, { metadata: { name: awsSecretBindingName } })
+      let awsSecretBinding = find(credentialStore.cloudProviderBindingList, { metadata: { name: awsSecretBindingName } })
       const secret = {
         ...awsSecretBinding._secret,
         data: {
@@ -154,7 +154,7 @@ describe('stores', () => {
 
       expect(api.updateCloudProviderCredential).toBeCalledTimes(1)
       expect(api.updateCloudProviderCredential).toBeCalledWith({ secretBinding: awsSecretBinding, secret })
-      awsSecretBinding = find(credentialStore.secretBindingList, { metadata: { name: awsSecretBindingName } })
+      awsSecretBinding = find(credentialStore.cloudProviderBindingList, { metadata: { name: awsSecretBindingName } })
       expect(awsSecretBinding._secret.data).toEqual({ newSecret2: 'dummy-data' })
     })
 
@@ -191,7 +191,7 @@ describe('stores', () => {
 
       expect(api.createCloudProviderCredential).toBeCalledTimes(1)
       expect(api.createCloudProviderCredential).toBeCalledWith({ secretBinding, secret })
-      const newSecretBinding = find(credentialStore.secretBindingList, { metadata: secretBinding.metadata })
+      const newSecretBinding = find(credentialStore.cloudProviderBindingList, { metadata: secretBinding.metadata })
       expect(newSecretBinding.metadata.namespace).toEqual(testNamespace)
       expect(newSecretBinding.provider.type).toEqual('aws')
       expect(newSecretBinding._secret.data).toEqual({ newSecret: 'dummy-data' })
@@ -212,17 +212,17 @@ describe('stores', () => {
       const namespace = 'invalid'
       authzStore.setNamespace(namespace)
 
-      expect(credentialStore.secretBindingList.length).toBeGreaterThan(0)
+      expect(credentialStore.cloudProviderBindingList.length).toBeGreaterThan(0)
       await expect(credentialStore.fetchCredentials()).rejects.toThrow(Error)
-      expect(credentialStore.secretBindingList.length).toBe(0)
+      expect(credentialStore.cloudProviderBindingList.length).toBe(0)
     })
     it('store should be resetted after setting new data', async () => {
       const namespace = 'invalid'
       authzStore.setNamespace(namespace)
 
-      expect(credentialStore.secretBindingList.length).toBeGreaterThan(0)
+      expect(credentialStore.cloudProviderBindingList.length).toBeGreaterThan(0)
       credentialStore._setCredentials({})
-      expect(credentialStore.secretBindingList.length).toBe(0)
+      expect(credentialStore.cloudProviderBindingList.length).toBe(0)
     })
   })
 })

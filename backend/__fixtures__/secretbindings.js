@@ -13,7 +13,7 @@ const pathToRegexp = require('path-to-regexp')
 const quotaList = require('./quotas').list('garden-foo')
 const quotas = map(quotaList, ({ metadata: { namespace, name } }) => ({ namespace, name }))
 
-const secretBindingList = [
+const cloudProviderBindingList = [
   getSecretBinding({
     namespace: 'garden-foo',
     name: 'foo-infra1',
@@ -85,7 +85,7 @@ const secretBindings = {
     return find(items, ['metadata.name', name])
   },
   list (namespace) {
-    const items = cloneDeep(secretBindingList)
+    const items = cloneDeep(cloudProviderBindingList)
     return namespace
       ? filter(items, ['metadata.namespace', namespace])
       : items
@@ -104,7 +104,7 @@ const mocks = {
         return Promise.reject(createError(503))
       }
       const { params: { namespace } = {} } = matchResult
-      const items = filter(secretBindingList, ['metadata.namespace', namespace])
+      const items = filter(cloudProviderBindingList, ['metadata.namespace', namespace])
       return Promise.resolve({ items })
     }
   },

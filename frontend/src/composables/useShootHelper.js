@@ -16,7 +16,7 @@ import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useCredentialStore } from '@/store/credential'
 import { useSeedStore } from '@/store/seed'
 
-import { useSecretBindingList } from '@/composables/useSecretBindingList'
+import { useCloudProviderBindingList } from '@/composables/useCloudProviderBindingList'
 
 import { selfTerminationDaysForSecret } from '@/utils'
 
@@ -115,7 +115,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     return cloudProfileStore.getDefaultNodesCIDR(cloudProfileName.value)
   })
 
-  const infrastructureSecretBindings = useSecretBindingList(providerType, { credentialStore, gardenerExtensionStore })
+  const infrastructureSecretBindings = useCloudProviderBindingList(providerType, { credentialStore, gardenerExtensionStore })
 
   const sortedKubernetesVersions = computed(() => {
     return cloudProfileStore.sortedKubernetesVersions(cloudProfileName.value)

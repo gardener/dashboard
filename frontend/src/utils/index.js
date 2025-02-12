@@ -352,8 +352,16 @@ export function getTimeStringTo (time, toTime, withoutPrefix = false) {
   return moment(time).to(toTime, withoutPrefix)
 }
 
-export function hasOwnSecret (secretBinding) {
-  return get(secretBinding, ['secretRef', 'namespace']) === get(secretBinding, ['metadata', 'namespace'])
+export function hasOwnCredential (binding) {
+  const bindingNamespace = binding.metadata.namespace
+  let refNamespace
+  if (binding._isSecretBinding) {
+    refNamespace = binding.secretRef.namespace
+  } else if (binding._isCredentialsBinding) {
+    refNamespace = binding.credentialsRef.namespace
+  }
+
+  return refNamespace === bindingNamespace
 }
 
 export function getCreatedBy (metadata) {

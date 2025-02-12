@@ -111,7 +111,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import { computed } from 'vue'
 
-import GSecretDialog from '@/components/Secrets/GSecretDialog'
+import GSecretDialog from '@/components/Credentials/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
 
 import { useProvideCredentialContext } from '@/composables/useCredentialContext'

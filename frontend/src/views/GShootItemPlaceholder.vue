@@ -129,7 +129,7 @@ export default {
         const promises = [
           shootStore.subscribe(routeParams),
         ]
-        if (['ShootItem', 'ShootItemHibernationSettings'].includes(routeName) && authzStore.canGetSecrets) {
+        if (['ShootItem', 'ShootItemHibernationSettings'].includes(routeName) && authzStore.canGetCloudProviderCredentials) {
           promises.push(credentialStore.fetchCredentials()) // Required for purpose configuration
         }
         if (['ShootItem', 'ShootItemHibernationSettings', 'ShootItemTerminal'].includes(routeName) && authzStore.canUseProjectTerminalShortcuts) {

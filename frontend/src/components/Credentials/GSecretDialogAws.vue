@@ -99,7 +99,7 @@ import {
   maxLength,
 } from '@vuelidate/validators'
 
-import GSecretDialog from '@/components/Secrets/GSecretDialog'
+import GSecretDialog from '@/components/Credentials/GSecretDialog'
 import GCodeBlock from '@/components/GCodeBlock'
 import GExternalLink from '@/components/GExternalLink'
 

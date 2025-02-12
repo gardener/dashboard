@@ -239,8 +239,8 @@ export default {
   },
   computed: {
     ...mapState(useCredentialStore, [
-      'infrastructureSecretBindingsList',
-      'dnsSecretBindingsList',
+      'infrastructureBindingList',
+      'dnsBindingList',
     ]),
     ...mapState(useGardenerExtensionStore, ['dnsProviderTypes']),
     ...mapState(useShootStore, ['shootList']),
@@ -253,10 +253,10 @@ export default {
       },
     },
     infrastructureSecretNames () {
-      return this.infrastructureSecretBindingsList.map(item => item.metadata.name)
+      return this.infrastructureBindingList.map(item => item.metadata.name)
     },
     dnsSecretNames () {
-      return this.dnsSecretBindingsList.map(item => item.metadata.name)
+      return this.dnsBindingList.map(item => item.metadata.name)
     },
     isCreateMode () {
       return !this.secretBinding

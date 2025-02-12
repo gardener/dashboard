@@ -354,7 +354,7 @@ export default {
       'canPatchShoots',
       'canDeleteShoots',
       'canCreateShoots',
-      'canGetSecrets',
+      'canGetCloudProviderCredentials',
     ]),
     ...mapState(useConfigStore, {
       accessRestrictionConfig: 'accessRestriction',
@@ -575,7 +575,7 @@ export default {
           sortable: false,
           align: 'end',
           defaultSelected: true,
-          hidden: !(this.canDeleteShoots || this.canGetSecrets),
+          hidden: !(this.canDeleteShoots || this.canGetCloudProviderCredentials),
         },
       ]
       return map(headers, (header, index) => ({

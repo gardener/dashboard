@@ -172,7 +172,7 @@ import {
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
-import GSecretDialog from '@/components/Secrets/GSecretDialog'
+import GSecretDialog from '@/components/Credentials/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
 
 import { useProvideCredentialContext } from '@/composables/useCredentialContext'

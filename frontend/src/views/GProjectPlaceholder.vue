@@ -49,7 +49,7 @@ export default {
   computed: {
     ...mapState(useAuthzStore, [
       'namespace',
-      'canGetSecrets',
+      'canGetCloudProviderCredentials',
     ]),
     ...mapState(useProjectStore, [
       'namespaces',
@@ -103,7 +103,7 @@ export default {
         this.fallbackRoute = {
           name: 'Home',
         }
-      } else if (['Secrets', 'Secret'].includes(routeName) && !this.canGetSecrets) {
+      } else if (['Credentials', 'Credential'].includes(routeName) && !this.canGetCloudProviderCredentials) {
         this.error = Object.assign(new Error('You do not have the necessary permissions to list secrets!'), {
           code: 403,
           reason: 'Forbidden',

@@ -62,7 +62,7 @@ import { mapActions } from 'pinia'
 import { useCredentialStore } from '@/store/credential'
 
 import GVendorIcon from '@/components/GVendorIcon'
-import GSecretDetailsItemContent from '@/components/Secrets/GSecretDetailsItemContent.vue'
+import GSecretDetailsItemContent from '@/components/Credentials/GSecretDetailsItemContent.vue'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 
 import get from 'lodash/get'

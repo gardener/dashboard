@@ -266,7 +266,7 @@ import GDnsConfiguration from '@/components/ShootDns/GDnsConfiguration'
 import GSeedConfiguration from '@/components/GSeedConfiguration'
 import GControlPlaneHighAvailabilityConfiguration from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityConfiguration'
 import GControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityTag'
-import GSecretDetailsItemContent from '@/components/Secrets/GSecretDetailsItemContent'
+import GSecretDetailsItemContent from '@/components/Credentials/GSecretDetailsItemContent'
 
 import { useShootResources } from '@/composables/useShootResources'
 import { useShootItem } from '@/composables/useShootItem'
@@ -350,7 +350,7 @@ export default {
       'canPatchShootsBinding',
     ]),
     ...mapState(useCredentialStore, [
-      'infrastructureSecretBindingsList',
+      'infrastructureBindingList',
     ]),
     showSeedInfo () {
       return !!this.shootSeedName
@@ -407,7 +407,7 @@ export default {
       return 'generated'
     },
     secretBinding () {
-      return find(this.infrastructureSecretBindingsList, ['metadata.name', this.shootSecretBindingName])
+      return find(this.infrastructureBindingList, ['metadata.name', this.shootSecretBindingName])
     },
   },
   methods: {

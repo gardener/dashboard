@@ -93,7 +93,7 @@ SPDX-License-Identifier: Apache-2.0
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
-import GSecretDialog from '@/components/Secrets/GSecretDialog'
+import GSecretDialog from '@/components/Credentials/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink.vue'
 
 import { useProvideCredentialContext } from '@/composables/useCredentialContext'

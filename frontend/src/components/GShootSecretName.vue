@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
       <g-text-router-link
         v-if="canLinkToSecret"
         v-bind="props"
-        :to="{ name: 'Secrets', params: { namespace }, hash: credentialHash }"
+        :to="{ name: 'Credentials', params: { namespace }, hash: credentialHash }"
         :text="secretBindingName"
       />
       <span
@@ -43,7 +43,7 @@ import { useAuthzStore } from '@/store/authz'
 import { useCredentialStore } from '@/store/credential'
 
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
-import GSecretDetailsItemContent from '@/components/Secrets/GSecretDetailsItemContent'
+import GSecretDetailsItemContent from '@/components/Credentials/GSecretDetailsItemContent'
 
 export default {
   components: {
@@ -60,10 +60,10 @@ export default {
   },
   computed: {
     ...mapState(useAuthzStore, [
-      'canGetSecrets',
+      'canGetCloudProviderCredentials',
     ]),
     canLinkToSecret () {
-      return this.canGetSecrets && this.secretBindingName && this.namespace
+      return this.canGetCloudProviderCredentials && this.secretBindingName && this.namespace
     },
     secretBinding () {
       return this.getSecretBinding({ namespace: this.namespace, name: this.secretBindingName })

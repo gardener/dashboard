@@ -188,7 +188,7 @@ import { useVuelidate } from '@vuelidate/core'
 
 import GCloudProfile from '@/components/GCloudProfile'
 import GWildcardSelect from '@/components/GWildcardSelect'
-import GSelectSecret from '@/components/Secrets/GSelectSecret'
+import GSelectSecret from '@/components/Credentials/GSelectSecret'
 
 import { useShootContext } from '@/composables/useShootContext'
 
