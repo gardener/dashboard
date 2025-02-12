@@ -5,12 +5,12 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div class="d-flex">
+  <div class="d-flex flex-wrap">
     <v-chip
       size="small"
       variant="tonal"
       color="primary"
-      class="mr-2 my-0"
+      class="mr-2 my-1"
     >
       {{ title }}
       <v-tooltip
@@ -30,7 +30,7 @@ SPDX-License-Identifier: Apache-2.0
       size="small"
       variant="tonal"
       color="primary"
-      class="mr-2"
+      class="mr-2 my-1"
     >
       {{ option.title }}
       <v-tooltip
