@@ -31,14 +31,14 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@codemirror/autocomplete": "^6.18.0",
-    "@codemirror/commands": "^6.6.0",
-    "@codemirror/lang-yaml": "^6.1.1",
-    "@codemirror/language": "^6.10.2",
-    "@codemirror/search": "^6.5.6",
-    "@codemirror/state": "^6.4.1",
+    "@codemirror/autocomplete": "^6.18.3",
+    "@codemirror/commands": "^6.7.1",
+    "@codemirror/lang-yaml": "^6.1.2",
+    "@codemirror/language": "^6.10.6",
+    "@codemirror/search": "^6.5.8",
+    "@codemirror/state": "^6.5.0",
     "@codemirror/theme-one-dark": "^6.1.2",
-    "@codemirror/view": "^6.33.0",
+    "@codemirror/view": "^6.35.3",
     "@fontsource/roboto": "^5.0.12",
     "@kyvg/vue3-notification": "^3.2.1",
     "@lezer/common": "^1.2.1",
@@ -66,7 +66,7 @@
     "md5": "^2.3.0",
     "mitt": "^3.0.1",
     "netmask": "^2.0.2",
-    "pinia": "^2.1.7",
+    "pinia": "^3.0.0",
     "semver": "^7.6.0",
     "socket.io-client": "^4.7.5",
     "splitpanes": "^3.1.5",
@@ -78,7 +78,7 @@
     "uuid": "^11.0.0",
     "vue": "^3.4.21",
     "vue-router": "^4.3.0",
-    "vuetify": "^3.5.10"
+    "vuetify": "^3.7.5"
   },
   "devDependencies": {
     "@microsoft/eslint-formatter-sarif": "^3.1.0",
@@ -105,7 +105,7 @@
     "unplugin-fonts": "^1.1.1",
     "vite": "^6.0.0",
     "vite-plugin-compression": "^0.5.1",
-    "vite-plugin-vuetify": "^2.0.3",
+    "vite-plugin-vuetify": "^2.0.4",
     "vitest": "^2.0.0",
     "vitest-fetch-mock": "^0.4.0"
   },

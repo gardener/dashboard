@@ -58,7 +58,7 @@ The Gardener Dashboard [`backend`](../../backend) server requires a kubeconfig f
 
 If you want to run the Garden cluster locally, follow the [getting started locally](https://github.com/gardener/gardener/blob/master/docs/development/getting_started_locally.md) documentation.
 Gardener Dashboard supports the `local` infrastructure provider that comes with the local Gardener cluster setup.
-See [6. Login to the dashboard](#6-login-to-the-dashboard) for more information on how to use the Dashboard with a local gardener or any other Gardener landscape.
+See [5. Login to the dashboard](#5-login-to-the-dashboard) for more information on how to use the Dashboard with a local gardener or any other Gardener landscape.
 
 Start the `backend` server (`http://localhost:3030`).
 
