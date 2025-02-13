@@ -22,8 +22,8 @@ function createStore (items) {
 describe('api', function () {
   let agent
 
-  beforeAll(() => {
-    agent = createAgent()
+  beforeAll(async () => {
+    agent = await createAgent()
 
     cache.initialize({
       projects: {

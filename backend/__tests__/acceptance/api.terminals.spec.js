@@ -21,8 +21,8 @@ function getTerminalName (target, identifier) {
 describe('api', function () {
   let agent
 
-  beforeAll(() => {
-    agent = createAgent()
+  beforeAll(async () => {
+    agent = await createAgent()
   })
 
   afterAll(() => {

@@ -4,13 +4,13 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import { format as fmt } from 'util'
+import kubeClient from '@gardener-dashboard/kube-client/lib/index.js'
+import { isHttpError } from 'http-errors'
 
-const { format: fmt } = require('util')
-const { dashboardClient } = require('@gardener-dashboard/kube-client')
-const { isHttpError } = require('http-errors')
+const { dashboardClient } = kubeClient
 
-async function healthCheck (transitive = false) {
+export async function healthCheck (transitive = false) {
   if (transitive === true) {
     try {
       await dashboardClient.healthz.get()
@@ -22,8 +22,4 @@ async function healthCheck (transitive = false) {
       throw new Error(fmt('Could not reach Kubernetes apiserver healthz endpoint. Request failed with error: %s', err))
     }
   }
-}
-
-module.exports = {
-  healthCheck,
 }

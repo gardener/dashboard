@@ -16,8 +16,8 @@ const { matchers, ...fixtures } = require('./__fixtures__')
 
 expect.extend(matchers)
 
-function createHttpAgent () {
-  const app = require('./lib/app')
+async function createHttpAgent () {
+  const app = (await import('./lib/app.mjs')).app
   let server = http.createServer(app)
   const healthCheck = app.get('healthCheck')
   if (typeof healthCheck === 'function') {
@@ -90,7 +90,7 @@ function createSocketAgent (cache) {
   return agent
 }
 
-function createAgent (type = 'http', cache) {
+async function createAgent (type = 'http', cache) {
   switch (type) {
     case 'io':
       return createSocketAgent(cache)

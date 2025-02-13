@@ -11,8 +11,8 @@ const { mockRequest } = require('@gardener-dashboard/request')
 describe('config', function () {
   let agent
 
-  beforeAll(() => {
-    agent = createAgent()
+  beforeAll(async () => {
+    agent = await createAgent()
   })
 
   afterAll(() => {

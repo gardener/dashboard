@@ -8,10 +8,14 @@
 
 const { createHttpError } = require('@gardener-dashboard/request')
 const { dashboardClient } = require('@gardener-dashboard/kube-client')
-const { healthCheck } = require('../lib/healthz')
 
 describe('healthz', function () {
   const healthz = dashboardClient.healthz
+
+  let healthCheck
+  beforeAll(async () => {
+    healthCheck = (await import('../lib/healthz/index.mjs')).healthCheck
+  })
 
   beforeEach(function () {
     healthz.get = jest.fn()
