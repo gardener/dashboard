@@ -30,7 +30,8 @@
     "lint": "eslint server.js . --max-warnings=0",
     "lint-sarif": "yarn lint --format=@microsoft/eslint-formatter-sarif",
     "test": "cross-env NODE_ENV=test jest",
-    "test-coverage": "yarn test --coverage"
+    "test-coverage": "yarn test --coverage",
+    "generate-diagrams": "node diagramGenerator.js"
   },
   "dependencies": {
     "@apidevtools/swagger-parser": "^10.1.0",
@@ -78,6 +79,7 @@
     "@microsoft/eslint-formatter-sarif": "^3.1.0",
     "abort-controller": "^3.0.0",
     "cross-env": "^7.0.3",
+    "dependency-cruiser": "^16.9.0",
     "dockerfile-ast": "^0.7.0",
     "eslint": "^9.11.0",
     "eslint-plugin-import": "^2.31.0",
