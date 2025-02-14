@@ -46,12 +46,12 @@ SPDX-License-Identifier: Apache-2.0
                     icon="mdi-plus"
                   />
                 </template>
-                Create Infrastructure Credential
+                Create Infrastructure Secret
               </v-tooltip>
             </template>
             <v-list>
               <v-list-subheader>
-                Create Infrastructure Credential
+                Create Infrastructure Secret
               </v-list-subheader>
               <v-list-item
                 v-for="infrastructure in sortedProviderTypeList"
@@ -170,12 +170,12 @@ SPDX-License-Identifier: Apache-2.0
                     icon="mdi-plus"
                   />
                 </template>
-                Create DNS Credential
+                Create Secret Credential
               </v-tooltip>
             </template>
             <v-list density="compact">
               <v-list-subheader>
-                Create DNS Credential
+                Create Secret Credential
               </v-list-subheader>
               <v-list-item
                 v-for="dnsProvider in dnsProviderTypes"
@@ -610,20 +610,26 @@ export default {
       return mapValues(tableKeys, () => () => 0)
     },
     computeItem (binding, relatedShootCount) {
-      let kind = 'Unknown'
+      let kind = {
+        icon: 'mdi-help-circle',
+        tooltip: 'Unknown',
+      }
       let credentialNamespace = ''
       let credentialName = ''
       if (binding._isSecretBinding) {
-        kind = 'Secret (SecretBinding)'
+        kind.tooltip = 'Secret (SecretBinding)'
+        kind.icon = 'mdi-account-key-outline'
         credentialNamespace = binding.secretRef.namespace
         credentialName = binding.secretRef.name
       }
       if (binding._isCredentialsBinding) {
         if (binding.credentialsRef.kind === 'Secret') {
-          kind = 'Secret (CredentialsBinding)'
+          kind.tooltip = 'Secret (CredentialsBinding)'
+          kind.icon = 'mdi-account-key'
         }
         if (binding.credentialsRef.kind === 'WorkloadIdentity') {
           kind = 'WorkloadIdentity'
+          kind.icon = 'mdi-account-card'
         }
         credentialNamespace = binding.credentialsRef.namespace
         credentialName = binding.credentialsRef.name

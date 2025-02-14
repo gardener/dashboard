@@ -30,7 +30,18 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </td>
     <td v-if="selectedHeaders.kind">
-      {{ item.kind }}
+      <v-tooltip location="top">
+        <template #activator="{ props }">
+          <v-icon
+            v-bind="props"
+            size="small"
+            class="mx-1"
+          >
+            {{ item.kind.icon }}
+          </v-icon>
+        </template>
+        <span>{{ item.kind.tooltip }}</span>
+      </v-tooltip>
     </td>
     <td v-if="selectedHeaders.credential">
       <span v-if="!item.hasOwnCredential">{{ item.credentialNamespace }}: </span>{{ item.credentialName }}
@@ -66,10 +77,10 @@ SPDX-License-Identifier: Apache-2.0
           @click="onUpdate"
         >
           <template #tooltip>
-            <span v-if="!item.hasOwnCredential">You can only edit credentials that are owned by you</span>
+            <span v-if="!item.hasOwnCredential">You can only edit secrets that are owned by you</span>
             <span v-else-if="!item.hasOwnSecret">The dashboard only supports editing credentials of type secret</span>
-            <span v-else-if="item.isMarkedForDeletion">Credential is marked for deletion</span>
-            <span v-else>Edit Credential</span>
+            <span v-else-if="item.isMarkedForDeletion">Secret is marked for deletion</span>
+            <span v-else>Edit Secret</span>
           </template>
         </g-action-button>
         <g-action-button
@@ -79,11 +90,11 @@ SPDX-License-Identifier: Apache-2.0
           @click="onDelete"
         >
           <template #tooltip>
-            <span v-if="!item.hasOwnCredential">You can only delete credentials that are owned by you</span>
+            <span v-if="!item.hasOwnCredential">You can only delete secrets that are owned by you</span>
             <span v-else-if="!item.hasOwnSecret">The dashboard only supports editing credentials of type secret</span>
-            <span v-else-if="item.relatedShootCount > 0">You can only delete credentials that are currently unused</span>
-            <span v-else-if="item.isMarkedForDeletion">Credential is already marked for deletion</span>
-            <span v-else>Delete Credential</span>
+            <span v-else-if="item.relatedShootCount > 0">You can only delete secrets that are currently unused</span>
+            <span v-else-if="item.isMarkedForDeletion">Secret is already marked for deletion</span>
+            <span v-else>Delete Secret</span>
           </template>
         </g-action-button>
       </div>
