@@ -102,12 +102,20 @@ export const useCredentialStore = defineStore('credential', () => {
           value: secret,
           configurable: true,
         })
+        Object.defineProperty(binding, '_secretName', {
+          value: binding.secretRef.name,
+          configurable: true,
+        })
       }
       if (isCredentialsBinding) {
         if (binding.credentialsRef.kind === 'Secret') {
           const secret = getSecret(binding.credentialsRef)
           Object.defineProperty(binding, '_secret', {
             value: secret,
+            configurable: true,
+          })
+          Object.defineProperty(binding, '_secretName', {
+            value: binding.credentialsRef.name,
             configurable: true,
           })
         }
@@ -146,14 +154,6 @@ export const useCredentialStore = defineStore('credential', () => {
     const credentialsBindings = Object.values(state.credentialsBindings).map(binding => decorateBinding(binding, 'CredentialsBinding'))
 
     return [...secretBindings, ...credentialsBindings]
-  })
-
-  const secretList = computed(() => {
-    return Object.values(state.secrets)
-  })
-
-  const workloadIdentitiesList = computed(() => {
-    return Object.values(state.workloadIdentities)
   })
 
   const quotaList = computed(() => {
@@ -208,6 +208,10 @@ export const useCredentialStore = defineStore('credential', () => {
     return get(state.secretBindings, [namespaceNameKey({ namespace, name })])
   }
 
+  function getCredentialsBinding ({ namespace, name }) {
+    return get(state.credentialsBindings, [namespaceNameKey({ namespace, name })])
+  }
+
   // TODO support credentials bindings
   function _updateCloudProviderCredential ({ secretBinding, secret }) {
     const key = namespaceNameKey(secretBinding.metadata)
@@ -225,8 +229,6 @@ export const useCredentialStore = defineStore('credential', () => {
 
   return {
     cloudProviderBindingList,
-    secretList,
-    workloadIdentitiesList,
     quotaList,
     fetchCredentials,
     _setCredentials,
@@ -237,6 +239,8 @@ export const useCredentialStore = defineStore('credential', () => {
     dnsBindingList,
     getSecret,
     getSecretBinding,
+    getCredentialsBinding,
+    getWorkloadIdentity,
     $reset,
   }
 })

@@ -146,7 +146,7 @@ export default {
     const gardenerExtensionStore = useGardenerExtensionStore()
 
     const dnsProviderType = toRef(props.dnsProvider, 'type')
-    const dnsSecretBindings = useCloudProviderBindingList(dnsProviderType, { credentialStore, gardenerExtensionStore })
+    const dnsCloudProviderBindings = useCloudProviderBindingList(dnsProviderType, { credentialStore, gardenerExtensionStore })
 
     return {
       v$: useVuelidate(),
@@ -156,7 +156,7 @@ export default {
       setResource,
       deleteResource,
       getResourceRefName,
-      dnsSecretBindings,
+      dnsCloudProviderBindings,
     }
   },
   validations () {
@@ -176,7 +176,7 @@ export default {
       },
       set (value) {
         this.dnsProvider.type = value
-        const defaultDnsSecret = head(this.dnsSecretBindings)
+        const defaultDnsSecret = head(this.dnsCloudProviderBindings)
         this.dnsServiceExtensionProviderSecret = defaultDnsSecret
       },
     },
@@ -185,11 +185,11 @@ export default {
         const resourceName = this.dnsProvider.secretName
         const secretName = this.getResourceRefName(resourceName)
 
-        return find(this.dnsSecretBindings, ['secretRef.name', secretName])
+        return find(this.dnsCloudProviderBindings, ['_secretName', secretName])
       },
-      set (value) {
+      set (binding) {
         this.deleteResource(this.dnsProvider.secretName)
-        const secretName = get(value, ['secretRef', 'name'])
+        const secretName = binding._secretName
         const resourceName = this.getDnsServiceExtensionResourceName(secretName)
         this.dnsProvider.secretName = resourceName
         this.setResource({

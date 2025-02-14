@@ -266,10 +266,10 @@ export default {
     },
     primaryDnsProviderSecret: {
       get () {
-        return find(this.dnsPrimaryProviderSecretBindings, ['secretRef.name', this.dnsPrimaryProviderSecretName])
+        return find(this.dnsPrimaryProviderSecretBindings, ['_secretName', this.dnsPrimaryProviderSecretName])
       },
       set (value) {
-        this.dnsPrimaryProviderSecretName = value?.secretRef.name
+        this.dnsPrimaryProviderSecretName = value?._secretName
       },
     },
     domainRecommendationVisible () {

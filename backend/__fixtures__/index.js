@@ -17,6 +17,8 @@ const managedseeds = require('./managedseeds')
 const configmaps = require('./configmaps')
 const secrets = require('./secrets')
 const secretbindings = require('./secretbindings')
+const credentialsbindings = require('./credentialsBindings')
+const workloadidentities = require('./workloadIdentities')
 const quotas = require('./quotas')
 const controllerregistrations = require('./controllerregistrations')
 const resourcequotas = require('./resourcequotas')
@@ -51,6 +53,8 @@ const fixtures = {
   configmaps,
   secrets,
   secretbindings,
+  credentialsbindings,
+  workloadidentities,
   projects,
   serviceaccounts,
   cloudprofiles,

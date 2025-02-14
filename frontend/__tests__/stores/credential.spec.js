@@ -21,9 +21,14 @@ import find from 'lodash/find'
 
 const testNamespace = 'garden-test'
 const awsSecretBindingName = 'aws-secretbinding'
+const awsCredentialsBindingName = 'aws-credentialsbinding'
 const awsSecretName = 'aws-secret'
+const awsWorkloadIndentityName = 'aws-wlid'
 const awsTrialSecretBindingName = 'aws-trial-secretbinding'
+const awsTrialCredentialsBindingName = 'aws-trial-credentialsbinding'
 const azureSecretBindingName = 'azure-secretbinding'
+const azureCredentialsBindingName = 'azure-credentialsbinding'
+const awsWorkloadIdentitiyCredentialsBindingName = 'aws-wlid-credentialsbinding'
 
 describe('stores', () => {
   describe('credential', () => {
@@ -91,26 +96,52 @@ describe('stores', () => {
       )
     })
 
-    it('should return cloudProviderBindingList with resolved secret', () => {
-      expect(credentialStore.cloudProviderBindingList.length).toBeGreaterThan(0)
+    it('should return cloudProviderBindingList with resolved secret (secretbinding)', () => {
       const awsSecretBinding = find(credentialStore.cloudProviderBindingList, { metadata: { name: awsSecretBindingName } })
       expect(awsSecretBinding.secretRef.name).toBe(awsSecretBinding._secret.metadata.name)
       expect(awsSecretBinding.secretRef.namespace).toBe(awsSecretBinding._secret.metadata.namespace)
     })
 
-    it('should return cloudProviderBindingList with trial quota and secret from other namespace', () => {
+    it('should return cloudProviderBindingList with resolved secret (credentialsbinding)', () => {
+      const awsCredentialsBinding = find(credentialStore.cloudProviderBindingList, { metadata: { name: awsCredentialsBindingName } })
+      expect(awsCredentialsBinding.credentialsRef.name).toBe(awsCredentialsBinding._secret.metadata.name)
+      expect(awsCredentialsBinding.credentialsRef.namespace).toBe(awsCredentialsBinding._secret.metadata.namespace)
+    })
+
+    it('should return cloudProviderBindingList with trial quota and secret from other namespace (secretbinding)', () => {
       const awsTrialSecretBinding = find(credentialStore.cloudProviderBindingList, { metadata: { name: awsTrialSecretBindingName } })
       expect(awsTrialSecretBinding._secret).toBeUndefined()
       expect(awsTrialSecretBinding.secretRef.namespace).toBe(awsTrialSecretBinding._quotas[0].metadata.namespace)
     })
 
-    it('should return cloudProviderBindingList with multiple quotas', () => {
+    it('should return cloudProviderBindingList with trial quota and secret from other namespace (credentialsbinding)', () => {
+      const awsTrialCredentialsBinding = find(credentialStore.cloudProviderBindingList, { metadata: { name: awsTrialCredentialsBindingName } })
+      expect(awsTrialCredentialsBinding._secret).toBeUndefined()
+      expect(awsTrialCredentialsBinding.credentialsRef.namespace).toBe(awsTrialCredentialsBinding._quotas[0].metadata.namespace)
+    })
+
+    it('should return cloudProviderBindingList with multiple quotas (secretbinding)', () => {
       const azureSecretBinding = find(credentialStore.cloudProviderBindingList, { metadata: { name: azureSecretBindingName } })
       expect(azureSecretBinding._secret).toMatchSnapshot()
       expect(azureSecretBinding._quotas.length).toBe(2)
       const azureQuotaRef2 = azureSecretBinding.quotas[1]
       const azureQuota = find(credentialStore.quotaList, { metadata: azureQuotaRef2 })
       expect(azureQuota).toMatchSnapshot()
+    })
+
+    it('should return cloudProviderBindingList with multiple quotas (credentialsbinding)', () => {
+      const azureCredentialsBinding = find(credentialStore.cloudProviderBindingList, { metadata: { name: azureCredentialsBindingName } })
+      expect(azureCredentialsBinding._secret).toMatchSnapshot()
+      expect(azureCredentialsBinding._quotas.length).toBe(2)
+      const azureQuotaRef2 = azureCredentialsBinding.quotas[1]
+      const azureQuota = find(credentialStore.quotaList, { metadata: azureQuotaRef2 })
+      expect(azureQuota).toMatchSnapshot()
+    })
+
+    it('should return cloudProviderBindingList with resolved workloadidentity (credentialsbinding)', () => {
+      const awsWorkloadIdentityCredentialsBinding = find(credentialStore.cloudProviderBindingList, { metadata: { name: awsWorkloadIdentitiyCredentialsBindingName } })
+      expect(awsWorkloadIdentityCredentialsBinding.credentialsRef.name).toBe(awsWorkloadIdentityCredentialsBinding._workloadIdentity.metadata.name)
+      expect(awsWorkloadIdentityCredentialsBinding.credentialsRef.namespace).toBe(awsWorkloadIdentityCredentialsBinding._workloadIdentity.metadata.namespace)
     })
 
     it('should return infrastructureBindingList', () => {
@@ -129,8 +160,16 @@ describe('stores', () => {
       expect(credentialStore.getSecret({ namespace: testNamespace, name: awsSecretName })).toMatchSnapshot()
     })
 
+    it('should return workloadIdentity', () => {
+      expect(credentialStore.getWorkloadIdentity({ namespace: testNamespace, name: awsWorkloadIndentityName })).toMatchSnapshot()
+    })
+
     it('should return secretBinding', () => {
       expect(credentialStore.getSecretBinding({ namespace: testNamespace, name: awsSecretBindingName })).toMatchSnapshot()
+    })
+
+    it('should return credentialsBinding', () => {
+      expect(credentialStore.getCredentialsBinding({ namespace: testNamespace, name: awsCredentialsBindingName })).toMatchSnapshot()
     })
 
     it('should fetchCredentials', async () => {
