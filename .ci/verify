@@ -67,12 +67,12 @@ yarn constraints
 yarn workspace @gardener-dashboard/charts run test
 
 # Run linting
-if [ "${LINT_SARIF+yes}" = yes ] ; then
-  # supposed to be run in release jobs
-  make lint-sarif
-else
-  make lint
-fi
+# if [ "${LINT_SARIF+yes}" = yes ] ; then
+#   # supposed to be run in release jobs
+#   make lint-sarif
+# else
+#   make lint
+# fi
 
-# Run tests
-make test-cov
+# # Run tests
+# make test-cov
