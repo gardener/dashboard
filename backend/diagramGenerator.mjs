@@ -64,7 +64,8 @@ function main () {
 
     console.log('All diagrams generated successfully! 🎉')
   } catch (error) {
-    console.error('Script failed! 😢')
+    console.error(`Script failed! 😢
+Please check the error message below for more information: \n${error.message}`)
     process.exit(1)
   }
 }
