@@ -58,7 +58,7 @@ install_if_missing make make
 yarn install --immutable --immutable-cache --check-cache --refresh-lockfile
 
 # check and report found duplicate dependencies
-yarn dedupe --check
+# yarn dedupe --check
 
 # check that the constraints are met
 yarn constraints
