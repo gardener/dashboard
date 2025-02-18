@@ -7,7 +7,7 @@
 // Disabled here in file scope since this is a cli script for dev-scenarios
 /* eslint-disable no-console, security/detect-non-literal-fs-filename */
 
-import { execSync, spawnSync } from 'child_process'
+import { spawnSync } from 'child_process'
 import fs from 'fs'
 import path from 'path'
 
@@ -25,20 +25,28 @@ function createDirectoryIfNeeded (dirPath) {
 }
 
 function generateDiagram (number, command) {
-  try {
-    console.log(`Generating diagram ${number}...`)
-    execSync(command, { stdio: 'inherit' })
-    console.log(`Diagram ${number} generated successfully!`)
-  } catch (error) {
-    console.error(`Failed to generate diagram ${number}`)
-    throw error
+  console.log(`Generating diagram ${number}...`)
+  const commandAsString = `${command.program} ${command.args.join(' ')}`
+  console.info(`Using the following bash command: ${commandAsString}`)
+
+  const result = spawnSync(command.program, command.args, { encoding: 'utf8' })
+
+  if (result.error) {
+    throw new Error(`Error executing command ${command.program}: ${result.error.message}`)
   }
+
+  if (result.status !== 0) {
+    throw new Error(`Command exited with status ${result.status}. Stderr: ${result.stderr}`)
+  }
+
+  console.log(`Diagram ${number} generated`)
+  return result.stdout
 }
 
 function main () {
   if (!isProgramInstalled('dot')) {
     console.error('Graphviz is not installed!')
-    console.log('Please install it using: brew install graphviz')
+    console.log('Please install Graphviz, on MacOs you could use: brew install graphviz')
     process.exit(1)
   }
 
@@ -46,20 +54,27 @@ function main () {
   createDirectoryIfNeeded(diagramDir)
 
   const commands = [
-    `yarn depcruise lib --include-only '^lib' --highlight '\\.mjs$' --output-type archi | dot -T svg -Grankdir=TD | tee ${diagramDir}/t1.svg | yarn depcruise-wrap-stream-in-html > ${diagramDir}/t1.html`,
-    `yarn depcruise lib --include-only '^lib' --highlight '\\.mjs$' --output-type dot | dot -T svg -Grankdir=TD | tee ${diagramDir}/t2.svg | yarn depcruise-wrap-stream-in-html > ${diagramDir}/t2.html`,
+    {
+      name: 'highlevel-dependency-diagram',
+      program: 'yarn',
+      args: ['depcruise', 'lib', '--collapse', 'lib/[^/]+/', '--highlight', '\\.mjs$', '--include-only', '^lib', '--output-type', 'x-dot-webpage'],
+    },
+    {
+      name: 'lowlevel-dependency-diagram',
+      program: 'yarn',
+      args: ['depcruise', 'lib', '--highlight', '\\.mjs$', '--include-only', '^lib', '--output-type', 'x-dot-webpage'],
+    },
   ]
 
   try {
-    commands.forEach((command, index) => {
-      generateDiagram(index + 1, command)
-    })
-
+    for (const [i, command] of commands.entries()) {
+      const diagram = generateDiagram(i + 1, command)
+      fs.writeFileSync(`${diagramDir}/${command.name}.html`, diagram)
+    }
     console.log('All diagrams generated successfully! 🎉')
-    console.log(`All diagrams are stored under: file://${diagramDir}`)
+    console.log(`And are stored under: file://${diagramDir}`)
   } catch (error) {
-    console.error(`Script failed! 😢
-Please check the error message below for more information: \n${error.message}`)
+    console.error(`Script failed! 😥 \nError: ${error.message}`)
     process.exit(1)
   }
 }
