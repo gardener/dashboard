@@ -4,7 +4,9 @@ on:
   push:
     paths:
       - 'backend/**'
-
+  pull_request:
+    paths:
+      - 'backend/**'
 jobs:
   generate-diagrams:
     runs-on: ubuntu-latest
@@ -14,6 +16,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           persist-credentials: true  # Ensures the default GITHUB_TOKEN can push commits
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Enable Corepack # Enable yarn version 4
         run: corepack enable
@@ -34,14 +38,10 @@ jobs:
         run: yarn generate-dependency-diagrams
         working-directory: ./backend
 
-      - name: Commit and push generated diagrams
-        run: |
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-          git add backend/diagram
-          if ! git diff --cached --quiet; then
-            git commit -m "Update dependency diagrams [skip ci]"
-            git push
-          else
-            echo "No changes detected in backend/diagram. Skipping commit."
-          fi
+      - uses: EndBug/add-and-commit@v9 # You can change this to use a specific version.
+        with:
+          add: './backend/diagram'
+          fetch: true
+          message: 'Commit from GitHub Actions (dependency-diagrams.yml)'
+          pathspec_error_handling: 'exitAtEnd'
+
