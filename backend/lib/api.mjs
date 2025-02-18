@@ -19,10 +19,10 @@ import kubeMonitor from '@gardener-dashboard/monitor/lib/index.js'
 const { monitorResponseTimes } = kubeMonitor
 const { createClient } = kubeClient
 
-export const hooks = createHooks()
+const hooks = createHooks()
 
 // configure router
-export const router = express.Router()
+const router = express.Router()
 router.use(compression({
   threshold: 8192,
   level: zlib.constants.Z_DEFAULT_COMPRESSION,
@@ -41,3 +41,8 @@ for (const [key, value] of Object.entries(routes)) {
 
 router.use(notFound)
 router.use(sendError)
+
+export {
+  hooks,
+  router,
+}

@@ -16,7 +16,7 @@ function toMilliseconds (seconds) {
   return seconds * 1000 + 200
 }
 
-export function createServer (app, metricsApp) {
+function createServer (app, metricsApp) {
   const port = app.get('port')
   const metricsPort = app.get('metricsPort')
   const periodSeconds = app.get('periodSeconds')
@@ -76,4 +76,8 @@ export function createServer (app, metricsApp) {
       logger.info('Server listening on port %d', port)
     },
   }
+}
+
+export {
+  createServer,
 }

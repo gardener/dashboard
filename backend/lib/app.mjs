@@ -49,7 +49,7 @@ if (gitHubRepoUrl) {
 }
 
 // configure app
-export const app = express()
+const app = express()
 app.set('port', port)
 app.set('metricsPort', metricsPort)
 app.set('logger', logger)
@@ -103,3 +103,7 @@ app.use(helmet.xFrameOptions({
 app.use(historyFallback(INDEX_FILENAME))
 
 app.use(renderError)
+
+export {
+  app,
+}
