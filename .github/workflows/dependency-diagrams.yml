@@ -1,0 +1,50 @@
+name: Generate Dependency Diagrams
+
+on:
+  push:
+    paths:
+      - 'backend/**'
+  pull_request:
+    paths:
+      - 'backend/**'
+
+jobs:
+  generate-diagrams:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true  # Ensures the default GITHUB_TOKEN can push commits
+
+      - name: Enable Corepack # Enable yarn version 4
+        run: corepack enable
+
+      - name: Install Graphviz
+        run: apt update && apt install -y graphviz
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install backend dependencies
+        run: yarn install
+        working-directory: ./backend
+
+      - name: Generate dependency diagrams
+        run: yarn generate-dependency-diagrams
+        working-directory: ./backend
+
+      - name: Commit and push generated diagrams
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git add backend/diagram
+          if ! git diff --cached --quiet; then
+            git commit -m "Update dependency diagrams [skip ci]"
+            git push
+          else
+            echo "No changes detected in backend/diagram. Skipping commit."
+          fi
