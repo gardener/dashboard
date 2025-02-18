@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+// Disabled here in file scope since this is a cli script for dev-scenarios
 /* eslint-disable no-console, security/detect-non-literal-fs-filename */
 
 import { execSync, spawnSync } from 'child_process'
