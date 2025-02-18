@@ -22,7 +22,7 @@ jobs:
         run: corepack enable
 
       - name: Install Graphviz
-        run: apt update && apt install -y graphviz
+        run: sudo apt update && apt install -y graphviz
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
