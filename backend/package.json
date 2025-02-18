@@ -43,7 +43,7 @@
     "@octokit/auth-app": "^6.0.4",
     "@octokit/core": "^5.1.0",
     "@octokit/plugin-paginate-graphql": "^4.0.1",
-    "@octokit/plugin-paginate-rest": "^9.2.1",
+    "@octokit/plugin-paginate-rest": "^11.4.1",
     "@octokit/plugin-request-log": "^4.0.1",
     "@octokit/plugin-rest-endpoint-methods": "^10.4.1",
     "base64url": "^3.0.1",
