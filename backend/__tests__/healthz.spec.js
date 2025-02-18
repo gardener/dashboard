@@ -14,7 +14,7 @@ describe('healthz', function () {
 
   let healthCheck
   beforeAll(async () => {
-    healthCheck = (await import('../lib/healthz/index.mjs')).healthCheck
+    ({ healthCheck } = await import('../lib/healthz/index.mjs'))
   })
 
   beforeEach(function () {

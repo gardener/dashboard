@@ -46,7 +46,7 @@ function createApplication (port, metricsPort) {
 
 describe('server', () => {
   beforeAll(async () => {
-    createServer = (await import('../lib/server.mjs')).createServer
+    ({ createServer } = await import('../lib/server.mjs'))
   })
   const port = 1234
   const metricsPort = 5678
