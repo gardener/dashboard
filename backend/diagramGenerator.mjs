@@ -10,7 +10,6 @@ import { execSync } from 'child_process'
 import fs from 'fs'
 import path from 'path'
 
-// Check if a program is installed
 function isProgramInstalled (programName) {
   try {
     execSync(`${programName} -V`)
@@ -20,7 +19,6 @@ function isProgramInstalled (programName) {
   }
 }
 
-// Create directory if it doesn't exist
 function createDirectoryIfNeeded (dirPath) {
   if (fs.existsSync(dirPath)) {
     return
@@ -29,7 +27,6 @@ function createDirectoryIfNeeded (dirPath) {
   fs.mkdirSync(dirPath, { recursive: true })
 }
 
-// Generate a single diagram
 function generateDiagram (number, command) {
   try {
     console.log(`Generating diagram ${number}...`)
@@ -42,7 +39,6 @@ function generateDiagram (number, command) {
 }
 
 function main () {
-  // Check if graphviz is installed
   if (!isProgramInstalled('dot')) {
     console.error('Graphviz is not installed!')
     console.log('Please install it using: brew install graphviz')
@@ -63,6 +59,7 @@ function main () {
     })
 
     console.log('All diagrams generated successfully! 🎉')
+    console.log(`All diagrams are stored under: file://${diagramDir}`)
   } catch (error) {
     console.error(`Script failed! 😢
 Please check the error message below for more information: \n${error.message}`)
