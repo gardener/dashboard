@@ -21,8 +21,8 @@ jobs:
       - name: Enable Corepack # Enable yarn version 4
         run: corepack enable
 
-      - name: Install Graphviz
-        run: sudo apt update && apt install -y graphviz
+      - name: Setup Graphviz
+        uses: ts-graphviz/setup-graphviz@v2
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
