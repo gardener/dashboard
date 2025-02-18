@@ -31,7 +31,7 @@
     "lint-sarif": "yarn lint --format=@microsoft/eslint-formatter-sarif",
     "test": "cross-env NODE_ENV=test node --experimental-vm-modules $(yarn bin jest)",
     "test-coverage": "yarn test --coverage",
-    "generate-diagrams": "node diagramGenerator.mjs"
+    "generate-dependency-diagrams": "node diagramGenerator.mjs"
   },
   "dependencies": {
     "@apidevtools/swagger-parser": "^10.1.0",
