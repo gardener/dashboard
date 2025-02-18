@@ -6,17 +6,13 @@
 
 /* eslint-disable no-console, security/detect-non-literal-fs-filename */
 
-import { execSync } from 'child_process'
+import { execSync, spawnSync } from 'child_process'
 import fs from 'fs'
 import path from 'path'
 
 function isProgramInstalled (programName) {
-  try {
-    execSync(`${programName} -V`)
-    return true
-  } catch (error) {
-    return false
-  }
+  const command = process.platform === 'win32' ? 'where' : 'which'
+  return spawnSync(command, [programName]).status === 0
 }
 
 function createDirectoryIfNeeded (dirPath) {
