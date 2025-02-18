@@ -20,7 +20,7 @@ function createDirectoryIfNeeded (dirPath) {
     return
   }
   console.log(`Creating directory: ${dirPath}`)
-  fs.mkdirSync(dirPath, { recursive: true })
+  fs.mkdirSync(dirPath)
 }
 
 function generateDiagram (number, command) {
