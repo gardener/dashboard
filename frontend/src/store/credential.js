@@ -98,6 +98,8 @@ export const useCredentialStore = defineStore('credential', () => {
       const isInfrastructureBinding = cloudProfileStore.sortedProviderTypeList.includes(binding.provider?.type)
       const isDnsBinding = gardenerExtensionStore.dnsProviderTypes.includes(binding.provider?.type)
 
+      binding.kind = kind // ensure kind is set (might not be set if objects are retrieved using list call)
+
       if (isSecretBinding) {
         const secret = getSecret(binding.secretRef)
         Object.defineProperties(binding, {
@@ -174,25 +176,21 @@ export const useCredentialStore = defineStore('credential', () => {
     return Object.values(state.quotas)
   })
 
-  // TODO support credentials bindings
   async function createCredential (params) {
-    const { data: { secretBinding, secret } } = await api.createCloudProviderCredential({ secretBinding: params.secretBinding, secret: params.secret })
-    _updateCloudProviderCredential({ secretBinding, secret })
-    appStore.setSuccess(`Cloud Provider credential ${secretBinding.metadata.name} created`)
+    const { data: { binding, secret } } = await api.createCloudProviderCredential({ binding: params.binding, secret: params.secret })
+    _updateCloudProviderCredential({ binding, secret })
+    appStore.setSuccess(`Cloud Provider credential ${binding.metadata.name} created`)
   }
 
-  // TODO support credentials bindings
   async function updateCredential (params) {
-    const { data: { secretBinding, secret } } = await api.updateCloudProviderCredential({ secretBinding: params.secretBinding, secret: params.secret })
-    _updateCloudProviderCredential({ secretBinding, secret })
-    appStore.setSuccess(`Cloud Provider credential ${secretBinding.metadata.name} updated`)
+    const { data: { binding, secret } } = await api.updateCloudProviderCredential({ binding: params.binding, secret: params.secret })
+    _updateCloudProviderCredential({ binding, secret })
+    appStore.setSuccess(`Cloud Provider credential ${binding.metadata.name} updated`)
   }
 
-  // TODO support credentials bindings
-  async function deleteCredential (name) {
-    const namespace = authzStore.namespace
-
-    await api.deleteCloudProviderCredential({ namespace, name })
+  async function deleteCredential (binding) {
+    const name = binding.metadata.name
+    await api.deleteCloudProviderCredential(binding)
     await fetchCredentials()
     appStore.setSuccess(`Cloud Provider credential ${name} deleted`)
   }
@@ -224,13 +222,17 @@ export const useCredentialStore = defineStore('credential', () => {
     return get(state.credentialsBindings, [namespaceNameKey({ namespace, name })])
   }
 
-  // TODO support credentials bindings
-  function _updateCloudProviderCredential ({ secretBinding, secret }) {
-    const key = namespaceNameKey(secretBinding.metadata)
-    set(state.secretBindings, [key], secretBinding)
+  function _updateCloudProviderCredential ({ binding, secret }) {
+    const key = namespaceNameKey(binding.metadata)
+
+    if (binding.kind === 'SecretBinding') {
+      set(state.secretBindings, [key], binding)
+    } else if (binding.kind === 'CredentialsBinding') {
+      set(state.credentialsBindings, [key], binding)
+    }
 
     if (secret) {
-      // technically speaking secret should always be there as we currently only support to create secret and secret binding together
+      // technically speaking secret should always be there as we currently only support to create secret and binding together
       // however this might change in the future
       const key = namespaceNameKey(secret.metadata)
       set(state.secrets, [key], secret)

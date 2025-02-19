@@ -19,6 +19,7 @@ import cloneDeep from 'lodash/cloneDeep'
 import get from 'lodash/get'
 import isEqual from 'lodash/isEqual'
 import set from 'lodash/set'
+import merge from 'lodash/merge'
 
 export function useCredentialsBindingContext (options = {}) {
   const {
@@ -35,7 +36,7 @@ export function useCredentialsBindingContext (options = {}) {
   const credentialsBindingManifest = ref({})
 
   function normalizeCredentialsBindingManifest (value) {
-    const object = Object.assign({
+    const object = merge({
       apiVersion: 'security.gardener.cloud/v1alpha1',
       kind: 'CredentialsBinding',
       credentialsRef: {

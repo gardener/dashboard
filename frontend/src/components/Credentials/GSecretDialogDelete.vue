@@ -111,11 +111,8 @@ export default {
       this.visible = false
     },
     async onDeleteSecret () {
-      const name = get(this.binding, ['metadata', 'name'])
       try {
-        console.log(this.binding)
-
-        // await this.deleteCredential(name)
+        await this.deleteCredential(this.binding)
         this.hide()
       } catch (err) {
         const errorDetails = errorDetailsFromError(err)

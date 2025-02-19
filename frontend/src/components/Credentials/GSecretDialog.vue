@@ -190,11 +190,15 @@ export default {
   ],
   setup (props) {
     let bindingContext
-    if (props.binding._isSecretBinding) {
+    if (!props.binding) {
+      // New binding always created as type 'CredentialsBinding'
+      bindingContext = useCredentialsBindingContext()
+    } else if (props.binding._isSecretBinding) {
       bindingContext = useSecretBindingContext()
     } else if (props.binding._isCredentialsBinding) {
       bindingContext = useCredentialsBindingContext()
     }
+
     const {
       createBindingManifest,
       setBindingManifest,
