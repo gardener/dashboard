@@ -15,12 +15,12 @@ import {
 
 import { useAuthzStore } from '@/store/authz'
 
-import { createCredentialContextComposable } from '@/composables/useCredentialContext'
+import { createCredentialContextComposable } from '@/composables/credential/useSecretContext'
 
 import { encodeBase64 } from '@/utils'
 
 describe('composables', () => {
-  describe('useCredentialContext', () => {
+  describe('useSecretContext', () => {
     const testNamespace = 'garden-foo'
     let credentialContext
 

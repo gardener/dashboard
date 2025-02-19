@@ -247,7 +247,7 @@ SPDX-License-Identifier: Apache-2.0
 
     <g-secret-dialog-wrapper
       :visible-dialog="visibleCredentialDialog"
-      :selected-secret-binding="selectedBinding"
+      :selected-binding="selectedBinding"
       @dialog-closed="onDialogClosed"
     />
   </v-container>
@@ -279,9 +279,9 @@ import GDataTableFooter from '@/components/GDataTableFooter.vue'
 import {
   hasOwnCredential,
   mapTableHeader,
+  calcRelatedShootCount,
 } from '@/utils'
 
-import some from 'lodash/some'
 import orderBy from 'lodash/orderBy'
 import mapValues from 'lodash/mapValues'
 import mapKeys from 'lodash/mapKeys'
@@ -411,10 +411,7 @@ export default {
       return this.sortItems(this.infrastructureCredentialsItems, this.infraCredentialSortBy, secondSortCriteria)
     },
     infrastructureCredentialsItems () {
-      return map(this.infrastructureBindingList, binding => {
-        const relatedShootCount = this.relatedShootCountInfra(binding)
-        return this.computeItem(binding, relatedShootCount)
-      })
+      return map(this.infrastructureBindingList, this.computeItem)
     },
     dnsCredentialTableHeaders () {
       const headers = [
@@ -481,10 +478,7 @@ export default {
       return this.sortItems(this.dnsCredentialItems, this.dnsCredentialSortBy, secondSortCriteria)
     },
     dnsCredentialItems () {
-      return map(this.dnsBindingList, binding => {
-        const relatedShootCount = this.relatedShootCountDns(binding)
-        return this.computeItem(binding, relatedShootCount)
-      })
+      return map(this.dnsBindingList, this.computeItem)
     },
   },
   watch: {
@@ -519,37 +513,6 @@ export default {
     onRemoveCredential (binding) {
       this.selectedBinding = binding
       this.visibleCredentialDialog = 'delete'
-    },
-    relatedShootCountInfra (binding) {
-      const bindingName = binding.metadata.name
-      const shootsByInfrastructureBinding = filter(this.shootList, ({ spec }) => {
-        if (binding._isSecretBinding) {
-          return spec.secretBindingName === bindingName
-        } else if (binding._isCredentialsBinding) {
-          return spec.credentialsBindingName === bindingName
-        }
-        return false
-      })
-      return shootsByInfrastructureBinding.length
-    },
-    relatedShootCountDns (binding) {
-      const secretName = binding._secret?.name
-      if (!secretName) {
-        return 0
-      }
-
-      const someDnsProviderHasSecretRef = providers => some(providers, ['secretName', secretName])
-      const someResourceHasSecretRef = resources => some(resources, { resourceRef: { kind: 'Secret', name: secretName } })
-
-      let count = 0
-      for (const shoot of this.shootList) {
-        const dnsProviders = shoot.spec.dns?.providers
-        const resources = shoot.spec.resources
-        if (someDnsProviderHasSecretRef(dnsProviders) || someResourceHasSecretRef(resources)) {
-          count++
-        }
-      }
-      return count
     },
     relatedShootCountLabel (count) {
       if (count === 0) {
@@ -609,7 +572,7 @@ export default {
       const tableKeys = mapKeys(sortableTableHeaders, ({ key }) => key)
       return mapValues(tableKeys, () => () => 0)
     },
-    computeItem (binding, relatedShootCount) {
+    computeItem (binding) {
       let kind = {
         icon: 'mdi-help-circle',
         tooltip: 'Unknown',
@@ -634,6 +597,7 @@ export default {
         credentialNamespace = binding.credentialsRef.namespace
         credentialName = binding.credentialsRef.name
       }
+      const relatedShootCount = calcRelatedShootCount(this.shootList, binding)
 
       return {
         name: binding.metadata.name,

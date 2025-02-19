@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <g-secret-dialog
     v-model="visible"
     :secret-validations="v$"
-    :secret-binding="secretBinding"
+    :binding="binding"
     :provider-type="providerType"
     :create-title="`Add new ${providerType} Secret`"
     :replace-title="`Replace ${providerType} Secret`"
@@ -49,7 +49,7 @@ import yaml from 'js-yaml'
 
 import GSecretDialog from '@/components/Credentials/GSecretDialog'
 
-import { useProvideCredentialContext } from '@/composables/useCredentialContext'
+import { useProvideSecretContext } from '@/composables/credential/useSecretContext'
 
 import {
   withFieldName,
@@ -71,7 +71,7 @@ export default {
       type: Boolean,
       required: true,
     },
-    secretBinding: {
+    binding: {
       type: Object,
     },
     providerType: {
@@ -82,7 +82,7 @@ export default {
     'update:modelValue',
   ],
   setup () {
-    const { secretStringDataRefs } = useProvideCredentialContext()
+    const { secretStringDataRefs } = useProvideSecretContext()
 
     const { secretData } = secretStringDataRefs({
       secretData: 'secretData',

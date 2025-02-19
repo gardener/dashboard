@@ -743,3 +743,34 @@ export function normalizeVersion (version) {
   const [major, minor = '0', patch = '0'] = parts
   return [major, minor, patch].map(Number).join('.') + suffix
 }
+
+export function calcRelatedShootCount (shootList, binding) {
+  if (!binding._secretName) {
+    return 0 // currently we only support secrets in dashboard
+  }
+  if (binding._isInfrastructureBinding) {
+    const bindingName = binding.metadata.name
+    const shootsByInfrastructureBinding = filter(shootList, ({ spec }) => {
+      if (binding._isSecretBinding) {
+        return spec.secretBindingName === bindingName
+      } else if (binding._isCredentialsBinding) {
+        return spec.credentialsBindingName === bindingName
+      }
+      return false
+    })
+    return shootsByInfrastructureBinding.length
+  } else if (binding._isDnsBinding) {
+    const someDnsProviderHasSecretRef = providers => some(providers, ['secretName', binding._secretName])
+    const someResourceHasSecretRef = resources => some(resources, { resourceRef: { kind: 'Secret', name: binding._secretName } })
+
+    let count = 0
+    for (const shoot of shootList) {
+      const dnsProviders = shoot.spec.dns?.providers
+      const resources = shoot.spec.resources
+      if (someDnsProviderHasSecretRef(dnsProviders) || someResourceHasSecretRef(resources)) {
+        count++
+      }
+    }
+    return count
+  }
+}

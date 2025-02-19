@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     :is="componentName"
     v-if="visibleDialog"
     v-model="visibleDialogState"
-    v-bind="{ secretBinding: selectedSecretBinding, providerType: visibleDialog }"
+    v-bind="{ binding: selectedBinding, providerType: visibleDialog }"
   />
 </template>
 
@@ -54,7 +54,7 @@ const components = {
 export default {
   components,
   props: {
-    selectedSecretBinding: {
+    selectedBinding: {
       type: Object,
       required: false,
     },

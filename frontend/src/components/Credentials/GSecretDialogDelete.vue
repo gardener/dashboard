@@ -71,7 +71,7 @@ export default {
       type: Boolean,
       required: true,
     },
-    secretBinding: {
+    binding: {
       type: Object,
       required: true,
     },
@@ -95,7 +95,7 @@ export default {
       },
     },
     name () {
-      return get(this.secretBinding, ['metadata', 'name'], '')
+      return get(this.binding, ['metadata', 'name'], '')
     },
   },
   watch: {
@@ -111,9 +111,11 @@ export default {
       this.visible = false
     },
     async onDeleteSecret () {
-      const name = get(this.secretBinding, ['metadata', 'name'])
+      const name = get(this.binding, ['metadata', 'name'])
       try {
-        await this.deleteCredential(name)
+        console.log(this.binding)
+
+        // await this.deleteCredential(name)
         this.hide()
       } catch (err) {
         const errorDetails = errorDetailsFromError(err)

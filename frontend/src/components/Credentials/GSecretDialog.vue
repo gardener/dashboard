@@ -127,7 +127,9 @@ import { useShootStore } from '@/store/shoot'
 import GToolbar from '@/components/GToolbar.vue'
 import GMessage from '@/components/GMessage'
 
-import { useCredentialContext } from '@/composables/useCredentialContext'
+import { useSecretContext } from '@/composables/credential/useSecretContext'
+import { useSecretBindingContext } from '@/composables/credential/useSecretBindingContext'
+import { useCredentialsBindingContext } from '@/composables/credential/useCredentialsBindingContext'
 
 import {
   messageFromErrors,
@@ -144,11 +146,10 @@ import {
   getErrorMessages,
   setDelayedInputFocus,
   setInputFocus,
+  calcRelatedShootCount,
 } from '@/utils'
 
 import includes from 'lodash/includes'
-import filter from 'lodash/filter'
-import get from 'lodash/get'
 
 export default {
   components: {
@@ -179,7 +180,7 @@ export default {
       type: String,
       required: true,
     },
-    secretBinding: {
+    binding: {
       type: Object,
     },
   },
@@ -187,25 +188,36 @@ export default {
     'update:modelValue',
     'cloud-profile-name',
   ],
-  setup () {
-    const { createSecretBindingManifest,
-      setSecretBindingManifest,
-      secretBindingManifest,
-      secretBindingName,
-      secretBindingProviderType,
-      secretBindingSecretRef,
+  setup (props) {
+    let bindingContext
+    if (props.binding._isSecretBinding) {
+      bindingContext = useSecretBindingContext()
+    } else if (props.binding._isCredentialsBinding) {
+      bindingContext = useCredentialsBindingContext()
+    }
+    const {
+      createBindingManifest,
+      setBindingManifest,
+      bindingManifest,
+      bindingName,
+      bindingProviderType,
+      bindingRef,
+    } = bindingContext
+
+    const {
       createSecretManifest,
       setSecretManifest,
       secretManifest,
-      secretName } = useCredentialContext()
+      secretName,
+    } = useSecretContext()
 
     return {
-      createSecretBindingManifest,
-      setSecretBindingManifest,
-      secretBindingManifest,
-      secretBindingName,
-      secretBindingProviderType,
-      secretBindingSecretRef,
+      createBindingManifest,
+      setBindingManifest,
+      bindingManifest,
+      bindingName,
+      bindingProviderType,
+      bindingRef,
       createSecretManifest,
       setSecretManifest,
       secretManifest,
@@ -259,7 +271,7 @@ export default {
       return this.dnsBindingList.map(item => item.metadata.name)
     },
     isCreateMode () {
-      return !this.secretBinding
+      return !this.binding
     },
     submitButtonText () {
       return this.isCreateMode ? 'Add Secret' : 'Replace Secret'
@@ -268,11 +280,7 @@ export default {
       return this.isCreateMode ? this.createTitle : this.replaceTitle
     },
     relatedShootCount () {
-      return this.shootsByInfrastructureSecret.length
-    },
-    shootsByInfrastructureSecret () {
-      const name = get(this.secretBinding, ['metadata', 'name'])
-      return filter(this.shootList, ['spec.secretBindingName', name])
+      return calcRelatedShootCount(this.shootList, this.binding)
     },
     helpContainerStyles () {
       const detailsRef = this.$refs.secretDetails
@@ -293,12 +301,12 @@ export default {
     },
     name: {
       get () {
-        return this.secretBindingName
+        return this.bindingName
       },
       set (value) {
-        this.secretBindingName = value
+        this.bindingName = value
         this.secretName = value
-        this.secretBindingSecretRef.name = value
+        this.bindingRef.name = value
       },
     },
   },
@@ -345,24 +353,24 @@ export default {
     },
     save () {
       if (this.isCreateMode) {
-        return this.createCredential({ secret: this.secretManifest, secretBinding: this.secretBindingManifest })
+        return this.createCredential({ secret: this.secretManifest, binding: this.bindingManifest })
       } else {
-        return this.updateCredential({ secret: this.secretManifest, secretBinding: this.secretBindingManifest })
+        return this.updateCredential({ secret: this.secretManifest, binding: this.bindingManifest })
       }
     },
     reset () {
       this.v$.$reset()
 
       if (this.isCreateMode) {
-        this.createSecretBindingManifest()
+        this.createBindingManifest()
         this.createSecretManifest()
         this.name = `my-${this.providerType}-secret`
-        this.secretBindingProviderType = this.providerType
+        this.bindingProviderType = this.providerType
 
         setDelayedInputFocus(this, 'name')
       } else {
-        this.setSecretBindingManifest(this.secretBinding)
-        this.setSecretManifest(this.secretBinding._secret)
+        this.setBindingManifest(this.binding)
+        this.setSecretManifest(this.binding._secret)
       }
 
       this.errorMessage = undefined

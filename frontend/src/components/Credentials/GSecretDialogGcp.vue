@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <g-secret-dialog
     v-model="visible"
     :secret-validations="v$"
-    :secret-binding="secretBinding"
+    :binding="binding"
     :provider-type="providerType"
     :create-title="`Add new ${name} Secret`"
     :replace-title="`Replace ${name} Secret`"
@@ -92,7 +92,7 @@ import { required } from '@vuelidate/validators'
 import GSecretDialog from '@/components/Credentials/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
 
-import { useProvideCredentialContext } from '@/composables/useCredentialContext'
+import { useProvideSecretContext } from '@/composables/credential/useSecretContext'
 
 import {
   withFieldName,
@@ -114,7 +114,7 @@ export default {
       type: Boolean,
       required: true,
     },
-    secretBinding: {
+    binding: {
       type: Object,
     },
     providerType: {
@@ -125,7 +125,7 @@ export default {
     'update:modelValue',
   ],
   setup () {
-    const { secretStringDataRefs } = useProvideCredentialContext()
+    const { secretStringDataRefs } = useProvideSecretContext()
 
     const { serviceAccountKey } = secretStringDataRefs({
       'serviceaccount.json': 'serviceAccountKey',

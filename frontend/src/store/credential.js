@@ -95,28 +95,34 @@ export const useCredentialStore = defineStore('credential', () => {
     const decorateBinding = (binding, kind) => {
       const isSecretBinding = kind === 'SecretBinding'
       const isCredentialsBinding = kind === 'CredentialsBinding'
+      const isInfrastructureBinding = cloudProfileStore.sortedProviderTypeList.includes(binding.provider?.type)
+      const isDnsBinding = gardenerExtensionStore.dnsProviderTypes.includes(binding.provider?.type)
 
       if (isSecretBinding) {
         const secret = getSecret(binding.secretRef)
-        Object.defineProperty(binding, '_secret', {
-          value: secret,
-          configurable: true,
-        })
-        Object.defineProperty(binding, '_secretName', {
-          value: binding.secretRef.name,
-          configurable: true,
+        Object.defineProperties(binding, {
+          _secret: {
+            value: secret,
+            configurable: true,
+          },
+          _secretName: {
+            value: binding.secretRef.name,
+            configurable: true,
+          },
         })
       }
       if (isCredentialsBinding) {
         if (binding.credentialsRef.kind === 'Secret') {
           const secret = getSecret(binding.credentialsRef)
-          Object.defineProperty(binding, '_secret', {
-            value: secret,
-            configurable: true,
-          })
-          Object.defineProperty(binding, '_secretName', {
-            value: binding.credentialsRef.name,
-            configurable: true,
+          Object.defineProperties(binding, {
+            _secret: {
+              value: secret,
+              configurable: true,
+            },
+            _secretName: {
+              value: binding.credentialsRef.name,
+              configurable: true,
+            },
           })
         }
         if (binding.credentialsRef.kind === 'WorkloadIdentity') {
@@ -128,23 +134,31 @@ export const useCredentialStore = defineStore('credential', () => {
         }
       }
 
-      Object.defineProperty(binding, '_isSecretBinding', {
-        value: isSecretBinding,
-        configurable: true,
-      })
-
-      Object.defineProperty(binding, '_isCredentialsBinding', {
-        value: isCredentialsBinding,
-        configurable: true,
-      })
-
       const quotas = (binding.quotas || [])
         .map(quota => get(state.quotas, namespaceNameKey(quota)))
         .filter(Boolean)
 
-      Object.defineProperty(binding, '_quotas', {
-        value: quotas,
-        configurable: true,
+      Object.defineProperties(binding, {
+        _isInfrastructureBinding: {
+          value: isInfrastructureBinding,
+          configurable: true,
+        },
+        _isDnsBinding: {
+          value: isDnsBinding,
+          configurable: true,
+        },
+        _isSecretBinding: {
+          value: isSecretBinding,
+          configurable: true,
+        },
+        _isCredentialsBinding: {
+          value: isCredentialsBinding,
+          configurable: true,
+        },
+        _quotas: {
+          value: quotas,
+          configurable: true,
+        },
       })
 
       return binding
@@ -184,14 +198,12 @@ export const useCredentialStore = defineStore('credential', () => {
   }
 
   const infrastructureBindingList = computed(() => {
-    return filter(cloudProviderBindingList.value, binding => {
-      return cloudProfileStore.sortedProviderTypeList.includes(binding.provider?.type)
-    })
+    return filter(cloudProviderBindingList.value, ['_isInfrastructureBinding', true])
   })
 
   const dnsBindingList = computed(() => {
     return filter(cloudProviderBindingList.value, binding => {
-      return gardenerExtensionStore.dnsProviderTypes.includes(binding.provider?.type) &&
+      return binding._isDnsBinding &&
         !!binding._secret // dns extension currently supports secrets only (no bindings)
     })
   })
