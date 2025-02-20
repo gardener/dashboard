@@ -4,9 +4,15 @@ on:
   push:
     paths:
       - 'backend/**'
+    branches-ignore:
+      - 'master'
+      - 'hotfix-*'
   pull_request:
     paths:
       - 'backend/**'
+    branches-ignore:
+      - 'master'
+      - 'hotfix-*'
 jobs:
   generate-diagrams:
     runs-on: ubuntu-latest
