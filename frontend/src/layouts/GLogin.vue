@@ -184,10 +184,7 @@ export default {
     if (this.error) {
       const err = this.error
       this.error = null
-      this.setError({
-        title: err.title,
-        text: err.message,
-      })
+      this.setError(err)
     }
     next()
   },
