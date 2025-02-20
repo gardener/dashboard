@@ -122,33 +122,45 @@ exports.patch = async function ({ user, params }) {
 
 exports.remove = async function ({ user, params }) {
   const client = user.client
-  const { binding: { kind, metadata: { namespace: bindingNamespace, name: secretBindingName } } } = params
+  const { binding: { kind, metadata: { namespace: bindingNamespace, name: bindingName } } } = params
 
+  const [
+    { items: secretBindings },
+    { items: credentialsBindings },
+  ] = await Promise.all([
+    client['core.gardener.cloud'].secretbindings.list(bindingNamespace),
+    client['security.gardener.cloud'].credentialsbindings.list(bindingNamespace),
+  ])
+
+  let promises, secretName, secretNamespace
   if (kind === 'CredentialsBinding') {
-    const credentialsBinding = await client['security.gardener.cloud'].credentialsbindings.get(bindingNamespace, secretBindingName)
-    if (credentialsBinding.metadata.namespace !== credentialsBinding.credentialsRef.namespace) {
-      throw createError(422, 'Remove allowed only if secret and credentialsBinding are in the same namespace')
-    }
-
-    const credentialsRef = credentialsBinding.credentialsRef
-    await Promise.all([
-      await client['security.gardener.cloud'].credentialsbindings.delete(bindingNamespace, secretBindingName),
-      await client.core.secrets.delete(credentialsRef.namespace, credentialsRef.name),
-    ])
+    const credentialsBinding = _.find(credentialsBindings, ['metadata.name', bindingName])
+    secretName = credentialsBinding.credentialsRef.name
+    secretNamespace = credentialsBinding.credentialsRef.namespace
+    promises = [client['security.gardener.cloud'].credentialsbindings.delete(bindingNamespace, bindingName)]
   } else if (kind === 'SecretBinding') {
-    const secretBinding = await client['core.gardener.cloud'].secretbindings.get(bindingNamespace, secretBindingName)
-    if (secretBinding.metadata.namespace !== secretBinding.secretRef.namespace) {
-      throw createError(422, 'Remove allowed only if secret and secretBinding are in the same namespace')
-    }
-
-    const secretRef = secretBinding.secretRef
-    await Promise.all([
-      await client['core.gardener.cloud'].secretbindings.delete(bindingNamespace, secretBindingName),
-      await client.core.secrets.delete(secretRef.namespace, secretRef.name),
-    ])
+    const secretBinding = _.find(secretBindings, ['metadata.name', bindingName])
+    secretName = secretBinding.secretRef.name
+    secretNamespace = secretBinding.secretRef.namespace
+    promises = [client['core.gardener.cloud'].secretbindings.delete(bindingNamespace, bindingName)]
   } else {
     throw createError(422, 'Unknown binding')
   }
+
+  if (bindingNamespace !== secretNamespace) {
+    throw createError(422, `Remove allowed only if secret and ${kind} are in the same namespace`)
+  }
+
+  const refs = [
+    ..._.map(secretBindings, 'secretRef'),
+    ..._.map(credentialsBindings, 'credentialsRef'),
+  ]
+  const referencedSecretCount = _.filter(refs, { namespace: secretNamespace, name: secretName }).length
+  if (referencedSecretCount === 1) {
+    promises.push(client.core.secrets.delete(secretNamespace, secretName))
+  }
+
+  await Promise.all(promises)
 }
 
 function resolveQuotas (binding) {
