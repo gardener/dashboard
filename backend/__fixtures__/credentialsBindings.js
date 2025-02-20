@@ -16,8 +16,8 @@ const quotas = map(quotaList, ({ metadata: { namespace, name } }) => ({ namespac
 const cloudProviderBindingList = [
   getCredentialsBinding({
     namespace: 'garden-foo',
-    name: 'foo-infra1',
-    cloudProfileName: 'infra1-profileName',
+    name: 'foo-infra1-secret1-credentialsbinding',
+    provider: 'infra1',
     credentialsRef: {
       kind: 'Secret',
       namespace: 'garden-foo',
@@ -27,19 +27,19 @@ const cloudProviderBindingList = [
   }),
   getCredentialsBinding({
     namespace: 'garden-foo',
-    name: 'foo-infra3',
-    cloudProfileName: 'infra3-profileName',
+    name: 'foo-infra3-secret3-credentialsbinding',
+    provider: 'infra3',
     credentialsRef: {
       kind: 'Secret',
       namespace: 'garden-foo',
-      name: 'secret2',
+      name: 'secret3',
     },
     quotas,
   }),
   getCredentialsBinding({
     namespace: 'garden-foo',
     name: 'trial-infra1',
-    cloudProfileName: 'infra1-profileName',
+    provider: 'infra1',
     credentialsRef: {
       kind: 'Secret',
       namespace: 'garden-trial',
@@ -50,7 +50,7 @@ const cloudProviderBindingList = [
   getCredentialsBinding({
     namespace: 'garden-foo',
     name: 'foo-wlid1',
-    cloudProfileName: 'infra1-profileName',
+    provider: 'infra1',
     credentialsRef: {
       kind: 'WorkloadIndentity',
       namespace: 'garden-foo',
@@ -61,21 +61,14 @@ const cloudProviderBindingList = [
   ),
 ]
 
-function getCredentialsBinding ({ namespace, name, cloudProfileName, dnsProviderName, credentialsRef = {}, quotas = [] }) {
-  const labels = {}
-  if (cloudProfileName) {
-    labels['cloudprofile.garden.sapcloud.io/name'] = cloudProfileName
-  }
-  if (dnsProviderName) {
-    labels['gardener.cloud/dnsProviderName'] = dnsProviderName
-  }
+function getCredentialsBinding ({ namespace, name, provider, credentialsRef = {}, quotas = [] }) {
   return {
     kind: 'CredentialsBinding',
     metadata: {
       name,
       namespace,
-      labels,
     },
+    provider,
     credentialsRef,
     quotas,
   }
@@ -122,7 +115,7 @@ const mocks = {
       const { params: { namespace } = {} } = matchResult
       const item = cloneDeep(json)
       set(item, ['metadata', 'namespace'], namespace)
-      set(item, ['metadata', ' resourceVersion'], resourceVersion)
+      set(item, ['metadata', 'resourceVersion'], resourceVersion)
       return Promise.resolve(item)
     }
   },

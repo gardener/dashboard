@@ -6,7 +6,7 @@
 
 'use strict'
 
-const { cloneDeep, map, find, filter, set } = require('lodash')
+const { cloneDeep, map, find, filter } = require('lodash')
 const createError = require('http-errors')
 const pathToRegexp = require('path-to-regexp')
 
@@ -16,8 +16,8 @@ const quotas = map(quotaList, ({ metadata: { namespace, name } }) => ({ namespac
 const cloudProviderBindingList = [
   getSecretBinding({
     namespace: 'garden-foo',
-    name: 'foo-infra1',
-    cloudProfileName: 'infra1-profileName',
+    name: 'foo-infra1-secret1-secretbinding',
+    provider: 'infra1',
     secretRef: {
       namespace: 'garden-foo',
       name: 'secret1',
@@ -26,8 +26,8 @@ const cloudProviderBindingList = [
   }),
   getSecretBinding({
     namespace: 'garden-foo',
-    name: 'foo-infra3',
-    cloudProfileName: 'infra3-profileName',
+    name: 'foo-infra3-secret2-secretbinding',
+    provider: 'infra3',
     secretRef: {
       namespace: 'garden-foo',
       name: 'secret2',
@@ -37,40 +37,23 @@ const cloudProviderBindingList = [
   getSecretBinding({
     namespace: 'garden-foo',
     name: 'trial-infra1',
-    cloudProfileName: 'infra1-profileName',
+    provider: 'infra1',
     secretRef: {
       namespace: 'garden-trial',
       name: 'trial-secret',
     },
     quotas,
   }),
-  getSecretBinding({
-    namespace: 'garden-foo',
-    name: 'foo-dns1',
-    dnsProviderName: 'foo-dns',
-    secretRef: {
-      namespace: 'garden-foo',
-      name: 'secret3',
-    },
-    quotas,
-  }),
 ]
 
-function getSecretBinding ({ namespace, name, cloudProfileName, dnsProviderName, secretRef = {}, quotas = [] }) {
-  const labels = {}
-  if (cloudProfileName) {
-    labels['cloudprofile.garden.sapcloud.io/name'] = cloudProfileName
-  }
-  if (dnsProviderName) {
-    labels['gardener.cloud/dnsProviderName'] = dnsProviderName
-  }
+function getSecretBinding ({ namespace, name, provider, secretRef = {}, quotas = [] }) {
   return {
     kind: 'SecretBinding',
     metadata: {
       name,
       namespace,
-      labels,
     },
+    provider,
     secretRef,
     quotas,
   }
@@ -106,19 +89,6 @@ const mocks = {
       const { params: { namespace } = {} } = matchResult
       const items = filter(cloudProviderBindingList, ['metadata.namespace', namespace])
       return Promise.resolve({ items })
-    }
-  },
-  create ({ resourceVersion = '42' } = {}) {
-    return (headers, json) => {
-      const matchResult = matchList(headers[':path'])
-      if (matchResult === false) {
-        return Promise.reject(createError(503))
-      }
-      const { params: { namespace } = {} } = matchResult
-      const item = cloneDeep(json)
-      set(item, ['metadata', 'namespace'], namespace)
-      set(item, ['metadata', ' resourceVersion'], resourceVersion)
-      return Promise.resolve(item)
     }
   },
   get () {

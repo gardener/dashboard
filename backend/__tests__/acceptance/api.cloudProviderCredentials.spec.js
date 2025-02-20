@@ -95,18 +95,20 @@ describe('api', function () {
       expect(res.body).toMatchSnapshot()
     })
 
-    it('should create a cloudProvider infrastructure secret', async function () {
-      const newSecretBinding = {
-        apiVersion: 'core.gardener.cloud/v1alpha1',
-        kind: 'SecretBinding',
+    it('should create a cloudProvider credentialsbinding and secret', async function () {
+      const newCredentialsBinding = {
+        apiVersion: 'security.gardener.cloud/v1alpha1',
+        kind: 'CredentialsBinding',
         metadata: {
-          name: `new-${infraName}-secretbinding`,
+          name: `new-${infraName}-credentialsbinding`,
           namespace,
         },
         provider: {
           type: infraName,
         },
-        secretRef: {
+        credentialsRef: {
+          apiVersion: 'v1',
+          kind: 'Secret',
           namespace,
           name: `new-${infraName}-secret`,
         },
@@ -126,10 +128,10 @@ describe('api', function () {
       }
 
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.create())
-      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.create())
+      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.create())
 
       const params = {
-        secretBinding: newSecretBinding,
+        binding: newCredentialsBinding,
         secret: newSecret,
       }
 
@@ -146,11 +148,11 @@ describe('api', function () {
       expect(res.body).toMatchSnapshot()
     })
 
-    it('should patch an own cloudProvider credential', async function () {
-      const secretBinding = _.find(fixtures.secretbindings.list(namespace), { metadata: { name: 'foo-infra1', namespace } })
+    it('should patch an own cloudProvider credential (secretbinding)', async function () {
+      const secretBinding = _.find(fixtures.secretbindings.list(namespace), { metadata: { name: 'foo-infra1-secret1-secretbinding', namespace } })
       const secret = _.find(fixtures.secrets.list(namespace), { metadata: secretBinding.secretRef })
       const params = {
-        secretBinding,
+        binding: secretBinding,
         secret,
       }
 
@@ -170,12 +172,37 @@ describe('api', function () {
       expect(res.body).toMatchSnapshot()
     })
 
-    it('should not patch a shared cloudProvider credential', async function () {
+    it('should patch an own cloudProvider credential (credentialsbinding)', async function () {
+      const credentialsBinding = _.find(fixtures.credentialsbindings.list(namespace), { metadata: { name: 'foo-infra1-secret1-credentialsbinding', namespace } })
+      const secretMetadata = _.pick(credentialsBinding.credentialsRef, ['name', 'namespace'])
+      const secret = _.find(fixtures.secrets.list(namespace), { metadata: secretMetadata })
+      const params = {
+        binding: credentialsBinding,
+        secret,
+      }
+
+      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.patch())
+
+      const res = await agent
+        .post('/api/cloudprovidercredentials')
+        .set('cookie', await user.cookie)
+        .send({ method: 'patch', params })
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toHaveBeenCalledTimes(2)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should not patch a shared cloudProvider credential (secretbinding)', async function () {
       const secretBinding = _.find(fixtures.secretbindings.list(namespace), { metadata: { name: 'trial-infra1' } })
       const secret = _.find(fixtures.secrets.list('garden-trial'), { metadata: { name: 'trial-secret' } })
 
       const params = {
-        secretBinding,
+        binding: secretBinding,
         secret,
       }
 
@@ -194,14 +221,86 @@ describe('api', function () {
       expect(res.body).toMatchSnapshot()
     })
 
-    it('should delete an own cloudProvider credential', async function () {
+    it('should not patch a shared cloudProvider credential (credentialsbinding)', async function () {
+      const credentialsBinding = _.find(fixtures.credentialsbindings.list(namespace), { metadata: { name: 'trial-infra1' } })
+      const secret = _.find(fixtures.secrets.list('garden-trial'), { metadata: { name: 'trial-secret' } })
+
       const params = {
-        bindingNamespace: namespace,
-        secretBindingName: 'foo-infra1',
+        binding: credentialsBinding,
+        secret,
       }
-      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.get())
+
+      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.get())
+
+      const res = await agent
+        .post('/api/cloudprovidercredentials')
+        .set('cookie', await user.cookie)
+        .send({ method: 'patch', params })
+        .expect('content-type', /json/)
+        .expect(422)
+
+      expect(mockRequest).toHaveBeenCalledTimes(1)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should delete an own cloudProvider credential (secretbinding)', async function () {
+      const secretBinding = _.find(fixtures.secretbindings.list(namespace), { metadata: { name: 'foo-infra3-secret2-secretbinding' } })
+
+      const params = {
+        binding: secretBinding,
+      }
+      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.list())
       mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.delete())
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.delete())
+
+      const res = await agent
+        .post('/api/cloudprovidercredentials')
+        .set('cookie', await user.cookie)
+        .send({ method: 'remove', params })
+        .expect(200)
+
+      expect(mockRequest).toHaveBeenCalledTimes(4)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should delete an own cloudProvider credential (credentialsbinding)', async function () {
+      const credentialsBinding = _.find(fixtures.credentialsbindings.list(namespace), { metadata: { name: 'foo-infra3-secret3-credentialsbinding' } })
+
+      const params = {
+        binding: credentialsBinding,
+      }
+      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.delete())
+      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.delete())
+
+      const res = await agent
+        .post('/api/cloudprovidercredentials')
+        .set('cookie', await user.cookie)
+        .send({ method: 'remove', params })
+        .expect(200)
+
+      expect(mockRequest).toHaveBeenCalledTimes(4)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should delete secret only if all referencing bindings have been deleted', async function () {
+      const secretBinding = _.find(fixtures.secretbindings.list(namespace), { metadata: { name: 'foo-infra1-secret1-secretbinding' } })
+
+      // delete secretbinding, expect secret to not be deleted (credentialsbinding still exists)
+      const params = {
+        binding: secretBinding,
+      }
+      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.delete())
 
       const res = await agent
         .post('/api/cloudprovidercredentials')
@@ -215,12 +314,14 @@ describe('api', function () {
       expect(res.body).toMatchSnapshot()
     })
 
-    it('should not delete a shared cloudProvider credential', async function () {
+    it('should not delete a shared cloudProvider credential (secretbinding)', async function () {
+      const secretBinding = _.find(fixtures.secretbindings.list(namespace), { metadata: { name: 'trial-infra1' } })
+
       const params = {
-        bindingNamespace: namespace,
-        secretBindingName: 'trial-infra1',
+        binding: secretBinding,
       }
-      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.list())
 
       const res = await agent
         .post('/api/cloudprovidercredentials')
@@ -228,7 +329,30 @@ describe('api', function () {
         .send({ method: 'remove', params })
         .expect(422)
 
-      expect(mockRequest).toHaveBeenCalledTimes(1)
+      expect(mockRequest).toHaveBeenCalledTimes(2)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot({
+        details: expect.any(Object),
+      })
+    })
+
+    it('should not delete a shared cloudProvider credential (credentialsbinding)', async function () {
+      const credentialsBinding = _.find(fixtures.credentialsbindings.list(namespace), { metadata: { name: 'trial-infra1' } })
+
+      const params = {
+        binding: credentialsBinding,
+      }
+      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.list())
+
+      const res = await agent
+        .post('/api/cloudprovidercredentials')
+        .set('cookie', await user.cookie)
+        .send({ method: 'remove', params })
+        .expect(422)
+
+      expect(mockRequest).toHaveBeenCalledTimes(2)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot({

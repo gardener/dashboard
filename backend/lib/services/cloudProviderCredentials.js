@@ -132,17 +132,18 @@ exports.remove = async function ({ user, params }) {
     client['security.gardener.cloud'].credentialsbindings.list(bindingNamespace),
   ])
 
-  let promises, secretName, secretNamespace
+  const promiseFns = []
+  let secretName, secretNamespace
   if (kind === 'CredentialsBinding') {
     const credentialsBinding = _.find(credentialsBindings, ['metadata.name', bindingName])
     secretName = credentialsBinding.credentialsRef.name
     secretNamespace = credentialsBinding.credentialsRef.namespace
-    promises = [client['security.gardener.cloud'].credentialsbindings.delete(bindingNamespace, bindingName)]
+    promiseFns.push(() => client['security.gardener.cloud'].credentialsbindings.delete(bindingNamespace, bindingName))
   } else if (kind === 'SecretBinding') {
     const secretBinding = _.find(secretBindings, ['metadata.name', bindingName])
     secretName = secretBinding.secretRef.name
     secretNamespace = secretBinding.secretRef.namespace
-    promises = [client['core.gardener.cloud'].secretbindings.delete(bindingNamespace, bindingName)]
+    promiseFns.push(() => client['core.gardener.cloud'].secretbindings.delete(bindingNamespace, bindingName))
   } else {
     throw createError(422, 'Unknown binding')
   }
@@ -157,10 +158,10 @@ exports.remove = async function ({ user, params }) {
   ]
   const referencedSecretCount = _.filter(refs, { namespace: secretNamespace, name: secretName }).length
   if (referencedSecretCount === 1) {
-    promises.push(client.core.secrets.delete(secretNamespace, secretName))
+    promiseFns.push(() => client.core.secrets.delete(secretNamespace, secretName))
   }
 
-  await Promise.all(promises)
+  await Promise.all(promiseFns.map(fn => fn()))
 }
 
 function resolveQuotas (binding) {
