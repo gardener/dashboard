@@ -100,7 +100,8 @@
     "verbose": true,
     "coverageDirectory": "coverage",
     "collectCoverageFrom": [
-      "lib/**/*.js"
+      "lib/**/*.js",
+      "lib/**/*.mjs"
     ],
     "testEnvironment": "node",
     "testPathIgnorePatterns": [
