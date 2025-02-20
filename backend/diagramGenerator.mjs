@@ -92,7 +92,7 @@ function main () {
       fs.writeFileSync(`${diagramDir}/${command.name}.html`, diagram)
     }
     console.log('All diagrams generated successfully! 🎉')
-    console.log(`And are stored under: file://${diagramDir}`)
+    console.log(`They are stored under: file://${diagramDir}`)
   } catch (error) {
     console.error(`Script failed! 😥 \nError: ${error.message}`)
     process.exit(1)
