@@ -8534,12 +8534,12 @@ __metadata:
   linkType: hard
 
 "openid-client@npm:^6.1.7":
-  version: 6.3.0
-  resolution: "openid-client@npm:6.3.0"
+  version: 6.3.1
+  resolution: "openid-client@npm:6.3.1"
   dependencies:
     jose: "npm:^5.10.0"
     oauth4webapi: "npm:^3.3.0"
-  checksum: 10c0/c362d0512d1f8617cd774e926dda4f6dd9b26dcea254d663cd217da931bb1d6bfa7aa1fbba85cd0fd77998843fd2c6d536e6ff22500d48f6ad8d4f8b587a1d6b
+  checksum: 10c0/a08dd0fef1f4bbf8ee763fbe6244b1aaaafd15df6591801e9ccf7a0a4db0836b7920ba837ecf472069ff76094f7b34f50328a8835b43fd7e3352cd6f372fab51
   languageName: node
   linkType: hard
 
