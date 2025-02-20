@@ -17,7 +17,7 @@ const { matchers, ...fixtures } = require('./__fixtures__')
 expect.extend(matchers)
 
 async function createHttpAgent () {
-  const app = (await import('./lib/app.mjs')).app
+  const { app } = await import('./lib/app.mjs')
   let server = http.createServer(app)
   const healthCheck = app.get('healthCheck')
   if (typeof healthCheck === 'function') {
