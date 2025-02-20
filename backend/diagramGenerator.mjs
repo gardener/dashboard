@@ -89,7 +89,7 @@ function main () {
   try {
     for (const command of commands) {
       const diagram = generateDiagram(command)
-      fs.writeFileSync(`${diagramDir}/${command.name}.html`, diagram)
+      fs.writeFileSync(path.join(diagramDir, command.name + '.html'), diagram)
     }
     console.log('All diagrams generated successfully! 🎉')
     console.log(`They are stored under: file://${diagramDir}`)
