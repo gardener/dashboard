@@ -57,12 +57,32 @@ function main () {
     {
       name: 'highlevel-dependency-diagram',
       program: 'yarn',
-      args: ['depcruise', 'lib', '--collapse', 'lib/[^/]+/', '--highlight', '\\.mjs$', '--include-only', '^lib', '--output-type', 'x-dot-webpage'],
+      args: [
+        'depcruise',
+        'lib',
+        '--collapse',
+        'lib/[^/]+/',
+        '--highlight',
+        '\\.mjs$',
+        '--include-only',
+        '^lib',
+        '--output-type',
+        'x-dot-webpage',
+      ],
     },
     {
       name: 'lowlevel-dependency-diagram',
       program: 'yarn',
-      args: ['depcruise', 'lib', '--highlight', '\\.mjs$', '--include-only', '^lib', '--output-type', 'x-dot-webpage'],
+      args: [
+        'depcruise',
+        'lib',
+        '--highlight',
+        '\\.mjs$',
+        '--include-only',
+        '^lib',
+        '--output-type',
+        'x-dot-webpage',
+      ],
     },
   ]
 
