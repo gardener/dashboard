@@ -24,8 +24,8 @@ function createDirectoryIfNeeded (dirPath) {
   fs.mkdirSync(dirPath)
 }
 
-function generateDiagram (number, command) {
-  console.log(`Generating diagram ${number}...`)
+function generateDiagram (command) {
+  console.log(`Generating diagram ${command.name}...`)
   const commandAsString = `${command.program} ${command.args.join(' ')}`
   console.info(`Using the following bash command: ${commandAsString}`)
 
@@ -39,7 +39,7 @@ function generateDiagram (number, command) {
     throw new Error(`Command exited with status ${result.status}. Stderr: ${result.stderr}`)
   }
 
-  console.log(`Diagram ${number} generated`)
+  console.log(`Diagram ${command.name} generated`)
   return result.stdout
 }
 
@@ -87,8 +87,8 @@ function main () {
   ]
 
   try {
-    for (const [i, command] of commands.entries()) {
-      const diagram = generateDiagram(i + 1, command)
+    for (const command of commands) {
+      const diagram = generateDiagram(command)
       fs.writeFileSync(`${diagramDir}/${command.name}.html`, diagram)
     }
     console.log('All diagrams generated successfully! 🎉')
