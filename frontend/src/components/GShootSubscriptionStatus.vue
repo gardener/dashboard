@@ -15,6 +15,14 @@ SPDX-License-Identifier: Apache-2.0
   >
     <template #activator="{ props }">
       <div v-bind="props">
+        <v-tooltip
+          activator="parent"
+          location="bottom"
+        >
+          <slot name="tooltip">
+            {{ message }}
+          </slot>
+        </v-tooltip>
         <v-progress-circular
           v-if="btnLoading"
           indeterminate
