@@ -14,9 +14,12 @@ SPDX-License-Identifier: Apache-2.0
     :aria-labelledby="iconName"
   >
     <title
+      v-if="iconName"
       :id="iconName"
       lang="en"
-    >{{ iconName }} icon</title>
+    >
+      {{ iconName }} icon
+    </title>
     <g :fill="iconColorCode">
       <slot />
     </g>
@@ -32,7 +35,7 @@ export default {
   props: {
     iconName: {
       type: String,
-      default: 'box',
+      required: false,
     },
     width: {
       type: [Number, String],
