@@ -23,7 +23,7 @@ function createDirectoryIfNeeded (dirPath) {
     return
   }
   console.log(`Creating directory: ${dirPath}`)
-  fs.mkdirSync(dirPath)
+  fs.mkdirSync(dirPath, { recursive: true })
 }
 
 function generateDiagram (command) {
@@ -60,10 +60,10 @@ function main () {
     process.exit(1)
   }
 
-  const diagramDir = path.join(process.cwd(), 'diagram')
+  const target = 'backend/lib'
+  const diagramDir = path.join(process.cwd(), 'diagram', target)
   createDirectoryIfNeeded(diagramDir)
 
-  const target = 'backend/lib'
   const commands = [
     {
       name: 'highlevel-dependency-diagram',
