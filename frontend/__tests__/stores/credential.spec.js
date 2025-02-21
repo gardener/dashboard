@@ -29,6 +29,19 @@ const awsTrialCredentialsBindingName = 'aws-trial-credentialsbinding'
 const azureSecretBindingName = 'azure-secretbinding'
 const azureCredentialsBindingName = 'azure-credentialsbinding'
 const awsWorkloadIdentitiyCredentialsBindingName = 'aws-wlid-credentialsbinding'
+const azureDnsSecretBindingName = 'azure-dns-secretbinding'
+const newSecret = {
+  apiVersion: 'v1',
+  kind: 'Secret',
+  type: 'Opaque',
+  metadata: {
+    name: 'my-new-secret',
+    namespace: testNamespace,
+  },
+  data: {
+    newSecret: 'dummy-data',
+  },
+}
 
 describe('stores', () => {
   describe('credential', () => {
@@ -50,18 +63,18 @@ describe('stores', () => {
           data: fixtures.credentials,
         }
       })
-      vi.spyOn(api, 'updateCloudProviderCredential').mockImplementation(({ secretBinding, secret }) => {
+      vi.spyOn(api, 'updateCloudProviderCredential').mockImplementation(({ binding, secret }) => {
         return {
           data: {
-            secretBinding,
+            binding,
             secret,
           },
         }
       })
-      vi.spyOn(api, 'createCloudProviderCredential').mockImplementation(({ secretBinding, secret }) => {
+      vi.spyOn(api, 'createCloudProviderCredential').mockImplementation(({ binding, secret }) => {
         return {
           data: {
-            secretBinding,
+            binding,
             secret,
           },
         }
@@ -144,6 +157,18 @@ describe('stores', () => {
       expect(awsWorkloadIdentityCredentialsBinding.credentialsRef.namespace).toBe(awsWorkloadIdentityCredentialsBinding._workloadIdentity.metadata.namespace)
     })
 
+    it('should return cloudProviderBindingList with resolved additional props (dns secretbinding)', () => {
+      const awsSecretBinding = find(credentialStore.cloudProviderBindingList, { metadata: { name: azureDnsSecretBindingName } })
+      const descriptors = Object.getOwnPropertyDescriptors(awsSecretBinding)
+      expect(descriptors).toMatchSnapshot()
+    })
+
+    it('should return cloudProviderBindingList with resolved additional props (infra credentialsbinding)', () => {
+      const awsCredentialsBinding = find(credentialStore.cloudProviderBindingList, { metadata: { name: awsCredentialsBindingName } })
+      const descriptors = Object.getOwnPropertyDescriptors(awsCredentialsBinding)
+      expect(descriptors).toMatchSnapshot()
+    })
+
     it('should return infrastructureBindingList', () => {
       expect(credentialStore.infrastructureBindingList.length).toBeGreaterThan(0)
       expect(credentialStore.cloudProviderBindingList.length).toBeGreaterThan(credentialStore.infrastructureBindingList.length)
@@ -181,7 +206,7 @@ describe('stores', () => {
       expect(credentialStore.cloudProviderBindingList.length).toBeGreaterThan(0)
     })
 
-    it('should updateCredential', async () => {
+    it('should update credential (secretbinding)', async () => {
       let awsSecretBinding = find(credentialStore.cloudProviderBindingList, { metadata: { name: awsSecretBindingName } })
       const secret = {
         ...awsSecretBinding._secret,
@@ -189,17 +214,34 @@ describe('stores', () => {
           newSecret2: 'dummy-data',
         },
       }
-      await credentialStore.updateCredential({ secretBinding: awsSecretBinding, secret })
+      await credentialStore.updateCredential({ binding: awsSecretBinding, secret })
 
       expect(api.updateCloudProviderCredential).toBeCalledTimes(1)
-      expect(api.updateCloudProviderCredential).toBeCalledWith({ secretBinding: awsSecretBinding, secret })
+      expect(api.updateCloudProviderCredential).toBeCalledWith({ binding: awsSecretBinding, secret })
       awsSecretBinding = find(credentialStore.cloudProviderBindingList, { metadata: { name: awsSecretBindingName } })
       expect(awsSecretBinding._secret.data).toEqual({ newSecret2: 'dummy-data' })
     })
 
-    it('should createCredential', async () => {
-      const secretBinding = {
-        apiVersion: 'core.gardener.cloud/v1alpha1',
+    it('should update credential (credentialsbinding)', async () => {
+      let awsCredentialsBinding = find(credentialStore.cloudProviderBindingList, { metadata: { name: awsCredentialsBindingName } })
+      const secret = {
+        ...awsCredentialsBinding._secret,
+        data: {
+          newSecret2: 'dummy-data',
+        },
+      }
+      await credentialStore.updateCredential({ binding: awsCredentialsBinding, secret })
+
+      expect(api.updateCloudProviderCredential).toBeCalledTimes(1)
+      expect(api.updateCloudProviderCredential).toBeCalledWith({ binding: awsCredentialsBinding, secret })
+      awsCredentialsBinding = find(credentialStore.cloudProviderBindingList, { metadata: { name: awsCredentialsBindingName } })
+      expect(awsCredentialsBinding._secret.data).toEqual({ newSecret2: 'dummy-data' })
+    })
+
+    it('should create credential (secretbinding)', async () => {
+      const secret = newSecret
+      const binding = {
+        apiVersion: 'core.gardener.cloud/v1beta1',
         kind: 'SecretBinding',
         metadata: {
           namespace: testNamespace,
@@ -213,37 +255,55 @@ describe('stores', () => {
           name: 'my-new-secret',
         },
       }
-      const secret = {
-        apiVersion: 'v1',
-        kind: 'Secret',
-        type: 'Opaque',
-        metadata: {
-          name: 'my-new-secret',
-          namespace: testNamespace,
-        },
-        data: {
-          newSecret: 'dummy-data',
-        },
-      }
 
-      await credentialStore.createCredential({ secretBinding, secret })
+      await credentialStore.createCredential({ binding, secret })
 
       expect(api.createCloudProviderCredential).toBeCalledTimes(1)
-      expect(api.createCloudProviderCredential).toBeCalledWith({ secretBinding, secret })
-      const newSecretBinding = find(credentialStore.cloudProviderBindingList, { metadata: secretBinding.metadata })
+      expect(api.createCloudProviderCredential).toBeCalledWith({ binding, secret })
+      const newSecretBinding = find(credentialStore.cloudProviderBindingList, { kind: 'SecretBinding', metadata: binding.metadata })
       expect(newSecretBinding.metadata.namespace).toEqual(testNamespace)
       expect(newSecretBinding.provider.type).toEqual('aws')
       expect(newSecretBinding._secret.data).toEqual({ newSecret: 'dummy-data' })
     })
 
-    it('should not delete credential', async () => {
-      const name = azureSecretBindingName
-      const namespace = testNamespace
+    it('should create credential (credentialsbinding)', async () => {
+      const secret = newSecret
+      const binding = {
+        apiVersion: 'security.gardener.cloud/v1alpha1',
+        kind: 'CredentialsBinding',
+        metadata: {
+          namespace: testNamespace,
+          name: 'my-new-secret-binding',
+        },
+        provider: {
+          type: 'aws',
+        },
+        credentialsRef: {
+          apiVersion: 'v1',
+          kind: 'Secret',
+          namespace: testNamespace,
+          name: 'my-new-secret',
+        },
+      }
 
-      await credentialStore.deleteCredential(name)
+      await credentialStore.createCredential({ binding, secret })
+
+      expect(api.createCloudProviderCredential).toBeCalledTimes(1)
+      expect(api.createCloudProviderCredential).toBeCalledWith({ binding, secret })
+
+      const newCredentialsBinding = find(credentialStore.cloudProviderBindingList, { kind: 'CredentialsBinding', metadata: binding.metadata })
+      expect(newCredentialsBinding.metadata.namespace).toEqual(testNamespace)
+      expect(newCredentialsBinding.provider.type).toEqual('aws')
+      expect(newCredentialsBinding._secret.data).toEqual({ newSecret: 'dummy-data' })
+    })
+
+    it('should delete credential', async () => {
+      const awsSecretBinding = find(credentialStore.cloudProviderBindingList, { metadata: { name: awsSecretBindingName } })
+
+      await credentialStore.deleteCredential(awsSecretBinding)
 
       expect(api.deleteCloudProviderCredential).toBeCalledTimes(1)
-      expect(api.deleteCloudProviderCredential).toBeCalledWith({ name, namespace })
+      expect(api.deleteCloudProviderCredential).toBeCalledWith(awsSecretBinding)
       expect(api.getCloudProviderCredentials).toBeCalledTimes(1)
     })
 
