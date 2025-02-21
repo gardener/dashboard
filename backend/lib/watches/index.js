@@ -8,3 +8,4 @@
 
 exports.shoots = require('./shoots')
 exports.leases = require('./leases')
+exports.projects = require('./projects')

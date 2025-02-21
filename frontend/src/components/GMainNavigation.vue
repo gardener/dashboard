@@ -199,10 +199,11 @@ SPDX-License-Identifier: Apache-2.0
         </template>
       </v-list-item>
       <template v-if="namespace">
-        <template v-for="(route, index) in routes">
+        <template
+          v-for="route in visibleRoutes"
+          :key="`${namespace}-${route.path}`"
+        >
           <v-list-item
-            v-if="!route.meta.menu.hidden"
-            :key="index"
             :to="namespacedRoute(route)"
             class="bg-main-background"
             active-class="active-item"
@@ -307,6 +308,15 @@ const namespace = toRef(projectStore, 'namespace')
 const projectList = toRef(projectStore, 'projectList')
 const sidebar = toRef(appStore, 'sidebar')
 const canCreateProject = toRef(authzStore, 'canCreateProject')
+
+const visibleRoutes = computed(() => {
+  if (!selectedProject.value) {
+    return []
+  }
+  return routes.value.filter(route => {
+    return !route.meta.menu.hidden
+  })
+})
 
 const selectedProject = computed({
   get () {

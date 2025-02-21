@@ -6,10 +6,10 @@
 
 'use strict'
 
+const { fetch, Agent } = require('undici')
 const assert = require('assert').strict
 const crypto = require('crypto')
 const { split, join, includes, head, chain, pick } = require('lodash')
-const { Issuer, custom, generators, TokenSet } = require('openid-client')
 const pRetry = require('p-retry')
 const pTimeout = require('p-timeout')
 const { authentication, authorization } = require('../services')
@@ -52,73 +52,83 @@ const {
   client_secret: clientSecret,
   usePKCE = !clientSecret,
   sessionLifetime = 86400,
-  rejectUnauthorized = true,
+  allowInsecure = false,
   ca,
+  rejectUnauthorized = true,
   clockTolerance = 15,
 } = oidc
-const responseTypes = ['code']
-const httpOptions = {
-  followRedirect: false,
+const connectOptions = {
   rejectUnauthorized,
 }
 if (ca) {
-  httpOptions.ca = ca
+  connectOptions.ca = ca
+}
+if (allowInsecure) {
+  logger.warn(
+    'WARNING: Insecure requests are allowed because "oidc.allowInsecure" is enabled. ' +
+    'This bypasses HTTPS-only restrictions and disables TLS certificate verification. ' +
+    'Use this setting only for local development or testing in non-secure environments.',
+  )
 }
 
-let clientPromise
-
-/**
- * (Customizing HTTP Requests)[https://github.com/panva/node-openid-client/blob/master/docs/README.md#customizing-http-requests]
- * Issuer constructor : override http request options for issuer discovery
- * Issuer instance    : override http request options for accessing the jwks endpoint
- * Client instance    : override http request options for token endpoint requests
- */
-function overrideHttpOptions () {
-  this[custom.http_options] = options => Object.assign({}, options, httpOptions)
-}
-overrideHttpOptions.call(Issuer)
-
-function discoverIssuer (url) {
-  return Issuer.discover(url)
+if (!rejectUnauthorized) {
+  logger.warn(
+    'WARNING: TLS certificate validation is disabled because "oidc.rejectUnauthorized" is set to false. ' +
+    'This bypasses certificate verification and compromises connection security. ' +
+    'Use this setting only for local development or testing in non-secure environments.',
+  )
 }
 
-function discoverClient (url) {
-  return pRetry(async () => {
-    let issuer
-    try {
-      issuer = await discoverIssuer(url)
-    } catch (err) {
-      logger.error('failed to discover OpenID Connect issuer %s', url, err)
-      throw err
-    }
-    overrideHttpOptions.call(issuer)
-    const options = {
-      client_id: clientId,
-      redirect_uris: redirectUris,
-      response_types: responseTypes,
-    }
-    if (clientSecret) {
-      options.client_secret = clientSecret
-    } else {
-      options.token_endpoint_auth_method = 'none'
-    }
-    const client = new issuer.Client(options)
-    overrideHttpOptions.call(client)
-    client[custom.clock_tolerance] = clockTolerance
-    return client
-  }, {
-    forever: true,
-    minTimeout: 1000,
-    maxTimeout: 60 * 1000,
-    randomize: true,
-  })
-}
-
-function getIssuerClient (url = issuer) {
-  if (!clientPromise) {
-    clientPromise = discoverClient(url)
+function getOpenIdClientModule () {
+  if (!exports.openidClientPromise) {
+    exports.openidClientPromise = import('openid-client')
   }
-  return pTimeout(clientPromise, 1000, `OpenID Connect issuer ${url} not available`)
+  return exports.openidClientPromise
+}
+
+async function getConfiguration () {
+  if (!exports.discoveryPromise) {
+    exports.discoveryPromise = pRetry(async () => {
+      const {
+        discovery,
+        customFetch,
+        allowInsecureRequests,
+      } = await getOpenIdClientModule()
+
+      const issuerUrl = new URL(issuer)
+      const clientMetadata = {
+        clockTolerance,
+      }
+      if (clientSecret) {
+        clientMetadata.client_secret = clientSecret
+      }
+      // ClientOptions: https://undici.nodejs.org/#/docs/api/Client?id=parameter-clientoptions
+      const clientOptions = { connect: connectOptions }
+      const dispatcher = new Agent(clientOptions)
+      const options = {
+        [customFetch]: (url, options) => {
+          return fetch(url, { ...options, dispatcher })
+        },
+      }
+      if (allowInsecure) {
+        options.execute = [allowInsecureRequests]
+      }
+      const clientAuthentication = undefined
+      return await discovery(
+        issuerUrl,
+        clientId,
+        clientMetadata,
+        clientAuthentication,
+        options,
+      )
+    }, {
+      forever: true,
+      minTimeout: 1000,
+      maxTimeout: 60 * 1000,
+      randomize: true,
+    })
+  }
+  return pTimeout(exports.discoveryPromise, 1000, 'Issuer not available')
 }
 
 function getBackendRedirectUri (origin) {
@@ -133,8 +143,8 @@ function getFrontendRedirectUrl (redirectUrl) {
     : new URL('/', head(redirectUris))
 }
 
-function getCodeChallengeMethod (client) {
-  const supportedMethods = client.issuer.code_challenge_methods_supported
+function getCodeChallengeMethod (config) {
+  const supportedMethods = config.code_challenge_methods_supported
   if (Array.isArray(supportedMethods)) {
     if (supportedMethods.includes('S256')) {
       return 'S256'
@@ -153,7 +163,16 @@ async function authorizationUrl (req, res) {
   const redirectPath = frontendRedirectUrl.pathname + frontendRedirectUrl.search
   const redirectOrigin = frontendRedirectUrl.origin
   const backendRedirectUri = getBackendRedirectUri(redirectOrigin)
-  const state = generators.state()
+  if (!includes(redirectUris, backendRedirectUri)) {
+    throw createError(400, 'The \'redirectUrl\' parameter must match a redirect URI in the settings')
+  }
+  const {
+    buildAuthorizationUrl,
+    randomPKCECodeVerifier,
+    calculatePKCECodeChallenge,
+    randomState,
+  } = await getOpenIdClientModule()
+  const state = randomState()
   res.cookie(COOKIE_STATE, {
     redirectPath,
     redirectOrigin,
@@ -164,18 +183,17 @@ async function authorizationUrl (req, res) {
     maxAge: 180_000, // cookie will be removed after 3 minutes
     sameSite: 'Lax',
   })
-  const client = await exports.getIssuerClient()
-  if (!includes(redirectUris, backendRedirectUri)) {
-    throw createError(400, 'The \'redirectUrl\' parameter must match a redirect URI in the settings')
-  }
+
   const params = {
     redirect_uri: backendRedirectUri,
     state,
     scope,
   }
+  const config = await getConfiguration()
+
   if (usePKCE) {
-    const codeChallengeMethod = getCodeChallengeMethod(client)
-    const codeVerifier = generators.codeVerifier()
+    const codeChallengeMethod = getCodeChallengeMethod(config)
+    const codeVerifier = randomPKCECodeVerifier()
     res.cookie(COOKIE_CODE_VERIFIER, codeVerifier, {
       secure: true,
       httpOnly: true,
@@ -184,7 +202,7 @@ async function authorizationUrl (req, res) {
     })
     switch (codeChallengeMethod) {
       case 'S256':
-        params.code_challenge = generators.codeChallenge(codeVerifier)
+        params.code_challenge = await calculatePKCECodeChallenge(codeVerifier)
         params.code_challenge_method = 'S256'
         break
       case 'plain':
@@ -192,7 +210,7 @@ async function authorizationUrl (req, res) {
         break
     }
   }
-  return client.authorizationUrl(params)
+  return buildAuthorizationUrl(config, params)
 }
 
 async function authorizeToken (req, res) {
@@ -201,7 +219,7 @@ async function authorizeToken (req, res) {
     .trim()
     .value()
   const payload = {}
-  const tokenSet = new TokenSet({ id_token: idToken })
+  const tokenSet = { id_token: idToken }
   tokenSet.access_token = await createAccessToken(payload, idToken)
   await setCookies(res, tokenSet)
   return decode(tokenSet.access_token)
@@ -291,6 +309,15 @@ async function authorizationCallback (req, res) {
     state,
   } = stateObject
 
+  const checks = {
+    idTokenExpected: true,
+    expectedState: state,
+  }
+  if (COOKIE_CODE_VERIFIER in req.cookies) {
+    checks.pkceCodeVerifier = req.cookies[COOKIE_CODE_VERIFIER] // eslint-disable-line security/detect-object-injection -- COOKIE_CODE_VERIFIER is a constant
+    res.clearCookie(COOKIE_CODE_VERIFIER, options)
+  }
+
   const baseUri = head(redirectUris)
   const resolvedOrigin = new URL(redirectPath, baseUri).origin
   const trustedOrigin = new URL(baseUri).origin
@@ -299,18 +326,14 @@ async function authorizationCallback (req, res) {
     throw createError(400, 'Invalid redirect path')
   }
 
-  const client = await exports.getIssuerClient()
-  const parameters = client.callbackParams(req)
   const backendRedirectUri = getBackendRedirectUri(redirectOrigin)
-  const checks = {
-    response_type: 'code',
-    state,
+  if (!includes(redirectUris, backendRedirectUri)) {
+    throw createError(400, 'The \'redirectOrigin\' must match a redirect URI in the settings')
   }
-  if (COOKIE_CODE_VERIFIER in req.cookies) {
-    checks.code_verifier = req.cookies[COOKIE_CODE_VERIFIER] // eslint-disable-line security/detect-object-injection -- COOKIE_CODE_VERIFIER is a constant
-    res.clearCookie(COOKIE_CODE_VERIFIER, options)
-  }
-  const tokenSet = await authorizationCodeExchange(backendRedirectUri, parameters, checks)
+
+  const originalUrl = req.originalUrl || req.url
+  const currentUrl = new URL(originalUrl, backendRedirectUri)
+  const tokenSet = await authorizationCodeExchange(currentUrl, checks)
   await setCookies(res, tokenSet)
   return { redirectPath }
 }
@@ -387,42 +410,53 @@ async function getTokenSet (cookies) {
     throw createError(401, 'The decrypted bearer token must not be empty', { code: 'ERR_JWE_DECRYPTION_FAILED' })
   }
   const [idToken, refreshToken] = values.split(',')
-  const tokenSet = new TokenSet({
+  const tokenSet = {
     id_token: idToken,
     refresh_token: refreshToken,
     access_token: accessToken,
-  })
+  }
   return tokenSet
 }
 
-async function authorizationCodeExchange (redirectUri, parameters, checks) {
-  try {
-    const client = await exports.getIssuerClient()
-    const iat = now()
-    const payload = { iat }
-    const tokenSet = await client.callback(redirectUri, parameters, checks)
-    if (tokenSet.refresh_token) {
-      /**
+async function authorizationCodeExchange (currentUrl, checks) {
+  const config = await getConfiguration()
+  const { authorizationCodeGrant } = await getOpenIdClientModule()
+  const iat = now()
+  const payload = { iat }
+  const tokenSet = await authorizationCodeGrant(
+    config,
+    currentUrl,
+    checks,
+  )
+  if (tokenSet.refresh_token) {
+    /**
        * If the tokenSet contains a refresh_token the session will be valid forever
        * and the id_token has a very short lifetime. In this case the expiration time
        * of the access_token will be the configured sessionLifetime.
        */
-      payload.exp = iat + sessionLifetime
-      payload.refresh_at = getRefreshAt(tokenSet)
-      payload.rti = digest(tokenSet.refresh_token)
-      logger.debug('Created TokenSet (%s)', payload.rti)
-    }
-    tokenSet.access_token = await createAccessToken(payload, tokenSet.id_token)
-    return tokenSet
-  } catch (err) {
-    throw handleClientError(err)
+    payload.exp = iat + sessionLifetime
+    payload.refresh_at = getRefreshAt(tokenSet)
+    payload.rti = digest(tokenSet.refresh_token)
+    logger.debug('Created TokenSet (%s)', payload.rti)
   }
+  tokenSet.access_token = await createAccessToken(payload, tokenSet.id_token)
+  return tokenSet
 }
 
 function handleClientError (err) {
-  if (['RPError', 'OPError'].includes(err.name)) {
-    logger.error('%s: %s', err.name, err.message)
-    err = createError(401, err)
+  if (err.name === 'ResponseBodyError') {
+    const message = err.error_description || err.error || err.message
+    logger.error('%s - %s: %s', err.status, err.name, message)
+    const props = {
+      cause: err.cause,
+      code: err.code,
+      error: err.error,
+      error_description: err.error_description,
+      originalMessage: err.message,
+      // We enforce a 401 status code and ignore the error’s status, but keep it for debugging purposes.
+      originialStatus: err.status,
+    }
+    err = createError(401, message, props)
   }
   return err
 }
@@ -430,9 +464,13 @@ function handleClientError (err) {
 async function refreshTokenSet (tokenSet) {
   const payload = pick(decode(tokenSet.access_token), ['exp', 'rti'])
   try {
-    const client = await exports.getIssuerClient()
+    const config = await getConfiguration()
+    const { refreshTokenGrant } = await getOpenIdClientModule()
     logger.debug('Refreshing TokenSet (%s)', payload.rti)
-    tokenSet = await client.refresh(tokenSet.refresh_token)
+    tokenSet = await refreshTokenGrant(
+      config,
+      tokenSet.refresh_token,
+    )
     const rti = payload.rti
     payload.rti = digest(tokenSet.refresh_token)
     logger.debug('Refreshed TokenSet (%s <- %s)', payload.rti, rti)
@@ -501,8 +539,6 @@ function clearCookies (res) {
 }
 
 exports = module.exports = {
-  discoverIssuer,
-  getIssuerClient,
   COOKIE_HEADER_PAYLOAD,
   COOKIE_SIGNATURE,
   COOKIE_TOKEN,
@@ -514,6 +550,7 @@ exports = module.exports = {
   decrypt,
   setCookies,
   clearCookies,
+  getConfiguration,
   authorizationUrl,
   authorizationCallback,
   refreshToken,
