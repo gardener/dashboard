@@ -35,8 +35,8 @@ path = [
   ".pnp.loader.mjs",
   "yarn.lock",
   "REUSE.toml",
-  "backend/.dependency-cruiser.mjs",
-  "backend/diagram/*"
+  ".dependency-cruiser.mjs",
+  "diagram/*"
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2017-2024 SAP SE or an SAP affiliate company and Gardener contributors"
