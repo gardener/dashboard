@@ -17,6 +17,7 @@ SPDX-License-Identifier: Apache-2.0
             view-box="0 0 298 403"
             class="ml-2"
             icon-color="toolbar-title"
+            icon-name="certified-kubernetes"
           >
             <g-certified-kubernetes />
           </g-icon-base>

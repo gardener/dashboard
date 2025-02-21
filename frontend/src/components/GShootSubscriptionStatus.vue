@@ -34,6 +34,7 @@ SPDX-License-Identifier: Apache-2.0
           <g-icon-base
             :width="16"
             :icon-color="color"
+            :icon-name="iconName"
           >
             <component :is="resolveComponent(iconName)" />
           </g-icon-base>
@@ -46,6 +47,7 @@ SPDX-License-Identifier: Apache-2.0
           <g-icon-base
             :width="16"
             :icon-color="color"
+            :icon-name="iconName"
           >
             <component :is="resolveComponent(iconName)" />
           </g-icon-base>
@@ -127,13 +129,15 @@ import GDisconnected from '@/components/icons/GDisconnected.vue'
 
 import { useShootSubscription } from '@/composables/useShootSubscription'
 
+import get from 'lodash/get'
+
 const components = {
   'g-connected': GConnected,
   'g-disconnected': GDisconnected,
 }
 
 function resolveComponent (name) {
-  return components[name] // eslint-disable-line security/detect-object-injection
+  return get(components, [name])
 }
 
 const {
