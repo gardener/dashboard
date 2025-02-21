@@ -78,6 +78,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./",\
         "packageDependencies": [\
           ["@microsoft/eslint-formatter-sarif", "npm:3.1.0"],\
+          ["dependency-cruiser", "npm:16.10.0"],\
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.20.1"],\
           ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:29.7.0"],\
           ["node-gyp", "npm:11.1.0"]\
@@ -1779,7 +1780,6 @@ const RAW_RUNTIME_STATE =
           ["compression", "npm:1.8.0"],\
           ["cookie-parser", "npm:1.4.7"],\
           ["cross-env", "npm:7.0.3"],\
-          ["dependency-cruiser", "npm:16.9.0"],\
           ["dockerfile-ast", "npm:0.7.0"],\
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.20.1"],\
           ["eslint-plugin-import", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:2.31.0"],\
@@ -6150,10 +6150,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["dependency-cruiser", [\
-      ["npm:16.9.0", {\
-        "packageLocation": "./.yarn/cache/dependency-cruiser-npm-16.9.0-b3d00d1527-3c0314fbed.zip/node_modules/dependency-cruiser/",\
+      ["npm:16.10.0", {\
+        "packageLocation": "./.yarn/cache/dependency-cruiser-npm-16.10.0-6422144538-3deb5633b0.zip/node_modules/dependency-cruiser/",\
         "packageDependencies": [\
-          ["dependency-cruiser", "npm:16.9.0"],\
+          ["dependency-cruiser", "npm:16.10.0"],\
           ["acorn", "npm:8.14.0"],\
           ["acorn-jsx", "virtual:a50722a5a9326b6a5f12350c494c4db3aa0f4caeac45e3e9e5fe071da20014ecfe738fe2ebe2c9c98abae81a4ea86b42f56d776b3bd5ec37f9ad3670c242b242#npm:5.3.2"],\
           ["acorn-jsx-walk", "npm:2.0.0"],\
@@ -6175,7 +6175,7 @@ const RAW_RUNTIME_STATE =
           ["semver", "npm:7.7.1"],\
           ["teamcity-service-messages", "npm:0.1.14"],\
           ["tsconfig-paths-webpack-plugin", "npm:4.2.0"],\
-          ["watskeburt", "npm:4.2.2"]\
+          ["watskeburt", "npm:4.2.3"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -8029,6 +8029,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["gardener-dashboard", "workspace:."],\
           ["@microsoft/eslint-formatter-sarif", "npm:3.1.0"],\
+          ["dependency-cruiser", "npm:16.10.0"],\
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.20.1"],\
           ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:29.7.0"],\
           ["node-gyp", "npm:11.1.0"]\
@@ -13877,10 +13878,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["watskeburt", [\
-      ["npm:4.2.2", {\
-        "packageLocation": "./.yarn/cache/watskeburt-npm-4.2.2-5c7efeec95-943c8df4b4.zip/node_modules/watskeburt/",\
+      ["npm:4.2.3", {\
+        "packageLocation": "./.yarn/cache/watskeburt-npm-4.2.3-17f8f55d6a-0d93c8124a.zip/node_modules/watskeburt/",\
         "packageDependencies": [\
-          ["watskeburt", "npm:4.2.2"]\
+          ["watskeburt", "npm:4.2.3"]\
         ],\
         "linkType": "HARD"\
       }]\

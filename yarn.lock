@@ -1087,7 +1087,6 @@ __metadata:
     compression: "npm:^1.7.4"
     cookie-parser: "npm:^1.4.6"
     cross-env: "npm:^7.0.3"
-    dependency-cruiser: "npm:^16.9.0"
     dockerfile-ast: "npm:^0.7.0"
     eslint: "npm:^9.11.0"
     eslint-plugin-import: "npm:^2.31.0"
@@ -4049,7 +4048,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"commander@npm:^13.0.0":
+"commander@npm:^13.1.0":
   version: 13.1.0
   resolution: "commander@npm:13.1.0"
   checksum: 10c0/7b8c5544bba704fbe84b7cab2e043df8586d5c114a4c5b607f83ae5060708940ed0b5bd5838cf8ce27539cde265c1cbd59ce3c8c6b017ed3eec8943e3a415164
@@ -4469,9 +4468,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dependency-cruiser@npm:^16.9.0":
-  version: 16.9.0
-  resolution: "dependency-cruiser@npm:16.9.0"
+"dependency-cruiser@npm:^16.10.0":
+  version: 16.10.0
+  resolution: "dependency-cruiser@npm:16.10.0"
   dependencies:
     acorn: "npm:^8.14.0"
     acorn-jsx: "npm:^5.3.2"
@@ -4479,9 +4478,9 @@ __metadata:
     acorn-loose: "npm:^8.4.0"
     acorn-walk: "npm:^8.3.4"
     ajv: "npm:^8.17.1"
-    commander: "npm:^13.0.0"
-    enhanced-resolve: "npm:^5.18.0"
-    ignore: "npm:^7.0.0"
+    commander: "npm:^13.1.0"
+    enhanced-resolve: "npm:^5.18.1"
+    ignore: "npm:^7.0.3"
     interpret: "npm:^3.1.1"
     is-installed-globally: "npm:^1.0.0"
     json5: "npm:^2.2.3"
@@ -4491,10 +4490,10 @@ __metadata:
     prompts: "npm:^2.4.2"
     rechoir: "npm:^0.8.0"
     safe-regex: "npm:^2.1.1"
-    semver: "npm:^7.6.3"
+    semver: "npm:^7.7.1"
     teamcity-service-messages: "npm:^0.1.14"
     tsconfig-paths-webpack-plugin: "npm:^4.2.0"
-    watskeburt: "npm:^4.2.2"
+    watskeburt: "npm:^4.2.3"
   bin:
     depcruise: bin/dependency-cruise.mjs
     depcruise-baseline: bin/depcruise-baseline.mjs
@@ -4502,7 +4501,7 @@ __metadata:
     depcruise-wrap-stream-in-html: bin/wrap-stream-in-html.mjs
     dependency-cruise: bin/dependency-cruise.mjs
     dependency-cruiser: bin/dependency-cruise.mjs
-  checksum: 10c0/3c0314fbedb72fb3663d8bfa2414cf0dd5b4bacceb9681911fc732fecadf6de98374a9fabfc8a05cd3cab5b34abebe5f168035aac1b921e7c3cc9d5f2927870b
+  checksum: 10c0/3deb5633b04bc86b6a6ee16d1665df13316157b70dbe2c21359878a865926d0ce77d3f93f35bedff4a35982902ff865f99bfddc141e1c0a10e4b2cef576d3186
   languageName: node
   linkType: hard
 
@@ -4762,7 +4761,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"enhanced-resolve@npm:^5.15.0, enhanced-resolve@npm:^5.17.1, enhanced-resolve@npm:^5.18.0, enhanced-resolve@npm:^5.7.0":
+"enhanced-resolve@npm:^5.15.0, enhanced-resolve@npm:^5.17.1, enhanced-resolve@npm:^5.18.1, enhanced-resolve@npm:^5.7.0":
   version: 5.18.1
   resolution: "enhanced-resolve@npm:5.18.1"
   dependencies:
@@ -6083,6 +6082,7 @@ __metadata:
   resolution: "gardener-dashboard@workspace:."
   dependencies:
     "@microsoft/eslint-formatter-sarif": "npm:^3.1.0"
+    dependency-cruiser: "npm:^16.10.0"
     eslint: "npm:^9.11.0"
     jest: "npm:^29.7.0"
     node-gyp: "npm:latest"
@@ -6513,7 +6513,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ignore@npm:^7.0.0":
+"ignore@npm:^7.0.3":
   version: 7.0.3
   resolution: "ignore@npm:7.0.3"
   checksum: 10c0/8e21637513cbcd888a4873d34d5c651a2e24b3c4c9a6b159335a26bed348c3c386c51d6fab23577f59140e1b226323138fbd50e63882d4568fd12aa6c822029e
@@ -9615,7 +9615,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:^7.3.5, semver@npm:^7.3.6, semver@npm:^7.5.3, semver@npm:^7.5.4, semver@npm:^7.6.0, semver@npm:^7.6.3":
+"semver@npm:^7.3.5, semver@npm:^7.3.6, semver@npm:^7.5.3, semver@npm:^7.5.4, semver@npm:^7.6.0, semver@npm:^7.6.3, semver@npm:^7.7.1":
   version: 7.7.1
   resolution: "semver@npm:7.7.1"
   bin:
@@ -11156,12 +11156,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"watskeburt@npm:^4.2.2":
-  version: 4.2.2
-  resolution: "watskeburt@npm:4.2.2"
+"watskeburt@npm:^4.2.3":
+  version: 4.2.3
+  resolution: "watskeburt@npm:4.2.3"
   bin:
     watskeburt: dist/run-cli.js
-  checksum: 10c0/943c8df4b47a61556a02f4688fd1dd519ed863786e09e6d5c962f83b06fb855eef00649b5206b5575b4a94611d8f045a675aa943a40846fb5ba9400366051444
+  checksum: 10c0/0d93c8124abf0d7e375b6d766107480f426b2ae27d8a6c9e94a3c82b4352f1debf057ece0fbe28cd155ba060222d176eeb795bd3f5573b9f37201d7b087edf85
   languageName: node
   linkType: hard
 

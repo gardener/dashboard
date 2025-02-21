@@ -13,7 +13,9 @@ import path from 'path'
 
 function isProgramInstalled (programName) {
   const command = process.platform === 'win32' ? 'where' : 'which'
-  return spawnSync(command, [programName]).status === 0
+  return spawnSync(command, [programName], {
+    cwd: process.cwd(),
+  }).status === 0
 }
 
 function createDirectoryIfNeeded (dirPath) {
@@ -29,14 +31,22 @@ function generateDiagram (command) {
   const commandAsString = `${command.program} ${command.args.join(' ')}`
   console.info(`Using the following bash command: ${commandAsString}`)
 
-  const result = spawnSync(command.program, command.args, { encoding: 'utf8' })
+  const result = spawnSync(
+    command.program,
+    command.args,
+    { encoding: 'utf8' }
+  )
 
   if (result.error) {
     throw new Error(`Error executing command ${command.program}: ${result.error.message}`)
   }
 
   if (result.status !== 0) {
-    throw new Error(`Command exited with status ${result.status}. Stderr: ${result.stderr}`)
+    throw new Error(`
+    Command exited with status ${result.status}.
+    Stderr: ${result.stderr}
+    Stdout: ${result.stdout}
+    `)
   }
 
   console.log(`Diagram ${command.name} generated`)
@@ -50,22 +60,23 @@ function main () {
     process.exit(1)
   }
 
-  const diagramDir = path.join(import.meta.dirname, 'diagram')
+  const diagramDir = path.join(process.cwd(), 'diagram')
   createDirectoryIfNeeded(diagramDir)
 
+  const target = 'backend/lib'
   const commands = [
     {
       name: 'highlevel-dependency-diagram',
       program: 'yarn',
       args: [
         'depcruise',
-        'lib',
+        target,
         '--collapse',
-        'lib/[^/]+/',
+        `${target}/[^/]+/`,
         '--highlight',
         '\\.mjs$',
         '--include-only',
-        '^lib',
+        `^${target}`,
         '--output-type',
         'x-dot-webpage',
       ],
@@ -75,11 +86,11 @@ function main () {
       program: 'yarn',
       args: [
         'depcruise',
-        'lib',
+        target,
         '--highlight',
         '\\.mjs$',
         '--include-only',
-        '^lib',
+        `^${target}`,
         '--output-type',
         'x-dot-webpage',
       ],
