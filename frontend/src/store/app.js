@@ -77,7 +77,6 @@ export const useAppStore = defineStore('app', () => {
       setAlertWithType('warning', {
         title: code === '299' ? 'Kubernetes Warning' : undefined,
         text,
-        duration: -1,
       })
     })
   }
