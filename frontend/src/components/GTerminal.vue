@@ -157,6 +157,7 @@ SPDX-License-Identifier: Apache-2.0
                       height="16"
                       view-box="0 -2 20 20"
                       class="mr-2"
+                      icon-name="split-vertically"
                     >
                       <g-split-vertically />
                     </g-icon-base>
@@ -179,6 +180,7 @@ SPDX-License-Identifier: Apache-2.0
                       height="16"
                       view-box="0 -2 20 20"
                       class="mr-2"
+                      icon-name="split-horizontally"
                     >
                       <g-split-horizontally />
                     </g-icon-base>
@@ -242,9 +244,9 @@ SPDX-License-Identifier: Apache-2.0
                       view-box="-2 -2 30 30"
                       icon-color="#bdbdbd"
                       class="mr-2"
+                      :icon-name="connectionIconName"
                     >
-                      <g-connected v-if="terminalSession.connectionState === TerminalSession.CONNECTED" />
-                      <g-disconnected v-else />
+                      <component :is="resolveComponent(connectionIconName)" />
                     </g-icon-base>
                     <span class="text-none text-grey-lighten-1">{{ connectionStateText }}</span>
                   </v-btn>
@@ -397,6 +399,11 @@ import find from 'lodash/find'
 import assign from 'lodash/assign'
 import get from 'lodash/get'
 
+const components = {
+  'g-connected': GConnected,
+  'g-disconnected': GDisconnected,
+}
+
 export default {
   components: {
     GTerminalSettingsDialog,
@@ -465,6 +472,11 @@ export default {
       'focusedElementId',
       'splitpaneResize',
     ]),
+    connectionIconName () {
+      return this.terminalSession.connectionState === TerminalSession.CONNECTED
+        ? 'g-connected'
+        : 'g-disconnected'
+    },
     terminalTitle () {
       const title = [this.targetText]
       if (this.name) {
@@ -580,6 +592,9 @@ export default {
     }
   },
   methods: {
+    resolveComponent (name) {
+      return get(components, [name])
+    },
     focus () {
       this.term.focus()
     },
