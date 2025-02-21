@@ -27,7 +27,7 @@ SPDX-License-Identifier: Apache-2.0
             :width="16"
             :icon-color="color"
           >
-            <component :is="iconName" />
+            <component :is="resolveComponent(iconName)" />
           </g-icon-base>
         </v-progress-circular>
         <v-btn
