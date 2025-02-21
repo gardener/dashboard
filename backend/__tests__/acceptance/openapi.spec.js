@@ -13,8 +13,8 @@ const { mockRequest } = require('@gardener-dashboard/request')
 describe('openapi', function () {
   let agent
 
-  beforeAll(() => {
-    agent = createAgent()
+  beforeAll(async () => {
+    agent = await createAgent()
   })
 
   afterAll(() => {

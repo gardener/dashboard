@@ -9,7 +9,7 @@
 const http = require('http')
 const terminus = require('@godaddy/terminus')
 const metricsApp = require('@gardener-dashboard/monitor')
-const createServer = require('../lib/server')
+let createServer
 
 function createApplication (port, metricsPort) {
   const app = (req, res) => {
@@ -45,6 +45,9 @@ function createApplication (port, metricsPort) {
 }
 
 describe('server', () => {
+  beforeAll(async () => {
+    ({ createServer } = await import('../lib/server.mjs'))
+  })
   const port = 1234
   const metricsPort = 5678
   const mockServer = {
