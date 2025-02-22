@@ -201,7 +201,7 @@ export default {
     /* Which modules not to follow further when encountered */
     doNotFollow: {
       /* path: an array of regular expressions in strings to match against */
-      path: ['node_modules']
+      path: ['node_modules', '__tests__', '__fixtures__', '__mocks__']
     },
 
     /* Which modules to exclude */

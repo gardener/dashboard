@@ -11,6 +11,14 @@ import { spawnSync } from 'child_process'
 import fs from 'fs'
 import path from 'path'
 
+//Add path here to enable diagram generation for more targets
+//For automatic diagram generation add the path to .github/workflows/dependency-diagrams.yml
+const targetWhitelist = [
+  'backend',
+  'packages',
+]
+const all = 'all'
+
 function isProgramInstalled (programName) {
   const command = process.platform === 'win32' ? 'where' : 'which'
   return spawnSync(command, [programName], {
@@ -53,49 +61,94 @@ function generateDiagram (command) {
   return result.stdout
 }
 
+function parseTargetFromArgs () {
+
+  const targetKey = '--target'
+
+  const helpMsg = `
+Usage: node script.js [options]
+Options:
+  --help                Show this help message
+Mandatory Options:
+  --target <target>     one of: ${targetWhitelist.join(', ')}
+`
+  const args = process.argv.slice(2)
+
+  if (args.length === 0) {
+    console.log(helpMsg)
+    process.exit(0)
+  }
+
+  if (args.includes('--help')) {
+    console.log(helpMsg)
+    process.exit(0)
+  }
+
+  if (!args.includes(targetKey)){
+    console.error(`Mandatory argument ${targetKey} is missing.`)
+    process.exit(1)
+  }
+
+  const target = args[args.indexOf(targetKey) + 1]
+  if(target === all) {
+    return targetWhitelist
+  }
+
+  if (!targetWhitelist.includes(target)) {
+    console.error(`Invalid target value ${target}. Allowed values are: ${targetWhitelist.join(', ')}`)
+    process.exit(1)
+  }
+
+  return [target]
+}
+
+function commandGenerator (targets) {
+  const levels = ['highlevel', 'lowlevel']
+  const commands = []
+
+  for (const target of targets) {
+
+    for (const level of levels) {
+      const args = [
+        'depcruise',
+        target,
+        '--highlight',
+        '\\.mjs$',
+        '--include-only',
+        `^${target}`,
+        '--output-type',
+        'x-dot-webpage',
+      ]
+
+      if (level === 'highlevel') {
+        args.push('--collapse', `${target}/[^/]+/`)
+      }
+
+      commands.push({
+        name: `${target}-${level}-dependency-diagram`,
+        program: 'yarn',
+        args
+      })
+    }
+  }
+
+  return commands
+}
+
 function main () {
+
+  const targets = parseTargetFromArgs()
+
+  const commands = commandGenerator(targets)
+
   if (!isProgramInstalled('dot')) {
     console.error('Graphviz is not installed!')
     console.log('Please install Graphviz, on MacOs you could use: brew install graphviz')
     process.exit(1)
   }
 
-  const target = 'backend/lib'
-  const diagramDir = path.join(process.cwd(), 'diagram', target)
+  const diagramDir = path.join(process.cwd(), 'diagram')
   createDirectoryIfNeeded(diagramDir)
-
-  const commands = [
-    {
-      name: 'highlevel-dependency-diagram',
-      program: 'yarn',
-      args: [
-        'depcruise',
-        target,
-        '--collapse',
-        `${target}/[^/]+/`,
-        '--highlight',
-        '\\.mjs$',
-        '--include-only',
-        `^${target}`,
-        '--output-type',
-        'x-dot-webpage',
-      ],
-    },
-    {
-      name: 'lowlevel-dependency-diagram',
-      program: 'yarn',
-      args: [
-        'depcruise',
-        target,
-        '--highlight',
-        '\\.mjs$',
-        '--include-only',
-        `^${target}`,
-        '--output-type',
-        'x-dot-webpage',
-      ],
-    },
-  ]
 
   try {
     for (const command of commands) {
