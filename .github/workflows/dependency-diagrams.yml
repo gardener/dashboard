@@ -8,24 +8,16 @@ on:
     branches-ignore:
       - 'master'
       - 'hotfix-*'
-  pull_request:
-    paths:
-      - 'backend/**'
-      - 'packages/**'
-    branches-ignore:
-      - 'master'
-      - 'hotfix-*'
+
 jobs:
   generate-diagrams:
     runs-on: ubuntu-latest
-
     steps:
+
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          persist-credentials: true  # Ensures the default GITHUB_TOKEN can push commits
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.ref }}
+          persist-credentials: true
 
       - name: Enable Corepack # Enable yarn version 4
         run: corepack enable
@@ -46,7 +38,7 @@ jobs:
 
       - uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 # v9.1.4
         with:
-          add: 'diagramm'
+          add: 'diagram/.'
           fetch: true
           message: 'Commit from GitHub Actions (dependency-diagrams.yml)'
           pathspec_error_handling: 'exitAtEnd'
