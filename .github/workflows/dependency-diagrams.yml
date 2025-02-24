@@ -40,5 +40,5 @@ jobs:
         with:
           add: 'diagram/.'
           fetch: true
-          message: 'Commit from GitHub Actions (dependency-diagrams.yml)'
+          message: 'Commit from GitHub Actions (dependency-diagrams.yml) [skip ci]'
           pathspec_error_handling: 'exitAtEnd'
