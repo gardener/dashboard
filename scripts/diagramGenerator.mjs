@@ -62,7 +62,6 @@ function generateDiagram (command) {
 }
 
 function parseTargetFromArgs () {
-
   const targetKey = '--target'
 
   const helpMsg = `
@@ -107,7 +106,6 @@ function commandGenerator (targets) {
   const commands = []
 
   for (const target of targets) {
-
     for (const level of levels) {
       const args = [
         'depcruise',
@@ -136,7 +134,6 @@ function commandGenerator (targets) {
 }
 
 function main () {
-
   const targets = parseTargetFromArgs()
 
   const commands = commandGenerator(targets)
