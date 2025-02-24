@@ -188,9 +188,9 @@ export const useCredentialStore = defineStore('credential', () => {
     appStore.setSuccess(`Cloud Provider credential ${binding.metadata.name} updated`)
   }
 
-  async function deleteCredential (binding) {
-    const name = binding.metadata.name
-    await api.deleteCloudProviderCredential(binding)
+  async function deleteCredential ({ namespace, secretBindingName, credentialsBindingName, secretName }) {
+    const name = secretBindingName ?? credentialsBindingName
+    await api.deleteCloudProviderCredential({ namespace, secretBindingName, credentialsBindingName, secretName })
     await fetchCredentials()
     appStore.setSuccess(`Cloud Provider credential ${name} deleted`)
   }
@@ -241,6 +241,10 @@ export const useCredentialStore = defineStore('credential', () => {
     // no update logic for quotas as they currently cannot be updated using the dashboard
   }
 
+  function bindingsForSecret (uid) {
+    return filter(cloudProviderBindingList.value, ['_secret.metadata.uid', uid])
+  }
+
   return {
     cloudProviderBindingList,
     quotaList,
@@ -255,6 +259,7 @@ export const useCredentialStore = defineStore('credential', () => {
     getSecretBinding,
     getCredentialsBinding,
     getWorkloadIdentity,
+    bindingsForSecret,
     $reset,
   }
 })

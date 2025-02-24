@@ -246,13 +246,11 @@ describe('api', function () {
     })
 
     it('should delete an own cloudProvider credential (secretbinding)', async function () {
-      const secretBinding = _.find(fixtures.secretbindings.list(namespace), { metadata: { name: 'foo-infra3-secret2-secretbinding' } })
-
       const params = {
-        binding: secretBinding,
+        namespace: 'garden-foo',
+        secretBindingName: 'foo-infra3-secret2-secretbinding',
+        secretName: 'secret2',
       }
-      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.list())
-      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.list())
       mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.delete())
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.delete())
 
@@ -262,20 +260,18 @@ describe('api', function () {
         .send({ method: 'remove', params })
         .expect(200)
 
-      expect(mockRequest).toHaveBeenCalledTimes(4)
+      expect(mockRequest).toHaveBeenCalledTimes(2)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
     })
 
     it('should delete an own cloudProvider credential (credentialsbinding)', async function () {
-      const credentialsBinding = _.find(fixtures.credentialsbindings.list(namespace), { metadata: { name: 'foo-infra3-secret3-credentialsbinding' } })
-
       const params = {
-        binding: credentialsBinding,
+        namespace: 'garden-foo',
+        credentialsBindingName: 'foo-infra3-secret3-credentialsbinding',
+        secretName: 'secret3',
       }
-      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.list())
-      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.list())
       mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.delete())
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.delete())
 
@@ -285,79 +281,10 @@ describe('api', function () {
         .send({ method: 'remove', params })
         .expect(200)
 
-      expect(mockRequest).toHaveBeenCalledTimes(4)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(res.body).toMatchSnapshot()
-    })
-
-    it('should delete secret only if all referencing bindings have been deleted', async function () {
-      const secretBinding = _.find(fixtures.secretbindings.list(namespace), { metadata: { name: 'foo-infra1-secret1-secretbinding' } })
-
-      // delete secretbinding, expect secret to not be deleted (credentialsbinding still exists)
-      const params = {
-        binding: secretBinding,
-      }
-      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.list())
-      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.list())
-      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.delete())
-
-      const res = await agent
-        .post('/api/cloudprovidercredentials')
-        .set('cookie', await user.cookie)
-        .send({ method: 'remove', params })
-        .expect(200)
-
-      expect(mockRequest).toHaveBeenCalledTimes(3)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(res.body).toMatchSnapshot()
-    })
-
-    it('should not delete a shared cloudProvider credential (secretbinding)', async function () {
-      const secretBinding = _.find(fixtures.secretbindings.list(namespace), { metadata: { name: 'trial-infra1' } })
-
-      const params = {
-        binding: secretBinding,
-      }
-      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.list())
-      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.list())
-
-      const res = await agent
-        .post('/api/cloudprovidercredentials')
-        .set('cookie', await user.cookie)
-        .send({ method: 'remove', params })
-        .expect(422)
-
       expect(mockRequest).toHaveBeenCalledTimes(2)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
-      expect(res.body).toMatchSnapshot({
-        details: expect.any(Object),
-      })
-    })
-
-    it('should not delete a shared cloudProvider credential (credentialsbinding)', async function () {
-      const credentialsBinding = _.find(fixtures.credentialsbindings.list(namespace), { metadata: { name: 'trial-infra1' } })
-
-      const params = {
-        binding: credentialsBinding,
-      }
-      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.list())
-      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.list())
-
-      const res = await agent
-        .post('/api/cloudprovidercredentials')
-        .set('cookie', await user.cookie)
-        .send({ method: 'remove', params })
-        .expect(422)
-
-      expect(mockRequest).toHaveBeenCalledTimes(2)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(res.body).toMatchSnapshot({
-        details: expect.any(Object),
-      })
+      expect(res.body).toMatchSnapshot()
     })
   })
 })

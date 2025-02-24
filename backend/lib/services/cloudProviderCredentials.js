@@ -122,46 +122,20 @@ exports.patch = async function ({ user, params }) {
 
 exports.remove = async function ({ user, params }) {
   const client = user.client
-  const { binding: { kind, metadata: { namespace: bindingNamespace, name: bindingName } } } = params
+  const { namespace, secretBindingName, credentialsBindingName, secretName } = params
 
-  const [
-    { items: secretBindings },
-    { items: credentialsBindings },
-  ] = await Promise.all([
-    client['core.gardener.cloud'].secretbindings.list(bindingNamespace),
-    client['security.gardener.cloud'].credentialsbindings.list(bindingNamespace),
-  ])
-
-  const promiseFns = []
-  let secretName, secretNamespace
-  if (kind === 'CredentialsBinding') {
-    const credentialsBinding = _.find(credentialsBindings, ['metadata.name', bindingName])
-    secretName = credentialsBinding.credentialsRef.name
-    secretNamespace = credentialsBinding.credentialsRef.namespace
-    promiseFns.push(() => client['security.gardener.cloud'].credentialsbindings.delete(bindingNamespace, bindingName))
-  } else if (kind === 'SecretBinding') {
-    const secretBinding = _.find(secretBindings, ['metadata.name', bindingName])
-    secretName = secretBinding.secretRef.name
-    secretNamespace = secretBinding.secretRef.namespace
-    promiseFns.push(() => client['core.gardener.cloud'].secretbindings.delete(bindingNamespace, bindingName))
-  } else {
-    throw createError(422, 'Unknown binding')
+  const promises = []
+  if (credentialsBindingName) {
+    promises.push(client['security.gardener.cloud'].credentialsbindings.delete(namespace, credentialsBindingName))
+  }
+  if (secretBindingName) {
+    promises.push(client['core.gardener.cloud'].secretbindings.delete(namespace, secretBindingName))
+  }
+  if (secretName) {
+    promises.push(client.core.secrets.delete(namespace, secretName))
   }
 
-  if (bindingNamespace !== secretNamespace) {
-    throw createError(422, `Remove allowed only if secret and ${kind} are in the same namespace`)
-  }
-
-  const refs = [
-    ..._.map(secretBindings, 'secretRef'),
-    ..._.map(credentialsBindings, 'credentialsRef'),
-  ]
-  const referencedSecretCount = _.filter(refs, { namespace: secretNamespace, name: secretName }).length
-  if (referencedSecretCount === 1) {
-    promiseFns.push(() => client.core.secrets.delete(secretNamespace, secretName))
-  }
-
-  await Promise.all(promiseFns.map(fn => fn()))
+  await Promise.all(promises)
 }
 
 function resolveQuotas (binding) {

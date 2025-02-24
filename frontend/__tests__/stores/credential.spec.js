@@ -298,12 +298,10 @@ describe('stores', () => {
     })
 
     it('should delete credential', async () => {
-      const awsSecretBinding = find(credentialStore.cloudProviderBindingList, { metadata: { name: awsSecretBindingName } })
-
-      await credentialStore.deleteCredential(awsSecretBinding)
+      await credentialStore.deleteCredential({ namespace: testNamespace, secretBindingName: awsSecretBindingName, credentialsBindingName: awsCredentialsBindingName, secretName: awsSecretName })
 
       expect(api.deleteCloudProviderCredential).toBeCalledTimes(1)
-      expect(api.deleteCloudProviderCredential).toBeCalledWith(awsSecretBinding)
+      expect(api.deleteCloudProviderCredential).toBeCalledWith({ namespace: testNamespace, secretBindingName: awsSecretBindingName, credentialsBindingName: awsCredentialsBindingName, secretName: awsSecretName })
       expect(api.getCloudProviderCredentials).toBeCalledTimes(1)
     })
 

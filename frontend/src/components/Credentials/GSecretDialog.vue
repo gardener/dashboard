@@ -46,7 +46,7 @@ SPDX-License-Identifier: Apache-2.0
               </template>
               <template v-else>
                 <div class="text-h6 pb-4">
-                  {{ name }}
+                  {{ name }} ({{ binding.kind }})
                 </div>
               </template>
             </div>
@@ -77,15 +77,21 @@ SPDX-License-Identifier: Apache-2.0
           rounded="0"
           class="mb-2"
         >
-          This secret is used by {{ relatedShootCount }} clusters. The new secret should be part of the same account as the one that gets replaced.
+          <div>This secret is used by {{ relatedShootCount }} clusters. The new secret should be part of the same account as the one that gets replaced.</div>
+          <div>Clusters will only start using the new secret after they got reconciled. Therefore, wait until all clusters using the secret are reconciled before you disable the old secret in your infrastructure account. Otherwise the clusters will no longer function.</div>
         </v-alert>
         <v-alert
-          :model-value="!isCreateMode && relatedShootCount > 0"
-          type="warning"
+          :model-value="otherBindings.length > 0"
+          type="info"
           rounded="0"
           class="mb-2"
         >
-          Clusters will only start using the new secret after they got reconciled. Therefore, wait until all clusters using the secret are reconciled before you disable the old secret in your infrastructure account. Otherwise the clusters will no longer function.
+          This secret is also referenced by
+          <pre
+            v-for="referencedBinding in otherBindings"
+            :key="referencedBinding.metadata.uid"
+          >{{ referencedBinding.metadata.name }} ({{ (referencedBinding.kind) }})</pre>
+          Updating secret data for this {{ binding.kind }} will also affect the other binfings that reference this secret.
         </v-alert>
       </div>
       <v-divider />
@@ -313,6 +319,9 @@ export default {
         this.bindingRef.name = value
       },
     },
+    otherBindings () {
+      return this.bindingsForSecret(this.binding._secret?.metadata.uid).filter(({ metadata }) => metadata.uid !== this.binding.metadata.uid)
+    },
   },
   mounted () {
     this.reset()
@@ -321,6 +330,7 @@ export default {
     ...mapActions(useCredentialStore, [
       'createCredential',
       'updateCredential',
+      'bindingsForSecret',
     ]),
     hide () {
       this.visible = false

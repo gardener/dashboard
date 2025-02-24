@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-card-text>
         <v-container fluid>
           <span class="text-subtitle-1">
-            Are you sure to delete the secret <span class="font-weight-bold">{{ name }}</span>?<br>
+            Are you sure to delete the secret <span class="font-weight-bold">{{ binding.metadata.name }} ({{ binding.kind }})</span>?<br>
             <span class="text-error font-weight-bold">The operation can not be undone.</span>
           </span>
         </v-container>
@@ -27,6 +27,21 @@ SPDX-License-Identifier: Apache-2.0
           color="error"
         />
       </v-card-text>
+      <div>
+        <v-alert
+          :model-value="otherBindings.length > 0"
+          type="info"
+          rounded="0"
+          class="mb-2"
+        >
+          This secret is also referenced by
+          <pre
+            v-for="referencedBinding in otherBindings"
+            :key="referencedBinding.metadata.uid"
+          >{{ referencedBinding.metadata.name }} ({{ (referencedBinding.kind) }})</pre>
+          Deleting this {{ binding.kind }} will not delete the referenced secret.
+        </v-alert>
+      </div>
       <v-divider />
       <v-card-actions>
         <v-spacer />
@@ -57,8 +72,6 @@ import GMessage from '@/components/GMessage'
 import GToolbar from '@/components/GToolbar.vue'
 
 import { errorDetailsFromError } from '@/utils/error'
-
-import get from 'lodash/get'
 
 export default {
   components: {
@@ -94,8 +107,8 @@ export default {
         this.$emit('update:modelValue', value)
       },
     },
-    name () {
-      return get(this.binding, ['metadata', 'name'], '')
+    otherBindings () {
+      return this.bindingsForSecret(this.binding._secret?.metadata.uid).filter(({ metadata }) => metadata.uid !== this.binding.metadata.uid)
     },
   },
   watch: {
@@ -106,13 +119,23 @@ export default {
     },
   },
   methods: {
-    ...mapActions(useCredentialStore, ['deleteCredential']),
+    ...mapActions(useCredentialStore, ['deleteCredential', 'bindingsForSecret']),
     hide () {
       this.visible = false
     },
     async onDeleteSecret () {
       try {
-        await this.deleteCredential(this.binding)
+        let secretBindingName, credentialsBindingName, secretName
+        if (this.binding._isSecretBinding) {
+          secretBindingName = this.binding.metadata.name
+        } else if (this.binding._isCredentialsBinding) {
+          credentialsBindingName = this.binding.metadata.name
+        }
+        if (this.otherBindings.length === 0) {
+          secretName = this.binding._secret.metadata.name
+        }
+        const { namespace } = this.binding.metadata
+        await this.deleteCredential({ namespace, secretBindingName, credentialsBindingName, secretName })
         this.hide()
       } catch (err) {
         const errorDetails = errorDetailsFromError(err)
