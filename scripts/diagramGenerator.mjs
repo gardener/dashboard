@@ -13,7 +13,7 @@ import path from 'path'
 
 //Add path here to enable diagram generation for more targets
 //For automatic diagram generation add the path to .github/workflows/dependency-diagrams.yml
-const targetWhitelist = [
+const allowedTargets = [
   'backend',
   'packages',
 ]
@@ -69,7 +69,7 @@ Usage: node script.js [options]
 Options:
   --help                Show this help message
 Mandatory Options:
-  --target <target>     one of: ${targetWhitelist.join(', ')}
+  --target <target>     one of: ${allowedTargets.join(', ')}
 `
   const args = process.argv.slice(2)
 
@@ -90,11 +90,11 @@ Mandatory Options:
 
   const target = args[args.indexOf(targetKey) + 1]
   if(target === all) {
-    return targetWhitelist
+    return allowedTargets
   }
 
-  if (!targetWhitelist.includes(target)) {
-    console.error(`Invalid target value ${target}. Allowed values are: ${targetWhitelist.join(', ')}`)
+  if (!allowedTargets.includes(target)) {
+    console.error(`Invalid target value ${target}. Allowed values are: ${allowedTargets.join(', ')}`)
     process.exit(1)
   }
 
