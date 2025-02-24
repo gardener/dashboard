@@ -12,7 +12,8 @@ import fs from 'fs'
 import path from 'path'
 
 //Add path here to enable diagram generation for more targets
-//For automatic diagram generation add the path to .github/workflows/dependency-diagrams.yml
+// For automatic execution of the related workflow, on a push event to the new target, add the path to .github/workflows/dependency-diagrams.yml under on.push.paths.
+// Also, add a short script to the package.json.
 const allowedTargets = [
   'backend',
   'packages',
