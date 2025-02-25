@@ -193,10 +193,9 @@ export default {
     } = useShootContext()
 
     const credentialStore = useCredentialStore()
-    const gardenerExtensionStore = useGardenerExtensionStore()
 
     const customDomain = ref(!!dnsDomain.value && !!dnsPrimaryProviderType.value)
-    const dnsPrimaryProviderSecretBindings = useCloudProviderBindingList(dnsPrimaryProviderType, { credentialStore, gardenerExtensionStore })
+    const dnsPrimaryProviderSecretBindings = useCloudProviderBindingList(dnsPrimaryProviderType, { credentialStore })
 
     return {
       v$: useVuelidate(),

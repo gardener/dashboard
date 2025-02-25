@@ -91,11 +91,12 @@ SPDX-License-Identifier: Apache-2.0
                 </h4>
                 <span class="wrap-text">
                   <span v-if="infraAccountError">
-                    There is a problem with your secret
+                    There is a problem with your credential
                     <code>
                       <g-shoot-secret-name
                         :namespace="namespace"
                         :secret-binding-name="secretBindingName"
+                        :credentials-binding-name="credentialsBindingName"
                       />
                     </code>:
                   </span>
@@ -151,6 +152,9 @@ export default {
       type: String,
     },
     secretBindingName: {
+      type: String,
+    },
+    credentialsBindingName: {
       type: String,
     },
     namespace: {

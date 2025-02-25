@@ -69,6 +69,7 @@ SPDX-License-Identifier: Apache-2.0
         :error-descriptions="errorDescriptions"
         :last-transition-time="condition.lastTransitionTime"
         :secret-binding-name="secretBindingName"
+        :credentials-binding-name="credentialsBindingName"
         :namespace="shootMetadata.namespace"
       />
     </g-popover>
@@ -104,6 +105,9 @@ export default {
       required: true,
     },
     secretBindingName: {
+      type: String,
+    },
+    credentialsBindingName: {
       type: String,
     },
     popperPlacement: {

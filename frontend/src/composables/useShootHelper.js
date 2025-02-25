@@ -34,6 +34,7 @@ const shootPropertyMappings = Object.freeze({
   seedName: 'spec.seedName',
   region: 'spec.region',
   secretBindingName: 'spec.secretBindingName',
+  credentialsBindingName: 'spec.credentialsBindingName',
   kubernetesVersion: 'spec.kubernetes.version',
   providerType: 'spec.provider.type',
   addons: 'spec.addons',
@@ -53,6 +54,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     seedName,
     region,
     secretBindingName,
+    credentialsBindingName,
     kubernetesVersion,
     providerType,
     addons,
@@ -60,8 +62,14 @@ export function createShootHelperComposable (shootItem, options = {}) {
     return computed(() => get(shootItem.value, path))
   })
 
-  const infrastructureSecretBinding = computed(() => {
-    return find(infrastructureSecretBindings.value, ['metadata.name', secretBindingName.value])
+  const infrastructureBinding = computed(() => {
+    if (secretBindingName.value) {
+      return find(infrastructureBindings.value, { kind: 'SecretBinding', metadata: { name: secretBindingName.value } })
+    }
+    if (credentialsBindingName.value) {
+      return find(infrastructureBindings.value, { kind: 'CredentialsBinding', metadata: { name: credentialsBindingName.value } })
+    }
+    return undefined
   })
 
   const cloudProfiles = computed(() => {
@@ -115,7 +123,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     return cloudProfileStore.getDefaultNodesCIDR(cloudProfileName.value)
   })
 
-  const infrastructureSecretBindings = useCloudProviderBindingList(providerType, { credentialStore, gardenerExtensionStore })
+  const infrastructureBindings = useCloudProviderBindingList(providerType, { credentialStore })
 
   const sortedKubernetesVersions = computed(() => {
     return cloudProfileStore.sortedKubernetesVersions(cloudProfileName.value)
@@ -129,7 +137,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     if (some(addons.value, 'enabled')) {
       return ['evaluation']
     }
-    return selfTerminationDaysForSecret(infrastructureSecretBinding.value)
+    return selfTerminationDaysForSecret(infrastructureBinding.value)
       ? ['evaluation']
       : ['evaluation', 'development', 'testing', 'production']
   })
@@ -168,7 +176,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     return cloudProfileStore.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({
       cloudProfileName: cloudProfileName.value,
       region: region.value,
-      secretDomain: get(infrastructureSecretBinding.value, ['data', 'domainName']),
+      secretDomain: get(infrastructureBinding.value, ['data', 'domainName']),
     })
   })
 
@@ -225,8 +233,8 @@ export function createShootHelperComposable (shootItem, options = {}) {
     isFailureToleranceTypeZoneSupported,
     allZones,
     defaultNodesCIDR,
-    infrastructureSecretBindings,
-    infrastructureSecretBinding,
+    infrastructureBindings,
+    infrastructureBinding,
     sortedKubernetesVersions,
     kubernetesVersionIsNotLatestPatch,
     allPurposes,

@@ -169,7 +169,7 @@ export const useShootDns = (manifest, options) => {
   }
 
   function getDefaultSecretName (type) {
-    const bindings = useCloudProviderBindingList(toRef(type), { credentialStore, gardenerExtensionStore })
+    const bindings = useCloudProviderBindingList(toRef(type), { credentialStore })
     // find unused secret
     const usedResourceNames = map(resources.value, 'name')
     const binding = find(bindings.value, binding => {

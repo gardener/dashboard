@@ -106,6 +106,7 @@ SPDX-License-Identifier: Apache-2.0
         :error-descriptions="errorDescriptions"
         :last-update-time="shootLastOperation.lastUpdateTime"
         :secret-binding-name="shootSecretBindingName"
+        :credentials-binding-name="shootCredentialsBindingName"
         :namespace="shootNamespace"
       />
     </g-popover>
@@ -182,6 +183,7 @@ export default {
     const {
       shootNamespace,
       shootSecretBindingName,
+      shootCredentialsBindingName,
       shootLastOperation,
       isShootMarkedForDeletion,
       isShootLastOperationTypeDelete,
@@ -195,6 +197,7 @@ export default {
     return {
       shootNamespace,
       shootSecretBindingName,
+      shootCredentialsBindingName,
       shootLastOperation,
       isShootMarkedForDeletion,
       isShootLastOperationTypeDelete,

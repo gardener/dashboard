@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-tooltip
-    :disabled="!secretBinding?._secret"
+    :disabled="!binding?._secret"
     location="top"
   >
     <template #activator="{ props }">
@@ -14,20 +14,29 @@ SPDX-License-Identifier: Apache-2.0
         v-if="canLinkToSecret"
         v-bind="props"
         :to="{ name: 'Credentials', params: { namespace }, hash: credentialHash }"
-        :text="secretBindingName"
+        :text="binding?.metadata.name"
       />
       <span
         v-else
         v-bind="props"
-      >{{ secretBindingName }}</span>
+      >{{ binding?.metadata.name }}</span>
+      <v-chip
+        label
+        size="x-small"
+        color="primary"
+        variant="tonal"
+        class="ml-2"
+      >
+        {{ binding?.kind }}
+      </v-chip>
     </template>
     <v-card>
       <g-secret-details-item-content
-        v-if="secretBinding"
+        v-if="binding"
         class="ma-1"
         infra
-        :secret="secretBinding._secret"
-        :provider-type="secretBinding.provider.type"
+        :secret="binding._secret"
+        :provider-type="binding.provider.type"
       />
     </v-card>
   </v-tooltip>
@@ -57,19 +66,31 @@ export default {
     secretBindingName: {
       type: String,
     },
+    credentialsBindingName: {
+      type: String,
+    },
   },
   computed: {
     ...mapState(useAuthzStore, [
       'canGetCloudProviderCredentials',
     ]),
     canLinkToSecret () {
-      return this.canGetCloudProviderCredentials && this.secretBindingName && this.namespace
+      return this.canGetCloudProviderCredentials && this.binding
     },
-    secretBinding () {
-      return this.getSecretBinding({ namespace: this.namespace, name: this.secretBindingName })
+    binding () {
+      if (!this.namespace) {
+        return undefined
+      }
+      if (this.secretBindingName) {
+        return this.getSecretBinding({ namespace: this.namespace, name: this.secretBindingName })
+      }
+      if (this.credentialsBindingName) {
+        return this.getCredentialsBinding({ namespace: this.namespace, name: this.credentialsBindingName })
+      }
+      return undefined
     },
     credentialHash () {
-      const uid = this.secretBinding?.metadata.uid
+      const uid = this.binding?.metadata.uid
       if (!uid) {
         return ''
       }
@@ -77,7 +98,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(useCredentialStore, ['getSecretBinding']),
+    ...mapActions(useCredentialStore, ['getSecretBinding', 'getCredentialsBinding']),
   },
 }
 </script>

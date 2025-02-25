@@ -67,6 +67,7 @@ export const useCredentialStore = defineStore('credential', () => {
 
     secretBindings?.forEach(item => {
       const key = namespaceNameKey(item.metadata)
+      item.kind = 'SecretBinding' // ensure kind is set (might not be set if objects are retrieved using list call)
       set(state.secretBindings, [key], item)
     })
 
@@ -77,6 +78,7 @@ export const useCredentialStore = defineStore('credential', () => {
 
     credentialsBindings?.forEach(item => {
       const key = namespaceNameKey(item.metadata)
+      item.kind = 'CredentialsBinding' // ensure kind is set (might not be set if objects are retrieved using list call)
       set(state.credentialsBindings, [key], item)
     })
 
@@ -92,82 +94,81 @@ export const useCredentialStore = defineStore('credential', () => {
   }
 
   const cloudProviderBindingList = computed(() => {
-    const decorateBinding = (binding, kind) => {
-      const isSecretBinding = kind === 'SecretBinding'
-      const isCredentialsBinding = kind === 'CredentialsBinding'
-      const isInfrastructureBinding = cloudProfileStore.sortedProviderTypeList.includes(binding.provider?.type)
-      const isDnsBinding = gardenerExtensionStore.dnsProviderTypes.includes(binding.provider?.type)
+    const decorateBinding =
+     binding => {
+       const isSecretBinding = binding.kind === 'SecretBinding'
+       const isCredentialsBinding = binding.kind === 'CredentialsBinding'
+       const isInfrastructureBinding = cloudProfileStore.sortedProviderTypeList.includes(binding.provider?.type)
+       const isDnsBinding = gardenerExtensionStore.dnsProviderTypes.includes(binding.provider?.type)
 
-      binding.kind = kind // ensure kind is set (might not be set if objects are retrieved using list call)
+       if (isSecretBinding) {
+         const secret = getSecret(binding.secretRef)
+         Object.defineProperties(binding, {
+           _secret: {
+             value: secret,
+             configurable: true,
+           },
+           _secretName: {
+             value: binding.secretRef.name,
+             configurable: true,
+           },
+         })
+       }
+       if (isCredentialsBinding) {
+         if (binding.credentialsRef.kind === 'Secret') {
+           const secret = getSecret(binding.credentialsRef)
+           Object.defineProperties(binding, {
+             _secret: {
+               value: secret,
+               configurable: true,
+             },
+             _secretName: {
+               value: binding.credentialsRef.name,
+               configurable: true,
+             },
+           })
+         }
+         if (binding.credentialsRef.kind === 'WorkloadIdentity') {
+           const workloadIdentity = getWorkloadIdentity(binding.credentialsRef)
+           Object.defineProperty(binding, '_workloadIdentity', {
+             value: workloadIdentity,
+             configurable: true,
+           })
+         }
+       }
 
-      if (isSecretBinding) {
-        const secret = getSecret(binding.secretRef)
-        Object.defineProperties(binding, {
-          _secret: {
-            value: secret,
-            configurable: true,
-          },
-          _secretName: {
-            value: binding.secretRef.name,
-            configurable: true,
-          },
-        })
-      }
-      if (isCredentialsBinding) {
-        if (binding.credentialsRef.kind === 'Secret') {
-          const secret = getSecret(binding.credentialsRef)
-          Object.defineProperties(binding, {
-            _secret: {
-              value: secret,
-              configurable: true,
-            },
-            _secretName: {
-              value: binding.credentialsRef.name,
-              configurable: true,
-            },
-          })
-        }
-        if (binding.credentialsRef.kind === 'WorkloadIdentity') {
-          const workloadIdentity = getWorkloadIdentity(binding.credentialsRef)
-          Object.defineProperty(binding, '_workloadIdentity', {
-            value: workloadIdentity,
-            configurable: true,
-          })
-        }
-      }
+       const quotas = (binding.quotas || [])
+         .map(quota => get(state.quotas, namespaceNameKey(quota)))
+         .filter(Boolean)
 
-      const quotas = (binding.quotas || [])
-        .map(quota => get(state.quotas, namespaceNameKey(quota)))
-        .filter(Boolean)
+       Object.defineProperties(binding, {
+         _isInfrastructureBinding: {
+           value: isInfrastructureBinding,
+           configurable: true,
+         },
+         _isDnsBinding: {
+           value: isDnsBinding,
+           configurable: true,
+         },
+         _isSecretBinding: {
+           value: isSecretBinding,
+           configurable: true,
+         },
+         _isCredentialsBinding: {
+           value: isCredentialsBinding,
+           configurable: true,
+         },
+         _quotas: {
+           value: quotas,
+           configurable: true,
+         },
+       })
 
-      Object.defineProperties(binding, {
-        _isInfrastructureBinding: {
-          value: isInfrastructureBinding,
-          configurable: true,
-        },
-        _isDnsBinding: {
-          value: isDnsBinding,
-          configurable: true,
-        },
-        _isSecretBinding: {
-          value: isSecretBinding,
-          configurable: true,
-        },
-        _isCredentialsBinding: {
-          value: isCredentialsBinding,
-          configurable: true,
-        },
-        _quotas: {
-          value: quotas,
-          configurable: true,
-        },
-      })
+       return binding
+     }
 
-      return binding
-    }
-
-    const secretBindings = Object.values(state.secretBindings).map(binding => decorateBinding(binding, 'SecretBinding'))
-    const credentialsBindings = Object.values(state.credentialsBindings).map(binding => decorateBinding(binding, 'CredentialsBinding'))
+    const secretBindings = Object.values(state.secretBindings).map(decorateBinding)
+    const credentialsBindings = Object.values(state.credentialsBindings).map(decorateBinding)
 
     return [...secretBindings, ...credentialsBindings]
   })

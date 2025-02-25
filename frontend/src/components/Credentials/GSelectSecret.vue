@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
       item-color="primary"
       :label="label"
       :disabled="disabled"
-      :items="allowedSecretBindings"
+      :items="allowedBindings"
       item-value="metadata.name"
       item-title="metadata.name"
       return-object
@@ -30,6 +30,15 @@ SPDX-License-Identifier: Apache-2.0
           :subtitle="item.raw.description"
         >
           {{ get(item.raw, 'metadata.name') }}
+          <v-chip
+            label
+            size="x-small"
+            color="primary"
+            variant="tonal"
+            class="ml-2"
+          >
+            {{ item.raw.kind }}
+          </v-chip>
           <v-icon v-if="!hasOwnCredential(item.raw)">
             mdi-share
           </v-icon>
@@ -71,7 +80,6 @@ import { required } from '@vuelidate/validators'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useProjectStore } from '@/store/project'
 import { useCredentialStore } from '@/store/credential'
-import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 
 import GSecretDialogWrapper from '@/components/Credentials/GSecretDialogWrapper'
 
@@ -134,14 +142,13 @@ export default {
       costObject,
     } = useProjectCostObject(projectItem)
     const credentialStore = useCredentialStore()
-    const gardenerExtensionStore = useGardenerExtensionStore()
 
     const v$ = useVuelidate({
       $registerAs: props.registerVuelidateAs,
     })
 
     const providerType = toRef(props, 'providerType')
-    const cloudProviderBindingList = useCloudProviderBindingList(providerType, { credentialStore, gardenerExtensionStore })
+    const cloudProviderBindingList = useCloudProviderBindingList(providerType, { credentialStore })
 
     return {
       costObjectsSettingEnabled,
@@ -186,9 +193,11 @@ export default {
         this.$emit('update:modelValue', value)
       },
     },
-    allowedSecretBindings () {
+    allowedBindings () {
       return this.cloudProviderBindingList
-        ?.filter(secret => !this.allowedSecretNames.includes(secret.metadata.name))
+        ?.filter(binding =>
+          !this.allowedSecretNames.includes(binding.secretRef?.name) &&
+        !this.allowedSecretNames.includes(binding.cedentialsRef?.name))
     },
     secretHint () {
       if (this.selfTerminationDays) {
@@ -211,11 +220,11 @@ export default {
     hasOwnCredential,
     openSecretDialog () {
       this.visibleSecretDialog = this.providerType
-      this.secretItemsBeforeAdd = cloneDeep(this.allowedSecretBindings)
+      this.secretItemsBeforeAdd = cloneDeep(this.allowedBindings)
     },
     onSecretDialogClosed () {
       this.visibleSecretDialog = undefined
-      const value = head(differenceWith(this.allowedSecretBindings, this.secretItemsBeforeAdd, isEqual))
+      const value = head(differenceWith(this.allowedBindings, this.secretItemsBeforeAdd, isEqual))
       if (value) {
         this.internalValue = value
       }

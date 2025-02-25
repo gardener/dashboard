@@ -149,9 +149,14 @@ export function createGlobalResolveGuards () {
             // filter has to be set before subscribing shoots
             shootStore.initializeShootListFilters()
             shootStore.subscribeShoots()
+            const promises = []
             if (authzStore.canUseProjectTerminalShortcuts) {
-              await terminalStore.ensureProjectTerminalShortcutsLoaded()
+              promises.push(terminalStore.ensureProjectTerminalShortcutsLoaded())
             }
+            if (authzStore.canGetCloudProviderCredentials) {
+              promises.push(credentialStore.fetchCredentials())
+            }
+            await Promise.all(promises)
             break
           }
           case 'ShootItem':

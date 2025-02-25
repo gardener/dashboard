@@ -39,6 +39,7 @@ SPDX-License-Identifier: Apache-2.0
           <g-shoot-secret-name
             :namespace="shootNamespace"
             :secret-binding-name="shootSecretBindingName"
+            :credentials-binding-name="shootCredentialsBindingName"
           />
         </g-list-item-content>
       </g-list-item>
@@ -306,6 +307,7 @@ export default {
       shootDomain,
       isCustomShootDomain,
       shootSecretBindingName,
+      shootCredentialsBindingName,
       hasShootWorkerGroups,
       shootControlPlaneHighAvailabilityFailureTolerance,
       shootProviderType,
@@ -330,6 +332,7 @@ export default {
       shootDomain,
       isCustomShootDomain,
       shootSecretBindingName,
+      shootCredentialsBindingName,
       hasShootWorkerGroups,
       shootControlPlaneHighAvailabilityFailureTolerance,
       shootProviderType,

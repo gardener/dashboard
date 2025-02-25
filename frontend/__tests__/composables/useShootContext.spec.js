@@ -101,6 +101,14 @@ describe('composables', () => {
       expect(shootContextStore.shootManifest).toMatchSnapshot()
     })
 
+    it('should change to credentials binding', async () => {
+      shootContextStore.createShootManifest()
+      shootContextStore.infrastructureBinding = global.fixtures.credentials.credentialsBindings.filter(({ provider }) => provider.type === shootContextStore.shootManifest.spec.provider.type)[0]
+      console.log(shootContextStore.infrastructureBinding)
+
+      expect(shootContextStore.shootManifest).toMatchSnapshot()
+    })
+
     it('should add workers and update zones network config', async () => {
       shootContextStore.createShootManifest()
 
