@@ -12,6 +12,7 @@ SPDX-License-Identifier: Apache-2.0
         height="23"
         icon-color="primary"
         view-box="-4 0 56 54"
+        icon-name="terminal-shortcut"
       >
         <g-terminal-shortcut-icon />
       </g-icon-base>
