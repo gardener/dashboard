@@ -441,7 +441,7 @@ const hasShootWorkerGroupWarning = computed(() => {
 
 <style lang="scss" scoped>
   .large-container {
-    max-height: 90px;
+    max-height: 140px;
     max-width: 350px;
   }
 

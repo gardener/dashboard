@@ -328,7 +328,10 @@ export default {
     const firstTableItemCount = computed(() => infrastructureSecretBindingsList.value.length)
     const secondTableItemCount = computed(() => dnsSecretBindingsList.value.length)
 
-    const { firstTableStyles: infraSecretTableStyles, secondTableStyles: dnsSecretTableStyles } = useTwoTableLayout({
+    const {
+      firstTableStyles: infraSecretTableStyles,
+      secondTableStyles: dnsSecretTableStyles,
+    } = useTwoTableLayout({
       firstTableItemCount,
       secondTableItemCount,
       itemHeight,
@@ -502,24 +505,19 @@ export default {
       handler (value) {
         setTimeout(() => {
           // Cannot start scrolling before the table is rendered
-          let itemIndex = findIndex(this.infrastructureSecretSortedItems, ['secretBinding.metadata.uid', value])
-          if (itemIndex !== -1) {
-            this.$refs.infraSecretTableRef.$el.querySelector('.v-table__wrapper').scrollTo(
-              {
+          const scrollToItem = (items, tableRef) => {
+            const itemIndex = findIndex(items, ['secretBinding.metadata.uid', value])
+            if (itemIndex !== -1) {
+              tableRef.$el.querySelector('.v-table__wrapper').scrollTo({
                 top: itemIndex * this.itemHeight,
                 left: 0,
                 behavior: 'smooth',
               })
+            }
           }
-          itemIndex = findIndex(this.dnsSecretSortedItems, ['secretBinding.metadata.uid', value])
-          if (itemIndex !== -1) {
-            this.$refs.dnsSecretTableRef.$el.querySelector('.v-table__wrapper').scrollTo(
-              {
-                top: itemIndex * this.itemHeight,
-                left: 0,
-                behavior: 'smooth',
-              })
-          }
+
+          scrollToItem(this.infrastructureSecretSortedItems, this.$refs.infraSecretTableRef)
+          scrollToItem(this.dnsSecretSortedItems, this.$refs.dnsSecretTableRef)
         }, 100)
       },
       immediate: true,

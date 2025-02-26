@@ -552,7 +552,10 @@ const itemHeight = 48
 const firstTableItemCount = computed(() => userList.value.length)
 const secondTableItemCount = computed(() => serviceAccountList.value.length)
 
-const { firstTableStyles: userTableStyles, secondTableStyles: serviceAccountTableStyles } = useTwoTableLayout({
+const {
+  firstTableStyles: userTableStyles,
+  secondTableStyles: serviceAccountTableStyles,
+} = useTwoTableLayout({
   firstTableItemCount,
   secondTableItemCount,
   itemHeight,

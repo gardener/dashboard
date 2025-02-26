@@ -13,8 +13,8 @@ import { useElementSize } from '@vueuse/core'
 export function useTwoTableLayout ({
   containerRefName = 'container', // Element containing two vuetify data tables
   itemHeight, // height of table items
-  tableHeaderHeight = 40, // height of table headers
-  tableFooterHeight = 37, // height of table footers
+  tableHeaderHeight = 40,
+  tableFooterHeight = 37,
   yMargins = 90, // combined vertical margins
   noDataHeight = 120, // reserved space in case of no data
   firstTableItemCount,
@@ -23,50 +23,47 @@ export function useTwoTableLayout ({
   const containerRef = useTemplateRef(containerRefName)
   const { height: containerHeight } = useElementSize(containerRef)
 
-  const desiredFirstTableHeight = computed(() => {
-    const contentHeight = firstTableItemCount.value * (itemHeight + 1)
+  const desiredHeight = itemCount => {
+    const contentHeight = itemCount.value * itemHeight
     if (contentHeight === 0) {
       return noDataHeight
     }
     return contentHeight + tableHeaderHeight + tableFooterHeight
+  }
+
+  const desiredFirstTableHeight = computed(() => {
+    return desiredHeight(firstTableItemCount)
   })
 
   const desiredSecondTableHeight = computed(() => {
-    const contentHeight = secondTableItemCount.value * (itemHeight + 1)
-    if (contentHeight === 0) {
-      return noDataHeight
-    }
-    return contentHeight + tableHeaderHeight + tableFooterHeight
+    return desiredHeight(secondTableItemCount)
   })
 
   const halfAvailableHeight = computed(() => {
     return containerHeight.value / 2 - yMargins
   })
 
-  const firstTableStyles = computed(() => {
-    const additionalHeight = halfAvailableHeight.value - desiredSecondTableHeight.value
+  const tableStyles = (desiredHeight, otherTableDesiredHeight) => {
+    const additionalHeight = halfAvailableHeight.value - otherTableDesiredHeight.value
     let availableHeight = halfAvailableHeight.value
     if (additionalHeight > 0) {
       availableHeight = availableHeight + additionalHeight
     }
-    const height = Math.min(desiredFirstTableHeight.value, availableHeight)
+    const height = Math.min(desiredHeight.value, availableHeight)
 
     return {
       height: `${height}px`,
     }
+  }
+
+  const firstTableStyles = computed(() => {
+    return tableStyles(desiredFirstTableHeight, desiredSecondTableHeight)
   })
 
   const secondTableStyles = computed(() => {
-    const additionalHeight = halfAvailableHeight.value - desiredFirstTableHeight.value
-    let availableHeight = halfAvailableHeight.value
-    if (additionalHeight > 0) {
-      availableHeight = availableHeight + additionalHeight
-    }
-    const height = Math.min(desiredSecondTableHeight.value, availableHeight)
-    return {
-      height: `${height}px`,
-    }
+    return tableStyles(desiredSecondTableHeight, desiredFirstTableHeight)
   })
+
   return {
     firstTableStyles,
     secondTableStyles,
