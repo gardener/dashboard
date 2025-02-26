@@ -91,7 +91,7 @@ SPDX-License-Identifier: Apache-2.0
             v-for="referencedBinding in otherBindings"
             :key="referencedBinding.metadata.uid"
           >{{ referencedBinding.metadata.name }} ({{ (referencedBinding.kind) }})</pre>
-          Updating secret data for this {{ binding.kind }} will also affect the other binfings that reference this secret.
+          Updating secret data for this {{ binding.kind }} will also affect the other bindings that reference this secret.
         </v-alert>
       </div>
       <v-divider />
