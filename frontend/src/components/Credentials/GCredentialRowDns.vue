@@ -30,10 +30,21 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </td>
     <td v-if="selectedHeaders.kind">
-      {{ item.kind }}
+      <v-tooltip location="top">
+        <template #activator="{ props }">
+          <v-icon
+            v-bind="props"
+            size="small"
+            class="mx-1"
+          >
+            {{ item.kind.icon }}
+          </v-icon>
+        </template>
+        <span>{{ item.kind.tooltip }}</span>
+      </v-tooltip>
     </td>
     <td v-if="selectedHeaders.credential">
-      <span v-if="!item.hasOwnCredential">{{ item.credentialNamespace }}: </span>{{ item.hasOwnCredentialName }}
+      <span v-if="!item.hasOwnCredential">{{ item.credentialNamespace }}: </span>{{ item.credentialName }}
     </td>
     <td v-if="selectedHeaders.dnsProvider">
       <g-vendor

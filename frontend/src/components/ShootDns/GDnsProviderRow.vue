@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0
           v-if="dnsServiceExtensionProviderSecret || !dnsProvider.secretName"
           v-model="dnsServiceExtensionProviderSecret"
           :provider-type="dnsProviderType"
-          :allowed-secret-names="allowedSecretNames"
+          :not-allowed-secret-names="usedSecretNames"
           register-vuelidate-as="dnsServiceExtensionProviderSecret"
         />
         <v-text-field
@@ -175,7 +175,9 @@ export default {
       },
       set (value) {
         this.dnsProvider.type = value
-        const defaultDnsSecret = head(this.dnsCloudProviderBindings)
+        const allowedCloudProviderBindings = this.dnsCloudProviderBindings.filter(({ _secretName, provider }) =>
+          provider.type === value && !this.usedSecretNames.includes(_secretName))
+        const defaultDnsSecret = head(allowedCloudProviderBindings)
         this.dnsServiceExtensionProviderSecret = defaultDnsSecret
       },
     },
@@ -187,8 +189,12 @@ export default {
         return find(this.dnsCloudProviderBindings, ['_secretName', secretName])
       },
       set (binding) {
+        if (!binding) {
+          this.dnsProvider.secretName = undefined
+          return
+        }
         this.deleteResource(this.dnsProvider.secretName)
-        const secretName = binding._secretName
+        const secretName = binding?._secretName
         const resourceName = this.getDnsServiceExtensionResourceName(secretName)
         this.dnsProvider.secretName = resourceName
         this.setResource({
@@ -233,12 +239,8 @@ export default {
         set(this.dnsProvider, ['zones', 'include'], value)
       },
     },
-    allowedSecretNames () {
-      const dnsProviderSecretName = get(this.dnsServiceExtensionProviderSecret, ['metadata', 'name'])
-      const secretNames = this.dnsServiceExtensionProviders.map(({ secretName }) => this.getResourceRefName(secretName))
-      return secretNames.filter(secretName => {
-        return dnsProviderSecretName !== secretName
-      })
+    usedSecretNames () {
+      return this.dnsServiceExtensionProviders.map(({ secretName }) => this.getResourceRefName(secretName))
     },
   },
   mounted () {

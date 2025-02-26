@@ -573,7 +573,7 @@ export default {
       return mapValues(tableKeys, () => () => 0)
     },
     computeItem (binding) {
-      let kind = {
+      const kind = {
         icon: 'mdi-help-circle',
         tooltip: 'Unknown',
       }
@@ -591,7 +591,7 @@ export default {
           kind.icon = 'mdi-account-key'
         }
         if (binding.credentialsRef.kind === 'WorkloadIdentity') {
-          kind = 'WorkloadIdentity'
+          kind.tooltip = 'WorkloadIdentity'
           kind.icon = 'mdi-account-card'
         }
         credentialNamespace = binding.credentialsRef.namespace

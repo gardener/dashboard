@@ -95,6 +95,7 @@ function createProviderCredentials (type, options = {}) {
       metadata: {
         namespace: secretNamepace,
         name: secretName,
+        uid: `secret-${name}-uid`,
       },
       data: {
         secret: 'cw==',

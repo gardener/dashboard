@@ -321,5 +321,10 @@ describe('stores', () => {
       credentialStore._setCredentials({})
       expect(credentialStore.cloudProviderBindingList.length).toBe(0)
     })
+
+    it('store should return all bindings for a specified secret', async () => {
+      const awsSecret = find(fixtures.credentials.secrets, { metadata: { name: awsSecretName } })
+      expect(credentialStore.bindingsForSecret(awsSecret.metadata.uid).length).toBe(2)
+    })
   })
 })

@@ -121,7 +121,7 @@ export default {
     registerVuelidateAs: {
       type: String,
     },
-    allowedSecretNames: {
+    notAllowedSecretNames: {
       type: Array,
       default: () => [],
     },
@@ -196,8 +196,8 @@ export default {
     allowedBindings () {
       return this.cloudProviderBindingList
         ?.filter(binding =>
-          !this.allowedSecretNames.includes(binding.secretRef?.name) &&
-        !this.allowedSecretNames.includes(binding.cedentialsRef?.name))
+          !this.notAllowedSecretNames.includes(binding.secretRef?.name) &&
+        !this.notAllowedSecretNames.includes(binding.cedentialsRef?.name))
     },
     secretHint () {
       if (this.selfTerminationDays) {

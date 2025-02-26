@@ -320,6 +320,9 @@ export default {
       },
     },
     otherBindings () {
+      if (!this.binding) {
+        return []
+      }
       return this.bindingsForSecret(this.binding._secret?.metadata.uid).filter(({ metadata }) => metadata.uid !== this.binding.metadata.uid)
     },
   },
