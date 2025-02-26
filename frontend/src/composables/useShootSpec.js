@@ -46,6 +46,10 @@ export function useShootSpec (shootItem, options = {}) {
     return shootSpec.value.secretBindingName
   })
 
+  const shootCredentialsBindingName = computed(() => {
+    return shootSpec.value.credentialsBindingName
+  })
+
   const shootK8sVersion = computed(() => {
     return get(shootSpec.value, ['kubernetes', 'version'])
   })
@@ -159,6 +163,7 @@ export function useShootSpec (shootItem, options = {}) {
     isShootActionsDisabledForPurpose,
     isShootSettingHibernated,
     shootSecretBindingName,
+    shootCredentialsBindingName,
     shootK8sVersion,
     shootAvailableK8sUpdates,
     shootKubernetesVersionObject,

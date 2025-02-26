@@ -79,7 +79,7 @@ export function useSecretBindingContext (options = {}) {
 
   const {
     name: secretBindingName,
-    namespace: bindingNamespace,
+    namespace: secretBindingNamespace,
   } = useObjectMetadata(secretBindingManifest)
 
   const secretBindingProviderType = computed({
@@ -101,13 +101,13 @@ export function useSecretBindingContext (options = {}) {
   })
 
   return {
-    secretBindingManifest: normalizedSecretBindingManifest,
-    setSecretBindingManifest,
-    createSecretBindingManifest,
-    isSecretBindingDirty,
-    secretBindingName,
-    bindingNamespace,
-    secretBindingProviderType,
-    secretBindingSecretRef,
+    bindingManifest: normalizedSecretBindingManifest,
+    setBindingManifest: setSecretBindingManifest,
+    createBindingManifest: createSecretBindingManifest,
+    isBindingDirty: isSecretBindingDirty,
+    bindingName: secretBindingName,
+    bindingNamespace: secretBindingNamespace,
+    bindingProviderType: secretBindingProviderType,
+    bindingRef: secretBindingSecretRef,
   }
 }
