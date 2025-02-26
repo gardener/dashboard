@@ -23,14 +23,6 @@ export function useTwoTableLayout ({
   const containerRef = useTemplateRef(containerRefName)
   const { height: containerHeight } = useElementSize(containerRef)
 
-  const desiredHeight = itemCount => {
-    const contentHeight = itemCount.value * itemHeight
-    if (contentHeight === 0) {
-      return noDataHeight
-    }
-    return contentHeight + tableHeaderHeight + tableFooterHeight
-  }
-
   const desiredFirstTableHeight = computed(() => {
     return desiredHeight(firstTableItemCount)
   })
@@ -43,7 +35,23 @@ export function useTwoTableLayout ({
     return containerHeight.value / 2 - yMargins
   })
 
-  const tableStyles = (desiredHeight, otherTableDesiredHeight) => {
+  const firstTableStyles = computed(() => {
+    return tableStyles(desiredFirstTableHeight, desiredSecondTableHeight)
+  })
+
+  const secondTableStyles = computed(() => {
+    return tableStyles(desiredSecondTableHeight, desiredFirstTableHeight)
+  })
+
+  function desiredHeight (itemCount) {
+    const contentHeight = itemCount.value * itemHeight
+    if (contentHeight === 0) {
+      return noDataHeight
+    }
+    return contentHeight + tableHeaderHeight + tableFooterHeight
+  }
+
+  function tableStyles (desiredHeight, otherTableDesiredHeight) {
     const additionalHeight = halfAvailableHeight.value - otherTableDesiredHeight.value
     let availableHeight = halfAvailableHeight.value
     if (additionalHeight > 0) {
@@ -55,14 +63,6 @@ export function useTwoTableLayout ({
       height: `${height}px`,
     }
   }
-
-  const firstTableStyles = computed(() => {
-    return tableStyles(desiredFirstTableHeight, desiredSecondTableHeight)
-  })
-
-  const secondTableStyles = computed(() => {
-    return tableStyles(desiredSecondTableHeight, desiredFirstTableHeight)
-  })
 
   return {
     firstTableStyles,
