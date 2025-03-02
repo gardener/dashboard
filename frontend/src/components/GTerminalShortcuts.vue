@@ -132,8 +132,8 @@ export default {
   ],
   setup () {
     const {
-      shootItem,
-    } = useShootItem()
+      shootItem = null,
+    } = useShootItem() || {}
 
     return {
       shootItem,

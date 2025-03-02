@@ -129,9 +129,9 @@ export default {
   ],
   setup () {
     const {
-      shootItem,
+      shootItem = null,
       isShootStatusHibernated,
-    } = useShootItem()
+    } = useShootItem() || {}
 
     return {
       shootItem,
