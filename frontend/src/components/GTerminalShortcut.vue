@@ -131,7 +131,7 @@ export default {
     const {
       shootItem = null,
       isShootStatusHibernated,
-    } = useShootItem() || {}
+    } = useShootItem() || {} // shoot-item is not provided in case of GardenTerminal
 
     return {
       shootItem,

@@ -133,7 +133,7 @@ export default {
   setup () {
     const {
       shootItem = null,
-    } = useShootItem() || {}
+    } = useShootItem() || {} // shoot-item is not provided in case of GardenTerminal
 
     return {
       shootItem,
