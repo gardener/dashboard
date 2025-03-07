@@ -2697,7 +2697,7 @@ const RAW_RUNTIME_STATE =
           ["@octokit/auth-oauth-app", "npm:7.1.0"],\
           ["@octokit/auth-oauth-user", "npm:4.1.0"],\
           ["@octokit/request", "npm:8.4.0"],\
-          ["@octokit/request-error", "npm:5.1.0"],\
+          ["@octokit/request-error", "npm:5.1.1"],\
           ["@octokit/types", "npm:13.8.0"],\
           ["deprecation", "npm:2.3.1"],\
           ["lru-cache", [\
@@ -2771,7 +2771,7 @@ const RAW_RUNTIME_STATE =
           ["@octokit/auth-token", "npm:4.0.0"],\
           ["@octokit/graphql", "npm:7.1.0"],\
           ["@octokit/request", "npm:8.4.0"],\
-          ["@octokit/request-error", "npm:5.1.0"],\
+          ["@octokit/request-error", "npm:5.1.1"],\
           ["@octokit/types", "npm:13.8.0"],\
           ["before-after-hook", "npm:2.2.3"],\
           ["universal-user-agent", "npm:6.0.1"]\
@@ -2818,7 +2818,7 @@ const RAW_RUNTIME_STATE =
           ["@octokit/oauth-methods", "npm:4.1.0"],\
           ["@octokit/oauth-authorization-url", "npm:6.0.2"],\
           ["@octokit/request", "npm:8.4.0"],\
-          ["@octokit/request-error", "npm:5.1.0"],\
+          ["@octokit/request-error", "npm:5.1.1"],\
           ["@octokit/types", "npm:13.8.0"],\
           ["btoa-lite", "npm:1.0.0"]\
         ],\
@@ -2937,7 +2937,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@octokit/request", "npm:8.4.0"],\
           ["@octokit/endpoint", "npm:9.0.5"],\
-          ["@octokit/request-error", "npm:5.1.0"],\
+          ["@octokit/request-error", "npm:5.1.1"],\
           ["@octokit/types", "npm:13.8.0"],\
           ["universal-user-agent", "npm:6.0.1"]\
         ],\
@@ -2945,10 +2945,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@octokit/request-error", [\
-      ["npm:5.1.0", {\
-        "packageLocation": "./.yarn/cache/@octokit-request-error-npm-5.1.0-f7282c5282-61e688abce.zip/node_modules/@octokit/request-error/",\
+      ["npm:5.1.1", {\
+        "packageLocation": "./.yarn/cache/@octokit-request-error-npm-5.1.1-f22d0f5771-dc9fc76ea5.zip/node_modules/@octokit/request-error/",\
         "packageDependencies": [\
-          ["@octokit/request-error", "npm:5.1.0"],\
+          ["@octokit/request-error", "npm:5.1.1"],\
           ["@octokit/types", "npm:13.8.0"],\
           ["deprecation", "npm:2.3.1"],\
           ["once", "npm:1.4.0"]\
