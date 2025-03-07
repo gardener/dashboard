@@ -42,7 +42,7 @@
   "bin": {
     "update-prod-install": "./scripts/update-prod-install.cjs"
   },
-  "packageManager": "yarn@4.6.0",
+  "packageManager": "yarn@4.7.0",
   "engines": {
     "node": "^22.7.0"
   }
