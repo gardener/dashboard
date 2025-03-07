@@ -1793,7 +1793,7 @@ const RAW_RUNTIME_STATE =
           ["helmet", "npm:8.0.0"],\
           ["http-errors", "npm:2.0.0"],\
           ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:29.7.0"],\
-          ["jose", "npm:5.10.0"],\
+          ["jose", "npm:6.0.8"],\
           ["js-yaml", "npm:4.1.0"],\
           ["jsonwebtoken", "npm:9.0.2"],\
           ["lodash", "npm:4.17.21"],\
@@ -9721,17 +9721,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["jose", [\
-      ["npm:5.10.0", {\
-        "packageLocation": "./.yarn/cache/jose-npm-5.10.0-4ce825ae05-e20d9fc58d.zip/node_modules/jose/",\
+      ["npm:6.0.8", {\
+        "packageLocation": "./.yarn/cache/jose-npm-6.0.8-1a6fe4a870-ab79567922.zip/node_modules/jose/",\
         "packageDependencies": [\
-          ["jose", "npm:5.10.0"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
-      ["npm:6.0.6", {\
-        "packageLocation": "./.yarn/cache/jose-npm-6.0.6-c13e4ddfaf-f05c42e295.zip/node_modules/jose/",\
-        "packageDependencies": [\
-          ["jose", "npm:6.0.6"]\
+          ["jose", "npm:6.0.8"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -10978,7 +10971,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/openid-client-npm-6.3.3-f0bd5f1998-640f341054.zip/node_modules/openid-client/",\
         "packageDependencies": [\
           ["openid-client", "npm:6.3.3"],\
-          ["jose", "npm:6.0.6"],\
+          ["jose", "npm:6.0.8"],\
           ["oauth4webapi", "npm:3.3.0"]\
         ],\
         "linkType": "HARD"\
