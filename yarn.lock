@@ -1204,7 +1204,7 @@ __metadata:
     sass: "npm:~1.79.0"
     semver: "npm:^7.6.0"
     socket.io-client: "npm:^4.7.5"
-    splitpanes: "npm:^3.1.5"
+    splitpanes: "npm:^4.0.0"
     statuses: "npm:^2.0.1"
     symbol-tree: "npm:^3.2.4"
     toidentifier: "npm:^1.0.1"
@@ -9949,12 +9949,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"splitpanes@npm:^3.1.5":
-  version: 3.1.8
-  resolution: "splitpanes@npm:3.1.8"
+"splitpanes@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "splitpanes@npm:4.0.0"
   peerDependencies:
     vue: ^3.2.0
-  checksum: 10c0/1da043eaa18e404f9c43aa9c27c3e5a65d531a525bd762657db781387cfbfcb71344bd548cacc9dc22b81358a0a251b5532dcb52f0a6095ef2057a38aed96288
+  checksum: 10c0/886c8066a68c1e26a0473afb3120dd79f11c1f50b1777341b12ecc440a779846db7e9f2ec43d25657c2b4a367fa2af99a4543a8baaaac902e58308fd61141673
   languageName: node
   linkType: hard
 
