@@ -239,6 +239,17 @@ export default {
                 value: decodeBase64(secretData.Zone),
               },
             ]
+          case 'powerdns':
+            return [
+              {
+                label: 'Server',
+                value: decodeBase64(secretData.server),
+              },
+              {
+                label: 'API Key',
+                value: 'hidden',
+              },
+            ]
           default:
             return [
               {

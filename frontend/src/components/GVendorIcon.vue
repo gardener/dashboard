@@ -93,6 +93,8 @@ const iconSrc = computed(() => {
       return new URL('/src/assets/netlify-dns.svg', import.meta.url)
     case 'rfc2136':
       return new URL('/src/assets/rfc2136.svg', import.meta.url)
+    case 'powerdns':
+      return new URL('/src/assets/powerdns.svg', import.meta.url)
 
     // os
     case 'coreos':
