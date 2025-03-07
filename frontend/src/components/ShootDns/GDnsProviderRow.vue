@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0
           v-if="dnsServiceExtensionProviderSecret || !dnsProvider.secretName"
           v-model="dnsServiceExtensionProviderSecret"
           :provider-type="dnsProviderType"
-          :allowed-secret-names="allowedSecretNames"
+          :not-allowed-secret-names="usedSecretNames"
           register-vuelidate-as="dnsServiceExtensionProviderSecret"
         />
         <v-text-field
@@ -107,11 +107,11 @@ import { useVuelidate } from '@vuelidate/core'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useCredentialStore } from '@/store/credential'
 
-import GSelectSecret from '@/components/Secrets/GSelectSecret'
+import GSelectSecret from '@/components/Credentials/GSelectSecret'
 import GVendorIcon from '@/components/GVendorIcon'
 
 import { useShootContext } from '@/composables/useShootContext'
-import { useSecretBindingList } from '@/composables/useSecretBindingList'
+import { useCloudProviderBindingList } from '@/composables/useCloudProviderBindingList'
 
 import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
@@ -143,10 +143,9 @@ export default {
     } = useShootContext()
 
     const credentialStore = useCredentialStore()
-    const gardenerExtensionStore = useGardenerExtensionStore()
 
     const dnsProviderType = toRef(props.dnsProvider, 'type')
-    const dnsSecretBindings = useSecretBindingList(dnsProviderType, { credentialStore, gardenerExtensionStore })
+    const dnsCloudProviderBindings = useCloudProviderBindingList(dnsProviderType, { credentialStore })
 
     return {
       v$: useVuelidate(),
@@ -156,7 +155,7 @@ export default {
       setResource,
       deleteResource,
       getResourceRefName,
-      dnsSecretBindings,
+      dnsCloudProviderBindings,
     }
   },
   validations () {
@@ -176,7 +175,9 @@ export default {
       },
       set (value) {
         this.dnsProvider.type = value
-        const defaultDnsSecret = head(this.dnsSecretBindings)
+        const allowedCloudProviderBindings = this.dnsCloudProviderBindings.filter(({ _secretName, provider }) =>
+          provider.type === value && !this.usedSecretNames.includes(_secretName))
+        const defaultDnsSecret = head(allowedCloudProviderBindings)
         this.dnsServiceExtensionProviderSecret = defaultDnsSecret
       },
     },
@@ -185,11 +186,15 @@ export default {
         const resourceName = this.dnsProvider.secretName
         const secretName = this.getResourceRefName(resourceName)
 
-        return find(this.dnsSecretBindings, ['secretRef.name', secretName])
+        return find(this.dnsCloudProviderBindings, ['_secretName', secretName])
       },
-      set (value) {
+      set (binding) {
+        if (!binding) {
+          this.dnsProvider.secretName = undefined
+          return
+        }
         this.deleteResource(this.dnsProvider.secretName)
-        const secretName = get(value, ['secretRef', 'name'])
+        const secretName = binding?._secretName
         const resourceName = this.getDnsServiceExtensionResourceName(secretName)
         this.dnsProvider.secretName = resourceName
         this.setResource({
@@ -234,12 +239,8 @@ export default {
         set(this.dnsProvider, ['zones', 'include'], value)
       },
     },
-    allowedSecretNames () {
-      const dnsProviderSecretName = get(this.dnsServiceExtensionProviderSecret, ['metadata', 'name'])
-      const secretNames = this.dnsServiceExtensionProviders.map(({ secretName }) => this.getResourceRefName(secretName))
-      return secretNames.filter(secretName => {
-        return dnsProviderSecretName !== secretName
-      })
+    usedSecretNames () {
+      return this.dnsServiceExtensionProviders.map(({ secretName }) => this.getResourceRefName(secretName))
     },
   },
   mounted () {

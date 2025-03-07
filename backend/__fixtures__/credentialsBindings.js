@@ -6,7 +6,7 @@
 
 'use strict'
 
-const { cloneDeep, map, find, filter } = require('lodash')
+const { cloneDeep, map, find, filter, set } = require('lodash')
 const createError = require('http-errors')
 const pathToRegexp = require('path-to-regexp')
 
@@ -14,57 +14,72 @@ const quotaList = require('./quotas').list('garden-foo')
 const quotas = map(quotaList, ({ metadata: { namespace, name } }) => ({ namespace, name }))
 
 const cloudProviderBindingList = [
-  getSecretBinding({
+  getCredentialsBinding({
     namespace: 'garden-foo',
-    name: 'foo-infra1-secret1-secretbinding',
+    name: 'foo-infra1-secret1-credentialsbinding',
     provider: 'infra1',
-    secretRef: {
+    credentialsRef: {
+      kind: 'Secret',
       namespace: 'garden-foo',
       name: 'secret1',
     },
     quotas,
   }),
-  getSecretBinding({
+  getCredentialsBinding({
     namespace: 'garden-foo',
-    name: 'foo-infra3-secret2-secretbinding',
+    name: 'foo-infra3-secret3-credentialsbinding',
     provider: 'infra3',
-    secretRef: {
+    credentialsRef: {
+      kind: 'Secret',
       namespace: 'garden-foo',
-      name: 'secret2',
+      name: 'secret3',
     },
     quotas,
   }),
-  getSecretBinding({
+  getCredentialsBinding({
     namespace: 'garden-foo',
     name: 'trial-infra1',
     provider: 'infra1',
-    secretRef: {
+    credentialsRef: {
+      kind: 'Secret',
       namespace: 'garden-trial',
       name: 'trial-secret',
     },
     quotas,
   }),
+  getCredentialsBinding({
+    namespace: 'garden-foo',
+    name: 'foo-wlid1',
+    provider: 'infra1',
+    credentialsRef: {
+      kind: 'WorkloadIndentity',
+      namespace: 'garden-foo',
+      name: 'wl-foo-infra1',
+    },
+    quotas,
+  },
+  ),
 ]
 
-function getSecretBinding ({ namespace, name, provider, secretRef = {}, quotas = [] }) {
+function getCredentialsBinding ({ namespace, name, provider, credentialsRef = {}, quotas = [] }) {
   return {
-    kind: 'SecretBinding',
+    kind: 'CredentialsBinding',
     metadata: {
       name,
       namespace,
     },
     provider,
-    secretRef,
+    credentialsRef,
     quotas,
   }
 }
 
-const secretBindings = {
+const credentialsBindings = {
   create (options) {
-    return getSecretBinding(options)
+    return getCredentialsBinding(options)
   },
   get (namespace, name) {
-    const items = secretBindings.list(namespace)
+    const items = credentialsBindings.list(namespace)
     return find(items, ['metadata.name', name])
   },
   list (namespace) {
@@ -76,8 +91,8 @@ const secretBindings = {
 }
 
 const matchOptions = { decode: decodeURIComponent }
-const matchList = pathToRegexp.match('/apis/core.gardener.cloud/v1beta1/namespaces/:namespace/secretbindings', matchOptions)
-const matchItem = pathToRegexp.match('/apis/core.gardener.cloud/v1beta1/namespaces/:namespace/secretbindings/:name', matchOptions)
+const matchList = pathToRegexp.match('/apis/security.gardener.cloud/v1alpha1/namespaces/:namespace/credentialsbindings', matchOptions)
+const matchItem = pathToRegexp.match('/apis/security.gardener.cloud/v1alpha1/namespaces/:namespace/credentialsbindings/:name', matchOptions)
 
 const mocks = {
   list () {
@@ -91,6 +106,19 @@ const mocks = {
       return Promise.resolve({ items })
     }
   },
+  create ({ resourceVersion = '42' } = {}) {
+    return (headers, json) => {
+      const matchResult = matchList(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
+      }
+      const { params: { namespace } = {} } = matchResult
+      const item = cloneDeep(json)
+      set(item, ['metadata', 'namespace'], namespace)
+      set(item, ['metadata', 'resourceVersion'], resourceVersion)
+      return Promise.resolve(item)
+    }
+  },
   get () {
     return headers => {
       const matchResult = matchItem(headers[':path'])
@@ -98,7 +126,7 @@ const mocks = {
         return Promise.reject(createError(503))
       }
       const { params: { namespace, name } = {} } = matchResult
-      const item = secretBindings.get(namespace, name)
+      const item = credentialsBindings.get(namespace, name)
       return Promise.resolve(item)
     }
   },
@@ -109,13 +137,13 @@ const mocks = {
         return Promise.reject(createError(503))
       }
       const { params: { namespace, name } = {} } = matchResult
-      const item = secretBindings.get(namespace, name)
+      const item = credentialsBindings.get(namespace, name)
       return Promise.resolve(item)
     }
   },
 }
 
 module.exports = {
-  ...secretBindings,
+  ...credentialsBindings,
   mocks,
 }
