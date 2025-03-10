@@ -60,6 +60,15 @@ const cloudProviderSecretList = [
     },
   }),
   getCloudProviderSecret({
+    namespace: 'garden-foo',
+    name: 'secret3',
+    cloudProfileName: 'infra3-profileName',
+    data: {
+      key: 'fooKey',
+      secret: 'fooSecret',
+    },
+  }),
+  getCloudProviderSecret({
     namespace: 'garden-trial',
     name: 'trial-secret',
     cloudProfileName: 'infra1-profileName',
