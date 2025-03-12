@@ -54,6 +54,7 @@ export default {
     const projectStore = useProjectStore()
 
     const project = toRef(projectStore, 'project')
+    const namespace = toRef(projectStore, 'namespace')
 
     const readyState = ref('initial')
     const error = ref(null)
@@ -151,7 +152,7 @@ export default {
 
     watch(project, value => {
       if (readyState.value === 'loaded') {
-        if (!value) {
+        if (!value && namespace.value !== '_all') {
           fallbackRoute.value = {
             name: 'Home',
           }

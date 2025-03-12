@@ -51,6 +51,15 @@ export function createTerminalSplitpanesComposable () {
   const appStore = useAppStore()
   const shootStore = useShootStore()
   const localStorageStore = useLocalStorageStore()
+  const terminalSplitpaneTreeRef = localStorageStore.terminalSplitpaneTreeRef(route)
+  const terminalSplitpaneTree = computed({
+    get () {
+      return terminalSplitpaneTreeRef.value
+    },
+    set (value) {
+      terminalSplitpaneTreeRef.value = value
+    },
+  })
 
   let symbolTree = new GSymbolTree()
   const newTerminal = {
@@ -121,7 +130,7 @@ export function createTerminalSplitpanesComposable () {
   }
 
   async function restoreSessions (addItemFn = () => add()) {
-    const data = localStorageStore.terminalSplitpaneTree
+    const data = terminalSplitpaneTree.value
     if (!data) {
       addItemFn()
       return
@@ -183,7 +192,7 @@ export function createTerminalSplitpanesComposable () {
     splitpaneTree.value = symbolTree.toJSON(symbolTree.root)
 
     const onySlotItemsInTree = every(symbolTree.ids(), id => includes(slotItemUUIds.value, id))
-    localStorageStore.terminalSplitpaneTree = onySlotItemsInTree || symbolTree.isEmpty()
+    terminalSplitpaneTree.value = onySlotItemsInTree || symbolTree.isEmpty()
       ? null // clear value
       : splitpaneTree.value
   }
