@@ -1901,7 +1901,7 @@ const RAW_RUNTIME_STATE =
           ["sass", "npm:1.79.6"],\
           ["semver", "npm:7.7.1"],\
           ["socket.io-client", "npm:4.8.1"],\
-          ["splitpanes", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.1.8"],\
+          ["splitpanes", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:4.0.2"],\
           ["statuses", "npm:2.0.1"],\
           ["symbol-tree", "npm:3.2.4"],\
           ["toidentifier", "npm:1.0.1"],\
@@ -12341,17 +12341,17 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["splitpanes", [\
-      ["npm:3.1.8", {\
-        "packageLocation": "./.yarn/cache/splitpanes-npm-3.1.8-873d75e752-1da043eaa1.zip/node_modules/splitpanes/",\
+      ["npm:4.0.2", {\
+        "packageLocation": "./.yarn/cache/splitpanes-npm-4.0.2-8b7b8587c3-42a11a4957.zip/node_modules/splitpanes/",\
         "packageDependencies": [\
-          ["splitpanes", "npm:3.1.8"]\
+          ["splitpanes", "npm:4.0.2"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.1.8", {\
-        "packageLocation": "./.yarn/__virtual__/splitpanes-virtual-57b4605b94/0/cache/splitpanes-npm-3.1.8-873d75e752-1da043eaa1.zip/node_modules/splitpanes/",\
+      ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:4.0.2", {\
+        "packageLocation": "./.yarn/__virtual__/splitpanes-virtual-d0d40bf12a/0/cache/splitpanes-npm-4.0.2-8b7b8587c3-42a11a4957.zip/node_modules/splitpanes/",\
         "packageDependencies": [\
-          ["splitpanes", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.1.8"],\
+          ["splitpanes", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:4.0.2"],\
           ["@types/vue", null],\
           ["vue", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.5.13"]\
         ],\
