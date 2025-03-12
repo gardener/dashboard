@@ -1100,7 +1100,7 @@ __metadata:
     helmet: "npm:^8.0.0"
     http-errors: "npm:^2.0.0"
     jest: "npm:^29.7.0"
-    jose: "npm:^5.2.3"
+    jose: "npm:^6.0.0"
     js-yaml: "npm:^4.1.0"
     jsonwebtoken: "npm:^9.0.2"
     lodash: "npm:^4.17.21"
@@ -7557,14 +7557,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jose@npm:^5.2.3":
-  version: 5.10.0
-  resolution: "jose@npm:5.10.0"
-  checksum: 10c0/e20d9fc58d7e402f2e5f04e824b8897d5579aae60e64cb88ebdea1395311c24537bf4892f7de413fab1acf11e922797fb1b42269bc8fc65089a3749265ccb7b0
-  languageName: node
-  linkType: hard
-
-"jose@npm:^6.0.10":
+"jose@npm:^6.0.0, jose@npm:^6.0.10":
   version: 6.0.10
   resolution: "jose@npm:6.0.10"
   checksum: 10c0/d1327afd7fe6011a6648b570b8a220dd89c3d427d6fb3225825650df3249b58bf0f76494179a34a0f7ad185832fb083d6402092d3c7f880c677d0dd38cc75eae
