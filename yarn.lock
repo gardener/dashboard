@@ -9950,11 +9950,11 @@ __metadata:
   linkType: hard
 
 "splitpanes@npm:^3.1.5":
-  version: 3.1.8
-  resolution: "splitpanes@npm:3.1.8"
+  version: 3.2.0
+  resolution: "splitpanes@npm:3.2.0"
   peerDependencies:
     vue: ^3.2.0
-  checksum: 10c0/1da043eaa18e404f9c43aa9c27c3e5a65d531a525bd762657db781387cfbfcb71344bd548cacc9dc22b81358a0a251b5532dcb52f0a6095ef2057a38aed96288
+  checksum: 10c0/aca9a4fb37f993bedfc17aeca720ab3d589558f89831d4d2810c585fafb168e0b8f79c969e157efc1c7d5a1abd4a5a127fc06a5c9123aefc9ad55a48f5adfeda
   languageName: node
   linkType: hard
 
