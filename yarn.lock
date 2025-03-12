@@ -7564,10 +7564,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jose@npm:^6.0.6":
-  version: 6.0.6
-  resolution: "jose@npm:6.0.6"
-  checksum: 10c0/f05c42e295dffeaa9e8c842da70567846a352f9971979ff725a6c2271e7741ab8e31c193fd4574985f7ce01567a6141f5e6ea9a5d766b189a27d2ad9a0d8e67d
+"jose@npm:^6.0.10":
+  version: 6.0.10
+  resolution: "jose@npm:6.0.10"
+  checksum: 10c0/d1327afd7fe6011a6648b570b8a220dd89c3d427d6fb3225825650df3249b58bf0f76494179a34a0f7ad185832fb083d6402092d3c7f880c677d0dd38cc75eae
   languageName: node
   linkType: hard
 
@@ -8517,10 +8517,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"oauth4webapi@npm:^3.3.0":
-  version: 3.3.0
-  resolution: "oauth4webapi@npm:3.3.0"
-  checksum: 10c0/3f379a55e5b8447e6650e206b55f12220f29c6582568008ae38ba8317902c09a9ca9d322803d4ff2a1dbe6b7b55706052e494bc2c2e19596295a93cb09dc075d
+"oauth4webapi@npm:^3.3.1":
+  version: 3.3.1
+  resolution: "oauth4webapi@npm:3.3.1"
+  checksum: 10c0/e3c990dddceff5392deac5401fbbd417f7ae0aeb192ac4531884e7b2d6356185fc9aad3dd62329b9c754f6a07c70de7c7e771a57c6f540cc2aa3a4e8924081b5
   languageName: node
   linkType: hard
 
@@ -8674,12 +8674,12 @@ __metadata:
   linkType: hard
 
 "openid-client@npm:^6.1.7":
-  version: 6.3.3
-  resolution: "openid-client@npm:6.3.3"
+  version: 6.3.4
+  resolution: "openid-client@npm:6.3.4"
   dependencies:
-    jose: "npm:^6.0.6"
-    oauth4webapi: "npm:^3.3.0"
-  checksum: 10c0/640f34105494ba27c905a25ff2a78c2a01bf5b1861ef87530db8b049cada6555265f85ffa6080339c78890eca5b462f8a098b9304bd452aaa36aee570ceb8f21
+    jose: "npm:^6.0.10"
+    oauth4webapi: "npm:^3.3.1"
+  checksum: 10c0/b5c09956e64ac39e1c0820aa816e3628740e1ab7224a3a19f06d7c703659f06287ea5f96d278f29e5b5784478f444c0eb67a6f64518fbe7f0fe3a635c13f88a9
   languageName: node
   linkType: hard
 
@@ -11120,8 +11120,8 @@ __metadata:
   linkType: hard
 
 "vuetify@npm:^3.7.5":
-  version: 3.7.15
-  resolution: "vuetify@npm:3.7.15"
+  version: 3.7.16
+  resolution: "vuetify@npm:3.7.16"
   peerDependencies:
     typescript: ">=4.7"
     vite-plugin-vuetify: ">=1.0.0"
@@ -11134,7 +11134,7 @@ __metadata:
       optional: true
     webpack-plugin-vuetify:
       optional: true
-  checksum: 10c0/76e5493cdd8835fab54f34427f70901ee2d17f220f05f76a5610fbee4cfabb9e07dd58198f21548f804025d6eda0b8b5a7e021250c80f9e693d72fa55dab062a
+  checksum: 10c0/786606ad1b6bcc4e33fa164ef8a06845134fad58cbd90bb907822467c34390176a3d1a8458737d066637586f662213444f95e9d818239217b08f8709f3155c1a
   languageName: node
   linkType: hard
 
