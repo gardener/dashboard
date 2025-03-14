@@ -15,8 +15,6 @@ import {
 
 import { useApi } from '@/composables/useApi'
 
-import { hasOwnSecret } from '@/utils'
-
 import { useAuthzStore } from './authz'
 import { useAppStore } from './app'
 import { useGardenerExtensionStore } from './gardenerExtension'
@@ -40,31 +38,36 @@ export const useCredentialStore = defineStore('credential', () => {
   const state = reactive({
     secretBindings: {},
     secrets: {},
+    credentialsBindings: {},
+    workloadIdentities: {},
     quotas: {},
   })
 
   function $reset () {
     state.secretBindings = {}
     state.secrets = {}
+    state.credentialsBindings = {}
+    state.workloadIdentities = {}
     state.quotas = {}
   }
 
   async function fetchCredentials () {
     const namespace = authzStore.namespace
     try {
-      const { data: { secretBindings, secrets, quotas } } = await api.getCloudProviderCredentials(namespace)
-      _setCredentials({ secretBindings, secrets, quotas })
+      const { data: { secretBindings, secrets, credentialsBindings, workloadIdentities, quotas } } = await api.getCloudProviderCredentials(namespace)
+      _setCredentials({ secretBindings, secrets, credentialsBindings, workloadIdentities, quotas })
     } catch (err) {
       $reset()
       throw err
     }
   }
 
-  function _setCredentials ({ secretBindings, secrets, quotas }) {
+  function _setCredentials ({ secretBindings, secrets, credentialsBindings, workloadIdentities, quotas }) {
     $reset()
 
     secretBindings?.forEach(item => {
       const key = namespaceNameKey(item.metadata)
+      item.kind = 'SecretBinding' // ensure kind is set (might not be set if objects are retrieved using list call)
       set(state.secretBindings, [key], item)
     })
 
@@ -73,38 +76,101 @@ export const useCredentialStore = defineStore('credential', () => {
       set(state.secrets, [key], item)
     })
 
+    credentialsBindings?.forEach(item => {
+      const key = namespaceNameKey(item.metadata)
+      item.kind = 'CredentialsBinding' // ensure kind is set (might not be set if objects are retrieved using list call)
+      set(state.credentialsBindings, [key], item)
+    })
+
+    workloadIdentities?.forEach(item => {
+      const key = namespaceNameKey(item.metadata)
+      set(state.workloadIdentities, [key], item)
+    })
+
     quotas?.forEach(item => {
       const key = namespaceNameKey(item.metadata)
       set(state.quotas, [key], item)
     })
   }
 
-  const secretBindingList = computed(() => {
-    const secretBindings = Object.values(state.secretBindings)
-    return secretBindings.map(secretBinding => {
-      const secret = getSecret(secretBinding.secretRef)
-      Object.defineProperty(secretBinding, '_secret', {
-        value: secret,
-        configurable: true,
-        enumerable: false,
-      })
+  const cloudProviderBindingList = computed(() => {
+    const decorateBinding =
+     binding => {
+       const isSecretBinding = binding.kind === 'SecretBinding'
+       const isCredentialsBinding = binding.kind === 'CredentialsBinding'
+       const isInfrastructureBinding = cloudProfileStore.sortedProviderTypeList.includes(binding.provider?.type)
+       const isDnsBinding = gardenerExtensionStore.dnsProviderTypes.includes(binding.provider?.type)
 
-      const quotas = (secretBinding.quotas || [])
-        .map(quota => get(state.quotas, namespaceNameKey(quota)))
-        .filter(Boolean)
+       if (isSecretBinding) {
+         const secret = getSecret(binding.secretRef)
+         Object.defineProperties(binding, {
+           _secret: {
+             value: secret,
+             configurable: true,
+           },
+           _secretName: {
+             value: binding.secretRef.name,
+             configurable: true,
+           },
+         })
+       }
+       if (isCredentialsBinding) {
+         if (binding.credentialsRef.kind === 'Secret') {
+           const secret = getSecret(binding.credentialsRef)
+           Object.defineProperties(binding, {
+             _secret: {
+               value: secret,
+               configurable: true,
+             },
+             _secretName: {
+               value: binding.credentialsRef.name,
+               configurable: true,
+             },
+           })
+         }
+         if (binding.credentialsRef.kind === 'WorkloadIdentity') {
+           const workloadIdentity = getWorkloadIdentity(binding.credentialsRef)
+           Object.defineProperty(binding, '_workloadIdentity', {
+             value: workloadIdentity,
+             configurable: true,
+           })
+         }
+       }
 
-      Object.defineProperty(secretBinding, '_quotas', {
-        value: quotas,
-        configurable: true,
-        enumerable: false,
-      })
+       const quotas = (binding.quotas || [])
+         .map(quota => get(state.quotas, namespaceNameKey(quota)))
+         .filter(Boolean)
 
-      return secretBinding
-    })
-  })
+       Object.defineProperties(binding, {
+         _isInfrastructureBinding: {
+           value: isInfrastructureBinding,
+           configurable: true,
+         },
+         _isDnsBinding: {
+           value: isDnsBinding,
+           configurable: true,
+         },
+         _isSecretBinding: {
+           value: isSecretBinding,
+           configurable: true,
+         },
+         _isCredentialsBinding: {
+           value: isCredentialsBinding,
+           configurable: true,
+         },
+         _quotas: {
+           value: quotas,
+           configurable: true,
+         },
+       })
 
-  const secretList = computed(() => {
-    return Object.values(state.secrets)
+       return binding
+     }
+
+    const secretBindings = Object.values(state.secretBindings).map(decorateBinding)
+    const credentialsBindings = Object.values(state.credentialsBindings).map(decorateBinding)
+
+    return [...secretBindings, ...credentialsBindings]
   })
 
   const quotaList = computed(() => {
@@ -112,34 +178,32 @@ export const useCredentialStore = defineStore('credential', () => {
   })
 
   async function createCredential (params) {
-    const { data: { secretBinding, secret } } = await api.createCloudProviderCredential({ secretBinding: params.secretBinding, secret: params.secret })
-    _updateCloudProviderCredential({ secretBinding, secret })
-    appStore.setSuccess(`Cloud Provider credential ${secretBinding.metadata.name} created`)
+    const { data: { binding, secret } } = await api.createCloudProviderCredential({ binding: params.binding, secret: params.secret })
+    _updateCloudProviderCredential({ binding, secret })
+    appStore.setSuccess(`Cloud Provider credential ${binding.metadata.name} created`)
   }
 
   async function updateCredential (params) {
-    const { data: { secretBinding, secret } } = await api.updateCloudProviderCredential({ secretBinding: params.secretBinding, secret: params.secret })
-    _updateCloudProviderCredential({ secretBinding, secret })
-    appStore.setSuccess(`Cloud Provider credential ${secretBinding.metadata.name} updated`)
+    const { data: { binding, secret } } = await api.updateCloudProviderCredential({ binding: params.binding, secret: params.secret })
+    _updateCloudProviderCredential({ binding, secret })
+    appStore.setSuccess(`Cloud Provider credential ${binding.metadata.name} updated`)
   }
 
-  async function deleteCredential (name) {
-    const namespace = authzStore.namespace
-
-    await api.deleteCloudProviderCredential({ namespace, name })
+  async function deleteCredential ({ namespace, secretBindingName, credentialsBindingName, secretName }) {
+    const name = secretBindingName ?? credentialsBindingName
+    await api.deleteCloudProviderCredential({ namespace, secretBindingName, credentialsBindingName, secretName })
     await fetchCredentials()
     appStore.setSuccess(`Cloud Provider credential ${name} deleted`)
   }
 
-  const infrastructureSecretBindingsList = computed(() => {
-    return filter(secretBindingList.value, secretBinding => {
-      return cloudProfileStore.sortedProviderTypeList.includes(secretBinding.provider?.type)
-    })
+  const infrastructureBindingList = computed(() => {
+    return filter(cloudProviderBindingList.value, ['_isInfrastructureBinding', true])
   })
 
-  const dnsSecretBindingsList = computed(() => {
-    return filter(secretBindingList.value, secretBinding => {
-      return gardenerExtensionStore.dnsProviderTypes.includes(secretBinding.provider?.type) && hasOwnSecret(secretBinding) // setting secret binding not supported
+  const dnsBindingList = computed(() => {
+    return filter(cloudProviderBindingList.value, binding => {
+      return binding._isDnsBinding &&
+        !!binding._secret // dns extension currently supports secrets only (no bindings)
     })
   })
 
@@ -147,16 +211,29 @@ export const useCredentialStore = defineStore('credential', () => {
     return get(state.secrets, [namespaceNameKey({ namespace, name })])
   }
 
+  function getWorkloadIdentity ({ namespace, name }) {
+    return get(state.workloadIdentities, [namespaceNameKey({ namespace, name })])
+  }
+
   function getSecretBinding ({ namespace, name }) {
     return get(state.secretBindings, [namespaceNameKey({ namespace, name })])
   }
 
-  function _updateCloudProviderCredential ({ secretBinding, secret }) {
-    const key = namespaceNameKey(secretBinding.metadata)
-    set(state.secretBindings, [key], secretBinding)
+  function getCredentialsBinding ({ namespace, name }) {
+    return get(state.credentialsBindings, [namespaceNameKey({ namespace, name })])
+  }
+
+  function _updateCloudProviderCredential ({ binding, secret }) {
+    const key = namespaceNameKey(binding.metadata)
+
+    if (binding.kind === 'SecretBinding') {
+      set(state.secretBindings, [key], binding)
+    } else if (binding.kind === 'CredentialsBinding') {
+      set(state.credentialsBindings, [key], binding)
+    }
 
     if (secret) {
-      // technically speaking secret hould always be there as we currently only support to create secret and secret binding together
+      // technically speaking secret should always be there as we currently only support to create secret and binding together
       // however this might change in the future
       const key = namespaceNameKey(secret.metadata)
       set(state.secrets, [key], secret)
@@ -165,19 +242,25 @@ export const useCredentialStore = defineStore('credential', () => {
     // no update logic for quotas as they currently cannot be updated using the dashboard
   }
 
+  function bindingsForSecret (uid) {
+    return filter(cloudProviderBindingList.value, ['_secret.metadata.uid', uid])
+  }
+
   return {
-    secretBindingList,
-    secretList,
+    cloudProviderBindingList,
     quotaList,
     fetchCredentials,
     _setCredentials,
     updateCredential,
     createCredential,
     deleteCredential,
-    infrastructureSecretBindingsList,
-    dnsSecretBindingsList,
+    infrastructureBindingList,
+    dnsBindingList,
     getSecret,
     getSecretBinding,
+    getCredentialsBinding,
+    getWorkloadIdentity,
+    bindingsForSecret,
     $reset,
   }
 })

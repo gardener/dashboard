@@ -181,17 +181,17 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     writeDefaults: false,
   })
 
-  const infraSecretSelectedColumns = useLocalStorage('secrets/infra-secret-list/selected-columns', {}, {
+  const infraCredentialSelectedColumns = useLocalStorage('secrets/infra-secret-list/selected-columns', {}, {
     serializer: StorageSerializers.json,
     writeDefaults: false,
   })
 
-  const infraSecretItemsPerPage = useLocalStorage('secrets/infra-secret-list/itemsPerPage', 10, {
+  const infraCredentialItemsPerPage = useLocalStorage('secrets/infra-secret-list/itemsPerPage', 10, {
     serializer: StorageSerializers.integer,
     writeDefaults: false,
   })
 
-  const infraSecretSortBy = useLocalStorage('secrets/infra-secret-list/sortBy', [{
+  const infraCredentialSortBy = useLocalStorage('secrets/infra-secret-list/sortBy', [{
     key: 'name',
     order: 'asc',
   }], {
@@ -199,17 +199,17 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     writeDefaults: false,
   })
 
-  const dnsSecretSelectedColumns = useLocalStorage('secrets/dns-secret-list/selected-columns', {}, {
+  const dnsCredentialSelectedColumns = useLocalStorage('secrets/dns-secret-list/selected-columns', {}, {
     serializer: StorageSerializers.json,
     writeDefaults: false,
   })
 
-  const dnsSecretItemsPerPage = useLocalStorage('secrets/dns-secret-list/itemsPerPage', 10, {
+  const dnsCredentialtemsPerPage = useLocalStorage('secrets/dns-secret-list/itemsPerPage', 10, {
     serializer: StorageSerializers.integer,
     writeDefaults: false,
   })
 
-  const dnsSecretSortBy = useLocalStorage('secrets/dns-secret-list/sortBy', [{
+  const dnsCredentialSortBy = useLocalStorage('secrets/dns-secret-list/sortBy', [{
     key: 'name',
     order: 'asc',
   }], {
@@ -281,12 +281,12 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     serviceAccountSelectedColumns,
     serviceAccountItemsPerPage,
     serviceAccountSortBy,
-    infraSecretSelectedColumns,
-    infraSecretItemsPerPage,
-    infraSecretSortBy,
-    dnsSecretSelectedColumns,
-    dnsSecretItemsPerPage,
-    dnsSecretSortBy,
+    infraCredentialSelectedColumns,
+    infraCredentialItemsPerPage,
+    infraCredentialSortBy,
+    dnsCredentialSelectedColumns,
+    dnsCredentialtemsPerPage,
+    dnsCredentialSortBy,
     shootSelectedColumns,
     shootSortBy,
     allProjectsShootFilter,

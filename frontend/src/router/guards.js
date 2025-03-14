@@ -131,8 +131,8 @@ export function createGlobalResolveGuards () {
             // no action required for redirect routes
             break
           }
-          case 'Secrets':
-          case 'Secret': {
+          case 'Credentials':
+          case 'Credential': {
             shootStore.subscribeShoots()
             await credentialStore.fetchCredentials()
             break
@@ -140,7 +140,7 @@ export function createGlobalResolveGuards () {
           case 'NewShoot':
           case 'NewShootEditor': {
             shootStore.subscribeShoots()
-            if (authzStore.canGetSecrets) {
+            if (authzStore.canGetCloudProviderCredentials) {
               await credentialStore.fetchCredentials()
             }
             break
@@ -149,9 +149,14 @@ export function createGlobalResolveGuards () {
             // filter has to be set before subscribing shoots
             shootStore.initializeShootListFilters()
             shootStore.subscribeShoots()
+            const promises = []
             if (authzStore.canUseProjectTerminalShortcuts) {
-              await terminalStore.ensureProjectTerminalShortcutsLoaded()
+              promises.push(terminalStore.ensureProjectTerminalShortcutsLoaded())
             }
+            if (authzStore.canGetCloudProviderCredentials) {
+              promises.push(credentialStore.fetchCredentials())
+            }
+            await Promise.all(promises)
             break
           }
           case 'ShootItem':
