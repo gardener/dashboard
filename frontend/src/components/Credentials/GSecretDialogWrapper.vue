@@ -28,6 +28,7 @@ import NetlifyDialog from '@/components/Credentials/GSecretDialogNetlify'
 import DDnsDialog from '@/components/Credentials/GSecretDialogDDns'
 import DeleteDialog from '@/components/Credentials/GSecretDialogDelete'
 import HcloudDialog from '@/components/Credentials/GSecretDialogHCloud'
+import PowerdnsDialog from '@/components/Credentials/GSecretDialogPowerdns'
 import GenericDialog from '@/components/Credentials/GSecretDialogGeneric'
 
 import head from 'lodash/head'
@@ -47,6 +48,7 @@ const components = {
   NetlifyDialog,
   DDnsDialog,
   HcloudDialog,
+  PowerdnsDialog,
   GenericDialog,
   DeleteDialog,
 }

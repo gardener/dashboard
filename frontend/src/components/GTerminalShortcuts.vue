@@ -89,6 +89,8 @@ import { mapActions } from 'pinia'
 
 import { useTerminalStore } from '@/store/terminal'
 
+import { useShootItem } from '@/composables/useShootItem'
+
 import { TargetEnum } from '@/utils'
 
 import GListItem from './GListItem.vue'
@@ -121,9 +123,6 @@ export default {
     GTerminalShortcutIcon,
   },
   props: {
-    shootItem: {
-      type: Object,
-    },
     popperBoundariesSelector: {
       type: String,
     },
@@ -131,6 +130,15 @@ export default {
   emits: [
     'addTerminalShortcut',
   ],
+  setup () {
+    const {
+      shootItem = null,
+    } = useShootItem() || {} // shoot-item is not provided in case of GardenTerminal
+
+    return {
+      shootItem,
+    }
+  },
   computed: {
     allPossibleTargets () {
       const targetsFilter = [TargetEnum.GARDEN]

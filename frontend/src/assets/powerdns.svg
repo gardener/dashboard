@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   version="1.1"
+   id="svg1"
+   xml:space="preserve"
+   width="240"
+   height="240"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1" /><inkscape:clipboard
+     style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:#e66e00;fill-opacity:1;stroke-width:0.94342225;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;-inkscape-stroke:none;stop-color:#000000;stop-opacity:1"
+     min="869.3442,3.3843836"
+     max="1080.892,144.01854"
+     geom-min="869.3442,3.3843836"
+     geom-max="1080.892,144.01854" />
+  <g
+     id="g1"
+     transform="translate(-869.3442,-3.3843836)">
+    <g
+       id="Ebene_1-2"
+       data-name="Ebene 1"
+       transform="matrix(0.945,0,0,0.95409679,65.462471,50)">
+      <path
+         class="cls-1"
+         d="M 929.76378,34.017 A 34.01575,34.01575 0 1 1 895.748,0.00131 34.01538,34.01538 0 0 1 929.76378,34.017"
+         id="path1"
+         style="fill:#e66e00" />
+      <path
+         class="cls-1"
+         d="M 929.76378,113.38584 A 34.01575,34.01575 0 1 1 895.748,79.37011 a 34.01538,34.01538 0 0 1 34.01579,34.01573"
+         id="path2"
+         style="fill:#e66e00" />
+      <path
+         class="cls-1"
+         d="M 1009.1339,34.017 A 34.01575,34.01575 0 1 1 975.11807,0.00131 34.01538,34.01538 0 0 1 1009.1339,34.017"
+         id="path3"
+         style="fill:#e66e00" />
+      <path
+         class="cls-1"
+         d="m 1009.1339,113.38584 a 34.01575,34.01575 0 1 1 -34.01583,-34.01573 34.01538,34.01538 0 0 1 34.01583,34.01573"
+         id="path4"
+         style="fill:#e66e00" />
+      <path
+         class="cls-1"
+         d="m 1088.5039,34.017 a 34.01575,34.01575 0 1 1 -34.0158,-34.01569 34.01539,34.01539 0 0 1 34.0158,34.01573"
+         id="path5"
+         style="fill:#e66e00" />
+      <path
+         class="cls-1"
+         d="m 1088.5039,113.38584 a 34.01575,34.01575 0 1 1 -34.0158,-34.01573 34.01539,34.01539 0 0 1 34.0158,34.01573"
+         id="path6"
+         style="fill:#e66e00" />
+    </g>
+</g>
+</svg>
