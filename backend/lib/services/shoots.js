@@ -304,7 +304,7 @@ exports.info = async function ({ user, namespace, name }) {
 
   if (shoot.spec.seedName) {
     const seed = getSeed(getSeedNameFromShoot(shoot))
-    if (seed && namespace !== 'garden') {
+    if (seed) {
       try {
         data.canLinkToSeed = !!(await client['core.gardener.cloud'].shoots.get('garden', seed.metadata.name))
       } catch (err) {
