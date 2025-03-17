@@ -2780,10 +2780,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@octokit/endpoint", [\
-      ["npm:9.0.5", {\
-        "packageLocation": "./.yarn/cache/@octokit-endpoint-npm-9.0.5-9f96e75a5d-e9bbb2111a.zip/node_modules/@octokit/endpoint/",\
+      ["npm:9.0.6", {\
+        "packageLocation": "./.yarn/cache/@octokit-endpoint-npm-9.0.6-7fb8efbd70-8e06197b21.zip/node_modules/@octokit/endpoint/",\
         "packageDependencies": [\
-          ["@octokit/endpoint", "npm:9.0.5"],\
+          ["@octokit/endpoint", "npm:9.0.6"],\
           ["@octokit/types", "npm:13.8.0"],\
           ["universal-user-agent", "npm:6.0.1"]\
         ],\
@@ -2936,7 +2936,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/@octokit-request-npm-8.4.0-75489e49cf-b857782ac2.zip/node_modules/@octokit/request/",\
         "packageDependencies": [\
           ["@octokit/request", "npm:8.4.0"],\
-          ["@octokit/endpoint", "npm:9.0.5"],\
+          ["@octokit/endpoint", "npm:9.0.6"],\
           ["@octokit/request-error", "npm:5.1.0"],\
           ["@octokit/types", "npm:13.8.0"],\
           ["universal-user-agent", "npm:6.0.1"]\
