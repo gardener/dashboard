@@ -176,6 +176,7 @@ const {
   hasShootWorkerGroups,
   shootInfo,
   isSeedUnreachable,
+  canLinkToSeed,
 } = selectedShoot.value
   ? useProvideShootItem(selectedShoot)
   : useShootItem()
@@ -232,11 +233,11 @@ const isGardenctlTileVisible = computed(() => {
 })
 
 const isTerminalTileVisible = computed(() => {
-  return !isEmpty(shootItem.value) && hasShootTerminalAccess.value && !isSeedUnreachable.value && (hasShootWorkerGroups.value || isAdmin.value)
+  return !isEmpty(shootItem.value) && hasShootTerminalAccess.value && !isSeedUnreachable.value && canLinkToSeed.value && (hasShootWorkerGroups.value || isAdmin.value)
 })
 
 const isTerminalShortcutsTileVisible = computed(() => {
-  return !isEmpty(shootItem.value) && isTerminalShortcutsFeatureEnabled.value && hasShootTerminalAccess.value && !hideTerminalShortcuts.value && !isSeedUnreachable.value && (hasShootWorkerGroups.value || isAdmin.value)
+  return isTerminalTileVisible.value && isTerminalShortcutsFeatureEnabled.value && !hideTerminalShortcuts.value
 })
 
 function onAddTerminalShortcut (shortcut) {
