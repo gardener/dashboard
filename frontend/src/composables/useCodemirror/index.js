@@ -235,6 +235,8 @@ export function useCodemirror (element, options) {
   }
 
   function setDocValue (value) {
+    initialDocValue = value
+
     const state = view.state
     const selection = state.selection
     const scrollPos = view.scrollDOM.scrollTop
@@ -253,7 +255,6 @@ export function useCodemirror (element, options) {
     view.focus()
 
     clearDocHistory()
-    initialDocValue = value
   }
 
   function clearDocHistory () {
