@@ -51,15 +51,7 @@ export function createTerminalSplitpanesComposable () {
   const appStore = useAppStore()
   const shootStore = useShootStore()
   const localStorageStore = useLocalStorageStore()
-  const terminalSplitpaneTreeRef = localStorageStore.terminalSplitpaneTreeRef(route)
-  const terminalSplitpaneTree = computed({
-    get () {
-      return terminalSplitpaneTreeRef.value
-    },
-    set (value) {
-      terminalSplitpaneTreeRef.value = value
-    },
-  })
+  const terminalSplitpaneTree = localStorageStore.terminalSplitpaneTreeRef(route)
 
   let symbolTree = new GSymbolTree()
   const newTerminal = {
