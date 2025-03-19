@@ -34,6 +34,7 @@ SPDX-License-Identifier: Apache-2.0
                     height="23"
                     icon-color="primary"
                     view-box="-4 0 56 54"
+                    icon-name="terminal-shortcut"
                   >
                     <g-terminal-shortcut-icon />
                   </g-icon-base>
@@ -61,6 +62,7 @@ SPDX-License-Identifier: Apache-2.0
                 height="23"
                 icon-color="primary"
                 view-box="-4 0 56 54"
+                icon-name="terminal-shortcut"
               >
                 <g-terminal-shortcut-icon />
               </g-icon-base>
@@ -86,6 +88,8 @@ SPDX-License-Identifier: Apache-2.0
 import { mapActions } from 'pinia'
 
 import { useTerminalStore } from '@/store/terminal'
+
+import { useShootItem } from '@/composables/useShootItem'
 
 import { TargetEnum } from '@/utils'
 
@@ -119,9 +123,6 @@ export default {
     GTerminalShortcutIcon,
   },
   props: {
-    shootItem: {
-      type: Object,
-    },
     popperBoundariesSelector: {
       type: String,
     },
@@ -129,6 +130,15 @@ export default {
   emits: [
     'addTerminalShortcut',
   ],
+  setup () {
+    const {
+      shootItem = null,
+    } = useShootItem() || {} // shoot-item is not provided in case of GardenTerminal
+
+    return {
+      shootItem,
+    }
+  },
   computed: {
     allPossibleTargets () {
       const targetsFilter = [TargetEnum.GARDEN]

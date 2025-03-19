@@ -13,7 +13,6 @@ import {
   toRef,
   effectScope,
 } from 'vue'
-import { useRoute } from 'vue-router'
 import { useLocalStorage } from '@vueuse/core'
 
 import { useProjectStore } from '@/store/project'
@@ -48,12 +47,12 @@ function createLocalStorageRef (key, initialValue) {
   return localStorageRef
 }
 
-const useLazyLocalStorage = () => {
+// Route is only required for terminalSplitpaneTree
+const useLazyLocalStorage = route => {
   const projectStore = useProjectStore()
 
   const keys = {
     get terminalSplitpaneTree () {
-      const route = useRoute()
       const routeName = getRouteName(route)
       const { name, namespace } = route.params
       const keys = [routeName, namespace]
@@ -237,14 +236,12 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     },
   })
 
-  const terminalSplitpaneTree = computed({
-    get () {
-      return lazyLocalStorage.terminalSplitpaneTree.value
-    },
-    set (value) {
-      lazyLocalStorage.terminalSplitpaneTree.value = value
-    },
-  })
+  const terminalSplitpaneTreeRef = function (route) {
+    // use dedicated scope for terminalSplitpaneTree with route
+    // Route must be passed by caller to ensure correct context
+    const lazyLocalStorageWithRoute = useLazyLocalStorage(route)
+    return lazyLocalStorageWithRoute.terminalSplitpaneTree
+  }
 
   return {
     colorScheme,
@@ -269,7 +266,7 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     shootListFetchFromCache,
     shootCustomSortBy,
     shootCustomSelectedColumns,
-    terminalSplitpaneTree,
+    terminalSplitpaneTreeRef,
   }
 })
 

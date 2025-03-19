@@ -66,8 +66,6 @@ dashboard:
             gardener-dashboard:
               image: europe-docker.pkg.dev/gardener-project/releases/gardener/dashboard
               tag_as_latest: true
-              extra_push_targets: # may be dropped after all users updated to new registry
-                - eu.gcr.io/gardener-project/gardener/dashboard
       steps:
         verify:
           vars:
