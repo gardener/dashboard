@@ -1769,7 +1769,7 @@ const RAW_RUNTIME_STATE =
           ["@godaddy/terminus", "npm:4.12.1"],\
           ["@microsoft/eslint-formatter-sarif", "npm:3.1.0"],\
           ["@octokit/auth-app", "npm:6.1.3"],\
-          ["@octokit/core", "npm:5.2.0"],\
+          ["@octokit/core", "npm:5.2.1"],\
           ["@octokit/plugin-paginate-graphql", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:4.0.1"],\
           ["@octokit/plugin-paginate-rest", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:9.2.2"],\
           ["@octokit/plugin-request-log", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:4.0.1"],\
@@ -2764,10 +2764,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@octokit/core", [\
-      ["npm:5.2.0", {\
-        "packageLocation": "./.yarn/cache/@octokit-core-npm-5.2.0-d30dcc079c-9dc5cf55b3.zip/node_modules/@octokit/core/",\
+      ["npm:5.2.1", {\
+        "packageLocation": "./.yarn/cache/@octokit-core-npm-5.2.1-383a3c951b-9759c70a6a.zip/node_modules/@octokit/core/",\
         "packageDependencies": [\
-          ["@octokit/core", "npm:5.2.0"],\
+          ["@octokit/core", "npm:5.2.1"],\
           ["@octokit/auth-token", "npm:4.0.0"],\
           ["@octokit/graphql", "npm:7.1.0"],\
           ["@octokit/request", "npm:8.4.1"],\
@@ -2853,7 +2853,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/__virtual__/@octokit-plugin-paginate-graphql-virtual-5c6bb13512/0/cache/@octokit-plugin-paginate-graphql-npm-4.0.1-83b19b5121-d559cdc2b5.zip/node_modules/@octokit/plugin-paginate-graphql/",\
         "packageDependencies": [\
           ["@octokit/plugin-paginate-graphql", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:4.0.1"],\
-          ["@octokit/core", "npm:5.2.0"],\
+          ["@octokit/core", "npm:5.2.1"],\
           ["@types/octokit__core", null]\
         ],\
         "packagePeers": [\
@@ -2875,7 +2875,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/__virtual__/@octokit-plugin-paginate-rest-virtual-a79b8e04ec/0/cache/@octokit-plugin-paginate-rest-npm-9.2.2-1b0382bc4a-e9c85b1706.zip/node_modules/@octokit/plugin-paginate-rest/",\
         "packageDependencies": [\
           ["@octokit/plugin-paginate-rest", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:9.2.2"],\
-          ["@octokit/core", "npm:5.2.0"],\
+          ["@octokit/core", "npm:5.2.1"],\
           ["@octokit/types", "npm:12.6.0"],\
           ["@types/octokit__core", null]\
         ],\
@@ -2898,7 +2898,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/__virtual__/@octokit-plugin-request-log-virtual-1d304a2a4a/0/cache/@octokit-plugin-request-log-npm-4.0.1-bc9d8da84b-6f556f8625.zip/node_modules/@octokit/plugin-request-log/",\
         "packageDependencies": [\
           ["@octokit/plugin-request-log", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:4.0.1"],\
-          ["@octokit/core", "npm:5.2.0"],\
+          ["@octokit/core", "npm:5.2.1"],\
           ["@types/octokit__core", null]\
         ],\
         "packagePeers": [\
@@ -2920,7 +2920,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/__virtual__/@octokit-plugin-rest-endpoint-methods-virtual-292623c079/0/cache/@octokit-plugin-rest-endpoint-methods-npm-10.4.1-3fc380dbdf-4b8f64c0f7.zip/node_modules/@octokit/plugin-rest-endpoint-methods/",\
         "packageDependencies": [\
           ["@octokit/plugin-rest-endpoint-methods", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:10.4.1"],\
-          ["@octokit/core", "npm:5.2.0"],\
+          ["@octokit/core", "npm:5.2.1"],\
           ["@octokit/types", "npm:12.6.0"],\
           ["@types/octokit__core", null]\
         ],\
