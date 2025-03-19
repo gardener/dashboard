@@ -13,6 +13,7 @@ import {
 import {
   EditorState,
   Compartment,
+  Transaction,
 } from '@codemirror/state'
 import {
   indentUnit,
@@ -248,13 +249,12 @@ export function useCodemirror (element, options) {
         insert: value,
       },
       selection,
+      annotations: Transaction.remote.of(true),
     })
 
     view.dispatch(transaction)
     view.scrollDOM.scrollTop = scrollPos
     view.focus()
-
-    clearDocHistory()
   }
 
   function clearDocHistory () {
