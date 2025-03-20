@@ -61,6 +61,10 @@
         'p-limit',
         'p-retry',
         'p-timeout',
+        'jose',
+        '@vueuse/core',
+        '@vueuse/integrations',
+        '@vueuse/router',
       ],
       matchUpdateTypes: [
         'major',
