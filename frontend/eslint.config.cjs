@@ -166,10 +166,12 @@ module.exports = [
       document: 'readonly',
       getComputedStyle: 'readonly',
       HTMLElement: 'readonly',
+      Element: 'readonly',
       MouseEvent: 'readonly',
       FileReader: 'readonly',
       Range: 'readonly',
       fixtures: 'readonly',
+      requestAnimationFrame: 'readonly',
     },
   }),
   {
