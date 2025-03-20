@@ -1065,6 +1065,7 @@ __metadata:
     vitest: "npm:^3.0.0"
     vitest-fetch-mock: "npm:^0.4.0"
     vue: "npm:^3.4.21"
+    vue-eslint-parser: "npm:^10.1.1"
     vue-router: "npm:^4.3.0"
     vuetify: "npm:^3.7.5"
   languageName: unknown
@@ -5330,7 +5331,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esquery@npm:^1.4.2, esquery@npm:^1.5.0":
+"esquery@npm:^1.4.2, esquery@npm:^1.5.0, esquery@npm:^1.6.0":
   version: 1.6.0
   resolution: "esquery@npm:1.6.0"
   dependencies:
@@ -10768,6 +10769,23 @@ __metadata:
     vue-demi-fix: bin/vue-demi-fix.js
     vue-demi-switch: bin/vue-demi-switch.js
   checksum: 10c0/8f1a38e41e3dd0a4821c87231c664dcc00e6dbf5eecd3de397b7ddb6ae01f173aed5385c55a3c3239be36145742f1a5be407662fc67f9c4515ea691dd0ac93e1
+  languageName: node
+  linkType: hard
+
+"vue-eslint-parser@npm:^10.1.1":
+  version: 10.1.1
+  resolution: "vue-eslint-parser@npm:10.1.1"
+  dependencies:
+    debug: "npm:^4.4.0"
+    eslint-scope: "npm:^8.2.0"
+    eslint-visitor-keys: "npm:^4.2.0"
+    espree: "npm:^10.3.0"
+    esquery: "npm:^1.6.0"
+    lodash: "npm:^4.17.21"
+    semver: "npm:^7.6.3"
+  peerDependencies:
+    eslint: ^8.57.0 || ^9.0.0
+  checksum: 10c0/dabf59cbc072df9aae50b8e768fc9e1c53b2c86b4e9813c08775771f77758986e008fe8d10346745a7bf3e46f4e508c1c2c6f5ea2e6b3c4694ff896e42d83197
   languageName: node
   linkType: hard
 

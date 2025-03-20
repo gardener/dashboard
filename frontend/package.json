@@ -107,7 +107,8 @@
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-vuetify": "^2.0.4",
     "vitest": "^3.0.0",
-    "vitest-fetch-mock": "^0.4.0"
+    "vitest-fetch-mock": "^0.4.0",
+    "vue-eslint-parser": "^10.1.1"
   },
   "packageManager": "yarn@4.6.0",
   "engines": {
