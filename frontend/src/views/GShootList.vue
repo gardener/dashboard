@@ -8,21 +8,10 @@ SPDX-License-Identifier: Apache-2.0
   <v-container fluid>
     <v-card class="ma-3">
       <g-toolbar
-        :height="72"
+        prepend-icon="mdi-hexagon-multiple"
+        :height="64"
       >
-        <template #prepend>
-          <g-icon-base
-            width="44"
-            height="60"
-            view-box="0 0 298 403"
-            class="ml-2"
-            icon-color="toolbar-title"
-            icon-name="certified-kubernetes"
-          >
-            <g-certified-kubernetes />
-          </g-icon-base>
-        </template>
-        <div class="text-h5">
+        <div class="text-h6">
           Kubernetes Clusters
         </div>
         <div class="text-caption">
@@ -156,18 +145,17 @@ SPDX-License-Identifier: Apache-2.0
         </template>
       </g-toolbar>
       <v-data-table-virtual
-        ref="shootTable"
         v-model:sort-by="sortByInternal"
         :headers="visibleHeaders"
         :items="sortedAndFilteredItems"
         :loading="loading || !connected"
         :custom-key-sort="customKeySort"
+        density="compact"
         hover
         must-sort
         fixed-header
         class="g-table"
-        height="calc(100vh - 240px)"
-        item-height="52px"
+        style="max-height: calc(100vh - 180px)"
       >
         <template #progress>
           <g-shoot-list-progress />
@@ -178,8 +166,9 @@ SPDX-License-Identifier: Apache-2.0
         <template #no-data>
           No clusters to show
         </template>
-        <template #item="{ item }">
+        <template #item="{ item, itemRef }">
           <g-shoot-list-row
+            :ref="itemRef"
             :model-value="item"
             :visible-headers="visibleHeaders"
           />
@@ -187,6 +176,7 @@ SPDX-License-Identifier: Apache-2.0
         <template #bottom>
           <g-data-table-footer
             :items-length="sortedAndFilteredItems.length"
+            items-label="Clusters"
           />
         </template>
       </v-data-table-virtual>
@@ -222,8 +212,6 @@ import GToolbar from '@/components/GToolbar.vue'
 import GShootListRow from '@/components/GShootListRow.vue'
 import GShootListProgress from '@/components/GShootListProgress.vue'
 import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
-import GIconBase from '@/components/icons/GIconBase.vue'
-import GCertifiedKubernetes from '@/components/icons/GCertifiedKubernetes.vue'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
 import GShootListActions from '@/components/GShootListActions.vue'
 
@@ -249,8 +237,6 @@ export default {
     GToolbar,
     GShootListRow,
     GShootListProgress,
-    GIconBase,
-    GCertifiedKubernetes,
     GTableColumnSelection,
     GDataTableFooter,
     GShootListActions,
