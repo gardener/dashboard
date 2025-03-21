@@ -13,6 +13,7 @@ import {
 import {
   EditorState,
   Compartment,
+  Transaction,
 } from '@codemirror/state'
 import {
   indentUnit,
@@ -141,7 +142,10 @@ export function useCodemirror (element, options) {
   const enterKey = {
     key: 'Enter',
     run (view) {
-      completions.value?.editorEnter(view)
+      if (!completions.value) {
+        return false
+      }
+      completions.value.editorEnter(view)
       return true
     },
   }
@@ -235,6 +239,8 @@ export function useCodemirror (element, options) {
   }
 
   function setDocValue (value) {
+    initialDocValue = value
+
     const state = view.state
     const selection = state.selection
     const scrollPos = view.scrollDOM.scrollTop
@@ -246,14 +252,12 @@ export function useCodemirror (element, options) {
         insert: value,
       },
       selection,
+      annotations: Transaction.remote.of(true),
     })
 
     view.dispatch(transaction)
     view.scrollDOM.scrollTop = scrollPos
     view.focus()
-
-    clearDocHistory()
-    initialDocValue = value
   }
 
   function clearDocHistory () {
