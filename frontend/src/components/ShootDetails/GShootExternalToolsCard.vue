@@ -57,15 +57,35 @@ const configStore = useConfigStore()
 
 const {
   shootMetadata,
+  shootProjectName,
+  shootPurpose,
+  shootSeedName,
+  shootRegion,
+  shootDomain,
+  shootAvailableK8sUpdates,
+  isNewCluster,
 } = useShootItem()
 
 const items = computed(() => {
   return configStore.externalTools ?? []
 })
 
+const urlData = computed(() => {
+  return {
+    ...shootMetadata.value,
+    domain: shootDomain.value,
+    projectName: shootProjectName.value,
+    seedName: shootSeedName.value,
+    region: shootRegion.value,
+    purpose: shootPurpose.value,
+    availableK8sUpdates: shootAvailableK8sUpdates.value,
+    isNewCluster: isNewCluster.value,
+  }
+})
+
 function expandUrl (url) {
   try {
-    return parseTemplate(url).expand(shootMetadata.value)
+    return parseTemplate(url).expand(urlData.value)
   } catch (err) {
     logger.error(`Failed to parse URL template "${url}"`)
     return url
