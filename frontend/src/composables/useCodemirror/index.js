@@ -142,7 +142,10 @@ export function useCodemirror (element, options) {
   const enterKey = {
     key: 'Enter',
     run (view) {
-      completions.value?.editorEnter(view)
+      if (!completions.value) {
+        return false
+      }
+      completions.value.editorEnter(view)
       return true
     },
   }
