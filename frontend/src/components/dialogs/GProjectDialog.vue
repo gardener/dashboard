@@ -214,7 +214,7 @@ async function submit () {
     loading.value = false
     hide()
     router.push({
-      name: 'Secrets',
+      name: 'Credentials',
       params: {
         namespace: project.spec.namespace,
       },
