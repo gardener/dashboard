@@ -1053,7 +1053,7 @@ __metadata:
     symbol-tree: "npm:^3.2.4"
     toidentifier: "npm:^1.0.1"
     typescript: "npm:^5.6.3"
-    universal-cookie: "npm:^8.0.0"
+    universal-cookie: "npm:^7.0.0"
     unplugin-fonts: "npm:^1.1.1"
     url-template: "npm:^3.1.1"
     uuid: "npm:^11.0.0"
@@ -2353,6 +2353,13 @@ __metadata:
   version: 1.0.2
   resolution: "@types/btoa-lite@npm:1.0.2"
   checksum: 10c0/daffbb47e4fe6493df70d83878b550adab48bab2f02b3591a59367af3ecebf34c971e070479ab68d83ca59cbeefbc61a50d9a7552f639dc908706183e0222bab
+  languageName: node
+  linkType: hard
+
+"@types/cookie@npm:^0.6.0":
+  version: 0.6.0
+  resolution: "@types/cookie@npm:0.6.0"
+  checksum: 10c0/5b326bd0188120fb32c0be086b141b1481fec9941b76ad537f9110e10d61ee2636beac145463319c71e4be67a17e85b81ca9e13ceb6e3bb63b93d16824d6c149
   languageName: node
   linkType: hard
 
@@ -4054,17 +4061,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cookie@npm:0.7.2, cookie@npm:~0.7.2":
+"cookie@npm:0.7.2, cookie@npm:^0.7.2, cookie@npm:~0.7.2":
   version: 0.7.2
   resolution: "cookie@npm:0.7.2"
   checksum: 10c0/9596e8ccdbf1a3a88ae02cf5ee80c1c50959423e1022e4e60b91dd87c622af1da309253d8abdb258fb5e3eacb4f08e579dc58b4897b8087574eee0fd35dfa5d2
-  languageName: node
-  linkType: hard
-
-"cookie@npm:^1.0.2":
-  version: 1.0.2
-  resolution: "cookie@npm:1.0.2"
-  checksum: 10c0/fd25fe79e8fbcfcaf6aa61cd081c55d144eeeba755206c058682257cb38c4bd6795c6620de3f064c740695bb65b7949ebb1db7a95e4636efb8357a335ad3f54b
   languageName: node
   linkType: hard
 
@@ -10477,12 +10477,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"universal-cookie@npm:^8.0.0":
-  version: 8.0.1
-  resolution: "universal-cookie@npm:8.0.1"
+"universal-cookie@npm:^7.0.0":
+  version: 7.2.2
+  resolution: "universal-cookie@npm:7.2.2"
   dependencies:
-    cookie: "npm:^1.0.2"
-  checksum: 10c0/96b1f2eba8941e590892513ab3220fccad9606485452d2443f86c69388a0c663937feb386a2911d2dec5796840ae7af155c6deef8712906a931ae8a30ae93485
+    "@types/cookie": "npm:^0.6.0"
+    cookie: "npm:^0.7.2"
+  checksum: 10c0/214c5cf72b12b6d98a72e11a10adb3f1d06dbeadbd9a2d46ded8c288d86387e9ff25499f85d2f85728809484d678c02028ac674cb8747257b38d2c17fb93e896
   languageName: node
   linkType: hard
 

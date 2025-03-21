@@ -1753,7 +1753,7 @@ const RAW_RUNTIME_STATE =
           ["symbol-tree", "npm:3.2.4"],\
           ["toidentifier", "npm:1.0.1"],\
           ["typescript", "patch:typescript@npm%3A5.8.2#optional!builtin<compat/typescript>::version=5.8.2&hash=5786d5"],\
-          ["universal-cookie", "npm:8.0.1"],\
+          ["universal-cookie", "npm:7.2.2"],\
           ["unplugin-fonts", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:1.3.1"],\
           ["url-template", "npm:3.1.1"],\
           ["uuid", "npm:11.1.0"],\
@@ -3327,6 +3327,15 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["@types/cookie", [\
+      ["npm:0.6.0", {\
+        "packageLocation": "./.yarn/cache/@types-cookie-npm-0.6.0-1f4c3f48f0-5b326bd018.zip/node_modules/@types/cookie/",\
+        "packageDependencies": [\
+          ["@types/cookie", "npm:0.6.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["@types/cors", [\
       ["npm:2.8.17", {\
         "packageLocation": "./.yarn/cache/@types-cors-npm-2.8.17-2556d16051-457364c28c.zip/node_modules/@types/cors/",\
@@ -4400,7 +4409,7 @@ const RAW_RUNTIME_STATE =
           ["nprogress", null],\
           ["qrcode", null],\
           ["sortablejs", null],\
-          ["universal-cookie", "npm:8.0.1"],\
+          ["universal-cookie", "npm:7.2.2"],\
           ["vue", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.5.13"]\
         ],\
         "packagePeers": [\
@@ -5652,13 +5661,6 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/cookie-npm-0.7.2-6ea9ee4231-9596e8ccdb.zip/node_modules/cookie/",\
         "packageDependencies": [\
           ["cookie", "npm:0.7.2"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
-      ["npm:1.0.2", {\
-        "packageLocation": "./.yarn/cache/cookie-npm-1.0.2-7a4273d897-fd25fe79e8.zip/node_modules/cookie/",\
-        "packageDependencies": [\
-          ["cookie", "npm:1.0.2"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -13071,11 +13073,12 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["universal-cookie", [\
-      ["npm:8.0.1", {\
-        "packageLocation": "./.yarn/cache/universal-cookie-npm-8.0.1-adfedd8694-96b1f2eba8.zip/node_modules/universal-cookie/",\
+      ["npm:7.2.2", {\
+        "packageLocation": "./.yarn/cache/universal-cookie-npm-7.2.2-c7f1748d18-214c5cf72b.zip/node_modules/universal-cookie/",\
         "packageDependencies": [\
-          ["universal-cookie", "npm:8.0.1"],\
-          ["cookie", "npm:1.0.2"]\
+          ["universal-cookie", "npm:7.2.2"],\
+          ["@types/cookie", "npm:0.6.0"],\
+          ["cookie", "npm:0.7.2"]\
         ],\
         "linkType": "HARD"\
       }]\
