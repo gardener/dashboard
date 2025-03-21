@@ -61,7 +61,7 @@ class Client {
   get baseUrl () {
     const { url, relativeUrl } = this.#options
     return relativeUrl
-      ? new URL(relativeUrl, url)
+      ? new URL(relativeUrl, url.endsWith('/') ? url : url + '/')
       : new URL(url)
   }
 
