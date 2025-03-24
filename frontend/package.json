@@ -73,7 +73,7 @@
     "statuses": "^2.0.1",
     "symbol-tree": "^3.2.4",
     "toidentifier": "^1.0.1",
-    "universal-cookie": "^7.0.0",
+    "universal-cookie": "^8.0.0",
     "url-template": "^3.1.1",
     "uuid": "^11.0.0",
     "vue": "^3.4.21",
