@@ -58,12 +58,7 @@ const configStore = useConfigStore()
 const {
   shootMetadata,
   shootProjectName,
-  shootPurpose,
-  shootSeedName,
-  shootRegion,
   shootDomain,
-  shootAvailableK8sUpdates,
-  isNewCluster,
 } = useShootItem()
 
 const items = computed(() => {
@@ -72,14 +67,10 @@ const items = computed(() => {
 
 const urlData = computed(() => {
   return {
-    ...shootMetadata.value,
+    name: shootMetadata.value.name,
+    namespace: shootMetadata.value.namespace,
     domain: shootDomain.value,
-    projectName: shootProjectName.value,
-    seedName: shootSeedName.value,
-    region: shootRegion.value,
-    purpose: shootPurpose.value,
-    availableK8sUpdates: shootAvailableK8sUpdates.value,
-    isNewCluster: isNewCluster.value,
+    project: shootProjectName.value,
   }
 })
 
