@@ -56,7 +56,8 @@ const logger = inject('logger')
 const configStore = useConfigStore()
 
 const {
-  shootMetadata,
+  shootName,
+  shootNamespace,
   shootProjectName,
   shootDomain,
 } = useShootItem()
@@ -67,8 +68,8 @@ const items = computed(() => {
 
 const urlData = computed(() => {
   return {
-    name: shootMetadata.value.name,
-    namespace: shootMetadata.value.namespace,
+    name: shootName.value,
+    namespace: shootNamespace.value,
     domain: shootDomain.value,
     project: shootProjectName.value,
   }
