@@ -86,13 +86,21 @@ export function createTerminalSplitpanesComposable () {
     return isStatusHibernated(get(shootItem.value, ['status']))
   })
 
+  const canScheduleOnSeed = computed(() => {
+    return get(shootItem.value, ['info', 'canLinkToSeed'])
+  })
+
   const slotItemUUIds = computed(() => {
     const slotItems = filter(symbolTree.items(), ['data.type', 'SLOT_ITEM'])
     return map(slotItems, 'uuid')
   })
 
   const defaultTarget = computed(() => {
-    return terminalCoordinates.value.target || (authzStore.hasControlPlaneTerminalAccess ? TargetEnum.CONTROL_PLANE : TargetEnum.SHOOT)
+    return terminalCoordinates.value.target ||
+     (authzStore.hasControlPlaneTerminalAccess &&
+      canScheduleOnSeed.value)
+      ? TargetEnum.CONTROL_PLANE
+      : TargetEnum.SHOOT
   })
 
   function addSlotItem ({ data = {}, targetId, position } = {}) {
@@ -250,6 +258,7 @@ export function createTerminalSplitpanesComposable () {
     shootName,
     hasShootWorkerGroups,
     isShootStatusHibernated,
+    canScheduleOnSeed,
     splitpaneTree,
     newTerminalPrompt,
     defaultTarget,

@@ -164,6 +164,7 @@ export default {
       shootName,
       hasShootWorkerGroups,
       isShootStatusHibernated,
+      canScheduleOnSeed,
       newTerminalPrompt,
       defaultTarget,
       setSelections,
@@ -181,6 +182,7 @@ export default {
       shootName,
       hasShootWorkerGroups,
       isShootStatusHibernated,
+      canScheduleOnSeed,
       newTerminalPrompt,
       defaultTarget,
       setSelections,
@@ -275,6 +277,10 @@ export default {
         await this.promptForSelections()
       }
     },
+    defaultTarget (value) {
+      this.targetTab.selectedTarget = value
+      this.updateSettings()
+    },
   },
   methods: {
     async promptForSelections () {
@@ -345,6 +351,8 @@ export default {
           name: this.shootName,
           target: this.targetTab.selectedTarget,
         })
+        config.canScheduleOnSeed = this.canScheduleOnSeed
+
         this.updateState(config)
       } catch (err) {
         this.targetTab.initializedForTarget = undefined

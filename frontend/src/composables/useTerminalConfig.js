@@ -28,6 +28,7 @@ export function createTerminalConfigComposable () {
       currentNode,
       privilegedMode,
       nodes = [],
+      canScheduleOnSeed = false,
     } = options
 
     const autoSelectNodeItem = {
@@ -37,13 +38,13 @@ export function createTerminalConfigComposable () {
     }
 
     state.node = defaultNode
-    if (!defaultNode) {
+    if (!defaultNode && nodes.length) {
       state.node = authnStore.isAdmin
         ? get(head(nodes), ['data', 'kubernetesHostname'])
         : autoSelectNodeItem.data.kubernetesHostname
     }
 
-    if (!authnStore.isAdmin) {
+    if (!authnStore.isAdmin || !canScheduleOnSeed) {
       state.runtime = 'shoot'
     } else {
       const currentNodeIsShootWorker = some(nodes, ['data.kubernetesHostname', currentNode])
@@ -56,6 +57,7 @@ export function createTerminalConfigComposable () {
     if (nodes.length) {
       state.shootNodes.unshift(autoSelectNodeItem)
     }
+    state.canScheduleOnSeed = canScheduleOnSeed
   }
 
   const state = reactive({
@@ -93,6 +95,9 @@ export function createTerminalConfigComposable () {
       */
     if (authnStore.isAdmin) {
       state.privilegedMode = value === 'shoot'
+    }
+    if (!state.canScheduleOnSeed) {
+      state.privilegedMode = false
     }
   })
 

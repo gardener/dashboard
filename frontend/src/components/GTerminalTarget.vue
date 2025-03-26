@@ -13,12 +13,22 @@ SPDX-License-Identifier: Apache-2.0
       :hint="hint"
       persistent-hint
     >
-      <v-radio
-        v-if="shootItem && hasControlPlaneTerminalAccess"
-        label="Control Plane"
-        value="cp"
-        color="primary"
-      />
+      <div>
+        <v-radio
+          v-if="shootItem && hasControlPlaneTerminalAccess"
+          label="Control Plane"
+          value="cp"
+          color="primary"
+          :disabled="!canScheduleOnSeed"
+        />
+        <v-tooltip
+          activator="parent"
+          location="top left"
+          :disabled="canScheduleOnSeed"
+        >
+          Terminals can only be scheduled on managed seeds
+        </v-tooltip>
+      </div>
       <v-radio
         v-if="shootItem && hasShootTerminalAccess"
         value="shoot"
@@ -84,12 +94,14 @@ export default {
     const {
       shootItem,
       isShootStatusHibernated,
+      canScheduleOnSeed,
     } = useTerminalSplitpanes()
 
     return {
       v$: useVuelidate(),
       shootItem,
       isShootStatusHibernated,
+      canScheduleOnSeed,
     }
   },
   validations () {
