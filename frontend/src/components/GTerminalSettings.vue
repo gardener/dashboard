@@ -96,17 +96,6 @@ SPDX-License-Identifier: Apache-2.0
           </span>
         </template>
       </v-select>
-      <v-alert
-        v-if="isAdmin && runtime === 'shoot'"
-        class="ml-6 mt-6 mb-2"
-        :model-value="true"
-        type="info"
-        color="primary"
-        variant="tonal"
-      >
-        <strong>Terminal will be running in an untrusted environment!</strong><br>
-        Do not enter credentials or sensitive data within the terminal session that cluster owners should not have access to, as the terminal will be running on one of the worker nodes.
-      </v-alert>
     </template>
   </div>
 </template>

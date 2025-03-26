@@ -89,6 +89,34 @@ SPDX-License-Identifier: Apache-2.0
         :namespace="shootNamespace"
       />
     </template>
+    <template #footer>
+      <v-alert
+        v-if="!isAdmin
+          && targetTab.selectedTarget === 'garden'"
+        class="mt-2 mb-2"
+        :value="true"
+        type="info"
+        color="primary"
+        variant="tonal"
+      >
+        <strong>Terminal will be running on <span class="font-family-monospace">{{ shootName }}</span> cluster</strong><br>
+        Make sure that only gardener project members with <span class="font-family-monospace">admin</span> role have privileged access to the <span class="font-family-monospace">{{ shootName }}</span> cluster before creating this terminal session.
+      </v-alert>
+      <v-alert
+        v-if="isAdmin
+          && targetTab.selectedTarget === 'shoot'
+          && !targetTab.configLoading
+          && state.runtime === 'shoot'"
+        class="ml-6 mt-6 mb-2"
+        :model-value="true"
+        type="info"
+        color="primary"
+        variant="tonal"
+      >
+        <strong>Terminal will be running in an untrusted environment!</strong><br>
+        Do not enter credentials or sensitive data within the terminal session that cluster owners should not have access to, as the terminal will be running on one of the worker nodes.
+      </v-alert>
+    </template>
   </g-dialog>
 </template>
 

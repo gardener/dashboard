@@ -52,17 +52,6 @@ SPDX-License-Identifier: Apache-2.0
         </template>
       </v-radio>
     </v-radio-group>
-    <v-alert
-      v-if="!isAdmin && selectedTarget === 'garden'"
-      class="mt-2 mb-2"
-      :value="true"
-      type="info"
-      color="primary"
-      variant="tonal"
-    >
-      <strong>Terminal will be running on <span class="font-family-monospace">{{ shootName }}</span> cluster</strong><br>
-      Make sure that only gardener project members with <span class="font-family-monospace">admin</span> role have privileged access to the <span class="font-family-monospace">{{ shootName }}</span> cluster before creating this terminal session.
-    </v-alert>
   </div>
 </template>
 
