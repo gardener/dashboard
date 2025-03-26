@@ -52,10 +52,10 @@ export function createTerminalConfigComposable () {
 
     state.containerImage = container.image
     state.privilegedMode = privilegedMode
-    state.shootNodes = [
-      autoSelectNodeItem,
-      ...nodes,
-    ]
+    state.shootNodes = nodes
+    if (nodes.length) {
+      state.shootNodes.unshift(autoSelectNodeItem)
+    }
   }
 
   const state = reactive({

@@ -779,14 +779,17 @@ async function getTerminalConfig ({ user, namespace, name, target }) {
       namespace,
       name,
     }
-    const hostClient = await client.createShootAdminKubeconfigClient(shootRef)
-
-    const nodeList = await hostClient.core.nodes.list()
-    config.nodes = _
-      .chain(nodeList)
-      .get(['items'])
-      .map(fromNodeResource)
-      .value()
+    try {
+      const hostClient = await client.createShootAdminKubeconfigClient(shootRef)
+      const nodeList = await hostClient.core.nodes.list()
+      config.nodes = _
+        .chain(nodeList)
+        .get(['items'])
+        .map(fromNodeResource)
+        .value()
+    } catch (err) {
+      config.nodes = []
+    }
   }
   return config
 }

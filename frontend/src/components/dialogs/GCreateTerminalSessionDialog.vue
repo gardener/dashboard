@@ -143,6 +143,7 @@ export default {
 
     const {
       config,
+      state,
       updateState,
     } = useProvideTerminalConfig()
 
@@ -156,6 +157,7 @@ export default {
       defaultTarget,
       setSelections,
       config,
+      state,
       updateState,
     }
   },
@@ -189,6 +191,13 @@ export default {
         default: {
           if (this.targetTab.configLoading) {
             return false
+          }
+
+          if (this.targetTab.selectedTarget === 'shoot') {
+            if (this.config.preferredHost === 'shoot' &&
+             !this.state.shootNodes.length) {
+              return false
+            }
           }
           return !this.v$.$invalid
         }
