@@ -378,6 +378,9 @@ export default {
           args.push('--oidc-extra-scope=' + scope)
         }
       }
+      if (oidc.usePKCE || !oidc.clientSecret) {
+        args.push('--oidc-pkce-method=S256')
+      }
       if (oidc.certificateAuthorityData) {
         args.push('--certificate-authority-data=' + oidc.certificateAuthorityData)
       } else if (oidc.insecureSkipTlsVerify) {
