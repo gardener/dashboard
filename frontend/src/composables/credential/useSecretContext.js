@@ -10,6 +10,8 @@ import {
   computed,
   watch,
   watchEffect,
+  inject,
+  provide,
 } from 'vue'
 
 import { useAuthzStore } from '@/store/authz'
@@ -27,7 +29,7 @@ import get from 'lodash/get'
 import isEqual from 'lodash/isEqual'
 import set from 'lodash/set'
 
-export function useSecretContext (options = {}) {
+export function createSecretContextComposable (options = {}) {
   const {
     authzStore = useAuthzStore(),
   } = options
@@ -142,4 +144,14 @@ export function useSecretContext (options = {}) {
     secretData,
     secretStringDataRefs,
   }
+}
+
+export function useSecretContext () {
+  return inject('secret-context', null)
+}
+
+export function useProvideSecretContext (options) {
+  const composable = createSecretContextComposable(options)
+  provide('secret-context', composable)
+  return composable
 }

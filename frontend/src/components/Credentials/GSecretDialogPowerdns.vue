@@ -8,42 +8,42 @@ SPDX-License-Identifier: Apache-2.0
   <g-secret-dialog
     v-model="visible"
     :secret-validations="v$"
-    :secret-binding="secretBinding"
-    create-title="Add new Metal Secret"
-    replace-title="Replace Metal Secret"
+    :binding="binding"
+    create-title="Add new PowerDNS Secret"
+    replace-title="Replace PowerDNS Secret"
   >
     <template #secret-slot>
       <div>
         <v-text-field
-          v-model="apiUrl"
+          v-model="server"
           color="primary"
-          label="API URL"
-          :error-messages="getErrorMessages(v$.apiUrl)"
+          label="Server"
+          :error-messages="getErrorMessages(v$.server)"
           variant="underlined"
-          @update:model-value="v$.apiUrl.$touch()"
-          @blur="v$.apiUrl.$touch()"
+          @update:model-value="v$.server.$touch()"
+          @blur="v$.server.$touch()"
         />
       </div>
       <div>
         <v-text-field
-          v-model="apiHmac"
+          v-model="apiKey"
           color="primary"
-          label="API HMAC"
+          label="API Key"
           :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideSecret ? 'password' : 'text'"
-          :error-messages="getErrorMessages(v$.apiHmac)"
+          :error-messages="getErrorMessages(v$.apiKey)"
           variant="underlined"
           @click:append="() => (hideSecret = !hideSecret)"
-          @update:model-value="v$.apiHmac.$touch()"
-          @blur="v$.apiHmac.$touch()"
+          @update:model-value="v$.apiKey.$touch()"
+          @blur="v$.apiKey.$touch()"
         />
       </div>
     </template>
     <template #help-slot>
       <div>
         <p>
-          Before you can provision and access a Kubernetes cluster on Metal Stack, you need to provide HMAC credentials and the endpoint of your Metal API.
-          The Gardener needs the credentials to provision and operate the Metal Stack infrastructure for your Kubernetes cluster.
+          To use this provider you need to configure the PowerDNS API with an API key. A detailed documentation to generate an API key is available at
+          <g-external-link url="https://doc.powerdns.com/authoritative/http-api/index.html#enabling-the-api" />
         </p>
       </div>
     </template>
@@ -57,9 +57,9 @@ import {
   url,
 } from '@vuelidate/validators'
 
-import GSecretDialog from '@/components/Secrets/GSecretDialog'
+import GSecretDialog from '@/components/Credentials/GSecretDialog'
 
-import { useProvideCredentialContext } from '@/composables/useCredentialContext'
+import { useProvideSecretContext } from '@/composables/credential/useSecretContext'
 
 import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
@@ -73,7 +73,7 @@ export default {
       type: Boolean,
       required: true,
     },
-    secretBinding: {
+    binding: {
       type: Object,
     },
   },
@@ -81,19 +81,19 @@ export default {
     'update:modelValue',
   ],
   setup () {
-    const { secretStringDataRefs } = useProvideCredentialContext()
+    const { secretStringDataRefs } = useProvideSecretContext()
 
     const {
-      apiHmac,
-      apiUrl,
+      server,
+      apiKey,
     } = secretStringDataRefs({
-      metalAPIHMac: 'apiHmac',
-      metalAPIURL: 'apiUrl',
+      server: 'server',
+      apiKey: 'apiKey',
     })
 
     return {
-      apiHmac,
-      apiUrl,
+      server,
+      apiKey,
       v$: useVuelidate(),
     }
   },
@@ -104,10 +104,10 @@ export default {
   },
   validations () {
     return {
-      apiHmac: withFieldName('API HMAC', {
+      apiKey: withFieldName('API Key', {
         required,
       }),
-      apiUrl: withFieldName('API URL', {
+      server: withFieldName('Server', {
         required,
         url,
       }),

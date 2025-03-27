@@ -56,6 +56,7 @@ SPDX-License-Identifier: Apache-2.0
           <g-shoot-secret-name
             :namespace="shootNamespace"
             :secret-binding-name="shootSecretBindingName"
+            :credentials-binding-name="shootCredentialsBindingName"
           />
         </code>
       </span>
@@ -104,6 +105,7 @@ export default {
       shootName,
       shootCreatedBy,
       shootSecretBindingName,
+      shootCredentialsBindingName,
       shootProviderType,
       isShootReconciliationDeactivated,
       shootLastErrors,
@@ -130,6 +132,7 @@ export default {
       shootName,
       shootCreatedBy,
       shootSecretBindingName,
+      shootCredentialsBindingName,
       shootProviderType,
       isShootReconciliationDeactivated,
       shootLastErrors,
