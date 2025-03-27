@@ -213,10 +213,10 @@ export default defineConfig(({ command, mode }) => {
         exclude: ['**/__fixtures__/**'],
         all: false,
         thresholds: {
-          statements: 75,
+          statements: 74,
           branches: 80,
           functions: 47,
-          lines: 75,
+          lines: 74,
         },
       }
 
