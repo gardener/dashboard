@@ -209,8 +209,6 @@ export default {
     const {
       touched,
       getEditorValue,
-      reloadEditor,
-      clearDocumentHistory,
     } = useProvide(injectionKey, useShootEditor(editorData, {
       completionPaths: [
         'spec.properties.provider.properties.workers',
@@ -239,8 +237,6 @@ export default {
       editorData,
       touched,
       getEditorValue,
-      reloadEditor,
-      clearDocumentHistory,
     }
   },
   computed: {
