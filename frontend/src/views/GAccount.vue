@@ -379,7 +379,7 @@ export default {
         }
       }
       if (oidc.usePKCE || !oidc.clientSecret) {
-        args.push('--oidc-use-pkce')
+        args.push('--oidc-pkce-method=S256')
       }
       if (oidc.certificateAuthorityData) {
         args.push('--certificate-authority-data=' + oidc.certificateAuthorityData)
