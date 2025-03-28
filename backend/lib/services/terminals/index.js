@@ -774,7 +774,8 @@ async function getTerminalConfig ({ user, namespace, name, target }) {
     },
   }
 
-  if (target === TargetEnum.SHOOT) {
+  if (target === TargetEnum.SHOOT ||
+     (target === TargetEnum.GARDEN && !isAdmin)) {
     const shootRef = {
       namespace,
       name,

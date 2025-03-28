@@ -87,7 +87,7 @@ export function createTerminalSplitpanesComposable () {
   })
 
   const canScheduleOnSeed = computed(() => {
-    return get(shootItem.value, ['info', 'canLinkToSeed'])
+    return get(shootItem.value, ['info', 'canLinkToSeed'], false)
   })
 
   const slotItemUUIds = computed(() => {
@@ -96,11 +96,13 @@ export function createTerminalSplitpanesComposable () {
   })
 
   const defaultTarget = computed(() => {
-    return terminalCoordinates.value.target ||
-     (authzStore.hasControlPlaneTerminalAccess &&
-      canScheduleOnSeed.value)
-      ? TargetEnum.CONTROL_PLANE
-      : TargetEnum.SHOOT
+    if (terminalCoordinates.value.target) {
+      return terminalCoordinates.value.target
+    }
+    if (authzStore.hasControlPlaneTerminalAccess && canScheduleOnSeed.value) {
+      return TargetEnum.CONTROL_PLANE
+    }
+    return TargetEnum.SHOOT
   })
 
   function addSlotItem ({ data = {}, targetId, position } = {}) {

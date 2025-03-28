@@ -66,6 +66,7 @@ export function createTerminalConfigComposable () {
     shootNodes: [],
     privilegedMode: false,
     runtime: 'shoot',
+    canScheduleOnSeed: false,
   })
 
   function isAutoSelectNode (hostname) {
