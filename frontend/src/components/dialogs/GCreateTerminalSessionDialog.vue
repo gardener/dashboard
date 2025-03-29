@@ -39,7 +39,6 @@ SPDX-License-Identifier: Apache-2.0
           <g-terminal-target
             v-model="targetTab.selectedTarget"
             :disabled="targetTab.configLoading"
-            @update:model-value="updateSettings"
           />
           <v-expansion-panels
             v-model="targetTab.value"
@@ -57,7 +56,7 @@ SPDX-License-Identifier: Apache-2.0
                 <g-terminal-settings
                   v-show="!targetTab.configLoading"
                   ref="settings"
-                  :runtime-settings-hidden="!hasShootWorkerGroups || targetTab.selectedTarget !== 'shoot'"
+                  :runtime-settings-hidden="!hasShootWorkerGroups || targetTab.selectedTarget !== TargetEnum.SHOOT"
                 />
               </v-expansion-panel-text>
             </v-expansion-panel>
@@ -88,6 +87,37 @@ SPDX-License-Identifier: Apache-2.0
         ref="serviceAccount"
         :namespace="shootNamespace"
       />
+    </template>
+    <template #footer>
+      <v-alert
+        v-if="showUserGardenTerminalAlert"
+        class="ma-2"
+        type="info"
+        color="primary"
+        variant="tonal"
+      >
+        <strong>Terminal will be running on <span class="font-family-monospace">{{ shootName }}</span> cluster</strong><br>
+        Make sure that only gardener project members with <span class="font-family-monospace">admin</span> role have privileged access to the <span class="font-family-monospace">{{ shootName }}</span> cluster before creating this terminal session.
+      </v-alert>
+      <v-alert
+        v-if="showAdminShootTerminalAlert"
+        class="ma-2"
+        type="info"
+        color="primary"
+        variant="tonal"
+      >
+        <strong>Terminal will be running in an untrusted environment!</strong><br>
+        Do not enter credentials or sensitive data within the terminal session that cluster owners should not have access to, as the terminal will be running on one of the worker nodes.
+      </v-alert>
+      <v-alert
+        v-if="createDisabledNoNodes"
+        class="ma-2"
+        type="error"
+        variant="tonal"
+      >
+        <strong>Cannot schedule terminal on<span class="font-family-monospace">{{ shootName }}</span> cluster</strong><br>
+        No worker nodes available in the cluster. Please check the cluster status and try again.
+      </v-alert>
     </template>
   </g-dialog>
 </template>
@@ -136,6 +166,7 @@ export default {
       shootName,
       hasShootWorkerGroups,
       isShootStatusHibernated,
+      canScheduleOnSeed,
       newTerminalPrompt,
       defaultTarget,
       setSelections,
@@ -143,6 +174,7 @@ export default {
 
     const {
       config,
+      state,
       updateState,
     } = useProvideTerminalConfig()
 
@@ -152,11 +184,14 @@ export default {
       shootName,
       hasShootWorkerGroups,
       isShootStatusHibernated,
+      canScheduleOnSeed,
       newTerminalPrompt,
       defaultTarget,
       setSelections,
       config,
+      state,
       updateState,
+      TargetEnum,
     }
   },
   data () {
@@ -188,6 +223,10 @@ export default {
         }
         default: {
           if (this.targetTab.configLoading) {
+            return false
+          }
+
+          if (this.createDisabledNoNodes) {
             return false
           }
           return !this.v$.$invalid
@@ -225,6 +264,26 @@ export default {
         }
       }
     },
+    showUserGardenTerminalAlert () {
+      return !this.isAdmin && this.targetTab.selectedTarget === TargetEnum.GARDEN
+    },
+    showAdminShootTerminalAlert () {
+      return this.isAdmin &&
+          this.targetTab.selectedTarget === TargetEnum.SHOOT &&
+          !this.targetTab.configLoading &&
+          this.state.runtime === TargetEnum.SHOOT
+    },
+    createDisabledNoNodes () {
+      if (this.state.runtime !== TargetEnum.SHOOT && this.state.runtime !== TargetEnum.GARDEN) {
+        return false
+      }
+      if (this.isAdmin && this.targetTab.selectedTarget === TargetEnum.GARDEN) {
+        // Admin Garden Terminal always scheduled on dedicated managed seed
+        return false
+      }
+
+      return !this.targetTab.configLoading && !this.state.shootNodes.length
+    },
   },
   watch: {
     isSettingsExpanded () {
@@ -237,6 +296,12 @@ export default {
       if (value) {
         await this.promptForSelections()
       }
+    },
+    defaultTarget (value) {
+      this.targetTab.selectedTarget = value
+    },
+    'targetTab.selectedTarget' () {
+      this.updateSettings()
     },
   },
   methods: {
@@ -308,6 +373,8 @@ export default {
           name: this.shootName,
           target: this.targetTab.selectedTarget,
         })
+        config.canScheduleOnSeed = this.canScheduleOnSeed
+
         this.updateState(config)
       } catch (err) {
         this.targetTab.initializedForTarget = undefined
