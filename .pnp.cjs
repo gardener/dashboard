@@ -1662,7 +1662,7 @@ const RAW_RUNTIME_STATE =
           ["socket.io", "npm:4.8.1"],\
           ["socket.io-client", "npm:4.8.1"],\
           ["supertest", "npm:7.0.0"],\
-          ["undici", "npm:7.5.0"],\
+          ["undici", "npm:7.6.0"],\
           ["uuid", "npm:11.1.0"]\
         ],\
         "linkType": "SOFT"\
@@ -1899,7 +1899,7 @@ const RAW_RUNTIME_STATE =
           ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:29.7.0"],\
           ["lodash", "npm:4.17.21"],\
           ["neostandard", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:0.12.1"],\
-          ["type-is", "npm:1.6.18"]\
+          ["type-is", "npm:2.0.1"]\
         ],\
         "linkType": "SOFT"\
       }]\
@@ -13088,10 +13088,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["undici", [\
-      ["npm:7.5.0", {\
-        "packageLocation": "./.yarn/cache/undici-npm-7.5.0-0533c07a70-07e1c984ff.zip/node_modules/undici/",\
+      ["npm:7.6.0", {\
+        "packageLocation": "./.yarn/cache/undici-npm-7.6.0-4784f37247-53824a217c.zip/node_modules/undici/",\
         "packageDependencies": [\
-          ["undici", "npm:7.5.0"]\
+          ["undici", "npm:7.6.0"]\
         ],\
         "linkType": "HARD"\
       }]\
