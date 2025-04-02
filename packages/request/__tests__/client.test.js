@@ -112,6 +112,15 @@ describe('Client', () => {
       expect(client.baseUrl.href).toBe(url.href)
     })
 
+    it('should create an instance with url path preserved', () => {
+      client = new Client({
+        url: url.href,
+        relativeUrl: 'foo/bar',
+      })
+      expect(url.href.endsWith('/')).toBe(false)
+      expect(client.baseUrl.href).toBe(url.href + '/foo/bar')
+    })
+
     it('should create an instance with bearer authorization', () => {
       client = new Client({
         url,

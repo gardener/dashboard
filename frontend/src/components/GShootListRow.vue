@@ -66,7 +66,7 @@ SPDX-License-Identifier: Apache-2.0
         </g-auto-hide>
       </template>
       <template v-if="cell.header.key === 'workers'">
-        <div class="d-flex justify-center">
+        <g-scroll-container class="d-flex flex-wrap justify-center large-container">
           <g-collapsible-items
             :items="shootWorkerGroups"
             :uid="shootUid"
@@ -80,7 +80,7 @@ SPDX-License-Identifier: Apache-2.0
               />
             </template>
           </g-collapsible-items>
-        </div>
+        </g-scroll-container>
       </template>
       <template v-if="cell.header.key === 'createdBy'">
         <g-account-avatar :account-name="shootCreatedBy" />
@@ -129,21 +129,23 @@ SPDX-License-Identifier: Apache-2.0
         />
       </template>
       <template v-if="cell.header.key === 'accessRestrictions'">
-        <g-collapsible-items
-          :items="shootAccessRestrictions"
-          :uid="shootUid"
-          inject-key="expandedAccessRestrictions"
-        >
-          <template #item="{ item }">
-            <g-access-restriction-chip
-              :id="item.key"
-              :key="item.key"
-              :title="item.title"
-              :description="item.description"
-              :options="item.options"
-            />
-          </template>
-        </g-collapsible-items>
+        <g-scroll-container class="d-flex flex-wrap justify-center large-container">
+          <g-collapsible-items
+            :items="shootAccessRestrictions"
+            :uid="shootUid"
+            inject-key="expandedAccessRestrictions"
+          >
+            <template #item="{ item }">
+              <g-access-restriction-chip
+                :id="item.key"
+                :key="item.key"
+                :title="item.title"
+                :description="item.description"
+                :options="item.options"
+              />
+            </template>
+          </g-collapsible-items>
+        </g-scroll-container>
       </template>
       <template v-if="cell.header.key === 'ticket'">
         <g-external-link
@@ -160,16 +162,16 @@ SPDX-License-Identifier: Apache-2.0
         <template v-if="shootLastUpdatedTicketTimestamp && !shootTicketLabels.length">
           None
         </template>
-        <div
+        <g-scroll-container
           v-else
-          class="d-flex flex-wrap ticket-labels"
+          class="d-flex flex-wrap justify-center small-container"
         >
           <g-ticket-label
             v-for="label in shootTicketLabels"
             :key="label.name"
             :label="label"
           />
-        </div>
+        </g-scroll-container>
       </template>
       <template v-if="cell.header.customField">
         <v-tooltip
@@ -264,6 +266,7 @@ import GControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvail
 import GWorkerGroup from '@/components/ShootWorkers/GWorkerGroup'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 import GCollapsibleItems from '@/components/GCollapsibleItems'
+import GScrollContainer from '@/components/GScrollContainer'
 
 import { useShootAction } from '@/composables/useShootAction'
 import { useProvideShootItem } from '@/composables/useShootItem'
@@ -437,10 +440,14 @@ const hasShootWorkerGroupWarning = computed(() => {
 </script>
 
 <style lang="scss" scoped>
-  .ticket-labels {
-    overflow-y: scroll;
-    max-height: 30px;
-    max-width: 300px;
+  .large-container {
+    max-height: 140px;
+    max-width: 350px;
+  }
+
+  .small-container {
+    max-height: 37px;
+    max-width: 350px;
   }
 
   .position-relative {

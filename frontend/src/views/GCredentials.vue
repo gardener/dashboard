@@ -6,15 +6,19 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-container
+    ref="container"
     fluid
+    class="container-size"
     @click="highlightedUid = null"
   >
     <v-card class="ma-3">
       <g-toolbar
         prepend-icon="mdi-key"
-        title="Infrastructure Credentials"
         :height="64"
       >
+        <div class="text-h6">
+          Infrastructure Credentials
+        </div>
         <template #append>
           <v-text-field
             v-if="infrastructureCredentialsItems.length > 3"
@@ -95,19 +99,21 @@ SPDX-License-Identifier: Apache-2.0
           Before you can provision and access a Kubernetes cluster, you need to add infrastructure account credentials. The Gardener needs the credentials to provision and operate the infrastructure for your Kubernetes cluster.
         </p>
       </v-card-text>
-      <v-data-table
+      <v-data-table-virtual
         v-else
+        ref="infraCredentialTableRef"
         v-model:sort-by="infraCredentialSortBy"
-        v-model:page="infraCredentialPage"
-        v-model:items-per-page="infraCredentialItemsPerPage"
         :headers="visibleInfraCredentialTableHeaders"
         :items="infrastructureCredentialSortedItems"
-        :items-per-page-options="itemsPerPageOptions"
         :custom-key-sort="disableCustomKeySort(visibleInfraCredentialTableHeaders)"
         must-sort
+        hover
         :search="infraCredentialFilter"
         density="compact"
         class="g-table"
+        :item-height="itemHeight"
+        :style="infraCredentialTableStyles"
+        fixed-header
       >
         <template #item="{ item }">
           <g-credential-row-infra
@@ -118,16 +124,13 @@ SPDX-License-Identifier: Apache-2.0
             @update="onUpdateCredential"
           />
         </template>
-        <template #bottom="{ pageCount }">
+        <template #bottom>
           <g-data-table-footer
-            v-model:page="infraCredentialPage"
-            v-model:items-per-page="infraCredentialItemsPerPage"
             :items-length="infrastructureCredentialsItems.length"
-            :items-per-page-options="itemsPerPageOptions"
-            :page-count="pageCount"
+            items-label="Infrastructure Credentials"
           />
         </template>
-      </v-data-table>
+      </v-data-table-virtual>
     </v-card>
 
     <v-card
@@ -136,9 +139,12 @@ SPDX-License-Identifier: Apache-2.0
     >
       <g-toolbar
         prepend-icon="mdi-key"
-        title="DNS Credentials"
         :height="64"
       >
+        <div class="text-h6">
+          DNS Credentials
+        </div>
+
         <template #append>
           <v-text-field
             v-if="dnsCredentialItems.length > 3"
@@ -210,19 +216,21 @@ SPDX-License-Identifier: Apache-2.0
           Before you can use your DNS Provider account for your cluster, you need to configure the credentials here.
         </p>
       </v-card-text>
-      <v-data-table
+      <v-data-table-virtual
         v-else
-        v-model:page="dnsCredentialPage"
+        ref="dnsCredentialTableRef"
         v-model:sort-by="dnsCredentialSortBy"
-        v-model:items-per-page="dnsCredentialtemsPerPage"
         :headers="visibleDnsCredentialTableHeaders"
         :items="dnsCredentialSortedItems"
-        :items-per-page-options="itemsPerPageOptions"
         :custom-key-sort="disableCustomKeySort(visibleDnsCredentialTableHeaders)"
         must-sort
+        hover
         :search="dnsCredentialFilter"
         density="compact"
         class="g-table"
+        :item-height="itemHeight"
+        :style="dnsCredentialTableStyles"
+        fixed-header
       >
         <template #item="{ item }">
           <g-credential-row-dns
@@ -233,16 +241,13 @@ SPDX-License-Identifier: Apache-2.0
             @update="onUpdateCredential"
           />
         </template>
-        <template #bottom="{ pageCount }">
+        <template #bottom>
           <g-data-table-footer
-            v-model:page="dnsCredentialPage"
-            v-model:items-per-page="dnsCredentialtemsPerPage"
             :items-length="dnsCredentialItems.length"
-            :items-per-page-options="itemsPerPageOptions"
-            :page-count="pageCount"
+            items-label="DNS Credentials"
           />
         </template>
-      </v-data-table>
+      </v-data-table-virtual>
     </v-card>
 
     <g-secret-dialog-wrapper
@@ -257,9 +262,13 @@ SPDX-License-Identifier: Apache-2.0
 import {
   mapState,
   mapWritableState,
+  storeToRefs,
 } from 'pinia'
 import { useUrlSearchParams } from '@vueuse/core'
-import { toRef } from 'vue'
+import {
+  toRef,
+  computed,
+} from 'vue'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
@@ -275,6 +284,8 @@ import GCredentialRowDns from '@/components/Credentials/GCredentialRowDns.vue'
 import GVendorIcon from '@/components/GVendorIcon'
 import GToolbar from '@/components/GToolbar'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
+
+import { useTwoTableLayout } from '@/composables/useTwoTableLayout'
 
 import {
   hasOwnCredential,
@@ -305,34 +316,48 @@ export default {
   setup () {
     const hashParams = useUrlSearchParams('hash-params')
     const highlightedUid = toRef(hashParams, 'credential-uid')
+
+    const credentialStore = useCredentialStore()
+    const {
+      infrastructureBindingList,
+      dnsBindingList,
+    } = storeToRefs(credentialStore)
+
+    const itemHeight = 58
+    const firstTableItemCount = computed(() => infrastructureBindingList.value.length)
+    const secondTableItemCount = computed(() => dnsBindingList.value.length)
+
+    const {
+      firstTableStyles: infraCredentialTableStyles,
+      secondTableStyles: dnsCredentialTableStyles,
+    } = useTwoTableLayout({
+      firstTableItemCount,
+      secondTableItemCount,
+      itemHeight,
+    })
+
     return {
       highlightedUid,
+      infrastructureBindingList,
+      dnsBindingList,
+      itemHeight,
+      infraCredentialTableStyles,
+      dnsCredentialTableStyles,
     }
   },
   data () {
     return {
       selectedBinding: {},
-      infraCredentialPage: 1,
-      dnsCredentialPage: 1,
       infraCredentialFilter: '',
       createInfraCredentialMenu: false,
       dnsCredentialFilter: '',
       createDnsCredentialMenu: false,
       visibleCredentialDialog: undefined,
-      itemsPerPageOptions: [
-        { value: 5, title: '5' },
-        { value: 10, title: '10' },
-        { value: 20, title: '20' },
-      ],
     }
   },
   computed: {
     ...mapState(useCloudProfileStore, ['sortedProviderTypeList']),
     ...mapState(useGardenerExtensionStore, ['dnsProviderTypes']),
-    ...mapState(useCredentialStore, [
-      'infrastructureBindingList',
-      'dnsBindingList',
-    ]),
     ...mapState(useAuthzStore, [
       'namespace',
       'canCreateCredentials',
@@ -340,10 +365,8 @@ export default {
     ...mapState(useShootStore, ['shootList']),
     ...mapWritableState(useLocalStorageStore, [
       'infraCredentialSelectedColumns',
-      'infraCredentialItemsPerPage',
       'infraCredentialSortBy',
       'dnsCredentialSelectedColumns',
-      'dnsCredentialtemsPerPage',
       'dnsCredentialSortBy',
     ]),
     infraCredentialTableHeaders () {
@@ -486,16 +509,24 @@ export default {
       this.reset()
     },
     highlightedUid: {
+      // TODO FIX
       handler (value) {
-        const infraIndex = findIndex(this.infrastructureCredentialSortedItems, ['binding.metadata.uid', value])
-        if (infraIndex !== -1) {
-          this.infraCredentialPage = Math.floor(infraIndex / this.infraCredentialItemsPerPage) + 1
-        }
+        setTimeout(() => {
+          // Cannot start scrolling before the table is rendered
+          const scrollToItem = (items, tableRef) => {
+            const itemIndex = findIndex(items, ['secretBinding.metadata.uid', value])
+            if (itemIndex !== -1) {
+              tableRef.$el.querySelector('.v-table__wrapper').scrollTo({
+                top: itemIndex * this.itemHeight,
+                left: 0,
+                behavior: 'smooth',
+              })
+            }
+          }
 
-        const dnsIndex = findIndex(this.dnsCredentialSortedItems, ['binding.metadata.uid', value])
-        if (dnsIndex !== -1) {
-          this.dnsCredentialPage = Math.floor(dnsIndex / this.dnsCredentialtemsPerPage) + 1
-        }
+          scrollToItem(this.infrastructureCredentialSortedItems, this.$refs.infraCredentialTableRef)
+          scrollToItem(this.dnsCredentialSortedItems, this.$refs.dnsCredentialTableRef)
+        }, 100)
       },
       immediate: true,
     },
@@ -527,12 +558,9 @@ export default {
     reset () {
       this.infraCredentialFilter = ''
       this.dnsCredentialFilter = ''
-      this.infraCredentialPage = 1
-      this.dnsCredentialPage = 1
     },
     resetInfraTableSettings () {
       this.infraCredentialSelectedColumns = mapTableHeader(this.infraCredentialTableHeaders, 'defaultSelected')
-      this.infraCredentialItemsPerPage = 10
       this.infraCredentialSortBy = [{ key: 'name', order: 'asc' }]
     },
     setSelectedDnsHeader (header) {
@@ -540,7 +568,6 @@ export default {
     },
     resetDnsTableSettings () {
       this.dnsCredentialSelectedColumns = mapTableHeader(this.dnsCredentialTableHeaders, 'defaultSelected')
-      this.dnsCredentialtemsPerPage = 10
       this.dnsCredentialSortBy = [{ key: 'name', order: 'asc' }]
     },
     onDialogClosed () {
@@ -617,3 +644,12 @@ export default {
   },
 }
 </script>
+
+<style lang="scss" scoped>
+
+.container-size {
+  height: 100%;
+  min-height: 800px; //ensure readability on small devices
+}
+
+</style>

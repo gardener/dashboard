@@ -347,11 +347,18 @@ global:
       serviceAccountDefaultTokenExpiration: 7776000 # seconds
 
       # # externalTools are links displayed in a dedicated card External Tools on the cluster details page.
-      # # The url can be an url-template (https://tools.ietf.org/html/rfc6570). The variables namespace and name of the shoot are available when the url is expanded.
+      # # The url can be an url-template (https://tools.ietf.org/html/rfc6570). The list of available variables of the shoot when the url is expanded is:
+      # # - namespace
+      # # - name
+      # # - domain
+      # # - project
       # externalTools:
       # - title: Example Tool
       #   icon: link
       #   url: https://example.org/foo/bar{?namespace,name}
+      # - title: Shoot Deployed Tool
+      #   icon: link
+      #   url: https://myapp.{domain}
 
       # # resourceQuotaHelp - configure help text how to configure project resource quota
       # resourceQuotaHelp:

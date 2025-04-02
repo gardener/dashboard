@@ -158,6 +158,7 @@ export default {
 
   .credential-row {
     transition: background-color 0.5s ease;
+    height: 58px;
 
     &.highlighted {
       background-color: $highlighted-color;

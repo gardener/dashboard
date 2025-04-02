@@ -10,7 +10,10 @@ SPDX-License-Identifier: Apache-2.0
       v-if="selectedHeaders.displayName"
       class="pa-0"
     >
-      <v-list>
+      <v-list
+        class="pa-0"
+        density="compact"
+      >
         <v-list-item
           :prepend-avatar="item.avatarUrl"
         >

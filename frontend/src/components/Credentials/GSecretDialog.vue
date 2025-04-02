@@ -63,9 +63,9 @@ SPDX-License-Identifier: Apache-2.0
               class="ml-6 help-container"
               :style="helpContainerStyles"
             >
-              <div class="help-content">
+              <g-scroll-container class="help-content">
                 <slot name="help-slot" />
-              </div>
+              </g-scroll-container>
             </div>
           </v-slide-x-reverse-transition>
         </div>
@@ -132,6 +132,7 @@ import { useShootStore } from '@/store/shoot'
 
 import GToolbar from '@/components/GToolbar.vue'
 import GMessage from '@/components/GMessage'
+import GScrollContainer from '@/components/GScrollContainer'
 
 import { useSecretContext } from '@/composables/credential/useSecretContext'
 import { useSecretBindingContext } from '@/composables/credential/useSecretBindingContext'
@@ -161,6 +162,7 @@ export default {
   components: {
     GMessage,
     GToolbar,
+    GScrollContainer,
   },
   inject: ['logger'],
   props: {
@@ -407,20 +409,8 @@ export default {
 
 .help-content {
   height: 100%;
-  overflow-y: auto;
   padding-right: 15px;
   box-sizing: content-box;
-}
-
-.help-container::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 50px;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(var(--v-theme-surface)));
-  pointer-events: none;
 }
 
 </style>
