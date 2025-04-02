@@ -96,6 +96,10 @@ export function createTerminalSplitpanesComposable () {
   })
 
   const defaultTarget = computed(() => {
+    if (!shootItem.value.info) {
+      // target depends on shootItem info, this ensures target is stable during loading
+      return undefined
+    }
     if (terminalCoordinates.value.target) {
       return terminalCoordinates.value.target
     }

@@ -89,35 +89,37 @@ SPDX-License-Identifier: Apache-2.0
       />
     </template>
     <template #footer>
-      <v-alert
-        v-if="showUserGardenTerminalAlert"
-        class="ma-2"
-        type="info"
-        color="primary"
-        variant="tonal"
-      >
-        <strong>Terminal will be running on <span class="font-family-monospace">{{ shootName }}</span> cluster</strong><br>
-        Make sure that only gardener project members with <span class="font-family-monospace">admin</span> role have privileged access to the <span class="font-family-monospace">{{ shootName }}</span> cluster before creating this terminal session.
-      </v-alert>
-      <v-alert
-        v-if="showAdminShootTerminalAlert"
-        class="ma-2"
-        type="info"
-        color="primary"
-        variant="tonal"
-      >
-        <strong>Terminal will be running in an untrusted environment!</strong><br>
-        Do not enter credentials or sensitive data within the terminal session that cluster owners should not have access to, as the terminal will be running on one of the worker nodes.
-      </v-alert>
-      <v-alert
-        v-if="createDisabledNoNodes"
-        class="ma-2"
-        type="error"
-        variant="tonal"
-      >
-        <strong>Cannot schedule terminal on <span class="font-family-monospace">{{ shootName }}</span> cluster</strong><br>
-        No worker nodes available in the cluster. Please check the cluster status and try again.
-      </v-alert>
+      <div v-if="targetTab.selectedTarget">
+        <v-alert
+          v-if="showUserGardenTerminalAlert"
+          class="ma-2"
+          type="info"
+          color="primary"
+          variant="tonal"
+        >
+          <strong>Terminal will be running on <span class="font-family-monospace">{{ shootName }}</span> cluster</strong><br>
+          Make sure that only gardener project members with <span class="font-family-monospace">admin</span> role have privileged access to the <span class="font-family-monospace">{{ shootName }}</span> cluster before creating this terminal session.
+        </v-alert>
+        <v-alert
+          v-if="showAdminShootTerminalAlert"
+          class="ma-2"
+          type="info"
+          color="primary"
+          variant="tonal"
+        >
+          <strong>Terminal will be running in an untrusted environment!</strong><br>
+          Do not enter credentials or sensitive data within the terminal session that cluster owners should not have access to, as the terminal will be running on one of the worker nodes.
+        </v-alert>
+        <v-alert
+          v-if="createDisabledNoNodes"
+          class="ma-2"
+          type="error"
+          variant="tonal"
+        >
+          <strong>Cannot schedule terminal on <span class="font-family-monospace">{{ shootName }}</span> cluster</strong><br>
+          No worker nodes available in the cluster. Please check the cluster status and try again.
+        </v-alert>
+      </div>
     </template>
   </g-dialog>
 </template>
@@ -233,9 +235,6 @@ export default {
         }
       }
     },
-    isSettingsExpanded () {
-      return this.targetTab.value === 0
-    },
     selections () {
       switch (this.tab) {
         case 'target-tab': {
@@ -286,9 +285,6 @@ export default {
     },
   },
   watch: {
-    isSettingsExpanded () {
-      this.updateSettings()
-    },
     config (value) {
       this.targetTab.selectedConfig = toRaw(value)
     },

@@ -5,70 +5,62 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <div>
-    <v-radio-group
-      v-if="!loading"
-      v-model="selectedTarget"
-      label="Terminal Target"
-      class="mt-6"
-      :hint="hint"
-      persistent-hint
+  <v-radio-group
+    v-model="selectedTarget"
+    label="Terminal Target"
+    class="mt-6"
+    :hint="hint"
+    persistent-hint
+  >
+    <div>
+      <v-radio
+        v-if="shootItem && hasControlPlaneTerminalAccess"
+        label="Control Plane"
+        value="cp"
+        color="primary"
+        :disabled="!canScheduleOnSeed"
+      />
+      <v-tooltip
+        activator="parent"
+        location="top left"
+        :disabled="canScheduleOnSeed"
+      >
+        Terminals can only be scheduled if seed of this cluster is a managed seed
+      </v-tooltip>
+    </div>
+    <v-radio
+      v-if="shootItem && hasShootTerminalAccess"
+      value="shoot"
+      color="primary"
+      :disabled="loading || isShootStatusHibernated"
     >
-      <div>
-        <v-radio
-          v-if="shootItem && hasControlPlaneTerminalAccess"
-          label="Control Plane"
-          value="cp"
-          color="primary"
-          :disabled="!canScheduleOnSeed"
-        />
-        <v-tooltip
-          activator="parent"
-          location="top left"
-          :disabled="canScheduleOnSeed"
+      <template #label>
+        <div>Cluster</div>
+        <v-icon
+          v-if="isShootStatusHibernated"
+          class="vertical-align-middle ml-2"
         >
-          Terminals can only be scheduled if seed of this cluster is a managed seed
-        </v-tooltip>
-      </div>
-      <v-radio
-        v-if="shootItem && hasShootTerminalAccess"
-        value="shoot"
-        color="primary"
-        :disabled="loading || isShootStatusHibernated"
-      >
-        <template #label>
-          <div>Cluster</div>
-          <v-icon
-            v-if="isShootStatusHibernated"
-            class="vertical-align-middle ml-2"
-          >
-            mdi-sleep
-          </v-icon>
-        </template>
-      </v-radio>
-      <v-radio
-        v-if="hasGardenTerminalAccess"
-        value="garden"
-        color="primary"
-        :disabled="loading || (!isAdmin && isShootStatusHibernated)"
-      >
-        <template #label>
-          <div>Garden Cluster</div>
-          <v-icon
-            v-if="!isAdmin && isShootStatusHibernated"
-            class="vertical-align-middle ml-2"
-          >
-            mdi-sleep
-          </v-icon>
-        </template>
-      </v-radio>
-    </v-radio-group>
-    <v-skeleton-loader
-      v-if="loading"
-      type="card"
-      class="ma-3"
-    />
-  </div>
+          mdi-sleep
+        </v-icon>
+      </template>
+    </v-radio>
+    <v-radio
+      v-if="hasGardenTerminalAccess"
+      value="garden"
+      color="primary"
+      :disabled="loading || (!isAdmin && isShootStatusHibernated)"
+    >
+      <template #label>
+        <div>Garden Cluster</div>
+        <v-icon
+          v-if="!isAdmin && isShootStatusHibernated"
+          class="vertical-align-middle ml-2"
+        >
+          mdi-sleep
+        </v-icon>
+      </template>
+    </v-radio>
+  </v-radio-group>
 </template>
 
 <script>
