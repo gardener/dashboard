@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@gardener-dashboard/logger": "workspace:^",
-    "express": "^4.18.3",
+    "express": "^5.0.0",
     "http-errors": "^2.0.0",
     "prom-client": "^15.1.0",
     "response-time": "^2.3.2"
@@ -60,7 +60,7 @@
       "<rootDir>/jest.setup.js"
     ]
   },
-  "packageManager": "yarn@4.7.0",
+  "packageManager": "yarn@4.8.1",
   "engines": {
     "node": "^22.7.0"
   }

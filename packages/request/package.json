@@ -28,7 +28,7 @@
     "@gardener-dashboard/logger": "workspace:^",
     "http-errors": "^2.0.0",
     "lodash": "^4.17.21",
-    "type-is": "^1.6.18"
+    "type-is": "^2.0.0"
   },
   "devDependencies": {
     "@gardener-dashboard/test-utils": "workspace:^",
@@ -66,7 +66,7 @@
       "<rootDir>/jest.setup.js"
     ]
   },
-  "packageManager": "yarn@4.7.0",
+  "packageManager": "yarn@4.8.1",
   "engines": {
     "node": "^22.7.0"
   }
