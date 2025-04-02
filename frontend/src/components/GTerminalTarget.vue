@@ -7,6 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div>
     <v-radio-group
+      v-if="!loading"
       v-model="selectedTarget"
       label="Terminal Target"
       class="mt-6"
@@ -26,14 +27,14 @@ SPDX-License-Identifier: Apache-2.0
           location="top left"
           :disabled="canScheduleOnSeed"
         >
-          Terminals can only be scheduled on managed seeds
+          Terminals can only be scheduled if seed of this cluster is a managed seed
         </v-tooltip>
       </div>
       <v-radio
         v-if="shootItem && hasShootTerminalAccess"
         value="shoot"
         color="primary"
-        :disabled="disabled || isShootStatusHibernated"
+        :disabled="loading || isShootStatusHibernated"
       >
         <template #label>
           <div>Cluster</div>
@@ -49,7 +50,7 @@ SPDX-License-Identifier: Apache-2.0
         v-if="hasGardenTerminalAccess"
         value="garden"
         color="primary"
-        :disabled="disabled || (!isAdmin && isShootStatusHibernated)"
+        :disabled="loading || (!isAdmin && isShootStatusHibernated)"
       >
         <template #label>
           <div>Garden Cluster</div>
@@ -62,6 +63,11 @@ SPDX-License-Identifier: Apache-2.0
         </template>
       </v-radio>
     </v-radio-group>
+    <v-skeleton-loader
+      v-if="loading"
+      type="card"
+      class="ma-3"
+    />
   </div>
 </template>
 
@@ -82,7 +88,7 @@ export default {
     modelValue: {
       type: String,
     },
-    disabled: {
+    loading: {
       type: Boolean,
       default: false,
     },

@@ -38,7 +38,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-window-item value="target-tab">
           <g-terminal-target
             v-model="targetTab.selectedTarget"
-            :disabled="targetTab.configLoading"
+            :loading="targetTab.configLoading"
           />
           <v-expansion-panels
             v-model="targetTab.value"
@@ -115,7 +115,7 @@ SPDX-License-Identifier: Apache-2.0
         type="error"
         variant="tonal"
       >
-        <strong>Cannot schedule terminal on<span class="font-family-monospace">{{ shootName }}</span> cluster</strong><br>
+        <strong>Cannot schedule terminal on <span class="font-family-monospace">{{ shootName }}</span> cluster</strong><br>
         No worker nodes available in the cluster. Please check the cluster status and try again.
       </v-alert>
     </template>
