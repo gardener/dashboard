@@ -10491,9 +10491,9 @@ __metadata:
   linkType: hard
 
 "undici@npm:^7.3.0":
-  version: 7.6.0
-  resolution: "undici@npm:7.6.0"
-  checksum: 10c0/53824a217c47dfc00961b8f504ebfa30f469357f2e5444320cbe446774dd4a836c37317a5d4ddf1ac61ab936ef05e081cc6a32ec60ac9e65dea841468397430d
+  version: 7.7.0
+  resolution: "undici@npm:7.7.0"
+  checksum: 10c0/2e535e56b5d462337e0dc57012659dab016a2596bc23dd44637c2b81b6947eb236c3390ccc9293f399032d363474f66cf836bc5ee14889fbcf820fa42181c629
   languageName: node
   linkType: hard
 
@@ -10919,13 +10919,13 @@ __metadata:
   linkType: hard
 
 "vuetify@npm:^3.7.5":
-  version: 3.7.19
-  resolution: "vuetify@npm:3.7.19"
+  version: 3.8.0
+  resolution: "vuetify@npm:3.8.0"
   peerDependencies:
     typescript: ">=4.7"
-    vite-plugin-vuetify: ">=1.0.0"
-    vue: ^3.3.0
-    webpack-plugin-vuetify: ">=2.0.0"
+    vite-plugin-vuetify: ">=2.1.0"
+    vue: ^3.5.0
+    webpack-plugin-vuetify: ">=3.1.0"
   peerDependenciesMeta:
     typescript:
       optional: true
@@ -10933,7 +10933,7 @@ __metadata:
       optional: true
     webpack-plugin-vuetify:
       optional: true
-  checksum: 10c0/8eda1fbf08cc0fbcab1fed7fab947d1a485353774be4db941cd5a9129011798a18e4d2e83fcc64555c85c9eb77ad6706e7d4c23101de00cde4663b88d00ffff2
+  checksum: 10c0/28c87ee1e768c34bbae152d098ff7addfa48fecc1464620adeb76832189b357a45e60b74e37776869f1d09458f8de65ee827a4adf9d74879b94fc056c158034d
   languageName: node
   linkType: hard
 
