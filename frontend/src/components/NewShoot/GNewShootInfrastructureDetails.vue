@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0
         cols="3"
       >
         <g-select-secret
-          v-model="infrastructureSecretBinding"
+          v-model="infrastructureBinding"
           :provider-type="providerType"
         />
       </v-col>
@@ -188,7 +188,7 @@ import { useVuelidate } from '@vuelidate/core'
 
 import GCloudProfile from '@/components/GCloudProfile'
 import GWildcardSelect from '@/components/GWildcardSelect'
-import GSelectSecret from '@/components/Secrets/GSelectSecret'
+import GSelectSecret from '@/components/Credentials/GSelectSecret'
 
 import { useShootContext } from '@/composables/useShootContext'
 
@@ -214,7 +214,7 @@ export default {
     const {
       providerType,
       cloudProfileName,
-      infrastructureSecretBinding,
+      infrastructureBinding,
       region,
       networkingType,
       providerControlPlaneConfigLoadBalancerProviderName,
@@ -226,7 +226,7 @@ export default {
       providerInfrastructureConfigFirewallSize,
       providerInfrastructureConfigFirewallNetworks,
       cloudProfiles,
-      infrastructureSecretBindings,
+      infrastructureBindings,
       regionsWithSeed,
       regionsWithoutSeed,
       showAllRegions,
@@ -245,7 +245,7 @@ export default {
       v$: useVuelidate(),
       providerType,
       cloudProfileName,
-      infrastructureSecretBinding,
+      infrastructureBinding,
       region,
       networkingType,
       loadBalancerProviderName: providerControlPlaneConfigLoadBalancerProviderName,
@@ -257,7 +257,7 @@ export default {
       firewallSize: providerInfrastructureConfigFirewallSize,
       firewallNetworks: providerInfrastructureConfigFirewallNetworks,
       cloudProfiles,
-      infrastructureSecretBindings,
+      infrastructureBindings,
       regionsWithSeed,
       regionsWithoutSeed,
       showAllRegions,

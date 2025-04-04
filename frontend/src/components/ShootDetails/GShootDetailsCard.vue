@@ -140,7 +140,7 @@ SPDX-License-Identifier: Apache-2.0
           <template #append>
             <!-- the selectable purposes depend on the used secretbinding which the user needs to be able to read in order to properly show the purpose configuration dialog -->
             <g-purpose-configuration
-              v-if="canGetSecrets"
+              v-if="canGetCloudProviderCredentials"
             />
           </template>
         </g-list-item>
@@ -287,7 +287,7 @@ const {
 
 const authzStore = useAuthzStore()
 const {
-  canGetSecrets,
+  canGetCloudProviderCredentials,
 } = storeToRefs(authzStore)
 
 const selfTerminationMessage = computed(() => {

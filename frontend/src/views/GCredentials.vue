@@ -17,12 +17,12 @@ SPDX-License-Identifier: Apache-2.0
         :height="64"
       >
         <div class="text-h6">
-          Infrastructure Secrets
+          Infrastructure Credentials
         </div>
         <template #append>
           <v-text-field
-            v-if="infrastructureSecretItems.length > 3"
-            v-model="infraSecretFilter"
+            v-if="infrastructureCredentialsItems.length > 3"
+            v-model="infraCredentialFilter"
             prepend-inner-icon="mdi-magnify"
             color="primary"
             label="Search"
@@ -34,11 +34,11 @@ SPDX-License-Identifier: Apache-2.0
             density="compact"
             flat
             class="g-table-search-field mr-3"
-            @keyup.esc="infraSecretFilter = ''"
+            @keyup.esc="infraCredentialFilter = ''"
           />
           <v-menu
-            v-if="canCreateSecrets"
-            v-model="createInfraSecretMenu"
+            v-if="canCreateCredentials"
+            v-model="createInfraCredentialMenu"
             location="left"
             absolute
           >
@@ -60,7 +60,7 @@ SPDX-License-Identifier: Apache-2.0
               <v-list-item
                 v-for="infrastructure in sortedProviderTypeList"
                 :key="infrastructure"
-                @click="openSecretAddDialog(infrastructure)"
+                @click="openCredentialAddDialog(infrastructure)"
               >
                 <template #prepend>
                   <g-vendor-icon
@@ -75,7 +75,7 @@ SPDX-License-Identifier: Apache-2.0
             </v-list>
           </v-menu>
           <g-table-column-selection
-            :headers="infraSecretTableHeaders"
+            :headers="infraCredentialTableHeaders"
             @set-selected-header="setSelectedInfraHeader"
             @reset="resetInfraTableSettings"
           />
@@ -91,9 +91,9 @@ SPDX-License-Identifier: Apache-2.0
           There must be at least one cloud profile supported by the dashboard as well as a seed that matches its seed selector.
         </v-alert>
       </v-card-text>
-      <v-card-text v-else-if="!infrastructureSecretItems.length">
+      <v-card-text v-else-if="!infrastructureCredentialsItems.length">
         <div class="text-h6 text-grey-darken-1 my-4">
-          Add Infrastructure Secrets to your project
+          Add Infrastructure Credentials to your project
         </div>
         <p class="text-body-1">
           Before you can provision and access a Kubernetes cluster, you need to add infrastructure account credentials. The Gardener needs the credentials to provision and operate the infrastructure for your Kubernetes cluster.
@@ -101,33 +101,33 @@ SPDX-License-Identifier: Apache-2.0
       </v-card-text>
       <v-data-table-virtual
         v-else
-        ref="infraSecretTableRef"
-        v-model:sort-by="infraSecretSortBy"
-        :headers="visibleInfraSecretTableHeaders"
-        :items="infrastructureSecretSortedItems"
-        :custom-key-sort="disableCustomKeySort(visibleInfraSecretTableHeaders)"
+        ref="infraCredentialTableRef"
+        v-model:sort-by="infraCredentialSortBy"
+        :headers="visibleInfraCredentialTableHeaders"
+        :items="infrastructureCredentialSortedItems"
+        :custom-key-sort="disableCustomKeySort(visibleInfraCredentialTableHeaders)"
         must-sort
         hover
-        :search="infraSecretFilter"
+        :search="infraCredentialFilter"
         density="compact"
         class="g-table"
-        :item-height="itemHeight"
-        :style="infraSecretTableStyles"
+        :style="infraCredentialTableStyles"
         fixed-header
       >
-        <template #item="{ item }">
-          <g-secret-row-infra
-            :key="`${item.secretNamespace}/${item.secretName}`"
+        <template #item="{ item, itemRef }">
+          <g-credential-row-infra
+            :key="`${item.credentialNamespace}/${item.credentialName}`"
+            :ref="itemRef"
             :item="item"
-            :headers="infraSecretTableHeaders"
-            @delete="onRemoveSecret"
-            @update="onUpdateSecret"
+            :headers="infraCredentialTableHeaders"
+            @delete="onRemoveCredential"
+            @update="onUpdateCredential"
           />
         </template>
         <template #bottom>
           <g-data-table-footer
-            :items-length="infrastructureSecretItems.length"
-            items-label="Infrastructure Secrets"
+            :items-length="infrastructureCredentialsItems.length"
+            items-label="Infrastructure Credentials"
           />
         </template>
       </v-data-table-virtual>
@@ -142,13 +142,13 @@ SPDX-License-Identifier: Apache-2.0
         :height="64"
       >
         <div class="text-h6">
-          DNS Secrets
+          DNS Credentials
         </div>
 
         <template #append>
           <v-text-field
-            v-if="dnsSecretItems.length > 3"
-            v-model="dnsSecretFilter"
+            v-if="dnsCredentialItems.length > 3"
+            v-model="dnsCredentialFilter"
             prepend-inner-icon="mdi-magnify"
             color="primary"
             label="Search"
@@ -160,11 +160,11 @@ SPDX-License-Identifier: Apache-2.0
             density="compact"
             flat
             class="g-table-search-field mr-3"
-            @keyup.esc="dnsSecretFilter = ''"
+            @keyup.esc="dnsCredentialFilter = ''"
           />
           <v-menu
-            v-if="canCreateSecrets"
-            v-model="createDnsSecretMenu"
+            v-if="canCreateCredentials"
+            v-model="createDnsCredentialMenu"
             location="left"
             absolute
           >
@@ -176,17 +176,17 @@ SPDX-License-Identifier: Apache-2.0
                     icon="mdi-plus"
                   />
                 </template>
-                Create DNS Secret
+                Create Secret Credential
               </v-tooltip>
             </template>
             <v-list density="compact">
               <v-list-subheader>
-                Create DNS Secret
+                Create Secret Credential
               </v-list-subheader>
               <v-list-item
                 v-for="dnsProvider in dnsProviderTypes"
                 :key="dnsProvider"
-                @click="openSecretAddDialog(dnsProvider)"
+                @click="openCredentialAddDialog(dnsProvider)"
               >
                 <template #prepend>
                   <g-vendor-icon
@@ -201,16 +201,16 @@ SPDX-License-Identifier: Apache-2.0
             </v-list>
           </v-menu>
           <g-table-column-selection
-            :headers="dnsSecretTableHeaders"
+            :headers="dnsCredentialTableHeaders"
             @set-selected-header="setSelectedDnsHeader"
             @reset="resetDnsTableSettings"
           />
         </template>
       </g-toolbar>
 
-      <v-card-text v-if="!dnsSecretItems.length">
+      <v-card-text v-if="!dnsCredentialItems.length">
         <div class="text-h6 text-grey-darken-1 my-4">
-          Add DNS Secrets to your project
+          Add DNS Credentials to your project
         </div>
         <p class="text-body-1">
           Before you can use your DNS Provider account for your cluster, you need to configure the credentials here.
@@ -218,41 +218,41 @@ SPDX-License-Identifier: Apache-2.0
       </v-card-text>
       <v-data-table-virtual
         v-else
-        ref="dnsSecretTableRef"
-        v-model:sort-by="dnsSecretSortBy"
-        :headers="visibleDnsSecretTableHeaders"
-        :items="dnsSecretSortedItems"
-        :custom-key-sort="disableCustomKeySort(visibleDnsSecretTableHeaders)"
+        ref="dnsCredentialTableRef"
+        v-model:sort-by="dnsCredentialSortBy"
+        :headers="visibleDnsCredentialTableHeaders"
+        :items="dnsCredentialSortedItems"
+        :custom-key-sort="disableCustomKeySort(visibleDnsCredentialTableHeaders)"
         must-sort
         hover
-        :search="dnsSecretFilter"
+        :search="dnsCredentialFilter"
         density="compact"
         class="g-table"
-        :item-height="itemHeight"
-        :style="dnsSecretTableStyles"
+        :style="dnsCredentialTableStyles"
         fixed-header
       >
-        <template #item="{ item }">
-          <g-secret-row-dns
-            :key="`${item.secretNamespace}/${item.secretName}`"
+        <template #item="{ item, itemRef }">
+          <g-credential-row-dns
+            :key="`${item.credentialNamespace}/${item.credentialName}`"
+            :ref="itemRef"
             :item="item"
-            :headers="dnsSecretTableHeaders"
-            @delete="onRemoveSecret"
-            @update="onUpdateSecret"
+            :headers="dnsCredentialTableHeaders"
+            @delete="onRemoveCredential"
+            @update="onUpdateCredential"
           />
         </template>
         <template #bottom>
           <g-data-table-footer
-            :items-length="dnsSecretItems.length"
-            items-label="DNS Secrets"
+            :items-length="dnsCredentialItems.length"
+            items-label="DNS Credentials"
           />
         </template>
       </v-data-table-virtual>
     </v-card>
 
     <g-secret-dialog-wrapper
-      :visible-dialog="visibleSecretDialog"
-      :selected-secret-binding="selectedSecretBinding"
+      :visible-dialog="visibleCredentialDialog"
+      :selected-binding="selectedBinding"
       @dialog-closed="onDialogClosed"
     />
   </v-container>
@@ -262,7 +262,6 @@ SPDX-License-Identifier: Apache-2.0
 import {
   mapState,
   mapWritableState,
-  mapActions,
   storeToRefs,
 } from 'pinia'
 import { useUrlSearchParams } from '@vueuse/core'
@@ -278,10 +277,10 @@ import { useAuthzStore } from '@/store/authz'
 import { useShootStore } from '@/store/shoot'
 import { useLocalStorageStore } from '@/store/localStorage'
 
-import GSecretDialogWrapper from '@/components/Secrets/GSecretDialogWrapper'
+import GSecretDialogWrapper from '@/components/Credentials/GSecretDialogWrapper'
 import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
-import GSecretRowInfra from '@/components/Secrets/GSecretRowInfra.vue'
-import GSecretRowDns from '@/components/Secrets/GSecretRowDns.vue'
+import GCredentialRowInfra from '@/components/Credentials/GCredentialRowInfra.vue'
+import GCredentialRowDns from '@/components/Credentials/GCredentialRowDns.vue'
 import GVendorIcon from '@/components/GVendorIcon'
 import GToolbar from '@/components/GToolbar'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
@@ -289,11 +288,11 @@ import GDataTableFooter from '@/components/GDataTableFooter.vue'
 import { useTwoTableLayout } from '@/composables/useTwoTableLayout'
 
 import {
-  hasOwnSecret,
+  hasOwnCredential,
   mapTableHeader,
+  calcRelatedShootCount,
 } from '@/utils'
 
-import some from 'lodash/some'
 import orderBy from 'lodash/orderBy'
 import mapValues from 'lodash/mapValues'
 import mapKeys from 'lodash/mapKeys'
@@ -307,8 +306,8 @@ export default {
   components: {
     GSecretDialogWrapper,
     GTableColumnSelection,
-    GSecretRowInfra,
-    GSecretRowDns,
+    GCredentialRowInfra,
+    GCredentialRowDns,
     GVendorIcon,
     GToolbar,
     GDataTableFooter,
@@ -320,17 +319,17 @@ export default {
 
     const credentialStore = useCredentialStore()
     const {
-      infrastructureSecretBindingsList,
-      dnsSecretBindingsList,
+      infrastructureBindingList,
+      dnsBindingList,
     } = storeToRefs(credentialStore)
 
     const itemHeight = 58
-    const firstTableItemCount = computed(() => infrastructureSecretBindingsList.value.length)
-    const secondTableItemCount = computed(() => dnsSecretBindingsList.value.length)
+    const firstTableItemCount = computed(() => infrastructureBindingList.value.length)
+    const secondTableItemCount = computed(() => dnsBindingList.value.length)
 
     const {
-      firstTableStyles: infraSecretTableStyles,
-      secondTableStyles: dnsSecretTableStyles,
+      firstTableStyles: infraCredentialTableStyles,
+      secondTableStyles: dnsCredentialTableStyles,
     } = useTwoTableLayout({
       firstTableItemCount,
       secondTableItemCount,
@@ -339,21 +338,21 @@ export default {
 
     return {
       highlightedUid,
-      infrastructureSecretBindingsList,
-      dnsSecretBindingsList,
+      infrastructureBindingList,
+      dnsBindingList,
       itemHeight,
-      infraSecretTableStyles,
-      dnsSecretTableStyles,
+      infraCredentialTableStyles,
+      dnsCredentialTableStyles,
     }
   },
   data () {
     return {
-      selectedSecretBinding: {},
-      infraSecretFilter: '',
-      createInfraSecretMenu: false,
-      dnsSecretFilter: '',
-      createDnsSecretMenu: false,
-      visibleSecretDialog: undefined,
+      selectedBinding: {},
+      infraCredentialFilter: '',
+      createInfraCredentialMenu: false,
+      dnsCredentialFilter: '',
+      createDnsCredentialMenu: false,
+      visibleCredentialDialog: undefined,
     }
   },
   computed: {
@@ -361,16 +360,16 @@ export default {
     ...mapState(useGardenerExtensionStore, ['dnsProviderTypes']),
     ...mapState(useAuthzStore, [
       'namespace',
-      'canCreateSecrets',
+      'canCreateCredentials',
     ]),
     ...mapState(useShootStore, ['shootList']),
     ...mapWritableState(useLocalStorageStore, [
-      'infraSecretSelectedColumns',
-      'infraSecretSortBy',
-      'dnsSecretSelectedColumns',
-      'dnsSecretSortBy',
+      'infraCredentialSelectedColumns',
+      'infraCredentialSortBy',
+      'dnsCredentialSelectedColumns',
+      'dnsCredentialSortBy',
     ]),
-    infraSecretTableHeaders () {
+    infraCredentialTableHeaders () {
       const headers = [
         {
           title: 'NAME',
@@ -380,9 +379,16 @@ export default {
           defaultSelected: true,
         },
         {
-          title: 'SECRET',
+          title: 'KIND',
           align: 'start',
-          key: 'secret',
+          key: 'kind',
+          sortable: true,
+          defaultSelected: true,
+        },
+        {
+          title: 'CREDENTIAL',
+          align: 'start',
+          key: 'credential',
           sortable: true,
           defaultSelected: true,
         },
@@ -417,23 +423,20 @@ export default {
       return map(headers, header => ({
         ...header,
         class: 'nowrap',
-        selected: get(this.infraSecretSelectedColumns, header.key, header.defaultSelected),
+        selected: get(this.infraCredentialSelectedColumns, header.key, header.defaultSelected),
       }))
     },
-    visibleInfraSecretTableHeaders () {
-      return filter(this.infraSecretTableHeaders, ['selected', true])
+    visibleInfraCredentialTableHeaders () {
+      return filter(this.infraCredentialTableHeaders, ['selected', true])
     },
-    infrastructureSecretSortedItems () {
+    infrastructureCredentialSortedItems () {
       const secondSortCriteria = 'name'
-      return this.sortItems(this.infrastructureSecretItems, this.infraSecretSortBy, secondSortCriteria)
+      return this.sortItems(this.infrastructureCredentialsItems, this.infraCredentialSortBy, secondSortCriteria)
     },
-    infrastructureSecretItems () {
-      return map(this.infrastructureSecretBindingsList, secretBinding => {
-        const relatedShootCount = this.relatedShootCountInfra(secretBinding)
-        return this.computeItem(secretBinding, relatedShootCount)
-      })
+    infrastructureCredentialsItems () {
+      return map(this.infrastructureBindingList, this.computeItem)
     },
-    dnsSecretTableHeaders () {
+    dnsCredentialTableHeaders () {
       const headers = [
         {
           title: 'NAME',
@@ -443,14 +446,21 @@ export default {
           defaultSelected: true,
         },
         {
-          title: 'Secret',
+          title: 'KIND',
           align: 'start',
-          key: 'secret',
+          key: 'kind',
           sortable: true,
           defaultSelected: true,
         },
         {
-          title: 'DNS Provider',
+          title: 'CREDENTIAL',
+          align: 'start',
+          key: 'credential',
+          sortable: true,
+          defaultSelected: true,
+        },
+        {
+          title: 'DNS PROVIDER',
           align: 'start',
           key: 'dnsProvider',
           sortable: true,
@@ -480,21 +490,18 @@ export default {
       return map(headers, header => ({
         ...header,
         class: 'nowrap',
-        selected: get(this.dnsSecretSelectedColumns, header.key, header.defaultSelected),
+        selected: get(this.dnsCredentialSelectedColumns, header.key, header.defaultSelected),
       }))
     },
-    visibleDnsSecretTableHeaders () {
-      return filter(this.dnsSecretTableHeaders, ['selected', true])
+    visibleDnsCredentialTableHeaders () {
+      return filter(this.dnsCredentialTableHeaders, ['selected', true])
     },
-    dnsSecretSortedItems () {
+    dnsCredentialSortedItems () {
       const secondSortCriteria = 'name'
-      return this.sortItems(this.dnsSecretItems, this.dnsSecretSortBy, secondSortCriteria)
+      return this.sortItems(this.dnsCredentialItems, this.dnsCredentialSortBy, secondSortCriteria)
     },
-    dnsSecretItems () {
-      return map(this.dnsSecretBindingsList, secretBinding => {
-        const relatedShootCount = this.relatedShootCountDns(secretBinding)
-        return this.computeItem(secretBinding, relatedShootCount)
-      })
+    dnsCredentialItems () {
+      return map(this.dnsBindingList, this.computeItem)
     },
   },
   watch: {
@@ -506,60 +513,32 @@ export default {
         setTimeout(() => {
           // Cannot start scrolling before the table is rendered
           const scrollToItem = (items, tableRef) => {
-            const itemIndex = findIndex(items, ['secretBinding.metadata.uid', value])
+            const itemIndex = findIndex(items, ['binding.metadata.uid', value])
             if (itemIndex !== -1) {
-              tableRef.$el.querySelector('.v-table__wrapper').scrollTo({
-                top: itemIndex * this.itemHeight,
-                left: 0,
-                behavior: 'smooth',
-              })
+              tableRef.scrollToIndex(itemIndex)
             }
           }
 
-          scrollToItem(this.infrastructureSecretSortedItems, this.$refs.infraSecretTableRef)
-          scrollToItem(this.dnsSecretSortedItems, this.$refs.dnsSecretTableRef)
+          scrollToItem(this.infrastructureCredentialSortedItems, this.$refs.infraCredentialTableRef)
+          scrollToItem(this.dnsCredentialSortedItems, this.$refs.dnsCredentialTableRef)
         }, 100)
       },
       immediate: true,
     },
   },
   methods: {
-    ...mapActions(useCredentialStore, [
-      'getSecretBinding',
-    ]),
-    openSecretAddDialog (providerType) {
-      this.selectedSecretBinding = undefined
-      this.visibleSecretDialog = providerType
+    openCredentialAddDialog (providerType) {
+      this.selectedBinding = undefined
+      this.visibleCredentialDialog = providerType
     },
-    onUpdateSecret (secretBinding) {
-      const providerType = secretBinding.provider.type
-      this.selectedSecretBinding = secretBinding
-      this.visibleSecretDialog = providerType
+    onUpdateCredential (binding) {
+      const providerType = binding.provider.type
+      this.selectedBinding = binding
+      this.visibleCredentialDialog = providerType
     },
-    onRemoveSecret (secretBinding) {
-      this.selectedSecretBinding = secretBinding
-      this.visibleSecretDialog = 'delete'
-    },
-    relatedShootCountInfra (secret) {
-      const name = secret.metadata.name
-      const shootsByInfrastructureSecret = filter(this.shootList, ['spec.secretBindingName', name])
-      return shootsByInfrastructureSecret.length
-    },
-    relatedShootCountDns (secret) {
-      const secretName = secret.metadata.name
-
-      const someDnsProviderHasSecretRef = providers => some(providers, ['secretName', secretName])
-      const someResourceHasSecretRef = resources => some(resources, { resourceRef: { kind: 'Secret', name: secretName } })
-
-      let count = 0
-      for (const shoot of this.shootList) {
-        const dnsProviders = shoot.spec.dns?.providers
-        const resources = shoot.spec.resources
-        if (someDnsProviderHasSecretRef(dnsProviders) || someResourceHasSecretRef(resources)) {
-          count++
-        }
-      }
-      return count
+    onRemoveCredential (binding) {
+      this.selectedBinding = binding
+      this.visibleCredentialDialog = 'delete'
     },
     relatedShootCountLabel (count) {
       if (count === 0) {
@@ -569,26 +548,26 @@ export default {
       }
     },
     setSelectedInfraHeader (header) {
-      this.infraSecretSelectedColumns[header.key] = !header.selected
+      this.infraCredentialSelectedColumns[header.key] = !header.selected
     },
     reset () {
-      this.infraSecretFilter = ''
-      this.dnsSecretFilter = ''
+      this.infraCredentialFilter = ''
+      this.dnsCredentialFilter = ''
     },
     resetInfraTableSettings () {
-      this.infraSecretSelectedColumns = mapTableHeader(this.infraSecretTableHeaders, 'defaultSelected')
-      this.infraSecretSortBy = [{ key: 'name', order: 'asc' }]
+      this.infraCredentialSelectedColumns = mapTableHeader(this.infraCredentialTableHeaders, 'defaultSelected')
+      this.infraCredentialSortBy = [{ key: 'name', order: 'asc' }]
     },
     setSelectedDnsHeader (header) {
-      this.dnsSecretSelectedColumns[header.key] = !header.selected
+      this.dnsCredentialSelectedColumns[header.key] = !header.selected
     },
     resetDnsTableSettings () {
-      this.dnsSecretSelectedColumns = mapTableHeader(this.dnsSecretTableHeaders, 'defaultSelected')
-      this.dnsSecretSortBy = [{ key: 'name', order: 'asc' }]
+      this.dnsCredentialSelectedColumns = mapTableHeader(this.dnsCredentialTableHeaders, 'defaultSelected')
+      this.dnsCredentialSortBy = [{ key: 'name', order: 'asc' }]
     },
     onDialogClosed () {
-      // This forces re-rendering of secret dialogs when re-opened so we don't need to reset them manually
-      this.visibleSecretDialog = undefined
+      // This forces re-rendering of credential dialogs when re-opened so we don't need to reset them manually
+      this.visibleCredentialDialog = undefined
     },
     sortItems (items, sortByArr, secondSortCriteria) {
       const sortByObj = head(sortByArr)
@@ -602,8 +581,8 @@ export default {
     },
     getRawVal (item, column) {
       switch (column) {
-        case 'secret':
-          return `${get(item, ['secret', 'metadata', 'namespace'])} ${get(item, ['secret', 'metadata', 'name'])}`
+        case 'credential':
+          return `${item.credentialNamespace} ${item.credentialName}`
         case 'infrastructure':
           return item.infrastructureName
         default:
@@ -615,18 +594,46 @@ export default {
       const tableKeys = mapKeys(sortableTableHeaders, ({ key }) => key)
       return mapValues(tableKeys, () => () => 0)
     },
-    computeItem (secretBinding, relatedShootCount) {
+    computeItem (binding) {
+      const kind = {
+        icon: 'mdi-help-circle',
+        tooltip: 'Unknown',
+      }
+      let credentialNamespace = ''
+      let credentialName = ''
+      if (binding._isSecretBinding) {
+        kind.tooltip = 'Secret (SecretBinding)'
+        kind.icon = 'mdi-key'
+        credentialNamespace = binding.secretRef.namespace
+        credentialName = binding.secretRef.name
+      }
+      if (binding._isCredentialsBinding) {
+        if (binding.credentialsRef.kind === 'Secret') {
+          kind.tooltip = 'Secret (CredentialsBinding)'
+          kind.icon = 'mdi-key-outline'
+        }
+        if (binding.credentialsRef.kind === 'WorkloadIdentity') {
+          kind.tooltip = 'WorkloadIdentity'
+          kind.icon = 'mdi-id-card'
+        }
+        credentialNamespace = binding.credentialsRef.namespace
+        credentialName = binding.credentialsRef.name
+      }
+      const relatedShootCount = calcRelatedShootCount(this.shootList, binding)
+
       return {
-        name: secretBinding.metadata.name,
-        hasOwnSecret: hasOwnSecret(secretBinding),
-        secretNamespace: secretBinding.secretRef.namespace,
-        secretName: secretBinding.secretRef.name,
-        providerType: secretBinding.provider.type,
+        name: binding.metadata.name,
+        kind,
+        hasOwnCredential: hasOwnCredential(binding),
+        hasOwnSecret: binding._secret !== undefined,
+        credentialNamespace,
+        credentialName,
+        providerType: binding.provider.type,
         relatedShootCount,
         relatedShootCountLabel: this.relatedShootCountLabel(relatedShootCount),
-        secretBinding,
-        highlighted: this.highlightedUid === secretBinding.metadata.uid,
-        isMarkedForDeletion: !!secretBinding.metadata.deletionTimestamp,
+        binding,
+        highlighted: this.highlightedUid && this.highlightedUid === binding.metadata.uid,
+        isMarkedForDeletion: !!binding.metadata.deletionTimestamp,
       }
     },
   },
