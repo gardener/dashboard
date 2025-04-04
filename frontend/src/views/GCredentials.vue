@@ -111,13 +111,13 @@ SPDX-License-Identifier: Apache-2.0
         :search="infraCredentialFilter"
         density="compact"
         class="g-table"
-        :item-height="itemHeight"
         :style="infraCredentialTableStyles"
         fixed-header
       >
-        <template #item="{ item }">
+        <template #item="{ item, itemRef }">
           <g-credential-row-infra
             :key="`${item.credentialNamespace}/${item.credentialName}`"
+            :ref="itemRef"
             :item="item"
             :headers="infraCredentialTableHeaders"
             @delete="onRemoveCredential"
@@ -228,13 +228,13 @@ SPDX-License-Identifier: Apache-2.0
         :search="dnsCredentialFilter"
         density="compact"
         class="g-table"
-        :item-height="itemHeight"
         :style="dnsCredentialTableStyles"
         fixed-header
       >
-        <template #item="{ item }">
+        <template #item="{ item, itemRef }">
           <g-credential-row-dns
             :key="`${item.credentialNamespace}/${item.credentialName}`"
+            :ref="itemRef"
             :item="item"
             :headers="dnsCredentialTableHeaders"
             @delete="onRemoveCredential"
@@ -509,18 +509,13 @@ export default {
       this.reset()
     },
     highlightedUid: {
-      // TODO FIX
       handler (value) {
         setTimeout(() => {
           // Cannot start scrolling before the table is rendered
           const scrollToItem = (items, tableRef) => {
-            const itemIndex = findIndex(items, ['secretBinding.metadata.uid', value])
+            const itemIndex = findIndex(items, ['binding.metadata.uid', value])
             if (itemIndex !== -1) {
-              tableRef.$el.querySelector('.v-table__wrapper').scrollTo({
-                top: itemIndex * this.itemHeight,
-                left: 0,
-                behavior: 'smooth',
-              })
+              tableRef.scrollToIndex(itemIndex)
             }
           }
 
@@ -608,18 +603,18 @@ export default {
       let credentialName = ''
       if (binding._isSecretBinding) {
         kind.tooltip = 'Secret (SecretBinding)'
-        kind.icon = 'mdi-account-key-outline'
+        kind.icon = 'mdi-key'
         credentialNamespace = binding.secretRef.namespace
         credentialName = binding.secretRef.name
       }
       if (binding._isCredentialsBinding) {
         if (binding.credentialsRef.kind === 'Secret') {
           kind.tooltip = 'Secret (CredentialsBinding)'
-          kind.icon = 'mdi-account-key'
+          kind.icon = 'mdi-key-outline'
         }
         if (binding.credentialsRef.kind === 'WorkloadIdentity') {
           kind.tooltip = 'WorkloadIdentity'
-          kind.icon = 'mdi-account-card'
+          kind.icon = 'mdi-id-card'
         }
         credentialNamespace = binding.credentialsRef.namespace
         credentialName = binding.credentialsRef.name

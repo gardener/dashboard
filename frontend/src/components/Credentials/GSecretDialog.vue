@@ -77,20 +77,24 @@ SPDX-License-Identifier: Apache-2.0
           rounded="0"
           class="mb-2"
         >
-          <div>This secret is used by {{ relatedShootCount }} clusters. The new secret should be part of the same account as the one that gets replaced.</div>
+          <div>This secret is used by {{ relatedShootCount }} {{ relatedShootCount === 1 ? 'cluster' : 'clusters' }}. The new secret should be part of the same account as the one that gets replaced.</div>
           <div>Clusters will only start using the new secret after they got reconciled. Therefore, wait until all clusters using the secret are reconciled before you disable the old secret in your infrastructure account. Otherwise the clusters will no longer function.</div>
         </v-alert>
         <v-alert
           :model-value="otherBindings.length > 0"
           type="info"
           rounded="0"
-          class="mb-2"
+          class="mb-2 list-style"
         >
           This secret is also referenced by
-          <pre
-            v-for="referencedBinding in otherBindings"
-            :key="referencedBinding.metadata.uid"
-          >{{ referencedBinding.metadata.name }} ({{ (referencedBinding.kind) }})</pre>
+          <ul>
+            <li
+              v-for="referencedBinding in otherBindings"
+              :key="referencedBinding.metadata.uid"
+            >
+              <pre>{{ referencedBinding.metadata.name }} ({{ (referencedBinding.kind) }})</pre>
+            </li>
+          </ul>
           Updating secret data for this {{ binding.kind }} will also affect the other bindings that reference this secret.
         </v-alert>
       </div>
@@ -411,6 +415,15 @@ export default {
   height: 100%;
   padding-right: 15px;
   box-sizing: content-box;
+}
+
+.list-style {
+  ul {
+    margin-left: 10px;
+  }
+  li {
+    margin-left: 10px;
+  }
 }
 
 </style>

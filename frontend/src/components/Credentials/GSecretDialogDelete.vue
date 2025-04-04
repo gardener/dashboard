@@ -32,13 +32,17 @@ SPDX-License-Identifier: Apache-2.0
           :model-value="otherBindings.length > 0"
           type="info"
           rounded="0"
-          class="mb-2"
+          class="mb-2 list-style"
         >
           This secret is also referenced by
-          <pre
-            v-for="referencedBinding in otherBindings"
-            :key="referencedBinding.metadata.uid"
-          >{{ referencedBinding.metadata.name }} ({{ (referencedBinding.kind) }})</pre>
+          <ul>
+            <li
+              v-for="referencedBinding in otherBindings"
+              :key="referencedBinding.metadata.uid"
+            >
+              <pre>{{ referencedBinding.metadata.name }} ({{ (referencedBinding.kind) }})</pre>
+            </li>
+          </ul>
           Deleting this {{ binding.kind }} will not delete the referenced secret.
         </v-alert>
       </div>
@@ -160,5 +164,14 @@ export default {
   .credential_title {
     font-size: 30px;
     font-weight: 400;
+  }
+
+  .list-style {
+    ul {
+      margin-left: 10px;
+    }
+    li {
+      margin-left: 10px;
+    }
   }
 </style>

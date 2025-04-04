@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
       :label="label"
       :disabled="disabled"
       :items="allowedBindings"
-      item-value="metadata.name"
+      item-value="metadata.uid"
       item-title="metadata.name"
       return-object
       :error-messages="getErrorMessages(v$.internalValue)"
