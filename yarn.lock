@@ -8350,10 +8350,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"oauth4webapi@npm:^3.4.0":
-  version: 3.4.0
-  resolution: "oauth4webapi@npm:3.4.0"
-  checksum: 10c0/c9ab4c4a745e74a0eaa835d46b4081da88ce83f221fa2f04c8e76219245e207bd5db2e2fa2cdc4b899ab55a797aa18b84f423d6b2729f5d8f7fd6c18a8eb3467
+"oauth4webapi@npm:^3.4.1":
+  version: 3.4.1
+  resolution: "oauth4webapi@npm:3.4.1"
+  checksum: 10c0/d581cfde0d9b80a5e29444755c7ce345f0b7db57ea3e23f4430afacf603d0107feee6fd53b92262999da5c8fbdbd088d1efe2ac3f81f71d9ec543daa340951be
   languageName: node
   linkType: hard
 
@@ -8507,12 +8507,12 @@ __metadata:
   linkType: hard
 
 "openid-client@npm:^6.1.7":
-  version: 6.4.1
-  resolution: "openid-client@npm:6.4.1"
+  version: 6.4.2
+  resolution: "openid-client@npm:6.4.2"
   dependencies:
     jose: "npm:^6.0.10"
-    oauth4webapi: "npm:^3.4.0"
-  checksum: 10c0/55a4d34fcfc5b21f97502a6fc9b30adc2503b218e41c7ab13bd7ac0fa360caac737f96e77c2d1a4f7054d5c16439fefc5f3a8df31a92c688b3318c82ab07d1f1
+    oauth4webapi: "npm:^3.4.1"
+  checksum: 10c0/a291933d571c1b2904c65f142ef79737094c31594a58a237df4813abe315385981122b668d5a6dc44bb0e079e1fe6dd6a3d974814bd9f75f8be08dac91cd227e
   languageName: node
   linkType: hard
 
