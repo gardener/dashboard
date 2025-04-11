@@ -30,7 +30,7 @@ exports[`config should return the frontend configuration 2`] = `
     {
       "icon": "mdi-slack",
       "title": "Feedback",
-      "url": "https://kubernetes.slack.com/messages/gardener/",
+      "url": "https://gardener-cloud.slack.com/",
     },
     {
       "icon": "mdi-bug",

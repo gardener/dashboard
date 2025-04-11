@@ -5,7 +5,7 @@
 ![](https://github.com/gardener/dashboard/blob/master/logo/logo_gardener_dashboard.png)
 
 [![CI Build status](https://concourse.ci.gardener.cloud/api/v1/teams/gardener/pipelines/dashboard-master/jobs/master-head-update-job/badge)](https://concourse.ci.gardener.cloud/teams/gardener/pipelines/dashboard-master/jobs/master-head-update-job)
-[![Slack channel #gardener](https://img.shields.io/badge/slack-gardener-brightgreen.svg?logo=slack)](https://kubernetes.slack.com/messages/gardener)
+[![Slack workspace](https://img.shields.io/badge/Slack-Gardener%20Project-brightgreen.svg?logo=slack)](https://gardener-cloud.slack.com/)
 
 ## Demo
 
@@ -19,4 +19,3 @@
 [Apache License 2.0](./LICENSES/Apache-2.0.txt)
 
 Copyright 2020 The Gardener Authors
-
