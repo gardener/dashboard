@@ -144,6 +144,11 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     writeDefaults: false,
   })
 
+  const workspaceStorage = useLocalStorage('global/workspace', '', {
+    serializer: StorageSerializers.string,
+    writeDefaults: false,
+  })
+
   const userSelectedColumns = useLocalStorage('members/useraccount-list/selected-columns', {}, {
     serializer: StorageSerializers.json,
     writeDefaults: false,
@@ -243,6 +248,19 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     return lazyLocalStorageWithRoute.terminalSplitpaneTree
   }
 
+  const workspace = computed({
+    get () {
+      const workspaceName = workspaceStorage.value
+      if (workspaceName === '') {
+        return undefined
+      }
+      return workspaceName
+    },
+    set (value) {
+      workspaceStorage.value = value
+    },
+  })
+
   return {
     colorScheme,
     autoLogin,
@@ -267,6 +285,7 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     shootCustomSortBy,
     shootCustomSelectedColumns,
     terminalSplitpaneTreeRef,
+    workspace,
   }
 })
 

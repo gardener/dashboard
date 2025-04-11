@@ -8,11 +8,11 @@
 
 const { isHttpError } = require('@gardener-dashboard/request')
 const { Config } = require('@gardener-dashboard/kube-config')
-const { dashboardClient } = require('@gardener-dashboard/kube-client')
+const { createDashboardClient } = require('@gardener-dashboard/kube-client')
 const resources = require('@gardener-dashboard/kube-client/lib/resources')
 const createError = require('http-errors')
 const utils = require('../utils')
-const cache = require('../cache')
+const getCache = require('../cache')
 const authorization = require('./authorization')
 const logger = require('../logger')
 const _ = require('lodash')
@@ -25,9 +25,9 @@ const {
   getSeedNameFromShoot,
   projectFilter,
 } = utils
-const { getSeed } = cache
 
 exports.list = async function ({ user, namespace, labelSelector }) {
+  const cache = getCache(user.workspace)
   const query = {}
   if (labelSelector) {
     query.labelSelector = labelSelector
@@ -288,6 +288,8 @@ function getDashboardUrlPath (kubernetesVersion) {
 exports.getDashboardUrlPath = getDashboardUrlPath
 
 exports.info = async function ({ user, namespace, name }) {
+  const cache = getCache(user.workspace)
+
   const client = user.client
 
   const shoot = await read({ user, namespace, name })
@@ -297,13 +299,13 @@ exports.info = async function ({ user, namespace, name }) {
   }
 
   try {
-    data.kubeconfigGardenlogin = await getKubeconfigGardenlogin(client, shoot)
+    data.kubeconfigGardenlogin = await getKubeconfigGardenlogin(user, shoot)
   } catch (err) {
     logger.info('failed to get gardenlogin kubeconfig', err.message)
   }
 
   if (shoot.spec.seedName) {
-    const seed = getSeed(getSeedNameFromShoot(shoot))
+    const seed = cache.getSeed(getSeedNameFromShoot(shoot))
     if (seed && namespace !== 'garden') {
       try {
         data.canLinkToSeed = !!(await client['core.gardener.cloud'].shoots.get('garden', seed.metadata.name))
@@ -323,13 +325,14 @@ exports.info = async function ({ user, namespace, name }) {
   return data
 }
 
-async function getGardenClusterIdentity () {
+async function getGardenClusterIdentity (workspace) {
   const configClusterIdentity = _.get(config, ['clusterIdentity'])
 
   if (configClusterIdentity) {
     return configClusterIdentity
   }
 
+  const dashboardClient = createDashboardClient(workspace)
   const clusterIdentity = await dashboardClient.core.configmaps.get('kube-system', 'cluster-identity')
 
   return clusterIdentity.data['cluster-identity']
@@ -342,7 +345,7 @@ async function getClusterCaData (client, { namespace, name }) {
 }
 exports.getClusterCaData = getClusterCaData
 
-async function getKubeconfigGardenlogin (client, shoot) {
+async function getKubeconfigGardenlogin (user, shoot) {
   if (!shoot.status?.advertisedAddresses?.length) {
     throw new Error('Shoot has no advertised addresses')
   }
@@ -353,8 +356,8 @@ async function getKubeconfigGardenlogin (client, shoot) {
     caData,
     gardenClusterIdentity,
   ] = await Promise.all([
-    getClusterCaData(client, { namespace, name }),
-    getGardenClusterIdentity(),
+    getClusterCaData(user.client, { namespace, name }),
+    getGardenClusterIdentity(user.workspace),
   ])
 
   const extensions = [{

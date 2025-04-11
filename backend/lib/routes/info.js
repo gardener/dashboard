@@ -10,7 +10,7 @@ const express = require('express')
 const { extend } = require('@gardener-dashboard/request')
 const logger = require('../logger')
 const { decodeBase64 } = require('../utils')
-const { dashboardClient } = require('@gardener-dashboard/kube-client')
+const { createDashboardClient } = require('@gardener-dashboard/kube-client')
 const { version } = require('../../package')
 const { metricsRoute } = require('../middleware')
 
@@ -22,14 +22,15 @@ router.route('/')
   .all(metricsMiddleware)
   .get(async (req, res, next) => {
     try {
-      const gardenerVersion = await fetchGardenerVersion()
+      const gardenerVersion = await fetchGardenerVersion(req.user)
       res.send({ version, gardenerVersion })
     } catch (err) {
       next(err)
     }
   })
 
-async function fetchGardenerVersion () {
+async function fetchGardenerVersion (user) {
+  const dashboardClient = createDashboardClient(user.workspace)
   try {
     const {
       spec: {

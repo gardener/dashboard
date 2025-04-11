@@ -26,17 +26,17 @@ async function unsubscribe (socket, key) {
   }
 }
 
-function synchronize (socket, key, ...args) {
+function synchronize (socket, workspace, key, ...args) {
   switch (key) {
     case 'shoots': {
       const [uids] = args
       assertArray(uids)
-      return shoots.synchronize(socket, uids)
+      return shoots.synchronize(socket, workspace, uids)
     }
     case 'projects': {
       const [uids] = args
       assertArray(uids)
-      return projects.synchronize(socket, uids)
+      return projects.synchronize(socket, workspace, uids)
     }
     default:
       throw new TypeError(`Invalid synchronization type - ${key}`)

@@ -8,9 +8,11 @@ import { format as fmt } from 'util'
 import kubeClient from '@gardener-dashboard/kube-client/lib/index.js'
 import { isHttpError } from 'http-errors'
 
-const { dashboardClient } = kubeClient
+const { createDashboardClient } = kubeClient
 
 async function healthCheck (transitive = false) {
+  const dashboardClient = createDashboardClient('root') // TODO: use root here? =>Webhook is not workspaced?
+
   if (transitive === true) {
     try {
       await dashboardClient.healthz.get()

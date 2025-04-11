@@ -10,11 +10,12 @@ const assert = require('assert').strict
 const { Unauthorized } = require('http-errors')
 const logger = require('../logger')
 const {
-  dashboardClient,
+  createDashboardClient,
   Resources,
 } = require('@gardener-dashboard/kube-client')
 
-exports.isAuthenticated = async function ({ token } = {}) {
+exports.isAuthenticated = async function ({ token } = {}, workspace) {
+  const dashboardClient = createDashboardClient(workspace)
   const { apiVersion, kind } = Resources.TokenReview
   const body = {
     kind,

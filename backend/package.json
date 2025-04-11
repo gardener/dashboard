@@ -27,6 +27,7 @@
   ],
   "scripts": {
     "serve": "cross-env NODE_ENV=development node server.mjs",
+    "serve-kcp": "cross-env NODE_ENV=development cross-env KCP=true node server.mjs",
     "lint": "eslint server.mjs . --max-warnings=0",
     "lint-sarif": "yarn lint --format=@microsoft/eslint-formatter-sarif",
     "test": "cross-env NODE_ENV=test node --experimental-vm-modules $(yarn bin jest)",

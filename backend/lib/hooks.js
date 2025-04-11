@@ -8,10 +8,11 @@
 
 const { createDashboardClient, abortWatcher } = require('@gardener-dashboard/kube-client')
 const { monitorHttpServer, monitorSocketIO } = require('@gardener-dashboard/monitor')
-const cache = require('./cache')
+const getCache = require('./cache')
 const config = require('./config')
 const watches = require('./watches')
 const io = require('./io')
+const logger = require('./logger')
 
 class LifecycleHooks {
   constructor (client) {
@@ -21,6 +22,8 @@ class LifecycleHooks {
     this.ac = new AbortController()
     // io instance
     this.io = undefined
+    // workspace watchers
+    this.watchers = {}
   }
 
   cleanup () {
@@ -36,10 +39,66 @@ class LifecycleHooks {
   }
 
   beforeListen (server) {
+    if (process.env.KCP) {
+      const workspacesInformer = this.client['tenancy.kcp.io'].workspaces.informer()
+
+      workspacesInformer.on('add', async workspace => {
+        const workspacepath = `${workspace.spec.type.path}:${workspace.metadata.name}`
+        logger.debug('Starting watches for workspace %s', workspacepath)
+        const watcher = new ResourceWatcher(server, workspacepath, this.ac)
+        await watcher.watchResourcesInWorkspace()
+        this.watchers[workspace.metadata.uid] = watcher
+      })
+
+      workspacesInformer.on('delete', workspace => {
+        const workspacepath = `${workspace.spec.type.path}:${workspace.metadata.name}`
+        logger.debug('Stopping watches for workspace %s', workspacepath)
+        const watcher = this.watchers[workspace.metadata.uid]
+        if (watcher) {
+          watcher.ac.abort()
+          delete this.watchers[workspace.metadata.uid]
+        }
+      })
+
+      // Start the informer with an abort controller if applicable
+      workspacesInformer.run(new AbortController().signal)
+
+      monitorHttpServer(server)
+    } else {
+      logger.debug('Starting watches in non workspace mode')
+      const watcher = new ResourceWatcher(server, undefined, this.ac)
+      watcher.watchResourcesInWorkspace()
+    }
+  }
+}
+
+class ResourceWatcher {
+  constructor (server, workspace, ac) {
+    // server
+    this.server = server
+    // workspace
+    this.workspace = workspace
+    // client
+    this.client = createDashboardClient(
+      workspace,
+      {
+        id: `watch-${this.workspace ?? 'default'}`,
+        pingInterval: 30000,
+        maxOutstandingPings: 2,
+      })
+    // cache
+    this.cache = getCache(this.workspace)
+    // io instance
+    this.io = undefined
+    // abort controller
+    this.ac = ac
+  }
+
+  watchResourcesInWorkspace () {
     // create informers
     const informers = this.constructor.createInformers(this.client)
     // initialize cache
-    cache.initialize(informers)
+    this.cache.initialize(informers)
     // run informers
     const untilHasSyncedList = []
     for (const informer of Object.values(informers)) {
@@ -47,20 +106,20 @@ class LifecycleHooks {
       untilHasSyncedList.push(informer.store.untilHasSynced)
     }
     // create io instance
-    this.io = io(server, cache)
+    this.io = io(this.server, this.workspace)
     // register watches
     for (const [key, watch] of Object.entries(watches)) {
       const informer = informers[key] // eslint-disable-line security/detect-object-injection
       if (informer) {
         if (key === 'leases') {
-          watch(this.io, informer, { signal: this.ac.signal })
+          // TODO What to do with the leases informer? =>root workspace? shared repo or dedicated?
+          // watch(this.io, informer, { signal: this.ac.signal })
         } else {
           watch(this.io, informer)
         }
       }
     }
 
-    monitorHttpServer(server)
     monitorSocketIO(this.io)
 
     return Promise.all(untilHasSyncedList)
@@ -90,11 +149,13 @@ class LifecycleHooks {
 }
 
 module.exports = () => {
-  const client = createDashboardClient({
-    id: 'watch',
-    pingInterval: 30000,
-    maxOutstandingPings: 2,
-  })
-  return new LifecycleHooks(client)
+  const rootClient = createDashboardClient(
+    'root', // TODO: use root here? =>Currently we assume that root is the parent of all workspaces
+    {
+      id: 'watch',
+      pingInterval: 30000,
+      maxOutstandingPings: 2,
+    })
+  return new LifecycleHooks(rootClient)
 }
 module.exports.LifecycleHooks = LifecycleHooks

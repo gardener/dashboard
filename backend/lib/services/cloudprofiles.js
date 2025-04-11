@@ -10,7 +10,7 @@ const { NotFound, Forbidden } = require('http-errors')
 const authorization = require('./authorization')
 const logger = require('../logger')
 const _ = require('lodash')
-const { getCloudProfiles, getVisibleAndNotProtectedSeeds } = require('../cache')
+const getCache = require('../cache')
 
 function fromResource ({ cloudProfile: { metadata, spec }, seedNames }) {
   const providerType = spec.type
@@ -58,6 +58,7 @@ function assignSeedsToCloudProfileIteratee (seeds) {
 }
 
 exports.list = async function ({ user }) {
+  const { getCloudProfiles, getVisibleAndNotProtectedSeeds } = getCache(user.workspace)
   const allowed = await authorization.canListCloudProfiles(user)
   if (!allowed) {
     throw new Forbidden('You are not allowed to list cloudprofiles')
@@ -79,6 +80,8 @@ exports.list = async function ({ user }) {
 }
 
 exports.read = async function ({ user, name }) {
+  const { getCloudProfiles, getVisibleAndNotProtectedSeeds } = getCache(user.workspace)
+
   const allowed = await authorization.canGetCloudProfiles(user, name)
   if (!allowed) {
     throw new Forbidden(`You are not allowed to get cloudprofile ${name}`)

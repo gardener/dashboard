@@ -15,13 +15,13 @@ const { load } = require('@gardener-dashboard/kube-config')
 const ac = new AbortController()
 const clientConfig = load(process.env, { signal: ac.signal })
 
-function createClient (options) {
+function createClient (workspace, options) {
   assert.ok(options.auth && options.auth.bearer, 'Client credentials are required')
-  return new Client(clientConfig, options)
+  return new Client(clientConfig, workspace, options)
 }
 
-function createDashboardClient (options) {
-  return new Client(clientConfig, options)
+function createDashboardClient (workspace, options) {
+  return new Client(clientConfig, workspace, options)
 }
 
 function abortWatcher () {
@@ -30,14 +30,10 @@ function abortWatcher () {
 
 exports = module.exports = createClient
 
-// create a client instance for the gardener cluster with dashboard privileges
-const dashboardClient = new Client(clientConfig)
-
 Object.assign(exports, {
   createClient,
   createDashboardClient,
   abortWatcher,
-  dashboardClient,
   Resources,
   Store,
 })

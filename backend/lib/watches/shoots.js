@@ -8,8 +8,7 @@
 
 const { shootHasIssue } = require('../utils')
 
-module.exports = (io, informer, options) => {
-  const nsp = io.of('/')
+module.exports = (nsp, informer, options) => {
   const { shootsWithIssues = new Set() } = options ?? {}
 
   const publishShoots = event => {

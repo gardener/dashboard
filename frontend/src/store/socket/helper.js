@@ -9,9 +9,13 @@ import {
   Manager,
 } from 'socket.io-client'
 
+import { useLocalStorageStore } from '@/store/localStorage'
+
 import { createClockSkewError } from '@/utils/errors'
 
 export function createSocket (state, context) {
+  const localStorage = useLocalStorageStore()
+
   const {
     logger,
     authnStore,
@@ -20,11 +24,14 @@ export function createSocket (state, context) {
     projectStore,
   } = context
 
-  const socket = io({
-    path: '/api/events',
-    transports: ['websocket'],
-    autoConnect: false,
-  })
+  const socket = io(
+    `/${localStorage.workspace ?? ''}`,
+    {
+      path: '/api/events',
+      transports: ['websocket'],
+      autoConnect: false,
+    },
+  )
 
   const manager = socket.io
 

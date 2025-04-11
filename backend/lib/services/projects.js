@@ -7,16 +7,17 @@
 'use strict'
 
 const _ = require('lodash')
-const { dashboardClient } = require('@gardener-dashboard/kube-client')
+const { createDashboardClient } = require('@gardener-dashboard/kube-client')
 
 const { PreconditionFailed, InternalServerError } = require('http-errors')
 const shoots = require('./shoots')
 const authorization = require('./authorization')
 const { projectFilter, simplifyProject } = require('../utils')
-const cache = require('../cache')
+const getCache = require('../cache')
 const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
 
 async function validateDeletePreconditions ({ user, name }) {
+  const cache = getCache(user.workspace)
   const project = cache.getProject(name)
   const namespace = _.get(project, ['spec', 'namespace'])
 
@@ -27,6 +28,7 @@ async function validateDeletePreconditions ({ user, name }) {
 }
 
 exports.list = async function ({ user }) {
+  const cache = getCache(user.workspace)
   const canListProjects = await authorization.canListProjects(user)
   return _
     .chain(cache.getProjects())
@@ -38,6 +40,7 @@ exports.list = async function ({ user }) {
 
 exports.create = async function ({ user, body }) {
   const client = user.client
+  const dashboardClient = createDashboardClient(user.workspace)
 
   const name = _.get(body, ['metadata', 'name'])
   _.set(body, ['spec', 'namespace'], `garden-${name}`)

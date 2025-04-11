@@ -5,7 +5,7 @@
 //
 
 const _ = require('lodash')
-const { getQuotas } = require('../cache')
+const getCache = require('../cache')
 const createError = require('http-errors')
 const logger = require('../logger')
 
@@ -33,7 +33,7 @@ exports.list = async function ({ user, params }) {
 
   const quotas = _
     .chain(secretBindings)
-    .flatMap(resolveQuotas)
+    .flatMap(resolveQuotas(user))
     .uniqBy('metadata.uid')
     .filter('spec.clusterLifetimeDays')
     .map(pickQuotaProperties)
@@ -73,7 +73,7 @@ exports.create = async function ({ user, params }) {
   return {
     secretBinding,
     secret,
-    quotas: resolveQuotas(secretBinding),
+    quotas: resolveQuotas(user)(secretBinding),
   }
 }
 
@@ -100,7 +100,7 @@ exports.patch = async function ({ user, params }) {
   return {
     secretBinding,
     secret,
-    quotas: resolveQuotas(secretBinding),
+    quotas: resolveQuotas(user)(secretBinding),
   }
 }
 
@@ -123,16 +123,19 @@ exports.remove = async function ({ user, params }) {
   ])
 }
 
-function resolveQuotas (secretBinding) {
-  const quotas = getQuotas()
-  const findQuota = ({ namespace, name } = {}) => _.find(quotas, ({ metadata }) => metadata.namespace === namespace && metadata.name === name)
-  try {
-    return _
-      .chain(secretBinding.quotas)
-      .map(findQuota)
-      .compact()
-      .value()
-  } catch (err) {
-    return []
+function resolveQuotas (user) {
+  return secretBinding => {
+    const { getQuotas } = getCache(user.workspace)
+    const quotas = getQuotas()
+    const findQuota = ({ namespace, name } = {}) => _.find(quotas, ({ metadata }) => metadata.namespace === namespace && metadata.name === name)
+    try {
+      return _
+        .chain(secretBinding.quotas)
+        .map(findQuota)
+        .compact()
+        .value()
+    } catch (err) {
+      return []
+    }
   }
 }

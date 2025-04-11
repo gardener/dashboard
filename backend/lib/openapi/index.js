@@ -10,7 +10,7 @@ const { canGetOpenAPI } = require('../services/authorization')
 const { Forbidden } = require('http-errors')
 const SwaggerParser = require('@apidevtools/swagger-parser')
 const express = require('express')
-const { dashboardClient } = require('@gardener-dashboard/kube-client')
+const { createDashboardClient } = require('@gardener-dashboard/kube-client')
 const _ = require('lodash')
 
 const router = module.exports = express.Router()
@@ -29,6 +29,7 @@ router.route('/')
 const schemaDefinitions = {} // Cache, TODO: Need to update cache when apiserver gets updated
 
 async function getSchemaDefinitions (user) {
+  const dashboardClient = createDashboardClient(user.workspace)
   const hasAuthorization = await canGetOpenAPI(user)
   if (!hasAuthorization) {
     throw new Forbidden('User is not allowed to read OpenAPI schemas definitions')

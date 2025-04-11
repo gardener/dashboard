@@ -10,6 +10,22 @@ SPDX-License-Identifier: Apache-2.0
       minHeight: `${appHeight}px`
     }"
   >
+    <v-alert
+      v-if="showWorkspaceWarning"
+      type="warning"
+      variant="tonal"
+      position="absolute"
+    >
+      Workspace changed. Please reload page!
+    </v-alert>
+    <v-alert
+      v-else-if="workspace"
+      type="success"
+      variant="tonal"
+      position="absolute"
+    >
+      Workspace set to <strong>{{ workspace }}</strong>
+    </v-alert>
     <v-main
       class="d-flex flex-column align-center justify-space-between"
       style="height: 100vh;"
@@ -128,6 +144,7 @@ import {
   mapWritableState,
   mapActions,
 } from 'pinia'
+import { useRoute } from 'vue-router'
 
 import { useAppStore } from '@/store/app'
 import { useAuthnStore } from '@/store/authn'
@@ -142,7 +159,6 @@ import GNotify from '@/components/GNotify.vue'
 import { setDelayedInputFocus } from '@/utils'
 
 import get from 'lodash/get'
-
 export default {
   components: {
     GLoginTeaser,
@@ -188,11 +204,18 @@ export default {
     }
     next()
   },
+  setup () {
+    const route = useRoute()
+    return {
+      route,
+    }
+  },
   data () {
     return {
       showToken: false,
       token: '',
       error: null,
+      showWorkspaceWarning: false,
     }
   },
   computed: {
@@ -203,6 +226,9 @@ export default {
     ]),
     ...mapWritableState(useLoginStore, [
       'loginType',
+    ]),
+    ...mapWritableState(useLocalStorageStore, [
+      'workspace',
     ]),
     breakpointName () {
       return this.$vuetify.display.name
@@ -276,6 +302,15 @@ export default {
             delay: 0,
             noSelect: true,
           })
+        }
+      },
+      immediate: true,
+    },
+    route: {
+      handler (route) {
+        if (this.workspace !== route.query.workspace) {
+          this.workspace = route.query.workspace
+          this.showWorkspaceWarning = true
         }
       },
       immediate: true,

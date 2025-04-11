@@ -7,7 +7,7 @@
 'use strict'
 
 const createError = require('http-errors')
-const cache = require('../cache')
+const getCache = require('../cache')
 const logger = require('../logger')
 const {
   projectFilter,
@@ -33,6 +33,7 @@ async function canListAllShoots (user, namespaces) {
 }
 
 function getAllNamespaces (user) {
+  const cache = getCache(user.workspace)
   return cache.getProjects()
     .filter(projectFilter(user, false))
     .map(project => project.spec.namespace)

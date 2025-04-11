@@ -12,7 +12,7 @@ async function hasAuthorization (user, { resourceAttributes, nonResourceAttribut
   if (!user) {
     return false
   }
-  const client = user.client ?? createClient(user)
+  const client = user.client ?? createClient(undefined, user)
   const { apiVersion, kind } = Resources.SelfSubjectAccessReview
   const body = {
     kind,

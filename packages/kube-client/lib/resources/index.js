@@ -7,6 +7,7 @@
 'use strict'
 
 const _ = require('lodash')
+const path = require('path')
 const { http } = require('../symbols')
 
 const resourceGroups = _
@@ -20,11 +21,11 @@ function loadGroup ({ name }) {
   return _.mapKeys(resources, 'names.plural')
 }
 
-function load (clientConfig, options) {
+function load (clientConfig, workspace, options) {
   const createInstance = Ctor => new Ctor(clientConfig.extend({
     ...options,
     responseType: 'json',
-    relativeUrl: Ctor[http.relativeUrl],
+    relativeUrl: workspace ? path.join('clusters', workspace, Ctor[http.relativeUrl]) : Ctor[http.relativeUrl],
   }))
   const createInstances = resourceGroup => _.mapValues(resourceGroup, createInstance)
   return _.mapValues(resourceGroups, createInstances)

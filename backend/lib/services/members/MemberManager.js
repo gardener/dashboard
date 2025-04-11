@@ -12,7 +12,7 @@ const { dumpKubeconfig } = require('@gardener-dashboard/kube-config')
 const { Resources } = require('@gardener-dashboard/kube-client')
 
 const config = require('../../config')
-const { findProjectByNamespace } = require('../../cache')
+const getCache = require('../../cache')
 const Member = require('./Member')
 const SubjectListItem = require('./SubjectListItem')
 const SubjectList = require('./SubjectList')
@@ -312,8 +312,9 @@ class MemberManager {
       .value()
   }
 
-  static async create ({ client, id }, namespace) {
-    const name = findProjectByNamespace(namespace).metadata.name
+  static async create ({ client, id, workspace }, namespace) {
+    const cache = getCache(workspace)
+    const name = cache.findProjectByNamespace(namespace).metadata.name
     const [
       project,
       { items: serviceAccounts },

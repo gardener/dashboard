@@ -20,12 +20,12 @@ const { fromKubeconfig, parseKubeconfig } = require('@gardener-dashboard/kube-co
 class Client {
   #clientConfig
 
-  constructor (clientConfig, options) {
+  constructor (clientConfig, workspace, options) {
     this.#clientConfig = clientConfig
     // add hooks for logging
     options = debug.attach(options)
     // assign grouped resources (e.g. core.)
-    resources.assign(this, clientConfig, options)
+    resources.assign(this, clientConfig, workspace, options)
     // assign non-resource endpoints (e.g healthz)
     nonResourceEndpoints.assign(this, clientConfig, options)
   }

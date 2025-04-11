@@ -10,7 +10,7 @@ const createError = require('http-errors')
 const cookieParser = require('cookie-parser')
 const kubernetesClient = require('@gardener-dashboard/kube-client')
 const { cloneDeep } = require('lodash')
-const cache = require('../cache')
+const getCache = require('../cache')
 const logger = require('../logger')
 const authorization = require('../services/authorization')
 const { authenticate } = require('../security')
@@ -154,7 +154,9 @@ function synchronizeFactory (kind, options = {}) {
   } = options
   const uidNotFound = uidNotFoundFactory(group, kind)
 
-  return (socket, uids = []) => {
+  return (socket, workspace, uids = []) => {
+    const cache = getCache(workspace)
+
     return uids.map(uid => {
       const object = cache.getByUid(kind, uid)
       if (!object) {

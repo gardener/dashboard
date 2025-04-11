@@ -11,13 +11,11 @@ const { get } = require('lodash')
 const ioHelper = require('../io/helper')
 const { isMemberOf } = require('../utils')
 
-module.exports = (io, informer) => {
-  const nsp = io.of('/')
-
+module.exports = (nsp, informer) => {
   const handleEvent = async (type, newObject, oldObject) => {
     const path = ['metadata', 'uid']
     const uid = get(newObject, path, get(oldObject, path))
-    const sockets = await io.fetchSockets()
+    const sockets = await nsp.fetchSockets()
     const users = new Map()
     for (const socket of sockets) {
       const user = ioHelper.getUserFromSocket(socket)

@@ -63,6 +63,12 @@ class GardenerDashboard extends V1Alpha1(NamedGroup(HttpClient)) {
   }
 }
 
+class KCPTenancy extends V1Alpha1(NamedGroup(HttpClient)) {
+  static get group () {
+    return 'tenancy.kcp.io'
+  }
+}
+
 module.exports = {
   APIRegistration,
   Authentication,
@@ -73,4 +79,5 @@ module.exports = {
   GardenerCore,
   GardenerSeedManagement,
   GardenerDashboard,
+  KCPTenancy,
 }

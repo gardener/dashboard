@@ -10,7 +10,7 @@ const _ = require('lodash')
 const logger = require('../logger')
 const markdown = require('../markdown')
 const express = require('express')
-const { dashboardClient } = require('@gardener-dashboard/kube-client')
+const { createDashboardClient } = require('@gardener-dashboard/kube-client')
 const config = require('../config')
 const { metricsRoute } = require('../middleware')
 
@@ -22,6 +22,7 @@ const metricsMiddleware = metricsRoute('config')
 router.route('/')
   .all(metricsMiddleware)
   .get(async (req, res, next) => {
+    const dashboardClient = createDashboardClient(req.user.workspace)
     try {
       if (!frontendConfig.clusterIdentity) {
         try {

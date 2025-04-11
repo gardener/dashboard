@@ -4,6 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import { useLocalStorageStore } from '@/store/localStorage'
+
 const interceptors = []
 
 export const registry = {
@@ -25,11 +27,16 @@ export const registry = {
 }
 
 export function fetchWrapper (url, { method = 'GET', cache = 'no-cache', headers, body, ...options } = {}) {
+  const localStorage = useLocalStorageStore()
+
   let promise = new Promise(resolve => {
     headers = {
       accept: 'application/json, text/*;q=0.9, */*;q=0.8',
       'x-requested-with': 'XMLHttpRequest',
       ...headers,
+    }
+    if (localStorage.workspace) {
+      headers.workspace = localStorage.workspace
     }
     if (body) {
       if (typeof body === 'object') {

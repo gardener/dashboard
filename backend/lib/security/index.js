@@ -43,6 +43,7 @@ const {
   COOKIE_STATE,
   GARDENER_AUDIENCE,
 } = require('./constants')
+const { log } = require('console')
 
 const {
   issuer,
@@ -220,15 +221,16 @@ async function authorizeToken (req, res) {
     .value()
   const payload = {}
   const tokenSet = { id_token: idToken }
-  tokenSet.access_token = await createAccessToken(payload, idToken)
+  const workspace = req.headers.workspace
+  tokenSet.access_token = await createAccessToken(payload, idToken, workspace)
   await setCookies(res, tokenSet)
   return decode(tokenSet.access_token)
 }
 
-async function createAccessToken (payload, idToken) {
+async function createAccessToken (payload, idToken, workspace) {
   const user = { auth: { bearer: idToken } }
   const results = await Promise.allSettled([
-    authentication.isAuthenticated({ token: idToken }),
+    authentication.isAuthenticated({ token: idToken }, workspace),
     authorization.isAdmin(user),
   ])
   // throw an error if any promise has been rejected
@@ -333,7 +335,8 @@ async function authorizationCallback (req, res) {
 
   const originalUrl = req.originalUrl || req.url
   const currentUrl = new URL(originalUrl, backendRedirectUri)
-  const tokenSet = await authorizationCodeExchange(currentUrl, checks)
+  const workspace = req.headers.workspace
+  const tokenSet = await authorizationCodeExchange(currentUrl, checks, workspace)
   await setCookies(res, tokenSet)
   return { redirectPath }
 }
@@ -418,7 +421,7 @@ async function getTokenSet (cookies) {
   return tokenSet
 }
 
-async function authorizationCodeExchange (currentUrl, checks) {
+async function authorizationCodeExchange (currentUrl, checks, workspace) {
   const config = await getConfiguration()
   const { authorizationCodeGrant } = await getOpenIdClientModule()
   const iat = now()
@@ -439,7 +442,7 @@ async function authorizationCodeExchange (currentUrl, checks) {
     payload.rti = digest(tokenSet.refresh_token)
     logger.debug('Created TokenSet (%s)', payload.rti)
   }
-  tokenSet.access_token = await createAccessToken(payload, tokenSet.id_token)
+  tokenSet.access_token = await createAccessToken(payload, tokenSet.id_token, workspace)
   return tokenSet
 }
 
@@ -461,7 +464,7 @@ function handleClientError (err) {
   return err
 }
 
-async function refreshTokenSet (tokenSet) {
+async function refreshTokenSet (tokenSet, workspace) {
   const payload = pick(decode(tokenSet.access_token), ['exp', 'rti'])
   try {
     const config = await getConfiguration()
@@ -475,7 +478,7 @@ async function refreshTokenSet (tokenSet) {
     payload.rti = digest(tokenSet.refresh_token)
     logger.debug('Refreshed TokenSet (%s <- %s)', payload.rti, rti)
     payload.refresh_at = getRefreshAt(tokenSet)
-    tokenSet.access_token = await createAccessToken(payload, tokenSet.id_token)
+    tokenSet.access_token = await createAccessToken(payload, tokenSet.id_token, workspace)
     return tokenSet
   } catch (err) {
     logger.error('Failed to refresh TokenSet (%s)', payload.rti)
@@ -489,7 +492,8 @@ async function refreshToken (req, res) {
   let user = await verifyAccessToken(tokenSet.access_token)
   if (tokenSet.refresh_token) {
     try {
-      tokenSet = await refreshTokenSet(tokenSet)
+      const workspace = req.headers.workspace
+      tokenSet = await refreshTokenSet(tokenSet, workspace)
       await setCookies(res, tokenSet)
     } catch (err) {
       if (isHttpError(err) && err.statusCode === 401) {
@@ -517,8 +521,12 @@ function authenticate (options = {}) {
         enumerable: true,
       })
       Object.defineProperty(user, 'client', {
-        value: options.createClient({ auth }),
+        value: options.createClient(req.headers.workspace, { auth }),
       })
+      Object.defineProperty(user, 'workspace', {
+        value: req.headers.workspace,
+      })
+
       req.user = user
       next()
     } catch (err) {

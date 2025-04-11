@@ -7,7 +7,7 @@
 'use strict'
 
 const createError = require('http-errors')
-const { dashboardClient } = require('@gardener-dashboard/kube-client')
+const { createDashboardClient } = require('@gardener-dashboard/kube-client')
 const { isHttpError } = require('@gardener-dashboard/request')
 
 function currentMicroDateStr () {
@@ -24,6 +24,7 @@ async function updateLease () {
       renewTime: currentMicroDateStr(),
     },
   }
+  const dashboardClient = createDashboardClient('root') // TODO: use root here? =>Webhook is not workspaced?
   try {
     await dashboardClient['coordination.k8s.io'].leases.mergePatch(namespace, name, body)
   } catch (err) {

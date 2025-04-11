@@ -16,28 +16,32 @@ const router = module.exports = express.Router({
   mergeParams: true,
 })
 
-const ticketCache = cache.getTicketCache()
+const ticketCache = {}// TODO cache.getTicketCache()
 const metricsMiddleware = metricsRoute('tickets')
 
 function getProjectName (namespace = '_all') {
   if (namespace !== '_all') {
-    return cache.findProjectByNamespace(namespace).metadata.name
+    // TODO
+    // return cache.findProjectByNamespace(namespace).metadata.name
   }
 }
 function getIssues (namespace) {
-  const projectName = getProjectName(namespace)
-  const predicate = projectName
-    ? ['metadata.projectName', projectName]
-    : () => true
-  return _.filter(ticketCache.getIssues(), predicate)
+  // const projectName = getProjectName(namespace)
+  // const predicate = projectName
+  //   ? ['metadata.projectName', projectName]
+  //   : () => true
+  // return _.filter(ticketCache.getIssues(), predicate)
+  // TODO
+  return []
 }
 
 async function getIssuesAndComments (namespace, name) {
-  const projectName = getProjectName(namespace)
-  const issues = _.filter(ticketCache.getIssues(), { metadata: { projectName, name } })
-  const promises = _.map(issues, issue => tickets.getIssueComments({ number: issue.metadata.number }))
-  const comments = _.flatten(await Promise.all(promises))
-  return [issues, comments]
+  // const projectName = getProjectName(namespace)
+  // const issues = _.filter(ticketCache.getIssues(), { metadata: { projectName, name } })
+  // const promises = _.map(issues, issue => tickets.getIssueComments({ number: issue.metadata.number }))
+  // const comments = _.flatten(await Promise.all(promises))
+  // return [issues, comments]
+  return []
 }
 
 router.route('/')

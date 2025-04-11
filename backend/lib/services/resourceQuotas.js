@@ -9,7 +9,7 @@
 const _ = require('lodash')
 const { Forbidden } = require('http-errors')
 const authorization = require('./authorization')
-const { getResourceQuotas } = require('../cache')
+const getCache = require('../cache')
 
 function fromResource (resourceQuotas) {
   return _.map(resourceQuotas, ({ status }) => {
@@ -22,6 +22,7 @@ function fromResource (resourceQuotas) {
 }
 
 exports.list = async function ({ user, namespace }) {
+  const { getResourceQuotas } = getCache(user.workspace)
   const allowed = await authorization.canListResourceQuotas(user, namespace)
   if (!allowed) {
     throw new Forbidden(`You are not allowed to list resource quotas in namespace ${namespace}`)

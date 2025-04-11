@@ -6,13 +6,14 @@
 
 'use strict'
 
-const { getControllerRegistrations } = require('../cache')
+const getCache = require('../cache')
 const authorization = require('./authorization')
 const _ = require('lodash')
 
 const REQUIRED_RESOURCE_KINDS = ['Network', 'DNSRecord']
 const REQUIRED_RESOURCE_NAMES = ['extension-shoot-dns-service']
 exports.listExtensions = async function ({ user }) {
+  const { getControllerRegistrations } = getCache(user.workspace)
   const controllerregistrations = getControllerRegistrations()
   const allowed = await authorization.canListControllerRegistrations(user)
   const extensions = []
