@@ -9,27 +9,27 @@ SPDX-License-Identifier: Apache-2.0
     :is="componentName"
     v-if="visibleDialog"
     v-model="visibleDialogState"
-    v-bind="{ secretBinding: selectedSecretBinding, providerType: visibleDialog }"
+    v-bind="{ binding: selectedBinding, providerType: visibleDialog }"
   />
 </template>
 
 <script>
 
-import GcpDialog from '@/components/Secrets/GSecretDialogGcp'
-import AwsDialog from '@/components/Secrets/GSecretDialogAws'
-import AzureDialog from '@/components/Secrets/GSecretDialogAzure'
-import OpenstackDialog from '@/components/Secrets/GSecretDialogOpenstack'
-import AlicloudDialog from '@/components/Secrets/GSecretDialogAlicloud'
-import MetalDialog from '@/components/Secrets/GSecretDialogMetal'
-import VsphereDialog from '@/components/Secrets/GSecretDialogVSphere'
-import CloudflareDialog from '@/components/Secrets/GSecretDialogCloudflare'
-import InfobloxDialog from '@/components/Secrets/GSecretDialogInfoblox'
-import NetlifyDialog from '@/components/Secrets/GSecretDialogNetlify'
-import DDnsDialog from '@/components/Secrets/GSecretDialogDDns'
-import DeleteDialog from '@/components/Secrets/GSecretDialogDelete'
-import HcloudDialog from '@/components/Secrets/GSecretDialogHCloud'
-import PowerdnsDialog from '@/components/Secrets/GSecretDialogPowerdns'
-import GenericDialog from '@/components/Secrets/GSecretDialogGeneric'
+import GcpDialog from '@/components/Credentials/GSecretDialogGcp'
+import AwsDialog from '@/components/Credentials/GSecretDialogAws'
+import AzureDialog from '@/components/Credentials/GSecretDialogAzure'
+import OpenstackDialog from '@/components/Credentials/GSecretDialogOpenstack'
+import AlicloudDialog from '@/components/Credentials/GSecretDialogAlicloud'
+import MetalDialog from '@/components/Credentials/GSecretDialogMetal'
+import VsphereDialog from '@/components/Credentials/GSecretDialogVSphere'
+import CloudflareDialog from '@/components/Credentials/GSecretDialogCloudflare'
+import InfobloxDialog from '@/components/Credentials/GSecretDialogInfoblox'
+import NetlifyDialog from '@/components/Credentials/GSecretDialogNetlify'
+import DDnsDialog from '@/components/Credentials/GSecretDialogDDns'
+import DeleteDialog from '@/components/Credentials/GSecretDialogDelete'
+import HcloudDialog from '@/components/Credentials/GSecretDialogHCloud'
+import PowerdnsDialog from '@/components/Credentials/GSecretDialogPowerdns'
+import GenericDialog from '@/components/Credentials/GSecretDialogGeneric'
 
 import head from 'lodash/head'
 import split from 'lodash/split'
@@ -56,7 +56,7 @@ const components = {
 export default {
   components,
   props: {
-    selectedSecretBinding: {
+    selectedBinding: {
       type: Object,
       required: false,
     },
