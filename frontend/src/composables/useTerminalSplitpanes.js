@@ -96,7 +96,7 @@ export function createTerminalSplitpanesComposable () {
   })
 
   const defaultTarget = computed(() => {
-    if (!shootItem.value.info) {
+    if (get(shootItem.value, ['info', 'canLinkToSeed']) === undefined) {
       // target depends on shootItem info, this ensures target is stable during loading
       return undefined
     }

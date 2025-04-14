@@ -91,7 +91,7 @@ SPDX-License-Identifier: Apache-2.0
     <template #footer>
       <div v-if="targetTab.selectedTarget">
         <v-alert
-          v-if="showUserGardenTerminalAlert"
+          v-if="isUserGardenTerminal"
           class="ma-2"
           type="info"
           color="primary"
@@ -101,7 +101,7 @@ SPDX-License-Identifier: Apache-2.0
           Make sure that only gardener project members with <span class="font-family-monospace">admin</span> role have privileged access to the <span class="font-family-monospace">{{ shootName }}</span> cluster before creating this terminal session.
         </v-alert>
         <v-alert
-          v-if="showAdminShootTerminalAlert"
+          v-if="isTerminalInUntrustedEnvironment"
           class="ma-2"
           type="info"
           color="primary"
@@ -111,7 +111,7 @@ SPDX-License-Identifier: Apache-2.0
           Do not enter credentials or sensitive data within the terminal session that cluster owners should not have access to, as the terminal will be running on one of the worker nodes.
         </v-alert>
         <v-alert
-          v-if="createDisabledNoNodes"
+          v-if="hasNoAvailableNodes"
           class="ma-2"
           type="error"
           variant="tonal"
@@ -228,7 +228,7 @@ export default {
             return false
           }
 
-          if (this.createDisabledNoNodes) {
+          if (this.hasNoAvailableNodes) {
             return false
           }
           return !this.v$.$invalid
@@ -263,17 +263,17 @@ export default {
         }
       }
     },
-    showUserGardenTerminalAlert () {
+    isUserGardenTerminal () {
       return !this.isAdmin && this.targetTab.selectedTarget === TargetEnum.GARDEN
     },
-    showAdminShootTerminalAlert () {
+    isTerminalInUntrustedEnvironment () {
       return this.isAdmin &&
           this.targetTab.selectedTarget === TargetEnum.SHOOT &&
           !this.targetTab.configLoading &&
           this.state.runtime === TargetEnum.SHOOT
     },
-    createDisabledNoNodes () {
-      if (this.state.runtime !== TargetEnum.SHOOT && this.state.runtime !== TargetEnum.GARDEN) {
+    hasNoAvailableNodes () {
+      if (this.state.runtime !== TargetEnum.SHOOT) {
         return false
       }
       if (this.isAdmin && this.targetTab.selectedTarget === TargetEnum.GARDEN) {

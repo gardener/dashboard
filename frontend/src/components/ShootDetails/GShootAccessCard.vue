@@ -236,7 +236,7 @@ const isTerminalTileVisible = computed(() => {
 })
 
 const isTerminalShortcutsTileVisible = computed(() => {
-  return isTerminalShortcutsFeatureEnabled.value && !hideTerminalShortcuts.value && isTerminalShortcutsFeatureEnabled.value
+  return isTerminalTileVisible.value && !hideTerminalShortcuts.value && isTerminalShortcutsFeatureEnabled.value
 })
 
 function onAddTerminalShortcut (shortcut) {

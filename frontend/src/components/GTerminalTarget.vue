@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
         location="top left"
         :disabled="canScheduleOnSeed"
       >
-        Terminals can only be scheduled if seed of this cluster is a managed seed
+        Terminals can only be scheduled if the seed is a managed seed
       </v-tooltip>
     </div>
     <v-radio

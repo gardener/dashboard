@@ -789,6 +789,7 @@ async function getTerminalConfig ({ user, namespace, name, target }) {
         .map(fromNodeResource)
         .value()
     } catch (err) {
+      logger.error('Could not list terminal host nodes', err)
       config.nodes = []
     }
   }

@@ -46,21 +46,17 @@ SPDX-License-Identifier: Apache-2.0
     >
       <g-action-button
         icon="mdi-console-line"
-        :disabled="disabledCannotScheduleOnSeed || disabledOperatorOnShoot || disabledHibernated"
+        :disabled="(isAdmin && !canScheduleOnSeed) ||
+          (isShootTarget && isShootHibernated)"
         @click.stop="addTerminalShortcut(shortcut)"
       >
         <template #tooltip>
-          <span v-if="disabledHibernated">
+          <div v-if="isAdmin && !canScheduleOnSeed">
+            Terminal shortcut not available on non-managed seed
+          </div>
+          <span v-else-if="isShootTarget && isShootHibernated">
             Cluster is hibernated. Wake up cluster to open terminal
           </span>
-          <span v-if="disabledCannotScheduleOnSeed">
-            Control Plane terminals can only be scheduled if seed of this cluster is a managed seed
-          </span>
-          <div v-else-if="disabledOperatorOnShoot">
-            <div>For operators, terminal shortcuts targeting clusters are only available on managed seeds.</div>
-            <div>Since the seed for this cluster is not managed, you cannot schedule a terminal using this shortcut.</div>
-            <div>To schedule a terminal on this cluster, please use the 'Create Terminal' dialog.</div>
-          </div>
           <span v-else>
             Create
             '<span class="font-family-monospace">{{ shortcut.title }}</span>'
@@ -176,32 +172,14 @@ export default {
     canScheduleOnSeed () {
       return get(this.shootItem, ['info', 'canLinkToSeed'], false)
     },
-    disabledHibernated () {
-      const target = this.shortcut.target
-      if (this.shootItem && !this.isShootStatusHibernated) {
-        return false
-      }
-      if (target !== TargetEnum.SHOOT) {
-        return false
-      }
-
-      return true
+    isShootTarget () {
+      return this.shortcut.target === TargetEnum.SHOOT
     },
-    disabledCannotScheduleOnSeed () {
-      const target = this.shortcut.target
-      if (target !== TargetEnum.CONTROL_PLANE) {
-        return false
-      }
-
-      return !this.canScheduleOnSeed
+    isControlPlaneTarget () {
+      return this.shortcut.target === TargetEnum.CONTROL_PLANE
     },
-    disabledOperatorOnShoot () {
-      const target = this.shortcut.target
-      if (target === TargetEnum.SHOOT && this.isAdmin) {
-        return !this.canScheduleOnSeed
-      }
-
-      return false
+    isShootHibernated () {
+      return this.shootItem && this.isShootStatusHibernated
     },
     visibilityIconShortcut () {
       return this.expansionPanel ? 'mdi-eye-off' : 'mdi-eye'
