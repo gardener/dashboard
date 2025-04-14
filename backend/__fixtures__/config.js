@@ -94,7 +94,7 @@ const defaultConfig = {
       {
         title: 'Feedback',
         icon: 'mdi-slack',
-        url: 'https://kubernetes.slack.com/messages/gardener/',
+        url: 'https://gardener-cloud.slack.com/',
       },
       {
         title: 'Issues',

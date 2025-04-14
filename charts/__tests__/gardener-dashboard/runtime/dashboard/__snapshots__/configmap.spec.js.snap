@@ -446,7 +446,7 @@ exports[`gardener-dashboard configmap should render the template w/ defaults val
       {
         "icon": "mdi-slack",
         "title": "slack",
-        "url": "https://kubernetes.slack.com/messages/gardener",
+        "url": "https://gardener-cloud.slack.com/",
       },
       {
         "icon": "mdi-bug",
