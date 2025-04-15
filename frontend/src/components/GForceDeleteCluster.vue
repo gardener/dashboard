@@ -53,7 +53,7 @@ SPDX-License-Identifier: Apache-2.0
         I confirm that I read the message above and deleted all resources
         in the underlying <code>{{ shootProviderType }}</code> account
         <code>
-          <g-shoot-secret-name
+          <g-shoot-credential-name
             :namespace="shootNamespace"
             :secret-binding-name="shootSecretBindingName"
             :credentials-binding-name="shootCredentialsBindingName"
@@ -79,7 +79,7 @@ import {
 import { useVuelidate } from '@vuelidate/core'
 
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
-import GShootSecretName from '@/components/GShootSecretName'
+import GShootCredentialName from '@/components/GShootCredentialName'
 
 import { useShootItem } from '@/composables/useShootItem'
 
@@ -97,7 +97,7 @@ import filter from 'lodash/filter'
 export default {
   components: {
     GAccountAvatar,
-    GShootSecretName,
+    GShootCredentialName,
   },
   setup () {
     const {

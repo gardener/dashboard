@@ -250,10 +250,10 @@ export function createShootContextComposable (options = {}) {
       return undefined
     },
     set (value) {
-      if (value.kind === 'CredentialsBinding') {
+      if (value?.kind === 'CredentialsBinding') {
         credentialsBindingName.value = get(value, ['metadata', 'name'])
       }
-      if (value.kind === 'SecretBinding') {
+      if (value?.kind === 'SecretBinding') {
         secretBindingName.value = get(value, ['metadata', 'name'])
       }
     },

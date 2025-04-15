@@ -247,12 +247,13 @@ describe('api', function () {
 
     it('should delete an own cloudProvider credential (secretbinding)', async function () {
       const params = {
-        namespace: 'garden-foo',
-        secretBindingName: 'foo-infra3-secret2-secretbinding',
-        secretName: 'secret2',
+        bindingKind: 'SecretBinding',
+        bindingNamespace: 'garden-foo',
+        bindingName: 'foo-infra3-secret2-secretbinding',
       }
-      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.delete())
+      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.delete())
+      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.delete())
 
       const res = await agent
         .post('/api/cloudprovidercredentials')
@@ -260,7 +261,7 @@ describe('api', function () {
         .send({ method: 'remove', params })
         .expect(200)
 
-      expect(mockRequest).toHaveBeenCalledTimes(2)
+      expect(mockRequest).toHaveBeenCalledTimes(3)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
@@ -268,12 +269,13 @@ describe('api', function () {
 
     it('should delete an own cloudProvider credential (credentialsbinding)', async function () {
       const params = {
-        namespace: 'garden-foo',
-        credentialsBindingName: 'foo-infra3-secret3-credentialsbinding',
-        secretName: 'secret3',
+        bindingKind: 'CredentialsBinding',
+        bindingNamespace: 'garden-foo',
+        bindingName: 'foo-infra3-secret3-credentialsbinding',
       }
-      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.delete())
+      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.delete())
+      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.delete())
 
       const res = await agent
         .post('/api/cloudprovidercredentials')
@@ -281,7 +283,7 @@ describe('api', function () {
         .send({ method: 'remove', params })
         .expect(200)
 
-      expect(mockRequest).toHaveBeenCalledTimes(2)
+      expect(mockRequest).toHaveBeenCalledTimes(3)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()

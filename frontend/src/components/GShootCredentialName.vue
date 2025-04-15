@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
   >
     <template #activator="{ props }">
       <g-text-router-link
-        v-if="canLinkToSecret"
+        v-if="canLinkToCredential"
         v-bind="props"
         :to="{ name: 'Credentials', params: { namespace }, hash: credentialHash }"
         :text="binding?.metadata.name"
@@ -74,7 +74,7 @@ export default {
     ...mapState(useAuthzStore, [
       'canGetCloudProviderCredentials',
     ]),
-    canLinkToSecret () {
+    canLinkToCredential () {
       return this.canGetCloudProviderCredentials && this.binding
     },
     binding () {

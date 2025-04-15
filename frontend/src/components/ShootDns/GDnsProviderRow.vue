@@ -35,7 +35,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-select>
       </div>
       <div class="regular-input">
-        <g-select-secret
+        <g-select-credential
           v-if="dnsServiceExtensionProviderSecret || !dnsProvider.secretName"
           v-model="dnsServiceExtensionProviderSecret"
           :provider-type="dnsProviderType"
@@ -107,7 +107,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useCredentialStore } from '@/store/credential'
 
-import GSelectSecret from '@/components/Credentials/GSelectSecret'
+import GSelectCredential from '@/components/Credentials/GSelectCredential'
 import GVendorIcon from '@/components/GVendorIcon'
 
 import { useShootContext } from '@/composables/useShootContext'
@@ -123,7 +123,7 @@ import get from 'lodash/get'
 
 export default {
   components: {
-    GSelectSecret,
+    GSelectCredential,
     GVendorIcon,
   },
   props: {

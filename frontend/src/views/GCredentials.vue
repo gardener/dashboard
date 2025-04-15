@@ -288,9 +288,9 @@ import GDataTableFooter from '@/components/GDataTableFooter.vue'
 import { useTwoTableLayout } from '@/composables/useTwoTableLayout'
 
 import {
-  hasOwnCredential,
+  computeBindingItem,
   mapTableHeader,
-  calcRelatedShootCount,
+  calculateRelatedShootCount,
 } from '@/utils'
 
 import orderBy from 'lodash/orderBy'
@@ -585,6 +585,8 @@ export default {
           return `${item.credentialNamespace} ${item.credentialName}`
         case 'infrastructure':
           return item.infrastructureName
+        case 'kind':
+          return item.kind.tooltip
         default:
           return get(item, [column])
       }
@@ -595,45 +597,16 @@ export default {
       return mapValues(tableKeys, () => () => 0)
     },
     computeItem (binding) {
-      const kind = {
-        icon: 'mdi-help-circle',
-        tooltip: 'Unknown',
-      }
-      let credentialNamespace = ''
-      let credentialName = ''
-      if (binding._isSecretBinding) {
-        kind.tooltip = 'Secret (SecretBinding)'
-        kind.icon = 'mdi-key'
-        credentialNamespace = binding.secretRef.namespace
-        credentialName = binding.secretRef.name
-      }
-      if (binding._isCredentialsBinding) {
-        if (binding.credentialsRef.kind === 'Secret') {
-          kind.tooltip = 'Secret (CredentialsBinding)'
-          kind.icon = 'mdi-key-outline'
-        }
-        if (binding.credentialsRef.kind === 'WorkloadIdentity') {
-          kind.tooltip = 'WorkloadIdentity'
-          kind.icon = 'mdi-id-card'
-        }
-        credentialNamespace = binding.credentialsRef.namespace
-        credentialName = binding.credentialsRef.name
-      }
-      const relatedShootCount = calcRelatedShootCount(this.shootList, binding)
+      const bindingItem = computeBindingItem(binding)
+      const relatedShootCount = calculateRelatedShootCount(this.shootList, binding)
+      const relatedShootCountLabel = this.relatedShootCountLabel(relatedShootCount)
+      const highlighted = this.highlightedUid && this.highlightedUid === binding.metadata.uid
 
       return {
-        name: binding.metadata.name,
-        kind,
-        hasOwnCredential: hasOwnCredential(binding),
-        hasOwnSecret: binding._secret !== undefined,
-        credentialNamespace,
-        credentialName,
-        providerType: binding.provider.type,
+        ...bindingItem,
         relatedShootCount,
-        relatedShootCountLabel: this.relatedShootCountLabel(relatedShootCount),
-        binding,
-        highlighted: this.highlightedUid && this.highlightedUid === binding.metadata.uid,
-        isMarkedForDeletion: !!binding.metadata.deletionTimestamp,
+        relatedShootCountLabel,
+        highlighted,
       }
     },
   },

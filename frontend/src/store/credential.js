@@ -189,11 +189,10 @@ export const useCredentialStore = defineStore('credential', () => {
     appStore.setSuccess(`Cloud Provider credential ${binding.metadata.name} updated`)
   }
 
-  async function deleteCredential ({ namespace, secretBindingName, credentialsBindingName, secretName }) {
-    const name = secretBindingName ?? credentialsBindingName
-    await api.deleteCloudProviderCredential({ namespace, secretBindingName, credentialsBindingName, secretName })
+  async function deleteCredential ({ bindingKind, bindingNamespace, bindingName }) {
+    await api.deleteCloudProviderCredential({ bindingKind, bindingNamespace, bindingName })
     await fetchCredentials()
-    appStore.setSuccess(`Cloud Provider credential ${name} deleted`)
+    appStore.setSuccess(`Cloud Provider credential ${bindingName} deleted`)
   }
 
   const infrastructureBindingList = computed(() => {

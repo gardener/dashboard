@@ -297,11 +297,19 @@ describe('stores', () => {
       expect(newCredentialsBinding._secret.data).toEqual({ newSecret: 'dummy-data' })
     })
 
-    it('should delete credential', async () => {
-      await credentialStore.deleteCredential({ namespace: testNamespace, secretBindingName: awsSecretBindingName, credentialsBindingName: awsCredentialsBindingName, secretName: awsSecretName })
+    it('should delete credential (secretbinding)', async () => {
+      await credentialStore.deleteCredential({ bindingKind: 'SecretBinding', bindingNamespace: testNamespace, bindingName: awsSecretBindingName })
 
       expect(api.deleteCloudProviderCredential).toBeCalledTimes(1)
-      expect(api.deleteCloudProviderCredential).toBeCalledWith({ namespace: testNamespace, secretBindingName: awsSecretBindingName, credentialsBindingName: awsCredentialsBindingName, secretName: awsSecretName })
+      expect(api.deleteCloudProviderCredential).toBeCalledWith({ bindingKind: 'SecretBinding', bindingNamespace: testNamespace, bindingName: awsSecretBindingName })
+      expect(api.getCloudProviderCredentials).toBeCalledTimes(1)
+    })
+
+    it('should delete credential (credentialsbinding)', async () => {
+      await credentialStore.deleteCredential({ bindingKind: 'CredentialsBinding', bindingNamespace: testNamespace, bindingName: awsCredentialsBindingName })
+
+      expect(api.deleteCloudProviderCredential).toBeCalledTimes(1)
+      expect(api.deleteCloudProviderCredential).toBeCalledWith({ bindingKind: 'CredentialsBinding', bindingNamespace: testNamespace, bindingName: awsCredentialsBindingName })
       expect(api.getCloudProviderCredentials).toBeCalledTimes(1)
     })
 

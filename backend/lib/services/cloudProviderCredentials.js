@@ -27,8 +27,15 @@ exports.list = async function ({ user, params }) {
     client['security.gardener.cloud'].workloadidentities.list(bindingNamespace),
   ])
 
+  const secrets = [
+    ...secretBindingSecrets,
+    ...credentialsBindingSecrets,
+  ]
   const quotas = _
-    .chain([...secretBindings, ...credentialsBindings])
+    .chain([
+      ...secretBindings,
+      ...credentialsBindings,
+    ])
     .flatMap(resolveQuotas)
     .uniqBy('metadata.uid')
     .value()
@@ -36,7 +43,7 @@ exports.list = async function ({ user, params }) {
   return {
     secretBindings,
     credentialsBindings,
-    secrets: [...secretBindingSecrets, ...credentialsBindingSecrets],
+    secrets,
     workloadIdentities,
     quotas,
   }
@@ -74,65 +81,88 @@ exports.create = async function ({ user, params }) {
     throw err
   }
 
+  const quotas = resolveQuotas(binding)
+
   return {
     binding,
     secret,
-    quotas: resolveQuotas(binding),
+    quotas,
   }
+}
+
+const validateOwnSecret = async ({ client, bindingKind, bindingNamespace, bindingName, secretNamespace, secretName }) => {
+  let binding, secretRefNamespace, secretRefName
+  if (bindingKind === 'SecretBinding') {
+    binding = await client['core.gardener.cloud'].secretbindings.get(bindingNamespace, bindingName)
+    secretRefNamespace = binding.secretRef.namespace
+    secretRefName = binding.secretRef.name
+  } else if (bindingKind === 'CredentialsBinding') {
+    binding = await client['security.gardener.cloud'].credentialsbindings.get(bindingNamespace, bindingName)
+    secretRefNamespace = binding.credentialsRef.namespace
+    secretRefName = binding.credentialsRef.name
+  } else {
+    throw createError(422, `Unknown binding ${bindingKind}`)
+  }
+  if (bindingNamespace !== secretRefNamespace ||
+    (secretNamespace && secretNamespace !== secretRefNamespace)) {
+    throw createError(422, `Operation allowed only if Secret and ${bindingKind} are in the same namespace`)
+  }
+  if (secretName && secretName !== secretRefName) {
+    throw createError(422, `Binding does not reference secret ${secretName} in namespace ${secretNamespace}`)
+  }
+
+  return secretRefName
 }
 
 exports.patch = async function ({ user, params }) {
   const client = user.client
 
   let { secret, binding } = params
-  const secretNamespace = secret.metadata.namespace
-  const secretName = secret.metadata.name
+  const bindingKind = binding.kind
   const bindingNamespace = binding.metadata.namespace
   const bindingName = binding.metadata.name
-  const kind = binding.kind
+  const secretNamespace = secret.metadata.namespace
+  const secretName = secret.metadata.name
+  await validateOwnSecret({
+    client,
+    bindingKind,
+    bindingNamespace,
+    bindingName,
+    secretNamespace,
+    secretName,
+  })
 
-  let secretRefNamespace
-  if (kind === 'SecretBinding') {
-    secretRefNamespace = binding.secretRef.namespace
-    binding = await client['core.gardener.cloud'].secretbindings.get(bindingNamespace, bindingName)
-    if (!binding) {
-      throw createError(404)
-    }
-  } else if (kind === 'CredentialsBinding') {
-    secretRefNamespace = binding.credentialsRef.namespace
-    binding = await client['security.gardener.cloud'].credentialsbindings.get(bindingNamespace, bindingName)
-    if (!binding) {
-      throw createError(404)
-    }
-  } else {
-    throw createError(422, 'Unknown binding kind')
-  }
-  if (bindingNamespace !== secretRefNamespace ||
-    secretRefNamespace !== secretNamespace) {
-    throw createError(422, `Patch allowed only if Secret and ${kind} are in the same namespace`)
-  }
-  secret = await client.core.secrets.update(bindingNamespace, secretName, secret)
+  secret = await client.core.secrets.update(secretNamespace, secretName, secret)
+
+  const quotas = resolveQuotas(binding)
 
   return {
     binding,
     secret,
-    quotas: resolveQuotas(binding),
+    quotas,
   }
 }
 
 exports.remove = async function ({ user, params }) {
   const client = user.client
-  const { namespace, secretBindingName, credentialsBindingName, secretName } = params
+  const { bindingKind, bindingNamespace, bindingName } = params
+
+  const secretName = await validateOwnSecret({
+    client,
+    bindingKind,
+    bindingNamespace,
+    bindingName,
+  })
 
   const promises = []
-  if (credentialsBindingName) {
-    promises.push(client['security.gardener.cloud'].credentialsbindings.delete(namespace, credentialsBindingName))
-  }
-  if (secretBindingName) {
-    promises.push(client['core.gardener.cloud'].secretbindings.delete(namespace, secretBindingName))
-  }
   if (secretName) {
-    promises.push(client.core.secrets.delete(namespace, secretName))
+    promises.push(client.core.secrets.delete(bindingNamespace, secretName))
+  }
+  if (bindingKind === 'SecretBinding') {
+    promises.push(client['core.gardener.cloud'].secretbindings.delete(bindingNamespace, bindingName))
+  }
+  if (bindingKind === 'CredentialsBinding') {
+    promises.push(client['security.gardener.cloud'].credentialsbindings.delete(bindingNamespace, bindingName))
   }
 
   await Promise.all(promises)

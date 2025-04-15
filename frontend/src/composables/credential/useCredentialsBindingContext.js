@@ -26,16 +26,16 @@ export function useCredentialsBindingContext (options = {}) {
     authzStore = useAuthzStore(),
   } = options
 
-  const initialCredentialsBindingManifest = shallowRef(null)
+  const initialBindingManifest = shallowRef(null)
 
-  const normalizedInitialCredentialsBindingManifest = computed(() => {
-    const object = cloneDeep(initialCredentialsBindingManifest.value)
-    return normalizeCredentialsBindingManifest(object)
+  const normalizedInitialBindingManifest = computed(() => {
+    const object = cloneDeep(initialBindingManifest.value)
+    return normalizeBindingManifest(object)
   })
 
-  const credentialsBindingManifest = ref({})
+  const bindingManifest = ref({})
 
-  function normalizeCredentialsBindingManifest (value) {
+  function normalizeBindingManifest (value) {
     const object = merge({
       apiVersion: 'security.gardener.cloud/v1alpha1',
       kind: 'CredentialsBinding',
@@ -47,19 +47,19 @@ export function useCredentialsBindingContext (options = {}) {
     return cleanup(object)
   }
 
-  const normalizedCredentialsBindingManifest = computed(() => {
-    const object = cloneDeep(credentialsBindingManifest.value)
-    return normalizeCredentialsBindingManifest(object)
+  const normalizedBindingManifest = computed(() => {
+    const object = cloneDeep(bindingManifest.value)
+    return normalizeBindingManifest(object)
   })
 
-  function setCredentialsBindingManifest (value) {
-    initialCredentialsBindingManifest.value = value
-    credentialsBindingManifest.value = cloneDeep(initialCredentialsBindingManifest.value)
+  function setBindingManifest (value) {
+    initialBindingManifest.value = value
+    bindingManifest.value = cloneDeep(initialBindingManifest.value)
   }
 
-  function createCredentialsBindingManifest () {
+  function createBindingManifest () {
     const namespace = get(options, ['namespace'], authzStore.namespace)
-    credentialsBindingManifest.value = {
+    bindingManifest.value = {
       metadata: {
         name: '',
         namespace,
@@ -72,47 +72,47 @@ export function useCredentialsBindingContext (options = {}) {
         namespace,
       },
     }
-    initialCredentialsBindingManifest.value = cloneDeep(credentialsBindingManifest.value)
+    initialBindingManifest.value = cloneDeep(bindingManifest.value)
   }
 
-  const isCredentialsBindingDirty = computed(() => {
+  const isBindingDirty = computed(() => {
     return !isEqual(
-      normalizedCredentialsBindingManifest.value,
-      normalizedInitialCredentialsBindingManifest.value,
+      normalizedBindingManifest.value,
+      normalizedInitialBindingManifest.value,
     )
   })
 
   const {
-    name: credentialsBindingName,
-    namespace: credentialsBindingNamespace,
-  } = useObjectMetadata(credentialsBindingManifest)
+    name: bindingName,
+    namespace: bindingNamespace,
+  } = useObjectMetadata(bindingManifest)
 
-  const credentialsBindingProviderType = computed({
+  const bindingProviderType = computed({
     get () {
-      return get(credentialsBindingManifest.value, ['provider', 'type'])
+      return get(bindingManifest.value, ['provider', 'type'])
     },
     set (value) {
-      set(credentialsBindingManifest.value, ['provider', 'type'], value)
+      set(bindingManifest.value, ['provider', 'type'], value)
     },
   })
 
-  const credentialsBindingCredentialsRef = computed({
+  const bindingCredentialsRef = computed({
     get () {
-      return get(credentialsBindingManifest.value, ['credentialsRef'])
+      return get(bindingManifest.value, ['credentialsRef'])
     },
     set (value) {
-      set(credentialsBindingManifest.value, ['credentialsRef'], value)
+      set(bindingManifest.value, ['credentialsRef'], value)
     },
   })
 
   return {
-    bindingManifest: normalizedCredentialsBindingManifest,
-    setBindingManifest: setCredentialsBindingManifest,
-    createBindingManifest: createCredentialsBindingManifest,
-    isBindingDirty: isCredentialsBindingDirty,
-    bindingName: credentialsBindingName,
-    bindingNamespace: credentialsBindingNamespace,
-    bindingProviderType: credentialsBindingProviderType,
-    bindingRef: credentialsBindingCredentialsRef,
+    bindingManifest: normalizedBindingManifest,
+    setBindingManifest,
+    createBindingManifest,
+    isBindingDirty,
+    bindingName,
+    bindingNamespace,
+    bindingProviderType,
+    bindingRef: bindingCredentialsRef,
   }
 }

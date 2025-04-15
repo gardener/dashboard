@@ -744,10 +744,7 @@ export function normalizeVersion (version) {
   return [major, minor, patch].map(Number).join('.') + suffix
 }
 
-export function calcRelatedShootCount (shootList, binding) {
-  if (!binding._secretName) {
-    return 0 // currently we only support secrets in dashboard
-  }
+export function calculateRelatedShootCount (shootList, binding) {
   if (binding._isInfrastructureBinding) {
     const bindingName = binding.metadata.name
     const shootsByInfrastructureBinding = filter(shootList, ({ spec }) => {
@@ -760,6 +757,9 @@ export function calcRelatedShootCount (shootList, binding) {
     })
     return shootsByInfrastructureBinding.length
   } else if (binding._isDnsBinding) {
+    if (!binding._secretName) {
+      return 0 // currently DNS provider does not support workload identity
+    }
     const someDnsProviderHasSecretRef = providers => some(providers, ['secretName', binding._secretName])
     const someResourceHasSecretRef = resources => some(resources, { resourceRef: { kind: 'Secret', name: binding._secretName } })
 
@@ -772,5 +772,48 @@ export function calcRelatedShootCount (shootList, binding) {
       }
     }
     return count
+  }
+}
+
+export function computeBindingItem (binding) {
+  if (!binding) {
+    return undefined
+  }
+  const kind = {
+    icon: 'mdi-help-circle',
+    tooltip: 'Unknown',
+  }
+  let credentialNamespace = ''
+  let credentialName = ''
+  if (binding._isSecretBinding) {
+    kind.tooltip = 'Secret (SecretBinding)'
+    kind.icon = 'mdi-key'
+    credentialNamespace = binding.secretRef.namespace
+    credentialName = binding.secretRef.name
+  }
+  if (binding._isCredentialsBinding) {
+    if (binding.credentialsRef.kind === 'Secret') {
+      kind.tooltip = 'Secret (CredentialsBinding)'
+      kind.icon = 'mdi-key-outline'
+    }
+    if (binding.credentialsRef.kind === 'WorkloadIdentity') {
+      kind.tooltip = 'WorkloadIdentity'
+      kind.icon = 'mdi-id-card'
+    }
+    credentialNamespace = binding.credentialsRef.namespace
+    credentialName = binding.credentialsRef.name
+  }
+
+  return {
+    name: binding.metadata.name,
+    kind,
+    hasOwnCredential: hasOwnCredential(binding),
+    hasOwnSecret: binding._secret !== undefined,
+    hasOwnWorkloadIdentity: binding._workloadIdentity !== undefined,
+    credentialNamespace,
+    credentialName,
+    providerType: binding.provider.type,
+    binding,
+    isMarkedForDeletion: !!binding.metadata.deletionTimestamp,
   }
 }

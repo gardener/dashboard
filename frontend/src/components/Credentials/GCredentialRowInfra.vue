@@ -68,48 +68,24 @@ SPDX-License-Identifier: Apache-2.0
         {{ item.relatedShootCountLabel }}
       </div>
     </td>
-    <td v-if="selectedHeaders.actions">
-      <div class="d-flex justify-end">
-        <g-action-button
-          v-if="canPatchCredentials"
-          icon="mdi-pencil"
-          :disabled="!item.hasOwnCredential || !item.hasOwnSecret || item.isMarkedForDeletion"
-          @click="onUpdate"
-        >
-          <template #tooltip>
-            <span v-if="!item.hasOwnCredential">You can only edit secrets that are owned by you</span>
-            <span v-else-if="!item.hasOwnSecret">The dashboard only supports editing credentials of type secret</span>
-            <span v-else-if="item.isMarkedForDeletion">Secret is marked for deletion</span>
-            <span v-else>Edit Secret</span>
-          </template>
-        </g-action-button>
-        <g-action-button
-          v-if="canDeleteCredentials"
-          icon="mdi-delete"
-          :disabled="item.relatedShootCount > 0 || !item.hasOwnCredential || !item.hasOwnSecret || item.isMarkedForDeletion"
-          @click="onDelete"
-        >
-          <template #tooltip>
-            <span v-if="!item.hasOwnCredential">You can only delete secrets that are owned by you</span>
-            <span v-else-if="!item.hasOwnSecret">The dashboard only supports editing credentials of type secret</span>
-            <span v-else-if="item.relatedShootCount > 0">You can only delete secrets that are currently unused</span>
-            <span v-else-if="item.isMarkedForDeletion">Secret is already marked for deletion</span>
-            <span v-else>Delete Secret</span>
-          </template>
-        </g-action-button>
-      </div>
+    <td
+      v-if="selectedHeaders.actions"
+      class="text-action-button"
+    >
+      <g-credential-row-actions
+        :item="item"
+        @update="onUpdate"
+        @delete="onDelete"
+      />
     </td>
   </tr>
 </template>
 
 <script>
-import { mapState } from 'pinia'
-
-import { useAuthzStore } from '@/store/authz'
 
 import GVendor from '@/components/GVendor'
 import GSecretDetailsItemContent from '@/components/Credentials/GSecretDetailsItemContent'
-import GActionButton from '@/components/GActionButton.vue'
+import GCredentialRowActions from '@/components/Credentials/GCredentialRowActions'
 
 import { mapTableHeader } from '@/utils'
 
@@ -117,7 +93,7 @@ export default {
   components: {
     GVendor,
     GSecretDetailsItemContent,
-    GActionButton,
+    GCredentialRowActions,
   },
   props: {
     item: {
@@ -134,7 +110,6 @@ export default {
     'delete',
   ],
   computed: {
-    ...mapState(useAuthzStore, ['canPatchCredentials', 'canDeleteCredentials']),
     selectedHeaders () {
       return mapTableHeader(this.headers, 'selected')
     },

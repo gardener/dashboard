@@ -66,7 +66,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-select>
         </v-col>
         <v-col cols="3">
-          <g-select-secret
+          <g-select-credential
             v-model="primaryDnsProviderSecret"
             :provider-type="dnsPrimaryProviderType"
             register-vuelidate-as="dnsProviderSecret"
@@ -156,7 +156,7 @@ import { ref } from 'vue'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useCredentialStore } from '@/store/credential'
 
-import GSelectSecret from '@/components/Credentials/GSelectSecret'
+import GSelectCredential from '@/components/Credentials/GSelectCredential'
 import GDnsProviderRow from '@/components/ShootDns/GDnsProviderRow'
 import GVendorIcon from '@/components/GVendorIcon'
 
@@ -176,7 +176,7 @@ export default {
   components: {
     GDnsProviderRow,
     GVendorIcon,
-    GSelectSecret,
+    GSelectCredential,
   },
   setup () {
     const {

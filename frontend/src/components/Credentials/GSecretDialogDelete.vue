@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-card-text>
         <v-container fluid>
           <span class="text-subtitle-1">
-            Are you sure to delete the secret <span class="font-weight-bold">{{ binding.metadata.name }} ({{ binding.kind }})</span>?<br>
+            Are you sure to delete the <code>Secret</code> <span class="font-weight-bold">{{ binding.metadata.name }} (<code>{{ binding.kind }}</code>)</span>?<br>
             <span class="text-error font-weight-bold">The operation can not be undone.</span>
           </span>
         </v-container>
@@ -129,17 +129,10 @@ export default {
     },
     async onDeleteSecret () {
       try {
-        let secretBindingName, credentialsBindingName, secretName
-        if (this.binding._isSecretBinding) {
-          secretBindingName = this.binding.metadata.name
-        } else if (this.binding._isCredentialsBinding) {
-          credentialsBindingName = this.binding.metadata.name
-        }
-        if (this.otherBindings.length === 0) {
-          secretName = this.binding._secret.metadata.name
-        }
-        const { namespace } = this.binding.metadata
-        await this.deleteCredential({ namespace, secretBindingName, credentialsBindingName, secretName })
+        const bindingKind = this.binding.kind
+        const bindingNamespace = this.binding.metadata.namespace
+        const bindingName = this.binding.metadata.name
+        await this.deleteCredential({ bindingKind, bindingNamespace, bindingName })
         this.hide()
       } catch (err) {
         const errorDetails = errorDetailsFromError(err)

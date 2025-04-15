@@ -93,7 +93,7 @@ SPDX-License-Identifier: Apache-2.0
                   <span v-if="infraAccountError">
                     There is a problem with your credential
                     <code>
-                      <g-shoot-secret-name
+                      <g-shoot-credential-name
                         :namespace="namespace"
                         :secret-binding-name="secretBindingName"
                         :credentials-binding-name="credentialsBindingName"
@@ -126,14 +126,14 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 
 import GAnsiText from '@/components/GAnsiText.vue'
-import GShootSecretName from '@/components/GShootSecretName.vue'
+import GShootCredentialName from '@/components/GShootCredentialName.vue'
 
 import isEmpty from 'lodash/isEmpty'
 
 export default {
   components: {
     GAnsiText,
-    GShootSecretName,
+    GShootCredentialName,
   },
   props: {
     statusTitle: {

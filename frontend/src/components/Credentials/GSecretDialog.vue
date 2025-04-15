@@ -78,7 +78,7 @@ SPDX-License-Identifier: Apache-2.0
           class="mb-2"
         >
           <div>This secret is used by {{ relatedShootCount }} {{ relatedShootCount === 1 ? 'cluster' : 'clusters' }}. The new secret should be part of the same account as the one that gets replaced.</div>
-          <div>Clusters will only start using the new secret after they got reconciled. Therefore, wait until all clusters using the secret are reconciled before you disable the old secret in your infrastructure account. Otherwise the clusters will no longer function.</div>
+          <div>Clusters will only start using the new secret after they are reconciled. Therefore, wait until all clusters using the secret are reconciled before you disable the old secret in your infrastructure account. Otherwise the clusters will no longer function.</div>
         </v-alert>
         <v-alert
           :model-value="otherBindings.length > 0"
@@ -86,7 +86,7 @@ SPDX-License-Identifier: Apache-2.0
           rounded="0"
           class="mb-2 list-style"
         >
-          This secret is also referenced by
+          This <code>Secret</code> is also referenced by
           <ul>
             <li
               v-for="referencedBinding in otherBindings"
@@ -95,7 +95,7 @@ SPDX-License-Identifier: Apache-2.0
               <pre>{{ referencedBinding.metadata.name }} ({{ (referencedBinding.kind) }})</pre>
             </li>
           </ul>
-          Updating secret data for this {{ binding.kind }} will also affect the other bindings that reference this secret.
+          Updating <code>Secret</code> data for this <code>{{ binding.kind }}</code> will also affect the other <code>Bindings</code> that reference this <code>Secret</code>.
         </v-alert>
       </div>
       <v-divider />
@@ -157,7 +157,7 @@ import {
   getErrorMessages,
   setDelayedInputFocus,
   setInputFocus,
-  calcRelatedShootCount,
+  calculateRelatedShootCount,
 } from '@/utils'
 
 import includes from 'lodash/includes'
@@ -296,7 +296,7 @@ export default {
       return this.isCreateMode ? this.createTitle : this.replaceTitle
     },
     relatedShootCount () {
-      return calcRelatedShootCount(this.shootList, this.binding)
+      return calculateRelatedShootCount(this.shootList, this.binding)
     },
     helpContainerStyles () {
       const detailsRef = this.$refs.secretDetails

@@ -27,28 +27,12 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item
           v-bind="props"
           :title="undefined"
-          :subtitle="item.raw.description"
         >
-          {{ get(item.raw, 'metadata.name') }}
-          <v-chip
-            label
-            size="x-small"
-            color="primary"
-            variant="tonal"
-            class="ml-2"
-          >
-            {{ item.raw.kind }}
-          </v-chip>
-          <v-icon v-if="!hasOwnCredential(item.raw)">
-            mdi-share
-          </v-icon>
+          <g-select-credential-item :item="item.raw" />
         </v-list-item>
       </template>
       <template #selection="{ item }">
-        {{ get(item.raw, 'metadata.name') }}
-        <v-icon v-if="!hasOwnCredential(item.raw)">
-          mdi-share
-        </v-icon>
+        <g-select-credential-item :item="item.raw" />
       </template>
       <template #append-item>
         <v-divider class="mb-2" />
@@ -82,6 +66,7 @@ import { useProjectStore } from '@/store/project'
 import { useCredentialStore } from '@/store/credential'
 
 import GSecretDialogWrapper from '@/components/Credentials/GSecretDialogWrapper'
+import GSelectCredentialItem from '@/components/Credentials/GSelectCredentialItem'
 
 import { useProjectCostObject } from '@/composables/useProjectCostObject'
 import { useCloudProviderBindingList } from '@/composables/useCloudProviderBindingList'
@@ -97,7 +82,6 @@ import {
   selfTerminationDaysForSecret,
 } from '@/utils'
 
-import get from 'lodash/get'
 import head from 'lodash/head'
 import isEqual from 'lodash/isEqual'
 import differenceWith from 'lodash/differenceWith'
@@ -106,6 +90,7 @@ import cloneDeep from 'lodash/cloneDeep'
 export default {
   components: {
     GSecretDialogWrapper,
+    GSelectCredentialItem,
   },
   props: {
     modelValue: {
@@ -195,9 +180,10 @@ export default {
     },
     allowedBindings () {
       return this.cloudProviderBindingList
-        ?.filter(binding =>
-          !this.notAllowedSecretNames.includes(binding.secretRef?.name) &&
-        !this.notAllowedSecretNames.includes(binding.cedentialsRef?.name))
+        ?.filter(binding => {
+          const name = binding.secretRef?.name || binding.cedentialsRef?.name
+          return !this.notAllowedSecretNames.includes(name)
+        })
     },
     secretHint () {
       if (this.selfTerminationDays) {
@@ -216,8 +202,6 @@ export default {
     ...mapActions(useCloudProfileStore, [
       'cloudProfileByName',
     ]),
-    get,
-    hasOwnCredential,
     openSecretDialog () {
       this.visibleSecretDialog = this.providerType
       this.secretItemsBeforeAdd = cloneDeep(this.allowedBindings)

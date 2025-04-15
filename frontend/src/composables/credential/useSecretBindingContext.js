@@ -25,16 +25,16 @@ export function useSecretBindingContext (options = {}) {
     authzStore = useAuthzStore(),
   } = options
 
-  const initialSecretBindingManifest = shallowRef(null)
+  const initialBindingManifest = shallowRef(null)
 
-  const normalizedInitialSecretBindingManifest = computed(() => {
-    const object = cloneDeep(initialSecretBindingManifest.value)
-    return normalizeSecretBindingManifest(object)
+  const normalizedInitialBindingManifest = computed(() => {
+    const object = cloneDeep(initialBindingManifest.value)
+    return normalizeBindingManifest(object)
   })
 
-  const secretBindingManifest = ref({})
+  const bindingManifest = ref({})
 
-  function normalizeSecretBindingManifest (value) {
+  function normalizeBindingManifest (value) {
     const object = Object.assign({
       apiVersion: 'core.gardener.cloud/v1beta1',
       kind: 'SecretBinding',
@@ -42,19 +42,19 @@ export function useSecretBindingContext (options = {}) {
     return cleanup(object)
   }
 
-  const normalizedSecretBindingManifest = computed(() => {
-    const object = cloneDeep(secretBindingManifest.value)
-    return normalizeSecretBindingManifest(object)
+  const normalizedBindingManifest = computed(() => {
+    const object = cloneDeep(bindingManifest.value)
+    return normalizeBindingManifest(object)
   })
 
-  function setSecretBindingManifest (value) {
-    initialSecretBindingManifest.value = value
-    secretBindingManifest.value = cloneDeep(initialSecretBindingManifest.value)
+  function setBindingManifest (value) {
+    initialBindingManifest.value = value
+    bindingManifest.value = cloneDeep(initialBindingManifest.value)
   }
 
-  function createSecretBindingManifest () {
+  function createBindingManifest () {
     const namespace = get(options, ['namespace'], authzStore.namespace)
-    secretBindingManifest.value = {
+    bindingManifest.value = {
       metadata: {
         name: '',
         namespace,
@@ -67,47 +67,47 @@ export function useSecretBindingContext (options = {}) {
         namespace,
       },
     }
-    initialSecretBindingManifest.value = cloneDeep(secretBindingManifest.value)
+    initialBindingManifest.value = cloneDeep(bindingManifest.value)
   }
 
-  const isSecretBindingDirty = computed(() => {
+  const isBindingDirty = computed(() => {
     return !isEqual(
-      normalizedSecretBindingManifest.value,
-      normalizedInitialSecretBindingManifest.value,
+      normalizedBindingManifest.value,
+      normalizedInitialBindingManifest.value,
     )
   })
 
   const {
-    name: secretBindingName,
-    namespace: secretBindingNamespace,
-  } = useObjectMetadata(secretBindingManifest)
+    name: bindingName,
+    namespace: bindingNamespace,
+  } = useObjectMetadata(bindingManifest)
 
-  const secretBindingProviderType = computed({
+  const bindingProviderType = computed({
     get () {
-      return get(secretBindingManifest.value, ['provider', 'type'])
+      return get(bindingManifest.value, ['provider', 'type'])
     },
     set (value) {
-      set(secretBindingManifest.value, ['provider', 'type'], value)
+      set(bindingManifest.value, ['provider', 'type'], value)
     },
   })
 
-  const secretBindingSecretRef = computed({
+  const bindingSecretRef = computed({
     get () {
-      return get(secretBindingManifest.value, ['secretRef'])
+      return get(bindingManifest.value, ['secretRef'])
     },
     set (value) {
-      set(secretBindingManifest.value, ['secretRef'], value)
+      set(bindingManifest.value, ['secretRef'], value)
     },
   })
 
   return {
-    bindingManifest: normalizedSecretBindingManifest,
-    setBindingManifest: setSecretBindingManifest,
-    createBindingManifest: createSecretBindingManifest,
-    isBindingDirty: isSecretBindingDirty,
-    bindingName: secretBindingName,
-    bindingNamespace: secretBindingNamespace,
-    bindingProviderType: secretBindingProviderType,
-    bindingRef: secretBindingSecretRef,
+    bindingManifest: normalizedBindingManifest,
+    setBindingManifest,
+    createBindingManifest,
+    isBindingDirty,
+    bindingName,
+    bindingNamespace,
+    bindingProviderType,
+    bindingRef: bindingSecretRef,
   }
 }
