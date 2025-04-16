@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Utilities for testing",
   "license": "Apache-2.0",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gardener/dashboard.git",
@@ -14,7 +15,7 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
   },
-  "main": "lib/index.js",
+  "exports": "./lib/index.js",
   "files": [
     "lib"
   ],
