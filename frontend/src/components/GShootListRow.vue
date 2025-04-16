@@ -200,7 +200,7 @@ SPDX-License-Identifier: Apache-2.0
           justify="end"
         >
           <g-action-button
-            v-if="canGetSecrets"
+            v-if="canGetCloudProviderCredentials"
             icon="mdi-key"
             :disabled="isClusterAccessDialogDisabled"
             :tooltip="showClusterAccessActionTitle"
@@ -306,7 +306,7 @@ const seedStore = useSeedStore()
 const gardenerExtensionStore = useGardenerExtensionStore()
 
 const {
-  canGetSecrets,
+  canGetCloudProviderCredentials,
   canPatchShoots,
 } = storeToRefs(authzStore)
 

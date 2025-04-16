@@ -46,7 +46,6 @@ export default {
     const {
       shootNamespace,
       shootName,
-      shootSecretBindingName,
       shootPurpose,
     } = useShootItem()
 
@@ -60,7 +59,6 @@ export default {
       v$: useVuelidate(),
       shootNamespace,
       shootName,
-      shootSecretBindingName,
       shootPurpose,
       allPurposes,
       purpose,

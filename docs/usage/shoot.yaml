@@ -4,7 +4,7 @@ metadata:
   name: daffodil
   namespace: garden-flowering
 spec:
-  secretBindingName: trial-secretbinding-gcp
+  credentialsBindingName: trial-credentials-gcp
   cloudProfileName: gcp
   region: europe-west1
   purpose: evaluation

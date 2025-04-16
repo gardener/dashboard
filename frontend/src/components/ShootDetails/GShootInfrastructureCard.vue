@@ -36,9 +36,10 @@ SPDX-License-Identifier: Apache-2.0
       </g-list-item>
       <g-list-item v-if="hasShootWorkerGroups">
         <g-list-item-content label="Credential">
-          <g-shoot-secret-name
+          <g-shoot-credential-name
             :namespace="shootNamespace"
             :secret-binding-name="shootSecretBindingName"
+            :credentials-binding-name="shootCredentialsBindingName"
           />
         </g-list-item-content>
       </g-list-item>
@@ -259,14 +260,14 @@ import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 
 import GCopyBtn from '@/components/GCopyBtn'
 import GShootSeedName from '@/components/GShootSeedName'
-import GShootSecretName from '@/components/GShootSecretName'
+import GShootCredentialName from '@/components/GShootCredentialName'
 import GVendor from '@/components/GVendor'
 import GDnsProvider from '@/components/ShootDns/GDnsProvider'
 import GDnsConfiguration from '@/components/ShootDns/GDnsConfiguration'
 import GSeedConfiguration from '@/components/GSeedConfiguration'
 import GControlPlaneHighAvailabilityConfiguration from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityConfiguration'
 import GControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityTag'
-import GSecretDetailsItemContent from '@/components/Secrets/GSecretDetailsItemContent'
+import GSecretDetailsItemContent from '@/components/Credentials/GSecretDetailsItemContent'
 
 import { useShootResources } from '@/composables/useShootResources'
 import { useShootItem } from '@/composables/useShootItem'
@@ -285,7 +286,7 @@ export default {
   components: {
     GCopyBtn,
     GShootSeedName,
-    GShootSecretName,
+    GShootCredentialName,
     GVendor,
     GDnsProvider,
     GDnsConfiguration,
@@ -306,6 +307,7 @@ export default {
       shootDomain,
       isCustomShootDomain,
       shootSecretBindingName,
+      shootCredentialsBindingName,
       hasShootWorkerGroups,
       shootControlPlaneHighAvailabilityFailureTolerance,
       shootProviderType,
@@ -330,6 +332,7 @@ export default {
       shootDomain,
       isCustomShootDomain,
       shootSecretBindingName,
+      shootCredentialsBindingName,
       hasShootWorkerGroups,
       shootControlPlaneHighAvailabilityFailureTolerance,
       shootProviderType,
@@ -350,7 +353,7 @@ export default {
       'canPatchShootsBinding',
     ]),
     ...mapState(useCredentialStore, [
-      'infrastructureSecretBindingsList',
+      'infrastructureBindingList',
     ]),
     showSeedInfo () {
       return !!this.shootSeedName
@@ -407,7 +410,7 @@ export default {
       return 'generated'
     },
     secretBinding () {
-      return find(this.infrastructureSecretBindingsList, ['metadata.name', this.shootSecretBindingName])
+      return find(this.infrastructureBindingList, ['metadata.name', this.shootSecretBindingName])
     },
   },
   methods: {

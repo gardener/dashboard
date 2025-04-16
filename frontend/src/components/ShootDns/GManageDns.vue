@@ -66,7 +66,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-select>
         </v-col>
         <v-col cols="3">
-          <g-select-secret
+          <g-select-credential
             v-model="primaryDnsProviderSecret"
             :provider-type="dnsPrimaryProviderType"
             register-vuelidate-as="dnsProviderSecret"
@@ -156,12 +156,12 @@ import { ref } from 'vue'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useCredentialStore } from '@/store/credential'
 
-import GSelectSecret from '@/components/Secrets/GSelectSecret'
+import GSelectCredential from '@/components/Credentials/GSelectCredential'
 import GDnsProviderRow from '@/components/ShootDns/GDnsProviderRow'
 import GVendorIcon from '@/components/GVendorIcon'
 
 import { useShootContext } from '@/composables/useShootContext'
-import { useSecretBindingList } from '@/composables/useSecretBindingList'
+import { useCloudProviderBindingList } from '@/composables/useCloudProviderBindingList'
 
 import {
   withFieldName,
@@ -176,7 +176,7 @@ export default {
   components: {
     GDnsProviderRow,
     GVendorIcon,
-    GSelectSecret,
+    GSelectCredential,
   },
   setup () {
     const {
@@ -193,10 +193,9 @@ export default {
     } = useShootContext()
 
     const credentialStore = useCredentialStore()
-    const gardenerExtensionStore = useGardenerExtensionStore()
 
     const customDomain = ref(!!dnsDomain.value && !!dnsPrimaryProviderType.value)
-    const dnsPrimaryProviderSecretBindings = useSecretBindingList(dnsPrimaryProviderType, { credentialStore, gardenerExtensionStore })
+    const dnsPrimaryProviderSecretBindings = useCloudProviderBindingList(dnsPrimaryProviderType, { credentialStore })
 
     return {
       v$: useVuelidate(),
@@ -266,10 +265,10 @@ export default {
     },
     primaryDnsProviderSecret: {
       get () {
-        return find(this.dnsPrimaryProviderSecretBindings, ['secretRef.name', this.dnsPrimaryProviderSecretName])
+        return find(this.dnsPrimaryProviderSecretBindings, ['_secretName', this.dnsPrimaryProviderSecretName])
       },
       set (value) {
-        this.dnsPrimaryProviderSecretName = value?.secretRef.name
+        this.dnsPrimaryProviderSecretName = value?._secretName
       },
     },
     domainRecommendationVisible () {
