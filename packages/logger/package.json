@@ -22,7 +22,7 @@
   "scripts": {
     "lint": "eslint . --max-warnings=0",
     "lint-sarif": "yarn lint --format=@microsoft/eslint-formatter-sarif",
-    "test": "jest",
+    "test": "node --experimental-vm-modules $(yarn bin jest)",
     "test-coverage": "yarn test --coverage"
   },
   "dependencies": {
