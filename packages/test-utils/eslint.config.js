@@ -4,12 +4,12 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-const neostandard = require('neostandard')
-const pluginSecurity = require('eslint-plugin-security')
-const pluginLodash = require('eslint-plugin-lodash')
-const pluginImport = require('eslint-plugin-import')
+import neostandard from 'neostandard'
+import pluginSecurity from 'eslint-plugin-security'
+import pluginLodash from 'eslint-plugin-lodash'
+import pluginImport from 'eslint-plugin-import'
 
-module.exports = [
+export default [
   ...neostandard({}),
   {
     rules: {
