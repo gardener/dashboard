@@ -774,19 +774,24 @@ async function getTerminalConfig ({ user, namespace, name, target }) {
     },
   }
 
-  if (target === TargetEnum.SHOOT) {
+  if (target === TargetEnum.SHOOT ||
+     (target === TargetEnum.GARDEN && !isAdmin)) {
     const shootRef = {
       namespace,
       name,
     }
-    const hostClient = await client.createShootAdminKubeconfigClient(shootRef)
-
-    const nodeList = await hostClient.core.nodes.list()
-    config.nodes = _
-      .chain(nodeList)
-      .get(['items'])
-      .map(fromNodeResource)
-      .value()
+    try {
+      const hostClient = await client.createShootAdminKubeconfigClient(shootRef)
+      const nodeList = await hostClient.core.nodes.list()
+      config.nodes = _
+        .chain(nodeList)
+        .get(['items'])
+        .map(fromNodeResource)
+        .value()
+    } catch (err) {
+      logger.error('Could not list terminal host nodes', err)
+      config.nodes = []
+    }
   }
   return config
 }
