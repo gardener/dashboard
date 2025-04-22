@@ -11,8 +11,7 @@ SPDX-License-Identifier: Apache-2.0
       :key="condition.type"
       :condition="condition"
       :popper-placement="popperPlacement"
-      :secret-binding-name="shootSecretBindingName"
-      :credentials-binding-name="shootCredentialsBindingName"
+      :shoot-binding="shootCloudProviderBinding"
       :shoot-metadata="shootMetadata"
       :stale-shoot="isStaleShoot"
     />
@@ -75,8 +74,7 @@ const {
 } = toRefs(props)
 
 const {
-  shootSecretBindingName,
-  shootCredentialsBindingName,
+  shootCloudProviderBinding,
   shootMetadata,
   shootUid,
   shootReadiness,

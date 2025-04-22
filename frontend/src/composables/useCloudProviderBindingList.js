@@ -8,7 +8,7 @@ import { computed } from 'vue'
 
 import { useCredentialStore } from '@/store/credential'
 
-import { hasOwnCredential } from '@/utils'
+import { isSharedCredential } from '@/utils'
 
 import filter from 'lodash/filter'
 
@@ -23,7 +23,7 @@ export const useCloudProviderBindingList = (providerType, options = {}) => {
         return false
       }
       if (binding._isDnsBinding) {
-        return hasOwnCredential(binding) // shared dns secret not supported by dns extension
+        return !isSharedCredential(binding) // shared dns secret not supported by dns extension
       }
       return true
     })

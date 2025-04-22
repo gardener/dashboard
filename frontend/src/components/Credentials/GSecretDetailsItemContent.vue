@@ -41,14 +41,6 @@ import get from 'lodash/get'
 export default {
 
   props: {
-    infra: {
-      type: Boolean,
-      default: false,
-    },
-    dns: {
-      type: Boolean,
-      default: false,
-    },
     secret: {
       type: Object,
     },
@@ -65,17 +57,11 @@ export default {
       if (!this.secret) {
         return undefined
       }
-      if (this.infra) {
-        return this.getSecretDetailsInfra(this.secret)
-      }
-      if (this.dns) {
-        return this.getSecretDetailsDns(this.secret)
-      }
-      return undefined
+      return this.getSecretDetails(this.secret)
     },
   },
   methods: {
-    getSecretDetailsInfra (secret) {
+    getSecretDetails (secret) {
       const secretData = secret.data || {}
       const getGCPProjectId = () => {
         const serviceAccount = get(secretData, ['serviceaccount.json'])
@@ -83,6 +69,7 @@ export default {
       }
       try {
         switch (this.providerType) {
+          // infra
           case 'openstack':
             return [
               {
@@ -147,22 +134,6 @@ export default {
                 value: decodeBase64(secretData.hcloudToken),
               },
             ]
-          default:
-            return [
-              {
-                label: 'Secret Data',
-                value: JSON.stringify(secretData),
-              },
-            ]
-        }
-      } catch (err) {
-        return undefined
-      }
-    },
-    getSecretDetailsDns (secret) {
-      const secretData = secret.data || {}
-      try {
-        switch (this.providerType) {
           case 'openstack-designate':
             return [
               {
@@ -174,6 +145,7 @@ export default {
                 value: decodeBase64(secretData.tenantName),
               },
             ]
+          // dns
           case 'aws-route53':
             return [
               {

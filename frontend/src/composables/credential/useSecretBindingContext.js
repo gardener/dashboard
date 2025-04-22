@@ -25,14 +25,14 @@ export function useSecretBindingContext (options = {}) {
     authzStore = useAuthzStore(),
   } = options
 
-  const initialBindingManifest = shallowRef(null)
+  const initialManifest = shallowRef(null)
 
-  const normalizedInitialBindingManifest = computed(() => {
-    const object = cloneDeep(initialBindingManifest.value)
+  const normalizedInitialManifest = computed(() => {
+    const object = cloneDeep(initialManifest.value)
     return normalizeBindingManifest(object)
   })
 
-  const bindingManifest = ref({})
+  const manifest = ref({})
 
   function normalizeBindingManifest (value) {
     const object = Object.assign({
@@ -42,19 +42,19 @@ export function useSecretBindingContext (options = {}) {
     return cleanup(object)
   }
 
-  const normalizedBindingManifest = computed(() => {
-    const object = cloneDeep(bindingManifest.value)
+  const normalizedManifest = computed(() => {
+    const object = cloneDeep(manifest.value)
     return normalizeBindingManifest(object)
   })
 
   function setBindingManifest (value) {
-    initialBindingManifest.value = value
-    bindingManifest.value = cloneDeep(initialBindingManifest.value)
+    initialManifest.value = value
+    manifest.value = cloneDeep(initialManifest.value)
   }
 
   function createBindingManifest () {
     const namespace = get(options, ['namespace'], authzStore.namespace)
-    bindingManifest.value = {
+    manifest.value = {
       metadata: {
         name: '',
         namespace,
@@ -67,47 +67,47 @@ export function useSecretBindingContext (options = {}) {
         namespace,
       },
     }
-    initialBindingManifest.value = cloneDeep(bindingManifest.value)
+    initialManifest.value = cloneDeep(manifest.value)
   }
 
   const isBindingDirty = computed(() => {
     return !isEqual(
-      normalizedBindingManifest.value,
-      normalizedInitialBindingManifest.value,
+      normalizedManifest.value,
+      normalizedInitialManifest.value,
     )
   })
 
   const {
     name: bindingName,
     namespace: bindingNamespace,
-  } = useObjectMetadata(bindingManifest)
+  } = useObjectMetadata(manifest)
 
   const bindingProviderType = computed({
     get () {
-      return get(bindingManifest.value, ['provider', 'type'])
+      return get(manifest.value, ['provider', 'type'])
     },
     set (value) {
-      set(bindingManifest.value, ['provider', 'type'], value)
+      set(manifest.value, ['provider', 'type'], value)
     },
   })
 
-  const bindingSecretRef = computed({
+  const secretRef = computed({
     get () {
-      return get(bindingManifest.value, ['secretRef'])
+      return get(manifest.value, ['secretRef'])
     },
     set (value) {
-      set(bindingManifest.value, ['secretRef'], value)
+      set(manifest.value, ['secretRef'], value)
     },
   })
 
   return {
-    bindingManifest: normalizedBindingManifest,
+    bindingManifest: normalizedManifest,
     setBindingManifest,
     createBindingManifest,
     isBindingDirty,
     bindingName,
     bindingNamespace,
     bindingProviderType,
-    bindingRef: bindingSecretRef,
+    bindingRef: secretRef,
   }
 }

@@ -148,15 +148,12 @@ describe('api', function () {
       expect(res.body).toMatchSnapshot()
     })
 
-    it('should patch an own cloudProvider credential (secretbinding)', async function () {
-      const secretBinding = _.find(fixtures.secretbindings.list(namespace), { metadata: { name: 'foo-infra1-secret1-secretbinding', namespace } })
-      const secret = _.find(fixtures.secrets.list(namespace), { metadata: secretBinding.secretRef })
+    it('should patch an own cloudProvider credential (secret)', async function () {
+      const secret = _.find(fixtures.secrets.list(namespace), { metadata: { name: 'secret1', namespace } })
       const params = {
-        binding: secretBinding,
         secret,
       }
 
-      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.patch())
 
       const res = await agent
@@ -166,23 +163,21 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toHaveBeenCalledTimes(2)
+      expect(mockRequest).toHaveBeenCalledTimes(1)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
     })
 
-    it('should patch an own cloudProvider credential (credentialsbinding)', async function () {
-      const credentialsBinding = _.find(fixtures.credentialsbindings.list(namespace), { metadata: { name: 'foo-infra1-secret1-credentialsbinding', namespace } })
-      const secretMetadata = _.pick(credentialsBinding.credentialsRef, ['name', 'namespace'])
-      const secret = _.find(fixtures.secrets.list(namespace), { metadata: secretMetadata })
+    it('should re-create an own cloudProvider credential (secret) when patching an orphaned binding', async function () {
+      const secret = _.find(fixtures.secrets.list(namespace), { metadata: { name: 'secret1', namespace } })
+      secret.metadata.name = 'secret4' // not existing secret
       const params = {
-        binding: credentialsBinding,
         secret,
       }
 
-      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.patch())
+      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.create())
 
       const res = await agent
         .post('/api/cloudprovidercredentials')
@@ -192,54 +187,6 @@ describe('api', function () {
         .expect(200)
 
       expect(mockRequest).toHaveBeenCalledTimes(2)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(res.body).toMatchSnapshot()
-    })
-
-    it('should not patch a shared cloudProvider credential (secretbinding)', async function () {
-      const secretBinding = _.find(fixtures.secretbindings.list(namespace), { metadata: { name: 'trial-infra1' } })
-      const secret = _.find(fixtures.secrets.list('garden-trial'), { metadata: { name: 'trial-secret' } })
-
-      const params = {
-        binding: secretBinding,
-        secret,
-      }
-
-      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.get())
-
-      const res = await agent
-        .post('/api/cloudprovidercredentials')
-        .set('cookie', await user.cookie)
-        .send({ method: 'patch', params })
-        .expect('content-type', /json/)
-        .expect(422)
-
-      expect(mockRequest).toHaveBeenCalledTimes(1)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(res.body).toMatchSnapshot()
-    })
-
-    it('should not patch a shared cloudProvider credential (credentialsbinding)', async function () {
-      const credentialsBinding = _.find(fixtures.credentialsbindings.list(namespace), { metadata: { name: 'trial-infra1' } })
-      const secret = _.find(fixtures.secrets.list('garden-trial'), { metadata: { name: 'trial-secret' } })
-
-      const params = {
-        binding: credentialsBinding,
-        secret,
-      }
-
-      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.get())
-
-      const res = await agent
-        .post('/api/cloudprovidercredentials')
-        .set('cookie', await user.cookie)
-        .send({ method: 'patch', params })
-        .expect('content-type', /json/)
-        .expect(422)
-
-      expect(mockRequest).toHaveBeenCalledTimes(1)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()

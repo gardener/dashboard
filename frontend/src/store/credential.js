@@ -184,9 +184,9 @@ export const useCredentialStore = defineStore('credential', () => {
   }
 
   async function updateCredential (params) {
-    const { data: { binding, secret } } = await api.updateCloudProviderCredential({ binding: params.binding, secret: params.secret })
-    _updateCloudProviderCredential({ binding, secret })
-    appStore.setSuccess(`Cloud Provider credential ${binding.metadata.name} updated`)
+    const { data: { secret } } = await api.updateCloudProviderCredential({ secret: params.secret })
+    _updateCloudProviderCredential({ secret })
+    appStore.setSuccess(`Cloud Provider credential ${params.binding.metadata.name} updated`)
   }
 
   async function deleteCredential ({ bindingKind, bindingNamespace, bindingName }) {
@@ -214,26 +214,17 @@ export const useCredentialStore = defineStore('credential', () => {
     return get(state.workloadIdentities, [namespaceNameKey({ namespace, name })])
   }
 
-  function getSecretBinding ({ namespace, name }) {
-    return get(state.secretBindings, [namespaceNameKey({ namespace, name })])
-  }
-
-  function getCredentialsBinding ({ namespace, name }) {
-    return get(state.credentialsBindings, [namespaceNameKey({ namespace, name })])
-  }
-
   function _updateCloudProviderCredential ({ binding, secret }) {
-    const key = namespaceNameKey(binding.metadata)
-
-    if (binding.kind === 'SecretBinding') {
-      set(state.secretBindings, [key], binding)
-    } else if (binding.kind === 'CredentialsBinding') {
-      set(state.credentialsBindings, [key], binding)
+    if (binding) {
+      const key = namespaceNameKey(binding.metadata)
+      if (binding.kind === 'SecretBinding') {
+        set(state.secretBindings, [key], binding)
+      } else if (binding.kind === 'CredentialsBinding') {
+        set(state.credentialsBindings, [key], binding)
+      }
     }
 
     if (secret) {
-      // technically speaking secret should always be there as we currently only support to create secret and binding together
-      // however this might change in the future
       const key = namespaceNameKey(secret.metadata)
       set(state.secrets, [key], secret)
     }
@@ -255,10 +246,6 @@ export const useCredentialStore = defineStore('credential', () => {
     deleteCredential,
     infrastructureBindingList,
     dnsBindingList,
-    getSecret,
-    getSecretBinding,
-    getCredentialsBinding,
-    getWorkloadIdentity,
     bindingsForSecret,
     $reset,
   }

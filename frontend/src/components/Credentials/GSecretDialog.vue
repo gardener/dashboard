@@ -72,13 +72,22 @@ SPDX-License-Identifier: Apache-2.0
       </v-card-text>
       <div>
         <v-alert
+          v-if="!isCreateMode && orphaned"
+          :value="true"
+          type="info"
+          color="primary"
+          variant="tonal"
+        >
+          The Secret <code>{{ binding._secretName }}</code> for this <code>Binding</code> does not exist anymore and will be re-created if you update the data.
+        </v-alert>
+        <v-alert
           :model-value="!isCreateMode && relatedShootCount > 0"
           type="warning"
           rounded="0"
           class="mb-2"
         >
-          <div>This secret is used by {{ relatedShootCount }} {{ relatedShootCount === 1 ? 'cluster' : 'clusters' }}. The new secret should be part of the same account as the one that gets replaced.</div>
-          <div>Clusters will only start using the new secret after they are reconciled. Therefore, wait until all clusters using the secret are reconciled before you disable the old secret in your infrastructure account. Otherwise the clusters will no longer function.</div>
+          <div>This <code>Secret</code> is used by {{ relatedShootCount }} {{ relatedShootCount === 1 ? 'cluster' : 'clusters' }}. The new <code>Secret</code> should be part of the same account as the one that gets replaced.</div>
+          <div>Clusters will only start using the new <code>Secret</code> after they are reconciled. Therefore, wait until all clusters using the <code>Secret</code> are reconciled before you disable the old <code>Secret</code> in your infrastructure account. Otherwise the clusters will no longer function.</div>
         </v-alert>
         <v-alert
           :model-value="otherBindings.length > 0"
@@ -158,6 +167,7 @@ import {
   setDelayedInputFocus,
   setInputFocus,
   calculateRelatedShootCount,
+  isSharedCredential,
 } from '@/utils'
 
 import includes from 'lodash/includes'
@@ -298,6 +308,9 @@ export default {
     relatedShootCount () {
       return calculateRelatedShootCount(this.shootList, this.binding)
     },
+    orphaned () {
+      return !isSharedCredential(this.binding) && this.binding._secret === undefined && this.binding._workloadIdentity === undefined
+    },
     helpContainerStyles () {
       const detailsRef = this.$refs.secretDetails
       let detailsHeight = 0
@@ -392,8 +405,19 @@ export default {
 
         setDelayedInputFocus(this, 'name')
       } else {
-        this.setBindingManifest(this.binding)
-        this.setSecretManifest(this.binding._secret)
+        if (this.binding._secret) {
+          this.setBindingManifest(this.binding)
+          this.setSecretManifest(this.binding._secret)
+        } else {
+          this.setBindingManifest(this.binding)
+          const name = this.binding._secretName
+          // Manually add labels as secret resource does not get reconciled automatically
+          // TODO: check if this is still needed after https://github.com/gardener/gardener/issues/11915
+          const labels = {
+            'reference.gardener.cloud/credentialsbinding': 'true',
+          }
+          this.createSecretManifest({ name, labels })
+        }
       }
 
       this.errorMessage = undefined

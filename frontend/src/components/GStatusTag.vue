@@ -68,9 +68,7 @@ SPDX-License-Identifier: Apache-2.0
         :last-message="nonErrorMessage"
         :error-descriptions="errorDescriptions"
         :last-transition-time="condition.lastTransitionTime"
-        :secret-binding-name="secretBindingName"
-        :credentials-binding-name="credentialsBindingName"
-        :namespace="shootMetadata.namespace"
+        :shoot-binding="shootBinding"
       />
     </g-popover>
   </div>
@@ -104,11 +102,8 @@ export default {
       type: Object,
       required: true,
     },
-    secretBindingName: {
-      type: String,
-    },
-    credentialsBindingName: {
-      type: String,
+    shootBinding: {
+      type: Object,
     },
     popperPlacement: {
       type: String,

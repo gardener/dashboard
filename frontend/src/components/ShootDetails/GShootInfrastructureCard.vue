@@ -36,18 +36,16 @@ SPDX-License-Identifier: Apache-2.0
       </g-list-item>
       <g-list-item v-if="hasShootWorkerGroups">
         <g-list-item-content label="Credential">
-          <g-shoot-credential-name
-            :namespace="shootNamespace"
-            :secret-binding-name="shootSecretBindingName"
-            :credentials-binding-name="shootCredentialsBindingName"
+          <g-credential-name
+            :binding="shootCloudProviderBinding"
+            render-link
           />
         </g-list-item-content>
       </g-list-item>
-      <g-list-item v-if="secretBinding?._secret">
+      <g-list-item v-if="shootCloudProviderBinding?._secret">
         <g-secret-details-item-content
-          infra
-          :secret="secretBinding._secret"
-          :provider-type="secretBinding.provider.type"
+          :secret="shootCloudProviderBinding._secret"
+          :provider-type="shootCloudProviderBinding.provider.type"
           details-title
         />
       </g-list-item>
@@ -254,13 +252,12 @@ import {
 } from 'pinia'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
-import { useCredentialStore } from '@/store/credential'
 import { useAuthzStore } from '@/store/authz'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 
 import GCopyBtn from '@/components/GCopyBtn'
 import GShootSeedName from '@/components/GShootSeedName'
-import GShootCredentialName from '@/components/GShootCredentialName'
+import GCredentialName from '@/components/Credentials/GCredentialName'
 import GVendor from '@/components/GVendor'
 import GDnsProvider from '@/components/ShootDns/GDnsProvider'
 import GDnsConfiguration from '@/components/ShootDns/GDnsConfiguration'
@@ -286,7 +283,7 @@ export default {
   components: {
     GCopyBtn,
     GShootSeedName,
-    GShootCredentialName,
+    GCredentialName,
     GVendor,
     GDnsProvider,
     GDnsConfiguration,
@@ -306,8 +303,7 @@ export default {
       shootZones,
       shootDomain,
       isCustomShootDomain,
-      shootSecretBindingName,
-      shootCredentialsBindingName,
+      shootCloudProviderBinding,
       hasShootWorkerGroups,
       shootControlPlaneHighAvailabilityFailureTolerance,
       shootProviderType,
@@ -331,8 +327,7 @@ export default {
       shootZones,
       shootDomain,
       isCustomShootDomain,
-      shootSecretBindingName,
-      shootCredentialsBindingName,
+      shootCloudProviderBinding,
       hasShootWorkerGroups,
       shootControlPlaneHighAvailabilityFailureTolerance,
       shootProviderType,
@@ -351,9 +346,6 @@ export default {
     ]),
     ...mapState(useAuthzStore, [
       'canPatchShootsBinding',
-    ]),
-    ...mapState(useCredentialStore, [
-      'infrastructureBindingList',
     ]),
     showSeedInfo () {
       return !!this.shootSeedName
@@ -408,9 +400,6 @@ export default {
         return 'custom'
       }
       return 'generated'
-    },
-    secretBinding () {
-      return find(this.infrastructureBindingList, ['metadata.name', this.shootSecretBindingName])
     },
   },
   methods: {

@@ -352,7 +352,7 @@ export function getTimeStringTo (time, toTime, withoutPrefix = false) {
   return moment(time).to(toTime, withoutPrefix)
 }
 
-export function hasOwnCredential (binding) {
+export function isSharedCredential (binding) {
   const bindingNamespace = binding.metadata.namespace
   let refNamespace
   if (binding._isSecretBinding) {
@@ -361,7 +361,7 @@ export function hasOwnCredential (binding) {
     refNamespace = binding.credentialsRef.namespace
   }
 
-  return refNamespace === bindingNamespace
+  return refNamespace !== bindingNamespace
 }
 
 export function getCreatedBy (metadata) {
@@ -758,7 +758,7 @@ export function calculateRelatedShootCount (shootList, binding) {
     return shootsByInfrastructureBinding.length
   } else if (binding._isDnsBinding) {
     if (!binding._secretName) {
-      return 0 // currently DNS provider does not support workload identity
+      return 0 // currently DNS provider only allows to reference secrets directly
     }
     const someDnsProviderHasSecretRef = providers => some(providers, ['secretName', binding._secretName])
     const someResourceHasSecretRef = resources => some(resources, { resourceRef: { kind: 'Secret', name: binding._secretName } })
@@ -804,15 +804,21 @@ export function computeBindingItem (binding) {
     credentialName = binding.credentialsRef.name
   }
 
+  const _isSharedCredential = isSharedCredential(binding)
+  const hasOwnSecret = binding._secret !== undefined
+  const hasOwnWorkloadIdentity = binding._workloadIdentity !== undefined
+  const isOrphaned = !_isSharedCredential && !hasOwnSecret && !hasOwnWorkloadIdentity
+
   return {
     name: binding.metadata.name,
     kind,
-    hasOwnCredential: hasOwnCredential(binding),
-    hasOwnSecret: binding._secret !== undefined,
-    hasOwnWorkloadIdentity: binding._workloadIdentity !== undefined,
+    isSharedCredential: _isSharedCredential,
+    hasOwnSecret,
+    hasOwnWorkloadIdentity,
     credentialNamespace,
     credentialName,
     providerType: binding.provider.type,
+    isOrphaned,
     binding,
     isMarkedForDeletion: !!binding.metadata.deletionTimestamp,
   }

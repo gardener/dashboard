@@ -41,7 +41,7 @@ export function createSecretContextComposable (options = {}) {
     return normalizeSecretManifest(object)
   })
 
-  const secretManifest = ref({})
+  const manifest = ref({})
 
   function normalizeSecretManifest (value) {
     const object = Object.assign({
@@ -52,30 +52,31 @@ export function createSecretContextComposable (options = {}) {
     return cleanup(object)
   }
 
-  const normalizedSecretManifest = computed(() => {
-    const object = cloneDeep(secretManifest.value)
+  const normalizedManifest = computed(() => {
+    const object = cloneDeep(manifest.value)
     return normalizeSecretManifest(object)
   })
 
   function setSecretManifest (value) {
     initialSecretManifest.value = value
-    secretManifest.value = cloneDeep(initialSecretManifest.value)
+    manifest.value = cloneDeep(initialSecretManifest.value)
   }
 
-  function createSecretManifest () {
-    secretManifest.value = {
+  function createSecretManifest ({ name = '', labels = {} } = {}) {
+    manifest.value = {
       metadata: {
-        name: '',
+        name,
         namespace: get(options, ['namespace'], authzStore.namespace),
+        labels,
       },
       data: {},
     }
-    initialSecretManifest.value = cloneDeep(secretManifest.value)
+    initialSecretManifest.value = cloneDeep(manifest.value)
   }
 
   const isSecretDirty = computed(() => {
     return !isEqual(
-      normalizedSecretManifest.value,
+      normalizedManifest.value,
       normalizedInitialSecretManifest.value,
     )
   })
@@ -83,14 +84,14 @@ export function createSecretContextComposable (options = {}) {
   const {
     name: secretName,
     namespace: secretNamespace,
-  } = useObjectMetadata(secretManifest)
+  } = useObjectMetadata(manifest)
 
   const secretData = computed({
     get () {
-      return get(secretManifest.value, ['data'])
+      return get(manifest.value, ['data'])
     },
     set (value) {
-      set(secretManifest.value, ['data'], value)
+      set(manifest.value, ['data'], value)
     },
   })
 
@@ -135,7 +136,7 @@ export function createSecretContextComposable (options = {}) {
   }
 
   return {
-    secretManifest: normalizedSecretManifest,
+    secretManifest: normalizedManifest,
     setSecretManifest,
     createSecretManifest,
     isSecretDirty,

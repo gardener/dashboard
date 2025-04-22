@@ -28,11 +28,11 @@ SPDX-License-Identifier: Apache-2.0
           v-bind="props"
           :title="undefined"
         >
-          <g-select-credential-item :item="item.raw" />
+          <g-credential-name :binding="item.raw" />
         </v-list-item>
       </template>
       <template #selection="{ item }">
-        <g-select-credential-item :item="item.raw" />
+        <g-credential-name :binding="item.raw" />
       </template>
       <template #append-item>
         <v-divider class="mb-2" />
@@ -66,7 +66,7 @@ import { useProjectStore } from '@/store/project'
 import { useCredentialStore } from '@/store/credential'
 
 import GSecretDialogWrapper from '@/components/Credentials/GSecretDialogWrapper'
-import GSelectCredentialItem from '@/components/Credentials/GSelectCredentialItem'
+import GCredentialName from '@/components/Credentials/GCredentialName'
 
 import { useProjectCostObject } from '@/composables/useProjectCostObject'
 import { useCloudProviderBindingList } from '@/composables/useCloudProviderBindingList'
@@ -78,7 +78,7 @@ import {
 } from '@/utils/validators'
 import {
   getErrorMessages,
-  hasOwnCredential,
+  isSharedCredential,
   selfTerminationDaysForSecret,
 } from '@/utils'
 
@@ -90,7 +90,7 @@ import cloneDeep from 'lodash/cloneDeep'
 export default {
   components: {
     GSecretDialogWrapper,
-    GSelectCredentialItem,
+    GCredentialName,
   },
   props: {
     modelValue: {
@@ -154,7 +154,7 @@ export default {
       { type: 'requiresCostObjectIfEnabled', enabled },
       function requiresCostObjectIfEnabled (value) {
         return enabled
-          ? !!this.costObject || !hasOwnCredential(value)
+          ? !!this.costObject || isSharedCredential(value)
           : true
       },
     )

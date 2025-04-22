@@ -7,6 +7,7 @@
 import { computed } from 'vue'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
+import { useCredentialStore } from '@/store/credential'
 import { useSeedStore } from '@/store/seed'
 
 import get from 'lodash/get'
@@ -20,6 +21,7 @@ export function useShootSpec (shootItem, options = {}) {
   const {
     cloudProfileStore = useCloudProfileStore(),
     seedStore = useSeedStore(),
+    credentialStore = useCredentialStore(),
   } = options
 
   const shootSpec = computed(() => {
@@ -48,6 +50,28 @@ export function useShootSpec (shootItem, options = {}) {
 
   const shootCredentialsBindingName = computed(() => {
     return shootSpec.value.credentialsBindingName
+  })
+
+  const shootCloudProviderBinding = computed(() => {
+    if (shootSecretBindingName.value) {
+      return find(credentialStore.cloudProviderBindingList, {
+        _isSecretBinding: true,
+        metadata: {
+          name: shootSecretBindingName.value,
+          namespace: get(shootItem.value, ['metadata', 'namespace']),
+        },
+      })
+    }
+    if (shootCredentialsBindingName.value) {
+      return find(credentialStore.cloudProviderBindingList, {
+        _isCredentialsBinding: true,
+        metadata: {
+          name: shootCredentialsBindingName.value,
+          namespace: get(shootItem.value, ['metadata', 'namespace']),
+        },
+      })
+    }
+    return undefined
   })
 
   const shootK8sVersion = computed(() => {
@@ -164,6 +188,7 @@ export function useShootSpec (shootItem, options = {}) {
     isShootSettingHibernated,
     shootSecretBindingName,
     shootCredentialsBindingName,
+    shootCloudProviderBinding,
     shootK8sVersion,
     shootAvailableK8sUpdates,
     shootKubernetesVersionObject,

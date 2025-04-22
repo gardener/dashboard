@@ -46,7 +46,6 @@ SPDX-License-Identifier: Apache-2.0
       <v-list-item v-if="secret">
         <g-secret-details-item-content
           class="pb-2"
-          dns
           :secret="secret"
           :provider-type="type"
           details-title

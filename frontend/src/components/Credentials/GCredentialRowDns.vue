@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
       <div class="d-flex">
         {{ item.name }}
         <v-tooltip
-          v-if="!item.hasOwnCredential"
+          v-if="item.isSharedCredential"
           location="top"
         >
           <template #activator="{ props }">
@@ -44,7 +44,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-tooltip>
     </td>
     <td v-if="selectedHeaders.credential">
-      <span v-if="!item.hasOwnCredential">{{ item.credentialNamespace }}: </span>{{ item.credentialName }}
+      <span v-if="item.isSharedCredential">{{ item.credentialNamespace }}: </span>{{ item.credentialName }}
     </td>
     <td v-if="selectedHeaders.dnsProvider">
       <g-vendor
@@ -54,7 +54,6 @@ SPDX-License-Identifier: Apache-2.0
     </td>
     <td v-if="selectedHeaders.details">
       <g-secret-details-item-content
-        dns
         class="py-1"
         :secret="item.binding._secret"
         :provider-type="item.providerType"
