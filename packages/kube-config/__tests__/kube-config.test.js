@@ -4,16 +4,19 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import { jest } from '@jest/globals'
+import fs from 'fs'
+import fsp from 'fs/promises'
+import path from 'path'
+import os from 'os'
+import yaml from 'js-yaml'
+import gtoken from 'gtoken'
+import { cloneDeep } from 'lodash-es'
+import Config from '../lib/Config'
+import config from '../lib/index.js'
 
-const fs = require('fs')
-const fsp = require('fs/promises')
-const path = require('path')
-const os = require('os')
-const yaml = require('js-yaml')
-const { mockGetToken } = require('gtoken')
-const { cloneDeep } = require('lodash')
-const Config = require('../lib/Config')
+const { mockGetToken } = gtoken
+
 const {
   load,
   dumpKubeconfig,
@@ -22,7 +25,7 @@ const {
   cleanKubeconfig,
   parseKubeconfig,
   constants,
-} = require('../lib')
+} = config
 
 describe('kube-config', () => {
   const server = new URL('https://kubernetes:6443')
