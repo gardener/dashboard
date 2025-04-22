@@ -7,9 +7,9 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <span v-if="binding">
     <v-tooltip location="top">
-      <template #activator="{ props: tprops }">
+      <template #activator="{ props: tProps }">
         <v-icon
-          v-bind="tprops"
+          v-bind="tProps"
           size="small"
           class="mr-2"
         >
@@ -24,16 +24,16 @@ SPDX-License-Identifier: Apache-2.0
       :disabled="!binding?._secret"
       location="top"
     >
-      <template #activator="{ props: tprops }">
+      <template #activator="{ props: tProps }">
         <g-text-router-link
           v-if="canLinkToCredential && renderLink"
-          v-bind="tprops"
+          v-bind="tProps"
           :to="{ name: 'Credentials', params: { namespace: binding.metadata.namespace }, hash: credentialHash }"
           :text="computedItem.name"
         />
         <span
           v-else
-          v-bind="tprops"
+          v-bind="tProps"
         >{{ computedItem.name }}</span>
       </template>
       <v-card>
@@ -48,9 +48,9 @@ SPDX-License-Identifier: Apache-2.0
       v-if="computedItem.isSharedCredential"
       location="top"
     >
-      <template #activator="{ props: tprops }">
+      <template #activator="{ props: tProps }">
         <v-icon
-          v-bind="tprops"
+          v-bind="tProps"
           size="small"
           class="ml-2"
         >
