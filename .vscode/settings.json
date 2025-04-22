@@ -38,7 +38,7 @@
     "**/.yarn/versions/**": true,
     "**/dist": true
   },
-  "eslint.nodePath": ".yarn/sdks",
+  "eslint.runtime": "./scripts/eslint-yarn-node.js",
   "files.exclude": {
     "logo": true,
     "LICENSES": true,
