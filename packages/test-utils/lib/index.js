@@ -6,10 +6,10 @@
 
 import helper from './helper.js'
 import matchers from './matchers.js'
-import { spyOnHelper, moduleResolve, createMockModule, semiAutoMockHelper } from './spyOnHelper.js'
+import { spyOnHelper, moduleResolve, createMockModule, semiAutoMockHelper, mockOnHelper, spyOnHelperMocked } from './spyOnHelper.js'
 
 export default {
   helper,
   matchers,
 }
-export { spyOnHelper, moduleResolve, createMockModule, semiAutoMockHelper }
+export { spyOnHelper, moduleResolve, createMockModule, semiAutoMockHelper, mockOnHelper, spyOnHelperMocked }
