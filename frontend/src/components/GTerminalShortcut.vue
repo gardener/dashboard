@@ -52,7 +52,7 @@ SPDX-License-Identifier: Apache-2.0
       >
         <template #tooltip>
           <div v-if="isAdmin && !canScheduleOnSeed">
-            Terminal shortcut not available on non-managed seed
+            Terminals can only be scheduled if the seed is a managed seed
           </div>
           <span v-else-if="isShootTarget && isShootHibernated">
             Cluster is hibernated. Wake up cluster to open terminal

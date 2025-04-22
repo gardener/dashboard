@@ -101,7 +101,7 @@ SPDX-License-Identifier: Apache-2.0
           Make sure that only gardener project members with <span class="font-family-monospace">admin</span> role have privileged access to the <span class="font-family-monospace">{{ shootName }}</span> cluster before creating this terminal session.
         </v-alert>
         <v-alert
-          v-if="isTerminalInUntrustedEnvironment"
+          v-if="isAdmin && isTerminalInUntrustedEnvironment"
           class="ma-2"
           type="info"
           color="primary"
@@ -267,8 +267,7 @@ export default {
       return !this.isAdmin && this.targetTab.selectedTarget === TargetEnum.GARDEN
     },
     isTerminalInUntrustedEnvironment () {
-      return this.isAdmin &&
-          this.targetTab.selectedTarget === TargetEnum.SHOOT &&
+      return this.targetTab.selectedTarget === TargetEnum.SHOOT &&
           !this.targetTab.configLoading &&
           this.state.runtime === TargetEnum.SHOOT
     },
@@ -342,6 +341,7 @@ export default {
       this.targetTab.selectedConfig = {
         container: undefined,
       }
+      this.updateSettings()
     },
     reset () {
       this.tab = 'target-tab'
