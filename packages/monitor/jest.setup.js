@@ -4,11 +4,27 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import { jest } from '@jest/globals'
+import http from 'http'
+import { Test } from 'supertest'
+import app from './lib/app.js'
 
-const http = require('http')
-const { Test } = require('supertest')
-const app = require('./lib/app')
+const promClientMock = await import('./__mocks__/prom-client.js')
+jest.unstable_mockModule('prom-client', () => {
+  return promClientMock
+})
+
+const responseTimeMock = await import('./__mocks__/response-time.js')
+jest.unstable_mockModule('response-time', () => {
+  return responseTimeMock
+})
+
+const loggerMock = await import('./__mocks__/@gardener-dashboard/logger.js')
+jest.unstable_mockModule('@gardener-dashboard/logger', () => {
+  return loggerMock
+})
+
+jest.resetModules()
 
 function createHttpAgent () {
   const server = http.createServer(app)

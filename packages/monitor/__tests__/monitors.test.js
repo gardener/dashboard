@@ -4,13 +4,44 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import { jest } from '@jest/globals'
+import { spyOnHelper,  moduleResolve, createMockModule, semiAutoMockHelper} from '@gardener-dashboard/test-utils'
+import { response } from 'express'
 
-const responseTime = require('response-time')
-const { monitorSocketIO, monitorHttpServer, monitorResponseTimes } = require('../lib/monitors')
-const metrics = require('../lib/metrics')
+const {default: spy} = await spyOnHelper(`../lib/metrics.js`,
+  [
+    'connectionsCount.inc',
+    'connectionsTotal.inc',
+    'connectionsCount.dec',
 
-jest.mock('../lib/metrics')
+  ],
+  import.meta.url,
+)
+
+jest.unstable_mockModule('../lib/metrics.js', () => {
+  return {
+    default: {
+      ...spy,
+      responseTime: {
+        observe: jest.fn(),
+      },
+    }
+  }
+})
+
+//await semiAutoMockHelper(`../lib/metrics.js`,
+//  [
+//    'responseTime.observe',
+//  ],
+//  import.meta.url,
+//)
+
+const { default: metrics } = await import('../lib/metrics.js')
+
+// ToDo migrate mocks folder to global setup mocks!!
+const { default: { monitorSocketIO, monitorHttpServer, monitorResponseTimes } } = await import('../lib/monitors.js')
+
+const { default: responseTime } = await import('response-time')
 
 describe('monitors', () => {
   describe('socketIO connection monitor', () => {
@@ -78,7 +109,7 @@ describe('monitors', () => {
       const method = 'PATCH'
       const statusCode = 42
       const requestDuration = 1234
-
+      console.log(additionalLabels)
       monitorResponseTimes(additionalLabels)
       expect(responseTime).toHaveBeenCalledTimes(1)
       const responseTimeHandler = responseTime.mock.calls[0][0]
