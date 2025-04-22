@@ -9,5 +9,5 @@ import Logger from './Logger.js'
 const globalLogger = new Logger()
 export {
   Logger,
-  globalLogger
+  globalLogger,
 }

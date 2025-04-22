@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Polling Watcher",
   "license": "Apache-2.0",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gardener/dashboard.git",
@@ -14,13 +15,13 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
   },
-  "main": "lib/index.js",
+  "exports": "./lib/index.js",
   "files": [
     "lib"
   ],
   "scripts": {
     "lint": "eslint . --max-warnings=0",
-    "test": "jest",
+    "test": "node --experimental-vm-modules $(yarn bin jest)",
     "test-coverage": "yarn test --coverage"
   },
   "dependencies": {
@@ -28,6 +29,7 @@
     "@gardener-dashboard/test-utils": "workspace:^"
   },
   "devDependencies": {
+    "@jest/globals": "^29.7.0",
     "eslint": "^9.11.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jest": "^28.8.3",
