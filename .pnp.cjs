@@ -1891,6 +1891,7 @@ const RAW_RUNTIME_STATE =
           ["@gardener-dashboard/logger", "workspace:packages/logger"],\
           ["@gardener-dashboard/request", "workspace:packages/request"],\
           ["@gardener-dashboard/test-utils", "workspace:packages/test-utils"],\
+          ["@jest/globals", "npm:29.7.0"],\
           ["@microsoft/eslint-formatter-sarif", "npm:3.1.0"],\
           ["abort-controller", "npm:3.0.0"],\
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.23.0"],\
@@ -1901,6 +1902,7 @@ const RAW_RUNTIME_STATE =
           ["http-errors", "npm:2.0.0"],\
           ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:29.7.0"],\
           ["lodash", "npm:4.17.21"],\
+          ["lodash-es", "npm:4.17.21"],\
           ["neostandard", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:0.12.1"],\
           ["type-is", "npm:2.0.1"]\
         ],\
@@ -1912,11 +1914,13 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./packages/test-utils/",\
         "packageDependencies": [\
           ["@gardener-dashboard/test-utils", "workspace:packages/test-utils"],\
+          ["@jest/globals", "npm:29.7.0"],\
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.23.0"],\
           ["eslint-plugin-import", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:2.31.0"],\
-          ["eslint-plugin-jest", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:28.11.0"],\
+          ["eslint-plugin-jest", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:28.11.0"],\
           ["eslint-plugin-lodash", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:8.0.0"],\
           ["eslint-plugin-security", "npm:3.0.1"],\
+          ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:29.7.0"],\
           ["neostandard", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:0.12.1"]\
         ],\
         "linkType": "SOFT"\
@@ -7058,28 +7062,6 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:28.11.0", {\
-        "packageLocation": "./.yarn/__virtual__/eslint-plugin-jest-virtual-b4e45d69f1/0/cache/eslint-plugin-jest-npm-28.11.0-a208fceab5-faa06ce1c4.zip/node_modules/eslint-plugin-jest/",\
-        "packageDependencies": [\
-          ["@types/eslint", null],\
-          ["@types/jest", null],\
-          ["@types/typescript-eslint__eslint-plugin", null],\
-          ["@typescript-eslint/eslint-plugin", null],\
-          ["@typescript-eslint/utils", "virtual:b75379e9775200b6eb11ba96c1447bdd86a2bfbbc43eccc1e6d3754a637b769e1125996279a13e4942f04cd20f2adcf4ed4210cb28b4c3c7565290afa3934754#npm:8.29.0"],\
-          ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.23.0"],\
-          ["eslint-plugin-jest", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:28.11.0"],\
-          ["jest", null]\
-        ],\
-        "packagePeers": [\
-          "@types/eslint",\
-          "@types/jest",\
-          "@types/typescript-eslint__eslint-plugin",\
-          "@typescript-eslint/eslint-plugin",\
-          "eslint",\
-          "jest"\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:28.11.0", {\
         "packageLocation": "./.yarn/__virtual__/eslint-plugin-jest-virtual-b75379e977/0/cache/eslint-plugin-jest-npm-28.11.0-a208fceab5-faa06ce1c4.zip/node_modules/eslint-plugin-jest/",\
         "packageDependencies": [\
@@ -9996,6 +9978,15 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/lodash-npm-4.17.21-6382451519-d8cbea072b.zip/node_modules/lodash/",\
         "packageDependencies": [\
           ["lodash", "npm:4.17.21"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["lodash-es", [\
+      ["npm:4.17.21", {\
+        "packageLocation": "./.yarn/cache/lodash-es-npm-4.17.21-b45832dfce-fb407355f7.zip/node_modules/lodash-es/",\
+        "packageDependencies": [\
+          ["lodash-es", "npm:4.17.21"]\
         ],\
         "linkType": "HARD"\
       }]\

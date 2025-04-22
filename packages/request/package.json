@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "HTTP Client",
   "license": "Apache-2.0",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gardener/dashboard.git",
@@ -14,24 +15,26 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
   },
-  "main": "lib/index.js",
+  "exports": "./lib/index.js",
   "files": [
     "lib"
   ],
   "scripts": {
     "lint": "eslint . --max-warnings=0",
     "lint-sarif": "yarn lint --format=@microsoft/eslint-formatter-sarif",
-    "test": "jest",
+    "test": "node --experimental-vm-modules $(yarn bin jest)",
     "test-coverage": "yarn test --coverage"
   },
   "dependencies": {
     "@gardener-dashboard/logger": "workspace:^",
     "http-errors": "^2.0.0",
     "lodash": "^4.17.21",
+    "lodash-es": "^4.17.21",
     "type-is": "^2.0.0"
   },
   "devDependencies": {
     "@gardener-dashboard/test-utils": "workspace:^",
+    "@jest/globals": "^29.7.0",
     "@microsoft/eslint-formatter-sarif": "^3.1.0",
     "abort-controller": "^3.0.0",
     "eslint": "^9.11.0",

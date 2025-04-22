@@ -4,15 +4,16 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import { jest } from '@jest/globals'
+import http from 'http'
+import http2 from 'http2'
+import zlib from 'zlib'
+import stream from 'stream'
+import { promisify } from 'util'
+import typeis from 'type-is'
+import request from '../lib/index.js'
 
-const http = require('http')
-const http2 = require('http2')
-const zlib = require('zlib')
-const stream = require('stream')
-const { promisify } = require('util')
-const typeis = require('type-is')
-const { Client, Agent, isHttpError } = require('../lib')
+const { Client, Agent, isHttpError } = request
 
 const pipeline = promisify(stream.pipeline)
 const {
