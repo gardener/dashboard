@@ -4,16 +4,14 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const { camelCase } = require('lodash')
-const http2 = require('http2')
-const { mix } = require('mixwith')
-const mixins = require('../lib/mixins')
-const { PatchType } = require('../lib/util')
-const { Informer } = require('../lib/cache')
-const { http } = require('../lib/symbols')
-const { V1, V1Alpha1, V1Beta1, CoreGroup, NamedGroup, NamespaceScoped, ClusterScoped, Readable, Observable, Writable } = mixins
+import { jest } from '@jest/globals'
+import { camelCase } from 'lodash-es'
+import http2 from 'http2'
+import { mix } from 'mixwith'
+import { V1, V1Alpha1, V1Beta1, CoreGroup, NamedGroup, NamespaceScoped, ClusterScoped, Readable, Observable, Writable } from '../lib/mixins.js'
+import { PatchType } from '../lib/util.js'
+import { Informer } from '../lib/cache/index.js'
+import { http } from '../lib/symbols.js'
 const { HTTP2_HEADER_CONTENT_TYPE } = http2.constants
 
 describe('kube-client', () => {

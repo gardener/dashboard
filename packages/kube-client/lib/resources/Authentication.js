@@ -4,12 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const { mix } = require('mixwith')
-
-const { Authentication } = require('../groups')
-const { ClusterScoped, Creatable } = require('../mixins')
+import { mix } from 'mixwith'
+import { Authentication } from '../groups.js'
+import { ClusterScoped, Creatable } from '../mixins.js'
 
 class TokenReview extends mix(Authentication).with(ClusterScoped, Creatable) {
   static get names () {
@@ -21,6 +18,6 @@ class TokenReview extends mix(Authentication).with(ClusterScoped, Creatable) {
   }
 }
 
-module.exports = {
+export default {
   TokenReview,
 }

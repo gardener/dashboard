@@ -4,10 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const HttpClient = require('../HttpClient')
-const { http } = require('../symbols')
+import HttpClient from '../HttpClient.js'
+import { http } from '../symbols.js'
 
 class API extends HttpClient {
   get () {
@@ -15,4 +13,4 @@ class API extends HttpClient {
   }
 }
 
-module.exports = API
+export default API

@@ -4,20 +4,25 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import _ from 'lodash-es'
+import { http } from '../symbols.js'
 
-const _ = require('lodash')
-const { http } = require('../symbols')
+const resourceGroups = await (async () => {
+  const groupsModule = await import('../groups.js')
+  const groups = Object.values(groupsModule)
 
-const resourceGroups = _
-  .chain(require('../groups'))
-  .mapKeys(({ group }) => group || 'core')
-  .mapValues(loadGroup)
-  .value()
+  const rg = {}
+  for (const { group, name } of groups) {
+    const groupKey = group || 'core'
+    const resources = await loadGroup(name)
+    rg[groupKey] = _.mapKeys(resources, 'names.plural')
+  }
+  return rg
+})()
 
-function loadGroup ({ name }) {
-  const resources = require(`./${name}`) // eslint-disable-line security/detect-non-literal-require
-  return _.mapKeys(resources, 'names.plural')
+async function loadGroup (name) {
+  const resourcesModule = await import(`./${name}.js`)
+  return resourcesModule.default || resourcesModule
 }
 
 function load (clientConfig, options) {
@@ -48,7 +53,7 @@ function getResourceGroupMetadata (resources, resourceGroup) {
     .value()
 }
 
-exports.Resources = _.reduce(resourceGroups, getResourceGroupMetadata, {
+export const Resources = _.reduce(resourceGroups, getResourceGroupMetadata, {
   TokenRequest: {
     name: 'token',
     kind: 'TokenRequest',
@@ -62,6 +67,6 @@ exports.Resources = _.reduce(resourceGroups, getResourceGroupMetadata, {
   },
 })
 
-exports.assign = (object, ...args) => {
+export function assign (object, ...args) {
   return Object.assign(object, load(...args))
 }
