@@ -7,7 +7,6 @@
 import { jest } from '@jest/globals'
 import http from 'http'
 import { Test } from 'supertest'
-import app from './lib/app.js'
 
 const promClientMock = await import('./__mocks__/prom-client.js')
 jest.unstable_mockModule('prom-client', () => {
@@ -26,7 +25,8 @@ jest.unstable_mockModule('@gardener-dashboard/logger', () => {
 
 jest.resetModules()
 
-function createHttpAgent () {
+async function createHttpAgent () {
+  const { default: app } = await import('./lib/app.js')
   const server = http.createServer(app)
 
   const agent = {
@@ -45,7 +45,7 @@ function createHttpAgent () {
   return agent
 }
 
-function createAgent () {
+async function createAgent () {
   return createHttpAgent()
 }
 
