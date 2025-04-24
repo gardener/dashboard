@@ -236,7 +236,7 @@ const isTerminalTileVisible = computed(() => {
 })
 
 const isTerminalShortcutsTileVisible = computed(() => {
-  return !isEmpty(shootItem.value) && isTerminalShortcutsFeatureEnabled.value && hasShootTerminalAccess.value && !hideTerminalShortcuts.value && !isSeedUnreachable.value && (hasShootWorkerGroups.value || isAdmin.value)
+  return isTerminalTileVisible.value && !hideTerminalShortcuts.value && isTerminalShortcutsFeatureEnabled.value
 })
 
 function onAddTerminalShortcut (shortcut) {

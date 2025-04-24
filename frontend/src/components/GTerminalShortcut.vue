@@ -46,17 +46,21 @@ SPDX-License-Identifier: Apache-2.0
     >
       <g-action-button
         icon="mdi-console-line"
-        :disabled="disabled"
+        :disabled="(isAdmin && !canScheduleOnSeed) ||
+          (isShootTarget && isShootHibernated)"
         @click.stop="addTerminalShortcut(shortcut)"
       >
         <template #tooltip>
-          <span v-if="!disabled">
+          <div v-if="isAdmin && !canScheduleOnSeed">
+            Terminals can only be scheduled if the seed is a managed seed
+          </div>
+          <span v-else-if="isShootTarget && isShootHibernated">
+            Cluster is hibernated. Wake up cluster to open terminal
+          </span>
+          <span v-else>
             Create
             '<span class="font-family-monospace">{{ shortcut.title }}</span>'
             terminal session
-          </span>
-          <span v-else>
-            Cluster is hibernated. Wake up cluster to open terminal
           </span>
         </template>
       </g-action-button>
@@ -165,16 +169,17 @@ export default {
       const args = get(this.shortcut, ['container', 'args'])
       return join(args, ' ')
     },
-    disabled () {
-      const target = this.shortcut.target
-      if (this.shootItem && !this.isShootStatusHibernated) {
-        return false
-      }
-      if (target !== TargetEnum.SHOOT) {
-        return false
-      }
-
-      return true
+    canScheduleOnSeed () {
+      return get(this.shootItem, ['info', 'canLinkToSeed'], false)
+    },
+    isShootTarget () {
+      return this.shortcut.target === TargetEnum.SHOOT
+    },
+    isControlPlaneTarget () {
+      return this.shortcut.target === TargetEnum.CONTROL_PLANE
+    },
+    isShootHibernated () {
+      return this.shootItem && this.isShootStatusHibernated
     },
     visibilityIconShortcut () {
       return this.expansionPanel ? 'mdi-eye-off' : 'mdi-eye'
