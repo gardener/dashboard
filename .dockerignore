@@ -73,7 +73,7 @@
 !backend/package.json
 !backend/eslint.config.js
 !backend/jest.setup.js
-!backend/server.js
+!backend/server.mjs
 !backend/lib
 !backend/__tests__
 !backend/__fixtures__
