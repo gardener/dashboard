@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
       return-object
       :error-messages="getErrorMessages(v$.internalValue)"
       persistent-hint
-      :hint="secretHint"
+      :hint="credentialHint"
       variant="underlined"
       @blur="v$.internalValue.$touch()"
     >
@@ -69,18 +69,15 @@ import GSecretDialogWrapper from '@/components/Credentials/GSecretDialogWrapper'
 import GCredentialName from '@/components/Credentials/GCredentialName'
 
 import { useProjectCostObject } from '@/composables/useProjectCostObject'
-import { useCloudProviderBindingList } from '@/composables/useCloudProviderBindingList'
+import { useCloudProviderBindingList } from '@/composables/credential/useCloudProviderBindingList'
+import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
 
 import {
   withParams,
   withMessage,
   withFieldName,
 } from '@/utils/validators'
-import {
-  getErrorMessages,
-  isSharedCredential,
-  selfTerminationDaysForSecret,
-} from '@/utils'
+import { getErrorMessages } from '@/utils'
 
 import head from 'lodash/head'
 import isEqual from 'lodash/isEqual'
@@ -135,11 +132,19 @@ export default {
     const providerType = toRef(props, 'providerType')
     const cloudProviderBindingList = useCloudProviderBindingList(providerType, { credentialStore })
 
+    const binding = toRef(props, 'modelValue')
+    const {
+      isSharedCredential,
+      selfTerminationDays,
+    } = useCloudProviderBinding(binding)
+
     return {
       costObjectsSettingEnabled,
       costObjectErrorMessage,
       costObject,
       cloudProviderBindingList,
+      isSharedCredential,
+      selfTerminationDays,
       v$,
     }
   },
@@ -152,9 +157,9 @@ export default {
   validations () {
     const requiresCostObjectIfEnabled = (enabled = false) => withParams(
       { type: 'requiresCostObjectIfEnabled', enabled },
-      function requiresCostObjectIfEnabled (value) {
+      function requiresCostObjectIfEnabled () {
         return enabled
-          ? !!this.costObject || isSharedCredential(value)
+          ? !!this.costObject || this.isSharedCredential
           : true
       },
     )
@@ -185,14 +190,11 @@ export default {
           return !this.notAllowedSecretNames.includes(name)
         })
     },
-    secretHint () {
+    credentialHint () {
       if (this.selfTerminationDays) {
         return `The selected secret has an associated quota that will cause the cluster to self terminate after ${this.selfTerminationDays} days`
       }
       return undefined
-    },
-    selfTerminationDays () {
-      return selfTerminationDaysForSecret(this.internalValue)
     },
   },
   mounted () {

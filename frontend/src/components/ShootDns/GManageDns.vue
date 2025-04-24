@@ -161,7 +161,7 @@ import GDnsProviderRow from '@/components/ShootDns/GDnsProviderRow'
 import GVendorIcon from '@/components/GVendorIcon'
 
 import { useShootContext } from '@/composables/useShootContext'
-import { useCloudProviderBindingList } from '@/composables/useCloudProviderBindingList'
+import { useCloudProviderBindingList } from '@/composables/credential/useCloudProviderBindingList'
 
 import {
   withFieldName,

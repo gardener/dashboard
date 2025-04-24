@@ -29,7 +29,6 @@ import map from 'lodash/map'
 import toLower from 'lodash/toLower'
 import filter from 'lodash/filter'
 import words from 'lodash/words'
-import find from 'lodash/find'
 import some from 'lodash/some'
 import sortBy from 'lodash/sortBy'
 import isEmpty from 'lodash/isEmpty'
@@ -352,18 +351,6 @@ export function getTimeStringTo (time, toTime, withoutPrefix = false) {
   return moment(time).to(toTime, withoutPrefix)
 }
 
-export function isSharedCredential (binding) {
-  const bindingNamespace = binding.metadata.namespace
-  let refNamespace
-  if (binding._isSecretBinding) {
-    refNamespace = binding.secretRef.namespace
-  } else if (binding._isCredentialsBinding) {
-    refNamespace = binding.credentialsRef.namespace
-  }
-
-  return refNamespace !== bindingNamespace
-}
-
 export function getCreatedBy (metadata) {
   return get(metadata, ['annotations', 'gardener.cloud/created-by']) || get(metadata, ['annotations', 'garden.sapcloud.io/createdBy'])
 }
@@ -464,20 +451,6 @@ export function shortRandomString (length) {
     text += possible.charAt(Math.floor(Math.random() * possible.length))
   }
   return text
-}
-
-export function selfTerminationDaysForSecret (secretBinding) {
-  const clusterLifetimeDays = function (quotas, scope) {
-    return get(find(quotas, scope), ['spec', 'clusterLifetimeDays'])
-  }
-
-  const quotas = get(secretBinding, ['_quotas'])
-  let terminationDays = clusterLifetimeDays(quotas, { spec: { scope: { apiVersion: 'core.gardener.cloud/v1beta1', kind: 'Project' } } })
-  if (!terminationDays) {
-    terminationDays = clusterLifetimeDays(quotas, { spec: { scope: { apiVersion: 'v1', kind: 'Secret' } } })
-  }
-
-  return terminationDays
 }
 
 export const shootAddonList = [
@@ -742,84 +715,4 @@ export function normalizeVersion (version) {
   }
   const [major, minor = '0', patch = '0'] = parts
   return [major, minor, patch].map(Number).join('.') + suffix
-}
-
-export function calculateRelatedShootCount (shootList, binding) {
-  if (binding._isInfrastructureBinding) {
-    const bindingName = binding.metadata.name
-    const shootsByInfrastructureBinding = filter(shootList, ({ spec }) => {
-      if (binding._isSecretBinding) {
-        return spec.secretBindingName === bindingName
-      } else if (binding._isCredentialsBinding) {
-        return spec.credentialsBindingName === bindingName
-      }
-      return false
-    })
-    return shootsByInfrastructureBinding.length
-  } else if (binding._isDnsBinding) {
-    if (!binding._secretName) {
-      return 0 // currently DNS provider only allows to reference secrets directly
-    }
-    const someDnsProviderHasSecretRef = providers => some(providers, ['secretName', binding._secretName])
-    const someResourceHasSecretRef = resources => some(resources, { resourceRef: { kind: 'Secret', name: binding._secretName } })
-
-    let count = 0
-    for (const shoot of shootList) {
-      const dnsProviders = shoot.spec.dns?.providers
-      const resources = shoot.spec.resources
-      if (someDnsProviderHasSecretRef(dnsProviders) || someResourceHasSecretRef(resources)) {
-        count++
-      }
-    }
-    return count
-  }
-}
-
-export function computeBindingItem (binding) {
-  if (!binding) {
-    return undefined
-  }
-  const kind = {
-    icon: 'mdi-help-circle',
-    tooltip: 'Unknown',
-  }
-  let credentialNamespace = ''
-  let credentialName = ''
-  if (binding._isSecretBinding) {
-    kind.tooltip = 'Secret (SecretBinding)'
-    kind.icon = 'mdi-key'
-    credentialNamespace = binding.secretRef.namespace
-    credentialName = binding.secretRef.name
-  }
-  if (binding._isCredentialsBinding) {
-    if (binding.credentialsRef.kind === 'Secret') {
-      kind.tooltip = 'Secret (CredentialsBinding)'
-      kind.icon = 'mdi-key-outline'
-    }
-    if (binding.credentialsRef.kind === 'WorkloadIdentity') {
-      kind.tooltip = 'WorkloadIdentity'
-      kind.icon = 'mdi-id-card'
-    }
-    credentialNamespace = binding.credentialsRef.namespace
-    credentialName = binding.credentialsRef.name
-  }
-
-  const _isSharedCredential = isSharedCredential(binding)
-  const hasOwnSecret = binding._secret !== undefined
-  const hasOwnWorkloadIdentity = binding._workloadIdentity !== undefined
-  const isOrphaned = !_isSharedCredential && !hasOwnSecret && !hasOwnWorkloadIdentity
-
-  return {
-    name: binding.metadata.name,
-    kind,
-    isSharedCredential: _isSharedCredential,
-    hasOwnSecret,
-    hasOwnWorkloadIdentity,
-    credentialNamespace,
-    credentialName,
-    providerType: binding.provider.type,
-    isOrphaned,
-    binding,
-    isMarkedForDeletion: !!binding.metadata.deletionTimestamp,
-  }
 }

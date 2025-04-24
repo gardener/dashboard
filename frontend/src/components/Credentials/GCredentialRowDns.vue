@@ -7,72 +7,68 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <tr
     class="credential-row"
-    :class="{ 'highlighted': item.highlighted }"
+    :class="{ 'highlighted': isHighlighted }"
   >
     <td v-if="selectedHeaders.name">
       <div class="d-flex">
-        {{ item.name }}
+        {{ binding.metadata.name }}
         <v-tooltip
-          v-if="item.isSharedCredential"
+          v-if="isSharedCredential"
           location="top"
         >
-          <template #activator="{ props }">
+          <template #activator="{ props: tProps }">
             <v-icon
-              v-bind="props"
+              v-bind="tProps"
               size="small"
               class="mx-1"
             >
               mdi-account-arrow-left
             </v-icon>
           </template>
-          <span>Credential shared by {{ item.credentialNamespace }}</span>
+          <span>Credential shared by {{ credentialNamespace }}</span>
+        </v-tooltip>
+        <v-tooltip
+          v-if="isOrphanedCredential"
+          location="top"
+        >
+          <template #activator="{ props: activatorProps }">
+            <v-icon
+              v-bind="activatorProps"
+              icon="mdi-alert-circle-outline"
+              end
+              size="small"
+              color="warning"
+            />
+          </template>
+          Associated credential does not exist
         </v-tooltip>
       </div>
     </td>
     <td v-if="selectedHeaders.kind">
-      <v-tooltip location="top">
-        <template #activator="{ props }">
-          <v-icon
-            v-bind="props"
-            size="small"
-            class="mx-1"
-          >
-            {{ item.kind.icon }}
-          </v-icon>
-        </template>
-        <span>{{ item.kind.tooltip }}</span>
-      </v-tooltip>
-    </td>
-    <td v-if="selectedHeaders.credential">
-      <span v-if="item.isSharedCredential">{{ item.credentialNamespace }}: </span>{{ item.credentialName }}
+      <g-credential-icon :binding="binding" />
     </td>
     <td v-if="selectedHeaders.dnsProvider">
       <g-vendor
         extended
-        :provider-type="item.providerType"
+        :provider-type="binding.provider.type"
       />
     </td>
     <td v-if="selectedHeaders.details">
       <g-secret-details-item-content
         class="py-1"
-        :secret="item.binding._secret"
-        :provider-type="item.providerType"
+        :secret="binding._secret"
+        :provider-type="binding.provider.type"
       />
     </td>
-    <td v-if="selectedHeaders.relatedShootCount">
-      <div
-        class="d-flex"
-        :class="{'font-weight-light text-disabled' : !item.relatedShootCount}"
-      >
-        {{ item.relatedShootCountLabel }}
-      </div>
+    <td v-if="selectedHeaders.credentialUseCount">
+      <g-credential-used-by-label :used-by="credentialUseCount" />
     </td>
     <td
       v-if="selectedHeaders.actions"
       class="text-action-button"
     >
       <g-credential-row-actions
-        :item="item"
+        :binding="binding"
         @update="onUpdate"
         @delete="onDelete"
       />
@@ -80,46 +76,56 @@ SPDX-License-Identifier: Apache-2.0
   </tr>
 </template>
 
-<script>
+<script setup>
+import {
+  computed,
+  toRef,
+} from 'vue'
+
 import GVendor from '@/components/GVendor'
 import GSecretDetailsItemContent from '@/components/Credentials/GSecretDetailsItemContent'
 import GCredentialRowActions from '@/components/Credentials/GCredentialRowActions'
+import GCredentialIcon from '@/components/Credentials/GCredentialIcon'
+import GCredentialUsedByLabel from '@/components/Credentials/GCredentialUsedByLabel'
+
+import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
 
 import { mapTableHeader } from '@/utils'
 
-export default {
-  components: {
-    GVendor,
-    GSecretDetailsItemContent,
-    GCredentialRowActions,
+const props = defineProps({
+  binding: {
+    type: Object,
+    required: true,
   },
-  props: {
-    item: {
-      type: Object,
-      required: true,
-    },
-    headers: {
-      type: Array,
-      required: true,
-    },
+  isHighlighted: {
+    type: Boolean,
+    default: false,
   },
-  emits: [
-    'update',
-    'delete',
-  ],
-  computed: {
-    selectedHeaders () {
-      return mapTableHeader(this.headers, 'selected')
-    },
+  headers: {
+    type: Array,
+    required: true,
   },
-  methods: {
-    onUpdate () {
-      this.$emit('update', this.item.binding)
-    },
-    onDelete () {
-      this.$emit('delete', this.item.binding)
-    },
-  },
+})
+
+const binding = toRef(props, 'binding')
+
+const {
+  isSharedCredential,
+  credentialNamespace,
+  credentialUseCount,
+  isOrphanedCredential,
+} = useCloudProviderBinding(binding)
+
+const emit = defineEmits(['update', 'delete'])
+
+const selectedHeaders = computed(() => mapTableHeader(props.headers, 'selected'))
+
+function onUpdate (value) {
+  emit('update', value)
+}
+
+function onDelete (value) {
+  emit('delete', value)
 }
 </script>
 

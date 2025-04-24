@@ -6,18 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <span v-if="binding">
-    <v-tooltip location="top">
-      <template #activator="{ props: tProps }">
-        <v-icon
-          v-bind="tProps"
-          size="small"
-          class="mr-2"
-        >
-          {{ computedItem.kind.icon }}
-        </v-icon>
-      </template>
-      <span>{{ computedItem.kind.tooltip }}</span>
-    </v-tooltip>
+    <g-credential-icon :binding="binding" />
     <v-tooltip
       class="credentials-details-tooltip"
       :open-delay="500"
@@ -29,12 +18,12 @@ SPDX-License-Identifier: Apache-2.0
           v-if="canLinkToCredential && renderLink"
           v-bind="tProps"
           :to="{ name: 'Credentials', params: { namespace: binding.metadata.namespace }, hash: credentialHash }"
-          :text="computedItem.name"
+          :text="binding.metadata.name"
         />
         <span
           v-else
           v-bind="tProps"
-        >{{ computedItem.name }}</span>
+        >{{ binding.metadata.name }}</span>
       </template>
       <v-card>
         <g-secret-details-item-content
@@ -45,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-card>
     </v-tooltip>
     <v-tooltip
-      v-if="computedItem.isSharedCredential"
+      v-if="isSharedCredential"
       location="top"
     >
       <template #activator="{ props: tProps }">
@@ -57,10 +46,10 @@ SPDX-License-Identifier: Apache-2.0
           mdi-account-arrow-left
         </v-icon>
       </template>
-      <span>Credential shared by {{ computedItem.credentialNamespace }}</span>
+      <span>Credential shared by {{ credentialNamespace }}</span>
     </v-tooltip>
     <v-tooltip
-      v-if="computedItem.isOrphaned"
+      v-if="isOrphanedCredential"
       location="top"
     >
       <template #activator="{ props: activatorProps }">
@@ -72,7 +61,7 @@ SPDX-License-Identifier: Apache-2.0
           color="warning"
         />
       </template>
-      Associated Credential does not exist
+      Associated credential does not exist
     </v-tooltip>
   </span>
   <span v-else>
@@ -91,8 +80,9 @@ import { useAuthzStore } from '@/store/authz'
 
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 import GSecretDetailsItemContent from '@/components/Credentials/GSecretDetailsItemContent'
+import GCredentialIcon from '@/components/Credentials/GCredentialIcon'
 
-import { computeBindingItem } from '@/utils'
+import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
 
 const props = defineProps({
   binding: Object,
@@ -104,14 +94,18 @@ const binding = toRef(props.binding)
 const authzStore = useAuthzStore()
 const { canGetCloudProviderCredentials } = storeToRefs(authzStore)
 
-const computedItem = computed(() => computeBindingItem(binding.value))
-
 const canLinkToCredential = computed(() => canGetCloudProviderCredentials.value && binding.value)
 
 const credentialHash = computed(() => {
   const uid = binding.value?.metadata?.uid
   return uid ? `#credential-uid=${encodeURIComponent(uid)}` : ''
 })
+
+const {
+  isSharedCredential,
+  credentialNamespace,
+  isOrphanedCredential,
+} = useCloudProviderBinding(binding)
 
 </script>
 

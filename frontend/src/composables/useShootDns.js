@@ -14,7 +14,7 @@ import { useCredentialStore } from '@/store/credential'
 
 import { useShootResources } from '@/composables/useShootResources'
 import { useShootExtensions } from '@/composables/useShootExtensions'
-import { useCloudProviderBindingList } from '@/composables/useCloudProviderBindingList'
+import { useCloudProviderBindingList } from '@/composables/credential/useCloudProviderBindingList'
 
 import get from 'lodash/get'
 import set from 'lodash/set'

@@ -8,7 +8,7 @@ import { computed } from 'vue'
 
 import { useCredentialStore } from '@/store/credential'
 
-import { isSharedCredential } from '@/utils'
+import { isSharedCredential } from './helper'
 
 import filter from 'lodash/filter'
 

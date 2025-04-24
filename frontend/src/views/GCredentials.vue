@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
         </div>
         <template #append>
           <v-text-field
-            v-if="infrastructureCredentialsItems.length > 3"
+            v-if="infrastructureBindingList.length > 3"
             v-model="infraCredentialFilter"
             prepend-inner-icon="mdi-magnify"
             color="primary"
@@ -91,7 +91,7 @@ SPDX-License-Identifier: Apache-2.0
           There must be at least one cloud profile supported by the dashboard as well as a seed that matches its seed selector.
         </v-alert>
       </v-card-text>
-      <v-card-text v-else-if="!infrastructureCredentialsItems.length">
+      <v-card-text v-else-if="!infrastructureBindingList.length">
         <div class="text-h6 text-grey-darken-1 my-4">
           Add Infrastructure Credentials to your project
         </div>
@@ -118,7 +118,8 @@ SPDX-License-Identifier: Apache-2.0
           <g-credential-row-infra
             :key="`${item.credentialNamespace}/${item.credentialName}`"
             :ref="itemRef"
-            :item="item"
+            :binding="item"
+            :highlighted="isHighlighted(item)"
             :headers="infraCredentialTableHeaders"
             @delete="onRemoveCredential"
             @update="onUpdateCredential"
@@ -126,7 +127,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
         <template #bottom>
           <g-data-table-footer
-            :items-length="infrastructureCredentialsItems.length"
+            :items-length="infrastructureBindingList.length"
             items-label="Infrastructure Credentials"
           />
         </template>
@@ -147,7 +148,7 @@ SPDX-License-Identifier: Apache-2.0
 
         <template #append>
           <v-text-field
-            v-if="dnsCredentialItems.length > 3"
+            v-if="dnsBindingList.length > 3"
             v-model="dnsCredentialFilter"
             prepend-inner-icon="mdi-magnify"
             color="primary"
@@ -208,7 +209,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
       </g-toolbar>
 
-      <v-card-text v-if="!dnsCredentialItems.length">
+      <v-card-text v-if="!dnsBindingList.length">
         <div class="text-h6 text-grey-darken-1 my-4">
           Add DNS Credentials to your project
         </div>
@@ -235,7 +236,8 @@ SPDX-License-Identifier: Apache-2.0
           <g-credential-row-dns
             :key="`${item.credentialNamespace}/${item.credentialName}`"
             :ref="itemRef"
-            :item="item"
+            :binding="item"
+            :highlighted="isHighlighted(item)"
             :headers="dnsCredentialTableHeaders"
             @delete="onRemoveCredential"
             @update="onUpdateCredential"
@@ -243,7 +245,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
         <template #bottom>
           <g-data-table-footer
-            :items-length="dnsCredentialItems.length"
+            :items-length="dnsBindingList.length"
             items-label="DNS Credentials"
           />
         </template>
@@ -287,11 +289,7 @@ import GDataTableFooter from '@/components/GDataTableFooter.vue'
 
 import { useTwoTableLayout } from '@/composables/useTwoTableLayout'
 
-import {
-  computeBindingItem,
-  mapTableHeader,
-  calculateRelatedShootCount,
-} from '@/utils'
+import { mapTableHeader } from '@/utils'
 
 import orderBy from 'lodash/orderBy'
 import mapValues from 'lodash/mapValues'
@@ -386,13 +384,6 @@ export default {
           defaultSelected: true,
         },
         {
-          title: 'CREDENTIAL',
-          align: 'start',
-          key: 'credential',
-          sortable: true,
-          defaultSelected: true,
-        },
-        {
           title: 'INFRASTRUCTURE',
           align: 'start',
           key: 'infrastructure',
@@ -409,7 +400,7 @@ export default {
         {
           title: 'USED BY',
           align: 'start',
-          key: 'relatedShootCount',
+          key: 'credentialUseCount',
           defaultSelected: true,
         },
         {
@@ -431,10 +422,7 @@ export default {
     },
     infrastructureCredentialSortedItems () {
       const secondSortCriteria = 'name'
-      return this.sortItems(this.infrastructureCredentialsItems, this.infraCredentialSortBy, secondSortCriteria)
-    },
-    infrastructureCredentialsItems () {
-      return map(this.infrastructureBindingList, this.computeItem)
+      return this.sortItems(this.infrastructureBindingList, this.infraCredentialSortBy, secondSortCriteria)
     },
     dnsCredentialTableHeaders () {
       const headers = [
@@ -449,13 +437,6 @@ export default {
           title: 'KIND',
           align: 'start',
           key: 'kind',
-          sortable: true,
-          defaultSelected: true,
-        },
-        {
-          title: 'CREDENTIAL',
-          align: 'start',
-          key: 'credential',
           sortable: true,
           defaultSelected: true,
         },
@@ -476,7 +457,7 @@ export default {
         {
           title: 'USED BY',
           align: 'start',
-          key: 'relatedShootCount',
+          key: 'credentialUseCount',
           defaultSelected: true,
         },
         {
@@ -498,10 +479,7 @@ export default {
     },
     dnsCredentialSortedItems () {
       const secondSortCriteria = 'name'
-      return this.sortItems(this.dnsCredentialItems, this.dnsCredentialSortBy, secondSortCriteria)
-    },
-    dnsCredentialItems () {
-      return map(this.dnsBindingList, this.computeItem)
+      return this.sortItems(this.dnsBindingList, this.dnsCredentialSortBy, secondSortCriteria)
     },
   },
   watch: {
@@ -539,13 +517,6 @@ export default {
     onRemoveCredential (binding) {
       this.selectedBinding = binding
       this.visibleCredentialDialog = 'delete'
-    },
-    relatedShootCountLabel (count) {
-      if (count === 0) {
-        return 'currently unused'
-      } else {
-        return `${count} ${count > 1 ? 'clusters' : 'cluster'}`
-      }
     },
     setSelectedInfraHeader (header) {
       this.infraCredentialSelectedColumns[header.key] = !header.selected
@@ -596,18 +567,8 @@ export default {
       const tableKeys = mapKeys(sortableTableHeaders, ({ key }) => key)
       return mapValues(tableKeys, () => () => 0)
     },
-    computeItem (binding) {
-      const bindingItem = computeBindingItem(binding)
-      const relatedShootCount = calculateRelatedShootCount(this.shootList, binding)
-      const relatedShootCountLabel = this.relatedShootCountLabel(relatedShootCount)
-      const highlighted = this.highlightedUid && this.highlightedUid === binding.metadata.uid
-
-      return {
-        ...bindingItem,
-        relatedShootCount,
-        relatedShootCountLabel,
-        highlighted,
-      }
+    isHighlighted (binding) {
+      return this.highlightedUid && this.highlightedUid === binding.metadata.uid
     },
   },
 }

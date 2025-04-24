@@ -16,9 +16,8 @@ import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useCredentialStore } from '@/store/credential'
 import { useSeedStore } from '@/store/seed'
 
-import { useCloudProviderBindingList } from '@/composables/useCloudProviderBindingList'
-
-import { selfTerminationDaysForSecret } from '@/utils'
+import { useCloudProviderBindingList } from '@/composables/credential/useCloudProviderBindingList'
+import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
 
 import { useShootAccessRestrictions } from './useShootAccessRestrictions'
 
@@ -133,11 +132,13 @@ export function createShootHelperComposable (shootItem, options = {}) {
     return cloudProfileStore.kubernetesVersionIsNotLatestPatch(kubernetesVersion.value, cloudProfileName.value)
   })
 
+  const { selfTerminationDays } = useCloudProviderBinding(infrastructureBinding)
+
   const allPurposes = computed(() => {
     if (some(addons.value, 'enabled')) {
       return ['evaluation']
     }
-    return selfTerminationDaysForSecret(infrastructureBinding.value)
+    return selfTerminationDays.value
       ? ['evaluation']
       : ['evaluation', 'development', 'testing', 'production']
   })

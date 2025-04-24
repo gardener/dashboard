@@ -111,7 +111,7 @@ import GSelectCredential from '@/components/Credentials/GSelectCredential'
 import GVendorIcon from '@/components/GVendorIcon'
 
 import { useShootContext } from '@/composables/useShootContext'
-import { useCloudProviderBindingList } from '@/composables/useCloudProviderBindingList'
+import { useCloudProviderBindingList } from '@/composables/credential/useCloudProviderBindingList'
 
 import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'

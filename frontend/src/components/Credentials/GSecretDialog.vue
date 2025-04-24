@@ -72,7 +72,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-card-text>
       <div>
         <v-alert
-          v-if="!isCreateMode && orphaned"
+          v-if="!isCreateMode && isOrphanedCredential"
           :value="true"
           type="info"
           color="primary"
@@ -81,12 +81,12 @@ SPDX-License-Identifier: Apache-2.0
           The Secret <code>{{ binding._secretName }}</code> for this <code>Binding</code> does not exist anymore and will be re-created if you update the data.
         </v-alert>
         <v-alert
-          :model-value="!isCreateMode && relatedShootCount > 0"
+          :model-value="!isCreateMode && credentialUseCount > 0"
           type="warning"
           rounded="0"
           class="mb-2"
         >
-          <div>This <code>Secret</code> is used by {{ relatedShootCount }} {{ relatedShootCount === 1 ? 'cluster' : 'clusters' }}. The new <code>Secret</code> should be part of the same account as the one that gets replaced.</div>
+          <div>This <code>Secret</code> is used by {{ credentialUseCount }} {{ credentialUseCount === 1 ? 'cluster' : 'clusters' }}. The new <code>Secret</code> should be part of the same account as the one that gets replaced.</div>
           <div>Clusters will only start using the new <code>Secret</code> after they are reconciled. Therefore, wait until all clusters using the <code>Secret</code> are reconciled before you disable the old <code>Secret</code> in your infrastructure account. Otherwise the clusters will no longer function.</div>
         </v-alert>
         <v-alert
@@ -138,6 +138,7 @@ import {
   required,
   maxLength,
 } from '@vuelidate/validators'
+import { toRef } from 'vue'
 
 import { useCredentialStore } from '@/store/credential'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
@@ -150,6 +151,7 @@ import GScrollContainer from '@/components/GScrollContainer'
 import { useSecretContext } from '@/composables/credential/useSecretContext'
 import { useSecretBindingContext } from '@/composables/credential/useSecretBindingContext'
 import { useCredentialsBindingContext } from '@/composables/credential/useCredentialsBindingContext'
+import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
 
 import {
   messageFromErrors,
@@ -166,8 +168,6 @@ import {
   getErrorMessages,
   setDelayedInputFocus,
   setInputFocus,
-  calculateRelatedShootCount,
-  isSharedCredential,
 } from '@/utils'
 
 import includes from 'lodash/includes'
@@ -237,6 +237,12 @@ export default {
       secretName,
     } = useSecretContext()
 
+    const binding = toRef(props, 'binding')
+    const {
+      isOrphanedCredential,
+      credentialUseCount,
+    } = useCloudProviderBinding(binding)
+
     return {
       createBindingManifest,
       setBindingManifest,
@@ -248,6 +254,8 @@ export default {
       setSecretManifest,
       secretManifest,
       secretName,
+      isOrphanedCredential,
+      credentialUseCount,
       v$: useVuelidate(),
     }
   },
@@ -304,12 +312,6 @@ export default {
     },
     title () {
       return this.isCreateMode ? this.createTitle : this.replaceTitle
-    },
-    relatedShootCount () {
-      return calculateRelatedShootCount(this.shootList, this.binding)
-    },
-    orphaned () {
-      return !isSharedCredential(this.binding) && this.binding._secret === undefined && this.binding._workloadIdentity === undefined
     },
     helpContainerStyles () {
       const detailsRef = this.$refs.secretDetails
