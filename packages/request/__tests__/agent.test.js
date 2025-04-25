@@ -6,7 +6,6 @@
 
 import { jest } from '@jest/globals'
 import http2 from 'http2'
-import { mockOnHelper } from '@gardener-dashboard/test-utils'
 
 // const mock = await mockOnHelper('../lib/SessionPool.js',
 //  [
@@ -39,12 +38,30 @@ const mockMyClass = jest.fn().mockImplementation(() => {
 })
 
 jest.unstable_mockModule('./lib/SessionPool.js', () => {
+  const superMock = jest.fn(
+    mockMyClass,
+  )
+
+  superMock.prototype = {
+    constructor: mockMyClass.prototype.constructor,
+    uuid: 1123,
+    destroy: jest.fn(),
+    getSession: jest.fn(),
+    request: jest.fn(),
+    setSessionTimeout: jest.fn(),
+    clearSessionTimeout: jest.fn(),
+    setSessionHeartbeat: jest.fn(),
+    clearSessionHeartbeat: jest.fn(),
+    createSession: jest.fn(),
+    deleteSession: jest.fn(),
+  }
   return {
-    default: mockMyClass,
+    default: superMock,
   }
 })
 
 const { default: SessionPool } = await import('../lib/SessionPool.js')
+const newSessionPool = new SessionPool('https://foo.org')
 const { default: request } = await import('../lib/index.js')
 const { Agent } = request
 
@@ -104,27 +121,33 @@ describe('Agent', () => {
   })
 
   describe('#request', () => {
-    it.skip('should send a minimal request', async () => {
+    it('should send a minimal request', async () => {
       const host = 'foo.org'
       const agent = new Agent()
       const headers = {
         [HTTP2_HEADER_HOST]: host,
       }
-      await agent.request(headers, { id: 'id' })
-      expect(SessionPool).toBeCalledTimes(1)
-      expect(SessionPool.mock.calls[0]).toEqual([
+      const requestOptions = { id: 'id' }
+
+      const mockRequest = jest.fn()
+      jest.spyOn(agent, 'getSessionPool').mockReturnValue({
+        request: mockRequest,
+      })
+
+      await agent.request(headers, requestOptions)
+
+      expect(agent.getSessionPool).toBeCalledTimes(1)
+      expect(agent.getSessionPool).toBeCalledWith(
         expect.objectContaining({
           protocol: 'https:',
           host,
           pathname: '/id',
           hash: expect.stringMatching(/^#[a-f0-9]{7}$/),
         }),
-      ])
-      const pool = SessionPool.mock.instances[0]
-      expect(pool.request).toBeCalledTimes(1)
-      expect(pool.request.mock.calls[0]).toEqual([
-        headers, {},
-      ])
+      )
+
+      expect(mockRequest).toBeCalledTimes(1)
+      expect(mockRequest).toBeCalledWith(headers, {})
     })
   })
 })

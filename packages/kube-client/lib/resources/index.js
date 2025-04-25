@@ -6,23 +6,39 @@
 
 import _ from 'lodash-es'
 import { http } from '../symbols.js'
+import * as groups from '../groups.js'
+import APIRegistration from './APIRegistration.js'
+import Authentication from './Authentication.js'
+import Authorization from './Authorization.js'
+import Coordination from './Coordination.js'
+import Core from './Core.js'
+import GardenerCore from './GardenerCore.js'
+import GardenerDashboard from './GardenerDashboard.js'
+import GardenerSeedManagement from './GardenerSeedManagement.js'
+import Networking from './Networking.js'
 
-const resourceGroups = await (async () => {
-  const groupsModule = await import('../groups.js')
-  const groups = Object.values(groupsModule)
+const resourceGroups = _
+  .chain(groups)
+  .mapKeys(({ group }) => group || 'core')
+  .mapValues(loadGroup)
+  .value()
 
-  const rg = {}
-  for (const { group, name } of groups) {
-    const groupKey = group || 'core'
-    const resources = await loadGroup(name)
-    rg[groupKey] = _.mapKeys(resources, 'names.plural')
+function loadGroup ({ name }) {
+  const resourcesModules = {
+    APIRegistration,
+    Authentication,
+    Authorization,
+    Coordination,
+    Core,
+    GardenerCore,
+    GardenerDashboard,
+    GardenerSeedManagement,
+    Networking,
   }
-  return rg
-})()
 
-async function loadGroup (name) {
-  const resourcesModule = await import(`./${name}.js`)
-  return resourcesModule.default || resourcesModule
+  const resources = resourcesModules[name]
+
+  return _.mapKeys(resources, 'names.plural')
 }
 
 function load (clientConfig, options) {

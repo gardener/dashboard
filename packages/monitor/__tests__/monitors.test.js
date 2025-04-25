@@ -5,10 +5,9 @@
 //
 
 import { jest } from '@jest/globals'
-import { spyOnHelper,  moduleResolve, createMockModule, semiAutoMockHelper} from '@gardener-dashboard/test-utils'
-import { response } from 'express'
+import { spyOnHelper } from '@gardener-dashboard/jest-esm-utils'
 
-const {default: spy} = await spyOnHelper(`../lib/metrics.js`,
+const { default: spy } = await spyOnHelper('../lib/metrics.js',
   [
     'connectionsCount.inc',
     'connectionsTotal.inc',
@@ -25,16 +24,16 @@ jest.unstable_mockModule('../lib/metrics.js', () => {
       responseTime: {
         observe: jest.fn(),
       },
-    }
+    },
   }
 })
 
-//await semiAutoMockHelper(`../lib/metrics.js`,
+// await semiAutoMockHelper(`../lib/metrics.js`,
 //  [
 //    'responseTime.observe',
 //  ],
 //  import.meta.url,
-//)
+// )
 
 const { default: metrics } = await import('../lib/metrics.js')
 
