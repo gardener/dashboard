@@ -4,11 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { format as fmt } from 'util'
-import kubeClient from '@gardener-dashboard/kube-client/lib/index.js'
-import { isHttpError } from 'http-errors'
+'use strict'
 
-const { dashboardClient } = kubeClient
+const { format: fmt } = require('util')
+const { dashboardClient } = require('@gardener-dashboard/kube-client')
+const { isHttpError } = require('http-errors')
 
 async function healthCheck (transitive = false) {
   if (transitive === true) {
@@ -24,6 +24,6 @@ async function healthCheck (transitive = false) {
   }
 }
 
-export {
+module.exports = {
   healthCheck,
 }

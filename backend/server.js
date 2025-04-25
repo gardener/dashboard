@@ -4,9 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { app } from './lib/app.mjs'
-import metricsApp from '@gardener-dashboard/monitor/lib/index.js'
+'use strict'
 
-import { createServer } from './lib/server.mjs'
+const app = require('./lib/app')
+const metricsApp = require('@gardener-dashboard/monitor')
+
+const createServer = require('./lib/server')
 
 createServer(app, metricsApp).run()

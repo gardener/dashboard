@@ -4,9 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import http from 'http'
-import pTimeout from 'p-timeout'
-import terminus from '@godaddy/terminus/index.js'
+'use strict'
+
+const http = require('http')
+const pTimeout = require('p-timeout')
+const terminus = require('@godaddy/terminus')
 
 function toMilliseconds (seconds) {
   seconds = parseInt(seconds)
@@ -78,6 +80,4 @@ function createServer (app, metricsApp) {
   }
 }
 
-export {
-  createServer,
-}
+module.exports = createServer
