@@ -12,36 +12,11 @@ SPDX-License-Identifier: Apache-2.0
     <td v-if="selectedHeaders.name">
       <div class="d-flex">
         {{ binding.metadata.name }}
-        <v-tooltip
+        <g-shared-credential-icon
           v-if="isSharedCredential"
-          location="top"
-        >
-          <template #activator="{ props: tProps }">
-            <v-icon
-              v-bind="tProps"
-              size="small"
-              class="mx-1"
-            >
-              mdi-account-arrow-left
-            </v-icon>
-          </template>
-          <span>Credential shared by {{ credentialNamespace }}</span>
-        </v-tooltip>
-        <v-tooltip
-          v-if="isOrphanedCredential"
-          location="top"
-        >
-          <template #activator="{ props: activatorProps }">
-            <v-icon
-              v-bind="activatorProps"
-              icon="mdi-alert-circle-outline"
-              end
-              size="small"
-              color="warning"
-            />
-          </template>
-          Associated credential does not exist
-        </v-tooltip>
+          :namespace="credentialNamespace"
+        />
+        <g-orphaned-credential-icon v-if="isOrphanedCredential" />
       </div>
     </td>
     <td v-if="selectedHeaders.kind">
@@ -55,8 +30,9 @@ SPDX-License-Identifier: Apache-2.0
     </td>
     <td v-if="selectedHeaders.details">
       <g-secret-details-item-content
+        v-if="hasOwnSecret"
         class="py-1"
-        :secret="binding._secret"
+        :secret="credential"
         :provider-type="binding.provider.type"
       />
     </td>
@@ -87,6 +63,8 @@ import GSecretDetailsItemContent from '@/components/Credentials/GSecretDetailsIt
 import GCredentialRowActions from '@/components/Credentials/GCredentialRowActions'
 import GCredentialIcon from '@/components/Credentials/GCredentialIcon'
 import GCredentialUsedByLabel from '@/components/Credentials/GCredentialUsedByLabel'
+import GSharedCredentialIcon from '@/components/Credentials/GSharedCredentialIcon.vue'
+import GOrphanedCredentialIcon from '@/components/Credentials/GOrphanedCredentialIcon.vue'
 
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
 
@@ -114,6 +92,8 @@ const {
   credentialNamespace,
   credentialUseCount,
   isOrphanedCredential,
+  credential,
+  hasOwnSecret,
 } = useCloudProviderBinding(binding)
 
 const emit = defineEmits(['update', 'delete'])

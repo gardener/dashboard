@@ -45,6 +45,7 @@ function createProviderCredentials (type, options = {}) {
       metadata: {
         namespace: bindingNamespace,
         name: secretBindingName,
+        uid: `sb-${name}-uid`,
       },
       provider: {
         type,
@@ -73,6 +74,7 @@ function createProviderCredentials (type, options = {}) {
       metadata: {
         namespace: bindingNamespace,
         name: credentialsBindingName,
+        uid: `cb-${name}-uid`,
       },
       provider: {
         type,
@@ -110,6 +112,7 @@ function createProviderCredentials (type, options = {}) {
       metadata: {
         namespace: secretNamepace,
         name: workloadIdentityName,
+        uid: `wlid-${name}-uid`,
       },
       spec: {
         targetSystem: {
@@ -135,7 +138,14 @@ const credentials = [
   createProviderCredentials('aws', { name: 'aws-trial', secretNamepace: 'garden-trial' }),
   createProviderCredentials('azure', { quotas: [
     { metadata: { name: 'azure-foo-quota', namespace: 'garden-trial' } },
-    { metadata: { name: 'azure-bar-quota', namespace: 'garden-test' } },
+    { metadata: { name: 'azure-bar-quota', namespace: 'garden-test' },
+      spec: {
+        scope: {
+          kind: 'Project',
+          apiVersion: 'core.gardener.cloud/v1beta1',
+        },
+        clusterLifetimeDays: 7,
+      } },
   ] }),
   createProviderCredentials('openstack'),
   createProviderCredentials('gcp'),

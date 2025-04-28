@@ -78,7 +78,7 @@ SPDX-License-Identifier: Apache-2.0
           color="primary"
           variant="tonal"
         >
-          The Secret <code>{{ binding._secretName }}</code> for this <code>Binding</code> does not exist anymore and will be re-created if you update the data.
+          The Secret <code>{{ credentialName }}</code> for this <code>Binding</code> does not exist anymore and will be re-created if you update the data.
         </v-alert>
         <v-alert
           :model-value="!isCreateMode && credentialUseCount > 0"
@@ -90,7 +90,7 @@ SPDX-License-Identifier: Apache-2.0
           <div>Clusters will only start using the new <code>Secret</code> after they are reconciled. Therefore, wait until all clusters using the <code>Secret</code> are reconciled before you disable the old <code>Secret</code> in your infrastructure account. Otherwise the clusters will no longer function.</div>
         </v-alert>
         <v-alert
-          :model-value="otherBindings.length > 0"
+          :model-value="bindingsWithSameCredential.length > 0"
           type="info"
           rounded="0"
           class="mb-2 list-style"
@@ -98,7 +98,7 @@ SPDX-License-Identifier: Apache-2.0
           This <code>Secret</code> is also referenced by
           <ul>
             <li
-              v-for="referencedBinding in otherBindings"
+              v-for="referencedBinding in bindingsWithSameCredential"
               :key="referencedBinding.metadata.uid"
             >
               <pre>{{ referencedBinding.metadata.name }} ({{ (referencedBinding.kind) }})</pre>
@@ -170,8 +170,6 @@ import {
   setInputFocus,
 } from '@/utils'
 
-import includes from 'lodash/includes'
-
 export default {
   components: {
     GMessage,
@@ -198,7 +196,7 @@ export default {
       type: String,
       required: true,
     },
-    replaceTitle: {
+    updateTitle: {
       type: String,
       required: true,
     },
@@ -211,13 +209,25 @@ export default {
     'cloud-profile-name',
   ],
   setup (props) {
+    const binding = toRef(props, 'binding')
+    const {
+      isOrphanedCredential,
+      credentialUseCount,
+      credentialName,
+      isSecretBinding,
+      isCredentialsBinding,
+      isDnsBinding,
+      bindingsWithSameCredential,
+      credential,
+    } = useCloudProviderBinding(binding)
+
     let bindingContext
     if (!props.binding) {
       // New binding always created as type 'CredentialsBinding'
       bindingContext = useCredentialsBindingContext()
-    } else if (props.binding._isSecretBinding) {
+    } else if (isSecretBinding) {
       bindingContext = useSecretBindingContext()
-    } else if (props.binding._isCredentialsBinding) {
+    } else if (isCredentialsBinding) {
       bindingContext = useCredentialsBindingContext()
     }
 
@@ -237,12 +247,6 @@ export default {
       secretName,
     } = useSecretContext()
 
-    const binding = toRef(props, 'binding')
-    const {
-      isOrphanedCredential,
-      credentialUseCount,
-    } = useCloudProviderBinding(binding)
-
     return {
       createBindingManifest,
       setBindingManifest,
@@ -256,6 +260,10 @@ export default {
       secretName,
       isOrphanedCredential,
       credentialUseCount,
+      credentialName,
+      isDnsBinding,
+      bindingsWithSameCredential,
+      credential,
       v$: useVuelidate(),
     }
   },
@@ -277,17 +285,13 @@ export default {
       maxLength: maxLength(128),
       lowerCaseAlphaNumHyphen,
       noStartEndHyphen,
-      unique: unique(this.isDnsProviderSecret ? 'dnsSecretNames' : 'infrastructureSecretNames'),
+      unique: unique(this.isDnsBinding ? 'dnsSecretNames' : 'infrastructureSecretNames'),
     }
     rules.name = withFieldName('Secret Name', nameRules)
 
     return rules
   },
   computed: {
-    ...mapState(useCredentialStore, [
-      'infrastructureBindingList',
-      'dnsBindingList',
-    ]),
     ...mapState(useGardenerExtensionStore, ['dnsProviderTypes']),
     ...mapState(useShootStore, ['shootList']),
     visible: {
@@ -308,10 +312,10 @@ export default {
       return !this.binding
     },
     submitButtonText () {
-      return this.isCreateMode ? 'Add Secret' : 'Replace Secret'
+      return this.isCreateMode ? 'Add Secret' : 'Update Secret'
     },
     title () {
-      return this.isCreateMode ? this.createTitle : this.replaceTitle
+      return this.isCreateMode ? this.createTitle : this.updateTitle
     },
     helpContainerStyles () {
       const detailsRef = this.$refs.secretDetails
@@ -324,12 +328,6 @@ export default {
         maxWidth: '50%',
       }
     },
-    isInfrastructureSecret () {
-      return includes(this.sortedProviderTypeList, this.providerType)
-    },
-    isDnsProviderSecret () {
-      return includes(this.dnsProviderTypes, this.providerType)
-    },
     name: {
       get () {
         return this.bindingName
@@ -340,12 +338,6 @@ export default {
         this.bindingRef.name = value
       },
     },
-    otherBindings () {
-      if (!this.binding) {
-        return []
-      }
-      return this.bindingsForSecret(this.binding._secret?.metadata.uid).filter(({ metadata }) => metadata.uid !== this.binding.metadata.uid)
-    },
   },
   mounted () {
     this.reset()
@@ -354,7 +346,6 @@ export default {
     ...mapActions(useCredentialStore, [
       'createCredential',
       'updateCredential',
-      'bindingsForSecret',
     ]),
     hide () {
       this.visible = false
@@ -407,12 +398,13 @@ export default {
 
         setDelayedInputFocus(this, 'name')
       } else {
-        if (this.binding._secret) {
+        if (this.credential) {
           this.setBindingManifest(this.binding)
-          this.setSecretManifest(this.binding._secret)
+          this.setSecretManifest(this.credential)
         } else {
           this.setBindingManifest(this.binding)
-          const name = this.binding._secretName
+          const name = this.credentialName
+
           // Manually add labels as secret resource does not get reconciled automatically
           // TODO: check if this is still needed after https://github.com/gardener/gardener/issues/11915
           const labels = {

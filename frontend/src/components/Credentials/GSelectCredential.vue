@@ -64,6 +64,7 @@ import { required } from '@vuelidate/validators'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useProjectStore } from '@/store/project'
 import { useCredentialStore } from '@/store/credential'
+import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 
 import GSecretDialogWrapper from '@/components/Credentials/GSecretDialogWrapper'
 import GCredentialName from '@/components/Credentials/GCredentialName'
@@ -109,7 +110,7 @@ export default {
     },
     label: {
       type: String,
-      default: 'Secret',
+      default: 'Credential',
     },
   },
   emits: [
@@ -124,13 +125,14 @@ export default {
       costObject,
     } = useProjectCostObject(projectItem)
     const credentialStore = useCredentialStore()
+    const gardenerExtensionStore = useGardenerExtensionStore()
 
     const v$ = useVuelidate({
       $registerAs: props.registerVuelidateAs,
     })
 
     const providerType = toRef(props, 'providerType')
-    const cloudProviderBindingList = useCloudProviderBindingList(providerType, { credentialStore })
+    const cloudProviderBindingList = useCloudProviderBindingList(providerType, { credentialStore, gardenerExtensionStore })
 
     const binding = toRef(props, 'modelValue')
     const {

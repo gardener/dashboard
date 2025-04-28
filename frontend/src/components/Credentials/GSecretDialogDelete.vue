@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-card-text>
       <div>
         <v-alert
-          :model-value="otherBindings.length > 0"
+          :model-value="bindingsWithSameCredential.length > 0"
           type="info"
           rounded="0"
           class="mb-2 list-style"
@@ -37,7 +37,7 @@ SPDX-License-Identifier: Apache-2.0
           This secret is also referenced by
           <ul>
             <li
-              v-for="referencedBinding in otherBindings"
+              v-for="referencedBinding in bindingsWithSameCredential"
               :key="referencedBinding.metadata.uid"
             >
               <pre>{{ referencedBinding.metadata.name }} ({{ (referencedBinding.kind) }})</pre>
@@ -69,11 +69,14 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapActions } from 'pinia'
+import { toRef } from 'vue'
 
 import { useCredentialStore } from '@/store/credential'
 
 import GMessage from '@/components/GMessage'
 import GToolbar from '@/components/GToolbar.vue'
+
+import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
 
 import { errorDetailsFromError } from '@/utils/error'
 
@@ -96,6 +99,15 @@ export default {
   emits: [
     'update:modelValue',
   ],
+  setup (props) {
+    const binding = toRef(props, 'binding')
+    const {
+      bindingsWithSameCredential,
+    } = useCloudProviderBinding(binding)
+    return {
+      bindingsWithSameCredential,
+    }
+  },
   data () {
     return {
       errorMessage: undefined,
@@ -111,9 +123,6 @@ export default {
         this.$emit('update:modelValue', value)
       },
     },
-    otherBindings () {
-      return this.bindingsForSecret(this.binding._secret?.metadata.uid).filter(({ metadata }) => metadata.uid !== this.binding.metadata.uid)
-    },
   },
   watch: {
     modelValue: function (modelValue) {
@@ -123,7 +132,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(useCredentialStore, ['deleteCredential', 'bindingsForSecret']),
+    ...mapActions(useCredentialStore, ['deleteCredential']),
     hide () {
       this.visible = false
     },

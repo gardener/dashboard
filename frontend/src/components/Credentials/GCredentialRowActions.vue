@@ -51,7 +51,7 @@ const props = defineProps({
     required: true,
   },
 })
-const binding = toRef(props.binding)
+const binding = toRef(props, 'binding')
 
 const emit = defineEmits(['update', 'delete'])
 
@@ -72,4 +72,5 @@ function onUpdate () {
 function onDelete () {
   emit('delete', binding.value)
 }
+
 </script>

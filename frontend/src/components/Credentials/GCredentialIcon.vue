@@ -25,6 +25,11 @@ import {
   toRef,
 } from 'vue'
 
+import {
+  isCredentialsBinding,
+  isSecretBinding,
+} from '@/composables/credential/helper'
+
 const props = defineProps({
   binding: Object,
   renderLink: Boolean,
@@ -37,11 +42,11 @@ const credentialIcon = computed(() => {
     icon: 'mdi-help-circle',
     tooltip: 'Unknown',
   }
-  if (binding.value._isSecretBinding) {
+  if (isSecretBinding(binding.value)) {
     credentialIcon.tooltip = 'Secret (SecretBinding)'
     credentialIcon.icon = 'mdi-key'
   }
-  if (binding.value._isCredentialsBinding) {
+  if (isCredentialsBinding(binding.value)) {
     if (binding.value.credentialsRef.kind === 'Secret') {
       credentialIcon.tooltip = 'Secret (CredentialsBinding)'
       credentialIcon.icon = 'mdi-key-outline'

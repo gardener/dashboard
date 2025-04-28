@@ -34,10 +34,10 @@ export function createSecretContextComposable (options = {}) {
     authzStore = useAuthzStore(),
   } = options
 
-  const initialSecretManifest = shallowRef(null)
+  const initialManifest = shallowRef(null)
 
-  const normalizedInitialSecretManifest = computed(() => {
-    const object = cloneDeep(initialSecretManifest.value)
+  const normalizedInitialManifest = computed(() => {
+    const object = cloneDeep(initialManifest.value)
     return normalizeSecretManifest(object)
   })
 
@@ -58,8 +58,8 @@ export function createSecretContextComposable (options = {}) {
   })
 
   function setSecretManifest (value) {
-    initialSecretManifest.value = value
-    manifest.value = cloneDeep(initialSecretManifest.value)
+    initialManifest.value = value
+    manifest.value = cloneDeep(initialManifest.value)
   }
 
   function createSecretManifest ({ name = '', labels = {} } = {}) {
@@ -71,13 +71,13 @@ export function createSecretContextComposable (options = {}) {
       },
       data: {},
     }
-    initialSecretManifest.value = cloneDeep(manifest.value)
+    initialManifest.value = cloneDeep(manifest.value)
   }
 
   const isSecretDirty = computed(() => {
     return !isEqual(
       normalizedManifest.value,
-      normalizedInitialSecretManifest.value,
+      normalizedInitialManifest.value,
     )
   })
 

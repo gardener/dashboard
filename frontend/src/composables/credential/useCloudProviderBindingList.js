@@ -7,14 +7,19 @@
 import { computed } from 'vue'
 
 import { useCredentialStore } from '@/store/credential'
+import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 
-import { isSharedCredential } from './helper'
+import {
+  isDnsBinding,
+  isSharedCredential,
+} from './helper'
 
 import filter from 'lodash/filter'
 
 export const useCloudProviderBindingList = (providerType, options = {}) => {
   const {
     credentialStore = useCredentialStore(),
+    gardenerExtensionStore = useGardenerExtensionStore(),
   } = options
 
   return computed(() => {
@@ -22,8 +27,8 @@ export const useCloudProviderBindingList = (providerType, options = {}) => {
       if (binding.provider?.type !== providerType.value) {
         return false
       }
-      if (binding._isDnsBinding) {
-        return !isSharedCredential(binding) // shared dns secret not supported by dns extension
+      if (isDnsBinding(binding, gardenerExtensionStore)) {
+        return !isSharedCredential(binding) // dns extension currently supports secrets only (no bindings)
       }
       return true
     })

@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
     :binding="binding"
     :provider-type="providerType"
     :create-title="`Add new ${providerType} Secret`"
-    :replace-title="`Replace ${providerType} Secret`"
+    :update-title="`Update ${providerType} Secret`"
   >
     <template #secret-slot>
       <div>

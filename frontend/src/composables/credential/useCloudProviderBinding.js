@@ -10,8 +10,20 @@ import {
 } from 'vue'
 
 import { useShootStore } from '@/store/shoot'
+import { useCloudProfileStore } from '@/store/cloudProfile'
+import { useGardenerExtensionStore } from '@/store/gardenerExtension'
+import { useCredentialStore } from '@/store/credential'
 
-import { isSharedCredential as _isSharedCredential } from './helper'
+import {
+  isSharedCredential as _isSharedCredential,
+  isInfrastructureBinding as _isInfrastructureBinding,
+  isDnsBinding as _isDnsBinding,
+  isSecretBinding as _isSecretBinding,
+  isCredentialsBinding as _isCredentialsBinding,
+  credentialName as _credentialName,
+  credentialNamespace as _credentialNameSpace,
+  credentialRef as _credentialRef,
+} from './helper'
 
 import filter from 'lodash/filter'
 import some from 'lodash/some'
@@ -22,44 +34,103 @@ export const useCloudProviderBinding = (binding, options = {}) => {
   if (!isRef(binding)) {
     throw new TypeError('First argument `binding` must be a ref object')
   }
+
   const {
     shootStore = useShootStore(),
+    cloudProfileStore = useCloudProfileStore(),
+    gardenerExtensionStore = useGardenerExtensionStore(),
+    credentialStore = useCredentialStore(),
   } = options
   const shootList = shootStore.shootList
 
-  const isSharedCredential = computed(() => {
-    return _isSharedCredential(binding.value)
+  // Classification Flags
+  const isSharedCredential = computed(() =>
+    _isSharedCredential(binding.value),
+  )
+  const isSecretBinding = computed(() =>
+    _isSecretBinding(binding.value),
+  )
+  const isCredentialsBinding = computed(() =>
+    _isCredentialsBinding(binding.value),
+  )
+  const isSecret = computed(() =>
+    isSecretBinding.value ||
+    binding.value?.credentialsRef?.kind === 'Secret',
+  )
+  const isWorkloadIdentity = computed(() =>
+    isCredentialsBinding.value &&
+    binding.value?.credentialsRef?.kind === 'WorkloadIdentity',
+  )
+  const isInfrastructureBinding = computed(() =>
+    _isInfrastructureBinding(binding.value, cloudProfileStore),
+  )
+  const isDnsBinding = computed(() =>
+    _isDnsBinding(binding.value, gardenerExtensionStore),
+  )
+  const isMarkedForDeletion = computed(() =>
+    Boolean(binding.value?.metadata.deletionTimestamp),
+  )
+
+  // Credential References
+  const credentialRef = computed(() =>
+    _credentialRef(binding.value),
+  )
+  const credentialNamespace = computed(() =>
+    _credentialNameSpace(binding.value),
+  )
+  const credentialName = computed(() =>
+    _credentialName(binding.value, true),
+  )
+
+  // Resolved Credential Object
+  const credential = computed(() => {
+    if (isSecret.value) {
+      return credentialStore.getSecret(credentialRef.value)
+    }
+    if (isWorkloadIdentity.value) {
+      return credentialStore.getWorkloadIdentity(credentialRef.value)
+    }
+    return undefined
   })
 
-  const hasOwnSecret = computed(() => binding.value._secret !== undefined)
-  const hasOwnWorkloadIdentity = computed(() => binding.value._workloadIdentity !== undefined)
-  const isOrphanedCredential = computed(() => !isSharedCredential.value && !hasOwnSecret.value && !hasOwnWorkloadIdentity.value)
-  const isMarkedForDeletion = computed(() => !!binding.value.metadata.deletionTimestamp)
+  // Usage & Orphan Detection
+  const hasOwnSecret = computed(() =>
+    isSecret.value && credential.value !== undefined,
+  )
+  const hasOwnWorkloadIdentity = computed(() =>
+    isWorkloadIdentity.value && credential.value !== undefined,
+  )
+  const isOrphanedCredential = computed(() =>
+    !isSharedCredential.value &&
+    !hasOwnSecret.value &&
+    !hasOwnWorkloadIdentity.value,
+  )
 
   const credentialUseCount = computed(() => {
-    if (binding.value._isInfrastructureBinding) {
-      const bindingName = binding.value.metadata.name
-      const shootsByInfrastructureBinding = filter(shootList, ({ spec }) => {
-        if (binding.value._isSecretBinding) {
-          return spec.secretBindingName === bindingName
-        } else if (binding.value._isCredentialsBinding) {
-          return spec.credentialsBindingName === bindingName
-        }
-        return false
-      })
-      return shootsByInfrastructureBinding.length
-    } else if (binding.value._isDnsBinding) {
-      if (!binding.value._secretName) {
-        return 0 // currently DNS provider only allows to reference secrets directly
+    // count shoots referencing this binding by type
+    if (isInfrastructureBinding.value) {
+      const name = binding.value?.metadata.name
+      const shoots = filter(shootList, ({ spec }) =>
+        isSecretBinding.value
+          ? spec.secretBindingName === name
+          : isCredentialsBinding.value
+            ? spec.credentialsBindingName === name
+            : false,
+      )
+      return shoots.length
+    }
+    if (isDnsBinding.value) {
+      if (isSharedCredential.value === undefined) {
+        return 0 // dns extension currently supports secrets only (no bindings)
       }
-      const someDnsProviderHasSecretRef = providers => some(providers, ['secretName', binding.value._secretName])
-      const someResourceHasSecretRef = resources => some(resources, { resourceRef: { kind: 'Secret', name: binding.value._secretName } })
+      const byProvider = providers =>
+        some(providers, ['secretName', credentialName.value])
+      const byResource = resources =>
+        some(resources, { resourceRef: { kind: 'Secret', name: credentialName.value } })
 
       let count = 0
       for (const shoot of shootList) {
-        const dnsProviders = shoot.spec.dns?.providers
-        const resources = shoot.spec.resources
-        if (someDnsProviderHasSecretRef(dnsProviders) || someResourceHasSecretRef(resources)) {
+        if (byProvider(shoot.spec.dns?.providers) || byResource(shoot.spec.resources)) {
           count++
         }
       }
@@ -68,31 +139,62 @@ export const useCloudProviderBinding = (binding, options = {}) => {
     return 0
   })
 
-  const credentialNamespace = computed(() => binding.value._isSecretBinding ? binding.value.secretRef.namespace : binding.value.credentialsRef.namespace)
-  const credentialName = computed(() => binding.value._isSecretBinding ? binding.value.secretRef.name : binding.value.credentialsRef.name)
+  const bindingsWithSameCredential = computed(() =>
+    filter(
+      credentialStore.cloudProviderBindingList,
+      other => {
+        const otherRef = _credentialRef(other)
+        return other.metadata.uid !== binding.value?.metadata.uid &&
+        otherRef.namespace === credentialRef.value.namespace &&
+        otherRef.name === credentialRef.value.name &&
+        (otherRef.kind ?? 'Secret') === (credentialRef.value.kind ?? 'Secret')
+      },
+    ),
+  )
+
+  // Quotas & Lifecycles
+  const quotas = computed(() =>
+    (binding.value?.quotas || [])
+      .map(credentialStore.getQuota)
+      .filter(Boolean),
+  )
 
   const selfTerminationDays = computed(() => {
-    const clusterLifetimeDays = function (quotas, scope) {
-      return get(find(quotas, scope), ['spec', 'clusterLifetimeDays'])
-    }
+    const findScope = scope =>
+      get(find(quotas.value, scope), ['spec', 'clusterLifetimeDays'])
 
-    const quotas = get(binding.value, ['_quotas'])
-    let terminationDays = clusterLifetimeDays(quotas, { spec: { scope: { apiVersion: 'core.gardener.cloud/v1beta1', kind: 'Project' } } })
-    if (!terminationDays) {
-      terminationDays = clusterLifetimeDays(quotas, { spec: { scope: { apiVersion: 'v1', kind: 'Secret' } } })
-    }
-
-    return terminationDays
+    return (
+      findScope({ spec: { scope: { apiVersion: 'core.gardener.cloud/v1beta1', kind: 'Project' } } }) ||
+      findScope({ spec: { scope: { apiVersion: 'v1', kind: 'Secret' } } })
+    )
   })
+
   return {
+    // Classification
     isSharedCredential,
+    isSecretBinding,
+    isCredentialsBinding,
+    isSecret,
+    isWorkloadIdentity,
+    isInfrastructureBinding,
+    isDnsBinding,
+    isMarkedForDeletion,
+
+    // References & resolved credential
+    credentialRef,
+    credentialNamespace,
+    credentialName,
+    credential,
+
+    // Usage/orphan checks
     hasOwnSecret,
     hasOwnWorkloadIdentity,
     isOrphanedCredential,
     credentialUseCount,
-    isMarkedForDeletion,
-    credentialNamespace,
-    credentialName,
+    bindingsWithSameCredential,
+
+    // Quotas & lifecycle
+    quotas,
     selfTerminationDays,
   }
 }

@@ -122,7 +122,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     return cloudProfileStore.getDefaultNodesCIDR(cloudProfileName.value)
   })
 
-  const infrastructureBindings = useCloudProviderBindingList(providerType, { credentialStore })
+  const infrastructureBindings = useCloudProviderBindingList(providerType, { credentialStore, gardenerExtensionStore })
 
   const sortedKubernetesVersions = computed(() => {
     return cloudProfileStore.sortedKubernetesVersions(cloudProfileName.value)

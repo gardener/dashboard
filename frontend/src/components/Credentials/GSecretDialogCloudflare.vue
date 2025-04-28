@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     :secret-validations="v$"
     :binding="binding"
     create-title="Add new Cloudflare Secret"
-    replace-title="Replace Cloudflare Secret"
+    update-title="Update Cloudflare Secret"
   >
     <template #secret-slot>
       <div>

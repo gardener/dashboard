@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-tooltip
       class="credentials-details-tooltip"
       :open-delay="500"
-      :disabled="!binding?._secret"
+      :disabled="!hasOwnSecret"
       location="top"
     >
       <template #activator="{ props: tProps }">
@@ -28,41 +28,16 @@ SPDX-License-Identifier: Apache-2.0
       <v-card>
         <g-secret-details-item-content
           class="ma-1"
-          :secret="binding._secret"
+          :secret="credential"
           :provider-type="binding.provider.type"
         />
       </v-card>
     </v-tooltip>
-    <v-tooltip
+    <g-shared-credential-icon
       v-if="isSharedCredential"
-      location="top"
-    >
-      <template #activator="{ props: tProps }">
-        <v-icon
-          v-bind="tProps"
-          size="small"
-          class="ml-2"
-        >
-          mdi-account-arrow-left
-        </v-icon>
-      </template>
-      <span>Credential shared by {{ credentialNamespace }}</span>
-    </v-tooltip>
-    <v-tooltip
-      v-if="isOrphanedCredential"
-      location="top"
-    >
-      <template #activator="{ props: activatorProps }">
-        <v-icon
-          v-bind="activatorProps"
-          icon="mdi-alert-circle-outline"
-          end
-          size="small"
-          color="warning"
-        />
-      </template>
-      Associated credential does not exist
-    </v-tooltip>
+      :namespace="credentialNamespace"
+    />
+    <g-orphaned-credential-icon v-if="isOrphanedCredential" />
   </span>
   <span v-else>
     <span>Unknown credential</span>
@@ -81,6 +56,8 @@ import { useAuthzStore } from '@/store/authz'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 import GSecretDetailsItemContent from '@/components/Credentials/GSecretDetailsItemContent'
 import GCredentialIcon from '@/components/Credentials/GCredentialIcon'
+import GOrphanedCredentialIcon from '@/components/Credentials/GOrphanedCredentialIcon.vue'
+import GSharedCredentialIcon from '@/components/Credentials/GSharedCredentialIcon.vue'
 
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
 
@@ -89,7 +66,7 @@ const props = defineProps({
   renderLink: Boolean,
 })
 
-const binding = toRef(props.binding)
+const binding = toRef(props, 'binding')
 
 const authzStore = useAuthzStore()
 const { canGetCloudProviderCredentials } = storeToRefs(authzStore)
@@ -105,6 +82,8 @@ const {
   isSharedCredential,
   credentialNamespace,
   isOrphanedCredential,
+  hasOwnSecret,
+  credential,
 } = useCloudProviderBinding(binding)
 
 </script>

@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     :secret-validations="v$"
     :binding="binding"
     create-title="Add new Infoblox Secret"
-    replace-title="Replace Infoblox Secret"
+    update-title="Update Infoblox Secret"
   >
     <template #secret-slot>
       <div>

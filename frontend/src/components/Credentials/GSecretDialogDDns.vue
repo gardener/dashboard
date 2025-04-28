@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     :secret-validations="v$"
     :binding="binding"
     create-title="Add new DDNS (RFC2136) Secret"
-    replace-title="Replace DDNS (RFC2136) Secret"
+    update-title="Update DDNS (RFC2136) Secret"
   >
     <template #secret-slot>
       <div>

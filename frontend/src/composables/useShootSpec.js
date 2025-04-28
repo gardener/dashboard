@@ -54,8 +54,7 @@ export function useShootSpec (shootItem, options = {}) {
 
   const shootCloudProviderBinding = computed(() => {
     if (shootSecretBindingName.value) {
-      return find(credentialStore.cloudProviderBindingList, {
-        _isSecretBinding: true,
+      return find(credentialStore.secretBindingList, {
         metadata: {
           name: shootSecretBindingName.value,
           namespace: get(shootItem.value, ['metadata', 'namespace']),
@@ -63,8 +62,7 @@ export function useShootSpec (shootItem, options = {}) {
       })
     }
     if (shootCredentialsBindingName.value) {
-      return find(credentialStore.cloudProviderBindingList, {
-        _isCredentialsBinding: true,
+      return find(credentialStore.credentialsBindingList, {
         metadata: {
           name: shootCredentialsBindingName.value,
           namespace: get(shootItem.value, ['metadata', 'namespace']),

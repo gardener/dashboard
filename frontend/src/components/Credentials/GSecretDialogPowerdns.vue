@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     :secret-validations="v$"
     :binding="binding"
     create-title="Add new PowerDNS Secret"
-    replace-title="Replace PowerDNS Secret"
+    update-title="Update PowerDNS Secret"
   >
     <template #secret-slot>
       <div>

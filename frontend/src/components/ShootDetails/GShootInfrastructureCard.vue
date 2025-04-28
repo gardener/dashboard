@@ -42,9 +42,9 @@ SPDX-License-Identifier: Apache-2.0
           />
         </g-list-item-content>
       </g-list-item>
-      <g-list-item v-if="shootCloudProviderBinding?._secret">
+      <g-list-item v-if="hasOwnSecret">
         <g-secret-details-item-content
-          :secret="shootCloudProviderBinding._secret"
+          :secret="credential"
           :provider-type="shootCloudProviderBinding.provider.type"
           details-title
         />
@@ -268,6 +268,7 @@ import GSecretDetailsItemContent from '@/components/Credentials/GSecretDetailsIt
 
 import { useShootResources } from '@/composables/useShootResources'
 import { useShootItem } from '@/composables/useShootItem'
+import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
 
 import {
   wildcardObjectsFromStrings,
@@ -317,6 +318,11 @@ export default {
 
     const { getResourceRefName } = useShootResources(shootItem)
 
+    const {
+      hasOwnSecret,
+      credential,
+    } = useCloudProviderBinding(shootCloudProviderBinding)
+
     return {
       shootItem,
       shootName,
@@ -338,6 +344,8 @@ export default {
       shootDnsServiceExtensionProviders,
       shootDnsPrimaryProvider,
       getResourceRefName,
+      credential,
+      hasOwnSecret,
     }
   },
   computed: {

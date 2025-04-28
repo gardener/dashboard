@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     :secret-validations="v$"
     :binding="binding"
     create-title="Add new Metal Secret"
-    replace-title="Replace Metal Secret"
+    update-title="Update Metal Secret"
   >
     <template #secret-slot>
       <div>

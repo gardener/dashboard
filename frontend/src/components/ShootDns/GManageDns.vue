@@ -70,7 +70,7 @@ SPDX-License-Identifier: Apache-2.0
             v-model="primaryDnsProviderSecret"
             :provider-type="dnsPrimaryProviderType"
             register-vuelidate-as="dnsProviderSecret"
-            label="Primary DNS Provider Secret"
+            label="Primary DNS Provider Credential"
           />
         </v-col>
       </v-row>
@@ -162,6 +162,7 @@ import GVendorIcon from '@/components/GVendorIcon'
 
 import { useShootContext } from '@/composables/useShootContext'
 import { useCloudProviderBindingList } from '@/composables/credential/useCloudProviderBindingList'
+import { credentialName } from '@/composables/credential/helper'
 
 import {
   withFieldName,
@@ -193,9 +194,10 @@ export default {
     } = useShootContext()
 
     const credentialStore = useCredentialStore()
+    const gardenerExtensionStore = useGardenerExtensionStore()
 
     const customDomain = ref(!!dnsDomain.value && !!dnsPrimaryProviderType.value)
-    const dnsPrimaryProviderSecretBindings = useCloudProviderBindingList(dnsPrimaryProviderType, { credentialStore })
+    const dnsPrimaryProviderSecretBindings = useCloudProviderBindingList(dnsPrimaryProviderType, { credentialStore, gardenerExtensionStore })
 
     return {
       v$: useVuelidate(),
@@ -265,10 +267,12 @@ export default {
     },
     primaryDnsProviderSecret: {
       get () {
-        return find(this.dnsPrimaryProviderSecretBindings, ['_secretName', this.dnsPrimaryProviderSecretName])
+        return find(this.dnsPrimaryProviderSecretBindings, binding => {
+          return credentialName(binding) === this.dnsPrimaryProviderSecretName
+        })
       },
-      set (value) {
-        this.dnsPrimaryProviderSecretName = value?._secretName
+      set (binding) {
+        this.dnsPrimaryProviderSecretName = credentialName(binding)
       },
     },
     domainRecommendationVisible () {
