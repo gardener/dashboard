@@ -28,7 +28,7 @@
     "lint-sarif": "yarn lint --format=@microsoft/eslint-formatter-sarif",
     "test": "node --experimental-vm-modules $(yarn bin jest)",
     "test-coverage": "yarn test --coverage",
-    "build": "rollup -c rollup.config.js"
+    "build": "rm -rf dist && yarn install && rollup -c rollup.config.js"
   },
   "dependencies": {
     "chalk": "^4.1.2"
@@ -36,6 +36,7 @@
   "devDependencies": {
     "@microsoft/eslint-formatter-sarif": "^3.1.0",
     "@rollup/plugin-commonjs": "^28.0.3",
+    "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^16.0.1",
     "eslint": "^9.11.0",
     "eslint-plugin-import": "^2.31.0",

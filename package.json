@@ -19,11 +19,6 @@
     "Koser, Holger <holger.koser@sap.com>",
     "Sutter, Peter <peter.sutter@sap.com>"
   ],
-  "scripts": {
-    "generate-all-dependency-diagrams": "node scripts/diagramGenerator.mjs --target all",
-    "generate-backend-dependency-diagrams": "node scripts/diagramGenerator.mjs --target backend",
-    "generate-packages-dependency-diagrams": "node scripts/diagramGenerator.mjs --target packages"
-  },
   "dependenciesMeta": {
     "deasync": {
       "built": false
@@ -34,7 +29,6 @@
   },
   "devDependencies": {
     "@microsoft/eslint-formatter-sarif": "^3.1.0",
-    "dependency-cruiser": "^16.10.0",
     "eslint": "^9.11.0",
     "jest": "^29.7.0",
     "node-gyp": "latest"

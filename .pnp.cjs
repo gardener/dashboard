@@ -70,12 +70,12 @@ const RAW_RUNTIME_STATE =
     ["@gardener-dashboard/charts", ["workspace:charts"]],\
     ["@gardener-dashboard/frontend", ["workspace:frontend"]],\
     ["@gardener-dashboard/jest-esm-utils", ["workspace:packages/jest-esm-utils"]],\
-    ["@gardener-dashboard/kube-client", ["workspace:packages/kube-client"]],\
-    ["@gardener-dashboard/kube-config", ["workspace:packages/kube-config"]],\
+    ["@gardener-dashboard/kube-client", ["virtual:308e6f6fc8ece40dc431c0262d6ce289b500de4f6907c1590705e447612cabd5449211a4beedefe8a9928cbbfadf61a2948370e008c5b20469cb7cd477775cd8#workspace:packages/kube-client", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#workspace:packages/kube-client", "workspace:packages/kube-client"]],\
+    ["@gardener-dashboard/kube-config", ["virtual:308e6f6fc8ece40dc431c0262d6ce289b500de4f6907c1590705e447612cabd5449211a4beedefe8a9928cbbfadf61a2948370e008c5b20469cb7cd477775cd8#workspace:packages/kube-config", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#workspace:packages/kube-config", "workspace:packages/kube-config"]],\
     ["@gardener-dashboard/logger", ["workspace:packages/logger"]],\
-    ["@gardener-dashboard/monitor", ["workspace:packages/monitor"]],\
-    ["@gardener-dashboard/polling-watcher", ["workspace:packages/polling-watcher"]],\
-    ["@gardener-dashboard/request", ["workspace:packages/request"]],\
+    ["@gardener-dashboard/monitor", ["virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#workspace:packages/monitor", "workspace:packages/monitor"]],\
+    ["@gardener-dashboard/polling-watcher", ["virtual:a4bffdd027e6c14b6cef370d2a51a0fa94651756975dc181a5c4f302fd6145d87b62c13a664777f8bc22ab1b175576a32271b4fa695059b48510c962df572dd4#workspace:packages/polling-watcher", "workspace:packages/polling-watcher"]],\
+    ["@gardener-dashboard/request", ["virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#workspace:packages/request", "workspace:packages/request"]],\
     ["@gardener-dashboard/test-utils", ["workspace:packages/test-utils"]],\
     ["gardener-dashboard", ["workspace:."]],\
     ["transpile-test", ["workspace:packages/transpileTest"]]\
@@ -88,12 +88,10 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./",\
         "packageDependencies": [\
           ["@microsoft/eslint-formatter-sarif", "npm:3.1.0"],\
-          ["dependency-cruiser", "npm:16.10.0"],\
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.23.0"],\
           ["gardener-dashboard", "workspace:."],\
           ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:29.7.0"],\
-          ["node-gyp", "npm:11.1.0"],\
-          ["rollup", "npm:4.40.0"]\
+          ["node-gyp", "npm:11.1.0"]\
         ],\
         "linkType": "SOFT"\
       }]\
@@ -1619,11 +1617,11 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@apidevtools/swagger-parser", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:10.1.1"],\
           ["@gardener-dashboard/backend", "workspace:backend"],\
-          ["@gardener-dashboard/kube-client", "workspace:packages/kube-client"],\
-          ["@gardener-dashboard/kube-config", "workspace:packages/kube-config"],\
+          ["@gardener-dashboard/kube-client", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#workspace:packages/kube-client"],\
+          ["@gardener-dashboard/kube-config", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#workspace:packages/kube-config"],\
           ["@gardener-dashboard/logger", "workspace:packages/logger"],\
-          ["@gardener-dashboard/monitor", "workspace:packages/monitor"],\
-          ["@gardener-dashboard/request", "workspace:packages/request"],\
+          ["@gardener-dashboard/monitor", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#workspace:packages/monitor"],\
+          ["@gardener-dashboard/request", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#workspace:packages/request"],\
           ["@gardener-dashboard/test-utils", "workspace:packages/test-utils"],\
           ["@godaddy/terminus", "npm:4.12.1"],\
           ["@microsoft/eslint-formatter-sarif", "npm:3.1.0"],\
@@ -1800,18 +1798,102 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@gardener-dashboard/kube-client", [\
-      ["workspace:packages/kube-client", {\
-        "packageLocation": "./packages/kube-client/",\
+      ["virtual:308e6f6fc8ece40dc431c0262d6ce289b500de4f6907c1590705e447612cabd5449211a4beedefe8a9928cbbfadf61a2948370e008c5b20469cb7cd477775cd8#workspace:packages/kube-client", {\
+        "packageLocation": "./.yarn/__virtual__/@gardener-dashboard-kube-client-virtual-fadbc41774/1/packages/kube-client/",\
         "packageDependencies": [\
-          ["@gardener-dashboard/kube-client", "workspace:packages/kube-client"],\
-          ["@gardener-dashboard/kube-config", "workspace:packages/kube-config"],\
+          ["@gardener-dashboard/kube-client", "virtual:308e6f6fc8ece40dc431c0262d6ce289b500de4f6907c1590705e447612cabd5449211a4beedefe8a9928cbbfadf61a2948370e008c5b20469cb7cd477775cd8#workspace:packages/kube-client"],\
+          ["@gardener-dashboard/kube-config", "virtual:308e6f6fc8ece40dc431c0262d6ce289b500de4f6907c1590705e447612cabd5449211a4beedefe8a9928cbbfadf61a2948370e008c5b20469cb7cd477775cd8#workspace:packages/kube-config"],\
           ["@gardener-dashboard/logger", "workspace:packages/logger"],\
-          ["@gardener-dashboard/request", "workspace:packages/request"],\
+          ["@gardener-dashboard/request", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#workspace:packages/request"],\
           ["@gardener-dashboard/test-utils", "workspace:packages/test-utils"],\
           ["@jest/globals", "npm:29.7.0"],\
           ["@microsoft/eslint-formatter-sarif", "npm:3.1.0"],\
           ["@rollup/plugin-commonjs", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:28.0.3"],\
-          ["@rollup/plugin-json", "virtual:2c923f59c4675c87278ce3aa7d501b2831091130d417bde2a24ce2608345e7844c4d71578f103362589eb4d651e2514ad746bccd32508a2feda0d63dda053573#npm:6.1.0"],\
+          ["@rollup/plugin-json", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:6.1.0"],\
+          ["@rollup/plugin-node-resolve", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:16.0.1"],\
+          ["@types/gardener-dashboard__kube-config", null],\
+          ["@types/gardener-dashboard__logger", null],\
+          ["@types/gardener-dashboard__request", null],\
+          ["abort-controller", "npm:3.0.0"],\
+          ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.23.0"],\
+          ["eslint-plugin-import", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:2.31.0"],\
+          ["eslint-plugin-jest", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:28.11.0"],\
+          ["eslint-plugin-lodash", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:8.0.0"],\
+          ["eslint-plugin-security", "npm:3.0.1"],\
+          ["express", "npm:5.1.0"],\
+          ["http-errors", "npm:2.0.0"],\
+          ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:29.7.0"],\
+          ["jsonwebtoken", "npm:9.0.2"],\
+          ["lodash-es", "npm:4.17.21"],\
+          ["mixwith", "npm:0.1.1"],\
+          ["neostandard", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:0.12.1"],\
+          ["rollup", "npm:4.40.0"],\
+          ["uuid", "npm:11.1.0"]\
+        ],\
+        "packagePeers": [\
+          "@gardener-dashboard/kube-config",\
+          "@gardener-dashboard/logger",\
+          "@gardener-dashboard/request",\
+          "@types/gardener-dashboard__kube-config",\
+          "@types/gardener-dashboard__logger",\
+          "@types/gardener-dashboard__request"\
+        ],\
+        "linkType": "SOFT"\
+      }],\
+      ["virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#workspace:packages/kube-client", {\
+        "packageLocation": "./.yarn/__virtual__/@gardener-dashboard-kube-client-virtual-6e2c4c5999/1/packages/kube-client/",\
+        "packageDependencies": [\
+          ["@gardener-dashboard/kube-client", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#workspace:packages/kube-client"],\
+          ["@gardener-dashboard/kube-config", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#workspace:packages/kube-config"],\
+          ["@gardener-dashboard/logger", "workspace:packages/logger"],\
+          ["@gardener-dashboard/request", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#workspace:packages/request"],\
+          ["@gardener-dashboard/test-utils", "workspace:packages/test-utils"],\
+          ["@jest/globals", "npm:29.7.0"],\
+          ["@microsoft/eslint-formatter-sarif", "npm:3.1.0"],\
+          ["@rollup/plugin-commonjs", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:28.0.3"],\
+          ["@rollup/plugin-json", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:6.1.0"],\
+          ["@rollup/plugin-node-resolve", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:16.0.1"],\
+          ["@types/gardener-dashboard__kube-config", null],\
+          ["@types/gardener-dashboard__logger", null],\
+          ["@types/gardener-dashboard__request", null],\
+          ["abort-controller", "npm:3.0.0"],\
+          ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.23.0"],\
+          ["eslint-plugin-import", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:2.31.0"],\
+          ["eslint-plugin-jest", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:28.11.0"],\
+          ["eslint-plugin-lodash", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:8.0.0"],\
+          ["eslint-plugin-security", "npm:3.0.1"],\
+          ["express", "npm:5.1.0"],\
+          ["http-errors", "npm:2.0.0"],\
+          ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:29.7.0"],\
+          ["jsonwebtoken", "npm:9.0.2"],\
+          ["lodash-es", "npm:4.17.21"],\
+          ["mixwith", "npm:0.1.1"],\
+          ["neostandard", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:0.12.1"],\
+          ["rollup", "npm:4.40.0"],\
+          ["uuid", "npm:11.1.0"]\
+        ],\
+        "packagePeers": [\
+          "@gardener-dashboard/kube-config",\
+          "@gardener-dashboard/logger",\
+          "@gardener-dashboard/request",\
+          "@types/gardener-dashboard__kube-config",\
+          "@types/gardener-dashboard__logger",\
+          "@types/gardener-dashboard__request"\
+        ],\
+        "linkType": "SOFT"\
+      }],\
+      ["workspace:packages/kube-client", {\
+        "packageLocation": "./packages/kube-client/",\
+        "packageDependencies": [\
+          ["@gardener-dashboard/kube-client", "workspace:packages/kube-client"],\
+          ["@gardener-dashboard/kube-config", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#workspace:packages/kube-config"],\
+          ["@gardener-dashboard/logger", "workspace:packages/logger"],\
+          ["@gardener-dashboard/request", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#workspace:packages/request"],\
+          ["@gardener-dashboard/test-utils", "workspace:packages/test-utils"],\
+          ["@jest/globals", "npm:29.7.0"],\
+          ["@microsoft/eslint-formatter-sarif", "npm:3.1.0"],\
+          ["@rollup/plugin-commonjs", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:28.0.3"],\
+          ["@rollup/plugin-json", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:6.1.0"],\
           ["@rollup/plugin-node-resolve", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:16.0.1"],\
           ["abort-controller", "npm:3.0.0"],\
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.23.0"],\
@@ -1833,16 +1915,81 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@gardener-dashboard/kube-config", [\
-      ["workspace:packages/kube-config", {\
-        "packageLocation": "./packages/kube-config/",\
+      ["virtual:308e6f6fc8ece40dc431c0262d6ce289b500de4f6907c1590705e447612cabd5449211a4beedefe8a9928cbbfadf61a2948370e008c5b20469cb7cd477775cd8#workspace:packages/kube-config", {\
+        "packageLocation": "./.yarn/__virtual__/@gardener-dashboard-kube-config-virtual-5f9ae3be72/1/packages/kube-config/",\
         "packageDependencies": [\
-          ["@gardener-dashboard/kube-config", "workspace:packages/kube-config"],\
-          ["@gardener-dashboard/polling-watcher", "workspace:packages/polling-watcher"],\
+          ["@gardener-dashboard/kube-config", "virtual:308e6f6fc8ece40dc431c0262d6ce289b500de4f6907c1590705e447612cabd5449211a4beedefe8a9928cbbfadf61a2948370e008c5b20469cb7cd477775cd8#workspace:packages/kube-config"],\
+          ["@gardener-dashboard/polling-watcher", "virtual:a4bffdd027e6c14b6cef370d2a51a0fa94651756975dc181a5c4f302fd6145d87b62c13a664777f8bc22ab1b175576a32271b4fa695059b48510c962df572dd4#workspace:packages/polling-watcher"],\
           ["@gardener-dashboard/test-utils", "workspace:packages/test-utils"],\
           ["@jest/globals", "npm:29.7.0"],\
           ["@microsoft/eslint-formatter-sarif", "npm:3.1.0"],\
           ["@rollup/plugin-commonjs", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:28.0.3"],\
-          ["@rollup/plugin-json", "virtual:2c923f59c4675c87278ce3aa7d501b2831091130d417bde2a24ce2608345e7844c4d71578f103362589eb4d651e2514ad746bccd32508a2feda0d63dda053573#npm:6.1.0"],\
+          ["@rollup/plugin-json", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:6.1.0"],\
+          ["@rollup/plugin-node-resolve", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:16.0.1"],\
+          ["@types/gardener-dashboard__polling-watcher", null],\
+          ["@types/gardener-dashboard__test-utils", null],\
+          ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.23.0"],\
+          ["eslint-plugin-import", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:2.31.0"],\
+          ["eslint-plugin-jest", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:28.11.0"],\
+          ["eslint-plugin-lodash", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:8.0.0"],\
+          ["eslint-plugin-security", "npm:3.0.1"],\
+          ["gtoken", "npm:7.1.0"],\
+          ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:29.7.0"],\
+          ["js-yaml", "npm:4.1.0"],\
+          ["lodash-es", "npm:4.17.21"],\
+          ["neostandard", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:0.12.1"],\
+          ["rollup", "npm:4.40.0"]\
+        ],\
+        "packagePeers": [\
+          "@gardener-dashboard/polling-watcher",\
+          "@gardener-dashboard/test-utils",\
+          "@types/gardener-dashboard__polling-watcher",\
+          "@types/gardener-dashboard__test-utils"\
+        ],\
+        "linkType": "SOFT"\
+      }],\
+      ["virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#workspace:packages/kube-config", {\
+        "packageLocation": "./.yarn/__virtual__/@gardener-dashboard-kube-config-virtual-a4bffdd027/1/packages/kube-config/",\
+        "packageDependencies": [\
+          ["@gardener-dashboard/kube-config", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#workspace:packages/kube-config"],\
+          ["@gardener-dashboard/polling-watcher", "virtual:a4bffdd027e6c14b6cef370d2a51a0fa94651756975dc181a5c4f302fd6145d87b62c13a664777f8bc22ab1b175576a32271b4fa695059b48510c962df572dd4#workspace:packages/polling-watcher"],\
+          ["@gardener-dashboard/test-utils", "workspace:packages/test-utils"],\
+          ["@jest/globals", "npm:29.7.0"],\
+          ["@microsoft/eslint-formatter-sarif", "npm:3.1.0"],\
+          ["@rollup/plugin-commonjs", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:28.0.3"],\
+          ["@rollup/plugin-json", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:6.1.0"],\
+          ["@rollup/plugin-node-resolve", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:16.0.1"],\
+          ["@types/gardener-dashboard__polling-watcher", null],\
+          ["@types/gardener-dashboard__test-utils", null],\
+          ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.23.0"],\
+          ["eslint-plugin-import", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:2.31.0"],\
+          ["eslint-plugin-jest", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:28.11.0"],\
+          ["eslint-plugin-lodash", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:8.0.0"],\
+          ["eslint-plugin-security", "npm:3.0.1"],\
+          ["gtoken", "npm:7.1.0"],\
+          ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:29.7.0"],\
+          ["js-yaml", "npm:4.1.0"],\
+          ["lodash-es", "npm:4.17.21"],\
+          ["neostandard", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:0.12.1"],\
+          ["rollup", "npm:4.40.0"]\
+        ],\
+        "packagePeers": [\
+          "@gardener-dashboard/test-utils",\
+          "@types/gardener-dashboard__polling-watcher",\
+          "@types/gardener-dashboard__test-utils"\
+        ],\
+        "linkType": "SOFT"\
+      }],\
+      ["workspace:packages/kube-config", {\
+        "packageLocation": "./packages/kube-config/",\
+        "packageDependencies": [\
+          ["@gardener-dashboard/kube-config", "workspace:packages/kube-config"],\
+          ["@gardener-dashboard/polling-watcher", "virtual:a4bffdd027e6c14b6cef370d2a51a0fa94651756975dc181a5c4f302fd6145d87b62c13a664777f8bc22ab1b175576a32271b4fa695059b48510c962df572dd4#workspace:packages/polling-watcher"],\
+          ["@gardener-dashboard/test-utils", "workspace:packages/test-utils"],\
+          ["@jest/globals", "npm:29.7.0"],\
+          ["@microsoft/eslint-formatter-sarif", "npm:3.1.0"],\
+          ["@rollup/plugin-commonjs", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:28.0.3"],\
+          ["@rollup/plugin-json", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:6.1.0"],\
           ["@rollup/plugin-node-resolve", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:16.0.1"],\
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.23.0"],\
           ["eslint-plugin-import", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:2.31.0"],\
@@ -1866,6 +2013,7 @@ const RAW_RUNTIME_STATE =
           ["@gardener-dashboard/logger", "workspace:packages/logger"],\
           ["@microsoft/eslint-formatter-sarif", "npm:3.1.0"],\
           ["@rollup/plugin-commonjs", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:28.0.3"],\
+          ["@rollup/plugin-json", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:6.1.0"],\
           ["@rollup/plugin-node-resolve", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:16.0.1"],\
           ["chalk", "npm:4.1.2"],\
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.23.0"],\
@@ -1882,6 +2030,42 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@gardener-dashboard/monitor", [\
+      ["virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#workspace:packages/monitor", {\
+        "packageLocation": "./.yarn/__virtual__/@gardener-dashboard-monitor-virtual-cfb59f52db/1/packages/monitor/",\
+        "packageDependencies": [\
+          ["@gardener-dashboard/jest-esm-utils", "workspace:packages/jest-esm-utils"],\
+          ["@gardener-dashboard/logger", "workspace:packages/logger"],\
+          ["@gardener-dashboard/monitor", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#workspace:packages/monitor"],\
+          ["@gardener-dashboard/test-utils", "workspace:packages/test-utils"],\
+          ["@jest/globals", "npm:29.7.0"],\
+          ["@microsoft/eslint-formatter-sarif", "npm:3.1.0"],\
+          ["@rollup/plugin-commonjs", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:28.0.3"],\
+          ["@rollup/plugin-json", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:6.1.0"],\
+          ["@rollup/plugin-node-resolve", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:16.0.1"],\
+          ["@types/gardener-dashboard__logger", null],\
+          ["@types/gardener-dashboard__test-utils", null],\
+          ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.23.0"],\
+          ["eslint-plugin-import", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:2.31.0"],\
+          ["eslint-plugin-jest", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:28.11.0"],\
+          ["eslint-plugin-lodash", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:8.0.0"],\
+          ["eslint-plugin-security", "npm:3.0.1"],\
+          ["express", "npm:5.1.0"],\
+          ["http-errors", "npm:2.0.0"],\
+          ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:29.7.0"],\
+          ["neostandard", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:0.12.1"],\
+          ["prom-client", "npm:15.1.3"],\
+          ["response-time", "npm:2.3.3"],\
+          ["rollup", "npm:4.40.0"],\
+          ["supertest", "npm:7.1.0"]\
+        ],\
+        "packagePeers": [\
+          "@gardener-dashboard/logger",\
+          "@gardener-dashboard/test-utils",\
+          "@types/gardener-dashboard__logger",\
+          "@types/gardener-dashboard__test-utils"\
+        ],\
+        "linkType": "SOFT"\
+      }],\
       ["workspace:packages/monitor", {\
         "packageLocation": "./packages/monitor/",\
         "packageDependencies": [\
@@ -1892,7 +2076,7 @@ const RAW_RUNTIME_STATE =
           ["@jest/globals", "npm:29.7.0"],\
           ["@microsoft/eslint-formatter-sarif", "npm:3.1.0"],\
           ["@rollup/plugin-commonjs", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:28.0.3"],\
-          ["@rollup/plugin-json", "virtual:2c923f59c4675c87278ce3aa7d501b2831091130d417bde2a24ce2608345e7844c4d71578f103362589eb4d651e2514ad746bccd32508a2feda0d63dda053573#npm:6.1.0"],\
+          ["@rollup/plugin-json", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:6.1.0"],\
           ["@rollup/plugin-node-resolve", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:16.0.1"],\
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.23.0"],\
           ["eslint-plugin-import", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:2.31.0"],\
@@ -1912,6 +2096,34 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@gardener-dashboard/polling-watcher", [\
+      ["virtual:a4bffdd027e6c14b6cef370d2a51a0fa94651756975dc181a5c4f302fd6145d87b62c13a664777f8bc22ab1b175576a32271b4fa695059b48510c962df572dd4#workspace:packages/polling-watcher", {\
+        "packageLocation": "./.yarn/__virtual__/@gardener-dashboard-polling-watcher-virtual-f8dc3cd6c2/1/packages/polling-watcher/",\
+        "packageDependencies": [\
+          ["@gardener-dashboard/logger", "workspace:packages/logger"],\
+          ["@gardener-dashboard/polling-watcher", "virtual:a4bffdd027e6c14b6cef370d2a51a0fa94651756975dc181a5c4f302fd6145d87b62c13a664777f8bc22ab1b175576a32271b4fa695059b48510c962df572dd4#workspace:packages/polling-watcher"],\
+          ["@gardener-dashboard/test-utils", "workspace:packages/test-utils"],\
+          ["@jest/globals", "npm:29.7.0"],\
+          ["@rollup/plugin-commonjs", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:28.0.3"],\
+          ["@rollup/plugin-json", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:6.1.0"],\
+          ["@rollup/plugin-node-resolve", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:16.0.1"],\
+          ["@types/gardener-dashboard__logger", null],\
+          ["@types/gardener-dashboard__test-utils", null],\
+          ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.23.0"],\
+          ["eslint-plugin-import", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:2.31.0"],\
+          ["eslint-plugin-jest", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:28.11.0"],\
+          ["eslint-plugin-lodash", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:8.0.0"],\
+          ["eslint-plugin-security", "npm:3.0.1"],\
+          ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:29.7.0"],\
+          ["neostandard", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:0.12.1"],\
+          ["rollup", "npm:4.40.0"]\
+        ],\
+        "packagePeers": [\
+          "@gardener-dashboard/test-utils",\
+          "@types/gardener-dashboard__logger",\
+          "@types/gardener-dashboard__test-utils"\
+        ],\
+        "linkType": "SOFT"\
+      }],\
       ["workspace:packages/polling-watcher", {\
         "packageLocation": "./packages/polling-watcher/",\
         "packageDependencies": [\
@@ -1920,6 +2132,7 @@ const RAW_RUNTIME_STATE =
           ["@gardener-dashboard/test-utils", "workspace:packages/test-utils"],\
           ["@jest/globals", "npm:29.7.0"],\
           ["@rollup/plugin-commonjs", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:28.0.3"],\
+          ["@rollup/plugin-json", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:6.1.0"],\
           ["@rollup/plugin-node-resolve", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:16.0.1"],\
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.23.0"],\
           ["eslint-plugin-import", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:2.31.0"],\
@@ -1934,6 +2147,38 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@gardener-dashboard/request", [\
+      ["virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#workspace:packages/request", {\
+        "packageLocation": "./.yarn/__virtual__/@gardener-dashboard-request-virtual-da5c259967/1/packages/request/",\
+        "packageDependencies": [\
+          ["@gardener-dashboard/logger", "workspace:packages/logger"],\
+          ["@gardener-dashboard/request", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#workspace:packages/request"],\
+          ["@gardener-dashboard/test-utils", "workspace:packages/test-utils"],\
+          ["@jest/globals", "npm:29.7.0"],\
+          ["@microsoft/eslint-formatter-sarif", "npm:3.1.0"],\
+          ["@rollup/plugin-commonjs", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:28.0.3"],\
+          ["@rollup/plugin-json", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:6.1.0"],\
+          ["@rollup/plugin-node-resolve", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:16.0.1"],\
+          ["@types/gardener-dashboard__logger", null],\
+          ["abort-controller", "npm:3.0.0"],\
+          ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.23.0"],\
+          ["eslint-plugin-import", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:2.31.0"],\
+          ["eslint-plugin-jest", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:28.11.0"],\
+          ["eslint-plugin-lodash", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:8.0.0"],\
+          ["eslint-plugin-security", "npm:3.0.1"],\
+          ["http-errors", "npm:2.0.0"],\
+          ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:29.7.0"],\
+          ["lodash", "npm:4.17.21"],\
+          ["lodash-es", "npm:4.17.21"],\
+          ["neostandard", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:0.12.1"],\
+          ["rollup", "npm:4.40.0"],\
+          ["type-is", "npm:2.0.1"]\
+        ],\
+        "packagePeers": [\
+          "@gardener-dashboard/logger",\
+          "@types/gardener-dashboard__logger"\
+        ],\
+        "linkType": "SOFT"\
+      }],\
       ["workspace:packages/request", {\
         "packageLocation": "./packages/request/",\
         "packageDependencies": [\
@@ -1943,7 +2188,7 @@ const RAW_RUNTIME_STATE =
           ["@jest/globals", "npm:29.7.0"],\
           ["@microsoft/eslint-formatter-sarif", "npm:3.1.0"],\
           ["@rollup/plugin-commonjs", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:28.0.3"],\
-          ["@rollup/plugin-json", "virtual:2c923f59c4675c87278ce3aa7d501b2831091130d417bde2a24ce2608345e7844c4d71578f103362589eb4d651e2514ad746bccd32508a2feda0d63dda053573#npm:6.1.0"],\
+          ["@rollup/plugin-json", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:6.1.0"],\
           ["@rollup/plugin-node-resolve", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:16.0.1"],\
           ["abort-controller", "npm:3.0.0"],\
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.23.0"],\
@@ -1969,6 +2214,7 @@ const RAW_RUNTIME_STATE =
           ["@gardener-dashboard/test-utils", "workspace:packages/test-utils"],\
           ["@jest/globals", "npm:29.7.0"],\
           ["@rollup/plugin-commonjs", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:28.0.3"],\
+          ["@rollup/plugin-json", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:6.1.0"],\
           ["@rollup/plugin-node-resolve", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:16.0.1"],\
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.23.0"],\
           ["eslint-plugin-import", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:2.31.0"],\
@@ -3129,10 +3375,10 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:2c923f59c4675c87278ce3aa7d501b2831091130d417bde2a24ce2608345e7844c4d71578f103362589eb4d651e2514ad746bccd32508a2feda0d63dda053573#npm:6.1.0", {\
-        "packageLocation": "./.yarn/__virtual__/@rollup-plugin-json-virtual-eec892a495/0/cache/@rollup-plugin-json-npm-6.1.0-df78b06968-9400c431b5.zip/node_modules/@rollup/plugin-json/",\
+      ["virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:6.1.0", {\
+        "packageLocation": "./.yarn/__virtual__/@rollup-plugin-json-virtual-abb5da0909/0/cache/@rollup-plugin-json-npm-6.1.0-df78b06968-9400c431b5.zip/node_modules/@rollup/plugin-json/",\
         "packageDependencies": [\
-          ["@rollup/plugin-json", "virtual:2c923f59c4675c87278ce3aa7d501b2831091130d417bde2a24ce2608345e7844c4d71578f103362589eb4d651e2514ad746bccd32508a2feda0d63dda053573#npm:6.1.0"],\
+          ["@rollup/plugin-json", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:6.1.0"],\
           ["@rollup/pluginutils", "virtual:8b0d0d7da1b2bf9f2e59dbca70c171e06e6832fee3a269ce7f8a9d8acc829450ef245e803d6e0153aed9169bf23f28755a4ff62a63b1436d73e74cd0d90ce0e3#npm:5.1.4"],\
           ["@types/rollup", null],\
           ["rollup", "npm:4.40.0"]\
@@ -4959,35 +5205,6 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
-    ["acorn-jsx-walk", [\
-      ["npm:2.0.0", {\
-        "packageLocation": "./.yarn/cache/acorn-jsx-walk-npm-2.0.0-5bfe4a55fd-ee268a91ec.zip/node_modules/acorn-jsx-walk/",\
-        "packageDependencies": [\
-          ["acorn-jsx-walk", "npm:2.0.0"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["acorn-loose", [\
-      ["npm:8.4.0", {\
-        "packageLocation": "./.yarn/cache/acorn-loose-npm-8.4.0-49c935542d-e62407bdc3.zip/node_modules/acorn-loose/",\
-        "packageDependencies": [\
-          ["acorn", "npm:8.14.0"],\
-          ["acorn-loose", "npm:8.4.0"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["acorn-walk", [\
-      ["npm:8.3.4", {\
-        "packageLocation": "./.yarn/cache/acorn-walk-npm-8.3.4-a75fa85ead-76537ac5fb.zip/node_modules/acorn-walk/",\
-        "packageDependencies": [\
-          ["acorn", "npm:8.14.0"],\
-          ["acorn-walk", "npm:8.3.4"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
     ["agent-base", [\
       ["npm:7.1.3", {\
         "packageLocation": "./.yarn/cache/agent-base-npm-7.1.3-b2c16e72fb-6192b580c5.zip/node_modules/agent-base/",\
@@ -5874,13 +6091,6 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "HARD"\
       }],\
-      ["npm:13.1.0", {\
-        "packageLocation": "./.yarn/cache/commander-npm-13.1.0-bdbbfaaf9d-7b8c5544bb.zip/node_modules/commander/",\
-        "packageDependencies": [\
-          ["commander", "npm:13.1.0"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["npm:9.5.0", {\
         "packageLocation": "./.yarn/cache/commander-npm-9.5.0-993b3f2434-5f7784fbda.zip/node_modules/commander/",\
         "packageDependencies": [\
@@ -6405,37 +6615,6 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/depd-npm-2.0.0-b6c51a4b43-58bd06ec20.zip/node_modules/depd/",\
         "packageDependencies": [\
           ["depd", "npm:2.0.0"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["dependency-cruiser", [\
-      ["npm:16.10.0", {\
-        "packageLocation": "./.yarn/cache/dependency-cruiser-npm-16.10.0-6422144538-3deb5633b0.zip/node_modules/dependency-cruiser/",\
-        "packageDependencies": [\
-          ["acorn", "npm:8.14.0"],\
-          ["acorn-jsx", "virtual:a50722a5a9326b6a5f12350c494c4db3aa0f4caeac45e3e9e5fe071da20014ecfe738fe2ebe2c9c98abae81a4ea86b42f56d776b3bd5ec37f9ad3670c242b242#npm:5.3.2"],\
-          ["acorn-jsx-walk", "npm:2.0.0"],\
-          ["acorn-loose", "npm:8.4.0"],\
-          ["acorn-walk", "npm:8.3.4"],\
-          ["ajv", "npm:8.17.1"],\
-          ["commander", "npm:13.1.0"],\
-          ["dependency-cruiser", "npm:16.10.0"],\
-          ["enhanced-resolve", "npm:5.18.1"],\
-          ["ignore", "npm:7.0.3"],\
-          ["interpret", "npm:3.1.1"],\
-          ["is-installed-globally", "npm:1.0.0"],\
-          ["json5", "npm:2.2.3"],\
-          ["memoize", "npm:10.0.0"],\
-          ["picocolors", "npm:1.1.1"],\
-          ["picomatch", "npm:4.0.2"],\
-          ["prompts", "npm:2.4.2"],\
-          ["rechoir", "npm:0.8.0"],\
-          ["safe-regex", "npm:2.1.1"],\
-          ["semver", "npm:7.7.1"],\
-          ["teamcity-service-messages", "npm:0.1.14"],\
-          ["tsconfig-paths-webpack-plugin", "npm:4.2.0"],\
-          ["watskeburt", "npm:4.2.3"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -8261,12 +8440,10 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./",\
         "packageDependencies": [\
           ["@microsoft/eslint-formatter-sarif", "npm:3.1.0"],\
-          ["dependency-cruiser", "npm:16.10.0"],\
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.23.0"],\
           ["gardener-dashboard", "workspace:."],\
           ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:29.7.0"],\
-          ["node-gyp", "npm:11.1.0"],\
-          ["rollup", "npm:4.40.0"]\
+          ["node-gyp", "npm:11.1.0"]\
         ],\
         "linkType": "SOFT"\
       }]\
@@ -8429,16 +8606,6 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["glob-parent", "npm:6.0.2"],\
           ["is-glob", "npm:4.0.3"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["global-directory", [\
-      ["npm:4.0.1", {\
-        "packageLocation": "./.yarn/cache/global-directory-npm-4.0.1-1de95382fd-f9cbeef41d.zip/node_modules/global-directory/",\
-        "packageDependencies": [\
-          ["global-directory", "npm:4.0.1"],\
-          ["ini", "npm:4.1.1"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -8729,13 +8896,6 @@ const RAW_RUNTIME_STATE =
           ["ignore", "npm:5.3.2"]\
         ],\
         "linkType": "HARD"\
-      }],\
-      ["npm:7.0.3", {\
-        "packageLocation": "./.yarn/cache/ignore-npm-7.0.3-6ded2ddf1c-8e21637513.zip/node_modules/ignore/",\
-        "packageDependencies": [\
-          ["ignore", "npm:7.0.3"]\
-        ],\
-        "linkType": "HARD"\
       }]\
     ]],\
     ["immutable", [\
@@ -8805,13 +8965,6 @@ const RAW_RUNTIME_STATE =
           ["ini", "npm:1.3.8"]\
         ],\
         "linkType": "HARD"\
-      }],\
-      ["npm:4.1.1", {\
-        "packageLocation": "./.yarn/cache/ini-npm-4.1.1-01c2cbda7b-7fddc8dfd3.zip/node_modules/ini/",\
-        "packageDependencies": [\
-          ["ini", "npm:4.1.1"]\
-        ],\
-        "linkType": "HARD"\
       }]\
     ]],\
     ["internal-slot", [\
@@ -8822,15 +8975,6 @@ const RAW_RUNTIME_STATE =
           ["hasown", "npm:2.0.2"],\
           ["internal-slot", "npm:1.1.0"],\
           ["side-channel", "npm:1.1.0"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["interpret", [\
-      ["npm:3.1.1", {\
-        "packageLocation": "./.yarn/cache/interpret-npm-3.1.1-715bac2bd7-6f3c4d0aa6.zip/node_modules/interpret/",\
-        "packageDependencies": [\
-          ["interpret", "npm:3.1.1"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -9061,17 +9205,6 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
-    ["is-installed-globally", [\
-      ["npm:1.0.0", {\
-        "packageLocation": "./.yarn/cache/is-installed-globally-npm-1.0.0-d3fa5f1a07-5f57745b6e.zip/node_modules/is-installed-globally/",\
-        "packageDependencies": [\
-          ["global-directory", "npm:4.0.1"],\
-          ["is-installed-globally", "npm:1.0.0"],\
-          ["is-path-inside", "npm:4.0.0"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
     ["is-map", [\
       ["npm:2.0.3", {\
         "packageLocation": "./.yarn/cache/is-map-npm-2.0.3-9e061e76e3-2c4d431b74.zip/node_modules/is-map/",\
@@ -9125,13 +9258,6 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/is-path-inside-npm-3.0.3-2ea0ef44fd-cf7d4ac35f.zip/node_modules/is-path-inside/",\
         "packageDependencies": [\
           ["is-path-inside", "npm:3.0.3"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
-      ["npm:4.0.0", {\
-        "packageLocation": "./.yarn/cache/is-path-inside-npm-4.0.0-2af2bde69d-51188d7e2b.zip/node_modules/is-path-inside/",\
-        "packageDependencies": [\
-          ["is-path-inside", "npm:4.0.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -10558,16 +10684,6 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
-    ["memoize", [\
-      ["npm:10.0.0", {\
-        "packageLocation": "./.yarn/cache/memoize-npm-10.0.0-953b145644-1584351834.zip/node_modules/memoize/",\
-        "packageDependencies": [\
-          ["memoize", "npm:10.0.0"],\
-          ["mimic-function", "npm:5.0.1"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
     ["merge-descriptors", [\
       ["npm:2.0.0", {\
         "packageLocation": "./.yarn/cache/merge-descriptors-npm-2.0.0-abd9f0b061-95389b7ced.zip/node_modules/merge-descriptors/",\
@@ -10670,15 +10786,6 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/mimic-fn-npm-2.1.0-4fbeb3abb4-b26f5479d7.zip/node_modules/mimic-fn/",\
         "packageDependencies": [\
           ["mimic-fn", "npm:2.1.0"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["mimic-function", [\
-      ["npm:5.0.1", {\
-        "packageLocation": "./.yarn/cache/mimic-function-npm-5.0.1-5078456e31-f3d9464dd1.zip/node_modules/mimic-function/",\
-        "packageDependencies": [\
-          ["mimic-function", "npm:5.0.1"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -11813,16 +11920,6 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/readdirp-npm-4.1.1-c531313b8b-a1afc90d0e.zip/node_modules/readdirp/",\
         "packageDependencies": [\
           ["readdirp", "npm:4.1.1"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["rechoir", [\
-      ["npm:0.8.0", {\
-        "packageLocation": "./.yarn/cache/rechoir-npm-0.8.0-fb660b3bc8-1a30074124.zip/node_modules/rechoir/",\
-        "packageDependencies": [\
-          ["rechoir", "npm:0.8.0"],\
-          ["resolve", "patch:resolve@npm%3A1.22.10#optional!builtin<compat/resolve>::version=1.22.10&hash=c3c19d"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -13048,15 +13145,6 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
-    ["teamcity-service-messages", [\
-      ["npm:0.1.14", {\
-        "packageLocation": "./.yarn/cache/teamcity-service-messages-npm-0.1.14-727fa525d3-e2e4564786.zip/node_modules/teamcity-service-messages/",\
-        "packageDependencies": [\
-          ["teamcity-service-messages", "npm:0.1.14"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
     ["test-exclude", [\
       ["npm:6.0.0", {\
         "packageLocation": "./.yarn/cache/test-exclude-npm-6.0.0-3fb03d69df-019d33d81a.zip/node_modules/test-exclude/",\
@@ -13231,12 +13319,12 @@ const RAW_RUNTIME_STATE =
       ["workspace:packages/transpileTest", {\
         "packageLocation": "./packages/transpileTest/",\
         "packageDependencies": [\
-          ["@gardener-dashboard/kube-client", "workspace:packages/kube-client"],\
-          ["@gardener-dashboard/kube-config", "workspace:packages/kube-config"],\
+          ["@gardener-dashboard/kube-client", "virtual:308e6f6fc8ece40dc431c0262d6ce289b500de4f6907c1590705e447612cabd5449211a4beedefe8a9928cbbfadf61a2948370e008c5b20469cb7cd477775cd8#workspace:packages/kube-client"],\
+          ["@gardener-dashboard/kube-config", "virtual:308e6f6fc8ece40dc431c0262d6ce289b500de4f6907c1590705e447612cabd5449211a4beedefe8a9928cbbfadf61a2948370e008c5b20469cb7cd477775cd8#workspace:packages/kube-config"],\
           ["@gardener-dashboard/logger", "workspace:packages/logger"],\
-          ["@gardener-dashboard/monitor", "workspace:packages/monitor"],\
-          ["@gardener-dashboard/polling-watcher", "workspace:packages/polling-watcher"],\
-          ["@gardener-dashboard/request", "workspace:packages/request"],\
+          ["@gardener-dashboard/monitor", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#workspace:packages/monitor"],\
+          ["@gardener-dashboard/polling-watcher", "virtual:a4bffdd027e6c14b6cef370d2a51a0fa94651756975dc181a5c4f302fd6145d87b62c13a664777f8bc22ab1b175576a32271b4fa695059b48510c962df572dd4#workspace:packages/polling-watcher"],\
+          ["@gardener-dashboard/request", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#workspace:packages/request"],\
           ["@gardener-dashboard/test-utils", "workspace:packages/test-utils"],\
           ["transpile-test", "workspace:packages/transpileTest"]\
         ],\
@@ -13287,29 +13375,6 @@ const RAW_RUNTIME_STATE =
           ["minimist", "npm:1.2.8"],\
           ["strip-bom", "npm:3.0.0"],\
           ["tsconfig-paths", "npm:3.15.0"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
-      ["npm:4.2.0", {\
-        "packageLocation": "./.yarn/cache/tsconfig-paths-npm-4.2.0-ac1edf8677-09a5877402.zip/node_modules/tsconfig-paths/",\
-        "packageDependencies": [\
-          ["json5", "npm:2.2.3"],\
-          ["minimist", "npm:1.2.8"],\
-          ["strip-bom", "npm:3.0.0"],\
-          ["tsconfig-paths", "npm:4.2.0"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["tsconfig-paths-webpack-plugin", [\
-      ["npm:4.2.0", {\
-        "packageLocation": "./.yarn/cache/tsconfig-paths-webpack-plugin-npm-4.2.0-2a177d83ba-495c5ab7c1.zip/node_modules/tsconfig-paths-webpack-plugin/",\
-        "packageDependencies": [\
-          ["chalk", "npm:4.1.2"],\
-          ["enhanced-resolve", "npm:5.18.1"],\
-          ["tapable", "npm:2.2.1"],\
-          ["tsconfig-paths", "npm:4.2.0"],\
-          ["tsconfig-paths-webpack-plugin", "npm:4.2.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -14199,15 +14264,6 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["makeerror", "npm:1.0.12"],\
           ["walker", "npm:1.0.8"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["watskeburt", [\
-      ["npm:4.2.3", {\
-        "packageLocation": "./.yarn/cache/watskeburt-npm-4.2.3-17f8f55d6a-0d93c8124a.zip/node_modules/watskeburt/",\
-        "packageDependencies": [\
-          ["watskeburt", "npm:4.2.3"]\
         ],\
         "linkType": "HARD"\
       }]\

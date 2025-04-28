@@ -27,11 +27,12 @@
     "lint": "eslint . --max-warnings=0",
     "test": "node --experimental-vm-modules $(yarn bin jest)",
     "test-coverage": "yarn test --coverage",
-    "build": "rollup -c rollup.config.js"
+    "build": "rm -rf dist && yarn install && rollup -c rollup.config.js"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
     "@rollup/plugin-commonjs": "^28.0.3",
+    "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^16.0.1",
     "eslint": "^9.11.0",
     "eslint-plugin-import": "^2.31.0",

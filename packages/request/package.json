@@ -28,16 +28,19 @@
     "lint-sarif": "yarn lint --format=@microsoft/eslint-formatter-sarif",
     "test": "node --experimental-vm-modules $(yarn bin jest)",
     "test-coverage": "yarn test --coverage",
-    "build": "rollup -c rollup.config.js"
+    "build": "rm -rf dist && yarn install && rollup -c rollup.config.js"
   },
   "dependencies": {
-    "@gardener-dashboard/logger": "workspace:^",
     "http-errors": "^2.0.0",
     "lodash": "^4.17.21",
     "lodash-es": "^4.17.21",
     "type-is": "^2.0.0"
   },
+  "peerDependencies": {
+    "@gardener-dashboard/logger": "workspace:^"
+  },
   "devDependencies": {
+    "@gardener-dashboard/logger": "workspace:^",
     "@gardener-dashboard/test-utils": "workspace:^",
     "@jest/globals": "^29.7.0",
     "@microsoft/eslint-formatter-sarif": "^3.1.0",
