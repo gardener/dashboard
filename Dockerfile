@@ -73,4 +73,4 @@ FROM node-scratch AS dashboard
 COPY --from=dashboard-builder /app/dist .
 
 ENTRYPOINT [ "tini", "--", "node", "--require=/app/.pnp.cjs", "--loader=/app/.pnp.loader.mjs"]
-CMD ["server.js"]
+CMD ["server.mjs"]
