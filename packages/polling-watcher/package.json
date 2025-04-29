@@ -27,7 +27,7 @@
     "lint": "eslint . --max-warnings=0",
     "test": "node --experimental-vm-modules $(yarn bin jest)",
     "test-coverage": "yarn test --coverage",
-    "build": "rm -rf && yarn install && rollup -c rollup.config.js"
+    "build": "rm -rf dist && yarn install && rollup -c ../rollup.config.js"
   },
   "peerDependencies": {
     "@gardener-dashboard/logger": "workspace:^",
@@ -37,17 +37,13 @@
     "@gardener-dashboard/logger": "workspace:^",
     "@gardener-dashboard/test-utils": "workspace:^",
     "@jest/globals": "^29.7.0",
-    "@rollup/plugin-commonjs": "^28.0.3",
-    "@rollup/plugin-json": "^6.1.0",
-    "@rollup/plugin-node-resolve": "^16.0.1",
     "eslint": "^9.11.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jest": "^28.8.3",
     "eslint-plugin-lodash": "^8.0.0",
     "eslint-plugin-security": "^3.0.1",
     "jest": "^29.7.0",
-    "neostandard": "^0.12.0",
-    "rollup": "^4.40.0"
+    "neostandard": "^0.12.0"
   },
   "jest": {
     "restoreMocks": true,

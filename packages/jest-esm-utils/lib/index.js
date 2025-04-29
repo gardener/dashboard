@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2025 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -10,5 +10,5 @@ export {
   createMockModule,
   semiAutoMockHelper,
   mockOnHelper,
-  spyOnHelperMocked
-} from './spyOnHelper.js';
+  spyOnHelperMocked,
+} from './spyOnHelper.js'

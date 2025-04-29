@@ -1094,9 +1094,6 @@ __metadata:
     "@gardener-dashboard/test-utils": "workspace:^"
     "@jest/globals": "npm:^29.7.0"
     "@microsoft/eslint-formatter-sarif": "npm:^3.1.0"
-    "@rollup/plugin-commonjs": "npm:^28.0.3"
-    "@rollup/plugin-json": "npm:^6.1.0"
-    "@rollup/plugin-node-resolve": "npm:^16.0.1"
     abort-controller: "npm:^3.0.0"
     eslint: "npm:^9.11.0"
     eslint-plugin-import: "npm:^2.31.0"
@@ -1110,7 +1107,6 @@ __metadata:
     lodash-es: "npm:^4.17.21"
     mixwith: "npm:^0.1.1"
     neostandard: "npm:^0.12.0"
-    rollup: "npm:^4.40.0"
     uuid: "npm:^11.0.0"
   peerDependencies:
     "@gardener-dashboard/kube-config": "workspace:^"
@@ -1140,7 +1136,6 @@ __metadata:
     js-yaml: "npm:^4.1.0"
     lodash-es: "npm:^4.17.21"
     neostandard: "npm:^0.12.0"
-    rollup: "npm:^4.40.0"
   peerDependencies:
     "@gardener-dashboard/polling-watcher": "workspace:^"
     "@gardener-dashboard/test-utils": "workspace:^"
@@ -1164,7 +1159,6 @@ __metadata:
     jest: "npm:^29.7.0"
     jest-date-mock: "npm:^1.0.8"
     neostandard: "npm:^0.12.0"
-    rollup: "npm:^4.40.0"
   languageName: unknown
   linkType: soft
 
@@ -1191,7 +1185,6 @@ __metadata:
     neostandard: "npm:^0.12.0"
     prom-client: "npm:^15.1.0"
     response-time: "npm:^2.3.2"
-    rollup: "npm:^4.40.0"
     supertest: "npm:^7.0.0"
   peerDependencies:
     "@gardener-dashboard/logger": "workspace:^"
@@ -1216,7 +1209,6 @@ __metadata:
     eslint-plugin-security: "npm:^3.0.1"
     jest: "npm:^29.7.0"
     neostandard: "npm:^0.12.0"
-    rollup: "npm:^4.40.0"
   peerDependencies:
     "@gardener-dashboard/logger": "workspace:^"
     "@gardener-dashboard/test-utils": "workspace:^"
@@ -1245,7 +1237,6 @@ __metadata:
     lodash: "npm:^4.17.21"
     lodash-es: "npm:^4.17.21"
     neostandard: "npm:^0.12.0"
-    rollup: "npm:^4.40.0"
     type-is: "npm:^2.0.0"
   peerDependencies:
     "@gardener-dashboard/logger": "workspace:^"
@@ -1267,7 +1258,6 @@ __metadata:
     eslint-plugin-security: "npm:^3.0.1"
     jest: "npm:^29.7.0"
     neostandard: "npm:^0.12.0"
-    rollup: "npm:^4.40.0"
   languageName: unknown
   linkType: soft
 
@@ -8838,6 +8828,24 @@ __metadata:
   checksum: 10c0/62ba2785eb655fec084a257af34dbe24292ab74516d6aecef97ef72d4897310bc6898f6c85b5cd22770eaa1ce60d55a0230e150fb6a966e3ecd6c511e23d164b
   languageName: node
   linkType: hard
+
+"packages@workspace:packages":
+  version: 0.0.0-use.local
+  resolution: "packages@workspace:packages"
+  dependencies:
+    "@microsoft/eslint-formatter-sarif": "npm:^3.1.0"
+    "@rollup/plugin-commonjs": "npm:^28.0.3"
+    "@rollup/plugin-json": "npm:^6.1.0"
+    "@rollup/plugin-node-resolve": "npm:^16.0.1"
+    eslint: "npm:^9.11.0"
+    eslint-plugin-import: "npm:^2.31.0"
+    eslint-plugin-jest: "npm:^28.8.3"
+    eslint-plugin-lodash: "npm:^8.0.0"
+    eslint-plugin-security: "npm:^3.0.1"
+    neostandard: "npm:^0.12.0"
+    rollup: "npm:^4.40.0"
+  languageName: unknown
+  linkType: soft
 
 "parent-module@npm:^1.0.0":
   version: 1.0.1

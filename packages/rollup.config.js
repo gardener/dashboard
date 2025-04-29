@@ -1,24 +1,24 @@
 import { nodeResolve } from '@rollup/plugin-node-resolve'
 import json from '@rollup/plugin-json'
-import { readFileSync } from 'node:fs'
 import commonjs from '@rollup/plugin-commonjs'
+import { readFileSync } from 'node:fs'
 
 export default [
   {
-    input: 'lib/index.js',
+    input: `${process.cwd()}/lib/index.js`,
     cache: false,
     output: {
-      file: 'dist/index.cjs',
+      file: `${process.cwd()}/dist/index.cjs`,
       format: 'cjs',
     },
-    external: getPeerDependencies(),
+    external: getPeerDependencies(readFileSync),
     plugins: [nodeResolve(), json(), commonjs()],
   },
   {
-    input: 'lib/index.js',
+    input: `${process.cwd()}/lib/index.js`,
     cache: false,
     output: {
-      file: 'dist/index.js',
+      file: `${process.cwd()}/dist/index.js`,
       format: 'esm',
     },
     external: getPeerDependencies(),

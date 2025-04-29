@@ -1,0 +1,37 @@
+{
+  "name": "packages",
+  "version": "1.0.0",
+  "description": "packages parent folder",
+  "license": "Apache-2.0",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gardener/dashboard.git",
+    "directory": "packages"
+  },
+  "bugs": {
+    "url": "https://github.com/gardener/dashboard/issues"
+  },
+  "scripts": {
+    "build-all": "rm -rf dist && yarn install && rollup -c rollup.config.js",
+    "build:all": "yarn workspaces foreach --all --parallel --no-private --include 'packages/*' run build",
+    "test:all": "yarn workspaces foreach --all --parallel --no-private --include 'packages/*' run test"
+  },
+  "devDependencies": {
+    "@microsoft/eslint-formatter-sarif": "^3.1.0",
+    "@rollup/plugin-commonjs": "^28.0.3",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "eslint": "^9.11.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jest": "^28.8.3",
+    "eslint-plugin-lodash": "^8.0.0",
+    "eslint-plugin-security": "^3.0.1",
+    "neostandard": "^0.12.0",
+    "rollup": "^4.40.0"
+  },
+  "packageManager": "yarn@4.8.1",
+  "engines": {
+    "node": "^22.7.0"
+  }
+}
