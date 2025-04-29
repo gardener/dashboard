@@ -5,6 +5,7 @@
 //
 
 import { computed } from 'vue'
+import { storeToRefs } from 'pinia'
 
 import { useCredentialStore } from '@/store/credential'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
@@ -22,12 +23,14 @@ export const useCloudProviderBindingList = (providerType, options = {}) => {
     gardenerExtensionStore = useGardenerExtensionStore(),
   } = options
 
+  const { dnsProviderTypes } = storeToRefs(gardenerExtensionStore)
+
   return computed(() => {
     return filter(credentialStore.cloudProviderBindingList, binding => {
       if (binding.provider?.type !== providerType.value) {
         return false
       }
-      if (isDnsBinding(binding, gardenerExtensionStore)) {
+      if (isDnsBinding(binding, dnsProviderTypes.value)) {
         return !isSharedCredential(binding) // dns extension currently supports secrets only (no bindings)
       }
       return true

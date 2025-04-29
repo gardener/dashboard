@@ -43,6 +43,9 @@ export const useCloudProviderBinding = (binding, options = {}) => {
     credentialStore = useCredentialStore(),
   } = options
   const { shootList } = storeToRefs(shootStore)
+  const { cloudProviderBindingList } = storeToRefs(credentialStore)
+  const { sortedProviderTypeList } = storeToRefs(cloudProfileStore)
+  const { dnsProviderTypes } = storeToRefs(gardenerExtensionStore)
 
   // Classification Flags
   const isSharedCredential = computed(() =>
@@ -63,10 +66,10 @@ export const useCloudProviderBinding = (binding, options = {}) => {
     binding.value?.credentialsRef?.kind === 'WorkloadIdentity',
   )
   const isInfrastructureBinding = computed(() =>
-    _isInfrastructureBinding(binding.value, cloudProfileStore),
+    _isInfrastructureBinding(binding.value, sortedProviderTypeList.value),
   )
   const isDnsBinding = computed(() =>
-    _isDnsBinding(binding.value, gardenerExtensionStore),
+    _isDnsBinding(binding.value, dnsProviderTypes.value),
   )
   const isMarkedForDeletion = computed(() =>
     Boolean(binding.value?.metadata.deletionTimestamp),
@@ -146,7 +149,7 @@ export const useCloudProviderBinding = (binding, options = {}) => {
 
   const bindingsWithSameCredential = computed(() =>
     filter(
-      credentialStore.cloudProviderBindingList,
+      cloudProviderBindingList.value,
       other => {
         const otherRef = _credentialRef(other)
         return other.metadata.uid !== binding.value?.metadata.uid &&

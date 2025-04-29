@@ -45,9 +45,9 @@ export function credentialKind (binding) {
   return undefined
 }
 
-export function isInfrastructureBinding (binding, cloudProfileStore) {
-  return cloudProfileStore.sortedProviderTypeList.includes(binding?.provider?.type)
+export function isInfrastructureBinding (binding, sortedProviderTypeList) {
+  return sortedProviderTypeList.includes(binding?.provider?.type)
 }
-export function isDnsBinding (binding, gardenerExtensionStore) {
-  return gardenerExtensionStore.dnsProviderTypes.includes(binding?.provider?.type)
+export function isDnsBinding (binding, dnsProviderTypes) {
+  return dnsProviderTypes.includes(binding?.provider?.type)
 }

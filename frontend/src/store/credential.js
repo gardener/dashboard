@@ -7,6 +7,7 @@
 import {
   defineStore,
   acceptHMRUpdate,
+  storeToRefs,
 } from 'pinia'
 import {
   computed,
@@ -39,6 +40,9 @@ export const useCredentialStore = defineStore('credential', () => {
   const authzStore = useAuthzStore()
   const gardenerExtensionStore = useGardenerExtensionStore()
   const cloudProfileStore = useCloudProfileStore()
+
+  const { sortedProviderTypeList } = storeToRefs(cloudProfileStore)
+  const { dnsProviderTypes } = storeToRefs(gardenerExtensionStore)
 
   const state = reactive({
     secretBindings: {},
@@ -131,13 +135,13 @@ export const useCredentialStore = defineStore('credential', () => {
 
   const infrastructureBindingList = computed(() => {
     return filter(cloudProviderBindingList.value, binding => {
-      return isInfrastructureBinding(binding, cloudProfileStore)
+      return isInfrastructureBinding(binding, sortedProviderTypeList.value)
     })
   })
 
   const dnsBindingList = computed(() => {
     return filter(cloudProviderBindingList.value, binding => {
-      return isDnsBinding(binding, gardenerExtensionStore) &&
+      return isDnsBinding(binding, dnsProviderTypes.value) &&
         !isSharedCredential(binding)
     })
   })
