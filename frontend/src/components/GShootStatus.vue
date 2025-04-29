@@ -105,8 +105,7 @@ SPDX-License-Identifier: Apache-2.0
         :last-message="lastMessage"
         :error-descriptions="errorDescriptions"
         :last-update-time="shootLastOperation.lastUpdateTime"
-        :secret-binding-name="shootSecretBindingName"
-        :namespace="shootNamespace"
+        :shoot-binding="shootCloudProviderBinding"
       />
     </g-popover>
     <div class="d-flex">
@@ -180,8 +179,7 @@ export default {
   },
   setup () {
     const {
-      shootNamespace,
-      shootSecretBindingName,
+      shootCloudProviderBinding,
       shootLastOperation,
       isShootMarkedForDeletion,
       isShootLastOperationTypeDelete,
@@ -193,8 +191,7 @@ export default {
     } = useShootItem()
 
     return {
-      shootNamespace,
-      shootSecretBindingName,
+      shootCloudProviderBinding,
       shootLastOperation,
       isShootMarkedForDeletion,
       isShootLastOperationTypeDelete,

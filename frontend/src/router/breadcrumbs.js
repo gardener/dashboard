@@ -87,10 +87,10 @@ export function shootListBreadcrumbs () {
   ]
 }
 
-export function secretsBreadcrumbs () {
+export function credentialsBreadcrumbs () {
   return [
     {
-      title: 'Secrets',
+      title: 'Credentials',
     },
   ]
 }

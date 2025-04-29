@@ -1,0 +1,38 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`composables > useProvideShootItem > should compute shootCloudProviderBinding correctly 1`] = `
+{
+  "credentialsRef": {
+    "kind": "Secret",
+    "name": "aws-secret",
+    "namespace": "garden-test",
+  },
+  "kind": "CredentialsBinding",
+  "metadata": {
+    "name": "aws-credentialsbinding",
+    "namespace": "garden-test",
+    "uid": "cb-aws-secret-uid",
+  },
+  "provider": {
+    "type": "aws",
+  },
+}
+`;
+
+exports[`composables > useProvideShootItem > should compute shootCloudProviderBinding correctly 2`] = `
+{
+  "kind": "SecretBinding",
+  "metadata": {
+    "name": "aws-secretbinding",
+    "namespace": "garden-test",
+    "uid": "sb-aws-uid",
+  },
+  "provider": {
+    "type": "aws",
+  },
+  "secretRef": {
+    "name": "aws-secret",
+    "namespace": "garden-test",
+  },
+}
+`;
