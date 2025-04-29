@@ -28,37 +28,14 @@
     "build": "rm -rf dist && yarn install && rollup -c ../rollup.config.js"
   },
   "devDependencies": {
-    "@jest/globals": "^29.7.0",
     "eslint": "^9.11.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jest": "^28.8.3",
     "eslint-plugin-lodash": "^8.0.0",
     "eslint-plugin-security": "^3.0.1",
-    "jest": "^29.7.0",
     "neostandard": "^0.12.0"
   },
-  "jest": {
-    "restoreMocks": true,
-    "verbose": true,
-    "coverageDirectory": "coverage",
-    "collectCoverageFrom": [
-      "lib/**/*.js"
-    ],
-    "testEnvironment": "node",
-    "transformIgnorePatterns": [
-      "/node_modules/",
-      "\\.pnp\\.[^\\/]+$"
-    ],
-    "coverageThreshold": {
-      "global": {
-        "branches": 84.5,
-        "functions": 97,
-        "lines": 95,
-        "statements": 95
-      }
-    }
-  },
-  "packageManager": "yarn@4.8.1",
+  "packageManager": "yarn@4.9.1",
   "engines": {
     "node": "^22.7.0"
   }
