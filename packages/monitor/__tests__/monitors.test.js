@@ -28,16 +28,8 @@ jest.unstable_mockModule('../lib/metrics.js', () => {
   }
 })
 
-// await semiAutoMockHelper(`../lib/metrics.js`,
-//  [
-//    'responseTime.observe',
-//  ],
-//  import.meta.url,
-// )
-
 const { default: metrics } = await import('../lib/metrics.js')
 
-// ToDo migrate mocks folder to global setup mocks!!
 const { default: { monitorSocketIO, monitorHttpServer, monitorResponseTimes } } = await import('../lib/monitors.js')
 
 const { default: responseTime } = await import('response-time')

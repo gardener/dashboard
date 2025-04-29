@@ -1734,7 +1734,7 @@ const RAW_RUNTIME_STATE =
           ["dayjs", "npm:1.11.13"],\
           ["downloadjs", "npm:1.4.7"],\
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.23.0"],\
-          ["eslint-import-resolver-alias", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:1.1.2"],\
+          ["eslint-import-resolver-alias", "virtual:cfb59f52db931439eb14a47d99c6d8e602c14483d7dcfb0a236c44522c1caf76628ef60a9ab9501c1ea33a268c652322842aea7c72977de7ffa2e241262638c0#npm:1.1.2"],\
           ["eslint-plugin-import", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:2.31.0"],\
           ["eslint-plugin-import-newlines", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:1.4.0"],\
           ["eslint-plugin-lodash", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:8.0.0"],\
@@ -1958,6 +1958,7 @@ const RAW_RUNTIME_STATE =
           ["@types/gardener-dashboard__logger", null],\
           ["@types/gardener-dashboard__test-utils", null],\
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.23.0"],\
+          ["eslint-import-resolver-alias", "virtual:cfb59f52db931439eb14a47d99c6d8e602c14483d7dcfb0a236c44522c1caf76628ef60a9ab9501c1ea33a268c652322842aea7c72977de7ffa2e241262638c0#npm:1.1.2"],\
           ["eslint-plugin-import", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:2.31.0"],\
           ["eslint-plugin-jest", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:28.11.0"],\
           ["eslint-plugin-lodash", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:8.0.0"],\
@@ -1990,6 +1991,7 @@ const RAW_RUNTIME_STATE =
           ["@jest/globals", "npm:29.7.0"],\
           ["@microsoft/eslint-formatter-sarif", "npm:3.1.0"],\
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.23.0"],\
+          ["eslint-import-resolver-alias", "virtual:cfb59f52db931439eb14a47d99c6d8e602c14483d7dcfb0a236c44522c1caf76628ef60a9ab9501c1ea33a268c652322842aea7c72977de7ffa2e241262638c0#npm:1.1.2"],\
           ["eslint-plugin-import", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:2.31.0"],\
           ["eslint-plugin-jest", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:28.11.0"],\
           ["eslint-plugin-lodash", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:8.0.0"],\
@@ -2072,7 +2074,6 @@ const RAW_RUNTIME_STATE =
           ["eslint-plugin-security", "npm:3.0.1"],\
           ["http-errors", "npm:2.0.0"],\
           ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:29.7.0"],\
-          ["lodash", "npm:4.17.21"],\
           ["lodash-es", "npm:4.17.21"],\
           ["neostandard", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:0.12.1"],\
           ["rimraf", "npm:6.0.1"],\
@@ -2101,7 +2102,6 @@ const RAW_RUNTIME_STATE =
           ["eslint-plugin-security", "npm:3.0.1"],\
           ["http-errors", "npm:2.0.0"],\
           ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:29.7.0"],\
-          ["lodash", "npm:4.17.21"],\
           ["lodash-es", "npm:4.17.21"],\
           ["neostandard", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:0.12.1"],\
           ["rimraf", "npm:6.0.1"],\
@@ -7369,11 +7369,11 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "HARD"\
       }],\
-      ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:1.1.2", {\
-        "packageLocation": "./.yarn/__virtual__/eslint-import-resolver-alias-virtual-ba96313cbd/0/cache/eslint-import-resolver-alias-npm-1.1.2-19bb9eab39-71f156e131.zip/node_modules/eslint-import-resolver-alias/",\
+      ["virtual:cfb59f52db931439eb14a47d99c6d8e602c14483d7dcfb0a236c44522c1caf76628ef60a9ab9501c1ea33a268c652322842aea7c72977de7ffa2e241262638c0#npm:1.1.2", {\
+        "packageLocation": "./.yarn/__virtual__/eslint-import-resolver-alias-virtual-90cec19d08/0/cache/eslint-import-resolver-alias-npm-1.1.2-19bb9eab39-71f156e131.zip/node_modules/eslint-import-resolver-alias/",\
         "packageDependencies": [\
           ["@types/eslint-plugin-import", null],\
-          ["eslint-import-resolver-alias", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:1.1.2"],\
+          ["eslint-import-resolver-alias", "virtual:cfb59f52db931439eb14a47d99c6d8e602c14483d7dcfb0a236c44522c1caf76628ef60a9ab9501c1ea33a268c652322842aea7c72977de7ffa2e241262638c0#npm:1.1.2"],\
           ["eslint-plugin-import", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:2.31.0"]\
         ],\
         "packagePeers": [\
