@@ -12,7 +12,7 @@ import os from 'os'
 import yaml from 'js-yaml'
 import gtoken from 'gtoken'
 import { cloneDeep } from 'lodash-es'
-import Config from '../lib/Config'
+import Config from '../lib/Config.js'
 import config from '../lib/index.js'
 
 const { mockGetToken } = gtoken
