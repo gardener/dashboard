@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import { jest } from '@jest/globals'
 import { mix } from 'mixwith'
 import * as mixins from '../lib/mixins.js'
 import { http } from '../lib/symbols.js'
