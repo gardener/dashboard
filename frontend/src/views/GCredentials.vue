@@ -288,6 +288,7 @@ import GToolbar from '@/components/GToolbar'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
 
 import { useTwoTableLayout } from '@/composables/useTwoTableLayout'
+import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
 
 import { mapTableHeader } from '@/utils'
 
@@ -400,7 +401,7 @@ export default {
         {
           title: 'USED BY',
           align: 'start',
-          key: 'credentialUseCount',
+          key: 'credentialUsageCount',
           defaultSelected: true,
         },
         {
@@ -457,7 +458,7 @@ export default {
         {
           title: 'USED BY',
           align: 'start',
-          key: 'credentialUseCount',
+          key: 'credentialUsageCount',
           defaultSelected: true,
         },
         {
@@ -551,15 +552,20 @@ export default {
       return orderBy(items, [item => this.getRawVal(item, sortBy), secondSortCriteria], [sortOrder, 'asc'])
     },
     getRawVal (item, column) {
+      const {
+        credentialUsageCount,
+        credentialKind,
+      } = useCloudProviderBinding(toRef(item))
       switch (column) {
-        case 'credential':
-          return `${item.credentialNamespace} ${item.credentialName}`
+        case 'name':
+          return item.metadata.name
         case 'infrastructure':
-          return item.infrastructureName
+        case 'dnsProvider':
+          return item.provider.type
         case 'kind':
-          return item.kind.tooltip
-        default:
-          return get(item, [column])
+          return `${item.kind} (${credentialKind.value})`
+        case 'credentialUsageCount':
+          return credentialUsageCount.value
       }
     },
     disableCustomKeySort (tableHeaders) {

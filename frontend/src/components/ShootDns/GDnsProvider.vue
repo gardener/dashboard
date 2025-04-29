@@ -44,9 +44,9 @@ SPDX-License-Identifier: Apache-2.0
         </v-list-item-title>
       </v-list-item>
       <v-list-item v-if="secret">
-        <g-secret-details-item-content
+        <g-credential-details-item-content
           class="pb-2"
-          :secret="secret"
+          :credential="secret"
           :provider-type="type"
           details-title
         />
@@ -61,7 +61,7 @@ import { mapActions } from 'pinia'
 import { useCredentialStore } from '@/store/credential'
 
 import GVendorIcon from '@/components/GVendorIcon'
-import GSecretDetailsItemContent from '@/components/Credentials/GSecretDetailsItemContent.vue'
+import GCredentialDetailsItemContent from '@/components/Credentials/GCredentialDetailsItemContent.vue'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 
 import get from 'lodash/get'
@@ -70,7 +70,7 @@ import join from 'lodash/join'
 export default {
   components: {
     GVendorIcon,
-    GSecretDetailsItemContent,
+    GCredentialDetailsItemContent,
     GTextRouterLink,
   },
   props: {

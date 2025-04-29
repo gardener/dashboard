@@ -10,7 +10,6 @@ SPDX-License-Identifier: Apache-2.0
     <v-tooltip
       class="credentials-details-tooltip"
       :open-delay="500"
-      :disabled="!hasOwnSecret"
       location="top"
     >
       <template #activator="{ props: tProps }">
@@ -26,9 +25,10 @@ SPDX-License-Identifier: Apache-2.0
         >{{ binding.metadata.name }}</span>
       </template>
       <v-card>
-        <g-secret-details-item-content
+        <g-credential-details-item-content
           class="ma-1"
-          :secret="credential"
+          :credential="credential"
+          :shared="isSharedCredential"
           :provider-type="binding.provider.type"
         />
       </v-card>
@@ -37,7 +37,10 @@ SPDX-License-Identifier: Apache-2.0
       v-if="isSharedCredential"
       :namespace="credentialNamespace"
     />
-    <g-orphaned-credential-icon v-if="isOrphanedCredential" />
+    <g-orphaned-credential-icon
+      v-if="isOrphanedCredential"
+      :binding="binding"
+    />
   </span>
   <span v-else>
     <span>Unknown credential</span>
@@ -54,7 +57,7 @@ import { storeToRefs } from 'pinia'
 import { useAuthzStore } from '@/store/authz'
 
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
-import GSecretDetailsItemContent from '@/components/Credentials/GSecretDetailsItemContent'
+import GCredentialDetailsItemContent from '@/components/Credentials/GCredentialDetailsItemContent'
 import GCredentialIcon from '@/components/Credentials/GCredentialIcon'
 import GOrphanedCredentialIcon from '@/components/Credentials/GOrphanedCredentialIcon.vue'
 import GSharedCredentialIcon from '@/components/Credentials/GSharedCredentialIcon.vue'
@@ -82,7 +85,6 @@ const {
   isSharedCredential,
   credentialNamespace,
   isOrphanedCredential,
-  hasOwnSecret,
   credential,
 } = useCloudProviderBinding(binding)
 

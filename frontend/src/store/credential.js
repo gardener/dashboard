@@ -17,8 +17,6 @@ import { useApi } from '@/composables/useApi'
 import {
   isDnsBinding,
   isInfrastructureBinding,
-  isSecretBinding,
-  isCredentialsBinding,
   isSharedCredential,
 } from '@/composables/credential/helper'
 
@@ -80,6 +78,7 @@ export const useCredentialStore = defineStore('credential', () => {
 
     secrets?.forEach(item => {
       const key = namespaceNameKey(item.metadata)
+      item.kind = 'Secret' // ensure kind is set (might not be set if objects are retrieved using list call)
       set(state.secrets, [key], item)
     })
 
@@ -91,6 +90,7 @@ export const useCredentialStore = defineStore('credential', () => {
 
     workloadIdentities?.forEach(item => {
       const key = namespaceNameKey(item.metadata)
+      item.kind = 'WorkloadIdentity' // ensure kind is set (might not be set if objects are retrieved using list call)
       set(state.workloadIdentities, [key], item)
     })
 
@@ -142,13 +142,13 @@ export const useCredentialStore = defineStore('credential', () => {
     })
   })
 
-  const secretBindingList = computed(() => {
-    return filter(cloudProviderBindingList.value, isSecretBinding)
-  })
+  const secretBindingList = computed(() =>
+    Object.values(state.secretBindings),
+  )
 
-  const credentialsBindingList = computed(() => {
-    return filter(cloudProviderBindingList.value, isCredentialsBinding)
-  })
+  const credentialsBindingList = computed(() =>
+    Object.values(state.credentialsBindings),
+  )
 
   function getSecret ({ namespace, name }) {
     return get(state.secrets, [namespaceNameKey({ namespace, name })])

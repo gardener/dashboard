@@ -42,9 +42,10 @@ SPDX-License-Identifier: Apache-2.0
           />
         </g-list-item-content>
       </g-list-item>
-      <g-list-item v-if="hasOwnSecret">
-        <g-secret-details-item-content
-          :secret="credential"
+      <g-list-item v-if="hasShootWorkerGroups">
+        <g-credential-details-item-content
+          :credential="credential"
+          :shared="isSharedCredential"
           :provider-type="shootCloudProviderBinding.provider.type"
           details-title
         />
@@ -264,7 +265,7 @@ import GDnsConfiguration from '@/components/ShootDns/GDnsConfiguration'
 import GSeedConfiguration from '@/components/GSeedConfiguration'
 import GControlPlaneHighAvailabilityConfiguration from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityConfiguration'
 import GControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityTag'
-import GSecretDetailsItemContent from '@/components/Credentials/GSecretDetailsItemContent'
+import GCredentialDetailsItemContent from '@/components/Credentials/GCredentialDetailsItemContent'
 
 import { useShootResources } from '@/composables/useShootResources'
 import { useShootItem } from '@/composables/useShootItem'
@@ -291,7 +292,7 @@ export default {
     GSeedConfiguration,
     GControlPlaneHighAvailabilityConfiguration,
     GControlPlaneHighAvailabilityTag,
-    GSecretDetailsItemContent,
+    GCredentialDetailsItemContent,
   },
   setup () {
     const {
@@ -319,8 +320,8 @@ export default {
     const { getResourceRefName } = useShootResources(shootItem)
 
     const {
-      hasOwnSecret,
       credential,
+      isSharedCredential,
     } = useCloudProviderBinding(shootCloudProviderBinding)
 
     return {
@@ -345,7 +346,7 @@ export default {
       shootDnsPrimaryProvider,
       getResourceRefName,
       credential,
-      hasOwnSecret,
+      isSharedCredential,
     }
   },
   computed: {

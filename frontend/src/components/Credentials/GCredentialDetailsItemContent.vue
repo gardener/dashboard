@@ -10,16 +10,16 @@ SPDX-License-Identifier: Apache-2.0
       <template #label>
         <span v-if="detailsTitle">Credential Details (</span>
         <span
-          v-for="({ label }, index) in secretDetails"
+          v-for="({ label }, index) in credentialDetails"
           :key="label"
         >
           <span>{{ label }}</span>
-          <span v-if="index !== secretDetails.length - 1"> / </span>
+          <span v-if="index !== credentialDetails.length - 1"> / </span>
         </span>
         <span v-if="detailsTitle">)</span>
       </template>
       <span
-        v-for="({ value, label }, index) in secretDetails"
+        v-for="({ value, label }, index) in credentialDetails"
         :key="label"
       >
         <span v-if="value">{{ value }}</span>
@@ -27,7 +27,7 @@ SPDX-License-Identifier: Apache-2.0
           v-else
           class="font-weight-light text-disabled"
         >unknown</span>
-        <span v-if="index !== secretDetails.length - 1"> / </span>
+        <span v-if="index !== credentialDetails.length - 1"> / </span>
       </span>
     </g-list-item-content>
   </div>
@@ -41,8 +41,12 @@ import get from 'lodash/get'
 export default {
 
   props: {
-    secret: {
+    credential: {
       type: Object,
+    },
+    shared: {
+      type: Boolean,
+      default: false,
     },
     providerType: {
       type: String,
@@ -53,15 +57,36 @@ export default {
     },
   },
   computed: {
-    secretDetails () {
-      if (!this.secret) {
-        return undefined
+    credentialDetails () {
+      if (this.shared) {
+        return [
+          {
+            label: 'Shared',
+            value: 'Details not available for shared credentials',
+          },
+        ]
       }
-      return this.getSecretDetails(this.secret)
+      if (this.credential?.kind === 'Secret') {
+        return this.getCredentialDetails(this.credential)
+      }
+      if (this.credential?.kind === 'WorkloadIdentity') {
+        return [
+          {
+            label: 'WorkloadIdentity',
+            value: 'Details not available for credentials of type WorkloadIdentity',
+          },
+        ]
+      }
+      return [
+        {
+          label: 'Unknown',
+          value: 'Information not available',
+        },
+      ]
     },
   },
   methods: {
-    getSecretDetails (secret) {
+    getCredentialDetails (secret) {
       const secretData = secret.data || {}
       const getGCPProjectId = () => {
         const serviceAccount = get(secretData, ['serviceaccount.json'])

@@ -16,7 +16,10 @@ SPDX-License-Identifier: Apache-2.0
           v-if="isSharedCredential"
           :namespace="credentialNamespace"
         />
-        <g-orphaned-credential-icon v-if="isOrphanedCredential" />
+        <g-orphaned-credential-icon
+          v-if="isOrphanedCredential"
+          :binding="binding"
+        />
       </div>
     </td>
     <td v-if="selectedHeaders.kind">
@@ -29,15 +32,15 @@ SPDX-License-Identifier: Apache-2.0
       />
     </td>
     <td v-if="selectedHeaders.details">
-      <g-secret-details-item-content
-        v-if="hasOwnSecret"
+      <g-credential-details-item-content
         class="py-1"
-        :secret="credential"
+        :credential="credential"
+        :shared="isSharedCredential"
         :provider-type="binding.provider.type"
       />
     </td>
-    <td v-if="selectedHeaders.credentialUseCount">
-      <g-credential-used-by-label :used-by="credentialUseCount" />
+    <td v-if="selectedHeaders.credentialUsageCount">
+      <g-credential-used-by-label :used-by="credentialUsageCount" />
     </td>
     <td
       v-if="selectedHeaders.actions"
@@ -59,7 +62,7 @@ import {
 } from 'vue'
 
 import GVendor from '@/components/GVendor'
-import GSecretDetailsItemContent from '@/components/Credentials/GSecretDetailsItemContent'
+import GCredentialDetailsItemContent from '@/components/Credentials/GCredentialDetailsItemContent'
 import GCredentialRowActions from '@/components/Credentials/GCredentialRowActions'
 import GCredentialIcon from '@/components/Credentials/GCredentialIcon'
 import GCredentialUsedByLabel from '@/components/Credentials/GCredentialUsedByLabel'
@@ -90,10 +93,9 @@ const binding = toRef(props, 'binding')
 const {
   isSharedCredential,
   credentialNamespace,
-  credentialUseCount,
+  credentialUsageCount,
   isOrphanedCredential,
   credential,
-  hasOwnSecret,
 } = useCloudProviderBinding(binding)
 
 const emit = defineEmits(['update', 'delete'])

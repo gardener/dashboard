@@ -12,10 +12,10 @@ SPDX-License-Identifier: Apache-2.0
         size="small"
         class="mr-2"
       >
-        {{ credentialIcon.icon }}
+        {{ icon }}
       </v-icon>
     </template>
-    <span>{{ credentialIcon.tooltip }}</span>
+    <span>{{ tooltip }}</span>
   </v-tooltip>
 </template>
 
@@ -37,26 +37,29 @@ const props = defineProps({
 
 const binding = toRef(props, 'binding')
 
-const credentialIcon = computed(() => {
-  const credentialIcon = {
-    icon: 'mdi-help-circle',
-    tooltip: 'Unknown',
-  }
+const icon = computed(() => {
   if (isSecretBinding(binding.value)) {
-    credentialIcon.tooltip = 'Secret (SecretBinding)'
-    credentialIcon.icon = 'mdi-key'
+    return 'mdi-key'
   }
   if (isCredentialsBinding(binding.value)) {
     if (binding.value.credentialsRef.kind === 'Secret') {
-      credentialIcon.tooltip = 'Secret (CredentialsBinding)'
-      credentialIcon.icon = 'mdi-key-outline'
+      return 'mdi-key-outline'
     }
     if (binding.value.credentialsRef.kind === 'WorkloadIdentity') {
-      credentialIcon.tooltip = 'WorkloadIdentity'
-      credentialIcon.icon = 'mdi-id-card'
+      return 'mdi-id-card'
     }
   }
-  return credentialIcon
+  return 'mdi-help-circle'
+})
+
+const tooltip = computed(() => {
+  if (isSecretBinding(binding.value)) {
+    return 'Secret (SecretBinding)'
+  }
+  if (isCredentialsBinding(binding.value)) {
+    return `${binding.value.credentialsRef.kind} (${binding.value.kind})`
+  }
+  return 'Unknown credential binding type'
 })
 
 </script>

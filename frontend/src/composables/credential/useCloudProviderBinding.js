@@ -23,6 +23,7 @@ import {
   credentialName as _credentialName,
   credentialNamespace as _credentialNameSpace,
   credentialRef as _credentialRef,
+  credentialKind as _credentialKind,
 } from './helper'
 
 import filter from 'lodash/filter'
@@ -82,6 +83,10 @@ export const useCloudProviderBinding = (binding, options = {}) => {
     _credentialName(binding.value, true),
   )
 
+  const credentialKind = computed(() =>
+    _credentialKind(binding.value),
+  )
+
   // Resolved Credential Object
   const credential = computed(() => {
     if (isSecret.value) {
@@ -106,7 +111,7 @@ export const useCloudProviderBinding = (binding, options = {}) => {
     !hasOwnWorkloadIdentity.value,
   )
 
-  const credentialUseCount = computed(() => {
+  const credentialUsageCount = computed(() => {
     // count shoots referencing this binding by type
     if (isInfrastructureBinding.value) {
       const name = binding.value?.metadata.name
@@ -147,7 +152,7 @@ export const useCloudProviderBinding = (binding, options = {}) => {
         return other.metadata.uid !== binding.value?.metadata.uid &&
         otherRef.namespace === credentialRef.value.namespace &&
         otherRef.name === credentialRef.value.name &&
-        (otherRef.kind ?? 'Secret') === (credentialRef.value.kind ?? 'Secret')
+        (otherRef.kind ?? 'Secret') === credentialKind.value
       },
     ),
   )
@@ -184,13 +189,14 @@ export const useCloudProviderBinding = (binding, options = {}) => {
     credentialRef,
     credentialNamespace,
     credentialName,
+    credentialKind,
     credential,
 
     // Usage/orphan checks
     hasOwnSecret,
     hasOwnWorkloadIdentity,
     isOrphanedCredential,
-    credentialUseCount,
+    credentialUsageCount,
     bindingsWithSameCredential,
 
     // Quotas & lifecycle

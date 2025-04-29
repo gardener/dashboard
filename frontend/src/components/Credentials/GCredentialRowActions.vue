@@ -21,11 +21,11 @@ SPDX-License-Identifier: Apache-2.0
     <g-action-button
       v-if="canDeleteCredentials"
       icon="mdi-delete"
-      :disabled="credentialUseCount > 0 || isSharedCredential || hasOwnWorkloadIdentity || isMarkedForDeletion"
+      :disabled="credentialUsageCount > 0 || isSharedCredential || hasOwnWorkloadIdentity || isMarkedForDeletion"
       @click="onDelete"
     >
       <template #tooltip>
-        <span v-if="credentialUseCount > 0">You can only delete Secrets that are currently unused</span>
+        <span v-if="credentialUsageCount > 0">You can only delete Secrets that are currently unused</span>
         <span v-else-if="isSharedCredential">You can only delete Secrets that are owned by you</span>
         <span v-else-if="hasOwnWorkloadIdentity">The dashboard doesn't support deleting credentials of type WorkloadIdentity</span>
         <span v-else-if="isMarkedForDeletion">Secret is already marked for deletion</span>
@@ -60,7 +60,7 @@ const { canPatchCredentials, canDeleteCredentials } = storeToRefs(authzStore)
 
 const {
   hasOwnWorkloadIdentity,
-  credentialUseCount,
+  credentialUsageCount,
   isMarkedForDeletion,
   isSharedCredential,
 } = useCloudProviderBinding(binding)

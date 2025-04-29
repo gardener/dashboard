@@ -81,16 +81,16 @@ SPDX-License-Identifier: Apache-2.0
           The Secret <code>{{ credentialName }}</code> for this <code>Binding</code> does not exist anymore and will be re-created if you update the data.
         </v-alert>
         <v-alert
-          :model-value="!isCreateMode && credentialUseCount > 0"
+          :model-value="!isCreateMode && credentialUsageCount > 0"
           type="warning"
           rounded="0"
           class="mb-2"
         >
-          <div>This <code>Secret</code> is used by {{ credentialUseCount }} {{ credentialUseCount === 1 ? 'cluster' : 'clusters' }}. The new <code>Secret</code> should be part of the same account as the one that gets replaced.</div>
+          <div>This <code>Secret</code> is used by {{ credentialUsageCount }} {{ credentialUsageCount === 1 ? 'cluster' : 'clusters' }}. The new <code>Secret</code> should be part of the same account as the one that gets replaced.</div>
           <div>Clusters will only start using the new <code>Secret</code> after they are reconciled. Therefore, wait until all clusters using the <code>Secret</code> are reconciled before you disable the old <code>Secret</code> in your infrastructure account. Otherwise the clusters will no longer function.</div>
         </v-alert>
         <v-alert
-          :model-value="bindingsWithSameCredential.length > 0"
+          :model-value="!isCreateMode && bindingsWithSameCredential.length > 0"
           type="info"
           rounded="0"
           class="mb-2 list-style"
@@ -212,7 +212,7 @@ export default {
     const binding = toRef(props, 'binding')
     const {
       isOrphanedCredential,
-      credentialUseCount,
+      credentialUsageCount,
       credentialName,
       isSecretBinding,
       isCredentialsBinding,
@@ -259,7 +259,7 @@ export default {
       secretManifest,
       secretName,
       isOrphanedCredential,
-      credentialUseCount,
+      credentialUsageCount,
       credentialName,
       isDnsBinding,
       bindingsWithSameCredential,
@@ -294,6 +294,10 @@ export default {
   computed: {
     ...mapState(useGardenerExtensionStore, ['dnsProviderTypes']),
     ...mapState(useShootStore, ['shootList']),
+    ...mapState(useCredentialStore, [
+      'infrastructureBindingList',
+      'dnsBindingList',
+    ]),
     visible: {
       get () {
         return this.modelValue
