@@ -8,6 +8,7 @@ import {
   computed,
   isRef,
 } from 'vue'
+import { storeToRefs } from 'pinia'
 
 import { useShootStore } from '@/store/shoot'
 import { useCloudProfileStore } from '@/store/cloudProfile'
@@ -30,7 +31,6 @@ import filter from 'lodash/filter'
 import some from 'lodash/some'
 import get from 'lodash/get'
 import find from 'lodash/find'
-
 export const useCloudProviderBinding = (binding, options = {}) => {
   if (!isRef(binding)) {
     throw new TypeError('First argument `binding` must be a ref object')
@@ -42,7 +42,7 @@ export const useCloudProviderBinding = (binding, options = {}) => {
     gardenerExtensionStore = useGardenerExtensionStore(),
     credentialStore = useCredentialStore(),
   } = options
-  const shootList = shootStore.shootList
+  const { shootList } = storeToRefs(shootStore)
 
   // Classification Flags
   const isSharedCredential = computed(() =>
@@ -115,7 +115,7 @@ export const useCloudProviderBinding = (binding, options = {}) => {
     // count shoots referencing this binding by type
     if (isInfrastructureBinding.value) {
       const name = binding.value?.metadata.name
-      const shoots = filter(shootList, ({ spec }) =>
+      const shoots = filter(shootList.value, ({ spec }) =>
         isSecretBinding.value
           ? spec.secretBindingName === name
           : isCredentialsBinding.value
@@ -134,7 +134,7 @@ export const useCloudProviderBinding = (binding, options = {}) => {
         some(resources, { resourceRef: { kind: 'Secret', name: credentialName.value } })
 
       let count = 0
-      for (const shoot of shootList) {
+      for (const shoot of shootList.value) {
         if (byProvider(shoot.spec.dns?.providers) || byResource(shoot.spec.resources)) {
           count++
         }
