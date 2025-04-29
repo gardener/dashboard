@@ -7,22 +7,6 @@
 import { jest } from '@jest/globals'
 import http2 from 'http2'
 
-// const mock = await mockOnHelper('../lib/SessionPool.js',
-//  [
-//    'prototype.destroy',
-//    'prototype.getSession',
-//    'prototype.request',
-//    'prototype.setSessionTimeout',
-//    'prototype.clearSessionTimeout',
-//    'prototype.setSessionHeartbeat',
-//    'prototype.clearSessionHeartbeat',
-//    'prototype.createSession',
-//    'prototype.deleteSession',
-//    'prototype.constructor',
-//  ],
-//  import.meta.url,
-// )
-
 const mockMyClass = jest.fn().mockImplementation(() => {
   return {
     destroy: jest.fn(),
@@ -37,7 +21,7 @@ const mockMyClass = jest.fn().mockImplementation(() => {
   }
 })
 
-jest.unstable_mockModule('../lib/SessionPool.js', () => {
+jest.unstable_mockModule('./lib/SessionPool.js', () => {
   const superMock = jest.fn(
     mockMyClass,
   )
@@ -60,8 +44,6 @@ jest.unstable_mockModule('../lib/SessionPool.js', () => {
   }
 })
 
-const { default: SessionPool } = await import('../lib/SessionPool.js')
-const newSessionPool = new SessionPool('https://foo.org')
 const { default: request } = await import('../lib/index.js')
 const { Agent } = request
 
