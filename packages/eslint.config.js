@@ -64,17 +64,20 @@ export default [
       'import/resolver': {
         alias: {
           map: [
-            ['@gardener-dashboard/kube-client', path.resolve(__dirname, './kube-client')],
-            ['@gardener-dashboard/kube-config', path.resolve(__dirname, './kube-config')],
-            ['@gardener-dashboard/logger', path.resolve(__dirname, './logger')],
-            ['@gardener-dashboard/monitor', path.resolve(__dirname, './monitor')],
-            ['@gardener-dashboard/polling-watcher', path.resolve(__dirname, './polling-watcher')],
-            ['@gardener-dashboard/request', path.resolve(__dirname, './request')],
-            ['@gardener-dashboard/test-utils', path.resolve(__dirname, './test-utils')],
+            ['@gardener-dashboard/kube-client', `${process.cwd()}/kube-client`],
+            ['@gardener-dashboard/kube-config', `${process.cwd()}/kube-config`],
+            ['@gardener-dashboard/logger', `${process.cwd()}/logger`],
+            ['@gardener-dashboard/monitor', `${process.cwd()}/monitor`],
+            ['@gardener-dashboard/polling-watcher', `${process.cwd()}/polling-watcher`],
+            ['@gardener-dashboard/request', `${process.cwd()}/request`],
+            ['@gardener-dashboard/test-utils', `${process.cwd()}/test-utils`],
           ],
           extensions: ['.js', '.jsx', '.ts', '.tsx'],
         },
       },
     },
+  },
+  {
+    ignores: ['**/dist/**'],
   },
 ];

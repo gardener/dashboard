@@ -24,11 +24,10 @@
     "registry": "https://npm.pkg.github.com/"
   },
   "scripts": {
-    "lint": "eslint . --max-warnings=0",
+    "lint": "yarn workspace packages eslint -c eslint.config.js ./test-utils --max-warnings=0",
     "build": "rimraf dist && yarn install && rollup -c ../rollup.config.js"
   },
   "devDependencies": {
-    "neostandard": "^0.12.0",
     "rimraf": "^6.0.1",
     "rollup": "^4.40.1"
   },
