@@ -13,7 +13,6 @@
     "url": "https://github.com/gardener/dashboard/issues"
   },
   "scripts": {
-    "build-all": "rm -rf dist && yarn install && rollup -c rollup.config.js",
     "build:all": "yarn workspaces foreach --all --parallel --no-private --include 'packages/*' run build",
     "test:all": "yarn workspaces foreach --all --parallel --no-private --include 'packages/*' run test"
   },
