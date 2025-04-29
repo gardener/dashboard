@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <tr
     class="credential-row"
-    :class="{ 'highlighted': isHighlighted }"
+    :class="{ 'highlighted': highlighted }"
   >
     <td v-if="selectedHeaders.name">
       <div class="d-flex">
@@ -78,7 +78,7 @@ const props = defineProps({
     type: Object,
     required: true,
   },
-  isHighlighted: {
+  highlighted: {
     type: Boolean,
     default: false,
   },
