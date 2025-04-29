@@ -19,10 +19,13 @@ SPDX-License-Identifier: Apache-2.0
         <span v-if="detailsTitle">)</span>
       </template>
       <span
-        v-for="({ value, label }, index) in credentialDetails"
+        v-for="({ value, label, valueClass }, index) in credentialDetails"
         :key="label"
       >
-        <span v-if="value">{{ value }}</span>
+        <span
+          v-if="value"
+          :class="valueClass"
+        >{{ value }}</span>
         <span
           v-else
           class="font-weight-light text-disabled"
@@ -63,6 +66,7 @@ export default {
           {
             label: 'Shared',
             value: 'Details not available for shared credentials',
+            valueClass: 'font-weight-light text-disabled',
           },
         ]
       }
@@ -74,6 +78,7 @@ export default {
           {
             label: 'WorkloadIdentity',
             value: 'Details not available for credentials of type WorkloadIdentity',
+            valueClass: 'font-weight-light text-disabled',
           },
         ]
       }
