@@ -57,7 +57,7 @@ const errorCodes = {
   },
   ERR_INFRA_DEPENDENCIES: {
     shortDescription: 'Infrastructure Dependencies',
-    description: 'Infrastructure operation failed as unmanaged resources exist in your cloud provider account. Please delete all manually created resources related to this Shoot.',
+    description: 'Infrastructure operation failed due to issues with cloud provider resources, configuration, or unmanaged resources. Please check your cloud environment, resolve any unmet requirements or conflicts, and remove any manually created resources related to this Shoot.',
     temporaryError: false,
     userError: true,
     infraAccountError: true,
