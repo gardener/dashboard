@@ -492,7 +492,7 @@ export default {
         setTimeout(() => {
           // Cannot start scrolling before the table is rendered
           const scrollToItem = (items, tableRef) => {
-            const itemIndex = findIndex(items, ['binding.metadata.uid', value])
+            const itemIndex = findIndex(items, ['metadata.uid', value])
             if (itemIndex !== -1) {
               tableRef.scrollToIndex(itemIndex)
             }
