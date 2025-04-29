@@ -37,7 +37,7 @@ const mockMyClass = jest.fn().mockImplementation(() => {
   }
 })
 
-jest.unstable_mockModule('./lib/SessionPool.js', () => {
+jest.unstable_mockModule('../lib/SessionPool.js', () => {
   const superMock = jest.fn(
     mockMyClass,
   )
