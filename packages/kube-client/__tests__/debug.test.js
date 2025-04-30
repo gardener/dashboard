@@ -4,12 +4,12 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import { jest } from '@jest/globals'
+import { globalLogger as logger } from '@gardener-dashboard/logger'
+import debug from '../lib/debug.js'
+import jwt from 'jsonwebtoken'
 
-const jwt = require('jsonwebtoken')
-
-const { globalLogger: logger } = require('@gardener-dashboard/logger')
-const { attach, beforeRequest, afterResponse } = require('../lib/debug')
+const { attach, beforeRequest, afterResponse } = debug
 
 describe('kube-client', () => {
   describe('debug', () => {

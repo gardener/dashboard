@@ -4,10 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import { get, includes } from 'lodash-es'
+import httpErrors from 'http-errors'
 
-const { get, includes } = require('lodash')
-const { isHttpError } = require('http-errors')
+const { isHttpError } = httpErrors
 
 const CONNECTION_ERROR_CODES = [
   'ECONNREFUSED',
@@ -98,7 +98,7 @@ function isAbortError (err) {
   return err.code === 'ABORT_ERR' || err.name === 'AbortError'
 }
 
-module.exports = {
+export {
   StatusError,
   CacheExpiredError,
   isResourceExpired,

@@ -4,10 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import createResponseTimeMiddleware from 'response-time'
+import metrics from './metrics.js'
 
-const createResponseTimeMiddleware = require('response-time')
-const { connectionsCount, connectionsTotal, responseTime } = require('./metrics')
+const { connectionsCount, connectionsTotal, responseTime } = metrics
 
 function monitorResponseTimes (additionalLabels = {}) {
   return createResponseTimeMiddleware((req, res, timeMs) => {
@@ -47,7 +47,7 @@ function monitorHttpServer (server) {
   })
 }
 
-module.exports = {
+export default {
   monitorResponseTimes,
   monitorSocketIO,
   monitorHttpServer,

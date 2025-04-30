@@ -3,17 +3,14 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
+import BackoffManager from './BackoffManager.js'
+import Informer from './Informer.js'
+import ListPager from './ListPager.js'
+import Reflector from './Reflector.js'
+import Store from './Store.js'
+import ListWatcher from './ListWatcher.js'
 
-'use strict'
-
-const BackoffManager = require('./BackoffManager')
-const Informer = require('./Informer')
-const ListPager = require('./ListPager')
-const Reflector = require('./Reflector')
-const Store = require('./Store')
-const ListWatcher = require('./ListWatcher')
-
-module.exports = {
+export {
   BackoffManager,
   Informer,
   ListPager,

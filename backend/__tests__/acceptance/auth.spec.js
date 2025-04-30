@@ -72,8 +72,8 @@ describe('auth', function () {
 
   let agent
 
-  beforeAll(async () => {
-    agent = await createAgent()
+  beforeAll(() => {
+    agent = createAgent()
   })
 
   afterAll(() => {
