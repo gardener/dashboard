@@ -23,22 +23,21 @@ const resourceGroups = _
   .mapValues(loadGroup)
   .value()
 
-function loadGroup ({ name }) {
-  const resourcesModules = {
-    APIRegistration,
-    Authentication,
-    Authorization,
-    Coordination,
-    Core,
-    GardenerCore,
-    GardenerDashboard,
-    GardenerSeedManagement,
-    Networking,
-  }
+const resourcesModules = {
+  APIRegistration,
+  Authentication,
+  Authorization,
+  Coordination,
+  Core,
+  GardenerCore,
+  GardenerDashboard,
+  GardenerSeedManagement,
+  Networking,
+}
 
+function loadGroup ({ name }) {
   // eslint-disable-next-line security/detect-object-injection
   const resources = resourcesModules[name]
-
   return _.mapKeys(resources, 'names.plural')
 }
 
