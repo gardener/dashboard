@@ -1069,15 +1069,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@gardener-dashboard/jest-esm-utils@workspace:^, @gardener-dashboard/jest-esm-utils@workspace:packages/jest-esm-utils":
-  version: 0.0.0-use.local
-  resolution: "@gardener-dashboard/jest-esm-utils@workspace:packages/jest-esm-utils"
-  dependencies:
-    "@jest/globals": "npm:^29.7.0"
-    jest: "npm:^29.7.0"
-  languageName: unknown
-  linkType: soft
-
 "@gardener-dashboard/kube-client@workspace:^, @gardener-dashboard/kube-client@workspace:packages/kube-client":
   version: 0.0.0-use.local
   resolution: "@gardener-dashboard/kube-client@workspace:packages/kube-client"
@@ -1140,7 +1131,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@gardener-dashboard/monitor@workspace:packages/monitor"
   dependencies:
-    "@gardener-dashboard/jest-esm-utils": "workspace:^"
     "@gardener-dashboard/logger": "workspace:^"
     "@gardener-dashboard/test-utils": "workspace:^"
     "@jest/globals": "npm:^29.7.0"

@@ -31,10 +31,6 @@ const RAW_RUNTIME_STATE =
       "reference": "workspace:packages"\
     },\
     {\
-      "name": "@gardener-dashboard/jest-esm-utils",\
-      "reference": "workspace:packages/jest-esm-utils"\
-    },\
-    {\
       "name": "@gardener-dashboard/kube-client",\
       "reference": "workspace:packages/kube-client"\
     },\
@@ -70,7 +66,6 @@ const RAW_RUNTIME_STATE =
     ["@gardener-dashboard/backend", ["workspace:backend"]],\
     ["@gardener-dashboard/charts", ["workspace:charts"]],\
     ["@gardener-dashboard/frontend", ["workspace:frontend"]],\
-    ["@gardener-dashboard/jest-esm-utils", ["workspace:packages/jest-esm-utils"]],\
     ["@gardener-dashboard/kube-client", ["virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#workspace:packages/kube-client", "workspace:packages/kube-client"]],\
     ["@gardener-dashboard/kube-config", ["virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#workspace:packages/kube-config", "workspace:packages/kube-config"]],\
     ["@gardener-dashboard/logger", ["workspace:packages/logger"]],\
@@ -1782,17 +1777,6 @@ const RAW_RUNTIME_STATE =
         "linkType": "SOFT"\
       }]\
     ]],\
-    ["@gardener-dashboard/jest-esm-utils", [\
-      ["workspace:packages/jest-esm-utils", {\
-        "packageLocation": "./packages/jest-esm-utils/",\
-        "packageDependencies": [\
-          ["@gardener-dashboard/jest-esm-utils", "workspace:packages/jest-esm-utils"],\
-          ["@jest/globals", "npm:29.7.0"],\
-          ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:29.7.0"]\
-        ],\
-        "linkType": "SOFT"\
-      }]\
-    ]],\
     ["@gardener-dashboard/kube-client", [\
       ["virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#workspace:packages/kube-client", {\
         "packageLocation": "./.yarn/__virtual__/@gardener-dashboard-kube-client-virtual-6e2c4c5999/1/packages/kube-client/",\
@@ -1911,7 +1895,6 @@ const RAW_RUNTIME_STATE =
       ["virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#workspace:packages/monitor", {\
         "packageLocation": "./.yarn/__virtual__/@gardener-dashboard-monitor-virtual-cfb59f52db/1/packages/monitor/",\
         "packageDependencies": [\
-          ["@gardener-dashboard/jest-esm-utils", "workspace:packages/jest-esm-utils"],\
           ["@gardener-dashboard/logger", "workspace:packages/logger"],\
           ["@gardener-dashboard/monitor", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#workspace:packages/monitor"],\
           ["@gardener-dashboard/test-utils", "workspace:packages/test-utils"],\
@@ -1939,7 +1922,6 @@ const RAW_RUNTIME_STATE =
       ["workspace:packages/monitor", {\
         "packageLocation": "./packages/monitor/",\
         "packageDependencies": [\
-          ["@gardener-dashboard/jest-esm-utils", "workspace:packages/jest-esm-utils"],\
           ["@gardener-dashboard/logger", "workspace:packages/logger"],\
           ["@gardener-dashboard/monitor", "workspace:packages/monitor"],\
           ["@gardener-dashboard/test-utils", "workspace:packages/test-utils"],\
