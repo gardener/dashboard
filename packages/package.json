@@ -1,5 +1,5 @@
 {
-  "name": "packages",
+  "name": "@gardener-dashboard/packages",
   "version": "1.0.0",
   "description": "packages parent folder",
   "license": "Apache-2.0",
@@ -22,9 +22,11 @@
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^16.0.1",
     "eslint": "^9.11.0",
+    "eslint-import-resolver-pnp": "^0.0.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jest": "^28.8.3",
     "eslint-plugin-lodash": "^8.0.0",
+    "eslint-plugin-require-node-import-prefix": "^0.0.2",
     "eslint-plugin-security": "^3.0.1",
     "neostandard": "^0.12.0",
     "rollup": "^4.40.0"

@@ -4,12 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import neostandard from 'neostandard';
-import pluginJest from 'eslint-plugin-jest';
-import pluginSecurity from 'eslint-plugin-security';
-import pluginLodash from 'eslint-plugin-lodash';
-import pluginImport from 'eslint-plugin-import';
-import path from 'path';
+import neostandard from 'neostandard'
+import pluginJest from 'eslint-plugin-jest'
+import pluginSecurity from 'eslint-plugin-security'
+import pluginLodash from 'eslint-plugin-lodash'
 
 export default [
   ...neostandard({}),
@@ -20,12 +18,6 @@ export default [
     },
   },
   pluginSecurity.configs.recommended,
-  {
-    plugins: {
-      import: pluginImport,
-    },
-    rules: pluginImport.flatConfigs.recommended.rules,
-  },
   {
     plugins: {
       lodash: pluginLodash,
@@ -60,24 +52,6 @@ export default [
     },
   },
   {
-    settings: {
-      'import/resolver': {
-        alias: {
-          map: [
-            ['@gardener-dashboard/kube-client', `${process.cwd()}/kube-client`],
-            ['@gardener-dashboard/kube-config', `${process.cwd()}/kube-config`],
-            ['@gardener-dashboard/logger', `${process.cwd()}/logger`],
-            ['@gardener-dashboard/monitor', `${process.cwd()}/monitor`],
-            ['@gardener-dashboard/polling-watcher', `${process.cwd()}/polling-watcher`],
-            ['@gardener-dashboard/request', `${process.cwd()}/request`],
-            ['@gardener-dashboard/test-utils', `${process.cwd()}/test-utils`],
-          ],
-          extensions: ['.js', '.jsx', '.ts', '.tsx'],
-        },
-      },
-    },
-  },
-  {
     ignores: ['**/dist/**'],
   },
-];
+]
