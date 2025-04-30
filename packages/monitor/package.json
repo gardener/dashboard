@@ -41,7 +41,6 @@
     "@gardener-dashboard/test-utils": "workspace:^"
   },
   "devDependencies": {
-    "@gardener-dashboard/jest-esm-utils": "workspace:^",
     "@gardener-dashboard/logger": "workspace:^",
     "@gardener-dashboard/test-utils": "workspace:^",
     "@jest/globals": "^29.7.0",

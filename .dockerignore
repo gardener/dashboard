@@ -68,10 +68,6 @@
 !packages/test-utils/package.json
 !packages/test-utils/dist
 
-# include workspace packages/jest-esm-utils
-!packages/jest-esm-utils/package.json
-!packages/jest-esm-utils/dist
-
 # include metadata files
 !VERSION
 !Dockerfile

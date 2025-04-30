@@ -5,7 +5,47 @@
 //
 
 import { jest } from '@jest/globals'
-import { spyOnHelper } from '@gardener-dashboard/jest-esm-utils'
+import { createRequire } from 'module'
+
+/**
+ * Partial spy on the specified methods or properties.
+ *
+ * @param {string} moduleName - The name of the module to mock.
+ * @param {string[]} methodPaths - An array of method paths to spy. Each path should be a dot-separated string
+ *                                 representing the method's location within the module (e.g., "connectionsCount.inc").
+ * @param importMetaUrl
+ * @returns {Promise<void>} A promise that resolves when the module is mocked.
+ */
+async function spyOnHelper (moduleName, methodPaths, importMetaUrl = '') {
+  if (importMetaUrl) {
+    moduleName = moduleResolve(importMetaUrl, moduleName)
+  }
+
+  const { default: actual } = await import(moduleName)
+
+  for (const method of methodPaths) {
+    if (method.includes('.')) {
+      const parts = method.split('.')
+      const property = parts.pop() // Get the last part (e.g., 'inc')
+
+      const parent = parts.reduce((obj, key) => obj[key], actual)
+
+      parent[property] = jest.fn(parent[property])
+    } else {
+      return {
+        default: jest.fn(actual),
+      }
+    }
+  }
+  return {
+    default: actual,
+  }
+}
+
+function moduleResolve (importMetaUrl, modulePath) {
+  const require = createRequire(importMetaUrl)
+  return require.resolve(modulePath)
+}
 
 const { default: spy } = await spyOnHelper('../lib/metrics.js',
   [
