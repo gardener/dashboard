@@ -40,7 +40,7 @@ SPDX-License-Identifier: Apache-2.0
       </g-list-item-content>
     </g-list-item>
     <template
-      v-if="isOidcObservabilityUrlsEnabled || canGetSecrets"
+      v-if="isOidcObservabilityUrlsEnabled || canGetCloudProviderCredentials"
     >
       <v-divider inset />
       <g-cluster-metrics
@@ -76,7 +76,7 @@ import { useShootHelper } from '@/composables/useShootHelper'
 
 const authzStore = useAuthzStore()
 const {
-  canGetSecrets,
+  canGetCloudProviderCredentials,
 } = storeToRefs(authzStore)
 
 const {

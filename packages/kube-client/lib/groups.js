@@ -61,6 +61,12 @@ class GardenerDashboard extends V1Alpha1(NamedGroup(HttpClient)) {
   }
 }
 
+class GardenerSecurity extends V1Alpha1(NamedGroup(HttpClient)) {
+  static get group () {
+    return 'security.gardener.cloud'
+  }
+}
+
 export {
   APIRegistration,
   Authentication,
@@ -71,4 +77,5 @@ export {
   GardenerCore,
   GardenerSeedManagement,
   GardenerDashboard,
+  GardenerSecurity,
 }

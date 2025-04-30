@@ -29,7 +29,6 @@ import map from 'lodash/map'
 import toLower from 'lodash/toLower'
 import filter from 'lodash/filter'
 import words from 'lodash/words'
-import find from 'lodash/find'
 import some from 'lodash/some'
 import sortBy from 'lodash/sortBy'
 import isEmpty from 'lodash/isEmpty'
@@ -352,10 +351,6 @@ export function getTimeStringTo (time, toTime, withoutPrefix = false) {
   return moment(time).to(toTime, withoutPrefix)
 }
 
-export function hasOwnSecret (secretBinding) {
-  return get(secretBinding, ['secretRef', 'namespace']) === get(secretBinding, ['metadata', 'namespace'])
-}
-
 export function getCreatedBy (metadata) {
   return get(metadata, ['annotations', 'gardener.cloud/created-by']) || get(metadata, ['annotations', 'garden.sapcloud.io/createdBy'])
 }
@@ -456,20 +451,6 @@ export function shortRandomString (length) {
     text += possible.charAt(Math.floor(Math.random() * possible.length))
   }
   return text
-}
-
-export function selfTerminationDaysForSecret (secretBinding) {
-  const clusterLifetimeDays = function (quotas, scope) {
-    return get(find(quotas, scope), ['spec', 'clusterLifetimeDays'])
-  }
-
-  const quotas = get(secretBinding, ['_quotas'])
-  let terminationDays = clusterLifetimeDays(quotas, { spec: { scope: { apiVersion: 'core.gardener.cloud/v1beta1', kind: 'Project' } } })
-  if (!terminationDays) {
-    terminationDays = clusterLifetimeDays(quotas, { spec: { scope: { apiVersion: 'v1', kind: 'Secret' } } })
-  }
-
-  return terminationDays
 }
 
 export const shootAddonList = [

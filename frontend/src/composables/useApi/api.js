@@ -60,16 +60,16 @@ export function getCloudProviderCredentials (namespace) {
   return invokeCloudProviderCredentialMethod('list', { bindingNamespace: namespace })
 }
 
-export function createCloudProviderCredential ({ secretBinding, secret }) {
-  return invokeCloudProviderCredentialMethod('create', { secretBinding, secret })
+export function createCloudProviderCredential (params) {
+  return invokeCloudProviderCredentialMethod('create', params)
 }
 
-export function updateCloudProviderCredential ({ secretBinding, secret }) {
-  return invokeCloudProviderCredentialMethod('patch', { secretBinding, secret })
+export function updateCloudProviderCredential (params) {
+  return invokeCloudProviderCredentialMethod('patch', params)
 }
 
-export function deleteCloudProviderCredential ({ namespace, name }) {
-  return invokeCloudProviderCredentialMethod('remove', { bindingNamespace: namespace, secretBindingName: name })
+export function deleteCloudProviderCredential (params) {
+  return invokeCloudProviderCredentialMethod('remove', params)
 }
 
 /* Tickets */

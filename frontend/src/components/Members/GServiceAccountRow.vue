@@ -47,7 +47,7 @@ SPDX-License-Identifier: Apache-2.0
                   color="warning"
                 />
               </template>
-              Associated Service Account does not exists
+              Associated Service Account does not exist
             </v-tooltip>
           </v-list-item-title>
           <v-list-item-subtitle style="flex: 1 0 100%;">

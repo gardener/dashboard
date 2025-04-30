@@ -91,11 +91,11 @@ SPDX-License-Identifier: Apache-2.0
                 </h4>
                 <span class="wrap-text">
                   <span v-if="infraAccountError">
-                    There is a problem with your secret
+                    There is a problem with your credential
                     <code>
-                      <g-shoot-secret-name
-                        :namespace="namespace"
-                        :secret-binding-name="secretBindingName"
+                      <g-credential-name
+                        :binding="shootBinding"
+                        render-link
                       />
                     </code>:
                   </span>
@@ -125,14 +125,14 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 
 import GAnsiText from '@/components/GAnsiText.vue'
-import GShootSecretName from '@/components/GShootSecretName.vue'
+import GCredentialName from '@/components/Credentials/GCredentialName.vue'
 
 import isEmpty from 'lodash/isEmpty'
 
 export default {
   components: {
     GAnsiText,
-    GShootSecretName,
+    GCredentialName,
   },
   props: {
     statusTitle: {
@@ -150,11 +150,8 @@ export default {
     lastTransitionTime: {
       type: String,
     },
-    secretBindingName: {
-      type: String,
-    },
-    namespace: {
-      type: String,
+    shootBinding: {
+      type: Object,
     },
   },
   computed: {

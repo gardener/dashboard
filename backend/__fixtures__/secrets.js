@@ -60,6 +60,15 @@ const cloudProviderSecretList = [
     },
   }),
   getCloudProviderSecret({
+    namespace: 'garden-foo',
+    name: 'secret3',
+    cloudProfileName: 'infra3-profileName',
+    data: {
+      key: 'fooKey',
+      secret: 'fooSecret',
+    },
+  }),
+  getCloudProviderSecret({
     namespace: 'garden-trial',
     name: 'trial-secret',
     cloudProfileName: 'infra1-profileName',
@@ -224,6 +233,9 @@ const mocks = {
         return Promise.reject(createError(409))
       }
       const item = secrets.get(namespace, name)
+      if (!item) {
+        return Promise.reject(createError(404))
+      }
       const resourceVersion = get(item, ['metadata', 'resourceVersion'], '42')
       merge(item, json)
       set(item, ['metadata', 'resourceVersion'], (+resourceVersion + 1).toString())
