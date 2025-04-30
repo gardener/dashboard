@@ -5,7 +5,7 @@
 //
 const request = await import('@gardener-dashboard/request')
 const { default: { mockClient } } = request
-const gardenerCore = await import('../lib/resources/GardenerCore')
+const gardenerCore = await import('../lib/resources/GardenerCore.js')
 const { Shoot } = gardenerCore
 
 describe('kube-client', () => {

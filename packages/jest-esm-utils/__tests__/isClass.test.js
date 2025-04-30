@@ -4,8 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { jest } from '@jest/globals'
-import { isClass } from '../lib/isClass'
+import { isClass } from '../lib/isClass.js'
 
 describe('isClass', () => {
   it('should return true for a class', () => {

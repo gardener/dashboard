@@ -36,6 +36,7 @@ function loadGroup ({ name }) {
     Networking,
   }
 
+  // eslint-disable-next-line security/detect-object-injection
   const resources = resourcesModules[name]
 
   return _.mapKeys(resources, 'names.plural')

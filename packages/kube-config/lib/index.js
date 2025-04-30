@@ -8,8 +8,8 @@ import fs from 'fs'
 import os from 'os'
 import path from 'path'
 import yaml from 'js-yaml'
-import Config from './Config'
-import ClientConfig from './ClientConfig'
+import Config from './Config.js'
+import ClientConfig from './ClientConfig.js'
 import {
   KUBERNETES_SERVICEACCOUNT_TOKEN_FILE,
   KUBERNETES_SERVICEACCOUNT_CA_FILE,

@@ -7,8 +7,4 @@
 export {
   spyOnHelper,
   moduleResolve,
-  createMockModule,
-  semiAutoMockHelper,
-  mockOnHelper,
-  spyOnHelperMocked,
 } from './spyOnHelper.js'

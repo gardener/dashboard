@@ -17,7 +17,7 @@
     "registry": "https://npm.pkg.github.com/"
   },
   "scripts": {
-    "lint": "yarn workspace packages eslint -c eslint.config.js ./jest-esm-utils --max-warnings=0",
+    "lint": "yarn workspace @gardener-dashboard/packages eslint -c eslint.config.js ./jest-esm-utils --max-warnings=0",
     "test": "node --experimental-vm-modules $(yarn bin jest)",
     "test-coverage": "yarn test --coverage"
   },

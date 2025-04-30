@@ -3,6 +3,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
-import{ jest } from '@jest/globals'
+import { jest } from '@jest/globals'
 
 export default jest.fn()

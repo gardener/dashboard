@@ -100,7 +100,6 @@ describe('monitors', () => {
       const method = 'PATCH'
       const statusCode = 42
       const requestDuration = 1234
-      console.log(additionalLabels)
       monitorResponseTimes(additionalLabels)
       expect(responseTime).toHaveBeenCalledTimes(1)
       const responseTimeHandler = responseTime.mock.calls[0][0]

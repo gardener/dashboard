@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import helper from './helper'
-import resources from './resources'
+import helper from './helper.js'
+import resources from './resources.js'
 
 export default {
   helper,

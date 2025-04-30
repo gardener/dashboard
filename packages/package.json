@@ -14,7 +14,8 @@
   },
   "scripts": {
     "build:all": "yarn workspaces foreach --all --parallel --no-private --include 'packages/*' run build",
-    "test:all": "yarn workspaces foreach --all --parallel --no-private --include 'packages/*' run test"
+    "test:all": "yarn workspaces foreach --all --parallel --no-private --include 'packages/*' run test",
+    "lint:all": "yarn workspaces foreach --all --parallel --no-private --include 'packages/*' run lint"
   },
   "devDependencies": {
     "@microsoft/eslint-formatter-sarif": "^3.1.0",

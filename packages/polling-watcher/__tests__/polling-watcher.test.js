@@ -7,7 +7,7 @@
 import { jest } from '@jest/globals'
 import fs from 'fs/promises'
 import { globalLogger as logger } from '@gardener-dashboard/logger'
-import createWatch from '../lib'
+import createWatch from '../lib/index.js'
 
 describe('polling-watcher', () => {
   beforeAll(() => {

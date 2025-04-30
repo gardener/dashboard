@@ -24,7 +24,7 @@
     "registry": "https://npm.pkg.github.com/"
   },
   "scripts": {
-    "lint": "yarn workspace packages eslint -c eslint.config.js ./polling-watcher --max-warnings=0",
+    "lint": "yarn workspace @gardener-dashboard/packages eslint -c eslint.config.js ./polling-watcher --max-warnings=0",
     "test": "node --experimental-vm-modules $(yarn bin jest)",
     "test-coverage": "yarn test --coverage",
     "build": "rimraf dist && yarn install && rollup -c ../rollup.config.js"

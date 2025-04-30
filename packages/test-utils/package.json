@@ -24,7 +24,7 @@
     "registry": "https://npm.pkg.github.com/"
   },
   "scripts": {
-    "lint": "yarn workspace packages eslint -c eslint.config.js ./test-utils --max-warnings=0",
+    "lint": "yarn workspace @gardener-dashboard/packages eslint -c eslint.config.js ./test-utils --max-warnings=0",
     "build": "rimraf dist && yarn install && rollup -c ../rollup.config.js"
   },
   "devDependencies": {

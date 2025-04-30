@@ -3,13 +3,12 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
-
-import BackoffManager from './BackoffManager'
-import Informer from './Informer'
-import ListPager from './ListPager'
-import Reflector from './Reflector'
-import Store from './Store'
-import ListWatcher from './ListWatcher'
+import BackoffManager from './BackoffManager.js'
+import Informer from './Informer.js'
+import ListPager from './ListPager.js'
+import Reflector from './Reflector.js'
+import Store from './Store.js'
+import ListWatcher from './ListWatcher.js'
 
 export {
   BackoffManager,

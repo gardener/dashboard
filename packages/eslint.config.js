@@ -8,6 +8,7 @@ import neostandard from 'neostandard'
 import pluginJest from 'eslint-plugin-jest'
 import pluginSecurity from 'eslint-plugin-security'
 import pluginLodash from 'eslint-plugin-lodash'
+import importPlugin from 'eslint-plugin-import'
 
 export default [
   ...neostandard({}),
@@ -49,6 +50,18 @@ export default [
       'security/detect-unsafe-regex': 'off',
       'security/detect-non-literal-fs-filename': 'off',
       'security/detect-non-literal-require': 'off',
+    },
+  },
+  {
+    plugins: {
+      import: importPlugin,
+    },
+    rules: {
+      'import/extensions': ['error', 'ignorePackages', {
+        js: 'always',
+        mjs: 'always',
+        cjs: 'always',
+      }],
     },
   },
   {
