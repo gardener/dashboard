@@ -31,12 +31,12 @@
     "build": "rimraf dist && yarn install && rollup -c ../rollup.config.js"
   },
   "dependencies": {
+    "@gardener-dashboard/polling-watcher": "workspace:^",
     "gtoken": "^7.1.0",
     "js-yaml": "^4.1.0",
     "lodash-es": "^4.17.21"
   },
   "peerDependencies": {
-    "@gardener-dashboard/polling-watcher": "workspace:^",
     "@gardener-dashboard/test-utils": "workspace:^"
   },
   "devDependencies": {

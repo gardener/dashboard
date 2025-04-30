@@ -17,31 +17,31 @@
 
 # include workspace packages/logger
 !packages/logger/package.json
-!packages/logger/lib
+!packages/logger/dist
 
 # include workspace packages/request
 !packages/request/package.json
-!packages/request/lib
+!packages/request/dist
 
 # include workspace packages/polling-watcher
 !packages/polling-watcher/package.json
-!packages/polling-watcher/lib
+!packages/polling-watcher/dist
 
 # include workspace packages/kube-config
 !packages/kube-config/package.json
-!packages/kube-config/lib
+!packages/kube-config/dist
 
 # include workspace packages/kube-client
 !packages/kube-client/package.json
-!packages/kube-client/lib
+!packages/kube-client/dist
 
 # include workspace packages/monitor
 !packages/monitor/package.json
-!packages/monitor/lib
+!packages/monitor/dist
 
 # include workspace backend
 !backend/package.json
-!backend/server.mjs
+!backend/server.js
 !backend/lib
 
 # include workspace frontend
@@ -61,9 +61,16 @@
 !charts/gardener-dashboard
 !charts/identity
 
+# include workspace packages
+!packages/package.json
+
 # include workspace packages/test-utils
 !packages/test-utils/package.json
-!packages/test-utils/lib
+!packages/test-utils/dist
+
+# include workspace packages/jest-esm-utils
+!packages/jest-esm-utils/package.json
+!packages/jest-esm-utils/dist
 
 # include metadata files
 !VERSION
