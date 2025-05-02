@@ -28,8 +28,8 @@ spec:
       machine:
         type: n1-standard-2
         image:
-          name: coreos
-          version: 2303.3.0
+          name: gardenlinux
+          version: 1592.9.0
       volume:
         type: pd-standard
         size: 50Gi
