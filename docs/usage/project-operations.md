@@ -218,7 +218,6 @@ To create a new cluster using the command line, you need a YAML definition of th
             type: n1-standard-2
             image:
               name: gardenlinux
-              version: 1592.9.0
           volume:
             type: pd-standard
             size: 50Gi
