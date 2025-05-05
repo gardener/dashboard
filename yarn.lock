@@ -1165,7 +1165,7 @@ __metadata:
     eslint-plugin-require-node-import-prefix: "npm:^0.0.2"
     eslint-plugin-security: "npm:^3.0.1"
     neostandard: "npm:^0.12.0"
-    rollup: "npm:^4.40.0"
+    rollup: "npm:^4.40.1"
   languageName: unknown
   linkType: soft
 
@@ -9452,7 +9452,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rollup@npm:^4.30.1, rollup@npm:^4.40.0, rollup@npm:^4.40.1":
+"rollup@npm:^4.30.1, rollup@npm:^4.40.1":
   version: 4.40.1
   resolution: "rollup@npm:4.40.1"
   dependencies:
