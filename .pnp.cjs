@@ -4876,13 +4876,6 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["acorn", [\
-      ["npm:8.14.0", {\
-        "packageLocation": "./.yarn/cache/acorn-npm-8.14.0-dc46f61424-6d4ee461a7.zip/node_modules/acorn/",\
-        "packageDependencies": [\
-          ["acorn", "npm:8.14.0"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["npm:8.14.1", {\
         "packageLocation": "./.yarn/cache/acorn-npm-8.14.1-aee76ee752-dbd36c1ed1.zip/node_modules/acorn/",\
         "packageDependencies": [\
@@ -4903,21 +4896,8 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/__virtual__/acorn-jsx-virtual-834321b202/0/cache/acorn-jsx-npm-5.3.2-d7594599ea-4c54868fbe.zip/node_modules/acorn-jsx/",\
         "packageDependencies": [\
           ["@types/acorn", null],\
-          ["acorn", "npm:8.14.0"],\
-          ["acorn-jsx", "virtual:a50722a5a9326b6a5f12350c494c4db3aa0f4caeac45e3e9e5fe071da20014ecfe738fe2ebe2c9c98abae81a4ea86b42f56d776b3bd5ec37f9ad3670c242b242#npm:5.3.2"]\
-        ],\
-        "packagePeers": [\
-          "@types/acorn",\
-          "acorn"\
-        ],\
-        "linkType": "HARD"\
-      }],\
-      ["virtual:bdb40e5eec2abab7841a997651f1b716f32383663f8e09c084d5eef63c9d467800fc82957bf6d0b0963f0c5ef8afa590f56f9218e27f6d6079b4a33c7fc0d8c3#npm:5.3.2", {\
-        "packageLocation": "./.yarn/__virtual__/acorn-jsx-virtual-97d5cc73cc/0/cache/acorn-jsx-npm-5.3.2-d7594599ea-4c54868fbe.zip/node_modules/acorn-jsx/",\
-        "packageDependencies": [\
-          ["@types/acorn", null],\
           ["acorn", "npm:8.14.1"],\
-          ["acorn-jsx", "virtual:bdb40e5eec2abab7841a997651f1b716f32383663f8e09c084d5eef63c9d467800fc82957bf6d0b0963f0c5ef8afa590f56f9218e27f6d6079b4a33c7fc0d8c3#npm:5.3.2"]\
+          ["acorn-jsx", "virtual:a50722a5a9326b6a5f12350c494c4db3aa0f4caeac45e3e9e5fe071da20014ecfe738fe2ebe2c9c98abae81a4ea86b42f56d776b3bd5ec37f9ad3670c242b242#npm:5.3.2"]\
         ],\
         "packagePeers": [\
           "@types/acorn",\
@@ -4939,7 +4919,7 @@ const RAW_RUNTIME_STATE =
       ["npm:8.5.0", {\
         "packageLocation": "./.yarn/cache/acorn-loose-npm-8.5.0-120f06b2cc-221df4224c.zip/node_modules/acorn-loose/",\
         "packageDependencies": [\
-          ["acorn", "npm:8.14.0"],\
+          ["acorn", "npm:8.14.1"],\
           ["acorn-loose", "npm:8.5.0"]\
         ],\
         "linkType": "HARD"\
@@ -6381,7 +6361,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/dependency-cruiser-npm-16.10.1-bdb40e5eec-7e39f8c75d.zip/node_modules/dependency-cruiser/",\
         "packageDependencies": [\
           ["acorn", "npm:8.14.1"],\
-          ["acorn-jsx", "virtual:bdb40e5eec2abab7841a997651f1b716f32383663f8e09c084d5eef63c9d467800fc82957bf6d0b0963f0c5ef8afa590f56f9218e27f6d6079b4a33c7fc0d8c3#npm:5.3.2"],\
+          ["acorn-jsx", "virtual:a50722a5a9326b6a5f12350c494c4db3aa0f4caeac45e3e9e5fe071da20014ecfe738fe2ebe2c9c98abae81a4ea86b42f56d776b3bd5ec37f9ad3670c242b242#npm:5.3.2"],\
           ["acorn-jsx-walk", "npm:2.0.0"],\
           ["acorn-loose", "npm:8.5.0"],\
           ["acorn-walk", "npm:8.3.4"],\
@@ -7627,7 +7607,7 @@ const RAW_RUNTIME_STATE =
       ["npm:10.3.0", {\
         "packageLocation": "./.yarn/cache/espree-npm-10.3.0-e5b10052f5-272beeaca7.zip/node_modules/espree/",\
         "packageDependencies": [\
-          ["acorn", "npm:8.14.0"],\
+          ["acorn", "npm:8.14.1"],\
           ["acorn-jsx", "virtual:a50722a5a9326b6a5f12350c494c4db3aa0f4caeac45e3e9e5fe071da20014ecfe738fe2ebe2c9c98abae81a4ea86b42f56d776b3bd5ec37f9ad3670c242b242#npm:5.3.2"],\
           ["eslint-visitor-keys", "npm:4.2.0"],\
           ["espree", "npm:10.3.0"]\
@@ -7637,7 +7617,7 @@ const RAW_RUNTIME_STATE =
       ["npm:9.6.1", {\
         "packageLocation": "./.yarn/cache/espree-npm-9.6.1-a50722a5a9-1a2e9b4699.zip/node_modules/espree/",\
         "packageDependencies": [\
-          ["acorn", "npm:8.14.0"],\
+          ["acorn", "npm:8.14.1"],\
           ["acorn-jsx", "virtual:a50722a5a9326b6a5f12350c494c4db3aa0f4caeac45e3e9e5fe071da20014ecfe738fe2ebe2c9c98abae81a4ea86b42f56d776b3bd5ec37f9ad3670c242b242#npm:5.3.2"],\
           ["eslint-visitor-keys", "npm:3.4.3"],\
           ["espree", "npm:9.6.1"]\
@@ -13557,7 +13537,7 @@ const RAW_RUNTIME_STATE =
       ["npm:2.0.0-beta.1", {\
         "packageLocation": "./.yarn/cache/unplugin-npm-2.0.0-beta.1-e18fb615d4-4a700c9fc5.zip/node_modules/unplugin/",\
         "packageDependencies": [\
-          ["acorn", "npm:8.14.0"],\
+          ["acorn", "npm:8.14.1"],\
           ["unplugin", "npm:2.0.0-beta.1"],\
           ["webpack-virtual-modules", "npm:0.6.2"]\
         ],\
