@@ -16,6 +16,7 @@ import GardenerCore from './GardenerCore.js'
 import GardenerDashboard from './GardenerDashboard.js'
 import GardenerSeedManagement from './GardenerSeedManagement.js'
 import Networking from './Networking.js'
+import GardenerSecurity from './GardenerSecurity.js'
 
 const resourceGroups = _
   .chain(groups)
@@ -23,19 +24,19 @@ const resourceGroups = _
   .mapValues(loadGroup)
   .value()
 
-const resourcesModules = {
-  APIRegistration,
-  Authentication,
-  Authorization,
-  Coordination,
-  Core,
-  GardenerCore,
-  GardenerDashboard,
-  GardenerSeedManagement,
-  Networking,
-}
-
 function loadGroup ({ name }) {
+  const resourcesModules = {
+    APIRegistration,
+    Authentication,
+    Authorization,
+    Coordination,
+    Core,
+    GardenerCore,
+    GardenerDashboard,
+    GardenerSecurity,
+    GardenerSeedManagement,
+    Networking,
+  }
   // eslint-disable-next-line security/detect-object-injection
   const resources = resourcesModules[name]
   return _.mapKeys(resources, 'names.plural')
