@@ -71,7 +71,10 @@ export default {
         ]
       }
       if (this.credential?.kind === 'Secret') {
-        return this.getCredentialDetails(this.credential)
+        const details = this.getCredentialDetails(this.credential)
+        if (details) {
+          return details
+        }
       }
       if (this.credential?.kind === 'WorkloadIdentity') {
         return [
@@ -84,8 +87,9 @@ export default {
       }
       return [
         {
-          label: 'Unknown',
-          value: 'Information not available',
+          label: this.credential?.kind || 'Unknown',
+          value: `No details available for credentials of type ${this.providerType}`,
+          valueClass: 'font-weight-light text-disabled',
         },
       ]
     },
@@ -161,7 +165,7 @@ export default {
             return [
               {
                 label: 'Hetzner Cloud Token',
-                value: decodeBase64(secretData.hcloudToken),
+                value: 'hidden',
               },
             ]
           case 'openstack-designate':
@@ -253,12 +257,7 @@ export default {
               },
             ]
           default:
-            return [
-              {
-                label: 'Secret Data',
-                value: JSON.stringify(secretData),
-              },
-            ]
+            return undefined
         }
       } catch (err) {
         return undefined
