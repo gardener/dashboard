@@ -217,8 +217,7 @@ To create a new cluster using the command line, you need a YAML definition of th
           machine:
             type: n1-standard-2
             image:
-              name: coreos
-              version: 2303.3.0
+              name: gardenlinux
           volume:
             type: pd-standard
             size: 50Gi
