@@ -37,7 +37,7 @@ function loadGroup ({ name }) {
     GardenerSeedManagement,
     Networking,
   }
-  /* eslint-disable-next-line security/detect-object-injection --  function is only consumed internally with known input*/
+  /* eslint-disable-next-line security/detect-object-injection -- function is only consumed internally with known input */
   const resources = resourcesModules[name]
   return _.mapKeys(resources, 'names.plural')
 }
