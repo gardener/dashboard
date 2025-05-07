@@ -18,7 +18,11 @@ export default [
       format: 'cjs',
     },
     external: getPeerDependencies(readFileSync),
-    plugins: [nodeResolve(), json(), commonjs()],
+    plugins: [
+      nodeResolve(),
+      json(),
+      commonjs(),
+    ],
   },
   {
     input: `${process.cwd()}/lib/index.js`,
@@ -28,7 +32,11 @@ export default [
       format: 'esm',
     },
     external: getPeerDependencies(),
-    plugins: [nodeResolve(), json(), commonjs()],
+    plugins: [
+      nodeResolve(),
+      json(),
+      commonjs(),
+    ],
   },
 ]
 
