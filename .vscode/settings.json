@@ -25,7 +25,7 @@
       "directory": "./charts/"
     },
     {
-      "pattern": "./packages/*/"
+      "pattern": "./packages/**/"
     }
   ],
   "search.exclude": {
@@ -38,7 +38,7 @@
     "**/.yarn/versions/**": true,
     "**/dist": true
   },
-  "eslint.runtime": "./scripts/eslint-yarn-node.js",
+  "eslint.runtime": "./scripts/eslint-yarn-node.mjs",
   "files.exclude": {
     "logo": true,
     "LICENSES": true,

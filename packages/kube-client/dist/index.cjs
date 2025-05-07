@@ -25620,7 +25620,7 @@ function decodeBase64 (value) {
 
 function afterResponse (response) {
   const { headers, httpVersion, statusCode, statusMessage, body, request } = response;
-  const requestOptions = get(request, ['options'], {});
+               const requestOptions = get(request, ['options'], {});
   const id = get(requestOptions, ['headers', 'x-request-id']);
   const { url, method, [xRequestStart]: start } = requestOptions;
   const duration = start ? Date.now() - start : undefined;
@@ -25702,9 +25702,9 @@ function beforeRequest (options) {
 }
 
 function addHook (options, hook) {
-  const name = hook.name;
+          const name = hook.name;
   let hooks = get(options, ['hooks', name]);
-  if (!Array.isArray(hooks)) {
+                     if (!Array.isArray(hooks)) {
     set(options, ['hooks', name], (hooks = []));
   }
   hooks.push(hook);

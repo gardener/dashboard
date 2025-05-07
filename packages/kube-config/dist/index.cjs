@@ -110859,9 +110859,6 @@ function readKubeconfig (filename) {
     filename = filename.shift();
   }
   const dirname = path.dirname(filename);
-  if (!fs.existsSync(filename)) {
-    throw new Error(`Configuration file not found at path: ${filename}`)
-  }
   const kubeconfig = jsYaml.load(
     fs.readFileSync(filename, 'utf8'), // eslint-disable-line security/detect-non-literal-fs-filename
   );

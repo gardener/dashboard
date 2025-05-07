@@ -1,12 +1,15 @@
 #!/usr/bin/env node
-
+//ToDo license? 
 //https://github.com/microsoft/vscode-eslint/issues/1602#issuecomment-1524128714
 
 import { execSync, spawn } from "node:child_process";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
-process.chdir(dirname(fileURLToPath(import.meta.url)));
+const scribtDir = dirname(fileURLToPath(import.meta.url))
+console.log('currentDir: ',scribtDir)
+process.chdir(scribtDir);
+
 
 const nodeOptions = execSync("yarn node -p process.env.NODE_OPTIONS")
   .toString()
