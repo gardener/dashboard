@@ -1,5 +1,4 @@
 # .husky/pre-commit
 set -x
 ggshield secret scan pre-commit "$@"
-
 #ToDo add check and validation and user message to check if ggshield is installed and guide the user etc.
