@@ -19,17 +19,14 @@ SPDX-License-Identifier: Apache-2.0
         <span v-if="detailsTitle">)</span>
       </template>
       <span
-        v-for="({ value, label, valueClass }, index) in credentialDetails"
+        v-for="({ value, label, hidden, disabledText = hidden }, index) in credentialDetails"
         :key="label"
       >
-        <span
-          v-if="value"
-          :class="valueClass"
-        >{{ value }}</span>
-        <span
-          v-else
-          class="font-weight-light text-disabled"
-        >unknown</span>
+        <span :class="{'font-weight-light text-disabled' : disabledText }">
+          <template v-if="hidden">******</template>
+          <template v-else-if="value">{{ value }}</template>
+          <template v-else>unknown</template>
+        </span>
         <span v-if="index !== credentialDetails.length - 1"> / </span>
       </span>
     </g-list-item-content>
@@ -66,26 +63,28 @@ export default {
           {
             label: 'Shared',
             value: 'Details not available for shared credentials',
-            valueClass: 'font-weight-light text-disabled',
+            disabledText: true,
           },
         ]
-      }
-      if (this.credential?.kind === 'Secret') {
-        return this.getCredentialDetails(this.credential)
-      }
-      if (this.credential?.kind === 'WorkloadIdentity') {
+      } else if (this.credential?.kind === 'Secret') {
+        const details = this.getCredentialDetails(this.credential)
+        if (details) {
+          return details
+        }
+      } else if (this.credential?.kind === 'WorkloadIdentity') {
         return [
           {
             label: 'WorkloadIdentity',
             value: 'Details not available for credentials of type WorkloadIdentity',
-            valueClass: 'font-weight-light text-disabled',
+            disabledText: true,
           },
         ]
       }
       return [
         {
-          label: 'Unknown',
-          value: 'Information not available',
+          label: this.credential?.kind || 'Unknown',
+          value: 'Details not available',
+          disabledText: true,
         },
       ]
     },
@@ -161,7 +160,7 @@ export default {
             return [
               {
                 label: 'Hetzner Cloud Token',
-                value: decodeBase64(secretData.hcloudToken),
+                hidden: true,
               },
             ]
           case 'openstack-designate':
@@ -216,14 +215,14 @@ export default {
             return [
               {
                 label: 'API Key',
-                value: 'hidden',
+                hidden: true,
               },
             ]
           case 'netlify-dns':
             return [
               {
                 label: 'API Key',
-                value: 'hidden',
+                hidden: true,
               },
             ]
           case 'rfc2136':
@@ -249,16 +248,11 @@ export default {
               },
               {
                 label: 'API Key',
-                value: 'hidden',
+                hidden: true,
               },
             ]
           default:
-            return [
-              {
-                label: 'Secret Data',
-                value: JSON.stringify(secretData),
-              },
-            ]
+            return undefined
         }
       } catch (err) {
         return undefined
