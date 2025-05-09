@@ -4,10 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const HttpClient = require('./HttpClient')
-const { V1, V1Alpha1, V1Beta1, CoreGroup, NamedGroup } = require('./mixins')
+import HttpClient from './HttpClient.js'
+import { V1, V1Alpha1, V1Beta1, CoreGroup, NamedGroup } from './mixins.js'
 
 class APIRegistration extends V1(NamedGroup(HttpClient)) {
   static get group () {
@@ -69,7 +67,7 @@ class GardenerSecurity extends V1Alpha1(NamedGroup(HttpClient)) {
   }
 }
 
-module.exports = {
+export {
   APIRegistration,
   Authentication,
   Authorization,

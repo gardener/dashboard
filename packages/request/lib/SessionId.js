@@ -4,10 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const crypto = require('crypto')
-const { get, set } = require('lodash')
+import crypto from 'crypto'
+import { get, set } from 'lodash-es'
 
 const kOptions = Symbol('options')
 
@@ -65,4 +63,4 @@ function createPath ({ id, ...options }) {
   return path
 }
 
-module.exports = SessionId
+export default SessionId

@@ -18,8 +18,8 @@ function createStore (items) {
 describe('api', function () {
   let agent
 
-  beforeAll(async () => {
-    agent = await createAgent()
+  beforeAll(() => {
+    agent = createAgent()
 
     cache.initialize({
       shoots: {

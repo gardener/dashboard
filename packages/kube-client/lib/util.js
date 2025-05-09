@@ -4,11 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const http2 = require('http2')
-const path = require('path')
-const _ = require('lodash')
+import http2 from 'http2'
+import path from 'path'
+import _ from 'lodash-es'
 
 const {
   HTTP2_HEADER_CONTENT_TYPE,
@@ -71,7 +69,7 @@ function validateLabelValue (name) {
   }
 }
 
-exports = module.exports = {
+export {
   decodeBase64,
   setContentType,
   PatchType,
