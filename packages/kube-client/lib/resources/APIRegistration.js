@@ -4,12 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const { mix } = require('mixwith')
-
-const { APIRegistration } = require('../groups')
-const { ClusterScoped, Readable } = require('../mixins')
+import { mix } from 'mixwith'
+import { APIRegistration } from '../groups.js'
+import { ClusterScoped, Readable } from '../mixins.js'
 
 class APIService extends mix(APIRegistration).with(ClusterScoped, Readable) {
   static get names () {
@@ -21,6 +18,6 @@ class APIService extends mix(APIRegistration).with(ClusterScoped, Readable) {
   }
 }
 
-module.exports = {
+export default {
   APIService,
 }

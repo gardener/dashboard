@@ -4,12 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import helper from './helper.js'
+import matchers from './matchers.js'
 
-const helper = require('./helper')
-const matchers = require('./matchers')
-
-module.exports = {
+export default {
   helper,
   matchers,
 }

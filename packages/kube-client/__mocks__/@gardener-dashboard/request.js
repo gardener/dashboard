@@ -4,17 +4,16 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const { PassThrough } = require('stream')
-const request = jest.requireActual('@gardener-dashboard/request')
+import { jest } from '@jest/globals'
+import { PassThrough } from 'node:stream'
+import request from '@gardener-dashboard/request'
 
 const mockClient = {
-  request: jest.fn(() => Promise.resolve()),
+  request: jest.fn(),
   stream: jest.fn(() => Promise.resolve(new PassThrough({ objectMode: true }))),
 }
 
-module.exports = {
+export default {
   ...request,
   extend: jest.fn(() => mockClient),
   mockClient,

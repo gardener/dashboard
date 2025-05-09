@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
 class ListWatcher {
   constructor (listFunc, watchFunc, { group, version, names }, query) {
     this.listFunc = listFunc
@@ -43,4 +41,4 @@ class ListWatcher {
   }
 }
 
-module.exports = ListWatcher
+export default ListWatcher

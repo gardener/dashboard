@@ -34,6 +34,14 @@ scripts/bin
 node_modules/
 bin/
 dist/
+!packages/jest-esm-utils/dist/
+!packages/kube-client/dist/
+!packages/kube-config/dist/
+!packages/logger/dist/
+!packages/monitor/dist/
+!packages/polling-watcher/dist/
+!packages/request/dist/
+!packages/test-utils/dist/
 ssl/
 tmp/
 coverage/

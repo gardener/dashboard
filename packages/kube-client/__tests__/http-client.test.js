@@ -4,15 +4,15 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import { jest } from '@jest/globals'
+import request from '@gardener-dashboard/request'
+import httpErrors from 'http-errors'
+import HttpClient from '../lib/HttpClient.js'
+import { http } from '../lib/symbols.js'
+const { default: { delay } } = await import('../__fixtures__/helper.js')
 
-const { extend, mockClient } = require('@gardener-dashboard/request')
-
-const { GatewayTimeout } = require('http-errors')
-const HttpClient = require('../lib/HttpClient')
-const { http } = require('../lib/symbols')
-
-const { delay } = fixtures.helper
+const { extend, mockClient } = request
+const { GatewayTimeout } = httpErrors
 
 class TestClient extends HttpClient {
   request (...args) {

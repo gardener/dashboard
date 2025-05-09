@@ -4,14 +4,12 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const http2 = require('http2')
-const net = require('net')
-const { omit } = require('lodash')
-const { globalLogger: logger } = require('@gardener-dashboard/logger')
-const Semaphore = require('./Semaphore')
-const { TimeoutError, StreamError, isAbortError } = require('./errors')
+import http2 from 'http2'
+import net from 'net'
+import { omit } from 'lodash-es'
+import { globalLogger as logger } from '@gardener-dashboard/logger'
+import Semaphore from './Semaphore.js'
+import { TimeoutError, StreamError, isAbortError } from './errors.js'
 
 const {
   NGHTTP2_CANCEL,
@@ -307,4 +305,4 @@ class SessionPool {
   }
 }
 
-module.exports = SessionPool
+export default SessionPool

@@ -4,9 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const crypto = require('crypto')
+import crypto from 'node:crypto'
 
 function getOwnSymbol (obj, description) {
   return Object.getOwnPropertySymbols(obj).find(symbol => symbol.description === description)
@@ -53,7 +51,7 @@ function randomNumber () {
   return crypto.randomBytes(4).readUInt32LE(0)
 }
 
-module.exports = {
+export default {
   getOwnSymbol,
   getOwnSymbolProperty,
   nextTick,

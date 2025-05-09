@@ -4,9 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const { isResourceExpired } = require('../ApiErrors')
+import { isResourceExpired } from '../ApiErrors.js'
 
 function initializeList ({ metadata: { resourceVersion, selfLink } }) {
   return {
@@ -96,4 +94,4 @@ class ListPager {
   }
 }
 
-module.exports = ListPager
+export default ListPager

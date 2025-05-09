@@ -4,12 +4,13 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import { jest } from '@jest/globals'
+import http2 from 'http2'
+import zlib from 'zlib'
+import { globalLogger as logger } from '@gardener-dashboard/logger'
+import client from '../lib/index.js'
 
-const http2 = require('http2')
-const zlib = require('zlib')
-const { globalLogger: logger } = require('@gardener-dashboard/logger')
-const { Client, extend } = require('../lib')
+const { Client, extend } = client
 
 const {
   HTTP2_HEADER_METHOD,

@@ -4,12 +4,12 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import assert from 'assert'
+import fs from 'fs'
+import createWatch from '@gardener-dashboard/polling-watcher'
+import stream from 'node:stream'
 
-const assert = require('assert').strict
-const fs = require('fs')
-const createWatch = require('@gardener-dashboard/polling-watcher')
-const { EventEmitter } = require('stream')
+const { EventEmitter } = stream
 
 function getCluster ({ currentCluster }, files) {
   const cluster = {}
@@ -235,4 +235,4 @@ class ClientConfig {
   }
 }
 
-module.exports = ClientConfig
+export default ClientConfig

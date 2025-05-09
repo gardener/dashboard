@@ -4,12 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const { mix } = require('mixwith')
-
-const { Authorization } = require('../groups')
-const { ClusterScoped, Creatable } = require('../mixins')
+import { mix } from 'mixwith'
+import { Authorization } from '../groups.js'
+import { ClusterScoped, Creatable } from '../mixins.js'
 
 class SelfSubjectAccessReview extends mix(Authorization).with(ClusterScoped, Creatable) {
   static get names () {
@@ -41,7 +38,7 @@ class SubjectAccessReview extends mix(Authorization).with(ClusterScoped, Creatab
   }
 }
 
-module.exports = {
+export default {
   SelfSubjectAccessReview,
   SelfSubjectRulesReview,
   SubjectAccessReview,

@@ -4,12 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const { mix } = require('mixwith')
-
-const { GardenerSeedManagement } = require('../groups')
-const { NamespaceScoped, Readable, Writable, Observable } = require('../mixins')
+import { mix } from 'mixwith'
+import { GardenerSeedManagement } from '../groups.js'
+import { NamespaceScoped, Readable, Writable, Observable } from '../mixins.js'
 
 class SeedManagement extends mix(GardenerSeedManagement).with(NamespaceScoped, Readable, Observable, Writable) {
   static get names () {
@@ -21,6 +18,6 @@ class SeedManagement extends mix(GardenerSeedManagement).with(NamespaceScoped, R
   }
 }
 
-module.exports = {
+export default {
   SeedManagement,
 }

@@ -4,10 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const chalk = require('chalk')
-const util = require('util')
+import chalk from 'chalk'
+import util from 'util'
 
 const LEVELS = {
   trace: 1,
@@ -148,4 +146,4 @@ class Logger {
 
 Logger.prototype.LEVELS = Logger.LEVELS = LEVELS
 
-module.exports = Logger
+export default Logger

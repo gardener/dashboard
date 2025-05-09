@@ -4,18 +4,16 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const fs = require('fs')
-const os = require('os')
-const path = require('path')
-const yaml = require('js-yaml')
-const Config = require('./Config')
-const ClientConfig = require('./ClientConfig')
-const {
+import fs from 'fs'
+import os from 'os'
+import path from 'path'
+import yaml from 'js-yaml'
+import Config from './Config.js'
+import ClientConfig from './ClientConfig.js'
+import {
   KUBERNETES_SERVICEACCOUNT_TOKEN_FILE,
   KUBERNETES_SERVICEACCOUNT_CA_FILE,
-} = require('./constants')
+} from './constants.js'
 
 function readKubeconfig (filename) {
   if (!filename) {
@@ -65,55 +63,62 @@ function inClusterConfig ({
   })
 }
 
-exports = module.exports = {
+function parseKubeconfig (input) {
+  return Config.parse(input)
+}
+function cleanKubeconfig (input) {
+  return parseKubeconfig(input).clean()
+}
+function fromKubeconfig (input) {
+  return new ClientConfig(cleanKubeconfig(input))
+}
+function dumpKubeconfig ({ userName, contextName = 'default', clusterName = 'garden', namespace, token, server, caData }) {
+  return Config.build(
+    { server, 'certificate-authority-data': caData },
+    { token },
+    { userName, contextName, clusterName, namespace },
+  ).toYAML()
+}
+function load (env, options) {
+  let config
+  if (env.KUBECONFIG) {
+    config = readKubeconfig(env.KUBECONFIG)
+  } else {
+    try {
+      config = inClusterConfig(env)
+    } catch (err) {
+      config = readKubeconfig()
+    }
+  }
+  return new ClientConfig(config, { ...options, reactive: true })
+}
+function getInCluster (env) {
+  try {
+    return new ClientConfig(inClusterConfig(env))
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      switch (err.path) {
+        case KUBERNETES_SERVICEACCOUNT_TOKEN_FILE:
+          throw new TypeError('Failed to load in-cluster configuration, serviceaccount token not found')
+        case KUBERNETES_SERVICEACCOUNT_CA_FILE:
+          throw new TypeError('Failed to load in-cluster configuration, serviceaccount certificate authority not found')
+      }
+    }
+    throw err
+  }
+}
+
+export default {
   Config,
   ClientConfig,
   constants: {
     KUBERNETES_SERVICEACCOUNT_CA_FILE,
     KUBERNETES_SERVICEACCOUNT_TOKEN_FILE,
   },
-  parseKubeconfig (input) {
-    return Config.parse(input)
-  },
-  cleanKubeconfig (input) {
-    return exports.parseKubeconfig(input).clean()
-  },
-  fromKubeconfig (input) {
-    return new ClientConfig(exports.cleanKubeconfig(input))
-  },
-  dumpKubeconfig ({ userName, contextName = 'default', clusterName = 'garden', namespace, token, server, caData }) {
-    return Config.build(
-      { server, 'certificate-authority-data': caData },
-      { token },
-      { userName, contextName, clusterName, namespace },
-    ).toYAML()
-  },
-  load (env, options) {
-    let config
-    if (env.KUBECONFIG) {
-      config = readKubeconfig(env.KUBECONFIG)
-    } else {
-      try {
-        config = inClusterConfig(env)
-      } catch (err) {
-        config = readKubeconfig()
-      }
-    }
-    return new ClientConfig(config, { ...options, reactive: true })
-  },
-  getInCluster (env) {
-    try {
-      return new ClientConfig(inClusterConfig(env))
-    } catch (err) {
-      if (err.code === 'ENOENT') {
-        switch (err.path) {
-          case KUBERNETES_SERVICEACCOUNT_TOKEN_FILE:
-            throw new TypeError('Failed to load in-cluster configuration, serviceaccount token not found')
-          case KUBERNETES_SERVICEACCOUNT_CA_FILE:
-            throw new TypeError('Failed to load in-cluster configuration, serviceaccount certificate authority not found')
-        }
-      }
-      throw err
-    }
-  },
+  parseKubeconfig,
+  cleanKubeconfig,
+  fromKubeconfig,
+  dumpKubeconfig,
+  load,
+  getInCluster,
 }

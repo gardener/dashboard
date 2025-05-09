@@ -4,11 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const { mix } = require('mixwith')
-const mixins = require('../lib/mixins')
-const { http } = require('../lib/symbols')
+import { jest } from '@jest/globals'
+import { mix } from 'mixwith'
+import * as mixins from '../lib/mixins.js'
+import { http } from '../lib/symbols.js'
 const { V1, NamedGroup, NamespaceScoped, ClusterScoped, Readable, Observable, Writable } = mixins
 
 class MockClient {
@@ -52,7 +51,7 @@ class Bar extends mix(MockGroup).with(ClusterScoped, Readable, Observable, Writa
   }
 }
 
-module.exports = {
+export {
   Foo,
   Bar,
 }

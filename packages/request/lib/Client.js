@@ -4,19 +4,19 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import { join } from 'path'
+import { isIP } from 'net'
+import http from 'http'
+import http2 from 'http2'
+import zlib from 'zlib'
+import typeis from 'type-is/index.js'
+import { pick, omit } from 'lodash-es'
+import { globalLogger as logger } from '@gardener-dashboard/logger'
+import { createHttpError, ParseError } from './errors.js'
+import agent from './Agent.js'
+import { pipeline } from 'stream'
 
-const { join } = require('path')
-const { isIP } = require('net')
-const http = require('http')
-const http2 = require('http2')
-const zlib = require('zlib')
-const typeis = require('type-is')
-const { pick, omit } = require('lodash')
-const { globalLogger: logger } = require('@gardener-dashboard/logger')
-const { createHttpError, ParseError } = require('./errors')
-const { globalAgent } = require('./Agent')
-const { pipeline } = require('stream')
+const { globalAgent } = agent
 
 const {
   HTTP2_HEADER_STATUS,
@@ -391,4 +391,4 @@ class Client {
   }
 }
 
-module.exports = Client
+export default Client

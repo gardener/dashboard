@@ -4,11 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import _ from 'lodash-es'
+import gtoken from 'gtoken'
+import yaml from 'js-yaml'
 
-const _ = require('lodash')
-const { GoogleToken } = require('gtoken')
-const yaml = require('js-yaml')
+const { GoogleToken } = gtoken
 
 const PROPERTY_NAMES = ['apiVersion', 'kind', 'current-context', 'contexts', 'clusters', 'users']
 
@@ -174,4 +174,4 @@ class Config {
   }
 }
 
-module.exports = Config
+export default Config

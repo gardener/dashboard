@@ -4,11 +4,14 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import { jest } from '@jest/globals'
+import 'abort-controller/polyfill'
+import testUtils from '@gardener-dashboard/test-utils'
 
-require('abort-controller/polyfill')
-const { matchers, ...fixtures } = require('./__fixtures__')
-
+const { matchers } = testUtils
 expect.extend(matchers)
 
-global.fixtures = fixtures
+const loggerMock = await import('./__mocks__/@gardener-dashboard/logger.js')
+jest.unstable_mockModule('@gardener-dashboard/logger', () => {
+  return loggerMock
+})

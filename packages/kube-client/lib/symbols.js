@@ -4,13 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-module.exports = {
-  http: {
-    relativeUrl: Symbol('http.relativeUrl'),
-    client: Symbol('http.client'),
-    agent: Symbol('http.agent'),
-    request: Symbol('http.request'),
-  },
+export const http = {
+  relativeUrl: Symbol('http.relativeUrl'),
+  client: Symbol('http.client'),
+  agent: Symbol('http.agent'),
+  request: Symbol('http.request'),
 }

@@ -4,13 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const promClient = require('prom-client')
-const app = require('../lib/app')
+import promClient from 'prom-client'
 
 describe('app', () => {
-  it('should clear register on destroy', () => {
+  it('should clear register on destroy', async () => {
+    const { default: app } = await import('../lib/app.js')
     app.destroy()
     expect(promClient.register.clear).toBeCalledTimes(1)
   })

@@ -4,12 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import { mix } from 'mixwith'
 
-const { mix } = require('mixwith')
-
-const { GardenerSecurity } = require('../groups')
-const { NamespaceScoped, Readable, Writable, Observable } = require('../mixins')
+import { GardenerSecurity } from '../groups.js'
+import { NamespaceScoped, Readable, Writable, Observable } from '../mixins.js'
 
 class CredentialsBinding extends mix(GardenerSecurity).with(NamespaceScoped, Readable, Observable, Writable) {
   static get names () {
@@ -31,7 +29,7 @@ class WorkloadIdentity extends mix(GardenerSecurity).with(NamespaceScoped, Reada
   }
 }
 
-module.exports = {
+export default {
   CredentialsBinding,
   WorkloadIdentity,
 }

@@ -4,11 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const crypto = require('crypto')
-const fs = require('fs/promises')
-const { globalLogger: logger } = require('@gardener-dashboard/logger')
+import crypto from 'crypto'
+import fs from 'fs/promises'
+import { globalLogger as logger } from '@gardener-dashboard/logger'
 
 function sha256 (data) {
   return crypto.createHash('sha256').update(data).digest('hex')
@@ -38,7 +36,7 @@ function removeAbortListener (signal, abort) {
 }
 
 // Note: The parameter 'paths' must not be user input to prevent security vulnerabilities
-module.exports = async function createWatch (paths, options = {}) {
+export default async function createWatch (paths, options = {}) {
   const {
     interval = 300_000,
     signal,

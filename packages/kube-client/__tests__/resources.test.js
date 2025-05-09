@@ -3,11 +3,10 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
-
-'use strict'
-
-const { mockClient } = require('@gardener-dashboard/request')
-const { Shoot } = require('../lib/resources/GardenerCore')
+const request = await import('@gardener-dashboard/request')
+const { default: { mockClient } } = request
+const gardenerCore = await import('../lib/resources/GardenerCore.js')
+const { Shoot } = gardenerCore
 
 describe('kube-client', () => {
   describe('resources', () => {
@@ -18,15 +17,15 @@ describe('kube-client', () => {
         const name = 'test'
         const data = { foo: 'bar' }
 
-        let shoot
+        let shootInstance
 
         beforeEach(() => {
-          shoot = new Shoot({ url })
+          shootInstance = new Shoot({ url })
           mockClient.request.mockImplementation((...args) => args)
         })
 
         it('should create an adminkubeconfig subresource', async () => {
-          const args = await shoot.createAdminKubeconfigRequest(namespace, name, data)
+          const args = await shootInstance.createAdminKubeconfigRequest(namespace, name, data)
           expect(args).toEqual([
             `namespaces/${namespace}/shoots/${name}/adminkubeconfig`,
             {

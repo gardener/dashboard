@@ -4,11 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const EventEmitter = require('events')
-const Reflector = require('./Reflector')
-const Store = require('./Store')
+import EventEmitter from 'events'
+import Reflector from './Reflector.js'
+import Store from './Store.js'
 
 class Informer extends EventEmitter {
   #reflector
@@ -116,4 +114,4 @@ class Informer extends EventEmitter {
   }
 }
 
-module.exports = Informer
+export default Informer

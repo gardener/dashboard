@@ -4,12 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const { mix } = require('mixwith')
-
-const { Networking } = require('../groups')
-const { NamespaceScoped, Readable, Writable, Observable } = require('../mixins')
+import { mix } from 'mixwith'
+import { Networking } from '../groups.js'
+import { NamespaceScoped, Readable, Writable, Observable } from '../mixins.js'
 
 class Ingress extends mix(Networking).with(NamespaceScoped, Readable, Observable, Writable) {
   static get names () {
@@ -21,6 +18,6 @@ class Ingress extends mix(Networking).with(NamespaceScoped, Readable, Observable
   }
 }
 
-module.exports = {
+export default {
   Ingress,
 }

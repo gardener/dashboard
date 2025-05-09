@@ -4,14 +4,14 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import fs from 'fs'
+import os from 'os'
+import path from 'path'
+import Config from '../lib/Config.js'
+import ClientConfig from '../lib/ClientConfig.js'
+import testUtils from '@gardener-dashboard/test-utils'
 
-const fs = require('fs')
-const os = require('os')
-const path = require('path')
-const Config = require('../lib/Config')
-const ClientConfig = require('../lib/ClientConfig')
-const { encodeBase64, onceEvent } = fixtures.helper
+const { encodeBase64, onceEvent } = testUtils.helper
 
 describe('client-config', () => {
   let context

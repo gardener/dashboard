@@ -4,11 +4,18 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import SessionId from '../lib/SessionId.js'
+import crypto from 'node:crypto'
 
-const SessionId = require('../lib/SessionId')
+function sha1Hash (data, length = 7) {
+  return crypto
+    .createHash('sha1')
+    .update(data)
+    .digest('hex')
+    .substring(0, length)
+}
 
-const objectHash = obj => fixtures.helper.sha1Hash(JSON.stringify(obj))
+const objectHash = obj => sha1Hash(JSON.stringify(obj))
 
 describe('SessionId', () => {
   const authority = 'https://foo.org'

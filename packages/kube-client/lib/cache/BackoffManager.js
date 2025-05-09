@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
 class BackoffManager {
   constructor (options = {}) {
     const {
@@ -48,4 +46,4 @@ class BackoffManager {
   }
 }
 
-module.exports = BackoffManager
+export default BackoffManager

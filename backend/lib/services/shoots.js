@@ -8,8 +8,8 @@
 
 const { isHttpError } = require('@gardener-dashboard/request')
 const { Config } = require('@gardener-dashboard/kube-config')
-const { dashboardClient } = require('@gardener-dashboard/kube-client')
-const resources = require('@gardener-dashboard/kube-client/lib/resources')
+const kubeClient = require('@gardener-dashboard/kube-client')
+const { Resources, dashboardClient } = kubeClient
 const createError = require('http-errors')
 const utils = require('../utils')
 const cache = require('../cache')
@@ -182,7 +182,7 @@ exports.replaceSeedName = async function ({ user, namespace, name, body }) {
 
 exports.createAdminKubeconfig = async function ({ user, namespace, name, body }) {
   const client = user.client
-  const { apiVersion, kind } = resources.Resources.AdminKubeconfigRequest
+  const { apiVersion, kind } = Resources.AdminKubeconfigRequest
   const payload = {
     kind,
     apiVersion,

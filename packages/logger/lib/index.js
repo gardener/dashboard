@@ -4,11 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import Logger from './Logger.js'
 
-const Logger = require('./Logger')
-
-module.exports = {
+const globalLogger = new Logger()
+export {
   Logger,
-  globalLogger: new Logger(),
+  globalLogger,
 }

@@ -4,10 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import testUtils from '@gardener-dashboard/test-utils'
+import kubeConfig from '@gardener-dashboard/kube-config'
 
-const { helper } = require('@gardener-dashboard/test-utils')
-const { parseKubeconfig } = require('@gardener-dashboard/kube-config')
+const { helper } = testUtils
+const { parseKubeconfig } = kubeConfig
 
 function createTestKubeconfig (user = { token: 'token' }, cluster = { server: 'server' }) {
   return parseKubeconfig({
@@ -30,7 +31,7 @@ function createTestKubeconfig (user = { token: 'token' }, cluster = { server: 's
   })
 }
 
-module.exports = {
+export default {
   ...helper,
   createTestKubeconfig,
 }
