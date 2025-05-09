@@ -57,11 +57,9 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { toRef } from 'vue'
-import { mapActions } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
-import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useProjectStore } from '@/store/project'
 import { useCredentialStore } from '@/store/credential'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
@@ -203,9 +201,6 @@ export default {
     this.v$.internalValue.$touch()
   },
   methods: {
-    ...mapActions(useCloudProfileStore, [
-      'cloudProfileByName',
-    ]),
     openSecretDialog () {
       this.visibleSecretDialog = this.providerType
       this.secretItemsBeforeAdd = cloneDeep(this.allowedBindings)

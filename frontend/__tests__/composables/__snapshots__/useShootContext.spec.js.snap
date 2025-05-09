@@ -95,7 +95,10 @@ exports[`composables > useShootContext > should change the infrastructure kind 1
         "enabled": false,
       },
     },
-    "cloudProfileName": "gcp",
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "gcp",
+    },
     "hibernation": {
       "schedules": [
         {
@@ -186,7 +189,10 @@ exports[`composables > useShootContext > should change to credentials binding 1`
         "enabled": false,
       },
     },
-    "cloudProfileName": "aws",
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "aws",
+    },
     "credentialsBindingName": "aws-credentialsbinding",
     "hibernation": {
       "schedules": [
@@ -286,7 +292,10 @@ exports[`composables > useShootContext > should create a default "alicloud" shoo
         "enabled": false,
       },
     },
-    "cloudProfileName": "alicloud",
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "alicloud",
+    },
     "hibernation": {
       "schedules": [
         {
@@ -384,7 +393,10 @@ exports[`composables > useShootContext > should create a default "aws" shoot man
         "enabled": false,
       },
     },
-    "cloudProfileName": "aws",
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "aws",
+    },
     "hibernation": {
       "schedules": [
         {
@@ -484,7 +496,10 @@ exports[`composables > useShootContext > should create a default "azure" shoot m
         "enabled": false,
       },
     },
-    "cloudProfileName": "az",
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "az",
+    },
     "hibernation": {
       "schedules": [
         {
@@ -578,7 +593,10 @@ exports[`composables > useShootContext > should create a default "gcp" shoot man
         "enabled": false,
       },
     },
-    "cloudProfileName": "gcp",
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "gcp",
+    },
     "hibernation": {
       "schedules": [
         {
@@ -669,7 +687,10 @@ exports[`composables > useShootContext > should create a default "ironcore" shoo
         "enabled": false,
       },
     },
-    "cloudProfileName": "ironcore",
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "ironcore",
+    },
     "hibernation": {
       "schedules": [
         {
@@ -748,7 +769,10 @@ exports[`composables > useShootContext > should create a default "openstack" sho
         "enabled": false,
       },
     },
-    "cloudProfileName": "openstack-1",
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "openstack-1",
+    },
     "hibernation": {
       "schedules": [
         {

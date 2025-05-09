@@ -29,7 +29,7 @@ import map from 'lodash/map'
 import get from 'lodash/get'
 
 const shootPropertyMappings = Object.freeze({
-  cloudProfileName: 'spec.cloudProfileName',
+  cloudProfileRef: 'spec.cloudProfile',
   seedName: 'spec.seedName',
   region: 'spec.region',
   secretBindingName: 'spec.secretBindingName',
@@ -49,7 +49,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
   } = options
 
   const {
-    cloudProfileName,
+    cloudProfileRef,
     seedName,
     region,
     secretBindingName,
@@ -75,13 +75,18 @@ export function createShootHelperComposable (shootItem, options = {}) {
     return cloudProfileStore.cloudProfilesByProviderType(providerType.value)
   })
 
-  const defaultCloudProfileName = computed(() => {
+  const defaultCloudProfileRef = computed(() => {
     const defaultCloudProfile = head(cloudProfiles.value)
-    return get(defaultCloudProfile, ['metadata', 'name'])
+    const name = get(defaultCloudProfile, ['metadata', 'name'])
+    const cloudProfileRef = {
+      name,
+      kind: 'CloudProfile',
+    }
+    return cloudProfileRef
   })
 
   const cloudProfile = computed(() => {
-    return cloudProfileStore.cloudProfileByName(cloudProfileName.value)
+    return cloudProfileStore.cloudProfileByRef(cloudProfileRef.value)
   })
 
   const seed = computed(() => {
@@ -93,7 +98,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
   })
 
   const seeds = computed(() => {
-    return cloudProfileStore.seedsByCloudProfileName(cloudProfileName.value)
+    return cloudProfileStore.seedsByCloudProfileRef(cloudProfileRef.value)
   })
 
   const isFailureToleranceTypeZoneSupported = computed(() => {
@@ -104,32 +109,32 @@ export function createShootHelperComposable (shootItem, options = {}) {
   })
 
   const allZones = computed(() => {
-    return cloudProfileStore.zonesByCloudProfileNameAndRegion({
-      cloudProfileName: cloudProfileName.value,
+    return cloudProfileStore.zonesByCloudProfileRefAndRegion({
+      cloudProfileRef: cloudProfileRef.value,
       region: region.value,
     })
   })
 
   const regionsWithSeed = computed(() => {
-    return cloudProfileStore.regionsWithSeedByCloudProfileName(cloudProfileName.value)
+    return cloudProfileStore.regionsWithSeedByCloudProfileRef(cloudProfileRef.value)
   })
 
   const regionsWithoutSeed = computed(() => {
-    return cloudProfileStore.regionsWithoutSeedByCloudProfileName(cloudProfileName.value)
+    return cloudProfileStore.regionsWithoutSeedByCloudProfileRef(cloudProfileRef.value)
   })
 
   const defaultNodesCIDR = computed(() => {
-    return cloudProfileStore.getDefaultNodesCIDR(cloudProfileName.value)
+    return cloudProfileStore.getDefaultNodesCIDR(cloudProfileRef.value)
   })
 
   const infrastructureBindings = useCloudProviderBindingList(providerType, { credentialStore, gardenerExtensionStore })
 
   const sortedKubernetesVersions = computed(() => {
-    return cloudProfileStore.sortedKubernetesVersions(cloudProfileName.value)
+    return cloudProfileStore.sortedKubernetesVersions(cloudProfileRef.value)
   })
 
   const kubernetesVersionIsNotLatestPatch = computed(() => {
-    return cloudProfileStore.kubernetesVersionIsNotLatestPatch(kubernetesVersion.value, cloudProfileName.value)
+    return cloudProfileStore.kubernetesVersionIsNotLatestPatch(kubernetesVersion.value, cloudProfileRef.value)
   })
 
   const { selfTerminationDays } = useCloudProviderBinding(infrastructureBinding)
@@ -144,67 +149,67 @@ export function createShootHelperComposable (shootItem, options = {}) {
   })
 
   const allLoadBalancerProviderNames = computed(() => {
-    return cloudProfileStore.loadBalancerProviderNamesByCloudProfileNameAndRegion({
-      cloudProfileName: cloudProfileName.value,
+    return cloudProfileStore.loadBalancerProviderNamesByCloudProfileRefAndRegion({
+      cloudProfileRef: cloudProfileRef.value,
       region: region.value,
     })
   })
 
   const allLoadBalancerClassNames = computed(() => {
-    return cloudProfileStore.loadBalancerClassNamesByCloudProfileName(cloudProfileName.value)
+    return cloudProfileStore.loadBalancerClassNamesByCloudProfileRef(cloudProfileRef.value)
   })
 
   const partitionIDs = computed(() => {
-    return cloudProfileStore.partitionIDsByCloudProfileNameAndRegion({
-      cloudProfileName: cloudProfileName.value,
+    return cloudProfileStore.partitionIDsByCloudProfileRefAndRegion({
+      cloudProfileRef: cloudProfileRef.value,
       region: region.value,
     })
   })
 
   const firewallImages = computed(() => {
-    return cloudProfileStore.firewallImagesByCloudProfileName(cloudProfileName.value)
+    return cloudProfileStore.firewallImagesByCloudProfileRef(cloudProfileRef.value)
   })
 
   const firewallSizes = computed(() => {
-    const firewallSizes = cloudProfileStore.firewallSizesByCloudProfileNameAndRegion({
-      cloudProfileName: cloudProfileName.value,
+    const firewallSizes = cloudProfileStore.firewallSizesByCloudProfileRefAndRegion({
+      cloudProfileRef: cloudProfileRef.value,
       region: region.value,
     })
     return map(firewallSizes, 'name')
   })
 
   const allFloatingPoolNames = computed(() => {
-    return cloudProfileStore.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({
-      cloudProfileName: cloudProfileName.value,
+    return cloudProfileStore.floatingPoolNamesByCloudProfileRefAndRegionAndDomain({
+      cloudProfileRef: cloudProfileRef.value,
       region: region.value,
       secretDomain: get(infrastructureBinding.value, ['data', 'domainName']),
     })
   })
 
   const allMachineTypes = computed(() => {
-    return cloudProfileStore.machineTypesByCloudProfileName(cloudProfileName.value)
+    return cloudProfileStore.machineTypesByCloudProfileRef(cloudProfileRef.value)
   })
 
   const machineArchitectures = computed(() => {
-    return cloudProfileStore.machineArchitecturesByCloudProfileNameAndRegion({
-      cloudProfileName: cloudProfileName.value,
+    return cloudProfileStore.machineArchitecturesByCloudProfileRefAndRegion({
+      cloudProfileRef: cloudProfileRef.value,
       region: region.value,
     })
   })
 
   const allVolumeTypes = computed(() => {
-    return cloudProfileStore.volumeTypesByCloudProfileName(cloudProfileName.value)
+    return cloudProfileStore.volumeTypesByCloudProfileRef(cloudProfileRef.value)
   })
 
   const volumeTypes = computed(() => {
-    return cloudProfileStore.volumeTypesByCloudProfileNameAndRegion({
-      cloudProfileName: cloudProfileName.value,
+    return cloudProfileStore.volumeTypesByCloudProfileRefAndRegion({
+      cloudProfileRef: cloudProfileRef.value,
       region: region.value,
     })
   })
 
   const machineImages = computed(() => {
-    return cloudProfileStore.machineImagesByCloudProfileName(cloudProfileName.value)
+    return cloudProfileStore.machineImagesByCloudProfileRef(cloudProfileRef.value)
   })
 
   const networkingTypes = computed(() => {
@@ -226,7 +231,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
 
   return {
     cloudProfiles,
-    defaultCloudProfileName,
+    defaultCloudProfileRef,
     cloudProfile,
     seed,
     seedIngressDomain,

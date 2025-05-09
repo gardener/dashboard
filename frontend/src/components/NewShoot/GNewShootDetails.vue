@@ -123,7 +123,6 @@ export default {
     const {
       shootName,
       kubernetesVersion,
-      cloudProfileName,
       purpose,
       workerless,
       shootNamespace,
@@ -138,7 +137,6 @@ export default {
       v$: useVuelidate(),
       shootName,
       kubernetesVersion,
-      cloudProfileName,
       purpose,
       workerless,
       shootNamespace,
