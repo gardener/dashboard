@@ -1,0 +1,9 @@
+# .husky/pre-commit
+set -x
+
+if ! command -v ggshield &> /dev/null; then
+  echo "Error: ggshield is not installed. Please visit https://docs.gitguardian.com/ggshield-docs/getting-started for installation instructions."
+  exit 1
+fi
+
+ggshield secret scan pre-commit "$@"
