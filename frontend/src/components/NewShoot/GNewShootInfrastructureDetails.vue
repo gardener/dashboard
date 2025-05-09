@@ -11,10 +11,9 @@ SPDX-License-Identifier: Apache-2.0
         v-if="cloudProfiles.length > 1"
         cols="3"
       >
-        <g-cloud-profile
+        <g-select-cloud-profile
           ref="cloudProfile"
-          v-model="cloudProfileName"
-          create-mode
+          v-model="cloudProfileRef"
           :cloud-profiles="cloudProfiles"
           color="primary"
         />
@@ -186,7 +185,7 @@ import {
 } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
-import GCloudProfile from '@/components/GCloudProfile'
+import GSelectCloudProfile from '@/components/GSelectCloudProfile'
 import GWildcardSelect from '@/components/GWildcardSelect'
 import GSelectCredential from '@/components/Credentials/GSelectCredential'
 
@@ -206,14 +205,14 @@ import map from 'lodash/map'
 
 export default {
   components: {
-    GCloudProfile,
+    GSelectCloudProfile,
     GWildcardSelect,
     GSelectCredential,
   },
   setup () {
     const {
       providerType,
-      cloudProfileName,
+      cloudProfileRef,
       infrastructureBinding,
       region,
       networkingType,
@@ -244,8 +243,8 @@ export default {
     return {
       v$: useVuelidate(),
       providerType,
-      cloudProfileName,
       infrastructureBinding,
+      cloudProfileRef,
       region,
       networkingType,
       loadBalancerProviderName: providerControlPlaneConfigLoadBalancerProviderName,

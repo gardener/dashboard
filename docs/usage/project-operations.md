@@ -194,7 +194,9 @@ To create a new cluster using the command line, you need a YAML definition of th
       namespace: garden-flowering
     spec:
       secretBindingName: trial-secretbinding-gcp
-      cloudProfileName: gcp
+      cloudProfile:
+        kind: CloudProfile
+        name: gcp
       region: europe-west1
       purpose: evaluation
       provider:

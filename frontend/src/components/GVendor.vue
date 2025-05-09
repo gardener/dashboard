@@ -40,9 +40,9 @@ SPDX-License-Identifier: Apache-2.0
             {{ providerType }}
           </v-list-item-title>
         </v-list-item>
-        <v-list-item v-if="shootCloudProfileName">
+        <v-list-item v-if="shootCloudProfileRef">
           <v-list-item-subtitle>Cloud Profile</v-list-item-subtitle>
-          <v-list-item-title>{{ shootCloudProfileName }}</v-list-item-title>
+          <v-list-item-title>{{ shootCloudProfileRef }}</v-list-item-title>
         </v-list-item>
         <v-list-item v-if="region">
           <v-list-item-subtitle>Region</v-list-item-subtitle>
@@ -90,10 +90,10 @@ export default {
   },
   setup () {
     const {
-      shootCloudProfileName,
+      shootCloudProfileRef,
     } = useShootItem() ?? {}
     return {
-      shootCloudProfileName,
+      shootCloudProfileRef,
     }
   },
   computed: {

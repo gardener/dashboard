@@ -402,7 +402,7 @@ export default {
   setup () {
     const {
       shootMetadata,
-      shootCloudProfileName,
+      shootCloudProfileRef,
     } = useShootItem()
 
     const tab = ref('overview')
@@ -410,7 +410,7 @@ export default {
     return {
       tab,
       shootMetadata,
-      shootCloudProfileName,
+      shootCloudProfileRef,
     }
   },
   data () {
@@ -431,12 +431,12 @@ export default {
       },
     },
     machineType () {
-      const machineTypes = this.machineTypesByCloudProfileName(this.shootCloudProfileName)
+      const machineTypes = this.machineTypesByCloudProfileRef(this.shootCloudProfileRef)
       const type = get(this.workerGroup, ['machine', 'type'])
       return find(machineTypes, ['name', type])
     },
     volumeType () {
-      const volumeTypes = this.volumeTypesByCloudProfileName(this.shootCloudProfileName)
+      const volumeTypes = this.volumeTypesByCloudProfileRef(this.shootCloudProfileRef)
       const type = get(this.workerGroup, ['volume', 'type'])
       return find(volumeTypes, ['name', type])
     },
@@ -468,7 +468,7 @@ export default {
       return {}
     },
     machineImage () {
-      const machineImages = this.machineImagesByCloudProfileName(this.shootCloudProfileName)
+      const machineImages = this.machineImagesByCloudProfileRef(this.shootCloudProfileRef)
       const { name, version } = get(this.workerGroup, ['machine', 'image'], {})
       return find(machineImages, { name, version }) ?? {}
     },
@@ -499,9 +499,9 @@ export default {
   },
   methods: {
     ...mapActions(useCloudProfileStore, [
-      'machineTypesByCloudProfileName',
-      'volumeTypesByCloudProfileName',
-      'machineImagesByCloudProfileName',
+      'machineTypesByCloudProfileRef',
+      'volumeTypesByCloudProfileRef',
+      'machineImagesByCloudProfileRef',
     ]),
     updateWorkerGroupYaml (value) {
       this.workerGroupYaml = yaml.dump(value)

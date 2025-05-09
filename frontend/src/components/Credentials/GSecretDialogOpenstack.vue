@@ -163,14 +163,11 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapActions } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 import {
   required,
   requiredIf,
 } from '@vuelidate/validators'
-
-import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import GSecretDialog from '@/components/Credentials/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
@@ -340,7 +337,6 @@ export default {
     },
   },
   methods: {
-    ...mapActions(useCloudProfileStore, ['cloudProfileByName']),
     reset () {
       this.v$.$reset()
 

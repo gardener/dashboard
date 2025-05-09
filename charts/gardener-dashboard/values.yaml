@@ -283,7 +283,7 @@ global:
 
       # # accessRestriction is used to define the access restricion text, keys and value mappings
       # accessRestriction:
-      #   noItemsText: No access restriction options available for region ${region} and cloud profile ${cloudProfile}
+      #   noItemsText: No access restriction options available for region ${region} and cloud profile ${cloudProfileName} (${cloudProfileKind})
       #   items:
       #   - key: eu-access
       #     display:

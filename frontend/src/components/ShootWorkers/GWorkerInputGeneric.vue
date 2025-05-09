@@ -62,7 +62,7 @@ SPDX-License-Identifier: Apache-2.0
         <g-volume-type
           :volume-types="volumeTypes"
           :worker="worker"
-          :cloud-profile-name="cloudProfileName"
+          :cloud-profile-ref="cloudProfileRef"
           :field-name="`${workerGroupName} Volume Type`"
         />
       </div>
@@ -213,7 +213,7 @@ export default {
   setup () {
     const {
       isNewCluster,
-      cloudProfileName,
+      cloudProfileRef,
       kubernetesVersion,
       region,
       allZones,
@@ -230,7 +230,7 @@ export default {
     return {
       v$: useVuelidate(),
       isNewCluster,
-      cloudProfileName,
+      cloudProfileRef,
       kubernetesVersion,
       region,
       allZones,
@@ -321,8 +321,8 @@ export default {
         : this.initialZones
     },
     machineTypes () {
-      return this.machineTypesByCloudProfileNameAndRegionAndArchitecture({
-        cloudProfileName: this.cloudProfileName,
+      return this.machineTypesByCloudProfileRefAndRegionAndArchitecture({
+        cloudProfileRef: this.cloudProfileRef,
         region: this.region,
         architecture: this.machineArchitecture,
       })
@@ -337,7 +337,7 @@ export default {
       return find(this.volumeTypes, ['name', this.worker.volume?.type])
     },
     machineImages () {
-      const machineImages = this.machineImagesByCloudProfileName(this.cloudProfileName)
+      const machineImages = this.machineImagesByCloudProfileRef(this.cloudProfileRef)
       return filter(machineImages, ({ isExpired, architectures }) => !isExpired && includes(architectures, this.machineArchitecture))
     },
     minimumVolumeSize () {
@@ -490,10 +490,10 @@ export default {
   },
   methods: {
     ...mapActions(useCloudProfileStore, [
-      'machineTypesByCloudProfileNameAndRegionAndArchitecture',
-      'machineImagesByCloudProfileName',
+      'machineTypesByCloudProfileRefAndRegionAndArchitecture',
+      'machineImagesByCloudProfileRef',
       'minimumVolumeSizeByMachineTypeAndVolumeType',
-      'defaultMachineImageForCloudProfileNameAndMachineType',
+      'defaultMachineImageForCloudProfileRefAndMachineType',
     ]),
     onInputVolumeSize () {
       if (this.hasVolumeSize) {
@@ -511,7 +511,7 @@ export default {
     resetWorkerMachine () {
       const defaultMachineType = head(this.machineTypes)
       this.worker.machine.type = get(defaultMachineType, ['name'])
-      const defaultMachineImage = this.defaultMachineImageForCloudProfileNameAndMachineType(this.cloudProfileName, defaultMachineType)
+      const defaultMachineImage = this.defaultMachineImageForCloudProfileRefAndMachineType(this.cloudProfileRef, defaultMachineType)
       this.worker.machine.image = pick(defaultMachineImage, ['name', 'version'])
     },
     getErrorMessages,

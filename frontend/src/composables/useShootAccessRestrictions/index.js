@@ -21,7 +21,7 @@ import keyBy from 'lodash/keyBy'
 import mapValues from 'lodash/mapValues'
 
 const shootPropertyMappings = Object.freeze({
-  cloudProfileName: 'spec.cloudProfileName',
+  cloudProfileRef: 'spec.cloudProfile',
   region: 'spec.region',
 })
 
@@ -31,7 +31,7 @@ export const useShootAccessRestrictions = (shootItem, options = {}) => {
   } = options
 
   const {
-    cloudProfileName,
+    cloudProfileRef,
     region,
   } = mapValues(shootPropertyMappings, path => {
     return computed(() => get(shootItem.value, path))
@@ -40,15 +40,15 @@ export const useShootAccessRestrictions = (shootItem, options = {}) => {
   const unsetLegacyAccessRestriction = ref(false)
 
   const accessRestrictionDefinitionList = computed(() => {
-    return cloudProfileStore.accessRestrictionDefinitionsByCloudProfileNameAndRegion({
-      cloudProfileName: cloudProfileName.value,
+    return cloudProfileStore.accessRestrictionDefinitionsByCloudProfileRefAndRegion({
+      cloudProfileRef: cloudProfileRef.value,
       region: region.value,
     })
   })
 
   const accessRestrictionNoItemsText = computed(() => {
-    return cloudProfileStore.accessRestrictionNoItemsTextForCloudProfileNameAndRegion({
-      cloudProfileName: cloudProfileName.value,
+    return cloudProfileStore.accessRestrictionNoItemsTextForCloudProfileRefAndRegion({
+      cloudProfileRef: cloudProfileRef.value,
       region: region.value,
     })
   })

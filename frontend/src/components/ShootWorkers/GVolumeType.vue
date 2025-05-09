@@ -76,8 +76,8 @@ export default {
       type: Array,
       default: () => [],
     },
-    cloudProfileName: {
-      type: String,
+    cloudProfileRef: {
+      type: Object,
     },
     fieldName: {
       type: String,
@@ -134,7 +134,7 @@ export default {
       return ''
     },
     isAWS () {
-      const cloudProfile = this.cloudProfileByName(this.cloudProfileName)
+      const cloudProfile = this.cloudProfileByRef(this.cloudProfileRef)
       return get(cloudProfile, ['metadata', 'providerType']) === 'aws'
     },
   },
@@ -144,7 +144,7 @@ export default {
   },
   methods: {
     ...mapActions(useCloudProfileStore, [
-      'cloudProfileByName',
+      'cloudProfileByRef',
     ]),
     onInputVolumeType () {
       this.v$.worker.volume.type.$touch()
