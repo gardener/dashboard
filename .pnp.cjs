@@ -1636,7 +1636,7 @@ const RAW_RUNTIME_STATE =
           ["eslint-plugin-lodash", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:8.0.0"],\
           ["eslint-plugin-security", "npm:3.0.1"],\
           ["express", "npm:5.1.0"],\
-          ["express-static-gzip", "npm:2.2.0"],\
+          ["express-static-gzip", "npm:3.0.0"],\
           ["fast-json-patch", "npm:3.1.1"],\
           ["fnv-plus", "npm:1.3.1"],\
           ["helmet", "npm:8.1.0"],\
@@ -1650,7 +1650,7 @@ const RAW_RUNTIME_STATE =
           ["neostandard", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:0.12.1"],\
           ["object-hash", "npm:3.0.0"],\
           ["openapi-types", "npm:12.1.3"],\
-          ["openid-client", "npm:6.4.2"],\
+          ["openid-client", "npm:6.5.0"],\
           ["p-event", "npm:4.2.0"],\
           ["p-limit", "npm:3.1.0"],\
           ["p-retry", "npm:4.6.2"],\
@@ -1663,7 +1663,7 @@ const RAW_RUNTIME_STATE =
           ["socket.io", "npm:4.8.1"],\
           ["socket.io-client", "npm:4.8.1"],\
           ["supertest", "npm:7.1.0"],\
-          ["undici", "npm:7.8.0"],\
+          ["undici", "npm:7.9.0"],\
           ["uuid", "npm:11.1.0"]\
         ],\
         "linkType": "SOFT"\
@@ -6493,15 +6493,6 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
-    ["destroy", [\
-      ["npm:1.2.0", {\
-        "packageLocation": "./.yarn/cache/destroy-npm-1.2.0-6a511802e2-bd7633942f.zip/node_modules/destroy/",\
-        "packageDependencies": [\
-          ["destroy", "npm:1.2.0"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
     ["detect-libc", [\
       ["npm:1.0.3", {\
         "packageLocation": "./.yarn/cache/detect-libc-npm-1.0.3-c30ac344d4-4da0deae9f.zip/node_modules/detect-libc/",\
@@ -6709,13 +6700,6 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["encodeurl", [\
-      ["npm:1.0.2", {\
-        "packageLocation": "./.yarn/cache/encodeurl-npm-1.0.2-f8c8454c41-f6c2387379.zip/node_modules/encodeurl/",\
-        "packageDependencies": [\
-          ["encodeurl", "npm:1.0.2"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["npm:2.0.0", {\
         "packageLocation": "./.yarn/cache/encodeurl-npm-2.0.0-3660bcc92a-5d317306ac.zip/node_modules/encodeurl/",\
         "packageDependencies": [\
@@ -7909,12 +7893,13 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["express-static-gzip", [\
-      ["npm:2.2.0", {\
-        "packageLocation": "./.yarn/cache/express-static-gzip-npm-2.2.0-a69a6b6ada-41a06af321.zip/node_modules/express-static-gzip/",\
+      ["npm:3.0.0", {\
+        "packageLocation": "./.yarn/cache/express-static-gzip-npm-3.0.0-90f275839c-f1d6b24416.zip/node_modules/express-static-gzip/",\
         "packageDependencies": [\
-          ["express-static-gzip", "npm:2.2.0"],\
+          ["express-static-gzip", "npm:3.0.0"],\
+          ["mime-types", "npm:3.0.1"],\
           ["parseurl", "npm:1.3.3"],\
-          ["serve-static", "npm:1.16.2"]\
+          ["serve-static", "npm:2.2.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -8232,13 +8217,6 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["fresh", [\
-      ["npm:0.5.2", {\
-        "packageLocation": "./.yarn/cache/fresh-npm-0.5.2-ad2bb4c0a2-c6d27f3ed8.zip/node_modules/fresh/",\
-        "packageDependencies": [\
-          ["fresh", "npm:0.5.2"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["npm:2.0.0", {\
         "packageLocation": "./.yarn/cache/fresh-npm-2.0.0-b0c1795dff-0557548194.zip/node_modules/fresh/",\
         "packageDependencies": [\
@@ -10671,13 +10649,6 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["mime", [\
-      ["npm:1.6.0", {\
-        "packageLocation": "./.yarn/cache/mime-npm-1.6.0-60ae95038a-b92cd0adc4.zip/node_modules/mime/",\
-        "packageDependencies": [\
-          ["mime", "npm:1.6.0"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["npm:2.6.0", {\
         "packageLocation": "./.yarn/cache/mime-npm-2.6.0-88b89d8de0-a7f2589900.zip/node_modules/mime/",\
         "packageDependencies": [\
@@ -11122,10 +11093,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["oauth4webapi", [\
-      ["npm:3.4.1", {\
-        "packageLocation": "./.yarn/cache/oauth4webapi-npm-3.4.1-4313f78e2d-d581cfde0d.zip/node_modules/oauth4webapi/",\
+      ["npm:3.5.1", {\
+        "packageLocation": "./.yarn/cache/oauth4webapi-npm-3.5.1-a36854e256-5d57ba4299.zip/node_modules/oauth4webapi/",\
         "packageDependencies": [\
-          ["oauth4webapi", "npm:3.4.1"]\
+          ["oauth4webapi", "npm:3.5.1"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -11300,12 +11271,12 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["openid-client", [\
-      ["npm:6.4.2", {\
-        "packageLocation": "./.yarn/cache/openid-client-npm-6.4.2-ed8214f346-a291933d57.zip/node_modules/openid-client/",\
+      ["npm:6.5.0", {\
+        "packageLocation": "./.yarn/cache/openid-client-npm-6.5.0-fc539d7532-403a1b0d08.zip/node_modules/openid-client/",\
         "packageDependencies": [\
           ["jose", "npm:6.0.10"],\
-          ["oauth4webapi", "npm:3.4.1"],\
-          ["openid-client", "npm:6.4.2"]\
+          ["oauth4webapi", "npm:3.5.1"],\
+          ["openid-client", "npm:6.5.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -12310,26 +12281,6 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["send", [\
-      ["npm:0.19.0", {\
-        "packageLocation": "./.yarn/cache/send-npm-0.19.0-4297594770-ea3f8a67a8.zip/node_modules/send/",\
-        "packageDependencies": [\
-          ["debug", "virtual:50886165444733a0f3bfe50ac2d8c33ee920ef2e6dbf1ccf65ba96ddbcfed411a593dc29bef477196f1108a3580db1be948ed737826fc181781c2a4eff7140b1#npm:2.6.9"],\
-          ["depd", "npm:2.0.0"],\
-          ["destroy", "npm:1.2.0"],\
-          ["encodeurl", "npm:1.0.2"],\
-          ["escape-html", "npm:1.0.3"],\
-          ["etag", "npm:1.8.1"],\
-          ["fresh", "npm:0.5.2"],\
-          ["http-errors", "npm:2.0.0"],\
-          ["mime", "npm:1.6.0"],\
-          ["ms", "npm:2.1.3"],\
-          ["on-finished", "npm:2.4.1"],\
-          ["range-parser", "npm:1.2.1"],\
-          ["send", "npm:0.19.0"],\
-          ["statuses", "npm:2.0.1"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["npm:1.2.0", {\
         "packageLocation": "./.yarn/cache/send-npm-1.2.0-6a1006154e-531bcfb561.zip/node_modules/send/",\
         "packageDependencies": [\
@@ -12350,17 +12301,6 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["serve-static", [\
-      ["npm:1.16.2", {\
-        "packageLocation": "./.yarn/cache/serve-static-npm-1.16.2-5d8e560aec-528fff6f5e.zip/node_modules/serve-static/",\
-        "packageDependencies": [\
-          ["encodeurl", "npm:2.0.0"],\
-          ["escape-html", "npm:1.0.3"],\
-          ["parseurl", "npm:1.3.3"],\
-          ["send", "npm:0.19.0"],\
-          ["serve-static", "npm:1.16.2"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["npm:2.2.0", {\
         "packageLocation": "./.yarn/cache/serve-static-npm-2.2.0-a71bf524e0-30e2ed1dbf.zip/node_modules/serve-static/",\
         "packageDependencies": [\
@@ -13490,10 +13430,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["undici", [\
-      ["npm:7.8.0", {\
-        "packageLocation": "./.yarn/cache/undici-npm-7.8.0-f0da50780d-7141f63ea4.zip/node_modules/undici/",\
+      ["npm:7.9.0", {\
+        "packageLocation": "./.yarn/cache/undici-npm-7.9.0-4d29a0710d-d024e1e493.zip/node_modules/undici/",\
         "packageDependencies": [\
-          ["undici", "npm:7.8.0"]\
+          ["undici", "npm:7.9.0"]\
         ],\
         "linkType": "HARD"\
       }]\
