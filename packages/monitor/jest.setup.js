@@ -23,8 +23,6 @@ jest.unstable_mockModule('@gardener-dashboard/logger', () => {
   return loggerMock
 })
 
-jest.resetModules()
-
 async function createHttpAgent () {
   const { default: app } = await import('./lib/app.js')
   const server = http.createServer(app)

@@ -57,7 +57,7 @@ const { default: spy } = await spyOnHelper('../lib/metrics.js',
   import.meta.url,
 )
 
-jest.unstable_mockModule('../lib/metrics.js', () => {
+jest.unstable_mockModule('./lib/metrics.js', () => {
   return {
     default: {
       ...spy,
@@ -75,7 +75,7 @@ const {
     monitorSocketIO,
     monitorHttpServer,
     monitorResponseTimes,
-  }
+  },
 } = await import('../lib/monitors.js')
 
 const { default: responseTime } = await import('response-time')
