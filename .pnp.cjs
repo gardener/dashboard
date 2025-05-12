@@ -1657,7 +1657,7 @@ const RAW_RUNTIME_STATE =
           ["p-timeout", "npm:4.1.0"],\
           ["path-to-regexp", "npm:8.2.0"],\
           ["sanitize-html", "npm:2.16.0"],\
-          ["semver", "npm:7.7.1"],\
+          ["semver", "npm:7.7.2"],\
           ["set-cookie-parser", "npm:2.7.1"],\
           ["showdown", "npm:2.1.0"],\
           ["socket.io", "npm:4.8.1"],\
@@ -1748,7 +1748,7 @@ const RAW_RUNTIME_STATE =
           ["pinia", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.0.2"],\
           ["rollup-plugin-visualizer", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.14.0"],\
           ["sass", "npm:1.79.6"],\
-          ["semver", "npm:7.7.1"],\
+          ["semver", "npm:7.7.2"],\
           ["socket.io-client", "npm:4.8.1"],\
           ["splitpanes", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:4.0.3"],\
           ["statuses", "npm:2.0.1"],\
@@ -2543,7 +2543,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/@npmcli-fs-npm-4.0.0-1d9cc8a27b-c90935d5ce.zip/node_modules/@npmcli/fs/",\
         "packageDependencies": [\
           ["@npmcli/fs", "npm:4.0.0"],\
-          ["semver", "npm:7.7.1"]\
+          ["semver", "npm:7.7.2"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -3698,7 +3698,7 @@ const RAW_RUNTIME_STATE =
           ["fast-glob", "npm:3.3.3"],\
           ["is-glob", "npm:4.0.3"],\
           ["minimatch", "npm:9.0.5"],\
-          ["semver", "npm:7.7.1"],\
+          ["semver", "npm:7.7.2"],\
           ["ts-api-utils", "virtual:e0f2a42d6f899d95a3141657e87a9f76ce91ef14f77997ea3956aca8c4406e1cf704f9cd558704d711e4c7db301edbcfe5b6d3464f51384c71e43d50bbfe0200#npm:2.0.1"],\
           ["typescript", null]\
         ],\
@@ -3719,7 +3719,7 @@ const RAW_RUNTIME_STATE =
           ["fast-glob", "npm:3.3.3"],\
           ["is-glob", "npm:4.0.3"],\
           ["minimatch", "npm:9.0.5"],\
-          ["semver", "npm:7.7.1"],\
+          ["semver", "npm:7.7.2"],\
           ["ts-api-utils", "virtual:e0f2a42d6f899d95a3141657e87a9f76ce91ef14f77997ea3956aca8c4406e1cf704f9cd558704d711e4c7db301edbcfe5b6d3464f51384c71e43d50bbfe0200#npm:2.0.1"],\
           ["typescript", null]\
         ],\
@@ -3740,7 +3740,7 @@ const RAW_RUNTIME_STATE =
           ["fast-glob", "npm:3.3.3"],\
           ["is-glob", "npm:4.0.3"],\
           ["minimatch", "npm:9.0.5"],\
-          ["semver", "npm:7.7.1"],\
+          ["semver", "npm:7.7.2"],\
           ["ts-api-utils", "virtual:97ebca8b83d90605eb11c89cc1a73f4ae64a2d11e4136e217791eec0ac486b5c7c2a193586c5f937d982eea5c6b443c325983cef57ea86e4c34b09356e06990b#npm:2.0.1"],\
           ["typescript", "patch:typescript@npm%3A5.8.2#optional!builtin<compat/typescript>::version=5.8.2&hash=5786d5"]\
         ],\
@@ -6127,7 +6127,7 @@ const RAW_RUNTIME_STATE =
           ["prompts", "npm:2.4.2"],\
           ["rechoir", "npm:0.8.0"],\
           ["safe-regex", "npm:2.1.1"],\
-          ["semver", "npm:7.7.1"],\
+          ["semver", "npm:7.7.2"],\
           ["teamcity-service-messages", "npm:0.1.14"],\
           ["tsconfig-paths-webpack-plugin", "npm:4.2.0"],\
           ["watskeburt", "npm:4.2.3"]\
@@ -6302,7 +6302,7 @@ const RAW_RUNTIME_STATE =
           ["commander", "npm:10.0.1"],\
           ["editorconfig", "npm:1.0.4"],\
           ["minimatch", "npm:9.0.1"],\
-          ["semver", "npm:7.7.1"]\
+          ["semver", "npm:7.7.2"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -6799,7 +6799,7 @@ const RAW_RUNTIME_STATE =
           ["@types/eslint", null],\
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.23.0"],\
           ["eslint-compat-utils", "virtual:be224eb9f9b5f438a076915887fea3a4c05a8dd43f77c0cfe091271342d137530ca600d2aad517fe5a1383345b55297c00ed7c9814424b7b447d7b9647a3554e#npm:0.5.1"],\
-          ["semver", "npm:7.7.1"]\
+          ["semver", "npm:7.7.2"]\
         ],\
         "packagePeers": [\
           "@types/eslint",\
@@ -7049,7 +7049,7 @@ const RAW_RUNTIME_STATE =
           ["get-tsconfig", "npm:4.10.0"],\
           ["is-glob", "npm:4.0.3"],\
           ["minimatch", "npm:9.0.5"],\
-          ["semver", "npm:7.7.1"],\
+          ["semver", "npm:7.7.2"],\
           ["stable-hash", "npm:0.0.4"],\
           ["tslib", "npm:2.8.1"]\
         ],\
@@ -7157,7 +7157,7 @@ const RAW_RUNTIME_STATE =
           ["globals", "npm:15.14.0"],\
           ["ignore", "npm:5.3.2"],\
           ["minimatch", "npm:9.0.5"],\
-          ["semver", "npm:7.7.1"]\
+          ["semver", "npm:7.7.2"]\
         ],\
         "packagePeers": [\
           "@types/eslint",\
@@ -7258,7 +7258,7 @@ const RAW_RUNTIME_STATE =
           ["natural-compare", "npm:1.4.0"],\
           ["nth-check", "npm:2.1.1"],\
           ["postcss-selector-parser", "npm:6.1.2"],\
-          ["semver", "npm:7.7.1"],\
+          ["semver", "npm:7.7.2"],\
           ["vue-eslint-parser", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:10.1.1"],\
           ["xml-name-validator", "npm:4.0.0"]\
         ],\
@@ -8601,7 +8601,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/is-bun-module-npm-1.3.0-7df4176ea3-2966744188.zip/node_modules/is-bun-module/",\
         "packageDependencies": [\
           ["is-bun-module", "npm:1.3.0"],\
-          ["semver", "npm:7.7.1"]\
+          ["semver", "npm:7.7.2"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -9006,7 +9006,7 @@ const RAW_RUNTIME_STATE =
           ["@istanbuljs/schema", "npm:0.1.3"],\
           ["istanbul-lib-coverage", "npm:3.2.2"],\
           ["istanbul-lib-instrument", "npm:6.0.3"],\
-          ["semver", "npm:7.7.1"]\
+          ["semver", "npm:7.7.2"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -9555,7 +9555,7 @@ const RAW_RUNTIME_STATE =
           ["jest-util", "npm:29.7.0"],\
           ["natural-compare", "npm:1.4.0"],\
           ["pretty-format", "npm:29.7.0"],\
-          ["semver", "npm:7.7.1"]\
+          ["semver", "npm:7.7.2"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -9851,7 +9851,7 @@ const RAW_RUNTIME_STATE =
           ["lodash.isstring", "npm:4.0.1"],\
           ["lodash.once", "npm:4.1.1"],\
           ["ms", "npm:2.1.3"],\
-          ["semver", "npm:7.7.1"]\
+          ["semver", "npm:7.7.2"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -10130,7 +10130,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/make-dir-npm-4.0.0-ec3cd921cc-69b98a6c0b.zip/node_modules/make-dir/",\
         "packageDependencies": [\
           ["make-dir", "npm:4.0.0"],\
-          ["semver", "npm:7.7.1"]\
+          ["semver", "npm:7.7.2"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -10623,7 +10623,7 @@ const RAW_RUNTIME_STATE =
           ["node-gyp", "npm:11.1.0"],\
           ["nopt", "npm:8.1.0"],\
           ["proc-log", "npm:5.0.0"],\
-          ["semver", "npm:7.7.1"],\
+          ["semver", "npm:7.7.2"],\
           ["tar", "npm:7.4.3"],\
           ["which", "npm:5.0.0"]\
         ],\
@@ -11876,10 +11876,10 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "HARD"\
       }],\
-      ["npm:7.7.1", {\
-        "packageLocation": "./.yarn/cache/semver-npm-7.7.1-4572475307-fd603a6fb9.zip/node_modules/semver/",\
+      ["npm:7.7.2", {\
+        "packageLocation": "./.yarn/cache/semver-npm-7.7.2-dfc3bc5ec9-aca305edfb.zip/node_modules/semver/",\
         "packageDependencies": [\
-          ["semver", "npm:7.7.1"]\
+          ["semver", "npm:7.7.2"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -13646,7 +13646,7 @@ const RAW_RUNTIME_STATE =
           ["espree", "npm:10.3.0"],\
           ["esquery", "npm:1.6.0"],\
           ["lodash", "npm:4.17.21"],\
-          ["semver", "npm:7.7.1"],\
+          ["semver", "npm:7.7.2"],\
           ["vue-eslint-parser", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:10.1.1"]\
         ],\
         "packagePeers": [\
