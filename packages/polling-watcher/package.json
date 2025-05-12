@@ -27,7 +27,7 @@
     "lint": "eslint . --max-warnings=0",
     "test": "node --experimental-vm-modules $(yarn bin jest)",
     "test-coverage": "yarn test --coverage",
-    "build": "rimraf dist && yarn install && rollup -c rollup.config.js"
+    "build": "yarn install && rollup -c rollup.config.js"
   },
   "peerDependencies": {
     "@gardener-dashboard/logger": "workspace:^",
@@ -50,7 +50,6 @@
     "eslint-plugin-security": "^3.0.1",
     "jest": "^29.7.0",
     "neostandard": "^0.12.0",
-    "rimraf": "^6.0.1",
     "rollup": "^4.40.1"
   },
   "jest": {

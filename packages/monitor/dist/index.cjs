@@ -48308,7 +48308,11 @@ var metrics = {
 //
 
 
-const { connectionsCount, connectionsTotal, responseTime } = metrics;
+const {
+  connectionsCount,
+  connectionsTotal,
+  responseTime,
+} = metrics;
 
 function monitorResponseTimes (additionalLabels = {}) {
   return createResponseTimeMiddleware((req, res, timeMs) => {
