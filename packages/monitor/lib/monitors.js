@@ -7,7 +7,11 @@
 import createResponseTimeMiddleware from 'response-time'
 import metrics from './metrics.js'
 
-const { connectionsCount, connectionsTotal, responseTime } = metrics
+const {
+  connectionsCount,
+  connectionsTotal,
+  responseTime,
+} = metrics
 
 function monitorResponseTimes (additionalLabels = {}) {
   return createResponseTimeMiddleware((req, res, timeMs) => {

@@ -70,7 +70,13 @@ jest.unstable_mockModule('../lib/metrics.js', () => {
 
 const { default: metrics } = await import('../lib/metrics.js')
 
-const { default: { monitorSocketIO, monitorHttpServer, monitorResponseTimes } } = await import('../lib/monitors.js')
+const {
+  default: {
+    monitorSocketIO,
+    monitorHttpServer,
+    monitorResponseTimes,
+  }
+} = await import('../lib/monitors.js')
 
 const { default: responseTime } = await import('response-time')
 
