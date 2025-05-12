@@ -17,15 +17,15 @@ describe('kube-client', () => {
         const name = 'test'
         const data = { foo: 'bar' }
 
-        let shootInstance
+        let shoot
 
         beforeEach(() => {
-          shootInstance = new Shoot({ url })
+          shoot = new Shoot({ url })
           mockClient.request.mockImplementation((...args) => args)
         })
 
         it('should create an adminkubeconfig subresource', async () => {
-          const args = await shootInstance.createAdminKubeconfigRequest(namespace, name, data)
+          const args = await shoot.createAdminKubeconfigRequest(namespace, name, data)
           expect(args).toEqual([
             `namespaces/${namespace}/shoots/${name}/adminkubeconfig`,
             {
