@@ -7,7 +7,7 @@
 import { jest } from '@jest/globals'
 import http2 from 'http2'
 
-const mockMyClass = jest.fn().mockImplementation(() => {
+const sessionPoolInstanceMock = jest.fn().mockImplementation(() => {
   return {
     destroy: jest.fn(),
     getSession: jest.fn(),
@@ -22,12 +22,12 @@ const mockMyClass = jest.fn().mockImplementation(() => {
 })
 
 jest.unstable_mockModule('./lib/SessionPool.js', () => {
-  const superMock = jest.fn(
-    mockMyClass,
+  const SessionPoolClassMock = jest.fn(
+    sessionPoolInstanceMock,
   )
 
-  superMock.prototype = {
-    constructor: mockMyClass.prototype.constructor,
+  SessionPoolClassMock.prototype = {
+    constructor: sessionPoolInstanceMock.prototype.constructor,
     uuid: 1123,
     destroy: jest.fn(),
     getSession: jest.fn(),
@@ -40,7 +40,7 @@ jest.unstable_mockModule('./lib/SessionPool.js', () => {
     deleteSession: jest.fn(),
   }
   return {
-    default: superMock,
+    default: SessionPoolClassMock,
   }
 })
 
