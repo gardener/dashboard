@@ -9,18 +9,12 @@ import json from '@rollup/plugin-json'
 import commonjs from '@rollup/plugin-commonjs'
 import { readFileSync } from 'node:fs'
 
-function getOutputDir () {
-  const arg = process.argv.find(a => a.startsWith('--output-dir='))
-  if (arg) return arg.replace('--output-dir=', '')
-  return process.cwd() + '/dist'
-}
-
 export default [
   {
     input: `${process.cwd()}/lib/index.js`,
     cache: false,
     output: {
-      file: `${getOutputDir()}/index.cjs`,
+      file: `${process.cwd()}/dist/index.cjs`,
       format: 'cjs',
     },
     external: getPeerDependencies(readFileSync),
@@ -34,7 +28,7 @@ export default [
     input: `${process.cwd()}/lib/index.js`,
     cache: false,
     output: {
-      file: `${getOutputDir()}/index.js`,
+      file: `${process.cwd()}/dist/index.js`,
       format: 'esm',
     },
     external: getPeerDependencies(),

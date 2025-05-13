@@ -25,7 +25,7 @@
   },
   "scripts": {
     "lint": "eslint . --max-warnings=0",
-    "build": "yarn install && rollup -c rollup.config.js"
+    "build": "rimraf dist && yarn install && rollup -c rollup.config.js"
   },
   "devDependencies": {
     "@microsoft/eslint-formatter-sarif": "^3.1.0",
@@ -40,6 +40,7 @@
     "eslint-plugin-require-node-import-prefix": "^0.0.2",
     "eslint-plugin-security": "^3.0.1",
     "neostandard": "^0.12.0",
+    "rimraf": "^6.0.1",
     "rollup": "^4.40.1"
   },
   "packageManager": "yarn@4.9.1",
