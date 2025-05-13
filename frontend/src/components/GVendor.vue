@@ -42,7 +42,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-list-item>
         <v-list-item v-if="shootCloudProfileRef">
           <v-list-item-subtitle>Cloud Profile</v-list-item-subtitle>
-          <v-list-item-title>{{ shootCloudProfileRef.name }} ({{ shootCloudProfileRef.kind }})</v-list-item-title>
+          <v-list-item-title>{{ cloudProfileRefDisplayValue }}</v-list-item-title>
         </v-list-item>
         <v-list-item v-if="region">
           <v-list-item-subtitle>Region</v-list-item-subtitle>
@@ -132,6 +132,17 @@ export default {
         titles.push(this.zoneTitle)
       }
       return join(titles, ' / ')
+    },
+    cloudProfileRefDisplayValue () {
+      if (!this.shootCloudProfileRef) {
+        return ''
+      }
+
+      if (this.shootCloudProfileRef.kind === 'NamespacedCloudProfile') {
+        return `${this.shootCloudProfileRef.name} (Namespaced)`
+      }
+
+      return this.shootCloudProfileRef.name
     },
   },
 }
