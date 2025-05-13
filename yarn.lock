@@ -1132,8 +1132,6 @@ __metadata:
     neostandard: "npm:^0.12.0"
     rimraf: "npm:^6.0.1"
     rollup: "npm:^4.40.1"
-  peerDependencies:
-    "@gardener-dashboard/test-utils": "workspace:^"
   languageName: unknown
   linkType: soft
 
@@ -1190,7 +1188,6 @@ __metadata:
     supertest: "npm:^7.0.0"
   peerDependencies:
     "@gardener-dashboard/logger": "workspace:^"
-    "@gardener-dashboard/test-utils": "workspace:^"
   languageName: unknown
   linkType: soft
 
@@ -1218,7 +1215,6 @@ __metadata:
     rollup: "npm:^4.40.1"
   peerDependencies:
     "@gardener-dashboard/logger": "workspace:^"
-    "@gardener-dashboard/test-utils": "workspace:^"
   languageName: unknown
   linkType: soft
 

@@ -36,9 +36,6 @@
     "js-yaml": "^4.1.0",
     "lodash-es": "^4.17.21"
   },
-  "peerDependencies": {
-    "@gardener-dashboard/test-utils": "workspace:^"
-  },
   "devDependencies": {
     "@gardener-dashboard/polling-watcher": "workspace:^",
     "@gardener-dashboard/test-utils": "workspace:^",

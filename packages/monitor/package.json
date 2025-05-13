@@ -37,8 +37,7 @@
     "response-time": "^2.3.2"
   },
   "peerDependencies": {
-    "@gardener-dashboard/logger": "workspace:^",
-    "@gardener-dashboard/test-utils": "workspace:^"
+    "@gardener-dashboard/logger": "workspace:^"
   },
   "devDependencies": {
     "@gardener-dashboard/logger": "workspace:^",
