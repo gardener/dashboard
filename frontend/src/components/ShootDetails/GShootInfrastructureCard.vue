@@ -300,7 +300,7 @@ export default {
       shootName,
       shootNamespace,
       shootSeedName,
-      shootCloudProfileName,
+      shootCloudProfileRef,
       shootRegion,
       shootZones,
       shootDomain,
@@ -329,7 +329,7 @@ export default {
       shootName,
       shootNamespace,
       shootSeedName,
-      shootCloudProfileName,
+      shootCloudProfileRef,
       shootRegion,
       shootZones,
       shootDomain,
@@ -373,8 +373,8 @@ export default {
         return shootLBClasses
       }
 
-      const availableFloatingPools = this.floatingPoolsByCloudProfileNameAndRegionAndDomain({
-        cloudProfileName: this.shootCloudProfileName,
+      const availableFloatingPools = this.floatingPoolsByCloudProfileRefAndRegionAndDomain({
+        cloudProfileRef: this.shootCloudProfileRef,
         region: this.shootRegion,
       })
       const floatingPoolWildCardObjects = wildcardObjectsFromStrings(map(availableFloatingPools, 'name'))
@@ -413,8 +413,7 @@ export default {
   },
   methods: {
     ...mapActions(useCloudProfileStore, [
-      'cloudProfileByName',
-      'floatingPoolsByCloudProfileNameAndRegionAndDomain',
+      'floatingPoolsByCloudProfileRefAndRegionAndDomain',
     ]),
   },
 }
