@@ -1,5 +1,6 @@
 # .husky/pre-commit
-set -x
+. .husky/common.sh
+. "$(dirname "$0")/husky-user-choice.sh"
 
 if ! command -v ggshield &> /dev/null; then
   echo "Error: ggshield is not installed. Please visit https://docs.gitguardian.com/ggshield-docs/getting-started for installation instructions."

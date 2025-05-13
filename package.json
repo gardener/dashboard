@@ -23,7 +23,7 @@
     "generate-all-dependency-diagrams": "node scripts/diagramGenerator.mjs --target all",
     "generate-backend-dependency-diagrams": "node scripts/diagramGenerator.mjs --target backend",
     "generate-packages-dependency-diagrams": "node scripts/diagramGenerator.mjs --target packages",
-    "postinstall": "husky"
+    "postinstall": "[ ! -f .husky/managed-hooks-enabled ] || grep -q '^true$' .husky/managed-hooks-enabled && husky || echo '[husky] Skipping husky install due to user preference.'"
   },
   "dependenciesMeta": {
     "deasync": {

@@ -1,3 +1,5 @@
 # .husky/pre-commit
-set -x
+. .husky/common.sh
+. "$(dirname "$0")/husky-user-choice.sh"
+
 .ci/verify
