@@ -42,7 +42,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-list-item>
         <v-list-item v-if="shootCloudProfileRef">
           <v-list-item-subtitle>Cloud Profile</v-list-item-subtitle>
-          <v-list-item-title>{{ shootCloudProfileRef }}</v-list-item-title>
+          <v-list-item-title>{{ shootCloudProfileRef.name }} ({{ shootCloudProfileRef.kind }})</v-list-item-title>
         </v-list-item>
         <v-list-item v-if="region">
           <v-list-item-subtitle>Region</v-list-item-subtitle>
