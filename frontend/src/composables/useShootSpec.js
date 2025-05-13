@@ -77,7 +77,7 @@ export function useShootSpec (shootItem, options = {}) {
   })
 
   const shootAvailableK8sUpdates = computed(() => {
-    return cloudProfileStore.availableKubernetesUpdatesForShoot(shootK8sVersion.value, shootCloudProfileName.value)
+    return cloudProfileStore.availableKubernetesUpdatesForShoot(shootK8sVersion.value, shootCloudProfileRef.value)
   })
 
   const shootSupportedPatchAvailable = computed(() => {
@@ -89,12 +89,12 @@ export function useShootSpec (shootItem, options = {}) {
   })
 
   const shootKubernetesVersionObject = computed(() => {
-    const kubernetesVersionObjects = cloudProfileStore.kubernetesVersions(shootCloudProfileName.value)
+    const kubernetesVersionObjects = cloudProfileStore.kubernetesVersions(shootCloudProfileRef.value)
     return find(kubernetesVersionObjects, ['version', shootK8sVersion.value]) ?? {}
   })
 
-  const shootCloudProfileName = computed(() => {
-    return shootSpec.value.cloudProfileName
+  const shootCloudProfileRef = computed(() => {
+    return shootSpec.value.cloudProfile
   })
 
   const shootProviderType = computed(() => {
@@ -192,7 +192,7 @@ export function useShootSpec (shootItem, options = {}) {
     shootKubernetesVersionObject,
     shootSupportedPatchAvailable,
     shootSupportedUpgradeAvailable,
-    shootCloudProfileName,
+    shootCloudProfileRef,
     shootProviderType,
     shootWorkerGroups,
     hasShootWorkerGroups,

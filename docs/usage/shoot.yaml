@@ -5,7 +5,9 @@ metadata:
   namespace: garden-flowering
 spec:
   credentialsBindingName: trial-credentials-gcp
-  cloudProfileName: gcp
+  cloudProfile:
+    kind: CloudProfile
+    name: gcp
   region: europe-west1
   purpose: evaluation
   provider:

@@ -328,7 +328,7 @@ const {
   shootAccessRestrictions,
   shootWorkerGroups,
   shootUid,
-  shootCloudProfileName,
+  shootCloudProfileRef,
 } = useProvideShootItem(shootItem, {
   cloudProfileStore,
   projectStore,
@@ -429,7 +429,7 @@ const cells = computed(() => {
 })
 
 const hasShootWorkerGroupWarning = computed(() => {
-  const machineImages = cloudProfileStore.machineImagesByCloudProfileName(shootCloudProfileName.value)
+  const machineImages = cloudProfileStore.machineImagesByCloudProfileRef(shootCloudProfileRef.value)
   return some(shootWorkerGroups.value, workerGroup => {
     const { name, version } = get(workerGroup, ['machine', 'image'], {})
     const machineImage = find(machineImages, { name, version })
