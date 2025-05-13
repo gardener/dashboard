@@ -78,14 +78,14 @@ export default {
   setup () {
     const {
       shootMetadata,
-      shootCloudProfileName,
+      shootCloudProfileRef,
       shootControlPlaneHighAvailabilityFailureTolerance,
       shootSeedName,
     } = useShootItem()
 
     return {
       shootMetadata,
-      shootCloudProfileName,
+      shootCloudProfileRef,
       shootControlPlaneHighAvailabilityFailureTolerance,
       shootSeedName,
     }
@@ -103,7 +103,7 @@ export default {
       },
     },
     zoneSupported () {
-      const seeds = this.seedsByCloudProfileName(this.shootCloudProfileName)
+      const seeds = this.seedsByCloudProfileRef(this.shootCloudProfileRef)
       return some(seeds, ({ data }) => data.zones?.length >= 3)
     },
     zoneHighAvailabilityConfigurationError () {
@@ -120,7 +120,7 @@ export default {
   },
   methods: {
     ...mapActions(useCloudProfileStore, [
-      'seedsByCloudProfileName',
+      'seedsByCloudProfileRef',
     ]),
   },
 }

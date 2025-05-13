@@ -31,11 +31,8 @@ function getSecret ({ namespace, name, labels, creationTimestamp, data = {} }) {
   return { metadata, data }
 }
 
-function getCloudProviderSecret ({ cloudProfileName, ...options }) {
+function getCloudProviderSecret ({ ...options }) {
   return getSecret({
-    labels: {
-      'cloudprofile.garden.sapcloud.io/name': cloudProfileName,
-    },
     ...options,
   })
 }
@@ -44,7 +41,6 @@ const cloudProviderSecretList = [
   getCloudProviderSecret({
     namespace: 'garden-foo',
     name: 'secret1',
-    cloudProfileName: 'infra1-profileName',
     data: {
       key: 'fooKey',
       secret: 'fooSecret',
@@ -53,7 +49,6 @@ const cloudProviderSecretList = [
   getCloudProviderSecret({
     namespace: 'garden-foo',
     name: 'secret2',
-    cloudProfileName: 'infra3-profileName',
     data: {
       key: 'fooKey',
       secret: 'fooSecret',
@@ -62,7 +57,6 @@ const cloudProviderSecretList = [
   getCloudProviderSecret({
     namespace: 'garden-foo',
     name: 'secret3',
-    cloudProfileName: 'infra3-profileName',
     data: {
       key: 'fooKey',
       secret: 'fooSecret',
@@ -71,7 +65,6 @@ const cloudProviderSecretList = [
   getCloudProviderSecret({
     namespace: 'garden-trial',
     name: 'trial-secret',
-    cloudProfileName: 'infra1-profileName',
     data: {
       key: 'trialKey',
       secret: 'trialSecret',

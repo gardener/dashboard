@@ -206,7 +206,6 @@ export default {
   },
   emits: [
     'update:modelValue',
-    'cloud-profile-name',
   ],
   setup (props) {
     const binding = toRef(props, 'binding')

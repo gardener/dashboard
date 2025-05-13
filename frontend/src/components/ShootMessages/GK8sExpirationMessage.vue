@@ -46,7 +46,7 @@ export default {
     },
     isExpired: {
       type: Boolean,
-      required: true,
+      default: false,
     },
   },
 }
