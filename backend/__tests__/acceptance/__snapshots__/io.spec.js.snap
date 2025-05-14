@@ -40,10 +40,10 @@ exports[`api events when user is "admin" should subscribe shoots for a single cl
       "uid": 1,
     },
     "spec": {
-      "cloudProfile: {
-        "name": "infra1-profileName",
+      "cloudProfile": {
         "kind": "CloudProfile",
-      }
+        "name": "infra1-profileName",
+      },
       "hibernation": {
         "enabled": false,
       },
@@ -123,10 +123,10 @@ exports[`api events when user is "admin" should subscribe shoots for a single na
       "uid": 1,
     },
     "spec": {
-      "cloudProfile: {
-        "name": "infra1-profileName",
+      "cloudProfile": {
         "kind": "CloudProfile",
-      }
+        "name": "infra1-profileName",
+      },
       "hibernation": {
         "enabled": false,
       },
@@ -205,10 +205,10 @@ exports[`api events when user is "admin" should subscribe shoots for all namespa
       "uid": 1,
     },
     "spec": {
-      "cloudProfile: {
-        "name": "infra1-profileName",
+      "cloudProfile": {
         "kind": "CloudProfile",
-      }
+        "name": "infra1-profileName",
+      },
       "hibernation": {
         "enabled": false,
       },
@@ -243,10 +243,10 @@ exports[`api events when user is "admin" should subscribe shoots for all namespa
       "uid": 4,
     },
     "spec": {
-      "cloudProfile: {
-        "name": "infra1-profileName",
+      "cloudProfile": {
         "kind": "CloudProfile",
-      }
+        "name": "infra1-profileName",
+      },
       "hibernation": {
         "enabled": false,
       },
