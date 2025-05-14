@@ -56,9 +56,9 @@ exports[`api shoots should create a shoot 1`] = `
         "uid": "garden-foo--newShoot",
       },
       "spec": {
-        "cloudProfile: {
-          "name": "infra1-profileName",
+        "cloudProfile": {
           "kind": "CloudProfile",
+          "name": "infra1-profileName",
         },
         "hibernation": {
           "enabled": false,
@@ -91,9 +91,9 @@ exports[`api shoots should create a shoot 2`] = `
     "uid": 21,
   },
   "spec": {
-    "cloudProfile: {
-      "name": "infra1-profileName",
+    "cloudProfile": {
       "kind": "CloudProfile",
+      "name": "infra1-profileName",
     },
     "hibernation": {
       "enabled": false,
@@ -158,9 +158,9 @@ exports[`api shoots should delete a shoot 2`] = `
     "uid": 2,
   },
   "spec": {
-    "cloudProfile: {
-      "name": "infra1-profileName",
+    "cloudProfile": {
       "kind": "CloudProfile",
+      "name": "infra1-profileName",
     },
     "hibernation": {
       "enabled": false,
@@ -223,9 +223,9 @@ exports[`api shoots should patch annotations 2`] = `
     "uid": 2,
   },
   "spec": {
-    "cloudProfile: {
-      "name": "infra1-profileName",
+    "cloudProfile": {
       "kind": "CloudProfile",
+      "name": "infra1-profileName",
     },
     "hibernation": {
       "enabled": false,
@@ -300,9 +300,9 @@ exports[`api shoots should replace addons 2`] = `
         },
       },
     ],
-    "cloudProfile: {
-      "name": "infra1-profileName",
+    "cloudProfile": {
       "kind": "CloudProfile",
+      "name": "infra1-profileName",
     },
     "hibernation": {
       "enabled": false,
@@ -364,9 +364,9 @@ exports[`api shoots should replace hibernation enabled 2`] = `
     "uid": 2,
   },
   "spec": {
-    "cloudProfile: {
-      "name": "infra1-profileName",
+    "cloudProfile": {
       "kind": "CloudProfile",
+      "name": "infra1-profileName",
     },
     "hibernation": {
       "enabled": true,
@@ -433,9 +433,9 @@ exports[`api shoots should replace hibernation schedules 2`] = `
     "uid": 2,
   },
   "spec": {
-    "cloudProfile: {
-      "name": "infra1-profileName",
+    "cloudProfile": {
       "kind": "CloudProfile",
+      "name": "infra1-profileName",
     },
     "hibernation": {
       "enabled": false,
@@ -501,9 +501,9 @@ exports[`api shoots should replace purpose 2`] = `
     "uid": 2,
   },
   "spec": {
-    "cloudProfile: {
-      "name": "infra1-profileName",
+    "cloudProfile": {
       "kind": "CloudProfile",
+      "name": "infra1-profileName",
     },
     "hibernation": {
       "enabled": false,
@@ -565,9 +565,9 @@ exports[`api shoots should replace shoot 1`] = `
         "uid": 2,
       },
       "spec": {
-        "cloudProfile: {
-          "name": "infra1-profileName",
+        "cloudProfile": {
           "kind": "CloudProfile",
+          "name": "infra1-profileName",
         },
         "hibernation": {
           "enabled": false,
@@ -612,9 +612,9 @@ exports[`api shoots should replace shoot 2`] = `
     "uid": 2,
   },
   "spec": {
-    "cloudProfile: {
-      "name": "infra1-profileName",
+    "cloudProfile": {
       "kind": "CloudProfile",
+      "name": "infra1-profileName",
     },
     "hibernation": {
       "enabled": false,
@@ -676,9 +676,9 @@ exports[`api shoots should replace shoot kubernetes version 2`] = `
     "uid": 2,
   },
   "spec": {
-    "cloudProfile: {
-      "name": "infra1-profileName",
+    "cloudProfile": {
       "kind": "CloudProfile",
+      "name": "infra1-profileName",
     },
     "hibernation": {
       "enabled": false,
@@ -747,9 +747,9 @@ exports[`api shoots should replace shoot maintenance data 2`] = `
     "uid": 2,
   },
   "spec": {
-    "cloudProfile: {
-      "name": "infra1-profileName",
+    "cloudProfile": {
       "kind": "CloudProfile",
+      "name": "infra1-profileName",
     },
     "hibernation": {
       "enabled": false,
@@ -819,9 +819,9 @@ exports[`api shoots should replace shoot seedname 2`] = `
     "uid": 2,
   },
   "spec": {
-    "cloudProfile: {
-      "name": "infra1-profileName",
+    "cloudProfile": {
       "kind": "CloudProfile",
+      "name": "infra1-profileName",
     },
     "hibernation": {
       "enabled": false,
@@ -894,9 +894,9 @@ exports[`api shoots should replace shoot workers 2`] = `
     "uid": 2,
   },
   "spec": {
-    "cloudProfile: {
-      "name": "infra1-profileName",
+    "cloudProfile": {
       "kind": "CloudProfile",
+      "name": "infra1-profileName",
     },
     "hibernation": {
       "enabled": false,
@@ -961,9 +961,9 @@ exports[`api shoots should return a shoot 2`] = `
     "uid": 2,
   },
   "spec": {
-    "cloudProfile: {
-      "name": "infra1-profileName",
+    "cloudProfile": {
       "kind": "CloudProfile",
+      "name": "infra1-profileName",
     },
     "hibernation": {
       "enabled": false,
@@ -1138,9 +1138,9 @@ exports[`api shoots should return all shoots for a non-admin user 2`] = `
         "uid": 1,
       },
       "spec": {
-        "cloudProfile: {
-          "name": "infra1-profileName",
+        "cloudProfile": {
           "kind": "CloudProfile",
+          "name": "infra1-profileName",
         },
         "hibernation": {
           "enabled": false,
@@ -1179,9 +1179,9 @@ exports[`api shoots should return all shoots for a non-admin user 2`] = `
         "uid": 2,
       },
       "spec": {
-        "cloudProfile: {
-          "name": "infra1-profileName",
+        "cloudProfile": {
           "kind": "CloudProfile",
+          "name": "infra1-profileName",
         },
         "hibernation": {
           "enabled": false,
@@ -1220,9 +1220,9 @@ exports[`api shoots should return all shoots for a non-admin user 2`] = `
         "uid": 3,
       },
       "spec": {
-        "cloudProfile: {
-          "name": "infra1-profileName",
+        "cloudProfile": {
           "kind": "CloudProfile",
+          "name": "infra1-profileName",
         },
         "hibernation": {
           "enabled": false,
@@ -1291,9 +1291,9 @@ exports[`api shoots should return all shoots for an admin user 2`] = `
         "uid": 1,
       },
       "spec": {
-        "cloudProfile: {
-          "name": "infra1-profileName",
+        "cloudProfile": {
           "kind": "CloudProfile",
+          "name": "infra1-profileName",
         },
         "hibernation": {
           "enabled": false,
@@ -1332,9 +1332,9 @@ exports[`api shoots should return all shoots for an admin user 2`] = `
         "uid": 2,
       },
       "spec": {
-        "cloudProfile: {
-          "name": "infra1-profileName",
+        "cloudProfile": {
           "kind": "CloudProfile",
+          "name": "infra1-profileName",
         },
         "hibernation": {
           "enabled": false,
@@ -1373,9 +1373,9 @@ exports[`api shoots should return all shoots for an admin user 2`] = `
         "uid": 3,
       },
       "spec": {
-        "cloudProfile: {
-          "name": "infra1-profileName",
+        "cloudProfile": {
           "kind": "CloudProfile",
+          "name": "infra1-profileName",
         },
         "hibernation": {
           "enabled": false,
@@ -1408,9 +1408,9 @@ exports[`api shoots should return all shoots for an admin user 2`] = `
         "uid": 4,
       },
       "spec": {
-        "cloudProfile: {
-          "name": "infra1-profileName",
+        "cloudProfile": {
           "kind": "CloudProfile",
+          "name": "infra1-profileName",
         },
         "hibernation": {
           "enabled": false,
@@ -1485,9 +1485,9 @@ exports[`api shoots should return all unhealthy shoots 2`] = `
         "uid": 3,
       },
       "spec": {
-        "cloudProfile: {
-          "name": "infra1-profileName",
+        "cloudProfile": {
           "kind": "CloudProfile",
+          "name": "infra1-profileName",
         },
         "hibernation": {
           "enabled": false,
@@ -1775,9 +1775,9 @@ exports[`api shoots should return shoots for a single namespace 2`] = `
         "uid": 1,
       },
       "spec": {
-        "cloudProfile: {
-          "name": "infra1-profileName",
+        "cloudProfile": {
           "kind": "CloudProfile",
+          "name": "infra1-profileName",
         },
         "hibernation": {
           "enabled": false,
@@ -1816,9 +1816,9 @@ exports[`api shoots should return shoots for a single namespace 2`] = `
         "uid": 2,
       },
       "spec": {
-        "cloudProfile: {
-          "name": "infra1-profileName",
+        "cloudProfile": {
           "kind": "CloudProfile",
+          "name": "infra1-profileName",
         },
         "hibernation": {
           "enabled": false,
@@ -1857,9 +1857,9 @@ exports[`api shoots should return shoots for a single namespace 2`] = `
         "uid": 3,
       },
       "spec": {
-        "cloudProfile: {
-          "name": "infra1-profileName",
+        "cloudProfile": {
           "kind": "CloudProfile",
+          "name": "infra1-profileName",
         },
         "hibernation": {
           "enabled": false,
