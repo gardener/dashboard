@@ -13,8 +13,8 @@ const tickets = require('../../lib/services/tickets')
 describe('api', function () {
   let agent
 
-  beforeAll(async () => {
-    agent = await createAgent()
+  beforeAll(() => {
+    agent = createAgent()
   })
 
   afterAll(() => {
