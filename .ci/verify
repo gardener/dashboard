@@ -3,4 +3,4 @@
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # Call the hack/verify.sh script from the .ci/verify script
-"$SCRIPT_DIR/../hack/verify.sh"
+"$SCRIPT_DIR/../hack/verify"
