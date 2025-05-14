@@ -2,4 +2,4 @@
 . .husky/common.sh
 . "$(dirname "$0")/husky-user-choice.sh"
 
-.ci/verify
+.hack/verify

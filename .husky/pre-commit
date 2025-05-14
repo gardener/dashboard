@@ -2,9 +2,48 @@
 . .husky/common.sh
 . "$(dirname "$0")/husky-user-choice.sh"
 
-if ! command -v ggshield &> /dev/null; then
-  echo "Error: ggshield is not installed. Please visit https://docs.gitguardian.com/ggshield-docs/getting-started for installation instructions."
+HUSKY_USER_CONFIG_FILE=".husky/user-config"
+
+if [ ! -f "$HUSKY_USER_CONFIG_FILE" ] || ! grep -q '^ggshield=' "$HUSKY_USER_CONFIG_FILE"; then
+  echo ""
+  echo "🦉 ggshield Secret Scanning Setup"
+  echo ""
+  echo "────────────────────────────────────────────"
+  echo ""
+  echo "You can optionally enable ggshield for secret scanning in this project."
+  echo "Note: Only enable this if you already have a ggshield (GitGuardian) account and are willing to connect it, or if you are willing to create one."
+  echo "More info: https://www.gitguardian.com/ggshield"
+  echo ""
+  echo "To set your preference, run one of the following commands:"
+  echo ""
+  echo "  • ✅  To enable ggshield secret scanning:"
+  echo "      echo ggshield=true >> $HUSKY_USER_CONFIG_FILE"
+  echo ""
+  echo "  • ⚠️  To disable ggshield secret scanning:"
+  echo "      echo ggshield=false >> $HUSKY_USER_CONFIG_FILE"
+  echo ""
+  echo "You can change this at any time by editing or deleting:"
+  echo "  $HUSKY_USER_CONFIG_FILE"
+  echo ""
+  echo "────────────────────────────────────────────"
   exit 1
 fi
 
-ggshield secret scan pre-commit "$@"
+. "$HUSKY_USER_CONFIG_FILE"
+
+if [ "$ggshield" = "true" ]; then
+  if ! command -v ggshield &> /dev/null; then
+    echo ""
+    echo "🦉 ggshield Secret Scanning Setup"
+    echo ""
+    echo "────────────────────────────────────────────"
+    echo ""
+    echo "ggshield is not installed, but you opted in for secret scanning."
+    echo "Please visit the link below for installation assistance:"
+    echo "https://docs.gitguardian.com/ggshield-docs/getting-started"
+    echo ""
+    echo "────────────────────────────────────────────"
+    exit 1
+  fi
+  ggshield secret scan pre-commit "$@"
+fi

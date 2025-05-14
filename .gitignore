@@ -42,4 +42,4 @@ kubeconfig*
 .vscode/launch.json
 
 # husky managed hooks
-.husky/managed-hooks-enabled
+.husky/user-config
