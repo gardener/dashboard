@@ -3,3 +3,11 @@
 . "$(dirname "$0")/husky-user-choice.sh"
 
 "$(dirname "$0")/../hack/verify"
+
+echo ""
+echo "────────────────────────────────────────────"
+echo ""
+echo "Pre-push hook executed successfully."
+echo ""
+echo "────────────────────────────────────────────"
+echo ""

@@ -1,31 +1,17 @@
 # .husky/pre-commit
 . .husky/common.sh
 . "$(dirname "$0")/husky-user-choice.sh"
+. "$(dirname "$0")/setup-messages.sh"
 
 HUSKY_USER_CONFIG_FILE=".husky/user-config"
 
 if [ ! -f "$HUSKY_USER_CONFIG_FILE" ] || ! grep -q '^ggshield=' "$HUSKY_USER_CONFIG_FILE"; then
-  echo ""
-  echo "🦉 ggshield Secret Scanning Setup"
-  echo ""
-  echo "────────────────────────────────────────────"
-  echo ""
-  echo "You can optionally enable ggshield for secret scanning in this project."
-  echo "Note: Only enable this if you already have a ggshield (GitGuardian) account and are willing to connect it, or if you are willing to create one."
-  echo "More info: https://www.gitguardian.com/ggshield"
-  echo ""
-  echo "To set your preference, run one of the following commands:"
-  echo ""
-  echo "  • ✅  To enable ggshield secret scanning:"
-  echo "      echo ggshield=true >> $HUSKY_USER_CONFIG_FILE"
-  echo ""
-  echo "  • ⚠️  To disable ggshield secret scanning:"
-  echo "      echo ggshield=false >> $HUSKY_USER_CONFIG_FILE"
-  echo ""
-  echo "You can change this at any time by editing or deleting:"
-  echo "  $HUSKY_USER_CONFIG_FILE"
-  echo ""
-  echo "────────────────────────────────────────────"
+  show_ggshield_setup_message
+  exit 1
+fi
+
+if [ ! -f "$HUSKY_USER_CONFIG_FILE" ] || ! grep -q '^reuse=' "$HUSKY_USER_CONFIG_FILE"; then
+  show_reuse_setup_message
   exit 1
 fi
 
@@ -34,7 +20,7 @@ fi
 if [ "$ggshield" = "true" ]; then
   if ! command -v ggshield &> /dev/null; then
     echo ""
-    echo "🦉 ggshield Secret Scanning Setup"
+    echo "ggshield Install Check"
     echo ""
     echo "────────────────────────────────────────────"
     echo ""
@@ -47,3 +33,28 @@ if [ "$ggshield" = "true" ]; then
   fi
   ggshield secret scan pre-commit "$@"
 fi
+
+if [ "$reuse" = "true" ]; then
+  if ! command -v pipx &> /dev/null; then
+    echo ""
+    echo "REUSE Install Check"
+    echo ""
+    echo "────────────────────────────────────────────"
+    echo ""
+    echo "pipx is not installed, but you opted in for REUSE compliance checks."
+    echo "Please visit the link below for installation assistance:"
+    echo "https://pipx.pypa.io/stable/installation/"
+    echo ""
+    echo "────────────────────────────────────────────"
+    exit 1
+  fi
+  pipx run reuse lint
+fi
+
+echo ""
+echo "────────────────────────────────────────────"
+echo ""
+echo "Pre-commit hook executed successfully."
+echo ""
+echo "────────────────────────────────────────────"
+echo ""
