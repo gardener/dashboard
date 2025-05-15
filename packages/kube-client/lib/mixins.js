@@ -4,15 +4,12 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const { isPlainObject, isEmpty } = require('lodash')
-const { join } = require('path')
-const { Mixin } = require('mixwith')
-
-const { Informer, ListWatcher } = require('./cache')
-const { http } = require('./symbols')
-const { clusterScopedUrl, namespaceScopedUrl, validateLabelValue, setPatchType, PatchType } = require('./util')
+import { isPlainObject, isEmpty } from 'lodash-es'
+import { join } from 'path'
+import { Mixin } from 'mixwith'
+import { Informer, ListWatcher } from './cache/index.js'
+import { http } from './symbols.js'
+import { clusterScopedUrl, namespaceScopedUrl, validateLabelValue, setPatchType, PatchType } from './util.js'
 
 // Plain subclass factories without deduplication, caching and instanceof support
 const V1Alpha1 = superclass => class extends superclass {
@@ -536,7 +533,7 @@ function normalizeSearchParams (method, searchParams, options) {
   return normalizedSearchParams
 }
 
-module.exports = {
+export {
   V1,
   V1Alpha1,
   V1Beta1,

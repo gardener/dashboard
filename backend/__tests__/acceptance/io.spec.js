@@ -81,7 +81,7 @@ describe('api', function () {
   let socket
   let nsp
 
-  beforeAll(async () => {
+  beforeAll(() => {
     cache.cache.resetTicketCache()
     cache.initialize({
       projects: {
@@ -91,7 +91,7 @@ describe('api', function () {
         store: createStore(fixtures.shoots.list()),
       },
     })
-    agent = await createAgent('io', cache)
+    agent = createAgent('io', cache)
     nsp = agent.io.sockets
   })
 

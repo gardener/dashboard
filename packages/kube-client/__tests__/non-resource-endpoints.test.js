@@ -4,12 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const request = require('@gardener-dashboard/request')
-const HttpClient = require('../lib/HttpClient')
-const { assign } = require('../lib/nonResourceEndpoints')
-const { http } = require('../lib/symbols')
+import { jest } from '@jest/globals'
+import request from '@gardener-dashboard/request'
+import HttpClient from '../lib/HttpClient.js'
+import { assign } from '../lib/nonResourceEndpoints/index.js'
+import { http } from '../lib/symbols.js'
 
 describe('kube-client', () => {
   describe('non-resource-endpoints', () => {

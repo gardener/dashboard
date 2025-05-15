@@ -4,11 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import request from '@gardener-dashboard/request'
 
-const { createHttpError } = require('@gardener-dashboard/request')
-
-const {
+import {
   StatusError,
   CacheExpiredError,
   isExpiredError,
@@ -16,7 +14,8 @@ const {
   isGone,
   isTooLargeResourceVersionError,
   isGatewayTimeout,
-} = require('../lib/ApiErrors')
+} from '../lib/ApiErrors.js'
+const { createHttpError } = request
 
 describe('kube-client', () => {
   describe('ApiErrors', () => {

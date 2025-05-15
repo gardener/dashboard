@@ -58,6 +58,9 @@ FROM builder AS dashboard-builder
 RUN yarn workspace @gardener-dashboard/backend version "$(cat VERSION)"
 RUN yarn workspace @gardener-dashboard/frontend version "$(cat VERSION)"
 
+# build packages
+RUN yarn packages-build-all
+
 # run frontend build
 RUN yarn workspace @gardener-dashboard/frontend run build
 
@@ -73,4 +76,4 @@ FROM node-scratch AS dashboard
 COPY --from=dashboard-builder /app/dist .
 
 ENTRYPOINT [ "tini", "--", "node", "--require=/app/.pnp.cjs", "--loader=/app/.pnp.loader.mjs"]
-CMD ["server.mjs"]
+CMD ["server.js"]

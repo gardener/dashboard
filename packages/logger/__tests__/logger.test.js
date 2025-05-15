@@ -4,12 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import jestDateMock from 'jest-date-mock'
+import chalk from 'chalk'
 
-const jestDateMock = require('jest-date-mock')
-const chalk = require('chalk')
-
-const { Logger } = require('../lib')
+import { Logger } from '../lib/index.js'
 const LEVELS = Logger.LEVELS
 const ENV = process.env
 

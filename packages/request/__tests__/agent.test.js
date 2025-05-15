@@ -4,19 +4,54 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import { jest } from '@jest/globals'
+import http2 from 'http2'
 
-const http2 = require('http2')
-const { Agent } = require('../lib')
-const SessionPool = require('../lib/SessionPool')
+const sessionPoolInstanceMock = jest.fn().mockImplementation(() => {
+  return {
+    destroy: jest.fn(),
+    getSession: jest.fn(),
+    request: jest.fn(),
+    setSessionTimeout: jest.fn(),
+    clearSessionTimeout: jest.fn(),
+    setSessionHeartbeat: jest.fn(),
+    clearSessionHeartbeat: jest.fn(),
+    createSession: jest.fn(),
+    deleteSession: jest.fn(),
+  }
+})
 
-jest.mock('../lib/SessionPool')
+jest.unstable_mockModule('./lib/SessionPool.js', () => {
+  const SessionPoolClassMock = jest.fn(
+    sessionPoolInstanceMock,
+  )
+
+  SessionPoolClassMock.prototype = {
+    constructor: sessionPoolInstanceMock.prototype.constructor,
+    uuid: 1123,
+    destroy: jest.fn(),
+    getSession: jest.fn(),
+    request: jest.fn(),
+    setSessionTimeout: jest.fn(),
+    clearSessionTimeout: jest.fn(),
+    setSessionHeartbeat: jest.fn(),
+    clearSessionHeartbeat: jest.fn(),
+    createSession: jest.fn(),
+    deleteSession: jest.fn(),
+  }
+  return {
+    default: SessionPoolClassMock,
+  }
+})
+
+const { default: request } = await import('../lib/index.js')
+const { Agent } = request
 
 const { HTTP2_HEADER_HOST } = http2.constants
 
 describe('Agent', () => {
   beforeEach(() => {
-    SessionPool.mockClear()
+    jest.clearAllMocks()
   })
 
   describe('#constructor', () => {
@@ -74,21 +109,27 @@ describe('Agent', () => {
       const headers = {
         [HTTP2_HEADER_HOST]: host,
       }
-      await agent.request(headers, { id: 'id' })
-      expect(SessionPool).toBeCalledTimes(1)
-      expect(SessionPool.mock.calls[0]).toEqual([
+      const requestOptions = { id: 'id' }
+
+      const mockRequest = jest.fn()
+      jest.spyOn(agent, 'getSessionPool').mockReturnValue({
+        request: mockRequest,
+      })
+
+      await agent.request(headers, requestOptions)
+
+      expect(agent.getSessionPool).toBeCalledTimes(1)
+      expect(agent.getSessionPool).toBeCalledWith(
         expect.objectContaining({
           protocol: 'https:',
           host,
           pathname: '/id',
           hash: expect.stringMatching(/^#[a-f0-9]{7}$/),
         }),
-      ])
-      const pool = SessionPool.mock.instances[0]
-      expect(pool.request).toBeCalledTimes(1)
-      expect(pool.request.mock.calls[0]).toEqual([
-        headers, {},
-      ])
+      )
+
+      expect(mockRequest).toBeCalledTimes(1)
+      expect(mockRequest).toBeCalledWith(headers, {})
     })
   })
 })

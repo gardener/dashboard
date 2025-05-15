@@ -4,12 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const { clone, split, first, get, set } = require('lodash')
-const crypto = require('crypto')
-const jwt = require('jsonwebtoken')
-const { globalLogger: logger } = require('@gardener-dashboard/logger')
+import { clone, split, first, get, set } from 'lodash-es'
+import crypto from 'crypto'
+import jwt from 'jsonwebtoken'
+import { globalLogger as logger } from '@gardener-dashboard/logger'
 const xRequestStart = Symbol('x-request-start')
 
 const xRequestId = {
@@ -130,7 +128,7 @@ function attach (options = {}) {
   return options
 }
 
-module.exports = {
+export default {
   attach,
   beforeRequest,
   afterResponse,

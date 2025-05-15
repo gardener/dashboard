@@ -12,8 +12,8 @@ const { mockRequest } = require('@gardener-dashboard/request')
 describe('healthz', function () {
   let agent
 
-  beforeAll(async () => {
-    agent = await createAgent()
+  beforeAll(() => {
+    agent = createAgent()
   })
 
   afterAll(() => {

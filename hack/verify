@@ -9,7 +9,7 @@ set -o pipefail
 set -e
 
 if [[ -z "${SOURCE_PATH}" ]]; then
-  export SOURCE_PATH="$(readlink -f $(dirname ${0})/.. )"
+  export SOURCE_PATH="$(readlink -f $(dirname ${0})/..)"
 else
   export SOURCE_PATH="$(readlink -f "${SOURCE_PATH}")"
 fi
@@ -33,6 +33,7 @@ install_if_missing() {
   fi
 }
 
+
 # Add the bin directory to the PATH
 mkdir -p "${SOURCE_PATH}/bin"
 export PATH="${SOURCE_PATH}/bin:$PATH"
@@ -55,6 +56,9 @@ install_if_missing make make
 # the cache folder was to be modified or
 # the checksums of the packages are not consistent
 yarn install --immutable --immutable-cache --check-cache --refresh-lockfile
+
+# build packages
+yarn packages-build-all
 
 # check and report found duplicate dependencies
 yarn dedupe --check

@@ -4,13 +4,81 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import { jest } from '@jest/globals'
+import { createRequire } from 'module'
 
-const responseTime = require('response-time')
-const { monitorSocketIO, monitorHttpServer, monitorResponseTimes } = require('../lib/monitors')
-const metrics = require('../lib/metrics')
+/**
+ * Partial spy on the specified methods or properties.
+ *
+ * @param {string} moduleName - The name of the module to mock.
+ * @param {string[]} methodPaths - An array of method paths to spy. Each path should be a dot-separated string
+ *                                 representing the method's location within the module (e.g., "connectionsCount.inc").
+ * @param importMetaUrl
+ * @returns {Promise<void>} A promise that resolves when the module is mocked.
+ */
+async function spyOnHelper (moduleName, methodPaths, importMetaUrl = '') {
+  if (importMetaUrl) {
+    moduleName = moduleResolve(importMetaUrl, moduleName)
+  }
 
-jest.mock('../lib/metrics')
+  const { default: actual } = await import(moduleName)
+
+  for (const method of methodPaths) {
+    if (method.includes('.')) {
+      const parts = method.split('.')
+      const property = parts.pop() // Get the last part (e.g., 'inc')
+
+      const parent = parts.reduce((obj, key) => obj[key], actual)
+
+      parent[property] = jest.fn(parent[property])
+    } else {
+      return {
+        default: jest.fn(actual),
+      }
+    }
+  }
+  return {
+    default: actual,
+  }
+}
+
+function moduleResolve (importMetaUrl, modulePath) {
+  const require = createRequire(importMetaUrl)
+  return require.resolve(modulePath)
+}
+
+const { default: spy } = await spyOnHelper('../lib/metrics.js',
+  [
+    'connectionsCount.inc',
+    'connectionsTotal.inc',
+    'connectionsCount.dec',
+
+  ],
+  import.meta.url,
+)
+
+jest.unstable_mockModule('./lib/metrics.js', () => {
+  return {
+    default: {
+      ...spy,
+      responseTime: {
+        observe: jest.fn(),
+      },
+    },
+  }
+})
+
+const { default: metrics } = await import('../lib/metrics.js')
+
+const {
+  default: {
+    monitorSocketIO,
+    monitorHttpServer,
+    monitorResponseTimes,
+  },
+} = await import('../lib/monitors.js')
+
+const { default: responseTime } = await import('response-time')
 
 describe('monitors', () => {
   describe('socketIO connection monitor', () => {
@@ -78,7 +146,6 @@ describe('monitors', () => {
       const method = 'PATCH'
       const statusCode = 42
       const requestDuration = 1234
-
       monitorResponseTimes(additionalLabels)
       expect(responseTime).toHaveBeenCalledTimes(1)
       const responseTimeHandler = responseTime.mock.calls[0][0]
