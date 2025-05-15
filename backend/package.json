@@ -20,14 +20,14 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
   },
-  "main": "server.js",
+  "main": "server.mjs",
   "files": [
     "lib",
-    "server.js"
+    "server.mjs"
   ],
   "scripts": {
-    "serve": "cross-env NODE_ENV=development node server.js",
-    "lint": "eslint server.js . --max-warnings=0",
+    "serve": "cross-env NODE_ENV=development node --experimental-vm-modules server.mjs",
+    "lint": "eslint server.mjs . --max-warnings=0",
     "lint-sarif": "yarn lint --format=@microsoft/eslint-formatter-sarif",
     "test": "cross-env NODE_ENV=test jest",
     "test-coverage": "yarn test --coverage"
