@@ -153,6 +153,7 @@ SPDX-License-Identifier: Apache-2.0
         density="compact"
         hover
         item-height="37"
+        :item-key="getItemKey"
         must-sort
         fixed-header
         class="g-table"
@@ -813,6 +814,9 @@ export default {
         unset(reactiveObject, [key])
       }
       Object.assign(reactiveObject, defaultState)
+    },
+    getItemKey (item, fallback) {
+      return get(item, ['raw', 'metadata', 'uid'], fallback)
     },
   },
 }
