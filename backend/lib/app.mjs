@@ -11,10 +11,10 @@ import { resolve, join } from 'path'
 import logger from './logger/index.js'
 import { notFound, renderError, historyFallback, noCache } from './middleware.js'
 import helmet from 'helmet'
-import api from './api.js'
-import auth from './auth.js'
-import githubWebhook from './github/webhook/index.js'
-import { healthCheck } from './healthz/index.js'
+import { router as apiRouter, hooks as apiHooks } from './api.mjs'
+import { router as authRouter } from './auth.mjs'
+import { router as githubWebhookRouter } from './github/webhook/index.mjs'
+import { healthCheck } from './healthz/index.mjs'
 
 const { port, metricsPort } = config
 const periodSeconds = config.readinessProbe?.periodSeconds || 10
@@ -50,7 +50,7 @@ app.set('metricsPort', metricsPort)
 app.set('logger', logger)
 app.set('healthCheck', healthCheck)
 app.set('periodSeconds ', periodSeconds)
-app.set('hooks', api.hooks)
+app.set('hooks', apiHooks)
 app.set('trust proxy', 1)
 app.set('etag', false)
 app.set('x-powered-by', false)
@@ -62,9 +62,9 @@ if (process.env.NODE_ENV !== 'development') {
   app.use(helmet.strictTransportSecurity())
 }
 app.use(noCache(STATIC_PATHS))
-app.use('/auth', auth.router)
-app.use('/webhook', githubWebhook.router)
-app.use('/api', api.router)
+app.use('/auth', authRouter)
+app.use('/webhook', githubWebhookRouter)
+app.use('/api', apiRouter)
 
 app.use(helmet.xXssProtection())
 app.use(helmet.contentSecurityPolicy({
