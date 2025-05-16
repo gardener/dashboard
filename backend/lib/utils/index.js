@@ -113,6 +113,10 @@ function simplifyProject (project) {
   return project
 }
 
+function simplifySeed (seed) {
+  return simplifyObjectMetadata(seed)
+}
+
 function parseSelector (selector = '') {
   let notOperator
   let key
@@ -249,6 +253,7 @@ module.exports = {
   parseRooms,
   simplifyObjectMetadata,
   simplifyProject,
+  simplifySeed,
   parseSelectors,
   filterBySelectors,
   getConfigValue,

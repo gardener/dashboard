@@ -58,13 +58,8 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapActions } from 'pinia'
-
-import { useCloudProfileStore } from '@/store/cloudProfile'
-
 import { useShootItem } from '@/composables/useShootItem'
-
-import some from 'lodash/some'
+import { useShootHelper } from '@/composables/useShootHelper'
 
 export default {
   inject: [
@@ -77,22 +72,25 @@ export default {
   },
   setup () {
     const {
-      shootMetadata,
+      shootUid,
       shootCloudProfileRef,
       shootControlPlaneHighAvailabilityFailureTolerance,
       shootSeedName,
     } = useShootItem()
 
+    const { isFailureToleranceTypeZoneSupported } = useShootHelper()
+
     return {
-      shootMetadata,
+      shootUid,
       shootCloudProfileRef,
       shootControlPlaneHighAvailabilityFailureTolerance,
       shootSeedName,
+      isFailureToleranceTypeZoneSupported,
     }
   },
   computed: {
     popoverKey () {
-      return `g-control-plane-hig-availability-tag:${this.shootMetadata.uid}`
+      return `g-control-plane-hig-availability-tag:${this.shootUid}`
     },
     internalValue: {
       get () {
@@ -102,13 +100,9 @@ export default {
         this.activePopoverKey = value ? this.popoverKey : ''
       },
     },
-    zoneSupported () {
-      const seeds = this.seedsByCloudProfileRef(this.shootCloudProfileRef)
-      return some(seeds, ({ data }) => data.zones?.length >= 3)
-    },
     zoneHighAvailabilityConfigurationError () {
       return this.shootControlPlaneHighAvailabilityFailureTolerance === 'zone' &&
-        !this.zoneSupported &&
+        !this.isFailureToleranceTypeZoneSupported &&
         !this.shootSeedName
     },
     color () {
@@ -117,11 +111,6 @@ export default {
       }
       return 'primary'
     },
-  },
-  methods: {
-    ...mapActions(useCloudProfileStore, [
-      'seedsByCloudProfileRef',
-    ]),
   },
 }
 </script>
