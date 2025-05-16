@@ -3,6 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import router from './router.js'
+import router from './router.mjs'
 
 export { router }

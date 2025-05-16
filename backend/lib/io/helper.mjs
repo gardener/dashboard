@@ -4,19 +4,19 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-const crypto = require('crypto')
-const { promisify } = require('util')
-const createError = require('http-errors')
-const cookieParser = require('cookie-parser')
-const kubernetesClient = require('@gardener-dashboard/kube-client')
-const { cloneDeep } = require('lodash')
-const cache = require('../cache')
-const logger = require('../logger')
-const authorization = require('../services/authorization')
-const { authenticate } = require('../security')
-const { simplifyObjectMetadata } = require('../utils')
+import crypto from 'crypto'
+import { promisify } from 'util'
+import httpErrors from 'http-errors'
+import cookieParser from 'cookie-parser'
+import kubernetesClient from '@gardener-dashboard/kube-client'
+import { cloneDeep } from 'lodash-es'
+import cache from '../cache/index.js'
+import logger from '../logger/index.js'
+import authorization from '../services/authorization.js'
+import { authenticate } from '../security/index.js'
+import { simplifyObjectMetadata } from '../utils/index.js'
 
-const { isHttpError } = createError
+const { isHttpError } = httpErrors
 
 function expiresIn (socket) {
   const user = getUserFromSocket(socket)
@@ -56,7 +56,7 @@ function authenticateFn (options) {
   }
 
   return async req => {
-    await cookieParserAsync(req, res) // Note: We intentionally omit the 'next' callback here because promisify automatically appends an error-first callback (err, value) => { ... } to the function arguments.
+    await cookieParserAsync(req, res)
     await authenticateAsync(req, res, next)
     await userProfilesAsync(req, res, next)
     return req.user
@@ -74,9 +74,9 @@ function authenticationMiddleware () {
       if (user.rti) {
         const delay = expiresIn(socket)
         if (delay > 0) {
-          helper.setDisconnectTimeout(socket, delay)
+          setDisconnectTimeout(socket, delay)
         } else {
-          throw createError(401, 'Token refresh required', {
+          throw httpErrors(401, 'Token refresh required', {
             code: 'ERR_JWT_TOKEN_REFRESH_REQUIRED',
             data: {
               rti: user.rti,
@@ -89,7 +89,6 @@ function authenticationMiddleware () {
     } catch (err) {
       logger.error('Socket %s authentication failed: %s', socket.id, err)
       if (isHttpError(err)) {
-        // additional details (see https://socket.io/docs/v4/server-api/#namespaceusefn)
         const { statusCode, code, data } = err
         err.data = { statusCode, code, ...data }
       }
@@ -179,12 +178,15 @@ function synchronizeFactory (kind, options = {}) {
   }
 }
 
-const helper = module.exports = {
-  constants,
+export {
+  expiresIn,
+  userProfiles,
+  authenticateFn,
   authenticationMiddleware,
   getUserFromSocket,
   setDisconnectTimeout,
   sha256,
   joinPrivateRoom,
   synchronizeFactory,
+  constants,
 }

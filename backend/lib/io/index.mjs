@@ -6,7 +6,7 @@
 
 import { Server } from 'socket.io'
 import logger from '../logger/index.js'
-import helper from './helper.js'
+import { authenticationMiddleware, joinPrivateRoom } from './helper.mjs'
 import dispatcher from './dispatcher.mjs'
 
 function init (httpServer, cache) {
@@ -16,7 +16,7 @@ function init (httpServer, cache) {
   })
 
   // middleware
-  io.use(helper.authenticationMiddleware())
+  io.use(authenticationMiddleware())
 
   // handle connections (see https://socket.io/docs/v4/server-application-structure)
   io.on('connection', socket => {
@@ -24,7 +24,7 @@ function init (httpServer, cache) {
     const timeoutId = socket.data.timeoutId
     delete socket.data.timeoutId
 
-    helper.joinPrivateRoom(socket)
+    joinPrivateRoom(socket)
 
     // handle 'subscribe' events
     socket.on('subscribe', async (key, ...args) => {

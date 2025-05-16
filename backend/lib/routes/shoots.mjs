@@ -5,7 +5,7 @@
 //
 
 import express from 'express'
-import services from '../services/index.js'
+import services from '../services/index.mjs'
 import { metricsRoute } from '../middleware.js'
 import utils from '../utils/index.js'
 import kubeClientModule from '@gardener-dashboard/kube-client'

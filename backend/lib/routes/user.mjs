@@ -5,7 +5,7 @@
 //
 
 import express from 'express'
-import services from '../services/index.js'
+import services from '../services/index.mjs'
 import { metricsRoute } from '../middleware.js'
 import config from '../config/index.js'
 import utils from '../utils/index.js'

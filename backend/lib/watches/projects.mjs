@@ -5,7 +5,7 @@
 //
 
 import { get } from 'lodash-es'
-import * as ioHelper from '../io/helper.js'
+import * as ioHelper from '../io/helper.mjs'
 import { isMemberOf } from '../utils/index.js'
 
 export default (io, informer) => {

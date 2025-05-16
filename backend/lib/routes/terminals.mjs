@@ -5,7 +5,7 @@
 //
 
 import express from 'express'
-import services from '../services/index.js'
+import services from '../services/index.mjs'
 import httpErrors from 'http-errors'
 import { metricsRoute } from '../middleware.js'
 const { terminals, authorization } = services
