@@ -34,6 +34,7 @@ import { useGardenerExtensionStore } from '../gardenerExtension'
 import { useCredentialStore } from '../credential'
 import { useSocketStore } from '../socket'
 import { useTicketStore } from '../ticket'
+import { useSeedStore } from '../seed'
 import { useLocalStorageStore } from '../localStorage'
 
 import {
@@ -70,6 +71,7 @@ const useShootStore = defineStore('shoot', () => {
   const gardenerExtensionStore = useGardenerExtensionStore()
   const ticketStore = useTicketStore()
   const socketStore = useSocketStore()
+  const seedStore = useSeedStore()
   const localStorageStore = useLocalStorageStore()
 
   const projectItem = toRef(projectStore, 'project')
@@ -88,6 +90,7 @@ const useShootStore = defineStore('shoot', () => {
     gardenerExtensionStore,
     ticketStore,
     socketStore,
+    seedStore,
     shootCustomFieldsComposable,
   }
 
