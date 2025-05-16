@@ -26,11 +26,14 @@ export function isTemporaryError (errorCodesArray) {
 }
 
 export function objectsFromErrorCodes (errorCodesArray) {
-  return map(errorCodesArray, code => get(errorCodes, code, {
-    code,
-    description: `Error Code: ${code}`,
-    shortDescription: `Error Code: ${code}`,
-  }))
+  return map(errorCodesArray, code => {
+    const defaultCodeObject = {
+      code,
+      description: `Error Code: ${code}`,
+      shortDescription: `Error Code: ${code}`,
+    }
+    return get(errorCodes, [code], defaultCodeObject)
+  })
 }
 
 const errorCodes = {

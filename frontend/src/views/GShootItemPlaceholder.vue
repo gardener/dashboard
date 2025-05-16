@@ -41,6 +41,7 @@ import { useTerminalStore } from '@/store/terminal'
 import GShootItemLoading from '@/views/GShootItemLoading.vue'
 import GShootItemError from '@/views/GShootItemError.vue'
 
+import { useProvideSeedItem } from '@/composables/useSeedItem'
 import { useProvideProjectItem } from '@/composables/useProjectItem'
 import { useProvideShootItem } from '@/composables/useShootItem'
 import { useProvideShootHelper } from '@/composables/useShootHelper'
@@ -215,10 +216,10 @@ export default {
     useProvideProjectItem(projectItem)
     const {
       hasShootWorkerGroups,
+      shootSeedName,
     } = useProvideShootItem(shootItem, {
       cloudProfileStore,
       projectStore,
-      seedStore,
     })
 
     useProvideShootHelper(shootItem, {
@@ -228,6 +229,9 @@ export default {
       credentialStore,
       seedStore,
     })
+
+    const seedItem = computed(() => seedStore.seedByName(shootSeedName.value))
+    useProvideSeedItem(seedItem)
 
     return {
       component,
