@@ -7,5 +7,6 @@
 import shoots from './shoots.js'
 import leases from './leases.js'
 import projects from './projects.js'
+import seeds from './seeds.js'
 
-export { shoots, leases, projects }
+export { shoots, leases, projects, seeds }
