@@ -6,6 +6,7 @@
 
 const shoots = require('./shoots')
 const projects = require('./projects')
+const seeds = require('./seeds')
 
 async function subscribe (socket, key, options = {}) {
   switch (key) {
@@ -37,6 +38,11 @@ function synchronize (socket, key, ...args) {
       const [uids] = args
       assertArray(uids)
       return projects.synchronize(socket, uids)
+    }
+    case 'seeds': {
+      const [uids] = args
+      assertArray(uids)
+      return seeds.synchronize(socket, uids)
     }
     default:
       throw new TypeError(`Invalid synchronization type - ${key}`)

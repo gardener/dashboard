@@ -6,7 +6,7 @@
 
 'use strict'
 
-const { NotFound, Forbidden } = require('http-errors')
+const { Forbidden } = require('http-errors')
 const authorization = require('./authorization')
 const _ = require('lodash')
 const { getCloudProfiles, getVisibleAndNotProtectedSeeds } = require('../cache')
@@ -24,7 +24,6 @@ function fromResource ({ cloudProfile: { metadata, spec }, seedNames }) {
 function emptyToUndefined (value) {
   return _.isEmpty(value) ? undefined : value
 }
-
 function assignSeedsToCloudProfileIteratee (seeds) {
   return cloudProfileResource => {
     function filterProviderType (seed) {
@@ -65,25 +64,4 @@ exports.list = async function ({ user }) {
   const cloudProfiles = getCloudProfiles()
   const seeds = getVisibleAndNotProtectedSeeds()
   return _.map(cloudProfiles, assignSeedsToCloudProfileIteratee(seeds))
-}
-
-exports.read = async function ({ user, name }) {
-  const allowed = await authorization.canGetCloudProfiles(user, name)
-  if (!allowed) {
-    throw new Forbidden(`You are not allowed to get cloudprofile ${name}`)
-  }
-
-  const cloudProfiles = getCloudProfiles()
-  const cloudProfileResource = _.find(cloudProfiles, ['metadata.name', name])
-  if (!cloudProfileResource) {
-    throw new NotFound(`Cloud profile with name ${name} not found`)
-  }
-
-  const seeds = getVisibleAndNotProtectedSeeds()
-  const cloudProfile = assignSeedsToCloudProfileIteratee(seeds)(cloudProfileResource)
-  if (!cloudProfile.data.seedNames) {
-    throw new NotFound(`No matching seed for cloud profile with name ${name} found`)
-  }
-
-  return cloudProfile
 }
