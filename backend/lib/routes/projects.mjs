@@ -4,13 +4,12 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import express from 'express'
+import services from '../services/index.js'
+import { metricsRoute } from '../middleware.js'
+const { projects } = services
 
-const express = require('express')
-const { projects } = require('../services')
-const { metricsRoute } = require('../middleware')
-
-const router = module.exports = express.Router()
+const router = express.Router()
 
 const metricsMiddleware = metricsRoute('project')
 
@@ -40,17 +39,7 @@ router.route('/:project')
     try {
       const user = req.user
       const name = req.params.project
-      res.send(await projects.read({ user, name }))
-    } catch (err) {
-      next(err)
-    }
-  })
-  .put(async (req, res, next) => {
-    try {
-      const user = req.user
-      const name = req.params.project
-      const body = req.body
-      res.send(await projects.patch({ user, name, body }))
+      res.send(await projects.get({ user, name }))
     } catch (err) {
       next(err)
     }
@@ -65,6 +54,16 @@ router.route('/:project')
       next(err)
     }
   })
+  .put(async (req, res, next) => {
+    try {
+      const user = req.user
+      const name = req.params.project
+      const body = req.body
+      res.send(await projects.update({ user, name, body }))
+    } catch (err) {
+      next(err)
+    }
+  })
   .delete(async (req, res, next) => {
     try {
       const user = req.user
@@ -74,3 +73,5 @@ router.route('/:project')
       next(err)
     }
   })
+
+export default router

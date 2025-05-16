@@ -7,7 +7,7 @@
 import { Server } from 'socket.io'
 import logger from '../logger/index.js'
 import helper from './helper.js'
-import dispatcher from './dispatcher.js'
+import dispatcher from './dispatcher.mjs'
 
 function init (httpServer, cache) {
   const io = new Server(httpServer, {

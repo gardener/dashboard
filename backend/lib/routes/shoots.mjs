@@ -4,14 +4,15 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import express from 'express'
+import services from '../services/index.js'
+import { metricsRoute } from '../middleware.js'
+import utils from '../utils/index.js'
+import kubeClientModule from '@gardener-dashboard/kube-client'
+const { shoots } = services
+const { dashboardClient } = kubeClientModule
 
-const express = require('express')
-const { shoots } = require('../services')
-const { metricsRoute } = require('../middleware')
-const { simplifyObjectMetadata } = require('../utils')
-
-const router = module.exports = express.Router({
+const router = express.Router({
   mergeParams: true,
 })
 
@@ -26,7 +27,7 @@ router.route('/')
       const labelSelector = req.query.labelSelector
       const shootList = await shoots.list({ user, namespace, labelSelector })
       for (const object of shootList.items) {
-        simplifyObjectMetadata(object)
+        utils.simplifyObjectMetadata(object)
       }
       res.send(shootList)
     } catch (err) {
@@ -258,3 +259,5 @@ router.route('/:name/adminkubeconfig')
       next(err)
     }
   })
+
+export default router

@@ -4,17 +4,27 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import express from 'express'
+import requestModule from '@gardener-dashboard/request'
+import { readFile } from 'fs/promises'
+import { dirname, join } from 'path'
+import { fileURLToPath } from 'url'
+import logger from '../logger/index.js'
+import utils from '../utils/index.js'
+import kubeClientModule from '@gardener-dashboard/kube-client'
+import { metricsRoute } from '../middleware.js'
 
-const express = require('express')
-const { extend } = require('@gardener-dashboard/request')
-const logger = require('../logger')
-const { decodeBase64 } = require('../utils')
-const { dashboardClient } = require('@gardener-dashboard/kube-client')
-const { version } = require('../../package')
-const { metricsRoute } = require('../middleware')
+const { extend } = requestModule
+const { dashboardClient } = kubeClientModule
 
-const router = module.exports = express.Router()
+const __dirname = dirname(fileURLToPath(import.meta.url))
+
+async function getPkg () {
+  const content = await readFile(join(__dirname, '../../package.json'), 'utf8')
+  return JSON.parse(content)
+}
+
+const router = express.Router()
 
 const metricsMiddleware = metricsRoute('info')
 
@@ -23,7 +33,8 @@ router.route('/')
   .get(async (req, res, next) => {
     try {
       const gardenerVersion = await fetchGardenerVersion()
-      res.send({ version, gardenerVersion })
+      const pkg = await getPkg()
+      res.send({ version: pkg.version, gardenerVersion })
     } catch (err) {
       next(err)
     }
@@ -45,7 +56,7 @@ async function fetchGardenerVersion () {
       },
     }
     if (caBundle) {
-      clientConfig.ca = decodeBase64(caBundle)
+      clientConfig.ca = utils.decodeBase64(caBundle)
     } else if (process.env.NODE_ENV !== 'production' && insecureSkipTLSVerify === true) {
       clientConfig.rejectUnauthorized = false
     }
@@ -56,3 +67,5 @@ async function fetchGardenerVersion () {
     logger.warn(`Could not fetch gardener version. Error: ${err.message}`)
   }
 }
+
+export default router

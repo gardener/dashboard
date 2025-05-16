@@ -6,19 +6,19 @@
 
 import _ from 'lodash-es'
 import config from '../config/index.js'
-import configRoute from './config.js'
-import infoRoute from './info.js'
-import openapiRoute from '../openapi/index.js'
-import userRoute from './user.js'
-import cloudprofilesRoute from './cloudprofiles.js'
-import seedsRoute from './seeds.js'
-import gardenerExtensionsRoute from './gardenerExtensions.js'
-import projectsRoute from './projects.js'
-import shootsRoute from './shoots.js'
-import ticketsRoute from './tickets.js'
-import cloudProviderCredentialsRoute from './cloudProviderCredentials.js'
-import membersRoute from './members.js'
-import resourceQuotasRoute from './resourceQuotas.js'
+import configRoute from './config.mjs'
+import infoRoute from './info.mjs'
+import openapiRoute from '../openapi/index.mjs'
+import userRoute from './user.mjs'
+import cloudprofilesRoute from './cloudprofiles.mjs'
+import seedsRoute from './seeds.mjs'
+import gardenerExtensionsRoute from './gardenerExtensions.mjs'
+import projectsRoute from './projects.mjs'
+import shootsRoute from './shoots.mjs'
+import ticketsRoute from './tickets.mjs'
+import cloudProviderCredentialsRoute from './cloudProviderCredentials.mjs'
+import membersRoute from './members.mjs'
+import resourceQuotasRoute from './resourceQuotas.mjs'
 
 const routes = {
   '/config': configRoute,
@@ -37,7 +37,7 @@ const routes = {
 }
 
 if (_.get(config, ['frontend', 'features', 'terminalEnabled'], false)) {
-  const terminalsRoute = (await import('./terminals.js')).default
+  const terminalsRoute = (await import('./terminals.mjs')).default
   routes['/terminals'] = terminalsRoute
 }
 

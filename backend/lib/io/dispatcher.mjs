@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-const shoots = require('./shoots')
-const projects = require('./projects')
+import shoots from './shoots.js'
+import projects from './projects.js'
 
 async function subscribe (socket, key, options = {}) {
   switch (key) {
@@ -45,11 +45,11 @@ function synchronize (socket, key, ...args) {
 
 function assertArray (value) {
   if (!Array.isArray(value)) {
-    throw new TypeError('Invalid parameters for synchronize shoots')
+    throw new TypeError('Expected an array')
   }
 }
 
-module.exports = {
+export default {
   subscribe,
   unsubscribe,
   synchronize,

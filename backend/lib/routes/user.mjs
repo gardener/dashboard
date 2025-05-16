@@ -4,16 +4,16 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import express from 'express'
+import services from '../services/index.js'
+import { metricsRoute } from '../middleware.js'
+import config from '../config/index.js'
+import utils from '../utils/index.js'
+const { authorization } = services
 
-const express = require('express')
+const { encodeBase64 } = utils
 
-const config = require('../config')
-const { encodeBase64 } = require('../utils')
-const { authorization } = require('../services')
-const { metricsRoute } = require('../middleware')
-
-const router = module.exports = express.Router({
+const router = express.Router({
   mergeParams: true,
 })
 
@@ -39,21 +39,18 @@ router.route('/kubeconfig')
       apiServerCaData: certificateAuthorityData,
       apiServerSkipTlsVerify: insecureSkipTlsVerify,
       oidc = {},
-    } = config
-    const {
-      issuer: issuerUrl,
       public: {
         clientId = oidc.client_id,
         clientSecret,
         usePKCE,
       } = {},
-    } = oidc
+    } = config
     const body = {
       server,
       certificateAuthorityData,
       insecureSkipTlsVerify,
       oidc: {
-        issuerUrl,
+        issuerUrl: oidc.issuer,
         clientId,
       },
     }
@@ -81,3 +78,5 @@ router.route('/kubeconfig')
     }
     res.send(body)
   })
+
+export default router
