@@ -29,14 +29,14 @@ import map from 'lodash/map'
 import get from 'lodash/get'
 
 const shootPropertyMappings = Object.freeze({
-  cloudProfileRef: 'spec.cloudProfile',
-  seedName: 'spec.seedName',
-  region: 'spec.region',
-  secretBindingName: 'spec.secretBindingName',
-  credentialsBindingName: 'spec.credentialsBindingName',
-  kubernetesVersion: 'spec.kubernetes.version',
-  providerType: 'spec.provider.type',
-  addons: 'spec.addons',
+  cloudProfileRef: ['spec', 'cloudProfile'],
+  seedName: ['spec', 'seedName'],
+  region: ['spec', 'region'],
+  secretBindingName: ['spec', 'secretBindingName'],
+  credentialsBindingName: ['spec', 'credentialsBindingName'],
+  kubernetesVersion: ['spec', 'kubernetes', 'version'],
+  providerType: ['spec', 'provider', 'type'],
+  addons: ['spec', 'addons'],
 })
 
 export function createShootHelperComposable (shootItem, options = {}) {
@@ -94,7 +94,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
   })
 
   const seedIngressDomain = computed(() => {
-    return get(seed.value, ['data', 'ingressDomain'])
+    return get(seed.value, ['spec', 'ingress', 'domain'])
   })
 
   const seeds = computed(() => {
@@ -105,7 +105,10 @@ export function createShootHelperComposable (shootItem, options = {}) {
     const seedList = seedName.value
       ? [seed.value]
       : seeds.value
-    return some(seedList, ({ data }) => data.zones?.length >= 3)
+    return some(seedList, seed => {
+      const zones = get(seed, ['spec', 'provider', 'zones'], [])
+      return zones.length >= 3
+    })
   })
 
   const allZones = computed(() => {

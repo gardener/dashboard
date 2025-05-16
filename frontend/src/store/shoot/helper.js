@@ -245,11 +245,37 @@ export function getRawVal (context, item, column) {
   }
 }
 
+function getReadinessSortVal ({
+  conditions,
+  lastOperationTime,
+  creationTime,
+  isErrorFn,
+  configStore,
+}) {
+  if (!conditions.length) {
+    // items without conditions have medium priority
+    const priority = '00000100'
+    const time = lastOperationTime ?? creationTime
+    return `${priority}-${time}`
+  }
+  const iteratee = ({ type, status = 'True', lastTransitionTime = '1970-01-01T00:00:00Z' }) => {
+    const isError = isErrorFn(status)
+    // items without any error have lowest priority
+    const priority = !isError
+      ? '99999999'
+      : padStart(configStore.conditionForType(type).sortOrder, 8, '0')
+    return `${priority}-${lastTransitionTime}`
+  }
+  // the condition with the lowest priority and transitionTime is used
+  return head(conditions.map(iteratee).sort())
+}
+
 export function getSortVal (state, context, item, sortBy) {
   const {
     configStore,
     projectStore,
     ticketStore,
+    seedStore,
   } = context
 
   const purposeValue = {
@@ -301,23 +327,38 @@ export function getSortVal (state, context, item, sortBy) {
       const conditions = item.status?.conditions ?? []
       const constraints = item.status?.constraints ?? []
       const readinessConditions = [...conditions, ...constraints]
-      if (!readinessConditions.length) {
-        // items without conditions have medium priority
-        const priority = '00000100'
-        const lastTransitionTime = item.status?.lastOperation.lastUpdateTime ?? item.metadata.creationTimestamp
-        return `${priority}-${lastTransitionTime}`
-      }
       const hideProgressingClusters = get(state.shootListFilters, ['progressing'], false)
-      const iteratee = ({ type, status = 'True', lastTransitionTime = '1970-01-01T00:00:00Z' }) => {
-        const isError = status !== 'True' && !(hideProgressingClusters && status === 'Progressing')
-        // items without any error have lowest priority
-        const priority = !isError
-          ? '99999999'
-          : padStart(configStore.conditionForType(type).sortOrder, 8, '0')
-        return `${priority}-${lastTransitionTime}`
+      const lastOperationTime = item.status?.lastOperation?.lastUpdateTime
+      const creationTime = item.metadata.creationTimestamp
+      const isErrorFn = status => status !== 'True' && !(hideProgressingClusters && status === 'Progressing')
+      return getReadinessSortVal({
+        conditions: readinessConditions,
+        lastOperationTime,
+        creationTime,
+        isErrorFn,
+        configStore,
+      })
+    }
+    case 'seedReadiness': {
+      const seedName = get(item, ['spec', 'seedName'])
+      if (!seedName) {
+        return '99999999' // lowest priority when not assigned to seed yet
       }
-      // the condition with the lowest priority and transitionTime is used
-      return head(readinessConditions.map(iteratee).sort())
+      const seed = seedStore.seedByName(seedName)
+      if (!seed) {
+        return '99999999' // lowest priority when seed not found
+      }
+      const conditions = get(seed, ['status', 'conditions'], [])
+      const lastOperationTime = get(seed, ['status', 'lastOperation', 'lastUpdateTime'])
+      const creationTime = get(seed, ['metadata', 'creationTimestamp'])
+      const isErrorFn = status => status !== 'True'
+      return getReadinessSortVal({
+        conditions,
+        lastOperationTime,
+        creationTime,
+        isErrorFn,
+        configStore,
+      })
     }
     case 'ticket': {
       const metadata = item.metadata
@@ -394,7 +435,19 @@ export function sortItemsFn (state, context) {
     }
 
     const iteratee = item => getSortVal(state, context, item, key)
-    return orderBy(items, [iteratee, 'metadata.name'], [order, 'asc'])
+
+    let sortKeys
+    let sortOrders
+    if (key === 'seedReadiness') {
+      // second sort key is the seed name
+      sortKeys = [iteratee, 'spec.seedName', 'metadata.name']
+      sortOrders = [order, 'asc', 'asc']
+    } else {
+      sortKeys = [iteratee, 'metadata.name']
+      sortOrders = [order, 'asc']
+    }
+
+    return orderBy(items, sortKeys, sortOrders)
   }
 }
 

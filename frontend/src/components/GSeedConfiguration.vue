@@ -39,12 +39,14 @@ import {
   ref,
   computed,
 } from 'vue'
+import { storeToRefs } from 'pinia'
 
 import { useSeedStore } from '@/store/seed'
 
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 
 import { useShootItem } from '@/composables/useShootItem'
+import { useSeedProviderType } from '@/composables/useSeedItem'
 
 import { errorDetailsFromError } from '@/utils/error'
 
@@ -65,21 +67,30 @@ export default {
     } = useShootItem()
 
     const seedStore = useSeedStore()
+    const { seedList } = storeToRefs(seedStore)
 
     const seedNames = computed(() => {
-      return map(seedStore.seedList, 'metadata.name')
+      return map(seedList.value, 'metadata.name')
     })
 
+    const selectedSeed = computed(() => {
+      return find(seedList.value, ['metadata.name', seedName.value])
+    })
+
+    const sourceSeed = computed(() => {
+      return find(seedList.value, ['metadata.name', shootSeedName.value])
+    })
+
+    const selectedType = useSeedProviderType(selectedSeed)
+    const sourceType = useSeedProviderType(sourceSeed)
+
     const providerMismatch = computed(() => {
-      const selectedSeed = find(seedStore.seedList, ['metadata.name', seedName.value])
-      const sourceSeed = find(seedStore.seedList, ['metadata.name', shootSeedName.value])
-      if (!selectedSeed || !sourceSeed) {
+      if (!selectedSeed.value || !sourceSeed.value) {
         return false
       }
-      const selectedProvider = selectedSeed.data.type
-      const sourceProvider = sourceSeed.data.type
-      const shootProvider = shootProviderType.value
-      return selectedProvider !== sourceProvider || selectedProvider !== shootProvider
+      const isSameSeedType = selectedType.value === sourceType.value
+      const isSameShootType = shootProviderType.value === selectedType.value
+      return !(isSameSeedType && isSameShootType)
     })
 
     const seedName = ref(shootSeedName.value)

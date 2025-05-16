@@ -64,9 +64,16 @@ function expiresIn (socket) {
 
 async function userProfiles (req, res, next) {
   try {
-    const canListProjects = await authorization.canListProjects(req.user)
+    const [
+      canListProjects,
+      canListSeeds,
+    ] = await Promise.all([
+      authorization.canListProjects(req.user),
+      authorization.canListSeeds(req.user),
+    ])
     const profiles = Object.freeze({
       canListProjects,
+      canListSeeds,
     })
     Object.defineProperty(req.user, 'profiles', {
       value: profiles,
