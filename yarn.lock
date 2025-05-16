@@ -948,6 +948,7 @@ __metadata:
     js-yaml: "npm:^4.1.0"
     jsonwebtoken: "npm:^9.0.2"
     lodash: "npm:^4.17.21"
+    lodash-es: "npm:^4.17.21"
     morgan: "npm:^1.10.0"
     neostandard: "npm:^0.12.0"
     object-hash: "npm:^3.0.0"
@@ -6079,6 +6080,7 @@ __metadata:
     dependency-cruiser: "npm:^16.10.1"
     eslint: "npm:^9.11.0"
     jest: "npm:^29.7.0"
+    lodash-es: "npm:^4.17.21"
     node-gyp: "npm:latest"
   dependenciesMeta:
     deasync:

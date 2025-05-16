@@ -4,14 +4,15 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import kubeClientModule from '@gardener-dashboard/kube-client'
+import monitorModule from '@gardener-dashboard/monitor'
+import cache from './cache/index.js'
+import config from './config/index.js'
+import watches from './watches/index.js'
+import io from './io/index.mjs'
 
-const { createDashboardClient, abortWatcher } = require('@gardener-dashboard/kube-client')
-const { monitorHttpServer, monitorSocketIO } = require('@gardener-dashboard/monitor')
-const cache = require('./cache')
-const config = require('./config')
-const watches = require('./watches')
-const io = require('./io')
+const { createDashboardClient, abortWatcher } = kubeClientModule
+const { monitorHttpServer, monitorSocketIO } = monitorModule
 
 class LifecycleHooks {
   constructor (client) {
@@ -89,7 +90,7 @@ class LifecycleHooks {
   }
 }
 
-module.exports = () => {
+export default () => {
   const client = createDashboardClient({
     id: 'watch',
     pingInterval: 30000,
@@ -97,4 +98,4 @@ module.exports = () => {
   })
   return new LifecycleHooks(client)
 }
-module.exports.LifecycleHooks = LifecycleHooks
+export { LifecycleHooks }

@@ -48,5 +48,8 @@
   "packageManager": "yarn@4.9.1",
   "engines": {
     "node": "^22.7.0"
+  },
+  "dependencies": {
+    "lodash-es": "^4.17.21"
   }
 }
