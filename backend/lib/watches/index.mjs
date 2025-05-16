@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import shoots from './shoots.js'
-import leases from './leases.js'
-import projects from './projects.js'
+import shoots from './shoots.mjs'
+import leases from './leases.mjs'
+import projects from './projects.mjs'
 
 export { shoots, leases, projects }

@@ -4,28 +4,17 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import { get } from 'lodash-es'
+import { isMemberOf, simplifyProject } from '../utils/index.js'
+import { constants, getUserFromSocket, synchronizeFactory } from './helper.js'
 
-const { get } = require('lodash')
-const {
-  isMemberOf,
-  simplifyProject,
-} = require('../utils')
-const {
-  constants,
-  getUserFromSocket,
-  synchronizeFactory,
-} = require('./helper')
-
-module.exports = {
-  synchronize: synchronizeFactory('Project', {
-    group: 'core.gardener.cloud',
-    accessResolver (socket, object) {
-      const user = getUserFromSocket(socket)
-      return get(user, ['profiles', 'canListProjects'], false) || isMemberOf(object, user)
-        ? constants.OBJECT_SIMPLE
-        : constants.OBJECT_NONE
-    },
-    simplifyObject: simplifyProject,
-  }),
-}
+export const synchronize = synchronizeFactory('Project', {
+  group: 'core.gardener.cloud',
+  accessResolver (socket, object) {
+    const user = getUserFromSocket(socket)
+    return get(user, ['profiles', 'canListProjects'], false) || isMemberOf(object, user)
+      ? constants.OBJECT_SIMPLE
+      : constants.OBJECT_NONE
+  },
+  simplifyObject: simplifyProject,
+})

@@ -4,21 +4,14 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const createError = require('http-errors')
-const cache = require('../cache')
-const logger = require('../logger')
-const {
-  projectFilter,
-  parseRooms,
-} = require('../utils')
-const { authorization } = require('../services')
-const {
-  constants,
-  getUserFromSocket,
-  synchronizeFactory,
-} = require('./helper')
+import httpErrors from 'http-errors'
+import cache from '../cache/index.js'
+import logger from '../logger/index.js'
+import { projectFilter, parseRooms } from '../utils/index.js'
+import services from '../services/index.js'
+import { constants, getUserFromSocket, synchronizeFactory } from './helper.js'
+const { authorization } = services
+const createError = httpErrors
 
 async function canListAllShoots (user, namespaces) {
   const canListShoots = async namespace => [namespace, await authorization.canListShoots(user, namespace)]
@@ -38,7 +31,7 @@ function getAllNamespaces (user) {
     .map(project => project.spec.namespace)
 }
 
-async function subscribe (socket, { namespace, name, labelSelector }) {
+export async function subscribe (socket, { namespace, name, labelSelector }) {
   const user = getUserFromSocket(socket)
 
   const joinRoom = room => {
@@ -71,14 +64,14 @@ async function subscribe (socket, { namespace, name, labelSelector }) {
   throw createError(403, 'Insufficient authorization for shoot subscription')
 }
 
-function unsubscribe (socket) {
+export function unsubscribe (socket) {
   const promises = Array.from(socket.rooms)
     .filter(room => room !== socket.id && room.startsWith('shoots'))
     .map(room => socket.leave(room))
   return Promise.all(promises)
 }
 
-const synchronize = synchronizeFactory('Shoot', {
+export const synchronize = synchronizeFactory('Shoot', {
   accessResolver (socket, object) {
     const rooms = Array.from(socket.rooms).filter(room => room !== socket.id)
     const [
@@ -97,9 +90,3 @@ const synchronize = synchronizeFactory('Shoot', {
     return constants.OBJECT_NONE
   },
 })
-
-module.exports = {
-  subscribe,
-  unsubscribe,
-  synchronize,
-}
