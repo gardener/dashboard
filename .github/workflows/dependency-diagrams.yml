@@ -36,9 +36,8 @@ jobs:
       - name: Generate dependency diagrams
         run: yarn generate-all-dependency-diagrams
 
-      - uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 # v9.1.4
+      - name: Commit changes
+        uses: iarekylew00t/verified-bot-commit@29b641455ab27bc012ce6b3147e271d661b48a4a # v1.3.5
         with:
-          add: 'diagram/.'
-          fetch: true
-          message: 'Commit from GitHub Actions (dependency-diagrams.yml) [skip ci]'
-          pathspec_error_handling: 'exitAtEnd'
+          message: 'Update dependency diagrams'
+          files: diagram/**
