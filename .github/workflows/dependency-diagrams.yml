@@ -40,4 +40,8 @@ jobs:
         uses: iarekylew00t/verified-bot-commit@29b641455ab27bc012ce6b3147e271d661b48a4a # v1.3.5
         with:
           message: 'Update dependency diagrams'
-          files: diagram/**
+          files: |
+            backend-highlevel-dependency-diagram.html
+            backend-lowlevel-dependency-diagram.html
+            packages-highlevel-dependency-diagram.html
+            packages-lowlevel-dependency-diagram.html
