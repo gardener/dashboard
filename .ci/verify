@@ -4,7 +4,24 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# Install required tools on alpine
+install_if_missing() {
+  # usage: install_if_missing <cmd_name> <apk_package_name>
+  CMD_NAME="$1"
+  APK_PKG="$2"
 
-# Call the hack/verify.sh script from the .ci/verify script
-"$SCRIPT_DIR/../hack/verify"
+  if ! command -v "$CMD_NAME" >/dev/null 2>&1; then
+    echo "Command '$CMD_NAME' not found."
+    if [ -f /etc/alpine-release ]; then
+      echo "Installing '$APK_PKG' on Alpine..."
+      apk add --no-cache "$APK_PKG"
+    else
+      echo "'$APK_PKG' not found, but this is not an Alpine image. Skipping..."
+    fi
+  fi
+}
+
+# Install make if it does not exist
+install_if_missing make make
+
+make verify
