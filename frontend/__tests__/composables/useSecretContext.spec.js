@@ -105,5 +105,27 @@ describe('composables', () => {
         token: encodeBase64('mytoken'),
       })
     })
+
+    it('should update secretData vis secretStringData, null values shall not be encoded', async () => {
+      secretContext.setSecretManifest({
+        metadata: {
+          name: 'my-secret',
+          namespace: testNamespace,
+        },
+        data: {
+          password: encodeBase64('initial'),
+        },
+      })
+
+      secretContext.secretStringData = {
+        password: 'mypassword',
+        token: null,
+      }
+
+      expect(secretContext.secretData).toEqual({
+        password: encodeBase64('mypassword'),
+        token: undefined,
+      })
+    })
   })
 })
