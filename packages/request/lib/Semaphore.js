@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
 const kReleased = Symbol('released')
 
 function setReleased (obj, value) {
@@ -60,4 +58,4 @@ class Semaphore {
   }
 }
 
-module.exports = Semaphore
+export default Semaphore

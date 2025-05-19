@@ -4,10 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const { ListWatcher } = require('../lib/cache')
-const { Foo } = fixtures.resources
+import { jest } from '@jest/globals'
+import { ListWatcher } from '../lib/cache/index.js'
+import { Foo } from '../__fixtures__/resources.js'
 
 describe('kube-client', () => {
   describe('cache', () => {

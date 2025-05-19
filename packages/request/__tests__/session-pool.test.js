@@ -4,17 +4,16 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import { jest } from '@jest/globals'
+import EventEmitter from 'events'
+import http2 from 'http2'
+import crypto from 'crypto'
+import SessionId from '../lib/SessionId.js'
+import SessionPool from '../lib/SessionPool.js'
+import { StreamError } from '../lib/errors.js'
+import testUtils from '@gardener-dashboard/test-utils'
 
-const EventEmitter = require('events')
-const http2 = require('http2')
-const crypto = require('crypto')
-
-const SessionId = require('../lib/SessionId')
-const SessionPool = require('../lib/SessionPool')
-const { StreamError } = require('../lib/errors')
-
-const { getOwnSymbolProperty } = fixtures.helper
+const { getOwnSymbolProperty } = testUtils.helper
 const {
   NGHTTP2_CANCEL,
   HTTP2_HEADER_STATUS,

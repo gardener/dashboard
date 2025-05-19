@@ -20,7 +20,7 @@ describe('composables', () => {
     let shootResource
 
     const cloudProfileStore = {
-      accessRestrictionDefinitionsByCloudProfileNameAndRegion: vi.fn(),
+      accessRestrictionDefinitionsByCloudProfileRefAndRegion: vi.fn(),
     }
 
     beforeAll(() => {
@@ -64,7 +64,10 @@ describe('composables', () => {
         metadata: {
         },
         spec: {
-          cloudProfileName: 'cloud-profile-name',
+          cloudProfile: {
+            name: 'cloud-profile-name',
+            kind: 'CloudProfile',
+          },
           region: 'region',
           accessRestrictions: [
             {
@@ -79,7 +82,7 @@ describe('composables', () => {
         },
       })
 
-      cloudProfileStore.accessRestrictionDefinitionsByCloudProfileNameAndRegion.mockReturnValue([
+      cloudProfileStore.accessRestrictionDefinitionsByCloudProfileRefAndRegion.mockReturnValue([
         accessRestrictionDefinition,
       ])
     })

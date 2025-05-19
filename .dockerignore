@@ -18,30 +18,36 @@
 # include workspace packages/logger
 !packages/logger/package.json
 !packages/logger/lib
+!packages/logger/rollup.config.js
 
 # include workspace packages/request
 !packages/request/package.json
 !packages/request/lib
+!packages/request/rollup.config.js
 
 # include workspace packages/polling-watcher
 !packages/polling-watcher/package.json
 !packages/polling-watcher/lib
+!packages/polling-watcher/rollup.config.js
 
 # include workspace packages/kube-config
 !packages/kube-config/package.json
 !packages/kube-config/lib
+!packages/kube-config/rollup.config.js
 
 # include workspace packages/kube-client
 !packages/kube-client/package.json
 !packages/kube-client/lib
+!packages/kube-client/rollup.config.js
 
 # include workspace packages/monitor
 !packages/monitor/package.json
 !packages/monitor/lib
+!packages/monitor/rollup.config.js
 
 # include workspace backend
 !backend/package.json
-!backend/server.mjs
+!backend/server.js
 !backend/lib
 
 # include workspace frontend
@@ -64,6 +70,7 @@
 # include workspace packages/test-utils
 !packages/test-utils/package.json
 !packages/test-utils/lib
+!packages/test-utils/rollup.config.js
 
 # include metadata files
 !VERSION

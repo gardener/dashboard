@@ -18,8 +18,8 @@ describe('github', function () {
   const now = new Date('2006-01-02T15:04:05.000Z')
   const microDateStr = now.toISOString().replace(/Z$/, '000Z')
 
-  beforeAll(async () => {
-    agent = await createAgent()
+  beforeAll(() => {
+    agent = createAgent()
   })
 
   afterAll(() => {

@@ -4,13 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const http2 = require('http2')
-const { pick, omit } = require('lodash')
-const { globalLogger: logger } = require('@gardener-dashboard/logger')
-const SessionId = require('./SessionId')
-const SessionPool = require('./SessionPool')
+import http2 from 'http2'
+import { pick, omit } from 'lodash-es'
+import { globalLogger as logger } from '@gardener-dashboard/logger'
+import SessionId from './SessionId.js'
+import SessionPool from './SessionPool.js'
 
 const {
   HTTP2_HEADER_AUTHORITY,
@@ -77,4 +75,4 @@ class Agent {
 
 Object.defineProperty(Agent, 'globalAgent', { value: new Agent() })
 
-module.exports = Agent
+export default Agent

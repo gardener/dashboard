@@ -4,19 +4,41 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const _ = require('lodash')
-const { http } = require('../symbols')
+import _ from 'lodash-es'
+import { http } from '../symbols.js'
+import * as groups from '../groups.js'
+import APIRegistration from './APIRegistration.js'
+import Authentication from './Authentication.js'
+import Authorization from './Authorization.js'
+import Coordination from './Coordination.js'
+import Core from './Core.js'
+import GardenerCore from './GardenerCore.js'
+import GardenerDashboard from './GardenerDashboard.js'
+import GardenerSeedManagement from './GardenerSeedManagement.js'
+import Networking from './Networking.js'
+import GardenerSecurity from './GardenerSecurity.js'
 
 const resourceGroups = _
-  .chain(require('../groups'))
+  .chain(groups)
   .mapKeys(({ group }) => group || 'core')
   .mapValues(loadGroup)
   .value()
 
 function loadGroup ({ name }) {
-  const resources = require(`./${name}`) // eslint-disable-line security/detect-non-literal-require
+  const resourcesModules = {
+    APIRegistration,
+    Authentication,
+    Authorization,
+    Coordination,
+    Core,
+    GardenerCore,
+    GardenerDashboard,
+    GardenerSecurity,
+    GardenerSeedManagement,
+    Networking,
+  }
+  /* eslint-disable-next-line security/detect-object-injection -- function is only consumed internally with known input */
+  const resources = resourcesModules[name]
   return _.mapKeys(resources, 'names.plural')
 }
 
@@ -48,7 +70,7 @@ function getResourceGroupMetadata (resources, resourceGroup) {
     .value()
 }
 
-exports.Resources = _.reduce(resourceGroups, getResourceGroupMetadata, {
+export const Resources = _.reduce(resourceGroups, getResourceGroupMetadata, {
   TokenRequest: {
     name: 'token',
     kind: 'TokenRequest',
@@ -62,6 +84,6 @@ exports.Resources = _.reduce(resourceGroups, getResourceGroupMetadata, {
   },
 })
 
-exports.assign = (object, ...args) => {
+export function assign (object, ...args) {
   return Object.assign(object, load(...args))
 }

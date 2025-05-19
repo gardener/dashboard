@@ -64,7 +64,10 @@ function getShoot ({
   createdBy,
   purpose = 'foo-purpose',
   kind = 'fooInfra',
-  profile = 'infra1-profileName',
+  cloudProfileRef = {
+    name: 'infra1-profileName',
+    kind: 'CloudProfile',
+  },
   region = 'foo-west',
   secretBindingName = 'foo-secret',
   seed = 'infra1-seed',
@@ -82,7 +85,7 @@ function getShoot ({
     },
     spec: {
       secretBindingName,
-      cloudProfileName: profile,
+      cloudProfile: cloudProfileRef,
       region,
       hibernation,
       provider: {
