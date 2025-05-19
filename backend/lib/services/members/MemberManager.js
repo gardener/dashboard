@@ -182,7 +182,7 @@ class MemberManager {
     if (!Array.isArray(roles)) {
       throw new UnprocessableEntity('Roles must be an array')
     }
-    const MAX_ROLES = 100; // Define a reasonable limit for roles
+    const MAX_ROLES = 10 // Define a reasonable limit for roles
     if (roles.length > MAX_ROLES) {
       throw new UnprocessableEntity(`Roles array exceeds the maximum allowed size of ${MAX_ROLES}`)
     }
