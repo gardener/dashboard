@@ -1,6 +1,4 @@
 #!/bin/sh
-# .husky/husky-user-choice.sh
-# Shared logic for handling user choice for managed/custom Husky hooks (POSIX-compliant)
 
 # Use a fixed file path for the user choice in the .husky folder
 HUSKY_USER_CONFIG_FILE=".husky/user-config"
