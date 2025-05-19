@@ -77,7 +77,7 @@ show_husky_managed_hooks_setup_message() {
   echo "• To enable the managed Husky git hooks, run:"
   echo "      echo managed_hooks=true > $HUSKY_USER_CONFIG_FILE"
   echo ""
-  echo "• To use your own hooks (skip managed hooks), run:"
+  echo "• To disable managed hooks and use your own instead (bypasses secret scanning and verify scripts), run:"
   echo "      echo managed_hooks=false > $HUSKY_USER_CONFIG_FILE && git config --local --unset core.hooksPath"
   echo ""
   echo "You can change this at any time by editing or deleting:"
