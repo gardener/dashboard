@@ -139,7 +139,11 @@ export default {
   watch: {
     stringData (value) {
       if (!this.touched) {
-        this.internalYaml = yaml.dump(value)
+        if (value && Object.keys(value).length > 0) {
+          this.internalYaml = yaml.dump(value)
+        } else {
+          this.internalYaml = ''
+        }
       }
     },
   },
