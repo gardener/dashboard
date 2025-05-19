@@ -57,6 +57,18 @@ show_reuse_setup_message() {
 }
 
 show_husky_managed_hooks_setup_message() {
+  # Create default config if it does not exist
+  if [ ! -f "$HUSKY_USER_CONFIG_FILE" ]; then
+    cat > "$HUSKY_USER_CONFIG_FILE" <<EOF
+managed_hooks=true
+ggshield=false
+reuse=true
+EOF
+    echo "[husky] Default configuration file created at $HUSKY_USER_CONFIG_FILE with:
+     managed_hooks=true,
+     ggshield=false,
+     reuse=true."
+  fi
   echo ""
   echo "Husky Managed Git Hooks Setup"
   echo "────────────────────────────────────────────"
@@ -71,17 +83,24 @@ show_husky_managed_hooks_setup_message() {
   echo ""
   echo "────────────────────────────────────────────"
   echo ""
-  echo "To set your preference, run one of the following commands:"
+  echo "A default configuration file will be created with the following settings:"
+  echo "  - Husky enabled (managed_hooks=true)"
+  echo "  - ggshield disabled (ggshield=false)"
+  echo "  - reuse enabled (reuse=true)"
   echo ""
-  echo "Choose one of the following options:"
-  echo "- To enable the managed Husky git hooks, run:"
-  echo "      echo managed_hooks=true > $HUSKY_USER_CONFIG_FILE"
+  echo "To disable Husky managed hooks and reset your core.hooksPath, run:"
+  echo "    echo managed_hooks=false > $HUSKY_USER_CONFIG_FILE && git config --local --unset core.hooksPath"
   echo ""
-  echo "- To disable managed hooks and use your own instead (bypasses secret scanning and verify scripts), run:"
-  echo "      echo managed_hooks=false > $HUSKY_USER_CONFIG_FILE && git config --local --unset core.hooksPath"
+  echo "To enable or disable ggshield secret scanning, run:"
+  echo "    echo ggshield=true >> $HUSKY_USER_CONFIG_FILE   # enable"
+  echo "    echo ggshield=false >> $HUSKY_USER_CONFIG_FILE  # disable"
   echo ""
-  echo "You can change this at any time by editing or deleting:"
-  echo "- $HUSKY_USER_CONFIG_FILE"
+  echo "To enable or disable REUSE Compliance scanning, run:"
+  echo "    echo reuse=true >> $HUSKY_USER_CONFIG_FILE   # enable"
+  echo "    echo reuse=false >> $HUSKY_USER_CONFIG_FILE  # disable"
+  echo ""
+  echo "You can change these settings at any time by editing or deleting:"
+  echo "  $HUSKY_USER_CONFIG_FILE"
   echo ""
   echo "Learn more about Husky: https://typicode.github.io/husky/"
   echo ""
