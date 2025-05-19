@@ -9,6 +9,9 @@ on:
       - 'master'
       - 'hotfix-*'
 
+permissions:
+  contents: write
+
 jobs:
   generate-diagrams:
     runs-on: ubuntu-latest
