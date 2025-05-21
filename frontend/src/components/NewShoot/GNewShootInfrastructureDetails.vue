@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <v-container class="px-0 mx-0">
     <v-row>
       <v-col
-        v-if="cloudProfiles.length > 1"
+        v-if="cloudProfiles.length > 1 || !cloudProfileHasSeedNames"
         cols="3"
       >
         <g-select-cloud-profile
@@ -202,6 +202,7 @@ import forEach from 'lodash/forEach'
 import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
 import map from 'lodash/map'
+import find from 'lodash/find'
 
 export default {
   components: {
@@ -339,6 +340,10 @@ export default {
           },
         }
       })
+    },
+    cloudProfileHasSeedNames () {
+      const selectedCloudProfile = find(this.cloudProfiles, { metadata: { name: this.cloudProfileRef.name } })
+      return selectedCloudProfile?.data.seedNames?.length
     },
   },
   mounted () {

@@ -7,12 +7,15 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-select
     v-model="selectedValue"
+    v-messages-color="{ color: 'warning' }"
     :items="selectItems"
     label="Cloud Profile"
     item-color="primary"
     :error-messages="getErrorMessages(v$.selectedValue)"
     :item-title="title"
     variant="underlined"
+    :hint="hint"
+    persistent-hint
     @blur="v$.selectedValue.$touch()"
   />
 </template>
@@ -28,6 +31,8 @@ import { required } from '@vuelidate/validators'
 
 import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
+
+import find from 'lodash/find'
 
 const props = defineProps({
   modelValue: { // cloudProfileRef
@@ -108,5 +113,17 @@ const rules = {
     required,
   }),
 }
+
+const selectedCloudProfile = computed(() => {
+  return find(props.cloudProfiles, { metadata: { name: props.modelValue?.name } })
+})
+
+const hint = computed(() => {
+  if (selectedCloudProfile.value && !selectedCloudProfile.value.data.seedNames?.length) {
+    return 'This cloud profile does not have a matching seed. Gardener will not be able to schedule shoots using this cloud profile'
+  }
+  return ''
+})
+
 const v$ = useVuelidate(rules, { selectedValue })
 </script>
