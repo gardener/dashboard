@@ -105,9 +105,11 @@ SPDX-License-Identifier: Apache-2.0
         v-model:sort-by="infraCredentialSortBy"
         :headers="visibleInfraCredentialTableHeaders"
         :items="infrastructureCredentialSortedItems"
+        :item-key="getItemKey"
         :custom-key-sort="disableCustomKeySort(visibleInfraCredentialTableHeaders)"
         must-sort
         hover
+        :custom-filter="customFilter"
         :search="infraCredentialFilter"
         density="compact"
         class="g-table"
@@ -116,7 +118,6 @@ SPDX-License-Identifier: Apache-2.0
       >
         <template #item="{ item, itemRef }">
           <g-credential-row-infra
-            :key="`${item.credentialNamespace}/${item.credentialName}`"
             :ref="itemRef"
             :binding="item"
             :highlighted="isHighlighted(item)"
@@ -223,9 +224,11 @@ SPDX-License-Identifier: Apache-2.0
         v-model:sort-by="dnsCredentialSortBy"
         :headers="visibleDnsCredentialTableHeaders"
         :items="dnsCredentialSortedItems"
+        :item-key="getItemKey"
         :custom-key-sort="disableCustomKeySort(visibleDnsCredentialTableHeaders)"
         must-sort
         hover
+        :custom-filter="customFilter"
         :search="dnsCredentialFilter"
         density="compact"
         class="g-table"
@@ -234,7 +237,6 @@ SPDX-License-Identifier: Apache-2.0
       >
         <template #item="{ item, itemRef }">
           <g-credential-row-dns
-            :key="`${item.credentialNamespace}/${item.credentialName}`"
             :ref="itemRef"
             :binding="item"
             :highlighted="isHighlighted(item)"
@@ -575,6 +577,22 @@ export default {
     },
     isHighlighted (binding) {
       return this.highlightedUid && this.highlightedUid === binding.metadata.uid
+    },
+    customFilter (_, query, item) {
+      const values = [
+        item.raw.metadata.name,
+        item.raw.provider.type,
+        item.raw.kind,
+      ]
+      return values.some(value => {
+        if (value) {
+          return value.toString().toLowerCase().includes(query.toLowerCase())
+        }
+        return false
+      })
+    },
+    getItemKey (item, fallback) {
+      return get(item, ['raw', 'metadata', 'uid'], fallback)
     },
   },
 }
