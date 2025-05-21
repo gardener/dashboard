@@ -579,10 +579,17 @@ export default {
       return this.highlightedUid && this.highlightedUid === binding.metadata.uid
     },
     customFilter (_, query, item) {
+      const {
+        credentialDetails,
+      } = useCloudProviderBinding(toRef(item.raw))
+
+      const detailValues = map(credentialDetails.value, 'value')
+
       const values = [
         item.raw.metadata.name,
         item.raw.provider.type,
         item.raw.kind,
+        ...detailValues,
       ]
       return values.some(value => {
         if (value) {
