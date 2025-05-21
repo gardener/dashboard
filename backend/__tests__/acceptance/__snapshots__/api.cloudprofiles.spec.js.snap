@@ -97,6 +97,27 @@ exports[`api cloudprofiles should return all cloudprofiles 2`] = `
           },
         ],
       },
+      "seedSelector": {},
+      "type": "infra2",
+    },
+    "metadata": {
+      "displayName": "infra2-profileName",
+      "name": "infra2-profileName",
+      "providerType": "infra2",
+    },
+  },
+  {
+    "data": {
+      "kubernetes": {
+        "versions": [
+          {
+            "version": "1.9.0",
+          },
+          {
+            "version": "1.8.5",
+          },
+        ],
+      },
       "seedNames": [
         "infra3-seed-with-selector",
       ],
