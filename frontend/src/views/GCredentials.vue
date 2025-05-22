@@ -69,7 +69,7 @@ SPDX-License-Identifier: Apache-2.0
                   />
                 </template>
                 <v-list-item-title>
-                  {{ infrastructure }}
+                  {{ vendorDisplayName(infrastructure) }}
                 </v-list-item-title>
               </v-list-item>
             </v-list>
@@ -196,7 +196,7 @@ SPDX-License-Identifier: Apache-2.0
                   />
                 </template>
                 <v-list-item-title>
-                  {{ dnsProvider }}
+                  {{ vendorDisplayName(dnsProvider) }}
                 </v-list-item-title>
               </v-list-item>
             </v-list>
@@ -264,6 +264,7 @@ SPDX-License-Identifier: Apache-2.0
 import {
   mapState,
   mapWritableState,
+  mapActions,
   storeToRefs,
 } from 'pinia'
 import { useUrlSearchParams } from '@vueuse/core'
@@ -278,6 +279,7 @@ import { useCredentialStore } from '@/store/credential'
 import { useAuthzStore } from '@/store/authz'
 import { useShootStore } from '@/store/shoot'
 import { useLocalStorageStore } from '@/store/localStorage'
+import { useConfigStore } from '@/store/config'
 
 import GSecretDialogWrapper from '@/components/Credentials/GSecretDialogWrapper'
 import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
@@ -506,6 +508,7 @@ export default {
     },
   },
   methods: {
+    ...mapActions(useConfigStore, ['vendorDisplayName']),
     openCredentialAddDialog (providerType) {
       this.selectedBinding = undefined
       this.visibleCredentialDialog = providerType

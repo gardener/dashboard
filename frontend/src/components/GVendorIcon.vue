@@ -32,8 +32,12 @@ import {
   computed,
   toRef,
 } from 'vue'
+import { storeToRefs } from 'pinia'
+
+import { useConfigStore } from '@/store/config'
 
 import startsWith from 'lodash/startsWith'
+import get from 'lodash/get'
 
 const props = defineProps({
   icon: {
@@ -52,7 +56,18 @@ const props = defineProps({
 
 const noBackground = toRef(props, 'noBackground')
 
+const configStore = useConfigStore()
+const { vendors } = storeToRefs(configStore)
+
 const iconSrc = computed(() => {
+  const customCloudProviderIcon = get(vendors, ['value', props.icon, 'icon'])
+  if (customCloudProviderIcon) {
+    if (startsWith(customCloudProviderIcon, 'data:image/')) {
+      return customCloudProviderIcon
+    }
+    return `/static/vendor-assets/${customCloudProviderIcon}`
+  }
+
   switch (props.icon) {
     // infrastructures
     case 'azure':

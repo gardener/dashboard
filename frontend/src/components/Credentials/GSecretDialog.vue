@@ -143,6 +143,7 @@ import { toRef } from 'vue'
 import { useCredentialStore } from '@/store/credential'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useShootStore } from '@/store/shoot'
+import { useConfigStore } from '@/store/config'
 
 import GToolbar from '@/components/GToolbar.vue'
 import GMessage from '@/components/GMessage'
@@ -189,14 +190,6 @@ export default {
       required: true,
     },
     providerType: {
-      type: String,
-      required: true,
-    },
-    createTitle: {
-      type: String,
-      required: true,
-    },
-    updateTitle: {
       type: String,
       required: true,
     },
@@ -318,7 +311,9 @@ export default {
       return this.isCreateMode ? 'Add Secret' : 'Update Secret'
     },
     title () {
-      return this.isCreateMode ? this.createTitle : this.updateTitle
+      return this.isCreateMode
+        ? `Add new ${this.vendorDisplayName(this.providerType)} Secret`
+        : `Replace ${this.vendorDisplayName(this.providerType)} Secret`
     },
     helpContainerStyles () {
       const detailsRef = this.$refs.secretDetails
@@ -350,6 +345,7 @@ export default {
       'createCredential',
       'updateCredential',
     ]),
+    ...mapActions(useConfigStore, ['vendorDisplayName']),
     hide () {
       this.visible = false
     },
@@ -396,6 +392,7 @@ export default {
       if (this.isCreateMode) {
         this.createBindingManifest()
         this.createSecretManifest()
+        // TODO(grolu): use vendor name - what if vendor display name contains invalid characters?
         this.name = `my-${this.providerType}-secret`
         this.bindingProviderType = this.providerType
 

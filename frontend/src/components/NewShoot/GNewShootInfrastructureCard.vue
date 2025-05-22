@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0
           :style="getVendorIconStyles(isHovering)"
         />
         <div class="mt-2 text-subtitle-1">
-          {{ providerType }}
+          {{ vendorName }}
         </div>
       </div>
     </v-card>
@@ -32,6 +32,10 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+
+import { mapActions } from 'pinia'
+
+import { useConfigStore } from '@/store/config'
 
 import GVendorIcon from '@/components/GVendorIcon'
 
@@ -59,8 +63,12 @@ export default {
     variant () {
       return this.modelValue ? 'outlined' : 'elevated'
     },
+    vendorName () {
+      return this.vendorDisplayName(this.providerType)
+    },
   },
   methods: {
+    ...mapActions(useConfigStore, ['vendorDisplayName']),
     getVendorIconStyles (isHovering) {
       let grayscale = '80%'
       if (isHovering) {

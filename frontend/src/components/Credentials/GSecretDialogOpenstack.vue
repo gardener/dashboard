@@ -10,8 +10,6 @@ SPDX-License-Identifier: Apache-2.0
     :secret-validations="v$"
     :binding="binding"
     :provider-type="providerType"
-    :create-title="`Add new ${name} Secret`"
-    :update-title="`Update ${name} Secret`"
   >
     <template #secret-slot>
       <div v-if="providerType==='openstack-designate'">
@@ -315,15 +313,6 @@ export default {
     },
     isCreateMode () {
       return !this.secret
-    },
-    name () {
-      if (this.providerType === 'openstack') {
-        return 'OpenStack'
-      }
-      if (this.providerType === 'openstack-designate') {
-        return 'OpenStack Designate'
-      }
-      return undefined
     },
   },
   watch: {

@@ -9,8 +9,6 @@ SPDX-License-Identifier: Apache-2.0
     v-model="visible"
     :secret-validations="v$"
     :binding="binding"
-    create-title="Add new PowerDNS Secret"
-    update-title="Update PowerDNS Secret"
   >
     <template #secret-slot>
       <div>

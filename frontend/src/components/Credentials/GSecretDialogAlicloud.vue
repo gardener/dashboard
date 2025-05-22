@@ -10,8 +10,6 @@ SPDX-License-Identifier: Apache-2.0
     :secret-validations="v$"
     :binding="binding"
     :provider-type="providerType"
-    :create-title="`Add new ${name} Secret`"
-    :update-title="`Update ${name} Secret`"
   >
     <template #secret-slot>
       <div>
@@ -207,15 +205,6 @@ export default {
     },
     valid () {
       return !this.v$.$invalid
-    },
-    name () {
-      if (this.providerType === 'alicloud') {
-        return 'Alibaba Cloud'
-      }
-      if (this.providerType === 'alicloud-dns') {
-        return 'Alicloud DNS'
-      }
-      return undefined
     },
     isCreateMode () {
       return !this.secret

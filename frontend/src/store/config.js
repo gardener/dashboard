@@ -202,6 +202,10 @@ export const useConfigStore = defineStore('config', () => {
     }
   })
 
+  const vendors = computed(() => {
+    return state.value?.vendors
+  })
+
   const resourceQuotaHelp = computed(() => {
     return state.value?.resourceQuotaHelp
   })
@@ -399,6 +403,72 @@ export const useConfigStore = defineStore('config', () => {
     return get(allKnownConditions.value, [type], getCondition(type))
   }
 
+  function vendorDisplayName (kind) {
+    const knownVendors = {
+      alicloud: {
+        name: 'Alibaba Cloud',
+      },
+      'alicloud-dns': {
+        name: 'Alicloud DNS',
+      },
+      aws: {
+        name: 'aws',
+      },
+      'aws-route53': {
+        name: 'Amazon Route53',
+      },
+      azure: {
+        name: 'Azure',
+      },
+      'azure-dns': {
+        name: 'Azure DNS',
+      },
+      'azure-private-dns': {
+        name: 'Azure Private DNS',
+      },
+      'cloudflare-dns': {
+        name: 'Cloudflare',
+      },
+      gcp: {
+        name: 'Google Cloud',
+      },
+      'google-clouddns': {
+        name: 'Google Cloud DNS',
+      },
+      hcloud: {
+        name: 'Hetzner Cloud',
+      },
+      'infoblox-dns': {
+        name: 'Infoblox',
+      },
+      metal: {
+        name: 'Metal',
+      },
+      'netlify-dns': {
+        name: 'Netlify',
+      },
+      openstack: {
+        name: 'OpenStack',
+      },
+      'openstack-designate': {
+        name: 'OpenStack Designate',
+      },
+      vsphere: {
+        name: 'vSphere',
+      },
+      ironcore: {
+        name: 'IronCore',
+      },
+      powerdns: {
+        name: 'PowerDNS',
+      },
+      rfc2136: {
+        name: 'Dynamic DNS (RFC2136)',
+      },
+    }
+    return get({ ...knownVendors, ...vendors.value }, [kind, 'name'], kind)
+  }
+
   return {
     isInitial,
     appVersion,
@@ -437,11 +507,13 @@ export const useConfigStore = defineStore('config', () => {
     alertBannerType,
     alertBannerIdentifier,
     costObjectsSettings,
+    vendors,
     purposeRequiresHibernationSchedule,
     isShootHasNoHibernationScheduleWarning,
     fetchConfig,
     setConfiguration,
     conditionForType,
+    vendorDisplayName,
     $reset,
   }
 })

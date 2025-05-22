@@ -34,7 +34,7 @@ import { useSeedStore } from '../seed'
 
 import {
   matchesPropertyOrEmpty,
-  vendorNameFromImageName,
+  vendorNameFromMachineImageName,
   findVendorHint,
   decorateClassificationObject,
   firstItemMatchingVersionClassification,
@@ -102,7 +102,9 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
         return semver.rcompare(a.version, b.version)
       })
 
-      const vendorName = vendorNameFromImageName(name)
+      const vendorName = vendorNameFromMachineImageName(name)
+      const displayName = get(configStore, ['vendors', vendorName, 'name'], vendorName)
+
       const vendorHint = findVendorHint(configStore.vendorHints, vendorName)
 
       return map(versions, ({ version, expirationDate, cri, classification, architectures }) => {
@@ -112,6 +114,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
         return decorateClassificationObject({
           key: name + '/' + version,
           name,
+          displayName,
           version,
           updateStrategy,
           cri,
@@ -366,6 +369,14 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     })
     const unavailableItemsInAllZones = intersection(...unavailableItems)
 
+    if (type === 'machineTypes') {
+      items.forEach(item => {
+        if (!item.architecture) {
+          item.architecture = 'amd64' // default if not maintained
+        }
+      })
+    }
+
     return filter(items, machineAndVolumeTypePredicate(unavailableItemsInAllZones))
   }
 
@@ -430,15 +441,10 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
   }
 
   function machineTypesByCloudProfileRefAndRegionAndArchitecture ({ cloudProfileRef, region, architecture }) {
-    let machineTypes = machineTypesOrVolumeTypesByCloudProfileRefAndRegion({
+    const machineTypes = machineTypesOrVolumeTypesByCloudProfileRefAndRegion({
       type: 'machineTypes',
       cloudProfileRef,
       region,
-    })
-    machineTypes = map(machineTypes, item => {
-      const machineType = { ...item }
-      machineType.architecture ??= 'amd64' // default if not maintained
-      return machineType
     })
 
     if (architecture) {

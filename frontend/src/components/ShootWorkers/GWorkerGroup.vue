@@ -201,7 +201,7 @@ SPDX-License-Identifier: Apache-2.0
                         <legend class="text-caption text-medium-emphasis">
                           Name
                         </legend>
-                        <span class="text-body-2">{{ workerGroup.machine.image.name }}</span>
+                        <span class="text-body-2">{{ machineImage ? machineImage.displayName : workerGroup.machine.image.name }}</span>
                       </v-col>
                       <v-col>
                         <legend class="text-caption text-medium-emphasis">
