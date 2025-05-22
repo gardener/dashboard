@@ -115,7 +115,13 @@ const rules = {
 }
 
 const selectedCloudProfile = computed(() => {
-  return find(props.cloudProfiles, { metadata: { name: props.modelValue?.name } })
+  if (props.modelValue?.kind === 'CloudProfile') {
+    return find(props.cloudProfiles, { metadata: { name: props.modelValue?.name } })
+  }
+  if (props.modelValue?.kind === 'NamespacedCloudProfile') {
+    return find(props.namespacedCloudProfiles, { metadata: { name: props.modelValue?.name } })
+  }
+  return undefined
 })
 
 const hint = computed(() => {

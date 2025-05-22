@@ -342,8 +342,13 @@ export default {
       })
     },
     cloudProfileHasSeedNames () {
-      const selectedCloudProfile = find(this.cloudProfiles, { metadata: { name: this.cloudProfileRef.name } })
-      return selectedCloudProfile?.data.seedNames?.length
+      if (this.cloudProfileRef?.kind === 'CloudProfile') {
+        const selectedCloudProfile = find(this.cloudProfiles, { metadata: { name: this.cloudProfileRef.name } })
+        return selectedCloudProfile?.data.seedNames?.length
+      } else {
+        // TODO: Implement this for NamespacedCloudProfile
+        return false
+      }
     },
   },
   mounted () {
