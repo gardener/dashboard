@@ -149,26 +149,7 @@ export const useConfigStore = defineStore('config', () => {
   })
 
   const accessRestriction = computed(() => {
-    // TODO(petersutter): remove mapping from seed.gardener.cloud/eu-access to eu-access-only in dashboard version >=1.80.0. Add breaking change release note.
-    const accessRestriction = state.value?.accessRestriction
-    if (!accessRestriction) {
-      return
-    }
-
-    const items = map(accessRestriction.items, item => {
-      if (item.key === 'seed.gardener.cloud/eu-access') {
-        return {
-          ...item,
-          key: 'eu-access-only',
-        }
-      }
-      return item
-    })
-
-    return {
-      ...accessRestriction,
-      items,
-    }
+    return state.value?.accessRestriction
   })
 
   const sla = computed(() => {
