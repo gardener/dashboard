@@ -10019,11 +10019,11 @@ __metadata:
   linkType: hard
 
 "splitpanes@npm:^4.0.0":
-  version: 4.0.3
-  resolution: "splitpanes@npm:4.0.3"
+  version: 4.0.4
+  resolution: "splitpanes@npm:4.0.4"
   peerDependencies:
     vue: ^3.2.0
-  checksum: 10c0/f0bac494ab744cf49c456f31bc8251951afbe3e70032ba1f2e26bdfe7d2b6e2e27b971d0bcc5b464b113ab1fe45f19f9b35c8a633b65173845a83d968b76ca98
+  checksum: 10c0/a2a8097981b13b5a6d84a5eb3d56d80b3f93ef1e5faf8d4a08cab1eb633c92bcfe61805b189a463480c908096cffef79ae5a1c3da378ef31a19571df22430474
   languageName: node
   linkType: hard
 
