@@ -6,14 +6,14 @@ import config from '../../config/index.js'
 import { getClusterCaData } from '../shoots.js'
 import kubeClient from '@gardener-dashboard/kube-client'
 import { decodeBase64, getConfigValue, getSeedNameFromShoot } from '../../utils/index.js'
-import { toTerminalResource, fromNodeResource } from './resources.js'
+import { toTerminalResource, fromNodeResource } from './resources.mjs'
 import {
   getKubeApiServerHostForSeedOrManagedSeed,
   getKubeApiServerHostForShoot,
   getGardenTerminalHostClusterCredentials,
   getGardenHostClusterKubeApiServer,
   getShootRef,
-} from './utils.js'
+} from './utils.mjs'
 import cache from '../../cache/index.js'
 import logger from '../../logger/index.js'
 import markdown from '../../markdown.js'
