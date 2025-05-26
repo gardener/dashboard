@@ -4,6 +4,7 @@
   "description": "Gardener Dashboard Server",
   "license": "Apache-2.0",
   "author": "Koser, Holger <holger.koser@sap.com>",
+  "type": "module",
   "contributors": [
     "Herz, Andreas <andreas.herz@sap.com>",
     "Sutter, Peter <peter.sutter@sap.com>",
@@ -20,14 +21,10 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
   },
-  "main": "server.mjs",
-  "files": [
-    "lib",
-    "server.mjs"
-  ],
+  "exports": "./lib/server.js",
   "scripts": {
-    "serve": "cross-env NODE_ENV=development node --experimental-vm-modules server.mjs",
-    "lint": "eslint server.mjs . --max-warnings=0",
+    "serve": "cross-env NODE_ENV=development node --experimental-vm-modules server.js",
+    "lint": "eslint server.js . --max-warnings=0",
     "lint-sarif": "yarn lint --format=@microsoft/eslint-formatter-sarif",
     "test": "cross-env NODE_ENV=test jest",
     "test-coverage": "yarn test --coverage"
