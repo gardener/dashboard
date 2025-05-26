@@ -5,7 +5,7 @@
 //
 
 import pLimit from 'p-limit'
-import logger from '../logger/index.js'
+import logger from '../logger/index.mjs'
 import config from '../config/index.js'
 import cache from '../cache/index.mjs'
 import * as tickets from '../services/tickets.mjs'

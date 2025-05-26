@@ -8,7 +8,7 @@ import _ from 'lodash-es'
 import httpErrors from 'http-errors'
 import * as authorization from './authorization.mjs'
 import cache from '../cache/index.mjs'
-import { isSeedUnreachable } from '../utils/index.js'
+import { isSeedUnreachable } from '../utils/index.mjs'
 const { Forbidden } = httpErrors
 const { getSeeds } = cache
 

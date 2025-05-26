@@ -5,7 +5,7 @@ import { load as yamlLoad } from 'js-yaml'
 import config from '../../config/index.js'
 import { getClusterCaData } from '../shoots.mjs'
 import kubeClient from '@gardener-dashboard/kube-client'
-import { decodeBase64, getConfigValue, getSeedNameFromShoot } from '../../utils/index.js'
+import { decodeBase64, getConfigValue, getSeedNameFromShoot } from '../../utils/index.mjs'
 import { toTerminalResource, fromNodeResource } from './resources.mjs'
 import {
   getKubeApiServerHostForSeedOrManagedSeed,
@@ -15,8 +15,8 @@ import {
   getShootRef,
 } from './utils.mjs'
 import cache from '../../cache/index.mjs'
-import logger from '../../logger/index.js'
-import markdown from '../../markdown.js'
+import logger from '../../logger/index.mjs'
+import { createConverter } from '../../markdown.mjs'
 const { Resources } = kubeClient
 const { Forbidden, UnprocessableEntity, InternalServerError, isHttpError } = httpErrors
 const { getSeed, findProjectByNamespace } = cache
@@ -32,7 +32,7 @@ const TargetEnum = {
   SHOOT: 'shoot',
 }
 
-export const converter = markdown.createConverter()
+export const converter = createConverter()
 
 export function create ({ user, body }) {
   const { coordinate: { namespace, name, target } } = body

@@ -6,7 +6,7 @@
 
 import assert from 'assert'
 import httpErrors from 'http-errors'
-import logger from '../logger/index.js'
+import logger from '../logger/index.mjs'
 import kubeClient from '@gardener-dashboard/kube-client'
 const { Unauthorized } = httpErrors
 const { dashboardClient, Resources } = kubeClient

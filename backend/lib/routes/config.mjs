@@ -5,8 +5,8 @@
 //
 
 import _ from 'lodash-es'
-import logger from '../logger/index.js'
-import markdown from '../markdown.js'
+import logger from '../logger/index.mjs'
+import { createConverter } from '../markdown.mjs'
 import express from 'express'
 import kubeClientModule from '@gardener-dashboard/kube-client'
 import config from '../config/index.js'
@@ -40,7 +40,7 @@ router.route('/')
   })
 
 function sanitizeFrontendConfig (frontendConfig) {
-  const converter = markdown.createConverter()
+  const converter = createConverter()
   const convertAndSanitize = (obj, key) => {
     const value = obj[key] // eslint-disable-line security/detect-object-injection -- key is a local fixed string
     if (value) {

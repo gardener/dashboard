@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import logger from '../logger/index.js'
+import logger from '../logger/index.mjs'
 
 class SyncManager {
   ready = false

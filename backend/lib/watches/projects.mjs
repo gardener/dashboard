@@ -6,7 +6,7 @@
 
 import { get } from 'lodash-es'
 import * as ioHelper from '../io/helper.mjs'
-import { isMemberOf } from '../utils/index.js'
+import { isMemberOf } from '../utils/index.mjs'
 
 export default (io, informer) => {
   const nsp = io.of('/')

@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import * as getControllerRegistrations from '../cache/index.mjs'
+import cacheModule from '../cache/index.mjs'
 import * as authorization from './authorization.mjs'
 import _ from 'lodash-es'
 
@@ -12,7 +12,7 @@ const REQUIRED_RESOURCE_KINDS = ['Network', 'DNSRecord']
 const REQUIRED_RESOURCE_NAMES = ['extension-shoot-dns-service']
 
 export async function listExtensions ({ user }) {
-  const controllerregistrations = getControllerRegistrations()
+  const controllerregistrations = cacheModule.getControllerRegistrations()
   const allowed = await authorization.canListControllerRegistrations(user)
   const extensions = []
   for (const { metadata, spec = {} } of controllerregistrations) {

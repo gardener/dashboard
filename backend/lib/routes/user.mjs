@@ -8,10 +8,8 @@ import express from 'express'
 import services from '../services/index.mjs'
 import { metricsRoute } from '../middleware.mjs'
 import config from '../config/index.js'
-import utils from '../utils/index.js'
+import { encodeBase64 } from '../utils/index.mjs'
 const { authorization } = services
-
-const { encodeBase64 } = utils
 
 const router = express.Router({
   mergeParams: true,

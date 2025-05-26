@@ -6,9 +6,9 @@
 
 import _ from 'lodash-es'
 import httpErrors from 'http-errors'
-import logger from '../logger/index.js'
+import logger from '../logger/index.mjs'
 import cache from '../cache/index.mjs'
-import { projectFilter, parseRooms } from '../utils/index.js'
+import { projectFilter, parseRooms } from '../utils/index.mjs'
 import services from '../services/index.mjs'
 import { constants, getUserFromSocket, synchronizeFactory } from './helper.mjs'
 const { authorization } = services

@@ -7,7 +7,7 @@
 import _ from 'lodash-es'
 import httpErrors from 'http-errors'
 import cache from '../cache/index.mjs'
-import logger from '../logger/index.js'
+import logger from '../logger/index.mjs'
 const { isHttpError, createError } = httpErrors
 const { getQuotas } = cache
 

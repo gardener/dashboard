@@ -6,7 +6,7 @@
 import express from 'express'
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
-import logger from './logger/index.js'
+import logger from './logger/index.mjs'
 import {
   authorizationUrl,
   authorizationCallback,

@@ -5,7 +5,7 @@
 //
 
 import { get } from 'lodash-es'
-import { isMemberOf, simplifyProject } from '../utils/index.js'
+import { isMemberOf, simplifyProject } from '../utils/index.mjs'
 import { constants, getUserFromSocket, synchronizeFactory } from './helper.mjs'
 
 export const synchronize = synchronizeFactory('Project', {

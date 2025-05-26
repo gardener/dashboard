@@ -7,7 +7,7 @@
 import _ from 'lodash-es'
 import config from '../config/index.js'
 import { searchIssues, getComments } from '../github/index.mjs'
-import markdown from '../markdown.js'
+import { createConverter } from '../markdown.mjs'
 import cache from '../cache/index.mjs'
 
 function fromLabel (item) {
@@ -26,7 +26,7 @@ if (apiUrl) {
   options.ghMentionsLink = new URL(apiUrl).origin + '/{u}'
 }
 
-export const converter = markdown.createConverter(options)
+export const converter = createConverter(options)
 
 export function fromIssue (issue) {
   const labels = _.map(issue.labels, fromLabel)

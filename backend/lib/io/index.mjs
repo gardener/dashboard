@@ -5,7 +5,7 @@
 //
 
 import { Server } from 'socket.io'
-import logger from '../logger/index.js'
+import logger from '../logger/index.mjs'
 import { authenticationMiddleware, joinPrivateRoom } from './helper.mjs'
 import dispatcher from './dispatcher.mjs'
 

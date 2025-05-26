@@ -11,10 +11,10 @@ import cookieParser from 'cookie-parser'
 import kubeClient from '@gardener-dashboard/kube-client'
 import { cloneDeep } from 'lodash-es'
 import cache from '../cache/index.mjs'
-import logger from '../logger/index.js'
+import logger from '../logger/index.mjs'
 import * as authorization from '../services/authorization.mjs'
 import { authenticate } from '../security/index.mjs'
-import { simplifyObjectMetadata } from '../utils/index.js'
+import { simplifyObjectMetadata } from '../utils/index.mjs'
 
 const { isHttpError } = httpErrors
 const kubernetesClient = kubeClient

@@ -4,12 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import showdown from 'showdown'
+import sanitizeHtml from 'sanitize-html'
+const { Converter } = showdown
 
-const { Converter } = require('showdown')
-const sanitizeHtml = require('sanitize-html')
-
-function createConverter (options) {
+export function createConverter (options) {
   const converter = new Converter({
     tables: true,
     parseImgDimensions: true,
@@ -31,8 +30,4 @@ function createConverter (options) {
       })
     },
   }
-}
-
-module.exports = {
-  createConverter,
 }

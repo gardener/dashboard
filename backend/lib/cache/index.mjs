@@ -7,7 +7,7 @@
 import _ from 'lodash-es'
 import httpErrors from 'http-errors'
 import createTicketCache from './tickets.mjs'
-import { parseSelectors, filterBySelectors } from '../utils/index.js'
+import { parseSelectors, filterBySelectors } from '../utils/index.mjs'
 const { NotFound } = httpErrors
 
 /*

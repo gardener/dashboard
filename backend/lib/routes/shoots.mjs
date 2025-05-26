@@ -7,7 +7,7 @@
 import express from 'express'
 import services from '../services/index.mjs'
 import { metricsRoute } from '../middleware.mjs'
-import utils from '../utils/index.js'
+import { simplifyObjectMetadata } from '../utils/index.mjs'
 import kubeClientModule from '@gardener-dashboard/kube-client'
 const { shoots } = services
 const { dashboardClient } = kubeClientModule
@@ -27,7 +27,7 @@ router.route('/')
       const labelSelector = req.query.labelSelector
       const shootList = await shoots.list({ user, namespace, labelSelector })
       for (const object of shootList.items) {
-        utils.simplifyObjectMetadata(object)
+        simplifyObjectMetadata(object)
       }
       res.send(shootList)
     } catch (err) {

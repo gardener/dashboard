@@ -5,7 +5,7 @@
 //
 
 import _ from 'lodash-es'
-import logger from './logger/index.js'
+import logger from './logger/index.mjs'
 import morgan from 'morgan'
 import httpErrors from 'http-errors'
 import { STATUS_CODES } from 'http'

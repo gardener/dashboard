@@ -4,12 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const { logLevel, logHttpRequestBody } = require('../config')
-const { globalLogger } = require('@gardener-dashboard/logger')
+import config from '../config/index.js'
+import { globalLogger } from '@gardener-dashboard/logger'
+const { logLevel, logHttpRequestBody } = config
 
 globalLogger.setLogLevel(logLevel)
 globalLogger.setLogHttpRequestBody(logHttpRequestBody)
 
-module.exports = globalLogger
+export default globalLogger

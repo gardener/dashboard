@@ -13,7 +13,7 @@ import { legacyRestEndpointMethods } from '@octokit/plugin-rest-endpoint-methods
 import { paginateRest } from '@octokit/plugin-paginate-rest'
 import { paginateGraphql } from '@octokit/plugin-paginate-graphql'
 import config from '../config/index.js'
-import logger from '../logger/index.js'
+import logger from '../logger/index.mjs'
 
 const Octokit = Core.plugin(requestLog, legacyRestEndpointMethods, paginateRest, paginateGraphql)
 

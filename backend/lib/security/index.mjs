@@ -12,7 +12,7 @@ import pRetry from 'p-retry'
 import pTimeout from 'p-timeout'
 import services from '../services/index.mjs'
 import createError from 'http-errors'
-import logger from '../logger/index.js'
+import logger from '../logger/index.mjs'
 import config from '../config/index.js'
 import createJose from './jose.mjs'
 import {

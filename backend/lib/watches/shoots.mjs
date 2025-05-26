@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { shootHasIssue } from '../utils/index.js'
+import { shootHasIssue } from '../utils/index.mjs'
 
 export default (io, informer, options) => {
   const nsp = io.of('/')

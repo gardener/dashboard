@@ -4,32 +4,30 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import _ from 'lodash-es'
+import config from '../config/index.js'
+import assert from 'assert/strict'
 
-const _ = require('lodash')
-const config = require('../config')
-const assert = require('assert').strict
+export const EXISTS = '\u2203'
+export const NOT_EXISTS = '!\u2203'
+export const EQUAL = '='
+export const NOT_EQUAL = '!='
 
-const EXISTS = '∃'
-const NOT_EXISTS = '!∃'
-const EQUAL = '='
-const NOT_EQUAL = '!='
-
-function decodeBase64 (value) {
+export function decodeBase64 (value) {
   if (!value) {
     return
   }
   return Buffer.from(value, 'base64').toString('utf8')
 }
 
-function encodeBase64 (value) {
+export function encodeBase64 (value) {
   if (!value) {
     return
   }
   return Buffer.from(value, 'utf8').toString('base64')
 }
 
-function isMemberOf (project, user) {
+export function isMemberOf (project, user) {
   return _
     .chain(project)
     .get(['spec', 'members'])
@@ -56,7 +54,7 @@ function isMemberOf (project, user) {
     .value()
 }
 
-function projectFilter (user, canListProjects = false) {
+export function projectFilter (user, canListProjects = false) {
   const isPending = project => {
     return _.get(project, ['status', 'phase'], 'Pending') === 'Pending'
   }
@@ -69,7 +67,7 @@ function projectFilter (user, canListProjects = false) {
   }
 }
 
-function parseRooms (rooms) {
+export function parseRooms (rooms) {
   let isAdmin = false
   const namespaces = []
   const qualifiedNames = []
@@ -99,7 +97,7 @@ function parseRooms (rooms) {
   ]
 }
 
-function simplifyObjectMetadata (object) {
+export function simplifyObjectMetadata (object) {
   object.metadata.managedFields = undefined
   if (object.metadata.annotations) {
     object.metadata.annotations['kubectl.kubernetes.io/last-applied-configuration'] = undefined
@@ -107,13 +105,13 @@ function simplifyObjectMetadata (object) {
   return object
 }
 
-function simplifyProject (project) {
+export function simplifyProject (project) {
   project = simplifyObjectMetadata(project)
   _.set(project, ['spec', 'members'], undefined)
   return project
 }
 
-function parseSelector (selector = '') {
+export function parseSelector (selector = '') {
   let notOperator
   let key
   let operator
@@ -164,7 +162,7 @@ function parseSelector (selector = '') {
   }
 }
 
-function parseSelectors (selectors) {
+export function parseSelectors (selectors) {
   const items = []
   for (const selector of selectors) {
     const item = parseSelector(selector)
@@ -175,7 +173,7 @@ function parseSelectors (selectors) {
   return items
 }
 
-function filterBySelectors (selectors) {
+export function filterBySelectors (selectors) {
   return item => {
     const labels = item.metadata.labels ?? {}
     for (const { op, key, value } of selectors) {
@@ -211,7 +209,7 @@ function filterBySelectors (selectors) {
   }
 }
 
-function getConfigValue (path, defaultValue) {
+export function getConfigValue (path, defaultValue) {
   const value = _.get(config, path, defaultValue)
   if (arguments.length === 1 && typeof value === 'undefined') {
     assert.fail(`no config with ${path} found`)
@@ -219,47 +217,24 @@ function getConfigValue (path, defaultValue) {
   return value
 }
 
-function getSeedNameFromShoot ({ spec = {} }) {
+export function getSeedNameFromShoot ({ spec = {} }) {
   const seed = spec.seedName
   assert.ok(seed, 'There is no seed assigned to this shoot (yet)')
   return seed
 }
 
-function shootHasIssue (shoot) {
+export function shootHasIssue (shoot) {
   return _.get(shoot, ['metadata', 'labels', 'shoot.gardener.cloud/status'], 'healthy') !== 'healthy'
 }
 
-function getSeedIngressDomain (seed) {
+export function getSeedIngressDomain (seed) {
   return _.get(seed, ['spec', 'ingress', 'domain'])
 }
 
-function isSeedUnreachable (seed) {
+export function isSeedUnreachable (seed) {
   const matchLabels = _.get(config, ['unreachableSeeds', 'matchLabels'])
   if (!matchLabels) {
     return false
   }
   return _.isMatch(seed, { metadata: { labels: matchLabels } })
-}
-
-module.exports = {
-  decodeBase64,
-  encodeBase64,
-  isMemberOf,
-  projectFilter,
-  parseRooms,
-  simplifyObjectMetadata,
-  simplifyProject,
-  parseSelectors,
-  filterBySelectors,
-  getConfigValue,
-  getSeedNameFromShoot,
-  shootHasIssue,
-  isSeedUnreachable,
-  getSeedIngressDomain,
-  constants: Object.freeze({
-    EXISTS,
-    NOT_EXISTS,
-    EQUAL,
-    NOT_EQUAL,
-  }),
 }

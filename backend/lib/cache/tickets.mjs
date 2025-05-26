@@ -6,7 +6,7 @@
 
 import EventEmitter from 'events'
 import _ from 'lodash-es'
-import logger from '../logger/index.js'
+import logger from '../logger/index.mjs'
 
 function init () {
   const issues = new Map()

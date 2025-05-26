@@ -5,7 +5,7 @@
 //
 import httpErrors from 'http-errors'
 import * as authorization from './authorization.mjs'
-import logger from '../logger/index.js'
+import logger from '../logger/index.mjs'
 import _ from 'lodash-es'
 import cache from '../cache/index.mjs'
 const { NotFound, Forbidden } = httpErrors
