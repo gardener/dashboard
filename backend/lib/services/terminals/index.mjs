@@ -14,7 +14,7 @@ import {
   getGardenHostClusterKubeApiServer,
   getShootRef,
 } from './utils.mjs'
-import cache from '../../cache/index.js'
+import cache from '../../cache/index.mjs'
 import logger from '../../logger/index.js'
 import markdown from '../../markdown.js'
 const { Resources } = kubeClient

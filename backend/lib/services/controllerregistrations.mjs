@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import * as getControllerRegistrations from '../cache/index.js'
+import * as getControllerRegistrations from '../cache/index.mjs'
 import * as authorization from './authorization.mjs'
 import _ from 'lodash-es'
 

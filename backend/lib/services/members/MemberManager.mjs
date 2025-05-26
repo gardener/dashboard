@@ -9,14 +9,14 @@ import httpErrors from 'http-errors'
 import kubeConfigModule from '@gardener-dashboard/kube-config'
 import kubeClientModule from '@gardener-dashboard/kube-client'
 import config from '../../config/index.js'
-import * as cache from '../../cache/index.js'
+import cache from '../../cache/index.mjs'
 import Member from './Member.mjs'
 import SubjectListItem from './SubjectListItem.mjs'
 import SubjectList from './SubjectList.mjs'
 
-const { findProjectByNamespace } = cache
 const { dumpKubeconfig } = kubeConfigModule
 const { Resources } = kubeClientModule
+const { findProjectByNamespace } = cache
 
 class MemberManager {
   constructor (client, userId, project, serviceAccounts) {

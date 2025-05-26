@@ -10,7 +10,7 @@ import httpErrors from 'http-errors'
 import * as shoots from './shoots.mjs'
 import * as authorization from './authorization.mjs'
 import { projectFilter, simplifyProject } from '../utils/index.js'
-import cache from '../cache/index.js'
+import cache from '../cache/index.mjs'
 const { dashboardClient } = kubeClient
 const { PreconditionFailed, InternalServerError } = httpErrors
 const { getProject, getProjects } = cache

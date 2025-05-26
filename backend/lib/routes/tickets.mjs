@@ -6,7 +6,7 @@
 
 import express from 'express'
 import _ from 'lodash-es'
-import cache from '../cache/index.js'
+import cache from '../cache/index.mjs'
 import * as tickets from '../services/tickets.mjs'
 import { metricsRoute } from '../middleware.mjs'
 

@@ -6,7 +6,7 @@
 
 import kubeClientModule from '@gardener-dashboard/kube-client'
 import monitorModule from '@gardener-dashboard/monitor'
-import cache from './cache/index.js'
+import cache from './cache/index.mjs'
 import config from './config/index.js'
 import * as watches from './watches/index.mjs'
 import io from './io/index.mjs'

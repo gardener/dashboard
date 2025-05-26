@@ -7,7 +7,7 @@
 import _ from 'lodash-es'
 import httpErrors from 'http-errors'
 import logger from '../logger/index.js'
-import cache from '../cache/index.js'
+import cache from '../cache/index.mjs'
 import { projectFilter, parseRooms } from '../utils/index.js'
 import services from '../services/index.mjs'
 import { constants, getUserFromSocket, synchronizeFactory } from './helper.mjs'

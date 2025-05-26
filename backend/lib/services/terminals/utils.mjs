@@ -8,7 +8,7 @@ import assert from 'assert/strict'
 import _ from 'lodash-es'
 import { format as fmt } from 'util'
 import { getConfigValue, getSeedNameFromShoot, getSeedIngressDomain } from '../../utils/index.js'
-import * as cache from '../../cache/index.js'
+import cache from '../../cache/index.mjs'
 
 const { getSeed, findProjectByNamespace } = cache
 

@@ -9,7 +9,7 @@ import kubeConfigPkg from '@gardener-dashboard/kube-config'
 import kubeClientPkg from '@gardener-dashboard/kube-client'
 import createError from 'http-errors'
 import * as utils from '../utils/index.js'
-import * as cache from '../cache/index.js'
+import cache from '../cache/index.mjs'
 import * as authorization from './authorization.mjs'
 import logger from '../logger/index.js'
 import _ from 'lodash-es'
@@ -25,7 +25,7 @@ const {
   getSeedNameFromShoot,
   projectFilter,
 } = utils
-const { getSeed } = cache
+const { getSeed, getShoots, getProjects } = cache
 
 export async function list ({ user, namespace, labelSelector }) {
   const query = {}
@@ -38,12 +38,12 @@ export async function list ({ user, namespace, labelSelector }) {
       return {
         apiVersion: 'v1',
         kind: 'List',
-        items: cache.getShoots(namespace, query),
+        items: getShoots(namespace, query),
       }
     } else {
       // user is permitted to list shoots only in namespaces associated with their projects
       const namespaces = _
-        .chain(cache.getProjects())
+        .chain(getProjects())
         .filter(projectFilter(user, false))
         .map('spec.namespace')
         .value()
@@ -65,7 +65,7 @@ export async function list ({ user, namespace, labelSelector }) {
         kind: 'List',
         items: namespaces
           .filter(namespace => allowedNamespaceMap.get(namespace))
-          .flatMap(namespace => cache.getShoots(namespace, query)),
+          .flatMap(namespace => getShoots(namespace, query)),
       }
     }
   }
@@ -76,7 +76,7 @@ export async function list ({ user, namespace, labelSelector }) {
   return {
     apiVersion: 'v1',
     kind: 'List',
-    items: cache.getShoots(namespace, query),
+    items: getShoots(namespace, query),
   }
 }
 

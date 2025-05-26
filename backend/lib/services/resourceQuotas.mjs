@@ -7,7 +7,7 @@
 import _ from 'lodash-es'
 import httpErrors from 'http-errors'
 import * as authorization from './authorization.mjs'
-import cache from '../cache/index.js'
+import cache from '../cache/index.mjs'
 const { Forbidden } = httpErrors
 const { getResourceQuotas } = cache
 

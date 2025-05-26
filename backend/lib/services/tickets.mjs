@@ -8,7 +8,7 @@ import _ from 'lodash-es'
 import config from '../config/index.js'
 import { searchIssues, getComments } from '../github/index.mjs'
 import markdown from '../markdown.js'
-import cache from '../cache/index.js'
+import cache from '../cache/index.mjs'
 
 function fromLabel (item) {
   return _.pick(item, [

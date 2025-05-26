@@ -7,7 +7,7 @@ import httpErrors from 'http-errors'
 import * as authorization from './authorization.mjs'
 import logger from '../logger/index.js'
 import _ from 'lodash-es'
-import cache from '../cache/index.js'
+import cache from '../cache/index.mjs'
 const { NotFound, Forbidden } = httpErrors
 const { getCloudProfiles, getVisibleAndNotProtectedSeeds } = cache
 
