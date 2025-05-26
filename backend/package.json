@@ -26,7 +26,9 @@
     "serve": "cross-env NODE_ENV=development node --experimental-vm-modules server.js",
     "lint": "eslint server.js . --max-warnings=0",
     "lint-sarif": "yarn lint --format=@microsoft/eslint-formatter-sarif",
-    "test": "cross-env NODE_ENV=test jest",
+    "build-cjs": "rollup -c rollup.cjs.config.js",
+    "pretest": "yarn build-cjs",
+    "test": "NODE_PATH=./lib-cjs cross-env NODE_ENV=test node --experimental-vm-modules $(yarn bin jest)",
     "test-coverage": "yarn test --coverage"
   },
   "dependencies": {
@@ -74,6 +76,9 @@
   "devDependencies": {
     "@gardener-dashboard/test-utils": "workspace:^",
     "@microsoft/eslint-formatter-sarif": "^3.1.0",
+    "@rollup/plugin-commonjs": "^28.0.3",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^16.0.1",
     "abort-controller": "^3.0.0",
     "cross-env": "^7.0.3",
     "dockerfile-ast": "^0.7.0",
@@ -87,36 +92,10 @@
     "neostandard": "^0.12.0",
     "p-event": "^4.2.0",
     "path-to-regexp": "^8.0.0",
+    "rollup": "^4.41.1",
     "set-cookie-parser": "^2.6.0",
     "socket.io-client": "^4.7.5",
     "supertest": "^7.0.0"
-  },
-  "jest": {
-    "restoreMocks": true,
-    "verbose": true,
-    "coverageDirectory": "coverage",
-    "collectCoverageFrom": [
-      "lib/**/*.js"
-    ],
-    "testEnvironment": "node",
-    "testPathIgnorePatterns": [
-      "/test-ignore/"
-    ],
-    "transformIgnorePatterns": [
-      "/node_modules/",
-      "\\.pnp\\.[^\\/]+$"
-    ],
-    "coverageThreshold": {
-      "global": {
-        "branches": 68,
-        "functions": 94,
-        "lines": 90,
-        "statements": 90
-      }
-    },
-    "setupFilesAfterEnv": [
-      "<rootDir>/jest.setup.js"
-    ]
   },
   "packageManager": "yarn@4.9.1",
   "engines": {

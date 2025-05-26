@@ -19,6 +19,7 @@ import ticketsRoute from './tickets.js'
 import cloudProviderCredentialsRoute from './cloudProviderCredentials.js'
 import membersRoute from './members.js'
 import resourceQuotasRoute from './resourceQuotas.js'
+import terminalsRoute from './terminals.js'
 
 const routes = {
   '/config': configRoute,
@@ -37,7 +38,6 @@ const routes = {
 }
 
 if (_.get(config, ['frontend', 'features', 'terminalEnabled'], false)) {
-  const terminalsRoute = (await import('./terminals.js')).default
   routes['/terminals'] = terminalsRoute
 }
 
