@@ -14,7 +14,7 @@ import * as authorization from './authorization.mjs'
 import logger from '../logger/index.mjs'
 import _ from 'lodash-es'
 import semver from 'semver'
-import config from '../config/index.js'
+import config from '../config/index.mjs'
 
 const { isHttpError } = requestPkg
 const { Config } = kubeConfigPkg

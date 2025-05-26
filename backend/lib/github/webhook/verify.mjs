@@ -7,7 +7,7 @@
 import { createHmac, timingSafeEqual } from 'crypto'
 import assert from 'assert'
 import createError from 'http-errors'
-import config from '../../config/index.js'
+import config from '../../config/index.mjs'
 
 function digestsEqual (a, b) {
   if (a.length !== b.length) return false

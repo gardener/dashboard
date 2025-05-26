@@ -13,7 +13,7 @@ import pTimeout from 'p-timeout'
 import services from '../services/index.mjs'
 import createError from 'http-errors'
 import logger from '../logger/index.mjs'
-import config from '../config/index.js'
+import config from '../config/index.mjs'
 import createJose from './jose.mjs'
 import {
   GARDENER_AUDIENCE,

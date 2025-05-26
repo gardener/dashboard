@@ -9,7 +9,7 @@ import logger from '../logger/index.mjs'
 import { createConverter } from '../markdown.mjs'
 import express from 'express'
 import kubeClientModule from '@gardener-dashboard/kube-client'
-import config from '../config/index.js'
+import config from '../config/index.mjs'
 import { metricsRoute } from '../middleware.mjs'
 import httpErrors from 'http-errors'
 const { dashboardClient } = kubeClientModule

@@ -5,7 +5,7 @@
 //
 
 import _ from 'lodash-es'
-import config from '../config/index.js'
+import config from '../config/index.mjs'
 import assert from 'assert/strict'
 
 export const EXISTS = '\u2203'

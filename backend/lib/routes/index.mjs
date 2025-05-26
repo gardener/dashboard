@@ -5,7 +5,7 @@
 //
 
 import _ from 'lodash-es'
-import config from '../config/index.js'
+import config from '../config/index.mjs'
 import configRoute from './config.mjs'
 import infoRoute from './info.mjs'
 import openapiRoute from '../openapi/index.mjs'

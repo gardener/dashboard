@@ -7,7 +7,7 @@
 import express from 'express'
 import services from '../services/index.mjs'
 import { metricsRoute } from '../middleware.mjs'
-import config from '../config/index.js'
+import config from '../config/index.mjs'
 import { encodeBase64 } from '../utils/index.mjs'
 const { authorization } = services
 

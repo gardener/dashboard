@@ -6,7 +6,7 @@
 import express from 'express'
 import expressStaticGzip from 'express-static-gzip'
 import _ from 'lodash-es'
-import config from './config/index.js'
+import config from './config/index.mjs'
 import { resolve, join } from 'path'
 import logger from './logger/index.mjs'
 import { notFound, renderError, historyFallback, noCache } from './middleware.mjs'

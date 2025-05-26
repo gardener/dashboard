@@ -5,7 +5,7 @@
 //
 
 import _ from 'lodash-es'
-import config from '../config/index.js'
+import config from '../config/index.mjs'
 import { searchIssues, getComments } from '../github/index.mjs'
 import { createConverter } from '../markdown.mjs'
 import cache from '../cache/index.mjs'

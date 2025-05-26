@@ -5,7 +5,7 @@
 //
 
 import initOctokit from './octokit.mjs'
-import config from '../config/index.js'
+import config from '../config/index.mjs'
 
 const octokit = initOctokit()
 const {

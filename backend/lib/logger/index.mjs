@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import config from '../config/index.js'
+import config from '../config/index.mjs'
 import { globalLogger } from '@gardener-dashboard/logger'
 const { logLevel, logHttpRequestBody } = config
 

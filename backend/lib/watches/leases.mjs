@@ -6,7 +6,7 @@
 
 import pLimit from 'p-limit'
 import logger from '../logger/index.mjs'
-import config from '../config/index.js'
+import config from '../config/index.mjs'
 import cache from '../cache/index.mjs'
 import * as tickets from '../services/tickets.mjs'
 import * as SyncManager from '../github/SyncManager.mjs'
