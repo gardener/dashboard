@@ -40,3 +40,6 @@ coverage/
 my*
 kubeconfig*
 .vscode/launch.json
+
+# husky managed hooks
+.husky/user-config
