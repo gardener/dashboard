@@ -10,7 +10,6 @@ import cache from './cache/index.js'
 import config from './config/index.js'
 import * as watches from './watches/index.mjs'
 import io from './io/index.mjs'
-
 const { createDashboardClient, abortWatcher } = kubeClientModule
 const { monitorHttpServer, monitorSocketIO } = monitorModule
 

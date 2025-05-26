@@ -6,7 +6,7 @@
 
 import express from 'express'
 import services from '../services/index.mjs'
-import { metricsRoute } from '../middleware.js'
+import { metricsRoute } from '../middleware.mjs'
 const { projects } = services
 
 const router = express.Router()

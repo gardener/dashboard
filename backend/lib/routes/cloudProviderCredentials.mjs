@@ -7,7 +7,7 @@
 import express from 'express'
 import services from '../services/index.mjs'
 import httpErrors from 'http-errors'
-import { metricsRoute } from '../middleware.js'
+import { metricsRoute } from '../middleware.mjs'
 const { cloudProviderCredentials } = services
 const { UnprocessableEntity } = httpErrors
 

@@ -10,11 +10,10 @@ import markdown from '../markdown.js'
 import express from 'express'
 import kubeClientModule from '@gardener-dashboard/kube-client'
 import config from '../config/index.js'
-import { metricsRoute } from '../middleware.js'
+import { metricsRoute } from '../middleware.mjs'
 import httpErrors from 'http-errors'
-const { UnprocessableEntity } = httpErrors
-
 const { dashboardClient } = kubeClientModule
+const { UnprocessableEntity } = httpErrors
 
 const router = express.Router()
 

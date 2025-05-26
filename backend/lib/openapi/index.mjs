@@ -11,7 +11,6 @@ import express from 'express'
 import kubeClientModule from '@gardener-dashboard/kube-client'
 import _ from 'lodash-es'
 const { Forbidden } = httpErrors
-
 const { dashboardClient } = kubeClientModule
 
 const router = express.Router()

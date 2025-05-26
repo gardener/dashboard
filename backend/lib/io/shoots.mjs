@@ -4,14 +4,15 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import _ from 'lodash-es'
 import httpErrors from 'http-errors'
-import cache from '../cache/index.js'
 import logger from '../logger/index.js'
+import cache from '../cache/index.js'
 import { projectFilter, parseRooms } from '../utils/index.js'
 import services from '../services/index.mjs'
 import { constants, getUserFromSocket, synchronizeFactory } from './helper.mjs'
 const { authorization } = services
-const createError = httpErrors
+const { NotFound, createError } = httpErrors
 
 async function canListAllShoots (user, namespaces) {
   const canListShoots = async namespace => [namespace, await authorization.canListShoots(user, namespace)]

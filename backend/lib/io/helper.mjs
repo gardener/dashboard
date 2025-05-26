@@ -8,15 +8,16 @@ import crypto from 'crypto'
 import { promisify } from 'util'
 import httpErrors from 'http-errors'
 import cookieParser from 'cookie-parser'
-import kubernetesClient from '@gardener-dashboard/kube-client'
+import kubeClient from '@gardener-dashboard/kube-client'
 import { cloneDeep } from 'lodash-es'
 import cache from '../cache/index.js'
 import logger from '../logger/index.js'
 import authorization from '../services/authorization.js'
-import { authenticate } from '../security/index.js'
+import { authenticate } from '../security/index.mjs'
 import { simplifyObjectMetadata } from '../utils/index.js'
 
 const { isHttpError } = httpErrors
+const kubernetesClient = kubeClient
 
 function expiresIn (socket) {
   const user = getUserFromSocket(socket)

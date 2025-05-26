@@ -5,8 +5,8 @@
 
 import { format as fmt } from 'util'
 import kubeClientModule from '@gardener-dashboard/kube-client'
-import { isHttpError } from 'http-errors'
-
+import httpErrors from 'http-errors'
+const { isHttpError } = httpErrors
 const { dashboardClient } = kubeClientModule
 
 async function healthCheck (transitive = false) {

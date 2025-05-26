@@ -4,13 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const _ = require('lodash')
-const config = require('../config')
-const github = require('../github')
-const markdown = require('../markdown')
-const cache = require('../cache')
+import _ from 'lodash-es'
+import config from '../config/index.js'
+import github from '../github/index.js'
+import markdown from '../markdown.js'
+import cache from '../cache/index.js'
 
 function fromLabel (item) {
   return _.pick(item, [
@@ -28,9 +26,9 @@ if (apiUrl) {
   options.ghMentionsLink = new URL(apiUrl).origin + '/{u}'
 }
 
-const converter = exports.converter = markdown.createConverter(options)
+export const converter = markdown.createConverter(options)
 
-function fromIssue (issue) {
+export function fromIssue (issue) {
   const labels = _.map(issue.labels, fromLabel)
   const [, projectName, name, ticketTitle] = /^\[([a-z0-9-]+)\/([a-z0-9-]+)\]\s*(.*)$/.exec(issue.title || '') || []
   return {
@@ -65,9 +63,8 @@ function fromIssue (issue) {
       .value(),
   }
 }
-exports.fromIssue = fromIssue
 
-function fromComment (number, name, projectName, item) {
+export function fromComment (number, name, projectName, item) {
   const metadata = _
     .chain(item)
     .pick([
@@ -98,9 +95,8 @@ function fromComment (number, name, projectName, item) {
     data,
   }
 }
-exports.fromComment = fromComment
 
-async function getOpenIssues ({ name, projectName } = {}) {
+export async function getOpenIssues ({ name, projectName } = {}) {
   let title
   if (name && projectName) {
     title = `[${projectName}/${name}]`
@@ -108,9 +104,8 @@ async function getOpenIssues ({ name, projectName } = {}) {
   const githubIssues = await github.searchIssues({ state: 'open', title })
   return _.map(githubIssues, fromIssue)
 }
-exports.getOpenIssues = getOpenIssues
 
-async function loadOpenIssues (...args) {
+export async function loadOpenIssues (...args) {
   const issues = await getOpenIssues(...args)
   const ticketCache = cache.getTicketCache()
   for (const issue of issues) {
@@ -124,17 +119,17 @@ async function loadOpenIssues (...args) {
 
   return issues
 }
-exports.loadOpenIssues = exports.list = loadOpenIssues
 
-async function getIssueComments ({ number }) {
+export const list = loadOpenIssues
+
+export async function getIssueComments ({ number }) {
   const ticketCache = cache.getTicketCache()
   const { metadata: { name, projectName } } = ticketCache.getIssue(number)
   const githubComments = await github.getComments({ number })
   return _.map(githubComments, githubComment => fromComment(number, name, projectName, githubComment))
 }
-exports.getIssueComments = getIssueComments
 
-async function loadIssueComments ({ number }) {
+export async function loadIssueComments ({ number }) {
   const comments = await getIssueComments({ number })
   const ticketCache = cache.getTicketCache()
   for (const comment of comments) {
@@ -148,4 +143,3 @@ async function loadIssueComments ({ number }) {
 
   return comments
 }
-exports.loadIssueComments = loadIssueComments

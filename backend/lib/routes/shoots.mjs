@@ -6,7 +6,7 @@
 
 import express from 'express'
 import services from '../services/index.mjs'
-import { metricsRoute } from '../middleware.js'
+import { metricsRoute } from '../middleware.mjs'
 import utils from '../utils/index.js'
 import kubeClientModule from '@gardener-dashboard/kube-client'
 const { shoots } = services

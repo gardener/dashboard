@@ -4,20 +4,21 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import _ from 'lodash-es'
+import kubeClient from '@gardener-dashboard/kube-client'
+import httpErrors from 'http-errors'
+import shoots from './shoots.js'
+import authorization from './authorization.js'
+import { projectFilter, simplifyProject } from '../utils/index.js'
+import cache from '../cache/index.js'
+const { dashboardClient } = kubeClient
+const { PreconditionFailed, InternalServerError } = httpErrors
+const { getProject, getProjects } = cache
 
-const _ = require('lodash')
-const { dashboardClient } = require('@gardener-dashboard/kube-client')
-
-const { PreconditionFailed, InternalServerError } = require('http-errors')
-const shoots = require('./shoots')
-const authorization = require('./authorization')
-const { projectFilter, simplifyProject } = require('../utils')
-const cache = require('../cache')
 const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
 
 async function validateDeletePreconditions ({ user, name }) {
-  const project = cache.getProject(name)
+  const project = getProject(name)
   const namespace = _.get(project, ['spec', 'namespace'])
 
   const shootList = await shoots.list({ user, namespace })
@@ -26,17 +27,19 @@ async function validateDeletePreconditions ({ user, name }) {
   }
 }
 
-exports.list = async function ({ user }) {
+export const projectInitializationTimeout = PROJECT_INITIALIZATION_TIMEOUT
+
+export async function list ({ user }) {
   const canListProjects = await authorization.canListProjects(user)
   return _
-    .chain(cache.getProjects())
+    .chain(getProjects())
     .filter(projectFilter(user, canListProjects))
     .map(_.cloneDeep)
     .map(simplifyProject)
     .value()
 }
 
-exports.create = async function ({ user, body }) {
+export async function create ({ user, body }) {
   const client = user.client
 
   const name = _.get(body, ['metadata', 'name'])
@@ -58,22 +61,20 @@ exports.create = async function ({ user, body }) {
 
   return project
 }
-// needs to be exported for testing
-exports.projectInitializationTimeout = PROJECT_INITIALIZATION_TIMEOUT
 
-exports.read = async function ({ user, name }) {
+export async function read ({ user, name }) {
   const client = user.client
   const project = await client['core.gardener.cloud'].projects.get(name)
   return project
 }
 
-exports.patch = async function ({ user, name, body }) {
+export async function patch ({ user, name, body }) {
   const client = user.client
   const project = await client['core.gardener.cloud'].projects.mergePatch(name, body)
   return project
 }
 
-exports.remove = async function ({ user, name }) {
+export async function remove ({ user, name }) {
   await validateDeletePreconditions({ user, name })
 
   const client = user.client

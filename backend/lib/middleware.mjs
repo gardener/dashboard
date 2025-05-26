@@ -4,14 +4,13 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import _ from 'lodash-es'
+import logger from './logger/index.js'
+import morgan from 'morgan'
+import httpErrors from 'http-errors'
+import { STATUS_CODES } from 'http'
 
-const _ = require('lodash')
-const logger = require('./logger')
-const morgan = require('morgan')
-
-const { NotFound, InternalServerError, isHttpError } = require('http-errors')
-const { STATUS_CODES } = require('http')
+const { NotFound, InternalServerError, isHttpError } = httpErrors
 
 const SENSITIVE_PARAMS = [
   'code',
@@ -39,9 +38,9 @@ morgan.token('url', (req, res) => {
   }
 })
 
-const requestLogger = morgan('common', logger)
+export const requestLogger = morgan('common', logger)
 
-function noCache (staticPaths = []) {
+export function noCache (staticPaths = []) {
   const isStatic = path => {
     for (const staticPath of staticPaths) {
       if (path.startsWith(staticPath)) {
@@ -58,7 +57,7 @@ function noCache (staticPaths = []) {
   }
 }
 
-function historyFallback (filename) {
+export function historyFallback (filename) {
   return (req, res, next) => {
     if (!_.includes(['GET', 'HEAD'], req.method) || !req.accepts('html')) {
       return next()
@@ -71,7 +70,7 @@ function historyFallback (filename) {
   }
 }
 
-function notFound (req, res, next) {
+export function notFound (req, res, next) {
   next(new NotFound('The server has not found anything matching the Request-URI'))
 }
 
@@ -99,12 +98,12 @@ function errorToLocals (err, req) {
   return { code, reason, message, status, details }
 }
 
-function sendError (err, req, res, next) {
+export function sendError (err, req, res, next) {
   const locals = errorToLocals(err, req)
   res.status(locals.code).send(locals)
 }
 
-function renderError (err, req, res, next) {
+export function renderError (err, req, res, next) {
   const locals = errorToLocals(err, req)
 
   res.format({
@@ -113,7 +112,7 @@ function renderError (err, req, res, next) {
   })
 }
 
-function metricsRoute (prefix) {
+export function metricsRoute (prefix) {
   return (req, res, next) => {
     const path = req.route?.path ?? ''
     req.metricsRoute = prefix + path
@@ -121,7 +120,7 @@ function metricsRoute (prefix) {
   }
 }
 
-const ErrorTemplate = _.template(`<!doctype html>
+export const ErrorTemplate = _.template(`<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -146,14 +145,3 @@ const ErrorTemplate = _.template(`<!doctype html>
   <% if (details.stack) { %><pre><%= details.stack %></pre><% } %>
 </body>
 </html>`)
-
-module.exports = {
-  noCache,
-  historyFallback,
-  requestLogger,
-  notFound,
-  sendError,
-  renderError,
-  metricsRoute,
-  ErrorTemplate,
-}

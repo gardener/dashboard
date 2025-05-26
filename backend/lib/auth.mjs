@@ -13,8 +13,8 @@ import {
   refreshToken,
   authorizeToken,
   clearCookies,
-} from './security/index.js'
-import { requestLogger } from './middleware.js'
+} from './security/index.mjs'
+import { requestLogger } from './middleware.mjs'
 
 const router = express.Router()
 

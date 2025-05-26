@@ -6,10 +6,10 @@
 
 import express from 'express'
 import bodyParser from 'body-parser'
-import { requestLogger } from '../../middleware.js'
+import { requestLogger } from '../../middleware.mjs'
 import monitorModule from '@gardener-dashboard/monitor'
-import handleGithubEvent from './handler.js'
-import verify from './verify.js'
+import handleGithubEvent from './handler.mjs'
+import verify from './verify.mjs'
 const { monitorResponseTimes } = monitorModule
 
 const router = express.Router()

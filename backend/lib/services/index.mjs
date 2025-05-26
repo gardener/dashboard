@@ -4,18 +4,18 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import cloudprofiles from './cloudprofiles.js'
-import seeds from './seeds.js'
-import projects from './projects.js'
+import * as cloudprofiles from './cloudprofiles.mjs'
+import * as seeds from './seeds.mjs'
+import * as projects from './projects.mjs'
 import shoots from './shoots.js'
-import cloudProviderCredentials from './cloudProviderCredentials.js'
-import membersModule from './members/index.js'
+import * as cloudProviderCredentials from './cloudProviderCredentials.mjs'
+import * as membersModule from './members/index.mjs'
+import * as authentication from './authentication.mjs'
 import authorization from './authorization.js'
-import authentication from './authentication.js'
-import tickets from './tickets.js'
-import terminalsModule from './terminals/index.js'
-import controllerregistrations from './controllerregistrations.js'
-import resourceQuotas from './resourceQuotas.js'
+import * as tickets from './tickets.mjs'
+import * as terminalsModule from './terminals/index.mjs'
+import * as controllerregistrations from './controllerregistrations.mjs'
+import * as resourceQuotas from './resourceQuotas.mjs'
 const members = membersModule
 const terminals = terminalsModule
 

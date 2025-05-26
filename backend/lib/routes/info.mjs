@@ -12,7 +12,8 @@ import { fileURLToPath } from 'url'
 import logger from '../logger/index.js'
 import utils from '../utils/index.js'
 import kubeClientModule from '@gardener-dashboard/kube-client'
-import { metricsRoute } from '../middleware.js'
+import { metricsRoute } from '../middleware.mjs'
+import httpErrors from 'http-errors'
 
 const { extend } = requestModule
 const { dashboardClient } = kubeClientModule
