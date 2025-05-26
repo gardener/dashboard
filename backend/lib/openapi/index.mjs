@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { canGetOpenAPI } from '../services/authorization.js'
+import { canGetOpenAPI } from '../services/authorization.mjs'
 import httpErrors from 'http-errors'
 import SwaggerParser from '@apidevtools/swagger-parser'
 import express from 'express'

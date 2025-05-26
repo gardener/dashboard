@@ -4,18 +4,19 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import _ from 'lodash-es'
+import httpErrors from 'http-errors'
+import kubeConfigModule from '@gardener-dashboard/kube-config'
+import kubeClientModule from '@gardener-dashboard/kube-client'
+import config from '../../config/index.js'
+import * as cache from '../../cache/index.js'
+import Member from './Member.mjs'
+import SubjectListItem from './SubjectListItem.mjs'
+import SubjectList from './SubjectList.mjs'
 
-const _ = require('lodash')
-const { NotFound, Conflict, UnprocessableEntity, isHttpError } = require('http-errors')
-const { dumpKubeconfig } = require('@gardener-dashboard/kube-config')
-const { Resources } = require('@gardener-dashboard/kube-client')
-
-const config = require('../../config')
-const { findProjectByNamespace } = require('../../cache')
-const Member = require('./Member')
-const SubjectListItem = require('./SubjectListItem')
-const SubjectList = require('./SubjectList')
+const { findProjectByNamespace } = cache
+const { dumpKubeconfig } = kubeConfigModule
+const { Resources } = kubeClientModule
 
 class MemberManager {
   constructor (client, userId, project, serviceAccounts) {
@@ -34,7 +35,7 @@ class MemberManager {
     const item = this.subjectList.get(id)
     if (!item) {
       const { kind } = Member.parseUsername(id)
-      throw new NotFound(`${kind} '${id}' is not related to this project`)
+      throw new httpErrors.NotFound(`${kind} '${id}' is not related to this project`)
     }
 
     if (item.kind === 'ServiceAccount') {
@@ -48,7 +49,7 @@ class MemberManager {
   async create (id, { roles, description }) {
     let item = this.subjectList.get(id)
     if (item) {
-      throw new Conflict(`${item.kind} '${id}' already exists`)
+      throw new httpErrors.Conflict(`${item.kind} '${id}' already exists`)
     }
     item = SubjectListItem.create(id, SubjectListItem.END_OF_LIST)
 
@@ -71,7 +72,7 @@ class MemberManager {
     const item = this.subjectList.get(id)
     if (!item) {
       const { kind } = Member.parseUsername(id)
-      throw new NotFound(`${kind} '${id}' is not related to this project`)
+      throw new httpErrors.NotFound(`${kind} '${id}' is not related to this project`)
     }
 
     this.setItemRoles(item, roles)
@@ -114,18 +115,18 @@ class MemberManager {
     }
 
     if (item.kind !== 'ServiceAccount') {
-      throw new UnprocessableEntity('Member is not a ServiceAccount')
+      throw new httpErrors.UnprocessableEntity('Member is not a ServiceAccount')
     }
 
     const { namespace, name } = Member.parseUsername(item.id)
     if (namespace !== this.namespace) {
-      throw new UnprocessableEntity('It is not possible to reset a ServiceAccount from another namespace')
+      throw new httpErrors.UnprocessableEntity('It is not possible to reset a ServiceAccount from another namespace')
     }
 
     try {
       await this.client.core.serviceaccounts.delete(namespace, name)
     } catch (err) {
-      if (!isHttpError(err) || err.statusCode !== 404) {
+      if (!httpErrors.isHttpError(err) || err.statusCode !== 404) {
         throw err
       }
     }
@@ -148,7 +149,7 @@ class MemberManager {
         },
       })
     } catch (err) {
-      if (!isHttpError(err) || err.statusCode !== 409) {
+      if (!httpErrors.isHttpError(err) || err.statusCode !== 409) {
         throw err
       }
 
@@ -181,7 +182,7 @@ class MemberManager {
   setItemRoles (item, roles) {
     roles = _.compact(roles)
     if (!roles.length && item.kind !== 'ServiceAccount') {
-      throw new UnprocessableEntity('At least one role is required')
+      throw new httpErrors.UnprocessableEntity('At least one role is required')
     }
     item.roles = roles
   }
@@ -248,7 +249,7 @@ class MemberManager {
     try {
       await this.client.core.serviceaccounts.delete(namespace, name)
     } catch (err) {
-      if (!isHttpError(err) || err.statusCode !== 404) {
+      if (!httpErrors.isHttpError(err) || err.statusCode !== 404) {
         throw err
       }
     }
@@ -295,7 +296,7 @@ class MemberManager {
       .chain(results)
       .filter(['status', 'rejected'])
       .map('reason')
-      .filter(err => !isHttpError(err) || err.statusCode !== 404)
+      .filter(err => !httpErrors.isHttpError(err) || err.statusCode !== 404)
       .value()
 
     if (errors.length === 1) {
@@ -325,4 +326,4 @@ class MemberManager {
   }
 }
 
-module.exports = MemberManager
+export default MemberManager

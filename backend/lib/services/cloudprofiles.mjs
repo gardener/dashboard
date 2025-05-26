@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 import httpErrors from 'http-errors'
-import authorization from './authorization.js'
+import * as authorization from './authorization.mjs'
 import logger from '../logger/index.js'
 import _ from 'lodash-es'
 import cache from '../cache/index.js'

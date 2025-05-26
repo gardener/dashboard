@@ -5,7 +5,7 @@
 //
 
 import * as getControllerRegistrations from '../cache/index.js'
-import authorization from './authorization.js'
+import * as authorization from './authorization.mjs'
 import _ from 'lodash-es'
 
 const REQUIRED_RESOURCE_KINDS = ['Network', 'DNSRecord']

@@ -7,8 +7,8 @@
 import _ from 'lodash-es'
 import kubeClient from '@gardener-dashboard/kube-client'
 import httpErrors from 'http-errors'
-import shoots from './shoots.js'
-import authorization from './authorization.js'
+import * as shoots from './shoots.mjs'
+import * as authorization from './authorization.mjs'
 import { projectFilter, simplifyProject } from '../utils/index.js'
 import cache from '../cache/index.js'
 const { dashboardClient } = kubeClient

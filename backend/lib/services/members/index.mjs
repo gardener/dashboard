@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import MemberManager from './MemberManager.js'
+import MemberManager from './MemberManager.mjs'
 
 export async function list ({ user, namespace }) {
   const memberManager = await MemberManager.create(user, namespace)
