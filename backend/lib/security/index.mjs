@@ -79,16 +79,20 @@ if (!rejectUnauthorized) {
   )
 }
 
-function getOpenIdClientModule () {
-  if (!exports.openidClientPromise) {
-    exports.openidClientPromise = import('openid-client')
+export let openidClientPromise
+
+async function getOpenIdClientModule () {
+  if (!openidClientPromise) {
+    openidClientPromise = import('openid-client')
   }
-  return exports.openidClientPromise
+  return openidClientPromise
 }
 
+export let discoveryPromise
+
 async function getConfiguration () {
-  if (!exports.discoveryPromise) {
-    exports.discoveryPromise = pRetry(async () => {
+  if (!discoveryPromise) {
+    discoveryPromise = pRetry(async () => {
       const {
         discovery,
         customFetch,
@@ -128,7 +132,7 @@ async function getConfiguration () {
       randomize: true,
     })
   }
-  return pTimeout(exports.discoveryPromise, 1000, 'Issuer not available')
+  return pTimeout(discoveryPromise, 1000, 'Issuer not available')
 }
 
 function getBackendRedirectUri (origin) {
