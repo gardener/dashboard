@@ -4,18 +4,17 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import { Agent } from 'https'
+import _ from 'lodash-es'
+import { Octokit as Core } from '@octokit/core'
+import { createAppAuth } from '@octokit/auth-app'
+import { requestLog } from '@octokit/plugin-request-log'
+import { legacyRestEndpointMethods } from '@octokit/plugin-rest-endpoint-methods'
+import { paginateRest } from '@octokit/plugin-paginate-rest'
+import { paginateGraphql } from '@octokit/plugin-paginate-graphql'
+import config from '../config/index.js'
+import logger from '../logger/index.js'
 
-const { Agent } = require('https')
-const _ = require('lodash')
-const { Octokit: Core } = require('@octokit/core')
-const { createAppAuth } = require('@octokit/auth-app')
-const { requestLog } = require('@octokit/plugin-request-log')
-const { legacyRestEndpointMethods } = require('@octokit/plugin-rest-endpoint-methods')
-const { paginateRest } = require('@octokit/plugin-paginate-rest')
-const { paginateGraphql } = require('@octokit/plugin-paginate-graphql')
-const config = require('../config')
-const logger = require('../logger')
 const Octokit = Core.plugin(requestLog, legacyRestEndpointMethods, paginateRest, paginateGraphql)
 
 class OctokitLog {
@@ -91,8 +90,7 @@ function init (options) {
       timeout,
     },
   }, options)
-
   return new Octokit(options)
 }
 
-module.exports = init
+export default init

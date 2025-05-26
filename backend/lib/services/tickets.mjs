@@ -6,7 +6,7 @@
 
 import _ from 'lodash-es'
 import config from '../config/index.js'
-import github from '../github/index.js'
+import { searchIssues, getComments } from '../github/index.mjs'
 import markdown from '../markdown.js'
 import cache from '../cache/index.js'
 
@@ -101,7 +101,7 @@ export async function getOpenIssues ({ name, projectName } = {}) {
   if (name && projectName) {
     title = `[${projectName}/${name}]`
   }
-  const githubIssues = await github.searchIssues({ state: 'open', title })
+  const githubIssues = await searchIssues({ state: 'open', title })
   return _.map(githubIssues, fromIssue)
 }
 
@@ -125,7 +125,7 @@ export const list = loadOpenIssues
 export async function getIssueComments ({ number }) {
   const ticketCache = cache.getTicketCache()
   const { metadata: { name, projectName } } = ticketCache.getIssue(number)
-  const githubComments = await github.getComments({ number })
+  const githubComments = await getComments({ number })
   return _.map(githubComments, githubComment => fromComment(number, name, projectName, githubComment))
 }
 
