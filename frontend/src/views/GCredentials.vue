@@ -119,8 +119,8 @@ SPDX-License-Identifier: Apache-2.0
         <template #item="{ item, itemRef }">
           <g-credential-row-infra
             :ref="itemRef"
-            :binding="item"
-            :highlighted="isHighlighted(item)"
+            :item="item"
+            :highlighted="isHighlighted(item.binding)"
             :headers="infraCredentialTableHeaders"
             @delete="onRemoveCredential"
             @update="onUpdateCredential"
@@ -238,8 +238,8 @@ SPDX-License-Identifier: Apache-2.0
         <template #item="{ item, itemRef }">
           <g-credential-row-dns
             :ref="itemRef"
-            :binding="item"
-            :highlighted="isHighlighted(item)"
+            :item="item"
+            :highlighted="isHighlighted(item.binding)"
             :headers="dnsCredentialTableHeaders"
             @delete="onRemoveCredential"
             @update="onUpdateCredential"
@@ -302,6 +302,7 @@ import head from 'lodash/head'
 import filter from 'lodash/filter'
 import get from 'lodash/get'
 import findIndex from 'lodash/findIndex'
+import toLower from 'lodash/toLower'
 
 export default {
   components: {
@@ -423,9 +424,15 @@ export default {
     visibleInfraCredentialTableHeaders () {
       return filter(this.infraCredentialTableHeaders, ['selected', true])
     },
+    infrastructureItems () {
+      return this.infrastructureBindingList.map(binding => ({
+        binding,
+        bindingComposable: useCloudProviderBinding(toRef(binding)),
+      }))
+    },
     infrastructureCredentialSortedItems () {
       const secondSortCriteria = 'name'
-      return this.sortItems(this.infrastructureBindingList, this.infraCredentialSortBy, secondSortCriteria)
+      return this.sortItems(this.infrastructureItems, this.infraCredentialSortBy, secondSortCriteria)
     },
     dnsCredentialTableHeaders () {
       const headers = [
@@ -480,9 +487,15 @@ export default {
     visibleDnsCredentialTableHeaders () {
       return filter(this.dnsCredentialTableHeaders, ['selected', true])
     },
+    dnsItems () {
+      return this.dnsBindingList.map(binding => ({
+        binding,
+        bindingComposable: useCloudProviderBinding(toRef(binding)),
+      }))
+    },
     dnsCredentialSortedItems () {
       const secondSortCriteria = 'name'
-      return this.sortItems(this.dnsBindingList, this.dnsCredentialSortBy, secondSortCriteria)
+      return this.sortItems(this.dnsItems, this.dnsCredentialSortBy, secondSortCriteria)
     },
   },
   watch: {
@@ -494,7 +507,7 @@ export default {
         setTimeout(() => {
           // Cannot start scrolling before the table is rendered
           const scrollToItem = (items, tableRef) => {
-            const itemIndex = findIndex(items, ['metadata.uid', value])
+            const itemIndex = findIndex(items, ['binding.metadata.uid', value])
             if (itemIndex !== -1) {
               tableRef.scrollToIndex(itemIndex)
             }
@@ -551,21 +564,25 @@ export default {
 
       const sortBy = sortByObj.key
       const sortOrder = sortByObj.order
+
       return orderBy(items, [item => this.getRawVal(item, sortBy), secondSortCriteria], [sortOrder, 'asc'])
     },
     getRawVal (item, column) {
       const {
-        credentialUsageCount,
-        credentialKind,
-      } = useCloudProviderBinding(toRef(item))
+        bindingComposable,
+        binding,
+      } = item
+
+      const { credentialKind, credentialUsageCount } = bindingComposable
+
       switch (column) {
         case 'name':
-          return item.metadata.name
+          return binding.metadata.name
         case 'infrastructure':
         case 'dnsProvider':
-          return item.provider.type
+          return binding.provider.type
         case 'kind':
-          return `${item.kind} (${credentialKind.value})`
+          return `${binding.kind} (${credentialKind.value})`
         case 'credentialUsageCount':
           return credentialUsageCount.value
       }
@@ -580,26 +597,28 @@ export default {
     },
     customFilter (_, query, item) {
       const {
-        credentialDetails,
-      } = useCloudProviderBinding(toRef(item.raw))
+        bindingComposable,
+        binding,
+      } = item.raw
 
+      const credentialDetails = bindingComposable.credentialDetails
       const detailValues = map(credentialDetails.value, 'value')
 
       const values = [
-        item.raw.metadata.name,
-        item.raw.provider.type,
-        item.raw.kind,
+        binding.metadata.name,
+        binding.provider.type,
+        binding.kind,
         ...detailValues,
       ]
       return values.some(value => {
         if (value) {
-          return value.toString().toLowerCase().includes(query.toLowerCase())
+          return toLower(value).includes(toLower(query))
         }
         return false
       })
     },
     getItemKey (item, fallback) {
-      return get(item, ['raw', 'metadata', 'uid'], fallback)
+      return get(item, ['raw', 'binding', 'metadata', 'uid'], fallback)
     },
   },
 }

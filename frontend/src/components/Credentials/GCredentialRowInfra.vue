@@ -69,12 +69,12 @@ import GCredentialUsedByLabel from '@/components/Credentials/GCredentialUsedByLa
 import GSharedCredentialIcon from '@/components/Credentials/GSharedCredentialIcon.vue'
 import GOrphanedCredentialIcon from '@/components/Credentials/GOrphanedCredentialIcon.vue'
 
-import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
+import { useUnwrapReactive } from '@/composables/useUnwrapReactive'
 
 import { mapTableHeader } from '@/utils'
 
 const props = defineProps({
-  binding: {
+  item: {
     type: Object,
     required: true,
   },
@@ -88,15 +88,25 @@ const props = defineProps({
   },
 })
 
-const binding = toRef(props, 'binding')
+const item = toRef(props, 'item')
+
+const binding = computed(() => item.value.binding)
+const composable = computed(() => item.value.bindingComposable)
 
 const {
-  isSharedCredential,
-  credentialNamespace,
   credentialUsageCount,
+  isSharedCredential,
   isOrphanedCredential,
+  credentialNamespace,
   credential,
-} = useCloudProviderBinding(binding)
+} = useUnwrapReactive(
+  composable,
+  'credentialUsageCount',
+  'isSharedCredential',
+  'isOrphanedCredential',
+  'credentialNamespace',
+  'credential',
+)
 
 const emit = defineEmits(['update', 'delete'])
 
@@ -111,6 +121,7 @@ function onUpdate (value) {
 function onDelete (value) {
   emit('delete', value)
 }
+
 </script>
 
 <style lang="scss" scoped>
