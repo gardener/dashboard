@@ -105,9 +105,11 @@ SPDX-License-Identifier: Apache-2.0
         v-model:sort-by="infraCredentialSortBy"
         :headers="visibleInfraCredentialTableHeaders"
         :items="infrastructureCredentialSortedItems"
+        :item-key="getItemKey"
         :custom-key-sort="disableCustomKeySort(visibleInfraCredentialTableHeaders)"
         must-sort
         hover
+        :custom-filter="customFilter"
         :search="infraCredentialFilter"
         density="compact"
         class="g-table"
@@ -116,10 +118,9 @@ SPDX-License-Identifier: Apache-2.0
       >
         <template #item="{ item, itemRef }">
           <g-credential-row-infra
-            :key="`${item.credentialNamespace}/${item.credentialName}`"
             :ref="itemRef"
-            :binding="item"
-            :highlighted="isHighlighted(item)"
+            :item="item"
+            :highlighted="isHighlighted(item.binding)"
             :headers="infraCredentialTableHeaders"
             @delete="onRemoveCredential"
             @update="onUpdateCredential"
@@ -223,9 +224,11 @@ SPDX-License-Identifier: Apache-2.0
         v-model:sort-by="dnsCredentialSortBy"
         :headers="visibleDnsCredentialTableHeaders"
         :items="dnsCredentialSortedItems"
+        :item-key="getItemKey"
         :custom-key-sort="disableCustomKeySort(visibleDnsCredentialTableHeaders)"
         must-sort
         hover
+        :custom-filter="customFilter"
         :search="dnsCredentialFilter"
         density="compact"
         class="g-table"
@@ -234,10 +237,9 @@ SPDX-License-Identifier: Apache-2.0
       >
         <template #item="{ item, itemRef }">
           <g-credential-row-dns
-            :key="`${item.credentialNamespace}/${item.credentialName}`"
             :ref="itemRef"
-            :binding="item"
-            :highlighted="isHighlighted(item)"
+            :item="item"
+            :highlighted="isHighlighted(item.binding)"
             :headers="dnsCredentialTableHeaders"
             @delete="onRemoveCredential"
             @update="onUpdateCredential"
@@ -269,6 +271,7 @@ import {
 import { useUrlSearchParams } from '@vueuse/core'
 import {
   toRef,
+  unref,
   computed,
 } from 'vue'
 
@@ -300,6 +303,7 @@ import head from 'lodash/head'
 import filter from 'lodash/filter'
 import get from 'lodash/get'
 import findIndex from 'lodash/findIndex'
+import toLower from 'lodash/toLower'
 
 export default {
   components: {
@@ -421,9 +425,12 @@ export default {
     visibleInfraCredentialTableHeaders () {
       return filter(this.infraCredentialTableHeaders, ['selected', true])
     },
+    infrastructureItems () {
+      return map(this.infrastructureBindingList, this.computeItem)
+    },
     infrastructureCredentialSortedItems () {
       const secondSortCriteria = 'name'
-      return this.sortItems(this.infrastructureBindingList, this.infraCredentialSortBy, secondSortCriteria)
+      return this.sortItems(this.infrastructureItems, this.infraCredentialSortBy, secondSortCriteria)
     },
     dnsCredentialTableHeaders () {
       const headers = [
@@ -478,9 +485,12 @@ export default {
     visibleDnsCredentialTableHeaders () {
       return filter(this.dnsCredentialTableHeaders, ['selected', true])
     },
+    dnsItems () {
+      return map(this.dnsBindingList, this.computeItem)
+    },
     dnsCredentialSortedItems () {
       const secondSortCriteria = 'name'
-      return this.sortItems(this.dnsBindingList, this.dnsCredentialSortBy, secondSortCriteria)
+      return this.sortItems(this.dnsItems, this.dnsCredentialSortBy, secondSortCriteria)
     },
   },
   watch: {
@@ -492,7 +502,7 @@ export default {
         setTimeout(() => {
           // Cannot start scrolling before the table is rendered
           const scrollToItem = (items, tableRef) => {
-            const itemIndex = findIndex(items, ['metadata.uid', value])
+            const itemIndex = findIndex(items, ['binding.metadata.uid', value])
             if (itemIndex !== -1) {
               tableRef.scrollToIndex(itemIndex)
             }
@@ -506,6 +516,26 @@ export default {
     },
   },
   methods: {
+    computeItem (binding) {
+      const {
+        credentialUsageCount,
+        isSharedCredential,
+        isOrphanedCredential,
+        credentialNamespace,
+        credential,
+        credentialDetails,
+      } = useCloudProviderBinding(toRef(binding))
+
+      return {
+        binding,
+        credentialUsageCount: unref(credentialUsageCount),
+        isSharedCredential: unref(isSharedCredential),
+        isOrphanedCredential: unref(isOrphanedCredential),
+        credentialNamespace: unref(credentialNamespace),
+        credential: unref(credential),
+        credentialDetails: unref(credentialDetails),
+      }
+    },
     openCredentialAddDialog (providerType) {
       this.selectedBinding = undefined
       this.visibleCredentialDialog = providerType
@@ -549,21 +579,24 @@ export default {
 
       const sortBy = sortByObj.key
       const sortOrder = sortByObj.order
+
       return orderBy(items, [item => this.getRawVal(item, sortBy), secondSortCriteria], [sortOrder, 'asc'])
     },
     getRawVal (item, column) {
       const {
-        credentialUsageCount,
         credentialKind,
-      } = useCloudProviderBinding(toRef(item))
+        credentialUsageCount,
+        binding,
+      } = item
+
       switch (column) {
         case 'name':
-          return item.metadata.name
+          return binding.metadata.name
         case 'infrastructure':
         case 'dnsProvider':
-          return item.provider.type
+          return binding.provider.type
         case 'kind':
-          return `${item.kind} (${credentialKind.value})`
+          return `${binding.kind} (${credentialKind.value})`
         case 'credentialUsageCount':
           return credentialUsageCount.value
       }
@@ -575,6 +608,31 @@ export default {
     },
     isHighlighted (binding) {
       return this.highlightedUid && this.highlightedUid === binding.metadata.uid
+    },
+    customFilter (_, query, item) {
+      const {
+        credentialDetails,
+        binding,
+      } = item.raw
+
+      const detailValues = map(credentialDetails, 'value')
+
+      const values = [
+        binding.metadata.name,
+        binding.provider.type,
+        binding.kind,
+        ...detailValues,
+      ]
+
+      return values.some(value => {
+        if (value) {
+          return toLower(value).includes(toLower(query))
+        }
+        return false
+      })
+    },
+    getItemKey (item, fallback) {
+      return get(item, ['raw', 'binding', 'metadata', 'uid'], fallback)
     },
   },
 }
