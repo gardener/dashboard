@@ -120,6 +120,12 @@ SPDX-License-Identifier: Apache-2.0
           <g-credential-row-infra
             :ref="itemRef"
             :item="item"
+            :binding="item.binding"
+            :credential-usage-count="item.credentialUsageCount"
+            :is-shared-credential="item.isSharedCredential"
+            :is-orphaned-credential="item.isOrphanedCredential"
+            :credential-namespace="item.credentialNamespace"
+            :credential="item.credential"
             :highlighted="isHighlighted(item.binding)"
             :headers="infraCredentialTableHeaders"
             @delete="onRemoveCredential"
@@ -271,6 +277,7 @@ import {
 import { useUrlSearchParams } from '@vueuse/core'
 import {
   toRef,
+  unref,
   computed,
 } from 'vue'
 
@@ -425,10 +432,7 @@ export default {
       return filter(this.infraCredentialTableHeaders, ['selected', true])
     },
     infrastructureItems () {
-      return this.infrastructureBindingList.map(binding => ({
-        binding,
-        bindingComposable: useCloudProviderBinding(toRef(binding)),
-      }))
+      return map(this.infrastructureBindingList, this.computeItem)
     },
     infrastructureCredentialSortedItems () {
       const secondSortCriteria = 'name'
@@ -488,10 +492,7 @@ export default {
       return filter(this.dnsCredentialTableHeaders, ['selected', true])
     },
     dnsItems () {
-      return this.dnsBindingList.map(binding => ({
-        binding,
-        bindingComposable: useCloudProviderBinding(toRef(binding)),
-      }))
+      return map(this.dnsBindingList, this.computeItem)
     },
     dnsCredentialSortedItems () {
       const secondSortCriteria = 'name'
@@ -521,6 +522,26 @@ export default {
     },
   },
   methods: {
+    computeItem (binding) {
+      const {
+        credentialUsageCount,
+        isSharedCredential,
+        isOrphanedCredential,
+        credentialNamespace,
+        credential,
+        credentialDetails,
+      } = useCloudProviderBinding(toRef(binding))
+
+      return {
+        binding,
+        credentialUsageCount: unref(credentialUsageCount),
+        isSharedCredential: unref(isSharedCredential),
+        isOrphanedCredential: unref(isOrphanedCredential),
+        credentialNamespace: unref(credentialNamespace),
+        credential: unref(credential),
+        credentialDetails: unref(credentialDetails),
+      }
+    },
     openCredentialAddDialog (providerType) {
       this.selectedBinding = undefined
       this.visibleCredentialDialog = providerType
@@ -569,11 +590,10 @@ export default {
     },
     getRawVal (item, column) {
       const {
-        bindingComposable,
+        credentialKind,
+        credentialUsageCount,
         binding,
       } = item
-
-      const { credentialKind, credentialUsageCount } = bindingComposable
 
       switch (column) {
         case 'name':
@@ -597,12 +617,11 @@ export default {
     },
     customFilter (_, query, item) {
       const {
-        bindingComposable,
+        credentialDetails,
         binding,
       } = item.raw
 
-      const credentialDetails = bindingComposable.credentialDetails
-      const detailValues = map(credentialDetails.value, 'value')
+      const detailValues = map(credentialDetails, 'value')
 
       const values = [
         binding.metadata.name,
@@ -610,6 +629,7 @@ export default {
         binding.kind,
         ...detailValues,
       ]
+
       return values.some(value => {
         if (value) {
           return toLower(value).includes(toLower(query))

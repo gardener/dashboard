@@ -11,43 +11,43 @@ SPDX-License-Identifier: Apache-2.0
   >
     <td v-if="selectedHeaders.name">
       <div class="d-flex">
-        {{ binding.metadata.name }}
+        {{ item.binding.metadata.name }}
         <g-shared-credential-icon
-          v-if="isSharedCredential"
-          :namespace="credentialNamespace"
+          v-if="item.isSharedCredential"
+          :namespace="item.credentialNamespace"
         />
         <g-orphaned-credential-icon
-          v-if="isOrphanedCredential"
-          :binding="binding"
+          v-if="item.isOrphanedCredential"
+          :binding="item.binding"
         />
       </div>
     </td>
     <td v-if="selectedHeaders.kind">
-      <g-credential-icon :binding="binding" />
+      <g-credential-icon :binding="item.binding" />
     </td>
     <td v-if="selectedHeaders.dnsProvider">
       <g-vendor
         extended
-        :provider-type="binding.provider.type"
+        :provider-type="item.binding.provider.type"
       />
     </td>
     <td v-if="selectedHeaders.details">
       <g-credential-details-item-content
         class="py-1"
-        :credential="credential"
-        :shared="isSharedCredential"
-        :provider-type="binding.provider.type"
+        :credential="item.credential"
+        :shared="item.isSharedCredential"
+        :provider-type="item.binding.provider.type"
       />
     </td>
     <td v-if="selectedHeaders.credentialUsageCount">
-      <g-credential-used-by-label :used-by="credentialUsageCount" />
+      <g-credential-used-by-label :used-by="item.credentialUsageCount" />
     </td>
     <td
       v-if="selectedHeaders.actions"
       class="text-action-button"
     >
       <g-credential-row-actions
-        :binding="binding"
+        :binding="item.binding"
         @update="onUpdate"
         @delete="onDelete"
       />
@@ -58,7 +58,7 @@ SPDX-License-Identifier: Apache-2.0
 <script setup>
 import {
   computed,
-  toRef,
+  toRefs,
 } from 'vue'
 
 import GVendor from '@/components/GVendor'
@@ -68,8 +68,6 @@ import GCredentialIcon from '@/components/Credentials/GCredentialIcon'
 import GCredentialUsedByLabel from '@/components/Credentials/GCredentialUsedByLabel'
 import GSharedCredentialIcon from '@/components/Credentials/GSharedCredentialIcon.vue'
 import GOrphanedCredentialIcon from '@/components/Credentials/GOrphanedCredentialIcon.vue'
-
-import { useUnwrapReactive } from '@/composables/useUnwrapReactive'
 
 import { mapTableHeader } from '@/utils'
 
@@ -88,29 +86,15 @@ const props = defineProps({
   },
 })
 
-const item = toRef(props, 'item')
-
-const binding = computed(() => item.value.binding)
-const composable = computed(() => item.value.bindingComposable)
-
 const {
-  credentialUsageCount,
-  isSharedCredential,
-  isOrphanedCredential,
-  credentialNamespace,
-  credential,
-} = useUnwrapReactive(
-  composable,
-  'credentialUsageCount',
-  'isSharedCredential',
-  'isOrphanedCredential',
-  'credentialNamespace',
-  'credential',
-)
+  item,
+  highlighted,
+  headers,
+} = toRefs(props)
 
 const emit = defineEmits(['update', 'delete'])
 
-const selectedHeaders = computed(() => mapTableHeader(props.headers, 'selected'))
+const selectedHeaders = computed(() => mapTableHeader(headers.value, 'selected'))
 
 function onUpdate (value) {
   emit('update', value)
