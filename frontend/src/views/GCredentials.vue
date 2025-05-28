@@ -120,12 +120,6 @@ SPDX-License-Identifier: Apache-2.0
           <g-credential-row-infra
             :ref="itemRef"
             :item="item"
-            :binding="item.binding"
-            :credential-usage-count="item.credentialUsageCount"
-            :is-shared-credential="item.isSharedCredential"
-            :is-orphaned-credential="item.isOrphanedCredential"
-            :credential-namespace="item.credentialNamespace"
-            :credential="item.credential"
             :highlighted="isHighlighted(item.binding)"
             :headers="infraCredentialTableHeaders"
             @delete="onRemoveCredential"
