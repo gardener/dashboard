@@ -25,6 +25,7 @@ import {
   credentialNamespace as _credentialNameSpace,
   credentialRef as _credentialRef,
   credentialKind as _credentialKind,
+  secretDetails as _secretDetails,
 } from './helper'
 
 import filter from 'lodash/filter'
@@ -97,6 +98,13 @@ export const useCloudProviderBinding = (binding, options = {}) => {
     }
     if (isWorkloadIdentity.value) {
       return credentialStore.getWorkloadIdentity(credentialRef.value)
+    }
+    return undefined
+  })
+
+  const credentialDetails = computed(() => {
+    if (isSecret.value && credential.value) {
+      return _secretDetails(credential.value, binding.value?.provider?.type)
     }
     return undefined
   })
@@ -194,6 +202,7 @@ export const useCloudProviderBinding = (binding, options = {}) => {
     credentialName,
     credentialKind,
     credential,
+    credentialDetails,
 
     // Usage/orphan checks
     hasOwnSecret,
