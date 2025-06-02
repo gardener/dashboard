@@ -103,7 +103,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
       })
 
       const vendorName = vendorNameFromMachineImageName(name)
-      const displayName = get(configStore, ['vendors', vendorName, 'name'], vendorName)
+      const displayName = configStore.vendorDisplayName(vendorName)
 
       const vendorHint = findVendorHint(configStore.vendorHints, vendorName)
 

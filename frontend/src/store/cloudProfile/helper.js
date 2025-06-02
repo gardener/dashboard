@@ -38,7 +38,7 @@ export function vendorNameFromMachineImageName (imageName) {
   } else if (lowerCaseName.includes('flatcar')) {
     return 'flatcar'
   } else if (lowerCaseName.includes('memoryone') || lowerCaseName.includes('vsmp')) {
-    return 'memoryone'
+    return 'memoryone-chost'
   }
   return undefined
 }

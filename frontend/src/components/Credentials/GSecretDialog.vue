@@ -171,6 +171,8 @@ import {
   setInputFocus,
 } from '@/utils'
 
+import kebapCase from 'lodash/kebabCase'
+
 export default {
   components: {
     GMessage,
@@ -312,8 +314,8 @@ export default {
     },
     title () {
       return this.isCreateMode
-        ? `Add new ${this.vendorDisplayName(this.providerType)} Secret`
-        : `Replace ${this.vendorDisplayName(this.providerType)} Secret`
+        ? `Add new ${this.displayName} Secret`
+        : `Replace ${this.displayName} Secret`
     },
     helpContainerStyles () {
       const detailsRef = this.$refs.secretDetails
@@ -335,6 +337,9 @@ export default {
         this.secretName = value
         this.bindingRef.name = value
       },
+    },
+    displayName () {
+      return this.vendorDisplayName(this.providerType)
     },
   },
   mounted () {
@@ -392,8 +397,8 @@ export default {
       if (this.isCreateMode) {
         this.createBindingManifest()
         this.createSecretManifest()
-        // TODO(grolu): use vendor name - what if vendor display name contains invalid characters?
-        this.name = `my-${this.providerType}-secret`
+        const kebapName = kebapCase(this.displayName)
+        this.name = `my-${kebapName}-secret`
         this.bindingProviderType = this.providerType
 
         setDelayedInputFocus(this, 'name')

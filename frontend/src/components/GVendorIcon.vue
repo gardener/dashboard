@@ -69,7 +69,7 @@ const iconSrc = computed(() => {
   }
 
   switch (props.icon) {
-    // infrastructures
+    // infrastructure providers
     case 'azure':
       return new URL('/src/assets/azure.svg', import.meta.url)
     case 'aws':
@@ -110,6 +110,8 @@ const iconSrc = computed(() => {
       return new URL('/src/assets/rfc2136.svg', import.meta.url)
     case 'powerdns':
       return new URL('/src/assets/powerdns.svg', import.meta.url)
+    case 'hcloud':
+      return new URL('/src/assets/hcloud.svg', import.meta.url)
 
     // os
     case 'coreos':
@@ -124,8 +126,6 @@ const iconSrc = computed(() => {
       return new URL('/src/assets/gardenlinux.svg', import.meta.url)
     case 'flatcar':
       return new URL('/src/assets/flatcar.svg', import.meta.url)
-    case 'hcloud':
-      return new URL('/src/assets/hcloud.svg', import.meta.url)
   }
 
   return undefined
