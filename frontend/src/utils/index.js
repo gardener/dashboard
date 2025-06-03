@@ -40,8 +40,6 @@ import compact from 'lodash/compact'
 import forEach from 'lodash/forEach'
 import omit from 'lodash/omit'
 
-const configStore = useConfigStore()
-
 const serviceAccountRegex = /^system:serviceaccount:([^:]+):([^:]+)$/
 const colorCodeRegex = /^#([a-f0-9]{6}|[a-f0-9]{3})$/i
 
@@ -523,7 +521,14 @@ export function randomMaintenanceBegin () {
   return `${randomHour}:00`
 }
 
-export function maintenanceWindowWithBeginAndTimezone (beginTime, beginTimezone, windowSize = configStore.defaultMaintenanceWindowSizeMinutes) {
+export function maintenanceWindowWithBeginAndTimezone (
+  beginTime,
+  beginTimezone,
+  windowSize = null
+) {
+  const store = useConfigStore()
+  const effectiveWindowSize = windowSize ?? store.defaultMaintenanceWindowSizeMinutes
+
   const maintenanceTimezone = new TimeWithOffset(beginTimezone)
   if (!maintenanceTimezone.isValid()) {
     return
@@ -539,7 +544,7 @@ export function maintenanceWindowWithBeginAndTimezone (beginTime, beginTimezone,
   }
 
   const begin = `${beginMoment.format('HHmm')}00${timezoneString}`
-  const endMoment = beginMoment.add(windowSize, 'm')
+  const endMoment = beginMoment.add(effectiveWindowSize, 'm')
   const end = `${endMoment.format('HHmm')}00${timezoneString}`
   return { begin, end }
 }
