@@ -46,6 +46,27 @@ SPDX-License-Identifier: Apache-2.0
                     </v-icon>
                   </template>
                   <div class="text-body-2 text-medium-emphasis">
+                    Title
+                  </div>
+                  <div class="text-body-1 wrap-text">
+                    <g-editable-text
+                      :read-only="!canPatchProject"
+                      color="action-button"
+                      :model-value="projectTitle"
+                      :save="updateProjectTitle"
+                      :rules="projectTitleRules"
+                      counter="true"
+                      max-length="64"
+                    />
+                  </div>
+                </g-list-item>
+                <g-list-item>
+                  <template #prepend>
+                    <v-icon :color="color">
+                      mdi-text-subject
+                    </v-icon>
+                  </template>
+                  <div class="text-body-2 text-medium-emphasis">
                     Description
                   </div>
                   <div class="text-body-1 wrap-text">
@@ -511,6 +532,8 @@ import {
   getDateFormatted,
 } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
+import { annotations } from '@/utils/annotations.js'
+import { projectTitleRules } from '@/utils/project.js'
 
 import includes from 'lodash/includes'
 import set from 'lodash/set'
@@ -541,6 +564,7 @@ const {
 } = storeToRefs(projectStore)
 const {
   projectName,
+  projectTitle,
   shootCustomFields,
   projectOwner: owner,
   projectCreationTimestamp: creationTimestamp,
@@ -610,21 +634,19 @@ function updateOwner (name) {
     kind: 'User',
     name,
   }
-  return updateProperty('owner', owner)
+  return updateProperty('spec.owner', owner)
+}
+
+function updateProjectTitle (value) {
+  return updateProperty(`metadata.annotations["${annotations.projectTitle}"]`, value || null)
 }
 
 function updateDescription (value) {
-  if (!value) {
-    value = null
-  }
-  return updateProperty('description', value)
+  return updateProperty('spec.description', value)
 }
 
 function updatePurpose (value) {
-  if (!value) {
-    value = null
-  }
-  return updateProperty('purpose', value)
+  return updateProperty('spec.purpose', value)
 }
 
 async function updateProperty (key, value, options = {}) {
@@ -634,7 +656,7 @@ async function updateProperty (key, value, options = {}) {
       metadata: { name },
       spec: { namespace },
     }
-    set(mergePatchDocument, ['spec', key], value)
+    set(mergePatchDocument, key, value)
     await projectStore.patchProject(mergePatchDocument)
   } catch (err) {
     const { error = `Failed to update project ${key}` } = options

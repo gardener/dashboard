@@ -12,3 +12,7 @@ export function truncateProjectTitle (title, maxLength = 64) {
   }
   return title
 }
+
+export const projectTitleRules = {
+  maxLength: maxLength(64),
+}
