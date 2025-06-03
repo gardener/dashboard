@@ -49,6 +49,11 @@ export const useShootMetadata = (shootItem, options = {}) => {
     return projectStore.projectNameByNamespace(shootNamespace.value)
   })
 
+  const shootProjectTitle = computed(() => {
+    const projectTitleByNamespace = projectStore.projectTitleByNamespace(shootNamespace.value)
+    return projectTitleByNamespace
+  })
+
   const shootConfirmationDeletion = computed(() => {
     return isTruthyValue(getShootAnnotation('confirmation.gardener.cloud/deletion'))
   })
@@ -82,6 +87,7 @@ export const useShootMetadata = (shootItem, options = {}) => {
     shootNamespace,
     shootName,
     shootProjectName,
+    shootProjectTitle,
     shootCreationTimestamp,
     shootDeletionTimestamp,
     shootGeneration,
