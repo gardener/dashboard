@@ -740,7 +740,7 @@ export function createShootContextComposable (options = {}) {
   /* maintenanceAutoUpdateKubernetesVersion */
   const maintenanceAutoUpdateKubernetesVersion = computed({
     get () {
-      return get(manifest.value, ['spec', 'maintenance', 'autoUpdate', 'kubernetesVersion'], true)
+      return get(manifest.value, ['spec', 'maintenance', 'autoUpdate', 'kubernetesVersion'], configStore.defaultAutoUpdateKubernetes )
     },
     set (value) {
       set(manifest.value, ['spec', 'maintenance', 'autoUpdate', 'kubernetesVersion'], value)
@@ -749,7 +749,7 @@ export function createShootContextComposable (options = {}) {
 
   const maintenanceAutoUpdateMachineImageVersion = computed({
     get () {
-      return get(manifest.value, ['spec', 'maintenance', 'autoUpdate', 'machineImageVersion'], true)
+      return get(manifest.value, ['spec', 'maintenance', 'autoUpdate', 'machineImageVersion'], configStore.defaultAutoUpdateOS)
     },
     set (value) {
       set(manifest.value, ['spec', 'maintenance', 'autoUpdate', 'machineImageVersion'], value)
@@ -757,8 +757,8 @@ export function createShootContextComposable (options = {}) {
   })
 
   function resetMaintenanceAutoUpdate () {
-    maintenanceAutoUpdateKubernetesVersion.value = true
-    maintenanceAutoUpdateMachineImageVersion.value = true
+    maintenanceAutoUpdateKubernetesVersion.value = configStore.defaultAutoUpdateKubernetes
+    maintenanceAutoUpdateMachineImageVersion.value = configStore.defaultAutoUpdateOS
   }
 
   /* hibernation */
