@@ -19,6 +19,7 @@ import {
   hash,
 } from './crypto'
 import TimeWithOffset from './TimeWithOffset'
+import { useConfigStore } from '../store/config'
 
 import capitalize from 'lodash/capitalize'
 import replace from 'lodash/replace'
@@ -38,6 +39,8 @@ import sample from 'lodash/sample'
 import compact from 'lodash/compact'
 import forEach from 'lodash/forEach'
 import omit from 'lodash/omit'
+
+const configStore = useConfigStore()
 
 const serviceAccountRegex = /^system:serviceaccount:([^:]+):([^:]+)$/
 const colorCodeRegex = /^#([a-f0-9]{6}|[a-f0-9]{3})$/i
