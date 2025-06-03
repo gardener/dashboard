@@ -55,7 +55,7 @@ SPDX-License-Identifier: Apache-2.0
               class="text-left"
               :class="{ placeholder: !selectedProject }"
             >
-              {{ selectedProjectName }}
+              {{ selectedProjectTitle }}
               <template v-if="selectedProject">
                 <g-stale-project-warning
                   :project="selectedProject"
@@ -66,6 +66,12 @@ SPDX-License-Identifier: Apache-2.0
                   size="small"
                 />
               </template>
+              <v-tooltip
+                activator="parent"
+                location="top"
+              >
+                {{ truncateProjectTitle(selectedProjectTitle) }}
+              </v-tooltip>
             </div>
             <template #append>
               <v-icon
@@ -129,10 +135,37 @@ SPDX-License-Identifier: Apache-2.0
                 </v-icon>
               </template>
               <v-list-item-title class="project-name text-uppercase">
-                {{ project.metadata.name }}
+                <span
+                  v-if="hasProjectTitle(project)"
+                  class="text-primary"
+                >
+                  {{ getProjectTitle(project) }}
+                </span>
+                <span v-else>{{ project.metadata.name }}</span>
+
+                <v-tooltip
+                  v-if="hasProjectTitle(project)"
+                  activator="parent"
+                  location="top"
+                >
+                  {{ truncateProjectTitle(getProjectTitle(project)) }}
+                </v-tooltip>
               </v-list-item-title>
               <v-list-item-subtitle class="project-owner">
-                {{ getProjectOwner(project) }}
+                <abbr :title="hasProjectTitle(project) ? '' : null">
+                  <span v-if="hasProjectTitle(project)">
+                    {{ project.metadata.name }} &bull;
+                  </span>
+                  {{ getProjectOwner(project) }}
+                </abbr>
+
+                <v-tooltip
+                  v-if="hasProjectTitle(project)"
+                  activator="parent"
+                  location="bottom"
+                >
+                  {{ getProjectTooltip(project) }}
+                </v-tooltip>
               </v-list-item-subtitle>
               <template #append>
                 <g-stale-project-warning
@@ -255,6 +288,8 @@ import {
   namespacedRoute as getNamespacedRoute,
   routeName as getRouteName,
 } from '@/utils'
+import { annotations } from '@/utils/annotations.js'
+import { truncateProjectTitle } from '@/utils/project.js'
 
 import find from 'lodash/find'
 import findIndex from 'lodash/findIndex'
@@ -345,6 +380,10 @@ const selectedProjectName = computed(() => {
   return project ? project.metadata.name : ''
 })
 
+const selectedProjectTitle = computed(() => {
+  return getProjectTitle(selectedProject.value) ?? selectedProjectName
+})
+
 const sortedAndFilteredProjectList = computed(() => {
   const predicate = item => {
     if (!projectFilter.value) {
@@ -387,6 +426,22 @@ const projectNameThatMatchesFilter = computed(() => {
     ? projectName
     : undefined
 })
+
+function hasProjectTitle (project) {
+  return !!getProjectTitle(project)
+}
+
+function getProjectTitle (project) {
+  return get(project, ['metadata', 'annotations', annotations.projectTitle])
+}
+
+function getProjectTooltip (project) {
+  if (!hasProjectTitle(project)) {
+    return undefined
+  }
+
+  return `Project: ${project.metadata.name} • Owner: ${getProjectOwner(project)}`
+}
 
 function getProjectOwner (project) {
   return emailToDisplayName(get(project, ['spec', 'owner', 'name']))
@@ -605,8 +660,11 @@ watch(projectMenu, value => {
     margin: 0 24px 0 0 !important;
   }
   :deep(.v-btn__content > div) {
-    min-width: 153px !important;
+    width: 153px !important;
     text-align: left !important;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
   :deep(.v-btn__append) {
     margin: 0 0 0 4px !important;
@@ -658,6 +716,10 @@ watch(projectMenu, value => {
 
       :deep(.v-list-item__prepend > .v-icon) {
         opacity: 0.9;
+      }
+
+      :deep(.v-list-item__prepend > .v-list-item__spacer) {
+        width: 16px;
       }
 
       .highlighted-item {
