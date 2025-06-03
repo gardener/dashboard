@@ -82,7 +82,6 @@ export const useGardenerExtensionStore = defineStore('gardenerExtension', () => 
   
   const networkingTypeList = computed(() => {
     const types = sortBy(networkingTypes.value)
-    if (!configStore.defaultNetworkingType) return types
   
     if (types.includes(configStore.defaultNetworkingType)) {
       const filtered = types.filter(type => type !== configStore.defaultNetworkingType)
