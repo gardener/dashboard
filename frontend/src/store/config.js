@@ -287,6 +287,10 @@ export const useConfigStore = defineStore('config', () => {
     return state.value?.defaultZonesSelectAll ?? false
   })
 
+  const defaultMaintenanceHours = computed(() => {
+    return state.value?.defaultMaintenanceHours ?? ['22', '23', '00', '01', '02', '03', '04', '05']
+  })
+
   const defaultMaintenanceWindowSizeMinutes = computed(() => {
     return state.value?.defaultMaintenanceWindowSizeMinutes ?? 60
   })
