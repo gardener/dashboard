@@ -17,7 +17,7 @@ import { useApi } from '@/composables/useApi'
 
 import map from 'lodash/map'
 import flatMap from 'lodash/flatMap'
-import { useConfigStore } from '../config'
+import { useConfigStore } from '@/store/config'
 import filter from 'lodash/filter'
 import get from 'lodash/get'
 import some from 'lodash/some'
@@ -89,7 +89,6 @@ export const useGardenerExtensionStore = defineStore('gardenerExtension', () => 
   
   const networkingTypeList = computed(() => {
     const types = sortBy(networkingTypes.value)
-    if (!configStore.defaultNetworkingType) return types
   
     if (types.includes(configStore.defaultNetworkingType)) {
       const filtered = types.filter(type => type !== configStore.defaultNetworkingType)
