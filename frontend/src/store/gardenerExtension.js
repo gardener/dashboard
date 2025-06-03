@@ -98,10 +98,6 @@ export const useGardenerExtensionStore = defineStore('gardenerExtension', () => 
     return types
   })
 
-  const networkingTypeList = computed(() => {
-    return sortBy(networkingTypes.value)
-  })
-
   return {
     list,
     isInitial,
