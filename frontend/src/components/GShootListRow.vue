@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
       <template v-if="cell.header.key === 'project'">
         <g-text-router-link
           :to="{ name: 'ShootList', params: { namespace: shootNamespace } }"
-          :text="shootProjectName"
+          :text="shootProjectTitleAndName"
         />
       </template>
       <template v-if="cell.header.key === 'name'">
@@ -267,6 +267,7 @@ import { useProvideShootHelper } from '@/composables/useShootHelper'
 import { formatValue } from '@/composables/useProjectShootCustomFields/helper'
 
 import { getIssueSince } from '@/utils'
+import { truncateProjectTitle } from '@/utils/project.js'
 
 import find from 'lodash/find'
 import some from 'lodash/some'
@@ -310,6 +311,7 @@ const {
   shootCreatedBy,
   shootCreationTimestamp,
   shootProjectName,
+  shootProjectTitle,
   shootPurpose,
   shootProviderType,
   shootRegion,
@@ -337,6 +339,12 @@ useProvideShootHelper(shootItem, {
 
 const seedItem = computed(() => seedStore.seedByName(shootSeedName.value))
 useProvideSeedItem(seedItem)
+
+const shootProjectTitleAndName = computed(() => {
+  const title = shootProjectTitle.value
+  const name = shootProjectName.value
+  return title ? `${truncateProjectTitle(title, 32)} (${name})` : name
+})
 
 const isInfoAvailable = computed(() => {
   // operator not yet updated shoot resource
