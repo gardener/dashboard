@@ -476,6 +476,7 @@ export const useConfigStore = defineStore('config', () => {
     defaultContainerRuntime,
     defaultControlPlaneHighAvailability,
     defaultInfrastructure,
+    defaultMaintenanceHours,
     defaultMaintenanceWindowSizeMinutes,
     defaultMaxSurge,
     defaultNetworkingType,
