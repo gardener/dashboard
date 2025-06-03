@@ -30,6 +30,18 @@ SPDX-License-Identifier: Apache-2.0
             />
           </v-col>
         </v-row>
+        <v-row>
+          <v-col cols="12">
+            <v-text-field
+              v-model.trim="v$.projectTitle.$model"
+              variant="underlined"
+              color="primary"
+              label="Title"
+              counter="64"
+              :error-messages="getErrorMessages(v$.projectTitle)"
+            />
+          </v-col>
+        </v-row>
 
         <g-project-cost-object />
 
@@ -131,6 +143,7 @@ import {
   isConflict,
   isGatewayTimeout,
 } from '@/utils/error'
+import { projectTitleRules } from '@/utils/project.js'
 
 const props = defineProps({
   modelValue: {
@@ -150,6 +163,7 @@ const {
   createProjectManifest,
   projectManifest,
   projectName,
+  projectTitle,
   description,
   purpose,
 } = useProvideProjectContext()
@@ -185,9 +199,10 @@ const rules = {
     lowerCaseAlphaNumHyphen,
     isUniqueProjectName,
   },
+  projectTitle: projectTitleRules,
 }
 
-const v$ = useVuelidate(rules, { projectName })
+const v$ = useVuelidate(rules, { projectName, projectTitle })
 
 watch(visible, value => {
   if (value) {
