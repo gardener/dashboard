@@ -513,7 +513,7 @@ export function randomMaintenanceBegin () {
   return `${randomHour}:00`
 }
 
-export function maintenanceWindowWithBeginAndTimezone (beginTime, beginTimezone, windowSize = 60) {
+export function maintenanceWindowWithBeginAndTimezone (beginTime, beginTimezone, windowSize = configStore.defaultMaintenanceWindowSizeMinutes) {
   const maintenanceTimezone = new TimeWithOffset(beginTimezone)
   if (!maintenanceTimezone.isValid()) {
     return

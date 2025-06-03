@@ -661,9 +661,9 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     const worker = {
       id,
       name,
-      minimum: 1,
-      maximum: 2,
-      maxSurge: 1,
+      minimum: configStore.defaultAutoscalerMin,
+      maximum: configStore.defaultAutoscalerMax,
+      maxSurge: configStore.defaultMaxSurge,
       machine: {
         type: machineType.name,
         image: pick(machineImage, ['name', 'version']),
