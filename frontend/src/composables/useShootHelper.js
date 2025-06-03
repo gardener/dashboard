@@ -193,7 +193,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     }
     return selfTerminationDays.value
       ? ['evaluation']
-      : ['evaluation', 'development', 'testing', 'production']
+      : configStore.defaultPurposes
   })
 
   const allLoadBalancerProviderNames = useLoadBalancerProviderNames(region)

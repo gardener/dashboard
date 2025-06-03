@@ -247,6 +247,58 @@ export const useConfigStore = defineStore('config', () => {
     return state.value?.defaultNodesCIDR ?? '10.250.0.0/16'
   })
 
+  const defaultInfrastructure = computed(() => {
+    return state.value?.defaultInfrastructure
+  })
+
+  const defaultPurposes = computed(() => {
+    return state.value?.defaultPurposes ?? ['evaluation', 'development', 'testing', 'production']
+  })
+
+  const defaultWorkerlessCluster = computed(() => {
+    return state.value?.defaultWorkerlessCluster ?? false
+  })
+
+  const defaultNetworkingType = computed(() => {
+    return state.value?.defaultNetworkingType
+  })
+
+  const defaultControlPlaneHighAvailability = computed(() => {
+    return state.value?.defaultControlPlaneHighAvailability ?? false
+  })
+
+  const defaultContainerRuntime = computed(() => {
+    return state.value?.defaultContainerRuntime
+  })
+
+  const defaultAutoscalerMin = computed(() => {
+    return state.value?.defaultAutoscalerMin ?? 1
+  })
+
+  const defaultAutoscalerMax = computed(() => {
+    return state.value?.defaultAutoscalerMax ?? 2
+  })
+
+  const defaultMaxSurge = computed(() => {
+    return state.value?.defaultMaxSurge ?? 1
+  })
+
+  const defaultZonesSelectAll = computed(() => {
+    return state.value?.defaultZonesSelectAll ?? false
+  })
+
+  const defaultMaintenanceWindowSizeMinutes = computed(() => {
+    return state.value?.defaultMaintenanceWindowSizeMinutes ?? 60
+  })
+
+  const defaultAutoUpdateOS = computed(() => {
+    return state.value?.defaultAutoUpdateOS ?? true
+  })
+
+  const defaultAutoUpdateKubernetes = computed(() => {
+    return state.value?.defaultAutoUpdateKubernetes ?? true
+  })
+
   const shootAdminKubeconfig = computed(() => {
     return state.value?.shootAdminKubeconfig
   })
@@ -413,7 +465,20 @@ export const useConfigStore = defineStore('config', () => {
     vendorHints,
     helpMenuItems,
     externalTools,
+    defaultAutoUpdateKubernetes,
+    defaultAutoUpdateOS,
+    defaultAutoscalerMax,
+    defaultAutoscalerMin,
+    defaultContainerRuntime,
+    defaultControlPlaneHighAvailability,
+    defaultInfrastructure,
+    defaultMaintenanceWindowSizeMinutes,
+    defaultMaxSurge,
+    defaultNetworkingType,
     defaultNodesCIDR,
+    defaultPurposes,
+    defaultWorkerlessCluster,
+    defaultZonesSelectAll,
     shootAdminKubeconfig,
     apiServerUrl,
     clusterIdentity,
