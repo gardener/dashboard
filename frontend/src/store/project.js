@@ -18,6 +18,8 @@ import { useApi } from '@/composables/useApi'
 import { useLogger } from '@/composables/useLogger'
 import { useSocketEventHandler } from '@/composables/useSocketEventHandler'
 
+import { annotations } from '@/utils/annotations.js'
+
 import { useAuthzStore } from './authz'
 import { useAppStore } from './app'
 
@@ -56,6 +58,17 @@ export const useProjectStore = defineStore('project', () => {
       }
     }
     return projectNames
+  })
+
+  const projectMap = computed(() => {
+    const projects = {}
+    if (Array.isArray(list.value)) {
+      for (const project of list.value) {
+        const { spec: { namespace } } = project
+        set(projects, [namespace], project)
+      }
+    }
+    return projects
   })
 
   const defaultNamespace = computed(() => {
@@ -116,6 +129,13 @@ export const useProjectStore = defineStore('project', () => {
       ? metadata
       : metadata?.namespace
     return get(projectNameMap.value, [namespace], replace(namespace, /^garden-/, ''))
+  }
+
+  function projectTitleByNamespace (metadata) {
+    const namespace = typeof metadata === 'string'
+      ? metadata
+      : metadata?.namespace
+    return get(projectMap.value, [namespace, 'metadata', 'annotations', annotations.projectTitle])
   }
 
   async function fetchProjects () {
@@ -185,6 +205,7 @@ export const useProjectStore = defineStore('project', () => {
     updateProject,
     deleteProject,
     projectNameByNamespace,
+    projectTitleByNamespace,
     handleEvent: socketEventHandler.listener,
     $reset,
   }
