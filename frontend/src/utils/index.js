@@ -19,7 +19,7 @@ import {
   hash,
 } from './crypto'
 import TimeWithOffset from './TimeWithOffset'
-import { useConfigStore } from '../store/config'
+import { useConfigStore } from '@/store/config'
 
 import capitalize from 'lodash/capitalize'
 import replace from 'lodash/replace'
