@@ -5,6 +5,11 @@
 //
 
 import {
+  setActivePinia,
+  createPinia,
+} from 'pinia'
+
+import {
   canI,
   machineImageHasUpdateForAutoUpdateStrategy,
   machineImageHasUpdate,
@@ -313,6 +318,7 @@ describe('utils', () => {
     let status
 
     beforeEach(() => {
+      setActivePinia(createPinia())
       status = {
         lastOperation: {
           state: 'False',
