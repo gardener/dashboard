@@ -251,11 +251,11 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
       availableFloatingPools = filter(availableFloatingPools, { domain: secretDomain })
     }
 
-    const match = availableFloatingPools.find(pool => pool.name === configStore.defaultFloatingPool);
+    const match = availableFloatingPools.find(pool => pool.name === configStore.defaultFloatingPool)
 
     return match
       ? [match, ...availableFloatingPools.filter(pool => pool.name !== configStore.defaultFloatingPool)]
-      : availableFloatingPools;
+      : availableFloatingPools
   }
 
   function floatingPoolNamesByCloudProfileRefAndRegionAndDomain ({ cloudProfileRef, region, secretDomain }) {
@@ -273,7 +273,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     const match = uniq(map(availableLoadBalancerProviders, 'name'))
 
     if (match.includes(configStore.defaultLoadbalancerProvider)) {
-      match.unshift(...match.splice(match.indexOf(defaultLoadbalancerProvider), 1));
+      match.unshift(...match.splice(match.indexOf(configStore.defaultLoadbalancerProvider), 1))
     }
 
     return match
@@ -648,7 +648,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
       ? configStore.defaultZonesSelectAll
         ? availableZones
         : [sample(availableZones)]
-      : undefined;
+      : undefined
     const architecture = head(machineArchitecturesByCloudProfileRefAndRegion({ cloudProfileRef, region }))
     const machineTypesForZone = machineTypesByCloudProfileRefAndRegionAndArchitecture({ cloudProfileRef, region, architecture })
     const machineType = head(machineTypesForZone) || {}
