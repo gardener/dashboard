@@ -7,8 +7,8 @@ metadata:
 data:
   frontend-config.yaml: |
     frontend:
-      # FIXME: I have no idea where the complete defaults were from, i just obtained parts of this file and started building from there
-      #NEW these values are all optional, the following demonstrates what they could be changed to
+      # FIXME: I have no idea where the complete defaults can be obtained, my file got pierced together by documentation scraps within this repo. The following lists only the proposed extensions
+      #NEW these values are all optional. If undefined, nothing should change to the current status quo
       defaultInfrastructures:
         - 'openstack'
         - 'aws'
