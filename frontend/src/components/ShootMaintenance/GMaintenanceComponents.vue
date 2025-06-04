@@ -6,10 +6,10 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div class="ml-3">
-    <div class="text-subtitle-1 pt-4">
+    <div class="text-subtitle-1 pt-4" v-if="showAutoUpdate">
       {{ title }}
     </div>
-    <template v-if="!workerless">
+    <template v-if="!workerless && showAutoUpdate">
       <div
         v-if="!readonly || osUpdates"
         class="d-flex mt-4"
@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </template>
     <div
-      v-if="!readonly || k8sUpdates"
+      v-if="(!readonly || k8sUpdates) && showAutoUpdates"
       class="d-flex mt-4"
     >
       <div class="d-flex align-center justify-center action-select">

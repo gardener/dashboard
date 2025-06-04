@@ -53,7 +53,7 @@ SPDX-License-Identifier: Apache-2.0
         />
       </v-col>
     </v-row>
-    <v-row>
+    <v-row v-if="showWorkerlessOption">
       <v-col cols="12">
         <v-checkbox
           v-model="workerless"
