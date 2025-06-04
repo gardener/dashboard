@@ -542,7 +542,11 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
   function generateWorker (availableZones, cloudProfileRef, region, kubernetesVersion) {
     const id = uuidv4()
     const name = `worker-${shortRandomString(5)}`
-    const zones = !isEmpty(availableZones) ? [sample(availableZones)] : undefined
+    const zones = !isEmpty(availableZones)
+      ? configStore.defaultZonesSelectAll
+        ? availableZones
+        : [sample(availableZones)]
+      : undefined;
     const architecture = head(machineArchitecturesByCloudProfileRefAndRegion({ cloudProfileRef, region }))
     const machineTypesForZone = machineTypesByCloudProfileRefAndRegionAndArchitecture({ cloudProfileRef, region, architecture })
     const machineType = head(machineTypesForZone) || {}

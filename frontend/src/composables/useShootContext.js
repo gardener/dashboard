@@ -860,7 +860,6 @@ export function createShootContextComposable (options = {}) {
       return !!controlPlaneHighAvailabilityFailureToleranceType.value
     },
     set (value) {
-      console.log("bla")
       if (!value) {
         controlPlaneHighAvailabilityFailureToleranceType.value = undefined
       } else {
