@@ -857,11 +857,19 @@ export function createShootContextComposable (options = {}) {
 
   const controlPlaneHighAvailability = computed({
     get () {
-      return !!controlPlaneHighAvailabilityFailureToleranceType.value
+
+      if (controlPlaneHighAvailabilityFailureToleranceType.value == undefined) {
+        controlPlaneHighAvailabilityFailureToleranceType.value = isFailureToleranceTypeZoneSupported.value
+          ? 'zone'
+          : 'node';
+        return !!configStore.defaultControlPlaneHighAvailability;
+      } else {
+        return !!controlPlaneHighAvailabilityFailureToleranceType.value;
+      }
     },
     set (value) {
       if (!value) {
-        controlPlaneHighAvailabilityFailureToleranceType.value = undefined
+        controlPlaneHighAvailabilityFailureToleranceType.value = null
       } else {
         controlPlaneHighAvailabilityFailureToleranceType.value = isFailureToleranceTypeZoneSupported.value
           ? 'zone'
