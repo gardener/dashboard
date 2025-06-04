@@ -15,37 +15,55 @@ data:
     frontend:
       # FIXME: I have no idea where the complete defaults can be obtained, my file got pierced together by documentation scraps within this repo. The following lists only the proposed extensions
       #NEW these values are all optional. If undefined, nothing should change to the current status quo
-      defaultInfrastructures:
-        - 'openstack'
-        - 'aws'
-        - 'azure'
-        - 'gcp'
-        - 'alicloud'
-        - 'metal'
-        - 'vsphere'
-        - 'hcloud'
-        - 'onmetal'
-        - 'ironcore'
-        - 'local'
-      defaultFloatingPool: external # reorders the pools, so the default is first should it exist
-      defaultLoadbalancerProvider: amphora # reorders the loadbalancers, so the default is first should it exist
-      defaultAutoUpdateKubernetes: false
-      defaultAutoUpdateOS: false
-      defaultAutoscalerMax: 3
-      defaultAutoscalerMin: 2
-      defaultContainerRuntime: containerd # reorders the container runtimes, so the default is first should it exist
-      defaultControlPlaneHighAvailability: true
-      defaultMaintenanceWindowSizeMinutes: 90
-      defaultMaintenanceHours:
-        - '10'
-        - '11'
-      defaultMaxSurge: 1
-      defaultNetworkingType: cilium # reorders the networking types, so the default is first should it exist
-      defaultPurposes: # first in list is default
-        - production
-        - testing
-        - development
-        - evaluation
-      defaultWorkerlessCluster: false
-      defaultZonesSelectAll: true # If true, selects all zones instead of a random one
+      #
+  shootDefaults: # unless indicated, none of these values are required, but serve as examples
+    controlPlaneHighAvailabilityHelp:
+      text: ": Your text here" # REQUIRED
+    hibernationSchedule:
+      development: null
+      evaluation: null
+      production: null
+      testing: null
+    nodesCIDR: '10.250.0.0/16'
+    infrastructures:
+      - 'aws'
+      - 'azure'
+      - 'gcp'
+      - 'openstack'
+      - 'alicloud'
+      - 'metal'
+      - 'vsphere'
+      - 'hcloud'
+      - 'onmetal'
+      - 'ironcore'
+      - 'local'
+    purposes:
+      - 'evaluation'
+      - 'development'
+      - 'testing'
+      - 'production'
+    workerlessCluster: false
+    networkingType: cilium
+    floatingPool: external
+    loadbalancerProvider: amphora
+    controlPlaneHighAvailability: false
+    containerRuntime: containerd
+    autoscalerMin: 1
+    autoscalerMax: 2
+    maxSurge: 1
+    zonesSelectAll: false
+    maintenanceHours:
+      - '22'
+      - '23'
+      - '00'
+      - '01'
+      - '02'
+      - '03'
+      - '04'
+      - '05'
+    maintenanceWindowSizeMinutes: 60
+    autoUpdateOS: true
+    autoUpdateKubernetes: true
+  XXX
+
       #END
