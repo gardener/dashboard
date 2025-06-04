@@ -9,7 +9,7 @@
 const _ = require('lodash')
 
 describe('security', function () {
-  const createJose = require('../lib/security/jose')
+  const createJose = require('../dist/lib/security/jose')
 
   describe('jose', function () {
     const secret1 = Buffer.from('this-is-a-secret-only-used-for-tests').toString('base64')
@@ -133,17 +133,17 @@ describe('security', function () {
         jest.mock('undici', () => ({
           Agent: jest.fn().mockImplementation((options) => ({ options })),
         }))
-        require('../lib/config/gardener').readConfig.mockReturnValue(config)
-        jest.mock('../lib/services/authentication', () => ({
+        require('../dist/lib/config/gardener').readConfig.mockReturnValue(config)
+        jest.mock('../dist/lib/services/authentication', () => ({
           isAuthenticated: jest.fn(),
         }))
-        jest.mock('../lib/services/authorization', () => ({
+        jest.mock('../dist/lib/services/authorization', () => ({
           isAdmin: jest.fn(),
         }))
         undici = require('undici')
-        authentication = require('../lib/services/authentication')
-        authorization = require('../lib/services/authorization')
-        security = require('../lib/security')
+        authentication = require('../dist/lib/services/authentication')
+        authorization = require('../dist/lib/services/authorization')
+        security = require('../dist/lib/security')
         jose = createJose(config.sessionSecrets)
       })
       security.openidClientPromise = Promise.resolve(mockOpenidClient)

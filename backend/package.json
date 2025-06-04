@@ -26,8 +26,7 @@
     "serve": "cross-env NODE_ENV=development node --experimental-vm-modules server.js",
     "lint": "eslint server.js . --max-warnings=0",
     "lint-sarif": "yarn lint --format=@microsoft/eslint-formatter-sarif",
-    "build-cjs": "rollup -c rollup.cjs.config.js",
-    "pretest": "yarn build-cjs",
+    "build-test-target": "rollup -c rollup.config.js",
     "test": "NODE_PATH=./lib-cjs cross-env NODE_ENV=test node --experimental-vm-modules $(yarn bin jest)",
     "test-coverage": "yarn test --coverage"
   },
@@ -93,6 +92,7 @@
     "p-event": "^4.2.0",
     "path-to-regexp": "^8.0.0",
     "rollup": "^4.41.1",
+    "rollup-plugin-copy": "^3.5.0",
     "set-cookie-parser": "^2.6.0",
     "socket.io-client": "^4.7.5",
     "supertest": "^7.0.0"

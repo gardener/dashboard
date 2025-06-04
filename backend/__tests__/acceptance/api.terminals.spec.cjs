@@ -8,7 +8,7 @@
 
 const { padStart } = require('lodash')
 const { mockRequest } = require('@gardener-dashboard/request')
-const { converter } = require('../../lib/services/terminals')
+const { converter } = require('../../dist/lib/services/terminals')
 
 function getTerminalName (target, identifier) {
   return [

@@ -10,8 +10,8 @@ const { mockRequest } = require('@gardener-dashboard/request')
 const { Store } = require('@gardener-dashboard/kube-client')
 const kubeconfig = require('@gardener-dashboard/kube-config')
 const yaml = require('js-yaml')
-const logger = require('../../lib/logger')
-const cache = require('../../lib/cache')
+const logger = require('../../dist/lib/logger')
+const cache = require('../../dist/lib/cache')
 
 function createStore (items) {
   const store = new Store()

@@ -20,7 +20,7 @@ const {
   simplifyObjectMetadata,
   simplifyProject,
   parseRooms,
-} = require('../lib/utils')
+} = require('../dist/lib/utils')
 
 describe('utils', function () {
   describe('index', function () {

@@ -6,12 +6,12 @@
 
 'use strict'
 
+jest.mock('../../dist/lib/services/projects')
+
 const express = require('express')
 const supertest = require('supertest')
-const projects = require('../../lib/services/projects')
-const routes = require('../../lib/routes/projects')
-
-jest.mock('../../lib/services/projects')
+const projects = require('../../dist/lib/services/projects')
+const routes = require('../../dist/lib/routes/projects')
 
 const app = express()
 app.use(express.json())

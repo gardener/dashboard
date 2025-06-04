@@ -8,7 +8,7 @@
 
 const { createHttpError } = require('@gardener-dashboard/request')
 const { dashboardClient } = require('@gardener-dashboard/kube-client')
-const { healthCheck } = require('../lib/healthz')
+const { healthCheck } = require('../dist/lib/healthz')
 
 describe('healthz', function () {
   const healthz = dashboardClient.healthz

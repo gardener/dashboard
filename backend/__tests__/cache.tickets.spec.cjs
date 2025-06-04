@@ -8,7 +8,7 @@
 
 const assert = require('assert').strict
 const _ = require('lodash')
-const createTicketCache = require('../lib/cache/tickets')
+const createTicketCache = require('../dist/lib/cache/tickets')
 
 function timestamp (secondsFromNow = 0) {
   return new Date(Date.now() + secondsFromNow * 1000).toISOString().replace(/\.\d+Z$/, 'Z')

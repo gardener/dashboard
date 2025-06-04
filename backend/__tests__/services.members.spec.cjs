@@ -10,8 +10,8 @@ const _ = require('lodash')
 const { parseKubeconfig } = require('@gardener-dashboard/kube-config')
 const { UnprocessableEntity, NotFound } = require('http-errors')
 const createError = require('http-errors')
-const MemberManager = require('../lib/services/members/MemberManager')
-const SubjectList = require('../lib/services/members/SubjectList')
+const MemberManager = require('../dist/lib/services/members/MemberManager')
+const SubjectList = require('../dist/lib/services/members/SubjectList')
 
 describe('services', function () {
   describe('members', function () {

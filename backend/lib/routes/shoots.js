@@ -8,9 +8,8 @@ import express from 'express'
 import services from '../services/index.js'
 import { metricsRoute } from '../middleware.js'
 import { simplifyObjectMetadata } from '../utils/index.js'
-import kubeClientModule from '@gardener-dashboard/kube-client'
+
 const { shoots } = services
-const { dashboardClient } = kubeClientModule
 
 const router = express.Router({
   mergeParams: true,

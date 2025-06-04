@@ -8,8 +8,6 @@ const neostandard = require('neostandard')
 const pluginJest = require('eslint-plugin-jest')
 const pluginSecurity = require('eslint-plugin-security')
 const pluginLodash = require('eslint-plugin-lodash')
-const pluginImport = require('eslint-plugin-import')
-
 module.exports = [
   ...neostandard({}),
   {
@@ -19,12 +17,6 @@ module.exports = [
     },
   },
   pluginSecurity.configs.recommended,
-  {
-    plugins: {
-      import: pluginImport,
-    },
-    rules: pluginImport.flatConfigs.recommended.rules,
-  },
   {
     plugins: {
       lodash: pluginLodash,
@@ -55,5 +47,8 @@ module.exports = [
       'security/detect-possible-timing-attacks': 'off',
       'security/detect-unsafe-regex': 'off',
     },
+  },
+  {
+    ignores: ['dist'],
   },
 ]

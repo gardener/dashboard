@@ -3,7 +3,7 @@ module.exports = {
   verbose: true,
   coverageDirectory: 'coverage',
   collectCoverageFrom: [
-    'lib/**/*.js',
+    'dist/**/*.cjs',
   ],
   testEnvironment: 'node',
   testPathIgnorePatterns: [
@@ -31,8 +31,4 @@ module.exports = {
     '**/?(*.)+(spec|test).js',
     '**/?(*.)+(spec|test).cjs',
   ],
-  moduleNameMapper: {
-    '^../lib/(.*)$': '<rootDir>/lib-cjs/$1',
-    '^../../lib/(.*)$': '<rootDir>/lib-cjs/$1',
-  },
 }

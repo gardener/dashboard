@@ -4,15 +4,13 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import _ from 'lodash-es'
-import httpErrors from 'http-errors'
+import createError from 'http-errors'
 import logger from '../logger/index.js'
 import cache from '../cache/index.js'
 import { projectFilter, parseRooms } from '../utils/index.js'
 import services from '../services/index.js'
-import { constants, getUserFromSocket, synchronizeFactory } from './helper.js'
+import helper from './helper.js'
 const { authorization } = services
-const { NotFound, createError } = httpErrors
 
 async function canListAllShoots (user, namespaces) {
   const canListShoots = async namespace => [namespace, await authorization.canListShoots(user, namespace)]
@@ -33,7 +31,7 @@ function getAllNamespaces (user) {
 }
 
 export async function subscribe (socket, { namespace, name, labelSelector }) {
-  const user = getUserFromSocket(socket)
+  const user = helper.getUserFromSocket(socket)
 
   const joinRoom = room => {
     logger.debug('User %s joined rooms [%s]', user.id, room)
@@ -72,7 +70,7 @@ export function unsubscribe (socket) {
   return Promise.all(promises)
 }
 
-export const synchronize = synchronizeFactory('Shoot', {
+export const synchronize = helper.synchronizeFactory('Shoot', {
   accessResolver (socket, object) {
     const rooms = Array.from(socket.rooms).filter(room => room !== socket.id)
     const [
@@ -84,10 +82,10 @@ export const synchronize = synchronizeFactory('Shoot', {
     const { namespace, name } = object.metadata
     const qualifiedName = [namespace, name].join('/')
     if (qualifiedNames.includes(qualifiedName)) {
-      return constants.OBJECT_ORIGINAL
+      return helper.constants.OBJECT_ORIGINAL
     } else if (isAdmin || namespaces.includes(namespace)) {
-      return constants.OBJECT_SIMPLE
+      return helper.constants.OBJECT_SIMPLE
     }
-    return constants.OBJECT_NONE
+    return helper.constants.OBJECT_NONE
   },
 })

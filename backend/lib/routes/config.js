@@ -11,9 +11,8 @@ import express from 'express'
 import kubeClientModule from '@gardener-dashboard/kube-client'
 import config from '../config/index.js'
 import { metricsRoute } from '../middleware.js'
-import httpErrors from 'http-errors'
+
 const { dashboardClient } = kubeClientModule
-const { UnprocessableEntity } = httpErrors
 
 const router = express.Router()
 

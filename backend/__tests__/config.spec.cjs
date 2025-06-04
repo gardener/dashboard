@@ -7,12 +7,12 @@
 'use strict'
 
 const fs = require('fs')
-const gardener = require('../lib/config/gardener')
+const gardener = require('../dist/lib/config/gardener')
 
 describe('config', function () {
   describe('gardener', function () {
     describe('#readConfig', function () {
-      const originalGardener = jest.requireActual('../lib/config/gardener')
+      const originalGardener = jest.requireActual('../dist/lib/config/gardener')
 
       const path = 'path'
       let readFileSyncStub

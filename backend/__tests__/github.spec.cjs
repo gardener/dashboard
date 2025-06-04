@@ -10,12 +10,12 @@ const { AssertionError } = require('assert')
 const createError = require('http-errors')
 const { mockOctokitPaginateGraphQL } = require('@octokit/core')
 const { dashboardClient } = require('@gardener-dashboard/kube-client')
-const logger = require('../lib/logger')
-const config = require('../lib/config')
-const handleGithubEvent = require('../lib/github/webhook/handler')
-const verify = require('../lib/github/webhook/verify')
-const SyncManager = require('../lib/github/SyncManager')
-const { getComments } = require('../lib/github')
+const logger = require('../dist/lib/logger')
+const config = require('../dist/lib/config')
+const handleGithubEvent = require('../dist/lib/github/webhook/handler')
+const verify = require('../dist/lib/github/webhook/verify')
+const SyncManager = require('../dist/lib/github/SyncManager')
+const { getComments } = require('../dist/lib/github')
 
 const actualNextTick = jest.requireActual('process').nextTick
 

@@ -5,10 +5,9 @@
 //
 
 import _ from 'lodash-es'
-import httpErrors from 'http-errors'
+import createError, { isHttpError } from 'http-errors'
 import cache from '../cache/index.js'
 import logger from '../logger/index.js'
-const { isHttpError, createError } = httpErrors
 const { getQuotas } = cache
 
 export async function list ({ user, params }) {

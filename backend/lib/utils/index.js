@@ -8,10 +8,12 @@ import _ from 'lodash-es'
 import config from '../config/index.js'
 import assert from 'assert/strict'
 
-export const EXISTS = '\u2203'
-export const NOT_EXISTS = '!\u2203'
-export const EQUAL = '='
-export const NOT_EQUAL = '!='
+export const constants = {
+  EXISTS: '\u2203',
+  NOT_EXISTS: '!\u2203',
+  EQUAL: '=',
+  NOT_EQUAL: '!=',
+}
 
 export function decodeBase64 (value) {
   if (!value) {
@@ -151,14 +153,14 @@ export function parseSelector (selector = '') {
 
   if (notOperator) {
     if (!operator) {
-      return { op: NOT_EXISTS, key }
+      return { op: constants.NOT_EXISTS, key }
     }
   } else if (!operator) {
-    return { op: EXISTS, key }
+    return { op: constants.EXISTS, key }
   } else if (operator === '!=') {
-    return { op: NOT_EQUAL, key, value }
+    return { op: constants.NOT_EQUAL, key, value }
   } else if (operator === '=' || operator === '==') {
-    return { op: EQUAL, key, value }
+    return { op: constants.EQUAL, key, value }
   }
 }
 
@@ -179,25 +181,25 @@ export function filterBySelectors (selectors) {
     for (const { op, key, value } of selectors) {
       const labelValue = _.get(labels, [key], '')
       switch (op) {
-        case NOT_EXISTS: {
+        case constants.NOT_EXISTS: {
           if (key in labels) {
             return false
           }
           break
         }
-        case EXISTS: {
+        case constants.EXISTS: {
           if (!(key in labels)) {
             return false
           }
           break
         }
-        case NOT_EQUAL: {
+        case constants.NOT_EQUAL: {
           if (labelValue === value) {
             return false
           }
           break
         }
-        case EQUAL: {
+        case constants.EQUAL: {
           if (labelValue !== value) {
             return false
           }

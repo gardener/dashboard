@@ -8,18 +8,18 @@
 
 const fixtures = require('../__fixtures__')
 
-jest.mock('../lib/github/SyncManager')
+jest.mock('../dist/lib/github/SyncManager')
 
 const EventEmitter = require('events')
 const pLimit = require('p-limit')
 const _ = require('lodash')
-const logger = require('../lib/logger')
-const config = require('../lib/config')
-const watches = require('../lib/watches')
-const cache = require('../lib/cache')
-const tickets = require('../lib/services/tickets')
-const SyncManager = require('../lib/github/SyncManager')
-const { sha256 } = require('../lib/io/helper')
+const logger = require('../dist/lib/logger')
+const config = require('../dist/lib/config')
+const watches = require('../dist/lib/watches')
+const cache = require('../dist/lib/cache')
+const tickets = require('../dist/lib/services/tickets')
+const SyncManager = require('../dist/lib/github/SyncManager')
+const { sha256 } = require('../dist/lib/io/helper')
 
 const { cloneDeep } = require('lodash')
 
@@ -409,7 +409,9 @@ describe('watches', function () {
     })
 
     it('should should load issues and comments of all issues', async function () {
-      const { loadOpenIssuesAndComments } = watches.leases.test
+      // todo exported directly
+      // const { loadOpenIssuesAndComments } = watches.leases.test
+      const { loadOpenIssuesAndComments } = require('../dist/lib/watches/leases.cjs')
 
       const issues = fixtures.github.issues.list()
       const issueNumbers = issues.map(i => i.number)

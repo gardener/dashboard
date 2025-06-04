@@ -6,7 +6,7 @@
 
 const { mockRequest } = require('@gardener-dashboard/request')
 const { Store } = require('@gardener-dashboard/kube-client')
-const cache = require('../../lib/cache')
+const cache = require('../../dist/lib/cache')
 const _ = require('lodash')
 
 function createStore (items) {

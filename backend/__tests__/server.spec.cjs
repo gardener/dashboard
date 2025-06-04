@@ -9,7 +9,7 @@
 const http = require('http')
 const terminus = require('@godaddy/terminus')
 const metricsApp = require('@gardener-dashboard/monitor')
-const createServer = require('../lib/server')
+const createServer = require('../dist/lib/server')
 
 function createApplication (port, metricsPort) {
   const app = (req, res) => {

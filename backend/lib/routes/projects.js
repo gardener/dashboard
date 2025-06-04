@@ -39,7 +39,7 @@ router.route('/:project')
     try {
       const user = req.user
       const name = req.params.project
-      res.send(await projects.get({ user, name }))
+      res.send(await projects.read({ user, name }))
     } catch (err) {
       next(err)
     }
@@ -59,7 +59,7 @@ router.route('/:project')
       const user = req.user
       const name = req.params.project
       const body = req.body
-      res.send(await projects.update({ user, name, body }))
+      res.send(await projects.patch({ user, name, body }))
     } catch (err) {
       next(err)
     }

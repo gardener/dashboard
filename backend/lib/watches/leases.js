@@ -9,7 +9,7 @@ import logger from '../logger/index.js'
 import config from '../config/index.js'
 import cache from '../cache/index.js'
 import * as tickets from '../services/tickets.js'
-import * as SyncManager from '../github/SyncManager.js'
+import SyncManager from '../github/SyncManager.js'
 
 export async function loadOpenIssuesAndComments (concurrency) {
   const issues = await tickets.loadOpenIssues()
@@ -57,4 +57,5 @@ export default (io, informer, { signal }) => {
 }
 
 // exported for testing
-export const test = { loadOpenIssuesAndComments }
+// ToDo delete, is exported directly or adapt test
+// export const test = { loadOpenIssuesAndComments }

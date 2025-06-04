@@ -32,34 +32,34 @@ const TargetEnum = {
   SHOOT: 'shoot',
 }
 
-export const converter = createConverter()
+const converter = createConverter()
 
-export function create ({ user, body }) {
+function create ({ user, body }) {
   const { coordinate: { namespace, name, target } } = body
   return getOrCreateTerminalSession({ user, namespace, name, target, body })
 }
 
-export async function terminalConfig ({ user, body: { coordinate: { namespace, name, target } } }) {
+async function terminalConfig ({ user, body: { coordinate: { namespace, name, target } } }) {
   return getTerminalConfig({ user, namespace, name, target })
 }
 
-export function list ({ user, body: { coordinate: { namespace } } }) {
+function list ({ user, body: { coordinate: { namespace } } }) {
   return listTerminalSessions({ user, namespace })
 }
 
-export function remove ({ user, body = {} }) {
+function remove ({ user, body = {} }) {
   return deleteTerminalSession({ user, body })
 }
 
-export function fetch ({ user, body = {} }) {
+function fetch ({ user, body = {} }) {
   return fetchTerminalSession({ user, body })
 }
 
-export async function heartbeat ({ user, body = {} }) {
+async function heartbeat ({ user, body = {} }) {
   return heartbeatTerminalSession({ user, body })
 }
 
-export async function listProjectTerminalShortcuts ({ user, body = {} }) {
+async function listProjectTerminalShortcuts ({ user, body = {} }) {
   const { coordinate: { namespace } } = body
   return listShortcuts({ user, namespace })
 }
@@ -78,7 +78,7 @@ function imageHelpText (terminal) {
 }
 
 // exported for unit test
-export function findImageDescription (containerImage, containerImageDescriptions) {
+function findImageDescription (containerImage, containerImageDescriptions) {
   return _
     .chain(containerImageDescriptions)
     .find(({ image }) => {
@@ -677,7 +677,7 @@ function getSeedShootNamespace (shoot) {
   return seedShootNamespace
 }
 
-export function ensureTerminalAllowed ({ method, isAdmin, body }) {
+function ensureTerminalAllowed ({ method, isAdmin, body }) {
   if (isAdmin) {
     return
   }
@@ -789,7 +789,7 @@ function pickShortcutValues (data) {
   return shortcut
 }
 
-export function fromShortcutSecretResource (secret) {
+function fromShortcutSecretResource (secret) {
   const shortcutsBase64 = _.get(secret, ['data', 'shortcuts'])
   const shortcuts = yamlLoad(decodeBase64(shortcutsBase64))
   return _
@@ -814,4 +814,18 @@ async function listShortcuts ({ user, namespace }) {
     }
     throw err
   }
+}
+
+export {
+  create,
+  terminalConfig as config,
+  list,
+  remove,
+  fetch,
+  heartbeat,
+  listProjectTerminalShortcuts,
+  findImageDescription,
+  ensureTerminalAllowed,
+  fromShortcutSecretResource,
+  converter,
 }

@@ -7,9 +7,9 @@
 'use strict'
 
 const { mockRequest } = require('@gardener-dashboard/request')
-const { cache: { resetTicketCache } } = require('../../lib/cache')
-const { loadOpenIssues } = require('../../lib/services/tickets')
-const { octokit } = require('../../lib/github')
+const { cache: { resetTicketCache } } = require('../../dist/lib/cache')
+const { loadOpenIssues } = require('../../dist/lib/services/tickets')
+const { octokit } = require('../../dist/lib/github')
 
 describe('github', function () {
   let agent

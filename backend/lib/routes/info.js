@@ -10,10 +10,9 @@ import { readFile } from 'fs/promises'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
 import logger from '../logger/index.js'
-import { decodeBase64, encodeBase64, simplifyObjectMetadata } from '../utils/index.js'
+import { decodeBase64 } from '../utils/index.js'
 import kubeClientModule from '@gardener-dashboard/kube-client'
 import { metricsRoute } from '../middleware.js'
-import httpErrors from 'http-errors'
 
 const { extend } = requestModule
 const { dashboardClient } = kubeClientModule
@@ -61,7 +60,7 @@ async function fetchGardenerVersion () {
     } else if (process.env.NODE_ENV !== 'production' && insecureSkipTLSVerify === true) {
       clientConfig.rejectUnauthorized = false
     }
-    const client = request.extend(clientConfig.extend({ responseType: 'json' }))
+    const client = extend(clientConfig.extend({ responseType: 'json' }))
     const version = await client.request('version')
     return version
   } catch (err) {

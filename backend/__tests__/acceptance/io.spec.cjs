@@ -11,9 +11,9 @@ const { Store } = require('@gardener-dashboard/kube-client')
 const { mockListIssues, mockListComments } = require('@octokit/core')
 const pEvent = require('p-event')
 const createError = require('http-errors')
-const tickets = require('../../lib/services/tickets')
-const cache = require('../../lib/cache')
-const ioHelper = require('../../lib/io/helper')
+const tickets = require('../../dist/lib/services/tickets')
+const cache = require('../../dist/lib/cache')
+const ioHelper = require('../../dist/lib/io/helper')
 const fixtures = require('../../__fixtures__')
 
 function publishEvent (socket, room, eventName, metadata) {

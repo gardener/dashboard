@@ -11,7 +11,7 @@ const assert = require('assert').strict
 const setCookieParser = require('set-cookie-parser')
 const { mockRequest } = require('@gardener-dashboard/request')
 
-const security = require('../../lib/security')
+const security = require('../../dist/lib/security')
 const {
   COOKIE_HEADER_PAYLOAD,
   COOKIE_SIGNATURE,

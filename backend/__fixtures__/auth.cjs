@@ -14,8 +14,8 @@ const {
   COOKIE_HEADER_PAYLOAD,
   COOKIE_TOKEN,
   COOKIE_SIGNATURE,
-} = require('../lib/security/constants')
-const jose = require('../lib/security/jose')
+} = require('../dist/lib/security/constants')
+const jose = require('../dist/lib/security/jose')
 const { sessionSecrets } = require('./config').default
 
 const { sign, encrypt, decode } = jose(sessionSecrets)

@@ -10,20 +10,20 @@ const _ = require('lodash')
 const yaml = require('js-yaml')
 const assert = require('assert').strict
 const { Forbidden } = require('http-errors')
-const config = require('../lib/config')
-const { cache } = require('../lib/cache')
-const { encodeBase64 } = require('../lib/utils')
+const config = require('../dist/lib/config')
+const { cache } = require('../dist/lib/cache')
+const { encodeBase64 } = require('../dist/lib/utils')
 
 const {
   ensureTerminalAllowed,
   findImageDescription,
   fromShortcutSecretResource,
-} = require('../lib/services/terminals')
+} = require('../dist/lib/services/terminals')
 
 const {
   getGardenTerminalHostClusterCredentials,
   getGardenHostClusterKubeApiServer,
-} = require('../lib/services/terminals/utils')
+} = require('../dist/lib/services/terminals/utils')
 
 const {
   dashboardClient,

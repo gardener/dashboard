@@ -9,8 +9,8 @@
 const {
   getDashboardUrlPath,
   getGardenClusterIdentity,
-} = require('../lib/services/shoots')
-const config = require('../lib/config')
+} = require('../dist/lib/services/shoots')
+const config = require('../dist/lib/config')
 const { mockRequest } = require('@gardener-dashboard/request')
 
 describe('services', function () {

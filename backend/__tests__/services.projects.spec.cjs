@@ -6,16 +6,80 @@
 
 'use strict'
 
-const { PreconditionFailed, InternalServerError } = require('http-errors')
-const projects = require('../lib/services/projects')
-const shoots = require('../lib/services/shoots')
-const authorization = require('../lib/services/authorization')
-const cache = require('../lib/cache')
-const { dashboardClient } = require('@gardener-dashboard/kube-client')
+jest.mock('../dist/lib/cache', () => {
+  const projectList = [
+    {
+      metadata: {
+        name: 'foo',
+      },
+      spec: {
+        members: [
+          {
+            kind: 'User',
+            name: 'foo@bar.com',
+          },
+          {
+            kind: 'User',
+            name: 'system:serviceaccount:garden-foo:robot-user',
+          },
+          {
+            kind: 'ServiceAccount',
+            name: 'robot-sa',
+            namespace: 'garden-foo',
+          },
+        ],
+      },
+      status: {
+        phase: 'Ready',
+      },
+    },
+    {
+      metadata: {
+        name: 'bar',
+      },
+      spec: {
+        members: [
+          {
+            kind: 'User',
+            name: 'bar@bar.com',
+          },
+        ],
+      },
+      status: {
+        phase: 'Ready',
+      },
+    },
+    {
+      metadata: {
+        name: 'pending',
+      },
+      spec: {
+        members: [
+          {
+            apiGroup: 'rbac.authorization.k8s.io',
+            kind: 'User',
+            name: 'bar@bar.com',
+          },
+        ],
+      },
+    },
+    {
+      metadata: {
+        name: 'terminating',
+      },
+      status: {
+        phase: 'Terminating',
+      },
+    },
+  ]
 
-jest.mock('../lib/services/shoots')
-jest.mock('../lib/services/authorization')
-jest.mock('../lib/cache')
+  return {
+    getProjects: jest.fn(() => projectList),
+    getProject: jest.fn(name => projectList.find(project => project.metadata.name === name)),
+  }
+})
+jest.mock('../dist/lib/services/shoots')
+jest.mock('../dist/lib/services/authorization')
 jest.mock('@gardener-dashboard/kube-client', () => ({
   dashboardClient: {
     'core.gardener.cloud': {
@@ -26,98 +90,28 @@ jest.mock('@gardener-dashboard/kube-client', () => ({
   },
 }))
 
-const createUser = (username) => {
-  return {
-    id: username,
-    client: {
-      'core.gardener.cloud': {
-        projects: {
-          create: jest.fn(),
-          get: jest.fn(),
-          mergePatch: jest.fn(),
-          delete: jest.fn(),
-        },
-      },
-    },
-  }
-}
-
 describe('services/projects', () => {
-  let projectList
+  const { PreconditionFailed, InternalServerError } = require('http-errors')
+  const projects = require('../dist/lib/services/projects')
+  const shoots = require('../dist/lib/services/shoots')
+  const authorization = require('../dist/lib/services/authorization')
+  const { dashboardClient } = require('@gardener-dashboard/kube-client')
 
-  beforeEach(() => {
-    projectList = [
-      {
-        metadata: {
-          name: 'foo',
-        },
-        spec: {
-          members: [
-            {
-              kind: 'User',
-              name: 'foo@bar.com',
-            },
-            {
-              kind: 'User',
-              name: 'system:serviceaccount:garden-foo:robot-user',
-            },
-            {
-              kind: 'ServiceAccount',
-              name: 'robot-sa',
-              namespace: 'garden-foo',
-            },
-          ],
-        },
-        status: {
-          phase: 'Ready',
+  const createUser = (username) => {
+    return {
+      id: username,
+      client: {
+        'core.gardener.cloud': {
+          projects: {
+            create: jest.fn(),
+            get: jest.fn(),
+            mergePatch: jest.fn(),
+            delete: jest.fn(),
+          },
         },
       },
-      {
-        metadata: {
-          name: 'bar',
-        },
-        spec: {
-          members: [
-            {
-              kind: 'User',
-              name: 'bar@bar.com',
-            },
-          ],
-        },
-        status: {
-          phase: 'Ready',
-        },
-      },
-      {
-        metadata: {
-          name: 'pending',
-        },
-        spec: {
-          members: [
-            {
-              apiGroup: 'rbac.authorization.k8s.io',
-              kind: 'User',
-              name: 'bar@bar.com',
-            },
-          ],
-        },
-      },
-      {
-        metadata: {
-          name: 'terminating',
-        },
-        status: {
-          phase: 'Terminating',
-        },
-      },
-    ]
-    jest.clearAllMocks()
-    cache.getProjects = jest.fn().mockImplementation(() => projectList)
-    cache.getProject = jest.fn(name => projectList.find(project => project.metadata.name === name))
-    dashboardClient['core.gardener.cloud'].projects.watch.mockResolvedValue({
-      until: jest.fn().mockResolvedValue(projectList[0]),
-    })
-  })
+    }
+  }
 
   describe('#list', () => {
     it('should return all projects if user can list all projects', async () => {

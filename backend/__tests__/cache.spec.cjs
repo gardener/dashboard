@@ -7,7 +7,7 @@
 'use strict'
 
 const { Store } = require('@gardener-dashboard/kube-client')
-const cache = require('../lib/cache')
+const cache = require('../dist/lib/cache')
 const fixtures = require('../__fixtures__')
 const { cache: internalCache } = cache
 

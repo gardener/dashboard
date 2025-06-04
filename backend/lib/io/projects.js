@@ -6,15 +6,15 @@
 
 import { get } from 'lodash-es'
 import { isMemberOf, simplifyProject } from '../utils/index.js'
-import { constants, getUserFromSocket, synchronizeFactory } from './helper.js'
+import helper from './helper.js'
 
-export const synchronize = synchronizeFactory('Project', {
+export const synchronize = helper.synchronizeFactory('Project', {
   group: 'core.gardener.cloud',
   accessResolver (socket, object) {
-    const user = getUserFromSocket(socket)
+    const user = helper.getUserFromSocket(socket)
     return get(user, ['profiles', 'canListProjects'], false) || isMemberOf(object, user)
-      ? constants.OBJECT_SIMPLE
-      : constants.OBJECT_NONE
+      ? helper.constants.OBJECT_SIMPLE
+      : helper.constants.OBJECT_NONE
   },
   simplifyObject: simplifyProject,
 })

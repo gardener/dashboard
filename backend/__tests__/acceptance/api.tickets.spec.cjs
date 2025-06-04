@@ -8,7 +8,7 @@
 
 const { mockRequest } = require('@gardener-dashboard/request')
 const { mockListIssues, mockListComments } = require('@octokit/core')
-const tickets = require('../../lib/services/tickets')
+const tickets = require('../../dist/lib/services/tickets')
 
 describe('api', function () {
   let agent
