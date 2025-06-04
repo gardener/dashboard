@@ -857,8 +857,7 @@ export function createShootContextComposable (options = {}) {
 
   const controlPlaneHighAvailability = computed({
     get () {
-
-      if (controlPlaneHighAvailabilityFailureToleranceType.value == undefined) {
+      if (controlPlaneHighAvailabilityFailureToleranceType.value === undefined) {
         controlPlaneHighAvailabilityFailureToleranceType.value = isFailureToleranceTypeZoneSupported.value
           ? 'zone'
           : 'node';
