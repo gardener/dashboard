@@ -238,10 +238,69 @@ data:
         {{- end }}
         {{- end }}
       {{- end }}
-      {{- if .Values.global.dashboard.frontendConfig.defaultHibernationSchedule }}
-      defaultHibernationSchedule:
-{{ toYaml .Values.global.dashboard.frontendConfig.defaultHibernationSchedule | trim | nindent 8 }}
-      {{- end }}
+      shootDefaults:
+        {{- if .Values.global.dashboard.frontendConfig.shootDefaults.hibernationSchedule }}
+        hibernationSchedule:
+{{ toYaml .Values.global.dashboard.frontendConfig.shootDefaults.hibernationSchedule | trim | nindent 10 }}
+        {{- end }}
+        {{- if .Values.global.dashboard.frontendConfig.shootDefaults.controlPlaneHighAvailabilityHelp }}
+        controlPlaneHighAvailabilityHelp:
+          text: {{ required ".Values.global.dashboard.frontendConfig.shootDefaults.controlPlaneHighAvailabilityHelp.text is required" .Values.global.dashboard.frontendConfig.shootDefaults.controlPlaneHighAvailabilityHelp.text | quote }}
+        {{- end }}
+        {{- if .Values.global.dashboard.frontendConfig.shootDefaults.nodesCIDR }}
+        nodesCIDR: {{ .Values.global.dashboard.frontendConfig.shootDefaults.nodesCIDR }}
+        {{- end }}
+        {{- if .Values.global.dashboard.frontendConfig.shootDefaults.infrastructures}}
+        infrastructures:
+{{ toYaml .Values.global.dashboard.frontendConfig.shootDefaults.infrastructures | trim | nindent 10 }}
+        {{- end }}
+        {{- if .Values.global.dashboard.frontendConfig.shootDefaults.purposes}}
+        purposes:
+{{ toYaml .Values.global.dashboard.frontendConfig.shootDefaults.purposes | trim | nindent 10 }}
+        {{- end }}
+        {{- if .Values.global.dashboard.frontendConfig.shootDefaults.workerlessCluster}}
+        workerlessCluster: {{ .Values.global.dashboard.frontendConfig.shootDefaults.workerlessCluster }}
+        {{- end }}
+        {{- if .Values.global.dashboard.frontendConfig.shootDefaults.networkingType}}
+        networkingType: {{ .Values.global.dashboard.frontendConfig.shootDefaults.networkingType }}
+        {{- end }}
+        {{- if .Values.global.dashboard.frontendConfig.shootDefaults.floatingPool}}
+        floatingPool: {{ .Values.global.dashboard.frontendConfig.shootDefaults.floatingPool }}
+        {{- end }}
+        {{- if .Values.global.dashboard.frontendConfig.shootDefaults.loadbalancerProvider}}
+        loadbalancerProvider: {{ .Values.global.dashboard.frontendConfig.shootDefaults.loadbalancerProvider }}
+        {{- end }}
+        {{- if .Values.global.dashboard.frontendConfig.shootDefaults.controlPlaneHighAvailability}}
+        controlPlaneHighAvailability: {{ .Values.global.dashboard.frontendConfig.shootDefaults.controlPlaneHighAvailability }}
+        {{- end }}
+        {{- if .Values.global.dashboard.frontendConfig.shootDefaults.containerRuntime}}
+        containerRuntime: {{ .Values.global.dashboard.frontendConfig.shootDefaults.containerRuntime }}
+        {{- end }}
+        {{- if .Values.global.dashboard.frontendConfig.shootDefaults.autoscalerMin}}
+        autoscalerMin: {{ .Values.global.dashboard.frontendConfig.shootDefaults.autoscalerMin }}
+        {{- end }}
+        {{- if .Values.global.dashboard.frontendConfig.shootDefaults.autoscalerMax}}
+        autoscalerMax: {{ .Values.global.dashboard.frontendConfig.shootDefaults.autoscalerMax }}
+        {{- end }}
+        {{- if .Values.global.dashboard.frontendConfig.shootDefaults.maxSurge}}
+        maxSurge: {{ .Values.global.dashboard.frontendConfig.shootDefaults.maxSurge }}
+        {{- end }}
+        {{- if .Values.global.dashboard.frontendConfig.shootDefaults.zoneSelectAll}}
+        zoneSelectAll: {{ .Values.global.dashboard.frontendConfig.shootDefaults.zoneSelectAll }}
+        {{- end }}
+        {{- if .Values.global.dashboard.frontendConfig.shootDefaults.maintenanceHours}}
+        maintenanceHours:
+{{ toYaml .Values.global.dashboard.frontendConfig.shootDefaults.maintenanceHours | trim | nindent 10 }}
+        {{- end }}
+        {{- if .Values.global.dashboard.frontendConfig.shootDefaults.maintenanceWindowSizeMinutes}}
+        maintenanceWindowSizeMinutes: {{ .Values.global.dashboard.frontendConfig.shootDefaults.maintenanceWindowSizeMinutes }}
+        {{- end }}
+        {{- if .Values.global.dashboard.frontendConfig.shootDefaults.autoUpdateOS}}
+        autoUpdateOS: {{ .Values.global.dashboard.frontendConfig.shootDefaults.autoUpdateOS }}
+        {{- end }}
+        {{- if .Values.global.dashboard.frontendConfig.shootDefaults.autoUpdateKubernetes}}
+        autoUpdateKubernetes: {{ .Values.global.dashboard.frontendConfig.shootDefaults.autoUpdateKubernetes }}
+        {{- end }}
       {{- if .Values.global.dashboard.frontendConfig.shootAdminKubeconfig }}
       shootAdminKubeconfig:
 {{ toYaml .Values.global.dashboard.frontendConfig.shootAdminKubeconfig | trim | nindent 8 }}
@@ -332,13 +391,6 @@ data:
       {{- if .Values.global.dashboard.frontendConfig.resourceQuotaHelp }}
       resourceQuotaHelp:
         text: {{ required ".Values.global.dashboard.frontendConfig.resourceQuotaHelp.text is required" .Values.global.dashboard.frontendConfig.resourceQuotaHelp.text | quote }}
-      {{- end }}
-      {{- if .Values.global.dashboard.frontendConfig.controlPlaneHighAvailabilityHelp }}
-      controlPlaneHighAvailabilityHelp:
-        text: {{ required ".Values.global.dashboard.frontendConfig.controlPlaneHighAvailabilityHelp.text is required" .Values.global.dashboard.frontendConfig.controlPlaneHighAvailabilityHelp.text | quote }}
-      {{- end }}
-      {{- if .Values.global.dashboard.frontendConfig.defaultNodesCIDR }}
-      defaultNodesCIDR: {{ .Values.global.dashboard.frontendConfig.defaultNodesCIDR }}
       {{- end }}
       {{- if .Values.global.dashboard.frontendConfig.serviceAccountDefaultTokenExpiration }}
       serviceAccountDefaultTokenExpiration: {{ .Values.global.dashboard.frontendConfig.serviceAccountDefaultTokenExpiration }}
