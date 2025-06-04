@@ -29,8 +29,8 @@ import {
 } from '@/utils'
 import { v4 as uuidv4 } from '@/utils/uuid'
 
-import { useConfigStore } from '../config'
 import { useSeedStore } from '../seed'
+import { useConfigStore } from '../config'
 
 import {
   matchesPropertyOrEmpty,
@@ -79,7 +79,18 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
   })
 
   function flattenMachineImages (machineImages) {
-    return flatMap(machineImages, machineImage => {
+    const machineImagesWithVendors = map(machineImages, machineImage => {
+      const vendorName = vendorNameFromMachineImageName(machineImage.name)
+      const vendor = configStore.vendor(vendorName)
+      return {
+        ...machineImage,
+        vendor,
+      }
+    })
+    const visibleMachineImagesWithVendors = filter(machineImagesWithVendors, ({ vendor }) => !vendor.hidden)
+    const sortedMachineImagesWithVendors = sortBy(visibleMachineImagesWithVendors, 'vendor.weight')
+
+    return flatMap(sortedMachineImagesWithVendors, machineImage => {
       const { name, updateStrategy = 'major' } = machineImage
 
       const versions = []
@@ -102,10 +113,9 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
         return semver.rcompare(a.version, b.version)
       })
 
-      const vendorName = vendorNameFromMachineImageName(name)
-      const displayName = configStore.vendorDisplayName(vendorName)
+      const displayName = machineImage.vendor.displayName
 
-      const vendorHint = findVendorHint(configStore.vendorHints, vendorName)
+      const vendorHint = findVendorHint(configStore.vendorHints, machineImage.vendor.name)
 
       return map(versions, ({ version, expirationDate, cri, classification, architectures }) => {
         if (isEmpty(architectures)) {
@@ -120,8 +130,8 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
           cri,
           classification,
           expirationDate,
-          vendorName,
-          icon: vendorName,
+          vendorName: machineImage.vendor.name,
+          icon: machineImage.vendor.name,
           vendorHint,
           architectures,
         })
@@ -154,26 +164,15 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     }
   }
 
-  const knownProviderTypesList = ref([
-    'aws',
-    'azure',
-    'gcp',
-    'openstack',
-    'alicloud',
-    'metal',
-    'vsphere',
-    'hcloud',
-    'onmetal',
-    'ironcore',
-    'local',
-  ])
-
   const providerTypesList = computed(() => {
     return uniq(map(list.value, 'metadata.providerType'))
   })
 
-  const sortedProviderTypeList = computed(() => {
-    return intersection(knownProviderTypesList.value, providerTypesList.value)
+  const sortedInfraProviderTypeList = computed(() => {
+    const infraProviderVendors = map(providerTypesList.value, configStore.vendor)
+    const visibleInfraVendors = filter(infraProviderVendors, ({ hidden }) => !hidden)
+    const sortedVisibleInfraVendors = sortBy(visibleInfraVendors, 'weight')
+    return map(sortedVisibleInfraVendors, 'name')
   })
 
   function cloudProfilesByProviderType (providerType) {
@@ -697,7 +696,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     setCloudProfiles,
     fetchCloudProfiles,
     cloudProfilesByProviderType,
-    sortedProviderTypeList,
+    sortedInfraProviderTypeList,
     cloudProfileByRef,
     regionsWithSeedByCloudProfileRef,
     regionsWithoutSeedByCloudProfileRef,

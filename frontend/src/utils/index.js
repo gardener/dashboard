@@ -548,6 +548,9 @@ export function getDurationInMinutes (begin, end) {
 }
 
 export function defaultCriNameByKubernetesVersion (criNames, kubernetesVersion) {
+  if (!kubernetesVersion) {
+    return head(criNames)
+  }
   const criName = semver.lt(kubernetesVersion, '1.22.0')
     ? 'docker'
     : 'containerd'

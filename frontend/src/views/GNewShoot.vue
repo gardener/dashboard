@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div
-    v-if="sortedProviderTypeList.length"
+    v-if="sortedInfraProviderTypeList.length"
     class="d-flex flex-column justify-space-between fill-height"
   >
     <v-container
@@ -175,7 +175,7 @@ export default {
   },
   inject: ['api', 'logger'],
   async beforeRouteLeave (to, from, next) {
-    if (!this.sortedProviderTypeList.length) {
+    if (!this.sortedInfraProviderTypeList.length) {
       return next()
     }
 
@@ -233,7 +233,7 @@ export default {
       'accessRestriction',
     ]),
     ...mapState(useCloudProfileStore, [
-      'sortedProviderTypeList',
+      'sortedInfraProviderTypeList',
     ]),
   },
   methods: {

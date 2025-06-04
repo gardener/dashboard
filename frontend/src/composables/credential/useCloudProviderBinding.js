@@ -45,7 +45,7 @@ export const useCloudProviderBinding = (binding, options = {}) => {
   } = options
   const { shootList } = storeToRefs(shootStore)
   const { cloudProviderBindingList } = storeToRefs(credentialStore)
-  const { sortedProviderTypeList } = storeToRefs(cloudProfileStore)
+  const { sortedInfraProviderTypeList } = storeToRefs(cloudProfileStore)
   const { dnsProviderTypes } = storeToRefs(gardenerExtensionStore)
 
   // Classification Flags
@@ -67,7 +67,7 @@ export const useCloudProviderBinding = (binding, options = {}) => {
     binding.value?.credentialsRef?.kind === 'WorkloadIdentity',
   )
   const isInfrastructureBinding = computed(() =>
-    _isInfrastructureBinding(binding.value, sortedProviderTypeList.value),
+    _isInfrastructureBinding(binding.value, sortedInfraProviderTypeList.value),
   )
   const isDnsBinding = computed(() =>
     _isDnsBinding(binding.value, dnsProviderTypes.value),
