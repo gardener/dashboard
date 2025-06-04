@@ -393,7 +393,8 @@ const sortedAndFilteredProjectList = computed(() => {
     const name = toLower(item.metadata.name)
     let owner = get(item, ['spec', 'owner', 'name'])
     owner = toLower(replace(owner, /@.*$/, ''))
-    return includes(name, filter) || includes(owner, filter)
+    const projectTitle = toLower(getProjectTitle(item) || '')
+    return includes(name, filter) || includes(owner, filter) || includes(projectTitle, filter)
   }
   const filteredList = filter([
     allProjectsItem,
@@ -406,7 +407,12 @@ const sortedAndFilteredProjectList = computed(() => {
   const allProjectsMatch = item => {
     return item?.spec.namespace === allProjectsItem.spec.namespace ? 0 : 1
   }
-  const sortedList = sortBy(filteredList, [allProjectsMatch, exactMatch, 'metadata.name'])
+
+  const sortByTitleOrName = item => {
+    const title = getProjectTitle(item)
+    return title ? toLower(title) : toLower(item.metadata.name)
+  }
+  const sortedList = sortBy(filteredList, [allProjectsMatch, exactMatch, sortByTitleOrName])
   return sortedList
 })
 
