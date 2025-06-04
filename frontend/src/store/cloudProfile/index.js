@@ -151,19 +151,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     }
   }
 
-  const knownProviderTypesList = ref([
-    'aws',
-    'azure',
-    'gcp',
-    'openstack',
-    'alicloud',
-    'metal',
-    'vsphere',
-    'hcloud',
-    'onmetal',
-    'ironcore',
-    'local',
-  ])
+  const knownProviderTypesList = ref(configStore.defaultInfrastructures)
 
   const providerTypesList = computed(() => {
     return uniq(map(list.value, 'metadata.providerType'))
@@ -263,7 +251,11 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
       availableFloatingPools = filter(availableFloatingPools, { domain: secretDomain })
     }
 
-    return availableFloatingPools
+    const match = availableFloatingPools.find(pool => pool.name === configStore.defaultFloatingPool);
+    
+    return match
+      ? [match, ...availableFloatingPools.filter(pool => pool.name !== configStore.defaultFloatingPool)]
+      : availableFloatingPools;
   }
 
   function floatingPoolNamesByCloudProfileRefAndRegionAndDomain ({ cloudProfileRef, region, secretDomain }) {
@@ -278,7 +270,13 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     if (hasRegionSpecificLoadBalancerProvider) {
       availableLoadBalancerProviders = filter(availableLoadBalancerProviders, { region })
     }
-    return uniq(map(availableLoadBalancerProviders, 'name'))
+    const match = uniq(map(availableLoadBalancerProviders, 'name'))
+
+    if (match.includes(configStore.defaultLoadbalancerProvider)) {
+      match.unshift(...match.splice(match.indexOf(defaultLoadbalancerProvider), 1));
+    }
+
+    return match
   }
 
   function loadBalancerClassNamesByCloudProfileRef (cloudProfileRef) {
