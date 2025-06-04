@@ -1,0 +1,45 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gardener-dashboard-frontend
+  namespace: garden
+data:
+  frontend-config.yaml: |
+    frontend:
+      # FIXME: I have no idea where the complete defaults were from, i just obtained parts of this file and started building from there
+      #NEW these values are all optional, the following demonstrates what they could be changed to
+      defaultInfrastructures:
+        - 'openstack'
+        - 'aws'
+        - 'azure'
+        - 'gcp'
+        - 'alicloud'
+        - 'metal'
+        - 'vsphere'
+        - 'hcloud'
+        - 'onmetal'
+        - 'ironcore'
+        - 'local'
+      defaultFloatingPool: external # reorders the pools, so the default is first should it exist
+      defaultLoadbalancerProvider: amphora # reorders the loadbalancers, so the default is first should it exist
+      defaultAutoUpdateKubernetes: false
+      defaultAutoUpdateOS: false
+      defaultAutoscalerMax: 3
+      defaultAutoscalerMin: 2
+      defaultContainerRuntime: containerd # reorders the container runtimes, so the default is first should it exist
+      defaultControlPlaneHighAvailability: true
+      defaultMaintenanceWindowSizeMinutes: 90
+      defaultMaintenanceHours:
+        - '10'
+        - '11'
+      defaultMaxSurge: 1
+      defaultNetworkingType: cilium # reorders the networking types, so the default is first should it exist
+      defaultPurposes: # first in list is default
+        - production
+        - testing
+        - development
+        - evaluation
+      defaultWorkerlessCluster: false
+      defaultZonesSelectAll: true # If true, selects all zones instead of a random one
+      #END
