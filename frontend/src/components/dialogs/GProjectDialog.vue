@@ -27,7 +27,13 @@ SPDX-License-Identifier: Apache-2.0
               label="Name"
               counter="10"
               :error-messages="getErrorMessages(v$.projectName)"
-            />
+            >
+              <v-tooltip
+                activator="parent"
+                location="top"
+                text="Technical, unique project name."
+              />
+            </v-text-field>
           </v-col>
         </v-row>
         <v-row>
@@ -39,7 +45,13 @@ SPDX-License-Identifier: Apache-2.0
               label="Title"
               counter="64"
               :error-messages="getErrorMessages(v$.projectTitle)"
-            />
+            >
+              <v-tooltip
+                activator="parent"
+                location="top"
+                text="Human-readable project title."
+              />
+            </v-text-field>
           </v-col>
         </v-row>
 
