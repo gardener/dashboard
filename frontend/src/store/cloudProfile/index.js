@@ -252,7 +252,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     }
 
     const match = availableFloatingPools.find(pool => pool.name === configStore.defaultFloatingPool);
-    
+
     return match
       ? [match, ...availableFloatingPools.filter(pool => pool.name !== configStore.defaultFloatingPool)]
       : availableFloatingPools;
