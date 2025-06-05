@@ -804,9 +804,11 @@ describe('gardener-dashboard', function () {
           global: {
             dashboard: {
               frontendConfig: {
-                controlPlaneHighAvailabilityHelp: {
-                  text: '[foo](https://bar.baz)',
-                },
+		shootDefaults: {
+                  controlPlaneHighAvailabilityHelp: {
+                    text: '[foo](https://bar.baz)',
+                  },
+		},
               },
             },
           },
@@ -815,7 +817,7 @@ describe('gardener-dashboard', function () {
         expect(documents).toHaveLength(1)
         const [configMap] = documents
         const config = yaml.load(configMap.data['config.yaml'])
-        expect(pick(config, ['frontend.controlPlaneHighAvailabilityHelp'])).toMatchSnapshot()
+        expect(pick(config, ['frontend.shootDefaults.controlPlaneHighAvailabilityHelp'])).toMatchSnapshot()
       })
     })
 

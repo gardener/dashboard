@@ -224,57 +224,57 @@ global:
 
       #       ## Anything else we need to know?
 
-      # shootDefaults:
-      #   # configure help text for control plane high availability, control plane pricing etc.
-      #   controlPlaneHighAvailabilityHelp:
-      #     text: Help text
-      #   hibernationSchedule:
-      #     evaluation:
-      #     - start: 00 17 * * 1,2,3,4,5
-      #     development:
-      #     - start: 00 17 * * 1,2,3,4,5
-      #       end: 00 08 * * 1,2,3,4,5
-      #     production: ~
-      #   nodesCIDR: '10.250.0.0/16'
-      #   infrastructures:
-      #     - 'aws'
-      #     - 'azure'
-      #     - 'gcp'
-      #     - 'openstack'
-      #     - 'alicloud'
-      #     - 'metal'
-      #     - 'vsphere'
-      #     - 'hcloud'
-      #     - 'onmetal'
-      #     - 'ironcore'
-      #     - 'local'
-      #   purposes:
-      #     - 'evaluation'
-      #     - 'development'
-      #     - 'testing'
-      #     - 'production'
-      #   workerlessCluster: false
-      #   networkingType: cilium
-      #   floatingPool: external
-      #   loadbalancerProvider: amphora
-      #   controlPlaneHighAvailability: false
-      #   containerRuntime: containerd
-      #   autoscalerMin: 1
-      #   autoscalerMax: 2
-      #   maxSurge: 1
-      #   zonesSelectAll: false
-      #   maintenanceHours:
-      #     - '22'
-      #     - '23'
-      #     - '00'
-      #     - '01'
-      #     - '02'
-      #     - '03'
-      #     - '04'
-      #     - '05'
-      #   maintenanceWindowSizeMinutes: 60
-      #   autoUpdateOS: true
-      #   autoUpdateKubernetes: true
+      shootDefaults:
+        hibernationSchedule:
+          evaluation:
+          - start: 00 17 * * 1,2,3,4,5
+          development:
+          - start: 00 17 * * 1,2,3,4,5
+            end: 00 08 * * 1,2,3,4,5
+          production: ~
+        nodesCIDR: '10.250.0.0/16'
+      # # configure help text for control plane high availability, control plane pricing etc.
+      # controlPlaneHighAvailabilityHelp:
+      #   text: Help text
+      # infrastructures:
+      #   - 'aws'
+      #   - 'azure'
+      #   - 'gcp'
+      #   - 'openstack'
+      #   - 'alicloud'
+      #   - 'metal'
+      #   - 'vsphere'
+      #   - 'hcloud'
+      #   - 'onmetal'
+      #   - 'ironcore'
+      #   - 'local'
+      # purposes:
+      #   - 'evaluation'
+      #   - 'development'
+      #   - 'testing'
+      #   - 'production'
+      # workerlessCluster: false
+      # networkingType: cilium
+      # floatingPool: external
+      # loadbalancerProvider: amphora
+      # controlPlaneHighAvailability: false
+      # containerRuntime: containerd
+      # autoscalerMin: 1
+      # autoscalerMax: 2
+      # maxSurge: 1
+      # zonesSelectAll: false
+      # maintenanceHours:
+      #   - '22'
+      #   - '23'
+      #   - '00'
+      #   - '01'
+      #   - '02'
+      #   - '03'
+      #   - '04'
+      #   - '05'
+      # maintenanceWindowSizeMinutes: 60
+      # autoUpdateOS: true
+      # autoUpdateKubernetes: true
       seedCandidateDeterminationStrategy: SameRegion
       features:
         terminalEnabled: false

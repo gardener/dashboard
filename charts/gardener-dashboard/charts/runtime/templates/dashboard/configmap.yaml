@@ -238,6 +238,7 @@ data:
         {{- end }}
         {{- end }}
       {{- end }}
+      {{- if .Values.global.dashboard.frontendConfig.shootDefaults}}
       shootDefaults:
         {{- if .Values.global.dashboard.frontendConfig.shootDefaults.hibernationSchedule }}
         hibernationSchedule:
@@ -301,6 +302,7 @@ data:
         {{- if .Values.global.dashboard.frontendConfig.shootDefaults.autoUpdateKubernetes}}
         autoUpdateKubernetes: {{ .Values.global.dashboard.frontendConfig.shootDefaults.autoUpdateKubernetes }}
         {{- end }}
+      {{- end }}
       {{- if .Values.global.dashboard.frontendConfig.shootAdminKubeconfig }}
       shootAdminKubeconfig:
 {{ toYaml .Values.global.dashboard.frontendConfig.shootAdminKubeconfig | trim | nindent 8 }}

@@ -134,8 +134,10 @@ exports[`gardener-dashboard configmap contentSecurityPolicy should render the te
 exports[`gardener-dashboard configmap controlPlaneHighAvailabilityHelp should render the template with controlPlaneHighAvailabilityHelp markdown 1`] = `
 {
   "frontend": {
-    "controlPlaneHighAvailabilityHelp": {
-      "text": "[foo](https://bar.baz)",
+    "shootDefaults": {
+      "controlPlaneHighAvailabilityHelp": {
+        "text": "[foo](https://bar.baz)",
+      },
     },
   },
 }
@@ -407,21 +409,6 @@ exports[`gardener-dashboard configmap should render the template w/ defaults val
     ],
   },
   "frontend": {
-    "defaultHibernationSchedule": {
-      "development": [
-        {
-          "end": "00 08 * * 1,2,3,4,5",
-          "start": "00 17 * * 1,2,3,4,5",
-        },
-      ],
-      "evaluation": [
-        {
-          "start": "00 17 * * 1,2,3,4,5",
-        },
-      ],
-      "production": null,
-    },
-    "defaultNodesCIDR": "10.250.0.0/16",
     "experimental": {
       "throttleDelayPerCluster": 10,
     },
@@ -459,6 +446,23 @@ exports[`gardener-dashboard configmap should render the template w/ defaults val
     "shootAdminKubeconfig": {
       "enabled": false,
       "maxExpirationSeconds": 86400,
+    },
+    "shootDefaults": {
+      "hibernationSchedule": {
+        "development": [
+          {
+            "end": "00 08 * * 1,2,3,4,5",
+            "start": "00 17 * * 1,2,3,4,5",
+          },
+        ],
+        "evaluation": [
+          {
+            "start": "00 17 * * 1,2,3,4,5",
+          },
+        ],
+        "production": null,
+      },
+      "nodesCIDR": "10.250.0.0/16",
     },
   },
   "logFormat": "text",
