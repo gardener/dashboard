@@ -6,7 +6,10 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div class="ml-3">
-    <div class="text-subtitle-1 pt-4" v-if="configStore.showAutoUpdate">
+    <div
+      v-if="configStore.showAutoUpdate"
+      class="text-subtitle-1 pt-4"
+    >
       {{ title }}
     </div>
     <template v-if="!workerless && configStore.showAutoUpdate">
@@ -100,7 +103,7 @@ import {
   computed,
   toRefs,
 } from 'vue'
-import { storeToRefs } from 'pinia'
+
 import { useConfigStore } from '@/store/config'
 
 const configStore = useConfigStore()

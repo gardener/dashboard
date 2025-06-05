@@ -33,13 +33,19 @@ SPDX-License-Identifier: Apache-2.0
           <g-new-shoot-infrastructure-details />
         </v-card-text>
       </v-card>
-      <v-card class="mt-4" v-if="showControlPlaneHighAvailability">
+      <v-card
+        v-if="showControlPlaneHighAvailability"
+        class="mt-4"
+      >
         <g-toolbar title="Control Plane High Availability" />
         <v-card-text class="pt-2">
           <g-manage-control-plane-high-availability />
         </v-card-text>
       </v-card>
-      <v-card class="mt-4" v-if="showDNSConfiguration">
+      <v-card
+        v-if="showDNSConfiguration"
+        class="mt-4"
+      >
         <g-toolbar title="DNS Configuration" />
         <v-card-text class="py-1">
           <g-manage-dns />
@@ -67,7 +73,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-card>
       <v-card
         v-show="!workerless"
-	v-if="showAddons"
+        v-if="showAddons"
         class="mt-4"
       >
         <g-toolbar
@@ -88,7 +94,10 @@ SPDX-License-Identifier: Apache-2.0
           />
         </v-card-text>
       </v-card>
-      <v-card class="mt-4" v-if="showHibernation">
+      <v-card
+        v-if="showHibernation"
+        class="mt-4"
+      >
         <g-toolbar title="Hibernation" />
         <v-card-text>
           <g-manage-hibernation-schedule />
