@@ -6,10 +6,10 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div class="ml-3">
-    <div class="text-subtitle-1 pt-4" v-if="showAutoUpdate">
+    <div class="text-subtitle-1 pt-4" v-if="configStore.showAutoUpdate">
       {{ title }}
     </div>
-    <template v-if="!workerless && showAutoUpdate">
+    <template v-if="!workerless && configStore.showAutoUpdate">
       <div
         v-if="!readonly || osUpdates"
         class="d-flex mt-4"
@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </template>
     <div
-      v-if="(!readonly || k8sUpdates) && showAutoUpdates"
+      v-if="(!readonly || k8sUpdates) && configStore.showAutoUpdate"
       class="d-flex mt-4"
     >
       <div class="d-flex align-center justify-center action-select">
@@ -100,6 +100,10 @@ import {
   computed,
   toRefs,
 } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useConfigStore } from '@/store/config'
+
+const configStore = useConfigStore()
 
 const props = defineProps({
   title: {

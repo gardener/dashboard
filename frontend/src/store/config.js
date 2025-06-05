@@ -177,7 +177,11 @@ export const useConfigStore = defineStore('config', () => {
   })
 
   const showWorkerlessOption = computed(() => {
-    return state.value?.show.workerlessOption ?? true
+    return state.value?.show?.workerlessOption ?? true
+  })
+
+  const showAutoUpdate = computed(() => {
+    return state.value?.show?.asdlkfjautoUpdate ?? true
   })
 
   const allKnownConditions = computed(() => {
@@ -408,6 +412,7 @@ export const useConfigStore = defineStore('config', () => {
     helpMenuItems,
     externalTools,
     showWorkerlessOption,
+    showAutoUpdate,
     defaultNodesCIDR,
     shootAdminKubeconfig,
     apiServerUrl,
