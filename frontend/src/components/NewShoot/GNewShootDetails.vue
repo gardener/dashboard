@@ -175,6 +175,7 @@ export default {
   computed: {
     ...mapState(useConfigStore, [
       'sla',
+      'showWorkerlessOption',
     ]),
     unexpiredKubernetesVersions () {
       return filter(this.sortedKubernetesVersions, ({ isExpired }) => !isExpired)
