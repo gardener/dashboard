@@ -181,7 +181,27 @@ export const useConfigStore = defineStore('config', () => {
   })
 
   const showAutoUpdate = computed(() => {
-    return state.value?.show?.asdlkfjautoUpdate ?? true
+    return state.value?.show?.autoUpdate ?? true
+  })
+
+  const showInfrastructure = computed(() => {
+    return state.value?.show?.infrastructure ?? true
+  })
+
+  const showControlPlaneHighAvailability = computed(() => {
+    return state.value?.show?.controlPlaneHighAvailability ?? true
+  })
+
+  const showDNSConfiguration = computed(() => {
+    return state.value?.show?.DNSConfiguration ?? true
+  })
+
+  const showAddons = computed(() => {
+    return state.value?.show?.addons ?? true
+  })
+
+  const showHibernation = computed(() => {
+    return state.value?.show?.hibernation ?? true
   })
 
   const allKnownConditions = computed(() => {
@@ -411,8 +431,13 @@ export const useConfigStore = defineStore('config', () => {
     vendorHints,
     helpMenuItems,
     externalTools,
-    showWorkerlessOption,
+    showAddons,
     showAutoUpdate,
+    showControlPlaneHighAvailability,
+    showDNSConfiguration,
+    showHibernation,
+    showInfrastructure,
+    showWorkerlessOption,
     defaultNodesCIDR,
     shootAdminKubeconfig,
     apiServerUrl,

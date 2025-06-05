@@ -232,6 +232,11 @@ export default {
   computed: {
     ...mapState(useConfigStore, [
       'accessRestriction',
+      'showInfrastructure',
+      'showControlPlaneHighAvailability',
+      'showDNSConfiguration',
+      'showAddons',
+      'showHibernation',
     ]),
     ...mapState(useCloudProfileStore, [
       'sortedProviderTypeList',
