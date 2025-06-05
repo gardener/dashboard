@@ -15,9 +15,6 @@ data:
     frontend:
       # FIXME: I have no idea where the complete defaults can be obtained, my file got pierced together by documentation scraps within this repo. The following lists only the proposed extensions
       shootDefaults:
-        # configure help text for control plane high availability, control plane pricing etc.
-        controlPlaneHighAvailabilityHelp:
-          text: Help text
         hibernationSchedule:
           evaluation:
           - start: 00 17 * * 1,2,3,4,5
@@ -26,42 +23,45 @@ data:
             end: 00 08 * * 1,2,3,4,5
           production: ~
         nodesCIDR: '10.250.0.0/16'
-        infrastructures:
-          - 'aws'
-          - 'azure'
-          - 'gcp'
-          - 'openstack'
-          - 'alicloud'
-          - 'metal'
-          - 'vsphere'
-          - 'hcloud'
-          - 'onmetal'
-          - 'ironcore'
-          - 'local'
-        purposes:
-          - 'evaluation'
-          - 'development'
-          - 'testing'
-          - 'production'
-        workerlessCluster: false
-        networkingType: cilium
-        floatingPool: external
-        loadbalancerProvider: amphora
-        controlPlaneHighAvailability: false
-        containerRuntime: containerd
-        autoscalerMin: 1
-        autoscalerMax: 2
-        maxSurge: 1
-        zonesSelectAll: false
-        maintenanceHours:
-          - '22'
-          - '23'
-          - '00'
-          - '01'
-          - '02'
-          - '03'
-          - '04'
-          - '05'
-        maintenanceWindowSizeMinutes: 60
-        autoUpdateOS: true
-        autoUpdateKubernetes: true
+      # # configure help text for control plane high availability, control plane pricing etc.
+      # controlPlaneHighAvailabilityHelp:
+      #   text: Help text
+      # infrastructures:
+      #   - 'aws'
+      #   - 'azure'
+      #   - 'gcp'
+      #   - 'openstack'
+      #   - 'alicloud'
+      #   - 'metal'
+      #   - 'vsphere'
+      #   - 'hcloud'
+      #   - 'onmetal'
+      #   - 'ironcore'
+      #   - 'local'
+      # purposes:
+      #   - 'evaluation'
+      #   - 'development'
+      #   - 'testing'
+      #   - 'production'
+      # workerlessCluster: false
+      # networkingType: cilium
+      # floatingPool: external
+      # loadbalancerProvider: amphora
+      # controlPlaneHighAvailability: false
+      # containerRuntime: containerd
+      # autoscalerMin: 1
+      # autoscalerMax: 2
+      # maxSurge: 1
+      # zonesSelectAll: false
+      # maintenanceHours:
+      #   - '22'
+      #   - '23'
+      #   - '00'
+      #   - '01'
+      #   - '02'
+      #   - '03'
+      #   - '04'
+      #   - '05'
+      # maintenanceWindowSizeMinutes: 60
+      # autoUpdateOS: true
+      # autoUpdateKubernetes: true
