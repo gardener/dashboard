@@ -6,7 +6,7 @@
 
 'use strict'
 
-const { cloneDeep, find } = require('lodash')
+const { cloneDeep, find, isEmpty } = require('lodash')
 
 function getSeed ({
   name,
@@ -23,7 +23,6 @@ function getSeed ({
     metadata: {
       name,
       uid,
-      labels,
     },
     spec: {
       provider: {
@@ -40,6 +39,9 @@ function getSeed ({
         },
       },
     },
+  }
+  if (!isEmpty(labels)) {
+    seed.metadata.labels = labels
   }
   if (seedProtected) {
     seed.spec.taints.push({

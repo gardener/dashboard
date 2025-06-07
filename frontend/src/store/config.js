@@ -338,6 +338,10 @@ export const useConfigStore = defineStore('config', () => {
     return controlPlaneHighAvailabilityHelp.value?.text
   })
 
+  const unreachableSeeds = computed(() => {
+    return state.value?.unreachableSeeds
+  })
+
   async function fetchConfig () {
     const response = await api.getConfiguration()
     setConfiguration({
@@ -418,6 +422,7 @@ export const useConfigStore = defineStore('config', () => {
     alertBannerType,
     alertBannerIdentifier,
     costObjectsSettings,
+    unreachableSeeds,
     purposeRequiresHibernationSchedule,
     isShootHasNoHibernationScheduleWarning,
     fetchConfig,
