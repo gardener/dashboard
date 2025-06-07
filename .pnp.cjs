@@ -1751,7 +1751,7 @@ const RAW_RUNTIME_STATE =
           ["semver", "npm:7.7.2"],\
           ["socket.io-client", "npm:4.8.1"],\
           ["splitpanes", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:4.0.4"],\
-          ["statuses", "npm:2.0.1"],\
+          ["statuses", "npm:2.0.2"],\
           ["symbol-tree", "npm:3.2.4"],\
           ["toidentifier", "npm:1.0.1"],\
           ["typescript", "patch:typescript@npm%3A5.8.3#optional!builtin<compat/typescript>::version=5.8.3&hash=5786d5"],\
@@ -7855,7 +7855,7 @@ const RAW_RUNTIME_STATE =
           ["router", "npm:2.2.0"],\
           ["send", "npm:1.2.0"],\
           ["serve-static", "npm:2.2.0"],\
-          ["statuses", "npm:2.0.1"],\
+          ["statuses", "npm:2.0.2"],\
           ["type-is", "npm:2.0.1"],\
           ["vary", "npm:1.1.2"]\
         ],\
@@ -8040,7 +8040,7 @@ const RAW_RUNTIME_STATE =
           ["finalhandler", "npm:2.1.0"],\
           ["on-finished", "npm:2.4.1"],\
           ["parseurl", "npm:1.3.3"],\
-          ["statuses", "npm:2.0.1"]\
+          ["statuses", "npm:2.0.2"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -12318,7 +12318,7 @@ const RAW_RUNTIME_STATE =
           ["on-finished", "npm:2.4.1"],\
           ["range-parser", "npm:1.2.1"],\
           ["send", "npm:1.2.0"],\
-          ["statuses", "npm:2.0.1"]\
+          ["statuses", "npm:2.0.2"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -12739,6 +12739,13 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/statuses-npm-2.0.1-81d2b97fee-34378b207a.zip/node_modules/statuses/",\
         "packageDependencies": [\
           ["statuses", "npm:2.0.1"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:2.0.2", {\
+        "packageLocation": "./.yarn/cache/statuses-npm-2.0.2-2d84c63b8c-a9947d98ad.zip/node_modules/statuses/",\
+        "packageDependencies": [\
+          ["statuses", "npm:2.0.2"]\
         ],\
         "linkType": "HARD"\
       }]\
