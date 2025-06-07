@@ -1746,7 +1746,7 @@ const RAW_RUNTIME_STATE =
           ["neostandard", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:0.12.1"],\
           ["netmask", "npm:2.0.2"],\
           ["pinia", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.0.3"],\
-          ["rollup-plugin-visualizer", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.14.0"],\
+          ["rollup-plugin-visualizer", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:6.0.1"],\
           ["sass", "npm:1.79.6"],\
           ["semver", "npm:7.7.2"],\
           ["socket.io-client", "npm:4.8.1"],\
@@ -12115,15 +12115,15 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["rollup-plugin-visualizer", [\
-      ["npm:5.14.0", {\
-        "packageLocation": "./.yarn/cache/rollup-plugin-visualizer-npm-5.14.0-25d98e0d4e-ec6ca9ed12.zip/node_modules/rollup-plugin-visualizer/",\
+      ["npm:6.0.1", {\
+        "packageLocation": "./.yarn/cache/rollup-plugin-visualizer-npm-6.0.1-d86eb944d2-c938224b20.zip/node_modules/rollup-plugin-visualizer/",\
         "packageDependencies": [\
-          ["rollup-plugin-visualizer", "npm:5.14.0"]\
+          ["rollup-plugin-visualizer", "npm:6.0.1"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.14.0", {\
-        "packageLocation": "./.yarn/__virtual__/rollup-plugin-visualizer-virtual-ad184b5a6e/0/cache/rollup-plugin-visualizer-npm-5.14.0-25d98e0d4e-ec6ca9ed12.zip/node_modules/rollup-plugin-visualizer/",\
+      ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:6.0.1", {\
+        "packageLocation": "./.yarn/__virtual__/rollup-plugin-visualizer-virtual-be90f340e3/0/cache/rollup-plugin-visualizer-npm-6.0.1-d86eb944d2-c938224b20.zip/node_modules/rollup-plugin-visualizer/",\
         "packageDependencies": [\
           ["@types/rolldown", null],\
           ["@types/rollup", null],\
@@ -12131,7 +12131,7 @@ const RAW_RUNTIME_STATE =
           ["picomatch", "npm:4.0.2"],\
           ["rolldown", null],\
           ["rollup", null],\
-          ["rollup-plugin-visualizer", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.14.0"],\
+          ["rollup-plugin-visualizer", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:6.0.1"],\
           ["source-map", "npm:0.7.4"],\
           ["yargs", "npm:17.7.2"]\
         ],\
