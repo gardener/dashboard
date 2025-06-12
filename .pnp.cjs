@@ -1000,9 +1000,9 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/@codemirror-autocomplete-npm-6.18.6-8411d8f056-6506949397.zip/node_modules/@codemirror/autocomplete/",\
         "packageDependencies": [\
           ["@codemirror/autocomplete", "npm:6.18.6"],\
-          ["@codemirror/language", "npm:6.11.0"],\
+          ["@codemirror/language", "npm:6.11.1"],\
           ["@codemirror/state", "npm:6.5.2"],\
-          ["@codemirror/view", "npm:6.36.8"],\
+          ["@codemirror/view", "npm:6.37.2"],\
           ["@lezer/common", "npm:1.2.3"]\
         ],\
         "linkType": "HARD"\
@@ -1013,9 +1013,9 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/@codemirror-commands-npm-6.8.1-55a15bb735-da61311f4c.zip/node_modules/@codemirror/commands/",\
         "packageDependencies": [\
           ["@codemirror/commands", "npm:6.8.1"],\
-          ["@codemirror/language", "npm:6.11.0"],\
+          ["@codemirror/language", "npm:6.11.1"],\
           ["@codemirror/state", "npm:6.5.2"],\
-          ["@codemirror/view", "npm:6.36.8"],\
+          ["@codemirror/view", "npm:6.37.2"],\
           ["@lezer/common", "npm:1.2.3"]\
         ],\
         "linkType": "HARD"\
@@ -1027,7 +1027,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@codemirror/autocomplete", "npm:6.18.6"],\
           ["@codemirror/lang-yaml", "npm:6.1.2"],\
-          ["@codemirror/language", "npm:6.11.0"],\
+          ["@codemirror/language", "npm:6.11.1"],\
           ["@codemirror/state", "npm:6.5.2"],\
           ["@lezer/common", "npm:1.2.3"],\
           ["@lezer/highlight", "npm:1.2.1"],\
@@ -1038,12 +1038,12 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@codemirror/language", [\
-      ["npm:6.11.0", {\
-        "packageLocation": "./.yarn/cache/@codemirror-language-npm-6.11.0-5a037bc3dd-a8e45ef6db.zip/node_modules/@codemirror/language/",\
+      ["npm:6.11.1", {\
+        "packageLocation": "./.yarn/cache/@codemirror-language-npm-6.11.1-ee7d76b869-4d6959f66a.zip/node_modules/@codemirror/language/",\
         "packageDependencies": [\
-          ["@codemirror/language", "npm:6.11.0"],\
+          ["@codemirror/language", "npm:6.11.1"],\
           ["@codemirror/state", "npm:6.5.2"],\
-          ["@codemirror/view", "npm:6.36.8"],\
+          ["@codemirror/view", "npm:6.37.2"],\
           ["@lezer/common", "npm:1.2.3"],\
           ["@lezer/highlight", "npm:1.2.1"],\
           ["@lezer/lr", "npm:1.4.2"],\
@@ -1058,7 +1058,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@codemirror/search", "npm:6.5.11"],\
           ["@codemirror/state", "npm:6.5.2"],\
-          ["@codemirror/view", "npm:6.36.8"],\
+          ["@codemirror/view", "npm:6.37.2"],\
           ["crelt", "npm:1.0.6"]\
         ],\
         "linkType": "HARD"\
@@ -1078,21 +1078,22 @@ const RAW_RUNTIME_STATE =
       ["npm:6.1.2", {\
         "packageLocation": "./.yarn/cache/@codemirror-theme-one-dark-npm-6.1.2-4b82de8377-d0d70ce1e0.zip/node_modules/@codemirror/theme-one-dark/",\
         "packageDependencies": [\
-          ["@codemirror/language", "npm:6.11.0"],\
+          ["@codemirror/language", "npm:6.11.1"],\
           ["@codemirror/state", "npm:6.5.2"],\
           ["@codemirror/theme-one-dark", "npm:6.1.2"],\
-          ["@codemirror/view", "npm:6.36.8"],\
+          ["@codemirror/view", "npm:6.37.2"],\
           ["@lezer/highlight", "npm:1.2.1"]\
         ],\
         "linkType": "HARD"\
       }]\
     ]],\
     ["@codemirror/view", [\
-      ["npm:6.36.8", {\
-        "packageLocation": "./.yarn/cache/@codemirror-view-npm-6.36.8-f1a3a9e52a-0ec264fb6f.zip/node_modules/@codemirror/view/",\
+      ["npm:6.37.2", {\
+        "packageLocation": "./.yarn/cache/@codemirror-view-npm-6.37.2-f5292258d4-bd6f6e5372.zip/node_modules/@codemirror/view/",\
         "packageDependencies": [\
           ["@codemirror/state", "npm:6.5.2"],\
-          ["@codemirror/view", "npm:6.36.8"],\
+          ["@codemirror/view", "npm:6.37.2"],\
+          ["crelt", "npm:1.0.6"],\
           ["style-mod", "npm:4.1.2"],\
           ["w3c-keyname", "npm:2.2.8"]\
         ],\
@@ -1694,11 +1695,11 @@ const RAW_RUNTIME_STATE =
           ["@codemirror/autocomplete", "npm:6.18.6"],\
           ["@codemirror/commands", "npm:6.8.1"],\
           ["@codemirror/lang-yaml", "npm:6.1.2"],\
-          ["@codemirror/language", "npm:6.11.0"],\
+          ["@codemirror/language", "npm:6.11.1"],\
           ["@codemirror/search", "npm:6.5.11"],\
           ["@codemirror/state", "npm:6.5.2"],\
           ["@codemirror/theme-one-dark", "npm:6.1.2"],\
-          ["@codemirror/view", "npm:6.36.8"],\
+          ["@codemirror/view", "npm:6.37.2"],\
           ["@fontsource/roboto", "npm:5.2.5"],\
           ["@gardener-dashboard/frontend", "workspace:frontend"],\
           ["@kyvg/vue3-notification", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.4.1"],\
