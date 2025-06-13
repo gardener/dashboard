@@ -75,3 +75,6 @@
 # include metadata files
 !VERSION
 !Dockerfile
+
+# include hack/verify script
+!hack/verify
