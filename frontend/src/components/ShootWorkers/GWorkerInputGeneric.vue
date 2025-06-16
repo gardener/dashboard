@@ -90,7 +90,7 @@ SPDX-License-Identifier: Apache-2.0
           label="Autoscaler Min."
           variant="underlined"
           @input="v$.worker.minimum.$touch()"
-          @blur="v$.worker.minimum.$touch()"
+          @blur="v$.worker.minimum.$touch(); overrideMax()"
         />
       </div>
       <div class="small-input">
@@ -103,7 +103,7 @@ SPDX-License-Identifier: Apache-2.0
           variant="underlined"
           :error-messages="getErrorMessages(v$.worker.maximum)"
           @input="v$.worker.maximum.$touch()"
-          @blur="v$.worker.maximum.$touch()"
+          @blur="v$.worker.maximum.$touch(); overrideMin()"
         />
       </div>
       <div class="small-input">
@@ -361,9 +361,6 @@ export default {
       },
       set (value) {
         this.worker.minimum = Math.max(0, parseInt(value))
-        if (this.innerMax < this.worker.minimum) {
-          this.worker.maximum = this.worker.minimum
-        }
       },
     },
     innerMax: {
@@ -372,9 +369,6 @@ export default {
       },
       set: function (value) {
         this.worker.maximum = Math.max(0, parseInt(value))
-        if (this.innerMin > this.worker.maximum) {
-          this.worker.minimum = this.worker.maximum
-        }
       },
     },
     maxSurge: {
@@ -513,6 +507,16 @@ export default {
       this.worker.machine.type = get(defaultMachineType, ['name'])
       const defaultMachineImage = this.defaultMachineImageForCloudProfileRefAndMachineType(this.cloudProfileRef, defaultMachineType)
       this.worker.machine.image = pick(defaultMachineImage, ['name', 'version'])
+    },
+    overrideMax () {
+      if (this.innerMax < this.worker.minimum) {
+        this.worker.maximum = this.worker.minimum
+      }
+    },
+    overrideMin () {
+      if (this.innerMin > this.worker.maximum) {
+        this.worker.minimum = this.worker.maximum
+      }
     },
     getErrorMessages,
   },
