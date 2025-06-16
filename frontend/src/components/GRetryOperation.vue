@@ -60,7 +60,9 @@ const {
 } = storeToRefs(authzStore)
 
 const canRetry = computed(() => {
-  if (!canPatchShoots.value) return // No permission to patch shoots
+  if (!canPatchShoots.value) {
+    return false
+  }
 
   const reconcileScheduled = shootGeneration.value !== shootObservedGeneration.value && !!shootObservedGeneration.value
 
