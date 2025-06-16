@@ -100,11 +100,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@apidevtools/json-schema-ref-parser", [\
-      ["npm:11.7.2", {\
-        "packageLocation": "./.yarn/cache/@apidevtools-json-schema-ref-parser-npm-11.7.2-06ef388533-90dd8e60e2.zip/node_modules/@apidevtools/json-schema-ref-parser/",\
+      ["npm:14.0.1", {\
+        "packageLocation": "./.yarn/cache/@apidevtools-json-schema-ref-parser-npm-14.0.1-a09f2df306-f8aff4d32f.zip/node_modules/@apidevtools/json-schema-ref-parser/",\
         "packageDependencies": [\
-          ["@apidevtools/json-schema-ref-parser", "npm:11.7.2"],\
-          ["@jsdevtools/ono", "npm:7.1.3"],\
+          ["@apidevtools/json-schema-ref-parser", "npm:14.0.1"],\
           ["@types/json-schema", "npm:7.0.15"],\
           ["js-yaml", "npm:4.1.0"]\
         ],\
@@ -130,24 +129,23 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@apidevtools/swagger-parser", [\
-      ["npm:10.1.1", {\
-        "packageLocation": "./.yarn/cache/@apidevtools-swagger-parser-npm-10.1.1-527689a109-21be668c64.zip/node_modules/@apidevtools/swagger-parser/",\
+      ["npm:12.0.0", {\
+        "packageLocation": "./.yarn/cache/@apidevtools-swagger-parser-npm-12.0.0-67e85db9c8-c905c49dc5.zip/node_modules/@apidevtools/swagger-parser/",\
         "packageDependencies": [\
-          ["@apidevtools/swagger-parser", "npm:10.1.1"]\
+          ["@apidevtools/swagger-parser", "npm:12.0.0"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:10.1.1", {\
-        "packageLocation": "./.yarn/__virtual__/@apidevtools-swagger-parser-virtual-8e10cb8f07/0/cache/@apidevtools-swagger-parser-npm-10.1.1-527689a109-21be668c64.zip/node_modules/@apidevtools/swagger-parser/",\
+      ["virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:12.0.0", {\
+        "packageLocation": "./.yarn/__virtual__/@apidevtools-swagger-parser-virtual-2e14c2bcc8/0/cache/@apidevtools-swagger-parser-npm-12.0.0-67e85db9c8-c905c49dc5.zip/node_modules/@apidevtools/swagger-parser/",\
         "packageDependencies": [\
-          ["@apidevtools/json-schema-ref-parser", "npm:11.7.2"],\
+          ["@apidevtools/json-schema-ref-parser", "npm:14.0.1"],\
           ["@apidevtools/openapi-schemas", "npm:2.1.0"],\
           ["@apidevtools/swagger-methods", "npm:3.0.2"],\
-          ["@apidevtools/swagger-parser", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:10.1.1"],\
-          ["@jsdevtools/ono", "npm:7.1.3"],\
+          ["@apidevtools/swagger-parser", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:12.0.0"],\
           ["@types/openapi-types", null],\
           ["ajv", "npm:8.17.1"],\
-          ["ajv-draft-04", "virtual:8e10cb8f07e1fe4a2521962e5934906d18b47e757c540eb2531098ed953fa2761a838fa7d519ed25368afdc7729d481a085cdd2d14d300a8dd7b6527735bcddc#npm:1.0.0"],\
+          ["ajv-draft-04", "virtual:2e14c2bcc847580c404461325322b2c1b250f8b344f90ef3b78a6f6384b2479d7a79f1e5373ee71aa0ec4db6e04a491ee0887d861dffb48b5916b0ab35c5a9b1#npm:1.0.0"],\
           ["call-me-maybe", "npm:1.0.2"],\
           ["openapi-types", "npm:12.1.3"]\
         ],\
@@ -1607,7 +1605,7 @@ const RAW_RUNTIME_STATE =
       ["workspace:backend", {\
         "packageLocation": "./backend/",\
         "packageDependencies": [\
-          ["@apidevtools/swagger-parser", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:10.1.1"],\
+          ["@apidevtools/swagger-parser", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:12.0.0"],\
           ["@gardener-dashboard/backend", "workspace:backend"],\
           ["@gardener-dashboard/kube-client", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#workspace:packages/kube-client"],\
           ["@gardener-dashboard/kube-config", "workspace:packages/kube-config"],\
@@ -2568,15 +2566,6 @@ const RAW_RUNTIME_STATE =
           ["@jridgewell/resolve-uri", "npm:3.1.2"],\
           ["@jridgewell/sourcemap-codec", "npm:1.5.0"],\
           ["@jridgewell/trace-mapping", "npm:0.3.25"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["@jsdevtools/ono", [\
-      ["npm:7.1.3", {\
-        "packageLocation": "./.yarn/cache/@jsdevtools-ono-npm-7.1.3-cb2313543b-a9f7e3e8e3.zip/node_modules/@jsdevtools/ono/",\
-        "packageDependencies": [\
-          ["@jsdevtools/ono", "npm:7.1.3"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -5043,12 +5032,12 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:8e10cb8f07e1fe4a2521962e5934906d18b47e757c540eb2531098ed953fa2761a838fa7d519ed25368afdc7729d481a085cdd2d14d300a8dd7b6527735bcddc#npm:1.0.0", {\
-        "packageLocation": "./.yarn/__virtual__/ajv-draft-04-virtual-4d7e1d0572/0/cache/ajv-draft-04-npm-1.0.0-6fc962dbab-6044310bd3.zip/node_modules/ajv-draft-04/",\
+      ["virtual:2e14c2bcc847580c404461325322b2c1b250f8b344f90ef3b78a6f6384b2479d7a79f1e5373ee71aa0ec4db6e04a491ee0887d861dffb48b5916b0ab35c5a9b1#npm:1.0.0", {\
+        "packageLocation": "./.yarn/__virtual__/ajv-draft-04-virtual-900a776629/0/cache/ajv-draft-04-npm-1.0.0-6fc962dbab-6044310bd3.zip/node_modules/ajv-draft-04/",\
         "packageDependencies": [\
           ["@types/ajv", null],\
           ["ajv", "npm:8.17.1"],\
-          ["ajv-draft-04", "virtual:8e10cb8f07e1fe4a2521962e5934906d18b47e757c540eb2531098ed953fa2761a838fa7d519ed25368afdc7729d481a085cdd2d14d300a8dd7b6527735bcddc#npm:1.0.0"]\
+          ["ajv-draft-04", "virtual:2e14c2bcc847580c404461325322b2c1b250f8b344f90ef3b78a6f6384b2479d7a79f1e5373ee71aa0ec4db6e04a491ee0887d861dffb48b5916b0ab35c5a9b1#npm:1.0.0"]\
         ],\
         "packagePeers": [\
           "@types/ajv",\
