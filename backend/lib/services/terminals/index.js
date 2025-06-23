@@ -2,7 +2,7 @@ import httpErrors from 'http-errors'
 import _ from 'lodash-es'
 import hash from 'object-hash'
 import { load as yamlLoad } from 'js-yaml'
-import config from '../../config/index.js'
+import gardenerConfig from '../../config/index.js'
 import { getClusterCaData } from '../shoots.js'
 import kubeClient from '@gardener-dashboard/kube-client'
 import { decodeBase64, getConfigValue, getSeedNameFromShoot } from '../../utils/index.js'
@@ -39,7 +39,7 @@ function create ({ user, body }) {
   return getOrCreateTerminalSession({ user, namespace, name, target, body })
 }
 
-async function terminalConfig ({ user, body: { coordinate: { namespace, name, target } } }) {
+async function config ({ user, body: { coordinate: { namespace, name, target } } }) {
   return getTerminalConfig({ user, namespace, name, target })
 }
 
@@ -98,7 +98,7 @@ async function readServiceAccountToken (client, { namespace, serviceAccountName 
     kind,
     apiVersion,
     spec: {
-      expirationSeconds: _.get(config, ['terminal', 'serviceAccountTokenExpiration'], 43200), // default is 12h
+      expirationSeconds: _.get(gardenerConfig, ['terminal', 'serviceAccountTokenExpiration'], 43200), // default is 12h
     },
   }
 
@@ -184,8 +184,8 @@ async function getTargetCluster ({ user, namespace, name, target, preferredHost,
   switch (target) {
     case TargetEnum.GARDEN: {
       targetCluster.kubeconfigContextNamespace = namespace
-      targetCluster.apiServer.server = config.apiServerUrl
-      targetCluster.apiServer.caData = config.apiServerCaData
+      targetCluster.apiServer.server = gardenerConfig.apiServerUrl
+      targetCluster.apiServer.caData = gardenerConfig.apiServerCaData
 
       if (isAdmin) {
         targetCluster.namespace = 'garden'
@@ -818,7 +818,7 @@ async function listShortcuts ({ user, namespace }) {
 
 export {
   create,
-  terminalConfig as config,
+  config,
   list,
   remove,
   fetch,
