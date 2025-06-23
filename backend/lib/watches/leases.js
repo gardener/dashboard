@@ -55,7 +55,3 @@ export default (io, informer, { signal }) => {
   const handleEvent = event => syncManager.sync()
   informer.on('update', object => handleEvent({ type: 'MODIFIED', object }))
 }
-
-// exported for testing
-// ToDo delete, is exported directly or adapt test
-// export const test = { loadOpenIssuesAndComments }
