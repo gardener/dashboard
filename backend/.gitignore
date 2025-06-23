@@ -24,4 +24,4 @@ my*
 .nyc_output
 
 # Ignore CJS build output directory
-lib-cjs/
+dist/
