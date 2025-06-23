@@ -19,11 +19,9 @@ const { dashboardClient } = kubeClientModule
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
-const content = await readFile(join(__dirname, '../../package.json'), 'utf8')
-const versionInfo = JSON.parse(content)
-
-function getPackageJson () {
-  return versionInfo
+async function getPkg () {
+  const content = await readFile(join(__dirname, '../../package.json'), 'utf8')
+  return JSON.parse(content)
 }
 
 const router = express.Router()
@@ -35,7 +33,7 @@ router.route('/')
   .get(async (req, res, next) => {
     try {
       const gardenerVersion = await fetchGardenerVersion()
-      const pkg = getPackageJson()
+      const pkg = await getPkg()
       res.send({ version: pkg.version, gardenerVersion })
     } catch (err) {
       next(err)
