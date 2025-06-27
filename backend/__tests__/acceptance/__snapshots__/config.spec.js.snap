@@ -39,5 +39,10 @@ exports[`config should return the frontend configuration 2`] = `
     },
   ],
   "serviceAccountDefaultTokenExpiration": 42,
+  "unreachableSeeds": {
+    "matchLabels": {
+      "test-unreachable": "true",
+    },
+  },
 }
 `;

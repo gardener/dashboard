@@ -13,7 +13,6 @@ import {
 
 import { useProjectStore } from '@/store/project'
 import { useCloudProfileStore } from '@/store/cloudProfile'
-import { useSeedStore } from '@/store/seed'
 
 import { errorCodesFromArray } from '@/utils/errorCodes'
 
@@ -35,7 +34,6 @@ export function createShootItemComposable (shootItem, options = {}) {
   const {
     projectStore = useProjectStore(),
     cloudProfileStore = useCloudProfileStore(),
-    seedStore = useSeedStore(),
   } = options
 
   if (!isRef(shootItem)) {
@@ -107,11 +105,9 @@ export function createShootItemComposable (shootItem, options = {}) {
     shootMaintenance,
     shootControlPlaneHighAvailabilityFailureTolerance,
     shootSeedName,
-    isSeedUnreachable,
     shootResources,
   } = useShootSpec(shootItem, {
     cloudProfileStore,
-    seedStore,
   })
 
   const {
@@ -228,7 +224,6 @@ export function createShootItemComposable (shootItem, options = {}) {
     shootMaintenance,
     shootControlPlaneHighAvailabilityFailureTolerance,
     shootSeedName,
-    isSeedUnreachable,
     shootResources,
     /* status */
     shootStatus,
