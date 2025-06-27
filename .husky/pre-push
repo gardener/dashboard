@@ -1,0 +1,15 @@
+# .husky/pre-commit
+. .husky/common.sh
+. "$(dirname "$0")/husky-user-choice.sh"
+
+VERIFY_ON_PUSH=$(grep '^verify_on_push=' "$HUSKY_USER_CONFIG_FILE" | cut -d'=' -f2)
+if [ "$VERIFY_ON_PUSH" = "true" ]; then
+  "$(dirname "$0")/../hack/verify"
+  echo ""
+  echo "────────────────────────────────────────────"
+  echo ""
+  echo "Pre-push hook executed successfully."
+  echo ""
+  echo "────────────────────────────────────────────"
+  echo ""
+fi
