@@ -1649,7 +1649,7 @@ const RAW_RUNTIME_STATE =
           ["neostandard", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:0.12.1"],\
           ["object-hash", "npm:3.0.0"],\
           ["openapi-types", "npm:12.1.3"],\
-          ["openid-client", "npm:6.5.0"],\
+          ["openid-client", "npm:6.6.2"],\
           ["p-event", "npm:4.2.0"],\
           ["p-limit", "npm:3.1.0"],\
           ["p-retry", "npm:4.6.2"],\
@@ -10006,10 +10006,10 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "HARD"\
       }],\
-      ["npm:6.0.10", {\
-        "packageLocation": "./.yarn/cache/jose-npm-6.0.10-d2dce0e52a-d1327afd7f.zip/node_modules/jose/",\
+      ["npm:6.0.11", {\
+        "packageLocation": "./.yarn/cache/jose-npm-6.0.11-213415aaa7-d290be4532.zip/node_modules/jose/",\
         "packageDependencies": [\
-          ["jose", "npm:6.0.10"]\
+          ["jose", "npm:6.0.11"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -11098,10 +11098,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["oauth4webapi", [\
-      ["npm:3.5.1", {\
-        "packageLocation": "./.yarn/cache/oauth4webapi-npm-3.5.1-a36854e256-5d57ba4299.zip/node_modules/oauth4webapi/",\
+      ["npm:3.5.5", {\
+        "packageLocation": "./.yarn/cache/oauth4webapi-npm-3.5.5-253f3f2c05-3ab9bcfa0d.zip/node_modules/oauth4webapi/",\
         "packageDependencies": [\
-          ["oauth4webapi", "npm:3.5.1"]\
+          ["oauth4webapi", "npm:3.5.5"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -11276,12 +11276,12 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["openid-client", [\
-      ["npm:6.5.0", {\
-        "packageLocation": "./.yarn/cache/openid-client-npm-6.5.0-fc539d7532-403a1b0d08.zip/node_modules/openid-client/",\
+      ["npm:6.6.2", {\
+        "packageLocation": "./.yarn/cache/openid-client-npm-6.6.2-b0cf019648-1b479494ce.zip/node_modules/openid-client/",\
         "packageDependencies": [\
-          ["jose", "npm:6.0.10"],\
-          ["oauth4webapi", "npm:3.5.1"],\
-          ["openid-client", "npm:6.5.0"]\
+          ["jose", "npm:6.0.11"],\
+          ["oauth4webapi", "npm:3.5.5"],\
+          ["openid-client", "npm:6.6.2"]\
         ],\
         "linkType": "HARD"\
       }]\
