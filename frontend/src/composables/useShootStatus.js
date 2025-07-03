@@ -62,16 +62,6 @@ export const useShootStatus = shootItem => {
     return get(shootItem.value, ['status', 'credentials', 'rotation'], {})
   })
 
-  const shootReadiness = computed(() => {
-    const shootConstraintsNotInCondition = filter(shootConstraints.value, condition => {
-      return condition.status !== 'True'
-    })
-    return [
-      ...shootConditions.value,
-      ...shootConstraintsNotInCondition,
-    ]
-  })
-
   const shootObservedGeneration = computed(() => {
     return get(shootItem.value, ['status', 'observedGeneration'])
   })
@@ -140,7 +130,6 @@ export const useShootStatus = shootItem => {
     shootConditions,
     shootConstraints,
     shootCredentialsRotation,
-    shootReadiness,
     shootObservedGeneration,
     shootTechnicalId,
     lastMaintenance,

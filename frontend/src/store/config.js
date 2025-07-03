@@ -104,10 +104,11 @@ const wellKnownConditions = {
     sortOrder: '12',
   },
   DualStackNodesMigrationReady: {
-    name: 'Dual Stack Nodes Migration Ready',
+    name: 'Dual Stack Nodes Migration',
     shortName: 'DSNM',
-    description: 'Indicates that the nodes of a shoot are ready for dual-stack migration of the cluster. If this is in error state, the nodes need to be rolled before the migration can continue. This error is expected at the beginning of the migration process and does not require immediate user action.',
+    description: 'Indicates that dual-stack migration of the cluster is currently in progress.',
     sortOrder: '13',
+    progressConstraint: true,
   },
 }
 
