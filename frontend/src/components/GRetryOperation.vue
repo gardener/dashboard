@@ -29,8 +29,10 @@ import {
   computed,
   inject,
 } from 'vue'
+import { storeToRefs } from 'pinia'
 
 import { useAppStore } from '@/store/app'
+import { useAuthzStore } from '@/store/authz.js'
 
 import { useShootItem } from '@/composables/useShootItem'
 
@@ -52,7 +54,16 @@ const appStore = useAppStore()
 
 const retryingOperation = ref(false)
 
+const authzStore = useAuthzStore()
+const {
+  canPatchShoots,
+} = storeToRefs(authzStore)
+
 const canRetry = computed(() => {
+  if (!canPatchShoots.value) {
+    return false
+  }
+
   const reconcileScheduled = shootGeneration.value !== shootObservedGeneration.value && !!shootObservedGeneration.value
 
   return get(shootLastOperation.value, ['state']) === 'Failed' &&
