@@ -49,8 +49,8 @@ export function credentialKind (binding) {
   return undefined
 }
 
-export function isInfrastructureBinding (binding, sortedProviderTypeList) {
-  return sortedProviderTypeList.includes(binding?.provider?.type)
+export function isInfrastructureBinding (binding, sortedInfraProviderTypeList) {
+  return sortedInfraProviderTypeList.includes(binding?.provider?.type)
 }
 export function isDnsBinding (binding, dnsProviderTypes) {
   return dnsProviderTypes.includes(binding?.provider?.type)
