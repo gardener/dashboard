@@ -30,6 +30,14 @@ SPDX-License-Identifier: Apache-2.0
             size="x-small"
             class="chip-icon"
           />
+          <v-progress-circular
+            v-if="isProgressConstraint"
+            indeterminate
+            :size="10"
+            :width="1"
+            color="primary"
+            class="mr-1"
+          />
           {{ chipText }}
           <v-tooltip
             :activator="$refs.tagChipRef"
@@ -152,6 +160,9 @@ export default {
       if (this.isProgressing) {
         return 'Progressing'
       }
+      if (this.isProgressConstraint) {
+        return 'Operation in Progresss'
+      }
 
       return 'Healthy'
     },
@@ -177,9 +188,12 @@ export default {
         return 'mdi-progress-alert'
       }
 
-      return ''
+      return false
     },
     isError () {
+      if (this.condition.progressConstraint === true) {
+        return false
+      }
       if (this.condition.status === 'False' || !isEmpty(this.condition.codes)) {
         return true
       }
@@ -196,6 +210,9 @@ export default {
         return true
       }
       return false
+    },
+    isProgressConstraint () {
+      return this.condition.progressConstraint === true
     },
     isUserError () {
       return isUserError(this.condition.codes)

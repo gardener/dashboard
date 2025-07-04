@@ -77,24 +77,36 @@ const {
   shootCloudProviderBinding,
   shootMetadata,
   shootUid,
-  shootReadiness,
+  shootConditions,
+  shootConstraints,
 } = useShootItem()
 
 const configStore = useConfigStore()
 const shootStore = useShootStore()
 
-const conditions = computed(() => {
-  const conditions = shootReadiness.value
-    .filter(condition => !!condition.lastTransitionTime)
-    .map(condition => {
-      const conditionDefaults = configStore.conditionForType(condition.type)
+const getConditions = (items, type) => {
+  return items
+    .filter(item => !!item.lastTransitionTime)
+    .map(item => {
+      const conditionDefaults = configStore.conditionForType(item.type)
       return {
+        ...item,
         ...conditionDefaults,
-        ...condition,
         sortOrder: padStart(conditionDefaults.sortOrder, 8, '0'),
       }
     })
-  return sortBy(conditions, 'sortOrder')
+    .filter(condition =>
+      type === 'Condition' ||
+      (condition.status !== 'True' ||
+      condition.progressConstraint),
+    )
+}
+
+const conditions = computed(() => {
+  return sortBy([
+    ...getConditions(shootConditions.value, 'Condition'),
+    ...getConditions(shootConstraints.value, 'Constraint'),
+  ], 'sortOrder')
 })
 
 const errorCodeObjects = computed(() => {
