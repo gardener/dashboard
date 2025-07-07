@@ -84,29 +84,44 @@ const {
 const configStore = useConfigStore()
 const shootStore = useShootStore()
 
-const getConditions = (items, type) => {
-  return items
-    .filter(item => !!item.lastTransitionTime)
-    .map(item => {
-      const conditionDefaults = configStore.conditionForType(item.type)
-      return {
-        ...item,
-        ...conditionDefaults,
-        sortOrder: padStart(conditionDefaults.sortOrder, 8, '0'),
-      }
-    })
-    .filter(condition =>
-      type === 'Condition' ||
-      (condition.status !== 'True' ||
-      condition.progressConstraint),
-    )
+/**
+ * Merge an item (condition or constraint) with its default config,
+ * apply status-mapping and padded sortOrder.
+ */
+function mergeItem (item) {
+  const defaults = configStore.conditionForType(item.type) ?? {}
+
+  return {
+    ...item,
+    ...defaults,
+    status: defaults.statusMappings?.[item.status] ?? item.status,
+    sortOrder: padStart(defaults.sortOrder ?? '', 8, '0'),
+  }
 }
 
 const conditions = computed(() => {
-  return sortBy([
-    ...getConditions(shootConditions.value, 'Condition'),
-    ...getConditions(shootConstraints.value, 'Constraint'),
-  ], 'sortOrder')
+  const merged = []
+
+  // helper to avoid repeating the same checks
+  const pushIfValid = (item, mustNotBeTrue) => {
+    item = mergeItem(item)
+    if (!item.lastTransitionTime) {
+      return
+    }
+    if (mustNotBeTrue && item.status === 'True') {
+      return
+    }
+    merged.push(item)
+  }
+
+  for (const c of shootConditions.value) {
+    pushIfValid(c, false)
+  }
+  for (const c of shootConstraints.value) {
+    pushIfValid(c, true)
+  }
+
+  return sortBy(merged, 'sortOrder')
 })
 
 const errorCodeObjects = computed(() => {

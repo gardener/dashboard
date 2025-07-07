@@ -13,7 +13,6 @@ import {
 
 import get from 'lodash/get'
 import find from 'lodash/find'
-import filter from 'lodash/filter'
 
 export const useShootStatus = shootItem => {
   const shootStatus = computed(() => {
