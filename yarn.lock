@@ -485,8 +485,8 @@ __metadata:
   linkType: hard
 
 "@codemirror/language@npm:^6.0.0, @codemirror/language@npm:^6.10.6":
-  version: 6.11.0
-  resolution: "@codemirror/language@npm:6.11.0"
+  version: 6.11.2
+  resolution: "@codemirror/language@npm:6.11.2"
   dependencies:
     "@codemirror/state": "npm:^6.0.0"
     "@codemirror/view": "npm:^6.23.0"
@@ -494,7 +494,7 @@ __metadata:
     "@lezer/highlight": "npm:^1.0.0"
     "@lezer/lr": "npm:^1.0.0"
     style-mod: "npm:^4.0.0"
-  checksum: 10c0/a8e45ef6dbccc5a7389f277b026412eeecc4ce3dfd806f77f34a8d85df20e257b3b5d0da26c59d9f024e7109542614c62cfa708158da447b0ae97b8fd8476fa9
+  checksum: 10c0/ed03a8d452a92a01be1b5dd3c65199d0c4559e004a4d2399c16cac3226c879fbe4ea46e6884b442a8033392ea78b658da2c3926b827598a1e5de8f62b5991251
   languageName: node
   linkType: hard
 
@@ -519,25 +519,26 @@ __metadata:
   linkType: hard
 
 "@codemirror/theme-one-dark@npm:^6.1.2":
-  version: 6.1.2
-  resolution: "@codemirror/theme-one-dark@npm:6.1.2"
+  version: 6.1.3
+  resolution: "@codemirror/theme-one-dark@npm:6.1.3"
   dependencies:
     "@codemirror/language": "npm:^6.0.0"
     "@codemirror/state": "npm:^6.0.0"
     "@codemirror/view": "npm:^6.0.0"
     "@lezer/highlight": "npm:^1.0.0"
-  checksum: 10c0/d0d70ce1e03fa7e5d51cc72d8bdef043f30e14a5aee88f4dd71b64e176c3d68629c82390b9cfdab8cc1ac20d35703b65fe9160051fddc873aa67c613d9525a3d
+  checksum: 10c0/de8483c69911bcd61a19679384de663ced9c8bed3c776f08581a8b724e9f456a17053b1cf6e9d1f2a475fa6bc42e905ec8ba1ee0a8b55213d18087d9d9150317
   languageName: node
   linkType: hard
 
 "@codemirror/view@npm:^6.0.0, @codemirror/view@npm:^6.17.0, @codemirror/view@npm:^6.23.0, @codemirror/view@npm:^6.27.0, @codemirror/view@npm:^6.35.3":
-  version: 6.36.8
-  resolution: "@codemirror/view@npm:6.36.8"
+  version: 6.38.0
+  resolution: "@codemirror/view@npm:6.38.0"
   dependencies:
     "@codemirror/state": "npm:^6.5.0"
+    crelt: "npm:^1.0.6"
     style-mod: "npm:^4.1.0"
     w3c-keyname: "npm:^2.2.4"
-  checksum: 10c0/0ec264fb6f3e72b45c5a4f94bc3d6bf4c281e5ff087254afae7213b8c401403bbc73cf56c741ba0ed74e524b915878198d2aaaf4a641e375d458c622738f49d4
+  checksum: 10c0/ed6600619192724b047529c3c37a1c191b127b1c2f096962828bc8d3475eb3c13124c76bc0b2d230bb6ce5e4727cdc10159ee468885233a7b2aa769e58ea310a
   languageName: node
   linkType: hard
 
@@ -4471,7 +4472,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"crelt@npm:^1.0.5":
+"crelt@npm:^1.0.5, crelt@npm:^1.0.6":
   version: 1.0.6
   resolution: "crelt@npm:1.0.6"
   checksum: 10c0/e0fb76dff50c5eb47f2ea9b786c17f9425c66276025adee80876bdbf4a84ab72e899e56d3928431ab0cb057a105ef704df80fe5726ef0f7b1658f815521bdf09
