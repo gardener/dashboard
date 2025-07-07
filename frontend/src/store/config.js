@@ -23,16 +23,22 @@ import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
 import camelCase from 'lodash/camelCase'
 
+const defaultConditionStatusTextMappings = {
+  True: 'Healthy',
+  False: 'Error',
+}
+
+const defaultConditionStatusMappings = {
+  Progressing: 'Degraded',
+}
+
 const wellKnownConditions = {
   APIServerAvailable: {
     name: 'API Server',
     shortName: 'API',
     description: 'Indicates whether the shoot\'s kube-apiserver is healthy and available. If this is in error state then no interaction with the cluster is possible. The workload running on the cluster is most likely not affected.',
-    statusMappings: {
-      True: 'Healhty',
-      False: 'Error',
-      Progressing: 'Degraded',
-    },
+    statusTextMappings: defaultConditionStatusTextMappings,
+    statusMappings: defaultConditionStatusMappings,
     sortOrder: '0',
   },
   ControlPlaneHealthy: {
@@ -40,88 +46,64 @@ const wellKnownConditions = {
     shortName: 'CP',
     description: 'Indicates whether all control plane components are up and running.',
     showAdminOnly: true,
-    statusMappings: {
-      True: 'Healhty',
-      False: 'Error',
-      Progressing: 'Degraded',
-    },
+    statusTextMappings: defaultConditionStatusTextMappings,
+    statusMappings: defaultConditionStatusMappings,
     sortOrder: '1',
   },
   SystemComponentsHealthy: {
     name: 'System Components',
     shortName: 'SC',
     description: 'Indicates whether all system components in the kube-system namespace are up and running. Gardener manages these system components and should automatically take care that the components become healthy again.',
-    statusMappings: {
-      True: 'Healhty',
-      False: 'Error',
-      Progressing: 'Degraded',
-    },
+    statusTextMappings: defaultConditionStatusTextMappings,
+    statusMappings: defaultConditionStatusMappings,
     sortOrder: '2',
   },
   EveryNodeReady: {
     name: 'Nodes',
     shortName: 'N',
     description: 'Indicates whether all nodes registered to the cluster are healthy and up-to-date. If this is in error state there then there is probably an issue with the cluster nodes. In worst case there is currently not enough capacity to schedule all the workloads/pods running in the cluster and that might cause a service disruption of your applications.',
-    statusMappings: {
-      True: 'Healhty',
-      False: 'Error',
-      Progressing: 'Degraded',
-    },
+    statusTextMappings: defaultConditionStatusTextMappings,
+    statusMappings: defaultConditionStatusMappings,
     sortOrder: '3',
   },
   ObservabilityComponentsHealthy: {
     name: 'Observability Components',
     shortName: 'OC',
     description: 'Indicates whether all observability components like Prometheus, Vali, Plutono, etc. are up and running. Gardener manages these system components and should automatically take care that the components become healthy again.',
-    statusMappings: {
-      True: 'Healhty',
-      False: 'Error',
-      Progressing: 'Degraded',
-    },
+    statusTextMappings: defaultConditionStatusTextMappings,
+    statusMappings: defaultConditionStatusMappings,
     sortOrder: '4',
   },
   BackupBucketsReady: {
     name: 'Seed Backup Buckets',
     shortName: 'BB',
     description: 'Indicates that associated BackupBuckets are ready.',
-    statusMappings: {
-      True: 'Healhty',
-      False: 'Error',
-      Progressing: 'Degraded',
-    },
+    statusTextMappings: defaultConditionStatusTextMappings,
+    statusMappings: defaultConditionStatusMappings,
     sortOrder: '5',
   },
   ExtensionsReady: {
     name: 'Seed Extensions',
     shortName: 'E',
     description: 'Indicates that the extensions are ready.',
-    statusMappings: {
-      True: 'Healhty',
-      False: 'Error',
-      Progressing: 'Degraded',
-    },
+    statusTextMappings: defaultConditionStatusTextMappings,
+    statusMappings: defaultConditionStatusMappings,
     sortOrder: '6',
   },
   GardenletReady: {
     name: 'Seed Gardenlet',
     shortName: 'G',
     description: 'Indicates that the Gardenlet is ready.',
-    statusMappings: {
-      True: 'Healhty',
-      False: 'Error',
-      Progressing: 'Degraded',
-    },
+    statusTextMappings: defaultConditionStatusTextMappings,
+    statusMappings: defaultConditionStatusMappings,
     sortOrder: '7',
   },
   SeedSystemComponentsHealthy: {
     name: 'Seed System Components',
     shortName: 'SSC',
     description: 'Indicates the system components health',
-    statusMappings: {
-      True: 'Healhty',
-      False: 'Error',
-      Progressing: 'Degraded',
-    },
+    statusTextMappings: defaultConditionStatusTextMappings,
+    statusMappings: defaultConditionStatusMappings,
     sortOrder: '8',
   },
   MaintenancePreconditionsSatisfied: {

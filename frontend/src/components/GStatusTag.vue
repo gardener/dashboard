@@ -64,7 +64,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-chip>
       </template>
       <g-shoot-message-details
-        :status-title="chipStatus"
+        :status-title="chipStatusText"
         :last-message="nonErrorMessage"
         :error-descriptions="errorDescriptions"
         :last-transition-time="condition.lastTransitionTime"
@@ -143,12 +143,15 @@ export default {
       return this.condition.shortName || ''
     },
     chipStatus () {
-      return this.condition.status
+      return get(this.condition.statusMappings, this.condition.status, this.condition.status)
+    },
+    chipStatusText () {
+      return get(this.condition.statusTextMappings, this.chipStatus, this.chipStatus)
     },
     chipTooltip () {
       return {
         title: this.condition.name,
-        status: this.chipStatus,
+        status: this.chipStatusText,
         description: this.condition.description,
         userErrorCodeObjects: filter(objectsFromErrorCodes(this.condition.codes), { userError: true }),
       }
@@ -173,9 +176,7 @@ export default {
       return ''
     },
     isError () {
-      return this.chipStatus === 'False' ||
-        this.chipStatus === 'Error' ||
-        !isEmpty(this.condition.codes)
+      return this.chipStatus === 'False' || !isEmpty(this.condition.codes)
     },
     isUnknown () {
       return this.chipStatus === 'Unknown'

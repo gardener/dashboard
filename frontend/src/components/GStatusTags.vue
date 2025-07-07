@@ -94,7 +94,6 @@ function mergeItem (item) {
   return {
     ...item,
     ...defaults,
-    status: defaults.statusMappings?.[item.status] ?? item.status,
     sortOrder: padStart(defaults.sortOrder ?? '', 8, '0'),
   }
 }
