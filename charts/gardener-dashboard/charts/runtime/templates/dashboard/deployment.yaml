@@ -139,7 +139,7 @@ spec:
           {{- range .Values.global.dashboard.nodeOptions }}
           - {{ . }}
           {{- end }}
-          - server.mjs
+          - server.js
           {{- end }}
           image: "{{ include "utils-templates.image" .Values.global.dashboard.image }}"
           imagePullPolicy: {{ .Values.global.dashboard.image.pullPolicy }}
