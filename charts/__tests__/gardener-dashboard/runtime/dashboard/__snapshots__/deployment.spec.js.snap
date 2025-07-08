@@ -196,7 +196,7 @@ exports[`gardener-dashboard deployment should render the template with default v
           {
             "args": [
               "--max-old-space-size=920",
-              "server.mjs",
+              "server.js",
             ],
             "env": [
               {
@@ -361,7 +361,7 @@ exports[`gardener-dashboard deployment should render the template with node opti
   "--expose-gc",
   "--trace-gc",
   "--gc-interval=100",
-  "server.mjs",
+  "server.js",
 ]
 `;
 
