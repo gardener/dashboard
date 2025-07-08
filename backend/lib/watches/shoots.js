@@ -8,9 +8,8 @@
 
 const { shootHasIssue } = require('../utils')
 
-module.exports = (io, informer, options) => {
+module.exports = (io, informer) => {
   const nsp = io.of('/')
-  const { shootsWithIssues = new Set() } = options ?? {}
 
   const publishShoots = event => {
     const { type, object } = event
@@ -23,28 +22,34 @@ module.exports = (io, informer, options) => {
     nsp.to(rooms).emit('shoots', { type, uid })
   }
 
-  const publishUnhealthyShoots = event => {
-    let type = event.type
-    const object = event.object
+  const publishUnhealthyShoots = (event) => {
+    const { type, object, oldObject } = event
     const { namespace, uid } = object.metadata
 
-    if (shootHasIssue(object)) {
-      if (!shootsWithIssues.has(uid)) {
-        shootsWithIssues.add(uid)
-      } else if (type === 'DELETED') {
-        shootsWithIssues.delete(uid)
+    const hasIssue = shootHasIssue(object)
+    const hadIssue = oldObject ? shootHasIssue(oldObject) : false
+
+    let eventType
+    if (type === 'DELETED') {
+      if (!hasIssue) {
+        return
       }
-    } else if (shootsWithIssues.has(uid)) {
-      type = 'DELETED'
-      shootsWithIssues.delete(uid)
+      eventType = 'DELETED'
+    } else if (hasIssue && !hadIssue) {
+      eventType = 'ADDED'
+    } else if (hasIssue && hadIssue) {
+      eventType = type
+    } else if (!hasIssue && hadIssue) {
+      eventType = 'DELETED'
     } else {
       return
     }
+
     const rooms = [
       'shoots:unhealthy:admin',
       `shoots:unhealthy;${namespace}`,
     ]
-    nsp.to(rooms).emit('shoots', { type, uid })
+    nsp.to(rooms).emit('shoots', { type: eventType, uid })
   }
 
   const handleEvent = event => {
@@ -53,6 +58,6 @@ module.exports = (io, informer, options) => {
   }
 
   informer.on('add', object => handleEvent({ type: 'ADDED', object }))
-  informer.on('update', object => handleEvent({ type: 'MODIFIED', object }))
+  informer.on('update', (object, oldObject) => handleEvent({ type: 'MODIFIED', object, oldObject }))
   informer.on('delete', object => handleEvent({ type: 'DELETED', object }))
 }
