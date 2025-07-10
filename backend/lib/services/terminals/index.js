@@ -83,7 +83,6 @@ function imageHelpText (terminal) {
   return converter.makeSanitizedHtml(containerImageDescription)
 }
 
-// exported for unit test
 function findImageDescription (containerImage, containerImageDescriptions) {
   return _
     .chain(containerImageDescriptions)
@@ -829,7 +828,7 @@ export {
   remove,
   fetch,
   heartbeat,
-  listProjectTerminalShortcuts,
+  listProjectTerminalShortcuts, // exported for unit test
   findImageDescription,
   ensureTerminalAllowed,
   fromShortcutSecretResource,
