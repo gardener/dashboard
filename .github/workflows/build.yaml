@@ -57,6 +57,19 @@ jobs:
       ocm-labels: ${{ toJSON(matrix.args.ocm-labels) }}
       extra-tags: latest
 
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: gardener/cc-utils/.github/actions/trusted-checkout@master
+      - name: run-verify
+        shell: bash
+        run: |
+          set -eu
+          .ci/verify
+
   sast-lint:
     runs-on: ubuntu-latest
     permissions:
