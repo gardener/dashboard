@@ -76,4 +76,7 @@ function fromNodeResource ({ metadata, status = {} }) {
   }
 }
 
-export { toTerminalResource, fromNodeResource }
+export {
+  toTerminalResource,
+  fromNodeResource,
+}
