@@ -127,8 +127,7 @@ describe('hooks', () => {
         expect(cache.initialize.mock.calls[0][0]).toBe(informers)
 
         expect(io).toHaveBeenCalledTimes(1)
-        // ToDo checking for dead variable
-        // expect(io.mock.calls[0]).toEqual([server, cache])
+        expect(io.mock.calls[0]).toEqual([server])
 
         for (const [key, watch] of Object.entries(watches)) {
           expect(watch).toHaveBeenCalledTimes(1)
