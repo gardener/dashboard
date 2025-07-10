@@ -17,6 +17,7 @@ import SubjectList from './SubjectList.js'
 const { dumpKubeconfig } = kubeConfigModule
 const { Resources } = kubeClientModule
 const { findProjectByNamespace } = cache
+const { NotFound, Conflict, UnprocessableEntity, isHttpError } = httpErrors
 
 class MemberManager {
   constructor (client, userId, project, serviceAccounts) {
@@ -35,7 +36,7 @@ class MemberManager {
     const item = this.subjectList.get(id)
     if (!item) {
       const { kind } = Member.parseUsername(id)
-      throw new httpErrors.NotFound(`${kind} '${id}' is not related to this project`)
+      throw new NotFound(`${kind} '${id}' is not related to this project`)
     }
 
     if (item.kind === 'ServiceAccount') {
@@ -49,7 +50,7 @@ class MemberManager {
   async create (id, { roles, description }) {
     let item = this.subjectList.get(id)
     if (item) {
-      throw new httpErrors.Conflict(`${item.kind} '${id}' already exists`)
+      throw new Conflict(`${item.kind} '${id}' already exists`)
     }
     item = SubjectListItem.create(id, SubjectListItem.END_OF_LIST)
 
@@ -72,7 +73,7 @@ class MemberManager {
     const item = this.subjectList.get(id)
     if (!item) {
       const { kind } = Member.parseUsername(id)
-      throw new httpErrors.NotFound(`${kind} '${id}' is not related to this project`)
+      throw new NotFound(`${kind} '${id}' is not related to this project`)
     }
 
     this.setItemRoles(item, roles)
@@ -115,18 +116,18 @@ class MemberManager {
     }
 
     if (item.kind !== 'ServiceAccount') {
-      throw new httpErrors.UnprocessableEntity('Member is not a ServiceAccount')
+      throw new UnprocessableEntity('Member is not a ServiceAccount')
     }
 
     const { namespace, name } = Member.parseUsername(item.id)
     if (namespace !== this.namespace) {
-      throw new httpErrors.UnprocessableEntity('It is not possible to reset a ServiceAccount from another namespace')
+      throw new UnprocessableEntity('It is not possible to reset a ServiceAccount from another namespace')
     }
 
     try {
       await this.client.core.serviceaccounts.delete(namespace, name)
     } catch (err) {
-      if (!httpErrors.isHttpError(err) || err.statusCode !== 404) {
+      if (!isHttpError(err) || err.statusCode !== 404) {
         throw err
       }
     }
@@ -149,7 +150,7 @@ class MemberManager {
         },
       })
     } catch (err) {
-      if (!httpErrors.isHttpError(err) || err.statusCode !== 409) {
+      if (!isHttpError(err) || err.statusCode !== 409) {
         throw err
       }
 
@@ -182,7 +183,7 @@ class MemberManager {
   setItemRoles (item, roles) {
     roles = _.compact(roles)
     if (!roles.length && item.kind !== 'ServiceAccount') {
-      throw new httpErrors.UnprocessableEntity('At least one role is required')
+      throw new UnprocessableEntity('At least one role is required')
     }
     item.roles = roles
   }
@@ -249,7 +250,7 @@ class MemberManager {
     try {
       await this.client.core.serviceaccounts.delete(namespace, name)
     } catch (err) {
-      if (!httpErrors.isHttpError(err) || err.statusCode !== 404) {
+      if (!isHttpError(err) || err.statusCode !== 404) {
         throw err
       }
     }
@@ -296,7 +297,7 @@ class MemberManager {
       .chain(results)
       .filter(['status', 'rejected'])
       .map('reason')
-      .filter(err => !httpErrors.isHttpError(err) || err.statusCode !== 404)
+      .filter(err => !isHttpError(err) || err.statusCode !== 404)
       .value()
 
     if (errors.length === 1) {
