@@ -4,14 +4,20 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { subscribe as shootsSubscribe, unsubscribe as shootsUnsubscribe, synchronize as shootsSynchronize } from './shoots.js'
-import { synchronize as projectsSynchronize } from './projects.js'
+import {
+  subscribe as subscribeShoots,
+  unsubscribe as unsubscribeShoots,
+  synchronize as synchronizeShoots,
+} from './shoots.js'
+import {
+  synchronize as synchronizeProjects,
+} from './projects.js'
 
 async function subscribe (socket, key, options = {}) {
   switch (key) {
     case 'shoots':
-      await shootsUnsubscribe(socket)
-      return shootsSubscribe(socket, options)
+      await unsubscribeShoots(socket)
+      return subscribeShoots(socket, options)
     default:
       throw new TypeError(`Invalid subscription type - ${key}`)
   }
@@ -20,7 +26,7 @@ async function subscribe (socket, key, options = {}) {
 async function unsubscribe (socket, key) {
   switch (key) {
     case 'shoots':
-      return shootsUnsubscribe(socket)
+      return unsubscribeShoots(socket)
     default:
       throw new TypeError(`Invalid subscription type - ${key}`)
   }
@@ -31,12 +37,12 @@ function synchronize (socket, key, ...args) {
     case 'shoots': {
       const [uids] = args
       assertArray(uids)
-      return shootsSynchronize(socket, uids)
+      return synchronizeShoots(socket, uids)
     }
     case 'projects': {
       const [uids] = args
       assertArray(uids)
-      return projectsSynchronize(socket, uids)
+      return synchronizeProjects(socket, uids)
     }
     default:
       throw new TypeError(`Invalid synchronization type - ${key}`)
