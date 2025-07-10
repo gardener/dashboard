@@ -78,9 +78,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - uses: gardener/cc-utils/.github/actions/trusted-checkout@master
+      - uses: actions/checkout@v4
       - name: run-eslint
         run: |
+          set -eu
+          yarn install --immutable --immutable-cache --check-cache --refresh-lockfile
           set -eu
           (
             cd frontend
