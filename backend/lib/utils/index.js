@@ -8,12 +8,12 @@ import _ from 'lodash-es'
 import config from '../config/index.js'
 import assert from 'assert/strict'
 
-export const constants = {
+export const constants = Object.freeze({
   EXISTS: '\u2203',
   NOT_EXISTS: '!\u2203',
   EQUAL: '=',
   NOT_EQUAL: '!=',
-}
+})
 
 export function decodeBase64 (value) {
   if (!value) {
