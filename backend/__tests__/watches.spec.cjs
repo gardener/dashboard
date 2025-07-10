@@ -409,9 +409,7 @@ describe('watches', function () {
     })
 
     it('should should load issues and comments of all issues', async function () {
-      // todo exported directly
-      // const { loadOpenIssuesAndComments } = watches.leases.test
-      const { loadOpenIssuesAndComments } = require('../dist/lib/watches/leases.cjs')
+      const { test: { loadOpenIssuesAndComments } } = require('../dist/lib/watches/leases.cjs')
 
       const issues = fixtures.github.issues.list()
       const issueNumbers = issues.map(i => i.number)

@@ -11,16 +11,18 @@ import cache from '../cache/index.js'
 import * as tickets from '../services/tickets.js'
 import SyncManager from '../github/SyncManager.js'
 
-export async function loadOpenIssuesAndComments (concurrency) {
-  const issues = await tickets.loadOpenIssues()
+export const test = {
+  loadOpenIssuesAndComments: async function (concurrency) {
+    const issues = await tickets.loadOpenIssues()
 
-  const limit = pLimit(concurrency)
-  const input = issues.map((issue) => {
-    const { number } = issue.metadata
-    return limit(() => tickets.loadIssueComments({ number }))
-  })
+    const limit = pLimit(concurrency)
+    const input = issues.map((issue) => {
+      const { number } = issue.metadata
+      return limit(() => tickets.loadIssueComments({ number }))
+    })
 
-  await Promise.all(input)
+    await Promise.all(input)
+  },
 }
 
 export default (io, informer, { signal }) => {
@@ -44,7 +46,7 @@ export default (io, informer, { signal }) => {
 
   const { pollIntervalSeconds, syncThrottleSeconds, syncConcurrency } = config.gitHub
   const syncManager = new SyncManager(() => {
-    return loadOpenIssuesAndComments(syncConcurrency || 10)
+    return test.loadOpenIssuesAndComments(syncConcurrency || 10)
   }, {
     interval: pollIntervalSeconds * 1000 || 0,
     throttle: syncThrottleSeconds * 1000 || 0,
