@@ -44,7 +44,7 @@ router.route('/:project')
       next(err)
     }
   })
-  .patch(async (req, res, next) => {
+  .put(async (req, res, next) => {
     try {
       const user = req.user
       const name = req.params.project
@@ -54,7 +54,7 @@ router.route('/:project')
       next(err)
     }
   })
-  .put(async (req, res, next) => {
+  .patch(async (req, res, next) => {
     try {
       const user = req.user
       const name = req.params.project
