@@ -440,10 +440,10 @@ export function sortItemsFn (state, context) {
     let sortOrders
     if (key === 'seedReadiness') {
       // second sort key is the seed name
-      sortKeys = [iteratee, 'spec.seedName', 'metadata.name']
+      sortKeys = [iteratee, ['spec', 'seedName'], ['metadata', 'name']]
       sortOrders = [order, 'asc', 'asc']
     } else {
-      sortKeys = [iteratee, 'metadata.name']
+      sortKeys = [iteratee, ['metadata', 'name']]
       sortOrders = [order, 'asc']
     }
 
