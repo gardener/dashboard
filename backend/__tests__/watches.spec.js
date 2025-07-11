@@ -119,12 +119,6 @@ describe('watches', function () {
       .set(['metadata', 'labels', 'shoot.gardener.cloud/status'], 'unhealthy')
       .value()
 
-    let shootsWithIssues
-
-    beforeEach(() => {
-      shootsWithIssues = new Set()
-    })
-
     it('should watch shoots without issues', async function () {
       watches.shoots(io, informer)
 
@@ -162,19 +156,13 @@ describe('watches', function () {
     })
 
     it('should watch shoots with issues', async function () {
-      watches.shoots(io, informer, { shootsWithIssues })
+      watches.shoots(io, informer)
 
-      expect(shootsWithIssues).toHaveProperty('size', 0)
       informer.emit('add', foobarUnhealthy)
-      expect(shootsWithIssues).toHaveProperty('size', 1)
-      informer.emit('update', foobar)
-      expect(shootsWithIssues).toHaveProperty('size', 0)
+      informer.emit('update', foobar, foobarUnhealthy)
       informer.emit('add', foobazUnhealthy)
-      expect(shootsWithIssues).toHaveProperty('size', 1)
-      informer.emit('update', foobazUnhealthy)
-      expect(shootsWithIssues).toHaveProperty('size', 1)
+      informer.emit('update', foobazUnhealthy, foobazUnhealthy)
       informer.emit('delete', foobazUnhealthy)
-      expect(shootsWithIssues).toHaveProperty('size', 0)
 
       const fooRoom = rooms.get('shoots;foo')
       expect(fooRoom.emit).toHaveBeenCalledTimes(5)
