@@ -10,6 +10,7 @@ const createServer = require('socket.io')
 const logger = require('../logger')
 const helper = require('./helper')
 const dispatcher = require('./dispatcher')
+const { get } = require('lodash')
 
 function init (httpServer, cache) {
   const io = createServer(httpServer, {
@@ -27,6 +28,12 @@ function init (httpServer, cache) {
     delete socket.data.timeoutId
 
     helper.joinPrivateRoom(socket)
+
+    const user = helper.getUserFromSocket(socket)
+    if (get(user, ['profiles', 'canListSeeds'], false)) {
+      socket.join('seeds')
+      logger.debug('Socket %s auto-joined seeds room', socket.id)
+    }
 
     // handle 'subscribe' events
     socket.on('subscribe', async (key, ...args) => {
