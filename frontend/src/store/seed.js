@@ -14,6 +14,8 @@ import {
 } from 'vue'
 
 import { useApi } from '@/composables/useApi'
+import { useLogger } from '@/composables/useLogger'
+import { useSocketEventHandler } from '@/composables/useSocketEventHandler'
 
 import find from 'lodash/find'
 import get from 'lodash/get'
@@ -21,6 +23,7 @@ import keyBy from 'lodash/keyBy'
 
 export const useSeedStore = defineStore('seed', () => {
   const api = useApi()
+  const logger = useLogger()
 
   const list = ref(null)
 
@@ -54,10 +57,10 @@ export const useSeedStore = defineStore('seed', () => {
     return seeds
   }
 
-  function isSeedUnreachableByName (name) {
-    const seed = seedByName(name)
-    return get(seed, ['metadata', 'unreachable'])
-  }
+  const socketEventHandler = useSocketEventHandler(useSeedStore, {
+    logger,
+  })
+  socketEventHandler.start(500)
 
   return {
     list,
@@ -66,7 +69,7 @@ export const useSeedStore = defineStore('seed', () => {
     fetchSeeds,
     seedByName,
     seedsForCloudProfile,
-    isSeedUnreachableByName,
+    handleEvent: socketEventHandler.listener,
   }
 })
 
