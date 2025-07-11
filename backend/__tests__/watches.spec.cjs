@@ -281,25 +281,14 @@ describe('watches', function () {
 
       await flushPromises()
 
-      const ids = [
-        'admin@example.org',
-        'bar@example.org',
-      ].map(sha256)
+      const ids = ['seeds']
 
       expect(Array.from(rooms.keys())).toEqual(ids)
-      expect(nsp.to).toHaveBeenCalledTimes(6)
+      expect(nsp.to).toHaveBeenCalledTimes(3)
 
-      const adminRoom = rooms.get(ids[0])
-      expect(adminRoom.emit).toHaveBeenCalledTimes(3)
-      expect(adminRoom.emit.mock.calls).toEqual([
-        ['seeds', { type: 'ADDED', uid }],
-        ['seeds', { type: 'MODIFIED', uid }],
-        ['seeds', { type: 'DELETED', uid }],
-      ])
-
-      const barRoom = rooms.get(ids[1])
-      expect(barRoom.emit).toHaveBeenCalledTimes(3)
-      expect(barRoom.emit.mock.calls).toEqual([
+      const seedsRoom = rooms.get(ids[0])
+      expect(seedsRoom.emit).toHaveBeenCalledTimes(3)
+      expect(seedsRoom.emit.mock.calls).toEqual([
         ['seeds', { type: 'ADDED', uid }],
         ['seeds', { type: 'MODIFIED', uid }],
         ['seeds', { type: 'DELETED', uid }],
