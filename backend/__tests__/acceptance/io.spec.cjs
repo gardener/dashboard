@@ -152,6 +152,7 @@ describe('api', function () {
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
           ...defaultRooms,
+          'seeds',
           'shoots;garden-foo/fooShoot',
         ]))
 
@@ -182,12 +183,14 @@ describe('api', function () {
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
           ...defaultRooms,
+          'seeds',
           'shoots;garden-foo',
         ]))
 
         await unsubscribe(socket, 'shoots')
         expect(getRooms(socket, nsp)).toEqual(new Set([
           ...defaultRooms,
+          'seeds',
         ]))
       })
 
@@ -203,6 +206,7 @@ describe('api', function () {
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
           ...defaultRooms,
+          'seeds',
           'shoots;garden-foo',
           'shoots;garden-bar',
         ]))
@@ -220,6 +224,7 @@ describe('api', function () {
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
           ...defaultRooms,
+          'seeds',
           'shoots:unhealthy;garden-foo',
           'shoots:unhealthy;garden-bar',
         ]))
@@ -273,12 +278,14 @@ describe('api', function () {
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
           ...defaultRooms,
+          'seeds',
           'shoots;garden-foo',
         ]))
 
         await unsubscribe(socket, 'shoots')
         expect(getRooms(socket, nsp)).toEqual(new Set([
           ...defaultRooms,
+          'seeds',
         ]))
       })
 
@@ -332,6 +339,7 @@ describe('api', function () {
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
           ...defaultRooms,
+          'seeds',
           'shoots;garden-foo/fooShoot',
         ]))
 
@@ -349,6 +357,7 @@ describe('api', function () {
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
           ...defaultRooms,
+          'seeds',
           'shoots;garden-foo',
         ]))
 
@@ -366,6 +375,7 @@ describe('api', function () {
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
           ...defaultRooms,
+          'seeds',
           'shoots:admin',
         ]))
 
@@ -383,6 +393,7 @@ describe('api', function () {
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
           ...defaultRooms,
+          'seeds',
           'shoots:unhealthy:admin',
         ]))
       })

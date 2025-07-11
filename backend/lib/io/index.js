@@ -8,6 +8,7 @@ import { Server } from 'socket.io'
 import logger from '../logger/index.js'
 import helper from './helper.js'
 import dispatcher from './dispatcher.js'
+import _ from 'lodash-es'
 
 function init (httpServer, cache) {
   const io = new Server(httpServer, {
@@ -25,6 +26,12 @@ function init (httpServer, cache) {
     delete socket.data.timeoutId
 
     helper.joinPrivateRoom(socket)
+
+    const user = helper.getUserFromSocket(socket)
+    if (_.get(user, ['profiles', 'canListSeeds'], false)) {
+      socket.join('seeds')
+      logger.debug('Socket %s auto-joined seeds room', socket.id)
+    }
 
     // handle 'subscribe' events
     socket.on('subscribe', async (key, ...args) => {
