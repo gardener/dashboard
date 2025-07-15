@@ -41,7 +41,7 @@ jobs:
         run: yarn generate-all-dependency-diagrams
 
       - name: Commit changes
-        uses: iarekylew00t/verified-bot-commit@69a9979a7952792313012eadcbdd6b56f17154f6 # v1.5.0
+        uses: iarekylew00t/verified-bot-commit@cc09d455be3e20eb6b1c3d1c30a5221f9475aa10 # v1.5.1
         with:
           message: 'Update dependency diagrams'
           files: |
