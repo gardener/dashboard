@@ -60,14 +60,14 @@ exports[`api user should return the kubeconfig data the user 1`] = `
   "certificateAuthorityData": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCkxpNHUKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==",
   "oidc": {
     "certificateAuthorityData": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCkxpNHUKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==",
-    "clientId": "dashboard",
+    "clientId": "kube-kubectl",
+    "clientSecret": "6b7562652d6b75626563746c2d736563726574",
     "extraScopes": [
       "email",
       "profile",
       "groups",
     ],
     "issuerUrl": "https://kubernetes:32001",
-    "usePKCE": true,
   },
   "server": "https://kubernetes.external.foo.bar",
 }

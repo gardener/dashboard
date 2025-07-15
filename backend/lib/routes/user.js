@@ -37,18 +37,21 @@ router.route('/kubeconfig')
       apiServerCaData: certificateAuthorityData,
       apiServerSkipTlsVerify: insecureSkipTlsVerify,
       oidc = {},
+    } = config
+    const {
+      issuer: issuerUrl,
       public: {
         clientId = oidc.client_id,
         clientSecret,
         usePKCE,
       } = {},
-    } = config
+    } = oidc
     const body = {
       server,
       certificateAuthorityData,
       insecureSkipTlsVerify,
       oidc: {
-        issuerUrl: oidc.issuer,
+        issuerUrl,
         clientId,
       },
     }
