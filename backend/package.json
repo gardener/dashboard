@@ -23,7 +23,7 @@
   },
   "exports": "./lib/server.js",
   "scripts": {
-    "serve": "cross-env NODE_ENV=development node --experimental-vm-modules server.js",
+    "serve": "cross-env NODE_ENV=development node server.js",
     "lint": "eslint server.js . --max-warnings=0",
     "lint-sarif": "yarn lint --format=@microsoft/eslint-formatter-sarif",
     "build-test-target": "rollup -c rollup.config.js",
