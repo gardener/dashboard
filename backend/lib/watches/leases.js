@@ -11,6 +11,7 @@ import cache from '../cache/index.js'
 import * as tickets from '../services/tickets.js'
 import SyncManager from '../github/SyncManager.js'
 
+// exported for testing
 export const test = {
   loadOpenIssuesAndComments: async function (concurrency) {
     const issues = await tickets.loadOpenIssues()
