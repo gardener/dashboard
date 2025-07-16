@@ -8,7 +8,7 @@ import showdown from 'showdown'
 import sanitizeHtml from 'sanitize-html'
 const { Converter } = showdown
 
-export function createConverter (options) {
+function createConverter (options) {
   const converter = new Converter({
     tables: true,
     parseImgDimensions: true,
@@ -30,4 +30,8 @@ export function createConverter (options) {
       })
     },
   }
+}
+
+export {
+  createConverter,
 }

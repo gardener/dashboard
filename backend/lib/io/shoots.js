@@ -30,7 +30,7 @@ function getAllNamespaces (user) {
     .map(project => project.spec.namespace)
 }
 
-export async function subscribe (socket, { namespace, name, labelSelector }) {
+async function subscribe (socket, { namespace, name, labelSelector }) {
   const user = helper.getUserFromSocket(socket)
 
   const joinRoom = room => {
@@ -63,14 +63,14 @@ export async function subscribe (socket, { namespace, name, labelSelector }) {
   throw createError(403, 'Insufficient authorization for shoot subscription')
 }
 
-export function unsubscribe (socket) {
+function unsubscribe (socket) {
   const promises = Array.from(socket.rooms)
     .filter(room => room !== socket.id && room.startsWith('shoots'))
     .map(room => socket.leave(room))
   return Promise.all(promises)
 }
 
-export const synchronize = helper.synchronizeFactory('Shoot', {
+const synchronize = helper.synchronizeFactory('Shoot', {
   accessResolver (socket, object) {
     const rooms = Array.from(socket.rooms).filter(room => room !== socket.id)
     const [
@@ -89,3 +89,9 @@ export const synchronize = helper.synchronizeFactory('Shoot', {
     return helper.constants.OBJECT_NONE
   },
 })
+
+export {
+  subscribe,
+  unsubscribe,
+  synchronize,
+}

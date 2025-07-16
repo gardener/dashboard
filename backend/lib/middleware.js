@@ -38,9 +38,9 @@ morgan.token('url', (req, res) => {
   }
 })
 
-export const requestLogger = morgan('common', logger)
+const requestLogger = morgan('common', logger)
 
-export function noCache (staticPaths = []) {
+function noCache (staticPaths = []) {
   const isStatic = path => {
     for (const staticPath of staticPaths) {
       if (path.startsWith(staticPath)) {
@@ -57,7 +57,7 @@ export function noCache (staticPaths = []) {
   }
 }
 
-export function historyFallback (filename) {
+function historyFallback (filename) {
   return (req, res, next) => {
     if (!_.includes(['GET', 'HEAD'], req.method) || !req.accepts('html')) {
       return next()
@@ -70,7 +70,7 @@ export function historyFallback (filename) {
   }
 }
 
-export function notFound (req, res, next) {
+function notFound (req, res, next) {
   next(new NotFound('The server has not found anything matching the Request-URI'))
 }
 
@@ -98,12 +98,12 @@ function errorToLocals (err, req) {
   return { code, reason, message, status, details }
 }
 
-export function sendError (err, req, res, next) {
+function sendError (err, req, res, next) {
   const locals = errorToLocals(err, req)
   res.status(locals.code).send(locals)
 }
 
-export function renderError (err, req, res, next) {
+function renderError (err, req, res, next) {
   const locals = errorToLocals(err, req)
 
   res.format({
@@ -112,7 +112,7 @@ export function renderError (err, req, res, next) {
   })
 }
 
-export function metricsRoute (prefix) {
+function metricsRoute (prefix) {
   return (req, res, next) => {
     const path = req.route?.path ?? ''
     req.metricsRoute = prefix + path
@@ -120,7 +120,7 @@ export function metricsRoute (prefix) {
   }
 }
 
-export const ErrorTemplate = _.template(`<!doctype html>
+const ErrorTemplate = _.template(`<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -145,3 +145,14 @@ export const ErrorTemplate = _.template(`<!doctype html>
   <% if (details.stack) { %><pre><%= details.stack %></pre><% } %>
 </body>
 </html>`)
+
+export {
+  noCache,
+  historyFallback,
+  requestLogger,
+  notFound,
+  sendError,
+  renderError,
+  metricsRoute,
+  ErrorTemplate,
+}
