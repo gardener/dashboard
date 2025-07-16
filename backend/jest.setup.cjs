@@ -14,7 +14,6 @@ const ioClient = require('socket.io-client')
 const { createTerminus } = require('@godaddy/terminus')
 const { matchers, ...fixtures } = require('./__fixtures__')
 
-// eslint-disable-next-line no-undef -- presumable bug in jest (29.7.0) handling .cjs file extensions
 expect.extend(matchers)
 
 function createHttpAgent () {
@@ -39,7 +38,6 @@ function createHttpAgent () {
   }
 
   for (const method of ['get', 'put', 'patch', 'delete', 'post']) {
-    // eslint-disable-next-line security/detect-object-injection -- methods are predefined
     agent[method] = function (url) {
       const test = new Test(server, method, url)
       test.set('x-requested-with', 'XMLHttpRequest')
@@ -100,11 +98,8 @@ function createAgent (type = 'http', cache) {
       return createHttpAgent()
   }
 }
-
-// eslint-disable-next-line no-undef -- presumable bug in jest (29.7.0) handling .cjs file extensions
 jest.mock('./dist/lib/config/gardener', () => {
   const fixtures = require('./__fixtures__')
-  // eslint-disable-next-line no-undef -- presumable bug in jest (29.7.0) handling .cjs file extensions
   const originalGardener = jest.requireActual('./dist/lib/config/gardener')
   const mockFiles = new Map()
   for (const [path, data] of fixtures.config.list()) {
@@ -112,18 +107,17 @@ jest.mock('./dist/lib/config/gardener', () => {
   }
   return {
     ...originalGardener,
-    // eslint-disable-next-line no-undef -- presumable bug in jest (29.7.0) handling .cjs file extensions
+
     readConfig: jest.fn(path => mockFiles.get(path)),
   }
 })
 
-// eslint-disable-next-line no-undef -- presumable bug in jest (29.7.0) handling .cjs file extensions
 jest.mock('./dist/lib/cache/index.cjs', () => {
   const { find } = require('lodash')
   const fixtures = require('./__fixtures__')
-  // eslint-disable-next-line no-undef -- presumable bug in jest (29.7.0) handling .cjs file extensions
+
   const originalCache = jest.requireActual('./dist/lib/cache')
-  // eslint-disable-next-line no-undef -- presumable bug in jest (29.7.0) handling .cjs file extensions
+
   const createTicketCache = jest.requireActual('./dist/lib/cache/tickets')
   const { cache } = originalCache
   const keys = [
@@ -136,7 +130,6 @@ jest.mock('./dist/lib/cache/index.cjs', () => {
   ]
   for (const key of keys) {
     cache.set(key, {
-      // eslint-disable-next-line security/detect-object-injection -- keys are predefined
       items: fixtures[key].list(),
       list () {
         return this.items
@@ -151,7 +144,6 @@ jest.mock('./dist/lib/cache/index.cjs', () => {
   return originalCache
 })
 
-// eslint-disable-next-line no-undef -- presumable bug in jest (29.7.0) handling .cjs file extensions
 beforeAll(() => {
   Object.assign(process.env, fixtures.env)
 })

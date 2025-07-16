@@ -57,7 +57,7 @@ module.exports = [
       '**/__fixtures__/**',
       '**/__mocks__/**',
       '**/__tests__/**',
-      '**/jest.setup.js',
+      '**/jest.setup.cjs',
     ],
     plugins: {
       jest: pluginJest,
