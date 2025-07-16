@@ -15,7 +15,8 @@ const { dashboardClient } = kubeClient
 const { PreconditionFailed, InternalServerError } = httpErrors
 const { getProject, getProjects } = cache
 
-const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
+// needs to be exported for testing
+export const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
 
 async function validateDeletePreconditions ({ user, name }) {
   const project = getProject(name)
@@ -26,8 +27,6 @@ async function validateDeletePreconditions ({ user, name }) {
     throw new PreconditionFailed('Only empty projects can be deleted')
   }
 }
-
-export const projectInitializationTimeout = PROJECT_INITIALIZATION_TIMEOUT
 
 export async function list ({ user }) {
   const canListProjects = await authorization.canListProjects(user)
@@ -54,10 +53,9 @@ export async function create ({ user, body }) {
       ok: _.get(project, ['status', 'phase']) === 'Ready',
     }
   }
-  const timeout = exports.projectInitializationTimeout
   // must be the dashboardClient because rbac rolebinding does not exist yet
   const asyncIterable = await dashboardClient['core.gardener.cloud'].projects.watch(name)
-  project = await asyncIterable.until(isProjectReady, { timeout })
+  project = await asyncIterable.until(isProjectReady, { PROJECT_INITIALIZATION_TIMEOUT })
 
   return project
 }
