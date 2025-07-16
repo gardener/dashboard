@@ -7,13 +7,17 @@
 import json from '@rollup/plugin-json'
 import commonjs from '@rollup/plugin-commonjs'
 import copy from 'rollup-plugin-copy'
+import { fileURLToPath } from 'url'
+import { dirname, resolve } from 'path'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
 export default [
   {
     input: 'server.js',
     cache: false,
     output: {
-      dir: `${process.cwd()}/dist/`,
+      dir: resolve(__dirname, 'dist'),
       format: 'cjs',
       preserveModules: true,
       entryFileNames: '[name].cjs',
@@ -26,7 +30,7 @@ export default [
       commonjs(),
       copy({
         targets: [
-          { src: 'package.json', dest: `${process.cwd()}/dist/` },
+          { src: 'package.json', dest: resolve(__dirname, 'dist') },
         ],
       }),
     ],

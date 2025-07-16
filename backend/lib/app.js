@@ -8,7 +8,8 @@ import express from 'express'
 import expressStaticGzip from 'express-static-gzip'
 import _ from 'lodash-es'
 import config from './config/index.js'
-import { resolve, join } from 'path'
+import { resolve, join, dirname } from 'path'
+import { fileURLToPath } from 'url'
 import logger from './logger/index.js'
 import { notFound, renderError, historyFallback, noCache } from './middleware.js'
 import helmet from 'helmet'
@@ -27,7 +28,8 @@ for (const ctor of [Object, Function, Array, String, Number, Boolean]) {
 }
 
 // resolve pathnames
-const PUBLIC_DIRNAME = resolve(join(process.cwd(), 'public'))
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const PUBLIC_DIRNAME = resolve(join(__dirname, '..', 'public'))
 const INDEX_FILENAME = join(PUBLIC_DIRNAME, 'index.html')
 const STATIC_PATHS = ['/assets', '/static', '/js', '/css', '/fonts', '/img']
 
