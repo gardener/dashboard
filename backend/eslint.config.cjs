@@ -8,6 +8,8 @@ const neostandard = require('neostandard')
 const pluginJest = require('eslint-plugin-jest')
 const pluginSecurity = require('eslint-plugin-security')
 const pluginLodash = require('eslint-plugin-lodash')
+const pluginImport = require('eslint-plugin-import')
+
 module.exports = [
   ...neostandard({}),
   {
@@ -17,6 +19,31 @@ module.exports = [
     },
   },
   pluginSecurity.configs.recommended,
+  {
+    settings: {
+      'import/resolver': {
+        [require.resolve('../eslint-import-resolver-local.cjs')]: {
+          map: [
+            ['@gardener-dashboard/monitor', '../packages/monitor'],
+            ['@gardener-dashboard/logger', '../packages/logger'],
+            ['@gardener-dashboard/kube-client', '../packages/kube-client'],
+            ['@gardener-dashboard/kube-config', '../packages/kube-config'],
+            ['@gardener-dashboard/polling-watcher', '../packages/polling-watcher'],
+            ['@gardener-dashboard/request', '../packages/request'],
+            ['@gardener-dashboard/test-utils', '../packages/test-utils'],
+          ],
+        },
+        node: {
+          extensions: ['.js', '.cjs', '.mjs'],
+        },
+      },
+    },
+    plugins: {
+      import: pluginImport,
+    },
+    rules: pluginImport.flatConfigs.recommended.rules,
+  },
+
   {
     plugins: {
       lodash: pluginLodash,

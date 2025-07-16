@@ -44,7 +44,7 @@ const importConfig = {
         ],
         extensions: ['.js', '.vue'],
       },
-      [path.resolve('./eslint-import-resolver-local.cjs')]: {
+      [path.resolve('../eslint-import-resolver-local.cjs')]: {
         map: [
           ['unfonts.css', null],
           ['@vueuse/integrations/useCookies', null],
