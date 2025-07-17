@@ -1965,7 +1965,7 @@ const RAW_RUNTIME_STATE =
           ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:29.7.0"],\
           ["neostandard", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:0.12.2"],\
           ["prom-client", "npm:15.1.3"],\
-          ["response-time", "npm:2.3.3"],\
+          ["response-time", "npm:2.3.4"],\
           ["rimraf", "npm:6.0.1"],\
           ["rollup", "npm:4.44.2"],\
           ["supertest", "npm:7.1.1"]\
@@ -1999,7 +1999,7 @@ const RAW_RUNTIME_STATE =
           ["jest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:29.7.0"],\
           ["neostandard", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:0.12.2"],\
           ["prom-client", "npm:15.1.3"],\
-          ["response-time", "npm:2.3.3"],\
+          ["response-time", "npm:2.3.4"],\
           ["rimraf", "npm:6.0.1"],\
           ["rollup", "npm:4.44.2"],\
           ["supertest", "npm:7.1.1"]\
@@ -11568,13 +11568,6 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["on-headers", [\
-      ["npm:1.0.2", {\
-        "packageLocation": "./.yarn/cache/on-headers-npm-1.0.2-e7cd3ea25e-f649e65c19.zip/node_modules/on-headers/",\
-        "packageDependencies": [\
-          ["on-headers", "npm:1.0.2"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["npm:1.1.0", {\
         "packageLocation": "./.yarn/cache/on-headers-npm-1.1.0-7d18779060-2c3b6b0d68.zip/node_modules/on-headers/",\
         "packageDependencies": [\
@@ -12352,12 +12345,12 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["response-time", [\
-      ["npm:2.3.3", {\
-        "packageLocation": "./.yarn/cache/response-time-npm-2.3.3-a2ac0648ba-5e04c6a803.zip/node_modules/response-time/",\
+      ["npm:2.3.4", {\
+        "packageLocation": "./.yarn/cache/response-time-npm-2.3.4-7fc5457cc0-c593323c1d.zip/node_modules/response-time/",\
         "packageDependencies": [\
           ["depd", "npm:2.0.0"],\
-          ["on-headers", "npm:1.0.2"],\
-          ["response-time", "npm:2.3.3"]\
+          ["on-headers", "npm:1.1.0"],\
+          ["response-time", "npm:2.3.4"]\
         ],\
         "linkType": "HARD"\
       }]\
