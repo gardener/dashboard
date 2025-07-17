@@ -1677,7 +1677,7 @@ const RAW_RUNTIME_STATE =
           ["js-yaml", "npm:4.1.0"],\
           ["jsonwebtoken", "npm:9.0.2"],\
           ["lodash", "npm:4.17.21"],\
-          ["morgan", "npm:1.10.0"],\
+          ["morgan", "npm:1.10.1"],\
           ["neostandard", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:0.12.2"],\
           ["object-hash", "npm:3.0.0"],\
           ["openapi-types", "npm:12.1.3"],\
@@ -11190,15 +11190,15 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["morgan", [\
-      ["npm:1.10.0", {\
-        "packageLocation": "./.yarn/cache/morgan-npm-1.10.0-a0da109b6b-684db061da.zip/node_modules/morgan/",\
+      ["npm:1.10.1", {\
+        "packageLocation": "./.yarn/cache/morgan-npm-1.10.1-247862abc0-2ecd68504d.zip/node_modules/morgan/",\
         "packageDependencies": [\
           ["basic-auth", "npm:2.0.1"],\
           ["debug", "virtual:50886165444733a0f3bfe50ac2d8c33ee920ef2e6dbf1ccf65ba96ddbcfed411a593dc29bef477196f1108a3580db1be948ed737826fc181781c2a4eff7140b1#npm:2.6.9"],\
           ["depd", "npm:2.0.0"],\
-          ["morgan", "npm:1.10.0"],\
+          ["morgan", "npm:1.10.1"],\
           ["on-finished", "npm:2.3.0"],\
-          ["on-headers", "npm:1.0.2"]\
+          ["on-headers", "npm:1.1.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -11572,6 +11572,13 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/on-headers-npm-1.0.2-e7cd3ea25e-f649e65c19.zip/node_modules/on-headers/",\
         "packageDependencies": [\
           ["on-headers", "npm:1.0.2"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:1.1.0", {\
+        "packageLocation": "./.yarn/cache/on-headers-npm-1.1.0-7d18779060-2c3b6b0d68.zip/node_modules/on-headers/",\
+        "packageDependencies": [\
+          ["on-headers", "npm:1.1.0"]\
         ],\
         "linkType": "HARD"\
       }]\
