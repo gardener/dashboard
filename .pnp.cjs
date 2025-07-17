@@ -1657,7 +1657,7 @@ const RAW_RUNTIME_STATE =
           ["abort-controller", "npm:3.0.0"],\
           ["base64url", "npm:3.0.1"],\
           ["body-parser", "npm:2.2.0"],\
-          ["compression", "npm:1.8.0"],\
+          ["compression", "npm:1.8.1"],\
           ["cookie-parser", "npm:1.4.7"],\
           ["cross-env", "npm:7.0.3"],\
           ["dockerfile-ast", "npm:0.7.0"],\
@@ -6203,15 +6203,15 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["compression", [\
-      ["npm:1.8.0", {\
-        "packageLocation": "./.yarn/cache/compression-npm-1.8.0-5088616544-804d3c8430.zip/node_modules/compression/",\
+      ["npm:1.8.1", {\
+        "packageLocation": "./.yarn/cache/compression-npm-1.8.1-e34a5db404-85114b0b91.zip/node_modules/compression/",\
         "packageDependencies": [\
           ["bytes", "npm:3.1.2"],\
           ["compressible", "npm:2.0.18"],\
-          ["compression", "npm:1.8.0"],\
-          ["debug", "virtual:50886165444733a0f3bfe50ac2d8c33ee920ef2e6dbf1ccf65ba96ddbcfed411a593dc29bef477196f1108a3580db1be948ed737826fc181781c2a4eff7140b1#npm:2.6.9"],\
+          ["compression", "npm:1.8.1"],\
+          ["debug", "virtual:e34a5db40400b9e5b2ff4a99207e6e6259d3054982622ae91b68c81eb2631164c6d9db4ab29c0dbf7620574b8d6b678f010601eafc55a6b832550053c1b61b7b#npm:2.6.9"],\
           ["negotiator", "npm:0.6.4"],\
-          ["on-headers", "npm:1.0.2"],\
+          ["on-headers", "npm:1.1.0"],\
           ["safe-buffer", "npm:5.2.1"],\
           ["vary", "npm:1.1.2"]\
         ],\
@@ -6556,11 +6556,11 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "HARD"\
       }],\
-      ["virtual:50886165444733a0f3bfe50ac2d8c33ee920ef2e6dbf1ccf65ba96ddbcfed411a593dc29bef477196f1108a3580db1be948ed737826fc181781c2a4eff7140b1#npm:2.6.9", {\
-        "packageLocation": "./.yarn/__virtual__/debug-virtual-f28ed1b076/0/cache/debug-npm-2.6.9-7d4cb597dc-121908fb83.zip/node_modules/debug/",\
+      ["virtual:e34a5db40400b9e5b2ff4a99207e6e6259d3054982622ae91b68c81eb2631164c6d9db4ab29c0dbf7620574b8d6b678f010601eafc55a6b832550053c1b61b7b#npm:2.6.9", {\
+        "packageLocation": "./.yarn/__virtual__/debug-virtual-63e86aadbc/0/cache/debug-npm-2.6.9-7d4cb597dc-121908fb83.zip/node_modules/debug/",\
         "packageDependencies": [\
           ["@types/supports-color", null],\
-          ["debug", "virtual:50886165444733a0f3bfe50ac2d8c33ee920ef2e6dbf1ccf65ba96ddbcfed411a593dc29bef477196f1108a3580db1be948ed737826fc181781c2a4eff7140b1#npm:2.6.9"],\
+          ["debug", "virtual:e34a5db40400b9e5b2ff4a99207e6e6259d3054982622ae91b68c81eb2631164c6d9db4ab29c0dbf7620574b8d6b678f010601eafc55a6b832550053c1b61b7b#npm:2.6.9"],\
           ["ms", "npm:2.0.0"],\
           ["supports-color", null]\
         ],\
@@ -11194,7 +11194,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/morgan-npm-1.10.1-247862abc0-2ecd68504d.zip/node_modules/morgan/",\
         "packageDependencies": [\
           ["basic-auth", "npm:2.0.1"],\
-          ["debug", "virtual:50886165444733a0f3bfe50ac2d8c33ee920ef2e6dbf1ccf65ba96ddbcfed411a593dc29bef477196f1108a3580db1be948ed737826fc181781c2a4eff7140b1#npm:2.6.9"],\
+          ["debug", "virtual:e34a5db40400b9e5b2ff4a99207e6e6259d3054982622ae91b68c81eb2631164c6d9db4ab29c0dbf7620574b8d6b678f010601eafc55a6b832550053c1b61b7b#npm:2.6.9"],\
           ["depd", "npm:2.0.0"],\
           ["morgan", "npm:1.10.1"],\
           ["on-finished", "npm:2.3.0"],\
