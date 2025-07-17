@@ -1,0 +1,84 @@
+name: Prepare Hotfix Branch
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'The tag for which the hotfix should be created'
+        required: true
+        type: string
+
+jobs:
+  prepare-hotfix:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ inputs.tag }}
+      - name: Setup Git Identity
+        uses: gardener/cc-utils/.github/actions/setup-git-identity@master
+      - name: Compute and validate branch names
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          if [[ ! "$TAG" =~ \.0$ ]]; then
+            echo "Tag does not end with .0"
+            exit 1
+          fi
+          BASE_VERSION="${TAG%.*}"
+          HOTFIX_BRANCH="hotfix-${BASE_VERSION}"
+          if [[ ! "$HOTFIX_BRANCH" =~ ^hotfix-[a-zA-Z0-9.-]+$ ]]; then
+            echo "Invalid hotfix branch name derived from tag: $HOTFIX_BRANCH"
+            exit 1
+          fi
+          PREPARE_BRANCH="hotfix-prepare-${BASE_VERSION}"
+          echo "HOTFIX_BRANCH=$HOTFIX_BRANCH" >> $GITHUB_ENV
+          echo "PREPARE_BRANCH=$PREPARE_BRANCH" >> $GITHUB_ENV
+      - name: Check and create branches
+        run: |
+          git fetch origin
+          if git ls-remote --exit-code origin "$HOTFIX_BRANCH" > /dev/null 2>&1; then
+            echo "Hotfix branch $HOTFIX_BRANCH already exists"
+            exit 1
+          fi
+          if git ls-remote --exit-code origin "$PREPARE_BRANCH" > /dev/null 2>&1; then
+            echo "Prepare branch $PREPARE_BRANCH already exists"
+            exit 1
+          fi
+
+          git checkout -b "$HOTFIX_BRANCH"
+          git push origin "$HOTFIX_BRANCH"
+
+          git checkout -b "$PREPARE_BRANCH" # do not push yet
+      - name: Bump patch version
+        uses: gardener/cc-utils/.github/actions/version@master
+        with:
+          version-operation: bump-patch
+          prerelease: dev
+          repository-operation: commit-to-head
+          commit-message: Bump patch version to ${version} for hotfix
+      - name: Update and commit .yarnrc.yml
+        run: |
+          cat <<EOF >> .yarnrc.yml
+
+          changesetBaseRefs:
+            - "master"
+            - "origin/master"
+            - "$HOTFIX_BRANCH"
+            - "origin/$HOTFIX_BRANCH"
+          EOF
+          git add .yarnrc.yml
+          git commit -m "Add hotfix branch to changesetBaseRefs in .yarnrc.yml"
+      - name: Push prepare branch and create Pull Request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git push origin "$PREPARE_BRANCH"
+          gh pr create \
+            --base "$HOTFIX_BRANCH" \
+            --head "$PREPARE_BRANCH" \
+            --title "[$HOTFIX_BRANCH] Prepare hotfix branch" \
+            --body "Bumps the patch version and adds the hotfix branch references to .yarnrc.yml for release preparation."
