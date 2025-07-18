@@ -10,8 +10,6 @@ SPDX-License-Identifier: Apache-2.0
     :secret-validations="v$"
     :binding="binding"
     :provider-type="providerType"
-    :create-title="`Add new ${name} Secret`"
-    :update-title="`Update ${name} Secret`"
   >
     <template #secret-slot>
       <div>
@@ -211,18 +209,6 @@ export default {
     },
     isCreateMode () {
       return !this.secret
-    },
-    name () {
-      if (this.providerType === 'azure') {
-        return 'Azure'
-      }
-      if (this.providerType === 'azure-dns') {
-        return 'Azure DNS'
-      }
-      if (this.providerType === 'azure-private-dns') {
-        return 'Azure Private DNS'
-      }
-      return undefined
     },
   },
   methods: {
