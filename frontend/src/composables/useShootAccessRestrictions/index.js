@@ -17,8 +17,8 @@ import keyBy from 'lodash/keyBy'
 import mapValues from 'lodash/mapValues'
 
 const shootPropertyMappings = Object.freeze({
-  cloudProfileRef: 'spec.cloudProfile',
-  region: 'spec.region',
+  cloudProfileRef: ['spec', 'cloudProfile'],
+  region: ['spec', 'region'],
 })
 
 export const useShootAccessRestrictions = (shootItem, options = {}) => {
