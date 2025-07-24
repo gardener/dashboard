@@ -4,10 +4,20 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { fetch, Agent } from 'undici'
+import {
+  fetch,
+  Agent,
+} from 'undici'
 import assert from 'assert/strict'
 import crypto from 'crypto'
-import { split, join, includes, head, chain, pick } from 'lodash-es'
+import {
+  split,
+  join,
+  includes,
+  head,
+  chain,
+  pick,
+} from 'lodash-es'
 import pRetry from 'p-retry'
 import pTimeout from 'p-timeout'
 import services from '../services/index.js'

@@ -13,7 +13,11 @@ import config from './config/index.js'
 import routes from './routes/index.js'
 import createHooks from './hooks.js'
 import { authenticate } from './security/index.js'
-import { notFound, sendError, requestLogger } from './middleware.js'
+import {
+  notFound,
+  sendError,
+  requestLogger,
+} from './middleware.js'
 import kubeClientModule from '@gardener-dashboard/kube-client'
 import monitorModule from '@gardener-dashboard/monitor'
 

@@ -6,7 +6,10 @@
 
 import _ from 'lodash-es'
 import config from '../config/index.js'
-import { searchIssues, getComments } from '../github/index.js'
+import {
+  searchIssues,
+  getComments,
+} from '../github/index.js'
 import { createConverter } from '../markdown.js'
 import cache from '../cache/index.js'
 

@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { createHmac, timingSafeEqual } from 'crypto'
+import {
+  createHmac,
+  timingSafeEqual,
+} from 'crypto'
 import assert from 'assert'
 import createError from 'http-errors'
 import config from '../../config/index.js'

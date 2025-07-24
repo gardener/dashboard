@@ -7,7 +7,10 @@
 import express from 'express'
 import requestModule from '@gardener-dashboard/request'
 import { readFile } from 'fs/promises'
-import { dirname, join } from 'path'
+import {
+  dirname,
+  join,
+} from 'path'
 import { fileURLToPath } from 'url'
 import logger from '../logger/index.js'
 import { decodeBase64 } from '../utils/index.js'

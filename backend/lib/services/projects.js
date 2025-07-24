@@ -9,7 +9,10 @@ import kubeClientModule from '@gardener-dashboard/kube-client'
 import httpErrors from 'http-errors'
 import * as shoots from './shoots.js'
 import * as authorization from './authorization.js'
-import { projectFilter, simplifyProject } from '../utils/index.js'
+import {
+  projectFilter,
+  simplifyProject,
+} from '../utils/index.js'
 import cache from '../cache/index.js'
 const { dashboardClient } = kubeClientModule
 const { PreconditionFailed, InternalServerError } = httpErrors

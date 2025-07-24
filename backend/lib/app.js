@@ -8,12 +8,24 @@ import express from 'express'
 import expressStaticGzip from 'express-static-gzip'
 import _ from 'lodash-es'
 import config from './config/index.js'
-import { resolve, join, dirname } from 'path'
+import {
+  resolve,
+  join,
+  dirname,
+} from 'path'
 import { fileURLToPath } from 'url'
 import logger from './logger/index.js'
-import { notFound, renderError, historyFallback, noCache } from './middleware.js'
+import {
+  notFound,
+  renderError,
+  historyFallback,
+  noCache,
+} from './middleware.js'
 import helmet from 'helmet'
-import { router as apiRouter, hooks as apiHooks } from './api.js'
+import {
+  router as apiRouter,
+  hooks as apiHooks,
+} from './api.js'
 import { router as authRouter } from './auth.js'
 import { router as githubWebhookRouter } from './github/webhook/index.js'
 import { healthCheck } from './healthz/index.js'

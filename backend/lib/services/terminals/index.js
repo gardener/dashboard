@@ -11,8 +11,15 @@ import { load as yamlLoad } from 'js-yaml'
 import gardenerConfig from '../../config/index.js'
 import { getClusterCaData } from '../shoots.js'
 import kubeClientModule from '@gardener-dashboard/kube-client'
-import { decodeBase64, getConfigValue, getSeedNameFromShoot } from '../../utils/index.js'
-import { toTerminalResource, fromNodeResource } from './resources.js'
+import {
+  decodeBase64,
+  getConfigValue,
+  getSeedNameFromShoot,
+} from '../../utils/index.js'
+import {
+  toTerminalResource,
+  fromNodeResource,
+} from './resources.js'
 import {
   getKubeApiServerHostForSeedOrManagedSeed,
   getKubeApiServerHostForShoot,

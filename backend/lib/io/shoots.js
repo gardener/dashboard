@@ -7,7 +7,10 @@
 import createError from 'http-errors'
 import logger from '../logger/index.js'
 import cache from '../cache/index.js'
-import { projectFilter, parseRooms } from '../utils/index.js'
+import {
+  projectFilter,
+  parseRooms,
+} from '../utils/index.js'
 import services from '../services/index.js'
 import helper from './helper.js'
 const { authorization } = services

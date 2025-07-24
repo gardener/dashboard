@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { isPlainObject, map } from 'lodash-es'
+import {
+  isPlainObject,
+  map,
+} from 'lodash-es'
 import { promisify } from 'util'
 import jwt from 'jsonwebtoken'
 import crypto from 'crypto'

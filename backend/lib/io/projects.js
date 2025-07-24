@@ -5,7 +5,10 @@
 //
 
 import { get } from 'lodash-es'
-import { isMemberOf, simplifyProject } from '../utils/index.js'
+import {
+  isMemberOf,
+  simplifyProject,
+} from '../utils/index.js'
 import helper from './helper.js'
 
 export const synchronize = helper.synchronizeFactory('Project', {

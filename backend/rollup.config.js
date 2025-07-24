@@ -8,7 +8,10 @@ import json from '@rollup/plugin-json'
 import commonjs from '@rollup/plugin-commonjs'
 import copy from 'rollup-plugin-copy'
 import { fileURLToPath } from 'url'
-import { dirname, resolve } from 'path'
+import {
+  dirname,
+  resolve,
+} from 'path'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 

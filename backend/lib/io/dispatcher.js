@@ -9,9 +9,7 @@ import {
   unsubscribe as unsubscribeShoots,
   synchronize as synchronizeShoots,
 } from './shoots.js'
-import {
-  synchronize as synchronizeProjects,
-} from './projects.js'
+import { synchronize as synchronizeProjects } from './projects.js'
 
 async function subscribe (socket, key, options = {}) {
   switch (key) {
