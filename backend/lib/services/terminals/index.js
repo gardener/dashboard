@@ -10,7 +10,7 @@ import hash from 'object-hash'
 import { load as yamlLoad } from 'js-yaml'
 import gardenerConfig from '../../config/index.js'
 import { getClusterCaData } from '../shoots.js'
-import kubeClient from '@gardener-dashboard/kube-client'
+import kubeClientModule from '@gardener-dashboard/kube-client'
 import { decodeBase64, getConfigValue, getSeedNameFromShoot } from '../../utils/index.js'
 import { toTerminalResource, fromNodeResource } from './resources.js'
 import {
@@ -23,7 +23,7 @@ import {
 import cache from '../../cache/index.js'
 import logger from '../../logger/index.js'
 import { createConverter } from '../../markdown.js'
-const { Resources } = kubeClient
+const { Resources } = kubeClientModule
 const { Forbidden, UnprocessableEntity, InternalServerError, isHttpError } = httpErrors
 const { getSeed, findProjectByNamespace } = cache
 

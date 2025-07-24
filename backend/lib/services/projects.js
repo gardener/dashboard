@@ -5,13 +5,13 @@
 //
 
 import _ from 'lodash-es'
-import kubeClient from '@gardener-dashboard/kube-client'
+import kubeClientModule from '@gardener-dashboard/kube-client'
 import httpErrors from 'http-errors'
 import * as shoots from './shoots.js'
 import * as authorization from './authorization.js'
 import { projectFilter, simplifyProject } from '../utils/index.js'
 import cache from '../cache/index.js'
-const { dashboardClient } = kubeClient
+const { dashboardClient } = kubeClientModule
 const { PreconditionFailed, InternalServerError } = httpErrors
 const { getProject, getProjects } = cache
 

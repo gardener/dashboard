@@ -8,7 +8,7 @@ import crypto from 'crypto'
 import { promisify } from 'util'
 import httpErrors from 'http-errors'
 import cookieParser from 'cookie-parser'
-import kubeClient from '@gardener-dashboard/kube-client'
+import kubeClientModule from '@gardener-dashboard/kube-client'
 import { cloneDeep } from 'lodash-es'
 import cache from '../cache/index.js'
 import logger from '../logger/index.js'
@@ -103,7 +103,7 @@ export default {
   },
 
   authenticationMiddleware () {
-    const authenticate = this.authenticateFn(kubeClient)
+    const authenticate = this.authenticateFn(kubeClientModule)
 
     return async (socket, next) => {
       logger.debug('Socket %s authenticating', socket.id)
