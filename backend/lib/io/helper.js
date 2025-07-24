@@ -17,7 +17,6 @@ import { authenticate } from '../security/index.js'
 import { simplifyObjectMetadata } from '../utils/index.js'
 
 const { isHttpError } = httpErrors
-const kubernetesClient = kubeClient
 
 export default {
   constants: Object.freeze({
@@ -104,7 +103,7 @@ export default {
   },
 
   authenticationMiddleware () {
-    const authenticate = this.authenticateFn(kubernetesClient)
+    const authenticate = this.authenticateFn(kubeClient)
 
     return async (socket, next) => {
       logger.debug('Socket %s authenticating', socket.id)
