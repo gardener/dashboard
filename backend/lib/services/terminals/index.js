@@ -696,7 +696,7 @@ export function ensureTerminalAllowed ({ method, isAdmin, body }) {
   }
 
   // whitelist methods for terminal sessions for everybody
-  if (_.includes(['list', 'fetch', 'terminalConfig', 'remove', 'heartbeat', 'listProjectTerminalShortcuts'], method)) {
+  if (_.includes(['list', 'fetch', 'config', 'remove', 'heartbeat', 'listProjectTerminalShortcuts'], method)) {
     return
   }
 
