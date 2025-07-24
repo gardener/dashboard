@@ -16,13 +16,12 @@ import {
 import cache from '../cache/index.js'
 const { dashboardClient } = kubeClientModule
 const { PreconditionFailed, InternalServerError } = httpErrors
-const { getProject, getProjects } = cache
 
 // needs to be exported for testing
 export const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
 
 async function validateDeletePreconditions ({ user, name }) {
-  const project = getProject(name)
+  const project = cache.getProject(name)
   const namespace = _.get(project, ['spec', 'namespace'])
 
   const shootList = await shoots.list({ user, namespace })
@@ -34,7 +33,7 @@ async function validateDeletePreconditions ({ user, name }) {
 export async function list ({ user }) {
   const canListProjects = await authorization.canListProjects(user)
   return _
-    .chain(getProjects())
+    .chain(cache.getProjects())
     .filter(projectFilter(user, canListProjects))
     .map(_.cloneDeep)
     .map(simplifyProject)
