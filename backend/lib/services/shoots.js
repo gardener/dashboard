@@ -25,8 +25,6 @@ const {
   getSeedNameFromShoot,
   projectFilter,
 } = utils
-const { getSeed, getShoots, getProjects } = cache
-
 export async function list ({ user, namespace, labelSelector }) {
   const query = {}
   if (labelSelector) {
@@ -38,12 +36,12 @@ export async function list ({ user, namespace, labelSelector }) {
       return {
         apiVersion: 'v1',
         kind: 'List',
-        items: getShoots(namespace, query),
+        items: cache.getShoots(namespace, query),
       }
     } else {
       // user is permitted to list shoots only in namespaces associated with their projects
       const namespaces = _
-        .chain(getProjects())
+        .chain(cache.getProjects())
         .filter(projectFilter(user, false))
         .map('spec.namespace')
         .value()
@@ -65,7 +63,7 @@ export async function list ({ user, namespace, labelSelector }) {
         kind: 'List',
         items: namespaces
           .filter(namespace => allowedNamespaceMap.get(namespace))
-          .flatMap(namespace => getShoots(namespace, query)),
+          .flatMap(namespace => cache.getShoots(namespace, query)),
       }
     }
   }
@@ -76,7 +74,7 @@ export async function list ({ user, namespace, labelSelector }) {
   return {
     apiVersion: 'v1',
     kind: 'List',
-    items: getShoots(namespace, query),
+    items: cache.getShoots(namespace, query),
   }
 }
 
@@ -303,7 +301,7 @@ export async function info ({ user, namespace, name }) {
   }
 
   if (shoot.spec.seedName) {
-    const seed = getSeed(getSeedNameFromShoot(shoot))
+    const seed = cache.getSeed(getSeedNameFromShoot(shoot))
     if (seed) {
       try {
         data.canLinkToSeed = !!(await client['core.gardener.cloud'].shoots.get('garden', seed.metadata.name))
