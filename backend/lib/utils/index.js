@@ -8,28 +8,28 @@ import _ from 'lodash-es'
 import config from '../config/index.js'
 import assert from 'assert/strict'
 
-export const constants = Object.freeze({
+const constants = Object.freeze({
   EXISTS: '\u2203',
   NOT_EXISTS: '!\u2203',
   EQUAL: '=',
   NOT_EQUAL: '!=',
 })
 
-export function decodeBase64 (value) {
+function decodeBase64 (value) {
   if (!value) {
     return
   }
   return Buffer.from(value, 'base64').toString('utf8')
 }
 
-export function encodeBase64 (value) {
+function encodeBase64 (value) {
   if (!value) {
     return
   }
   return Buffer.from(value, 'utf8').toString('base64')
 }
 
-export function isMemberOf (project, user) {
+function isMemberOf (project, user) {
   return _
     .chain(project)
     .get(['spec', 'members'])
@@ -56,7 +56,7 @@ export function isMemberOf (project, user) {
     .value()
 }
 
-export function projectFilter (user, canListProjects = false) {
+function projectFilter (user, canListProjects = false) {
   const isPending = project => {
     return _.get(project, ['status', 'phase'], 'Pending') === 'Pending'
   }
@@ -69,7 +69,7 @@ export function projectFilter (user, canListProjects = false) {
   }
 }
 
-export function parseRooms (rooms) {
+function parseRooms (rooms) {
   let isAdmin = false
   const namespaces = []
   const qualifiedNames = []
@@ -99,7 +99,7 @@ export function parseRooms (rooms) {
   ]
 }
 
-export function simplifyObjectMetadata (object) {
+function simplifyObjectMetadata (object) {
   object.metadata.managedFields = undefined
   if (object.metadata.annotations) {
     object.metadata.annotations['kubectl.kubernetes.io/last-applied-configuration'] = undefined
@@ -107,13 +107,13 @@ export function simplifyObjectMetadata (object) {
   return object
 }
 
-export function simplifyProject (project) {
+function simplifyProject (project) {
   project = simplifyObjectMetadata(project)
   _.set(project, ['spec', 'members'], undefined)
   return project
 }
 
-export function parseSelector (selector = '') {
+function parseSelector (selector = '') {
   let notOperator
   let key
   let operator
@@ -164,7 +164,7 @@ export function parseSelector (selector = '') {
   }
 }
 
-export function parseSelectors (selectors) {
+function parseSelectors (selectors) {
   const items = []
   for (const selector of selectors) {
     const item = parseSelector(selector)
@@ -175,7 +175,7 @@ export function parseSelectors (selectors) {
   return items
 }
 
-export function filterBySelectors (selectors) {
+function filterBySelectors (selectors) {
   return item => {
     const labels = item.metadata.labels ?? {}
     for (const { op, key, value } of selectors) {
@@ -211,7 +211,7 @@ export function filterBySelectors (selectors) {
   }
 }
 
-export function getConfigValue (path, defaultValue) {
+function getConfigValue (path, defaultValue) {
   const value = _.get(config, path, defaultValue)
   if (arguments.length === 1 && typeof value === 'undefined') {
     assert.fail(`no config with ${path} found`)
@@ -219,24 +219,43 @@ export function getConfigValue (path, defaultValue) {
   return value
 }
 
-export function getSeedNameFromShoot ({ spec = {} }) {
+function getSeedNameFromShoot ({ spec = {} }) {
   const seed = spec.seedName
   assert.ok(seed, 'There is no seed assigned to this shoot (yet)')
   return seed
 }
 
-export function shootHasIssue (shoot) {
+function shootHasIssue (shoot) {
   return _.get(shoot, ['metadata', 'labels', 'shoot.gardener.cloud/status'], 'healthy') !== 'healthy'
 }
 
-export function getSeedIngressDomain (seed) {
+function getSeedIngressDomain (seed) {
   return _.get(seed, ['spec', 'ingress', 'domain'])
 }
 
-export function isSeedUnreachable (seed) {
+function isSeedUnreachable (seed) {
   const matchLabels = _.get(config, ['unreachableSeeds', 'matchLabels'])
   if (!matchLabels) {
     return false
   }
   return _.isMatch(seed, { metadata: { labels: matchLabels } })
+}
+
+export {
+  constants,
+  decodeBase64,
+  encodeBase64,
+  isMemberOf,
+  projectFilter,
+  parseRooms,
+  simplifyObjectMetadata,
+  simplifyProject,
+  parseSelector,
+  parseSelectors,
+  filterBySelectors,
+  getConfigValue,
+  getSeedNameFromShoot,
+  shootHasIssue,
+  getSeedIngressDomain,
+  isSeedUnreachable,
 }
