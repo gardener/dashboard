@@ -14,15 +14,15 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+    env:
+      TAG: ${{ inputs.tag }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          ref: ${{ inputs.tag }}
+          ref: ${{ env.TAG }}
       - name: Setup Git Identity
         uses: gardener/cc-utils/.github/actions/setup-git-identity@master
       - name: Compute and validate branch names
-        env:
-          TAG: ${{ inputs.tag }}
         run: |
           if [[ ! "$TAG" =~ \.0$ ]]; then
             echo "Tag does not end with .0"
