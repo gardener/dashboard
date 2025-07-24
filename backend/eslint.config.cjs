@@ -9,6 +9,22 @@ const pluginJest = require('eslint-plugin-jest')
 const pluginSecurity = require('eslint-plugin-security')
 const pluginLodash = require('eslint-plugin-lodash')
 const pluginImport = require('eslint-plugin-import')
+const importNewlines = require('eslint-plugin-import-newlines')
+
+const importNewlinesConfig = {
+  plugins: {
+    'import-newlines': {
+      meta: {
+        name: 'eslint-plugin-import-newlines',
+        version: '1.4.0',
+      },
+      rules: importNewlines.rules,
+    },
+  },
+  rules: {
+    'import-newlines/enforce': ['error', 1],
+  },
+}
 
 module.exports = [
   ...neostandard({}),
@@ -78,4 +94,5 @@ module.exports = [
   {
     ignores: ['dist'],
   },
+  importNewlinesConfig,
 ]

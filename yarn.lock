@@ -937,6 +937,7 @@ __metadata:
     dockerfile-ast: "npm:^0.7.0"
     eslint: "npm:^9.11.0"
     eslint-plugin-import: "npm:^2.31.0"
+    eslint-plugin-import-newlines: "npm:^1.4.0"
     eslint-plugin-jest: "npm:^28.8.3"
     eslint-plugin-lodash: "npm:^8.0.0"
     eslint-plugin-security: "npm:^3.0.1"
