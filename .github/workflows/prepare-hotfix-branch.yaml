@@ -11,15 +11,19 @@ on:
 jobs:
   prepare-hotfix:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
     env:
       TAG: ${{ inputs.tag }}
     steps:
+      - name: Create GitHub App token
+        uses: actions/create-github-app-token@df432ceedc7162793a195dd1713ff69aefc7379e   # v2.0.6
+        id: app-token
+        with:
+          app-id: ${{ vars.GARDENER_GITHUB_ACTIONS_APP_ID }}
+          private-key: ${{ secrets.GARDENER_GITHUB_ACTIONS_PRIVATE_KEY }}
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ env.TAG }}
+          token: ${{ steps.app-token.outputs.token }}
       - name: Setup Git Identity
         uses: gardener/cc-utils/.github/actions/setup-git-identity@master
       - name: Compute and validate branch names
@@ -74,7 +78,7 @@ jobs:
           git commit -m "Add hotfix branch to changesetBaseRefs in .yarnrc.yml"
       - name: Push prepare branch and create Pull Request
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           git push origin "$PREPARE_BRANCH"
           gh pr create \
