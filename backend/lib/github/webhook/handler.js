@@ -6,9 +6,9 @@
 
 import createError from 'http-errors'
 import kubeClient from '@gardener-dashboard/kube-client'
-import requestPkg from '@gardener-dashboard/request'
+import requestModule from '@gardener-dashboard/request'
 const { dashboardClient } = kubeClient
-const { isHttpError } = requestPkg
+const { isHttpError } = requestModule
 
 function currentMicroDateStr () {
   const date = new Date().toISOString()

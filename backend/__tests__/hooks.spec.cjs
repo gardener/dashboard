@@ -16,11 +16,11 @@ jest.mock('../dist/lib/watches')
 const io = require('../dist/lib/io')
 const watches = require('../dist/lib/watches')
 
-const hookPkg = require('../dist/lib/hooks')
+const hookModule = require('../dist/lib/hooks')
 
 describe('hooks', () => {
   describe('LifecycleHooks', () => {
-    const { LifecycleHooks, default: createHooks } = hookPkg
+    const { LifecycleHooks, default: createHooks } = hookModule
     let hooks
     let dashboardClient
 

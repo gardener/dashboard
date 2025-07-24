@@ -4,9 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import requestPkg from '@gardener-dashboard/request'
-import kubeConfigPkg from '@gardener-dashboard/kube-config'
-import kubeClientPkg from '@gardener-dashboard/kube-client'
+import requestModule from '@gardener-dashboard/request'
+import kubeConfigModule from '@gardener-dashboard/kube-config'
+import kubeClientModule from '@gardener-dashboard/kube-client'
 import createError from 'http-errors'
 import * as utils from '../utils/index.js'
 import cache from '../cache/index.js'
@@ -16,9 +16,9 @@ import _ from 'lodash-es'
 import semver from 'semver'
 import config from '../config/index.js'
 
-const { isHttpError } = requestPkg
-const { Config } = kubeConfigPkg
-const { Resources, dashboardClient } = kubeClientPkg
+const { isHttpError } = requestModule
+const { Config } = kubeConfigModule
+const { Resources, dashboardClient } = kubeClientModule
 const {
   decodeBase64,
   encodeBase64,
