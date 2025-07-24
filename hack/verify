@@ -38,6 +38,7 @@ yarn install --immutable --immutable-cache --check-cache --refresh-lockfile
 
 # build packages
 yarn packages-build-all
+yarn workspace @gardener-dashboard/backend build-test-target
 
 # check and report found duplicate dependencies
 yarn dedupe --check
