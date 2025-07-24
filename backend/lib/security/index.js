@@ -4,26 +4,45 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import {
+  fetch,
+  Agent,
+} from 'undici'
+import assert from 'assert/strict'
+import crypto from 'crypto'
+import {
+  split,
+  join,
+  includes,
+  head,
+  chain,
+  pick,
+} from 'lodash-es'
+import pRetry from 'p-retry'
+import pTimeout from 'p-timeout'
+import services from '../services/index.js'
+import createError from 'http-errors'
+import logger from '../logger/index.js'
+import config from '../config/index.js'
+import createJose from './jose.js'
+import {
+  GARDENER_AUDIENCE,
+  COOKIE_HEADER_PAYLOAD,
+  COOKIE_SIGNATURE,
+  COOKIE_TOKEN,
+  COOKIE_CODE_VERIFIER,
+  COOKIE_STATE,
+} from './constants.js'
 
-const { fetch, Agent } = require('undici')
-const assert = require('assert').strict
-const crypto = require('crypto')
-const { split, join, includes, head, chain, pick } = require('lodash')
-const pRetry = require('p-retry')
-const pTimeout = require('p-timeout')
-const { authentication, authorization } = require('../services')
-const createError = require('http-errors')
-const logger = require('../logger')
-const { sessionSecrets, oidc = {} } = require('../config')
-
+const { authentication, authorization } = services
+const { sessionSecrets, oidc = {} } = config
 const {
   sign,
   verify,
   decode,
   encrypt,
   decrypt,
-} = require('./jose')(sessionSecrets)
+} = createJose(sessionSecrets)
 
 const now = () => Math.floor(Date.now() / 1000)
 const digest = (data, n = 7) => {
@@ -34,15 +53,6 @@ const digest = (data, n = 7) => {
     .substring(0, n)
 }
 const { isHttpError } = createError
-
-const {
-  COOKIE_HEADER_PAYLOAD,
-  COOKIE_TOKEN,
-  COOKIE_SIGNATURE,
-  COOKIE_CODE_VERIFIER,
-  COOKIE_STATE,
-  GARDENER_AUDIENCE,
-} = require('./constants')
 
 const {
   issuer,
@@ -79,16 +89,20 @@ if (!rejectUnauthorized) {
   )
 }
 
-function getOpenIdClientModule () {
-  if (!exports.openidClientPromise) {
-    exports.openidClientPromise = import('openid-client')
+export let openidClientPromise
+
+async function getOpenIdClientModule () {
+  if (!openidClientPromise) {
+    openidClientPromise = import('openid-client')
   }
-  return exports.openidClientPromise
+  return openidClientPromise
 }
 
+export let discoveryPromise
+
 async function getConfiguration () {
-  if (!exports.discoveryPromise) {
-    exports.discoveryPromise = pRetry(async () => {
+  if (!discoveryPromise) {
+    discoveryPromise = pRetry(async () => {
       const {
         discovery,
         customFetch,
@@ -128,7 +142,7 @@ async function getConfiguration () {
       randomize: true,
     })
   }
-  return pTimeout(exports.discoveryPromise, 1000, 'Issuer not available')
+  return pTimeout(discoveryPromise, 1000, 'Issuer not available')
 }
 
 function getBackendRedirectUri (origin) {
@@ -538,7 +552,7 @@ function clearCookies (res) {
   res.clearCookie(COOKIE_TOKEN, options)
 }
 
-exports = module.exports = {
+export {
   COOKIE_HEADER_PAYLOAD,
   COOKIE_SIGNATURE,
   COOKIE_TOKEN,

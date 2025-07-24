@@ -4,11 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import initOctokit from './octokit.js'
+import config from '../config/index.js'
 
-const octokit = require('./octokit')()
-const config = require('../config')
-
+const octokit = initOctokit()
 const {
   org: owner,
   repository: repo,
@@ -110,7 +109,7 @@ function createComment ({ number }, body) {
   })
 }
 
-module.exports = {
+export {
   octokit,
   searchIssues,
   closeIssue,

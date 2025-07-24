@@ -4,13 +4,13 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-const _ = require('lodash')
-const { isHttpError } = require('@gardener-dashboard/request')
-const { getQuotas } = require('../cache')
-const createError = require('http-errors')
-const logger = require('../logger')
+import _ from 'lodash-es'
+import createError, { isHttpError } from 'http-errors'
+import cache from '../cache/index.js'
+import logger from '../logger/index.js'
+const { getQuotas } = cache
 
-exports.list = async function ({ user, params }) {
+export async function list ({ user, params }) {
   const client = user.client
   const { bindingNamespace } = params
 
@@ -50,7 +50,7 @@ exports.list = async function ({ user, params }) {
   }
 }
 
-exports.create = async function ({ user, params }) {
+export async function create ({ user, params }) {
   const client = user.client
 
   let { secret, binding } = params
@@ -91,7 +91,7 @@ exports.create = async function ({ user, params }) {
   }
 }
 
-exports.patch = async function ({ user, params }) {
+export async function patch ({ user, params }) {
   const client = user.client
 
   let { secret } = params
@@ -111,7 +111,7 @@ exports.patch = async function ({ user, params }) {
   }
 }
 
-exports.remove = async function ({ user, params }) {
+export async function remove ({ user, params }) {
   const client = user.client
   const { bindingKind, bindingNamespace, bindingName } = params
 

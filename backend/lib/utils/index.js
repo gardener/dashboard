@@ -4,16 +4,16 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import _ from 'lodash-es'
+import config from '../config/index.js'
+import assert from 'assert/strict'
 
-const _ = require('lodash')
-const config = require('../config')
-const assert = require('assert').strict
-
-const EXISTS = '∃'
-const NOT_EXISTS = '!∃'
-const EQUAL = '='
-const NOT_EQUAL = '!='
+const constants = Object.freeze({
+  EXISTS: '\u2203',
+  NOT_EXISTS: '!\u2203',
+  EQUAL: '=',
+  NOT_EQUAL: '!=',
+})
 
 function decodeBase64 (value) {
   if (!value) {
@@ -153,14 +153,14 @@ function parseSelector (selector = '') {
 
   if (notOperator) {
     if (!operator) {
-      return { op: NOT_EXISTS, key }
+      return { op: constants.NOT_EXISTS, key }
     }
   } else if (!operator) {
-    return { op: EXISTS, key }
+    return { op: constants.EXISTS, key }
   } else if (operator === '!=') {
-    return { op: NOT_EQUAL, key, value }
+    return { op: constants.NOT_EQUAL, key, value }
   } else if (operator === '=' || operator === '==') {
-    return { op: EQUAL, key, value }
+    return { op: constants.EQUAL, key, value }
   }
 }
 
@@ -181,25 +181,25 @@ function filterBySelectors (selectors) {
     for (const { op, key, value } of selectors) {
       const labelValue = _.get(labels, [key], '')
       switch (op) {
-        case NOT_EXISTS: {
+        case constants.NOT_EXISTS: {
           if (key in labels) {
             return false
           }
           break
         }
-        case EXISTS: {
+        case constants.EXISTS: {
           if (!(key in labels)) {
             return false
           }
           break
         }
-        case NOT_EQUAL: {
+        case constants.NOT_EQUAL: {
           if (labelValue === value) {
             return false
           }
           break
         }
-        case EQUAL: {
+        case constants.EQUAL: {
           if (labelValue !== value) {
             return false
           }
@@ -241,7 +241,8 @@ function isSeedUnreachable (seed) {
   return _.isMatch(seed, { metadata: { labels: matchLabels } })
 }
 
-module.exports = {
+export {
+  constants,
   decodeBase64,
   encodeBase64,
   isMemberOf,
@@ -249,17 +250,12 @@ module.exports = {
   parseRooms,
   simplifyObjectMetadata,
   simplifyProject,
+  parseSelector,
   parseSelectors,
   filterBySelectors,
   getConfigValue,
   getSeedNameFromShoot,
   shootHasIssue,
-  isSeedUnreachable,
   getSeedIngressDomain,
-  constants: Object.freeze({
-    EXISTS,
-    NOT_EXISTS,
-    EQUAL,
-    NOT_EQUAL,
-  }),
+  isSeedUnreachable,
 }

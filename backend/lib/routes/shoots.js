@@ -4,14 +4,14 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import express from 'express'
+import services from '../services/index.js'
+import { metricsRoute } from '../middleware.js'
+import { simplifyObjectMetadata } from '../utils/index.js'
 
-const express = require('express')
-const { shoots } = require('../services')
-const { metricsRoute } = require('../middleware')
-const { simplifyObjectMetadata } = require('../utils')
+const { shoots } = services
 
-const router = module.exports = express.Router({
+const router = express.Router({
   mergeParams: true,
 })
 
@@ -258,3 +258,5 @@ router.route('/:name/adminkubeconfig')
       next(err)
     }
   })
+
+export default router

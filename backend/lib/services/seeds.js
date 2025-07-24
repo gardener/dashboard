@@ -4,13 +4,13 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const _ = require('lodash')
-const { Forbidden } = require('http-errors')
-const authorization = require('./authorization')
-const { getSeeds } = require('../cache')
-const { isSeedUnreachable } = require('../utils')
+import _ from 'lodash-es'
+import httpErrors from 'http-errors'
+import * as authorization from './authorization.js'
+import cache from '../cache/index.js'
+import { isSeedUnreachable } from '../utils/index.js'
+const { Forbidden } = httpErrors
+const { getSeeds } = cache
 
 function fromResource (seed) {
   const unreachable = isSeedUnreachable(seed)
@@ -36,7 +36,7 @@ function fromResource (seed) {
   return { metadata, data }
 }
 
-exports.list = async function ({ user }) {
+export async function list ({ user }) {
   const allowed = await authorization.canListSeeds(user)
   if (!allowed) {
     throw new Forbidden('You are not allowed to list seeds')

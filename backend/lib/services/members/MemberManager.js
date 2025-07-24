@@ -4,18 +4,20 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import _ from 'lodash-es'
+import httpErrors from 'http-errors'
+import kubeConfigModule from '@gardener-dashboard/kube-config'
+import kubeClientModule from '@gardener-dashboard/kube-client'
+import config from '../../config/index.js'
+import cache from '../../cache/index.js'
+import Member from './Member.js'
+import SubjectListItem from './SubjectListItem.js'
+import SubjectList from './SubjectList.js'
 
-const _ = require('lodash')
-const { NotFound, Conflict, UnprocessableEntity, isHttpError } = require('http-errors')
-const { dumpKubeconfig } = require('@gardener-dashboard/kube-config')
-const { Resources } = require('@gardener-dashboard/kube-client')
-
-const config = require('../../config')
-const { findProjectByNamespace } = require('../../cache')
-const Member = require('./Member')
-const SubjectListItem = require('./SubjectListItem')
-const SubjectList = require('./SubjectList')
+const { dumpKubeconfig } = kubeConfigModule
+const { Resources } = kubeClientModule
+const { findProjectByNamespace } = cache
+const { NotFound, Conflict, UnprocessableEntity, isHttpError } = httpErrors
 
 class MemberManager {
   constructor (client, userId, project, serviceAccounts) {
@@ -332,4 +334,4 @@ class MemberManager {
   }
 }
 
-module.exports = MemberManager
+export default MemberManager

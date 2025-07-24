@@ -3,13 +3,12 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
-
-'use strict'
-
-const { NotFound, Forbidden } = require('http-errors')
-const authorization = require('./authorization')
-const _ = require('lodash')
-const { getCloudProfiles, getVisibleAndNotProtectedSeeds } = require('../cache')
+import httpErrors from 'http-errors'
+import * as authorization from './authorization.js'
+import _ from 'lodash-es'
+import cache from '../cache/index.js'
+const { NotFound, Forbidden } = httpErrors
+const { getCloudProfiles, getVisibleAndNotProtectedSeeds } = cache
 
 function fromResource ({ cloudProfile: { metadata, spec }, seedNames }) {
   const providerType = spec.type
@@ -56,7 +55,7 @@ function assignSeedsToCloudProfileIteratee (seeds) {
   }
 }
 
-exports.list = async function ({ user }) {
+export async function list ({ user }) {
   const allowed = await authorization.canListCloudProfiles(user)
   if (!allowed) {
     throw new Forbidden('You are not allowed to list cloudprofiles')
@@ -67,7 +66,7 @@ exports.list = async function ({ user }) {
   return _.map(cloudProfiles, assignSeedsToCloudProfileIteratee(seeds))
 }
 
-exports.read = async function ({ user, name }) {
+export async function read ({ user, name }) {
   const allowed = await authorization.canGetCloudProfiles(user, name)
   if (!allowed) {
     throw new Forbidden(`You are not allowed to get cloudprofile ${name}`)

@@ -4,14 +4,13 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import _ from 'lodash-es'
+import logger from './logger/index.js'
+import morgan from 'morgan'
+import httpErrors from 'http-errors'
+import { STATUS_CODES } from 'http'
 
-const _ = require('lodash')
-const logger = require('./logger')
-const morgan = require('morgan')
-
-const { NotFound, InternalServerError, isHttpError } = require('http-errors')
-const { STATUS_CODES } = require('http')
+const { NotFound, InternalServerError, isHttpError } = httpErrors
 
 const SENSITIVE_PARAMS = [
   'code',
@@ -147,7 +146,7 @@ const ErrorTemplate = _.template(`<!doctype html>
 </body>
 </html>`)
 
-module.exports = {
+export {
   noCache,
   historyFallback,
   requestLogger,
