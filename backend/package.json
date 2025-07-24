@@ -1,6 +1,6 @@
 {
   "name": "@gardener-dashboard/backend",
-  "version": "1.80.0",
+  "version": "1.82.0-dev",
   "description": "Gardener Dashboard Server",
   "license": "Apache-2.0",
   "author": "Koser, Holger <holger.koser@sap.com>",
@@ -31,7 +31,7 @@
     "test-coverage": "yarn test --coverage"
   },
   "dependencies": {
-    "@apidevtools/swagger-parser": "^10.1.0",
+    "@apidevtools/swagger-parser": "^12.0.0",
     "@gardener-dashboard/kube-client": "workspace:^",
     "@gardener-dashboard/kube-config": "workspace:^",
     "@gardener-dashboard/logger": "workspace:^",
@@ -98,8 +98,9 @@
     "socket.io-client": "^4.7.5",
     "supertest": "^7.0.0"
   },
-  "packageManager": "yarn@4.9.1",
+  "packageManager": "yarn@4.9.2",
   "engines": {
     "node": "^22.7.0"
-  }
+  },
+  "stableVersion": "1.81.0"
 }

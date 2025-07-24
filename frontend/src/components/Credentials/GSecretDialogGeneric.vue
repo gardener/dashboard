@@ -24,7 +24,6 @@ SPDX-License-Identifier: Apache-2.0
           :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
           :class="{ 'hide-secret': hideSecret }"
           @click:append="() => (hideSecret = !hideSecret)"
-          @update:model-value="onInputSecretData"
           @blur="v$.data.$touch()"
         />
       </div>
@@ -55,10 +54,7 @@ import {
   withFieldName,
   withMessage,
 } from '@/utils/validators'
-import {
-  getErrorMessages,
-  setDelayedInputFocus,
-} from '@/utils'
+import { getErrorMessages } from '@/utils'
 
 import isObject from 'lodash/isObject'
 
@@ -82,28 +78,25 @@ export default {
     'update:modelValue',
   ],
   setup () {
-    const { secretStringDataRefs } = useProvideSecretContext()
-
-    const { secretData } = secretStringDataRefs({
-      secretData: 'secretData',
-    })
+    const { secretStringData } = useProvideSecretContext()
 
     return {
-      secretData,
+      stringData: secretStringData,
       v$: useVuelidate(),
     }
   },
   data () {
     return {
       hideSecret: true,
-      data: undefined,
+      internalYaml: '',
+      touched: false,
     }
   },
   validations () {
     return {
       data: withFieldName('Secret Data', {
         required,
-        isYAML: withMessage('You need to enter secret data as YAML key - value pairs', () => Object.keys(this.secretData).length > 0),
+        isYAML: withMessage('You need to enter secret data as YAML key - value pairs', () => Object.keys(this.stringData).length > 0),
       }),
     }
   },
@@ -116,6 +109,26 @@ export default {
         this.$emit('update:modelValue', modelValue)
       },
     },
+    data: {
+      get () {
+        return this.internalYaml
+      },
+      set (value) {
+        this.internalYaml = value
+        this.touched = true
+        this.stringData = {}
+
+        try {
+          this.stringData = yaml.load(value)
+        } catch (err) {
+        /* ignore errors */
+        } finally {
+          if (!isObject(this.stringData)) {
+            this.stringData = {}
+          }
+        }
+      },
+    },
     valid () {
       return !this.v$.$invalid
     },
@@ -123,32 +136,18 @@ export default {
       return !this.secret
     },
   },
-  methods: {
-    onInputSecretData () {
-      this.secretData = {}
-
-      try {
-        this.secretData = yaml.load(this.data)
-      } catch (err) {
-        /* ignore errors */
-      } finally {
-        if (!isObject(this.secretData)) {
-          this.secretData = {}
+  watch: {
+    stringData (value) {
+      if (!this.touched) {
+        if (value && Object.keys(value).length > 0) {
+          this.internalYaml = yaml.dump(value)
+        } else {
+          this.internalYaml = ''
         }
       }
-
-      this.v$.data.$touch()
     },
-    reset () {
-      this.v$.$reset()
-
-      this.data = ''
-      this.secretData = {}
-
-      if (!this.isCreateMode) {
-        setDelayedInputFocus(this, 'data')
-      }
-    },
+  },
+  methods: {
     getErrorMessages,
   },
 }

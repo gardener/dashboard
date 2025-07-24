@@ -5,7 +5,6 @@
 //
 import httpErrors from 'http-errors'
 import * as authorization from './authorization.js'
-import logger from '../logger/index.js'
 import _ from 'lodash-es'
 import cache from '../cache/index.js'
 const { NotFound, Forbidden } = httpErrors
@@ -64,17 +63,7 @@ export async function list ({ user }) {
 
   const cloudProfiles = getCloudProfiles()
   const seeds = getVisibleAndNotProtectedSeeds()
-  return _
-    .chain(cloudProfiles)
-    .map(assignSeedsToCloudProfileIteratee(seeds))
-    .filter(cloudProfile => {
-      if (!_.isEmpty(cloudProfile.data.seedNames)) {
-        return true
-      }
-      logger.info(`No matching seed for cloud profile with name ${cloudProfile.metadata.name} found`)
-      return false
-    })
-    .value()
+  return _.map(cloudProfiles, assignSeedsToCloudProfileIteratee(seeds))
 }
 
 export async function read ({ user, name }) {

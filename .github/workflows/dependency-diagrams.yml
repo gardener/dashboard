@@ -8,6 +8,10 @@ on:
     branches-ignore:
       - 'master'
       - 'hotfix-*'
+      - 'release-*'
+
+permissions:
+  contents: write
 
 jobs:
   generate-diagrams:
@@ -36,9 +40,12 @@ jobs:
       - name: Generate dependency diagrams
         run: yarn generate-all-dependency-diagrams
 
-      - uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 # v9.1.4
+      - name: Commit changes
+        uses: iarekylew00t/verified-bot-commit@cc09d455be3e20eb6b1c3d1c30a5221f9475aa10 # v1.5.1
         with:
-          add: 'diagram/.'
-          fetch: true
-          message: 'Commit from GitHub Actions (dependency-diagrams.yml) [skip ci]'
-          pathspec_error_handling: 'exitAtEnd'
+          message: 'Update dependency diagrams'
+          files: |
+            backend-highlevel-dependency-diagram.html
+            backend-lowlevel-dependency-diagram.html
+            packages-highlevel-dependency-diagram.html
+            packages-lowlevel-dependency-diagram.html

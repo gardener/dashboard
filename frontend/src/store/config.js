@@ -103,6 +103,12 @@ const wellKnownConditions = {
     description: 'Indicates that there is at least one CA certificate which expires in less than 1 year. A credentials rotation operation should be considered.',
     sortOrder: '12',
   },
+  DualStackNodesMigrationReady: {
+    name: 'Dual Stack Nodes Migration Ready',
+    shortName: 'DSNM',
+    description: 'Indicates that the nodes of a shoot are ready for dual-stack migration of the cluster. If this is in error state, the nodes need to be rolled before the migration can continue. This error is expected at the beginning of the migration process and does not require immediate user action.',
+    sortOrder: '13',
+  },
 }
 
 export function getCondition (type) {
@@ -149,26 +155,7 @@ export const useConfigStore = defineStore('config', () => {
   })
 
   const accessRestriction = computed(() => {
-    // TODO(petersutter): remove mapping from seed.gardener.cloud/eu-access to eu-access-only in dashboard version >=1.80.0. Add breaking change release note.
-    const accessRestriction = state.value?.accessRestriction
-    if (!accessRestriction) {
-      return
-    }
-
-    const items = map(accessRestriction.items, item => {
-      if (item.key === 'seed.gardener.cloud/eu-access') {
-        return {
-          ...item,
-          key: 'eu-access-only',
-        }
-      }
-      return item
-    })
-
-    return {
-      ...accessRestriction,
-      items,
-    }
+    return state.value?.accessRestriction
   })
 
   const sla = computed(() => {

@@ -46,3 +46,8 @@ push: ## Push the Gardener Dashboard to the registry.
 
 .PHONY: release
 release: build push ## Build and Push the Gardener Dashboard.
+
+.PHONY: verify
+verify: ## Run verification script locally (linting, tests, dependencies).
+	@echo "Running verification script"
+	@./hack/verify

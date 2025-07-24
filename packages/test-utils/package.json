@@ -43,7 +43,7 @@
     "rimraf": "^6.0.1",
     "rollup": "^4.41.1"
   },
-  "packageManager": "yarn@4.9.1",
+  "packageManager": "yarn@4.9.2",
   "engines": {
     "node": "^22.7.0"
   }

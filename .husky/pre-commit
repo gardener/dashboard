@@ -1,0 +1,60 @@
+# .husky/pre-commit
+. .husky/common.sh
+. "$(dirname "$0")/husky-user-choice.sh"
+. "$(dirname "$0")/setup-messages.sh"
+
+HUSKY_USER_CONFIG_FILE=".husky/user-config"
+
+if [ ! -f "$HUSKY_USER_CONFIG_FILE" ] || ! grep -q '^ggshield=' "$HUSKY_USER_CONFIG_FILE"; then
+  show_ggshield_setup_message
+  exit 1
+fi
+
+if [ ! -f "$HUSKY_USER_CONFIG_FILE" ] || ! grep -q '^reuse=' "$HUSKY_USER_CONFIG_FILE"; then
+  show_reuse_setup_message
+  exit 1
+fi
+
+. "$HUSKY_USER_CONFIG_FILE"
+
+if [ "$ggshield" = "true" ]; then
+  if ! command -v ggshield &> /dev/null; then
+    echo ""
+    echo "ggshield Install Check"
+    echo ""
+    echo "────────────────────────────────────────────"
+    echo ""
+    echo "ggshield is not installed, but you opted in for secret scanning."
+    echo "Please visit the link below for installation assistance:"
+    echo "https://docs.gitguardian.com/ggshield-docs/getting-started"
+    echo ""
+    echo "────────────────────────────────────────────"
+    exit 1
+  fi
+  ggshield secret scan pre-commit "$@"
+fi
+
+if [ "$reuse" = "true" ]; then
+  if ! command -v pipx &> /dev/null; then
+    echo ""
+    echo "REUSE Install Check"
+    echo ""
+    echo "────────────────────────────────────────────"
+    echo ""
+    echo "pipx is not installed, but you opted in for REUSE compliance checks."
+    echo "Please visit the link below for installation assistance:"
+    echo "https://pipx.pypa.io/stable/installation/"
+    echo ""
+    echo "────────────────────────────────────────────"
+    exit 1
+  fi
+  pipx run reuse lint
+fi
+
+echo ""
+echo "────────────────────────────────────────────"
+echo ""
+echo "Pre-commit hook executed successfully."
+echo ""
+echo "────────────────────────────────────────────"
+echo ""

@@ -28,6 +28,7 @@ import cloneDeep from 'lodash/cloneDeep'
 import get from 'lodash/get'
 import isEqual from 'lodash/isEqual'
 import set from 'lodash/set'
+import mapValues from 'lodash/mapValues'
 
 export function createSecretContextComposable (options = {}) {
   const {
@@ -95,6 +96,21 @@ export function createSecretContextComposable (options = {}) {
     },
   })
 
+  const secretStringData = computed({
+    get () {
+      return mapValues(secretData.value, value => {
+        return value ? decodeBase64(value) : undefined
+      })
+    },
+    set (value) {
+      secretData.value = value
+        ? mapValues(value, value => {
+          return value ? encodeBase64(value) : undefined
+        })
+        : undefined
+    },
+  })
+
   /**
    * Creates a set of refs for string-based secret data fields. Each key in
    * `keyMapping` maps a key in the `.data` object to a variable name. The
@@ -112,11 +128,10 @@ export function createSecretContextComposable (options = {}) {
 
     // Watch changes in secretData to decode them into the refs
     watch(
-      secretData,
-      newValues => {
+      secretStringData,
+      newValue => {
         for (const [dataKey, variableName] of Object.entries(keyMapping)) {
-          const value = decodeBase64(get(newValues, [dataKey], ''))
-          set(refs, [variableName, 'value'], value)
+          set(refs, [variableName, 'value'], get(newValue, [dataKey], ''))
         }
       },
       { immediate: true, deep: true },
@@ -124,10 +139,10 @@ export function createSecretContextComposable (options = {}) {
 
     // Whenever the refs change, encode them back into base64 in `secretData`
     watchEffect(() => {
-      secretData.value = Object.fromEntries(
+      secretStringData.value = Object.fromEntries(
         Object.entries(keyMapping).map(([dataKey, variableName]) => [
           dataKey,
-          encodeBase64(get(refs, [variableName, 'value'])),
+          get(refs, [variableName, 'value']),
         ]),
       )
     })
@@ -143,6 +158,7 @@ export function createSecretContextComposable (options = {}) {
     secretName,
     secretNamespace,
     secretData,
+    secretStringData,
     secretStringDataRefs,
   }
 }

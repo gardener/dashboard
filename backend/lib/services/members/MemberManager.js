@@ -181,6 +181,13 @@ class MemberManager {
   }
 
   setItemRoles (item, roles) {
+    if (!Array.isArray(roles)) {
+      throw new UnprocessableEntity('Roles must be an array')
+    }
+    const MAX_ROLES = 10 // Define a reasonable limit for roles
+    if (roles.length > MAX_ROLES) {
+      throw new UnprocessableEntity(`Roles array exceeds the maximum allowed size of ${MAX_ROLES}`)
+    }
     roles = _.compact(roles)
     if (!roles.length && item.kind !== 'ServiceAccount') {
       throw new UnprocessableEntity('At least one role is required')

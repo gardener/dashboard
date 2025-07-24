@@ -185,6 +185,7 @@ export const useCredentialStore = defineStore('credential', () => {
   }
 
   return {
+    state,
     cloudProviderBindingList,
     quotaList,
     fetchCredentials,

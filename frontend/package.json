@@ -1,6 +1,6 @@
 {
   "name": "@gardener-dashboard/frontend",
-  "version": "1.80.0",
+  "version": "1.82.0-dev",
   "description": "Gardener Dashboard Client",
   "license": "Apache-2.0",
   "author": "Koser, Holger <holger.koser@sap.com>",
@@ -110,8 +110,9 @@
     "vitest-fetch-mock": "^0.4.0",
     "vue-eslint-parser": "^10.1.1"
   },
-  "packageManager": "yarn@4.9.1",
+  "packageManager": "yarn@4.9.2",
   "engines": {
     "node": "^22.7.0"
-  }
+  },
+  "stableVersion": "1.81.0"
 }
