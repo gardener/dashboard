@@ -6,12 +6,6 @@
 
 import express from 'express'
 import requestModule from '@gardener-dashboard/request'
-import { readFile } from 'fs/promises'
-import {
-  dirname,
-  join,
-} from 'path'
-import { fileURLToPath } from 'url'
 import logger from '../logger/index.js'
 import { decodeBase64 } from '../utils/index.js'
 import kubeClientModule from '@gardener-dashboard/kube-client'
@@ -20,24 +14,25 @@ import { metricsRoute } from '../middleware.js'
 const { extend } = requestModule
 const { dashboardClient } = kubeClientModule
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
+async function getVersionFromPackageJson () {
+  const { default: packageJson } = await import('../../package.json')
 
-async function getPkg () {
-  const content = await readFile(join(__dirname, '../../package.json'), 'utf8')
-  return JSON.parse(content)
+  const { version } = packageJson
+  return version
 }
 
 const router = express.Router()
 
-const metricsMiddleware = metricsRoute('info')
+const metricsMiddleware =
+  metricsRoute('info')
 
 router.route('/')
   .all(metricsMiddleware)
   .get(async (req, res, next) => {
     try {
       const gardenerVersion = await fetchGardenerVersion()
-      const pkg = await getPkg()
-      res.send({ version: pkg.version, gardenerVersion })
+      const version = await getVersionFromPackageJson()
+      res.send({ version, gardenerVersion })
     } catch (err) {
       next(err)
     }
