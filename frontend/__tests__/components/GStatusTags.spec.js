@@ -30,6 +30,7 @@ describe('components', () => {
             return {
               type,
               lastTransitionTime,
+              status: 'True',
             }
           }),
         },
@@ -85,6 +86,7 @@ describe('components', () => {
         shortName: 'SC',
         name: 'Sample Condition',
         sortOrder: '000000SC',
+        status: 'True',
       })
     })
 
@@ -98,6 +100,7 @@ describe('components', () => {
         shortName: 'ELSTC',
         name: 'Extra Long Sample TEST Condition',
         sortOrder: '000ELSTC',
+        status: 'True',
       })
     })
 
@@ -111,6 +114,7 @@ describe('components', () => {
         shortName: 'S',
         name: 'Singlecondition',
         sortOrder: '0000000S',
+        status: 'True',
       })
     })
 
@@ -124,6 +128,9 @@ describe('components', () => {
         shortName: 'API',
         name: 'API Server',
         sortOrder: '00000000',
+        statusMappings: expect.any(Object),
+        statusTextMappings: expect.any(Object),
+        status: 'True',
         description: expect.stringContaining('kube-apiserver'),
       })
     })
@@ -138,6 +145,7 @@ describe('components', () => {
         shortName: 'CC',
         name: 'Config Condition',
         sortOrder: '00000000',
+        status: 'True',
         description: 'Config Condition Description',
       })
     })
@@ -152,6 +160,7 @@ describe('components', () => {
         shortName: 'CPO',
         name: 'Control Plane Overwritten',
         sortOrder: '00000011',
+        status: 'True',
         description: 'Overwritten Description',
       })
     })
