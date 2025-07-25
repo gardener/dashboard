@@ -83,6 +83,9 @@ export default {
       .cloneDeep()
       .value()
   },
+  getSeedByUid (uid) {
+    return cache.get('seeds').find(['metadata.uid', uid])
+  },
   getVisibleAndNotProtectedSeeds () {
     const predicate = item => {
       const taints = _.get(item, ['spec', 'taints'])
@@ -154,6 +157,8 @@ export default {
         return this.getProjectByUid(uid)
       case 'Shoot':
         return this.getShootByUid(uid)
+      case 'Seed':
+        return this.getSeedByUid(uid)
       default:
         throw new TypeError(`Kind '${kind}' not supported`)
     }

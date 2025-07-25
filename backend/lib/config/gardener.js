@@ -207,6 +207,7 @@ export default {
     _.set(config, ['sessionSecrets'], sessionSecrets)
     _.set(config, ['frontend', 'apiServerUrl'], config.apiServerUrl)
     _.set(config, ['frontend', 'clusterIdentity'], config.clusterIdentity)
+    _.set(config, ['frontend', 'unreachableSeeds', 'matchLabels'], config.unreachableSeeds?.matchLabels)
     if (!config.gitHub && _.has(config, ['frontend', 'ticket'])) {
       _.unset(config, ['frontend', 'ticket'])
     }
