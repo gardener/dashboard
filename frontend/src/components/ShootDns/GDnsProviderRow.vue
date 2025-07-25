@@ -48,7 +48,7 @@ SPDX-License-Identifier: Apache-2.0
           disabled
           variant="underlined"
           persistent-hint
-          hint="Secret Binding for secret not found in project namespace. Use YAML view to edit secret"
+          hint="Binding for secret not found in project namespace. Use YAML view to edit secret"
         />
       </div>
       <div class="large-input">
