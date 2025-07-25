@@ -4,11 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import { get } from 'lodash-es'
 
-const { get } = require('lodash')
-
-module.exports = (io, informer) => {
+export default (io, informer) => {
   const nsp = io.of('/')
 
   const handleEvent = (type, newObject, oldObject) => {
