@@ -93,7 +93,7 @@ describe('stores', () => {
     })
 
     it('should create a new credential store', () => {
-      expect(cloudProfileStore.sortedProviderTypeList).toEqual(
+      expect(cloudProfileStore.sortedInfraProviderTypeList).toEqual(
         expect.arrayContaining(['aws', 'azure']),
       )
       expect(gardenerExtensionStore.dnsProviderTypes).toEqual(
@@ -104,7 +104,7 @@ describe('stores', () => {
     it('should return infrastructureBindingList', () => {
       expect(credentialStore.infrastructureBindingList.length).toBeGreaterThan(0)
       expect(credentialStore.cloudProviderBindingList.length).toBeGreaterThan(credentialStore.infrastructureBindingList.length)
-      expect(cloudProfileStore.sortedProviderTypeList).toMatchSnapshot()
+      expect(cloudProfileStore.sortedInfraProviderTypeList).toMatchSnapshot()
     })
 
     it('should return dnsBindingList', () => {
