@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Gardener contributors
+# SPDX-FileCopyrightText: 2025 SAP SE or an SAP affiliate company and Gardener contributors
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -66,9 +66,9 @@ def extract_pr_info(pr_number: int, repo_owner: str, repo_name: str, github_toke
         labels = []
         for label in pr.labels:
             labels.append({
-                'name': label.name,
-                'color': label.color,
-                'description': label.description or ''
+                'name': label.get('name', ''),
+                'color': label.get('color', ''),
+                'description': label.get('description', '') or ''
             })
         pr_info['labels'] = labels
 
