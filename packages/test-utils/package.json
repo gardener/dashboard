@@ -35,7 +35,7 @@
     "eslint": "^9.11.0",
     "eslint-import-resolver-pnp": "^0.0.0",
     "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-jest": "^28.8.3",
+    "eslint-plugin-jest": "^29.0.0",
     "eslint-plugin-lodash": "^8.0.0",
     "eslint-plugin-require-node-import-prefix": "^0.0.2",
     "eslint-plugin-security": "^3.0.1",
