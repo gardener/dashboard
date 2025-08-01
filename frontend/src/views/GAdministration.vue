@@ -26,12 +26,14 @@ SPDX-License-Identifier: Apache-2.0
                     </v-icon>
                   </template>
                   <div class="text-body-2 text-medium-emphasis">
-                    <span>Name</span>
-                    <v-tooltip
-                      activator="parent"
-                      location="top"
-                      text="Technical, unique project name."
-                    />
+                    <span>
+                      <span>Name</span>
+                      <v-tooltip
+                        activator="parent"
+                        location="top"
+                        text="Technical, unique project name."
+                      />
+                    </span>
                   </div>
                   <div class="text-body-1">
                     {{ projectName }}
@@ -51,12 +53,14 @@ SPDX-License-Identifier: Apache-2.0
                     </v-icon>
                   </template>
                   <div class="text-body-2 text-medium-emphasis">
-                    <span>Title</span>
-                    <v-tooltip
-                      activator="parent"
-                      location="top"
-                      text="Human-readable project title."
-                    />
+                    <span>
+                      <span>Title</span>
+                      <v-tooltip
+                        activator="parent"
+                        location="top"
+                        text="Human-readable project title."
+                      />
+                    </span>
                   </div>
                   <div class="text-body-1 wrap-text">
                     <g-editable-text
