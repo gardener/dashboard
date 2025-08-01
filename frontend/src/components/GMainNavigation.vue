@@ -55,23 +55,30 @@ SPDX-License-Identifier: Apache-2.0
               class="text-left"
               :class="{ placeholder: !selectedProject }"
             >
-              {{ selectedProjectTitle }}
-              <template v-if="selectedProject">
-                <g-stale-project-warning
-                  :project="selectedProject"
-                  size="small"
-                />
-                <g-not-ready-project-warning
-                  :project="selectedProject"
-                  size="small"
-                />
-              </template>
-              <v-tooltip
-                activator="parent"
-                location="top"
-              >
-                {{ truncateProjectTitle(selectedProjectTitle) }}
-              </v-tooltip>
+              <div class="flex-align-center">
+                <div>
+                  <div>{{ selectedProjectName }}</div>
+                  <div
+                    v-if="!!selectedProjectTitle"
+                    class="selected-project-title"
+                  >
+                    {{ selectedProjectTitle }}
+                  </div>
+                </div>
+
+                <div>
+                  <template v-if="selectedProject">
+                    <g-stale-project-warning
+                      :project="selectedProject"
+                      size="small"
+                    />
+                    <g-not-ready-project-warning
+                      :project="selectedProject"
+                      size="small"
+                    />
+                  </template>
+                </div>
+              </div>
             </div>
             <template #append>
               <v-icon
@@ -124,7 +131,6 @@ SPDX-License-Identifier: Apache-2.0
               ref="refProjectListItems"
               :key="project.metadata.name"
               class="project-list-tile"
-              :height="48"
               :class="{ 'highlighted-item': isHighlightedProject(project) }"
               :data-g-project-name="project.metadata.name"
               @click="onProjectClick($event, project)"
@@ -135,37 +141,13 @@ SPDX-License-Identifier: Apache-2.0
                 </v-icon>
               </template>
               <v-list-item-title class="project-name text-uppercase">
-                <span
-                  v-if="hasProjectTitle(project)"
-                  class="text-primary"
-                >
-                  {{ getProjectTitle(project) }}
-                </span>
-                <span v-else>{{ project.metadata.name }}</span>
-
-                <v-tooltip
-                  v-if="hasProjectTitle(project)"
-                  activator="parent"
-                  location="top"
-                >
-                  {{ truncateProjectTitle(getProjectTitle(project)) }}
-                </v-tooltip>
+                {{ project.metadata.name }}
+              </v-list-item-title>
+              <v-list-item-title class="project-title">
+                {{ getProjectTitle(project) }}
               </v-list-item-title>
               <v-list-item-subtitle class="project-owner">
-                <abbr :title="hasProjectTitle(project) ? '' : null">
-                  <span v-if="hasProjectTitle(project)">
-                    {{ project.metadata.name }} &bull;
-                  </span>
-                  {{ getProjectOwner(project) }}
-                </abbr>
-
-                <v-tooltip
-                  v-if="hasProjectTitle(project)"
-                  activator="parent"
-                  location="bottom"
-                >
-                  {{ getProjectTooltip(project) }}
-                </v-tooltip>
+                {{ getProjectOwner(project) }}
               </v-list-item-subtitle>
               <template #append>
                 <g-stale-project-warning
@@ -281,6 +263,9 @@ import GStaleProjectWarning from '@/components/GStaleProjectWarning.vue'
 import GNotReadyProjectWarning from '@/components/GNotReadyProjectWarning.vue'
 import GTeaser from '@/components/GTeaser.vue'
 
+import { getProjectTitle } from '@/composables/useProjectMetadata/helper.js'
+import { useProjectMetadata } from '@/composables/useProjectMetadata/index.js'
+
 import {
   emailToDisplayName,
   setDelayedInputFocus,
@@ -288,8 +273,6 @@ import {
   namespacedRoute as getNamespacedRoute,
   routeName as getRouteName,
 } from '@/utils'
-import { annotations } from '@/utils/annotations.js'
-import { truncateProjectTitle } from '@/utils/project.js'
 
 import find from 'lodash/find'
 import findIndex from 'lodash/findIndex'
@@ -362,6 +345,8 @@ const selectedProject = computed({
   },
 })
 
+const { projectTitle: selectedProjectTitle } = useProjectMetadata(selectedProject)
+
 const hasNoProjects = computed(() => {
   return !projectList.value.length
 })
@@ -378,10 +363,6 @@ const projectMenuIcon = computed(() => {
 const selectedProjectName = computed(() => {
   const project = selectedProject.value
   return project ? project.metadata.name : ''
-})
-
-const selectedProjectTitle = computed(() => {
-  return getProjectTitle(selectedProject.value) ?? selectedProjectName
 })
 
 const sortedAndFilteredProjectList = computed(() => {
@@ -432,22 +413,6 @@ const projectNameThatMatchesFilter = computed(() => {
     ? projectName
     : undefined
 })
-
-function hasProjectTitle (project) {
-  return !!getProjectTitle(project)
-}
-
-function getProjectTitle (project) {
-  return get(project, ['metadata', 'annotations', annotations.projectTitle])
-}
-
-function getProjectTooltip (project) {
-  if (!hasProjectTitle(project)) {
-    return undefined
-  }
-
-  return `Project: ${project.metadata.name} • Owner: ${getProjectOwner(project)}`
-}
 
 function getProjectOwner (project) {
   return emailToDisplayName(get(project, ['spec', 'owner', 'name']))
@@ -681,6 +646,17 @@ watch(projectMenu, value => {
     font-weight: 400;
     text-transform: none;
   }
+
+  .flex-align-center {
+    display: flex;
+    align-items: center
+  }
+
+  .selected-project-title {
+    text-transform: none;
+    font-weight: normal;
+    font-size: 14px;
+  }
 }
 
 .project-menu {
@@ -716,7 +692,7 @@ watch(projectMenu, value => {
         font-size: 14px;
       }
 
-      .project-owner {
+      .project-title, .project-owner {
         font-size: 11px;
       }
 
