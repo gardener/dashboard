@@ -65,8 +65,8 @@ SPDX-License-Identifier: Apache-2.0
                       :model-value="projectTitle"
                       :save="updateProjectTitle"
                       :rules="projectTitleRules"
-                      counter="true"
-                      max-length="64"
+                      :counter="true"
+                      :max-length="64"
                     />
                   </div>
                 </g-list-item>
