@@ -26,7 +26,14 @@ SPDX-License-Identifier: Apache-2.0
                     </v-icon>
                   </template>
                   <div class="text-body-2 text-medium-emphasis">
-                    Name
+                    <span>
+                      <span>Name</span>
+                      <v-tooltip
+                        activator="parent"
+                        location="top"
+                        text="Technical, unique project name."
+                      />
+                    </span>
                   </div>
                   <div class="text-body-1">
                     {{ projectName }}
@@ -38,6 +45,34 @@ SPDX-License-Identifier: Apache-2.0
                       tooltip-text="Copy project name to clipboard"
                     />
                   </template>
+                </g-list-item>
+                <g-list-item>
+                  <template #prepend>
+                    <v-icon :color="color">
+                      mdi-text-subject
+                    </v-icon>
+                  </template>
+                  <div class="text-body-2 text-medium-emphasis">
+                    <span>
+                      <span>Title</span>
+                      <v-tooltip
+                        activator="parent"
+                        location="top"
+                        text="Human-readable project title."
+                      />
+                    </span>
+                  </div>
+                  <div class="text-body-1 wrap-text">
+                    <g-editable-text
+                      :read-only="!canPatchProject"
+                      color="action-button"
+                      :model-value="projectTitle"
+                      :save="updateProjectTitle"
+                      :rules="{ maxLength: maxLength(64) }"
+                      :counter="true"
+                      :max-length="64"
+                    />
+                  </div>
                 </g-list-item>
                 <g-list-item>
                   <template #prepend>
@@ -485,6 +520,7 @@ import {
 import {
   required,
   helpers,
+  maxLength,
 } from '@vuelidate/validators'
 
 import { useAppStore } from '@/store/app'
@@ -522,6 +558,7 @@ import {
   getDateFormatted,
 } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
+import { annotations } from '@/utils/annotations.js'
 
 import includes from 'lodash/includes'
 import set from 'lodash/set'
@@ -552,6 +589,7 @@ const {
 } = storeToRefs(projectStore)
 const {
   projectName,
+  projectTitle,
   shootCustomFields,
   projectOwner: owner,
   projectCreationTimestamp: creationTimestamp,
@@ -621,34 +659,32 @@ function updateOwner (name) {
     kind: 'User',
     name,
   }
-  return updateProperty('owner', owner)
+  return updateProperty(['spec', 'owner'], owner)
+}
+
+function updateProjectTitle (value) {
+  return updateProperty(['metadata', 'annotations', annotations.projectTitle], value || null)
 }
 
 function updateDescription (value) {
-  if (!value) {
-    value = null
-  }
-  return updateProperty('description', value)
+  return updateProperty(['spec', 'description'], value)
 }
 
 function updatePurpose (value) {
-  if (!value) {
-    value = null
-  }
-  return updateProperty('purpose', value)
+  return updateProperty(['spec', 'purpose'], value)
 }
 
-async function updateProperty (key, value, options = {}) {
+async function updateProperty (path, value, options = {}) {
   const { metadata: { name }, spec: { namespace } } = projectStore.project
   try {
     const mergePatchDocument = {
       metadata: { name },
       spec: { namespace },
     }
-    set(mergePatchDocument, ['spec', key], value)
+    set(mergePatchDocument, path, value)
     await projectStore.patchProject(mergePatchDocument)
   } catch (err) {
-    const { error = `Failed to update project ${key}` } = options
+    const { error = `Failed to update project ${path.join('.')}` } = options
     throw Object.assign(new Error(error), errorDetailsFromError(err))
   }
 }

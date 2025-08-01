@@ -55,17 +55,30 @@ SPDX-License-Identifier: Apache-2.0
               class="text-left"
               :class="{ placeholder: !selectedProject }"
             >
-              {{ selectedProjectName }}
-              <template v-if="selectedProject">
-                <g-stale-project-warning
-                  :project="selectedProject"
-                  size="small"
-                />
-                <g-not-ready-project-warning
-                  :project="selectedProject"
-                  size="small"
-                />
-              </template>
+              <div class="flex-align-center">
+                <div>
+                  <div>{{ selectedProjectName }}</div>
+                  <div
+                    v-if="!!selectedProjectTitle"
+                    class="selected-project-title"
+                  >
+                    {{ selectedProjectTitle }}
+                  </div>
+                </div>
+
+                <div>
+                  <template v-if="selectedProject">
+                    <g-stale-project-warning
+                      :project="selectedProject"
+                      size="small"
+                    />
+                    <g-not-ready-project-warning
+                      :project="selectedProject"
+                      size="small"
+                    />
+                  </template>
+                </div>
+              </div>
             </div>
             <template #append>
               <v-icon
@@ -118,7 +131,6 @@ SPDX-License-Identifier: Apache-2.0
               ref="refProjectListItems"
               :key="project.metadata.name"
               class="project-list-tile"
-              :height="48"
               :class="{ 'highlighted-item': isHighlightedProject(project) }"
               :data-g-project-name="project.metadata.name"
               @click="onProjectClick($event, project)"
@@ -130,6 +142,9 @@ SPDX-License-Identifier: Apache-2.0
               </template>
               <v-list-item-title class="project-name text-uppercase">
                 {{ project.metadata.name }}
+              </v-list-item-title>
+              <v-list-item-title class="project-title">
+                {{ getProjectTitle(project) }}
               </v-list-item-title>
               <v-list-item-subtitle class="project-owner">
                 {{ getProjectOwner(project) }}
@@ -251,6 +266,9 @@ import GStaleProjectWarning from '@/components/GStaleProjectWarning.vue'
 import GNotReadyProjectWarning from '@/components/GNotReadyProjectWarning.vue'
 import GTeaser from '@/components/GTeaser.vue'
 
+import { getProjectTitle } from '@/composables/useProjectMetadata/helper.js'
+import { useProjectMetadata } from '@/composables/useProjectMetadata/index.js'
+
 import {
   emailToDisplayName,
   setDelayedInputFocus,
@@ -330,6 +348,8 @@ const selectedProject = computed({
   },
 })
 
+const { projectTitle: selectedProjectTitle } = useProjectMetadata(selectedProject)
+
 const hasNoProjects = computed(() => {
   return !projectList.value.length
 })
@@ -357,7 +377,8 @@ const sortedAndFilteredProjectList = computed(() => {
     const name = toLower(item.metadata.name)
     let owner = get(item, ['spec', 'owner', 'name'])
     owner = toLower(replace(owner, /@.*$/, ''))
-    return includes(name, filter) || includes(owner, filter)
+    const projectTitle = toLower(getProjectTitle(item) || '')
+    return includes(name, filter) || includes(owner, filter) || includes(projectTitle, filter)
   }
   const filteredList = filter([
     allProjectsItem,
@@ -370,7 +391,12 @@ const sortedAndFilteredProjectList = computed(() => {
   const allProjectsMatch = item => {
     return item?.spec.namespace === allProjectsItem.spec.namespace ? 0 : 1
   }
-  const sortedList = sortBy(filteredList, [allProjectsMatch, exactMatch, 'metadata.name'])
+
+  const sortByTitleOrName = item => {
+    const title = getProjectTitle(item)
+    return title ? toLower(title) : toLower(item.metadata.name)
+  }
+  const sortedList = sortBy(filteredList, [allProjectsMatch, exactMatch, sortByTitleOrName])
   return sortedList
 })
 
@@ -608,8 +634,11 @@ watch(projectMenu, value => {
     margin: 0 24px 0 0 !important;
   }
   :deep(.v-btn__content > div) {
-    min-width: 153px !important;
+    width: 153px !important;
     text-align: left !important;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
   :deep(.v-btn__append) {
     margin: 0 0 0 4px !important;
@@ -619,6 +648,17 @@ watch(projectMenu, value => {
     content: 'Project';
     font-weight: 400;
     text-transform: none;
+  }
+
+  .flex-align-center {
+    display: flex;
+    align-items: center
+  }
+
+  .selected-project-title {
+    text-transform: none;
+    font-weight: normal;
+    font-size: 14px;
   }
 }
 
@@ -655,12 +695,16 @@ watch(projectMenu, value => {
         font-size: 14px;
       }
 
-      .project-owner {
+      .project-title, .project-owner {
         font-size: 11px;
       }
 
       :deep(.v-list-item__prepend > .v-icon) {
         opacity: 0.9;
+      }
+
+      :deep(.v-list-item__prepend > .v-list-item__spacer) {
+        width: 16px;
       }
 
       .highlighted-item {

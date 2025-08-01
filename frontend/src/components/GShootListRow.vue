@@ -10,12 +10,12 @@ SPDX-License-Identifier: Apache-2.0
       v-for="cell in cells"
       :key="cell.header.key"
       :class="cell.header.class"
-      class="position-relative"
+      class="position-relative project-cell"
     >
       <template v-if="cell.header.key === 'project'">
         <g-text-router-link
           :to="{ name: 'ShootList', params: { namespace: shootNamespace } }"
-          :text="shootProjectName"
+          :text="shootProjectNameAndTitle"
         />
       </template>
       <template v-if="cell.header.key === 'name'">
@@ -317,6 +317,7 @@ const {
   shootCreatedBy,
   shootCreationTimestamp,
   shootProjectName,
+  shootProjectTitle,
   shootPurpose,
   shootProviderType,
   shootRegion,
@@ -341,6 +342,12 @@ useProvideShootHelper(shootItem, {
   gardenerExtensionStore,
   credentialStore,
   seedStore,
+})
+
+const shootProjectNameAndTitle = computed(() => {
+  const title = shootProjectTitle.value
+  const name = shootProjectName.value
+  return title ? `${name} – ${title}` : name
 })
 
 const isInfoAvailable = computed(() => {
@@ -461,6 +468,11 @@ const hasShootWorkerGroupWarning = computed(() => {
     left: 0;
     position: absolute;
     pointer-events: none;
+  }
+
+  .project-cell {
+    max-width: 200px;
+    overflow: hidden;
   }
 
   .v-theme--light .stale .stale-overlay {
