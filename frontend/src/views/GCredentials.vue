@@ -43,15 +43,11 @@ SPDX-License-Identifier: Apache-2.0
             absolute
           >
             <template #activator="{ props: menuProps }">
-              <v-tooltip location="top">
-                <template #activator="{ props: tooltipProps }">
-                  <v-btn
-                    v-bind="mergeProps(menuProps, tooltipProps)"
-                    icon="mdi-plus"
-                  />
-                </template>
-                Create Infrastructure Secret
-              </v-tooltip>
+              <v-btn
+                v-tooltip:top="'Create Infrastructure Secret'"
+                v-bind="menuProps"
+                icon="mdi-plus"
+              />
             </template>
             <v-list>
               <v-list-subheader>
@@ -171,15 +167,11 @@ SPDX-License-Identifier: Apache-2.0
             absolute
           >
             <template #activator="{ props: menuProps }">
-              <v-tooltip location="top">
-                <template #activator="{ props: tooltipProps }">
-                  <v-btn
-                    v-bind="mergeProps(menuProps, tooltipProps)"
-                    icon="mdi-plus"
-                  />
-                </template>
-                Create Secret Credential
-              </v-tooltip>
+              <v-btn
+                v-tooltip:top="'Create Secret Credential'"
+                v-bind="menuProps"
+                icon="mdi-plus"
+              />
             </template>
             <v-list density="compact">
               <v-list-subheader>

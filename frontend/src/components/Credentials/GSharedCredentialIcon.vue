@@ -5,18 +5,13 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-tooltip location="top">
-    <template #activator="{ props: tProps }">
-      <v-icon
-        v-bind="tProps"
-        size="small"
-        class="ml-2"
-      >
-        mdi-account-arrow-left
-      </v-icon>
-    </template>
-    <span>This credential is shared from the {{ namespace }} namespace</span>
-  </v-tooltip>
+  <v-icon
+    v-tooltip:top="`This credential is shared from the ${namespace} namespace`"
+    size="small"
+    class="ml-2"
+  >
+    mdi-account-arrow-left
+  </v-icon>
 </template>
 
 <script setup>

@@ -5,22 +5,15 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-tooltip
+  <v-btn
     v-if="canRetry"
-    location="top"
-  >
-    <template #activator="{ props }">
-      <v-btn
-        v-bind="props"
-        density="comfortable"
-        variant="text"
-        icon="mdi-reload"
-        color="primary"
-        @click="onRetryOperation"
-      />
-    </template>
-    Retry Operation
-  </v-tooltip>
+    v-tooltip:top="'Retry Operation'"
+    density="comfortable"
+    variant="text"
+    icon="mdi-reload"
+    color="primary"
+    @click="onRetryOperation"
+  />
 </template>
 
 <script setup>

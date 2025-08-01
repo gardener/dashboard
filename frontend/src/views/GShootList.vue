@@ -120,20 +120,13 @@ SPDX-License-Identifier: Apache-2.0
             </v-chip>
             <br>
           </v-tooltip>
-          <v-tooltip
+          <v-btn
             v-if="canCreateShoots && projectScope"
-            location="top"
-          >
-            <template #activator="{ props }">
-              <v-btn
-                v-bind="props"
-                icon="mdi-plus"
-                color="toolbar-title"
-                :to="{ name: 'NewShoot', params: { namespace } }"
-              />
-            </template>
-            <span>Create Cluster</span>
-          </v-tooltip>
+            v-tooltip:top="'Create Cluster'"
+            icon="mdi-plus"
+            color="toolbar-title"
+            :to="{ name: 'NewShoot', params: { namespace } }"
+          />
           <g-table-column-selection
             :headers="selectableHeaders"
             :filters="selectableFilters"

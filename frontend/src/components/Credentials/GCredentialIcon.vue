@@ -5,18 +5,13 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-tooltip location="top">
-    <template #activator="{ props: tProps }">
-      <v-icon
-        v-bind="tProps"
-        size="small"
-        class="mr-2"
-      >
-        {{ icon }}
-      </v-icon>
-    </template>
-    <span>{{ tooltip }}</span>
-  </v-tooltip>
+  <v-icon
+    v-tooltip:top="tooltip"
+    size="small"
+    class="mr-2"
+  >
+    {{ icon }}
+  </v-icon>
 </template>
 
 <script setup>

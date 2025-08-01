@@ -19,36 +19,22 @@ SPDX-License-Identifier: Apache-2.0
         >
           <v-list-item-title>
             {{ item.displayName }}
-            <v-tooltip
+            <v-icon
               v-if="foreign"
-              location="top"
-            >
-              <template #activator="{ props: activatorProps }">
-                <v-icon
-                  v-bind="activatorProps"
-                  icon="mdi-account-arrow-left"
-                  end
-                  size="small"
-                  color="medium-emphasis"
-                />
-              </template>
-              Service Account invited from namespace {{ serviceAccountNamespace }}
-            </v-tooltip>
-            <v-tooltip
+              v-tooltip:top="`Service Account invited from namespace ${serviceAccountNamespace}`"
+              icon="mdi-account-arrow-left"
+              end
+              size="small"
+              color="medium-emphasis"
+            />
+            <v-icon
               v-if="orphaned"
-              location="top"
-            >
-              <template #activator="{ props: activatorProps }">
-                <v-icon
-                  v-bind="activatorProps"
-                  icon="mdi-alert-circle-outline"
-                  end
-                  size="small"
-                  color="warning"
-                />
-              </template>
-              Associated Service Account does not exist
-            </v-tooltip>
+              v-tooltip:top="'Associated Service Account does not exist'"
+              icon="mdi-alert-circle-outline"
+              end
+              size="small"
+              color="warning"
+            />
           </v-list-item-title>
           <v-list-item-subtitle style="flex: 1 0 100%;">
             {{ item.username }}
