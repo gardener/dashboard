@@ -68,7 +68,7 @@ SPDX-License-Identifier: Apache-2.0
                       color="action-button"
                       :model-value="projectTitle"
                       :save="updateProjectTitle"
-                      :rules="projectTitleRules"
+                      :rules="{ maxLength: maxLength(64) }"
                       :counter="true"
                       :max-length="64"
                     />
@@ -509,6 +509,7 @@ import {
 import {
   required,
   helpers,
+  maxLength,
 } from '@vuelidate/validators'
 
 import { useAppStore } from '@/store/app'
@@ -547,7 +548,6 @@ import {
 } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
 import { annotations } from '@/utils/annotations.js'
-import { projectTitleRules } from '@/utils/project.js'
 
 import includes from 'lodash/includes'
 import set from 'lodash/set'

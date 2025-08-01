@@ -54,7 +54,7 @@ import {
 } from 'vue'
 
 import { useProjectPhase } from '@/composables/useProjectItem'
-import { useProjectMetadata } from '@/composables/useProjectMetadata'
+import { useProjectMetadata } from '@/composables/useProjectMetadata/index.js'
 
 const props = defineProps({
   project: {

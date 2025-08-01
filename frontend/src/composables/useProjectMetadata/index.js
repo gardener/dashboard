@@ -8,7 +8,7 @@ import { computed } from 'vue'
 
 import { annotations } from '@/utils/annotations.js'
 
-import { useObjectMetadata } from './useObjectMetadata'
+import { useObjectMetadata } from '../useObjectMetadata.js'
 
 export const useProjectMetadata = (projectItem, options = {}) => {
   const {
@@ -33,7 +33,11 @@ export const useProjectMetadata = (projectItem, options = {}) => {
   // projectTitle is a project-specific annotation
   const projectTitle = computed({
     get () {
-      return getProjectAnnotation(annotations.projectTitle)
+      const title = getProjectAnnotation(annotations.projectTitle)
+      if (title) {
+        return title.trim()
+      }
+      return undefined
     },
     set (value) {
       setProjectAnnotation(annotations.projectTitle, value)

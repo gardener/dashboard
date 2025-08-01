@@ -247,7 +247,7 @@ import GCodeBlock from '@/components/GCodeBlock.vue'
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
 import GTimeString from '@/components/GTimeString.vue'
 
-import { useProjectMetadata } from '@/composables/useProjectMetadata'
+import { useProjectMetadata } from '@/composables/useProjectMetadata/index.js'
 import { useProjectNamespace } from '@/composables/useProjectItem'
 
 import head from 'lodash/head'
