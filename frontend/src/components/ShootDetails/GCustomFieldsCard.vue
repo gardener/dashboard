@@ -30,18 +30,11 @@ SPDX-License-Identifier: Apache-2.0
             </v-icon>
           </template>
           <g-list-item-content :label="field.name">
-            <v-tooltip
+            <span
               v-if="field.tooltip"
-              location="top"
-            >
-              <template #activator="{ props }">
-                <span
-                  v-bind="props"
-                  :class="{'text-disabled' : !field.value}"
-                >{{ field.displayValue }}</span>
-              </template>
-              {{ field.tooltip }}
-            </v-tooltip>
+              v-tooltip:top="field.tooltip"
+              :class="{'text-disabled' : !field.value}"
+            >{{ field.displayValue }}</span>
             <span
               v-else-if="field.displayValue"
               :class="{'text-disabled' : !field.value}"

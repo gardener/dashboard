@@ -71,20 +71,15 @@ SPDX-License-Identifier: Apache-2.0
         @blur="v$.internalValue.$touch"
       >
         <template #append>
-          <v-tooltip location="top">
-            <template #activator="{ props }">
-              <v-btn
-                v-bind="props"
-                :disabled="!valid"
-                icon="mdi-check"
-                variant="text"
-                density="comfortable"
-                color="success"
-                @click="onSave"
-              />
-            </template>
-            <span>Save</span>
-          </v-tooltip>
+          <v-btn
+            v-tooltip:top="'Save'"
+            :disabled="!valid"
+            icon="mdi-check"
+            variant="text"
+            density="comfortable"
+            color="success"
+            @click="onSave"
+          />
         </template>
         <template #message="{ message }">
           <g-error-message

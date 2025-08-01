@@ -15,6 +15,7 @@ SPDX-License-Identifier: Apache-2.0
       <template v-if="!expanded">
         <v-hover v-slot="{ props: hoverProps, isHovering }">
           <v-chip
+            v-tooltip:top="'Expand items'"
             v-bind="hoverProps"
             :variant="isHovering ? 'flat' : 'outlined'"
             size="small"
@@ -24,12 +25,6 @@ SPDX-License-Identifier: Apache-2.0
             @click="expanded = true"
           >
             {{ itemCount }}
-            <v-tooltip
-              location="top"
-              activator="parent"
-            >
-              Expand items
-            </v-tooltip>
           </v-chip>
         </v-hover>
       </template>

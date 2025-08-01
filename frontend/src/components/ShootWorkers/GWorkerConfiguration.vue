@@ -94,13 +94,10 @@ SPDX-License-Identifier: Apache-2.0
       </v-expand-transition>
     </template>
   </g-action-button-dialog>
-  <v-tooltip
-    :activator="$refs.actionDialog"
-    location="top"
-    :disabled="hasShootWorkerGroups"
-  >
-    It is not possible to add worker groups to workerless clusters
-  </v-tooltip>
+  <div
+    :ref="'actionDialog'"
+    v-tooltip="{ text: 'It is not possible to add worker groups to workerless clusters', location: 'top', disabled: hasShootWorkerGroups }"
+  />
 </template>
 
 <script>

@@ -56,18 +56,11 @@ SPDX-License-Identifier: Apache-2.0
             Access Dashboard using the kubectl command-line tool by running the following command:
             <code>kubectl proxy</code>.
             Kubectl will make Dashboard available at:
-            <v-tooltip
+            <span
               v-if="isShootStatusHibernated"
-              location="top"
-            >
-              <template #activator="slotProps">
-                <span
-                  v-bind="slotProps.props"
-                  class="text-grey"
-                >{{ dashboardUrl }}</span>
-              </template>
-              Dashboard is not running for hibernated clusters
-            </v-tooltip>
+              v-tooltip:top="'Dashboard is not running for hibernated clusters'"
+              class="text-grey"
+            >{{ dashboardUrl }}</span>
             <a
               v-else
               class="text-anchor"
