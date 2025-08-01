@@ -10,12 +10,12 @@ SPDX-License-Identifier: Apache-2.0
       v-for="cell in cells"
       :key="cell.header.key"
       :class="cell.header.class"
-      class="position-relative"
+      class="position-relative project-cell"
     >
       <template v-if="cell.header.key === 'project'">
         <g-text-router-link
           :to="{ name: 'ShootList', params: { namespace: shootNamespace } }"
-          :text="shootProjectTitleAndName"
+          :text="shootProjectNameAndTitle"
         />
       </template>
       <template v-if="cell.header.key === 'name'">
@@ -274,7 +274,6 @@ import { useProvideShootHelper } from '@/composables/useShootHelper'
 import { formatValue } from '@/composables/useProjectShootCustomFields/helper'
 
 import { getIssueSince } from '@/utils'
-import { truncateProjectTitle } from '@/utils/project.js'
 
 import find from 'lodash/find'
 import some from 'lodash/some'
@@ -345,10 +344,10 @@ useProvideShootHelper(shootItem, {
   seedStore,
 })
 
-const shootProjectTitleAndName = computed(() => {
+const shootProjectNameAndTitle = computed(() => {
   const title = shootProjectTitle.value
   const name = shootProjectName.value
-  return title ? `${truncateProjectTitle(title, 32)} (${name})` : name
+  return title ? `${name} – ${title}` : name
 })
 
 const isInfoAvailable = computed(() => {
@@ -469,6 +468,11 @@ const hasShootWorkerGroupWarning = computed(() => {
     left: 0;
     position: absolute;
     pointer-events: none;
+  }
+
+  .project-cell {
+    max-width: 200px;
+    overflow: hidden;
   }
 
   .v-theme--light .stale .stale-overlay {
