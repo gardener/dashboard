@@ -145,7 +145,6 @@ import {
   isConflict,
   isGatewayTimeout,
 } from '@/utils/error'
-import { projectTitleRules } from '@/utils/project.js'
 
 const props = defineProps({
   modelValue: {
@@ -201,7 +200,9 @@ const rules = {
     lowerCaseAlphaNumHyphen,
     isUniqueProjectName,
   },
-  projectTitle: projectTitleRules,
+  projectTitle: {
+    maxLength: maxLength(64),
+  },
 }
 
 const v$ = useVuelidate(rules, { projectName, projectTitle })
