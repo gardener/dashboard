@@ -648,32 +648,32 @@ function updateOwner (name) {
     kind: 'User',
     name,
   }
-  return updateProperty('spec.owner', owner)
+  return updateProperty(['spec', 'owner'], owner)
 }
 
 function updateProjectTitle (value) {
-  return updateProperty(`metadata.annotations["${annotations.projectTitle}"]`, value || null)
+  return updateProperty(['metadata', 'annotations', annotations.projectTitle], value || null)
 }
 
 function updateDescription (value) {
-  return updateProperty('spec.description', value)
+  return updateProperty(['spec', 'description'], value)
 }
 
 function updatePurpose (value) {
-  return updateProperty('spec.purpose', value)
+  return updateProperty(['spec', 'purpose'], value)
 }
 
-async function updateProperty (key, value, options = {}) {
+async function updateProperty (path, value, options = {}) {
   const { metadata: { name }, spec: { namespace } } = projectStore.project
   try {
     const mergePatchDocument = {
       metadata: { name },
       spec: { namespace },
     }
-    set(mergePatchDocument, key, value)
+    set(mergePatchDocument, path, value)
     await projectStore.patchProject(mergePatchDocument)
   } catch (err) {
-    const { error = `Failed to update project ${key}` } = options
+    const { error = `Failed to update project ${path.join('.')}` } = options
     throw Object.assign(new Error(error), errorDetailsFromError(err))
   }
 }
