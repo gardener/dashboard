@@ -65,7 +65,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Check matrix status
+      - name: Fail if OCI matrix failed
         if: ${{ needs.oci-images.result != 'success' }}
         run: exit 1
 
