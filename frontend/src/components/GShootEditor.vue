@@ -224,7 +224,7 @@ const {
   helpTooltip,
   loadEditor,
   focusEditor,
-  resetEditor,
+  refreshEditor,
   destroyEditor,
   execUndo,
   execRedo,
