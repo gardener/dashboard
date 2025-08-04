@@ -7,12 +7,11 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div
     class="d-flex flex-row"
-    style="min-width: 250px;"
   >
     <v-select
       v-model="criName"
+      style="flex: 0 0 125px"
       v-messages-color="{ color: 'warning' }"
-      class="flex-grow-0 flex-shrink-0"
       color="primary"
       item-color="primary"
       :items="criItems"
@@ -27,7 +26,8 @@ SPDX-License-Identifier: Apache-2.0
     <v-select
       v-if="criContainerRuntimeTypes.length"
       v-model="selectedCriContainerRuntimeTypes"
-      class="ml-1 flex-shrink-0"
+      class="ml-1"
+      style="flex: 0 0 125px"
       color="primary"
       item-color="primary"
       :items="criContainerRuntimeTypes"
