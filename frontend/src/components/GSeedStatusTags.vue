@@ -9,6 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     <g-seed-status-tag
       v-for="condition in conditions"
       :key="condition.type"
+      :seed-name="seedName"
       :condition="condition"
       :popper-placement="popperPlacement"
       :shoot-metadata="shootMetadata"
@@ -83,6 +84,7 @@ const {
 
 const {
   seedItem,
+  seedName,
 } = useSeedItem()
 const seedConditions = useSeedConditions(seedItem)
 

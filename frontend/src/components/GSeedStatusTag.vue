@@ -10,9 +10,13 @@ SPDX-License-Identifier: Apache-2.0
       v-model="internalValue"
       :placement="popperPlacement"
       :disabled="!condition.message"
-      :toolbar-title="popperTitle"
       :toolbar-color="color"
     >
+      <template #toolbar-title>
+        <span v-if="staleShoot">Last Status - </span>
+        <span v-else>{{ condition.name }} - </span>
+        <span class="font-family-monospace font-weight-bold">{{ seedName }}</span>
+      </template>
       <template #activator="{ props }">
         <v-chip
           v-bind="props"
@@ -79,6 +83,10 @@ export default {
     'activePopoverKey',
   ],
   props: {
+    seedName: {
+      type: String,
+      required: true,
+    },
     condition: {
       type: Object,
       required: true,
@@ -110,12 +118,6 @@ export default {
       set (value) {
         this.activePopoverKey = value ? this.popoverKey : ''
       },
-    },
-    popperTitle () {
-      if (this.staleShoot) {
-        return 'Last Status'
-      }
-      return this.condition.name
     },
     chipText () {
       return this.condition.shortName || ''
