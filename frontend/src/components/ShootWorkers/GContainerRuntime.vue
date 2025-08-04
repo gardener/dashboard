@@ -10,8 +10,8 @@ SPDX-License-Identifier: Apache-2.0
   >
     <v-select
       v-model="criName"
-      style="flex: 0 0 125px"
       v-messages-color="{ color: 'warning' }"
+      style="flex: 0 0 125px"
       color="primary"
       item-color="primary"
       :items="criItems"
