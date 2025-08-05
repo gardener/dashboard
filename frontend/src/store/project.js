@@ -205,6 +205,8 @@ export const useProjectStore = defineStore('project', () => {
     currentNamespaces,
     defaultNamespace,
     projectName,
+    projectTitle,
+    projectNameAndTitle,
     projectList,
     projectsNotMarkedForDeletion,
     project,
