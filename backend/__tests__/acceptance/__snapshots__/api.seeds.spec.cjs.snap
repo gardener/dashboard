@@ -29,120 +29,217 @@ exports[`api seeds should return all seeds 1`] = `
 exports[`api seeds should return all seeds 2`] = `
 [
   {
-    "data": {
-      "ingressDomain": "ingress.foo-east.infra1.example.org",
-      "region": "foo-east",
-      "type": "infra1",
-      "unprotected": false,
-      "visible": false,
-    },
+    "kind": "Seed",
     "metadata": {
       "name": "soil-infra1",
-      "unreachable": false,
+      "uid": "seed--soil-infra1",
+    },
+    "spec": {
+      "ingress": {
+        "domain": "ingress.foo-east.infra1.example.org",
+      },
+      "provider": {
+        "region": "foo-east",
+        "type": "infra1",
+      },
+      "settings": {
+        "scheduling": {
+          "visible": false,
+        },
+      },
+      "taints": [
+        {
+          "key": "seed.gardener.cloud/protected",
+        },
+      ],
     },
   },
   {
-    "data": {
-      "ingressDomain": "ingress.foo-east.infra1.example.org",
-      "region": "foo-east",
-      "type": "infra1",
-      "unprotected": true,
-      "visible": true,
-    },
+    "kind": "Seed",
     "metadata": {
       "name": "infra1-seed",
-      "unreachable": false,
+      "uid": "seed--infra1-seed",
+    },
+    "spec": {
+      "ingress": {
+        "domain": "ingress.foo-east.infra1.example.org",
+      },
+      "provider": {
+        "region": "foo-east",
+        "type": "infra1",
+      },
+      "settings": {
+        "scheduling": {
+          "visible": true,
+        },
+      },
+      "taints": [],
     },
   },
   {
-    "data": {
-      "ingressDomain": "ingress.foo-west.infra1.example.org",
-      "region": "foo-west",
-      "type": "infra1",
-      "unprotected": true,
-      "visible": true,
-    },
+    "kind": "Seed",
     "metadata": {
       "name": "infra1-seed2",
-      "unreachable": false,
+      "uid": "seed--infra1-seed2",
+    },
+    "spec": {
+      "ingress": {
+        "domain": "ingress.foo-west.infra1.example.org",
+      },
+      "provider": {
+        "region": "foo-west",
+        "type": "infra1",
+      },
+      "settings": {
+        "scheduling": {
+          "visible": true,
+        },
+      },
+      "taints": [],
     },
   },
   {
-    "data": {
-      "ingressDomain": "ingress.foo-europe.infra3.example.org",
-      "region": "foo-europe",
-      "type": "infra3",
-      "unprotected": true,
-      "visible": true,
-    },
+    "kind": "Seed",
     "metadata": {
+      "labels": {
+        "biz": "baz",
+        "test-unreachable": "true",
+      },
       "name": "infra3-seed",
-      "unreachable": true,
+      "uid": "seed--infra3-seed",
+    },
+    "spec": {
+      "ingress": {
+        "domain": "ingress.foo-europe.infra3.example.org",
+      },
+      "provider": {
+        "region": "foo-europe",
+        "type": "infra3",
+      },
+      "settings": {
+        "scheduling": {
+          "visible": true,
+        },
+      },
+      "taints": [],
     },
   },
   {
-    "data": {
-      "ingressDomain": "ingress.foo-south.infra1.example.org",
-      "region": "foo-south",
-      "type": "infra1",
-      "unprotected": true,
-      "visible": true,
-    },
+    "kind": "Seed",
     "metadata": {
       "name": "infra4-seed-managed",
-      "unreachable": false,
+      "uid": "seed--infra4-seed-managed",
+    },
+    "spec": {
+      "ingress": {
+        "domain": "ingress.foo-south.infra1.example.org",
+      },
+      "provider": {
+        "region": "foo-south",
+        "type": "infra1",
+      },
+      "settings": {
+        "scheduling": {
+          "visible": true,
+        },
+      },
+      "taints": [],
     },
   },
   {
-    "data": {
-      "ingressDomain": "ingress.foo-europe.infra3.example.org",
-      "region": "foo-europe",
-      "type": "infra3",
-      "unprotected": true,
-      "visible": true,
-    },
+    "kind": "Seed",
     "metadata": {
+      "labels": {
+        "foo": "bar",
+        "fooz": "baz",
+      },
       "name": "infra3-seed-with-selector",
-      "unreachable": false,
+      "uid": "seed--infra3-seed-with-selector",
+    },
+    "spec": {
+      "ingress": {
+        "domain": "ingress.foo-europe.infra3.example.org",
+      },
+      "provider": {
+        "region": "foo-europe",
+        "type": "infra3",
+      },
+      "settings": {
+        "scheduling": {
+          "visible": true,
+        },
+      },
+      "taints": [],
     },
   },
   {
-    "data": {
-      "ingressDomain": "ingress.foo-europe.infra3.example.org",
-      "region": "foo-europe",
-      "type": "infra3",
-      "unprotected": true,
-      "visible": true,
-    },
+    "kind": "Seed",
     "metadata": {
       "name": "infra3-seed-without-selector",
-      "unreachable": false,
+      "uid": "seed--infra3-seed-without-selector",
+    },
+    "spec": {
+      "ingress": {
+        "domain": "ingress.foo-europe.infra3.example.org",
+      },
+      "provider": {
+        "region": "foo-europe",
+        "type": "infra3",
+      },
+      "settings": {
+        "scheduling": {
+          "visible": true,
+        },
+      },
+      "taints": [],
     },
   },
   {
-    "data": {
-      "ingressDomain": "ingress.foo-europe.infra3.example.org",
-      "region": "foo-europe",
-      "type": "infra3",
-      "unprotected": false,
-      "visible": true,
-    },
+    "kind": "Seed",
     "metadata": {
       "name": "infra3-seed-protected",
-      "unreachable": false,
+      "uid": "seed--infra3-seed-protected",
+    },
+    "spec": {
+      "ingress": {
+        "domain": "ingress.foo-europe.infra3.example.org",
+      },
+      "provider": {
+        "region": "foo-europe",
+        "type": "infra3",
+      },
+      "settings": {
+        "scheduling": {
+          "visible": true,
+        },
+      },
+      "taints": [
+        {
+          "key": "seed.gardener.cloud/protected",
+        },
+      ],
     },
   },
   {
-    "data": {
-      "ingressDomain": "ingress.foo-europe.infra3.example.org",
-      "region": "foo-europe",
-      "type": "infra3",
-      "unprotected": true,
-      "visible": false,
-    },
+    "kind": "Seed",
     "metadata": {
       "name": "infra3-seed-invisible",
-      "unreachable": false,
+      "uid": "seed--infra3-seed-invisible",
+    },
+    "spec": {
+      "ingress": {
+        "domain": "ingress.foo-europe.infra3.example.org",
+      },
+      "provider": {
+        "region": "foo-europe",
+        "type": "infra3",
+      },
+      "settings": {
+        "scheduling": {
+          "visible": false,
+        },
+      },
+      "taints": [],
     },
   },
 ]

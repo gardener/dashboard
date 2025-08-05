@@ -3,6 +3,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
+
 import httpErrors from 'http-errors'
 import * as authorization from './authorization.js'
 import _ from 'lodash-es'
@@ -23,7 +24,6 @@ function fromResource ({ cloudProfile: { metadata, spec }, seedNames }) {
 function emptyToUndefined (value) {
   return _.isEmpty(value) ? undefined : value
 }
-
 function assignSeedsToCloudProfileIteratee (seeds) {
   return cloudProfileResource => {
     function filterProviderType (seed) {

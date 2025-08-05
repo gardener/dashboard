@@ -61,6 +61,7 @@ const sockets = [
         id: 'admin@example.org',
         profiles: {
           canListProjects: true,
+          canListSeeds: true,
         },
       },
     },
@@ -72,6 +73,7 @@ const sockets = [
         id: 'foo@example.org',
         profiles: {
           canListProjects: false,
+          canListSeeds: false,
         },
       },
     },
@@ -83,6 +85,7 @@ const sockets = [
         id: 'bar@example.org',
         profiles: {
           canListProjects: false,
+          canListSeeds: true,
         },
       },
     },
@@ -256,6 +259,39 @@ describe('watches', function () {
       expect(fooRoom.emit.mock.calls).toEqual([
         ['projects', { type: 'ADDED', uid }],
         ['projects', { type: 'DELETED', uid }],
+      ])
+    })
+  })
+
+  describe('seeds', function () {
+    it('should watch seeds', async function () {
+      watches.seeds(io, informer)
+
+      const uid = 7
+      const seed = {
+        metadata: {
+          name: 'seed-foo',
+          uid,
+        },
+      }
+
+      informer.emit('add', seed)
+      informer.emit('update', seed)
+      informer.emit('delete', seed)
+
+      await flushPromises()
+
+      const ids = ['seeds']
+
+      expect(Array.from(rooms.keys())).toEqual(ids)
+      expect(nsp.to).toHaveBeenCalledTimes(3)
+
+      const seedsRoom = rooms.get(ids[0])
+      expect(seedsRoom.emit).toHaveBeenCalledTimes(3)
+      expect(seedsRoom.emit.mock.calls).toEqual([
+        ['seeds', { type: 'ADDED', uid }],
+        ['seeds', { type: 'MODIFIED', uid }],
+        ['seeds', { type: 'DELETED', uid }],
       ])
     })
   })

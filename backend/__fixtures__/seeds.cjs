@@ -15,7 +15,7 @@ function getSeed ({
   kind,
   seedProtected = false,
   seedVisible = true,
-  labels = {},
+  labels,
 }) {
   uid = uid || `seed--${name}`
   const seed = {
