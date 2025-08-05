@@ -17,6 +17,7 @@ import {
 import { useApi } from '@/composables/useApi'
 import { useLogger } from '@/composables/useLogger'
 import { useSocketEventHandler } from '@/composables/useSocketEventHandler'
+import { getProjectTitle } from '@/composables/useProjectMetadata/helper.js'
 
 import { annotations } from '@/utils/annotations.js'
 
@@ -107,7 +108,7 @@ export const useProjectStore = defineStore('project', () => {
   })
 
   const projectTitle = computed(() => {
-    const title = get(project.value, ['metadata', 'annotations', annotations.projectTitle])
+    const title = getProjectTitle(project.value)
     return title ? title.trim() : title
   })
 
