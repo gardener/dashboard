@@ -129,8 +129,9 @@ describe('api', function () {
 
       beforeEach(async () => {
         // authorization check for `canListProjects` and `canListSeeds`
-        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        mockRequest
+          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
         socket = await agent.connect({
           cookie: await user.cookie,
         })
@@ -195,9 +196,10 @@ describe('api', function () {
       })
 
       it('should subscribe shoots for all namespace', async function () {
-        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        mockRequest
+          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
 
         await subscribe(socket, 'shoots', { namespace: '_all' })
 
@@ -213,9 +215,10 @@ describe('api', function () {
       })
 
       it('should subscribe unhealthy shoots for all namespace', async function () {
-        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        mockRequest
+          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
 
         await subscribe(socket, 'shoots', { namespace: '_all', labelSelector: 'shoot.gardener.cloud/status!=healthy' })
 
@@ -241,9 +244,10 @@ describe('api', function () {
       })
 
       it('should fail to subscribe shoots for all namespaces', async function () {
-        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess({ allowed: false }))
+        mockRequest
+          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess({ allowed: false }))
 
         await expect(subscribe(socket, 'shoots', { namespace: '_all' })).rejects.toEqual(expect.objectContaining({
           name: 'ForbiddenError',
@@ -316,8 +320,9 @@ describe('api', function () {
 
       beforeEach(async () => {
         // authorization check for `canListProjects` and `canListSeeds`
-        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        mockRequest
+          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
         socket = await agent.connect({
           cookie: await user.cookie,
         })
@@ -482,8 +487,9 @@ describe('api', function () {
       }
       const user = fixtures.auth.createUser(options)
       // authorization check for `canListProjects` and `canListSeeds`
-      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+      mockRequest
+        .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       socket = await agent.connect({
         cookie: await user.cookie,
       })

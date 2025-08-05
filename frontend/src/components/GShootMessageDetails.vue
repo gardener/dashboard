@@ -87,7 +87,7 @@ SPDX-License-Identifier: Apache-2.0
                     Your Action is required
                   </h3>
                   <h4 class="wrap-text font-weight-bold">
-                    This error is flagged as user error which indicates that no Gardener operator action is required.
+                    This is a user-resolvable error — no Gardener operations team intervention needed.
                     Please read the error message carefully and take action.
                   </h4>
                 </template>
