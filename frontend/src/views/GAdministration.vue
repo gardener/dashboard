@@ -485,7 +485,7 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <template #content>
         <v-card-text>
-          Are you sure to delete the project <span class="font-weight-bold">{{ projectName }}</span>?
+          Are you sure to delete the project <span class="font-weight-bold">{{ projectNameAndTitle }}</span>?
           <br>
           <span class="text-error font-weight-bold">The operation can not be undone.</span>
         </v-card-text>
@@ -579,6 +579,7 @@ const {
 const {
   projectName,
   projectTitle,
+  projectNameAndTitle,
   shootCustomFields,
   projectOwner: owner,
   projectCreationTimestamp: creationTimestamp,
