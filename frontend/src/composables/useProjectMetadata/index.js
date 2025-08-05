@@ -44,10 +44,20 @@ export const useProjectMetadata = (projectItem, options = {}) => {
     },
   })
 
+  const projectNameAndTitle = computed(() => {
+    const name = projectName.value
+    const title = projectTitle.value
+    if (title) {
+      return `${name} – ${title}`
+    }
+    return name
+  })
+
   return {
     projectMetadata,
     projectName,
     projectTitle,
+    projectNameAndTitle,
     projectCreationTimestamp,
     projectDeletionTimestamp,
     projectGeneration,

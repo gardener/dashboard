@@ -106,6 +106,17 @@ export const useProjectStore = defineStore('project', () => {
     return get(project.value, ['metadata', 'name'])
   })
 
+  const projectTitle = computed(() => {
+    const title = get(project.value, ['metadata', 'annotations', annotations.projectTitle])
+    return title ? title.trim() : title
+  })
+
+  const projectNameAndTitle = computed(() => {
+    const name = projectName.value
+    const title = projectTitle.value
+    return title ? `${name} – ${title}` : name
+  })
+
   const projectNames = computed(() => {
     return map(list.value, 'metadata.name')
   })
