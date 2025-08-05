@@ -38,7 +38,7 @@ SPDX-License-Identifier: Apache-2.0
       :namespace="credentialNamespace"
     />
     <g-orphaned-credential-icon
-      v-if="!isOrphanedCredential"
+      v-if="isOrphanedCredential"
       :binding="binding"
     />
   </span>
