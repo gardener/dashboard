@@ -209,6 +209,7 @@ export default {
     const {
       touched,
       getEditorValue,
+      refreshEditor,
     } = useProvide(injectionKey, useShootEditor(editorData, {
       completionPaths: [
         'spec.properties.provider.properties.workers',
@@ -237,6 +238,7 @@ export default {
       editorData,
       touched,
       getEditorValue,
+      refreshEditor,
     }
   },
   computed: {
@@ -261,6 +263,7 @@ export default {
             // dialog downsize as editor not yet rendered
             this.overviewTabHeight = this.$refs.overviewTab.$el.getBoundingClientRect().height
             this.disableWorkerAnimation = true
+            this.refreshEditor()
             break
           }
         }
