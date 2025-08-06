@@ -40,6 +40,7 @@ SPDX-License-Identifier: Apache-2.0
         Control plane failure tolerance type <code>{{ controlPlaneHighAvailabilityFailureToleranceType }}</code> configured
       </v-alert>
       <v-alert
+        v-if="(controlPlaneHighAvailabilityFailureToleranceType === 'node' && !isFailureToleranceTypeZoneSupported) || controlPlaneHighAvailabilityFailureToleranceTypeChangeAllowed"
         type="info"
         variant="tonal"
       >
