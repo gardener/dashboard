@@ -263,7 +263,6 @@ export default {
             // dialog downsize as editor not yet rendered
             this.overviewTabHeight = this.$refs.overviewTab.$el.getBoundingClientRect().height
             this.disableWorkerAnimation = true
-            //
             this.refreshEditor()
             break
           }
