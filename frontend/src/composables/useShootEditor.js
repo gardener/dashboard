@@ -161,8 +161,8 @@ export function useShootEditor (initialValue, options = {}) {
     }
   }
 
-  function resetEditor () {
-    setEditorValue(shootItem.value, false)
+  function refreshEditor () {
+    setEditorValue(shootItem.value)
   }
 
   function focusEditor () {
@@ -242,7 +242,7 @@ export function useShootEditor (initialValue, options = {}) {
     getDocumentValue,
     getEditorValue,
     setEditorValue,
-    resetEditor,
+    refreshEditor,
     focusEditor,
     execUndo,
     execRedo,

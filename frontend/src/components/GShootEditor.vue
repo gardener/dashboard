@@ -46,7 +46,7 @@ SPDX-License-Identifier: Apache-2.0
                   size="x-small"
                   icon="mdi-reload"
                   :disabled="!touched"
-                  @click="resetEditor"
+                  @click="refreshEditor"
                 />
               </div>
             </template>
@@ -224,7 +224,7 @@ const {
   helpTooltip,
   loadEditor,
   focusEditor,
-  resetEditor,
+  refreshEditor,
   destroyEditor,
   execUndo,
   execRedo,
