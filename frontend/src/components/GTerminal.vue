@@ -226,9 +226,8 @@ SPDX-License-Identifier: Apache-2.0
           >
             <template #activator="{ props: menuProps }">
               <v-btn
-                v-tooltip="{
+                v-tooltip:top="{
                   text: terminalSession.detailedConnectionStateText || connectionStateText,
-                  location: 'top',
                   disabled: connectionMenu,
                   style: { minWidth: '110px' }
                 }"

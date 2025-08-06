@@ -10,7 +10,10 @@ SPDX-License-Identifier: Apache-2.0
       <v-card-text>
         <h3>Let's get started</h3>
         <div
-          v-tooltip="{ text: 'You are not authorized to create projects', location: 'top', disabled: canCreateProject }"
+          v-tooltip:top="{
+            text: 'You are not authorized to create projects',
+            disabled: canCreateProject
+          }"
         >
           <v-btn
             variant="text"

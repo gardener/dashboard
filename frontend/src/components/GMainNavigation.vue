@@ -148,9 +148,8 @@ SPDX-License-Identifier: Apache-2.0
           </v-list>
           <v-card-actions>
             <div
-              v-tooltip="{
+              v-tooltip:top="{
                 text: 'You are not authorized to create projects',
-                location: 'top',
                 disabled: canCreateProject
               }"
               style="width: 100%"

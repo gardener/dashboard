@@ -12,16 +12,19 @@ SPDX-License-Identifier: Apache-2.0
     :hint="hint"
     persistent-hint
   >
-    <div>
+    <div
+      v-tooltip="{
+        text: 'Terminals can only be scheduled if the seed is a managed seed',
+        location: 'top left',
+        disabled: canScheduleOnSeed
+      }"
+    >
       <v-radio
         v-if="shootItem && hasControlPlaneTerminalAccess"
         label="Control Plane"
         value="cp"
         color="primary"
         :disabled="!canScheduleOnSeed"
-      />
-      <div
-        v-tooltip="{ text: 'Terminals can only be scheduled if the seed is a managed seed', location: 'top left', disabled: canScheduleOnSeed }"
       />
     </div>
     <v-radio

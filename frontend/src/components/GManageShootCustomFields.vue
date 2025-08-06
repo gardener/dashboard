@@ -245,7 +245,10 @@ SPDX-License-Identifier: Apache-2.0
             >
               <v-text-field
                 v-model="editedField.weight"
-                v-tooltip="{ text: 'The built-in columns start with a weight of 100, increasing by 100 (200, 300, etc.)', location: 'top', model: weightTooltip }"
+                v-tooltip:top="{
+                  text: 'The built-in columns start with a weight of 100, increasing by 100 (200, 300, etc.)',
+                  model: weightTooltip
+                }"
                 variant="underlined"
                 label="Weight"
                 type="number"

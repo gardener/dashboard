@@ -281,16 +281,22 @@ SPDX-License-Identifier: Apache-2.0
                     Delete Project
                   </div>
                   <template #append>
-                    <v-btn
-                      v-if="canDeleteProject"
-                      v-tooltip:top="isDeleteButtonDisabled ? 'You can only delete projects that do not contain clusters' : 'Delete Project'"
-                      color="action-button"
-                      :disabled="isDeleteButtonDisabled"
-                      icon="mdi-delete"
-                      variant="text"
-                      size="small"
-                      @click.stop="showDialog"
-                    />
+                    <div
+                      v-tooltip:top="
+                        isDeleteButtonDisabled ?
+                          'You can only delete projects that do not contain clusters' :
+                          'Delete Project'"
+                    >
+                      <v-btn
+                        v-if="canDeleteProject"
+                        color="action-button"
+                        :disabled="isDeleteButtonDisabled"
+                        icon="mdi-delete"
+                        variant="text"
+                        size="small"
+                        @click.stop="showDialog"
+                      />
+                    </div>
                   </template>
                 </g-list-item>
               </g-list>

@@ -70,7 +70,10 @@ SPDX-License-Identifier: Apache-2.0
       <template v-if="filters && filters.length">
         <v-divider />
         <v-card-text
-          v-tooltip.bottom="{ text: filterTooltip, disabled: !filterTooltip, maxWidth: 300 }"
+          v-tooltip:bottom="{
+            text: filterTooltip,
+            disabled: !filterTooltip, maxWidth: 300
+          }"
           class="pt-1"
         >
           <div class="text-subtitle-2 text-medium-emphasis py-2">

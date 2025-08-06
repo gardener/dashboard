@@ -6,7 +6,10 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <span
-    v-tooltip="{ text: dateTimeString, location: 'top', disabled: noTooltip }"
+    v-tooltip:top="{
+      text: dateTimeString,
+      disabled: noTooltip
+    }"
     :class="contentClass"
   >
     <span>{{ relDateTimeString }}</span> <!-- A span is necessary to prevent an extra space from being added at the end. -->

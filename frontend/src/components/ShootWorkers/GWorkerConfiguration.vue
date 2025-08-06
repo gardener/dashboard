@@ -11,6 +11,7 @@ SPDX-License-Identifier: Apache-2.0
     width="1250"
     confirm-required
     caption="Configure Workers"
+    :tooltip="dialogTooltip"
     disable-confirm-input-focus
     max-height="80vh"
     :disabled="!hasShootWorkerGroups"
@@ -94,10 +95,6 @@ SPDX-License-Identifier: Apache-2.0
       </v-expand-transition>
     </template>
   </g-action-button-dialog>
-  <div
-    :ref="'actionDialog'"
-    v-tooltip="{ text: 'It is not possible to add worker groups to workerless clusters', location: 'top', disabled: hasShootWorkerGroups }"
-  />
 </template>
 
 <script>
@@ -262,6 +259,11 @@ export default {
           }
         }
       },
+    },
+    dialogTooltip () {
+      return !this.hasShootWorkerGroups
+        ? 'It is not possible to add worker groups to workerless clusters'
+        : undefined
     },
   },
   methods: {

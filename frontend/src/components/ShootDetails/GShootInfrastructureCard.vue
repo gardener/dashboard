@@ -231,7 +231,10 @@ SPDX-License-Identifier: Apache-2.0
                   mdi-star
                 </v-icon>
                 <span
-                  v-tooltip="{ text: 'Default Load Balancer Class', location: 'top', disabled: name !== defaultLoadbalancerClass }"
+                  v-tooltip:top="{
+                    text: 'Default Load Balancer Class',
+                    disabled: name !== defaultLoadbalancerClass
+                  }"
                 />
               </v-chip>
             </div>

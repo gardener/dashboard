@@ -21,7 +21,10 @@ SPDX-License-Identifier: Apache-2.0
     <!-- Help -->
     <v-btn
       v-if="helpMenuItems.length"
-      v-tooltip="{ text: 'Info', location: 'left', disabled: help }"
+      v-tooltip:left="{
+        text: 'Info',
+        disabled: help
+      }"
       color="primary"
       icon
       class="mr-5"
@@ -105,136 +108,170 @@ SPDX-License-Identifier: Apache-2.0
       icon
       class="mr-3"
     >
-      <v-badge
-        v-if="isAdmin"
-        color="primary"
-        location="bottom right"
-        icon="mdi-account-supervisor"
+      <v-tooltip
+        :disabled="menu"
+        location="left"
       >
-        <v-avatar
-          v-tooltip="{ text: isAdmin ? `${avatarTitle} Operator` : avatarTitle, location: 'left', disabled: menu }"
-          size="40"
-          class="cursor-pointer"
-          :src="avatarUrl"
-          :alt="`avatar of ${avatarTitle}`"
-          tag="div"
-        >
-          <v-img
-            :src="avatarUrl"
-            :alt="`avatar of ${avatarTitle}`"
-          />
-        </v-avatar>
-      </v-badge>
-      <v-avatar
-        v-else
-        v-tooltip="{ text: avatarTitle, location: 'left', disabled: menu }"
-        size="40"
-        class="cursor-pointer"
-      >
-        <v-img
-          :src="avatarUrl"
-          :alt="`avatar of ${avatarTitle}`"
-        />
-      </v-avatar>
-    </v-btn>
-
-    <v-menu
-      v-model="menu"
-      activator="parent"
-      open-on-click
-      close-on-content-click
-      :offset="[12, 4]"
-      transition="slide-y-transition"
-    >
-      <v-sheet
-        :rounded="0"
-        :elevation="4"
-      >
-        <div class="text-center pa-3">
-          <div class="text-h6">
-            {{ displayName }}
-          </div>
-          <div class="text-caption">
-            {{ username }}
-          </div>
-          <div
+        <template #activator="{ props }">
+          <v-badge
             v-if="isAdmin"
-            class="text-caption"
+            color="primary"
+            location="bottom right"
+            icon="mdi-account-supervisor"
           >
-            Operator
+            <v-avatar
+              v-bind="props"
+              size="40"
+              class="cursor-pointer"
+            >
+              <v-img
+                :src="avatarUrl"
+                :alt="`avatar of ${avatarTitle}`"
+              />
+            </v-avatar>
+          </v-badge>
+          <v-avatar
+            v-else
+            v-bind="props"
+            size="40"
+            class="cursor-pointer"
+          >
+            <v-img
+              :src="avatarUrl"
+              :alt="`avatar of ${avatarTitle}`"
+            />
+          </v-avatar>
+        </template>
+        <span v-if="isAdmin">
+          {{ avatarTitle }}
+          <v-chip
+            size="small"
+            color="primary"
+            variant="elevated"
+          >
+            <v-icon
+              start
+              icon="mdi-account-supervisor"
+            />
+            <span class="operator">Operator</span>
+          </v-chip>
+        </span>
+        <span v-else>{{ avatarTitle }}</span>
+      </v-tooltip>
+
+      <v-menu
+        v-model="menu"
+        activator="parent"
+        open-on-click
+        close-on-content-click
+        :offset="[12, 4]"
+        transition="slide-y-transition"
+      >
+        <v-sheet
+          :rounded="0"
+          :elevation="4"
+        >
+          <div class="text-center pa-3">
+            <div class="text-h6">
+              {{ displayName }}
+            </div>
+            <div class="text-caption">
+              {{ username }}
+            </div>
+            <div
+              v-if="isAdmin"
+              class="text-caption"
+            >
+              Operator
+            </div>
+            <v-btn-toggle
+              v-model="colorMode"
+              color="primary"
+              mandatory="force"
+              divided
+              density="compact"
+              class="mt-3"
+              @click.stop
+            >
+              <v-tooltip location="top">
+                <template #activator="{ props }">
+                  <v-btn
+                    value="light"
+                    v-bind="props"
+                    variant="tonal"
+                    min-width="36"
+                  >
+                    <v-icon icon="mdi-white-balance-sunny" />
+                  </v-btn>
+                </template>
+                <span>Light Mode</span>
+              </v-tooltip>
+              <v-tooltip location="top">
+                <template #activator="{ props }">
+                  <v-btn
+                    value="dark"
+                    v-bind="props"
+                    variant="tonal"
+                    min-width="36"
+                  >
+                    <v-icon icon="mdi-weather-night" />
+                  </v-btn>
+                </template>
+                <span>Dark Mode</span>
+              </v-tooltip>
+              <v-tooltip location="top">
+                <template #activator="{ props }">
+                  <v-btn
+                    value="auto"
+                    v-bind="props"
+                    variant="tonal"
+                    min-width="36"
+                  >
+                    <v-icon icon="mdi-brightness-auto" />
+                  </v-btn>
+                </template>
+                <span>Automatically choose theme based on your system settings</span>
+              </v-tooltip>
+            </v-btn-toggle>
           </div>
-          <v-btn-toggle
-            v-model="colorMode"
-            color="primary"
-            mandatory="force"
-            divided
-            density="compact"
-            class="mt-3"
-            @click.stop
-          >
+          <v-divider />
+          <div class="pa-3">
             <v-btn
-              v-tooltip:top="'Light Mode'"
-              value="light"
-              variant="tonal"
-              min-width="36"
+              block
+              variant="text"
+              color="primary"
+              class="justify-start pl-4"
+              prepend-icon="mdi-account-circle"
+              :to="accountLink"
             >
-              <v-icon icon="mdi-white-balance-sunny" />
+              My Account
             </v-btn>
             <v-btn
-              v-tooltip:top="'Dark Mode'"
-              value="dark"
-              variant="tonal"
-              min-width="36"
+              block
+              variant="text"
+              class="justify-start pl-4 mt-3"
+              prepend-icon="mdi-cog"
+              :to="settingsLink"
             >
-              <v-icon icon="mdi-weather-night" />
+              Settings
             </v-btn>
+          </div>
+          <v-divider />
+          <div class="pa-3">
             <v-btn
-              v-tooltip:top="'Automatically choose theme based on your system settings'"
-              value="auto"
-              variant="tonal"
-              min-width="36"
+              block
+              variant="text"
+              color="pink"
+              class="justify-start pl-4"
+              prepend-icon="mdi-exit-to-app"
+              @click.stop="handleLogout"
             >
-              <v-icon icon="mdi-brightness-auto" />
+              Logout
             </v-btn>
-          </v-btn-toggle>
-        </div>
-        <v-divider />
-        <div class="pa-3">
-          <v-btn
-            block
-            variant="text"
-            color="primary"
-            class="justify-start pl-4"
-            prepend-icon="mdi-account-circle"
-            :to="accountLink"
-          >
-            My Account
-          </v-btn>
-          <v-btn
-            block
-            variant="text"
-            class="justify-start pl-4 mt-3"
-            prepend-icon="mdi-cog"
-            :to="settingsLink"
-          >
-            Settings
-          </v-btn>
-        </div>
-        <v-divider />
-        <div class="pa-3">
-          <v-btn
-            block
-            variant="text"
-            color="pink"
-            class="justify-start pl-4"
-            prepend-icon="mdi-exit-to-app"
-            @click.stop="handleLogout"
-          >
-            Logout
-          </v-btn>
-        </div>
-      </v-sheet>
-    </v-menu>
+          </div>
+        </v-sheet>
+      </v-menu>
+    </v-btn>
     <!-- terminals -->
     <template
       v-if="tabs && tabs.length > 1"

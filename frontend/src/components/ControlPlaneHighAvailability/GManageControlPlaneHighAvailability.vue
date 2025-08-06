@@ -5,15 +5,15 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div>
+  <div
+    v-tooltip:top="{
+      text: 'It is not possible to change the control plane failure tolerance if a type has already been set',
+      disabled: controlPlaneHighAvailabilityFailureToleranceTypeChangeAllowed,
+      maxWidth: 400
+    }"
+  >
     <v-checkbox
       v-model="controlPlaneHighAvailability"
-      v-tooltip="{
-        text: 'It is not possible to change the control plane failure tolerance if a type has already been set',
-        location: 'top',
-        disabled: controlPlaneHighAvailabilityFailureToleranceTypeChangeAllowed,
-        maxWidth: 400
-      }"
       label="Enable Control Plane High Availability"
       color="primary"
       hide-details

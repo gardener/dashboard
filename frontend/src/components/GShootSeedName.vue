@@ -6,7 +6,10 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div
-    v-tooltip="{ text: shootLastOperationTypeControlPlaneMigrationMessage, location: 'top', disabled: !isShootLastOperationTypeControlPlaneMigrating }"
+    v-tooltip:top="{
+      text: shootLastOperationTypeControlPlaneMigrationMessage,
+      disabled: !isShootLastOperationTypeControlPlaneMigrating
+    }"
   >
     <v-progress-circular
       v-if="isShootLastOperationTypeControlPlaneMigrating"

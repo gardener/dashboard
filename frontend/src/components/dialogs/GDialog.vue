@@ -87,7 +87,10 @@ SPDX-License-Identifier: Apache-2.0
           {{ cancelButtonText }}
         </v-btn>
         <div
-          v-tooltip="{ text: 'You need to confirm your changes by typing this cluster\'s name', location: 'top', disabled: !notConfirmed }"
+          v-tooltip:top="{
+            text: 'You need to confirm your changes by typing this cluster\'s name',
+            disabled: !notConfirmed
+          }"
         >
           <v-btn
             variant="text"

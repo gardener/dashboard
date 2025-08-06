@@ -16,9 +16,8 @@ SPDX-License-Identifier: Apache-2.0
       {{ shortcut.title }}
       <v-chip
         v-if="isUnverified"
-        v-tooltip="{
+        v-tooltip:top="{
           text: 'This terminal shortcut was created by a member of this project and is not verified by the landscape administrator and therefore could be malicious',
-          location: 'top',
           maxWidth: 400
         }"
         size="small"

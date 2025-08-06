@@ -168,14 +168,14 @@ SPDX-License-Identifier: Apache-2.0
           >
             <template #activator="{ props: menuProps }">
               <v-btn
-                v-tooltip:top="'Create Secret Credential'"
+                v-tooltip:top="'Create DNS Credential'"
                 v-bind="menuProps"
                 icon="mdi-plus"
               />
             </template>
             <v-list density="compact">
               <v-list-subheader>
-                Create Secret Credential
+                Create DNS Credential
               </v-list-subheader>
               <v-list-item
                 v-for="dnsProvider in dnsProviderTypes"

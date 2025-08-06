@@ -22,10 +22,13 @@ SPDX-License-Identifier: Apache-2.0
           :icon="machineImage.icon"
           :size="20"
         />
-        <span class="pl-1">{{ workerGroup.name }}</span>
         <span
-          v-tooltip="{ text: 'Machine image version is deprecated', location: 'top', disabled: !machineImage.isDeprecated }"
-        />
+          v-tooltip:top="{
+            text: 'Machine image version is deprecated',
+            disabled: !machineImage.isDeprecated
+          }"
+          class="pl-1"
+        >{{ workerGroup.name }}</span>
       </v-chip>
     </template>
     <v-tabs
