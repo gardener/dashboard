@@ -1,4 +1,4 @@
-name: Cherry Pick Action (Improved)
+name: Cherry Pick Action
 
 on:
   issue_comment:
@@ -14,11 +14,33 @@ jobs:
     if: |
       github.event.issue.pull_request &&
       contains(github.event.comment.body, '/cherry-pick ') &&
-      (github.event.comment.author_association == 'OWNER' || github.event.comment.author_association == 'MEMBER')
+      (github.event.comment.author_association == 'OWNER' || github.event.comment.author_association == 'MEMBER') &&
+      github.event.comment.user.type == 'User'
     outputs:
       branches: ${{ steps.parse.outputs.branches }}
       has-branches: ${{ steps.parse.outputs.has-branches }}
     steps:
+      - name: Check if PR is merged
+        id: check_merged
+        run: |
+          MERGED=$(gh pr view ${{ github.event.issue.number }} --json merged --jq '.merged')
+          echo "merged=$MERGED" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Comment if PR not merged
+        if: steps.check_merged.outputs.merged != 'true'
+        run: |
+          gh pr comment ${{ github.event.issue.number }} \
+            --body "❌ Cherry-pick aborted: The PR must be merged before cherry-picking to other branches." \
+            --repo ${{ github.repository }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Fail if PR not merged
+        if: steps.check_merged.outputs.merged != 'true'
+        run: exit 1
+
       - name: Parse branches
         id: parse
         env:
