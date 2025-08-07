@@ -15,8 +15,9 @@ SPDX-License-Identifier: Apache-2.0
       <template v-if="cell.header.key === 'project'">
         <g-text-router-link
           :to="{ name: 'ShootList', params: { namespace: shootNamespace } }"
-          :text="shootProjectNameAndTitle"
+          :text="shootProjectName"
         />
+        <span v-if="shootProjectTitle"> &mdash; {{ shootProjectTitle }}</span>
       </template>
       <template v-if="cell.header.key === 'name'">
         <v-row
