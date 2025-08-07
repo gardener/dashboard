@@ -225,34 +225,30 @@ SPDX-License-Identifier: Apache-2.0
             offset-y
           >
             <template #activator="{ props: menuProps }">
-              <v-tooltip
-                :disabled="connectionMenu"
-                location="top"
-                style="min-width: 110px"
+              <v-btn
+                v-tooltip:top="{
+                  text: terminalSession.detailedConnectionStateText || connectionStateText,
+                  disabled: connectionMenu,
+                  style: { minWidth: '110px' }
+                }"
+                v-bind="menuProps"
+                size="small"
+                variant="text"
+                color="grey-lighten-1"
+                class="text-none g-system-bar-button"
               >
-                <template #activator="{ props: tooltipProps }">
-                  <v-btn
-                    v-bind="mergeProps(menuProps, tooltipProps)"
-                    size="small"
-                    variant="text"
-                    color="grey-lighten-1"
-                    class="text-none g-system-bar-button"
-                  >
-                    <g-icon-base
-                      width="18"
-                      height="18"
-                      view-box="-2 -2 30 30"
-                      icon-color="#bdbdbd"
-                      class="mr-2"
-                      :icon-name="connectionIconName"
-                    >
-                      <component :is="resolveComponent(connectionIconName)" />
-                    </g-icon-base>
-                    <span class="text-none text-grey-lighten-1">{{ connectionStateText }}</span>
-                  </v-btn>
-                </template>
-                {{ terminalSession.detailedConnectionStateText || connectionStateText }}
-              </v-tooltip>
+                <g-icon-base
+                  width="18"
+                  height="18"
+                  view-box="-2 -2 30 30"
+                  icon-color="#bdbdbd"
+                  class="mr-2"
+                  :icon-name="connectionIconName"
+                >
+                  <component :is="resolveComponent(connectionIconName)" />
+                </g-icon-base>
+                <span class="text-none text-grey-lighten-1">{{ connectionStateText }}</span>
+              </v-btn>
             </template>
             <v-card rounded="0">
               <v-card-actions v-if="terminalSession.connectionState === TerminalSession.DISCONNECTED">
@@ -280,28 +276,21 @@ SPDX-License-Identifier: Apache-2.0
             </v-card>
           </v-menu>
 
-          <v-tooltip
+          <v-btn
             v-if="imageShortText"
-            location="top"
+            v-tooltip:top="`Image: ${terminalSession.container.image}`"
+            size="small"
+            variant="text"
+            :loading="loading.imageBtn"
+            color="grey-lighten-1"
+            class="text-none g-system-bar-button"
+            @click="configure('imageBtn')"
           >
-            <template #activator="{ props }">
-              <v-btn
-                v-bind="props"
-                size="small"
-                variant="text"
-                :loading="loading.imageBtn"
-                color="grey-lighten-1"
-                class="text-none g-system-bar-button"
-                @click="configure('imageBtn')"
-              >
-                <v-icon class="mr-2">
-                  mdi-layers-triple-outline
-                </v-icon>
-                <span>{{ imageShortText }}</span>
-              </v-btn>
-            </template>
-            Image: {{ terminalSession.container.image }}
-          </v-tooltip>
+            <v-icon class="mr-2">
+              mdi-layers-triple-outline
+            </v-icon>
+            <span>{{ imageShortText }}</span>
+          </v-btn>
 
           <v-tooltip
             v-if="privilegedMode !== undefined && target === 'shoot'"
@@ -328,31 +317,24 @@ SPDX-License-Identifier: Apache-2.0
             <strong>Host Network:</strong> {{ terminalSession.hostNetwork }}
           </v-tooltip>
 
-          <v-tooltip
+          <v-btn
             v-if="terminalSession.node && target === 'shoot'"
-            location="top"
+            v-tooltip:top="`Node: ${terminalSession.node}`"
+            size="small"
+            variant="text"
+            :loading="loading.nodeBtn"
+            color="grey-lighten-1"
+            class="text-none g-system-bar-button"
+            @click="configure('nodeBtn')"
           >
-            <template #activator="{ props }">
-              <v-btn
-                v-bind="props"
-                size="small"
-                variant="text"
-                :loading="loading.nodeBtn"
-                color="grey-lighten-1"
-                class="text-none g-system-bar-button"
-                @click="configure('nodeBtn')"
-              >
-                <v-icon
-                  :size="14"
-                  class="mr-2"
-                >
-                  mdi-server
-                </v-icon>
-                <span>{{ terminalSession.node }}</span>
-              </v-btn>
-            </template>
-            Node: {{ terminalSession.node }}
-          </v-tooltip>
+            <v-icon
+              :size="14"
+              class="mr-2"
+            >
+              mdi-server
+            </v-icon>
+            <span>{{ terminalSession.node }}</span>
+          </v-btn>
         </div>
       </template>
     </g-drag-n-droppable-component>

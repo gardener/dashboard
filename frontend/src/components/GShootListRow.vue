@@ -179,18 +179,11 @@ SPDX-License-Identifier: Apache-2.0
         </g-scroll-container>
       </template>
       <template v-if="cell.header.customField">
-        <v-tooltip
+        <span
           v-if="cell.header.tooltip"
-          location="top"
-        >
-          <template #activator="slotProps">
-            <span
-              v-bind="slotProps.props"
-              :class="{'text-disabled' : !cell.value}"
-            >{{ cell.displayValue }}</span>
-          </template>
-          {{ cell.header.tooltip }}
-        </v-tooltip>
+          v-tooltip:top="cell.header.tooltip"
+          :class="{'text-disabled' : !cell.value}"
+        >{{ cell.displayValue }}</span>
         <span
           v-else-if="cell.displayValue"
           :class="{'text-disabled' : !cell.value}"
@@ -219,18 +212,11 @@ SPDX-License-Identifier: Apache-2.0
           />
         </v-row>
       </template>
-      <v-tooltip
+      <div
         v-if="isStaleShoot"
-        location="top"
-      >
-        <template #activator="slotProps">
-          <div
-            class="stale-overlay"
-            v-bind="slotProps.props"
-          />
-        </template>
-        This cluster is no longer part of the list and kept as stale item
-      </v-tooltip>
+        v-tooltip:top="'This cluster is no longer part of the list and kept as stale item'"
+        class="stale-overlay"
+      />
     </td>
   </tr>
 </template>

@@ -8,6 +8,10 @@ SPDX-License-Identifier: Apache-2.0
   <v-chip
     v-for="({ displayName, notEditable, tooltip }, index) in props.roleDisplayNames"
     :key="displayName"
+    v-tooltip:top="{
+      text: tooltip,
+      disabled: !tooltip
+    }"
     :disabled="notEditable"
     size="small"
     color="action-button"
@@ -15,13 +19,6 @@ SPDX-License-Identifier: Apache-2.0
     :class="{ 'ml-3': index > 0 }"
   >
     {{ displayName }}
-    <v-tooltip
-      activator="parent"
-      location="top"
-      :disabled="!tooltip"
-    >
-      {{ tooltip }}
-    </v-tooltip>
   </v-chip>
 </template>
 
