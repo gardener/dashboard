@@ -104,6 +104,8 @@ import { storeToRefs } from 'pinia'
 
 import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
+import { useConfigStore } from '@/store/config'
+import { useSeedStore } from '@/store/seed'
 import { useTerminalStore } from '@/store/terminal'
 
 import GList from '@/components/GList.vue'
@@ -111,11 +113,13 @@ import GListItem from '@/components/GListItem.vue'
 import GListItemContent from '@/components/GListItemContent.vue'
 import GTerminalListTile from '@/components/GTerminalListTile.vue'
 
+import { useProvideSeedItem } from '@/composables/useSeedItem'
 import { useShootAdminKubeconfig } from '@/composables/useShootAdminKubeconfig'
 import {
   useShootItem,
   useProvideShootItem,
 } from '@/composables/useShootItem'
+import { useProvideSeedHelper } from '@/composables/useSeedHelper'
 
 import GGardenctlCommands from './GGardenctlCommands.vue'
 import GShootKubeconfig from './GShootKubeconfig.vue'
@@ -144,11 +148,13 @@ const emit = defineEmits([
   'addTerminalShortcut',
 ])
 
+const configStore = useConfigStore()
 const authnStore = useAuthnStore()
 const {
   isAdmin,
 } = storeToRefs(authnStore)
 const authzStore = useAuthzStore()
+const seedStore = useSeedStore()
 const {
   hasShootTerminalAccess,
   canCreateShootsAdminkubeconfig,
@@ -168,10 +174,19 @@ const {
   isShootStatusHibernated,
   hasShootWorkerGroups,
   shootInfo,
-  isSeedUnreachable,
+  shootSeedName,
 } = selectedShoot.value
   ? useProvideShootItem(selectedShoot)
   : useShootItem()
+
+const seedItem = computed(() => seedStore.seedByName(shootSeedName.value))
+useProvideSeedItem(seedItem)
+
+const {
+  isSeedUnreachable,
+} = useProvideSeedHelper(seedItem, {
+  configStore,
+})
 
 const dashboardUrl = computed(() => {
   if (!hasDashboardEnabled.value) {

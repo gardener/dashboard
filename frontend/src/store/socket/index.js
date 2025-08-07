@@ -23,6 +23,7 @@ import { useAuthnStore } from '../authn'
 import { useShootStore } from '../shoot'
 import { useTicketStore } from '../ticket'
 import { useProjectStore } from '../project'
+import { useSeedStore } from '../seed'
 
 import { createSocket } from './helper'
 
@@ -35,6 +36,7 @@ export const useSocketStore = defineStore('socket', () => {
   const shootStore = useShootStore()
   const ticketStore = useTicketStore()
   const projectStore = useProjectStore()
+  const seedStore = useSeedStore()
 
   const state = reactive({
     id: null,
@@ -55,6 +57,7 @@ export const useSocketStore = defineStore('socket', () => {
   const synchronizing = new Map([
     ['shoots', false],
     ['projects', false],
+    ['seeds', false],
   ])
 
   const socket = createSocket(state, {
@@ -63,6 +66,7 @@ export const useSocketStore = defineStore('socket', () => {
     shootStore,
     ticketStore,
     projectStore,
+    seedStore,
   })
 
   const id = computed(() => {

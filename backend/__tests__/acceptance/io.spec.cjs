@@ -128,8 +128,10 @@ describe('api', function () {
       let args
 
       beforeEach(async () => {
-        // authorization check for `canListProjects`
-        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        // authorization check for `canListProjects` and `canListSeeds`
+        mockRequest
+          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
         socket = await agent.connect({
           cookie: await user.cookie,
         })
@@ -137,7 +139,7 @@ describe('api', function () {
           socket.id,
           ioHelper.sha256(username),
         ]
-        expect(mockRequest).toHaveBeenCalledTimes(1)
+        expect(mockRequest).toHaveBeenCalledTimes(2)
         mockRequest.mockClear()
       })
 
@@ -151,6 +153,7 @@ describe('api', function () {
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
           ...defaultRooms,
+          'seeds',
           'shoots;garden-foo/fooShoot',
         ]))
 
@@ -181,19 +184,22 @@ describe('api', function () {
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
           ...defaultRooms,
+          'seeds',
           'shoots;garden-foo',
         ]))
 
         await unsubscribe(socket, 'shoots')
         expect(getRooms(socket, nsp)).toEqual(new Set([
           ...defaultRooms,
+          'seeds',
         ]))
       })
 
       it('should subscribe shoots for all namespace', async function () {
-        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        mockRequest
+          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
 
         await subscribe(socket, 'shoots', { namespace: '_all' })
 
@@ -202,15 +208,17 @@ describe('api', function () {
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
           ...defaultRooms,
+          'seeds',
           'shoots;garden-foo',
           'shoots;garden-bar',
         ]))
       })
 
       it('should subscribe unhealthy shoots for all namespace', async function () {
-        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        mockRequest
+          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
 
         await subscribe(socket, 'shoots', { namespace: '_all', labelSelector: 'shoot.gardener.cloud/status!=healthy' })
 
@@ -219,6 +227,7 @@ describe('api', function () {
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
           ...defaultRooms,
+          'seeds',
           'shoots:unhealthy;garden-foo',
           'shoots:unhealthy;garden-bar',
         ]))
@@ -235,9 +244,10 @@ describe('api', function () {
       })
 
       it('should fail to subscribe shoots for all namespaces', async function () {
-        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess({ allowed: false }))
+        mockRequest
+          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess({ allowed: false }))
 
         await expect(subscribe(socket, 'shoots', { namespace: '_all' })).rejects.toEqual(expect.objectContaining({
           name: 'ForbiddenError',
@@ -272,12 +282,14 @@ describe('api', function () {
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
           ...defaultRooms,
+          'seeds',
           'shoots;garden-foo',
         ]))
 
         await unsubscribe(socket, 'shoots')
         expect(getRooms(socket, nsp)).toEqual(new Set([
           ...defaultRooms,
+          'seeds',
         ]))
       })
 
@@ -307,7 +319,10 @@ describe('api', function () {
       let defaultRooms
 
       beforeEach(async () => {
-        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        // authorization check for `canListProjects` and `canListSeeds`
+        mockRequest
+          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
         socket = await agent.connect({
           cookie: await user.cookie,
         })
@@ -315,7 +330,7 @@ describe('api', function () {
           socket.id,
           ioHelper.sha256(username),
         ]
-        expect(mockRequest).toHaveBeenCalledTimes(1)
+        expect(mockRequest).toHaveBeenCalledTimes(2)
         mockRequest.mockClear()
       })
 
@@ -329,6 +344,7 @@ describe('api', function () {
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
           ...defaultRooms,
+          'seeds',
           'shoots;garden-foo/fooShoot',
         ]))
 
@@ -346,6 +362,7 @@ describe('api', function () {
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
           ...defaultRooms,
+          'seeds',
           'shoots;garden-foo',
         ]))
 
@@ -363,6 +380,7 @@ describe('api', function () {
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
           ...defaultRooms,
+          'seeds',
           'shoots:admin',
         ]))
 
@@ -380,6 +398,7 @@ describe('api', function () {
 
         expect(getRooms(socket, nsp)).toEqual(new Set([
           ...defaultRooms,
+          'seeds',
           'shoots:unhealthy:admin',
         ]))
       })
@@ -403,6 +422,7 @@ describe('api', function () {
     let timestamp
 
     beforeEach(() => {
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       timestamp = Math.floor(Date.now() / 1000)
     })
 
@@ -466,11 +486,14 @@ describe('api', function () {
         refresh_at: Math.ceil(Date.now() / 1000) + 4,
       }
       const user = fixtures.auth.createUser(options)
-      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+      // authorization check for `canListProjects` and `canListSeeds`
+      mockRequest
+        .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       socket = await agent.connect({
         cookie: await user.cookie,
       })
-      expect(mockRequest).toHaveBeenCalledTimes(1)
+      expect(mockRequest).toHaveBeenCalledTimes(2)
       expect(mockSetDisconnectTimeout).toHaveBeenCalledTimes(1)
       expect(mockSetDisconnectTimeout.mock.calls[0]).toEqual([
         expect.objectContaining({

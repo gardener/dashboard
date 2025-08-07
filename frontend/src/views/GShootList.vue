@@ -436,14 +436,6 @@ export default {
           hidden: false,
         },
         {
-          title: 'SEED',
-          key: 'seed',
-          sortable: isSortable(true),
-          align: 'start',
-          defaultSelected: false,
-          hidden: false,
-        },
-        {
           title: 'TECHNICAL ID',
           key: 'technicalId',
           sortable: isSortable(true),
@@ -508,6 +500,23 @@ export default {
           align: 'start',
           defaultSelected: true,
           hidden: false,
+          stalePointerEvents: true,
+        },
+        {
+          title: 'SEED',
+          key: 'seed',
+          sortable: isSortable(true),
+          align: 'start',
+          defaultSelected: false,
+          hidden: false,
+        },
+        {
+          title: 'SEED READINESS',
+          key: 'seedReadiness',
+          sortable: isSortable(true),
+          align: 'start',
+          defaultSelected: true,
+          hidden: !this.isAdmin,
           stalePointerEvents: true,
         },
         {

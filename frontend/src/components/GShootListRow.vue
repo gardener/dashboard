@@ -113,6 +113,11 @@ SPDX-License-Identifier: Apache-2.0
           <g-status-tags />
         </div>
       </template>
+      <template v-if="cell.header.key === 'seedReadiness'">
+        <div class="d-flex">
+          <g-seed-status-tags />
+        </div>
+      </template>
       <template v-if="cell.header.key === 'controlPlaneHighAvailability'">
         <div class="d-flex justify-center">
           <g-control-plane-high-availability-tag
@@ -240,6 +245,7 @@ import GCopyBtn from '@/components/GCopyBtn.vue'
 import GVendor from '@/components/GVendor.vue'
 import GShootStatus from '@/components/GShootStatus.vue'
 import GStatusTags from '@/components/GStatusTags.vue'
+import GSeedStatusTags from '@/components/GSeedStatusTags.vue'
 import GPurposeTag from '@/components/GPurposeTag.vue'
 import GTimeString from '@/components/GTimeString.vue'
 import GShootVersionChip from '@/components/ShootVersion/GShootVersionChip.vue'
@@ -254,6 +260,7 @@ import GTextRouterLink from '@/components/GTextRouterLink.vue'
 import GCollapsibleItems from '@/components/GCollapsibleItems'
 import GScrollContainer from '@/components/GScrollContainer'
 
+import { useProvideSeedItem } from '@/composables/useSeedItem'
 import { useShootAction } from '@/composables/useShootAction'
 import { useProvideShootItem } from '@/composables/useShootItem'
 import { useProvideShootHelper } from '@/composables/useShootHelper'
@@ -318,7 +325,6 @@ const {
 } = useProvideShootItem(shootItem, {
   cloudProfileStore,
   projectStore,
-  seedStore,
 })
 
 useProvideShootHelper(shootItem, {
@@ -328,6 +334,9 @@ useProvideShootHelper(shootItem, {
   credentialStore,
   seedStore,
 })
+
+const seedItem = computed(() => seedStore.seedByName(shootSeedName.value))
+useProvideSeedItem(seedItem)
 
 const isInfoAvailable = computed(() => {
   // operator not yet updated shoot resource
