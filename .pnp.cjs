@@ -1690,7 +1690,7 @@ const RAW_RUNTIME_STATE =
           ["openid-client", "npm:6.6.3"],\
           ["p-event", "npm:4.2.0"],\
           ["p-limit", "npm:3.1.0"],\
-          ["p-retry", "npm:4.6.2"],\
+          ["p-retry", "npm:6.2.1"],\
           ["p-timeout", "npm:4.1.0"],\
           ["path-to-regexp", "npm:8.2.0"],\
           ["rollup", "npm:4.46.2"],\
@@ -3915,10 +3915,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@types/retry", [\
-      ["npm:0.12.0", {\
-        "packageLocation": "./.yarn/cache/@types-retry-npm-0.12.0-e4e6294a2c-7c5c908636.zip/node_modules/@types/retry/",\
+      ["npm:0.12.2", {\
+        "packageLocation": "./.yarn/cache/@types-retry-npm-0.12.2-e1f0617c50-07481551a9.zip/node_modules/@types/retry/",\
         "packageDependencies": [\
-          ["@types/retry", "npm:0.12.0"]\
+          ["@types/retry", "npm:0.12.2"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -9663,6 +9663,15 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["is-network-error", [\
+      ["npm:1.1.0", {\
+        "packageLocation": "./.yarn/cache/is-network-error-npm-1.1.0-31c8d0998d-89eef83c2a.zip/node_modules/is-network-error/",\
+        "packageDependencies": [\
+          ["is-network-error", "npm:1.1.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["is-number", [\
       ["npm:7.0.0", {\
         "packageLocation": "./.yarn/cache/is-number-npm-7.0.0-060086935c-b4686d0d30.zip/node_modules/is-number/",\
@@ -11957,11 +11966,12 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["p-retry", [\
-      ["npm:4.6.2", {\
-        "packageLocation": "./.yarn/cache/p-retry-npm-4.6.2-9f871cfc9b-d58512f120.zip/node_modules/p-retry/",\
+      ["npm:6.2.1", {\
+        "packageLocation": "./.yarn/cache/p-retry-npm-6.2.1-317647f1db-10d0149001.zip/node_modules/p-retry/",\
         "packageDependencies": [\
-          ["@types/retry", "npm:0.12.0"],\
-          ["p-retry", "npm:4.6.2"],\
+          ["@types/retry", "npm:0.12.2"],\
+          ["is-network-error", "npm:1.1.0"],\
+          ["p-retry", "npm:6.2.1"],\
           ["retry", "npm:0.13.1"]\
         ],\
         "linkType": "HARD"\
