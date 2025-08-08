@@ -9,6 +9,7 @@ SPDX-License-Identifier: Apache-2.0
   <v-tooltip
     location="top"
     :open-delay="openDelay"
+    :open-on-hover="openOnHover"
   >
     <template #activator="{ props }">
       <span v-bind="props">
@@ -75,8 +76,9 @@ import { useProvideProjectItem } from '@/composables/useProjectItem.js'
 const props = defineProps({
   project: { type: Object, required: true },
   openDelay: { type: Number, default: 200 },
+  openOnHover: { type: Boolean, default: true },
 })
-const { project, openDelay } = toRefs(props)
+const { project, openDelay, openOnHover } = toRefs(props)
 const { projectName, projectTitle } = useProjectMetadata(project)
 const { projectDescription, projectOwner, projectCreatedBy, projectCreationTimestamp, projectPurpose } = useProvideProjectItem(project)
 </script>
