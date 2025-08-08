@@ -145,7 +145,6 @@ SPDX-License-Identifier: Apache-2.0
         :custom-key-sort="customKeySort"
         density="compact"
         hover
-        item-height="37"
         :item-key="getItemKey"
         must-sort
         fixed-header
@@ -161,8 +160,9 @@ SPDX-License-Identifier: Apache-2.0
         <template #no-data>
           No clusters to show
         </template>
-        <template #item="{ item }">
+        <template #item="{ item, itemRef }">
           <g-shoot-list-row
+            :ref="itemRef"
             :model-value="item"
             :visible-headers="visibleHeaders"
           />
