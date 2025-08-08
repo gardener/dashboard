@@ -4,7 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { useObjectMetadata } from './useObjectMetadata'
+import { computed } from 'vue'
+
+import { annotations } from '@/utils/annotations.js'
+
+import { useObjectMetadata } from '../useObjectMetadata.js'
 
 export const useProjectMetadata = (projectItem, options = {}) => {
   const {
@@ -26,9 +30,34 @@ export const useProjectMetadata = (projectItem, options = {}) => {
     unsetLabel: unsetProjectLabel,
   } = useObjectMetadata(projectItem)
 
+  // projectTitle is a project-specific annotation
+  const projectTitle = computed({
+    get () {
+      const title = getProjectAnnotation(annotations.projectTitle)
+      if (title) {
+        return title.trim()
+      }
+      return undefined
+    },
+    set (value) {
+      setProjectAnnotation(annotations.projectTitle, value)
+    },
+  })
+
+  const projectNameAndTitle = computed(() => {
+    const name = projectName.value
+    const title = projectTitle.value
+    if (title) {
+      return `${name} – ${title}`
+    }
+    return name
+  })
+
   return {
     projectMetadata,
     projectName,
+    projectTitle,
+    projectNameAndTitle,
     projectCreationTimestamp,
     projectDeletionTimestamp,
     projectGeneration,

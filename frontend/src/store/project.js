@@ -17,6 +17,9 @@ import {
 import { useApi } from '@/composables/useApi'
 import { useLogger } from '@/composables/useLogger'
 import { useSocketEventHandler } from '@/composables/useSocketEventHandler'
+import { getProjectTitle } from '@/composables/useProjectMetadata/helper.js'
+
+import { annotations } from '@/utils/annotations.js'
 
 import { useAuthzStore } from './authz'
 import { useAppStore } from './app'
@@ -58,6 +61,17 @@ export const useProjectStore = defineStore('project', () => {
     return projectNames
   })
 
+  const projectMap = computed(() => {
+    const projects = {}
+    if (Array.isArray(list.value)) {
+      for (const project of list.value) {
+        const { spec: { namespace } } = project
+        set(projects, [namespace], project)
+      }
+    }
+    return projects
+  })
+
   const defaultNamespace = computed(() => {
     if (namespaces.value) {
       return namespaces.value.includes('garden')
@@ -93,6 +107,17 @@ export const useProjectStore = defineStore('project', () => {
     return get(project.value, ['metadata', 'name'])
   })
 
+  const projectTitle = computed(() => {
+    const title = getProjectTitle(project.value)
+    return title ? title.trim() : title
+  })
+
+  const projectNameAndTitle = computed(() => {
+    const name = projectName.value
+    const title = projectTitle.value
+    return title ? `${name} – ${title}` : name
+  })
+
   const projectNames = computed(() => {
     return map(list.value, 'metadata.name')
   })
@@ -116,6 +141,20 @@ export const useProjectStore = defineStore('project', () => {
       ? metadata
       : metadata?.namespace
     return get(projectNameMap.value, [namespace], replace(namespace, /^garden-/, ''))
+  }
+
+  function projectTitleByNamespace (metadata) {
+    const namespace = typeof metadata === 'string'
+      ? metadata
+      : metadata?.namespace
+    return get(projectMap.value, [namespace, 'metadata', 'annotations', annotations.projectTitle])
+  }
+
+  function projectByNamespace (metadata) {
+    const namespace = typeof metadata === 'string'
+      ? metadata
+      : metadata?.namespace
+    return get(projectMap.value, [namespace])
   }
 
   async function fetchProjects () {
@@ -174,6 +213,8 @@ export const useProjectStore = defineStore('project', () => {
     currentNamespaces,
     defaultNamespace,
     projectName,
+    projectTitle,
+    projectNameAndTitle,
     projectList,
     projectsNotMarkedForDeletion,
     project,
@@ -185,6 +226,8 @@ export const useProjectStore = defineStore('project', () => {
     updateProject,
     deleteProject,
     projectNameByNamespace,
+    projectTitleByNamespace,
+    projectByNamespace,
     handleEvent: socketEventHandler.listener,
     $reset,
   }
