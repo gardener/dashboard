@@ -1689,7 +1689,7 @@ const RAW_RUNTIME_STATE =
           ["openapi-types", "npm:12.1.3"],\
           ["openid-client", "npm:6.6.3"],\
           ["p-event", "npm:4.2.0"],\
-          ["p-limit", "npm:3.1.0"],\
+          ["p-limit", "npm:6.2.0"],\
           ["p-retry", "npm:4.6.2"],\
           ["p-timeout", "npm:4.1.0"],\
           ["path-to-regexp", "npm:8.2.0"],\
@@ -11927,6 +11927,14 @@ const RAW_RUNTIME_STATE =
           ["yocto-queue", "npm:0.1.0"]\
         ],\
         "linkType": "HARD"\
+      }],\
+      ["npm:6.2.0", {\
+        "packageLocation": "./.yarn/cache/p-limit-npm-6.2.0-937c5c9b86-448bf55a17.zip/node_modules/p-limit/",\
+        "packageDependencies": [\
+          ["p-limit", "npm:6.2.0"],\
+          ["yocto-queue", "npm:1.2.1"]\
+        ],\
+        "linkType": "HARD"\
       }]\
     ]],\
     ["p-locate", [\
@@ -15265,6 +15273,13 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/yocto-queue-npm-0.1.0-c6c9a7db29-dceb44c285.zip/node_modules/yocto-queue/",\
         "packageDependencies": [\
           ["yocto-queue", "npm:0.1.0"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:1.2.1", {\
+        "packageLocation": "./.yarn/cache/yocto-queue-npm-1.2.1-98b92882fa-5762caa3d0.zip/node_modules/yocto-queue/",\
+        "packageDependencies": [\
+          ["yocto-queue", "npm:1.2.1"]\
         ],\
         "linkType": "HARD"\
       }]\
