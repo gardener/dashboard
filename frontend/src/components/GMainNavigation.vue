@@ -57,9 +57,9 @@ SPDX-License-Identifier: Apache-2.0
             >
               <div class="flex-align-center">
                 <g-project-tooltip
-                  v-if="!isShowingAllProjects"
                   open-delay="1000"
                   :project="selectedProject"
+                  :open-on-hover="!isAllProjectsItem(selectedProject)"
                 >
                   <div>{{ selectedProjectName }}</div>
                   <div
@@ -69,9 +69,6 @@ SPDX-License-Identifier: Apache-2.0
                     {{ selectedProjectTitle }}
                   </div>
                 </g-project-tooltip>
-                <div v-else>
-                  {{ selectedProjectName }}
-                </div>
 
                 <div v-if="selectedProject">
                   <g-stale-project-warning
@@ -148,6 +145,7 @@ SPDX-License-Identifier: Apache-2.0
               <g-project-tooltip
                 open-delay="1000"
                 :project="project"
+                :open-on-hover="!isAllProjectsItem(project)"
               >
                 <v-list-item-title class="project-name text-uppercase">
                   {{ project.metadata.name }}
@@ -354,10 +352,6 @@ const selectedProject = computed({
   set ({ spec = {} } = {}) {
     router.push(getProjectMenuTargetRoute(spec.namespace))
   },
-})
-
-const isShowingAllProjects = computed(() => {
-  return selectedProject.value === allProjectsItem
 })
 
 const { projectTitle: selectedProjectTitle } = useProjectMetadata(selectedProject)
@@ -614,6 +608,10 @@ function handleProjectListScroll () {
 
 function isHighlightedProject (project) {
   return project.metadata.name === highlightedProjectName.value
+}
+
+function isAllProjectsItem (project) {
+  return project === allProjectsItem
 }
 
 onMounted(() => {
