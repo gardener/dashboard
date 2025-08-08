@@ -50,29 +50,6 @@
         'npm',
       ],
       matchPackageNames: [
-        '@octokit/auth-app',
-        '@octokit/core',
-        '@octokit/plugin-paginate-graphql',
-        '@octokit/plugin-paginate-rest',
-        '@octokit/plugin-request-log',
-        '@octokit/plugin-rest-endpoint-methods',
-        'chalk',
-        'p-event',
-        'p-limit',
-        'p-retry',
-        'p-timeout',
-        'jose',
-      ],
-      matchUpdateTypes: [
-        'major',
-      ],
-      enabled: false,
-    },
-    {
-      matchDatasources: [
-        'npm',
-      ],
-      matchPackageNames: [
         'sass',
       ],
       matchUpdateTypes: [
