@@ -56,7 +56,11 @@ SPDX-License-Identifier: Apache-2.0
               :class="{ placeholder: !selectedProject }"
             >
               <div class="flex-align-center">
-                <div>
+                <g-project-tooltip
+                  v-if="!isShowingAllProjects"
+                  open-delay="1000"
+                  :project="selectedProject"
+                >
                   <div>{{ selectedProjectName }}</div>
                   <div
                     v-if="!!selectedProjectTitle"
@@ -64,19 +68,20 @@ SPDX-License-Identifier: Apache-2.0
                   >
                     {{ selectedProjectTitle }}
                   </div>
+                </g-project-tooltip>
+                <div v-else>
+                  {{ selectedProjectName }}
                 </div>
 
-                <div>
-                  <template v-if="selectedProject">
-                    <g-stale-project-warning
-                      :project="selectedProject"
-                      size="small"
-                    />
-                    <g-not-ready-project-warning
-                      :project="selectedProject"
-                      size="small"
-                    />
-                  </template>
+                <div v-if="selectedProject">
+                  <g-stale-project-warning
+                    :project="selectedProject"
+                    size="small"
+                  />
+                  <g-not-ready-project-warning
+                    :project="selectedProject"
+                    size="small"
+                  />
                 </div>
               </div>
             </div>
@@ -140,15 +145,20 @@ SPDX-License-Identifier: Apache-2.0
                   {{ project.metadata.name === selectedProjectName ? 'mdi-check' : '' }}
                 </v-icon>
               </template>
-              <v-list-item-title class="project-name text-uppercase">
-                {{ project.metadata.name }}
-              </v-list-item-title>
-              <v-list-item-title class="project-title">
-                {{ getProjectTitle(project) }}
-              </v-list-item-title>
-              <v-list-item-subtitle class="project-owner">
-                {{ getProjectOwner(project) }}
-              </v-list-item-subtitle>
+              <g-project-tooltip
+                open-delay="1000"
+                :project="project"
+              >
+                <v-list-item-title class="project-name text-uppercase">
+                  {{ project.metadata.name }}
+                </v-list-item-title>
+                <v-list-item-title class="project-title">
+                  {{ getProjectTitle(project) }}
+                </v-list-item-title>
+                <v-list-item-subtitle class="project-owner">
+                  {{ getProjectOwner(project) }}
+                </v-list-item-subtitle>
+              </g-project-tooltip>
               <template #append>
                 <g-stale-project-warning
                   :project="project"
@@ -262,6 +272,7 @@ import GProjectDialog from '@/components/dialogs/GProjectDialog.vue'
 import GStaleProjectWarning from '@/components/GStaleProjectWarning.vue'
 import GNotReadyProjectWarning from '@/components/GNotReadyProjectWarning.vue'
 import GTeaser from '@/components/GTeaser.vue'
+import GProjectTooltip from '@/components/GProjectTooltip.vue'
 
 import { getProjectTitle } from '@/composables/useProjectMetadata/helper.js'
 import { useProjectMetadata } from '@/composables/useProjectMetadata/index.js'
@@ -343,6 +354,10 @@ const selectedProject = computed({
   set ({ spec = {} } = {}) {
     router.push(getProjectMenuTargetRoute(spec.namespace))
   },
+})
+
+const isShowingAllProjects = computed(() => {
+  return selectedProject.value === allProjectsItem
 })
 
 const { projectTitle: selectedProjectTitle } = useProjectMetadata(selectedProject)
