@@ -344,12 +344,6 @@ useProvideShootHelper(shootItem, {
 const seedItem = computed(() => seedStore.seedByName(shootSeedName.value))
 useProvideSeedItem(seedItem)
 
-const shootProjectNameAndTitle = computed(() => {
-  const title = shootProjectTitle.value
-  const name = shootProjectName.value
-  return title ? `${name} – ${title}` : name
-})
-
 const isInfoAvailable = computed(() => {
   // operator not yet updated shoot resource
   if (shootLastOperation.value.type === undefined || shootLastOperation.value.state === undefined) {
