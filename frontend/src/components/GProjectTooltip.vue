@@ -11,10 +11,10 @@ SPDX-License-Identifier: Apache-2.0
     :open-delay="openDelay"
     :open-on-hover="openOnHover"
   >
-    <template #activator="{ props }">
-      <span v-bind="props">
+    <template #activator="{ props: activatorProps }">
+      <div v-bind="activatorProps">
         <slot />
-      </span>
+      </div>
     </template>
     <v-card elevation="12">
       <v-list>
