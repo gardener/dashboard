@@ -150,6 +150,13 @@ export const useProjectStore = defineStore('project', () => {
     return get(projectMap.value, [namespace, 'metadata', 'annotations', annotations.projectTitle])
   }
 
+  function projectByNamespace (metadata) {
+    const namespace = typeof metadata === 'string'
+      ? metadata
+      : metadata?.namespace
+    return get(projectMap.value, [namespace])
+  }
+
   async function fetchProjects () {
     const response = await api.getProjects()
     list.value = response.data
@@ -220,6 +227,7 @@ export const useProjectStore = defineStore('project', () => {
     deleteProject,
     projectNameByNamespace,
     projectTitleByNamespace,
+    projectByNamespace,
     handleEvent: socketEventHandler.listener,
     $reset,
   }

@@ -50,8 +50,11 @@ export const useShootMetadata = (shootItem, options = {}) => {
   })
 
   const shootProjectTitle = computed(() => {
-    const projectTitleByNamespace = projectStore.projectTitleByNamespace(shootNamespace.value)
-    return projectTitleByNamespace
+    return projectStore.projectTitleByNamespace(shootNamespace.value)
+  })
+
+  const shootProject = computed(() => {
+    return projectStore.projectByNamespace(shootNamespace.value)
   })
 
   const shootConfirmationDeletion = computed(() => {
@@ -88,6 +91,7 @@ export const useShootMetadata = (shootItem, options = {}) => {
     shootName,
     shootProjectName,
     shootProjectTitle,
+    shootProject,
     shootCreationTimestamp,
     shootDeletionTimestamp,
     shootGeneration,
