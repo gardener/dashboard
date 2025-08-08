@@ -20,6 +20,7 @@ jobs:
       checkout-fetch-depth: 10
     permissions:
       contents: read
+      pull-requests: write
 
   oci-images:
     name: Build OCI-Images
