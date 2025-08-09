@@ -23,7 +23,13 @@ jobs:
       - name: Check if PR is merged
         id: check_merged
         run: |
-          MERGED=$(gh pr view ${{ github.event.issue.number }} --json merged --jq '.merged')
+          STATE=$(gh pr view ${{ github.event.issue.number }} --json state --jq '.state')
+          if [ "$STATE" = "MERGED" ]; then
+            MERGED="true"
+          else
+            MERGED="false"
+            echo "PR is not merged; current state: $STATE"
+          fi
           echo "merged=$MERGED" >> $GITHUB_OUTPUT
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
