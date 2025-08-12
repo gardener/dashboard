@@ -54,6 +54,7 @@ const importConfig = {
           ['vuetify/lib/util/colors', null],
           ['@/assets/whitespace-eye.svg?raw', null],
           ['@/assets/whitespace-eye-off.svg?raw', null],
+          ['virtual:g-mdi-meta', null],
         ],
       },
     },
@@ -175,6 +176,10 @@ module.exports = [
     },
   }),
   {
+    languageOptions: {
+      ecmaVersion: 2025,
+      sourceType: 'module',
+    },
     rules: {
       'no-restricted-globals': ['error', 'find', 'event', 'location', 'history'],
       'no-console': 'error',

@@ -60,6 +60,7 @@
 !frontend/index.html
 !frontend/public
 !frontend/src
+!frontend/vite
 
 # include workspace charts
 !charts/package.json

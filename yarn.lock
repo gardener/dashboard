@@ -1036,6 +1036,7 @@ __metadata:
     "@kyvg/vue3-notification": "npm:^3.2.1"
     "@lezer/common": "npm:^1.2.1"
     "@mdi/font": "npm:7.4.47"
+    "@mdi/svg": "npm:7.4.47"
     "@microsoft/eslint-formatter-sarif": "npm:^3.1.0"
     "@pinia/testing": "npm:^1.0.0"
     "@typescript-eslint/utils": "npm:^8.12.2"
@@ -1763,6 +1764,13 @@ __metadata:
   version: 7.4.47
   resolution: "@mdi/font@npm:7.4.47"
   checksum: 10c0/4cd44a9e9c40218f00d2500f7408f913ac276348054c9c1b0108330060fecb3cb58c8c08eda39a7535298aaf3f1d28c0c115751cfe9fc2c9cdb9d50450107db9
+  languageName: node
+  linkType: hard
+
+"@mdi/svg@npm:7.4.47":
+  version: 7.4.47
+  resolution: "@mdi/svg@npm:7.4.47"
+  checksum: 10c0/c2beb137eb91472e7603bba6dcd904493a1902a70c14d816c77edfd157b26ec65d16bee5cb161b6d1765ddc9d94dd3cf6b37d887f581f624fc9aae571e9bd9e0
   languageName: node
   linkType: hard
 

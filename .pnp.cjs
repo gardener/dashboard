@@ -1743,6 +1743,7 @@ const RAW_RUNTIME_STATE =
           ["@kyvg/vue3-notification", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.4.1"],\
           ["@lezer/common", "npm:1.2.3"],\
           ["@mdi/font", "npm:7.4.47"],\
+          ["@mdi/svg", "npm:7.4.47"],\
           ["@microsoft/eslint-formatter-sarif", "npm:3.1.0"],\
           ["@pinia/testing", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:1.0.2"],\
           ["@typescript-eslint/utils", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:8.39.0"],\
@@ -2707,6 +2708,15 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/@mdi-font-npm-7.4.47-4b1c2f0954-4cd44a9e9c.zip/node_modules/@mdi/font/",\
         "packageDependencies": [\
           ["@mdi/font", "npm:7.4.47"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["@mdi/svg", [\
+      ["npm:7.4.47", {\
+        "packageLocation": "./.yarn/cache/@mdi-svg-npm-7.4.47-eb08526ec8-c2beb137eb.zip/node_modules/@mdi/svg/",\
+        "packageDependencies": [\
+          ["@mdi/svg", "npm:7.4.47"]\
         ],\
         "linkType": "HARD"\
       }]\
