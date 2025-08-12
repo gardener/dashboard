@@ -23,7 +23,7 @@ SPDX-License-Identifier: Apache-2.0
         <g-list-item>
           <template #prepend>
             <v-icon
-              v-if="field.icon"
+              v-if="field.icon && isMdiIcon(field.icon)"
               color="primary"
             >
               {{ field.icon }}
@@ -55,6 +55,8 @@ import { useShootItem } from '@/composables/useShootItem'
 import { useProjectShootCustomFields } from '@/composables/useProjectShootCustomFields'
 import { useProjectItem } from '@/composables/useProjectItem'
 import { formatValue } from '@/composables/useProjectShootCustomFields/helper'
+
+import { isMdiIcon } from '@/utils/mdiIcons'
 
 import map from 'lodash/map'
 import get from 'lodash/get'
