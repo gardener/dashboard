@@ -37,22 +37,16 @@ SPDX-License-Identifier: Apache-2.0
 <script setup>
 import {
   computed,
-  onMounted,
   ref,
 } from 'vue'
 
-const items = ref([])
-let aliasMap = new Map()
+import {
+  mdiIcons,
+  mdiAliasMap,
+} from '@/utils/mdiIcons'
 
-onMounted(async () => {
-  const {
-    mdiIcons,
-    mdiAliasMap,
-  } = await import('@/utils/mdiIcons')
-
-  items.value = mdiIcons
-  aliasMap = mdiAliasMap
-})
+const items = ref(mdiIcons)
+const aliasMap = mdiAliasMap
 
 function filter (value, query) {
   const q = String(query ?? '').toLowerCase()
