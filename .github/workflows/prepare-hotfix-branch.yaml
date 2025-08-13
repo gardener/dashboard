@@ -8,6 +8,9 @@ on:
         required: true
         type: string
 
+permissions:
+  contents: none  # we rely on the GitHub App token instead
+
 jobs:
   prepare-hotfix:
     runs-on: ubuntu-latest
@@ -20,12 +23,17 @@ jobs:
         with:
           app-id: ${{ vars.GARDENER_GITHUB_ACTIONS_APP_ID }}
           private-key: ${{ secrets.GARDENER_GITHUB_ACTIONS_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           ref: ${{ env.TAG }}
           token: ${{ steps.app-token.outputs.token }}
+
       - name: Setup Git Identity
         uses: gardener/cc-utils/.github/actions/setup-git-identity@master
+
       - name: Compute and validate branch names
         run: |
           if [[ ! "$TAG" =~ \.0$ ]]; then
@@ -41,6 +49,7 @@ jobs:
           PREPARE_BRANCH="hotfix-prepare-${BASE_VERSION}"
           echo "HOTFIX_BRANCH=$HOTFIX_BRANCH" >> $GITHUB_ENV
           echo "PREPARE_BRANCH=$PREPARE_BRANCH" >> $GITHUB_ENV
+
       - name: Check and create branches
         run: |
           git fetch origin
@@ -52,11 +61,10 @@ jobs:
             echo "Prepare branch $PREPARE_BRANCH already exists"
             exit 1
           fi
-
           git checkout -b "$HOTFIX_BRANCH"
           git push origin "$HOTFIX_BRANCH"
-
           git checkout -b "$PREPARE_BRANCH" # do not push yet
+
       - name: Bump patch version
         uses: gardener/cc-utils/.github/actions/version@master
         with:
@@ -64,6 +72,7 @@ jobs:
           prerelease: dev
           repository-operation: commit-to-head
           commit-message: Bump patch version to ${version} for hotfix
+
       - name: Update and commit .yarnrc.yml
         run: |
           cat <<EOF >> .yarnrc.yml
@@ -76,6 +85,7 @@ jobs:
           EOF
           git add .yarnrc.yml
           git commit -m "Add hotfix branch to changesetBaseRefs in .yarnrc.yml"
+
       - name: Push prepare branch and create Pull Request
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
