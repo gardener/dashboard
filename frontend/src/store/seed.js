@@ -19,7 +19,9 @@ import { useSocketEventHandler } from '@/composables/useSocketEventHandler'
 
 import find from 'lodash/find'
 import get from 'lodash/get'
-import keyBy from 'lodash/keyBy'
+import filter from 'lodash/filter'
+import isEmpty from 'lodash/isEmpty'
+import matches from 'lodash/matches'
 
 export const useSeedStore = defineStore('seed', () => {
   const api = useApi()
@@ -44,17 +46,43 @@ export const useSeedStore = defineStore('seed', () => {
     return find(list.value, ['metadata.name', name])
   }
 
-  function seedsForCloudProfile (cloudProfile) {
-    const seeds = []
-    const seedsByName = keyBy(list.value, 'metadata.name')
-    const names = get(cloudProfile, ['data', 'seedNames'], [])
-    for (const name of names) {
-      const seed = get(seedsByName, [name])
-      if (seed) {
-        seeds.push(seed)
-      }
+  // Higher-order function that creates a seed matcher for a cloud profile
+  function createSeedMatcher (cloudProfile) {
+    if (!cloudProfile) {
+      return () => false
     }
-    return seeds
+
+    const providerType = get(cloudProfile, ['metadata', 'providerType'])
+    const matchLabels = get(cloudProfile, ['data', 'seedSelector', 'matchLabels'])
+    const providerTypes = get(cloudProfile, ['data', 'seedSelector', 'providerTypes'], [providerType])
+
+    return function matchSeed (seed) {
+      // Check provider type matching
+      const seedProviderType = get(seed, ['spec', 'provider', 'type'])
+      const providerTypeMatches = providerTypes.some(type => [seedProviderType, '*'].includes(type))
+
+      if (!providerTypeMatches) {
+        return false
+      }
+
+      // Check label selector matching if specified
+      if (matchLabels && !isEmpty(matchLabels)) {
+        const seedLabels = get(seed, ['metadata', 'labels'], {})
+        const labelMatcher = matches(matchLabels)
+        return labelMatcher(seedLabels)
+      }
+
+      return true
+    }
+  }
+
+  function seedsForCloudProfile (cloudProfile) {
+    if (!cloudProfile || !list.value) {
+      return []
+    }
+
+    const seedMatcher = createSeedMatcher(cloudProfile)
+    return filter(list.value, seedMatcher)
   }
 
   const socketEventHandler = useSocketEventHandler(useSeedStore, {
