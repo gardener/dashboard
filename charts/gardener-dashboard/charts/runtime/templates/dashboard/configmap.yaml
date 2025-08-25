@@ -37,6 +37,12 @@ data:
     maxRequestBodySize: {{ .Values.global.dashboard.maxRequestBodySize | default "100kb" }}
     readinessProbe:
       periodSeconds: {{ .Values.global.dashboard.readinessProbe.periodSeconds }}
+    {{- $allowedOrigins := .Values.global.dashboard.io.allowedOrigins | default (list "*") }}
+    io:
+      allowedOrigins:
+      {{- range $allowedOrigins }}
+      - {{ . | quote }}
+      {{- end }}
     {{- if .Values.global.dashboard.gitHub }}
     gitHub:
       apiUrl: {{ .Values.global.dashboard.gitHub.apiUrl }}

@@ -9,11 +9,34 @@ import logger from '../logger/index.js'
 import helper from './helper.js'
 import dispatcher from './dispatcher.js'
 import _ from 'lodash-es'
+import config from '../config/index.js'
 
 function init (httpServer, cache) {
+  const allowedOrigins = config.io?.allowedOrigins
+  if (!allowedOrigins || allowedOrigins.length === 0) {
+    throw new Error('io.allowedOrigins configuration is required')
+  }
+
+  const allowAll = allowedOrigins.includes('*')
+
   const io = new Server(httpServer, {
     path: '/api/events',
     serveClient: false,
+    transports: ['websocket'],
+    allowRequest: (req, callback) => {
+      if (allowAll) {
+        return callback(null, true)
+      }
+      const { origin } = req.headers
+      if (!origin) {
+        return callback(null, true)
+      }
+      const isAllowed = allowedOrigins.includes(origin)
+      if (!isAllowed) {
+        logger.debug('Socket connection from disallowed origin %s rejected', origin)
+      }
+      callback(null, isAllowed)
+    },
   })
 
   // middleware

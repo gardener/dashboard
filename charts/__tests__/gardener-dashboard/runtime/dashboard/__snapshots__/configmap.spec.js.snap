@@ -461,6 +461,11 @@ exports[`gardener-dashboard configmap should render the template w/ defaults val
       "maxExpirationSeconds": 86400,
     },
   },
+  "io": {
+    "allowedOrigins": [
+      "*",
+    ],
+  },
   "logFormat": "text",
   "logLevel": "debug",
   "maxRequestBodySize": "100kb",
@@ -506,6 +511,17 @@ exports[`gardener-dashboard configmap sla should render the template with sla de
       "description": "[foo](https://bar.baz)",
       "title": "SLA title",
     },
+  },
+}
+`;
+
+exports[`gardener-dashboard configmap socket io should render the template with allowed origins 1`] = `
+{
+  "io": {
+    "allowedOrigins": [
+      "https://foo.example.com",
+      "https://bar.example.com",
+    ],
   },
 }
 `;
