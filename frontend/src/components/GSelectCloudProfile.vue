@@ -29,6 +29,8 @@ import {
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
+import { useCloudProfileStore } from '@/store/cloudProfile/index'
+
 import {
   getErrorMessages,
   cloudProfileDisplayName,
@@ -42,16 +44,15 @@ const props = defineProps({
     type: Object,
     default: null,
   },
-  cloudProfiles: {
-    type: Array,
-    required: true,
-  },
-  namespacedCloudProfiles: {
-    type: Array,
-    required: false,
-    default: () => [],
-  },
 })
+
+const { seedsByCloudProfileRef, cloudProfileList } = useCloudProfileStore()
+
+const seeds = computed(() => {
+  return seedsByCloudProfileRef(props.modelValue)
+})
+
+const namespacedCloudProfiles = [] // Todo to be implemented: useNamespacedCloudProfileStore()
 
 const emit = defineEmits([
   'update:modelValue',
@@ -60,9 +61,9 @@ const emit = defineEmits([
 const selectItems = computed(() => {
   const items = []
 
-  if (props.namespacedCloudProfiles.length > 0) {
+  if (namespacedCloudProfiles.length > 0) {
     items.push(
-      ...props.namespacedCloudProfiles.map(profile => {
+      ...namespacedCloudProfiles.map(profile => {
         const cloudProfileRef = {
           name: profile.metadata.name,
           kind: 'NamespacedCloudProfile',
@@ -75,9 +76,9 @@ const selectItems = computed(() => {
     )
   }
 
-  if (props.cloudProfiles.length > 0) {
+  if (cloudProfileList.length > 0) {
     items.push(
-      ...props.cloudProfiles.map(profile => {
+      ...cloudProfileList.map(profile => {
         const cloudProfileRef = {
           name: profile.metadata.name,
           kind: 'CloudProfile',
@@ -119,17 +120,16 @@ const rules = {
 
 const selectedCloudProfile = computed(() => {
   if (props.modelValue?.kind === 'CloudProfile') {
-    return find(props.cloudProfiles, { metadata: { name: props.modelValue?.name } })
+    return find(cloudProfileList, { metadata: { name: props.modelValue?.name } })
   }
   if (props.modelValue?.kind === 'NamespacedCloudProfile') {
-    return find(props.namespacedCloudProfiles, { metadata: { name: props.modelValue?.name } })
+    return find(namespacedCloudProfiles, { metadata: { name: props.modelValue?.name } })
   }
   return undefined
 })
 
-// ToDo access seednames by function
 const hint = computed(() => {
-  if (selectedCloudProfile.value && !selectedCloudProfile.value.data) { // .seedNames?.length) {
+  if (selectedCloudProfile.value && !seeds.value.length) {
     return 'This cloud profile does not have a matching seed. Gardener will not be able to schedule shoots using this cloud profile'
   }
   return ''
