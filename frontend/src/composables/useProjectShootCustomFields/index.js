@@ -9,6 +9,8 @@ import { computed } from 'vue'
 import { useLogger } from '@/composables/useLogger'
 import { useProjectMetadata } from '@/composables/useProjectMetadata'
 
+import { isMdiIcon } from '@/utils/mdiIcons'
+
 import cloneDeep from 'lodash/cloneDeep'
 import filter from 'lodash/filter'
 import isEmpty from 'lodash/isEmpty'
@@ -87,6 +89,7 @@ export function useProjectShootCustomFields (projectItem, options = {}) {
       const customFieldWithKey = {
         ...defaultProperties,
         ...customField,
+        icon: isMdiIcon(customField.icon) ? customField.icon : undefined,
         weight: Number(customField.weight) || 0,
       }
       Object.defineProperty(customFieldWithKey, 'key', {
