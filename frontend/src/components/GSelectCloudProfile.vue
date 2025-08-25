@@ -29,7 +29,10 @@ import {
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
-import { getErrorMessages } from '@/utils'
+import {
+  getErrorMessages,
+  cloudProfileDisplayName,
+} from '@/utils'
 import { withFieldName } from '@/utils/validators'
 
 import find from 'lodash/find'
@@ -66,7 +69,7 @@ const selectItems = computed(() => {
         }
         return {
           value: cloudProfileRef,
-          title: `${profile.metadata.displayName} (Namespaced)`,
+          title: `${cloudProfileDisplayName(profile)} (Namespaced)`,
         }
       }),
     )
@@ -81,7 +84,7 @@ const selectItems = computed(() => {
         }
         return {
           value: cloudProfileRef,
-          title: profile.metadata.displayName,
+          title: cloudProfileDisplayName(profile),
         }
       }),
     )
@@ -124,8 +127,9 @@ const selectedCloudProfile = computed(() => {
   return undefined
 })
 
+// ToDo access seednames by function
 const hint = computed(() => {
-  if (selectedCloudProfile.value && !selectedCloudProfile.value.data.seedNames?.length) {
+  if (selectedCloudProfile.value && !selectedCloudProfile.value.data) { // .seedNames?.length) {
     return 'This cloud profile does not have a matching seed. Gardener will not be able to schedule shoots using this cloud profile'
   }
   return ''
