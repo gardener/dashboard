@@ -149,6 +149,15 @@ export function displayName (username) {
   return username
 }
 
+// TODO: PR Reviewer, is this functionality still used?
+export function cloudProfileDisplayName (cloudProfile) {
+  if (!cloudProfile) {
+    return ''
+  }
+  const name = get(cloudProfile, ['metadata', 'name'])
+  return get(cloudProfile, ['metadata', 'annotations', 'garden.sapcloud.io/displayName'], name)
+}
+
 export function convertToGibibyte (value) {
   if (!value) {
     throw new TypeError('Value is empty')

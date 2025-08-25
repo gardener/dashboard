@@ -26,12 +26,12 @@ describe('stores', () => {
 
     let cloudProfileRef
 
-    function setData (data) {
+    function setData (spec) {
       cloudProfileStore.setCloudProfiles([{
         metadata: {
           name: 'foo',
         },
-        data,
+        spec,
       }])
     }
 

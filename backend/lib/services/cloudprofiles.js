@@ -11,24 +11,13 @@ import cache from '../cache/index.js'
 const { NotFound, Forbidden } = httpErrors
 const { getCloudProfiles } = cache
 
-function fromResource ({ metadata, spec }) {
-  const providerType = spec.type
-  const name = _.get(metadata, ['name'])
-  const displayName = _.get(metadata, ['annotations', 'garden.sapcloud.io/displayName'], name)
-  const resourceVersion = _.get(metadata, ['resourceVersion'])
-  metadata = { name, providerType, displayName, resourceVersion }
-  const data = { ...spec }
-  return { metadata, data }
-}
-
 export async function list ({ user }) {
   const allowed = await authorization.canListCloudProfiles(user)
   if (!allowed) {
     throw new Forbidden('You are not allowed to list cloudprofiles')
   }
 
-  const cloudProfiles = getCloudProfiles()
-  return _.map(cloudProfiles, fromResource)
+  return getCloudProfiles()
 }
 
 export async function read ({ user, name }) {
@@ -43,5 +32,5 @@ export async function read ({ user, name }) {
     throw new NotFound(`Cloud profile with name ${name} not found`)
   }
 
-  return fromResource(cloudProfileResource)
+  return cloudProfileResource
 }
