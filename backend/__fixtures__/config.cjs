@@ -81,6 +81,9 @@ const defaultConfig = {
       'test-unreachable': 'true',
     },
   },
+  io: {
+    allowedOrigins: ['*'],
+  },
   frontend: {
     features: {
       terminalEnabled: true,
