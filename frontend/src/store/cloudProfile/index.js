@@ -151,19 +151,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     }
   }
 
-  const knownProviderTypesList = ref([
-    'aws',
-    'azure',
-    'gcp',
-    'openstack',
-    'alicloud',
-    'metal',
-    'vsphere',
-    'hcloud',
-    'onmetal',
-    'ironcore',
-    'local',
-  ])
+  const knownProviderTypesList = ref(configStore.defaultInfrastructures)
 
   const providerTypesList = computed(() => {
     return uniq(map(list.value, 'metadata.providerType'))
@@ -263,7 +251,11 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
       availableFloatingPools = filter(availableFloatingPools, { domain: secretDomain })
     }
 
-    return availableFloatingPools
+    const match = availableFloatingPools.find(pool => pool.name === configStore.defaultFloatingPool)
+
+    return match
+      ? [match, ...availableFloatingPools.filter(pool => pool.name !== configStore.defaultFloatingPool)]
+      : availableFloatingPools
   }
 
   function floatingPoolNamesByCloudProfileRefAndRegionAndDomain ({ cloudProfileRef, region, secretDomain }) {
@@ -278,7 +270,13 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     if (hasRegionSpecificLoadBalancerProvider) {
       availableLoadBalancerProviders = filter(availableLoadBalancerProviders, { region })
     }
-    return uniq(map(availableLoadBalancerProviders, 'name'))
+    const match = uniq(map(availableLoadBalancerProviders, 'name'))
+
+    if (match.includes(configStore.defaultLoadbalancerProvider)) {
+      match.unshift(...match.splice(match.indexOf(configStore.defaultLoadbalancerProvider), 1))
+    }
+
+    return match
   }
 
   function loadBalancerClassNamesByCloudProfileRef (cloudProfileRef) {
@@ -646,7 +644,11 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
   function generateWorker (availableZones, cloudProfileRef, region, kubernetesVersion) {
     const id = uuidv4()
     const name = `worker-${shortRandomString(5)}`
-    const zones = !isEmpty(availableZones) ? [sample(availableZones)] : undefined
+    const zones = !isEmpty(availableZones)
+      ? configStore.defaultZonesSelectAll
+        ? availableZones
+        : [sample(availableZones)]
+      : undefined
     const architecture = head(machineArchitecturesByCloudProfileRefAndRegion({ cloudProfileRef, region }))
     const machineTypesForZone = machineTypesByCloudProfileRefAndRegionAndArchitecture({ cloudProfileRef, region, architecture })
     const machineType = head(machineTypesForZone) || {}
@@ -661,9 +663,9 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     const worker = {
       id,
       name,
-      minimum: 1,
-      maximum: 2,
-      maxSurge: 1,
+      minimum: configStore.defaultAutoscalerMin,
+      maximum: configStore.defaultAutoscalerMax,
+      maxSurge: configStore.defaultMaxSurge,
       machine: {
         type: machineType.name,
         image: pick(machineImage, ['name', 'version']),
