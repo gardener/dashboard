@@ -12,13 +12,18 @@ import _ from 'lodash-es'
 import config from '../config/index.js'
 
 function init (httpServer, cache) {
-  const allowedOrigins = config.io?.allowedOrigins
-  if (!allowedOrigins || allowedOrigins.length === 0) {
-    throw new Error('io.allowedOrigins configuration is required')
+  const allowedOrigins = config.websocketAllowedOrigins
+  if (!allowedOrigins?.length) {
+    throw new Error('websocketAllowedOrigins configuration is required')
   }
+  allowedOrigins.forEach(allowedOrigin => {
+    logger.info('WebSocket allowed origin: %s', allowedOrigin)
+  })
 
   const allowAll = allowedOrigins.includes('*')
-
+  if (allowAll) {
+    logger.warn('WebSocket allowing all origins (*) - this seeting is not recommended for production environments')
+  }
   const io = new Server(httpServer, {
     path: '/api/events',
     serveClient: false,
@@ -29,11 +34,12 @@ function init (httpServer, cache) {
       }
       const { origin } = req.headers
       if (!origin) {
-        return callback(null, true)
+        logger.warn('Socket connection rejected - request contains no origin')
+        return callback(null, false)
       }
       const isAllowed = allowedOrigins.includes(origin)
       if (!isAllowed) {
-        logger.debug('Socket connection from disallowed origin %s rejected', origin)
+        logger.warn('Socket connection from disallowed origin %s rejected', origin)
       }
       callback(null, isAllowed)
     },

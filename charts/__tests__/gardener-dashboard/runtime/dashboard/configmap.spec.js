@@ -894,11 +894,7 @@ describe('gardener-dashboard', function () {
       it('should render the template with allowed origins', async function () {
         const values = {
           global: {
-            dashboard: {
-              io: {
-                allowedOrigins: ['https://foo.example.com', 'https://bar.example.com'],
-              },
-            },
+            websocketAllowedOrigins: ['https://foo.example.com', 'https://bar.example.com'],
           },
         }
         const documents = await renderTemplates(templates, values)

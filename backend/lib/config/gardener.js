@@ -116,8 +116,8 @@ const configMappings = [
     type: 'Integer',
   },
   {
-    environmentVariableName: 'IO_ALLOWED_ORIGINS',
-    configPath: 'io.allowedOrigins',
+    environmentVariableName: 'WEBSOCKET_ALLOWED_ORIGINS',
+    configPath: 'websocketAllowedOrigins',
     type: 'Array',
   },
 ]
@@ -187,6 +187,7 @@ export default {
     const requiredConfigurationProperties = [
       'sessionSecret',
       'apiServerUrl',
+      'websocketAllowedOrigins',
     ]
 
     // When OIDC is configured, some more configuration is required

@@ -72,7 +72,7 @@ describe('config', function () {
       const environmentVariables = {
         API_SERVER_URL: 'apiServerUrl',
         SESSION_SECRET: 'secret',
-        IO_ALLOWED_ORIGINS: 'https://foo.example.org,https://bar.example.org',
+        WEBSOCKET_ALLOWED_ORIGINS: 'https://foo.example.org,https://bar.example.org',
       }
 
       let readFileSyncSpy
@@ -134,7 +134,7 @@ describe('config', function () {
         expect(gardener.readConfig).toHaveBeenCalledTimes(1)
         expect(gardener.readConfig.mock.calls[0]).toEqual([filename])
         expect(config.sessionSecret).toBe(env.SESSION_SECRET)
-        expect(config.io.allowedOrigins).toEqual(env.IO_ALLOWED_ORIGINS.split(','))
+        expect(config.websocketAllowedOrigins).toEqual(env.WEBSOCKET_ALLOWED_ORIGINS.split(','))
         expect(config.logLevel).toBe('debug')
       })
 
@@ -144,7 +144,7 @@ describe('config', function () {
         }, environmentVariables)
 
         const config = gardener.loadConfig(undefined, { env })
-        expect(config.io.allowedOrigins).toEqual([
+        expect(config.websocketAllowedOrigins).toEqual([
           'https://foo.example.org',
           'https://bar.example.org',
         ])
