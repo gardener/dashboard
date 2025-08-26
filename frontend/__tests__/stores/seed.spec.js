@@ -29,6 +29,12 @@ describe('stores', () => {
             type: 'aws',
           },
           region: 'eu-west-1',
+          taints: [], // No taints = not protected
+          settings: {
+            scheduling: {
+              visible: true,
+            },
+          },
         },
       },
       {
@@ -44,6 +50,12 @@ describe('stores', () => {
             type: 'aws',
           },
           region: 'us-east-1',
+          taints: [], // No taints = not protected
+          settings: {
+            scheduling: {
+              visible: true,
+            },
+          },
         },
       },
       {
@@ -59,6 +71,12 @@ describe('stores', () => {
             type: 'gcp',
           },
           region: 'europe-west1',
+          taints: [], // No taints = not protected
+          settings: {
+            scheduling: {
+              visible: true,
+            },
+          },
         },
       },
       {
@@ -74,6 +92,12 @@ describe('stores', () => {
             type: 'azure',
           },
           region: 'westeurope',
+          taints: [], // No taints = not protected
+          settings: {
+            scheduling: {
+              visible: true,
+            },
+          },
         },
       },
     ]
@@ -92,7 +116,7 @@ describe('stores', () => {
             name: 'aws-profile',
             providerType: 'aws',
           },
-          data: {
+          spec: {
             type: 'aws',
           },
         }
@@ -109,7 +133,7 @@ describe('stores', () => {
             name: 'aws-production-profile',
             providerType: 'aws',
           },
-          data: {
+          spec: {
             type: 'aws',
             seedSelector: {
               matchLabels: {
@@ -130,7 +154,7 @@ describe('stores', () => {
             name: 'multi-provider-profile',
             providerType: 'aws',
           },
-          data: {
+          spec: {
             type: 'aws',
             seedSelector: {
               providerTypes: ['aws', 'gcp'],
@@ -151,7 +175,7 @@ describe('stores', () => {
             name: 'wildcard-profile',
             providerType: 'aws',
           },
-          data: {
+          spec: {
             type: 'aws',
             seedSelector: {
               providerTypes: ['*'],
@@ -169,7 +193,7 @@ describe('stores', () => {
             name: 'complex-selector-profile',
             providerType: 'aws',
           },
-          data: {
+          spec: {
             type: 'aws',
             seedSelector: {
               providerTypes: ['*'],
@@ -193,7 +217,7 @@ describe('stores', () => {
             name: 'no-match-profile',
             providerType: 'openstack',
           },
-          data: {
+          spec: {
             type: 'openstack',
           },
         }
@@ -214,7 +238,7 @@ describe('stores', () => {
             name: 'aws-profile',
             providerType: 'aws',
           },
-          data: {
+          spec: {
             type: 'aws',
           },
         }
@@ -233,6 +257,12 @@ describe('stores', () => {
               provider: {
                 type: 'aws',
               },
+              taints: [], // No taints = not protected
+              settings: {
+                scheduling: {
+                  visible: true,
+                },
+              },
             },
           },
         ]
@@ -243,7 +273,7 @@ describe('stores', () => {
             name: 'aws-profile-with-labels',
             providerType: 'aws',
           },
-          data: {
+          spec: {
             type: 'aws',
             seedSelector: {
               matchLabels: {
@@ -267,6 +297,12 @@ describe('stores', () => {
               provider: {
                 type: 'aws',
               },
+              taints: [], // No taints = not protected
+              settings: {
+                scheduling: {
+                  visible: true,
+                },
+              },
             },
           },
         ]
@@ -277,7 +313,7 @@ describe('stores', () => {
             name: 'aws-profile-no-selector',
             providerType: 'aws',
           },
-          data: {
+          spec: {
             type: 'aws',
           },
         }

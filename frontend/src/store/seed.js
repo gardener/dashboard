@@ -46,6 +46,16 @@ export const useSeedStore = defineStore('seed', () => {
     return find(list.value, ['metadata.name', name])
   }
 
+  function getVisibleAndNotProtectedSeeds () {
+    const predicate = item => {
+      const taints = get(item, ['spec', 'taints'])
+      const unprotected = !find(taints, ['key', 'seed.gardener.cloud/protected'])
+      const visible = get(item, ['spec', 'settings', 'scheduling', 'visible'])
+      return unprotected && visible
+    }
+    return filter(list.value, predicate)
+  }
+
   // Higher-order function that creates a seed matcher for a cloud profile
   function createSeedMatcher (cloudProfile) {
     if (!cloudProfile) {
@@ -53,8 +63,8 @@ export const useSeedStore = defineStore('seed', () => {
     }
 
     const providerType = get(cloudProfile, ['metadata', 'providerType'])
-    const matchLabels = get(cloudProfile, ['data', 'seedSelector', 'matchLabels'])
-    const providerTypes = get(cloudProfile, ['data', 'seedSelector', 'providerTypes'], [providerType])
+    const matchLabels = get(cloudProfile, ['spec', 'seedSelector', 'matchLabels'])
+    const providerTypes = get(cloudProfile, ['spec', 'seedSelector', 'providerTypes'], [providerType])
 
     return function matchSeed (seed) {
       // Check provider type matching
@@ -77,12 +87,14 @@ export const useSeedStore = defineStore('seed', () => {
   }
 
   function seedsForCloudProfile (cloudProfile) {
-    if (!cloudProfile || !list.value) {
+    const seeds = getVisibleAndNotProtectedSeeds()
+
+    if (!cloudProfile || !seeds.length > 0) {
       return []
     }
 
     const seedMatcher = createSeedMatcher(cloudProfile)
-    return filter(list.value, seedMatcher)
+    return filter(seeds, seedMatcher)
   }
 
   const socketEventHandler = useSocketEventHandler(useSeedStore, {
