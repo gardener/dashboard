@@ -52,7 +52,7 @@ const seeds = computed(() => {
   return seedsByCloudProfileRef(props.modelValue)
 })
 
-const namespacedCloudProfiles = [] // Todo to be implemented: useNamespacedCloudProfileStore()
+const namespacedCloudProfiles = [] // ToDo: To be implemented: useNamespacedCloudProfileStore()
 
 const emit = defineEmits([
   'update:modelValue',
