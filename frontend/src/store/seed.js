@@ -81,7 +81,6 @@ export const useSeedStore = defineStore('seed', () => {
       return []
     }
 
-    // ToDo Extract to outer scope?
     const seedMatcher = createSeedMatcher(cloudProfile)
     return filter(list.value, seedMatcher)
   }
