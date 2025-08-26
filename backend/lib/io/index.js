@@ -14,7 +14,7 @@ import config from '../config/index.js'
 function init (httpServer, cache) {
   const allowedOrigins = config.websocketAllowedOrigins
   if (!allowedOrigins?.length) {
-    throw new Error('websocketAllowedOrigins configuration is required')
+    logger.warn('websocketAllowedOrigins configuration is required')
   }
   allowedOrigins.forEach(allowedOrigin => {
     logger.info('WebSocket allowed origin: %s', allowedOrigin)

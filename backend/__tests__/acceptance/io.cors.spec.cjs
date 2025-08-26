@@ -30,9 +30,16 @@ describe('cors', () => {
     jest.clearAllMocks()
   })
 
-  it('should throw if no origins are configured', () => {
-    Object.defineProperty(config, 'websocketAllowedOrigins', { value: undefined })
-    expect(() => createAgent('io', cache)).toThrow('websocketAllowedOrigins configuration is required')
+  it('should reject connections if no origins are configured', async () => {
+    Object.defineProperty(config, 'websocketAllowedOrigins', { value: [] })
+    mockRequest
+      .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+      .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+    agent = createAgent('io', cache)
+    const cookie = await user.cookie
+    await expect(
+      agent.connect({ cookie, originHeader: 'https://allowed.example.org' }),
+    ).rejects.toThrow(/websocket error/i)
   })
 
   it('should reject connections from disallowed origins', async () => {
