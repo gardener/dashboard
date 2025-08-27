@@ -62,7 +62,7 @@ export const useSeedStore = defineStore('seed', () => {
       return () => false
     }
 
-    const providerType = get(cloudProfile, ['metadata', 'providerType'])
+    const providerType = get(cloudProfile, ['spec', 'type'])
     const matchLabels = get(cloudProfile, ['spec', 'seedSelector', 'matchLabels'])
     const providerTypes = get(cloudProfile, ['spec', 'seedSelector', 'providerTypes'], [providerType])
 

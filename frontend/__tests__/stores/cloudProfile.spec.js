@@ -26,7 +26,7 @@ describe('stores', () => {
 
     let cloudProfileRef
 
-    function setData (spec) {
+    function setSpec (spec) {
       cloudProfileStore.setCloudProfiles([{
         metadata: {
           name: 'foo',
@@ -36,13 +36,13 @@ describe('stores', () => {
     }
 
     function setMachineImages (machineImages) {
-      setData({
+      setSpec({
         machineImages,
       })
     }
 
     function setKubernetesVersions (kubernetesVersions) {
-      setData({
+      setSpec({
         kubernetes: {
           versions: kubernetesVersions,
         },
@@ -651,7 +651,7 @@ describe('stores', () => {
       ]
 
       beforeEach(() => {
-        setData({
+        setSpec({
           machineTypes,
           volumeTypes,
           regions,
@@ -749,7 +749,7 @@ describe('stores', () => {
       ]
 
       beforeEach(() => {
-        setData({
+        setSpec({
           providerConfig: {
             constraints: {
               floatingPools,
@@ -833,7 +833,7 @@ describe('stores', () => {
       })
 
       it('should return default node cidr from cloud profile', () => {
-        setData({
+        setSpec({
           providerConfig: {
             defaultNodesCIDR: '1.2.3.4/16',
           },
