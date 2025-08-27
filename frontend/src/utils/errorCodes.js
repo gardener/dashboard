@@ -53,14 +53,12 @@ const errorCodes = {
     description: 'Cloud provider quota exceeded. Please request limit increases.',
     temporaryError: false,
     userError: true,
-    infraAccountError: true,
   },
   ERR_INFRA_DEPENDENCIES: {
     shortDescription: 'Infrastructure Dependencies',
     description: 'Infrastructure operation failed due to issues with cloud provider resources, configuration, or unmanaged resources. Please check your cloud environment, resolve any unmet requirements or conflicts, and remove any manually created resources related to this Shoot.',
     temporaryError: false,
     userError: true,
-    infraAccountError: true,
   },
   ERR_CLEANUP_CLUSTER_RESOURCES: {
     shortDescription: 'Cleanup Cluster',
@@ -73,7 +71,6 @@ const errorCodes = {
     description: 'The underlying infrastructure provider proclaimed that it does not have enough resources to fulfill your request at this point in time. You might want to wait or change your shoot configuration.',
     temporaryError: false,
     userError: true,
-    infraAccountError: true,
   },
   ERR_CONFIGURATION_PROBLEM: {
     shortDescription: 'Configuration Problem',
