@@ -4733,9 +4733,9 @@ __metadata:
   linkType: hard
 
 "dayjs@npm:^1.11.10":
-  version: 1.11.13
-  resolution: "dayjs@npm:1.11.13"
-  checksum: 10c0/a3caf6ac8363c7dade9d1ee797848ddcf25c1ace68d9fe8678ecf8ba0675825430de5d793672ec87b24a69bf04a1544b176547b2539982275d5542a7955f35b7
+  version: 1.11.14
+  resolution: "dayjs@npm:1.11.14"
+  checksum: 10c0/9ef4788e171c966e146edf357bfbbec21e125f68648c08b853e81e7a4657c9ab67c024cd69ce2bb568fdc609a6d51d690396838d082dd077beb4f81a12718cc0
   languageName: node
   linkType: hard
 
