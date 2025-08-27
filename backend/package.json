@@ -98,7 +98,7 @@
     "socket.io-client": "^4.7.5",
     "supertest": "^7.0.0"
   },
-  "packageManager": "yarn@4.9.2",
+  "packageManager": "yarn@4.9.4",
   "engines": {
     "node": "22.18.0"
   },
