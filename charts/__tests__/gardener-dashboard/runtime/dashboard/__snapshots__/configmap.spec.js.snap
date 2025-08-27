@@ -519,8 +519,7 @@ exports[`gardener-dashboard configmap socket io should render the template with 
 {
   "io": {
     "allowedOrigins": [
-      "https://foo.example.com",
-      "https://bar.example.com",
+      "*",
     ],
   },
 }
