@@ -1,6 +1,9 @@
 name: Build
 on:
   push:
+    branches:
+    - master
+    - hotfix-*
   pull_request:
     types:
     - opened
