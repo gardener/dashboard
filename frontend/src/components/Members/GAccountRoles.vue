@@ -16,7 +16,8 @@ SPDX-License-Identifier: Apache-2.0
     size="small"
     color="action-button"
     variant="tonal"
-    :class="{ 'ml-3': index > 0 }"
+    :class="{ 'mx-1': index > 0 }"
+    class="my-1"
   >
     {{ displayName }}
   </v-chip>
