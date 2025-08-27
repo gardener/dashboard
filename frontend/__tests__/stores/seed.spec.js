@@ -101,11 +101,21 @@ describe('stores', () => {
         },
       },
     ]
+    const mockProject = {
+      spec: {
+        tolerations: {
+          defaults: [
+            {
+              key: 'example-key',
+            },
+          ],
+        },
+      },
+    }
 
     beforeEach(() => {
       setActivePinia(createPinia())
       seedStore = useSeedStore()
-      // Mock the seed list
       seedStore.list = mockSeeds
     })
 
@@ -121,7 +131,7 @@ describe('stores', () => {
           },
         }
 
-        const matchingSeeds = seedStore.seedsForCloudProfile(cloudProfile)
+        const matchingSeeds = seedStore.seedsForCloudProfileByProject(cloudProfile, mockProject)
         expect(matchingSeeds).toHaveLength(2)
         expect(matchingSeeds[0].metadata.name).toBe('aws-seed-1')
         expect(matchingSeeds[1].metadata.name).toBe('aws-seed-2')
@@ -143,7 +153,7 @@ describe('stores', () => {
           },
         }
 
-        const matchingSeeds = seedStore.seedsForCloudProfile(cloudProfile)
+        const matchingSeeds = seedStore.seedsForCloudProfileByProject(cloudProfile, mockProject)
         expect(matchingSeeds).toHaveLength(1)
         expect(matchingSeeds[0].metadata.name).toBe('aws-seed-1')
       })
@@ -162,7 +172,7 @@ describe('stores', () => {
           },
         }
 
-        const matchingSeeds = seedStore.seedsForCloudProfile(cloudProfile)
+        const matchingSeeds = seedStore.seedsForCloudProfileByProject(cloudProfile, mockProject)
         expect(matchingSeeds).toHaveLength(3)
         expect(matchingSeeds.map(s => s.metadata.name)).toEqual(
           expect.arrayContaining(['aws-seed-1', 'aws-seed-2', 'gcp-seed-1']),
@@ -183,7 +193,7 @@ describe('stores', () => {
           },
         }
 
-        const matchingSeeds = seedStore.seedsForCloudProfile(cloudProfile)
+        const matchingSeeds = seedStore.seedsForCloudProfileByProject(cloudProfile, mockProject)
         expect(matchingSeeds).toHaveLength(4) // All seeds should match
       })
 
@@ -204,7 +214,7 @@ describe('stores', () => {
           },
         }
 
-        const matchingSeeds = seedStore.seedsForCloudProfile(cloudProfile)
+        const matchingSeeds = seedStore.seedsForCloudProfileByProject(cloudProfile, mockProject)
         expect(matchingSeeds).toHaveLength(2)
         expect(matchingSeeds.map(s => s.metadata.name)).toEqual(
           expect.arrayContaining(['aws-seed-1', 'gcp-seed-1']),
@@ -222,12 +232,12 @@ describe('stores', () => {
           },
         }
 
-        const matchingSeeds = seedStore.seedsForCloudProfile(cloudProfile)
+        const matchingSeeds = seedStore.seedsForCloudProfileByProject(cloudProfile, mockProject)
         expect(matchingSeeds).toHaveLength(0)
       })
 
       it('should return empty array when cloud profile is null', () => {
-        const matchingSeeds = seedStore.seedsForCloudProfile(null)
+        const matchingSeeds = seedStore.seedsForCloudProfileByProject(null)
         expect(matchingSeeds).toHaveLength(0)
       })
 
@@ -243,7 +253,7 @@ describe('stores', () => {
           },
         }
 
-        const matchingSeeds = seedStore.seedsForCloudProfile(cloudProfile)
+        const matchingSeeds = seedStore.seedsForCloudProfileByProject(cloudProfile, mockProject)
         expect(matchingSeeds).toHaveLength(0)
       })
 
@@ -283,7 +293,7 @@ describe('stores', () => {
           },
         }
 
-        const matchingSeeds = seedStore.seedsForCloudProfile(cloudProfile)
+        const matchingSeeds = seedStore.seedsForCloudProfileByProject(cloudProfile, mockProject)
         expect(matchingSeeds).toHaveLength(0) // Should not match due to missing labels
       })
 
@@ -318,7 +328,7 @@ describe('stores', () => {
           },
         }
 
-        const matchingSeeds = seedStore.seedsForCloudProfile(cloudProfile)
+        const matchingSeeds = seedStore.seedsForCloudProfileByProject(cloudProfile, mockProject)
         expect(matchingSeeds).toHaveLength(1)
         expect(matchingSeeds[0].metadata.name).toBe('aws-seed-no-labels')
       })
@@ -334,6 +344,210 @@ describe('stores', () => {
       it('should return undefined for non-existent seed', () => {
         const seed = seedStore.seedByName('non-existent-seed')
         expect(seed).toBeUndefined()
+      })
+    })
+
+    describe('#taints and tolerations matching', () => {
+      it('should return seeds when taints and tolerations match', () => {
+        const seedsWithTaints = [
+          {
+            metadata: {
+              name: 'aws-seed-with-taints',
+            },
+            spec: {
+              provider: {
+                type: 'aws',
+              },
+              region: 'eu-west-1',
+              taints: [
+                {
+                  key: 'example-key',
+                },
+              ],
+              settings: {
+                scheduling: {
+                  visible: true,
+                },
+              },
+            },
+          },
+        ]
+        seedStore.list = seedsWithTaints
+
+        const projectWithTolerations = {
+          spec: {
+            tolerations: {
+              defaults: [
+                {
+                  key: 'example-key',
+                },
+              ],
+            },
+          },
+        }
+
+        const cloudProfile = {
+          metadata: {
+            name: 'aws-profile',
+            providerType: 'aws',
+          },
+          spec: {
+            type: 'aws',
+          },
+        }
+
+        const matchingSeeds = seedStore.seedsForCloudProfileByProject(cloudProfile, projectWithTolerations)
+        expect(matchingSeeds).toHaveLength(1)
+        expect(matchingSeeds[0].metadata.name).toBe('aws-seed-with-taints')
+      })
+
+      it('should not return seeds when taints and tolerations do not match', () => {
+        const seedsWithTaints = [
+          {
+            metadata: {
+              name: 'aws-seed-with-different-taints',
+            },
+            spec: {
+              provider: {
+                type: 'aws',
+              },
+              region: 'eu-west-1',
+              taints: [
+                {
+                  key: 'different-key',
+                },
+              ],
+              settings: {
+                scheduling: {
+                  visible: true,
+                },
+              },
+            },
+          },
+        ]
+        seedStore.list = seedsWithTaints
+
+        const projectWithDifferentTolerations = {
+          spec: {
+            tolerations: {
+              defaults: [
+                {
+                  key: 'example-key',
+                },
+              ],
+            },
+          },
+        }
+
+        const cloudProfile = {
+          metadata: {
+            name: 'aws-profile',
+            providerType: 'aws',
+          },
+          spec: {
+            type: 'aws',
+          },
+        }
+
+        const matchingSeeds = seedStore.seedsForCloudProfileByProject(cloudProfile, projectWithDifferentTolerations)
+        expect(matchingSeeds).toHaveLength(0)
+      })
+
+      it('should not return seeds when there are taints but no tolerations', () => {
+        const seedsWithTaints = [
+          {
+            metadata: {
+              name: 'aws-seed-with-taints-no-tolerations',
+            },
+            spec: {
+              provider: {
+                type: 'aws',
+              },
+              region: 'eu-west-1',
+              taints: [
+                {
+                  key: 'example-key',
+                },
+              ],
+              settings: {
+                scheduling: {
+                  visible: true,
+                },
+              },
+            },
+          },
+        ]
+        seedStore.list = seedsWithTaints
+
+        const projectWithoutTolerations = {
+          spec: {
+            tolerations: {
+              defaults: [],
+            },
+          },
+        }
+
+        const cloudProfile = {
+          metadata: {
+            name: 'aws-profile',
+            providerType: 'aws',
+          },
+          spec: {
+            type: 'aws',
+          },
+        }
+
+        const matchingSeeds = seedStore.seedsForCloudProfileByProject(cloudProfile, projectWithoutTolerations)
+        expect(matchingSeeds).toHaveLength(0)
+      })
+
+      it('should return seeds when there are no taints but tolerations exist', () => {
+        const seedsWithoutTaints = [
+          {
+            metadata: {
+              name: 'aws-seed-without-taints',
+            },
+            spec: {
+              provider: {
+                type: 'aws',
+              },
+              region: 'eu-west-1',
+              taints: [],
+              settings: {
+                scheduling: {
+                  visible: true,
+                },
+              },
+            },
+          },
+        ]
+        seedStore.list = seedsWithoutTaints
+
+        const projectWithTolerations = {
+          spec: {
+            tolerations: {
+              defaults: [
+                {
+                  key: 'example-key',
+                },
+              ],
+            },
+          },
+        }
+
+        const cloudProfile = {
+          metadata: {
+            name: 'aws-profile',
+            providerType: 'aws',
+          },
+          spec: {
+            type: 'aws',
+          },
+        }
+
+        const matchingSeeds = seedStore.seedsForCloudProfileByProject(cloudProfile, projectWithTolerations)
+        expect(matchingSeeds).toHaveLength(1)
+        expect(matchingSeeds[0].metadata.name).toBe('aws-seed-without-taints')
       })
     })
   })

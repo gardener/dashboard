@@ -188,7 +188,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
 
   function seedsByCloudProfileRef (cloudProfileRef) {
     const cloudProfile = cloudProfileByRef(cloudProfileRef)
-    return seedStore.seedsForCloudProfile(cloudProfile)
+    return seedStore.seedsForCloudProfileByProject(cloudProfile)
   }
 
   function zonesByCloudProfileRefAndRegion ({ cloudProfileRef, region }) {
@@ -212,7 +212,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     if (!cloudProfile) {
       return []
     }
-    const seeds = seedStore.seedsForCloudProfile(cloudProfile)
+    const seeds = seedStore.seedsForCloudProfileByProject(cloudProfile)
 
     const uniqueSeedRegions = uniq(map(seeds, 'spec.region'))
     const uniqueSeedRegionsWithZones = filter(uniqueSeedRegions, isValidRegion(cloudProfile))

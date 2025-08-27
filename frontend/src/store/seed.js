@@ -17,6 +17,8 @@ import { useApi } from '@/composables/useApi'
 import { useLogger } from '@/composables/useLogger'
 import { useSocketEventHandler } from '@/composables/useSocketEventHandler'
 
+import { useProjectStore } from './project'
+
 import find from 'lodash/find'
 import get from 'lodash/get'
 import filter from 'lodash/filter'
@@ -46,17 +48,38 @@ export const useSeedStore = defineStore('seed', () => {
     return find(list.value, ['metadata.name', name])
   }
 
-  function getVisibleAndNotProtectedSeeds () {
-    const predicate = item => {
-      const taints = get(item, ['spec', 'taints'])
-      const unprotected = !find(taints, ['key', 'seed.gardener.cloud/protected'])
-      const visible = get(item, ['spec', 'settings', 'scheduling', 'visible'])
-      return unprotected && visible
+  function canTolerateAllTaints (seed, project) {
+    const seedTaints = get(seed, ['spec', 'taints'])
+
+    if (!seedTaints || seedTaints.length === 0) {
+      return true
+    }
+
+    const projectTolerations = get(project, ['spec', 'tolerations', 'defaults'], [])
+    if (!projectTolerations || projectTolerations.length === 0) {
+      return false
+    }
+
+    return seedTaints.every(taint => {
+      return projectTolerations.some(toleration => {
+        return toleration.key === taint.key
+      })
+    })
+  }
+
+  function getVisibleAndToleratedSeeds (project) {
+    const predicate = seed => {
+      const visible = get(seed, ['spec', 'settings', 'scheduling', 'visible'])
+
+      if (!visible) {
+        return false
+      }
+
+      return canTolerateAllTaints(seed, project)
     }
     return filter(list.value, predicate)
   }
 
-  // Higher-order function that creates a seed matcher for a cloud profile
   function createSeedMatcher (cloudProfile) {
     if (!cloudProfile) {
       return () => false
@@ -86,10 +109,14 @@ export const useSeedStore = defineStore('seed', () => {
     }
   }
 
-  function seedsForCloudProfile (cloudProfile) {
-    const seeds = getVisibleAndNotProtectedSeeds()
+  function seedsForCloudProfileByProject (cloudProfile, project) {
+    if (!cloudProfile || !project) {
+      return []
+    }
 
-    if (!cloudProfile || !seeds.length > 0) {
+    const seeds = getVisibleAndToleratedSeeds(project)
+
+    if (!seeds.length > 0) {
       return []
     }
 
@@ -108,7 +135,7 @@ export const useSeedStore = defineStore('seed', () => {
     seedList,
     fetchSeeds,
     seedByName,
-    seedsForCloudProfile,
+    seedsForCloudProfileByProject,
     handleEvent: socketEventHandler.listener,
   }
 })
