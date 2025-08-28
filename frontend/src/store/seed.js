@@ -88,7 +88,6 @@ export const useSeedStore = defineStore('seed', () => {
     const providerTypes = get(cloudProfile, ['spec', 'seedSelector', 'providerTypes'], [providerType])
 
     return function matchSeed (seed) {
-      // Check provider type matching
       const seedProviderType = get(seed, ['spec', 'provider', 'type'])
       const providerTypeMatches = providerTypes.some(type => [seedProviderType, '*'].includes(type))
 
@@ -96,7 +95,6 @@ export const useSeedStore = defineStore('seed', () => {
         return false
       }
 
-      // Check label selector matching if specified
       if (matchLabels && !isEmpty(matchLabels)) {
         const seedLabels = get(seed, ['metadata', 'labels'], {})
         const labelMatcher = matches(matchLabels)
