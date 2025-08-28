@@ -17,8 +17,6 @@ import { useApi } from '@/composables/useApi'
 import { useLogger } from '@/composables/useLogger'
 import { useSocketEventHandler } from '@/composables/useSocketEventHandler'
 
-import { useProjectStore } from './project'
-
 import find from 'lodash/find'
 import get from 'lodash/get'
 import filter from 'lodash/filter'
