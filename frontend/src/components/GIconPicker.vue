@@ -10,13 +10,13 @@ SPDX-License-Identifier: Apache-2.0
     :items="items"
     :label="label"
     variant="underlined"
-    clearable
+    :clearable="!!model"
     :error-messages="errorMessages"
     :hint="hint"
     persistent-hint
     :custom-filter="filter"
   >
-    <template #append>
+    <template #prepend-inner>
       <v-icon
         v-if="model"
         color="primary"
