@@ -60,6 +60,7 @@
 !frontend/index.html
 !frontend/public
 !frontend/src
+!frontend/vite/g-mdi-meta.js
 
 # include workspace charts
 !charts/package.json

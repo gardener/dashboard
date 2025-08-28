@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
       >
         <template #prepend>
           <v-icon
-            v-if="icon"
+            v-if="icon && isMdiIcon(icon)"
             size="small"
             class="pr-1"
           >
@@ -36,11 +36,12 @@ SPDX-License-Identifier: Apache-2.0
         <v-list-item>
           <v-list-item-subtitle>Icon</v-list-item-subtitle>
           <v-list-item-title>
-            <template v-if="icon">
-              <v-icon class="pr-1">
-                {{ icon }}
-              </v-icon>
-            </template>
+            <v-icon
+              v-if="icon && isMdiIcon(icon)"
+              class="pr-1"
+            >
+              {{ icon }}
+            </v-icon>
             <span
               v-else
               class="font-weight-light text-disabled"
@@ -132,53 +133,51 @@ SPDX-License-Identifier: Apache-2.0
   </g-popover>
 </template>
 
-<script>
+<script setup>
+import { ref } from 'vue'
 
-export default {
-  props: {
-    color: {
-      type: String,
-    },
-    name: {
-      type: String,
-      required: true,
-    },
-    path: {
-      type: String,
-      required: true,
-    },
-    icon: {
-      type: String,
-    },
-    tooltip: {
-      type: String,
-    },
-    defaultValue: {
-      type: String,
-    },
-    showColumn: {
-      type: Boolean,
-    },
-    weight: {
-      type: Number,
-    },
-    columnSelectedByDefault: {
-      type: Boolean,
-    },
-    searchable: {
-      type: Boolean,
-    },
-    sortable: {
-      type: Boolean,
-    },
-    showDetails: {
-      type: Boolean,
-    },
+import { isMdiIcon } from '@/utils/mdiIcons'
+
+defineProps({
+  color: {
+    type: String,
   },
-  data () {
-    return {
-      popover: false,
-    }
+  name: {
+    type: String,
+    required: true,
   },
-}
+  path: {
+    type: String,
+    required: true,
+  },
+  icon: {
+    type: String,
+  },
+  tooltip: {
+    type: String,
+  },
+  defaultValue: {
+    type: String,
+  },
+  showColumn: {
+    type: Boolean,
+  },
+  weight: {
+    type: Number,
+  },
+  columnSelectedByDefault: {
+    type: Boolean,
+  },
+  searchable: {
+    type: Boolean,
+  },
+  sortable: {
+    type: Boolean,
+  },
+  showDetails: {
+    type: Boolean,
+  },
+})
+
+const popover = ref(false)
 </script>
