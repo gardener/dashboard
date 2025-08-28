@@ -31,3 +31,10 @@ runs:
         gh pr comment "$PR_NUMBER" \
           --body "$SUMMARY" \
           --repo ${{ github.repository }}
+
+        if [ "$CHERRY_PICK_RESULT" = "success" ]; then
+          # Remove the label if present; do not fail if it's missing
+          gh pr edit "$PR_NUMBER" \
+            --remove-label "needs/cherry-pick" \
+            --repo ${{ github.repository }} || true
+        fi
