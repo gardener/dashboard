@@ -30,6 +30,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
 import { useCloudProfileStore } from '@/store/cloudProfile/index'
+import { useProjectStore } from '@/store/project.js'
 
 import {
   getErrorMessages,
@@ -47,9 +48,10 @@ const props = defineProps({
 })
 
 const { seedsByCloudProfileRef, cloudProfileList } = useCloudProfileStore()
+const projectStore = useProjectStore()
 
 const seeds = computed(() => {
-  return seedsByCloudProfileRef(props.modelValue)
+  return seedsByCloudProfileRef(props.modelValue, projectStore.project)
 })
 
 const namespacedCloudProfiles = [] // ToDo: To be implemented: useNamespacedCloudProfileStore()

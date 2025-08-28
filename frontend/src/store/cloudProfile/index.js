@@ -186,9 +186,9 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return find(list.value, ['metadata.name', cloudProfileRef?.name])
   }
 
-  function seedsByCloudProfileRef (cloudProfileRef) {
+  function seedsByCloudProfileRef (cloudProfileRef, project) {
     const cloudProfile = cloudProfileByRef(cloudProfileRef)
-    return seedStore.seedsForCloudProfileByProject(cloudProfile)
+    return seedStore.seedsForCloudProfileByProject(cloudProfile, project)
   }
 
   function zonesByCloudProfileRefAndRegion ({ cloudProfileRef, region }) {
@@ -203,28 +203,28 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return map(get(find(cloudProfile.spec.regions, { name: region }), ['zones']), 'name')
   }
 
-  function regionsWithSeedByCloudProfileRef (cloudProfileRef) {
+  function regionsWithSeedByCloudProfileRef (cloudProfileRef, project) {
     const cloudProfile = cloudProfileByRef(cloudProfileRef)
-    return _regionsWithSeedByCloudProfile(cloudProfile)
+    return _regionsWithSeedByCloudProfile(cloudProfile, project)
   }
 
-  function _regionsWithSeedByCloudProfile (cloudProfile) {
+  function _regionsWithSeedByCloudProfile (cloudProfile, project) {
     if (!cloudProfile) {
       return []
     }
-    const seeds = seedStore.seedsForCloudProfileByProject(cloudProfile)
+    const seeds = seedStore.seedsForCloudProfileByProject(cloudProfile, project)
 
     const uniqueSeedRegions = uniq(map(seeds, 'spec.region'))
     const uniqueSeedRegionsWithZones = filter(uniqueSeedRegions, isValidRegion(cloudProfile))
     return uniqueSeedRegionsWithZones
   }
 
-  function regionsWithoutSeedByCloudProfileRef (cloudProfileRef) {
+  function regionsWithoutSeedByCloudProfileRef (cloudProfileRef, project) {
     const cloudProfile = cloudProfileByRef(cloudProfileRef)
     if (!cloudProfile) {
       return []
     }
-    const regionsWithSeed = _regionsWithSeedByCloudProfile(cloudProfile)
+    const regionsWithSeed = _regionsWithSeedByCloudProfile(cloudProfile, project)
     const regionsInCloudProfile = map(cloudProfile.spec.regions, 'name')
     const regionsInCloudProfileWithZones = filter(regionsInCloudProfile, isValidRegion(cloudProfile))
     const regionsWithoutSeed = difference(regionsInCloudProfileWithZones, regionsWithSeed)
