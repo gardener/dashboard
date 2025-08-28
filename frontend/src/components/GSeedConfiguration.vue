@@ -23,12 +23,15 @@ SPDX-License-Identifier: Apache-2.0
           :items="seedNames"
           persistent-hint
         />
-        <div
+        <v-alert
           v-if="providerMismatch"
           class="my-2"
+          type="info"
+          variant="tonal"
         >
-          Note: Ensure network connectivity for etcd backups and Shoot control plane. Without it, migration may stall.
-        </div>
+          The selected seed cluster has a different provider type than the current seed cluster or the shoot. This may lead to migration issues.
+          Ensure network connectivity for etcd backups and Shoot control plane. Without it, migration may stall.
+        </v-alert>
       </v-card-text>
     </template>
   </g-action-button-dialog>
