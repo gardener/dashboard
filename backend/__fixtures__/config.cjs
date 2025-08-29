@@ -81,6 +81,7 @@ const defaultConfig = {
       'test-unreachable': 'true',
     },
   },
+  websocketAllowedOrigins: ['*'],
   frontend: {
     features: {
       terminalEnabled: true,
