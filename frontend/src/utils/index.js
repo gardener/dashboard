@@ -573,7 +573,6 @@ export const MEMBER_ROLE_DESCRIPTORS = [
   {
     name: 'serviceaccountmanager',
     displayName: 'Service Account Manager',
-    shortDisplayName: 'SA Manager',
   },
   {
     name: 'viewer',

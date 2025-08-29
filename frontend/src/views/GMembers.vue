@@ -385,7 +385,7 @@ const userList = computed(() => {
       displayName: displayName(username),
       isEmail: isEmail(username),
       isOwner: isOwner(username),
-      roleDisplayNames: sortedRoleDescriptors(user.roles),
+      roleDescriptors: sortedRoleDescriptors(user.roles),
       isCurrentUser: isCurrentUser(username),
     }
   })
@@ -449,7 +449,7 @@ const serviceAccountList = computed(() => {
       ...serviceAccount,
       avatarUrl: gravatarUrlGeneric(username),
       displayName: displayName(username),
-      roleDisplayNames: sortedRoleDescriptors(serviceAccount.roles),
+      roleDescriptors: sortedRoleDescriptors(serviceAccount.roles),
       isCurrentUser: isCurrentUser(username),
     }
   })
