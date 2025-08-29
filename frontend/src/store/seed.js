@@ -19,7 +19,9 @@ import { useSocketEventHandler } from '@/composables/useSocketEventHandler'
 
 import find from 'lodash/find'
 import get from 'lodash/get'
-import keyBy from 'lodash/keyBy'
+import filter from 'lodash/filter'
+import isEmpty from 'lodash/isEmpty'
+import matches from 'lodash/matches'
 
 export const useSeedStore = defineStore('seed', () => {
   const api = useApi()
@@ -44,17 +46,78 @@ export const useSeedStore = defineStore('seed', () => {
     return find(list.value, ['metadata.name', name])
   }
 
-  function seedsForCloudProfile (cloudProfile) {
-    const seeds = []
-    const seedsByName = keyBy(list.value, 'metadata.name')
-    const names = get(cloudProfile, ['data', 'seedNames'], [])
-    for (const name of names) {
-      const seed = get(seedsByName, [name])
-      if (seed) {
-        seeds.push(seed)
-      }
+  function canTolerateAllTaints (seed, project) {
+    const seedTaints = get(seed, ['spec', 'taints'])
+
+    if (!seedTaints || seedTaints.length === 0) {
+      return true
     }
-    return seeds
+
+    const projectTolerations = get(project, ['spec', 'tolerations', 'defaults'], [])
+    if (!projectTolerations || projectTolerations.length === 0) {
+      return false
+    }
+
+    return seedTaints.every(taint => {
+      return projectTolerations.some(toleration => {
+        return toleration.key === taint.key
+      })
+    })
+  }
+
+  function getVisibleAndToleratedSeeds (project) {
+    const predicate = seed => {
+      const visible = get(seed, ['spec', 'settings', 'scheduling', 'visible'])
+
+      if (!visible) {
+        return false
+      }
+
+      return canTolerateAllTaints(seed, project)
+    }
+    return filter(list.value, predicate)
+  }
+
+  function createSeedMatcher (cloudProfile) {
+    if (!cloudProfile) {
+      return () => false
+    }
+
+    const providerType = get(cloudProfile, ['spec', 'type'])
+    const matchLabels = get(cloudProfile, ['spec', 'seedSelector', 'matchLabels'])
+    const providerTypes = get(cloudProfile, ['spec', 'seedSelector', 'providerTypes'], [providerType])
+
+    return function matchSeed (seed) {
+      const seedProviderType = get(seed, ['spec', 'provider', 'type'])
+      const providerTypeMatches = providerTypes.some(type => [seedProviderType, '*'].includes(type))
+
+      if (!providerTypeMatches) {
+        return false
+      }
+
+      if (matchLabels && !isEmpty(matchLabels)) {
+        const seedLabels = get(seed, ['metadata', 'labels'], {})
+        const labelMatcher = matches(matchLabels)
+        return labelMatcher(seedLabels)
+      }
+
+      return true
+    }
+  }
+
+  function seedsForCloudProfileByProject (cloudProfile, project) {
+    if (!cloudProfile || !project) {
+      return []
+    }
+
+    const seeds = getVisibleAndToleratedSeeds(project)
+
+    if (!seeds.length > 0) {
+      return []
+    }
+
+    const seedMatcher = createSeedMatcher(cloudProfile)
+    return filter(seeds, seedMatcher)
   }
 
   const socketEventHandler = useSocketEventHandler(useSeedStore, {
@@ -68,7 +131,7 @@ export const useSeedStore = defineStore('seed', () => {
     seedList,
     fetchSeeds,
     seedByName,
-    seedsForCloudProfile,
+    seedsForCloudProfileByProject,
     handleEvent: socketEventHandler.listener,
   }
 })
