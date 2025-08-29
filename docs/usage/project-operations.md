@@ -39,11 +39,11 @@ Once the latter is set up, each Gardener user can use the `kubelogin` plugin for
 
 1. Open the menu at the top right of the screen, then choose **MY ACCOUNT**.
 
-    ![Show account details](../images/Show-account-details.png)
+    ![Show account details](../images/show-account-details.png)
 
 1. On the **Access** card, choose the arrow to see all options for the personalized command-line interface access.
 
-    ![Show details of OICD login](../images/Show-details-of-OICD-login.png)
+    ![Show details of OICD login](../images/show-details-of-oicd-login.png)
 
     > The personal bearer token that is also offered here only provides access for a limited amount of time for one time operations, for example, in `curl` commands. The `kubeconfig` provided for the personalized access is used by `kubelogin` to grant access to the Gardener API for the user permanently by using a refresh token.
 
