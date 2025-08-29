@@ -5,26 +5,27 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <v-chip
-    v-for="({ displayName, notEditable, tooltip }, index) in props.roleDisplayNames"
-    :key="displayName"
-    v-tooltip:top="{
-      text: tooltip,
-      disabled: !tooltip
-    }"
-    :disabled="notEditable"
-    size="small"
-    color="action-button"
-    variant="tonal"
-    :class="{ 'ml-3': index > 0 }"
-  >
-    {{ displayName }}
-  </v-chip>
+  <div class="d-flex flex-wrap ga-1 justify-end">
+    <v-chip
+      v-for="({ displayName, notEditable, tooltip }) in props.roleDescriptors"
+      :key="displayName"
+      v-tooltip:top="{
+        text: tooltip,
+        disabled: !tooltip
+      }"
+      size="x-small"
+      color="action-button"
+      variant="tonal"
+      :class="{ 'opacity-30' : notEditable }"
+    >
+      {{ displayName }}
+    </v-chip>
+  </div>
 </template>
 
 <script setup>
 const props = defineProps({
-  roleDisplayNames: {
+  roleDescriptors: {
     type: Array,
     required: true,
   },

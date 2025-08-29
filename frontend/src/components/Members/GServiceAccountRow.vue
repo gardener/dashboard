@@ -36,7 +36,7 @@ SPDX-License-Identifier: Apache-2.0
               color="warning"
             />
           </v-list-item-title>
-          <v-list-item-subtitle style="flex: 1 0 100%;">
+          <v-list-item-subtitle>
             {{ item.username }}
           </v-list-item-subtitle>
         </v-list-item>
@@ -62,17 +62,17 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </td>
     <td v-if="selectedHeaders.description">
-      <div class="description-column">
+      <g-scroll-container class="description-column">
         <span v-if="item.description">{{ item.description }}</span>
         <span
           v-else
           class="font-weight-light text-disabled"
         >not defined</span>
-      </div>
+      </g-scroll-container>
     </td>
     <td v-if="selectedHeaders.roles">
       <div class="d-flex justify-end">
-        <g-account-roles :role-display-names="item.roleDisplayNames" />
+        <g-account-roles :role-descriptors="item.roleDescriptors" />
       </div>
     </td>
     <td v-if="selectedHeaders.actions">
@@ -163,6 +163,7 @@ import GAccountAvatar from '@/components/GAccountAvatar.vue'
 import GAccountRoles from '@/components/Members/GAccountRoles.vue'
 import GTimeString from '@/components/GTimeString.vue'
 import GActionButton from '@/components/GActionButton.vue'
+import GScrollContainer from '@/components/GScrollContainer'
 
 import {
   isForeignServiceAccount,
@@ -264,4 +265,5 @@ function onDelete () {
   max-height: 60px;
   overflow: auto;
 }
+
 </style>
