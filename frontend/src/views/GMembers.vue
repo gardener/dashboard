@@ -298,7 +298,7 @@ import {
   parseServiceAccountUsername,
   isForeignServiceAccount,
   isServiceAccountUsername,
-  sortedRoleDisplayNames,
+  sortedRoleDescriptors,
   mapTableHeader,
 } from '@/utils'
 
@@ -385,7 +385,7 @@ const userList = computed(() => {
       displayName: displayName(username),
       isEmail: isEmail(username),
       isOwner: isOwner(username),
-      roleDisplayNames: sortedRoleDisplayNames(user.roles),
+      roleDisplayNames: sortedRoleDescriptors(user.roles),
       isCurrentUser: isCurrentUser(username),
     }
   })
@@ -449,7 +449,7 @@ const serviceAccountList = computed(() => {
       ...serviceAccount,
       avatarUrl: gravatarUrlGeneric(username),
       displayName: displayName(username),
-      roleDisplayNames: sortedRoleDisplayNames(serviceAccount.roles),
+      roleDisplayNames: sortedRoleDescriptors(serviceAccount.roles),
       isCurrentUser: isCurrentUser(username),
     }
   })

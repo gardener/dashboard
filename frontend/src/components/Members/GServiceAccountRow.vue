@@ -71,9 +71,9 @@ SPDX-License-Identifier: Apache-2.0
       </g-scroll-container>
     </td>
     <td v-if="selectedHeaders.roles">
-      <g-scroll-container class="d-flex flex-wrap justify-end roles-column">
-        <g-account-roles :role-display-names="item.roleDisplayNames" />
-      </g-scroll-container>
+      <div class="d-flex justify-end">
+        <g-account-roles :role-descriptors="item.roleDisplayNames" />
+      </div>
     </td>
     <td v-if="selectedHeaders.actions">
       <div class="d-flex justify-end">
@@ -266,9 +266,4 @@ function onDelete () {
   overflow: auto;
 }
 
-.roles-column {
-  max-width: 200px;
-  max-height: 60px;
-  overflow: auto;
-}
 </style>
