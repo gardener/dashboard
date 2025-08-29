@@ -11,7 +11,7 @@ import {
   provide,
 } from 'vue'
 
-import { useProjectMetadata } from '@/composables/useProjectMetadata'
+import { useProjectMetadata } from '@/composables/useProjectMetadata/index.js'
 import { useProjectShootCustomFields } from '@/composables/useProjectShootCustomFields'
 import { useProjectCostObject } from '@/composables/useProjectCostObject'
 
@@ -25,6 +25,8 @@ export function createProjectItemComposable (projectItem) {
   const {
     projectMetadata,
     projectName,
+    projectTitle,
+    projectNameAndTitle,
     projectCreationTimestamp,
     projectDeletionTimestamp,
     projectGeneration,
@@ -81,6 +83,8 @@ export function createProjectItemComposable (projectItem) {
     /* metadata */
     projectMetadata,
     projectName,
+    projectTitle,
+    projectNameAndTitle,
     projectCreationTimestamp,
     projectDeletionTimestamp,
     projectGeneration,

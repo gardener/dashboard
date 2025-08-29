@@ -7,7 +7,7 @@
 import { computed } from 'vue'
 
 import { useLogger } from '@/composables/useLogger'
-import { useProjectMetadata } from '@/composables/useProjectMetadata'
+import { useProjectMetadata } from '@/composables/useProjectMetadata/index.js'
 
 import { isMdiIcon } from '@/utils/mdiIcons'
 

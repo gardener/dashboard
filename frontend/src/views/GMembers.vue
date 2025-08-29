@@ -364,7 +364,7 @@ const {
 } = storeToRefs(localStorageStore)
 
 const {
-  projectName,
+  projectNameAndTitle,
   projectOwner: owner,
 } = useProvideProjectItem(project)
 
@@ -623,11 +623,11 @@ function confirmRemoveUser (name) {
   let message
   if (isCurrentUser(name)) {
     message = renderComponent(GRemoveProjectMember, {
-      projectName: projectName.value,
+      projectName: projectNameAndTitle.value,
     })
   } else {
     message = renderComponent(GRemoveProjectMember, {
-      projectName: projectName.value,
+      projectName: projectNameAndTitle.value,
       memberName: displayName(name),
     })
   }
@@ -660,7 +660,7 @@ async function onResetServiceAccount ({ username }) {
 function confirmRemoveForeignServiceAccount (serviceAccountName) {
   const { namespace, name } = parseServiceAccountUsername(serviceAccountName)
   const message = renderComponent(GRemoveProjectMember, {
-    projectName: projectName.value,
+    projectName: projectNameAndTitle.value,
     memberName: name,
     namespace,
   })

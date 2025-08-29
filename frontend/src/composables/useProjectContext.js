@@ -15,7 +15,7 @@ import {
 import { cleanup } from '@/composables/helper'
 
 import { useProjectShootCustomFields } from './useProjectShootCustomFields'
-import { useProjectMetadata } from './useProjectMetadata'
+import { useProjectMetadata } from './useProjectMetadata/index.js'
 import { useProjectCostObject } from './useProjectCostObject'
 
 import cloneDeep from 'lodash/cloneDeep'
@@ -66,6 +66,7 @@ export function createProjectContextComposable () {
   const projectMetadataComposable = useProjectMetadata(manifest)
   const {
     projectName,
+    projectTitle,
     isNewProject,
     getProjectAnnotation,
     setProjectAnnotation,
@@ -119,6 +120,7 @@ export function createProjectContextComposable () {
     isProjectDirty,
     /* metadata */
     projectName,
+    projectTitle,
     isNewProject,
     getProjectAnnotation,
     setProjectAnnotation,

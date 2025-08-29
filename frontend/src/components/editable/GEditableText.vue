@@ -67,6 +67,8 @@ SPDX-License-Identifier: Apache-2.0
         :messages="messages"
         :error-messages="getErrorMessages(v$.internalValue)"
         class="g-field"
+        :counter="counter"
+        :maxlength="maxLength"
         @input="v$.internalValue.$touch"
         @blur="v$.internalValue.$touch"
       >
@@ -130,6 +132,13 @@ export default {
     readOnly: {
       type: Boolean,
       default: false,
+    },
+    counter: {
+      type: Boolean,
+      default: false,
+    },
+    maxLength: {
+      type: Number,
     },
   },
   emits: [
