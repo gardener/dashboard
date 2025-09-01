@@ -162,6 +162,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     'hcloud',
     'onmetal',
     'ironcore',
+    'stackit',
     'local',
   ])
 
