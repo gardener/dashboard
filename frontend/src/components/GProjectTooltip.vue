@@ -71,7 +71,7 @@ import { toRefs } from 'vue'
 import GTimeString from '@/components/GTimeString.vue'
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
 
-import { useProjectMetadata } from '@/composables/useProjectMetadata/index.js'
+import { useProjectMetadata } from '@/composables/useProjectMetadata'
 import { useProvideProjectItem } from '@/composables/useProjectItem.js'
 
 const props = defineProps({

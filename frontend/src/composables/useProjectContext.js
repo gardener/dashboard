@@ -15,7 +15,7 @@ import {
 import { cleanup } from '@/composables/helper'
 
 import { useProjectShootCustomFields } from './useProjectShootCustomFields'
-import { useProjectMetadata } from './useProjectMetadata/index.js'
+import { useProjectMetadata } from './useProjectMetadata'
 import { useProjectCostObject } from './useProjectCostObject'
 
 import cloneDeep from 'lodash/cloneDeep'

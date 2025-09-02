@@ -13,7 +13,7 @@ import { useConfigStore } from '@/store/config'
 
 import { transformHtml } from '@/utils'
 
-import { useProjectMetadata } from './useProjectMetadata/index.js'
+import { useProjectMetadata } from './useProjectMetadata'
 
 import find from 'lodash/find'
 import get from 'lodash/get'

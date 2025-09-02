@@ -273,7 +273,7 @@ import GTeaser from '@/components/GTeaser.vue'
 import GProjectTooltip from '@/components/GProjectTooltip.vue'
 
 import { getProjectTitle } from '@/composables/useProjectMetadata/helper.js'
-import { useProjectMetadata } from '@/composables/useProjectMetadata/index.js'
+import { useProjectMetadata } from '@/composables/useProjectMetadata'
 
 import {
   emailToDisplayName,

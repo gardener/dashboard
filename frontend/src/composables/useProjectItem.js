@@ -11,7 +11,7 @@ import {
   provide,
 } from 'vue'
 
-import { useProjectMetadata } from '@/composables/useProjectMetadata/index.js'
+import { useProjectMetadata } from '@/composables/useProjectMetadata'
 import { useProjectShootCustomFields } from '@/composables/useProjectShootCustomFields'
 import { useProjectCostObject } from '@/composables/useProjectCostObject'
 
