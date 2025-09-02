@@ -111,7 +111,7 @@ export const useSeedStore = defineStore('seed', () => {
    *
    * @param {Object} cloudProfile - The cloud profile containing seed selector criteria
    * @param {Object} [project] - Optional project with toleration settings. When provided,
-   *                            project tolerations are used to filter seeds with taints
+   *                            project tolerations are used to consider seeds with taints
    * @returns {Array} Array of seed objects that match the cloud profile and are accessible
    *                  to the project, or empty array if no matches found
    */

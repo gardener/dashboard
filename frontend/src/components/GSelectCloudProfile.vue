@@ -23,6 +23,7 @@ SPDX-License-Identifier: Apache-2.0
 <script setup>
 import {
   computed,
+  toRef,
   ref,
   watch,
 } from 'vue'
@@ -48,7 +49,7 @@ const props = defineProps({
   },
 })
 
-const cloudProfileRef = props.modelValue
+const cloudProfileRef = toRef(props.modelValue)
 
 const cloudProfileStore = useCloudProfileStore()
 const { seedsByCloudProfileRef } = cloudProfileStore
@@ -56,7 +57,7 @@ const { cloudProfileList } = storeToRefs(cloudProfileStore)
 const { project } = storeToRefs(useProjectStore)
 
 const seeds = computed(() => {
-  return seedsByCloudProfileRef(cloudProfileRef, project)
+  return seedsByCloudProfileRef(cloudProfileRef.value, project)
 })
 
 const namespacedCloudProfiles = [] // ToDo: To be implemented: useNamespacedCloudProfileStore()
@@ -71,12 +72,12 @@ const selectItems = computed(() => {
   if (namespacedCloudProfiles.length > 0) {
     items.push(
       ...namespacedCloudProfiles.map(profile => {
-        const cloudProfileRef = {
+        const namespacedCloudProfileRef = {
           name: profile.metadata.name,
           kind: 'NamespacedCloudProfile',
         }
         return {
-          value: cloudProfileRef,
+          value: namespacedCloudProfileRef,
           title: `${cloudProfileDisplayName(profile)} (Namespaced)`,
         }
       }),
@@ -103,7 +104,7 @@ const selectItems = computed(() => {
 
 const selectedValue = ref(null)
 
-watch(() => cloudProfileRef, newValue => {
+watch(() => cloudProfileRef.value, newValue => {
   selectedValue.value = newValue
 }, { deep: true, immediate: true })
 
@@ -126,11 +127,11 @@ const rules = {
 }
 
 const selectedCloudProfile = computed(() => {
-  if (cloudProfileRef?.kind === 'CloudProfile') {
-    return find(cloudProfileList.value, { metadata: { name: cloudProfileRef?.name } })
+  if (cloudProfileRef.value?.kind === 'CloudProfile') {
+    return find(cloudProfileList.value, { metadata: { name: cloudProfileRef.value?.name } })
   }
-  if (cloudProfileRef?.kind === 'NamespacedCloudProfile') {
-    return find(namespacedCloudProfiles, { metadata: { name: cloudProfileRef?.name } })
+  if (cloudProfileRef.value?.kind === 'NamespacedCloudProfile') {
+    return find(namespacedCloudProfiles, { metadata: { name: cloudProfileRef.value?.name } })
   }
   return undefined
 })

@@ -66,7 +66,9 @@ export function createShootHelperComposable (shootItem, options = {}) {
   })
 
   const { projectNameByNamespace } = projectStore
-  const projectName = projectNameByNamespace(namespace)
+  const projectName = computed(() => {
+    return projectNameByNamespace(namespace)
+  })
 
   const project = computed(() => {
     return find(projectStore.projectList, ['metadata.name', projectName.value])
