@@ -38,7 +38,7 @@ const shootPropertyMappings = Object.freeze({
   kubernetesVersion: ['spec', 'kubernetes', 'version'],
   providerType: ['spec', 'provider', 'type'],
   addons: ['spec', 'addons'],
-  projectName: ['metadata', 'namespace'],
+  namespace: ['metadata', 'namespace'],
 })
 
 export function createShootHelperComposable (shootItem, options = {}) {
@@ -60,10 +60,13 @@ export function createShootHelperComposable (shootItem, options = {}) {
     kubernetesVersion,
     providerType,
     addons,
-    projectName,
+    namespace,
   } = mapValues(shootPropertyMappings, path => {
     return computed(() => get(shootItem.value, path))
   })
+
+  const { projectNameByNamespace } = projectStore
+  const projectName = projectNameByNamespace(namespace)
 
   const project = computed(() => {
     return find(projectStore.projectList, ['metadata.name', projectName.value])

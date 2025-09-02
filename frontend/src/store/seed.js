@@ -47,14 +47,13 @@ export const useSeedStore = defineStore('seed', () => {
   }
 
   function canTolerateAllTaints (seed, project) {
-    const seedTaints = get(seed, ['spec', 'taints'])
-
-    if (!seedTaints || seedTaints.length === 0) {
+    const seedTaints = get(seed, ['spec', 'taints']) ?? []
+    if (seedTaints.length === 0) {
       return true
     }
 
-    const projectTolerations = get(project, ['spec', 'tolerations', 'defaults'], [])
-    if (!projectTolerations || projectTolerations.length === 0) {
+    const projectTolerations = get(project, ['spec', 'tolerations', 'defaults']) ?? []
+    if (projectTolerations.length === 0) {
       return false
     }
 
@@ -85,19 +84,21 @@ export const useSeedStore = defineStore('seed', () => {
 
     const providerType = get(cloudProfile, ['spec', 'type'])
     const matchLabels = get(cloudProfile, ['spec', 'seedSelector', 'matchLabels'])
+    const labelMatcher = !isEmpty(matchLabels)
+      ? matches(matchLabels)
+      : null
     const providerTypes = get(cloudProfile, ['spec', 'seedSelector', 'providerTypes'], [providerType])
 
     return function matchSeed (seed) {
       const seedProviderType = get(seed, ['spec', 'provider', 'type'])
-      const providerTypeMatches = providerTypes.some(type => [seedProviderType, '*'].includes(type))
+      const providerTypeMatches = providerTypes.includes(seedProviderType) || providerTypes.includes('*')
 
       if (!providerTypeMatches) {
         return false
       }
 
-      if (matchLabels && !isEmpty(matchLabels)) {
+      if (labelMatcher) {
         const seedLabels = get(seed, ['metadata', 'labels'], {})
-        const labelMatcher = matches(matchLabels)
         return labelMatcher(seedLabels)
       }
 
@@ -105,14 +106,23 @@ export const useSeedStore = defineStore('seed', () => {
     }
   }
 
+  /**
+   * Returns seeds that match the cloud profile's seed selector and are tolerated by the project.
+   *
+   * @param {Object} cloudProfile - The cloud profile containing seed selector criteria
+   * @param {Object} [project] - Optional project with toleration settings. When provided,
+   *                            project tolerations are used to filter seeds with taints
+   * @returns {Array} Array of seed objects that match the cloud profile and are accessible
+   *                  to the project, or empty array if no matches found
+   */
   function seedsForCloudProfileByProject (cloudProfile, project) {
-    if (!cloudProfile || !project) {
+    if (!cloudProfile) {
       return []
     }
 
     const seeds = getVisibleAndToleratedSeeds(project)
 
-    if (!seeds.length > 0) {
+    if (seeds.length === 0) {
       return []
     }
 

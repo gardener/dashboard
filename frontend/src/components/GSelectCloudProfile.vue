@@ -26,6 +26,7 @@ import {
   ref,
   watch,
 } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
@@ -47,11 +48,15 @@ const props = defineProps({
   },
 })
 
-const { seedsByCloudProfileRef, cloudProfileList } = useCloudProfileStore()
-const projectStore = useProjectStore()
+const cloudProfileRef = props.modelValue
+
+const cloudProfileStore = useCloudProfileStore()
+const { seedsByCloudProfileRef } = cloudProfileStore
+const { cloudProfileList } = storeToRefs(cloudProfileStore)
+const { project } = storeToRefs(useProjectStore)
 
 const seeds = computed(() => {
-  return seedsByCloudProfileRef(props.modelValue, projectStore.project)
+  return seedsByCloudProfileRef(cloudProfileRef, project)
 })
 
 const namespacedCloudProfiles = [] // ToDo: To be implemented: useNamespacedCloudProfileStore()
@@ -78,9 +83,9 @@ const selectItems = computed(() => {
     )
   }
 
-  if (cloudProfileList.length > 0) {
+  if (cloudProfileList.value.length > 0) {
     items.push(
-      ...cloudProfileList.map(profile => {
+      ...cloudProfileList.value.map(profile => {
         const cloudProfileRef = {
           name: profile.metadata.name,
           kind: 'CloudProfile',
@@ -98,7 +103,7 @@ const selectItems = computed(() => {
 
 const selectedValue = ref(null)
 
-watch(() => props.modelValue, newValue => {
+watch(() => cloudProfileRef, newValue => {
   selectedValue.value = newValue
 }, { deep: true, immediate: true })
 
@@ -121,11 +126,11 @@ const rules = {
 }
 
 const selectedCloudProfile = computed(() => {
-  if (props.modelValue?.kind === 'CloudProfile') {
-    return find(cloudProfileList, { metadata: { name: props.modelValue?.name } })
+  if (cloudProfileRef?.kind === 'CloudProfile') {
+    return find(cloudProfileList.value, { metadata: { name: cloudProfileRef?.name } })
   }
-  if (props.modelValue?.kind === 'NamespacedCloudProfile') {
-    return find(namespacedCloudProfiles, { metadata: { name: props.modelValue?.name } })
+  if (cloudProfileRef?.kind === 'NamespacedCloudProfile') {
+    return find(namespacedCloudProfiles, { metadata: { name: cloudProfileRef?.name } })
   }
   return undefined
 })

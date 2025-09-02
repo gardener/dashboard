@@ -149,7 +149,6 @@ export function displayName (username) {
   return username
 }
 
-// TODO: PR Reviewer, is this functionality still used?
 export function cloudProfileDisplayName (cloudProfile) {
   if (!cloudProfile) {
     return ''
