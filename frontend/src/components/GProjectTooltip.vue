@@ -7,9 +7,10 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <!-- we make the tooltip background transparent so that it does not conflict with the cards background -->
   <v-tooltip
-    location="top"
+    location="right"
     :open-delay="openDelay"
     :open-on-hover="openOnHover"
+    :max-width="300"
   >
     <template #activator="{ props: activatorProps }">
       <div v-bind="activatorProps">
