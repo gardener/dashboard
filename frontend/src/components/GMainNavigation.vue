@@ -57,7 +57,7 @@ SPDX-License-Identifier: Apache-2.0
             >
               <div class="flex-align-center">
                 <g-project-tooltip
-                  open-delay="1000"
+                  :open-delay="1000"
                   :project="selectedProject"
                   :open-on-hover="!isAllProjectsItem(selectedProject)"
                 >
@@ -143,7 +143,7 @@ SPDX-License-Identifier: Apache-2.0
                 </v-icon>
               </template>
               <g-project-tooltip
-                open-delay="1000"
+                :open-delay="1000"
                 :project="project"
                 :open-on-hover="!isAllProjectsItem(project)"
               >
