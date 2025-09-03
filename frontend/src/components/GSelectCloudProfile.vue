@@ -54,10 +54,11 @@ const cloudProfileRef = toRef(props.modelValue)
 const cloudProfileStore = useCloudProfileStore()
 const { seedsByCloudProfileRef } = cloudProfileStore
 const { cloudProfileList } = storeToRefs(cloudProfileStore)
-const { project } = storeToRefs(useProjectStore)
+const projectStore = useProjectStore()
+const { project } = storeToRefs(projectStore)
 
 const seeds = computed(() => {
-  return seedsByCloudProfileRef(cloudProfileRef.value, project)
+  return seedsByCloudProfileRef(cloudProfileRef.value, project.value)
 })
 
 const namespacedCloudProfiles = [] // ToDo: To be implemented: useNamespacedCloudProfileStore()
