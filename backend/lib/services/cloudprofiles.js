@@ -9,51 +9,7 @@ import * as authorization from './authorization.js'
 import _ from 'lodash-es'
 import cache from '../cache/index.js'
 const { NotFound, Forbidden } = httpErrors
-const { getCloudProfiles, getVisibleAndNotProtectedSeeds } = cache
-
-function fromResource ({ cloudProfile: { metadata, spec }, seedNames }) {
-  const providerType = spec.type
-  const name = _.get(metadata, ['name'])
-  const displayName = _.get(metadata, ['annotations', 'garden.sapcloud.io/displayName'], name)
-  const resourceVersion = _.get(metadata, ['resourceVersion'])
-  metadata = { name, providerType, displayName, resourceVersion }
-  const data = { seedNames, ...spec }
-  return { metadata, data }
-}
-
-function emptyToUndefined (value) {
-  return _.isEmpty(value) ? undefined : value
-}
-function assignSeedsToCloudProfileIteratee (seeds) {
-  return cloudProfileResource => {
-    function filterProviderType (seed) {
-      const seedProviderType = _.get(seed, ['spec', 'provider', 'type'])
-      return providerTypes.some(providerType => [seedProviderType, '*'].includes(providerType))
-    }
-    const providerType = cloudProfileResource.spec.type
-    const matchLabels = _.get(cloudProfileResource, ['spec', 'seedSelector', 'matchLabels'])
-    const providerTypes = _.get(cloudProfileResource, ['spec', 'seedSelector', 'providerTypes'], [providerType])
-    const matchLabelsFilter = {
-      metadata: {},
-    }
-    if (matchLabels) {
-      matchLabelsFilter.metadata.labels = matchLabels
-    }
-
-    const seedNamesForCloudProfile = _
-      .chain(seeds)
-      .filter(filterProviderType)
-      .filter(matchLabelsFilter)
-      .map('metadata.name')
-      .thru(emptyToUndefined)
-      .value()
-
-    return fromResource({
-      cloudProfile: cloudProfileResource,
-      seedNames: seedNamesForCloudProfile,
-    })
-  }
-}
+const { getCloudProfiles } = cache
 
 export async function list ({ user }) {
   const allowed = await authorization.canListCloudProfiles(user)
@@ -61,9 +17,7 @@ export async function list ({ user }) {
     throw new Forbidden('You are not allowed to list cloudprofiles')
   }
 
-  const cloudProfiles = getCloudProfiles()
-  const seeds = getVisibleAndNotProtectedSeeds()
-  return _.map(cloudProfiles, assignSeedsToCloudProfileIteratee(seeds))
+  return getCloudProfiles()
 }
 
 export async function read ({ user, name }) {
@@ -78,11 +32,5 @@ export async function read ({ user, name }) {
     throw new NotFound(`Cloud profile with name ${name} not found`)
   }
 
-  const seeds = getVisibleAndNotProtectedSeeds()
-  const cloudProfile = assignSeedsToCloudProfileIteratee(seeds)(cloudProfileResource)
-  if (!cloudProfile.data.seedNames) {
-    throw new NotFound(`No matching seed for cloud profile with name ${name} found`)
-  }
-
-  return cloudProfile
+  return cloudProfileResource
 }

@@ -86,15 +86,6 @@ export default {
   getSeedByUid (uid) {
     return cache.get('seeds').find(['metadata.uid', uid])
   },
-  getVisibleAndNotProtectedSeeds () {
-    const predicate = item => {
-      const taints = _.get(item, ['spec', 'taints'])
-      const unprotected = !_.find(taints, ['key', 'seed.gardener.cloud/protected'])
-      const visible = _.get(item, ['spec', 'settings', 'scheduling', 'visible'])
-      return unprotected && visible
-    }
-    return _.filter(cache.getSeeds(), predicate)
-  },
   getProject (name) {
     const project = cache.get('projects').find(['metadata.name', name])
     if (!project) {

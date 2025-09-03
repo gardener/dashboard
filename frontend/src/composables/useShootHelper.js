@@ -15,6 +15,7 @@ import { useConfigStore } from '@/store/config'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useCredentialStore } from '@/store/credential'
 import { useSeedStore } from '@/store/seed'
+import { useProjectStore } from '@/store/project'
 
 import { useCloudProviderBindingList } from '@/composables/credential/useCloudProviderBindingList'
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
@@ -37,6 +38,7 @@ const shootPropertyMappings = Object.freeze({
   kubernetesVersion: ['spec', 'kubernetes', 'version'],
   providerType: ['spec', 'provider', 'type'],
   addons: ['spec', 'addons'],
+  namespace: ['metadata', 'namespace'],
 })
 
 export function createShootHelperComposable (shootItem, options = {}) {
@@ -46,6 +48,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     gardenerExtensionStore = useGardenerExtensionStore(),
     credentialStore = useCredentialStore(),
     seedStore = useSeedStore(),
+    projectStore = useProjectStore(),
   } = options
 
   const {
@@ -57,8 +60,18 @@ export function createShootHelperComposable (shootItem, options = {}) {
     kubernetesVersion,
     providerType,
     addons,
+    namespace,
   } = mapValues(shootPropertyMappings, path => {
     return computed(() => get(shootItem.value, path))
+  })
+
+  const { projectNameByNamespace } = projectStore
+  const projectName = computed(() => {
+    return projectNameByNamespace(namespace)
+  })
+
+  const project = computed(() => {
+    return find(projectStore.projectList, ['metadata.name', projectName.value])
   })
 
   const infrastructureBinding = computed(() => {
@@ -98,7 +111,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
   })
 
   const seeds = computed(() => {
-    return cloudProfileStore.seedsByCloudProfileRef(cloudProfileRef.value)
+    return cloudProfileStore.seedsByCloudProfileRef(cloudProfileRef.value, project.value)
   })
 
   const isFailureToleranceTypeZoneSupported = computed(() => {
@@ -119,11 +132,11 @@ export function createShootHelperComposable (shootItem, options = {}) {
   })
 
   const regionsWithSeed = computed(() => {
-    return cloudProfileStore.regionsWithSeedByCloudProfileRef(cloudProfileRef.value)
+    return cloudProfileStore.regionsWithSeedByCloudProfileRef(cloudProfileRef.value, project.value)
   })
 
   const regionsWithoutSeed = computed(() => {
-    return cloudProfileStore.regionsWithoutSeedByCloudProfileRef(cloudProfileRef.value)
+    return cloudProfileStore.regionsWithoutSeedByCloudProfileRef(cloudProfileRef.value, project.value)
   })
 
   const defaultNodesCIDR = computed(() => {

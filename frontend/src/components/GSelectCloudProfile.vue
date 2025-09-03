@@ -23,13 +23,21 @@ SPDX-License-Identifier: Apache-2.0
 <script setup>
 import {
   computed,
+  toRef,
   ref,
   watch,
 } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
-import { getErrorMessages } from '@/utils'
+import { useCloudProfileStore } from '@/store/cloudProfile/index'
+import { useProjectStore } from '@/store/project.js'
+
+import {
+  getErrorMessages,
+  cloudProfileDisplayName,
+} from '@/utils'
 import { withFieldName } from '@/utils/validators'
 
 import find from 'lodash/find'
@@ -39,16 +47,21 @@ const props = defineProps({
     type: Object,
     default: null,
   },
-  cloudProfiles: {
-    type: Array,
-    required: true,
-  },
-  namespacedCloudProfiles: {
-    type: Array,
-    required: false,
-    default: () => [],
-  },
 })
+
+const cloudProfileRef = toRef(props.modelValue)
+
+const cloudProfileStore = useCloudProfileStore()
+const { seedsByCloudProfileRef } = cloudProfileStore
+const { cloudProfileList } = storeToRefs(cloudProfileStore)
+const projectStore = useProjectStore()
+const { project } = storeToRefs(projectStore)
+
+const seeds = computed(() => {
+  return seedsByCloudProfileRef(cloudProfileRef.value, project.value)
+})
+
+const namespacedCloudProfiles = [] // ToDo: To be implemented: useNamespacedCloudProfileStore()
 
 const emit = defineEmits([
   'update:modelValue',
@@ -57,31 +70,31 @@ const emit = defineEmits([
 const selectItems = computed(() => {
   const items = []
 
-  if (props.namespacedCloudProfiles.length > 0) {
+  if (namespacedCloudProfiles.length > 0) {
     items.push(
-      ...props.namespacedCloudProfiles.map(profile => {
-        const cloudProfileRef = {
+      ...namespacedCloudProfiles.map(profile => {
+        const namespacedCloudProfileRef = {
           name: profile.metadata.name,
           kind: 'NamespacedCloudProfile',
         }
         return {
-          value: cloudProfileRef,
-          title: `${profile.metadata.displayName} (Namespaced)`,
+          value: namespacedCloudProfileRef,
+          title: `${cloudProfileDisplayName(profile)} (Namespaced)`,
         }
       }),
     )
   }
 
-  if (props.cloudProfiles.length > 0) {
+  if (cloudProfileList.value.length > 0) {
     items.push(
-      ...props.cloudProfiles.map(profile => {
+      ...cloudProfileList.value.map(profile => {
         const cloudProfileRef = {
           name: profile.metadata.name,
           kind: 'CloudProfile',
         }
         return {
           value: cloudProfileRef,
-          title: profile.metadata.displayName,
+          title: cloudProfileDisplayName(profile),
         }
       }),
     )
@@ -92,7 +105,7 @@ const selectItems = computed(() => {
 
 const selectedValue = ref(null)
 
-watch(() => props.modelValue, newValue => {
+watch(() => cloudProfileRef.value, newValue => {
   selectedValue.value = newValue
 }, { deep: true, immediate: true })
 
@@ -115,17 +128,17 @@ const rules = {
 }
 
 const selectedCloudProfile = computed(() => {
-  if (props.modelValue?.kind === 'CloudProfile') {
-    return find(props.cloudProfiles, { metadata: { name: props.modelValue?.name } })
+  if (cloudProfileRef.value?.kind === 'CloudProfile') {
+    return find(cloudProfileList.value, { metadata: { name: cloudProfileRef.value?.name } })
   }
-  if (props.modelValue?.kind === 'NamespacedCloudProfile') {
-    return find(props.namespacedCloudProfiles, { metadata: { name: props.modelValue?.name } })
+  if (cloudProfileRef.value?.kind === 'NamespacedCloudProfile') {
+    return find(namespacedCloudProfiles, { metadata: { name: cloudProfileRef.value?.name } })
   }
   return undefined
 })
 
 const hint = computed(() => {
-  if (selectedCloudProfile.value && !selectedCloudProfile.value.data.seedNames?.length) {
+  if (selectedCloudProfile.value && !seeds.value.length) {
     return 'This cloud profile does not have a matching seed. Gardener will not be able to schedule shoots using this cloud profile'
   }
   return ''
