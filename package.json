@@ -38,10 +38,10 @@
   },
   "devDependencies": {
     "@microsoft/eslint-formatter-sarif": "^3.1.0",
-    "dependency-cruiser": "^16.10.1",
+    "dependency-cruiser": "^17.0.0",
     "eslint": "^9.11.0",
     "husky": "^9.1.7",
-    "jest": "^29.7.0",
+    "jest": "^30.0.0",
     "node-gyp": "latest"
   },
   "bin": {
