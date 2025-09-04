@@ -48,7 +48,7 @@ describe('kube-client', () => {
     })
 
     it('should create a HttpClient instance', () => {
-      expect(extend).toBeCalledTimes(1)
+      expect(extend).toHaveBeenCalledTimes(1)
       expect(extend.mock.calls[0]).toEqual([options])
       expect(testClient[http.client]).toBe(mockClient)
     })
@@ -56,21 +56,21 @@ describe('kube-client', () => {
     it('should call the request method with empty searchParams', async () => {
       const searchParams = new URLSearchParams()
       await testClient.request(url, { method, searchParams })
-      expect(mockClient.request).toBeCalledTimes(1)
+      expect(mockClient.request).toHaveBeenCalledTimes(1)
       expect(mockClient.request.mock.calls[0]).toEqual([url, { method }])
     })
 
     it('should call the request method with searchParams', async () => {
       const searchParams = new URLSearchParams({ foo: 'bar' })
       await testClient.request(url, { method, searchParams })
-      expect(mockClient.request).toBeCalledTimes(1)
+      expect(mockClient.request).toHaveBeenCalledTimes(1)
       expect(mockClient.request.mock.calls[0]).toEqual([url, { method, searchParams }])
     })
 
     it('should wait until the condition is met', async () => {
       const response = await testClient.stream(url, { method })
       writeNumbers(response)
-      expect(mockClient.stream).toBeCalledTimes(1)
+      expect(mockClient.stream).toHaveBeenCalledTimes(1)
       expect(mockClient.stream.mock.calls[0]).toEqual([url, { method }])
       expect(typeof response.until).toBe('function')
       const value = await response.until(event => ({
@@ -85,14 +85,14 @@ describe('kube-client', () => {
       const response = await testClient.stream(url, { method })
       const destroySpy = jest.spyOn(response, 'destroy')
       writeNumbers(response)
-      expect(mockClient.stream).toBeCalledTimes(1)
+      expect(mockClient.stream).toHaveBeenCalledTimes(1)
       expect(mockClient.stream.mock.calls[0]).toEqual([url, { method }])
       expect(typeof response.until).toBe('function')
       await expect(response.until(
         event => ({
           ok: event.object > 9,
         }), { timeout: 10 })).rejects.toThrow(GatewayTimeout)
-      expect(destroySpy).toBeCalled()
+      expect(destroySpy).toHaveBeenCalled()
       expect(destroySpy.mock.calls[0]).toHaveLength(1)
       expect(destroySpy.mock.calls[0][0].message).toMatch(/"dummies" .* 10 ms/)
     })

@@ -102,7 +102,7 @@ describe('Client', () => {
     })
 
     it('should throw a type error', () => {
-      expect(() => new Client()).toThrowError(TypeError)
+      expect(() => new Client()).toThrow(TypeError)
     })
 
     it('should create an instance with url and relativeUrl', () => {
@@ -163,13 +163,13 @@ describe('Client', () => {
       })
       const args = ['a', 2, true]
       client.executeHooks('beforeRequest', ...args)
-      expect(beforeRequestSpy).toBeCalledTimes(1)
+      expect(beforeRequestSpy).toHaveBeenCalledTimes(1)
       expect(beforeRequestSpy.mock.calls[0]).toEqual(args)
-      expect(afterResponseSpy).not.toBeCalled()
+      expect(afterResponseSpy).not.toHaveBeenCalled()
       client.executeHooks('afterResponse')
-      expect(afterResponseSpy).toBeCalledTimes(1)
-      expect(logger.error).toBeCalledTimes(1)
-      expect(logger.error).lastCalledWith('Failed to execute "afterResponse" hooks', message)
+      expect(afterResponseSpy).toHaveBeenCalledTimes(1)
+      expect(logger.error).toHaveBeenCalledTimes(1)
+      expect(logger.error).toHaveBeenLastCalledWith('Failed to execute "afterResponse" hooks', message)
     })
   })
 
@@ -304,7 +304,7 @@ describe('Client', () => {
       const response = await client.fetch()
       const error = new Error('error')
       response.destroy(error)
-      expect(stream.destroy).toBeCalledTimes(1)
+      expect(stream.destroy).toHaveBeenCalledTimes(1)
       expect(stream.destroy.mock.calls[0]).toEqual([error])
     })
   })

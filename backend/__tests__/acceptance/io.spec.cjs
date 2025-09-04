@@ -9,7 +9,7 @@
 const { mockRequest } = require('@gardener-dashboard/request')
 const { Store } = require('@gardener-dashboard/kube-client')
 const { mockListIssues, mockListComments } = require('@octokit/core')
-const pEvent = require('p-event')
+const { pEvent } = require('../../p-event-helper')
 const createError = require('http-errors')
 const tickets = require('../../dist/lib/services/tickets')
 const cache = require('../../dist/lib/cache')

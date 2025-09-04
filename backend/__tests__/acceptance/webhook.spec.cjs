@@ -10,12 +10,14 @@ const { mockRequest } = require('@gardener-dashboard/request')
 const { cache: { resetTicketCache } } = require('../../dist/lib/cache')
 const { loadOpenIssues } = require('../../dist/lib/services/tickets')
 const { octokit } = require('../../dist/lib/github')
+const RealDate = Date
 
 describe('github', function () {
   let agent
   let cache
 
   const now = new Date('2006-01-02T15:04:05.000Z')
+  const fixed = now.getTime()
   const microDateStr = now.toISOString().replace(/Z$/, '000Z')
 
   beforeAll(() => {
@@ -57,11 +59,28 @@ describe('github', function () {
       beforeAll(() => {
         // Be careful when adding other tests in this block. E.g. express error handlers
         // won't be work when fake timers are enabled as the test in that case never complete.
-        jest.useFakeTimers()
-        jest.setSystemTime(now)
+        // use legacy timers to avoid ClockDate mutations
+        jest.useFakeTimers({ legacyFakeTimers: true })
+
+        // The following code is because
+        // jest.setSystemTime() is not available when using legacy fake timers.
+        // freeze "now" by replacing global Date constructor + Date.now
+        function MockDate (...args) {
+          if (args.length === 0) {
+            return new RealDate(fixed)
+          }
+          return new RealDate(...args)
+        }
+        MockDate.UTC = RealDate.UTC
+        MockDate.parse = RealDate.parse
+        MockDate.now = () => fixed
+        MockDate.prototype = RealDate.prototype
+
+        global.Date = MockDate
       })
 
       afterAll(() => {
+        global.Date = RealDate
         jest.useRealTimers()
       })
 
