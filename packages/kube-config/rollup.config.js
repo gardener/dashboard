@@ -16,6 +16,7 @@ export default [
     output: {
       file: `${process.cwd()}/dist/index.cjs`,
       format: 'cjs',
+      inlineDynamicImports: true,
     },
     external: getPeerDependencies(readFileSync),
     plugins: [
