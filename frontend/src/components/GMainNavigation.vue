@@ -395,7 +395,7 @@ const sortedAndFilteredProjectList = computed(() => {
     return toLower(item.metadata.name) === toLower(projectFilter.value) ? 0 : 1
   }
   const allProjectsMatch = item => {
-    return item?.spec.namespace === allProjectsItem.spec.namespace ? 0 : 1
+    return isAllProjectsItem(item) ? 0 : 1
   }
 
   const lowerTitleOrName = item => {
@@ -611,7 +611,7 @@ function isHighlightedProject (project) {
 }
 
 function isAllProjectsItem (project) {
-  return project === allProjectsItem
+  return project?.spec.namespace === allProjectsItem.spec.namespace
 }
 
 onMounted(() => {
