@@ -623,11 +623,11 @@ function confirmRemoveUser (name) {
   let message
   if (isCurrentUser(name)) {
     message = renderComponent(GRemoveProjectMember, {
-      projectName: projectNameAndTitle.value,
+      projectNameAndTitle: projectNameAndTitle.value,
     })
   } else {
     message = renderComponent(GRemoveProjectMember, {
-      projectName: projectNameAndTitle.value,
+      projectNameAndTitle: projectNameAndTitle.value,
       memberName: displayName(name),
     })
   }
@@ -660,7 +660,7 @@ async function onResetServiceAccount ({ username }) {
 function confirmRemoveForeignServiceAccount (serviceAccountName) {
   const { namespace, name } = parseServiceAccountUsername(serviceAccountName)
   const message = renderComponent(GRemoveProjectMember, {
-    projectName: projectNameAndTitle.value,
+    projectNameAndTitle: projectNameAndTitle.value,
     memberName: name,
     namespace,
   })
