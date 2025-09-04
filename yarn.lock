@@ -988,7 +988,7 @@ __metadata:
     helmet: "npm:^8.0.0"
     http-errors: "npm:^2.0.0"
     jest: "npm:^30.0.0"
-    jose: "npm:^5.2.3"
+    jose: "npm:^6.0.0"
     js-yaml: "npm:^4.1.0"
     jsonwebtoken: "npm:^9.0.2"
     lodash: "npm:^4.17.21"
@@ -8021,17 +8021,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jose@npm:^5.2.3":
-  version: 5.10.0
-  resolution: "jose@npm:5.10.0"
-  checksum: 10c0/e20d9fc58d7e402f2e5f04e824b8897d5579aae60e64cb88ebdea1395311c24537bf4892f7de413fab1acf11e922797fb1b42269bc8fc65089a3749265ccb7b0
-  languageName: node
-  linkType: hard
-
-"jose@npm:^6.0.12":
-  version: 6.0.12
-  resolution: "jose@npm:6.0.12"
-  checksum: 10c0/e5ca51b078b2443f6ca671e14d72e0ffd21b760dac0d77cabd7af649a127376ec90665c8b25f34dd88bb31094915ee662daf76e0b33a025d28dbc2bc17413dec
+"jose@npm:^6.0.0, jose@npm:^6.0.12":
+  version: 6.1.0
+  resolution: "jose@npm:6.1.0"
+  checksum: 10c0/f4518579e907317e144facd15c7627acd06097bbea17735097437217498aa419564c039dd4020f6af5f2d024a7cee6b7be4648ccbbdc238aedb80a47c061217d
   languageName: node
   linkType: hard
 

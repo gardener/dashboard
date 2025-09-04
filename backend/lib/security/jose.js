@@ -11,9 +11,18 @@ import {
 import { promisify } from 'util'
 import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
-import * as jose from 'jose'
 import { v1 as uuidv1 } from 'uuid'
 import base64url from 'base64url'
+
+// ESM only depenedency jose must be wrapped in a dynamic import so that common js tests work
+// TODO Remove when we switch to ESM tests
+let josePromise = null
+async function getJose () {
+  if (!josePromise) {
+    josePromise = import('jose')
+  }
+  return josePromise
+}
 
 const jwtSign = promisify(jwt.sign)
 const jwtVerify = promisify(jwt.verify)
@@ -75,12 +84,13 @@ export default function createJose (sessionSecrets) {
     decode (token) {
       return jwt.decode(token) || {}
     },
-    encrypt (text) {
+    async encrypt (text) {
       const encodedText = encoder.encode(text)
       const protectedHeader = {
         enc: 'A128CBC-HS256',
         alg: 'PBES2-HS256+A128KW',
       }
+      const jose = await getJose()
       return new jose.CompactEncrypt(encodedText)
         .setProtectedHeader(protectedHeader)
         .encrypt(symetricKey)
@@ -92,6 +102,7 @@ export default function createJose (sessionSecrets) {
       let firstError
       for (const symetricKey of symmetricKeys) {
         try {
+          const jose = await getJose()
           const { plaintext } = await jose.compactDecrypt(data, symetricKey, options)
           return decoder.decode(plaintext)
         } catch (err) {
