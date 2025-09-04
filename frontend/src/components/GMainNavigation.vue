@@ -398,11 +398,11 @@ const sortedAndFilteredProjectList = computed(() => {
     return item?.spec.namespace === allProjectsItem.spec.namespace ? 0 : 1
   }
 
-  const sortByTitleOrName = item => {
+  const lowerTitleOrName = item => {
     const title = getProjectTitle(item)
     return title ? toLower(title) : toLower(item.metadata.name)
   }
-  const sortedList = sortBy(filteredList, [allProjectsMatch, exactMatch, sortByTitleOrName])
+  const sortedList = sortBy(filteredList, [allProjectsMatch, exactMatch, lowerTitleOrName])
   return sortedList
 })
 
