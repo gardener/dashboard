@@ -9,7 +9,7 @@
 require('abort-controller/polyfill')
 const http = require('http')
 const { Test } = require('supertest')
-const pEvent = require('p-event')
+const { pEvent } = require('./__test_helpers__/p-event')
 const ioClient = require('socket.io-client')
 const { createTerminus } = require('@godaddy/terminus')
 const { matchers, ...fixtures } = require('./__fixtures__')
