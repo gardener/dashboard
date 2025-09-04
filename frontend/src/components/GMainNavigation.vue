@@ -70,7 +70,7 @@ SPDX-License-Identifier: Apache-2.0
                   </div>
                 </g-project-tooltip>
 
-                <div v-if="selectedProject">
+                <template v-if="selectedProject">
                   <g-stale-project-warning
                     :project="selectedProject"
                     size="small"
@@ -79,7 +79,7 @@ SPDX-License-Identifier: Apache-2.0
                     :project="selectedProject"
                     size="small"
                   />
-                </div>
+                </template>
               </div>
             </div>
             <template #append>
