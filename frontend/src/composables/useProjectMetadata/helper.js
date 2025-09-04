@@ -12,3 +12,7 @@ export function getProjectTitle (project) {
   const title = get(project, ['metadata', 'annotations', annotations.projectTitle])
   return title?.trim()
 }
+
+export function formatProjectNameAndTitle (name, title) {
+  return title ? `${name} — ${title}` : name
+}

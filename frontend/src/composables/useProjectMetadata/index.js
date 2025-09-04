@@ -6,7 +6,10 @@
 
 import { computed } from 'vue'
 
-import { getProjectTitle } from '@/composables/useProjectMetadata/helper.js'
+import {
+  formatProjectNameAndTitle,
+  getProjectTitle,
+} from '@/composables/useProjectMetadata/helper.js'
 
 import { annotations } from '@/utils/annotations.js'
 
@@ -42,12 +45,7 @@ export const useProjectMetadata = (projectItem, options = {}) => {
   })
 
   const projectNameAndTitle = computed(() => {
-    const name = projectName.value
-    const title = projectTitle.value
-    if (title) {
-      return `${name} — ${title}`
-    }
-    return name
+    return formatProjectNameAndTitle(projectName.value, projectTitle.value)
   })
 
   return {
