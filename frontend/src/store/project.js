@@ -22,8 +22,6 @@ import {
   getProjectTitle,
 } from '@/composables/useProjectMetadata/helper.js'
 
-import { annotations } from '@/utils/annotations.js'
-
 import { useAuthzStore } from './authz'
 import { useAppStore } from './app'
 
