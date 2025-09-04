@@ -3,7 +3,7 @@ name: Prepare Release
 runs:
   using: composite
   steps:
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@v5
       with:
         node-version: '22.18.0'
     - name: bump-version

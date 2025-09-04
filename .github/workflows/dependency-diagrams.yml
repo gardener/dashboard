@@ -30,7 +30,7 @@ jobs:
         uses: ts-graphviz/setup-graphviz@b1de5da23ed0a6d14e0aeee8ed52fdd87af2363c # v2.0.2
 
       - name: Setup Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: '22.18.0'
 
@@ -41,7 +41,7 @@ jobs:
         run: yarn generate-all-dependency-diagrams
 
       - name: Commit changes
-        uses: iarekylew00t/verified-bot-commit@7c65c374f3a553aff88ab7f06819971889822c20 # v1.5.3
+        uses: iarekylew00t/verified-bot-commit@5d97e6c42571dc0973c4fcb42b84ca2d1e70653c # v2.0.0
         with:
           message: 'Update dependency diagrams'
           files: |
