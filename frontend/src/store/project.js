@@ -144,10 +144,8 @@ export const useProjectStore = defineStore('project', () => {
   }
 
   function projectTitleByNamespace (metadata) {
-    const namespace = typeof metadata === 'string'
-      ? metadata
-      : metadata?.namespace
-    return get(projectMap.value, [namespace, 'metadata', 'annotations', annotations.projectTitle])
+    const project = projectByNamespace(metadata)
+    return getProjectTitle(project)
   }
 
   function projectByNamespace (metadata) {
