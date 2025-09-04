@@ -79,9 +79,22 @@ const props = defineProps({
   openDelay: { type: Number, default: 200 },
   openOnHover: { type: Boolean, default: true },
 })
-const { project, openDelay, openOnHover } = toRefs(props)
-const { projectName, projectTitle } = useProjectMetadata(project)
-const { projectDescription, projectOwner, projectCreatedBy, projectCreationTimestamp, projectPurpose } = useProvideProjectItem(project)
+const {
+  project,
+  openDelay,
+  openOnHover,
+} = toRefs(props)
+const {
+  projectName,
+  projectTitle,
+} = useProjectMetadata(project)
+const {
+  projectDescription,
+  projectOwner,
+  projectCreatedBy,
+  projectCreationTimestamp,
+  projectPurpose,
+} = useProvideProjectItem(project)
 </script>
 
 <style lang="scss" scoped>
