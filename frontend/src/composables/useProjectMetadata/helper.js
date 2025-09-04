@@ -9,5 +9,6 @@ import { annotations } from '@/utils/annotations.js'
 import get from 'lodash/get'
 
 export function getProjectTitle (project) {
-  return get(project, ['metadata', 'annotations', annotations.projectTitle])
+  const title = get(project, ['metadata', 'annotations', annotations.projectTitle])
+  return title?.trim()
 }

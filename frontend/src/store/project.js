@@ -108,8 +108,7 @@ export const useProjectStore = defineStore('project', () => {
   })
 
   const projectTitle = computed(() => {
-    const title = getProjectTitle(project.value)
-    return title ? title.trim() : title
+    return getProjectTitle(project.value)
   })
 
   const projectNameAndTitle = computed(() => {
