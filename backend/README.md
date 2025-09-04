@@ -8,9 +8,6 @@ Setup
 # install dependencies
 yarn
 
-# build project internal dependencies
-yarn workspace gardener-dashboard packages-build-all
-
 # run server at localhost:3030
 yarn start
 
