@@ -47,7 +47,7 @@ export const useProjectMetadata = (projectItem, options = {}) => {
     const name = projectName.value
     const title = projectTitle.value
     if (title) {
-      return `${name} – ${title}`
+      return `${name} — ${title}`
     }
     return name
   })

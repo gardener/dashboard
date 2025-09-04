@@ -115,7 +115,7 @@ export const useProjectStore = defineStore('project', () => {
   const projectNameAndTitle = computed(() => {
     const name = projectName.value
     const title = projectTitle.value
-    return title ? `${name} – ${title}` : name
+    return title ? `${name} — ${title}` : name
   })
 
   const projectNames = computed(() => {
