@@ -75,7 +75,7 @@ jobs:
     steps:
       - uses: actions/setup-node@v4
         with:
-          node-version: '22.18.0'
+          node-version: '22.19.0'
       - uses: gardener/cc-utils/.github/actions/trusted-checkout@master
       - name: run-verify
         shell: bash
@@ -105,7 +105,7 @@ jobs:
     steps:
       - uses: actions/setup-node@v4
         with:
-          node-version: '22.18.0'
+          node-version: '22.19.0'
       - uses: actions/checkout@v5
       - name: run-eslint
         run: |
