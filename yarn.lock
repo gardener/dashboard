@@ -1001,7 +1001,7 @@ __metadata:
     p-event: "npm:^6.0.0"
     p-limit: "npm:3.1.0"
     p-retry: "npm:4.6.2"
-    p-timeout: "npm:^4.1.0"
+    p-timeout: "npm:^6.0.0"
     path-to-regexp: "npm:^8.0.0"
     rollup: "npm:^4.41.1"
     rollup-plugin-copy: "npm:^3.5.0"
@@ -9289,14 +9289,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"p-timeout@npm:^4.1.0":
-  version: 4.1.0
-  resolution: "p-timeout@npm:4.1.0"
-  checksum: 10c0/25aaf13ae9ebfff4ab45591f6647f3bee1ecede073c367175fb0157c27efb170cfb51259a4d2e9118d2ca595453bc885f086ad0ca7476d1c26cee3d13a7c9f6d
-  languageName: node
-  linkType: hard
-
-"p-timeout@npm:^6.1.2":
+"p-timeout@npm:^6.0.0, p-timeout@npm:^6.1.2":
   version: 6.1.4
   resolution: "p-timeout@npm:6.1.4"
   checksum: 10c0/019edad1c649ab07552aa456e40ce7575c4b8ae863191477f02ac8d283ac8c66cedef0ca93422735130477a051dfe952ba717641673fd3599befdd13f63bcc33
