@@ -5,5 +5,5 @@
 //
 
 export const annotations = Object.freeze({
-  projectTitle: 'dashboard.gardener.cloud/project-title',
+  projectTitle: 'dashboard.gardener.cloud/project-title', // projectTitle is a project-specific annotation
 })
