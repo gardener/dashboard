@@ -64,5 +64,16 @@
         'github-actions',
       ],
     },
+    {
+      groupName: 'Node.js',
+      matchPackageNames: [
+        'node',
+      ],
+      matchManagers: [
+        'github-actions',
+        'npm',
+        'regex',
+      ],
+    },
   ],
 }
