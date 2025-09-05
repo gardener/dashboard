@@ -53,9 +53,10 @@ const colorScheme = toRef(localStorageStore, 'colorScheme')
 const { system } = useColorMode({
   storageRef: colorScheme,
   onChanged (value) {
-    theme.global.name.value = value === 'auto'
+    const themeValue = value === 'auto'
       ? system.value
       : value
+    theme.change(themeValue)
   },
 })
 
