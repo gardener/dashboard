@@ -51,12 +51,6 @@ cd dashboard
 yarn
 ```
 
-And build all project internal dependencies.
-```sh
-yarn workspace gardener-dashboard packages-build-all
-```
-
-
 ### 3. Configuration
 Place the Gardener Dashboard configuration under `${HOME}/.gardener/config.yaml` or alternatively set the path to the configuration file using the `GARDENER_CONFIG` environment variable.
 

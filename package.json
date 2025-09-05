@@ -23,7 +23,6 @@
     "generate-all-dependency-diagrams": "node scripts/diagramGenerator.mjs --target all",
     "generate-backend-dependency-diagrams": "node scripts/diagramGenerator.mjs --target backend",
     "generate-packages-dependency-diagrams": "node scripts/diagramGenerator.mjs --target packages",
-    "packages-build-all": "yarn workspaces foreach --all --topological --no-private --include 'packages/*' run build",
     "packages-test-all": "yarn workspaces foreach --all --parallel --no-private --include 'packages/*' run test",
     "packages-lint-all": "yarn workspaces foreach --all --parallel --no-private --include 'packages/*' run lint",
     "postinstall": "[ ! -f .husky/user-config ] || grep -q '^managed_hooks=true$' .husky/user-config && husky || echo '[husky] Skipping husky install due to user preference.'"
