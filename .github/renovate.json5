@@ -66,16 +66,25 @@
       excludePackageNames: [
         'node',
       ],
+      excludeDatasources: [
+        'node',
+        'node-version',
     },
     {
       groupName: 'Node.js',
+      groupSlug: 'node',
       matchPackageNames: [
         'node',
       ],
       matchManagers: [
         'github-actions',
         'npm',
+        'nvm',
         'regex',
+      ],
+      matchDatasources: [
+        'node',
+        'node-version',
       ],
     },
   ],
