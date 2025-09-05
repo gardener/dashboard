@@ -63,6 +63,9 @@
       matchManagers: [
         'github-actions',
       ],
+      excludePackageNames: [
+        'node',
+      ],
     },
     {
       groupName: 'Node.js',
