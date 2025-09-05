@@ -10,6 +10,10 @@ import {
   formatValue,
   isCustomField,
 } from '@/composables/useProjectShootCustomFields/helper'
+import {
+  formatProjectNameAndTitle,
+  getProjectTitle,
+} from '@/composables/useProjectMetadata/helper.js'
 
 import {
   isTruthyValue,
@@ -206,8 +210,11 @@ export function getRawVal (context, item, column) {
       return metadata.creationTimestamp
     case 'createdBy':
       return getCreatedBy(metadata)
-    case 'project':
-      return projectStore.projectNameByNamespace(metadata)
+    case 'project': {
+      const project = projectStore.projectByNamespace(metadata)
+      const title = getProjectTitle(project)
+      return formatProjectNameAndTitle(project.metadata.name, title)
+    }
     case 'k8sVersion':
       return get(spec, ['kubernetes', 'version'])
     case 'infrastructure':
