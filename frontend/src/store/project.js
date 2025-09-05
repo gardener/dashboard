@@ -141,11 +141,6 @@ export const useProjectStore = defineStore('project', () => {
     return get(projectNameMap.value, [namespace], replace(namespace, /^garden-/, ''))
   }
 
-  function projectTitleByNamespace (metadata) {
-    const project = projectByNamespace(metadata)
-    return getProjectTitle(project)
-  }
-
   function projectByNamespace (metadata) {
     const namespace = typeof metadata === 'string'
       ? metadata
@@ -222,7 +217,6 @@ export const useProjectStore = defineStore('project', () => {
     updateProject,
     deleteProject,
     projectNameByNamespace,
-    projectTitleByNamespace,
     projectByNamespace,
     handleEvent: socketEventHandler.listener,
     $reset,

@@ -45,16 +45,9 @@ export const useShootMetadata = (shootItem, options = {}) => {
     return namespace.value ?? projectStore.namespace
   })
 
+  // TODO(marc1404,petersutter): Should be moved out of this composable (https://github.com/gardener/dashboard/pull/2470#discussion_r2316494854)
   const shootProjectName = computed(() => {
     return projectStore.projectNameByNamespace(shootNamespace.value)
-  })
-
-  const shootProjectTitle = computed(() => {
-    return projectStore.projectTitleByNamespace(shootNamespace.value)
-  })
-
-  const shootProject = computed(() => {
-    return projectStore.projectByNamespace(shootNamespace.value)
   })
 
   const shootConfirmationDeletion = computed(() => {
@@ -90,8 +83,6 @@ export const useShootMetadata = (shootItem, options = {}) => {
     shootNamespace,
     shootName,
     shootProjectName,
-    shootProjectTitle,
-    shootProject,
     shootCreationTimestamp,
     shootDeletionTimestamp,
     shootGeneration,

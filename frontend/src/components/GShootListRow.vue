@@ -13,12 +13,12 @@ SPDX-License-Identifier: Apache-2.0
       class="position-relative project-cell"
     >
       <template v-if="cell.header.key === 'project'">
-        <g-project-tooltip :project="shootProject">
+        <g-project-tooltip :project="project">
           <g-text-router-link
             :to="{ name: 'ShootList', params: { namespace: shootNamespace } }"
             :text="shootProjectName"
           />
-          <span v-if="shootProjectTitle"> &mdash; {{ shootProjectTitle }}</span>
+          <span v-if="projectTitle"> &mdash; {{ projectTitle }}</span>
         </g-project-tooltip>
       </template>
       <template v-if="cell.header.key === 'name'">
@@ -269,6 +269,7 @@ import { useShootAction } from '@/composables/useShootAction'
 import { useProvideShootItem } from '@/composables/useShootItem'
 import { useProvideShootHelper } from '@/composables/useShootHelper'
 import { formatValue } from '@/composables/useProjectShootCustomFields/helper'
+import { useProjectMetadata } from '@/composables/useProjectMetadata/index.js'
 
 import { getIssueSince } from '@/utils'
 
@@ -314,8 +315,6 @@ const {
   shootCreatedBy,
   shootCreationTimestamp,
   shootProjectName,
-  shootProjectTitle,
-  shootProject,
   shootPurpose,
   shootProviderType,
   shootRegion,
@@ -332,6 +331,8 @@ const {
   cloudProfileStore,
   projectStore,
 })
+const project = computed(() => projectStore.projectByNamespace(shootNamespace.value))
+const { projectTitle } = useProjectMetadata(project)
 
 useProvideShootHelper(shootItem, {
   cloudProfileStore,
