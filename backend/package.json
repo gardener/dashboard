@@ -64,7 +64,7 @@
     "openid-client": "^6.1.7",
     "p-limit": "3.1.0",
     "p-retry": "4.6.2",
-    "p-timeout": "^4.1.0",
+    "p-timeout": "^6.0.0",
     "sanitize-html": "^2.12.1",
     "semver": "^7.6.0",
     "showdown": "^2.1.0",
