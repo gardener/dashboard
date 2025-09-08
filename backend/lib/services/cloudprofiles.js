@@ -6,10 +6,9 @@
 
 import httpErrors from 'http-errors'
 import * as authorization from './authorization.js'
-import _ from 'lodash-es'
 import cache from '../cache/index.js'
-const { NotFound, Forbidden } = httpErrors
-const { getCloudProfiles } = cache
+const { Forbidden } = httpErrors
+const { getCloudProfiles, getNamespacedCloudProfiles } = cache
 
 export async function list ({ user }) {
   const allowed = await authorization.canListCloudProfiles(user)
@@ -20,17 +19,11 @@ export async function list ({ user }) {
   return getCloudProfiles()
 }
 
-export async function read ({ user, name }) {
-  const allowed = await authorization.canGetCloudProfiles(user, name)
+export async function listForNamespace ({ user, namespace }) {
+  const allowed = await authorization.canListNamespacedCloudProfiles(user, namespace)
   if (!allowed) {
-    throw new Forbidden(`You are not allowed to get cloudprofile ${name}`)
+    throw new Forbidden(`You are not allowed to list namespaced cloudprofiles in namespace ${namespace}`)
   }
 
-  const cloudProfiles = getCloudProfiles()
-  const cloudProfileResource = _.find(cloudProfiles, ['metadata.name', name])
-  if (!cloudProfileResource) {
-    throw new NotFound(`Cloud profile with name ${name} not found`)
-  }
-
-  return cloudProfileResource
+  return getNamespacedCloudProfiles(namespace)
 }

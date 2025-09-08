@@ -113,6 +113,17 @@ export function canGetCloudProfiles (user, name) {
   })
 }
 
+export function canListNamespacedCloudProfiles (user, namespace) {
+  return hasAuthorization(user, {
+    resourceAttributes: {
+      verb: 'list',
+      group: 'core.gardener.cloud',
+      resource: 'namespacedcloudprofiles',
+      namespace,
+    },
+  })
+}
+
 export function canListResourceQuotas (user, namespace) {
   return hasAuthorization(user, {
     resourceAttributes: {

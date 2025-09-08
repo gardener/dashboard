@@ -122,6 +122,7 @@ jest.mock('./dist/lib/cache/index.cjs', () => {
   const { cache } = originalCache
   const keys = [
     'cloudprofiles',
+    'namespacedCloudProfiles',
     'seeds',
     'quotas',
     'projects',
