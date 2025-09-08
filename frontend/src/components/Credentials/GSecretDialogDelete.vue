@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-card-text>
         <v-container fluid>
           <span class="text-subtitle-1">
-            Are you sure to delete the <code>Secret</code> <span class="font-weight-bold">{{ binding.metadata.name }} (<code>{{ binding.kind }}</code>)</span>?<br>
+            Are you sure to delete the <code>Secret</code> <span class="font-weight-bold">{{ credentialEntity.metadata.name }} (<code>{{ credentialEntity.kind }}</code>)</span>?<br>
             <span class="text-error font-weight-bold">The operation can not be undone.</span>
           </span>
         </v-container>
@@ -43,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
               <pre>{{ referencedBinding.metadata.name }} ({{ (referencedBinding.kind) }})</pre>
             </li>
           </ul>
-          Deleting this {{ binding.kind }} will not delete the referenced secret.
+          Deleting this {{ credentialEntity.kind }} will not delete the referenced secret.
         </v-alert>
       </div>
       <v-divider />
@@ -69,7 +69,10 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapActions } from 'pinia'
-import { toRef } from 'vue'
+import {
+  toRef,
+  computed,
+} from 'vue'
 
 import { useCredentialStore } from '@/store/credential'
 
@@ -77,6 +80,11 @@ import GMessage from '@/components/GMessage'
 import GToolbar from '@/components/GToolbar.vue'
 
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
+import { useCredential } from '@/composables/credential/useCloudProviderCredential'
+import {
+  isSecretBinding,
+  isCredentialsBinding,
+} from '@/composables/credential/helper'
 
 import { errorDetailsFromError } from '@/utils/error'
 
@@ -91,7 +99,7 @@ export default {
       type: Boolean,
       required: true,
     },
-    binding: {
+    credentialEntity: {
       type: Object,
       required: true,
     },
@@ -100,10 +108,16 @@ export default {
     'update:modelValue',
   ],
   setup (props) {
-    const binding = toRef(props, 'binding')
+    const credential = toRef(props, 'credentialEntity')
+    let composable
+    if (isSecretBinding(credential.value) || isCredentialsBinding(credential.value)) {
+      composable = useCloudProviderBinding(credential)
+    } else {
+      composable = useCredential(credential)
+    }
     const {
-      bindingsWithSameCredential,
-    } = useCloudProviderBinding(binding)
+      bindingsWithSameCredential = computed(() => []),
+    } = composable
     return {
       bindingsWithSameCredential,
     }
@@ -138,10 +152,20 @@ export default {
     },
     async onDeleteSecret () {
       try {
-        const bindingKind = this.binding.kind
-        const bindingNamespace = this.binding.metadata.namespace
-        const bindingName = this.binding.metadata.name
-        await this.deleteCredential({ bindingKind, bindingNamespace, bindingName })
+        const { kind, metadata: { namespace, name } } = this.credentialEntity
+        if (kind === 'Secret' || kind === 'WorkloadIdentity') {
+          await this.deleteCredential({
+            credentialKind: kind,
+            credentialNamespace: namespace,
+            credentialName: name,
+          })
+        } else {
+          await this.deleteCredential({
+            bindingKind: kind,
+            bindingNamespace: namespace,
+            bindingName: name,
+          })
+        }
         this.hide()
       } catch (err) {
         const errorDetails = errorDetailsFromError(err)

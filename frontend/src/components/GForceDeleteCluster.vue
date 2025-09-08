@@ -54,7 +54,7 @@ SPDX-License-Identifier: Apache-2.0
         in the underlying <code>{{ shootProviderType }}</code> account
         <code>
           <g-credential-name
-            :binding="shootCloudProviderBinding"
+            :credential-entity="shootCloudProviderBinding"
             render-link
           />
         </code>

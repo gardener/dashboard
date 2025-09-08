@@ -44,33 +44,45 @@ import { useAuthzStore } from '@/store/authz'
 import GActionButton from '@/components/GActionButton.vue'
 
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
+import { useCredential } from '@/composables/credential/useCloudProviderCredential'
+import {
+  isSecretBinding,
+  isCredentialsBinding,
+} from '@/composables/credential/helper'
 
 const props = defineProps({
-  binding: {
+  credentialEntity: {
     type: Object,
     required: true,
   },
 })
-const binding = toRef(props, 'binding')
+const credential = toRef(props, 'credentialEntity')
 
 const emit = defineEmits(['update', 'delete'])
 
 const authzStore = useAuthzStore()
 const { canPatchCredentials, canDeleteCredentials } = storeToRefs(authzStore)
 
+let composable
+if (isSecretBinding(credential.value) || isCredentialsBinding(credential.value)) {
+  composable = useCloudProviderBinding(credential)
+} else {
+  composable = useCredential(credential)
+}
+
 const {
   hasOwnWorkloadIdentity,
   credentialUsageCount,
   isMarkedForDeletion,
   isSharedCredential,
-} = useCloudProviderBinding(binding)
+} = composable
 
 function onUpdate () {
-  emit('update', binding.value)
+  emit('update', credential.value)
 }
 
 function onDelete () {
-  emit('delete', binding.value)
+  emit('delete', credential.value)
 }
 
 </script>

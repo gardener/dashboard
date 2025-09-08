@@ -60,11 +60,10 @@ export const useCloudProviderBinding = (binding, options = {}) => {
   )
   const isSecret = computed(() =>
     isSecretBinding.value ||
-    binding.value?.credentialsRef?.kind === 'Secret',
+    (isCredentialsBinding.value && binding.value?.credentialsRef?.kind === 'Secret'),
   )
   const isWorkloadIdentity = computed(() =>
-    isCredentialsBinding.value &&
-    binding.value?.credentialsRef?.kind === 'WorkloadIdentity',
+    isCredentialsBinding.value && binding.value?.credentialsRef?.kind === 'WorkloadIdentity',
   )
   const isInfrastructureBinding = computed(() =>
     _isInfrastructureBinding(binding.value, sortedProviderTypeList.value),
@@ -77,9 +76,12 @@ export const useCloudProviderBinding = (binding, options = {}) => {
   )
 
   // Credential References
-  const credentialRef = computed(() =>
-    _credentialRef(binding.value),
-  )
+  const credentialRef = computed(() => {
+    if (isSecretBinding.value || isCredentialsBinding.value) {
+      return _credentialRef(binding.value)
+    }
+    return undefined
+  })
   const credentialNamespace = computed(() =>
     _credentialNameSpace(binding.value),
   )
@@ -116,7 +118,7 @@ export const useCloudProviderBinding = (binding, options = {}) => {
   const hasOwnWorkloadIdentity = computed(() =>
     isWorkloadIdentity.value && credential.value !== undefined,
   )
-  const isOrphanedCredential = computed(() =>
+  const isOrphanedBinding = computed(() =>
     !isSharedCredential.value &&
     !hasOwnSecret.value &&
     !hasOwnWorkloadIdentity.value,
@@ -159,9 +161,14 @@ export const useCloudProviderBinding = (binding, options = {}) => {
     filter(
       cloudProviderBindingList.value,
       other => {
+        if (other.metadata.uid === binding.value?.metadata.uid) {
+          return false
+        }
+        if (!_isSecretBinding(other) && !_isCredentialsBinding(other)) {
+          return false
+        }
         const otherRef = _credentialRef(other)
-        return other.metadata.uid !== binding.value?.metadata.uid &&
-        otherRef.namespace === credentialRef.value.namespace &&
+        return otherRef.namespace === credentialRef.value.namespace &&
         otherRef.name === credentialRef.value.name &&
         (otherRef.kind ?? 'Secret') === credentialKind.value
       },
@@ -207,7 +214,7 @@ export const useCloudProviderBinding = (binding, options = {}) => {
     // Usage/orphan checks
     hasOwnSecret,
     hasOwnWorkloadIdentity,
-    isOrphanedCredential,
+    isOrphanedBinding,
     credentialUsageCount,
     bindingsWithSameCredential,
 

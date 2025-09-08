@@ -17,26 +17,26 @@ SPDX-License-Identifier: Apache-2.0
           :namespace="item.credentialNamespace"
         />
         <g-orphaned-credential-icon
-          v-if="item.isOrphanedCredential"
-          :binding="item.binding"
+          v-if="item.isOrphanedBinding"
+          :credential-entity="item.binding"
         />
       </div>
     </td>
     <td v-if="selectedHeaders.kind">
-      <g-credential-icon :binding="item.binding" />
+      <g-credential-icon :credential-entity="item.binding" />
     </td>
     <td v-if="selectedHeaders.infrastructure">
       <g-vendor
         extended
-        :provider-type="item.binding.provider.type"
+        :provider-type="getProviderType(item.binding)"
       />
     </td>
     <td v-if="selectedHeaders.details">
       <g-credential-details-item-content
         class="py-1"
-        :credential="item.credential"
+        :credential-entity="item.credential"
         :shared="item.isSharedCredential"
-        :provider-type="item.binding.provider.type"
+        :provider-type="getProviderType(item.binding)"
       />
     </td>
     <td v-if="selectedHeaders.credentialUsageCount">
@@ -47,7 +47,7 @@ SPDX-License-Identifier: Apache-2.0
       class="text-action-button"
     >
       <g-credential-row-actions
-        :binding="item.binding"
+        :credential-entity="item.binding"
         @update="onUpdate"
         @delete="onDelete"
       />
@@ -68,6 +68,8 @@ import GCredentialIcon from '@/components/Credentials/GCredentialIcon'
 import GCredentialUsedByLabel from '@/components/Credentials/GCredentialUsedByLabel'
 import GSharedCredentialIcon from '@/components/Credentials/GSharedCredentialIcon.vue'
 import GOrphanedCredentialIcon from '@/components/Credentials/GOrphanedCredentialIcon.vue'
+
+import { getProviderType } from '@/composables/credential/helper'
 
 import { mapTableHeader } from '@/utils'
 

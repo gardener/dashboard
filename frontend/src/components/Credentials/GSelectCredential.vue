@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
       item-color="primary"
       :label="label"
       :disabled="disabled"
-      :items="allowedBindings"
+      :items="allowedCredentials"
       item-value="metadata.uid"
       item-title="metadata.name"
       return-object
@@ -28,11 +28,11 @@ SPDX-License-Identifier: Apache-2.0
           v-bind="props"
           :title="undefined"
         >
-          <g-credential-name :binding="item.raw" />
+          <g-credential-name :credential-entity="item.raw" />
         </v-list-item>
       </template>
       <template #selection="{ item }">
-        <g-credential-name :binding="item.raw" />
+        <g-credential-name :credential-entity="item.raw" />
       </template>
       <template #append-item>
         <v-divider class="mb-2" />
@@ -70,6 +70,11 @@ import GCredentialName from '@/components/Credentials/GCredentialName'
 import { useProjectCostObject } from '@/composables/useProjectCostObject'
 import { useCloudProviderBindingList } from '@/composables/credential/useCloudProviderBindingList'
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
+import { useCredential } from '@/composables/credential/useCloudProviderCredential'
+import {
+  isSecretBinding,
+  isCredentialsBinding,
+} from '@/composables/credential/helper'
 
 import {
   withParams,
@@ -132,11 +137,17 @@ export default {
     const providerType = toRef(props, 'providerType')
     const cloudProviderBindingList = useCloudProviderBindingList(providerType, { credentialStore, gardenerExtensionStore })
 
-    const binding = toRef(props, 'modelValue')
+    const credential = toRef(props, 'modelValue')
+    let composable
+    if (isSecretBinding(credential.value) || isCredentialsBinding(credential.value)) {
+      composable = useCloudProviderBinding(credential)
+    } else {
+      composable = useCredential(credential)
+    }
     const {
       isSharedCredential,
       selfTerminationDays,
-    } = useCloudProviderBinding(binding)
+    } = composable
 
     return {
       costObjectsSettingEnabled,
@@ -183,10 +194,10 @@ export default {
         this.$emit('update:modelValue', value)
       },
     },
-    allowedBindings () {
+    allowedCredentials () {
       return this.cloudProviderBindingList
-        ?.filter(binding => {
-          const name = binding.secretRef?.name || binding.cedentialsRef?.name
+        ?.filter(credential => {
+          const name = credential.secretRef?.name || credential.cedentialsRef?.name
           return !this.notAllowedSecretNames.includes(name)
         })
     },
@@ -203,11 +214,11 @@ export default {
   methods: {
     openSecretDialog () {
       this.visibleSecretDialog = this.providerType
-      this.secretItemsBeforeAdd = cloneDeep(this.allowedBindings)
+      this.secretItemsBeforeAdd = cloneDeep(this.allowedCredentials)
     },
     onSecretDialogClosed () {
       this.visibleSecretDialog = undefined
-      const value = head(differenceWith(this.allowedBindings, this.secretItemsBeforeAdd, isEqual))
+      const value = head(differenceWith(this.allowedCredentials, this.secretItemsBeforeAdd, isEqual))
       if (value) {
         this.internalValue = value
       }

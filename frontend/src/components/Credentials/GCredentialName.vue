@@ -5,8 +5,8 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <span v-if="binding">
-    <g-credential-icon :binding="binding" />
+  <span v-if="credentialEntity">
+    <g-credential-icon :credential-entity="credentialEntity" />
     <v-tooltip
       class="credentials-details-tooltip"
       :open-delay="500"
@@ -16,20 +16,20 @@ SPDX-License-Identifier: Apache-2.0
         <g-text-router-link
           v-if="canLinkToCredential && renderLink"
           v-bind="tProps"
-          :to="{ name: 'Credentials', params: { namespace: binding.metadata.namespace }, hash: credentialHash }"
-          :text="binding.metadata.name"
+          :to="{ name: 'Credentials', params: { namespace: credentialEntity.metadata.namespace }, hash: credentialHash }"
+          :text="credentialEntity.metadata.name"
         />
         <span
           v-else
           v-bind="tProps"
-        >{{ binding.metadata.name }}</span>
+        >{{ credentialEntity.metadata.name }}</span>
       </template>
       <v-card>
         <g-credential-details-item-content
           class="ma-1"
-          :credential="credential"
+          :credential-entity="credential"
           :shared="isSharedCredential"
-          :provider-type="binding.provider.type"
+          :provider-type="providerType"
         />
       </v-card>
     </v-tooltip>
@@ -38,8 +38,8 @@ SPDX-License-Identifier: Apache-2.0
       :namespace="credentialNamespace"
     />
     <g-orphaned-credential-icon
-      v-if="isOrphanedCredential"
-      :binding="binding"
+      v-if="isOrphanedBinding"
+      :credential-entity="credentialEntity"
     />
   </span>
   <span v-else>
@@ -63,30 +63,45 @@ import GOrphanedCredentialIcon from '@/components/Credentials/GOrphanedCredentia
 import GSharedCredentialIcon from '@/components/Credentials/GSharedCredentialIcon.vue'
 
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
+import { useCredential } from '@/composables/credential/useCloudProviderCredential'
+import {
+  isSecretBinding,
+  isCredentialsBinding,
+  getProviderType,
+} from '@/composables/credential/helper'
 
 const props = defineProps({
-  binding: Object,
+  credentialEntity: Object,
   renderLink: Boolean,
 })
 
-const binding = toRef(props, 'binding')
+const credentialEntity = toRef(props, 'credentialEntity')
 
 const authzStore = useAuthzStore()
 const { canGetCloudProviderCredentials } = storeToRefs(authzStore)
 
-const canLinkToCredential = computed(() => canGetCloudProviderCredentials.value && binding.value)
+const canLinkToCredential = computed(() => canGetCloudProviderCredentials.value && credentialEntity.value)
 
 const credentialHash = computed(() => {
-  const uid = binding.value?.metadata?.uid
+  const uid = credentialEntity.value?.metadata?.uid
   return uid ? `#credential-uid=${encodeURIComponent(uid)}` : ''
 })
+
+let composable
+if (isSecretBinding(credentialEntity.value) || isCredentialsBinding(credentialEntity.value)) {
+  composable = useCloudProviderBinding(credentialEntity)
+} else {
+  composable = useCredential(credentialEntity)
+}
 
 const {
   isSharedCredential,
   credentialNamespace,
-  isOrphanedCredential,
+  isOrphanedBinding,
   credential,
-} = useCloudProviderBinding(binding)
+} = composable
+
+const providerType = computed(() => getProviderType(credential.value))
 
 </script>
 

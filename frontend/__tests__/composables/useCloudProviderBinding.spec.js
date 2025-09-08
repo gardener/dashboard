@@ -77,7 +77,7 @@ describe('useCloudProviderBinding composable', () => {
   function findBindingRef (name) {
     return ref(
       find(
-        [...global.fixtures.credentials.secretBindings, ...global.fixtures.credentials.credentialsBindings],
+        credentialStore.cloudProviderBindingList,
         b => b.metadata.name === name,
       ),
     )
@@ -103,7 +103,7 @@ describe('useCloudProviderBinding composable', () => {
     const sharedBindingRef = findBindingRef('aws-trial-secretbinding')
     const bindingComposable = useCloudProviderBinding(sharedBindingRef)
     expect(bindingComposable.isSharedCredential.value).toBe(true)
-    expect(bindingComposable.isOrphanedCredential.value).toBe(false)
+    expect(bindingComposable.isOrphanedBinding.value).toBe(false)
   })
 
   it('resolves secretbinding credentialRef/name/namespace', () => {
@@ -149,13 +149,6 @@ describe('useCloudProviderBinding composable', () => {
     const bindingComposable = useCloudProviderBinding(credentialsBindingRef)
     expect(bindingComposable.isInfrastructureBinding.value).toBe(true)
     expect(bindingComposable.credentialUsageCount.value).toBe(1)
-  })
-
-  it('counts shoots referencing dns credentialsbinding', () => {
-    const credentialsBindingRef = findBindingRef('aws-route53-credentialsbinding')
-    const bindingComposable = useCloudProviderBinding(credentialsBindingRef)
-    expect(bindingComposable.isDnsBinding.value).toBe(true)
-    expect(bindingComposable.credentialUsageCount.value).toBe(2)
   })
 
   it('finds other bindings with same secret', () => {

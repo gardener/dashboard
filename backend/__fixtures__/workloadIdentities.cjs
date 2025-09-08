@@ -58,6 +58,17 @@ const mocks = {
       return Promise.resolve(item)
     }
   },
+  delete () {
+    return headers => {
+      const matchResult = matchItem(headers[':path'])
+      if (matchResult === false) {
+        return Promise.reject(createError(503))
+      }
+      const { params: { namespace, name } = {} } = matchResult
+      const item = find(workloadIdentitiesList, { 'metadata.namespace': namespace, 'metadata.name': name })
+      return Promise.resolve(item)
+    }
+  },
 }
 
 module.exports = {

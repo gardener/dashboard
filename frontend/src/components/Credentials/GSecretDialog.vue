@@ -46,7 +46,7 @@ SPDX-License-Identifier: Apache-2.0
               </template>
               <template v-else>
                 <div class="text-h6 pb-4">
-                  {{ name }} ({{ binding.kind }})
+                  {{ credentialName }} ({{ credentialEntity.kind }})
                 </div>
               </template>
             </div>
@@ -72,7 +72,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-card-text>
       <div>
         <v-alert
-          v-if="!isCreateMode && isOrphanedCredential"
+          v-if="!isCreateMode && isOrphanedBinding"
           :value="true"
           type="info"
           color="primary"
@@ -90,7 +90,7 @@ SPDX-License-Identifier: Apache-2.0
           <div>Clusters will only start using the new <code>Secret</code> after they are reconciled. Therefore, wait until all clusters using the <code>Secret</code> are reconciled before you disable the old <code>Secret</code> in your infrastructure account. Otherwise the clusters will no longer function.</div>
         </v-alert>
         <v-alert
-          :model-value="!isCreateMode && bindingsWithSameCredential.length > 0"
+          :model-value="!isCreateMode && bindingsWithSameCredential?.length > 0"
           type="info"
           rounded="0"
           class="mb-2 list-style"
@@ -104,7 +104,7 @@ SPDX-License-Identifier: Apache-2.0
               <pre>{{ referencedBinding.metadata.name }} ({{ (referencedBinding.kind) }})</pre>
             </li>
           </ul>
-          Updating <code>Secret</code> data for this <code>{{ binding.kind }}</code> will also affect the other <code>Bindings</code> that reference this <code>Secret</code>.
+          Updating <code>Secret</code> data for this <code>{{ credentialEntity.kind }}</code> will also affect the other <code>Bindings</code> that reference this <code>Secret</code>.
         </v-alert>
       </div>
       <v-divider />
@@ -132,13 +132,18 @@ SPDX-License-Identifier: Apache-2.0
 import {
   mapActions,
   mapState,
+  storeToRefs,
 } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 import {
   required,
   maxLength,
 } from '@vuelidate/validators'
-import { toRef } from 'vue'
+import {
+  toRef,
+  ref,
+  computed,
+} from 'vue'
 
 import { useCredentialStore } from '@/store/credential'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
@@ -152,6 +157,12 @@ import { useSecretContext } from '@/composables/credential/useSecretContext'
 import { useSecretBindingContext } from '@/composables/credential/useSecretBindingContext'
 import { useCredentialsBindingContext } from '@/composables/credential/useCredentialsBindingContext'
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
+import { useCredential } from '@/composables/credential/useCloudProviderCredential'
+import {
+  isSecretBinding,
+  isCredentialsBinding,
+  isDnsBinding,
+} from '@/composables/credential/helper'
 
 import {
   messageFromErrors,
@@ -169,6 +180,8 @@ import {
   setDelayedInputFocus,
   setInputFocus,
 } from '@/utils'
+
+import cloneDeep from 'lodash/cloneDeep'
 
 export default {
   components: {
@@ -200,7 +213,7 @@ export default {
       type: String,
       required: true,
     },
-    binding: {
+    credentialEntity: {
       type: Object,
     },
   },
@@ -208,36 +221,66 @@ export default {
     'update:modelValue',
   ],
   setup (props) {
-    const binding = toRef(props, 'binding')
-    const {
-      isOrphanedCredential,
-      credentialUsageCount,
-      credentialName,
-      isSecretBinding,
-      isCredentialsBinding,
-      isDnsBinding,
-      bindingsWithSameCredential,
-      credential,
-    } = useCloudProviderBinding(binding)
+    const credentialEntity = toRef(props, 'credentialEntity')
+    const providerType = toRef(props, 'providerType')
+    const gardenerExtensionStore = useGardenerExtensionStore()
+    const { dnsProviderTypes } = storeToRefs(gardenerExtensionStore)
 
-    let bindingContext
-    if (!props.binding) {
-      // New binding always created as type 'CredentialsBinding'
-      bindingContext = useCredentialsBindingContext()
-    } else if (isSecretBinding) {
-      bindingContext = useSecretBindingContext()
-    } else if (isCredentialsBinding) {
-      bindingContext = useCredentialsBindingContext()
+    const isBinding = computed(() =>
+      isSecretBinding(credentialEntity.value) || isCredentialsBinding(credentialEntity.value),
+    )
+
+    let credentialComposable = {}
+
+    if (credentialEntity.value) {
+      if (isBinding.value) {
+        credentialComposable = useCloudProviderBinding(credentialEntity)
+      } else {
+        credentialComposable = useCredential(credentialEntity)
+      }
     }
 
     const {
-      createBindingManifest,
-      setBindingManifest,
-      bindingManifest,
-      bindingName,
-      bindingProviderType,
-      bindingRef,
-    } = bindingContext
+      isOrphanedBinding,
+      credentialUsageCount,
+      credentialName,
+      bindingsWithSameCredential,
+      credential,
+    } = credentialComposable
+
+    const isDnsBindingRef = computed(() =>
+      isBinding.value && isDnsBinding(credentialEntity.value, dnsProviderTypes.value),
+    )
+    const isDnsProvider = computed(() => dnsProviderTypes.value.includes(providerType.value))
+    const isDnsCredential = computed(() => isDnsBindingRef.value || isDnsProvider.value)
+
+    let bindingContext
+    if (!props.credentialEntity && !isDnsProvider.value) {
+      bindingContext = useCredentialsBindingContext()
+    } else if (isSecretBinding(credentialEntity.value)) {
+      bindingContext = useSecretBindingContext()
+    } else if (isCredentialsBinding(credentialEntity.value)) {
+      bindingContext = useCredentialsBindingContext()
+    }
+
+    let createBindingManifest, setBindingManifest, bindingManifest, bindingName, bindingProviderType, bindingRef
+    if (bindingContext) {
+      ({
+        createBindingManifest,
+        setBindingManifest,
+        bindingManifest,
+        bindingName,
+        bindingProviderType,
+        bindingRef,
+      } = bindingContext)
+    } else {
+      createBindingManifest = () => {}
+      setBindingManifest = () => {}
+      bindingManifest = ref({})
+      bindingName = ref('')
+      bindingProviderType = ref('')
+      bindingRef = ref({})
+    }
 
     const {
       createSecretManifest,
@@ -257,12 +300,12 @@ export default {
       setSecretManifest,
       secretManifest,
       secretName,
-      isOrphanedCredential,
+      credential,
+      isOrphanedBinding,
       credentialUsageCount,
       credentialName,
-      isDnsBinding,
+      isDnsCredential,
       bindingsWithSameCredential,
-      credential,
       v$: useVuelidate(),
     }
   },
@@ -284,7 +327,7 @@ export default {
       maxLength: maxLength(128),
       lowerCaseAlphaNumHyphen,
       noStartEndHyphen,
-      unique: unique(this.isDnsBinding ? 'dnsSecretNames' : 'infrastructureSecretNames'),
+      unique: unique('credentialNames'),
     }
     rules.name = withFieldName('Secret Name', nameRules)
 
@@ -295,7 +338,7 @@ export default {
     ...mapState(useShootStore, ['shootList']),
     ...mapState(useCredentialStore, [
       'infrastructureBindingList',
-      'dnsBindingList',
+      'dnsCredentialList',
     ]),
     visible: {
       get () {
@@ -305,14 +348,14 @@ export default {
         this.$emit('update:modelValue', modelValue)
       },
     },
-    infrastructureSecretNames () {
-      return this.infrastructureBindingList.map(item => item.metadata.name)
-    },
-    dnsSecretNames () {
-      return this.dnsBindingList.map(item => item.metadata.name)
+    credentialNames () {
+      return [
+        ...this.infrastructureBindingList.map(item => item.metadata.name),
+        ...this.dnsCredentialList.map(item => item.metadata.name),
+      ]
     },
     isCreateMode () {
-      return !this.binding
+      return !this.credentialEntity
     },
     submitButtonText () {
       return this.isCreateMode ? 'Add Secret' : 'Update Secret'
@@ -369,25 +412,39 @@ export default {
         this.hide()
       } catch (err) {
         const errorDetails = errorDetailsFromError(err)
+        const secretType = this.isDnsCredential ? 'DNS Credential' : 'Infrastructure Secret'
         if (this.isCreateMode) {
           if (isConflict(err)) {
-            this.errorMessage = `Infrastructure Secret name '${this.name}' is already taken. Please try a different name.`
+            this.errorMessage = `${secretType} name '${this.name}' is already taken. Please try a different name.`
             setInputFocus(this, 'name')
           } else {
-            this.errorMessage = 'Failed to create Infrastructure Secret.'
+            this.errorMessage = `Failed to create ${secretType}.`
           }
         } else {
-          this.errorMessage = 'Failed to update Infrastructure Secret.'
+          this.errorMessage = `Failed to update ${secretType}.`
         }
         this.detailedErrorMessage = errorDetails.detailedMessage
         this.logger.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
     save () {
+      const secret = cloneDeep(this.secretManifest)
+      if (this.isDnsCredential) {
+        const labelKey = `provider.shoot.gardener.cloud/${this.providerType}`
+        secret.metadata.labels = {
+          ...(secret.metadata.labels || {}),
+          [labelKey]: 'true',
+        }
+      }
+
       if (this.isCreateMode) {
-        return this.createCredential({ secret: this.secretManifest, binding: this.bindingManifest })
+        return this.isDnsCredential
+          ? this.createCredential({ secret })
+          : this.createCredential({ secret, binding: this.bindingManifest })
       } else {
-        return this.updateCredential({ secret: this.secretManifest, binding: this.bindingManifest })
+        return this.isDnsCredential
+          ? this.updateCredential({ secret })
+          : this.updateCredential({ secret, binding: this.bindingManifest })
       }
     },
     reset () {

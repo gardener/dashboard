@@ -37,17 +37,17 @@ import {
 } from '@/composables/credential/helper'
 
 const props = defineProps({
-  binding: Object,
+  credentialEntity: Object,
 })
 
-const binding = toRef(props, 'binding')
+const credential = toRef(props, 'credentialEntity')
 
 const credentialName = computed(() =>
-  _credentialName(binding.value),
+  _credentialName(credential.value),
 )
 
 const credentialKind = computed(() =>
-  _credentialKind(binding.value),
+  _credentialKind(credential.value),
 )
 
 </script>

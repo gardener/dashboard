@@ -46,7 +46,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-list-item v-if="secret">
         <g-credential-details-item-content
           class="pb-2"
-          :credential="secret"
+          :credential-entity="secret"
           :provider-type="type"
           details-title
         />
@@ -118,9 +118,9 @@ export default {
         title: 'Credential',
         value: this.secretName,
         to: {
-          name: 'Secret',
+          name: 'Credentials',
           params: {
-            name: this.secretName,
+            hash: this.secretName,
             namespace: this.shootNamespace,
           },
         },

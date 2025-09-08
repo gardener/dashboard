@@ -14,6 +14,7 @@ function createProviderCredentials (type, options = {}) {
     typeSecret = !typeWorkloadIdentity,
     createSecretBinding = typeSecret,
     createCredentialsBinding = true,
+    labels = {},
   } = options
   const secretBindingName = `${name}-secretbinding`
   const credentialsBindingName = `${name}-credentialsbinding`
@@ -98,6 +99,7 @@ function createProviderCredentials (type, options = {}) {
         namespace: secretNamepace,
         name: secretName,
         uid: `secret-${name}-uid`,
+        labels,
       },
       data: {
         secret: 'cw==',
@@ -150,8 +152,8 @@ const credentials = [
   createProviderCredentials('openstack'),
   createProviderCredentials('gcp'),
   createProviderCredentials('ironcore'),
-  createProviderCredentials('aws-route53'),
-  createProviderCredentials('azure-dns'),
+  createProviderCredentials('aws-route53', { createSecretBinding: false, createCredentialsBinding: false, labels: { 'provider.shoot.gardener.cloud/aws-route53': 'true' } }),
+  createProviderCredentials('azure-dns', { createSecretBinding: false, createCredentialsBinding: false, labels: { 'provider.shoot.gardener.cloud/azure-dns': 'true' } }),
 ]
 
 const secretBindings = credentials.map(item => item.secretBinding).filter(Boolean)

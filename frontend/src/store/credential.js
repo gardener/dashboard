@@ -18,7 +18,9 @@ import { useApi } from '@/composables/useApi'
 import {
   isDnsBinding,
   isInfrastructureBinding,
-  isSharedCredential,
+  isSecret as _isSecret,
+  isWorkloadIdentity as _isWorkloadIdentity,
+  getProviderType,
 } from '@/composables/credential/helper'
 
 import { useAuthzStore } from './authz'
@@ -105,10 +107,27 @@ export const useCredentialStore = defineStore('credential', () => {
   }
 
   const cloudProviderBindingList = computed(() => {
-    const secretBindings = Object.values(state.secretBindings)
-    const credentialsBindings = Object.values(state.credentialsBindings)
+    const secretBindings = Object.values(state.secretBindings).filter(binding => !isDnsBinding(binding, dnsProviderTypes.value))
+    const credentialsBindings = Object.values(state.credentialsBindings).filter(binding => !isDnsBinding(binding, dnsProviderTypes.value))
+    const dnsCredentials = [
+      ...Object.values(state.secrets),
+      ...Object.values(state.workloadIdentities),
+    ].reduce((arr, item) => {
+      const providerType = getProviderType(item)
+      if (!providerType || !dnsProviderTypes.value.includes(providerType)) {
+        return arr
+      }
+      const credential = { ...item, provider: { type: providerType } }
+      if (_isSecret(item)) {
+        credential.secretRef = { name: item.metadata.name, namespace: item.metadata.namespace }
+      } else if (_isWorkloadIdentity(item)) {
+        credential.credentialsRef = { kind: 'WorkloadIdentity', name: item.metadata.name, namespace: item.metadata.namespace }
+      }
+      arr.push(credential)
+      return arr
+    }, [])
 
-    return [...secretBindings, ...credentialsBindings]
+    return [...secretBindings, ...credentialsBindings, ...dnsCredentials]
   })
 
   const quotaList = computed(() => {
@@ -118,16 +137,26 @@ export const useCredentialStore = defineStore('credential', () => {
   async function createCredential (params) {
     const { data: { binding, secret } } = await api.createCloudProviderCredential({ binding: params.binding, secret: params.secret })
     _updateCloudProviderCredential({ binding, secret })
-    appStore.setSuccess(`Cloud Provider credential ${binding.metadata.name} created`)
+    const name = binding?.metadata?.name || secret.metadata.name
+    appStore.setSuccess(`Cloud Provider credential ${name} created`)
   }
 
   async function updateCredential (params) {
     const { data: { secret } } = await api.updateCloudProviderCredential({ secret: params.secret })
     _updateCloudProviderCredential({ secret })
-    appStore.setSuccess(`Cloud Provider credential ${params.binding.metadata.name} updated`)
+    const name = params.binding?.metadata?.name || secret.metadata.name
+    appStore.setSuccess(`Cloud Provider credential ${name} updated`)
   }
 
-  async function deleteCredential ({ bindingKind, bindingNamespace, bindingName }) {
+  async function deleteCredential (params) {
+    if (params.credentialKind) {
+      const { credentialKind, credentialNamespace, credentialName } = params
+      await api.deleteCloudProviderCredential({ credentialKind, credentialNamespace, credentialName })
+      await fetchCredentials()
+      appStore.setSuccess(`Cloud Provider credential ${credentialName} deleted`)
+      return
+    }
+    const { bindingKind, bindingNamespace, bindingName } = params
     await api.deleteCloudProviderCredential({ bindingKind, bindingNamespace, bindingName })
     await fetchCredentials()
     appStore.setSuccess(`Cloud Provider credential ${bindingName} deleted`)
@@ -139,11 +168,31 @@ export const useCredentialStore = defineStore('credential', () => {
     })
   })
 
-  const dnsBindingList = computed(() => {
-    return filter(cloudProviderBindingList.value, binding => {
-      return isDnsBinding(binding, dnsProviderTypes.value) &&
-        !isSharedCredential(binding)
-    })
+  const dnsCredentialList = computed(() => {
+    return [
+      ...Object.values(state.secrets),
+      ...Object.values(state.workloadIdentities),
+    ].reduce((arr, credential) => {
+      const providerType = getProviderType(credential)
+      if (!providerType || !dnsProviderTypes.value.includes(providerType)) {
+        return arr
+      }
+      const item = { ...credential, provider: { type: providerType } }
+      if (_isSecret(credential)) {
+        item.secretRef = {
+          name: credential.metadata.name,
+          namespace: credential.metadata.namespace,
+        }
+      } else if (_isWorkloadIdentity(credential)) {
+        item.credentialsRef = {
+          kind: 'WorkloadIdentity',
+          name: credential.metadata.name,
+          namespace: credential.metadata.namespace,
+        }
+      }
+      arr.push(item)
+      return arr
+    }, [])
   })
 
   const secretBindingList = computed(() =>
@@ -194,7 +243,7 @@ export const useCredentialStore = defineStore('credential', () => {
     createCredential,
     deleteCredential,
     infrastructureBindingList,
-    dnsBindingList,
+    dnsCredentialList,
     secretBindingList,
     credentialsBindingList,
     getSecret,

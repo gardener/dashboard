@@ -15,6 +15,31 @@ export function isCredentialsBinding (binding) {
   return binding?.kind === 'CredentialsBinding'
 }
 
+export function isSecret (credential) {
+  return credential?.kind === 'Secret'
+}
+
+export function isWorkloadIdentity (credential) {
+  return credential?.kind === 'WorkloadIdentity'
+}
+
+export function getProviderType (credential) {
+  if (credential?.provider?.type) {
+    return credential.provider.type
+  }
+  const labels = credential?.metadata?.labels || {}
+  for (const [key, value] of Object.entries(labels)) {
+    if (value !== 'true') {
+      continue
+    }
+    const match = key.match(/^provider\.shoot\.gardener\.cloud\/(.+)$/)
+    if (match) {
+      return match[1]
+    }
+  }
+  return undefined
+}
+
 export function credentialRef (binding) {
   if (isSecretBinding(binding)) {
     return binding?.secretRef
@@ -26,17 +51,20 @@ export function credentialRef (binding) {
 }
 
 export function credentialName (binding) {
-  return credentialRef(binding)?.name
+  return credentialRef(binding)?.name || binding?.metadata?.name
 }
 
 export function credentialNamespace (binding) {
-  return credentialRef(binding)?.namespace
+  return credentialRef(binding)?.namespace || binding?.metadata?.namespace
 }
 
 export function isSharedCredential (binding) {
-  const bindingNamespace = binding?.metadata.namespace
-
-  return credentialNamespace(binding) !== bindingNamespace
+  const bindingNamespace = binding?.metadata?.namespace
+  const namespace = credentialNamespace(binding)
+  if (!bindingNamespace || !namespace) {
+    return false
+  }
+  return namespace !== bindingNamespace
 }
 
 export function credentialKind (binding) {
@@ -45,6 +73,12 @@ export function credentialKind (binding) {
   }
   if (isCredentialsBinding(binding)) {
     return binding?.credentialsRef?.kind
+  }
+  if (isSecret(binding)) {
+    return 'Secret'
+  }
+  if (isWorkloadIdentity(binding)) {
+    return 'WorkloadIdentity'
   }
   return undefined
 }
