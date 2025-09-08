@@ -7,7 +7,9 @@ exports[`useCloudProviderBinding composable > fetches actual secret from store 1
   },
   "kind": "Secret",
   "metadata": {
-    "labels": {},
+    "labels": {
+      "provider.shoot.gardener.cloud/aws": "true",
+    },
     "name": "aws-secret",
     "namespace": "garden-test",
     "uid": "secret-aws-uid",

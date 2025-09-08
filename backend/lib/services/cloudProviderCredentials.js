@@ -145,6 +145,7 @@ export async function remove ({ user, params }) {
     return
   }
 
+  // Deletion via binding
   let binding, secretRefNamespace, secretRefName
   if (bindingKind === 'SecretBinding') {
     binding = await client['core.gardener.cloud'].secretbindings.get(bindingNamespace, bindingName)
