@@ -64,10 +64,13 @@ describe('api', function () {
         .expect(200)
 
       expect(mockRequest).toHaveBeenCalledTimes(4)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
       expect(res.body.secrets).toHaveLength(1)
       expect(res.body.secrets[0].metadata.name).toBe('dns-secret')
       expect(Array.isArray(res.body.workloadIdentities)).toBe(true)
       expect(res.body.secretBindings).toHaveLength(4)
+      expect(res.body).toMatchSnapshot()
     })
 
     it('should return no cloudProvider credentials', async function () {
@@ -146,8 +149,11 @@ describe('api', function () {
         .expect(200)
 
       expect(mockRequest).toHaveBeenCalledTimes(2)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
       expect(res.body.binding.metadata.name).toBe(`new-${infraName}-credentialsbinding`)
       expect(res.body.secret.metadata.name).toBe(`new-${infraName}-secret`)
+      expect(res.body).toMatchSnapshot()
     })
 
     it('should create a cloudProvider dns secret (no binding)', async function () {
@@ -181,7 +187,10 @@ describe('api', function () {
         .expect(200)
 
       expect(mockRequest).toHaveBeenCalledTimes(1)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
       expect(res.body.secret.metadata.name).toBe('new-dns-secret')
+      expect(res.body).toMatchSnapshot()
     })
 
     it('should patch an own cloudProvider credential (secret)', async function () {
@@ -288,6 +297,7 @@ describe('api', function () {
 
       expect(mockRequest).toHaveBeenCalledTimes(1)
       expect(mockRequest.mock.calls).toMatchSnapshot()
+
       expect(res.body).toMatchSnapshot()
     })
 
@@ -307,6 +317,7 @@ describe('api', function () {
 
       expect(mockRequest).toHaveBeenCalledTimes(1)
       expect(mockRequest.mock.calls).toMatchSnapshot()
+
       expect(res.body).toMatchSnapshot()
     })
   })
