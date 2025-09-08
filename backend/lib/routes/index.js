@@ -11,6 +11,7 @@ import infoRoute from './info.js'
 import openapiRoute from '../openapi/index.js'
 import userRoute from './user.js'
 import cloudprofilesRoute from './cloudprofiles.js'
+import namespacedCloudProfilesRoute from './namespacedCloudProfiles.js'
 import seedsRoute from './seeds.js'
 import gardenerExtensionsRoute from './gardenerExtensions.js'
 import projectsRoute from './projects.js'
@@ -32,6 +33,7 @@ const routes = {
   '/projects': projectsRoute,
   '/namespaces/:namespace/shoots': shootsRoute,
   '/namespaces/:namespace/tickets': ticketsRoute,
+  '/namespaces/:namespace/cloudprofiles': namespacedCloudProfilesRoute,
   '/cloudprovidercredentials': cloudProviderCredentialsRoute,
   '/namespaces/:namespace/members': membersRoute,
   '/namespaces/:namespace/resourcequotas': resourceQuotasRoute,
