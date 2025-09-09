@@ -20,6 +20,7 @@
     "Sutter, Peter <peter.sutter@sap.com>"
   ],
   "scripts": {
+    "serve": "yarn workspaces foreach --all --parallel --interlaced --include '@gardener-dashboard/frontend' --include '@gardener-dashboard/backend' run serve",
     "generate-all-dependency-diagrams": "node scripts/diagramGenerator.mjs --target all",
     "generate-backend-dependency-diagrams": "node scripts/diagramGenerator.mjs --target backend",
     "generate-packages-dependency-diagrams": "node scripts/diagramGenerator.mjs --target packages",
