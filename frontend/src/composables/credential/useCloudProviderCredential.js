@@ -14,7 +14,6 @@ import { useShootStore } from '@/store/shoot'
 
 import {
   isSecret as _isSecret,
-  isWorkloadIdentity as _isWorkloadIdentity,
   credentialName as _credentialName,
   credentialNamespace as _credentialNamespace,
   credentialKind as _credentialKind,
@@ -23,7 +22,7 @@ import {
 } from './helper'
 
 import some from 'lodash/some'
-export const useCredential = (credential, options = {}) => {
+export const useCloudProviderCredential = (credential, options = {}) => {
   if (!isRef(credential)) {
     throw new TypeError('First argument `credential` must be a ref object')
   }
@@ -34,7 +33,6 @@ export const useCredential = (credential, options = {}) => {
   const { shootList } = storeToRefs(shootStore)
 
   const isSecret = computed(() => _isSecret(credential.value))
-  const isWorkloadIdentity = computed(() => _isWorkloadIdentity(credential.value))
 
   const credentialNamespace = computed(() => _credentialNamespace(credential.value))
   const credentialName = computed(() => _credentialName(credential.value))
@@ -63,7 +61,6 @@ export const useCredential = (credential, options = {}) => {
     return count
   })
 
-  const hasOwnWorkloadIdentity = computed(() => isWorkloadIdentity.value)
   const isMarkedForDeletion = computed(() => Boolean(credential.value?.metadata.deletionTimestamp))
 
   return {
@@ -73,7 +70,6 @@ export const useCredential = (credential, options = {}) => {
     credentialKind,
     credentialDetails,
     credentialUsageCount,
-    hasOwnWorkloadIdentity,
     isMarkedForDeletion,
   }
 }

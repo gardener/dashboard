@@ -69,10 +69,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapActions } from 'pinia'
-import {
-  toRef,
-  computed,
-} from 'vue'
+import { toRef } from 'vue'
 
 import { useCredentialStore } from '@/store/credential'
 
@@ -80,7 +77,6 @@ import GMessage from '@/components/GMessage'
 import GToolbar from '@/components/GToolbar.vue'
 
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
-import { useCredential } from '@/composables/credential/useCloudProviderCredential'
 import {
   isSecretBinding,
   isCredentialsBinding,
@@ -109,15 +105,11 @@ export default {
   ],
   setup (props) {
     const credentialEntity = toRef(props, 'credentialEntity')
-    let composable
+    let bindingsWithSameCredential = []
     if (isSecretBinding(credentialEntity.value) || isCredentialsBinding(credentialEntity.value)) {
-      composable = useCloudProviderBinding(credentialEntity)
-    } else {
-      composable = useCredential(credentialEntity)
+      const composable = useCloudProviderBinding(credentialEntity)
+      bindingsWithSameCredential = composable.bindingsWithSameCredential
     }
-    const {
-      bindingsWithSameCredential = computed(() => []),
-    } = composable
     return {
       bindingsWithSameCredential,
     }

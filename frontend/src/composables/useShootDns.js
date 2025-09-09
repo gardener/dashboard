@@ -11,10 +11,11 @@ import {
 
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useCredentialStore } from '@/store/credential'
+import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import { useShootResources } from '@/composables/useShootResources'
 import { useShootExtensions } from '@/composables/useShootExtensions'
-import { useCloudProviderBindingList } from '@/composables/credential/useCloudProviderBindingList'
+import { useCloudProviderEntityList } from '@/composables/credential/useCloudProviderEntityList'
 import { credentialName } from '@/composables/credential/helper'
 
 import get from 'lodash/get'
@@ -31,6 +32,7 @@ export const useShootDns = (manifest, options) => {
   const {
     gardenerExtensionStore = useGardenerExtensionStore(),
     credentialStore = useCredentialStore(),
+    cloudProfileStore = useCloudProfileStore(),
   } = options
 
   /* resources */
@@ -170,7 +172,7 @@ export const useShootDns = (manifest, options) => {
   }
 
   function getDefaultSecretName (type) {
-    const bindings = useCloudProviderBindingList(toRef(type), { credentialStore, gardenerExtensionStore })
+    const bindings = useCloudProviderEntityList(toRef(type), { credentialStore, gardenerExtensionStore, cloudProfileStore })
     // find unused secret
     const usedResourceNames = map(resources.value, 'name')
     const binding = find(bindings.value, binding => {

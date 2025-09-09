@@ -12,13 +12,11 @@ import { storeToRefs } from 'pinia'
 
 import { useShootStore } from '@/store/shoot'
 import { useCloudProfileStore } from '@/store/cloudProfile'
-import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useCredentialStore } from '@/store/credential'
 
 import {
   isSharedCredential as _isSharedCredential,
   isInfrastructureBinding as _isInfrastructureBinding,
-  isDnsBinding as _isDnsBinding,
   isSecretBinding as _isSecretBinding,
   isCredentialsBinding as _isCredentialsBinding,
   credentialName as _credentialName,
@@ -29,7 +27,6 @@ import {
 } from './helper'
 
 import filter from 'lodash/filter'
-import some from 'lodash/some'
 import get from 'lodash/get'
 import find from 'lodash/find'
 export const useCloudProviderBinding = (binding, options = {}) => {
@@ -40,13 +37,11 @@ export const useCloudProviderBinding = (binding, options = {}) => {
   const {
     shootStore = useShootStore(),
     cloudProfileStore = useCloudProfileStore(),
-    gardenerExtensionStore = useGardenerExtensionStore(),
     credentialStore = useCredentialStore(),
   } = options
   const { shootList } = storeToRefs(shootStore)
-  const { cloudProviderBindingList } = storeToRefs(credentialStore)
+  const { infrastructureBindingList } = storeToRefs(credentialStore)
   const { sortedProviderTypeList } = storeToRefs(cloudProfileStore)
-  const { dnsProviderTypes } = storeToRefs(gardenerExtensionStore)
 
   // Classification Flags
   const isSharedCredential = computed(() =>
@@ -58,18 +53,15 @@ export const useCloudProviderBinding = (binding, options = {}) => {
   const isCredentialsBinding = computed(() =>
     _isCredentialsBinding(binding.value),
   )
-  const isSecret = computed(() =>
+  const hasSecret = computed(() =>
     isSecretBinding.value ||
     (isCredentialsBinding.value && binding.value?.credentialsRef?.kind === 'Secret'),
   )
-  const isWorkloadIdentity = computed(() =>
+  const hasWorkloadIdentity = computed(() =>
     isCredentialsBinding.value && binding.value?.credentialsRef?.kind === 'WorkloadIdentity',
   )
   const isInfrastructureBinding = computed(() =>
     _isInfrastructureBinding(binding.value, sortedProviderTypeList.value),
-  )
-  const isDnsBinding = computed(() =>
-    _isDnsBinding(binding.value, dnsProviderTypes.value),
   )
   const isMarkedForDeletion = computed(() =>
     Boolean(binding.value?.metadata.deletionTimestamp),
@@ -95,17 +87,17 @@ export const useCloudProviderBinding = (binding, options = {}) => {
 
   // Resolved Credential Object
   const credential = computed(() => {
-    if (isSecret.value) {
+    if (hasSecret.value) {
       return credentialStore.getSecret(credentialRef.value)
     }
-    if (isWorkloadIdentity.value) {
+    if (hasWorkloadIdentity.value) {
       return credentialStore.getWorkloadIdentity(credentialRef.value)
     }
     return undefined
   })
 
   const credentialDetails = computed(() => {
-    if (isSecret.value && credential.value) {
+    if (hasSecret.value && credential.value) {
       return _secretDetails(credential.value, binding.value?.provider?.type)
     }
     return undefined
@@ -113,10 +105,10 @@ export const useCloudProviderBinding = (binding, options = {}) => {
 
   // Usage & Orphan Detection
   const hasOwnSecret = computed(() =>
-    isSecret.value && credential.value !== undefined,
+    hasSecret.value && credential.value !== undefined,
   )
   const hasOwnWorkloadIdentity = computed(() =>
-    isWorkloadIdentity.value && credential.value !== undefined,
+    hasOwnWorkloadIdentity.value && credential.value !== undefined,
   )
   const isOrphanedBinding = computed(() =>
     !isSharedCredential.value &&
@@ -126,40 +118,23 @@ export const useCloudProviderBinding = (binding, options = {}) => {
 
   const credentialUsageCount = computed(() => {
     // count shoots referencing this binding by type
-    if (isInfrastructureBinding.value) {
-      const name = binding.value?.metadata.name
-      const shoots = filter(shootList.value, ({ spec }) =>
-        isSecretBinding.value
-          ? spec.secretBindingName === name
-          : isCredentialsBinding.value
-            ? spec.credentialsBindingName === name
-            : false,
-      )
-      return shoots.length
+    if (!isInfrastructureBinding.value) {
+      return 0
     }
-    if (isDnsBinding.value) {
-      if (isSharedCredential.value === undefined) {
-        return 0 // dns extension currently supports secrets only (no bindings)
-      }
-      const byProvider = providers =>
-        some(providers, ['secretName', credentialName.value])
-      const byResource = resources =>
-        some(resources, { resourceRef: { kind: 'Secret', name: credentialName.value } })
-
-      let count = 0
-      for (const shoot of shootList.value) {
-        if (byProvider(shoot.spec.dns?.providers) || byResource(shoot.spec.resources)) {
-          count++
-        }
-      }
-      return count
-    }
-    return 0
+    const name = binding.value?.metadata.name
+    const shoots = filter(shootList.value, ({ spec }) =>
+      isSecretBinding.value
+        ? spec.secretBindingName === name
+        : isCredentialsBinding.value
+          ? spec.credentialsBindingName === name
+          : false,
+    )
+    return shoots.length
   })
 
   const bindingsWithSameCredential = computed(() =>
     filter(
-      cloudProviderBindingList.value,
+      infrastructureBindingList.value,
       other => {
         if (other.metadata.uid === binding.value?.metadata.uid) {
           return false
@@ -197,10 +172,7 @@ export const useCloudProviderBinding = (binding, options = {}) => {
     isSharedCredential,
     isSecretBinding,
     isCredentialsBinding,
-    isSecret,
-    isWorkloadIdentity,
     isInfrastructureBinding,
-    isDnsBinding,
     isMarkedForDeletion,
 
     // References & resolved credential

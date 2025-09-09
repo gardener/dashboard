@@ -38,7 +38,7 @@ const icon = computed(() => {
   if (isSecretBinding(credentialEntity.value)) {
     return 'mdi-key'
   }
-  if (isCredentialsBinding(credential.value)) {
+  if (isCredentialsBinding(credentialEntity.value)) {
     if (credentialEntity.value.credentialsRef.kind === 'Secret') {
       return 'mdi-key-outline'
     }

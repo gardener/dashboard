@@ -83,11 +83,12 @@ export function credentialKind (binding) {
   return undefined
 }
 
-export function isInfrastructureBinding (binding, sortedProviderTypeList) {
-  return sortedProviderTypeList.includes(binding?.provider?.type)
+export function isInfrastructureBinding (binding, infraProviderTypes) {
+  return infraProviderTypes.includes(getProviderType(binding))
 }
-export function isDnsBinding (binding, dnsProviderTypes) {
-  return dnsProviderTypes.includes(binding?.provider?.type)
+
+export function isDNSCredential (credential, dnsProviderTypes) {
+  return dnsProviderTypes.includes(getProviderType(credential))
 }
 
 export function secretDetails (secret, providerType) {

@@ -44,7 +44,7 @@ import { useAuthzStore } from '@/store/authz'
 import GActionButton from '@/components/GActionButton.vue'
 
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
-import { useCredential } from '@/composables/credential/useCloudProviderCredential'
+import { useCloudProviderCredential } from '@/composables/credential/useCloudProviderCredential'
 import {
   isSecretBinding,
   isCredentialsBinding,
@@ -67,7 +67,7 @@ let composable
 if (isSecretBinding(credentialEntity.value) || isCredentialsBinding(credentialEntity.value)) {
   composable = useCloudProviderBinding(credentialEntity)
 } else {
-  composable = useCredential(credentialEntity)
+  composable = useCloudProviderCredential(credentialEntity)
 }
 
 const {

@@ -284,7 +284,7 @@ import GDataTableFooter from '@/components/GDataTableFooter.vue'
 
 import { useTwoTableLayout } from '@/composables/useTwoTableLayout'
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
-import { useCredential } from '@/composables/credential/useCloudProviderCredential'
+import { useCloudProviderCredential } from '@/composables/credential/useCloudProviderCredential'
 import {
   isSecretBinding,
   isCredentialsBinding,
@@ -523,7 +523,7 @@ export default {
       if (isSecretBinding(resource) || isCredentialsBinding(resource)) {
         composable = useCloudProviderBinding(refResource)
       } else {
-        composable = useCredential(refResource)
+        composable = useCloudProviderCredential(refResource)
       }
       const {
         credentialUsageCount,

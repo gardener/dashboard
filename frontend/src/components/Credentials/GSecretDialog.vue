@@ -157,11 +157,10 @@ import { useSecretContext } from '@/composables/credential/useSecretContext'
 import { useSecretBindingContext } from '@/composables/credential/useSecretBindingContext'
 import { useCredentialsBindingContext } from '@/composables/credential/useCredentialsBindingContext'
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
-import { useCredential } from '@/composables/credential/useCloudProviderCredential'
+import { useCloudProviderCredential } from '@/composables/credential/useCloudProviderCredential'
 import {
   isSecretBinding,
   isCredentialsBinding,
-  isDnsBinding,
 } from '@/composables/credential/helper'
 
 import {
@@ -236,7 +235,7 @@ export default {
       if (isBinding.value) {
         credentialComposable = useCloudProviderBinding(credentialEntity)
       } else {
-        credentialComposable = useCredential(credentialEntity)
+        credentialComposable = useCloudProviderCredential(credentialEntity)
       }
     }
 
@@ -248,11 +247,7 @@ export default {
       credential,
     } = credentialComposable
 
-    const isDnsBindingRef = computed(() =>
-      isBinding.value && isDnsBinding(credentialEntity.value, dnsProviderTypes.value),
-    )
     const isDnsProvider = computed(() => dnsProviderTypes.value.includes(providerType.value))
-    const isDnsCredential = computed(() => isDnsBindingRef.value || isDnsProvider.value)
 
     let bindingContext
     if (!props.credentialEntity && !isDnsProvider.value) {
@@ -304,8 +299,8 @@ export default {
       isOrphanedBinding,
       credentialUsageCount,
       credentialName,
-      isDnsCredential,
       bindingsWithSameCredential,
+      isDnsProvider,
       v$: useVuelidate(),
     }
   },
@@ -412,7 +407,7 @@ export default {
         this.hide()
       } catch (err) {
         const errorDetails = errorDetailsFromError(err)
-        const secretType = this.isDnsCredential ? 'DNS Credential' : 'Infrastructure Secret'
+        const secretType = this.isDnsProvider ? 'DNS Credential' : 'Infrastructure Secret'
         if (this.isCreateMode) {
           if (isConflict(err)) {
             this.errorMessage = `${secretType} name '${this.name}' is already taken. Please try a different name.`
@@ -429,7 +424,7 @@ export default {
     },
     save () {
       const secret = cloneDeep(this.secretManifest)
-      if (this.isDnsCredential) {
+      if (this.isDnsProvider) {
         const labelKey = `provider.shoot.gardener.cloud/${this.providerType}`
         secret.metadata.labels = {
           ...(secret.metadata.labels || {}),
@@ -438,11 +433,11 @@ export default {
       }
 
       if (this.isCreateMode) {
-        return this.isDnsCredential
+        return this.isDnsProvider
           ? this.createCredential({ secret })
           : this.createCredential({ secret, binding: this.bindingManifest })
       } else {
-        return this.isDnsCredential
+        return this.isDnsProvider
           ? this.updateCredential({ secret })
           : this.updateCredential({ secret, binding: this.bindingManifest })
       }

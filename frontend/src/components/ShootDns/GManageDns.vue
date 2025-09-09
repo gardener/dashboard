@@ -155,13 +155,14 @@ import { ref } from 'vue'
 
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useCredentialStore } from '@/store/credential'
+import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import GSelectCredential from '@/components/Credentials/GSelectCredential'
 import GDnsProviderRow from '@/components/ShootDns/GDnsProviderRow'
 import GVendorIcon from '@/components/GVendorIcon'
 
 import { useShootContext } from '@/composables/useShootContext'
-import { useCloudProviderBindingList } from '@/composables/credential/useCloudProviderBindingList'
+import { useCloudProviderEntityList } from '@/composables/credential/useCloudProviderEntityList'
 import { credentialName } from '@/composables/credential/helper'
 
 import {
@@ -195,9 +196,10 @@ export default {
 
     const credentialStore = useCredentialStore()
     const gardenerExtensionStore = useGardenerExtensionStore()
+    const cloudProfileStore = useCloudProfileStore()
 
     const customDomain = ref(!!dnsDomain.value && !!dnsPrimaryProviderType.value)
-    const dnsPrimaryProviderSecretBindings = useCloudProviderBindingList(dnsPrimaryProviderType, { credentialStore, gardenerExtensionStore })
+    const dnsPrimaryProviderSecretBindings = useCloudProviderEntityList(dnsPrimaryProviderType, { credentialStore, gardenerExtensionStore, cloudProfileStore })
 
     return {
       v$: useVuelidate(),

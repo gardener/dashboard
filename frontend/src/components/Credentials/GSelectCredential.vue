@@ -63,14 +63,15 @@ import { required } from '@vuelidate/validators'
 import { useProjectStore } from '@/store/project'
 import { useCredentialStore } from '@/store/credential'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
+import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import GSecretDialogWrapper from '@/components/Credentials/GSecretDialogWrapper'
 import GCredentialName from '@/components/Credentials/GCredentialName'
 
 import { useProjectCostObject } from '@/composables/useProjectCostObject'
-import { useCloudProviderBindingList } from '@/composables/credential/useCloudProviderBindingList'
+import { useCloudProviderEntityList } from '@/composables/credential/useCloudProviderEntityList'
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
-import { useCredential } from '@/composables/credential/useCloudProviderCredential'
+import { useCloudProviderCredential } from '@/composables/credential/useCloudProviderCredential'
 import {
   isSecretBinding,
   isCredentialsBinding,
@@ -129,20 +130,21 @@ export default {
     } = useProjectCostObject(projectItem)
     const credentialStore = useCredentialStore()
     const gardenerExtensionStore = useGardenerExtensionStore()
+    const cloudProfileStore = useCloudProfileStore()
 
     const v$ = useVuelidate({
       $registerAs: props.registerVuelidateAs,
     })
 
     const providerType = toRef(props, 'providerType')
-    const cloudProviderBindingList = useCloudProviderBindingList(providerType, { credentialStore, gardenerExtensionStore })
+    const cloudProviderEntityList = useCloudProviderEntityList(providerType, { credentialStore, gardenerExtensionStore, cloudProfileStore })
 
     const credential = toRef(props, 'modelValue')
     let composable
     if (isSecretBinding(credential.value) || isCredentialsBinding(credential.value)) {
       composable = useCloudProviderBinding(credential)
     } else {
-      composable = useCredential(credential)
+      composable = useCloudProviderCredential(credential)
     }
     const {
       isSharedCredential,
@@ -153,7 +155,7 @@ export default {
       costObjectsSettingEnabled,
       costObjectErrorMessage,
       costObject,
-      cloudProviderBindingList,
+      cloudProviderEntityList,
       isSharedCredential,
       selfTerminationDays,
       v$,
@@ -195,7 +197,7 @@ export default {
       },
     },
     allowedCredentials () {
-      return this.cloudProviderBindingList
+      return this.cloudProviderEntityList
         ?.filter(credential => {
           const name = credential.secretRef?.name || credential.cedentialsRef?.name
           return !this.notAllowedSecretNames.includes(name)

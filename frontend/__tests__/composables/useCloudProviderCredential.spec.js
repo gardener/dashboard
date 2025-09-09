@@ -11,11 +11,11 @@ import {
 import { useShootStore } from '@/store/shoot'
 import { useCredentialStore } from '@/store/credential'
 
-import { useCredential } from '@/composables/credential/useCloudProviderCredential'
+import { useCloudProviderCredential } from '@/composables/credential/useCloudProviderCredential'
 
 import find from 'lodash/find'
 
-describe('useCredential composable', () => {
+describe('useCloudProviderCredential composable', () => {
   let shootStore
   let credentialStore
 
@@ -55,12 +55,13 @@ describe('useCredential composable', () => {
   })
 
   function findCredentialRef (name) {
-    return ref(find(credentialStore.cloudProviderBindingList, c => c.metadata.name === name))
+    const credential = find(credentialStore.dnsCredentialList, c => c.metadata.name === name)
+    return ref(credential)
   }
 
   it('counts shoots referencing dns secret', () => {
     const credentialRef = findCredentialRef('aws-route53-secret')
-    const composable = useCredential(credentialRef)
+    const composable = useCloudProviderCredential(credentialRef)
     expect(composable.credentialUsageCount.value).toBe(2)
   })
 })

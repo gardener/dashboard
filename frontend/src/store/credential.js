@@ -16,11 +16,8 @@ import {
 
 import { useApi } from '@/composables/useApi'
 import {
-  isDnsBinding,
   isInfrastructureBinding,
-  isSecret as _isSecret,
-  isWorkloadIdentity as _isWorkloadIdentity,
-  getProviderType,
+  isDNSCredential,
 } from '@/composables/credential/helper'
 
 import { useAuthzStore } from './authz'
@@ -28,7 +25,6 @@ import { useAppStore } from './app'
 import { useGardenerExtensionStore } from './gardenerExtension'
 import { useCloudProfileStore } from './cloudProfile'
 
-import filter from 'lodash/filter'
 import set from 'lodash/set'
 import get from 'lodash/get'
 
@@ -106,30 +102,6 @@ export const useCredentialStore = defineStore('credential', () => {
     })
   }
 
-  const cloudProviderBindingList = computed(() => {
-    const secretBindings = Object.values(state.secretBindings).filter(binding => !isDnsBinding(binding, dnsProviderTypes.value))
-    const credentialsBindings = Object.values(state.credentialsBindings).filter(binding => !isDnsBinding(binding, dnsProviderTypes.value))
-    const dnsCredentials = [
-      ...Object.values(state.secrets),
-      ...Object.values(state.workloadIdentities),
-    ].reduce((arr, item) => {
-      const providerType = getProviderType(item)
-      if (!providerType || !dnsProviderTypes.value.includes(providerType)) {
-        return arr
-      }
-      const credential = { ...item, provider: { type: providerType } }
-      if (_isSecret(item)) {
-        credential.secretRef = { name: item.metadata.name, namespace: item.metadata.namespace }
-      } else if (_isWorkloadIdentity(item)) {
-        credential.credentialsRef = { kind: 'WorkloadIdentity', name: item.metadata.name, namespace: item.metadata.namespace }
-      }
-      arr.push(credential)
-      return arr
-    }, [])
-
-    return [...secretBindings, ...credentialsBindings, ...dnsCredentials]
-  })
-
   const quotaList = computed(() => {
     return Object.values(state.quotas)
   })
@@ -163,36 +135,17 @@ export const useCredentialStore = defineStore('credential', () => {
   }
 
   const infrastructureBindingList = computed(() => {
-    return filter(cloudProviderBindingList.value, binding => {
-      return isInfrastructureBinding(binding, sortedProviderTypeList.value)
-    })
+    return [
+      ...secretBindingList.value,
+      ...credentialsBindingList.value,
+    ].filter(binding => isInfrastructureBinding(binding, sortedProviderTypeList.value))
   })
 
   const dnsCredentialList = computed(() => {
     return [
       ...Object.values(state.secrets),
       ...Object.values(state.workloadIdentities),
-    ].reduce((arr, credential) => {
-      const providerType = getProviderType(credential)
-      if (!providerType || !dnsProviderTypes.value.includes(providerType)) {
-        return arr
-      }
-      const item = { ...credential, provider: { type: providerType } }
-      if (_isSecret(credential)) {
-        item.secretRef = {
-          name: credential.metadata.name,
-          namespace: credential.metadata.namespace,
-        }
-      } else if (_isWorkloadIdentity(credential)) {
-        item.credentialsRef = {
-          kind: 'WorkloadIdentity',
-          name: credential.metadata.name,
-          namespace: credential.metadata.namespace,
-        }
-      }
-      arr.push(item)
-      return arr
-    }, [])
+    ].filter(credential => isDNSCredential(credential, dnsProviderTypes.value))
   })
 
   const secretBindingList = computed(() =>
@@ -235,7 +188,6 @@ export const useCredentialStore = defineStore('credential', () => {
 
   return {
     state,
-    cloudProviderBindingList,
     quotaList,
     fetchCredentials,
     _setCredentials,

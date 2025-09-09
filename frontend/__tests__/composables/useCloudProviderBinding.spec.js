@@ -77,7 +77,7 @@ describe('useCloudProviderBinding composable', () => {
   function findBindingRef (name) {
     return ref(
       find(
-        credentialStore.cloudProviderBindingList,
+        credentialStore.infrastructureBindingList,
         b => b.metadata.name === name,
       ),
     )
