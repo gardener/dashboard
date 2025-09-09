@@ -11,8 +11,9 @@ yarn serve
 # Lint code
 yarn lint
 
-# Testing (CRITICAL - run in sequence)
-yarn build-test-target  # First transpile ESM to CommonJS
-yarn test              # Then run tests
-yarn test-coverage     # Run tests with coverage
+# Testing
+yarn build-test-target  # Required: Transpile ESM to CommonJS for tests
+yarn test              # Run tests
+# Or
+yarn test-coverage     # Run tests with coverage report
 ```
