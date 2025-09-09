@@ -27,7 +27,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-card>
         <g-credential-details-item-content
           class="ma-1"
-          :credential-entity="credential"
+          :credential="credential"
           :shared="isSharedCredential"
           :provider-type="providerType"
         />

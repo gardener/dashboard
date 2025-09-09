@@ -56,7 +56,7 @@ const props = defineProps({
     required: true,
   },
 })
-const credential = toRef(props, 'credentialEntity')
+const credentialEntity = toRef(props, 'credentialEntity')
 
 const emit = defineEmits(['update', 'delete'])
 
@@ -64,10 +64,10 @@ const authzStore = useAuthzStore()
 const { canPatchCredentials, canDeleteCredentials } = storeToRefs(authzStore)
 
 let composable
-if (isSecretBinding(credential.value) || isCredentialsBinding(credential.value)) {
-  composable = useCloudProviderBinding(credential)
+if (isSecretBinding(credentialEntity.value) || isCredentialsBinding(credentialEntity.value)) {
+  composable = useCloudProviderBinding(credentialEntity)
 } else {
-  composable = useCredential(credential)
+  composable = useCredential(credentialEntity)
 }
 
 const {
@@ -78,11 +78,11 @@ const {
 } = composable
 
 function onUpdate () {
-  emit('update', credential.value)
+  emit('update', credentialEntity.value)
 }
 
 function onDelete () {
-  emit('delete', credential.value)
+  emit('delete', credentialEntity.value)
 }
 
 </script>

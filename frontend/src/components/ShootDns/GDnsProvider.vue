@@ -46,7 +46,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-list-item v-if="secret">
         <g-credential-details-item-content
           class="pb-2"
-          :credential-entity="secret"
+          :credential="secret"
           :provider-type="type"
           details-title
         />

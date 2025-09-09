@@ -44,7 +44,7 @@ SPDX-License-Identifier: Apache-2.0
       </g-list-item>
       <g-list-item v-if="hasShootWorkerGroups">
         <g-credential-details-item-content
-          :credential-entity="credential"
+          :credential="credential"
           :shared="isSharedCredential"
           :provider-type="shootCloudProviderBinding.provider.type"
           details-title

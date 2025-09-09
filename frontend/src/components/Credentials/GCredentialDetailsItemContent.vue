@@ -43,7 +43,7 @@ import {
 export default {
 
   props: {
-    credentialEntity: {
+    credential: {
       type: Object,
     },
     shared: {
@@ -68,12 +68,12 @@ export default {
             disabledText: true,
           },
         ]
-      } else if (isSecret(this.credentialEntity)) {
-        const details = secretDetails(this.credentialEntity, this.providerType)
+      } else if (isSecret(this.credential)) {
+        const details = secretDetails(this.credential, this.providerType)
         if (details) {
           return details
         }
-      } else if (isWorkloadIdentity(this.credentialEntity)) {
+      } else if (isWorkloadIdentity(this.credential)) {
         return [
           {
             label: 'WorkloadIdentity',
@@ -84,7 +84,7 @@ export default {
       }
       return [
         {
-          label: this.credentialEntity?.kind || 'Unknown',
+          label: this.credential?.kind || 'Unknown',
           value: 'Details not available',
           disabledText: true,
         },

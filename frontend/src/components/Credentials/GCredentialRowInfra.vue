@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
     <td v-if="selectedHeaders.details">
       <g-credential-details-item-content
         class="py-1"
-        :credential-entity="item.credential"
+        :credential="item.credential"
         :shared="item.isSharedCredential"
         :provider-type="getProviderType(item.binding)"
       />

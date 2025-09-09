@@ -40,14 +40,14 @@ const props = defineProps({
   credentialEntity: Object,
 })
 
-const credential = toRef(props, 'credentialEntity')
+const credentialEntity = toRef(props, 'credentialEntity')
 
 const credentialName = computed(() =>
-  _credentialName(credential.value),
+  _credentialName(credentialEntity.value),
 )
 
 const credentialKind = computed(() =>
-  _credentialKind(credential.value),
+  _credentialKind(credentialEntity.value),
 )
 
 </script>

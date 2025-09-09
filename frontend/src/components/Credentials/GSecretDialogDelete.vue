@@ -108,12 +108,12 @@ export default {
     'update:modelValue',
   ],
   setup (props) {
-    const credential = toRef(props, 'credentialEntity')
+    const credentialEntity = toRef(props, 'credentialEntity')
     let composable
-    if (isSecretBinding(credential.value) || isCredentialsBinding(credential.value)) {
-      composable = useCloudProviderBinding(credential)
+    if (isSecretBinding(credentialEntity.value) || isCredentialsBinding(credentialEntity.value)) {
+      composable = useCloudProviderBinding(credentialEntity)
     } else {
-      composable = useCredential(credential)
+      composable = useCredential(credentialEntity)
     }
     const {
       bindingsWithSameCredential = computed(() => []),

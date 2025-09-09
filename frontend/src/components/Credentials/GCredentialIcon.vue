@@ -32,40 +32,40 @@ const props = defineProps({
   renderLink: Boolean,
 })
 
-const credential = toRef(props, 'credentialEntity')
+const credentialEntity = toRef(props, 'credentialEntity')
 
 const icon = computed(() => {
-  if (isSecretBinding(credential.value)) {
+  if (isSecretBinding(credentialEntity.value)) {
     return 'mdi-key'
   }
   if (isCredentialsBinding(credential.value)) {
-    if (credential.value.credentialsRef.kind === 'Secret') {
+    if (credentialEntity.value.credentialsRef.kind === 'Secret') {
       return 'mdi-key-outline'
     }
-    if (credential.value.credentialsRef.kind === 'WorkloadIdentity') {
+    if (credentialEntity.value.credentialsRef.kind === 'WorkloadIdentity') {
       return 'mdi-id-card'
     }
   }
-  if (isSecret(credential.value)) {
+  if (isSecret(credentialEntity.value)) {
     return 'mdi-key'
   }
-  if (isWorkloadIdentity(credential.value)) {
+  if (isWorkloadIdentity(credentialEntity.value)) {
     return 'mdi-id-card'
   }
   return 'mdi-help-circle'
 })
 
 const tooltip = computed(() => {
-  if (isSecretBinding(credential.value)) {
+  if (isSecretBinding(credentialEntity.value)) {
     return 'Secret (SecretBinding)'
   }
-  if (isCredentialsBinding(credential.value)) {
-    return `${credential.value.credentialsRef.kind} (${credential.value.kind})`
+  if (isCredentialsBinding(credentialEntity.value)) {
+    return `${credentialEntity.value.credentialsRef.kind} (${credentialEntity.value.kind})`
   }
-  if (isSecret(credential.value)) {
+  if (isSecret(credentialEntity.value)) {
     return 'Secret'
   }
-  if (isWorkloadIdentity(credential.value)) {
+  if (isWorkloadIdentity(credentialEntity.value)) {
     return 'Workload Identity'
   }
   return 'Unknown credential binding type'
