@@ -115,6 +115,11 @@ const configMappings = [
     configPath: 'metricsPort',
     type: 'Integer',
   },
+  {
+    environmentVariableName: 'WEBSOCKET_ALLOWED_ORIGINS',
+    configPath: 'websocketAllowedOrigins',
+    type: 'Array',
+  },
 ]
 
 function parseConfigValue (value, type) {
@@ -124,6 +129,8 @@ function parseConfigValue (value, type) {
       return Number.isInteger(value) ? value : undefined
     case 'Boolean':
       return value === 'true'
+    case 'Array':
+      return value ? value.split(',').map(v => v.trim()).filter(Boolean) : undefined
     default:
       return value
   }
@@ -180,6 +187,7 @@ export default {
     const requiredConfigurationProperties = [
       'sessionSecret',
       'apiServerUrl',
+      'websocketAllowedOrigins',
     ]
 
     // When OIDC is configured, some more configuration is required
