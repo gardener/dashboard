@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
 <script setup>
 import {
   computed,
-  toRef,
+  toRefs,
 } from 'vue'
 
 import {
@@ -28,45 +28,53 @@ import {
 } from '@/composables/credential/helper'
 
 const props = defineProps({
-  credentialEntity: Object,
-  renderLink: Boolean,
+  credential: Object,
+  binding: Object,
 })
 
-const credentialEntity = toRef(props, 'credentialEntity')
+const { credential, binding } = toRefs(props)
 
 const icon = computed(() => {
-  if (isSecretBinding(credentialEntity.value)) {
-    return 'mdi-key'
-  }
-  if (isCredentialsBinding(credentialEntity.value)) {
-    if (credentialEntity.value.credentialsRef.kind === 'Secret') {
-      return 'mdi-key-outline'
+  if (binding?.value) {
+    if (isSecretBinding(binding.value)) {
+      return 'mdi-key'
     }
-    if (credentialEntity.value.credentialsRef.kind === 'WorkloadIdentity') {
+    if (isCredentialsBinding(binding.value)) {
+      if (binding.value.credentialsRef.kind === 'Secret') {
+        return 'mdi-key-outline'
+      }
+      if (binding.value.credentialsRef.kind === 'WorkloadIdentity') {
+        return 'mdi-id-card'
+      }
+    }
+  }
+  if (credential?.value) {
+    if (isSecret(credential.value)) {
+      return 'mdi-key'
+    }
+    if (isWorkloadIdentity(credential.value)) {
       return 'mdi-id-card'
     }
-  }
-  if (isSecret(credentialEntity.value)) {
-    return 'mdi-key'
-  }
-  if (isWorkloadIdentity(credentialEntity.value)) {
-    return 'mdi-id-card'
   }
   return 'mdi-help-circle'
 })
 
 const tooltip = computed(() => {
-  if (isSecretBinding(credentialEntity.value)) {
-    return 'Secret (SecretBinding)'
+  if (binding?.value) {
+    if (isSecretBinding(binding.value)) {
+      return 'Secret (SecretBinding)'
+    }
+    if (isCredentialsBinding(binding.value)) {
+      return `${binding.value.credentialsRef.kind} (${binding.value.kind})`
+    }
   }
-  if (isCredentialsBinding(credentialEntity.value)) {
-    return `${credentialEntity.value.credentialsRef.kind} (${credentialEntity.value.kind})`
-  }
-  if (isSecret(credentialEntity.value)) {
-    return 'Secret'
-  }
-  if (isWorkloadIdentity(credentialEntity.value)) {
-    return 'Workload Identity'
+  if (credential?.value) {
+    if (isSecret(credential.value)) {
+      return 'Secret'
+    }
+    if (isWorkloadIdentity(credential.value)) {
+      return 'Workload Identity'
+    }
   }
   return 'Unknown credential binding type'
 })

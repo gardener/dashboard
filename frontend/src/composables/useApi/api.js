@@ -57,7 +57,7 @@ export function invokeCloudProviderCredentialMethod (method, params) {
 }
 
 export function getCloudProviderCredentials (namespace) {
-  return invokeCloudProviderCredentialMethod('list', { bindingNamespace: namespace })
+  return invokeCloudProviderCredentialMethod('list', { namespace })
 }
 
 export function createCloudProviderCredential (params) {

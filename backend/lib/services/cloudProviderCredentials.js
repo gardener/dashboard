@@ -12,7 +12,7 @@ const { getQuotas } = cache
 
 export async function list ({ user, params }) {
   const client = user.client
-  const { bindingNamespace } = params
+  const { namespace } = params
 
   const [
     { items: secretBindings },
@@ -20,10 +20,10 @@ export async function list ({ user, params }) {
     { items: secrets },
     { items: workloadIdentities },
   ] = await Promise.all([
-    client['core.gardener.cloud'].secretbindings.list(bindingNamespace),
-    client['security.gardener.cloud'].credentialsbindings.list(bindingNamespace),
-    client.core.secrets.list(bindingNamespace),
-    client['security.gardener.cloud'].workloadidentities.list(bindingNamespace),
+    client['core.gardener.cloud'].secretbindings.list(namespace),
+    client['security.gardener.cloud'].credentialsbindings.list(namespace),
+    client.core.secrets.list(namespace),
+    client['security.gardener.cloud'].workloadidentities.list(namespace),
   ])
 
   const hasProviderLabel = item => {

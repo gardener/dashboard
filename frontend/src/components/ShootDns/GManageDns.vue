@@ -67,9 +67,9 @@ SPDX-License-Identifier: Apache-2.0
         </v-col>
         <v-col cols="3">
           <g-select-credential
-            v-model="primaryDnsProviderSecret"
+            v-model="primaryDnsProviderCredential"
             :provider-type="dnsPrimaryProviderType"
-            register-vuelidate-as="dnsProviderSecret"
+            register-vuelidate-as="dnsProviderCredential"
             label="Primary DNS Provider Credential"
           />
         </v-col>
@@ -163,7 +163,6 @@ import GVendorIcon from '@/components/GVendorIcon'
 
 import { useShootContext } from '@/composables/useShootContext'
 import { useCloudProviderEntityList } from '@/composables/credential/useCloudProviderEntityList'
-import { credentialName } from '@/composables/credential/helper'
 
 import {
   withFieldName,
@@ -199,7 +198,7 @@ export default {
     const cloudProfileStore = useCloudProfileStore()
 
     const customDomain = ref(!!dnsDomain.value && !!dnsPrimaryProviderType.value)
-    const dnsPrimaryProviderSecretBindings = useCloudProviderEntityList(dnsPrimaryProviderType, { credentialStore, gardenerExtensionStore, cloudProfileStore })
+    const dnsPrimaryProviderCredentials = useCloudProviderEntityList(dnsPrimaryProviderType, { credentialStore, gardenerExtensionStore, cloudProfileStore })
 
     return {
       v$: useVuelidate(),
@@ -214,7 +213,7 @@ export default {
       resetDnsPrimaryProvider,
       deleteDnsServiceExtensionProvider,
       customDomain,
-      dnsPrimaryProviderSecretBindings,
+      dnsPrimaryProviderCredentials,
     }
   },
   validations () {
@@ -222,7 +221,7 @@ export default {
       dnsPrimaryProviderType: withFieldName('Primary DNS Provider Type', {
         required: withMessage('Provider type is required if a cluster domain is defined', requiredIf(this.isNewCluster && !!this.dnsDomain)),
       }),
-      primaryDnsProviderSecret: withFieldName('Primary DNS Provider Secret', {
+      primaryDnsProviderCredential: withFieldName('Primary DNS Provider Secret', {
         required: withMessage('Provider secret is required if a cluster domain is defined', requiredIf(this.isNewCluster && !!this.dnsDomain)),
       }),
       dnsDomain: withFieldName('Custom Cluster Domain', {
@@ -267,14 +266,14 @@ export default {
         }
       },
     },
-    primaryDnsProviderSecret: {
+    primaryDnsProviderCredential: {
       get () {
-        return find(this.dnsPrimaryProviderSecretBindings, binding => {
-          return credentialName(binding) === this.dnsPrimaryProviderSecretName
+        return find(this.dnsPrimaryProviderCredentials, credential => {
+          return credential?.metadata?.name === this.dnsPrimaryProviderSecretName
         })
       },
-      set (binding) {
-        this.dnsPrimaryProviderSecretName = credentialName(binding)
+      set (credential) {
+        this.dnsPrimaryProviderSecretName = credential?.metadata?.name
       },
     },
     domainRecommendationVisible () {
@@ -284,7 +283,7 @@ export default {
       if (!this.dnsPrimaryProviderType) {
         return false
       }
-      if (!this.primaryDnsProviderSecret) {
+      if (!this.primaryDnsProviderCredential) {
         return false
       }
       if (!this.hasDnsServiceExtension) {
@@ -298,7 +297,7 @@ export default {
       if (value) {
         const type = head(this.dnsProviderTypesWithPrimarySupport)
         this.dnsPrimaryProviderType = type
-        this.primaryDnsProviderSecret = head(this.dnsPrimaryProviderSecretBindings)
+        this.primaryDnsProviderCredential = head(this.dnsPrimaryProviderCredentials)
         this.v$.dnsDomain.$reset()
       }
     },

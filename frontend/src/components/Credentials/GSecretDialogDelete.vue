@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-card-text>
         <v-container fluid>
           <span class="text-subtitle-1">
-            Are you sure to delete the <code>Secret</code> <span class="font-weight-bold">{{ credentialEntity.metadata.name }} (<code>{{ credentialEntity.kind }}</code>)</span>?<br>
+            Are you sure to delete the <code>Secret</code> <span class="font-weight-bold">{{ resourceName }} (<code>{{ resourceKind }}</code>)</span>?<br>
             <span class="text-error font-weight-bold">The operation can not be undone.</span>
           </span>
         </v-container>
@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-card-text>
       <div>
         <v-alert
-          :model-value="bindingsWithSameCredential.length > 0"
+          :model-value="bindingsWithSameCredential?.length > 0"
           type="info"
           rounded="0"
           class="mb-2 list-style"
@@ -43,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
               <pre>{{ referencedBinding.metadata.name }} ({{ (referencedBinding.kind) }})</pre>
             </li>
           </ul>
-          Deleting this {{ credentialEntity.kind }} will not delete the referenced secret.
+          Deleting this {{ resourceKind }} will not delete the referenced secret.
         </v-alert>
       </div>
       <v-divider />
@@ -69,7 +69,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapActions } from 'pinia'
-import { toRef } from 'vue'
+import { toRefs } from 'vue'
 
 import { useCredentialStore } from '@/store/credential'
 
@@ -77,10 +77,7 @@ import GMessage from '@/components/GMessage'
 import GToolbar from '@/components/GToolbar.vue'
 
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
-import {
-  isSecretBinding,
-  isCredentialsBinding,
-} from '@/composables/credential/helper'
+import { useCloudProviderCredential } from '@/composables/credential/useCloudProviderCredential'
 
 import { errorDetailsFromError } from '@/utils/error'
 
@@ -95,23 +92,38 @@ export default {
       type: Boolean,
       required: true,
     },
-    credentialEntity: {
+    credential: {
       type: Object,
-      required: true,
+    },
+    binding: {
+      type: Object,
     },
   },
   emits: [
     'update:modelValue',
   ],
   setup (props) {
-    const credentialEntity = toRef(props, 'credentialEntity')
-    let bindingsWithSameCredential = []
-    if (isSecretBinding(credentialEntity.value) || isCredentialsBinding(credentialEntity.value)) {
-      const composable = useCloudProviderBinding(credentialEntity)
-      bindingsWithSameCredential = composable.bindingsWithSameCredential
+    const { credential, binding } = toRefs(props)
+    let credentialComposable = {}
+    if (binding?.value) {
+      credentialComposable = useCloudProviderBinding(binding)
     }
+    if (credential?.value) {
+      credentialComposable = useCloudProviderCredential(credential)
+    }
+
+    const {
+      bindingsWithSameCredential,
+      resourceName,
+      resourceKind,
+      resourceNamespace,
+    } = credentialComposable
+
     return {
       bindingsWithSameCredential,
+      resourceName,
+      resourceKind,
+      resourceNamespace,
     }
   },
   data () {
@@ -144,18 +156,18 @@ export default {
     },
     async onDeleteSecret () {
       try {
-        const { kind, metadata: { namespace, name } } = this.credentialEntity
-        if (kind === 'Secret' || kind === 'WorkloadIdentity') {
+        if (this.credential) {
           await this.deleteCredential({
-            credentialKind: kind,
-            credentialNamespace: namespace,
-            credentialName: name,
+            credentialKind: this.resourceKind,
+            credentialNamespace: this.resourceNamespace,
+            credentialName: this.resourceName,
           })
-        } else {
+        }
+        if (this.binding) {
           await this.deleteCredential({
-            bindingKind: kind,
-            bindingNamespace: namespace,
-            bindingName: name,
+            bindingKind: this.resourceKind,
+            bindingNamespace: this.resourceNamespace,
+            bindingName: this.resourceName,
           })
         }
         this.hide()

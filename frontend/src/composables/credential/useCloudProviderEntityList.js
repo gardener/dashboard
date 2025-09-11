@@ -14,7 +14,10 @@ import { useCredentialStore } from '@/store/credential'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
-import { getProviderType } from './helper'
+import {
+  bindingProviderType,
+  credentialProviderType,
+} from './helper'
 
 import filter from 'lodash/filter'
 
@@ -35,12 +38,12 @@ export const useCloudProviderEntityList = (providerType, options = {}) => {
   return computed(() => {
     if (sortedProviderTypeList.value.includes(providerType.value)) {
       return filter(credentialStore.infrastructureBindingList, binding => {
-        return getProviderType(binding) === providerType.value
+        return bindingProviderType(binding) === providerType.value
       })
     }
     if (dnsProviderTypes.value.includes(providerType.value)) {
       return filter(credentialStore.dnsCredentialList, credential => {
-        return getProviderType(credential) === providerType.value
+        return credentialProviderType(credential) === providerType.value
       })
     }
     return []

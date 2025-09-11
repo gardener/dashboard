@@ -54,14 +54,14 @@ describe('useCloudProviderCredential composable', () => {
     credentialStore._setCredentials(fixtures.credentials)
   })
 
-  function findCredentialRef (name) {
+  function findbindingCredentialRef (name) {
     const credential = find(credentialStore.dnsCredentialList, c => c.metadata.name === name)
     return ref(credential)
   }
 
   it('counts shoots referencing dns secret', () => {
-    const credentialRef = findCredentialRef('aws-route53-secret')
-    const composable = useCloudProviderCredential(credentialRef)
+    const bindingCredentialRef = findbindingCredentialRef('aws-route53-secret')
+    const composable = useCloudProviderCredential(bindingCredentialRef)
     expect(composable.credentialUsageCount.value).toBe(2)
   })
 })

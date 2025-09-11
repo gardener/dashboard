@@ -37,7 +37,7 @@ SPDX-License-Identifier: Apache-2.0
       <g-list-item v-if="hasShootWorkerGroups">
         <g-list-item-content label="Credential">
           <g-credential-name
-            :credential-entity="shootCloudProviderBinding"
+            :binding="shootCloudProviderBinding"
             render-link
           />
         </g-list-item-content>
@@ -45,7 +45,7 @@ SPDX-License-Identifier: Apache-2.0
       <g-list-item v-if="hasShootWorkerGroups">
         <g-credential-details-item-content
           :credential="credential"
-          :shared="isSharedCredential"
+          :shared="isSharedBinding"
           :provider-type="shootCloudProviderBinding.provider.type"
           details-title
         />
@@ -320,7 +320,7 @@ export default {
 
     const {
       credential,
-      isSharedCredential,
+      isSharedBinding,
     } = useCloudProviderBinding(shootCloudProviderBinding)
 
     return {
@@ -345,7 +345,7 @@ export default {
       shootDnsPrimaryProvider,
       getResourceRefName,
       credential,
-      isSharedCredential,
+      isSharedBinding,
     }
   },
   computed: {

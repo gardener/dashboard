@@ -138,14 +138,14 @@ export const useCredentialStore = defineStore('credential', () => {
     return [
       ...secretBindingList.value,
       ...credentialsBindingList.value,
-    ].filter(binding => isInfrastructureBinding(binding, sortedProviderTypeList.value))
+    ].filter(binding => isInfrastructureBinding({ binding, infraProviderTypes: sortedProviderTypeList.value }))
   })
 
   const dnsCredentialList = computed(() => {
     return [
       ...Object.values(state.secrets),
       ...Object.values(state.workloadIdentities),
-    ].filter(credential => isDNSCredential(credential, dnsProviderTypes.value))
+    ].filter(credential => isDNSCredential({ credential, dnsProviderTypes: dnsProviderTypes.value }))
   })
 
   const secretBindingList = computed(() =>

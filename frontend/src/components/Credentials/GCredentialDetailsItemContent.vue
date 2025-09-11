@@ -69,7 +69,7 @@ export default {
           },
         ]
       } else if (isSecret(this.credential)) {
-        const details = secretDetails(this.credential, this.providerType)
+        const details = secretDetails({ secret: this.credential, providerType: this.providerType })
         if (details) {
           return details
         }

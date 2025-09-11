@@ -96,7 +96,7 @@ SPDX-License-Identifier: Apache-2.0
                     There is a problem with the credential
                     <code v-if="shootBinding">
                       <g-credential-name
-                        :credential-entity="shootBinding"
+                        :binding="shootBinding"
                         render-link
                       />
                     </code>:

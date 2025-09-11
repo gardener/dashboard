@@ -56,7 +56,7 @@ SPDX-License-Identifier: Apache-2.0
               <v-list-item
                 v-for="infrastructure in sortedProviderTypeList"
                 :key="infrastructure"
-                @click="openCredentialAddDialog(infrastructure)"
+                @click="onAddInfraBinding(infrastructure)"
               >
                 <template #prepend>
                   <g-vendor-icon
@@ -118,8 +118,8 @@ SPDX-License-Identifier: Apache-2.0
             :item="item"
             :highlighted="isHighlighted(item.binding)"
             :headers="infraCredentialTableHeaders"
-            @delete="onRemoveCredential"
-            @update="onUpdateCredential"
+            @update-infra-binding="onUpdateInfraBinding"
+            @delete-infra-binding="onDeleteInfraBinding"
           />
         </template>
         <template #bottom>
@@ -180,7 +180,7 @@ SPDX-License-Identifier: Apache-2.0
               <v-list-item
                 v-for="dnsProvider in dnsProviderTypes"
                 :key="dnsProvider"
-                @click="openCredentialAddDialog(dnsProvider)"
+                @click="onAddDnsCredential(dnsProvider)"
               >
                 <template #prepend>
                   <g-vendor-icon
@@ -233,8 +233,8 @@ SPDX-License-Identifier: Apache-2.0
             :item="item"
             :highlighted="isHighlighted(item.credential)"
             :headers="dnsCredentialTableHeaders"
-            @delete="onRemoveCredential"
-            @update="onUpdateCredential"
+            @update-dns-credential="onUpdateDnsCredential"
+            @delete-dns-credential="onDeleteDnsCredential"
           />
         </template>
         <template #bottom>
@@ -248,7 +248,8 @@ SPDX-License-Identifier: Apache-2.0
 
     <g-secret-dialog-wrapper
       :visible-dialog="visibleCredentialDialog"
-      :selected-credential-entity="selectedCredential"
+      :selected-dns-credential="selectedDnsCredential"
+      :selected-infra-binding="selectedInfraBinding"
       @dialog-closed="onDialogClosed"
     />
   </v-container>
@@ -288,7 +289,8 @@ import { useCloudProviderCredential } from '@/composables/credential/useCloudPro
 import {
   isSecretBinding,
   isCredentialsBinding,
-  getProviderType,
+  credentialProviderType,
+  bindingProviderType,
 } from '@/composables/credential/helper'
 
 import { mapTableHeader } from '@/utils'
@@ -348,7 +350,8 @@ export default {
   },
   data () {
     return {
-      selectedCredential: {},
+      selectedInfraBinding: {},
+      selectedDnsCredential: {},
       infraCredentialFilter: '',
       createInfraCredentialMenu: false,
       dnsCredentialFilter: '',
@@ -527,7 +530,7 @@ export default {
       }
       const {
         credentialUsageCount,
-        isSharedCredential,
+        isSharedBinding,
         isOrphanedBinding,
         credentialNamespace,
         credential,
@@ -539,24 +542,43 @@ export default {
         binding: isSecretBinding(resource) || isCredentialsBinding(resource) ? resource : undefined,
         credential: unref(credential),
         credentialUsageCount: unref(credentialUsageCount),
-        isSharedCredential: unref(isSharedCredential),
+        isSharedBinding: unref(isSharedBinding),
         isOrphanedBinding: unref(isOrphanedBinding),
         credentialNamespace: unref(credentialNamespace),
         credentialDetails: unref(credentialDetails),
         credentialKind,
       }
     },
-    openCredentialAddDialog (providerType) {
-      this.selectedCredential = undefined
+    onAddInfraBinding (providerType) {
+      this.selectedInfraBinding = undefined
+      this.selectedDnsCredential = undefined
       this.visibleCredentialDialog = providerType
     },
-    onUpdateCredential (credential) {
-      const providerType = getProviderType(credential)
-      this.selectedCredential = credential
+    onAddDnsCredential (providerType) {
+      this.selectedInfraBinding = undefined
+      this.selectedDnsCredential = undefined
       this.visibleCredentialDialog = providerType
     },
-    onRemoveCredential (credential) {
-      this.selectedCredential = credential
+    onUpdateInfraBinding (binding) {
+      const providerType = bindingProviderType(binding)
+      this.selectedInfraBinding = binding
+      this.selectedDnsCredential = undefined
+      this.visibleCredentialDialog = providerType
+    },
+    onDeleteInfraBinding (binding) {
+      this.selectedInfraBinding = binding
+      this.selectedDnsCredential = undefined
+      this.visibleCredentialDialog = 'delete'
+    },
+    onUpdateDnsCredential (credential) {
+      const providerType = credentialProviderType(credential)
+      this.selectedDnsCredential = credential
+      this.selectedInfraBinding = undefined
+      this.visibleCredentialDialog = providerType
+    },
+    onDeleteDnsCredential (credential) {
+      this.selectedDnsCredential = credential
+      this.selectedInfraBinding = undefined
       this.visibleCredentialDialog = 'delete'
     },
     setSelectedInfraHeader (header) {
@@ -604,9 +626,9 @@ export default {
         case 'name':
           return (binding ?? credential).metadata.name
         case 'infrastructure':
-          return getProviderType(binding)
+          return bindingProviderType(binding)
         case 'dnsProvider':
-          return getProviderType(credential)
+          return credentialProviderType(credential)
         case 'kind':
           return `${credential.kind} (${credentialKind.value})`
         case 'credentialUsageCount':
@@ -632,8 +654,9 @@ export default {
 
       const values = [
         (binding ?? credential).metadata.name,
-        getProviderType(binding ?? credential),
-        credential.kind,
+        credentialProviderType(credential),
+        credential?.kind,
+        binding?.kind,
         ...detailValues,
       ]
 

@@ -14,11 +14,8 @@ import { useShootStore } from '@/store/shoot'
 
 import {
   isSecret as _isSecret,
-  credentialName as _credentialName,
-  credentialNamespace as _credentialNamespace,
-  credentialKind as _credentialKind,
   secretDetails as _secretDetails,
-  getProviderType as _getProviderType,
+  credentialProviderType as _credentialProviderType,
 } from './helper'
 
 import some from 'lodash/some'
@@ -34,14 +31,15 @@ export const useCloudProviderCredential = (credential, options = {}) => {
 
   const isSecret = computed(() => _isSecret(credential.value))
 
-  const credentialNamespace = computed(() => _credentialNamespace(credential.value))
-  const credentialName = computed(() => _credentialName(credential.value))
-  const credentialKind = computed(() => _credentialKind(credential.value))
-  const providerType = computed(() => _getProviderType(credential.value))
+  const credentialNamespace = computed(() => credential?.value?.metadata?.namespace)
+  const credentialName = computed(() => credential.value?.metadata?.name)
+  const credentialKind = computed(() => credential.value?.kind)
+  const providerType = computed(() => _credentialProviderType(credential.value))
+  const resourceUid = computed(() => credential.value?.metadata?.uid)
 
   const credentialDetails = computed(() => {
     if (isSecret.value) {
-      return _secretDetails(credential.value, providerType.value)
+      return _secretDetails({ secret: credential.value, providerType: providerType.value })
     }
     return undefined
   })
@@ -64,6 +62,13 @@ export const useCloudProviderCredential = (credential, options = {}) => {
   const isMarkedForDeletion = computed(() => Boolean(credential.value?.metadata.deletionTimestamp))
 
   return {
+    // Resource
+    resourceName: credentialName,
+    resourceNamespace: credentialNamespace,
+    resourceKind: credentialKind,
+    resourceUid,
+
+    // Credential
     credential,
     credentialNamespace,
     credentialName,
@@ -71,5 +76,6 @@ export const useCloudProviderCredential = (credential, options = {}) => {
     credentialDetails,
     credentialUsageCount,
     isMarkedForDeletion,
+    providerType,
   }
 }

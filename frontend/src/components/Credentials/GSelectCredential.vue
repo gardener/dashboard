@@ -108,7 +108,7 @@ export default {
     registerVuelidateAs: {
       type: String,
     },
-    notAllowedSecretNames: {
+    notAllowedCredentialNames: {
       type: Array,
       default: () => [],
     },
@@ -147,7 +147,7 @@ export default {
       composable = useCloudProviderCredential(credential)
     }
     const {
-      isSharedCredential,
+      isSharedBinding,
       selfTerminationDays,
     } = composable
 
@@ -156,7 +156,7 @@ export default {
       costObjectErrorMessage,
       costObject,
       cloudProviderEntityList,
-      isSharedCredential,
+      isSharedBinding,
       selfTerminationDays,
       v$,
     }
@@ -172,7 +172,7 @@ export default {
       { type: 'requiresCostObjectIfEnabled', enabled },
       function requiresCostObjectIfEnabled () {
         return enabled
-          ? !!this.costObject || this.isSharedCredential
+          ? !!this.costObject || this.isSharedBinding
           : true
       },
     )
@@ -198,9 +198,9 @@ export default {
     },
     allowedCredentials () {
       return this.cloudProviderEntityList
-        ?.filter(credential => {
-          const name = credential.secretRef?.name || credential.cedentialsRef?.name
-          return !this.notAllowedSecretNames.includes(name)
+        ?.filter(credentialEntity => {
+          const name = credentialEntity.secretRef?.name || credentialEntity.cedentialsRef?.name || credentialEntity.metadata?.name
+          return !this.notAllowedCredentialNames.includes(name)
         })
     },
     credentialHint () {
