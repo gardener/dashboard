@@ -28,11 +28,25 @@ SPDX-License-Identifier: Apache-2.0
           v-bind="props"
           :title="undefined"
         >
-          <g-credential-name :credential-entity="item.raw" />
+          <g-credential-name
+            v-if="isDnsProvider"
+            :credential="item.raw"
+          />
+          <g-credential-name
+            v-else
+            :binding="item.raw"
+          />
         </v-list-item>
       </template>
       <template #selection="{ item }">
-        <g-credential-name :credential-entity="item.raw" />
+        <g-credential-name
+          v-if="isDnsProvider"
+          :credential="item.raw"
+        />
+        <g-credential-name
+          v-else
+          :binding="item.raw"
+        />
       </template>
       <template #append-item>
         <v-divider class="mb-2" />
@@ -56,9 +70,13 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { toRef } from 'vue'
+import {
+  toRef,
+  computed,
+} from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
+import { storeToRefs } from 'pinia'
 
 import { useProjectStore } from '@/store/project'
 import { useCredentialStore } from '@/store/credential'
@@ -72,10 +90,6 @@ import { useProjectCostObject } from '@/composables/useProjectCostObject'
 import { useCloudProviderEntityList } from '@/composables/credential/useCloudProviderEntityList'
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
 import { useCloudProviderCredential } from '@/composables/credential/useCloudProviderCredential'
-import {
-  isSecretBinding,
-  isCredentialsBinding,
-} from '@/composables/credential/helper'
 
 import {
   withParams,
@@ -108,7 +122,7 @@ export default {
     registerVuelidateAs: {
       type: String,
     },
-    notAllowedCredentialNames: {
+    notAllowedSecretNames: {
       type: Array,
       default: () => [],
     },
@@ -137,14 +151,17 @@ export default {
     })
 
     const providerType = toRef(props, 'providerType')
+    const credential = toRef(props, 'modelValue')
+
     const cloudProviderEntityList = useCloudProviderEntityList(providerType, { credentialStore, gardenerExtensionStore, cloudProfileStore })
 
-    const credential = toRef(props, 'modelValue')
+    const { dnsProviderTypes } = storeToRefs(gardenerExtensionStore)
+    const isDnsProvider = computed(() => dnsProviderTypes.value.includes(providerType.value))
     let composable
-    if (isSecretBinding(credential.value) || isCredentialsBinding(credential.value)) {
-      composable = useCloudProviderBinding(credential)
-    } else {
+    if (isDnsProvider.value) {
       composable = useCloudProviderCredential(credential)
+    } else {
+      composable = useCloudProviderBinding(credential)
     }
     const {
       isSharedBinding,
@@ -158,6 +175,7 @@ export default {
       cloudProviderEntityList,
       isSharedBinding,
       selfTerminationDays,
+      isDnsProvider,
       v$,
     }
   },
@@ -200,7 +218,7 @@ export default {
       return this.cloudProviderEntityList
         ?.filter(credentialEntity => {
           const name = credentialEntity.secretRef?.name || credentialEntity.cedentialsRef?.name || credentialEntity.metadata?.name
-          return !this.notAllowedCredentialNames.includes(name)
+          return !this.notAllowedSecretNames.includes(name)
         })
     },
     credentialHint () {

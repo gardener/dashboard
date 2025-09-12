@@ -80,10 +80,10 @@ const authzStore = useAuthzStore()
 const { canGetCloudProviderCredentials } = storeToRefs(authzStore)
 
 let credentialComposable = {}
-if (credential.value) {
+if (binding.value) {
   credentialComposable = useCloudProviderBinding(binding)
 }
-if (binding.value) {
+if (credential.value) {
   credentialComposable = useCloudProviderCredential(credential)
 }
 
@@ -97,10 +97,10 @@ const {
   resourceUid,
 } = credentialComposable
 
-const canLinkToCredential = computed(() => canGetCloudProviderCredentials.value && resourceUid.value)
+const canLinkToCredential = computed(() => canGetCloudProviderCredentials.value && resourceUid?.value)
 
 const resourceHash = computed(() => {
-  const uid = resourceUid.value
+  const uid = resourceUid?.value
   return uid ? `#credential-uid=${encodeURIComponent(uid)}` : ''
 })
 

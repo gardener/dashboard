@@ -140,7 +140,6 @@ import {
   maxLength,
 } from '@vuelidate/validators'
 import {
-  ref,
   computed,
   toRefs,
 } from 'vue'
@@ -226,7 +225,6 @@ export default {
     const isDnsProvider = computed(() => dnsProviderTypes.value.includes(providerType.value))
 
     let credentialComposable = {}
-    let bindingContext
 
     if (binding?.value) {
       credentialComposable = useCloudProviderBinding(binding)
@@ -244,6 +242,7 @@ export default {
       credential: credentialResource,
     } = credentialComposable
 
+    let bindingContext = {}
     if (!isDnsProvider.value) {
       const { isSecretBinding } = credentialComposable
       if (isSecretBinding) {
@@ -254,30 +253,21 @@ export default {
       }
     }
 
-    let createBindingManifest, setBindingManifest, bindingManifest, bindingName, bindingProviderType, bindingRef
-    if (bindingContext) {
-      ({
-        createBindingManifest,
-        setBindingManifest,
-        bindingManifest,
-        bindingName,
-        bindingProviderType,
-        bindingRef,
-      } = bindingContext)
-    } else {
-      createBindingManifest = () => {}
-      setBindingManifest = () => {}
-      bindingManifest = ref({})
-      bindingName = ref('')
-      bindingProviderType = ref('')
-      bindingRef = ref({})
-    }
+    const {
+      createBindingManifest,
+      setBindingManifest,
+      bindingManifest,
+      bindingName,
+      bindingProviderType,
+      bindingRef,
+    } = bindingContext
 
     const {
       createSecretManifest,
       setSecretManifest,
       secretManifest,
       secretName,
+      secretProviderType,
     } = useSecretContext()
 
     return {
@@ -286,6 +276,7 @@ export default {
       bindingManifest,
       bindingName,
       bindingProviderType,
+      secretProviderType,
       bindingRef,
       createSecretManifest,
       setSecretManifest,
@@ -369,12 +360,17 @@ export default {
     },
     name: {
       get () {
+        if (this.isDnsProvider) {
+          return this.secretName
+        }
         return this.bindingName
       },
       set (value) {
-        this.bindingName = value
+        if (!this.isDnsProvider) {
+          this.bindingName = value
+          this.bindingRef.name = value
+        }
         this.secretName = value
-        this.bindingRef.name = value
       },
     },
   },
@@ -421,33 +417,30 @@ export default {
       }
     },
     save () {
-      const secret = cloneDeep(this.secretManifest)
-      if (this.isDnsProvider) {
-        const labelKey = `provider.shoot.gardener.cloud/${this.providerType}`
-        secret.metadata.labels = {
-          ...(secret.metadata.labels || {}),
-          [labelKey]: 'true',
-        }
-      }
-
       if (this.isCreateMode) {
         return this.isDnsProvider
-          ? this.createCredential({ secret })
-          : this.createCredential({ secret, binding: this.bindingManifest })
+          ? this.createCredential({ secret: this.secretManifest })
+          : this.createCredential({ secret: this.secretManifest, binding: this.bindingManifest })
       } else {
         return this.isDnsProvider
-          ? this.updateCredential({ secret })
-          : this.updateCredential({ secret, binding: this.bindingManifest })
+          ? this.updateCredential({ secret: this.secretManifest })
+          : this.updateCredential({ secret: this.secretManifest, binding: this.bindingManifest })
       }
     },
     reset () {
       this.v$.$reset()
 
       if (this.isCreateMode) {
-        this.createBindingManifest()
         this.createSecretManifest()
+
+        if (!this.isDnsProvider) {
+          this.createBindingManifest()
+          this.bindingProviderType = this.providerType
+        } else {
+          this.secretProviderType = this.providerType
+        }
+
         this.name = `my-${this.providerType}-secret`
-        this.bindingProviderType = this.providerType
 
         setDelayedInputFocus(this, 'name')
       } else {

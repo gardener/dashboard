@@ -108,6 +108,10 @@ export default {
     secret () {
       return this.getSecret({ namespace: this.shootNamespace, name: this.secretName })
     },
+    resourceHash () {
+      const uid = get(this.secret, ['metadata', 'uid'])
+      return uid ? `#credential-uid=${encodeURIComponent(uid)}` : ''
+    },
     dnsProviderDescriptions () {
       const descriptions = []
       descriptions.push({
@@ -120,9 +124,9 @@ export default {
         to: {
           name: 'Credentials',
           params: {
-            hash: this.secretName,
             namespace: this.shootNamespace,
           },
+          hash: this.resourceHash,
         },
       })
       descriptions.push({
