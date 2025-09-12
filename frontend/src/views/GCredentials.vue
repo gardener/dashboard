@@ -56,7 +56,7 @@ SPDX-License-Identifier: Apache-2.0
               <v-list-item
                 v-for="infrastructure in sortedProviderTypeList"
                 :key="infrastructure"
-                @click="openCredentialAddDialog(infrastructure)"
+                @click="onAddInfraBinding(infrastructure)"
               >
                 <template #prepend>
                   <g-vendor-icon
@@ -118,8 +118,8 @@ SPDX-License-Identifier: Apache-2.0
             :item="item"
             :highlighted="isHighlighted(item.binding)"
             :headers="infraCredentialTableHeaders"
-            @delete="onRemoveCredential"
-            @update="onUpdateCredential"
+            @update-infra-binding="onUpdateInfraBinding"
+            @delete-infra-binding="onDeleteInfraBinding"
           />
         </template>
         <template #bottom>
@@ -145,7 +145,7 @@ SPDX-License-Identifier: Apache-2.0
 
         <template #append>
           <v-text-field
-            v-if="dnsBindingList.length > 3"
+            v-if="dnsCredentialList.length > 3"
             v-model="dnsCredentialFilter"
             prepend-inner-icon="mdi-magnify"
             color="primary"
@@ -180,7 +180,7 @@ SPDX-License-Identifier: Apache-2.0
               <v-list-item
                 v-for="dnsProvider in dnsProviderTypes"
                 :key="dnsProvider"
-                @click="openCredentialAddDialog(dnsProvider)"
+                @click="onAddDnsCredential(dnsProvider)"
               >
                 <template #prepend>
                   <g-vendor-icon
@@ -202,7 +202,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
       </g-toolbar>
 
-      <v-card-text v-if="!dnsBindingList.length">
+      <v-card-text v-if="!dnsCredentialList.length">
         <div class="text-h6 text-grey-darken-1 my-4">
           Add DNS Credentials to your project
         </div>
@@ -231,15 +231,15 @@ SPDX-License-Identifier: Apache-2.0
           <g-credential-row-dns
             :ref="itemRef"
             :item="item"
-            :highlighted="isHighlighted(item.binding)"
+            :highlighted="isHighlighted(item.credential)"
             :headers="dnsCredentialTableHeaders"
-            @delete="onRemoveCredential"
-            @update="onUpdateCredential"
+            @update-dns-credential="onUpdateDnsCredential"
+            @delete-dns-credential="onDeleteDnsCredential"
           />
         </template>
         <template #bottom>
           <g-data-table-footer
-            :items-length="dnsBindingList.length"
+            :items-length="dnsCredentialList.length"
             items-label="DNS Credentials"
           />
         </template>
@@ -248,7 +248,8 @@ SPDX-License-Identifier: Apache-2.0
 
     <g-secret-dialog-wrapper
       :visible-dialog="visibleCredentialDialog"
-      :selected-binding="selectedBinding"
+      :selected-dns-credential="selectedDnsCredential"
+      :selected-infra-binding="selectedInfraBinding"
       @dialog-closed="onDialogClosed"
     />
   </v-container>
@@ -284,6 +285,13 @@ import GDataTableFooter from '@/components/GDataTableFooter.vue'
 
 import { useTwoTableLayout } from '@/composables/useTwoTableLayout'
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
+import { useCloudProviderCredential } from '@/composables/credential/useCloudProviderCredential'
+import {
+  isSecretBinding,
+  isCredentialsBinding,
+  credentialProviderType,
+  bindingProviderType,
+} from '@/composables/credential/helper'
 
 import { mapTableHeader } from '@/utils'
 
@@ -315,12 +323,12 @@ export default {
     const credentialStore = useCredentialStore()
     const {
       infrastructureBindingList,
-      dnsBindingList,
+      dnsCredentialList,
     } = storeToRefs(credentialStore)
 
     const itemHeight = 58
     const firstTableItemCount = computed(() => infrastructureBindingList.value.length)
-    const secondTableItemCount = computed(() => dnsBindingList.value.length)
+    const secondTableItemCount = computed(() => dnsCredentialList.value.length)
 
     const {
       firstTableStyles: infraCredentialTableStyles,
@@ -334,7 +342,7 @@ export default {
     return {
       highlightedUid,
       infrastructureBindingList,
-      dnsBindingList,
+      dnsCredentialList,
       itemHeight,
       infraCredentialTableStyles,
       dnsCredentialTableStyles,
@@ -342,7 +350,8 @@ export default {
   },
   data () {
     return {
-      selectedBinding: {},
+      selectedInfraBinding: {},
+      selectedDnsCredential: {},
       infraCredentialFilter: '',
       createInfraCredentialMenu: false,
       dnsCredentialFilter: '',
@@ -478,7 +487,7 @@ export default {
       return filter(this.dnsCredentialTableHeaders, ['selected', true])
     },
     dnsItems () {
-      return map(this.dnsBindingList, this.computeItem)
+      return map(this.dnsCredentialList, this.computeItem)
     },
     dnsCredentialSortedItems () {
       const secondSortCriteria = 'name'
@@ -494,7 +503,10 @@ export default {
         setTimeout(() => {
           // Cannot start scrolling before the table is rendered
           const scrollToItem = (items, tableRef) => {
-            const itemIndex = findIndex(items, ['binding.metadata.uid', value])
+            const itemIndex = findIndex(items, item => {
+              const uid = item.binding?.metadata.uid ?? item.credential?.metadata.uid
+              return uid === value
+            })
             if (itemIndex !== -1) {
               tableRef.scrollToIndex(itemIndex)
             }
@@ -508,37 +520,65 @@ export default {
     },
   },
   methods: {
-    computeItem (binding) {
+    computeItem (resource) {
+      const refResource = toRef(resource)
+      let composable
+      if (isSecretBinding(resource) || isCredentialsBinding(resource)) {
+        composable = useCloudProviderBinding(refResource)
+      } else {
+        composable = useCloudProviderCredential(refResource)
+      }
       const {
         credentialUsageCount,
-        isSharedCredential,
-        isOrphanedCredential,
+        isSharedBinding,
+        isOrphanedBinding,
         credentialNamespace,
         credential,
         credentialDetails,
-      } = useCloudProviderBinding(toRef(binding))
+        credentialKind,
+      } = composable
 
       return {
-        binding,
-        credentialUsageCount: unref(credentialUsageCount),
-        isSharedCredential: unref(isSharedCredential),
-        isOrphanedCredential: unref(isOrphanedCredential),
-        credentialNamespace: unref(credentialNamespace),
+        binding: isSecretBinding(resource) || isCredentialsBinding(resource) ? resource : undefined,
         credential: unref(credential),
+        credentialUsageCount: unref(credentialUsageCount),
+        isSharedBinding: unref(isSharedBinding),
+        isOrphanedBinding: unref(isOrphanedBinding),
+        credentialNamespace: unref(credentialNamespace),
         credentialDetails: unref(credentialDetails),
+        credentialKind,
       }
     },
-    openCredentialAddDialog (providerType) {
-      this.selectedBinding = undefined
+    onAddInfraBinding (providerType) {
+      this.selectedInfraBinding = undefined
+      this.selectedDnsCredential = undefined
       this.visibleCredentialDialog = providerType
     },
-    onUpdateCredential (binding) {
-      const providerType = binding.provider.type
-      this.selectedBinding = binding
+    onAddDnsCredential (providerType) {
+      this.selectedInfraBinding = undefined
+      this.selectedDnsCredential = undefined
       this.visibleCredentialDialog = providerType
     },
-    onRemoveCredential (binding) {
-      this.selectedBinding = binding
+    onUpdateInfraBinding (binding) {
+      const providerType = bindingProviderType(binding)
+      this.selectedInfraBinding = binding
+      this.selectedDnsCredential = undefined
+      this.visibleCredentialDialog = providerType
+    },
+    onDeleteInfraBinding (binding) {
+      this.selectedInfraBinding = binding
+      this.selectedDnsCredential = undefined
+      this.visibleCredentialDialog = 'delete'
+    },
+    onUpdateDnsCredential (credential) {
+      const providerType = credentialProviderType(credential)
+      this.selectedDnsCredential = credential
+      this.selectedInfraBinding = undefined
+      this.visibleCredentialDialog = providerType
+    },
+    onDeleteDnsCredential (credential) {
+      this.selectedDnsCredential = credential
+      this.selectedInfraBinding = undefined
       this.visibleCredentialDialog = 'delete'
     },
     setSelectedInfraHeader (header) {
@@ -578,17 +618,19 @@ export default {
       const {
         credentialKind,
         credentialUsageCount,
+        credential,
         binding,
       } = item
 
       switch (column) {
         case 'name':
-          return binding.metadata.name
+          return (binding ?? credential).metadata.name
         case 'infrastructure':
+          return bindingProviderType(binding)
         case 'dnsProvider':
-          return binding.provider.type
+          return credentialProviderType(credential)
         case 'kind':
-          return `${binding.kind} (${credentialKind.value})`
+          return `${credential.kind} (${credentialKind.value})`
         case 'credentialUsageCount':
           return credentialUsageCount.value
       }
@@ -598,21 +640,23 @@ export default {
       const tableKeys = mapKeys(sortableTableHeaders, ({ key }) => key)
       return mapValues(tableKeys, () => () => 0)
     },
-    isHighlighted (binding) {
-      return this.highlightedUid && this.highlightedUid === binding.metadata.uid
+    isHighlighted (credential) {
+      return this.highlightedUid && this.highlightedUid === credential.metadata.uid
     },
     customFilter (_, query, item) {
       const {
         credentialDetails,
+        credential,
         binding,
       } = item.raw
 
       const detailValues = map(credentialDetails, 'value')
 
       const values = [
-        binding.metadata.name,
-        binding.provider.type,
-        binding.kind,
+        (binding ?? credential).metadata.name,
+        credentialProviderType(credential),
+        credential?.kind,
+        binding?.kind,
         ...detailValues,
       ]
 
@@ -624,7 +668,7 @@ export default {
       })
     },
     getItemKey (item, fallback) {
-      return get(item, ['raw', 'binding', 'metadata', 'uid'], fallback)
+      return item.raw?.binding?.metadata.uid ?? item.raw?.credential?.metadata.uid ?? fallback
     },
   },
 }

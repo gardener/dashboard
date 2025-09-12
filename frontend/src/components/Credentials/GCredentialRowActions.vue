@@ -9,11 +9,11 @@ SPDX-License-Identifier: Apache-2.0
     <g-action-button
       v-if="canPatchCredentials"
       icon="mdi-pencil"
-      :disabled="isSharedCredential || hasOwnWorkloadIdentity"
+      :disabled="isSharedBinding || hasOwnWorkloadIdentity"
       @click="onUpdate"
     >
       <template #tooltip>
-        <span v-if="isSharedCredential">You can only edit Secrets that are owned by you</span>
+        <span v-if="isSharedBinding">You can only edit Secrets that are owned by you</span>
         <span v-else-if="hasOwnWorkloadIdentity">The dashboard doesn't support editing credentials of type WorkloadIdentity</span>
         <span v-else>Edit Secret</span>
       </template>
@@ -21,12 +21,12 @@ SPDX-License-Identifier: Apache-2.0
     <g-action-button
       v-if="canDeleteCredentials"
       icon="mdi-delete"
-      :disabled="credentialUsageCount > 0 || isSharedCredential || hasOwnWorkloadIdentity || isMarkedForDeletion"
+      :disabled="credentialUsageCount > 0 || isSharedBinding || hasOwnWorkloadIdentity || isMarkedForDeletion"
       @click="onDelete"
     >
       <template #tooltip>
         <span v-if="credentialUsageCount > 0">You can only delete Secrets that are currently unused</span>
-        <span v-else-if="isSharedCredential">You can only delete Secrets that are owned by you</span>
+        <span v-else-if="isSharedBinding">You can only delete Secrets that are owned by you</span>
         <span v-else-if="hasOwnWorkloadIdentity">The dashboard doesn't support deleting credentials of type WorkloadIdentity</span>
         <span v-else-if="isMarkedForDeletion">Secret is already marked for deletion</span>
         <span v-else>Delete Secret</span>
@@ -37,40 +37,47 @@ SPDX-License-Identifier: Apache-2.0
 
 <script setup>
 import { storeToRefs } from 'pinia'
-import { toRef } from 'vue'
+import { toRefs } from 'vue'
 
 import { useAuthzStore } from '@/store/authz'
 
 import GActionButton from '@/components/GActionButton.vue'
 
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
+import { useCloudProviderCredential } from '@/composables/credential/useCloudProviderCredential'
 
 const props = defineProps({
-  binding: {
-    type: Object,
-    required: true,
-  },
+  credential: Object,
+  binding: Object,
 })
-const binding = toRef(props, 'binding')
+const { credential, binding } = toRefs(props)
 
 const emit = defineEmits(['update', 'delete'])
 
 const authzStore = useAuthzStore()
 const { canPatchCredentials, canDeleteCredentials } = storeToRefs(authzStore)
 
+let composable = {}
+if (binding?.value) {
+  composable = useCloudProviderBinding(binding)
+}
+if (credential?.value) {
+  composable = useCloudProviderCredential(credential)
+}
+
 const {
   hasOwnWorkloadIdentity,
   credentialUsageCount,
   isMarkedForDeletion,
-  isSharedCredential,
-} = useCloudProviderBinding(binding)
+  isSharedBinding,
+} = composable
 
 function onUpdate () {
-  emit('update', binding.value)
+  emit('update', binding?.value || credential?.value)
 }
 
 function onDelete () {
-  emit('delete', binding.value)
+  emit('delete', binding?.value || credential?.value)
 }
 
 </script>

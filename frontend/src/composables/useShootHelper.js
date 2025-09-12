@@ -17,7 +17,7 @@ import { useCredentialStore } from '@/store/credential'
 import { useSeedStore } from '@/store/seed'
 import { useProjectStore } from '@/store/project'
 
-import { useCloudProviderBindingList } from '@/composables/credential/useCloudProviderBindingList'
+import { useCloudProviderEntityList } from '@/composables/credential/useCloudProviderEntityList'
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
 
 import { useShootAccessRestrictions } from './useShootAccessRestrictions'
@@ -143,7 +143,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     return cloudProfileStore.getDefaultNodesCIDR(cloudProfileRef.value)
   })
 
-  const infrastructureBindings = useCloudProviderBindingList(providerType, { credentialStore, gardenerExtensionStore })
+  const infrastructureBindings = useCloudProviderEntityList(providerType, { credentialStore, gardenerExtensionStore, cloudProfileStore })
 
   const sortedKubernetesVersions = computed(() => {
     return cloudProfileStore.sortedKubernetesVersions(cloudProfileRef.value)

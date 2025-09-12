@@ -13,11 +13,11 @@ SPDX-License-Identifier: Apache-2.0
       <div class="d-flex">
         {{ item.binding.metadata.name }}
         <g-shared-credential-icon
-          v-if="item.isSharedCredential"
+          v-if="item.isSharedBinding"
           :namespace="item.credentialNamespace"
         />
         <g-orphaned-credential-icon
-          v-if="item.isOrphanedCredential"
+          v-if="item.isOrphanedBinding"
           :binding="item.binding"
         />
       </div>
@@ -28,15 +28,15 @@ SPDX-License-Identifier: Apache-2.0
     <td v-if="selectedHeaders.infrastructure">
       <g-vendor
         extended
-        :provider-type="item.binding.provider.type"
+        :provider-type="bindingProviderType(item.binding)"
       />
     </td>
     <td v-if="selectedHeaders.details">
       <g-credential-details-item-content
         class="py-1"
         :credential="item.credential"
-        :shared="item.isSharedCredential"
-        :provider-type="item.binding.provider.type"
+        :shared="item.isSharedBinding"
+        :provider-type="bindingProviderType(item.binding)"
       />
     </td>
     <td v-if="selectedHeaders.credentialUsageCount">
@@ -67,7 +67,9 @@ import GCredentialRowActions from '@/components/Credentials/GCredentialRowAction
 import GCredentialIcon from '@/components/Credentials/GCredentialIcon'
 import GCredentialUsedByLabel from '@/components/Credentials/GCredentialUsedByLabel'
 import GSharedCredentialIcon from '@/components/Credentials/GSharedCredentialIcon.vue'
-import GOrphanedCredentialIcon from '@/components/Credentials/GOrphanedCredentialIcon.vue'
+import GOrphanedCredentialIcon from '@/components/Credentials/GOrphanedBindingIcon.vue'
+
+import { bindingProviderType } from '@/composables/credential/helper'
 
 import { mapTableHeader } from '@/utils'
 
@@ -92,18 +94,18 @@ const {
   headers,
 } = toRefs(props)
 
-const emit = defineEmits(['update', 'delete'])
+const emit = defineEmits(['updateInfraBinding', 'deleteInfraBinding'])
 
 const selectedHeaders = computed(() =>
   mapTableHeader(headers.value, 'selected'),
 )
 
 function onUpdate (value) {
-  emit('update', value)
+  emit('updateInfraBinding', value)
 }
 
 function onDelete (value) {
-  emit('delete', value)
+  emit('deleteInfraBinding', value)
 }
 
 </script>

@@ -5,8 +5,11 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <span v-if="binding">
-    <g-credential-icon :binding="binding" />
+  <span v-if="resourceHash">
+    <g-credential-icon
+      :binding="binding"
+      :credential="credential"
+    />
     <v-tooltip
       class="credentials-details-tooltip"
       :open-delay="500"
@@ -16,29 +19,29 @@ SPDX-License-Identifier: Apache-2.0
         <g-text-router-link
           v-if="canLinkToCredential && renderLink"
           v-bind="tProps"
-          :to="{ name: 'Credentials', params: { namespace: binding.metadata.namespace }, hash: credentialHash }"
-          :text="binding.metadata.name"
+          :to="{ name: 'Credentials', params: { namespace: resourceNamespace }, hash: resourceHash }"
+          :text="resourceName"
         />
         <span
           v-else
           v-bind="tProps"
-        >{{ binding.metadata.name }}</span>
+        >{{ resourceName }}</span>
       </template>
       <v-card>
         <g-credential-details-item-content
           class="ma-1"
           :credential="credential"
-          :shared="isSharedCredential"
-          :provider-type="binding.provider.type"
+          :shared="isSharedBinding"
+          :provider-type="providerType"
         />
       </v-card>
     </v-tooltip>
     <g-shared-credential-icon
-      v-if="isSharedCredential"
+      v-if="isSharedBinding"
       :namespace="credentialNamespace"
     />
     <g-orphaned-credential-icon
-      v-if="isOrphanedCredential"
+      v-if="isOrphanedBinding"
       :binding="binding"
     />
   </span>
@@ -50,7 +53,7 @@ SPDX-License-Identifier: Apache-2.0
 <script setup>
 import {
   computed,
-  toRef,
+  toRefs,
 } from 'vue'
 import { storeToRefs } from 'pinia'
 
@@ -59,34 +62,47 @@ import { useAuthzStore } from '@/store/authz'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 import GCredentialDetailsItemContent from '@/components/Credentials/GCredentialDetailsItemContent'
 import GCredentialIcon from '@/components/Credentials/GCredentialIcon'
-import GOrphanedCredentialIcon from '@/components/Credentials/GOrphanedCredentialIcon.vue'
+import GOrphanedCredentialIcon from '@/components/Credentials/GOrphanedBindingIcon.vue'
 import GSharedCredentialIcon from '@/components/Credentials/GSharedCredentialIcon.vue'
 
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
+import { useCloudProviderCredential } from '@/composables/credential/useCloudProviderCredential'
 
 const props = defineProps({
+  credential: Object,
   binding: Object,
   renderLink: Boolean,
 })
 
-const binding = toRef(props, 'binding')
+const { credential, binding } = toRefs(props)
 
 const authzStore = useAuthzStore()
 const { canGetCloudProviderCredentials } = storeToRefs(authzStore)
 
-const canLinkToCredential = computed(() => canGetCloudProviderCredentials.value && binding.value)
-
-const credentialHash = computed(() => {
-  const uid = binding.value?.metadata?.uid
-  return uid ? `#credential-uid=${encodeURIComponent(uid)}` : ''
-})
+let credentialComposable = {}
+if (binding.value) {
+  credentialComposable = useCloudProviderBinding(binding)
+}
+if (credential.value) {
+  credentialComposable = useCloudProviderCredential(credential)
+}
 
 const {
-  isSharedCredential,
+  isSharedBinding,
   credentialNamespace,
-  isOrphanedCredential,
-  credential,
-} = useCloudProviderBinding(binding)
+  isOrphanedBinding,
+  providerType,
+  resourceName,
+  resourceNamespace,
+  resourceUid,
+} = credentialComposable
+
+const canLinkToCredential = computed(() => canGetCloudProviderCredentials.value && resourceUid?.value)
+
+const resourceHash = computed(() => {
+  const uid = resourceUid?.value
+  return uid ? `#credential-uid=${encodeURIComponent(uid)}` : ''
+})
 
 </script>
 

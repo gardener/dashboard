@@ -32,8 +32,8 @@ import {
 } from 'vue'
 
 import {
-  credentialName as _credentialName,
-  credentialKind as _credentialKind,
+  bindingCredentialName,
+  bindingCredentialKind,
 } from '@/composables/credential/helper'
 
 const props = defineProps({
@@ -43,11 +43,11 @@ const props = defineProps({
 const binding = toRef(props, 'binding')
 
 const credentialName = computed(() =>
-  _credentialName(binding.value),
+  bindingCredentialName(binding.value),
 )
 
 const credentialKind = computed(() =>
-  _credentialKind(binding.value),
+  bindingCredentialKind(binding.value),
 )
 
 </script>
