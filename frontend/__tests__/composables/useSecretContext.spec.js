@@ -135,8 +135,9 @@ describe('composables', () => {
             name: 'my-secret',
             namespace: testNamespace,
             labels: {
+              'other.label1': 'true',
               'provider.shoot.gardener.cloud/aws': 'true',
-              'other.label': 'value',
+              'other.label2': 'true',
             },
           },
           data: {},
@@ -148,8 +149,9 @@ describe('composables', () => {
         // Test setter - should set new provider type
         secretContext.secretProviderType = 'gcp'
         expect(secretContext.secretManifest.metadata.labels).toEqual({
+          'other.label1': 'true',
           'provider.shoot.gardener.cloud/aws': 'true',
-          'other.label': 'value',
+          'other.label2': 'true',
           'provider.shoot.gardener.cloud/gcp': 'true',
         })
         expect(secretContext.secretProviderType).toBe('aws') // Should return first match

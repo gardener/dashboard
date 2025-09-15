@@ -24,7 +24,9 @@ export function credentialProviderType (credential) {
       continue
     }
     const [, type] = /^provider\.shoot\.gardener\.cloud\/(.+)$/.exec(key) || []
-    return type
+    if (type) {
+      return type
+    }
   }
   return undefined
 }
