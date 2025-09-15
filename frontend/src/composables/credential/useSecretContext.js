@@ -29,7 +29,6 @@ import get from 'lodash/get'
 import isEqual from 'lodash/isEqual'
 import set from 'lodash/set'
 import mapValues from 'lodash/mapValues'
-import find from 'lodash/find'
 
 export function createSecretContextComposable (options = {}) {
   const {
@@ -90,9 +89,14 @@ export function createSecretContextComposable (options = {}) {
 
   const secretProviderType = computed({
     get () {
-      return find(manifest.value.metadata.labels, label => {
-        return /^provider\.shoot\.gardener\.cloud\/(.+)$/.test(label)
-      })
+      const labels = get(manifest.value, ['metadata', 'labels'], {})
+      for (const key of Object.keys(labels)) {
+        const match = key.match(/^provider\.shoot\.gardener\.cloud\/(.+)$/)
+        if (match) {
+          return match[1]
+        }
+      }
+      return undefined
     },
     set (value) {
       const labelKey = `provider.shoot.gardener.cloud/${value}`
