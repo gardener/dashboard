@@ -53,7 +53,7 @@ describe('api', function () {
       mockRequest.mockImplementationOnce(fixtures.workloadidentities.mocks.list())
 
       const params = {
-        bindingNamespace: namespace,
+        namespace,
       }
 
       const res = await agent
@@ -69,7 +69,7 @@ describe('api', function () {
       expect(res.body.secrets).toHaveLength(1)
       expect(res.body.secrets[0].metadata.name).toBe('dns-secret')
       expect(Array.isArray(res.body.workloadIdentities)).toBe(true)
-      expect(res.body.secretBindings).toHaveLength(4)
+      expect(res.body.secretBindings).toHaveLength(3)
       expect(res.body).toMatchSnapshot()
     })
 
@@ -81,7 +81,7 @@ describe('api', function () {
 
       const namespace = 'garden-baz'
       const params = {
-        bindingNamespace: namespace,
+        namespace,
       }
 
       const res = await agent

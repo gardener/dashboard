@@ -44,15 +44,6 @@ const cloudProviderBindingList = [
     },
     quotas,
   }),
-  getSecretBinding({
-    namespace: 'garden-foo',
-    name: 'dns-aws-route53-secretbinding',
-    provider: 'aws-route53',
-    secretRef: {
-      namespace: 'garden-foo',
-      name: 'dns-secret',
-    },
-  }),
 ]
 
 function getSecretBinding ({ namespace, name, provider, secretRef = {}, quotas = [] }) {

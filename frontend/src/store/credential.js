@@ -18,6 +18,7 @@ import { useApi } from '@/composables/useApi'
 import {
   isInfrastructureBinding,
   isDNSCredential,
+  isSecret,
 } from '@/composables/credential/helper'
 
 import { useAuthzStore } from './authz'
@@ -145,7 +146,8 @@ export const useCredentialStore = defineStore('credential', () => {
     return [
       ...Object.values(state.secrets),
       ...Object.values(state.workloadIdentities),
-    ].filter(credential => isDNSCredential({ credential, dnsProviderTypes: dnsProviderTypes.value }))
+    ].filter(credential => isDNSCredential({ credential, dnsProviderTypes: dnsProviderTypes.value }),
+    ).filter(credential => isSecret(credential)) // Remove filter when DNS supports credentials of kind WorkloadIdentity
   })
 
   const secretBindingList = computed(() =>
