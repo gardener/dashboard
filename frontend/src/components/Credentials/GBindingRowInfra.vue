@@ -23,7 +23,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </td>
     <td v-if="selectedHeaders.kind">
-      <g-credential-icon :binding="item.binding" />
+      <g-binding-icon :binding="item.binding" />
     </td>
     <td v-if="selectedHeaders.infrastructure">
       <g-vendor
@@ -46,7 +46,7 @@ SPDX-License-Identifier: Apache-2.0
       v-if="selectedHeaders.actions"
       class="text-action-button"
     >
-      <g-credential-row-actions
+      <g-binding-row-actions
         :binding="item.binding"
         @update="onUpdate"
         @delete="onDelete"
@@ -63,8 +63,8 @@ import {
 
 import GVendor from '@/components/GVendor'
 import GCredentialDetailsItemContent from '@/components/Credentials/GCredentialDetailsItemContent'
-import GCredentialRowActions from '@/components/Credentials/GCredentialRowActions'
-import GCredentialIcon from '@/components/Credentials/GCredentialIcon'
+import GBindingRowActions from '@/components/Credentials/GBindingRowActions'
+import GBindingIcon from '@/components/Credentials/GBindingIcon'
 import GCredentialUsedByLabel from '@/components/Credentials/GCredentialUsedByLabel'
 import GSharedCredentialIcon from '@/components/Credentials/GSharedCredentialIcon.vue'
 import GOrphanedCredentialIcon from '@/components/Credentials/GOrphanedBindingIcon.vue'

@@ -175,8 +175,6 @@ import {
   setInputFocus,
 } from '@/utils'
 
-import cloneDeep from 'lodash/cloneDeep'
-
 export default {
   components: {
     GMessage,
@@ -226,9 +224,9 @@ export default {
 
     let credentialComposable = {}
 
-    if (binding?.value) {
+    if (binding.value) {
       credentialComposable = useCloudProviderBinding(binding)
-    } if (credential?.value) {
+    } if (credential.value) {
       credentialComposable = useCloudProviderCredential(credential)
     }
 

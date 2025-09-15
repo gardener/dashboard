@@ -36,7 +36,7 @@ SPDX-License-Identifier: Apache-2.0
       </g-list-item>
       <g-list-item v-if="hasShootWorkerGroups">
         <g-list-item-content label="Credential">
-          <g-credential-name
+          <g-binding-name
             :binding="shootCloudProviderBinding"
             render-link
           />
@@ -257,7 +257,7 @@ import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 
 import GCopyBtn from '@/components/GCopyBtn'
 import GShootSeedName from '@/components/GShootSeedName'
-import GCredentialName from '@/components/Credentials/GCredentialName'
+import GBindingName from '@/components/Credentials/GBindingName'
 import GVendor from '@/components/GVendor'
 import GDnsProvider from '@/components/ShootDns/GDnsProvider'
 import GDnsConfiguration from '@/components/ShootDns/GDnsConfiguration'
@@ -284,7 +284,7 @@ export default {
   components: {
     GCopyBtn,
     GShootSeedName,
-    GCredentialName,
+    GBindingName,
     GVendor,
     GDnsProvider,
     GDnsConfiguration,

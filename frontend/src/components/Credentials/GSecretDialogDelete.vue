@@ -105,10 +105,10 @@ export default {
   setup (props) {
     const { credential, binding } = toRefs(props)
     let credentialComposable = {}
-    if (binding?.value) {
+    if (binding.value) {
       credentialComposable = useCloudProviderBinding(binding)
     }
-    if (credential?.value) {
+    if (credential.value) {
       credentialComposable = useCloudProviderCredential(credential)
     }
 

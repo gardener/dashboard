@@ -31,7 +31,7 @@ export const useCloudProviderCredential = (credential, options = {}) => {
 
   const isSecret = computed(() => _isSecret(credential.value))
 
-  const credentialNamespace = computed(() => credential?.value?.metadata?.namespace)
+  const credentialNamespace = computed(() => credential.value?.metadata?.namespace)
   const credentialName = computed(() => credential.value?.metadata?.name)
   const credentialKind = computed(() => credential.value?.kind)
   const providerType = computed(() => _credentialProviderType(credential.value))

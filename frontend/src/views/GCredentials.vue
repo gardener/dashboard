@@ -113,7 +113,7 @@ SPDX-License-Identifier: Apache-2.0
         fixed-header
       >
         <template #item="{ item, itemRef }">
-          <g-credential-row-infra
+          <g-binding-row-infra
             :ref="itemRef"
             :item="item"
             :highlighted="isHighlighted(item.binding)"
@@ -277,7 +277,7 @@ import { useLocalStorageStore } from '@/store/localStorage'
 
 import GSecretDialogWrapper from '@/components/Credentials/GSecretDialogWrapper'
 import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
-import GCredentialRowInfra from '@/components/Credentials/GCredentialRowInfra.vue'
+import GBindingRowInfra from '@/components/Credentials/GBindingRowInfra.vue'
 import GCredentialRowDns from '@/components/Credentials/GCredentialRowDns.vue'
 import GVendorIcon from '@/components/GVendorIcon'
 import GToolbar from '@/components/GToolbar'
@@ -309,7 +309,7 @@ export default {
   components: {
     GSecretDialogWrapper,
     GTableColumnSelection,
-    GCredentialRowInfra,
+    GBindingRowInfra,
     GCredentialRowDns,
     GVendorIcon,
     GToolbar,

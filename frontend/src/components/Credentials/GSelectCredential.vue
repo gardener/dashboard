@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
             v-if="isDnsProvider"
             :credential="item.raw"
           />
-          <g-credential-name
+          <g-binding-name
             v-else
             :binding="item.raw"
           />
@@ -43,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
           v-if="isDnsProvider"
           :credential="item.raw"
         />
-        <g-credential-name
+        <g-binding-name
           v-else
           :binding="item.raw"
         />
@@ -85,6 +85,7 @@ import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import GSecretDialogWrapper from '@/components/Credentials/GSecretDialogWrapper'
 import GCredentialName from '@/components/Credentials/GCredentialName'
+import GBindingName from '@/components/Credentials/GBindingName'
 
 import { useProjectCostObject } from '@/composables/useProjectCostObject'
 import { useCloudProviderEntityList } from '@/composables/credential/useCloudProviderEntityList'
@@ -107,6 +108,7 @@ export default {
   components: {
     GSecretDialogWrapper,
     GCredentialName,
+    GBindingName,
   },
   props: {
     modelValue: {

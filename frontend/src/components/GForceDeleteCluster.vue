@@ -53,7 +53,7 @@ SPDX-License-Identifier: Apache-2.0
         I confirm that I read the message above and deleted all resources
         in the underlying <code>{{ shootProviderType }}</code> account
         <code>
-          <g-credential-name
+          <g-binding-name
             :binding="shootCloudProviderBinding"
             render-link
           />
@@ -78,7 +78,7 @@ import {
 import { useVuelidate } from '@vuelidate/core'
 
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
-import GCredentialName from '@/components/Credentials/GCredentialName'
+import GBindingName from '@/components/Credentials/GBindingName'
 
 import { useShootItem } from '@/composables/useShootItem'
 
@@ -96,7 +96,7 @@ import filter from 'lodash/filter'
 export default {
   components: {
     GAccountAvatar,
-    GCredentialName,
+    GBindingName,
   },
   setup () {
     const {
