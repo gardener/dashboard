@@ -107,8 +107,7 @@ export default {
     let credentialComposable = {}
     if (binding.value) {
       credentialComposable = useCloudProviderBinding(binding)
-    }
-    if (credential.value) {
+    } else if (credential.value) {
       credentialComposable = useCloudProviderCredential(credential)
     }
 

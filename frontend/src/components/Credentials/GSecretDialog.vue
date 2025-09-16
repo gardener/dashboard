@@ -226,7 +226,7 @@ export default {
 
     if (binding.value) {
       credentialComposable = useCloudProviderBinding(binding)
-    } if (credential.value) {
+    } else if (credential.value) {
       credentialComposable = useCloudProviderCredential(credential)
     }
 
@@ -446,22 +446,6 @@ export default {
           this.setBindingManifest(this.binding)
         }
         this.setSecretManifest(this.credentialResource)
-        /*
-        if (this.credential) {
-          this.setBindingManifest(this.binding)
-          this.setSecretManifest(this.credential)
-        } else {
-          this.setBindingManifest(this.binding)
-          const name = this.credentialName
-
-          // Manually add labels as secret resource does not get reconciled automatically
-          // TODO: check if this is still needed after https://github.com/gardener/gardener/issues/11915
-          const labels = {
-            'reference.gardener.cloud/credentialsbinding': 'true',
-          }
-          this.createSecretManifest({ name, labels })
-        }
-          */
       }
 
       this.errorMessage = undefined
