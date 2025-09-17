@@ -86,7 +86,7 @@ describe('config', function () {
         readFileSyncSpy.mockRestore()
       })
 
-      it('should return the config in test environment', function () {
+      it('should return the config in test environment without config file', function () {
         const env = Object.assign({
           NODE_ENV: 'test',
         }, environmentVariables)
@@ -94,79 +94,20 @@ describe('config', function () {
         const config = gardener.loadConfig(undefined, { env })
         const defaults = gardener.getDefaults({ env })
         expect(config).toMatchObject(defaults)
-      })
-
-      it('should return the config in production environment', function () {
-        const env = Object.assign({
-          NODE_ENV: 'production',
-        }, environmentVariables)
-
-        const filename = '/etc/gardener/1/config.yaml'
-        const config = gardener.loadConfig(filename, { env })
-        expect(gardener.readConfig).toHaveBeenCalledTimes(1)
-        expect(gardener.readConfig.mock.calls[0]).toEqual([filename])
-        expect(config.port).toBe(1234)
-        expect(config.logLevel).toBe('warn')
-      })
-
-      it('should return the config with port and logLevel overridden by environment variables', function () {
-        const env = Object.assign({
-          NODE_ENV: 'production',
-          PORT: '3456',
-          LOG_LEVEL: 'error',
-        }, environmentVariables)
-
-        const filename = '/etc/gardener/2/config.yaml'
-        const config = gardener.loadConfig(filename, { env })
-        expect(gardener.readConfig).toHaveBeenCalledTimes(1)
-        expect(gardener.readConfig.mock.calls[0]).toEqual([filename])
-        expect(config.port).toBe(3456)
-        expect(config.logLevel).toBe('error')
-      })
-
-      it('should return the config in development environment', function () {
-        const env = Object.assign({
-          NODE_ENV: 'development',
-        }, environmentVariables)
-
-        const filename = '/etc/gardener/3/config.yaml'
-        const config = gardener.loadConfig(filename, { env })
-        expect(gardener.readConfig).toHaveBeenCalledTimes(1)
-        expect(gardener.readConfig.mock.calls[0]).toEqual([filename])
-        expect(config.sessionSecret).toBe(env.SESSION_SECRET)
-        expect(config.websocketAllowedOrigins).toEqual(env.WEBSOCKET_ALLOWED_ORIGINS.split(','))
         expect(config.logLevel).toBe('debug')
       })
 
-      it('should read allowed origins from environment variables', function () {
+      it('should set default loglevel production environment', function () {
         const env = Object.assign({
-          NODE_ENV: 'test',
+          NODE_ENV: 'production',
         }, environmentVariables)
 
         const config = gardener.loadConfig(undefined, { env })
-        expect(config.websocketAllowedOrigins).toEqual([
-          'https://foo.example.org',
-          'https://bar.example.org',
-        ])
-      })
-
-      it('should return the config with oidc.ca overridden by environment variables', function () {
-        const env = Object.assign({
-          OIDC_CLIENT_ID: 'client_id',
-          OIDC_CLIENT_SECRET: 'client_secret',
-          OIDC_CA: 'ca',
-        }, environmentVariables)
-
-        const filename = '/etc/gardener/4/config.yaml'
-        const config = gardener.loadConfig(filename, { env })
-        expect(config.oidc.client_id).toBe('client_id')
-        expect(config.oidc.client_secret).toBe('client_secret')
-        expect(config.oidc.ca).toBe('ca')
+        expect(config.logLevel).toBe('warn')
       })
 
       it('should return the config with values read from the filesystem', function () {
-        const env = Object.assign({}, environmentVariables)
-
+        const env = {}
         const fileMap = {
           '/etc/gardener-dashboard/secrets/oidc/client_id': 'client_id_from_file',
           '/etc/gardener-dashboard/secrets/oidc/client_secret': 'client_secret_from_file',
@@ -181,7 +122,7 @@ describe('config', function () {
           throw new Error(filePath + ': not found')
         })
 
-        const filename = '/etc/gardener/4/config.yaml'
+        const filename = '/etc/gardener/config.yaml'
         const config = gardener.loadConfig(filename, { env })
 
         expect(config.oidc.issuer).toBe('https://kubernetes:32001')
@@ -189,6 +130,36 @@ describe('config', function () {
         expect(config.oidc.client_secret).toBe('client_secret_from_file')
         expect(config.gitHub.authentication.appId).toBe(12345)
         expect(config.gitHub.authentication.installationId).toBe(67890)
+        expect(config.websocketAllowedOrigins).toEqual(['*'])
+        expect(config.logLevel).toBe('info')
+      })
+
+      it('should return the config overridden by environment variables', function () {
+        const env = Object.assign({
+          NODE_ENV: 'production',
+          PORT: '3456',
+          LOG_LEVEL: 'error',
+          OIDC_CLIENT_ID: 'client_id',
+          OIDC_CLIENT_SECRET: 'client_secret',
+          OIDC_CA: 'ca',
+        }, environmentVariables)
+
+        const filename = '/etc/gardener/config.yaml'
+        const config = gardener.loadConfig(filename, { env })
+        expect(gardener.readConfig).toHaveBeenCalledTimes(1)
+        expect(gardener.readConfig.mock.calls[0]).toEqual([filename])
+
+        // local env
+        expect(config.port).toBe(parseInt(env.PORT))
+        expect(config.logLevel).toBe(env.LOG_LEVEL)
+        expect(config.oidc.client_id).toBe(env.OIDC_CLIENT_ID)
+        expect(config.oidc.client_secret).toBe(env.OIDC_CLIENT_SECRET)
+        expect(config.oidc.ca).toBe(env.OIDC_CA)
+
+        // global env
+        expect(config.apiServerUrl).toBe(env.API_SERVER_URL)
+        expect(config.sessionSecret).toBe(env.SESSION_SECRET)
+        expect(config.websocketAllowedOrigins).toEqual(env.WEBSOCKET_ALLOWED_ORIGINS.split(','))
       })
     })
   })
