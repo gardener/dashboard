@@ -4,14 +4,19 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-const shoots = require('./shoots')
-const projects = require('./projects')
+import {
+  subscribe as subscribeShoots,
+  unsubscribe as unsubscribeShoots,
+  synchronize as synchronizeShoots,
+} from './shoots.js'
+import { synchronize as synchronizeProjects } from './projects.js'
+import { synchronize as synchronizeSeeds } from './seeds.js'
 
 async function subscribe (socket, key, options = {}) {
   switch (key) {
     case 'shoots':
-      await shoots.unsubscribe(socket)
-      return shoots.subscribe(socket, options)
+      await unsubscribeShoots(socket)
+      return subscribeShoots(socket, options)
     default:
       throw new TypeError(`Invalid subscription type - ${key}`)
   }
@@ -20,7 +25,7 @@ async function subscribe (socket, key, options = {}) {
 async function unsubscribe (socket, key) {
   switch (key) {
     case 'shoots':
-      return shoots.unsubscribe(socket)
+      return unsubscribeShoots(socket)
     default:
       throw new TypeError(`Invalid subscription type - ${key}`)
   }
@@ -31,12 +36,17 @@ function synchronize (socket, key, ...args) {
     case 'shoots': {
       const [uids] = args
       assertArray(uids)
-      return shoots.synchronize(socket, uids)
+      return synchronizeShoots(socket, uids)
     }
     case 'projects': {
       const [uids] = args
       assertArray(uids)
-      return projects.synchronize(socket, uids)
+      return synchronizeProjects(socket, uids)
+    }
+    case 'seeds': {
+      const [uids] = args
+      assertArray(uids)
+      return synchronizeSeeds(socket, uids)
     }
     default:
       throw new TypeError(`Invalid synchronization type - ${key}`)
@@ -45,11 +55,11 @@ function synchronize (socket, key, ...args) {
 
 function assertArray (value) {
   if (!Array.isArray(value)) {
-    throw new TypeError('Invalid parameters for synchronize shoots')
+    throw new TypeError('Expected an array')
   }
 }
 
-module.exports = {
+export default {
   subscribe,
   unsubscribe,
   synchronize,

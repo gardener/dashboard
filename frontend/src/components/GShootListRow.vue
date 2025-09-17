@@ -10,13 +10,16 @@ SPDX-License-Identifier: Apache-2.0
       v-for="cell in cells"
       :key="cell.header.key"
       :class="cell.header.class"
-      class="position-relative"
+      class="position-relative project-cell"
     >
       <template v-if="cell.header.key === 'project'">
-        <g-text-router-link
-          :to="{ name: 'ShootList', params: { namespace: shootNamespace } }"
-          :text="shootProjectName"
-        />
+        <g-project-tooltip :project="project">
+          <g-text-router-link
+            :to="{ name: 'ShootList', params: { namespace: shootNamespace } }"
+            :text="shootProjectName"
+          />
+          <span v-if="projectTitle"> &mdash; {{ projectTitle }}</span>
+        </g-project-tooltip>
       </template>
       <template v-if="cell.header.key === 'name'">
         <v-row
@@ -113,6 +116,11 @@ SPDX-License-Identifier: Apache-2.0
           <g-status-tags />
         </div>
       </template>
+      <template v-if="cell.header.key === 'seedReadiness'">
+        <div class="d-flex">
+          <g-seed-status-tags />
+        </div>
+      </template>
       <template v-if="cell.header.key === 'controlPlaneHighAvailability'">
         <div class="d-flex justify-center">
           <g-control-plane-high-availability-tag
@@ -174,18 +182,11 @@ SPDX-License-Identifier: Apache-2.0
         </g-scroll-container>
       </template>
       <template v-if="cell.header.customField">
-        <v-tooltip
+        <span
           v-if="cell.header.tooltip"
-          location="top"
-        >
-          <template #activator="slotProps">
-            <span
-              v-bind="slotProps.props"
-              :class="{'text-disabled' : !cell.value}"
-            >{{ cell.displayValue }}</span>
-          </template>
-          {{ cell.header.tooltip }}
-        </v-tooltip>
+          v-tooltip:top="cell.header.tooltip"
+          :class="{'text-disabled' : !cell.value}"
+        >{{ cell.displayValue }}</span>
         <span
           v-else-if="cell.displayValue"
           :class="{'text-disabled' : !cell.value}"
@@ -214,18 +215,11 @@ SPDX-License-Identifier: Apache-2.0
           />
         </v-row>
       </template>
-      <v-tooltip
+      <div
         v-if="isStaleShoot"
-        location="top"
-      >
-        <template #activator="slotProps">
-          <div
-            class="stale-overlay"
-            v-bind="slotProps.props"
-          />
-        </template>
-        This cluster is no longer part of the list and kept as stale item
-      </v-tooltip>
+        v-tooltip:top="'This cluster is no longer part of the list and kept as stale item'"
+        class="stale-overlay"
+      />
     </td>
   </tr>
 </template>
@@ -254,6 +248,7 @@ import GCopyBtn from '@/components/GCopyBtn.vue'
 import GVendor from '@/components/GVendor.vue'
 import GShootStatus from '@/components/GShootStatus.vue'
 import GStatusTags from '@/components/GStatusTags.vue'
+import GSeedStatusTags from '@/components/GSeedStatusTags.vue'
 import GPurposeTag from '@/components/GPurposeTag.vue'
 import GTimeString from '@/components/GTimeString.vue'
 import GShootVersionChip from '@/components/ShootVersion/GShootVersionChip.vue'
@@ -267,11 +262,14 @@ import GWorkerGroup from '@/components/ShootWorkers/GWorkerGroup'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 import GCollapsibleItems from '@/components/GCollapsibleItems'
 import GScrollContainer from '@/components/GScrollContainer'
+import GProjectTooltip from '@/components/GProjectTooltip.vue'
 
+import { useProvideSeedItem } from '@/composables/useSeedItem'
 import { useShootAction } from '@/composables/useShootAction'
 import { useProvideShootItem } from '@/composables/useShootItem'
 import { useProvideShootHelper } from '@/composables/useShootHelper'
 import { formatValue } from '@/composables/useProjectShootCustomFields/helper'
+import { useProjectMetadata } from '@/composables/useProjectMetadata/index.js'
 
 import { getIssueSince } from '@/utils'
 
@@ -332,8 +330,9 @@ const {
 } = useProvideShootItem(shootItem, {
   cloudProfileStore,
   projectStore,
-  seedStore,
 })
+const project = computed(() => projectStore.projectByNamespace(shootNamespace.value))
+const { projectTitle } = useProjectMetadata(project)
 
 useProvideShootHelper(shootItem, {
   cloudProfileStore,
@@ -342,6 +341,9 @@ useProvideShootHelper(shootItem, {
   credentialStore,
   seedStore,
 })
+
+const seedItem = computed(() => seedStore.seedByName(shootSeedName.value))
+useProvideSeedItem(seedItem)
 
 const isInfoAvailable = computed(() => {
   // operator not yet updated shoot resource
@@ -461,6 +463,11 @@ const hasShootWorkerGroupWarning = computed(() => {
     left: 0;
     position: absolute;
     pointer-events: none;
+  }
+
+  .project-cell {
+    max-width: 200px;
+    overflow: hidden;
   }
 
   .v-theme--light .stale .stale-overlay {

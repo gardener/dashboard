@@ -4,21 +4,31 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const express = require('express')
-const expressStaticGzip = require('express-static-gzip')
-const _ = require('lodash')
-const config = require('./config')
-const { resolve, join } = require('path')
-const logger = require('./logger')
-const { notFound, renderError, historyFallback, noCache } = require('./middleware')
-const helmet = require('helmet')
-const api = require('./api')
-const auth = require('./auth')
-const githubWebhook = require('./github/webhook')
-
-const { healthCheck } = require('./healthz')
+import express from 'express'
+import expressStaticGzip from 'express-static-gzip'
+import _ from 'lodash-es'
+import config from './config/index.js'
+import {
+  resolve,
+  join,
+  dirname,
+} from 'path'
+import { fileURLToPath } from 'url'
+import logger from './logger/index.js'
+import {
+  notFound,
+  renderError,
+  historyFallback,
+  noCache,
+} from './middleware.js'
+import helmet from 'helmet'
+import {
+  router as apiRouter,
+  hooks as apiHooks,
+} from './api.js'
+import { router as authRouter } from './auth.js'
+import { router as githubWebhookRouter } from './github/webhook/index.js'
+import { healthCheck } from './healthz/index.js'
 
 const { port, metricsPort } = config
 const periodSeconds = config.readinessProbe?.periodSeconds || 10
@@ -30,6 +40,7 @@ for (const ctor of [Object, Function, Array, String, Number, Boolean]) {
 }
 
 // resolve pathnames
+const __dirname = dirname(fileURLToPath(import.meta.url))
 const PUBLIC_DIRNAME = resolve(join(__dirname, '..', 'public'))
 const INDEX_FILENAME = join(PUBLIC_DIRNAME, 'index.html')
 const STATIC_PATHS = ['/assets', '/static', '/js', '/css', '/fonts', '/img']
@@ -54,7 +65,7 @@ app.set('metricsPort', metricsPort)
 app.set('logger', logger)
 app.set('healthCheck', healthCheck)
 app.set('periodSeconds ', periodSeconds)
-app.set('hooks', api.hooks)
+app.set('hooks', apiHooks)
 app.set('trust proxy', 1)
 app.set('etag', false)
 app.set('x-powered-by', false)
@@ -66,9 +77,9 @@ if (process.env.NODE_ENV !== 'development') {
   app.use(helmet.strictTransportSecurity())
 }
 app.use(noCache(STATIC_PATHS))
-app.use('/auth', auth.router)
-app.use('/webhook', githubWebhook.router)
-app.use('/api', api.router)
+app.use('/auth', authRouter)
+app.use('/webhook', githubWebhookRouter)
+app.use('/api', apiRouter)
 
 app.use(helmet.xXssProtection())
 app.use(helmet.contentSecurityPolicy({
@@ -103,4 +114,4 @@ app.use(historyFallback(INDEX_FILENAME))
 
 app.use(renderError)
 
-module.exports = app
+export default app

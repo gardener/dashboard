@@ -10,6 +10,6 @@ describe('app', () => {
   it('should clear register on destroy', async () => {
     const { default: app } = await import('../lib/app.js')
     app.destroy()
-    expect(promClient.register.clear).toBeCalledTimes(1)
+    expect(promClient.register.clear).toHaveBeenCalledTimes(1)
   })
 })

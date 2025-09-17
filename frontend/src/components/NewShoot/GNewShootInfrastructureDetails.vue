@@ -7,14 +7,10 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-container class="px-0 mx-0">
     <v-row>
-      <v-col
-        v-if="cloudProfiles.length > 1"
-        cols="3"
-      >
+      <v-col cols="3">
         <g-select-cloud-profile
           ref="cloudProfile"
           v-model="cloudProfileRef"
-          :cloud-profiles="cloudProfiles"
           color="primary"
         />
       </v-col>
@@ -224,7 +220,6 @@ export default {
       providerInfrastructureConfigFirewallImage,
       providerInfrastructureConfigFirewallSize,
       providerInfrastructureConfigFirewallNetworks,
-      cloudProfiles,
       infrastructureBindings,
       regionsWithSeed,
       regionsWithoutSeed,
@@ -255,7 +250,6 @@ export default {
       firewallImage: providerInfrastructureConfigFirewallImage,
       firewallSize: providerInfrastructureConfigFirewallSize,
       firewallNetworks: providerInfrastructureConfigFirewallNetworks,
-      cloudProfiles,
       infrastructureBindings,
       regionsWithSeed,
       regionsWithoutSeed,

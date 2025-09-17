@@ -4,23 +4,20 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const express = require('express')
-const bodyParser = require('body-parser')
-const cookieParser = require('cookie-parser')
-const logger = require('./logger')
-const {
+import express from 'express'
+import bodyParser from 'body-parser'
+import cookieParser from 'cookie-parser'
+import logger from './logger/index.js'
+import {
   authorizationUrl,
   authorizationCallback,
   refreshToken,
   authorizeToken,
   clearCookies,
-} = require('./security')
-const { requestLogger } = require('./middleware')
+} from './security/index.js'
+import { requestLogger } from './middleware.js'
 
-// configure router
-const router = exports.router = express.Router()
+const router = express.Router()
 
 router.use(requestLogger)
 router.use(cookieParser())
@@ -81,3 +78,5 @@ router.route('/token')
       next(err)
     }
   })
+
+export { router }

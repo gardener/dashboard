@@ -30,7 +30,6 @@ import toLower from 'lodash/toLower'
 import filter from 'lodash/filter'
 import words from 'lodash/words'
 import some from 'lodash/some'
-import sortBy from 'lodash/sortBy'
 import isEmpty from 'lodash/isEmpty'
 import includes from 'lodash/includes'
 import split from 'lodash/split'
@@ -147,6 +146,14 @@ export function displayName (username) {
     return serviceAccount
   }
   return username
+}
+
+export function cloudProfileDisplayName (cloudProfile) {
+  if (!cloudProfile) {
+    return ''
+  }
+  const name = get(cloudProfile, ['metadata', 'name'])
+  return get(cloudProfile, ['metadata', 'annotations', 'garden.sapcloud.io/displayName'], name)
 }
 
 export function convertToGibibyte (value) {
@@ -561,26 +568,26 @@ export function defaultCriNameByKubernetesVersion (criNames, kubernetesVersion) 
 
 export const MEMBER_ROLE_DESCRIPTORS = [
   {
-    name: 'admin',
-    displayName: 'Admin',
-  },
-  {
-    name: 'viewer',
-    displayName: 'Viewer',
+    name: 'owner',
+    displayName: 'Owner',
+    notEditable: true,
+    tooltip: 'You can change the project owner on the administration page',
   },
   {
     name: 'uam',
     displayName: 'UAM',
   },
   {
+    name: 'admin',
+    displayName: 'Admin',
+  },
+  {
     name: 'serviceaccountmanager',
     displayName: 'Service Account Manager',
   },
   {
-    name: 'owner',
-    displayName: 'Owner',
-    notEditable: true,
-    tooltip: 'You can change the project owner on the administration page',
+    name: 'viewer',
+    displayName: 'Viewer',
   },
 ]
 
@@ -647,9 +654,8 @@ export function machineVendorHasSupportedVersion (machineImage, machineImages) {
 
 export const UNKNOWN_EXPIRED_TIMESTAMP = '1970-01-01T00:00:00Z'
 
-export function sortedRoleDisplayNames (roleNames) {
-  const displayNames = filter(MEMBER_ROLE_DESCRIPTORS, role => includes(roleNames, role.name))
-  return sortBy(displayNames, 'displayName')
+export function sortedRoleDescriptors (roleNames) {
+  return filter(MEMBER_ROLE_DESCRIPTORS, role => includes(roleNames, role.name))
 }
 
 export function mapTableHeader (headers, valueKey) {

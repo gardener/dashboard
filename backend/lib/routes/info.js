@@ -4,25 +4,34 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import express from 'express'
+import requestModule from '@gardener-dashboard/request'
+import logger from '../logger/index.js'
+import { decodeBase64 } from '../utils/index.js'
+import kubeClientModule from '@gardener-dashboard/kube-client'
+import { metricsRoute } from '../middleware.js'
 
-const express = require('express')
-const { extend } = require('@gardener-dashboard/request')
-const logger = require('../logger')
-const { decodeBase64 } = require('../utils')
-const { dashboardClient } = require('@gardener-dashboard/kube-client')
-const { version } = require('../../package')
-const { metricsRoute } = require('../middleware')
+const { extend } = requestModule
+const { dashboardClient } = kubeClientModule
 
-const router = module.exports = express.Router()
+async function getVersionFromPackageJson () {
+  const { default: packageJson } = await import('../../package.json')
 
-const metricsMiddleware = metricsRoute('info')
+  const { version } = packageJson
+  return version
+}
+
+const router = express.Router()
+
+const metricsMiddleware =
+  metricsRoute('info')
 
 router.route('/')
   .all(metricsMiddleware)
   .get(async (req, res, next) => {
     try {
       const gardenerVersion = await fetchGardenerVersion()
+      const version = await getVersionFromPackageJson()
       res.send({ version, gardenerVersion })
     } catch (err) {
       next(err)
@@ -56,3 +65,5 @@ async function fetchGardenerVersion () {
     logger.warn(`Could not fetch gardener version. Error: ${err.message}`)
   }
 }
+
+export default router

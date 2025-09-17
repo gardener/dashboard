@@ -109,6 +109,12 @@ const wellKnownConditions = {
     description: 'Indicates that there is at least one CA certificate which expires in less than 1 year. A credentials rotation operation should be considered.',
     sortOrder: '12',
   },
+  DualStackNodesMigrationReady: {
+    name: 'Dual Stack Nodes Migration Ready',
+    shortName: 'DSNM',
+    description: 'Indicates that the nodes of a shoot are ready for dual-stack migration of the cluster. If this is in error state, the nodes need to be rolled before the migration can continue. This error is expected at the beginning of the migration process and does not require immediate user action.',
+    sortOrder: '13',
+  },
 }
 
 export function getCondition (type) {
@@ -376,6 +382,10 @@ export const useConfigStore = defineStore('config', () => {
     return controlPlaneHighAvailabilityHelp.value?.text
   })
 
+  const unreachableSeeds = computed(() => {
+    return state.value?.unreachableSeeds
+  })
+
   async function fetchConfig () {
     const response = await api.getConfiguration()
     setConfiguration({
@@ -464,9 +474,16 @@ export const useConfigStore = defineStore('config', () => {
       displayName: 'OnMetal',
       weight: 900,
     },
-    { name: 'ironcore',
+    {
+      name: 'ironcore',
       displayName: 'IronCore',
-      weight: 1000 },
+      weight: 1000,
+    },
+    {
+      name: 'stackit',
+      displayName: 'stackit',
+      weight: 1100,
+    },
     {
       name: 'local',
       displayName: 'Local',
@@ -649,6 +666,7 @@ export const useConfigStore = defineStore('config', () => {
     alertBannerIdentifier,
     costObjectsSettings,
     sortedDnsProviderTypeList,
+    unreachableSeeds,
     purposeRequiresHibernationSchedule,
     isShootHasNoHibernationScheduleWarning,
     fetchConfig,

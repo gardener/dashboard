@@ -1,0 +1,148 @@
+name: Build
+
+on:
+  workflow_call:
+    inputs:
+      mode:
+        required: true
+        type: string
+        default: snapshot
+        description: |
+          the mode to use. either `snapshot` or `release`. Will affect effective version, as well
+          as target-oci-registry.
+
+jobs:
+  prepare:
+    uses: gardener/cc-utils/.github/workflows/prepare.yaml@master
+    with:
+      mode: ${{ inputs.mode }}
+      version-commit-callback-action-path: .github/actions/prepare-release
+      checkout-fetch-depth: 0
+    permissions:
+      contents: read
+      pull-requests: write
+
+  oci-images:
+    name: Build OCI-Images
+    needs:
+      - prepare
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    secrets: inherit
+    uses: gardener/cc-utils/.github/workflows/oci-ocm.yaml@master
+    strategy:
+      matrix:
+        args:
+          - name: gardener-dashboard
+            target: dashboard
+            # special-handling: push to different repository for `openmpf`-branch
+            oci-repository: gardener/dashboard${{ github.ref_name == 'openmfp' && '-openmpf' || '' }}
+            ocm-labels:
+              name: gardener.cloud/cve-categorisation
+              value:
+                network_exposure: public
+                authentication_enforced: false
+                user_interaction: end-user
+                confidentiality_requirement: high
+                integrity_requirement: high
+                availability_requirement: low
+    with:
+      name: ${{ matrix.args.name }}
+      version: ${{ needs.prepare.outputs.version }}
+      target: ${{ matrix.args.target }}
+      oci-registry: ${{ needs.prepare.outputs.oci-registry }}
+      oci-repository: ${{ matrix.args.oci-repository }}
+      oci-platforms: linux/amd64,linux/arm64
+      ocm-labels: ${{ toJSON(matrix.args.ocm-labels) }}
+      extra-tags: latest
+
+  oci-images-summary:
+    name: OCI Images Summary
+    runs-on: ubuntu-latest
+    needs: oci-images
+    if: ${{ always() }}  # Ensures this job runs even if the matrix partially fails
+    permissions:
+      contents: read
+    steps:
+      - name: Fail if OCI matrix failed
+        if: ${{ needs.oci-images.result != 'success' }}
+        run: exit 1
+
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: '22.18.0'
+      - uses: gardener/cc-utils/.github/actions/trusted-checkout@master
+      - name: run-verify
+        shell: bash
+        run: |
+          set -eu
+          mkdir /tmp/blobs.d
+          .ci/verify |& tee /tmp/blobs.d/verify-log.txt
+          tar czf /tmp/blobs.d/verify-log.tar.gz -C/tmp/blobs.d verify-log.txt
+      - name: add-verify-results-to-component-descriptor
+        uses: gardener/cc-utils/.github/actions/export-ocm-fragments@master
+        with:
+          blobs-directory: /tmp/blobs.d
+          ocm-resources: |
+            - name: test-results
+              relation: local
+              access:
+                type: localBlob
+                localReference: verify-log.tar.gz
+              labels:
+                - name: gardener.cloud/purposes
+                  value:
+                    - test
+  sast-lint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: '22.18.0'
+      - uses: actions/checkout@v5
+      - name: run-eslint
+        run: |
+          set -eu
+          yarn install --immutable --immutable-cache --check-cache --refresh-lockfile
+          set -eu
+          (
+            cd frontend
+            yarn lint --format=@microsoft/eslint-formatter-sarif -o ../dashboard-frontend.sarif
+          )
+          (
+            cd backend
+            yarn lint --format=@microsoft/eslint-formatter-sarif -o ../dashboard-backend.sarif
+          )
+
+          mkdir /tmp/blobs.d
+          tar czf /tmp/blobs.d/eslint-report.tar.gz \
+            dashboard-frontend.sarif \
+            dashboard-backend.sarif
+      - name: add-sast-report-to-component-descriptor
+        uses: gardener/cc-utils/.github/actions/export-ocm-fragments@master
+        with:
+          blobs-directory: /tmp/blobs.d
+          ocm-resources: |
+            name: eslint-report
+            relation: local
+            access:
+              type: localBlob
+              localReference: eslint-report.tar.gz
+            labels:
+              - name: gardener.cloud/purposes
+                value:
+                  - lint
+                  - sast
+                  - eslint
+              - name: gardener.cloud/comment
+                value: |
+                  we use eslint-plugin-security (linter) for SAST scans
+                  see: https://github.com/eslint-community/eslint-plugin-security
+                  enabled by: https://github.com/gardener/dashboard/pull/2029

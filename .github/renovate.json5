@@ -50,29 +50,6 @@
         'npm',
       ],
       matchPackageNames: [
-        '@octokit/auth-app',
-        '@octokit/core',
-        '@octokit/plugin-paginate-graphql',
-        '@octokit/plugin-paginate-rest',
-        '@octokit/plugin-request-log',
-        '@octokit/plugin-rest-endpoint-methods',
-        'chalk',
-        'p-event',
-        'p-limit',
-        'p-retry',
-        'p-timeout',
-        'jose',
-      ],
-      matchUpdateTypes: [
-        'major',
-      ],
-      enabled: false,
-    },
-    {
-      matchDatasources: [
-        'npm',
-      ],
-      matchPackageNames: [
         'sass',
       ],
       matchUpdateTypes: [
@@ -85,6 +62,29 @@
       groupName: 'github-actions',
       matchManagers: [
         'github-actions',
+      ],
+      excludePackageNames: [
+        'node',
+      ],
+      excludeDatasources: [
+        'node',
+        'node-version',
+    },
+    {
+      groupName: 'Node.js',
+      groupSlug: 'node',
+      matchPackageNames: [
+        'node',
+      ],
+      matchManagers: [
+        'github-actions',
+        'npm',
+        'nvm',
+        'regex',
+      ],
+      matchDatasources: [
+        'node',
+        'node-version',
       ],
     },
   ],

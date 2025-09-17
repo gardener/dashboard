@@ -4,14 +4,12 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const assert = require('assert').strict
-const _ = require('lodash')
-const yaml = require('js-yaml')
-const fs = require('fs')
-const { homedir } = require('os')
-const { join } = require('path')
+import assert from 'assert'
+import _ from 'lodash-es'
+import { load } from 'js-yaml'
+import fs from 'fs'
+import { homedir } from 'os'
+import { join } from 'path'
 
 /*
 configMappings defines mappings between config values, their sources (environment variables or files),
@@ -131,7 +129,7 @@ function parseConfigValue (value, type) {
   }
 }
 
-module.exports = {
+export default {
   assignConfigFromEnvironmentAndFileSystem (config, env) {
     for (const configMapping of configMappings) {
       const {
@@ -209,6 +207,7 @@ module.exports = {
     _.set(config, ['sessionSecrets'], sessionSecrets)
     _.set(config, ['frontend', 'apiServerUrl'], config.apiServerUrl)
     _.set(config, ['frontend', 'clusterIdentity'], config.clusterIdentity)
+    _.set(config, ['frontend', 'unreachableSeeds', 'matchLabels'], config.unreachableSeeds?.matchLabels)
     if (!config.gitHub && _.has(config, ['frontend', 'ticket'])) {
       _.unset(config, ['frontend', 'ticket'])
     }
@@ -217,6 +216,6 @@ module.exports = {
   },
   readConfig (path) {
     const data = fs.readFileSync(path, 'utf8') // eslint-disable-line security/detect-non-literal-fs-filename
-    return yaml.load(data)
+    return load(data)
   },
 }

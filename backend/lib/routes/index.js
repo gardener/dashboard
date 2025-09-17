@@ -4,27 +4,41 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import _ from 'lodash-es'
+import config from '../config/index.js'
+import configRoute from './config.js'
+import infoRoute from './info.js'
+import openapiRoute from '../openapi/index.js'
+import userRoute from './user.js'
+import cloudprofilesRoute from './cloudprofiles.js'
+import seedsRoute from './seeds.js'
+import gardenerExtensionsRoute from './gardenerExtensions.js'
+import projectsRoute from './projects.js'
+import shootsRoute from './shoots.js'
+import ticketsRoute from './tickets.js'
+import cloudProviderCredentialsRoute from './cloudProviderCredentials.js'
+import membersRoute from './members.js'
+import resourceQuotasRoute from './resourceQuotas.js'
+import terminalsRoute from './terminals.js'
 
-const _ = require('lodash')
-const config = require('../config')
-
-module.exports = {
-  '/config': require('./config'),
-  '/info': require('./info'),
-  '/openapi': require('../openapi'),
-  '/user': require('./user'),
-  '/cloudprofiles': require('./cloudprofiles'),
-  '/seeds': require('./seeds'),
-  '/gardenerextensions': require('./gardenerExtensions'),
-  '/projects': require('./projects'),
-  '/namespaces/:namespace/shoots': require('./shoots'),
-  '/namespaces/:namespace/tickets': require('./tickets'),
-  '/cloudprovidercredentials': require('./cloudProviderCredentials'),
-  '/namespaces/:namespace/members': require('./members'),
-  '/namespaces/:namespace/resourcequotas': require('./resourceQuotas'),
+const routes = {
+  '/config': configRoute,
+  '/info': infoRoute,
+  '/openapi': openapiRoute,
+  '/user': userRoute,
+  '/cloudprofiles': cloudprofilesRoute,
+  '/seeds': seedsRoute,
+  '/gardenerextensions': gardenerExtensionsRoute,
+  '/projects': projectsRoute,
+  '/namespaces/:namespace/shoots': shootsRoute,
+  '/namespaces/:namespace/tickets': ticketsRoute,
+  '/cloudprovidercredentials': cloudProviderCredentialsRoute,
+  '/namespaces/:namespace/members': membersRoute,
+  '/namespaces/:namespace/resourcequotas': resourceQuotasRoute,
 }
 
 if (_.get(config, ['frontend', 'features', 'terminalEnabled'], false)) {
-  module.exports['/terminals'] = require('./terminals')
+  routes['/terminals'] = terminalsRoute
 }
+
+export default routes

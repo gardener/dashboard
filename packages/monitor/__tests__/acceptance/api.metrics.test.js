@@ -67,7 +67,7 @@ describe('api', () => {
         status: 500,
         message: error.message,
       })
-      expect(logger.error).toBeCalledTimes(1)
+      expect(logger.error).toHaveBeenCalledTimes(1)
     })
   })
 })

@@ -1,0 +1,1697 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`api members should add a foreign service account as member to project 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "patch",
+      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+      "content-type": "application/merge-patch+json",
+    },
+    {
+      "spec": {
+        "members": [
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "foo@example.org",
+            "role": "admin",
+            "roles": [],
+          },
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "bar@example.org",
+            "role": "admin",
+            "roles": [
+              "owner",
+            ],
+          },
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "system:serviceaccount:garden-foo:robot",
+            "role": "viewer",
+            "roles": [],
+          },
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "system:serviceaccount:garden-baz:robot",
+            "role": "viewer",
+            "roles": [
+              "admin",
+            ],
+          },
+          {
+            "kind": "ServiceAccount",
+            "name": "fsa",
+            "namespace": "othernamespace",
+            "role": "myrole",
+          },
+        ],
+      },
+    },
+  ],
+]
+`;
+
+exports[`api members should add a foreign service account as member to project 2`] = `
+[
+  {
+    "roles": [
+      "admin",
+    ],
+    "username": "foo@example.org",
+  },
+  {
+    "roles": [
+      "admin",
+      "owner",
+    ],
+    "username": "bar@example.org",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [
+      "viewer",
+    ],
+    "username": "system:serviceaccount:garden-foo:robot",
+  },
+  {
+    "roles": [
+      "viewer",
+      "admin",
+    ],
+    "username": "system:serviceaccount:garden-baz:robot",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [],
+    "username": "system:serviceaccount:garden-foo:robot-nomember",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [],
+    "username": "system:serviceaccount:garden-foo:dashboard-webterminal",
+  },
+  {
+    "roles": [
+      "myrole",
+    ],
+    "username": "system:serviceaccount:othernamespace:fsa",
+  },
+]
+`;
+
+exports[`api members should add a project member 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "patch",
+      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+      "content-type": "application/merge-patch+json",
+    },
+    {
+      "spec": {
+        "members": [
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "foo@example.org",
+            "role": "admin",
+            "roles": [],
+          },
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "bar@example.org",
+            "role": "admin",
+            "roles": [
+              "owner",
+            ],
+          },
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "system:serviceaccount:garden-foo:robot",
+            "role": "viewer",
+            "roles": [],
+          },
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "system:serviceaccount:garden-baz:robot",
+            "role": "viewer",
+            "roles": [
+              "admin",
+            ],
+          },
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "baz@example.org",
+            "role": "admin",
+            "roles": [
+              "owner",
+            ],
+          },
+        ],
+      },
+    },
+  ],
+]
+`;
+
+exports[`api members should add a project member 2`] = `
+[
+  {
+    "roles": [
+      "admin",
+    ],
+    "username": "foo@example.org",
+  },
+  {
+    "roles": [
+      "admin",
+      "owner",
+    ],
+    "username": "bar@example.org",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [
+      "viewer",
+    ],
+    "username": "system:serviceaccount:garden-foo:robot",
+  },
+  {
+    "roles": [
+      "viewer",
+      "admin",
+    ],
+    "username": "system:serviceaccount:garden-baz:robot",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [],
+    "username": "system:serviceaccount:garden-foo:robot-nomember",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [],
+    "username": "system:serviceaccount:garden-foo:dashboard-webterminal",
+  },
+  {
+    "roles": [
+      "admin",
+      "owner",
+    ],
+    "username": "baz@example.org",
+  },
+]
+`;
+
+exports[`api members should add a service account and assign member roles 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+    {
+      "metadata": {
+        "annotations": {
+          "dashboard.gardener.cloud/created-by": "bar@example.org",
+          "dashboard.gardener.cloud/description": "description",
+        },
+        "name": "foo",
+        "namespace": "garden-foo",
+      },
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "patch",
+      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+      "content-type": "application/merge-patch+json",
+    },
+    {
+      "spec": {
+        "members": [
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "foo@example.org",
+            "role": "admin",
+            "roles": [],
+          },
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "bar@example.org",
+            "role": "admin",
+            "roles": [
+              "owner",
+            ],
+          },
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "system:serviceaccount:garden-foo:robot",
+            "role": "viewer",
+            "roles": [],
+          },
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "system:serviceaccount:garden-baz:robot",
+            "role": "viewer",
+            "roles": [
+              "admin",
+            ],
+          },
+          {
+            "kind": "ServiceAccount",
+            "name": "foo",
+            "namespace": "garden-foo",
+            "role": "myrole",
+          },
+        ],
+      },
+    },
+  ],
+]
+`;
+
+exports[`api members should add a service account and assign member roles 2`] = `
+[
+  {
+    "roles": [
+      "admin",
+    ],
+    "username": "foo@example.org",
+  },
+  {
+    "roles": [
+      "admin",
+      "owner",
+    ],
+    "username": "bar@example.org",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [
+      "viewer",
+    ],
+    "username": "system:serviceaccount:garden-foo:robot",
+  },
+  {
+    "roles": [
+      "viewer",
+      "admin",
+    ],
+    "username": "system:serviceaccount:garden-baz:robot",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [],
+    "username": "system:serviceaccount:garden-foo:robot-nomember",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [],
+    "username": "system:serviceaccount:garden-foo:dashboard-webterminal",
+  },
+  {
+    "createdBy": "bar@example.org",
+    "creationTimestamp": "now",
+    "description": "description",
+    "roles": [
+      "myrole",
+    ],
+    "username": "system:serviceaccount:garden-foo:foo",
+  },
+]
+`;
+
+exports[`api members should add roles to existing service account without roles => add member 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "patch",
+      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+      "content-type": "application/merge-patch+json",
+    },
+    {
+      "spec": {
+        "members": [
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "foo@example.org",
+            "role": "admin",
+            "roles": [],
+          },
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "bar@example.org",
+            "role": "admin",
+            "roles": [
+              "owner",
+            ],
+          },
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "system:serviceaccount:garden-foo:robot",
+            "role": "viewer",
+            "roles": [],
+          },
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "system:serviceaccount:garden-baz:robot",
+            "role": "viewer",
+            "roles": [
+              "admin",
+            ],
+          },
+          {
+            "kind": "ServiceAccount",
+            "name": "robot-nomember",
+            "namespace": "garden-foo",
+            "role": "myrole",
+          },
+        ],
+      },
+    },
+  ],
+]
+`;
+
+exports[`api members should add roles to existing service account without roles => add member 2`] = `
+[
+  {
+    "roles": [
+      "admin",
+    ],
+    "username": "foo@example.org",
+  },
+  {
+    "roles": [
+      "admin",
+      "owner",
+    ],
+    "username": "bar@example.org",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [
+      "viewer",
+    ],
+    "username": "system:serviceaccount:garden-foo:robot",
+  },
+  {
+    "roles": [
+      "viewer",
+      "admin",
+    ],
+    "username": "system:serviceaccount:garden-baz:robot",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [
+      "myrole",
+    ],
+    "username": "system:serviceaccount:garden-foo:robot-nomember",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [],
+    "username": "system:serviceaccount:garden-foo:dashboard-webterminal",
+  },
+]
+`;
+
+exports[`api members should create a service account without roles 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+    {
+      "metadata": {
+        "annotations": {
+          "dashboard.gardener.cloud/created-by": "bar@example.org",
+          "dashboard.gardener.cloud/description": undefined,
+        },
+        "name": "foo",
+        "namespace": "garden-foo",
+      },
+    },
+  ],
+]
+`;
+
+exports[`api members should create a service account without roles 2`] = `
+[
+  {
+    "roles": [
+      "admin",
+    ],
+    "username": "foo@example.org",
+  },
+  {
+    "roles": [
+      "admin",
+      "owner",
+    ],
+    "username": "bar@example.org",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [
+      "viewer",
+    ],
+    "username": "system:serviceaccount:garden-foo:robot",
+  },
+  {
+    "roles": [
+      "viewer",
+      "admin",
+    ],
+    "username": "system:serviceaccount:garden-baz:robot",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [],
+    "username": "system:serviceaccount:garden-foo:robot-nomember",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [],
+    "username": "system:serviceaccount:garden-foo:dashboard-webterminal",
+  },
+  {
+    "createdBy": "bar@example.org",
+    "creationTimestamp": "now",
+    "roles": [],
+    "username": "system:serviceaccount:garden-foo:foo",
+  },
+]
+`;
+
+exports[`api members should delete a foreign service account 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "patch",
+      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+      "content-type": "application/merge-patch+json",
+    },
+    {
+      "spec": {
+        "members": [
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "foo@example.org",
+            "role": "admin",
+            "roles": [],
+          },
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "bar@example.org",
+            "role": "admin",
+            "roles": [
+              "owner",
+            ],
+          },
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "system:serviceaccount:garden-foo:robot",
+            "role": "viewer",
+            "roles": [],
+          },
+        ],
+      },
+    },
+  ],
+]
+`;
+
+exports[`api members should delete a foreign service account 2`] = `
+[
+  {
+    "roles": [
+      "admin",
+    ],
+    "username": "foo@example.org",
+  },
+  {
+    "roles": [
+      "admin",
+      "owner",
+    ],
+    "username": "bar@example.org",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [
+      "viewer",
+    ],
+    "username": "system:serviceaccount:garden-foo:robot",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [],
+    "username": "system:serviceaccount:garden-foo:robot-nomember",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [],
+    "username": "system:serviceaccount:garden-foo:dashboard-webterminal",
+  },
+]
+`;
+
+exports[`api members should delete a project member 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "patch",
+      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+      "content-type": "application/merge-patch+json",
+    },
+    {
+      "spec": {
+        "members": [
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "foo@example.org",
+            "role": "admin",
+            "roles": [],
+          },
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "system:serviceaccount:garden-foo:robot",
+            "role": "viewer",
+            "roles": [],
+          },
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "system:serviceaccount:garden-baz:robot",
+            "role": "viewer",
+            "roles": [
+              "admin",
+            ],
+          },
+        ],
+      },
+    },
+  ],
+]
+`;
+
+exports[`api members should delete a project member 2`] = `
+[
+  {
+    "roles": [
+      "admin",
+    ],
+    "username": "foo@example.org",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [
+      "viewer",
+    ],
+    "username": "system:serviceaccount:garden-foo:robot",
+  },
+  {
+    "roles": [
+      "viewer",
+      "admin",
+    ],
+    "username": "system:serviceaccount:garden-baz:robot",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [],
+    "username": "system:serviceaccount:garden-foo:robot-nomember",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [],
+    "username": "system:serviceaccount:garden-foo:dashboard-webterminal",
+  },
+]
+`;
+
+exports[`api members should delete a service account 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "delete",
+      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts/robot",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "patch",
+      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+      "content-type": "application/merge-patch+json",
+    },
+    {
+      "spec": {
+        "members": [
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "foo@example.org",
+            "role": "admin",
+            "roles": [],
+          },
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "bar@example.org",
+            "role": "admin",
+            "roles": [
+              "owner",
+            ],
+          },
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "system:serviceaccount:garden-baz:robot",
+            "role": "viewer",
+            "roles": [
+              "admin",
+            ],
+          },
+        ],
+      },
+    },
+  ],
+]
+`;
+
+exports[`api members should delete a service account 2`] = `
+[
+  {
+    "roles": [
+      "admin",
+    ],
+    "username": "foo@example.org",
+  },
+  {
+    "roles": [
+      "admin",
+      "owner",
+    ],
+    "username": "bar@example.org",
+  },
+  {
+    "roles": [
+      "viewer",
+      "admin",
+    ],
+    "username": "system:serviceaccount:garden-baz:robot",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [],
+    "username": "system:serviceaccount:garden-foo:robot-nomember",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [],
+    "username": "system:serviceaccount:garden-foo:dashboard-webterminal",
+  },
+]
+`;
+
+exports[`api members should not add a foreign service account without roles as member to project 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+]
+`;
+
+exports[`api members should not add a foreign service account without roles as member to project 2`] = `
+[
+  {
+    "roles": [
+      "admin",
+    ],
+    "username": "foo@example.org",
+  },
+  {
+    "roles": [
+      "admin",
+      "owner",
+    ],
+    "username": "bar@example.org",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [
+      "viewer",
+    ],
+    "username": "system:serviceaccount:garden-foo:robot",
+  },
+  {
+    "roles": [
+      "viewer",
+      "admin",
+    ],
+    "username": "system:serviceaccount:garden-baz:robot",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [],
+    "username": "system:serviceaccount:garden-foo:robot-nomember",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [],
+    "username": "system:serviceaccount:garden-foo:dashboard-webterminal",
+  },
+]
+`;
+
+exports[`api members should not add member that is already a project member 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+]
+`;
+
+exports[`api members should not add member that is already a project member 2`] = `
+{
+  "code": 409,
+  "details": Any<Object>,
+  "message": "User 'foo@example.org' already exists",
+  "reason": "Conflict",
+  "status": "Failure",
+}
+`;
+
+exports[`api members should not create service account if already exists 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+]
+`;
+
+exports[`api members should not create service account if already exists 2`] = `
+{
+  "code": 409,
+  "details": Any<Object>,
+  "message": "ServiceAccount 'system:serviceaccount:garden-foo:robot' already exists",
+  "reason": "Conflict",
+  "status": "Failure",
+}
+`;
+
+exports[`api members should not delete a member that is not a project member 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+]
+`;
+
+exports[`api members should not delete a member that is not a project member 2`] = `
+[
+  {
+    "roles": [
+      "admin",
+    ],
+    "username": "foo@example.org",
+  },
+  {
+    "roles": [
+      "admin",
+      "owner",
+    ],
+    "username": "bar@example.org",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [
+      "viewer",
+    ],
+    "username": "system:serviceaccount:garden-foo:robot",
+  },
+  {
+    "roles": [
+      "viewer",
+      "admin",
+    ],
+    "username": "system:serviceaccount:garden-baz:robot",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [],
+    "username": "system:serviceaccount:garden-foo:robot-nomember",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [],
+    "username": "system:serviceaccount:garden-foo:dashboard-webterminal",
+  },
+]
+`;
+
+exports[`api members should not return members but respond "not found" 1`] = `
+{
+  "code": 404,
+  "details": Any<Object>,
+  "message": "Namespace 'garden-baz' is not related to a gardener project",
+  "reason": "Not Found",
+  "status": "Failure",
+}
+`;
+
+exports[`api members should remove all roles of existing service account => delete member 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "patch",
+      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+      "content-type": "application/merge-patch+json",
+    },
+    {
+      "spec": {
+        "members": [
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "foo@example.org",
+            "role": "admin",
+            "roles": [],
+          },
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "bar@example.org",
+            "role": "admin",
+            "roles": [
+              "owner",
+            ],
+          },
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "system:serviceaccount:garden-baz:robot",
+            "role": "viewer",
+            "roles": [
+              "admin",
+            ],
+          },
+        ],
+      },
+    },
+  ],
+]
+`;
+
+exports[`api members should remove all roles of existing service account => delete member 2`] = `
+[
+  {
+    "roles": [
+      "admin",
+    ],
+    "username": "foo@example.org",
+  },
+  {
+    "roles": [
+      "admin",
+      "owner",
+    ],
+    "username": "bar@example.org",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [],
+    "username": "system:serviceaccount:garden-foo:robot",
+  },
+  {
+    "roles": [
+      "viewer",
+      "admin",
+    ],
+    "username": "system:serviceaccount:garden-baz:robot",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [],
+    "username": "system:serviceaccount:garden-foo:robot-nomember",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [],
+    "username": "system:serviceaccount:garden-foo:dashboard-webterminal",
+  },
+]
+`;
+
+exports[`api members should reset a service account 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "delete",
+      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts/robot",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+    {
+      "metadata": {
+        "annotations": {
+          "dashboard.gardener.cloud/created-by": "bar@example.org",
+          "dashboard.gardener.cloud/description": undefined,
+        },
+        "name": "robot",
+        "namespace": "garden-foo",
+      },
+    },
+  ],
+]
+`;
+
+exports[`api members should reset a service account 2`] = `
+[
+  {
+    "roles": [
+      "admin",
+    ],
+    "username": "foo@example.org",
+  },
+  {
+    "roles": [
+      "admin",
+      "owner",
+    ],
+    "username": "bar@example.org",
+  },
+  {
+    "createdBy": "bar@example.org",
+    "creationTimestamp": "now",
+    "orphaned": false,
+    "roles": [
+      "viewer",
+    ],
+    "username": "system:serviceaccount:garden-foo:robot",
+  },
+  {
+    "roles": [
+      "viewer",
+      "admin",
+    ],
+    "username": "system:serviceaccount:garden-baz:robot",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [],
+    "username": "system:serviceaccount:garden-foo:robot-nomember",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [],
+    "username": "system:serviceaccount:garden-foo:dashboard-webterminal",
+  },
+]
+`;
+
+exports[`api members should return a service account 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts/robot/token",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+    {
+      "apiVersion": "authentication.k8s.io/v1",
+      "kind": "TokenRequest",
+      "spec": {
+        "audiences": [
+          "aud1",
+          "aud2",
+        ],
+        "expirationSeconds": 42,
+      },
+    },
+  ],
+]
+`;
+
+exports[`api members should return a service account 2`] = `
+{
+  "creationTimestamp": "2020-01-01T00:00:00Z",
+  "kubeconfig": "apiVersion: v1
+kind: Config
+current-context: garden-foo-robot
+contexts:
+  - name: garden-foo-robot
+    context:
+      cluster: garden
+      user: robot
+      namespace: garden-foo
+clusters:
+  - name: garden
+    cluster:
+      server: https://kubernetes.external.foo.bar
+      certificate-authority-data: >-
+        LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCkxpNHUKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==
+users:
+  - name: robot
+    user:
+      token: secret
+",
+  "roles": [
+    "viewer",
+  ],
+  "username": "system:serviceaccount:garden-foo:robot",
+}
+`;
+
+exports[`api members should return all project members, including service accounts without entry in project 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+]
+`;
+
+exports[`api members should return all project members, including service accounts without entry in project 2`] = `
+[
+  {
+    "roles": [
+      "admin",
+    ],
+    "username": "foo@example.org",
+  },
+  {
+    "roles": [
+      "admin",
+      "owner",
+    ],
+    "username": "bar@example.org",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [
+      "viewer",
+    ],
+    "username": "system:serviceaccount:garden-foo:robot",
+  },
+  {
+    "roles": [
+      "viewer",
+      "admin",
+    ],
+    "username": "system:serviceaccount:garden-baz:robot",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [],
+    "username": "system:serviceaccount:garden-foo:robot-nomember",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [],
+    "username": "system:serviceaccount:garden-foo:dashboard-webterminal",
+  },
+]
+`;
+
+exports[`api members should update roles of a project member 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "patch",
+      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+      "content-type": "application/merge-patch+json",
+    },
+    {
+      "spec": {
+        "members": [
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "foo@example.org",
+            "role": "admin",
+            "roles": [],
+          },
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "bar@example.org",
+            "role": "newRole",
+          },
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "system:serviceaccount:garden-foo:robot",
+            "role": "viewer",
+            "roles": [],
+          },
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "system:serviceaccount:garden-baz:robot",
+            "role": "viewer",
+            "roles": [
+              "admin",
+            ],
+          },
+        ],
+      },
+    },
+  ],
+]
+`;
+
+exports[`api members should update roles of a project member 2`] = `
+[
+  {
+    "roles": [
+      "admin",
+    ],
+    "username": "foo@example.org",
+  },
+  {
+    "roles": [
+      "newRole",
+    ],
+    "username": "bar@example.org",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [
+      "viewer",
+    ],
+    "username": "system:serviceaccount:garden-foo:robot",
+  },
+  {
+    "roles": [
+      "viewer",
+      "admin",
+    ],
+    "username": "system:serviceaccount:garden-baz:robot",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [],
+    "username": "system:serviceaccount:garden-foo:robot-nomember",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [],
+    "username": "system:serviceaccount:garden-foo:dashboard-webterminal",
+  },
+]
+`;
+
+exports[`api members should update roles of existing service account 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "patch",
+      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts/robot",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+      "content-type": "application/merge-patch+json",
+    },
+    {
+      "metadata": {
+        "annotations": {
+          "dashboard.gardener.cloud/description": "newDescription",
+        },
+      },
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "patch",
+      ":path": "/apis/core.gardener.cloud/v1beta1/projects/foo",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhckBleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.7WKy0sNVkJzIqh3QJIF1zk3QjzwFe_zMTv8PmnOCsxg",
+      "content-type": "application/merge-patch+json",
+    },
+    {
+      "spec": {
+        "members": [
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "foo@example.org",
+            "role": "admin",
+            "roles": [],
+          },
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "bar@example.org",
+            "role": "admin",
+            "roles": [
+              "owner",
+            ],
+          },
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "system:serviceaccount:garden-foo:robot",
+            "role": "myrole",
+          },
+          {
+            "apiGroup": "rbac.authorization.k8s.io",
+            "kind": "User",
+            "name": "system:serviceaccount:garden-baz:robot",
+            "role": "viewer",
+            "roles": [
+              "admin",
+            ],
+          },
+        ],
+      },
+    },
+  ],
+]
+`;
+
+exports[`api members should update roles of existing service account 2`] = `
+[
+  {
+    "roles": [
+      "admin",
+    ],
+    "username": "foo@example.org",
+  },
+  {
+    "roles": [
+      "admin",
+      "owner",
+    ],
+    "username": "bar@example.org",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "description": "newDescription",
+    "roles": [
+      "myrole",
+    ],
+    "username": "system:serviceaccount:garden-foo:robot",
+  },
+  {
+    "roles": [
+      "viewer",
+      "admin",
+    ],
+    "username": "system:serviceaccount:garden-baz:robot",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [],
+    "username": "system:serviceaccount:garden-foo:robot-nomember",
+  },
+  {
+    "creationTimestamp": "2020-01-01T00:00:00Z",
+    "roles": [],
+    "username": "system:serviceaccount:garden-foo:dashboard-webterminal",
+  },
+]
+`;

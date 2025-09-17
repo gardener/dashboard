@@ -4,14 +4,14 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import express from 'express'
+import services from '../services/index.js'
+import httpErrors from 'http-errors'
+import { metricsRoute } from '../middleware.js'
+const { members } = services
+const { UnprocessableEntity } = httpErrors
 
-const express = require('express')
-const { members } = require('../services')
-const { UnprocessableEntity } = require('http-errors')
-const { metricsRoute } = require('../middleware')
-
-const router = module.exports = express.Router({
+const router = express.Router({
   mergeParams: true,
 })
 
@@ -89,3 +89,5 @@ router.route('/:name')
       next(err)
     }
   })
+
+export default router

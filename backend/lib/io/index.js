@@ -4,15 +4,14 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const createServer = require('socket.io')
-const logger = require('../logger')
-const helper = require('./helper')
-const dispatcher = require('./dispatcher')
+import { Server } from 'socket.io'
+import logger from '../logger/index.js'
+import helper from './helper.js'
+import dispatcher from './dispatcher.js'
+import _ from 'lodash-es'
 
 function init (httpServer, cache) {
-  const io = createServer(httpServer, {
+  const io = new Server(httpServer, {
     path: '/api/events',
     serveClient: false,
   })
@@ -27,6 +26,12 @@ function init (httpServer, cache) {
     delete socket.data.timeoutId
 
     helper.joinPrivateRoom(socket)
+
+    const user = helper.getUserFromSocket(socket)
+    if (_.get(user, ['profiles', 'canListSeeds'], false)) {
+      socket.join('seeds')
+      logger.debug('Socket %s auto-joined seeds room', socket.id)
+    }
 
     // handle 'subscribe' events
     socket.on('subscribe', async (key, ...args) => {
@@ -78,4 +83,4 @@ function init (httpServer, cache) {
   return io
 }
 
-exports = module.exports = init
+export default init

@@ -1,0 +1,47 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`api resourceQuotas should return a resource quota 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImpvaG4uZG9lQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.LkQ9PEN893UNTsZZn2Ux_CAYNOoQ2ISboWuHiAc5HHU",
+    },
+    {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": {
+          "group": "",
+          "namespace": "garden-foo",
+          "resource": "resourcequotas",
+          "verb": "list",
+        },
+      },
+    },
+  ],
+]
+`;
+
+exports[`api resourceQuotas should return a resource quota 2`] = `
+[
+  {
+    "metadata": {},
+    "spec": {},
+    "status": {
+      "hard": {
+        "count/configmaps": "22",
+        "count/secrets": "70",
+      },
+      "used": {
+        "count/configmaps": "5",
+        "count/secrets": "12",
+      },
+    },
+  },
+]
+`;

@@ -67,24 +67,21 @@ SPDX-License-Identifier: Apache-2.0
         :messages="messages"
         :error-messages="getErrorMessages(v$.internalValue)"
         class="g-field"
+        :counter="counter"
+        :maxlength="maxLength"
         @input="v$.internalValue.$touch"
         @blur="v$.internalValue.$touch"
       >
         <template #append>
-          <v-tooltip location="top">
-            <template #activator="{ props }">
-              <v-btn
-                v-bind="props"
-                :disabled="!valid"
-                icon="mdi-check"
-                variant="text"
-                density="comfortable"
-                color="success"
-                @click="onSave"
-              />
-            </template>
-            <span>Save</span>
-          </v-tooltip>
+          <v-btn
+            v-tooltip:top="'Save'"
+            :disabled="!valid"
+            icon="mdi-check"
+            variant="text"
+            density="comfortable"
+            color="success"
+            @click="onSave"
+          />
         </template>
         <template #message="{ message }">
           <g-error-message
@@ -135,6 +132,13 @@ export default {
     readOnly: {
       type: Boolean,
       default: false,
+    },
+    counter: {
+      type: Boolean,
+      default: false,
+    },
+    maxLength: {
+      type: Number,
     },
   },
   emits: [

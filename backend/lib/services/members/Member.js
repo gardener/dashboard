@@ -4,9 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const { pick } = require('lodash')
+import { pick } from 'lodash-es'
 
 const PROPERTY_NAMES = Object.freeze([
   'createdBy',
@@ -45,4 +43,4 @@ class Member {
   }
 }
 
-module.exports = Member
+export default Member
