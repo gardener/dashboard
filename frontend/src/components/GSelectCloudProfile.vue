@@ -59,8 +59,8 @@ const props = defineProps({
 })
 
 const cloudProfileRef = toRef(props, 'modelValue')
-const cloudProfilesRef = toRef(props, 'cloudProfiles')
-const namespacedCloudProfilesRef = toRef(props, 'namespacedCloudProfiles')
+const cloudProfiles = toRef(props, 'cloudProfiles')
+const namespacedCloudProfiles = toRef(props, 'namespacedCloudProfiles')
 
 const cloudProfileStore = useCloudProfileStore()
 const { seedsByCloudProfileRef } = cloudProfileStore
@@ -78,9 +78,9 @@ const emit = defineEmits([
 const selectItems = computed(() => {
   const items = []
 
-  if (namespacedCloudProfilesRef.value.length > 0) {
+  if (namespacedCloudProfiles.value.length > 0) {
     items.push(
-      ...namespacedCloudProfilesRef.value.map(profile => {
+      ...namespacedCloudProfiles.value.map(profile => {
         const namespacedCloudProfileRef = {
           name: profile.metadata.name,
           kind: 'NamespacedCloudProfile',
@@ -93,15 +93,15 @@ const selectItems = computed(() => {
     )
   }
 
-  if (cloudProfilesRef.value.length > 0) {
+  if (cloudProfiles.value.length > 0) {
     items.push(
-      ...cloudProfilesRef.value.map(profile => {
-        const cloudProfileRefListEntry = {
+      ...cloudProfiles.value.map(profile => {
+        const cloudProfileRef = {
           name: profile.metadata.name,
           kind: 'CloudProfile',
         }
         return {
-          value: cloudProfileRefListEntry,
+          value: cloudProfileRef,
           title: cloudProfileDisplayName(profile),
         }
       }),
@@ -137,10 +137,10 @@ const rules = {
 
 const selectedCloudProfile = computed(() => {
   if (cloudProfileRef.value?.kind === 'CloudProfile') {
-    return find(cloudProfilesRef.value, { metadata: { name: cloudProfileRef.value?.name } })
+    return find(cloudProfiles.value, { metadata: { name: cloudProfileRef.value?.name } })
   }
   if (cloudProfileRef.value?.kind === 'NamespacedCloudProfile') {
-    return find(namespacedCloudProfilesRef.value, { metadata: { name: cloudProfileRef.value?.name } })
+    return find(namespacedCloudProfiles.value, { metadata: { name: cloudProfileRef.value?.name } })
   }
   return undefined
 })
