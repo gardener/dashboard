@@ -43,25 +43,33 @@ import { withFieldName } from '@/utils/validators'
 import find from 'lodash/find'
 
 const props = defineProps({
-  modelValue: { // cloudProfileRef
+  modelValue: {
     type: Object,
     default: null,
   },
+  cloudProfiles: {
+    type: Array,
+    required: true,
+  },
+  namespacedCloudProfiles: {
+    type: Array,
+    required: false,
+    default: () => [],
+  },
 })
 
-const cloudProfileRef = toRef(props.modelValue)
+const cloudProfileRef = toRef(props, 'modelValue')
+const cloudProfiles = toRef(props, 'cloudProfiles')
+const namespacedCloudProfiles = toRef(props, 'namespacedCloudProfiles')
 
 const cloudProfileStore = useCloudProfileStore()
 const { seedsByCloudProfileRef } = cloudProfileStore
-const { cloudProfileList } = storeToRefs(cloudProfileStore)
 const projectStore = useProjectStore()
 const { project } = storeToRefs(projectStore)
 
 const seeds = computed(() => {
   return seedsByCloudProfileRef(cloudProfileRef.value, project.value)
 })
-
-const namespacedCloudProfiles = [] // ToDo: To be implemented: useNamespacedCloudProfileStore()
 
 const emit = defineEmits([
   'update:modelValue',
@@ -70,9 +78,9 @@ const emit = defineEmits([
 const selectItems = computed(() => {
   const items = []
 
-  if (namespacedCloudProfiles.length > 0) {
+  if (namespacedCloudProfiles.value.length > 0) {
     items.push(
-      ...namespacedCloudProfiles.map(profile => {
+      ...namespacedCloudProfiles.value.map(profile => {
         const namespacedCloudProfileRef = {
           name: profile.metadata.name,
           kind: 'NamespacedCloudProfile',
@@ -85,9 +93,9 @@ const selectItems = computed(() => {
     )
   }
 
-  if (cloudProfileList.value.length > 0) {
+  if (cloudProfiles.value.length > 0) {
     items.push(
-      ...cloudProfileList.value.map(profile => {
+      ...cloudProfiles.value.map(profile => {
         const cloudProfileRef = {
           name: profile.metadata.name,
           kind: 'CloudProfile',
@@ -129,10 +137,10 @@ const rules = {
 
 const selectedCloudProfile = computed(() => {
   if (cloudProfileRef.value?.kind === 'CloudProfile') {
-    return find(cloudProfileList.value, { metadata: { name: cloudProfileRef.value?.name } })
+    return find(cloudProfiles.value, { metadata: { name: cloudProfileRef.value?.name } })
   }
   if (cloudProfileRef.value?.kind === 'NamespacedCloudProfile') {
-    return find(namespacedCloudProfiles, { metadata: { name: cloudProfileRef.value?.name } })
+    return find(namespacedCloudProfiles.value, { metadata: { name: cloudProfileRef.value?.name } })
   }
   return undefined
 })
