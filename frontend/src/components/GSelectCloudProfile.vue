@@ -43,25 +43,33 @@ import { withFieldName } from '@/utils/validators'
 import find from 'lodash/find'
 
 const props = defineProps({
-  modelValue: { // cloudProfileRef
+  modelValue: {
     type: Object,
     default: null,
   },
+  cloudProfiles: {
+    type: Array,
+    required: true,
+  },
+  namespacedCloudProfiles: {
+    type: Array,
+    required: false,
+    default: () => [],
+  },
 })
 
-const cloudProfileRef = toRef(props.modelValue)
+const cloudProfileRef = toRef(props, 'modelValue')
+const cloudProfilesRef = toRef(props, 'cloudProfiles')
+const namespacedCloudProfilesRef = toRef(props, 'namespacedCloudProfiles')
 
 const cloudProfileStore = useCloudProfileStore()
 const { seedsByCloudProfileRef } = cloudProfileStore
-const { cloudProfileList } = storeToRefs(cloudProfileStore)
 const projectStore = useProjectStore()
 const { project } = storeToRefs(projectStore)
 
 const seeds = computed(() => {
   return seedsByCloudProfileRef(cloudProfileRef.value, project.value)
 })
-
-const namespacedCloudProfiles = [] // ToDo: To be implemented: useNamespacedCloudProfileStore()
 
 const emit = defineEmits([
   'update:modelValue',
@@ -70,9 +78,9 @@ const emit = defineEmits([
 const selectItems = computed(() => {
   const items = []
 
-  if (namespacedCloudProfiles.length > 0) {
+  if (namespacedCloudProfilesRef.value.length > 0) {
     items.push(
-      ...namespacedCloudProfiles.map(profile => {
+      ...namespacedCloudProfilesRef.value.map(profile => {
         const namespacedCloudProfileRef = {
           name: profile.metadata.name,
           kind: 'NamespacedCloudProfile',
@@ -85,15 +93,15 @@ const selectItems = computed(() => {
     )
   }
 
-  if (cloudProfileList.value.length > 0) {
+  if (cloudProfilesRef.value.length > 0) {
     items.push(
-      ...cloudProfileList.value.map(profile => {
-        const cloudProfileRef = {
+      ...cloudProfilesRef.value.map(profile => {
+        const cloudProfileRefListEntry = {
           name: profile.metadata.name,
           kind: 'CloudProfile',
         }
         return {
-          value: cloudProfileRef,
+          value: cloudProfileRefListEntry,
           title: cloudProfileDisplayName(profile),
         }
       }),
@@ -129,10 +137,10 @@ const rules = {
 
 const selectedCloudProfile = computed(() => {
   if (cloudProfileRef.value?.kind === 'CloudProfile') {
-    return find(cloudProfileList.value, { metadata: { name: cloudProfileRef.value?.name } })
+    return find(cloudProfilesRef.value, { metadata: { name: cloudProfileRef.value?.name } })
   }
   if (cloudProfileRef.value?.kind === 'NamespacedCloudProfile') {
-    return find(namespacedCloudProfiles, { metadata: { name: cloudProfileRef.value?.name } })
+    return find(namespacedCloudProfilesRef.value, { metadata: { name: cloudProfileRef.value?.name } })
   }
   return undefined
 })
