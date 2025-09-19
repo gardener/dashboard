@@ -7459,7 +7459,7 @@ const RAW_RUNTIME_STATE =
     ]],\
     ["esbuild", [\
       ["npm:0.25.1", {\
-        "packageLocation": "./.yarn/unplugged/esbuild-npm-0.25.1-d9214fa98d/node_modules/esbuild/",\
+        "packageLocation": "./.yarn/cache/esbuild-npm-0.25.1-d9214fa98d-80fca30dd0.zip/node_modules/esbuild/",\
         "packageDependencies": [\
           ["@esbuild/aix-ppc64", "npm:0.25.1"],\
           ["@esbuild/android-arm", "npm:0.25.1"],\
@@ -14276,7 +14276,7 @@ const RAW_RUNTIME_STATE =
     ]],\
     ["unrs-resolver", [\
       ["npm:1.11.1", {\
-        "packageLocation": "./.yarn/unplugged/unrs-resolver-npm-1.11.1-9828edd1f1/node_modules/unrs-resolver/",\
+        "packageLocation": "./.yarn/cache/unrs-resolver-npm-1.11.1-9828edd1f1-c91b112c71.zip/node_modules/unrs-resolver/",\
         "packageDependencies": [\
           ["@unrs/resolver-binding-android-arm-eabi", "npm:1.11.1"],\
           ["@unrs/resolver-binding-android-arm64", "npm:1.11.1"],\
@@ -14743,14 +14743,14 @@ const RAW_RUNTIME_STATE =
     ]],\
     ["vue-demi", [\
       ["npm:0.13.11", {\
-        "packageLocation": "./.yarn/unplugged/vue-demi-virtual-9761a07e89/node_modules/vue-demi/",\
+        "packageLocation": "./.yarn/cache/vue-demi-npm-0.13.11-3e74f92dc7-8f1a38e41e.zip/node_modules/vue-demi/",\
         "packageDependencies": [\
           ["vue-demi", "npm:0.13.11"]\
         ],\
         "linkType": "SOFT"\
       }],\
       ["virtual:14a035260190bd051f2358aefb643bcd023ae70253c045851948c31be5d833b297d317f2cdfb9a1eca7e8034e4574c70d045bd8b1f40ac830574c3873a4d7732#npm:0.13.11", {\
-        "packageLocation": "./.yarn/unplugged/vue-demi-virtual-9761a07e89/node_modules/vue-demi/",\
+        "packageLocation": "./.yarn/__virtual__/vue-demi-virtual-9761a07e89/0/cache/vue-demi-npm-0.13.11-3e74f92dc7-8f1a38e41e.zip/node_modules/vue-demi/",\
         "packageDependencies": [\
           ["@types/vue", null],\
           ["@types/vue__composition-api", null],\

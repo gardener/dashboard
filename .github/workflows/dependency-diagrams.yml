@@ -35,7 +35,9 @@ jobs:
           node-version: '22.18.0'
 
       - name: Install dependencies
-        run: yarn install
+        run: |
+          set -eu
+          YARN_ENABLE_SCRIPTS=0 yarn install --immutable --immutable-cache --check-cache --refresh-lockfile
 
       - name: Generate dependency diagrams
         run: yarn generate-all-dependency-diagrams
