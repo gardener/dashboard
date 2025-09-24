@@ -16,7 +16,7 @@ const { dashboardClient } = kubeClientModule
 
 async function getVersionFromPackageJson () {
   const { default: packageJson } = await import('../../package.json', {
-    with: { type: 'json' }
+    with: { type: 'json' },
   })
 
   const { version } = packageJson
