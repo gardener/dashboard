@@ -215,7 +215,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     }
     const seeds = seedStore.seedsForCloudProfileByProject(cloudProfile, project)
 
-    const uniqueSeedRegions = uniq(map(seeds, 'spec.region'))
+    const uniqueSeedRegions = uniq(map(seeds, seed => get(seed, ['spec', 'provider', 'region'])))
     const uniqueSeedRegionsWithZones = filter(uniqueSeedRegions, isValidRegion(cloudProfile))
     return uniqueSeedRegionsWithZones
   }
