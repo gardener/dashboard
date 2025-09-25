@@ -894,27 +894,31 @@ describe('gardener-dashboard', function () {
       it('should render the template with multiple allowed origins', async function () {
         const values = {
           global: {
-            websocketAllowedOrigins: ['https://foo.example.com', 'https://bar.example.com'],
+            dashboard: {
+              websocketAllowedOrigins: ['https://foo.example.com', 'https://bar.example.com'],
+            },
           },
         }
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
         const [configMap] = documents
         const config = yaml.load(configMap.data['config.yaml'])
-        expect(pick(config, ['io'])).toMatchSnapshot()
+        expect(pick(config, ['websocketAllowedOrigins'])).toMatchSnapshot()
       })
 
       it('should render the template with default allowed origin', async function () {
         const values = {
           global: {
-            websocketAllowedOrigins: ['*'],
+            dashboard: {
+              websocketAllowedOrigins: null, // enforce helm default
+            },
           },
         }
         const documents = await renderTemplates(templates, values)
         expect(documents).toHaveLength(1)
         const [configMap] = documents
         const config = yaml.load(configMap.data['config.yaml'])
-        expect(pick(config, ['io'])).toMatchSnapshot()
+        expect(pick(config, ['websocketAllowedOrigins'])).toMatchSnapshot()
       })
     })
   })

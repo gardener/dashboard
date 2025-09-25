@@ -150,22 +150,21 @@ describe('config', function () {
         expect(gardener.readConfig.mock.calls[0]).toEqual([filename])
 
         // local env
-        expect(config.port).toBe(parseInt(env.PORT))
-        expect(config.logLevel).toBe(env.LOG_LEVEL)
-        expect(config.oidc.client_id).toBe(env.OIDC_CLIENT_ID)
-        expect(config.oidc.client_secret).toBe(env.OIDC_CLIENT_SECRET)
-        expect(config.oidc.ca).toBe(env.OIDC_CA)
+        expect(config.port).toBe(3456)
+        expect(config.logLevel).toBe('error')
+        expect(config.oidc.client_id).toBe('client_id')
+        expect(config.oidc.client_secret).toBe('client_secret')
+        expect(config.oidc.ca).toBe('ca')
 
         // global env
-        expect(config.apiServerUrl).toBe(env.API_SERVER_URL)
-        expect(config.sessionSecret).toBe(env.SESSION_SECRET)
-        expect(config.websocketAllowedOrigins).toEqual(env.WEBSOCKET_ALLOWED_ORIGINS.split(','))
+        expect(config.apiServerUrl).toBe('apiServerUrl')
+        expect(config.sessionSecret).toBe('secret')
+        expect(config.websocketAllowedOrigins).toEqual(['https://foo.example.org', 'https://bar.example.org'])
       })
 
       it('should throw empty apiServerUrl', function () {
         const env = Object.assign({
           NODE_ENV: 'production',
-          API_SERVER_URL: '',
           SESSION_SECRET: 'secret',
           WEBSOCKET_ALLOWED_ORIGINS: '*',
         })
@@ -178,7 +177,6 @@ describe('config', function () {
         const env = Object.assign({
           NODE_ENV: 'production',
           API_SERVER_URL: 'apiServerUrl',
-          SESSION_SECRET: '',
           WEBSOCKET_ALLOWED_ORIGINS: '',
         })
 
@@ -191,7 +189,6 @@ describe('config', function () {
           NODE_ENV: 'production',
           API_SERVER_URL: 'apiServerUrl',
           SESSION_SECRET: 'secret',
-          WEBSOCKET_ALLOWED_ORIGINS: '',
         })
 
         expect(() => gardener.loadConfig(undefined, { env }))

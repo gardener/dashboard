@@ -124,7 +124,7 @@ const configMappings = [
 
 function parseConfigValue (value, type) {
   const parseArray = value => {
-    if (typeof value !== 'string' || !value.length > 0) {
+    if (value == null || typeof value !== 'string' || value.length === 0) {
       return undefined
     }
     const arr = value.split(',').map(v => v.trim()).filter(Boolean)

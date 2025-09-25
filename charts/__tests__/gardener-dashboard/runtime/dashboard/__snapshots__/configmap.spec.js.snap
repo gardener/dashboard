@@ -461,11 +461,6 @@ exports[`gardener-dashboard configmap should render the template w/ defaults val
       "maxExpirationSeconds": 86400,
     },
   },
-  "io": {
-    "allowedOrigins": [
-      "*",
-    ],
-  },
   "logFormat": "text",
   "logLevel": "debug",
   "maxRequestBodySize": "100kb",
@@ -501,6 +496,9 @@ Li4u
       "seedRef": "soil-gcp",
     },
   },
+  "websocketAllowedOrigins": [
+    "*",
+  ],
 }
 `;
 
@@ -517,21 +515,18 @@ exports[`gardener-dashboard configmap sla should render the template with sla de
 
 exports[`gardener-dashboard configmap socket io should render the template with default allowed origin 1`] = `
 {
-  "io": {
-    "allowedOrigins": [
-      "*",
-    ],
-  },
+  "websocketAllowedOrigins": [
+    "*",
+  ],
 }
 `;
 
 exports[`gardener-dashboard configmap socket io should render the template with multiple allowed origins 1`] = `
 {
-  "io": {
-    "allowedOrigins": [
-      "*",
-    ],
-  },
+  "websocketAllowedOrigins": [
+    "https://foo.example.com",
+    "https://bar.example.com",
+  ],
 }
 `;
 
