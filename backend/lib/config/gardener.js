@@ -123,6 +123,13 @@ const configMappings = [
 ]
 
 function parseConfigValue (value, type) {
+  const parseArray = value => {
+    if (typeof value !== 'string' || !value.length > 0) {
+      return undefined
+    }
+    const arr = value.split(',').map(v => v.trim()).filter(Boolean)
+    return arr.length > 0 ? arr : undefined
+  }
   switch (type) {
     case 'Integer':
       value = parseInt(value, 10)
@@ -130,7 +137,7 @@ function parseConfigValue (value, type) {
     case 'Boolean':
       return value === 'true'
     case 'Array':
-      return value ? value.split(',').map(v => v.trim()).filter(Boolean) : undefined
+      return parseArray(value)
     default:
       return value
   }

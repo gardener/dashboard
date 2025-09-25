@@ -161,6 +161,55 @@ describe('config', function () {
         expect(config.sessionSecret).toBe(env.SESSION_SECRET)
         expect(config.websocketAllowedOrigins).toEqual(env.WEBSOCKET_ALLOWED_ORIGINS.split(','))
       })
+
+      it('should throw empty apiServerUrl', function () {
+        const env = Object.assign({
+          NODE_ENV: 'production',
+          API_SERVER_URL: '',
+          SESSION_SECRET: 'secret',
+          WEBSOCKET_ALLOWED_ORIGINS: '*',
+        })
+
+        expect(() => gardener.loadConfig(undefined, { env }))
+          .toThrow("Configuration value 'apiServerUrl' is required")
+      })
+
+      it('should throw empty session secret', function () {
+        const env = Object.assign({
+          NODE_ENV: 'production',
+          API_SERVER_URL: 'apiServerUrl',
+          SESSION_SECRET: '',
+          WEBSOCKET_ALLOWED_ORIGINS: '',
+        })
+
+        expect(() => gardener.loadConfig(undefined, { env }))
+          .toThrow("Configuration value 'sessionSecret' is required")
+      })
+
+      it('should throw empty websocketAllowedOrigins', function () {
+        const env = Object.assign({
+          NODE_ENV: 'production',
+          API_SERVER_URL: 'apiServerUrl',
+          SESSION_SECRET: 'secret',
+          WEBSOCKET_ALLOWED_ORIGINS: '',
+        })
+
+        expect(() => gardener.loadConfig(undefined, { env }))
+          .toThrow("Configuration value 'websocketAllowedOrigins' is required")
+      })
+
+      it('should throw if oidc only configured partly', function () {
+        const env = Object.assign({
+          NODE_ENV: 'production',
+          API_SERVER_URL: 'apiServerUrl',
+          SESSION_SECRET: 'secret',
+          WEBSOCKET_ALLOWED_ORIGINS: '*',
+          OIDC_CLIENT_ID: 'client_id',
+        })
+
+        expect(() => gardener.loadConfig(undefined, { env }))
+          .toThrow("Configuration value 'oidc.issuer' is required")
+      })
     })
   })
 })

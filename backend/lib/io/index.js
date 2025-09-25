@@ -14,16 +14,17 @@ import config from '../config/index.js'
 function init (httpServer, cache) {
   const allowedOrigins = config.websocketAllowedOrigins
   if (!allowedOrigins?.length) {
-    logger.warn('websocketAllowedOrigins configuration is required')
+    throw new Error('WebSocket allowed origins configuration is required')
+  } else {
+    logger.info('WebSocket allowed origins: %s', allowedOrigins.join(', '))
   }
-  allowedOrigins.forEach(allowedOrigin => {
-    logger.info('WebSocket allowed origin: %s', allowedOrigin)
-  })
+
+  const msg = config.isProd
+    ? 'WebSocket allowing all origins (*) — this is unsafe in production. Restrict allowedOrigins.'
+    : 'WebSocket allowing all origins (*) — OK for local/dev, but do not use in production.'
+  logger.warn(msg)
 
   const allowAll = allowedOrigins.includes('*')
-  if (allowAll) {
-    logger.warn('WebSocket allowing all origins (*) - this seeting is not recommended for production environments')
-  }
   const io = new Server(httpServer, {
     path: '/api/events',
     serveClient: false,

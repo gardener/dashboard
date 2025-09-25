@@ -515,7 +515,17 @@ exports[`gardener-dashboard configmap sla should render the template with sla de
 }
 `;
 
-exports[`gardener-dashboard configmap socket io should render the template with allowed origins 1`] = `
+exports[`gardener-dashboard configmap socket io should render the template with default allowed origin 1`] = `
+{
+  "io": {
+    "allowedOrigins": [
+      "*",
+    ],
+  },
+}
+`;
+
+exports[`gardener-dashboard configmap socket io should render the template with multiple allowed origins 1`] = `
 {
   "io": {
     "allowedOrigins": [

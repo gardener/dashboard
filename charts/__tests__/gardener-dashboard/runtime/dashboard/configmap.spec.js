@@ -891,10 +891,23 @@ describe('gardener-dashboard', function () {
     })
 
     describe('socket io', function () {
-      it('should render the template with allowed origins', async function () {
+      it('should render the template with multiple allowed origins', async function () {
         const values = {
           global: {
             websocketAllowedOrigins: ['https://foo.example.com', 'https://bar.example.com'],
+          },
+        }
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [configMap] = documents
+        const config = yaml.load(configMap.data['config.yaml'])
+        expect(pick(config, ['io'])).toMatchSnapshot()
+      })
+
+      it('should render the template with default allowed origin', async function () {
+        const values = {
+          global: {
+            websocketAllowedOrigins: ['*'],
           },
         }
         const documents = await renderTemplates(templates, values)

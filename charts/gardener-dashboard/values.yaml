@@ -86,7 +86,7 @@ global:
 
     io:
       # list of allowed origins for the socket.io events endpoint
-      # use ["*"] to allow all origins
+      # use ["*"] to allow all origins - this is not recommended for production environments
       allowedOrigins:
       - "*"
 
