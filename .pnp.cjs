@@ -1949,7 +1949,7 @@ const RAW_RUNTIME_STATE =
           ["@rollup/plugin-commonjs", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:28.0.6"],\
           ["@rollup/plugin-json", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:6.1.0"],\
           ["@rollup/plugin-node-resolve", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:16.0.1"],\
-          ["chalk", "npm:5.6.0"],\
+          ["chalk", "npm:5.6.2"],\
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.32.0"],\
           ["eslint-import-resolver-pnp", "npm:0.0.0"],\
           ["eslint-plugin-import", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:2.32.0"],\
@@ -6258,10 +6258,10 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "HARD"\
       }],\
-      ["npm:5.6.0", {\
-        "packageLocation": "./.yarn/cache/chalk-npm-5.6.0-a3b5d69c6e-f8558fc12f.zip/node_modules/chalk/",\
+      ["npm:5.6.2", {\
+        "packageLocation": "./.yarn/cache/chalk-npm-5.6.2-ecbd482482-99a4b0f0e7.zip/node_modules/chalk/",\
         "packageDependencies": [\
-          ["chalk", "npm:5.6.0"]\
+          ["chalk", "npm:5.6.2"]\
         ],\
         "linkType": "HARD"\
       }]\
