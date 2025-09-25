@@ -112,7 +112,7 @@ describe('stores', () => {
           ],
         },
         {
-          name: 'foo',
+          name: 'ubuntu',
           versions: [
             {
               version: '1.02', // incompatible version (not semver compatible - can be normalized)
@@ -127,6 +127,14 @@ describe('stores', () => {
             {
               version: '1.3.4',
               classification: 'deprecated',
+            },
+          ],
+        },
+        {
+          name: 'foo', // not supported, defaults to hidden
+          versions: [
+            {
+              version: '1.3.4',
             },
           ],
         },
@@ -166,18 +174,18 @@ describe('stores', () => {
         expect(previewImage.isSupported).toBe(false)
         expect(previewImage.isPreview).toBe(true)
 
-        const normalizedImage = find(decoratedAndSortedMachineImages, { name: 'foo', version: '1.2.0' })
+        const normalizedImage = find(decoratedAndSortedMachineImages, { name: 'ubuntu', version: '1.2.0' })
         expect(normalizedImage).toBeDefined()
 
-        const invalidImage = find(decoratedAndSortedMachineImages, { name: 'foo', version: '1.2.x' })
+        const invalidImage = find(decoratedAndSortedMachineImages, { name: 'ubuntu', version: '1.2.x' })
         expect(invalidImage).toBeUndefined()
 
-        const imageWithExpirationWarning = find(decoratedAndSortedMachineImages, { name: 'foo', version: '1.3.3' })
+        const imageWithExpirationWarning = find(decoratedAndSortedMachineImages, { name: 'ubuntu', version: '1.3.3' })
         expect(imageWithExpirationWarning.vendorHint).toBeUndefined()
         expect(imageWithExpirationWarning.isSupported).toBe(true)
         expect(imageWithExpirationWarning.isExpirationWarning).toBe(true)
 
-        const deprecatedImageWithNoExpiration = find(decoratedAndSortedMachineImages, { name: 'foo', version: '1.3.4' })
+        const deprecatedImageWithNoExpiration = find(decoratedAndSortedMachineImages, { name: 'ubuntu', version: '1.3.4' })
         expect(deprecatedImageWithNoExpiration.isDeprecated).toBe(true)
         expect(deprecatedImageWithNoExpiration.isExpirationWarning).toBe(false)
       })
@@ -259,9 +267,9 @@ describe('stores', () => {
         it('one should be warning level (update available, auto update enabled, expiration warning), one error (no update path)', () => {
           const imageWithExpirationWarning = find(decoratedAndSortedMachineImages, { name: 'gardenlinux', version: '1.1.3' })
           // version has expiration warning, newer version exists but is deprecated
-          const imageWithNoUpdatePath = find(decoratedAndSortedMachineImages, { name: 'foo', version: '1.3.3' })
+          const imageWithNoUpdatePath = find(decoratedAndSortedMachineImages, { name: 'ubuntu', version: '1.3.3' })
           // no newer version exists, version is deprecated but there is no expiration date
-          const deprecatedImageWithNoExpiration = find(decoratedAndSortedMachineImages, { name: 'foo', version: '1.3.4' })
+          const deprecatedImageWithNoExpiration = find(decoratedAndSortedMachineImages, { name: 'ubuntu', version: '1.3.4' })
 
           const workers = generateWorkerGroups([
             imageWithExpirationWarning,

@@ -54,7 +54,7 @@ SPDX-License-Identifier: Apache-2.0
                 Create Infrastructure Secret
               </v-list-subheader>
               <v-list-item
-                v-for="infrastructure in sortedProviderTypeList"
+                v-for="infrastructure in sortedInfraProviderTypeList"
                 :key="infrastructure"
                 @click="openCredentialAddDialog(infrastructure)"
               >
@@ -65,7 +65,7 @@ SPDX-License-Identifier: Apache-2.0
                   />
                 </template>
                 <v-list-item-title>
-                  {{ infrastructure }}
+                  {{ vendorDisplayName(infrastructure) }}
                 </v-list-item-title>
               </v-list-item>
             </v-list>
@@ -78,7 +78,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
       </g-toolbar>
 
-      <v-card-text v-if="!sortedProviderTypeList.length">
+      <v-card-text v-if="!sortedInfraProviderTypeList.length">
         <v-alert
           class="ma-3"
           type="warning"
@@ -189,7 +189,7 @@ SPDX-License-Identifier: Apache-2.0
                   />
                 </template>
                 <v-list-item-title>
-                  {{ dnsProvider }}
+                  {{ vendorDisplayName(dnsProvider) }}
                 </v-list-item-title>
               </v-list-item>
             </v-list>
@@ -258,6 +258,7 @@ SPDX-License-Identifier: Apache-2.0
 import {
   mapState,
   mapWritableState,
+  mapActions,
   storeToRefs,
 } from 'pinia'
 import { useUrlSearchParams } from '@vueuse/core'
@@ -273,6 +274,7 @@ import { useCredentialStore } from '@/store/credential'
 import { useAuthzStore } from '@/store/authz'
 import { useShootStore } from '@/store/shoot'
 import { useLocalStorageStore } from '@/store/localStorage'
+import { useConfigStore } from '@/store/config'
 
 import GSecretDialogWrapper from '@/components/Credentials/GSecretDialogWrapper'
 import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
@@ -351,7 +353,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(useCloudProfileStore, ['sortedProviderTypeList']),
+    ...mapState(useCloudProfileStore, ['sortedInfraProviderTypeList']),
     ...mapState(useGardenerExtensionStore, ['dnsProviderTypes']),
     ...mapState(useAuthzStore, [
       'namespace',
@@ -508,6 +510,7 @@ export default {
     },
   },
   methods: {
+    ...mapActions(useConfigStore, ['vendorDisplayName']),
     computeItem (binding) {
       const {
         credentialUsageCount,

@@ -22,6 +22,12 @@ import map from 'lodash/map'
 import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
 import camelCase from 'lodash/camelCase'
+import find from 'lodash/find'
+import values from 'lodash/values'
+import keyBy from 'lodash/keyBy'
+import assign from 'lodash/assign'
+import filter from 'lodash/filter'
+import sortBy from 'lodash/sortBy'
 
 const wellKnownConditions = {
   APIServerAvailable: {
@@ -187,6 +193,38 @@ export const useConfigStore = defineStore('config', () => {
       ...wellKnownConditions,
       ...knownConditions.value,
     }
+  })
+
+  const infraVendors = computed(() => {
+    const vendors = state.value?.infraVendors
+    if (vendors && Array.isArray(vendors)) {
+      return vendors
+    }
+    return []
+  })
+
+  const dnsVendors = computed(() => {
+    const vendors = state.value?.dnsVendors
+    if (vendors && Array.isArray(vendors)) {
+      return vendors
+    }
+    return []
+  })
+
+  const imageVendors = computed(() => {
+    const vendors = state.value?.imageVendors
+    if (vendors && Array.isArray(vendors)) {
+      return vendors
+    }
+    return []
+  })
+
+  const vendors = computed(() => {
+    return [
+      ...infraVendors.value,
+      ...dnsVendors.value,
+      ...imageVendors.value,
+    ]
   })
 
   const resourceQuotaHelp = computed(() => {
@@ -390,6 +428,205 @@ export const useConfigStore = defineStore('config', () => {
     return get(allKnownConditions.value, [type], getCondition(type))
   }
 
+  const knownInfraVendors = [
+    {
+      name: 'aws',
+      displayName: 'AWS',
+      weight: 100,
+    },
+    {
+      name: 'azure',
+      displayName: 'Azure',
+      weight: 200,
+    },
+    {
+      name: 'gcp',
+      displayName: 'Google Cloud',
+      weight: 300,
+    },
+    {
+      name: 'openstack',
+      displayName: 'OpenStack',
+      weight: 400,
+    },
+    {
+      name: 'alicloud',
+      displayName: 'Alibaba Cloud',
+      weight: 500,
+    },
+    {
+      name: 'metal',
+      displayName: 'Metal',
+      weight: 600,
+    },
+    {
+      name: 'vsphere',
+      displayName: 'vSphere',
+      weight: 700,
+    },
+    {
+      name: 'hcloud',
+      displayName: 'Hetzner Cloud',
+      weight: 800,
+    },
+    {
+      name: 'onMetal',
+      displayName: 'OnMetal',
+      weight: 900,
+    },
+    {
+      name: 'ironcore',
+      displayName: 'IronCore',
+      weight: 1000,
+    },
+    {
+      name: 'stackit',
+      displayName: 'stackit',
+      weight: 1100,
+    },
+    {
+      name: 'local',
+      displayName: 'Local',
+      weight: 10100,
+    },
+  ]
+
+  const knownDNSVendors = [
+    {
+      name: 'aws-route53',
+      displayName: 'Amazon Route53',
+      weight: 100,
+    },
+    {
+      name: 'azure-dns',
+      displayName: 'Azure DNS',
+      weight: 200,
+    },
+    {
+      name: 'azure-private-dns',
+      displayName: 'Azure Private DNS',
+      weight: 300,
+    },
+    {
+      name: 'google-clouddns',
+      displayName: 'Google Cloud DNS',
+      weight: 400,
+    },
+    {
+      name: 'openstack-designate',
+      displayName: 'OpenStack Designate',
+      weight: 500,
+    },
+    {
+      name: 'alicloud-dns',
+      displayName: 'Alicloud DNS',
+      weight: 600,
+    },
+
+    // other dns providers
+    {
+      name: 'cloudflare-dns',
+      displayName: 'Cloudflare DNS',
+      weight: 10100,
+    },
+    {
+      name: 'infoblox-dns',
+      displayName: 'Infoblox',
+      weight: 10200,
+    },
+    {
+      name: 'netlify-dns',
+      displayName: 'Netlify DNS',
+      weight: 10300,
+    },
+    {
+      name: 'powerdns',
+      displayName: 'PowerDNS',
+      weight: 10400,
+    },
+    {
+      name: 'rfc2136',
+      displayName: 'Dynamic DNS (RFC2136)',
+      weight: 10500,
+    },
+  ]
+
+  const knownImageVendors = [
+    // os
+    {
+      name: 'gardenlinux',
+      displayName: 'Garden Linux',
+      weight: 100,
+    },
+    {
+      name: 'ubuntu',
+      displayName: 'Ubuntu',
+      weight: 200,
+    },
+    {
+      name: 'coreos',
+      displayName: 'CoreOS',
+      weight: 300,
+    },
+    {
+      name: 'flatcar',
+      displayName: 'Flatcar',
+      weight: 400,
+    },
+    {
+      name: 'suse-jeos',
+      displayName: 'SUSE Linux Enterprise Server (JeOS)',
+      weight: 500,
+    },
+    {
+      name: 'suse-chost',
+      displayName: 'SUSE Container Host configuration (Chost)',
+      weight: 600,
+    },
+    {
+      name: 'memoryone-chost',
+      displayName: 'MemoryOne Container Host configuration (Chost)',
+      weight: 700,
+    },
+  ]
+
+  const knownVendors = [
+    ...knownInfraVendors,
+    ...knownDNSVendors,
+    ...knownImageVendors,
+  ]
+
+  const vendor = function (kind) {
+    // if kind is not unique at some point in the future we could introduce
+    // a type param and access dedicated array directly
+    const configuredVendor = find(vendors.value, ['name', kind])
+    const knownVendor = find(knownVendors, ['name', kind])
+
+    return {
+      name: kind,
+      weight: 11000,
+      hidden: !knownVendor, // remove if we want to support unknown vendors
+      ...knownVendor,
+      ...configuredVendor,
+    }
+  }
+
+  const vendorDisplayName = function (kind) {
+    return get(vendor(kind), ['displayName'], kind)
+  }
+
+  const sortedDnsProviderTypeList = computed(() => {
+    const dnsProviderVendors = values(
+      assign(
+        keyBy(knownDNSVendors, 'name'),
+        keyBy(dnsVendors.value, 'name'),
+      ),
+    )
+    const visibleDnsVendors = filter(dnsProviderVendors, ({ hidden }) => !hidden)
+    const sortedVisibleDnsVendors = sortBy(visibleDnsVendors, 'weight')
+    return map(sortedVisibleDnsVendors, 'name')
+  })
+
   return {
     isInitial,
     appVersion,
@@ -428,12 +665,15 @@ export const useConfigStore = defineStore('config', () => {
     alertBannerType,
     alertBannerIdentifier,
     costObjectsSettings,
+    sortedDnsProviderTypeList,
     unreachableSeeds,
     purposeRequiresHibernationSchedule,
     isShootHasNoHibernationScheduleWarning,
     fetchConfig,
     setConfiguration,
     conditionForType,
+    vendor,
+    vendorDisplayName,
     $reset,
   }
 })
