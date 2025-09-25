@@ -95,7 +95,7 @@ SPDX-License-Identifier: Apache-2.0
                   <span v-if="infraAccountError">
                     There is a problem with the credential
                     <code v-if="shootBinding">
-                      <g-credential-name
+                      <g-binding-name
                         :binding="shootBinding"
                         render-link
                       />
@@ -127,14 +127,14 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 
 import GAnsiText from '@/components/GAnsiText.vue'
-import GCredentialName from '@/components/Credentials/GCredentialName.vue'
+import GBindingName from '@/components/Credentials/GBindingName.vue'
 
 import isEmpty from 'lodash/isEmpty'
 
 export default {
   components: {
     GAnsiText,
-    GCredentialName,
+    GBindingName,
   },
   props: {
     statusTitle: {
