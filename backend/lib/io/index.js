@@ -20,16 +20,19 @@ function init (httpServer, cache) {
   }
 
   const allowAll = allowedOrigins.includes('*')
+  if (allowAll) {
+    const msg = config.isProd
+      ? 'WebSocket allowing all origins (*) — this is unsafe in production. Restrict allowedOrigins.'
+      : 'WebSocket allowing all origins (*) — OK for local/dev, but do not use in production.'
+    logger.warn(msg)
+  }
+
   const io = new Server(httpServer, {
     path: '/api/events',
     serveClient: false,
     transports: ['websocket'],
     allowRequest: (req, callback) => {
       if (allowAll) {
-        const msg = config.isProd
-          ? 'WebSocket allowing all origins (*) — this is unsafe in production. Restrict allowedOrigins.'
-          : 'WebSocket allowing all origins (*) — OK for local/dev, but do not use in production.'
-        logger.warn(msg)
         return callback(null, true)
       }
       const { origin } = req.headers

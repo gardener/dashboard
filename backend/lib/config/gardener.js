@@ -214,6 +214,9 @@ export default {
     _.forEach(requiredConfigurationProperties, path => {
       assert.ok(_.get(config, path), `Configuration value '${path}' is required`)
     })
+    if (!config.websocketAllowedOrigins?.length) {
+      assert.fail('Configuration value \'websocketAllowedOrigins\' must not be empty')
+    }
 
     const sessionSecrets = [config.sessionSecret]
     if (config.sessionSecretPrevious) {
