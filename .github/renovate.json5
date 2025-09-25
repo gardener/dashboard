@@ -69,6 +69,7 @@
       excludeDatasources: [
         'node',
         'node-version',
+      ],
     },
     {
       groupName: 'Node.js',
