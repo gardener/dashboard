@@ -66,14 +66,10 @@
       excludePackageNames: [
         'node',
       ],
-      excludeDatasources: [
-        'node',
-        'node-version',
-      ],
     },
     {
-      groupName: 'Node.js',
-      groupSlug: 'node',
+      groupName: 'Node.js Version',
+      groupSlug: 'node-version',
       matchPackageNames: [
         'node',
       ],
@@ -81,12 +77,15 @@
         'github-actions',
         'npm',
         'nvm',
+        'nodenv',
         'regex',
       ],
       matchDatasources: [
         'node',
         'node-version',
       ],
+      prTitle: 'chore(node): upgrade Node to {{newVersion}} everywhere',
+      separateMinorPatch: false,
     },
   ],
 }
