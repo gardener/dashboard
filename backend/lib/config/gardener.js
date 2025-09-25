@@ -115,15 +115,29 @@ const configMappings = [
     configPath: 'metricsPort',
     type: 'Integer',
   },
+  {
+    environmentVariableName: 'WEBSOCKET_ALLOWED_ORIGINS',
+    configPath: 'websocketAllowedOrigins',
+    type: 'Array',
+  },
 ]
 
 function parseConfigValue (value, type) {
+  const parseArray = value => {
+    if (value == null || typeof value !== 'string' || value.length === 0) {
+      return undefined
+    }
+    const arr = value.split(',').map(v => v.trim()).filter(Boolean)
+    return arr.length > 0 ? arr : undefined
+  }
   switch (type) {
     case 'Integer':
       value = parseInt(value, 10)
       return Number.isInteger(value) ? value : undefined
     case 'Boolean':
       return value === 'true'
+    case 'Array':
+      return parseArray(value)
     default:
       return value
   }
@@ -180,6 +194,7 @@ export default {
     const requiredConfigurationProperties = [
       'sessionSecret',
       'apiServerUrl',
+      'websocketAllowedOrigins',
     ]
 
     // When OIDC is configured, some more configuration is required
@@ -199,6 +214,9 @@ export default {
     _.forEach(requiredConfigurationProperties, path => {
       assert.ok(_.get(config, path), `Configuration value '${path}' is required`)
     })
+    if (!config.websocketAllowedOrigins?.length) {
+      assert.fail('Configuration value \'websocketAllowedOrigins\' must not be empty')
+    }
 
     const sessionSecrets = [config.sessionSecret]
     if (config.sessionSecretPrevious) {

@@ -81,6 +81,7 @@ const defaultConfig = {
       'test-unreachable': 'true',
     },
   },
+  websocketAllowedOrigins: ['*'],
   frontend: {
     features: {
       terminalEnabled: true,
@@ -110,23 +111,8 @@ const configMap = new Map()
 
 configMap.set(defaultConfigPath, defaultConfig)
 
-configMap.set('/etc/gardener/1/config.yaml', {
-  port: 1234,
-})
-
-configMap.set('/etc/gardener/2/config.yaml', {
-  port: 1234,
-  logLevel: 'info',
-})
-
-configMap.set('/etc/gardener/3/config.yaml', {
-  sessionSecret: undefined,
-})
-
-configMap.set('/etc/gardener/4/config.yaml', {
-  oidc: {
-    ...defaultConfig.oidc,
-  },
+configMap.set('/etc/gardener/config.yaml', {
+  ...defaultConfig,
 })
 
 module.exports = {
