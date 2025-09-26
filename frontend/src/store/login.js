@@ -12,6 +12,11 @@ import { ref } from 'vue'
 
 import { useLogger } from '@/composables/useLogger'
 
+import {
+  createBrandingAssetUrls,
+  applyBrandingAssetLinks,
+} from '@/utils/brandingAssets'
+
 export const useLoginStore = defineStore('login', () => {
   const logger = useLogger()
 
@@ -22,8 +27,11 @@ export const useLoginStore = defineStore('login', () => {
   const loginTypes = ref(['token'])
   const landingPageUrl = ref('')
   const themes = ref(null)
+  const defaultAssetUrls = createBrandingAssetUrls()
+
   const branding = ref({
-    productLogoUrl: '/static/assets/logo.svg',
+    assetUrls: defaultAssetUrls,
+    productLogoUrl: defaultAssetUrls.productLogo,
     productName: 'Gardener',
     productSlogan: 'Universal Kubernetes at Scale',
     oidcLoginText: 'Press Login to be redirected to the configured\nOpenID Connect Provider.',
@@ -41,6 +49,12 @@ export const useLoginStore = defineStore('login', () => {
       landingPageUrl.value = data.landingPageUrl
       themes.value = data.themes ?? {}
       Object.assign(branding.value, data.branding ?? {})
+      const assetUrls = createBrandingAssetUrls(branding.value.assets)
+      branding.value.assetUrls = assetUrls
+      if (!branding.value.productLogoUrl) {
+        branding.value.productLogoUrl = assetUrls.productLogo
+      }
+      applyBrandingAssetLinks(assetUrls)
       if (branding.value.productTitle === undefined) {
         branding.value.productTitle = branding.value.productName
       }
