@@ -1,0 +1,20 @@
+{{- if .Values.global.dashboard.enabled }}
+{{- if .Values.global.dashboard.frontendConfig.customAssets }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dashboard-custom-assets
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: gardener-dashboard
+    app.kubernetes.io/component: dashboard
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/managed-by: "{{ .Release.Service }}"
+binaryData:
+{{- range $file, $content := .Values.global.dashboard.frontendConfig.customAssets }}
+  {{ $file }}: |
+    {{ $content }}
+{{- end }}
+{{- end }}
+{{- end }}

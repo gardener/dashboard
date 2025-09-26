@@ -16,6 +16,10 @@ import { useBrowserLocation } from '@vueuse/core'
 
 import { useApi } from '@/composables/useApi'
 
+import {
+  createBrandingAssetUrls,
+  applyBrandingAssetLinks,
+} from '@/utils/brandingAssets'
 import { hash } from '@/utils/crypto'
 
 import map from 'lodash/map'
@@ -206,17 +210,18 @@ export const useConfigStore = defineStore('config', () => {
   })
 
   const branding = computed(() => {
-    const branding = {
-      productLogoUrl: '/static/assets/logo.svg',
+    const brandingConfig = state.value?.branding ?? {}
+    const assetUrls = brandingConfig.assetUrls ?? createBrandingAssetUrls(brandingConfig.assets)
+
+    return {
+      assetUrls,
+      productLogoUrl: assetUrls.productLogo,
       productName: 'Gardener',
       productTitleSuperscript: appVersion.value,
       productSlogan: 'Universal Kubernetes at Scale',
-      ...state.value?.branding,
+      ...brandingConfig,
+      productTitle: brandingConfig.productTitle ?? brandingConfig.productName ?? 'Gardener',
     }
-    if (branding.productTitle === undefined) {
-      branding.productTitle = branding.productName
-    }
-    return branding
   })
 
   const terminal = computed(() => {
@@ -358,6 +363,17 @@ export const useConfigStore = defineStore('config', () => {
 
   function setConfiguration (value) {
     state.value = value
+    const branding = state.value?.branding
+    if (branding) {
+      const assetUrls = createBrandingAssetUrls(branding.assets)
+      branding.assetUrls = assetUrls
+      if (!branding.productLogoUrl) {
+        branding.productLogoUrl = assetUrls.productLogo
+      }
+      applyBrandingAssetLinks(assetUrls)
+    } else {
+      applyBrandingAssetLinks(createBrandingAssetUrls())
+    }
   }
 
   async function $reset () {

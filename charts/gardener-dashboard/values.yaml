@@ -146,12 +146,17 @@ global:
     frontendConfig:
       landingPageUrl: https://github.com/gardener
       # # asset configuration (see https://github.com/gardener/dashboard/blob/master/docs/customization.md#logos-and-icons for the format and generation of the default values).
+      # # Replace the complete asset bundle (legacy behaviour):
       # assets:
       #   favicon-16x16.png: |
       #   favicon-32x32.png: |
       #   favicon-96x96.png: |
       #   favicon.ico: |
       #   logo.svg: |
+      # # Provide individual custom files that can be referenced from branding.assets:
+      # customAssets:
+      #   custom-logo.svg: |
+      #     <base64 encoded file>
       helpMenuItems:
       - title: Getting Started
         icon: mdi-file-document-outline
@@ -315,6 +320,10 @@ global:
 
       # # branding - customize the dashboard branding. See https://github.com/gardener/dashboard/blob/master/docs/operations/customization.md#branding for possible values and a complete example.
       # branding:
+      #   assets:
+      #     productLogo:
+      #       fileName: custom-logo.svg
+      #       version: v2
       #   productName: Nucleus
       #   productDescription: Supercool Cluster Service
 
