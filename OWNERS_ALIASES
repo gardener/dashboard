@@ -1,0 +1,11 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+aliases:
+  dashboard-reviewers:
+  - grolu
+  - klocke-io
+  - petersutter
+  dashboard-approvers:
+  - grolu
+  - klocke-io
+  - petersutter
