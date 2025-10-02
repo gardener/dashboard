@@ -127,5 +127,50 @@ describe('composables', () => {
         token: undefined,
       })
     })
+
+    describe('secretProviderType', () => {
+      it('should get and set provider type correctly', () => {
+        secretContext.setSecretManifest({
+          metadata: {
+            name: 'my-secret',
+            namespace: testNamespace,
+            labels: {
+              'other.label1': 'true',
+              'provider.shoot.gardener.cloud/aws': 'true',
+              'other.label2': 'true',
+            },
+          },
+          data: {},
+        })
+
+        // Test getter - should extract provider type from label key
+        expect(secretContext.secretProviderType).toBe('aws')
+
+        // Test setter - should set new provider type
+        secretContext.secretProviderType = 'gcp'
+        expect(secretContext.secretManifest.metadata.labels).toEqual({
+          'other.label1': 'true',
+          'provider.shoot.gardener.cloud/aws': 'true',
+          'other.label2': 'true',
+          'provider.shoot.gardener.cloud/gcp': 'true',
+        })
+        expect(secretContext.secretProviderType).toBe('aws') // Should return first match
+      })
+
+      it('should return undefined when no provider label exists', () => {
+        secretContext.setSecretManifest({
+          metadata: {
+            name: 'my-secret',
+            namespace: testNamespace,
+            labels: {
+              'other.label': 'value',
+            },
+          },
+          data: {},
+        })
+
+        expect(secretContext.secretProviderType).toBeUndefined()
+      })
+    })
   })
 })

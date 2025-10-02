@@ -34,7 +34,11 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { secretDetails } from '@/composables/credential/helper'
+import {
+  secretDetails,
+  isSecret,
+  isWorkloadIdentity,
+} from '@/composables/credential/helper'
 
 export default {
 
@@ -64,12 +68,12 @@ export default {
             disabledText: true,
           },
         ]
-      } else if (this.credential?.kind === 'Secret') {
-        const details = secretDetails(this.credential, this.providerType)
+      } else if (isSecret(this.credential)) {
+        const details = secretDetails({ secret: this.credential, providerType: this.providerType })
         if (details) {
           return details
         }
-      } else if (this.credential?.kind === 'WorkloadIdentity') {
+      } else if (isWorkloadIdentity(this.credential)) {
         return [
           {
             label: 'WorkloadIdentity',
