@@ -31,6 +31,9 @@ spec:
         {{- if .Values.global.dashboard.frontendConfig.assets }}
         checksum/configmap-gardener-dashboard-assets: {{ include (print .Template.BasePath "/dashboard/configmap-assets.yaml") . | sha256sum }}
         {{- end }}
+        {{- if .Values.global.dashboard.frontendConfig.customAssets }}
+        checksum/configmap-gardener-dashboard-custom-assets: {{ include (print .Template.BasePath "/dashboard/configmap-custom-assets.yaml") . | sha256sum }}
+        {{- end }}
         checksum/secret-gardener-dashboard-sessionSecret: {{ include (print .Template.BasePath "/dashboard/secret-sessionSecret.yaml") . | sha256sum }}
         {{- if .Values.global.dashboard.oidc }}
         checksum/secret-gardener-dashboard-oidc: {{ include (print .Template.BasePath "/dashboard/secret-oidc.yaml") . | sha256sum }}
@@ -79,6 +82,12 @@ spec:
       - name: assets
         configMap:
           name: dashboard-assets
+          defaultMode: 0444
+      {{- end }}
+      {{- if .Values.global.dashboard.frontendConfig.customAssets }}
+      - name: custom-assets
+        configMap:
+          name: dashboard-custom-assets
           defaultMode: 0444
       {{- end }}
       {{- if .Values.global.dashboard.oidc }}
@@ -205,6 +214,10 @@ spec:
           {{- if .Values.global.dashboard.frontendConfig.assets }}
           - name: assets
             mountPath: /app/public/static/assets
+          {{- end }}
+          {{- if .Values.global.dashboard.frontendConfig.customAssets }}
+          - name: custom-assets
+            mountPath: /app/public/static/custom-assets
           {{- end }}
           {{- if .Values.global.dashboard.serviceAccountTokenVolumeProjection.enabled }}
           - name: service-account-token
