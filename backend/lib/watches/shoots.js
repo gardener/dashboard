@@ -4,11 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import { shootHasIssue } from '../utils/index.js'
 
-const { shootHasIssue } = require('../utils')
-
-module.exports = (nsp, informer, options) => {
+export default (nsp, informer, options) => {
   const { shootsWithIssues = new Set() } = options ?? {}
 
   const publishShoots = event => {

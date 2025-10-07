@@ -4,17 +4,21 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import _ from 'lodash-es'
+import kubeClientModule from '@gardener-dashboard/kube-client'
+import httpErrors from 'http-errors'
+import * as shoots from './shoots.js'
+import * as authorization from './authorization.js'
+import {
+  projectFilter,
+  simplifyProject,
+} from '../utils/index.js'
+import getCache from '../cache/index.js'
+const { PreconditionFailed, InternalServerError } = httpErrors
+const { createDashboardClient } = kubeClientModule
 
-const _ = require('lodash')
-const { createDashboardClient } = require('@gardener-dashboard/kube-client')
-
-const { PreconditionFailed, InternalServerError } = require('http-errors')
-const shoots = require('./shoots')
-const authorization = require('./authorization')
-const { projectFilter, simplifyProject } = require('../utils')
-const getCache = require('../cache')
-const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
+// needs to be exported for testing
+export const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
 
 async function validateDeletePreconditions ({ user, name }) {
   const cache = getCache(user.workspace)
@@ -27,7 +31,7 @@ async function validateDeletePreconditions ({ user, name }) {
   }
 }
 
-exports.list = async function ({ user }) {
+export async function list ({ user }) {
   const cache = getCache(user.workspace)
   const canListProjects = await authorization.canListProjects(user)
   return _
@@ -38,7 +42,7 @@ exports.list = async function ({ user }) {
     .value()
 }
 
-exports.create = async function ({ user, body }) {
+export async function create ({ user, body }) {
   const client = user.client
   const dashboardClient = createDashboardClient(user.workspace)
 
@@ -54,29 +58,26 @@ exports.create = async function ({ user, body }) {
       ok: _.get(project, ['status', 'phase']) === 'Ready',
     }
   }
-  const timeout = exports.projectInitializationTimeout
   // must be the dashboardClient because rbac rolebinding does not exist yet
   const asyncIterable = await dashboardClient['core.gardener.cloud'].projects.watch(name)
-  project = await asyncIterable.until(isProjectReady, { timeout })
+  project = await asyncIterable.until(isProjectReady, { PROJECT_INITIALIZATION_TIMEOUT })
 
   return project
 }
-// needs to be exported for testing
-exports.projectInitializationTimeout = PROJECT_INITIALIZATION_TIMEOUT
 
-exports.read = async function ({ user, name }) {
+export async function read ({ user, name }) {
   const client = user.client
   const project = await client['core.gardener.cloud'].projects.get(name)
   return project
 }
 
-exports.patch = async function ({ user, name, body }) {
+export async function patch ({ user, name, body }) {
   const client = user.client
   const project = await client['core.gardener.cloud'].projects.mergePatch(name, body)
   return project
 }
 
-exports.remove = async function ({ user, name }) {
+export async function remove ({ user, name }) {
   await validateDeletePreconditions({ user, name })
 
   const client = user.client

@@ -4,12 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const _ = require('lodash')
-const { Forbidden } = require('http-errors')
-const authorization = require('./authorization')
-const getCache = require('../cache')
+import _ from 'lodash-es'
+import httpErrors from 'http-errors'
+import * as authorization from './authorization.js'
+import getCache from '../cache/index.js'
+const { Forbidden } = httpErrors
 
 function fromResource (resourceQuotas) {
   return _.map(resourceQuotas, ({ status }) => {
@@ -21,8 +20,9 @@ function fromResource (resourceQuotas) {
   })
 }
 
-exports.list = async function ({ user, namespace }) {
+export async function list ({ user, namespace }) {
   const { getResourceQuotas } = getCache(user.workspace)
+
   const allowed = await authorization.canListResourceQuotas(user, namespace)
   if (!allowed) {
     throw new Forbidden(`You are not allowed to list resource quotas in namespace ${namespace}`)

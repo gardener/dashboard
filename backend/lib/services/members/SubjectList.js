@@ -4,11 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const _ = require('lodash')
-
-const SubjectListItem = require('./SubjectListItem')
+import _ from 'lodash-es'
+import SubjectListItem from './SubjectListItem.js'
 
 class SubjectList {
   constructor (project, serviceAccounts) {
@@ -125,4 +122,4 @@ class SubjectList {
   }
 }
 
-module.exports = SubjectList
+export default SubjectList

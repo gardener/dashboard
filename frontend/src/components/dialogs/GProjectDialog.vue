@@ -25,8 +25,22 @@ SPDX-License-Identifier: Apache-2.0
               variant="underlined"
               color="primary"
               label="Name"
+              hint="Technical, unique project name."
               counter="10"
               :error-messages="getErrorMessages(v$.projectName)"
+            />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12">
+            <v-text-field
+              v-model.trim="v$.projectTitle.$model"
+              variant="underlined"
+              color="primary"
+              label="Title"
+              hint="Human-readable project title."
+              counter="64"
+              :error-messages="getErrorMessages(v$.projectTitle)"
             />
           </v-col>
         </v-row>
@@ -150,6 +164,7 @@ const {
   createProjectManifest,
   projectManifest,
   projectName,
+  projectTitle,
   description,
   purpose,
 } = useProvideProjectContext()
@@ -185,9 +200,12 @@ const rules = {
     lowerCaseAlphaNumHyphen,
     isUniqueProjectName,
   },
+  projectTitle: {
+    maxLength: maxLength(64),
+  },
 }
 
-const v$ = useVuelidate(rules, { projectName })
+const v$ = useVuelidate(rules, { projectName, projectTitle })
 
 watch(visible, value => {
   if (value) {
@@ -214,7 +232,7 @@ async function submit () {
     loading.value = false
     hide()
     router.push({
-      name: 'Secrets',
+      name: 'Credentials',
       params: {
         namespace: project.spec.namespace,
       },

@@ -4,18 +4,19 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import _ from 'lodash-es'
+import request from '@gardener-dashboard/request'
+import { globalLogger as logger } from '@gardener-dashboard/logger'
+import httpErrors from 'http-errors'
+import { decodeBase64 } from './util.js'
+import debug from './debug.js'
+import * as resources from './resources/index.js'
+import * as nonResourceEndpoints from './nonResourceEndpoints/index.js'
+import kubeConfig from '@gardener-dashboard/kube-config'
 
-const _ = require('lodash')
-const { isHttpError } = require('@gardener-dashboard/request')
-const { globalLogger: logger } = require('@gardener-dashboard/logger')
-const { NotFound } = require('http-errors')
-const { decodeBase64 } = require('./util')
-const debug = require('./debug')
-const resources = require('./resources')
-const nonResourceEndpoints = require('./nonResourceEndpoints')
-
-const { fromKubeconfig, parseKubeconfig } = require('@gardener-dashboard/kube-config')
+const { isHttpError } = request
+const { NotFound } = httpErrors
+const { fromKubeconfig, parseKubeconfig } = kubeConfig
 
 class Client {
   #clientConfig
@@ -112,4 +113,4 @@ async function getResource (resource, { namespace, name, throwNotFound = true })
   }
 }
 
-module.exports = Client
+export default Client

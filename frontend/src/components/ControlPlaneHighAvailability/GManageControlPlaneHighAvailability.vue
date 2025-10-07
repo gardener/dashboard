@@ -5,27 +5,22 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div>
-    <v-tooltip
-      location="top"
-      :disabled="controlPlaneHighAvailabilityFailureToleranceTypeChangeAllowed"
-      max-width="400px"
-    >
-      <template #activator="{ props }">
-        <div v-bind="props">
-          <v-checkbox
-            v-model="controlPlaneHighAvailability"
-            label="Enable Control Plane High Availability"
-            color="primary"
-            hide-details
-            :disabled="!controlPlaneHighAvailabilityFailureToleranceTypeChangeAllowed"
-            density="compact"
-            class="mb-2"
-          />
-        </div>
-      </template>
-      It is not possible to change the control plane failure tolerance if a type has already been set
-    </v-tooltip>
+  <div
+    v-tooltip:top="{
+      text: 'It is not possible to change the control plane failure tolerance if a type has already been set',
+      disabled: controlPlaneHighAvailabilityFailureToleranceTypeChangeAllowed,
+      maxWidth: 400
+    }"
+  >
+    <v-checkbox
+      v-model="controlPlaneHighAvailability"
+      label="Enable Control Plane High Availability"
+      color="primary"
+      hide-details
+      :disabled="!controlPlaneHighAvailabilityFailureToleranceTypeChangeAllowed"
+      density="compact"
+      class="mb-2"
+    />
     <v-alert
       v-if="!controlPlaneHighAvailabilityFailureToleranceType"
       border-color="primary"
@@ -45,6 +40,7 @@ SPDX-License-Identifier: Apache-2.0
         Control plane failure tolerance type <code>{{ controlPlaneHighAvailabilityFailureToleranceType }}</code> configured
       </v-alert>
       <v-alert
+        v-if="(controlPlaneHighAvailabilityFailureToleranceType === 'node' && !isFailureToleranceTypeZoneSupported) || controlPlaneHighAvailabilityFailureToleranceTypeChangeAllowed"
         type="info"
         variant="tonal"
       >

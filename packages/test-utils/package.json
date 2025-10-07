@@ -3,6 +3,15 @@
   "version": "1.0.0",
   "description": "Utilities for testing",
   "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./lib/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gardener/dashboard.git",
@@ -14,23 +23,28 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
   },
-  "main": "lib/index.js",
-  "files": [
-    "lib"
-  ],
   "scripts": {
-    "lint": "eslint . --max-warnings=0"
+    "lint": "eslint . --max-warnings=0",
+    "build": "rimraf dist && yarn install && rollup -c rollup.config.js"
   },
   "devDependencies": {
+    "@microsoft/eslint-formatter-sarif": "^3.1.0",
+    "@rollup/plugin-commonjs": "^28.0.3",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^16.0.1",
     "eslint": "^9.11.0",
+    "eslint-import-resolver-pnp": "^0.0.0",
     "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-jest": "^28.8.3",
+    "eslint-plugin-jest": "^29.0.0",
     "eslint-plugin-lodash": "^8.0.0",
+    "eslint-plugin-require-node-import-prefix": "^0.0.2",
     "eslint-plugin-security": "^3.0.1",
-    "neostandard": "^0.12.0"
+    "neostandard": "^0.12.0",
+    "rimraf": "^6.0.1",
+    "rollup": "^4.41.1"
   },
-  "packageManager": "yarn@4.8.1",
+  "packageManager": "yarn@4.9.4",
   "engines": {
-    "node": "^22.7.0"
+    "node": "22.18.0"
   }
 }

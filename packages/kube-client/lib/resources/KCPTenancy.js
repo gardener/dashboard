@@ -6,10 +6,10 @@
 
 'use strict'
 
-const { mix } = require('mixwith')
+import { mix } from 'mixwith'
 
-const { KCPTenancy } = require('../groups')
-const { ClusterScoped, Readable, Writable, Observable } = require('../mixins')
+import { KCPTenancy } from '../groups.js'
+import { ClusterScoped, Readable, Writable, Observable } from '../mixins.js'
 
 class Workspace extends mix(KCPTenancy).with(ClusterScoped, Readable, Observable, Writable) {
   static get names () {
@@ -21,6 +21,6 @@ class Workspace extends mix(KCPTenancy).with(ClusterScoped, Readable, Observable
   }
 }
 
-module.exports = {
+export default {
   Workspace,
 }

@@ -36,17 +36,17 @@ SPDX-License-Identifier: Apache-2.0
       </g-list-item>
       <g-list-item v-if="hasShootWorkerGroups">
         <g-list-item-content label="Credential">
-          <g-shoot-secret-name
-            :namespace="shootNamespace"
-            :secret-binding-name="shootSecretBindingName"
+          <g-credential-name
+            :binding="shootCloudProviderBinding"
+            render-link
           />
         </g-list-item-content>
       </g-list-item>
-      <g-list-item v-if="secretBinding?._secret">
-        <g-secret-details-item-content
-          infra
-          :secret="secretBinding._secret"
-          :provider-type="secretBinding.provider.type"
+      <g-list-item v-if="hasShootWorkerGroups">
+        <g-credential-details-item-content
+          :credential="credential"
+          :shared="isSharedCredential"
+          :provider-type="shootCloudProviderBinding.provider.type"
           details-title
         />
       </g-list-item>
@@ -230,13 +230,12 @@ SPDX-License-Identifier: Apache-2.0
                 >
                   mdi-star
                 </v-icon>
-                <v-tooltip
-                  activator="parent"
-                  :disabled="name !== defaultLoadbalancerClass"
-                  location="top"
-                >
-                  <span>Default Load Balancer Class</span>
-                </v-tooltip>
+                <span
+                  v-tooltip:top="{
+                    text: 'Default Load Balancer Class',
+                    disabled: name !== defaultLoadbalancerClass
+                  }"
+                />
               </v-chip>
             </div>
           </g-list-item-content>
@@ -253,23 +252,23 @@ import {
 } from 'pinia'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
-import { useCredentialStore } from '@/store/credential'
 import { useAuthzStore } from '@/store/authz'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 
 import GCopyBtn from '@/components/GCopyBtn'
 import GShootSeedName from '@/components/GShootSeedName'
-import GShootSecretName from '@/components/GShootSecretName'
+import GCredentialName from '@/components/Credentials/GCredentialName'
 import GVendor from '@/components/GVendor'
 import GDnsProvider from '@/components/ShootDns/GDnsProvider'
 import GDnsConfiguration from '@/components/ShootDns/GDnsConfiguration'
 import GSeedConfiguration from '@/components/GSeedConfiguration'
 import GControlPlaneHighAvailabilityConfiguration from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityConfiguration'
 import GControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityTag'
-import GSecretDetailsItemContent from '@/components/Secrets/GSecretDetailsItemContent'
+import GCredentialDetailsItemContent from '@/components/Credentials/GCredentialDetailsItemContent'
 
 import { useShootResources } from '@/composables/useShootResources'
 import { useShootItem } from '@/composables/useShootItem'
+import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
 
 import {
   wildcardObjectsFromStrings,
@@ -285,14 +284,14 @@ export default {
   components: {
     GCopyBtn,
     GShootSeedName,
-    GShootSecretName,
+    GCredentialName,
     GVendor,
     GDnsProvider,
     GDnsConfiguration,
     GSeedConfiguration,
     GControlPlaneHighAvailabilityConfiguration,
     GControlPlaneHighAvailabilityTag,
-    GSecretDetailsItemContent,
+    GCredentialDetailsItemContent,
   },
   setup () {
     const {
@@ -300,12 +299,12 @@ export default {
       shootName,
       shootNamespace,
       shootSeedName,
-      shootCloudProfileName,
+      shootCloudProfileRef,
       shootRegion,
       shootZones,
       shootDomain,
       isCustomShootDomain,
-      shootSecretBindingName,
+      shootCloudProviderBinding,
       hasShootWorkerGroups,
       shootControlPlaneHighAvailabilityFailureTolerance,
       shootProviderType,
@@ -319,17 +318,22 @@ export default {
 
     const { getResourceRefName } = useShootResources(shootItem)
 
+    const {
+      credential,
+      isSharedCredential,
+    } = useCloudProviderBinding(shootCloudProviderBinding)
+
     return {
       shootItem,
       shootName,
       shootNamespace,
       shootSeedName,
-      shootCloudProfileName,
+      shootCloudProfileRef,
       shootRegion,
       shootZones,
       shootDomain,
       isCustomShootDomain,
-      shootSecretBindingName,
+      shootCloudProviderBinding,
       hasShootWorkerGroups,
       shootControlPlaneHighAvailabilityFailureTolerance,
       shootProviderType,
@@ -340,6 +344,8 @@ export default {
       shootDnsServiceExtensionProviders,
       shootDnsPrimaryProvider,
       getResourceRefName,
+      credential,
+      isSharedCredential,
     }
   },
   computed: {
@@ -348,9 +354,6 @@ export default {
     ]),
     ...mapState(useAuthzStore, [
       'canPatchShootsBinding',
-    ]),
-    ...mapState(useCredentialStore, [
-      'infrastructureSecretBindingsList',
     ]),
     showSeedInfo () {
       return !!this.shootSeedName
@@ -369,8 +372,8 @@ export default {
         return shootLBClasses
       }
 
-      const availableFloatingPools = this.floatingPoolsByCloudProfileNameAndRegionAndDomain({
-        cloudProfileName: this.shootCloudProfileName,
+      const availableFloatingPools = this.floatingPoolsByCloudProfileRefAndRegionAndDomain({
+        cloudProfileRef: this.shootCloudProfileRef,
         region: this.shootRegion,
       })
       const floatingPoolWildCardObjects = wildcardObjectsFromStrings(map(availableFloatingPools, 'name'))
@@ -406,14 +409,10 @@ export default {
       }
       return 'generated'
     },
-    secretBinding () {
-      return find(this.infrastructureSecretBindingsList, ['metadata.name', this.shootSecretBindingName])
-    },
   },
   methods: {
     ...mapActions(useCloudProfileStore, [
-      'cloudProfileByName',
-      'floatingPoolsByCloudProfileNameAndRegionAndDomain',
+      'floatingPoolsByCloudProfileRefAndRegionAndDomain',
     ]),
   },
 }

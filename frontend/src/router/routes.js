@@ -32,7 +32,7 @@ import {
   shootListBreadcrumbs,
   shootItemBreadcrumbs,
   shootItemTerminalBreadcrumbs,
-  secretsBreadcrumbs,
+  credentialsBreadcrumbs,
   newShootBreadcrumbs,
   newShootEditorBreadcrumbs,
   administrationBreadcrumbs,
@@ -47,7 +47,7 @@ import {
 
 const GMembers = () => import('@/views/GMembers.vue')
 const GHome = () => import('@/views/GHome.vue')
-const GSecrets = () => import('@/views/GSecrets.vue')
+const GCredentials = () => import('@/views/GCredentials.vue')
 const GAdministration = () => import('@/views/GAdministration.vue')
 
 const GNewShoot = () => import('@/views/GNewShoot.vue')
@@ -103,7 +103,7 @@ export function createRoutes () {
         shootListRoute('shoots'),
         newShootHierarchy('shoots/+'),
         shootItemHierarchy('shoots/:name'),
-        secretListRoute('secrets'),
+        credentialListRoute('credentials'),
         membersRoute('members'),
         administrationRoute('administration'),
         { path: 'term', redirect: 'term/garden' },
@@ -365,20 +365,20 @@ export function createRoutes () {
     }
   }
 
-  function secretListRoute (path) {
+  function credentialListRoute (path) {
     return {
       path,
-      name: 'Secrets',
-      component: GSecrets,
+      name: 'Credentials',
+      component: GCredentials,
       meta: {
         menu: {
-          title: 'Secrets',
+          title: 'Credentials',
           icon: 'mdi-key',
           get hidden () {
-            return !authzStore.canGetSecrets
+            return !authzStore.canGetCloudProviderCredentials
           },
         },
-        breadcrumbs: secretsBreadcrumbs,
+        breadcrumbs: credentialsBreadcrumbs,
       },
     }
   }

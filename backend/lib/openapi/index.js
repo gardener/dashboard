@@ -4,16 +4,16 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import { canGetOpenAPI } from '../services/authorization.js'
+import httpErrors from 'http-errors'
+import SwaggerParser from '@apidevtools/swagger-parser'
+import express from 'express'
+import kubeClientModule from '@gardener-dashboard/kube-client'
+import _ from 'lodash-es'
+const { Forbidden } = httpErrors
+const { createDashboardClient } = kubeClientModule
 
-const { canGetOpenAPI } = require('../services/authorization')
-const { Forbidden } = require('http-errors')
-const SwaggerParser = require('@apidevtools/swagger-parser')
-const express = require('express')
-const { createDashboardClient } = require('@gardener-dashboard/kube-client')
-const _ = require('lodash')
-
-const router = module.exports = express.Router()
+const router = express.Router()
 
 router.route('/')
   .get(async (req, res, next) => {
@@ -52,3 +52,5 @@ async function getSchemaDefinitions (user) {
 
   return schemaDefinitions
 }
+
+export default router

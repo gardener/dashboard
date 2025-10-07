@@ -4,9 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const Semaphore = require('../lib/Semaphore')
+import Semaphore from '../lib/Semaphore.js'
 
 describe('Semaphore', () => {
   describe('#constructor', () => {

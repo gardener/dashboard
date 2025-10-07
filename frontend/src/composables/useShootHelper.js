@@ -15,10 +15,10 @@ import { useConfigStore } from '@/store/config'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useCredentialStore } from '@/store/credential'
 import { useSeedStore } from '@/store/seed'
+import { useProjectStore } from '@/store/project'
 
-import { useSecretBindingList } from '@/composables/useSecretBindingList'
-
-import { selfTerminationDaysForSecret } from '@/utils'
+import { useCloudProviderBindingList } from '@/composables/credential/useCloudProviderBindingList'
+import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
 
 import { useShootAccessRestrictions } from './useShootAccessRestrictions'
 
@@ -30,13 +30,15 @@ import map from 'lodash/map'
 import get from 'lodash/get'
 
 const shootPropertyMappings = Object.freeze({
-  cloudProfileName: 'spec.cloudProfileName',
-  seedName: 'spec.seedName',
-  region: 'spec.region',
-  secretBindingName: 'spec.secretBindingName',
-  kubernetesVersion: 'spec.kubernetes.version',
-  providerType: 'spec.provider.type',
-  addons: 'spec.addons',
+  cloudProfileRef: ['spec', 'cloudProfile'],
+  seedName: ['spec', 'seedName'],
+  region: ['spec', 'region'],
+  secretBindingName: ['spec', 'secretBindingName'],
+  credentialsBindingName: ['spec', 'credentialsBindingName'],
+  kubernetesVersion: ['spec', 'kubernetes', 'version'],
+  providerType: ['spec', 'provider', 'type'],
+  addons: ['spec', 'addons'],
+  namespace: ['metadata', 'namespace'],
 })
 
 export function createShootHelperComposable (shootItem, options = {}) {
@@ -46,35 +48,58 @@ export function createShootHelperComposable (shootItem, options = {}) {
     gardenerExtensionStore = useGardenerExtensionStore(),
     credentialStore = useCredentialStore(),
     seedStore = useSeedStore(),
+    projectStore = useProjectStore(),
   } = options
 
   const {
-    cloudProfileName,
+    cloudProfileRef,
     seedName,
     region,
     secretBindingName,
+    credentialsBindingName,
     kubernetesVersion,
     providerType,
     addons,
+    namespace,
   } = mapValues(shootPropertyMappings, path => {
     return computed(() => get(shootItem.value, path))
   })
 
-  const infrastructureSecretBinding = computed(() => {
-    return find(infrastructureSecretBindings.value, ['metadata.name', secretBindingName.value])
+  const { projectNameByNamespace } = projectStore
+  const projectName = computed(() => {
+    return projectNameByNamespace(namespace)
+  })
+
+  const project = computed(() => {
+    return find(projectStore.projectList, ['metadata.name', projectName.value])
+  })
+
+  const infrastructureBinding = computed(() => {
+    if (secretBindingName.value) {
+      return find(infrastructureBindings.value, { kind: 'SecretBinding', metadata: { name: secretBindingName.value } })
+    }
+    if (credentialsBindingName.value) {
+      return find(infrastructureBindings.value, { kind: 'CredentialsBinding', metadata: { name: credentialsBindingName.value } })
+    }
+    return undefined
   })
 
   const cloudProfiles = computed(() => {
     return cloudProfileStore.cloudProfilesByProviderType(providerType.value)
   })
 
-  const defaultCloudProfileName = computed(() => {
+  const defaultCloudProfileRef = computed(() => {
     const defaultCloudProfile = head(cloudProfiles.value)
-    return get(defaultCloudProfile, ['metadata', 'name'])
+    const name = get(defaultCloudProfile, ['metadata', 'name'])
+    const cloudProfileRef = {
+      name,
+      kind: 'CloudProfile',
+    }
+    return cloudProfileRef
   })
 
   const cloudProfile = computed(() => {
-    return cloudProfileStore.cloudProfileByName(cloudProfileName.value)
+    return cloudProfileStore.cloudProfileByRef(cloudProfileRef.value)
   })
 
   const seed = computed(() => {
@@ -82,120 +107,125 @@ export function createShootHelperComposable (shootItem, options = {}) {
   })
 
   const seedIngressDomain = computed(() => {
-    return get(seed.value, ['data', 'ingressDomain'])
+    return get(seed.value, ['spec', 'ingress', 'domain'])
   })
 
   const seeds = computed(() => {
-    return cloudProfileStore.seedsByCloudProfileName(cloudProfileName.value)
+    return cloudProfileStore.seedsByCloudProfileRef(cloudProfileRef.value, project.value)
   })
 
   const isFailureToleranceTypeZoneSupported = computed(() => {
     const seedList = seedName.value
       ? [seed.value]
       : seeds.value
-    return some(seedList, ({ data }) => data.zones?.length >= 3)
+    return some(seedList, seed => {
+      const zones = get(seed, ['spec', 'provider', 'zones'], [])
+      return zones.length >= 3
+    })
   })
 
   const allZones = computed(() => {
-    return cloudProfileStore.zonesByCloudProfileNameAndRegion({
-      cloudProfileName: cloudProfileName.value,
+    return cloudProfileStore.zonesByCloudProfileRefAndRegion({
+      cloudProfileRef: cloudProfileRef.value,
       region: region.value,
     })
   })
 
   const regionsWithSeed = computed(() => {
-    return cloudProfileStore.regionsWithSeedByCloudProfileName(cloudProfileName.value)
+    return cloudProfileStore.regionsWithSeedByCloudProfileRef(cloudProfileRef.value, project.value)
   })
 
   const regionsWithoutSeed = computed(() => {
-    return cloudProfileStore.regionsWithoutSeedByCloudProfileName(cloudProfileName.value)
+    return cloudProfileStore.regionsWithoutSeedByCloudProfileRef(cloudProfileRef.value, project.value)
   })
 
   const defaultNodesCIDR = computed(() => {
-    return cloudProfileStore.getDefaultNodesCIDR(cloudProfileName.value)
+    return cloudProfileStore.getDefaultNodesCIDR(cloudProfileRef.value)
   })
 
-  const infrastructureSecretBindings = useSecretBindingList(providerType, { credentialStore, gardenerExtensionStore })
+  const infrastructureBindings = useCloudProviderBindingList(providerType, { credentialStore, gardenerExtensionStore })
 
   const sortedKubernetesVersions = computed(() => {
-    return cloudProfileStore.sortedKubernetesVersions(cloudProfileName.value)
+    return cloudProfileStore.sortedKubernetesVersions(cloudProfileRef.value)
   })
 
   const kubernetesVersionIsNotLatestPatch = computed(() => {
-    return cloudProfileStore.kubernetesVersionIsNotLatestPatch(kubernetesVersion.value, cloudProfileName.value)
+    return cloudProfileStore.kubernetesVersionIsNotLatestPatch(kubernetesVersion.value, cloudProfileRef.value)
   })
+
+  const { selfTerminationDays } = useCloudProviderBinding(infrastructureBinding)
 
   const allPurposes = computed(() => {
     if (some(addons.value, 'enabled')) {
       return ['evaluation']
     }
-    return selfTerminationDaysForSecret(infrastructureSecretBinding.value)
+    return selfTerminationDays.value
       ? ['evaluation']
       : ['evaluation', 'development', 'testing', 'production']
   })
 
   const allLoadBalancerProviderNames = computed(() => {
-    return cloudProfileStore.loadBalancerProviderNamesByCloudProfileNameAndRegion({
-      cloudProfileName: cloudProfileName.value,
+    return cloudProfileStore.loadBalancerProviderNamesByCloudProfileRefAndRegion({
+      cloudProfileRef: cloudProfileRef.value,
       region: region.value,
     })
   })
 
   const allLoadBalancerClassNames = computed(() => {
-    return cloudProfileStore.loadBalancerClassNamesByCloudProfileName(cloudProfileName.value)
+    return cloudProfileStore.loadBalancerClassNamesByCloudProfileRef(cloudProfileRef.value)
   })
 
   const partitionIDs = computed(() => {
-    return cloudProfileStore.partitionIDsByCloudProfileNameAndRegion({
-      cloudProfileName: cloudProfileName.value,
+    return cloudProfileStore.partitionIDsByCloudProfileRefAndRegion({
+      cloudProfileRef: cloudProfileRef.value,
       region: region.value,
     })
   })
 
   const firewallImages = computed(() => {
-    return cloudProfileStore.firewallImagesByCloudProfileName(cloudProfileName.value)
+    return cloudProfileStore.firewallImagesByCloudProfileRef(cloudProfileRef.value)
   })
 
   const firewallSizes = computed(() => {
-    const firewallSizes = cloudProfileStore.firewallSizesByCloudProfileNameAndRegion({
-      cloudProfileName: cloudProfileName.value,
+    const firewallSizes = cloudProfileStore.firewallSizesByCloudProfileRefAndRegion({
+      cloudProfileRef: cloudProfileRef.value,
       region: region.value,
     })
     return map(firewallSizes, 'name')
   })
 
   const allFloatingPoolNames = computed(() => {
-    return cloudProfileStore.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({
-      cloudProfileName: cloudProfileName.value,
+    return cloudProfileStore.floatingPoolNamesByCloudProfileRefAndRegionAndDomain({
+      cloudProfileRef: cloudProfileRef.value,
       region: region.value,
-      secretDomain: get(infrastructureSecretBinding.value, ['data', 'domainName']),
+      secretDomain: get(infrastructureBinding.value, ['data', 'domainName']),
     })
   })
 
   const allMachineTypes = computed(() => {
-    return cloudProfileStore.machineTypesByCloudProfileName(cloudProfileName.value)
+    return cloudProfileStore.machineTypesByCloudProfileRef(cloudProfileRef.value)
   })
 
   const machineArchitectures = computed(() => {
-    return cloudProfileStore.machineArchitecturesByCloudProfileNameAndRegion({
-      cloudProfileName: cloudProfileName.value,
+    return cloudProfileStore.machineArchitecturesByCloudProfileRefAndRegion({
+      cloudProfileRef: cloudProfileRef.value,
       region: region.value,
     })
   })
 
   const allVolumeTypes = computed(() => {
-    return cloudProfileStore.volumeTypesByCloudProfileName(cloudProfileName.value)
+    return cloudProfileStore.volumeTypesByCloudProfileRef(cloudProfileRef.value)
   })
 
   const volumeTypes = computed(() => {
-    return cloudProfileStore.volumeTypesByCloudProfileNameAndRegion({
-      cloudProfileName: cloudProfileName.value,
+    return cloudProfileStore.volumeTypesByCloudProfileRefAndRegion({
+      cloudProfileRef: cloudProfileRef.value,
       region: region.value,
     })
   })
 
   const machineImages = computed(() => {
-    return cloudProfileStore.machineImagesByCloudProfileName(cloudProfileName.value)
+    return cloudProfileStore.machineImagesByCloudProfileRef(cloudProfileRef.value)
   })
 
   const networkingTypes = computed(() => {
@@ -217,7 +247,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
 
   return {
     cloudProfiles,
-    defaultCloudProfileName,
+    defaultCloudProfileRef,
     cloudProfile,
     seed,
     seedIngressDomain,
@@ -225,8 +255,8 @@ export function createShootHelperComposable (shootItem, options = {}) {
     isFailureToleranceTypeZoneSupported,
     allZones,
     defaultNodesCIDR,
-    infrastructureSecretBindings,
-    infrastructureSecretBinding,
+    infrastructureBindings,
+    infrastructureBinding,
     sortedKubernetesVersions,
     kubernetesVersionIsNotLatestPatch,
     allPurposes,

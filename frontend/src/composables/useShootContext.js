@@ -93,6 +93,7 @@ export function createShootContextComposable (options = {}) {
       unset(object, ['spec', 'addons'])
       unset(object, ['spec', 'networking'])
       unset(object, ['spec', 'secretBindingName'])
+      unset(object, ['spec', 'credentialsBindingName'])
       unset(object, ['spec', 'maintenance', 'autoUpdate', 'machineImageVersion'])
     }
     return cleanup(object)
@@ -187,20 +188,20 @@ export function createShootContextComposable (options = {}) {
   })
 
   function resetKubernetesVersion () {
-    const kubernetesVersions = map(cloudProfileStore.sortedKubernetesVersions(cloudProfileName.value), 'version')
+    const kubernetesVersions = map(cloudProfileStore.sortedKubernetesVersions(cloudProfileRef.value), 'version')
     if (!kubernetesVersion.value || !includes(kubernetesVersions, kubernetesVersion.value)) {
-      const defaultKubernetesVersionDescriptor = cloudProfileStore.defaultKubernetesVersionForCloudProfileName(cloudProfileName.value)
+      const defaultKubernetesVersionDescriptor = cloudProfileStore.defaultKubernetesVersionForCloudProfileRef(cloudProfileRef.value)
       kubernetesVersion.value = get(defaultKubernetesVersionDescriptor, ['version'])
     }
   }
 
-  /* cloudProfileName */
-  const cloudProfileName = computed({
+  /* cloudProfileRef */
+  const cloudProfileRef = computed({
     get () {
-      return get(manifest.value, ['spec', 'cloudProfileName'])
+      return get(manifest.value, ['spec', 'cloudProfile'])
     },
     set (value) {
-      set(manifest.value, ['spec', 'cloudProfileName'], value)
+      set(manifest.value, ['spec', 'cloudProfile'], value)
       resetCloudProfileDependendValues()
     },
   })
@@ -208,7 +209,7 @@ export function createShootContextComposable (options = {}) {
   function resetCloudProfileDependendValues () {
     resetNetworkingType()
     resetKubernetesVersion()
-    resetSecretBindingName()
+    resetBindingName()
     resetRegion()
     resetProviderControlPlaneConfigLoadBalancerClasses()
     resetProviderInfrastructureConfigProjectID()
@@ -222,21 +223,44 @@ export function createShootContextComposable (options = {}) {
     },
     set (value) {
       set(manifest.value, ['spec', 'secretBindingName'], value)
+      unset(manifest.value, ['spec', 'credentialsBindingName'])
       resetPurpose()
     },
   })
 
-  const infrastructureSecretBinding = computed({
+  const credentialsBindingName = computed({
     get () {
-      return find(infrastructureSecretBindings.value, ['metadata.name', secretBindingName.value])
+      return get(manifest.value, ['spec', 'credentialsBindingName'])
     },
     set (value) {
-      secretBindingName.value = get(value, ['metadata', 'name'])
+      set(manifest.value, ['spec', 'credentialsBindingName'], value)
+      unset(manifest.value, ['spec', 'secretBindingName'])
+      resetPurpose()
     },
   })
 
-  function resetSecretBindingName () {
-    infrastructureSecretBinding.value = head(infrastructureSecretBindings.value)
+  const infrastructureBinding = computed({
+    get () {
+      if (secretBindingName.value) {
+        return find(infrastructureBindings.value, { kind: 'SecretBinding', metadata: { name: secretBindingName.value } })
+      }
+      if (credentialsBindingName.value) {
+        return find(infrastructureBindings.value, { kind: 'CredentialsBinding', metadata: { name: credentialsBindingName.value } })
+      }
+      return undefined
+    },
+    set (value) {
+      if (value?.kind === 'CredentialsBinding') {
+        credentialsBindingName.value = get(value, ['metadata', 'name'])
+      }
+      if (value?.kind === 'SecretBinding') {
+        secretBindingName.value = get(value, ['metadata', 'name'])
+      }
+    },
+  })
+
+  function resetBindingName () {
+    infrastructureBinding.value = head(infrastructureBindings.value)
   }
 
   /* networking */
@@ -318,17 +342,17 @@ export function createShootContextComposable (options = {}) {
     },
     set (value) {
       set(manifest.value, ['spec', 'provider', 'type'], value)
-      applySpecTemplate(defaultCloudProfileName.value)
-      cloudProfileName.value = defaultCloudProfileName.value
+      applySpecTemplate(defaultCloudProfileRef.value)
+      cloudProfileRef.value = defaultCloudProfileRef.value
     },
   })
 
-  function applySpecTemplate (cloudProfileName) {
+  function applySpecTemplate (cloudProfileRef) {
     const {
       kubernetes,
       networking,
       provider,
-    } = getSpecTemplate(providerType.value, cloudProfileStore.getDefaultNodesCIDR(cloudProfileName))
+    } = getSpecTemplate(providerType.value, cloudProfileStore.getDefaultNodesCIDR(cloudProfileRef))
     set(manifest.value, ['spec', 'provider', 'infrastructureConfig'], provider.infrastructureConfig)
     set(manifest.value, ['spec', 'provider', 'controlPlaneConfig'], provider.controlPlaneConfig)
     set(manifest.value, ['spec', 'networking'], networking)
@@ -414,8 +438,8 @@ export function createShootContextComposable (options = {}) {
   }
 
   const allFirewallNetworks = computed(() => {
-    return cloudProfileStore.firewallNetworksByCloudProfileNameAndPartitionId({
-      cloudProfileName: cloudProfileName.value,
+    return cloudProfileStore.firewallNetworksByCloudProfileRefAndPartitionId({
+      cloudProfileRef: cloudProfileRef.value,
       partitionID: providerInfrastructureConfigPartitionID.value,
     })
   })
@@ -500,12 +524,12 @@ export function createShootContextComposable (options = {}) {
   })
 
   watch(workerless, value => {
-    if (value || !cloudProfileName.value) {
+    if (value || !cloudProfileRef.value) {
       return
     }
-    if (!networkingType.value || !secretBindingName.value) {
+    if (!networkingType.value || (!secretBindingName.value && !credentialsBindingName.value)) {
       // If worker required values missing (navigated to overview tab from yaml), reset to defaults
-      applySpecTemplate(cloudProfileName.value)
+      applySpecTemplate(cloudProfileRef.value)
       resetCloudProfileDependendValues()
     }
   }, {
@@ -544,7 +568,7 @@ export function createShootContextComposable (options = {}) {
       !isEmpty(zones)
         ? zones
         : availableZones.value,
-      cloudProfileName.value,
+      cloudProfileRef.value,
       region.value,
       kubernetesVersion.value,
     )
@@ -881,14 +905,14 @@ export function createShootContextComposable (options = {}) {
 
   const {
     cloudProfiles,
-    defaultCloudProfileName,
+    defaultCloudProfileRef,
     cloudProfile,
     seed,
     seeds,
     isFailureToleranceTypeZoneSupported,
     allZones,
     defaultNodesCIDR,
-    infrastructureSecretBindings,
+    infrastructureBindings,
     sortedKubernetesVersions,
     kubernetesVersionIsNotLatestPatch,
     allPurposes,
@@ -944,18 +968,13 @@ export function createShootContextComposable (options = {}) {
     shootNamespace,
     shootProjectName,
     isNewCluster,
-    /* purpose */
     purpose,
     isShootActionsDisabled,
-    /* cloudProfileName */
-    cloudProfileName,
-    /* region */
+    cloudProfileRef,
     region,
-    /* seedName */
     seedName,
     /* secretBindingName */
-    secretBindingName,
-    infrastructureSecretBinding,
+    infrastructureBinding,
     /* kubernetes */
     kubernetesVersion,
     /* networking */
@@ -1044,7 +1063,7 @@ export function createShootContextComposable (options = {}) {
     initialZones,
     maxAdditionalZones,
     defaultNodesCIDR,
-    infrastructureSecretBindings,
+    infrastructureBindings,
     sortedKubernetesVersions,
     kubernetesVersionIsNotLatestPatch,
     allPurposes,

@@ -95,7 +95,10 @@ exports[`composables > useShootContext > should change the infrastructure kind 1
         "enabled": false,
       },
     },
-    "cloudProfileName": "gcp",
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "gcp",
+    },
     "hibernation": {
       "schedules": [
         {
@@ -169,6 +172,109 @@ exports[`composables > useShootContext > should change the infrastructure kind 1
 }
 `;
 
+exports[`composables > useShootContext > should change to credentials binding 1`] = `
+{
+  "apiVersion": "core.gardener.cloud/v1beta1",
+  "kind": "Shoot",
+  "metadata": {
+    "name": "m6kgstc1b0",
+    "namespace": "garden-test",
+  },
+  "spec": {
+    "addons": {
+      "kubernetesDashboard": {
+        "enabled": false,
+      },
+      "nginxIngress": {
+        "enabled": false,
+      },
+    },
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "aws",
+    },
+    "credentialsBindingName": "aws-credentialsbinding",
+    "hibernation": {
+      "schedules": [
+        {
+          "location": "Europe/Berlin",
+          "start": "00 17 * * 1,2,3,4,5",
+        },
+      ],
+    },
+    "kubernetes": {
+      "version": "1.28.6",
+    },
+    "maintenance": {
+      "autoUpdate": {
+        "kubernetesVersion": true,
+        "machineImageVersion": true,
+      },
+      "timeWindow": {
+        "begin": "220000+0100",
+        "end": "230000+0100",
+      },
+    },
+    "networking": {
+      "nodes": "10.180.0.0/16",
+      "type": "calico",
+    },
+    "provider": {
+      "controlPlaneConfig": {
+        "apiVersion": "aws.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "ControlPlaneConfig",
+      },
+      "infrastructureConfig": {
+        "apiVersion": "aws.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "InfrastructureConfig",
+        "networks": {
+          "vpc": {
+            "cidr": "10.180.0.0/16",
+          },
+          "zones": [
+            {
+              "internal": "10.180.48.0/20",
+              "name": "eu-central-1a",
+              "public": "10.180.32.0/20",
+              "workers": "10.180.0.0/19",
+            },
+          ],
+        },
+      },
+      "type": "aws",
+      "workers": [
+        {
+          "cri": {
+            "name": "containerd",
+          },
+          "machine": {
+            "architecture": "amd64",
+            "image": {
+              "name": "gardenlinux",
+              "version": "1312.3.0",
+            },
+            "type": "m4.large",
+          },
+          "maxSurge": 1,
+          "maximum": 2,
+          "minimum": 1,
+          "name": "worker-m6kgs",
+          "volume": {
+            "size": "50Gi",
+            "type": "gp3",
+          },
+          "zones": [
+            "eu-central-1a",
+          ],
+        },
+      ],
+    },
+    "purpose": "evaluation",
+    "region": "eu-central-1",
+  },
+}
+`;
+
 exports[`composables > useShootContext > should create a default "alicloud" shoot manifest 1`] = `
 {
   "apiVersion": "core.gardener.cloud/v1beta1",
@@ -186,7 +292,10 @@ exports[`composables > useShootContext > should create a default "alicloud" shoo
         "enabled": false,
       },
     },
-    "cloudProfileName": "alicloud",
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "alicloud",
+    },
     "hibernation": {
       "schedules": [
         {
@@ -284,7 +393,10 @@ exports[`composables > useShootContext > should create a default "aws" shoot man
         "enabled": false,
       },
     },
-    "cloudProfileName": "aws",
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "aws",
+    },
     "hibernation": {
       "schedules": [
         {
@@ -384,7 +496,10 @@ exports[`composables > useShootContext > should create a default "azure" shoot m
         "enabled": false,
       },
     },
-    "cloudProfileName": "az",
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "az",
+    },
     "hibernation": {
       "schedules": [
         {
@@ -478,7 +593,10 @@ exports[`composables > useShootContext > should create a default "gcp" shoot man
         "enabled": false,
       },
     },
-    "cloudProfileName": "gcp",
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "gcp",
+    },
     "hibernation": {
       "schedules": [
         {
@@ -569,7 +687,10 @@ exports[`composables > useShootContext > should create a default "ironcore" shoo
         "enabled": false,
       },
     },
-    "cloudProfileName": "ironcore",
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "ironcore",
+    },
     "hibernation": {
       "schedules": [
         {
@@ -648,7 +769,10 @@ exports[`composables > useShootContext > should create a default "openstack" sho
         "enabled": false,
       },
     },
-    "cloudProfileName": "openstack-1",
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "openstack-1",
+    },
     "hibernation": {
       "schedules": [
         {

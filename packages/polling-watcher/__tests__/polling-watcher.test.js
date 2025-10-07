@@ -4,11 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const fs = require('fs/promises')
-const { globalLogger: logger } = require('@gardener-dashboard/logger')
-const createWatch = require('../lib')
+import { jest } from '@jest/globals'
+import fs from 'fs/promises'
+import { globalLogger as logger } from '@gardener-dashboard/logger'
+import createWatch from '../lib/index.js'
 
 describe('polling-watcher', () => {
   beforeAll(() => {

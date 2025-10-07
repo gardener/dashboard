@@ -107,7 +107,7 @@ export default {
         fallbackRoute.value = {
           name: 'Home',
         }
-      } else if (['Secrets', 'Secret'].includes(routeName) && !authzStore.canGetSecrets) {
+      } else if (['Secrets', 'Secret'].includes(routeName) && !authzStore.canGetCloudProviderCredentials) {
         error.value = Object.assign(new Error('You do not have the necessary permissions to list secrets!'), {
           code: 403,
           reason: 'Forbidden',

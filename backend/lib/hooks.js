@@ -4,15 +4,15 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const { createDashboardClient, abortWatcher } = require('@gardener-dashboard/kube-client')
-const { monitorHttpServer, monitorSocketIO } = require('@gardener-dashboard/monitor')
-const getCache = require('./cache')
-const config = require('./config')
-const watches = require('./watches')
-const io = require('./io')
-const logger = require('./logger')
+import kubeClientModule from '@gardener-dashboard/kube-client'
+import monitorModule from '@gardener-dashboard/monitor'
+import getCache from './cache/index.js'
+import config from './config/index.js'
+import * as watches from './watches/index.js'
+import io from './io/index.js'
+import logger from './logger/index.js'
+const { createDashboardClient, abortWatcher } = kubeClientModule
+const { monitorHttpServer, monitorSocketIO } = monitorModule
 
 class LifecycleHooks {
   constructor (client) {
@@ -148,7 +148,7 @@ class ResourceWatcher {
   }
 }
 
-module.exports = () => {
+export default () => {
   const rootClient = createDashboardClient(
     'root', // TODO: use root here? =>Currently we assume that root is the parent of all workspaces
     {
@@ -158,4 +158,4 @@ module.exports = () => {
     })
   return new LifecycleHooks(rootClient)
 }
-module.exports.LifecycleHooks = LifecycleHooks
+export { LifecycleHooks }

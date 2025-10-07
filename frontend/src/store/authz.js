@@ -54,12 +54,20 @@ export const useAuthzStore = defineStore('authz', () => {
     return canI(status.value, 'patch', 'core.gardener.cloud', 'shoots/binding')
   })
 
-  const canGetSecrets = computed(() => {
-    return canI(status.value, 'list', '', 'secrets')
+  const canGetCloudProviderCredentials = computed(() => {
+    return canI(status.value, 'list', '', 'secrets') && canI(status.value, 'list', 'security.gardener.cloud', 'workloadidentities')
   })
 
-  const canCreateSecrets = computed(() => {
-    return canI(status.value, 'create', '', 'secrets')
+  const canCreateCredentials = computed(() => {
+    return canI(status.value, 'create', '', 'secrets') && canI(status.value, 'create', 'security.gardener.cloud', 'workloadidentities')
+  })
+
+  const canPatchCredentials = computed(() => {
+    return canI(status.value, 'patch', '', 'secrets') && canI(status.value, 'patch', 'security.gardener.cloud', 'workloadidentities')
+  })
+
+  const canDeleteCredentials = computed(() => {
+    return canI(status.value, 'delete', '', 'secrets') && canI(status.value, 'delete', 'security.gardener.cloud', 'workloadidentities')
   })
 
   const canCreateShootsAdminkubeconfig = computed(() => {
@@ -68,14 +76,6 @@ export const useAuthzStore = defineStore('authz', () => {
 
   const canCreateShootsViewerkubeconfig = computed(() => {
     return canI(status.value, 'create', 'core.gardener.cloud', 'shoots/viewerkubeconfig')
-  })
-
-  const canPatchSecrets = computed(() => {
-    return canI(status.value, 'patch', '', 'secrets')
-  })
-
-  const canDeleteSecrets = computed(() => {
-    return canI(status.value, 'delete', '', 'secrets')
   })
 
   const canCreateTokenRequest = computed(() => {
@@ -115,7 +115,7 @@ export const useAuthzStore = defineStore('authz', () => {
   })
 
   const canGetProjectTerminalShortcuts = computed(() => {
-    return canGetSecrets.value
+    return canGetCloudProviderCredentials.value
   })
 
   const canUseProjectTerminalShortcuts = computed(() => {
@@ -186,12 +186,12 @@ export const useAuthzStore = defineStore('authz', () => {
     canPatchShoots,
     canDeleteShoots,
     canPatchShootsBinding,
-    canGetSecrets,
-    canCreateSecrets,
+    canGetCloudProviderCredentials,
+    canCreateCredentials,
     canCreateShootsAdminkubeconfig,
     canCreateShootsViewerkubeconfig,
-    canPatchSecrets,
-    canDeleteSecrets,
+    canPatchCredentials,
+    canDeleteCredentials,
     canCreateTokenRequest,
     canCreateServiceAccounts,
     canPatchServiceAccounts,

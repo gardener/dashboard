@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # SPDX-FileCopyrightText: 2025 SAP SE or an SAP affiliate company and Gardener contributors
 #
@@ -33,46 +33,7 @@ install_if_missing() {
   fi
 }
 
-
-# Add the bin directory to the PATH
-mkdir -p "${SOURCE_PATH}/bin"
-export PATH="${SOURCE_PATH}/bin:$PATH"
-
-# Install helm if it does not exist
-if [ ! -f "${SOURCE_PATH}/bin/helm" ]; then
-  VERSION="3.11.1"
-  BASE_URL="https://get.helm.sh"
-  ARCH="$(uname -m | sed 's/^x86_64$/amd64/;s/^aarch64$/arm64/')"
-  KERNEL="$(uname -s | tr '[:upper:]' '[:lower:]')"
-  wget ${BASE_URL}/helm-v${VERSION}-${KERNEL}-${ARCH}.tar.gz -O - | tar -xz -C "${SOURCE_PATH}/bin" --strip-components=1 "${KERNEL}-${ARCH}/helm"
-  chmod +x "${SOURCE_PATH}/bin/helm"
-fi
-
 # Install make if it does not exist
 install_if_missing make make
 
-# Abort with an error exit code if
-# the lockfile was to be modified or
-# the cache folder was to be modified or
-# the checksums of the packages are not consistent
-yarn install --immutable --immutable-cache --check-cache --refresh-lockfile
-
-# check and report found duplicate dependencies
-yarn dedupe --check
-
-# check that the constraints are met
-yarn constraints
-
-# Run the helm chart unit tests
-yarn workspace @gardener-dashboard/charts run test
-
-# Run linting
-if [ "${LINT_SARIF+yes}" = yes ] ; then
-  # supposed to be run in release jobs
-  make lint-sarif
-else
-  make lint
-fi
-
-# Run tests
-make test-cov
+make verify

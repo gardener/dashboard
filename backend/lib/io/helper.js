@@ -4,31 +4,78 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-const crypto = require('crypto')
-const { promisify } = require('util')
-const createError = require('http-errors')
-const cookieParser = require('cookie-parser')
-const kubernetesClient = require('@gardener-dashboard/kube-client')
-const { cloneDeep } = require('lodash')
-const getCache = require('../cache')
-const logger = require('../logger')
-const authorization = require('../services/authorization')
-const { authenticate } = require('../security')
-const { simplifyObjectMetadata } = require('../utils')
+import crypto from 'crypto'
+import { promisify } from 'util'
+import httpErrors from 'http-errors'
+import cookieParser from 'cookie-parser'
+import kubeClientModule from '@gardener-dashboard/kube-client'
+import { cloneDeep } from 'lodash-es'
+import getCache from '../cache/index.js'
+import logger from '../logger/index.js'
+import * as authorization from '../services/authorization.js'
+import { authenticate } from '../security/index.js'
+import { simplifyObjectMetadata } from '../utils/index.js'
 
-const { isHttpError } = createError
+const { isHttpError } = httpErrors
+
+const constants = Object.freeze({
+  OBJECT_NONE: 0,
+  OBJECT_SIMPLE: 1,
+  OBJECT_ORIGINAL: 2,
+})
+function synchronizeFactory (kind, options = {}) {
+  const {
+    group = 'core.gardener.cloud',
+    accessResolver = () => helper.constants.OBJECT_SIMPLE,
+    simplifyObject = simplifyObjectMetadata,
+  } = options
+  const uidNotFound = uidNotFoundFactory(group, kind)
+
+  return (socket, workspace, uids = []) => {
+    const cache = getCache(workspace)
+
+    return uids.map(uid => {
+      const object = cache.getByUid(kind, uid)
+      if (!object) {
+        // the object has been removed from the cache
+        return uidNotFound(uid)
+      }
+      switch (accessResolver(socket, object)) {
+        case helper.constants.OBJECT_SIMPLE: {
+          const clonedObject = cloneDeep(object)
+          simplifyObject(clonedObject)
+          return clonedObject
+        }
+        case helper.constants.OBJECT_ORIGINAL: {
+          return object
+        }
+        default: {
+          // the user has no authorization to access the object
+          return uidNotFound(uid)
+        }
+      }
+    })
+  }
+}
 
 function expiresIn (socket) {
-  const user = getUserFromSocket(socket)
+  const user = helper.getUserFromSocket(socket)
   const refreshAt = user?.refresh_at ?? 0
   return Math.max(0, refreshAt * 1000 - Date.now())
 }
 
 async function userProfiles (req, res, next) {
   try {
-    const canListProjects = await authorization.canListProjects(req.user)
+    const [
+      canListProjects,
+      canListSeeds,
+    ] = await Promise.all([
+      authorization.canListProjects(req.user),
+      authorization.canListSeeds(req.user),
+    ])
     const profiles = Object.freeze({
       canListProjects,
+      canListSeeds,
     })
     Object.defineProperty(req.user, 'profiles', {
       value: profiles,
@@ -56,7 +103,7 @@ function authenticateFn (options) {
   }
 
   return async req => {
-    await cookieParserAsync(req, res) // Note: We intentionally omit the 'next' callback here because promisify automatically appends an error-first callback (err, value) => { ... } to the function arguments.
+    await cookieParserAsync(req, res)
     await authenticateAsync(req, res, next)
     await userProfilesAsync(req, res, next)
     return req.user
@@ -64,7 +111,7 @@ function authenticateFn (options) {
 }
 
 function authenticationMiddleware () {
-  const authenticate = authenticateFn(kubernetesClient)
+  const authenticate = authenticateFn(kubeClientModule)
 
   return async (socket, next) => {
     logger.debug('Socket %s authenticating', socket.id)
@@ -76,7 +123,7 @@ function authenticationMiddleware () {
         if (delay > 0) {
           helper.setDisconnectTimeout(socket, delay)
         } else {
-          throw createError(401, 'Token refresh required', {
+          throw httpErrors(401, 'Token refresh required', {
             code: 'ERR_JWT_TOKEN_REFRESH_REQUIRED',
             data: {
               rti: user.rti,
@@ -89,7 +136,6 @@ function authenticationMiddleware () {
     } catch (err) {
       logger.error('Socket %s authentication failed: %s', socket.id, err)
       if (isHttpError(err)) {
-        // additional details (see https://socket.io/docs/v4/server-api/#namespaceusefn)
         const { statusCode, code, data } = err
         err.data = { statusCode, code, ...data }
       }
@@ -120,8 +166,8 @@ function sha256 (data) {
 }
 
 function joinPrivateRoom (socket) {
-  const user = getUserFromSocket(socket)
-  return socket.join(sha256(user.id))
+  const user = helper.getUserFromSocket(socket)
+  return socket.join(helper.sha256(user.id))
 }
 
 function uidNotFoundFactory (group, kind) {
@@ -140,48 +186,7 @@ function uidNotFoundFactory (group, kind) {
   })
 }
 
-const constants = Object.freeze({
-  OBJECT_NONE: 0,
-  OBJECT_SIMPLE: 1,
-  OBJECT_ORIGINAL: 2,
-})
-
-function synchronizeFactory (kind, options = {}) {
-  const {
-    group = 'core.gardener.cloud',
-    accessResolver = () => constants.OBJECT_SIMPLE,
-    simplifyObject = simplifyObjectMetadata,
-  } = options
-  const uidNotFound = uidNotFoundFactory(group, kind)
-
-  return (socket, workspace, uids = []) => {
-    const cache = getCache(workspace)
-
-    return uids.map(uid => {
-      const object = cache.getByUid(kind, uid)
-      if (!object) {
-        // the object has been removed from the cache
-        return uidNotFound(uid)
-      }
-      switch (accessResolver(socket, object)) {
-        case constants.OBJECT_SIMPLE: {
-          const clonedObject = cloneDeep(object)
-          simplifyObject(clonedObject)
-          return clonedObject
-        }
-        case constants.OBJECT_ORIGINAL: {
-          return object
-        }
-        default: {
-          // the user has no authorization to access the object
-          return uidNotFound(uid)
-        }
-      }
-    })
-  }
-}
-
-const helper = module.exports = {
+const helper = {
   constants,
   authenticationMiddleware,
   getUserFromSocket,
@@ -190,3 +195,5 @@ const helper = module.exports = {
   joinPrivateRoom,
   synchronizeFactory,
 }
+
+export default helper

@@ -17,74 +17,42 @@
 
 # include workspace packages/logger
 !packages/logger/package.json
-!packages/logger/eslint.config.js
-!packages/logger/jest.setup.js
 !packages/logger/lib
-!packages/logger/__tests__
-!packages/logger/__fixtures__
-!packages/logger/__mocks__
+!packages/logger/rollup.config.js
 
 # include workspace packages/request
 !packages/request/package.json
-!packages/request/eslint.config.js
-!packages/request/jest.setup.js
 !packages/request/lib
-!packages/request/__tests__
-!packages/request/__fixtures__
-!packages/request/__mocks__
+!packages/request/rollup.config.js
 
 # include workspace packages/polling-watcher
 !packages/polling-watcher/package.json
-!packages/polling-watcher/eslint.config.js
-!packages/polling-watcher/jest.setup.js
 !packages/polling-watcher/lib
-!packages/polling-watcher/__tests__
-!packages/polling-watcher/__fixtures__
-!packages/polling-watcher/__mocks__
+!packages/polling-watcher/rollup.config.js
 
 # include workspace packages/kube-config
 !packages/kube-config/package.json
-!packages/kube-config/eslint.config.js
-!packages/kube-config/jest.setup.js
 !packages/kube-config/lib
-!packages/kube-config/__tests__
-!packages/kube-config/__fixtures__
-!packages/kube-config/__mocks__
+!packages/kube-config/rollup.config.js
 
 # include workspace packages/kube-client
 !packages/kube-client/package.json
-!packages/kube-client/eslint.config.js
-!packages/kube-client/jest.setup.js
 !packages/kube-client/lib
-!packages/kube-client/__tests__
-!packages/kube-client/__fixtures__
-!packages/kube-client/__mocks__
+!packages/kube-client/rollup.config.js
 
 # include workspace packages/monitor
 !packages/monitor/package.json
-!packages/monitor/eslint.config.js
-!packages/monitor/jest.setup.js
 !packages/monitor/lib
-!packages/monitor/__tests__
-!packages/monitor/__fixtures__
-!packages/monitor/__mocks__
+!packages/monitor/rollup.config.js
 
 # include workspace backend
 !backend/package.json
-!backend/eslint.config.js
-!backend/jest.setup.js
 !backend/server.js
 !backend/lib
-!backend/__tests__
-!backend/__fixtures__
-!backend/__mocks__
 
 # include workspace frontend
 !frontend/.browserslistrc
-!frontend/.env*
 !frontend/.gitignore
-!frontend/eslint.config.cjs
-!frontend/eslint-import-resolver-local.cjs
 !frontend/jsconfig.json
 !frontend/package.json
 !frontend/vite.config.js
@@ -92,26 +60,22 @@
 !frontend/index.html
 !frontend/public
 !frontend/src
-!frontend/__tests__
-!frontend/__fixtures__
-!frontend/__mocks__
+!frontend/vite/g-mdi-meta.js
 
 # include workspace charts
 !charts/package.json
-!charts/eslint.config.js
-!charts/jest.setup.js
 !charts/_versions.tpl
 !charts/gardener-dashboard
 !charts/identity
-!charts/__tests__
-!charts/__fixtures__
-!charts/__mocks__
 
 # include workspace packages/test-utils
 !packages/test-utils/package.json
-!packages/test-utils/eslint.config.js
 !packages/test-utils/lib
+!packages/test-utils/rollup.config.js
 
 # include metadata files
 !VERSION
 !Dockerfile
+
+# include hack/verify script
+!hack/verify

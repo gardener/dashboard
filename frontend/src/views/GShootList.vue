@@ -120,20 +120,13 @@ SPDX-License-Identifier: Apache-2.0
             </v-chip>
             <br>
           </v-tooltip>
-          <v-tooltip
+          <v-btn
             v-if="canCreateShoots && projectScope"
-            location="top"
-          >
-            <template #activator="{ props }">
-              <v-btn
-                v-bind="props"
-                icon="mdi-plus"
-                color="toolbar-title"
-                :to="{ name: 'NewShoot', params: { namespace } }"
-              />
-            </template>
-            <span>Create Cluster</span>
-          </v-tooltip>
+            v-tooltip:top="'Create Cluster'"
+            icon="mdi-plus"
+            color="toolbar-title"
+            :to="{ name: 'NewShoot', params: { namespace } }"
+          />
           <g-table-column-selection
             :headers="selectableHeaders"
             :filters="selectableFilters"
@@ -152,6 +145,7 @@ SPDX-License-Identifier: Apache-2.0
         :custom-key-sort="customKeySort"
         density="compact"
         hover
+        :item-key="getItemKey"
         must-sort
         fixed-header
         class="g-table"
@@ -341,7 +335,7 @@ export default {
       'canPatchShoots',
       'canDeleteShoots',
       'canCreateShoots',
-      'canGetSecrets',
+      'canGetCloudProviderCredentials',
     ]),
     ...mapState(useConfigStore, {
       accessRestrictionConfig: 'accessRestriction',
@@ -442,14 +436,6 @@ export default {
           hidden: false,
         },
         {
-          title: 'SEED',
-          key: 'seed',
-          sortable: isSortable(true),
-          align: 'start',
-          defaultSelected: false,
-          hidden: false,
-        },
-        {
           title: 'TECHNICAL ID',
           key: 'technicalId',
           sortable: isSortable(true),
@@ -517,6 +503,23 @@ export default {
           stalePointerEvents: true,
         },
         {
+          title: 'SEED',
+          key: 'seed',
+          sortable: isSortable(true),
+          align: 'start',
+          defaultSelected: false,
+          hidden: false,
+        },
+        {
+          title: 'SEED READINESS',
+          key: 'seedReadiness',
+          sortable: isSortable(true),
+          align: 'start',
+          defaultSelected: true,
+          hidden: !this.isAdmin,
+          stalePointerEvents: true,
+        },
+        {
           title: 'ISSUE SINCE',
           key: 'issueSince',
           sortable: isSortable(true),
@@ -562,7 +565,7 @@ export default {
           sortable: false,
           align: 'end',
           defaultSelected: true,
-          hidden: !(this.canDeleteShoots || this.canGetSecrets),
+          hidden: !(this.canDeleteShoots || this.canGetCloudProviderCredentials),
         },
       ]
       return map(headers, (header, index) => ({
@@ -813,6 +816,9 @@ export default {
         unset(reactiveObject, [key])
       }
       Object.assign(reactiveObject, defaultState)
+    },
+    getItemKey (item, fallback) {
+      return get(item, ['raw', 'metadata', 'uid'], fallback)
     },
   },
 }

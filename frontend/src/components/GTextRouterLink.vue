@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
       v-bind="$attrs"
       :href="href"
       class="text-anchor"
-      @click="navigate"
+      @click.stop="navigate"
       v-text="text"
     />
   </router-link>

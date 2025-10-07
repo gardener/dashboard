@@ -4,17 +4,14 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import assert from 'assert'
+import httpErrors from 'http-errors'
+import logger from '../logger/index.js'
+import kubeClientModule from '@gardener-dashboard/kube-client'
+const { Unauthorized } = httpErrors
+const { createDashboardClient, Resources } = kubeClientModule
 
-const assert = require('assert').strict
-const { Unauthorized } = require('http-errors')
-const logger = require('../logger')
-const {
-  createDashboardClient,
-  Resources,
-} = require('@gardener-dashboard/kube-client')
-
-exports.isAuthenticated = async function ({ token } = {}, workspace) {
+export async function isAuthenticated ({ token } = {}, workspace) {
   const dashboardClient = createDashboardClient(workspace)
   const { apiVersion, kind } = Resources.TokenReview
   const body = {

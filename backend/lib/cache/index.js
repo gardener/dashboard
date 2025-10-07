@@ -4,10 +4,14 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-const _ = require('lodash')
-const { NotFound } = require('http-errors')
-const createTicketCache = require('./tickets')
-const { parseSelectors, filterBySelectors } = require('../utils')
+import _ from 'lodash-es'
+import httpErrors from 'http-errors'
+import createTicketCache from './tickets.js'
+import {
+  parseSelectors,
+  filterBySelectors,
+} from '../utils/index.js'
+const { NotFound } = httpErrors
 
 /*
   In file `lib/api.js` the synchronization is started with the privileged dashboardClient.
@@ -55,13 +59,13 @@ class Cache extends Map {
 }
 
 const caches = {}
-module.exports = (workspace) => {
+export default function getCache (workspace) {
   const chacheID = workspace ?? 'default'
 
-  let cache = caches[chacheID]
+  let cache = _.get(caches, [chacheID])
   if (!cache) {
     cache = new Cache()
-    caches[chacheID] = cache
+    _.set(caches, [chacheID], cache)
   }
   return {
     cache,

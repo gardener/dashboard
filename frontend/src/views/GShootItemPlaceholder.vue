@@ -41,6 +41,7 @@ import { useTerminalStore } from '@/store/terminal'
 import GShootItemLoading from '@/views/GShootItemLoading.vue'
 import GShootItemError from '@/views/GShootItemError.vue'
 
+import { useProvideSeedItem } from '@/composables/useSeedItem'
 import { useProvideProjectItem } from '@/composables/useProjectItem'
 import { useProvideShootItem } from '@/composables/useShootItem'
 import { useProvideShootHelper } from '@/composables/useShootHelper'
@@ -129,7 +130,7 @@ export default {
         const promises = [
           shootStore.subscribe(routeParams),
         ]
-        if (['ShootItem', 'ShootItemHibernationSettings'].includes(routeName) && authzStore.canGetSecrets) {
+        if (['ShootItem', 'ShootItemHibernationSettings'].includes(routeName) && authzStore.canGetCloudProviderCredentials) {
           promises.push(credentialStore.fetchCredentials()) // Required for purpose configuration
         }
         if (['ShootItem', 'ShootItemHibernationSettings', 'ShootItemTerminal'].includes(routeName) && authzStore.canUseProjectTerminalShortcuts) {
@@ -182,7 +183,6 @@ export default {
     onBeforeRouteUpdate(async to => {
       if (isLoadRequired(route, to)) {
         await load(to)
-        readyState.value = 'loaded'
       }
     })
 
@@ -216,10 +216,10 @@ export default {
     useProvideProjectItem(projectItem)
     const {
       hasShootWorkerGroups,
+      shootSeedName,
     } = useProvideShootItem(shootItem, {
       cloudProfileStore,
       projectStore,
-      seedStore,
     })
 
     useProvideShootHelper(shootItem, {
@@ -229,6 +229,9 @@ export default {
       credentialStore,
       seedStore,
     })
+
+    const seedItem = computed(() => seedStore.seedByName(shootSeedName.value))
+    useProvideSeedItem(seedItem)
 
     return {
       component,

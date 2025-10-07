@@ -4,18 +4,19 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import _ from 'lodash-es'
+import httpErrors from 'http-errors'
+import kubeConfigModule from '@gardener-dashboard/kube-config'
+import kubeClientModule from '@gardener-dashboard/kube-client'
+import config from '../../config/index.js'
+import Member from './Member.js'
+import SubjectListItem from './SubjectListItem.js'
+import SubjectList from './SubjectList.js'
+import getCache from '../../cache/index.js'
 
-const _ = require('lodash')
-const { NotFound, Conflict, UnprocessableEntity, isHttpError } = require('http-errors')
-const { dumpKubeconfig } = require('@gardener-dashboard/kube-config')
-const { Resources } = require('@gardener-dashboard/kube-client')
-
-const config = require('../../config')
-const getCache = require('../../cache')
-const Member = require('./Member')
-const SubjectListItem = require('./SubjectListItem')
-const SubjectList = require('./SubjectList')
+const { dumpKubeconfig } = kubeConfigModule
+const { Resources } = kubeClientModule
+const { NotFound, Conflict, UnprocessableEntity, isHttpError } = httpErrors
 
 class MemberManager {
   constructor (client, userId, project, serviceAccounts) {
@@ -179,6 +180,13 @@ class MemberManager {
   }
 
   setItemRoles (item, roles) {
+    if (!Array.isArray(roles)) {
+      throw new UnprocessableEntity('Roles must be an array')
+    }
+    const MAX_ROLES = 10 // Define a reasonable limit for roles
+    if (roles.length > MAX_ROLES) {
+      throw new UnprocessableEntity(`Roles array exceeds the maximum allowed size of ${MAX_ROLES}`)
+    }
     roles = _.compact(roles)
     if (!roles.length && item.kind !== 'ServiceAccount') {
       throw new UnprocessableEntity('At least one role is required')
@@ -326,4 +334,4 @@ class MemberManager {
   }
 }
 
-module.exports = MemberManager
+export default MemberManager

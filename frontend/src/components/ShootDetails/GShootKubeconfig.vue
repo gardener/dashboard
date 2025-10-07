@@ -92,7 +92,7 @@ export default {
   setup () {
     const authzStore = useAuthzStore()
     const {
-      canGetSecrets,
+      canGetCloudProviderCredentials,
     } = storeToRefs(authzStore)
 
     const {
@@ -105,7 +105,7 @@ export default {
     const expansionPanel = ref(false)
 
     return {
-      canGetSecrets,
+      canGetCloudProviderCredentials,
       shootNamespace,
       shootName,
       shootProjectName,

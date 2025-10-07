@@ -4,40 +4,35 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const _ = require('lodash')
-const hash = require('object-hash')
-const yaml = require('js-yaml')
-const config = require('../../config')
-const { getClusterCaData } = require('../shoots')
-const { Resources } = require('@gardener-dashboard/kube-client')
-
-const { Forbidden, UnprocessableEntity, InternalServerError } = require('http-errors')
-const { isHttpError } = require('@gardener-dashboard/request')
-
-const {
+import httpErrors from 'http-errors'
+import _ from 'lodash-es'
+import hash from 'object-hash'
+import { load as yamlLoad } from 'js-yaml'
+import gardenerConfig from '../../config/index.js'
+import { getClusterCaData } from '../shoots.js'
+import kubeClientModule from '@gardener-dashboard/kube-client'
+import {
   decodeBase64,
   getConfigValue,
   getSeedNameFromShoot,
-} = require('../../utils')
-
-const {
+} from '../../utils/index.js'
+import {
   toTerminalResource,
   fromNodeResource,
-} = require('./resources')
-
-const {
+} from './resources.js'
+import {
   getKubeApiServerHostForSeedOrManagedSeed,
   getKubeApiServerHostForShoot,
   getGardenTerminalHostClusterCredentials,
   getGardenHostClusterKubeApiServer,
   getShootRef,
-} = require('./utils')
-
-const { getSeed, findProjectByNamespace } = require('../../cache')
-const logger = require('../../logger')
-const markdown = require('../../markdown')
+} from './utils.js'
+import cache from '../../cache/index.js'
+import logger from '../../logger/index.js'
+import { createConverter } from '../../markdown.js'
+const { Resources } = kubeClientModule
+const { Forbidden, UnprocessableEntity, InternalServerError, isHttpError } = httpErrors
+const { getSeed, findProjectByNamespace } = cache
 
 const TERMINAL_CONTAINER_NAME = 'terminal'
 
@@ -50,34 +45,35 @@ const TargetEnum = {
   SHOOT: 'shoot',
 }
 
-const converter = exports.converter = markdown.createConverter()
+export const converter = createConverter()
 
-exports.create = function ({ user, body }) {
+export function create ({ user, body }) {
   const { coordinate: { namespace, name, target } } = body
   return getOrCreateTerminalSession({ user, namespace, name, target, body })
 }
 
-exports.config = async function ({ user, body: { coordinate: { namespace, name, target } } }) {
+export async function config ({ user, body: { coordinate: { namespace, name, target } } }) {
   return getTerminalConfig({ user, namespace, name, target })
 }
 
-exports.list = function ({ user, body: { coordinate: { namespace } } }) {
+export function list ({ user, body: { coordinate: { namespace } } }) {
   return listTerminalSessions({ user, namespace })
 }
 
-exports.remove = function ({ user, body = {} }) {
+export function remove ({ user, body = {} }) {
   return deleteTerminalSession({ user, body })
 }
 
-exports.fetch = function ({ user, body = {} }) {
+export function fetch ({ user, body = {} }) {
   return fetchTerminalSession({ user, body })
 }
 
-exports.heartbeat = async function ({ user, body = {} }) {
+export async function heartbeat ({ user, body = {} }) {
   return heartbeatTerminalSession({ user, body })
 }
 
-exports.listProjectTerminalShortcuts = async function ({ user, body = {} }) {
+// exported for unit test
+export async function listProjectTerminalShortcuts ({ user, body = {} }) {
   const { coordinate: { namespace } } = body
   return listShortcuts({ user, namespace })
 }
@@ -95,7 +91,7 @@ function imageHelpText (terminal) {
   return converter.makeSanitizedHtml(containerImageDescription)
 }
 
-function findImageDescription (containerImage, containerImageDescriptions) {
+export function findImageDescription (containerImage, containerImageDescriptions) {
   return _
     .chain(containerImageDescriptions)
     .find(({ image }) => {
@@ -108,8 +104,6 @@ function findImageDescription (containerImage, containerImageDescriptions) {
     .get(['description'])
     .value()
 }
-// exported for unit test
-exports.findImageDescription = findImageDescription
 
 async function readServiceAccountToken (client, { namespace, serviceAccountName }) {
   const { apiVersion, kind } = Resources.TokenRequest
@@ -117,7 +111,7 @@ async function readServiceAccountToken (client, { namespace, serviceAccountName 
     kind,
     apiVersion,
     spec: {
-      expirationSeconds: _.get(config, ['terminal', 'serviceAccountTokenExpiration'], 43200), // default is 12h
+      expirationSeconds: _.get(gardenerConfig, ['terminal', 'serviceAccountTokenExpiration'], 43200), // default is 12h
     },
   }
 
@@ -203,8 +197,8 @@ async function getTargetCluster ({ user, namespace, name, target, preferredHost,
   switch (target) {
     case TargetEnum.GARDEN: {
       targetCluster.kubeconfigContextNamespace = namespace
-      targetCluster.apiServer.server = config.apiServerUrl
-      targetCluster.apiServer.caData = config.apiServerCaData
+      targetCluster.apiServer.server = gardenerConfig.apiServerUrl
+      targetCluster.apiServer.caData = gardenerConfig.apiServerCaData
 
       if (isAdmin) {
         targetCluster.namespace = 'garden'
@@ -696,7 +690,7 @@ function getSeedShootNamespace (shoot) {
   return seedShootNamespace
 }
 
-function ensureTerminalAllowed ({ method, isAdmin, body }) {
+export function ensureTerminalAllowed ({ method, isAdmin, body }) {
   if (isAdmin) {
     return
   }
@@ -714,7 +708,6 @@ function ensureTerminalAllowed ({ method, isAdmin, body }) {
   }
   throw new Forbidden('Terminal usage is not allowed')
 }
-exports.ensureTerminalAllowed = ensureTerminalAllowed
 
 function getContainerImage ({ isAdmin, preferredImage }) {
   if (preferredImage) {
@@ -774,19 +767,24 @@ async function getTerminalConfig ({ user, namespace, name, target }) {
     },
   }
 
-  if (target === TargetEnum.SHOOT) {
+  if (target === TargetEnum.SHOOT ||
+     (target === TargetEnum.GARDEN && !isAdmin)) {
     const shootRef = {
       namespace,
       name,
     }
-    const hostClient = await client.createShootAdminKubeconfigClient(shootRef)
-
-    const nodeList = await hostClient.core.nodes.list()
-    config.nodes = _
-      .chain(nodeList)
-      .get(['items'])
-      .map(fromNodeResource)
-      .value()
+    try {
+      const hostClient = await client.createShootAdminKubeconfigClient(shootRef)
+      const nodeList = await hostClient.core.nodes.list()
+      config.nodes = _
+        .chain(nodeList)
+        .get(['items'])
+        .map(fromNodeResource)
+        .value()
+    } catch (err) {
+      logger.error('Could not list terminal host nodes', err)
+      config.nodes = []
+    }
   }
   return config
 }
@@ -804,9 +802,9 @@ function pickShortcutValues (data) {
   return shortcut
 }
 
-function fromShortcutSecretResource (secret) {
+export function fromShortcutSecretResource (secret) {
   const shortcutsBase64 = _.get(secret, ['data', 'shortcuts'])
-  const shortcuts = yaml.load(decodeBase64(shortcutsBase64))
+  const shortcuts = yamlLoad(decodeBase64(shortcutsBase64))
   return _
     .chain(shortcuts)
     .map(pickShortcutValues)
@@ -815,7 +813,6 @@ function fromShortcutSecretResource (secret) {
     .filter(shortcut => _.includes([TargetEnum.GARDEN, TargetEnum.CONTROL_PLANE, TargetEnum.SHOOT], shortcut.target))
     .value()
 }
-exports.fromShortcutSecretResource = fromShortcutSecretResource // for unit tests
 
 async function listShortcuts ({ user, namespace }) {
   const client = user.client

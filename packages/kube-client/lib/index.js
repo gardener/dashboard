@@ -4,13 +4,13 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import assert from 'node:assert'
+import Client from './Client.js'
+import Store from './cache/Store.js'
+import { Resources } from './resources/index.js'
+import kubeConfig from '@gardener-dashboard/kube-config'
 
-const assert = require('assert').strict
-const Client = require('./Client')
-const Store = require('./cache/Store')
-const { Resources } = require('./resources')
-const { load } = require('@gardener-dashboard/kube-config')
+const { load } = kubeConfig
 
 const ac = new AbortController()
 const clientConfig = load(process.env, { signal: ac.signal })
@@ -28,12 +28,10 @@ function abortWatcher () {
   ac.abort()
 }
 
-exports = module.exports = createClient
-
-Object.assign(exports, {
+export default {
   createClient,
   createDashboardClient,
   abortWatcher,
   Resources,
   Store,
-})
+}
