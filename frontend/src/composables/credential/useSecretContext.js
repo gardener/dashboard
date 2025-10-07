@@ -18,6 +18,7 @@ import { useAuthzStore } from '@/store/authz'
 
 import { cleanup } from '@/composables/helper'
 import { useObjectMetadata } from '@/composables/useObjectMetadata'
+import { credentialProviderType } from '@/composables/credential/helper'
 
 import {
   decodeBase64,
@@ -86,6 +87,16 @@ export function createSecretContextComposable (options = {}) {
     name: secretName,
     namespace: secretNamespace,
   } = useObjectMetadata(manifest)
+
+  const secretProviderType = computed({
+    get () {
+      return credentialProviderType(manifest.value)
+    },
+    set (value) {
+      const labelKey = `provider.shoot.gardener.cloud/${value}`
+      set(manifest.value, ['metadata', 'labels', labelKey], 'true')
+    },
+  })
 
   const secretData = computed({
     get () {
@@ -160,6 +171,7 @@ export function createSecretContextComposable (options = {}) {
     secretData,
     secretStringData,
     secretStringDataRefs,
+    secretProviderType,
   }
 }
 

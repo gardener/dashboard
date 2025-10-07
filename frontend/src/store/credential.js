@@ -16,9 +16,9 @@ import {
 
 import { useApi } from '@/composables/useApi'
 import {
-  isDnsBinding,
   isInfrastructureBinding,
-  isSharedCredential,
+  isDNSCredential,
+  isSecret,
 } from '@/composables/credential/helper'
 
 import { useAuthzStore } from './authz'
@@ -26,7 +26,6 @@ import { useAppStore } from './app'
 import { useGardenerExtensionStore } from './gardenerExtension'
 import { useCloudProfileStore } from './cloudProfile'
 
-import filter from 'lodash/filter'
 import set from 'lodash/set'
 import get from 'lodash/get'
 
@@ -104,13 +103,6 @@ export const useCredentialStore = defineStore('credential', () => {
     })
   }
 
-  const cloudProviderBindingList = computed(() => {
-    const secretBindings = Object.values(state.secretBindings)
-    const credentialsBindings = Object.values(state.credentialsBindings)
-
-    return [...secretBindings, ...credentialsBindings]
-  })
-
   const quotaList = computed(() => {
     return Object.values(state.quotas)
   })
@@ -118,32 +110,44 @@ export const useCredentialStore = defineStore('credential', () => {
   async function createCredential (params) {
     const { data: { binding, secret } } = await api.createCloudProviderCredential({ binding: params.binding, secret: params.secret })
     _updateCloudProviderCredential({ binding, secret })
-    appStore.setSuccess(`Cloud Provider credential ${binding.metadata.name} created`)
+    const name = binding?.metadata?.name || secret.metadata.name
+    appStore.setSuccess(`Cloud Provider credential ${name} created`)
   }
 
   async function updateCredential (params) {
     const { data: { secret } } = await api.updateCloudProviderCredential({ secret: params.secret })
     _updateCloudProviderCredential({ secret })
-    appStore.setSuccess(`Cloud Provider credential ${params.binding.metadata.name} updated`)
+    const name = params.binding?.metadata?.name || secret.metadata.name
+    appStore.setSuccess(`Cloud Provider credential ${name} updated`)
   }
 
-  async function deleteCredential ({ bindingKind, bindingNamespace, bindingName }) {
+  async function deleteCredential (params) {
+    if (params.credentialKind) {
+      const { credentialKind, credentialNamespace, credentialName } = params
+      await api.deleteCloudProviderCredential({ credentialKind, credentialNamespace, credentialName })
+      await fetchCredentials()
+      appStore.setSuccess(`Cloud Provider credential ${credentialName} deleted`)
+      return
+    }
+    const { bindingKind, bindingNamespace, bindingName } = params
     await api.deleteCloudProviderCredential({ bindingKind, bindingNamespace, bindingName })
     await fetchCredentials()
     appStore.setSuccess(`Cloud Provider credential ${bindingName} deleted`)
   }
 
   const infrastructureBindingList = computed(() => {
-    return filter(cloudProviderBindingList.value, binding => {
-      return isInfrastructureBinding(binding, sortedProviderTypeList.value)
-    })
+    return [
+      ...secretBindingList.value,
+      ...credentialsBindingList.value,
+    ].filter(binding => isInfrastructureBinding({ binding, infraProviderTypes: sortedProviderTypeList.value }))
   })
 
-  const dnsBindingList = computed(() => {
-    return filter(cloudProviderBindingList.value, binding => {
-      return isDnsBinding(binding, dnsProviderTypes.value) &&
-        !isSharedCredential(binding)
-    })
+  const dnsCredentialList = computed(() => {
+    return [
+      ...Object.values(state.secrets),
+      ...Object.values(state.workloadIdentities),
+    ].filter(credential => isDNSCredential({ credential, dnsProviderTypes: dnsProviderTypes.value }),
+    ).filter(credential => isSecret(credential)) // Remove filter when DNS supports credentials of kind WorkloadIdentity
   })
 
   const secretBindingList = computed(() =>
@@ -186,7 +190,6 @@ export const useCredentialStore = defineStore('credential', () => {
 
   return {
     state,
-    cloudProviderBindingList,
     quotaList,
     fetchCredentials,
     _setCredentials,
@@ -194,7 +197,7 @@ export const useCredentialStore = defineStore('credential', () => {
     createCredential,
     deleteCredential,
     infrastructureBindingList,
-    dnsBindingList,
+    dnsCredentialList,
     secretBindingList,
     credentialsBindingList,
     getSecret,
