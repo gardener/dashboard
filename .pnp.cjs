@@ -1004,26 +1004,26 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@codemirror/autocomplete", [\
-      ["npm:6.18.7", {\
-        "packageLocation": "./.yarn/cache/@codemirror-autocomplete-npm-6.18.7-669d8427da-562c13711f.zip/node_modules/@codemirror/autocomplete/",\
+      ["npm:6.19.0", {\
+        "packageLocation": "./.yarn/cache/@codemirror-autocomplete-npm-6.19.0-35753381f1-9ec67349fb.zip/node_modules/@codemirror/autocomplete/",\
         "packageDependencies": [\
-          ["@codemirror/autocomplete", "npm:6.18.7"],\
+          ["@codemirror/autocomplete", "npm:6.19.0"],\
           ["@codemirror/language", "npm:6.11.3"],\
           ["@codemirror/state", "npm:6.5.2"],\
-          ["@codemirror/view", "npm:6.38.3"],\
+          ["@codemirror/view", "npm:6.38.5"],\
           ["@lezer/common", "npm:1.2.3"]\
         ],\
         "linkType": "HARD"\
       }]\
     ]],\
     ["@codemirror/commands", [\
-      ["npm:6.8.1", {\
-        "packageLocation": "./.yarn/cache/@codemirror-commands-npm-6.8.1-55a15bb735-da61311f4c.zip/node_modules/@codemirror/commands/",\
+      ["npm:6.9.0", {\
+        "packageLocation": "./.yarn/cache/@codemirror-commands-npm-6.9.0-1ee8569443-9317112b3b.zip/node_modules/@codemirror/commands/",\
         "packageDependencies": [\
-          ["@codemirror/commands", "npm:6.8.1"],\
+          ["@codemirror/commands", "npm:6.9.0"],\
           ["@codemirror/language", "npm:6.11.3"],\
           ["@codemirror/state", "npm:6.5.2"],\
-          ["@codemirror/view", "npm:6.38.3"],\
+          ["@codemirror/view", "npm:6.38.5"],\
           ["@lezer/common", "npm:1.2.3"]\
         ],\
         "linkType": "HARD"\
@@ -1033,7 +1033,7 @@ const RAW_RUNTIME_STATE =
       ["npm:6.1.2", {\
         "packageLocation": "./.yarn/cache/@codemirror-lang-yaml-npm-6.1.2-9fd6e82b08-fc993c5e24.zip/node_modules/@codemirror/lang-yaml/",\
         "packageDependencies": [\
-          ["@codemirror/autocomplete", "npm:6.18.7"],\
+          ["@codemirror/autocomplete", "npm:6.19.0"],\
           ["@codemirror/lang-yaml", "npm:6.1.2"],\
           ["@codemirror/language", "npm:6.11.3"],\
           ["@codemirror/state", "npm:6.5.2"],\
@@ -1051,7 +1051,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@codemirror/language", "npm:6.11.3"],\
           ["@codemirror/state", "npm:6.5.2"],\
-          ["@codemirror/view", "npm:6.38.3"],\
+          ["@codemirror/view", "npm:6.38.5"],\
           ["@lezer/common", "npm:1.2.3"],\
           ["@lezer/highlight", "npm:1.2.1"],\
           ["@lezer/lr", "npm:1.4.2"],\
@@ -1066,7 +1066,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@codemirror/search", "npm:6.5.11"],\
           ["@codemirror/state", "npm:6.5.2"],\
-          ["@codemirror/view", "npm:6.38.3"],\
+          ["@codemirror/view", "npm:6.38.5"],\
           ["crelt", "npm:1.0.6"]\
         ],\
         "linkType": "HARD"\
@@ -1089,18 +1089,18 @@ const RAW_RUNTIME_STATE =
           ["@codemirror/language", "npm:6.11.3"],\
           ["@codemirror/state", "npm:6.5.2"],\
           ["@codemirror/theme-one-dark", "npm:6.1.3"],\
-          ["@codemirror/view", "npm:6.38.3"],\
+          ["@codemirror/view", "npm:6.38.5"],\
           ["@lezer/highlight", "npm:1.2.1"]\
         ],\
         "linkType": "HARD"\
       }]\
     ]],\
     ["@codemirror/view", [\
-      ["npm:6.38.3", {\
-        "packageLocation": "./.yarn/cache/@codemirror-view-npm-6.38.3-9c7ec320e4-70c9ec6d6a.zip/node_modules/@codemirror/view/",\
+      ["npm:6.38.5", {\
+        "packageLocation": "./.yarn/cache/@codemirror-view-npm-6.38.5-a66add839b-ad2b2459d4.zip/node_modules/@codemirror/view/",\
         "packageDependencies": [\
           ["@codemirror/state", "npm:6.5.2"],\
-          ["@codemirror/view", "npm:6.38.3"],\
+          ["@codemirror/view", "npm:6.38.5"],\
           ["crelt", "npm:1.0.6"],\
           ["style-mod", "npm:4.1.2"],\
           ["w3c-keyname", "npm:2.2.8"]\
@@ -1747,14 +1747,14 @@ const RAW_RUNTIME_STATE =
       ["workspace:frontend", {\
         "packageLocation": "./frontend/",\
         "packageDependencies": [\
-          ["@codemirror/autocomplete", "npm:6.18.7"],\
-          ["@codemirror/commands", "npm:6.8.1"],\
+          ["@codemirror/autocomplete", "npm:6.19.0"],\
+          ["@codemirror/commands", "npm:6.9.0"],\
           ["@codemirror/lang-yaml", "npm:6.1.2"],\
           ["@codemirror/language", "npm:6.11.3"],\
           ["@codemirror/search", "npm:6.5.11"],\
           ["@codemirror/state", "npm:6.5.2"],\
           ["@codemirror/theme-one-dark", "npm:6.1.3"],\
-          ["@codemirror/view", "npm:6.38.3"],\
+          ["@codemirror/view", "npm:6.38.5"],\
           ["@fontsource/roboto", "npm:5.2.8"],\
           ["@gardener-dashboard/frontend", "workspace:frontend"],\
           ["@kyvg/vue3-notification", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.4.1"],\
