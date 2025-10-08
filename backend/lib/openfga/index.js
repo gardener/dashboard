@@ -142,7 +142,7 @@ async function getDerivedResourceRules (username, namespace, accountId) {
     .value()
 }
 
-export default  {
+export default {
   client: fgaClient,
   listProjects,
   writeProject,

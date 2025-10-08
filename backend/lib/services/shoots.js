@@ -15,7 +15,7 @@ import logger from '../logger/index.js'
 import _ from 'lodash-es'
 import semver from 'semver'
 import config from '../config/index.js'
-import { list as listProjects } from  './projects.js'
+import { list as listProjects } from './projects.js'
 
 const { isHttpError } = requestModule
 const { Config } = kubeConfigModule
