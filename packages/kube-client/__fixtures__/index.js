@@ -4,14 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import helper from './helper.js'
+import resources from './resources.js'
 
-const { matchers } = require('@gardener-dashboard/test-utils')
-const helper = require('./helper')
-const resources = require('./resources')
-
-module.exports = {
-  matchers,
+export default {
   helper,
   resources,
 }

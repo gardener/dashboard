@@ -11,7 +11,20 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState } from 'pinia'
+import {
+  ref,
+  computed,
+  watch,
+  onBeforeMount,
+  onMounted,
+  onBeforeUnmount,
+  toRef,
+} from 'vue'
+import {
+  useRoute,
+  onBeforeRouteLeave,
+  onBeforeRouteUpdate,
+} from 'vue-router'
 
 import { useAuthzStore } from '@/store/authz'
 import { useProjectStore } from '@/store/project'
@@ -35,87 +48,129 @@ export default {
       }
     })
   },
-  beforeRouteUpdate (to, from) {
-    if (isLoadRequired(this.$route, to)) {
-      this.load(to)
-    }
-  },
-  data () {
-    return {
-      error: null,
-      fallbackRoute: null,
-    }
-  },
-  computed: {
-    ...mapState(useAuthzStore, [
-      'namespace',
-      'canGetSecrets',
-    ]),
-    ...mapState(useProjectStore, [
-      'namespaces',
-    ]),
-    component () {
-      if (this.error) {
+  setup () {
+    const route = useRoute()
+    const authzStore = useAuthzStore()
+    const projectStore = useProjectStore()
+
+    const project = toRef(projectStore, 'project')
+    const namespace = toRef(projectStore, 'namespace')
+
+    const readyState = ref('initial')
+    const error = ref(null)
+    const fallbackRoute = ref(null)
+
+    const component = computed(() => {
+      if (error.value) {
         return 'g-project-error'
       }
       return 'router-view'
-    },
-    componentProperties () {
-      switch (this.component) {
+    })
+
+    const componentProperties = computed(() => {
+      switch (component.value) {
         case 'g-project-error': {
           const {
             code = 500,
             reason = 'Oops, something went wrong',
             message = 'An unexpected error occurred. Please try again later',
-          } = this.error ?? {}
+          } = error.value ?? {}
           return {
             code,
             text: reason,
             message,
-            fallbackRoute: this.fallbackRoute,
+            fallbackRoute: fallbackRoute.value,
           }
         }
         default: {
           return {}
         }
       }
-    },
-  },
-  mounted () {
-    this.load(this.$route)
-  },
-  methods: {
-    load (route) {
-      this.error = null
-      this.fallbackRoute = null
+    })
+
+    function load (route) {
+      error.value = null
+      fallbackRoute.value = null
+      readyState.value = 'loading'
       const routeName = route.name
       const routeParams = route.params
-      if (this.namespace !== routeParams.namespace) {
-        this.error = new Error('An unexpected error occurred')
-        this.fallbackRoute = {
+      if (authzStore.namespace !== routeParams.namespace) {
+        error.value = new Error('An unexpected error occurred')
+        fallbackRoute.value = {
           name: 'Home',
         }
-      } else if (!this.namespaces.includes(this.namespace) && this.namespace !== '_all') {
-        this.error = Object.assign(new Error('The project you are looking for doesn\'t exist or you are not authorized to view this project!'), {
+      } else if (!projectStore.namespaces.includes(authzStore.namespace) && authzStore.namespace !== '_all') {
+        error.value = Object.assign(new Error('The project you are looking for doesn\'t exist or you are not authorized to view this project!'), {
           code: 404,
           reason: 'Project not found',
         })
-        this.fallbackRoute = {
+        fallbackRoute.value = {
           name: 'Home',
         }
-      } else if (['Secrets', 'Secret'].includes(routeName) && !this.canGetSecrets) {
-        this.error = Object.assign(new Error('You do not have the necessary permissions to list secrets!'), {
+      } else if (['Secrets', 'Secret'].includes(routeName) && !authzStore.canGetCloudProviderCredentials) {
+        error.value = Object.assign(new Error('You do not have the necessary permissions to list secrets!'), {
           code: 403,
           reason: 'Forbidden',
         })
-        this.fallbackRoute = {
+        fallbackRoute.value = {
           name: 'ShootList',
           params: {
-            namespace: this.namespace,
+            namespace: authzStore.namespace,
           },
         }
       }
-    },
+    }
+
+    onBeforeMount(() => {
+      readyState.value = 'initial'
+    })
+
+    onMounted(async () => {
+      await load(route)
+      readyState.value = 'loaded'
+    })
+
+    onBeforeUnmount(() => {
+      readyState.value = 'initial'
+    })
+
+    onBeforeRouteUpdate(async to => {
+      if (isLoadRequired(route, to)) {
+        await load(to)
+      }
+    })
+
+    onBeforeRouteLeave(() => {
+      readyState.value = 'initial'
+    })
+
+    watch(() => route.path, value => {
+      if (value) {
+        readyState.value = 'loaded'
+      }
+    })
+
+    watch(project, value => {
+      if (readyState.value === 'loaded') {
+        if (!value && namespace.value !== '_all') {
+          fallbackRoute.value = {
+            name: 'Home',
+          }
+          error.value = Object.assign(new Error('The project you are looking for is no longer available'), {
+            code: 410,
+            reason: 'Project is gone',
+          })
+        } else if ([404, 410].includes(error.value?.code)) {
+          fallbackRoute.value = null
+          error.value = null
+        }
+      }
+    })
+
+    return {
+      component,
+      componentProperties,
+    }
   },
 }
 </script>

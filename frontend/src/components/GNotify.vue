@@ -8,6 +8,7 @@ SPDX-License-Identifier: Apache-2.0
     position="bottom right"
     class="ma-2"
     width="360px"
+    pause-on-hover
   >
     <template #body="{ item, close }">
       <v-alert

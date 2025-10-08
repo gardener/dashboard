@@ -4,20 +4,23 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import _ from 'lodash-es'
+import kubeClientModule from '@gardener-dashboard/kube-client'
+import httpErrors from 'http-errors'
+import * as shoots from './shoots.js'
+import * as authorization from './authorization.js'
+import {
+  projectFilter,
+  simplifyProject,
+} from '../utils/index.js'
+import cache from '../cache/index.js'
+import logger from '../logger/index.js'
+import openfga from '../openfga/index.js'
+const { dashboardClient } = kubeClientModule
+const { PreconditionFailed, InternalServerError } = httpErrors
 
-const _ = require('lodash')
-const { dashboardClient } = require('@gardener-dashboard/kube-client')
-
-const { PreconditionFailed, InternalServerError } = require('http-errors')
-const shoots = require('./shoots')
-const authorization = require('./authorization')
-const { projectFilter, trimProject } = require('../utils')
-const cache = require('../cache')
-const logger = require('../logger')
-const openfga = require('../openfga')
-
-const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
+// needs to be exported for testing
+export const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
 
 async function validateDeletePreconditions ({ user, name }) {
   const project = cache.getProject(name)
@@ -29,7 +32,7 @@ async function validateDeletePreconditions ({ user, name }) {
   }
 }
 
-exports.list = async function ({ user, canListProjects }) {
+export async function list ({ user, canListProjects }) {
   if (typeof canListProjects !== 'boolean') {
     canListProjects = await authorization.canListProjects(user)
   }
@@ -41,16 +44,17 @@ exports.list = async function ({ user, canListProjects }) {
       logger.error('openfga query failed: %s', err)
     }
   }
+
   return _
     .chain(cache.getProjects())
     .filter(projectFilter(user, canListProjects, projectAllowList))
     .forEach(project => setComputedProjectAnnotations(project))
     .map(_.cloneDeep)
-    .map(trimProject)
+    .map(simplifyProject)
     .value()
 }
 
-exports.create = async function ({ user, body }) {
+export async function create ({ user, body }) {
   const client = user.client
 
   const accountId = _.get(body, ['metadata', 'annotations', 'openmfp.org/account-id'])
@@ -67,10 +71,9 @@ exports.create = async function ({ user, body }) {
       ok: _.get(project, ['status', 'phase']) === 'Ready',
     }
   }
-  const timeout = exports.projectInitializationTimeout
   // must be the dashboardClient because rbac rolebinding does not exist yet
   const asyncIterable = await dashboardClient['core.gardener.cloud'].projects.watch(name)
-  project = await asyncIterable.until(isProjectReady, { timeout })
+  project = await asyncIterable.until(isProjectReady, { PROJECT_INITIALIZATION_TIMEOUT })
   if (openfga.client && accountId) {
     try {
       await openfga.writeProject(namespace, accountId)
@@ -81,17 +84,15 @@ exports.create = async function ({ user, body }) {
 
   return project
 }
-// needs to be exported for testing
-exports.projectInitializationTimeout = PROJECT_INITIALIZATION_TIMEOUT
 
-exports.read = async function ({ user, name }) {
+export async function read ({ user, name }) {
   const client = user.client
   const project = await client['core.gardener.cloud'].projects.get(name)
   setComputedProjectAnnotations(project)
   return project
 }
 
-exports.patch = async function ({ user, name, body }) {
+export async function patch ({ user, name, body }) {
   const client = user.client
   const project = await client['core.gardener.cloud'].projects.mergePatch(name, body)
   setComputedProjectAnnotations(project)
@@ -106,7 +107,7 @@ function setComputedProjectAnnotations (project) {
   _.set(project, ['metadata', 'annotations', 'computed.gardener.cloud/number-of-shoots'], shoots.length)
 }
 
-exports.remove = async function ({ user, name }) {
+export async function remove ({ user, name }) {
   await validateDeletePreconditions({ user, name })
 
   const client = user.client

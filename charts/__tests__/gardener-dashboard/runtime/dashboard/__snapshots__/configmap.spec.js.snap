@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`gardener-dashboard configmap access restrictions should render the template w/ \`item.options\` 1`] = `
 {
@@ -446,7 +446,7 @@ exports[`gardener-dashboard configmap should render the template w/ defaults val
       {
         "icon": "mdi-slack",
         "title": "slack",
-        "url": "https://kubernetes.slack.com/messages/gardener",
+        "url": "https://gardener-cloud.slack.com/",
       },
       {
         "icon": "mdi-bug",
@@ -496,6 +496,9 @@ Li4u
       "seedRef": "soil-gcp",
     },
   },
+  "websocketAllowedOrigins": [
+    "*",
+  ],
 }
 `;
 
@@ -507,6 +510,23 @@ exports[`gardener-dashboard configmap sla should render the template with sla de
       "title": "SLA title",
     },
   },
+}
+`;
+
+exports[`gardener-dashboard configmap socket io should render the template with default allowed origin 1`] = `
+{
+  "websocketAllowedOrigins": [
+    "*",
+  ],
+}
+`;
+
+exports[`gardener-dashboard configmap socket io should render the template with multiple allowed origins 1`] = `
+{
+  "websocketAllowedOrigins": [
+    "https://foo.example.com",
+    "https://bar.example.com",
+  ],
 }
 `;
 

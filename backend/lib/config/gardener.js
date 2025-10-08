@@ -4,14 +4,12 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const assert = require('assert').strict
-const _ = require('lodash')
-const yaml = require('js-yaml')
-const fs = require('fs')
-const { homedir } = require('os')
-const { join } = require('path')
+import assert from 'assert'
+import _ from 'lodash-es'
+import { load } from 'js-yaml'
+import fs from 'fs'
+import { homedir } from 'os'
+import { join } from 'path'
 
 /*
 configMappings defines mappings between config values, their sources (environment variables or files),
@@ -146,9 +144,21 @@ const configMappings = [
     filePath: '/etc/gardener-dashboard/secrets/fga/apiToken',
     configPath: 'fgaApiToken',
   },
+  {
+    environmentVariableName: 'WEBSOCKET_ALLOWED_ORIGINS',
+    configPath: 'websocketAllowedOrigins',
+    type: 'Array',
+  },
 ]
 
 function parseConfigValue (value, type) {
+  const parseArray = value => {
+    if (value == null || typeof value !== 'string' || value.length === 0) {
+      return undefined
+    }
+    const arr = value.split(',').map(v => v.trim()).filter(Boolean)
+    return arr.length > 0 ? arr : undefined
+  }
   switch (type) {
     case 'Object':
       return value
@@ -159,12 +169,14 @@ function parseConfigValue (value, type) {
       return Number.isInteger(value) ? value : undefined
     case 'Boolean':
       return value === 'true'
+    case 'Array':
+      return parseArray(value)
     default:
       return value
   }
 }
 
-module.exports = {
+export default {
   assignConfigFromEnvironmentAndFileSystem (config, env) {
     for (const configMapping of configMappings) {
       const {
@@ -215,6 +227,7 @@ module.exports = {
     const requiredConfigurationProperties = [
       'sessionSecret',
       'apiServerUrl',
+      'websocketAllowedOrigins',
     ]
 
     // When OIDC is configured, some more configuration is required
@@ -234,6 +247,9 @@ module.exports = {
     _.forEach(requiredConfigurationProperties, path => {
       assert.ok(_.get(config, path), `Configuration value '${path}' is required`)
     })
+    if (!config.websocketAllowedOrigins?.length) {
+      assert.fail('Configuration value \'websocketAllowedOrigins\' must not be empty')
+    }
 
     const sessionSecrets = [config.sessionSecret]
     if (config.sessionSecretPrevious) {
@@ -242,6 +258,7 @@ module.exports = {
     _.set(config, ['sessionSecrets'], sessionSecrets)
     _.set(config, ['frontend', 'apiServerUrl'], config.apiServerUrl)
     _.set(config, ['frontend', 'clusterIdentity'], config.clusterIdentity)
+    _.set(config, ['frontend', 'unreachableSeeds', 'matchLabels'], config.unreachableSeeds?.matchLabels)
     if (!config.gitHub && _.has(config, ['frontend', 'ticket'])) {
       _.unset(config, ['frontend', 'ticket'])
     }
@@ -250,6 +267,6 @@ module.exports = {
   },
   readConfig (path) {
     const data = fs.readFileSync(path, 'utf8') // eslint-disable-line security/detect-non-literal-fs-filename
-    return yaml.load(data)
+    return load(data)
   },
 }

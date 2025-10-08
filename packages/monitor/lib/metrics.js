@@ -4,9 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const promClient = require('prom-client')
+import promClient from 'prom-client'
 
 const connectionsCount = new promClient.Gauge({
   name: 'tcp_connections_count',
@@ -29,7 +27,7 @@ const responseTime = new promClient.Histogram({
   ],
 })
 
-module.exports = {
+export default {
   connectionsCount,
   connectionsTotal,
   responseTime,

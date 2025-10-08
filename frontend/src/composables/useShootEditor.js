@@ -156,15 +156,13 @@ export function useShootEditor (initialValue, options = {}) {
   function setEditorValue (value) {
     if (value) {
       cm?.setDocValue(yaml.dump(value))
+      setEditorTouched(false)
+      resetEditorHistory()
     }
   }
 
-  function resetEditor () {
+  function refreshEditor () {
     setEditorValue(shootItem.value)
-  }
-
-  function reloadEditor () {
-    resetEditor()
   }
 
   function focusEditor () {
@@ -175,10 +173,6 @@ export function useShootEditor (initialValue, options = {}) {
     return cm?.getDocValue()
   }
 
-  function setDocumentValue (value) {
-    cm?.setDocValue(value)
-  }
-
   function execUndo () {
     cm?.undo()
   }
@@ -187,11 +181,13 @@ export function useShootEditor (initialValue, options = {}) {
     cm?.redo()
   }
 
-  function clearDocumentHistory () {
+  function setEditorTouched (editorTouched) {
+    clean.value = !editorTouched
+    touched.value = editorTouched
+  }
+
+  function resetEditorHistory () {
     cm?.clearDocHistory()
-    clean.value = true
-    touched.value = false
-    conflictPath.value = null
     historySize.value = {
       undo: 0,
       redo: 0,
@@ -211,6 +207,7 @@ export function useShootEditor (initialValue, options = {}) {
   })
 
   watch(shootItem, (newValue, oldValue) => {
+    conflictPath.value = null
     if (!touched.value) {
       setEditorValue(newValue)
       return
@@ -220,6 +217,7 @@ export function useShootEditor (initialValue, options = {}) {
       ['metadata', 'annotations'],
       ['metadata', 'labels'],
     ]
+
     for (const path of paths) {
       const newProp = get(newValue, path)
       const oldProp = get(oldValue, path)
@@ -232,6 +230,7 @@ export function useShootEditor (initialValue, options = {}) {
 
   return {
     conflictPath,
+    setEditorTouched,
     touched,
     clean,
     showManagedFields,
@@ -241,13 +240,10 @@ export function useShootEditor (initialValue, options = {}) {
     loadEditor,
     destroyEditor,
     getDocumentValue,
-    setDocumentValue,
     getEditorValue,
     setEditorValue,
-    resetEditor,
-    reloadEditor,
+    refreshEditor,
     focusEditor,
-    clearDocumentHistory,
     execUndo,
     execRedo,
     isReadOnly,

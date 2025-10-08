@@ -131,7 +131,12 @@ describe('components', () => {
         expect(mockNext).toBeCalledTimes(1)
         expect(mockNext.mock.calls[0]).toEqual([expect.any(Function)])
         expect(appStore.setError).toBeCalledTimes(1)
-        expect(appStore.setError.mock.calls[0]).toEqual([error])
+        expect(appStore.setError.mock.calls[0]).toEqual([
+          expect.objectContaining({
+            message: 'error',
+            title: 'title',
+          }),
+        ])
         expect(mockRouter.replace).toBeCalledTimes(1)
         expect(mockRouter.replace.mock.calls[0]).toEqual(['/login'])
       })

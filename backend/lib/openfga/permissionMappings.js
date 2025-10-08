@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-module.exports = function getPermissionMappings (accountId, namespace) {
+export default function (accountId, namespace) {
   const accountPermissions = getAccountPermissions(accountId)
   const projectPermissions = getProjectPermissions(namespace)
 

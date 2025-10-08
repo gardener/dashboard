@@ -6,7 +6,7 @@
 
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
-import colors from 'vuetify/lib/util/colors'
+import { grey } from 'vuetify/lib/util/colors'
 
 import { useShootStore } from '@/store/shoot'
 import { useSocketStore } from '@/store/socket'
@@ -58,7 +58,7 @@ export function useShootSubscription (options = {}) {
       case 'alert-subscribe':
         return 'error'
       case 'progress-connect':
-        return colors.grey.darken1
+        return grey.darken1
       case 'progress-load':
       case 'progress-subscribe':
       default:

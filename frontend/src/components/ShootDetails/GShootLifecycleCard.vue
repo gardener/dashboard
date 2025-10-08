@@ -135,7 +135,7 @@ SPDX-License-Identifier: Apache-2.0
                 Cluster deletion failed
               </span>
               <span v-else>
-                Delete cluster and remove all ressources
+                Delete cluster and remove all resources
               </span>
             </template>
           </g-list-item-content>

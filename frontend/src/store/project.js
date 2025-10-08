@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -15,6 +15,12 @@ import {
 } from 'vue'
 
 import { useApi } from '@/composables/useApi'
+import { useLogger } from '@/composables/useLogger'
+import { useSocketEventHandler } from '@/composables/useSocketEventHandler'
+import {
+  formatProjectNameAndTitle,
+  getProjectTitle,
+} from '@/composables/useProjectMetadata/helper.js'
 
 import { useAuthzStore } from './authz'
 import { useAppStore } from './app'
@@ -29,6 +35,7 @@ import replace from 'lodash/replace'
 
 export const useProjectStore = defineStore('project', () => {
   const api = useApi()
+  const logger = useLogger()
   const appStore = useAppStore()
   const authzStore = useAuthzStore()
 
@@ -53,6 +60,17 @@ export const useProjectStore = defineStore('project', () => {
       }
     }
     return projectNames
+  })
+
+  const projectMap = computed(() => {
+    const projects = {}
+    if (Array.isArray(list.value)) {
+      for (const project of list.value) {
+        const { spec: { namespace } } = project
+        set(projects, [namespace], project)
+      }
+    }
+    return projects
   })
 
   const defaultNamespace = computed(() => {
@@ -90,6 +108,14 @@ export const useProjectStore = defineStore('project', () => {
     return get(project.value, ['metadata', 'name'])
   })
 
+  const projectTitle = computed(() => {
+    return getProjectTitle(project.value)
+  })
+
+  const projectNameAndTitle = computed(() => {
+    return formatProjectNameAndTitle(projectName.value, projectTitle.value)
+  })
+
   const projectNames = computed(() => {
     return map(list.value, 'metadata.name')
   })
@@ -113,6 +139,13 @@ export const useProjectStore = defineStore('project', () => {
       ? metadata
       : metadata?.namespace
     return get(projectNameMap.value, [namespace], replace(namespace, /^garden-/, ''))
+  }
+
+  function projectByNamespace (metadata) {
+    const namespace = typeof metadata === 'string'
+      ? metadata
+      : metadata?.namespace
+    return get(projectMap.value, [namespace])
   }
 
   async function fetchProjects () {
@@ -154,6 +187,11 @@ export const useProjectStore = defineStore('project', () => {
     // do not remove project from store as it will stay in terminating phase for a while
   }
 
+  const socketEventHandler = useSocketEventHandler(useProjectStore, {
+    logger,
+  })
+  socketEventHandler.start(500)
+
   async function $reset () {
     list.value = null
   }
@@ -166,6 +204,8 @@ export const useProjectStore = defineStore('project', () => {
     currentNamespaces,
     defaultNamespace,
     projectName,
+    projectTitle,
+    projectNameAndTitle,
     projectList,
     projectsNotMarkedForDeletion,
     project,
@@ -177,6 +217,8 @@ export const useProjectStore = defineStore('project', () => {
     updateProject,
     deleteProject,
     projectNameByNamespace,
+    projectByNamespace,
+    handleEvent: socketEventHandler.listener,
     $reset,
   }
 })

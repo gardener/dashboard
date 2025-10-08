@@ -4,9 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const { get, matches, matchesProperty, property, isPlainObject } = require('lodash')
+import { get, matches, matchesProperty, property, isPlainObject } from 'lodash-es'
 
 class Store {
   #map = new Map()
@@ -122,4 +120,4 @@ class Store {
   }
 }
 
-module.exports = Store
+export default Store

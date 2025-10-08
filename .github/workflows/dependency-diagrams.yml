@@ -1,0 +1,53 @@
+name: Generate Dependency Diagrams
+
+on:
+  push:
+    paths:
+      - 'backend/**'
+      - 'packages/**'
+    branches-ignore:
+      - 'master'
+      - 'hotfix-*'
+      - 'release-*'
+
+permissions:
+  contents: write
+
+jobs:
+  generate-diagrams:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: true
+
+      - name: Enable Corepack # Enable yarn version 4
+        run: corepack enable
+
+      - name: Setup Graphviz
+        uses: ts-graphviz/setup-graphviz@b1de5da23ed0a6d14e0aeee8ed52fdd87af2363c # v2.0.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: '22.20.0'
+
+      - name: Install dependencies
+        run: |
+          set -eu
+          YARN_ENABLE_SCRIPTS=0 yarn install --immutable --immutable-cache --check-cache --refresh-lockfile
+
+      - name: Generate dependency diagrams
+        run: yarn generate-all-dependency-diagrams
+
+      - name: Commit changes
+        uses: iarekylew00t/verified-bot-commit@d1f021004df95afc864edb948f9093e51469b565 # v2.0.1
+        with:
+          message: 'Update dependency diagrams'
+          files: |
+            backend-highlevel-dependency-diagram.html
+            backend-lowlevel-dependency-diagram.html
+            packages-highlevel-dependency-diagram.html
+            packages-lowlevel-dependency-diagram.html

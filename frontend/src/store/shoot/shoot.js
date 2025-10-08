@@ -16,14 +16,13 @@ import {
   toRaw,
   toRef,
 } from 'vue'
-import { useDocumentVisibility } from '@vueuse/core'
 
 import { useLogger } from '@/composables/useLogger'
 import { useApi } from '@/composables/useApi'
 import { useProjectShootCustomFields } from '@/composables/useProjectShootCustomFields'
+import { useSocketEventHandler } from '@/composables/useSocketEventHandler'
 
 import { isNotFound } from '@/utils/error'
-import { isTooManyRequestsError } from '@/utils/errors'
 
 import { useAppStore } from '../app'
 import { useAuthnStore } from '../authn'
@@ -32,9 +31,10 @@ import { useProjectStore } from '../project'
 import { useCloudProfileStore } from '../cloudProfile'
 import { useConfigStore } from '../config'
 import { useGardenerExtensionStore } from '../gardenerExtension'
-import { useSecretStore } from '../secret'
+import { useCredentialStore } from '../credential'
 import { useSocketStore } from '../socket'
 import { useTicketStore } from '../ticket'
+import { useSeedStore } from '../seed'
 import { useLocalStorageStore } from '../localStorage'
 
 import {
@@ -48,7 +48,6 @@ import {
 
 import isEqual from 'lodash/isEqual'
 import isEmpty from 'lodash/isEmpty'
-import throttle from 'lodash/throttle'
 import includes from 'lodash/includes'
 import find from 'lodash/find'
 import difference from 'lodash/difference'
@@ -61,7 +60,6 @@ import get from 'lodash/get'
 const useShootStore = defineStore('shoot', () => {
   const api = useApi()
   const logger = useLogger()
-  const visibility = useDocumentVisibility()
 
   const appStore = useAppStore()
   const authnStore = useAuthnStore()
@@ -69,10 +67,11 @@ const useShootStore = defineStore('shoot', () => {
   const projectStore = useProjectStore()
   const cloudProfileStore = useCloudProfileStore()
   const configStore = useConfigStore()
-  const secretStore = useSecretStore()
+  const credentialStore = useCredentialStore()
   const gardenerExtensionStore = useGardenerExtensionStore()
   const ticketStore = useTicketStore()
   const socketStore = useSocketStore()
+  const seedStore = useSeedStore()
   const localStorageStore = useLocalStorageStore()
 
   const projectItem = toRef(projectStore, 'project')
@@ -87,10 +86,11 @@ const useShootStore = defineStore('shoot', () => {
     projectStore,
     cloudProfileStore,
     configStore,
-    secretStore,
+    credentialStore,
     gardenerExtensionStore,
     ticketStore,
     socketStore,
+    seedStore,
     shootCustomFieldsComposable,
   }
 
@@ -558,30 +558,11 @@ const useShootStore = defineStore('shoot', () => {
     })
   }
 
-  function cancelSubscriptionEventHandler (state) {
-    if (typeof state.subscriptionEventHandler?.cancel === 'function') {
-      state.subscriptionEventHandler.cancel()
-    }
-  }
-
-  function setSubscriptionEventHandler (state, func, throttleDelay) {
-    if (throttleDelay > 0) {
-      func = throttle(func, throttleDelay)
-    }
-    state.subscriptionEventHandler = markRaw(func)
-  }
-
-  function unsetSubscriptionEventHandler (state) {
-    state.subscriptionEventHandler = undefined
-  }
-
   async function openSubscription (value, throttleDelay) {
     const shootStore = this
     shootStore.$patch(({ state }) => {
       setSubscriptionState(state, constants.OPENING)
-      cancelSubscriptionEventHandler(state)
-      shootEvents.clear()
-      setSubscriptionEventHandler(state, handleEvents, throttleDelay)
+      state.subscriptionEventHandler = socketEventHandler.start(throttleDelay)
     })
     try {
       await socketStore.emitSubscribe(value)
@@ -600,9 +581,8 @@ const useShootStore = defineStore('shoot', () => {
     shootStore.$patch(({ state }) => {
       state.subscription = null
       setSubscriptionState(state, constants.CLOSING)
-      cancelSubscriptionEventHandler(state)
-      shootEvents.clear()
-      unsetSubscriptionEventHandler(state)
+      socketEventHandler.stop()
+      state.subscriptionEventHandler = undefined
     })
     try {
       await socketStore.emitUnsubscribe()
@@ -613,83 +593,33 @@ const useShootStore = defineStore('shoot', () => {
     }
   }
 
-  async function handleEvents (shootStore) {
-    const events = Array.from(shootEvents.values())
-    shootEvents.clear()
-    const uids = []
-    const deletedUids = []
-    for (const { type, uid } of events) {
-      if (type === 'DELETED') {
-        deletedUids.push(uid)
-      } else {
-        uids.push(uid)
-      }
-    }
-    try {
-      const items = await socketStore.synchronize(uids)
+  function isShootActive (uid) {
+    return includes(activeUids.value, uid)
+  }
+
+  const socketEventHandler = useSocketEventHandler(useShootStore, {
+    logger,
+    createOperator ({ state }) {
       const notOnlyShootsWithIssues = !onlyAllShootsWithIssues(state, context)
-      shootStore.$patch(({ state }) => {
-        for (const uid of deletedUids) {
-          if (state.focusMode) {
-            const value = get(state.shoots, [uid])
-            set(state.staleShoots, [uid], value)
-          }
-          unset(state.shoots, [uid])
-        }
-        for (const item of items) {
-          if (item.kind === 'Status') {
-            logger.info('Failed to synchronize a single shoot: %s', item.message)
-            if (item.code === 404) {
-              const uid = item.details?.uid
-              if (uid) {
-                unset(state.shoots, [uid])
-              }
-            }
-          } else if (notOnlyShootsWithIssues || shootHasIssue(item)) {
-            const uid = item.metadata.uid
+      return {
+        set (uid, item) {
+          if (notOnlyShootsWithIssues || shootHasIssue(item)) {
             if (state.focusMode) {
               unset(state.staleShoots, [uid])
             }
             set(state.shoots, [uid], markRaw(item))
           }
-        }
-      })
-    } catch (err) {
-      if (isTooManyRequestsError(err)) {
-        logger.info('Skipped synchronization of modified shoots: %s', err.message)
-      } else {
-        logger.error('Failed to synchronize modified shoots: %s', err.message)
+        },
+        delete (uid) {
+          if (state.focusMode) {
+            const value = get(state.shoots, [uid])
+            set(state.staleShoots, [uid], value)
+          }
+          unset(state.shoots, [uid])
+        },
       }
-      // Synchronization failed. Rollback shoot events
-      for (const event of events) {
-        const { uid } = event
-        if (!shootEvents.has(uid)) {
-          shootEvents.set(uid, event)
-        }
-      }
-    }
-  }
-
-  function handleEvent (event) {
-    const shootStore = this
-    const { type, uid } = event
-    if (!['ADDED', 'MODIFIED', 'DELETED'].includes(type)) {
-      logger.error('undhandled event type', type)
-      return
-    }
-    shootEvents.set(uid, event)
-    shootStore.invokeSubscriptionEventHandler()
-  }
-
-  function isShootActive (uid) {
-    return includes(activeUids.value, uid)
-  }
-
-  function invokeSubscriptionEventHandler () {
-    if (typeof state.subscriptionEventHandler === 'function' && visibility.value === 'visible') {
-      state.subscriptionEventHandler(this)
-    }
-  }
+    },
+  })
 
   return {
     // state
@@ -720,7 +650,6 @@ const useShootStore = defineStore('shoot', () => {
     unsubscribe,
     unsubscribeShoots,
     closeSubscription,
-    handleEvent,
     deleteShoot,
     fetchInfo,
     setSelection,
@@ -732,7 +661,7 @@ const useShootStore = defineStore('shoot', () => {
     sortItems,
     setSortBy,
     isShootActive,
-    invokeSubscriptionEventHandler,
+    handleEvent: socketEventHandler.listener,
   }
 })
 

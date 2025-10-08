@@ -8,22 +8,9 @@ SPDX-License-Identifier: Apache-2.0
   <v-container fluid>
     <v-card class="ma-3">
       <g-toolbar
+        :prepend-icon="!isInIframe ? 'mdi-hexagon-multiple' : undefined"
         :height="isInIframe ? 48 : 72"
       >
-        <template
-          v-if="!isInIframe"
-          #prepend
-        >
-          <g-icon-base
-            width="44"
-            height="60"
-            view-box="0 0 298 403"
-            class="ml-2"
-            icon-color="toolbar-title"
-          >
-            <g-certified-kubernetes />
-          </g-icon-base>
-        </template>
         <div :class="!isInIframe ? 'text-h5' : 'text-body-1'">
           Clusters
         </div>
@@ -136,20 +123,13 @@ SPDX-License-Identifier: Apache-2.0
             </v-chip>
             <br>
           </v-tooltip>
-          <v-tooltip
+          <v-btn
             v-if="canCreateShoots && projectScope"
-            location="top"
-          >
-            <template #activator="{ props }">
-              <v-btn
-                v-bind="props"
-                icon="mdi-plus"
-                color="toolbar-title"
-                :to="{ name: 'NewShoot', params: { namespace } }"
-              />
-            </template>
-            <span>Create Cluster</span>
-          </v-tooltip>
+            v-tooltip:top="'Create Cluster'"
+            icon="mdi-plus"
+            color="toolbar-title"
+            :to="{ name: 'NewShoot', params: { namespace } }"
+          />
           <g-table-column-selection
             :headers="selectableHeaders"
             :filters="selectableFilters"
@@ -160,18 +140,19 @@ SPDX-License-Identifier: Apache-2.0
           />
         </template>
       </g-toolbar>
-      <v-data-table
-        v-model:page="page"
+      <v-data-table-virtual
         v-model:sort-by="sortByInternal"
-        v-model:items-per-page="shootItemsPerPage"
         :headers="visibleHeaders"
         :items="sortedAndFilteredItems"
-        hover
         :loading="loading || !connected"
-        :items-per-page-options="itemsPerPageOptions"
         :custom-key-sort="customKeySort"
+        density="compact"
+        hover
+        :item-key="getItemKey"
         must-sort
+        fixed-header
         class="g-table"
+        style="max-height: calc(100vh - 180px)"
       >
         <template #progress>
           <g-shoot-list-progress />
@@ -182,22 +163,20 @@ SPDX-License-Identifier: Apache-2.0
         <template #no-data>
           No clusters to show
         </template>
-        <template #item="{ item }">
+        <template #item="{ item, itemRef }">
           <g-shoot-list-row
+            :ref="itemRef"
             :model-value="item"
             :visible-headers="visibleHeaders"
           />
         </template>
-        <template #bottom="{ pageCount }">
+        <template #bottom>
           <g-data-table-footer
-            v-model:page="page"
-            v-model:items-per-page="shootItemsPerPage"
             :items-length="sortedAndFilteredItems.length"
-            :items-per-page-options="itemsPerPageOptions"
-            :page-count="pageCount"
+            items-label="Clusters"
           />
         </template>
-      </v-data-table>
+      </v-data-table-virtual>
     </v-card>
     <g-shoot-list-actions />
   </v-container>
@@ -230,8 +209,6 @@ import GToolbar from '@/components/GToolbar.vue'
 import GShootListRow from '@/components/GShootListRow.vue'
 import GShootListProgress from '@/components/GShootListProgress.vue'
 import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
-import GIconBase from '@/components/icons/GIconBase.vue'
-import GCertifiedKubernetes from '@/components/icons/GCertifiedKubernetes.vue'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
 import GShootListActions from '@/components/GShootListActions.vue'
 
@@ -258,8 +235,6 @@ export default {
     GToolbar,
     GShootListRow,
     GShootListProgress,
-    GIconBase,
-    GCertifiedKubernetes,
     GTableColumnSelection,
     GDataTableFooter,
     GShootListActions,
@@ -336,7 +311,6 @@ export default {
 
     function onUpdateShootSearch (value) {
       shootSearch.value = value
-
       setDebouncedShootSearch()
     }
 
@@ -355,13 +329,7 @@ export default {
   data () {
     return {
       dialog: null,
-      page: 1,
       selectedColumns: undefined,
-      itemsPerPageOptions: [
-        { value: 5, title: '5' },
-        { value: 10, title: '10' },
-        { value: 20, title: '20' },
-      ],
     }
   },
   computed: {
@@ -373,7 +341,7 @@ export default {
       'canPatchShoots',
       'canDeleteShoots',
       'canCreateShoots',
-      'canGetSecrets',
+      'canGetCloudProviderCredentials',
     ]),
     ...mapState(useConfigStore, {
       accessRestrictionConfig: 'accessRestriction',
@@ -397,7 +365,6 @@ export default {
     ]),
     ...mapWritableState(useLocalStorageStore, [
       'shootSelectedColumns',
-      'shootItemsPerPage',
       'shootSortBy',
       'shootCustomSelectedColumns',
       'shootCustomSortBy',
@@ -406,9 +373,6 @@ export default {
     ]),
     defaultSortBy () {
       return [{ key: 'name', order: 'asc' }]
-    },
-    defaultItemsPerPage () {
-      return 10
     },
     focusModeInternal: {
       get () {
@@ -475,14 +439,6 @@ export default {
           sortable: isSortable(true),
           align: 'start',
           defaultSelected: true,
-          hidden: false,
-        },
-        {
-          title: 'SEED',
-          key: 'seed',
-          sortable: isSortable(true),
-          align: 'start',
-          defaultSelected: false,
           hidden: false,
         },
         {
@@ -553,6 +509,23 @@ export default {
           stalePointerEvents: true,
         },
         {
+          title: 'SEED',
+          key: 'seed',
+          sortable: isSortable(true),
+          align: 'start',
+          defaultSelected: false,
+          hidden: false,
+        },
+        {
+          title: 'SEED READINESS',
+          key: 'seedReadiness',
+          sortable: isSortable(true),
+          align: 'start',
+          defaultSelected: true,
+          hidden: !this.isAdmin,
+          stalePointerEvents: true,
+        },
+        {
           title: 'ISSUE SINCE',
           key: 'issueSince',
           sortable: isSortable(true),
@@ -598,7 +571,7 @@ export default {
           sortable: false,
           align: 'end',
           defaultSelected: true,
-          hidden: !(this.canDeleteShoots || this.canGetSecrets),
+          hidden: !(this.canDeleteShoots || this.canGetCloudProviderCredentials),
         },
       ]
       return map(headers, (header, index) => ({
@@ -814,7 +787,6 @@ export default {
         ...this.defaultCustomSelectedColumns,
       }
       this.saveSelectedColumns()
-      this.shootItemsPerPage = this.defaultItemsPerPage
       this.sortByInternal = this.defaultSortBy
     },
     updateTableSettings () {
@@ -850,6 +822,9 @@ export default {
         unset(reactiveObject, [key])
       }
       Object.assign(reactiveObject, defaultState)
+    },
+    getItemKey (item, fallback) {
+      return get(item, ['raw', 'metadata', 'uid'], fallback)
     },
   },
 }

@@ -4,14 +4,39 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import _ from 'lodash-es'
+import logger from './logger/index.js'
+import morgan from 'morgan'
+import httpErrors from 'http-errors'
+import { STATUS_CODES } from 'http'
 
-const _ = require('lodash')
-const logger = require('./logger')
-const morgan = require('morgan')
+const { NotFound, InternalServerError, isHttpError } = httpErrors
 
-const { NotFound, InternalServerError, isHttpError } = require('http-errors')
-const { STATUS_CODES } = require('http')
+const SENSITIVE_PARAMS = [
+  'code',
+  'state',
+]
+morgan.token('url', (req, res) => {
+  const reqUrl = req.originalUrl || req.url
+  try {
+    // It's sufficient to use any valid base URL, since we only need a placeholder to correctly parse the path and query parameters.
+    // We don't actually rely on or need the real domain for logging purposes.
+    const safeBase = 'https://localhost'
+    const url = new URL(reqUrl, safeBase)
+
+    const searchParams = url.searchParams
+    for (const param of SENSITIVE_PARAMS) {
+      if (!searchParams.has(param)) {
+        continue
+      }
+      searchParams.set(param, 'REDACTED')
+    }
+
+    return url.pathname + url.search
+  } catch (err) {
+    return reqUrl
+  }
+})
 
 const requestLogger = morgan('common', logger)
 
@@ -121,7 +146,7 @@ const ErrorTemplate = _.template(`<!doctype html>
 </body>
 </html>`)
 
-module.exports = {
+export {
   noCache,
   historyFallback,
   requestLogger,

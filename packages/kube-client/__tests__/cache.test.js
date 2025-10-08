@@ -4,12 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const { PassThrough, addAbortSignal } = require('stream')
-
-const ApiErrors = require('../lib/ApiErrors')
-const { Reflector, Store, ListPager } = require('../lib/cache')
+import { jest } from '@jest/globals'
+import { PassThrough, addAbortSignal } from 'node:stream'
+import * as ApiErrors from '../lib/ApiErrors.js'
+import { Reflector, Store, ListPager } from '../lib/cache/index.js'
 const nextTick = () => new Promise(resolve => process.nextTick(resolve))
 
 describe('kube-client', () => {

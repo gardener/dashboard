@@ -14,6 +14,9 @@
     '**/node_modules/**',
     '**/.yarn/**',
   ],
+  postUpdateOptions: [
+    'yarnDedupeHighest',
+  ],
   customManagers: [
     {
       customType: 'regex',
@@ -47,30 +50,6 @@
         'npm',
       ],
       matchPackageNames: [
-        '@octokit/auth-app',
-        '@octokit/core',
-        '@octokit/plugin-paginate-graphql',
-        '@octokit/plugin-paginate-rest',
-        '@octokit/plugin-request-log',
-        '@octokit/plugin-rest-endpoint-methods',
-        'chalk',
-        'jest',
-        'openid-client',
-        'p-event',
-        'p-limit',
-        'p-retry',
-        'p-timeout',
-      ],
-      matchUpdateTypes: [
-        'major',
-      ],
-      enabled: false,
-    },
-    {
-      matchDatasources: [
-        'npm',
-      ],
-      matchPackageNames: [
         'sass',
       ],
       matchUpdateTypes: [
@@ -84,6 +63,29 @@
       matchManagers: [
         'github-actions',
       ],
+      excludePackageNames: [
+        'node',
+      ],
+    },
+    {
+      groupName: 'Node.js Version',
+      groupSlug: 'node-version',
+      matchPackageNames: [
+        'node',
+      ],
+      matchManagers: [
+        'github-actions',
+        'npm',
+        'nvm',
+        'nodenv',
+        'regex',
+      ],
+      matchDatasources: [
+        'node',
+        'node-version',
+      ],
+      prTitle: 'chore(node): upgrade Node to {{newVersion}} everywhere',
+      separateMinorPatch: false,
     },
   ],
 }

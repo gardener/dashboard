@@ -25,6 +25,8 @@ export function createProjectItemComposable (projectItem) {
   const {
     projectMetadata,
     projectName,
+    projectTitle,
+    projectNameAndTitle,
     projectCreationTimestamp,
     projectDeletionTimestamp,
     projectGeneration,
@@ -81,6 +83,8 @@ export function createProjectItemComposable (projectItem) {
     /* metadata */
     projectMetadata,
     projectName,
+    projectTitle,
+    projectNameAndTitle,
     projectCreationTimestamp,
     projectDeletionTimestamp,
     projectGeneration,
