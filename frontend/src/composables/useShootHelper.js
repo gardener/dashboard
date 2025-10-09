@@ -19,6 +19,7 @@ import { useProjectStore } from '@/store/project'
 
 import { useCloudProviderBindingList } from '@/composables/credential/useCloudProviderBindingList'
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
+import { useCloudProfileForKubeVersions } from '@/composables/useCloudProfile/useCloudProfileForKubeVersions.js'
 
 import { useShootAccessRestrictions } from './useShootAccessRestrictions'
 
@@ -102,6 +103,11 @@ export function createShootHelperComposable (shootItem, options = {}) {
     return cloudProfileStore.cloudProfileByRef(cloudProfileRef.value)
   })
 
+  const {
+    sortedKubernetesVersions,
+    kubernetesVersionIsNotLatestPatch: kubernetesVersionIsNotLatestPatchFn,
+  } = useCloudProfileForKubeVersions(cloudProfile)
+
   const seed = computed(() => {
     return seedStore.seedByName(seedName.value)
   })
@@ -145,13 +151,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
 
   const infrastructureBindings = useCloudProviderBindingList(providerType, { credentialStore, gardenerExtensionStore })
 
-  const sortedKubernetesVersions = computed(() => {
-    return cloudProfileStore.sortedKubernetesVersions(cloudProfileRef.value)
-  })
-
-  const kubernetesVersionIsNotLatestPatch = computed(() => {
-    return cloudProfileStore.kubernetesVersionIsNotLatestPatch(kubernetesVersion.value, cloudProfileRef.value)
-  })
+  const kubernetesVersionIsNotLatestPatch = kubernetesVersionIsNotLatestPatchFn(kubernetesVersion)
 
   const { selfTerminationDays } = useCloudProviderBinding(infrastructureBinding)
 

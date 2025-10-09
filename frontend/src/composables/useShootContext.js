@@ -29,6 +29,7 @@ import { useLogger } from '@/composables/useLogger'
 import { createShootHelperComposable } from '@/composables/useShootHelper'
 import { useShootMetadata } from '@/composables/useShootMetadata'
 import { useShootAccessRestrictions } from '@/composables/useShootAccessRestrictions'
+import { useCloudProfileForKubeVersions } from '@/composables/useCloudProfile/useCloudProfileForKubeVersions.js'
 
 import {
   scheduleEventsFromCrontabBlocks,
@@ -188,9 +189,14 @@ export function createShootContextComposable (options = {}) {
   })
 
   function resetKubernetesVersion () {
-    const kubernetesVersions = map(cloudProfileStore.sortedKubernetesVersions(cloudProfileRef.value), 'version')
+    const cloudProfile = computed(() => cloudProfileStore.cloudProfileByRef(cloudProfileRef.value))
+    const {
+      sortedKubernetesVersions,
+      defaultKubernetesVersion,
+    } = useCloudProfileForKubeVersions(cloudProfile)
+    const kubernetesVersions = map(sortedKubernetesVersions.value, 'version')
     if (!kubernetesVersion.value || !includes(kubernetesVersions, kubernetesVersion.value)) {
-      const defaultKubernetesVersionDescriptor = cloudProfileStore.defaultKubernetesVersionForCloudProfileRef(cloudProfileRef.value)
+      const defaultKubernetesVersionDescriptor = defaultKubernetesVersion.value
       kubernetesVersion.value = get(defaultKubernetesVersionDescriptor, ['version'])
     }
   }
