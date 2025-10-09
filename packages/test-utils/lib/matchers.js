@@ -4,9 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-module.exports = {
+export default {
   toBeWithinRange (value, floor, ceiling) {
     const pass = value >= floor && value <= ceiling
     const phrase = pass ? 'not to be' : 'to be'

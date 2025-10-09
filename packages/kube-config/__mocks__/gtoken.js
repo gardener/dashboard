@@ -4,18 +4,16 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import { jest } from '@jest/globals'
+import _ from 'lodash-es'
 
-const _ = require('lodash')
-
-const mockGetToken = jest.fn().mockResolvedValue({
+export const mockGetToken = jest.fn().mockResolvedValue({
   access_token: 'valid-access-token',
   token_type: 'Bearer',
 })
 
-module.exports = {
-  mockGetToken,
-  GoogleToken: jest.fn().mockImplementation((options = {}) => {
+export class GoogleToken {
+  constructor (options) {
     return {
       key: options.key,
       iss: options.email,
@@ -34,5 +32,11 @@ module.exports = {
         return this.rawToken
       },
     }
-  }),
+  }
+
+  async getToken () {
+    return mockGetToken()
+  }
 }
+
+export default GoogleToken

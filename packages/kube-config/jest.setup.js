@@ -3,11 +3,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
+import { jest } from '@jest/globals'
 
-'use strict'
+const gtokenMock = await import('./__mocks__/gtoken.js')
+jest.unstable_mockModule('gtoken', () => {
+  return gtokenMock
+})
 
-const { matchers, ...fixtures } = require('./__fixtures__')
-
-expect.extend(matchers)
-
-global.fixtures = fixtures
+jest.resetModules()

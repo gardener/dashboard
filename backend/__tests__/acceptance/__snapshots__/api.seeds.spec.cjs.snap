@@ -1,0 +1,246 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`api seeds should return all seeds 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImpvaG4uZG9lQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.LkQ9PEN893UNTsZZn2Ux_CAYNOoQ2ISboWuHiAc5HHU",
+    },
+    {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": {
+          "group": "core.gardener.cloud",
+          "resource": "seeds",
+          "verb": "list",
+        },
+      },
+    },
+  ],
+]
+`;
+
+exports[`api seeds should return all seeds 2`] = `
+[
+  {
+    "kind": "Seed",
+    "metadata": {
+      "name": "soil-infra1",
+      "uid": "seed--soil-infra1",
+    },
+    "spec": {
+      "ingress": {
+        "domain": "ingress.foo-east.infra1.example.org",
+      },
+      "provider": {
+        "region": "foo-east",
+        "type": "infra1",
+      },
+      "settings": {
+        "scheduling": {
+          "visible": false,
+        },
+      },
+      "taints": [
+        {
+          "key": "seed.gardener.cloud/protected",
+        },
+      ],
+    },
+  },
+  {
+    "kind": "Seed",
+    "metadata": {
+      "name": "infra1-seed",
+      "uid": "seed--infra1-seed",
+    },
+    "spec": {
+      "ingress": {
+        "domain": "ingress.foo-east.infra1.example.org",
+      },
+      "provider": {
+        "region": "foo-east",
+        "type": "infra1",
+      },
+      "settings": {
+        "scheduling": {
+          "visible": true,
+        },
+      },
+      "taints": [],
+    },
+  },
+  {
+    "kind": "Seed",
+    "metadata": {
+      "name": "infra1-seed2",
+      "uid": "seed--infra1-seed2",
+    },
+    "spec": {
+      "ingress": {
+        "domain": "ingress.foo-west.infra1.example.org",
+      },
+      "provider": {
+        "region": "foo-west",
+        "type": "infra1",
+      },
+      "settings": {
+        "scheduling": {
+          "visible": true,
+        },
+      },
+      "taints": [],
+    },
+  },
+  {
+    "kind": "Seed",
+    "metadata": {
+      "labels": {
+        "biz": "baz",
+        "test-unreachable": "true",
+      },
+      "name": "infra3-seed",
+      "uid": "seed--infra3-seed",
+    },
+    "spec": {
+      "ingress": {
+        "domain": "ingress.foo-europe.infra3.example.org",
+      },
+      "provider": {
+        "region": "foo-europe",
+        "type": "infra3",
+      },
+      "settings": {
+        "scheduling": {
+          "visible": true,
+        },
+      },
+      "taints": [],
+    },
+  },
+  {
+    "kind": "Seed",
+    "metadata": {
+      "name": "infra4-seed-managed",
+      "uid": "seed--infra4-seed-managed",
+    },
+    "spec": {
+      "ingress": {
+        "domain": "ingress.foo-south.infra1.example.org",
+      },
+      "provider": {
+        "region": "foo-south",
+        "type": "infra1",
+      },
+      "settings": {
+        "scheduling": {
+          "visible": true,
+        },
+      },
+      "taints": [],
+    },
+  },
+  {
+    "kind": "Seed",
+    "metadata": {
+      "labels": {
+        "foo": "bar",
+        "fooz": "baz",
+      },
+      "name": "infra3-seed-with-selector",
+      "uid": "seed--infra3-seed-with-selector",
+    },
+    "spec": {
+      "ingress": {
+        "domain": "ingress.foo-europe.infra3.example.org",
+      },
+      "provider": {
+        "region": "foo-europe",
+        "type": "infra3",
+      },
+      "settings": {
+        "scheduling": {
+          "visible": true,
+        },
+      },
+      "taints": [],
+    },
+  },
+  {
+    "kind": "Seed",
+    "metadata": {
+      "name": "infra3-seed-without-selector",
+      "uid": "seed--infra3-seed-without-selector",
+    },
+    "spec": {
+      "ingress": {
+        "domain": "ingress.foo-europe.infra3.example.org",
+      },
+      "provider": {
+        "region": "foo-europe",
+        "type": "infra3",
+      },
+      "settings": {
+        "scheduling": {
+          "visible": true,
+        },
+      },
+      "taints": [],
+    },
+  },
+  {
+    "kind": "Seed",
+    "metadata": {
+      "name": "infra3-seed-protected",
+      "uid": "seed--infra3-seed-protected",
+    },
+    "spec": {
+      "ingress": {
+        "domain": "ingress.foo-europe.infra3.example.org",
+      },
+      "provider": {
+        "region": "foo-europe",
+        "type": "infra3",
+      },
+      "settings": {
+        "scheduling": {
+          "visible": true,
+        },
+      },
+      "taints": [
+        {
+          "key": "seed.gardener.cloud/protected",
+        },
+      ],
+    },
+  },
+  {
+    "kind": "Seed",
+    "metadata": {
+      "name": "infra3-seed-invisible",
+      "uid": "seed--infra3-seed-invisible",
+    },
+    "spec": {
+      "ingress": {
+        "domain": "ingress.foo-europe.infra3.example.org",
+      },
+      "provider": {
+        "region": "foo-europe",
+        "type": "infra3",
+      },
+      "settings": {
+        "scheduling": {
+          "visible": false,
+        },
+      },
+      "taints": [],
+    },
+  },
+]
+`;

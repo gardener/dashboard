@@ -40,45 +40,30 @@ SPDX-License-Identifier: Apache-2.0
                   density="compact"
                   class="mt-1 h-75"
                 >
-                  <v-tooltip location="top">
-                    <template #activator="{ props }">
-                      <v-btn
-                        value="light"
-                        v-bind="props"
-                        variant="tonal"
-                        min-width="36"
-                      >
-                        <v-icon icon="mdi-white-balance-sunny" />
-                      </v-btn>
-                    </template>
-                    <span>Light Mode</span>
-                  </v-tooltip>
-                  <v-tooltip location="top">
-                    <template #activator="{ props }">
-                      <v-btn
-                        value="dark"
-                        v-bind="props"
-                        variant="tonal"
-                        min-width="36"
-                      >
-                        <v-icon icon="mdi-weather-night" />
-                      </v-btn>
-                    </template>
-                    <span>Dark Mode</span>
-                  </v-tooltip>
-                  <v-tooltip location="top">
-                    <template #activator="{ props }">
-                      <v-btn
-                        value="auto"
-                        v-bind="props"
-                        variant="tonal"
-                        min-width="36"
-                      >
-                        <v-icon icon="mdi-brightness-auto" />
-                      </v-btn>
-                    </template>
-                    <span>Automatically choose theme based on your system settings</span>
-                  </v-tooltip>
+                  <v-btn
+                    v-tooltip:top="'Light Mode'"
+                    value="light"
+                    variant="tonal"
+                    min-width="36"
+                  >
+                    <v-icon icon="mdi-white-balance-sunny" />
+                  </v-btn>
+                  <v-btn
+                    v-tooltip:top="'Dark Mode'"
+                    value="dark"
+                    variant="tonal"
+                    min-width="36"
+                  >
+                    <v-icon icon="mdi-weather-night" />
+                  </v-btn>
+                  <v-btn
+                    v-tooltip:top="'Automatically choose theme based on your system settings'"
+                    value="auto"
+                    variant="tonal"
+                    min-width="36"
+                  >
+                    <v-icon icon="mdi-brightness-auto" />
+                  </v-btn>
                 </v-btn-toggle>
               </v-col>
               <v-col cols="12">

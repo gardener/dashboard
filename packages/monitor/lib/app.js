@@ -4,12 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const express = require('express')
-const promClient = require('prom-client')
-const createError = require('http-errors')
-const logger = require('./logger')
+import express from 'express'
+import promClient from 'prom-client'
+import createError from 'http-errors'
+import logger from './logger.js'
 
 const { register } = promClient
 
@@ -44,4 +42,4 @@ app.use((err, req, res, next) => {
 
 app.destroy = () => register.clear()
 
-module.exports = app
+export default app

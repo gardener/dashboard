@@ -4,11 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const request = require('@gardener-dashboard/request')
-const createError = require('http-errors')
-const { http } = require('./symbols')
+import request from '@gardener-dashboard/request'
+import createError from 'http-errors'
+import { http } from './symbols.js'
 
 class HttpClient {
   constructor (options) {
@@ -72,4 +70,4 @@ class HttpClient {
   }
 }
 
-module.exports = HttpClient
+export default HttpClient

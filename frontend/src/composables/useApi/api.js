@@ -48,28 +48,28 @@ export function getConfiguration () {
   return getResource('/api/config')
 }
 
-/* CloudProviders Secrets */
-
-export function getCloudProviderSecrets ({ namespace }) {
-  namespace = encodeURIComponent(namespace)
-  return getResource(`/api/namespaces/${namespace}/cloudprovidersecrets`)
+/* Credentials */
+export function invokeCloudProviderCredentialMethod (method, params) {
+  return callResourceMethod('/api/cloudprovidercredentials', {
+    method,
+    params,
+  })
 }
 
-export function updateCloudProviderSecret ({ namespace, name, data }) {
-  namespace = encodeURIComponent(namespace)
-  name = encodeURIComponent(name)
-  return updateResource(`/api/namespaces/${namespace}/cloudprovidersecrets/${name}`, data)
+export function getCloudProviderCredentials (namespace) {
+  return invokeCloudProviderCredentialMethod('list', { bindingNamespace: namespace })
 }
 
-export function createCloudProviderSecret ({ namespace, data }) {
-  namespace = encodeURIComponent(namespace)
-  return createResource(`/api/namespaces/${namespace}/cloudprovidersecrets`, data)
+export function createCloudProviderCredential (params) {
+  return invokeCloudProviderCredentialMethod('create', params)
 }
 
-export function deleteCloudProviderSecret ({ namespace, name }) {
-  namespace = encodeURIComponent(namespace)
-  name = encodeURIComponent(name)
-  return deleteResource(`/api/namespaces/${namespace}/cloudprovidersecrets/${name}`)
+export function updateCloudProviderCredential (params) {
+  return invokeCloudProviderCredentialMethod('patch', params)
+}
+
+export function deleteCloudProviderCredential (params) {
+  return invokeCloudProviderCredentialMethod('remove', params)
 }
 
 /* Tickets */
@@ -398,10 +398,10 @@ export function getResourceQuotas ({ namespace }) {
 
 export default {
   getConfiguration,
-  getCloudProviderSecrets,
-  updateCloudProviderSecret,
-  createCloudProviderSecret,
-  deleteCloudProviderSecret,
+  getCloudProviderCredentials,
+  createCloudProviderCredential,
+  updateCloudProviderCredential,
+  deleteCloudProviderCredential,
   getIssues,
   getIssuesAndComments,
   getShoots,

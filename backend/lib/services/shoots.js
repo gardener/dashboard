@@ -4,30 +4,28 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import requestModule from '@gardener-dashboard/request'
+import kubeConfigModule from '@gardener-dashboard/kube-config'
+import kubeClientModule from '@gardener-dashboard/kube-client'
+import createError from 'http-errors'
+import * as utils from '../utils/index.js'
+import cache from '../cache/index.js'
+import * as authorization from './authorization.js'
+import logger from '../logger/index.js'
+import _ from 'lodash-es'
+import semver from 'semver'
+import config from '../config/index.js'
+import { list as listProjects } from './projects.js'
 
-const { isHttpError } = require('@gardener-dashboard/request')
-const { Config } = require('@gardener-dashboard/kube-config')
-const { dashboardClient } = require('@gardener-dashboard/kube-client')
-const resources = require('@gardener-dashboard/kube-client/lib/resources')
-const createError = require('http-errors')
-const utils = require('../utils')
-const cache = require('../cache')
-const authorization = require('./authorization')
-const logger = require('../logger')
-const _ = require('lodash')
-const semver = require('semver')
-const config = require('../config')
-const projectsService = require('./projects')
-
+const { isHttpError } = requestModule
+const { Config } = kubeConfigModule
+const { Resources, dashboardClient } = kubeClientModule
 const {
   decodeBase64,
   encodeBase64,
   getSeedNameFromShoot,
 } = utils
-const { getSeed } = cache
-
-exports.list = async function ({ user, namespace, labelSelector }) {
+export async function list ({ user, namespace, labelSelector }) {
   const query = {}
   if (labelSelector) {
     query.labelSelector = labelSelector
@@ -42,7 +40,7 @@ exports.list = async function ({ user, namespace, labelSelector }) {
       }
     } else {
       // user is permitted to list shoots only in namespaces associated with their projects
-      const projects = await projectsService.list({ user, canListProjects: false })
+      const projects = await listProjects({ user, canListProjects: false })
       const namespaces = _.map(projects, 'spec.namespace')
 
       const results = await Promise.allSettled(namespaces.map(async namespace => {
@@ -77,7 +75,7 @@ exports.list = async function ({ user, namespace, labelSelector }) {
   }
 }
 
-exports.create = async function ({ user, namespace, body, ...options }) {
+export async function create ({ user, namespace, body, ...options }) {
   const client = user.client
   const username = user.id
 
@@ -89,20 +87,18 @@ exports.create = async function ({ user, namespace, body, ...options }) {
   return client['core.gardener.cloud'].shoots.create(namespace, body, options)
 }
 
-async function read ({ user, namespace, name }) {
+export async function read ({ user, namespace, name }) {
   const client = user.client
 
   return client['core.gardener.cloud'].shoots.get(namespace, name)
 }
-exports.read = read
 
-async function patch ({ user, namespace, name, body }) {
+export async function patch ({ user, namespace, name, body }) {
   const client = user.client
   return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, body)
 }
-exports.patch = patch
 
-exports.replace = async function ({ user, namespace, name, body, ...options }) {
+export async function replace ({ user, namespace, name, body, ...options }) {
   const client = user.client
 
   const { metadata, kind, apiVersion, status } = await client['core.gardener.cloud'].shoots.get(namespace, name)
@@ -118,7 +114,7 @@ exports.replace = async function ({ user, namespace, name, body, ...options }) {
   return client['core.gardener.cloud'].shoots.update(namespace, name, body, options)
 }
 
-exports.replaceVersion = async function ({ user, namespace, name, body }) {
+export async function replaceVersion ({ user, namespace, name, body }) {
   const client = user.client
   const version = body.version
   const patchOperations = [{
@@ -129,7 +125,7 @@ exports.replaceVersion = async function ({ user, namespace, name, body }) {
   return client['core.gardener.cloud'].shoots.jsonPatch(namespace, name, patchOperations)
 }
 
-exports.replaceHibernationEnabled = async function ({ user, namespace, name, body }) {
+export async function replaceHibernationEnabled ({ user, namespace, name, body }) {
   const client = user.client
   const enabled = !!body.enabled
   const payload = {
@@ -142,7 +138,7 @@ exports.replaceHibernationEnabled = async function ({ user, namespace, name, bod
   return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
 }
 
-exports.replaceHibernationSchedules = async function ({ user, namespace, name, body }) {
+export async function replaceHibernationSchedules ({ user, namespace, name, body }) {
   const client = user.client
   const schedules = body
   const payload = {
@@ -155,7 +151,7 @@ exports.replaceHibernationSchedules = async function ({ user, namespace, name, b
   return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
 }
 
-exports.replacePurpose = async function ({ user, namespace, name, body }) {
+export async function replacePurpose ({ user, namespace, name, body }) {
   const client = user.client
   const purpose = body.purpose
   const payload = {
@@ -166,7 +162,7 @@ exports.replacePurpose = async function ({ user, namespace, name, body }) {
   return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
 }
 
-exports.replaceSeedName = async function ({ user, namespace, name, body }) {
+export async function replaceSeedName ({ user, namespace, name, body }) {
   const client = user.client
   const seedName = body.seedName
   const patchOperations = [{
@@ -177,9 +173,9 @@ exports.replaceSeedName = async function ({ user, namespace, name, body }) {
   return client['core.gardener.cloud'].shoots.jsonPatch(namespace, [name, 'binding'], patchOperations)
 }
 
-exports.createAdminKubeconfig = async function ({ user, namespace, name, body }) {
+export async function createAdminKubeconfig ({ user, namespace, name, body }) {
   const client = user.client
-  const { apiVersion, kind } = resources.Resources.AdminKubeconfigRequest
+  const { apiVersion, kind } = Resources.AdminKubeconfigRequest
   const payload = {
     kind,
     apiVersion,
@@ -196,7 +192,7 @@ exports.createAdminKubeconfig = async function ({ user, namespace, name, body })
   }
 }
 
-exports.replaceAddons = async function ({ user, namespace, name, body }) {
+export async function replaceAddons ({ user, namespace, name, body }) {
   const client = user.client
   const addons = body
   const payload = {
@@ -208,7 +204,7 @@ exports.replaceAddons = async function ({ user, namespace, name, body }) {
   return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
 }
 
-exports.replaceControlPlaneHighAvailability = async function ({ user, namespace, name, body }) {
+export async function replaceControlPlaneHighAvailability ({ user, namespace, name, body }) {
   const client = user.client
   const highAvailability = body
   const payload = {
@@ -222,7 +218,7 @@ exports.replaceControlPlaneHighAvailability = async function ({ user, namespace,
   return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
 }
 
-exports.patchProvider = async function ({ user, namespace, name, body }) {
+export async function patchProvider ({ user, namespace, name, body }) {
   const client = user.client
   const payload = {
     spec: {
@@ -232,7 +228,7 @@ exports.patchProvider = async function ({ user, namespace, name, body }) {
   return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
 }
 
-exports.replaceMaintenance = async function ({ user, namespace, name, body }) {
+export async function replaceMaintenance ({ user, namespace, name, body }) {
   const client = user.client
   const { timeWindowBegin, timeWindowEnd, updateKubernetesVersion, updateOSVersion } = body
   const payload = {
@@ -252,7 +248,7 @@ exports.replaceMaintenance = async function ({ user, namespace, name, body }) {
   return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
 }
 
-const patchAnnotations = async function ({ user, namespace, name, annotations }) {
+export const patchAnnotations = async function ({ user, namespace, name, annotations }) {
   const client = user.client
   const body = {
     metadata: {
@@ -261,9 +257,8 @@ const patchAnnotations = async function ({ user, namespace, name, annotations })
   }
   return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, body)
 }
-exports.patchAnnotations = patchAnnotations
 
-exports.remove = async function ({ user, namespace, name }) {
+export async function remove ({ user, namespace, name }) {
   const client = user.client
   const annotations = {
     'confirmation.gardener.cloud/deletion': 'true',
@@ -273,7 +268,7 @@ exports.remove = async function ({ user, namespace, name }) {
   return client['core.gardener.cloud'].shoots.delete(namespace, name)
 }
 
-function getDashboardUrlPath (kubernetesVersion) {
+export function getDashboardUrlPath (kubernetesVersion) {
   if (!kubernetesVersion) {
     return undefined
   }
@@ -282,9 +277,8 @@ function getDashboardUrlPath (kubernetesVersion) {
   }
   return '/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/'
 }
-exports.getDashboardUrlPath = getDashboardUrlPath
 
-exports.info = async function ({ user, namespace, name }) {
+export async function info ({ user, namespace, name }) {
   const client = user.client
 
   const shoot = await read({ user, namespace, name })
@@ -300,8 +294,8 @@ exports.info = async function ({ user, namespace, name }) {
   }
 
   if (shoot.spec.seedName) {
-    const seed = getSeed(getSeedNameFromShoot(shoot))
-    if (seed && namespace !== 'garden') {
+    const seed = cache.getSeed(getSeedNameFromShoot(shoot))
+    if (seed) {
       try {
         data.canLinkToSeed = !!(await client['core.gardener.cloud'].shoots.get('garden', seed.metadata.name))
       } catch (err) {
@@ -320,7 +314,7 @@ exports.info = async function ({ user, namespace, name }) {
   return data
 }
 
-async function getGardenClusterIdentity () {
+export async function getGardenClusterIdentity () {
   const configClusterIdentity = _.get(config, ['clusterIdentity'])
 
   if (configClusterIdentity) {
@@ -331,13 +325,11 @@ async function getGardenClusterIdentity () {
 
   return clusterIdentity.data['cluster-identity']
 }
-exports.getGardenClusterIdentity = getGardenClusterIdentity
 
-async function getClusterCaData (client, { namespace, name }) {
+export async function getClusterCaData (client, { namespace, name }) {
   const configmap = await client.core.configmaps.get(namespace, `${name}.ca-cluster`)
   return encodeBase64(configmap.data?.['ca.crt'])
 }
-exports.getClusterCaData = getClusterCaData
 
 async function getKubeconfigGardenlogin (client, shoot) {
   if (!shoot.status?.advertisedAddresses?.length) {

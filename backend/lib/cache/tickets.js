@@ -4,9 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-const EventEmitter = require('events')
-const _ = require('lodash')
-const logger = require('../logger')
+import EventEmitter from 'events'
+import _ from 'lodash-es'
+import logger from '../logger/index.js'
 
 function init () {
   const issues = new Map()
@@ -150,4 +150,4 @@ function init () {
   }
 }
 
-module.exports = init
+export default init

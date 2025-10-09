@@ -22,6 +22,8 @@ import { createError } from '@/utils/errors'
 import { useAuthnStore } from '../authn'
 import { useShootStore } from '../shoot'
 import { useTicketStore } from '../ticket'
+import { useProjectStore } from '../project'
+import { useSeedStore } from '../seed'
 
 import { createSocket } from './helper'
 
@@ -33,6 +35,8 @@ export const useSocketStore = defineStore('socket', () => {
   const authnStore = useAuthnStore()
   const shootStore = useShootStore()
   const ticketStore = useTicketStore()
+  const projectStore = useProjectStore()
+  const seedStore = useSeedStore()
 
   const state = reactive({
     id: null,
@@ -48,14 +52,21 @@ export const useSocketStore = defineStore('socket', () => {
       jitter: 0.5,
       attempts: 0,
     },
-    synchronizing: false,
   })
+
+  const synchronizing = new Map([
+    ['shoots', false],
+    ['projects', false],
+    ['seeds', false],
+  ])
 
   const socket = createSocket(state, {
     logger,
     authnStore,
     shootStore,
     ticketStore,
+    projectStore,
+    seedStore,
   })
 
   const id = computed(() => {
@@ -122,27 +133,27 @@ export const useSocketStore = defineStore('socket', () => {
     }
   }
 
-  async function synchronize (uids) {
+  async function synchronize (key, uids) {
     if (!uids.length) {
       return []
     }
-    if (state.synchronizing) {
+    if (synchronizing.get(key)) {
       throw createError(429, 'Synchronization is still in progress', { name: 'TooManyRequests' })
     }
-    state.synchronizing = true
+    synchronizing.set(key, true)
     try {
       const {
         statusCode = 500,
         name = 'InternalError',
-        message = 'Failed to synchronize shoots',
+        message = `Failed to synchronize ${key}`,
         items = [],
-      } = await socket.timeout(acknowledgementTimeout).emitWithAck('synchronize', 'shoots', uids)
+      } = await socket.timeout(acknowledgementTimeout).emitWithAck('synchronize', key, uids)
       if (statusCode === 200) {
         return items
       }
       throw createError(statusCode, message, { name })
     } finally {
-      state.synchronizing = false
+      synchronizing.set(key, false)
     }
   }
 

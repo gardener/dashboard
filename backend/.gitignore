@@ -22,3 +22,6 @@ my*
 # Ignore coverage results
 /coverage
 .nyc_output
+
+# Ignore CJS build output directory
+dist/

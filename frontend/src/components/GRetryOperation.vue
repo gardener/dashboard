@@ -5,22 +5,15 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-tooltip
+  <v-btn
     v-if="canRetry"
-    location="top"
-  >
-    <template #activator="{ props }">
-      <v-btn
-        v-bind="props"
-        density="comfortable"
-        variant="text"
-        icon="mdi-reload"
-        color="primary"
-        @click="onRetryOperation"
-      />
-    </template>
-    Retry Operation
-  </v-tooltip>
+    v-tooltip:top="'Retry Operation'"
+    density="comfortable"
+    variant="text"
+    icon="mdi-reload"
+    color="primary"
+    @click="onRetryOperation"
+  />
 </template>
 
 <script setup>
@@ -29,8 +22,10 @@ import {
   computed,
   inject,
 } from 'vue'
+import { storeToRefs } from 'pinia'
 
 import { useAppStore } from '@/store/app'
+import { useAuthzStore } from '@/store/authz.js'
 
 import { useShootItem } from '@/composables/useShootItem'
 
@@ -52,7 +47,16 @@ const appStore = useAppStore()
 
 const retryingOperation = ref(false)
 
+const authzStore = useAuthzStore()
+const {
+  canPatchShoots,
+} = storeToRefs(authzStore)
+
 const canRetry = computed(() => {
+  if (!canPatchShoots.value) {
+    return false
+  }
+
   const reconcileScheduled = shootGeneration.value !== shootObservedGeneration.value && !!shootObservedGeneration.value
 
   return get(shootLastOperation.value, ['state']) === 'Failed' &&
@@ -72,10 +76,7 @@ async function onRetryOperation () {
       },
     })
   } catch (err) {
-    appStore.setError({
-      text: err,
-      duration: -1,
-    })
+    appStore.setError(err)
     logger.error('failed to retry operation', err)
   } finally {
     retryingOperation.value = false

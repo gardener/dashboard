@@ -95,10 +95,10 @@ export function shootListBreadcrumbs () {
   ]
 }
 
-export function secretsBreadcrumbs () {
+export function credentialsBreadcrumbs () {
   return [
     {
-      title: 'Secrets',
+      title: 'Credentials',
     },
   ]
 }
@@ -118,25 +118,6 @@ export function shootItemBreadcrumbs ({ params }) {
       get to () {
         return {
           name: 'ShootList',
-          params: pick(params, ['namespace']),
-        }
-      },
-    },
-    {
-      get title () {
-        return get(params, ['name'])
-      },
-    },
-  ]
-}
-
-export function secretItemBreadcrumbs ({ params }) {
-  return [
-    {
-      title: 'Secrets',
-      get to () {
-        return {
-          name: 'Secrets',
           params: pick(params, ['namespace']),
         }
       },

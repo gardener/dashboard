@@ -39,65 +39,41 @@ SPDX-License-Identifier: Apache-2.0
     >
       <div class="d-flex align-center justify-start fill-height">
         <div class="px-2">
-          <v-tooltip location="top">
-            <template #activator="slotProps">
-              <div v-bind="slotProps.props">
-                <g-action-button
-                  size="x-small"
-                  icon="mdi-reload"
-                  :disabled="!touched"
-                  @click="resetEditor"
-                />
-              </div>
-            </template>
-            <span>Discard and Reload</span>
-          </v-tooltip>
+          <g-action-button
+            v-tooltip:top="'Discard and Reload'"
+            size="x-small"
+            icon="mdi-reload"
+            :disabled="!touched"
+            @click="refreshEditor"
+          />
         </div>
         <v-divider vertical />
         <div class="px-2">
-          <v-tooltip location="top">
-            <template #activator="slotProps">
-              <div v-bind="slotProps.props">
-                <g-action-button
-                  size="x-small"
-                  icon="mdi-undo"
-                  :disabled="historySize.undo === 0"
-                  @click="execUndo"
-                />
-              </div>
-            </template>
-            <span>Undo</span>
-          </v-tooltip>
+          <g-action-button
+            v-tooltip:top="'Undo'"
+            size="x-small"
+            icon="mdi-undo"
+            :disabled="historySize.undo === 0"
+            @click="execUndo"
+          />
         </div>
         <div class="px-2">
-          <v-tooltip location="top">
-            <template #activator="slotProps">
-              <div v-bind="slotProps.props">
-                <g-action-button
-                  size="x-small"
-                  icon="mdi-redo"
-                  :disabled="historySize.redo === 0"
-                  @click="execRedo"
-                />
-              </div>
-            </template>
-            <span>Redo</span>
-          </v-tooltip>
+          <g-action-button
+            v-tooltip:top="'Redo'"
+            size="x-small"
+            icon="mdi-redo"
+            :disabled="historySize.redo === 0"
+            @click="execRedo"
+          />
         </div>
         <v-divider vertical />
         <div class="px-2">
-          <v-tooltip location="top">
-            <template #activator="slotProps">
-              <div v-bind="slotProps.props">
-                <g-action-button
-                  size="x-small"
-                  icon="mdi-download"
-                  @click="downloadContent"
-                />
-              </div>
-            </template>
-            <span>Download</span>
-          </v-tooltip>
+          <g-action-button
+            v-tooltip:top="'Download'"
+            size="x-small"
+            icon="mdi-download"
+            @click="downloadContent"
+          />
         </div>
         <div class="px-2">
           <g-copy-btn
@@ -111,42 +87,30 @@ SPDX-License-Identifier: Apache-2.0
         </div>
         <v-divider vertical />
         <div class="px-2">
-          <v-tooltip location="top">
-            <template #activator="slotProps">
-              <div v-bind="slotProps.props">
-                <g-action-button
-                  size="x-small"
-                  :icon="showManagedFields ? 'mdi-text-short' : 'mdi-text-long'"
-                  :disabled="touched"
-                  @click="showManagedFields = !showManagedFields"
-                />
-              </div>
-            </template>
-            <span>{{ showManagedFields ? 'Hide' : 'Show' }} managed fields</span>
-          </v-tooltip>
+          <g-action-button
+            v-tooltip:top="showManagedFields ? 'Hide managed fields' : 'Show managed fields'"
+            size="x-small"
+            :icon="showManagedFields ? 'mdi-text-short' : 'mdi-text-long'"
+            :disabled="touched"
+            @click="showManagedFields = !showManagedFields"
+          />
         </div>
         <div class="px-2">
-          <v-tooltip location="top">
-            <template #activator="slotProps">
-              <div v-bind="slotProps.props">
-                <v-btn
-                  variant="text"
-                  size="x-small"
-                  flat
-                  icon
-                  @click="renderWhitespaces = !renderWhitespaces"
-                >
-                  <!-- eslint-disable vue/no-v-html -->
-                  <span
-                    style="width: 18px; height: 18px"
-                    v-html="renderWhitespaces ? whitespaceEyeOff : whitespaceEye"
-                  />
-                  <!-- eslint-enable vue/no-v-html -->
-                </v-btn>
-              </div>
-            </template>
-            <span>{{ renderWhitespaces ? 'Hide' : 'Render' }} whitespaces</span>
-          </v-tooltip>
+          <v-btn
+            v-tooltip:top="renderWhitespaces ? 'Hide whitespaces' : 'Render whitespaces'"
+            variant="text"
+            size="x-small"
+            flat
+            icon
+            @click="renderWhitespaces = !renderWhitespaces"
+          >
+            <!-- eslint-disable vue/no-v-html -->
+            <span
+              style="width: 18px; height: 18px"
+              v-html="renderWhitespaces ? whitespaceEyeOff : whitespaceEye"
+            />
+          <!-- eslint-enable vue/no-v-html -->
+          </v-btn>
         </div>
         <v-divider vertical />
       </div>
@@ -224,7 +188,7 @@ const {
   helpTooltip,
   loadEditor,
   focusEditor,
-  resetEditor,
+  refreshEditor,
   destroyEditor,
   execUndo,
   execRedo,

@@ -5,22 +5,17 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-tooltip location="top">
-    <template #activator="{ props }">
-      <v-chip
-        v-if="!!shortPurpose"
-        v-bind="props"
-        :variant="!isCritical ? 'tonal' : 'flat'"
-        :text-color="textColor"
-        color="primary"
-        size="small"
-        class="purpose-tag"
-      >
-        {{ shortPurpose }}
-      </v-chip>
-    </template>
-    <span>{{ purpose }}</span>
-  </v-tooltip>
+  <v-chip
+    v-if="!!shortPurpose"
+    v-tooltip:top="purpose"
+    :variant="!isCritical ? 'tonal' : 'flat'"
+    :text-color="textColor"
+    color="primary"
+    size="small"
+    class="purpose-tag"
+  >
+    {{ shortPurpose }}
+  </v-chip>
 </template>
 
 <script>

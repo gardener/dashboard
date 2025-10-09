@@ -62,7 +62,7 @@ SPDX-License-Identifier: Apache-2.0
         <g-volume-type
           :volume-types="volumeTypes"
           :worker="worker"
-          :cloud-profile-name="cloudProfileName"
+          :cloud-profile-ref="cloudProfileRef"
           :field-name="`${workerGroupName} Volume Type`"
         />
       </div>
@@ -90,7 +90,7 @@ SPDX-License-Identifier: Apache-2.0
           label="Autoscaler Min."
           variant="underlined"
           @input="v$.worker.minimum.$touch()"
-          @blur="v$.worker.minimum.$touch()"
+          @blur="ensureValidAutoscalerMin()"
         />
       </div>
       <div class="small-input">
@@ -103,7 +103,7 @@ SPDX-License-Identifier: Apache-2.0
           variant="underlined"
           :error-messages="getErrorMessages(v$.worker.maximum)"
           @input="v$.worker.maximum.$touch()"
-          @blur="v$.worker.maximum.$touch()"
+          @blur="ensureValidAutoscalerMax()"
         />
       </div>
       <div class="small-input">
@@ -213,7 +213,7 @@ export default {
   setup () {
     const {
       isNewCluster,
-      cloudProfileName,
+      cloudProfileRef,
       kubernetesVersion,
       region,
       allZones,
@@ -230,7 +230,7 @@ export default {
     return {
       v$: useVuelidate(),
       isNewCluster,
-      cloudProfileName,
+      cloudProfileRef,
       kubernetesVersion,
       region,
       allZones,
@@ -321,8 +321,8 @@ export default {
         : this.initialZones
     },
     machineTypes () {
-      return this.machineTypesByCloudProfileNameAndRegionAndArchitecture({
-        cloudProfileName: this.cloudProfileName,
+      return this.machineTypesByCloudProfileRefAndRegionAndArchitecture({
+        cloudProfileRef: this.cloudProfileRef,
         region: this.region,
         architecture: this.machineArchitecture,
       })
@@ -337,7 +337,7 @@ export default {
       return find(this.volumeTypes, ['name', this.worker.volume?.type])
     },
     machineImages () {
-      const machineImages = this.machineImagesByCloudProfileName(this.cloudProfileName)
+      const machineImages = this.machineImagesByCloudProfileRef(this.cloudProfileRef)
       return filter(machineImages, ({ isExpired, architectures }) => !isExpired && includes(architectures, this.machineArchitecture))
     },
     minimumVolumeSize () {
@@ -361,9 +361,6 @@ export default {
       },
       set (value) {
         this.worker.minimum = Math.max(0, parseInt(value))
-        if (this.innerMax < this.worker.minimum) {
-          this.worker.maximum = this.worker.minimum
-        }
       },
     },
     innerMax: {
@@ -372,9 +369,6 @@ export default {
       },
       set: function (value) {
         this.worker.maximum = Math.max(0, parseInt(value))
-        if (this.innerMin > this.worker.maximum) {
-          this.worker.minimum = this.worker.maximum
-        }
       },
     },
     maxSurge: {
@@ -490,10 +484,10 @@ export default {
   },
   methods: {
     ...mapActions(useCloudProfileStore, [
-      'machineTypesByCloudProfileNameAndRegionAndArchitecture',
-      'machineImagesByCloudProfileName',
+      'machineTypesByCloudProfileRefAndRegionAndArchitecture',
+      'machineImagesByCloudProfileRef',
       'minimumVolumeSizeByMachineTypeAndVolumeType',
-      'defaultMachineImageForCloudProfileNameAndMachineType',
+      'defaultMachineImageForCloudProfileRefAndMachineType',
     ]),
     onInputVolumeSize () {
       if (this.hasVolumeSize) {
@@ -511,8 +505,22 @@ export default {
     resetWorkerMachine () {
       const defaultMachineType = head(this.machineTypes)
       this.worker.machine.type = get(defaultMachineType, ['name'])
-      const defaultMachineImage = this.defaultMachineImageForCloudProfileNameAndMachineType(this.cloudProfileName, defaultMachineType)
+      const defaultMachineImage = this.defaultMachineImageForCloudProfileRefAndMachineType(this.cloudProfileRef, defaultMachineType)
       this.worker.machine.image = pick(defaultMachineImage, ['name', 'version'])
+    },
+    ensureValidAutoscalerMin () {
+      this.v$.worker.minimum.$touch()
+      // Ensure maximum is not less than minimum
+      if (this.innerMax < this.worker.minimum) {
+        this.worker.maximum = this.worker.minimum
+      }
+    },
+    ensureValidAutoscalerMax () {
+      this.v$.worker.maximum.$touch()
+      // Ensure minimum is not greater than maximum
+      if (this.innerMin > this.worker.maximum) {
+        this.worker.minimum = this.worker.maximum
+      }
     },
     getErrorMessages,
   },

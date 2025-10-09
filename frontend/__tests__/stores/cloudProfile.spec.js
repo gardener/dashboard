@@ -24,23 +24,25 @@ describe('stores', () => {
     let configStore
     let cloudProfileStore
 
-    function setData (data) {
+    let cloudProfileRef
+
+    function setSpec (spec) {
       cloudProfileStore.setCloudProfiles([{
         metadata: {
           name: 'foo',
         },
-        data,
+        spec,
       }])
     }
 
     function setMachineImages (machineImages) {
-      setData({
+      setSpec({
         machineImages,
       })
     }
 
     function setKubernetesVersions (kubernetesVersions) {
-      setData({
+      setSpec({
         kubernetes: {
           versions: kubernetesVersions,
         },
@@ -71,6 +73,11 @@ describe('stores', () => {
       })
       cloudProfileStore = useCloudProfileStore()
       cloudProfileStore.setCloudProfiles([])
+
+      cloudProfileRef = {
+        name: 'foo',
+        kind: 'CloudProfile',
+      }
     })
 
     describe('machineImages', () => {
@@ -127,7 +134,7 @@ describe('stores', () => {
 
       beforeEach(() => {
         setMachineImages(machineImages)
-        decoratedAndSortedMachineImages = cloudProfileStore.machineImagesByCloudProfileName('foo')
+        decoratedAndSortedMachineImages = cloudProfileStore.machineImagesByCloudProfileRef(cloudProfileRef)
       })
 
       it('should transform machine images from cloud profile', () => {
@@ -201,7 +208,7 @@ describe('stores', () => {
             imageWithNoUpdate,
             imageWithExpirationWarning,
           ])
-          let expiredWorkerGroups = cloudProfileStore.expiringWorkerGroupsForShoot(workers, 'foo', false)
+          let expiredWorkerGroups = cloudProfileStore.expiringWorkerGroupsForShoot(workers, cloudProfileRef, false)
           expect(expiredWorkerGroups).toBeInstanceOf(Array)
           expect(expiredWorkerGroups).toHaveLength(1)
           expect(expiredWorkerGroups[0]).toMatchObject({
@@ -211,7 +218,7 @@ describe('stores', () => {
             severity: 'warning',
           })
 
-          expiredWorkerGroups = cloudProfileStore.expiringWorkerGroupsForShoot(workers, 'foo', true)
+          expiredWorkerGroups = cloudProfileStore.expiringWorkerGroupsForShoot(workers, cloudProfileRef, true)
           expect(expiredWorkerGroups).toBeInstanceOf(Array)
           expect(expiredWorkerGroups).toHaveLength(2) // Now also include auto update information
           expect(expiredWorkerGroups[0]).toMatchObject({
@@ -238,7 +245,7 @@ describe('stores', () => {
             imageWithNoUpdate,
             imageWithExpirationWarning,
           ])
-          const expiredWorkerGroups = cloudProfileStore.expiringWorkerGroupsForShoot(workers, 'foo', false)
+          const expiredWorkerGroups = cloudProfileStore.expiringWorkerGroupsForShoot(workers, cloudProfileRef, false)
           expect(expiredWorkerGroups).toBeInstanceOf(Array)
           expect(expiredWorkerGroups).toHaveLength(1)
           expect(expiredWorkerGroups[0]).toMatchObject({
@@ -261,7 +268,7 @@ describe('stores', () => {
             imageWithNoUpdatePath,
             deprecatedImageWithNoExpiration,
           ])
-          const expiredWorkerGroups = cloudProfileStore.expiringWorkerGroupsForShoot(workers, 'foo', true)
+          const expiredWorkerGroups = cloudProfileStore.expiringWorkerGroupsForShoot(workers, cloudProfileRef, true)
           expect(expiredWorkerGroups).toBeInstanceOf(Array)
           expect(expiredWorkerGroups).toHaveLength(2)
           expect(expiredWorkerGroups[0]).toMatchObject({
@@ -288,7 +295,7 @@ describe('stores', () => {
             imageWithExpirationDate,
             imageWithNoUpdate,
           ])
-          const expiredWorkerGroups = cloudProfileStore.expiringWorkerGroupsForShoot(workers, 'foo', false)
+          const expiredWorkerGroups = cloudProfileStore.expiringWorkerGroupsForShoot(workers, cloudProfileRef, false)
           expect(expiredWorkerGroups).toBeInstanceOf(Array)
           expect(expiredWorkerGroups).toHaveLength(0)
         })
@@ -385,7 +392,7 @@ describe('stores', () => {
 
       describe('#sortedKubernetesVersions', () => {
         it('should filter and sort kubernetes versions from cloud profile', () => {
-          const decoratedAndSortedVersions = cloudProfileStore.sortedKubernetesVersions('foo')
+          const decoratedAndSortedVersions = cloudProfileStore.sortedKubernetesVersions(cloudProfileRef)
           expect(decoratedAndSortedVersions).toHaveLength(kubernetesVersions.length - 1)
 
           const expiredDecoratedVersion = find(decoratedAndSortedVersions, expiredVersion)
@@ -417,14 +424,14 @@ describe('stores', () => {
       })
       describe('#availableKubernetesUpdatesForShoot', () => {
         it('should differentiate between patch/minor/major available K8sUpdates for given version, filter out expired', () => {
-          const availableK8sUpdates = cloudProfileStore.availableKubernetesUpdatesForShoot(deprecatedOldest16Version.version, 'foo')
+          const availableK8sUpdates = cloudProfileStore.availableKubernetesUpdatesForShoot(deprecatedOldest16Version.version, cloudProfileRef)
           expect(availableK8sUpdates.patch.length).toBe(5)
           expect(availableK8sUpdates.minor.length).toBe(3)
           expect(availableK8sUpdates.major.length).toBe(2)
         })
 
         it('should return available K8sUpdates for given version', () => {
-          const availableK8sUpdates = cloudProfileStore.availableKubernetesUpdatesForShoot(unclassified164VersionWithExpiration.version, 'foo')
+          const availableK8sUpdates = cloudProfileStore.availableKubernetesUpdatesForShoot(unclassified164VersionWithExpiration.version, cloudProfileRef)
           expect(availableK8sUpdates.patch[0]).toEqual(expect.objectContaining(supported165VersionWithExpiration))
           expect(availableK8sUpdates.minor[0]).toEqual(expect.objectContaining(supported18VersionWithExpirationWarning))
           expect(availableK8sUpdates.major[0]).toEqual(expect.objectContaining(preview22Version))
@@ -432,120 +439,138 @@ describe('stores', () => {
       })
       describe('#kubernetesVersionIsNotLatestPatch', () => {
         it('selected kubernetes version should be latest (one minor, one major, one preview patch update available)', () => {
-          const result = cloudProfileStore.kubernetesVersionIsNotLatestPatch(supported165VersionWithExpiration.version, 'foo')
+          const result = cloudProfileStore.kubernetesVersionIsNotLatestPatch(supported165VersionWithExpiration.version, cloudProfileRef)
           expect(result).toBe(false)
         })
 
         it('selected kubernetes version should not be latest', () => {
-          const result = cloudProfileStore.kubernetesVersionIsNotLatestPatch(supported162VersionWithExpirationWarning.version, 'foo')
+          const result = cloudProfileStore.kubernetesVersionIsNotLatestPatch(supported162VersionWithExpirationWarning.version, cloudProfileRef)
           expect(result).toBe(true)
         })
       })
 
       describe('#k8sVersionUpdatePathAvailable', () => {
         it('selected kubernetes version should have update path (minor update available)', () => {
-          const result = cloudProfileStore.kubernetesVersionUpdatePathAvailable(supported17VersionWithExpirationWarning.version, 'foo')
+          const result = cloudProfileStore.kubernetesVersionUpdatePathAvailable(supported17VersionWithExpirationWarning.version, cloudProfileRef)
           expect(result).toBe(true)
         })
 
         it('selected kubernetes version should have update path (patch update available)', () => {
-          const result = cloudProfileStore.kubernetesVersionUpdatePathAvailable(unclassified164VersionWithExpiration.version, 'foo')
+          const result = cloudProfileStore.kubernetesVersionUpdatePathAvailable(unclassified164VersionWithExpiration.version, cloudProfileRef)
           expect(result).toBe(true)
         })
 
         it('selected kubernetes version should have update path (no immediate update available)', () => {
-          const result = cloudProfileStore.kubernetesVersionUpdatePathAvailable(deprecated14Version.version, 'foo')
+          const result = cloudProfileStore.kubernetesVersionUpdatePathAvailable(deprecated14Version.version, cloudProfileRef)
           expect(result).toBe(true)
         })
 
         it('selected kubernetes version should not have update path (minor update is preview)', () => {
-          const result = cloudProfileStore.kubernetesVersionUpdatePathAvailable(supported20Version.version, 'foo')
+          const result = cloudProfileStore.kubernetesVersionUpdatePathAvailable(supported20Version.version, cloudProfileRef)
           expect(result).toBe(false)
         })
 
         it('selected kubernetes version should not have update path (no newer version available)', () => {
-          const result = cloudProfileStore.kubernetesVersionUpdatePathAvailable(deprecated181VersionWithoutExpiration.version, 'foo')
+          const result = cloudProfileStore.kubernetesVersionUpdatePathAvailable(deprecated181VersionWithoutExpiration.version, cloudProfileRef)
           expect(result).toBe(false)
         })
       })
 
       describe('#k8sVersionExpirationForShoot', () => {
         it('should be info level (patch available, auto update enabled))', () => {
-          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(unclassified164VersionWithExpiration.version, 'foo', true)
+          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(unclassified164VersionWithExpiration.version, cloudProfileRef, true)
           expect(versionExpirationWarning).toEqual({
             expirationDate: unclassified164VersionWithExpiration.expirationDate,
+            isExpired: false,
             isValidTerminationDate: true,
             severity: 'info',
           })
         })
 
         it('should be warning level (patch available, auto update enabled, expiration warning))', () => {
-          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(supported162VersionWithExpirationWarning.version, 'foo', true)
+          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(supported162VersionWithExpirationWarning.version, cloudProfileRef, true)
           expect(versionExpirationWarning).toEqual({
             expirationDate: supported162VersionWithExpirationWarning.expirationDate,
+            isExpired: false,
             isValidTerminationDate: true,
             severity: 'warning',
           })
         })
 
         it('should be warning level (patch available, auto update disabled))', () => {
-          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(supported162VersionWithExpirationWarning.version, 'foo', false)
+          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(supported162VersionWithExpirationWarning.version, cloudProfileRef, false)
           expect(versionExpirationWarning).toEqual({
             expirationDate: supported162VersionWithExpirationWarning.expirationDate,
+            isExpired: false,
             isValidTerminationDate: true,
             severity: 'warning',
           })
         })
 
         it('should be warning level (update available, auto update enabled / disabled))', () => {
-          let versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(supported17VersionWithExpirationWarning.version, 'foo', true)
+          let versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(supported17VersionWithExpirationWarning.version, cloudProfileRef, true)
           expect(versionExpirationWarning).toEqual({
             expirationDate: supported17VersionWithExpirationWarning.expirationDate,
+            isExpired: false,
             isValidTerminationDate: true,
             severity: 'warning',
           })
 
-          versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(supported17VersionWithExpirationWarning.version, 'foo', false)
+          versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(supported17VersionWithExpirationWarning.version, cloudProfileRef, false)
           expect(versionExpirationWarning).toEqual({
             expirationDate: supported17VersionWithExpirationWarning.expirationDate,
+            isExpired: false,
             isValidTerminationDate: true,
             severity: 'warning',
           })
         })
 
         it('should be error level (only deprecated newer version available))', () => {
-          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(supported18VersionWithExpirationWarning.version, 'foo', false)
+          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(supported18VersionWithExpirationWarning.version, cloudProfileRef, false)
           expect(versionExpirationWarning).toEqual({
             expirationDate: supported18VersionWithExpirationWarning.expirationDate,
+            isExpired: false,
             isValidTerminationDate: true,
             severity: 'error',
           })
         })
 
         it('should not have warning (version not expired))', () => {
-          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(unclassified164VersionWithExpiration.version, 'foo', false)
+          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(unclassified164VersionWithExpiration.version, cloudProfileRef, false)
           expect(versionExpirationWarning).toBeUndefined()
         })
 
         it('should have info (auto update)', () => {
-          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(unclassified164VersionWithExpiration.version, 'foo', true)
+          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(unclassified164VersionWithExpiration.version, cloudProfileRef, true)
           expect(versionExpirationWarning).toEqual({
             expirationDate: unclassified164VersionWithExpiration.expirationDate,
+            isExpired: false,
             isValidTerminationDate: true,
             severity: 'info',
           })
         })
 
         it('should not have warning (deprecated version has no expiration))', () => {
-          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(deprecatedOldest16Version.version, 'foo', false)
+          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(deprecatedOldest16Version.version, cloudProfileRef, false)
           expect(versionExpirationWarning).toBeUndefined()
         })
 
         it('should not have error when no immediate supported minor version update exists', () => {
-          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(deprecated14Version.version, 'foo', true)
+          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(deprecated14Version.version, cloudProfileRef, true)
           expect(versionExpirationWarning).toEqual({
             expirationDate: deprecated14Version.expirationDate,
+            isExpired: false,
             isValidTerminationDate: true,
+            severity: 'warning',
+          })
+        })
+
+        it('should have warning when version is expired', () => {
+          const versionExpirationWarning = cloudProfileStore.kubernetesVersionExpirationForShoot(expiredVersion.version, cloudProfileRef, false)
+          expect(versionExpirationWarning).toEqual({
+            expirationDate: expiredVersion.expirationDate,
+            isExpired: true,
+            isValidTerminationDate: false,
             severity: 'warning',
           })
         })
@@ -626,7 +651,7 @@ describe('stores', () => {
       ]
 
       beforeEach(() => {
-        setData({
+        setSpec({
           machineTypes,
           volumeTypes,
           regions,
@@ -634,32 +659,32 @@ describe('stores', () => {
       })
 
       it('should return machineTypes by region and zones from cloud profile', () => {
-        let dashboardMachineTypes = cloudProfileStore.machineTypesByCloudProfileName('foo')
+        let dashboardMachineTypes = cloudProfileStore.machineTypesByCloudProfileRef(cloudProfileRef)
         expect(dashboardMachineTypes).toHaveLength(4)
 
-        dashboardMachineTypes = cloudProfileStore.machineTypesByCloudProfileNameAndRegionAndArchitecture({ cloudProfileName: 'foo', region: 'region1', architecture: 'amd64' })
+        dashboardMachineTypes = cloudProfileStore.machineTypesByCloudProfileRefAndRegionAndArchitecture({ cloudProfileRef, region: 'region1', architecture: 'amd64' })
         expect(dashboardMachineTypes).toHaveLength(2)
         expect(dashboardMachineTypes[0].name).toBe('machineType1')
         expect(dashboardMachineTypes[1].name).toBe('machineType3')
 
-        dashboardMachineTypes = cloudProfileStore.machineTypesByCloudProfileNameAndRegionAndArchitecture({ cloudProfileName: 'foo', region: 'region2', architecture: 'arm64' })
+        dashboardMachineTypes = cloudProfileStore.machineTypesByCloudProfileRefAndRegionAndArchitecture({ cloudProfileRef, region: 'region2', architecture: 'arm64' })
         expect(dashboardMachineTypes).toHaveLength(1)
         expect(dashboardMachineTypes[0].name).toBe('machineType4')
       })
 
       it('should return volumeTypes by region and zones from cloud profile', () => {
-        let dashboardVolumeTypes = cloudProfileStore.volumeTypesByCloudProfileName('foo')
+        let dashboardVolumeTypes = cloudProfileStore.volumeTypesByCloudProfileRef(cloudProfileRef)
         expect(dashboardVolumeTypes).toHaveLength(3)
 
-        dashboardVolumeTypes = cloudProfileStore.volumeTypesByCloudProfileNameAndRegion({ cloudProfileName: 'foo', region: 'region1' })
+        dashboardVolumeTypes = cloudProfileStore.volumeTypesByCloudProfileRefAndRegion({ cloudProfileRef, region: 'region1' })
         expect(dashboardVolumeTypes).toHaveLength(2)
 
-        dashboardVolumeTypes = cloudProfileStore.volumeTypesByCloudProfileNameAndRegion({ cloudProfileName: 'foo', region: 'region2' })
+        dashboardVolumeTypes = cloudProfileStore.volumeTypesByCloudProfileRefAndRegion({ cloudProfileRef, region: 'region2' })
         expect(dashboardVolumeTypes).toHaveLength(3)
       })
 
       it('should return an empty machineType / volumeType array if no cloud profile is provided', () => {
-        const items = cloudProfileStore.machineTypesByCloudProfileName()
+        const items = cloudProfileStore.machineTypesByCloudProfileRef()
         expect(items).toBeInstanceOf(Array)
         expect(items).toHaveLength(0)
       })
@@ -724,7 +749,7 @@ describe('stores', () => {
       ]
 
       beforeEach(() => {
-        setData({
+        setSpec({
           providerConfig: {
             constraints: {
               floatingPools,
@@ -735,91 +760,85 @@ describe('stores', () => {
       })
 
       it('should return floating pool names by region and domain from cloud profile', () => {
-        const cloudProfileName = 'foo'
-
         let region = 'fooRegion'
         let secretDomain = 'fooDomain'
-        let dashboardFloatingPools = cloudProfileStore.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({ cloudProfileName, region, secretDomain })
+        let dashboardFloatingPools = cloudProfileStore.floatingPoolNamesByCloudProfileRefAndRegionAndDomain({ cloudProfileRef, region, secretDomain })
         expect(dashboardFloatingPools).toHaveLength(1)
         expect(dashboardFloatingPools[0]).toBe('global FP')
 
         region = 'region1'
         secretDomain = 'fooDomain'
-        dashboardFloatingPools = cloudProfileStore.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({ cloudProfileName, region, secretDomain })
+        dashboardFloatingPools = cloudProfileStore.floatingPoolNamesByCloudProfileRefAndRegionAndDomain({ cloudProfileRef, region, secretDomain })
         expect(dashboardFloatingPools).toHaveLength(1)
         expect(dashboardFloatingPools[0]).toBe('regional FP')
 
         region = 'region2'
         secretDomain = 'fooDomain'
-        dashboardFloatingPools = cloudProfileStore.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({ cloudProfileName, region, secretDomain })
+        dashboardFloatingPools = cloudProfileStore.floatingPoolNamesByCloudProfileRefAndRegionAndDomain({ cloudProfileRef, region, secretDomain })
         expect(dashboardFloatingPools).toHaveLength(2)
         expect(dashboardFloatingPools[0]).toBe('global FP')
         expect(dashboardFloatingPools[1]).toBe('regional non constraining FP')
 
         region = 'fooRegion'
         secretDomain = 'domain1'
-        dashboardFloatingPools = cloudProfileStore.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({ cloudProfileName, region, secretDomain })
+        dashboardFloatingPools = cloudProfileStore.floatingPoolNamesByCloudProfileRefAndRegionAndDomain({ cloudProfileRef, region, secretDomain })
         expect(dashboardFloatingPools).toHaveLength(1)
         expect(dashboardFloatingPools[0]).toBe('domain specific FP')
 
         region = 'fooRegion'
         secretDomain = 'domain2'
-        dashboardFloatingPools = cloudProfileStore.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({ cloudProfileName, region, secretDomain })
+        dashboardFloatingPools = cloudProfileStore.floatingPoolNamesByCloudProfileRefAndRegionAndDomain({ cloudProfileRef, region, secretDomain })
         expect(dashboardFloatingPools).toHaveLength(2)
         expect(dashboardFloatingPools[0]).toBe('global FP')
         expect(dashboardFloatingPools[1]).toBe('domain specific non constraining FP')
 
         region = 'region3'
         secretDomain = 'domain3'
-        dashboardFloatingPools = cloudProfileStore.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({ cloudProfileName, region, secretDomain })
+        dashboardFloatingPools = cloudProfileStore.floatingPoolNamesByCloudProfileRefAndRegionAndDomain({ cloudProfileRef, region, secretDomain })
         expect(dashboardFloatingPools).toHaveLength(2)
         expect(dashboardFloatingPools[0]).toBe('domain specific, regional FP')
         expect(dashboardFloatingPools[1]).toBe('additional domain specific, regional FP')
 
         region = 'region4'
         secretDomain = 'domain4'
-        dashboardFloatingPools = cloudProfileStore.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({ cloudProfileName, region, secretDomain })
+        dashboardFloatingPools = cloudProfileStore.floatingPoolNamesByCloudProfileRefAndRegionAndDomain({ cloudProfileRef, region, secretDomain })
         expect(dashboardFloatingPools).toHaveLength(2)
         expect(dashboardFloatingPools[0]).toBe('global FP')
         expect(dashboardFloatingPools[1]).toBe('domain specific, regional non constraining FP')
       })
 
       it('should return load balancer provider names by region from cloud profile', () => {
-        const cloudProfileName = 'foo'
-
         let region = 'fooRegion'
-        let dashboardLoadBalancerProviderNames = cloudProfileStore.loadBalancerProviderNamesByCloudProfileNameAndRegion({ cloudProfileName, region })
+        let dashboardLoadBalancerProviderNames = cloudProfileStore.loadBalancerProviderNamesByCloudProfileRefAndRegion({ cloudProfileRef, region })
         expect(dashboardLoadBalancerProviderNames).toHaveLength(1)
         expect(dashboardLoadBalancerProviderNames[0]).toBe('global LB')
 
         region = 'region1'
-        dashboardLoadBalancerProviderNames = cloudProfileStore.loadBalancerProviderNamesByCloudProfileNameAndRegion({ cloudProfileName, region })
+        dashboardLoadBalancerProviderNames = cloudProfileStore.loadBalancerProviderNamesByCloudProfileRefAndRegion({ cloudProfileRef, region })
         expect(dashboardLoadBalancerProviderNames).toHaveLength(2)
         expect(dashboardLoadBalancerProviderNames[0]).toBe('regional LB')
         expect(dashboardLoadBalancerProviderNames[1]).toBe('additional regional LB')
 
         region = 'region2'
-        dashboardLoadBalancerProviderNames = cloudProfileStore.loadBalancerProviderNamesByCloudProfileNameAndRegion({ cloudProfileName, region })
+        dashboardLoadBalancerProviderNames = cloudProfileStore.loadBalancerProviderNamesByCloudProfileRefAndRegion({ cloudProfileRef, region })
         expect(dashboardLoadBalancerProviderNames).toHaveLength(1)
         expect(dashboardLoadBalancerProviderNames[0]).toBe('other regional LB')
       })
     })
 
     describe('providerConfig.defaultNodesCIDR', () => {
-      const cloudProfileName = 'foo'
-
       it('should return default node cidr from config', async () => {
-        const defaultNodesCIDR = cloudProfileStore.getDefaultNodesCIDR(cloudProfileName)
+        const defaultNodesCIDR = cloudProfileStore.getDefaultNodesCIDR(cloudProfileRef)
         expect(defaultNodesCIDR).toBe('10.10.0.0/16')
       })
 
       it('should return default node cidr from cloud profile', () => {
-        setData({
+        setSpec({
           providerConfig: {
             defaultNodesCIDR: '1.2.3.4/16',
           },
         })
-        const defaultNodesCIDR = cloudProfileStore.getDefaultNodesCIDR(cloudProfileName)
+        const defaultNodesCIDR = cloudProfileStore.getDefaultNodesCIDR(cloudProfileRef)
         expect(defaultNodesCIDR).toBe('1.2.3.4/16')
       })
     })

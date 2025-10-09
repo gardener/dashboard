@@ -12,15 +12,14 @@ import {
   provide,
   inject,
   toRef,
-  watch,
   computed,
+  watch,
 } from 'vue'
 import { useTheme } from 'vuetify'
 import {
   onKeyStroke,
   useEventBus,
   useColorMode,
-  useDocumentVisibility,
   useTitle,
 } from '@vueuse/core'
 import { useRouteQuery } from '@vueuse/router'
@@ -29,7 +28,6 @@ import { useRoute } from 'vue-router'
 import { useConfigStore } from '@/store/config'
 import { useLoginStore } from '@/store/login'
 import { useLocalStorageStore } from '@/store/localStorage'
-import { useShootStore } from '@/store/shoot'
 import { useProjectStore } from '@/store/project'
 
 import { useCustomColors } from '@/composables/useCustomColors'
@@ -39,10 +37,8 @@ import get from 'lodash/get'
 const theme = useTheme()
 const route = useRoute()
 const localStorageStore = useLocalStorageStore()
-const visibility = useDocumentVisibility()
 const configStore = useConfigStore()
 const loginStore = useLoginStore()
-const shootStore = useShootStore()
 const projectStore = useProjectStore()
 const logger = inject('logger')
 
@@ -61,9 +57,10 @@ const sapTheme = useRouteQuery('sap-theme')
 const { system } = useColorMode({
   storageRef: colorScheme,
   onChanged (value) {
-    theme.global.name.value = value === 'auto'
+    const themeValue = value === 'auto'
       ? system.value
       : value
+    theme.change(themeValue)
   },
 })
 
@@ -76,12 +73,6 @@ const bus = useEventBus('esc-pressed')
 onKeyStroke('Escape', e => {
   bus.emit()
   e.preventDefault()
-})
-
-watch(visibility, (current, previous) => {
-  if (current === 'visible' && previous === 'hidden') {
-    shootStore.invokeSubscriptionEventHandler()
-  }
 })
 
 watch(sapTheme, value => {
@@ -107,12 +98,12 @@ const documentTitle = computed(() => {
   }
 
   if (route.meta.namespaced !== false) {
-    const projectName = projectStore.projectName
+    const projectNameAndTitle = projectStore.projectNameAndTitle
     const routeParamName = route.params.name
     if (routeParamName) {
-      titleItems.push([projectName, routeParamName].join('/'))
-    } else if (projectName) {
-      titleItems.push(projectName)
+      titleItems.push([projectNameAndTitle, routeParamName].join('/'))
+    } else if (projectNameAndTitle) {
+      titleItems.push(projectNameAndTitle)
     }
   }
   if (titleItems.length) {

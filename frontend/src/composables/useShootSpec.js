@@ -7,7 +7,7 @@
 import { computed } from 'vue'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
-import { useSeedStore } from '@/store/seed'
+import { useCredentialStore } from '@/store/credential'
 
 import get from 'lodash/get'
 import uniq from 'lodash/uniq'
@@ -19,7 +19,7 @@ import compact from 'lodash/compact'
 export function useShootSpec (shootItem, options = {}) {
   const {
     cloudProfileStore = useCloudProfileStore(),
-    seedStore = useSeedStore(),
+    credentialStore = useCredentialStore(),
   } = options
 
   const shootSpec = computed(() => {
@@ -46,12 +46,36 @@ export function useShootSpec (shootItem, options = {}) {
     return shootSpec.value.secretBindingName
   })
 
+  const shootCredentialsBindingName = computed(() => {
+    return shootSpec.value.credentialsBindingName
+  })
+
+  const shootCloudProviderBinding = computed(() => {
+    if (shootSecretBindingName.value) {
+      return find(credentialStore.secretBindingList, {
+        metadata: {
+          name: shootSecretBindingName.value,
+          namespace: get(shootItem.value, ['metadata', 'namespace']),
+        },
+      })
+    }
+    if (shootCredentialsBindingName.value) {
+      return find(credentialStore.credentialsBindingList, {
+        metadata: {
+          name: shootCredentialsBindingName.value,
+          namespace: get(shootItem.value, ['metadata', 'namespace']),
+        },
+      })
+    }
+    return undefined
+  })
+
   const shootK8sVersion = computed(() => {
     return get(shootSpec.value, ['kubernetes', 'version'])
   })
 
   const shootAvailableK8sUpdates = computed(() => {
-    return cloudProfileStore.availableKubernetesUpdatesForShoot(shootK8sVersion.value, shootCloudProfileName.value)
+    return cloudProfileStore.availableKubernetesUpdatesForShoot(shootK8sVersion.value, shootCloudProfileRef.value)
   })
 
   const shootSupportedPatchAvailable = computed(() => {
@@ -63,12 +87,12 @@ export function useShootSpec (shootItem, options = {}) {
   })
 
   const shootKubernetesVersionObject = computed(() => {
-    const kubernetesVersionObjects = cloudProfileStore.kubernetesVersions(shootCloudProfileName.value)
+    const kubernetesVersionObjects = cloudProfileStore.kubernetesVersions(shootCloudProfileRef.value)
     return find(kubernetesVersionObjects, ['version', shootK8sVersion.value]) ?? {}
   })
 
-  const shootCloudProfileName = computed(() => {
-    return shootSpec.value.cloudProfileName
+  const shootCloudProfileRef = computed(() => {
+    return shootSpec.value.cloudProfile
   })
 
   const shootProviderType = computed(() => {
@@ -144,10 +168,6 @@ export function useShootSpec (shootItem, options = {}) {
     return get(shootSpec.value, ['seedName'])
   })
 
-  const isSeedUnreachable = computed(() => {
-    return seedStore.isSeedUnreachableByName(shootSeedName.value)
-  })
-
   const shootResources = computed(() => {
     return get(shootSpec.value, ['resources'])
   })
@@ -159,12 +179,14 @@ export function useShootSpec (shootItem, options = {}) {
     isShootActionsDisabledForPurpose,
     isShootSettingHibernated,
     shootSecretBindingName,
+    shootCredentialsBindingName,
+    shootCloudProviderBinding,
     shootK8sVersion,
     shootAvailableK8sUpdates,
     shootKubernetesVersionObject,
     shootSupportedPatchAvailable,
     shootSupportedUpgradeAvailable,
-    shootCloudProfileName,
+    shootCloudProfileRef,
     shootProviderType,
     shootWorkerGroups,
     hasShootWorkerGroups,
@@ -183,7 +205,6 @@ export function useShootSpec (shootItem, options = {}) {
     shootMaintenance,
     shootControlPlaneHighAvailabilityFailureTolerance,
     shootSeedName,
-    isSeedUnreachable,
     shootResources,
   }
 }

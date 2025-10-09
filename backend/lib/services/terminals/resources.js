@@ -4,11 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const _ = require('lodash')
-
-const { Resources } = require('@gardener-dashboard/kube-client')
+import _ from 'lodash-es'
+import kubeClientModule from '@gardener-dashboard/kube-client'
+const { Resources } = kubeClientModule
 
 const COMPONENT_TERMINAL = 'dashboard-terminal'
 
@@ -78,7 +76,7 @@ function fromNodeResource ({ metadata, status = {} }) {
   }
 }
 
-module.exports = {
+export {
   toTerminalResource,
   fromNodeResource,
 }

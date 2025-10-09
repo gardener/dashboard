@@ -1,0 +1,165 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`api cloudprofiles should return all cloudprofiles 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImpvaG4uZG9lQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.LkQ9PEN893UNTsZZn2Ux_CAYNOoQ2ISboWuHiAc5HHU",
+    },
+    {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": {
+          "group": "core.gardener.cloud",
+          "resource": "cloudprofiles",
+          "verb": "list",
+        },
+      },
+    },
+  ],
+]
+`;
+
+exports[`api cloudprofiles should return all cloudprofiles 2`] = `
+[
+  {
+    "metadata": {
+      "name": "infra1-profileName",
+      "uid": 1,
+    },
+    "spec": {
+      "kubernetes": {
+        "versions": [
+          {
+            "version": "1.9.0",
+          },
+          {
+            "version": "1.8.5",
+          },
+        ],
+      },
+      "seedSelector": {},
+      "type": "infra1",
+    },
+  },
+  {
+    "metadata": {
+      "name": "infra1-profileName2",
+      "uid": 2,
+    },
+    "spec": {
+      "kubernetes": {
+        "versions": [
+          {
+            "version": "1.9.0",
+          },
+          {
+            "version": "1.8.5",
+          },
+        ],
+      },
+      "seedSelector": {
+        "providerTypes": [
+          "infra2",
+          "infra3",
+        ],
+      },
+      "type": "infra1",
+    },
+  },
+  {
+    "metadata": {
+      "name": "infra2-profileName",
+      "uid": 3,
+    },
+    "spec": {
+      "kubernetes": {
+        "versions": [
+          {
+            "version": "1.9.0",
+          },
+          {
+            "version": "1.8.5",
+          },
+        ],
+      },
+      "seedSelector": {},
+      "type": "infra2",
+    },
+  },
+  {
+    "metadata": {
+      "name": "infra3-profileName",
+      "uid": 4,
+    },
+    "spec": {
+      "kubernetes": {
+        "versions": [
+          {
+            "version": "1.9.0",
+          },
+          {
+            "version": "1.8.5",
+          },
+        ],
+      },
+      "seedSelector": {
+        "matchLabels": {
+          "foo": "bar",
+        },
+      },
+      "type": "infra3",
+    },
+  },
+  {
+    "metadata": {
+      "name": "infra3-profileName2",
+      "uid": 5,
+    },
+    "spec": {
+      "kubernetes": {
+        "versions": [
+          {
+            "version": "1.9.0",
+          },
+          {
+            "version": "1.8.5",
+          },
+        ],
+      },
+      "seedSelector": {},
+      "type": "infra3",
+    },
+  },
+  {
+    "metadata": {
+      "name": "infra4-profileName",
+      "uid": 6,
+    },
+    "spec": {
+      "kubernetes": {
+        "versions": [
+          {
+            "version": "1.9.0",
+          },
+          {
+            "version": "1.8.5",
+          },
+        ],
+      },
+      "seedSelector": {
+        "providerTypes": [
+          "*",
+        ],
+      },
+      "type": "infra4",
+    },
+  },
+]
+`;

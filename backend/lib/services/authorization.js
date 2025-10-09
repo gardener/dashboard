@@ -4,11 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const { Resources, createClient } = require('@gardener-dashboard/kube-client')
-const openfga = require('../openfga')
-const logger = require('../logger')
+import kubeClientModule from '@gardener-dashboard/kube-client'
+import openfga from '../openfga/index.js'
+import logger from '../logger/index.js'
+const { Resources, createClient } = kubeClientModule
 
 async function hasAuthorization (user, { resourceAttributes, nonResourceAttributes }) {
   if (!user) {
@@ -32,7 +31,7 @@ async function hasAuthorization (user, { resourceAttributes, nonResourceAttribut
   return allowed
 }
 
-exports.isAdmin = function (user) {
+export function isAdmin (user) {
   // if someone is allowed to get secrets in all namespaces he is considered to be an administrator
   return hasAuthorization(user, {
     resourceAttributes: {
@@ -43,7 +42,7 @@ exports.isAdmin = function (user) {
   })
 }
 
-exports.canListProjects = function (user) {
+export function canListProjects (user) {
   return hasAuthorization(user, {
     resourceAttributes: {
       verb: 'list',
@@ -53,7 +52,7 @@ exports.canListProjects = function (user) {
   })
 }
 
-exports.canGetOpenAPI = function (user) {
+export function canGetOpenAPI (user) {
   return hasAuthorization(user, {
     nonResourceAttributes: {
       verb: 'get',
@@ -62,7 +61,7 @@ exports.canGetOpenAPI = function (user) {
   })
 }
 
-exports.canListShoots = function (user, namespace) {
+export function canListShoots (user, namespace) {
   return hasAuthorization(user, {
     resourceAttributes: {
       verb: 'list',
@@ -73,7 +72,7 @@ exports.canListShoots = function (user, namespace) {
   })
 }
 
-exports.canGetShoot = function (user, namespace, name) {
+export function canGetShoot (user, namespace, name) {
   return hasAuthorization(user, {
     resourceAttributes: {
       verb: 'get',
@@ -85,7 +84,7 @@ exports.canGetShoot = function (user, namespace, name) {
   })
 }
 
-exports.canListSeeds = function (user) {
+export function canListSeeds (user) {
   return hasAuthorization(user, {
     resourceAttributes: {
       verb: 'list',
@@ -95,7 +94,7 @@ exports.canListSeeds = function (user) {
   })
 }
 
-exports.canListCloudProfiles = function (user) {
+export function canListCloudProfiles (user) {
   return hasAuthorization(user, {
     resourceAttributes: {
       verb: 'list',
@@ -105,7 +104,7 @@ exports.canListCloudProfiles = function (user) {
   })
 }
 
-exports.canGetCloudProfiles = function (user, name) {
+export function canGetCloudProfiles (user, name) {
   return hasAuthorization(user, {
     resourceAttributes: {
       verb: 'get',
@@ -116,7 +115,7 @@ exports.canGetCloudProfiles = function (user, name) {
   })
 }
 
-exports.canListResourceQuotas = function (user, namespace) {
+export function canListResourceQuotas (user, namespace) {
   return hasAuthorization(user, {
     resourceAttributes: {
       verb: 'list',
@@ -127,7 +126,7 @@ exports.canListResourceQuotas = function (user, namespace) {
   })
 }
 
-exports.canListControllerRegistrations = function (user) {
+export function canListControllerRegistrations (user) {
   return hasAuthorization(user, {
     resourceAttributes: {
       verb: 'list',
@@ -137,7 +136,7 @@ exports.canListControllerRegistrations = function (user) {
   })
 }
 
-exports.canGetSecret = function (user, namespace, name) {
+export function canGetSecret (user, namespace, name) {
   return hasAuthorization(user, {
     resourceAttributes: {
       verb: 'get',
@@ -152,7 +151,7 @@ exports.canGetSecret = function (user, namespace, name) {
 /*
 SelfSubjectRulesReview should only be used to hide/show actions or views on the UI and not for authorization checks.
 */
-exports.selfSubjectRulesReview = async function (user, namespace, accountId) {
+export async function selfSubjectRulesReview (user, namespace, accountId) {
   if (!user) {
     return false
   }
