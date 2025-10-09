@@ -29,6 +29,7 @@ import { useLogger } from '@/composables/useLogger'
 import { createShootHelperComposable } from '@/composables/useShootHelper'
 import { useShootMetadata } from '@/composables/useShootMetadata'
 import { useShootAccessRestrictions } from '@/composables/useShootAccessRestrictions'
+import { useCloudProfileForKubeVersions } from '@/composables/useCloudProfile/useCloudProfileForKubeVersions.js'
 
 import {
   scheduleEventsFromCrontabBlocks,
@@ -188,9 +189,9 @@ export function createShootContextComposable (options = {}) {
   })
 
   function resetKubernetesVersion () {
-    const kubernetesVersions = map(cloudProfileStore.sortedKubernetesVersions(cloudProfileRef.value), 'version')
+    const kubernetesVersions = map(sortedKubernetesVersions.value, 'version')
     if (!kubernetesVersion.value || !includes(kubernetesVersions, kubernetesVersion.value)) {
-      const defaultKubernetesVersionDescriptor = cloudProfileStore.defaultKubernetesVersionForCloudProfileRef(cloudProfileRef.value)
+      const defaultKubernetesVersionDescriptor = defaultKubernetesVersion.value
       kubernetesVersion.value = get(defaultKubernetesVersionDescriptor, ['version'])
     }
   }
@@ -939,6 +940,10 @@ export function createShootContextComposable (options = {}) {
     credentialStore,
     seedStore,
   })
+
+  const {
+    defaultKubernetesVersion,
+  } = useCloudProfileForKubeVersions(cloudProfile)
 
   /* watches */
   watch(isFailureToleranceTypeZoneSupported, value => {
