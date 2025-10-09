@@ -4,12 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const { mix } = require('mixwith')
-
-const { Coordination } = require('../groups')
-const { NamespaceScoped, Readable, Observable, Writable } = require('../mixins')
+import { mix } from 'mixwith'
+import { Coordination } from '../groups.js'
+import { NamespaceScoped, Readable, Observable, Writable } from '../mixins.js'
 
 class Lease extends mix(Coordination).with(NamespaceScoped, Readable, Observable, Writable) {
   static get names () {
@@ -21,6 +18,6 @@ class Lease extends mix(Coordination).with(NamespaceScoped, Readable, Observable
   }
 }
 
-module.exports = {
+export default {
   Lease,
 }

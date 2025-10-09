@@ -19,6 +19,7 @@ import { useShootStore } from '@/store/shoot'
 import { useProjectStore } from '@/store/project'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useSeedStore } from '@/store/seed'
+import { useCredentialStore } from '@/store/credential'
 
 import { createShootItemComposable } from '@/composables/useShootItem'
 
@@ -34,6 +35,7 @@ describe('composables', () => {
     let projectStore
     let cloudProfileStore
     let seedStore
+    let credentialStore
     let reactiveShootItem
 
     function setObjectValue (object, path, value) {
@@ -66,6 +68,7 @@ describe('composables', () => {
       projectStore = useProjectStore()
       cloudProfileStore = useCloudProfileStore()
       seedStore = useSeedStore()
+      credentialStore = useCredentialStore()
 
       reactiveShootItem = reactive({
         isStaleShoot: computed(() => !shootStore.isShootActive(shootItem.value?.metadata.uid)),
@@ -230,6 +233,16 @@ describe('composables', () => {
 
       setShootItem('metadata.deletionTimestamp', undefined)
       expect(reactiveShootItem.canForceDeleteShoot).toBe(false)
+    })
+
+    it('should compute shootCloudProviderBinding correctly', () => {
+      credentialStore._setCredentials(fixtures.credentials)
+      setShootItem('spec.credentialsBindingName', 'aws-credentialsbinding')
+      expect(reactiveShootItem.shootCloudProviderBinding).toMatchSnapshot()
+
+      setShootItem('spec.credentialsBindingName', undefined)
+      setShootItem('spec.secretBindingName', 'aws-secretbinding')
+      expect(reactiveShootItem.shootCloudProviderBinding).toMatchSnapshot()
     })
   })
 })

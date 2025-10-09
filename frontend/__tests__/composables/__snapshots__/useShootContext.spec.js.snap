@@ -95,7 +95,10 @@ exports[`composables > useShootContext > should change the infrastructure kind 1
         "enabled": false,
       },
     },
-    "cloudProfileName": "gcp",
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "gcp",
+    },
     "hibernation": {
       "schedules": [
         {
@@ -164,12 +167,12 @@ exports[`composables > useShootContext > should change the infrastructure kind 1
     },
     "purpose": "evaluation",
     "region": "europe-west1",
-    "secretBindingName": "gcp-secret",
+    "secretBindingName": "gcp-secretbinding",
   },
 }
 `;
 
-exports[`composables > useShootContext > should create a default "alicloud" shoot manifest 1`] = `
+exports[`composables > useShootContext > should change to credentials binding 1`] = `
 {
   "apiVersion": "core.gardener.cloud/v1beta1",
   "kind": "Shoot",
@@ -186,105 +189,11 @@ exports[`composables > useShootContext > should create a default "alicloud" shoo
         "enabled": false,
       },
     },
-    "cloudProfileName": "alicloud",
-    "hibernation": {
-      "schedules": [
-        {
-          "location": "Europe/Berlin",
-          "start": "00 17 * * 1,2,3,4,5",
-        },
-      ],
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "aws",
     },
-    "kubernetes": {
-      "version": "1.28.6",
-    },
-    "maintenance": {
-      "autoUpdate": {
-        "kubernetesVersion": true,
-        "machineImageVersion": true,
-      },
-      "timeWindow": {
-        "begin": "220000+0100",
-        "end": "230000+0100",
-      },
-    },
-    "networking": {
-      "nodes": "10.180.0.0/16",
-      "type": "calico",
-    },
-    "provider": {
-      "controlPlaneConfig": {
-        "apiVersion": "alicloud.provider.extensions.gardener.cloud/v1alpha1",
-        "kind": "ControlPlaneConfig",
-      },
-      "infrastructureConfig": {
-        "apiVersion": "alicloud.provider.extensions.gardener.cloud/v1alpha1",
-        "kind": "InfrastructureConfig",
-        "networks": {
-          "vpc": {
-            "cidr": "10.180.0.0/16",
-          },
-          "zones": [
-            {
-              "name": "eu-central-1a",
-              "workers": "10.180.0.0/18",
-            },
-          ],
-        },
-      },
-      "type": "alicloud",
-      "workers": [
-        {
-          "cri": {
-            "name": "containerd",
-          },
-          "machine": {
-            "architecture": "amd64",
-            "image": {
-              "name": "gardenlinux",
-              "version": "1312.3.0",
-            },
-            "type": "ecs.c1.small",
-          },
-          "maxSurge": 1,
-          "maximum": 2,
-          "minimum": 1,
-          "name": "worker-m6kgs",
-          "volume": {
-            "size": "50Gi",
-            "type": "cloud",
-          },
-          "zones": [
-            "eu-central-1a",
-          ],
-        },
-      ],
-    },
-    "purpose": "evaluation",
-    "region": "eu-central-1",
-    "secretBindingName": "alicloud-secret",
-  },
-}
-`;
-
-exports[`composables > useShootContext > should create a default "aws" shoot manifest 1`] = `
-{
-  "apiVersion": "core.gardener.cloud/v1beta1",
-  "kind": "Shoot",
-  "metadata": {
-    "name": "m6kgstc1b0",
-    "namespace": "garden-test",
-  },
-  "spec": {
-    "addons": {
-      "kubernetesDashboard": {
-        "enabled": false,
-      },
-      "nginxIngress": {
-        "enabled": false,
-      },
-    },
-    "cloudProfileName": "aws",
+    "credentialsBindingName": "aws-credentialsbinding",
     "hibernation": {
       "schedules": [
         {
@@ -362,7 +271,210 @@ exports[`composables > useShootContext > should create a default "aws" shoot man
     },
     "purpose": "evaluation",
     "region": "eu-central-1",
-    "secretBindingName": "aws-secret",
+  },
+}
+`;
+
+exports[`composables > useShootContext > should create a default "alicloud" shoot manifest 1`] = `
+{
+  "apiVersion": "core.gardener.cloud/v1beta1",
+  "kind": "Shoot",
+  "metadata": {
+    "name": "m6kgstc1b0",
+    "namespace": "garden-test",
+  },
+  "spec": {
+    "addons": {
+      "kubernetesDashboard": {
+        "enabled": false,
+      },
+      "nginxIngress": {
+        "enabled": false,
+      },
+    },
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "alicloud",
+    },
+    "hibernation": {
+      "schedules": [
+        {
+          "location": "Europe/Berlin",
+          "start": "00 17 * * 1,2,3,4,5",
+        },
+      ],
+    },
+    "kubernetes": {
+      "version": "1.28.6",
+    },
+    "maintenance": {
+      "autoUpdate": {
+        "kubernetesVersion": true,
+        "machineImageVersion": true,
+      },
+      "timeWindow": {
+        "begin": "220000+0100",
+        "end": "230000+0100",
+      },
+    },
+    "networking": {
+      "nodes": "10.180.0.0/16",
+      "type": "calico",
+    },
+    "provider": {
+      "controlPlaneConfig": {
+        "apiVersion": "alicloud.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "ControlPlaneConfig",
+      },
+      "infrastructureConfig": {
+        "apiVersion": "alicloud.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "InfrastructureConfig",
+        "networks": {
+          "vpc": {
+            "cidr": "10.180.0.0/16",
+          },
+          "zones": [
+            {
+              "name": "eu-central-1a",
+              "workers": "10.180.0.0/18",
+            },
+          ],
+        },
+      },
+      "type": "alicloud",
+      "workers": [
+        {
+          "cri": {
+            "name": "containerd",
+          },
+          "machine": {
+            "architecture": "amd64",
+            "image": {
+              "name": "gardenlinux",
+              "version": "1312.3.0",
+            },
+            "type": "ecs.c1.small",
+          },
+          "maxSurge": 1,
+          "maximum": 2,
+          "minimum": 1,
+          "name": "worker-m6kgs",
+          "volume": {
+            "size": "50Gi",
+            "type": "cloud",
+          },
+          "zones": [
+            "eu-central-1a",
+          ],
+        },
+      ],
+    },
+    "purpose": "evaluation",
+    "region": "eu-central-1",
+    "secretBindingName": "alicloud-secretbinding",
+  },
+}
+`;
+
+exports[`composables > useShootContext > should create a default "aws" shoot manifest 1`] = `
+{
+  "apiVersion": "core.gardener.cloud/v1beta1",
+  "kind": "Shoot",
+  "metadata": {
+    "name": "m6kgstc1b0",
+    "namespace": "garden-test",
+  },
+  "spec": {
+    "addons": {
+      "kubernetesDashboard": {
+        "enabled": false,
+      },
+      "nginxIngress": {
+        "enabled": false,
+      },
+    },
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "aws",
+    },
+    "hibernation": {
+      "schedules": [
+        {
+          "location": "Europe/Berlin",
+          "start": "00 17 * * 1,2,3,4,5",
+        },
+      ],
+    },
+    "kubernetes": {
+      "version": "1.28.6",
+    },
+    "maintenance": {
+      "autoUpdate": {
+        "kubernetesVersion": true,
+        "machineImageVersion": true,
+      },
+      "timeWindow": {
+        "begin": "220000+0100",
+        "end": "230000+0100",
+      },
+    },
+    "networking": {
+      "nodes": "10.180.0.0/16",
+      "type": "calico",
+    },
+    "provider": {
+      "controlPlaneConfig": {
+        "apiVersion": "aws.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "ControlPlaneConfig",
+      },
+      "infrastructureConfig": {
+        "apiVersion": "aws.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "InfrastructureConfig",
+        "networks": {
+          "vpc": {
+            "cidr": "10.180.0.0/16",
+          },
+          "zones": [
+            {
+              "internal": "10.180.48.0/20",
+              "name": "eu-central-1a",
+              "public": "10.180.32.0/20",
+              "workers": "10.180.0.0/19",
+            },
+          ],
+        },
+      },
+      "type": "aws",
+      "workers": [
+        {
+          "cri": {
+            "name": "containerd",
+          },
+          "machine": {
+            "architecture": "amd64",
+            "image": {
+              "name": "gardenlinux",
+              "version": "1312.3.0",
+            },
+            "type": "m4.large",
+          },
+          "maxSurge": 1,
+          "maximum": 2,
+          "minimum": 1,
+          "name": "worker-m6kgs",
+          "volume": {
+            "size": "50Gi",
+            "type": "gp3",
+          },
+          "zones": [
+            "eu-central-1a",
+          ],
+        },
+      ],
+    },
+    "purpose": "evaluation",
+    "region": "eu-central-1",
+    "secretBindingName": "aws-secretbinding",
   },
 }
 `;
@@ -384,7 +496,10 @@ exports[`composables > useShootContext > should create a default "azure" shoot m
         "enabled": false,
       },
     },
-    "cloudProfileName": "az",
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "az",
+    },
     "hibernation": {
       "schedules": [
         {
@@ -456,7 +571,7 @@ exports[`composables > useShootContext > should create a default "azure" shoot m
     },
     "purpose": "evaluation",
     "region": "westeurope",
-    "secretBindingName": "azure-secret",
+    "secretBindingName": "azure-secretbinding",
   },
 }
 `;
@@ -478,7 +593,10 @@ exports[`composables > useShootContext > should create a default "gcp" shoot man
         "enabled": false,
       },
     },
-    "cloudProfileName": "gcp",
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "gcp",
+    },
     "hibernation": {
       "schedules": [
         {
@@ -547,7 +665,7 @@ exports[`composables > useShootContext > should create a default "gcp" shoot man
     },
     "purpose": "evaluation",
     "region": "europe-west1",
-    "secretBindingName": "gcp-secret",
+    "secretBindingName": "gcp-secretbinding",
   },
 }
 `;
@@ -569,7 +687,10 @@ exports[`composables > useShootContext > should create a default "ironcore" shoo
         "enabled": false,
       },
     },
-    "cloudProfileName": "ironcore",
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "ironcore",
+    },
     "hibernation": {
       "schedules": [
         {
@@ -626,7 +747,7 @@ exports[`composables > useShootContext > should create a default "ironcore" shoo
     },
     "purpose": "evaluation",
     "region": "de-fra",
-    "secretBindingName": "ironcore-secret",
+    "secretBindingName": "ironcore-secretbinding",
   },
 }
 `;
@@ -648,7 +769,10 @@ exports[`composables > useShootContext > should create a default "openstack" sho
         "enabled": false,
       },
     },
-    "cloudProfileName": "openstack-1",
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "openstack-1",
+    },
     "hibernation": {
       "schedules": [
         {
@@ -714,7 +838,7 @@ exports[`composables > useShootContext > should create a default "openstack" sho
     },
     "purpose": "evaluation",
     "region": "eu-de-1",
-    "secretBindingName": "openstack-secret",
+    "secretBindingName": "openstack-secretbinding",
   },
 }
 `;

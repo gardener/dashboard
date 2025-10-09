@@ -6,13 +6,19 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <v-container fluid>
+  <v-container
+    ref="container"
+    fluid
+    class="container-size"
+  >
     <v-card class="ma-3">
       <g-toolbar
         prepend-icon="mdi-account-multiple"
-        title="Project Users"
         :height="64"
       >
+        <div class="text-h6">
+          Project Users
+        </div>
         <template #append>
           <v-text-field
             v-if="userList.length > 3"
@@ -30,45 +36,24 @@ SPDX-License-Identifier: Apache-2.0
             density="compact"
             @keyup.esc="userFilter = ''"
           />
-          <v-tooltip
+          <v-btn
             v-if="allEmails"
-            location="top"
-          >
-            <template #activator="{ props }">
-              <v-btn
-                v-bind="props"
-                icon="mdi-email-outline"
-                :href="`mailto:${allEmails}`"
-              />
-            </template>
-            <span>Mail to all Members</span>
-          </v-tooltip>
-          <v-tooltip
+            v-tooltip:top="'Mail to all Members'"
+            icon="mdi-email-outline"
+            :href="`mailto:${allEmails}`"
+          />
+          <v-btn
             v-if="canManageMembers"
-            location="top"
-          >
-            <template #activator="{ props }">
-              <v-btn
-                v-bind="props"
-                icon="mdi-plus"
-                @click.stop="openUserAddDialog"
-              />
-            </template>
-            <span>Add Member</span>
-          </v-tooltip>
-          <v-tooltip
+            v-tooltip:top="'Add Member'"
+            icon="mdi-plus"
+            @click.stop="openUserAddDialog"
+          />
+          <v-btn
             v-if="canManageMembers"
-            location="top"
-          >
-            <template #activator="{ props }">
-              <v-btn
-                v-bind="props"
-                icon="mdi-help-circle-outline"
-                @click.stop="openUserHelpDialog"
-              />
-            </template>
-            <span>Help</span>
-          </v-tooltip>
+            v-tooltip:top="'Help'"
+            icon="mdi-help-circle-outline"
+            @click.stop="openUserHelpDialog"
+          />
           <g-table-column-selection
             :headers="userAccountTableHeaders"
             @set-selected-header="setSelectedHeaderUserAccount"
@@ -86,19 +71,20 @@ SPDX-License-Identifier: Apache-2.0
           Access to resources within your project can be configured by assigning roles.
         </p>
       </v-card-text>
-      <v-data-table
+      <v-data-table-virtual
         v-else
-        v-model:page="userPage"
         v-model:sort-by="userSortBy"
-        v-model:items-per-page="userItemsPerPage"
         :headers="visibleUserAccountTableHeaders"
         :items="userSortedList"
-        :items-per-page-options="itemsPerPageOptions"
         :custom-key-sort="disableCustomKeySort(visibleUserAccountTableHeaders)"
         must-sort
+        hover
         :search="userFilter"
         density="compact"
         class="g-table"
+        :item-height="itemHeight"
+        :style="userTableStyles"
+        fixed-header
       >
         <template #item="{ item }">
           <g-user-row
@@ -109,24 +95,23 @@ SPDX-License-Identifier: Apache-2.0
             @edit="onEditUser"
           />
         </template>
-        <template #bottom="{ pageCount }">
+        <template #bottom>
           <g-data-table-footer
-            v-model:page="userPage"
-            v-model:items-per-page="userItemsPerPage"
             :items-length="userList.length"
-            :items-per-page-options="itemsPerPageOptions"
-            :page-count="pageCount"
+            items-label="Users"
           />
         </template>
-      </v-data-table>
+      </v-data-table-virtual>
     </v-card>
 
     <v-card class="ma-3 mt-6">
       <g-toolbar
         prepend-icon="mdi-monitor-multiple"
-        title="Service Accounts"
         :height="64"
       >
+        <div class="text-h6">
+          Service Accounts
+        </div>
         <template #append>
           <v-text-field
             v-if="serviceAccountList.length > 3"
@@ -144,29 +129,17 @@ SPDX-License-Identifier: Apache-2.0
             density="compact"
             @keyup.esc="serviceAccountFilter = ''"
           />
-          <v-tooltip
+          <v-btn
             v-if="canManageServiceAccountMembers && canCreateServiceAccounts"
-            location="top"
-          >
-            <template #activator="{ props }">
-              <v-btn
-                v-bind="props"
-                icon="mdi-plus"
-                @click.stop="openServiceAccountAddDialog"
-              />
-            </template>
-            <span>Create Service Account</span>
-          </v-tooltip>
-          <v-tooltip location="top">
-            <template #activator="{ props }">
-              <v-btn
-                v-bind="props"
-                icon="mdi-help-circle-outline"
-                @click.stop="openServiceAccountHelpDialog"
-              />
-            </template>
-            <span>Help</span>
-          </v-tooltip>
+            v-tooltip:top="'Create Service Account'"
+            icon="mdi-plus"
+            @click.stop="openServiceAccountAddDialog"
+          />
+          <v-btn
+            v-tooltip:top="'Help'"
+            icon="mdi-help-circle-outline"
+            @click.stop="openServiceAccountHelpDialog"
+          />
           <g-table-column-selection
             :headers="serviceAccountTableHeaders"
             @set-selected-header="setSelectedHeaderServiceAccount"
@@ -184,18 +157,20 @@ SPDX-License-Identifier: Apache-2.0
           Access to resources within your project can be configured by assigning roles.
         </p>
       </v-card-text>
-      <v-data-table
+      <v-data-table-virtual
         v-else
-        v-model:page="serviceAccountPage"
         v-model:sort-by="serviceAccountSortBy"
-        v-model:items-per-page="serviceAccountItemsPerPage"
         :headers="visibleServiceAccountTableHeaders"
         :items="serviceAccountSortedList"
-        :items-per-page-options="itemsPerPageOptions"
-        must-sort
-        :search="serviceAccountFilter"
         :custom-key-sort="disableCustomKeySort(visibleServiceAccountTableHeaders)"
+        must-sort
+        hover
+        :search="serviceAccountFilter"
+        density="compact"
         class="g-table"
+        :item-height="itemHeight"
+        :style="serviceAccountTableStyles"
+        fixed-header
       >
         <template #item="{ item }">
           <g-service-account-row
@@ -209,16 +184,13 @@ SPDX-License-Identifier: Apache-2.0
             @edit="onEditServiceAccount"
           />
         </template>
-        <template #bottom="{ pageCount }">
+        <template #bottom>
           <g-data-table-footer
-            v-model:page="serviceAccountPage"
-            v-model:items-per-page="serviceAccountItemsPerPage"
             :items-length="serviceAccountList.length"
-            :items-per-page-options="itemsPerPageOptions"
-            :page-count="pageCount"
+            items-label="Service Accounts"
           />
         </template>
-      </v-data-table>
+      </v-data-table-virtual>
     </v-card>
 
     <g-member-dialog
@@ -287,7 +259,6 @@ SPDX-License-Identifier: Apache-2.0
 import {
   ref,
   computed,
-  markRaw,
   inject,
   watch,
 } from 'vue'
@@ -318,6 +289,7 @@ import GDataTableFooter from '@/components/GDataTableFooter.vue'
 
 import { useApi } from '@/composables/useApi'
 import { useProvideProjectItem } from '@/composables/useProjectItem'
+import { useTwoTableLayout } from '@/composables/useTwoTableLayout'
 
 import {
   displayName,
@@ -326,7 +298,7 @@ import {
   parseServiceAccountUsername,
   isForeignServiceAccount,
   isServiceAccountUsername,
-  sortedRoleDisplayNames,
+  sortedRoleDescriptors,
   mapTableHeader,
 } from '@/utils'
 
@@ -368,8 +340,6 @@ const userFilter = ref('')
 const serviceAccountFilter = ref('')
 const currentServiceAccountName = ref()
 const currentServiceAccountKubeconfig = ref()
-const userPage = ref(1)
-const serviceAccountPage = ref(1)
 
 const {
   project,
@@ -388,25 +358,17 @@ const {
 const { list: memberList } = storeToRefs(memberStore)
 const {
   userSelectedColumns,
-  userItemsPerPage,
   userSortBy,
   serviceAccountSelectedColumns,
-  serviceAccountItemsPerPage,
   serviceAccountSortBy,
 } = storeToRefs(localStorageStore)
 
 const {
-  projectName,
+  projectNameAndTitle,
   projectOwner: owner,
 } = useProvideProjectItem(project)
 
 const confirmDialog = ref(null)
-
-const itemsPerPageOptions = markRaw([
-  { value: 5, title: '5' },
-  { value: 10, title: '10' },
-  { value: 20, title: '20' },
-])
 
 const userSortedList = computed(() => {
   const secondSortCriteria = 'username'
@@ -423,7 +385,7 @@ const userList = computed(() => {
       displayName: displayName(username),
       isEmail: isEmail(username),
       isOwner: isOwner(username),
-      roleDisplayNames: sortedRoleDisplayNames(user.roles),
+      roleDescriptors: sortedRoleDescriptors(user.roles),
       isCurrentUser: isCurrentUser(username),
     }
   })
@@ -487,7 +449,7 @@ const serviceAccountList = computed(() => {
       ...serviceAccount,
       avatarUrl: gravatarUrlGeneric(username),
       displayName: displayName(username),
-      roleDisplayNames: sortedRoleDisplayNames(serviceAccount.roles),
+      roleDescriptors: sortedRoleDescriptors(serviceAccount.roles),
       isCurrentUser: isCurrentUser(username),
     }
   })
@@ -553,6 +515,19 @@ const visibleServiceAccountTableHeaders = computed(() => {
   return filter(serviceAccountTableHeaders.value, ['selected', true])
 })
 
+const itemHeight = 48
+const firstTableItemCount = computed(() => userList.value.length)
+const secondTableItemCount = computed(() => serviceAccountList.value.length)
+
+const {
+  firstTableStyles: userTableStyles,
+  secondTableStyles: serviceAccountTableStyles,
+} = useTwoTableLayout({
+  firstTableItemCount,
+  secondTableItemCount,
+  itemHeight,
+})
+
 watch(namespace, () => {
   reset()
 })
@@ -560,8 +535,6 @@ watch(namespace, () => {
 function reset () {
   userFilter.value = ''
   serviceAccountFilter.value = ''
-  userPage.value = 1
-  serviceAccountPage.value = 1
 }
 
 function setKubeconfigError (err) {
@@ -650,11 +623,11 @@ function confirmRemoveUser (name) {
   let message
   if (isCurrentUser(name)) {
     message = renderComponent(GRemoveProjectMember, {
-      projectName: projectName.value,
+      projectNameAndTitle: projectNameAndTitle.value,
     })
   } else {
     message = renderComponent(GRemoveProjectMember, {
-      projectName: projectName.value,
+      projectNameAndTitle: projectNameAndTitle.value,
       memberName: displayName(name),
     })
   }
@@ -687,7 +660,7 @@ async function onResetServiceAccount ({ username }) {
 function confirmRemoveForeignServiceAccount (serviceAccountName) {
   const { namespace, name } = parseServiceAccountUsername(serviceAccountName)
   const message = renderComponent(GRemoveProjectMember, {
-    projectName: projectName.value,
+    projectNameAndTitle: projectNameAndTitle.value,
     memberName: name,
     namespace,
   })
@@ -785,7 +758,6 @@ function setSelectedHeaderUserAccount (header) {
 
 function resetTableSettingsUserAccount () {
   userSelectedColumns.value = mapTableHeader(userAccountTableHeaders.value, 'defaultSelected')
-  userItemsPerPage.value = 10
   userSortBy.value = [{ key: 'username', order: 'asc' }]
 }
 
@@ -795,7 +767,6 @@ function setSelectedHeaderServiceAccount (header) {
 
 function resetTableSettingsServiceAccount () {
   serviceAccountSelectedColumns.value = mapTableHeader(serviceAccountTableHeaders.value, 'defaultSelected')
-  serviceAccountItemsPerPage.value = 10
   serviceAccountSortBy.value = [{ key: 'displayName', order: 'asc' }]
 }
 
@@ -806,3 +777,12 @@ function disableCustomKeySort (tableHeaders) {
 }
 
 </script>
+
+<style lang="scss" scoped>
+
+.container-size {
+  height: 100%;
+  min-height: 800px; //ensure readability on small devices
+}
+
+</style>

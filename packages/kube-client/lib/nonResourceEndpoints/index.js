@@ -4,21 +4,22 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import _ from 'lodash-es'
+import { http } from '../symbols.js'
+import apiCtor from './API.js'
+import healthzCtor from './Healthz.js'
+import openAPICtor from './OpenAPI.js'
 
-const _ = require('lodash')
-const { http } = require('../symbols')
-
-const endpoints = exports.endpoints = {
+export const endpoints = {
   api: {
-    Ctor: require('./API'),
+    Ctor: apiCtor,
     responseType: 'json',
   },
   healthz: {
-    Ctor: require('./Healthz'),
+    Ctor: healthzCtor,
   },
   openapi: {
-    Ctor: require('./OpenAPI'),
+    Ctor: openAPICtor,
     responseType: 'json',
   },
 }
@@ -32,6 +33,6 @@ function load (clientConfig, options) {
   return _.mapValues(endpoints, createInstance)
 }
 
-exports.assign = (object, ...args) => {
+export function assign (object, ...args) {
   return Object.assign(object, load(...args))
 }

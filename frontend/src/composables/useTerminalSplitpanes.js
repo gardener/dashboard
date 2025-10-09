@@ -51,6 +51,7 @@ export function createTerminalSplitpanesComposable () {
   const appStore = useAppStore()
   const shootStore = useShootStore()
   const localStorageStore = useLocalStorageStore()
+  const terminalSplitpaneTree = localStorageStore.terminalSplitpaneTreeRef(route)
 
   let symbolTree = new GSymbolTree()
   const newTerminal = {
@@ -85,13 +86,27 @@ export function createTerminalSplitpanesComposable () {
     return isStatusHibernated(get(shootItem.value, ['status']))
   })
 
+  const canScheduleOnSeed = computed(() => {
+    return get(shootItem.value, ['info', 'canLinkToSeed'], false)
+  })
+
   const slotItemUUIds = computed(() => {
     const slotItems = filter(symbolTree.items(), ['data.type', 'SLOT_ITEM'])
     return map(slotItems, 'uuid')
   })
 
   const defaultTarget = computed(() => {
-    return terminalCoordinates.value.target || (authzStore.hasControlPlaneTerminalAccess ? TargetEnum.CONTROL_PLANE : TargetEnum.SHOOT)
+    if (terminalCoordinates.value.target) {
+      return terminalCoordinates.value.target
+    }
+    if (get(shootItem.value, ['info', 'canLinkToSeed']) === undefined) {
+      // target depends on shootItem info, this ensures target is stable during loading
+      return undefined
+    }
+    if (authzStore.hasControlPlaneTerminalAccess && canScheduleOnSeed.value) {
+      return TargetEnum.CONTROL_PLANE
+    }
+    return TargetEnum.SHOOT
   })
 
   function addSlotItem ({ data = {}, targetId, position } = {}) {
@@ -121,7 +136,7 @@ export function createTerminalSplitpanesComposable () {
   }
 
   async function restoreSessions (addItemFn = () => add()) {
-    const data = localStorageStore.terminalSplitpaneTree
+    const data = terminalSplitpaneTree.value
     if (!data) {
       addItemFn()
       return
@@ -183,7 +198,7 @@ export function createTerminalSplitpanesComposable () {
     splitpaneTree.value = symbolTree.toJSON(symbolTree.root)
 
     const onySlotItemsInTree = every(symbolTree.ids(), id => includes(slotItemUUIds.value, id))
-    localStorageStore.terminalSplitpaneTree = onySlotItemsInTree || symbolTree.isEmpty()
+    terminalSplitpaneTree.value = onySlotItemsInTree || symbolTree.isEmpty()
       ? null // clear value
       : splitpaneTree.value
   }
@@ -249,6 +264,7 @@ export function createTerminalSplitpanesComposable () {
     shootName,
     hasShootWorkerGroups,
     isShootStatusHibernated,
+    canScheduleOnSeed,
     splitpaneTree,
     newTerminalPrompt,
     defaultTarget,

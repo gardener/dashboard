@@ -4,6 +4,7 @@ exports[`useProjectShootCustomFields > should add a custom field 1`] = `
 [
   {
     "columnSelectedByDefault": true,
+    "icon": undefined,
     "name": "Field1",
     "path": "path1",
     "searchable": true,
@@ -50,6 +51,7 @@ exports[`useProjectShootCustomFields > should skip custom fields with invalid va
 [
   {
     "columnSelectedByDefault": true,
+    "icon": undefined,
     "name": "Valid Field",
     "path": "path1",
     "searchable": true,

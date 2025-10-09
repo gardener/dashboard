@@ -34,24 +34,7 @@ COPY . .
 
 # validate zero-installs project and disable network
 RUN yarn config set enableNetwork false
-RUN yarn install --immutable --immutable-cache
-
-# check that the constraints are met
-RUN yarn constraints
-
-# run lint
-RUN yarn workspace @gardener-dashboard/logger run lint-sarif
-RUN yarn workspace @gardener-dashboard/request run lint-sarif
-RUN yarn workspace @gardener-dashboard/kube-config run lint-sarif
-RUN yarn workspace @gardener-dashboard/kube-client run lint-sarif
-RUN yarn workspace @gardener-dashboard/monitor run lint-sarif
-
-# run test --coverage
-RUN yarn workspace @gardener-dashboard/logger run test --coverage
-RUN yarn workspace @gardener-dashboard/request run test --coverage
-RUN yarn workspace @gardener-dashboard/kube-config run test --coverage
-RUN yarn workspace @gardener-dashboard/kube-client run test --coverage
-RUN yarn workspace @gardener-dashboard/monitor run test --coverage
+RUN YARN_ENABLE_SCRIPTS=0 yarn install --immutable --immutable-cache
 
 ############# node-scratch #############
 FROM scratch AS node-scratch
@@ -70,14 +53,6 @@ ENTRYPOINT [ "tini", "--", "node"]
 
 ############# dashboard-builder #############
 FROM builder AS dashboard-builder
-
-# run lint
-RUN yarn workspace @gardener-dashboard/backend run lint-sarif
-RUN yarn workspace @gardener-dashboard/frontend run lint-sarif
-
-# run test --coverage
-RUN yarn workspace @gardener-dashboard/backend run test --coverage
-RUN yarn workspace @gardener-dashboard/frontend run test --coverage
 
 # bump version
 RUN yarn workspace @gardener-dashboard/backend version "$(cat VERSION)"

@@ -235,7 +235,7 @@ describe('stores', () => {
           },
         }
       })
-      mockSynchronize = vi.spyOn(socketStore, 'synchronize').mockImplementation(uids => Promise.resolve(getShoots(uids)))
+      mockSynchronize = vi.spyOn(socketStore, 'synchronize').mockImplementation((key, uids) => Promise.resolve(getShoots(uids)))
       shootStore.initializeShootListFilters()
     })
 

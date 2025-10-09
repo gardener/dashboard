@@ -11,6 +11,7 @@ SPDX-License-Identifier: Apache-2.0
     width="1250"
     confirm-required
     caption="Configure Workers"
+    :tooltip="dialogTooltip"
     disable-confirm-input-focus
     max-height="80vh"
     :disabled="!hasShootWorkerGroups"
@@ -94,13 +95,6 @@ SPDX-License-Identifier: Apache-2.0
       </v-expand-transition>
     </template>
   </g-action-button-dialog>
-  <v-tooltip
-    :activator="$refs.actionDialog"
-    location="top"
-    :disabled="hasShootWorkerGroups"
-  >
-    It is not possible to add worker groups to workerless clusters
-  </v-tooltip>
 </template>
 
 <script>
@@ -209,8 +203,7 @@ export default {
     const {
       touched,
       getEditorValue,
-      reloadEditor,
-      clearDocumentHistory,
+      refreshEditor,
     } = useProvide(injectionKey, useShootEditor(editorData, {
       completionPaths: [
         'spec.properties.provider.properties.workers',
@@ -239,8 +232,7 @@ export default {
       editorData,
       touched,
       getEditorValue,
-      reloadEditor,
-      clearDocumentHistory,
+      refreshEditor,
     }
   },
   computed: {
@@ -265,10 +257,16 @@ export default {
             // dialog downsize as editor not yet rendered
             this.overviewTabHeight = this.$refs.overviewTab.$el.getBoundingClientRect().height
             this.disableWorkerAnimation = true
+            this.refreshEditor()
             break
           }
         }
       },
+    },
+    dialogTooltip () {
+      return !this.hasShootWorkerGroups
+        ? 'It is not possible to add worker groups to workerless clusters'
+        : undefined
     },
   },
   methods: {

@@ -26,11 +26,21 @@ SPDX-License-Identifier: Apache-2.0
         hint="Choose &quot;Cluster&quot; if you want to troubleshoot a worker node of the cluster"
         persistent-hint
       >
-        <v-radio
-          label="Infrastructure (Seed)"
-          value="seed"
-          color="primary"
-        />
+        <div>
+          <v-radio
+            label="Infrastructure (Seed)"
+            value="seed"
+            color="primary"
+            :disabled="!canScheduleOnSeed"
+          />
+          <div
+            v-tooltip="{
+              text: 'Terminals can only be scheduled if the seed is a managed seed',
+              location: 'top left',
+              disabled: canScheduleOnSeed
+            }"
+          />
+        </div>
         <v-radio
           label="Cluster"
           value="shoot"
@@ -96,17 +106,6 @@ SPDX-License-Identifier: Apache-2.0
           </span>
         </template>
       </v-select>
-      <v-alert
-        v-if="isAdmin && runtime === 'shoot'"
-        class="ml-6 mt-6 mb-2"
-        :model-value="true"
-        type="info"
-        color="primary"
-        variant="tonal"
-      >
-        <strong>Terminal will be running in an untrusted environment!</strong><br>
-        Do not enter credentials or sensitive data within the terminal session that cluster owners should not have access to, as the terminal will be running on one of the worker nodes.
-      </v-alert>
     </template>
   </div>
 </template>
@@ -144,6 +143,7 @@ export default {
       shootNodes,
       privilegedMode,
       runtime,
+      canScheduleOnSeed,
     } = toRefs(state)
 
     const rules = {
@@ -159,6 +159,7 @@ export default {
       shootNodes,
       privilegedMode,
       runtime,
+      canScheduleOnSeed,
     }
   },
   computed: {

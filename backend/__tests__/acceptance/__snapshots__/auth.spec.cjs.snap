@@ -1,0 +1,49 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`auth should redirect to home after successful authorization 1`] = `
+[
+  {
+    ":authority": "kubernetes:6443",
+    ":method": "post",
+    ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+    ":scheme": "https",
+    "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
+  },
+  {
+    "apiVersion": "authorization.k8s.io/v1",
+    "kind": "SelfSubjectAccessReview",
+    "spec": {
+      "nonResourceAttributes": undefined,
+      "resourceAttributes": {
+        "group": "",
+        "resource": "secrets",
+        "verb": "get",
+      },
+    },
+  },
+]
+`;
+
+exports[`auth should successfully login with a given token 1`] = `
+[
+  {
+    ":authority": "kubernetes:6443",
+    ":method": "post",
+    ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+    ":scheme": "https",
+    "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
+  },
+  {
+    "apiVersion": "authorization.k8s.io/v1",
+    "kind": "SelfSubjectAccessReview",
+    "spec": {
+      "nonResourceAttributes": undefined,
+      "resourceAttributes": {
+        "group": "",
+        "resource": "secrets",
+        "verb": "get",
+      },
+    },
+  },
+]
+`;

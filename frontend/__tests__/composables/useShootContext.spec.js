@@ -13,7 +13,7 @@ import {
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useConfigStore } from '@/store/config'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
-import { useSecretStore } from '@/store/secret'
+import { useCredentialStore } from '@/store/credential'
 import { useAppStore } from '@/store/app'
 import { useAuthzStore } from '@/store/authz'
 
@@ -44,8 +44,8 @@ describe('composables', () => {
     authzStore.setNamespace('garden-test')
     const configStore = useConfigStore()
     configStore.setConfiguration(global.fixtures.config)
-    const secretStore = useSecretStore()
-    secretStore.list = global.fixtures.secrets
+    const credentialStore = useCredentialStore()
+    credentialStore._setCredentials(global.fixtures.credentials)
     const cloudProfileStore = useCloudProfileStore()
     cloudProfileStore.setCloudProfiles(cloneDeep(global.fixtures.cloudprofiles))
     const gardenerExtensionStore = useGardenerExtensionStore()
@@ -57,7 +57,7 @@ describe('composables', () => {
       cloudProfileStore,
       configStore,
       gardenerExtensionStore,
-      secretStore,
+      credentialStore,
     })
     shootContextStore = reactive(composable)
   })
@@ -98,6 +98,12 @@ describe('composables', () => {
     it('should change the infrastructure kind', async () => {
       shootContextStore.createShootManifest()
       shootContextStore.providerType = 'gcp'
+      expect(shootContextStore.shootManifest).toMatchSnapshot()
+    })
+
+    it('should change to credentials binding', async () => {
+      shootContextStore.createShootManifest()
+      shootContextStore.infrastructureBinding = global.fixtures.credentials.credentialsBindings.filter(({ provider }) => provider.type === shootContextStore.shootManifest.spec.provider.type)[0]
       expect(shootContextStore.shootManifest).toMatchSnapshot()
     })
 

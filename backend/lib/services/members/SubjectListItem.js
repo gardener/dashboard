@@ -4,11 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const _ = require('lodash')
-
-const Member = require('./Member')
+import _ from 'lodash-es'
+import Member from './Member.js'
 
 const allowedExtensionProperties = Object.freeze([
   ...Member.allowedExtensionProperties,
@@ -152,4 +149,4 @@ class SubjectListItemGroup extends SubjectListItem {
   }
 }
 
-module.exports = SubjectListItem
+export default SubjectListItem

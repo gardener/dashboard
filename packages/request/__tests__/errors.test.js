@@ -4,17 +4,15 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const createError = require('http-errors')
-const {
+import createError from 'http-errors'
+import {
   TimeoutError,
   StreamError,
   ParseError,
   isAbortError,
   createHttpError,
   isHttpError,
-} = require('../lib/errors')
+} from '../lib/errors.js'
 
 describe('errors', () => {
   it('#isAbortError', () => {

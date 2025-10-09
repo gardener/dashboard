@@ -4,12 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const { mix } = require('mixwith')
-
-const { GardenerDashboard } = require('../groups')
-const { NamespaceScoped, Readable, Writable, Observable } = require('../mixins')
+import { mix } from 'mixwith'
+import { GardenerDashboard } from '../groups.js'
+import { NamespaceScoped, Readable, Writable, Observable } from '../mixins.js'
 
 class Terminal extends mix(GardenerDashboard).with(NamespaceScoped, Readable, Observable, Writable) {
   static get names () {
@@ -21,6 +18,6 @@ class Terminal extends mix(GardenerDashboard).with(NamespaceScoped, Readable, Ob
   }
 }
 
-module.exports = {
+export default {
   Terminal,
 }

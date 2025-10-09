@@ -3,6 +3,15 @@
   "version": "1.0.0",
   "description": "Prometheus Monitoring",
   "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./lib/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gardener/dashboard.git",
@@ -14,32 +23,41 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
   },
-  "main": "lib/index.js",
-  "files": [
-    "lib"
-  ],
   "scripts": {
     "lint": "eslint . --max-warnings=0",
     "lint-sarif": "yarn lint --format=@microsoft/eslint-formatter-sarif",
-    "test": "jest",
-    "test-coverage": "yarn test --coverage"
+    "test": "node --experimental-vm-modules $(yarn bin jest)",
+    "test-coverage": "yarn test --coverage",
+    "build": "rimraf dist && yarn install && rollup -c rollup.config.js"
   },
   "dependencies": {
-    "@gardener-dashboard/logger": "workspace:^",
-    "express": "^4.18.3",
+    "express": "^5.0.0",
     "http-errors": "^2.0.0",
     "prom-client": "^15.1.0",
     "response-time": "^2.3.2"
   },
+  "peerDependencies": {
+    "@gardener-dashboard/logger": "workspace:^"
+  },
   "devDependencies": {
+    "@gardener-dashboard/logger": "workspace:^",
+    "@gardener-dashboard/test-utils": "workspace:^",
+    "@jest/globals": "^30.0.0",
     "@microsoft/eslint-formatter-sarif": "^3.1.0",
+    "@rollup/plugin-commonjs": "^28.0.3",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^16.0.1",
     "eslint": "^9.11.0",
+    "eslint-import-resolver-pnp": "^0.0.0",
     "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-jest": "^28.8.3",
+    "eslint-plugin-jest": "^29.0.0",
     "eslint-plugin-lodash": "^8.0.0",
+    "eslint-plugin-require-node-import-prefix": "^0.0.2",
     "eslint-plugin-security": "^3.0.1",
-    "jest": "^29.7.0",
-    "neostandard": "^0.11.7",
+    "jest": "^30.0.0",
+    "neostandard": "^0.12.0",
+    "rimraf": "^6.0.1",
+    "rollup": "^4.41.1",
     "supertest": "^7.0.0"
   },
   "jest": {
@@ -60,8 +78,8 @@
       "<rootDir>/jest.setup.js"
     ]
   },
-  "packageManager": "yarn@4.5.3",
+  "packageManager": "yarn@4.9.4",
   "engines": {
-    "node": "^22.7.0"
+    "node": "22.18.0"
   }
 }

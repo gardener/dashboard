@@ -4,12 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const { mix } = require('mixwith')
-
-const { Core } = require('../groups')
-const { NamespaceScoped, ClusterScoped, Readable, Writable, Observable } = require('../mixins')
+import { mix } from 'mixwith'
+import { Core } from '../groups.js'
+import { NamespaceScoped, ClusterScoped, Readable, Writable, Observable } from '../mixins.js'
 
 class Endpoints extends mix(Core).with(NamespaceScoped, Readable, Writable) {
   static get names () {
@@ -105,7 +102,7 @@ class ResourceQuota extends mix(Core).with(NamespaceScoped, Readable, Observable
   }
 }
 
-module.exports = {
+export default {
   Endpoints,
   Namespace,
   Node,

@@ -4,14 +4,13 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const express = require('express')
-const bodyParser = require('body-parser')
-const { requestLogger } = require('../../middleware')
-const { monitorResponseTimes } = require('@gardener-dashboard/monitor')
-const handleGithubEvent = require('./handler')
-const verify = require('./verify')
+import express from 'express'
+import bodyParser from 'body-parser'
+import { requestLogger } from '../../middleware.js'
+import monitorModule from '@gardener-dashboard/monitor'
+import handleGithubEvent from './handler.js'
+import verify from './verify.js'
+const { monitorResponseTimes } = monitorModule
 
 const router = express.Router()
 
@@ -27,7 +26,6 @@ router.route('/')
   .post(middlewares, async (req, res, next) => {
     try {
       const eventName = req.headers['x-github-event']
-
       await handleGithubEvent(eventName)
       res.status(204).end()
     } catch (err) {
@@ -38,4 +36,4 @@ router.route('/')
     res.set('Allow', 'POST').status(405).end()
   })
 
-module.exports = router
+export default router

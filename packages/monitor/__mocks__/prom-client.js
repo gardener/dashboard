@@ -3,14 +3,13 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
+import { jest } from '@jest/globals'
 
-'use strict'
-
-const promClient = jest.requireActual('prom-client')
+const promClient = await import('prom-client')
 
 const register = promClient.register
 
-module.exports = {
+export default {
   ...promClient,
   register: {
     ...register,

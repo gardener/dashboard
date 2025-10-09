@@ -3,11 +3,10 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
-
-'use strict'
-
-const { mockClient } = require('@gardener-dashboard/request')
-const { Shoot } = require('../lib/resources/GardenerCore')
+const request = await import('@gardener-dashboard/request')
+const { default: { mockClient } } = request
+const gardenerCore = await import('../lib/resources/GardenerCore.js')
+const { Shoot } = gardenerCore
 
 describe('kube-client', () => {
   describe('resources', () => {

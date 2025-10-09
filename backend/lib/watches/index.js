@@ -4,7 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import shoots from './shoots.js'
+import leases from './leases.js'
+import projects from './projects.js'
+import seeds from './seeds.js'
 
-exports.shoots = require('./shoots')
-exports.leases = require('./leases')
+export { shoots, leases, projects, seeds }

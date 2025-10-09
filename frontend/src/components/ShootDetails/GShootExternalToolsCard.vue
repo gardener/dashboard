@@ -56,16 +56,28 @@ const logger = inject('logger')
 const configStore = useConfigStore()
 
 const {
-  shootMetadata,
+  shootName,
+  shootNamespace,
+  shootProjectName,
+  shootDomain,
 } = useShootItem()
 
 const items = computed(() => {
   return configStore.externalTools ?? []
 })
 
+const urlData = computed(() => {
+  return {
+    name: shootName.value,
+    namespace: shootNamespace.value,
+    domain: shootDomain.value,
+    project: shootProjectName.value,
+  }
+})
+
 function expandUrl (url) {
   try {
-    return parseTemplate(url).expand(shootMetadata.value)
+    return parseTemplate(url).expand(urlData.value)
   } catch (err) {
     logger.error(`Failed to parse URL template "${url}"`)
     return url
