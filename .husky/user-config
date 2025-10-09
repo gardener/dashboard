@@ -1,0 +1,22 @@
+
+managed_hooks=true
+
+# User configuration template for Husky managed hooks
+#
+# ggshield Secret Scanning Setup
+# ────────────────────────────────────────────
+# You can optionally enable ggshield for secret scanning in this project.
+# Note: Only enable this if you already have a ggshield (GitGuardian) account and are willing to connect it, or if you are willing to create one.
+# More info: https://www.gitguardian.com/ggshield
+ggshield=false
+
+# REUSE Compliance Check Setup
+# ────────────────────────────────────────────
+# REUSE checks that all files are properly licensed and attributed.
+# Learn more: https://reuse.software/
+# To use it, pipx has to be installed.
+# If you don't have pipx installed, but want to use reuse in our pre-commit hook,
+# please visit the link below for installation assistance:
+# https://pipx.pypa.io/stable/installation/
+reuse=false
+verify_on_push=false

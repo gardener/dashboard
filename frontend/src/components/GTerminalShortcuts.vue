@@ -14,35 +14,33 @@ SPDX-License-Identifier: Apache-2.0
       @add-terminal-shortcut="onAddTerminalShortcut"
     >
       <template #icon>
-        <v-tooltip location="top">
-          <template #activator="{ props }">
-            <span v-bind="props">
-              <v-badge
-                avatar
-                location="bottom right"
-                color="transparent"
+        <span
+          v-tooltip:top="'Project specific terminal shortcut'"
+        >
+          <v-badge
+            avatar
+            location="bottom right"
+            color="transparent"
+          >
+            <template #badge>
+              <v-icon
+                icon="mdi-grid-large"
+                color="primary"
+              />
+            </template>
+            <span>
+              <g-icon-base
+                width="24"
+                height="23"
+                icon-color="primary"
+                view-box="-4 0 56 54"
+                icon-name="terminal-shortcut"
               >
-                <template #badge>
-                  <v-icon
-                    icon="mdi-grid-large"
-                    color="primary"
-                  />
-                </template>
-                <span>
-                  <g-icon-base
-                    width="24"
-                    height="23"
-                    icon-color="primary"
-                    view-box="-4 0 56 54"
-                  >
-                    <g-terminal-shortcut-icon />
-                  </g-icon-base>
-                </span>
-              </v-badge>
+                <g-terminal-shortcut-icon />
+              </g-icon-base>
             </span>
-          </template>
-          Project specific terminal shortcut
-        </v-tooltip>
+          </v-badge>
+        </span>
       </template>
     </g-terminal-shortcut>
     <g-terminal-shortcut
@@ -53,21 +51,19 @@ SPDX-License-Identifier: Apache-2.0
       @add-terminal-shortcut="onAddTerminalShortcut"
     >
       <template #icon>
-        <v-tooltip location="top">
-          <template #activator="{ props }">
-            <span v-bind="props">
-              <g-icon-base
-                width="24"
-                height="23"
-                icon-color="primary"
-                view-box="-4 0 56 54"
-              >
-                <g-terminal-shortcut-icon />
-              </g-icon-base>
-            </span>
-          </template>
-          Default terminal shortcut
-        </v-tooltip>
+        <span
+          v-tooltip:top="'Default terminal shortcut'"
+        >
+          <g-icon-base
+            width="24"
+            height="23"
+            icon-color="primary"
+            view-box="-4 0 56 54"
+            icon-name="terminal-shortcut"
+          >
+            <g-terminal-shortcut-icon />
+          </g-icon-base>
+        </span>
       </template>
     </g-terminal-shortcut>
   </template>
@@ -86,6 +82,8 @@ SPDX-License-Identifier: Apache-2.0
 import { mapActions } from 'pinia'
 
 import { useTerminalStore } from '@/store/terminal'
+
+import { useShootItem } from '@/composables/useShootItem'
 
 import { TargetEnum } from '@/utils'
 
@@ -119,9 +117,6 @@ export default {
     GTerminalShortcutIcon,
   },
   props: {
-    shootItem: {
-      type: Object,
-    },
     popperBoundariesSelector: {
       type: String,
     },
@@ -129,6 +124,15 @@ export default {
   emits: [
     'addTerminalShortcut',
   ],
+  setup () {
+    const {
+      shootItem = null,
+    } = useShootItem() || {} // shoot-item is not provided in case of GardenTerminal
+
+    return {
+      shootItem,
+    }
+  },
   computed: {
     allPossibleTargets () {
       const targetsFilter = [TargetEnum.GARDEN]

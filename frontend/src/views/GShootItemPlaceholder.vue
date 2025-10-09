@@ -30,7 +30,7 @@ import {
 import { useAuthzStore } from '@/store/authz'
 import { useAuthnStore } from '@/store/authn'
 import { useConfigStore } from '@/store/config'
-import { useSecretStore } from '@/store/secret'
+import { useCredentialStore } from '@/store/credential'
 import { useShootStore } from '@/store/shoot'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useProjectStore } from '@/store/project'
@@ -41,6 +41,7 @@ import { useTerminalStore } from '@/store/terminal'
 import GShootItemLoading from '@/views/GShootItemLoading.vue'
 import GShootItemError from '@/views/GShootItemError.vue'
 
+import { useProvideSeedItem } from '@/composables/useSeedItem'
 import { useProvideProjectItem } from '@/composables/useProjectItem'
 import { useProvideShootItem } from '@/composables/useShootItem'
 import { useProvideShootHelper } from '@/composables/useShootHelper'
@@ -69,7 +70,7 @@ export default {
     const authzStore = useAuthzStore()
     const configStore = useConfigStore()
     const shootStore = useShootStore()
-    const secretStore = useSecretStore()
+    const credentialStore = useCredentialStore()
     const terminalStore = useTerminalStore()
     const cloudProfileStore = useCloudProfileStore()
     const projectStore = useProjectStore()
@@ -129,8 +130,8 @@ export default {
         const promises = [
           shootStore.subscribe(routeParams),
         ]
-        if (['ShootItem', 'ShootItemHibernationSettings'].includes(routeName) && authzStore.canGetSecrets) {
-          promises.push(secretStore.fetchSecrets()) // Required for purpose configuration
+        if (['ShootItem', 'ShootItemHibernationSettings'].includes(routeName) && authzStore.canGetCloudProviderCredentials) {
+          promises.push(credentialStore.fetchCredentials()) // Required for purpose configuration
         }
         if (['ShootItem', 'ShootItemHibernationSettings', 'ShootItemTerminal'].includes(routeName) && authzStore.canUseProjectTerminalShortcuts) {
           promises.push(terminalStore.ensureProjectTerminalShortcutsLoaded())
@@ -215,19 +216,22 @@ export default {
     useProvideProjectItem(projectItem)
     const {
       hasShootWorkerGroups,
+      shootSeedName,
     } = useProvideShootItem(shootItem, {
       cloudProfileStore,
       projectStore,
-      seedStore,
     })
 
     useProvideShootHelper(shootItem, {
       cloudProfileStore,
       configStore,
       gardenerExtensionStore,
-      secretStore,
+      credentialStore,
       seedStore,
     })
+
+    const seedItem = computed(() => seedStore.seedByName(shootSeedName.value))
+    useProvideSeedItem(seedItem)
 
     return {
       component,

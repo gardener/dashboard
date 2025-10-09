@@ -18,15 +18,10 @@ SPDX-License-Identifier: Apache-2.0
     <g-list-item-content
       :label="appTitle"
     >
-      <v-tooltip
+      <span
         v-if="isShootStatusHibernated"
-        location="top"
-      >
-        <template #activator="{ props }">
-          <span v-bind="props">{{ urlText }}</span>
-        </template>
-        {{ appTitle }} is not running for hibernated clusters
-      </v-tooltip>
+        v-tooltip:top="`${appTitle} is not running for hibernated clusters`"
+      >{{ urlText }}</span>
       <g-external-link
         v-else
         :url="url"

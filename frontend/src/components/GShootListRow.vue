@@ -10,13 +10,16 @@ SPDX-License-Identifier: Apache-2.0
       v-for="cell in cells"
       :key="cell.header.key"
       :class="cell.header.class"
-      class="position-relative"
+      class="position-relative project-cell"
     >
       <template v-if="cell.header.key === 'project'">
-        <g-text-router-link
-          :to="{ name: 'ShootList', params: { namespace: shootNamespace } }"
-          :text="shootProjectName"
-        />
+        <g-project-tooltip :project="project">
+          <g-text-router-link
+            :to="{ name: 'ShootList', params: { namespace: shootNamespace } }"
+            :text="shootProjectName"
+          />
+          <span v-if="projectTitle"> &mdash; {{ projectTitle }}</span>
+        </g-project-tooltip>
       </template>
       <template v-if="cell.header.key === 'name'">
         <v-row
@@ -66,7 +69,7 @@ SPDX-License-Identifier: Apache-2.0
         </g-auto-hide>
       </template>
       <template v-if="cell.header.key === 'workers'">
-        <div class="d-flex justify-center">
+        <g-scroll-container class="d-flex flex-wrap justify-center large-container">
           <g-collapsible-items
             :items="shootWorkerGroups"
             :uid="shootUid"
@@ -80,7 +83,7 @@ SPDX-License-Identifier: Apache-2.0
               />
             </template>
           </g-collapsible-items>
-        </div>
+        </g-scroll-container>
       </template>
       <template v-if="cell.header.key === 'createdBy'">
         <g-account-avatar :account-name="shootCreatedBy" />
@@ -113,6 +116,11 @@ SPDX-License-Identifier: Apache-2.0
           <g-status-tags />
         </div>
       </template>
+      <template v-if="cell.header.key === 'seedReadiness'">
+        <div class="d-flex">
+          <g-seed-status-tags />
+        </div>
+      </template>
       <template v-if="cell.header.key === 'controlPlaneHighAvailability'">
         <div class="d-flex justify-center">
           <g-control-plane-high-availability-tag
@@ -129,21 +137,23 @@ SPDX-License-Identifier: Apache-2.0
         />
       </template>
       <template v-if="cell.header.key === 'accessRestrictions'">
-        <g-collapsible-items
-          :items="shootAccessRestrictions"
-          :uid="shootUid"
-          inject-key="expandedAccessRestrictions"
-        >
-          <template #item="{ item }">
-            <g-access-restriction-chip
-              :id="item.key"
-              :key="item.key"
-              :title="item.title"
-              :description="item.description"
-              :options="item.options"
-            />
-          </template>
-        </g-collapsible-items>
+        <g-scroll-container class="d-flex flex-wrap justify-center large-container">
+          <g-collapsible-items
+            :items="shootAccessRestrictions"
+            :uid="shootUid"
+            inject-key="expandedAccessRestrictions"
+          >
+            <template #item="{ item }">
+              <g-access-restriction-chip
+                :id="item.key"
+                :key="item.key"
+                :title="item.title"
+                :description="item.description"
+                :options="item.options"
+              />
+            </template>
+          </g-collapsible-items>
+        </g-scroll-container>
       </template>
       <template v-if="cell.header.key === 'ticket'">
         <g-external-link
@@ -160,30 +170,23 @@ SPDX-License-Identifier: Apache-2.0
         <template v-if="shootLastUpdatedTicketTimestamp && !shootTicketLabels.length">
           None
         </template>
-        <div
+        <g-scroll-container
           v-else
-          class="d-flex flex-wrap ticket-labels"
+          class="d-flex flex-wrap justify-center small-container"
         >
           <g-ticket-label
             v-for="label in shootTicketLabels"
             :key="label.name"
             :label="label"
           />
-        </div>
+        </g-scroll-container>
       </template>
       <template v-if="cell.header.customField">
-        <v-tooltip
+        <span
           v-if="cell.header.tooltip"
-          location="top"
-        >
-          <template #activator="slotProps">
-            <span
-              v-bind="slotProps.props"
-              :class="{'text-disabled' : !cell.value}"
-            >{{ cell.displayValue }}</span>
-          </template>
-          {{ cell.header.tooltip }}
-        </v-tooltip>
+          v-tooltip:top="cell.header.tooltip"
+          :class="{'text-disabled' : !cell.value}"
+        >{{ cell.displayValue }}</span>
         <span
           v-else-if="cell.displayValue"
           :class="{'text-disabled' : !cell.value}"
@@ -198,7 +201,7 @@ SPDX-License-Identifier: Apache-2.0
           justify="end"
         >
           <g-action-button
-            v-if="canGetSecrets"
+            v-if="canGetCloudProviderCredentials"
             icon="mdi-key"
             :disabled="isClusterAccessDialogDisabled"
             :tooltip="showClusterAccessActionTitle"
@@ -212,18 +215,11 @@ SPDX-License-Identifier: Apache-2.0
           />
         </v-row>
       </template>
-      <v-tooltip
+      <div
         v-if="isStaleShoot"
-        location="top"
-      >
-        <template #activator="slotProps">
-          <div
-            class="stale-overlay"
-            v-bind="slotProps.props"
-          />
-        </template>
-        This cluster is no longer part of the list and kept as stale item
-      </v-tooltip>
+        v-tooltip:top="'This cluster is no longer part of the list and kept as stale item'"
+        class="stale-overlay"
+      />
     </td>
   </tr>
 </template>
@@ -239,7 +235,7 @@ import { useAuthzStore } from '@/store/authz'
 import { useTicketStore } from '@/store/ticket'
 import { useShootStore } from '@/store/shoot'
 import { useConfigStore } from '@/store/config'
-import { useSecretStore } from '@/store/secret'
+import { useCredentialStore } from '@/store/credential'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useProjectStore } from '@/store/project'
 import { useSeedStore } from '@/store/seed'
@@ -252,6 +248,7 @@ import GCopyBtn from '@/components/GCopyBtn.vue'
 import GVendor from '@/components/GVendor.vue'
 import GShootStatus from '@/components/GShootStatus.vue'
 import GStatusTags from '@/components/GStatusTags.vue'
+import GSeedStatusTags from '@/components/GSeedStatusTags.vue'
 import GPurposeTag from '@/components/GPurposeTag.vue'
 import GTimeString from '@/components/GTimeString.vue'
 import GShootVersionChip from '@/components/ShootVersion/GShootVersionChip.vue'
@@ -264,11 +261,15 @@ import GControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvail
 import GWorkerGroup from '@/components/ShootWorkers/GWorkerGroup'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 import GCollapsibleItems from '@/components/GCollapsibleItems'
+import GScrollContainer from '@/components/GScrollContainer'
+import GProjectTooltip from '@/components/GProjectTooltip.vue'
 
+import { useProvideSeedItem } from '@/composables/useSeedItem'
 import { useShootAction } from '@/composables/useShootAction'
 import { useProvideShootItem } from '@/composables/useShootItem'
 import { useProvideShootHelper } from '@/composables/useShootHelper'
 import { formatValue } from '@/composables/useProjectShootCustomFields/helper'
+import { useProjectMetadata } from '@/composables/useProjectMetadata/index.js'
 
 import { getIssueSince } from '@/utils'
 
@@ -296,14 +297,14 @@ const shootStore = useShootStore()
 const ticketStore = useTicketStore()
 const authzStore = useAuthzStore()
 const configStore = useConfigStore()
-const secretStore = useSecretStore()
+const credentialStore = useCredentialStore()
 const cloudProfileStore = useCloudProfileStore()
 const projectStore = useProjectStore()
 const seedStore = useSeedStore()
 const gardenerExtensionStore = useGardenerExtensionStore()
 
 const {
-  canGetSecrets,
+  canGetCloudProviderCredentials,
   canPatchShoots,
 } = storeToRefs(authzStore)
 
@@ -325,20 +326,24 @@ const {
   shootAccessRestrictions,
   shootWorkerGroups,
   shootUid,
-  shootCloudProfileName,
+  shootCloudProfileRef,
 } = useProvideShootItem(shootItem, {
   cloudProfileStore,
   projectStore,
-  seedStore,
 })
+const project = computed(() => projectStore.projectByNamespace(shootNamespace.value))
+const { projectTitle } = useProjectMetadata(project)
 
 useProvideShootHelper(shootItem, {
   cloudProfileStore,
   configStore,
   gardenerExtensionStore,
-  secretStore,
+  credentialStore,
   seedStore,
 })
+
+const seedItem = computed(() => seedStore.seedByName(shootSeedName.value))
+useProvideSeedItem(seedItem)
 
 const isInfoAvailable = computed(() => {
   // operator not yet updated shoot resource
@@ -426,7 +431,7 @@ const cells = computed(() => {
 })
 
 const hasShootWorkerGroupWarning = computed(() => {
-  const machineImages = cloudProfileStore.machineImagesByCloudProfileName(shootCloudProfileName.value)
+  const machineImages = cloudProfileStore.machineImagesByCloudProfileRef(shootCloudProfileRef.value)
   return some(shootWorkerGroups.value, workerGroup => {
     const { name, version } = get(workerGroup, ['machine', 'image'], {})
     const machineImage = find(machineImages, { name, version })
@@ -437,10 +442,14 @@ const hasShootWorkerGroupWarning = computed(() => {
 </script>
 
 <style lang="scss" scoped>
-  .ticket-labels {
-    overflow-y: scroll;
-    max-height: 30px;
-    max-width: 300px;
+  .large-container {
+    max-height: 140px;
+    max-width: 350px;
+  }
+
+  .small-container {
+    max-height: 37px;
+    max-width: 350px;
   }
 
   .position-relative {
@@ -454,6 +463,11 @@ const hasShootWorkerGroupWarning = computed(() => {
     left: 0;
     position: absolute;
     pointer-events: none;
+  }
+
+  .project-cell {
+    max-width: 200px;
+    overflow: hidden;
   }
 
   .v-theme--light .stale .stale-overlay {

@@ -13,7 +13,6 @@ import {
   toRef,
   effectScope,
 } from 'vue'
-import { useRoute } from 'vue-router'
 import { useLocalStorage } from '@vueuse/core'
 
 import { useProjectStore } from '@/store/project'
@@ -48,8 +47,8 @@ function createLocalStorageRef (key, initialValue) {
   return localStorageRef
 }
 
-const useLazyLocalStorage = () => {
-  const route = useRoute()
+// Route is only required for terminalSplitpaneTree
+const useLazyLocalStorage = route => {
   const projectStore = useProjectStore()
 
   const keys = {
@@ -150,11 +149,6 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     writeDefaults: false,
   })
 
-  const userItemsPerPage = useLocalStorage('members/useraccount-list/itemsPerPage', 10, {
-    serializer: StorageSerializers.integer,
-    writeDefaults: false,
-  })
-
   const userSortBy = useLocalStorage('members/useraccount-list/sortBy', [{
     key: 'username',
     order: 'asc',
@@ -168,11 +162,6 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     writeDefaults: false,
   })
 
-  const serviceAccountItemsPerPage = useLocalStorage('members/serviceaccount-list/itemsPerPage', 10, {
-    serializer: StorageSerializers.integer,
-    writeDefaults: false,
-  })
-
   const serviceAccountSortBy = useLocalStorage('members/serviceaccount-list/sortBy', [{
     key: 'displayName',
     order: 'asc',
@@ -181,17 +170,12 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     writeDefaults: false,
   })
 
-  const infraSecretSelectedColumns = useLocalStorage('secrets/infra-secret-list/selected-columns', {}, {
+  const infraCredentialSelectedColumns = useLocalStorage('secrets/infra-secret-list/selected-columns', {}, {
     serializer: StorageSerializers.json,
     writeDefaults: false,
   })
 
-  const infraSecretItemsPerPage = useLocalStorage('secrets/infra-secret-list/itemsPerPage', 10, {
-    serializer: StorageSerializers.integer,
-    writeDefaults: false,
-  })
-
-  const infraSecretSortBy = useLocalStorage('secrets/infra-secret-list/sortBy', [{
+  const infraCredentialSortBy = useLocalStorage('secrets/infra-secret-list/sortBy', [{
     key: 'name',
     order: 'asc',
   }], {
@@ -199,17 +183,12 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     writeDefaults: false,
   })
 
-  const dnsSecretSelectedColumns = useLocalStorage('secrets/dns-secret-list/selected-columns', {}, {
+  const dnsCredentialSelectedColumns = useLocalStorage('secrets/dns-secret-list/selected-columns', {}, {
     serializer: StorageSerializers.json,
     writeDefaults: false,
   })
 
-  const dnsSecretItemsPerPage = useLocalStorage('secrets/dns-secret-list/itemsPerPage', 10, {
-    serializer: StorageSerializers.integer,
-    writeDefaults: false,
-  })
-
-  const dnsSecretSortBy = useLocalStorage('secrets/dns-secret-list/sortBy', [{
+  const dnsCredentialSortBy = useLocalStorage('secrets/dns-secret-list/sortBy', [{
     key: 'name',
     order: 'asc',
   }], {
@@ -219,11 +198,6 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
 
   const shootSelectedColumns = useLocalStorage('projects/shoot-list/selected-columns', {}, {
     serializer: StorageSerializers.json,
-    writeDefaults: false,
-  })
-
-  const shootItemsPerPage = useLocalStorage('projects/shoot-list/itemsPerPage', 10, {
-    serializer: StorageSerializers.integer,
     writeDefaults: false,
   })
 
@@ -262,14 +236,12 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     },
   })
 
-  const terminalSplitpaneTree = computed({
-    get () {
-      return lazyLocalStorage.terminalSplitpaneTree.value
-    },
-    set (value) {
-      lazyLocalStorage.terminalSplitpaneTree.value = value
-    },
-  })
+  const terminalSplitpaneTreeRef = function (route) {
+    // use dedicated scope for terminalSplitpaneTree with route
+    // Route must be passed by caller to ensure correct context
+    const lazyLocalStorageWithRoute = useLazyLocalStorage(route)
+    return lazyLocalStorageWithRoute.terminalSplitpaneTree
+  }
 
   return {
     colorScheme,
@@ -281,25 +253,20 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     renderEditorWhitespaes,
     shootAdminKubeconfigExpiration,
     userSelectedColumns,
-    userItemsPerPage,
     userSortBy,
     serviceAccountSelectedColumns,
-    serviceAccountItemsPerPage,
     serviceAccountSortBy,
-    infraSecretSelectedColumns,
-    infraSecretItemsPerPage,
-    infraSecretSortBy,
-    dnsSecretSelectedColumns,
-    dnsSecretItemsPerPage,
-    dnsSecretSortBy,
+    infraCredentialSelectedColumns,
+    infraCredentialSortBy,
+    dnsCredentialSelectedColumns,
+    dnsCredentialSortBy,
     shootSelectedColumns,
-    shootItemsPerPage,
     shootSortBy,
     allProjectsShootFilter,
     shootListFetchFromCache,
     shootCustomSortBy,
     shootCustomSelectedColumns,
-    terminalSplitpaneTree,
+    terminalSplitpaneTreeRef,
   }
 })
 

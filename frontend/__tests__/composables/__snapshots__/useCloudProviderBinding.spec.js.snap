@@ -1,0 +1,36 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`useCloudProviderBinding composable > fetches actual secret from store 1`] = `
+{
+  "data": {
+    "secret": "cw==",
+  },
+  "kind": "Secret",
+  "metadata": {
+    "name": "aws-secret",
+    "namespace": "garden-test",
+    "uid": "secret-aws-uid",
+  },
+}
+`;
+
+exports[`useCloudProviderBinding composable > finds other bindings with same secret 1`] = `
+[
+  {
+    "credentialsRef": {
+      "kind": "Secret",
+      "name": "aws-secret",
+      "namespace": "garden-test",
+    },
+    "kind": "CredentialsBinding",
+    "metadata": {
+      "name": "aws-credentialsbinding",
+      "namespace": "garden-test",
+      "uid": "cb-aws-secret-uid",
+    },
+    "provider": {
+      "type": "aws",
+    },
+  },
+]
+`;

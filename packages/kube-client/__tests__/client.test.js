@@ -4,23 +4,33 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import { jest } from '@jest/globals'
+import httpErrors from 'http-errors'
+import client from '../lib/index.js'
+import request from '@gardener-dashboard/request'
+import kubeConfig from '@gardener-dashboard/kube-config'
 
-const { NotFound } = require('http-errors')
-const { createClient, createDashboardClient } = require('../lib')
-const { extend } = require('@gardener-dashboard/request')
-const { mockLoadResult } = require('@gardener-dashboard/kube-config')
+const { NotFound } = httpErrors
+const { createClient, createDashboardClient } = client
+const { extend } = request
+const { mockLoadResult } = kubeConfig
 
-function resourceEndpoints () {
+const { default: helper } = await import('../__fixtures__/helper.js')
+
+async function resourceEndpoints () {
   let endpoints = []
-  for (const name of Object.keys(require('../lib/groups'))) {
-    endpoints = endpoints.concat(Object.keys(require(`../lib/resources/${name}`)))
+  const groups = await import('../lib/groups.js')
+  for (const name of Object.keys(groups)) {
+    const { default: pkg } = await import(`../lib/resources/${name}`)
+    endpoints = endpoints.concat(Object.keys(pkg))
   }
   return endpoints
 }
 
-function nonResourceEndpoints () {
-  return Object.keys(require('../lib/nonResourceEndpoints').endpoints)
+async function nonResourceEndpoints () {
+  const { endpoints: pkg } = await import('../lib/nonResourceEndpoints/index.js')
+  const endpoints = Object.keys(pkg)
+  return endpoints
 }
 
 describe('kube-client', () => {
@@ -49,7 +59,7 @@ describe('kube-client', () => {
     })
 
     it('should read a kubeconfig from a secret', async () => {
-      const testKubeconfig = fixtures.helper.createTestKubeconfig({ token: bearer }, { server })
+      const testKubeconfig = helper.createTestKubeconfig({ token: bearer }, { server })
       getSecretStub.mockReturnValue({
         data: {
           kubeconfig: Buffer.from(testKubeconfig.toYAML()).toString('base64'),
@@ -61,7 +71,7 @@ describe('kube-client', () => {
     })
 
     it('should create a client from a kubeconfig', async () => {
-      const testKubeconfig = fixtures.helper.createTestKubeconfig({ token: bearer }, { server })
+      const testKubeconfig = helper.createTestKubeconfig({ token: bearer }, { server })
       getSecretStub.mockReturnValue({
         data: {
           kubeconfig: Buffer.from(testKubeconfig.toYAML()).toString('base64'),
@@ -77,7 +87,7 @@ describe('kube-client', () => {
         'client-certificate-data': certificateAuthorityData,
         'client-key-data': clientCertificateData,
       }
-      const testKubeconfig = fixtures.helper.createTestKubeconfig(user, { server })
+      const testKubeconfig = helper.createTestKubeconfig(user, { server })
       createShootAdminKubeconfigStub.mockReturnValue({
         status: {
           kubeconfig: Buffer.from(testKubeconfig.toYAML()).toString('base64'),
@@ -102,7 +112,7 @@ describe('kube-client', () => {
     })
 
     it('should not find a "serviceaccount.json" in the secret', async () => {
-      const testKubeconfig = fixtures.helper.createTestKubeconfig({ 'auth-provider': { name: 'gcp' } })
+      const testKubeconfig = helper.createTestKubeconfig({ 'auth-provider': { name: 'gcp' } })
       getSecretStub.mockReturnValue({
         data: {
           kubeconfig: Buffer.from(testKubeconfig.toYAML()).toString('base64'),
@@ -111,16 +121,17 @@ describe('kube-client', () => {
       await expect(testClient.getKubeconfig({ namespace, name })).rejects.toThrow(NotFound)
     })
   })
-
   describe('#createDashboardClient', () => {
-    const resourceEndpointNames = resourceEndpoints()
-    const nonResourceEndpointNames = nonResourceEndpoints()
+    let resourceEndpointNames
+    let nonResourceEndpointNames
 
     const { url, auth } = mockLoadResult
     const server = new URL(url)
     let testClient
 
-    beforeEach(() => {
+    beforeEach(async () => {
+      resourceEndpointNames = await resourceEndpoints()
+      nonResourceEndpointNames = await nonResourceEndpoints()
       jest.clearAllMocks()
       testClient = createDashboardClient({})
     })
@@ -145,19 +156,11 @@ describe('kube-client', () => {
     })
   })
   describe('#dashboardClient', () => {
-    let kubeConfig
-    let kubeClient
-
-    const mockKubeClient = () => {
-      jest.isolateModules(() => {
-        kubeConfig = require('@gardener-dashboard/kube-config')
-        kubeClient = require('../lib')
-      })
-    }
-
-    it('should abort watching kubeconfig changes', () => {
-      mockKubeClient()
-      expect(kubeConfig.load).toBeCalledTimes(1)
+    it('should abort watching kubeconfig changes', async () => {
+      jest.resetModules()
+      const { default: kubeConfig } = await import('@gardener-dashboard/kube-config')
+      const { default: kubeClient } = await import('../lib/index.js')
+      expect(kubeConfig.load).toHaveBeenCalledTimes(1)
       const firstCall = kubeConfig.load.mock.calls[0]
       expect(firstCall).toHaveLength(2)
       const { signal } = firstCall[1]

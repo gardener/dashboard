@@ -21,7 +21,7 @@ When installing the Dashboard via Helm chart, access restrictions are configured
 
 ```yaml
 accessRestriction:
-  noItemsText: No access restriction options available for region {region} and cloud profile {cloudProfile}
+  noItemsText: No access restriction options available for region ${region} and cloud profile ${cloudProfileName} (${cloudProfileKind})
   items:
   - key: eu-access-only
     display:
@@ -65,7 +65,7 @@ metadata:
 data:
   frontend-config.yaml: |
     accessRestriction:
-      noItemsText: No access restriction options available for region {region} and cloud profile {cloudProfile}
+      noItemsText: No access restriction options available for region ${region} and cloud profile ${cloudProfileName} (${cloudProfileKind})
       items:
       - key: eu-access-only
         display:

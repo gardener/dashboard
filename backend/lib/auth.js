@@ -4,22 +4,20 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const express = require('express')
-const bodyParser = require('body-parser')
-const cookieParser = require('cookie-parser')
-const {
+import express from 'express'
+import bodyParser from 'body-parser'
+import cookieParser from 'cookie-parser'
+import logger from './logger/index.js'
+import {
   authorizationUrl,
   authorizationCallback,
   refreshToken,
   authorizeToken,
   clearCookies,
-} = require('./security')
-const { requestLogger } = require('./middleware')
+} from './security/index.js'
+import { requestLogger } from './middleware.js'
 
-// configure router
-const router = exports.router = express.Router()
+const router = express.Router()
 
 router.use(requestLogger)
 router.use(cookieParser())
@@ -29,6 +27,7 @@ router.route('/')
     try {
       res.redirect(await authorizationUrl(req, res))
     } catch (err) {
+      logger.error('failed to redirect to authorization url: %s', err)
       res.redirect(`/login#error=${encodeURIComponent(err.message)}`)
     }
   })
@@ -66,6 +65,7 @@ router.route('/callback')
       const { redirectPath = '/' } = await authorizationCallback(req, res)
       res.redirect(redirectPath)
     } catch (err) {
+      logger.error('Error during authorization callback: %s', err)
       res.redirect(`/login#error=${encodeURIComponent(err.message)}`)
     }
   })
@@ -78,3 +78,5 @@ router.route('/token')
       next(err)
     }
   })
+
+export { router }

@@ -4,21 +4,18 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const { format: fmt } = require('util')
-const timers = require('timers/promises')
-
-const { globalLogger: logger } = require('@gardener-dashboard/logger')
-const ListPager = require('./ListPager')
-const BackoffManager = require('./BackoffManager')
-const {
+import { format as fmt } from 'node:util'
+import timers from 'timers/promises'
+import { globalLogger as logger } from '@gardener-dashboard/logger'
+import ListPager from './ListPager.js'
+import BackoffManager from './BackoffManager.js'
+import {
   isExpiredError,
   isConnectionRefused,
   isTooLargeResourceVersionError,
   isAbortError,
   StatusError,
-} = require('../ApiErrors')
+} from '../ApiErrors.js'
 
 function delay (milliseconds) {
   return timers.setTimeout(milliseconds)
@@ -307,4 +304,4 @@ function assertSignal (signal) {
   }
 }
 
-module.exports = Reflector
+export default Reflector

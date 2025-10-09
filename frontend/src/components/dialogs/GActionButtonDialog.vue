@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     :icon="icon"
     :color="color"
     :caption="caption"
-    :tooltip="tooltip"
+    :tooltip="actionTooltip"
     :confirm-button-text="confirmButtonText"
     :confirm-required="confirmRequired"
     :width="width"
@@ -120,6 +120,15 @@ export default {
       return (this.isShootMarkedForDeletion && !this.ignoreDeletionStatus) ||
         this.isShootActionsDisabledForPurpose ||
         this.disabled
+    },
+    actionTooltip () {
+      if (this.isShootActionsDisabledForPurpose) {
+        return 'Actions disabled for clusters with purpose infrastructure'
+      }
+      if (this.isShootMarkedForDeletion && !this.ignoreDeletionStatus) {
+        return 'Actions disabled for clusters that are marked for deletion'
+      }
+      return this.tooltip
     },
   },
   methods: {

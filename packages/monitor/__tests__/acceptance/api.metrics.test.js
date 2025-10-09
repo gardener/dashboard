@@ -4,17 +4,15 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const promClient = require('prom-client')
-const logger = require('../../lib/logger')
+import promClient from 'prom-client'
+import logger from '../../lib/logger.js'
 
 describe('api', () => {
   describe('metrics', () => {
     let agent
 
-    beforeAll(() => {
-      agent = createAgent()
+    beforeAll(async () => {
+      agent = await createAgent()
     })
 
     afterAll(() => {
@@ -69,7 +67,7 @@ describe('api', () => {
         status: 500,
         message: error.message,
       })
-      expect(logger.error).toBeCalledTimes(1)
+      expect(logger.error).toHaveBeenCalledTimes(1)
     })
   })
 })

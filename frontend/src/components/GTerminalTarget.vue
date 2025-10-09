@@ -5,65 +5,61 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <div>
-    <v-radio-group
-      v-model="selectedTarget"
-      label="Terminal Target"
-      class="mt-6"
-      :hint="hint"
-      persistent-hint
+  <v-radio-group
+    v-model="selectedTarget"
+    label="Terminal Target"
+    class="mt-6"
+    :hint="hint"
+    persistent-hint
+  >
+    <div
+      v-tooltip="{
+        text: 'Terminals can only be scheduled if the seed is a managed seed',
+        location: 'top left',
+        disabled: canScheduleOnSeed
+      }"
     >
       <v-radio
         v-if="shootItem && hasControlPlaneTerminalAccess"
         label="Control Plane"
         value="cp"
         color="primary"
+        :disabled="!canScheduleOnSeed"
       />
-      <v-radio
-        v-if="shootItem && hasShootTerminalAccess"
-        value="shoot"
-        color="primary"
-        :disabled="disabled || isShootStatusHibernated"
-      >
-        <template #label>
-          <div>Cluster</div>
-          <v-icon
-            v-if="isShootStatusHibernated"
-            class="vertical-align-middle ml-2"
-          >
-            mdi-sleep
-          </v-icon>
-        </template>
-      </v-radio>
-      <v-radio
-        v-if="hasGardenTerminalAccess"
-        value="garden"
-        color="primary"
-        :disabled="disabled || (!isAdmin && isShootStatusHibernated)"
-      >
-        <template #label>
-          <div>Garden Cluster</div>
-          <v-icon
-            v-if="!isAdmin && isShootStatusHibernated"
-            class="vertical-align-middle ml-2"
-          >
-            mdi-sleep
-          </v-icon>
-        </template>
-      </v-radio>
-    </v-radio-group>
-    <v-alert
-      v-if="!isAdmin && selectedTarget === 'garden'"
-      class="mt-2 mb-2"
-      :value="true"
-      type="info"
+    </div>
+    <v-radio
+      v-if="shootItem && hasShootTerminalAccess"
+      value="shoot"
       color="primary"
-      variant="tonal"
+      :disabled="loading || isShootStatusHibernated"
     >
-      <strong>Terminal will be running on <span class="font-family-monospace">{{ shootName }}</span> cluster</strong><br>
-      Make sure that only gardener project members with <span class="font-family-monospace">admin</span> role have privileged access to the <span class="font-family-monospace">{{ shootName }}</span> cluster before creating this terminal session.
-    </v-alert>
-  </div>
+      <template #label>
+        <div>Cluster</div>
+        <v-icon
+          v-if="isShootStatusHibernated"
+          class="vertical-align-middle ml-2"
+        >
+          mdi-sleep
+        </v-icon>
+      </template>
+    </v-radio>
+    <v-radio
+      v-if="hasGardenTerminalAccess"
+      value="garden"
+      color="primary"
+      :disabled="loading || (!isAdmin && isShootStatusHibernated)"
+    >
+      <template #label>
+        <div>Garden Cluster</div>
+        <v-icon
+          v-if="!isAdmin && isShootStatusHibernated"
+          class="vertical-align-middle ml-2"
+        >
+          mdi-sleep
+        </v-icon>
+      </template>
+    </v-radio>
+  </v-radio-group>
 </template>
 
 <script>
@@ -83,7 +79,7 @@ export default {
     modelValue: {
       type: String,
     },
-    disabled: {
+    loading: {
       type: Boolean,
       default: false,
     },
@@ -95,12 +91,14 @@ export default {
     const {
       shootItem,
       isShootStatusHibernated,
+      canScheduleOnSeed,
     } = useTerminalSplitpanes()
 
     return {
       v$: useVuelidate(),
       shootItem,
       isShootStatusHibernated,
+      canScheduleOnSeed,
     }
   },
   validations () {

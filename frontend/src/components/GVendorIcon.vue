@@ -63,6 +63,8 @@ const iconSrc = computed(() => {
       return new URL('/src/assets/gcp.svg', import.meta.url)
     case 'openstack':
       return new URL('/src/assets/openstack.svg', import.meta.url)
+    case 'stackit':
+      return new URL('/src/assets/stackit.svg', import.meta.url)
     case 'alicloud':
       return new URL('/src/assets/alicloud.svg', import.meta.url)
     case 'vsphere':
@@ -93,6 +95,8 @@ const iconSrc = computed(() => {
       return new URL('/src/assets/netlify-dns.svg', import.meta.url)
     case 'rfc2136':
       return new URL('/src/assets/rfc2136.svg', import.meta.url)
+    case 'powerdns':
+      return new URL('/src/assets/powerdns.svg', import.meta.url)
 
     // os
     case 'coreos':

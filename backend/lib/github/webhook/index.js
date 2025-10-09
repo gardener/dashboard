@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import router from './router.js'
 
-const router = require('./router')
-
-module.exports = { router }
+export { router }

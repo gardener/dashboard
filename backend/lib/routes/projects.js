@@ -4,13 +4,12 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import express from 'express'
+import services from '../services/index.js'
+import { metricsRoute } from '../middleware.js'
+const { projects } = services
 
-const express = require('express')
-const { projects } = require('../services')
-const { metricsRoute } = require('../middleware')
-
-const router = module.exports = express.Router()
+const router = express.Router()
 
 const metricsMiddleware = metricsRoute('project')
 
@@ -74,3 +73,5 @@ router.route('/:project')
       next(err)
     }
   })
+
+export default router

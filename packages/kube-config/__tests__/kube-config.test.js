@@ -4,16 +4,17 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import { jest } from '@jest/globals'
+import fs from 'fs'
+import fsp from 'fs/promises'
+import path from 'path'
+import os from 'os'
+import yaml from 'js-yaml'
+import { cloneDeep } from 'lodash-es'
+import Config from '../lib/Config.js'
+import config from '../lib/index.js'
+const { mockGetToken } = await import('gtoken')
 
-const fs = require('fs')
-const fsp = require('fs/promises')
-const path = require('path')
-const os = require('os')
-const yaml = require('js-yaml')
-const { mockGetToken } = require('gtoken')
-const { cloneDeep } = require('lodash')
-const Config = require('../lib/Config')
 const {
   load,
   dumpKubeconfig,
@@ -22,7 +23,7 @@ const {
   cleanKubeconfig,
   parseKubeconfig,
   constants,
-} = require('../lib')
+} = config
 
 describe('kube-config', () => {
   const server = new URL('https://kubernetes:6443')
@@ -469,7 +470,7 @@ describe('kube-config', () => {
     it('should refresh an existing auth-provider token', async () => {
       const kubeconfig = parseKubeconfig(input)
       await kubeconfig.refreshAuthProviderConfig(credentials)
-      expect(mockGetToken).toBeCalledTimes(1)
+      expect(mockGetToken).toHaveBeenCalledTimes(1)
       expect(kubeconfig.users).toHaveLength(1)
       const authProvider = kubeconfig.currentUser['auth-provider']
       expect(authProvider.name).toBe('gcp')
@@ -481,7 +482,7 @@ describe('kube-config', () => {
       delete input.users[0].user['auth-provider'].config
       const kubeconfig = parseKubeconfig(input)
       await kubeconfig.refreshAuthProviderConfig(credentials)
-      expect(mockGetToken).toBeCalledTimes(1)
+      expect(mockGetToken).toHaveBeenCalledTimes(1)
       expect(kubeconfig.users).toHaveLength(1)
       const authProvider = kubeconfig.currentUser['auth-provider']
       expect(authProvider.config['access-token']).toBe('valid-access-token')
@@ -495,7 +496,7 @@ describe('kube-config', () => {
       }
       const kubeconfig = parseKubeconfig(input)
       await kubeconfig.refreshAuthProviderConfig(credentials)
-      expect(mockGetToken).toBeCalledTimes(1)
+      expect(mockGetToken).toHaveBeenCalledTimes(1)
       expect(kubeconfig.users).toHaveLength(1)
       const authProvider = kubeconfig.currentUser['auth-provider']
       expect(authProvider.config['access-token']).toBe('valid-access-token')
@@ -505,7 +506,7 @@ describe('kube-config', () => {
       delete input.users[0].user['auth-provider']
       const kubeconfig = parseKubeconfig(input)
       await kubeconfig.refreshAuthProviderConfig(credentials)
-      expect(mockGetToken).toBeCalledTimes(0)
+      expect(mockGetToken).toHaveBeenCalledTimes(0)
       expect(kubeconfig.toJSON()).toMatchObject(input)
     })
   })

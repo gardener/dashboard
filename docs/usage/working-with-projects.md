@@ -38,7 +38,7 @@ If you need to create more projects, expand the `Projects` list dropdown on the 
 
 After rotating your Gardener credentials and updating the corresponding secret in Gardener, you also need to reconcile all the shoots so that they can start using the updated secret. Updating the secret on its own won't trigger shoot reconciliation and the shoot will use the old credentials until reconciliation, which is why you need to either trigger reconciliation or wait until it is performed in the next maintenance time window.
 
-For more information, see [Credentials Rotation for Shoot Clusters](https://github.com/gardener/gardener/blob/master/docs/usage/shoot_credentials_rotation.md#cloud-provider-keys).
+For more information, see [Credentials Rotation for Shoot Clusters](https://github.com/gardener/gardener/blob/master/docs/usage/shoot-operations/shoot_credentials_rotation.md#cloud-provider-keys).
 
 ## Deleting Your Project
 

@@ -14,24 +14,19 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <g-list-item-content>
       {{ shortcut.title }}
-      <v-tooltip
+      <v-chip
         v-if="isUnverified"
-        location="top"
-        max-width="400px"
+        v-tooltip:top="{
+          text: 'This terminal shortcut was created by a member of this project and is not verified by the landscape administrator and therefore could be malicious',
+          maxWidth: 400
+        }"
+        size="small"
+        color="warning"
+        variant="tonal"
+        class="my-0 ml-2"
       >
-        <template #activator="{ props }">
-          <v-chip
-            v-bind="props"
-            size="small"
-            color="warning"
-            variant="tonal"
-            class="my-0 ml-2"
-          >
-            Unverified
-          </v-chip>
-        </template>
-        This terminal shortcut was created by a member of this project and is not verified by the landscape administrator and therefore could be malicious
-      </v-tooltip>
+        Unverified
+      </v-chip>
       <template
         v-if="shortcut.description"
         #description
@@ -46,17 +41,21 @@ SPDX-License-Identifier: Apache-2.0
     >
       <g-action-button
         icon="mdi-console-line"
-        :disabled="disabled"
+        :disabled="(isAdmin && !canScheduleOnSeed) ||
+          (isShootTarget && isShootHibernated)"
         @click.stop="addTerminalShortcut(shortcut)"
       >
         <template #tooltip>
-          <span v-if="!disabled">
+          <div v-if="isAdmin && !canScheduleOnSeed">
+            Terminals can only be scheduled if the seed is a managed seed
+          </div>
+          <span v-else-if="isShootTarget && isShootHibernated">
+            Cluster is hibernated. Wake up cluster to open terminal
+          </span>
+          <span v-else>
             Create
             '<span class="font-family-monospace">{{ shortcut.title }}</span>'
             terminal session
-          </span>
-          <span v-else>
-            Cluster is hibernated. Wake up cluster to open terminal
           </span>
         </template>
       </g-action-button>
@@ -129,9 +128,9 @@ export default {
   ],
   setup () {
     const {
-      shootItem,
+      shootItem = null,
       isShootStatusHibernated,
-    } = useShootItem()
+    } = useShootItem() || {} // shoot-item is not provided in case of GardenTerminal
 
     return {
       shootItem,
@@ -165,16 +164,17 @@ export default {
       const args = get(this.shortcut, ['container', 'args'])
       return join(args, ' ')
     },
-    disabled () {
-      const target = this.shortcut.target
-      if (this.shootItem && !this.isShootStatusHibernated) {
-        return false
-      }
-      if (target !== TargetEnum.SHOOT) {
-        return false
-      }
-
-      return true
+    canScheduleOnSeed () {
+      return get(this.shootItem, ['info', 'canLinkToSeed'], false)
+    },
+    isShootTarget () {
+      return this.shortcut.target === TargetEnum.SHOOT
+    },
+    isControlPlaneTarget () {
+      return this.shortcut.target === TargetEnum.CONTROL_PLANE
+    },
+    isShootHibernated () {
+      return this.shootItem && this.isShootStatusHibernated
     },
     visibilityIconShortcut () {
       return this.expansionPanel ? 'mdi-eye-off' : 'mdi-eye'

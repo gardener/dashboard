@@ -4,14 +4,14 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-const _ = require('lodash')
+import _ from 'lodash-es'
+import request from '@gardener-dashboard/request'
+import logger from '../logger/index.js'
+import cache from '../cache/index.js'
+import getPermissionMappings from './permissionMappings.js'
+import config from '../config/index.js'
 
-const { extend } = require('@gardener-dashboard/request')
-
-const config = require('../config')
-const logger = require('../logger')
-const cache = require('../cache')
-const getPermissionMappings = require('./permissionMappings')
+const { extend } = request
 
 const {
   fgaApiUrl,
@@ -142,7 +142,7 @@ async function getDerivedResourceRules (username, namespace, accountId) {
     .value()
 }
 
-module.exports = {
+export default {
   client: fgaClient,
   listProjects,
   writeProject,

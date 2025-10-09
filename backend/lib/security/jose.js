@@ -4,15 +4,16 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const { isPlainObject, map } = require('lodash')
-const { promisify } = require('util')
-const jwt = require('jsonwebtoken')
-const crypto = require('crypto')
-const jose = require('jose')
-const uuid = require('uuid')
-const base64url = require('base64url')
+import {
+  isPlainObject,
+  map,
+} from 'lodash-es'
+import { promisify } from 'util'
+import jwt from 'jsonwebtoken'
+import crypto from 'crypto'
+import * as jose from 'jose'
+import { v1 as uuidv1 } from 'uuid'
+import base64url from 'base64url'
 
 const jwtSign = promisify(jwt.sign)
 const jwtVerify = promisify(jwt.verify)
@@ -34,7 +35,7 @@ function decodeSecret (input) {
   return Buffer.from(input)
 }
 
-module.exports = sessionSecrets => {
+export default function createJose (sessionSecrets) {
   if (!sessionSecrets?.length) {
     throw new Error('No session secrets provided')
   }
@@ -56,7 +57,7 @@ module.exports = sessionSecrets => {
         options.expiresIn = '1d'
       }
       if (!payload.jti && !options.jwtid) {
-        options.jwtid = uuid.v1()
+        options.jwtid = uuidv1()
       }
       return jwtSign(payload, secretOrPrivateKey, options)
     },

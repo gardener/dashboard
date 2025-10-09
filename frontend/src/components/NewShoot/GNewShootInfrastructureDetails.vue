@@ -7,14 +7,10 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-container class="px-0 mx-0">
     <v-row>
-      <v-col
-        v-if="cloudProfiles.length > 1"
-        cols="3"
-      >
-        <g-cloud-profile
+      <v-col cols="3">
+        <g-select-cloud-profile
           ref="cloudProfile"
-          v-model="cloudProfileName"
-          create-mode
+          v-model="cloudProfileRef"
           :cloud-profiles="cloudProfiles"
           color="primary"
         />
@@ -23,8 +19,8 @@ SPDX-License-Identifier: Apache-2.0
         v-if="!workerless"
         cols="3"
       >
-        <g-select-secret
-          v-model="infrastructureSecret"
+        <g-select-credential
+          v-model="infrastructureBinding"
           :provider-type="providerType"
         />
       </v-col>
@@ -186,9 +182,9 @@ import {
 } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
-import GCloudProfile from '@/components/GCloudProfile'
+import GSelectCloudProfile from '@/components/GSelectCloudProfile'
 import GWildcardSelect from '@/components/GWildcardSelect'
-import GSelectSecret from '@/components/Secrets/GSelectSecret'
+import GSelectCredential from '@/components/Credentials/GSelectCredential'
 
 import { useShootContext } from '@/composables/useShootContext'
 
@@ -206,15 +202,15 @@ import map from 'lodash/map'
 
 export default {
   components: {
-    GCloudProfile,
+    GSelectCloudProfile,
     GWildcardSelect,
-    GSelectSecret,
+    GSelectCredential,
   },
   setup () {
     const {
       providerType,
-      cloudProfileName,
-      infrastructureSecret,
+      cloudProfileRef,
+      infrastructureBinding,
       region,
       networkingType,
       providerControlPlaneConfigLoadBalancerProviderName,
@@ -226,7 +222,7 @@ export default {
       providerInfrastructureConfigFirewallSize,
       providerInfrastructureConfigFirewallNetworks,
       cloudProfiles,
-      infrastructureSecrets,
+      infrastructureBindings,
       regionsWithSeed,
       regionsWithoutSeed,
       showAllRegions,
@@ -244,8 +240,8 @@ export default {
     return {
       v$: useVuelidate(),
       providerType,
-      cloudProfileName,
-      infrastructureSecret,
+      infrastructureBinding,
+      cloudProfileRef,
       region,
       networkingType,
       loadBalancerProviderName: providerControlPlaneConfigLoadBalancerProviderName,
@@ -257,7 +253,7 @@ export default {
       firewallSize: providerInfrastructureConfigFirewallSize,
       firewallNetworks: providerInfrastructureConfigFirewallNetworks,
       cloudProfiles,
-      infrastructureSecrets,
+      infrastructureBindings,
       regionsWithSeed,
       regionsWithoutSeed,
       showAllRegions,

@@ -19,6 +19,15 @@
     "Koser, Holger <holger.koser@sap.com>",
     "Sutter, Peter <peter.sutter@sap.com>"
   ],
+  "scripts": {
+    "serve": "yarn workspaces foreach --all --parallel --interlaced --include '@gardener-dashboard/frontend' --include '@gardener-dashboard/backend' run serve",
+    "generate-all-dependency-diagrams": "node scripts/diagramGenerator.mjs --target all",
+    "generate-backend-dependency-diagrams": "node scripts/diagramGenerator.mjs --target backend",
+    "generate-packages-dependency-diagrams": "node scripts/diagramGenerator.mjs --target packages",
+    "packages-test-all": "yarn workspaces foreach --all --parallel --no-private --include 'packages/*' run test",
+    "packages-lint-all": "yarn workspaces foreach --all --parallel --no-private --include 'packages/*' run lint",
+    "postinstall": "[ ! -f .husky/user-config ] || grep -q '^managed_hooks=true$' .husky/user-config && husky || echo '[husky] Skipping husky install due to user preference.'"
+  },
   "dependenciesMeta": {
     "deasync": {
       "built": false
@@ -29,15 +38,20 @@
   },
   "devDependencies": {
     "@microsoft/eslint-formatter-sarif": "^3.1.0",
+    "dependency-cruiser": "^17.0.0",
     "eslint": "^9.11.0",
-    "jest": "^29.7.0",
+    "husky": "^9.1.7",
+    "jest": "^30.0.0",
     "node-gyp": "latest"
   },
   "bin": {
     "update-prod-install": "./scripts/update-prod-install.cjs"
   },
-  "packageManager": "yarn@4.5.3",
+  "packageManager": "yarn@4.9.4",
   "engines": {
-    "node": "^22.7.0"
+    "node": "22.18.0"
+  },
+  "dependencies": {
+    "lodash-es": "^4.17.21"
   }
 }

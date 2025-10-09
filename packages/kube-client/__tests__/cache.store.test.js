@@ -4,9 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const { Store } = require('../lib/cache')
+import { jest } from '@jest/globals'
+import { Store } from '../lib/cache/index.js'
 
 describe('kube-client', () => {
   describe('cache', () => {

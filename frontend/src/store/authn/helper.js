@@ -121,19 +121,6 @@ export function useUserManager (cookies, options) {
         Object.defineProperty(response, 'data', { value: data })
         if (data.message) {
           message = data.message
-          if (statusCode === 401) {
-            /*
-             * The OPError message has the following format `${error} (${error_description})`
-             * (see https://github.com/panva/node-openid-client/blob/1e3892e6222fdd1956735f97584ebc722fcebdd3/lib/errors.js#L5)
-             * The error and the error_description are values returned in the error response
-             * from the the OpenID Connect Provider (OP). We use the original OP error_description
-             * as error message if possible.
-             */
-            const matches = /^(.+) \((.+)\)$/.exec(message)
-            if (matches && matches.length > 2) {
-              message = matches[2]
-            }
-          }
         }
       } catch (err) { /* ignore error */ }
       throw createError(statusCode, message, { response })

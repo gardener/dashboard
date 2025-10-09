@@ -4,10 +4,14 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-const _ = require('lodash')
-const { NotFound } = require('http-errors')
-const createTicketCache = require('./tickets')
-const { parseSelectors, filterBySelectors } = require('../utils')
+import _ from 'lodash-es'
+import httpErrors from 'http-errors'
+import createTicketCache from './tickets.js'
+import {
+  parseSelectors,
+  filterBySelectors,
+} from '../utils/index.js'
+const { NotFound } = httpErrors
 
 /*
   In file `lib/api.js` the synchronization is started with the privileged dashboardClient.
@@ -56,7 +60,7 @@ class Cache extends Map {
 
 const cache = new Cache()
 
-module.exports = {
+export default {
   cache,
   initialize (informers) {
     for (const [key, informer] of Object.entries(informers)) {
@@ -79,14 +83,8 @@ module.exports = {
       .cloneDeep()
       .value()
   },
-  getVisibleAndNotProtectedSeeds () {
-    const predicate = item => {
-      const taints = _.get(item, ['spec', 'taints'])
-      const unprotected = !_.find(taints, ['key', 'seed.gardener.cloud/protected'])
-      const visible = _.get(item, ['spec', 'settings', 'scheduling', 'visible'])
-      return unprotected && visible
-    }
-    return _.filter(cache.getSeeds(), predicate)
+  getSeedByUid (uid) {
+    return cache.get('seeds').find(['metadata.uid', uid])
   },
   getProject (name) {
     const project = cache.get('projects').find(['metadata.name', name])
@@ -94,6 +92,9 @@ module.exports = {
       throw new NotFound(`Project with name '${name}' not found`)
     }
     return project
+  },
+  getProjectByUid (uid) {
+    return cache.get('projects').find(['metadata.uid', uid])
   },
   getProjects () {
     return cache.getProjects()
@@ -140,5 +141,17 @@ module.exports = {
   },
   getTicketCache () {
     return cache.getTicketCache()
+  },
+  getByUid (kind, uid) {
+    switch (kind) {
+      case 'Project':
+        return this.getProjectByUid(uid)
+      case 'Shoot':
+        return this.getShootByUid(uid)
+      case 'Seed':
+        return this.getSeedByUid(uid)
+      default:
+        throw new TypeError(`Kind '${kind}' not supported`)
+    }
   },
 }

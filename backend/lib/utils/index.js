@@ -4,16 +4,16 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import _ from 'lodash-es'
+import config from '../config/index.js'
+import assert from 'assert/strict'
 
-const _ = require('lodash')
-const config = require('../config')
-const assert = require('assert').strict
-
-const EXISTS = '∃'
-const NOT_EXISTS = '!∃'
-const EQUAL = '='
-const NOT_EQUAL = '!='
+const constants = Object.freeze({
+  EXISTS: '\u2203',
+  NOT_EXISTS: '!\u2203',
+  EQUAL: '=',
+  NOT_EQUAL: '!=',
+})
 
 function decodeBase64 (value) {
   if (!value) {
@@ -29,37 +29,37 @@ function encodeBase64 (value) {
   return Buffer.from(value, 'utf8').toString('base64')
 }
 
-function projectFilter (user, canListProjects = false, projectAllowList = []) {
-  const isMemberOf = project => {
-    if (projectAllowList.includes(project.metadata.name)) {
-      return true
-    }
-    return _
-      .chain(project)
-      .get(['spec', 'members'])
-      .find(({ kind, namespace, name }) => {
-        switch (kind) {
-          case 'Group':
-            if (_.includes(user.groups, name)) {
-              return true
-            }
-            break
-          case 'User':
-            if (user.id === name) {
-              return true
-            }
-            break
-          case 'ServiceAccount':
-            if (user.id === `system:serviceaccount:${namespace}:${name}`) {
-              return true
-            }
-            break
-        }
-        return false
-      })
-      .value()
+function isMemberOf (project, user, projectAllowList = []) {
+  if (projectAllowList.includes(project.metadata.name)) {
+    return true
   }
+  return _
+    .chain(project)
+    .get(['spec', 'members'])
+    .find(({ kind, namespace, name }) => {
+      switch (kind) {
+        case 'Group':
+          if (_.includes(user.groups, name)) {
+            return true
+          }
+          break
+        case 'User':
+          if (user.id === name) {
+            return true
+          }
+          break
+        case 'ServiceAccount':
+          if (user.id === `system:serviceaccount:${namespace}:${name}`) {
+            return true
+          }
+          break
+      }
+      return false
+    })
+    .value()
+}
 
+function projectFilter (user, canListProjects = false, projectAllowList = []) {
   const isPending = project => {
     return _.get(project, ['status', 'phase'], 'Pending') === 'Pending'
   }
@@ -68,7 +68,7 @@ function projectFilter (user, canListProjects = false, projectAllowList = []) {
     if (isPending(project)) {
       return false
     }
-    return canListProjects || isMemberOf(project)
+    return canListProjects || isMemberOf(project, user, projectAllowList)
   }
 }
 
@@ -102,7 +102,7 @@ function parseRooms (rooms) {
   ]
 }
 
-function trimObjectMetadata (object) {
+function simplifyObjectMetadata (object) {
   object.metadata.managedFields = undefined
   if (object.metadata.annotations) {
     object.metadata.annotations['kubectl.kubernetes.io/last-applied-configuration'] = undefined
@@ -110,10 +110,14 @@ function trimObjectMetadata (object) {
   return object
 }
 
-function trimProject (project) {
-  project = trimObjectMetadata(project)
+function simplifyProject (project) {
+  project = simplifyObjectMetadata(project)
   _.set(project, ['spec', 'members'], undefined)
   return project
+}
+
+function simplifySeed (seed) {
+  return simplifyObjectMetadata(seed)
 }
 
 function parseSelector (selector = '') {
@@ -156,14 +160,14 @@ function parseSelector (selector = '') {
 
   if (notOperator) {
     if (!operator) {
-      return { op: NOT_EXISTS, key }
+      return { op: constants.NOT_EXISTS, key }
     }
   } else if (!operator) {
-    return { op: EXISTS, key }
+    return { op: constants.EXISTS, key }
   } else if (operator === '!=') {
-    return { op: NOT_EQUAL, key, value }
+    return { op: constants.NOT_EQUAL, key, value }
   } else if (operator === '=' || operator === '==') {
-    return { op: EQUAL, key, value }
+    return { op: constants.EQUAL, key, value }
   }
 }
 
@@ -184,25 +188,25 @@ function filterBySelectors (selectors) {
     for (const { op, key, value } of selectors) {
       const labelValue = _.get(labels, [key], '')
       switch (op) {
-        case NOT_EXISTS: {
+        case constants.NOT_EXISTS: {
           if (key in labels) {
             return false
           }
           break
         }
-        case EXISTS: {
+        case constants.EXISTS: {
           if (!(key in labels)) {
             return false
           }
           break
         }
-        case NOT_EQUAL: {
+        case constants.NOT_EQUAL: {
           if (labelValue === value) {
             return false
           }
           break
         }
-        case EQUAL: {
+        case constants.EQUAL: {
           if (labelValue !== value) {
             return false
           }
@@ -244,24 +248,22 @@ function isSeedUnreachable (seed) {
   return _.isMatch(seed, { metadata: { labels: matchLabels } })
 }
 
-module.exports = {
+export {
+  constants,
   decodeBase64,
   encodeBase64,
+  isMemberOf,
   projectFilter,
   parseRooms,
-  trimObjectMetadata,
-  trimProject,
+  simplifyObjectMetadata,
+  simplifyProject,
+  simplifySeed,
+  parseSelector,
   parseSelectors,
   filterBySelectors,
   getConfigValue,
   getSeedNameFromShoot,
   shootHasIssue,
-  isSeedUnreachable,
   getSeedIngressDomain,
-  constants: Object.freeze({
-    EXISTS,
-    NOT_EXISTS,
-    EQUAL,
-    NOT_EQUAL,
-  }),
+  isSeedUnreachable,
 }
