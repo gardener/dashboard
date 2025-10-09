@@ -65,6 +65,7 @@ import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useConfigStore } from '@/store/config'
 
 import { useShootItem } from '@/composables/useShootItem'
+import { useCloudProfileForKubeVersions } from '@/composables/useCloudProfile/useCloudProfileForKubeVersions'
 
 import { isSelfTerminationWarning } from '@/utils'
 
@@ -188,13 +189,16 @@ const shootMessages = computed(() => {
   ]
 })
 
+const k8sAutoPatch = computed(() => get(shootItem.value, ['spec', 'maintenance', 'autoUpdate', 'kubernetesVersion'], false))
+const cloudProfile = computed(() => cloudProfileStore.cloudProfileByRef(shootCloudProfileRef.value))
+const { useKubernetesVersionExpirationForShoot } = useCloudProfileForKubeVersions(cloudProfile)
+const k8sExpiration = useKubernetesVersionExpirationForShoot(shootK8sVersion, k8sAutoPatch)
+
 const k8sMessage = computed(() => {
   if (!filterMatches('k8s')) {
     return []
   }
-  const k8sAutoPatch = get(shootItem.value, ['spec', 'maintenance', 'autoUpdate', 'kubernetesVersion'], false)
-  const k8sExpiration = cloudProfileStore.kubernetesVersionExpirationForShoot(shootK8sVersion.value, shootCloudProfileRef.value, k8sAutoPatch)
-  if (!k8sExpiration) {
+  if (!k8sExpiration.value) {
     return []
   }
   const {
@@ -202,7 +206,7 @@ const k8sMessage = computed(() => {
     isValidTerminationDate,
     severity,
     isExpired,
-  } = k8sExpiration
+  } = k8sExpiration.value
   return [{
     key: 'k8sWarning',
     icon: 'mdi-update',

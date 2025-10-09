@@ -9,6 +9,8 @@ import { computed } from 'vue'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useCredentialStore } from '@/store/credential'
 
+import { useCloudProfileForKubeVersions } from '@/composables/useCloudProfile/useCloudProfileForKubeVersions.js'
+
 import get from 'lodash/get'
 import uniq from 'lodash/uniq'
 import flatMap from 'lodash/flatMap'
@@ -74,8 +76,11 @@ export function useShootSpec (shootItem, options = {}) {
     return get(shootSpec.value, ['kubernetes', 'version'])
   })
 
+  const cloudProfile = computed(() => cloudProfileStore.cloudProfileByRef(shootCloudProfileRef.value))
+  const { useAvailableKubernetesUpdatesForShoot, kubernetesVersions } = useCloudProfileForKubeVersions(cloudProfile)
+
   const shootAvailableK8sUpdates = computed(() => {
-    return cloudProfileStore.availableKubernetesUpdatesForShoot(shootK8sVersion.value, shootCloudProfileRef.value)
+    return useAvailableKubernetesUpdatesForShoot(shootK8sVersion).value
   })
 
   const shootSupportedPatchAvailable = computed(() => {
@@ -87,8 +92,7 @@ export function useShootSpec (shootItem, options = {}) {
   })
 
   const shootKubernetesVersionObject = computed(() => {
-    const kubernetesVersionObjects = cloudProfileStore.kubernetesVersions(shootCloudProfileRef.value)
-    return find(kubernetesVersionObjects, ['version', shootK8sVersion.value]) ?? {}
+    return find(kubernetesVersions.value, ['version', shootK8sVersion.value]) ?? {}
   })
 
   const shootCloudProfileRef = computed(() => {
