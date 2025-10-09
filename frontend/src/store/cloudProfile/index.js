@@ -56,7 +56,6 @@ import isEmpty from 'lodash/isEmpty'
 import flatMap from 'lodash/flatMap'
 import template from 'lodash/template'
 import head from 'lodash/head'
-import cloneDeep from 'lodash/cloneDeep'
 import sample from 'lodash/sample'
 import pick from 'lodash/pick'
 
@@ -65,8 +64,6 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
   const api = useApi()
   const seedStore = useSeedStore()
   const configStore = useConfigStore()
-
-  const availableKubernetesUpdatesCache = new Map()
 
   const list = ref(null)
 
@@ -521,130 +518,6 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return firstItemMatchingVersionClassification(machineImages)
   }
 
-  function kubernetesVersions (cloudProfileRef) {
-    const cloudProfile = cloudProfileByRef(cloudProfileRef)
-    const allVersions = get(cloudProfile, ['spec', 'kubernetes', 'versions'], [])
-    const validVersions = filter(allVersions, ({ version }) => {
-      if (!semver.valid(version)) {
-        logger.info(`Skipped Kubernetes version ${version} as it is not a valid semver version`)
-        return false
-      }
-      return true
-    })
-    return map(validVersions, decorateClassificationObject)
-  }
-
-  function sortedKubernetesVersions (cloudProfileRef) {
-    const kubernetsVersions = cloneDeep(kubernetesVersions(cloudProfileRef))
-    kubernetsVersions.sort((a, b) => {
-      return semver.rcompare(a.version, b.version)
-    })
-    return kubernetsVersions
-  }
-
-  function defaultKubernetesVersionForCloudProfileRef (cloudProfileRef) {
-    const k8sVersions = sortedKubernetesVersions(cloudProfileRef)
-    return firstItemMatchingVersionClassification(k8sVersions)
-  }
-
-  function availableKubernetesUpdatesForShoot (shootVersion, cloudProfileRef) {
-    if (!shootVersion || !cloudProfileRef) {
-      return
-    }
-    const key = `${shootVersion}_${cloudProfileRef.kind}_${cloudProfileRef.name}`
-    let newerVersions = availableKubernetesUpdatesCache.get(key)
-    if (newerVersions !== undefined) {
-      return newerVersions
-    }
-    newerVersions = {}
-    const allVersions = kubernetesVersions(cloudProfileRef)
-
-    const validVersions = filter(allVersions, ({ isExpired }) => !isExpired)
-    const newerVersionsForShoot = filter(validVersions, ({ version }) => semver.gt(version, shootVersion))
-    for (const version of newerVersionsForShoot) {
-      const diff = semver.diff(version.version, shootVersion)
-      /* eslint-disable security/detect-object-injection */
-      if (!newerVersions[diff]) {
-        newerVersions[diff] = []
-      }
-      newerVersions[diff].push(version)
-      /* eslint-enable security/detect-object-injection */
-    }
-    newerVersions = newerVersionsForShoot.length ? newerVersions : null
-    availableKubernetesUpdatesCache.set(key, newerVersions)
-
-    return newerVersions
-  }
-
-  function kubernetesVersionIsNotLatestPatch (kubernetesVersion, cloudProfileRef) {
-    const allVersions = kubernetesVersions(cloudProfileRef)
-    return some(allVersions, ({ version, isSupported }) => {
-      return semver.diff(version, kubernetesVersion) === 'patch' && semver.gt(version, kubernetesVersion) && isSupported
-    })
-  }
-
-  function kubernetesVersionUpdatePathAvailable (kubernetesVersion, cloudProfileRef) {
-    const allVersions = kubernetesVersions(cloudProfileRef)
-    if (kubernetesVersionIsNotLatestPatch(kubernetesVersion, cloudProfileRef)) {
-      return true
-    }
-
-    const nextMinorVersion = semver.minor(kubernetesVersion) + 1
-    let hasNextMinorVersion = false
-    let hasNewerSupportedMinorVersion = false
-
-    for (const { version, isSupported } of allVersions) {
-      const minorVersion = semver.minor(version)
-      if (minorVersion === nextMinorVersion) {
-        // we can only upgrade one version at a time, therefore we only check if the next version exists
-        // as for the current upgrade this is the only relevant version
-        hasNextMinorVersion = true
-      }
-      if (minorVersion >= nextMinorVersion && isSupported) {
-        // if no newer supported exists (no need to be next minor) there is no update path
-        // this will result in an error in case the current version is about to expire
-        // we show this as error information to the user (this should not happen, likely a misconfiguration)
-        hasNewerSupportedMinorVersion = true
-      }
-    }
-
-    return hasNextMinorVersion && hasNewerSupportedMinorVersion
-  }
-
-  function kubernetesVersionExpirationForShoot (shootK8sVersion, cloudProfileRef, k8sAutoPatch) {
-    const allVersions = kubernetesVersions(cloudProfileRef)
-    const version = find(allVersions, { version: shootK8sVersion })
-    if (!version) {
-      return {
-        version: shootK8sVersion,
-        expirationDate: UNKNOWN_EXPIRED_TIMESTAMP,
-        isValidTerminationDate: false,
-        severity: 'warning',
-      }
-    }
-
-    const patchAvailable = kubernetesVersionIsNotLatestPatch(shootK8sVersion, cloudProfileRef)
-    const updatePathAvailable = kubernetesVersionUpdatePathAvailable(shootK8sVersion, cloudProfileRef)
-
-    const severity = getVersionExpirationWarningSeverity({
-      isExpirationWarning: version.isExpirationWarning,
-      autoPatchEnabled: k8sAutoPatch,
-      updateAvailable: updatePathAvailable,
-      autoUpdatePossible: patchAvailable,
-    })
-
-    if (!severity) {
-      return undefined
-    }
-
-    return {
-      expirationDate: version.expirationDate,
-      isExpired: version.isExpired,
-      isValidTerminationDate: isValidTerminationDate(version.expirationDate),
-      severity,
-    }
-  }
-
   function generateWorker (availableZones, cloudProfileRef, region, kubernetesVersion) {
     const id = uuidv4()
     const name = `worker-${shortRandomString(5)}`
@@ -690,6 +563,8 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     list,
     isInitial,
     cloudProfileList,
+    seedsByCloudProfileRef,
+    loadBalancerClassesByCloudProfileRef,
     setCloudProfiles,
     fetchCloudProfiles,
     cloudProfilesByProviderType,
@@ -706,28 +581,23 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     firewallImagesByCloudProfileRef,
     firewallSizesByCloudProfileRefAndRegion,
     firewallNetworksByCloudProfileRefAndPartitionId,
-    defaultKubernetesVersionForCloudProfileRef,
     zonesByCloudProfileRefAndRegion,
+    // Machine Type
     machineArchitecturesByCloudProfileRefAndRegion,
-    expiringWorkerGroupsForShoot,
     machineTypesByCloudProfileRef,
     machineTypesByCloudProfileRefAndRegionAndArchitecture,
+    // Volum Stuff
     volumeTypesByCloudProfileRefAndRegion,
     volumeTypesByCloudProfileRef,
-    defaultMachineImageForCloudProfileRefAndMachineType,
     minimumVolumeSizeByMachineTypeAndVolumeType,
+    // Access Restrictions
     accessRestrictionsByCloudProfileRefAndRegion,
     accessRestrictionDefinitionsByCloudProfileRefAndRegion,
     accessRestrictionNoItemsTextForCloudProfileRefAndRegion,
-    kubernetesVersions,
-    sortedKubernetesVersions,
-    kubernetesVersionIsNotLatestPatch,
-    availableKubernetesUpdatesForShoot,
-    kubernetesVersionUpdatePathAvailable,
-    kubernetesVersionExpirationForShoot,
-    seedsByCloudProfileRef,
-    loadBalancerClassesByCloudProfileRef,
+    // MachineImage Stuff
+    defaultMachineImageForCloudProfileRefAndMachineType,
     generateWorker,
+    expiringWorkerGroupsForShoot,
     machineImagesByCloudProfileRef,
   }
 })
