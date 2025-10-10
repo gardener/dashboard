@@ -385,6 +385,7 @@ import GVendorIcon from '@/components/GVendorIcon'
 
 import { useShootItem } from '@/composables/useShootItem'
 import { useCloudProfileForMachineImages } from '@/composables/useCloudProfile/useCloudProfileForMachineImages'
+import { useCloudProfileForMachineTypes } from '@/composables/useCloudProfile/useCloudProfileForMachineTypes'
 
 import get from 'lodash/get'
 import find from 'lodash/find'
@@ -412,6 +413,7 @@ export default {
     const cloudProfileStore = useCloudProfileStore()
     const cloudProfile = computed(() => cloudProfileStore.cloudProfileByRef(shootCloudProfileRef.value))
     const { machineImages } = useCloudProfileForMachineImages(cloudProfile)
+    const { machineTypes } = useCloudProfileForMachineTypes(cloudProfile, cloudProfileStore.zonesByCloudProfileAndRegion)
 
     const tab = ref('overview')
 
@@ -420,6 +422,7 @@ export default {
       shootMetadata,
       shootCloudProfileRef,
       machineImages,
+      machineTypes,
     }
   },
   data () {
@@ -440,9 +443,8 @@ export default {
       },
     },
     machineType () {
-      const machineTypes = this.machineTypesByCloudProfileRef(this.shootCloudProfileRef)
       const type = get(this.workerGroup, ['machine', 'type'])
-      return find(machineTypes, ['name', type])
+      return find(this.machineTypes, ['name', type])
     },
     volumeType () {
       const volumeTypes = this.volumeTypesByCloudProfileRef(this.shootCloudProfileRef)
@@ -507,7 +509,6 @@ export default {
   },
   methods: {
     ...mapActions(useCloudProfileStore, [
-      'machineTypesByCloudProfileRef',
       'volumeTypesByCloudProfileRef',
     ]),
     updateWorkerGroupYaml (value) {
