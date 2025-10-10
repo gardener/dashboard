@@ -56,18 +56,11 @@ SPDX-License-Identifier: Apache-2.0
             Access Dashboard using the kubectl command-line tool by running the following command:
             <code>kubectl proxy</code>.
             Kubectl will make Dashboard available at:
-            <v-tooltip
+            <span
               v-if="isShootStatusHibernated"
-              location="top"
-            >
-              <template #activator="slotProps">
-                <span
-                  v-bind="slotProps.props"
-                  class="text-grey"
-                >{{ dashboardUrl }}</span>
-              </template>
-              Dashboard is not running for hibernated clusters
-            </v-tooltip>
+              v-tooltip:top="'Dashboard is not running for hibernated clusters'"
+              class="text-grey"
+            >{{ dashboardUrl }}</span>
             <a
               v-else
               class="text-anchor"
@@ -111,6 +104,8 @@ import { storeToRefs } from 'pinia'
 
 import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
+import { useConfigStore } from '@/store/config'
+import { useSeedStore } from '@/store/seed'
 import { useTerminalStore } from '@/store/terminal'
 
 import GList from '@/components/GList.vue'
@@ -118,10 +113,13 @@ import GListItem from '@/components/GListItem.vue'
 import GListItemContent from '@/components/GListItemContent.vue'
 import GTerminalListTile from '@/components/GTerminalListTile.vue'
 
+import { useProvideSeedItem } from '@/composables/useSeedItem'
+import { useShootAdminKubeconfig } from '@/composables/useShootAdminKubeconfig'
 import {
   useShootItem,
   useProvideShootItem,
 } from '@/composables/useShootItem'
+import { useProvideSeedHelper } from '@/composables/useSeedHelper'
 
 import GGardenctlCommands from './GGardenctlCommands.vue'
 import GShootKubeconfig from './GShootKubeconfig.vue'
@@ -150,17 +148,18 @@ const emit = defineEmits([
   'addTerminalShortcut',
 ])
 
+const configStore = useConfigStore()
 const authnStore = useAuthnStore()
 const {
   isAdmin,
 } = storeToRefs(authnStore)
 const authzStore = useAuthzStore()
+const seedStore = useSeedStore()
 const {
   hasShootTerminalAccess,
   canCreateShootsAdminkubeconfig,
   canCreateShootsViewerkubeconfig,
   hasControlPlaneTerminalAccess,
-  canPatchShoots,
 } = storeToRefs(authzStore)
 const terminalStore = useTerminalStore()
 const {
@@ -168,14 +167,26 @@ const {
 } = storeToRefs(terminalStore)
 
 const {
+  isEnabled: isShootAdminKubeconfigEnabled,
+} = useShootAdminKubeconfig()
+const {
   shootItem,
   isShootStatusHibernated,
   hasShootWorkerGroups,
   shootInfo,
-  isSeedUnreachable,
+  shootSeedName,
 } = selectedShoot.value
   ? useProvideShootItem(selectedShoot)
   : useShootItem()
+
+const seedItem = computed(() => seedStore.seedByName(shootSeedName.value))
+useProvideSeedItem(seedItem)
+
+const {
+  isSeedUnreachable,
+} = useProvideSeedHelper(seedItem, {
+  configStore,
+})
 
 const dashboardUrl = computed(() => {
   if (!hasDashboardEnabled.value) {
@@ -221,7 +232,7 @@ const isDashboardTileVisible = computed(() => {
 })
 
 const isKubeconfigTileVisible = computed(() => {
-  return !!kubeconfigGardenlogin.value || canPatchShoots.value
+  return !!kubeconfigGardenlogin.value || (isShootAdminKubeconfigEnabled.value && canCreateShootsAdminkubeconfig.value)
 })
 
 const isGardenctlTileVisible = computed(() => {
@@ -233,7 +244,7 @@ const isTerminalTileVisible = computed(() => {
 })
 
 const isTerminalShortcutsTileVisible = computed(() => {
-  return !isEmpty(shootItem.value) && isTerminalShortcutsFeatureEnabled.value && hasShootTerminalAccess.value && !hideTerminalShortcuts.value && !isSeedUnreachable.value && (hasShootWorkerGroups.value || isAdmin.value)
+  return isTerminalTileVisible.value && !hideTerminalShortcuts.value && isTerminalShortcutsFeatureEnabled.value
 })
 
 function onAddTerminalShortcut (shortcut) {

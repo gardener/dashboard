@@ -157,13 +157,11 @@ export default [
   {
     metadata: {
       name: 'alicloud',
-      providerType: 'alicloud',
-      displayName: 'Alibaba Cloud',
+      annotations: {
+        'garden.sapcloud.io/displayName': 'Alibaba Cloud',
+      },
     },
-    data: {
-      seedNames: [
-        'ali-ha',
-      ],
+    spec: {
       kubernetes: {
         versions: [
           ...kubernetesVersions,
@@ -283,10 +281,11 @@ export default [
   {
     metadata: {
       name: 'aws',
-      providerType: 'aws',
-      displayName: 'aws',
+      annotations: {
+        'garden.sapcloud.io/displayName': 'aws',
+      },
     },
-    data: {
+    spec: {
       seedNames: [
         'aws-ha',
       ],
@@ -470,10 +469,11 @@ export default [
   {
     metadata: {
       name: 'az',
-      providerType: 'azure',
-      displayName: 'Azure',
+      annotations: {
+        'garden.sapcloud.io/displayName': 'Azure',
+      },
     },
-    data: {
+    spec: {
       seedNames: [
         'az-ha',
       ],
@@ -580,10 +580,11 @@ export default [
   {
     metadata: {
       name: 'openstack-1',
-      providerType: 'openstack',
-      displayName: 'Openstack 1',
+      annotations: {
+        'garden.sapcloud.io/displayName': 'Openstack 1',
+      },
     },
-    data: {
+    spec: {
       seedNames: [
         'openstack-ha',
       ],
@@ -738,10 +739,11 @@ export default [
   {
     metadata: {
       name: 'openstack-2',
-      providerType: 'openstack',
-      displayName: 'Openstack 2',
+      annotations: {
+        'garden.sapcloud.io/displayName': 'Openstack 2',
+      },
     },
-    data: {
+    spec: {
       seedNames: [
         'openstack-ha',
       ],
@@ -920,10 +922,11 @@ export default [
   {
     metadata: {
       name: 'gcp',
-      providerType: 'gcp',
-      displayName: 'Google Cloud',
+      annotations: {
+        'garden.sapcloud.io/displayName': 'Google Cloud',
+      },
     },
-    data: {
+    spec: {
       seedNames: [
         'gcp-ha',
       ],
@@ -1071,10 +1074,11 @@ export default [
   {
     metadata: {
       name: 'ironcore',
-      providerType: 'ironcore',
-      displayName: 'IronCore',
+      annotations: {
+        'garden.sapcloud.io/displayName': 'IronCore',
+      },
     },
-    data: {
+    spec: {
       seedNames: [
         'gcp-ha',
       ],

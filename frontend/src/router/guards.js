@@ -13,7 +13,7 @@ import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useKubeconfigStore } from '@/store/kubeconfig'
 import { useMemberStore } from '@/store/member'
-import { useSecretStore } from '@/store/secret'
+import { useCredentialStore } from '@/store/credential'
 import { useSeedStore } from '@/store/seed'
 import { useShootStore } from '@/store/shoot'
 import { useTerminalStore } from '@/store/terminal'
@@ -121,7 +121,7 @@ export function createGlobalResolveGuards () {
   const authzStore = useAuthzStore()
   const projectStore = useProjectStore()
   const memberStore = useMemberStore()
-  const secretStore = useSecretStore()
+  const credentialStore = useCredentialStore()
   const shootStore = useShootStore()
   const terminalStore = useTerminalStore()
 
@@ -154,17 +154,17 @@ export function createGlobalResolveGuards () {
             await projectStore.fetchProjects()
             break
           }
-          case 'Secrets':
-          case 'Secret': {
+          case 'Credentials':
+          case 'Credential': {
             shootStore.subscribeShoots()
-            await secretStore.fetchSecrets()
+            await credentialStore.fetchCredentials()
             break
           }
           case 'NewShoot':
           case 'NewShootEditor': {
             shootStore.subscribeShoots()
-            if (authzStore.canGetSecrets) {
-              await secretStore.fetchSecrets()
+            if (authzStore.canGetCloudProviderCredentials) {
+              await credentialStore.fetchCredentials()
             }
             break
           }
@@ -172,9 +172,14 @@ export function createGlobalResolveGuards () {
             // filter has to be set before subscribing shoots
             shootStore.initializeShootListFilters()
             shootStore.subscribeShoots()
+            const promises = []
             if (authzStore.canUseProjectTerminalShortcuts) {
-              await terminalStore.ensureProjectTerminalShortcutsLoaded()
+              promises.push(terminalStore.ensureProjectTerminalShortcutsLoaded())
             }
+            if (authzStore.canGetCloudProviderCredentials) {
+              promises.push(credentialStore.fetchCredentials())
+            }
+            await Promise.all(promises)
             break
           }
           case 'ShootItem':

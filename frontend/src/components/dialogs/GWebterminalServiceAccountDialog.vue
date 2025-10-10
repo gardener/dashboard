@@ -41,7 +41,7 @@ SPDX-License-Identifier: Apache-2.0
                 </v-list-item-title>
                 <template #append>
                   <v-list-item-action>
-                    <g-account-roles :role-display-names="desiredRoleDisplayNames" />
+                    <g-account-roles :role-descriptors="desiredRoleDescriptors" />
                   </v-list-item-action>
                 </template>
               </v-list-item>
@@ -66,7 +66,7 @@ import {
   errorDetailsFromError,
   isConflict,
 } from '@/utils/error'
-import { sortedRoleDisplayNames } from '@/utils'
+import { sortedRoleDescriptors } from '@/utils'
 
 import get from 'lodash/get'
 
@@ -105,8 +105,8 @@ export default {
     serviceAccountUsername () {
       return `system:serviceaccount:${this.namespace}:${this.serviceAccountName}`
     },
-    desiredRoleDisplayNames () {
-      return sortedRoleDisplayNames(this.desiredRoles)
+    desiredRoleDescriptors () {
+      return sortedRoleDescriptors(this.desiredRoles)
     },
     desiredRoles () {
       const roles = [...get(this.member, ['roles'], [])]

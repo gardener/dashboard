@@ -38,7 +38,6 @@ SPDX-License-Identifier: Apache-2.0
 <script setup>
 import {
   ref,
-  computed,
   inject,
   provide,
 } from 'vue'
@@ -79,7 +78,7 @@ const {
   conflictPath,
   getEditorValue,
   focusEditor,
-  clearDocumentHistory,
+  setEditorTouched,
 } = useProvide(injectionKey, useShootEditor(shootItem, {
   extraKeys: [
     { key: 'Ctrl-s',
@@ -89,32 +88,37 @@ const {
   ],
 }))
 
-const hasConflict = computed(() => {
-  return !isEmpty(conflictPath.value)
-})
-
 async function save () {
   try {
     if (!touched.value) {
       return
     }
     if (clean.value) {
-      clearDocumentHistory()
-      return
-    }
-    if (hasConflict.value && !(await confirmOverwrite())) {
+      setEditorTouched(false)
       return
     }
 
+    const hasConflict = !isEmpty(conflictPath.value)
+    if (hasConflict) {
+      const overwrite = await confirmOverwrite()
+      if (!overwrite) {
+        return
+      }
+      conflictPath.value = null
+    }
+
     const shootResource = getEditorValue()
+
+    setEditorTouched(false)
     await api.replaceShoot({
       namespace: shootNamespace.value,
       name: shootName.value,
       data: pick(shootResource, ['spec', 'metadata.labels', 'metadata.annotations']),
     })
-
-    clearDocumentHistory()
   } catch (err) {
+    // Reset editor state to allow user to retry saving
+    setEditorTouched(true)
+
     errorMessage.value = 'Failed to save changes.'
     if (err.response) {
       const errorDetails = errorDetailsFromError(err)

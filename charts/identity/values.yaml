@@ -5,7 +5,7 @@ replicaCount: 1
 
 image:
   repository: ghcr.io/dexidp/dex
-  tag: v2.41.1-distroless
+  tag: v2.44.0-distroless
   pullPolicy: IfNotPresent
 
 containerPort: 5556
@@ -27,7 +27,7 @@ ingress:
 dashboardOrigins:
   - 'https://dashboard.ingress.example.org'
   - 'https://dashboard.example.org'
-  - 'http://localhost:8080'
+  - 'https://localhost:8443'
 dashboardClientSecret: sHq4vLoiQcIWbO3h
 kubectlClientSecret: if6ji0dTFE4rQfj8
 

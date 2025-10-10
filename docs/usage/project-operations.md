@@ -39,11 +39,11 @@ Once the latter is set up, each Gardener user can use the `kubelogin` plugin for
 
 1. Open the menu at the top right of the screen, then choose **MY ACCOUNT**.
 
-    ![Show account details](../images/Show-account-details.png)
+    ![Show account details](../images/show-account-details.png)
 
 1. On the **Access** card, choose the arrow to see all options for the personalized command-line interface access.
 
-    ![Show details of OICD login](../images/Show-details-of-OICD-login.png)
+    ![Show details of OICD login](../images/show-details-of-oicd-login.png)
 
     > The personal bearer token that is also offered here only provides access for a limited amount of time for one time operations, for example, in `curl` commands. The `kubeconfig` provided for the personalized access is used by `kubelogin` to grant access to the Gardener API for the user permanently by using a refresh token.
 
@@ -194,7 +194,9 @@ To create a new cluster using the command line, you need a YAML definition of th
       namespace: garden-flowering
     spec:
       secretBindingName: trial-secretbinding-gcp
-      cloudProfileName: gcp
+      cloudProfile:
+        kind: CloudProfile
+        name: gcp
       region: europe-west1
       purpose: evaluation
       provider:
@@ -217,8 +219,7 @@ To create a new cluster using the command line, you need a YAML definition of th
           machine:
             type: n1-standard-2
             image:
-              name: coreos
-              version: 2303.3.0
+              name: gardenlinux
           volume:
             type: pd-standard
             size: 50Gi
@@ -332,7 +333,7 @@ To delete a shoot cluster, you must first annotate the shoot resource to confirm
 To get the `kubeconfig` for a shoot cluster in Gardener from the command line, use one of the following methods:
 
 1. **Using `shoots/admin/kubeconfig` Subresource**:
-   - You can obtain a temporary admin `kubeconfig` by using the `shoots/admin/kubeconfig` subresource. Detailed instructions can be found in the Gardener documentation [here](https://github.com/gardener/gardener/blob/master/docs/usage/shoot_access.md#shootsadminkubeconfig-subresource).
+   - You can obtain a temporary admin `kubeconfig` by using the `shoots/admin/kubeconfig` subresource. Detailed instructions can be found in the Gardener documentation [here](https://github.com/gardener/gardener/blob/master/docs/usage/shoot/shoot_access.md#shootsadminkubeconfig-subresource).
 
 2. **Using `gardenctl` and `gardenlogin`**:
    `gardenctl` simplifies targeting Shoot clusters. It automatically downloads a `kubeconfig` that uses the `gardenlogin` kubectl auth plugin. This plugin transparently manages `Shoot` cluster authentication and certificate renewal without embedding any credentials in the kubeconfig file.

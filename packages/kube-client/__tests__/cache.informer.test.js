@@ -4,10 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const { Informer, ListWatcher, Store, Reflector } = require('../lib/cache')
-const { Foo } = fixtures.resources
+import { jest } from '@jest/globals'
+import { Informer, ListWatcher, Store, Reflector } from '../lib/cache/index.js'
+import { Foo } from '../__fixtures__/resources.js'
 
 describe('kube-client', () => {
   describe('cache', () => {
@@ -51,17 +50,17 @@ describe('kube-client', () => {
         expect(informer.hasSynced).toBe(store.hasSynced)
         expect(informer.lastSyncResourceVersion).toBe(reflector.lastSyncResourceVersion)
         informer.run(externalAbortController.signal)
-        expect(reflector.run).toBeCalledTimes(1)
+        expect(reflector.run).toHaveBeenCalledTimes(1)
         expect(reflector.run.mock.calls[0]).toHaveLength(1)
         expect(reflector.run.mock.calls[0][0]).toBe(internalAbortController.signal)
         externalAbortController.abort()
-        expect(internalAbortController.abort).toBeCalledTimes(1)
+        expect(internalAbortController.abort).toHaveBeenCalledTimes(1)
       })
 
       it('should replace store data', async () => {
         reflector.store.replace([a, b, c])
         expect(store.list()).toEqual([a, b, c])
-        expect(informer.emit).toBeCalledTimes(3)
+        expect(informer.emit).toHaveBeenCalledTimes(3)
         expect(informer.emit.mock.calls).toEqual([
           ['add', a],
           ['add', b],
@@ -71,7 +70,7 @@ describe('kube-client', () => {
 
         reflector.store.delete(c)
         expect(store.list()).toEqual([a, b])
-        expect(informer.emit).toBeCalledTimes(1)
+        expect(informer.emit).toHaveBeenCalledTimes(1)
         expect(informer.emit.mock.calls).toEqual([
           ['delete', c],
         ])
@@ -79,7 +78,7 @@ describe('kube-client', () => {
 
         reflector.store.add(x)
         expect(store.list()).toEqual([x, b])
-        expect(informer.emit).toBeCalledTimes(1)
+        expect(informer.emit).toHaveBeenCalledTimes(1)
         expect(informer.emit.mock.calls).toEqual([
           ['update', x, a],
         ])
@@ -87,7 +86,7 @@ describe('kube-client', () => {
 
         reflector.store.update(y)
         expect(store.list()).toEqual([x, y])
-        expect(informer.emit).toBeCalledTimes(1)
+        expect(informer.emit).toHaveBeenCalledTimes(1)
         expect(informer.emit.mock.calls).toEqual([
           ['update', y, b],
         ])
@@ -95,7 +94,7 @@ describe('kube-client', () => {
 
         reflector.store.update(z)
         expect(store.list()).toEqual([x, y, z])
-        expect(informer.emit).toBeCalledTimes(1)
+        expect(informer.emit).toHaveBeenCalledTimes(1)
         expect(informer.emit.mock.calls).toEqual([
           ['add', z],
         ])
@@ -103,7 +102,7 @@ describe('kube-client', () => {
 
         reflector.store.replace([a, b])
         expect(store.list()).toEqual([a, b])
-        expect(informer.emit).toBeCalledTimes(3)
+        expect(informer.emit).toHaveBeenCalledTimes(3)
         expect(informer.emit.mock.calls).toEqual([
           ['update', a, x],
           ['update', b, y],

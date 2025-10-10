@@ -4,12 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const { mix } = require('mixwith')
-
-const { GardenerCore } = require('../groups')
-const { NamespaceScoped, ClusterScoped, Readable, Writable, Observable } = require('../mixins')
+import { mix } from 'mixwith'
+import { GardenerCore } from '../groups.js'
+import { NamespaceScoped, ClusterScoped, Readable, Writable, Observable } from '../mixins.js'
 
 class Project extends mix(GardenerCore).with(ClusterScoped, Readable, Observable, Writable) {
   static get names () {
@@ -61,7 +58,7 @@ class SecretBinding extends mix(GardenerCore).with(NamespaceScoped, Readable, Ob
   }
 }
 
-class Shoot extends mix(GardenerCore).with(NamespaceScoped, Readable, Observable, Writable) {
+export class Shoot extends mix(GardenerCore).with(NamespaceScoped, Readable, Observable, Writable) {
   createAdminKubeconfigRequest (namespace, name, body, options) {
     return this.create([namespace, name, 'adminkubeconfig'], body, options)
   }
@@ -85,7 +82,7 @@ class ControllerRegistration extends mix(GardenerCore).with(ClusterScoped, Reada
   }
 }
 
-module.exports = {
+export default {
   CloudProfile,
   Project,
   Quota,

@@ -4,16 +4,14 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const Client = require('./Client')
-const Agent = require('./Agent')
-const errors = require('./errors')
+import Client from './Client.js'
+import Agent from './Agent.js'
+import * as errors from './errors.js'
 
 const { extend } = Client
 const { globalAgent } = Agent
 
-module.exports = {
+export default {
   Agent,
   globalAgent,
   extend,

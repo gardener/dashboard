@@ -84,6 +84,11 @@ global:
     # Example: nodeOptions: [--optimize-for-size, --max-old-space-size=920, --gc-interval=100]
     nodeOptions: [--max-old-space-size=920]
 
+    # list of allowed origins for the socket.io events endpoint
+    # use ["*"] to allow all origins - this is not recommended for production environments
+    websocketAllowedOrigins:
+    - "*"
+
     ingress:
       ingressClassName: nginx
       annotations:
@@ -134,10 +139,6 @@ global:
     #     -----BEGIN CERTIFICATE-----
     #     Li4u
     #     -----END CERTIFICATE-----
-    #   # secretKey reference to the certificate authority
-    #   caSecretKeyRef:
-    #     name: oidc-ca-secret-name
-    #     key: ca.crt
     #   # configuration for kubeconfig download required by kubelogin
     #   public:
     #     # clientId is the identifier of the public oidc client use by kubelogin
@@ -287,7 +288,7 @@ global:
 
       # # accessRestriction is used to define the access restricion text, keys and value mappings
       # accessRestriction:
-      #   noItemsText: No access restriction options available for region ${region} and cloud profile ${cloudProfile}
+      #   noItemsText: No access restriction options available for region ${region} and cloud profile ${cloudProfileName} (${cloudProfileKind})
       #   items:
       #   - key: eu-access
       #     display:
@@ -351,11 +352,18 @@ global:
       serviceAccountDefaultTokenExpiration: 7776000 # seconds
 
       # # externalTools are links displayed in a dedicated card External Tools on the cluster details page.
-      # # The url can be an url-template (https://tools.ietf.org/html/rfc6570). The variables namespace and name of the shoot are available when the url is expanded.
+      # # The url can be an url-template (https://tools.ietf.org/html/rfc6570). The list of available variables of the shoot when the url is expanded is:
+      # # - namespace
+      # # - name
+      # # - domain
+      # # - project
       # externalTools:
       # - title: Example Tool
       #   icon: link
       #   url: https://example.org/foo/bar{?namespace,name}
+      # - title: Shoot Deployed Tool
+      #   icon: link
+      #   url: https://myapp.{domain}
 
       # # resourceQuotaHelp - configure help text how to configure project resource quota
       # resourceQuotaHelp:

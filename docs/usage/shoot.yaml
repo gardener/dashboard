@@ -4,8 +4,10 @@ metadata:
   name: daffodil
   namespace: garden-flowering
 spec:
-  secretBindingName: trial-secretbinding-gcp
-  cloudProfileName: gcp
+  credentialsBindingName: trial-credentials-gcp
+  cloudProfile:
+    kind: CloudProfile
+    name: gcp
   region: europe-west1
   purpose: evaluation
   provider:
@@ -28,8 +30,7 @@ spec:
       machine:
         type: n1-standard-2
         image:
-          name: coreos
-          version: 2303.3.0
+          name: gardenlinux
       volume:
         type: pd-standard
         size: 50Gi

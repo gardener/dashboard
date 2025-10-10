@@ -16,6 +16,7 @@ import { errorDetailsFromError } from '@/utils/error'
 import moment from '@/utils/moment'
 
 import assign from 'lodash/assign'
+import pick from 'lodash/pick'
 
 export const useAppStore = defineStore('app', () => {
   const ready = ref(false)
@@ -40,13 +41,28 @@ export const useAppStore = defineStore('app', () => {
 
     if (typeof value === 'string') {
       alert.text = value
-    } else if (value && typeof value === 'object') {
-      const { response, text = '', ...props } = value
-      assign(alert, props)
-      alert.text = response
-        ? errorDetailsFromError(value).detailedMessage
-        : text
+      return notify(alert)
     }
+
+    const alertDetails = pick(value, [
+      'title',
+      'text',
+      'name',
+      'message',
+      'response',
+    ])
+
+    alert.title = alertDetails.title ?? alertDetails.name ?? 'Error'
+    alert.text = alertDetails.response
+      ? errorDetailsFromError(value).detailedMessage
+      : alertDetails.text ?? alertDetails.message ?? 'An unknown error occurred'
+
+    const extraProps = pick(value, [
+      'duration',
+      'ignoreDuplicates',
+      'closeOnClick',
+    ])
+    assign(alert, extraProps)
 
     notify(alert)
   }
@@ -62,7 +78,6 @@ export const useAppStore = defineStore('app', () => {
       setAlertWithType('warning', {
         title: code === '299' ? 'Kubernetes Warning' : undefined,
         text,
-        duration: -1,
       })
     })
   }

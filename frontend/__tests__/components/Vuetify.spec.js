@@ -46,6 +46,11 @@ describe('components', () => {
 
       expect(wrapper.find('.v-main > div[class$=\'wrap\']').text()).toBe(text)
     })
+
+    it('should apply theme classes to application', () => {
+      const wrapper = mountApplication()
+      expect(wrapper.classes()).toContain('v-theme--light')
+    })
   })
 
   describe('v-messages', () => {
@@ -102,6 +107,93 @@ describe('components', () => {
         hint,
       })
       expect(wrapper.find(selector).text()).toBe(hint)
+    })
+  })
+
+  describe('v-textarea', () => {
+    it('Ensure .v-input__control exists for v-textarea', () => {
+      const Component = {
+        template: '<v-textarea />',
+      }
+      const wrapper = mount(Component, {
+        global: {
+          plugins: [
+            createVuetifyPlugin(),
+          ],
+        },
+      })
+      expect(wrapper.find('.v-input__control').exists()).toBe(true)
+    })
+  })
+
+  describe('v-data-table-virtual', () => {
+    it('should be able to find v-table__wrapper element', () => {
+      const Component = {
+        template: '<v-data-table-virtual />',
+      }
+      const wrapper = mount(Component, {
+        global: {
+          plugins: [
+            createVuetifyPlugin(),
+          ],
+        },
+      })
+      const footer = wrapper.find('.v-table__wrapper')
+      expect(footer.exists()).toBe(true)
+    })
+  })
+
+  describe('v-data-table', () => {
+    it('should be able to find v-data-table-footer classes', () => {
+      const Component = {
+        template: '<v-data-table />',
+      }
+      const wrapper = mount(Component, {
+        global: {
+          plugins: [
+            createVuetifyPlugin(),
+          ],
+        },
+      })
+      const footer = wrapper.find('.v-data-table-footer')
+      expect(footer.exists()).toBe(true)
+      const footerInfo = wrapper.find('.v-data-table-footer__info')
+      expect(footerInfo.exists()).toBe(true)
+    })
+  })
+
+  describe('v-breadcrumbs', () => {
+    it('should be able to find v-breadcrumbs-item v-breadcrumbs-item--disabled class', () => {
+      const Component = {
+        template: '<v-breadcrumbs><v-breadcrumbs-item disabled>test</v-breadcrumbs-item></v-breadcrumbs>',
+      }
+      const wrapper = mount(Component, {
+        global: {
+          plugins: [
+            createVuetifyPlugin(),
+          ],
+        },
+      })
+      const breadcrumbsItem = wrapper.find('.v-breadcrumbs-item')
+      expect(breadcrumbsItem.exists()).toBe(true)
+      expect(breadcrumbsItem.classes()).toContain('v-breadcrumbs-item--disabled')
+    })
+  })
+
+  describe('v-btn', () => {
+    it('should be able to find v-btn icon class', () => {
+      const Component = {
+        template: '<v-btn icon="mdi-foo" />',
+      }
+      const wrapper = mount(Component, {
+        global: {
+          plugins: [
+            createVuetifyPlugin(),
+          ],
+        },
+      })
+      const iconItem = wrapper.find('.v-icon')
+      expect(iconItem.exists()).toBe(true)
     })
   })
 })

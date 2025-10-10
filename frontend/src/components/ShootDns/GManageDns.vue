@@ -66,11 +66,11 @@ SPDX-License-Identifier: Apache-2.0
           </v-select>
         </v-col>
         <v-col cols="3">
-          <g-select-secret
+          <g-select-credential
             v-model="primaryDnsProviderSecret"
             :provider-type="dnsPrimaryProviderType"
             register-vuelidate-as="dnsProviderSecret"
-            label="Primary DNS Provider Secret"
+            label="Primary DNS Provider Credential"
           />
         </v-col>
       </v-row>
@@ -154,14 +154,15 @@ import { mapState } from 'pinia'
 import { ref } from 'vue'
 
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
-import { useSecretStore } from '@/store/secret'
+import { useCredentialStore } from '@/store/credential'
 
-import GSelectSecret from '@/components/Secrets/GSelectSecret'
+import GSelectCredential from '@/components/Credentials/GSelectCredential'
 import GDnsProviderRow from '@/components/ShootDns/GDnsProviderRow'
 import GVendorIcon from '@/components/GVendorIcon'
 
 import { useShootContext } from '@/composables/useShootContext'
-import { useSecretList } from '@/composables/useSecretList'
+import { useCloudProviderBindingList } from '@/composables/credential/useCloudProviderBindingList'
+import { credentialName } from '@/composables/credential/helper'
 
 import {
   withFieldName,
@@ -176,7 +177,7 @@ export default {
   components: {
     GDnsProviderRow,
     GVendorIcon,
-    GSelectSecret,
+    GSelectCredential,
   },
   setup () {
     const {
@@ -192,11 +193,11 @@ export default {
       deleteDnsServiceExtensionProvider,
     } = useShootContext()
 
-    const secretStore = useSecretStore()
+    const credentialStore = useCredentialStore()
     const gardenerExtensionStore = useGardenerExtensionStore()
 
     const customDomain = ref(!!dnsDomain.value && !!dnsPrimaryProviderType.value)
-    const dnsPrimaryProviderSecrets = useSecretList(dnsPrimaryProviderType, { secretStore, gardenerExtensionStore })
+    const dnsPrimaryProviderSecretBindings = useCloudProviderBindingList(dnsPrimaryProviderType, { credentialStore, gardenerExtensionStore })
 
     return {
       v$: useVuelidate(),
@@ -211,7 +212,7 @@ export default {
       resetDnsPrimaryProvider,
       deleteDnsServiceExtensionProvider,
       customDomain,
-      dnsPrimaryProviderSecrets,
+      dnsPrimaryProviderSecretBindings,
     }
   },
   validations () {
@@ -266,10 +267,12 @@ export default {
     },
     primaryDnsProviderSecret: {
       get () {
-        return find(this.dnsPrimaryProviderSecrets, ['metadata.secretRef.name', this.dnsPrimaryProviderSecretName])
+        return find(this.dnsPrimaryProviderSecretBindings, binding => {
+          return credentialName(binding) === this.dnsPrimaryProviderSecretName
+        })
       },
-      set (value) {
-        this.dnsPrimaryProviderSecretName = value?.metadata.secretRef.name
+      set (binding) {
+        this.dnsPrimaryProviderSecretName = credentialName(binding)
       },
     },
     domainRecommendationVisible () {
@@ -293,7 +296,7 @@ export default {
       if (value) {
         const type = head(this.dnsProviderTypesWithPrimarySupport)
         this.dnsPrimaryProviderType = type
-        this.primaryDnsProviderSecret = head(this.dnsPrimaryProviderSecrets)
+        this.primaryDnsProviderSecret = head(this.dnsPrimaryProviderSecretBindings)
         this.v$.dnsDomain.$reset()
       }
     },

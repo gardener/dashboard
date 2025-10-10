@@ -4,11 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const http = require('http')
-const createError = require('http-errors')
-const { get } = require('lodash')
+import http from 'http'
+import createError from 'http-errors'
+import { get } from 'lodash-es'
 
 class TimeoutError extends Error {
   constructor (message) {
@@ -85,7 +83,7 @@ function isHttpError (err, expectedStatusCode) {
   return true
 }
 
-module.exports = {
+export {
   TimeoutError,
   StreamError,
   ParseError,

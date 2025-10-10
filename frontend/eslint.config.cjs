@@ -44,7 +44,7 @@ const importConfig = {
         ],
         extensions: ['.js', '.vue'],
       },
-      [path.resolve('./eslint-import-resolver-local.cjs')]: {
+      [path.resolve('../eslint-import-resolver-local.cjs')]: {
         map: [
           ['unfonts.css', null],
           ['@vueuse/integrations/useCookies', null],
@@ -54,6 +54,7 @@ const importConfig = {
           ['vuetify/lib/util/colors', null],
           ['@/assets/whitespace-eye.svg?raw', null],
           ['@/assets/whitespace-eye-off.svg?raw', null],
+          ['virtual:g-mdi-meta', null],
         ],
       },
     },
@@ -166,13 +167,19 @@ module.exports = [
       document: 'readonly',
       getComputedStyle: 'readonly',
       HTMLElement: 'readonly',
+      Element: 'readonly',
       MouseEvent: 'readonly',
       FileReader: 'readonly',
       Range: 'readonly',
       fixtures: 'readonly',
+      requestAnimationFrame: 'readonly',
     },
   }),
   {
+    languageOptions: {
+      ecmaVersion: 2025,
+      sourceType: 'module',
+    },
     rules: {
       'no-restricted-globals': ['error', 'find', 'event', 'location', 'history'],
       'no-console': 'error',

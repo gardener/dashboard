@@ -79,6 +79,7 @@ export function createProjectContextComposable (options = {}) {
   const projectMetadataComposable = useProjectMetadata(manifest)
   const {
     projectName,
+    projectTitle,
     isNewProject,
     getProjectAnnotation,
     setProjectAnnotation,
@@ -136,6 +137,7 @@ export function createProjectContextComposable (options = {}) {
     isProjectDirty,
     /* metadata */
     projectName,
+    projectTitle,
     isNewProject,
     getProjectAnnotation,
     setProjectAnnotation,

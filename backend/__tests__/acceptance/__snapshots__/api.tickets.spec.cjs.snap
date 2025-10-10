@@ -1,0 +1,188 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`api tickets should fetch open issues and comments for shoot cluster test in namespace bar 1`] = `
+{
+  "comments": [
+    {
+      "data": {
+        "body": "<p>This is comment 1 for issue #2</p>",
+        "html_url": "https://github.com/gardener/ticket-dev/issues/2#issuecomment-1",
+        "user": {
+          "avatar_url": "https://avatars1.githubusercontent.com/u/21031061?v=4",
+          "login": "johndoe",
+        },
+      },
+      "kind": "comment",
+      "metadata": {
+        "created_at": "2018-07-02T20:25:32Z",
+        "id": 1,
+        "name": "test",
+        "number": 2,
+        "projectName": "bar",
+        "updated_at": "2018-07-02T20:25:32Z",
+      },
+    },
+  ],
+  "issues": [
+    {
+      "data": {
+        "body": "<p>The second bug</p>",
+        "comments": 1,
+        "html_url": "https://github.com/gardener/ticket-dev/issues/2",
+        "labels": [
+          {
+            "color": "d73a4a",
+            "id": 949737505,
+            "name": "bug",
+          },
+        ],
+        "ticketTitle": "title",
+        "user": {
+          "avatar_url": "https://avatars1.githubusercontent.com/u/21031061?v=4",
+          "login": "johndoe",
+        },
+      },
+      "kind": "issue",
+      "metadata": {
+        "created_at": "2018-07-02T20:20:32Z",
+        "id": 327883528,
+        "name": "test",
+        "number": 2,
+        "projectName": "bar",
+        "state": "open",
+        "updated_at": "2018-07-02T20:20:32Z",
+      },
+    },
+  ],
+}
+`;
+
+exports[`api tickets should fetch open issues for all namespaces 1`] = `
+{
+  "issues": [
+    {
+      "data": {
+        "body": "<p>The first bug</p>",
+        "comments": 0,
+        "html_url": "https://github.com/gardener/ticket-dev/issues/1",
+        "labels": [
+          {
+            "color": "d73a4a",
+            "id": 949737505,
+            "name": "bug",
+          },
+        ],
+        "ticketTitle": "title",
+        "user": {
+          "avatar_url": "https://avatars1.githubusercontent.com/u/21031061?v=4",
+          "login": "johndoe",
+        },
+      },
+      "kind": "issue",
+      "metadata": {
+        "created_at": "2018-07-02T20:19:32Z",
+        "id": 327883527,
+        "name": "test",
+        "number": 1,
+        "projectName": "foo",
+        "state": "open",
+        "updated_at": "2018-07-02T20:19:32Z",
+      },
+    },
+    {
+      "data": {
+        "body": "<p>The second bug</p>",
+        "comments": 1,
+        "html_url": "https://github.com/gardener/ticket-dev/issues/2",
+        "labels": [
+          {
+            "color": "d73a4a",
+            "id": 949737505,
+            "name": "bug",
+          },
+        ],
+        "ticketTitle": "title",
+        "user": {
+          "avatar_url": "https://avatars1.githubusercontent.com/u/21031061?v=4",
+          "login": "johndoe",
+        },
+      },
+      "kind": "issue",
+      "metadata": {
+        "created_at": "2018-07-02T20:20:32Z",
+        "id": 327883528,
+        "name": "test",
+        "number": 2,
+        "projectName": "bar",
+        "state": "open",
+        "updated_at": "2018-07-02T20:20:32Z",
+      },
+    },
+    {
+      "data": {
+        "body": "<p>The third bug</p>",
+        "comments": 0,
+        "html_url": "https://github.com/gardener/ticket-dev/issues/3",
+        "labels": [
+          {
+            "color": "d73a4a",
+            "id": 949737505,
+            "name": "bug",
+          },
+        ],
+        "ticketTitle": "title",
+        "user": {
+          "avatar_url": "https://avatars1.githubusercontent.com/u/21031061?v=4",
+          "login": "johndoe",
+        },
+      },
+      "kind": "issue",
+      "metadata": {
+        "created_at": "2018-07-02T20:21:32Z",
+        "id": 327883529,
+        "name": "test",
+        "number": 3,
+        "projectName": "foobar",
+        "state": "open",
+        "updated_at": "2018-07-02T20:21:32Z",
+      },
+    },
+  ],
+}
+`;
+
+exports[`api tickets should fetch open issues for namespace foo 1`] = `
+{
+  "issues": [
+    {
+      "data": {
+        "body": "<p>The first bug</p>",
+        "comments": 0,
+        "html_url": "https://github.com/gardener/ticket-dev/issues/1",
+        "labels": [
+          {
+            "color": "d73a4a",
+            "id": 949737505,
+            "name": "bug",
+          },
+        ],
+        "ticketTitle": "title",
+        "user": {
+          "avatar_url": "https://avatars1.githubusercontent.com/u/21031061?v=4",
+          "login": "johndoe",
+        },
+      },
+      "kind": "issue",
+      "metadata": {
+        "created_at": "2018-07-02T20:19:32Z",
+        "id": 327883527,
+        "name": "test",
+        "number": 1,
+        "projectName": "foo",
+        "state": "open",
+        "updated_at": "2018-07-02T20:19:32Z",
+      },
+    },
+  ],
+}
+`;

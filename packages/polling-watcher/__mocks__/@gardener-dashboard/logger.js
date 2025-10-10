@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import { jest } from '@jest/globals'
 
 const globalLogger = {
   log: jest.fn(),
@@ -15,6 +15,6 @@ const globalLogger = {
   error: jest.fn(),
 }
 
-module.exports = {
+export {
   globalLogger,
 }
