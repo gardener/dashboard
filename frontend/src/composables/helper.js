@@ -12,6 +12,10 @@ import isNil from 'lodash/isNil'
 import isObject from 'lodash/isObject'
 import find from 'lodash/find'
 import head from 'lodash/head'
+import get from 'lodash/get'
+import isEqual from 'lodash/isEqual'
+import includes from 'lodash/includes'
+import lowerCase from 'lodash/lowerCase'
 
 export function cleanup (obj) {
   const cleanupObject = obj => {
@@ -56,6 +60,58 @@ export function cleanup (obj) {
   }
 
   return cleanupValue(obj)
+}
+
+export function matchesPropertyOrEmpty (path, srcValue) {
+  return object => {
+    const objValue = get(object, path)
+    if (!objValue) {
+      return true
+    }
+    return isEqual(objValue, srcValue)
+  }
+}
+
+export function vendorNameFromImageName (imageName) {
+  const lowerCaseName = lowerCase(imageName)
+  if (lowerCaseName.includes('coreos')) {
+    return 'coreos'
+  } else if (lowerCaseName.includes('ubuntu')) {
+    return 'ubuntu'
+  } else if (lowerCaseName.includes('gardenlinux')) {
+    return 'gardenlinux'
+  } else if (lowerCaseName.includes('suse') && lowerCaseName.includes('jeos')) {
+    return 'suse-jeos'
+  } else if (lowerCaseName.includes('suse') && lowerCaseName.includes('chost')) {
+    return 'suse-chost'
+  } else if (lowerCaseName.includes('flatcar')) {
+    return 'flatcar'
+  } else if (lowerCaseName.includes('memoryone') || lowerCaseName.includes('vsmp')) {
+    return 'memoryone'
+  } else if (lowerCaseName.includes('aws-route53')) {
+    return 'aws-route53'
+  } else if (lowerCaseName.includes('azure-dns')) {
+    return 'azure-dns'
+  } else if (lowerCaseName.includes('azure-private-dns')) {
+    return 'azure-private-dns'
+  } else if (lowerCaseName.includes('google-clouddns')) {
+    return 'google-clouddns'
+  } else if (lowerCaseName.includes('openstack-designate')) {
+    return 'openstack-designate'
+  } else if (lowerCaseName.includes('alicloud-dns')) {
+    return 'alicloud-dns'
+  } else if (lowerCaseName.includes('cloudflare-dns')) {
+    return 'cloudflare-dns'
+  } else if (lowerCaseName.includes('infoblox-dns')) {
+    return 'infoblox-dns'
+  } else if (lowerCaseName.includes('netlify-dns')) {
+    return 'netlify-dns'
+  }
+  return undefined
+}
+
+export function findVendorHint (vendorHints, vendorName) {
+  return find(vendorHints, hint => includes(hint.matchNames, vendorName))
 }
 
 export function decorateClassificationObject (plainObject) {

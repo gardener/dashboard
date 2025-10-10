@@ -40,7 +40,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
       <div class="regular-input">
         <g-machine-image
-          :machine-images="machineImages"
+          :machine-images="filteredMachineImages"
           :worker="worker"
           :machine-type="selectedMachineType"
           :auto-update="maintenanceAutoUpdateMachineImageVersion"
@@ -149,6 +149,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { computed } from 'vue'
 import { mapActions } from 'pinia'
 import {
   required,
@@ -167,6 +168,7 @@ import GMachineImage from '@/components/ShootWorkers/GMachineImage'
 import GContainerRuntime from '@/components/ShootWorkers/GContainerRuntime'
 
 import { useShootContext } from '@/composables/useShootContext'
+import { useCloudProfileForMachineImages } from '@/composables/useCloudProfile/useCloudProfileForMachineImages'
 
 import {
   withFieldName,
@@ -214,6 +216,7 @@ export default {
     const {
       isNewCluster,
       cloudProfileRef,
+      cloudProfile,
       kubernetesVersion,
       region,
       allZones,
@@ -226,6 +229,8 @@ export default {
       volumeTypes,
       providerWorkers,
     } = useShootContext()
+
+    const { machineImages, defaultMachineImageForMachineType } = useCloudProfileForMachineImages(cloudProfile)
 
     return {
       v$: useVuelidate(),
@@ -242,6 +247,8 @@ export default {
       machineArchitectures,
       volumeTypes,
       providerWorkers,
+      machineImages,
+      defaultMachineImageForMachineType,
     }
   },
   data () {
@@ -336,9 +343,8 @@ export default {
     selectedVolumeType () {
       return find(this.volumeTypes, ['name', this.worker.volume?.type])
     },
-    machineImages () {
-      const machineImages = this.machineImagesByCloudProfileRef(this.cloudProfileRef)
-      return filter(machineImages, ({ isExpired, architectures }) => !isExpired && includes(architectures, this.machineArchitecture))
+    filteredMachineImages () {
+      return filter(this.machineImages, ({ isExpired, architectures }) => !isExpired && includes(architectures, this.machineArchitecture))
     },
     minimumVolumeSize () {
       const minimumVolumeSize = convertToGi(this.minimumVolumeSizeByMachineTypeAndVolumeType({
@@ -439,7 +445,7 @@ export default {
       return undefined
     },
     selectedMachineImage () {
-      return find(this.machineImages, this.worker.machine.image)
+      return find(this.filteredMachineImages, this.worker.machine.image)
     },
     machineImageCri () {
       return get(this.selectedMachineImage, ['cri'])
@@ -485,9 +491,7 @@ export default {
   methods: {
     ...mapActions(useCloudProfileStore, [
       'machineTypesByCloudProfileRefAndRegionAndArchitecture',
-      'machineImagesByCloudProfileRef',
       'minimumVolumeSizeByMachineTypeAndVolumeType',
-      'defaultMachineImageForCloudProfileRefAndMachineType',
     ]),
     onInputVolumeSize () {
       if (this.hasVolumeSize) {
@@ -505,7 +509,8 @@ export default {
     resetWorkerMachine () {
       const defaultMachineType = head(this.machineTypes)
       this.worker.machine.type = get(defaultMachineType, ['name'])
-      const defaultMachineImage = this.defaultMachineImageForCloudProfileRefAndMachineType(this.cloudProfileRef, defaultMachineType)
+      const machineTypeRef = computed(() => defaultMachineType)
+      const defaultMachineImage = this.defaultMachineImageForMachineType(machineTypeRef).value
       this.worker.machine.image = pick(defaultMachineImage, ['name', 'version'])
     },
     ensureValidAutoscalerMin () {
