@@ -15,6 +15,7 @@ import logger from '../logger/index.js'
 import _ from 'lodash-es'
 import semver from 'semver'
 import config from '../config/index.js'
+import { list as listProjects } from './projects.js'
 
 const { isHttpError } = requestModule
 const { Config } = kubeConfigModule
@@ -23,7 +24,6 @@ const {
   decodeBase64,
   encodeBase64,
   getSeedNameFromShoot,
-  projectFilter,
 } = utils
 export async function list ({ user, namespace, labelSelector }) {
   const query = {}
@@ -40,11 +40,8 @@ export async function list ({ user, namespace, labelSelector }) {
       }
     } else {
       // user is permitted to list shoots only in namespaces associated with their projects
-      const namespaces = _
-        .chain(cache.getProjects())
-        .filter(projectFilter(user, false))
-        .map('spec.namespace')
-        .value()
+      const projects = await listProjects({ user, canListProjects: false })
+      const namespaces = _.map(projects, 'spec.namespace')
 
       const results = await Promise.allSettled(namespaces.map(async namespace => {
         const allowed = await authorization.canListShoots(user, namespace)

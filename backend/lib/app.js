@@ -30,7 +30,11 @@ import { router as authRouter } from './auth.js'
 import { router as githubWebhookRouter } from './github/webhook/index.js'
 import { healthCheck } from './healthz/index.js'
 
-const { port, metricsPort } = config
+const {
+  port,
+  metricsPort,
+  cspFrameAncestors = [],
+} = config
 const periodSeconds = config.readinessProbe?.periodSeconds || 10
 
 // protect against Prototype Pollution vulnerabilities
@@ -90,7 +94,7 @@ app.use(helmet.contentSecurityPolicy({
     fontSrc: ['\'self\'', 'data:'],
     imgSrc,
     scriptSrc: ['\'self\'', '\'unsafe-eval\''],
-    frameAncestors: ['\'self\''],
+    frameAncestors: ['\'self\'', ...cspFrameAncestors],
   },
 }))
 app.use(helmet.referrerPolicy({
@@ -106,10 +110,6 @@ app.use(expressStaticGzip(PUBLIC_DIRNAME, {
   },
 }))
 app.use(STATIC_PATHS, notFound)
-
-app.use(helmet.xFrameOptions({
-  action: 'deny',
-}))
 app.use(historyFallback(INDEX_FILENAME))
 
 app.use(renderError)
