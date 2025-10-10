@@ -12,10 +12,10 @@ import {
   ref,
   computed,
 } from 'vue'
-import semver from 'semver'
 
-import { useLogger } from '@/composables/useLogger'
 import { useApi } from '@/composables/useApi'
+import { useCloudProfileForMachineTypes } from '@/composables/useCloudProfile/useCloudProfileForMachineTypes'
+import { useCloudProfileForMachineImages } from '@/composables/useCloudProfile/useCloudProfileForMachineImages'
 
 import {
   shortRandomString,
@@ -25,27 +25,19 @@ import {
   machineImageHasUpdate,
   machineVendorHasSupportedVersion,
   UNKNOWN_EXPIRED_TIMESTAMP,
-  normalizeVersion,
 } from '@/utils'
 import { v4 as uuidv4 } from '@/utils/uuid'
 
 import { useConfigStore } from '../config'
 import { useSeedStore } from '../seed'
 
-import {
-  matchesPropertyOrEmpty,
-  vendorNameFromImageName,
-  findVendorHint,
-  decorateClassificationObject,
-  firstItemMatchingVersionClassification,
-} from './helper'
+import { matchesPropertyOrEmpty } from './helper'
 
 import filter from 'lodash/filter'
 import sortBy from 'lodash/sortBy'
 import uniq from 'lodash/uniq'
 import map from 'lodash/map'
 import get from 'lodash/get'
-import set from 'lodash/set'
 import some from 'lodash/some'
 import intersection from 'lodash/intersection'
 import find from 'lodash/find'
@@ -53,14 +45,12 @@ import difference from 'lodash/difference'
 import toPairs from 'lodash/toPairs'
 import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
-import flatMap from 'lodash/flatMap'
 import template from 'lodash/template'
 import head from 'lodash/head'
 import sample from 'lodash/sample'
 import pick from 'lodash/pick'
 
 export const useCloudProfileStore = defineStore('cloudProfile', () => {
-  const logger = useLogger()
   const api = useApi()
   const seedStore = useSeedStore()
   const configStore = useConfigStore()
@@ -75,63 +65,12 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return list.value
   })
 
-  function flattenMachineImages (machineImages) {
-    return flatMap(machineImages, machineImage => {
-      const { name, updateStrategy = 'major' } = machineImage
-
-      const versions = []
-      for (const versionObj of machineImage.versions) {
-        if (semver.valid(versionObj.version)) {
-          versions.push(versionObj)
-          continue
-        }
-
-        const normalizedVersion = normalizeVersion(versionObj.version)
-        if (normalizedVersion) {
-          versionObj.version = normalizedVersion
-          versions.push(versionObj)
-          continue
-        }
-
-        logger.warn(`Skipped machine image ${name} as version ${versionObj.version} is not a valid semver version and cannot be normalized`)
-      }
-      versions.sort((a, b) => {
-        return semver.rcompare(a.version, b.version)
-      })
-
-      const vendorName = vendorNameFromImageName(name)
-      const vendorHint = findVendorHint(configStore.vendorHints, vendorName)
-
-      return map(versions, ({ version, expirationDate, cri, classification, architectures }) => {
-        if (isEmpty(architectures)) {
-          architectures = ['amd64'] // default if not maintained
-        }
-        return decorateClassificationObject({
-          key: name + '/' + version,
-          name,
-          version,
-          updateStrategy,
-          cri,
-          classification,
-          expirationDate,
-          vendorName,
-          icon: vendorName,
-          vendorHint,
-          architectures,
-        })
-      })
-    })
-  }
-
   async function fetchCloudProfiles () {
     const response = await api.getCloudProfiles()
     setCloudProfiles(response.data)
   }
 
   function setCloudProfiles (cloudProfiles) {
-    for (const cloudProfile of cloudProfiles) {
-      set(cloudProfile, ['spec', 'machineImages'], flattenMachineImages(get(cloudProfile, ['spec', 'machineImages'])))
-    }
     list.value = cloudProfiles
   }
 
@@ -372,62 +311,6 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return machineTypesOrVolumeTypesByCloudProfileRefAndRegion({ type: 'machineTypes', cloudProfileRef })
   }
 
-  function getVersionExpirationWarningSeverity (options) {
-    const {
-      isExpirationWarning,
-      autoPatchEnabled,
-      updateAvailable,
-      autoUpdatePossible,
-    } = options
-    const autoPatchEnabledAndPossible = autoPatchEnabled && autoUpdatePossible
-    if (!isExpirationWarning) {
-      return autoPatchEnabledAndPossible
-        ? 'info'
-        : undefined
-    }
-    if (!updateAvailable) {
-      return 'error'
-    }
-    return 'warning'
-  }
-
-  function expiringWorkerGroupsForShoot (shootWorkerGroups, cloudProfileRef, imageAutoPatch) {
-    const allMachineImages = machineImagesByCloudProfileRef(cloudProfileRef)
-    const workerGroups = map(shootWorkerGroups, worker => {
-      const workerImage = get(worker, ['machine', 'image'], {})
-      const { name, version } = workerImage
-      const workerImageDetails = find(allMachineImages, { name, version })
-      if (!workerImageDetails) {
-        return {
-          ...workerImage,
-          expirationDate: UNKNOWN_EXPIRED_TIMESTAMP,
-          workerName: worker.name,
-          isValidTerminationDate: false,
-          severity: 'warning',
-          supportedVersionAvailable: false,
-        }
-      }
-
-      const updateAvailable = machineImageHasUpdate(workerImageDetails, allMachineImages)
-      const supportedVersionAvailable = machineVendorHasSupportedVersion(workerImageDetails, allMachineImages)
-      const severity = getVersionExpirationWarningSeverity({
-        isExpirationWarning: workerImageDetails.isExpirationWarning,
-        autoPatchEnabled: imageAutoPatch,
-        updateAvailable,
-        autoUpdatePossible: updateAvailable,
-      })
-
-      return {
-        ...workerImageDetails,
-        isValidTerminationDate: isValidTerminationDate(workerImageDetails.expirationDate),
-        workerName: worker.name,
-        severity,
-        supportedVersionAvailable,
-      }
-    })
-    return filter(workerGroups, 'severity')
-  }
-
   function machineTypesByCloudProfileRefAndRegionAndArchitecture ({ cloudProfileRef, region, architecture }) {
     let machineTypes = machineTypesOrVolumeTypesByCloudProfileRefAndRegion({
       type: 'machineTypes',
@@ -463,11 +346,6 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
 
   function volumeTypesByCloudProfileRef (cloudProfileRef) {
     return volumeTypesByCloudProfileRefAndRegion({ cloudProfileRef, region: undefined })
-  }
-
-  function machineImagesByCloudProfileRef (cloudProfileRef) {
-    const cloudProfile = cloudProfileByRef(cloudProfileRef)
-    return get(cloudProfile, ['spec', 'machineImages'])
   }
 
   function accessRestrictionNoItemsTextForCloudProfileRefAndRegion ({ cloudProfileRef, region }) {
@@ -512,10 +390,68 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return get(regionData, ['accessRestrictions'], [])
   }
 
-  function defaultMachineImageForCloudProfileRefAndMachineType (cloudProfileRef, machineType) {
-    const allMachineImages = machineImagesByCloudProfileRef(cloudProfileRef)
-    const machineImages = filter(allMachineImages, ({ architectures }) => includes(architectures, machineType.architecture))
-    return firstItemMatchingVersionClassification(machineImages)
+  function getVersionExpirationWarningSeverity (options) {
+    const {
+      isExpirationWarning,
+      autoPatchEnabled,
+      updateAvailable,
+      autoUpdatePossible,
+    } = options
+
+    const autoPatchEnabledAndPossible = autoPatchEnabled && autoUpdatePossible
+    if (!isExpirationWarning) {
+      return autoPatchEnabledAndPossible
+        ? 'info'
+        : undefined
+    }
+    if (!updateAvailable) {
+      return 'error'
+    }
+    return 'warning'
+  }
+
+  function expiringWorkerGroupsForShoot (shootWorkerGroups, cloudProfileRef, imageAutoPatch) {
+    const cloudProfile = cloudProfileByRef(cloudProfileRef)
+    if (!cloudProfile) {
+      return []
+    }
+    const cloudProfileValue = computed(() => cloudProfile)
+    const { machineImages } = useCloudProfileForMachineImages(cloudProfileValue)
+    const allMachineImages = machineImages.value
+
+    const workerGroups = map(shootWorkerGroups, worker => {
+      const workerImage = get(worker, ['machine', 'image'], {})
+      const { name, version } = workerImage
+      const workerImageDetails = find(allMachineImages, { name, version })
+      if (!workerImageDetails) {
+        return {
+          ...workerImage,
+          expirationDate: UNKNOWN_EXPIRED_TIMESTAMP,
+          workerName: worker.name,
+          isValidTerminationDate: false,
+          severity: 'warning',
+          supportedVersionAvailable: false,
+        }
+      }
+
+      const updateAvailable = machineImageHasUpdate(workerImageDetails, allMachineImages)
+      const supportedVersionAvailable = machineVendorHasSupportedVersion(workerImageDetails, allMachineImages)
+      const severity = getVersionExpirationWarningSeverity({
+        isExpirationWarning: workerImageDetails.isExpirationWarning,
+        autoPatchEnabled: imageAutoPatch,
+        updateAvailable,
+        autoUpdatePossible: updateAvailable,
+      })
+
+      return {
+        ...workerImageDetails,
+        isValidTerminationDate: isValidTerminationDate(workerImageDetails.expirationDate),
+        workerName: worker.name,
+        severity,
+        supportedVersionAvailable,
+      }
+    })
+    return filter(workerGroups, 'severity')
   }
 
   function generateWorker (availableZones, cloudProfileRef, region, kubernetesVersion) {
@@ -527,7 +463,14 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     const machineType = head(machineTypesForZone) || {}
     const volumeTypesForZone = volumeTypesByCloudProfileRefAndRegion({ cloudProfileRef, region })
     const volumeType = head(volumeTypesForZone) || {}
-    const machineImage = defaultMachineImageForCloudProfileRefAndMachineType(cloudProfileRef, machineType)
+
+    // Get machine image using composable
+    const cloudProfile = cloudProfileByRef(cloudProfileRef)
+    const cloudProfileValue = computed(() => cloudProfile)
+    const { defaultMachineImageForMachineType } = useCloudProfileForMachineImages(cloudProfileValue)
+    const machineTypeRef = computed(() => machineType)
+    const machineImage = defaultMachineImageForMachineType(machineTypeRef).value
+
     const minVolumeSize = minimumVolumeSizeByMachineTypeAndVolumeType({ machineType, volumeType })
     const criNames = map(machineImage?.cri, 'name')
     const criName = defaultCriNameByKubernetesVersion(criNames, kubernetesVersion)
@@ -594,11 +537,10 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     accessRestrictionsByCloudProfileRefAndRegion,
     accessRestrictionDefinitionsByCloudProfileRefAndRegion,
     accessRestrictionNoItemsTextForCloudProfileRefAndRegion,
-    // MachineImage Stuff
-    defaultMachineImageForCloudProfileRefAndMachineType,
-    generateWorker,
+    // Worker Group Management
     expiringWorkerGroupsForShoot,
-    machineImagesByCloudProfileRef,
+    // Worker Generation
+    generateWorker,
   }
 })
 

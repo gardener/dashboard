@@ -20,6 +20,7 @@ import { useProjectStore } from '@/store/project'
 import { useCloudProviderEntityList } from '@/composables/credential/useCloudProviderEntityList'
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
 import { useCloudProfileForKubeVersions } from '@/composables/useCloudProfile/useCloudProfileForKubeVersions.js'
+import { useCloudProfileForMachineImages } from '@/composables/useCloudProfile/useCloudProfileForMachineImages'
 
 import { useShootAccessRestrictions } from './useShootAccessRestrictions'
 
@@ -107,6 +108,10 @@ export function createShootHelperComposable (shootItem, options = {}) {
     sortedKubernetesVersions,
     useKubernetesVersionIsNotLatestPatch,
   } = useCloudProfileForKubeVersions(cloudProfile)
+
+  const {
+    machineImages: machineImagesFromComposable,
+  } = useCloudProfileForMachineImages(cloudProfile)
 
   const seed = computed(() => {
     return seedStore.seedByName(seedName.value)
@@ -227,9 +232,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     })
   })
 
-  const machineImages = computed(() => {
-    return cloudProfileStore.machineImagesByCloudProfileRef(cloudProfileRef.value)
-  })
+  const machineImages = machineImagesFromComposable
 
   const networkingTypes = computed(() => {
     return gardenerExtensionStore.networkingTypes
