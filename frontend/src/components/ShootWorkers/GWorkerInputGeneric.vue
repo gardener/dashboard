@@ -169,6 +169,7 @@ import GContainerRuntime from '@/components/ShootWorkers/GContainerRuntime'
 
 import { useShootContext } from '@/composables/useShootContext'
 import { useCloudProfileForMachineImages } from '@/composables/useCloudProfile/useCloudProfileForMachineImages'
+import { useCloudProfileForMachineTypes } from '@/composables/useCloudProfile/useCloudProfileForMachineTypes'
 
 import {
   withFieldName,
@@ -228,9 +229,11 @@ export default {
       machineArchitectures,
       volumeTypes,
       providerWorkers,
+      cloudProfileStore,
     } = useShootContext()
 
     const { machineImages, defaultMachineImageForMachineType } = useCloudProfileForMachineImages(cloudProfile)
+    const { machineTypesByRegionAndArchitecture } = useCloudProfileForMachineTypes(cloudProfile, cloudProfileStore.zonesByCloudProfileAndRegion)
 
     return {
       v$: useVuelidate(),
@@ -249,6 +252,7 @@ export default {
       providerWorkers,
       machineImages,
       defaultMachineImageForMachineType,
+      machineTypesByRegionAndArchitecture,
     }
   },
   data () {
@@ -328,11 +332,9 @@ export default {
         : this.initialZones
     },
     machineTypes () {
-      return this.machineTypesByCloudProfileRefAndRegionAndArchitecture({
-        cloudProfileRef: this.cloudProfileRef,
-        region: this.region,
-        architecture: this.machineArchitecture,
-      })
+      const regionRef = computed(() => this.region)
+      const architectureRef = computed(() => this.machineArchitecture)
+      return this.machineTypesByRegionAndArchitecture(regionRef, architectureRef).value
     },
     volumeInCloudProfile () {
       return !isEmpty(this.volumeTypes)
@@ -490,7 +492,6 @@ export default {
   },
   methods: {
     ...mapActions(useCloudProfileStore, [
-      'machineTypesByCloudProfileRefAndRegionAndArchitecture',
       'minimumVolumeSizeByMachineTypeAndVolumeType',
     ]),
     onInputVolumeSize () {

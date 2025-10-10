@@ -21,6 +21,7 @@ import { useCloudProviderEntityList } from '@/composables/credential/useCloudPro
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
 import { useCloudProfileForKubeVersions } from '@/composables/useCloudProfile/useCloudProfileForKubeVersions.js'
 import { useCloudProfileForMachineImages } from '@/composables/useCloudProfile/useCloudProfileForMachineImages'
+import { useCloudProfileForMachineTypes } from '@/composables/useCloudProfile/useCloudProfileForMachineTypes'
 
 import { useShootAccessRestrictions } from './useShootAccessRestrictions'
 
@@ -112,6 +113,11 @@ export function createShootHelperComposable (shootItem, options = {}) {
   const {
     machineImages: machineImagesFromComposable,
   } = useCloudProfileForMachineImages(cloudProfile)
+
+  const {
+    machineTypes: allMachineTypesFromComposable,
+    machineArchitecturesByRegion,
+  } = useCloudProfileForMachineTypes(cloudProfile, cloudProfileStore.zonesByCloudProfileAndRegion)
 
   const seed = computed(() => {
     return seedStore.seedByName(seedName.value)
@@ -207,16 +213,9 @@ export function createShootHelperComposable (shootItem, options = {}) {
     })
   })
 
-  const allMachineTypes = computed(() => {
-    return cloudProfileStore.machineTypesByCloudProfileRef(cloudProfileRef.value)
-  })
+  const allMachineTypes = allMachineTypesFromComposable
 
-  const machineArchitectures = computed(() => {
-    return cloudProfileStore.machineArchitecturesByCloudProfileRefAndRegion({
-      cloudProfileRef: cloudProfileRef.value,
-      region: region.value,
-    })
-  })
+  const machineArchitectures = machineArchitecturesByRegion(region)
 
   const allVolumeTypes = computed(() => {
     return cloudProfileStore.volumeTypesByCloudProfileRef(cloudProfileRef.value)

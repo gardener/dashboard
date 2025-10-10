@@ -245,7 +245,11 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
       return
     }
     // Firewall Sizes equals to list of machine types for this cloud provider
-    const firewallSizes = machineTypesByCloudProfileRefAndRegionAndArchitecture({ cloudProfileRef, region, architecture: undefined })
+    const cloudProfileValue = computed(() => cloudProfile)
+    const { machineTypesByRegionAndArchitecture } = useCloudProfileForMachineTypes(cloudProfileValue, zonesByCloudProfileAndRegion)
+    const regionRef = computed(() => region)
+    const architectureRef = computed(() => undefined)
+    const firewallSizes = machineTypesByRegionAndArchitecture(regionRef, architectureRef).value
     return firewallSizes
   }
 
@@ -305,39 +309,6 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     const unavailableItemsInAllZones = intersection(...unavailableItems)
 
     return filter(items, machineAndVolumeTypePredicate(unavailableItemsInAllZones))
-  }
-
-  function machineTypesByCloudProfileRef (cloudProfileRef) {
-    return machineTypesOrVolumeTypesByCloudProfileRefAndRegion({ type: 'machineTypes', cloudProfileRef })
-  }
-
-  function machineTypesByCloudProfileRefAndRegionAndArchitecture ({ cloudProfileRef, region, architecture }) {
-    let machineTypes = machineTypesOrVolumeTypesByCloudProfileRefAndRegion({
-      type: 'machineTypes',
-      cloudProfileRef,
-      region,
-    })
-    machineTypes = map(machineTypes, item => {
-      const machineType = { ...item }
-      machineType.architecture ??= 'amd64' // default if not maintained
-      return machineType
-    })
-
-    if (architecture) {
-      return filter(machineTypes, { architecture })
-    }
-
-    return machineTypes
-  }
-
-  function machineArchitecturesByCloudProfileRefAndRegion ({ cloudProfileRef, region }) {
-    const machineTypes = machineTypesOrVolumeTypesByCloudProfileRefAndRegion({
-      type: 'machineTypes',
-      cloudProfileRef,
-      region,
-    })
-    const architectures = uniq(map(machineTypes, 'architecture'))
-    return architectures.sort()
   }
 
   function volumeTypesByCloudProfileRefAndRegion ({ cloudProfileRef, region }) {
@@ -458,16 +429,23 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     const id = uuidv4()
     const name = `worker-${shortRandomString(5)}`
     const zones = !isEmpty(availableZones) ? [sample(availableZones)] : undefined
-    const architecture = head(machineArchitecturesByCloudProfileRefAndRegion({ cloudProfileRef, region }))
-    const machineTypesForZone = machineTypesByCloudProfileRefAndRegionAndArchitecture({ cloudProfileRef, region, architecture })
+
+    // Get cloud profile and setup composables
+    const cloudProfile = cloudProfileByRef(cloudProfileRef)
+    const cloudProfileValue = computed(() => cloudProfile)
+    const { machineArchitecturesByRegion, machineTypesByRegionAndArchitecture } = useCloudProfileForMachineTypes(cloudProfileValue, zonesByCloudProfileAndRegion)
+    const { defaultMachineImageForMachineType } = useCloudProfileForMachineImages(cloudProfileValue)
+
+    // Get machine architecture and types
+    const regionRef = computed(() => region)
+    const architecture = head(machineArchitecturesByRegion(regionRef).value)
+    const architectureRef = computed(() => architecture)
+    const machineTypesForZone = machineTypesByRegionAndArchitecture(regionRef, architectureRef).value
     const machineType = head(machineTypesForZone) || {}
     const volumeTypesForZone = volumeTypesByCloudProfileRefAndRegion({ cloudProfileRef, region })
     const volumeType = head(volumeTypesForZone) || {}
 
-    // Get machine image using composable
-    const cloudProfile = cloudProfileByRef(cloudProfileRef)
-    const cloudProfileValue = computed(() => cloudProfile)
-    const { defaultMachineImageForMachineType } = useCloudProfileForMachineImages(cloudProfileValue)
+    // Get machine image
     const machineTypeRef = computed(() => machineType)
     const machineImage = defaultMachineImageForMachineType(machineTypeRef).value
 
@@ -525,10 +503,6 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     firewallSizesByCloudProfileRefAndRegion,
     firewallNetworksByCloudProfileRefAndPartitionId,
     zonesByCloudProfileRefAndRegion,
-    // Machine Type
-    machineArchitecturesByCloudProfileRefAndRegion,
-    machineTypesByCloudProfileRef,
-    machineTypesByCloudProfileRefAndRegionAndArchitecture,
     // Volum Stuff
     volumeTypesByCloudProfileRefAndRegion,
     volumeTypesByCloudProfileRef,
