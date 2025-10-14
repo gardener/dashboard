@@ -88,6 +88,11 @@ def extract_pr_info(pr_number: int, repo_owner: str, repo_name: str, github_toke
                     content=pr.body
                 )
 
+                if malformed_blocks:
+                    logger.info(f"Found {len(malformed_blocks)} malformed release note block(s)")
+                    for block in malformed_blocks:
+                        logger.warning(f"Malformed release note block: {block}")
+
                 if valid_blocks:
                     logger.info(f"Found {len(valid_blocks)} release note block(s)")
 
