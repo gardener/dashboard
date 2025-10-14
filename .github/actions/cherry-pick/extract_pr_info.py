@@ -83,17 +83,17 @@ def extract_pr_info(pr_number: int, repo_owner: str, repo_name: str, github_toke
         if pr.body:
             try:
                 # Use gardener-gha-libs to extract source blocks
-                source_blocks = list(rnm.iter_source_blocks(
+                valid_blocks, malformed_blocks = rnm.iter_source_blocks(
                     source=pr,
                     content=pr.body
-                ))
+                )
 
-                if source_blocks:
-                    logger.info(f"Found {len(source_blocks)} release note block(s)")
+                if valid_blocks:
+                    logger.info(f"Found {len(valid_blocks)} release note block(s)")
 
                     # Format release notes
                     release_notes = []
-                    for block in source_blocks:
+                    for block in valid_blocks:
                         if block.has_content():
                             formatted_note = f"```{block.category} {block.target_group}\n{block.note_message}\n```"
                             release_notes.append(formatted_note)
