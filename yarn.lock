@@ -452,26 +452,26 @@ __metadata:
   linkType: hard
 
 "@codemirror/autocomplete@npm:^6.0.0, @codemirror/autocomplete@npm:^6.18.3":
-  version: 6.18.7
-  resolution: "@codemirror/autocomplete@npm:6.18.7"
+  version: 6.19.0
+  resolution: "@codemirror/autocomplete@npm:6.19.0"
   dependencies:
     "@codemirror/language": "npm:^6.0.0"
     "@codemirror/state": "npm:^6.0.0"
     "@codemirror/view": "npm:^6.17.0"
     "@lezer/common": "npm:^1.0.0"
-  checksum: 10c0/562c13711fc1b184d3684300d255ebb0c7d45a4ea2c7f14e9307b5372f5af213720d06431864239d1507ba4613fb0ee7c5091b327a2125b2ee8109d4f5344fb1
+  checksum: 10c0/9ec67349fb29f241c20bd0d1eb5faee2f4b43e80e4ea404b590990af20385feb3c9131791fcb87791fd6c790fbbad488ed4283e4a062998b5b40bfb8f6b0f277
   languageName: node
   linkType: hard
 
 "@codemirror/commands@npm:^6.7.1":
-  version: 6.8.1
-  resolution: "@codemirror/commands@npm:6.8.1"
+  version: 6.9.0
+  resolution: "@codemirror/commands@npm:6.9.0"
   dependencies:
     "@codemirror/language": "npm:^6.0.0"
     "@codemirror/state": "npm:^6.4.0"
     "@codemirror/view": "npm:^6.27.0"
     "@lezer/common": "npm:^1.1.0"
-  checksum: 10c0/da61311f4c39036f93fbe518c673f2464902cf1b64b071319b14b7d690315b72828de4bc12f28be78eeac6e8b8bd8800d4e7921dc37977f78baac4dd49c5b4bf
+  checksum: 10c0/9317112b3bc2d5f083ea4f587773bfae4a0b532dd8a4b561a99b85a5f011f1f9693b5df5946b3f596565ee50f10ae4b9428901481dabeb96ba0a9c7caebba2fd
   languageName: node
   linkType: hard
 
@@ -537,14 +537,14 @@ __metadata:
   linkType: hard
 
 "@codemirror/view@npm:^6.0.0, @codemirror/view@npm:^6.17.0, @codemirror/view@npm:^6.23.0, @codemirror/view@npm:^6.27.0, @codemirror/view@npm:^6.35.3":
-  version: 6.38.3
-  resolution: "@codemirror/view@npm:6.38.3"
+  version: 6.38.6
+  resolution: "@codemirror/view@npm:6.38.6"
   dependencies:
     "@codemirror/state": "npm:^6.5.0"
     crelt: "npm:^1.0.6"
     style-mod: "npm:^4.1.0"
     w3c-keyname: "npm:^2.2.4"
-  checksum: 10c0/70c9ec6d6a6528d64613c922165cc156f564435be50767167785fa97cb1be29d1d4c95a550405ce8144bc4147138ca463c6f1b94afa6b42b45e4f9cbe9045ec5
+  checksum: 10c0/7faa6558a991faf8acb6a74dbe5e21b6e1a83f8ace7ec7b37e8250c4e1e9f152c40978588cf2d2609c8ad7126e05ce9cae052bf345232630c300d27ccfb87493
   languageName: node
   linkType: hard
 
