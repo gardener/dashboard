@@ -65,6 +65,8 @@ import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useConfigStore } from '@/store/config'
 
 import { useShootItem } from '@/composables/useShootItem'
+import { useCloudProfileForKubeVersions } from '@/composables/useCloudProfile/useCloudProfileForKubeVersions'
+import { useCloudProfileForMachineImages } from '@/composables/useCloudProfile/useCloudProfileForMachineImages'
 
 import { isSelfTerminationWarning } from '@/utils'
 
@@ -152,6 +154,9 @@ const {
   canPatchShoots,
 } = storeToRefs(authzStore)
 
+const cloudProfile = computed(() => cloudProfileStore.cloudProfileByRef(shootCloudProfileRef.value))
+const { expiringWorkerGroupsForShoot } = useCloudProfileForMachineImages(cloudProfile)
+
 const popover = ref(false)
 
 const internalValue = computed({
@@ -192,8 +197,10 @@ const k8sMessage = computed(() => {
   if (!filterMatches('k8s')) {
     return []
   }
-  const k8sAutoPatch = get(shootItem.value, ['spec', 'maintenance', 'autoUpdate', 'kubernetesVersion'], false)
-  const k8sExpiration = cloudProfileStore.kubernetesVersionExpirationForShoot(shootK8sVersion.value, shootCloudProfileRef.value, k8sAutoPatch)
+  const k8sAutoPatch = ref(get(shootItem.value, ['spec', 'maintenance', 'autoUpdate', 'kubernetesVersion'], false))
+  const cloudProfile = computed(() => cloudProfileStore.cloudProfileByRef(shootCloudProfileRef.value))
+  const { kubernetesVersionExpirationForShoot } = useCloudProfileForKubeVersions(cloudProfile)
+  const k8sExpiration = kubernetesVersionExpirationForShoot(shootK8sVersion, k8sAutoPatch).value
   if (!k8sExpiration) {
     return []
   }
@@ -223,8 +230,8 @@ const machineImageMessages = computed(() => {
   if (!filterMatches('machine-image')) {
     return []
   }
-  const imageAutoPatch = get(shootItem.value, ['spec', 'maintenance', 'autoUpdate', 'machineImageVersion'], false)
-  const expiredWorkerGroups = cloudProfileStore.expiringWorkerGroupsForShoot(shootWorkerGroups.value, shootCloudProfileRef.value, imageAutoPatch)
+  const imageAutoPatch = ref(get(shootItem.value, ['spec', 'maintenance', 'autoUpdate', 'machineImageVersion'], false))
+  const expiredWorkerGroups = expiringWorkerGroupsForShoot(shootWorkerGroups, imageAutoPatch).value
   return map(expiredWorkerGroups, workerGroup => {
     const {
       expirationDate,

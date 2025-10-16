@@ -371,7 +371,10 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { ref } from 'vue'
+import {
+  computed,
+  ref,
+} from 'vue'
 import { mapActions } from 'pinia'
 import yaml from 'js-yaml'
 
@@ -381,6 +384,8 @@ import GCodeBlock from '@/components/GCodeBlock'
 import GVendorIcon from '@/components/GVendorIcon'
 
 import { useShootItem } from '@/composables/useShootItem'
+import { useCloudProfileForMachineImages } from '@/composables/useCloudProfile/useCloudProfileForMachineImages'
+import { useCloudProfileForMachineTypes } from '@/composables/useCloudProfile/useCloudProfileForMachineTypes'
 
 import get from 'lodash/get'
 import find from 'lodash/find'
@@ -405,12 +410,19 @@ export default {
       shootCloudProfileRef,
     } = useShootItem()
 
+    const cloudProfileStore = useCloudProfileStore()
+    const cloudProfile = computed(() => cloudProfileStore.cloudProfileByRef(shootCloudProfileRef.value))
+    const { machineImages } = useCloudProfileForMachineImages(cloudProfile)
+    const { machineTypes } = useCloudProfileForMachineTypes(cloudProfile, cloudProfileStore.zonesByCloudProfileAndRegion)
+
     const tab = ref('overview')
 
     return {
       tab,
       shootMetadata,
       shootCloudProfileRef,
+      machineImages,
+      machineTypes,
     }
   },
   data () {
@@ -431,9 +443,8 @@ export default {
       },
     },
     machineType () {
-      const machineTypes = this.machineTypesByCloudProfileRef(this.shootCloudProfileRef)
       const type = get(this.workerGroup, ['machine', 'type'])
-      return find(machineTypes, ['name', type])
+      return find(this.machineTypes, ['name', type])
     },
     volumeType () {
       const volumeTypes = this.volumeTypesByCloudProfileRef(this.shootCloudProfileRef)
@@ -468,9 +479,8 @@ export default {
       return {}
     },
     machineImage () {
-      const machineImages = this.machineImagesByCloudProfileRef(this.shootCloudProfileRef)
       const { name, version } = get(this.workerGroup, ['machine', 'image'], {})
-      return find(machineImages, { name, version }) ?? {}
+      return find(this.machineImages, { name, version }) ?? {}
     },
     machineCri () {
       return this.workerGroup.cri ?? {}
@@ -499,9 +509,7 @@ export default {
   },
   methods: {
     ...mapActions(useCloudProfileStore, [
-      'machineTypesByCloudProfileRef',
       'volumeTypesByCloudProfileRef',
-      'machineImagesByCloudProfileRef',
     ]),
     updateWorkerGroupYaml (value) {
       this.workerGroupYaml = yaml.dump(value)

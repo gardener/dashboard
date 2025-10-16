@@ -19,6 +19,9 @@ import { useProjectStore } from '@/store/project'
 
 import { useCloudProviderBindingList } from '@/composables/credential/useCloudProviderBindingList'
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
+import { useCloudProfileForKubeVersions } from '@/composables/useCloudProfile/useCloudProfileForKubeVersions.js'
+import { useCloudProfileForMachineImages } from '@/composables/useCloudProfile/useCloudProfileForMachineImages'
+import { useCloudProfileForMachineTypes } from '@/composables/useCloudProfile/useCloudProfileForMachineTypes'
 
 import { useShootAccessRestrictions } from './useShootAccessRestrictions'
 
@@ -102,6 +105,20 @@ export function createShootHelperComposable (shootItem, options = {}) {
     return cloudProfileStore.cloudProfileByRef(cloudProfileRef.value)
   })
 
+  const {
+    sortedKubernetesVersions,
+    kubernetesVersionIsNotLatestPatch: kubernetesVersionIsNotLatestPatchFn,
+  } = useCloudProfileForKubeVersions(cloudProfile)
+
+  const {
+    machineImages: machineImagesFromComposable,
+  } = useCloudProfileForMachineImages(cloudProfile)
+
+  const {
+    machineTypes: allMachineTypesFromComposable,
+    machineArchitecturesByRegion,
+  } = useCloudProfileForMachineTypes(cloudProfile, cloudProfileStore.zonesByCloudProfileAndRegion)
+
   const seed = computed(() => {
     return seedStore.seedByName(seedName.value)
   })
@@ -145,13 +162,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
 
   const infrastructureBindings = useCloudProviderBindingList(providerType, { credentialStore, gardenerExtensionStore })
 
-  const sortedKubernetesVersions = computed(() => {
-    return cloudProfileStore.sortedKubernetesVersions(cloudProfileRef.value)
-  })
-
-  const kubernetesVersionIsNotLatestPatch = computed(() => {
-    return cloudProfileStore.kubernetesVersionIsNotLatestPatch(kubernetesVersion.value, cloudProfileRef.value)
-  })
+  const kubernetesVersionIsNotLatestPatch = kubernetesVersionIsNotLatestPatchFn(kubernetesVersion)
 
   const { selfTerminationDays } = useCloudProviderBinding(infrastructureBinding)
 
@@ -202,16 +213,9 @@ export function createShootHelperComposable (shootItem, options = {}) {
     })
   })
 
-  const allMachineTypes = computed(() => {
-    return cloudProfileStore.machineTypesByCloudProfileRef(cloudProfileRef.value)
-  })
+  const allMachineTypes = allMachineTypesFromComposable
 
-  const machineArchitectures = computed(() => {
-    return cloudProfileStore.machineArchitecturesByCloudProfileRefAndRegion({
-      cloudProfileRef: cloudProfileRef.value,
-      region: region.value,
-    })
-  })
+  const machineArchitectures = machineArchitecturesByRegion(region)
 
   const allVolumeTypes = computed(() => {
     return cloudProfileStore.volumeTypesByCloudProfileRef(cloudProfileRef.value)
@@ -224,9 +228,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     })
   })
 
-  const machineImages = computed(() => {
-    return cloudProfileStore.machineImagesByCloudProfileRef(cloudProfileRef.value)
-  })
+  const machineImages = machineImagesFromComposable
 
   const networkingTypes = computed(() => {
     return gardenerExtensionStore.networkingTypes
