@@ -13,7 +13,8 @@ It is possible to change the branding of the Gardener Dashboard when using the [
 | `productTitle` | Title of the Gardener product displayed below the logo. It could also contain information about the specific Gardener instance (e.g. Development, Canary, Live) | `Gardener`  |
 | `productTitleSuperscript` | Superscript next to the product title. To supress the superscript set to `false` | Production version (e.g 1.73.1) |
 | `productSlogan` | Slogan that is displayed under the product title and on the login page| `Universal Kubernetes at Scale` |
-| `productLogoUrl` | URL for the product logo. You can also use [data:](https://developer.mozilla.org/en-US/docs/web/http/basics_of_http/data_urls) scheme for development. For production it is recommended to provide static assets | `/static/assets/logo.svg` |
+| `productLogoUrl` | URL for the product logo. You can also use the `data:` scheme for development. For production, it is recommended to provide static assets. If you use `branding.assets.productLogo` to configure custom logos and do not provide a custom login template, you can use this configuration to adapt the logo path on the login page. | `/static/assets/logo.svg` |
+| `assets` | Map with overrides for dashboard assets (logo and favicons). Each entry accepts a `fileName` and optional `version` that are served from `/static/custom-assets`. | `{}` |
 | `teaserHeight` | Height of the teaser in the [GMainNavigation](../../frontend/src/components/GMainNavigation.vue) component | `200` |
 | `teaserTemplate` | Custom HTML template to replace to teaser content | refer to [GTeaser](../../frontend/src/components/GTeaser.vue) |
 | `loginTeaserHeight` | Height of the login teaser in the [GLogin](../../frontend/src/layouts/GLogin.vue) component | `260` |
@@ -50,7 +51,11 @@ If you use the helm chart, you can configure those with `frontendConfig.themes.l
 
 ## Logos and Icons
 
-It is also possible to exchange the Dashboard logo and icons. You can replace the [assets](../../frontend/public/static/assets) folder when using the [helm chart](../../charts/gardener-dashboard) in the `frontendConfig.assets` map.
+It is also possible to exchange the Dashboard logo and icons. You can either replace the complete asset bundle or configure dedicated overrides for the logo and favicons.
+
+### Replace the complete assets folder (legacy)
+
+You can replace the [assets](../../frontend/public/static/assets) folder when using the [helm chart](../../charts/gardener-dashboard) in the `frontendConfig.assets` map.
 
 Attention: You need to set values for all files as mapping the volume will overwrite all files. It is not possible to exchange single files.
 
@@ -77,6 +82,30 @@ EOF
 ```
 
 Then, swap in the base64 encoded version of your files where needed.
+
+### Override selected assets
+
+To override individual assets without replacing the whole folder, provide the file contents in the `frontendConfig.customAssets` map and reference them via `branding.assets`. The Dashboard serves the files from `/static/custom-assets/<fileName>` and appends the optional `version` query parameter to help with cache busting.
+
+The following asset keys are supported: `productLogo`, `favicon`, `favicon16`, `favicon32`, and `favicon96`.
+
+```yaml
+frontendConfig:
+  customAssets:
+    custom-logo.svg: |
+      <base64 encoded file>
+    favicon-16x16.png: |
+      <base64 encoded file>
+  branding:
+    assets:
+      productLogo:
+        fileName: custom-logo.svg
+        version: v2
+      favicon16:
+        fileName: favicon-16x16.png
+```
+
+With this configuration the Dashboard rewrites the logo to `/static/custom-assets/custom-logo.svg?v=v2` and the 16×16 favicon to `/static/custom-assets/favicon-16x16.png`. Omitted entries continue to use the defaults from `/static/assets`.
 
 ## Customization Example
 
