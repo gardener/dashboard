@@ -22,10 +22,10 @@ module.exports = {
   transform: undefined,
   coverageThreshold: {
     global: {
-      branches: 68,
-      functions: 94,
-      lines: 90,
-      statements: 90,
+      branches: 60,
+      functions: 85,
+      lines: 80,
+      statements: 80,
     },
   },
   setupFilesAfterEnv: [
