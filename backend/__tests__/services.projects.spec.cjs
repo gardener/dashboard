@@ -73,21 +73,22 @@ jest.mock('../dist/lib/cache', () => {
     },
   ]
 
-  return {
+  return jest.fn(() => ({
     getProjects: jest.fn(() => projectList),
     getProject: jest.fn(name => projectList.find(project => project.metadata.name === name)),
-  }
+  }))
 })
 jest.mock('../dist/lib/services/shoots')
 jest.mock('../dist/lib/services/authorization')
-jest.mock('@gardener-dashboard/kube-client', () => ({
-  dashboardClient: {
-    'core.gardener.cloud': {
-      projects: {
-        watch: jest.fn(),
-      },
+const dashboardClient = {
+  'core.gardener.cloud': {
+    projects: {
+      watch: jest.fn(),
     },
   },
+}
+jest.mock('@gardener-dashboard/kube-client', () => ({
+  createDashboardClient: jest.fn(() => dashboardClient),
 }))
 
 describe('services/projects', () => {
@@ -95,7 +96,6 @@ describe('services/projects', () => {
   const projects = require('../dist/lib/services/projects')
   const shoots = require('../dist/lib/services/shoots')
   const authorization = require('../dist/lib/services/authorization')
-  const { dashboardClient } = require('@gardener-dashboard/kube-client')
 
   const createUser = (username) => {
     return {

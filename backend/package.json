@@ -24,7 +24,6 @@
   "exports": "./lib/server.js",
   "scripts": {
     "serve": "cross-env NODE_ENV=development node server.js",
-    "serve-kcp": "cross-env NODE_ENV=development cross-env KCP=true node server.js",
     "lint": "eslint server.js . --max-warnings=0",
     "lint-sarif": "yarn lint --format=@microsoft/eslint-formatter-sarif",
     "build-packages-for-test-target": "yarn workspaces foreach --all --topological --no-private --include 'packages/*' run build",

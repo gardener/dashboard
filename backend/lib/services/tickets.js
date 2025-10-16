@@ -11,7 +11,9 @@ import {
   getComments,
 } from '../github/index.js'
 import { createConverter } from '../markdown.js'
-import cache from '../cache/index.js'
+import getCache from '../cache/index.js'
+
+const cache = getCache() // TODO Currently in KCP there is no separation between workspacs
 
 function fromLabel (item) {
   return _.pick(item, [

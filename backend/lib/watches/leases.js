@@ -7,9 +7,11 @@
 import pLimit from 'p-limit'
 import logger from '../logger/index.js'
 import config from '../config/index.js'
-import cache from '../cache/index.js'
+import getCache from '../cache/index.js'
 import * as tickets from '../services/tickets.js'
 import SyncManager from '../github/SyncManager.js'
+
+const cache = getCache()// TODO currently not workspaced
 
 // exported for testing
 export const test = {

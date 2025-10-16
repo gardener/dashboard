@@ -48,7 +48,7 @@ describe('kube-client', () => {
     let createShootAdminKubeconfigStub
 
     beforeEach(() => {
-      testClient = createClient({ auth: { bearer } })
+      testClient = createClient(undefined, { auth: { bearer } })
       getSecretStub = jest.spyOn(testClient.core.secrets, 'get')
       createShootAdminKubeconfigStub = jest.spyOn(testClient['core.gardener.cloud'].shoots, 'createAdminKubeconfigRequest')
     })
@@ -133,7 +133,7 @@ describe('kube-client', () => {
       resourceEndpointNames = await resourceEndpoints()
       nonResourceEndpointNames = await nonResourceEndpoints()
       jest.clearAllMocks()
-      testClient = createDashboardClient({})
+      testClient = createDashboardClient(undefined, {})
     })
 
     it('should create a dashboard client', () => {

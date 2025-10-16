@@ -11,7 +11,7 @@ const { isHttpError } = httpErrors
 const { createDashboardClient } = kubeClientModule
 
 async function healthCheck (transitive = false) {
-  const dashboardClient = createDashboardClient('root') // TODO: use root here? =>Webhook is not workspaced?
+  const dashboardClient = createDashboardClient()
 
   if (transitive === true) {
     try {

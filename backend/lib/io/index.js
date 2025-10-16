@@ -10,7 +10,7 @@ import helper from './helper.js'
 import dispatcher from './dispatcher.js'
 import config from '../config/index.js'
 
-let io
+let globalIO
 
 function init (httpServer, workspace) {
   const allowedOrigins = config.websocketAllowedOrigins
@@ -26,6 +26,13 @@ function init (httpServer, workspace) {
       ? 'WebSocket allowing all origins (*) — this is unsafe in production. Restrict allowedOrigins.'
       : 'WebSocket allowing all origins (*) — OK for local/dev, but do not use in production.'
     logger.warn(msg)
+  }
+
+  let io
+  if (workspace && globalIO) {
+    // Reuse global io instance in case of multiple workspaces (kcp)
+    // Do not cache instance for regular (non workspace mode) to avoid issues during tests
+    io = globalIO
   }
 
   if (!io) {
@@ -49,6 +56,7 @@ function init (httpServer, workspace) {
         callback(null, isAllowed)
       },
     })
+    globalIO = io
   }
 
   const handleConnection = socket => {

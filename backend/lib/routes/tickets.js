@@ -6,7 +6,7 @@
 
 import express from 'express'
 import _ from 'lodash-es'
-import cache from '../cache/index.js'
+import getCache from '../cache/index.js'
 import * as tickets from '../services/tickets.js'
 import { metricsRoute } from '../middleware.js'
 
@@ -14,32 +14,29 @@ const router = express.Router({
   mergeParams: true,
 })
 
-const ticketCache = {}// TODO cache.getTicketCache()
+const cache = getCache() // TODO Currently in KCP there is no separation between workspacs
+const ticketCache = cache.getTicketCache()
 const metricsMiddleware = metricsRoute('tickets')
 
 function getProjectName (namespace = '_all') {
   if (namespace !== '_all') {
-    // TODO
-    // return cache.findProjectByNamespace(namespace).metadata.name
+    return cache.findProjectByNamespace(namespace).metadata.name
   }
 }
 function getIssues (namespace) {
-  // const projectName = getProjectName(namespace)
-  // const predicate = projectName
-  //   ? ['metadata.projectName', projectName]
-  //   : () => true
-  // return _.filter(ticketCache.getIssues(), predicate)
-  // TODO
-  return []
+  const projectName = getProjectName(namespace)
+  const predicate = projectName
+    ? ['metadata.projectName', projectName]
+    : () => true
+  return _.filter(ticketCache.getIssues(), predicate)
 }
 
 async function getIssuesAndComments (namespace, name) {
-  // const projectName = getProjectName(namespace)
-  // const issues = _.filter(ticketCache.getIssues(), { metadata: { projectName, name } })
-  // const promises = _.map(issues, issue => tickets.getIssueComments({ number: issue.metadata.number }))
-  // const comments = _.flatten(await Promise.all(promises))
-  // return [issues, comments]
-  return []
+  const projectName = getProjectName(namespace)
+  const issues = _.filter(ticketCache.getIssues(), { metadata: { projectName, name } })
+  const promises = _.map(issues, issue => tickets.getIssueComments({ number: issue.metadata.number }))
+  const comments = _.flatten(await Promise.all(promises))
+  return [issues, comments]
 }
 
 router.route('/')

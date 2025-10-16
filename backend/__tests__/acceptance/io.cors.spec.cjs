@@ -7,7 +7,6 @@
 'use strict'
 
 const { mockRequest } = require('@gardener-dashboard/request')
-const cache = require('../../dist/lib/cache')
 const fixtures = require('../../__fixtures__')
 const config = require('../../dist/lib/config')
 
@@ -35,7 +34,7 @@ describe('cors', () => {
     mockRequest
       .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-    expect(() => createAgent('io', cache))
+    expect(() => createAgent('io'))
       .toThrow('WebSocket allowed origins configuration is required')
   })
 
@@ -44,7 +43,7 @@ describe('cors', () => {
     mockRequest
       .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-    agent = createAgent('io', cache)
+    agent = createAgent('io')
     const cookie = await user.cookie
     await expect(
       agent.connect({ cookie, originHeader: 'https://forbidden.example.org' }),
@@ -56,7 +55,7 @@ describe('cors', () => {
     mockRequest
       .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-    agent = createAgent('io', cache)
+    agent = createAgent('io')
     const cookie = await user.cookie
     await expect(
       agent.connect({ cookie }),
@@ -68,7 +67,7 @@ describe('cors', () => {
     mockRequest
       .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-    agent = createAgent('io', cache)
+    agent = createAgent('io')
     const cookie = await user.cookie
     socket = await agent.connect({ cookie, originHeader: 'https://allowed.example.org' })
     expect(socket.connected).toBe(true)
@@ -79,7 +78,7 @@ describe('cors', () => {
     mockRequest
       .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-    agent = createAgent('io', cache)
+    agent = createAgent('io')
     const cookie = await user.cookie
     socket = await agent.connect({ cookie, originHeader: 'https://any.example.org' })
     expect(socket.connected).toBe(true)

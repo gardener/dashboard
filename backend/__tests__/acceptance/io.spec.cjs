@@ -12,7 +12,7 @@ const { mockListIssues, mockListComments } = require('@octokit/core')
 const { pEvent } = require('../../__test_helpers__/p-event')
 const createError = require('http-errors')
 const tickets = require('../../dist/lib/services/tickets')
-const cache = require('../../dist/lib/cache')
+const getCache = require('../../dist/lib/cache')
 const ioHelper = require('../../dist/lib/io/helper')
 const fixtures = require('../../__fixtures__')
 
@@ -80,8 +80,10 @@ describe('api', function () {
   let agent
   let socket
   let nsp
+  let cache
 
   beforeAll(() => {
+    cache = getCache()
     cache.cache.resetTicketCache()
     cache.initialize({
       projects: {

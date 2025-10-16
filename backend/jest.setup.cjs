@@ -47,9 +47,9 @@ function createHttpAgent () {
   return agent
 }
 
-function createSocketAgent (cache) {
+function createSocketAgent () {
   const server = http.createServer()
-  const io = require('./dist/lib/io')(server, cache)
+  const io = require('./dist/lib/io')(server)
   server.listen(0, '127.0.0.1')
 
   const agent = {
@@ -76,6 +76,7 @@ function createSocketAgent (cache) {
         autoConnect: false,
         transports: ['websocket'],
       })
+
       socket.connect()
       if (connected) {
         await pEvent(socket, 'connect', {
@@ -90,10 +91,10 @@ function createSocketAgent (cache) {
   return agent
 }
 
-function createAgent (type = 'http', cache) {
+function createAgent (type = 'http') {
   switch (type) {
     case 'io':
-      return createSocketAgent(cache)
+      return createSocketAgent()
     default:
       return createHttpAgent()
   }
@@ -116,32 +117,37 @@ jest.mock('./dist/lib/cache/index.cjs', () => {
   const { find } = require('lodash')
   const fixtures = require('./__fixtures__')
 
-  const originalCache = jest.requireActual('./dist/lib/cache')
+  const originalGetCache = jest.requireActual('./dist/lib/cache')
 
   const createTicketCache = jest.requireActual('./dist/lib/cache/tickets')
-  const { cache } = originalCache
-  const keys = [
-    'cloudprofiles',
-    'seeds',
-    'quotas',
-    'projects',
-    'controllerregistrations',
-    'resourcequotas',
-  ]
-  for (const key of keys) {
-    cache.set(key, {
-      items: fixtures[key].list(),
-      list () {
-        return this.items
-      },
-      find (predicate) {
-        return find(this.list(), predicate)
-      },
-    })
-  }
-  cache.ticketCache = createTicketCache()
-  cache.resetTicketCache = () => (cache.ticketCache = createTicketCache())
-  return originalCache
+
+  const mockGetCache = jest.fn(() => {
+    const api = originalGetCache()
+    const { cache } = api
+    const keys = [
+      'cloudprofiles',
+      'seeds',
+      'quotas',
+      'projects',
+      'controllerregistrations',
+      'resourcequotas',
+    ]
+    for (const key of keys) {
+      cache.set(key, {
+        items: fixtures[key].list(),
+        list () {
+          return this.items
+        },
+        find (predicate) {
+          return find(this.list(), predicate)
+        },
+      })
+    }
+    cache.ticketCache = createTicketCache()
+    cache.resetTicketCache = () => (cache.ticketCache = createTicketCache())
+    return api
+  })
+  return mockGetCache
 })
 
 beforeAll(() => {

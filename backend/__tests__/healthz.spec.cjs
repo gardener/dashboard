@@ -6,15 +6,24 @@
 
 'use strict'
 
-const { createHttpError } = require('@gardener-dashboard/request')
-const { dashboardClient } = require('@gardener-dashboard/kube-client')
-const { healthCheck } = require('../dist/lib/healthz')
+const dashboardClient = {
+  healthz: {
+    get: jest.fn(),
+  },
+}
+
+jest.mock('@gardener-dashboard/kube-client', () => ({
+  createDashboardClient: jest.fn(() => dashboardClient),
+}))
 
 describe('healthz', function () {
+  const { createHttpError } = require('@gardener-dashboard/request')
+  const { healthCheck } = require('../dist/lib/healthz')
+
   const healthz = dashboardClient.healthz
 
-  beforeEach(function () {
-    healthz.get = jest.fn()
+  afterEach(() => {
+    healthz.get.mockClear()
   })
 
   it('should successfully check transitive healthz', async function () {

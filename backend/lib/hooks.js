@@ -15,7 +15,9 @@ const { createDashboardClient, abortWatcher } = kubeClientModule
 const { monitorHttpServer, monitorSocketIO } = monitorModule
 
 class LifecycleHooks {
-  constructor (client) {
+  constructor (client, kcpMode) {
+    // KCP Mode
+    this.kcpMode = kcpMode
     // client
     this.client = client
     // abort controller
@@ -39,7 +41,8 @@ class LifecycleHooks {
   }
 
   beforeListen (server) {
-    if (process.env.KCP) {
+    if (this.kcpMode) {
+      logger.info('Starting watches in KCP workspace aware mode')
       const workspacesInformer = this.client['tenancy.kcp.io'].workspaces.informer()
 
       workspacesInformer.on('add', async workspace => {
@@ -65,7 +68,7 @@ class LifecycleHooks {
 
       monitorHttpServer(server)
     } else {
-      logger.debug('Starting watches in non workspace mode')
+      logger.info('Starting watches in regular mode')
       const watcher = new ResourceWatcher(server, undefined, this.ac)
       watcher.watchResourcesInWorkspace()
     }
@@ -112,8 +115,7 @@ class ResourceWatcher {
       const informer = informers[key] // eslint-disable-line security/detect-object-injection
       if (informer) {
         if (key === 'leases') {
-          // TODO What to do with the leases informer? =>root workspace? shared repo or dedicated?
-          // watch(this.io, informer, { signal: this.ac.signal })
+          watch(this.io, informer, { signal: this.ac.signal })
         } else {
           watch(this.io, informer)
         }
@@ -149,13 +151,23 @@ class ResourceWatcher {
 }
 
 export default () => {
-  const rootClient = createDashboardClient(
-    'root', // TODO: use root here? =>Currently we assume that root is the parent of all workspaces
-    {
+  const kcpMode = config.kcpMode === true
+  let client
+  if (kcpMode) {
+    client = createDashboardClient('root', {
       id: 'watch',
       pingInterval: 30000,
       maxOutstandingPings: 2,
     })
-  return new LifecycleHooks(rootClient)
+  } else {
+    // Regular Mode, no workspaces
+    client = createDashboardClient(undefined, {
+      id: 'watch',
+      pingInterval: 30000,
+      maxOutstandingPings: 2,
+    })
+  }
+  return new LifecycleHooks(client, kcpMode)
 }
+
 export { LifecycleHooks }

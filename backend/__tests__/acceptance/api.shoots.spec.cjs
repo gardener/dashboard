@@ -11,7 +11,7 @@ const { Store } = require('@gardener-dashboard/kube-client')
 const kubeconfig = require('@gardener-dashboard/kube-config')
 const yaml = require('js-yaml')
 const logger = require('../../dist/lib/logger')
-const cache = require('../../dist/lib/cache')
+const getCache = require('../../dist/lib/cache')
 
 function createStore (items) {
   const store = new Store()
@@ -21,9 +21,11 @@ function createStore (items) {
 
 describe('api', function () {
   let agent
+  let cache
 
   beforeAll(() => {
     agent = createAgent()
+    cache = getCache()
 
     cache.initialize({
       projects: {

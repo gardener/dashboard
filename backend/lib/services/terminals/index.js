@@ -27,12 +27,11 @@ import {
   getGardenHostClusterKubeApiServer,
   getShootRef,
 } from './utils.js'
-import cache from '../../cache/index.js'
+import getCache from '../../cache/index.js'
 import logger from '../../logger/index.js'
 import { createConverter } from '../../markdown.js'
 const { Resources } = kubeClientModule
 const { Forbidden, UnprocessableEntity, InternalServerError, isHttpError } = httpErrors
-const { getSeed, findProjectByNamespace } = cache
 
 const TERMINAL_CONTAINER_NAME = 'terminal'
 
@@ -214,7 +213,8 @@ async function getTargetCluster ({ user, namespace, name, target, preferredHost,
           },
         ])
       } else {
-        const projectName = findProjectByNamespace(namespace).metadata.name
+        const cache = getCache(user.workspace)
+        const projectName = cache.findProjectByNamespace(namespace).metadata.name
         targetCluster.namespace = namespace
         const serviceAccountName = DASHBOARD_WEBTERMINAL_NAME
 
@@ -347,7 +347,8 @@ async function getSeedHostCluster (client, { namespace, name, target, body, shoo
   const seedName = getSeedNameFromShoot(shootResource)
   const managedSeed = await client.getManagedSeed({ namespace: 'garden', name: seedName, throwNotFound: false })
 
-  const seed = getSeed(seedName)
+  const cache = getCache(client.workspace)
+  const seed = cache.getSeed(seedName)
 
   if (!managedSeed) {
     throw new Error('terminal cannot be hosted on non-managed seed')
@@ -377,7 +378,7 @@ async function getShootHostCluster (client, { namespace, name, body, shootResour
       name,
     },
   }
-  hostCluster.kubeApiServer = await getKubeApiServerHostForShoot(shootResource)
+  hostCluster.kubeApiServer = await getKubeApiServerHostForShoot(shootResource, client.workspace)
   return hostCluster
 }
 

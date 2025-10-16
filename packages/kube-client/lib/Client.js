@@ -20,9 +20,11 @@ const { fromKubeconfig, parseKubeconfig } = kubeConfig
 
 class Client {
   #clientConfig
+  workspace
 
   constructor (clientConfig, workspace, options) {
     this.#clientConfig = clientConfig
+    this.workspace = workspace
     // add hooks for logging
     options = debug.attach(options)
     // assign grouped resources (e.g. core.)

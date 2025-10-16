@@ -12,9 +12,7 @@ import {
   getSeedNameFromShoot,
   getSeedIngressDomain,
 } from '../../utils/index.js'
-import cache from '../../cache/index.js'
-
-const { getSeed, findProjectByNamespace } = cache
+import getCache from '../../cache/index.js'
 
 const GardenTerminalHostRefType = {
   SEED_REF: 'seedRef',
@@ -54,9 +52,10 @@ async function getGardenTerminalHostClusterCredentials (client) {
   }
 }
 
-function getSeedForGardenTerminalHostCluster () {
+function getSeedForGardenTerminalHostCluster (workspace) {
+  const cache = getCache(workspace)
   const seedName = getConfigValue('terminal.gardenTerminalHost.seedRef')
-  const seed = getSeed(seedName)
+  const seed = cache.getSeed(seedName)
   if (!seed) {
     throw new Error(`There is no seed with name ${seedName}`)
   }
@@ -68,7 +67,7 @@ async function getGardenHostClusterKubeApiServer (client) {
 
   switch (refType) {
     case GardenTerminalHostRefType.SEED_REF: {
-      const seed = getSeedForGardenTerminalHostCluster()
+      const seed = getSeedForGardenTerminalHostCluster(client.workspace)
       const managedSeed = await client.getManagedSeed({ namespace: 'garden', name: seed.metadata.name, throwNotFound: false })
       return getKubeApiServerHostForSeedOrManagedSeed(client, seed, managedSeed)
     }
@@ -76,7 +75,7 @@ async function getGardenHostClusterKubeApiServer (client) {
       const namespace = getConfigValue('terminal.gardenTerminalHost.shootRef.namespace', 'garden')
       const shootName = getConfigValue('terminal.gardenTerminalHost.shootRef.name')
       const shootResource = await client.getShoot({ namespace, name: shootName })
-      return getKubeApiServerHostForShoot(shootResource)
+      return getKubeApiServerHostForShoot(shootResource, client.workspace)
     }
     default:
       assert.fail(`unknown refType ${refType}`)
@@ -87,18 +86,17 @@ async function getKubeApiServerHostForSeedOrManagedSeed (client, seed, managedSe
   if (managedSeed) {
     const shootRef = getShootRef(managedSeed)
     const shoot = await client.getShoot(shootRef)
-    return getKubeApiServerHostForShoot(shoot)
+    return getKubeApiServerHostForShoot(shoot, client.workspace)
   }
 
   return getKubeApiServerHostForSeed(seed)
 }
 
-function getKubeApiServerHostForShoot (shoot, seed) {
-  if (!seed) {
-    seed = getSeed(getSeedNameFromShoot(shoot))
-  }
+function getKubeApiServerHostForShoot (shoot, workspace) {
+  const cache = getCache(workspace)
+  const seed = cache.getSeed(getSeedNameFromShoot(shoot))
   const { namespace, name } = shoot.metadata
-  const projectName = findProjectByNamespace(namespace).metadata.name
+  const projectName = cache.findProjectByNamespace(namespace).metadata.name
   const ingressDomain = getSeedIngressDomain(seed)
   return `api-${projectName}--${name}.${ingressDomain}`
 }

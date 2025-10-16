@@ -6,7 +6,7 @@
 
 const { mockRequest } = require('@gardener-dashboard/request')
 const { Store } = require('@gardener-dashboard/kube-client')
-const cache = require('../../dist/lib/cache')
+const getCache = require('../../dist/lib/cache')
 const _ = require('lodash')
 
 function createStore (items) {
@@ -17,8 +17,10 @@ function createStore (items) {
 
 describe('api', function () {
   let agent
+  let cache
 
   beforeAll(() => {
+    cache = getCache()
     agent = createAgent()
 
     cache.initialize({

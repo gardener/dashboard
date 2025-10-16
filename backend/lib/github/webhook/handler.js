@@ -24,7 +24,7 @@ async function updateLease () {
       renewTime: currentMicroDateStr(),
     },
   }
-  const dashboardClient = createDashboardClient('root') // TODO: use root here? =>Webhook is not workspaced?
+  const dashboardClient = createDashboardClient()
   try {
     await dashboardClient['coordination.k8s.io'].leases.mergePatch(namespace, name, body)
   } catch (err) {
