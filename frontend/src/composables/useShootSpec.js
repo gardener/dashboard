@@ -108,7 +108,7 @@ export function useShootSpec (shootItem, options = {}) {
   })
 
   const sshAccessEnabled = computed(() => {
-    return get(shootSpec.value, ['provider', 'workerSettings', 'sshAccess', 'enabled'], false)
+    return get(shootSpec.value, ['provider', 'workersSettings', 'sshAccess', 'enabled'], false)
   })
 
   const shootAddons = computed(() => {
