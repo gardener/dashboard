@@ -30,6 +30,8 @@ import { createShootHelperComposable } from '@/composables/useShootHelper'
 import { useShootMetadata } from '@/composables/useShootMetadata'
 import { useShootAccessRestrictions } from '@/composables/useShootAccessRestrictions'
 import { useCloudProfileForKubeVersions } from '@/composables/useCloudProfile/useCloudProfileForKubeVersions.js'
+import { useCloudProfileForMachineTypes } from '@/composables/useCloudProfile/useCloudProfileForMachineTypes.js'
+import { useCloudProfileForMachineImages } from '@/composables/useCloudProfile/useCloudProfileForMachineImages.js'
 
 import {
   scheduleEventsFromCrontabBlocks,
@@ -47,10 +49,14 @@ import {
   shootAddonList,
   randomMaintenanceBegin,
   maintenanceWindowWithBeginAndTimezone,
+  convertToGi,
+  defaultCriNameByKubernetesVersion,
 } from '@/utils'
 
 import { useShootDns } from './useShootDns'
 
+import pick from 'lodash/pick'
+import sample from 'lodash/sample'
 import size from 'lodash/size'
 import isEmpty from 'lodash/isEmpty'
 import isEqual from 'lodash/isEqual'
@@ -353,7 +359,7 @@ export function createShootContextComposable (options = {}) {
       kubernetes,
       networking,
       provider,
-    } = getSpecTemplate(providerType.value, cloudProfileStore.getDefaultNodesCIDR(cloudProfileRef))
+    } = getSpecTemplate(providerType.value, defaultNodesCIDR.value)
     set(manifest.value, ['spec', 'provider', 'infrastructureConfig'], provider.infrastructureConfig)
     set(manifest.value, ['spec', 'provider', 'controlPlaneConfig'], provider.controlPlaneConfig)
     set(manifest.value, ['spec', 'networking'], networking)
@@ -565,7 +571,7 @@ export function createShootContextComposable (options = {}) {
   }
 
   function generateProviderWorker (zones) {
-    const { id, isNew, ...worker } = cloudProfileStore.generateWorker(
+    const { id, isNew, ...worker } = generateWorker(
       !isEmpty(zones)
         ? zones
         : availableZones.value,
@@ -1098,4 +1104,61 @@ export function useProvideShootContext (options) {
   const composable = createShootContextComposable(options)
   provide('shoot-context', composable)
   return composable
+}
+
+function generateWorker (availableZones, cloudProfileRef, region, kubernetesVersion) {
+  const cloudProfileStore = useCloudProfileStore()
+
+  const id = uuidv4()
+  const name = `worker-${shortRandomString(5)}`
+  const zones = !isEmpty(availableZones) ? [sample(availableZones)] : undefined
+
+  // Get cloud profile and setup composables
+  const cloudProfile = cloudProfileStore.cloudProfileByRef(cloudProfileRef)
+  const cloudProfileValue = computed(() => cloudProfile)
+  const { machineArchitecturesByRegion, machineTypesByRegionAndArchitecture } = useCloudProfileForMachineTypes(cloudProfileValue, cloudProfileStore.zonesByCloudProfileAndRegion)
+  const { defaultMachineImageForMachineType } = useCloudProfileForMachineImages(cloudProfileValue)
+
+  // Get machine architecture and types
+  const regionRef = computed(() => region)
+  const architecture = head(machineArchitecturesByRegion(regionRef).value)
+  const architectureRef = computed(() => architecture)
+  const machineTypesForZone = machineTypesByRegionAndArchitecture(regionRef, architectureRef).value
+  const machineType = head(machineTypesForZone) || {}
+  const volumeTypesForZone = cloudProfileStore.volumeTypesByCloudProfileRefAndRegion({ cloudProfileRef, region })
+  const volumeType = head(volumeTypesForZone) || {}
+
+  // Get machine image
+  const machineTypeRef = computed(() => machineType)
+  const machineImage = defaultMachineImageForMachineType(machineTypeRef).value
+
+  const minVolumeSize = cloudProfileStore.minimumVolumeSizeByMachineTypeAndVolumeType({ machineType, volumeType })
+  const criNames = map(machineImage?.cri, 'name')
+  const criName = defaultCriNameByKubernetesVersion(criNames, kubernetesVersion)
+
+  const defaultVolumeSize = convertToGi(minVolumeSize) <= convertToGi('50Gi') ? '50Gi' : minVolumeSize
+  const worker = {
+    id,
+    name,
+    minimum: 1,
+    maximum: 2,
+    maxSurge: 1,
+    machine: {
+      type: machineType.name,
+      image: pick(machineImage, ['name', 'version']),
+      architecture,
+    },
+    zones,
+    cri: {
+      name: criName,
+    },
+    isNew: true,
+  }
+  if (volumeType.name) {
+    worker.volume = {
+      type: volumeType.name,
+      size: defaultVolumeSize,
+    }
+  }
+  return worker
 }

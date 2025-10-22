@@ -22,6 +22,7 @@ import { useCloudProviderBinding } from '@/composables/credential/useCloudProvid
 import { useCloudProfileForKubeVersions } from '@/composables/useCloudProfile/useCloudProfileForKubeVersions.js'
 import { useCloudProfileForMachineImages } from '@/composables/useCloudProfile/useCloudProfileForMachineImages'
 import { useCloudProfileForMachineTypes } from '@/composables/useCloudProfile/useCloudProfileForMachineTypes'
+import { useCloudProfileForDefaultNodesCIDR } from '@/composables/useCloudProfile/useCloudProfileForDefaultNodesCIDR'
 
 import { useShootAccessRestrictions } from './useShootAccessRestrictions'
 
@@ -128,7 +129,8 @@ export function createShootHelperComposable (shootItem, options = {}) {
   })
 
   const seeds = computed(() => {
-    return cloudProfileStore.seedsByCloudProfileRef(cloudProfileRef.value, project.value)
+    const cloudProfile = cloudProfileStore.cloudProfileByRef(cloudProfileRef.value)
+    return seedStore.seedsForCloudProfileByProject(cloudProfile, project.value)
   })
 
   const isFailureToleranceTypeZoneSupported = computed(() => {
@@ -156,9 +158,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     return cloudProfileStore.regionsWithoutSeedByCloudProfileRef(cloudProfileRef.value, project.value)
   })
 
-  const defaultNodesCIDR = computed(() => {
-    return cloudProfileStore.getDefaultNodesCIDR(cloudProfileRef.value)
-  })
+  const { defaultNodesCIDR } = useCloudProfileForDefaultNodesCIDR(cloudProfile)
 
   const infrastructureBindings = useCloudProviderEntityList(providerType, { credentialStore, gardenerExtensionStore, cloudProfileStore })
 

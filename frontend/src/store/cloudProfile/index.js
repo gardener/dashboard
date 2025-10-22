@@ -21,10 +21,6 @@ import {
   shortRandomString,
   convertToGi,
   defaultCriNameByKubernetesVersion,
-  isValidTerminationDate,
-  machineImageHasUpdate,
-  machineVendorHasSupportedVersion,
-  UNKNOWN_EXPIRED_TIMESTAMP,
 } from '@/utils'
 import { v4 as uuidv4 } from '@/utils/uuid'
 
@@ -123,11 +119,6 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return find(list.value, ['metadata.name', cloudProfileRef?.name])
   }
 
-  function seedsByCloudProfileRef (cloudProfileRef, project) {
-    const cloudProfile = cloudProfileByRef(cloudProfileRef)
-    return seedStore.seedsForCloudProfileByProject(cloudProfile, project)
-  }
-
   function zonesByCloudProfileRefAndRegion ({ cloudProfileRef, region }) {
     const cloudProfile = cloudProfileByRef(cloudProfileRef)
     return zonesByCloudProfileAndRegion({ cloudProfile, region })
@@ -179,11 +170,6 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     }
 
     return '0Gi'
-  }
-
-  function getDefaultNodesCIDR (cloudProfileRef) {
-    const cloudProfile = cloudProfileByRef(cloudProfileRef)
-    return get(cloudProfile, ['spec', 'providerConfig', 'defaultNodesCIDR'], configStore.defaultNodesCIDR)
   }
 
   function floatingPoolsByCloudProfileRefAndRegionAndDomain ({ cloudProfileRef, region, secretDomain }) {
@@ -361,130 +347,10 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return get(regionData, ['accessRestrictions'], [])
   }
 
-  function getVersionExpirationWarningSeverity (options) {
-    const {
-      isExpirationWarning,
-      autoPatchEnabled,
-      updateAvailable,
-      autoUpdatePossible,
-    } = options
-
-    const autoPatchEnabledAndPossible = autoPatchEnabled && autoUpdatePossible
-    if (!isExpirationWarning) {
-      return autoPatchEnabledAndPossible
-        ? 'info'
-        : undefined
-    }
-    if (!updateAvailable) {
-      return 'error'
-    }
-    return 'warning'
-  }
-
-  function expiringWorkerGroupsForShoot (shootWorkerGroups, cloudProfileRef, imageAutoPatch) {
-    const cloudProfile = cloudProfileByRef(cloudProfileRef)
-    if (!cloudProfile) {
-      return []
-    }
-    const cloudProfileValue = computed(() => cloudProfile)
-    const { machineImages } = useCloudProfileForMachineImages(cloudProfileValue)
-    const allMachineImages = machineImages.value
-
-    const workerGroups = map(shootWorkerGroups, worker => {
-      const workerImage = get(worker, ['machine', 'image'], {})
-      const { name, version } = workerImage
-      const workerImageDetails = find(allMachineImages, { name, version })
-      if (!workerImageDetails) {
-        return {
-          ...workerImage,
-          expirationDate: UNKNOWN_EXPIRED_TIMESTAMP,
-          workerName: worker.name,
-          isValidTerminationDate: false,
-          severity: 'warning',
-          supportedVersionAvailable: false,
-        }
-      }
-
-      const updateAvailable = machineImageHasUpdate(workerImageDetails, allMachineImages)
-      const supportedVersionAvailable = machineVendorHasSupportedVersion(workerImageDetails, allMachineImages)
-      const severity = getVersionExpirationWarningSeverity({
-        isExpirationWarning: workerImageDetails.isExpirationWarning,
-        autoPatchEnabled: imageAutoPatch,
-        updateAvailable,
-        autoUpdatePossible: updateAvailable,
-      })
-
-      return {
-        ...workerImageDetails,
-        isValidTerminationDate: isValidTerminationDate(workerImageDetails.expirationDate),
-        workerName: worker.name,
-        severity,
-        supportedVersionAvailable,
-      }
-    })
-    return filter(workerGroups, 'severity')
-  }
-
-  function generateWorker (availableZones, cloudProfileRef, region, kubernetesVersion) {
-    const id = uuidv4()
-    const name = `worker-${shortRandomString(5)}`
-    const zones = !isEmpty(availableZones) ? [sample(availableZones)] : undefined
-
-    // Get cloud profile and setup composables
-    const cloudProfile = cloudProfileByRef(cloudProfileRef)
-    const cloudProfileValue = computed(() => cloudProfile)
-    const { machineArchitecturesByRegion, machineTypesByRegionAndArchitecture } = useCloudProfileForMachineTypes(cloudProfileValue, zonesByCloudProfileAndRegion)
-    const { defaultMachineImageForMachineType } = useCloudProfileForMachineImages(cloudProfileValue)
-
-    // Get machine architecture and types
-    const regionRef = computed(() => region)
-    const architecture = head(machineArchitecturesByRegion(regionRef).value)
-    const architectureRef = computed(() => architecture)
-    const machineTypesForZone = machineTypesByRegionAndArchitecture(regionRef, architectureRef).value
-    const machineType = head(machineTypesForZone) || {}
-    const volumeTypesForZone = volumeTypesByCloudProfileRefAndRegion({ cloudProfileRef, region })
-    const volumeType = head(volumeTypesForZone) || {}
-
-    // Get machine image
-    const machineTypeRef = computed(() => machineType)
-    const machineImage = defaultMachineImageForMachineType(machineTypeRef).value
-
-    const minVolumeSize = minimumVolumeSizeByMachineTypeAndVolumeType({ machineType, volumeType })
-    const criNames = map(machineImage?.cri, 'name')
-    const criName = defaultCriNameByKubernetesVersion(criNames, kubernetesVersion)
-
-    const defaultVolumeSize = convertToGi(minVolumeSize) <= convertToGi('50Gi') ? '50Gi' : minVolumeSize
-    const worker = {
-      id,
-      name,
-      minimum: 1,
-      maximum: 2,
-      maxSurge: 1,
-      machine: {
-        type: machineType.name,
-        image: pick(machineImage, ['name', 'version']),
-        architecture,
-      },
-      zones,
-      cri: {
-        name: criName,
-      },
-      isNew: true,
-    }
-    if (volumeType.name) {
-      worker.volume = {
-        type: volumeType.name,
-        size: defaultVolumeSize,
-      }
-    }
-    return worker
-  }
-
   return {
     list,
     isInitial,
     cloudProfileList,
-    seedsByCloudProfileRef,
     loadBalancerClassesByCloudProfileRef,
     setCloudProfiles,
     fetchCloudProfiles,
@@ -494,7 +360,6 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     regionsWithSeedByCloudProfileRef,
     regionsWithoutSeedByCloudProfileRef,
     loadBalancerProviderNamesByCloudProfileRefAndRegion,
-    getDefaultNodesCIDR,
     floatingPoolNamesByCloudProfileRefAndRegionAndDomain,
     floatingPoolsByCloudProfileRefAndRegionAndDomain,
     loadBalancerClassNamesByCloudProfileRef,
@@ -511,10 +376,6 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     accessRestrictionsByCloudProfileRefAndRegion,
     accessRestrictionDefinitionsByCloudProfileRefAndRegion,
     accessRestrictionNoItemsTextForCloudProfileRefAndRegion,
-    // Worker Group Management
-    expiringWorkerGroupsForShoot,
-    // Worker Generation
-    generateWorker,
   }
 })
 

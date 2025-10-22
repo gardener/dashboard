@@ -66,6 +66,7 @@ import { useConfigStore } from '@/store/config'
 
 import { useShootItem } from '@/composables/useShootItem'
 import { useCloudProfileForKubeVersions } from '@/composables/useCloudProfile/useCloudProfileForKubeVersions'
+import { useShootMessages } from '@/composables/useShootMessages'
 
 import { isSelfTerminationWarning } from '@/utils'
 
@@ -228,7 +229,11 @@ const machineImageMessages = computed(() => {
     return []
   }
   const imageAutoPatch = get(shootItem.value, ['spec', 'maintenance', 'autoUpdate', 'machineImageVersion'], false)
-  const expiredWorkerGroups = cloudProfileStore.expiringWorkerGroupsForShoot(shootWorkerGroups.value, shootCloudProfileRef.value, imageAutoPatch)
+  const cloudProfile = computed(() => cloudProfileStore.cloudProfileByRef(shootCloudProfileRef.value))
+  const { expiringWorkerGroupsForShoot } = useShootMessages(cloudProfile)
+  const shootWorkerGroupsRef = computed(() => shootWorkerGroups.value)
+  const imageAutoPatchRef = computed(() => imageAutoPatch)
+  const expiredWorkerGroups = expiringWorkerGroupsForShoot(shootWorkerGroupsRef, imageAutoPatchRef).value
   return map(expiredWorkerGroups, workerGroup => {
     const {
       expirationDate,
