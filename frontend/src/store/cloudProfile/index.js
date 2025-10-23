@@ -16,6 +16,7 @@ import {
 import { useApi } from '@/composables/useApi'
 import { useCloudProfileForMachineTypes } from '@/composables/useCloudProfile/useCloudProfileForMachineTypes'
 import { useCloudProfileForMachineImages } from '@/composables/useCloudProfile/useCloudProfileForMachineImages'
+import { useCloudProfileForRegions } from '@/composables/useCloudProfile/useCloudProfileForRegions'
 
 import {
   shortRandomString,
@@ -25,7 +26,6 @@ import {
 import { v4 as uuidv4 } from '@/utils/uuid'
 
 import { useConfigStore } from '../config'
-import { useSeedStore } from '../seed'
 
 import { matchesPropertyOrEmpty } from './helper'
 
@@ -34,10 +34,8 @@ import sortBy from 'lodash/sortBy'
 import uniq from 'lodash/uniq'
 import map from 'lodash/map'
 import get from 'lodash/get'
-import some from 'lodash/some'
 import intersection from 'lodash/intersection'
 import find from 'lodash/find'
-import difference from 'lodash/difference'
 import toPairs from 'lodash/toPairs'
 import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
@@ -48,7 +46,6 @@ import pick from 'lodash/pick'
 
 export const useCloudProfileStore = defineStore('cloudProfile', () => {
   const api = useApi()
-  const seedStore = useSeedStore()
   const configStore = useConfigStore()
 
   const list = ref(null)
@@ -68,19 +65,6 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
 
   function setCloudProfiles (cloudProfiles) {
     list.value = cloudProfiles
-  }
-
-  function isValidRegion (cloudProfile) {
-    const providerType = cloudProfile.spec.type
-    return region => {
-      if (providerType === 'azure') {
-        // Azure regions may not be zoned, need to filter these out for the dashboard
-        return !!zonesByCloudProfileAndRegion({ cloudProfile, region }).length
-      }
-
-      // Filter regions that are not defined in cloud profile
-      return some(cloudProfile.spec.regions, ['name', region])
-    }
   }
 
   const knownProviderTypesList = ref([
@@ -117,47 +101,6 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
       return null
     }
     return find(list.value, ['metadata.name', cloudProfileRef?.name])
-  }
-
-  function zonesByCloudProfileRefAndRegion ({ cloudProfileRef, region }) {
-    const cloudProfile = cloudProfileByRef(cloudProfileRef)
-    return zonesByCloudProfileAndRegion({ cloudProfile, region })
-  }
-
-  function zonesByCloudProfileAndRegion ({ cloudProfile, region }) {
-    if (!cloudProfile) {
-      return []
-    }
-    return map(get(find(cloudProfile.spec.regions, { name: region }), ['zones']), 'name')
-  }
-
-  function regionsWithSeedByCloudProfileRef (cloudProfileRef, project) {
-    const cloudProfile = cloudProfileByRef(cloudProfileRef)
-    return _regionsWithSeedByCloudProfile(cloudProfile, project)
-  }
-
-  function _regionsWithSeedByCloudProfile (cloudProfile, project) {
-    if (!cloudProfile) {
-      return []
-    }
-    const seeds = seedStore.seedsForCloudProfileByProject(cloudProfile, project)
-
-    // need to use get as map does not support array paths
-    const uniqueSeedRegions = uniq(map(seeds, seed => get(seed, ['spec', 'provider', 'region'])))
-    const uniqueSeedRegionsWithZones = filter(uniqueSeedRegions, isValidRegion(cloudProfile))
-    return uniqueSeedRegionsWithZones
-  }
-
-  function regionsWithoutSeedByCloudProfileRef (cloudProfileRef, project) {
-    const cloudProfile = cloudProfileByRef(cloudProfileRef)
-    if (!cloudProfile) {
-      return []
-    }
-    const regionsWithSeed = _regionsWithSeedByCloudProfile(cloudProfile, project)
-    const regionsInCloudProfile = map(cloudProfile.spec.regions, 'name')
-    const regionsInCloudProfileWithZones = filter(regionsInCloudProfile, isValidRegion(cloudProfile))
-    const regionsWithoutSeed = difference(regionsInCloudProfileWithZones, regionsWithSeed)
-    return regionsWithoutSeed
   }
 
   function minimumVolumeSizeByMachineTypeAndVolumeType ({ machineType, volumeType }) {
@@ -221,7 +164,10 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     if (get(cloudProfile, ['spec', 'type']) !== 'metal') {
       return
     }
-    const partitionIDs = zonesByCloudProfileRefAndRegion({ cloudProfileRef, region })
+    const cloudProfileValue = computed(() => cloudProfile)
+    const regionRef = computed(() => region)
+    const { zonesByRegion } = useCloudProfileForRegions(cloudProfileValue)
+    const partitionIDs = zonesByRegion(regionRef).value
     return partitionIDs
   }
 
@@ -232,7 +178,8 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     }
     // Firewall Sizes equals to list of machine types for this cloud provider
     const cloudProfileValue = computed(() => cloudProfile)
-    const { machineTypesByRegionAndArchitecture } = useCloudProfileForMachineTypes(cloudProfileValue, zonesByCloudProfileAndRegion)
+    const { zonesByRegion } = useCloudProfileForRegions(cloudProfileValue)
+    const { machineTypesByRegionAndArchitecture } = useCloudProfileForMachineTypes(cloudProfileValue, zonesByRegion)
     const regionRef = computed(() => region)
     const architectureRef = computed(() => undefined)
     const firewallSizes = machineTypesByRegionAndArchitecture(regionRef, architectureRef).value
@@ -280,7 +227,10 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     if (!region) {
       return items
     }
-    const zones = zonesByCloudProfileRefAndRegion({ cloudProfileRef, region })
+    const cloudProfileValue = computed(() => cloudProfile)
+    const regionRef = computed(() => region)
+    const { zonesByRegion } = useCloudProfileForRegions(cloudProfileValue)
+    const zones = zonesByRegion(regionRef).value
 
     const regionObject = find(cloudProfile.spec.regions, { name: region })
     let regionZones = get(regionObject, ['zones'], [])
@@ -357,8 +307,6 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     cloudProfilesByProviderType,
     sortedProviderTypeList,
     cloudProfileByRef,
-    regionsWithSeedByCloudProfileRef,
-    regionsWithoutSeedByCloudProfileRef,
     loadBalancerProviderNamesByCloudProfileRefAndRegion,
     floatingPoolNamesByCloudProfileRefAndRegionAndDomain,
     floatingPoolsByCloudProfileRefAndRegionAndDomain,
@@ -367,7 +315,6 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     firewallImagesByCloudProfileRef,
     firewallSizesByCloudProfileRefAndRegion,
     firewallNetworksByCloudProfileRefAndPartitionId,
-    zonesByCloudProfileRefAndRegion,
     // Volum Stuff
     volumeTypesByCloudProfileRefAndRegion,
     volumeTypesByCloudProfileRef,

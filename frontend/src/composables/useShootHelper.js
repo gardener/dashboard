@@ -23,6 +23,7 @@ import { useCloudProfileForKubeVersions } from '@/composables/useCloudProfile/us
 import { useCloudProfileForMachineImages } from '@/composables/useCloudProfile/useCloudProfileForMachineImages'
 import { useCloudProfileForMachineTypes } from '@/composables/useCloudProfile/useCloudProfileForMachineTypes'
 import { useCloudProfileForDefaultNodesCIDR } from '@/composables/useCloudProfile/useCloudProfileForDefaultNodesCIDR'
+import { useCloudProfileForRegions } from '@/composables/useCloudProfile/useCloudProfileForRegions'
 
 import { useShootAccessRestrictions } from './useShootAccessRestrictions'
 
@@ -116,9 +117,15 @@ export function createShootHelperComposable (shootItem, options = {}) {
   } = useCloudProfileForMachineImages(cloudProfile)
 
   const {
+    zonesByRegion,
+    regionsWithSeed: regionsWithSeedFn,
+    regionsWithoutSeed: regionsWithoutSeedFn,
+  } = useCloudProfileForRegions(cloudProfile)
+
+  const {
     machineTypes: allMachineTypesFromComposable,
     machineArchitecturesByRegion,
-  } = useCloudProfileForMachineTypes(cloudProfile, cloudProfileStore.zonesByCloudProfileAndRegion)
+  } = useCloudProfileForMachineTypes(cloudProfile, zonesByRegion)
 
   const seed = computed(() => {
     return seedStore.seedByName(seedName.value)
@@ -143,20 +150,11 @@ export function createShootHelperComposable (shootItem, options = {}) {
     })
   })
 
-  const allZones = computed(() => {
-    return cloudProfileStore.zonesByCloudProfileRefAndRegion({
-      cloudProfileRef: cloudProfileRef.value,
-      region: region.value,
-    })
-  })
+  const allZones = zonesByRegion(region)
 
-  const regionsWithSeed = computed(() => {
-    return cloudProfileStore.regionsWithSeedByCloudProfileRef(cloudProfileRef.value, project.value)
-  })
+  const regionsWithSeed = regionsWithSeedFn(project)
 
-  const regionsWithoutSeed = computed(() => {
-    return cloudProfileStore.regionsWithoutSeedByCloudProfileRef(cloudProfileRef.value, project.value)
-  })
+  const regionsWithoutSeed = regionsWithoutSeedFn(project)
 
   const { defaultNodesCIDR } = useCloudProfileForDefaultNodesCIDR(cloudProfile)
 
