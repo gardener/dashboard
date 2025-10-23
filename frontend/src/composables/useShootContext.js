@@ -33,6 +33,7 @@ import { useCloudProfileForKubeVersions } from '@/composables/useCloudProfile/us
 import { useCloudProfileForMachineTypes } from '@/composables/useCloudProfile/useCloudProfileForMachineTypes.js'
 import { useCloudProfileForMachineImages } from '@/composables/useCloudProfile/useCloudProfileForMachineImages.js'
 import { useCloudProfileForRegions } from '@/composables/useCloudProfile/useCloudProfileForRegions.js'
+import { useCloudProfileForMetalConstraints } from '@/composables/useCloudProfile/useCloudProfileForMetalConstraints'
 
 import {
   scheduleEventsFromCrontabBlocks,
@@ -444,13 +445,6 @@ export function createShootContextComposable (options = {}) {
   function resetProviderInfrastructureConfigPartitionID () {
     providerInfrastructureConfigPartitionID.value = head(partitionIDs.value)
   }
-
-  const allFirewallNetworks = computed(() => {
-    return cloudProfileStore.firewallNetworksByCloudProfileRefAndPartitionId({
-      cloudProfileRef: cloudProfileRef.value,
-      partitionID: providerInfrastructureConfigPartitionID.value,
-    })
-  })
 
   const providerInfrastructureConfigProjectID = computed({
     get () {
@@ -951,6 +945,11 @@ export function createShootContextComposable (options = {}) {
   const {
     defaultKubernetesVersion,
   } = useCloudProfileForKubeVersions(cloudProfile)
+
+  const { zonesByRegion } = useCloudProfileForRegions(cloudProfile)
+  const { firewallNetworksByPartitionId } = useCloudProfileForMetalConstraints(cloudProfile, zonesByRegion)
+
+  const allFirewallNetworks = firewallNetworksByPartitionId(computed(() => providerInfrastructureConfigPartitionID.value))
 
   /* watches */
   watch(isFailureToleranceTypeZoneSupported, value => {

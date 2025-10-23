@@ -246,10 +246,8 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import {
-  mapState,
-  mapActions,
-} from 'pinia'
+import { mapState } from 'pinia'
+import { computed } from 'vue'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useAuthzStore } from '@/store/authz'
@@ -269,6 +267,7 @@ import GCredentialDetailsItemContent from '@/components/Credentials/GCredentialD
 import { useShootResources } from '@/composables/useShootResources'
 import { useShootItem } from '@/composables/useShootItem'
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
+import { useCloudProfileForOpenStackConstraints } from '@/composables/useCloudProfile/useCloudProfileForOpenStackConstraints'
 
 import {
   wildcardObjectsFromStrings,
@@ -294,6 +293,8 @@ export default {
     GCredentialDetailsItemContent,
   },
   setup () {
+    const cloudProfileStore = useCloudProfileStore()
+
     const {
       shootItem,
       shootName,
@@ -323,6 +324,12 @@ export default {
       isSharedBinding,
     } = useCloudProviderBinding(shootCloudProviderBinding)
 
+    const cloudProfile = computed(() => cloudProfileStore.cloudProfileByRef(shootCloudProfileRef.value))
+    const { floatingPoolsByRegionAndDomain } = useCloudProfileForOpenStackConstraints(cloudProfile)
+
+    const secretDomain = computed(() => get(shootCloudProviderBinding.value, ['data', 'domainName']))
+    const availableFloatingPools = floatingPoolsByRegionAndDomain(shootRegion, secretDomain)
+
     return {
       shootItem,
       shootName,
@@ -346,6 +353,7 @@ export default {
       getResourceRefName,
       credential,
       isSharedBinding,
+      availableFloatingPools,
     }
   },
   computed: {
@@ -372,11 +380,7 @@ export default {
         return shootLBClasses
       }
 
-      const availableFloatingPools = this.floatingPoolsByCloudProfileRefAndRegionAndDomain({
-        cloudProfileRef: this.shootCloudProfileRef,
-        region: this.shootRegion,
-      })
-      const floatingPoolWildCardObjects = wildcardObjectsFromStrings(map(availableFloatingPools, 'name'))
+      const floatingPoolWildCardObjects = wildcardObjectsFromStrings(map(this.availableFloatingPools, 'name'))
 
       const shootFloatingPoolName = get(this.shootItem, ['spec', 'provider', 'infrastructureConfig', 'floatingPoolName'])
       const floatingPoolWildcardName = bestMatchForString(floatingPoolWildCardObjects, shootFloatingPoolName)
@@ -385,7 +389,7 @@ export default {
         return
       }
 
-      const shootFloatingPool = find(availableFloatingPools, ['name', floatingPoolWildcardName.originalValue])
+      const shootFloatingPool = find(this.availableFloatingPools, ['name', floatingPoolWildcardName.originalValue])
       return get(shootFloatingPool, ['loadBalancerClasses'])
     },
     defaultLoadbalancerClass () {
@@ -409,11 +413,6 @@ export default {
       }
       return 'generated'
     },
-  },
-  methods: {
-    ...mapActions(useCloudProfileStore, [
-      'floatingPoolsByCloudProfileRefAndRegionAndDomain',
-    ]),
   },
 }
 </script>
