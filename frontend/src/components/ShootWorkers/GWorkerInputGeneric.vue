@@ -170,6 +170,7 @@ import GContainerRuntime from '@/components/ShootWorkers/GContainerRuntime'
 import { useShootContext } from '@/composables/useShootContext'
 import { useCloudProfileForMachineImages } from '@/composables/useCloudProfile/useCloudProfileForMachineImages'
 import { useCloudProfileForMachineTypes } from '@/composables/useCloudProfile/useCloudProfileForMachineTypes'
+import { useCloudProfileForRegions } from '@/composables/useCloudProfile/useCloudProfileForRegions'
 
 import {
   withFieldName,
@@ -229,11 +230,12 @@ export default {
       machineArchitectures,
       volumeTypes,
       providerWorkers,
-      cloudProfileStore,
     } = useShootContext()
 
     const { machineImages, defaultMachineImageForMachineType } = useCloudProfileForMachineImages(cloudProfile)
-    const { machineTypesByRegionAndArchitecture } = useCloudProfileForMachineTypes(cloudProfile, cloudProfileStore.zonesByCloudProfileAndRegion)
+    const cloudProfileValue = computed(() => cloudProfile.value)
+    const { zonesByRegion } = useCloudProfileForRegions(cloudProfileValue)
+    const { machineTypesByRegionAndArchitecture } = useCloudProfileForMachineTypes(cloudProfile, zonesByRegion)
 
     return {
       v$: useVuelidate(),

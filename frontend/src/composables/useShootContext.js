@@ -32,6 +32,7 @@ import { useShootAccessRestrictions } from '@/composables/useShootAccessRestrict
 import { useCloudProfileForKubeVersions } from '@/composables/useCloudProfile/useCloudProfileForKubeVersions.js'
 import { useCloudProfileForMachineTypes } from '@/composables/useCloudProfile/useCloudProfileForMachineTypes.js'
 import { useCloudProfileForMachineImages } from '@/composables/useCloudProfile/useCloudProfileForMachineImages.js'
+import { useCloudProfileForRegions } from '@/composables/useCloudProfile/useCloudProfileForRegions.js'
 
 import {
   scheduleEventsFromCrontabBlocks,
@@ -1116,7 +1117,8 @@ function generateWorker (availableZones, cloudProfileRef, region, kubernetesVers
   // Get cloud profile and setup composables
   const cloudProfile = cloudProfileStore.cloudProfileByRef(cloudProfileRef)
   const cloudProfileValue = computed(() => cloudProfile)
-  const { machineArchitecturesByRegion, machineTypesByRegionAndArchitecture } = useCloudProfileForMachineTypes(cloudProfileValue, cloudProfileStore.zonesByCloudProfileAndRegion)
+  const { zonesByRegion } = useCloudProfileForRegions(cloudProfileValue)
+  const { machineArchitecturesByRegion, machineTypesByRegionAndArchitecture } = useCloudProfileForMachineTypes(cloudProfileValue, zonesByRegion)
   const { defaultMachineImageForMachineType } = useCloudProfileForMachineImages(cloudProfileValue)
 
   // Get machine architecture and types

@@ -48,7 +48,6 @@ describe('composables', () => {
     credentialStore._setCredentials(global.fixtures.credentials)
     const cloudProfileStore = useCloudProfileStore()
     cloudProfileStore.setCloudProfiles(cloneDeep(global.fixtures.cloudprofiles))
-    cloudProfileStore.zonesByCloudProfileAndRegion = vi.fn().mockReturnValue(['a', 'b', 'c'])
     const gardenerExtensionStore = useGardenerExtensionStore()
     gardenerExtensionStore.list = global.fixtures.gardenerExtensions
     const composable = createShootContextComposable({
