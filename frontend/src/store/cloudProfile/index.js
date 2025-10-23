@@ -27,8 +27,6 @@ import { v4 as uuidv4 } from '@/utils/uuid'
 
 import { useConfigStore } from '../config'
 
-import { matchesPropertyOrEmpty } from './helper'
-
 import filter from 'lodash/filter'
 import sortBy from 'lodash/sortBy'
 import uniq from 'lodash/uniq'
@@ -36,7 +34,6 @@ import map from 'lodash/map'
 import get from 'lodash/get'
 import intersection from 'lodash/intersection'
 import find from 'lodash/find'
-import toPairs from 'lodash/toPairs'
 import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
 import template from 'lodash/template'
@@ -113,94 +110,6 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     }
 
     return '0Gi'
-  }
-
-  function floatingPoolsByCloudProfileRefAndRegionAndDomain ({ cloudProfileRef, region, secretDomain }) {
-    const cloudProfile = cloudProfileByRef(cloudProfileRef)
-    const floatingPools = get(cloudProfile, ['spec', 'providerConfig', 'constraints', 'floatingPools'])
-    let availableFloatingPools = filter(floatingPools, matchesPropertyOrEmpty('region', region))
-    availableFloatingPools = filter(availableFloatingPools, matchesPropertyOrEmpty('domain', secretDomain))
-
-    const hasRegionSpecificFloatingPool = find(availableFloatingPools, fp => !!fp.region && !fp.nonConstraining)
-    if (hasRegionSpecificFloatingPool) {
-      availableFloatingPools = filter(availableFloatingPools, { region })
-    }
-    const hasDomainSpecificFloatingPool = find(availableFloatingPools, fp => !!fp.domain && !fp.nonConstraining)
-    if (hasDomainSpecificFloatingPool) {
-      availableFloatingPools = filter(availableFloatingPools, { domain: secretDomain })
-    }
-
-    return availableFloatingPools
-  }
-
-  function floatingPoolNamesByCloudProfileRefAndRegionAndDomain ({ cloudProfileRef, region, secretDomain }) {
-    return uniq(map(floatingPoolsByCloudProfileRefAndRegionAndDomain({ cloudProfileRef, region, secretDomain }), 'name'))
-  }
-
-  function loadBalancerProviderNamesByCloudProfileRefAndRegion ({ cloudProfileRef, region }) {
-    const cloudProfile = cloudProfileByRef(cloudProfileRef)
-    const loadBalancerProviders = get(cloudProfile, ['spec', 'providerConfig', 'constraints', 'loadBalancerProviders'])
-    let availableLoadBalancerProviders = filter(loadBalancerProviders, matchesPropertyOrEmpty('region', region))
-    const hasRegionSpecificLoadBalancerProvider = find(availableLoadBalancerProviders, lb => !!lb.region)
-    if (hasRegionSpecificLoadBalancerProvider) {
-      availableLoadBalancerProviders = filter(availableLoadBalancerProviders, { region })
-    }
-    return uniq(map(availableLoadBalancerProviders, 'name'))
-  }
-
-  function loadBalancerClassNamesByCloudProfileRef (cloudProfileRef) {
-    const loadBalancerClasses = loadBalancerClassesByCloudProfileRef(cloudProfileRef)
-    return uniq(map(loadBalancerClasses, 'name'))
-  }
-
-  function loadBalancerClassesByCloudProfileRef (cloudProfileRef) {
-    const cloudProfile = cloudProfileByRef(cloudProfileRef)
-    return get(cloudProfile, ['spec', 'providerConfig', 'constraints', 'loadBalancerConfig', 'classes'])
-  }
-
-  function partitionIDsByCloudProfileRefAndRegion ({ cloudProfileRef, region }) {
-    // Partion IDs equal zones for metal infrastructure
-    const cloudProfile = cloudProfileByRef(cloudProfileRef)
-    if (get(cloudProfile, ['spec', 'type']) !== 'metal') {
-      return
-    }
-    const cloudProfileValue = computed(() => cloudProfile)
-    const regionRef = computed(() => region)
-    const { zonesByRegion } = useCloudProfileForRegions(cloudProfileValue)
-    const partitionIDs = zonesByRegion(regionRef).value
-    return partitionIDs
-  }
-
-  function firewallSizesByCloudProfileRefAndRegion ({ cloudProfileRef, region }) {
-    const cloudProfile = cloudProfileByRef(cloudProfileRef)
-    if (get(cloudProfile, ['spec', 'type']) !== 'metal') {
-      return
-    }
-    // Firewall Sizes equals to list of machine types for this cloud provider
-    const cloudProfileValue = computed(() => cloudProfile)
-    const { zonesByRegion } = useCloudProfileForRegions(cloudProfileValue)
-    const { machineTypesByRegionAndArchitecture } = useCloudProfileForMachineTypes(cloudProfileValue, zonesByRegion)
-    const regionRef = computed(() => region)
-    const architectureRef = computed(() => undefined)
-    const firewallSizes = machineTypesByRegionAndArchitecture(regionRef, architectureRef).value
-    return firewallSizes
-  }
-
-  function firewallImagesByCloudProfileRef (cloudProfileRef) {
-    const cloudProfile = cloudProfileByRef(cloudProfileRef)
-    return get(cloudProfile, ['spec', 'providerConfig', 'firewallImages'])
-  }
-
-  function firewallNetworksByCloudProfileRefAndPartitionId ({ cloudProfileRef, partitionID }) {
-    const cloudProfile = cloudProfileByRef(cloudProfileRef)
-    const networks = get(cloudProfile, ['spec', 'providerConfig', 'firewallNetworks', partitionID])
-    return map(toPairs(networks), ([key, value]) => {
-      return {
-        key,
-        value,
-        text: `${key} [${value}]`,
-      }
-    })
   }
 
   function machineTypesOrVolumeTypesByCloudProfileRefAndRegion ({ type, cloudProfileRef, region }) {
@@ -301,20 +210,11 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     list,
     isInitial,
     cloudProfileList,
-    loadBalancerClassesByCloudProfileRef,
     setCloudProfiles,
     fetchCloudProfiles,
     cloudProfilesByProviderType,
     sortedProviderTypeList,
     cloudProfileByRef,
-    loadBalancerProviderNamesByCloudProfileRefAndRegion,
-    floatingPoolNamesByCloudProfileRefAndRegionAndDomain,
-    floatingPoolsByCloudProfileRefAndRegionAndDomain,
-    loadBalancerClassNamesByCloudProfileRef,
-    partitionIDsByCloudProfileRefAndRegion,
-    firewallImagesByCloudProfileRef,
-    firewallSizesByCloudProfileRefAndRegion,
-    firewallNetworksByCloudProfileRefAndPartitionId,
     // Volum Stuff
     volumeTypesByCloudProfileRefAndRegion,
     volumeTypesByCloudProfileRef,

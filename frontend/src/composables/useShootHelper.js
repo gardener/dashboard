@@ -24,6 +24,8 @@ import { useCloudProfileForMachineImages } from '@/composables/useCloudProfile/u
 import { useCloudProfileForMachineTypes } from '@/composables/useCloudProfile/useCloudProfileForMachineTypes'
 import { useCloudProfileForDefaultNodesCIDR } from '@/composables/useCloudProfile/useCloudProfileForDefaultNodesCIDR'
 import { useCloudProfileForRegions } from '@/composables/useCloudProfile/useCloudProfileForRegions'
+import { useCloudProfileForOpenStackConstraints } from '@/composables/useCloudProfile/useCloudProfileForOpenStackConstraints'
+import { useCloudProfileForMetalConstraints } from '@/composables/useCloudProfile/useCloudProfileForMetalConstraints'
 
 import { useShootAccessRestrictions } from './useShootAccessRestrictions'
 
@@ -127,6 +129,18 @@ export function createShootHelperComposable (shootItem, options = {}) {
     machineArchitecturesByRegion,
   } = useCloudProfileForMachineTypes(cloudProfile, zonesByRegion)
 
+  const {
+    floatingPoolNamesByRegionAndDomain,
+    loadBalancerProviderNamesByRegion,
+    loadBalancerClassNames,
+  } = useCloudProfileForOpenStackConstraints(cloudProfile)
+
+  const {
+    partitionIDsByRegion,
+    firewallImages: firewallImagesFromComposable,
+    firewallSizesByRegion,
+  } = useCloudProfileForMetalConstraints(cloudProfile, zonesByRegion)
+
   const seed = computed(() => {
     return seedStore.seedByName(seedName.value)
   })
@@ -162,10 +176,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
 
   const kubernetesVersionIsNotLatestPatch = useKubernetesVersionIsNotLatestPatch(kubernetesVersion).value
 
-  const {
-    selfTerminationDays,
-    openStackDomainName,
-  } = useCloudProviderBinding(infrastructureBinding)
+  const { selfTerminationDays } = useCloudProviderBinding(infrastructureBinding)
 
   const allPurposes = computed(() => {
     if (some(addons.value, 'enabled')) {
@@ -176,43 +187,22 @@ export function createShootHelperComposable (shootItem, options = {}) {
       : ['evaluation', 'development', 'testing', 'production']
   })
 
-  const allLoadBalancerProviderNames = computed(() => {
-    return cloudProfileStore.loadBalancerProviderNamesByCloudProfileRefAndRegion({
-      cloudProfileRef: cloudProfileRef.value,
-      region: region.value,
-    })
-  })
+  const secretDomain = computed(() => get(infrastructureBinding.value, ['data', 'domainName']))
 
-  const allLoadBalancerClassNames = computed(() => {
-    return cloudProfileStore.loadBalancerClassNamesByCloudProfileRef(cloudProfileRef.value)
-  })
+  const allLoadBalancerProviderNames = loadBalancerProviderNamesByRegion(region)
 
-  const partitionIDs = computed(() => {
-    return cloudProfileStore.partitionIDsByCloudProfileRefAndRegion({
-      cloudProfileRef: cloudProfileRef.value,
-      region: region.value,
-    })
-  })
+  const allLoadBalancerClassNames = loadBalancerClassNames
 
-  const firewallImages = computed(() => {
-    return cloudProfileStore.firewallImagesByCloudProfileRef(cloudProfileRef.value)
-  })
+  const partitionIDs = partitionIDsByRegion(region)
+
+  const firewallImages = firewallImagesFromComposable
 
   const firewallSizes = computed(() => {
-    const firewallSizes = cloudProfileStore.firewallSizesByCloudProfileRefAndRegion({
-      cloudProfileRef: cloudProfileRef.value,
-      region: region.value,
-    })
-    return map(firewallSizes, 'name')
+    const sizes = firewallSizesByRegion(region).value
+    return map(sizes, 'name')
   })
 
-  const allFloatingPoolNames = computed(() => {
-    return cloudProfileStore.floatingPoolNamesByCloudProfileRefAndRegionAndDomain({
-      cloudProfileRef: cloudProfileRef.value,
-      region: region.value,
-      secretDomain: openStackDomainName.value,
-    })
-  })
+  const allFloatingPoolNames = floatingPoolNamesByRegionAndDomain(region, secretDomain)
 
   const allMachineTypes = allMachineTypesFromComposable
 
