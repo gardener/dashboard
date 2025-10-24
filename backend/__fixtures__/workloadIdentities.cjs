@@ -29,6 +29,17 @@ const workloadIdentitiesList = [
       },
     },
   }),
+  getWorkloadIdentity({
+    metadata: {
+      namespace: 'garden-foo',
+      name: 'dns-wlid',
+    },
+    spec: {
+      targetSystem: {
+        type: 'infra-1',
+      },
+    },
+  }),
 ]
 
 const matchOptions = { decode: decodeURIComponent }

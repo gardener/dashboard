@@ -71,8 +71,12 @@ export function updateCloudProviderCredential (params) {
   return invokeCloudProviderCredentialMethod('patch', params)
 }
 
-export function deleteCloudProviderCredential (params) {
-  return invokeCloudProviderCredentialMethod('remove', params)
+export function deleteDnsProviderCredential (params) {
+  return invokeCloudProviderCredentialMethod('remove-dns', params)
+}
+
+export function deleteInfraProviderCredential (params) {
+  return invokeCloudProviderCredentialMethod('remove-infra', params)
 }
 
 /* Tickets */
@@ -403,7 +407,8 @@ export default {
   createDnsProviderCredential,
   createInfraProviderCredential,
   updateCloudProviderCredential,
-  deleteCloudProviderCredential,
+  deleteDnsProviderCredential,
+  deleteInfraProviderCredential,
   getIssues,
   getIssuesAndComments,
   getShoots,

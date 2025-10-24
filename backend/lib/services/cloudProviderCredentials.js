@@ -80,13 +80,16 @@ export async function createInfra ({ user, params }) {
   const kind = binding.kind
 
   let secretRefNamespace
-  if (kind === 'CredentialsBinding') {
-    secretRefNamespace = binding.credentialsRef.namespace
-  } else if (kind === 'SecretBinding') {
-    throw createError(422, 'Creating SecretBindings is no longer supported')
-  } else {
-    throw createError(422, 'Unknown binding')
+  switch (kind) {
+    case 'CredentialsBinding':
+      secretRefNamespace = binding.credentialsRef.namespace
+      break
+    case 'SecretBinding':
+      throw createError(422, 'Creating SecretBindings is no longer supported')
+    default:
+      throw createError(422, 'Unknown binding')
   }
+
   if (bindingNamespace !== secretRefNamespace ||
     secretRefNamespace !== secretNamespace) {
     throw createError(422, 'Create allowed if secret and credentialsbinding are in the same namespace')
@@ -129,60 +132,83 @@ export async function patch ({ user, params }) {
   }
 }
 
-export async function remove ({ user, params }) {
+export async function removeDns ({ user, params }) {
   const client = user.client
-  const { bindingKind, bindingNamespace, bindingName, credentialKind, credentialNamespace, credentialName } = params
+  const { credentialKind, credentialNamespace, credentialName } = params
 
-  // Direct credential deletion (DNS credentials without bindings)
-  if (credentialKind) {
-    if (!credentialNamespace || !credentialName) {
-      throw createError(422, 'credentialNamespace and credentialName are required')
-    }
-    try {
-      if (credentialKind === 'Secret') {
-        await client.core.secrets.delete(credentialNamespace, credentialName)
-      } else if (credentialKind === 'WorkloadIdentity') {
-        await client['security.gardener.cloud'].workloadidentities.delete(credentialNamespace, credentialName)
-      } else {
-        throw createError(422, `Unknown credentialKind ${credentialKind}`)
-      }
-    } catch (err) {
-      if (!isHttpError(err, 404)) {
-        throw err
-      }
-    }
-    return
+  if (!credentialNamespace || !credentialName) {
+    throw createError(422, 'credentialNamespace and credentialName are required')
   }
-
-  // Deletion via binding
-  let binding, secretRefNamespace, secretRefName
-  if (bindingKind === 'SecretBinding') {
-    binding = await client['core.gardener.cloud'].secretbindings.get(bindingNamespace, bindingName)
-    secretRefNamespace = binding.secretRef.namespace
-    secretRefName = binding.secretRef.name
-  } else if (bindingKind === 'CredentialsBinding') {
-    binding = await client['security.gardener.cloud'].credentialsbindings.get(bindingNamespace, bindingName)
-    secretRefNamespace = binding.credentialsRef.namespace
-    secretRefName = binding.credentialsRef.name
-  } else {
-    throw createError(422, `Unknown binding ${bindingKind}`)
-  }
-  if (bindingNamespace !== secretRefNamespace) {
-    throw createError(422, `Delete allowed only if Secret and ${bindingKind} are in the same namespace`)
-  }
-
   try {
-    await client.core.secrets.delete(bindingNamespace, secretRefName)
+    switch (credentialKind) {
+      case 'Secret':
+        await client.core.secrets.delete(credentialNamespace, credentialName)
+        break
+      case 'WorkloadIdentity':
+        await client['security.gardener.cloud'].workloadidentities.delete(credentialNamespace, credentialName)
+        break
+      default:
+        throw createError(422, `Unknown credentialKind ${credentialKind}`)
+    }
   } catch (err) {
     if (!isHttpError(err, 404)) {
       throw err
     }
   }
-  if (bindingKind === 'SecretBinding') {
-    await client['core.gardener.cloud'].secretbindings.delete(bindingNamespace, bindingName)
+}
+
+export async function removeInfra ({ user, params }) {
+  const client = user.client
+  const { bindingKind, bindingNamespace, bindingName } = params
+
+  let binding, credentialRefNamespace, credentialRefName, credentialKind
+  switch (bindingKind) {
+    case 'SecretBinding':
+      binding = await client['core.gardener.cloud'].secretbindings.get(bindingNamespace, bindingName)
+      credentialRefNamespace = binding.secretRef.namespace
+      credentialRefName = binding.secretRef.name
+      credentialKind = 'Secret'
+      break
+    case 'CredentialsBinding':
+      binding = await client['security.gardener.cloud'].credentialsbindings.get(bindingNamespace, bindingName)
+      credentialRefNamespace = binding.credentialsRef.namespace
+      credentialRefName = binding.credentialsRef.name
+      credentialKind = binding.credentialsRef.kind
+      break
+    default:
+      throw createError(422, `Unknown binding ${bindingKind}`)
   }
-  if (bindingKind === 'CredentialsBinding') {
-    await client['security.gardener.cloud'].credentialsbindings.delete(bindingNamespace, bindingName)
+
+  if (bindingNamespace !== credentialRefNamespace) {
+    throw createError(422, `Delete allowed only if Secret and ${bindingKind} are in the same namespace`)
+  }
+
+  try {
+    switch (credentialKind) {
+      case 'Secret':
+        await client.core.secrets.delete(credentialRefNamespace, credentialRefName)
+        break
+      case 'WorkloadIdentity':
+        await client['security.gardener.cloud'].workloadidentities.delete(credentialRefNamespace, credentialRefName)
+        break
+      default:
+        throw createError(422, `Unknown credentialKind ${credentialKind}`)
+    }
+  } catch (err) {
+    if (!isHttpError(err, 404)) {
+      throw err
+    }
+  }
+
+  switch (bindingKind) {
+    case 'SecretBinding':
+      binding = await client['core.gardener.cloud'].secretbindings.delete(bindingNamespace, bindingName)
+      break
+    case 'CredentialsBinding':
+      binding = await client['security.gardener.cloud'].credentialsbindings.delete(bindingNamespace, bindingName)
+      break
+    default:
+      throw createError(422, `Unknown binding ${bindingKind}`)
   }
 }
 

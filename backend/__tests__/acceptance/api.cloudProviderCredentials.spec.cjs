@@ -250,7 +250,7 @@ describe('api', function () {
       const res = await agent
         .post('/api/cloudprovidercredentials')
         .set('cookie', await user.cookie)
-        .send({ method: 'remove', params })
+        .send({ method: 'remove-infra', params })
         .expect(200)
 
       expect(mockRequest).toHaveBeenCalledTimes(3)
@@ -259,7 +259,7 @@ describe('api', function () {
       expect(res.body).toMatchSnapshot()
     })
 
-    it('should delete an own cloudProvider credential (credentialsbinding)', async function () {
+    it('should delete an own cloudProvider credential (secret / credentialsbinding)', async function () {
       const params = {
         bindingKind: 'CredentialsBinding',
         bindingNamespace: 'garden-foo',
@@ -272,7 +272,29 @@ describe('api', function () {
       const res = await agent
         .post('/api/cloudprovidercredentials')
         .set('cookie', await user.cookie)
-        .send({ method: 'remove', params })
+        .send({ method: 'remove-infra', params })
+        .expect(200)
+
+      expect(mockRequest).toHaveBeenCalledTimes(3)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should delete an own cloudProvider credential (workloadidentity / credentialsbinding)', async function () {
+      const params = {
+        bindingKind: 'CredentialsBinding',
+        bindingNamespace: 'garden-foo',
+        bindingName: 'foo-wlid1',
+      }
+      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.workloadidentities.mocks.delete())
+      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.delete())
+
+      const res = await agent
+        .post('/api/cloudprovidercredentials')
+        .set('cookie', await user.cookie)
+        .send({ method: 'remove-infra', params })
         .expect(200)
 
       expect(mockRequest).toHaveBeenCalledTimes(3)
@@ -292,7 +314,7 @@ describe('api', function () {
       const res = await agent
         .post('/api/cloudprovidercredentials')
         .set('cookie', await user.cookie)
-        .send({ method: 'remove', params })
+        .send({ method: 'remove-dns', params })
         .expect(200)
 
       expect(mockRequest).toHaveBeenCalledTimes(1)
@@ -301,18 +323,18 @@ describe('api', function () {
       expect(res.body).toMatchSnapshot()
     })
 
-    it('should delete a cloudProvider credential (workloadidentity / no binding)', async function () {
+    it('should delete a cloudProvider DNS credential (workloadidentity / no binding)', async function () {
       const params = {
         credentialKind: 'WorkloadIdentity',
         credentialNamespace: namespace,
-        credentialName: 'wl-foo-infra1',
+        credentialName: 'dns-wlid',
       }
       mockRequest.mockImplementationOnce(fixtures.workloadidentities.mocks.delete())
 
       const res = await agent
         .post('/api/cloudprovidercredentials')
         .set('cookie', await user.cookie)
-        .send({ method: 'remove', params })
+        .send({ method: 'remove-dns', params })
         .expect(200)
 
       expect(mockRequest).toHaveBeenCalledTimes(1)

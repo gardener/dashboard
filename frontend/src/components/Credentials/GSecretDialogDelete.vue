@@ -149,21 +149,24 @@ export default {
     },
   },
   methods: {
-    ...mapActions(useCredentialStore, ['deleteCredential']),
+    ...mapActions(useCredentialStore, [
+      'deleteDnsCredential',
+      'deleteInfraCredential',
+    ]),
     hide () {
       this.visible = false
     },
     async onDeleteSecret () {
       try {
         if (this.credential) {
-          await this.deleteCredential({
+          await this.deleteDnsCredential({
             credentialKind: this.resourceKind,
             credentialNamespace: this.resourceNamespace,
             credentialName: this.resourceName,
           })
         }
         if (this.binding) {
-          await this.deleteCredential({
+          await this.deleteInfraCredential({
             bindingKind: this.resourceKind,
             bindingNamespace: this.resourceNamespace,
             bindingName: this.resourceName,
