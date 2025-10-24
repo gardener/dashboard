@@ -144,7 +144,7 @@ describe('api', function () {
       const res = await agent
         .post('/api/cloudprovidercredentials')
         .set('cookie', await user.cookie)
-        .send({ method: 'create', params })
+        .send({ method: 'create-infra', params })
         .expect('content-type', /json/)
         .expect(200)
 
@@ -182,7 +182,7 @@ describe('api', function () {
       const res = await agent
         .post('/api/cloudprovidercredentials')
         .set('cookie', await user.cookie)
-        .send({ method: 'create', params })
+        .send({ method: 'create-dns', params })
         .expect('content-type', /json/)
         .expect(200)
 

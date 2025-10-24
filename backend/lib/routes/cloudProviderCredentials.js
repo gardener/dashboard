@@ -29,8 +29,11 @@ router.route('/')
         case 'list':
           credentialOperation = cloudProviderCredentials.list
           break
-        case 'create':
-          credentialOperation = cloudProviderCredentials.create
+        case 'create-dns':
+          credentialOperation = cloudProviderCredentials.createDns
+          break
+        case 'create-infra':
+          credentialOperation = cloudProviderCredentials.createInfra
           break
         case 'patch':
           credentialOperation = cloudProviderCredentials.patch

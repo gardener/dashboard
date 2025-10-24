@@ -377,7 +377,8 @@ export default {
   },
   methods: {
     ...mapActions(useCredentialStore, [
-      'createCredential',
+      'createDnsCredential',
+      'createInfraCredential',
       'updateCredential',
     ]),
     hide () {
@@ -417,8 +418,8 @@ export default {
     save () {
       if (this.isCreateMode) {
         return this.isDnsProvider
-          ? this.createCredential({ secret: this.secretManifest })
-          : this.createCredential({ secret: this.secretManifest, binding: this.bindingManifest })
+          ? this.createDnsCredential({ secret: this.secretManifest })
+          : this.createInfraCredential({ secret: this.secretManifest, binding: this.bindingManifest })
       } else {
         return this.isDnsProvider
           ? this.updateCredential({ secret: this.secretManifest })

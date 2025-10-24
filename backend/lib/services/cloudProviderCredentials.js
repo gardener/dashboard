@@ -54,7 +54,19 @@ export async function list ({ user, params }) {
   }
 }
 
-export async function create ({ user, params }) {
+export async function createDns ({ user, params }) {
+  const client = user.client
+  let { secret } = params
+  const secretNamespace = secret.metadata.namespace
+
+  secret = await client.core.secrets.create(secretNamespace, secret)
+
+  return {
+    secret,
+  }
+}
+
+export async function createInfra ({ user, params }) {
   const client = user.client
   let { secret, binding } = params
   const secretNamespace = secret.metadata.namespace
@@ -91,12 +103,9 @@ export async function create ({ user, params }) {
     throw err
   }
 
-  const quotas = resolveQuotas(binding)
-
   return {
     binding,
     secret,
-    quotas,
   }
 }
 

@@ -3,7 +3,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
-
 import { useAppStore } from '@/store/app'
 
 import { fetchWrapper } from './fetch'
@@ -60,8 +59,12 @@ export function getCloudProviderCredentials (namespace) {
   return invokeCloudProviderCredentialMethod('list', { namespace })
 }
 
-export function createCloudProviderCredential (params) {
-  return invokeCloudProviderCredentialMethod('create', params)
+export function createDnsProviderCredential (params) {
+  return invokeCloudProviderCredentialMethod('create-dns', params)
+}
+
+export function createInfraProviderCredential (params) {
+  return invokeCloudProviderCredentialMethod('create-infra', params)
 }
 
 export function updateCloudProviderCredential (params) {
@@ -397,7 +400,8 @@ export function getResourceQuotas ({ namespace }) {
 export default {
   getConfiguration,
   getCloudProviderCredentials,
-  createCloudProviderCredential,
+  createDnsProviderCredential,
+  createInfraProviderCredential,
   updateCloudProviderCredential,
   deleteCloudProviderCredential,
   getIssues,

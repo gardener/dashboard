@@ -107,8 +107,15 @@ export const useCredentialStore = defineStore('credential', () => {
     return Object.values(state.quotas)
   })
 
-  async function createCredential (params) {
-    const { data: { binding, secret } } = await api.createCloudProviderCredential({ binding: params.binding, secret: params.secret })
+  async function createDnsCredential (params) {
+    const { data: { secret } } = await api.createDnsProviderCredential({ secret: params.secret })
+    _updateCloudProviderCredential({ secret })
+    const name = secret.metadata.name
+    appStore.setSuccess(`DNS Provider credential ${name} created`)
+  }
+
+  async function createInfraCredential (params) {
+    const { data: { binding, secret } } = await api.createInfraProviderCredential({ binding: params.binding, secret: params.secret })
     _updateCloudProviderCredential({ binding, secret })
     const name = binding?.metadata?.name || secret.metadata.name
     appStore.setSuccess(`Cloud Provider credential ${name} created`)
@@ -194,7 +201,8 @@ export const useCredentialStore = defineStore('credential', () => {
     fetchCredentials,
     _setCredentials,
     updateCredential,
-    createCredential,
+    createDnsCredential,
+    createInfraCredential,
     deleteCredential,
     infrastructureBindingList,
     dnsCredentialList,
