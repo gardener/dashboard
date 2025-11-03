@@ -14,18 +14,7 @@ import {
 } from 'vue'
 
 import { useApi } from '@/composables/useApi'
-import { useCloudProfileForMachineTypes } from '@/composables/useCloudProfile/useCloudProfileForMachineTypes'
-import { useCloudProfileForMachineImages } from '@/composables/useCloudProfile/useCloudProfileForMachineImages'
 import { useCloudProfileForRegions } from '@/composables/useCloudProfile/useCloudProfileForRegions'
-
-import {
-  shortRandomString,
-  convertToGi,
-  defaultCriNameByKubernetesVersion,
-} from '@/utils'
-import { v4 as uuidv4 } from '@/utils/uuid'
-
-import { useConfigStore } from '../config'
 
 import filter from 'lodash/filter'
 import sortBy from 'lodash/sortBy'
@@ -35,15 +24,9 @@ import get from 'lodash/get'
 import intersection from 'lodash/intersection'
 import find from 'lodash/find'
 import includes from 'lodash/includes'
-import isEmpty from 'lodash/isEmpty'
-import template from 'lodash/template'
-import head from 'lodash/head'
-import sample from 'lodash/sample'
-import pick from 'lodash/pick'
 
 export const useCloudProfileStore = defineStore('cloudProfile', () => {
   const api = useApi()
-  const configStore = useConfigStore()
 
   const list = ref(null)
 
@@ -118,10 +101,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
         if (item.usable === false) {
           return false
         }
-        if (includes(unavailableItems, item.name)) {
-          return false
-        }
-        return true
+        return !includes(unavailableItems, item.name)
       }
     }
 
@@ -164,48 +144,6 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return volumeTypesByCloudProfileRefAndRegion({ cloudProfileRef, region: undefined })
   }
 
-  function accessRestrictionNoItemsTextForCloudProfileRefAndRegion ({ cloudProfileRef, region }) {
-    const defaultNoItemsText = 'No access restriction options available for region ${region}' // eslint-disable-line no-template-curly-in-string
-    const noItemsText = get(configStore, ['accessRestriction', 'noItemsText'], defaultNoItemsText)
-
-    return template(noItemsText)({
-      region,
-      cloudProfileName: cloudProfileRef?.name,
-      cloudProfileKind: cloudProfileRef?.kind,
-      cloudProfile: cloudProfileRef?.name, // deprecated
-    })
-  }
-
-  function accessRestrictionDefinitionsByCloudProfileRefAndRegion ({ cloudProfileRef, region }) {
-    if (!cloudProfileRef || !region) {
-      return []
-    }
-
-    const allowedAccessRestrictions = accessRestrictionsByCloudProfileRefAndRegion({ cloudProfileRef, region })
-    if (isEmpty(allowedAccessRestrictions)) {
-      return []
-    }
-
-    const allowedAccessRestrictionNames = allowedAccessRestrictions.map(ar => ar.name)
-
-    const items = get(configStore, ['accessRestriction', 'items'])
-    return filter(items, ({ key }) => {
-      return key && allowedAccessRestrictionNames.includes(key)
-    })
-  }
-
-  function accessRestrictionsByCloudProfileRefAndRegion ({ cloudProfileRef, region }) {
-    const cloudProfile = cloudProfileByRef(cloudProfileRef)
-    if (!cloudProfile) {
-      return []
-    }
-    const regionData = find(cloudProfile.spec.regions, [['name'], region])
-    if (!regionData) {
-      return []
-    }
-    return get(regionData, ['accessRestrictions'], [])
-  }
-
   return {
     list,
     isInitial,
@@ -215,14 +153,10 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     cloudProfilesByProviderType,
     sortedProviderTypeList,
     cloudProfileByRef,
-    // Volum Stuff
+    // Volume Stuff
     volumeTypesByCloudProfileRefAndRegion,
     volumeTypesByCloudProfileRef,
     minimumVolumeSizeByMachineTypeAndVolumeType,
-    // Access Restrictions
-    accessRestrictionsByCloudProfileRefAndRegion,
-    accessRestrictionDefinitionsByCloudProfileRefAndRegion,
-    accessRestrictionNoItemsTextForCloudProfileRefAndRegion,
   }
 })
 
