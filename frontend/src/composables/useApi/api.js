@@ -60,23 +60,27 @@ export function getCloudProviderCredentials (namespace) {
 }
 
 export function createDnsProviderCredential (params) {
-  return invokeCloudProviderCredentialMethod('create-dns', params)
+  return invokeCloudProviderCredentialMethod('createDns', params)
 }
 
 export function createInfraProviderCredential (params) {
-  return invokeCloudProviderCredentialMethod('create-infra', params)
+  return invokeCloudProviderCredentialMethod('createInfra', params)
 }
 
-export function updateCloudProviderCredential (params) {
-  return invokeCloudProviderCredentialMethod('patch', params)
+export function updateDnsProviderCredential (params) {
+  return invokeCloudProviderCredentialMethod('patchDns', params)
+}
+
+export function updateInfraProviderCredential (params) {
+  return invokeCloudProviderCredentialMethod('patchInfra', params)
 }
 
 export function deleteDnsProviderCredential (params) {
-  return invokeCloudProviderCredentialMethod('remove-dns', params)
+  return invokeCloudProviderCredentialMethod('removeDns', params)
 }
 
 export function deleteInfraProviderCredential (params) {
-  return invokeCloudProviderCredentialMethod('remove-infra', params)
+  return invokeCloudProviderCredentialMethod('removeInfra', params)
 }
 
 /* Tickets */
@@ -406,7 +410,8 @@ export default {
   getCloudProviderCredentials,
   createDnsProviderCredential,
   createInfraProviderCredential,
-  updateCloudProviderCredential,
+  updateDnsProviderCredential,
+  updateInfraProviderCredential,
   deleteDnsProviderCredential,
   deleteInfraProviderCredential,
   getIssues,

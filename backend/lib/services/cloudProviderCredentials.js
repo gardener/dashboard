@@ -78,11 +78,6 @@ export async function createInfra ({ user, params }) {
   let { secret, binding } = params
   const secretNamespace = secret.metadata.namespace
 
-  if (!binding) {
-    secret = await client.core.secrets.create(secretNamespace, secret)
-    return { secret }
-  }
-
   const bindingNamespace = binding.metadata.namespace
   const kind = binding.kind
 
@@ -119,7 +114,20 @@ export async function createInfra ({ user, params }) {
   }
 }
 
-export async function patch ({ user, params }) {
+export async function patchDns ({ user, params }) {
+  const client = user.client
+
+  let { secret } = params
+  const secretNamespace = secret.metadata.namespace
+  const secretName = secret.metadata.name
+
+  secret = await client.core.secrets.update(secretNamespace, secretName, secret)
+  return {
+    secret,
+  }
+}
+
+export async function patchInfra ({ user, params }) {
   const client = user.client
 
   let { secret } = params

@@ -144,7 +144,7 @@ describe('api', function () {
       const res = await agent
         .post('/api/cloudprovidercredentials')
         .set('cookie', await user.cookie)
-        .send({ method: 'create-infra', params })
+        .send({ method: 'createInfra', params })
         .expect('content-type', /json/)
         .expect(200)
 
@@ -182,7 +182,7 @@ describe('api', function () {
       const res = await agent
         .post('/api/cloudprovidercredentials')
         .set('cookie', await user.cookie)
-        .send({ method: 'create-dns', params })
+        .send({ method: 'createDns', params })
         .expect('content-type', /json/)
         .expect(200)
 
@@ -193,7 +193,7 @@ describe('api', function () {
       expect(res.body).toMatchSnapshot()
     })
 
-    it('should patch an own cloudProvider credential (secret)', async function () {
+    it('should patch an own dns secret', async function () {
       const secret = _.find(fixtures.secrets.list(namespace), { metadata: { name: 'secret1', namespace } })
       const params = {
         secret,
@@ -204,7 +204,7 @@ describe('api', function () {
       const res = await agent
         .post('/api/cloudprovidercredentials')
         .set('cookie', await user.cookie)
-        .send({ method: 'patch', params })
+        .send({ method: 'patchDns', params })
         .expect('content-type', /json/)
         .expect(200)
 
@@ -214,7 +214,7 @@ describe('api', function () {
       expect(res.body).toMatchSnapshot()
     })
 
-    it('should re-create an own cloudProvider credential (secret) when patching an orphaned binding', async function () {
+    it('should re-create an own infra credential (secret) when patching an orphaned binding', async function () {
       const secret = _.find(fixtures.secrets.list(namespace), { metadata: { name: 'secret1', namespace } })
       secret.metadata.name = 'secret4' // not existing secret
       const params = {
@@ -227,7 +227,7 @@ describe('api', function () {
       const res = await agent
         .post('/api/cloudprovidercredentials')
         .set('cookie', await user.cookie)
-        .send({ method: 'patch', params })
+        .send({ method: 'patchInfra', params })
         .expect('content-type', /json/)
         .expect(200)
 
@@ -250,7 +250,7 @@ describe('api', function () {
       const res = await agent
         .post('/api/cloudprovidercredentials')
         .set('cookie', await user.cookie)
-        .send({ method: 'remove-infra', params })
+        .send({ method: 'removeInfra', params })
         .expect(200)
 
       expect(mockRequest).toHaveBeenCalledTimes(3)
@@ -272,7 +272,7 @@ describe('api', function () {
       const res = await agent
         .post('/api/cloudprovidercredentials')
         .set('cookie', await user.cookie)
-        .send({ method: 'remove-infra', params })
+        .send({ method: 'removeInfra', params })
         .expect(200)
 
       expect(mockRequest).toHaveBeenCalledTimes(3)
@@ -294,7 +294,7 @@ describe('api', function () {
       const res = await agent
         .post('/api/cloudprovidercredentials')
         .set('cookie', await user.cookie)
-        .send({ method: 'remove-infra', params })
+        .send({ method: 'removeInfra', params })
         .expect(200)
 
       expect(mockRequest).toHaveBeenCalledTimes(3)
@@ -314,7 +314,7 @@ describe('api', function () {
       const res = await agent
         .post('/api/cloudprovidercredentials')
         .set('cookie', await user.cookie)
-        .send({ method: 'remove-dns', params })
+        .send({ method: 'removeDns', params })
         .expect(200)
 
       expect(mockRequest).toHaveBeenCalledTimes(1)
@@ -334,7 +334,7 @@ describe('api', function () {
       const res = await agent
         .post('/api/cloudprovidercredentials')
         .set('cookie', await user.cookie)
-        .send({ method: 'remove-dns', params })
+        .send({ method: 'removeDns', params })
         .expect(200)
 
       expect(mockRequest).toHaveBeenCalledTimes(1)

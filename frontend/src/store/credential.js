@@ -109,23 +109,30 @@ export const useCredentialStore = defineStore('credential', () => {
 
   async function createDnsCredential ({ secret }) {
     const { data } = await api.createDnsProviderCredential({ secret })
-    _updateCloudProviderCredential({ secret: data.secret })
+    _updateDnsProviderCredential({ secret: data.secret })
     const name = data.secret.metadata.name
     appStore.setSuccess(`DNS Provider credential ${name} created`)
   }
 
   async function createInfraCredential ({ binding, secret }) {
     const { data } = await api.createInfraProviderCredential({ binding, secret })
-    _updateCloudProviderCredential({ binding: data.binding, secret: data.secret })
-    const name = data.binding.metadata?.name
-    appStore.setSuccess(`Cloud Provider credential ${name} created`)
+    _updateInfraProviderCredential({ binding: data.binding, secret: data.secret })
+    const name = data.binding.metadata.name
+    appStore.setSuccess(`Infrastructure credential ${name} created`)
   }
 
-  async function updateCredential ({ secret, binding }) {
-    const { data } = await api.updateCloudProviderCredential({ secret })
-    _updateCloudProviderCredential({ secret: data.secret })
-    const name = binding?.metadata?.name || secret.metadata.name
-    appStore.setSuccess(`Cloud Provider credential ${name} updated`)
+  async function updateDnsCredential ({ secret }) {
+    const { data } = await api.updateDnsProviderCredential({ secret })
+    _updateDnsProviderCredential({ secret: data.secret })
+    const name = secret.metadata.name
+    appStore.setSuccess(`DNS Provider credential ${name} updated`)
+  }
+
+  async function updateInfraCredential ({ secret, binding }) {
+    const { data } = await api.updateInfraProviderCredential({ secret })
+    _updateInfraProviderCredential({ binding, secret: data.secret })
+    const name = binding.metadata?.name
+    appStore.setSuccess(`Infrastructure Provider credential ${name} updated`)
   }
 
   async function deleteDnsCredential ({ credentialKind, credentialNamespace, credentialName }) {
@@ -137,7 +144,7 @@ export const useCredentialStore = defineStore('credential', () => {
   async function deleteInfraCredential ({ bindingKind, bindingNamespace, bindingName }) {
     await api.deleteInfraProviderCredential({ bindingKind, bindingNamespace, bindingName })
     await fetchCredentials()
-    appStore.setSuccess(`Cloud Provider credential ${bindingName} deleted`)
+    appStore.setSuccess(`Infrastructure credential ${bindingName} deleted`)
   }
 
   const infrastructureBindingList = computed(() => {
@@ -177,22 +184,21 @@ export const useCredentialStore = defineStore('credential', () => {
     return get(state.quotas, [namespaceNameKey({ namespace, name })])
   }
 
-  function _updateCloudProviderCredential ({ binding, secret }) {
-    if (binding) {
-      const key = namespaceNameKey(binding.metadata)
-      if (binding.kind === 'SecretBinding') {
-        set(state.secretBindings, [key], binding)
-      } else if (binding.kind === 'CredentialsBinding') {
-        set(state.credentialsBindings, [key], binding)
-      }
+  function _updateDnsProviderCredential ({ secret }) {
+    const key = namespaceNameKey(secret.metadata)
+    set(state.secrets, [key], secret)
+  }
+
+  function _updateInfraProviderCredential ({ binding, secret }) {
+    const bindingKey = namespaceNameKey(binding.metadata)
+    if (binding.kind === 'SecretBinding') {
+      set(state.secretBindings, [bindingKey], binding)
+    } else if (binding.kind === 'CredentialsBinding') {
+      set(state.credentialsBindings, [bindingKey], binding)
     }
 
-    if (secret) {
-      const key = namespaceNameKey(secret.metadata)
-      set(state.secrets, [key], secret)
-    }
-
-    // no update logic for quotas as they currently cannot be updated using the dashboard
+    const secretKey = namespaceNameKey(secret.metadata)
+    set(state.secrets, [secretKey], secret)
   }
 
   return {
@@ -200,7 +206,8 @@ export const useCredentialStore = defineStore('credential', () => {
     quotaList,
     fetchCredentials,
     _setCredentials,
-    updateCredential,
+    updateDnsCredential,
+    updateInfraCredential,
     createDnsCredential,
     createInfraCredential,
     deleteDnsCredential,

@@ -21,6 +21,7 @@ import find from 'lodash/find'
 
 const testNamespace = 'garden-test'
 const awsSecretBindingName = 'aws-secretbinding'
+const awsRoute53SecretName = 'aws-route53-secret'
 const awsCredentialsBindingName = 'aws-credentialsbinding'
 const awsWlidCredentialsBindingName = 'aws-wlid-credentialsbinding'
 const newSecret = {
@@ -56,10 +57,16 @@ describe('stores', () => {
           data: fixtures.credentials,
         }
       })
-      vi.spyOn(api, 'updateCloudProviderCredential').mockImplementation(({ binding, secret }) => {
+      vi.spyOn(api, 'updateDnsProviderCredential').mockImplementation(({ secret }) => {
         return {
           data: {
-            binding,
+            secret,
+          },
+        }
+      })
+      vi.spyOn(api, 'updateInfraProviderCredential').mockImplementation(({ secret }) => {
+        return {
+          data: {
             secret,
           },
         }
@@ -98,7 +105,8 @@ describe('stores', () => {
       api.getCloudProviderCredentials.mockClear()
       api.createDnsProviderCredential.mockClear()
       api.createInfraProviderCredential.mockClear()
-      api.updateCloudProviderCredential.mockClear()
+      api.updateDnsProviderCredential.mockClear()
+      api.updateInfraProviderCredential.mockClear()
       api.deleteDnsProviderCredential.mockClear()
       api.deleteInfraProviderCredential.mockClear()
     })
@@ -153,7 +161,7 @@ describe('stores', () => {
       expect(credentialStore.dnsCredentialList.length).toBeGreaterThan(0)
     })
 
-    it('should update credential (secret)', async () => {
+    it('should update credential (credentialsbinding/secret)', async () => {
       const awsSecretBinding = find(credentialStore.infrastructureBindingList, { metadata: { name: awsSecretBindingName } })
       let awsSecret = credentialStore.getSecret(awsSecretBinding.secretRef)
       const secret = {
@@ -162,12 +170,29 @@ describe('stores', () => {
           newSecret2: 'dummy-data',
         },
       }
-      await credentialStore.updateCredential({ binding: awsSecretBinding, secret })
+      await credentialStore.updateInfraCredential({ binding: awsSecretBinding, secret })
 
-      expect(api.updateCloudProviderCredential).toBeCalledTimes(1)
-      expect(api.updateCloudProviderCredential).toBeCalledWith({ secret })
+      expect(api.updateInfraProviderCredential).toBeCalledTimes(1)
+      expect(api.updateInfraProviderCredential).toBeCalledWith({ secret })
       awsSecret = credentialStore.getSecret(awsSecretBinding.secretRef)
       expect(awsSecret.data).toEqual({ newSecret2: 'dummy-data' })
+    })
+
+    it('should update dns credential (secret)', async () => {
+      const awsRoute53Secret = find(credentialStore.dnsCredentialList, { metadata: { name: awsRoute53SecretName } })
+
+      const secret = {
+        ...awsRoute53Secret,
+        data: {
+          newSecret2: 'dummy-data',
+        },
+      }
+      await credentialStore.updateDnsCredential({ secret })
+
+      expect(api.updateDnsProviderCredential).toBeCalledTimes(1)
+      expect(api.updateDnsProviderCredential).toBeCalledWith({ secret })
+      const updatedAwsRoute53Secret = find(credentialStore.dnsCredentialList, { metadata: { name: awsRoute53SecretName } })
+      expect(updatedAwsRoute53Secret.data).toEqual({ newSecret2: 'dummy-data' })
     })
 
     it('should create credential (credentialsbinding)', async () => {
